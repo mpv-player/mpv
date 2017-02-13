@@ -69,6 +69,7 @@ struct vo_cocoa_state {
     NSOpenGLContext *nsgl_ctx;
 
     NSScreen *current_screen;
+    CGDirectDisplayID display_id;
 
     NSInteger window_level;
     int fullscreen;
@@ -307,25 +308,45 @@ static void vo_cocoa_update_screen_info(struct vo *vo)
         if (!s->current_screen)
             s->current_screen = [NSScreen mainScreen];
     }
+
+    NSDictionary* sinfo = [s->current_screen deviceDescription];
+    s->display_id = [[sinfo objectForKey:@"NSScreenNumber"] longValue];
+}
+
+static void vo_cocoa_signal_swap(struct vo_cocoa_state *s)
+{
+    pthread_mutex_lock(&s->sync_lock);
+    s->sync_counter += 1;
+    pthread_cond_signal(&s->sync_wakeup);
+    pthread_mutex_unlock(&s->sync_lock);
+}
+
+static void vo_cocoa_start_displaylink(struct vo_cocoa_state *s)
+{
+    if (!CVDisplayLinkIsRunning(s->link))
+        CVDisplayLinkStart(s->link);
+}
+
+static void vo_cocoa_stop_displaylink(struct vo_cocoa_state *s)
+{
+    if (CVDisplayLinkIsRunning(s->link)) {
+        CVDisplayLinkStop(s->link);
+        vo_cocoa_signal_swap(s);
+    }
 }
 
 static void vo_cocoa_init_displaylink(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    NSDictionary* sinfo = [s->current_screen deviceDescription];
-    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
-    CGDirectDisplayID did = [sid longValue];
-
-    CVDisplayLinkCreateWithCGDisplay(did, &s->link);
+    CVDisplayLinkCreateWithCGDisplay(s->display_id, &s->link);
     CVDisplayLinkSetOutputCallback(s->link, &displayLinkCallback, vo);
     CVDisplayLinkStart(s->link);
 }
 
 static void vo_cocoa_uninit_displaylink(struct vo_cocoa_state *s)
 {
-    if (CVDisplayLinkIsRunning(s->link))
-        CVDisplayLinkStop(s->link);
+    vo_cocoa_stop_displaylink(s);
     CVDisplayLinkRelease(s->link);
 }
 
@@ -400,9 +421,7 @@ void vo_cocoa_uninit(struct vo *vo)
     run_on_main_thread(vo, ^{
         enable_power_management(s);
         vo_cocoa_uninit_displaylink(s);
-        pthread_mutex_lock(&s->sync_lock);
-        pthread_cond_signal(&s->sync_wakeup);
-        pthread_mutex_unlock(&s->sync_lock);
+        vo_cocoa_signal_swap(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_screen_reconfiguration_observer(vo);
 
@@ -467,10 +486,7 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     struct vo *vo = displayLinkContext;
     struct vo_cocoa_state *s = vo->cocoa;
 
-    pthread_mutex_lock(&s->sync_lock);
-    s->sync_counter += 1;
-    pthread_cond_signal(&s->sync_wakeup);
-    pthread_mutex_unlock(&s->sync_lock);
+    vo_cocoa_signal_swap(s);
     return kCVReturnSuccess;
 }
 
@@ -625,11 +641,7 @@ static void cocoa_screen_reconfiguration_observer(
         struct vo *vo = ctx;
         struct vo_cocoa_state *s = vo->cocoa;
 
-        NSDictionary* sinfo = [s->current_screen deviceDescription];
-        NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
-        CGDirectDisplayID did = [sid longValue];
-
-        if (did == display) {
+        if (s->display_id == display) {
             MP_VERBOSE(vo, "detected display mode change, updating screen refresh rate\n");
             flag_events(vo, VO_EVENT_WIN_STATE);
         }
@@ -760,7 +772,7 @@ void vo_cocoa_swap_buffers(struct vo *vo)
 
     pthread_mutex_lock(&s->sync_lock);
     uint64_t old_counter = s->sync_counter;
-    while(old_counter == s->sync_counter) {
+    while(CVDisplayLinkIsRunning(s->link) && old_counter == s->sync_counter) {
         pthread_cond_wait(&s->sync_wakeup, &s->sync_lock);
     }
     pthread_mutex_unlock(&s->sync_lock);
@@ -1006,11 +1018,13 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
     // Make vo.c not do video timing, which would slow down resizing.
     vo_event(self.vout, VO_EVENT_LIVE_RESIZING);
+    vo_cocoa_stop_displaylink(self.vout->cocoa);
 }
 
 - (void)windowDidEndLiveResize:(NSNotification *)notification
 {
     vo_query_and_reset_events(self.vout, VO_EVENT_LIVE_RESIZING);
+    vo_cocoa_start_displaylink(self.vout->cocoa);
 }
 
 - (void)didChangeWindowedScreenProfile:(NSNotification *)notification
