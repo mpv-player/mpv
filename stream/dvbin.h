@@ -62,12 +62,13 @@
 
 typedef struct {
     char *name;
-    int freq, srate, diseqc, tone;
+    unsigned int freq, srate, diseqc;
     char pol;
-    int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
-    bool is_dvb_s2;
-    int stream_id;
-    int service_id;
+    unsigned int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
+    bool is_dvb_x2;
+    unsigned int delsys;
+    unsigned int stream_id;
+    unsigned int service_id;
     fe_spectral_inversion_t inv;
     fe_modulation_t mod;
     fe_transmit_mode_t trans;
@@ -78,57 +79,96 @@ typedef struct {
 } dvb_channel_t;
 
 typedef struct {
-    uint16_t NUM_CHANNELS;
-    uint16_t current;
+    unsigned int NUM_CHANNELS;
+    unsigned int current;
     dvb_channel_t *channels;
-} dvb_channels_list;
+} dvb_channels_list_t;
 
 typedef struct {
-    int type;
-    dvb_channels_list *list;
-    char *name;
     int devno;
-} dvb_card_config_t;
+    unsigned int delsys_mask;
+    dvb_channels_list_t *list;
+} dvb_adapter_config_t;
 
 typedef struct {
-    int count;
-    dvb_card_config_t *cards;
+    unsigned int adapters_count;
+    dvb_adapter_config_t *adapters;
+    unsigned int cur_adapter;
 
-    int card;
     int fe_fd;
     int dvr_fd;
     int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
-    dvb_channels_list *list;
-    int tuner_type;
     int is_on;
     int retry;
     int timeout;
-    int last_freq;
+    unsigned int last_freq;
     bool switching_channel;
     bool stream_used;
 } dvb_state_t;
 
-typedef struct dvb_params {
+typedef struct {
     struct mp_log *log;
 
     dvb_state_t *state;
 
     char *cfg_prog;
-    int cfg_card;
+    int cfg_devno;
     int cfg_timeout;
     char *cfg_file;
 
     int cfg_full_transponder;
 } dvb_priv_t;
 
-#define TUNER_SAT       1
-#define TUNER_TER       2
-#define TUNER_CBL       3
-#define TUNER_ATSC      4
+
+/* Keep in sync with enum fe_delivery_system. */
+#ifndef DVB_USE_S2API
+#    define SYS_DVBC_ANNEX_A        1
+#    define SYS_DVBT                3
+#    define SYS_DVBS                5
+#    define SYS_DVBS2               6
+#    define SYS_ATSC                11
+#    define SYS_DVBT2               16
+#    define SYS_DVBC_ANNEX_C        18
+#endif
+#define SYS_DVB__COUNT__            (SYS_DVBC_ANNEX_C + 1)
+
+
+#define DELSYS_BIT(__bit)        (((unsigned int)1) << (__bit))
+
+#define DELSYS_SET(__mask, __bit)                                       \
+    (__mask) |= DELSYS_BIT((__bit))
+
+#define DELSYS_IS_SET(__mask, __bit)                                    \
+    (0 != ((__mask) & DELSYS_BIT((__bit))))
+
+
+#ifdef DVB_ATSC
+#define DELSYS_SUPP_MASK                                                \
+    (                                                                   \
+        DELSYS_BIT(SYS_DVBC_ANNEX_A) |                                  \
+        DELSYS_BIT(SYS_DVBT) |                                          \
+        DELSYS_BIT(SYS_DVBS) |                                          \
+        DELSYS_BIT(SYS_DVBS2) |                                         \
+        DELSYS_BIT(SYS_ATSC) |                                          \
+        DELSYS_BIT(SYS_DVBT2) |                                         \
+        DELSYS_BIT(SYS_DVBC_ANNEX_C)                                    \
+    )
+#else
+#define DELSYS_SUPP_MASK                                                \
+    (                                                                   \
+        DELSYS_BIT(SYS_DVBC_ANNEX_A) |                                  \
+        DELSYS_BIT(SYS_DVBT) |                                          \
+        DELSYS_BIT(SYS_DVBS) |                                          \
+        DELSYS_BIT(SYS_DVBS2) |                                         \
+        DELSYS_BIT(SYS_DVBT2) |                                         \
+        DELSYS_BIT(SYS_DVBC_ANNEX_C)                                    \
+    )
+#endif
+
 
 int dvb_step_channel(stream_t *, int);
-int dvb_set_channel(stream_t *, int, int);
+int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
 void dvb_free_state(dvb_state_t *);
 
