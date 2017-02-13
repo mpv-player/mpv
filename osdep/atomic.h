@@ -27,15 +27,14 @@
 #else
 
 // Emulate the parts of C11 stdatomic.h needed by mpv.
-// Still relies on gcc/clang atomic builtins.
 
-typedef struct { volatile unsigned long v;      } atomic_ulong;
-typedef struct { volatile int v;                } atomic_int;
-typedef struct { volatile unsigned int v;       } atomic_uint;
-typedef struct { volatile _Bool v;              } atomic_bool;
-typedef struct { volatile long long v;          } atomic_llong;
-typedef struct { volatile uint_least32_t v;     } atomic_uint_least32_t;
-typedef struct { volatile unsigned long long v; } atomic_ullong;
+typedef struct { unsigned long v;      } atomic_ulong;
+typedef struct { int v;                } atomic_int;
+typedef struct { unsigned int v;       } atomic_uint;
+typedef struct { _Bool v;              } atomic_bool;
+typedef struct { long long v;          } atomic_llong;
+typedef struct { uint_least32_t v;     } atomic_uint_least32_t;
+typedef struct { unsigned long long v; } atomic_ullong;
 
 #define ATOMIC_VAR_INIT(x) \
     {.v = (x)}
@@ -44,24 +43,6 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
 #define memory_order_seq_cst 2
 
 #define atomic_load_explicit(p, e) atomic_load(p)
-
-#if HAVE_ATOMIC_BUILTINS
-
-#define atomic_load(p) \
-    __atomic_load_n(&(p)->v, __ATOMIC_SEQ_CST)
-#define atomic_store(p, val) \
-    __atomic_store_n(&(p)->v, val, __ATOMIC_SEQ_CST)
-#define atomic_fetch_add(a, b) \
-    __atomic_fetch_add(&(a)->v, b, __ATOMIC_SEQ_CST)
-#define atomic_fetch_and(a, b) \
-    __atomic_fetch_and(&(a)->v, b, __ATOMIC_SEQ_CST)
-#define atomic_fetch_or(a, b) \
-    __atomic_fetch_or(&(a)->v, b, __ATOMIC_SEQ_CST)
-#define atomic_compare_exchange_strong(a, b, c) \
-    __atomic_compare_exchange_n(&(a)->v, b, c, 0, __ATOMIC_SEQ_CST, \
-    __ATOMIC_SEQ_CST)
-
-#elif defined(__GNUC__)
 
 #include <pthread.h>
 
@@ -103,10 +84,6 @@ extern pthread_mutex_t mp_atomic_mutex;
        }                                                \
        pthread_mutex_unlock(&mp_atomic_mutex);          \
        res; })
-
-#else
-# error "this should have been a configuration error, report a bug please"
-#endif /* no atomics */
 
 #endif /* else HAVE_STDATOMIC */
 

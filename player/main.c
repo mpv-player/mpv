@@ -74,7 +74,7 @@ static const char def_config[] =
 #define FULLCONFIG "(missing)\n"
 #endif
 
-#if !(HAVE_STDATOMIC || HAVE_ATOMIC_BUILTINS || HAVE_SYNC_BUILTINS)
+#if !HAVE_STDATOMIC
 pthread_mutex_t mp_atomic_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 

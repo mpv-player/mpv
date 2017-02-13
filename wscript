@@ -171,19 +171,11 @@ main_dependencies = [
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
                 'atomic_fetch_add(&test, 1)'))
     }, {
-        'name': 'atomic-builtins',
-        'desc': 'compiler support for __atomic built-ins',
-        'func': check_libs(['atomic'],
-            check_statement('stdint.h',
-                'int64_t test = 0;'
-                'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)')),
-        'deps_neg': [ 'stdatomic' ],
-    }, {
         'name': 'atomics',
-        'desc': 'stdatomic.h support or emulation',
+        'desc': 'stdatomic.h support or slow emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'atomic-builtins', 'gnuc'],
+        'deps_any': ['stdatomic', 'gnuc'],
     }, {
         'name': 'c11-tls',
         'desc': 'C11 TLS support',
