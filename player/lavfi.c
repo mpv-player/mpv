@@ -71,6 +71,8 @@ struct lavfi {
 
     struct lavfi_pad **pads;
     int num_pads;
+
+    AVFrame *tmp_frame;
 };
 
 struct lavfi_pad {
@@ -78,7 +80,6 @@ struct lavfi_pad {
     enum stream_type type;
     enum lavfi_direction dir;
     char *name; // user-given pad name
-    AVFrame *tmp_frame;
 
     bool connected;     // if false, inputs/otuputs are considered always EOF
 
@@ -144,9 +145,6 @@ static void add_pad(struct lavfi *c, enum lavfi_direction dir, AVFilterInOut *it
         p->main = c;
         p->dir = dir;
         p->name = talloc_strdup(p, item->name);
-        p->tmp_frame = av_frame_alloc();
-        if (!p->tmp_frame)
-            abort();
         p->type = type;
         MP_TARRAY_APPEND(c, c->pads, c->num_pads, p);
     }
@@ -238,6 +236,9 @@ struct lavfi *lavfi_create(struct mp_log *log, char *graph_string)
     struct lavfi *c = talloc_zero(NULL, struct lavfi);
     c->log = log;
     c->graph_string = graph_string;
+    c->tmp_frame = av_frame_alloc();
+    if (!c->tmp_frame)
+        abort();
     precreate_graph(c);
     return c;
 }
@@ -246,6 +247,7 @@ void lavfi_destroy(struct lavfi *c)
 {
     free_graph(c);
     clear_data(c);
+    av_frame_free(&c->tmp_frame);
     talloc_free(c);
 }
 
@@ -564,22 +566,22 @@ static void read_output_pads(struct lavfi *c)
         int flags = pad->output_needed ? 0 : AV_BUFFERSINK_FLAG_NO_REQUEST;
         int r = AVERROR_EOF;
         if (!pad->buffer_is_eof)
-            r = av_buffersink_get_frame_flags(pad->buffer, pad->tmp_frame, flags);
+            r = av_buffersink_get_frame_flags(pad->buffer, c->tmp_frame, flags);
         if (r >= 0) {
             pad->output_needed = false;
-            double pts = mp_pts_from_av(pad->tmp_frame->pts, &pad->timebase);
+            double pts = mp_pts_from_av(c->tmp_frame->pts, &pad->timebase);
             if (pad->type == STREAM_AUDIO) {
-                pad->pending_a = mp_audio_from_avframe(pad->tmp_frame);
+                pad->pending_a = mp_audio_from_avframe(c->tmp_frame);
                 if (pad->pending_a)
                     pad->pending_a->pts = pts;
             } else if (pad->type == STREAM_VIDEO) {
-                pad->pending_v = mp_image_from_av_frame(pad->tmp_frame);
+                pad->pending_v = mp_image_from_av_frame(c->tmp_frame);
                 if (pad->pending_v)
                     pad->pending_v->pts = pts;
             } else {
                 assert(0);
             }
-            av_frame_unref(pad->tmp_frame);
+            av_frame_unref(c->tmp_frame);
             if (!pad->pending_v && !pad->pending_a)
                 MP_ERR(c, "could not use filter output\n");
             pad->output_eof = false;
