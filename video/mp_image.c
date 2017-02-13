@@ -41,6 +41,9 @@
 
 #include "video/filter/vf.h"
 
+#define HAVE_OPAQUE_REF (LIBAVUTIL_VERSION_MICRO >= 100 && \
+                         LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 47, 100))
+
 static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
@@ -721,6 +724,15 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
     };
 
     dst->params.chroma_location = avchroma_location_to_mp(src->chroma_location);
+
+#if HAVE_OPAQUE_REF
+    if (src->opaque_ref) {
+        struct mp_image_params *p = (void *)src->opaque_ref->data;
+        dst->params.rotate = p->rotate;
+        dst->params.stereo_in = p->stereo_in;
+        dst->params.stereo_out = p->stereo_out;
+    }
+#endif
 }
 
 // Copy properties and data of the mp_image into the AVFrame, without taking
@@ -756,6 +768,14 @@ static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
     dst->color_trc = mp_csp_trc_to_avcol_trc(src->params.color.gamma);
 
     dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
+
+#if HAVE_OPAQUE_REF
+    av_buffer_unref(&dst->opaque_ref);
+    dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
+    if (!dst->opaque_ref)
+        abort();
+    *(struct mp_image_params *)dst->opaque_ref->data = src->params;
+#endif
 }
 
 // Create a new mp_image reference to av_frame.
