@@ -40,7 +40,6 @@
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
-#include "video/out/opengl/hwdec.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
 #include "audio/filter/af.h"
@@ -51,6 +50,10 @@
 
 #if HAVE_DRM
 #include "video/out/drm_common.h"
+#endif
+
+#if HAVE_GL
+#include "video/out/opengl/hwdec.h"
 #endif
 
 extern const char mp_help_text[];
