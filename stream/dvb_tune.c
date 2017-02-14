@@ -108,7 +108,7 @@ old_api:
     mp_verbose(log, "Querying tuner type via pre-DVBv5 API for frontend FD %d\n",
                fe_fd);
 
-    memset(&fe_info, 0, sizeof(struct dvb_frontend_info));
+    memset(&fe_info, 0x00, sizeof(struct dvb_frontend_info));
     if (ioctl(fe_fd, FE_GET_INFO, &fe_info) < 0) {
         mp_err(log, "DVBv3: FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
         return ret_mask;
@@ -180,9 +180,9 @@ int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt)
 
     dvb_state_t* state = priv->state;
 
-    snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%d/frontend0", n);
-    snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%d/dvr0", n);
-    snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%d/demux0", n);
+    snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%u/frontend0", n);
+    snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%u/dvr0", n);
+    snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%u/demux0", n);
     state->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (state->fe_fd < 0) {
         MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n",
@@ -285,7 +285,7 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
 
     struct dmx_sct_filter_params fparams;
 
-    memset(&fparams, 0, sizeof(fparams));
+    memset(&fparams, 0x00, sizeof(fparams));
     fparams.pid = 0;
     fparams.filter.filter[0] = 0x00;
     fparams.filter.mask[0] = 0xff;
@@ -461,7 +461,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 
     return diseqc_send_msg(secfd, polv ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18,
                            &cmd, hi_lo ? SEC_TONE_ON : SEC_TONE_OFF,
-                           (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
+                           ((sat_no / 4) % 2) ? SEC_MINI_B : SEC_MINI_A);
 }
 
 static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
@@ -641,7 +641,7 @@ old_api:
         MP_ERR(priv, "DVB-API version 3 does not support stream_id (PLP).\n");
         return -1;
     }
-    memset(&feparams, 0, sizeof(feparams));
+    memset(&feparams, 0x00, sizeof(feparams));
     feparams.frequency = freq;
     feparams.inversion = specInv;
 

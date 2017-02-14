@@ -221,8 +221,9 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
     const char *ter_conf =
         "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
+#ifdef DVB_ATSC
     const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
-
+#endif
     const char *vdr_conf =
         "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%d:%*d:%*d:%*d\n%n";
 
@@ -240,7 +241,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
             return NULL;
         }
-        memset(list, 0, sizeof(dvb_channels_list_t));
+        memset(list, 0x00, sizeof(dvb_channels_list_t));
     }
 
     ptr = &chn;
@@ -251,7 +252,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         if ((line[0] == '#') || (strlen(line) == 0))
             continue;
 
-        memset(ptr, 0, sizeof(dvb_channel_t));
+        memset(ptr, 0x00, sizeof(dvb_channel_t));
         vpid_str[0] = apid_str[0] = tpid_str[0] = 0;
         vdr_loc_str[0] = vdr_par_str[0] = 0;
 
@@ -345,8 +346,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                                &valid_digits) == 1)
                     {
                         if (valid_digits == strlen(vdr_loc_str)) {
-                            ptr->diseqc = diseqc_info;
-                            if ((ptr->diseqc > 4) || (ptr->diseqc < 0))
+                            ptr->diseqc = (unsigned int)diseqc_info;
+                            if (ptr->diseqc > 4)
                                 continue;
                             if (ptr->diseqc > 0)
                                 ptr->diseqc--;
@@ -406,7 +407,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 ptr->pol = mp_toupper(ptr->pol);
                 ptr->freq *=  1000UL;
                 ptr->srate *=  1000UL;
-                if ((ptr->diseqc > 4) || (ptr->diseqc < 0))
+                if (ptr->diseqc > 4)
                     continue;
                 if (ptr->diseqc > 0)
                     ptr->diseqc--;
@@ -433,8 +434,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         }
 
 
-        if ((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) ||
-            (strlen(ptr->name) == 0))
+        if (fields < 2 || ptr->pids_cnt == 0 || ptr->freq == 0 ||
+            strlen(ptr->name) == 0)
             continue;
 
         /* Add some PIDs which are mandatory in DVB,
@@ -538,8 +539,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 ptr->mod = VSB_8;
             } else if (!strcmp(mod, "VSB_16") || !strcmp(mod, "16VSB")) {
                 ptr->mod = VSB_16;
-            }
 #endif
+            }
         }
 
         switch (delsys) {
@@ -989,6 +990,7 @@ static int dvb_open(stream_t *stream)
       goto err_out;
     }
 
+    // Need to re-get config in any case, not part of global state.
     stream->priv = mp_get_config_group(stream, stream->global, &stream_dvb_conf);
     dvb_state_t *state = dvb_get_state(stream);
 
@@ -1054,7 +1056,6 @@ err_out:
 
 dvb_state_t *dvb_get_state(stream_t *stream)
 {
-    // Need to re-get config in any case, not part of global state. 
     if (global_dvb_state != NULL) {
       return global_dvb_state;
     }
@@ -1093,7 +1094,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)
         return NULL;
-    memset(state, 0, sizeof(dvb_state_t));
+    memset(state, 0x00, sizeof(dvb_state_t));
     state->switching_channel = false;
     state->stream_used = true;
     state->fe_fd = state->dvr_fd = -1;
@@ -1145,6 +1146,8 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             case SYS_DVBS2:
                 conf_file_name = "channels.conf.sat";
                 break;
+            default:
+                continue;
             }
 
             if (priv->cfg_file && priv->cfg_file[0]) {
