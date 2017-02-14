@@ -428,12 +428,12 @@ static void determine_working_formats(struct gl_hwdec *hw)
         }
         for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++) {
             AVBufferRef *fref = NULL;
+            struct mp_image *s = NULL;
+            AVFrame *frame = NULL;
             fref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
             if (!fref)
                 goto err;
             AVHWFramesContext *fctx = (void *)fref->data;
-            struct mp_image *s = NULL;
-            AVFrame *frame = NULL;
             fctx->format = AV_PIX_FMT_VAAPI;
             fctx->sw_format = fc->valid_sw_formats[n];
             fctx->width = 128;
