@@ -101,6 +101,8 @@ static void terminate_cocoa_application(void)
     NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
     [em removeEventHandlerForEventClass:kInternetEventClass
                              andEventID:kAEGetURL];
+    [em removeEventHandlerForEventClass:kCoreEventClass
+                             andEventID:kAEQuitApplication];
     [super dealloc];
 }
 
@@ -206,13 +208,17 @@ static void terminate_cocoa_application(void)
     return [item autorelease];
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)theApp
+- (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
-    return NSTerminateNow;
+    NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
+    [em setEventHandler:self
+            andSelector:@selector(handleQuitEvent:withReplyEvent:)
+          forEventClass:kCoreEventClass
+             andEventID:kAEQuitApplication];
 }
 
-- (void)handleQuitEvent:(NSAppleEventDescriptor*)e
-         withReplyEvent:(NSAppleEventDescriptor*)r
+- (void)handleQuitEvent:(NSAppleEventDescriptor *)event
+         withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
     [self stopPlayback];
 }
