@@ -146,7 +146,7 @@ mpv's custom build step on top of waf
 
 Build step is pretty much vanilla waf. The only difference being that the list
 of source files can contain both strings or tuples. If a tuple is found,
-the second element in the tuple will the used to match the features detected
+the second element in the tuple will be used to match the features detected
 in the configure step (the ``name`` field described above). If this feature
 was not enabled during configure, the source file will not be compiled in.
 
