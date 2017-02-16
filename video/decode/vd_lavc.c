@@ -665,7 +665,7 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
         fctx->initial_pool_size = initial_pool_size;
 
         int res = av_hwframe_ctx_init(ctx->cached_hw_frames_ctx);
-        if (res > 0) {
+        if (res < 0) {
             MP_ERR(ctx, "Failed to allocate hw frames.\n");
             av_buffer_unref(&ctx->cached_hw_frames_ctx);
             return -1;
