@@ -34,48 +34,10 @@
 #include "video/hwdec.h"
 #include "video/filter/vf.h"
 
-#define ADDITIONAL_SURFACES (HWDEC_EXTRA_SURFACES + HWDEC_DELAY_QUEUE_COUNT)
-
 struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
-    struct mp_hwdec_ctx *hwdev;
 };
-
-static int init_decoder(struct lavc_ctx *ctx, int w, int h)
-{
-    struct priv *p = ctx->hwdec_priv;
-    // libavcodec has no way yet to communicate the exact surface format needed
-    // for the frame pool, or the required minimum size of the frame pool.
-    // Hopefully, this weakness in the libavcodec API will be fixed in the
-    // future.
-    // For the pixel format, we try to second-guess from what the libavcodec
-    // software decoder would require (sw_pix_fmt). It could break and require
-    // adjustment if new VAAPI surface formats are added.
-    int sw_format = ctx->avctx->sw_pix_fmt == AV_PIX_FMT_YUV420P10 ?
-                    AV_PIX_FMT_P010 : AV_PIX_FMT_NV12;
-
-    // The video output might not support all formats.
-    // Note that supported_formats==NULL means any are accepted.
-    if (p->hwdev && p->hwdev->supported_formats) {
-        int mp_format = pixfmt2imgfmt(sw_format);
-        bool found = false;
-        for (int n = 0; p->hwdev->supported_formats[n]; n++) {
-            if (p->hwdev->supported_formats[n] == mp_format) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            MP_WARN(ctx, "Surface format %s not supported for direct rendering.\n",
-                    mp_imgfmt_to_name(mp_format));
-            return -1;
-        }
-    }
-
-    return hwdec_setup_hw_frames_ctx(ctx, p->ctx->av_device_ref, sw_format,
-                                hwdec_get_max_refs(ctx) + ADDITIONAL_SURFACES);
-}
 
 static void uninit(struct lavc_ctx *ctx)
 {
@@ -84,11 +46,11 @@ static void uninit(struct lavc_ctx *ctx)
     if (!p)
         return;
 
-    if (!p->hwdev)
-        va_destroy(p->ctx);
+    va_destroy(p->ctx);
 
     talloc_free(p);
     ctx->hwdec_priv = NULL;
+    ctx->hwdec_dev = NULL;
 }
 
 static int init(struct lavc_ctx *ctx, bool direct)
@@ -99,19 +61,19 @@ static int init(struct lavc_ctx *ctx, bool direct)
     };
 
     if (direct) {
-        p->hwdev = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI);
-        p->ctx = p->hwdev->ctx;
+        ctx->hwdec_dev = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI);
     } else {
         p->ctx = va_create_standalone(ctx->log, false);
         if (!p->ctx) {
             talloc_free(p);
             return -1;
         }
+        ctx->hwdec_dev = &p->ctx->hwctx;
     }
 
     ctx->hwdec_priv = p;
 
-    if (!p->ctx->av_device_ref)
+    if (!ctx->hwdec_dev->av_device_ref)
         return -1;
 
     return 0;
@@ -151,21 +113,30 @@ static int init_copy(struct lavc_ctx *ctx)
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
-    .volatile_context = true,
     .probe = probe,
     .init = init_direct,
     .uninit = uninit,
-    .init_decoder = init_decoder,
+    .generic_hwaccel = true,
+    .static_pool = true,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_NONE}
+    },
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .type = HWDEC_VAAPI_COPY,
     .copying = true,
     .image_format = IMGFMT_VAAPI,
-    .volatile_context = true,
     .probe = probe_copy,
     .init = init_copy,
     .uninit = uninit,
-    .init_decoder = init_decoder,
-    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
+    .generic_hwaccel = true,
+    .static_pool = true,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_NONE}
+    },
 };

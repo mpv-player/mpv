@@ -55,6 +55,9 @@ typedef struct lavc_ctx {
     // For free use by hwdec implementation
     void *hwdec_priv;
 
+    // Set by generic hwaccels.
+    struct mp_hwdec_ctx *hwdec_dev;
+
     int hwdec_fmt;
     int hwdec_w;
     int hwdec_h;
@@ -98,6 +101,16 @@ struct vd_lavc_hwdec {
     // with hwdec_find_decoder.
     // Intuitively, this will force the corresponding wrapper decoder.
     const char *lavc_suffix;
+    // Generic hwaccels set AVCodecContext.hw_frames_ctx in get_format().
+    // pixfmt_map must be non-NULL.
+    // struct lavc_ctx.hwdec_dev must be set at runtime (in init).
+    bool generic_hwaccel;
+    // Array of pixfmt pairs. The first pixfmt is the AVCodecContext.sw_pix_fmt,
+    // the second the required AVHWFramesContext.sw_format.
+    const enum AVPixelFormat (*pixfmt_map)[2];
+    // The generic hwaccel has a fixed pool size. Enough surfaces need to be
+    // preallocated before decoding begins. If false, pool size is left to 0.
+    bool static_pool;
 };
 
 enum {

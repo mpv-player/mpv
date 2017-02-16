@@ -677,6 +677,64 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
     return ctx->avctx->hw_frames_ctx ? 0 : -1;
 }
 
+static int init_generic_hwaccel(struct dec_video *vd)
+{
+    struct lavc_ctx *ctx = vd->priv;
+    struct vd_lavc_hwdec *hwdec = ctx->hwdec;
+
+    if (!ctx->hwdec_dev)
+        return -1;
+
+    // libavcodec has no way yet to communicate the exact surface format needed
+    // for the frame pool, or the required minimum size of the frame pool.
+    // Hopefully, this weakness in the libavcodec API will be fixed in the
+    // future.
+    // For the pixel format, we try to second-guess from what the libavcodec
+    // software decoder would require (sw_pix_fmt). It could break and require
+    // adjustment if new hwaccel surface formats are added.
+    enum AVPixelFormat av_sw_format = AV_PIX_FMT_NONE;
+    for (int n = 0; hwdec->pixfmt_map[n][0] != AV_PIX_FMT_NONE; n++) {
+        if (ctx->avctx->sw_pix_fmt == hwdec->pixfmt_map[n][0]) {
+            av_sw_format = hwdec->pixfmt_map[n][1];
+            break;
+        }
+    }
+
+    if (av_sw_format == AV_PIX_FMT_NONE) {
+        MP_VERBOSE(ctx, "Unsupported hw decoding format: %s\n",
+                   mp_imgfmt_to_name(pixfmt2imgfmt(ctx->avctx->sw_pix_fmt)));
+        return -1;
+    }
+
+    // The video output might not support all formats.
+    // Note that supported_formats==NULL means any are accepted.
+    int *render_formats = ctx->hwdec_dev->supported_formats;
+    if (render_formats) {
+        int mp_format = pixfmt2imgfmt(av_sw_format);
+        bool found = false;
+        for (int n = 0; render_formats[n]; n++) {
+            if (render_formats[n] == mp_format) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            MP_WARN(ctx, "Surface format %s not supported for direct rendering.\n",
+                    mp_imgfmt_to_name(mp_format));
+            return -1;
+        }
+    }
+
+    int pool_size = 0;
+    if (hwdec->static_pool)
+        pool_size = hwdec_get_max_refs(ctx) + HWDEC_EXTRA_SURFACES;
+
+    ctx->hwdec_fmt = hwdec->image_format;
+
+    return hwdec_setup_hw_frames_ctx(ctx, ctx->hwdec_dev->av_device_ref,
+                                     av_sw_format, pool_size);
+}
+
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *fmt)
 {
@@ -699,6 +757,11 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
+            if (ctx->hwdec->generic_hwaccel) {
+                if (init_generic_hwaccel(vd) < 0)
+                    break;
+                return fmt[i];
+            }
             // There could be more reasons for a change, and it's possible
             // that we miss some. (Might also depend on the hwaccel type.)
             bool change =
