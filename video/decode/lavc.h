@@ -92,9 +92,6 @@ struct vd_lavc_hwdec {
     struct mp_image *(*allocate_image)(struct lavc_ctx *ctx, int w, int h);
     // Process the image returned by the libavcodec decoder.
     struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
-    // For horrible Intel shit-drivers only
-    void (*lock)(struct lavc_ctx *ctx);
-    void (*unlock)(struct lavc_ctx *ctx);
     // Optional; if a special hardware decoder is needed (instead of "hwaccel").
     const char *(*get_codec)(struct lavc_ctx *ctx, const char *codec);
     // Suffix for libavcodec decoder. If non-NULL, get_codec() is overridden

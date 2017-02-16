@@ -227,17 +227,6 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
     return false;
 }
 
-static void hwdec_lock(struct lavc_ctx *ctx)
-{
-    if (ctx->hwdec && ctx->hwdec->lock)
-        ctx->hwdec->lock(ctx);
-}
-static void hwdec_unlock(struct lavc_ctx *ctx)
-{
-    if (ctx->hwdec && ctx->hwdec->unlock)
-        ctx->hwdec->unlock(ctx);
-}
-
 // Find the correct profile entry for the current codec and profile.
 // Assumes the table has higher profiles first (for each codec).
 const struct hwdec_profile_entry *hwdec_find_profile(
@@ -675,10 +664,7 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
 
         fctx->initial_pool_size = initial_pool_size;
 
-        hwdec_lock(ctx);
         int res = av_hwframe_ctx_init(ctx->cached_hw_frames_ctx);
-        hwdec_unlock(ctx);
-
         if (res > 0) {
             MP_ERR(ctx, "Failed to allocate hw frames.\n");
             av_buffer_unref(&ctx->cached_hw_frames_ctx);
@@ -837,10 +823,7 @@ static bool do_send_packet(struct dec_video *vd, struct demux_packet *pkt)
     AVPacket avpkt;
     mp_set_av_packet(&avpkt, pkt, &ctx->codec_timebase);
 
-    hwdec_lock(ctx);
     int ret = avcodec_send_packet(avctx, pkt ? &avpkt : NULL);
-    hwdec_unlock(ctx);
-
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return false;
 
@@ -878,10 +861,7 @@ static bool decode_frame(struct dec_video *vd)
     if (!prepare_decoding(vd))
         return true;
 
-    hwdec_lock(ctx);
     int ret = avcodec_receive_frame(avctx, ctx->pic);
-    hwdec_unlock(ctx);
-
     if (ret == AVERROR_EOF) {
         // If flushing was initialized earlier and has ended now, make it start
         // over in case we get new packets at some point in the future.
