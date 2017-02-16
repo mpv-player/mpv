@@ -4,7 +4,9 @@ mpv as a whole is licensed as GPL version 2 or later (see LICENSE). Most source
 files are GPLv2+, but some files are available under a more liberal license,
 such as LGPLv2.1+, BSD, MIT, ISC, and possibly others. Look at the copyright
 header of each source file, and grep the sources for "Copyright" if you need
-to know details. Files without Copyright notice are licensed as LGPLv2.1+.
+to know details. C source files without Copyright notice are licensed as
+LGPLv2.1+. Also see the list of files with specific licenses below (not all
+files can have a standard license header).
 
 All new contributions must be LGPLv2.1+ licensed, or if the changes are done on
 GPL code, must come with the implicit agreement that the project can relicense
@@ -25,3 +27,9 @@ In particular, this affects the file libmpdemux/demux_ty_osd.c. It is disabled
 under mplayer2, and has been removed from mpv.
 
 "v2.1+" in this context means "version 2.1 or later".
+
+Source files with specific licenses:
+- everything under etc/ is unknown
+- everything under DOCS/man/ is GPLv2+
+- sub/osd_font.otf is GPLv2+
+- some tests under waftools/fragments/ might be GPLv2+
