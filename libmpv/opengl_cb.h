@@ -129,6 +129,7 @@ extern "C" {
  *                 as well, if you have recent enough drivers and the
  *                 "hwaccel" option is set to "cuda" as well)
  * - OSX: CGL is required (CGLGetCurrentContext() returning non-NULL)
+ * - iOS: EAGL is required (EAGLContext.currentContext returning non-nil)
  *
  * Once these things are setup, hardware decoding can be enabled/disabled at
  * any time by setting the "hwdec" property.
