@@ -76,7 +76,6 @@ struct vo_cocoa_state {
 
     bool cursor_visibility;
     bool cursor_visibility_wanted;
-    bool cursor_needs_set;
 
     bool embedded; // wether we are embedding in another GUI
 
@@ -378,23 +377,7 @@ void vo_cocoa_init(struct vo *vo)
     }
 }
 
-static void vo_cocoa_update_cursor(struct vo *vo, bool forceVisible)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-
-    if (s->embedded)
-        return;
-
-    if ((forceVisible || s->cursor_visibility_wanted) && !s->cursor_visibility) {
-        [NSCursor unhide];
-        s->cursor_visibility = YES;
-    } else if (!s->cursor_visibility_wanted && s->cursor_visibility) {
-        [NSCursor hide];
-        s->cursor_visibility = NO;
-    }
-}
-
-static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
+static int vo_cocoa_update_cursor_visibility(struct vo *vo, bool forceVisible)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
@@ -403,14 +386,16 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 
     if (s->view) {
         MpvEventsView *v = (MpvEventsView *) s->view;
-        s->cursor_visibility_wanted = !(!*visible && [v canHideCursor]);
-        vo_cocoa_update_cursor(vo, false);
-    } else {
-        s->cursor_visibility_wanted = *visible;
-        s->cursor_needs_set = true;
-    }
-    *visible = s->cursor_visibility;
+        bool visibility = !(!s->cursor_visibility_wanted && [v canHideCursor]);
 
+        if ((forceVisible || visibility) && !s->cursor_visibility) {
+            [NSCursor unhide];
+            s->cursor_visibility = YES;
+        } else if (!visibility && s->cursor_visibility) {
+            [NSCursor hide];
+            s->cursor_visibility = NO;
+        }
+    }
     return VO_TRUE;
 }
 
@@ -428,7 +413,7 @@ void vo_cocoa_uninit(struct vo *vo)
     run_on_main_thread(vo, ^{
         // if using --wid + libmpv there's no window to release
         if (s->window) {
-            vo_cocoa_update_cursor(vo, true);
+            vo_cocoa_update_cursor_visibility(vo, true);
             [s->window setDelegate:nil];
             [s->window close];
         }
@@ -872,7 +857,8 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        return vo_cocoa_set_cursor_visibility(vo, arg);
+        s->cursor_visibility_wanted = *(bool *)arg;
+        return vo_cocoa_update_cursor_visibility(vo, false);
     case VOCTRL_UPDATE_WINDOW_TITLE: {
         talloc_free(s->window_title);
         s->window_title = talloc_strdup(s, (char *) arg);
@@ -1046,18 +1032,12 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)windowDidResignKey:(NSNotification *)notification
 {
-    vo_cocoa_update_cursor(self.vout, true);
+    vo_cocoa_update_cursor_visibility(self.vout, true);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    if (s->cursor_needs_set) {
-        vo_cocoa_set_cursor_visibility(self.vout, &s->cursor_visibility_wanted);
-        s->cursor_needs_set = false;
-    } else {
-        vo_cocoa_update_cursor(self.vout, false);
-    }
+    vo_cocoa_update_cursor_visibility(self.vout, false);
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)notification
