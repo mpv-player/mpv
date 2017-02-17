@@ -323,9 +323,8 @@ Available video output drivers are:
 
 ``vaapi``
     Intel VA API video output driver with support for hardware decoding. Note
-    that there is absolutely no reason to use this, other than wanting to use
-    hardware decoding to save power on laptops, or possibly preventing video
-    tearing with some setups.
+    that there is absolutely no reason to use this, other than compatibility.
+    This is low quality, and has issues with OSD.
 
     .. note:: This driver is for compatibility with crappy systems. You can
               use vaapi hardware decoding with ``--vo=opengl`` too.
