@@ -88,9 +88,9 @@ const struct gl_format gl_formats[] = {
     // Special formats.
     {GL_RGB8,                GL_RGB,
      GL_UNSIGNED_SHORT_5_6_5,                           F_TF | F_GL2 | F_GL3},
-    {GL_RGB_RAW_422_APPLE,   GL_RGB_422_APPLE,
+    {GL_RGB,                 GL_RGB_422_APPLE,
      GL_UNSIGNED_SHORT_8_8_APPLE,                       F_TF | F_APPL},
-    {GL_RGB_RAW_422_APPLE,   GL_RGB_422_APPLE,
+    {GL_RGB,                 GL_RGB_422_APPLE,
      GL_UNSIGNED_SHORT_8_8_REV_APPLE,                   F_TF | F_APPL},
 
     {0}
