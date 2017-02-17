@@ -6,13 +6,28 @@
 #include "mp_image_pool.h"
 #include "vt.h"
 
+static const uint32_t map_imgfmt_cvpixfmt[][2] = {
+    {IMGFMT_420P,   kCVPixelFormatType_420YpCbCr8Planar},
+    {IMGFMT_UYVY,   kCVPixelFormatType_422YpCbCr8},
+    {IMGFMT_RGB0,   kCVPixelFormatType_32BGRA},
+    {IMGFMT_NV12,   kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange},
+    {0}
+};
+
+uint32_t mp_imgfmt_to_cvpixelformat(int mpfmt)
+{
+    for (int n = 0; map_imgfmt_cvpixfmt[n][0]; n++) {
+        if (map_imgfmt_cvpixfmt[n][0] == mpfmt)
+            return map_imgfmt_cvpixfmt[n][1];
+    }
+    return 0;
+}
+
 int mp_imgfmt_from_cvpixelformat(uint32_t cvpixfmt)
 {
-    switch (cvpixfmt) {
-    case kCVPixelFormatType_420YpCbCr8Planar:               return IMGFMT_420P;
-    case kCVPixelFormatType_422YpCbCr8:                     return IMGFMT_UYVY;
-    case kCVPixelFormatType_32BGRA:                         return IMGFMT_RGB0;
-    case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:   return IMGFMT_NV12;
+    for (int n = 0; map_imgfmt_cvpixfmt[n][0]; n++) {
+        if (map_imgfmt_cvpixfmt[n][1] == cvpixfmt)
+            return map_imgfmt_cvpixfmt[n][0];
     }
     return 0;
 }

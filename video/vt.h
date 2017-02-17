@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 int mp_imgfmt_from_cvpixelformat(uint32_t cvpixfmt);
+uint32_t mp_imgfmt_to_cvpixelformat(int mpfmt);
 
 struct mp_image;
 struct mp_image_pool;
