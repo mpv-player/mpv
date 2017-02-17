@@ -1410,18 +1410,6 @@ Audio
     if you want to force a different audio profile (e.g. with PulseAudio),
     or to set your own application name when using libmpv.
 
-``--volume-restore-data=<string>``
-    Used internally for use by playback resume (e.g. with ``quit-watch-later``).
-    Restoring value has to be done carefully, because different AOs as well as
-    softvol can have different value ranges, and we don't want to restore
-    volume if setting the volume changes it system wide. The normal options
-    (like ``--volume``) would always set the volume. This option was added for
-    restoring volume in a safer way (by storing the method used to set the
-    volume), and is not generally useful. Its semantics are considered private
-    to mpv.
-
-    Do not use.
-
 ``--audio-buffer=<seconds>``
     Set the audio output minimum buffer. The audio device might actually create
     a larger buffer if it pleases. If the device creates a smaller buffer,
