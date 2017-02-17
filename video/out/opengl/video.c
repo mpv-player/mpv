@@ -269,34 +269,6 @@ struct gl_video {
     bool broken_frame; // temporary error state
 };
 
-struct packed_fmt_entry {
-    int fmt;
-    int8_t component_size;
-    int8_t components[4]; // source component - 0 means unmapped
-};
-
-static const struct packed_fmt_entry mp_packed_formats[] = {
-    //                  w   R  G  B  A
-    {IMGFMT_Y8,         1, {1, 0, 0, 0}},
-    {IMGFMT_Y16,        2, {1, 0, 0, 0}},
-    {IMGFMT_YA8,        1, {1, 0, 0, 2}},
-    {IMGFMT_YA16,       2, {1, 0, 0, 2}},
-    {IMGFMT_ARGB,       1, {2, 3, 4, 1}},
-    {IMGFMT_0RGB,       1, {2, 3, 4, 0}},
-    {IMGFMT_BGRA,       1, {3, 2, 1, 4}},
-    {IMGFMT_BGR0,       1, {3, 2, 1, 0}},
-    {IMGFMT_ABGR,       1, {4, 3, 2, 1}},
-    {IMGFMT_0BGR,       1, {4, 3, 2, 0}},
-    {IMGFMT_RGBA,       1, {1, 2, 3, 4}},
-    {IMGFMT_RGB0,       1, {1, 2, 3, 0}},
-    {IMGFMT_BGR24,      1, {3, 2, 1, 0}},
-    {IMGFMT_RGB24,      1, {1, 2, 3, 0}},
-    {IMGFMT_RGB48,      2, {1, 2, 3, 0}},
-    {IMGFMT_RGBA64,     2, {1, 2, 3, 4}},
-    {IMGFMT_BGRA64,     2, {3, 2, 1, 4}},
-    {0},
-};
-
 static const struct gl_video_opts gl_video_opts_def = {
     .dither_algo = DITHER_FRUIT,
     .dither_depth = -1,
@@ -3256,25 +3228,6 @@ bool gl_video_showing_interpolated_frame(struct gl_video *p)
     return p->is_interpolated;
 }
 
-// dest = src.<w> (always using 4 components)
-static void packed_fmt_swizzle(char w[5], const struct packed_fmt_entry *fmt)
-{
-    for (int c = 0; c < 4; c++)
-        w[c] = "rgba"[MPMAX(fmt->components[c] - 1, 0)];
-    w[4] = '\0';
-}
-
-// Like gl_find_unorm_format(), but takes bits (not bytes), and if no fixed
-// point format is available, return an unsigned integer format.
-static const struct gl_format *find_plane_format(GL *gl, int bits, int n_channels)
-{
-    int bytes = (bits + 7) / 8;
-    const struct gl_format *f = gl_find_unorm_format(gl, bytes, n_channels);
-    if (f)
-        return f;
-    return gl_find_uint_format(gl, bytes, n_channels);
-}
-
 static void init_image_desc(struct gl_video *p, int fmt)
 {
     p->image_desc = mp_imgfmt_get_desc(fmt);
@@ -3292,85 +3245,17 @@ static void init_image_desc(struct gl_video *p, int fmt)
 // test_only=false also initializes some rendering parameters accordingly
 static bool init_format(struct gl_video *p, int fmt, bool test_only)
 {
-    struct GL *gl = p->gl;
-
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    if (!desc.id)
+    int cdepth = mp_imgfmt_get_desc(fmt).component_bits;
+    if (cdepth > 8 && cdepth < 16 && p->texture_16bit_depth < 16)
         return false;
 
-    if (desc.num_planes > 4)
+    struct gl_imgfmt_desc desc;
+    if (!gl_get_imgfmt_desc(p->gl, fmt, &desc))
         return false;
-
-    const struct gl_format *plane_format[4] = {0};
-    char color_swizzle[5] = "";
-    const struct packed_fmt_entry *packed_format = {0};
-
-    // YUV/planar formats
-    if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
-        int bits = desc.component_bits;
-        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            plane_format[0] = find_plane_format(gl, bits, 1);
-            for (int n = 1; n < desc.num_planes; n++)
-                plane_format[n] = plane_format[0];
-            // RGB/planar
-            if (desc.flags & MP_IMGFLAG_RGB_P)
-                snprintf(color_swizzle, sizeof(color_swizzle), "brga");
-            goto supported;
-        }
-    }
-
-    // YUV/half-packed
-    if (desc.flags & MP_IMGFLAG_YUV_NV) {
-        int bits = desc.component_bits;
-        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            plane_format[0] = find_plane_format(gl, bits, 1);
-            plane_format[1] = find_plane_format(gl, bits, 2);
-            if (desc.flags & MP_IMGFLAG_YUV_NV_SWAP)
-                snprintf(color_swizzle, sizeof(color_swizzle), "rbga");
-            goto supported;
-        }
-    }
-
-    // XYZ (same organization as RGB packed, but requires conversion matrix)
-    if (fmt == IMGFMT_XYZ12) {
-        plane_format[0] = gl_find_unorm_format(gl, 2, 3);
-        goto supported;
-    }
-
-    // Packed RGB(A) formats
-    for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
-        if (e->fmt == fmt) {
-            int n_comp = desc.bytes[0] / e->component_size;
-            plane_format[0] = gl_find_unorm_format(gl, e->component_size, n_comp);
-            packed_format = e;
-            goto supported;
-        }
-    }
-
-    // Special formats for which OpenGL happens to have direct support.
-    plane_format[0] = gl_find_special_format(gl, fmt);
-    if (plane_format[0]) {
-        // Packed YUV Apple formats color permutation
-        if (plane_format[0]->format == GL_RGB_422_APPLE)
-            snprintf(color_swizzle, sizeof(color_swizzle), "gbra");
-        goto supported;
-    }
-
-    // Unsupported format
-    return false;
-
-supported:
-
-    if (desc.component_bits > 8 && desc.component_bits < 16) {
-        if (p->texture_16bit_depth < 16)
-            return false;
-    }
 
     int use_integer = -1;
     for (int n = 0; n < desc.num_planes; n++) {
-        if (!plane_format[n])
-            return false;
-        int use_int_plane = gl_is_integer_format(plane_format[n]->format);
+        int use_int_plane = gl_is_integer_format(desc.planes[n]->format);
         if (use_integer < 0)
             use_integer = use_int_plane;
         if (use_integer != use_int_plane)
@@ -3383,8 +3268,7 @@ supported:
     if (!test_only) {
         for (int n = 0; n < desc.num_planes; n++) {
             struct texplane *plane = &p->image.planes[n];
-            const struct gl_format *format = plane_format[n];
-            assert(format);
+            const struct gl_format *format = desc.planes[n];
             plane->gl_format = format->format;
             plane->gl_internal_format = format->internal_format;
             plane->gl_type = format->type;
@@ -3393,9 +3277,7 @@ supported:
         init_image_desc(p, fmt);
 
         p->use_integer_conversion = use_integer;
-        if (packed_format)
-            packed_fmt_swizzle(color_swizzle, packed_format);
-        snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s", color_swizzle);
+        snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s", desc.swizzle);
     }
 
     return true;

@@ -35,9 +35,9 @@ enum {
                            // the format is still GL_FLOAT (32 bit)
 
     // --- Other constants.
-    MPGL_TYPE_UNORM = 1,
-    MPGL_TYPE_UINT = 2,
-    MPGL_TYPE_FLOAT = 3,
+    MPGL_TYPE_UNORM = 1,    // normalized integer (fixed point) formats
+    MPGL_TYPE_UINT  = 2,    // full integer formats
+    MPGL_TYPE_FLOAT = 3,    // float formats (both full and half)
 };
 
 int gl_format_feature_flags(GL *gl);
@@ -56,5 +56,18 @@ bool gl_is_integer_format(GLenum format);
 int gl_component_size(GLenum type);
 int gl_format_components(GLenum format);
 int gl_bytes_per_pixel(GLenum format, GLenum type);
+
+struct gl_imgfmt_desc {
+    int num_planes;
+    const struct gl_format *planes[4];
+    // Chroma shift (sub-sampling) for each plane.
+    int xs[4], ys[4];
+    // Component order (e.g. "rgba"), applied after all planes are combined.
+    // This has always 4 components (the excess components have no meaning).
+    // (For GL_LUMINANCE_ALPHA, it is assumed "ra" has been assigned to "rg".)
+    char swizzle[5];
+};
+
+bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out);
 
 #endif
