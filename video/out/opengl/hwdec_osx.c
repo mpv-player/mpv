@@ -27,8 +27,6 @@
 #include "video/mp_image_pool.h"
 #include "video/vt.h"
 #include "hwdec.h"
-#include "common/global.h"
-#include "options/options.h"
 
 struct vt_gl_plane_format {
     GLenum gl_format;
@@ -46,7 +44,6 @@ struct vt_format {
 
 struct priv {
     struct mp_hwdec_ctx hwctx;
-    struct mp_vt_ctx vtctx;
 
     CVPixelBufferRef pbuf;
     GLuint gl_planes[MP_MAX_PLANES];
@@ -123,14 +120,6 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static uint32_t get_vt_fmt(struct mp_vt_ctx *vtctx)
-{
-    struct gl_hwdec *hw = vtctx->priv;
-    struct vt_format *f =
-        vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
-    return f ? f->cvpixfmt : (uint32_t)-1;
-}
-
 static int create(struct gl_hwdec *hw)
 {
     if (!check_hwdec(hw))
@@ -141,14 +130,10 @@ static int create(struct gl_hwdec *hw)
 
     hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
-    p->vtctx = (struct mp_vt_ctx){
-        .priv = hw,
-        .get_vt_fmt = get_vt_fmt,
-    };
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_VIDEOTOOLBOX,
         .download_image = mp_vt_download_image,
-        .ctx = &p->vtctx,
+        .ctx = &p->hwctx,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 

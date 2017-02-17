@@ -22,6 +22,7 @@
 
 #include "common/av_common.h"
 #include "common/msg.h"
+#include "options/options.h"
 #include "video/mp_image.h"
 #include "video/decode/lavc.h"
 #include "video/mp_image_pool.h"
@@ -96,9 +97,16 @@ static void print_videotoolbox_error(struct mp_log *log, int lev, char *message,
     mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
-static int init_decoder_common(struct lavc_ctx *ctx, int w, int h, AVVideotoolboxContext *vtctx)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     av_videotoolbox_default_free(ctx->avctx);
+
+    AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
+    if (!vtctx)
+        return -1;
+
+    vtctx->cv_pix_fmt_type =
+        mp_imgfmt_to_cvpixelformat(ctx->opts->videotoolbox_format);
 
     int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
     if (err < 0) {
@@ -107,20 +115,6 @@ static int init_decoder_common(struct lavc_ctx *ctx, int w, int h, AVVideotoolbo
     }
 
     return 0;
-}
-
-static int init_decoder(struct lavc_ctx *ctx, int w, int h)
-{
-    AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
-    struct mp_vt_ctx *vt = hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX);
-    vtctx->cv_pix_fmt_type = vt->get_vt_fmt(vt);
-
-    return init_decoder_common(ctx, w, h, vtctx);
-}
-
-static int init_decoder_copy(struct lavc_ctx *ctx, int w, int h)
-{
-    return init_decoder_common(ctx, w, h, NULL);
 }
 
 static void uninit(struct lavc_ctx *ctx)
@@ -179,7 +173,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
     .probe = probe_copy,
     .init = init,
     .uninit = uninit,
-    .init_decoder = init_decoder_copy,
+    .init_decoder = init_decoder,
     .process_image = copy_image,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };
