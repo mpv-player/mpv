@@ -34,6 +34,7 @@
 #include "video/img_fourcc.h"
 #include "video/mp_image_pool.h"
 #include "common.h"
+#include "formats.h"
 
 #ifndef GL_OES_EGL_image
 typedef void* GLeglImageOES;
@@ -319,7 +320,10 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct mp_image layout = {0};
     mp_image_set_params(&layout, &hw_image->params);
     mp_image_setfmt(&layout, p->current_mpfmt);
-    struct mp_imgfmt_desc fmt = layout.fmt;
+
+    struct gl_imgfmt_desc desc;
+    if (!gl_get_imgfmt_desc(gl, p->current_mpfmt, &desc))
+        goto err;
 
     int drm_fmts[8] = {
         // 1 bytes per component, 1-4 components
@@ -338,21 +342,21 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         int attribs[20] = {EGL_NONE};
         int num_attribs = 0;
 
-        int fmt_index = -1;
-        int cbits = fmt.component_bits;
-        if ((fmt.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_YUV_NV)) &&
-            (fmt.flags & MP_IMGFLAG_NE) && cbits >= 8 && cbits <= 16)
-        {
-            // Regular planar and semi-planar formats.
-            fmt_index = fmt.components[n] - 1 + 4 * ((cbits + 7) / 8 - 1);
-        } else if (fmt.id == IMGFMT_RGB0 || fmt.id == IMGFMT_BGR0) {
-            fmt_index = 3 + 4 * ((cbits + 7) / 8 - 1);
-        }
-
-        if (fmt_index < 0 || fmt_index >= 8 || !drm_fmts[fmt_index])
+        const struct gl_format *fmt = desc.planes[n];
+        if (gl_format_type(fmt) != MPGL_TYPE_UNORM)
             goto err;
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[fmt_index]);
+        int n_comp = gl_format_components(fmt->format);
+        int comp_s = gl_component_size(fmt->type);
+        if (!gl_format_is_regular(fmt))
+            goto err;
+        if (n_comp < 1 || n_comp > 3 || comp_s < 1 || comp_s > 2)
+            goto err;
+        int drm_fmt = drm_fmts[n_comp - 1 + (comp_s - 1) * 4];
+        if (!drm_fmt)
+            goto err;
+
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmt);
         ADD_ATTRIB(EGL_WIDTH, mp_image_plane_w(&layout, n));
         ADD_ATTRIB(EGL_HEIGHT, mp_image_plane_h(&layout, n));
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_FD_EXT, buffer_info.handle);
@@ -378,6 +382,8 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     if (va_image->format.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct gl_hwdec_plane, out_frame->planes[1], out_frame->planes[2]);
+
+    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s", desc.swizzle);
 
     return 0;
 

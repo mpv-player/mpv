@@ -303,7 +303,14 @@ int gl_bytes_per_pixel(GLenum format, GLenum type)
     case GL_UNSIGNED_SHORT_8_8_REV_APPLE:       return 2;
     }
 
-    return gl_format_components(format) * gl_component_size(type);
+    return gl_component_size(type) * gl_format_components(format);
+}
+
+// The format has cleanly separated components (on byte boundaries).
+bool gl_format_is_regular(const struct gl_format *fmt)
+{
+    int bpp = gl_component_size(fmt->type) * gl_format_components(fmt->format);
+    return bpp == gl_bytes_per_pixel(fmt->format, fmt->type);
 }
 
 // dest = src.<w> (always using 4 components)

@@ -51,6 +51,7 @@ const struct gl_format *gl_find_uint_format(GL *gl, int bytes_per_component,
                                             int n_components);
 const struct gl_format *gl_find_float16_format(GL *gl, int n_components);
 int gl_format_type(const struct gl_format *format);
+bool gl_format_is_regular(const struct gl_format *format);
 GLenum gl_integer_format_to_base(GLenum format);
 bool gl_is_integer_format(GLenum format);
 int gl_component_size(GLenum type);
