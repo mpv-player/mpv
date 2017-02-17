@@ -42,8 +42,7 @@ struct priv {
     GLuint gl_textures[4];
     CUgraphicsResource cu_res[4];
     CUarray cu_array[4];
-    int sample_count[4];
-    int sample_width;
+    int plane_bytes[4];
 
     CUcontext cuda_ctx;
 };
@@ -157,27 +156,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     mp_image_set_params(&p->layout, params);
 
-    for (int n = 0; n < 4; n++)
-        p->sample_count[n] = 0;
-
-    switch (params->imgfmt) {
-    case IMGFMT_NV12:
-        p->sample_width = 1;
-        p->sample_count[0] = 1;
-        p->sample_count[1] = 2;
-        break;
-    case IMGFMT_P010:
-    case IMGFMT_P016:
-        p->sample_width = 2;
-        p->sample_count[0] = 1;
-        p->sample_count[1] = 2;
-        break;
-    case IMGFMT_420P:
-        p->sample_width = 1;
-        for (int n = 0; n < 3; n++)
-            p->sample_count[n] = 1;
-        break;
-    default:
+    struct gl_imgfmt_desc desc;
+    if (!gl_get_imgfmt_desc(gl, params->imgfmt, &desc)) {
         MP_ERR(hw, "Unsupported format: %s\n", mp_imgfmt_to_name(params->imgfmt));
         return -1;
     }
@@ -187,12 +167,10 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         return ret;
 
     gl->GenTextures(4, p->gl_textures);
-    for (int n = 0; n < 4; n++) {
-        if (!p->sample_count[n])
-            break;
+    for (int n = 0; n < desc.num_planes; n++) {
+        const struct gl_format *fmt = desc.planes[n];
 
-        const struct gl_format *fmt =
-            gl_find_unorm_format(gl, p->sample_width, p->sample_count[n]);
+        p->plane_bytes[n] = gl_bytes_per_pixel(fmt->format, fmt->type);
 
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         GLenum filter = GL_NEAREST;
@@ -270,10 +248,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     *out_frame = (struct gl_hwdec_frame) { 0, };
 
-    for (int n = 0; n < 4; n++) {
-        if (!p->sample_count[n])
-            break;
-
+    for (int n = 0; n < p->layout.num_planes; n++) {
         // widthInBytes must account for the chroma plane
         // elements being two samples wide.
         CUDA_MEMCPY2D cpy = {
@@ -283,8 +258,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .srcPitch      = hw_image->stride[n],
             .srcY          = 0,
             .dstArray      = p->cu_array[n],
-            .WidthInBytes  = mp_image_plane_w(&p->layout, n) *
-                             p->sample_count[n] * p->sample_width,
+            .WidthInBytes  = mp_image_plane_w(&p->layout, n) * p->plane_bytes[n],
             .Height        = mp_image_plane_h(&p->layout, n),
         };
         ret = CHECK_CU(cuMemcpy2D(&cpy));
