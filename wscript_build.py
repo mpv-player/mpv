@@ -303,6 +303,7 @@ def build(ctx):
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
+        ( "video/vt.c",                          "videotoolbox-hwaccel" ),
         ( "video/decode/d3d.c",                  "win32" ),
         ( "video/decode/dec_video.c"),
         ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),

@@ -25,6 +25,7 @@
 #include <OpenGL/CGLIOSurface.h>
 
 #include "video/mp_image_pool.h"
+#include "video/vt.h"
 #include "hwdec.h"
 #include "common/global.h"
 #include "options/options.h"
@@ -107,44 +108,6 @@ static struct vt_format *vt_get_gl_format_from_imgfmt(uint32_t imgfmt)
     return NULL;
 }
 
-static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
-                                       struct mp_image *hw_image,
-                                       struct mp_image_pool *swpool)
-{
-    if (hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
-        return NULL;
-
-    struct mp_image *image = NULL;
-    CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
-    CVPixelBufferLockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
-    size_t width  = CVPixelBufferGetWidth(pbuf);
-    size_t height = CVPixelBufferGetHeight(pbuf);
-    uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
-    struct vt_format *f = vt_get_gl_format(cvpixfmt);
-    if (!f)
-        goto unlock;
-
-    struct mp_image img = {0};
-    mp_image_setfmt(&img, f->imgfmt);
-    mp_image_set_size(&img, width, height);
-
-    for (int i = 0; i < f->planes; i++) {
-        void *base    = CVPixelBufferGetBaseAddressOfPlane(pbuf, i);
-        size_t stride = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i);
-        img.planes[i] = base;
-        img.stride[i] = stride;
-    }
-
-    mp_image_copy_attributes(&img, hw_image);
-
-    image = mp_image_pool_new_copy(swpool, &img);
-
-unlock:
-    CVPixelBufferUnlockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
-
-    return image;
-}
-
 static bool check_hwdec(struct gl_hwdec *hw)
 {
     if (hw->gl->version < 300) {
@@ -184,7 +147,7 @@ static int create(struct gl_hwdec *hw)
     };
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_VIDEOTOOLBOX,
-        .download_image = download_image,
+        .download_image = mp_vt_download_image,
         .ctx = &p->vtctx,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
