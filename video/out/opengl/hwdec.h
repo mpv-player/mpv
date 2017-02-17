@@ -23,13 +23,16 @@ struct gl_hwdec {
 struct gl_hwdec_plane {
     GLuint gl_texture;
     GLenum gl_target;
+    // Like struct gl_format.format (GL_RED etc.). Currently to detect
+    // GL_LUMINANCE_ALPHA and integer formats - can be left to 0 otherwise.
+    GLenum gl_format;
     int tex_w, tex_h; // allocated texture size
-    char swizzle[5]; // component order (if length is 0, use defaults)
 };
 
 struct gl_hwdec_frame {
     struct gl_hwdec_plane planes[4];
     bool vdpau_fields;
+    char swizzle[5]; // optional component swizzle (4 components if set)
 };
 
 struct gl_hwdec_driver {

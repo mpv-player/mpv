@@ -32,7 +32,6 @@ struct vt_gl_plane_format {
     GLenum gl_format;
     GLenum gl_type;
     GLenum gl_internal_format;
-    char swizzle[5];
 };
 
 struct vt_format {
@@ -40,6 +39,7 @@ struct vt_format {
     int imgfmt;
     int planes;
     struct vt_gl_plane_format gl[MP_MAX_PLANES];
+    char swizzle[5];
 };
 
 struct priv {
@@ -64,8 +64,9 @@ static struct vt_format vt_formats[] = {
         .imgfmt = IMGFMT_UYVY,
         .planes = 1,
         .gl = {
-            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB, "gbra" }
-        }
+            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB }
+        },
+        .swizzle = "gbra",
     },
     {
         .cvpixfmt = kCVPixelFormatType_420YpCbCr8Planar,
@@ -205,9 +206,9 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .tex_w = IOSurfaceGetWidthOfPlane(surface, i),
             .tex_h = IOSurfaceGetHeightOfPlane(surface, i),
         };
-        snprintf(out_frame->planes[i].swizzle, sizeof(out_frame->planes[i].swizzle),
-                 "%s", f->gl[i].swizzle);
     }
+
+    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s", f->swizzle);
 
     return 0;
 }

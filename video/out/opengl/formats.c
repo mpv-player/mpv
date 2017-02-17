@@ -221,6 +221,11 @@ GLenum gl_integer_format_to_base(GLenum format)
     return 0;
 }
 
+bool gl_is_integer_format(GLenum format)
+{
+    return !!gl_integer_format_to_base(format);
+}
+
 // Return the number of bytes per component this format implies.
 // Returns 0 for formats with non-byte alignments and formats which
 // merge multiple components (like GL_UNSIGNED_SHORT_5_6_5).

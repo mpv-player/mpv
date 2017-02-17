@@ -92,11 +92,9 @@ struct texplane {
     int tex_w, tex_h;
     GLint gl_internal_format;
     GLenum gl_target;
-    bool use_integer;
     GLenum gl_format;
     GLenum gl_type;
     GLuint gl_texture;
-    char swizzle[5];
     bool flipped;
     struct gl_pbo_upload pbo;
 };
@@ -125,11 +123,10 @@ struct img_tex {
     float multiplier; // multiplier to be used when sampling
     GLuint gl_tex;
     GLenum gl_target;
-    bool use_integer;
+    GLenum gl_format;
     int tex_w, tex_h; // source texture size
     int w, h; // logical size (after transformation)
     struct gl_transform transform; // rendering transformation
-    char swizzle[5];
 };
 
 // A named img_tex, for user scripting purposes
@@ -630,7 +627,6 @@ static struct img_tex img_tex_fbo(struct fbotex *fbo, enum plane_type type,
         .gl_tex = fbo->texture,
         .gl_target = GL_TEXTURE_2D,
         .multiplier = 1.0,
-        .use_integer = false,
         .tex_w = fbo->rw,
         .tex_h = fbo->rh,
         .w = fbo->lw,
@@ -737,15 +733,14 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .type = type,
             .gl_tex = t->gl_texture,
             .gl_target = t->gl_target,
+            .gl_format = t->gl_format,
             .multiplier = tex_mul,
-            .use_integer = t->use_integer,
             .tex_w = t->tex_w,
             .tex_h = t->tex_h,
             .w = t->w,
             .h = t->h,
             .components = p->image_desc.components[n],
         };
-        snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
         get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
                       &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
@@ -843,7 +838,8 @@ static void init_video(struct gl_video *p)
                            plane->tex_w, plane->tex_h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
-            int filter = plane->use_integer ? GL_NEAREST : GL_LINEAR;
+            int filter = gl_is_integer_format(plane->gl_format)
+                         ? GL_NEAREST : GL_LINEAR;
             gl->TexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, filter);
             gl->TexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, filter);
             gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -926,7 +922,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
         snprintf(texture_rot, sizeof(texture_rot), "texture_rot%d", n);
         snprintf(pixel_size, sizeof(pixel_size), "pixel_size%d", n);
 
-        if (s->use_integer) {
+        if (gl_is_integer_format(s->gl_format)) {
             gl_sc_uniform_tex_ui(sc, texture_name, s->gl_tex);
         } else {
             gl_sc_uniform_tex(sc, texture_name, s->gl_target, s->gl_tex);
@@ -1009,6 +1005,11 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                        &(struct mp_rect){0, 0, w, h});
 }
 
+static const char *get_tex_swizzle(struct img_tex *img)
+{
+    return img->gl_format == GL_LUMINANCE_ALPHA ? "raaa" : "rgba";
+}
+
 // Copy a texture to the vec4 color, while increasing offset. Also applies
 // the texture multiplier to the sampled color
 static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
@@ -1019,14 +1020,14 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     int id = pass_bind(p, img);
     char src[5] = {0};
     char dst[5] = {0};
-    const char *tex_fmt = img.swizzle[0] ? img.swizzle : "rgba";
+    const char *tex_fmt = get_tex_swizzle(&img);
     const char *dst_fmt = "rgba";
     for (int i = 0; i < count; i++) {
         src[i] = tex_fmt[i];
         dst[i] = dst_fmt[*offset + i];
     }
 
-    if (img.use_integer) {
+    if (gl_is_integer_format(img.gl_format)) {
         uint64_t tex_max = 1ull << p->image_desc.component_full_bits;
         img.multiplier *= 1.0 / (tex_max - 1);
     }
@@ -1064,7 +1065,7 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
 
     // Set up the sampling functions
     GLSLHF("#define %s_tex(pos) (%f * vec4(texture(%s_raw, pos)).%s)\n",
-           name, tex.multiplier, name, tex.swizzle[0] ? tex.swizzle : "rgba");
+           name, tex.multiplier, name, get_tex_swizzle(&tex));
 
     // Since the extra matrix multiplication impacts performance,
     // skip it unless the texture was actually rotated
@@ -1479,13 +1480,12 @@ static bool img_tex_equiv(struct img_tex a, struct img_tex b)
            a.components == b.components &&
            a.multiplier == b.multiplier &&
            a.gl_target == b.gl_target &&
-           a.use_integer == b.use_integer &&
+           a.gl_format == b.gl_format &&
            a.tex_w == b.tex_w &&
            a.tex_h == b.tex_h &&
            a.w == b.w &&
            a.h == b.h &&
-           gl_transform_eq(a.transform, b.transform) &&
-           strcmp(a.swizzle, b.swizzle) == 0;
+           gl_transform_eq(a.transform, b.transform);
 }
 
 static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
@@ -1701,7 +1701,7 @@ static void pass_read_video(struct gl_video *p)
     // If any textures are still in integer format by this point, we need
     // to introduce an explicit conversion pass to avoid breaking hooks/scaling
     for (int n = 0; n < 4; n++) {
-        if (tex[n].use_integer) {
+        if (gl_is_integer_format(tex[n].gl_format)) {
             GLSLF("// use_integer fix for plane %d\n", n);
 
             copy_img_tex(p, &(int){0}, tex[n]);
@@ -2933,10 +2933,11 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
                     .tex_h = plane->tex_h,
                     .gl_target = plane->gl_target,
                     .gl_texture = plane->gl_texture,
+                    .gl_format = plane->gl_format,
                 };
-                snprintf(vimg->planes[n].swizzle, sizeof(vimg->planes[n].swizzle),
-                         "%s", plane->swizzle);
             }
+            snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s",
+                     gl_frame.swizzle);
         } else {
             MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
             goto error;
@@ -3369,7 +3370,7 @@ supported:
     for (int n = 0; n < desc.num_planes; n++) {
         if (!plane_format[n])
             return false;
-        int use_int_plane = !!gl_integer_format_to_base(plane_format[n]->format);
+        int use_int_plane = gl_is_integer_format(plane_format[n]->format);
         if (use_integer < 0)
             use_integer = use_int_plane;
         if (use_integer != use_int_plane)
@@ -3387,17 +3388,13 @@ supported:
             plane->gl_format = format->format;
             plane->gl_internal_format = format->internal_format;
             plane->gl_type = format->type;
-            plane->use_integer = use_integer;
-            snprintf(plane->swizzle, sizeof(plane->swizzle), "rgba");
-            if (packed_format)
-                packed_fmt_swizzle(plane->swizzle, packed_format);
-            if (plane->gl_format == GL_LUMINANCE_ALPHA)
-                MPSWAP(char, plane->swizzle[1], plane->swizzle[3]);
         }
 
         init_image_desc(p, fmt);
 
         p->use_integer_conversion = use_integer;
+        if (packed_format)
+            packed_fmt_swizzle(color_swizzle, packed_format);
         snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s", color_swizzle);
     }
 
