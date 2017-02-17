@@ -415,10 +415,11 @@ supported:
     snprintf(out->swizzle, sizeof(out->swizzle), "%s", swizzle);
     out->num_planes = desc.num_planes;
     for (int n = 0; n < desc.num_planes; n++) {
+        if (!planes[n])
+            return false;
         out->xs[n] = desc.xs[n];
         out->ys[n] = desc.ys[n];
         out->planes[n] = planes[n];
-        assert(planes[n]);
     }
     return true;
 }
