@@ -79,7 +79,7 @@ static struct vt_format vt_formats[] = {
     },
     {
         .cvpixfmt = kCVPixelFormatType_32BGRA,
-        .imgfmt = IMGFMT_RGB0,
+        .imgfmt = IMGFMT_BGR0,
         .planes = 1,
         .gl = {
             { GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, GL_RGBA }

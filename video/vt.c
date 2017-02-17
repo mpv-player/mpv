@@ -9,7 +9,7 @@
 static const uint32_t map_imgfmt_cvpixfmt[][2] = {
     {IMGFMT_420P,   kCVPixelFormatType_420YpCbCr8Planar},
     {IMGFMT_UYVY,   kCVPixelFormatType_422YpCbCr8},
-    {IMGFMT_RGB0,   kCVPixelFormatType_32BGRA},
+    {IMGFMT_BGR0,   kCVPixelFormatType_32BGRA},
     {IMGFMT_NV12,   kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange},
     {0}
 };
