@@ -91,6 +91,9 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     av_dict_free(&opts);
     // Documented as "set by libavcodec", but there is no other way
     avctx->time_base = (AVRational) {1, 1000};
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    avctx->pkt_timebase = avctx->time_base;
+#endif
     priv->avctx = avctx;
     priv->extradata = talloc_strndup(priv, avctx->subtitle_header,
                                      avctx->subtitle_header_size);
