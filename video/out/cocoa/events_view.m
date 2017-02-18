@@ -266,7 +266,8 @@
         [self preciseScroll:event];
     } else {
         const int modifiers = [event modifierFlags];
-        const int mpkey = [event deltaY] > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        const int mpkey = ([event deltaX] + [event deltaY]) > 0 ?
+                            MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
         [self.adapter putKey:mpkey withModifiers:modifiers];
     }
 }
