@@ -34,12 +34,12 @@ def build(ctx):
     cls = Task.classes['cprogram']
     class cprogram(cls):
         try:
-            run_str = cls.orig_run_str + '${LAST_LINKFLAGS}'
+            run_str = cls.orig_run_str + ' ${LAST_LINKFLAGS}'
         except AttributeError:
             try:
-                run_str = cls.hcode + '${LAST_LINKFLAGS}'
+                run_str = cls.hcode + ' ${LAST_LINKFLAGS}'
             except TypeError:
-                run_str = cls.hcode.decode('iso8859-1') + '${LAST_LINKFLAGS}'
+                run_str = cls.hcode.decode('iso8859-1') + ' ${LAST_LINKFLAGS}'
 
     cls = Task.classes['macplist']
     class macplist(cls):
