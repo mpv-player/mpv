@@ -86,7 +86,7 @@
 
 - (BOOL)containsMouseLocation
 {
-    NSRect vF  = [[self.window screen] visibleFrame];
+    NSRect vF  = [[self.window screen] frame];
     NSRect vFW = [self.window convertRectFromScreen:vF];
     NSRect vFV = [self convertRect:vFW fromView:nil];
     NSPoint pt = [self convertPoint:[self mouseLocation] fromView:nil];
