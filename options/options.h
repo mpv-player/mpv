@@ -327,6 +327,7 @@ typedef struct MPOpts {
 
     struct gl_video_opts *gl_video_opts;
     struct angle_opts *angle_opts;
+    struct cocoa_opts *cocoa_opts;
     struct dvd_opts *dvd_opts;
 } MPOpts;
 
