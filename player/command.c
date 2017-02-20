@@ -354,7 +354,7 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     bstr bname = bstr0(name);
     char tmp[50];
     if (bstr_eatend0(&bname, "*")) {
-        snprintf(tmp, sizeof(name), "%.*s", BSTR_P(bname));
+        snprintf(tmp, sizeof(tmp), "%.*s", BSTR_P(bname));
         name = tmp;
     }
 
