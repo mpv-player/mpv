@@ -797,7 +797,7 @@ hwaccel_features = [
         'name': '--vaapi-hwaccel',
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
-        'func': check_headers('libavcodec/vaapi.h', use='libav'),
+        'func': check_true,
     }, {
         'name': '--vaapi-hwaccel-new',
         'desc': 'libavcodec VAAPI hwaccel (new)',
@@ -837,11 +837,9 @@ hwaccel_features = [
                                 use='libav'),
     }, {
         'name': '--d3d-hwaccel',
-        'desc': 'libavcodec DXVA2 and D3D11VA hwaccel',
+        'desc': 'DXVA2 and D3D11VA hwaccel',
         'deps': [ 'win32' ],
-        'func': compose_checks(
-                    check_headers('libavcodec/dxva2.h',  use='libav'),
-                    check_headers('libavcodec/d3d11va.h',  use='libav')),
+        'func': check_true,
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
