@@ -196,7 +196,6 @@ typedef struct mpv_stream_cb_info {
  * @param user_data opaque user data provided via mpv_stream_cb_add()
  * @param uri name of the stream to be opened (with protocol prefix)
  * @param info fields which the user should fill
- * @return opaque cookie identifing the newly opened stream
  * @return 0 on success, MPV_ERROR_LOADING_FAILED if the URI cannot be opened.
  */
 typedef int (*mpv_stream_cb_open_ro_fn)(void *user_data, char *uri,
