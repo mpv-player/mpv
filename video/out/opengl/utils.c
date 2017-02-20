@@ -622,7 +622,7 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
     return &sc->uniforms[sc->num_uniforms - 1];
 }
 
-const char* mp_sampler_type(GLenum texture_target)
+const char *mp_sampler_type(GLenum texture_target)
 {
     switch (texture_target) {
     case GL_TEXTURE_1D:         return "sampler1D";

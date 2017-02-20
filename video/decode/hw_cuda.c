@@ -63,7 +63,7 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     // This is proper use of the hw_frames_ctx API, but it does not work
     // (appaears to work but fails e.g. with 10 bit). The cuvid wrapper
-    // does non-standard things, and it's a meesy situation.
+    // does non-standard things, and it's a messy situation.
     /*
     hwframe_ctx->width = w;
     hwframe_ctx->height = h;
