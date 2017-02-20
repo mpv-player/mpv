@@ -469,8 +469,7 @@ void video_work(struct dec_video *d_video)
             video_reset(d_video);
         } else {
             d_video->codec = new_segment->codec;
-            if (d_video->vd_driver)
-                d_video->vd_driver->uninit(d_video);
+            d_video->vd_driver->uninit(d_video);
             d_video->vd_driver = NULL;
             video_init_best_codec(d_video);
         }

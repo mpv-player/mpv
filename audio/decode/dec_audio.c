@@ -260,8 +260,7 @@ void audio_work(struct dec_audio *da)
             audio_reset_decoding(da);
         } else {
             da->codec = new_segment->codec;
-            if (da->ad_driver)
-                da->ad_driver->uninit(da);
+            da->ad_driver->uninit(da);
             da->ad_driver = NULL;
             audio_init_best_codec(da);
         }
