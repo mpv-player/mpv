@@ -210,6 +210,8 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     // libva drivers (such as the vdpau wraper). So don't error out on failure.
     open_lavu_vaapi_device(res);
 
+    res->hwctx.emulated = va_guess_if_emulated(res);
+
     return res;
 
 error:
@@ -716,7 +718,13 @@ static const struct va_native_display *const native_displays[] = {
     NULL
 };
 
-struct mp_vaapi_ctx *va_create_standalone(struct mp_log *plog, bool probing)
+static void va_destroy_ctx(struct mp_hwdec_ctx *ctx)
+{
+    va_destroy(ctx->ctx);
+}
+
+struct mp_hwdec_ctx *va_create_standalone(struct mpv_global *global,
+                                          struct mp_log *plog, bool probing)
 {
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
@@ -731,7 +739,8 @@ struct mp_vaapi_ctx *va_create_standalone(struct mp_log *plog, bool probing)
             }
             ctx->native_ctx = native_ctx;
             ctx->destroy_native_ctx = native_displays[n]->destroy;
-            return ctx;
+            ctx->hwctx.destroy = va_destroy_ctx;
+            return &ctx->hwctx;
         }
     }
     return NULL;

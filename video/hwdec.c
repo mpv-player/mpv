@@ -72,8 +72,6 @@ void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
     devs->load_api_ctx = load_api_ctx;
 }
 
-// Cause VO to lazily load the requested device, and will block until this is
-// done (even if not available).
 void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type)
 {
     if (devs->load_api && !hwdec_devices_get_first(devs))

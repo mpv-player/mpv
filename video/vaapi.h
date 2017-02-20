@@ -73,6 +73,8 @@ void va_surface_init_subformat(struct mp_image *mpi);
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
 
-struct mp_vaapi_ctx *va_create_standalone(struct mp_log *plog, bool probing);
+struct mpv_global;
+struct mp_hwdec_ctx *va_create_standalone(struct mpv_global *global,
+                                          struct mp_log *plog, bool probing);
 
 #endif

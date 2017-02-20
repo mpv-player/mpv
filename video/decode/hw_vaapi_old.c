@@ -327,11 +327,12 @@ static int init(struct lavc_ctx *ctx, bool direct)
     if (direct) {
         p->ctx = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI)->ctx;
     } else {
-        p->ctx = va_create_standalone(ctx->log, false);
-        if (!p->ctx) {
+        struct mp_hwdec_ctx *hwctx = va_create_standalone(NULL, ctx->log, false);
+        if (!hwctx) {
             talloc_free(p);
             return -1;
         }
+        p->ctx = hwctx->ctx;
         p->own_ctx = true;
     }
 
@@ -368,9 +369,10 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
 static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                       const char *codec)
 {
-    struct mp_vaapi_ctx *dummy = va_create_standalone(ctx->log, true);
-    if (!dummy)
+    struct mp_hwdec_ctx *hwctx = va_create_standalone(NULL, ctx->log, true);
+    if (!hwctx)
         return HWDEC_ERR_NO_CTX;
+    struct mp_vaapi_ctx *dummy = hwctx->ctx;
     bool emulated = va_guess_if_emulated(dummy);
     va_destroy(dummy);
     if (!hwdec_check_codec_support(codec, profiles))

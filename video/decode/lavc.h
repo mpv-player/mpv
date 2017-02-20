@@ -19,6 +19,8 @@
 // This value does not yet include HWDEC_DELAY_QUEUE_COUNT.
 #define HWDEC_EXTRA_SURFACES 4
 
+struct mpv_global;
+
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;
@@ -95,9 +97,11 @@ struct vd_lavc_hwdec {
     struct mp_image *(*allocate_image)(struct lavc_ctx *ctx, int w, int h);
     // Process the image returned by the libavcodec decoder.
     struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
-    // Optional; if a special hardware decoder is needed (instead of "hwaccel").
-    const char *(*get_codec)(struct lavc_ctx *ctx, const char *codec);
-    // Suffix for libavcodec decoder. If non-NULL, get_codec() is overridden
+    // For copy hwdecs. If probing is true, don't log errors if unavailable.
+    // The returned device must be freed with mp_hwdec_ctx->destroy.
+    struct mp_hwdec_ctx *(*create_dev)(struct mpv_global *global,
+                                       struct mp_log *log, bool probing);
+    // Suffix for libavcodec decoder. If non-NULL, the codec is overridden
     // with hwdec_find_decoder.
     // Intuitively, this will force the corresponding wrapper decoder.
     const char *lavc_suffix;

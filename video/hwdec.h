@@ -53,6 +53,9 @@ struct mp_hwdec_ctx {
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
     int *supported_formats;
 
+    // Hint to generic code: it's using a wrapper API
+    bool emulated;
+
     // Optional. Legacy. (New code should use AVHWFramesContext and
     // mp_image_hw_download().)
     // Allocates a software image from the pool, downloads the hw image from
@@ -62,6 +65,9 @@ struct mp_hwdec_ctx {
     struct mp_image *(*download_image)(struct mp_hwdec_ctx *ctx,
                                        struct mp_image *mpi,
                                        struct mp_image_pool *swpool);
+
+    // Optional. Do not set for VO-bound devices.
+    void (*destroy)(struct mp_hwdec_ctx *ctx);
 };
 
 // Used to communicate hardware decoder device handles from VO to video decoder.
