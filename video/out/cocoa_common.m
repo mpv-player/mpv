@@ -591,6 +591,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
         [s->window setRestorable:NO];
         [s->window makeMainWindow];
         [s->window makeKeyAndOrderFront:nil];
+        if (!opts->fullscreen)
+            [s->window setMovableByWindowBackground:YES];
         [NSApp activateIgnoringOtherApps:YES];
     }
 }
