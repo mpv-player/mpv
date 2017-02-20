@@ -204,6 +204,11 @@
     [self.adapter windowDidDeminiaturize:notification];
 }
 
+- (void)windowWillMove:(NSNotification *)notification
+{
+    [self.adapter windowWillMove:notification];
+}
+
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
 - (BOOL)windowShouldClose:(id)sender

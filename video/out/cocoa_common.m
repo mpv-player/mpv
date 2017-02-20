@@ -76,6 +76,7 @@ struct vo_cocoa_state {
 
     bool cursor_visibility;
     bool cursor_visibility_wanted;
+    bool window_is_dragged;
 
     bool embedded; // wether we are embedding in another GUI
 
@@ -946,8 +947,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)signalMouseMovement:(NSPoint)point
 {
-    mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
     [self recalcMovableByWindowBackground:point];
+    if (!self.vout->cocoa->window_is_dragged)
+        mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
 }
 
 - (void)putKeyEvent:(NSEvent*)event
@@ -1050,6 +1052,16 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowDidDeminiaturize:(NSNotification *)notification
 {
     flag_events(self.vout, VO_EVENT_WIN_STATE);
+}
+
+- (void)windowWillMove:(NSNotification *)notification
+{
+    self.vout->cocoa->window_is_dragged = true;
+}
+
+- (void)mouseUp
+{
+    self.vout->cocoa->window_is_dragged = false;
 }
 
 @end
