@@ -174,26 +174,9 @@ extern "C" {
  * Windowing system interop on MS win32
  * ------------------------------------
  *
- * Warning: the following is only required if native OpenGL instead of ANGLE
- *          is used. ANGLE is recommended, because it also allows direct
- *          hardware decoding interop without further setup by the libmpv
- *          API user, while the same with native OpenGL is either very hard
- *          to do (via GL/DX interop with D3D9), or not implemented.
- *
- * If OpenGL switches to fullscreen, most players give it access GPU access,
- * which means DXVA2 hardware decoding in mpv won't work. This can be worked
- * around by giving mpv access to Direct3D device, which it will then use to
- * create a decoder. The device can be either the real device used for display,
- * or a "blank" device created before switching to fullscreen.
- *
- * You can provide glMPGetNativeDisplay as described in the previous section.
- * If it is called with name set to "IDirect3DDevice9", it should return a
- * IDirect3DDevice9 pointer (or NULL if not available). libmpv will release
- * this interface when it is done with it.
- *
- * In previous libmpv releases, this used "GL_MP_D3D_interfaces" and
- * "glMPGetD3DInterface". This is deprecated; use glMPGetNativeDisplay instead
- * (the semantics are 100% compatible).
+ * You should use ANGLE, and make sure your application and libmpv are linked
+ * to the same ANGLE DLLs. libmpv will pick the device context (needed for
+ * hardware decoding) from the current ANGLE EGL context.
  *
  * Windowing system interop on RPI
  * -------------------------------

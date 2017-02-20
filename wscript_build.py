@@ -366,7 +366,6 @@ def build(ctx):
         ( "video/out/opengl/hwdec_cuda.c",       "cuda-hwaccel" ),
         ( "video/out/opengl/hwdec_d3d11egl.c",   "egl-angle" ),
         ( "video/out/opengl/hwdec_d3d11eglrgb.c","egl-angle" ),
-        ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
         ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
