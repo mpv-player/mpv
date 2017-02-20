@@ -4401,6 +4401,12 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     Windows 8+ with ANGLE only.
 
+``--cocoa-force-dedicated-gpu=<yes|no>``
+    Deactivates the automatic graphics switching and forces the dedicated GPU.
+    (default: no)
+
+    OS X only.
+
 ``--opengl-sw``
     Continue even if a software renderer is detected.
 

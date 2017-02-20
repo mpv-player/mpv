@@ -17,13 +17,29 @@
 
 #include <OpenGL/OpenGL.h>
 #include <dlfcn.h>
+#include "options/m_config.h"
 #include "video/out/cocoa_common.h"
 #include "osdep/macosx_versions.h"
 #include "context.h"
 
-struct cgl_context {
+struct cocoa_opts {
+    int cocoa_force_dedicated_gpu;
+};
+
+#define OPT_BASE_STRUCT struct cocoa_opts
+const struct m_sub_options cocoa_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_FLAG("cocoa-force-dedicated-gpu", cocoa_force_dedicated_gpu, 0),
+        {0}
+    },
+    .size = sizeof(struct cocoa_opts),
+};
+
+struct priv {
     CGLPixelFormatObj pix;
     CGLContextObj ctx;
+
+    struct cocoa_opts *opts;
 };
 
 static int set_swap_interval(int enabled)
@@ -46,14 +62,13 @@ static void *cocoa_glgetaddr(const char *s)
     return ret;
 }
 
-static CGLError test_gl_version(struct vo *vo,
-                                CGLContextObj *ctx,
-                                CGLPixelFormatObj *pix,
-                                CGLOpenGLProfile version)
+static CGLError test_gl_version(struct MPGLContext *ctx, CGLOpenGLProfile ver)
 {
+    struct priv *p = ctx->priv;
+
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile,
-        (CGLPixelFormatAttribute) version,
+        (CGLPixelFormatAttribute) ver,
         kCGLPFAAccelerated,
         // leave this as the last entry of the array to not break the fallback
         // code
@@ -63,21 +78,21 @@ static CGLError test_gl_version(struct vo *vo,
 
     GLint npix;
     CGLError err;
-    err = CGLChoosePixelFormat(attrs, pix, &npix);
-    if (err == kCGLBadAttribute) {
+    err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
+    if (p->opts->cocoa_force_dedicated_gpu || err == kCGLBadAttribute) {
         // kCGLPFASupportsAutomaticGraphicsSwitching is probably not supported
         // by the current hardware. Falling back to not using it.
         attrs[MP_ARRAY_SIZE(attrs) - 2] = 0;
-        err = CGLChoosePixelFormat(attrs, pix, &npix);
+        err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
     }
 
     if (err != kCGLNoError) {
-        MP_ERR(vo, "error creating CGL pixel format: %s (%d)\n",
+        MP_ERR(ctx->vo, "error creating CGL pixel format: %s (%d)\n",
                CGLErrorString(err), err);
         goto error_out;
     }
 
-    err = CGLCreateContext(*pix, 0, ctx);
+    err = CGLCreateContext(p->pix, 0, &p->ctx);
 
 error_out:
     return err;
@@ -85,7 +100,7 @@ error_out:
 
 static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
 {
-    struct cgl_context *p = ctx->priv;
+    struct priv *p = ctx->priv;
     CGLError err;
 
     CGLOpenGLProfile gl_versions[] = {
@@ -94,7 +109,7 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
     };
 
     for (int n = 0; n < MP_ARRAY_SIZE(gl_versions); n++) {
-        err = test_gl_version(ctx->vo, &p->ctx, &p->pix, gl_versions[n]);
+        err = test_gl_version(ctx, gl_versions[n]);
         if (err == kCGLNoError)
             break;
     }
@@ -120,13 +135,15 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
 
 static void cocoa_uninit(MPGLContext *ctx)
 {
-    struct cgl_context *p = ctx->priv;
+    struct priv *p = ctx->priv;
     CGLReleaseContext(p->ctx);
     vo_cocoa_uninit(ctx->vo);
 }
 
 static int cocoa_init(MPGLContext *ctx, int vo_flags)
 {
+    struct priv *p = ctx->priv;
+    p->opts = mp_get_config_group(ctx, ctx->global, &cocoa_conf);
     vo_cocoa_init(ctx->vo);
 
     if (!create_gl_context(ctx, vo_flags))
@@ -156,7 +173,7 @@ static void cocoa_swap_buffers(struct MPGLContext *ctx)
 
 const struct mpgl_driver mpgl_driver_cocoa = {
     .name           = "cocoa",
-    .priv_size      = sizeof(struct cgl_context),
+    .priv_size      = sizeof(struct priv),
     .init           = cocoa_init,
     .reconfig       = cocoa_reconfig,
     .swap_buffers   = cocoa_swap_buffers,
