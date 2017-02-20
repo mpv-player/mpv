@@ -55,11 +55,9 @@ static CGLError test_gl_version(struct vo *vo,
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) version,
         kCGLPFAAccelerated,
-        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
         // leave this as the last entry of the array to not break the fallback
         // code
         kCGLPFASupportsAutomaticGraphicsSwitching,
-        #endif
         0
     };
 

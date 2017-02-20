@@ -18,10 +18,6 @@
 #ifndef MPV_MACOSX_VERSIONS
 #define MPV_MACOSX_VERSIONS
 
-#if !defined(MAC_OS_X_VERSION_10_8)
-#    define MAC_OS_X_VERSION_10_8 1080
-#endif
-
 #if !defined(MAC_OS_X_VERSION_10_9)
 #    define MAC_OS_X_VERSION_10_9 1090
 #endif

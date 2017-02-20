@@ -51,31 +51,4 @@ static const NSEventModifierFlags NSEventModifierFlagCommand =  NSCommandKeyMask
 static const NSEventModifierFlags NSEventModifierFlagOption = NSAlternateKeyMask;
 #endif
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_8)
-@interface NSArray (SubscriptingAdditions)
-- (id)objectAtIndexedSubscript:(NSUInteger)index;
-@end
-
-@interface NSMutableArray (SubscriptingAdditions)
-- (void)setObject: (id)object atIndexedSubscript:(NSUInteger)index;
-@end
-
-@interface NSDictionary (SubscriptingAdditions)
-- (id)objectForKeyedSubscript:(id)key;
-@end
-
-@interface NSMutableDictionary (SubscriptingAdditions)
-- (void)setObject: (id)object forKeyedSubscript:(id)key;
-@end
-
-#if __has_feature(objc_bool)
-    #define YES  __objc_yes
-    #define NO   __objc_no
-#else
-    #define YES  ((BOOL)1)
-    #define NO   ((BOOL)0)
-#endif
-
-#endif
-
 #endif /* MPV_MACOSX_COMPAT */
