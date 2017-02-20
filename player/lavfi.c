@@ -40,6 +40,7 @@
 #include "video/mp_image.h"
 #include "audio/fmt-conversion.h"
 #include "video/fmt-conversion.h"
+#include "video/hwdec.h"
 
 #include "lavfi.h"
 
@@ -51,6 +52,8 @@
 struct lavfi {
     struct mp_log *log;
     char *graph_string;
+
+    struct mp_hwdec_devices *hwdec_devs;
 
     AVFilterGraph *graph;
     // Set to true once all inputs have been initialized, and the graph is
@@ -423,6 +426,7 @@ static bool init_pads(struct lavfi *c)
                 params->height = pad->in_fmt_v->h;
                 params->sample_aspect_ratio.num = pad->in_fmt_v->params.p_w;
                 params->sample_aspect_ratio.den = pad->in_fmt_v->params.p_h;
+                params->hw_frames_ctx = pad->in_fmt_v->hwctx;
                 filter_name = "buffer";
             } else {
                 assert(0);
@@ -471,6 +475,11 @@ static void dump_graph(struct lavfi *c)
 #endif
 }
 
+void lavfi_set_hwdec_devs(struct lavfi *c, struct mp_hwdec_devices *hwdevs)
+{
+    c->hwdec_devs = hwdevs;
+}
+
 // Initialize the graph if all inputs have formats set. If it's already
 // initialized, or can't be initialized yet, do nothing.
 static void init_graph(struct lavfi *c)
@@ -478,6 +487,15 @@ static void init_graph(struct lavfi *c)
     assert(!c->initialized);
 
     if (init_pads(c)) {
+        if (c->hwdec_devs) {
+            struct mp_hwdec_ctx *hwdec = hwdec_devices_get_first(c->hwdec_devs);
+            for (int n = 0; n < c->graph->nb_filters; n++) {
+                AVFilterContext *filter = c->graph->filters[n];
+                if (hwdec && hwdec->av_device_ref)
+                    filter->hw_device_ctx = av_buffer_ref(hwdec->av_device_ref);
+            }
+        }
+
         // And here the actual libavfilter initialization happens.
         if (avfilter_graph_config(c->graph, NULL) < 0) {
             MP_FATAL(c, "failed to configure the filter graph\n");

@@ -22,6 +22,7 @@ bool lavfi_get_connected(struct lavfi_pad *pad);
 bool lavfi_process(struct lavfi *c);
 bool lavfi_has_failed(struct lavfi *c);
 void lavfi_seek_reset(struct lavfi *c);
+void lavfi_set_hwdec_devs(struct lavfi *c, struct mp_hwdec_devices *hwdevs);
 int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_audio **out_aframe);
 int lavfi_request_frame_v(struct lavfi_pad *pad, struct mp_image **out_vframe);
 bool lavfi_needs_input(struct lavfi_pad *pad);

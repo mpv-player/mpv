@@ -496,6 +496,9 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     vo_c->hwdec_devs = vo_c->vo->hwdec_devs;
 
+    if (mpctx->lavfi)
+        lavfi_set_hwdec_devs(mpctx->lavfi, vo_c->hwdec_devs);
+
     vo_c->filter_src = src;
     if (!vo_c->filter_src) {
         vo_c->track = track;
