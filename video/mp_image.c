@@ -177,6 +177,17 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
     talloc_free(src);
 }
 
+// Unref most data buffer (and clear the data array), but leave other fields
+// allocated. In particular, mp_image.hwctx is preserved.
+void mp_image_unref_data(struct mp_image *img)
+{
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        img->planes[n] = NULL;
+        img->stride[n] = 0;
+        av_buffer_unref(&img->bufs[n]);
+    }
+}
+
 // Return a new reference to img. The returned reference is owned by the caller,
 // while img is left untouched.
 struct mp_image *mp_image_new_ref(struct mp_image *img)

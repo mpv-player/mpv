@@ -124,6 +124,7 @@ int mp_image_plane_h(struct mp_image *mpi, int plane);
 
 void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
+void mp_image_unref_data(struct mp_image *img);
 
 struct mp_image *mp_image_new_dummy_ref(struct mp_image *img);
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,

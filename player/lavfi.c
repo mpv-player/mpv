@@ -102,7 +102,7 @@ struct lavfi_pad {
     bool input_eof;     // caller notified us that no input will come anymore
 
     // used to check for format changes manually
-    struct mp_image_params in_fmt_v;
+    struct mp_image *in_fmt_v;
     struct mp_audio in_fmt_a;
 
     // -- dir==LAVFI_OUT
@@ -194,7 +194,7 @@ static void free_graph(struct lavfi *c)
         pad->filter = NULL;
         pad->filter_pad = -1;
         pad->buffer = NULL;
-        pad->in_fmt_v = (struct mp_image_params){0};
+        TA_FREEP(&pad->in_fmt_v);
         pad->in_fmt_a = (struct mp_audio){0};
         pad->buffer_is_eof = false;
         pad->input_needed = false;
@@ -305,11 +305,11 @@ static bool is_aformat_ok(struct mp_audio *a, struct mp_audio *b)
 {
     return mp_audio_config_equals(a, b);
 }
-static bool is_vformat_ok(struct mp_image_params *a, struct mp_image_params *b)
+static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
     return a->imgfmt == b->imgfmt &&
            a->w == b->w && a->h && b->h &&
-           a->p_w == b->p_w && a->p_h == b->p_h;
+           a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h;
 }
 
 static void check_format_changes(struct lavfi *c)
@@ -324,9 +324,9 @@ static void check_format_changes(struct lavfi *c)
             c->draining_new_format |= !is_aformat_ok(pad->pending_a,
                                                      &pad->in_fmt_a);
         }
-        if (pad->type == STREAM_VIDEO && pad->pending_v && pad->in_fmt_v.imgfmt) {
-            c->draining_new_format |= !is_vformat_ok(&pad->pending_v->params,
-                                                     &pad->in_fmt_v);
+        if (pad->type == STREAM_VIDEO && pad->pending_v && pad->in_fmt_v) {
+            c->draining_new_format |= !is_vformat_ok(pad->pending_v,
+                                                     pad->in_fmt_v);
         }
     }
 
@@ -375,6 +375,8 @@ static bool init_pads(struct lavfi *c)
             char src_args[256];
             AVFilter *src_filter = NULL;
 
+            TA_FREEP(&pad->in_fmt_v); // potentially cleanup previous error state
+
             pad->input_eof |= !pad->connected;
 
             if (pad->pending_a) {
@@ -382,7 +384,10 @@ static bool init_pads(struct lavfi *c)
                 mp_audio_copy_config(&pad->in_fmt_a, pad->pending_a);
             } else if (pad->pending_v) {
                 assert(pad->type == STREAM_VIDEO);
-                pad->in_fmt_v = pad->pending_v->params;
+                pad->in_fmt_v = mp_image_new_ref(pad->pending_v);
+                if (!pad->in_fmt_v)
+                    goto error;
+                mp_image_unref_data(pad->in_fmt_v);
             } else if (pad->input_eof) {
                 // libavfilter makes this painful. Init it with a dummy config,
                 // just so we can tell it the stream is EOF.
@@ -391,11 +396,9 @@ static bool init_pads(struct lavfi *c)
                     mp_audio_set_num_channels(&pad->in_fmt_a, 2);
                     pad->in_fmt_a.rate = 48000;
                 } else if (pad->type == STREAM_VIDEO) {
-                    pad->in_fmt_v = (struct mp_image_params){
-                        .imgfmt = IMGFMT_420P,
-                        .w = 64, .h = 64,
-                        .p_w = 1, .p_h = 1,
-                    };
+                    pad->in_fmt_v = talloc_zero(NULL, struct mp_image);
+                    mp_image_setfmt(pad->in_fmt_v, IMGFMT_420P);
+                    mp_image_set_size(pad->in_fmt_v, 64, 64);
                 }
             } else {
                 // no input data, format unknown, can't init, wait longer.
@@ -415,10 +418,10 @@ static bool init_pads(struct lavfi *c)
             } else if (pad->type == STREAM_VIDEO) {
                 pad->timebase = AV_TIME_BASE_Q;
                 snprintf(src_args, sizeof(src_args), "%d:%d:%d:%d:%d:%d:%d",
-                         pad->in_fmt_v.w, pad->in_fmt_v.h,
-                         imgfmt2pixfmt(pad->in_fmt_v.imgfmt),
+                         pad->in_fmt_v->w, pad->in_fmt_v->h,
+                         imgfmt2pixfmt(pad->in_fmt_v->imgfmt),
                          pad->timebase.num, pad->timebase.den,
-                         pad->in_fmt_v.p_w, pad->in_fmt_v.p_h);
+                         pad->in_fmt_v->params.p_w, pad->in_fmt_v->params.p_h);
                 src_filter = avfilter_get_by_name("buffer");
             } else {
                 assert(0);
