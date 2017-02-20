@@ -387,7 +387,8 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
     MP_VERBOSE(vd, "Probing '%s'...\n", m_opt_choice_str(mp_hwdec_names, api));
     struct vd_lavc_hwdec *hwdec = find_hwcodec(api);
     if (!hwdec) {
-        MP_VERBOSE(vd, "Requested hardware decoder not compiled.\n");
+        int level = autoprobe ? MSGL_V : MSGL_WARN;
+        MP_MSG(vd, level, "Requested hardware decoder not compiled.\n");
         return NULL;
     }
     int r = hwdec_probe(vd, hwdec, codec, autoprobe);
