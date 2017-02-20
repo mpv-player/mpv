@@ -2214,7 +2214,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     if (track->d_audio)
         decoder_desc = track->d_audio->decoder_desc;
 
-    bool has_rg = track->stream->codec->replaygain_data;
+    bool has_rg = track->stream && track->stream->codec->replaygain_data;
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
                                        : (struct replaygain_data){0};
 
