@@ -605,8 +605,8 @@ void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
             c.desc = "Default";
         }
     }
-    c.name = c.name[0] ? talloc_asprintf(list, "%s/%s", dname, c.name)
-                       : talloc_strdup(list, dname);
+    c.name = (c.name && c.name[0]) ? talloc_asprintf(list, "%s/%s", dname, c.name)
+                                   : talloc_strdup(list, dname);
     c.desc = talloc_strdup(list, c.desc);
     MP_TARRAY_APPEND(list, list->devices, list->num_devices, c);
 }
