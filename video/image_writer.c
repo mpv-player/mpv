@@ -136,7 +136,9 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     int ret = avcodec_send_frame(avctx, pic);
     if (ret < 0)
         goto error_exit;
-    avcodec_send_frame(avctx, NULL); // send EOF
+    ret = avcodec_send_frame(avctx, NULL); // send EOF
+    if (ret < 0)
+        goto error_exit;
     ret = avcodec_receive_packet(avctx, &pkt);
     if (ret < 0)
         goto error_exit;
