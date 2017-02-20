@@ -372,9 +372,6 @@ static bool init_pads(struct lavfi *c)
             if (avfilter_link(pad->filter, pad->filter_pad, pad->buffer, 0) < 0)
                 goto error;
         } else {
-            char src_args[256];
-            AVFilter *src_filter = NULL;
-
             TA_FREEP(&pad->in_fmt_v); // potentially cleanup previous error state
 
             pad->input_eof |= !pad->connected;
@@ -406,35 +403,49 @@ static bool init_pads(struct lavfi *c)
                 return false;
             }
 
+            AVBufferSrcParameters *params = av_buffersrc_parameters_alloc();
+            if (!params)
+                goto error;
+
+            char *filter_name = NULL;
             if (pad->type == STREAM_AUDIO) {
-                pad->timebase = (AVRational){1, pad->in_fmt_a.rate};
-                snprintf(src_args, sizeof(src_args),
-                    "sample_rate=%d:sample_fmt=%s:time_base=%d/%d:"
-                    "channel_layout=0x%"PRIx64, pad->in_fmt_a.rate,
-                    av_get_sample_fmt_name(af_to_avformat(pad->in_fmt_a.format)),
-                    pad->timebase.num, pad->timebase.den,
-                    mp_chmap_to_lavc(&pad->in_fmt_a.channels));
-                src_filter = avfilter_get_by_name("abuffer");
+                params->time_base = pad->timebase =
+                    (AVRational){1, pad->in_fmt_a.rate};
+                params->format = af_to_avformat(pad->in_fmt_a.format);
+                params->sample_rate = pad->in_fmt_a.rate;
+                params->channel_layout =
+                    mp_chmap_to_lavc(&pad->in_fmt_a.channels);
+                filter_name = "abuffer";
             } else if (pad->type == STREAM_VIDEO) {
-                pad->timebase = AV_TIME_BASE_Q;
-                snprintf(src_args, sizeof(src_args), "%d:%d:%d:%d:%d:%d:%d",
-                         pad->in_fmt_v->w, pad->in_fmt_v->h,
-                         imgfmt2pixfmt(pad->in_fmt_v->imgfmt),
-                         pad->timebase.num, pad->timebase.den,
-                         pad->in_fmt_v->params.p_w, pad->in_fmt_v->params.p_h);
-                src_filter = avfilter_get_by_name("buffer");
+                params->time_base = pad->timebase = AV_TIME_BASE_Q;
+                params->format = imgfmt2pixfmt(pad->in_fmt_v->imgfmt);
+                params->width = pad->in_fmt_v->w;
+                params->height = pad->in_fmt_v->h;
+                params->sample_aspect_ratio.num = pad->in_fmt_v->params.p_w;
+                params->sample_aspect_ratio.den = pad->in_fmt_v->params.p_h;
+                filter_name = "buffer";
             } else {
                 assert(0);
             }
 
-            if (!src_filter)
+            AVFilter *filter = avfilter_get_by_name(filter_name);
+            if (filter) {
+                char name[256];
+                snprintf(name, sizeof(name), "mpv_src_%s", pad->name);
+
+                pad->buffer = avfilter_graph_alloc_filter(c->graph, filter, name);
+            }
+            if (!pad->buffer) {
+                av_free(params);
+                goto error;
+            }
+
+            int ret = av_buffersrc_parameters_set(pad->buffer, params);
+            av_free(params);
+            if (ret < 0)
                 goto error;
 
-            char name[256];
-            snprintf(name, sizeof(name), "mpv_src_%s", pad->name);
-
-            if (avfilter_graph_create_filter(&pad->buffer, src_filter,
-                                             name, src_args, NULL, c->graph) < 0)
+            if (avfilter_init_str(pad->buffer, NULL) < 0)
                 goto error;
 
             if (avfilter_link(pad->buffer, 0, pad->filter, pad->filter_pad) < 0)
