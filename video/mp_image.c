@@ -614,7 +614,8 @@ void mp_image_set_attributes(struct mp_image *image,
 // the colorspace as implied by the pixel format.
 void mp_image_params_guess_csp(struct mp_image_params *params)
 {
-    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(params->imgfmt);
+    int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(imgfmt);
     if (!fmt.id)
         return;
     if (fmt.flags & MP_IMGFLAG_YUV) {
