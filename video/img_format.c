@@ -211,7 +211,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                       ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     }
 
-    if (fmt == AV_PIX_FMT_XYZ12LE || fmt == AV_PIX_FMT_XYZ12BE) {
+    if ((pd->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+        desc.flags |= MP_IMGFLAG_HWACCEL;
+    } else if (fmt == AV_PIX_FMT_XYZ12LE || fmt == AV_PIX_FMT_XYZ12BE) {
         desc.flags |= MP_IMGFLAG_XYZ;
     } else if (!(pd->flags & AV_PIX_FMT_FLAG_RGB) &&
                fmt != AV_PIX_FMT_MONOBLACK &&
@@ -290,11 +292,10 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if ((desc.bpp[0] % 8) != 0)
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
-    if (pd->flags & AV_PIX_FMT_FLAG_HWACCEL) {
-        desc.flags |= MP_IMGFLAG_HWACCEL;
-        desc.component_bits = 8; // usually restricted to 8 bit; may change
-        desc.component_full_bits = desc.component_bits;
-        desc.plane_bits = desc.component_bits;
+    if (desc.flags & MP_IMGFLAG_HWACCEL) {
+        desc.component_bits = 0;
+        desc.component_full_bits = 0;
+        desc.plane_bits = 0;
     }
 
     if (desc.chroma_xs || desc.chroma_ys)
