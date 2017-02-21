@@ -586,7 +586,6 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
-    mp_wakeup_core(mpctx);
 }
 
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
