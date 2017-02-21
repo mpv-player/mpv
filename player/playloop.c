@@ -180,8 +180,8 @@ void update_screensaver_state(struct MPContext *mpctx)
 
     bool saver_state = mpctx->opts->pause || !mpctx->opts->stop_screensaver ||
                        !mpctx->playback_initialized;
-    vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
-                                             : VOCTRL_KILL_SCREENSAVER, NULL);
+    vo_control_async(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
+                                                   : VOCTRL_KILL_SCREENSAVER, NULL);
 }
 
 void add_step_frame(struct MPContext *mpctx, int dir)

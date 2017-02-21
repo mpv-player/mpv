@@ -581,6 +581,9 @@ void vo_control_async(struct vo *vo, int request, void *data)
     case VOCTRL_UPDATE_PLAYBACK_STATE:
         d[2] = ta_xdup_ptrtype(d, (struct voctrl_playback_state *)data);
         break;
+    case VOCTRL_KILL_SCREENSAVER:
+    case VOCTRL_RESTORE_SCREENSAVER:
+        break;
     default:
         abort(); // requires explicit support
     }
@@ -933,9 +936,13 @@ static void *vo_thread(void *ptr)
         bool redraw = in->request_redraw;
         bool send_reset = in->send_reset;
         in->send_reset = false;
+        bool send_pause = in->paused != vo_paused;
+        vo_paused = in->paused;
         pthread_mutex_unlock(&in->lock);
         if (send_reset)
             vo->driver->control(vo, VOCTRL_RESET, NULL);
+        if (send_pause)
+            vo->driver->control(vo, vo_paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
         if (wait_until > now && redraw) {
             do_redraw(vo); // now is a good time
             continue;
@@ -958,9 +965,9 @@ void vo_set_paused(struct vo *vo, bool paused)
         if (in->paused && in->dropped_frame)
             in->request_redraw = true;
         reset_vsync_timings(vo);
+        wakeup_locked(vo);
     }
     pthread_mutex_unlock(&in->lock);
-    vo_control(vo, paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
 }
 
 int64_t vo_get_drop_count(struct vo *vo)
