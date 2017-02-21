@@ -77,6 +77,7 @@ struct vo_cocoa_state {
     bool cursor_visibility;
     bool cursor_visibility_wanted;
     bool window_is_dragged;
+    id event_monitor_mouseup;
 
     bool embedded; // wether we are embedding in another GUI
 
@@ -352,6 +353,23 @@ static void vo_cocoa_uninit_displaylink(struct vo_cocoa_state *s)
     CVDisplayLinkRelease(s->link);
 }
 
+static void cocoa_add_event_monitor(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    s->event_monitor_mouseup = [NSEvent
+        addLocalMonitorForEventsMatchingMask: NSEventMaskLeftMouseUp
+                                     handler:^NSEvent*(NSEvent* event) {
+            s->window_is_dragged = false;
+            return event;
+        }];
+}
+
+static void cocoa_rm_event_monitor(struct vo *vo)
+{
+    [NSEvent removeMonitor:vo->cocoa->event_monitor_mouseup];
+}
+
 void vo_cocoa_init(struct vo *vo)
 {
     struct vo_cocoa_state *s = talloc_zero(NULL, struct vo_cocoa_state);
@@ -372,6 +390,8 @@ void vo_cocoa_init(struct vo *vo)
     vo_cocoa_init_displaylink(vo);
     cocoa_init_light_sensor(vo);
     cocoa_add_screen_reconfiguration_observer(vo);
+    cocoa_add_event_monitor(vo);
+
     if (!s->embedded) {
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         set_application_icon(NSApp);
@@ -426,6 +446,7 @@ void vo_cocoa_uninit(struct vo *vo)
         vo_cocoa_signal_swap(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_screen_reconfiguration_observer(vo);
+        cocoa_rm_event_monitor(vo);
 
         [s->nsgl_ctx release];
         CGLReleaseContext(s->cgl_ctx);
@@ -1057,11 +1078,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowWillMove:(NSNotification *)notification
 {
     self.vout->cocoa->window_is_dragged = true;
-}
-
-- (void)mouseUp
-{
-    self.vout->cocoa->window_is_dragged = false;
 }
 
 @end

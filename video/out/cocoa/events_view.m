@@ -211,7 +211,6 @@
 {
     if ([self.adapter mouseEnabled]) {
         [self mouseUpEvent:event];
-        [self.adapter mouseUp];
     } else {
         [super mouseUp:event];
     }
