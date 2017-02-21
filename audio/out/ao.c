@@ -245,9 +245,10 @@ static void split_ao_device(void *tmp, char *opt, char **out_ao, char **out_dev)
         return;
     if (!opt[0] || strcmp(opt, "auto") == 0)
         return;
-    // Split on "/". If there's no "/", leave out_device NULL.
+    // Split on "/". If "/" is the final character, or absent, out_dev is NULL.
     bstr b_dev, b_ao;
-    if (bstr_split_tok(bstr0(opt), "/", &b_ao, &b_dev))
+    bstr_split_tok(bstr0(opt), "/", &b_ao, &b_dev);
+    if (b_dev.len > 0)
         *out_dev = bstrto0(tmp, b_dev);
     *out_ao = bstrto0(tmp, b_ao);
 }
