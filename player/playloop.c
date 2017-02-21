@@ -56,7 +56,8 @@
 // mp_wait_events() was called.
 void mp_wait_events(struct MPContext *mpctx)
 {
-    if (mpctx->sleeptime > 0)
+    bool sleeping = mpctx->sleeptime > 0;
+    if (sleeping)
         MP_STATS(mpctx, "start sleep");
 
     mpctx->in_dispatch = true;
@@ -66,7 +67,7 @@ void mp_wait_events(struct MPContext *mpctx)
     mpctx->in_dispatch = false;
     mpctx->sleeptime = INFINITY;
 
-    if (mpctx->sleeptime > 0)
+    if (sleeping)
         MP_STATS(mpctx, "end sleep");
 }
 
