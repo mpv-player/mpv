@@ -839,8 +839,6 @@ static bool render_frame(struct vo *vo)
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
     } else {
-        vo->want_redraw = false;
-        in->want_redraw = false;
         in->request_redraw = false;
     }
 
@@ -859,14 +857,11 @@ static void do_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    vo->want_redraw = false;
-
     if (!vo->config_ok)
         return;
 
     pthread_mutex_lock(&in->lock);
     in->request_redraw = false;
-    in->want_redraw = false;
     bool full_redraw = in->dropped_frame;
     struct vo_frame *frame = NULL;
     if (!vo->driver->untimed)
@@ -901,6 +896,7 @@ static void *vo_thread(void *ptr)
 {
     struct vo *vo = ptr;
     struct vo_internal *in = vo->in;
+    bool vo_paused = false;
 
     mpthread_set_name("vo");
 
@@ -920,6 +916,7 @@ static void *vo_thread(void *ptr)
         bool working = render_frame(vo);
         int64_t now = mp_time_us();
         int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
+
         pthread_mutex_lock(&in->lock);
         if (in->wakeup_pts) {
             if (in->wakeup_pts > now) {
@@ -930,6 +927,7 @@ static void *vo_thread(void *ptr)
             }
         }
         if (vo->want_redraw && !in->want_redraw) {
+            vo->want_redraw = false;
             in->want_redraw = true;
             wakeup_core(vo);
         }
@@ -939,6 +937,7 @@ static void *vo_thread(void *ptr)
         bool send_pause = in->paused != vo_paused;
         vo_paused = in->paused;
         pthread_mutex_unlock(&in->lock);
+
         if (send_reset)
             vo->driver->control(vo, VOCTRL_RESET, NULL);
         if (send_pause)
@@ -947,6 +946,9 @@ static void *vo_thread(void *ptr)
             do_redraw(vo); // now is a good time
             continue;
         }
+        if (vo->want_redraw) // might have been set by VOCTRLs
+            wait_until = 0;
+
         wait_vo(vo, wait_until);
     }
     forget_frames(vo); // implicitly synchronized
@@ -962,8 +964,10 @@ void vo_set_paused(struct vo *vo, bool paused)
     pthread_mutex_lock(&in->lock);
     if (in->paused != paused) {
         in->paused = paused;
-        if (in->paused && in->dropped_frame)
+        if (in->paused && in->dropped_frame) {
             in->request_redraw = true;
+            wakeup_core(vo);
+        }
         reset_vsync_timings(vo);
         wakeup_locked(vo);
     }
@@ -992,6 +996,7 @@ void vo_redraw(struct vo *vo)
     pthread_mutex_lock(&in->lock);
     if (!in->request_redraw) {
         in->request_redraw = true;
+        in->want_redraw = false;
         wakeup_locked(vo);
     }
     pthread_mutex_unlock(&in->lock);

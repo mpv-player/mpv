@@ -441,7 +441,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
-        vo_wakeup(vo);
         return VO_TRUE;
     case VOCTRL_GET_EQUALIZER: {
         struct voctrl_get_equalizer_args *args = data;
