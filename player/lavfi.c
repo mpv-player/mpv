@@ -28,6 +28,7 @@
 #include <libavutil/mathematics.h>
 #include <libavutil/rational.h>
 #include <libavutil/error.h>
+#include <libavutil/opt.h>
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
@@ -442,6 +443,14 @@ static bool init_pads(struct lavfi *c)
             if (!pad->buffer) {
                 av_free(params);
                 goto error;
+            }
+
+            if (pad->type == STREAM_AUDIO) {
+                char layout[80];
+                snprintf(layout, sizeof(layout), "%lld",
+                         (long long)params->channel_layout);
+                av_opt_set(pad->buffer, "channel_layout", layout,
+                           AV_OPT_SEARCH_CHILDREN);
             }
 
             int ret = av_buffersrc_parameters_set(pad->buffer, params);
