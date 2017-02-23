@@ -29,6 +29,7 @@
 @property(nonatomic, retain) NSScreen *targetScreen;
 @property(nonatomic, retain) NSScreen *previousScreen;
 @property(nonatomic, retain) NSScreen *currentScreen;
+@property(nonatomic, retain) NSScreen *unfScreen;
 
 - (NSRect)frameRect:(NSRect)frameRect forCenteredContentSize:(NSSize)newSize;
 - (void)setCenteredContentSize:(NSSize)newSize;
@@ -37,7 +38,6 @@
 @implementation MpvVideoWindow {
     NSSize _queued_video_size;
     NSRect _unfs_content_frame;
-    NSRect _unfs_screen_frame;
     int _is_animating;
 }
 
@@ -45,6 +45,7 @@
 @synthesize targetScreen = _target_screen;
 @synthesize previousScreen = _previous_screen;
 @synthesize currentScreen = _current_screen;
+@synthesize unfScreen = _unf_Screen;
 - (id)initWithContentRect:(NSRect)content_rect
                 styleMask:(NSUInteger)style_mask
                   backing:(NSBackingStoreType)buffering_type
@@ -62,9 +63,9 @@
 
         self.targetScreen = screen;
         self.currentScreen = screen;
+        self.unfScreen = screen;
         _is_animating = 0;
         _unfs_content_frame = [self convertRectToScreen:[[self contentView] frame]];
-        _unfs_screen_frame = [screen frame];
     }
     return self;
 }
@@ -88,7 +89,7 @@
 
     if (![self.adapter isInFullScreenMode]) {
         _unfs_content_frame = [self convertRectToScreen:[[self contentView] frame]];
-        _unfs_screen_frame = [[self screen] frame];
+        self.unfScreen = [self screen];
     }
 
     //move window to target screen when going to fullscreen
@@ -284,16 +285,46 @@
 {
     NSRect frame = [self frameRectForContentRect:_unfs_content_frame];
     NSRect targetFrame = [screen frame];
+    NSRect targetVisibleFrame = [screen visibleFrame];
+    NSRect unfsScreenFrame = [self.unfScreen frame];
+    NSRect visibleWindow = NSIntersectionRect(unfsScreenFrame, frame);
 
-    CGFloat x_per = (_unfs_screen_frame.size.width - frame.size.width);
-    CGFloat y_per = (_unfs_screen_frame.size.height - frame.size.height);
-    if (x_per > 0) x_per = (frame.origin.x - _unfs_screen_frame.origin.x)/x_per;
-    if (y_per > 0) y_per = (frame.origin.y - _unfs_screen_frame.origin.y)/y_per;
+    // calculate visible area of every side
+    CGFloat left = frame.origin.x - unfsScreenFrame.origin.x;
+    CGFloat right = unfsScreenFrame.size.width -
+        (frame.origin.x - unfsScreenFrame.origin.x + frame.size.width);
+    CGFloat bottom = frame.origin.y - unfsScreenFrame.origin.y;
+    CGFloat top = unfsScreenFrame.size.height -
+        (frame.origin.y - unfsScreenFrame.origin.y + frame.size.height);
 
-    frame.origin.x = targetFrame.origin.x +
-        (targetFrame.size.width - frame.size.width)*x_per;
-    frame.origin.y = targetFrame.origin.y +
-        (targetFrame.size.height - frame.size.height)*y_per;
+    // normalize visible areas, decide which one to take horizontal/vertical
+    CGFloat x_per = (unfsScreenFrame.size.width - visibleWindow.size.width);
+    CGFloat y_per = (unfsScreenFrame.size.height - visibleWindow.size.height);
+    if (x_per != 0) x_per = (left >= 0 || right < 0 ? left : right)/x_per;
+    if (y_per != 0) y_per = (bottom >= 0 || top < 0 ? bottom : top)/y_per;
+
+    // calculate visible area for every side for target screen
+    CGFloat x_new_left = targetFrame.origin.x +
+        (targetFrame.size.width - visibleWindow.size.width)*x_per;
+    CGFloat x_new_right = targetFrame.origin.x + targetFrame.size.width -
+        (targetFrame.size.width - visibleWindow.size.width)*x_per - frame.size.width;
+    CGFloat y_new_bottom = targetFrame.origin.y +
+        (targetFrame.size.height - visibleWindow.size.height)*y_per;
+    CGFloat y_new_top = targetFrame.origin.y + targetFrame.size.height -
+        (targetFrame.size.height - visibleWindow.size.height)*y_per - frame.size.height;
+
+    // calculate new coordinates, decide which one to take horizontal/vertical
+    frame.origin.x = left >= 0 || right < 0 ? x_new_left : x_new_right;
+    frame.origin.y = bottom >= 0 || top < 0 ? y_new_bottom : y_new_top;
+
+    // don't place new window on top of a visible menubar
+    CGFloat top_mar = targetFrame.size.height -
+        (frame.origin.y - targetFrame.origin.y + frame.size.height);
+    CGFloat menuBarHeight = targetFrame.size.height -
+        (targetVisibleFrame.size.height + targetVisibleFrame.origin.y);
+
+    if (top_mar < menuBarHeight)
+        frame.origin.y -= top-menuBarHeight;
 
     if (withoutBounds)
         return frame;
