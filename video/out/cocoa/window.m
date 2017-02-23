@@ -93,7 +93,9 @@
 
     //move window to target screen when going to fullscreen
     if (![self.adapter isInFullScreenMode] && ![[self targetScreen] isEqual:[self screen]]) {
-        [self setFrame:[self calculateWindowPositionForScreen:[self targetScreen]] display:YES];
+        NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
+                                                withoutBounds:NO];
+        [self setFrame:frame display:YES];
     }
 
     [super toggleFullScreen:sender];
@@ -115,7 +117,8 @@
 - (void)setToWindow
 {
     [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
-    NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]];
+    NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
+                    withoutBounds:[[self targetScreen] isEqual:[self screen]]];
     [self setFrame:frame display:YES];
     [self setContentAspectRatio:_unfs_content_frame.size];
     [self setCenteredContentSize:_unfs_content_frame.size];
@@ -277,7 +280,7 @@
            animate:NO];
 }
 
-- (NSRect)calculateWindowPositionForScreen:(NSScreen *)screen
+- (NSRect)calculateWindowPositionForScreen:(NSScreen *)screen withoutBounds:(BOOL)withoutBounds
 {
     NSRect frame = [self frameRectForContentRect:_unfs_content_frame];
     NSRect targetFrame = [screen frame];
@@ -291,6 +294,9 @@
         (targetFrame.size.width - frame.size.width)*x_per;
     frame.origin.y = targetFrame.origin.y +
         (targetFrame.size.height - frame.size.height)*y_per;
+
+    if (withoutBounds)
+        return frame;
 
     //screen bounds right and left
     if (frame.origin.x + frame.size.width > targetFrame.origin.x + targetFrame.size.width)
