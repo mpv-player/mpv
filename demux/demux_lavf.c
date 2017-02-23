@@ -61,6 +61,7 @@
 #define OPT_BASE_STRUCT struct demux_lavf_opts
 struct demux_lavf_opts {
     int probesize;
+    int probeinfo;
     int probescore;
     float analyzeduration;
     int buffersize;
@@ -77,6 +78,8 @@ struct demux_lavf_opts {
 const struct m_sub_options demux_lavf_conf = {
     .opts = (const m_option_t[]) {
         OPT_INTRANGE("demuxer-lavf-probesize", probesize, 0, 32, INT_MAX),
+        OPT_CHOICE("demuxer-lavf-probe-info", probeinfo, 0,
+                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
         OPT_STRING("demuxer-lavf-format", format, 0),
         OPT_FLOATRANGE("demuxer-lavf-analyzeduration", analyzeduration, 0,
                        0, 3600),
@@ -100,6 +103,7 @@ const struct m_sub_options demux_lavf_conf = {
     },
     .size = sizeof(struct demux_lavf_opts),
     .defaults = &(const struct demux_lavf_opts){
+        .probeinfo = -1,
         .allow_mimetype = 1,
         .hacks = 1,
         // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the
@@ -116,6 +120,7 @@ struct format_hack {
     const char *mime_type;
     int probescore;
     float analyzeduration;
+    bool skipinfo : 1;          // skip avformat_find_stream_info()
     unsigned int if_flags;      // additional AVInputFormat.flags flags
     bool max_probe : 1;         // use probescore only if max. probe size reached
     bool ignore : 1;            // blacklisted
@@ -143,9 +148,12 @@ static const struct format_hack format_hacks[] = {
     {"mp3", "audio/mpeg", 24, 0.5},
     {"mp3", NULL,         24, .max_probe = true},
 
-    {"hls", .no_stream = true, .clear_filepos = true},
+    {"hls", .no_stream = true, .clear_filepos = true, .skipinfo = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
+
+    {"mp4", .skipinfo = true},
+    {"matroska", .skipinfo = true},
 
     // In theory, such streams might contain timestamps, but virtually none do.
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
@@ -889,15 +897,19 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     priv->avfc = avfc;
 
-    if (!demuxer->params || !demuxer->params->skip_lavf_probing) {
+    bool probeinfo = lavfdopts->probeinfo < 0 ?
+                            !priv->format_hack.skipinfo : lavfdopts->probeinfo;
+    if (demuxer->params && demuxer->params->skip_lavf_probing)
+        probeinfo = false;
+    if (probeinfo) {
         if (avformat_find_stream_info(avfc, NULL) < 0) {
             MP_ERR(demuxer, "av_find_stream_info() failed\n");
             return -1;
         }
-    }
 
-    MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
-               " bytes.\n", stream_tell(priv->stream));
+        MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
+                   " bytes.\n", stream_tell(priv->stream));
+    }
 
     for (int i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];

@@ -2552,6 +2552,15 @@ Demuxer
 ``--demuxer-lavf-analyzeduration=<value>``
     Maximum length in seconds to analyze the stream properties.
 
+``--demuxer-lavf-probe-info=<yes|no|auto>``
+    Whether to probe stream information (default: auto). Technically, this
+    controls whether libavformat's ``avformat_find_stream_info()`` function
+    is called. Usually it's safer to call it, but it can also make startup
+    slower.
+
+    The ``auto`` choice (the default) tries to skip this for a few know-safe
+    whitelisted formats, while calling it for everything else.
+
 ``--demuxer-lavf-probescore=<1-100>``
     Minimum required libavformat probe score. Lower values will require
     less data to be loaded (makes streams start faster), but makes file
