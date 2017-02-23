@@ -1018,6 +1018,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowDidChangeScreen:(NSNotification *)notification
 {
     vo_cocoa_update_screen_info(self.vout);
+}
+
+- (void)windowDidChangePhysicalScreen
+{
     vo_cocoa_update_displaylink(self.vout);
     flag_events(self.vout, VO_EVENT_WIN_STATE);
 }

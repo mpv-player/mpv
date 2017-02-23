@@ -168,14 +168,15 @@
 
 - (void)windowDidChangeScreen:(NSNotification *)notification
 {
-    //this event doesn't exclusively trigger on screen change
-    //examples: screen reconfigure, toggling fullscreen
+    [self.adapter windowDidChangeScreen:notification];
+
     if (!_is_animating && ![[self currentScreen] isEqual:[self screen]]) {
         self.previousScreen = [self screen];
     }
     if (![[self currentScreen] isEqual:[self screen]]) {
-        [self.adapter windowDidChangeScreen:notification];
+        [self.adapter windowDidChangePhysicalScreen];
     }
+
     self.currentScreen = [self screen];
 }
 
