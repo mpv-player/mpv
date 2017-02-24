@@ -366,6 +366,9 @@ void mpv_detach_destroy(mpv_handle *ctx)
     // causes a crash, block until all asynchronous requests were served.
     mpv_wait_async_requests(ctx);
 
+    osd_set_external(ctx->mpctx->osd, ctx, 0, 0, NULL);
+    mp_input_remove_sections_by_owner(ctx->mpctx->input, ctx->name);
+
     struct mp_client_api *clients = ctx->clients;
 
     pthread_mutex_lock(&clients->lock);
@@ -378,8 +381,6 @@ void mpv_detach_destroy(mpv_handle *ctx)
                 ctx->num_events--;
             }
             mp_msg_log_buffer_destroy(ctx->messages);
-            osd_set_external(ctx->mpctx->osd, ctx, 0, 0, NULL);
-            mp_input_remove_sections_by_owner(ctx->mpctx->input, ctx->name);
             pthread_cond_destroy(&ctx->wakeup);
             pthread_mutex_destroy(&ctx->wakeup_lock);
             pthread_mutex_destroy(&ctx->lock);
