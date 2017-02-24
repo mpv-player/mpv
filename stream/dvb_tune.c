@@ -137,7 +137,7 @@ old_api:
         if (FE_CAN_2G_MODULATION & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_DVBS2);
         }
-#ifdef __not_yet__
+#if 0 /* Not used now. */
         if (FE_CAN_TURBO_FEC & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_TURBO);
         }
@@ -152,7 +152,7 @@ old_api:
         if ((FE_CAN_8VSB | FE_CAN_16VSB) & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_ATSC);
         }
-#ifdef __not_yet__
+#if 0 /* Not used now. */
         if ((FE_CAN_QAM_64 | FE_CAN_QAM_256 | FE_CAN_QAM_AUTO) & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_DVBC_ANNEX_B);
         }
