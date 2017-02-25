@@ -630,9 +630,9 @@ Video
     :auto:      enable best hw decoder (see below)
     :yes:       exactly the same as ``auto``
     :auto-copy: enable best hw decoder with copy-back (see below)
-    :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
+    :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl``
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
+    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi``
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up),
                    or ``--vo=opengl-cb`` (iOS 9.0 and up)
