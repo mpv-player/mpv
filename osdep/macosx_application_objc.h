@@ -18,10 +18,15 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/macosx_application.h"
 
+struct mpv_event;
+
 @interface Application : NSApplication
+
 - (void)initialize_menu;
 - (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
 - (void)stopPlayback;
+- (void)processEvent:(struct mpv_event *)event;
+- (void)queueCommand:(char *)cmd;
 
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
