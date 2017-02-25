@@ -15,9 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ctype.h>
 #include <assert.h>
 
+#include "misc/ctype.h"
 #include "user_shaders.h"
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
@@ -56,7 +56,7 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
         case '<': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_LT;  continue;
         }
 
-        if (isdigit(word.start[0])) {
+        if (mp_isdigit(word.start[0])) {
             exp->tag = SZEXP_CONST;
             if (bstr_sscanf(word, "%f", &exp->val.cval) != 1)
                 return false;
