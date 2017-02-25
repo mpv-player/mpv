@@ -455,6 +455,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     MP_STATS(mpctx, "start init");
 
+#if HAVE_COCOA
+    mpv_handle *ctx = mp_new_client(mpctx->clients, "osx");
+    cocoa_set_mpv_handle(ctx);
+#endif
+
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(opts->encode_opts,

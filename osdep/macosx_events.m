@@ -28,18 +28,22 @@
 #include "mpv_talloc.h"
 #include "input/event.h"
 #include "input/input.h"
+#include "player/client.h"
 #include "input/keycodes.h"
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
 #include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
+#import "osdep/macosx_application_objc.h"
 
 #include "config.h"
 
 @interface EventsResponder ()
 {
     struct input_ctx *_inputContext;
+    struct mpv_handle *_ctx;
+    BOOL _is_application;
     NSCondition *_input_lock;
     CFMachPortRef _mk_tap_port;
 #if HAVE_APPLE_REMOTE
@@ -49,6 +53,8 @@
 
 - (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKey:(NSEvent *)event;
+- (void)setMpvHandle:(struct mpv_handle *)ctx;
+- (void)readEvents;
 - (void)startEventMonitor;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
@@ -210,6 +216,20 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     [[EventsResponder sharedInstance] setInputContext:input_context];
 }
 
+static void wakeup(void *context)
+{
+    [[EventsResponder sharedInstance] readEvents];
+}
+
+void cocoa_set_mpv_handle(struct mpv_handle *ctx)
+{
+    [[EventsResponder sharedInstance] setMpvHandle:ctx];
+    mpv_observe_property(ctx, 0, "duration", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(ctx, 0, "time-pos", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_FLAG);
+    mpv_set_wakeup_callback(ctx, wakeup, NULL);
+}
+
 @implementation EventsResponder
 
 + (EventsResponder *)sharedInstance
@@ -284,6 +304,47 @@ void cocoa_set_input_context(struct input_ctx *input_context)
         r = mp_input_use_alt_gr(_inputContext);
     [_input_lock unlock];
     return r;
+}
+
+- (void)setIsApplication:(BOOL)isApplication
+{
+    _is_application = isApplication;
+}
+
+- (void)setMpvHandle:(struct mpv_handle *)ctx
+{
+    if (_is_application) {
+        dispatch_sync(dispatch_get_main_queue(), ^{ _ctx = ctx; });
+    } else {
+        _ctx = ctx;
+    }
+}
+
+- (void)readEvents
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        while (_ctx) {
+            mpv_event *event = mpv_wait_event(_ctx, 0);
+            if (event->event_id == MPV_EVENT_NONE)
+                break;
+            [self processEvent:event];
+        }
+    });
+}
+
+-(void)processEvent:(struct mpv_event *)event
+{
+    switch (event->event_id) {
+    case MPV_EVENT_SHUTDOWN: {
+        mpv_detach_destroy(_ctx);
+        _ctx = nil;
+        break;
+    }
+    }
+
+    if(_is_application) {
+        [NSApp processEvent:event];
+    }
 }
 
 - (void)startEventMonitor

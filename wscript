@@ -923,7 +923,16 @@ standalone_features = [
         'desc': 'Apple Remote support',
         'deps': [ 'cocoa' ],
         'func': check_true
-    }
+    }, {
+        'name': '--macos-touchbar',
+        'desc': 'macOS Touch Bar support',
+        'deps': [ 'cocoa' ],
+        'func': check_cc(
+            fragment=load_fragment('touchbar.m'),
+            framework_name=['AppKit'],
+            compile_filename='test-touchbar.m',
+            linkflags='-fobjc-arc')
+     }
 ]
 
 _INSTALL_DIRS_LIST = [
