@@ -27,7 +27,7 @@
 
 #include "d3d.h"
 
-#define ADDITIONAL_SURFACES (HWDEC_EXTRA_SURFACES + HWDEC_DELAY_QUEUE_COUNT)
+#define ADDITIONAL_SURFACES HWDEC_EXTRA_SURFACES
 
 struct d3d11va_decoder {
     ID3D11VideoDecoder   *decoder;
