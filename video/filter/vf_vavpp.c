@@ -52,7 +52,7 @@ struct pipeline {
 };
 
 struct vf_priv_s {
-    int deint_type; // 0: none, 1: discard, 2: double fps
+    int deint_type;
     int interlaced_only;
     int reversal_bug;
     bool do_deint;
@@ -94,7 +94,7 @@ static void add_surfaces(struct vf_priv_s *p, struct surface_refs *refs, int dir
 // The array items must match with the "deint" suboption values.
 static const int deint_algorithm[] = {
     [0] = VAProcDeinterlacingNone,
-    [1] = VAProcDeinterlacingNone, // first-field, special-cased
+    [1] = VAProcDeinterlacingBob, // first-field, special-cased
     [2] = VAProcDeinterlacingBob,
     [3] = VAProcDeinterlacingWeave,
     [4] = VAProcDeinterlacingMotionAdaptive,
@@ -433,7 +433,7 @@ static bool initialize(struct vf_instance *vf)
         buffers[i] = VA_INVALID_ID;
     for (int i = 0; i < num_filters; i++) {
         if (filters[i] == VAProcFilterDeinterlacing) {
-            if (p->deint_type < 2)
+            if (p->deint_type < 1)
                 continue;
             VAProcFilterCapDeinterlacing caps[VAProcDeinterlacingCount];
             int num = va_query_filter_caps(vf, VAProcFilterDeinterlacing, caps,
