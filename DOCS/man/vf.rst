@@ -754,6 +754,13 @@ Available filters are:
         :no:  Deinterlace all frames.
         :yes: Only deinterlace frames marked as interlaced (default).
 
+    ``reversal-bug=<yes|no>``
+        :no:  Use the API as it appears to be documented. Reported to work well
+              with Mesa drivers.
+        :yes: Switch surface forward and backwards references (default). Appears
+              to work (or work better than ``no``) with Intel drivers. Matters
+              only for the advanced deinterlacing algorithms.
+
 ``vdpaupp``
     VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
     only. This filter is automatically inserted if deinterlacing is requested

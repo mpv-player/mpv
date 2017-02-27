@@ -54,6 +54,7 @@ struct pipeline {
 struct vf_priv_s {
     int deint_type; // 0: none, 1: discard, 2: double fps
     int interlaced_only;
+    int reversal_bug;
     bool do_deint;
     VABufferID buffers[VAProcFilterCount];
     int num_buffers;
@@ -74,6 +75,7 @@ static const struct vf_priv_s vf_priv_default = {
     .context = VA_INVALID_ID,
     .deint_type = 2,
     .interlaced_only = 1,
+    .reversal_bug = 1,
 };
 
 static void add_surfaces(struct vf_priv_s *p, struct surface_refs *refs, int dir)
@@ -136,8 +138,13 @@ static void update_pipeline(struct vf_instance *vf)
     p->pipe.num_output_colors = caps.num_output_color_standards;
     p->pipe.forward.max_surfaces = caps.num_forward_references;
     p->pipe.backward.max_surfaces = caps.num_backward_references;
-    mp_refqueue_set_refs(p->queue, caps.num_backward_references,
-                                   caps.num_forward_references);
+    if (p->reversal_bug) {
+        int max = MPMAX(caps.num_forward_references, caps.num_backward_references);
+        mp_refqueue_set_refs(p->queue, max, max);
+    } else {
+        mp_refqueue_set_refs(p->queue, p->pipe.backward.max_surfaces,
+                                       p->pipe.forward.max_surfaces);
+    }
     mp_refqueue_set_mode(p->queue,
         (p->do_deint ? MP_MODE_DEINT : 0) |
         (p->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
@@ -221,13 +228,21 @@ static struct mp_image *render(struct vf_instance *vf)
     param->filters = p->pipe.filters;
     param->num_filters = p->pipe.num_filters;
 
-    add_surfaces(p, &p->pipe.forward, 1);
+    int dir = p->reversal_bug ? -1 : 1;
+
+    add_surfaces(p, &p->pipe.forward, 1 * dir);
     param->forward_references = p->pipe.forward.surfaces;
     param->num_forward_references = p->pipe.forward.num_surfaces;
 
-    add_surfaces(p, &p->pipe.backward, -1);
+    add_surfaces(p, &p->pipe.backward, -1 * dir);
     param->backward_references = p->pipe.backward.surfaces;
     param->num_backward_references = p->pipe.backward.num_surfaces;
+
+    MP_TRACE(vf, "in=0x%x\n", (unsigned)in_id);
+    for (int n = 0; n < param->num_backward_references; n++)
+        MP_TRACE(vf, " b%d=0x%x\n", n, (unsigned)param->backward_references[n]);
+    for (int n = 0; n < param->num_forward_references; n++)
+        MP_TRACE(vf, " f%d=0x%x\n", n, (unsigned)param->forward_references[n]);
 
     vaUnmapBuffer(p->display, buffer);
 
@@ -481,6 +496,7 @@ static const m_option_t vf_opts_fields[] = {
                 {"motion-adaptive", 4},
                 {"motion-compensated", 5})),
     OPT_FLAG("interlaced-only", interlaced_only, 0),
+    OPT_FLAG("reversal-bug", reversal_bug, 0),
     {0}
 };
 
