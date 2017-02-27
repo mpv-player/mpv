@@ -112,8 +112,6 @@ static void update_pipeline(struct vf_instance *vf)
         filters++;
         num_filters--;
     }
-    if (filters == p->pipe.filters && num_filters == p->pipe.num_filters)
-        return; /* cached state is correct */
     p->pipe.forward.num_surfaces = p->pipe.backward.num_surfaces = 0;
     p->pipe.num_input_colors = p->pipe.num_output_colors = 0;
     p->pipe.num_filters = 0;
