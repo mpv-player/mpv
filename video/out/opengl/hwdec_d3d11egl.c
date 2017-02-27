@@ -290,7 +290,13 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     };
     if (!p->StreamPostD3DTextureNV12ANGLE(p->egl_display, p->egl_stream,
                                           (void *)d3d_tex, attrs))
-        return -1;
+    {
+        // ANGLE changed the enum ID of this without warning at one point.
+        attrs[0] = attrs[0] == 0x33AB ? 0x3AAB : 0x33AB;
+        if (!p->StreamPostD3DTextureNV12ANGLE(p->egl_display, p->egl_stream,
+                                          (void *)d3d_tex, attrs))
+            return -1;
+    }
 
     if (!p->StreamConsumerAcquireKHR(p->egl_display, p->egl_stream))
         return -1;
