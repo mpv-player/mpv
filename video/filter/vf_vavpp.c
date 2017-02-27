@@ -39,6 +39,7 @@ static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg
 struct surface_refs {
     VASurfaceID *surfaces;
     int num_surfaces;
+    int max_surfaces;
 };
 
 struct pipeline {
@@ -77,13 +78,14 @@ static const struct vf_priv_s vf_priv_default = {
 
 static void add_surfaces(struct vf_priv_s *p, struct surface_refs *refs, int dir)
 {
-    for (int n = 0; ; n++) {
+    for (int n = 0; n < refs->max_surfaces; n++) {
         struct mp_image *s = mp_refqueue_get(p->queue, (1 + n) * dir);
         if (!s)
             break;
         VASurfaceID id = va_surface_id(s);
-        if (id != VA_INVALID_ID)
-            MP_TARRAY_APPEND(p, refs->surfaces, refs->num_surfaces, id);
+        if (id == VA_INVALID_ID)
+            break;
+        MP_TARRAY_APPEND(p, refs->surfaces, refs->num_surfaces, id);
     }
 }
 
@@ -132,6 +134,8 @@ static void update_pipeline(struct vf_instance *vf)
     p->pipe.num_filters = num_filters;
     p->pipe.num_input_colors = caps.num_input_color_standards;
     p->pipe.num_output_colors = caps.num_output_color_standards;
+    p->pipe.forward.max_surfaces = caps.num_forward_references;
+    p->pipe.backward.max_surfaces = caps.num_backward_references;
     mp_refqueue_set_refs(p->queue, caps.num_backward_references,
                                    caps.num_forward_references);
     mp_refqueue_set_mode(p->queue,
