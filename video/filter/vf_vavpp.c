@@ -157,6 +157,7 @@ static struct mp_image *render(struct vf_instance *vf)
     struct mp_image *img = NULL;
     bool need_end_picture = false;
     bool success = false;
+    VABufferID buffer = VA_INVALID_ID;
 
     VASurfaceID in_id = va_surface_id(in);
     if (!p->pipe.filters || in_id == VA_INVALID_ID)
@@ -189,7 +190,6 @@ static struct mp_image *render(struct vf_instance *vf)
 
     need_end_picture = true;
 
-    VABufferID buffer = VA_INVALID_ID;
     VAProcPipelineParameterBuffer *param = NULL;
     status = vaCreateBuffer(p->display, p->context,
                             VAProcPipelineParameterBufferType,
@@ -212,6 +212,7 @@ static struct mp_image *render(struct vf_instance *vf)
     if (!check_error(vf, status, "vaMapBuffer()"))
         goto cleanup;
 
+    *param = (VAProcPipelineParameterBuffer){0};
     param->surface = in_id;
     param->surface_region = &(VARectangle){0, 0, in->w, in->h};
     param->output_region = &(VARectangle){0, 0, img->w, img->h};
@@ -239,6 +240,7 @@ static struct mp_image *render(struct vf_instance *vf)
 cleanup:
     if (need_end_picture)
         vaEndPicture(p->display, p->context);
+    vaDestroyBuffer(p->display, buffer);
     if (success)
         return img;
     talloc_free(img);
@@ -427,7 +429,7 @@ static bool initialize(struct vf_instance *vf)
             for (int n=0; n < num; n++) { // find the algorithm
                 if (caps[n].type != algorithm)
                     continue;
-                VAProcFilterParameterBufferDeinterlacing param;
+                VAProcFilterParameterBufferDeinterlacing param = {0};
                 param.type = VAProcFilterDeinterlacing;
                 param.algorithm = algorithm;
                 buffers[VAProcFilterDeinterlacing] =
