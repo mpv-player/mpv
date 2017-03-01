@@ -1039,8 +1039,25 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
-        if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
-            return DEMUXER_CTRL_DONTKNOW;
+        if (priv->avfc->duration <= 0) {
+            double total_duration = 0;
+            double av_duration = 0;
+            for (int n = 0; n < priv->avfc->nb_streams; n++) {
+                AVStream *st = priv->avfc->streams[n];
+                if (st->duration <= 0)
+                    continue;
+                double f_duration = st->duration * av_q2d(st->time_base);
+                total_duration = MPMAX(total_duration, f_duration);
+                if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ||
+                    st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+                    av_duration = MPMAX(av_duration, f_duration);
+            }
+            double duration = av_duration > 0 ? av_duration : total_duration;
+            if (duration <= 0)
+                return DEMUXER_CTRL_DONTKNOW;
+            *(double *)arg = duration;
+            return DEMUXER_CTRL_OK;
+        }
 
         *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
         return DEMUXER_CTRL_OK;
