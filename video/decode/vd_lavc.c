@@ -821,12 +821,14 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     ctx->hwdec_request_reinit |= ctx->hwdec_failed;
     ctx->hwdec_failed = false;
 
+    enum AVPixelFormat select = AV_PIX_FMT_NONE;
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
             if (ctx->hwdec->generic_hwaccel) {
                 if (init_generic_hwaccel(vd) < 0)
                     break;
-                return fmt[i];
+                select = fmt[i];
+                break;
             }
             // There could be more reasons for a change, and it's possible
             // that we miss some. (Might also depend on the hwaccel type.)
@@ -849,17 +851,25 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                     break;
                 }
             }
-            return fmt[i];
+            select = fmt[i];
+            break;
         }
     }
 
-    ctx->hwdec_failed = true;
-    for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
-        const AVPixFmtDescriptor *d = av_pix_fmt_desc_get(fmt[i]);
-        if (d && !(d->flags & AV_PIX_FMT_FLAG_HWACCEL))
-            return fmt[i];
+    if (select == AV_PIX_FMT_NONE) {
+        ctx->hwdec_failed = true;
+        for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
+            const AVPixFmtDescriptor *d = av_pix_fmt_desc_get(fmt[i]);
+            if (d && !(d->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+                select = fmt[i];
+                break;
+            }
+        }
     }
-    return AV_PIX_FMT_NONE;
+
+    const char *name = av_get_pix_fmt_name(select);
+    MP_VERBOSE(vd, "Requesting pixfmt '%s' from decoder.\n", name ? name : "-");
+    return select;
 }
 
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
