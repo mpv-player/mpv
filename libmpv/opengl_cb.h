@@ -31,21 +31,22 @@ extern "C" {
 #endif
 
 /**
- * Warning: this API is not stable yet.
  *
  * Overview
  * --------
  *
  * This API can be used to make mpv render into a foreign OpenGL context. It
- * can be used to handle video display. Be aware that using this API is not
- * required: you can embed the mpv window by setting the mpv "wid" option to
- * a native window handle (see "Embedding the video window" section in the
- * client.h header). In general, using the "wid" option is recommended over
- * the OpenGL API, because it's simpler and more flexible on the mpv side.
+ * can be used to handle video display.
  *
  * The renderer needs to be explicitly initialized with mpv_opengl_cb_init_gl(),
  * and then video can be drawn with mpv_opengl_cb_draw(). The user thread can
  * be notified by new frames with mpv_opengl_cb_set_update_callback().
+ *
+ * You can output and embed video without this API by setting the mpv "wid"
+ * option to a native window handle (see "Embedding the video window" section
+ * in the client.h header). In general, using the opengl-cb API is recommended,
+ * because window embedding can cause various issues, especially with GUI
+ * toolkits and certain platforms.
  *
  * OpenGL interop
  * --------------

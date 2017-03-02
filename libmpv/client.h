@@ -161,23 +161,19 @@ extern "C" {
  * Embedding the video window
  * --------------------------
  *
- * Currently you have to get the raw window handle, and set it as "wid" option.
- * This works on X11, win32, and OSX only. In addition, it works with a few VOs
- * only, and VOs which do not support this will just create a freestanding
- * window.
+ * Using the opengl-cb API (in opengl_cb.h) is recommended. This API requires
+ * you to create and maintain an OpenGL context, to which you can render
+ * video using a specific API call. This API does not include keyboard or mouse
+ * input directly.
  *
- * Both on X11 and win32, the player will fill the window referenced by the
- * "wid" option fully and letterbox the video (i.e. add black bars if the
- * aspect ratio of the window and the video mismatch).
+ * There is an older way to embed the native mpv window into your own. You have
+ * to get the raw window handle, and set it as "wid" option. This works on X11,
+ * win32, and OSX only. It's much easier to use than the opengl-cb API, but
+ * also has various problems.
  *
- * Setting the "input-vo-keyboard" may be required to get keyboard input
- * through the embedded window, if this is desired.
- *
- * For OpenGL integration (e.g. rendering video to a texture), a separate API
- * is available. Look at opengl_cb.h. This API does not include keyboard or
- * mouse input directly.
- *
- * Also see client API examples and the mpv manpage.
+ * Also see client API examples and the mpv manpage. There is an extensive
+ * discussion here:
+ * https://github.com/mpv-player/mpv-examples/tree/master/libmpv#methods-of-embedding-the-video-window
  *
  * Compatibility
  * -------------
