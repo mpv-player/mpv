@@ -448,7 +448,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 #if HAVE_VIDEOTOOLBOX_HWACCEL
-    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0),
+    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0, .min = -1),
 #endif
 
     // -1 means auto aspect (prefer container size until aspect change)

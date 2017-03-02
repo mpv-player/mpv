@@ -779,6 +779,8 @@ Video
     the given hardware. ``nv12``, the default, works better on modern hardware,
     while ``uyvy422`` appears to be better for old hardware. ``yuv420p`` also
     works.
+    Since mpv 0.25.0, ``no`` is an accepted value, which lets the decoder pick
+    the format on newer FFmpeg versions (will use ``nv12`` on older versions).
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9

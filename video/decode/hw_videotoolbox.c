@@ -105,8 +105,14 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     if (!vtctx)
         return -1;
 
-    vtctx->cv_pix_fmt_type =
-        mp_imgfmt_to_cvpixelformat(ctx->opts->videotoolbox_format);
+    int imgfmt = ctx->opts->videotoolbox_format;
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 81, 103)
+    if (!imgfmt)
+        imgfmt = IMGFMT_NV12;
+#endif
+    vtctx->cv_pix_fmt_type = mp_imgfmt_to_cvpixelformat(imgfmt);
+    MP_VERBOSE(ctx, "Requesting cv_pix_fmt_type=0x%x\n",
+               (unsigned)vtctx->cv_pix_fmt_type);
 
     int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
     if (err < 0) {
