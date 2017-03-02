@@ -72,7 +72,7 @@ build_options = [
         'desc': 'C plugins',
         'deps': [ 'libdl' ],
         'default': 'disable',
-        'func': check_cc(linkflags=['-Wl,-export-dynamic']),
+        'func': check_cc(linkflags=['-rdynamic']),
     }, {
         'name': 'dlopen',
         'desc': 'dlopen',
@@ -1033,7 +1033,7 @@ def configure(ctx):
         # not linked against libmpv. The C plugin needs to be able to pick
         # up the libmpv symbols from the binary. We still restrict the set
         # of exported symbols via mpv.def.
-        ctx.env.LINKFLAGS += ['-Wl,-export-dynamic']
+        ctx.env.LINKFLAGS += ['-rdynamic']
 
     ctx.store_dependencies_lists()
 
