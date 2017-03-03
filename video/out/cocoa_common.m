@@ -121,37 +121,14 @@ static void run_on_main_thread(struct vo *vo, void(^block)(void))
     dispatch_sync(dispatch_get_main_queue(), block);
 }
 
-static NSRect calculate_window_geometry(struct vo *vo, NSRect rect)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts  = vo->opts;
-
-    NSRect screenFrame = [s->current_screen frame];
-    rect.origin.y = screenFrame.size.height - (rect.origin.y + rect.size.height);
-
-    if(!opts->hidpi_window_scale) {
-        NSRect oldRect = rect;
-        rect = [s->current_screen convertRectFromBacking:rect];
-
-        CGFloat x_per = screenFrame.size.width - oldRect.size.width;
-        CGFloat y_per = screenFrame.size.height - oldRect.size.height;
-        if (x_per > 0) x_per = oldRect.origin.x/x_per;
-        if (y_per > 0) y_per = oldRect.origin.y/y_per;
-
-        rect.origin.x = (screenFrame.size.width - rect.size.width)*x_per;
-        rect.origin.y = (screenFrame.size.height - rect.size.height)*y_per;
-    }
-
-    return rect;
-}
-
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
     id<MpvWindowUpdate> win = (id<MpvWindowUpdate>) s->window;
-    NSRect r = calculate_window_geometry(vo, NSMakeRect(0, 0, w, h));
-    [win queueNewVideoSize:NSMakeSize(r.size.width, r.size.height)];
+    NSRect r = NSMakeRect(0, 0, w, h);
+    r = [s->current_screen convertRectFromBacking:r];
+    [win queueNewVideoSize:r.size];
 }
 
 static void flag_events(struct vo *vo, int events)
@@ -581,8 +558,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     if (s->embedded) {
         parent = (NSView *) (intptr_t) opts->WinID;
     } else {
-        NSRect wr = calculate_window_geometry(vo,
-            NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0));
+        NSRect wr = NSMakeRect(win->x0, win->y1, win->x1 - win->x0, win->y0 - win->y1);
+        wr = [s->current_screen convertRectFromBacking:wr];
         s->window = create_window(wr, s->current_screen, opts->border, adapter);
         parent = [s->window contentView];
     }
@@ -696,10 +673,15 @@ int vo_cocoa_config_window(struct vo *vo)
 
     run_on_main_thread(vo, ^{
         NSRect r = [s->current_screen frame];
+        r = [s->current_screen convertRectToBacking:r];
         struct mp_rect screenrc = {0, 0, r.size.width, r.size.height};
         struct vo_win_geometry geo;
-        vo_calc_window_geometry(vo, &screenrc, &geo);
+        vo_calc_window_geometry2(vo, &screenrc, [s->current_screen backingScaleFactor], &geo);
         vo_apply_window_geometry(vo, &geo);
+
+        //flip y coordinates
+        geo.win.y1 = r.size.height - geo.win.y1;
+        geo.win.y0 = r.size.height - geo.win.y0;
 
         uint32_t width = vo->dwidth;
         uint32_t height = vo->dheight;
@@ -869,10 +851,10 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *sz = arg;
-        int w, h;
-        w = sz[0];
-        h = sz[1];
-        queue_new_video_size(vo, w, h);
+        NSRect r = NSMakeRect(0, 0, sz[0], sz[1]);
+        if(vo->opts->hidpi_window_scale)
+            r = [s->current_screen convertRectToBacking:r];
+        queue_new_video_size(vo, r.size.width, r.size.height);
         return VO_TRUE;
     }
     case VOCTRL_GET_WIN_STATE: {
