@@ -100,14 +100,14 @@ static double sample_window(struct filter_window *kernel, double x)
 
     // All windows are symmetric, this makes life easier
     x = fabs(x);
-    if (x >= kernel->radius)
-        return 0.0;
 
     // Stretch and taper the window size as needed
     x = kernel->blur > 0.0 ? x / kernel->blur : x;
     x = x <= kernel->taper ? 0.0 : (x - kernel->taper) / (1 - kernel->taper);
 
-    return kernel->weight(kernel, x);
+    if (x < kernel->radius)
+        return kernel->weight(kernel, x);
+    return 0.0;
 }
 
 // Evaluate a filter's kernel and window at a given absolute position
