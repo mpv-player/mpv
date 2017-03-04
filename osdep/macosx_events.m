@@ -358,9 +358,11 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 - (BOOL)handleMediaKey:(NSEvent *)event
 {
     NSDictionary *keymapd = @{
-        @(NX_KEYTYPE_PLAY):    @(MP_KEY_PLAY),
-        @(NX_KEYTYPE_REWIND):  @(MP_KEY_PREV),
-        @(NX_KEYTYPE_FAST):    @(MP_KEY_NEXT),
+        @(NX_KEYTYPE_PLAY):     @(MP_KEY_PLAY),
+        @(NX_KEYTYPE_REWIND):   @(MP_KEY_PREV),
+        @(NX_KEYTYPE_FAST):     @(MP_KEY_NEXT),
+        @(NX_KEYTYPE_PREVIOUS): @(MP_KEY_REWIND),
+        @(NX_KEYTYPE_NEXT):     @(MP_KEY_FORWARD),
     };
 
     return [self handleKey:mk_code(event)
