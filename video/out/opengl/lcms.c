@@ -77,9 +77,9 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct mp_icc_opts
 const struct m_sub_options mp_icc_conf = {
     .opts = (const m_option_t[]) {
-        OPT_STRING("icc-profile", profile, 0),
+        OPT_STRING("icc-profile", profile, M_OPT_FILE),
         OPT_FLAG("icc-profile-auto", profile_auto, 0),
-        OPT_STRING("icc-cache-dir", cache_dir, 0),
+        OPT_STRING("icc-cache-dir", cache_dir, M_OPT_FILE),
         OPT_INT("icc-intent", intent, 0),
         OPT_INTRANGE("icc-contrast", contrast, 0, 0, 100000),
         OPT_STRING_VALIDATE("icc-3dlut-size", size_str, 0, validate_3dlut_size_opt),

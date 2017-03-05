@@ -305,7 +305,7 @@ const m_option_t mp_opts[] = {
 #endif
     OPT_FLAG("config", load_config, M_OPT_FIXED | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
-               M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE),
+               M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA
@@ -618,7 +618,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
     OPT_FLAG("write-filename-in-watch-later-config", write_filename_in_watch_later_config, 0),
     OPT_FLAG("ignore-path-in-watch-later-config", ignore_path_in_watch_later_config, 0),
-    OPT_STRING("watch-later-directory", watch_later_directory, 0),
+    OPT_STRING("watch-later-directory", watch_later_directory, M_OPT_FILE),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_STRING("ordered-chapters-files", ordered_chapters_files, M_OPT_FILE),
@@ -686,7 +686,7 @@ const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
-    OPT_STRING("screenshot-directory", screenshot_directory, 0),
+    OPT_STRING("screenshot-directory", screenshot_directory, M_OPT_FILE),
 
     OPT_STRING("record-file", record_file, M_OPT_FILE),
 

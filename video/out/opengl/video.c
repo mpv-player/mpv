@@ -380,7 +380,7 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", BLEND_SUBS_NO},
                     {"yes", BLEND_SUBS_YES},
                     {"video", BLEND_SUBS_VIDEO})),
-        OPT_STRINGLIST("opengl-shaders", user_shaders, 0),
+        OPT_STRINGLIST("opengl-shaders", user_shaders, M_OPT_FILE),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
