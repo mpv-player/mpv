@@ -57,7 +57,7 @@ struct vo_image_opts {
 static const struct m_sub_options vo_image_conf = {
     .opts = (const struct m_option[]) {
         OPT_SUBSTRUCT("vo-image", opts, image_writer_conf, 0),
-        OPT_STRING("vo-image-outdir", outdir, 0),
+        OPT_STRING("vo-image-outdir", outdir, M_OPT_FILE),
         {0},
     },
     .size = sizeof(struct vo_image_opts),

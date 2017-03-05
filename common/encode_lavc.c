@@ -36,7 +36,7 @@
 #define OPT_BASE_STRUCT struct encode_opts
 const struct m_sub_options encode_config = {
     .opts = (const m_option_t[]) {
-        OPT_STRING("o", file, M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE),
+        OPT_STRING("o", file, M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
         OPT_STRING("of", format, M_OPT_FIXED),
         OPT_STRINGLIST("ofopts*", fopts, M_OPT_FIXED),
         OPT_FLOATRANGE("ofps", fps, M_OPT_FIXED, 0.0, 1000000.0),

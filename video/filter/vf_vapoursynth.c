@@ -736,7 +736,7 @@ static int vf_open(vf_instance_t *vf)
 
 #define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    OPT_STRING("file", cfg_file, 0),
+    OPT_STRING("file", cfg_file, M_OPT_FILE),
     OPT_INTRANGE("buffered-frames", cfg_maxbuffer, 0, 1, 9999, OPTDEF_INT(4)),
     OPT_CHOICE_OR_INT("concurrent-frames", cfg_maxrequests, 0, 1, 99,
                       ({"auto", -1}), OPTDEF_INT(-1)),
