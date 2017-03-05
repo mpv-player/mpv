@@ -28,6 +28,7 @@
 #include <assert.h>
 
 #include "filter_kernels.h"
+#include "common/common.h"
 
 // NOTE: all filters are designed for discrete convolution
 
@@ -60,19 +61,20 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
 {
     assert(filter->f.radius > 0);
     // Only downscaling requires widening the filter
-    filter->inv_scale = inv_scale >= 1.0 ? inv_scale : 1.0;
-    filter->f.radius *= filter->inv_scale;
+    filter->filter_scale = MPMAX(1.0, inv_scale);
+    double src_radius = filter->f.radius * filter->filter_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
-        filter->size = 1;
+        filter->size = 1; // Not meaningful for EWA/polar scalers.
         // Safety precaution to avoid generating a gigantic shader
-        if (filter->f.radius > 16.0) {
-            filter->f.radius = 16.0;
+        if (src_radius > 16.0) {
+            src_radius = 16.0;
+            filter->filter_scale = src_radius / filter->f.radius;
             return false;
         }
         return true;
     }
-    int size = ceil(2.0 * filter->f.radius);
+    int size = ceil(2.0 * src_radius);
     // round up to smallest available size that's still large enough
     if (size < sizes[0])
         size = sizes[0];
@@ -87,7 +89,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
-        filter->inv_scale *= (filter->size/2.0) / filter->f.radius;
+        filter->filter_scale = (filter->size/2.0) / filter->f.radius;
         return false;
     }
 }
@@ -115,7 +117,7 @@ static double sample_filter(struct filter_kernel *filter, double x)
 {
     // The window is always stretched to the entire kernel
     double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
-    double k = sample_window(&filter->f, x / filter->inv_scale);
+    double k = sample_window(&filter->f, x);
     return filter->clamp ? fmax(0.0, fmin(1.0, w * k)) : w * k;
 }
 
@@ -130,7 +132,7 @@ static void mp_compute_weights(struct filter_kernel *filter, double f,
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);
-        double w = sample_filter(filter, x);
+        double w = sample_filter(filter, x / filter->filter_scale);
         out_w[n] = w;
         sum += w;
     }

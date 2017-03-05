@@ -3400,6 +3400,9 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
         const struct filter_kernel *kernel =
             mp_find_filter_kernel(p->opts.scaler[SCALER_TSCALE].kernel.name);
         if (kernel) {
+            // filter_scale wouldn't be correctly initialized were we to use it here.
+            // This is fine since we're always upsampling, but beware if downsampling
+            // is added!
             double radius = kernel->f.radius;
             radius = radius > 0 ? radius : p->opts.scaler[SCALER_TSCALE].radius;
             queue_size += 1 + ceil(radius);
