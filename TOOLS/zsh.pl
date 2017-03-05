@@ -96,6 +96,9 @@ my $tmpl = <<"EOS";
 local curcontext="\$curcontext" state state_descr line
 typeset -A opt_args
 
+local -a match mbegin mend
+local MATCH MBEGIN MEND
+
 # By default, don't complete URLs unless no files match
 local -a tag_order
 zstyle -a ":completion:*:*:\$service:*" tag-order tag_order || \
