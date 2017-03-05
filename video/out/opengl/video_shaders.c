@@ -107,8 +107,8 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 
 void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
 {
-    double radius = scaler->kernel->f.radius;
-    int bound = (int)ceil(radius);
+    double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
+    int bound = ceil(radius);
     bool use_ar = scaler->conf.antiring > 0;
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");
