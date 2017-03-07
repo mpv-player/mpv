@@ -945,8 +945,11 @@ static void handle_err(struct dec_video *vd)
     if (ctx->hwdec) {
         ctx->hwdec_fail_count += 1;
         // The FFmpeg VT hwaccel is buggy and can crash after 1 broken frame.
-        bool vt = ctx->hwdec && ctx->hwdec->type == HWDEC_VIDEOTOOLBOX;
-        if (ctx->hwdec_fail_count >= opts->software_fallback || vt)
+        bool force = false;
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 82, 101)
+        force |= ctx->hwdec && ctx->hwdec->type == HWDEC_VIDEOTOOLBOX;
+#endif
+        if (ctx->hwdec_fail_count >= opts->software_fallback || force)
             ctx->hwdec_failed = true;
     }
 }
