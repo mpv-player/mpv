@@ -45,6 +45,8 @@
 
 - (void)drawRect:(NSRect)rect
 {
+    [[NSColor blackColor] setFill];
+    NSRectFill(rect);
     [self.adapter performAsyncResize:[self frameInPixels].size];
 }
 @end
