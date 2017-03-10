@@ -1723,6 +1723,16 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, s.idle);
 }
 
+static int mp_property_demuxer_start_time(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, mpctx->demuxer->start_time);
+}
+
 static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
@@ -3915,6 +3925,7 @@ static const struct m_property mp_properties_base[] = {
     {"demuxer-cache-duration", mp_property_demuxer_cache_duration},
     {"demuxer-cache-time", mp_property_demuxer_cache_time},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
+    {"demuxer-start-time", mp_property_demuxer_start_time},
     {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"demuxer-via-network", mp_property_demuxer_is_network},

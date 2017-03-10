@@ -1232,6 +1232,9 @@ Property list
     separate audio files or streams) do not influence the value of this
     property (currently).
 
+``demuxer-start-time`` (R)
+    Returns the start time reported by the demuxer in fractional seconds.
+
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
 
