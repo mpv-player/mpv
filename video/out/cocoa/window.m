@@ -70,6 +70,13 @@
     return self;
 }
 
+- (void)setStyleMask:(NSWindowStyleMask)style
+{
+    NSResponder *nR = [self firstResponder];
+    [super setStyleMask:style];
+    [self makeFirstResponder:nR];
+}
+
 - (void)toggleFullScreen:(id)sender
 {
     if (_is_animating)
