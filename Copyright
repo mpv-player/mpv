@@ -33,3 +33,4 @@ Source files with specific licenses:
 - everything under DOCS/man/ is GPLv2+
 - sub/osd_font.otf is GPLv2+
 - some tests under waftools/fragments/ might be GPLv2+
+- version.sh is GPLv2+
