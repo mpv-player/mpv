@@ -1105,8 +1105,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         // we trigger EOF immediately, and let it play asynchronously.
         if (ao_eof_reached(mpctx->ao) || opts->gapless_audio) {
             mpctx->audio_status = STATUS_EOF;
-            if (!was_eof)
+            if (!was_eof) {
+                MP_VERBOSE(mpctx, "audio EOF reached\n");
                 mp_wakeup_core(mpctx);
+            }
         }
     }
 }
