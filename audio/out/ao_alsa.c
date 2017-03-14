@@ -1125,7 +1125,11 @@ static int audio_wait(struct ao *ao, pthread_mutex_t *lock)
         CHECK_ALSA_ERROR("cannot read poll events");
 
         if (revents & POLLERR)  {
-            check_device_present(ao, -ENODEV);
+            snd_pcm_status_t *status;
+            snd_pcm_status_alloca(&status);
+
+            err = snd_pcm_status(p->alsa, status);
+            check_device_present(ao, err);
             return -1;
         }
         if (revents & POLLOUT)
