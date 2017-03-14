@@ -1143,10 +1143,8 @@ alsa_error:
 
 static bool is_useless_device(char *name)
 {
-    char *crap[] = {"front", "rear", "center_lfe", "side", "surround21",
-        "surround40", "surround41", "surround50", "surround51", "surround71",
-        "sysdefault", "pulse", "null", "dsnoop", "dmix", "hw", "iec958",
-        "default"};
+    return false;
+    char *crap[] = {"rear", "center_lfe", "side", "pulse", "null", "dsnoop", "hw"};
     for (int i = 0; i < MP_ARRAY_SIZE(crap); i++) {
         int l = strlen(crap[i]);
         if (name && strncmp(name, crap[i], l) == 0 &&
