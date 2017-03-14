@@ -1143,7 +1143,6 @@ alsa_error:
 
 static bool is_useless_device(char *name)
 {
-    return false;
     char *crap[] = {"rear", "center_lfe", "side", "pulse", "null", "dsnoop", "hw"};
     for (int i = 0; i < MP_ARRAY_SIZE(crap); i++) {
         int l = strlen(crap[i]);
@@ -1151,6 +1150,9 @@ static bool is_useless_device(char *name)
             (!name[l] || name[l] == ':'))
             return true;
     }
+    // The standard default entry will achieve exactly the same.
+    if (name && strcmp(name, "default") == 0)
+        return true;
     return false;
 }
 
