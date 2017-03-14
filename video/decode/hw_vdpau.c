@@ -51,10 +51,13 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 0)
         return 0;
 
-    return av_vdpau_bind_context(ctx->avctx, p->mpvdp->vdp_device,
-                                 p->mpvdp->get_proc_address,
-                                 AV_HWACCEL_FLAG_IGNORE_LEVEL |
-                                 AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH);
+    int r = av_vdpau_bind_context(ctx->avctx, p->mpvdp->vdp_device,
+                                  p->mpvdp->get_proc_address,
+                                  AV_HWACCEL_FLAG_IGNORE_LEVEL |
+                                  AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH);
+    if (r >= 0 && ctx->avctx->codec_id == AV_CODEC_ID_HEVC)
+        MP_WARN(ctx, "HEVC video output may be broken due to nVidia bugs.\n");
+    return r;
 }
 
 static void uninit(struct lavc_ctx *ctx)
