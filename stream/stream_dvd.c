@@ -781,7 +781,9 @@ static int open_s_internal(stream_t *stream)
     d->vts_file=vts_file;
     d->cur_title = d->dvd_title;
 
-    pgc = vts_file->vts_pgcit ? vts_file->vts_pgcit->pgci_srp[ttn].pgc : NULL;
+    pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgcn; // local
+    pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgn;  // local
+    pgc = vts_file->vts_pgcit ? vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc : NULL;
     /**
      * Check number of audio channels and types
      */
@@ -879,8 +881,6 @@ static int open_s_internal(stream_t *stream)
      * Determine which program chain we want to watch.  This is based on the
      * chapter number.
      */
-    pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgcn; // local
-    pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgn;  // local
     d->cur_pgc_idx = pgc_id-1;
     d->cur_pgc = vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
