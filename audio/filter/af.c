@@ -36,7 +36,6 @@ extern const struct af_info af_info_format;
 extern const struct af_info af_info_volume;
 extern const struct af_info af_info_equalizer;
 extern const struct af_info af_info_pan;
-extern const struct af_info af_info_drc;
 extern const struct af_info af_info_lavcac3enc;
 extern const struct af_info af_info_lavrresample;
 extern const struct af_info af_info_scaletempo;
@@ -50,7 +49,6 @@ static const struct af_info *const filter_list[] = {
     &af_info_volume,
     &af_info_equalizer,
     &af_info_pan,
-    &af_info_drc,
     &af_info_lavcac3enc,
     &af_info_lavrresample,
 #if HAVE_RUBBERBAND
