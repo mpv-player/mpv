@@ -445,12 +445,16 @@ static void pointer_handle_button(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    mp_input_put_key(wl->vo->input_ctx, (MP_MOUSE_BTN0 + (button - BTN_LEFT)) |
-                    ((state == WL_POINTER_BUTTON_STATE_PRESSED)
-                    ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
+    state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
+                                                     : MP_KEY_STATE_UP;
+
+    button = button == BTN_LEFT   ? MP_MOUSE_BTN0 :
+             button == BTN_MIDDLE ? MP_MOUSE_BTN1 : MP_MOUSE_BTN2;
+
+    mp_input_put_key(wl->vo->input_ctx, button | state);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->window.mouse_x, wl->window.mouse_y) &&
-        (button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
+        (button == MP_MOUSE_BTN0) && (state == MP_KEY_STATE_DOWN))
         window_move(wl, serial);
 }
 
