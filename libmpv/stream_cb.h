@@ -54,7 +54,9 @@ extern "C" {
  * stream callbacks.
  *
  * Note that your custom callbacks must not invoke libmpv APIs as that would
- * cause a deadlock.
+ * cause a deadlock. (Unless you call a different mpv_handle than the one the
+ * callback was registered for, and the mpv_handles refer to different mpv
+ * instances.)
  *
  * Stream lifetime
  * ---------------
