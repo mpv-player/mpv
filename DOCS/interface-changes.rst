@@ -25,6 +25,7 @@ Interface changes
     - remove ppm, pgm, pgmyuv, tga choices from the --screenshot-format and
       --vo-image-format options
     - the "jpeg" choice in the option above now leads to a ".jpg" file extension
+    - --af=drc is gone (you can use e.g. lavfi/acompressor instead)
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

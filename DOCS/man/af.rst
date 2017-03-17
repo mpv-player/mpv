@@ -319,29 +319,6 @@ Available filters are:
         the mixing matrix at runtime, without reinitializing the entire filter
         chain.
 
-``drc[=method:target]``
-    Applies dynamic range compression. This maximizes the volume by compressing
-    the audio signal's dynamic range. (Formerly called ``volnorm``.)
-
-    ``<method>``
-        Sets the used method.
-
-        1
-            Use a single sample to smooth the variations via the standard
-            weighted mean over past samples (default).
-        2
-            Use several samples to smooth the variations via the standard
-            weighted mean over past samples.
-
-    ``<target>``
-        Sets the target amplitude as a fraction of the maximum for the sample
-        type (default: 0.25).
-
-    .. note::
-
-        This filter can cause distortion with audio signals that have a very
-        large dynamic range.
-
 ``scaletempo[=option1:option2:...]``
     Scales audio tempo without altering pitch, optionally synced to playback
     speed (default).

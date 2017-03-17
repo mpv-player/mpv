@@ -212,7 +212,7 @@ Command Line Switches
     ``-no<opt>``                ``--no-<opt>`` (add a dash)
     ``-a52drc level``           ``--ad-lavc-ac3drc=level``
     ``-ac spdifac3``            ``--ad=spdif:ac3`` (see ``--ad=help``)
-    ``-af volnorm``             ``--af=drc`` (renamed)
+    ``-af volnorm``             (removed; use acompressor ffmpeg filter instead)
     ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
     ``-aspect``                 ``--video-aspect``
