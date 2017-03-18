@@ -47,6 +47,7 @@ extern const struct mpgl_driver mpgl_driver_angle_es2;
 extern const struct mpgl_driver mpgl_driver_dxinterop;
 extern const struct mpgl_driver mpgl_driver_rpi;
 extern const struct mpgl_driver mpgl_driver_mali;
+extern const struct mpgl_driver mpgl_driver_vdpauglx;
 
 static const struct mpgl_driver *const backends[] = {
 #if HAVE_RPI
@@ -82,6 +83,9 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_MALI_FBDEV
     &mpgl_driver_mali,
+#endif
+#if HAVE_VDPAU_GL_X11
+    &mpgl_driver_vdpauglx,
 #endif
 };
 

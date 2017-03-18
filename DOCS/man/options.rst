@@ -4440,6 +4440,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
         X11/EGL
     mali-fbdev
         Direct fbdev/EGL support on some ARM/MALI devices.
+    vdpauglx
+        Use vdpau presentation with GLX as backing. Experimental use only.
+        Using this will have no advantage (other than additional bugs or
+        performance problems), and is for doing experiments only. Will not
+        be used automatically.
 
 ``--opengl-es=<mode>``
     Select whether to use GLES:
