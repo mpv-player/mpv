@@ -347,19 +347,16 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         }
     }
 
-    bool hwimage = image && (image->fmt.flags & MP_IMGFLAG_HWACCEL);
-    if (hwimage) {
+    if (image && (image->fmt.flags & MP_IMGFLAG_HWACCEL)) {
         struct mp_image *nimage = mp_image_hw_download(image, NULL);
         if (!nimage && mpctx->vo_chain && mpctx->vo_chain->hwdec_devs) {
             struct mp_hwdec_ctx *ctx =
                 hwdec_devices_get_first(mpctx->vo_chain->hwdec_devs);
-            if (ctx && ctx->download_image && hwimage)
+            if (ctx && ctx->download_image)
                 nimage = ctx->download_image(ctx, image, NULL);
         }
-        if (nimage) {
-            talloc_free(image);
-            image = nimage;
-        }
+        talloc_free(image);
+        image = nimage;
     }
 
     if (image && mode == MODE_SUBTITLES)
