@@ -1061,7 +1061,7 @@ void gl_sc_generate(struct gl_shader_cache *sc)
 
 // How many samples to keep around, for the sake of average and peak
 // calculations. This corresponds to a few seconds (exact time variable)
-#define QUERY_SAMPLE_SIZE 256
+#define QUERY_SAMPLE_SIZE 256u
 
 struct gl_timer {
     GL *gl;
