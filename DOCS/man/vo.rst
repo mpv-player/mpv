@@ -418,14 +418,6 @@ Available video output drivers are:
             JPEG files, extension .jpeg.
         png
             PNG files.
-        ppm
-            Portable bitmap format.
-        pgm
-            Portable graymap format.
-        pgmyuv
-            Portable graymap format, using the YV12 pixel format.
-        tga
-            Truevision TGA.
 
     ``--vo-image-png-compression=<0-9>``
         PNG compression factor (speed vs. file size tradeoff) (default: 7)

@@ -3107,10 +3107,6 @@ Screenshot
     Available choices:
 
     :png:       PNG
-    :ppm:       PPM
-    :pgm:       PGM
-    :pgmyuv:    PGM with YV12 pixel format
-    :tga:       TARGA
     :jpg:       JPEG (default)
     :jpeg:      JPEG (same as jpg, but with .jpeg file ending)
 
