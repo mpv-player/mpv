@@ -78,6 +78,7 @@ typedef struct MPGLContext {
     struct vo *vo;
     const struct mpgl_driver *driver;
     struct mpv_global *global;
+    struct mp_log *log;
 
     // For hwdec_vaegl.c.
     const char *native_display_type;

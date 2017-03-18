@@ -160,6 +160,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
         .vo = vo,
         .global = vo->global,
         .driver = driver,
+        .log = vo->log,
     };
     if (probing)
         vo_flags |= VOFLAG_PROBING;
