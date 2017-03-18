@@ -42,7 +42,7 @@
 #include "options/m_option.h"
 
 const struct image_writer_opts image_writer_opts_defaults = {
-    .format = "jpg",
+    .format = AV_CODEC_ID_MJPEG,
     .high_bit_depth = 1,
     .png_compression = 7,
     .png_filter = 5,
@@ -52,15 +52,22 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .tag_csp = 0,
 };
 
+const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
+    {"jpg",  AV_CODEC_ID_MJPEG},
+    {"jpeg", AV_CODEC_ID_MJPEG},
+    {"png",  AV_CODEC_ID_PNG},
+    {0}
+};
+
 #define OPT_BASE_STRUCT struct image_writer_opts
 
 const struct m_option image_writer_opts[] = {
+    OPT_CHOICE_C("format", format, 0, mp_image_writer_formats),
     OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
     OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
     OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
     OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
     OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
-    OPT_STRING("format", format, 0),
     OPT_FLAG("high-bit-depth", high_bit_depth, 0),
     OPT_FLAG("tag-colorspace", tag_csp, 0),
     {0},
@@ -69,15 +76,7 @@ const struct m_option image_writer_opts[] = {
 struct image_writer_ctx {
     struct mp_log *log;
     const struct image_writer_opts *opts;
-    const struct img_writer *writer;
     struct mp_imgfmt_desc original_format;
-};
-
-struct img_writer {
-    const char *file_ext;
-    bool (*write)(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp);
-    const int *pixfmts;
-    int lavc_codec;
 };
 
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
@@ -89,7 +88,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     av_init_packet(&pkt);
 
-    struct AVCodec *codec = avcodec_find_encoder(ctx->writer->lavc_codec);
+    struct AVCodec *codec = avcodec_find_encoder(ctx->opts->format);
     AVCodecContext *avctx = NULL;
     if (!codec)
         goto print_open_fail;
@@ -106,7 +105,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
                mp_imgfmt_to_name(image->imgfmt));
         goto error_exit;
     }
-    if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG) {
+    if (codec->id == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
         av_opt_set_int(avctx, "pred", ctx->opts->png_filter,
                        AV_OPT_SEARCH_CHILDREN);
@@ -237,14 +236,13 @@ static int get_encoder_format(struct AVCodec *codec, int srcfmt, bool highdepth)
     return current;
 }
 
-static int get_target_format(struct image_writer_ctx *ctx, int srcfmt)
+static int get_target_format(struct image_writer_ctx *ctx)
 {
-    if (!ctx->writer->lavc_codec)
-        goto unknown;
-
-    struct AVCodec *codec = avcodec_find_encoder(ctx->writer->lavc_codec);
+    struct AVCodec *codec = avcodec_find_encoder(ctx->opts->format);
     if (!codec)
         goto unknown;
+
+    int srcfmt = ctx->original_format.id;
 
     int target = get_encoder_format(codec, srcfmt, ctx->opts->high_bit_depth);
     if (!target)
@@ -256,28 +254,7 @@ static int get_target_format(struct image_writer_ctx *ctx, int srcfmt)
     return target;
 
 unknown:
-    return IMGFMT_RGB24;
-}
-
-static const struct img_writer img_writers[] = {
-    { "png", write_lavc, .lavc_codec = AV_CODEC_ID_PNG },
-#if HAVE_JPEG
-    { "jpg", write_jpeg },
-    { "jpeg", write_jpeg },
-#endif
-};
-
-static const struct img_writer *get_writer(const struct image_writer_opts *opts)
-{
-    const char *type = opts->format;
-
-    for (size_t n = 0; n < sizeof(img_writers) / sizeof(img_writers[0]); n++) {
-        const struct img_writer *writer = &img_writers[n];
-        if (type && strcmp(type, writer->file_ext) == 0)
-            return writer;
-    }
-
-    return &img_writers[0];
+    return IMGFMT_RGB0;
 }
 
 const char *image_writer_file_ext(const struct image_writer_opts *opts)
@@ -287,7 +264,16 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
     if (!opts)
         opts = &defs;
 
-    return get_writer(opts)->file_ext;
+    return m_opt_choice_str(mp_image_writer_formats, opts->format);
+}
+
+int image_writer_format_from_ext(const char *ext)
+{
+    for (int n = 0; mp_image_writer_formats[n].name; n++) {
+        if (ext && strcmp(mp_image_writer_formats[n].name, ext) == 0)
+            return mp_image_writer_formats[n].value;
+    }
+    return 0;
 }
 
 struct mp_image *convert_image(struct mp_image *image, int destfmt,
@@ -325,9 +311,19 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!opts)
         opts = &defs;
 
-    const struct img_writer *writer = get_writer(opts);
-    struct image_writer_ctx ctx = { log, opts, writer, image->fmt };
-    int destfmt = get_target_format(&ctx, image->imgfmt);
+    struct image_writer_ctx ctx = { log, opts, image->fmt };
+    bool (*write)(struct image_writer_ctx *, mp_image_t *, FILE *) = write_lavc;
+    int destfmt = 0;
+
+#if HAVE_JPEG
+    if (opts->format == AV_CODEC_ID_MJPEG) {
+        write = write_jpeg;
+        destfmt = IMGFMT_RGB24;
+    }
+#endif
+
+    if (!destfmt)
+        destfmt = get_target_format(&ctx);
 
     struct mp_image *dst = convert_image(image, destfmt, log);
     if (!dst)
@@ -338,7 +334,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (fp == NULL) {
         mp_err(log, "Error opening '%s' for writing!\n", filename);
     } else {
-        success = writer->write(&ctx, dst, fp);
+        success = write(&ctx, dst, fp);
         success = !fclose(fp) && success;
         if (!success)
             mp_err(log, "Error writing file '%s'!\n", filename);
@@ -351,6 +347,6 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
 void dump_png(struct mp_image *image, const char *filename, struct mp_log *log)
 {
     struct image_writer_opts opts = image_writer_opts_defaults;
-    opts.format = "png";
+    opts.format = AV_CODEC_ID_PNG;
     write_image(image, &opts, filename, log);
 }

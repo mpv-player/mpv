@@ -21,7 +21,7 @@ struct mp_image;
 struct mp_log;
 
 struct image_writer_opts {
-    char *format;
+    int format;
     int high_bit_depth;
     int png_compression;
     int png_filter;
@@ -41,6 +41,9 @@ extern const struct m_option image_writer_opts[];
 
 // Return the file extension that will be used, e.g. "png".
 const char *image_writer_file_ext(const struct image_writer_opts *opts);
+
+// Map file extension to format ID - return 0 (which is invalid) if unknown.
+int image_writer_format_from_ext(const char *ext);
 
 /*
  * Save the given image under the given filename. The parameters csp and opts

@@ -3108,7 +3108,7 @@ Screenshot
 
     :png:       PNG
     :jpg:       JPEG (default)
-    :jpeg:      JPEG (same as jpg, but with .jpeg file ending)
+    :jpeg:      JPEG (alias for jpg)
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace.

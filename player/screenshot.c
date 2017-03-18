@@ -384,8 +384,9 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
     ctx->osd = osd;
 
     char *ext = mp_splitext(filename, NULL);
-    if (ext)
-        opts.format = ext;
+    int format = image_writer_format_from_ext(ext);
+    if (format)
+        opts.format = format;
     struct mp_image *image = screenshot_get(mpctx, mode);
     if (!image) {
         screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
