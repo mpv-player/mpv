@@ -677,11 +677,12 @@ Input Commands that are Possibly Subject to Change
 ``screenshot-raw [subtitles|video|window]``
     Return a screenshot in memory. This can be used only through the client
     API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
-    ``stride`` fields set to obvious contents. A ``format`` field is set to
+    ``stride`` fields set to obvious contents. The ``format`` field is set to
     ``bgr0`` by default. This format is organized as ``B8G8R8X8`` (where ``B``
-    is the LSB). The contents of the padding ``X`` is undefined. The ``data``
+    is the LSB). The contents of the padding ``X`` are undefined. The ``data``
     field is of type MPV_FORMAT_BYTE_ARRAY with the actual image data. The image
-    is freed as soon as the result node is freed.
+    is freed as soon as the result mpv_node is freed. As usual with client API
+    semantics, you are not allowed to write to the image data.
 
 ``vf-command "<label>" "<cmd>" "<args>"``
     Send a command to the filter with the given ``<label>``. Use ``all`` to send
