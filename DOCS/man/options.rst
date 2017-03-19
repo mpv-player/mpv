@@ -4199,8 +4199,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     int frame
         A simple count of frames rendered, increases by one per frame and never
         resets (regardless of seeks).
-    vec2 image_size
-        The size in pixels of the input image.
+    vec2 input_size
+        The size in pixels of the input image (possibly cropped and prescaled).
     vec2 target_size
         The size in pixels of the visible part of the scaled (and possibly
         cropped) image.
