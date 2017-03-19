@@ -32,6 +32,7 @@
 #define NUM_SURFACES 4
 
 struct surface {
+    int w, h;
     VdpOutputSurface surface;
     // This nested shitshow of handles to the same object piss me off.
     GLvdpauSurfaceNV registered;
@@ -46,7 +47,7 @@ struct priv {
     VdpPresentationQueueTarget vdp_target;
     VdpPresentationQueue vdp_queue;
     int num_surfaces;
-    struct surface *surfaces;
+    struct surface surfaces[NUM_SURFACES];
     int current_surface;
 };
 
@@ -143,37 +144,35 @@ static int create_vdpau_objects(struct MPGLContext *ctx)
     return 0;
 }
 
-static void destroy_vdpau_window_sized_objects(struct MPGLContext *ctx)
+static void destroy_vdpau_surface(struct MPGLContext *ctx,
+                                  struct surface *surface)
 {
     struct priv *p = ctx->priv;
     struct vdp_functions *vdp = &p->vdp->vdp;
     VdpStatus vdp_st;
     GL *gl = ctx->gl;
 
-    for (int n = 0; n < p->num_surfaces; n++) {
-        struct surface *surface = &p->surfaces[n];
+    if (surface->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
 
-        if (surface->mapped)
-            gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
+    gl->DeleteFramebuffers(1, &surface->fbo);
+    gl->DeleteTextures(1, &surface->texture);
 
-        gl->DeleteFramebuffers(1, &surface->fbo);
-        gl->DeleteTextures(1, &surface->texture);
+    if (surface->registered)
+        gl->VDPAUUnregisterSurfaceNV(surface->registered);
 
-        if (surface->registered)
-            gl->VDPAUUnregisterSurfaceNV(surface->registered);
-
-        if (surface->surface != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->output_surface_destroy(surface->surface);
-            CHECK_VDP_WARNING(ctx, "destroying vdpau surface");
-        }
+    if (surface->surface != VDP_INVALID_HANDLE) {
+        vdp_st = vdp->output_surface_destroy(surface->surface);
+        CHECK_VDP_WARNING(ctx, "destroying vdpau surface");
     }
 
-    p->num_surfaces = 0;
-    p->current_surface = -1;
-    ctx->gl->main_fb = 0;
+    *surface = (struct surface){
+        .surface = VDP_INVALID_HANDLE,
+    };
 }
 
-static int recreate_vdpau_window_sized_objects(struct MPGLContext *ctx)
+static int recreate_vdpau_surface(struct MPGLContext *ctx,
+                                  struct surface *surface)
 {
     struct priv *p = ctx->priv;
     VdpDevice dev = p->vdp->vdp_device;
@@ -181,57 +180,52 @@ static int recreate_vdpau_window_sized_objects(struct MPGLContext *ctx)
     VdpStatus vdp_st;
     GL *gl = ctx->gl;
 
-    destroy_vdpau_window_sized_objects(ctx);
-    assert(p->num_surfaces == 0);
+    destroy_vdpau_surface(ctx, surface);
 
-    for (int n = 0; n < NUM_SURFACES; n++) {
-        MP_TARRAY_APPEND(p, p->surfaces, p->num_surfaces, (struct surface){
-            .surface = VDP_INVALID_HANDLE,
-        });
-        struct surface *surface = &p->surfaces[p->num_surfaces - 1];
+    surface->w = ctx->vo->dwidth;
+    surface->h = ctx->vo->dheight;
 
-        vdp_st = vdp->output_surface_create(dev, VDP_RGBA_FORMAT_B8G8R8A8,
-                                            ctx->vo->dwidth, ctx->vo->dheight,
-                                            &surface->surface);
-        CHECK_VDP_ERROR_NORETURN(ctx, "creating vdp output surface");
-        if (vdp_st != VDP_STATUS_OK)
-            goto error;
+    vdp_st = vdp->output_surface_create(dev, VDP_RGBA_FORMAT_B8G8R8A8,
+                                        surface->w, surface->h,
+                                        &surface->surface);
+    CHECK_VDP_ERROR_NORETURN(ctx, "creating vdp output surface");
+    if (vdp_st != VDP_STATUS_OK)
+        goto error;
 
-        gl->GenTextures(1, &surface->texture);
+    gl->GenTextures(1, &surface->texture);
 
-        surface->registered =
-            gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(surface->surface),
-                                             GL_TEXTURE_2D,
-                                             1, &surface->texture);
-        if (!surface->registered) {
-            MP_ERR(ctx, "could not register vdpau surface with GL\n");
-            goto error;
-        }
-
-        gl->VDPAUSurfaceAccessNV(surface->registered, GL_WRITE_DISCARD_NV);
-        gl->VDPAUMapSurfacesNV(1, &surface->registered);
-        surface->mapped = true;
-
-        gl->GenFramebuffers(1, &surface->fbo);
-        gl->BindFramebuffer(GL_FRAMEBUFFER, surface->fbo);
-        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                 GL_TEXTURE_2D, surface->texture, 0);
-        GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (err != GL_FRAMEBUFFER_COMPLETE) {
-            MP_ERR(ctx, "Framebuffer completeness check failed (error=%d).\n",
-                   (int)err);
-            goto error;
-        }
-        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
-        surface->mapped = false;
+    surface->registered =
+        gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(surface->surface),
+                                         GL_TEXTURE_2D,
+                                         1, &surface->texture);
+    if (!surface->registered) {
+        MP_ERR(ctx, "could not register vdpau surface with GL\n");
+        goto error;
     }
+
+    gl->VDPAUSurfaceAccessNV(surface->registered, GL_WRITE_DISCARD_NV);
+    gl->VDPAUMapSurfacesNV(1, &surface->registered);
+    surface->mapped = true;
+
+    gl->GenFramebuffers(1, &surface->fbo);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, surface->fbo);
+    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                             GL_TEXTURE_2D, surface->texture, 0);
+    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
+        MP_ERR(ctx, "Framebuffer completeness check failed (error=%d).\n",
+               (int)err);
+        goto error;
+    }
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
+    surface->mapped = false;
 
     return 0;
 
 error:
-    destroy_vdpau_window_sized_objects(ctx);
+    destroy_vdpau_surface(ctx, surface);
     return -1;
 }
 
@@ -243,7 +237,8 @@ static void glx_uninit(MPGLContext *ctx)
         struct vdp_functions *vdp = &p->vdp->vdp;
         VdpStatus vdp_st;
 
-        destroy_vdpau_window_sized_objects(ctx);
+        for (int n = 0; n < p->num_surfaces; n++)
+            destroy_vdpau_surface(ctx, &p->surfaces[n]);
 
         if (p->vdp_queue != VDP_INVALID_HANDLE) {
             vdp_st = vdp->presentation_queue_destroy(p->vdp_queue);
@@ -297,6 +292,11 @@ static int glx_init(struct MPGLContext *ctx, int flags)
     if (create_vdpau_objects(ctx) < 0)
         goto uninit;
 
+    p->num_surfaces = NUM_SURFACES;
+    for (int n = 0; n < p->num_surfaces; n++)
+        p->surfaces[n].surface = VDP_INVALID_HANDLE;
+    p->current_surface = -1;
+
     return 0;
 
 uninit:
@@ -311,8 +311,7 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
     VdpStatus vdp_st;
     GL *gl = ctx->gl;
 
-    if (!p->num_surfaces)
-        return;
+    ctx->gl->main_fb = 0;
 
     int current_surface = p->current_surface++;
     p->current_surface = p->current_surface % p->num_surfaces;
@@ -321,7 +320,7 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
         struct surface *surface = &p->surfaces[current_surface];
 
         if (surface->mapped)
-            gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
+            ctx->gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
         surface->mapped = false;
 
         vdp_st = vdp->presentation_queue_display(p->vdp_queue, surface->surface,
@@ -331,11 +330,21 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
 
     struct surface *surface = &p->surfaces[p->current_surface];
 
-    VdpTime prev_vsync_time;
-    vdp_st = vdp->presentation_queue_block_until_surface_idle(p->vdp_queue,
-                                                              surface->surface,
-                                                              &prev_vsync_time);
-    CHECK_VDP_WARNING(ctx, "waiting for surface failed");
+    if (surface->surface != VDP_INVALID_HANDLE) {
+        VdpTime prev_vsync_time;
+        vdp_st = vdp->presentation_queue_block_until_surface_idle(p->vdp_queue,
+                                                                  surface->surface,
+                                                                  &prev_vsync_time);
+        CHECK_VDP_WARNING(ctx, "waiting for surface failed");
+    }
+
+    if (surface->w != ctx->vo->dwidth || surface->h != ctx->vo->dheight)
+        recreate_vdpau_surface(ctx, surface);
+
+    if (surface->surface == VDP_INVALID_HANDLE) {
+        p->current_surface = -1;
+        return;
+    }
 
     gl->VDPAUMapSurfacesNV(1, &surface->registered);
     surface->mapped = true;
@@ -346,8 +355,6 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
 static int glx_reconfig(struct MPGLContext *ctx)
 {
     vo_x11_config_vo_window(ctx->vo);
-    if (recreate_vdpau_window_sized_objects(ctx) < 0)
-        return -1;
 
     glx_next_framebuffer(ctx); // map initial FBO
     return 0;
@@ -356,12 +363,7 @@ static int glx_reconfig(struct MPGLContext *ctx)
 static int glx_control(struct MPGLContext *ctx, int *events, int request,
                        void *arg)
 {
-    int r = vo_x11_control(ctx->vo, events, request, arg);
-
-    if (*events & VO_EVENT_RESIZE)
-        recreate_vdpau_window_sized_objects(ctx);
-
-    return r;
+    return vo_x11_control(ctx->vo, events, request, arg);
 }
 
 static void glx_swap_buffers(struct MPGLContext *ctx)
