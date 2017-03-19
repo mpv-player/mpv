@@ -53,6 +53,7 @@
 
 #ifndef GL_NV_vdpau_interop
 #define GLvdpauSurfaceNV GLintptr
+#define GL_WRITE_DISCARD_NV               0x88BE
 #endif
 
 #ifndef GL_DEBUG_SEVERITY_HIGH
