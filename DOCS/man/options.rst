@@ -4451,7 +4451,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     yes
         Try to prefer ES over Desktop GL
-    forc2
+    force2
         Try to request a ES 2.0 context (the driver might ignore this)
     no
         Try to prefer desktop GL over ES
