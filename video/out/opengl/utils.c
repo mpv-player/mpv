@@ -100,15 +100,15 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-mp_image_t *gl_read_window_contents(GL *gl, int w, int h)
+mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h)
 {
     if (gl->es)
         return NULL; // ES can't read from front buffer
     mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, w, h);
     if (!image)
         return NULL;
-    gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
-    GLenum obj = gl->main_fb ? GL_COLOR_ATTACHMENT0 : GL_FRONT;
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    GLenum obj = fbo ? GL_COLOR_ATTACHMENT0 : GL_FRONT;
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->ReadBuffer(obj);
     //flip image while reading (and also avoid stride-related trouble)

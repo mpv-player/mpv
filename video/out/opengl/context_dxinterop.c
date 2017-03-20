@@ -294,7 +294,7 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
         return -1;
     }
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, ctx->main_fb);
     gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, p->texture, 0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -506,7 +506,7 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
         goto fail;
 
     // Create the shared framebuffer
-    gl->GenFramebuffers(1, &gl->main_fb);
+    gl->GenFramebuffers(1, &ctx->main_fb);
 
     current_ctx = ctx;
     gl->SwapInterval = dxinterop_swap_interval;

@@ -2643,6 +2643,17 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         return;
     }
 
+    if (p->fb_depth == 0) {
+        debug_check_gl(p, "before retrieving framebuffer depth");
+        p->fb_depth = gl_get_fb_depth(gl, fbo);
+        debug_check_gl(p, "retrieving framebuffer depth");
+        if (p->fb_depth > 0) {
+            MP_VERBOSE(p, "Reported display depth: %d\n", p->fb_depth);
+        } else {
+            p->fb_depth = 8;
+        }
+    }
+
     p->broken_frame = false;
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -3126,15 +3137,6 @@ static void init_gl(struct gl_video *p)
     p->texture_16bit_depth = gl_determine_16bit_tex_depth(gl);
     if (p->texture_16bit_depth > 0)
         MP_VERBOSE(p, "16 bit texture depth: %d.\n", p->texture_16bit_depth);
-
-    debug_check_gl(p, "before retrieving framebuffer depth");
-    p->fb_depth = gl_get_fb_depth(gl, gl->main_fb);
-    debug_check_gl(p, "retrieving framebuffer depth");
-    if (p->fb_depth > 0) {
-        MP_VERBOSE(p, "Reported display depth: %d\n", p->fb_depth);
-    } else {
-        p->fb_depth = 8;
-    }
 
     p->upload_timer = gl_timer_create(p->gl);
     p->render_timer = gl_timer_create(p->gl);

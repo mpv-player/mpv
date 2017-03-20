@@ -311,7 +311,7 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
     VdpStatus vdp_st;
     GL *gl = ctx->gl;
 
-    ctx->gl->main_fb = 0;
+    ctx->main_fb = 0;
 
     int current_surface = p->current_surface++;
     p->current_surface = p->current_surface % p->num_surfaces;
@@ -348,7 +348,7 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
 
     gl->VDPAUMapSurfacesNV(1, &surface->registered);
     surface->mapped = true;
-    gl->main_fb = surface->fbo;
+    ctx->main_fb = surface->fbo;
     ctx->flip_v = true;
 }
 

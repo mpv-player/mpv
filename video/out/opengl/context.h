@@ -88,6 +88,9 @@ typedef struct MPGLContext {
     // Flip the rendered image vertically. This is useful for dxinterop.
     bool flip_v;
 
+    // framebuffer to render to (normally 0)
+    GLuint main_fb;
+
     // For free use by the mpgl_driver.
     void *priv;
 } MPGLContext;

@@ -128,7 +128,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             p->vsync_fences[p->num_vsync_fences++] = fence;
     }
 
-    gl_video_render_frame(p->renderer, frame, gl->main_fb);
+    gl_video_render_frame(p->renderer, frame, p->glctx->main_fb);
 
     if (p->opts.use_glFinish)
         gl->Finish();
@@ -270,8 +270,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_NOTIMPL;
     }
     case VOCTRL_SCREENSHOT_WIN: {
-        struct mp_image *screen =
-            gl_read_window_contents(p->gl, vo->dwidth, vo->dheight);
+        struct mp_image *screen = gl_read_fbo_contents(p->gl, p->glctx->main_fb,
+                                                       vo->dwidth, vo->dheight);
         if (!screen)
             break; // redirect to backend
         // set image parameters according to the display, if possible
