@@ -3122,56 +3122,18 @@ static void init_gl(struct gl_video *p)
 
     gl_video_set_gl_state(p);
 
-    // Test whether we can use 10 bit. Hope that testing a single format/channel
-    // is good enough (instead of testing all 1-4 channels variants etc.).
-    const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
-    if (gl->GetTexLevelParameteriv && fmt) {
-        GLuint tex;
-        gl->GenTextures(1, &tex);
-        gl->BindTexture(GL_TEXTURE_2D, tex);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, 64, 64, 0,
-                       fmt->format, fmt->type, NULL);
-        GLenum pname = 0;
-        switch (fmt->format) {
-        case GL_RED:        pname = GL_TEXTURE_RED_SIZE; break;
-        case GL_LUMINANCE:  pname = GL_TEXTURE_LUMINANCE_SIZE; break;
-        }
-        GLint param = 0;
-        if (pname)
-            gl->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, pname, &param);
-        if (param) {
-            MP_VERBOSE(p, "16 bit texture depth: %d.\n", (int)param);
-            p->texture_16bit_depth = param;
-        }
-        gl->DeleteTextures(1, &tex);
-    }
+    // Test whether we can use 10 bit.
+    p->texture_16bit_depth = gl_determine_16bit_tex_depth(gl);
+    if (p->texture_16bit_depth > 0)
+        MP_VERBOSE(p, "16 bit texture depth: %d.\n", p->texture_16bit_depth);
 
-    if ((gl->es >= 300 || gl->version) && (gl->mpgl_caps & MPGL_CAP_FB)) {
-        gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
-
-        debug_check_gl(p, "before retrieving framebuffer depth");
-
-        GLenum obj = gl->version ? GL_BACK_LEFT : GL_BACK;
-        if (gl->main_fb)
-            obj = GL_COLOR_ATTACHMENT0;
-
-        GLint depth_r = -1, depth_g = -1, depth_b = -1;
-
-        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
-                            GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &depth_r);
-        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
-                            GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &depth_g);
-        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
-                            GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &depth_b);
-
-        debug_check_gl(p, "retrieving framebuffer depth");
-
-        MP_VERBOSE(p, "Reported display depth: R=%d, G=%d, B=%d\n",
-                   depth_r, depth_g, depth_b);
-
-        p->fb_depth = depth_g > 0 ? depth_g : 8;
-
-        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    debug_check_gl(p, "before retrieving framebuffer depth");
+    p->fb_depth = gl_get_fb_depth(gl, gl->main_fb);
+    debug_check_gl(p, "retrieving framebuffer depth");
+    if (p->fb_depth > 0) {
+        MP_VERBOSE(p, "Reported display depth: %d\n", p->fb_depth);
+    } else {
+        p->fb_depth = 8;
     }
 
     p->upload_timer = gl_timer_create(p->gl);
