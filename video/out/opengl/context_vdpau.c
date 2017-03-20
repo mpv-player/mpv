@@ -295,7 +295,8 @@ static int glx_init(struct MPGLContext *ctx, int flags)
     p->num_surfaces = NUM_SURFACES;
     for (int n = 0; n < p->num_surfaces; n++)
         p->surfaces[n].surface = VDP_INVALID_HANDLE;
-    p->current_surface = -1;
+
+    ctx->flip_v = true;
 
     return 0;
 
@@ -304,29 +305,24 @@ uninit:
     return -1;
 }
 
-static void glx_next_framebuffer(struct MPGLContext *ctx)
+static int glx_reconfig(struct MPGLContext *ctx)
+{
+    vo_x11_config_vo_window(ctx->vo);
+    return 0;
+}
+
+static int glx_control(struct MPGLContext *ctx, int *events, int request,
+                       void *arg)
+{
+    return vo_x11_control(ctx->vo, events, request, arg);
+}
+
+static void glx_start_frame(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
     struct vdp_functions *vdp = &p->vdp->vdp;
     VdpStatus vdp_st;
     GL *gl = ctx->gl;
-
-    ctx->main_fb = 0;
-
-    int current_surface = p->current_surface++;
-    p->current_surface = p->current_surface % p->num_surfaces;
-
-    if (current_surface >= 0) {
-        struct surface *surface = &p->surfaces[current_surface];
-
-        if (surface->mapped)
-            ctx->gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
-        surface->mapped = false;
-
-        vdp_st = vdp->presentation_queue_display(p->vdp_queue, surface->surface,
-                                                 0, 0, 0);
-        CHECK_VDP_WARNING(ctx, "trying to present vdp surface");
-    }
 
     struct surface *surface = &p->surfaces[p->current_surface];
 
@@ -341,34 +337,35 @@ static void glx_next_framebuffer(struct MPGLContext *ctx)
     if (surface->w != ctx->vo->dwidth || surface->h != ctx->vo->dheight)
         recreate_vdpau_surface(ctx, surface);
 
-    if (surface->surface == VDP_INVALID_HANDLE) {
-        p->current_surface = -1;
-        return;
+
+    ctx->main_fb = surface->fbo; // 0 if creating the surface failed
+
+    if (surface->surface != VDP_INVALID_HANDLE) {
+        gl->VDPAUMapSurfacesNV(1, &surface->registered);
+        surface->mapped = true;
     }
-
-    gl->VDPAUMapSurfacesNV(1, &surface->registered);
-    surface->mapped = true;
-    ctx->main_fb = surface->fbo;
-    ctx->flip_v = true;
-}
-
-static int glx_reconfig(struct MPGLContext *ctx)
-{
-    vo_x11_config_vo_window(ctx->vo);
-
-    glx_next_framebuffer(ctx); // map initial FBO
-    return 0;
-}
-
-static int glx_control(struct MPGLContext *ctx, int *events, int request,
-                       void *arg)
-{
-    return vo_x11_control(ctx->vo, events, request, arg);
 }
 
 static void glx_swap_buffers(struct MPGLContext *ctx)
 {
-    glx_next_framebuffer(ctx);
+    struct priv *p = ctx->priv;
+    struct vdp_functions *vdp = &p->vdp->vdp;
+    VdpStatus vdp_st;
+    GL *gl = ctx->gl;
+
+    struct surface *surface = &p->surfaces[p->current_surface];
+    if (surface->surface == VDP_INVALID_HANDLE)
+        return; // surface alloc probably failed before
+
+    if (surface->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &surface->registered);
+    surface->mapped = false;
+
+    vdp_st = vdp->presentation_queue_display(p->vdp_queue, surface->surface,
+                                             0, 0, 0);
+    CHECK_VDP_WARNING(ctx, "trying to present vdp surface");
+
+    p->current_surface = (p->current_surface + 1) % p->num_surfaces;
 }
 
 static void glx_wakeup(struct MPGLContext *ctx)
@@ -386,6 +383,7 @@ const struct mpgl_driver mpgl_driver_vdpauglx = {
     .priv_size      = sizeof(struct priv),
     .init           = glx_init,
     .reconfig       = glx_reconfig,
+    .start_frame    = glx_start_frame,
     .swap_buffers   = glx_swap_buffers,
     .control        = glx_control,
     .wakeup         = glx_wakeup,

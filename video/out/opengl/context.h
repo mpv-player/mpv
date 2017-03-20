@@ -59,6 +59,11 @@ struct mpgl_driver {
     // Return 0 on success, negative value (-1) on error.
     int (*reconfig)(struct MPGLContext *ctx);
 
+    // Called when rendering starts. The backend can map or resize the
+    // framebuffer, or update GL.main_fb. swap_buffers() ends the frame.
+    // Optional.
+    void (*start_frame)(struct MPGLContext *ctx);
+
     // Present the frame.
     void (*swap_buffers)(struct MPGLContext *ctx);
 
@@ -99,6 +104,7 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
 int mpgl_reconfig_window(struct MPGLContext *ctx);
 int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg);
+void mpgl_start_frame(struct MPGLContext *ctx);
 void mpgl_swap_buffers(struct MPGLContext *ctx);
 
 int mpgl_find_backend(const char *name);

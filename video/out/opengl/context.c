@@ -240,6 +240,12 @@ int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg)
     return ctx->driver->control(ctx, events, request, arg);
 }
 
+void mpgl_start_frame(struct MPGLContext *ctx)
+{
+    if (ctx->driver->start_frame)
+        ctx->driver->start_frame(ctx);
+}
+
 void mpgl_swap_buffers(struct MPGLContext *ctx)
 {
     ctx->driver->swap_buffers(ctx);

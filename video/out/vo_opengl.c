@@ -122,6 +122,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
+    mpgl_start_frame(p->glctx);
+
     if (gl->FenceSync && p->num_vsync_fences < p->opts.vsync_fences) {
         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);;
         if (fence)
