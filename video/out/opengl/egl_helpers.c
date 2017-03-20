@@ -181,12 +181,14 @@ bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
             return true;
     }
 
-    if (try_gles) {
+    if (try_gles && !(opts->vo_flags & VOFLAG_GLES2)) {
         // ES 3.x
         if (create_context(display, log, true, 3, opts,
                            out_context, out_config))
             return true;
+    }
 
+    if (try_gles) {
         // ES 2.0
         if (create_context(display, log, probing, 2, opts,
                            out_context, out_config))

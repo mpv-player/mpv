@@ -373,6 +373,8 @@ static int preinit(struct vo *vo)
 
     if (p->opts.es == 1)
         vo_flags |= VOFLAG_GLES;
+    if (p->opts.es == 2)
+        vo_flags |= VOFLAG_GLES | VOFLAG_GLES2;
     if (p->opts.es == -1)
         vo_flags |= VOFLAG_NO_GLES;
 
@@ -437,7 +439,8 @@ const struct vo_driver video_out_opengl = {
         OPT_STRING_VALIDATE("opengl-backend", opts.backend, 0,
                             mpgl_validate_backend_opt),
         OPT_FLAG("opengl-sw", opts.allow_sw, 0),
-        OPT_CHOICE("opengl-es", opts.es, 0, ({"no", -1}, {"auto", 0}, {"yes", 1})),
+        OPT_CHOICE("opengl-es", opts.es, 0, ({"no", -1}, {"auto", 0},
+                                             {"yes", 1}, {"force2", 2})),
         OPT_INTPAIR("opengl-check-pattern", opts.pattern, 0),
         OPT_INTRANGE("opengl-vsync-fences", opts.vsync_fences, 0,
                      0, NUM_VSYNC_FENCES),
