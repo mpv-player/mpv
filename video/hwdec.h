@@ -38,7 +38,7 @@ struct mp_hwdec_ctx {
     const char *driver_name; // NULL if unknown/not loaded
 
     // This is never NULL. Its meaning depends on the .type field:
-    //  HWDEC_VDPAU:            struct mp_vaapi_ctx*
+    //  HWDEC_VDPAU:            struct mp_vdpau_ctx*
     //  HWDEC_VIDEOTOOLBOX:     non-NULL dummy pointer
     //  HWDEC_VAAPI:            struct mp_vaapi_ctx*
     //  HWDEC_D3D11VA:          ID3D11Device*
