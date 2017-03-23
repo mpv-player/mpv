@@ -77,6 +77,7 @@ struct priv {
     XVisualInfo vinfo;
 
     int current_buf;
+    bool reset_view;
 
 #if HAVE_SHM && HAVE_XEXT
     int Shmem_Flag;
@@ -268,8 +269,7 @@ static bool resize(struct vo *vo)
     if (mp_sws_reinit(p->sws) < 0)
         return false;
 
-    XFillRectangle(x11->display, x11->window, p->gc, 0, 0, vo->dwidth, vo->dheight);
-
+    p->reset_view = true;
     vo->want_redraw = true;
     return true;
 }
@@ -279,6 +279,11 @@ static void Display_Image(struct priv *p, XImage *myximage)
     struct vo *vo = p->vo;
 
     XImage *x_image = p->myximage[p->current_buf];
+
+    if (p->reset_view) {
+        XFillRectangle(vo->x11->display, vo->x11->window, p->gc, 0, 0, vo->dwidth, vo->dheight);
+        p->reset_view = false;
+    }
 
 #if HAVE_SHM && HAVE_XEXT
     if (p->Shmem_Flag) {
