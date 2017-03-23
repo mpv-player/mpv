@@ -832,10 +832,27 @@ hwaccel_features = [
         'desc': 'Videotoolbox with OpenGL',
         'deps': [ 'gl-cocoa', 'videotoolbox-hwaccel' ],
         'func': check_true
-    } , {
+    }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel',
         'deps': [ 'vdpau' ],
+        'func': check_true,
+    }, {
+        'name': '--vdpau-hwaccel-new',
+        'desc': 'libavcodec VDPAU hwaccel (new)',
+        'deps': [ 'vdpau-hwaccel' ],
+        'func': check_statement('libavcodec/version.h',
+            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 37, 1) && '
+            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
+            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 85, 101) && '
+            '       LIBAVCODEC_VERSION_MICRO >= 100)'
+            '      ? 1 : -1]',
+            use='libav'),
+    }, {
+        'name': '--vdpau-hwaccel-old',
+        'desc': 'libavcodec VDPAU hwaccel (old)',
+        'deps': [ 'vdpau' ],
+        'deps_neg': [ 'vdpau-hwaccel-new' ],
         'func': check_statement('libavcodec/vdpau.h',
                                 'av_vdpau_bind_context(0,0,0,AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH)',
                                 use='libav'),

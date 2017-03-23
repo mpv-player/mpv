@@ -605,3 +605,31 @@ bool mp_vdpau_guess_if_emulated(struct mp_vdpau_ctx *ctx)
     CHECK_VDP_WARNING(ctx, "Error when calling vdp_get_information_string");
     return vdp_st == VDP_STATUS_OK && info && strstr(info, "VAAPI");
 }
+
+static void vdpau_destroy_standalone(struct mp_hwdec_ctx *ctx)
+{
+    struct mp_vdpau_ctx *vdp = ctx->ctx;
+    Display *display = vdp->x11;
+    mp_vdpau_destroy(vdp);
+    XCloseDisplay(display);
+}
+
+struct mp_hwdec_ctx *vdpau_create_standalone(struct mpv_global *global,
+                                             struct mp_log *plog, bool probing)
+{
+    XInitThreads();
+
+    Display *display = XOpenDisplay(NULL);
+    if (!display)
+        return NULL;
+
+    struct mp_vdpau_ctx *vdp = mp_vdpau_create_device_x11(plog, display, probing);
+    if (!vdp) {
+        XCloseDisplay(display);
+        return NULL;
+    }
+
+    vdp->hwctx.emulated = mp_vdpau_guess_if_emulated(vdp);
+    vdp->hwctx.destroy = vdpau_destroy_standalone;
+    return &vdp->hwctx;
+}

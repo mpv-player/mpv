@@ -125,8 +125,6 @@ const struct m_sub_options vd_lavc_conf = {
     },
 };
 
-extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
-extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox;
 extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
@@ -205,12 +203,43 @@ extern const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 #endif
 #endif
 
+#if HAVE_VDPAU_HWACCEL
+#if HAVE_VDPAU_HWACCEL_NEW
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
+    .type = HWDEC_VDPAU,
+    .image_format = IMGFMT_VDPAU,
+    .generic_hwaccel = true,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
+        {AV_PIX_FMT_NONE}
+    },
+};
+
+#include "video/vdpau.h"
+
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
+    .type = HWDEC_VDPAU_COPY,
+    .copying = true,
+    .image_format = IMGFMT_VDPAU,
+    .generic_hwaccel = true,
+    .create_dev = vdpau_create_standalone,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
+        {AV_PIX_FMT_NONE}
+    },
+};
+#else
+extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
+extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy;
+#endif
+#endif
+
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
     &mp_vd_lavc_rpi_copy,
 #endif
-#if HAVE_VDPAU_HWACCEL
+#if HAVE_VDPAU_HWACCEL_OLD || HAVE_VDPAU_HWACCEL_NEW
     &mp_vd_lavc_vdpau,
     &mp_vd_lavc_vdpau_copy,
 #endif
@@ -555,6 +584,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     if (ctx->hwdec) {
         avctx->thread_count = 1;
+#if HAVE_VDPAU_HWACCEL_NEW
+        avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
+#endif
         if (ctx->hwdec->image_format)
             avctx->get_format = get_format_hwdec;
         if (ctx->hwdec->allocate_image)
@@ -796,6 +828,12 @@ static int init_generic_hwaccel(struct dec_video *vd)
         pool_size = hwdec_get_max_refs(ctx) + HWDEC_EXTRA_SURFACES;
 
     ctx->hwdec_fmt = hwdec->image_format;
+
+    if (hwdec->image_format == IMGFMT_VDPAU &&
+        ctx->avctx->codec_id == AV_CODEC_ID_HEVC)
+    {
+        MP_WARN(ctx, "HEVC video output may be broken due to nVidia bugs.\n");
+    }
 
     return hwdec_setup_hw_frames_ctx(ctx, ctx->hwdec_dev->av_device_ref,
                                      av_sw_format, pool_size);
