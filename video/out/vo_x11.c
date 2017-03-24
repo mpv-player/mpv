@@ -209,7 +209,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt)
 static bool resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    struct vo_x11_state *x11 = vo->x11;
 
     for (int i = 0; i < 2; i++)
         freeMyXImage(p, i);
