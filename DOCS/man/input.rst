@@ -1224,6 +1224,14 @@ Property list
     Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
     filled to the requested amount, and is currently not reading more data.
 
+``demuxer-via-network``
+    Returns ``yes`` if the stream demuxed via the main demuxer is most likely
+    played via network. What constitutes "network" is not always clear, might
+    be used for other types of untrusted streams, could be wrong in certain
+    cases, and its definition might be changing. Also, external files (like
+    separate audio files or streams) do not influence the value of this
+    property (currently).
+
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
 
