@@ -1487,8 +1487,10 @@ function osc_init()
         osc_param.unscaled_y = display_h
     end
     osc_param.playresy = osc_param.unscaled_y / scale
-    osc_param.playresx = osc_param.playresy * display_aspect
-    osc_param.display_aspect = display_aspect
+    if (display_aspect > 0) then
+        osc_param.display_aspect = display_aspect
+    end
+    osc_param.playresx = osc_param.playresy * osc_param.display_aspect
 
 
 
@@ -2031,7 +2033,8 @@ function render()
     end
 
     -- submit
-    mp.set_osd_ass(osc_param.playresy * aspect, osc_param.playresy, ass.text)
+    mp.set_osd_ass(osc_param.playresy * osc_param.display_aspect,
+                   osc_param.playresy, ass.text)
 
 
 
