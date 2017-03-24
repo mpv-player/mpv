@@ -316,7 +316,7 @@ function set_track(type, next)
 
     mp.commandv("set", type, new_track_mpv)
 
-        if (new_track_osc == 0) then
+    if (new_track_osc == 0) then
         show_message(nicetypes[type] .. " Track: none")
     else
         show_message(nicetypes[type]  .. " Track: "
@@ -772,7 +772,7 @@ function show_message(text, duration)
     text = string.gsub(text, "_", "_\226\128\139")
 
     local scale = 1
-    if (mp.get_property("video") == "no") then
+    if (mp.get_property("options/force-window") ~= "no") then
         scale = user_opts.scaleforcedwindow
     elseif state.fullscreen then
         scale = user_opts.scalefullscreen
@@ -1489,7 +1489,7 @@ function osc_init()
     local display_w, display_h, display_aspect = mp.get_osd_size()
     local scale = 1
 
-    if (mp.get_property("video") == "no") then -- dummy/forced window
+    if (mp.get_property("options/force-window") ~= "no") then
         scale = user_opts.scaleforcedwindow
     elseif state.fullscreen then
         scale = user_opts.scalefullscreen
