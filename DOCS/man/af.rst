@@ -4,8 +4,8 @@ AUDIO FILTERS
 Audio filters allow you to modify the audio stream and its properties. The
 syntax is:
 
-``--af=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Setup a chain of audio filters.
+``--af=...``
+    Setup a chain of audio filters. See ``--vf`` for the syntax.
 
 .. note::
 
@@ -15,27 +15,8 @@ syntax is:
     wrapper, which gives you access to most of libavfilter's filters. This
     includes all filters that have been ported from MPlayer to libavfilter.
 
-You can also set defaults for each filter. The defaults are applied before the
-normal filter parameters.
-
-``--af-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Set defaults for each filter.
-
-Audio filters are managed in lists. There are a few commands to manage the
-filter list:
-
-``--af-add=<filter1[,filter2,...]>``
-    Appends the filters given as arguments to the filter list.
-
-``--af-pre=<filter1[,filter2,...]>``
-    Prepends the filters given as arguments to the filter list.
-
-``--af-del=<index1[,index2,...]>``
-    Deletes the filters at the given indexes. Index numbers start at 0,
-    negative numbers address the end of the list (-1 is the last).
-
-``--af-clr``
-    Completely empties the filter list.
+See ``--vf`` group of options for info on how ``--af-defaults``, ``--af-add``,
+``--af-pre``, ``--af-del``, ``--af-clr``, and possibly others work.
 
 Available filters are:
 

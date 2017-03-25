@@ -128,6 +128,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_desc,
     .description = "video filters",
+    .allow_disable_entries = true,
 };
 
 // Try the cmd on each filter (starting with the first), and stop at the first
@@ -322,6 +323,8 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
 int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list)
 {
     for (int n = 0; list && list[n].name; n++) {
+        if (!list[n].enabled)
+            continue;
         struct vf_instance *vf =
             vf_append_filter(c, list[n].name, list[n].attribs);
         if (vf) {

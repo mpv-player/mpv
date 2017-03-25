@@ -146,6 +146,8 @@ struct m_obj_list {
     // Allow unknown entries, for which a dummy entry is inserted, and whose
     // options are skipped and ignored.
     bool allow_unknown_entries;
+    // Allow syntax for disabling entries.
+    bool allow_disable_entries;
     // This helps with confusing error messages if unknown flag options are used.
     bool disallow_positional_parameters;
     // Each sub-item is backed by global options (for AOs and VOs).
@@ -162,6 +164,8 @@ typedef struct m_obj_settings {
     char *name;
     // Optional user-defined name.
     char *label;
+    // User enable flag.
+    bool enabled;
     // NULL terminated array of parameter/value pairs.
     char **attribs;
 } m_obj_settings_t;

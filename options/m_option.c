@@ -2590,6 +2590,7 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
     for (n = 0; s[n].name; n++) {
         d[n].name = talloc_strdup(NULL, s[n].name);
         d[n].label = talloc_strdup(NULL, s[n].label);
+        d[n].enabled = s[n].enabled;
         d[n].attribs = NULL;
         copy_str_list(NULL, &(d[n].attribs), &(s[n].attribs));
     }
@@ -2754,7 +2755,7 @@ exit:
 #define NAMECH "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 
 // Parse one item, e.g. -vf a=b:c:d,e=f:g => parse a=b:c:d into "a" and "b:c:d"
-static int parse_obj_settings(struct mp_log *log, struct bstr opt,
+static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
                               struct bstr *pstr, const struct m_obj_list *list,
                               m_obj_settings_t **_ret)
 {
@@ -2763,6 +2764,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
     struct m_obj_desc desc;
     bstr label = {0};
     bool nopos = list->disallow_positional_parameters;
+    bool enabled = true;
 
     if (bstr_eatstart0(pstr, "@")) {
         if (!bstr_split_tok(*pstr, ":", &label, pstr)) {
@@ -2771,9 +2773,14 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         }
     }
 
+    if (list->allow_disable_entries && bstr_eatstart0(pstr, "!"))
+        enabled = false;
+
     bool has_param = false;
     int idx = bstrspn(*pstr, NAMECH);
     bstr str = bstr_splice(*pstr, 0, idx);
+    if (str.len == 0 && !enabled && label.len && op == OP_TOGGLE)
+        goto done; // "@labelname:!" is the special enable/disable toggle syntax
     *pstr = bstr_cut(*pstr, idx);
     // video filters use "=", VOs use ":"
     if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
@@ -2817,9 +2824,11 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
     if (!_ret)
         return 1;
 
+done: ;
     m_obj_settings_t item = {
         .name = bstrto0(NULL, str),
         .label = bstrdup0(NULL, label),
+        .enabled = enabled,
         .attribs = plist,
     };
     obj_settings_list_insert_at(_ret, -1, &item);
@@ -2964,7 +2973,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         if (op == OP_DEL)
             r = parse_obj_settings_del(log, name, &param, dst, mark_del);
         if (r == 0) {
-            r = parse_obj_settings(log, name, &param, ol, dst ? &res : NULL);
+            r = parse_obj_settings(log, name, op, &param, ol, dst ? &res : NULL);
         }
         if (r < 0)
             return r;
@@ -3017,12 +3026,25 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             talloc_free(res);
         } else if (op == OP_TOGGLE) {
             for (int n = 0; res && res[n].name; n++) {
-                int found = obj_settings_find_by_content(list, &res[n]);
-                if (found < 0) {
-                    obj_settings_list_insert_at(&list, -1, &res[n]);
-                } else {
-                    obj_settings_list_del_at(&list, found);
+                if (!res[n].enabled && !res[n].name[0]) {
+                    // Toggle enable/disable special case.
+                    int found =
+                        obj_settings_list_find_by_label0(list, res[n].label);
+                    if (found < 0) {
+                        mp_warn(log, "Option %.*s: Label %s not found\n",
+                                BSTR_P(name), res[n].label);
+                    } else {
+                        list[found].enabled = !list[found].enabled;
+                    }
                     obj_setting_free(&res[n]);
+                } else {
+                    int found = obj_settings_find_by_content(list, &res[n]);
+                    if (found < 0) {
+                        obj_settings_list_insert_at(&list, -1, &res[n]);
+                    } else {
+                        obj_settings_list_del_at(&list, found);
+                        obj_setting_free(&res[n]);
+                    }
                 }
             }
             talloc_free(res);
@@ -3073,6 +3095,8 @@ static char *print_obj_settings_list(const m_option_t *opt, const void *val)
         // Assume labels and names don't need escaping
         if (entry->label && entry->label[0])
             res = talloc_asprintf_append(res, "@%s:", entry->label);
+        if (!entry->enabled)
+            res = talloc_strdup_append(res, "!");
         res = talloc_strdup_append(res, entry->name);
         if (entry->attribs && entry->attribs[0]) {
             res = talloc_strdup_append(res, "=");
@@ -3111,6 +3135,10 @@ static int set_obj_settings_list(const m_option_t *opt, void *dst,
                 if (val->format != MPV_FORMAT_STRING)
                     goto error;
                 entry->label = talloc_strdup(NULL, val->u.string);
+            } else if (strcmp(key, "enabled") == 0) {
+                if (val->format != MPV_FORMAT_FLAG)
+                    goto error;
+                entry->enabled = val->u.flag;
             } else if (strcmp(key, "params") == 0) {
                 if (val->format != MPV_FORMAT_NODE_MAP)
                     goto error;
@@ -3176,6 +3204,9 @@ static int get_obj_settings_list(const m_option_t *opt, void *ta_parent,
         add_map_string(nentry, "name", entry->name);
         if (entry->label && entry->label[0])
             add_map_string(nentry, "label", entry->label);
+        struct mpv_node *enabled = add_map_entry(nentry, "enabled");
+        enabled->format = MPV_FORMAT_FLAG;
+        enabled->u.flag = entry->enabled;
         struct mpv_node *params = add_map_entry(nentry, "params");
         params->format = MPV_FORMAT_NODE_MAP;
         params->u.list = talloc_zero(ta_parent, struct mpv_node_list);

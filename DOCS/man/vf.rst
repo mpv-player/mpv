@@ -5,7 +5,37 @@ Video filters allow you to modify the video stream and its properties. The
 syntax is:
 
 ``--vf=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Setup a chain of video filters.
+    Setup a chain of video filters. This consists on the filter name, and an
+    option list of parameters after ``=``. The parameters are separated by
+    ``:`` (not ``,``, as that starts a new filter entry).
+
+    Before the filter name, a label can be specified with ``@name:``, where
+    name is an arbitrary user-given name, which identifies the filter. This
+    is only needed if you want to toggle the filter at runtime.
+
+    A ``!`` before the filter name means the filter is enabled by default. It
+    will be skipped on filter creation. This is also useful for runtime filter
+    toggling.
+
+    See the ``vf`` command (and ``toggle`` sub-command) for further explanations
+    and examples.
+
+    The general filter entry syntax is:
+
+        ``["@"<label-name>":"] ["!"] <filter-name> [ "=" <filter-parameter-list> ]``
+
+    and the ``filter-parameter-list``:
+
+        ``<filter-parameter> | <filter-parameter> "," <filter-parameter-list>``
+
+    and ``filter-parameter``:
+
+        ``( <param-name> "=" <param-value> ) | <param-value>``
+
+    ``param-value`` can further be quoted in ``[`` / ``]`` in case the value
+    contains characters like ``,`` or ``=``. This is used in particular with
+    the ``lavfi`` filter, which uses a very similar syntax as mpv (MPlayer
+    historically) to specify filters and their parameters.
 
 You can also set defaults for each filter. The defaults are applied before the
 normal filter parameters.

@@ -78,6 +78,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list af_obj_list = {
     .get_desc = get_desc,
     .description = "audio filters",
+    .allow_disable_entries = true,
     .aliases = {
         {"force",     "format"},
         {0}
@@ -545,6 +546,8 @@ int af_init(struct af_stream *s)
         // Add all filters in the list (if there are any)
         struct m_obj_settings *list = s->opts->af_settings;
         for (int i = 0; list && list[i].name; i++) {
+            if (!list[i].enabled)
+                continue;
             struct af_instance *af =
                 af_prepend(s, s->last, list[i].name, list[i].attribs);
             if (!af) {

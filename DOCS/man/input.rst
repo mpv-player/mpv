@@ -452,6 +452,9 @@ Input Commands that are Possibly Subject to Change
         (If several filters are passed to the command, this is done for
         each filter.)
 
+        A special variant is combining this with labels, and using ``@name:!``
+        as filter entry. This toggles the enable/disable flag.
+
     del
         Remove the given filters from the video chain. Unlike in the other
         cases, the second parameter is a comma separated list of filter names
@@ -486,6 +489,16 @@ Input Commands that are Possibly Subject to Change
         - ``a vf set flip`` turn video upside-down on the ``a`` key
         - ``b vf set ""`` remove all video filters on ``b``
         - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
+
+    .. admonition:: Example how to toggle disabled filters at runtime
+
+        - Add something ``vf-add=@deband:!lavfi=[gradfun]`` to ``mpv.conf``. The
+          ``@deband:`` is the label, and ``deband`` is an arbitrary, user-given
+          name for this filter entry. The ``!`` before the filter name disables
+          the filter by default. Everything after this is the normal filter name
+          and the filter parameters.
+        - Add ``a vf toggle @deband:!`` to ``input.conf``. This toggles the
+          "disabled" flag for the filter identified with ``deband``.
 
 ``cycle-values ["!reverse"] <property> "<value1>" "<value2>" ...``
     Cycle through a list of values. Each invocation of the command will set the

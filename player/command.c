@@ -3449,7 +3449,10 @@ static char *print_obj_osd_list(struct m_obj_settings *list)
                                          list[n].attribs[i],
                                          list[n].attribs[i + 1]);
         }
-        res = talloc_asprintf_append(res, "]\n");
+        res = talloc_asprintf_append(res, "]");
+        if (!list[n].enabled)
+            res = talloc_strdup_append(res, " (disabled)");
+        res = talloc_strdup_append(res, "\n");
     }
     if (!res)
         res = talloc_strdup(NULL, "(empty)");
