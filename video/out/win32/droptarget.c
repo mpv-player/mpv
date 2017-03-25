@@ -25,145 +25,130 @@
 #include "input/event.h"
 #include "osdep/atomic.h"
 #include "osdep/io.h"
+#include "osdep/windows_utils.h"
 #include "mpv_talloc.h"
 
 #include "droptarget.h"
 
-typedef struct tagDropTarget {
+struct droptarget {
     IDropTarget iface;
-    atomic_int refCnt;
-    DWORD lastEffect;
-    IDataObject* dataObj;
+    atomic_int ref_cnt;
     struct mp_log *log;
     struct input_ctx *input_ctx;
-} DropTarget;
+    DWORD last_effect;
+    IDataObject *data_obj;
+};
 
-static FORMATETC fmtetc_file = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-static FORMATETC fmtetc_url = { 0, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+static FORMATETC fmtetc_file = {
+    .cfFormat = CF_HDROP,
+    .dwAspect = DVASPECT_CONTENT,
+    .lindex = -1,
+    .tymed = TYMED_HGLOBAL,
+};
 
-static void DropTarget_Destroy(DropTarget* This)
+static FORMATETC fmtetc_url = {
+    .dwAspect = DVASPECT_CONTENT,
+    .lindex = -1,
+    .tymed = TYMED_HGLOBAL,
+};
+
+static void DropTarget_Destroy(struct droptarget *t)
 {
-    if (This->dataObj != NULL) {
-        This->dataObj->lpVtbl->Release(This->dataObj);
-        This->dataObj->lpVtbl = NULL;
+    SAFE_RELEASE(t->data_obj);
+    talloc_free(t);
+}
+
+static STDMETHODIMP DropTarget_QueryInterface(IDropTarget *self, REFIID riid,
+                                              void **ppvObject)
+{
+    if (IsEqualIID(riid, &IID_IUnknown) || IsEqualIID(riid, &IID_IDropTarget)) {
+        *ppvObject = self;
+        IDropTarget_AddRef(self);
+        return S_OK;
     }
 
-    talloc_free(This);
+    *ppvObject = NULL;
+    return E_NOINTERFACE;
 }
 
-static HRESULT STDMETHODCALLTYPE DropTarget_QueryInterface(IDropTarget* This,
-                                                           REFIID riid,
-                                                           void** ppvObject)
+static STDMETHODIMP_(ULONG) DropTarget_AddRef(IDropTarget *self)
 {
-    if (!IsEqualGUID(riid, &IID_IUnknown) ||
-        !IsEqualGUID(riid, &IID_IDataObject)) {
-        *ppvObject = NULL;
-        return E_NOINTERFACE;
-    }
-
-    *ppvObject = This;
-    This->lpVtbl->AddRef(This);
-    return S_OK;
+    struct droptarget *t = (struct droptarget *)self;
+    return atomic_fetch_add(&t->ref_cnt, 1) + 1;
 }
 
-static ULONG STDMETHODCALLTYPE DropTarget_AddRef(IDropTarget* This)
+static STDMETHODIMP_(ULONG) DropTarget_Release(IDropTarget *self)
 {
-    DropTarget* t = (DropTarget*)This;
-    return atomic_fetch_add(&t->refCnt, 1) + 1;
-}
+    struct droptarget *t = (struct droptarget *)self;
 
-static ULONG STDMETHODCALLTYPE DropTarget_Release(IDropTarget* This)
-{
-    DropTarget* t = (DropTarget*)This;
-    ULONG cRef = atomic_fetch_add(&t->refCnt, -1) - 1;
-
-    if (cRef == 0) {
+    ULONG ref_cnt = atomic_fetch_add(&t->ref_cnt, -1) - 1;
+    if (ref_cnt == 0)
         DropTarget_Destroy(t);
-    }
-
-    return cRef;
+    return ref_cnt;
 }
 
-static HRESULT STDMETHODCALLTYPE DropTarget_DragEnter(IDropTarget* This,
-                                                      IDataObject* pDataObj,
-                                                      DWORD grfKeyState,
-                                                      POINTL pt,
-                                                      DWORD* pdwEffect)
+static STDMETHODIMP DropTarget_DragEnter(IDropTarget *self,
+                                         IDataObject *pDataObj,
+                                         DWORD grfKeyState, POINTL pt,
+                                         DWORD *pdwEffect)
 {
-    DropTarget* t = (DropTarget*)This;
+    struct droptarget *t = (struct droptarget *)self;
 
-    pDataObj->lpVtbl->AddRef(pDataObj);
-    if (pDataObj->lpVtbl->QueryGetData(pDataObj, &fmtetc_file) != S_OK &&
-        pDataObj->lpVtbl->QueryGetData(pDataObj, &fmtetc_url) != S_OK) {
-
+    IDataObject_AddRef(pDataObj);
+    if (FAILED(IDataObject_QueryGetData(pDataObj, &fmtetc_file)) &&
+        FAILED(IDataObject_QueryGetData(pDataObj, &fmtetc_url)))
+    {
         *pdwEffect = DROPEFFECT_NONE;
     }
 
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-    }
-
-    t->dataObj = pDataObj;
-    t->lastEffect = *pdwEffect;
+    SAFE_RELEASE(t->data_obj);
+    t->data_obj = pDataObj;
+    t->last_effect = *pdwEffect;
     return S_OK;
 }
 
-static HRESULT STDMETHODCALLTYPE DropTarget_DragOver(IDropTarget* This,
-                                                     DWORD grfKeyState,
-                                                     POINTL pt,
-                                                     DWORD* pdwEffect)
+static STDMETHODIMP DropTarget_DragOver(IDropTarget *self, DWORD grfKeyState,
+                                        POINTL pt, DWORD *pdwEffect)
 {
-    DropTarget* t = (DropTarget*)This;
+    struct droptarget *t = (struct droptarget *)self;
 
-    *pdwEffect = t->lastEffect;
+    *pdwEffect = t->last_effect;
     return S_OK;
 }
 
-static HRESULT STDMETHODCALLTYPE DropTarget_DragLeave(IDropTarget* This)
+static STDMETHODIMP DropTarget_DragLeave(IDropTarget *self)
 {
-    DropTarget* t = (DropTarget*)This;
+    struct droptarget *t = (struct droptarget *)self;
 
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-        t->dataObj = NULL;
-    }
-
+    SAFE_RELEASE(t->data_obj);
     return S_OK;
 }
 
-static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
-                                                 IDataObject* pDataObj,
-                                                 DWORD grfKeyState, POINTL pt,
-                                                 DWORD* pdwEffect)
+static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
+                                    DWORD grfKeyState, POINTL pt,
+                                    DWORD *pdwEffect)
 {
-    DropTarget* t = (DropTarget*)This;
-
-    STGMEDIUM medium;
-
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-        t->dataObj = NULL;
-    }
-
+    struct droptarget *t = (struct droptarget *)self;
     enum mp_dnd_action action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
 
-    pDataObj->lpVtbl->AddRef(pDataObj);
+    SAFE_RELEASE(t->data_obj);
 
-    if (pDataObj->lpVtbl->GetData(pDataObj, &fmtetc_file, &medium) == S_OK) {
-        if (GlobalLock(medium.hGlobal) != NULL) {
-            HDROP hDrop = (HDROP)medium.hGlobal;
+    STGMEDIUM medium;
+    if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_file, &medium))) {
+        if (GlobalLock(medium.hGlobal)) {
+            HDROP drop = medium.hGlobal;
 
-            UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
-            char** files = talloc_zero_array(NULL, char*, numFiles);
+            UINT files_num = DragQueryFileW(drop, 0xFFFFFFFF, NULL, 0);
+            char **files = talloc_zero_array(NULL, char*, files_num);
 
-            UINT nrecvd_files = 0;
-            for (UINT i = 0; i < numFiles; i++) {
-                UINT len = DragQueryFileW(hDrop, i, NULL, 0);
-                wchar_t* buf = talloc_array(NULL, wchar_t, len + 1);
+            UINT recvd_files = 0;
+            for (UINT i = 0; i < files_num; i++) {
+                UINT len = DragQueryFileW(drop, i, NULL, 0);
+                wchar_t *buf = talloc_array(NULL, wchar_t, len + 1);
 
-                if (DragQueryFileW(hDrop, i, buf, len + 1) == len) {
-                    char* fname = mp_to_utf8(files, buf);
-                    files[nrecvd_files++] = fname;
+                if (DragQueryFileW(drop, i, buf, len + 1) == len) {
+                    char *fname = mp_to_utf8(files, buf);
+                    files[recvd_files++] = fname;
 
                     MP_VERBOSE(t, "received dropped file: %s\n", fname);
                 } else {
@@ -174,21 +159,18 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
             }
 
             GlobalUnlock(medium.hGlobal);
-            mp_event_drop_files(t->input_ctx, nrecvd_files, files,
-                                action);
-
+            mp_event_drop_files(t->input_ctx, recvd_files, files, action);
             talloc_free(files);
         }
 
         ReleaseStgMedium(&medium);
-    } else if (pDataObj->lpVtbl->GetData(pDataObj,
-                                         &fmtetc_url, &medium) == S_OK) {
-        // get the URL encoded in US-ASCII
-        wchar_t* wurl = GlobalLock(medium.hGlobal);
-        if (wurl != NULL) {
+    } else if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_url, &medium))) {
+        wchar_t *wurl = GlobalLock(medium.hGlobal);
+        if (wurl) {
             char *url = mp_to_utf8(NULL, wurl);
             if (mp_event_drop_mime_data(t->input_ctx, "text/uri-list",
-                                        bstr0(url), action) > 0) {
+                                        bstr0(url), action) > 0)
+            {
                 MP_VERBOSE(t, "received dropped URL: %s\n", url);
             } else {
                 MP_ERR(t, "error getting dropped URL\n");
@@ -199,35 +181,36 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
         }
 
         ReleaseStgMedium(&medium);
-    }
-    else {
-        t->lastEffect = DROPEFFECT_NONE;
+    } else {
+        t->last_effect = DROPEFFECT_NONE;
     }
 
-    pDataObj->lpVtbl->Release(pDataObj);
-    *pdwEffect = t->lastEffect;
+    *pdwEffect = t->last_effect;
     return S_OK;
 }
+
+static IDropTargetVtbl idroptarget_vtbl = {
+    .QueryInterface = DropTarget_QueryInterface,
+    .AddRef = DropTarget_AddRef,
+    .Release = DropTarget_Release,
+    .DragEnter = DropTarget_DragEnter,
+    .DragOver = DropTarget_DragOver,
+    .DragLeave = DropTarget_DragLeave,
+    .Drop = DropTarget_Drop,
+};
 
 IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
                                       struct input_ctx *input_ctx)
 {
-    DropTarget* dropTarget = talloc(NULL, DropTarget);
-    IDropTargetVtbl* vtbl = talloc(dropTarget, IDropTargetVtbl);
-    *vtbl = (IDropTargetVtbl){
-        DropTarget_QueryInterface, DropTarget_AddRef, DropTarget_Release,
-        DropTarget_DragEnter, DropTarget_DragOver, DropTarget_DragLeave,
-        DropTarget_Drop
-    };
+    fmtetc_url.cfFormat = RegisterClipboardFormatW(L"UniformResourceLocatorW");
 
-    fmtetc_url.cfFormat = (CLIPFORMAT)RegisterClipboardFormat(TEXT("UniformResourceLocatorW"));
+    struct droptarget *dt = talloc(NULL, struct droptarget);
+    dt->iface.lpVtbl = &idroptarget_vtbl;
+    atomic_store(&dt->ref_cnt, 0);
+    dt->last_effect = 0;
+    dt->data_obj = NULL;
+    dt->log = mp_log_new(dt, log, "droptarget");
+    dt->input_ctx = input_ctx;
 
-    dropTarget->iface.lpVtbl = vtbl;
-    atomic_store(&dropTarget->refCnt, 0);
-    dropTarget->lastEffect = 0;
-    dropTarget->dataObj = NULL;
-    dropTarget->log = mp_log_new(dropTarget, log, "droptarget");
-    dropTarget->input_ctx = input_ctx;
-
-    return &dropTarget->iface;
+    return &dt->iface;
 }
