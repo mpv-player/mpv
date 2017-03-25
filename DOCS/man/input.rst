@@ -1800,6 +1800,7 @@ Property list
             MPV_FORMAT_NODE_MAP (for each filter entry)
                 "name"      MPV_FORMAT_STRING
                 "label"     MPV_FORMAT_STRING [optional]
+                "enabled"   MPV_FORMAT_FLAG [optional]
                 "params"    MPV_FORMAT_NODE_MAP [optional]
                     "key"   MPV_FORMAT_STRING
                     "value" MPV_FORMAT_STRING

@@ -3121,6 +3121,7 @@ static int set_obj_settings_list(const m_option_t *opt, void *dst,
         talloc_zero_array(NULL, m_obj_settings_t, src->u.list->num + 1);
     for (int n = 0; n < src->u.list->num; n++) {
         m_obj_settings_t *entry = &entries[n];
+        entry->enabled = true;
         if (src->u.list->values[n].format != MPV_FORMAT_NODE_MAP)
             goto error;
         struct mpv_node_list *src_entry = src->u.list->values[n].u.list;
