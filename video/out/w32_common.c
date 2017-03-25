@@ -37,6 +37,7 @@
 #include "win_state.h"
 #include "w32_common.h"
 #include "win32/displayconfig.h"
+#include "win32/droptarget.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
@@ -147,203 +148,6 @@ struct vo_w32_state {
 
     HANDLE avrt_handle;
 };
-
-typedef struct tagDropTarget {
-    IDropTarget iface;
-    atomic_int refCnt;
-    DWORD lastEffect;
-    IDataObject* dataObj;
-    struct vo_w32_state *w32;
-} DropTarget;
-
-static FORMATETC fmtetc_file = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-static FORMATETC fmtetc_url = { 0, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-
-static void DropTarget_Destroy(DropTarget* This)
-{
-    if (This->dataObj != NULL) {
-        This->dataObj->lpVtbl->Release(This->dataObj);
-        This->dataObj->lpVtbl = NULL;
-    }
-
-    talloc_free(This);
-}
-
-static HRESULT STDMETHODCALLTYPE DropTarget_QueryInterface(IDropTarget* This,
-                                                           REFIID riid,
-                                                           void** ppvObject)
-{
-    if (!IsEqualGUID(riid, &IID_IUnknown) ||
-        !IsEqualGUID(riid, &IID_IDataObject)) {
-        *ppvObject = NULL;
-        return E_NOINTERFACE;
-    }
-
-    *ppvObject = This;
-    This->lpVtbl->AddRef(This);
-    return S_OK;
-}
-
-static ULONG STDMETHODCALLTYPE DropTarget_AddRef(IDropTarget* This)
-{
-    DropTarget* t = (DropTarget*)This;
-    return atomic_fetch_add(&t->refCnt, 1) + 1;
-}
-
-static ULONG STDMETHODCALLTYPE DropTarget_Release(IDropTarget* This)
-{
-    DropTarget* t = (DropTarget*)This;
-    ULONG cRef = atomic_fetch_add(&t->refCnt, -1) - 1;
-
-    if (cRef == 0) {
-        DropTarget_Destroy(t);
-    }
-
-    return cRef;
-}
-
-static HRESULT STDMETHODCALLTYPE DropTarget_DragEnter(IDropTarget* This,
-                                                      IDataObject* pDataObj,
-                                                      DWORD grfKeyState,
-                                                      POINTL pt,
-                                                      DWORD* pdwEffect)
-{
-    DropTarget* t = (DropTarget*)This;
-
-    pDataObj->lpVtbl->AddRef(pDataObj);
-    if (pDataObj->lpVtbl->QueryGetData(pDataObj, &fmtetc_file) != S_OK &&
-        pDataObj->lpVtbl->QueryGetData(pDataObj, &fmtetc_url) != S_OK) {
-
-        *pdwEffect = DROPEFFECT_NONE;
-    }
-
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-    }
-
-    t->dataObj = pDataObj;
-    t->lastEffect = *pdwEffect;
-    return S_OK;
-}
-
-static HRESULT STDMETHODCALLTYPE DropTarget_DragOver(IDropTarget* This,
-                                                     DWORD grfKeyState,
-                                                     POINTL pt,
-                                                     DWORD* pdwEffect)
-{
-    DropTarget* t = (DropTarget*)This;
-
-    *pdwEffect = t->lastEffect;
-    return S_OK;
-}
-
-static HRESULT STDMETHODCALLTYPE DropTarget_DragLeave(IDropTarget* This)
-{
-    DropTarget* t = (DropTarget*)This;
-
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-        t->dataObj = NULL;
-    }
-
-    return S_OK;
-}
-
-static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
-                                                 IDataObject* pDataObj,
-                                                 DWORD grfKeyState, POINTL pt,
-                                                 DWORD* pdwEffect)
-{
-    DropTarget* t = (DropTarget*)This;
-
-    STGMEDIUM medium;
-
-    if (t->dataObj != NULL) {
-        t->dataObj->lpVtbl->Release(t->dataObj);
-        t->dataObj = NULL;
-    }
-
-    enum mp_dnd_action action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
-
-    pDataObj->lpVtbl->AddRef(pDataObj);
-
-    if (pDataObj->lpVtbl->GetData(pDataObj, &fmtetc_file, &medium) == S_OK) {
-        if (GlobalLock(medium.hGlobal) != NULL) {
-            HDROP hDrop = (HDROP)medium.hGlobal;
-
-            UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
-            char** files = talloc_zero_array(NULL, char*, numFiles);
-
-            UINT nrecvd_files = 0;
-            for (UINT i = 0; i < numFiles; i++) {
-                UINT len = DragQueryFileW(hDrop, i, NULL, 0);
-                wchar_t* buf = talloc_array(NULL, wchar_t, len + 1);
-
-                if (DragQueryFileW(hDrop, i, buf, len + 1) == len) {
-                    char* fname = mp_to_utf8(files, buf);
-                    files[nrecvd_files++] = fname;
-
-                    MP_VERBOSE(t->w32, "received dropped file: %s\n",
-                               fname);
-                } else {
-                    MP_ERR(t->w32, "error getting dropped file name\n");
-                }
-
-                talloc_free(buf);
-            }
-
-            GlobalUnlock(medium.hGlobal);
-            mp_event_drop_files(t->w32->input_ctx, nrecvd_files, files,
-                                action);
-
-            talloc_free(files);
-        }
-
-        ReleaseStgMedium(&medium);
-    } else if (pDataObj->lpVtbl->GetData(pDataObj,
-                                         &fmtetc_url, &medium) == S_OK) {
-        // get the URL encoded in US-ASCII
-        wchar_t* wurl = GlobalLock(medium.hGlobal);
-        if (wurl != NULL) {
-            char *url = mp_to_utf8(NULL, wurl);
-            if (mp_event_drop_mime_data(t->w32->input_ctx, "text/uri-list",
-                                        bstr0(url), action) > 0) {
-                MP_VERBOSE(t->w32, "received dropped URL: %s\n", url);
-            } else {
-                MP_ERR(t->w32, "error getting dropped URL\n");
-            }
-
-            talloc_free(url);
-            GlobalUnlock(medium.hGlobal);
-        }
-
-        ReleaseStgMedium(&medium);
-    }
-    else {
-        t->lastEffect = DROPEFFECT_NONE;
-    }
-
-    pDataObj->lpVtbl->Release(pDataObj);
-    *pdwEffect = t->lastEffect;
-    return S_OK;
-}
-
-
-static void DropTarget_Init(DropTarget* This, struct vo_w32_state *w32)
-{
-    IDropTargetVtbl* vtbl = talloc(This, IDropTargetVtbl);
-    *vtbl = (IDropTargetVtbl){
-        DropTarget_QueryInterface, DropTarget_AddRef, DropTarget_Release,
-        DropTarget_DragEnter, DropTarget_DragOver, DropTarget_DragLeave,
-        DropTarget_Drop
-    };
-
-    This->iface.lpVtbl = vtbl;
-    atomic_store(&This->refCnt, 0);
-    This->lastEffect = 0;
-    This->dataObj = NULL;
-    This->w32 = w32;
-}
 
 static void add_window_borders(HWND hwnd, RECT *rc)
 {
@@ -1536,10 +1340,8 @@ static void *gui_thread(void *ptr)
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
 
-        fmtetc_url.cfFormat = (CLIPFORMAT)RegisterClipboardFormat(TEXT("UniformResourceLocatorW"));
-        DropTarget* dropTarget = talloc(NULL, DropTarget);
-        DropTarget_Init(dropTarget, w32);
-        RegisterDragDrop(w32->window, &dropTarget->iface);
+        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->input_ctx);
+        RegisterDragDrop(w32->window, dt);
 
         // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
         // make sure the taskbar is hidden when mpv goes fullscreen
