@@ -4384,8 +4384,21 @@ The following video options are currently all specific to ``--vo=opengl`` and
     chain will be used for D3D9. This option is mainly for debugging purposes,
     in case the custom swap chain has poor performance or does not work.
 
-    If set to ``yes``, the ``--angle-max-frame-latency`` and
-    ``--angle-swapchain-length`` options will have no effect.
+    If set to ``yes``, the ``--angle-max-frame-latency``,
+    ``--angle-swapchain-length`` and ``--angle-flip`` options will have no
+    effect.
+
+    Windows with ANGLE only.
+
+``--angle-flip=<yes|no>``
+    Enable flip-model presentation, which avoids unnecessarily copying the
+    backbuffer by sharing surfaces with the DWM (default: yes). This may cause
+    performance issues with older drivers. If flip-model presentation is not
+    supported (for example, on Windows 7 without the platform update), mpv will
+    automatically fall back to the older bitblt presentation model.
+
+    If set to ``no``, the ``--angle-swapchain-length`` option will have no
+    effect.
 
     Windows with ANGLE only.
 
