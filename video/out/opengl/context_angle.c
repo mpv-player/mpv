@@ -56,6 +56,7 @@ struct angle_opts {
     int egl_windowing;
     int swapchain_length; // Currently only works with DXGI 1.2+
     int max_frame_latency;
+    int flip;
 };
 
 #define OPT_BASE_STRUCT struct angle_opts
@@ -80,6 +81,7 @@ const struct m_sub_options angle_conf = {
                     {"yes", 1})),
         OPT_INTRANGE("angle-swapchain-length", swapchain_length, 0, 2, 16),
         OPT_INTRANGE("angle-max-frame-latency", max_frame_latency, 0, 1, 16),
+        OPT_FLAG("angle-flip", flip, 0),
         {0}
     },
     .defaults = &(const struct angle_opts) {
@@ -89,6 +91,7 @@ const struct m_sub_options angle_conf = {
         .egl_windowing = -1,
         .swapchain_length = 6,
         .max_frame_latency = 3,
+        .flip = 1,
     },
     .size = sizeof(struct angle_opts),
 };
@@ -383,13 +386,28 @@ static bool d3d11_swapchain_create_1_2(MPGLContext *ctx, int flags)
         .SampleDesc = { .Count = 1 },
         .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT |
                        DXGI_USAGE_SHADER_INPUT,
-        .BufferCount = p->opts->swapchain_length,
-        .SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
     };
+
+    if (p->opts->flip) {
+        desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        desc1.BufferCount = p->opts->swapchain_length;
+    } else {
+        desc1.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        desc1.BufferCount = 1;
+    }
 
     hr = IDXGIFactory2_CreateSwapChainForHwnd(p->dxgi_factory2,
         (IUnknown*)p->d3d11_device, vo_w32_hwnd(vo), &desc1, NULL, NULL,
         &p->dxgi_swapchain1);
+    if (FAILED(hr) && p->opts->flip) {
+        // Try again without DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+        desc1.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        desc1.BufferCount = 1;
+
+        hr = IDXGIFactory2_CreateSwapChainForHwnd(p->dxgi_factory2,
+            (IUnknown*)p->d3d11_device, vo_w32_hwnd(vo), &desc1, NULL, NULL,
+            &p->dxgi_swapchain1);
+    }
     if (FAILED(hr)) {
         MP_FATAL(vo, "Couldn't create DXGI 1.2+ swap chain: %s\n",
                  mp_HRESULT_to_str(hr));
@@ -670,6 +688,14 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         if (surface_ok) {
             if (p->dxgi_swapchain1) {
                 MP_VERBOSE(vo, "Using DXGI 1.2+\n");
+
+                DXGI_SWAP_CHAIN_DESC1 scd = {0};
+                IDXGISwapChain1_GetDesc1(p->dxgi_swapchain1, &scd);
+                if (scd.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL) {
+                    MP_VERBOSE(vo, "Using flip-model presentation\n");
+                } else {
+                    MP_VERBOSE(vo, "Using bitblt-model presentation\n");
+                }
             } else {
                 MP_VERBOSE(vo, "Using DXGI 1.1\n");
             }
