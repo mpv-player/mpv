@@ -4772,6 +4772,10 @@ Miscellaneous
 ``--video-sync=<audio|...>``
     How the player synchronizes audio and video.
 
+    If you use this option, you usually want to set it to ``display-resample``
+    to enable a timing mode that tries to not skip or repeat frames when for
+    example playing 24fps video on a 24Hz screen.
+
     The modes starting with ``display-`` try to output video frames completely
     synchronously to the display, using the detected display vertical refresh
     rate as a hint how fast frames will be displayed on average. These modes
