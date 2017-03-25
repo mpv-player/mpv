@@ -259,8 +259,15 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             packet->duration = UNKNOWN_DURATION;
         }
         char **r = lavc_conv_decode(ctx->converter, packet);
-        for (int n = 0; r && r[n]; n++)
-            ass_process_data(track, r[n], strlen(r[n]));
+        for (int n = 0; r && r[n]; n++) {
+            char *ass_line = r[n];
+            if (sd->opts->sub_filter_SDH)
+                ass_line = filter_SDH(sd, track->event_format, 0, ass_line, 0);
+            if (ass_line)
+                ass_process_data(track, ass_line, strlen(ass_line));
+            if (sd->opts->sub_filter_SDH)
+                talloc_free(ass_line);
+        }
         if (ctx->duration_unknown) {
             for (int n = 0; n < track->n_events - 1; n++) {
                 if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
@@ -272,9 +279,18 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     } else {
         // Note that for this packet format, libass has an internal mechanism
         // for discarding duplicate (already seen) packets.
-        ass_process_chunk(track, packet->buffer, packet->len,
-                          llrint(packet->pts * 1000),
-                          llrint(packet->duration * 1000));
+        char *ass_line = packet->buffer;
+        int ass_len = packet->len;
+        if (sd->opts->sub_filter_SDH) {
+            ass_line = filter_SDH(sd, track->event_format, 1, ass_line, ass_len);
+            ass_len = strlen(ass_line);
+        }
+        if (ass_line)
+            ass_process_chunk(track, ass_line, ass_len,
+                              llrint(packet->pts * 1000),
+                              llrint(packet->duration * 1000));
+        if (sd->opts->sub_filter_SDH)
+            talloc_free(ass_line);
     }
 }
 

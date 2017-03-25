@@ -1991,6 +1991,23 @@ Subtitles
 
     Default: 0.
 
+``--sub-filter-sdh=<yes|no>``
+    Applies filter removing subtitle additions for the deaf or hard-of-hearing (SDH).
+    This is intended for English, but may in part work for other languages too.
+    The intention is that it can be always enabled so may not remove
+    all parts added.
+    It removes speaker labels (like MAN:), upper case text in parentheses and
+    any text in brackets.
+
+    Default: ``no``.
+
+``--sub-filter-sdh-harder=<yes|no>``
+    Do harder SDH filtering (if enabled by ``--sub-filter-sdh``).
+    Will also remove speaker labels and text within parentheses using both
+    lower and upper case letters.
+
+    Default: ``no``.
+
 Window
 ------
 
