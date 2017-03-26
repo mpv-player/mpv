@@ -37,8 +37,6 @@ static const NSEventType NSEventTypeSystemDefined = NSSystemDefined;
 static const NSEventType NSEventTypeKeyDown = NSKeyDown;
 static const NSEventType NSEventTypeKeyUp = NSKeyUp;
 
-static const NSEventMask NSEventMaskKeyDown = NSKeyDownMask;
-static const NSEventMask NSEventMaskKeyUp = NSKeyUpMask;
 static const NSEventMask NSEventMaskLeftMouseUp = NSLeftMouseUpMask;
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10)

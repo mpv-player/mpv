@@ -124,16 +124,6 @@
 
 - (BOOL)resignFirstResponder { return YES; }
 
-- (void)keyDown:(NSEvent *)event
-{
-    [self.adapter putKeyEvent:event];
-}
-
-- (void)keyUp:(NSEvent *)event
-{
-    [self.adapter putKeyEvent:event];
-}
-
 - (BOOL)canHideCursor
 {
     return !self.hasMouseDown && [self containsMouseLocation]

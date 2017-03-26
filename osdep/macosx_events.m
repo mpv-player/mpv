@@ -55,7 +55,6 @@
 - (NSEvent *)handleKey:(NSEvent *)event;
 - (void)setMpvHandle:(struct mpv_handle *)ctx;
 - (void)readEvents;
-- (void)startEventMonitor;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
 - (void)startMediaKeys;
@@ -121,11 +120,6 @@ static int convert_key(unsigned key, unsigned charcode)
     if (mpkey)
         return mpkey;
     return charcode;
-}
-
-void cocoa_start_event_monitor(void)
-{
-    [[EventsResponder sharedInstance] startEventMonitor];
 }
 
 void cocoa_init_apple_remote(void)
@@ -347,19 +341,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     }
 }
 
-- (void)startEventMonitor
-{
-    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown|NSEventMaskKeyUp
-                                          handler:^(NSEvent *event) {
-        BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
-        if (equivalent) {
-            return (NSEvent *)nil;
-        } else {
-            return [self handleKey:event];
-        }
-    }];
-}
-
 - (void)startAppleRemote
 {
 
@@ -525,6 +506,17 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         [self handleMPKey:key withMask:[self keyModifierMask:event]];
 
     return nil;
+}
+
+- (bool)processKeyEvent:(NSEvent *)event
+{
+    if ((event.type == NSEventTypeKeyDown || event.type == NSEventTypeKeyUp) &&
+        ![[NSApp mainMenu] performKeyEquivalent:event])
+    {
+        [self handleKey:event];
+        return true;
+    }
+    return false;
 }
 
 - (void)handleFilesArray:(NSArray *)files

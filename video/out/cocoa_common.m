@@ -810,9 +810,6 @@ static int vo_cocoa_fullscreen(struct vo *vo)
         return VO_NOTIMPL;
 
     [s->window toggleFullScreen:nil];
-    // for whatever reason sometimes cocoa doesn't create an up event on
-    // the fullscreen input key
-    cocoa_put_key(MP_INPUT_RELEASE_ALL);
 
     return VO_TRUE;
 }
@@ -953,11 +950,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     [self recalcMovableByWindowBackground:point];
     if (!self.vout->cocoa->window_is_dragged)
         mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
-}
-
-- (void)putKeyEvent:(NSEvent*)event
-{
-    cocoa_put_key_event(event);
 }
 
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers

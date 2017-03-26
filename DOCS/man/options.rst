@@ -2923,11 +2923,6 @@ Input
 
     (This option was renamed from ``--input-x11-keyboard``.)
 
-``--input-app-events=<yes|no>``
-    (OS X only)
-    Enable/disable application wide keyboard events so that keyboard shortcuts
-    can be processed without a window. Enabled by default (except for libmpv).
-
 OSD
 ---
 
