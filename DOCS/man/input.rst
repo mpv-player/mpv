@@ -357,6 +357,11 @@ List of Input Commands
     <level>
         The minimum OSD level to show the text at (see ``--osd-level``).
 
+``expand-text "<string>"``
+    Property-expand the argument and return the expanded string. This can be
+    used only through the client API or from a script using
+    ``mp.command_native``. (see `Property Expansion`_).
+
 ``show-progress``
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.

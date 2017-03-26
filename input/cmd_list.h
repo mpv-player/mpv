@@ -67,6 +67,7 @@ enum mp_command_type {
     MP_CMD_SET,
     MP_CMD_PRINT_TEXT,
     MP_CMD_SHOW_TEXT,
+    MP_CMD_EXPAND_TEXT,
     MP_CMD_SHOW_PROGRESS,
     MP_CMD_ADD,
     MP_CMD_CYCLE,
