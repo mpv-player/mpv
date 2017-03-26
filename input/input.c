@@ -168,7 +168,6 @@ struct input_opts {
     int use_alt_gr;
     int use_appleremote;
     int use_media_keys;
-    int use_app_events;
     int default_bindings;
     int enable_mouse_movements;
     int vo_key_input;
@@ -193,7 +192,6 @@ const struct m_sub_options input_config = {
 #if HAVE_COCOA
         OPT_FLAG("input-appleremote", use_appleremote, 0),
         OPT_FLAG("input-media-keys", use_media_keys, 0),
-        OPT_FLAG("input-app-events", use_app_events, M_OPT_FIXED),
 #endif
         OPT_FLAG("window-dragging", allow_win_drag, 0),
         OPT_REPLACED("input-x11-keyboard", "input-vo-keyboard"),
@@ -210,7 +208,6 @@ const struct m_sub_options input_config = {
 #if HAVE_COCOA
         .use_appleremote = 1,
         .use_media_keys = 1,
-        .use_app_events = 1,
 #endif
         .default_bindings = 1,
         .vo_key_input = 1,
@@ -1297,11 +1294,6 @@ void mp_input_load_config(struct input_ctx *ictx)
             parse_config_file(ictx, files[n], false);
         talloc_free(tmp);
     }
-
-#if HAVE_COCOA
-    if (ictx->opts->use_app_events)
-        cocoa_start_event_monitor();
-#endif
 
 #if defined(__MINGW32__)
     if (ictx->global->opts->input_file && *ictx->global->opts->input_file)

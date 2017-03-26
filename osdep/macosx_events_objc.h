@@ -42,4 +42,6 @@ struct input_ctx;
 
 - (void)handleFilesArray:(NSArray *)files;
 
+- (bool)processKeyEvent:(NSEvent *)event;
+
 @end

@@ -81,8 +81,8 @@ static void terminate_cocoa_application(void)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    [super sendEvent:event];
-
+    if (![_eventsResponder processKeyEvent:event])
+        [super sendEvent:event];
     [_eventsResponder wakeup];
 }
 

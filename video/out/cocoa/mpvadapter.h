@@ -21,7 +21,6 @@
 @interface MpvCocoaAdapter : NSObject<NSWindowDelegate>
 - (void)setNeedsResize;
 - (void)signalMouseMovement:(NSPoint)point;
-- (void)putKeyEvent:(NSEvent*)event;
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers;
 - (void)putAxis:(int)mpkey delta:(float)delta;
 - (void)putCommand:(char*)cmd;
