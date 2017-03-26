@@ -452,8 +452,9 @@ Input Commands that are Possibly Subject to Change
         (If several filters are passed to the command, this is done for
         each filter.)
 
-        A special variant is combining this with labels, and using ``@name:!``
-        as filter entry. This toggles the enable/disable flag.
+        A special variant is combining this with labels, and using ``@name``
+        without filter name and parameters as filter entry. This toggles the
+        enable/disable flag.
 
     del
         Remove the given filters from the video chain. Unlike in the other
@@ -497,7 +498,7 @@ Input Commands that are Possibly Subject to Change
           name for this filter entry. The ``!`` before the filter name disables
           the filter by default. Everything after this is the normal filter name
           and the filter parameters.
-        - Add ``a vf toggle @deband:!`` to ``input.conf``. This toggles the
+        - Add ``a vf toggle @deband`` to ``input.conf``. This toggles the
           "disabled" flag for the filter identified with ``deband``.
 
 ``cycle-values ["!reverse"] <property> "<value1>" "<value2>" ...``

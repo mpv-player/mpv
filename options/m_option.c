@@ -2762,13 +2762,29 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
     int r;
     char **plist = NULL;
     struct m_obj_desc desc;
+    bstr str = {0};
     bstr label = {0};
     bool nopos = list->disallow_positional_parameters;
     bool enabled = true;
 
     if (bstr_eatstart0(pstr, "@")) {
-        if (!bstr_split_tok(*pstr, ":", &label, pstr)) {
+        bstr rest;
+        if (!bstr_split_tok(*pstr, ":", &label, &rest)) {
+            // "@labelname" is the special enable/disable toggle syntax
+            if (op == OP_TOGGLE) {
+                int idx = bstrspn(*pstr, NAMECH);
+                label = bstr_splice(*pstr, 0, idx);
+                if (label.len) {
+                    *pstr = bstr_cut(*pstr, idx);
+                    goto done;
+                }
+            }
             mp_err(log, "Option %.*s: ':' expected after label.\n", BSTR_P(opt));
+            return M_OPT_INVALID;
+        }
+        *pstr = rest;
+        if (label.len == 0) {
+            mp_err(log, "Option %.*s: label name expected.\n", BSTR_P(opt));
             return M_OPT_INVALID;
         }
     }
@@ -2778,9 +2794,11 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
 
     bool has_param = false;
     int idx = bstrspn(*pstr, NAMECH);
-    bstr str = bstr_splice(*pstr, 0, idx);
-    if (str.len == 0 && !enabled && label.len && op == OP_TOGGLE)
-        goto done; // "@labelname:!" is the special enable/disable toggle syntax
+    str = bstr_splice(*pstr, 0, idx);
+    if (!str.len) {
+        mp_err(log, "Option %.*s: filter name expected.\n", BSTR_P(opt));
+        return M_OPT_INVALID;
+    }
     *pstr = bstr_cut(*pstr, idx);
     // video filters use "=", VOs use ":"
     if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
@@ -3026,7 +3044,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             talloc_free(res);
         } else if (op == OP_TOGGLE) {
             for (int n = 0; res && res[n].name; n++) {
-                if (!res[n].enabled && !res[n].name[0]) {
+                if (res[n].label && !res[n].name[0]) {
                     // Toggle enable/disable special case.
                     int found =
                         obj_settings_list_find_by_label0(list, res[n].label);

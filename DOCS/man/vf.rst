@@ -24,6 +24,10 @@ syntax is:
 
         ``["@"<label-name>":"] ["!"] <filter-name> [ "=" <filter-parameter-list> ]``
 
+    or for the special "toggle" syntax (see ``vf`` command):
+
+        ``"@"<label-name>``
+
     and the ``filter-parameter-list``:
 
         ``<filter-parameter> | <filter-parameter> "," <filter-parameter-list>``
