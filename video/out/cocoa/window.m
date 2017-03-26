@@ -47,7 +47,7 @@
 @synthesize currentScreen = _current_screen;
 @synthesize unfScreen = _unf_Screen;
 - (id)initWithContentRect:(NSRect)content_rect
-                styleMask:(NSUInteger)style_mask
+                styleMask:(NSWindowStyleMask)style_mask
                   backing:(NSBackingStoreType)buffering_type
                     defer:(BOOL)flag
                    screen:(NSScreen *)screen
@@ -255,6 +255,7 @@
 
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
+
 - (BOOL)windowShouldClose:(id)sender
 {
     cocoa_put_key(MP_KEY_CLOSE_WIN);

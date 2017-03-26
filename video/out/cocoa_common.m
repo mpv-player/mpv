@@ -129,7 +129,6 @@ static void run_on_main_thread(struct vo *vo, void(^block)(void))
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts  = vo->opts;
     id<MpvWindowUpdate> win = (id<MpvWindowUpdate>) s->window;
     NSRect r = NSMakeRect(0, 0, w, h);
     r = [s->current_screen convertRectFromBacking:r];
@@ -955,7 +954,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)performAsyncResize:(NSSize)size
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
     vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 

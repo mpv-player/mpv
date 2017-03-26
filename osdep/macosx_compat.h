@@ -45,7 +45,7 @@ typedef NSUInteger NSEventModifierFlags;
 
 static const NSEventModifierFlags NSEventModifierFlagShift = NSShiftKeyMask;
 static const NSEventModifierFlags NSEventModifierFlagControl = NSControlKeyMask;
-static const NSEventModifierFlags NSEventModifierFlagCommand =  NSCommandKeyMask;
+static const NSEventModifierFlags NSEventModifierFlagCommand = NSCommandKeyMask;
 static const NSEventModifierFlags NSEventModifierFlagOption = NSAlternateKeyMask;
 #endif
 

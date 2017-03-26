@@ -23,7 +23,6 @@
 #include "events_view.h"
 
 @interface MpvEventsView()
-@property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
 - (int)mpvButtonNumber:(NSEvent*)event;
@@ -32,7 +31,6 @@
 @end
 
 @implementation MpvEventsView
-@synthesize clearing = _clearing;
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
@@ -110,6 +108,7 @@
 {
     return [self.adapter mouseEnabled];
 }
+
 - (BOOL)acceptsFirstResponder
 {
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
@@ -143,14 +142,6 @@
     } else {
         [super mouseExited:event];
     }
-}
-
-- (void)setFrameSize:(NSSize)size
-{
-    [super setFrameSize:size];
-
-    if (self.clearing)
-        return;
 }
 
 - (NSPoint)convertPointToPixels:(NSPoint)point
@@ -195,6 +186,7 @@
         [super mouseDown:event];
     }
 }
+
 - (void)mouseUp:(NSEvent *)event
 {
     if ([self.adapter mouseEnabled]) {
@@ -203,6 +195,7 @@
         [super mouseUp:event];
     }
 }
+
 - (void)rightMouseDown:(NSEvent *)event
 {
     if ([self.adapter mouseEnabled]) {

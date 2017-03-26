@@ -142,7 +142,7 @@ static int mk_flags(NSEvent *event)
     return ([event data1] & 0x0000FFFF);
 }
 
-static  int mk_down(NSEvent *event)
+static int mk_down(NSEvent *event)
 {
     return (((mk_flags(event) & 0xFF00) >> 8)) == 0xA;
 }
@@ -254,7 +254,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     [_input_lock unlock];
 }
 
-- (void)setInputContext:(struct input_ctx *)ctx;
+- (void)setInputContext:(struct input_ctx *)ctx
 {
     [_input_lock lock];
     _inputContext = ctx;
@@ -346,7 +346,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 - (void)startAppleRemote
 {
-
 #if HAVE_APPLE_REMOTE
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_remote = [[HIDRemote alloc] init];
@@ -356,8 +355,8 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         }
     });
 #endif
-
 }
+
 - (void)stopAppleRemote
 {
 #if HAVE_APPLE_REMOTE
@@ -367,10 +366,12 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     });
 #endif
 }
+
 - (void)restartMediaKeys
 {
     CGEventTapEnable(self->_mk_tap_port, true);
 }
+
 - (void)startMediaKeys
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -390,6 +391,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         [[NSRunLoop mainRunLoop] addPort:port forMode:NSRunLoopCommonModes];
     });
 }
+
 - (void)stopMediaKeys
 {
     dispatch_async(dispatch_get_main_queue(), ^{
