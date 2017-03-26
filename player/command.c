@@ -1852,6 +1852,7 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
     struct ao *ao = mpctx->ao;
     if (!ao)
         return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1876,7 +1877,7 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
             .type = CONF_TYPE_FLOAT,
             .flags = M_OPT_RANGE,
             .min = 0,
-            .max = 100,
+            .max = opts->softvol_max,
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
