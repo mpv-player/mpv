@@ -589,10 +589,34 @@ Some profiles are loaded automatically. The following example demonstrates this:
         profile-desc="profile for .flv files"
         vf=flip
 
+        [media.no-video]
+        profile-desc="profile for no video track is selected"
+        audio-client-name=mpvmusik
+
+        [media.video]
+        profile-desc="profile for a video track is selected"
+        keep-open=yes
+
+        [media.no_audio]
+        profile-desc="profile for no audio track is selected"
+
+        [media.mono]
+        profile-desc="profile for audio track selected is mono"
+        audio-channels=2
+
+        [media.stereo]
+        profile-desc="profile for audio track selected is stereo"
+
+        [media.surround]
+        profile-desc="profile for audio track selected have more then 2 channels"
+
 The profile name follows the schema ``type.name``, where type can be
 ``protocol`` for the input/output protocol in use (see ``--list-protocols``),
 and ``extension`` for the extension of the path of the currently played file
 (*not* the file format).
+
+The media profiles are loaded late after tracks are selected so some
+options may not work.
 
 This feature is very limited, and there are no other auto profiles.
 
