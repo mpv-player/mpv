@@ -34,6 +34,7 @@ local user_opts = {
     layout = "bottombar",
     seekbarstyle = "bar",       -- slider (diamond marker), knob (circle
                                 -- marker with guide), or bar (fill)
+    prefertitle = true,         -- show media-title (true) or filename (false)
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
@@ -101,6 +102,7 @@ local state = {
     enabled = true,
     input_enabled = true,
     showhide_enabled = false,
+    prefertitle = user_opts.prefertitle
 }
 
 
@@ -1511,25 +1513,24 @@ function osc_init()
     ne = new_element("title", "button")
 
     ne.content = function ()
-        local title = mp.get_property_osd("media-title")
-        if not (title == nil) then
-            return (title)
-        else
-            return ("mpv")
-        end
+        return (state.prefertitle) and
+            mp.get_property_osd("media-title", "mpv") or
+            mp.get_property_osd("filename", "mpv")
     end
 
     ne.eventresponder["mouse_btn0_up"] = function ()
-        local title = mp.get_property_osd("media-title")
+        state.prefertitle = not state.prefertitle
+        request_init()
+    end
+
+    ne.eventresponder["mouse_btn2_up"] = function ()
+        local title = mp.get_property_osd("filename")
         if (have_pl) then
             title = string.format("[%d/%d] %s", countone(pl_pos - 1),
                                   pl_count, title)
         end
         show_message(title)
     end
-
-    ne.eventresponder["mouse_btn2_up"] =
-        function () show_message(mp.get_property_osd("filename")) end
 
     -- playlist buttons
 
