@@ -132,7 +132,10 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     if (t->title)
         APPEND(b, " '%s'", t->title);
     const char *codec = s ? s->codec->codec : NULL;
-    APPEND(b, " (%s)", codec ? codec : "<unknown>");
+    if (codec && s->codec->channels.num)
+        APPEND(b, " (%s, %s)", codec, mp_chmap_to_str(&s->codec->channels));
+    else
+        APPEND(b, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         APPEND(b, " (external)");
     MP_INFO(mpctx, "%s\n", b);
