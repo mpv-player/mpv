@@ -5136,6 +5136,16 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_EXPAND_TEXT: {
+        if (!res)
+            return -1;
+        *res = (mpv_node){
+            .format = MPV_FORMAT_STRING,
+            .u.string = mp_property_expand_string(mpctx, cmd->args[0].v.s)
+        };
+        break;
+    }
+
     case MP_CMD_LOADFILE: {
         char *filename = cmd->args[0].v.s;
         int append = cmd->args[1].v.i;

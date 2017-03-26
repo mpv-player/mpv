@@ -97,6 +97,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_PRINT_TEXT, "print-text", { ARG_STRING }, .allow_auto_repeat = true },
   { MP_CMD_SHOW_TEXT, "show-text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) },
     .allow_auto_repeat = true},
+  { MP_CMD_EXPAND_TEXT, "expand-text", { ARG_STRING } },
   { MP_CMD_SHOW_PROGRESS, "show-progress",  .allow_auto_repeat = true},
   { MP_CMD_SUB_ADD, "sub-add", { ARG_STRING,
       OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
