@@ -510,10 +510,9 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 - (bool)processKeyEvent:(NSEvent *)event
 {
-    if ((event.type == NSEventTypeKeyDown || event.type == NSEventTypeKeyUp) &&
-        ![[NSApp mainMenu] performKeyEquivalent:event])
-    {
-        [self handleKey:event];
+    if (event.type == NSEventTypeKeyDown || event.type == NSEventTypeKeyUp){
+        if (![[NSApp mainMenu] performKeyEquivalent:event])
+            [self handleKey:event];
         return true;
     }
     return false;
