@@ -46,8 +46,8 @@ title
     | Displays current media-title or filename
 
     =============   ================================================
-    left-click      toggle displaying media-title or filename
-    right-click     show playlist position and length and filename
+    left-click      show playlist position and length and full title
+    right-click     show filename
     =============   ================================================
 
 cache
@@ -238,12 +238,6 @@ Configurable Options
     Default: 200
 
     Duration of fade out in ms, 0 = no fade
-
-``prefertitle``
-    Default: yes
-
-    Display media title if available (yes) or always display the
-    filename (no).
 
 ``tooltipborder``
     Default: 1
