@@ -31,6 +31,7 @@ Interface changes
     - add --sub-filter-sdh
     - add --sub-filter-sdh-harder
     - remove --input-app-events option (macOS)
+    - add --keep-open-playing
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

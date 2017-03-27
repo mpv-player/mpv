@@ -830,7 +830,7 @@ static void handle_keep_open(struct MPContext *mpctx)
                 seek_to_last_frame(mpctx);
             mpctx->playback_pts = mpctx->last_vo_pts;
         }
-        if (!mpctx->opts->pause)
+        if (!opts->keep_open_playing && !mpctx->opts->pause)
             pause_player(mpctx);
     }
 }
