@@ -2070,6 +2070,9 @@ Window
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will attempt to seek to the last frame.
 
+    Normally, this will act like ``set pause yes`` on EOF, unless the
+    ``--keep-open-pause=no`` option is set.
+
     The following arguments can be given:
 
     :no:        If the current file ends, go to the next file or terminate.
@@ -2095,6 +2098,11 @@ Window
     is not the case (e.g. ``mpv --keep-open file.mkv /dev/null`` will play
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
+
+``--keep-open-pause=<yes|no>``
+    If set to ``no``, instead of pausing when ``--keep-open`` is active, just
+    stop at end of file and continue playing forward when you seek backwards
+    until end where it stops again. Default: ``yes``.
 
 ``--image-display-duration=<seconds|inf>``
     If the current file is an image, play the image for the given amount of

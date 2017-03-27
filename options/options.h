@@ -200,6 +200,7 @@ typedef struct MPOpts {
     char *watch_later_directory;
     int pause;
     int keep_open;
+    int keep_open_pause;
     double image_display_duration;
     char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];

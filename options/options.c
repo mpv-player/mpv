@@ -354,6 +354,7 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1},
                 {"always", 2})),
+    OPT_FLAG("keep-open-pause", keep_open_pause, 0),
     OPT_DOUBLE("image-display-duration", image_display_duration,
                M_OPT_RANGE, 0, INFINITY),
 
@@ -911,6 +912,7 @@ const struct MPOpts mp_default_opts = {
     .play_frames = -1,
     .rebase_start_time = 1,
     .keep_open = 0,
+    .keep_open_pause = 1,
     .image_display_duration = 1.0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,
