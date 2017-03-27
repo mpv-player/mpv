@@ -244,6 +244,7 @@ Configurable Options
 
     String that supports property expansion that will be displayed as
     OSC title.
+    ASS tags are escaped, and newlines and trailing slashes are stripped.
 
 ``tooltipborder``
     Default: 1
