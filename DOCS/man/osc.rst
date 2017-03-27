@@ -43,7 +43,7 @@ pl next
     =============   ================================================
 
 title
-    | Displays current media-title or filename
+    | Displays current media-title, filename, or custom title
 
     =============   ================================================
     left-click      show playlist position and length and full title
@@ -238,6 +238,12 @@ Configurable Options
     Default: 200
 
     Duration of fade out in ms, 0 = no fade
+
+``title``
+    Default: ${media-title}
+
+    String that supports property expansion that will be displayed as
+    OSC title.
 
 ``tooltipborder``
     Default: 1

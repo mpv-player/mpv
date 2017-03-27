@@ -34,6 +34,8 @@ local user_opts = {
     layout = "bottombar",
     seekbarstyle = "bar",       -- slider (diamond marker), knob (circle
                                 -- marker with guide), or bar (fill)
+    title = "${media-title}",   -- string compatible with property-expansion
+                                -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
@@ -1511,12 +1513,8 @@ function osc_init()
     ne = new_element("title", "button")
 
     ne.content = function ()
-        local title = mp.get_property_osd("media-title")
-        if not (title == nil) then
-            return (title)
-        else
-            return ("mpv")
-        end
+        local title = mp.command_native({"expand-text", user_opts.title})
+        return not (title == "") and title or "mpv"
     end
 
     ne.eventresponder["mouse_btn0_up"] = function ()
