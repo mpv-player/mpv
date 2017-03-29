@@ -530,7 +530,7 @@ static int open_s(stream_t *stream)
         priv->track = TITLE_MENU;
     } else if (title.len) {
         bstr rest;
-        priv->title = bstrtoll(title, &rest, 10);
+        priv->track = bstrtoll(title, &rest, 10);
         if (rest.len) {
             MP_ERR(stream, "number expected: '%.*s'\n", BSTR_P(rest));
             return STREAM_ERROR;
