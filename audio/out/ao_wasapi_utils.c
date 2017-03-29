@@ -88,10 +88,12 @@ static const GUID *format_to_subtype(int format)
                 return wasapi_fmt_table[i].subtype;
         }
         return &KSDATAFORMAT_SPECIFIER_NONE;
-    } else if (af_fmt_is_float(format)) {
+    } else if (format == AF_FORMAT_FLOAT) {
         return &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+    } else if (af_fmt_is_int(format)) {
+        return &KSDATAFORMAT_SUBTYPE_PCM;
     }
-    return &KSDATAFORMAT_SUBTYPE_PCM;
+    return NULL;
 }
 
 // "solve" the under-determined inverse of format_to_subtype by assuming the
@@ -124,13 +126,27 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
                            int format, WORD valid_bits,
                            DWORD samplerate, struct mp_chmap *channels)
 {
+    // First find a format that is actually representable.
+    // (Notably excludes AF_FORMAT_DOUBLE.)
+    const GUID *sub_format = &KSDATAFORMAT_SPECIFIER_NONE;
+    int alt_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(format, alt_formats);
+    for (int n = 0; alt_formats[n]; n++) {
+        const GUID *guid = format_to_subtype(alt_formats[n]);
+        if (guid) {
+            format = alt_formats[n];
+            sub_format = guid;
+            break;
+        }
+    }
+
     wformat->Format.wFormatTag     = WAVE_FORMAT_EXTENSIBLE;
     wformat->Format.nChannels      = channels->num;
     wformat->Format.nSamplesPerSec = samplerate;
     wformat->Format.wBitsPerSample = af_fmt_to_bytes(format) * 8;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 
-    wformat->SubFormat                   = *format_to_subtype(format);
+    wformat->SubFormat                   = *sub_format;
     wformat->Samples.wValidBitsPerSample =
         valid_bits ? valid_bits : wformat->Format.wBitsPerSample;
     wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
@@ -318,10 +334,10 @@ static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                   int samplerate, struct mp_chmap *channels)
 {
     // some common bit depths / container sizes (requests welcome)
-    int try[]        = {AF_FORMAT_DOUBLE, AF_FORMAT_FLOAT, AF_FORMAT_S32,
+    int try[]        = {AF_FORMAT_FLOAT , AF_FORMAT_S32  ,
                         AF_FORMAT_S24   , AF_FORMAT_S32  , AF_FORMAT_S16,
                         AF_FORMAT_U8    , 0};
-    unsigned valid[] = {0               ,               0,             0,
+    unsigned valid[] = {0               ,               0,
                         0               ,              24,             0,
                         0               };
     for (int i = 0; try[i]; i++) {
@@ -595,6 +611,8 @@ static HRESULT fix_format(struct ao *ao)
         // in exclusive mode, these should all be the same
         bufferPeriod = bufferDuration = devicePeriod;
     }
+
+    ao->format = af_fmt_from_planar(ao->format);
 
     // handle unsupported buffer size hopefully this shouldn't happen because of
     // the above integer device period
