@@ -473,6 +473,7 @@ static int open_s_internal(stream_t *stream)
         int best_title = -1;
         int32_t num_titles;
         if (dvdnav_get_number_of_titles(dvdnav, &num_titles) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "List of available titles:\n");
             for (int n = 1; n <= num_titles; n++) {
                 uint64_t *parts = NULL, duration = 0;
                 dvdnav_describe_title_chapters(dvdnav, n, &parts, &duration);
@@ -480,6 +481,12 @@ static int open_s_internal(stream_t *stream)
                     if (duration > best_length) {
                         best_length = duration;
                         best_title = n;
+                    }
+                    if (duration > 90000) { // arbitrarily ignore <1s titles
+                        char *time = mp_format_time(duration / 90000, false);
+                        MP_VERBOSE(stream, "title: %3d duration: %s\n",
+                                   n - 1, time);
+                        talloc_free(time);
                     }
                     free(parts);
                 }
