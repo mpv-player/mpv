@@ -96,9 +96,6 @@ static void append_dir_subtitles(struct mpv_global *global,
     struct MPOpts *opts = global->opts;
     struct mp_log *log = mp_log_new(tmpmem, global->log, "find_files");
 
-    if (mp_is_url(bstr0(fname)))
-        goto out;
-
     struct bstr f_fbname = bstr0(mp_basename(fname));
     struct bstr f_fname = mp_iconv_to_utf8(log, f_fbname,
                                            "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
@@ -114,6 +111,10 @@ static void append_dir_subtitles(struct mpv_global *global,
     // 2 = any sub file containing movie name
     // 3 = sub file containing movie name and the lang extension
     char *path0 = bstrdup0(tmpmem, path);
+
+    if (mp_is_url(bstr0(path0)))
+        goto out;
+
     DIR *d = opendir(path0);
     if (!d)
         goto out;
