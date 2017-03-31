@@ -342,6 +342,11 @@ iconv support use --disable-iconv.",
                                  'dvdread', '>= 4.1.0'),
         'default': 'disable',
     }, {
+        'name': '--dvdread-common',
+        'desc': 'common dvdread code',
+        'deps_any': [ 'dvdread', 'dvdnav' ],
+        'func': check_true,
+    }, {
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
