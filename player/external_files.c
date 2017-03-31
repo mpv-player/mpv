@@ -270,12 +270,12 @@ struct subfn *find_external_files(struct mpv_global *global, const char *fname)
 
     // Load subtitles in dirs specified by sub-paths option
     if (opts->sub_auto >= 0) {
-        load_paths(global, &slist, &n, fname, opts->sub_paths, "sub/",
+        load_paths(global, &slist, &n, fname, opts->sub_paths, "sub",
                    STREAM_SUB);
     }
 
     if (opts->audiofile_auto >= 0) {
-        load_paths(global, &slist, &n, fname, opts->audiofile_paths, "audio/",
+        load_paths(global, &slist, &n, fname, opts->audiofile_paths, "audio",
                    STREAM_AUDIO);
     }
 
