@@ -93,7 +93,7 @@ static const stream_info_t *const stream_list[] = {
 #if HAVE_LIBSMBCLIENT
     &stream_info_smb,
 #endif
-#if HAVE_DVDREAD
+#if HAVE_DVDREAD || HAVE_DVDNAV
     &stream_info_ifo,
     &stream_info_dvd,
 #endif

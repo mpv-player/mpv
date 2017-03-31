@@ -338,8 +338,8 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--dvdnav',
         'desc': 'dvdnav support',
-        'deps': [ 'dvdread' ],
-        'func': check_pkg_config('dvdnav', '>= 4.2.0'),
+        'func': check_pkg_config('dvdnav',  '>= 4.2.0',
+                                 'dvdread', '>= 4.1.0'),
         'default': 'disable',
     }, {
         'name': '--cdda',
