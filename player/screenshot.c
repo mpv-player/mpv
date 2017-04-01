@@ -65,10 +65,6 @@ void screenshot_init(struct MPContext *mpctx)
     };
 }
 
-#define SMSG_OK 0
-#define SMSG_ERR 1
-#define SMSG_V 2
-
 static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
                            ...) PRINTF_ATTRIBUTE(3,4);
 
@@ -82,14 +78,8 @@ static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
     s = talloc_vasprintf(NULL, msg, ap);
     va_end(ap);
 
-    int msg_level = MSGL_INFO;
-    if (status == SMSG_ERR)
-        msg_level = MSGL_ERR;
-    if (status == SMSG_V)
-        msg_level = MSGL_V;
-
-    MP_MSG(ctx->mpctx, msg_level, "%s\n", s);
-    if (ctx->osd && msg_level <= MSGL_INFO)
+    MP_MSG(ctx->mpctx, status, "%s\n", s);
+    if (ctx->osd && status <= MSGL_INFO)
         set_osd_msg(ctx->mpctx, 1, ctx->mpctx->opts->osd_duration, "%s", s);
 
     talloc_free(s);
@@ -120,20 +110,20 @@ static void write_screenshot_thread(void *arg)
     screenshot_ctx *ctx = item->mpctx->screenshot_ctx;
 
     LOCK(item)
-    screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", item->filename);
+    screenshot_msg(ctx, MSGL_INFO, "Screenshot: '%s'", item->filename);
     UNLOCK(item)
 
     if (!item->img || !write_image(item->img, &item->opts, item->filename,
                                    item->mpctx->log))
     {
         LOCK(item)
-        screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
+        screenshot_msg(ctx, MSGL_ERR, "Error writing screenshot!");
         UNLOCK(item)
     }
 
     if (item->on_thread) {
         mp_dispatch_lock(item->mpctx->dispatch);
-        screenshot_msg(ctx, SMSG_V, "Screenshot writing done.");
+        screenshot_msg(ctx, MSGL_V, "Screenshot writing done.");
         item->mpctx->outstanding_async -= 1;
         mp_wakeup_core(item->mpctx);
         mp_dispatch_unlock(item->mpctx->dispatch);
@@ -357,7 +347,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
                                    &ctx->frameno);
 
         if (!fname) {
-            screenshot_msg(ctx, SMSG_ERR, "Invalid screenshot filename "
+            screenshot_msg(ctx, MSGL_ERR, "Invalid screenshot filename "
                            "template! Fix or remove the --screenshot-template "
                            "option.");
             return NULL;
@@ -378,7 +368,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
             return fname;
 
         if (sequence == prev_sequence) {
-            screenshot_msg(ctx, SMSG_ERR, "Can't save screenshot, file '%s' "
+            screenshot_msg(ctx, MSGL_ERR, "Can't save screenshot, file '%s' "
                            "already exists!", fname);
             talloc_free(fname);
             return NULL;
@@ -454,7 +444,7 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
         opts.format = format;
     struct mp_image *image = screenshot_get(mpctx, mode);
     if (!image) {
-        screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
+        screenshot_msg(ctx, MSGL_ERR, "Taking screenshot failed.");
         goto end;
     }
     write_screenshot(mpctx, image, filename, &opts, async);
@@ -492,7 +482,7 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
             write_screenshot(mpctx, image, filename, NULL, async);
         talloc_free(filename);
     } else {
-        screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
+        screenshot_msg(ctx, MSGL_ERR, "Taking screenshot failed.");
     }
 
     talloc_free(image);
