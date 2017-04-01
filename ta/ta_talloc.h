@@ -14,6 +14,8 @@
 #ifndef TA_TALLOC_H_
 #define TA_TALLOC_H_
 
+#include <string.h>
+
 #include "ta.h"
 
 // Note: all talloc wrappers are wired to the "x" functions, which abort on OOM.
