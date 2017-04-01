@@ -840,7 +840,8 @@ prefixes can be specified. They are separated by whitespace.
     will support this (usually this is explicitly documented). Some commands
     are asynchronous by default (or rather, their effects might manifest
     after completion of the command). The semantics of this flag might change
-    in the future. Set it only
+    in the future. Set it only if you don't rely on the effects of this command
+    being fully realized when it returns.
 
 All of the osd prefixes are still overridden by the global ``--osd-level``
 settings.
