@@ -605,8 +605,9 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
     int cache_buffer = 100;
+    bool use_pause_on_low_cache = c.size > 0 || mpctx->demuxer->is_network;
 
-    if (mpctx->restart_complete && c.size > 0) {
+    if (mpctx->restart_complete && use_pause_on_low_cache) {
         if (mpctx->paused && mpctx->paused_for_cache) {
             if (!s.underrun && (!opts->cache_pausing || s.idle ||
                                 s.ts_duration >= mpctx->cache_wait_time))
