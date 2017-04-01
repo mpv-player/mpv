@@ -840,6 +840,9 @@ int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
  *
  * The commands and their parameters are documented in input.rst.
  *
+ * Does not use OSD and string expansion by default (unlike mpv_command_string()
+ * and input.conf).
+ *
  * @param[in] args NULL-terminated list of strings. Usually, the first item
  *                 is the command, and the following items are arguments.
  * @return error code
@@ -851,6 +854,8 @@ int mpv_command(mpv_handle *ctx, const char **args);
  * In particular, calling mpv_command() is exactly like calling
  * mpv_command_node() with the format set to MPV_FORMAT_NODE_ARRAY, and
  * every arg passed in order as MPV_FORMAT_STRING.
+ *
+ * Does not use OSD and string expansion by default.
  *
  * @param[in] args mpv_node with format set to MPV_FORMAT_NODE_ARRAY; each entry
  *                 is an argument using an arbitrary format (the format must be
@@ -869,6 +874,8 @@ int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
  * Same as mpv_command, but use input.conf parsing for splitting arguments.
  * This is slightly simpler, but also more error prone, since arguments may
  * need quoting/escaping.
+ *
+ * This also has OSD and string expansion enabled by default.
  */
 int mpv_command_string(mpv_handle *ctx, const char *args);
 

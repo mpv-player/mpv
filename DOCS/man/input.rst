@@ -815,8 +815,10 @@ Input Command Prefixes
 These prefixes are placed between key name and the actual command. Multiple
 prefixes can be specified. They are separated by whitespace.
 
-``osd-auto`` (default)
-    Use the default behavior for this command.
+``osd-auto``
+    Use the default behavior for this command. This is the default for
+    ``input.conf`` commands. Some libmpv/scripting/IPC APIs do not use this as
+    default, but use ``no-osd`` instead.
 ``no-osd``
     Do not use any OSD for this command.
 ``osd-bar``
@@ -830,8 +832,10 @@ prefixes can be specified. They are separated by whitespace.
     Combine osd-bar and osd-msg.
 ``raw``
     Do not expand properties in string arguments. (Like ``"${property-name}"``.)
-``expand-properties`` (default)
+    This is the default for some libmpv/scripting/IPC APIs.
+``expand-properties``
     All string arguments are expanded as described in `Property Expansion`_.
+    This is the default for ``input.conf`` commands.
 ``repeatable``
     For some commands, keeping a key pressed doesn't run the command repeatedly.
     This prefix forces enabling key repeat in any case.
