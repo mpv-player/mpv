@@ -239,6 +239,12 @@ typedef struct MPContext {
     struct mp_dispatch_queue *dispatch;
     struct mp_cancel *playback_abort;
     bool in_dispatch;
+    // Number of asynchronous tasks that still need to finish until MPContext
+    // destruction is ok. It's implied that the async tasks call
+    // mp_wakeup_core() each time this is decremented.
+    // As using an atomic+wakeup would be racy, this is a normal integer, and
+    // mp_dispatch_lock must be called to change it.
+    int64_t outstanding_async;
 
     struct mp_log *statusline;
     struct osd_state *osd;

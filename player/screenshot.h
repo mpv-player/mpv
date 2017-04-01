@@ -31,13 +31,13 @@ void screenshot_init(struct MPContext *mpctx);
 //             screenshot slave command (MP_CMD_SCREENSHOT).
 // osd: show status on OSD
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
-                        bool osd);
+                        bool osd, bool async);
 
 // filename: where to store the screenshot; doesn't try to find an alternate
 //           name if the file already exists
 // mode, osd: same as in screenshot_request()
 void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
-                        bool osd);
+                        bool osd, bool async);
 
 // mode is the same as in screenshot_request()
 struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode);

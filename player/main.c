@@ -150,7 +150,7 @@ void mp_print_version(struct mp_log *log, int always)
 static void shutdown_clients(struct MPContext *mpctx)
 {
     mp_client_enter_shutdown(mpctx);
-    while (mp_clients_num(mpctx)) {
+    while (mp_clients_num(mpctx) || mpctx->outstanding_async) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
         mp_wait_events(mpctx);
     }

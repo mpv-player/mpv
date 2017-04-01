@@ -186,6 +186,12 @@ List of Input Commands
     second argument (and did not have flags). This syntax is still understood,
     but deprecated and might be removed in the future.
 
+    Setting the ``async`` flag will make encoding and writing the actual image
+    file asynchronous in most cases. (``each-frame`` mode ignores this flag
+    currently.) Requesting async screenshots too early or too often could lead
+    to the same filenames being chosen, and overwriting each others in undefined
+    order.
+
 ``screenshot-to-file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
@@ -197,6 +203,9 @@ List of Input Commands
 
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
+
+    The ``async`` flag has an effect on this command (see ``screenshot``
+    command).
 
 ``playlist-next [weak|force]``
     Go to the next entry on the playlist.

@@ -215,6 +215,7 @@ def build(ctx):
         ( "misc/node.c" ),
         ( "misc/ring.c" ),
         ( "misc/rendezvous.c" ),
+        ( "misc/thread_pool.c" ),
 
         ## Options
         ( "options/m_config.c" ),

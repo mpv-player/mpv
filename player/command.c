@@ -4827,6 +4827,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     bool bar_osd = auto_osd || (on_osd & MP_ON_OSD_BAR);
     bool msg_or_nobar_osd = msg_osd && !(auto_osd && opts->osd_bar_visible);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
+    bool async = cmd->flags & MP_ASYNC_CMD;
 
     mp_cmd_dump(mpctx->log, cmd->id == MP_CMD_IGNORE ? MSGL_DEBUG : MSGL_V,
                 "Run command:", cmd);
@@ -5366,12 +5367,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_SCREENSHOT: {
         int mode = cmd->args[0].v.i & 3;
         int freq = (cmd->args[0].v.i | cmd->args[1].v.i) >> 3;
-        screenshot_request(mpctx, mode, freq, msg_osd);
+        screenshot_request(mpctx, mode, freq, msg_osd, async);
         break;
     }
 
     case MP_CMD_SCREENSHOT_TO_FILE:
-        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
+        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd,
+                           async);
         break;
 
     case MP_CMD_SCREENSHOT_RAW: {

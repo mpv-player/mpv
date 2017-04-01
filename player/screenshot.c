@@ -28,6 +28,8 @@
 #include "core.h"
 #include "command.h"
 #include "misc/bstr.h"
+#include "misc/dispatch.h"
+#include "misc/thread_pool.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "video/mp_image.h"
@@ -50,6 +52,8 @@ typedef struct screenshot_ctx {
     bool osd;
 
     int frameno;
+
+    struct mp_thread_pool *thread_pool;
 } screenshot_ctx;
 
 void screenshot_init(struct MPContext *mpctx)
@@ -63,6 +67,7 @@ void screenshot_init(struct MPContext *mpctx)
 
 #define SMSG_OK 0
 #define SMSG_ERR 1
+#define SMSG_V 2
 
 static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
                            ...) PRINTF_ATTRIBUTE(3,4);
@@ -77,8 +82,14 @@ static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
     s = talloc_vasprintf(NULL, msg, ap);
     va_end(ap);
 
-    MP_MSG(ctx->mpctx, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
-    if (ctx->osd)
+    int msg_level = MSGL_INFO;
+    if (status == SMSG_ERR)
+        msg_level = MSGL_ERR;
+    if (status == SMSG_V)
+        msg_level = MSGL_V;
+
+    MP_MSG(ctx->mpctx, msg_level, "%s\n", s);
+    if (ctx->osd && msg_level <= MSGL_INFO)
         set_osd_msg(ctx->mpctx, 1, ctx->mpctx->opts->osd_duration, "%s", s);
 
     talloc_free(s);
@@ -90,6 +101,75 @@ static char *stripext(void *talloc_ctx, const char *s)
     if (!end)
         end = s + strlen(s);
     return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
+}
+
+struct screenshot_item {
+    bool on_thread;
+    struct MPContext *mpctx;
+    const char *filename;
+    struct mp_image *img;
+    struct image_writer_opts opts;
+};
+
+#define LOCK(item) if (item->on_thread) mp_dispatch_lock(item->mpctx->dispatch);
+#define UNLOCK(item) if (item->on_thread) mp_dispatch_unlock(item->mpctx->dispatch);
+
+static void write_screenshot_thread(void *arg)
+{
+    struct screenshot_item *item = arg;
+    screenshot_ctx *ctx = item->mpctx->screenshot_ctx;
+
+    LOCK(item)
+    screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", item->filename);
+    UNLOCK(item)
+
+    if (!item->img || !write_image(item->img, &item->opts, item->filename,
+                                   item->mpctx->log))
+    {
+        LOCK(item)
+        screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
+        UNLOCK(item)
+    }
+
+    if (item->on_thread) {
+        mp_dispatch_lock(item->mpctx->dispatch);
+        screenshot_msg(ctx, SMSG_V, "Screenshot writing done.");
+        item->mpctx->outstanding_async -= 1;
+        mp_wakeup_core(item->mpctx);
+        mp_dispatch_unlock(item->mpctx->dispatch);
+    }
+
+    talloc_free(item);
+}
+
+static void write_screenshot(struct MPContext *mpctx, struct mp_image *img,
+                             const char *filename, struct image_writer_opts *opts,
+                             bool async)
+{
+    screenshot_ctx *ctx = mpctx->screenshot_ctx;
+    struct image_writer_opts *gopts = mpctx->opts->screenshot_image_opts;
+
+    struct screenshot_item *item = talloc_zero(NULL, struct screenshot_item);
+    *item = (struct screenshot_item){
+        .mpctx = mpctx,
+        .filename = talloc_strdup(item, filename),
+        .img = talloc_steal(item, mp_image_new_ref(img)),
+        .opts = opts ? *opts : *gopts,
+    };
+
+    if (async) {
+        if (!ctx->thread_pool)
+            ctx->thread_pool = mp_thread_pool_create(ctx, 1);
+        if (ctx->thread_pool) {
+            item->on_thread = true;
+            mpctx->outstanding_async += 1;
+            mp_thread_pool_queue(ctx->thread_pool, write_screenshot_thread, item);
+            item = NULL;
+        }
+    }
+
+    if (item)
+        write_screenshot_thread(item);
 }
 
 #ifdef _WIN32
@@ -315,21 +395,6 @@ static void add_subs(struct MPContext *mpctx, struct mp_image *image)
                       OSD_DRAW_SUB_ONLY, image);
 }
 
-static void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
-{
-    screenshot_ctx *ctx = mpctx->screenshot_ctx;
-
-    struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
-
-    char *filename = gen_fname(ctx, image_writer_file_ext(opts));
-    if (filename) {
-        screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
-        if (!write_image(image, opts, filename, mpctx->log))
-            screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
-        talloc_free(filename);
-    }
-}
-
 static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 {
     struct mp_image *image = NULL;
@@ -376,7 +441,7 @@ struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
 }
 
 void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
-                        bool osd)
+                        bool osd, bool async)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
     struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
@@ -392,9 +457,7 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
         screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
         goto end;
     }
-    screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
-    if (!write_image(image, &opts, filename, mpctx->log))
-        screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
+    write_screenshot(mpctx, image, filename, &opts, async);
     talloc_free(image);
 
 end:
@@ -402,7 +465,7 @@ end:
 }
 
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
-                        bool osd)
+                        bool osd, bool async)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
@@ -423,7 +486,11 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
     struct mp_image *image = screenshot_get(mpctx, mode);
 
     if (image) {
-        screenshot_save(mpctx, image);
+        struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
+        char *filename = gen_fname(ctx, image_writer_file_ext(opts));
+        if (filename)
+            write_screenshot(mpctx, image, filename, NULL, async);
+        talloc_free(filename);
     } else {
         screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
     }
@@ -439,5 +506,5 @@ void screenshot_flip(struct MPContext *mpctx)
         return;
 
     ctx->each_frame = false;
-    screenshot_request(mpctx, ctx->mode, true, ctx->osd);
+    screenshot_request(mpctx, ctx->mode, true, ctx->osd, false);
 }
