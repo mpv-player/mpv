@@ -121,12 +121,13 @@ FFmpeg dependencies:
 Most of the above libraries are available in suitable versions on normal
 Linux distributions. However FFmpeg is an exception (distro versions may be
 too old to work at all or work well). For that reason you may want to use
-the separately available build wrapper ([mpv-build][mpv-build]) that first compiles FFmpeg
-libraries and libass, and then compiles the player statically linked against
-those.
+the separately available build wrapper ([mpv-build][mpv-build]) that first
+compiles FFmpeg libraries and libass, and then compiles the player statically
+linked against those.
 
 If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
-or cross-compile from Linux with MinGW. See [Windows compilation][windows_compilation].
+or cross-compile from Linux with MinGW. See
+[Windows compilation][windows_compilation].
 
 
 ## FFmpeg vs. Libav
