@@ -1628,8 +1628,11 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
             vo->dheight = w32->dh;
             mp_dispatch_unlock(w32->dispatch);
         }
-        if (*events & VO_EVENT_FULLSCREEN_STATE)
+        if (*events & VO_EVENT_FULLSCREEN_STATE) {
+            mp_dispatch_lock(w32->dispatch);
             reinit_window_state(w32);
+            mp_dispatch_unlock(w32->dispatch);
+        }
         return VO_TRUE;
     } else {
         int r;
