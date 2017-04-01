@@ -619,10 +619,217 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     return true;
 }
 
-static void toggle_fullscreen(struct vo_w32_state *w32)
+struct get_monitor_data {
+    int i;
+    int target;
+    HMONITOR mon;
+};
+
+static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
 {
-    w32->toggle_fs = true;
-    signal_events(w32, VO_EVENT_FULLSCREEN_STATE);
+    struct get_monitor_data *data = (struct get_monitor_data*)p;
+
+    if (data->i == data->target) {
+        data->mon = mon;
+        return FALSE;
+    }
+    data->i++;
+    return TRUE;
+}
+
+static HMONITOR get_monitor(int id)
+{
+    struct get_monitor_data data = { .target = id };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
+    return data.mon;
+}
+
+static void update_screen_rect(struct vo_w32_state *w32)
+{
+    struct mp_vo_opts *opts = w32->opts;
+    int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
+
+    // Handle --fs-screen=all
+    if (w32->current_fs && screen == -2) {
+        struct mp_rect rc = {
+            GetSystemMetrics(SM_XVIRTUALSCREEN),
+            GetSystemMetrics(SM_YVIRTUALSCREEN),
+            GetSystemMetrics(SM_CXVIRTUALSCREEN),
+            GetSystemMetrics(SM_CYVIRTUALSCREEN),
+        };
+        rc.x1 += rc.x0;
+        rc.y1 += rc.y0;
+        w32->screenrc = rc;
+        return;
+    }
+
+    // When not using --fs-screen=all, mpv belongs to a specific HMONITOR
+    HMONITOR mon;
+    if (screen == -1) {
+        // Handle --fs-screen=current and --screen=default
+        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    } else {
+        mon = get_monitor(screen);
+        if (!mon) {
+            MP_INFO(w32, "Screen %d does not exist, falling back to primary\n",
+                    screen);
+            mon = MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        }
+    }
+
+    MONITORINFO mi = { .cbSize = sizeof(mi) };
+    GetMonitorInfoW(mon, &mi);
+    w32->screenrc = (struct mp_rect){
+        mi.rcMonitor.left, mi.rcMonitor.top,
+        mi.rcMonitor.right, mi.rcMonitor.bottom,
+    };
+}
+
+static DWORD update_style(struct vo_w32_state *w32, DWORD style)
+{
+    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
+    const DWORD FRAME = WS_OVERLAPPEDWINDOW;
+    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    if (w32->current_fs) {
+        style |= FULLSCREEN;
+    } else {
+        style |= w32->opts->border ? FRAME : NO_FRAME;
+    }
+    return style;
+}
+
+// Update the window title, position, size, and border style.
+static void reinit_window_state(struct vo_w32_state *w32)
+{
+    HWND layer = HWND_NOTOPMOST;
+    RECT r;
+
+    if (w32->parent)
+        return;
+
+    bool new_fs = w32->toggle_fs ? !w32->current_fs : w32->opts->fullscreen;
+    bool toggle_fs = w32->current_fs != new_fs;
+    w32->current_fs = new_fs;
+    w32->toggle_fs = false;
+
+    if (w32->taskbar_list) {
+        ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
+                                           w32->window, w32->current_fs);
+    }
+
+    DWORD style = update_style(w32, GetWindowLongPtrW(w32->window, GWL_STYLE));
+
+    if (w32->opts->ontop)
+        layer = HWND_TOPMOST;
+
+    // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
+    update_screen_rect(w32);
+
+    int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
+    int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
+
+    if (w32->current_fs) {
+        // Save window position and size when switching to fullscreen.
+        if (toggle_fs) {
+            w32->prev_width = w32->dw;
+            w32->prev_height = w32->dh;
+            w32->prev_x = w32->window_x;
+            w32->prev_y = w32->window_y;
+            MP_VERBOSE(w32, "save window bounds: %d:%d:%d:%d\n",
+                   w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
+        }
+
+        w32->window_x = w32->screenrc.x0;
+        w32->window_y = w32->screenrc.y0;
+        w32->dw = screen_w;
+        w32->dh = screen_h;
+    } else {
+        if (toggle_fs) {
+            // Restore window position and size when switching from fullscreen.
+            MP_VERBOSE(w32, "restore window bounds: %d:%d:%d:%d\n",
+                   w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
+            w32->dw = w32->prev_width;
+            w32->dh = w32->prev_height;
+            w32->window_x = w32->prev_x;
+            w32->window_y = w32->prev_y;
+        }
+    }
+
+    r.left = w32->window_x;
+    r.right = r.left + w32->dw;
+    r.top = w32->window_y;
+    r.bottom = r.top + w32->dh;
+
+    SetWindowLongPtrW(w32->window, GWL_STYLE, style);
+
+    RECT cr = r;
+    add_window_borders(w32->window, &r);
+    // Check on client area size instead of window size on --fit-border=no
+    long o_w;
+    long o_h;
+    if( w32->opts->fit_border ) {
+        o_w = r.right - r.left;
+        o_h = r.bottom - r.top;
+    } else {
+        o_w = cr.right - cr.left;
+        o_h = cr.bottom - cr.top;
+    }
+
+    if ( !w32->current_fs && ( o_w > screen_w || o_h > screen_h ) )
+    {
+        MP_VERBOSE(w32, "requested window size larger than the screen\n");
+        // Use the aspect of the client area, not the full window size.
+        // Basically, try to compute the maximum window size.
+        long n_w;
+        long n_h;
+        if( w32->opts->fit_border ) {
+            n_w = screen_w - (r.right - cr.right) - (cr.left - r.left);
+            n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top);
+        } else {
+            n_w = screen_w;
+            n_h = screen_h;
+        }
+        // Letterbox
+        double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
+        double s_asp = n_w / (double)n_h;
+        if (asp > s_asp) {
+            n_h = n_w / asp;
+        } else {
+            n_w = n_h * asp;
+        }
+        // Save new size
+        w32->dw = n_w;
+        w32->dh = n_h;
+        // Get old window center
+        long o_cx = r.left + (r.right - r.left) / 2;
+        long o_cy = r.top + (r.bottom - r.top) / 2;
+        // Add window borders to the new window size
+        r = (RECT){.right = n_w, .bottom = n_h};
+        add_window_borders(w32->window, &r);
+        // Get top and left border size for client area position calculation
+        long b_top = -r.top;
+        long b_left = -r.left;
+        // Center the final window around the old window center
+        n_w = r.right - r.left;
+        n_h = r.bottom - r.top;
+        r.left = o_cx - n_w / 2;
+        r.top = o_cy - n_h / 2;
+        r.right = r.left + n_w;
+        r.bottom = r.top + n_h;
+        // Save new client area position
+        w32->window_x = r.left + b_left;
+        w32->window_y = r.top + b_top;
+    }
+
+    MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
+               (int) r.left, (int) r.top, (int)(r.right - r.left),
+               (int)(r.bottom - r.top));
+
+    SetWindowPos(w32->window, layer, r.left, r.top, r.right - r.left,
+                 r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+    signal_events(w32, VO_EVENT_RESIZE);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -745,7 +952,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case SC_RESTORE:
             if (IsMaximized(w32->window) && w32->current_fs) {
-                toggle_fullscreen(w32);
+                w32->toggle_fs = true;
+                reinit_window_state(w32);
+                signal_events(w32, VO_EVENT_FULLSCREEN_STATE);
                 return 0;
             }
             break;
@@ -997,219 +1206,6 @@ static void run_message_loop(struct vo_w32_state *w32)
     // external requests until termination is requested.
     while (!w32->terminate)
         mp_dispatch_queue_process(w32->dispatch, 1000);
-}
-
-struct get_monitor_data {
-    int i;
-    int target;
-    HMONITOR mon;
-};
-
-static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
-{
-    struct get_monitor_data *data = (struct get_monitor_data*)p;
-
-    if (data->i == data->target) {
-        data->mon = mon;
-        return FALSE;
-    }
-    data->i++;
-    return TRUE;
-}
-
-static HMONITOR get_monitor(int id)
-{
-    struct get_monitor_data data = { .target = id };
-    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
-    return data.mon;
-}
-
-static void update_screen_rect(struct vo_w32_state *w32)
-{
-    struct mp_vo_opts *opts = w32->opts;
-    int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
-
-    // Handle --fs-screen=all
-    if (w32->current_fs && screen == -2) {
-        struct mp_rect rc = {
-            GetSystemMetrics(SM_XVIRTUALSCREEN),
-            GetSystemMetrics(SM_YVIRTUALSCREEN),
-            GetSystemMetrics(SM_CXVIRTUALSCREEN),
-            GetSystemMetrics(SM_CYVIRTUALSCREEN),
-        };
-        rc.x1 += rc.x0;
-        rc.y1 += rc.y0;
-        w32->screenrc = rc;
-        return;
-    }
-
-    // When not using --fs-screen=all, mpv belongs to a specific HMONITOR
-    HMONITOR mon;
-    if (screen == -1) {
-        // Handle --fs-screen=current and --screen=default
-        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-    } else {
-        mon = get_monitor(screen);
-        if (!mon) {
-            MP_INFO(w32, "Screen %d does not exist, falling back to primary\n",
-                    screen);
-            mon = MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
-        }
-    }
-
-    MONITORINFO mi = { .cbSize = sizeof(mi) };
-    GetMonitorInfoW(mon, &mi);
-    w32->screenrc = (struct mp_rect){
-        mi.rcMonitor.left, mi.rcMonitor.top,
-        mi.rcMonitor.right, mi.rcMonitor.bottom,
-    };
-}
-
-static DWORD update_style(struct vo_w32_state *w32, DWORD style)
-{
-    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
-    const DWORD FRAME = WS_OVERLAPPEDWINDOW;
-    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
-    style &= ~(NO_FRAME | FRAME | FULLSCREEN);
-    if (w32->current_fs) {
-        style |= FULLSCREEN;
-    } else {
-        style |= w32->opts->border ? FRAME : NO_FRAME;
-    }
-    return style;
-}
-
-// Update the window title, position, size, and border style.
-static void reinit_window_state(struct vo_w32_state *w32)
-{
-    HWND layer = HWND_NOTOPMOST;
-    RECT r;
-
-    if (w32->parent)
-        return;
-
-    bool new_fs = w32->toggle_fs ? !w32->current_fs : w32->opts->fullscreen;
-    bool toggle_fs = w32->current_fs != new_fs;
-    w32->current_fs = new_fs;
-    w32->toggle_fs = false;
-
-    if (w32->taskbar_list) {
-        ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
-                                           w32->window, w32->current_fs);
-    }
-
-    DWORD style = update_style(w32, GetWindowLongPtrW(w32->window, GWL_STYLE));
-
-    if (w32->opts->ontop)
-        layer = HWND_TOPMOST;
-
-    // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
-    update_screen_rect(w32);
-
-    int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
-    int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
-
-    if (w32->current_fs) {
-        // Save window position and size when switching to fullscreen.
-        if (toggle_fs) {
-            w32->prev_width = w32->dw;
-            w32->prev_height = w32->dh;
-            w32->prev_x = w32->window_x;
-            w32->prev_y = w32->window_y;
-            MP_VERBOSE(w32, "save window bounds: %d:%d:%d:%d\n",
-                   w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
-        }
-
-        w32->window_x = w32->screenrc.x0;
-        w32->window_y = w32->screenrc.y0;
-        w32->dw = screen_w;
-        w32->dh = screen_h;
-    } else {
-        if (toggle_fs) {
-            // Restore window position and size when switching from fullscreen.
-            MP_VERBOSE(w32, "restore window bounds: %d:%d:%d:%d\n",
-                   w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
-            w32->dw = w32->prev_width;
-            w32->dh = w32->prev_height;
-            w32->window_x = w32->prev_x;
-            w32->window_y = w32->prev_y;
-        }
-    }
-
-    r.left = w32->window_x;
-    r.right = r.left + w32->dw;
-    r.top = w32->window_y;
-    r.bottom = r.top + w32->dh;
-
-    SetWindowLongPtrW(w32->window, GWL_STYLE, style);
-
-    RECT cr = r;
-    add_window_borders(w32->window, &r);
-    // Check on client area size instead of window size on --fit-border=no
-    long o_w;
-    long o_h;
-    if( w32->opts->fit_border ) {
-        o_w = r.right - r.left;
-        o_h = r.bottom - r.top;
-    } else {
-        o_w = cr.right - cr.left;
-        o_h = cr.bottom - cr.top;
-    }
-
-    if ( !w32->current_fs && ( o_w > screen_w || o_h > screen_h ) )
-    {
-        MP_VERBOSE(w32, "requested window size larger than the screen\n");
-        // Use the aspect of the client area, not the full window size.
-        // Basically, try to compute the maximum window size.
-        long n_w;
-        long n_h;
-        if( w32->opts->fit_border ) {
-            n_w = screen_w - (r.right - cr.right) - (cr.left - r.left);
-            n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top);
-        } else {
-            n_w = screen_w;
-            n_h = screen_h;
-        }
-        // Letterbox
-        double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
-        double s_asp = n_w / (double)n_h;
-        if (asp > s_asp) {
-            n_h = n_w / asp;
-        } else {
-            n_w = n_h * asp;
-        }
-        // Save new size
-        w32->dw = n_w;
-        w32->dh = n_h;
-        // Get old window center
-        long o_cx = r.left + (r.right - r.left) / 2;
-        long o_cy = r.top + (r.bottom - r.top) / 2;
-        // Add window borders to the new window size
-        r = (RECT){.right = n_w, .bottom = n_h};
-        add_window_borders(w32->window, &r);
-        // Get top and left border size for client area position calculation
-        long b_top = -r.top;
-        long b_left = -r.left;
-        // Center the final window around the old window center
-        n_w = r.right - r.left;
-        n_h = r.bottom - r.top;
-        r.left = o_cx - n_w / 2;
-        r.top = o_cy - n_h / 2;
-        r.right = r.left + n_w;
-        r.bottom = r.top + n_h;
-        // Save new client area position
-        w32->window_x = r.left + b_left;
-        w32->window_y = r.top + b_top;
-    }
-
-    MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
-               (int) r.left, (int) r.top, (int)(r.right - r.left),
-               (int)(r.bottom - r.top));
-
-    SetWindowPos(w32->window, layer, r.left, r.top, r.right - r.left,
-                 r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-
-    signal_events(w32, VO_EVENT_RESIZE);
 }
 
 static void gui_thread_reconfig(void *ptr)
@@ -1512,7 +1508,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_GET_FULLSCREEN:
-        *(bool *)arg = w32->toggle_fs != w32->current_fs;
+        *(bool *)arg = w32->current_fs;
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
@@ -1613,8 +1609,6 @@ static void do_control(void *ptr)
         w32->vo->dwidth = w32->dw;
         w32->vo->dheight = w32->dh;
     }
-    if (*events & VO_EVENT_FULLSCREEN_STATE)
-        reinit_window_state(w32);
 }
 
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
@@ -1628,8 +1622,6 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
             vo->dheight = w32->dh;
             mp_dispatch_unlock(w32->dispatch);
         }
-        if (*events & VO_EVENT_FULLSCREEN_STATE)
-            reinit_window_state(w32);
         return VO_TRUE;
     } else {
         int r;
