@@ -826,6 +826,12 @@ prefixes can be specified. They are separated by whitespace.
 ``repeatable``
     For some commands, keeping a key pressed doesn't run the command repeatedly.
     This prefix forces enabling key repeat in any case.
+``async``
+    Allow asynchronous execution (if possible). Note that only a few commands
+    will support this (usually this is explicitly documented). Some commands
+    are asynchronous by default (or rather, their effects might manifest
+    after completion of the command). The semantics of this flag might change
+    in the future. Set it only
 
 All of the osd prefixes are still overridden by the global ``--osd-level``
 settings.

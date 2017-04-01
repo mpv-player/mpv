@@ -34,6 +34,7 @@ enum mp_cmd_flags {
     MP_ON_OSD_MSG = 4,          // force a message, if applicable
     MP_EXPAND_PROPERTIES = 8,   // expand strings as properties
     MP_ALLOW_REPEAT = 16,       // if used as keybinding, allow key repeat
+    MP_ASYNC_CMD = 32,
 
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,

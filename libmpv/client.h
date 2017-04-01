@@ -879,6 +879,10 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * MPV_EVENT_COMMAND_REPLY event. (This event will also have an
  * error code set if running the command failed.)
  *
+ * This has nothing to do with the "async" command prefix, although they might
+ * be unified in the future. For now, calling this API means that the command
+ * will be synchronously executed on the core, without blocking the API user.
+ *
  * @param reply_userdata the value mpv_event.reply_userdata of the reply will
  *                       be set to (see section about asynchronous calls)
  * @param args NULL-terminated list of strings (see mpv_command())

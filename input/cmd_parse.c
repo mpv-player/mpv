@@ -49,6 +49,7 @@ static const struct flag cmd_flags[] = {
     {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
     {"repeatable",          0,               MP_ALLOW_REPEAT},
+    {"async",               0,               MP_ASYNC_CMD},
     {0}
 };
 
