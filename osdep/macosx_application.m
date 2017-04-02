@@ -135,7 +135,8 @@ static void terminate_cocoa_application(void)
 - (void)processEvent:(struct mpv_event *)event
 {
 #if HAVE_MACOS_TOUCHBAR
-    [(TouchBar *)self.touchBar processEvent:event];
+    if ([self respondsToSelector:@selector(touchBar)])
+        [(TouchBar *)self.touchBar processEvent:event];
 #endif
 }
 
@@ -179,9 +180,11 @@ static void terminate_cocoa_application(void)
     _R(menu, @"Zoom",     @"z", MPM_ZOOM)
 
 #if HAVE_MACOS_TOUCHBAR
-    [menu addItem:[NSMenuItem separatorItem]];
-    [self menuItemWithParent:menu title:@"Customize Touch Bar…"
-                      action:@selector(toggleTouchBarMenu) keyEquivalent: @""];
+    if ([self respondsToSelector:@selector(touchBar)]) {
+        [menu addItem:[NSMenuItem separatorItem]];
+        [self menuItemWithParent:menu title:@"Customize Touch Bar…"
+                          action:@selector(toggleTouchBarMenu) keyEquivalent: @""];
+    }
 #endif
 
     return [menu autorelease];
