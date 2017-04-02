@@ -59,6 +59,13 @@ normal filter parameters.
     in mpv (such as filters which deal with mpv specifics, or which are
     implemented in mpv only).
 
+    If a filter is not builtin, the ``lavfi-bridge`` will be automatically
+    tried. Keep in mind that this filter does not support positional arguments
+    like ``--vf=name=arg1:arg2``. Instead, you must use
+    ``--vf=name=arg1name=arg1value:...``. This bridge also does not support
+    help output, and does not verify parameters before the filter is actually
+    used.
+
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 

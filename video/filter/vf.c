@@ -56,6 +56,7 @@ extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_dlopen;
 extern const vf_info_t vf_info_lavfi;
+extern const vf_info_t vf_info_lavfi_bridge;
 extern const vf_info_t vf_info_vaapi;
 extern const vf_info_t vf_info_vapoursynth;
 extern const vf_info_t vf_info_vapoursynth_lazy;
@@ -74,6 +75,7 @@ static const vf_info_t *const filter_list[] = {
 
     &vf_info_mirror,
     &vf_info_lavfi,
+    &vf_info_lavfi_bridge,
     &vf_info_rotate,
     &vf_info_gradfun,
     &vf_info_pullup,
@@ -129,6 +131,7 @@ const struct m_obj_list vf_obj_list = {
     .get_desc = get_desc,
     .description = "video filters",
     .allow_disable_entries = true,
+    .allow_unknown_entries = true,
 };
 
 // Try the cmd on each filter (starting with the first), and stop at the first
@@ -241,10 +244,17 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
 static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
                                    char **args)
 {
+    const char *lavfi_name = NULL;
+    char **lavfi_args = NULL;
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vf_obj_list, bstr0(name))) {
-        MP_ERR(c, "Couldn't find video filter '%s'.\n", name);
-        return NULL;
+        if (!m_obj_list_find(&desc, &vf_obj_list, bstr0("lavfi-bridge"))) {
+            MP_ERR(c, "Couldn't find video filter '%s'.\n", name);
+            return NULL;
+        }
+        lavfi_name = name;
+        lavfi_args = args;
+        args = NULL;
     }
     vf_instance_t *vf = talloc_zero(NULL, struct vf_instance);
     *vf = (vf_instance_t) {
@@ -260,6 +270,19 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
                                         name, c->opts->vf_defs, args);
     if (!config)
         goto error;
+    if (lavfi_name) {
+        // Pass the filter arguments as proper sub-options to the bridge filter.
+        struct m_config_option *name_opt = m_config_get_co(config, bstr0("name"));
+        assert(name_opt);
+        assert(name_opt->opt->type == &m_option_type_string);
+        if (m_config_set_option_raw(config, name_opt, &lavfi_name, 0) < 0)
+            goto error;
+        struct m_config_option *opts = m_config_get_co(config, bstr0("opts"));
+        assert(opts);
+        assert(opts->opt->type == &m_option_type_keyvalue_list);
+        if (m_config_set_option_raw(config, opts, &lavfi_args, 0) < 0)
+            goto error;
+    }
     vf->priv = config->optstruct;
     int retcode = vf->info->open(vf);
     if (retcode < 1)

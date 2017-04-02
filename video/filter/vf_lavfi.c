@@ -65,6 +65,9 @@
 #endif
 
 struct vf_priv_s {
+    // Single filter bridge, instead of a graph.
+    bool is_bridge;
+
     AVFilterGraph *graph;
     AVFilterContext *in;
     AVFilterContext *out;
@@ -86,10 +89,9 @@ struct vf_priv_s {
     char *cfg_graph;
     int64_t cfg_sws_flags;
     char **cfg_avopts;
-};
 
-static const struct vf_priv_s vf_priv_dflt = {
-    .cfg_sws_flags = SWS_BICUBIC,
+    char *cfg_filter_name;
+    char **cfg_filter_opts;
 };
 
 static void destroy_graph(struct vf_instance *vf)
@@ -113,13 +115,12 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     AVFilterContext *in = NULL, *out = NULL;
     int ret;
 
-    if (bstr0(p->cfg_graph).len == 0) {
+    if (!p->is_bridge && bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(vf, "lavfi: no filter graph set\n");
         return false;
     }
 
     destroy_graph(vf);
-    MP_VERBOSE(vf, "lavfi: create graph: '%s'\n", p->cfg_graph);
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
@@ -165,14 +166,46 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
                                      "out", NULL, NULL, graph) < 0)
         goto error;
 
-    outputs->name    = av_strdup("in");
-    outputs->filter_ctx = in;
+    if (p->is_bridge) {
+        AVFilterContext *filter = avfilter_graph_alloc_filter(graph,
+                        avfilter_get_by_name(p->cfg_filter_name), "filter");
+        if (!filter)
+            goto error;
 
-    inputs->name    = av_strdup("out");
-    inputs->filter_ctx = out;
+        if (mp_set_avopts(vf->log, filter, p->cfg_filter_opts) < 0)
+            goto error;
 
-    if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
-        goto error;
+        if (avfilter_init_str(filter, NULL) < 0)
+            goto error;
+
+        // Yep, we have to manually link those filters.
+        if (filter->nb_inputs != 1 ||
+            avfilter_pad_get_type(filter->input_pads, 0) != AVMEDIA_TYPE_VIDEO ||
+            filter->nb_outputs != 1 ||
+            avfilter_pad_get_type(filter->output_pads, 0) != AVMEDIA_TYPE_VIDEO)
+        {
+            MP_ERR(vf, "The filter is required to have 1 video input pad and "
+                       "1 video output pad.\n");
+            goto error;
+        }
+        if (avfilter_link(in, 0, filter, 0) < 0 ||
+            avfilter_link(filter, 0, out, 0) < 0)
+        {
+            MP_ERR(vf, "Failed to link filter.\n");
+            goto error;
+        }
+    } else {
+        MP_VERBOSE(vf, "lavfi: create graph: '%s'\n", p->cfg_graph);
+
+        outputs->name    = av_strdup("in");
+        outputs->filter_ctx = in;
+
+        inputs->name    = av_strdup("out");
+        inputs->filter_ctx = out;
+
+        if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
+            goto error;
+    }
 
     if (vf->hwdec_devs) {
         struct mp_hwdec_ctx *hwdec = hwdec_devices_get_first(vf->hwdec_devs);
@@ -384,6 +417,8 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
+    struct vf_priv_s *p = vf->priv;
+
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
@@ -391,6 +426,18 @@ static int vf_open(vf_instance_t *vf)
     vf->query_format = query_format;
     vf->control = control;
     vf->uninit = uninit;
+
+    if (p->is_bridge) {
+        if (!p->cfg_filter_name) {
+            MP_ERR(vf, "Filter name not set!\n");
+            return 0;
+        }
+        if (!avfilter_get_by_name(p->cfg_filter_name)) {
+            MP_ERR(vf, "libavfilter filter '%s' not found!\n", p->cfg_filter_name);
+            return 0;
+        }
+    }
+
     return 1;
 }
 
@@ -445,8 +492,29 @@ const vf_info_t vf_info_lavfi = {
     .name = "lavfi",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_dflt,
+    .priv_defaults = &(const struct vf_priv_s){
+        .cfg_sws_flags = SWS_BICUBIC,
+    },
     .options = vf_opts_fields,
+    .print_help = print_help,
+};
+
+const vf_info_t vf_info_lavfi_bridge = {
+    .description = "libavfilter bridge (explicit options)",
+    .name = "lavfi-bridge",
+    .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .options = (const m_option_t[]) {
+        OPT_STRING("name", cfg_filter_name, M_OPT_MIN, .min = 1),
+        OPT_KEYVALUELIST("opts", cfg_filter_opts, 0),
+        OPT_INT64("sws-flags", cfg_sws_flags, 0),
+        OPT_KEYVALUELIST("o", cfg_avopts, 0),
+        {0}
+    },
+    .priv_defaults = &(const struct vf_priv_s){
+        .is_bridge = true,
+        .cfg_sws_flags = SWS_BICUBIC,
+    },
     .print_help = print_help,
 };
 
@@ -497,7 +565,7 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
     void *old_priv = vf->priv;
     struct vf_priv_s *p = talloc(vf, struct vf_priv_s);
     vf->priv = p;
-    *p = vf_priv_dflt;
+    *p = *(const struct vf_priv_s *)vf_info_lavfi.priv_defaults;
     p->cfg_sws_flags = lavfi_opts->sws_flags;
     p->cfg_avopts = lavfi_opts->avopts;
     va_list ap;
