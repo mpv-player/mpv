@@ -29,6 +29,7 @@
 
 struct vf_priv_s {
     int angle;
+    int warn;
     struct vf_lw_opts *lw_opts;
 };
 
@@ -67,6 +68,9 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    if (p->warn)
+        MP_WARN(vf, "%s", VF_LW_REPLACE);
+
     if (vf_lw_set_graph(vf, p->lw_opts, NULL, "%s", rot[p->angle]) >= 0) {
         vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
         return 1;
@@ -88,6 +92,7 @@ const vf_info_t vf_info_rotate = {
                     {"180", 2},
                     {"270", 3},
                     {"auto", 4})),
+        OPT_FLAG("warn", warn, 0, OPTDEF_INT(1)),
         OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
         {0}
     },

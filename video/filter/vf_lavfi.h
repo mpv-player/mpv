@@ -18,4 +18,8 @@ void vf_lw_set_reconfig_cb(struct vf_instance *vf,
                                                 struct mp_image_params *in,
                                                 struct mp_image_params *out));
 
+#define VF_LW_REPLACE "This filter will be replaced by using libavfilter " \
+    "option syntax directly. Parts of the old syntax will stop working, " \
+    "and some defaults may change.\n"
+
 #endif

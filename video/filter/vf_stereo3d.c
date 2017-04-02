@@ -72,10 +72,12 @@ struct vf_priv_s {
     int in_fmt;
     int out_fmt;
     bool auto_in;
+    int warn;
     struct vf_lw_opts *lw_opts;
 } const vf_priv_default = {
     SIDE_BY_SIDE_LR,
     ANAGLYPH_RC_DUBOIS,
+    .warn = 1,
 };
 
 const struct m_opt_choice_alternatives stereo_code_names[] = {
@@ -185,6 +187,9 @@ static void lavfi_init(vf_instance_t *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
+    if (vf->priv->warn)
+        MP_WARN(vf, "%s", VF_LW_REPLACE);
+
     if (vf->priv->out_fmt == STEREO_AUTO) {
         MP_FATAL(vf, "No autodetection for stereo output.\n");
         return 0;
@@ -200,6 +205,7 @@ static int vf_open(vf_instance_t *vf)
 static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("in", in_fmt, 0, stereo_code_names),
     OPT_CHOICE_C("out", out_fmt, 0, stereo_code_names),
+    OPT_FLAG("warn", warn, 0),
     OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };

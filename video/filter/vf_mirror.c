@@ -22,6 +22,7 @@
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "This filter is deprecated. Use lavfi hflip instead.\n");
     return vf_lw_set_graph(vf, NULL, NULL, "hflip") >= 0;
 }
 

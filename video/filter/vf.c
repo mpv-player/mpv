@@ -579,7 +579,11 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         }
         query_formats(fmts, vf);
         const char *filter = find_conv_filter(fmts, out_formats);
-        struct vf_instance *conv = vf_open(c, filter, NULL);
+        char **args = NULL;
+        char *args_no_warn[] = {"warn", "no", NULL};
+        if (strcmp(filter, "scale") == 0)
+            args = args_no_warn;
+        struct vf_instance *conv = vf_open(c, filter, args);
         if (conv) {
             conv->autoinserted = true;
             conv->next = vf->next;

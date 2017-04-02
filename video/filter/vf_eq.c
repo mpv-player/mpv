@@ -390,6 +390,9 @@ int vf_open(vf_instance_t *vf)
   vf_eq2_t *eq2;
   double   *par = vf->priv->par;
 
+  MP_WARN(vf, "This filter is deprecated. Use lavfi eq instead.\n"
+              "For interactive eq, there is no replacement.\n");
+
   vf->control = control;
   vf->query_format = query_format;
   vf->filter = filter;

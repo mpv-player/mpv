@@ -127,6 +127,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "This filter is deprecated and will be removed (no replacement)\n");
     vf->reconfig = reconfig;
     vf->query_format = query_format;
     vf->control   = control;

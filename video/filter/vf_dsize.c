@@ -83,6 +83,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "This filter is deprecated. No replacement.\n");
+
     vf->reconfig = reconfig;
     return 1;
 }

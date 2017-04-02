@@ -263,6 +263,8 @@ static int vf_open(vf_instance_t *vf)
         return 0;
     }
 
+    MP_WARN(vf, "This filter is deprecated. No replacement.\n");
+
     vf->priv->dll = DLLOpen(vf->priv->cfg_dllname);
     if (!vf->priv->dll) {
         MP_ERR(vf, "library not found: %s\n",

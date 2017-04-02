@@ -44,6 +44,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 }
 
 static int vf_open(vf_instance_t *vf){
+    MP_WARN(vf, "This filter is deprecated and will be removed (no replacement)\n");
     vf->query_format=query_format;
     return 1;
 }

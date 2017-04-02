@@ -59,6 +59,8 @@ static int lavfi_reconfig(struct vf_instance *vf,
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "%s", VF_LW_REPLACE);
+
     bool have_radius = vf->priv->cfg_radius > -1;
     bool have_size = vf->priv->cfg_size > -1;
 

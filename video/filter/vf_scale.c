@@ -39,6 +39,8 @@
 
 #include "options/m_option.h"
 
+#include "vf_lavfi.h"
+
 static struct vf_priv_s {
     int w, h;
     int cfg_w, cfg_h;
@@ -47,11 +49,13 @@ static struct vf_priv_s {
     struct mp_sws_context *sws;
     int noup;
     int accurate_rnd;
+    int warn;
 } const vf_priv_dflt = {
     0, 0,
     -1, -1,
     0,
     {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
+    .warn = 1,
 };
 
 static int find_best_out(vf_instance_t *vf, int in_format)
@@ -238,6 +242,8 @@ static int vf_open(vf_instance_t *vf)
     vf->priv->sws->log = vf->log;
     vf->priv->sws->params[0] = vf->priv->param[0];
     vf->priv->sws->params[1] = vf->priv->param[1];
+    if (vf->priv->warn)
+        MP_WARN(vf, "%s", VF_LW_REPLACE);
     return 1;
 }
 
@@ -250,6 +256,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INTRANGE("chr-drop", v_chr_drop, 0, 0, 3),
     OPT_INTRANGE("noup", noup, 0, 0, 2),
     OPT_FLAG("arnd", accurate_rnd, 0),
+    OPT_FLAG("warn", warn, 0),
     {0}
 };
 

@@ -32,11 +32,15 @@ struct vf_priv_s {
     int mode;
     int interlaced_only;
     struct vf_lw_opts *lw_opts;
+    int warn;
 };
 
 static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
+
+    if (p->warn)
+        MP_WARN(vf, "%s", VF_LW_REPLACE);
 
 #if LIBAVFILTER_VERSION_MICRO >= 100
     const char *mode[] = {"send_frame", "send_field", "send_frame_nospatial",
@@ -69,6 +73,7 @@ static const m_option_t vf_opts_fields[] = {
                 {"frame-nospatial", 2},
                 {"field-nospatial", 3})),
     OPT_FLAG("interlaced-only", interlaced_only, 0),
+    OPT_FLAG("warn", warn, 0),
     OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
@@ -81,6 +86,7 @@ const vf_info_t vf_info_yadif = {
     .priv_defaults = &(const struct vf_priv_s){
         .mode = 1,
         .interlaced_only = 1,
+        .warn = 1,
     },
     .options = vf_opts_fields,
 };

@@ -142,6 +142,8 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 }
 
 static int vf_open(vf_instance_t *vf){
+    MP_WARN(vf, "This filter is deprecated. Use lavfi pad instead.\n");
+
     vf->reconfig=reconfig;
     vf->query_format=query_format;
     vf->filter=filter;

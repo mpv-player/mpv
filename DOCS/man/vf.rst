@@ -55,6 +55,10 @@ normal filter parameters.
     wrapper, which gives you access to most of libavfilter's filters. This
     includes all filters that have been ported from MPlayer to libavfilter.
 
+    Most filters are deprecated in some ways, unless they're only available
+    in mpv (such as filters which deal with mpv specifics, or which are
+    implemented in mpv only).
+
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 

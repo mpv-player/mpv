@@ -38,6 +38,8 @@ struct vf_priv_s {
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "%s", VF_LW_REPLACE);
+
     struct vf_priv_s *p = vf->priv;
     const char *pname[3] = {"y", "u", "v"};
     if (vf_lw_set_graph(vf, p->lw_opts, "pullup", "%d:%d:%d:%d:%d:%s",

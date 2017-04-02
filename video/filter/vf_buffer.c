@@ -65,6 +65,7 @@ static void uninit(vf_instance_t *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
+    MP_WARN(vf, "This filter is deprecated. No replacement.\n");
     vf->filter_ext = filter_ext;
     vf->control = control;
     vf->uninit = uninit;
