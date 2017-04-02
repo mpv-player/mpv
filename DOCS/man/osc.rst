@@ -277,6 +277,14 @@ Configurable Options
 
     Also supports ``never`` and ``always``
 
+``boxmaxchars``
+    Default: 80
+
+    Max chars for the osc title at the box layout. mpv does not measure the
+    text width on screen and so it needs to limit it by number of chars. The
+    default is conservative to allow wide fonts to be used without overflow.
+    However, with many common fonts a bigger number can be used. YMMV.
+
 Script Commands
 ~~~~~~~~~~~~~~~
 

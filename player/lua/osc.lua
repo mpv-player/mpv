@@ -40,6 +40,7 @@ local user_opts = {
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
     visibility = "auto",        -- only used at init to set visibility_mode(...)
+    boxmaxchars = 80,           -- title crop threshold for box layout
 }
 
 -- read_options may modify hidetimeout, so save the original default value in
@@ -662,8 +663,10 @@ function render_elements(master_ass)
 
             local maxchars = element.layout.button.maxchars
             if not (maxchars == nil) and (#buttontext > maxchars) then
-                if (#buttontext > maxchars+20) then
-                    while (#buttontext > maxchars+20) do
+                local max_ratio = 1.25  -- up to 25% more chars while shrinking
+                local limit = math.max(0, math.floor(maxchars * max_ratio) - 3)
+                if (#buttontext > limit) then
+                    while (#buttontext > limit) do
                         buttontext = buttontext:gsub(".[\128-\191]*$", "")
                     end
                     buttontext = buttontext .. "..."
@@ -937,7 +940,7 @@ layouts["box"] = function ()
     lo = add_layout("title")
     lo.geometry = {x = posX, y = titlerowY, an = 8, w = 496, h = 12}
     lo.style = osc_styles.vidtitle
-    lo.button.maxchars = 80
+    lo.button.maxchars = user_opts.boxmaxchars
 
     lo = add_layout("pl_prev")
     lo.geometry =
