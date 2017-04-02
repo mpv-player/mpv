@@ -455,7 +455,7 @@ bool ao_chmap_sel_adjust2(struct ao *ao, const struct mp_chmap_sel *s,
             if (!mp_chmap_equals(&res, &(struct mp_chmap)MP_CHMAP_INIT_MONO) &&
                 !mp_chmap_equals(&res, &(struct mp_chmap)MP_CHMAP_INIT_STEREO))
             {
-                MP_WARN(ao, "Disabling multichannel output.\n");
+                MP_VERBOSE(ao, "Disabling multichannel output.\n");
                 *map = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
             }
         }
