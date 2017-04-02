@@ -399,6 +399,35 @@ static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
     return true;
 }
 
+static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
+{
+    btn |= mod_state(w32);
+    mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
+
+    if (btn == MP_MOUSE_BTN0 && !w32->current_fs &&
+        !mp_input_test_dragging(w32->input_ctx, x, y))
+    {
+        // Window dragging hack
+        ReleaseCapture();
+        SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+        mp_input_put_key(w32->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
+
+        // Indicate the message was handled, so DefWindowProc won't be called
+        return true;
+    }
+
+    SetCapture(w32->window);
+    return false;
+}
+
+static void handle_mouse_up(struct vo_w32_state *w32, int btn)
+{
+    btn |= mod_state(w32);
+    mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_UP);
+
+    ReleaseCapture();
+}
+
 static void signal_events(struct vo_w32_state *w32, int events)
 {
     atomic_fetch_or(&w32->event_flags, events);
@@ -840,7 +869,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     if (!w32->window)
         w32->window = hWnd; // can happen during CreateWindow*!
     assert(w32->window == hWnd);
-    int mouse_button = 0;
 
     switch (message) {
     case WM_USER:
@@ -1028,35 +1056,42 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_LBUTTONDOWN:
-        mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
+        if (handle_mouse_down(w32, MP_MOUSE_BTN0, GET_X_LPARAM(lParam),
+                                                  GET_Y_LPARAM(lParam)))
+            return 0;
         break;
     case WM_LBUTTONUP:
-        mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_UP;
+        handle_mouse_up(w32, MP_MOUSE_BTN0);
         break;
     case WM_MBUTTONDOWN:
-        mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
+        handle_mouse_down(w32, MP_MOUSE_BTN1, GET_X_LPARAM(lParam),
+                                              GET_Y_LPARAM(lParam));
         break;
     case WM_MBUTTONUP:
-        mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_UP;
+        handle_mouse_up(w32, MP_MOUSE_BTN1);
         break;
     case WM_RBUTTONDOWN:
-        mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
+        handle_mouse_down(w32, MP_MOUSE_BTN2, GET_X_LPARAM(lParam),
+                                              GET_Y_LPARAM(lParam));
         break;
     case WM_RBUTTONUP:
-        mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_UP;
+        handle_mouse_up(w32, MP_MOUSE_BTN2);
         break;
     case WM_MOUSEWHEEL: {
         int x = GET_WHEEL_DELTA_WPARAM(wParam);
-        mouse_button = x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        mp_input_put_key(w32->input_ctx,
+                         (x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4) |
+                         mod_state(w32));
+        ReleaseCapture();
         break;
     }
     case WM_XBUTTONDOWN:
-        mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
-        mouse_button |= MP_KEY_STATE_DOWN;
+        handle_mouse_down(w32,
+                          HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6,
+                          GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         break;
     case WM_XBUTTONUP:
-        mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
-        mouse_button |= MP_KEY_STATE_UP;
+        handle_mouse_up(w32, HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6);
         break;
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
@@ -1067,33 +1102,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         w32->tbtnCreated = true;
         update_playback_state(w32);
         return 0;
-    }
-
-    if (mouse_button) {
-        mouse_button |= mod_state(w32);
-        mp_input_put_key(w32->input_ctx, mouse_button);
-
-        if (mp_input_mouse_enabled(w32->input_ctx)) {
-            int x = GET_X_LPARAM(lParam);
-            int y = GET_Y_LPARAM(lParam);
-
-            if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
-                !w32->current_fs &&
-                !mp_input_test_dragging(w32->input_ctx, x, y))
-            {
-                // Window dragging hack
-                ReleaseCapture();
-                SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-                mp_input_put_key(w32->input_ctx, MP_MOUSE_BTN0 |
-                                                 MP_KEY_STATE_UP);
-                return 0;
-            }
-        }
-
-        if (mouse_button & MP_KEY_STATE_DOWN)
-            SetCapture(w32->window);
-        else
-            ReleaseCapture();
     }
 
     return DefWindowProcW(hWnd, message, wParam, lParam);
