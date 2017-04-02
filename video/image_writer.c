@@ -79,6 +79,16 @@ struct image_writer_ctx {
     struct mp_imgfmt_desc original_format;
 };
 
+static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
+{
+    switch (fmt) {
+    case AV_PIX_FMT_YUV420P: return AV_PIX_FMT_YUVJ420P;
+    case AV_PIX_FMT_YUV422P: return AV_PIX_FMT_YUVJ422P;
+    case AV_PIX_FMT_YUV444P: return AV_PIX_FMT_YUVJ444P;
+    }
+    return fmt;
+}
+
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 {
     bool success = 0;
@@ -99,7 +109,11 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     avctx->time_base = AV_TIME_BASE_Q;
     avctx->width = image->w;
     avctx->height = image->h;
+    avctx->color_range = mp_csp_levels_to_avcol_range(image->params.color.levels);
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+    // Annoying deprecated garbage for the jpg encoder.
+    if (image->params.color.levels == MP_CSP_LEVELS_PC)
+        avctx->pix_fmt = replace_j_format(avctx->pix_fmt);
     if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
         MP_ERR(ctx, "Image format %s not supported by lavc.\n",
                mp_imgfmt_to_name(image->imgfmt));
@@ -127,6 +141,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     pic->format = avctx->pix_fmt;
     pic->width = avctx->width;
     pic->height = avctx->height;
+    pic->color_range = avctx->color_range;
     if (ctx->opts->tag_csp) {
         pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.color.primaries);
         pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.color.gamma);
@@ -281,19 +296,37 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
 {
     int d_w, d_h;
     mp_image_params_get_dsize(&image->params, &d_w, &d_h);
-    bool is_anamorphic = image->w != d_w || image->h != d_h;
 
-    // Caveat: no colorspace/levels conversion done if pixel formats equal
-    //         it's unclear what colorspace/levels the target wants
-    if (image->imgfmt == destfmt && !is_anamorphic)
+    struct mp_image_params p = {
+        .imgfmt = destfmt,
+        .w = d_w,
+        .h = d_h,
+        .p_w = 1,
+        .p_h = 1,
+    };
+    mp_image_params_guess_csp(&p);
+
+    // If RGB, just assume everything is correct.
+    if (p.color.space != MP_CSP_RGB) {
+        // Currently, assume what FFmpeg's jpg encoder needs.
+        // Of course this works only for non-HDR (no HDR support in libswscale).
+        p.color.levels = MP_CSP_LEVELS_PC;
+        p.color.space = MP_CSP_BT_601;
+        p.chroma_location = MP_CHROMA_CENTER;
+        mp_image_params_guess_csp(&p);
+    }
+
+    if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
 
-    struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
+    struct mp_image *dst = mp_image_alloc(p.imgfmt, p.w, p.h);
     if (!dst) {
         mp_err(log, "Out of memory.\n");
         return NULL;
     }
     mp_image_copy_attributes(dst, image);
+
+    dst->params = p;
 
     if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
         mp_err(log, "Error when converting image.\n");
