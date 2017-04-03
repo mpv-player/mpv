@@ -1255,8 +1255,12 @@ void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo)
 int gl_determine_16bit_tex_depth(GL *gl)
 {
     const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
-    if (!gl->GetTexLevelParameteriv || !fmt)
+    if (!gl->GetTexLevelParameteriv || !fmt) {
+        // ANGLE supports ES 3.0 and the extension, but lacks the function above.
+        if (gl->mpgl_caps & MPGL_CAP_EXT16)
+            return 16;
         return -1;
+    }
 
     GLuint tex;
     gl->GenTextures(1, &tex);
