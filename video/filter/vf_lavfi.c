@@ -172,7 +172,7 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
         if (!filter)
             goto error;
 
-        if (mp_set_avopts(vf->log, filter, p->cfg_filter_opts) < 0)
+        if (mp_set_avopts(vf->log, filter->priv, p->cfg_filter_opts) < 0)
             goto error;
 
         if (avfilter_init_str(filter, NULL) < 0)

@@ -2606,17 +2606,33 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
 static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
                          struct m_config *config, bstr name, bstr val,
                          int flags, bool nopos,
-                         int *nold, bstr *out_name, bstr *out_val)
+                         int *nold, bstr *out_name, bstr *out_val,
+                         char *tmp, size_t tmp_size)
 {
     int r;
 
     if (!config) {
-        *out_name = name; // preserve args for opengl-hq legacy handling
-        *out_val = val;
+        // Duplicates the logic below, but with unknown parameter types/names.
+        if (val.start || nopos) {
+            *out_name = name;
+            *out_val = val;
+        } else {
+            val = name;
+            // positional fields
+            if (val.len == 0) { // Empty field, count it and go on
+                (*nold)++;
+                return 0;
+            }
+            // Positional naming convention for/followed by mp_set_avopts().
+            snprintf(tmp, tmp_size, "@%d", *nold);
+            *out_name = bstr0(tmp);
+            *out_val = val;
+            (*nold)++;
+        }
         return 1;
     }
 
-    // va.start != NULL => of the form name=val (not positional)
+    // val.start != NULL => of the form name=val (not positional)
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
     if (val.start || m_config_option_requires_param(config, name) == 0 || nopos) {
@@ -2683,6 +2699,7 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
     char **args = NULL;
     int num_args = 0;
     int r = 1;
+    char tmp[80];
 
     if (ret) {
         args = *ret;
@@ -2708,7 +2725,7 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
         if (bstr_equals0(fname, "help"))
             goto print_help;
         r = get_obj_param(log, opt_name, name, config, fname, fval, flags,
-                          nopos, &nold, &fname, &fval);
+                          nopos, &nold, &fname, &fval, tmp, sizeof(tmp));
         if (r < 0)
             goto exit;
 

@@ -302,6 +302,35 @@ void mp_avdict_print_unset(struct mp_log *log, int msgl, AVDictionary *dict)
         mp_msg(log, msgl, "Could not set AVOption %s='%s'\n", t->key, t->value);
 }
 
+// If the name starts with "@", try to interpret it as a number, and set *name
+// to the name of the n-th parameter.
+static void resolve_positional_arg(void *avobj, char **name)
+{
+    if (!*name || (*name)[0] != '@')
+        return;
+
+    char *end = NULL;
+    int pos = strtol(*name + 1, &end, 10);
+    if (!end || *end)
+        return;
+
+    const AVOption *opt = NULL;
+    int offset = -1;
+    while (1) {
+        opt = av_opt_next(avobj, opt);
+        if (!opt)
+            return;
+        // This is what libavfilter's parser does to skip aliases.
+        if (opt->offset != offset && opt->type != AV_OPT_TYPE_CONST)
+            pos--;
+        if (pos < 0) {
+            *name = (char *)opt->name;
+            return;
+        }
+        offset = opt->offset;
+    }
+}
+
 // kv is in the format as by OPT_KEYVALUELIST(): kv[0]=key0, kv[1]=val0, ...
 // Set these options on given avobj (using av_opt_set..., meaning avobj must
 // point to a struct that has AVClass as first member).
@@ -313,6 +342,7 @@ int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
     for (int n = 0; kv && kv[n * 2]; n++) {
         char *k = kv[n * 2 + 0];
         char *v = kv[n * 2 + 1];
+        resolve_positional_arg(avobj, &k);
         int r = av_opt_set(avobj, k, v, AV_OPT_SEARCH_CHILDREN);
         if (r == AVERROR_OPTION_NOT_FOUND) {
             mp_err(log, "AVOption '%s' not found.\n", k);
