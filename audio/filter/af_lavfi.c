@@ -87,7 +87,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
 {
     void *tmp = talloc_new(NULL);
     struct priv *p = af->priv;
-    AVFilterContext *in = NULL, *out = NULL, *f_format = NULL;
+    AVFilterContext *in = NULL, *out = NULL;
 
     if (bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(af, "lavfi: no filter graph set\n");
@@ -109,24 +109,6 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     if (!outputs || !inputs)
         goto error;
 
-    // Build list of acceptable output sample formats. libavfilter will insert
-    // conversion filters if needed.
-    static const enum AVSampleFormat sample_fmts[] = {
-        AV_SAMPLE_FMT_U8, AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S32,
-        AV_SAMPLE_FMT_FLT, AV_SAMPLE_FMT_DBL,
-        AV_SAMPLE_FMT_U8P, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_S32P,
-        AV_SAMPLE_FMT_FLTP, AV_SAMPLE_FMT_DBLP,
-        AV_SAMPLE_FMT_NONE
-    };
-    char *fmtstr = talloc_strdup(tmp, "");
-    for (int n = 0; sample_fmts[n] != AV_SAMPLE_FMT_NONE; n++) {
-        const char *name = av_get_sample_fmt_name(sample_fmts[n]);
-        if (name) {
-            const char *s = fmtstr[0] ? "|" : "";
-            fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
-        }
-    }
-
     char *src_args = talloc_asprintf(tmp,
         "sample_rate=%d:sample_fmt=%s:time_base=%d/%d:"
         "channel_layout=0x%"PRIx64,  config->rate,
@@ -141,18 +123,11 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
                                      "out", NULL, NULL, graph) < 0)
         goto error;
 
-    if (avfilter_graph_create_filter(&f_format, avfilter_get_by_name("aformat"),
-                                     "format", fmtstr, NULL, graph) < 0)
-        goto error;
-
-    if (avfilter_link(f_format, 0, out, 0) < 0)
-        goto error;
-
     outputs->name = av_strdup("in");
     outputs->filter_ctx = in;
 
     inputs->name = av_strdup("out");
-    inputs->filter_ctx = f_format;
+    inputs->filter_ctx = out;
 
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
