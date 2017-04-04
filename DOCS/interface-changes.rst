@@ -31,6 +31,16 @@ Interface changes
     - add --sub-filter-sdh
     - add --sub-filter-sdh-harder
     - remove --input-app-events option (macOS)
+    - deprecate most --vf and --af filters. Only some filters not in libavfilter
+      will be kept.
+      Also, you can use libavfilter filters directly (e.g. you can use
+      --vf=name=opts instead of --vf=lavfi=[name=opts]), as long as the
+      libavfilter filter's name doesn't clash with a mpv builtin filter.
+      In the long term, --vf/--af syntax might change again, but if it does, it
+      will switch to libavfilter's native syntax. (The above mentioned direct
+      support for lavfi filters still has some differences, such as how strings
+      are escaped.) If this happens, the non-deprecated builtin filters might be
+      moved to "somewhere else" syntax-wise.
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.
