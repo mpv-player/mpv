@@ -42,6 +42,7 @@ struct priv {
     int fast;                   // Use fix-point volume control
     int detach;                 // Detach if gain volume is neutral
     float cfg_volume;
+    int warn;
 };
 
 // Convert to gain value from dB. input <= -200dB will become 0 gain.
@@ -160,6 +161,8 @@ static int filter(struct af_instance *af, struct mp_audio *data)
 static int af_open(struct af_instance *af)
 {
     struct priv *s = af->priv;
+    if (s->warn)
+        MP_WARN(af, "This filter is deprecated. Use --volume directly.\n");
     af->control = control;
     af->filter_frame = filter;
     s->level = 1.0;
@@ -184,6 +187,7 @@ const struct af_info af_info_volume = {
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
         OPT_FLAG("detach", detach, 0),
+        OPT_FLAG("warn", warn, 0, OPTDEF_INT(1)),
         {0}
     },
 };

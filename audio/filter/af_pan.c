@@ -180,6 +180,7 @@ static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->filter_frame = filter_frame;
+    MP_WARN(af, "This filter is deprecated. Use lavfi pan instead.\n");
     af_pan_t *s = af->priv;
     int nch = s->nch;
     if (nch && AF_OK != control(af, AF_CONTROL_SET_PAN_NOUT, &nch))

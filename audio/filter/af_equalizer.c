@@ -188,6 +188,7 @@ static int filter(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
+  MP_WARN(af, "This filter is deprecated. Use 'anequalizer' or 'firequalizer' instead.\n");
   af->control=control;
   af->filter_frame = filter;
   af_equalizer_t *priv = af->priv;

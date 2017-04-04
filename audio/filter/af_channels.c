@@ -214,6 +214,8 @@ static int af_open(struct af_instance* af){
     af->filter_frame = filter_frame;
     af_channels_t *s = af->priv;
 
+    MP_WARN(af, "This filter is deprecated (no replacement).\n");
+
     // If router scan commandline for routing pairs
     if(s->routes && s->routes[0]){
         char* cp = s->routes;

@@ -135,7 +135,8 @@ void audio_update_volume(struct MPContext *mpctx)
         if (gain == 1.0)
             return;
         MP_VERBOSE(mpctx, "Inserting volume filter.\n");
-        if (!(af_add(ao_c->af, "volume", "softvol", NULL)
+        char *args[] = {"warn", "no", NULL};
+        if (!(af_add(ao_c->af, "volume", "softvol", args)
               && af_control_any_rev(ao_c->af, AF_CONTROL_SET_VOLUME, &gain)))
             MP_ERR(mpctx, "No volume control available.\n");
     }
