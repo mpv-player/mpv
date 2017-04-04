@@ -57,6 +57,9 @@
 #endif
 
 struct priv {
+    // Single filter bridge, instead of a graph.
+    bool is_bridge;
+
     AVFilterGraph *graph;
     AVFilterContext *in;
     AVFilterContext *out;
@@ -72,6 +75,8 @@ struct priv {
     // options
     char *cfg_graph;
     char **cfg_avopts;
+    char *cfg_filter_name;
+    char **cfg_filter_opts;
 };
 
 static void destroy_graph(struct af_instance *af)
@@ -89,13 +94,12 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     struct priv *p = af->priv;
     AVFilterContext *in = NULL, *out = NULL;
 
-    if (bstr0(p->cfg_graph).len == 0) {
+    if (!p->is_bridge && bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(af, "lavfi: no filter graph set\n");
         return false;
     }
 
     destroy_graph(af);
-    MP_VERBOSE(af, "lavfi: create graph: '%s'\n", p->cfg_graph);
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
@@ -123,14 +127,46 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
                                      "out", NULL, NULL, graph) < 0)
         goto error;
 
-    outputs->name = av_strdup("in");
-    outputs->filter_ctx = in;
+    if (p->is_bridge) {
+        AVFilterContext *filter = avfilter_graph_alloc_filter(graph,
+                        avfilter_get_by_name(p->cfg_filter_name), "filter");
+        if (!filter)
+            goto error;
 
-    inputs->name = av_strdup("out");
-    inputs->filter_ctx = out;
+        if (mp_set_avopts(af->log, filter->priv, p->cfg_filter_opts) < 0)
+            goto error;
 
-    if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
-        goto error;
+        if (avfilter_init_str(filter, NULL) < 0)
+            goto error;
+
+        // Yep, we have to manually link those filters.
+        if (filter->nb_inputs != 1 ||
+            avfilter_pad_get_type(filter->input_pads, 0) != AVMEDIA_TYPE_AUDIO ||
+            filter->nb_outputs != 1 ||
+            avfilter_pad_get_type(filter->output_pads, 0) != AVMEDIA_TYPE_AUDIO)
+        {
+            MP_ERR(af, "The filter is required to have 1 audio input pad and "
+                       "1 audio output pad.\n");
+            goto error;
+        }
+        if (avfilter_link(in, 0, filter, 0) < 0 ||
+            avfilter_link(filter, 0, out, 0) < 0)
+        {
+            MP_ERR(af, "Failed to link filter.\n");
+            goto error;
+        }
+    } else {
+        MP_VERBOSE(af, "lavfi: create graph: '%s'\n", p->cfg_graph);
+
+        outputs->name = av_strdup("in");
+        outputs->filter_ctx = in;
+
+        inputs->name = av_strdup("out");
+        inputs->filter_ctx = out;
+
+        if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
+            goto error;
+    }
 
     if (avfilter_graph_config(graph, NULL) < 0)
         goto error;
@@ -322,10 +358,23 @@ static void uninit(struct af_instance *af)
 
 static int af_open(struct af_instance *af)
 {
+    struct priv *p = af->priv;
+
     af->control = control;
     af->uninit = uninit;
     af->filter_frame = filter_frame;
     af->filter_out = filter_out;
+
+    if (p->is_bridge) {
+        if (!p->cfg_filter_name) {
+            MP_ERR(af, "Filter name not set!\n");
+            return 0;
+        }
+        if (!avfilter_get_by_name(p->cfg_filter_name)) {
+            MP_ERR(af, "libavfilter filter '%s' not found!\n", p->cfg_filter_name);
+            return 0;
+        }
+    }
     return AF_OK;
 }
 
@@ -337,6 +386,23 @@ const struct af_info af_info_lavfi = {
     .open = af_open,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
+        OPT_STRING("graph", cfg_graph, 0),
+        OPT_KEYVALUELIST("o", cfg_avopts, 0),
+        {0}
+    },
+};
+
+const struct af_info af_info_lavfi_bridge = {
+    .info = "libavfilter bridge (explicit options)",
+    .name = "lavfi-bridge",
+    .open = af_open,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv){
+        .is_bridge = true,
+    },
+    .options = (const struct m_option[]) {
+        OPT_STRING("name", cfg_filter_name, M_OPT_MIN, .min = 1),
+        OPT_KEYVALUELIST("opts", cfg_filter_opts, 0),
         OPT_STRING("graph", cfg_graph, 0),
         OPT_KEYVALUELIST("o", cfg_avopts, 0),
         {0}

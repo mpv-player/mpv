@@ -41,6 +41,7 @@ extern const struct af_info af_info_lavrresample;
 extern const struct af_info af_info_scaletempo;
 extern const struct af_info af_info_bs2b;
 extern const struct af_info af_info_lavfi;
+extern const struct af_info af_info_lavfi_bridge;
 extern const struct af_info af_info_rubberband;
 
 static const struct af_info *const filter_list[] = {
@@ -56,6 +57,7 @@ static const struct af_info *const filter_list[] = {
 #endif
     &af_info_scaletempo,
     &af_info_lavfi,
+    &af_info_lavfi_bridge,
     NULL
 };
 
@@ -79,6 +81,7 @@ const struct m_obj_list af_obj_list = {
     .get_desc = get_desc,
     .description = "audio filters",
     .allow_disable_entries = true,
+    .allow_unknown_entries = true,
     .aliases = {
         {"force",     "format"},
         {0}
@@ -149,10 +152,17 @@ contain the commandline parameters for the filter */
 static struct af_instance *af_create(struct af_stream *s, char *name,
                                      char **args)
 {
+    const char *lavfi_name = NULL;
+    char **lavfi_args = NULL;
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &af_obj_list, bstr0(name))) {
-        MP_ERR(s, "Couldn't find audio filter '%s'.\n", name);
-        return NULL;
+        if (!m_obj_list_find(&desc, &af_obj_list, bstr0("lavfi-bridge"))) {
+            MP_ERR(s, "Couldn't find audio filter '%s'.\n", name);
+            return NULL;
+        }
+        lavfi_name = name;
+        lavfi_args = args;
+        args = NULL;
     }
     MP_VERBOSE(s, "Adding filter %s \n", name);
 
@@ -170,6 +180,19 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
                                         name, s->opts->af_defs, args);
     if (!config)
         goto error;
+    if (lavfi_name) {
+        // Pass the filter arguments as proper sub-options to the bridge filter.
+        struct m_config_option *name_opt = m_config_get_co(config, bstr0("name"));
+        assert(name_opt);
+        assert(name_opt->opt->type == &m_option_type_string);
+        if (m_config_set_option_raw(config, name_opt, &lavfi_name, 0) < 0)
+            goto error;
+        struct m_config_option *opts = m_config_get_co(config, bstr0("opts"));
+        assert(opts);
+        assert(opts->opt->type == &m_option_type_keyvalue_list);
+        if (m_config_set_option_raw(config, opts, &lavfi_args, 0) < 0)
+            goto error;
+    }
     af->priv = config->optstruct;
 
     // Initialize the new filter
