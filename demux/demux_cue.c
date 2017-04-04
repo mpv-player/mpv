@@ -23,6 +23,8 @@
 #include <dirent.h>
 #include <inttypes.h>
 
+#include "osdep/io.h"
+
 #include "mpv_talloc.h"
 
 #include "misc/bstr.h"
