@@ -2091,6 +2091,11 @@ Window
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
 
+``--keep-open-playing=<yes|no>``
+    Instead of pausing when ``--keep-open`` is active, just stop at end of file
+    and continue playing forward when you seek backwards until end where it
+    stops again. Default: ``no``.
+
 ``--image-display-duration=<seconds|inf>``
     If the current file is an image, play the image for the given amount of
     seconds (default: 1). ``inf`` means the file is kept open forever (until
