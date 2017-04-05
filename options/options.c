@@ -948,6 +948,11 @@ const struct MPOpts mp_default_opts = {
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
     .videotoolbox_format = IMGFMT_NV12,
 
+    .audio_output_channels = {
+        .set = 1,
+        .auto_safe = 1,
+    },
+
     .index_mode = 1,
 
     .mf_fps = 1.0,
