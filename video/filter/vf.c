@@ -627,6 +627,39 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
     }
 }
 
+// Insert a conversion filter _after_ vf.
+// vf needs to have been successfully configured, vf->next unconfigured but
+// with formats negotiated.
+static void auto_insert_conversion_filter_if_needed(struct vf_chain *c,
+                                                    struct vf_instance *vf)
+{
+    if (!vf->next || vf->next->query_format(vf->next, vf->fmt_out.imgfmt) ||
+        is_conv_filter(vf) || is_conv_filter(vf->next))
+        return;
+
+    MP_INFO(c, "Using conversion filter.\n");
+
+    uint8_t fmts[IMGFMT_END - IMGFMT_START];
+    query_formats(fmts, vf->next);
+
+    uint8_t out_formats[IMGFMT_END - IMGFMT_START];
+    for (int n = IMGFMT_START; n < IMGFMT_END; n++)
+        out_formats[n - IMGFMT_START] = n == vf->fmt_out.imgfmt;
+
+    const char *filter = find_conv_filter(out_formats, fmts);
+    char **args = NULL;
+    char *args_no_warn[] = {"warn", "no", NULL};
+    if (strcmp(filter, "scale") == 0)
+        args = args_no_warn;
+    struct vf_instance *conv = vf_open(c, filter, args);
+    if (conv) {
+        conv->autoinserted = true;
+        conv->next = vf->next;
+        vf->next = conv;
+        update_formats(c, conv, vf->last_outfmts);
+    }
+}
+
 static int vf_reconfig_wrapper(struct vf_instance *vf,
                                const struct mp_image_params *p)
 {
@@ -689,6 +722,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
         }
         cur = vf->fmt_out;
         hwfctx = vf->out_hwframes_ref;
+        // Recheck if the new output format works with the following filters.
+        auto_insert_conversion_filter_if_needed(c, vf);
     }
     c->output_params = cur;
     c->initialized = r < 0 ? -1 : 1;
@@ -757,12 +792,14 @@ struct vf_chain *vf_new(struct mpv_global *global)
     static const struct vf_info in = { .name = "in" };
     c->first = talloc(c, struct vf_instance);
     *c->first = (struct vf_instance) {
+        .log = c->log,
         .info = &in,
         .query_format = input_query_format,
     };
     static const struct vf_info out = { .name = "out" };
     c->last = talloc(c, struct vf_instance);
     *c->last = (struct vf_instance) {
+        .log = c->log,
         .info = &out,
         .query_format = output_query_format,
         .priv = (void *)c,
