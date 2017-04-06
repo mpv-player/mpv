@@ -46,6 +46,10 @@
 #include <GL/glext.h>
 #endif
 
+#if HAVE_GL_WIN32
+#include <windows.h>
+#endif
+
 #define MP_GET_GL_WORKAROUNDS
 #include "header_fixes.h"
 
