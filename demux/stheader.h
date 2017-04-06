@@ -41,6 +41,7 @@ struct sh_stream {
 
     struct mp_codec_params *codec;
 
+    int program_num;
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag

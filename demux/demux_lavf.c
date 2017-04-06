@@ -700,6 +700,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, sh);
 
     if (sh) {
+        AVProgram *program = av_find_program_from_stream(priv->avfc, NULL, st->index);
+        if (program)
+            sh->program_num = program->program_num;
         sh->ff_index = st->index;
         sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec->codec_tag = codec->codec_tag;
