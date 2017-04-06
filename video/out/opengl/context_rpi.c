@@ -208,16 +208,6 @@ fail:
     return -1;
 }
 
-static void *get_proc_address(const GLubyte *name)
-{
-    void *p = eglGetProcAddress(name);
-    // EGL 1.4 (supported by the RPI firmware) does not necessarily return
-    // function pointers for core functions.
-    if (!p)
-        p = dlsym(RTLD_DEFAULT, name);
-    return p;
-}
-
 static int rpi_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
@@ -242,8 +232,7 @@ static int rpi_init(struct MPGLContext *ctx, int flags)
 
     ctx->gl = talloc_zero(ctx, GL);
 
-    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
-    mpgl_load_functions(ctx->gl, get_proc_address, exts, p->log);
+    mpegl_load_functions(ctx->gl, p->log);
 
     ctx->native_display_type = "MPV_RPI_WINDOW";
     ctx->native_display = p->win_params;

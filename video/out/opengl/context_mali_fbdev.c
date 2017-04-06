@@ -49,16 +49,6 @@ static bool get_fbdev_size(int *w, int *h)
     return ok;
 }
 
-static void *get_proc_address(const GLubyte *name)
-{
-    void *p = eglGetProcAddress(name);
-    // EGL 1.4 (supported by the MALI drivers) does not necessarily return
-    // function pointers for core functions.
-    if (!p)
-        p = dlsym(RTLD_DEFAULT, name);
-    return p;
-}
-
 struct priv {
     struct mp_log *log;
     struct GL *gl;
@@ -127,8 +117,7 @@ static int mali_init(struct MPGLContext *ctx, int flags)
 
     ctx->gl = talloc_zero(ctx, GL);
 
-    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
-    mpgl_load_functions(ctx->gl, get_proc_address, exts, p->log);
+    mpegl_load_functions(ctx->gl, p->log);
 
     return 0;
 

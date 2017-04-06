@@ -15,6 +15,12 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
+#if HAVE_LIBDL
+#include <dlfcn.h>
+#endif
+
 #include "common/common.h"
 
 #include "egl_helpers.h"
@@ -199,3 +205,28 @@ bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
     return false;
 }
 
+static void *mpegl_get_proc_address(void *ctx, const char *name)
+{
+    void *p = eglGetProcAddress(name);
+#if defined(__GLIBC__) && HAVE_LIBDL
+    // Some crappy ARM/Linux things do not provide EGL 1.5, so above call does
+    // not necessarily return function pointers for core functions. Try to get
+    // them from a loaded GLES lib. As POSIX leaves RTLD_DEFAULT "reserved",
+    // use it only with glibc.
+    if (!p)
+        p = dlsym(RTLD_DEFAULT, name);
+#endif
+    return p;
+}
+
+// Load gl version and function pointers into *gl.
+// Expects a current EGL context set.
+void mpegl_load_functions(struct GL *gl, struct mp_log *log)
+{
+    const char *egl_exts = "";
+    EGLDisplay display = eglGetCurrentDisplay();
+    if (display != EGL_NO_DISPLAY)
+        egl_exts = eglQueryString(display, EGL_EXTENSIONS);
+
+    mpgl_load_functions2(gl, mpegl_get_proc_address, NULL, egl_exts, log);
+}

@@ -67,7 +67,6 @@ static int egl_create_context(struct vo_wayland_state *wl, MPGLContext *ctx,
                               int flags)
 {
     GL *gl = ctx->gl;
-    const char *eglstr = "";
 
     if (!(wl->egl_context.egl.dpy = eglGetDisplay(wl->display.display)))
         return -1;
@@ -82,10 +81,7 @@ static int egl_create_context(struct vo_wayland_state *wl, MPGLContext *ctx,
 
     eglMakeCurrent(wl->egl_context.egl.dpy, NULL, NULL, wl->egl_context.egl.ctx);
 
-    eglstr = eglQueryString(wl->egl_context.egl.dpy, EGL_EXTENSIONS);
-
-    mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr,
-                        wl->log);
+    mpegl_load_functions(gl, wl->log);
 
     ctx->native_display_type = "wl";
     ctx->native_display = wl->display.display;

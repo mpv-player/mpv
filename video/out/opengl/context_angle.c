@@ -623,11 +623,6 @@ static int GLAPIENTRY angle_swap_interval(int interval)
     }
 }
 
-static void *get_proc_address(const GLubyte *proc_name)
-{
-    return eglGetProcAddress(proc_name);
-}
-
 static int angle_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
@@ -709,7 +704,7 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if (!surface_ok)
         goto fail;
 
-    mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
+    mpegl_load_functions(ctx->gl, vo->log);
 
     current_ctx = ctx;
     ctx->gl->SwapInterval = angle_swap_interval;

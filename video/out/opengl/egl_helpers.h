@@ -27,4 +27,7 @@ bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
                                struct mpegl_opts *opts,
                                EGLContext *out_context, EGLConfig *out_config);
 
+struct GL;
+void mpegl_load_functions(struct GL *gl, struct mp_log *log);
+
 #endif

@@ -307,9 +307,7 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
         return -1;
     }
 
-    const char *egl_exts = eglQueryString(p->egl.display, EGL_EXTENSIONS);
-    void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
-    mpgl_load_functions(ctx->gl, gpa, egl_exts, ctx->vo->log);
+    mpegl_load_functions(ctx->gl, ctx->vo->log);
 
     ctx->native_display_type = "drm";
     ctx->native_display = (void *)(intptr_t)p->kms->fd;

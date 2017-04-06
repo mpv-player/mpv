@@ -131,10 +131,7 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
         goto uninit;
     }
 
-    const char *egl_exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
-
-    void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
-    mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
+    mpegl_load_functions(ctx->gl, vo->log);
 
     ctx->native_display_type = "x11";
     ctx->native_display = vo->x11->display;
