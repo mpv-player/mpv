@@ -752,9 +752,9 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
     } , {
-        'name': '--android-gl',
-        'desc': 'Android OpenGL ES support',
-        'deps': ['android'],
+        'name': '--standard-gles3',
+        'desc': 'Standard OpenGL ES 3.0 support',
+        'deps_neg': [ 'standard-gl' ],
         'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
     } , {
         'name': '--ios-gl',
@@ -763,7 +763,7 @@ video_output_features = [
     } , {
         'name': '--any-gl',
         'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['standard-gl', 'android-gl', 'ios-gl', 'cocoa'],
+        'deps_any': ['standard-gl', 'standard-gles3', 'ios-gl', 'cocoa'],
         'func': check_true
     } , {
         'name': '--plain-gl',

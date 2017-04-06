@@ -67,7 +67,7 @@
 #define GL_BACK_LEFT                      0x0402
 #endif
 
-#if HAVE_ANDROID_GL
+#if HAVE_STANDARD_GLES3
 #define GL_UNSIGNED_BYTE_3_3_2            0x8032
 #define GL_UNSIGNED_BYTE_2_3_3_REV        0x8362
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV     0x8366

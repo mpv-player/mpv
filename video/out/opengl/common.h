@@ -39,7 +39,7 @@
 #elif HAVE_IOS_GL
 #include <OpenGLES/ES2/glext.h>
 #include <OpenGLES/ES3/glext.h>
-#elif HAVE_ANDROID_GL
+#elif HAVE_STANDARD_GLES3
 #include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
