@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <dlfcn.h>
 
 #include <X11/Xlib.h>
 #include <EGL/egl.h>
@@ -36,6 +37,16 @@ struct priv {
     EGLContext egl_context;
     EGLSurface egl_surface;
 };
+
+static void *get_proc_address(const GLubyte *name)
+{
+    void *p = eglGetProcAddress(name);
+    // EGL 1.4 (supported by the MALI drivers) does not necessarily return
+    // function pointers for core functions.
+    if (!p)
+        p = dlsym(RTLD_DEFAULT, name);
+    return p;
+}
 
 static void mpegl_uninit(MPGLContext *ctx)
 {
@@ -133,8 +144,7 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
 
     const char *egl_exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
 
-    void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
-    mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
+    mpgl_load_functions(ctx->gl, get_proc_address, egl_exts, vo->log);
 
     ctx->native_display_type = "x11";
     ctx->native_display = vo->x11->display;
