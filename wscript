@@ -342,8 +342,8 @@ iconv support use --disable-iconv.",
                                  'dvdread', '>= 4.1.0'),
         'default': 'disable',
     }, {
-        'name': '--dvdread-common',
-        'desc': 'common dvdread code',
+        'name': 'dvdread-common',
+        'desc': 'DVD/IFO support',
         'deps_any': [ 'dvdread', 'dvdnav' ],
         'func': check_true,
     }, {
