@@ -24,6 +24,19 @@
 #include "video/out/win32/exclusive_hack.h"
 #include "context.h"
 
+#if !defined(WGL_CONTEXT_MAJOR_VERSION_ARB)
+/* these are supposed to be defined in wingdi.h but mingw's is too old */
+/* only the bits actually used by mplayer are defined */
+/* reference: http://www.opengl.org/registry/specs/ARB/wgl_create_context.txt */
+
+#define WGL_CONTEXT_MAJOR_VERSION_ARB          0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB          0x2092
+#define WGL_CONTEXT_FLAGS_ARB                  0x2094
+#define WGL_CONTEXT_PROFILE_MASK_ARB           0x9126
+#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
+#endif
+
 struct w32_context {
     int opt_swapinterval;
     int current_swapinterval;

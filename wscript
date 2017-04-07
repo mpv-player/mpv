@@ -744,35 +744,19 @@ video_output_features = [
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
         'func': check_rpi,
-    }, {
-        'name': '--standard-gl',
-        'desc': 'Desktop standard OpenGL support',
-        # arbitrary OpenGL 3.0 symbol, and an arbitrary OpenGL legacy-only symbol
-        'func': check_statement('GL/gl.h', '(void)GL_RGB32F; (void)GL_LUMINANCE16'),
-    } , {
-        'name': '--standard-gles3',
-        'desc': 'Standard OpenGL ES 3.0 support',
-        'deps_neg': [ 'standard-gl' ],
-        'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
     } , {
         'name': '--ios-gl',
-        'desc': 'iOS OpenGL ES support',
+        'desc': 'iOS OpenGL ES hardware decoding interop support',
         'func': check_statement('OpenGLES/ES3/glext.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
-    } , {
-        'name': '--any-gl',
-        'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['standard-gl', 'standard-gles3', 'ios-gl', 'cocoa'],
-        'func': check_true
     } , {
         'name': '--plain-gl',
         'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
-        'deps': ['any-gl'],
         'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
         'func': check_true,
     }, {
         'name': '--mali-fbdev',
         'desc': 'MALI via Linux fbdev',
-        'deps': ['standard-gl', 'libdl'],
+        'deps': ['libdl'],
         'func': compose_checks(
             check_cc(lib="EGL"),
             check_cc(lib="GLESv2"),

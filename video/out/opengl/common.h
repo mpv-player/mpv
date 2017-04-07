@@ -31,27 +31,11 @@
 
 #include "video/mp_image.h"
 
-#if HAVE_GL_COCOA
-#define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED 1
-#include <OpenGL/gl.h>
-#include <OpenGL/gl3.h>
-#include <OpenGL/glext.h>
-#elif HAVE_IOS_GL
-#include <OpenGLES/ES2/glext.h>
-#include <OpenGLES/ES3/glext.h>
-#elif HAVE_STANDARD_GLES3
-#include <GLES3/gl3.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
+#include "gl_headers.h"
 
 #if HAVE_GL_WIN32
 #include <windows.h>
 #endif
-
-#define MP_GET_GL_WORKAROUNDS
-#include "header_fixes.h"
 
 struct GL;
 typedef struct GL GL;

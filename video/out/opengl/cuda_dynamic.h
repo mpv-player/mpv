@@ -25,6 +25,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "gl_headers.h"
+
 #define CUDA_VERSION 7050
 
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -84,9 +86,6 @@ typedef enum CUGLDeviceList_enum {
     CU_GL_DEVICE_LIST_CURRENT_FRAME = 2,
     CU_GL_DEVICE_LIST_NEXT_FRAME = 3,
 } CUGLDeviceList;
-
-typedef unsigned int    GLenum;
-typedef unsigned int    GLuint;
 
 #define CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD 2
 

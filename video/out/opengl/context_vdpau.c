@@ -18,9 +18,6 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 
-#define MP_GET_GLX_WORKAROUNDS
-#include "header_fixes.h"
-
 #include "video/vdpau.h"
 #include "video/out/x11_common.h"
 #include "context.h"
