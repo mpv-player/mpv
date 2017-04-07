@@ -133,6 +133,7 @@ struct format_hack {
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
     bool ignore_start : 1;
+    bool fix_editlists : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -152,7 +153,7 @@ static const struct format_hack format_hacks[] = {
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
 
-    {"mp4", .skipinfo = true},
+    {"mp4", .skipinfo = true, .fix_editlists = true},
     {"matroska", .skipinfo = true},
 
     // In theory, such streams might contain timestamps, but virtually none do.
@@ -874,6 +875,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     guess_and_set_vobsub_name(demuxer, &dopts);
+
+    if (priv->format_hack.fix_editlists)
+        av_dict_set(&dopts, "advanced_editlist", "0", 0);
 
     avfc->interrupt_callback = (AVIOInterruptCB){
         .callback = interrupt_cb,
