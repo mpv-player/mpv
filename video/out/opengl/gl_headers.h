@@ -38,7 +38,7 @@
 #define GL_RGBA16                         0x805B
 #define GL_TEXTURE_RED_SIZE               0x805C
 
-// --- GL 1.1 (probably?)
+// --- GL 1.1 (removed from 3.0 core and not in GLES 2/3)
 
 #define GL_TEXTURE_LUMINANCE_SIZE         0x8060
 #define GL_LUMINANCE8                     0x8040
