@@ -171,7 +171,6 @@ void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 void gl_sc_generate(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
-void gl_sc_unbind(struct gl_shader_cache *sc);
 
 struct gl_timer;
 

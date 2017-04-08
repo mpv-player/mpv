@@ -458,7 +458,6 @@ struct sc_entry {
     int num_uniforms;
     bstr frag;
     bstr vert;
-    struct gl_vao *vao;
 };
 
 struct gl_shader_cache {
