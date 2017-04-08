@@ -316,6 +316,16 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .ver_core = 410,
+        .ver_es_core = 300,
+        .extension = "GL_ARB_get_program_binary",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GetProgramBinary),
+            DEF_FN(ProgramBinary),
+            {0}
+        },
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {

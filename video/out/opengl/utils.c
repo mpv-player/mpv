@@ -23,7 +23,15 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#include <libavutil/sha.h>
+#include <libavutil/intreadwrite.h>
+#include <libavutil/mem.h>
+
+#include "osdep/io.h"
+
 #include "common/common.h"
+#include "options/path.h"
+#include "stream/stream.h"
 #include "formats.h"
 #include "utils.h"
 
@@ -488,6 +496,10 @@ struct gl_shader_cache {
 
     // temporary buffers (avoids frequent reallocations)
     bstr tmp[5];
+
+    // For the disk-cache.
+    char *cache_dir;
+    struct mpv_global *global; // can be NULL
 };
 
 struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
@@ -817,6 +829,14 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
     }
 }
 
+void gl_sc_set_cache_dir(struct gl_shader_cache *sc, struct mpv_global *global,
+                         const char *dir)
+{
+    talloc_free(sc->cache_dir);
+    sc->cache_dir = talloc_strdup(sc, dir);
+    sc->global = global;
+}
+
 static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
                                   GLenum type, const char *source)
 {
@@ -882,18 +902,10 @@ static void link_shader(struct gl_shader_cache *sc, GLuint program)
         sc->error_state = true;
 }
 
-static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
-                             const char *frag)
+static GLuint compile_program(struct gl_shader_cache *sc, const char *vertex,
+                              const char *frag)
 {
     GL *gl = sc->gl;
-    MP_VERBOSE(sc, "recompiling a shader program:\n");
-    if (sc->header_text.len) {
-        MP_VERBOSE(sc, "header:\n");
-        mp_log_source(sc->log, MSGL_V, sc->header_text.start);
-        MP_VERBOSE(sc, "body:\n");
-    }
-    if (sc->text.len)
-        mp_log_source(sc->log, MSGL_V, sc->text.start);
     GLuint prog = gl->CreateProgram();
     compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
     compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag);
@@ -903,6 +915,105 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
         gl->BindAttribLocation(prog, n, vname);
     }
     link_shader(sc, prog);
+    return prog;
+}
+
+static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
+                           const char *frag)
+{
+    GL *gl = sc->gl;
+
+    MP_VERBOSE(sc, "new shader program:\n");
+    if (sc->header_text.len) {
+        MP_VERBOSE(sc, "header:\n");
+        mp_log_source(sc->log, MSGL_V, sc->header_text.start);
+        MP_VERBOSE(sc, "body:\n");
+    }
+    if (sc->text.len)
+        mp_log_source(sc->log, MSGL_V, sc->text.start);
+
+    if (!sc->cache_dir || !sc->cache_dir[0] || !gl->ProgramBinary)
+        return compile_program(sc, vertex, frag);
+
+    // Try to load it from a disk cache, or compiling + saving it.
+
+    GLuint prog = 0;
+    void *tmp = talloc_new(NULL);
+    char *dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
+
+    struct AVSHA *sha = av_sha_alloc();
+    if (!sha)
+        abort();
+    av_sha_init(sha, 256);
+
+    av_sha_update(sha, vertex, strlen(vertex) + 1);
+    av_sha_update(sha, frag, strlen(frag) + 1);
+
+    // In theory, the array could change order, breaking old binaries.
+    for (int n = 0; sc->vao->entries[n].name; n++) {
+        av_sha_update(sha, sc->vao->entries[n].name,
+                      strlen(sc->vao->entries[n].name) + 1);
+    }
+
+    uint8_t hash[256 / 8];
+    av_sha_final(sha, hash);
+    av_free(sha);
+
+    char hashstr[256 / 8 * 2 + 1];
+    for (int n = 0; n < 256 / 8; n++)
+        snprintf(hashstr + n * 2, sizeof(hashstr) - n * 2, "%02X", hash[n]);
+
+    const char *header = "mpv shader cache v1\n";
+    size_t header_size = strlen(header) + 4;
+
+    char *filename = mp_path_join(tmp, dir, hashstr);
+    if (stat(filename, &(struct stat){0}) == 0) {
+        MP_VERBOSE(sc, "Trying to load shader from disk...\n");
+        struct bstr cachedata = stream_read_file(filename, tmp, sc->global,
+                                                 1000000000); // 1 GB
+        if (cachedata.len > header_size) {
+            GLenum format = AV_RL32(cachedata.start + header_size - 4);
+            prog = gl->CreateProgram();
+            gl_check_error(gl, sc->log, "before loading program");
+            gl->ProgramBinary(prog, format, cachedata.start + header_size,
+                                            cachedata.len - header_size);
+            gl->GetError(); // discard potential useless error
+            GLint status = 0;
+            gl->GetProgramiv(prog, GL_LINK_STATUS, &status);
+            if (!status) {
+                gl->DeleteProgram(prog);
+                prog = 0;
+            }
+        }
+        MP_VERBOSE(sc, "Loading cached shader %s.\n", prog ? "ok" : "failed");
+    }
+
+    if (!prog) {
+        prog = compile_program(sc, vertex, frag);
+
+        GLint size = 0;
+        gl->GetProgramiv(prog, GL_PROGRAM_BINARY_LENGTH, &size);
+        uint8_t *buffer = talloc_size(tmp, size + header_size);
+        GLsizei actual_size = 0;
+        GLenum binary_format = 0;
+        gl->GetProgramBinary(prog, size, &actual_size, &binary_format,
+                             buffer + header_size);
+        memcpy(buffer, header, header_size - 4);
+        AV_WL32(buffer + header_size - 4, binary_format);
+
+        if (actual_size) {
+            mp_mkdirp(dir);
+
+            MP_VERBOSE(sc, "Writing shader cache file: %s\n", filename);
+            FILE *out = fopen(filename, "wb");
+            if (out) {
+                fwrite(buffer, header_size + actual_size, 1, out);
+                fclose(out);
+            }
+        }
+    }
+
+    talloc_free(tmp);
     return prog;
 }
 
@@ -1030,7 +1141,7 @@ void gl_sc_generate(struct gl_shader_cache *sc)
     }
     // build vertex shader from vao and cache the locations of the uniform variables
     if (!entry->gl_shader) {
-        entry->gl_shader = create_program(sc, vert->start, frag->start);
+        entry->gl_shader = load_program(sc, vert->start, frag->start);
         entry->num_uniforms = 0;
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_cached_uniform un = {

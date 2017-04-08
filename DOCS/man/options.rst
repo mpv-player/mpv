@@ -4750,6 +4750,18 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     This option might be silently removed in the future.
 
+``--opengl-shader-cache-dir=<dirname>``
+    Store and load compiled GL shaders in this directory. Normally, shader
+    compilation is very fast, so this is usually not needed. But some GL
+    implementations (notably ANGLE, the default on Windows) have relatively
+    slow shader compilation, and can cause startup delays.
+
+    NOTE: This is not cleaned automatically, so old, unused cache files may
+    stick around indefinitely.
+
+    This option might be silently removed in the future, if ANGLE fixes shader
+    compilation speed.
+
 Miscellaneous
 -------------
 

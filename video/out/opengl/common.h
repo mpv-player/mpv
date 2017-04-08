@@ -150,6 +150,10 @@ struct GL {
     void (GLAPIENTRY *GetShaderiv)(GLuint, GLenum, GLint *);
     void (GLAPIENTRY *GetProgramInfoLog)(GLuint, GLsizei, GLsizei *, GLchar *);
     void (GLAPIENTRY *GetProgramiv)(GLenum, GLenum, GLint *);
+    void (GLAPIENTRY *GetProgramBinary)(GLuint, GLsizei, GLsizei *, GLenum *,
+                                        void *);
+    void (GLAPIENTRY *ProgramBinary)(GLuint, GLenum, const void *, GLsizei);
+
     const GLubyte* (GLAPIENTRY *GetStringi)(GLenum, GLuint);
     void (GLAPIENTRY *BindAttribLocation)(GLuint, GLuint, const GLchar *);
     void (GLAPIENTRY *BindFramebuffer)(GLenum, GLuint);

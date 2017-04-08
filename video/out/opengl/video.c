@@ -389,7 +389,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
         OPT_CHOICE("opengl-early-flush", early_flush, 0,
                    ({"no", 0}, {"yes", 1}, {"auto", -1})),
-
+        OPT_STRING("opengl-shader-cache-dir", shader_cache_dir, 0),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -3362,6 +3362,7 @@ static void reinit_from_options(struct gl_video *p)
 
     check_gl_features(p);
     uninit_rendering(p);
+    gl_sc_set_cache_dir(p->sc, p->global, p->opts.shader_cache_dir);
     gl_video_setup_hooks(p);
     reinit_osd(p);
 

@@ -134,6 +134,7 @@ struct gl_video_opts {
     int tex_pad_x, tex_pad_y;
     struct mp_icc_opts *icc_opts;
     int early_flush;
+    char *shader_cache_dir;
 };
 
 extern const struct m_sub_options gl_video_conf;
