@@ -134,22 +134,6 @@ Playback Control
     speed higher than normal automatically inserts the ``scaletempo`` audio
     filter.
 
-``--loop-playlist=<N|inf|force|no>``, ``--loop-playlist``
-    Loops playback ``N`` times. A value of ``1`` plays it one time (default),
-    ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
-    disables looping. If several files are specified on command line, the
-    entire playlist is looped. ``--loop-playlist`` is the same as
-    ``--loop-playlist=inf``.
-
-    The ``force`` mode is like ``inf``, but does not skip playlist entries
-    which have been marked as failing. This means the player might waste CPU
-    time trying to loop a file that doesn't exist. But it might be useful for
-    playing webradios under very bad network conditions.
-
-``--loop``
-    Currently a deprecated alias to ``--loop-playlist``. After a deprecation
-    period, it will be undeprecated, but changed to alias ``--loop-file``.
-
 ``--pause``
     Start the player in paused state.
 
@@ -291,6 +275,22 @@ Playback Control
     ``dvd://directory`` would open a whole bunch of files in the given
     directory). Prefixing the filename with ``./`` if it doesn't start with
     a ``/`` will avoid this.
+
+``--loop-playlist=<N|inf|force|no>``, ``--loop-playlist``
+    Loops playback ``N`` times. A value of ``1`` plays it one time (default),
+    ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
+    disables looping. If several files are specified on command line, the
+    entire playlist is looped. ``--loop-playlist`` is the same as
+    ``--loop-playlist=inf``.
+
+    The ``force`` mode is like ``inf``, but does not skip playlist entries
+    which have been marked as failing. This means the player might waste CPU
+    time trying to loop a file that doesn't exist. But it might be useful for
+    playing webradios under very bad network conditions.
+
+``--loop``
+    Currently a deprecated alias to ``--loop-playlist``. After a deprecation
+    period, it will be undeprecated, but changed to alias ``--loop-file``.
 
 ``--loop-file=<N|inf|no>``
     Loop a single file N times. ``inf`` means forever, ``no`` means normal
