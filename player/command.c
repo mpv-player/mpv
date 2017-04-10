@@ -3102,17 +3102,7 @@ static int mp_property_sub_speed(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    switch (action) {
-    case M_PROPERTY_SET: {
-        opts->sub_speed = *(float *)arg;
-        struct track *track = mpctx->current_track[0][STREAM_SUB];
-        struct dec_sub *sub = track ? track->d_sub : NULL;
-        if (sub) {
-            sub_control(track->d_sub, SD_CTRL_UPDATE_SPEED, NULL);
-        }
-        return M_PROPERTY_OK;
-    }
-    case M_PROPERTY_PRINT:
+    if (action == M_PROPERTY_PRINT) {
         *(char **)arg = talloc_asprintf(NULL, "%4.1f%%", 100 * opts->sub_speed);
         return M_PROPERTY_OK;
     }
@@ -5767,6 +5757,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_OSD) {
         osd_changed(mpctx->osd);
+        for (int n = 0; n < NUM_PTRACKS; n++) {
+            struct track *track = mpctx->current_track[n][STREAM_SUB];
+            struct dec_sub *sub = track ? track->d_sub : NULL;
+            if (sub)
+                sub_control(track->d_sub, SD_CTRL_UPDATE_SPEED, NULL);
+        }
         mp_wakeup_core(mpctx);
     }
 
