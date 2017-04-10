@@ -41,6 +41,8 @@ Interface changes
       support for lavfi filters still has some differences, such as how strings
       are escaped.) If this happens, the non-deprecated builtin filters might be
       moved to "somewhere else" syntax-wise.
+    - deprecate --loop - after a deprecation period, it will be undeprecated,
+      but changed to alias --loop-file
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

@@ -715,9 +715,12 @@ extern const char m_option_path_separator;
 
 // If "--optname" was removed, but "--newname" has the same semantics.
 // It will be redirected, and a warning will be printed on first use.
-#define OPT_REPLACED(optname, newname) \
+#define OPT_REPLACED_MSG(optname, newname, msg) \
     {.name = optname, .type = &m_option_type_alias, .priv = newname, \
-     .deprecation_message = "", .offset = -1}
+     .deprecation_message = (msg), .offset = -1}
+
+// Same, with a generic deprecation message.
+#define OPT_REPLACED(optname, newname) OPT_REPLACED_MSG(optname, newname, "")
 
 // "--optname" doesn't exist, but inform the user about a replacement with msg.
 #define OPT_REMOVED(optname, msg) \

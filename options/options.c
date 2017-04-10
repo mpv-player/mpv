@@ -607,7 +607,7 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
 
-    OPT_CHOICE_OR_INT("loop", loop_times, 0, 1, 10000,
+    OPT_CHOICE_OR_INT("loop-playlist", loop_times, 0, 1, 10000,
                       ({"no", 1},
                        {"inf", -1}, {"yes", -1},
                        {"force", -2})),
@@ -832,6 +832,8 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-style-override", "sub-ass-style-override"),
     OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
     OPT_REMOVED("fs-black-out-screens", NULL),
+    OPT_REPLACED_MSG("loop", "loop-playlist", "--loop will be changed to map to"
+        " --loop-file in future releases."),
 
     {0}
 };

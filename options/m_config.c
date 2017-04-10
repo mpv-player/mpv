@@ -624,12 +624,16 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
     const char *prefix = config->is_toplevel ? "--" : "";
     if (co->opt->type == &m_option_type_alias) {
         const char *alias = (const char *)co->opt->priv;
-        // deprecation_message is not used, but decides whether it's a
-        // proper or deprecated alias.
         if (co->opt->deprecation_message && !co->warning_was_printed) {
-            MP_WARN(config, "Warning: option %s%s was replaced with "
-                    "%s%s and might be removed in the future.\n",
-                    prefix, co->name, prefix, alias);
+            if (co->opt->deprecation_message[0]) {
+                MP_WARN(config, "Warning: option %s%s was replaced with "
+                        "%s%s: %s\n", prefix, co->name, prefix, alias,
+                        co->opt->deprecation_message);
+            } else {
+                MP_WARN(config, "Warning: option %s%s was replaced with "
+                        "%s%s and might be removed in the future.\n",
+                        prefix, co->name, prefix, alias);
+            }
             co->warning_was_printed = true;
         }
         return m_config_get_co(config, bstr0(alias));
