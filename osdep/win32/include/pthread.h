@@ -28,7 +28,6 @@
 #define pthread_mutex_unlock m_pthread_mutex_unlock
 #define pthread_cond_timedwait m_pthread_cond_timedwait
 #define pthread_cond_wait m_pthread_cond_wait
-#define pthread_self m_pthread_self
 #define pthread_exit m_pthread_exit
 #define pthread_join m_pthread_join
 #define pthread_detach m_pthread_detach
@@ -80,15 +79,11 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
 int pthread_cond_wait(pthread_cond_t *restrict cond,
                       pthread_mutex_t *restrict mutex);
 
-// Unusual, but allowed by POSIX.
-typedef struct {
-    DWORD id;
-    struct m_thread_info *info;
-} pthread_t;
+#define pthread_t DWORD
 
-#define pthread_equal(a, b) ((a).id == (b).id)
+#define pthread_equal(a, b) ((a) == (b))
+#define pthread_self() (GetCurrentThreadId())
 
-pthread_t pthread_self(void);
 void pthread_exit(void *retval);
 int pthread_join(pthread_t thread, void **retval);
 int pthread_detach(pthread_t thread);
