@@ -1505,7 +1505,7 @@ function osc_init()
     local have_pl = (pl_count > 1)
     local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
-    local loop = mp.get_property("loop", "no")
+    local loop = mp.get_property("loop-playlist", "no")
 
     local ne
 
