@@ -297,10 +297,10 @@ Playback Control
     playback. For compatibility, ``--loop-file`` and ``--loop-file=yes`` are
     also accepted, and are the same as ``--loop-file=inf``.
 
-    The difference to ``--loop`` is that this doesn't loop the playlist, just
-    the file itself. If the playlist contains only a single file, the difference
-    between the two option is that this option performs a seek on loop, instead
-    of reloading the file.
+    The difference to ``--loop-playlist`` is that this doesn't loop the playlist,
+    just the file itself. If the playlist contains only a single file, the
+    difference between the two option is that this option performs a seek on
+    loop, instead of reloading the file.
 
 ``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
     Set loop points. If playback passes the ``b`` timestamp, it will seek to

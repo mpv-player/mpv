@@ -4287,7 +4287,7 @@ static const struct property_osd_display {
     const char *msg;
 } property_osd_display[] = {
     // general
-    { "loop", "Loop" },
+    { "loop-playlist", "Loop" },
     { "loop-file", "Loop current file" },
     { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
                  .seek_bar = OSD_SEEK_INFO_BAR },
