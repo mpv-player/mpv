@@ -335,6 +335,24 @@ int mp_mkdir(const char *path, int mode)
     return res;
 }
 
+char *mp_win32_getcwd(char *buf, size_t size)
+{
+    wchar_t *wres = _wgetcwd(NULL, 0);
+    if (!wres)
+        return NULL;
+    char *t = mp_to_utf8(NULL, wres);
+    free(wres);
+    size_t st = strlen(t);
+    if (st >= size) {
+        talloc_free(t);
+        errno = ERANGE;
+        return NULL;
+    }
+    memcpy(buf, t, st + 1);
+    talloc_free(t);
+    return buf;
+}
+
 FILE *mp_tmpfile(void)
 {
     // Reserve a file name in the format %TMP%\mpvXXXX.TMP
