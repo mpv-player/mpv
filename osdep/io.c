@@ -350,7 +350,7 @@ char *mp_win32_getcwd(char *buf, size_t size)
         return NULL;
     }
     char *t = mp_to_utf8(NULL, wres);
-    free(wres);
+    talloc_free(wres);
     size_t st = strlen(t);
     if (st >= size) {
         talloc_free(t);
