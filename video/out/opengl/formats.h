@@ -7,10 +7,8 @@ struct gl_format {
     GLint internal_format;      // glTexImage argument
     GLenum format;              // glTexImage argument
     GLenum type;                // e.g. GL_UNSIGNED_SHORT
-    int flags;
+    int flags;                  // F_* flags
 };
-
-extern const struct gl_format gl_formats[];
 
 enum {
     // --- gl_format.flags

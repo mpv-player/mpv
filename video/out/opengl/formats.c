@@ -10,7 +10,7 @@ enum {
 
 // List of allowed formats, and their usability for bilinear filtering and FBOs.
 // This is limited to combinations that are useful for our renderer.
-const struct gl_format gl_formats[] = {
+static const struct gl_format gl_formats[] = {
     // These are used for desktop GL 3+, and GLES 3+ with GL_EXT_texture_norm16.
     {GL_R8,                  GL_RED,             T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
     {GL_RG8,                 GL_RG,              T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
@@ -238,8 +238,8 @@ int gl_format_type(const struct gl_format *format)
     return MPGL_TYPE_UNORM;
 }
 
-// Return an integer pixel "format" to a base internal format.
-// Return 0 if it's not an integer format.
+// Return base internal format of an integer format, or 0 if it's not integer.
+// "format" is like in struct gl_format.
 GLenum gl_integer_format_to_base(GLenum format)
 {
     switch (format) {
@@ -251,6 +251,8 @@ GLenum gl_integer_format_to_base(GLenum format)
     return 0;
 }
 
+// Return whether it's a non-normalized integer format.
+// "format" is like in struct gl_format.
 bool gl_is_integer_format(GLenum format)
 {
     return !!gl_integer_format_to_base(format);
@@ -259,6 +261,7 @@ bool gl_is_integer_format(GLenum format)
 // Return the number of bytes per component this format implies.
 // Returns 0 for formats with non-byte alignments and formats which
 // merge multiple components (like GL_UNSIGNED_SHORT_5_6_5).
+// "type" is like in struct gl_format.
 int gl_component_size(GLenum type)
 {
     switch (type) {
@@ -269,7 +272,8 @@ int gl_component_size(GLenum type)
     return 0;
 }
 
-// Return the number of a pixel "format".
+// Return the number of separate color components.
+// "format" is like in struct gl_format.
 int gl_format_components(GLenum format)
 {
     switch (format) {
@@ -291,8 +295,8 @@ int gl_format_components(GLenum format)
     return 0;
 }
 
-// return the number of bytes per pixel for the given format
-// does not handle all possible variants, just those used by mpv
+// Return the number of bytes per pixel for the given format.
+// Parameter names like in struct gl_format.
 int gl_bytes_per_pixel(GLenum format, GLenum type)
 {
     // Formats with merged components are special.

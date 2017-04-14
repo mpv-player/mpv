@@ -59,7 +59,7 @@
 
 #define GL_TEXTURE_RECTANGLE              0x84F5
 
-// -- GL 3.3
+// --- GL 3.3
 
 #define GL_TIME_ELAPSED                   0x88BF
 
@@ -77,7 +77,7 @@
 
 // --- GL_OES_EGL_image_external, GL_NV_EGL_stream_consumer_external
 
-#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+#define GL_TEXTURE_EXTERNAL_OES           0x8D65
 
 // --- GL_APPLE_rgb_422
 
