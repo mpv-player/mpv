@@ -1503,8 +1503,7 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    bool idle = mpctx->paused || !mpctx->restart_complete || !mpctx->playing;
-    return m_property_flag_ro(action, arg, idle);
+    return m_property_flag_ro(action, arg, !mpctx->playback_active);
 }
 
 static int mp_property_idle(void *ctx, struct m_property *prop,
@@ -4093,8 +4092,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
       "secondary-sid"),
     E(MPV_EVENT_IDLE, "*"),
-    E(MPV_EVENT_PAUSE,   "pause", "paused-on-cache", "core-idle", "eof-reached"),
-    E(MPV_EVENT_UNPAUSE, "pause", "paused-on-cache", "core-idle", "eof-reached"),
+    E(MPV_EVENT_PAUSE,   "pause"),
+    E(MPV_EVENT_UNPAUSE, "pause"),
     E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
@@ -4126,6 +4125,7 @@ static const char *const *const mp_event_property_change[] = {
       "fullscreen"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count"),
+    E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
 };
 #undef E
 

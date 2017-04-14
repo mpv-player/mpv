@@ -1281,6 +1281,9 @@ reopen_file:
 
 terminate_playback:
 
+    mpctx->playback_active = false;
+    update_core_idle_state(mpctx);
+
     process_unload_hooks(mpctx);
 
     if (mpctx->stop_play == KEEP_PLAYING)
@@ -1306,7 +1309,6 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
-    update_screensaver_state(mpctx);
 
     if (mpctx->stop_play == PT_RELOAD_FILE) {
         mpctx->stop_play = KEEP_PLAYING;

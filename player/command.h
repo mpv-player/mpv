@@ -56,6 +56,7 @@ enum {
     MP_EVENT_WIN_RESIZE,
     MP_EVENT_WIN_STATE,
     MP_EVENT_CHANGE_PLAYLIST,
+    MP_EVENT_CORE_IDLE,
 };
 
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type);

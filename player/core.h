@@ -415,7 +415,9 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
-    bool paused;
+    bool paused;            // internal pause state
+    bool playback_active;   // not paused, restarting, loading, unloading
+
     // step this many frames, then pause
     int step_frames;
     // Counted down each frame, stop playback if 0 is reached. (-1 = disable)
@@ -560,6 +562,7 @@ double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
 void set_pause_state(struct MPContext *mpctx, bool user_pause);
 void update_internal_pause_state(struct MPContext *mpctx);
+void update_core_idle_state(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 enum seek_precision exact, int flags);

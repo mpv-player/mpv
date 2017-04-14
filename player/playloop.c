@@ -120,6 +120,22 @@ double get_relative_time(struct MPContext *mpctx)
     return delta * 0.000001;
 }
 
+void update_core_idle_state(struct MPContext *mpctx)
+{
+    bool eof = mpctx->video_status == STATUS_EOF &&
+               mpctx->audio_status == STATUS_EOF;
+    bool active =
+        !mpctx->paused && mpctx->restart_complete && mpctx->playing && !eof;
+
+    if (mpctx->playback_active != active) {
+        mpctx->playback_active = active;
+
+        update_screensaver_state(mpctx);
+
+        mp_notify(mpctx, MP_EVENT_CORE_IDLE, NULL);
+    }
+}
+
 // The value passed here is the new value for mpctx->opts->pause
 void set_pause_state(struct MPContext *mpctx, bool user_pause)
 {
@@ -159,10 +175,10 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
         }
     }
 
-    if (send_update) {
-        update_screensaver_state(mpctx);
+    update_core_idle_state(mpctx);
+
+    if (send_update)
         mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
-    }
 }
 
 void update_internal_pause_state(struct MPContext *mpctx)
@@ -175,8 +191,7 @@ void update_screensaver_state(struct MPContext *mpctx)
     if (!mpctx->video_out)
         return;
 
-    bool saver_state = mpctx->opts->pause || !mpctx->opts->stop_screensaver ||
-                       !mpctx->playback_initialized;
+    bool saver_state = !mpctx->playback_active || !mpctx->opts->stop_screensaver;
     vo_control_async(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
                                                    : VOCTRL_KILL_SCREENSAVER, NULL);
 }
@@ -227,6 +242,8 @@ void reset_playback_state(struct MPContext *mpctx)
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
+
+    update_core_idle_state(mpctx);
 }
 
 static void mp_seek(MPContext *mpctx, struct seek_params seek)
@@ -980,6 +997,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->audio_allow_second_chance_seek = false;
         handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
+        update_core_idle_state(mpctx);
         if (!mpctx->playing_msg_shown) {
             if (opts->playing_msg && opts->playing_msg[0]) {
                 char *msg =
@@ -1102,6 +1120,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_keep_open(mpctx);
 
     handle_sstep(mpctx);
+
+    update_core_idle_state(mpctx);
 
     if (mpctx->stop_play)
         return;
