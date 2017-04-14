@@ -1274,14 +1274,15 @@ reopen_file:
 
     playback_start = mp_time_sec();
     mpctx->error_playing = 0;
+    mpctx->in_playloop = true;
     while (!mpctx->stop_play)
         run_playloop(mpctx);
+    mpctx->in_playloop = false;
 
     MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);
 
 terminate_playback:
 
-    mpctx->playback_active = false;
     update_core_idle_state(mpctx);
 
     process_unload_hooks(mpctx);

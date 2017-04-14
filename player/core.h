@@ -417,6 +417,7 @@ typedef struct MPContext {
 
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading
+    bool in_playloop;
 
     // step this many frames, then pause
     int step_frames;
