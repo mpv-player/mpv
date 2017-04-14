@@ -44,6 +44,7 @@ Interface changes
     - deprecate --loop - after a deprecation period, it will be undeprecated,
       but changed to alias --loop-file
     - add --keep-open-pause=no
+    - deprecate --demuxer-max-packets
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

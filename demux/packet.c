@@ -130,6 +130,32 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     return new;
 }
 
+#define ROUND_ALLOC(s) MP_ALIGN_UP(s, 64)
+
+// Attempt to estimate the total memory consumption of the given packet.
+// This is important if we store thousands of packets and not to exceed
+// user-provided limits. Of course we can't know how much memory internal
+// fragmentation of the libc memory allocator will waste.
+// Note that this should return a "stable" value - e.g. if a new packet ref
+// is created, this should return the same value with the new ref. (This
+// implies the value is not exact and does not return the actual size of
+// memory wasted due to internal fragmentation.)
+size_t demux_packet_estimate_total_size(struct demux_packet *dp)
+{
+    size_t size = ROUND_ALLOC(sizeof(struct demux_packet));
+    size += ROUND_ALLOC(dp->len);
+    if (dp->avpacket) {
+        size += ROUND_ALLOC(sizeof(AVPacket));
+        size += ROUND_ALLOC(sizeof(AVBufferRef));
+        size += 64; // upper bound estimate on sizeof(AVBuffer)
+        size += ROUND_ALLOC(dp->avpacket->side_data_elems *
+                            sizeof(dp->avpacket->side_data[0]));
+        for (int n = 0; n < dp->avpacket->side_data_elems; n++)
+            size += ROUND_ALLOC(dp->avpacket->side_data[n].size);
+    }
+    return size;
+}
+
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 {
 #if LIBAVCODEC_VERSION_MICRO >= 100

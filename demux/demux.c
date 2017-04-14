@@ -97,7 +97,8 @@ struct demux_opts {
 const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
-        OPT_INTRANGE("demuxer-max-packets", max_packs, 0, 0, INT_MAX),
+        OPT_INTRANGE("demuxer-max-packets", max_packs, 0, 0, INT_MAX,
+                     .deprecation_message = "use --demuxer-max-bytes"),
         OPT_INTRANGE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
@@ -106,7 +107,7 @@ const struct m_sub_options demux_conf = {
     },
     .size = sizeof(struct demux_opts),
     .defaults = &(const struct demux_opts){
-        .max_packs = 16000,
+        .max_packs = INT_MAX,
         .max_bytes = 400 * 1024 * 1024,
         .min_secs = 1.0,
         .min_secs_cache = 10.0,
@@ -558,7 +559,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     dp->next = NULL;
 
     ds->packs++;
-    ds->bytes += dp->len;
+    ds->bytes += demux_packet_estimate_total_size(dp);
     if (ds->tail) {
         // next packet in stream
         ds->tail->next = dp;
@@ -777,7 +778,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     pkt->next = NULL;
     if (!ds->head)
         ds->tail = NULL;
-    ds->bytes -= pkt->len;
+    ds->bytes -= demux_packet_estimate_total_size(pkt);
     ds->packs--;
 
     double ts = pkt->dts == MP_NOPTS_VALUE ? pkt->pts : pkt->dts;
