@@ -120,58 +120,54 @@ double get_relative_time(struct MPContext *mpctx)
     return delta * 0.000001;
 }
 
-void pause_player(struct MPContext *mpctx)
+// The value passed here is the new value for mpctx->opts->pause
+void set_pause_state(struct MPContext *mpctx, bool user_pause)
 {
-    mpctx->opts->pause = 1;
+    struct MPOpts *opts = mpctx->opts;
+    bool send_update = false;
 
-    update_screensaver_state(mpctx);
+    if (opts->pause != user_pause)
+        send_update = true;
+    opts->pause = user_pause;
 
-    if (mpctx->paused)
-        goto end;
-    mpctx->paused = true;
-    mpctx->step_frames = 0;
-    mpctx->time_frame -= get_relative_time(mpctx);
-    mpctx->osd_function = 0;
-    mpctx->osd_force_update = true;
-    mpctx->paused_for_cache = false;
+    bool internal_paused = opts->pause || mpctx->paused_for_cache;
+    if (internal_paused != mpctx->paused) {
+        mpctx->paused = internal_paused;
+        send_update = true;
 
-    if (mpctx->ao && mpctx->ao_chain)
-        ao_pause(mpctx->ao);
-    if (mpctx->video_out)
-        vo_set_paused(mpctx->video_out, true);
+        if (mpctx->ao && mpctx->ao_chain) {
+            if (internal_paused) {
+                ao_pause(mpctx->ao);
+            } else {
+                ao_resume(mpctx->ao);
+            }
+        }
 
-    mp_wakeup_core(mpctx);
+        if (mpctx->video_out)
+            vo_set_paused(mpctx->video_out, internal_paused);
 
-end:
-    mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+        mpctx->osd_function = 0;
+        mpctx->osd_force_update = true;
+
+        mp_wakeup_core(mpctx);
+
+        if (internal_paused) {
+            mpctx->step_frames = 0;
+            mpctx->time_frame -= get_relative_time(mpctx);
+        } else {
+            (void)get_relative_time(mpctx); // ignore time that passed during pause
+        }
+    }
+
+    if (send_update) {
+        update_screensaver_state(mpctx);
+        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+    }
 }
 
-void unpause_player(struct MPContext *mpctx)
+void update_internal_pause_state(struct MPContext *mpctx)
 {
-    mpctx->opts->pause = 0;
-
-    update_screensaver_state(mpctx);
-
-    if (!mpctx->paused)
-        goto end;
-    // Don't actually unpause while cache is loading.
-    if (mpctx->paused_for_cache)
-        goto end;
-    mpctx->paused = false;
-    mpctx->osd_function = 0;
-    mpctx->osd_force_update = true;
-
-    if (mpctx->ao && mpctx->ao_chain)
-        ao_resume(mpctx->ao);
-    if (mpctx->video_out)
-        vo_set_paused(mpctx->video_out, false);
-
-    mp_wakeup_core(mpctx);
-
-    (void)get_relative_time(mpctx);     // ignore time that passed during pause
-
-end:
-    mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+    set_pause_state(mpctx, mpctx->opts->pause);
 }
 
 void update_screensaver_state(struct MPContext *mpctx)
@@ -191,11 +187,11 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         return;
     if (dir > 0) {
         mpctx->step_frames += 1;
-        unpause_player(mpctx);
+        set_pause_state(mpctx, false);
     } else if (dir < 0) {
         if (!mpctx->hrseek_active) {
             queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, 0);
-            pause_player(mpctx);
+            set_pause_state(mpctx, true);
         }
     }
 }
@@ -619,17 +615,14 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                     mpctx->cache_wait_time /= 1.5 - 0.1;
                 }
                 mpctx->paused_for_cache = false;
-                if (!opts->pause)
-                    unpause_player(mpctx);
+                update_internal_pause_state(mpctx);
                 force_update = true;
             }
             mp_set_timeout(mpctx, 0.2);
         } else {
             if (opts->cache_pausing && s.underrun) {
-                bool prev_paused_user = opts->pause;
-                pause_player(mpctx);
                 mpctx->paused_for_cache = true;
-                opts->pause = prev_paused_user;
+                update_internal_pause_state(mpctx);
                 mpctx->cache_stop_time = now;
                 force_update = true;
             }
@@ -763,7 +756,7 @@ static void handle_sstep(struct MPContext *mpctx)
         if (mpctx->max_frames >= 0 && !mpctx->stop_play)
             mpctx->stop_play = AT_END_OF_FILE; // force EOF even if audio left
         if (mpctx->step_frames > 0 && !mpctx->paused)
-            pause_player(mpctx);
+            set_pause_state(mpctx, true);
     }
 }
 
@@ -831,8 +824,8 @@ static void handle_keep_open(struct MPContext *mpctx)
                 seek_to_last_frame(mpctx);
             mpctx->playback_pts = mpctx->last_vo_pts;
         }
-        if (opts->keep_open_pause && !mpctx->opts->pause)
-            pause_player(mpctx);
+        if (opts->keep_open_pause)
+            set_pause_state(mpctx, true);
     }
 }
 

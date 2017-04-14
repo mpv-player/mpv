@@ -1493,11 +1493,7 @@ static int mp_property_pause(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
 
     if (mpctx->playback_initialized && action == M_PROPERTY_SET) {
-        if (*(int *)arg) {
-            pause_player(mpctx);
-        } else {
-            unpause_player(mpctx);
-        }
+        set_pause_state(mpctx, *(int *)arg);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -5018,10 +5014,10 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->is_up_down) {
             if (cmd->is_up) {
                 if (mpctx->step_frames < 1)
-                    pause_player(mpctx);
+                    set_pause_state(mpctx, true);
             } else {
                 if (cmd->repeated) {
-                    unpause_player(mpctx);
+                    set_pause_state(mpctx, false);
                 } else {
                     add_step_frame(mpctx, 1);
                 }

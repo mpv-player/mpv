@@ -1268,8 +1268,7 @@ reopen_file:
         execute_queued_seek(mpctx);
     }
 
-    if (mpctx->opts->pause)
-        pause_player(mpctx);
+    update_internal_pause_state(mpctx);
 
     open_recorder(mpctx, true);
 

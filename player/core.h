@@ -558,8 +558,8 @@ void mp_wakeup_core_cb(void *ctx);
 void mp_process_input(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
-void pause_player(struct MPContext *mpctx);
-void unpause_player(struct MPContext *mpctx);
+void set_pause_state(struct MPContext *mpctx, bool user_pause);
+void update_internal_pause_state(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 enum seek_precision exact, int flags);
