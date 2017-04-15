@@ -993,7 +993,13 @@ layouts["box"] = function ()
 
     lo = add_layout("tog_fs")
     lo.geometry =
-        {x = posX+pos_offsetX, y = bigbtnrowY, an = 6, w = 25, h = 25}
+        {x = posX+pos_offsetX - 25, y = bigbtnrowY, an = 4, w = 25, h = 25}
+    lo.style = osc_styles.smallButtonsR
+
+    lo = add_layout("volume")
+    lo.geometry = 
+        {x = posX+pos_offsetX - (25 * 2) - osc_geo.p,
+         y = bigbtnrowY, an = 4, w = 25, h = 25}
     lo.style = osc_styles.smallButtonsR
 
     --
@@ -1154,7 +1160,7 @@ layouts["bottombar"] = function()
     local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
     local tsW = 90
-    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+    local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
 
     if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
         osc_param.playresy = minW / osc_param.display_aspect
@@ -1239,6 +1245,12 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
+    -- Volume
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("volume")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
     -- Left timecode
     geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
             w = tcW, h = geo.h }
@@ -1308,7 +1320,7 @@ layouts["topbar"] = function()
     local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
     local tsW = 90
-    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+    local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
 
     if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
         osc_param.playresy = minW / osc_param.display_aspect
@@ -1358,6 +1370,12 @@ layouts["topbar"] = function()
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("ch_next")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Volume
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("volume")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1803,6 +1821,26 @@ function osc_init()
         end
     end
 
+    -- volume
+    ne = new_element("volume", "button")
+
+    ne.content = function()
+        local volume = mp.get_property_number("volume", 0)
+        local mute = mp.get_property_native("mute")
+        local volicon = {"🔈", "🔉", "🔊"}
+        if volume == 0 or mute then
+            return "🔇"
+        else
+            return volicon[math.min(3,math.ceil(volume / (100/3)))]
+        end
+    end
+    ne.eventresponder["mouse_btn0_up"] =
+        function () mp.commandv("cycle", "mute") end
+
+    ne.eventresponder["mouse_btn3_press"] =
+        function () mp.commandv("osd-auto", "add", "volume", 5) end
+    ne.eventresponder["mouse_btn4_press"] =
+        function () mp.commandv("osd-auto", "add", "volume", -5) end
 
 
     -- load layout
