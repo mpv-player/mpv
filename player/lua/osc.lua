@@ -2054,7 +2054,7 @@ function process_event(source, what)
     local action = string.format("%s%s", source,
         what and ("_" .. what) or "")
 
-    if what == "down" then
+    if what == "down" or what == "press" then
 
         for n = 1, #elements do
 
@@ -2063,9 +2063,11 @@ function process_event(source, what)
                 (elements[n].eventresponder[source .. "_up"] or
                     elements[n].eventresponder[action]) then
 
-                state.active_element = n
-                state.active_event_source = source
-                -- fire the down event if the element has one
+                if what == "down" then
+                    state.active_element = n
+                    state.active_event_source = source
+                end
+                -- fire the down or press event if the element has one
                 if element_has_action(elements[n], action) then
                     elements[n].eventresponder[action](elements[n])
                 end
@@ -2248,6 +2250,8 @@ mp.set_key_bindings({
                                 function(e) process_event("shift+mouse_btn0", "down")  end},
     {"mouse_btn2",              function(e) process_event("mouse_btn2", "up") end,
                                 function(e) process_event("mouse_btn2", "down")  end},
+    {"mouse_btn3",              function(e) process_event("mouse_btn3", "press") end},
+    {"mouse_btn4",              function(e) process_event("mouse_btn4", "press") end},
     {"mouse_btn0_dbl",          "ignore"},
     {"shift+mouse_btn0_dbl",    "ignore"},
     {"mouse_btn2_dbl",          "ignore"},
