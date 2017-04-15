@@ -132,6 +132,7 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
                     (filter_harder || mp_isupper(rp[0]) || rp[0] == 'l')) ||
                    mp_isdigit(rp[0]) ||
                    rp[0] == ' ' || rp[0] == '\'' ||
+                   (filter_harder && (rp[0] == '(' || rp[0] == ')')) ||
                    rp[0] == '#' || rp[0] == '.' || rp[0] == ',') {
             rp++;
         } else {
@@ -151,7 +152,7 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
     } else if (rp[0] == '\\' && rp[1] == 'N') {
         // line end follows - skip it as line is empty
         rp += 2;
-    } else if (rp[0] == ' ' || filter_harder) {
+    } else if (rp[0] == ' ') {
         while (rp[0] == ' ') {
             rp++;
         }
