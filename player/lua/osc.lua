@@ -2086,7 +2086,8 @@ function process_event(source, what)
             end
 
             --reset active element
-            if not (elements[n].eventresponder["reset"] == nil) then
+            if not (n > #elements) and elements[n].eventresponder ~= nil and
+                elements[n].eventresponder["reset"] ~= nil then
                 elements[n].eventresponder["reset"](elements[n])
             end
 
