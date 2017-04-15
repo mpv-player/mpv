@@ -1260,10 +1260,15 @@ layouts["bottombar"] = function()
 
     local sb_l = geo.x + padX
 
+    -- Fullscreen button
+    geo = { x = osc_geo.x + osc_geo.w - buttonW - padX, y = geo.y, an = 4,
+            w = buttonW, h = geo.h }
+    lo = add_layout("tog_fs")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
 
     -- Track selection buttons
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = tsW, h = geo.h }
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
@@ -1389,10 +1394,14 @@ layouts["topbar"] = function()
 
     local sb_l = geo.x + padX
 
+    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
+            w = buttonW, h = geo.h }
+    lo = add_layout("tog_fs")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
 
     -- Track selection buttons
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = tsW, h = geo.h }
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
