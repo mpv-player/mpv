@@ -1,4 +1,6 @@
-/* Permission to use, copy, modify, and/or distribute this software for any
+/* Copyright (C) 2017 the mpv developers
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -12,13 +14,9 @@
  */
 
 /*
- * Note: the client API is licensed under ISC (see above) to ease
- * interoperability with other licenses. But keep in mind that the
- * mpv core is still mostly GPLv2+. It's up to lawyers to decide
- * whether applications using this API are affected by the GPL.
- * One argument against this is that proprietary applications
- * using mplayer in slave mode is apparently tolerated, and this
- * API is basically equivalent to slave mode.
+ * Note: the client API is licensed under ISC (see above) to enable
+ * other wrappers outside of mpv. But keep in mind that the
+ * mpv core is still mostly GPLv2+.
  */
 
 #ifndef MPV_CLIENT_API_H_
