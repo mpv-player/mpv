@@ -2045,24 +2045,29 @@ end
 -- Eventhandling
 --
 
+local function element_has_action(element, action)
+    return element and element.eventresponder and
+        element.eventresponder[action]
+end
+
 function process_event(source, what)
+    local action = string.format("%s%s", source,
+        what and ("_" .. what) or "")
 
     if what == "down" then
 
         for n = 1, #elements do
 
-            if not (elements[n].eventresponder == nil) then
-                if not (elements[n].eventresponder[source .. "_up"] == nil)
-                    or not (elements[n].eventresponder[source .. "_down"] == nil) then
+            if mouse_hit(elements[n]) and
+                elements[n].eventresponder and
+                (elements[n].eventresponder[source .. "_up"] or
+                    elements[n].eventresponder[action]) then
 
-                    if mouse_hit(elements[n]) then
-                        state.active_element = n
-                        state.active_event_source = source
-                        -- fire the down event if the element has one
-                        if not (elements[n].eventresponder[source .. "_" .. what] == nil) then
-                            elements[n].eventresponder[source .. "_" .. what](elements[n])
-                        end
-                    end
+                state.active_element = n
+                state.active_event_source = source
+                -- fire the down event if the element has one
+                if element_has_action(elements[n], action) then
+                    elements[n].eventresponder[action](elements[n])
                 end
 
             end
@@ -2070,24 +2075,19 @@ function process_event(source, what)
 
     elseif what == "up" then
 
-        if not (state.active_element == nil) then
-
+        if elements[state.active_element] then
             local n = state.active_element
 
             if n == 0 then
                 --click on background (does not work)
-            elseif n > 0 and not (n > #elements) and
-                not (elements[n].eventresponder == nil) and
-                not (elements[n].eventresponder[source .. "_" .. what] == nil) then
+            elseif element_has_action(elements[n], action) and
+                mouse_hit(elements[n]) then
 
-                if mouse_hit(elements[n]) then
-                    elements[n].eventresponder[source .. "_" .. what](elements[n])
-                end
+                elements[n].eventresponder[action](elements[n])
             end
 
             --reset active element
-            if not (n > #elements) and elements[n].eventresponder ~= nil and
-                elements[n].eventresponder["reset"] ~= nil then
+            if element_has_action(elements[n], "reset") then
                 elements[n].eventresponder["reset"](elements[n])
             end
 
@@ -2096,6 +2096,7 @@ function process_event(source, what)
         state.mouse_down_counter = 0
 
     elseif source == "mouse_move" then
+
         local mouseX, mouseY = get_virt_mouse_pos()
         if (user_opts.minmousemove == 0) or
             (not ((state.last_mouseX == nil) or (state.last_mouseY == nil)) and
@@ -2107,15 +2108,9 @@ function process_event(source, what)
         end
         state.last_mouseX, state.last_mouseY = mouseX, mouseY
 
-        if not (state.active_element == nil) then
-
-            local n = state.active_element
-
-            if not (n > #elements) and not (elements[n].eventresponder == nil) then
-                if not (elements[n].eventresponder[source] == nil) then
-                    elements[n].eventresponder[source](elements[n])
-                end
-            end
+        local n = state.active_element
+        if element_has_action(elements[n], action) then
+            elements[n].eventresponder[action](elements[n])
         end
         tick()
     end
