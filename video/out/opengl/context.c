@@ -65,9 +65,6 @@ static const struct mpgl_driver *const backends[] = {
 #if HAVE_GL_DXINTEROP
     &mpgl_driver_dxinterop,
 #endif
-#if HAVE_GL_WAYLAND
-    &mpgl_driver_wayland,
-#endif
 #if HAVE_GL_X11
     &mpgl_driver_x11_probe,
 #endif
@@ -76,6 +73,9 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_GL_X11
     &mpgl_driver_x11,
+#endif
+#if HAVE_GL_WAYLAND
+    &mpgl_driver_wayland,
 #endif
 #if HAVE_EGL_DRM
     &mpgl_driver_drm,
