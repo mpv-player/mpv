@@ -511,8 +511,10 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     struct sh_stream *sh = NULL;
     if (!src) {
         track = mpctx->current_track[0][STREAM_AUDIO];
-        if (!track)
+        if (!track) {
+            uninit_audio_out(mpctx);
             return;
+        }
         sh = track->stream;
         if (!sh) {
             uninit_audio_out(mpctx);
