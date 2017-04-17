@@ -20,12 +20,12 @@ The Interface
 
 ::
 
-    +---------+----------+----------------------------+-------------+
-    | pl prev | pl next  |  title                     |       cache |
-    +------+--+---+------+---------+-----------+------+-------+-----+
-    | play | skip | skip | time    |  seekbar  | time | audio | sub |
-    |      | back | frwd | elapsed |           | left |       |     |
-    +------+------+------+---------+-----------+------+-------+-----+
+    +---------+----------+------------------------------------------+----------+
+    | pl prev | pl next  |  title                                   |    cache |
+    +------+--+---+------+---------+-----------+------+-------+-----+-----+----+
+    | play | skip | skip | time    |  seekbar  | time | audio | sub | vol | fs |
+    |      | back | frwd | elapsed |           | left |       |     |     |    |
+    +------+------+------+---------+-----------+------+-------+-----+-----+----+
 
 
 pl prev
@@ -100,6 +100,17 @@ audio and sub
     left-click      cycle audio/sub tracks forward
     right-click     cycle audio/sub tracks backwards
     shift+L-click   show available audio/sub tracks
+    =============   ================================================
+
+vol
+    =============   ================================================
+    left-click      toggle mute
+    mouse wheel     volume up/down
+    =============   ================================================
+
+fs
+    =============   ================================================
+    left-click      toggle fullscreen
     =============   ================================================
 
 Key Bindings
