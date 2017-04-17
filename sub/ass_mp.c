@@ -220,7 +220,8 @@ static bool pack(struct mp_ass_packer *p, struct sub_bitmaps *res, int imgfmt)
     res->packed_h = bb[1].y;
 
     if (!p->cached_img || p->cached_img->w < res->packed_w ||
-                          p->cached_img->h < res->packed_h)
+                          p->cached_img->h < res->packed_h ||
+                          p->cached_img->imgfmt != imgfmt)
     {
         talloc_free(p->cached_img);
         p->cached_img = mp_image_alloc(imgfmt, p->packer->w, p->packer->h);
