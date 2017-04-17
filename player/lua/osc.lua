@@ -1837,11 +1837,12 @@ function osc_init()
     ne.content = function()
         local volume = mp.get_property_number("volume", 0)
         local mute = mp.get_property_native("mute")
-        local volicon = {"🔈", "🔉", "🔊"}
+        local volicon = {"\238\132\139", "\238\132\140",
+                         "\238\132\141", "\238\132\142"}
         if volume == 0 or mute then
-            return "🔇"
+            return "\238\132\138"
         else
-            return volicon[math.min(3,math.ceil(volume / (100/3)))]
+            return volicon[math.min(4,math.ceil(volume / (100/3)))]
         end
     end
     ne.eventresponder["mouse_btn0_up"] =
