@@ -48,20 +48,20 @@ static const char *lookup_tag(int type, uint32_t tag)
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
-static const char *const pcm_le[] = {"pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"};
-
-static const char *map_audio_pcm_tag(uint32_t tag, int bits)
+static void map_audio_pcm_tag(struct mp_codec_params *c)
 {
+    int bits = c->bits_per_coded_sample;
     int bytes = (bits + 7) / 8;
-    switch (tag) {
+    switch (c->codec_tag) {
     case 0x0:       // Microsoft PCM
     case 0x1:
     case 0xfffe:    // MS PCM, Extended
-        return bytes >= 1 && bytes <= 4 ? pcm_le[bytes - 1] : NULL;
+        if (bytes >= 1 && bytes <= 4)
+            mp_set_pcm_codec(c, bytes > 1, false, bytes * 8, false);
+        break;
     case 0x3:       // IEEE float
-        return bits == 64 ? "pcm_f64le" : "pcm_f32le";
-    default:
-        return NULL;
+        mp_set_pcm_codec(c, true, true, bits == 64 ? 64 : 32, false);
+        break;
     }
 }
 
@@ -69,12 +69,8 @@ void mp_set_codec_from_tag(struct mp_codec_params *c)
 {
     c->codec = lookup_tag(c->type, c->codec_tag);
 
-    if (c->type == STREAM_AUDIO && c->bits_per_coded_sample) {
-        const char *codec =
-            map_audio_pcm_tag(c->codec_tag, c->bits_per_coded_sample);
-        if (codec)
-            c->codec = codec;
-    }
+    if (c->type == STREAM_AUDIO && c->bits_per_coded_sample)
+        map_audio_pcm_tag(c);
 }
 
 void mp_set_pcm_codec(struct mp_codec_params *c, bool sign, bool is_float,
