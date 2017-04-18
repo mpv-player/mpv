@@ -49,7 +49,6 @@ static const char *lookup_tag(int type, uint32_t tag)
 }
 
 static const char *const pcm_le[] = {"pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"};
-static const char *const pcm_be[] = {"pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"};
 
 static const char *map_audio_pcm_tag(uint32_t tag, int bits)
 {
@@ -61,10 +60,6 @@ static const char *map_audio_pcm_tag(uint32_t tag, int bits)
         return bytes >= 1 && bytes <= 4 ? pcm_le[bytes - 1] : NULL;
     case 0x3:       // IEEE float
         return bits == 64 ? "pcm_f64le" : "pcm_f32le";
-    case 0x20776172:// 'raw '
-        return bits == 8 ? "pcm_u8" : "pcm_s16be";
-    case MKTAG('t', 'w', 'o', 's'): // demux_mkv.c internal
-        return bytes >= 1 && bytes <= 4 ? pcm_be[bytes - 1] : NULL;
     default:
         return NULL;
     }
