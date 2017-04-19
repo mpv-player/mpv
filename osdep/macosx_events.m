@@ -53,7 +53,7 @@
 
 - (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKey:(NSEvent *)event;
-- (void)setMpvHandle:(struct mpv_handle *)ctx;
+- (BOOL)setMpvHandle:(struct mpv_handle *)ctx;
 - (void)readEvents;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
@@ -217,11 +217,12 @@ static void wakeup(void *context)
 
 void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 {
-    [[EventsResponder sharedInstance] setMpvHandle:ctx];
-    mpv_observe_property(ctx, 0, "duration", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(ctx, 0, "time-pos", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_FLAG);
-    mpv_set_wakeup_callback(ctx, wakeup, NULL);
+    if ([[EventsResponder sharedInstance] setMpvHandle:ctx]) {
+        mpv_observe_property(ctx, 0, "duration", MPV_FORMAT_DOUBLE);
+        mpv_observe_property(ctx, 0, "time-pos", MPV_FORMAT_DOUBLE);
+        mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_FLAG);
+        mpv_set_wakeup_callback(ctx, wakeup, NULL);
+    }
 }
 
 @implementation EventsResponder
@@ -305,12 +306,14 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     _is_application = isApplication;
 }
 
-- (void)setMpvHandle:(struct mpv_handle *)ctx
+- (BOOL)setMpvHandle:(struct mpv_handle *)ctx
 {
     if (_is_application) {
         dispatch_sync(dispatch_get_main_queue(), ^{ _ctx = ctx; });
+        return YES;
     } else {
-        _ctx = ctx;
+        mpv_detach_destroy(ctx);
+        return NO;
     }
 }
 
