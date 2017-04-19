@@ -240,7 +240,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     This will print the message ``the key was pressed`` when ``x`` was pressed.
 
     The user can remap these key bindings. Then the user has to put the
-    following into his input.conf to remap the command to the ``y`` key:
+    following into their input.conf to remap the command to the ``y`` key:
 
     ::
 
@@ -259,7 +259,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the
-    key binding in a way that will overwrite the user's custom bindings in his
+    key binding in a way that will overwrite the user's custom bindings in their
     input.conf. (``mp.add_key_binding`` overwrites default key bindings only,
     but not those by the user's input.conf.)
 
