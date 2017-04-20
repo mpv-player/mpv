@@ -67,7 +67,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceStateChanged(
         case DEVICE_STATE_DISABLED:
         case DEVICE_STATE_NOTPRESENT:
         case DEVICE_STATE_UNPLUGGED:
-            MP_VERBOSE(ao, "OnDeviceStateChanged triggered on device %S: "
+            MP_VERBOSE(ao, "OnDeviceStateChanged triggered on device %ls: "
                        "requesting ao reload\n", pwstrDeviceId);
             ao_request_reload(ao);
             break;
@@ -106,7 +106,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceRemoved(
         MP_VERBOSE(ao, "OnDeviceRemoved triggered: sending hotplug event\n");
         ao_hotplug_event(ao);
     } else if (pwstrDeviceId && !wcscmp(pwstrDeviceId, change->monitored)) {
-        MP_VERBOSE(ao, "OnDeviceRemoved triggered for device %S: "
+        MP_VERBOSE(ao, "OnDeviceRemoved triggered for device %ls: "
                    "requesting ao reload\n", pwstrDeviceId);
         ao_request_reload(ao);
     }
@@ -166,7 +166,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     if (!change->is_hotplug && pwstrDeviceId &&
         !wcscmp(pwstrDeviceId, change->monitored))
     {
-        MP_VERBOSE(ao, "OnPropertyValueChanged triggered on device %S\n",
+        MP_VERBOSE(ao, "OnPropertyValueChanged triggered on device %ls\n",
                    pwstrDeviceId);
         if (IsEqualPropertyKey(PKEY_AudioEngine_DeviceFormat, key)) {
             MP_VERBOSE(change->ao,
@@ -213,7 +213,7 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
     } else {
         // Get the device string to compare with the pwstrDeviceId
         change->monitored = state->deviceID;
-        MP_VERBOSE(ao, "Monitoring changes in device %S\n", change->monitored);
+        MP_VERBOSE(ao, "Monitoring changes in device %ls\n", change->monitored);
     }
 
     // COM voodoo to emulate c++ class
