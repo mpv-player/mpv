@@ -45,6 +45,9 @@ Interface changes
       but changed to alias --loop-file
     - add --keep-open-pause=no
     - deprecate --demuxer-max-packets
+    - change --audio-file-auto default from "exact" to "no" (mpv won't load
+      files with the same filename as the video, but different extension, as
+      audio track anymore)
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

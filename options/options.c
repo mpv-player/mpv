@@ -933,7 +933,7 @@ const struct MPOpts mp_default_opts = {
     .movie_aspect = -1.,
     .field_dominance = -1,
     .sub_auto = 0,
-    .audiofile_auto = 0,
+    .audiofile_auto = -1,
     .osd_bar_visible = 1,
 #if HAVE_LIBASS
     .ass_enabled = 1,
