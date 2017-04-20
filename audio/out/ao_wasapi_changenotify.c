@@ -202,14 +202,6 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
                                   (void **)&change->pEnumerator);
     EXIT_ON_ERROR(hr);
 
-    // COM voodoo to emulate c++ class
-    change->client.lpVtbl = &sIMMNotificationClientVtbl;
-
-    // register the change notification client
-    hr = IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
-        change->pEnumerator, (IMMNotificationClient *)change);
-    EXIT_ON_ERROR(hr);
-
     // so the callbacks can access the ao
     change->ao = ao;
 
@@ -223,6 +215,14 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
         change->monitored = state->deviceID;
         MP_VERBOSE(ao, "Monitoring changes in device %S\n", change->monitored);
     }
+
+    // COM voodoo to emulate c++ class
+    change->client.lpVtbl = &sIMMNotificationClientVtbl;
+
+    // register the change notification client
+    hr = IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
+        change->pEnumerator, (IMMNotificationClient *)change);
+    EXIT_ON_ERROR(hr);
 
     return hr;
 exit_label:
