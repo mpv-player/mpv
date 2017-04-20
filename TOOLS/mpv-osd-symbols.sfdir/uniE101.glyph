@@ -1,0 +1,16 @@
+StartChar: uniE101
+Encoding: 57601 57601 16
+Width: 880
+GlyphClass: 2
+Flags: MW
+HStem: 780 20G<222 222>
+VStem: 222 600<400 400 400 800 400 800>
+LayerCount: 2
+Fore
+SplineSet
+822 400 m 1
+ 222 0 l 1
+ 222 800 l 1
+ 822 400 l 1
+EndSplineSet
+EndChar

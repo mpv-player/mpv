@@ -1,0 +1,21 @@
+StartChar: uniE007
+Encoding: 57351 57351 7
+Width: 880
+GlyphClass: 2
+Flags: MW
+HStem: -10 80<339 430 339 543> 730 80<339 430>
+VStem: 20 80<309 491 309 513>
+LayerCount: 2
+Fore
+SplineSet
+430 -10 m 0
+ 204 -10 20 174 20 400 c 0
+ 20 626 204 810 430 810 c 0
+ 656 810 840 626 840 400 c 0
+ 840 174 656 -10 430 -10 c 0
+430 70 m 1
+ 430 730 l 1
+ 248 730 100 582 100 400 c 0
+ 100 218 248 70 430 70 c 1
+EndSplineSet
+EndChar
