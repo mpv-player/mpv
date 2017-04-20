@@ -226,6 +226,8 @@ struct node_autofree {
     ~node_autofree() { mpv_free_node_contents(ptr); }
 };
 
+#if MPV_ENABLE_DEPRECATED
+
 /**
  * Return the given property as mpv_node converted to QVariant, or QVariant()
  * on error.
@@ -282,6 +284,8 @@ static inline QVariant command_variant(mpv_handle *ctx, const QVariant &args)
     node_autofree f(&res);
     return node_to_variant(&res);
 }
+
+#endif
 
 /**
  * This is used to return error codes wrapped in QVariant for functions which

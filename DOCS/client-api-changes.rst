@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ --- mpv 0.25.0 ---
+ 1.24   - add a MPV_ENABLE_DEPRECATED preprocessor symbol, which can be defined
+          by the user to exclude deprecated API symbols from the C headers
  --- mpv 0.23.0 ---
  1.24   - the deprecated mpv_suspend() and mpv_resume() APIs now do nothing.
  --- mpv 0.22.0 ---

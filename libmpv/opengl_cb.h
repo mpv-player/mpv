@@ -286,6 +286,7 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
  */
 int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h);
 
+#if MPV_ENABLE_DEPRECATED
 /**
  * Deprecated. Use mpv_opengl_cb_draw(). This function is equivalent to:
  *
@@ -298,6 +299,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h);
  * was never marked as stable).
  */
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
+#endif
 
 /**
  * Tell the renderer that a frame was flipped at the given time. This is

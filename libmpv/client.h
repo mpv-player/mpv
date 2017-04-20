@@ -208,6 +208,16 @@ extern "C" {
 #define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 24)
 
 /**
+ * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
+ * including any libmpv headers. Then deprecated symbols will be excluded
+ * from the headers. (Of course, deprecated properties and commands and
+ * other functionality will still work.)
+ */
+#ifndef MPV_ENABLE_DEPRECATED
+#define MPV_ENABLE_DEPRECATED 1
+#endif
+
+/**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
  */
 unsigned long mpv_client_api_version(void);
@@ -499,6 +509,8 @@ mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
  */
 int mpv_load_config_file(mpv_handle *ctx, const char *filename);
 
+#if MPV_ENABLE_DEPRECATED
+
 /**
  * This does nothing since mpv 0.23.0 (API version 1.24). Below is the
  * description of the old behavior.
@@ -531,6 +543,8 @@ void mpv_suspend(mpv_handle *ctx);
  * See mpv_suspend().
  */
 void mpv_resume(mpv_handle *ctx);
+
+#endif
 
 /**
  * Return the internal time in microseconds. This has an arbitrary start offset,
@@ -812,7 +826,7 @@ void mpv_free_node_contents(mpv_node *node);
  *              - deprecated options shadowed by properties:
  *                - chapter (option deprecated in 0.21.0)
  *                - playlist-pos (option deprecated in 0.21.0)
- *       The deprecated properties will be removed in mpv 0.23.0.
+ *       The deprecated properties were removed in mpv 0.23.0.
  *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".
@@ -1132,6 +1146,7 @@ typedef enum mpv_event_id {
      * decoding starts.
      */
     MPV_EVENT_FILE_LOADED       = 8,
+#if MPV_ENABLE_DEPRECATED
     /**
      * The list of video/audio/subtitle tracks was changed. (E.g. a new track
      * was found. This doesn't necessarily indicate a track switch; for this,
@@ -1150,6 +1165,7 @@ typedef enum mpv_event_id {
      *             and might be removed in the far future.
      */
     MPV_EVENT_TRACK_SWITCHED    = 10,
+#endif
     /**
      * Idle mode was entered. In this mode, no file is played, and the playback
      * core waits for new commands. (The command line player normally quits
@@ -1157,6 +1173,7 @@ typedef enum mpv_event_id {
      * was started with mpv_create(), idle mode is enabled by default.)
      */
     MPV_EVENT_IDLE              = 11,
+#if MPV_ENABLE_DEPRECATED
     /**
      * Playback was paused. This indicates the user pause state.
      *
@@ -1186,6 +1203,7 @@ typedef enum mpv_event_id {
      *             removed in the far future.
      */
     MPV_EVENT_UNPAUSE           = 13,
+#endif
     /**
      * Sent every time after a video frame is displayed. Note that currently,
      * this will be sent in lower frequency if there is no video, or playback
@@ -1193,6 +1211,7 @@ typedef enum mpv_event_id {
      * restricted to video frames only.
      */
     MPV_EVENT_TICK              = 14,
+#if MPV_ENABLE_DEPRECATED
     /**
      * @deprecated This was used internally with the internal "script_dispatch"
      *             command to dispatch keyboard and mouse input for the OSC.
@@ -1202,6 +1221,7 @@ typedef enum mpv_event_id {
      *             header only for compatibility.
      */
     MPV_EVENT_SCRIPT_INPUT_DISPATCH = 15,
+#endif
     /**
      * Triggered by the script-message input command. The command uses the
      * first argument of the command as client name (see mpv_client_name()) to
@@ -1226,6 +1246,7 @@ typedef enum mpv_event_id {
      * because there is no such thing as audio output embedding.
      */
     MPV_EVENT_AUDIO_RECONFIG    = 18,
+#if MPV_ENABLE_DEPRECATED
     /**
      * Happens when metadata (like file tags) is possibly updated. (It's left
      * unspecified whether this happens on file start or only when it changes
@@ -1236,6 +1257,7 @@ typedef enum mpv_event_id {
      *             be removed in the far future.
      */
     MPV_EVENT_METADATA_UPDATE   = 19,
+#endif
     /**
      * Happens when a seek was initiated. Playback stops. Usually it will
      * resume with MPV_EVENT_PLAYBACK_RESTART as soon as the seek is finished.
@@ -1253,6 +1275,7 @@ typedef enum mpv_event_id {
      * See also mpv_event and mpv_event_property.
      */
     MPV_EVENT_PROPERTY_CHANGE   = 22,
+#if MPV_ENABLE_DEPRECATED
     /**
      * Happens when the current chapter changes.
      *
@@ -1261,6 +1284,7 @@ typedef enum mpv_event_id {
      *             be removed in the far future.
      */
     MPV_EVENT_CHAPTER_CHANGE    = 23,
+#endif
     /**
      * Happens if the internal per-mpv_handle ringbuffer overflows, and at
      * least 1 event had to be dropped. This can happen if the client doesn't
@@ -1414,12 +1438,14 @@ typedef struct mpv_event_end_file {
     int error;
 } mpv_event_end_file;
 
+#if MPV_ENABLE_DEPRECATED
 /** @deprecated see MPV_EVENT_SCRIPT_INPUT_DISPATCH for remarks
  */
 typedef struct mpv_event_script_input_dispatch {
     int arg0;
     const char *type;
 } mpv_event_script_input_dispatch;
+#endif
 
 typedef struct mpv_event_client_message {
     /**
