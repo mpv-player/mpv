@@ -439,11 +439,11 @@ static void xrandr_read(struct vo_x11_state *x11)
 
 static void vo_x11_update_screeninfo(struct vo *vo)
 {
-    struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-    bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
     x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
 #if HAVE_XINERAMA
+    struct mp_vo_opts *opts = vo->opts;
+    bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
     if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
     {
         int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
