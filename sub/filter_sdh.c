@@ -43,13 +43,6 @@ static void init_buf(struct buffer *buf, int length)
     buf->length = length;
 }
 
-static inline void set_pos(struct sd *sd, struct buffer *buf, int pos)
-{
-    if (pos < 0 || pos >= buf->length)
-        return;
-    buf->pos = pos;
-}
-
 static inline int append(struct sd *sd, struct buffer *buf, char c)
 {
     if (buf->pos >= 0 && buf->pos < buf->length) {
@@ -136,13 +129,13 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
                    rp[0] == '#' || rp[0] == '.' || rp[0] == ',') {
             rp++;
         } else {
-            set_pos(sd, buf, old_pos);
+            buf->pos = old_pos;
             return;
          }
     }
     if (!*rp) {
         // : was not found
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return;
     }
     rp++; // skip :
@@ -162,7 +155,7 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
         }
     } else {
         // non space follows - no speaker label
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return;
     }
     *rpp = rp;
@@ -202,7 +195,7 @@ static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf)
     }
     if (!*rp) {
         // ] was not found
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return false;
     }
     rp++; // skip ]
@@ -256,18 +249,18 @@ static bool skip_parenthesed(struct sd *sd, char **rpp, struct buffer *buf)
                 only_digits = false;
             rp++;
         } else {
-            set_pos(sd, buf, old_pos);
+            buf->pos = old_pos;
             return false;
         }
     }
     if (!*rp) {
         // ) was not found
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return false;
     }
     if (only_digits) {
         // number within parentheses is probably not SDH
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return false;
     }
     rp++; // skip )
@@ -306,12 +299,12 @@ static void remove_leading_hyphen_space(struct sd *sd, int start_pos, struct buf
 
     // if there is not a leading '-' no removing will be done
     if (buf->string[start_pos] != '-') {
-        set_pos(sd, buf, old_pos);
+        buf->pos = old_pos;
         return;
     }
 
     char *rp = &buf->string[start_pos];  // read from here
-    set_pos(sd, buf, start_pos); // start writing here
+    buf->pos = start_pos; // start writing here
     rp++; // skip '-'
     copy_ass(sd, &rp, buf);
     while (rp[0] == ' ') {
@@ -442,7 +435,7 @@ char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int len
     // if no normal text i last line - remove last line
     // by moving write pointer to start of last line
     if (!line_with_text) {
-        set_pos(sd, buf, wp_line_end);
+        buf->pos = wp_line_end;
     } else {
         contains_text = true;
     }
