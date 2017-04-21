@@ -3070,6 +3070,7 @@ static void check_gl_features(struct gl_video *p)
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
             .temporal_dither = p->opts.temporal_dither,
+            .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
             .tex_pad_y = p->opts.tex_pad_y,
             .target_brightness = p->opts.target_brightness,
