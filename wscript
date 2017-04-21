@@ -579,32 +579,16 @@ video_output_features = [
     } , {
         'name': '--x11',
         'desc': 'X11',
-        'func': check_pkg_config('x11'),
-    } , {
-        'name': '--xss',
-        'desc': 'Xss screensaver extensions',
-        'deps': [ 'x11' ],
-        'func': check_pkg_config('xscrnsaver'),
-    } , {
-        'name': '--xext',
-        'desc': 'X extensions',
-        'deps': [ 'x11' ],
-        'func': check_pkg_config('xext'),
+        'func': check_pkg_config('x11',         '>= 1.0.0',
+                                 'xscrnsaver',  '>= 1.0.0',
+                                 'xext',        '>= 1.0.0',
+                                 'xinerama',    '>= 1.0.0',
+                                 'xrandr',      '>= 1.2.0'),
     } , {
         'name': '--xv',
         'desc': 'Xv video output',
         'deps': [ 'x11' ],
         'func': check_pkg_config('xv'),
-    } , {
-        'name': '--xinerama',
-        'desc': 'Xinerama',
-        'deps': [ 'x11' ],
-        'func': check_pkg_config('xinerama'),
-    }, {
-        'name': '--xrandr',
-        'desc': 'Xrandr',
-        'deps': [ 'x11' ],
-        'func': check_pkg_config('xrandr', '>= 1.2.0'),
     } , {
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',

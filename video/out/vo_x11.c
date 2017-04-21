@@ -37,7 +37,7 @@
 
 #include "x11_common.h"
 
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
@@ -79,7 +79,7 @@ struct priv {
     int current_buf;
     bool reset_view;
 
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
     int Shmem_Flag;
     XShmSegmentInfo Shminfo[2];
     int Shm_Warned_Slow;
@@ -91,7 +91,7 @@ static bool resize(struct vo *vo);
 static bool getMyXImage(struct priv *p, int foo)
 {
     struct vo *vo = p->vo;
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
     if (vo->x11->display_is_local && XShmQueryExtension(vo->x11->display)) {
         p->Shmem_Flag = 1;
         vo->x11->ShmCompletionEvent = XShmGetEventBase(vo->x11->display)
@@ -147,7 +147,7 @@ shmemerror:
     }
     p->myximage[foo]->data =
         calloc(1, p->myximage[foo]->bytes_per_line * p->image_height + 32);
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
 }
 #endif
     return true;
@@ -155,7 +155,7 @@ shmemerror:
 
 static void freeMyXImage(struct priv *p, int foo)
 {
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
     struct vo *vo = p->vo;
     if (p->Shmem_Flag) {
         XShmDetach(vo->x11->display, &p->Shminfo[foo]);
@@ -284,7 +284,7 @@ static void Display_Image(struct priv *p, XImage *myximage)
         p->reset_view = false;
     }
 
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
     if (p->Shmem_Flag) {
         XShmPutImage(vo->x11->display, vo->x11->window, p->gc, x_image,
                      0, 0, p->dst.x0, p->dst.y0, p->dst_w, p->dst_h,
@@ -312,7 +312,7 @@ static struct mp_image get_x_buffer(struct priv *p, int buf_index)
 
 static void wait_for_completion(struct vo *vo, int max_outstanding)
 {
-#if HAVE_SHM && HAVE_XEXT
+#if HAVE_SHM
     struct priv *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
     if (ctx->Shmem_Flag) {

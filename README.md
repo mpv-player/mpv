@@ -89,7 +89,8 @@ to the *prefix* after it is compiled.
 Essential dependencies (incomplete list):
 
 - gcc or clang
-- X development headers (xlib, X extensions, libvdpau, libGL, libXv, ...)
+- X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
+  libGL, libXv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
   and either libswresample or libavresample)

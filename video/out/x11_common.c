@@ -22,6 +22,23 @@
 #include <limits.h>
 #include <unistd.h>
 #include <poll.h>
+#include <string.h>
+#include <assert.h>
+
+#include <X11/Xmd.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/keysym.h>
+#include <X11/XKBlib.h>
+#include <X11/XF86keysym.h>
+
+#include <X11/extensions/scrnsaver.h>
+#include <X11/extensions/dpms.h>
+#include <X11/extensions/Xinerama.h>
+#include <X11/extensions/Xrandr.h>
+
+#include <zlib.h>
 
 #include "config.h"
 #include "misc/bstr.h"
@@ -34,10 +51,6 @@
 #include "x11_common.h"
 #include "mpv_talloc.h"
 
-#include <string.h>
-#include <unistd.h>
-#include <assert.h>
-
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/io.h"
@@ -46,34 +59,6 @@
 
 // Specifically for mp_cancel
 #include "stream/stream.h"
-
-#include <X11/Xmd.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/keysym.h>
-#include <X11/XKBlib.h>
-#include <X11/XF86keysym.h>
-
-#if HAVE_XSS
-#include <X11/extensions/scrnsaver.h>
-#endif
-
-#if HAVE_XEXT
-#include <X11/extensions/dpms.h>
-#endif
-
-#if HAVE_XINERAMA
-#include <X11/extensions/Xinerama.h>
-#endif
-
-#if HAVE_XRANDR
-#include <X11/extensions/Xrandr.h>
-#endif
-
-#if HAVE_ZLIB
-#include <zlib.h>
-#endif
 
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -369,7 +354,6 @@ static int vo_wm_detect(struct vo *vo)
 
 static void xrandr_read(struct vo_x11_state *x11)
 {
-#if HAVE_XRANDR
     for(int i = 0; i < x11->num_displays; i++)
         talloc_free(x11->displays[i].name);
 
@@ -434,7 +418,6 @@ static void xrandr_read(struct vo_x11_state *x11)
     }
 
     XRRFreeScreenResources(r);
-#endif
 }
 
 static void vo_x11_update_screeninfo(struct vo *vo)
@@ -443,7 +426,6 @@ static void vo_x11_update_screeninfo(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
     x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
-#if HAVE_XINERAMA
     if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
     {
         int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
@@ -476,7 +458,6 @@ static void vo_x11_update_screeninfo(struct vo *vo)
 
         XFree(screens);
     }
-#endif
 }
 
 // Get the monitors for the 4 edges of the rectangle spanning all screens.
@@ -484,7 +465,6 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
 {
     //top  bottom left   right
     b[0] = b[1] = b[2] = b[3] = 0;
-#if HAVE_XINERAMA
     int num_screens = 0;
     XineramaScreenInfo *screens = XineramaQueryScreens(x11->display, &num_screens);
     if (!screens)
@@ -501,7 +481,6 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
             b[3] = n;
     }
     XFree(screens);
-#endif
 }
 
 static void *screensaver_thread(void *arg)
@@ -1337,7 +1316,6 @@ static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4])
     XSendEvent(x11->display, x11->parent, False, NoEventMask, &ev);
 }
 
-#if HAVE_ZLIB
 static bstr decompress_gz(bstr in)
 {
     bstr res = {0};
@@ -1380,12 +1358,6 @@ static bstr decompress_gz(bstr in)
 error:
     return res;
 }
-#else
-static bstr decompress_gz(bstr in)
-{
-    return (bstr){0};
-}
-#endif
 
 #define MAX_ICONS 10
 
@@ -1978,9 +1950,6 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 
 static int xss_suspend(Display *mDisplay, Bool suspend)
 {
-#if !HAVE_XSS
-    return 0;
-#else
     int event, error, major, minor;
     if (XScreenSaverQueryExtension(mDisplay, &event, &error) != True ||
         XScreenSaverQueryVersion(mDisplay, &major, &minor) != True)
@@ -1989,7 +1958,6 @@ static int xss_suspend(Display *mDisplay, Bool suspend)
         return 0;
     XScreenSaverSuspend(mDisplay, suspend);
     return 1;
-#endif
 }
 
 static void set_screensaver(struct vo_x11_state *x11, bool enabled)
@@ -2001,7 +1969,6 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled)
     x11->screensaver_enabled = enabled;
     if (xss_suspend(mDisplay, !enabled))
         return;
-#if HAVE_XEXT
     int nothing;
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
         BOOL onoff = 0;
@@ -2022,7 +1989,6 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled)
                 MP_WARN(x11, "DPMS state could not be set.\n");
         }
     }
-#endif
 }
 
 static void vo_x11_selectinput_witherr(struct vo *vo,
