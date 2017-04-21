@@ -1002,6 +1002,10 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 ``~/.config/mpv/subfont.ttf``
     fallback subtitle font
 
+``~/.config/mpv/fonts/``
+    Font files in this directory are used by mpv/libass for subtitles. Useful
+    if you do not want to install fonts to your system.
+
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
     ``--script`` option. They are loaded in alphabetical order, and sub-directories
