@@ -31,6 +31,6 @@ under mplayer2, and has been removed from mpv.
 Source files with specific licenses:
 - everything under etc/ is unknown
 - everything under DOCS/man/ is GPLv2+
-- sub/osd_font.otf is GPLv2+
+- sub/osd_font.otf is LGPLv2.1+
 - some tests under waftools/fragments/ might be GPLv2+
 - version.sh is GPLv2+
