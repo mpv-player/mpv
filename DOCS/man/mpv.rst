@@ -996,6 +996,12 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 ``~/.config/mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)
 
+``~/.config/mpv/fonts.conf``
+    fontconfig fonts.conf that is customized for mpv
+
+``~/.config/mpv/subfont.ttf``
+    fallback subtitle font
+
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
     ``--script`` option. They are loaded in alphabetical order, and sub-directories
