@@ -125,6 +125,103 @@ local function edl_track_joined(fragments, protocol, is_live)
     return edl
 end
 
+local function add_single_video(json)
+    local streamurl = ""
+
+    -- DASH/split tracks
+    if not (json["requested_formats"] == nil) then
+        for _, track in pairs(json.requested_formats) do
+            local edl_track = nil
+            edl_track = edl_track_joined(track.fragments,
+                track.protocol, json.is_live)
+            if track.acodec and track.acodec ~= "none" then
+                -- audio track
+                mp.commandv("audio-add",
+                    edl_track or track.url, "auto",
+                    track.format_note or "")
+            elseif track.vcodec and track.vcodec ~= "none" then
+                -- video track
+                streamurl = edl_track or track.url
+            end
+        end
+
+    elseif not (json.url == nil) then
+        local edl_track = nil
+        edl_track = edl_track_joined(json.fragments, json.protocol,
+            json.is_live)
+
+        -- normal video or single track
+        streamurl = edl_track or json.url
+        set_http_headers(json.http_headers)
+    else
+        msg.error("No URL found in JSON data.")
+        return
+    end
+
+    msg.debug("streamurl: " .. streamurl)
+
+    mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
+
+    mp.set_property("file-local-options/force-media-title", json.title)
+
+    -- add subtitles
+    if not (json.requested_subtitles == nil) then
+        for lang, sub_info in pairs(json.requested_subtitles) do
+            msg.verbose("adding subtitle ["..lang.."]")
+
+            local sub = nil
+
+            if not (sub_info.data == nil) then
+                sub = "memory://"..sub_info.data
+            elseif not (sub_info.url == nil) then
+                sub = sub_info.url
+            end
+
+            if not (sub == nil) then
+                mp.commandv("sub-add", sub,
+                    "auto", sub_info.ext, lang)
+            else
+                msg.verbose("No subtitle data/url for ["..lang.."]")
+            end
+        end
+    end
+
+    -- add chapters from description
+    if not (json.description == nil) and not (json.duration == nil) then
+        chapter_list = extract_chapters(json.description, json.duration)
+    end
+
+    -- set start time
+    if not (json.start_time == nil) then
+        msg.debug("Setting start to: " .. json.start_time .. " secs")
+        mp.set_property("file-local-options/start", json.start_time)
+    end
+
+    -- set aspect ratio for anamorphic video
+    if not (json.stretched_ratio == nil) and
+        not option_was_set("video-aspect") then
+        mp.set_property('file-local-options/video-aspect', json.stretched_ratio)
+    end
+
+    -- for rtmp
+    if (json.protocol == "rtmp") then
+        local rtmp_prop = append_rtmp_prop(nil,
+            "rtmp_tcurl", streamurl)
+        rtmp_prop = append_rtmp_prop(rtmp_prop,
+            "rtmp_pageurl", json.page_url)
+        rtmp_prop = append_rtmp_prop(rtmp_prop,
+            "rtmp_playpath", json.play_path)
+        rtmp_prop = append_rtmp_prop(rtmp_prop,
+            "rtmp_swfverify", json.player_url)
+        rtmp_prop = append_rtmp_prop(rtmp_prop,
+            "rtmp_swfurl", json.player_url)
+        rtmp_prop = append_rtmp_prop(rtmp_prop,
+            "rtmp_app", json.app)
+
+        mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
+    end
+end
+
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
 
@@ -297,100 +394,7 @@ mp.add_hook("on_load", 10, function ()
             end
 
         else -- probably a video
-            local streamurl = ""
-
-            -- DASH/split tracks
-            if not (json["requested_formats"] == nil) then
-                for _, track in pairs(json.requested_formats) do
-                    local edl_track = nil
-                    edl_track = edl_track_joined(track.fragments,
-                        track.protocol, json.is_live)
-                    if track.acodec and track.acodec ~= "none" then
-                        -- audio track
-                        mp.commandv("audio-add",
-                            edl_track or track.url, "auto",
-                            track.format_note or "")
-                    elseif track.vcodec and track.vcodec ~= "none" then
-                        -- video track
-                        streamurl = edl_track or track.url
-                    end
-                end
-
-            elseif not (json.url == nil) then
-                local edl_track = nil
-                edl_track = edl_track_joined(json.fragments, json.protocol,
-                    json.is_live)
-
-                -- normal video or single track
-                streamurl = edl_track or json.url
-                set_http_headers(json.http_headers)
-            else
-                msg.error("No URL found in JSON data.")
-                return
-            end
-
-            msg.debug("streamurl: " .. streamurl)
-
-            mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
-
-            mp.set_property("file-local-options/force-media-title", json.title)
-
-            -- add subtitles
-            if not (json.requested_subtitles == nil) then
-                for lang, sub_info in pairs(json.requested_subtitles) do
-                    msg.verbose("adding subtitle ["..lang.."]")
-
-                    local sub = nil
-
-                    if not (sub_info.data == nil) then
-                        sub = "memory://"..sub_info.data
-                    elseif not (sub_info.url == nil) then
-                        sub = sub_info.url
-                    end
-
-                    if not (sub == nil) then
-                        mp.commandv("sub-add", sub,
-                            "auto", sub_info.ext, lang)
-                    else
-                        msg.verbose("No subtitle data/url for ["..lang.."]")
-                    end
-                end
-            end
-
-            -- add chapters from description
-            if not (json.description == nil) and not (json.duration == nil) then
-                chapter_list = extract_chapters(json.description, json.duration)
-            end
-
-            -- set start time
-            if not (json.start_time == nil) then
-                msg.debug("Setting start to: " .. json.start_time .. " secs")
-                mp.set_property("file-local-options/start", json.start_time)
-            end
-
-            -- set aspect ratio for anamorphic video
-            if not (json.stretched_ratio == nil) and
-                not option_was_set("video-aspect") then
-                mp.set_property('file-local-options/video-aspect', json.stretched_ratio)
-            end
-
-            -- for rtmp
-            if (json.protocol == "rtmp") then
-                local rtmp_prop = append_rtmp_prop(nil,
-                    "rtmp_tcurl", streamurl)
-                rtmp_prop = append_rtmp_prop(rtmp_prop,
-                    "rtmp_pageurl", json.page_url)
-                rtmp_prop = append_rtmp_prop(rtmp_prop,
-                    "rtmp_playpath", json.play_path)
-                rtmp_prop = append_rtmp_prop(rtmp_prop,
-                    "rtmp_swfverify", json.player_url)
-                rtmp_prop = append_rtmp_prop(rtmp_prop,
-                    "rtmp_swfurl", json.player_url)
-                rtmp_prop = append_rtmp_prop(rtmp_prop,
-                    "rtmp_app", json.app)
-
-                mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
-            end
+            add_single_video(json)
         end
     end
 end)
