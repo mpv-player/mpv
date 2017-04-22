@@ -7,8 +7,7 @@ contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
 changes.
 
-There is only one release branch that keeps track of the latest version and
-will not be maintained separately.
+Releases are tagged on the master branch and will not be maintained separately.
 
 The goal of releases is to provide Linux distributions with something to
 package. If you want the newest features, just use the master branch.
@@ -19,18 +18,22 @@ Releases other than the latest release are unsupported and unmaintained.
 Release procedure
 -----------------
 
-- Merge master into branch release/current.
+While on master:
 
-- Create and/or update the `RELEASE_NOTES` file.
+- Update the `RELEASE_NOTES` file.
 
-- Create and/or update the `VERSION` file.
+- Update the `VERSION` file.
 
 - Update `DOCS/client-api-changes.rst` and `DOCS/interface-changes.rst`
   (in particular, update the last version numbers if necessary)
 
-- Create tag v0.X.Y.
+- Commit changes.
 
-- Push branch and tag to GitHub.
+- Create signed tag v0.X.Y.
+
+- Add -UNKNOWN suffix to version in `VERSION` file.
+
+- Commit changes, push branch and tag to GitHub.
 
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
   the new version.
