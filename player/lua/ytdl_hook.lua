@@ -320,7 +320,8 @@ mp.add_hook("on_load", 10, function ()
             -- some funky guessing to detect multi-arc videos
             if (not (json.entries[1]["_type"] == "url_transparent")) and
                 (not (json.entries[1]["webpage_url"] == nil)
-                and (json.entries[1]["webpage_url"] == json["webpage_url"])) then
+                and (json.entries[1]["webpage_url"] == json["webpage_url"]))
+                and not (json.entries[1].url == nil) then
                 msg.verbose("multi-arc video detected, building EDL")
 
                 local playlist = edl_track_joined(json.entries)
@@ -365,6 +366,13 @@ mp.add_hook("on_load", 10, function ()
                     end
                 end
 
+            elseif (not (json.entries[1]["_type"] == "url_transparent")) and
+                (not (json.entries[1]["webpage_url"] == nil)
+                and (json.entries[1]["webpage_url"] == json["webpage_url"]))
+                and (#json.entries == 1) then
+
+                msg.verbose("Playlist with single entry detected.")
+                add_single_video(json.entries[1])
             else
 
                 local playlist = "#EXTM3U\n"
