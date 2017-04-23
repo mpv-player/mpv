@@ -68,7 +68,6 @@ static int unqueue_buf[MAX_CHANS];
 static struct ao *ao_data;
 
 struct priv {
-    char *cfg_device;
     ALenum al_format;
     int chunk_size;
 };
@@ -94,36 +93,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
-}
-
-static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param)
-{
-    if (bstr_equals0(param, "help")) {
-        if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
-            mp_fatal(log, "Device listing not supported.\n");
-            return M_OPT_EXIT;
-        }
-        const char *list = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-        mp_info(log, "OpenAL devices:\n");
-        while (list && *list) {
-            mp_info(log, "  '%s'\n", list);
-            list = list + strlen(list) + 1;
-        }
-        return M_OPT_EXIT;
-    }
-    return 0;
-}
-
-static void list_devs(struct ao *ao, struct ao_device_list *list)
-{
-    if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE)
-        return;
-    const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-    while (devs && *devs) {
-        ao_device_list_add(list, ao, &(struct ao_device_desc){devs, devs});
-        devs = devs + strlen(devs) + 1;
-    }
 }
 
 struct speaker {
@@ -205,9 +174,7 @@ static int init(struct ao *ao)
             goto err_out;
         }
     }
-    char *dev_name = p->cfg_device;
-    if (!dev_name || !dev_name[0])
-        dev_name = ao->device;
+    char *dev_name = ao->device;
     dev = alcOpenDevice(dev_name && dev_name[0] ? dev_name : NULL);
     if (!dev) {
         MP_FATAL(ao, "could not open device\n");
@@ -367,12 +334,5 @@ const struct ao_driver audio_out_openal = {
     .resume    = audio_resume,
     .reset     = reset,
     .drain     = drain,
-    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt,
-                            DEVICE_OPT_DEPRECATION),
-        {0}
-    },
-    .options_prefix = "ao-openal",
 };
