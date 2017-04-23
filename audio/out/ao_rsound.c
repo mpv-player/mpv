@@ -36,8 +36,6 @@
 
 struct priv {
     rsound_t *rd;
-    char *host;
-    char *port;
 };
 
 static int set_format(struct ao *ao)
@@ -65,12 +63,6 @@ static int init(struct ao *ao)
 
     if (rsd_init(&priv->rd) < 0)
         return -1;
-
-    if (priv->host && priv->host[0])
-        rsd_set_param(priv->rd, RSD_HOST, priv->host);
-
-    if (priv->port && priv->port[0])
-        rsd_set_param(priv->rd, RSD_PORT, priv->port);
 
     // Actual channel layout unknown.
     struct mp_chmap_sel sel = {0};
@@ -155,13 +147,5 @@ const struct ao_driver audio_out_rsound = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .priv_size = sizeof(struct priv),
-    .options   = (const struct m_option[]) {
-        OPT_STRING("host", host, 0,
-            .deprecation_message = "request --audio-device support on issue tracker"),
-        OPT_STRING("port", port, 0,
-            .deprecation_message = "request --audio-device support on issue tracker"),
-        {0}
-    },
-    .options_prefix = "rsound",
 };
 

@@ -70,7 +70,6 @@ struct priv {
     bool device_failed;
     double audio_end;
 
-    char *dsp;
     char *oss_mixer_device;
     char *cfg_oss_mixer_channel;
 };
@@ -282,8 +281,6 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
     const char *device = PATH_DEV_DSP;
     if (ao->device)
         device = ao->device;
-    if (p->dsp && p->dsp[0])
-        device = p->dsp;
 
     MP_VERBOSE(ao, "using '%s' dsp device\n", device);
 #ifdef __linux__
@@ -652,7 +649,6 @@ const struct ao_driver audio_out_oss = {
         .oss_mixer_device = PATH_DEV_MIXER,
     },
     .options = (const struct m_option[]) {
-        OPT_STRING("device", dsp, 0, DEVICE_OPT_DEPRECATION),
         OPT_STRING("mixer-device", oss_mixer_device, 0),
         OPT_STRING("mixer-channel", cfg_oss_mixer_channel, 0),
         {0}

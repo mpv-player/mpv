@@ -207,7 +207,4 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e);
 
-#define DEVICE_OPT_DEPRECATION \
-    .deprecation_message = "use --audio-device instead"
-
 #endif

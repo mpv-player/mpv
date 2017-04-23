@@ -41,9 +41,6 @@ Available audio output drivers are:
 
     The following global options are supported by this audio output:
 
-    ``--oss-device``
-        Sets the audio output device (default: ``/dev/dsp``).
-        Deprecated, use ``--audio-device``.
     ``--oss-mixer-device``
         Sets the audio mixer device (default: ``/dev/mixer``).
     ``--oss-mixer-channel``
@@ -98,12 +95,6 @@ Available audio output drivers are:
         setting in the ``Audio Devices`` dialog in the ``Audio MIDI Setup``
         utility. Note that this does not affect the selected speaker setup.
 
-    ``--coreaudio-exclusive``
-        Deprecated, use ``--audio-exclusive``.
-        Use exclusive mode access. This merely redirects to
-        ``coreaudio_exclusive``, but should be preferred over using that AO
-        directly.
-
 
 ``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
@@ -120,11 +111,9 @@ Available audio output drivers are:
 
     The following global options are supported by this audio output:
 
-    ``--pulse-host=<host>``, ``--pulse-sink=<sink>``
-        Specify the host and optionally output sink to use. An empty <host>
-        string uses a local connection, "localhost" uses network transfer
-        (most likely not what you want).
-        Deprecated, use ``--audio-device``.
+    ``--pulse-host=<host>``
+        Specify the host to use. An empty <host> string uses a local connection,
+        "localhost" uses network transfer (most likely not what you want).
 
     ``--pulse-buffer=<1-2000|native>``
         Set the audio buffer size in milliseconds. A higher value buffers
@@ -224,19 +213,6 @@ Available audio output drivers are:
               confused with RoarAudio, which is something completely
               different.
 
-    The following global options are supported by this audio output:
-
-    ``--rsound-host=<name/path>``
-        Set the address of the server (default: localhost).  Can be either a
-        network hostname for TCP connections or a Unix domain socket path
-        starting with '/'.
-    ``--rsound-port=<number>``
-        Set the TCP port used for connecting to the server (default: 12345).
-        Not used if connecting to a Unix domain socket.
-
-    These options are deprecated. If anyone cares enough, their functionality
-    can be added back using ``--audio-device``.
-
 ``sndio``
     Audio output to the OpenBSD sndio sound system
 
@@ -245,28 +221,5 @@ Available audio output drivers are:
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
 
-    The following global options are supported by this audio output:
-
-    ``--ao-sndio-device=<device>``
-        sndio device to use (default: ``$AUDIODEVICE``, resp. ``snd0``).
-        Deprecated, use ``--audio-device``.
-
 ``wasapi``
     Audio output to the Windows Audio Session API.
-
-    The following global options are supported by this audio output:
-
-    ``--ao-wasapi-exclusive``
-        Deprecated, use ``--audio-exclusive``.
-        Requests exclusive, direct hardware access. By definition prevents
-        sound playback of any other program until mpv exits.
-    ``--ao-wasapi-device=<id>``
-        Deprecated, use ``--audio-device``.
-
-        Uses the requested endpoint instead of the system's default audio
-        endpoint. Both an ordinal number (0,1,2,...) and the GUID
-        String are valid; the GUID string is guaranteed to not change
-        unless the driver is uninstalled.
-
-        Also supports searching active devices by human-readable name. If more
-        than one device matches the name, refuses loading it.

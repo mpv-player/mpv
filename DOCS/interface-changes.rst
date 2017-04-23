@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.26.0 ---
+    - remove remaining deprecated audio device options, like --alsa-devide
+      Some of them were removed in earlier releases.
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

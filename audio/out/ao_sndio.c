@@ -122,9 +122,9 @@ static int init(struct ao *ao)
     const struct af_to_par *ap;
     int i;
 
-    p->hdl = sio_open(p->dev, SIO_PLAY, 0);
+    p->hdl = sio_open(SIO_DEVANY, SIO_PLAY, 0);
     if (p->hdl == NULL) {
-        MP_ERR(ao, "can't open sndio %s\n", p->dev);
+        MP_ERR(ao, "can't open sndio %s\n", SIO_DEVANY);
         goto error;
     }
 
@@ -319,10 +319,4 @@ const struct ao_driver audio_out_sndio = {
     .resume    = audio_resume,
     .reset     = reset,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_STRING("device", dev, 0, OPTDEF_STR(SIO_DEVANY),
-                   DEVICE_OPT_DEPRECATION),
-        {0}
-    },
-    .options_prefix = "ao-sndio",
 };

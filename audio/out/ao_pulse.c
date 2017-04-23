@@ -59,7 +59,6 @@ struct priv {
     int wakeup_status;
 
     char *cfg_host;
-    char *cfg_sink;
     int cfg_buffer;
     int cfg_latency_hacks;
 };
@@ -415,7 +414,7 @@ static int init(struct ao *ao)
     pa_proplist *proplist = NULL;
     pa_format_info *format = NULL;
     struct priv *priv = ao->priv;
-    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : ao->device;
+    char *sink = ao->device;
 
     if (pa_init_boilerplate(ao) < 0)
         return -1;
@@ -836,7 +835,6 @@ const struct ao_driver audio_out_pulse = {
     },
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
-        OPT_STRING("sink", cfg_sink, 0, DEVICE_OPT_DEPRECATION),
         OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", 0})),
         OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
         {0}

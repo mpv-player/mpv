@@ -50,7 +50,6 @@
 #include "audio/format.h"
 
 struct ao_alsa_opts {
-    char *device;
     char *mixer_device;
     char *mixer_name;
     int mixer_index;
@@ -62,7 +61,6 @@ struct ao_alsa_opts {
 #define OPT_BASE_STRUCT struct ao_alsa_opts
 static const struct m_sub_options ao_alsa_conf = {
     .opts = (const struct m_option[]) {
-        OPT_STRING("alsa-device", device, 0, DEVICE_OPT_DEPRECATION),
         OPT_FLAG("alsa-resample", resample, 0),
         OPT_STRING("alsa-mixer-device", mixer_device, 0),
         OPT_STRING("alsa-mixer-name", mixer_name, 0),
@@ -656,8 +654,6 @@ static int init_device(struct ao *ao, int mode)
     const char *device = "default";
     if (ao->device)
         device = ao->device;
-    if (p->opts->device && p->opts->device[0])
-        device = p->opts->device;
 
     err = try_open_device(ao, device, mode);
     CHECK_ALSA_ERROR("Playback open error");
