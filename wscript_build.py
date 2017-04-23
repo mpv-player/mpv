@@ -310,8 +310,6 @@ def build(ctx):
         ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),
         ( "video/decode/hw_dxva2.c",             "d3d-hwaccel" ),
         ( "video/decode/hw_d3d11va.c",           "d3d-hwaccel" ),
-        ( "video/decode/hw_vaapi_old.c",         "vaapi-hwaccel-old" ),
-        ( "video/decode/hw_vdpau.c",             "vdpau-hwaccel-old" ),
         ( "video/decode/hw_videotoolbox.c",      "videotoolbox-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),

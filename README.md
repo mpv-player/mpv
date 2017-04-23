@@ -95,6 +95,8 @@ Essential dependencies (incomplete list):
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
   and either libswresample or libavresample)
   At least FFmpeg 3.2.2 or Libav 12 is required.
+  For hardware decoding with vaapi and vdpau, FFmpeg 3.3 or Libav git is
+  required.
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
@@ -102,6 +104,7 @@ Essential dependencies (incomplete list):
 - libjpeg (optional, used for screenshots only)
 - uchardet (optional, for subtitle charset detection)
 - vdpau and vaapi libraries for hardware decoding on Linux (optional)
+  (FFmpeg 3.3 or Libav git is also required.)
 
 Libass dependencies:
 

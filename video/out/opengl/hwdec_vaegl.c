@@ -414,55 +414,42 @@ static void determine_working_formats(struct gl_hwdec *hw)
 
     p->probing_formats = true;
 
-    if (HAVE_VAAPI_HWACCEL_OLD) {
-        struct mp_image_pool *alloc = mp_image_pool_new(1);
-        va_pool_set_allocator(alloc, p->ctx, VA_RT_FORMAT_YUV420);
-        struct mp_image *s = mp_image_pool_get(alloc, IMGFMT_VAAPI, 64, 64);
-        if (s) {
-            va_surface_init_subformat(s);
-            if (try_format(hw, s))
-                MP_TARRAY_APPEND(p, formats, num_formats, IMGFMT_NV12);
-        }
-        talloc_free(s);
-        talloc_free(alloc);
-    } else {
-        AVHWFramesConstraints *fc =
+    AVHWFramesConstraints *fc =
             av_hwdevice_get_hwframe_constraints(p->ctx->av_device_ref, NULL);
-        if (!fc) {
-            MP_WARN(hw, "failed to retrieve libavutil frame constaints\n");
-            goto done;
-        }
-        for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++) {
-            AVBufferRef *fref = NULL;
-            struct mp_image *s = NULL;
-            AVFrame *frame = NULL;
-            fref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
-            if (!fref)
-                goto err;
-            AVHWFramesContext *fctx = (void *)fref->data;
-            fctx->format = AV_PIX_FMT_VAAPI;
-            fctx->sw_format = fc->valid_sw_formats[n];
-            fctx->width = 128;
-            fctx->height = 128;
-            if (av_hwframe_ctx_init(fref) < 0)
-                goto err;
-            frame = av_frame_alloc();
-            if (!frame)
-                goto err;
-            if (av_hwframe_get_buffer(fref, frame, 0) < 0)
-                goto err;
-            s = mp_image_from_av_frame(frame);
-            if (!s || !mp_image_params_valid(&s->params))
-                goto err;
-            if (try_format(hw, s))
-                MP_TARRAY_APPEND(p, formats, num_formats, s->params.hw_subfmt);
-        err:
-            talloc_free(s);
-            av_frame_free(&frame);
-            av_buffer_unref(&fref);
-        }
-        av_hwframe_constraints_free(&fc);
+    if (!fc) {
+        MP_WARN(hw, "failed to retrieve libavutil frame constaints\n");
+        goto done;
     }
+    for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++) {
+        AVBufferRef *fref = NULL;
+        struct mp_image *s = NULL;
+        AVFrame *frame = NULL;
+        fref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
+        if (!fref)
+            goto err;
+        AVHWFramesContext *fctx = (void *)fref->data;
+        fctx->format = AV_PIX_FMT_VAAPI;
+        fctx->sw_format = fc->valid_sw_formats[n];
+        fctx->width = 128;
+        fctx->height = 128;
+        if (av_hwframe_ctx_init(fref) < 0)
+            goto err;
+        frame = av_frame_alloc();
+        if (!frame)
+            goto err;
+        if (av_hwframe_get_buffer(fref, frame, 0) < 0)
+            goto err;
+        s = mp_image_from_av_frame(frame);
+        if (!s || !mp_image_params_valid(&s->params))
+            goto err;
+        if (try_format(hw, s))
+            MP_TARRAY_APPEND(p, formats, num_formats, s->params.hw_subfmt);
+    err:
+        talloc_free(s);
+        av_frame_free(&frame);
+        av_buffer_unref(&fref);
+    }
+    av_hwframe_constraints_free(&fc);
 
 done:
     MP_TARRAY_APPEND(p, formats, num_formats, 0); // terminate it

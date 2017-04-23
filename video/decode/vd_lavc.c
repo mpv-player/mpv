@@ -169,7 +169,6 @@ static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
 };
 
 #if HAVE_VAAPI_HWACCEL
-#if HAVE_VAAPI_HWACCEL_NEW
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
@@ -197,14 +196,9 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
         {AV_PIX_FMT_NONE}
     },
 };
-#else
-extern const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
-extern const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
-#endif
 #endif
 
 #if HAVE_VDPAU_HWACCEL
-#if HAVE_VDPAU_HWACCEL_NEW
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .type = HWDEC_VDPAU,
     .image_format = IMGFMT_VDPAU,
@@ -228,10 +222,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
         {AV_PIX_FMT_NONE}
     },
 };
-#else
-extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
-extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy;
-#endif
 #endif
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
@@ -239,7 +229,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_rpi,
     &mp_vd_lavc_rpi_copy,
 #endif
-#if HAVE_VDPAU_HWACCEL_OLD || HAVE_VDPAU_HWACCEL_NEW
+#if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
     &mp_vd_lavc_vdpau_copy,
 #endif
@@ -247,7 +237,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_videotoolbox,
     &mp_vd_lavc_videotoolbox_copy,
 #endif
-#if HAVE_VAAPI_HWACCEL_OLD || HAVE_VAAPI_HWACCEL_NEW
+#if HAVE_VAAPI_HWACCEL
     &mp_vd_lavc_vaapi,
     &mp_vd_lavc_vaapi_copy,
 #endif
@@ -584,7 +574,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     if (ctx->hwdec) {
         avctx->thread_count = 1;
-#if HAVE_VDPAU_HWACCEL_NEW
+#if HAVE_VDPAU_HWACCEL
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
 #endif
         if (ctx->hwdec->image_format)

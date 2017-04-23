@@ -770,13 +770,8 @@ video_output_features = [
 hwaccel_features = [
     {
         'name': '--vaapi-hwaccel',
-        'desc': 'libavcodec VAAPI hwaccel',
+        'desc': 'libavcodec VAAPI hwaccel (FFmpeg 3.3 API)',
         'deps': [ 'vaapi' ],
-        'func': check_true,
-    }, {
-        'name': '--vaapi-hwaccel-new',
-        'desc': 'libavcodec VAAPI hwaccel (new)',
-        'deps': [ 'vaapi-hwaccel' ],
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
@@ -784,12 +779,6 @@ hwaccel_features = [
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
             '      ? 1 : -1]',
             use='libav'),
-    }, {
-        'name': '--vaapi-hwaccel-old',
-        'desc': 'libavcodec VAAPI hwaccel (old)',
-        'deps': [ 'vaapi-hwaccel' ],
-        'deps_neg': [ 'vaapi-hwaccel-new' ],
-        'func': check_true,
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
@@ -805,13 +794,8 @@ hwaccel_features = [
         'func': check_true
     }, {
         'name': '--vdpau-hwaccel',
-        'desc': 'libavcodec VDPAU hwaccel',
+        'desc': 'libavcodec VDPAU hwaccel (FFmpeg 3.3 API)',
         'deps': [ 'vdpau' ],
-        'func': check_true,
-    }, {
-        'name': '--vdpau-hwaccel-new',
-        'desc': 'libavcodec VDPAU hwaccel (new)',
-        'deps': [ 'vdpau-hwaccel' ],
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 37, 1) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
@@ -819,14 +803,6 @@ hwaccel_features = [
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
             '      ? 1 : -1]',
             use='libav'),
-    }, {
-        'name': '--vdpau-hwaccel-old',
-        'desc': 'libavcodec VDPAU hwaccel (old)',
-        'deps': [ 'vdpau' ],
-        'deps_neg': [ 'vdpau-hwaccel-new' ],
-        'func': check_statement('libavcodec/vdpau.h',
-                                'av_vdpau_bind_context(0,0,0,AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH)',
-                                use='libav'),
     }, {
         'name': '--d3d-hwaccel',
         'desc': 'DXVA2 and D3D11VA hwaccel',
@@ -841,7 +817,7 @@ hwaccel_features = [
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel-old' ],
+        'deps_any': [ 'd3d-hwaccel' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
