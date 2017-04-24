@@ -79,8 +79,7 @@ struct priv {
 static EGLDisplay *get_egl_display(void *device)
 {
     PFNEGLGETPLATFORMDISPLAYEXTPROC ptr_eglGetPlatformDisplayEXT =
-        (PFNEGLGETPLATFORMDISPLAYEXTPROC)
-        eglGetProcAddress("eglGetPlatformDisplayEXT");
+        (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
     if (ptr_eglGetPlatformDisplayEXT)
     {
         EGLDisplay display = ptr_eglGetPlatformDisplayEXT(
