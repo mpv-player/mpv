@@ -172,6 +172,10 @@
 #define MP_AXIS_DOWN      (MP_AXIS_BASE+1)
 #define MP_AXIS_LEFT      (MP_AXIS_BASE+2)
 #define MP_AXIS_RIGHT     (MP_AXIS_BASE+3)
+#define MP_AXIS_END       (MP_AXIS_BASE+4)
+
+#define MP_KEY_IS_AXIS(code) \
+    ((code) >= MP_AXIS_BASE && (code) < MP_AXIS_END)
 
 // Reserved area. Can be used for keys that have no explicit names assigned,
 // but should be mappable by the user anyway.
@@ -195,10 +199,12 @@
 
 // Whether to dispatch the key binding by current mouse position.
 #define MP_KEY_DEPENDS_ON_MOUSE_POS(code) \
-    (MP_KEY_IS_MOUSE_CLICK(code) || (code) == MP_KEY_MOUSE_MOVE)
+    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_AXIS(code) || \
+     (code) == MP_KEY_MOUSE_MOVE)
 
 #define MP_KEY_IS_MOUSE(code) \
-    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_MOUSE_MOVE(code))
+    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_AXIS(code) || \
+     MP_KEY_IS_MOUSE_MOVE(code))
 
 // No input source should generate this.
 #define MP_KEY_UNMAPPED (MP_KEY_INTERN+4)
