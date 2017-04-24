@@ -72,6 +72,7 @@ const struct mp_cmd_def mp_cmds[] = {
                       {"exact", 32|16})),
     },
     .allow_auto_repeat = true,
+    .scalable = true,
   },
   { MP_CMD_REVERT_SEEK, "revert-seek", {
       OARG_FLAGS(0, ({"mark", 1})),
@@ -148,12 +149,15 @@ const struct mp_cmd_def mp_cmds[] = {
 
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(1) },
-    .allow_auto_repeat = true},
+    .allow_auto_repeat = true,
+    .scalable = true,
+  },
   { MP_CMD_CYCLE, "cycle", {
       ARG_STRING,
       OARG_CYCLEDIR(1),
     },
-    .allow_auto_repeat = true
+    .allow_auto_repeat = true,
+    .scalable = true,
   },
   { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE },
     .allow_auto_repeat = true},
@@ -346,6 +350,11 @@ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
     return (cmd->def && cmd->def->allow_auto_repeat) ||
            cmd->id == MP_CMD_COMMAND_LIST ||
            (cmd->flags & MP_ALLOW_REPEAT);
+}
+
+bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
+{
+    return cmd->def && cmd->def->scalable;
 }
 
 void mp_print_cmd_list(struct mp_log *out)

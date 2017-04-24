@@ -32,6 +32,7 @@ struct mp_cmd_def {
     bool allow_auto_repeat; // react to repeated key events
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
+    bool scalable;
 };
 
 extern const struct mp_cmd_def mp_cmds[];
@@ -130,6 +131,8 @@ bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd);
 bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
+
+bool mp_input_is_scalable_cmd(struct mp_cmd *cmd);
 
 struct bstr;
 bool mp_replace_legacy_cmd(void *talloc_ctx, struct bstr *s);
