@@ -544,6 +544,7 @@ def build(ctx):
                 "features": features,
                 "export_symbols_def": "libmpv/mpv.def",
                 "install_path": ctx.env.LIBDIR,
+                "install_path_implib": ctx.env.LIBDIR,
             }
 
             if shared and ctx.dependency_satisfied('android'):
@@ -555,6 +556,9 @@ def build(ctx):
             else:
                 # for all other configurations we want SONAME to be used
                 libmpv_kwargs["vnum"] = libversion
+
+            if shared and ctx.env.DEST_OS == 'win32':
+                libmpv_kwargs["install_path"] = ctx.env.BINDIR
 
             ctx(**libmpv_kwargs)
 
