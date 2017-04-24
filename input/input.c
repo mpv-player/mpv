@@ -95,6 +95,11 @@ struct cmd_queue {
     struct mp_cmd *first;
 };
 
+struct axis_state {
+    double dead_zone_accum;
+    double unit_accum;
+};
+
 struct input_ctx {
     pthread_mutex_t mutex;
     struct mp_log *log;
@@ -129,6 +134,12 @@ struct input_ctx {
 
     bool mouse_mangle, mouse_src_mangle;
     struct mp_rect mouse_src, mouse_dst;
+
+    // Axis state (MP_AXIS_*)
+    struct axis_state axis_state_y; // MP_AXIS_UP/MP_AXIS_DOWN
+    struct axis_state axis_state_x; // MP_AXIS_LEFT/MP_AXIS_RIGHT
+    struct axis_state *axis_current; // Points to axis currently being scrolled
+    double last_axis_time; // mp_time_sec() of the last axis event
 
     // List of command binding sections
     struct cmd_bind_section *cmd_bind_sections;
@@ -542,7 +553,8 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
     return NULL;
 }
 
-static void interpret_key(struct input_ctx *ictx, int code, double scale)
+static void interpret_key(struct input_ctx *ictx, int code, double scale,
+                          int scale_units)
 {
     int state = code & (MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
     code = code & ~(unsigned)state;
@@ -604,8 +616,86 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     memset(ictx->key_history, 0, sizeof(ictx->key_history));
 
-    cmd->scale = scale;
-    mp_input_queue_cmd(ictx, cmd);
+    if (mp_input_is_scalable_cmd(cmd)) {
+        cmd->scale = scale;
+        mp_input_queue_cmd(ictx, cmd);
+    } else {
+        // Non-scalable commands won't understand cmd->scale, so synthesize
+        // multiple commands with cmd->scale = 1
+        cmd->scale = 1;
+        // Avoid spamming the player with too many commands
+        scale_units = FFMIN(scale_units, 20);
+        for (int i = 0; i < scale_units - 1; i++)
+            mp_input_queue_cmd(ictx, mp_cmd_clone(cmd));
+        if (scale_units)
+            mp_input_queue_cmd(ictx, cmd);
+    }
+}
+
+// Pre-processing for MP_AXIS_* events. If this returns false, the caller
+// should discard the event.
+static bool process_axis(struct input_ctx *ictx, int code, double *scale,
+                         int *scale_units)
+{
+    // Size of the deadzone in scroll units. The user must scroll at least this
+    // much in any direction before their scroll is registered.
+    static const double DEADZONE_DIST = 0.125;
+    // The deadzone accumulator is reset if no scrolls happened in this many
+    // seconds, eg. the user is assumed to have finished scrolling.
+    static const double DEADZONE_SCROLL_TIME = 0.2;
+    // The scale_units accumulator is reset if no scrolls happened in this many
+    // seconds. This value should be fairly large, so commands will still be
+    // sent when the user scrolls slowly.
+    static const double UNIT_SCROLL_TIME = 0.5;
+
+    // Determine which axis is being scrolled
+    double dir;
+    struct axis_state *state;
+    switch (code) {
+    case MP_AXIS_UP:    dir = -1; state = &ictx->axis_state_y; break;
+    case MP_AXIS_DOWN:  dir = +1; state = &ictx->axis_state_y; break;
+    case MP_AXIS_LEFT:  dir = -1; state = &ictx->axis_state_x; break;
+    case MP_AXIS_RIGHT: dir = +1; state = &ictx->axis_state_x; break;
+    default:
+        return true;
+    }
+
+    // Reset accumulators if it's determined that the user finished scrolling
+    double now = mp_time_sec();
+    if (now > ictx->last_axis_time + DEADZONE_SCROLL_TIME) {
+        ictx->axis_current = NULL;
+        ictx->axis_state_y.dead_zone_accum = 0;
+        ictx->axis_state_x.dead_zone_accum = 0;
+    }
+    if (now > ictx->last_axis_time + UNIT_SCROLL_TIME) {
+        ictx->axis_state_y.unit_accum = 0;
+        ictx->axis_state_x.unit_accum = 0;
+    }
+    ictx->last_axis_time = now;
+
+    // Process axis deadzone. A lot of touchpad drivers don't filter scroll
+    // input, which makes it difficult for the user to send AXIS_UP/DOWN
+    // without accidentally triggering AXIS_LEFT/RIGHT. We try to fix this by
+    // implementing a deadzone. When the value of either axis breaks out of the
+    // deadzone, events from the other axis will be ignored until the user
+    // finishes scrolling.
+    if (ictx->axis_current == NULL) {
+        state->dead_zone_accum += *scale * dir;
+        if (state->dead_zone_accum * dir > DEADZONE_DIST) {
+            ictx->axis_current = state;
+            *scale = state->dead_zone_accum * dir;
+        }
+    }
+    if (ictx->axis_current != state)
+        return false;
+
+    // Determine scale_units. This is incremented every time the accumulated
+    // scale value crosses 1.0. Non-scalable input commands will be ran that
+    // many times.
+    state->unit_accum += *scale * dir;
+    *scale_units = trunc(state->unit_accum * dir);
+    state->unit_accum -= *scale_units * dir;
+    return true;
 }
 
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
@@ -631,14 +721,19 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     // ignore system-doubleclick if we generate these events ourselves
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
-    interpret_key(ictx, code, scale);
+    int units = 1;
+    if (MP_KEY_IS_AXIS(unmod) && !process_axis(ictx, unmod, &scale, &units))
+        return;
+    interpret_key(ictx, code, scale, units);
     if (code & MP_KEY_STATE_DOWN) {
         code &= ~MP_KEY_STATE_DOWN;
         if (ictx->last_doubleclick_key_down == code &&
             now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0)
         {
-            if (code >= MP_MOUSE_BTN0 && code <= MP_MOUSE_BTN2)
-                interpret_key(ictx, code - MP_MOUSE_BTN0 + MP_MOUSE_BTN0_DBL, 1);
+            if (code >= MP_MOUSE_BTN0 && code <= MP_MOUSE_BTN2) {
+                interpret_key(ictx, code - MP_MOUSE_BTN0 + MP_MOUSE_BTN0_DBL,
+                              1, 1);
+            }
         }
         ictx->last_doubleclick_key_down = code;
         ictx->last_doubleclick_time = now;
