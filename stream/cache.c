@@ -602,16 +602,25 @@ static int cache_seek(stream_t *cache, int64_t pos)
         r = 0;
     } else {
         cache->pos = s->read_filepos = s->read_min = pos;
-        s->eof = false; // so that cache_read() will actually wait for new data
-        s->control = CACHE_CTRL_SEEK;
-        s->control_res = 0;
-        double retry = 0;
-        while (s->control != CACHE_CTRL_NONE) {
-            if (!cache_wakeup_and_wait(s, &retry))
-                break;
+        // Is this seek likely to cause a stream-level seek?
+        // If it is, wait until that is complete and return its result.
+        // This check is not quite exact - if the reader thread is blocked in
+        // a read, the read might advance file position enough that a seek
+        // forward is no longer needed.
+        if (pos < s->min_filepos || pos > s->max_filepos + s->seek_limit) {
+            s->eof = false;
+            s->control = CACHE_CTRL_SEEK;
+            s->control_res = 0;
+            double retry = 0;
+            while (s->control != CACHE_CTRL_NONE) {
+                if (!cache_wakeup_and_wait(s, &retry))
+                    break;
+            }
+            r = s->control_res;
+        } else {
+            pthread_cond_signal(&s->wakeup);
+            r = 1;
         }
-        r = s->control_res;
-        pthread_cond_signal(&s->wakeup);
     }
 
     pthread_mutex_unlock(&s->mutex);
