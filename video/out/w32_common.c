@@ -1097,11 +1097,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         return TRUE;
     case WM_XBUTTONDOWN:
         handle_mouse_down(w32,
-                          HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6,
+                          HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8,
                           GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         break;
     case WM_XBUTTONUP:
-        handle_mouse_up(w32, HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6);
+        handle_mouse_up(w32, HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8);
         break;
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
