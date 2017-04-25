@@ -618,11 +618,13 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
 
     if (mp_input_is_scalable_cmd(cmd)) {
         cmd->scale = scale;
+        cmd->scale_units = scale_units;
         mp_input_queue_cmd(ictx, cmd);
     } else {
         // Non-scalable commands won't understand cmd->scale, so synthesize
         // multiple commands with cmd->scale = 1
         cmd->scale = 1;
+        cmd->scale_units = 1;
         // Avoid spamming the player with too many commands
         scale_units = FFMIN(scale_units, 20);
         for (int i = 0; i < scale_units - 1; i++)

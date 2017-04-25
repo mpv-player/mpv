@@ -140,7 +140,7 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
 {
     struct mp_cmd *cmd = talloc_ptrtype(NULL, cmd);
     talloc_set_destructor(cmd, destroy_cmd);
-    *cmd = (struct mp_cmd) { .scale = 1, };
+    *cmd = (struct mp_cmd) { .scale = 1, .scale_units = 1 };
 
     if (node->format != MPV_FORMAT_NODE_ARRAY)
         goto error;
@@ -254,6 +254,7 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
     *cmd = (struct mp_cmd) {
         .flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES,
         .scale = 1,
+        .scale_units = 1,
     };
 
     ctx->str = bstr_lstrip(ctx->str);

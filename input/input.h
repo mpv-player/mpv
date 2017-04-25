@@ -85,6 +85,7 @@ typedef struct mp_cmd {
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
+    int scale_units;
     const struct mp_cmd_def *def;
     char *sender; // name of the client API user which sent this
     char *key_name; // string representation of the key binding
