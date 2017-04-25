@@ -428,6 +428,16 @@ static void handle_mouse_up(struct vo_w32_state *w32, int btn)
     ReleaseCapture();
 }
 
+static void handle_mouse_wheel(struct vo_w32_state *w32, bool horiz, int val)
+{
+    int code;
+    if (horiz)
+        code = val > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+    else
+        code = val > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
+    mp_input_put_axis(w32->input_ctx, code | mod_state(w32), abs(val) / 120.);
+}
+
 static void signal_events(struct vo_w32_state *w32, int events)
 {
     atomic_fetch_or(&w32->event_flags, events);
@@ -1077,14 +1087,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_RBUTTONUP:
         handle_mouse_up(w32, MP_MOUSE_BTN2);
         break;
-    case WM_MOUSEWHEEL: {
-        int x = GET_WHEEL_DELTA_WPARAM(wParam);
-        mp_input_put_key(w32->input_ctx,
-                         (x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4) |
-                         mod_state(w32));
-        ReleaseCapture();
-        break;
-    }
+    case WM_MOUSEWHEEL:
+        handle_mouse_wheel(w32, false, GET_WHEEL_DELTA_WPARAM(wParam));
+        return 0;
+    case WM_MOUSEHWHEEL:
+        handle_mouse_wheel(w32, true, GET_WHEEL_DELTA_WPARAM(wParam));
+        // Some buggy mouse drivers (SetPoint) stop delivering WM_MOUSEHWHEEL
+        // events when the message loop doesn't return TRUE (even on Windows 7)
+        return TRUE;
     case WM_XBUTTONDOWN:
         handle_mouse_down(w32,
                           HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6,
