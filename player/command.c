@@ -4783,6 +4783,20 @@ static bool check_property_autorepeat(char *property,  struct MPContext *mpctx)
     return true;
 }
 
+// Whether changes to this property (add/cycle cmds) benefit from cmd->scale
+static bool check_property_scalable(char *property, struct MPContext *mpctx)
+{
+    struct m_option prop = {0};
+    if (mp_property_do(property, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
+        return true;
+
+    // These properties are backed by a floating-point number
+    return prop.type == &m_option_type_float ||
+           prop.type == &m_option_type_double ||
+           prop.type == &m_option_type_time ||
+           prop.type == &m_option_type_aspect;
+}
+
 static struct mpv_node *add_map_entry(struct mpv_node *dst, const char *key)
 {
     struct mpv_node_list *list = dst->u.list;
@@ -4925,27 +4939,35 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_CYCLE:
     {
         char *property = cmd->args[0].v.s;
-        struct m_property_switch_arg s = {
-            .inc = cmd->args[1].v.d * cmd->scale,
-            .wrap = cmd->id == MP_CMD_CYCLE,
-        };
         if (cmd->repeated && !check_property_autorepeat(property, mpctx)) {
             MP_VERBOSE(mpctx, "Dropping command '%.*s' from auto-repeated key.\n",
                        BSTR_P(cmd->original));
             break;
         }
-        int r = mp_property_do(property, M_PROPERTY_SWITCH, &s, mpctx);
-        if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, property, on_osd);
-        } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Unknown property: '%s'", property);
-            return -1;
-        } else if (r <= 0) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Failed to increment property '%s' by %g",
-                        property, s.inc);
-            return -1;
+        double scale = 1;
+        int scale_units = cmd->scale_units;
+        if (check_property_scalable(property, mpctx)) {
+            scale = cmd->scale;
+            scale_units = 1;
+        }
+        for (int i = 0; i < scale_units; i++) {
+            struct m_property_switch_arg s = {
+                .inc = cmd->args[1].v.d * scale,
+                .wrap = cmd->id == MP_CMD_CYCLE,
+            };
+            int r = mp_property_do(property, M_PROPERTY_SWITCH, &s, mpctx);
+            if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
+                show_property_osd(mpctx, property, on_osd);
+            } else if (r == M_PROPERTY_UNKNOWN) {
+                set_osd_msg(mpctx, osdl, osd_duration,
+                            "Unknown property: '%s'", property);
+                return -1;
+            } else if (r <= 0) {
+                set_osd_msg(mpctx, osdl, osd_duration,
+                            "Failed to increment property '%s' by %g",
+                            property, s.inc);
+                return -1;
+            }
         }
         break;
     }
