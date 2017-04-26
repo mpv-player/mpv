@@ -101,8 +101,7 @@ typedef struct MPOpts {
     int force_vo;
     int softvol;
     float softvol_volume;
-    int rgain_track;            // Enable/disable track based replaygain
-    int rgain_album;            // Enable/disable album based replaygain
+    int rgain_mode;
     float rgain_preamp;         // Set replaygain pre-amplification
     int rgain_clip;             // Enable/disable clipping prevention
     float rgain_fallback;

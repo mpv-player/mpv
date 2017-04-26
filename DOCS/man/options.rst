@@ -1182,12 +1182,9 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
-``--replaygain-track=<yes|no>``
-    Adjust volume gain according to the track-gain replaygain value stored
-    in the file metadata.
-
-``--replaygain-album=<yes|no>``
-    Like replaygain-track, but using the album-gain value instead.
+``--replaygain=<no|track|album>``
+    Adjust volume gain according to the track-gain or album-gain replaygain
+    value stored in the file metadata (default: no replaygain).
 
 ``--replaygain-preamp=<db>``
     Pre-amplification gain in dB to apply to the selected replaygain gain

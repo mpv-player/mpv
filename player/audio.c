@@ -136,13 +136,13 @@ static float compute_replaygain(struct MPContext *mpctx)
     float rgain = 1.0;
 
     struct replaygain_data *rg = ao_c->af->replaygain_data;
-    if ((opts->rgain_track || opts->rgain_album) && rg) {
+    if (opts->rgain_mode && rg) {
         MP_VERBOSE(mpctx, "Replaygain: Track=%f/%f Album=%f/%f\n",
                    rg->track_gain, rg->track_peak,
                    rg->album_gain, rg->album_peak);
 
         float gain, peak;
-        if (opts->rgain_track) {
+        if (opts->rgain_mode == 1) {
             gain = rg->track_gain;
             peak = rg->track_peak;
         } else {
