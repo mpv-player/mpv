@@ -176,6 +176,7 @@ void audio_update_volume(struct MPContext *mpctx)
         return;
 
     float gain = MPMAX(opts->softvol_volume / 100.0, 0);
+    gain = pow(gain, 3);
     gain *= compute_replaygain(mpctx);
     if (opts->softvol_mute == 1)
         gain = 0.0;

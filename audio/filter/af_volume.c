@@ -106,7 +106,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     }
     case AF_CONTROL_SET_VOLUME:
         s->vol = *(float *)arg;
-        s->level = pow(s->vol, 3);
+        s->level = *(float *)arg;
         MP_VERBOSE(af, "volume gain: %f\n", s->level);
         return AF_OK;
     case AF_CONTROL_GET_VOLUME:
