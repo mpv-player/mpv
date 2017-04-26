@@ -27,7 +27,6 @@
 #include <gbm.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GL/gl.h>
 
 #include "context.h"
 #include "egl_helpers.h"
