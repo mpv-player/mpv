@@ -610,16 +610,13 @@ video_output_features = [
         'desc': 'OpenGL X11 EGL Backend',
         'deps': [ 'x11' ],
         'groups': [ 'gl' ],
-        'func': check_pkg_config('egl', 'gl'),
+        'func': check_pkg_config('egl'),
     } , {
         'name': '--egl-drm',
         'desc': 'OpenGL DRM EGL Backend',
         'deps': [ 'drm', 'gbm' ],
         'groups': [ 'gl' ],
-        'func': compose_checks(
-            check_pkg_config('egl'),
-            check_pkg_config_cflags('gl')
-        )
+        'func': check_pkg_config('egl'),
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
@@ -743,7 +740,6 @@ video_output_features = [
         'deps': ['libdl'],
         'func': compose_checks(
             check_cc(lib="EGL"),
-            check_cc(lib="GLESv2"),
             check_statement('EGL/fbdev_window.h', 'struct fbdev_window test'),
             check_statement('linux/fb.h', 'struct fb_var_screeninfo test'),
         ),

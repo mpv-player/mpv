@@ -144,7 +144,6 @@ def check_rpi(ctx, dependency_identifier):
     checks = [
         check_pkg_config('bcm_host', uselib_store='bcm_host'),
         check_pkg_config('egl'),
-        check_pkg_config('glesv2'),
         check_cc(lib=['mmal_core', 'mmal_util', 'mmal_vc_client'], use=['bcm_host']),
     ]
 
