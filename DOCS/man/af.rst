@@ -208,6 +208,9 @@ Available filters are:
     best to use the *Master* volume control of your sound card or the volume
     knob on your amplifier.
 
+    *WARNING*: This filter is deprecated. Use the top-level options like
+    ``--volume`` and ``--replaygain...`` instead.
+
     *NOTE*: This filter is not reentrant and can therefore only be enabled
     once for every audio stream.
 

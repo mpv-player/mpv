@@ -1820,10 +1820,7 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
 
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET)
-        audio_update_volume(mpctx);
-    return r;
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 /// Mute (RW)
@@ -5798,6 +5795,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_SCREENSAVER)
         update_screensaver_state(mpctx);
+
+    if (flags & UPDATE_VOL)
+        audio_update_volume(mpctx);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)

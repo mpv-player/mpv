@@ -1182,6 +1182,26 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
+``--replaygain-track=<yes|no>``
+    Adjust volume gain according to the track-gain replaygain value stored
+    in the file metadata.
+
+``--replaygain-album=<yes|no>``
+    Like replaygain-track, but using the album-gain value instead.
+
+``--replaygain-preamp=<db>``
+    Pre-amplification gain in dB to apply to the selected replaygain gain
+    (default: 0).
+
+``--replaygain-clip=<yes|no>``
+    Prevent clipping caused by replaygain by automatically lowering the
+    gain (default). Use ``--replaygain-clip=no`` to disable this.
+
+``--replaygain-fallback=<db>``
+    Gain in dB to apply if the file has no replay gain tags. This option
+    is always applied if the replaygain logic is somehow inactive. If this
+    is applied, no other replaygain options are applied.
+
 ``--balance=<value>``
     How much left/right channels contribute to the audio. (The implementation
     of this feature is rather odd. It doesn't change the volumes of each
