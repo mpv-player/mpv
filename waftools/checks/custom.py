@@ -146,10 +146,6 @@ def check_rpi(ctx, dependency_identifier):
         check_pkg_config('egl'),
         check_pkg_config('glesv2'),
         check_cc(lib=['mmal_core', 'mmal_util', 'mmal_vc_client'], use=['bcm_host']),
-        # We still need all OpenGL symbols, because the vo_opengl code is
-        # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
-        check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
-        check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
     ]
 
     ret = all((fn(ctx, dependency_identifier) for fn in checks))
