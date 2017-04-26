@@ -42,11 +42,15 @@
     return [self convertRectToBacking:[self frame]];
 }
 
-
 - (void)drawRect:(NSRect)rect
 {
     [[NSColor blackColor] setFill];
     NSRectFill(rect);
-    [self.adapter performAsyncResize:[self frameInPixels].size];
 }
+
+- (void)setNeedsDisplay:(BOOL)display
+{
+    [super setNeedsDisplay:NO];
+}
+
 @end
