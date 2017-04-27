@@ -4480,9 +4480,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Continue even if a software renderer is detected.
 
 ``--opengl-backend=<sys>``
-    The value ``auto`` (the default) selects the windowing backend. You can
-    also pass ``help`` to get a complete list of compiled in backends (sorted
-    by autoprobe order).
+    Specify a priority list of windowing backends to use with OpenGL. The value
+    ``auto`` (the default) automatically probes for the most suitable backend.
+    You can also pass ``help`` to get a complete list of compiled in backends
+    (sorted by autoprobe order).
 
     auto
         auto-select (default)
