@@ -100,17 +100,13 @@ typedef struct MPGLContext {
     void *priv;
 } MPGLContext;
 
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
+MPGLContext *mpgl_init(struct vo *vo, struct m_obj_settings *backend_list, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
 int mpgl_reconfig_window(struct MPGLContext *ctx);
 int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg);
 void mpgl_start_frame(struct MPGLContext *ctx);
 void mpgl_swap_buffers(struct MPGLContext *ctx);
 
-int mpgl_find_backend(const char *name);
-
-struct m_option;
-int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name, struct bstr param);
+extern const struct m_obj_list mpgl_backend_list;
 
 #endif

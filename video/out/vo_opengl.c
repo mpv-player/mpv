@@ -55,7 +55,7 @@ struct vo_opengl_opts {
     int allow_sw;
     int swap_interval;
     int vsync_fences;
-    char *backend;
+    struct m_obj_settings *backend_list;
     int es;
     int pattern[2];
 };
@@ -383,7 +383,7 @@ static int preinit(struct vo *vo)
     if (p->opts.allow_sw)
         vo_flags |= VOFLAG_SW;
 
-    p->glctx = mpgl_init(vo, p->opts.backend, vo_flags);
+    p->glctx = mpgl_init(vo, p->opts.backend_list, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
@@ -438,8 +438,7 @@ const struct vo_driver video_out_opengl = {
         OPT_FLAG("opengl-waitvsync", opts.waitvsync, 0),
         OPT_INT("opengl-swapinterval", opts.swap_interval, 0),
         OPT_FLAG("opengl-debug", opts.use_gl_debug, 0),
-        OPT_STRING_VALIDATE("opengl-backend", opts.backend, 0,
-                            mpgl_validate_backend_opt),
+        OPT_SETTINGSLIST("opengl-backend", opts.backend_list, 0, &mpgl_backend_list ),
         OPT_FLAG("opengl-sw", opts.allow_sw, 0),
         OPT_CHOICE("opengl-es", opts.es, 0, ({"no", -1}, {"auto", 0},
                                              {"yes", 1}, {"force2", 2})),

@@ -89,6 +89,30 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 };
 
+static bool get_desc(struct m_obj_desc *dst, int index)
+{
+    if (index >= MP_ARRAY_SIZE(backends) - 1)
+        return false;
+    const struct mpgl_driver *driver = backends[index];
+    *dst = (struct m_obj_desc) {
+        .name = driver->name,
+        .description = driver->name,
+        .priv_size = sizeof(struct mpgl_driver),
+        .p = driver,
+    };
+    return true;
+}
+
+// for backend option
+const struct m_obj_list mpgl_backend_list = {
+    .get_desc = get_desc,
+    .description = "OpenGL windowing backends",
+    .allow_unknown_entries = true,
+    .allow_disable_entries = true,
+    .allow_trailer = true,
+    .disallow_positional_parameters = true,
+};
+
 // 0-terminated list of desktop GL versions a backend should try to
 // initialize. The first entry is the most preferred version.
 const int mpgl_preferred_gl_versions[] = {
@@ -100,7 +124,7 @@ const int mpgl_preferred_gl_versions[] = {
     0
 };
 
-int mpgl_find_backend(const char *name)
+static int mpgl_find_backend(const char *name)
 {
     if (name == NULL || strcmp(name, "auto") == 0)
         return -1;
@@ -126,7 +150,7 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
     return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
 }
 
-static void *get_native_display(void *pctx, const char *name)
+static void *get_native_display(const char *name)
 {
     MPGLContext *ctx = pctx;
     if (!ctx->native_display_type || !name)
@@ -186,11 +210,41 @@ cleanup:
 
 // Create a VO window and create a GL context on it.
 //  vo_flags: passed to the backend's create window function
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
+MPGLContext *mpgl_init(struct vo *vo, struct m_obj_settings *backend_list, int vo_flags)
 {
     MPGLContext *ctx = NULL;
-    int index = mpgl_find_backend(backend_name);
-    if (index == -1) {
+    if (backend_list && backend_list[0].name) {
+        int n;
+        for (n = 0; backend_list[n].name; n++) {
+            // Something like "--opengl-backend=name," allows fallback to autoprobing.
+            int index = mpgl_find_backend(backend_list[n].name);
+            if (index == -1 || strlen(backend_list[n].name) == 0)
+                goto autoprobe;
+            if (index == -2) {
+                MP_FATAL(vo, "Unknown opengl backend '%s'\n", backend_list[n].name);
+                exit(-2);
+                return NULL;
+            }
+            ctx = init_backend(vo, backends[index], true, vo_flags);
+            if (ctx)
+                break;
+        }
+        if (!ctx && !vo->probing) {
+            // Now try with probing off
+            for (n = 0; backend_list[n].name; n++) {
+                int index = mpgl_find_backend(backend_list[n].name);
+                ctx = init_backend(vo, backends[index], false, vo_flags);
+                if (ctx)
+                    break;
+            }
+            if (!ctx) {
+                // Backend explicitly requested, but unable to fulfill
+                return NULL;
+            }
+        }
+    }
+    if (!ctx) {
+autoprobe:
         for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
             ctx = init_backend(vo, backends[n], true, vo_flags);
             if (ctx)
@@ -204,8 +258,6 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
                     break;
             }
         }
-    } else if (index >= 0) {
-        ctx = init_backend(vo, backends[index], false, vo_flags);
     }
     return ctx;
 }
