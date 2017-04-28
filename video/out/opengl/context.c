@@ -91,6 +91,14 @@ static const struct mpgl_driver *const backends[] = {
 
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
+    if (index == 0) {
+        *dst = (struct m_obj_desc) {
+            .name = "auto",
+            .description = "automatically select most suitable backend"
+        };
+        return true;
+    }
+    index--;
     if (index >= MP_ARRAY_SIZE(backends) - 1)
         return false;
     const struct mpgl_driver *driver = backends[index];
@@ -107,8 +115,6 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list mpgl_backend_list = {
     .get_desc = get_desc,
     .description = "OpenGL windowing backends",
-    .allow_unknown_entries = true,
-    .allow_disable_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
 };
@@ -218,13 +224,8 @@ MPGLContext *mpgl_init(struct vo *vo, struct m_obj_settings *backend_list, int v
         for (n = 0; backend_list[n].name; n++) {
             // Something like "--opengl-backend=name," allows fallback to autoprobing.
             int index = mpgl_find_backend(backend_list[n].name);
-            if (index == -1 || strlen(backend_list[n].name) == 0)
+            if (index < 0 || strlen(backend_list[n].name) == 0)
                 goto autoprobe;
-            if (index == -2) {
-                MP_FATAL(vo, "Unknown opengl backend '%s'\n", backend_list[n].name);
-                exit(-2);
-                return NULL;
-            }
             ctx = init_backend(vo, backends[index], true, vo_flags);
             if (ctx)
                 break;
