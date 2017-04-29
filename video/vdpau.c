@@ -481,6 +481,8 @@ void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
         CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
     }
 
+    av_buffer_unref(&ctx->av_device_ref);
+
     if (ctx->preemption_obj != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(ctx->preemption_obj);
         CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");

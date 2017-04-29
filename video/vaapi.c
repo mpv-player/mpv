@@ -224,6 +224,8 @@ error:
 void va_destroy(struct mp_vaapi_ctx *ctx)
 {
     if (ctx) {
+        av_buffer_unref(&ctx->av_device_ref);
+
         if (ctx->display)
             vaTerminate(ctx->display);
 
