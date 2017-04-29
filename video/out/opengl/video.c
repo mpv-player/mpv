@@ -840,8 +840,11 @@ static void unmap_current_image(struct gl_video *p)
             p->hwdec->driver->unmap(p->hwdec);
         memset(vimg->planes, 0, sizeof(vimg->planes));
         vimg->hwdec_mapped = false;
-        vimg->id = 0; // needs to be mapped again
+        vimg->id = 0; // needs  to be mapped again
     }
+
+    if (p->hwdec_active && p->hwdec->driver->overlay_frame)
+        p->hwdec->driver->overlay_frame(p->hwdec, NULL);
 }
 
 static void unref_current_image(struct gl_video *p)
