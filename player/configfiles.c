@@ -181,7 +181,7 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
             realpath = mp_path_join(tmp, cwd, fname);
         }
     }
-    if (bstr_startswith0(bfname, "dvd://") && opts->dvd_opts->device)
+    if (bstr_startswith0(bfname, "dvd://") && opts->dvd_opts && opts->dvd_opts->device)
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->dvd_opts->device);
     if ((bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
          bstr_startswith0(bfname, "bluray://")) && opts->bluray_device)
