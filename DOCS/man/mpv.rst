@@ -1001,6 +1001,8 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     fonts.conf in this file or mpv would not know about fonts that you already
     have in the system.
 
+    Only available when libass is built with fontconfig.
+
 ``~/.config/mpv/subfont.ttf``
     fallback subtitle font
 
