@@ -1011,7 +1011,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     if you do not want to install fonts to your system. Note that files in this
     directory are loaded into memory before being used by mpv. If you have a
     lot of fonts, consider using fonts.conf (see above) to include additional
-    fonts, which is more memory-effient.
+    fonts, which is more memory-efficient.
 
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
