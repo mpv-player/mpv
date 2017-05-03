@@ -97,7 +97,7 @@ struct vd_lavc_hwdec {
     // Process the image returned by the libavcodec decoder.
     struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
     // For copy hwdecs. If probing is true, don't log errors if unavailable.
-    // The returned device must be freed with mp_hwdec_ctx->destroy.
+    // The returned device will be freed with mp_hwdec_ctx->destroy.
     struct mp_hwdec_ctx *(*create_dev)(struct mpv_global *global,
                                        struct mp_log *log, bool probing);
     // Suffix for libavcodec decoder. If non-NULL, the codec is overridden
@@ -105,9 +105,10 @@ struct vd_lavc_hwdec {
     // Intuitively, this will force the corresponding wrapper decoder.
     const char *lavc_suffix;
     // Generic hwaccels set AVCodecContext.hw_frames_ctx in get_format().
-    // pixfmt_map must be non-NULL.
-    // struct lavc_ctx.hwdec_dev must be set at runtime (in init).
     bool generic_hwaccel;
+    // If set, AVCodecContext.hw_frames_ctx will be initialized in get_format,
+    // and pixfmt_map must be non-NULL.
+    bool set_hwframes;
     // Array of pixfmt pairs. The first pixfmt is the AVCodecContext.sw_pix_fmt,
     // the second the required AVHWFramesContext.sw_format.
     const enum AVPixelFormat (*pixfmt_map)[2];

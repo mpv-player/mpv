@@ -169,10 +169,11 @@ static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
 };
 
 #if HAVE_VAAPI_HWACCEL
-const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
+static const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
     .generic_hwaccel = true,
+    .set_hwframes = true,
     .static_pool = true,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
@@ -183,11 +184,12 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
 
 #include "video/vaapi.h"
 
-const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
+static const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .type = HWDEC_VAAPI_COPY,
     .copying = true,
     .image_format = IMGFMT_VAAPI,
     .generic_hwaccel = true,
+    .set_hwframes = true,
     .static_pool = true,
     .create_dev = va_create_standalone,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
@@ -199,10 +201,11 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
 #endif
 
 #if HAVE_VDPAU_HWACCEL
-const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
+static const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .type = HWDEC_VDPAU,
     .image_format = IMGFMT_VDPAU,
     .generic_hwaccel = true,
+    .set_hwframes = true,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
         {AV_PIX_FMT_NONE}
@@ -211,11 +214,12 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
 
 #include "video/vdpau.h"
 
-const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
+static const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
     .type = HWDEC_VDPAU_COPY,
     .copying = true,
     .image_format = IMGFMT_VDPAU,
     .generic_hwaccel = true,
+    .set_hwframes = true,
     .create_dev = vdpau_create_standalone,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
@@ -587,6 +591,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
                 goto error;
+            if (!ctx->hwdec->set_hwframes)
+                avctx->hw_device_ctx = av_buffer_ref(ctx->hwdec_dev->av_device_ref);
         }
         ctx->max_delay_queue = ctx->hwdec->delay_queue;
         ctx->hw_probing = true;
@@ -773,6 +779,9 @@ static int init_generic_hwaccel(struct dec_video *vd)
     if (!ctx->hwdec_dev)
         return -1;
 
+    if (!hwdec->set_hwframes)
+        return 0;
+
     // libavcodec has no way yet to communicate the exact surface format needed
     // for the frame pool, or the required minimum size of the frame pool.
     // Hopefully, this weakness in the libavcodec API will be fixed in the
@@ -781,6 +790,7 @@ static int init_generic_hwaccel(struct dec_video *vd)
     // software decoder would require (sw_pix_fmt). It could break and require
     // adjustment if new hwaccel surface formats are added.
     enum AVPixelFormat av_sw_format = AV_PIX_FMT_NONE;
+    assert(hwdec->pixfmt_map);
     for (int n = 0; hwdec->pixfmt_map[n][0] != AV_PIX_FMT_NONE; n++) {
         if (ctx->avctx->sw_pix_fmt == hwdec->pixfmt_map[n][0]) {
             av_sw_format = hwdec->pixfmt_map[n][1];
