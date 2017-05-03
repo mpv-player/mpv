@@ -591,8 +591,13 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
                 goto error;
-            if (!ctx->hwdec->set_hwframes)
+            if (!ctx->hwdec->set_hwframes) {
+#if HAVE_VDPAU_HWACCEL
                 avctx->hw_device_ctx = av_buffer_ref(ctx->hwdec_dev->av_device_ref);
+#else
+                goto error;
+#endif
+            }
         }
         ctx->max_delay_queue = ctx->hwdec->delay_queue;
         ctx->hw_probing = true;
