@@ -203,7 +203,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->gl_texture)
         return -1;
 
-    ID3D11Texture2D *d3d_tex = (void *)hw_image->planes[1];
+    ID3D11Texture2D *d3d_tex = (void *)hw_image->planes[0];
     if (!d3d_tex)
         return -1;
 

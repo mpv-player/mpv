@@ -87,9 +87,9 @@ static struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
 
     mp_image_setfmt(mpi, IMGFMT_D3D11VA);
     mp_image_set_size(mpi, w, h);
-    mpi->planes[0] = NULL;
-    mpi->planes[1] = (void *)surface->texture;
-    mpi->planes[2] = (void *)(intptr_t)surface_desc.Texture2D.ArraySlice;
+    mpi->planes[0] = (void *)surface->texture;
+    mpi->planes[1] = (void *)(intptr_t)surface_desc.Texture2D.ArraySlice;
+    mpi->planes[2] = NULL;
     mpi->planes[3] = (void *)surface->surface;
 
     return mpi;
@@ -115,8 +115,8 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     if (img->imgfmt != IMGFMT_D3D11VA)
         return img;
 
-    ID3D11Texture2D *texture = (void *)img->planes[1];
-    int subindex = (intptr_t)img->planes[2];
+    ID3D11Texture2D *texture = (void *)img->planes[0];
+    int subindex = (intptr_t)img->planes[1];
 
     if (!texture) {
         MP_ERR(p, "Failed to get Direct3D texture and surface from mp_image\n");
@@ -178,7 +178,7 @@ static const struct d3d_decoded_format d3d11_formats[] = {
 static struct mp_image *d3d11va_update_image_attribs(struct lavc_ctx *s,
                                                      struct mp_image *img)
 {
-    ID3D11Texture2D *texture = (void *)img->planes[1];
+    ID3D11Texture2D *texture = (void *)img->planes[0];
 
     if (!texture)
         return img;

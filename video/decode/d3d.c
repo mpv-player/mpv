@@ -301,8 +301,8 @@ struct mp_image *d3d11_download_image(struct mp_hwdec_ctx *ctx,
     if (mpi->imgfmt != IMGFMT_D3D11VA && mpi->imgfmt != IMGFMT_D3D11NV12)
         return NULL;
 
-    ID3D11Texture2D *texture = (void *)mpi->planes[1];
-    int subindex = (intptr_t)mpi->planes[2];
+    ID3D11Texture2D *texture = (void *)mpi->planes[0];
+    int subindex = (intptr_t)mpi->planes[1];
     if (!texture)
         return NULL;
 

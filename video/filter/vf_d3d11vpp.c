@@ -101,8 +101,8 @@ static struct mp_image *alloc_pool(void *pctx, int fmt, int w, int h)
     mp_image_set_size(mpi, w, h);
     mpi->params.hw_subfmt = p->out_params.hw_subfmt;
 
-    mpi->planes[1] = (void *)texture;
-    mpi->planes[2] = (void *)(intptr_t)0;
+    mpi->planes[0] = (void *)texture;
+    mpi->planes[1] = (void *)(intptr_t)0;
 
     return mpi;
 }
@@ -257,13 +257,13 @@ static int render(struct vf_instance *vf)
     if (!out)
         goto cleanup;
 
-    ID3D11Texture2D *d3d_out_tex = (void *)out->planes[1];
+    ID3D11Texture2D *d3d_out_tex = (void *)out->planes[0];
 
     in = mp_refqueue_get(p->queue, 0);
     if (!in)
         goto cleanup;
-    ID3D11Texture2D *d3d_tex = (void *)in->planes[1];
-    int d3d_subindex = (intptr_t)in->planes[2];
+    ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
+    int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
 
