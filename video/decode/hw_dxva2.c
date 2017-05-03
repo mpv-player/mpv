@@ -21,6 +21,7 @@
 
 #define DXVA2API_USE_BITFIELDS
 #include <libavcodec/dxva2.h>
+#include <libavutil/common.h>
 
 #include "lavc.h"
 #include "common/common.h"

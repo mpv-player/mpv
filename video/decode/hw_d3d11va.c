@@ -16,6 +16,7 @@
  */
 
 #include <libavcodec/d3d11va.h>
+#include <libavutil/mem.h>
 
 #include "lavc.h"
 #include "common/common.h"
