@@ -70,8 +70,8 @@ static CGLError test_gl_version(struct MPGLContext *ctx, CGLOpenGLProfile ver)
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) ver,
         kCGLPFADoubleBuffer,
-        kCGLPFAAllowOfflineRenderers,
-        kCGLPFABackingStore,
+        /*kCGLPFAAllowOfflineRenderers,
+        kCGLPFABackingStore,*/
         kCGLPFAAccelerated,
         // leave this as the last entry of the array to not break the fallback
         // code
