@@ -707,7 +707,7 @@ int vo_cocoa_config_window(struct vo *vo)
         vo->dwidth  = s->vo_dwidth  = frame.size.width;
         vo->dheight = s->vo_dheight = frame.size.height;
 
-        [s->nsgl_ctx update];
+        s->update_context = 1;
     });
     return 0;
 }
