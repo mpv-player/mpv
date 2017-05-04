@@ -751,7 +751,7 @@ video_output_features = [
                       'plain-gl' ],
         'func': check_true,
         'req': True,
-        'fmsg': "Unable to find OpenGL header files for video output. " +
+        'fmsg': "No OpenGL video output found or enabled. " +
                 "Aborting. If you really mean to compile without OpenGL " +
                 "video outputs use --disable-gl."
     }, {
