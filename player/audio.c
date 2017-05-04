@@ -119,13 +119,9 @@ fail:
     mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
 }
 
-// Convert to gain value from dB. input <= -200dB will become 0 gain.
-// Copyright (C)2002 Anders Johansson
-static float from_dB(float in, float k, float mi, float ma)
+static double db_gain(double db)
 {
-    if (in <= -200)
-        return 0.0;
-    return pow(10.0, MPCLAMP(in, mi, ma) / k);
+    return pow(10.0, db/20.0);
 }
 
 static float compute_replaygain(struct MPContext *mpctx)
@@ -151,7 +147,7 @@ static float compute_replaygain(struct MPContext *mpctx)
         }
 
         gain += opts->rgain_preamp;
-        rgain = from_dB(gain, 20.0, -200.0, 60.0);
+        rgain = db_gain(gain);
 
         MP_VERBOSE(mpctx, "Applying replay-gain: %f\n", rgain);
 
@@ -160,7 +156,7 @@ static float compute_replaygain(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "...with clipping prevention: %f\n", rgain);
         }
     } else if (opts->rgain_fallback) {
-        rgain = from_dB(opts->rgain_fallback, 20.0, -200.0, 60.0);
+        rgain = db_gain(opts->rgain_fallback);
         MP_VERBOSE(mpctx, "Applying fallback gain: %f\n", rgain);
     }
 
