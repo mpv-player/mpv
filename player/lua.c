@@ -1154,7 +1154,7 @@ static int script_subprocess(lua_State *L)
     lua_pop(L, 1); // -
 
     lua_getfield(L, 1, "max_size"); // m
-    int64_t max_size = lua_isnil(L, -1) ? 16 * 1024 * 1024 : lua_tointeger(L, -1);
+    int64_t max_size = lua_isnil(L, -1) ? 64 * 1024 * 1024 : lua_tointeger(L, -1);
 
     struct subprocess_cb_ctx cb_ctx = {
         .log = ctx->log,
