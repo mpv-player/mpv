@@ -5,6 +5,8 @@
 
 #include <libavcodec/avcodec.h>
 
+#include "config.h"
+
 #include "demux/stheader.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
@@ -138,5 +140,8 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
                               int av_sw_format, int initial_pool_size);
 
 const char *hwdec_find_decoder(const char *codec, const char *suffix);
+
+#define NEW_CUDA_HWACCEL \
+    (HAVE_CUDA_HWACCEL && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 94, 100))
 
 #endif

@@ -28,6 +28,8 @@ typedef void * CUcontext;
 #include "video/fmt-conversion.h"
 #include "video/decode/lavc.h"
 
+#if !NEW_CUDA_HWACCEL
+
 static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
@@ -47,6 +49,8 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     AVCodecContext *avctx = ctx->avctx;
     struct mp_hwdec_ctx *hwctx = ctx->hwdec_priv;
 
+    MP_VERBOSE(ctx, "Using old cuda API.\n");
+
     if (avctx->hw_frames_ctx) {
         MP_ERR(ctx, "hw_frames_ctx already initialised!\n");
         return -1;
@@ -63,7 +67,8 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     // This is proper use of the hw_frames_ctx API, but it does not work
     // (appaears to work but fails e.g. with 10 bit). The cuvid wrapper
-    // does non-standard things, and it's a messy situation.
+    // does non-standard things, and it's a messy situation. This whole
+    // file is actually used only with older libavcodec versions.
     /*
     hwframe_ctx->width = w;
     hwframe_ctx->height = h;
@@ -92,7 +97,7 @@ static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img
     return img;
 }
 
-const struct vd_lavc_hwdec mp_vd_lavc_cuda = {
+const struct vd_lavc_hwdec mp_vd_lavc_cuda_old = {
     .type = HWDEC_CUDA,
     .image_format = IMGFMT_CUDA,
     .lavc_suffix = "_cuvid",
@@ -102,3 +107,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_cuda = {
     .init_decoder = init_decoder,
     .process_image = process_image,
 };
+
+#endif
