@@ -96,11 +96,13 @@ local function edl_track_joined(fragments, protocol, is_live)
 
     local edl = "edl://"
     local offset = 1
+    local parts = {}
 
     if (protocol == "http_dash_segments") and
         not fragments[1].duration and not is_live then
         -- assume MP4 DASH initialization segment
-        edl = edl .. "!mp4_dash,init=" .. edl_escape(fragments[1].url) .. ";"
+        table.insert(parts,
+            "!mp4_dash,init=" .. edl_escape(fragments[1].url))
         offset = 2
 
         -- Check remaining fragments for duration;
@@ -116,13 +118,13 @@ local function edl_track_joined(fragments, protocol, is_live)
 
     for i = offset, #fragments do
         local fragment = fragments[i]
-        edl = edl .. edl_escape(fragment.url)
+        table.insert(parts, edl_escape(fragment.url))
         if fragment.duration then
-            edl = edl..",length="..fragment.duration
+            parts[#parts] =
+                parts[#parts] .. ",length="..fragment.duration
         end
-        edl = edl .. ";"
     end
-    return edl
+    return edl .. table.concat(parts, ";") .. ";"
 end
 
 local function add_single_video(json)
