@@ -34,3 +34,14 @@ Source files with specific licenses:
 - sub/osd_font.otf is LGPLv2.1+
 - some tests under waftools/fragments/ might be GPLv2+
 - version.sh is GPLv2+
+
+Some files are marked with "Almost LGPL." These files are GPL, but all authors
+have agreed to relicense them to LGPL. the problem is that one of the authors is
+Michael Niedermayer, who cited the following conditions for relicensing:
+
+  http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2016-September/073535.html
+
+We assume the first 3 conditions are fulfilled. The last condition can be
+interpreted as that his code can be changed to LGPL only as soon as the "core"
+of mpv changes to LGPL. We interpret "core" as something minimal, that can
+actually be built and run, with all GPL code disabled.
