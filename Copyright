@@ -190,10 +190,10 @@ LGPL relicensing status:
     osdep/terminal-win.c            medium
     osdep/threads.*                 LGPL
     osdep/timer.c                   LGPL
-    osdep/timer.h                   unknown
+    osdep/timer.h                   LGPL
     osdep/timer-darwin.c            LGPL (MIT)
-    osdep/timer-linux.c             unknown
-    osdep/timer-win2.c              unknown
+    osdep/timer-linux.c             LGPL
+    osdep/timer-win2.c              LGPL
     osdep/w32_keyboard.c            unknown
     osdep/w32_keyboard.h            unknown
     osdep/win32-console-wrapper.c   LGPL (BSD)
