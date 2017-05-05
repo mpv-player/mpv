@@ -45,3 +45,290 @@ We assume the first 3 conditions are fulfilled. The last condition can be
 interpreted as that his code can be changed to LGPL only as soon as the "core"
 of mpv changes to LGPL. We interpret "core" as something minimal, that can
 actually be built and run, with all GPL code disabled.
+
+LGPL relicensing status:
+
+    audio/decode/ad.h               LGPL
+    audio/decode/ad_lavc.c          very hard (nick's changes)
+    audio/decode/ad_spdif.c         very hard (author unreachable)
+    audio/decode/dec_audio.*        very hard (nick's changes)
+    audio/filter/af.*               must be killed (main author disagreed)
+    audio/filter/af_channel.c       must be killed (main author disagreed)
+    audio/filter/af_equalizer.c     must be killed (main author disagreed)
+    audio/filter/af_pan.c           must be killed (main author disagreed)
+    audio/filter/af_volume.c        must be killed (main author disagreed)
+    audio/filter/equalizer.h        must be killed (main author disagreed)
+    audio/filter/tools.c            must be killed (main author disagreed)
+    audio/filter/af_format.c        easy
+    audio/filter/af_lavc3enc.c      easy
+    audio/filter/af_lavfi.c         LGPL
+    audio/filter/af_scaletempo.c    easy
+    audio/filter/af_rubberband.c    LGPL
+    audio/out/ao.c                  hard
+    audio/out/ao.h                  very hard (anders' changes)
+    audio/out/ao_alsa.c             extremely hard (original author did not decide)
+    audio/out/ao_audiounit.m        easy
+    audio/out/ao_coreaudio.c        easy
+    audio/out/ao_coreaudio_chmap.c  easy
+    audio/out/ao_coreaudio_chmap.h  easy
+    audio/out/ao_coreaudio_exclusiv easy
+    audio/out/ao_coreaudio_properti easy
+    audio/out/ao_coreaudio_properti easy
+    audio/out/ao_coreaudio_utils.c  easy
+    audio/out/ao_coreaudio_utils.h  easy
+    audio/out/ao_jack.c             unknown
+    audio/out/ao_lavc.c             probably easy
+    audio/out/ao_null.c             unknown
+    audio/out/ao_openal.c           unknown
+    audio/out/ao_opensles.c         LGPL
+    audio/out/ao_oss.c              will stay GPL
+    audio/out/ao_pcm.c              unknown
+    audio/out/ao_pulse.c            easy
+    audio/out/ao_rsound.c           easy
+    audio/out/ao_sdl.c              LGPL
+    audio/out/ao_sndio.c            LGPL (BSD)
+    audio/out/ao_wasapi.c           LGPL
+    audio/out/ao_wasapi_changenotif LGPL
+    audio/out/ao_wasapi.h           LGPL
+    audio/out/ao_wasapi_utils.c     LGPL
+    audio/out/internal.h            very hard (anders' changes)
+    audio/out/pull.c                unknown
+    audio/out/push.c                unknown
+    audio/audio.*                   very hard (mp_audio based of anders' af_audio)
+    audio/audio_buffer.*            LGPL
+    audio/chmap.*                   LGPL
+    audio/chmap_sel.*               LGPL
+    audio/fmt-conversion.*          LGPL
+    audio/format.*                  hard (murky libaf origins)
+    common/av_common.*              LGPL
+    common/av_log.c                 almost LGPL
+    common/av_log.h                 LGPL
+    common/codecs.*                 LGPL
+    common/common.*                 LGPL
+    common/encode.h                 unknown
+    common/encode_lavc.*            unknown
+    common/global.h                 LGPL
+    common/msg.c                    almost LGPL
+    common/msg_control.h            LGPL
+    common/msg.h                    LGPL
+    common/playlist.*               LGPL
+    common/recorder.*               LGPL
+    common/tags.*                   LGPL
+    common/version.c                LGPL
+    demux/codec_tags.*              LGPL
+    demux/cue.*                     LGPL
+    demux/demux.*                   complications (at least Denes' changes)
+    demux/demux_cue.c               LGPL
+    demux/demux_disc.c              LGPL
+    demux/demux_edl.c               LGPL
+    demux/demux_lavf.c              hard
+    demux/demux_libarchive.c        LGPL
+    demux/demux_mf.c                hard
+    demux/demux_mkv.c               LGPL (mostly)
+    demux/demux_mkv_timeline.c      LGPL
+    demux/demux_null.c              LGPL
+    demux/demux_playlist.c          LGPL
+    demux/demux_rar.c               LGPL
+    demux/demux_raw.c               unknown
+    demux/demux_timeline.c          LGPL
+    demux/demux_tv.c                will stay GPL
+    demux/ebml.*                    LGPL
+    demux/matroska.h                LGPL
+    demux/packet.*                  LGPL
+    demux/stheader.h                hard
+    demux/timeline.*                LGPL
+    input/cmd_*                     unknown, probably easy except some commands
+    input/event.*                   LGPL
+    input/input.*                   potentially hard
+    input/ipc.c                     LGPL
+    input/ipc-unix.c                LGPL
+    input/ipc-win.c                 LGPL
+    input/keycodes.*                potentially hard
+    input/pipe-win32.c              LGPL
+    libmpv/*.*                      LGPL
+    misc/*.*                        LGPL
+    options/m_config.*              medium
+    options/m_option.*              medium
+    options/m_property.*            easy
+    options/options.*               very hard (lots of options and history)
+    options/parse_commandline.*     easy
+    options/parse_configfile.*      easy
+    options/path.*                  medium
+    osdep/android/*                 LGPL (BSD)
+    osdep/ar/*                      LGPL (BSD)
+    osdep/atomic.h                  LGPL
+    osdep/compiler.h                easy
+    osdep/endian.h                  easy
+    osdep/glob-win.c                LGPL
+    osdep/io.*                      LGPL
+    osdep/macosx_application.h      unknown
+    osdep/macosx_application.m      unknown
+    osdep/macosx_application_objc.h unknown
+    osdep/macosx_compat.h           unknown
+    osdep/macosx_events.*           unknown
+    osdep/macosx_events_objc.h      unknown
+    osdep/macosx_touchbar.*         unknown
+    osdep/macosx_versions.h         unknown
+    osdep/main-fn-cocoa.c           LGPL
+    osdep/main-fn.h                 LGPL
+    osdep/main-fn-unix.c            LGPL
+    osdep/main-fn-win.c             LGPL
+    osdep/mpv.exe.manifest          easy
+    osdep/mpv.rc                    easy
+    osdep/path.h                    unknown
+    osdep/path-macosx.m             unknown
+    osdep/path-unix.c               unknown
+    osdep/path-win.c                unknown
+    osdep/semaphore.h               LGPL
+    osdep/semaphore_osx.c           LGPL
+    osdep/strnlen.h                 LGPL
+    osdep/subprocess.*              LGPL
+    osdep/subprocess-posix.c        LGPL
+    osdep/subprocess-win.c          LGPL
+    osdep/terminal.h                unknown
+    osdep/terminal-unix.c           hard
+    osdep/terminal-win.c            medium
+    osdep/threads.*                 LGPL
+    osdep/timer.c                   LGPL
+    osdep/timer.h                   unknown
+    osdep/timer-darwin.c            LGPL (MIT)
+    osdep/timer-linux.c             unknown
+    osdep/timer-win2.c              unknown
+    osdep/w32_keyboard.c            unknown
+    osdep/w32_keyboard.h            unknown
+    osdep/win32-console-wrapper.c   LGPL (BSD)
+    osdep/win32/*                   LGPL (ISC)
+    osdep/windows_utils.*           LGPL
+    player/audio.c                  extremely hard (complex history, libaf ties)
+    player/client.*                 LGPL (ISC)
+    player/command.c                extremely hard (also some GPL-only things)
+    player/command.h                hard
+    player/configfiles.c            unknown
+    player/core.h                   extremely hard
+    player/external_files.*         hard (murky subreader.c origins)
+    player/lavfi.*                  LGPL
+    player/loadfile.c               extremely hard
+    player/lua/*.*                  LGPL
+    player/lua.c                    LGPL
+    player/misc.c                   LGPL
+    player/osd.c                    hard
+    player/playloop.c               extremely hard
+    player/screenshot.*             LGPL
+    player/scripting.*              LGPL
+    player/sub.c                    easy (probably almost no mplayer code)
+    player/video.c                  extremely hard
+    stream/ai_*                     will stay GPL (TV code)
+    stream/audio_in.*               will stay GPL (TV code)
+    stream/cache.c                  medium
+    stream/cache_file.c             LGPL
+    stream/cookies.*                unknown
+    stream/dvb*                     must stay GPL
+    stream/frequencies.*            must stay GPL
+    stream/rar.*                    LGPL
+    stream/stream_avdevice.c        unknown
+    stream/stream_bluray.c          unknown
+    stream/stream.c                 very hard
+    stream/stream_cb.c              LGPL
+    stream/stream_cdda.c            unknown
+    stream/stream_dvb.*             must stay GPL
+    stream/stream_dvd.c             unknown
+    stream/stream_dvd_common.*      unknown
+    stream/stream_dvdnav.c          unknown
+    stream/stream_edl.c             LGPL
+    stream/stream_file.c            hard
+    stream/stream.h                 hard
+    stream/stream_lavf.c            hard
+    stream/stream_libarchive.*      LGPL
+    stream/stream_memory.c          LGPL
+    stream/stream_mf.c              unknown
+    stream/stream_null.c            easy
+    stream/stream_rar.c             LGPL
+    stream/stream_smb.c             unknown
+    stream/stream_tv.c              will stay GPL
+    stream/tv*                      will stay GPL
+    sub/*                           LGPL
+    ta/*                            LGPL (ISC)
+    video/decode/d3d.*              LGPL
+    video/decode/dec_video.*        hard
+    video/decode/hw_cuda.c          LGPL
+    video/decode/hw_d3d11va.c       LGPL
+    video/decode/hw_dxva2.c         LGPL
+    video/decode/hw_videotoolbox.c  LGPL
+    video/decode/lavc.h             hard
+    video/decode/vd.h               hard
+    video/decode/vd_lavc.c          very hard
+    video/filter/refqueue.*         LGPL
+    video/filter/vf.c               medium
+    video/filter/vf.h               medium
+    video/filter/vf_buffer.c        LGPL
+    video/filter/vf_crop.c          will be deleted
+    video/filter/vf_d3d11vpp.c      LGPL
+    video/filter/vf_dlopen.*        LGPL
+    video/filter/vf_dsize.c         will be deleted
+    video/filter/vf_eq.c            will be deleted
+    video/filter/vf_expand.c        will be deleted
+    video/filter/vf_flip.c          will be deleted
+    video/filter/vf_format.c        will be deleted
+    video/filter/vf_gradfun.c       will be deleted
+    video/filter/vf_lavfi.*         LGPL
+    video/filter/vf_mirror.c        will be deleted
+    video/filter/vf_noformat.c      will be deleted
+    video/filter/vf_pullup.c        will be deleted
+    video/filter/vf_rotate.c        will be deleted
+    video/filter/vf_scale.c         will be deleted
+    video/filter/vf_stereo3d.c      will be deleted
+    video/filter/vf_sub.c           will be deleted
+    video/filter/vf_vapoursynth.c   LGPL
+    video/filter/vf_vavpp.c         LGPL
+    video/filter/vf_vdpaupp.c       LGPL
+    video/filter/vf_yadif.c         will be deleted
+    video/csputils.*                LGPL
+    video/fmt-conversion.*          must be killed (author disagreed to LGPL)
+    video/gpu_memcpy.*              will be deleted
+    video/hwdec.*                   LGPL
+    video/image_writer.*            unknown
+    video/img_format.*              hard
+    video/img_fourcc.h              hard
+    video/mp_image.*                hard (if even possible)
+    video/mp_image_pool.*           LGPL
+    video/out/aspect.*              hard
+    video/out/bitmap_packer.*       LGPL
+    video/out/cocoa*                unknown
+    video/out/d3d_shader_420p.h     LGPL
+    video/out/d3d_shader_nv12.h     LGPL
+    video/out/d3d_shader_yuv.hlsl   LGPL
+    video/out/dither.*              LGPL
+    video/out/drm_common.*          LGPL
+    video/out/filter_kernels.*      LGPL (BSD)
+    video/out/opengl/*              LGPL
+    video/out/vo.c                  hard
+    video/out/vo.h                  hard
+    video/out/vo_caca.c             unknown
+    video/out/vo_direct3d.c         unknown
+    video/out/vo_drm.c              LGPL
+    video/out/vo_image.c            unknown
+    video/out/vo_lavc.c             unknown
+    video/out/vo_null.c             unknown
+    video/out/vo_opengl.c           LGPL
+    video/out/vo_opengl_cb.c        LGPL
+    video/out/vo_rpi.c              LGPL
+    video/out/vo_sdl.c              LGPL
+    video/out/vo_tct.c              LGPL
+    video/out/vo_vaapi.c            probably impossible (some company's code)
+    video/out/vo_vdpau.c            probably impossible (nVidia's code)
+    video/out/vo_wayland.c          LGPL
+    video/out/vo_x11.c              probably impossible
+    video/out/vo_xv.c               probably impossible
+    video/out/w32_common.*          medium
+    video/out/wayland*              LGPL
+    video/out/win32/*               LGPL
+    video/out/win_state.*           unknown
+    video/out/x11_common.*          probably impossible
+    video/out/x11_icon.bin          must stay GPL
+    video/sws_utils.*               LGPL
+    video/vaapi.*                   hard (GPL-only parts must be ifdefed)
+    video/vdpau.c                   hard (GPL-only parts must be ifdefed)
+    video/vdpau_functions.inc       LGPL
+    video/vdpau.h                   unknown
+    video/vdpau_mixer.*             actual code must be rewritten
+    video/vt.*                      LGPL
