@@ -17,6 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Almost LGPL.
  */
 
 #include <stdlib.h>
