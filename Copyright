@@ -241,7 +241,7 @@ LGPL relicensing status:
     stream/stream_libarchive.*      LGPL
     stream/stream_memory.c          LGPL
     stream/stream_mf.c              unknown
-    stream/stream_null.c            easy
+    stream/stream_null.c            LGPL
     stream/stream_rar.c             LGPL
     stream/stream_smb.c             unknown
     stream/stream_tv.c              will stay GPL
