@@ -67,15 +67,15 @@ LGPL relicensing status:
     audio/out/ao.c                  hard
     audio/out/ao.h                  very hard (anders' changes)
     audio/out/ao_alsa.c             extremely hard (original author did not decide)
-    audio/out/ao_audiounit.m        easy
-    audio/out/ao_coreaudio.c        easy
-    audio/out/ao_coreaudio_chmap.c  easy
-    audio/out/ao_coreaudio_chmap.h  easy
-    audio/out/ao_coreaudio_exclusiv easy
-    audio/out/ao_coreaudio_properti easy
-    audio/out/ao_coreaudio_properti easy
-    audio/out/ao_coreaudio_utils.c  easy
-    audio/out/ao_coreaudio_utils.h  easy
+    audio/out/ao_audiounit.m        LGPL
+    audio/out/ao_coreaudio.c        LGPL
+    audio/out/ao_coreaudio_chmap.c  LGPL
+    audio/out/ao_coreaudio_chmap.h  LGPL
+    audio/out/ao_coreaudio_exclusiv LGPL
+    audio/out/ao_coreaudio_properti LGPL
+    audio/out/ao_coreaudio_properti LGPL
+    audio/out/ao_coreaudio_utils.c  LGPL
+    audio/out/ao_coreaudio_utils.h  LGPL
     audio/out/ao_jack.c             unknown
     audio/out/ao_lavc.c             probably easy
     audio/out/ao_null.c             unknown
