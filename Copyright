@@ -83,8 +83,8 @@ LGPL relicensing status:
     audio/out/ao_opensles.c         LGPL
     audio/out/ao_oss.c              will stay GPL
     audio/out/ao_pcm.c              unknown
-    audio/out/ao_pulse.c            easy
-    audio/out/ao_rsound.c           easy
+    audio/out/ao_pulse.c            LGPL
+    audio/out/ao_rsound.c           LGPL
     audio/out/ao_sdl.c              LGPL
     audio/out/ao_sndio.c            LGPL (BSD)
     audio/out/ao_wasapi.c           LGPL
