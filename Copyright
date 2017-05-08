@@ -219,7 +219,7 @@ LGPL relicensing status:
     player/video.c                  extremely hard
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
-    stream/cache.c                  medium
+    stream/cache.c                  LGPL 3+
     stream/cache_file.c             LGPL
     stream/cookies.*                unknown
     stream/dvb*                     must stay GPL
