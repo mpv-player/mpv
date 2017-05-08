@@ -4,6 +4,7 @@
 *.exe
 *.pyc
 .depend
+.DS_Store
 
 /config.h
 /config.mak
