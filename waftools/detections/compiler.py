@@ -65,11 +65,15 @@ def __add_cygwin_flags__(ctx):
     __add_mswin_flags__(ctx)
     ctx.env.CFLAGS += ['-mwin32']
 
+def __add_darwin_flags__(ctx):
+    ctx.env.CFLAGS += ['-D_DARWIN_SOURCE', "-D_DARWIN_C_SOURCE"]
+
 __compiler_map__ = {
     '__GNUC__':  __add_gcc_flags__,
     '__clang__': __add_clang_flags__,
     '__MINGW32__': __add_mingw_flags__,
     '__CYGWIN__': __add_cygwin_flags__,
+    '__APPLE__': __add_darwin_flags__,
 }
 
 def __apply_map__(ctx, fnmap):
