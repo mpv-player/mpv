@@ -157,7 +157,7 @@ LGPL relicensing status:
     osdep/android/*                 LGPL (BSD)
     osdep/ar/*                      LGPL (BSD)
     osdep/atomic.h                  LGPL
-    osdep/compiler.h                easy
+    osdep/compiler.h                LGPL
     osdep/endian.h                  easy
     osdep/glob-win.c                LGPL
     osdep/io.*                      LGPL
