@@ -158,7 +158,7 @@ LGPL relicensing status:
     osdep/ar/*                      LGPL (BSD)
     osdep/atomic.h                  LGPL
     osdep/compiler.h                LGPL
-    osdep/endian.h                  easy
+    osdep/endian.h                  LGPL
     osdep/glob-win.c                LGPL
     osdep/io.*                      LGPL
     osdep/macosx_application.h      unknown
