@@ -60,7 +60,7 @@ LGPL relicensing status:
     audio/filter/equalizer.h        must be killed (main author disagreed)
     audio/filter/tools.c            must be killed (main author disagreed)
     audio/filter/af_format.c        easy
-    audio/filter/af_lavc3enc.c      easy
+    audio/filter/af_lavc3enc.c      LGPL
     audio/filter/af_lavfi.c         LGPL
     audio/filter/af_scaletempo.c    easy
     audio/filter/af_rubberband.c    LGPL
