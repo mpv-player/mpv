@@ -223,7 +223,7 @@ static void write_json_str(bstr *b, unsigned char *str)
     APPEND(b, "\"");
     while (1) {
         unsigned char *cur = str;
-        while (cur[0] && cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
+        while (cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
             cur++;
         if (!cur[0])
             break;
