@@ -135,7 +135,7 @@ LGPL relicensing status:
     demux/ebml.*                    LGPL
     demux/matroska.h                LGPL
     demux/packet.*                  LGPL
-    demux/stheader.h                hard
+    demux/stheader.h                LGPL
     demux/timeline.*                LGPL
     input/cmd_*                     unknown, probably easy except some commands
     input/event.*                   LGPL
