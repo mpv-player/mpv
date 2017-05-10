@@ -792,7 +792,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
             ds->bitrate = -1;
             ds->last_br_ts = ts;
             ds->last_br_bytes = 0;
-        } else if (d > 0 && d >= 0.5) { // a window of least 500ms for UI purposes
+        } else if (d >= 0.5) { // a window of least 500ms for UI purposes
             ds->bitrate = ds->last_br_bytes / d;
             ds->last_br_ts = ts;
             ds->last_br_bytes = 0;
