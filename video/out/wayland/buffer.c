@@ -40,13 +40,16 @@ shm_buffer_t* shm_buffer_create(uint32_t width,
     shm_buffer_t *buffer = calloc(1, sizeof(shm_buffer_t));
     int fd = memfile_create(size);
 
-    if (fd < 0)
+    if (fd < 0) {
+        free(buffer);
         return NULL;
+    }
 
     buffer->data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
     if (buffer->data == MAP_FAILED) {
         close(fd);
+        free(buffer);
         return NULL;
     }
 
