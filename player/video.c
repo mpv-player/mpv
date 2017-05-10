@@ -107,10 +107,6 @@ int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
     }
 
     switch (vf_cmd) {
-    case VFCTRL_GET_DEINTERLACE:
-        return vo_control(vo_c->vo, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
-    case VFCTRL_SET_DEINTERLACE:
-        return vo_control(vo_c->vo, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
     case VFCTRL_SET_EQUALIZER: {
         vf_equalizer_t *eq = data;
         if (!vo_c->vo->config_ok)

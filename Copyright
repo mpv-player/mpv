@@ -301,14 +301,14 @@ LGPL relicensing status:
     video/out/drm_common.*          LGPL
     video/out/filter_kernels.*      LGPL (BSD)
     video/out/opengl/*              LGPL
-    video/out/vo.c                  hard
-    video/out/vo.h                  hard
+    video/out/vo.c                  LGPL
+    video/out/vo.h                  LGPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
     video/out/vo_drm.c              LGPL
     video/out/vo_image.c            unknown
     video/out/vo_lavc.c             unknown
-    video/out/vo_null.c             unknown
+    video/out/vo_null.c             LGPL
     video/out/vo_opengl.c           LGPL
     video/out/vo_opengl_cb.c        LGPL
     video/out/vo_rpi.c              LGPL
