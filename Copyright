@@ -49,6 +49,12 @@ interpreted as that his code can be changed to LGPL only as soon as the "core"
 of mpv changes to LGPL. We interpret "core" as something minimal, that can
 actually be built and run, with all GPL code disabled.
 
+Some files are LGPLv3+. This is due to the contributions of a single developer
+going by the SVN username "iive". The chosen license of this project is
+LGPLv2.1+. The affected files will be changed to LGPLv2.1+ at the earliest
+opportunity, for example if his contributions disappear by being replaced
+or removed. All new contributions to these files are implied to be LGPLv2.1+.
+
 LGPL relicensing status:
 
     audio/decode/ad.h               LGPL
@@ -222,7 +228,7 @@ LGPL relicensing status:
     player/video.c                  extremely hard
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
-    stream/cache.c                  LGPL 3+
+    stream/cache.c                  LGPLv3+
     stream/cache_file.c             LGPL
     stream/cookies.*                LGPL
     stream/dvb*                     must stay GPL

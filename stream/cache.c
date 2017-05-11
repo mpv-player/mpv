@@ -18,6 +18,8 @@
  *  84ec57750883 remove unused cache-prefill and create cache-seek-min that...
  *  9b0d8c680f63 cache min fill adjustment, based on patch by Jeremy Huddleston
  * (iive agreed to LGPL v3+ only. Jeremy agreed to LGPL v2.1 or later.)
+ * Once these changes are not relevant to for copyright anymore (e.g. because
+ * they have been removed), this file will change to LGPLv2.1+.
  */
 
 // Time in seconds the main thread waits for the cache thread. On wakeups, the
