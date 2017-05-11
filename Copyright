@@ -261,8 +261,8 @@ LGPL relicensing status:
     video/decode/vd.h               hard
     video/decode/vd_lavc.c          very hard
     video/filter/refqueue.*         LGPL
-    video/filter/vf.c               medium
-    video/filter/vf.h               medium
+    video/filter/vf.c               LGPL
+    video/filter/vf.h               LGPL (mostly)
     video/filter/vf_buffer.c        LGPL
     video/filter/vf_crop.c          will be deleted
     video/filter/vf_d3d11vpp.c      LGPL
