@@ -221,7 +221,7 @@ LGPL relicensing status:
     stream/audio_in.*               will stay GPL (TV code)
     stream/cache.c                  LGPL 3+
     stream/cache_file.c             LGPL
-    stream/cookies.*                unknown
+    stream/cookies.*                LGPL
     stream/dvb*                     must stay GPL
     stream/frequencies.*            must stay GPL
     stream/rar.*                    LGPL
