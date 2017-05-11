@@ -62,7 +62,7 @@ LGPL relicensing status:
     audio/filter/af_volume.c        must be killed (main author disagreed)
     audio/filter/equalizer.h        must be killed (main author disagreed)
     audio/filter/tools.c            must be killed (main author disagreed)
-    audio/filter/af_format.c        easy
+    audio/filter/af_format.c        LGPL
     audio/filter/af_lavc3enc.c      LGPL
     audio/filter/af_lavfi.c         LGPL
     audio/filter/af_scaletempo.c    LGPL
@@ -303,6 +303,7 @@ LGPL relicensing status:
     video/out/dither.*              LGPL
     video/out/drm_common.*          LGPL
     video/out/filter_kernels.*      LGPL (BSD)
+    video/out/opengl/hwdec_vaglx.c  GPL
     video/out/opengl/*              LGPL
     video/out/vo.c                  LGPL
     video/out/vo.h                  LGPL
