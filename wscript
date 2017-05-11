@@ -853,6 +853,7 @@ radio_and_tv_features = [
         'name': '--dvbin',
         'desc': 'DVB input module',
         'func': check_cc(fragment=load_fragment('dvb.c')),
+        'default': 'disable',
     }
 ]
 
