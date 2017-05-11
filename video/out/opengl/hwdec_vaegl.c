@@ -56,7 +56,7 @@ typedef void *EGLImageKHR;
 
 static VADisplay *create_x11_va_display(GL *gl)
 {
-    Display *x11 = gl->MPGetNativeDisplay("x11");
+    Display *x11 = mpgl_get_native_display(gl, "x11");
     return x11 ? vaGetDisplay(x11) : NULL;
 }
 #endif
@@ -66,7 +66,7 @@ static VADisplay *create_x11_va_display(GL *gl)
 
 static VADisplay *create_wayland_va_display(GL *gl)
 {
-    struct wl_display *wl = gl->MPGetNativeDisplay("wl");
+    struct wl_display *wl = mpgl_get_native_display(gl, "wl");
     return wl ? vaGetDisplayWl(wl) : NULL;
 }
 #endif
@@ -76,7 +76,7 @@ static VADisplay *create_wayland_va_display(GL *gl)
 
 static VADisplay *create_drm_va_display(GL *gl)
 {
-    int drm_fd = (intptr_t)gl->MPGetNativeDisplay("drm");
+    int drm_fd = (intptr_t)mpgl_get_native_display(gl, "drm");
     // Note: yes, drm_fd==0 could be valid - but it's rare and doesn't fit with
     //       our slightly crappy way of passing it through, so consider 0 not
     //       valid.
@@ -103,8 +103,6 @@ static const struct va_create_native create_native_cbs[] = {
 
 static VADisplay *create_native_va_display(GL *gl, struct mp_log *log)
 {
-    if (!gl->MPGetNativeDisplay)
-        return NULL;
     for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
         const struct va_create_native *disp = &create_native_cbs[n];
         mp_verbose(log, "Trying to open a %s VA display...\n", disp->name);

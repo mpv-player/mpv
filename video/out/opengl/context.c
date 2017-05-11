@@ -126,34 +126,13 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
     return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
 }
 
-#if HAVE_C11_TLS
-#define MP_TLS _Thread_local
-#elif HAVE_GCC_TLS
-#define MP_TLS __thread
-#endif
-
-#ifdef MP_TLS
-static MP_TLS MPGLContext *current_context;
-
-static void * GLAPIENTRY get_native_display(const char *name)
+static void *get_native_display(void *pctx, const char *name)
 {
-    if (current_context && current_context->native_display_type &&
-        name && strcmp(current_context->native_display_type, name) == 0)
-        return current_context->native_display;
-    return NULL;
+    MPGLContext *ctx = pctx;
+    if (!ctx->native_display_type || !name)
+        return NULL;
+    return strcmp(ctx->native_display_type, name) == 0 ? ctx->native_display : NULL;
 }
-
-static void set_current_context(MPGLContext *context)
-{
-    current_context = context;
-    if (context && !context->gl->MPGetNativeDisplay)
-        context->gl->MPGetNativeDisplay = get_native_display;
-}
-#else
-static void set_current_context(MPGLContext *context)
-{
-}
-#endif
 
 static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver,
                                  bool probing, int vo_flags)
@@ -195,7 +174,8 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
 
     ctx->gl->debug_context = !!(vo_flags & VOFLAG_GL_DEBUG);
 
-    set_current_context(ctx);
+    ctx->gl->get_native_display_ctx = ctx;
+    ctx->gl->get_native_display = get_native_display;
 
     return ctx;
 
@@ -253,7 +233,6 @@ void mpgl_swap_buffers(struct MPGLContext *ctx)
 
 void mpgl_uninit(MPGLContext *ctx)
 {
-    set_current_context(NULL);
     if (ctx)
         ctx->driver->uninit(ctx);
     talloc_free(ctx);

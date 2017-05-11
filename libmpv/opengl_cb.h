@@ -176,7 +176,7 @@ extern "C" {
  *
  * The RPI uses no proper interop, but hardware overlays instead. To place the
  * overlay correctly, you can communicate the window parameters as follows to
- * libmpv. gl->MPGetNativeDisplay("MPV_RPI_WINDOW") return an array of type int
+ * libmpv. glMPGetNativeDisplay("MPV_RPI_WINDOW") returns an array of type int
  * with the following 4 elements:
  *      0: display number (default 0)
  *      1: layer number of the GL layer - video will be placed in the layer

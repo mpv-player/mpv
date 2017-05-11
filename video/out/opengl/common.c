@@ -610,3 +610,13 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 {
     mpgl_load_functions2(gl, get_procaddr_wrapper, getProcAddress, ext2, log);
 }
+
+void *mpgl_get_native_display(struct GL *gl, const char *name)
+{
+    void *res = NULL;
+    if (gl->get_native_display)
+        res = gl->get_native_display(gl->get_native_display_ctx, name);
+    if (!res && gl->MPGetNativeDisplay)
+        res = gl->MPGetNativeDisplay(name);
+    return res;
+}
