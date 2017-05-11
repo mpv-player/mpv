@@ -28,6 +28,9 @@ under mplayer2, and has been removed from mpv.
 
 "v2.1+" in this context means "version 2.1 or later".
 
+Some libraries are GPLv2+ or GPLv3+ only. Building mpv with Samba support makes
+it GPLv3+.
+
 Source files with specific licenses:
 - everything under etc/ is unknown
 - everything under DOCS/man/ is GPLv2+
@@ -243,7 +246,7 @@ LGPL relicensing status:
     stream/stream_mf.c              unknown
     stream/stream_null.c            LGPL
     stream/stream_rar.c             LGPL
-    stream/stream_smb.c             unknown
+    stream/stream_smb.c             will stay GPLv3
     stream/stream_tv.c              will stay GPL
     stream/tv*                      will stay GPL
     sub/*                           LGPL

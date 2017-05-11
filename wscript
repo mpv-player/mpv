@@ -288,9 +288,10 @@ iconv support use --disable-iconv.",
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
         'name': '--libsmbclient',
-        'desc': 'Samba support',
+        'desc': 'Samba support (makes mpv GPLv3)',
         'deps': [ 'libdl' ],
         'func': check_pkg_config('smbclient'),
+        'default': 'disable',
         'module': 'input',
     }, {
         'name' : '--lua',
