@@ -737,10 +737,10 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     // and conflict with at least the full-range YCbCr/ICtCp values as defined
     // by ITU-R BT.2100. If somebody ever complains about full-range YUV looking
     // different from their reference display, this comment is probably why.
-    struct yuvlevels { double ymin, ymax, cmin, cmid; }
-        yuvlim =  { 16*s, 235*s, 16*s, 128*s },
-        yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128
-        anyfull = {  0*s, 255*s, -255*s/2, 0 },
+    struct yuvlevels { double ymin, ymax, cmax, cmid; }
+        yuvlim =  { 16*s, 235*s, 240*s, 128*s },
+        yuvfull = {  0*s, 255*s, 255*s, 128*s },
+        anyfull = {  0*s, 255*s, 255*s/2, 0 }, // cmax picked to make cmul=ymul
         yuvlev;
     switch (levels_in) {
     case MP_CSP_LEVELS_TV: yuvlev = yuvlim; break;
@@ -765,7 +765,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     }
 
     double ymul = (rgblev.max - rgblev.min) / (yuvlev.ymax - yuvlev.ymin);
-    double cmul = (rgblev.max - rgblev.min) / (yuvlev.cmid - yuvlev.cmin) / 2;
+    double cmul = (rgblev.max - rgblev.min) / (yuvlev.cmax - yuvlev.cmid) / 2;
 
     // Contrast scales the output value range (gain)
     ymul *= params->contrast;
