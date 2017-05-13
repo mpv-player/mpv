@@ -72,6 +72,9 @@ function find_and_add_entries()
         return
     end
     table.filter(files, function (v, k)
+        if string.match(v, "^%.") then
+            return false
+        end
         local ext = get_extension(v)
         if ext == nil then
             return false
