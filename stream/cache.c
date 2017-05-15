@@ -211,15 +211,21 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
     return read;
 }
 
+// Whether a seek will be needed to get to the position. This honors seek_limit,
+// which is a heuristic to prevent dropping the cache with small forward seeks.
+// This helps in situations where waiting for network a bit longer would quickly
+// reach the target position. Especially if the demuxer seeks back and forth,
+// not dropping the backwards cache will be a major performance win.
+static bool needs_seek(struct priv *s, int64_t pos)
+{
+    return pos < s->min_filepos || pos > s->max_filepos + s->seek_limit;
+}
+
 static bool cache_update_stream_position(struct priv *s)
 {
     int64_t read = s->read_filepos;
 
-    // drop cache contents only if seeking backward or too much fwd.
-    // This is also done for on-disk files, since it loses the backseek cache.
-    // That in turn can cause major bandwidth increase and performance
-    // issues with e.g. mov or badly interleaved files
-    if (read < s->min_filepos || read > s->max_filepos + s->seek_limit) {
+    if (needs_seek(s, read)) {
         MP_VERBOSE(s, "Dropping cache at pos %"PRId64", "
                    "cached range: %"PRId64"-%"PRId64".\n", read,
                    s->min_filepos, s->max_filepos);
@@ -607,7 +613,7 @@ static int cache_seek(stream_t *cache, int64_t pos)
         // This check is not quite exact - if the reader thread is blocked in
         // a read, the read might advance file position enough that a seek
         // forward is no longer needed.
-        if (pos < s->min_filepos || pos > s->max_filepos + s->seek_limit) {
+        if (needs_seek(s, pos)) {
             s->eof = false;
             s->control = CACHE_CTRL_SEEK;
             s->control_res = 0;
