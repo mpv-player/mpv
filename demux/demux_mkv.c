@@ -194,6 +194,7 @@ typedef struct mkv_demuxer {
     struct header_elem {
         int32_t id;
         int64_t pos;
+        bool needed;
         bool parsed;
     } *headers;
     int num_headers;
@@ -1970,6 +1971,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     // Read headers that come after the first cluster (i.e. require seeking).
     // Note: reading might increase ->num_headers.
     //       Likewise, ->headers might be reallocated.
+    int only_cue = -1;
     for (int n = 0; n < mkv_d->num_headers; n++) {
         struct header_elem *elem = &mkv_d->headers[n];
         if (elem->parsed)
@@ -1984,14 +1986,36 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             }
             continue;
         }
-        if (elem->id == MATROSKA_ID_CUES) {
-            // Read cues when they are needed, to avoid seeking on opening.
-            MP_VERBOSE(demuxer, "Deferring reading cues.\n");
-            continue;
-        }
-        if (read_deferred_element(demuxer, elem) < 0)
-            return -1;
+        elem->needed = true;
+        only_cue = only_cue < 0 && elem->id == MATROSKA_ID_CUES;
     }
+
+    // If there's only 1 needed element, and it's the cues, defer reading.
+    if (only_cue == 1) {
+        // Read cues when they are needed, to avoid seeking on opening.
+        MP_VERBOSE(demuxer, "Deferring reading cues.\n");
+    } else {
+        // Read them by ascending position to reduce unneeded seeks.
+        // O(n^2) because the number of elements is very low.
+        while (1) {
+            struct header_elem *lowest = NULL;
+            for (int n = 0; n < mkv_d->num_headers; n++) {
+                struct header_elem *elem = &mkv_d->headers[n];
+                if (!elem->needed)
+                    continue;
+                if (!lowest || elem->pos < lowest->pos)
+                    lowest = elem;
+            }
+
+            if (!lowest)
+                break;
+
+            lowest->needed = false;
+            if (read_deferred_element(demuxer, lowest) < 0)
+                return -1;
+        }
+    }
+
     if (!stream_seek(s, start_pos)) {
         MP_ERR(demuxer, "Couldn't seek back after reading headers?\n");
         return -1;
