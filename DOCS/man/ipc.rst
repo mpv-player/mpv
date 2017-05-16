@@ -201,6 +201,14 @@ extra commands can also be used as part of the protocol:
         { "error": "success" }
         { "event": "property-change", "id": 1, "data": 52.0, "name": "volume" }
 
+    .. warning::
+
+        If the connection is closed, the IPC client is destroyed internally,
+        and the observed properties are unregistered. This happens for example
+        when sending commands to a socket with separate ``socat`` invocations.
+        This can make it seem like property observation does not work. You must
+        keep the IPC connection open to make it work.
+
 ``observe_property_string``
     Like ``observe_property``, but the resulting data will always be a string.
 
