@@ -578,6 +578,44 @@ fail:
     return false;
 }
 
+static void context_destroy(struct MPGLContext *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->egl_context) {
+        eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                       EGL_NO_CONTEXT);
+        eglDestroyContext(p->egl_display, p->egl_context);
+    }
+    p->egl_context = EGL_NO_CONTEXT;
+}
+
+static bool context_init(struct MPGLContext *ctx, int flags)
+{
+    struct priv *p = ctx->priv;
+    struct vo *vo = ctx->vo;
+
+    if (!eglInitialize(p->egl_display, NULL, NULL)) {
+        MP_FATAL(vo, "Couldn't initialize EGL\n");
+        goto fail;
+    }
+
+    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+    if (exts)
+        MP_DBG(vo, "EGL extensions: %s\n", exts);
+
+    if (!mpegl_create_context(p->egl_display, vo->log, flags | VOFLAG_GLES,
+                              &p->egl_context, &p->egl_config))
+    {
+        MP_FATAL(vo, "Could not create EGL context!\n");
+        goto fail;
+    }
+
+    return true;
+fail:
+    context_destroy(ctx);
+    return false;
+}
+
 static void angle_uninit(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -593,12 +631,7 @@ static void angle_uninit(struct MPGLContext *ctx)
     else
         egl_window_surface_destroy(ctx);
 
-    if (p->egl_context) {
-        eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                       EGL_NO_CONTEXT);
-        eglDestroyContext(p->egl_display, p->egl_context);
-    }
-    p->egl_context = EGL_NO_CONTEXT;
+    context_destroy(ctx);
 
     // Uninit the EGL device implementation that is being used
     if (p->d3d11_device)
@@ -640,41 +673,34 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     }
 
     // Create the underlying EGL device implementation
-    bool device_ok = false;
-    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
-        device_ok = d3d11_device_create(ctx, flags);
-        if (device_ok) {
+    bool context_ok = false;
+    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
+        context_ok = d3d11_device_create(ctx, flags);
+        if (context_ok) {
             MP_VERBOSE(vo, "Using Direct3D 11 feature level %u_%u\n",
                 ((unsigned)p->d3d11_level) >> 12,
                 (((unsigned)p->d3d11_level) >> 8) & 0xf);
+
+            context_ok = context_init(ctx, flags);
+            if (!context_ok)
+                d3d11_device_destroy(ctx);
         }
     }
-    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
-        device_ok = d3d9_device_create(ctx, flags);
-        if (device_ok)
+    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
+        context_ok = d3d9_device_create(ctx, flags);
+        if (context_ok) {
             MP_VERBOSE(vo, "Using Direct3D 9\n");
-    }
-    if (!device_ok)
-        goto fail;
 
-    if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(vo, "Couldn't initialize EGL\n");
-        return false;
+            context_ok = context_init(ctx, flags);
+            if (!context_ok)
+                d3d9_device_destroy(ctx);
+        }
     }
+    if (!context_ok)
+        goto fail;
 
     if (!vo_w32_init(vo))
         goto fail;
-
-    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
-    if (exts)
-        MP_DBG(ctx->vo, "EGL extensions: %s\n", exts);
-
-    if (!mpegl_create_context(p->egl_display, vo->log, flags | VOFLAG_GLES,
-                              &p->egl_context, &p->egl_config))
-    {
-        MP_FATAL(vo, "Could not create EGL context!\n");
-        goto fail;
-    }
 
     // Create the underlying EGL surface implementation
     bool surface_ok = false;
