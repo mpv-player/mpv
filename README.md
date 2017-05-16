@@ -4,21 +4,21 @@
 
 --------------
 
-
-* [Overview](#overview)
-* [Downloads](#downloads)
-* [Changelog](#changelog)
-* [Compilation](#compilation)
-* [FFmpeg vs. Libav](#ffmpeg-vs-libav)
-* [Release cycle](#release-cycle)
-* [Bug reports](#bug-reports)
-* [Contributing](#contributing)
-* [Relation to MPlayer and mplayer2](#relation-to-mplayer-and-mplayer2)
+* [#Overview](#overview)
+* [#System requirements](#system-requirements)
+* [#Downloads](#downloads)
+* [#Changelogs](#changelogs)
+* [#Compilation](#compilation)
+* [#FFmpeg vs. Libav](#ffmpeg-vs-libav)
+* [#Release cycle](#release-cycle)
+* [#Bug reports](#bug-reports)
+* [#Contributing](#contributing)
+* [#Relation to MPlayer and mplayer2](#relation-to-mplayer-and-mplayer2)
+* [#Contact](#contact)
+* [#License](#license)
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
 * [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
 * [Man pages](http://mpv.io/manual/master/)
-* [Contact](#contact)
-* [License](#license)
 
 ## Overview
 
@@ -30,9 +30,10 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, or Windows Vista or later, or OSX 10.8 or later.
-- A somewhat capable CPU. Hardware decoding might sometimes help if the CPU
-  is too slow to decode video realtime, but must be explicitly enabled with
+
+- A not too ancient Linux, Windows Vista or later, or OSX 10.8 or later.
+- A somewhat capable CPU. Hardware decoding might help if the CPU is too
+  slow to decode video in realtime, but must be explicitly enabled with
   the `--hwdec` option.
 - A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
   many caveats with drivers or system compositors causing tearing, stutter,
@@ -45,48 +46,40 @@ Releases can be found on the [release list][releases].
 
 
 For semi-official builds and third-party packages please see
-[mpv.io](http://mpv.io/installation/).
+[mpv.io/installation](http://mpv.io/installation/).
 
-## Changelog
+## Changelogs
 
 
-There is no completely changelog, however changes to the player core interface
-are listed in the [interface changelog][interface-changes].
+Changes to the core player interface are listed in the [interface changelog][interface-changes].
 
 Changes to the C API are documented in the [client API changelog][api-changes].
 
-The [release list][releases] has a summary of most of the important changes
-on every release.
+The major changes of releases are documented in the [release list][releases].
 
-Changes to the default key bindings are inidcated in
-[restore-old-bindings.conf][restore-old-bindings].
+Changes to the default key bindings are indicated in [restore-old-bindings.conf][restore-old-bindings].
 
 ## Compilation
 
 
-Compiling with full features requires development files for several
+Compiling with all features requires the development files of several
 external libraries. Below is a list of some important requirements.
 
-The mpv build system uses *waf* but we don't store it in your source tree. The
-script './bootstrap.py' will download the latest version of waf that was tested
-with the build system.
+The mpv build system uses [Waf](https://waf.io/), but we don't store it in the
+source tree. Run the `bootstrap.py` script to download the latest version of
+Waf that was tested with the build system.
 
-For a list of the available build options use `./waf configure --help`. If
-you think you have support for some feature installed but configure fails to
-detect it, the file `build/config.log` may contain information about the
-reasons for the failure.
+For a list of the available build options see `./waf configure --help`. If
+configure doesn't recognize some features you have installed see `build/config.log`.
 
-NOTE: To avoid cluttering the output with unreadable spam, `--help` only shows
-one of the two switches for each option. If the option is autodetected by
-default, the `--disable-***` switch is printed; if the option is disabled by
-default, the `--enable-***` switch is printed. Either way, you can use
-`--enable-***` or `--disable-**` regardless of what is printed by `--help`.
+NOTE: To avoid cluttering the output, `--help` only shows the switch to change the
+default, but you can always use `--enable-*` and `--disable-*`.
 
 To build the software you can use `./waf build`: the result of the compilation
 will be located in `build/mpv`. You can use `./waf install` to install mpv
 to the *prefix* after it is compiled.
 
-Essential dependencies (incomplete list):
+Essential dependencies (incomplete):
 
 - gcc or clang
 - X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
