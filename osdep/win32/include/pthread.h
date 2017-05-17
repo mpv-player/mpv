@@ -33,6 +33,7 @@
 #define pthread_join m_pthread_join
 #define pthread_detach m_pthread_detach
 #define pthread_create m_pthread_create
+#define pthread_set_name_np m_pthread_set_name_np
 
 #define pthread_once_t INIT_ONCE
 #define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
@@ -96,5 +97,7 @@ int pthread_detach(pthread_t thread);
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine) (void *), void *arg);
+
+void pthread_set_name_np(pthread_t thread, const char *name);
 
 #endif

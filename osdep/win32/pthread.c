@@ -196,6 +196,29 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
     return 0;
 }
 
+void pthread_set_name_np(pthread_t thread, const char *name)
+{
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    if (!kernel32)
+        return;
+    HRESULT (WINAPI *pSetThreadDescription)(HANDLE, PCWSTR) =
+        (void*)GetProcAddress(kernel32, "SetThreadDescription");
+    if (!pSetThreadDescription)
+        return;
+
+    HANDLE th = OpenThread(THREAD_SET_LIMITED_INFORMATION, FALSE, thread.id);
+    if (!th)
+        return;
+    wchar_t wname[80];
+    int wc = MultiByteToWideChar(CP_UTF8, 0, name, -1, wname,
+                                 sizeof(wname) / sizeof(wchar_t) - 1);
+    if (wc > 0) {
+        wname[wc] = L'\0';
+        pSetThreadDescription(th, wname);
+    }
+    CloseHandle(th);
+}
+
 int sem_init(sem_t *sem, int pshared, unsigned int value)
 {
     if (pshared)
