@@ -22,6 +22,7 @@
 #include <libavutil/mathematics.h>
 
 #include "options/m_option.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
 #include "misc/dispatch.h"
@@ -196,6 +197,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     struct wasapi_state *state = ao->priv;
+    mpthread_set_name("wasapi event");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ret = wasapi_thread_init(ao);
