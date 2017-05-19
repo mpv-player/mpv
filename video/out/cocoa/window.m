@@ -107,29 +107,6 @@
     }
 
     [super toggleFullScreen:sender];
-
-    if (![self.adapter isInFullScreenMode]) {
-        [self setToFullScreen];
-    } else {
-        [self setToWindow];
-    }
-}
-
-- (void)setToFullScreen
-{
-    [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
-    NSRect frame = [[self targetScreen] frame];
-    [self setFrame:frame display:YES];
-}
-
-- (void)setToWindow
-{
-    [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
-    NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
-                    withoutBounds:[[self targetScreen] isEqual:[self screen]]];
-    [self setFrame:frame display:YES];
-    [self setContentAspectRatio:_unfs_content_frame.size];
-    [self setCenteredContentSize:_unfs_content_frame.size];
 }
 
 - (NSArray *)customWindowsToEnterFullScreenForWindow:(NSWindow *)window
@@ -142,10 +119,35 @@
     return [NSArray arrayWithObject:window];
 }
 
-// we still need to keep those around or it will use the standard animation
-- (void)window:(NSWindow *)window startCustomAnimationToEnterFullScreenWithDuration:(NSTimeInterval)duration {}
+- (void)window:(NSWindow *)window startCustomAnimationToEnterFullScreenWithDuration:(NSTimeInterval)duration
+{
+    NSRect frame = [[self targetScreen] frame];
 
-- (void)window:(NSWindow *)window startCustomAnimationToExitFullScreenWithDuration:(NSTimeInterval)duration {}
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+        [context setDuration:duration*0.9];
+        [[window animator] setFrame:frame display:YES];
+    } completionHandler:^{}];
+}
+
+- (void)window:(NSWindow *)window startCustomAnimationToExitFullScreenWithDuration:(NSTimeInterval)duration
+{
+    NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
+                    withoutBounds:[[self targetScreen] isEqual:[self screen]]];
+
+
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+        [context setDuration:duration*0.9];
+        [[window animator] setFrame:frame display:YES];
+    } completionHandler:^{}];
+}
+
+- (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
+{
+    NSRect frame = [self frame];
+
+    if (!NSEqualRects(frameRect, frame))
+        [super setFrame:frameRect display:flag];
+}
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification
 {
@@ -156,19 +158,18 @@
 - (void)windowDidExitFullScreen:(NSNotification *)notification
 {
     _is_animating = 0;
+    [self setContentAspectRatio:_unfs_content_frame.size];
     [self.adapter windowDidExitFullScreen:notification];
 }
 
 - (void)windowDidFailToEnterFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
-    [self setToWindow];
 }
 
 - (void)windowDidFailToExitFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
-    [self setToFullScreen];
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification

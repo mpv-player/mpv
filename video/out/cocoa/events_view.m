@@ -46,6 +46,8 @@
         [self registerForDraggedTypes:@[NSFilenamesPboardType,
                                         NSURLPboardType]];
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        self.wantsLayer = YES;
+        [self.layer setBackgroundColor:[NSColor blackColor].CGColor];
     }
     return self;
 }
