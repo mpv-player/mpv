@@ -187,30 +187,29 @@ def unpack_dependencies_lists(ctx):
     ctx.satisfied_deps = set(ctx.env.satisfied_deps)
 
 def filtered_sources(ctx, sources):
-    def __source_file__(source):
-        if isinstance(source, tuple):
-            return source[0]
-        else:
+    def check_source(source):
+        # just a filename with no dependency?
+        if isinstance(source, basestring):
             return source
 
-    def __check_filter__(dependency):
-        if dependency.find('!') == 0:
-            dependency = dependency.lstrip('!')
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency not in ctx.satisfied_deps
-        else:
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency in ctx.satisfied_deps
+        # may be followed by multiple dependencies, optional ! negation
+        source_file, deps = source[0], source[1:]
+        satisified = True
+        for dependency in deps:
+            this_dep_is_wanted = True
+            if dependency.find('!') == 0:
+                dependency = dependency.lstrip('!')
+                this_dep_is_wanted = False
 
-    def __unpack_and_check_filter__(source):
-        try:
-            _, dependency = source
-            return __check_filter__(dependency)
-        except ValueError:
-            return True
+            ctx.ensure_dependency_is_known(dependency)
+            if (dependency in ctx.satisfied_deps) != this_dep_is_wanted:
+                # don't short-circuit return false here so that we get around
+                # to ensuring all listed dependencies are known
+                satisified = False
 
-    return [__source_file__(source) for source in sources \
-            if __unpack_and_check_filter__(source)]
+        return satisified and source_file
+
+    return filter(None, (check_source(s) for s in sources))
 
 def env_fetch(tx):
     def fn(ctx):
