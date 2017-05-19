@@ -93,6 +93,10 @@ struct vo_cocoa_state {
     uint32_t old_dwidth;
     uint32_t old_dheight;
 
+    pthread_mutex_t anim_lock;
+    pthread_cond_t anim_wakeup;
+    bool is_animating;
+
     CVDisplayLinkRef link;
     pthread_mutex_t sync_lock;
     pthread_cond_t sync_wakeup;
@@ -294,6 +298,23 @@ static void vo_cocoa_update_screen_info(struct vo *vo)
     s->display_id = [[sinfo objectForKey:@"NSScreenNumber"] longValue];
 }
 
+static void vo_cocoa_anim_lock(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    pthread_mutex_lock(&s->anim_lock);
+    s->is_animating = true;
+    pthread_mutex_unlock(&s->anim_lock);
+}
+
+static void vo_cocoa_anim_unlock(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    pthread_mutex_lock(&s->anim_lock);
+    s->is_animating = false;
+    pthread_cond_signal(&s->anim_wakeup);
+    pthread_mutex_unlock(&s->anim_lock);
+}
+
 static void vo_cocoa_signal_swap(struct vo_cocoa_state *s)
 {
     pthread_mutex_lock(&s->sync_lock);
@@ -363,6 +384,8 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     pthread_mutex_init(&s->sync_lock, NULL);
     pthread_cond_init(&s->sync_wakeup, NULL);
+    pthread_mutex_init(&s->anim_lock, NULL);
+    pthread_cond_init(&s->anim_wakeup, NULL);
     vo->cocoa = s;
     vo_cocoa_update_screen_info(vo);
     vo_cocoa_init_displaylink(vo);
@@ -407,6 +430,11 @@ void vo_cocoa_uninit(struct vo *vo)
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->lock);
 
+    pthread_mutex_lock(&s->anim_lock);
+    while(s->is_animating)
+        pthread_cond_wait(&s->anim_wakeup, &s->anim_lock);
+    pthread_mutex_unlock(&s->anim_lock);
+
     // close window beforehand to prevent undefined behavior when in fullscreen
     // that resets the desktop to space 1
     run_on_main_thread(vo, ^{
@@ -436,6 +464,8 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->view removeFromSuperview];
         [s->view release];
 
+        pthread_cond_destroy(&s->anim_wakeup);
+        pthread_mutex_destroy(&s->anim_lock);
         pthread_cond_destroy(&s->sync_wakeup);
         pthread_mutex_destroy(&s->sync_lock);
         pthread_cond_destroy(&s->wakeup);
@@ -1014,6 +1044,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 1;
     s->pending_events |= VO_EVENT_FULLSCREEN_STATE;
+    vo_cocoa_anim_unlock(self.vout);
 }
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification
@@ -1021,6 +1052,27 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 0;
     s->pending_events |= VO_EVENT_FULLSCREEN_STATE;
+    vo_cocoa_anim_unlock(self.vout);
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification *)notification
+{
+    vo_cocoa_anim_lock(self.vout);
+}
+
+- (void)windowWillExitFullScreen:(NSNotification *)notification
+{
+    vo_cocoa_anim_lock(self.vout);
+}
+
+- (void)windowDidFailToEnterFullScreen:(NSWindow *)window
+{
+    vo_cocoa_anim_unlock(self.vout);
+}
+
+- (void)windowDidFailToExitFullScreen:(NSWindow *)window
+{
+    vo_cocoa_anim_unlock(self.vout);
 }
 
 - (void)windowWillStartLiveResize:(NSNotification *)notification

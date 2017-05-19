@@ -159,16 +159,28 @@
     [self.adapter windowDidExitFullScreen:notification];
 }
 
+- (void)windowWillEnterFullScreen:(NSNotification *)notification
+{
+    [self.adapter windowWillEnterFullScreen:notification];
+}
+
+- (void)windowWillExitFullScreen:(NSNotification *)notification
+{
+    [self.adapter windowWillExitFullScreen:notification];
+}
+
 - (void)windowDidFailToEnterFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
     [self setToWindow];
+    [self.adapter windowDidFailToEnterFullScreen:window];
 }
 
 - (void)windowDidFailToExitFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
     [self setToFullScreen];
+    [self.adapter windowDidFailToExitFullScreen:window];
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
