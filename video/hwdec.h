@@ -66,6 +66,9 @@ struct mp_hwdec_ctx {
                                        struct mp_image *mpi,
                                        struct mp_image_pool *swpool);
 
+    // Optional. Crap for vdpau. Makes sure preemption recovery is run if needed.
+    void (*restore_device)(struct mp_hwdec_ctx *ctx);
+
     // Optional. Do not set for VO-bound devices.
     void (*destroy)(struct mp_hwdec_ctx *ctx);
 };

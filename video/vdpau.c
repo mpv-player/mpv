@@ -188,6 +188,14 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
     ctx->vdp = vdp;
     ctx->get_proc_address = get_proc_address;
 
+    if (ctx->av_device_ref) {
+        AVHWDeviceContext *hwctx = (void *)ctx->av_device_ref->data;
+        AVVDPAUDeviceContext *vdctx = hwctx->hwctx;
+
+        vdctx->device = ctx->vdp_device;
+        vdctx->get_proc_address = ctx->get_proc_address;
+    }
+
     vdp_st = vdp.output_surface_create(ctx->vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
                                        1, 1, &ctx->preemption_obj);
     if (vdp_st != VDP_STATUS_OK) {
@@ -405,6 +413,13 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
     return mp_vdpau_get_surface(ctx, chroma, 0, false, w, h);
 }
 
+static void recheck_preemption(struct mp_hwdec_ctx *hwctx)
+{
+    struct mp_vdpau_ctx *ctx = hwctx->ctx;
+
+    mp_vdpau_handle_preemption(ctx, NULL);
+}
+
 static bool open_lavu_vdpau_device(struct mp_vdpau_ctx *ctx)
 {
     ctx->av_device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VDPAU);
@@ -437,6 +452,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
             .type = HWDEC_VDPAU,
             .ctx = ctx,
             .download_image = download_image,
+            .restore_device = recheck_preemption,
         },
         .getimg_surface = VDP_INVALID_HANDLE,
     };
