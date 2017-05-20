@@ -556,9 +556,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     assert(!ctx->avctx);
 
-    if (strcmp(decoder, "mp-rawvideo") == 0)
-        decoder = "rawvideo";
-
     AVCodec *lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec)
         return;
@@ -1216,8 +1213,6 @@ static int control(struct dec_video *vd, int cmd, void *arg)
 static void add_decoders(struct mp_decoder_list *list)
 {
     mp_add_lavc_decoders(list, AVMEDIA_TYPE_VIDEO);
-    mp_add_decoder(list, "lavc", "mp-rawvideo", "mp-rawvideo",
-                   "raw video");
 }
 
 const struct vd_functions mpcodecs_vd_ffmpeg = {

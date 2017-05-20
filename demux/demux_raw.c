@@ -22,6 +22,10 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <libavcodec/avcodec.h>
+
+#include "common/av_common.h"
+
 #include "options/m_config.h"
 #include "options/m_option.h"
 
@@ -30,6 +34,7 @@
 #include "stheader.h"
 #include "codec_tags.h"
 
+#include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/img_fourcc.h"
 
@@ -187,9 +192,9 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     const char *decoder = "rawvideo";
     int imgfmt = opts->vformat;
     int imgsize = opts->imgsize;
+    int mp_imgfmt = 0;
     if (opts->mp_format && !IMGFMT_IS_HWACCEL(opts->mp_format)) {
-        decoder = "mp-rawvideo";
-        imgfmt = opts->mp_format;
+        mp_imgfmt = opts->mp_format;
         if (!imgsize) {
             struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(opts->mp_format);
             for (int p = 0; p < desc.num_planes; p++) {
@@ -241,6 +246,16 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     c->reliable_fps = true;
     c->disp_w = width;
     c->disp_h = height;
+    if (mp_imgfmt) {
+        c->lav_codecpar = avcodec_parameters_alloc();
+        if (!c->lav_codecpar)
+            abort();
+        c->lav_codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+        c->lav_codecpar->codec_id = mp_codec_to_av_codec_id(decoder);
+        c->lav_codecpar->format = imgfmt2pixfmt(mp_imgfmt);
+        c->lav_codecpar->width = width;
+        c->lav_codecpar->height = height;
+    }
     demux_add_sh_stream(demuxer, sh);
 
     struct priv *p = talloc_ptrtype(demuxer, p);

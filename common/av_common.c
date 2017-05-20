@@ -90,10 +90,6 @@ AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
     // Video only
     avp->width = c->disp_w;
     avp->height = c->disp_h;
-    if (c->codec && strcmp(c->codec, "mp-rawvideo") == 0) {
-        avp->format = imgfmt2pixfmt(c->codec_tag);
-        avp->codec_tag = 0;
-    }
 
     // Audio only
     avp->sample_rate = c->samplerate;

@@ -24,6 +24,7 @@ Interface changes
       Some of them were removed in earlier releases.
     - introduce --replaygain... options, which replace the same functionality
       provided by the deprecated --af=volume:replaygain... mechanism.
+    - drop the internal "mp-rawvideo" codec (used by --demuxer=rawvideo)
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")
