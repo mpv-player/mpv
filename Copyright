@@ -73,8 +73,8 @@ LGPL relicensing status:
     audio/filter/af_lavfi.c         LGPL
     audio/filter/af_scaletempo.c    LGPL
     audio/filter/af_rubberband.c    LGPL
-    audio/out/ao.c                  hard
-    audio/out/ao.h                  very hard (anders' changes)
+    audio/out/ao.c                  LGPL
+    audio/out/ao.h                  LGPL
     audio/out/ao_alsa.c             extremely hard (original author did not decide)
     audio/out/ao_audiounit.m        LGPL
     audio/out/ao_coreaudio.c        LGPL
@@ -85,9 +85,9 @@ LGPL relicensing status:
     audio/out/ao_coreaudio_properti LGPL
     audio/out/ao_coreaudio_utils.c  LGPL
     audio/out/ao_coreaudio_utils.h  LGPL
-    audio/out/ao_jack.c             unknown
+    audio/out/ao_jack.c             will stay GPL
     audio/out/ao_lavc.c             probably easy
-    audio/out/ao_null.c             unknown
+    audio/out/ao_null.c             LGPL
     audio/out/ao_openal.c           unknown
     audio/out/ao_opensles.c         LGPL
     audio/out/ao_oss.c              will stay GPL
@@ -100,9 +100,9 @@ LGPL relicensing status:
     audio/out/ao_wasapi_changenotif LGPL
     audio/out/ao_wasapi.h           LGPL
     audio/out/ao_wasapi_utils.c     LGPL
-    audio/out/internal.h            very hard (anders' changes)
-    audio/out/pull.c                unknown
-    audio/out/push.c                unknown
+    audio/out/internal.h            LGPL
+    audio/out/pull.c                LGPL
+    audio/out/push.c                LGPL
     audio/audio.*                   very hard (mp_audio based of anders' af_audio)
     audio/audio_buffer.*            LGPL
     audio/chmap.*                   LGPL
