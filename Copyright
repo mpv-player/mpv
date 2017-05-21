@@ -59,7 +59,7 @@ LGPL relicensing status:
 
     audio/decode/ad.h               LGPL
     audio/decode/ad_lavc.c          very hard (nick's changes)
-    audio/decode/ad_spdif.c         very hard (author unreachable)
+    audio/decode/ad_spdif.c         LGPL
     audio/decode/dec_audio.*        very hard (nick's changes)
     audio/filter/af.*               must be killed (main author disagreed)
     audio/filter/af_channel.c       must be killed (main author disagreed)
