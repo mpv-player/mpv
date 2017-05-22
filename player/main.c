@@ -114,6 +114,8 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
 
 void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
+    bool had_log_file = mp_msg_has_log_file(mpctx->global);
+
     mp_msg_update_msglevels(mpctx->global);
 
     bool enable = mpctx->opts->use_terminal;
@@ -127,6 +129,9 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
             cas_terminal_owner(mpctx, NULL);
         }
     }
+
+    if (mp_msg_has_log_file(mpctx->global) && !had_log_file)
+        mp_print_version(mpctx->log, false); // for log-file=... in config files
 
     if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);

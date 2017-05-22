@@ -537,7 +537,20 @@ void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
 {
     struct mp_log_root *root = global->log->root;
 
+    pthread_mutex_lock(&mp_msg_lock);
     root->force_stderr = force_stderr;
+    pthread_mutex_unlock(&mp_msg_lock);
+}
+
+bool mp_msg_has_log_file(struct mpv_global *global)
+{
+    struct mp_log_root *root = global->log->root;
+
+    pthread_mutex_lock(&mp_msg_lock);
+    bool res = !!root->log_file;
+    pthread_mutex_unlock(&mp_msg_lock);
+
+    return res;
 }
 
 void mp_msg_uninit(struct mpv_global *global)
