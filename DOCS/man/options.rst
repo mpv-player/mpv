@@ -335,6 +335,10 @@ Playback Control
     Load chapters from this file, instead of using the chapter metadata found
     in the main file.
 
+    This accepts a media file (like mkv) or even a pseudo-format like ffmetadata
+    and uses its chapters to replace the current file's chapters. This doesn't
+    work with OGM or XML chapters directly.
+
 ``--sstep=<sec>``
     Skip <sec> seconds after every frame.
 
