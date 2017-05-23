@@ -167,6 +167,7 @@ void playlist_shuffle(struct playlist *pl)
                                                count);
     for (int n = 0; n < count; n++) {
         arr[n] = pl->first;
+        arr[n]->pos = n;
         playlist_unlink(pl, pl->first);
     }
     for (int n = 0; n < count - 1; n++) {
@@ -178,6 +179,27 @@ void playlist_shuffle(struct playlist *pl)
     talloc_free(arr);
     pl->current = save_current;
     pl->current_was_replaced = save_replaced;
+    pl->shuffled = true;
+}
+
+void playlist_unshuffle(struct playlist *pl) {
+    struct playlist_entry *save_current = pl->current;
+    bool save_replaced = pl->current_was_replaced;
+    int count = playlist_count(pl);
+    struct playlist_entry **arr = talloc_array(NULL, struct playlist_entry *,
+                                               count);
+    for (int n = 0; n < count; n++) {
+        arr[pl->first->pos] = pl->first;
+        playlist_unlink(pl, pl->first);
+    }
+
+    for (int n = 0; n < count; n++) {
+        playlist_add(pl, arr[n]);
+    }
+    talloc_free(arr);
+    pl->current = save_current;
+    pl->current_was_replaced = save_replaced;
+    pl->shuffled = false;
 }
 
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction)
