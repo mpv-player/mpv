@@ -150,6 +150,22 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
                               opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);
+
+        //Calculate the size of the smaller side of the scaled image based
+        // on the aspect ratio
+        if (opts->panscan) {
+            float dst_ar = window_w / (float)window_h;
+            float src_ar = src_w / (float)src_h;
+            if (dst_ar > src_ar) {
+                dst.x1 = (dst.y1 - dst.y0) 
+                       * ((src.x1 - src.x0) / (double)(src.y1 - src.y0))
+                       + dst.x0 + 0.5;
+            } else if (dst_ar < src_ar) {
+                dst.y1 = (dst.x1 - dst.x0) 
+                       / ((src.x1 - src.x0) / (double)(src.y1 - src.y0))
+                       + dst.y0 + 0.5;
+            }
+        }
     }
 
     *out_src = src;
