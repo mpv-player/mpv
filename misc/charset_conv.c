@@ -207,6 +207,9 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
                 op = outbuf + offset;
                 osize += size;
                 oleft += size;
+            } else if(errno == EILSEQ) {
+                int one = 1;
+                iconvctl(icdsc, ICONV_SET_DISCARD_ILSEQ, &one);
             } else {
                 if (errno == EINVAL && (flags & MP_ICONV_ALLOW_CUTOFF)) {
                     // This is intended for cases where the input buffer is cut
