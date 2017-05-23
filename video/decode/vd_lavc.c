@@ -701,6 +701,8 @@ static void uninit_avctx(struct dec_video *vd)
 
     av_freep(&ctx->avctx);
 
+    av_freep(&ctx->avctx);
+
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
     ctx->max_delay_queue = 0;
