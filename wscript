@@ -133,7 +133,7 @@ main_dependencies = [
         'desc': 'POSIX environment',
         # This should be good enough.
         'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
-            'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
+            'struct pollfd pfd; poll(&pfd, 1, 0); int f[2]; pipe(f); munmap(f,0)'),
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
