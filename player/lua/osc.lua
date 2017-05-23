@@ -1789,9 +1789,9 @@ function osc_init()
     ne.content = function ()
         if (state.rightTC_trem) then
             if state.tc_ms then
-                return ("-"..mp.get_property_osd("playtime-remaining/full"))
+                return ("\226\136\146"..mp.get_property_osd("playtime-remaining/full"))
             else
-                return ("-"..mp.get_property_osd("playtime-remaining"))
+                return ("\226\136\146"..mp.get_property_osd("playtime-remaining"))
             end
         else
             if state.tc_ms then
