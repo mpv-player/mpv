@@ -750,6 +750,11 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
     int h = ctx->avctx->coded_height;
     int av_hw_format = imgfmt2pixfmt(ctx->hwdec_fmt);
 
+    if (!device_ctx) {
+        MP_ERR(ctx, "Missing device context.\n");
+        return -1;
+    }
+
     if (ctx->cached_hw_frames_ctx) {
         AVHWFramesContext *fctx = (void *)ctx->cached_hw_frames_ctx->data;
         if (fctx->width != w || fctx->height != h ||
