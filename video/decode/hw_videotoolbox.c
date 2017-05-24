@@ -17,6 +17,10 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
+#if !HAVE_VIDEOTOOLBOX_HWACCEL_NEW
+
 #include <libavcodec/version.h>
 #include <libavcodec/videotoolbox.h>
 
@@ -183,3 +187,60 @@ const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
     .process_image = copy_image,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };
+
+#else
+
+#include <libavutil/hwcontext.h>
+
+#include "video/decode/lavc.h"
+
+static void vt_dummy_destroy(struct mp_hwdec_ctx *ctx)
+{
+    av_buffer_unref(&ctx->av_device_ref);
+    talloc_free(ctx);
+}
+
+static struct mp_hwdec_ctx *vt_create_dummy(struct mpv_global *global,
+                                            struct mp_log *plog, bool probing)
+{
+    struct mp_hwdec_ctx *ctx = talloc_ptrtype(NULL, ctx);
+    *ctx = (struct mp_hwdec_ctx) {
+        .type = HWDEC_VIDEOTOOLBOX_COPY,
+        .ctx = "dummy",
+        .destroy = vt_dummy_destroy,
+    };
+
+    if (av_hwdevice_ctx_create(&ctx->av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
+                               NULL, NULL, 0) < 0)
+    {
+        vt_dummy_destroy(ctx);
+        return NULL;
+    }
+
+    return ctx;
+}
+
+const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox = {
+    .type = HWDEC_VIDEOTOOLBOX,
+    .image_format = IMGFMT_VIDEOTOOLBOX,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_NONE}
+    },
+};
+
+const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
+    .type = HWDEC_VIDEOTOOLBOX_COPY,
+    .copying = true,
+    .image_format = IMGFMT_VIDEOTOOLBOX,
+    .generic_hwaccel = true,
+    .create_dev = vt_create_dummy,
+    .set_hwframes = true,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_NONE}
+    },
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
+};
+
+#endif

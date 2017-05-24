@@ -23,6 +23,10 @@
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGLES/EAGL.h>
 
+#include <libavutil/hwcontext.h>
+
+#include "config.h"
+
 #include "video/mp_image_pool.h"
 #include "video/vt.h"
 #include "formats.h"
@@ -77,6 +81,12 @@ static int create_hwdec(struct gl_hwdec *hw)
         .download_image = mp_vt_download_image,
         .ctx = &p->hwctx,
     };
+
+#if HAVE_VIDEOTOOLBOX_HWACCEL_NEW
+    av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
+                           NULL, NULL, 0);
+#endif
+
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
@@ -199,6 +209,8 @@ static void destroy(struct gl_hwdec *hw)
     CVPixelBufferRelease(p->pbuf);
     CFRelease(p->gl_texture_cache);
     p->gl_texture_cache = NULL;
+
+    av_buffer_unref(&p->hwctx.av_device_ref);
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
 }
