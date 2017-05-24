@@ -43,12 +43,11 @@ struct mp_hwdec_ctx {
     //  HWDEC_VAAPI:            struct mp_vaapi_ctx*
     //  HWDEC_D3D11VA:          ID3D11Device*
     //  HWDEC_DXVA2:            IDirect3DDevice9*
-    //  HWDEC_DXVA2_COPY:       IDirect3DDevice9*
     //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
     // libavutil-wrapped context, if available.
-    struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
+    struct AVBufferRef *av_device_ref; // AVHWDeviceContext*
 
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
     int *supported_formats;
