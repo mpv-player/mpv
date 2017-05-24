@@ -78,11 +78,8 @@ static int ipc_write_str(struct client_arg *client, const char *buf)
                 return 0;
             }
 
-            if (errno == EINTR)
+            if (errno == EINTR || errno == EAGAIN)
                 continue;
-
-            if (errno == EAGAIN)
-                return 0;
 
             return rc;
         }
