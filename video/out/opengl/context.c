@@ -141,22 +141,7 @@ static int mpgl_find_backend(const char *name)
     return -2;
 }
 
-int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name, struct bstr param)
-{
-    if (bstr_equals0(param, "help")) {
-        mp_info(log, "OpenGL windowing backends:\n");
-        mp_info(log, "    auto (autodetect)\n");
-        for (int n = 0; n < MP_ARRAY_SIZE(backends); n++)
-            mp_info(log, "    %s\n", backends[n]->name);
-        return M_OPT_EXIT;
-    }
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
-}
-
-static void *get_native_display(const char *name)
+static void *get_native_display(void *pctx, const char *name)
 {
     MPGLContext *ctx = pctx;
     if (!ctx->native_display_type || !name)
