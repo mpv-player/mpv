@@ -28,8 +28,25 @@
 
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavfilter/avfilter.h>
+#include <libswscale/swscale.h>
 
 #include "config.h"
+
+#if HAVE_LIBAVRESAMPLE
+#include <libavresample/avresample.h>
+#endif
+
+#if HAVE_LIBSWRESAMPLE
+#include <libswresample/swresample.h>
+#endif
+
+#if HAVE_LIBAVDEVICE
+#include <libavdevice/avdevice.h>
+#endif
+
 #include "mpv_talloc.h"
 #include "client.h"
 #include "common/av_common.h"
@@ -3648,6 +3665,36 @@ static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, av_version_info());
 }
 
+static int mp_property_library(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+#define SUB_PROP_LIBVER(lib) \
+    { #lib "-int", SUB_PROP_INT(lib##_version()) }, \
+    { #lib "-major", SUB_PROP_INT(lib##_version() >> 16) }, \
+    { #lib "-minor", SUB_PROP_INT((lib##_version() >> 8) & 0xFF) }, \
+    { #lib "-micro", SUB_PROP_INT(lib##_version() & 0xFF) }
+
+    struct m_sub_property props[] = {
+        SUB_PROP_LIBVER(avutil),
+        SUB_PROP_LIBVER(avcodec),
+        SUB_PROP_LIBVER(avformat),
+        SUB_PROP_LIBVER(avfilter),
+        SUB_PROP_LIBVER(swscale),
+#if HAVE_LIBAVRESAMPLE
+        SUB_PROP_LIBVER(avresample),
+#endif
+#if HAVE_LIBSWRESAMPLE
+        SUB_PROP_LIBVER(swresample),
+#endif
+#if HAVE_LIBAVDEVICE
+        SUB_PROP_LIBVER(avdevice),
+#endif
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -4057,6 +4104,7 @@ static const struct m_property mp_properties_base[] = {
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
     {"ffmpeg-version", mp_property_ffmpeg},
+    {"library-version", mp_property_library},
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
