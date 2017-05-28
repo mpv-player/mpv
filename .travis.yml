@@ -44,7 +44,7 @@ script:
   - ./bootstrap.py
   - ./waf configure
   - ./waf build
-after_script: TOOLS/travis-rebuild-website
+after_script: TOOLS/travis-rebuild-website.sh
 
 notifications:
   email: false
