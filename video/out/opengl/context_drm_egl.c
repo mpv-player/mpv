@@ -78,6 +78,11 @@ struct priv {
 
 static EGLDisplay *get_egl_display(void *device)
 {
+    const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!exts)
+        goto def;
+    if (!strstr(exts, "EGL_EXT_platform_base"))
+        goto def;
     PFNEGLGETPLATFORMDISPLAYEXTPROC ptr_eglGetPlatformDisplayEXT =
         (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
     if (ptr_eglGetPlatformDisplayEXT)
@@ -87,6 +92,7 @@ static EGLDisplay *get_egl_display(void *device)
         if (display != EGL_NO_DISPLAY)
             return display;
     }
+def:
     return eglGetDisplay(device);
 }
 
