@@ -4802,6 +4802,16 @@ The following video options are currently all specific to ``--vo=opengl`` and
     This option might be silently removed in the future, if ANGLE fixes shader
     compilation speed.
 
+``--cuda-decode-device=<auto|0..>``
+    Choose the GPU device used for decoding when using the ``cuda`` hwdec.
+
+    By default, the device that is being used to provide OpenGL output will
+    also be used for decoding (and in the vast majority of cases, only one
+    GPU will be present).
+
+    Note that when using the ``cuda-copy`` hwdec, a different option must be
+    passed: ``--vd-lavc-o=gpu=<0..>``.
+
 Miscellaneous
 -------------
 
