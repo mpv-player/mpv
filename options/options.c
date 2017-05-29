@@ -728,6 +728,11 @@ const m_option_t mp_opts[] = {
                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
 #endif
 
+#if HAVE_CUDA_HWACCEL
+    OPT_CHOICE_OR_INT("cuda-decode-device", cuda_device, 0,
+                      0, INT_MAX, ({"auto", -1})),
+#endif
+
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
@@ -973,6 +978,8 @@ const struct MPOpts mp_default_opts = {
         "Performer", "Title", "Track", "icy-title", "service_name",
         NULL
     },
+
+    .cuda_device = -1,
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

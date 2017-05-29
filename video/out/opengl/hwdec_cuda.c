@@ -34,6 +34,7 @@
 
 #include "formats.h"
 #include "hwdec.h"
+#include "options/m_config.h"
 #include "video.h"
 
 struct priv {
@@ -44,7 +45,8 @@ struct priv {
     CUarray cu_array[4];
     int plane_bytes[4];
 
-    CUcontext cuda_ctx;
+    CUcontext display_ctx;
+    CUcontext decode_ctx;
 };
 
 static int check_cu(struct gl_hwdec *hw, CUresult err, const char *func)
@@ -72,8 +74,7 @@ static int check_cu(struct gl_hwdec *hw, CUresult err, const char *func)
 
 static int cuda_create(struct gl_hwdec *hw)
 {
-    CUdevice device;
-    CUcontext cuda_ctx = NULL;
+    CUdevice display_dev;
     AVBufferRef *hw_device_ctx = NULL;
     CUcontext dummy;
     unsigned int device_count;
@@ -97,16 +98,43 @@ static int cuda_create(struct gl_hwdec *hw)
     if (ret < 0)
         goto error;
 
-    ret = CHECK_CU(cuGLGetDevices(&device_count, &device, 1,
+    // Allocate display context
+    ret = CHECK_CU(cuGLGetDevices(&device_count, &display_dev, 1,
                                   CU_GL_DEVICE_LIST_ALL));
     if (ret < 0)
         goto error;
 
-    ret = CHECK_CU(cuCtxCreate(&cuda_ctx, CU_CTX_SCHED_BLOCKING_SYNC, device));
+    ret = CHECK_CU(cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                               display_dev));
     if (ret < 0)
         goto error;
 
-    p->cuda_ctx = cuda_ctx;
+    p->decode_ctx = p->display_ctx;
+
+    int decode_dev_idx = -1;
+    mp_read_option_raw(hw->global, "cuda-decode-device", &m_option_type_choice,
+                       &decode_dev_idx);
+
+    if (decode_dev_idx > -1) {
+        CUdevice decode_dev;
+        ret = CHECK_CU(cuDeviceGet(&decode_dev, decode_dev_idx));
+        if (ret < 0)
+            goto error;
+
+        if (decode_dev != display_dev) {
+            MP_INFO(hw, "Using separate decoder and display devices\n");
+
+            // Pop the display context. We won't use it again during init()
+            ret = CHECK_CU(cuCtxPopCurrent(&dummy));
+            if (ret < 0)
+                goto error;
+
+            ret = CHECK_CU(cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                       decode_dev));
+            if (ret < 0)
+                goto error;
+        }
+    }
 
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA);
     if (!hw_device_ctx)
@@ -115,7 +143,7 @@ static int cuda_create(struct gl_hwdec *hw)
     AVHWDeviceContext *device_ctx = (void *)hw_device_ctx->data;
 
     AVCUDADeviceContext *device_hwctx = device_ctx->hwctx;
-    device_hwctx->cuda_ctx = cuda_ctx;
+    device_hwctx->cuda_ctx = p->decode_ctx;
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
@@ -129,7 +157,7 @@ static int cuda_create(struct gl_hwdec *hw)
 
     p->hwctx = (struct mp_hwdec_ctx) {
         .type = HWDEC_CUDA,
-        .ctx = cuda_ctx,
+        .ctx = p->decode_ctx,
         .av_device_ref = hw_device_ctx,
     };
     p->hwctx.driver_name = hw->driver->name;
@@ -162,7 +190,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         return -1;
     }
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
@@ -219,7 +247,7 @@ static void destroy(struct gl_hwdec *hw)
     CUcontext dummy;
 
     // Don't bail if any CUDA calls fail. This is all best effort.
-    CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     for (int n = 0; n < 4; n++) {
         if (p->cu_res[n] > 0)
             CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
@@ -227,7 +255,11 @@ static void destroy(struct gl_hwdec *hw)
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
 
-    CHECK_CU(cuCtxDestroy(p->cuda_ctx));
+    if (p->decode_ctx != p->display_ctx) {
+        CHECK_CU(cuCtxDestroy(p->decode_ctx));
+    }
+
+    CHECK_CU(cuCtxDestroy(p->display_ctx));
 
     gl->DeleteTextures(4, p->gl_textures);
 
@@ -242,7 +274,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     CUcontext dummy;
     int ret = 0, eret = 0;
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
