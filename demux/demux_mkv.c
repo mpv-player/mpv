@@ -2381,6 +2381,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     double tb = track->parse_timebase;
     int64_t pts = dp->pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : dp->pts * tb;
     int64_t dts = dp->dts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : dp->dts * tb;
+    bool copy_sidedata = true;
 
     while (dp->len) {
         uint8_t *data = NULL;
@@ -2399,8 +2400,10 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
                 break;
             demux_packet_copy_attribs(new, dp);
 #if LIBAVCODEC_VERSION_MICRO >= 100
-            av_copy_packet_side_data(new->avpacket, dp->avpacket);
+            if (copy_sidedata)
+                av_copy_packet_side_data(new->avpacket, dp->avpacket);
 #endif
+            copy_sidedata = false;
             if (track->parse_timebase) {
                 new->pts = track->av_parser->pts == AV_NOPTS_VALUE
                          ? MP_NOPTS_VALUE : track->av_parser->pts / tb;
