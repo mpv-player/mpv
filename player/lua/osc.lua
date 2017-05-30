@@ -2202,7 +2202,7 @@ function tick()
         ass:new_event()
         ass:pos(320, icon_y+65)
         ass:an(8)
-        ass:append("Drop files to play here.")
+        ass:append("Drop files or URLs to play here.")
         mp.set_osd_ass(640, 360, ass.text)
 
         if state.showhide_enabled then
