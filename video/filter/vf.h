@@ -46,6 +46,7 @@ typedef struct vf_info {
 
 typedef struct vf_instance {
     const vf_info_t *info;
+    char *full_name;
 
     // Initialize the filter. The filter must set *out to the same image
     // params as the images the filter functions will return for the given

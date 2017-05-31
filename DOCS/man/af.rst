@@ -15,6 +15,9 @@ syntax is:
     wrapper, which gives you access to most of libavfilter's filters. This
     includes all filters that have been ported from MPlayer to libavfilter.
 
+    The ``--vf`` description describes how libavfilter can be used and how to
+    workaround deprecated mpv filters.
+
 See ``--vf`` group of options for info on how ``--af-defaults``, ``--af-add``,
 ``--af-pre``, ``--af-del``, ``--af-clr``, and possibly others work.
 

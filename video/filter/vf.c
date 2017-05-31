@@ -229,7 +229,7 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
 
     for (vf_instance_t *f = c->first; f; f = f->next) {
         char b[128] = {0};
-        mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->info->name);
+        mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->full_name);
         if (f->label)
             mp_snprintf_cat(b, sizeof(b), "\"%s\" ", f->label);
         mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&f->fmt_out));
@@ -255,9 +255,12 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         lavfi_name = name;
         lavfi_args = args;
         args = NULL;
+        if (strncmp(lavfi_name, "lavfi-", 6) == 0)
+            lavfi_name += 6;
     }
     vf_instance_t *vf = talloc_zero(NULL, struct vf_instance);
     *vf = (vf_instance_t) {
+        .full_name = talloc_strdup(vf, name),
         .info = desc.p,
         .log = mp_log_new(vf, c->log, name),
         .hwdec_devs = c->hwdec_devs,
@@ -282,6 +285,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         assert(opts->opt->type == &m_option_type_keyvalue_list);
         if (m_config_set_option_raw(config, opts, &lavfi_args, 0) < 0)
             goto error;
+        vf->full_name = talloc_asprintf(vf, "%s (lavfi)", vf->full_name);
     }
     vf->priv = config->optstruct;
     int retcode = vf->info->open(vf);
@@ -792,6 +796,7 @@ struct vf_chain *vf_new(struct mpv_global *global)
     static const struct vf_info in = { .name = "in" };
     c->first = talloc(c, struct vf_instance);
     *c->first = (struct vf_instance) {
+        .full_name = "in",
         .log = c->log,
         .info = &in,
         .query_format = input_query_format,
@@ -799,6 +804,7 @@ struct vf_chain *vf_new(struct mpv_global *global)
     static const struct vf_info out = { .name = "out" };
     c->last = talloc(c, struct vf_instance);
     *c->last = (struct vf_instance) {
+        .full_name = "out",
         .log = c->log,
         .info = &out,
         .query_format = output_query_format,

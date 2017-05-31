@@ -49,13 +49,14 @@ normal filter parameters.
 
 .. note::
 
-    To get a full list of available video filters, see ``--vf=help``.
+    To get a full list of available video filters, see ``--vf=help`` and
+    http://ffmpeg.org/ffmpeg-filters.html .
 
     Also, keep in mind that most actual filters are available via the ``lavfi``
     wrapper, which gives you access to most of libavfilter's filters. This
     includes all filters that have been ported from MPlayer to libavfilter.
 
-    Most filters are deprecated in some ways, unless they're only available
+    Most builtin filters are deprecated in some ways, unless they're only available
     in mpv (such as filters which deal with mpv specifics, or which are
     implemented in mpv only).
 
@@ -65,6 +66,11 @@ normal filter parameters.
     is rather similar to libavfilter's, it's not the same. (Which means not
     everything accepted by vf_lavfi's ``graph`` option will be accepted by
     ``--vf``.)
+
+    You can also prefix the filter name with ``lavfi-`` to force the wrapper.
+    This is helpful if the filter name collides with a deprecated mpv builtin
+    filter. For example ``--vf=lavfi-scale=args`` would use libavfilter's
+    ``scale`` filter over mpv's deprecated builtin one.
 
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
@@ -92,7 +98,7 @@ With filters that support it, you can access parameters by their name.
     Sets a named parameter to the given value. Use on and off or yes and no to
     set flag parameters.
 
-Available filters are:
+Available mpv-only filters are:
 
 ``crop[=w:h:x:y]``
     Crops the given part of the image and discards the rest. Useful to remove

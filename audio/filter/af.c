@@ -163,11 +163,14 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         lavfi_name = name;
         lavfi_args = args;
         args = NULL;
+        if (strncmp(lavfi_name, "lavfi-", 6) == 0)
+            lavfi_name += 6;
     }
     MP_VERBOSE(s, "Adding filter %s \n", name);
 
     struct af_instance *af = talloc_zero(NULL, struct af_instance);
     *af = (struct af_instance) {
+        .full_name = talloc_strdup(af, name),
         .info = desc.p,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
@@ -192,6 +195,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         assert(opts->opt->type == &m_option_type_keyvalue_list);
         if (m_config_set_option_raw(config, opts, &lavfi_args, 0) < 0)
             goto error;
+        af->full_name = talloc_asprintf(af, "%s (lavfi)", af->full_name);
     }
     af->priv = config->optstruct;
 
@@ -271,7 +275,7 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     struct af_instance *af = s->first;
     while (af) {
         char b[128] = {0};
-        mp_snprintf_cat(b, sizeof(b), "  [%s] ", af->info->name);
+        mp_snprintf_cat(b, sizeof(b), "  [%s] ", af->full_name);
         if (af->label)
             mp_snprintf_cat(b, sizeof(b), "\"%s\" ", af->label);
         if (af->data)
@@ -518,6 +522,7 @@ struct af_stream *af_new(struct mpv_global *global)
     static const struct af_info in = { .name = "in" };
     s->first = talloc(s, struct af_instance);
     *s->first = (struct af_instance) {
+        .full_name = "in",
         .info = &in,
         .log = s->log,
         .control = input_control,
@@ -529,6 +534,7 @@ struct af_stream *af_new(struct mpv_global *global)
     static const struct af_info out = { .name = "out" };
     s->last = talloc(s, struct af_instance);
     *s->last = (struct af_instance) {
+        .full_name = "out",
         .info = &out,
         .log = s->log,
         .control = output_control,

@@ -52,6 +52,7 @@ struct af_info {
 // Linked list of audio filters
 struct af_instance {
     const struct af_info *info;
+    char *full_name;
     struct mp_log *log;
     struct MPOpts *opts;
     struct replaygain_data *replaygain_data;
