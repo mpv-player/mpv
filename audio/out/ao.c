@@ -62,6 +62,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_PULSE
     &audio_out_pulse,
 #endif
+#if HAVE_JACK
+    &audio_out_jack,
+#endif
 #if HAVE_ALSA
     &audio_out_alsa,
 #endif
@@ -72,9 +75,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
     &audio_out_oss,
 #endif
     // wrappers:
-#if HAVE_JACK
-    &audio_out_jack,
-#endif
 #if HAVE_OPENAL
     &audio_out_openal,
 #endif
