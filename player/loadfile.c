@@ -1202,6 +1202,14 @@ reopen_file:
         }
     }
 
+    // load auto media profiles
+    bool no_video_tracks = !mpctx->current_track[0][STREAM_VIDEO] ||
+         mpctx->current_track[0][STREAM_VIDEO]->attached_picture;
+    struct sh_stream *s = mpctx->current_track[0][STREAM_AUDIO] ?
+                          mpctx->current_track[0][STREAM_AUDIO]->stream : NULL;
+    int audio_channels =  s ? s->codec->channels.num : 0;
+    mp_load_media_profiles(mpctx, no_video_tracks, audio_channels);
+
     for (int n = 0; n < mpctx->num_tracks; n++)
         reselect_demux_stream(mpctx, mpctx->tracks[n]);
 

@@ -161,6 +161,25 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
         mp_auto_load_profile(mpctx, "ao", bstr0(opts->audio_driver_list[0].name));
 }
 
+void mp_load_media_profiles(struct MPContext *mpctx, bool no_video_tracks, int audio_channels)
+{
+    if (no_video_tracks) {
+        mp_auto_load_profile(mpctx, "media", bstr0("no-video"));
+    } else {
+        mp_auto_load_profile(mpctx, "media", bstr0("video"));
+    }
+    if (!audio_channels) {
+        mp_auto_load_profile(mpctx, "media", bstr0("no-audio"));
+    } else if (audio_channels == 1) {
+        mp_auto_load_profile(mpctx, "media", bstr0("mono"));
+    } else if (audio_channels == 2) {
+        mp_auto_load_profile(mpctx, "media", bstr0("stereo"));
+    } else {
+        mp_auto_load_profile(mpctx, "media", bstr0("surround"));
+    }
+}
+
+
 #define MP_WATCH_LATER_CONF "watch_later"
 
 static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,

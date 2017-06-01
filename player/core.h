@@ -487,6 +487,7 @@ void reload_audio_output(struct MPContext *mpctx);
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
 void mp_load_auto_profiles(struct MPContext *mpctx);
+void mp_load_media_profiles(struct MPContext *mpctx, bool no_video_tracks, int audio_channels);
 void mp_get_resume_defaults(struct MPContext *mpctx);
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
