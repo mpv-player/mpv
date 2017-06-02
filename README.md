@@ -86,6 +86,13 @@ To build the software you can use `./waf build`: the result of the compilation
 will be located in `build/mpv`. You can use `./waf install` to install mpv
 to the *prefix* after it is compiled.
 
+Example:
+
+    ./bootstrap.py
+    ./waf configure
+    ./waf
+    ./waf install
+
 Essential dependencies (incomplete list):
 
 - gcc or clang
