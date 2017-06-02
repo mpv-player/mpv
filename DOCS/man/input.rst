@@ -809,6 +809,11 @@ The following hooks are currently defined:
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.
 
+``on_prerender``
+    Called after a file has been loaded, and before rendering the first frame
+    in the file. This is useful when the user wants to change things that alter
+    the video output and avoid unneccessary flickering.
+
 Input Command Prefixes
 ----------------------
 

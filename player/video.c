@@ -1350,6 +1350,14 @@ static void calculate_frame_duration(struct MPContext *mpctx)
     MP_STATS(mpctx, "value %f frame-duration-approx", MPMAX(0, approx_duration));
 }
 
+static void process_prerender_hooks(struct MPContext *mpctx)
+{
+    mp_hook_run(mpctx, NULL, "on_prerender");
+
+    while (!mp_hook_test_completion(mpctx, "on_prerender"))
+        mp_idle(mpctx);
+}
+
 void write_video(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1515,6 +1523,8 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
+
+    process_prerender_hooks(mpctx);
 
     vo_queue_frame(vo, frame);
 
