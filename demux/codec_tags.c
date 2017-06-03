@@ -75,7 +75,6 @@ static void map_audio_pcm_tag(struct mp_codec_params *c)
         // WAVEFORMATEXTENSIBLE.SubFormat
         unsigned char *subformat = c->extradata + 6;
         if (memcmp(subformat + 4, guid_ffext + 4, 12) == 0) {
-            // libavformat extension.
             c->codec_tag = AV_RL32(subformat);
             c->codec = lookup_tag(c->type, c->codec_tag);
         }
