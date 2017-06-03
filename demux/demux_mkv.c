@@ -1549,12 +1549,12 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     unsigned char *extradata = track->private_data;
     unsigned int extradata_len = track->private_size;
-    uint64_t chmask = 0;
 
     if (!track->a_osfreq)
         track->a_osfreq = track->a_sfreq;
     sh_a->bits_per_coded_sample = track->a_bps ? track->a_bps : 16;
     sh_a->samplerate = (uint32_t) track->a_osfreq;
+    mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     for (int i = 0; mkv_audio_tags[i][0]; i++) {
         if (!strcmp(mkv_audio_tags[i][0], track->codec_id)) {
@@ -1581,10 +1581,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         extradata = track->private_data + 18;
         extradata_len = track->private_size - 18;
         sh_a->bits_per_coded_sample = track->a_bps;
+        sh_a->extradata = extradata;
+        sh_a->extradata_size = extradata_len;
         mp_set_codec_from_tag(sh_a);
-        // WAVEFORMATEXTENSIBLE.dwChannelMask
-        if (sh_a->codec_tag == 0xfffe && extradata_len >= 6)
-            chmask = AV_RL32(extradata + 2);
+        extradata = sh_a->extradata;
+        extradata_len = sh_a->extradata_size;
     } else if (!strcmp(track->codec_id, "A_PCM/INT/LIT")) {
         bool sign = sh_a->bits_per_coded_sample > 8;
         mp_set_pcm_codec(sh_a, sign, false, sh_a->bits_per_coded_sample, false);
@@ -1703,10 +1704,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     if (!sh_a->codec)
         goto error;
-
-    mp_chmap_from_waveext(&sh_a->channels, chmask);
-    if (sh_a->channels.num != track->a_channels)
-        mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh_a->codec;
     if (!strcmp(codec, "mp2") || !strcmp(codec, "mp3") ||
