@@ -1467,7 +1467,6 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    vo_x11_move_resize(vo, true, true, rc);
     vo_x11_decoration(vo, vo->opts->border);
 
     if (vo->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN)) {
@@ -1509,6 +1508,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         events |= KeyPressMask | KeyReleaseMask;
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
+    vo_x11_move_resize(vo, true, true, rc);
 
     if (vo->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN))
         x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", 1);
