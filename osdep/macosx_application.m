@@ -366,6 +366,30 @@ static bool bundle_started_from_finder()
     return is_bundle ? [is_bundle boolValue] : false;
 }
 
+static void init_path_for_bundle()
+{
+    NSTask *shell_task = [[[NSTask alloc] init] autorelease];
+    NSPipe *shell_out = [NSPipe pipe];
+    NSDictionary *env = [[NSProcessInfo processInfo] environment];
+    NSString *shell_path = [env objectForKey:@"SHELL"];
+
+    [shell_task setLaunchPath:shell_path];
+    [shell_task setArguments:@[@"-l", @"-c", @"echo $PATH"]];
+    [shell_task setStandardOutput:shell_out];
+    [shell_task launch];
+    [shell_task waitUntilExit];
+
+    NSFileHandle *read_handle = [shell_out fileHandleForReading];
+    NSData *read_data = [read_handle readDataToEndOfFile];
+    NSString *path = [[[NSString alloc] initWithData:read_data
+                     encoding:NSUTF8StringEncoding] autorelease];
+    [read_handle closeFile];
+
+    NSString *path_bundle = [env objectForKey:@"PATH"];
+    NSString *path_new = [NSString stringWithFormat:@"%@:%@", path_bundle, path];
+    setenv("PATH", [path_new UTF8String], 1);
+}
+
 int cocoa_main(int argc, char *argv[])
 {
     @autoreleasepool {
@@ -378,6 +402,7 @@ int cocoa_main(int argc, char *argv[])
 
         if (bundle_started_from_finder()) {
             macosx_redirect_output_to_logfile("mpv");
+            init_path_for_bundle();
             init_cocoa_application(true);
         } else {
             for (int i = 1; i < argc; i++)
