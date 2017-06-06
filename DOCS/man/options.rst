@@ -1808,10 +1808,10 @@ Subtitles
     removed in mpv 0.24.0.
 
 
-``--sub-fix-timing``, ``--no-sub-fix-timing``
-    By default, subtitle timing is adjusted to remove minor gaps or overlaps
-    between subtitles (if the difference is smaller than 210 ms, the gap or
-    overlap is removed).
+``--sub-fix-timing=<yes|no>``
+    Adjust subtitle timing is to remove minor gaps or overlaps between
+    subtitles (if the difference is smaller than 210 ms, the gap or overlap
+    is removed).
 
 ``--sub-forced-only``
     Display only forced subtitles for the DVD subtitle stream selected by e.g.

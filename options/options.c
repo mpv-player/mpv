@@ -957,7 +957,6 @@ const struct MPOpts mp_default_opts = {
     .ass_style_override = 1,
     .ass_shaper = 1,
     .use_embedded_fonts = 1,
-    .sub_fix_timing = 1,
     .screenshot_template = "mpv-shot%n",
 
     .hwdec_api = HAVE_RPI ? HWDEC_RPI : 0,
