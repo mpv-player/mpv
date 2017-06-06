@@ -25,6 +25,8 @@ Interface changes
     - introduce --replaygain... options, which replace the same functionality
       provided by the deprecated --af=volume:replaygain... mechanism.
     - drop the internal "mp-rawvideo" codec (used by --demuxer=rawvideo)
+    - rename --sub-ass-style-override to --sub-ass-override, and rename the
+      `--sub-ass-override=signfs` setting to `--sub-ass-override=scale`.
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

@@ -1481,7 +1481,7 @@ Subtitles
     Changing styling and position does not work with all subtitles. Image-based
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
-    overriding them can be controlled with ``--sub-ass-style-override``.
+    overriding them can be controlled with ``--sub-ass-override``.
 
     Previously some options working on text subtitles were called
     ``--sub-text-*``, they are now named ``--sub-*``, and those specifically
@@ -1558,8 +1558,8 @@ Subtitles
     scales with the approximate window size, while the other option disables
     this scaling.
 
-    Affects plain text subtitles only (or ASS if ``--sub-ass-style-override`` is
-    set high enough).
+    Affects plain text subtitles only (or ASS if ``--sub-ass-override`` is set
+    high enough).
 
 ``--sub-ass-scale-with-window=<yes|no>``
     Like ``--sub-scale-with-window``, but affects subtitles in ASS format only.
@@ -1638,16 +1638,19 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--sub-ass-style-override=<yes|no|force|signfs|strip>``
-    Control whether user style overrides should be applied.
+``--sub-ass-override=<yes|no|force|scale|strip>``
+    Control whether user style overrides should be applied. Note that all of
+    these overrides try to be somewhat smart about figuring out whether or not
+    a subtitle is considered a "sign".
 
-    :yes:   Apply all the ``--sub-ass-*`` style override options. Changing the default
-            for any of these options can lead to incorrect subtitle rendering
-            (default).
-    :signfs: like ``yes``, but apply ``--sub-scale`` only to signs
-    :no:    Render subtitles as forced by subtitle scripts.
-    :force: Try to force the font style as defined by the ``--sub-*``
-            options. Can break rendering easily.
+    :no:    Render subtitles as specified by the subtitle scripts, without
+            overrides.
+    :yes:   Apply all the ``--sub-ass-*`` style override options. Changing the
+            default for any of these options can lead to incorrect subtitle
+            rendering (default).
+    :force: Like ``yes``, but also force all ``--sub-*`` options. Can break
+            rendering easily.
+    :scale: Like ``yes``, but also apply ``--sub-scale``.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
@@ -1660,7 +1663,7 @@ Subtitles
 ``--sub-use-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in a plain text format  (or ASS if
-    ``--sub-ass-style-override`` is set high enough).
+    ``--sub-ass-override`` is set high enough).
 
     Default: yes.
 
@@ -1715,7 +1718,7 @@ Subtitles
 
     Choosing anything other than ``no`` will make the subtitle color depend on
     the video color space, and it's for example in theory not possible to reuse
-    a subtitle script with another video file. The ``--sub-ass-style-override``
+    a subtitle script with another video file. The ``--sub-ass-override``
     option doesn't affect how this option is interpreted.
 
 ``--stretch-dvd-subs=<yes|no>``
@@ -1755,9 +1758,9 @@ Subtitles
 
     .. note::
 
-        This has been deprecated by ``--sub-ass-style-override=strip``. You also
+        This has been deprecated by ``--sub-ass-override=strip``. You also
         may need ``--embeddedfonts=no`` to get the same behavior. Also,
-        using ``--sub-ass-style-override=force`` should give better results
+        using ``--sub-ass-override=style`` should give better results
         without breaking subtitles too much.
 
     If ``--no-sub-ass`` is specified, all tags and style declarations are
@@ -2000,7 +2003,7 @@ Subtitles
 
 ``--sub-ass-justify=<yes|no>``
     Applies justification as defined by ``--sub-justify`` on ASS subtitles
-    if ``--sub-ass-style-override`` is not set to ``no``.
+    if ``--sub-ass-override`` is not set to ``no``.
     Default: ``no``.
 
 ``--sub-shadow-color=<color>``
