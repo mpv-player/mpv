@@ -32,6 +32,7 @@ static const NSWindowStyleMask NSWindowStyleMaskMiniaturizable = NSMiniaturizabl
 static const NSWindowStyleMask NSWindowStyleMaskResizable = NSResizableWindowMask;
 static const NSWindowStyleMask NSWindowStyleMaskBorderless = NSBorderlessWindowMask;
 static const NSWindowStyleMask NSWindowStyleMaskFullScreen = NSFullScreenWindowMask;
+static const NSWindowStyleMask NSWindowStyleMaskFullSizeContentView = NSFullSizeContentViewWindowMask;
 
 static const NSEventType NSEventTypeSystemDefined = NSSystemDefined;
 static const NSEventType NSEventTypeKeyDown = NSKeyDown;

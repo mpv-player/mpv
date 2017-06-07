@@ -562,7 +562,13 @@ static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
         window_mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
                       NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable;
     } else {
-        window_mask = NSWindowStyleMaskBorderless|NSWindowStyleMaskResizable;
+        #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_10)
+            window_mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
+                          NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable|
+                          NSWindowStyleMaskFullSizeContentView;
+        #else
+            window_mask = NSWindowStyleMaskBorderless|NSWindowStyleMaskResizable;
+        #endif
     }
 
     MpvVideoWindow *w =
@@ -573,6 +579,13 @@ static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
                                              screen:s];
     w.adapter = adapter;
     [w setDelegate: w];
+    
+    #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_10)
+    if (!border) {
+        [w setTitlebarAppearsTransparent:YES];
+        [[w standardWindowButton:NSWindowCloseButton].superview.superview setHidden:YES];
+    }
+    #endif
 
     return w;
 }
