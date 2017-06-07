@@ -4334,7 +4334,7 @@ static const struct property_osd_display {
     { "sub-forced-only", "Forced sub only" },
     { "sub-scale", "Sub Scale"},
     { "sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
-    { "sub-ass-style-override", "ASS subtitle style override"},
+    { "sub-ass-override", "ASS subtitle style override"},
     { "vf", "Video filters", .msg = "Video filters:\n${vf}"},
     { "af", "Audio filters", .msg = "Audio filters:\n${af}"},
     { "tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
