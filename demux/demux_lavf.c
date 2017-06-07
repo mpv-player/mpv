@@ -477,7 +477,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->format_hack.image_format = true;
     }
 
-    priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
+    if (lavfdopts->hacks)
+        priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
 
     demuxer->filetype = priv->avif->name;
 
