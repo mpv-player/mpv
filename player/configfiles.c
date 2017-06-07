@@ -246,7 +246,7 @@ static const char *const backup_properties[] = {
     "sub-use-margins",
     "sub-ass-force-margins",
     "sub-ass-vsfilter-aspect-compat",
-    "sub-ass-style-override",
+    "sub-style-override",
     "ab-loop-a",
     "ab-loop-b",
     "options/video-aspect",
