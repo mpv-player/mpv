@@ -250,6 +250,8 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
         int64_t wait_us = until_time_us - mp_time_us();
         int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
         vt_switcher_poll(&p->vt_switcher, timeout_ms);
+    } else {
+        vo_wait_default(vo, until_time_us);
     }
 }
 
