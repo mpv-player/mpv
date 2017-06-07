@@ -71,7 +71,7 @@ build_options = [
         'name': '--cplugins',
         'desc': 'C plugins',
         'deps': [ 'libdl' ],
-        'default': 'disable',
+        'deps_neg': [ 'os-win32' ],
         'func': check_cc(linkflags=['-rdynamic']),
     }, {
         'name': 'dlopen',
