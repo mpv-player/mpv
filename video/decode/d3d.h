@@ -71,4 +71,12 @@ struct mp_image *d3d11_download_image(struct mp_hwdec_ctx *ctx,
                                       struct mp_image *mpi,
                                       struct mp_image_pool *swpool);
 
+struct AVBufferRef;
+struct IDirect3DDevice9;
+
+void d3d_hwframes_refine(struct lavc_ctx *ctx, struct AVBufferRef *hw_frames_ctx);
+
+struct AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device);
+struct AVBufferRef *d3d9_wrap_device_ref(struct IDirect3DDevice9 *device);
+
 #endif

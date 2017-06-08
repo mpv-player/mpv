@@ -399,7 +399,7 @@ static int hwdec_probe(struct dec_video *vd, struct vd_lavc_hwdec *hwdec,
         r = hwdec->probe(ctx, hwdec, codec);
     if (hwdec->generic_hwaccel) {
         assert(!hwdec->probe && !hwdec->init && !hwdec->init_decoder &&
-               !hwdec->uninit && !hwdec->allocate_image && !hwdec->process_image);
+               !hwdec->uninit && !hwdec->allocate_image);
         struct mp_hwdec_ctx *dev = hwdec_create_dev(vd, hwdec, autoprobe);
         if (!dev)
             return hwdec->copying ? -1 : HWDEC_ERR_NO_CTX;
@@ -778,6 +778,9 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
         fctx->height = h;
 
         fctx->initial_pool_size = initial_pool_size;
+
+        if (ctx->hwdec->hwframes_refine)
+            ctx->hwdec->hwframes_refine(ctx, ctx->cached_hw_frames_ctx);
 
         int res = av_hwframe_ctx_init(ctx->cached_hw_frames_ctx);
         if (res < 0) {

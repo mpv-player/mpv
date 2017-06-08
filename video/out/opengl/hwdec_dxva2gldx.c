@@ -22,6 +22,7 @@
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/hwdec.h"
+#include "video/decode/d3d.h"
 
 // for  WGL_ACCESS_READ_ONLY_NV
 #include <GL/wglext.h>
@@ -104,6 +105,7 @@ static int create(struct gl_hwdec *hw)
         .type = HWDEC_DXVA2,
         .driver_name = hw->driver->name,
         .ctx = (IDirect3DDevice9 *)p->device,
+        .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;

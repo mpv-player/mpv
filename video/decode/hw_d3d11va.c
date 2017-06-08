@@ -18,6 +18,8 @@
 #include <libavcodec/d3d11va.h>
 #include <libavutil/mem.h>
 
+#include "config.h"
+
 #include "lavc.h"
 #include "common/common.h"
 #include "common/av_common.h"
@@ -27,6 +29,8 @@
 #include "video/hwdec.h"
 
 #include "d3d.h"
+
+#if !HAVE_D3D_HWACCEL_NEW
 
 #define ADDITIONAL_SURFACES HWDEC_EXTRA_SURFACES
 
@@ -583,3 +587,104 @@ const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .process_image  = d3d11va_retrieve_image,
     .delay_queue    = HWDEC_DELAY_QUEUE_COUNT,
 };
+
+#else /* !HAVE_D3D_HWACCEL_NEW */
+
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_d3d11va.h>
+
+static void d3d11_destroy_dev(struct mp_hwdec_ctx *ctx)
+{
+    av_buffer_unref(&ctx->av_device_ref);
+    ID3D11Device_Release((ID3D11Device *)ctx->ctx);
+    talloc_free(ctx);
+}
+
+static struct mp_hwdec_ctx *d3d11_create_dev(struct mpv_global *global,
+                                             struct mp_log *plog, bool probing)
+{
+    ID3D11Device *device = NULL;
+    HRESULT hr;
+
+    d3d_load_dlls();
+    if (!d3d11_dll) {
+        mp_err(plog, "Failed to load D3D11 library\n");
+        return NULL;
+    }
+
+    PFN_D3D11_CREATE_DEVICE CreateDevice =
+        (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
+    if (!CreateDevice) {
+        mp_err(plog, "Failed to get D3D11CreateDevice symbol from DLL: %s\n",
+               mp_LastError_to_str());
+        return NULL;
+    }
+
+    hr = CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+                      D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
+                      D3D11_SDK_VERSION, &device, NULL, NULL);
+    if (FAILED(hr)) {
+        mp_err(plog, "Failed to create D3D11 Device: %s\n",
+               mp_HRESULT_to_str(hr));
+        return NULL;
+    }
+
+    struct mp_hwdec_ctx *ctx = talloc_ptrtype(NULL, ctx);
+    *ctx = (struct mp_hwdec_ctx) {
+        .type = HWDEC_D3D11VA_COPY,
+        .ctx = device,
+        .destroy = d3d11_destroy_dev,
+        .av_device_ref = d3d11_wrap_device_ref(device),
+    };
+
+    if (!ctx->av_device_ref) {
+        mp_err(plog, "Failed to allocate AVHWDeviceContext.\n");
+        d3d11_destroy_dev(ctx);
+        return NULL;
+    }
+
+    return ctx;
+}
+
+static struct mp_image *d3d11_update_image_attribs(struct lavc_ctx *s,
+                                                   struct mp_image *img)
+{
+    if (img->params.hw_subfmt == IMGFMT_NV12)
+        mp_image_setfmt(img, IMGFMT_D3D11NV12);
+
+    return img;
+}
+
+const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
+    .type = HWDEC_D3D11VA,
+    .image_format = IMGFMT_D3D11VA,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+    .static_pool = true,
+    .hwframes_refine = d3d_hwframes_refine,
+    .process_image = d3d11_update_image_attribs,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_NONE}
+    },
+};
+
+const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
+    .type = HWDEC_D3D11VA_COPY,
+    .copying = true,
+    .image_format = IMGFMT_D3D11VA,
+    .generic_hwaccel = true,
+    .create_dev = d3d11_create_dev,
+    .set_hwframes = true,
+    .static_pool = true,
+    .hwframes_refine = d3d_hwframes_refine,
+    .pixfmt_map = (const enum AVPixelFormat[][2]) {
+        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
+        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_NONE}
+    },
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
+};
+
+#endif /* else !HAVE_D3D_HWACCEL_NEW */

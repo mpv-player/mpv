@@ -814,6 +814,14 @@ hwaccel_features = [
         'deps': [ 'win32' ],
         'func': check_true,
     }, {
+        'name': '--d3d-hwaccel-new',
+        'desc': 'DXVA2 and D3D11VA hwaccel (new API)',
+        'func': check_statement('libavcodec/version.h',
+        'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 4, 0) && '
+        '       LIBAVCODEC_VERSION_MICRO < 100)'
+        '      ? 1 : -1]',
+        use='libav'),
+    }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
         'deps': [ 'gl' ],
