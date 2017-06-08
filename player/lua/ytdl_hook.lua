@@ -194,7 +194,8 @@ local function add_single_video(json)
     end
 
     -- set start time
-    if not (json.start_time == nil) then
+    if not (json.start_time == nil) and
+        not option_was_set("start") then
         msg.debug("Setting start to: " .. json.start_time .. " secs")
         mp.set_property("file-local-options/start", json.start_time)
     end
