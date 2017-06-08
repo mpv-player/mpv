@@ -1509,9 +1509,12 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
     }
 
     if (dst) {
+        free_str_list(dst);
         VAL(dst) = lst;
         if (r < 0)
             free_str_list(dst);
+    } else {
+        free_str_list(&lst);
     }
     return r;
 }
