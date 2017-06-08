@@ -817,6 +817,8 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
     frame->hw_frames_ctx = new_ref->hwctx;
     *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
+    if (frame->format == AV_PIX_FMT_NONE)
+        av_frame_free(&frame);
     return frame;
 }
 
