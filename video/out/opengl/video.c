@@ -328,6 +328,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_INTRANGE("target-brightness", target_brightness, 0, 1, 100000),
         OPT_CHOICE("hdr-tone-mapping", hdr_tone_mapping, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
+                    {"mobius",   TONE_MAPPING_MOBIUS},
                     {"reinhard", TONE_MAPPING_REINHARD},
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},

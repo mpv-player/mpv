@@ -4645,13 +4645,27 @@ The following video options are currently all specific to ``--vo=opengl`` and
     display. Valid values are:
 
     clip
-        Hard-clip any out-of-range values.
+        Hard-clip any out-of-range values. Use this when you care about
+        perfect color accuracy for in-range values at the cost of completely
+        distorting out-of-range values. Not generally recommended.
+    mobius
+        Generalization of Reinhard to a Möbius transform with linear section.
+        Smoothly maps out-of-range values while retaining contrast and colors
+        for in-range material as much as possible. Use this when you care about
+        color accuracy more than detail preservation. This is somewhere in
+        between ``clip`` and ``reinhard``, depending on the value of
+        ``--tone-mapping-param``. (default)
     reinhard
         Reinhard tone mapping algorithm. Very simple continuous curve.
-        Preserves dynamic range and peak but uses nonlinear contrast.
+        Preserves overall image brightness but uses nonlinear contrast, which
+        results in flattening of details and degradation in color accuracy.
     hable
-        Similar to ``reinhard`` but preserves dark contrast better (slightly
-        sigmoidal). Developed by John Hable for use in video games. (default)
+        Similar to ``reinhard`` but preserves both dark and bright details
+        better (slightly sigmoidal), at the cost of slightly darkening
+        everything. Developed by John Hable for use in video games. Use this
+        when you care about detail preservation more than color/brightness
+        accuracy. This is roughly equivalent to
+        ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``.
     gamma
         Fits a logarithmic transfer between the tone curves.
     linear
@@ -4662,6 +4676,12 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Set tone mapping parameters. Ignored if the tone mapping algorithm is not
     tunable. This affects the following tone mapping algorithms:
 
+    mobius
+        Specifies the transition point from linear to mobius transform. Every
+        value below this point is guaranteed to be mapped 1:1. The higher the
+        value, the more accurate the result will be, at the cost of losing
+        bright details. Defaults to 0.3, which due to the steep initial slope
+        still preserves in-range colors fairly accurately.
     reinhard
         Specifies the local contrast coefficient at the display peak. Defaults
         to 0.5, which means that in-gamut values will be about half as bright
