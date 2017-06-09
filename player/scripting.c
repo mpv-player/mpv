@@ -215,8 +215,11 @@ void mp_load_scripts(struct MPContext *mpctx)
     // Load scripts from options
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
-        if (files[n][0])
-            mp_load_script(mpctx, files[n]);
+        if (files[n][0]) {
+            char *path = mp_get_user_path(NULL, mpctx->global, files[n]);
+            mp_load_script(mpctx, path);
+            talloc_free(path);
+        }
     }
     if (!mpctx->opts->auto_load_scripts)
         return;
