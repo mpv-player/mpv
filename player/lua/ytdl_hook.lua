@@ -19,6 +19,11 @@ local function option_was_set(name)
                                 false)
 end
 
+-- return true if the option was set locally
+local function option_was_set_locally(name)
+    return mp.get_property_bool("option-info/" ..name.. "/set-locally", false)
+end
+
 -- youtube-dl may set special http headers for some sites (user-agent, cookies)
 local function set_http_headers(http_headers)
     if not http_headers then
@@ -195,7 +200,8 @@ local function add_single_video(json)
 
     -- set start time
     if not (json.start_time == nil) and
-        not option_was_set("start") then
+        not option_was_set("start") and
+        not option_was_set_locally("start") then
         msg.debug("Setting start to: " .. json.start_time .. " secs")
         mp.set_property("file-local-options/start", json.start_time)
     end
