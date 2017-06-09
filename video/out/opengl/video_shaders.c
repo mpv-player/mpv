@@ -377,6 +377,21 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         break;
 
+    case TONE_MAPPING_MOBIUS: {
+        float j = isnan(param) ? 0.3 : param;
+        // solve for M(j) = j; M(ref_peak) = 1.0; M'(j) = 1.0
+        // where M(x) = scale * (x+a)/(x+b)
+        float a = -j*j * (ref_peak - 1) / (j*j - 2*j + ref_peak),
+              b = (j*j - 2*j*ref_peak + ref_peak) / (ref_peak - 1);
+
+        GLSLF("color.rgb = mix(vec3(%f) * (color.rgb + vec3(%f))\n"
+              "                         / (color.rgb + vec3(%f)),\n"
+              "                color.rgb,\n"
+              "                lessThanEqual(color.rgb, vec3(%f)));\n",
+              (b*b + 2*b*j + j*j) / (b - a), a, b, j);
+        break;
+    }
+
     case TONE_MAPPING_REINHARD: {
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
