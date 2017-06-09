@@ -190,10 +190,8 @@ static void add_functions(struct script_ctx *ctx);
 static void load_file(lua_State *L, const char *fname)
 {
     struct script_ctx *ctx = get_ctx(L);
-    char *res_name = mp_get_user_path(NULL, ctx->mpctx->global, fname);
-    MP_VERBOSE(ctx, "loading file %s\n", res_name);
-    int r = luaL_loadfile(L, res_name);
-    talloc_free(res_name); // careful to not leak this on Lua errors
+    MP_VERBOSE(ctx, "loading file %s\n", fname);
+    int r = luaL_loadfile(L, fname);
     if (r)
         lua_error(L);
     lua_call(L, 0, 0);
