@@ -27,6 +27,10 @@ Interface changes
     - drop the internal "mp-rawvideo" codec (used by --demuxer=rawvideo)
     - rename --sub-ass-style-override to --sub-ass-override, and rename the
       `--sub-ass-override=signfs` setting to `--sub-ass-override=scale`.
+    - remove property "video-params/nom-peak"
+    - remove option --target-brightness
+    - replace vf_format's `peak` suboption by `sig-peak`, which is relative to
+      the reference white level instead of in cd/m^2
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

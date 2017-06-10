@@ -367,13 +367,14 @@ Available mpv-only filters are:
        :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
        :v-log:        Panasonic V-Log transfer curve
 
-    ``<peak>``
-        Reference peak illumination for the video file. This is mostly
-        interesting for HDR, but it can also be used tone map SDR content
-        to a darker or brighter exposure.
+    ``<sig-peak>``
+        Reference peak illumination for the video file, relative to the
+        signal's reference white level. This is mostly interesting for HDR, but
+        it can also be used tone map SDR content to simulate a different
+        exposure. Normally inferred from tags such as MaxCLL or mastering
+        metadata.
 
-        The default of 0.0 will default to the display's reference brightness
-        for SDR and the source's reference brightness for HDR.
+        The default of 0.0 will default to the source's nominal peak luminance.
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
