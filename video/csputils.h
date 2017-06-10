@@ -84,6 +84,7 @@ enum mp_csp_trc {
     MP_CSP_TRC_HLG,
     MP_CSP_TRC_V_LOG,
     MP_CSP_TRC_S_LOG1,
+    MP_CSP_TRC_S_LOG2,
     MP_CSP_TRC_COUNT
 };
 

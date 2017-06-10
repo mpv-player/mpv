@@ -83,6 +83,7 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"hlg",         MP_CSP_TRC_HLG},
     {"v-log",       MP_CSP_TRC_V_LOG},
     {"s-log1",      MP_CSP_TRC_S_LOG1},
+    {"s-log2",      MP_CSP_TRC_S_LOG2},
     {0}
 };
 
@@ -478,6 +479,7 @@ float mp_trc_nom_peak(enum mp_csp_trc trc)
     case MP_CSP_TRC_HLG:          return 12.0;
     case MP_CSP_TRC_V_LOG:        return 46.0855;
     case MP_CSP_TRC_S_LOG1:       return 6.52;
+    case MP_CSP_TRC_S_LOG2:       return 9.212;
     }
 
     return 1.0;
