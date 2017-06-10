@@ -291,7 +291,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .target_brightness = 250,
-    .hdr_tone_mapping = TONE_MAPPING_HABLE,
+    .hdr_tone_mapping = TONE_MAPPING_MOBIUS,
     .tone_mapping_param = NAN,
     .early_flush = -1,
 };
