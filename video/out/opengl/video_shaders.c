@@ -238,7 +238,10 @@ static const float VLOG_B = 0.00873,
 // Common constants for Sony S-Log
 static const float SLOG_A = 0.432699,
                    SLOG_B = 0.037584,
-                   SLOG_C = 0.616596 + 0.03;
+                   SLOG_C = 0.616596 + 0.03,
+                   SLOG_P = 3.538813,
+                   SLOG_Q = 0.030001,
+                   SLOG_K2 = 155.0 / 219.0;
 
 // Linearize (expand), given a TRC as input. In essence, this is the ITU-R
 // EOTF, calculated on an idealized (reference) monitor with a white point of
@@ -308,6 +311,13 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "            - vec3(%f);\n",
               SLOG_C, SLOG_A, SLOG_B);
         break;
+    case MP_CSP_TRC_S_LOG2:
+        GLSLF("color.rgb = mix((color.rgb - vec3(%f)) / vec3(%f),      \n"
+              "    (pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f)) \n"
+              "              - vec3(%f)) / vec3(%f),                   \n"
+              "    lessThanEqual(vec3(%f), color.rgb));                \n",
+              SLOG_Q, SLOG_P, SLOG_C, SLOG_A, SLOG_B, SLOG_K2, SLOG_Q);
+        break;
     default:
         abort();
     }
@@ -376,6 +386,13 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
     case MP_CSP_TRC_S_LOG1:
         GLSLF("color.rgb = vec3(%f) * log(color.rgb + vec3(%f)) + vec3(%f);\n",
               SLOG_A / M_LN10, SLOG_B, SLOG_C);
+        break;
+    case MP_CSP_TRC_S_LOG2:
+        GLSLF("color.rgb = mix(vec3(%f) * color.rgb + vec3(%f),                \n"
+              "                vec3(%f) * log(vec3(%f) * color.rgb + vec3(%f)) \n"
+              "                    + vec3(%f),                                 \n"
+              "                lessThanEqual(vec3(0.0), color.rgb));           \n",
+              SLOG_P, SLOG_Q, SLOG_A / M_LN10, SLOG_K2, SLOG_B, SLOG_C);
         break;
     default:
         abort();

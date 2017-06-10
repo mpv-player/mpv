@@ -367,6 +367,7 @@ Available mpv-only filters are:
        :hlg:          ITU-R BT.2100 HLG (Hybrid Log-gamma) curve
        :v-log:        Panasonic V-Log transfer curve
        :s-log1:       Sony S-Log1 transfer curve
+       :s-log2:       Sony S-Log2 transfer curve
 
     ``<sig-peak>``
         Reference peak illumination for the video file, relative to the

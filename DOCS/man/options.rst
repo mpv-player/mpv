@@ -4629,6 +4629,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Panasonic V-Log (VARICAM) curve
     s-log1
         Sony S-Log1 curve
+    s-log2
+        Sony S-Log2 curve
 
     .. note::
 
