@@ -721,28 +721,33 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
                                 struct mp_image_params *params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
+    AVFrameSideData *sd;
 
-#if LIBAVCODEC_VERSION_MICRO >= 100
-    // Get the reference peak (for HDR) if available. This is cached into ctx
-    // when it's found, since it's not available on every frame (and seems to
-    // be only available for keyframes)
-    AVFrameSideData *sd = av_frame_get_side_data(frame,
-                          AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+#if HAVE_AVUTIL_CONTENT_LIGHT_LEVEL
+    // Get the content light metadata if available
+    sd = av_frame_get_side_data(frame, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
     if (sd) {
-        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
-        if (mdm->has_luminance) {
-            double peak = av_q2d(mdm->max_luminance);
-            if (!isnormal(peak) || peak < 10 || peak > 100000) {
-                // Invalid data, ignore it. Sadly necessary
-                MP_WARN(vd, "Invalid HDR reference peak in stream: %f\n", peak);
-            } else {
-                ctx->cached_hdr_peak = peak;
-            }
-        }
+        AVContentLightMetadata *clm = (AVContentLightMetadata *)sd->data;
+        params->color.sig_peak = clm->MaxCLL / MP_REF_WHITE;
     }
 #endif
 
-    params->color.sig_peak = ctx->cached_hdr_peak / MP_REF_WHITE;
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    // Otherwise, try getting the mastering metadata if available
+    sd = av_frame_get_side_data(frame, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+    if (!params->color.sig_peak && sd) {
+        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
+        if (mdm->has_luminance)
+            params->color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
+    }
+#endif
+
+    if (params->color.sig_peak) {
+        ctx->cached_sig_peak = params->color.sig_peak;
+    } else {
+        params->color.sig_peak = ctx->cached_sig_peak;
+    }
+
     params->rotate = vd->codec->rotate;
     params->stereo_in = vd->codec->stereo_mode;
 }

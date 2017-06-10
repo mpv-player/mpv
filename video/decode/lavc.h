@@ -39,7 +39,7 @@ typedef struct lavc_ctx {
     int framedrop_flags;
 
     // For HDR side-data caching
-    double cached_hdr_peak;
+    float cached_sig_peak;
 
     bool hw_probing;
     struct demux_packet **sent_packets;

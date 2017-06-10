@@ -449,6 +449,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/imgutils.h',
                                 'av_image_copy_uc_from(0,0,0,0,0,0,0)',
                                 use='libav'),
+    }, {
+        'name': 'avutil-content-light-level',
+        'desc': 'libavutil content light level struct',
+        'func': check_statement('libavutil/frame.h',
+                                'AV_FRAME_DATA_CONTENT_LIGHT_LEVEL',
+                                use='libav'),
     },
 ]
 
