@@ -83,6 +83,7 @@ enum mp_csp_trc {
     MP_CSP_TRC_SMPTE_ST2084,
     MP_CSP_TRC_ARIB_STD_B67,
     MP_CSP_TRC_V_LOG,
+    MP_CSP_TRC_S_LOG1,
     MP_CSP_TRC_COUNT
 };
 

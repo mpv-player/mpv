@@ -236,6 +236,12 @@ static const float VLOG_B = 0.00873,
                    VLOG_D = 0.598206,
                    VLOG_R = 46.085527; // nominal peak
 
+// Common constants for Sony S-Log
+static const float SLOG_A = 0.432699,
+                   SLOG_B = 0.037584,
+                   SLOG_C = 0.616596 + 0.03,
+                   SLOG_R = 6.52; // nominal peak
+
 // Linearize (expand), given a TRC as input. This corresponds to the EOTF
 // in ITU-R terminology.
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
@@ -299,8 +305,13 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "    lessThanEqual(vec3(0.181), color.rgb));            \n",
               VLOG_D, VLOG_C, VLOG_B);
         // Same deal as with the B67 function, renormalize to texture range
-        GLSLF("color.rgb /= vec3(%f);\n", VLOG_R);
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        GLSLF("color.rgb = clamp(color.rgb / vec3(%f), 0.0, 1.0);\n", VLOG_R);
+        break;
+    case MP_CSP_TRC_S_LOG1:
+        GLSLF("color.rgb = pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f))\n"
+              "            - vec3(%f);\n",
+              SLOG_C, SLOG_A, SLOG_B);
+        GLSLF("color.rgb = clamp(color.rgb / vec3(%f), 0.0, 1.0);\n", SLOG_R);
         break;
     default:
         abort();
@@ -360,6 +371,11 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "                    + vec3(%f),                        \n"
               "                lessThanEqual(vec3(0.01), color.rgb)); \n",
               VLOG_C / M_LN10, VLOG_B, VLOG_D);
+        break;
+    case MP_CSP_TRC_S_LOG1:
+        GLSLF("color.rgb *= vec3(%f);\n", SLOG_R);
+        GLSLF("color.rgb = vec3(%f) * log(color.rgb + vec3(%f)) + vec3(%f);\n",
+              SLOG_A / M_LN10, SLOG_B, SLOG_C);
         break;
     default:
         abort();

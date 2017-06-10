@@ -366,6 +366,7 @@ Available mpv-only filters are:
        :st2084:       SMPTE ST2084 (HDR) curve
        :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
        :v-log:        Panasonic V-Log transfer curve
+       :s-log1:       Sony S-Log1 transfer curve
 
     ``<peak>``
         Reference peak illumination for the video file. This is mostly

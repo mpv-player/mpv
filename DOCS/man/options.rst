@@ -4626,6 +4626,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
     v-log
         Panasonic V-Log (VARICAM) curve
+    s-log1
+        Sony S-Log1 curve
 
     .. note::
 

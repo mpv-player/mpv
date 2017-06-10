@@ -82,6 +82,7 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
     {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
     {"v-log",       MP_CSP_TRC_V_LOG},
+    {"s-log1",      MP_CSP_TRC_S_LOG1},
     {0}
 };
 
@@ -467,6 +468,7 @@ float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
     case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
     case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
     case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
+    case MP_CSP_TRC_S_LOG1:       return 6.52 * ref_peak;
     }
 
     return ref_peak;
@@ -477,6 +479,7 @@ bool mp_trc_is_hdr(enum mp_csp_trc trc)
     switch (trc) {
     case MP_CSP_TRC_SMPTE_ST2084:
     case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_S_LOG1:
     case MP_CSP_TRC_V_LOG:
         return true;
     }
