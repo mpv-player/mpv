@@ -110,8 +110,6 @@ void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
         orig->primaries = new->primaries;
     if (!orig->gamma)
         orig->gamma = new->gamma;
-    if (!orig->nom_peak)
-        orig->nom_peak = new->nom_peak;
     if (!orig->sig_peak)
         orig->sig_peak = new->sig_peak;
 }
@@ -449,30 +447,23 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
     }
 }
 
-// Get the nominal peak for a given colorspace, based on a known reference peak
-// (i.e. the display of a reference white illuminant. This may or may not
-// be the actual signal peak)
-float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
+// Get the nominal peak for a given colorspace, relative to the reference white
+// level. In other words, this returns the brightest encodable value that can
+// be represented by a given transfer curve.
+float mp_trc_nom_peak(enum mp_csp_trc trc)
 {
     switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
-    case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
-    case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
+    case MP_CSP_TRC_SMPTE_ST2084: return 10000.0 / MP_REF_WHITE;
+    case MP_CSP_TRC_ARIB_STD_B67: return 12.0;
+    case MP_CSP_TRC_V_LOG:        return 46.0855;
     }
 
-    return ref_peak;
+    return 1.0;
 }
 
 bool mp_trc_is_hdr(enum mp_csp_trc trc)
 {
-    switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084:
-    case MP_CSP_TRC_ARIB_STD_B67:
-    case MP_CSP_TRC_V_LOG:
-        return true;
-    }
-
-    return false;
+    return mp_trc_nom_peak(trc) > 1.0;
 }
 
 // Compute the RGB/XYZ matrix as described here:
@@ -798,8 +789,7 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.levels == c2.levels &&
            c1.primaries == c2.primaries &&
            c1.gamma == c2.gamma &&
-           c1.sig_peak == c2.sig_peak &&
-           c1.nom_peak == c2.nom_peak;
+           c1.sig_peak == c2.sig_peak;
 }
 
 // Copy settings from eq into params.

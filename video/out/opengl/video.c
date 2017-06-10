@@ -290,7 +290,6 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .target_brightness = 250,
     .hdr_tone_mapping = TONE_MAPPING_MOBIUS,
     .tone_mapping_param = NAN,
     .early_flush = -1,
@@ -325,7 +324,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
-        OPT_INTRANGE("target-brightness", target_brightness, 0, 1, 100000),
         OPT_CHOICE("hdr-tone-mapping", hdr_tone_mapping, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"mobius",   TONE_MAPPING_MOBIUS},
@@ -2053,17 +2051,11 @@ static void pass_scale_main(struct gl_video *p)
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
-    struct mp_colorspace ref = src;
-
-    if (p->use_linear && !osd)
-        src.gamma = MP_CSP_TRC_LINEAR;
-
     // Figure out the target color space from the options, or auto-guess if
     // none were set
     struct mp_colorspace dst = {
         .gamma = p->opts.target_trc,
         .primaries = p->opts.target_prim,
-        .nom_peak = mp_csp_trc_nom_peak(p->opts.target_trc, p->opts.target_brightness),
     };
 
     if (p->use_lut_3d) {
@@ -2095,14 +2087,14 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         // this as the default output color space.
         dst.primaries = MP_CSP_PRIM_BT_709;
 
-        if (ref.primaries == MP_CSP_PRIM_BT_601_525 ||
-            ref.primaries == MP_CSP_PRIM_BT_601_625)
+        if (src.primaries == MP_CSP_PRIM_BT_601_525 ||
+            src.primaries == MP_CSP_PRIM_BT_601_625)
         {
             // Since we auto-pick BT.601 and BT.709 based on the dimensions,
             // combined with the fact that they're very similar to begin with,
             // and to avoid confusing the average user, just don't adapt BT.601
             // content automatically at all.
-            dst.primaries = ref.primaries;
+            dst.primaries = src.primaries;
         }
     }
 
@@ -2112,7 +2104,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         // altogether by default. The only exceptions to this rule apply to
         // very unusual TRCs, which even hardcode technoluddites would probably
         // not enjoy viewing unaltered.
-        dst.gamma = ref.gamma;
+        dst.gamma = src.gamma;
 
         // Avoid outputting linear light or HDR content "by default". For these
         // just pick gamma 2.2 as a default, since it's a good estimate for
@@ -2121,30 +2113,9 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
-    // For the src peaks, the correct brightness metadata may be present for
-    // sig_peak, nom_peak, both, or neither. To handle everything in a generic
-    // way, it's important to never automatically infer a sig_peak that is
-    // below the nom_peak (since we don't know what bits the image contains,
-    // doing so would potentially badly clip). The only time in which this
-    // may be the case is when the mastering metadata explicitly says so, i.e.
-    // the sig_peak was already set. So to simplify the logic as much as
-    // possible, make sure the nom_peak is present and correct first, and just
-    // set sig_peak = nom_peak if missing.
-    if (!src.nom_peak) {
-        // For display-referred colorspaces, we treat it as relative to
-        // target_brightness
-        src.nom_peak = mp_csp_trc_nom_peak(src.gamma, p->opts.target_brightness);
-    }
-
-    if (!src.sig_peak)
-        src.sig_peak = src.nom_peak;
-
-    MP_DBG(p, "HDR src nom: %f sig: %f, dst: %f\n",
-           src.nom_peak, src.sig_peak, dst.nom_peak);
-
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
-                   p->opts.tone_mapping_param);
+                   p->opts.tone_mapping_param, p->use_linear && !osd);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
@@ -3089,7 +3060,6 @@ static void check_gl_features(struct gl_video *p)
             .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
             .tex_pad_y = p->opts.tex_pad_y,
-            .target_brightness = p->opts.target_brightness,
             .hdr_tone_mapping = p->opts.hdr_tone_mapping,
             .tone_mapping_param = p->opts.tone_mapping_param,
             .early_flush = p->opts.early_flush,
