@@ -188,6 +188,11 @@ bool video_init_best_codec(struct dec_video *d_video)
     return !!d_video->vd_driver;
 }
 
+static bool is_valid_peak(float sig_peak)
+{
+    return !sig_peak || (sig_peak >= 1 && sig_peak <= 100);
+}
+
 static void fix_image_params(struct dec_video *d_video,
                              struct mp_image_params *params)
 {
@@ -258,8 +263,16 @@ static void fix_image_params(struct dec_video *d_video,
     }
     p.stereo_out = opts->video_stereo_mode;
 
-    // Detect colorspace from resolution.
     mp_colorspace_merge(&p.color, &c->color);
+
+    // Sanitize the HDR peak. Sadly necessary
+    if (!is_valid_peak(p.color.sig_peak)) {
+        MP_WARN(d_video, "Invalid HDR peak in stream: %f\n", p.color.sig_peak);
+        p.color.sig_peak = 0.0;
+    }
+
+    // Guess missing colorspace fields from metadata. This guarantees all
+    // fields are at least set to legal values afterwards.
     mp_image_params_guess_csp(&p);
 
     d_video->last_format = *params;
