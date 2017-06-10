@@ -66,6 +66,7 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"cie1931",     MP_CSP_PRIM_CIE_1931},
     {"dci-p3",      MP_CSP_PRIM_DCI_P3},
     {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
+    {"s-gamut",     MP_CSP_PRIM_S_GAMUT},
     {0}
 };
 
@@ -451,6 +452,14 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .red   = {0.730, 0.280},
             .green = {0.165, 0.840},
             .blue  = {0.100, -0.03},
+            .white = d65
+        };
+    // From Sony S-Log reference manual
+    case MP_CSP_PRIM_S_GAMUT:
+        return (struct mp_csp_primaries) {
+            .red   = {0.730, 0.280},
+            .green = {0.140, 0.855},
+            .blue  = {0.100, -0.05},
             .white = d65
         };
     default:
