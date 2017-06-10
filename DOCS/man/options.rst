@@ -4627,6 +4627,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         ITU-R BT.2100 HLG (Hybrid Log-gamma) curve, aka ARIB STD-B67
     v-log
         Panasonic V-Log (VARICAM) curve
+    s-log1
+        Sony S-Log1 curve
 
     .. note::
 
