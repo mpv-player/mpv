@@ -121,9 +121,14 @@ struct mp_colorspace {
     enum mp_csp_levels levels;
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
-    float nom_peak; // nominal (absolute) peak. 0 = auto/unknown
-    float sig_peak; // signal peak, highest value that occurs in the source
+    float sig_peak; // highest relative value in signal. 0 = unknown/auto
 };
+
+// For many colorspace conversions, in particular those involving HDR, an
+// implicit reference white level is needed. Since this magic constant shows up
+// a lot, give it an explicit name. The value of 100 cd/m² comes from ITU-R
+// documents such as ITU-R BT.2100
+#define MP_REF_WHITE 100.0
 
 // Replaces unknown values in the first struct by those of the second struct
 void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new);
@@ -230,7 +235,7 @@ int mp_chroma_location_to_av(enum mp_chroma_location mploc);
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
-float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak);
+float mp_trc_nom_peak(enum mp_csp_trc trc);
 bool mp_trc_is_hdr(enum mp_csp_trc trc);
 
 /* Color conversion matrix: RGB = m * YUV + c

@@ -742,7 +742,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     }
 #endif
 
-    params->color.sig_peak = ctx->cached_hdr_peak;
+    params->color.sig_peak = ctx->cached_hdr_peak / MP_REF_WHITE;
     params->rotate = vd->codec->rotate;
     params->stereo_in = vd->codec->stereo_mode;
 }

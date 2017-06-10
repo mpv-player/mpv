@@ -1456,9 +1456,6 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
-    ``video-params/nom-peak``
-        The video encoding's nominal peak brightness as float.
-
     ``video-params/sig-peak``
         The video file's tagged signal peak as float.
 
@@ -1489,7 +1486,6 @@ Property list
             "colorlevels"       MPV_FORMAT_STRING
             "primaries"         MPV_FORMAT_STRING
             "gamma"             MPV_FORMAT_STRING
-            "nom-peak"          MPV_FORMAT_DOUBLE
             "sig-peak"          MPV_FORMAT_DOUBLE
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64

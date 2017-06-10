@@ -408,7 +408,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     dst->params.color.primaries = src->params.color.primaries;
     dst->params.color.gamma = src->params.color.gamma;
-    dst->params.color.nom_peak = src->params.color.nom_peak;
     dst->params.color.sig_peak = src->params.color.sig_peak;
     if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
         dst->params.color.space = src->params.color.space;
@@ -531,8 +530,6 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(mp_csp_prim_names, p->color.primaries),
                         m_opt_choice_str(mp_csp_trc_names, p->color.gamma),
                         m_opt_choice_str(mp_csp_levels_names, p->color.levels));
-        if (p->color.nom_peak)
-            mp_snprintf_cat(b, bs, " NP=%f", p->color.nom_peak);
         if (p->color.sig_peak)
             mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
@@ -687,11 +684,10 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.gamma = MP_CSP_TRC_AUTO;
     }
 
-    // Guess the nominal peak (independent of the colorspace)
-    if (params->color.gamma == MP_CSP_TRC_SMPTE_ST2084) {
-        if (!params->color.nom_peak)
-            params->color.nom_peak = 10000; // As per the spec
-    }
+    // If the signal peak is unknown, we're forced to pick the TRC's nominal
+    // range as the signal peak to prevent clipping
+    if (!params->color.sig_peak)
+        params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
 }
 
 // Copy properties and data of the AVFrame into the mp_image, without taking

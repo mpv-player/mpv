@@ -572,7 +572,7 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
         struct ebml_mastering_metadata *mastering = &colour->mastering_metadata;
 
         if (mastering->n_luminance_max) {
-            track->color.sig_peak = mastering->luminance_max;
+            track->color.sig_peak = mastering->luminance_max / MP_REF_WHITE;
             MP_VERBOSE(demuxer, "|    + HDR peak: %f\n", track->color.sig_peak);
         }
     }

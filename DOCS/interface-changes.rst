@@ -29,6 +29,10 @@ Interface changes
       `--sub-ass-override=signfs` setting to `--sub-ass-override=scale`.
     - change default of --video-aspect-method to "bitstream". The "hybrid"
       method (old default) is deprecated.
+    - remove property "video-params/nom-peak"
+    - remove option --target-brightness
+    - replace vf_format's `peak` suboption by `sig-peak`, which is relative to
+      the reference white level instead of in cd/m^2
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")
