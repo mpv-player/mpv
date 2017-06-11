@@ -145,7 +145,7 @@ Ctrl + and Ctrl -
 u
     Switch between applying no style overrides to SSA/ASS subtitles, and
     overriding them almost completely with the normal subtitle style. See
-    ``--sub-ass-style-override`` for more info.
+    ``--sub-ass-override`` for more info.
 
 V
     Toggle subtitle VSFilter aspect compatibility mode. See
