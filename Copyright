@@ -162,7 +162,7 @@ LGPL relicensing status:
     options/options.*               very hard (lots of options and history)
     options/parse_commandline.*     easy
     options/parse_configfile.*      easy
-    options/path.*                  medium
+    options/path.*                  LGPL
     osdep/android/*                 LGPL (BSD)
     osdep/ar/*                      LGPL (BSD)
     osdep/atomic.h                  LGPL
@@ -184,10 +184,10 @@ LGPL relicensing status:
     osdep/main-fn-win.c             LGPL
     osdep/mpv.exe.manifest          easy
     osdep/mpv.rc                    easy
-    osdep/path.h                    unknown
-    osdep/path-macosx.m             unknown
-    osdep/path-unix.c               unknown
-    osdep/path-win.c                unknown
+    osdep/path.h                    LGPL
+    osdep/path-macosx.m             LGPL
+    osdep/path-unix.c               LGPL
+    osdep/path-win.c                LGPL
     osdep/semaphore.h               LGPL
     osdep/semaphore_osx.c           LGPL
     osdep/strnlen.h                 LGPL
