@@ -182,8 +182,8 @@ LGPL relicensing status:
     osdep/main-fn.h                 LGPL
     osdep/main-fn-unix.c            LGPL
     osdep/main-fn-win.c             LGPL
-    osdep/mpv.exe.manifest          easy
-    osdep/mpv.rc                    easy
+    osdep/mpv.exe.manifest          LGPL
+    osdep/mpv.rc                    LGPL
     osdep/path.h                    LGPL
     osdep/path-macosx.m             LGPL
     osdep/path-unix.c               LGPL
