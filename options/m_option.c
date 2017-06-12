@@ -2296,13 +2296,12 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
 static int parse_time(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
 {
-    double time;
-
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
+    double time = MP_NOPTS_VALUE;
     if (HAS_NOPTS(opt) && bstr_equals0(param, "no")) {
-        time = MP_NOPTS_VALUE;
+        // nothing
     } else if (!parse_timestring(param, &time, 0)) {
         mp_err(log, "Option %.*s: invalid time: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));
