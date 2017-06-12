@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -21,6 +21,8 @@
 #include <errno.h>
 #include <assert.h>
 #include <stdbool.h>
+
+#include "config.h"
 
 #include "osdep/io.h"
 #include "common/global.h"
@@ -34,9 +36,6 @@
 
 #define GLOBAL 0
 #define LOCAL 1
-
-#define dvd_range(a)  (a >= 0 && a < 255)
-
 
 struct parse_state {
     struct m_config *config;
@@ -224,6 +223,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             void *tmp = talloc_new(NULL);
             bstr file = p.arg;
             char *file0 = bstrdup0(tmp, p.arg);
+#if HAVE_GPL
             // expand DVD filename entries like dvd://1-3 into component titles
             if (bstr_startswith0(file, "dvd://")) {
                 int offset = 6;
@@ -239,6 +239,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     } else
                         end_title = strtol(splitpos + 1, &endpos, 10);
 
+                    #define dvd_range(a)  (a >= 0 && a < 255)
                     if (dvd_range(start_title) && dvd_range(end_title)
                             && (start_title < end_title)) {
                         for (int j = start_title; j <= end_title; j++) {
@@ -254,6 +255,9 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             } else {
                 process_non_option(files, file0);
             }
+#else
+            process_non_option(files, file0);
+#endif
             talloc_free(tmp);
         }
     }
