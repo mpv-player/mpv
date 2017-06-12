@@ -158,7 +158,7 @@ LGPL relicensing status:
     misc/*.*                        LGPL
     options/m_config.*              medium
     options/m_option.*              medium
-    options/m_property.*            easy
+    options/m_property.*            LGPL
     options/options.*               very hard (lots of options and history)
     options/parse_commandline.*     easy
     options/parse_configfile.*      easy
