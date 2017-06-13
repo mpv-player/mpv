@@ -86,7 +86,7 @@ LGPL relicensing status:
     audio/out/ao_coreaudio_utils.c  LGPL
     audio/out/ao_coreaudio_utils.h  LGPL
     audio/out/ao_jack.c             will stay GPL
-    audio/out/ao_lavc.c             probably easy
+    audio/out/ao_lavc.c             LGPL
     audio/out/ao_null.c             LGPL
     audio/out/ao_openal.c           unknown
     audio/out/ao_opensles.c         LGPL
@@ -114,8 +114,8 @@ LGPL relicensing status:
     common/av_log.h                 LGPL
     common/codecs.*                 LGPL
     common/common.*                 LGPL
-    common/encode.h                 unknown
-    common/encode_lavc.*            unknown
+    common/encode.h                 LGPL
+    common/encode_lavc.*            LGPL
     common/global.h                 LGPL
     common/msg.c                    almost LGPL
     common/msg_control.h            LGPL
@@ -318,7 +318,7 @@ LGPL relicensing status:
     video/out/vo_direct3d.c         unknown
     video/out/vo_drm.c              LGPL
     video/out/vo_image.c            unknown
-    video/out/vo_lavc.c             unknown
+    video/out/vo_lavc.c             LGPL
     video/out/vo_null.c             LGPL
     video/out/vo_opengl.c           LGPL
     video/out/vo_opengl_cb.c        LGPL
