@@ -2069,12 +2069,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         // limitation reasons, so we use a gamma 2.2 input curve here instead.
         // We could pick any value we want here, the difference is just coding
         // efficiency.
-        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084 ||
-            trc_orig == MP_CSP_TRC_ARIB_STD_B67 ||
-            trc_orig == MP_CSP_TRC_V_LOG)
-        {
+        if (mp_trc_is_hdr(trc_orig))
             trc_orig = MP_CSP_TRC_GAMMA22;
-        }
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             dst.primaries = prim_orig;
