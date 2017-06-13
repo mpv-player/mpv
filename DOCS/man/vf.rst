@@ -363,8 +363,8 @@ Available mpv-only filters are:
        :gamma2.2:     Pure power curve (gamma 2.2)
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
-       :st2084:       SMPTE ST2084 (HDR) curve
-       :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
+       :pq:           ITU-R BT.2100 PQ (Perceptual quantizer) curve
+       :hlg:          ITU-R BT.2100 HLG (Hybrid Log-gamma) curve
        :v-log:        Panasonic V-Log transfer curve
 
     ``<sig-peak>``

@@ -219,16 +219,16 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
 }
 
 // Common constants for SMPTE ST.2084 (HDR)
-static const float HDR_M1 = 2610./4096 * 1./4,
-                   HDR_M2 = 2523./4096 * 128,
-                   HDR_C1 = 3424./4096,
-                   HDR_C2 = 2413./4096 * 32,
-                   HDR_C3 = 2392./4096 * 32;
+static const float PQ_M1 = 2610./4096 * 1./4,
+                   PQ_M2 = 2523./4096 * 128,
+                   PQ_C1 = 3424./4096,
+                   PQ_C2 = 2413./4096 * 32,
+                   PQ_C3 = 2392./4096 * 32;
 
-// Common constants for ARIB STD-B67 (Hybrid Log-gamma)
-static const float B67_A = 0.17883277,
-                   B67_B = 0.28466892,
-                   B67_C = 0.55991073;
+// Common constants for ARIB STD-B67 (HLG)
+static const float HLG_A = 0.17883277,
+                   HLG_B = 0.28466892,
+                   HLG_C = 0.55991073;
 
 // Common constants for Panasonic V-Log
 static const float VLOG_B = 0.00873,
@@ -275,21 +275,21 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.8)),
                              lessThan(vec3(0.03125), color.rgb));)
         break;
-    case MP_CSP_TRC_SMPTE_ST2084:
-        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M2);
+    case MP_CSP_TRC_PQ:
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", PQ_M2);
         GLSLF("color.rgb = max(color.rgb - vec3(%f), vec3(0.0)) \n"
               "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
-              HDR_C1, HDR_C2, HDR_C3);
-        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M1);
+              PQ_C1, PQ_C2, PQ_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", PQ_M1);
         // PQ's output range is 0-10000, but we need it to be relative to to
         // MP_REF_WHITE instead, so rescale
         GLSLF("color.rgb *= vec3(%f);\n", 10000 / MP_REF_WHITE);
         break;
-    case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_HLG:
         GLSLF("color.rgb = mix(vec3(4.0) * color.rgb * color.rgb,\n"
               "                exp((color.rgb - vec3(%f)) / vec3(%f)) + vec3(%f),\n"
               "                lessThan(vec3(0.5), color.rgb));\n",
-              B67_C, B67_A, B67_B);
+              HLG_C, HLG_A, HLG_B);
         break;
     case MP_CSP_TRC_V_LOG:
         GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) / vec3(5.6), \n"
@@ -342,19 +342,19 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.0/1.8)),
                              lessThanEqual(vec3(0.001953), color.rgb));)
         break;
-    case MP_CSP_TRC_SMPTE_ST2084:
+    case MP_CSP_TRC_PQ:
         GLSLF("color.rgb /= vec3(%f);\n", 10000 / MP_REF_WHITE);
-        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M1);
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", PQ_M1);
         GLSLF("color.rgb = (vec3(%f) + vec3(%f) * color.rgb) \n"
               "             / (vec3(1.0) + vec3(%f) * color.rgb);\n",
-              HDR_C1, HDR_C2, HDR_C3);
-        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M2);
+              PQ_C1, PQ_C2, PQ_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", PQ_M2);
         break;
-    case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_HLG:
         GLSLF("color.rgb = mix(vec3(0.5) * sqrt(color.rgb),\n"
               "                vec3(%f) * log(color.rgb - vec3(%f)) + vec3(%f),\n"
               "                lessThan(vec3(1.0), color.rgb));\n",
-              B67_A, B67_B, B67_C);
+              HLG_A, HLG_B, HLG_C);
         break;
     case MP_CSP_TRC_V_LOG:
         GLSLF("color.rgb = mix(vec3(5.6) * color.rgb + vec3(0.125),   \n"

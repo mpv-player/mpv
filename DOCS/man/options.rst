@@ -4619,10 +4619,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Pure power curve (gamma 2.8), also used for BT.470-BG
     prophoto
         ProPhoto RGB (ROMM)
-    st2084
-        SMPTE ST2084 (HDR) curve, PQ OETF
-    std-b67
-        ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
+    pq
+        ITU-R BT.2100 PQ (Perceptual quantizer) curve, aka SMPTE ST2084
+    hlg
+        ITU-R BT.2100 HLG (Hybrid Log-gamma) curve, aka ARIB STD-B67
     v-log
         Panasonic V-Log (VARICAM) curve
 
