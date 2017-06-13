@@ -78,8 +78,8 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"gamma2.2",    MP_CSP_TRC_GAMMA22},
     {"gamma2.8",    MP_CSP_TRC_GAMMA28},
     {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
-    {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
-    {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
+    {"pq",          MP_CSP_TRC_PQ},
+    {"hlg",         MP_CSP_TRC_HLG},
     {"v-log",       MP_CSP_TRC_V_LOG},
     {0}
 };
@@ -188,8 +188,8 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
     case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
-    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_SMPTE_ST2084;
-    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_ARIB_STD_B67;
+    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_PQ;
+    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_HLG;
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -238,8 +238,8 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
     case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
-    case MP_CSP_TRC_SMPTE_ST2084: return AVCOL_TRC_SMPTEST2084;
-    case MP_CSP_TRC_ARIB_STD_B67: return AVCOL_TRC_ARIB_STD_B67;
+    case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
+    case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
     default:                      return AVCOL_TRC_UNSPECIFIED;
     }
 }
@@ -453,8 +453,8 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
 float mp_trc_nom_peak(enum mp_csp_trc trc)
 {
     switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084: return 10000.0 / MP_REF_WHITE;
-    case MP_CSP_TRC_ARIB_STD_B67: return 12.0;
+    case MP_CSP_TRC_PQ:           return 10000.0 / MP_REF_WHITE;
+    case MP_CSP_TRC_HLG:          return 12.0;
     case MP_CSP_TRC_V_LOG:        return 46.0855;
     }
 
