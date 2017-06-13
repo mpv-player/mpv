@@ -24,8 +24,9 @@ Sending patches
   the change.
 - The subject line (the first line in a commit message) should contain a
   prefix identifying the sub system, followed by a short description what
-  impact this commit has. This subject line shouldn't be longer than 72
-  characters, because it messes up the output of many git tools otherwise.
+  impact this commit has. This subject line and the commit message body
+  shouldn't be longer than 72 characters per line, because it messes up the
+  output of many git tools otherwise.
 
   For example, you fixed a crash in af_volume.c:
 
