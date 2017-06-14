@@ -1527,6 +1527,7 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
  *                  log level as set by the "--msg-level" option. This works
  *                  even if the terminal is disabled. (Since API version 1.19.)
  *                  Also see mpv_log_level.
+ * @return error code
  */
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
 
