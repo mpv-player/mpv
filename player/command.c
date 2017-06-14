@@ -2696,6 +2696,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"gamma",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
         {"sig-peak", SUB_PROP_FLOAT(p.color.sig_peak)},
+        {"light",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p.color.light))},
         {"chroma-location",
             SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
         {"stereo-in",

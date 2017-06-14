@@ -39,6 +39,7 @@ struct vf_priv_s {
     int primaries;
     int gamma;
     float sig_peak;
+    int light;
     int chroma_location;
     int stereo_in;
     int stereo_out;
@@ -97,6 +98,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->color.gamma = p->gamma;
     if (p->sig_peak)
         out->color.sig_peak = p->sig_peak;
+    if (p->light)
+        out->color.light = p->light;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)
@@ -146,6 +149,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
     OPT_CHOICE_C("gamma", gamma, 0, mp_csp_trc_names),
     OPT_FLOAT("sig-peak", sig_peak, 0),
+    OPT_CHOICE_C("light", light, 0, mp_csp_light_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     OPT_CHOICE_C("stereo-in", stereo_in, 0, mp_stereo3d_names),
     OPT_CHOICE_C("stereo-out", stereo_out, 0, mp_stereo3d_names),

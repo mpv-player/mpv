@@ -84,6 +84,15 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {0}
 };
 
+const struct m_opt_choice_alternatives mp_csp_light_names[] = {
+    {"auto",        MP_CSP_LIGHT_AUTO},
+    {"display",     MP_CSP_LIGHT_DISPLAY},
+    {"hlg",         MP_CSP_LIGHT_SCENE_HLG},
+    {"709-1886",    MP_CSP_LIGHT_SCENE_709_1886},
+    {"gamma1.2",    MP_CSP_LIGHT_SCENE_1_2},
+    {0}
+};
+
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "brightness",
     "contrast",
@@ -112,6 +121,8 @@ void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
         orig->gamma = new->gamma;
     if (!orig->sig_peak)
         orig->sig_peak = new->sig_peak;
+    if (!orig->light)
+        orig->light = new->light;
 }
 
 // The short name _must_ match with what vf_stereo3d accepts (if supported).
