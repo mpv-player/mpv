@@ -28,7 +28,7 @@
 
 struct mp_decoder_list;
 
-/* interface of video decoder drivers */
+/* interface of audio decoder drivers */
 struct ad_functions {
     const char *name;
     void (*add_decoders)(struct mp_decoder_list *list);

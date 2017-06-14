@@ -58,9 +58,9 @@ or removed. All new contributions to these files are implied to be LGPLv2.1+.
 LGPL relicensing status:
 
     audio/decode/ad.h               LGPL
-    audio/decode/ad_lavc.c          very hard (nick's changes)
+    audio/decode/ad_lavc.c          LGPL
     audio/decode/ad_spdif.c         LGPL
-    audio/decode/dec_audio.*        very hard (nick's changes)
+    audio/decode/dec_audio.*        LGPL
     audio/filter/af.*               must be killed (main author disagreed)
     audio/filter/af_channel.c       must be killed (main author disagreed)
     audio/filter/af_equalizer.c     must be killed (main author disagreed)
