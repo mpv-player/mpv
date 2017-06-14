@@ -1459,6 +1459,9 @@ Property list
     ``video-params/sig-peak``
         The video file's tagged signal peak as float.
 
+    ``video-params/light``
+        The light type in use as a string. (Exact values subject to change.)
+
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 
@@ -1487,6 +1490,7 @@ Property list
             "primaries"         MPV_FORMAT_STRING
             "gamma"             MPV_FORMAT_STRING
             "sig-peak"          MPV_FORMAT_DOUBLE
+            "light"             MPV_FORMAT_STRING
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64
             "stereo-in"         MPV_FORMAT_STRING

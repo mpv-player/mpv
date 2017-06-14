@@ -376,6 +376,20 @@ Available mpv-only filters are:
 
         The default of 0.0 will default to the source's nominal peak luminance.
 
+    ``<light>``
+        Light type of the scene. This is mostly correctly inferred based on the
+        gamma function, but it can be useful to override this when viewing raw
+        camera footage (e.g. V-Log), which is normally scene-referred instead
+        of display-referred.
+
+        Available light types are:
+
+       :auto:         Automatic selection (default)
+       :display:      Display-referred light (most content)
+       :hlg:          Scene-referred using the HLG OOTF (e.g. HLG content)
+       :709-1886:     Scene-referred using the BT709+BT1886 interaction
+       :gamma1.2:     Scene-referred using a pure power OOTF (gamma=1.2)
+
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
         same values as the ``--video-stereo-mode`` option.

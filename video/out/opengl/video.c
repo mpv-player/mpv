@@ -2056,6 +2056,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     struct mp_colorspace dst = {
         .gamma = p->opts.target_trc,
         .primaries = p->opts.target_prim,
+        .light = MP_CSP_LIGHT_DISPLAY,
     };
 
     if (p->use_lut_3d) {
@@ -2265,6 +2266,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
             static const struct mp_colorspace csp_srgb = {
                 .primaries = MP_CSP_PRIM_BT_709,
                 .gamma = MP_CSP_TRC_SRGB,
+                .light = MP_CSP_LIGHT_DISPLAY,
             };
 
             pass_colormanage(p, csp_srgb, true);

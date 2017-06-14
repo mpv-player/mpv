@@ -409,6 +409,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.color.primaries = src->params.color.primaries;
     dst->params.color.gamma = src->params.color.gamma;
     dst->params.color.sig_peak = src->params.color.sig_peak;
+    dst->params.color.light = src->params.color.light;
     if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
         dst->params.color.space = src->params.color.space;
         dst->params.color.levels = src->params.color.levels;
@@ -688,6 +689,16 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     // range as the signal peak to prevent clipping
     if (!params->color.sig_peak)
         params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
+
+    if (params->color.light == MP_CSP_LIGHT_AUTO) {
+        // HLG is always scene-referred (using its own OOTF), everything else
+        // we assume is display-refered by default.
+        if (params->color.gamma == MP_CSP_TRC_HLG) {
+            params->color.light = MP_CSP_LIGHT_SCENE_HLG;
+        } else {
+            params->color.light = MP_CSP_LIGHT_DISPLAY;
+        }
+    }
 }
 
 // Copy properties and data of the AVFrame into the mp_image, without taking

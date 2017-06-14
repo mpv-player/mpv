@@ -87,6 +87,17 @@ enum mp_csp_trc {
 
 extern const struct m_opt_choice_alternatives mp_csp_trc_names[];
 
+enum mp_csp_light {
+    MP_CSP_LIGHT_AUTO,
+    MP_CSP_LIGHT_DISPLAY,
+    MP_CSP_LIGHT_SCENE_HLG,
+    MP_CSP_LIGHT_SCENE_709_1886,
+    MP_CSP_LIGHT_SCENE_1_2,
+    MP_CSP_LIGHT_COUNT
+};
+
+extern const struct m_opt_choice_alternatives mp_csp_light_names[];
+
 // These constants are based on the ICC specification (Table 23) and match
 // up with the API of LittleCMS, which treats them as integers.
 enum mp_render_intent {
@@ -121,6 +132,7 @@ struct mp_colorspace {
     enum mp_csp_levels levels;
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
+    enum mp_csp_light light;
     float sig_peak; // highest relative value in signal. 0 = unknown/auto
 };
 
