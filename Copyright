@@ -195,9 +195,9 @@ LGPL relicensing status:
     osdep/subprocess.*              LGPL
     osdep/subprocess-posix.c        LGPL
     osdep/subprocess-win.c          LGPL
-    osdep/terminal.h                unknown
-    osdep/terminal-unix.c           hard
-    osdep/terminal-win.c            medium
+    osdep/terminal.h                LGPL
+    osdep/terminal-unix.c           LGPL
+    osdep/terminal-win.c            LGPL
     osdep/threads.*                 LGPL
     osdep/timer.c                   LGPL
     osdep/timer.h                   LGPL
