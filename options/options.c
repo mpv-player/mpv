@@ -56,16 +56,9 @@
 #include "video/out/opengl/hwdec.h"
 #endif
 
-extern const char mp_help_text[];
-
 static void print_version(struct mp_log *log)
 {
     mp_print_version(log, true);
-}
-
-static void print_help(struct mp_log *log)
-{
-    mp_info(log, "%s", mp_help_text);
 }
 
 extern const struct m_sub_options tv_params_conf;
@@ -274,6 +267,12 @@ const m_option_t mp_opts[] = {
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
+    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+
+    OPT_PRINT("list-protocols", stream_print_proto_list),
+    OPT_PRINT("version", print_version),
+    OPT_PRINT("V", print_version),
 
     OPT_CHOICE("player-operation-mode", operation_mode,
                M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
@@ -703,12 +702,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("record-file", record_file, M_OPT_FILE),
 
     OPT_SUBSTRUCT("", input_opts, input_config, 0),
-
-    OPT_PRINT("list-protocols", stream_print_proto_list),
-    OPT_PRINT("help", print_help),
-    OPT_PRINT("h", print_help),
-    OPT_PRINT("version", print_version),
-    OPT_PRINT("V", print_version),
 
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),

@@ -83,57 +83,6 @@ struct m_opt_backup {
     void *backup;
 };
 
-static int parse_include(struct m_config *config, struct bstr param, bool set,
-                         int flags)
-{
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-    if (!set)
-        return 1;
-    if (config->recursion_depth >= MAX_RECURSION_DEPTH) {
-        MP_ERR(config, "Maximum 'include' nesting depth exceeded.\n");
-        return M_OPT_INVALID;
-    }
-    char *filename = bstrdup0(NULL, param);
-    config->recursion_depth += 1;
-    config->includefunc(config->includefunc_ctx, filename, flags);
-    config->recursion_depth -= 1;
-    talloc_free(filename);
-    return 1;
-}
-
-static int parse_profile(struct m_config *config, const struct m_option *opt,
-                         struct bstr name, struct bstr param, bool set, int flags)
-{
-    if (!bstrcmp0(param, "help")) {
-        struct m_profile *p;
-        if (!config->profiles) {
-            MP_INFO(config, "No profiles have been defined.\n");
-            return M_OPT_EXIT;
-        }
-        MP_INFO(config, "Available profiles:\n");
-        for (p = config->profiles; p; p = p->next)
-            MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
-        MP_INFO(config, "\n");
-        return M_OPT_EXIT;
-    }
-
-    char **list = NULL;
-    int r = m_option_type_string_list.parse(config->log, opt, name, param, &list);
-    if (r < 0)
-        return r;
-    if (!list || !list[0])
-        return M_OPT_INVALID;
-    for (int i = 0; list[i]; i++) {
-        if (set)
-            r = m_config_set_profile(config, list[i], flags);
-        if (r < 0)
-            break;
-    }
-    m_option_free(opt, &list);
-    return r;
-}
-
 static int show_profile(struct m_config *config, bstr param)
 {
     struct m_profile *p;
@@ -168,17 +117,6 @@ static int show_profile(struct m_config *config, bstr param)
     config->profile_depth--;
     if (!config->profile_depth)
         MP_INFO(config, "\n");
-    return M_OPT_EXIT;
-}
-
-static int list_options(struct m_config *config, bstr val, bool show_help)
-{
-    char s[100];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(val));
-    if (show_help)
-        mp_info(config->log, "%s", mp_help_text);
-    if (s[0])
-        m_config_print_option_list(config, s);
     return M_OPT_EXIT;
 }
 
@@ -729,6 +667,73 @@ void m_config_mark_co_flags(struct m_config_option *co, int flags)
         co->is_set_from_config = true;
 }
 
+// Special options that don't really fit into the option handling mode. They
+// usually store no data, but trigger actions. Caller is assumed to have called
+// handle_set_opt_flags() to make sure the option can be set.
+// Returns M_OPT_UNKNOWN if the option is not a special option.
+static int m_config_handle_special_options(struct m_config *config,
+                                           struct m_config_option *co,
+                                           void *data, int flags)
+{
+    if (config->use_profiles && strcmp(co->name, "profile") == 0) {
+        char **list = *(char ***)data;
+
+        if (list && list[0] && !list[1] && strcmp(list[0], "help") == 0) {
+            if (!config->profiles) {
+                MP_INFO(config, "No profiles have been defined.\n");
+                return M_OPT_EXIT;
+            }
+            MP_INFO(config, "Available profiles:\n");
+            for (struct m_profile *p = config->profiles; p; p = p->next)
+                MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
+            MP_INFO(config, "\n");
+            return M_OPT_EXIT;
+        }
+
+        for (int n = 0; list && list[n]; n++) {
+            int r = m_config_set_profile(config, list[n], flags);
+            if (r < 0)
+                return r;
+        }
+        return 0;
+    }
+
+    if (config->includefunc && strcmp(co->name, "include") == 0) {
+        char *param = *(char **)data;
+        if (!param || !param[0])
+            return M_OPT_MISSING_PARAM;
+        if (config->recursion_depth >= MAX_RECURSION_DEPTH) {
+            MP_ERR(config, "Maximum 'include' nesting depth exceeded.\n");
+            return M_OPT_INVALID;
+        }
+        config->recursion_depth += 1;
+        config->includefunc(config->includefunc_ctx, param, flags);
+        config->recursion_depth -= 1;
+        return 1;
+    }
+
+    if (config->use_profiles && strcmp(co->name, "show-profile") == 0)
+        return show_profile(config, bstr0(*(char **)data));
+
+    if (config->is_toplevel && (strcmp(co->name, "h") == 0 ||
+                                strcmp(co->name, "help") == 0))
+    {
+        char *h = *(char **)data;
+        mp_info(config->log, "%s", mp_help_text);
+        if (h && h[0])
+            m_config_print_option_list(config, h);
+        return M_OPT_EXIT;
+    }
+
+    if (strcmp(co->name, "list-options") == 0) {
+        m_config_print_option_list(config, "*");
+        return M_OPT_EXIT;
+    }
+
+    return M_OPT_UNKNOWN;
+}
+
+
 // Unlike m_config_set_option_raw() this does not go through the property layer
 // via config.option_set_callback.
 int m_config_set_option_raw_direct(struct m_config *config,
@@ -738,14 +743,18 @@ int m_config_set_option_raw_direct(struct m_config *config,
     if (!co)
         return M_OPT_UNKNOWN;
 
-    // This affects some special options like "include", "profile". Maybe these
-    // should work, or maybe not. For now they would require special code.
-    if (!co->data)
-        return M_OPT_UNKNOWN;
-
     int r = handle_set_opt_flags(config, co, flags);
     if (r <= 1)
         return r;
+
+    r = m_config_handle_special_options(config, co, data, flags);
+    if (r != M_OPT_UNKNOWN)
+        return r;
+
+    // This affects some special options like "playlist", "v". Maybe these
+    // should work, or maybe not. For now they would require special code.
+    if (!co->data)
+        return flags & M_SETOPT_FROM_CMDLINE ? 0 : M_OPT_UNKNOWN;
 
     m_option_copy(co->opt, co->data, data);
 
@@ -761,6 +770,9 @@ int m_config_set_option_raw_direct(struct m_config *config,
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags)
 {
+    if (!co)
+        return M_OPT_UNKNOWN;
+
     if (config->option_set_callback) {
         int r = handle_set_opt_flags(config, co, flags);
         if (r <= 1)
@@ -824,18 +836,6 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
                    BSTR_P(name), BSTR_P(param), flags);
     }
 
-    if (config->includefunc && bstr_equals0(name, "include"))
-        return parse_include(config, param, set, flags);
-    if (config->use_profiles && bstr_equals0(name, "profile"))
-        return parse_profile(config, co->opt, name, param, set, flags);
-    if (config->use_profiles && bstr_equals0(name, "show-profile"))
-        return show_profile(config, param);
-    if (config->is_toplevel && (bstr_equals0(name, "h") ||
-                                bstr_equals0(name, "help")))
-        return list_options(config, param, true);
-    if (bstr_equals0(name, "list-options"))
-        return list_options(config, bstr0("*"), false);
-
     union m_option_value val = {0};
 
     // Some option types are "impure" and work on the existing data.
@@ -845,7 +845,7 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     r = m_option_parse(config->log, co->opt, name, param, &val);
 
-    if (r >= 0 && co->data)
+    if (r >= 0)
         r = m_config_set_option_raw(config, co, &val, flags);
 
     m_option_free(co->opt, &val);
@@ -1076,7 +1076,7 @@ int m_config_set_profile(struct m_config *config, char *name, int flags)
 
     if (config->profile_depth > MAX_PROFILE_DEPTH) {
         MP_WARN(config, "WARNING: Profile inclusion too deep.\n");
-        return M_OPT_UNKNOWN;
+        return M_OPT_INVALID;
     }
     config->profile_depth++;
     for (int i = 0; i < p->num_opts; i++) {
