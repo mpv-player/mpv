@@ -402,14 +402,14 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
     if (!opt)
         return M_PROPERTY_UNKNOWN;
 
-    void *valptr = opt->data;
-
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = *(opt->opt);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        m_option_copy(opt->opt, arg, valptr);
+        if (!opt->data)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        m_option_copy(opt->opt, arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, flags) < 0)
@@ -5672,7 +5672,16 @@ void command_init(struct MPContext *mpctx)
 
         struct m_property prop = {0};
 
-        if (co->data) {
+        if (co->opt->type == &m_option_type_alias) {
+            const char *alias = (const char *)co->opt->priv;
+
+            prop = (struct m_property){
+                .name = co->name,
+                .call = co->opt->deprecation_message ?
+                            mp_property_deprecated_alias : mp_property_alias,
+                .priv = (void *)alias,
+            };
+        } else {
             prop = (struct m_property){
                 .name = co->name,
                 .call = mp_property_generic_option,
@@ -5683,15 +5692,6 @@ void command_init(struct MPContext *mpctx)
                 prop.name = bstrto0(ctx, bname);
                 prop.call = mp_property_generic_option_star;
             }
-        } else if (co->opt->type == &m_option_type_alias) {
-            const char *alias = (const char *)co->opt->priv;
-
-            prop = (struct m_property){
-                .name = co->name,
-                .call = co->opt->deprecation_message ?
-                            mp_property_deprecated_alias : mp_property_alias,
-                .priv = (void *)alias,
-            };
         }
 
         if (prop.name) {

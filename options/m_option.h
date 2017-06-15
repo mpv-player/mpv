@@ -693,7 +693,7 @@ extern const char m_option_path_separator;
 
 #define OPT_PRINT(optname, fn)                                              \
     {.name = optname,                                                       \
-     .flags = M_OPT_FIXED | M_OPT_NOCFG | M_OPT_PRE_PARSE,   \
+     .flags = M_OPT_FIXED | M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP,   \
      .type = &m_option_type_print_fn,                                       \
      .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn),                            \
      .offset = -1}
@@ -726,6 +726,6 @@ extern const char m_option_path_separator;
 // "--optname" doesn't exist, but inform the user about a replacement with msg.
 #define OPT_REMOVED(optname, msg) \
     {.name = optname, .type = &m_option_type_removed, .priv = msg, \
-     .deprecation_message = "", .offset = -1}
+     .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */

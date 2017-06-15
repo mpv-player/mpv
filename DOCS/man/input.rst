@@ -2210,6 +2210,14 @@ caveats with some properties (due to historical reasons):
     These properties behave different from the deprecated options with the same
     names.
 
+``profile``, ``include``
+    These are write-only, and will perform actions as they are written to,
+    exactly as if they were used on the mpv CLI commandline. Their only use is
+    when using libmpv before ``mpv_initialize()``, which in turn is probably
+    only useful in encoding mode. Normal libmpv users should use other
+    mechanisms, such as the ``apply-profile`` command, and the
+    ``mpv_load_config_file`` API function. Avoid these properties.
+
 Property Expansion
 ------------------
 

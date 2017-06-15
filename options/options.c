@@ -254,21 +254,25 @@ const struct m_sub_options dvd_conf = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", CONF_TYPE_STORE, M_OPT_FIXED | CONF_NOCFG, .offset = -1},
+    {"v", CONF_TYPE_STORE, M_OPT_FIXED | CONF_NOCFG | M_OPT_NOPROP, .offset = -1},
     {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
      .min = 1, .offset = -1},
-    {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
-    {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP, .offset = -1},
+    {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP, .offset = -1},
 
     // handled in m_config.c
     { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
     { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
-    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
-    { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+      .offset = -1},
+    { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+      .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
-    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
-    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+       .offset = -1},
+    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+       .offset = -1},
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("version", print_version),
