@@ -13,6 +13,16 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Almost LGPLv3+.
+ *
+ * The parts potentially making this file LGPL v3 (instead of v2.1 or later) are:
+ * 376e3abf5c7d2 xvmc use get_format for IDCT/MC recognition
+ * c73f0e18bd1d6 Return PIX_FMT_NONE if the video system refuses all other formats.
+ * (iive agreed to LGPL v3+ only. Jeremy agreed to LGPL v2.1 or later.)
+ * Once these changes are not relevant to for copyright anymore (e.g. because
+ * they have been removed), and the core is LGPL, this file will change to
+ * LGPLv2.1+.
  */
 
 #include <stdio.h>
@@ -573,7 +583,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     AVCodecContext *avctx = ctx->avctx;
     if (!ctx->avctx)
         goto error;
-    avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
 
@@ -586,6 +595,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         goto error;
 
     if (ctx->hwdec) {
+        avctx->opaque = vd;
         avctx->thread_count = 1;
 #if HAVE_VDPAU_HWACCEL
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
