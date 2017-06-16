@@ -348,6 +348,7 @@ static char *format_delay(double time)
 int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flags)
 {
     struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
 
     // Normalize "vf*" to "vf"
     const char *name = co->name;
@@ -357,6 +358,14 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
         snprintf(tmp, sizeof(tmp), "%.*s", BSTR_P(bname));
         name = tmp;
     }
+
+    // Skip going through mp_property_generic_option (typically), because the
+    // property implementation is trivial, and can break some obscure features
+    // like --profile and --include if non-trivial flags are involved (which
+    // the bridge would drop).
+    struct m_property *prop = m_property_list_find(cmd->properties, name);
+    if (prop && prop->is_option)
+        goto direct_option;
 
     struct m_option type = {0};
 
@@ -5680,11 +5689,13 @@ void command_init(struct MPContext *mpctx)
                 .call = co->opt->deprecation_message ?
                             mp_property_deprecated_alias : mp_property_alias,
                 .priv = (void *)alias,
+                .is_option = true,
             };
         } else {
             prop = (struct m_property){
                 .name = co->name,
                 .call = mp_property_generic_option,
+                .is_option = true,
             };
 
             bstr bname = bstr0(prop.name);

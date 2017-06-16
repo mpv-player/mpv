@@ -132,6 +132,8 @@ struct m_property {
     // returns: one of enum mp_property_return
     int (*call)(void *ctx, struct m_property *prop, int action, void *arg);
     void *priv;
+    // Special-case: mark options for which command.c uses the option-bridge
+    bool is_option;
 };
 
 struct m_property *m_property_list_find(const struct m_property *list,
