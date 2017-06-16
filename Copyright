@@ -55,13 +55,15 @@ LGPLv2.1+. The affected files will be changed to LGPLv2.1+ at the earliest
 opportunity, for example if his contributions disappear by being replaced
 or removed. All new contributions to these files are implied to be LGPLv2.1+.
 
-LGPL relicensing status:
+LGPL relicensing status. Files which require some sort of action (relicensing,
+replacement, or partial/full rewrites) are marked with an "x".
 
     audio/decode/ad.h               LGPL
     audio/decode/ad_lavc.c          LGPL
     audio/decode/ad_spdif.c         LGPL
     audio/decode/dec_audio.*        LGPL
-    audio/filter/af.*               must be killed (main author disagreed)
+x   audio/filter/af.*               must be killed (main author disagreed)
+        (required for LGPL core: a new filter chain must be written)
     audio/filter/af_channel.c       must be killed (main author disagreed)
     audio/filter/af_equalizer.c     must be killed (main author disagreed)
     audio/filter/af_pan.c           must be killed (main author disagreed)
@@ -103,12 +105,14 @@ LGPL relicensing status:
     audio/out/internal.h            LGPL
     audio/out/pull.c                LGPL
     audio/out/push.c                LGPL
-    audio/audio.*                   very hard (mp_audio based of anders' af_audio)
+x   audio/audio.*                   very hard (mp_audio based of anders' af_audio)
+        (required for LGPL core: determine if the struct can be used anyway, or
+         devise a cheap AVFrame wrapper)
     audio/audio_buffer.*            LGPL
     audio/chmap.*                   LGPL
     audio/chmap_sel.*               LGPL
     audio/fmt-conversion.*          LGPL
-    audio/format.*                  hard (murky libaf origins)
+x   audio/format.*                  hard (murky libaf origins)
     common/av_common.*              LGPL
     common/av_log.c                 almost LGPL
     common/av_log.h                 LGPL
@@ -126,7 +130,7 @@ LGPL relicensing status:
     common/version.c                LGPL
     demux/codec_tags.*              LGPL
     demux/cue.*                     LGPL
-    demux/demux.*                   complications (at least Denes' changes)
+x   demux/demux.*                   complications (at least Denes' changes)
     demux/demux_cue.c               LGPL
     demux/demux_disc.c              LGPL
     demux/demux_edl.c               LGPL
@@ -148,11 +152,11 @@ LGPL relicensing status:
     demux/timeline.*                LGPL
     input/cmd_*                     unknown, probably easy except some commands
     input/event.*                   LGPL
-    input/input.*                   potentially hard
+x   input/input.*                   potentially hard
     input/ipc.c                     LGPL
     input/ipc-unix.c                LGPL
     input/ipc-win.c                 LGPL
-    input/keycodes.*                potentially hard
+x   input/keycodes.*                potentially hard
     input/pipe-win32.c              LGPL
     libmpv/*.*                      LGPL
     misc/*.*                        LGPL
@@ -160,7 +164,7 @@ LGPL relicensing status:
     options/m_option.c              almost LGPL
     options/m_option.h              LGPL
     options/m_property.*            LGPL
-    options/options.*               very hard (lots of options and history)
+x   options/options.*               very hard (lots of options and history)
     options/parse_commandline.*     LGPL
     options/parse_configfile.*      LGPL
     options/path.*                  LGPL
@@ -209,24 +213,24 @@ LGPL relicensing status:
     osdep/win32-console-wrapper.c   LGPL (BSD)
     osdep/win32/*                   LGPL (ISC)
     osdep/windows_utils.*           LGPL
-    player/audio.c                  extremely hard (complex history, libaf ties)
+x   player/audio.c                  extremely hard (complex history, libaf ties)
     player/client.*                 LGPL (ISC)
-    player/command.c                extremely hard (also some GPL-only things)
-    player/command.h                hard
-    player/configfiles.c            unknown
-    player/core.h                   extremely hard
-    player/external_files.*         hard (murky subreader.c origins)
+x   player/command.c                extremely hard (also some GPL-only things)
+x   player/command.h                hard
+x   player/configfiles.c            unknown
+x   player/core.h                   extremely hard
+x   player/external_files.*         hard (murky subreader.c origins)
     player/lavfi.*                  LGPL
-    player/loadfile.c               extremely hard
+x   player/loadfile.c               extremely hard
     player/lua/*.*                  LGPL
     player/lua.c                    LGPL
     player/misc.c                   LGPL
     player/osd.c                    hard
-    player/playloop.c               extremely hard
+x   player/playloop.c               extremely hard
     player/screenshot.*             LGPL
     player/scripting.*              LGPL
-    player/sub.c                    easy (probably almost no mplayer code)
-    player/video.c                  extremely hard
+x   player/sub.c                    easy (probably almost no mplayer code)
+x   player/video.c                  extremely hard
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
     stream/cache.c                  LGPLv3+
@@ -237,7 +241,7 @@ LGPL relicensing status:
     stream/rar.*                    LGPL
     stream/stream_avdevice.c        unknown
     stream/stream_bluray.c          unknown
-    stream/stream.c                 very hard
+x   stream/stream.c                 very hard
     stream/stream_cb.c              LGPL
     stream/stream_cdda.c            unknown
     stream/stream_dvb.*             must stay GPL
@@ -246,7 +250,7 @@ LGPL relicensing status:
     stream/stream_dvdnav.c          unknown
     stream/stream_edl.c             LGPL
     stream/stream_file.c            LGPL
-    stream/stream.h                 hard
+x   stream/stream.h                 hard
     stream/stream_lavf.c            LGPL
     stream/stream_libarchive.*      LGPL
     stream/stream_memory.c          LGPL
@@ -259,7 +263,7 @@ LGPL relicensing status:
     sub/*                           LGPL
     ta/*                            LGPL (ISC)
     video/decode/d3d.*              LGPL
-    video/decode/dec_video.*        hard
+x   video/decode/dec_video.*        hard
     video/decode/hw_cuda.c          LGPL
     video/decode/hw_d3d11va.c       LGPL
     video/decode/hw_dxva2.c         LGPL
@@ -293,15 +297,16 @@ LGPL relicensing status:
     video/filter/vf_vdpaupp.c       LGPL
     video/filter/vf_yadif.c         will be deleted
     video/csputils.*                LGPL
-    video/fmt-conversion.*          must be killed (author disagreed to LGPL)
+x   video/fmt-conversion.*          must be killed (author disagreed to LGPL)
+        (required for LGPL core: might direct-map them to AV_PIXFMT or so)
     video/gpu_memcpy.*              will be deleted
     video/hwdec.*                   LGPL
-    video/image_writer.*            unknown
-    video/img_format.*              hard
-    video/img_fourcc.h              hard
+x   video/image_writer.*            unknown
+x   video/img_format.*              hard
+x   video/img_fourcc.h              hard
     video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
-    video/out/aspect.*              hard
+x   video/out/aspect.*              hard
     video/out/bitmap_packer.*       LGPL
     video/out/cocoa*                unknown
     video/out/d3d_shader_420p.h     LGPL
@@ -333,7 +338,7 @@ LGPL relicensing status:
     video/out/w32_common.*          medium
     video/out/wayland*              LGPL
     video/out/win32/*               LGPL
-    video/out/win_state.*           unknown
+x   video/out/win_state.*           unknown
     video/out/x11_common.*          probably impossible
     video/out/x11_icon.bin          must stay GPL
     video/sws_utils.*               LGPL
@@ -343,3 +348,10 @@ LGPL relicensing status:
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
     video/vt.*                      LGPL
+
+Other:
+x   Build system                    nominally LGPL, but might contain GPL traces
+x   English translations            removed, but traces might be in C code
+x   etc/input.conf                  unknown
+x   Logo                            GPL (?), might have to exclude from LGPL builds
+x   version.sh                      GPL
