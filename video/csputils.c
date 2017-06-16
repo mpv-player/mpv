@@ -479,7 +479,7 @@ bool mp_trc_is_hdr(enum mp_csp_trc trc)
 
 // Compute the RGB/XYZ matrix as described here:
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-static void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
 {
     float S[3], X[4], Z[4];
 
@@ -537,14 +537,14 @@ static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
 
     for (int i = 0; i < 3; i++) {
         // source cone
-        C[i][0] = bradford[i][0] * src.x / src.y
+        C[i][0] = bradford[i][0] * mp_xy_X(src)
                 + bradford[i][1] * 1
-                + bradford[i][2] * (1 - src.x - src.y) / src.y;
+                + bradford[i][2] * mp_xy_Z(src);
 
         // dest cone
-        C[i][1] = bradford[i][0] * dest.x / dest.y
+        C[i][1] = bradford[i][0] * mp_xy_X(dest)
                 + bradford[i][1] * 1
-                + bradford[i][2] * (1 - dest.x - dest.y) / dest.y;
+                + bradford[i][2] * mp_xy_Z(dest);
     }
 
     // tmp := I * [Cd/Cs] * Ma

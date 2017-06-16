@@ -218,6 +218,14 @@ struct mp_csp_col_xy {
     float x, y;
 };
 
+static inline float mp_xy_X(struct mp_csp_col_xy xy) {
+    return xy.x / xy.y;
+}
+
+static inline float mp_xy_Z(struct mp_csp_col_xy xy) {
+    return (1 - xy.x - xy.y) / xy.y;
+}
+
 struct mp_csp_primaries {
     struct mp_csp_col_xy red, green, blue, white;
 };
@@ -268,6 +276,7 @@ struct mp_cmat {
     float c[3];
 };
 
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3]);
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
                        enum mp_render_intent intent, float cms_matrix[3][3]);
 
