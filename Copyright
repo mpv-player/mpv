@@ -130,7 +130,7 @@ LGPL relicensing status:
     demux/demux_cue.c               LGPL
     demux/demux_disc.c              LGPL
     demux/demux_edl.c               LGPL
-    demux/demux_lavf.c              hard
+    demux/demux_lavf.c              almost LGPL
     demux/demux_libarchive.c        LGPL
     demux/demux_mf.c                hard
     demux/demux_mkv.c               LGPL (mostly)

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Almost LGPL.
  */
 
 #include <stdlib.h>
@@ -1171,10 +1173,9 @@ static void demux_close_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     if (priv) {
-        if (priv->avfc) {
+        if (priv->avfc)
             av_freep(&priv->avfc->key);
-            avformat_close_input(&priv->avfc);
-        }
+        avformat_close_input(&priv->avfc);
         if (priv->pb)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
