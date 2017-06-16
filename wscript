@@ -292,7 +292,7 @@ iconv support use --disable-iconv.",
     }, {
         'name' : '--javascript',
         'desc' : 'Javascript (MuJS backend)',
-        'func':  check_statement('mujs.h', 'js_setreport(js_newstate(0, 0, 0), 0)', lib='mujs'),
+        'func': check_pkg_config('mujs', '>= 1.0.0'),
     }, {
         'name': '--libass',
         'desc': 'SSA/ASS support',
