@@ -89,6 +89,23 @@ local function init_buffers()
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
 end
 
+-- Save all properties known to this version of mpv
+local property_list = {}
+for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
+-- Mapping of properties to their deprecated names
+local property_aliases = {
+    ["decoder-frame-drop-count"] = "drop-frame-count",
+    ["frame-drop-count"] = "vo-drop-frame-count",
+    ["container-fps"] = "fps",
+}
+-- Return deprecated name for the given property
+local function compat(p)
+    while not property_list[p] and property_aliases[p] do
+        p = property_aliases[p]
+    end
+    return p
+end
+
 
 local function set_ASS(b)
     if not o.ass_formatting then
@@ -236,8 +253,7 @@ local function append_perfdata(s)
 
     local ds = mp.get_property_bool("display-sync-active", false)
     local target_fps = ds and mp.get_property_number("display-fps", 0)
-                       or mp.get_property_number("container-fps", 0)
-                       or mp.get_property_number("fps", 0)
+                       or mp.get_property_number(compat("container-fps"), 0)
     if target_fps > 0 then target_fps = 1 / target_fps * 1e6 end
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
@@ -374,13 +390,8 @@ local function add_video(s)
                         {no=true, [""]=true})
     end
     append_property(s, "avsync", {prefix="A-V:"})
-    if append_property(s, "decoder-frame-drop-count", {prefix="Dropped:"}) then
-        append_property(s, "frame-drop-count", {prefix="VO:", nl=""})
-        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
-    -- Deprecated FPS properties for backwards compatibility
-    elseif append_property(s, "drop-frame-count", {prefix="Dropped:"}) then
-        append_property(s, "vo-drop-frame-count", {prefix="VO:", nl=""})
+    if append_property(s, compat("decoder-frame-drop-count"), {prefix="Dropped:"}) then
+        append_property(s, compat("frame-drop-count"), {prefix="VO:", nl=""})
         append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
         append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
     end
@@ -391,8 +402,7 @@ local function add_video(s)
         append_property(s, "estimated-display-fps",
                         {prefix="Display FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, "container-fps", {prefix="FPS:", suffix=" (specified)"}) or
-        append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
+    if append_property(s, compat("container-fps"), {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-vf-fps",
                         {suffix=" (estimated)", nl="", indent=""})
     else
