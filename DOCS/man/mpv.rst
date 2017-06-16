@@ -769,6 +769,11 @@ PROTOCOLS
     Read data from the given file descriptor (for example 123). This is similar
     to piping data to stdin via ``-``, but can use an arbitrary file descriptor.
 
+``fdclose://123``
+
+    Like ``fd://``, but the file descriptor is closed after use. When using this
+    you need to ensure that the same fd URL will only be used once.
+
 ``edl://[edl specification as in edl-mpv.rst]``
 
     Stitch together parts of multiple files and play them.
