@@ -548,8 +548,26 @@ void pass_color_map(struct gl_shader_cache *sc,
 
     // Tone map to prevent clipping when the source signal peak exceeds the
     // encodable range
-    if (src.sig_peak > dst_range)
+    if (src.sig_peak > dst_range) {
+        // Convert to linear, relative XYZ before tone mapping to preserve
+        // channel balance better
+        struct mp_csp_primaries prim = mp_get_csp_primaries(src.primaries);
+        float rgb2xyz[3][3];
+        mp_get_rgb2xyz_matrix(prim, rgb2xyz);
+        gl_sc_uniform_mat3(sc, "rgb2xyz", true, &rgb2xyz[0][0]);
+        mp_invert_matrix3x3(rgb2xyz);
+        gl_sc_uniform_mat3(sc, "xyz2rgb", true, &rgb2xyz[0][0]);
+        // White balance, calculated from the relative XYZ coefficients of
+        // the white point. Failing to multiply in this difference causes
+        // the tone mapping process to shift the color temperature.
+        gl_sc_uniform_vec2(sc, "balance", (float[]){mp_xy_X(prim.white),
+                                                    mp_xy_Z(prim.white)});
+        GLSL(color.xyz = rgb2xyz * color.rgb;)
+        GLSL(color.xz /= balance;)
         pass_tone_map(sc, src.sig_peak / dst_range, algo, tone_mapping_param);
+        GLSL(color.xz *= balance;)
+        GLSL(color.rgb = xyz2rgb * color.xyz;)
+    }
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
