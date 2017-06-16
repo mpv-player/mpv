@@ -247,7 +247,7 @@ LGPL relicensing status:
     stream/stream_edl.c             LGPL
     stream/stream_file.c            LGPL
     stream/stream.h                 hard
-    stream/stream_lavf.c            hard
+    stream/stream_lavf.c            LGPL
     stream/stream_libarchive.*      LGPL
     stream/stream_memory.c          LGPL
     stream/stream_mf.c              unknown
