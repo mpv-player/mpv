@@ -299,7 +299,7 @@ LGPL relicensing status:
     video/image_writer.*            unknown
     video/img_format.*              hard
     video/img_fourcc.h              hard
-    video/mp_image.*                hard (if even possible)
+    video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
     video/out/aspect.*              hard
     video/out/bitmap_packer.*       LGPL

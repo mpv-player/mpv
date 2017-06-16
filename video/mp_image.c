@@ -13,13 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Almost LGPL.
  */
 
-#include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include <pthread.h>
 #include <assert.h>
@@ -33,7 +30,7 @@
 
 #include "mpv_talloc.h"
 
-#include "img_format.h"
+#include "common/common.h"
 #include "mp_image.h"
 #include "sws_utils.h"
 #include "fmt-conversion.h"
