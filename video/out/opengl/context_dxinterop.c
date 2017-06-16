@@ -565,12 +565,6 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
         return;
     }
 
-    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
-        MP_ERR(ctx->vo, "Couldn't lock rendertarget after stretchrect: %s\n",
-               mp_LastError_to_str());
-        return;
-    }
-
     hr = IDirect3DDevice9Ex_PresentEx(p->device, NULL, NULL, NULL, NULL, 0);
     switch (hr) {
     case D3DERR_DEVICELOST:
@@ -578,10 +572,15 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
         MP_VERBOSE(ctx->vo, "Direct3D device lost! Resetting.\n");
         p->lost_device = true;
         dxinterop_reset(ctx);
-        break;
+        return;
     default:
         if (FAILED(hr))
             MP_ERR(ctx->vo, "Failed to present: %s\n", mp_HRESULT_to_str(hr));
+    }
+
+    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
+        MP_ERR(ctx->vo, "Couldn't lock rendertarget after present: %s\n",
+               mp_LastError_to_str());
     }
 }
 
