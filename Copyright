@@ -310,7 +310,7 @@ x   video/img_format.*              hard
 x   video/img_fourcc.h              hard
     video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
-x   video/out/aspect.*              hard
+    video/out/aspect.*              LGPL
     video/out/bitmap_packer.*       LGPL
     video/out/cocoa*                unknown
     video/out/d3d_shader_420p.h     LGPL
