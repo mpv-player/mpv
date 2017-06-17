@@ -154,7 +154,7 @@ x   demux/demux.*                   complications (at least Denes' changes)
     demux/packet.*                  LGPL
     demux/stheader.h                LGPL
     demux/timeline.*                LGPL
-    input/cmd_*                     unknown, probably easy except some commands
+x   input/cmd_*                     unknown, probably easy except some commands
     input/event.*                   LGPL
 x   input/input.*                   potentially hard
     input/ipc.c                     LGPL
@@ -342,7 +342,7 @@ x   video/img_fourcc.h              hard
     video/out/w32_common.*          medium
     video/out/wayland*              LGPL
     video/out/win32/*               LGPL
-x   video/out/win_state.*           unknown
+    video/out/win_state.*           LGPL
     video/out/x11_common.*          probably impossible
     video/out/x11_icon.bin          must stay GPL
     video/sws_utils.*               LGPL
