@@ -47,8 +47,6 @@
 #include "client.h"
 #include "libmpv/client.h"
 
-#define MIN(a,b) ((a)<(b)?(a):(b))
-
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js
 static const char *const builtin_files[][3] = {
@@ -320,7 +318,7 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
 
     const char *builtin = get_builtin_file(filename);
     if (builtin) {
-        js_pushlstring(J, builtin, MIN(limit, strlen(builtin)));
+        js_pushlstring(J, builtin, MPMIN(limit, strlen(builtin)));
         return;
     }
 
@@ -329,7 +327,7 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
         js_error(J, "cannot open file: '%s'", filename);
     add_af_file(af, f);
 
-    int len = MIN(limit, 32 * 1024);  // initial allocation, size*2 strategy
+    int len = MPMIN(limit, 32 * 1024);  // initial allocation, size*2 strategy
     int got = 0;
     char *s = NULL;
     while ((s = talloc_realloc(af, s, char, len))) {
@@ -344,7 +342,7 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
             js_error(J, "cannot read data from file: '%s'", filename);
 
         got = got + r;
-        len = MIN(limit, len * 2);
+        len = MPMIN(limit, len * 2);
     }
 
     js_error(J, "cannot allocate %d bytes for file: '%s'", len, filename);
