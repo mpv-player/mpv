@@ -284,7 +284,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         double len = get_time_length(mpctx);
         if (len >= 0)
             seek_pts = seek.amount * len;
-        demux_flags = seek_pts > current_time ? SEEK_FORWARD : SEEK_BACKWARD;
+        demux_flags = SEEK_BACKWARD;
         break;
     default: abort();
     }
