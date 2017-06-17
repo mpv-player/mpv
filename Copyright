@@ -301,7 +301,7 @@ x   video/decode/dec_video.*        hard
     video/filter/vf_vdpaupp.c       LGPL
     video/filter/vf_yadif.c         will be deleted
     video/csputils.*                LGPL
-x   video/fmt-conversion.*          must be killed (author disagreed to LGPL)
+x   video/fmt-conversion.*          hard
         (required for LGPL core: might direct-map them to AV_PIXFMT or so)
     video/gpu_memcpy.*              will be deleted
     video/hwdec.*                   LGPL
