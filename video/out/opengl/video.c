@@ -2192,14 +2192,19 @@ static void pass_dither(struct gl_video *p)
             const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
             if (!fmt || gl->es)
                 fmt = gl_find_float16_format(gl, 1);
-            tex_size = size;
             if (fmt) {
+                tex_size = size;
                 tex_iformat = fmt->internal_format;
                 tex_format = fmt->format;
+                tex_type = GL_FLOAT;
+                tex_data = p->last_dither_matrix;
+            } else {
+                MP_VERBOSE(p, "GL too old. Falling back to ordered dither.\n");
+                p->opts.dither_algo = DITHER_ORDERED;
             }
-            tex_type = GL_FLOAT;
-            tex_data = p->last_dither_matrix;
-        } else {
+        }
+
+        if (p->opts.dither_algo == DITHER_ORDERED) {
             assert(sizeof(temp) >= 8 * 8);
             mp_make_ordered_dither_matrix(temp, 8);
 
