@@ -36,7 +36,7 @@ Source files with specific licenses:
 - everything under DOCS/man/ is GPLv2+
 - sub/osd_font.otf is LGPLv2.1+
 - some tests under waftools/fragments/ might be GPLv2+
-- version.sh is GPLv2+
+- version.sh is LGPLv2+
 
 Some files are marked with "Almost LGPL." These files are GPL, but all authors
 have agreed to relicense them to LGPL. the problem is that one of the authors is
@@ -355,4 +355,4 @@ x   Build system                    nominally LGPL, but might contain GPL traces
 x   English translations            removed, but traces might be in C code
 x   etc/input.conf                  unknown
 x   Logo                            GPL (?), might have to exclude from LGPL builds
-x   version.sh                      GPL
+    version.sh                      LGPL
