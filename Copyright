@@ -55,8 +55,9 @@ LGPLv2.1+. The affected files will be changed to LGPLv2.1+ at the earliest
 opportunity, for example if his contributions disappear by being replaced
 or removed. All new contributions to these files are implied to be LGPLv2.1+.
 
-LGPL relicensing status. Files which require some sort of action (relicensing,
-replacement, or partial/full rewrites) are marked with an "x".
+LGPL relicensing status. Files which require some sort of action to get a basic
+LGPL player core (relicensing, replacement, or partial/full rewrites) are marked
+with an "x".
 
     audio/decode/ad.h               LGPL
     audio/decode/ad_lavc.c          LGPL
