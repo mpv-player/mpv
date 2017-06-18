@@ -303,7 +303,7 @@ x   video/decode/dec_video.*        hard
     video/fmt-conversion.*          LGPL
     video/gpu_memcpy.*              will be deleted
     video/hwdec.*                   LGPL
-x   video/image_writer.*            unknown
+    video/image_writer.*            LGPL
     video/img_format.*              LGPL
     video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
@@ -323,7 +323,7 @@ x   video/image_writer.*            unknown
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
     video/out/vo_drm.c              LGPL
-    video/out/vo_image.c            unknown
+    video/out/vo_image.c            LGPL
     video/out/vo_lavc.c             LGPL
     video/out/vo_null.c             LGPL
     video/out/vo_opengl.c           LGPL

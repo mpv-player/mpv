@@ -426,16 +426,8 @@ Available video output drivers are:
         3 = average; 4 = Paeth; 5 = mixed) (default: 5)
     ``--vo-image-jpeg-quality=<0-100>``
         JPEG quality factor (default: 90)
-    ``--vo-image-jpeg-progressive=<yes|no>``
-        Specify standard or progressive JPEG (default: no).
-    ``--vo-image-jpeg-baseline=<yes|no>``
-        Specify use of JPEG baseline or not (default: yes).
     ``--vo-image-jpeg-optimize=<0-100>``
         JPEG optimization factor (default: 100)
-    ``--vo-image-jpeg-smooth=<0-100>``
-        smooth factor (default: 0)
-    ``--vo-image-jpeg-dpi=<1->``
-        JPEG DPI (default: 72)
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
