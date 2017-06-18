@@ -41,24 +41,7 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // FFmpeg names have an annoying "_vld" suffix
     {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
     {"vaapi",           IMGFMT_VAAPI},
-    // names below this are not preferred over the FFmpeg names
-    // the "none" entry makes mp_imgfmt_to_name prefer FFmpeg names
     {"none",            0},
-    // endian-specific aliases (not in FFmpeg)
-    {"rgb32",           IMGFMT_RGB32},
-    {"bgr32",           IMGFMT_BGR32},
-    // old names we keep around
-    {"y8",              IMGFMT_Y8},
-    {"420p",            IMGFMT_420P},
-    {"yv12",            IMGFMT_420P},
-    {"420p16",          IMGFMT_420P16},
-    {"420p10",          IMGFMT_420P10},
-    {"444p",            IMGFMT_444P},
-    {"444p9",           IMGFMT_444P9},
-    {"444p10",          IMGFMT_444P10},
-    {"422p",            IMGFMT_422P},
-    {"422p9",           IMGFMT_422P9},
-    {"422p10",          IMGFMT_422P10},
     {0}
 };
 
@@ -69,7 +52,7 @@ char **mp_imgfmt_name_list(void)
     int num = 0;
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         const char *name = mp_imgfmt_to_name(n);
-        if (strcmp(name, "none") != 0 && strcmp(name, "unknown") != 0)
+        if (strcmp(name, "unknown") != 0)
             list[num++] = talloc_strdup(list, name);
     }
     return list;
