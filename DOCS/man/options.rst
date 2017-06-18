@@ -4619,10 +4619,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Pure power curve (gamma 2.8), also used for BT.470-BG
     prophoto
         ProPhoto RGB (ROMM)
-    st2084
-        SMPTE ST2084 (HDR) curve, PQ OETF
-    std-b67
-        ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
+    pq
+        ITU-R BT.2100 PQ (Perceptual quantizer) curve, aka SMPTE ST2084
+    hlg
+        ITU-R BT.2100 HLG (Hybrid Log-gamma) curve, aka ARIB STD-B67
     v-log
         Panasonic V-Log (VARICAM) curve
 
@@ -4633,13 +4633,6 @@ The following video options are currently all specific to ``--vo=opengl`` and
         be required for the target device to correctly display the HDR signal.
         The user should independently guarantee this before using these signal
         formats for display.
-
-``--target-brightness=<1..100000>``
-    Specifies the display's approximate brightness in cd/m^2. When playing HDR
-    content on a SDR display (or SDR content on an HDR display), video colors
-    will be tone mapped to this target brightness using the algorithm specified
-    by ``--hdr-tone-mapping``. The default of 250 cd/m^2 corresponds to a
-    typical consumer display.
 
 ``--hdr-tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping HDR images onto the target

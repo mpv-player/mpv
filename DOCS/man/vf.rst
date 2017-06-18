@@ -363,17 +363,32 @@ Available mpv-only filters are:
        :gamma2.2:     Pure power curve (gamma 2.2)
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
-       :st2084:       SMPTE ST2084 (HDR) curve
-       :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
+       :pq:           ITU-R BT.2100 PQ (Perceptual quantizer) curve
+       :hlg:          ITU-R BT.2100 HLG (Hybrid Log-gamma) curve
        :v-log:        Panasonic V-Log transfer curve
 
-    ``<peak>``
-        Reference peak illumination for the video file. This is mostly
-        interesting for HDR, but it can also be used tone map SDR content
-        to a darker or brighter exposure.
+    ``<sig-peak>``
+        Reference peak illumination for the video file, relative to the
+        signal's reference white level. This is mostly interesting for HDR, but
+        it can also be used tone map SDR content to simulate a different
+        exposure. Normally inferred from tags such as MaxCLL or mastering
+        metadata.
 
-        The default of 0.0 will default to the display's reference brightness
-        for SDR and the source's reference brightness for HDR.
+        The default of 0.0 will default to the source's nominal peak luminance.
+
+    ``<light>``
+        Light type of the scene. This is mostly correctly inferred based on the
+        gamma function, but it can be useful to override this when viewing raw
+        camera footage (e.g. V-Log), which is normally scene-referred instead
+        of display-referred.
+
+        Available light types are:
+
+       :auto:         Automatic selection (default)
+       :display:      Display-referred light (most content)
+       :hlg:          Scene-referred using the HLG OOTF (e.g. HLG content)
+       :709-1886:     Scene-referred using the BT709+BT1886 interaction
+       :gamma1.2:     Scene-referred using a pure power OOTF (gamma=1.2)
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
