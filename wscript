@@ -79,12 +79,6 @@ build_options = [
         'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
-        'name': '--vf-dlopen-filters',
-        'desc': 'compilation of default filters for vf_dlopen',
-        'deps': [ 'dlopen' ],
-        'default': 'disable',
-        'func': check_true
-    }, {
         'name': '--zsh-comp',
         'desc': 'zsh completion',
         'func': check_ctx_vars('BIN_PERL'),

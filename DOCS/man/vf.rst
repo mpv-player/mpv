@@ -642,29 +642,6 @@ Available mpv-only filters are:
         size of the filter in percent of the image diagonal size. This is
         used to calculate the final radius size (default: 1).
 
-
-``dlopen=dll[:a0[:a1[:a2[:a3]]]]``
-    Loads an external library to filter the image. The library interface
-    is the ``vf_dlopen`` interface specified using ``libmpcodecs/vf_dlopen.h``.
-
-    .. warning:: This filter is deprecated.
-
-    ``dll=<library>``
-        Specify the library to load. This may require a full file system path
-        in some cases. This argument is required.
-
-    ``a0=<string>``
-        Specify the first parameter to pass to the library.
-
-    ``a1=<string>``
-        Specify the second parameter to pass to the library.
-
-    ``a2=<string>``
-        Specify the third parameter to pass to the library.
-
-    ``a3=<string>``
-        Specify the fourth parameter to pass to the library.
-
 ``vapoursynth=file:buffered-frames:concurrent-frames``
     Loads a VapourSynth filter script. This is intended for streamed
     processing: mpv actually provides a source filter, instead of using a

@@ -54,7 +54,6 @@ extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
-extern const vf_info_t vf_info_dlopen;
 extern const vf_info_t vf_info_lavfi;
 extern const vf_info_t vf_info_lavfi_bridge;
 extern const vf_info_t vf_info_vaapi;
@@ -86,9 +85,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_dsize,
     &vf_info_sub,
     &vf_info_buffer,
-#if HAVE_DLOPEN
-    &vf_info_dlopen,
-#endif
 #if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH
     &vf_info_vapoursynth,
 #endif

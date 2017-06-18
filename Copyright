@@ -281,7 +281,6 @@ x   video/decode/dec_video.*        hard
     video/filter/vf_buffer.c        LGPL
     video/filter/vf_crop.c          will be deleted
     video/filter/vf_d3d11vpp.c      LGPL
-    video/filter/vf_dlopen.*        LGPL
     video/filter/vf_dsize.c         will be deleted
     video/filter/vf_eq.c            will be deleted
     video/filter/vf_expand.c        will be deleted
