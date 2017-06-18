@@ -306,7 +306,6 @@ x   video/fmt-conversion.*          hard
     video/hwdec.*                   LGPL
 x   video/image_writer.*            unknown
 x   video/img_format.*              hard
-x   video/img_fourcc.h              hard
     video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
     video/out/aspect.*              LGPL

@@ -55,7 +55,6 @@ known issues:
 #endif
 #include "common/msg.h"
 #include "common/common.h"
-#include "video/img_fourcc.h"
 #include "audio/format.h"
 #include "tv.h"
 #include "audio_in.h"

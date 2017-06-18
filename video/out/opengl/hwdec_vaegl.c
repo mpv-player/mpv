@@ -24,6 +24,7 @@
 
 #include <va/va_drmcommon.h>
 
+#include <libavutil/common.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
 
@@ -31,7 +32,6 @@
 
 #include "hwdec.h"
 #include "video/vaapi.h"
-#include "video/img_fourcc.h"
 #include "video/mp_image_pool.h"
 #include "common.h"
 #include "formats.h"
@@ -325,13 +325,13 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     int drm_fmts[8] = {
         // 1 bytes per component, 1-4 components
-        MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
-        MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
+        MKTAG('R', '8', ' ', ' '),       // DRM_FORMAT_R8
+        MKTAG('G', 'R', '8', '8'),       // DRM_FORMAT_GR88
         0,                               // untested (DRM_FORMAT_RGB888?)
         0,                               // untested (DRM_FORMAT_RGBA8888?)
         // 2 bytes per component, 1-4 components
-        MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
-        MP_FOURCC('G', 'R', '3', '2'),   // proposed DRM_FORMAT_GR32
+        MKTAG('R', '1', '6', ' '),       // proposed DRM_FORMAT_R16
+        MKTAG('G', 'R', '3', '2'),       // proposed DRM_FORMAT_GR32
         0,                               // N/A
         0,                               // N/A
     };

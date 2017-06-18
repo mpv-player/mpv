@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/common.h>
 
 #include "common/av_common.h"
 
@@ -36,7 +37,6 @@
 
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
-#include "video/img_fourcc.h"
 
 #include "osdep/endian.h"
 
@@ -118,7 +118,7 @@ const struct m_sub_options demux_rawvideo_conf = {
     },
     .size = sizeof(struct demux_rawvideo_opts),
     .defaults = &(const struct demux_rawvideo_opts){
-        .vformat = MP_FOURCC_I420,
+        .vformat = MKTAG('I', '4', '2', '0'),
         .width = 1280,
         .height = 720,
         .fps = 25,
@@ -208,27 +208,15 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     if (!imgsize) {
         int bpp = 0;
         switch (imgfmt) {
-        case MP_FOURCC_I420: case MP_FOURCC_IYUV:
-        case MP_FOURCC_NV12: case MP_FOURCC_NV21:
-        case MP_FOURCC_HM12:
-        case MP_FOURCC_YV12:
+        case MKTAG('Y', 'V', '1', '2'):
+        case MKTAG('I', '4', '2', '0'):
+        case MKTAG('I', 'Y', 'U', 'V'):
+        case MKTAG('N', 'V', '1', '2'):
             bpp = 12;
             break;
-        case MP_FOURCC_RGB12: case MP_FOURCC_BGR12:
-        case MP_FOURCC_RGB15: case MP_FOURCC_BGR15:
-        case MP_FOURCC_RGB16: case MP_FOURCC_BGR16:
-        case MP_FOURCC_YUY2:  case MP_FOURCC_UYVY:
+        case MKTAG('U', 'Y', 'V', 'Y'):
+        case MKTAG('Y', 'U', 'Y', '2'):
             bpp = 16;
-            break;
-        case MP_FOURCC_RGB8: case MP_FOURCC_BGR8:
-        case MP_FOURCC_Y800: case MP_FOURCC_Y8:
-            bpp = 8;
-            break;
-        case MP_FOURCC_RGB24: case MP_FOURCC_BGR24:
-            bpp = 24;
-            break;
-        case MP_FOURCC_RGB32: case MP_FOURCC_BGR32:
-            bpp = 32;
             break;
         }
         if (!bpp) {

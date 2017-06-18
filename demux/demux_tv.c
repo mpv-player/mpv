@@ -11,7 +11,6 @@
 #include "codec_tags.h"
 
 #include "audio/format.h"
-#include "video/img_fourcc.h"
 #include "osdep/endian.h"
 
 #include "stream/stream.h"

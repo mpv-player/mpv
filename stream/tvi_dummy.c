@@ -21,7 +21,6 @@
 
 #include <stdio.h>
 #include "common/common.h"
-#include "video/img_fourcc.h"
 #include "tv.h"
 
 static tvi_handle_t *tvi_init_dummy(struct mp_log *log, tv_param_t* tv_param);

@@ -56,7 +56,6 @@
 #include "ebml.h"
 #include "matroska.h"
 #include "codec_tags.h"
-#include "video/img_fourcc.h"
 
 #include "common/msg.h"
 
@@ -1392,8 +1391,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             fourcc1 = AV_RL32(track->private_data + 0);
             fourcc2 = AV_RL32(track->private_data + 4);
         }
-        if (fourcc1 == MP_FOURCC('S', 'V', 'Q', '3') ||
-            fourcc2 == MP_FOURCC('S', 'V', 'Q', '3'))
+        if (fourcc1 == MKTAG('S', 'V', 'Q', '3') ||
+            fourcc2 == MKTAG('S', 'V', 'Q', '3'))
         {
             sh_v->codec = "svq3";
             extradata = track->private_data;
@@ -1417,7 +1416,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         track->parse = true;
         track->parse_timebase = 1e9;
     } else if (!strcmp(codec, "mjpeg")) {
-        sh_v->codec_tag = MP_FOURCC('m', 'j', 'p', 'g');
+        sh_v->codec_tag = MKTAG('m', 'j', 'p', 'g');
     }
 
     if (extradata_size > 0x1000000) {

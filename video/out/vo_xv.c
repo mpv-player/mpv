@@ -46,7 +46,6 @@
 #include "common/msg.h"
 #include "vo.h"
 #include "video/mp_image.h"
-#include "video/img_fourcc.h"
 #include "x11_common.h"
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
@@ -98,6 +97,14 @@ struct xvctx {
     int Shm_Warned_Slow;
 #endif
 };
+
+#define MP_FOURCC(a,b,c,d) ((a) | ((b)<<8) | ((c)<<16) | ((unsigned)(d)<<24))
+
+#define MP_FOURCC_YV12  MP_FOURCC('Y', 'V', '1', '2')
+#define MP_FOURCC_I420  MP_FOURCC('I', '4', '2', '0')
+#define MP_FOURCC_IYUV  MP_FOURCC('I', 'Y', 'U', 'V')
+#define MP_FOURCC_UYVY  MP_FOURCC('U', 'Y', 'V', 'Y')
+#define MP_FOURCC_YUY2  MP_FOURCC('Y', 'U', 'Y', '2')
 
 struct fmt_entry {
     int imgfmt;

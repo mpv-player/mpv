@@ -46,7 +46,6 @@
 #include "stream.h"
 
 #include "audio/format.h"
-#include "video/img_fourcc.h"
 #include "osdep/timer.h"
 
 #include "tv.h"
