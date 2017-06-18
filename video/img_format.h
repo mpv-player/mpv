@@ -130,11 +130,6 @@ enum mp_imgfmt {
     IMGFMT_420P10,
     IMGFMT_420P9,
 
-    // Planar YUV with alpha (4th plane)
-    IMGFMT_444AP,
-    IMGFMT_422AP,
-    IMGFMT_420AP,
-
     // Gray
     IMGFMT_Y8,
     IMGFMT_Y16,
