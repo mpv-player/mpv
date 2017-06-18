@@ -300,12 +300,11 @@ x   video/decode/dec_video.*        hard
     video/filter/vf_vdpaupp.c       LGPL
     video/filter/vf_yadif.c         will be deleted
     video/csputils.*                LGPL
-x   video/fmt-conversion.*          hard
-        (required for LGPL core: might direct-map them to AV_PIXFMT or so)
+    video/fmt-conversion.*          LGPL
     video/gpu_memcpy.*              will be deleted
     video/hwdec.*                   LGPL
 x   video/image_writer.*            unknown
-x   video/img_format.*              hard
+    video/img_format.*              LGPL
     video/mp_image.*                almost LGPL
     video/mp_image_pool.*           LGPL
     video/out/aspect.*              LGPL
