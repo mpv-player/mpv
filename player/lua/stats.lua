@@ -430,8 +430,8 @@ local function add_video(s)
     -- Append HDR metadata conditionally (only when present and interesting)
     local hdrpeak = mp.get_property_number("video-params/sig-peak", 0)
     local hdrinfo = ""
-    if hdrpeak > 0 then
-        hdrinfo = " (HDR peak: " .. hdrpeak .. " cd/m²)"
+    if hdrpeak > 1 then
+        hdrinfo = " (HDR peak: " .. hdrpeak .. ")"
     end
 
     append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
