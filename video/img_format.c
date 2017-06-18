@@ -58,7 +58,7 @@ char **mp_imgfmt_name_list(void)
     return list;
 }
 
-int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
+int mp_imgfmt_from_name(bstr name)
 {
     int img_fmt = 0;
     for (const struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
@@ -72,8 +72,6 @@ int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
         img_fmt = pixfmt2imgfmt(av_get_pix_fmt(t));
         talloc_free(t);
     }
-    if (!allow_hwaccel && IMGFMT_IS_HWACCEL(img_fmt))
-        return 0;
     return img_fmt;
 }
 

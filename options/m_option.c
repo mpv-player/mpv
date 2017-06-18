@@ -2069,7 +2069,7 @@ static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
         return M_OPT_EXIT;
     }
 
-    unsigned int fmt = mp_imgfmt_from_name(param, true);
+    unsigned int fmt = mp_imgfmt_from_name(param);
     if (!fmt && !(accept_no && bstr_equals0(param, "no"))) {
         mp_err(log, "Option %.*s: unknown format name: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));
