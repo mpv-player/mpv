@@ -288,15 +288,21 @@ void kms_destroy(struct kms *kms)
     talloc_free(kms);
 }
 
+static double mode_get_Hz(const drmModeModeInfo *mode)
+{
+    return mode->clock * 1000.0 / mode->htotal / mode->vtotal;
+}
+
 void kms_show_available_modes(
     struct mp_log *log, const drmModeConnector *connector)
 {
     mp_info(log, "Available modes:\n");
     for (unsigned int i = 0; i < connector->count_modes; i++) {
-        mp_info(log, "Mode %d: %s (%dx%d)\n", i,
+        mp_info(log, "Mode %d: %s (%dx%d@%.2fHz)\n", i,
                 connector->modes[i].name,
                 connector->modes[i].hdisplay,
-                connector->modes[i].vdisplay);
+                connector->modes[i].vdisplay,
+                mode_get_Hz(&connector->modes[i]));
     }
 }
 
@@ -350,7 +356,7 @@ void kms_show_available_cards_and_connectors(struct mp_log *log)
 
 double kms_get_display_fps(const struct kms *kms)
 {
-    return kms->mode.clock * 1000.0 / kms->mode.htotal / kms->mode.vtotal;
+    return mode_get_Hz(&kms->mode);
 }
 
 int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
