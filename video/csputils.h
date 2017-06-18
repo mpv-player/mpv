@@ -65,6 +65,7 @@ enum mp_csp_prim {
     MP_CSP_PRIM_CIE_1931,
     MP_CSP_PRIM_DCI_P3,
     MP_CSP_PRIM_V_GAMUT,
+    MP_CSP_PRIM_S_GAMUT,
     MP_CSP_PRIM_COUNT
 };
 
@@ -82,6 +83,8 @@ enum mp_csp_trc {
     MP_CSP_TRC_SMPTE_ST2084,
     MP_CSP_TRC_ARIB_STD_B67,
     MP_CSP_TRC_V_LOG,
+    MP_CSP_TRC_S_LOG1,
+    MP_CSP_TRC_S_LOG2,
     MP_CSP_TRC_COUNT
 };
 

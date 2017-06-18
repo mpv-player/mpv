@@ -4597,6 +4597,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
     v-gamut
         Panasonic V-Gamut (VARICAM) primaries
+    s-gamut
+        Sony S-Gamut (S-Log) primaries
 
 ``--target-trc=<value>``
     Specifies the transfer characteristics (gamma) of the display. Video colors
@@ -4625,6 +4627,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
         ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
     v-log
         Panasonic V-Log (VARICAM) curve
+    s-log1
+        Sony S-Log1 curve
+    s-log2
+        Sony S-Log2 curve
 
     .. note::
 

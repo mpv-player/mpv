@@ -66,6 +66,7 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"cie1931",     MP_CSP_PRIM_CIE_1931},
     {"dci-p3",      MP_CSP_PRIM_DCI_P3},
     {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
+    {"s-gamut",     MP_CSP_PRIM_S_GAMUT},
     {0}
 };
 
@@ -81,6 +82,8 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
     {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
     {"v-log",       MP_CSP_TRC_V_LOG},
+    {"s-log1",      MP_CSP_TRC_S_LOG1},
+    {"s-log2",      MP_CSP_TRC_S_LOG2},
     {0}
 };
 
@@ -444,6 +447,14 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .blue  = {0.100, -0.03},
             .white = d65
         };
+    // From Sony S-Log reference manual
+    case MP_CSP_PRIM_S_GAMUT:
+        return (struct mp_csp_primaries) {
+            .red   = {0.730, 0.280},
+            .green = {0.140, 0.855},
+            .blue  = {0.100, -0.05},
+            .white = d65
+        };
     default:
         return (struct mp_csp_primaries) {{0}};
     }
@@ -458,6 +469,8 @@ float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
     case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
     case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
     case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
+    case MP_CSP_TRC_S_LOG1:       return 6.52 * ref_peak;
+    case MP_CSP_TRC_S_LOG2:       return 9.212 * ref_peak;
     }
 
     return ref_peak;
@@ -468,6 +481,8 @@ bool mp_trc_is_hdr(enum mp_csp_trc trc)
     switch (trc) {
     case MP_CSP_TRC_SMPTE_ST2084:
     case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_S_LOG1:
+    case MP_CSP_TRC_S_LOG2:
     case MP_CSP_TRC_V_LOG:
         return true;
     }
