@@ -27,6 +27,8 @@ Interface changes
     - drop the internal "mp-rawvideo" codec (used by --demuxer=rawvideo)
     - rename --sub-ass-style-override to --sub-ass-override, and rename the
       `--sub-ass-override=signfs` setting to `--sub-ass-override=scale`.
+    - change default of --video-aspect-method to "bitstream". The "hybrid"
+      method (old default) is deprecated.
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

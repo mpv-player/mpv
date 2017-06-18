@@ -943,6 +943,7 @@ const struct MPOpts mp_default_opts = {
     .playback_speed = 1.,
     .pitch_correction = 1,
     .movie_aspect = -1.,
+    .aspect_method = 1,
     .field_dominance = -1,
     .sub_auto = 0,
     .audiofile_auto = -1,

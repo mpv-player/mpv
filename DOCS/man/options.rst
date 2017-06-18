@@ -823,12 +823,13 @@ Video
 
     :hybrid:    Prefer the container aspect ratio. If the bitstream aspect
                 switches mid-stream, switch to preferring the bitstream aspect.
-                This is the default behavior in mpv and mplayer2.
+                This was the default in older mpv and mplayer2. Deprecated.
     :container: Strictly prefer the container aspect ratio. This is apparently
                 the default behavior with VLC, at least with Matroska.
     :bitstream: Strictly prefer the bitstream aspect ratio, unless the bitstream
                 aspect ratio is not set. This is apparently the default behavior
-                with XBMC/kodi, at least with Matroska.
+                with XBMC/kodi, at least with Matroska, and the current default
+                for mpv.
 
     Normally you should not set this. Try the ``container`` and ``bitstream``
     choices if you encounter video that has the wrong aspect ratio in mpv,

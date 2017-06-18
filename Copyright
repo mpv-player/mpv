@@ -267,7 +267,7 @@ x   stream/stream.h                 hard
     sub/*                           LGPL
     ta/*                            LGPL (ISC)
     video/decode/d3d.*              LGPL
-x   video/decode/dec_video.*        hard
+    video/decode/dec_video.*        almost LGPL
     video/decode/hw_cuda.c          LGPL
     video/decode/hw_d3d11va.c       LGPL
     video/decode/hw_dxva2.c         LGPL
