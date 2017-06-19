@@ -4945,6 +4945,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+#if HAVE_GPL
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
@@ -4981,6 +4982,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
         break;
     }
+#endif
 
     case MP_CMD_MULTIPLY: {
         char *property = cmd->args[0].v.s;
@@ -5286,6 +5288,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+#if HAVE_GPL
     case MP_CMD_SUB_ADD:
     case MP_CMD_AUDIO_ADD: {
         if (!mpctx->playing)
@@ -5337,6 +5340,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             print_track_list(mpctx, "Track removed:");
         break;
     }
+#endif
 
     case MP_CMD_SUB_RELOAD:
     case MP_CMD_AUDIO_RELOAD: {

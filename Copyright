@@ -154,13 +154,13 @@ x   demux/demux.*                   complications (at least Denes' changes)
     demux/packet.*                  LGPL
     demux/stheader.h                LGPL
     demux/timeline.*                LGPL
-x   input/cmd_*                     unknown, probably easy except some commands
+    input/cmd_*                     LGPL
     input/event.*                   LGPL
-x   input/input.*                   potentially hard
+    input/input.*                   LGPL
     input/ipc.c                     LGPL
     input/ipc-unix.c                LGPL
     input/ipc-win.c                 LGPL
-x   input/keycodes.*                potentially hard
+x   input/keycodes.*                (pending)
     input/pipe-win32.c              LGPL
     libmpv/*.*                      LGPL
     misc/*.*                        LGPL
