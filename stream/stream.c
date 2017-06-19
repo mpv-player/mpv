@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -495,19 +495,21 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
     return rd;
 }
 
+// Drop len bytes form input, possibly reading more until all is skipped. If
+// EOF or an error was encountered before all could be skipped, return false,
+// otherwise return true.
 static bool stream_skip_read(struct stream *s, int64_t len)
 {
     while (len > 0) {
-        int x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!stream_fill_buffer_by(s, len))
-                return false; // EOF
-            x = s->buf_len - s->buf_pos;
+        unsigned int left = s->buf_len - s->buf_pos;
+        if (!left) {
+            if (!stream_fill_buffer_by(s, left))
+                return false;
+            continue;
         }
-        if (x > len)
-            x = len;
-        s->buf_pos += x;
-        len -= x;
+        unsigned skip = MPMIN(len, left);
+        s->buf_pos += skip;
+        len -= skip;
     }
     return true;
 }
@@ -581,11 +583,7 @@ bool stream_seek(stream_t *s, int64_t pos)
         return false;
     }
 
-    bool r = pos >= s->pos && stream_skip_read(s, pos - s->pos);
-    if (!r)
-        MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
-    s->eof = 0;
-    return r;
+    return stream_skip_read(s, pos - stream_tell(s));
 }
 
 bool stream_skip(stream_t *s, int64_t len)
