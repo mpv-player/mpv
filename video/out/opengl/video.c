@@ -2138,11 +2138,11 @@ static void pass_dither(struct gl_video *p)
     if (!p->dither_texture) {
         MP_VERBOSE(p, "Dither to %d.\n", dst_depth);
 
-        int tex_size;
-        void *tex_data;
+        int tex_size = 0;
+        void *tex_data = NULL;
         GLint tex_iformat = 0;
         GLint tex_format = 0;
-        GLenum tex_type;
+        GLenum tex_type = 0;
         unsigned char temp[256];
 
         if (p->opts.dither_algo == DITHER_FRUIT) {
