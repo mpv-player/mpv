@@ -1647,16 +1647,16 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (in->time_length < 0)
-            return DEMUXER_CTRL_NOTIMPL;
+            return CONTROL_FALSE;
         *(double *)arg = in->time_length;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     case DEMUXER_CTRL_STREAM_CTRL: {
         struct demux_ctrl_stream_ctrl *c = arg;
         int r = cached_stream_control(in, c->ctrl, c->arg);
         if (r == STREAM_ERROR)
             break;
         c->res = r;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
@@ -1667,7 +1667,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             if (ds->selected && ds->bitrate >= 0)
                 rates[ds->type] = MPMAX(0, rates[ds->type]) + ds->bitrate;
         }
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_GET_READER_STATE: {
         struct demux_ctrl_reader_state *r = arg;
@@ -1694,10 +1694,10 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             r->ts_duration = 0;
         r->ts_range[0] = MP_ADD_PTS(r->ts_range[0], in->ts_offset);
         r->ts_range[1] = MP_ADD_PTS(r->ts_range[1], in->ts_offset);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     }
-    return DEMUXER_CTRL_DONTKNOW;
+    return CONTROL_UNKNOWN;
 }
 
 struct demux_control_args {
@@ -1714,7 +1714,7 @@ static void thread_demux_control(void *p)
     int cmd = args->cmd;
     void *arg = args->arg;
     struct demux_internal *in = demuxer->in;
-    int r = DEMUXER_CTRL_NOTIMPL;
+    int r = CONTROL_UNKNOWN;
 
     if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
         struct demux_ctrl_stream_ctrl *c = arg;
@@ -1722,9 +1722,9 @@ static void thread_demux_control(void *p)
             MP_VERBOSE(demuxer, "blocking for STREAM_CTRL %d\n", c->ctrl);
         c->res = stream_control(demuxer->stream, c->ctrl, c->arg);
         if (c->res != STREAM_UNSUPPORTED)
-            r = DEMUXER_CTRL_OK;
+            r = CONTROL_OK;
     }
-    if (r != DEMUXER_CTRL_OK) {
+    if (r != CONTROL_OK) {
         if (in->threading)
             MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
         if (demuxer->desc->control)
@@ -1743,7 +1743,7 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
         pthread_mutex_lock(&in->lock);
         int cr = cached_demux_control(in, cmd, arg);
         pthread_mutex_unlock(&in->lock);
-        if (cr != DEMUXER_CTRL_DONTKNOW)
+        if (cr != CONTROL_UNKNOWN)
             return cr;
     }
 

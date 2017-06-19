@@ -3123,12 +3123,12 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (mkv_d->duration == 0)
-            return DEMUXER_CTRL_DONTKNOW;
+            return CONTROL_FALSE;
 
         *((double *) arg) = (double) mkv_d->duration;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     default:
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     }
 }
 

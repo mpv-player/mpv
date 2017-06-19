@@ -227,10 +227,10 @@ static int demux_tv_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     if (cmd != DEMUXER_CTRL_STREAM_CTRL)
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     struct demux_ctrl_stream_ctrl *ctrl = arg;
     ctrl->res = tv_stream_control(tvh, ctrl->ctrl, ctrl->arg);
-    return DEMUXER_CTRL_OK;
+    return CONTROL_OK;
 }
 
 const demuxer_desc_t demuxer_desc_tv = {

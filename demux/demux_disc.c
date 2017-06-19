@@ -357,14 +357,14 @@ static int d_control(demuxer_t *demuxer, int cmd, void *arg)
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) < 1)
             break;
         *(double *)arg = len;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_RESYNC:
         demux_flush(p->slave);
         break; // relay to slave demuxer
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         reselect_streams(demuxer);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     return demux_control(p->slave, cmd, arg);
 }

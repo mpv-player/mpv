@@ -306,13 +306,13 @@ static int raw_control(demuxer_t *demuxer, int cmd, void *arg)
         stream_t *s = demuxer->stream;
         int64_t end = 0;
         if (stream_control(s, STREAM_CTRL_GET_SIZE, &end) != STREAM_OK)
-            return DEMUXER_CTRL_DONTKNOW;
+            return CONTROL_FALSE;
 
         *((double *) arg) = (end / p->frame_size) / p->frame_rate;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     default:
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     }
 }
 

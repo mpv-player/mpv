@@ -2370,7 +2370,7 @@ static int mp_property_program(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    demux_program_t prog;
+    demux_program_t prog = {0};
 
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer || !mpctx->playback_initialized)
@@ -2384,7 +2384,7 @@ static int mp_property_program(void *ctx, struct m_property *prop,
         else
             prog.progid = -1;
         if (demux_control(demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM, &prog) ==
-            DEMUXER_CTRL_NOTIMPL)
+            CONTROL_UNKNOWN)
             return M_PROPERTY_ERROR;
 
         if (prog.aid < 0 && prog.vid < 0) {

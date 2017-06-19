@@ -30,11 +30,6 @@
 #include "packet.h"
 #include "stheader.h"
 
-// DEMUXER control commands/answers
-#define DEMUXER_CTRL_NOTIMPL -1
-#define DEMUXER_CTRL_DONTKNOW 0
-#define DEMUXER_CTRL_OK 1
-
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
     DEMUXER_CTRL_GET_TIME_LENGTH,

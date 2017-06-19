@@ -1061,18 +1061,18 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
             }
             double duration = av_duration > 0 ? av_duration : total_duration;
             if (duration <= 0)
-                return DEMUXER_CTRL_DONTKNOW;
+                return CONTROL_FALSE;
             *(double *)arg = duration;
-            return DEMUXER_CTRL_OK;
+            return CONTROL_OK;
         }
 
         *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
 
     case DEMUXER_CTRL_SWITCHED_TRACKS:
     {
         select_tracks(demuxer, 0);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_IDENTIFY_PROGRAM:
     {
@@ -1085,7 +1085,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 
         prog->vid = prog->aid = prog->sid = -2;
         if (priv->avfc->nb_programs < 1)
-            return DEMUXER_CTRL_DONTKNOW;
+            return CONTROL_FALSE;
 
         if (prog->progid == -1) {
             p = 0;
@@ -1097,7 +1097,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
                 if (priv->avfc->programs[i]->id == prog->progid)
                     break;
             if (i == priv->avfc->nb_programs)
-                return DEMUXER_CTRL_DONTKNOW;
+                return CONTROL_FALSE;
             p = i;
         }
         start = p;
@@ -1126,7 +1126,7 @@ redo:
         if (prog->progid == -1 && prog->vid == -2 && prog->aid == -2) {
             p = (p + 1) % priv->avfc->nb_programs;
             if (p == start)
-                return DEMUXER_CTRL_DONTKNOW;
+                return CONTROL_FALSE;
             goto redo;
         }
         priv->cur_program = prog->progid = program->id;
@@ -1136,7 +1136,7 @@ redo:
         // Enforce metadata update even if no explicit METADATA_UPDATED since we switched program.
         demux_changed(demuxer, DEMUX_EVENT_METADATA);
 
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_RESYNC:
         /* NOTE:
@@ -1157,15 +1157,15 @@ redo:
         priv->avfc->pb->pos = stream_tell(priv->stream);
         av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
                       AVSEEK_FLAG_BYTE);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     case DEMUXER_CTRL_REPLACE_STREAM:
         if (priv->own_stream)
             free_stream(priv->stream);
         priv->own_stream = false;
         priv->stream = demuxer->stream;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     default:
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     }
 }
 

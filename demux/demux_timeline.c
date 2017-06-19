@@ -436,13 +436,13 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH: {
         *(double *)arg = p->duration;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         reselect_streams(demuxer);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
-    return DEMUXER_CTRL_NOTIMPL;
+    return CONTROL_UNKNOWN;
 }
 
 const demuxer_desc_t demuxer_desc_timeline = {

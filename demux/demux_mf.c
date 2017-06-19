@@ -353,10 +353,10 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         *((double *)arg) = (double)mf->nr_of_files / mf->sh->codec->fps;
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
 
     default:
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     }
 }
 
