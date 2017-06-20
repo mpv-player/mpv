@@ -245,7 +245,7 @@ x   player/video.c                  extremely hard
     stream/rar.*                    LGPL
     stream/stream_avdevice.c        unknown
     stream/stream_bluray.c          unknown
-x   stream/stream.c                 very hard
+    stream/stream.*                 LGPL
     stream/stream_cb.c              LGPL
     stream/stream_cdda.c            unknown
     stream/stream_dvb.*             must stay GPL
@@ -254,7 +254,6 @@ x   stream/stream.c                 very hard
     stream/stream_dvdnav.c          unknown
     stream/stream_edl.c             LGPL
     stream/stream_file.c            LGPL
-x   stream/stream.h                 hard
     stream/stream_lavf.c            LGPL
     stream/stream_libarchive.*      LGPL
     stream/stream_memory.c          LGPL
