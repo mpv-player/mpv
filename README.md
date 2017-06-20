@@ -50,7 +50,7 @@ For semi-official builds and third-party packages please see
 ## Changelog
 
 
-There is no completely changelog, however changes to the player core interface
+There is no complete changelog, however changes to the player core interface
 are listed in the [interface changelog][interface-changes].
 
 Changes to the C API are documented in the [client API changelog][api-changes].
@@ -208,7 +208,7 @@ make code review easier for both parties later on.
 
 mpv is based on mplayer2, which in turn is based on the original MPlayer
 (also called mplayer, mplayer-svn, mplayer1). Many changes have been made, a
-large part of which is incompatible or completely changes how the player
+large part of which is incompatible or completely changed how the player
 behaves. Although there are still many similarities to its ancestors, mpv
 should generally be treated as a completely different program.
 
