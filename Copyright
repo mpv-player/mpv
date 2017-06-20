@@ -134,7 +134,7 @@ x   audio/format.*                  hard (murky libaf origins)
     common/version.c                LGPL
     demux/codec_tags.*              LGPL
     demux/cue.*                     LGPL
-x   demux/demux.*                   complications (at least Denes' changes)
+    demux/demux.*                   LGPL
     demux/demux_cue.c               LGPL
     demux/demux_disc.c              LGPL
     demux/demux_edl.c               LGPL
