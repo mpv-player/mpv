@@ -132,6 +132,18 @@ struct priv {
     double frame_rate;
 };
 
+static int generic_open(struct demuxer *demuxer)
+{
+    struct stream *s = demuxer->stream;
+    struct priv *p = demuxer->priv;
+
+    int64_t end = 0;
+    if (stream_control(s, STREAM_CTRL_GET_SIZE, &end) == STREAM_OK)
+        demuxer->duration = (end / p->frame_size) / p->frame_rate;
+
+    return 0;
+}
+
 static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct demux_rawaudio_opts *opts =
@@ -170,7 +182,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
         .read_frames = c->samplerate / 8,
     };
 
-    return 0;
+    return generic_open(demuxer);
 }
 
 static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
@@ -255,7 +267,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
         .read_frames = 1,
     };
 
-    return 0;
+    return generic_open(demuxer);
 }
 
 static int raw_fill_buffer(demuxer_t *demuxer)
@@ -297,32 +309,12 @@ static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
     stream_seek(s, (pos / p->frame_size) * p->frame_size);
 }
 
-static int raw_control(demuxer_t *demuxer, int cmd, void *arg)
-{
-    struct priv *p = demuxer->priv;
-
-    switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH: {
-        stream_t *s = demuxer->stream;
-        int64_t end = 0;
-        if (stream_control(s, STREAM_CTRL_GET_SIZE, &end) != STREAM_OK)
-            return CONTROL_FALSE;
-
-        *((double *) arg) = (end / p->frame_size) / p->frame_rate;
-        return CONTROL_OK;
-    }
-    default:
-        return CONTROL_UNKNOWN;
-    }
-}
-
 const demuxer_desc_t demuxer_desc_rawaudio = {
     .name = "rawaudio",
     .desc = "Uncompressed audio",
     .open = demux_rawaudio_open,
     .fill_buffer = raw_fill_buffer,
     .seek = raw_seek,
-    .control = raw_control,
 };
 
 const demuxer_desc_t demuxer_desc_rawvideo = {
@@ -331,5 +323,4 @@ const demuxer_desc_t demuxer_desc_rawvideo = {
     .open = demux_rawvideo_open,
     .fill_buffer = raw_fill_buffer,
     .seek = raw_seek,
-    .control = raw_control,
 };

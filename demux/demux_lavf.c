@@ -939,6 +939,26 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     demuxer->fully_read = priv->format_hack.fully_read;
 
+    if (priv->avfc->duration > 0) {
+        demuxer->duration = (double)priv->avfc->duration / AV_TIME_BASE;
+    } else {
+        double total_duration = 0;
+        double av_duration = 0;
+        for (int n = 0; n < priv->avfc->nb_streams; n++) {
+            AVStream *st = priv->avfc->streams[n];
+            if (st->duration <= 0)
+                continue;
+            double f_duration = st->duration * av_q2d(st->time_base);
+            total_duration = MPMAX(total_duration, f_duration);
+            if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ||
+                st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+                av_duration = MPMAX(av_duration, f_duration);
+        }
+        double duration = av_duration > 0 ? av_duration : total_duration;
+        if (duration > 0)
+            demuxer->duration = duration;
+    }
+
     return 0;
 }
 
@@ -1045,30 +1065,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     lavf_priv_t *priv = demuxer->priv;
 
     switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH:
-        if (priv->avfc->duration <= 0) {
-            double total_duration = 0;
-            double av_duration = 0;
-            for (int n = 0; n < priv->avfc->nb_streams; n++) {
-                AVStream *st = priv->avfc->streams[n];
-                if (st->duration <= 0)
-                    continue;
-                double f_duration = st->duration * av_q2d(st->time_base);
-                total_duration = MPMAX(total_duration, f_duration);
-                if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ||
-                    st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
-                    av_duration = MPMAX(av_duration, f_duration);
-            }
-            double duration = av_duration > 0 ? av_duration : total_duration;
-            if (duration <= 0)
-                return CONTROL_FALSE;
-            *(double *)arg = duration;
-            return CONTROL_OK;
-        }
-
-        *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
-        return CONTROL_OK;
-
     case DEMUXER_CTRL_SWITCHED_TRACKS:
     {
         select_tracks(demuxer, 0);

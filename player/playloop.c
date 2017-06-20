@@ -441,14 +441,7 @@ void execute_queued_seek(struct MPContext *mpctx)
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
-        return -1;
-
-    double len = demuxer_get_time_length(demuxer);
-    if (len >= 0)
-        return len;
-
-    return -1; // unknown
+    return demuxer ? demuxer->duration : -1;
 }
 
 double get_current_time(struct MPContext *mpctx)

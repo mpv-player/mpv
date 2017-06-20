@@ -32,7 +32,6 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_GET_TIME_LENGTH,
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
@@ -175,6 +174,7 @@ typedef struct demuxer {
     bool seekable;
     bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;
+    double duration;  // -1 if unknown
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
     // The file data was fully read, and there is no need to keep the stream
@@ -279,8 +279,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
 void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
                            struct mp_tags *tags);
-
-double demuxer_get_time_length(struct demuxer *demuxer);
 
 int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 

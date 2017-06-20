@@ -335,6 +335,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     mf->sh = sh;
     demuxer->priv = (void *)mf;
     demuxer->seekable = true;
+    demuxer->duration = mf->nr_of_files / mf->sh->codec->fps;
 
     return 0;
 
@@ -346,20 +347,6 @@ static void demux_close_mf(demuxer_t *demuxer)
 {
 }
 
-static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg)
-{
-    mf_t *mf = demuxer->priv;
-
-    switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH:
-        *((double *)arg) = (double)mf->nr_of_files / mf->sh->codec->fps;
-        return CONTROL_OK;
-
-    default:
-        return CONTROL_UNKNOWN;
-    }
-}
-
 const demuxer_desc_t demuxer_desc_mf = {
     .name = "mf",
     .desc = "image files (mf)",
@@ -367,5 +354,4 @@ const demuxer_desc_t demuxer_desc_mf = {
     .open = demux_open_mf,
     .close = demux_close_mf,
     .seek = demux_seek_mf,
-    .control = demux_control_mf,
 };

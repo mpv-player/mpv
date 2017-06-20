@@ -411,6 +411,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         mkv_d->duration = info.duration * mkv_d->tc_scale / 1e9;
         MP_VERBOSE(demuxer, "| + duration: %.3fs\n",
                mkv_d->duration);
+        demuxer->duration = mkv_d->duration;
     }
     if (info.title) {
         mp_tags_set_str(demuxer->metadata, "TITLE", info.title);
@@ -3090,8 +3091,10 @@ static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos)
     if (!last_ts[STREAM_VIDEO])
         last_ts[STREAM_VIDEO] = mkv_d->cluster_tc;
 
-    if (last_ts[STREAM_VIDEO])
+    if (last_ts[STREAM_VIDEO]) {
         mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9 - demuxer->start_time;
+        demuxer->duration = mkv_d->duration;
+    }
 
     stream_seek(demuxer->stream, start_pos);
     mkv_d->cluster_start = mkv_d->cluster_end = 0;
@@ -3116,22 +3119,6 @@ static void probe_first_timestamp(struct demuxer *demuxer)
         MP_VERBOSE(demuxer, "Start PTS: %f\n", demuxer->start_time);
 }
 
-static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
-{
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-
-    switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH:
-        if (mkv_d->duration == 0)
-            return CONTROL_FALSE;
-
-        *((double *) arg) = (double) mkv_d->duration;
-        return CONTROL_OK;
-    default:
-        return CONTROL_UNKNOWN;
-    }
-}
-
 static void mkv_free(struct demuxer *demuxer)
 {
     struct mkv_demuxer *mkv_d = demuxer->priv;
@@ -3149,7 +3136,6 @@ const demuxer_desc_t demuxer_desc_matroska = {
     .fill_buffer = demux_mkv_fill_buffer,
     .close = mkv_free,
     .seek = demux_mkv_seek,
-    .control = demux_mkv_control,
     .load_timeline = build_ordered_chapter_timeline,
 };
 

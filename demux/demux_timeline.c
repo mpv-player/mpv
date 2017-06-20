@@ -363,6 +363,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->editions = meta->editions;
     demuxer->num_editions = meta->num_editions;
     demuxer->edition = meta->edition;
+    demuxer->duration = p->duration;
 
     int num_streams = demux_get_num_stream(meta);
     for (int n = 0; n < num_streams; n++) {
@@ -431,17 +432,11 @@ static void d_close(struct demuxer *demuxer)
 
 static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 {
-    struct priv *p = demuxer->priv;
-
-    switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH: {
-        *(double *)arg = p->duration;
-        return CONTROL_OK;
-    }
-    case DEMUXER_CTRL_SWITCHED_TRACKS:
+    if (cmd == DEMUXER_CTRL_SWITCHED_TRACKS) {
         reselect_streams(demuxer);
         return CONTROL_OK;
     }
+
     return CONTROL_UNKNOWN;
 }
 

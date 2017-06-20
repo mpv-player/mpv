@@ -173,7 +173,6 @@ struct demux_internal {
 
     // Cached state.
     bool force_cache_update;
-    double time_length;
     struct mp_tags *stream_metadata;
     struct stream_cache_info stream_cache_info;
     int64_t stream_size;
@@ -1085,6 +1084,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->ts_resets_possible = src->ts_resets_possible;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
+        dst->duration = src->duration;
         dst->is_network = src->is_network;
         dst->priv = src->priv;
     }
@@ -1572,14 +1572,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
     return demuxer->num_chapters - 1;
 }
 
-double demuxer_get_time_length(struct demuxer *demuxer)
-{
-    double len;
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, &len) > 0)
-        return len;
-    return -1;
-}
-
 // must be called not locked
 static void update_cache(struct demux_internal *in)
 {
@@ -1587,21 +1579,14 @@ static void update_cache(struct demux_internal *in)
     struct stream *stream = demuxer->stream;
 
     // Don't lock while querying the stream.
-    double time_length = -1;
     struct mp_tags *stream_metadata = NULL;
     struct stream_cache_info stream_cache_info = {.size = -1};
-
-    if (demuxer->desc->control) {
-        demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                               &time_length);
-    }
 
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
     stream_control(stream, STREAM_CTRL_GET_CACHE_INFO, &stream_cache_info);
 
     pthread_mutex_lock(&in->lock);
-    in->time_length = time_length;
     in->stream_size = stream_size;
     in->stream_cache_info = stream_cache_info;
     if (stream_metadata) {
@@ -1645,11 +1630,6 @@ static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
 {
     switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH:
-        if (in->time_length < 0)
-            return CONTROL_FALSE;
-        *(double *)arg = in->time_length;
-        return CONTROL_OK;
     case DEMUXER_CTRL_STREAM_CTRL: {
         struct demux_ctrl_stream_ctrl *c = arg;
         int r = cached_stream_control(in, c->ctrl, c->arg);

@@ -199,16 +199,6 @@ static void copy_chapters(struct demux_chapter **chapters, int *num_chapters,
     }
 }
 
-// return length of the source in seconds, or -1 if unknown
-static double source_get_length(struct demuxer *demuxer)
-{
-    double time;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, &time) <= 0)
-        time = -1;
-    return time;
-}
-
 static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
 {
     if (part->chapter_ts) {
@@ -279,7 +269,7 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
 
             resolve_timestamps(part, source);
 
-            double end_time = source_get_length(source);
+            double end_time = source->duration;
             if (end_time >= 0)
                 end_time += source->start_time;
 

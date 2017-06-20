@@ -384,8 +384,7 @@ static void build_timeline_loop(struct tl_ctx *ctx,
             /* If we're the source or it's a non-ordered edition reference,
              * just add a timeline part from the source. */
             if (current_source == j || !linked_m->uid.edition) {
-                uint64_t source_full_length =
-                    demuxer_get_time_length(linked_source) * 1e9;
+                uint64_t source_full_length = linked_source->duration * 1e9;
                 uint64_t source_length = source_full_length - c->start;
                 int64_t join_diff = 0;
 

@@ -130,20 +130,6 @@ out:
     return res;
 }
 
-// return length of the source in seconds, or -1 if unknown
-static double source_get_length(struct demuxer *demuxer)
-{
-    double get_time_ans;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demuxer && demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                                 (void *) &get_time_ans) > 0)
-    {
-        return get_time_ans;
-    } else {
-        return -1;
-    }
-}
-
 static void build_timeline(struct timeline *tl)
 {
     struct priv *p = tl->demuxer->priv;
@@ -210,7 +196,7 @@ static void build_timeline(struct timeline *tl)
         if (i + 1 < track_count && tracks[i].source == tracks[i + 1].source) {
             duration = tracks[i + 1].start - tracks[i].start;
         } else {
-            duration = source_get_length(source);
+            duration = source->duration;
             // Two cases: 1) last track of a single-file cue, or 2) any track of
             // a multi-file cue. We need to do this for 1) only because the
             // timeline needs to be terminated with the length of the last
