@@ -116,7 +116,7 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     audio/chmap.*                   LGPL
     audio/chmap_sel.*               LGPL
     audio/fmt-conversion.*          LGPL
-x   audio/format.*                  hard (murky libaf origins)
+    audio/format.*                  LGPL
     common/av_common.*              LGPL
     common/av_log.c                 almost LGPL
     common/av_log.h                 LGPL
