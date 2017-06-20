@@ -223,7 +223,7 @@ x   player/command.c                extremely hard (also some GPL-only things)
 x   player/command.h                hard
 x   player/configfiles.c            unknown
 x   player/core.h                   extremely hard
-x   player/external_files.*         hard (murky subreader.c origins)
+    player/external_files.*         LGPL
     player/lavfi.*                  LGPL
 x   player/loadfile.c               extremely hard
     player/lua/*.*                  LGPL
