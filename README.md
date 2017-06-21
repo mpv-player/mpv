@@ -50,7 +50,7 @@ For semi-official builds and third-party packages please see
 ## Changelog
 
 
-There is no complete changelog, however changes to the player core interface
+There is no complete changelog; however, changes to the player core interface
 are listed in the [interface changelog][interface-changes].
 
 Changes to the C API are documented in the [client API changelog][api-changes].
@@ -58,7 +58,7 @@ Changes to the C API are documented in the [client API changelog][api-changes].
 The [release list][releases] has a summary of most of the important changes
 on every release.
 
-Changes to the default key bindings are inidcated in
+Changes to the default key bindings are indicated in
 [restore-old-bindings.conf][restore-old-bindings].
 
 ## Compilation
@@ -67,7 +67,7 @@ Changes to the default key bindings are inidcated in
 Compiling with full features requires development files for several
 external libraries. Below is a list of some important requirements.
 
-The mpv build system uses *waf* but we don't store it in your source tree. The
+The mpv build system uses *waf*, but we don't store it in your source tree. The
 script './bootstrap.py' will download the latest version of waf that was tested
 with the build system.
 
@@ -124,9 +124,9 @@ Libass dependencies:
 FFmpeg dependencies:
 
 - gcc or clang, yasm on x86 and x86_64
-- OpenSSL (has to be explicitly enabled when compiling ffmpeg)
-- libx264/libmp3lame/libfdk-aac if you want to use encoding (has to be
-  explicitly enabled when compiling ffmpeg)
+- OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
+- libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
+  explicitly enabled when compiling FFmpeg)
 - Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
@@ -160,7 +160,7 @@ versions for no rational reason.
 
 If you want to use a stable FFmpeg release, use the latest release, which has
 most likely the best maintenance out of all stable releases. Older releases
-are for distros, and at best receive basic changes like fixing critical security
+are for distros, and at best receive basic changes, like fixing critical security
 issues or build fixes, and at worst are completely abandoned.
 
 ## FFmpeg ABI compatibility
@@ -194,7 +194,11 @@ See the [release policy document][release-policy] for more information.
 
 
 Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
-reports or feature requests.
+reports or feature requests. Follow the template's instructions or the issue
+will likely be ignored or closed as invalid.
+
+Using the bug tracker as place for simple questions is fine but IRC is
+recommended (see [Contact](#Contact) below).
 
 ## Contributing
 
@@ -207,10 +211,10 @@ make code review easier for both parties later on.
 
 
 mpv is based on mplayer2, which in turn is based on the original MPlayer
-(also called mplayer, mplayer-svn, mplayer1). Many changes have been made, a
-large part of which is incompatible or completely changed how the player
+(also called mplayer, mplayer-svn, mplayer1). Many changes have been made,
+many of which are incompatible or completely changed how the player
 behaves. Although there are still many similarities to its ancestors, mpv
-should generally be treated as a completely different program.
+should generally be treated as a completely separate program.
 
 mpv was forked because we wanted to modernize MPlayer. This includes
 removing cruft (including features which stopped making sense 10 years ago),
@@ -223,13 +227,12 @@ In general, mpv should be considered a completely new program, rather than a
 MPlayer drop-in replacement.
 
 If you are wondering what's different from mplayer2 and MPlayer, an incomplete
-and now unmaintained list of changes is located [here][mplayer-changes].
+and largely unmaintained list of changes is located [here][mplayer-changes].
 
 ## Contact
 
 
-Most activity happens on the IRC channel and the github issue tracker. The
-mailing lists are mostly unused.
+Most activity happens on the IRC channel and the github issue tracker.
 
  - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
  - **User IRC Channel**: `#mpv` on `irc.freenode.net`
