@@ -160,7 +160,7 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     input/ipc.c                     LGPL
     input/ipc-unix.c                LGPL
     input/ipc-win.c                 LGPL
-    input/keycodes.*                LGPtir
+    input/keycodes.*                LGPL
     input/pipe-win32.c              LGPL
     libmpv/*.*                      LGPL
     misc/*.*                        LGPL
