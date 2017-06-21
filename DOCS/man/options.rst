@@ -1892,7 +1892,7 @@ Subtitles
     .. admonition:: Examples
 
         - ``--sub-font='Bitstream Vera Sans'``
-        - ``--sub-font='MS Comic Sans'``
+        - ``--sub-font='Comic Sans MS'``
 
     .. note::
 
@@ -2992,7 +2992,7 @@ OSD
     .. admonition:: Examples
 
         - ``--osd-font='Bitstream Vera Sans'``
-        - ``--osd-font='MS Comic Sans'``
+        - ``--osd-font='Comic Sans MS'``
 
 ``--osd-font-size=<size>``
     Specify the OSD font size. See ``--sub-font-size`` for details.
