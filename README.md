@@ -130,8 +130,8 @@ FFmpeg dependencies:
 - Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
-Linux distributions. However FFmpeg is an exception (distro versions may be
-too old to work at all or work well). For that reason you may want to use
+Linux distributions. However, FFmpeg is an exception (distro versions may be
+too old to work well or at all). For that reason you may want to use
 the separately available build wrapper ([mpv-build][mpv-build]) that first
 compiles FFmpeg libraries and libass, and then compiles the player statically
 linked against those.
@@ -206,6 +206,10 @@ recommended (see [Contact](#Contact) below).
 For small changes you can just send us pull requests through GitHub. For bigger
 changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
+
+You can check [the wiki](https://github.com/mpv-player/mpv/wiki/Stuff-to-do)
+or the [issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22)
+for ideas on what you could contribute with.
 
 ## Relation to MPlayer and mplayer2
 
