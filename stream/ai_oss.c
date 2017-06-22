@@ -25,15 +25,7 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
-#if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
-#else
-#if HAVE_SOUNDCARD_H
-#include <soundcard.h>
-#else
-#include <linux/soundcard.h>
-#endif
-#endif
 
 #include "osdep/io.h"
 

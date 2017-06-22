@@ -3,7 +3,7 @@ from waftools.checks.generic import *
 from waflib import Utils
 import os
 
-__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front",
+__all__ = ["check_pthreads", "check_iconv", "check_lua",
            "check_cocoa", "check_openal", "check_rpi"]
 
 pthreads_program = load_fragment('pthreads.c')
@@ -82,32 +82,6 @@ def check_lua(ctx, dependency_identifier):
                                      'version found: ' + lua_version)
             return True
     return False
-
-def __get_osslibdir():
-    cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
-    p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
-                                    stdout=Utils.subprocess.PIPE,
-                                    stderr=Utils.subprocess.PIPE)
-    return p.communicate()[0].decode().rstrip()
-
-def check_oss_4front(ctx, dependency_identifier):
-    oss_libdir = __get_osslibdir()
-
-    # avoid false positive from native sys/soundcard.h
-    if not oss_libdir:
-        ctx.undefine(inflector.define_key(dependency_identifier))
-        return False
-
-    soundcard_h = os.path.join(oss_libdir, "include/sys/soundcard.h")
-    include_dir = os.path.join(oss_libdir, "include")
-
-    fn = check_cc(header_name=soundcard_h,
-                  defines=['PATH_DEV_DSP="/dev/dsp"',
-                           'PATH_DEV_MIXER="/dev/mixer"'],
-                  cflags='-I{0}'.format(include_dir),
-                  fragment=load_fragment('oss_audio.c'))
-
-    return fn(ctx, dependency_identifier)
 
 def check_cocoa(ctx, dependency_identifier):
     fn = check_cc(

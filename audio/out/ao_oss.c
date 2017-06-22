@@ -42,13 +42,7 @@
 #include "osdep/timer.h"
 #include "osdep/endian.h"
 
-#if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
-#else
-#if HAVE_SOUNDCARD_H
-#include <soundcard.h>
-#endif
-#endif
 
 #include "audio/format.h"
 
@@ -59,6 +53,9 @@
 // clear the buffer), and the device should be closed when unused.
 // Define to 1 if SNDCTL_DSP_RESET should be used to reset without close.
 #define KEEP_DEVICE (defined(SNDCTL_DSP_RESET) && !defined(__NetBSD__))
+
+#define PATH_DEV_DSP "/dev/dsp"
+#define PATH_DEV_MIXER "/dev/mixer"
 
 struct priv {
     int audio_fd;

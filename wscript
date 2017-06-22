@@ -471,35 +471,10 @@ audio_output_features = [
         'func': check_pkg_config('sdl'),
         'default': 'disable'
     }, {
-        'name': 'oss-audio-4front',
-        'desc': 'OSS (implementation from opensound.com)',
-        'func': check_oss_4front,
-        'groups' : [ 'oss-audio' ]
-    }, {
-        'name': 'oss-audio-native',
-        'desc': 'OSS (platform-specific OSS implementation)',
-        'func': check_cc(header_name='sys/soundcard.h',
-                         defines=['PATH_DEV_DSP="/dev/dsp"',
-                                  'PATH_DEV_MIXER="/dev/mixer"'],
-                         fragment=load_fragment('oss_audio.c')),
-        'deps_neg': [ 'oss-audio-4front' ],
-        'groups' : [ 'oss-audio' ]
-    }, {
-        'name': 'oss-audio-sunaudio',
-        'desc': 'OSS (emulation on top of SunAudio)',
-        'func': check_cc(header_name='soundcard.h',
-                         lib='ossaudio',
-                         defines=['PATH_DEV_DSP="/dev/sound"',
-                                  'PATH_DEV_MIXER="/dev/mixer"'],
-                         fragment=load_fragment('oss_audio_sunaudio.c')),
-        'deps_neg': [ 'oss-audio-4front', 'oss-audio-native' ],
-        'groups' : [ 'oss-audio' ]
-    }, {
         'name': '--oss-audio',
-        'desc': 'OSS audio output',
-        'func': check_true,
-        'deps_any': [ 'oss-audio-native', 'oss-audio-sunaudio',
-                      'oss-audio-4front' ]
+        'desc': 'OSS',
+        'func': check_cc(header_name='sys/soundcard.h'),
+        'deps': [ 'posix' ],
     }, {
         'name': '--rsound',
         'desc': 'RSound audio output',
@@ -1006,14 +981,6 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     ctx.parse_dependencies(standalone_features)
-
-    ctx.define('HAVE_SYS_SOUNDCARD_H',
-               '(HAVE_OSS_AUDIO_NATIVE || HAVE_OSS_AUDIO_4FRONT)',
-               quote=False)
-
-    ctx.define('HAVE_SOUNDCARD_H',
-               'HAVE_OSS_AUDIO_SUNAUDIO',
-               quote=False)
 
     ctx.load('generators.headers')
 
