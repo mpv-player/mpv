@@ -1841,7 +1841,6 @@ const m_option_type_t m_option_type_color = {
     .copy  = copy_opt,
 };
 
-#if HAVE_GPL
 
 // Parse a >=0 number starting at s. Set s to the string following the number.
 // If the number ends with '%', eat that and set *out_per to true, but only
@@ -2046,37 +2045,6 @@ const m_option_type_t m_option_type_size_box = {
     .print = print_geometry,
     .copy  = copy_opt,
 };
-
-#else /* #if HAVE_GPL */
-
-void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
-                      int scrw, int scrh, struct m_geometry *gm)
-{
-    // nothing
-}
-
-static int parse_dummy(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param, void *dst)
-{
-    mp_err(log, "Unavailable in LGPL mode.\n");
-    return M_OPT_INVALID;
-}
-
-const m_option_type_t m_option_type_geometry = {
-    .name  = "Window geometry",
-    .size  = sizeof(struct m_geometry),
-    .parse = parse_dummy,
-    .copy  = copy_opt,
-};
-
-const m_option_type_t m_option_type_size_box = {
-    .name  = "Window size",
-    .size  = sizeof(struct m_geometry),
-    .parse = parse_dummy,
-    .copy  = copy_opt,
-};
-
-#endif
 
 
 #include "video/img_format.h"
