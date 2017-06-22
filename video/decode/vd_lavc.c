@@ -51,6 +51,7 @@
 #include "vd.h"
 #include "video/img_format.h"
 #include "video/filter/vf.h"
+#include "video/out/vo.h"
 #include "video/decode/dec_video.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
@@ -74,6 +75,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
                        struct vd_lavc_hwdec *hwdec);
 static void uninit_avctx(struct dec_video *vd);
 
+static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags);
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags);
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *pix_fmt);
@@ -583,8 +585,13 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     AVCodecContext *avctx = ctx->avctx;
     if (!ctx->avctx)
         goto error;
+    avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
+    if ((lavc_codec->capabilities & AV_CODEC_CAP_DR1) && vd->vo->driver->get_buffer) {
+        avctx->get_buffer2 = get_buffer2_direct;
+        avctx->thread_safe_callbacks = vd->vo->driver->caps & VO_CAP_GET_BUFFER_THREADSAFE;
+    }
 
 #if LIBAVCODEC_VERSION_MICRO >= 100
     avctx->pkt_timebase = ctx->codec_timebase;
@@ -595,7 +602,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         goto error;
 
     if (ctx->hwdec) {
-        avctx->opaque = vd;
         avctx->thread_count = 1;
 #if HAVE_VDPAU_HWACCEL
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
@@ -952,6 +958,40 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     return select;
 }
 
+static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
+{
+    struct dec_video *vd = avctx->opaque;
+    struct vo_buffer_data vbufd = { 0 };
+
+    struct mp_image img;
+    mp_image_copy_fields_from_av_frame(&img, pic);
+    vbufd.par            = &img.params;
+    vbufd.aligned_width  = img.params.w;
+    vbufd.aligned_height = img.params.h;
+    avcodec_align_dimensions2(avctx, &vbufd.aligned_width, &vbufd.aligned_height,
+                              vbufd.stride_alignment);
+
+    int ret = vd->vo->driver->get_buffer(vd->vo, &vbufd);
+    if (ret < 0)
+        return AVERROR(ENOMEM);
+    else if (ret > 0)
+        return avcodec_default_get_buffer2(avctx, pic, flags);
+
+    pic->buf[0] = av_buffer_create(vbufd.data[0], vbufd.total_size,
+                                   vbufd.release_buffer, vbufd.opaque, 0);
+
+    memset(pic->data,          0, AV_NUM_DATA_POINTERS*sizeof(uint8_t *));
+    memset(pic->extended_data, 0, AV_NUM_DATA_POINTERS*sizeof(uint8_t *));
+    memset(pic->linesize,      0, AV_NUM_DATA_POINTERS*sizeof(int));
+
+    for (int i = 0; i < img.num_planes; i++) {
+        pic->linesize[i] = vbufd.linesize[i];
+        pic->data[i] = pic->extended_data[i] = vbufd.data[i];
+    }
+
+    return 0;
+}
+
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
 {
     struct dec_video *vd = avctx->opaque;
@@ -1115,6 +1155,9 @@ static bool decode_frame(struct dec_video *vd)
     assert(mpi->planes[0] || mpi->planes[3]);
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
+
+    if (vd->vo->driver->get_buffer)
+        vd->vo->driver->flush_buffer(vd->vo, mpi);
 
 #if LIBAVCODEC_VERSION_MICRO >= 100
     mpi->pkt_duration =

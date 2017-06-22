@@ -154,9 +154,11 @@ struct voctrl_performance_data {
 
 enum {
     // VO does handle mp_image_params.rotate in 90 degree steps
-    VO_CAP_ROTATE90     = 1 << 0,
+    VO_CAP_ROTATE90              = 1 << 0,
     // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
-    VO_CAP_FRAMEDROP    = 1 << 1,
+    VO_CAP_FRAMEDROP             = 1 << 1,
+    // VO's get_buffer is safe to call from multiple threads
+    VO_CAP_GET_BUFFER_THREADSAFE = 1 << 2,
 };
 
 #define VO_MAX_REQ_FRAMES 10
@@ -224,6 +226,21 @@ struct vo_frame {
     uint64_t frame_id;
 };
 
+struct vo_buffer_data {
+    /* Inputs */
+    struct mp_image_params *par;     /* Partial, only width, height and imgfmt used */
+    int aligned_width;                          /* From avcodec_align_dimensions2() */
+    int aligned_height;                         /* From avcodec_align_dimensions2() */
+    int stride_alignment[MP_MAX_PLANES];        /* From avcodec_align_dimensions2() */
+
+    /* Outputs */
+    uint8_t *data[MP_MAX_PLANES];                             /* Pointers to planes */
+    size_t linesize[MP_MAX_PLANES];                              /* Stride in bytes */
+    size_t total_size;                     /* Total size of the buffer with padding */
+    void *opaque;                            /* Context to give to release function */
+    void (*release_buffer)(void *opaque, uint8_t *data);        /* Release function */
+};
+
 struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
@@ -260,6 +277,27 @@ struct vo_driver {
      * Control interface
      */
     int (*control)(struct vo *vo, uint32_t request, void *data);
+
+    /*
+     * lavc callback for direct rendering
+     * The opaque field of the AVBufferRef of each mp_image MUST be set to the
+     * opaque field provided from the vo_buffer_data struct. If no matching frame
+     * is found the VO will switch to indirect rendering. The VO will switch
+     * back to direct rendering if a matching buffer is fed into draw_frame again.
+     *
+     * The aligned_width/height/stride parameters must be generated via a call to
+     * avcodec_align_dimensions2() with a correct avctx, since each codec has
+     * different alignment and padding requirements.
+     *
+     * returns: < 0 on error, 0 on success, > 0 if the default get_buffer call
+     * (avcodec_default_get_buffer2) must be used
+     */
+    int (*get_buffer)(struct vo *vo, struct vo_buffer_data *buf);
+
+    /*
+     * Informs the VO the data is ready to be read.
+     */
+    void (*flush_buffer)(struct vo *vo, struct mp_image *mpi);
 
     /*
      * Render the given frame to the VO's backbuffer. This operation will be

@@ -703,8 +703,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
 
 // Copy properties and data of the AVFrame into the mp_image, without taking
 // care of memory management issues.
-static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                               struct AVFrame *src)
+void mp_image_copy_fields_from_av_frame(struct mp_image *dst, struct AVFrame *src)
 {
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
