@@ -313,7 +313,10 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- demuxer options --------------------
 
+#if HAVE_GPL
+    // Possibly GPL due to d8fd7131bbcde029ab41799fd3162050b43f6848.
     OPT_CHOICE_OR_INT("frames", play_frames, 0, 0, INT_MAX, ({"all", -1})),
+#endif
 
     OPT_REL_TIME("start", play_start, 0),
     OPT_REL_TIME("end", play_end, 0),

@@ -1117,7 +1117,10 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
 
+#if HAVE_GPL
+    // Possibly GPL due to d8fd7131bbcde029ab41799fd3162050b43f6848.
     mpctx->max_frames = opts->play_frames;
+#endif
 
     handle_force_window(mpctx, false);
 
@@ -1247,12 +1250,15 @@ reopen_file:
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
 
+#if HAVE_GPL
+    // Possibly GPL due to d8fd7131bbcde029ab41799fd3162050b43f6848.
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)
             mpctx->stop_play = PT_NEXT_ENTRY;
         mpctx->error_playing = 0;
         goto terminate_playback;
     }
+#endif
 
     double startpos = rel_time_to_abs(mpctx, opts->play_start);
     if (startpos == MP_NOPTS_VALUE && opts->chapterrange[0] > 0) {
