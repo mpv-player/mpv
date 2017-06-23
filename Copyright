@@ -169,7 +169,7 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     options/m_option.c              almost LGPL
     options/m_option.h              LGPL
     options/m_property.*            LGPL
-x   options/options.*               very hard (lots of options and history)
+    options/options.*               LGPL
     options/parse_commandline.*     LGPL
     options/parse_configfile.*      LGPL
     options/path.*                  LGPL
@@ -218,24 +218,24 @@ x   options/options.*               very hard (lots of options and history)
     osdep/win32-console-wrapper.c   LGPL (BSD)
     osdep/win32/*                   LGPL (ISC)
     osdep/windows_utils.*           LGPL
-x   player/audio.c                  extremely hard (complex history, libaf ties)
+x   player/audio.c                  LGPL (dysfunctional due to libaf)
     player/client.*                 LGPL (ISC)
-x   player/command.c                extremely hard (also some GPL-only things)
-x   player/command.h                hard
-x   player/configfiles.c            unknown
-x   player/core.h                   extremely hard
+    player/command.c                LGPL
+    player/command.h                LGPL
+    player/configfiles.c            LGPL
+    player/core.h                   LGPL
     player/external_files.*         LGPL
     player/lavfi.*                  LGPL
-x   player/loadfile.c               extremely hard
+    player/loadfile.c               LGPL
     player/lua/*.*                  LGPL
     player/lua.c                    LGPL
     player/misc.c                   LGPL
-    player/osd.c                    hard
-x   player/playloop.c               extremely hard
+    player/osd.c                    LGPL
+    player/playloop.c               LGPL
     player/screenshot.*             LGPL
     player/scripting.*              LGPL
-x   player/sub.c                    easy (probably almost no mplayer code)
-x   player/video.c                  extremely hard
+    player/sub.c                    LGPL
+    player/video.c                  LGPL
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
     stream/cache.c                  LGPLv3+
