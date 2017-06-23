@@ -2486,6 +2486,8 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, name);
 }
 
+#if HAVE_GPL
+// Possibly GPL due to 7b25afd7423e9056782993cbd1b32ead64ac1462.
 static int mp_property_deinterlace(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -2505,6 +2507,7 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
+#endif
 
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
@@ -3959,7 +3962,9 @@ static const struct m_property mp_properties_base[] = {
 
     // Video
     {"fullscreen", mp_property_fullscreen},
+#if HAVE_GPL
     {"deinterlace", mp_property_deinterlace},
+#endif
     {"taskbar-progress", mp_property_taskbar_progress},
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},

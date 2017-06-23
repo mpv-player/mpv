@@ -158,6 +158,7 @@ static bool check_output_format(struct vo_chain *vo_c, int imgfmt)
 
 static int probe_deint_filters(struct vo_chain *vo_c)
 {
+#if HAVE_GPL
     // Usually, we prefer inserting/removing deint filters. But If there's VO
     // support, or the user inserted a filter that supports swichting deint and
     // that has no VF_DEINTERLACE_LABEL, or if the filter was auto-inserted
@@ -165,6 +166,7 @@ static int probe_deint_filters(struct vo_chain *vo_c)
     // use the runtime switching method.
     if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){1}) == CONTROL_OK)
         return 0;
+#endif
 
     if (check_output_format(vo_c, IMGFMT_VDPAU)) {
         char *args[5] = {"deint", "yes"};
@@ -210,9 +212,11 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
             return;
     }
 
+#if HAVE_GPL
     // Make sure to reset this even if runtime deint switching is used.
     if (mpctx->opts->deinterlace >= 0)
         video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
+#endif
 
     if (params.rotate) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90) || params.rotate % 90) {
@@ -251,8 +255,10 @@ int get_deinterlacing(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
     int enabled = 0;
+#if HAVE_GPL
     if (video_vf_vo_control(vo_c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
         enabled = -1;
+#endif
     if (enabled < 0) {
         // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
         if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL))
