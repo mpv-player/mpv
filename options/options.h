@@ -73,6 +73,7 @@ typedef struct MPOpts {
     int use_terminal;
     char *dump_stats;
     int verbose;
+    int msg_really_quiet;
     char **msg_levels;
     int msg_color;
     int msg_module;

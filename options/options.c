@@ -261,8 +261,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, 0),
-    OPT_FLAG_STORE("really-quiet", verbose,
-                   M_OPT_FIXED | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
+    OPT_FLAG("really-quiet", msg_really_quiet, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_FLAG("terminal", use_terminal, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | UPDATE_TERM,
                 .type = &m_option_type_msglevels),
