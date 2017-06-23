@@ -269,7 +269,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("log-file", log_file, CONF_PRE_PARSE | M_OPT_FILE | UPDATE_TERM),
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
-#ifdef _WIN32
+#if defined(_WIN32) && HAVE_GPL
     OPT_CHOICE("priority", w32_priority, UPDATE_PRIORITY,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},

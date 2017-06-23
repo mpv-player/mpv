@@ -5769,7 +5769,7 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
 
 static void update_priority(struct MPContext *mpctx)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && HAVE_GPL
     struct MPOpts *opts = mpctx->opts;
     if (opts->w32_priority > 0)
         SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
