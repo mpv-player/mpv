@@ -4955,6 +4955,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
 #if HAVE_GPL
+    // Possibly GPL due to 7a71da01d64374ce22b430590f3df32c881288bd.
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
@@ -5304,6 +5305,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
 #if HAVE_GPL
+    // Possibly GPL due to 2f376d1b39913e8ff4c4499e7cf7148ec331d4db.
     case MP_CMD_SUB_ADD:
     case MP_CMD_AUDIO_ADD: {
         if (!mpctx->playing)
