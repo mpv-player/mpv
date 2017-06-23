@@ -111,7 +111,7 @@ static void update_loglevel(struct mp_log *log)
 {
     struct mp_log_root *root = log->root;
     pthread_mutex_lock(&mp_msg_lock);
-    log->level = MSGL_STATUS; // default log level
+    log->level = MSGL_STATUS + root->verbose; // default log level
     if (root->really_quiet)
         log->level -= 10;
     for (int n = 0; root->msg_levels && root->msg_levels[n * 2 + 0]; n++) {
