@@ -571,7 +571,8 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
     }
     if (colour->n_max_cll) {
         track->color.sig_peak = colour->max_cll / MP_REF_WHITE;
-        MP_VERBOSE(demuxer, "|    + MaxCLL: %lu\n", colour->max_cll);
+        MP_VERBOSE(demuxer, "|    + MaxCLL: %lu\n",
+                   (unsigned long)colour->max_cll);
     }
     // if MaxCLL is unavailable, try falling back to the mastering metadata
     if (!track->color.sig_peak && colour->n_mastering_metadata) {
