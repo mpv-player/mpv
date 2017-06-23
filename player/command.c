@@ -2618,6 +2618,7 @@ static int mp_property_frame_count(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, frames);
 }
 
+#if HAVE_GPL
 static int mp_property_video_color(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -2644,6 +2645,7 @@ static int mp_property_video_color(void *ctx, struct m_property *prop,
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
+#endif
 
 /// Video codec tag (RO)
 static int mp_property_video_format(void *ctx, struct m_property *prop,
@@ -3969,6 +3971,7 @@ static const struct m_property mp_properties_base[] = {
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
     {"on-all-workspaces", mp_property_all_workspaces},
+#if HAVE_GPL
     {"gamma", mp_property_video_color},
     {"brightness", mp_property_video_color},
     {"contrast", mp_property_video_color},
@@ -3976,6 +3979,7 @@ static const struct m_property mp_properties_base[] = {
     {"hue", mp_property_video_color},
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
+#endif
     {"video-out-params", mp_property_vo_imgparams},
     {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},

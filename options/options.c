@@ -564,6 +564,7 @@ const m_option_t mp_opts[] = {
                .deprecation_message = "use Lua scripting instead"),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
 
+#if HAVE_GPL
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
@@ -571,6 +572,7 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
     OPT_CHOICE_C("video-output-levels", video_output_levels, 0,
                  mp_csp_levels_names),
+#endif
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,

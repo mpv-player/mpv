@@ -68,6 +68,7 @@ static const char av_desync_help_text[] =
 "position will not match to the video (see A-V status field).\n"
 "\n";
 
+#if HAVE_GPL
 int video_set_colors(struct vo_chain *vo_c, const char *item, int value)
 {
     vf_equalizer_t data;
@@ -96,6 +97,7 @@ int video_get_colors(struct vo_chain *vo_c, const char *item, int *value)
     }
     return 0;
 }
+#endif
 
 // Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.
 int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
@@ -992,6 +994,7 @@ static void init_vo(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
 
+#if HAVE_GPL
     if (opts->gamma_gamma != 0)
         video_set_colors(vo_c, "gamma", opts->gamma_gamma);
     if (opts->gamma_brightness != 0)
@@ -1003,6 +1006,7 @@ static void init_vo(struct MPContext *mpctx)
     if (opts->gamma_hue != 0)
         video_set_colors(vo_c, "hue", opts->gamma_hue);
     video_set_colors(vo_c, "output-levels", opts->video_output_levels);
+#endif
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
