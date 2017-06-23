@@ -202,42 +202,6 @@ const m_option_type_t m_option_type_flag = {
     .get   = flag_get,
 };
 
-// Single-value, write-only flag
-
-static int parse_store(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param, void *dst)
-{
-    if (param.len == 0) {
-        if (dst)
-            VAL(dst) = opt->max;
-        return 0;
-    } else {
-        mp_err(log, "Invalid parameter for %.*s flag: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_DISALLOW_PARAM;
-    }
-}
-
-static int store_set(const m_option_t *opt, void *dst, struct mpv_node *src)
-{
-    if (src->format != MPV_FORMAT_FLAG)
-        return M_OPT_UNKNOWN;
-    if (!src->u.flag)
-        return M_OPT_INVALID;
-    VAL(dst) = opt->max;
-    return 1;
-}
-
-const m_option_type_t m_option_type_store = {
-    // can only be activated
-    .name  = "Flag",
-    .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
-    .parse = parse_store,
-    .copy  = copy_opt,
-    .set   = store_set,
-};
-
 // Integer
 
 #undef VAL
@@ -1654,8 +1618,6 @@ const m_option_type_t m_option_type_msglevels = {
     .set   = set_msglevels,
 };
 
-/////////////////// Print
-
 static int parse_print(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
@@ -1667,6 +1629,24 @@ const m_option_type_t m_option_type_print_fn = {
     .name  = "Print",
     .flags = M_OPT_TYPE_ALLOW_WILDCARD | M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_print,
+};
+
+static int parse_dummy_flag(struct mp_log *log, const m_option_t *opt,
+                            struct bstr name, struct bstr param, void *dst)
+{
+    if (param.len) {
+        mp_err(log, "Invalid parameter for %.*s flag: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_DISALLOW_PARAM;
+    }
+    return 0;
+}
+
+const m_option_type_t m_option_type_dummy_flag = {
+    // can only be activated
+    .name  = "Flag",
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
+    .parse = parse_dummy_flag,
 };
 
 #undef VAL

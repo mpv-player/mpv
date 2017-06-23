@@ -37,7 +37,7 @@ struct mpv_node;
 
 // Simple types
 extern const m_option_type_t m_option_type_flag;
-extern const m_option_type_t m_option_type_store;
+extern const m_option_type_t m_option_type_dummy_flag;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_intpair;
@@ -201,7 +201,6 @@ struct m_sub_options {
 };
 
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
-#define CONF_TYPE_STORE         (&m_option_type_store)
 #define CONF_TYPE_INT           (&m_option_type_int)
 #define CONF_TYPE_INT64         (&m_option_type_int64)
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
@@ -222,7 +221,6 @@ struct m_sub_options {
 // size/alignment requirements for option values in general.
 union m_option_value {
     int flag; // not the C type "bool"!
-    int store;
     int int_;
     int64_t int64;
     int intpair[2];
@@ -578,10 +576,6 @@ extern const char m_option_path_separator;
 
 #define OPT_FLAG(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
-
-#define OPT_FLAG_STORE(optname, varname, flags, value)          \
-    OPT_GENERAL(int, optname, varname, flags, .max = value,     \
-                .type = &m_option_type_store)
 
 #define OPT_STRINGLIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
