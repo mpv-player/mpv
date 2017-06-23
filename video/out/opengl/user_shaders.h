@@ -22,7 +22,7 @@
 #include "utils.h"
 
 #define SHADER_API 1
-#define SHADER_MAX_HOOKS 16
+#define SHADER_MAX_HOOKS 64
 #define SHADER_MAX_BINDS 6
 #define MAX_SZEXP_SIZE 32
 
