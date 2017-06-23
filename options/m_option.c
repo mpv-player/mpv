@@ -77,6 +77,8 @@ int m_option_required_params(const m_option_t *opt)
 {
     if (opt->type->flags & M_OPT_TYPE_OPTIONAL_PARAM)
         return 0;
+    if (opt->flags & M_OPT_OPTIONAL_PARAM)
+        return 0;
     if (opt->type == &m_option_type_choice) {
         struct m_opt_choice_alternatives *alt;
         for (alt = opt->priv; alt->name; alt++) {

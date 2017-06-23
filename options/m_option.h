@@ -402,6 +402,9 @@ struct m_option {
 #define UPDATE_OPTS_MASK \
     (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
 
+// Like M_OPT_TYPE_OPTIONAL_PARAM.
+#define M_OPT_OPTIONAL_PARAM    (1 << 30)
+
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
 #define CONF_MAX                M_OPT_MAX

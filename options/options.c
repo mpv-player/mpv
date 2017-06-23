@@ -244,10 +244,10 @@ const m_option_t mp_opts[] = {
       .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
-    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
-       .offset = -1},
-    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
-       .offset = -1},
+    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
+              M_OPT_OPTIONAL_PARAM, .offset = -1},
+    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
+           M_OPT_OPTIONAL_PARAM, .offset = -1},
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("version", print_version),
