@@ -66,6 +66,33 @@
 #include "stream.h"
 #include "common/common.h"
 
+#define OPT_BASE_STRUCT struct mp_cache_opts
+
+const struct m_sub_options stream_cache_conf = {
+    .opts = (const struct m_option[]){
+        OPT_CHOICE_OR_INT("cache", size, 0, 32, 0x7fffffff,
+                          ({"no", 0},
+                           {"auto", -1},
+                           {"yes", -2})),
+        OPT_CHOICE_OR_INT("cache-default", def_size, 0, 32, 0x7fffffff,
+                          ({"no", 0})),
+        OPT_INTRANGE("cache-initial", initial, 0, 0, 0x7fffffff),
+        OPT_INTRANGE("cache-seek-min", seek_min, 0, 0, 0x7fffffff),
+        OPT_INTRANGE("cache-backbuffer", back_buffer, 0, 0, 0x7fffffff),
+        OPT_STRING("cache-file", file, M_OPT_FILE),
+        OPT_INTRANGE("cache-file-size", file_max, 0, 0, 0x7fffffff),
+        {0}
+    },
+    .size = sizeof(struct mp_cache_opts),
+    .defaults = &(const struct mp_cache_opts){
+        .size = -1,
+        .def_size = 75000,
+        .initial = 0,
+        .seek_min = 500,
+        .back_buffer = 75000,
+        .file_max = 1024 * 1024,
+    },
+};
 
 // Note: (struct priv*)(cache->priv)->cache == cache
 struct priv {

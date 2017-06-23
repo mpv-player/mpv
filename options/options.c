@@ -65,6 +65,7 @@ extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
+extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
@@ -115,34 +116,6 @@ static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
     .defaults = &image_writer_opts_defaults,
-};
-
-#define OPT_BASE_STRUCT struct mp_cache_opts
-
-const struct m_sub_options stream_cache_conf = {
-    .opts = (const struct m_option[]){
-        OPT_CHOICE_OR_INT("cache", size, 0, 32, 0x7fffffff,
-                          ({"no", 0},
-                           {"auto", -1},
-                           {"yes", -2})),
-        OPT_CHOICE_OR_INT("cache-default", def_size, 0, 32, 0x7fffffff,
-                          ({"no", 0})),
-        OPT_INTRANGE("cache-initial", initial, 0, 0, 0x7fffffff),
-        OPT_INTRANGE("cache-seek-min", seek_min, 0, 0, 0x7fffffff),
-        OPT_INTRANGE("cache-backbuffer", back_buffer, 0, 0, 0x7fffffff),
-        OPT_STRING("cache-file", file, M_OPT_FILE),
-        OPT_INTRANGE("cache-file-size", file_max, 0, 0, 0x7fffffff),
-        {0}
-    },
-    .size = sizeof(struct mp_cache_opts),
-    .defaults = &(const struct mp_cache_opts){
-        .size = -1,
-        .def_size = 75000,
-        .initial = 0,
-        .seek_min = 500,
-        .back_buffer = 75000,
-        .file_max = 1024 * 1024,
-    },
 };
 
 #undef OPT_BASE_STRUCT
