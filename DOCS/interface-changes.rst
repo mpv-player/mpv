@@ -35,6 +35,7 @@ Interface changes
       the reference white level instead of in cd/m^2
     - renamed the TRCs `st2084` and `std-b67` to `pq` and `hlg` respectively
     - the "osd" command is deprecated (use "cycle osd-level")
+    - --field-dominance is deprecated (no replacement)
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")
