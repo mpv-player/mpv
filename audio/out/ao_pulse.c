@@ -191,9 +191,9 @@ static const struct format_map {
     int mp_format;
     pa_sample_format_t pa_format;
 } format_maps[] = {
-    {AF_FORMAT_S16, PA_SAMPLE_S16NE},
-    {AF_FORMAT_S32, PA_SAMPLE_S32NE},
     {AF_FORMAT_FLOAT, PA_SAMPLE_FLOAT32NE},
+    {AF_FORMAT_S32, PA_SAMPLE_S32NE},
+    {AF_FORMAT_S16, PA_SAMPLE_S16NE},
     {AF_FORMAT_U8, PA_SAMPLE_U8},
     {AF_FORMAT_UNKNOWN, 0}
 };
