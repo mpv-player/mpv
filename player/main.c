@@ -257,43 +257,42 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct mp_log *log = mpctx->log;
-    int opt_exit = 0;
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
         struct mp_decoder_list *list = audio_decoder_list();
         mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);
         talloc_free(list);
-        opt_exit = 1;
+        return true;
     }
     if (opts->audio_spdif && strcmp(opts->audio_spdif, "help") == 0) {
         MP_INFO(mpctx, "Choices: ac3,dts-hd,dts (and possibly more)\n");
-        opt_exit = 1;
+        return true;
     }
     if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
         struct mp_decoder_list *list = video_decoder_list();
         mp_print_decoders(log, MSGL_INFO, "Video decoders:", list);
         talloc_free(list);
-        opt_exit = 1;
+        return true;
     }
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
         demuxer_help(log);
         MP_INFO(mpctx, "\n");
-        opt_exit = 1;
+        return true;
     }
     if (opts->audio_device && strcmp(opts->audio_device, "help") == 0) {
         ao_print_devices(mpctx->global, log);
-        opt_exit = 1;
+        return true;
     }
     if (opts->property_print_help) {
         property_print_help(mpctx);
-        opt_exit = 1;
+        return true;
     }
 #if HAVE_ENCODING
     if (encode_lavc_showhelp(log, opts->encode_opts))
-        opt_exit = 1;
+        return true;
 #endif
-    return opt_exit;
+    return false;
 }
 
 static void handle_deprecated_options(struct MPContext *mpctx)
