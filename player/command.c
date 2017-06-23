@@ -5125,8 +5125,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+#if HAVE_GPL
+    // Potentially GPL due to 8d190244d21a4d40bb9e8f7d51aa09ca1888de09.
     case MP_CMD_OSD: {
+        MP_WARN(mpctx, "The 'osd' command is deprecated. "
+                       "Use 'cycle osd-level' instead.\n");
         int v = cmd->args[0].v.i;
+#define MAX_OSD_LEVEL 3
         if (opts->osd_level > MAX_OSD_LEVEL)
             opts->osd_level = MAX_OSD_LEVEL;
         if (v < 0)
@@ -5140,6 +5145,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mp_wakeup_core(mpctx);
         break;
     }
+#endif
 
     case MP_CMD_PRINT_TEXT: {
         MP_INFO(mpctx, "%s\n", cmd->args[0].v.s);

@@ -441,6 +441,8 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
             talloc_free(text);
         } else {
             sadd_hhmmssff_u(buffer, get_playback_time(mpctx), fractions);
+#if HAVE_GPL
+            // Potentially GPL due to 8d190244d21a4d40bb9e8f7d51aa09ca1888de09.
             if (level == 3) {
                 double len = get_time_length(mpctx);
                 if (len >= 0) {
@@ -449,6 +451,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
                 }
                 sadd_percentage(buffer, get_percent_pos(mpctx));
             }
+#endif
         }
     }
 }
