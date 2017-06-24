@@ -180,14 +180,14 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     osdep/endian.h                  LGPL
     osdep/glob-win.c                LGPL
     osdep/io.*                      LGPL
-    osdep/macosx_application.h      unknown
-    osdep/macosx_application.m      unknown
-    osdep/macosx_application_objc.h unknown
-    osdep/macosx_compat.h           unknown
-    osdep/macosx_events.*           unknown
-    osdep/macosx_events_objc.h      unknown
-    osdep/macosx_touchbar.*         unknown
-    osdep/macosx_versions.h         unknown
+    osdep/macosx_application.h      LGPL
+    osdep/macosx_application.m      LGPL
+    osdep/macosx_application_objc.h LGPL
+    osdep/macosx_compat.h           LGPL
+    osdep/macosx_events.*           LGPL
+    osdep/macosx_events_objc.h      LGPL
+    osdep/macosx_touchbar.*         LGPL
+    osdep/macosx_versions.h         LGPL
     osdep/main-fn-cocoa.c           LGPL
     osdep/main-fn.h                 LGPL
     osdep/main-fn-unix.c            LGPL
@@ -309,7 +309,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/mp_image_pool.*           LGPL
     video/out/aspect.*              LGPL
     video/out/bitmap_packer.*       LGPL
-    video/out/cocoa*                unknown
+    video/out/cocoa*                LGPL
     video/out/d3d_shader_420p.h     LGPL
     video/out/d3d_shader_nv12.h     LGPL
     video/out/d3d_shader_yuv.hlsl   LGPL
