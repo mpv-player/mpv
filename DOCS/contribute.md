@@ -159,3 +159,32 @@ General coding
 - If you add features that require intrusive changes, discuss them on the dev
   channel first. There might be a better way to add a feature and it can avoid
   wasted work.
+
+Rules for git push access
+-------------------------
+
+Push access to the main git repository is handed out on an arbitrary basis. If
+you got access, the following rules must be followed:
+
+- You are expected to follow the general development rules as outlined in this
+  whole document.
+- You must be present on the IRC dev channel when you push something.
+- Anyone can push small fixes: typo corrections, small/obvious/uncontroversial
+  bug fixes, edits to the user documentation or code comments, and so on.
+- You can freely make changes to parts of the code which you maintain. For
+  larger changes, it's recommended to let others review the changes first.
+- You automatically maintain code if you wrote or modified most of it before
+  (e.g. you made larger changes to it before, did partial or full rewrites, did
+  major bug fixes, or you're the original author of the code). If there is more
+  than one maintainer, you may need to come to an agreement with the others how
+  to handle this to avoid conflict.
+- As a maintainer, you can approve pushes by others to "your" code.
+- If you approve or merge 3rd party changes, make sure they follow the general
+  development rules.
+- Changes to user interface and public API must always be approved by the
+  project leader.
+- Seasoned project members are allowed to revert commits that broke the build,
+  or broke basic functionality in a catastrophic way, and the developer who
+  broke it is unavailable. (Depending on severity.)
+- Adhere to the CoC.
+- The project leader is not bound by these rules.
