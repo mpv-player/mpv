@@ -62,7 +62,7 @@ char *m_option_strerror(int code)
     case M_OPT_MISSING_PARAM:
         return "option requires parameter";
     case M_OPT_INVALID:
-        return "option could not be parsed";
+        return "option parameter could not be parsed";
     case M_OPT_OUT_OF_RANGE:
         return "parameter is outside values allowed for option";
     case M_OPT_DISALLOW_PARAM:

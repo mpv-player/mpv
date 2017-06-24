@@ -78,9 +78,6 @@ static int split_opt_silent(struct parse_state *p)
 
     bool ambiguous = !bstr_split_tok(p->arg, "=", &p->arg, &p->param);
 
-    if (!p->arg.len)
-        return M_OPT_INVALID;
-
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
     if (ambiguous && need_param) {
@@ -101,7 +98,7 @@ static bool split_opt(struct parse_state *p)
         return r == 0;
     p->error = true;
 
-    MP_FATAL(p->config, "Error parsing command line option '%.*s': %s\n",
+    MP_FATAL(p->config, "Error parsing commandline option %.*s: %s\n",
              BSTR_P(p->arg), m_option_strerror(r));
     return false;
 }
@@ -154,7 +151,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 ret = r;
                 goto err_out;
             } else if (r < 0) {
-                MP_FATAL(config, "Setting command line option '--%.*s=%.*s' failed.\n",
+                MP_FATAL(config, "Setting commandline option --%.*s=%.*s failed.\n",
                          BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;
             }
