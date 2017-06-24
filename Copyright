@@ -95,7 +95,7 @@ x   audio/filter/af.*               must be killed (main author disagreed)
     audio/out/ao_jack.c             will stay GPL
     audio/out/ao_lavc.c             LGPL
     audio/out/ao_null.c             LGPL
-    audio/out/ao_openal.c           unknown
+    audio/out/ao_openal.c           LGPL
     audio/out/ao_opensles.c         LGPL
     audio/out/ao_oss.c              will stay GPL
     audio/out/ao_pcm.c              LGPL
