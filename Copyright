@@ -213,8 +213,8 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     osdep/timer-darwin.c            LGPL (MIT)
     osdep/timer-linux.c             LGPL
     osdep/timer-win2.c              LGPL
-    osdep/w32_keyboard.c            unknown
-    osdep/w32_keyboard.h            unknown
+    osdep/w32_keyboard.c            LGPL
+    osdep/w32_keyboard.h            LGPL
     osdep/win32-console-wrapper.c   LGPL (BSD)
     osdep/win32/*                   LGPL (ISC)
     osdep/windows_utils.*           LGPL
@@ -336,7 +336,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/out/vo_wayland.c          LGPL
     video/out/vo_x11.c              probably impossible
     video/out/vo_xv.c               probably impossible
-    video/out/w32_common.*          medium
+    video/out/w32_common.*          LGPL
     video/out/wayland*              LGPL
     video/out/win32/*               LGPL
     video/out/win_state.*           LGPL
