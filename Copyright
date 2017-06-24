@@ -141,7 +141,7 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     demux/demux_edl.c               LGPL
     demux/demux_lavf.c              almost LGPL
     demux/demux_libarchive.c        LGPL
-    demux/demux_mf.c                hard
+    demux/demux_mf.c                LGPLv3+
     demux/demux_mkv.c               LGPL (mostly)
     demux/demux_mkv_timeline.c      LGPL
     demux/demux_null.c              LGPL
@@ -244,7 +244,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     stream/dvb*                     must stay GPL
     stream/frequencies.*            must stay GPL
     stream/rar.*                    LGPL
-    stream/stream_avdevice.c        unknown
+    stream/stream_avdevice.c        LGPL
     stream/stream_bluray.c          unknown
     stream/stream.*                 LGPL
     stream/stream_cb.c              LGPL
@@ -258,7 +258,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     stream/stream_lavf.c            LGPL
     stream/stream_libarchive.*      LGPL
     stream/stream_memory.c          LGPL
-    stream/stream_mf.c              unknown
+    stream/stream_mf.c              LGPL
     stream/stream_null.c            LGPL
     stream/stream_rar.c             LGPL
     stream/stream_smb.c             will stay GPLv3
