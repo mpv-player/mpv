@@ -147,7 +147,7 @@ x   audio/audio.*                   very hard (mp_audio based of anders' af_audi
     demux/demux_null.c              LGPL
     demux/demux_playlist.c          LGPL
     demux/demux_rar.c               LGPL
-    demux/demux_raw.c               unknown
+    demux/demux_raw.c               almost LGPL
     demux/demux_timeline.c          LGPL
     demux/demux_tv.c                will stay GPL
     demux/ebml.*                    LGPL
