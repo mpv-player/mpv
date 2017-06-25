@@ -812,14 +812,17 @@ radio_and_tv_features = [
         'name': '--tv',
         'desc': 'TV interface',
         'func': check_true,
+        'default': 'disable',
     }, {
         'name': 'sys_videoio_h',
         'desc': 'videoio.h',
-        'func': check_cc(header_name=['sys/time.h', 'sys/videoio.h'])
+        'func': check_cc(header_name=['sys/time.h', 'sys/videoio.h']),
+        'deps': [ 'tv' ],
     }, {
         'name': 'videodev',
         'desc': 'videodev2.h',
         'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h']),
+        'deps': [ 'tv' ],
         'deps_neg': [ 'sys_videoio_h' ],
     }, {
         'name': '--tv-v4l2',
