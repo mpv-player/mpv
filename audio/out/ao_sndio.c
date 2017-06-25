@@ -195,6 +195,8 @@ static int init(struct ao *ao)
     if (!p->pfd)
         goto error;
 
+    ao->period_size = p->par.round;
+
     return 0;
 
 error:

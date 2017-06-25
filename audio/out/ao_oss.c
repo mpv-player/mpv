@@ -394,7 +394,8 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
         }
     }
 
-    p->outburst -= p->outburst % (channels.num * af_fmt_to_bytes(format)); // round down
+    ao->period_size = channels.num * af_fmt_to_bytes(format);
+    p->outburst -= p->outburst % ao->period_size; // round down
 
     return 0;
 

@@ -160,6 +160,8 @@ static int init(struct ao *ao)
 
     ao->untimed = true;
 
+    ao->period_size = ac->aframesize * ac->framecount;
+
     if (ao->channels.num > AV_NUM_DATA_POINTERS)
         goto fail;
 
@@ -203,7 +205,7 @@ static void uninit(struct ao *ao)
     ac->shutdown = true;
 }
 
-// return: how many bytes can be played without blocking
+// return: how many samples can be played without blocking
 static int get_space(struct ao *ao)
 {
     struct priv *ac = ao->priv;

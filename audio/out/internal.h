@@ -48,6 +48,14 @@ struct ao {
     int init_flags; // AO_INIT_* flags
     bool stream_silence;        // if audio inactive, just play silence
 
+    // Set by the driver on init. This is typically the period size, and the
+    // smallest unit the driver will accept in one piece (although if
+    // AOPLAY_FINAL_CHUNK is set, the driver must accept everything).
+    // This value is in complete samples (i.e. 1 for stereo means 1 sample
+    // for both channels each).
+    // Used for push based API only.
+    int period_size;
+
     // The device as selected by the user, usually using ao_device_desc.name
     // from an entry from the list returned by driver->list_devices. If the
     // default device should be used, this is set to NULL.

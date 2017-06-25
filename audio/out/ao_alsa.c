@@ -840,6 +840,7 @@ static int init_device(struct ao *ao, int mode)
     MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
     ao->device_buffer = p->buffersize;
+    ao->period_size = p->outburst;
 
     return 0;
 

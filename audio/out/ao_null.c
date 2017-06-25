@@ -108,6 +108,8 @@ static int init(struct ao *ao)
 
     priv->last_time = mp_time_sec();
 
+    ao->period_size = priv->outburst;
+
     return 0;
 }
 

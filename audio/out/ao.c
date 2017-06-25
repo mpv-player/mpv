@@ -194,6 +194,8 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
 
     ao->stream_silence = flags & AO_INIT_STREAM_SILENCE;
 
+    ao->period_size = 1;
+
     int r = ao->driver->init(ao);
     if (r < 0) {
         // Silly exception for coreaudio spdif redirection
@@ -206,6 +208,11 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
                            encode_lavc_ctx, flags, samplerate, format, channels,
                            rdevice, redirect);
         }
+        goto fail;
+    }
+
+    if (ao->period_size < 1) {
+        MP_ERR(ao, "Invalid period size set.\n");
         goto fail;
     }
 

@@ -285,6 +285,8 @@ static void ao_play_data(struct ao *ao)
     int space = ao->driver->get_space(ao);
     bool play_silence = p->paused || (ao->stream_silence && !p->still_playing);
     space = MPMAX(space, 0);
+    if (space % ao->period_size)
+        MP_ERR(ao, "Audio device reports unaligned available buffer size.\n");
     struct mp_audio data;
     if (play_silence) {
         ao_get_silence(ao, &data, space);
@@ -295,16 +297,25 @@ static void ao_play_data(struct ao *ao)
     if (data.samples > space)
         data.samples = space;
     int flags = 0;
-    if (p->final_chunk && data.samples == max)
+    if (p->final_chunk && data.samples == max) {
         flags |= AOPLAY_FINAL_CHUNK;
+    } else {
+        data.samples = data.samples / ao->period_size * ao->period_size;
+    }
     MP_STATS(ao, "start ao fill");
     int r = 0;
     if (data.samples)
         r = ao->driver->play(ao, data.planes, data.samples, flags);
     MP_STATS(ao, "end ao fill");
     if (r > data.samples) {
-        MP_WARN(ao, "Audio device returned non-sense value.\n");
+        MP_ERR(ao, "Audio device returned non-sense value.\n");
         r = data.samples;
+    } else if (r < 0) {
+        MP_ERR(ao, "Error writing audio to device.\n");
+    } else if (r != data.samples) {
+        MP_ERR(ao, "Audio device returned broken buffer state (sent %d samples, "
+               "got %d samples, %d period%s)!\n", data.samples, r,
+               ao->period_size, flags & AOPLAY_FINAL_CHUNK ? " final" : "");
     }
     r = MPMAX(r, 0);
     // Probably can't copy the rest of the buffer due to period alignment.

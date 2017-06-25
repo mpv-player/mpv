@@ -214,6 +214,7 @@ static int init(struct ao *ao)
     }
 
     p->chunk_size = CHUNK_SAMPLES * af_fmt_to_bytes(ao->format);
+    ao->period_size = CHUNK_SAMPLES;
     return 0;
 
 err_out:
