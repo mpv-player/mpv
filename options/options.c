@@ -446,7 +446,7 @@ const m_option_t mp_opts[] = {
 #if HAVE_GPL
     OPT_CHOICE("field-dominance", field_dominance, UPDATE_IMGPAR,
                ({"auto", -1}, {"top", 0}, {"bottom", 1}),
-               .deprecation_message = "no replacement"),
+               .deprecation_message = "use --vf=setfield=bff or tff"),
 #endif
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
