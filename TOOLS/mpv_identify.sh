@@ -80,7 +80,7 @@ EOF
         video-codec
         video-format
         video-aspect
-        fps
+        container-fps
         width
         height
         dwidth
