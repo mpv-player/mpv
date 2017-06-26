@@ -54,6 +54,7 @@ static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
     talloc_free(cf);
 }
 
+// This name is used in builtin.conf to force encoding defaults (like ao/vo).
 #define SECT_ENCODE "encoding"
 
 void mp_parse_cfgfiles(struct MPContext *mpctx)
