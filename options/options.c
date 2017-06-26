@@ -367,7 +367,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("hls-bitrate", hls_bitrate, 0, 0, INT_MAX,
                       ({"no", -1}, {"min", 0}, {"max", INT_MAX})),
 
-    OPT_STRINGLIST("display-tags*", display_tags, 0),
+    OPT_STRINGLIST("display-tags", display_tags, 0),
 
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
@@ -414,9 +414,9 @@ const m_option_t mp_opts[] = {
 // ------------------------- codec/vfilter options --------------------
 
     OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list, ),
-    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list, ),
+    OPT_SETTINGSLIST("af", af_settings, 0, &af_obj_list, ),
     OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list, ),
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list, ),
+    OPT_SETTINGSLIST("vf", vf_settings, 0, &vf_obj_list, ),
 
     OPT_CHOICE("deinterlace", deinterlace, 0,
                ({"auto", -1},

@@ -243,6 +243,15 @@ union m_option_value {
 
 ////////////////////////////////////////////////////////////////////////////
 
+struct m_option_action {
+    // The name of the suffix, e.g. "add" for a list. If the option is named
+    // "foo", this will be available as "--foo-add". Note that no suffix (i.e.
+    // "--foo" is implicitly always available.
+    const char *name;
+    // One of M_OPT_TYPE*.
+    unsigned int flags;
+};
+
 // Option type description
 struct m_option_type {
     const char *name;
@@ -318,6 +327,10 @@ struct m_option_type {
     // static strings (and even mpv_node_list.keys), though.
     int (*get)(const m_option_t *opt, void *ta_parent, struct mpv_node *dst,
                void *src);
+
+    // Optional: list of suffixes, terminated with a {0} entry. An empty list
+    // behaves like the list being NULL.
+    const struct m_option_action *actions;
 };
 
 // Option description
@@ -412,17 +425,11 @@ struct m_option {
 
 // These flags are used to describe special parser capabilities or behavior.
 
-// Wildcard matching flag.
-/** If set the option type has a use for option names ending with a *
- *  (used for -aa*), this only affects the option name matching.
- */
-#define M_OPT_TYPE_ALLOW_WILDCARD       (1 << 1)
-
 // The parameter is optional and by default no parameter is preferred. If
 // ambiguous syntax is used ("--opt value"), the command line parser will
 // assume that the argument takes no parameter. In config files, these
 // options can be used without "=" and value.
-#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 2)
+#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 0)
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
@@ -460,14 +467,6 @@ struct m_option {
 char *m_option_strerror(int code);
 
 // Find the option matching the given name in the list.
-/** \ingroup Options
- *  This function takes the possible wildcards into account (see
- *  \ref M_OPT_TYPE_ALLOW_WILDCARD).
- *
- *  \param list Pointer to an array of \ref m_option.
- *  \param name Name of the option.
- *  \return The matching option or NULL.
- */
 const m_option_t *m_option_list_find(const m_option_t *list, const char *name);
 
 // Helper to parse options, see \ref m_option_type::parse.

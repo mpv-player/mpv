@@ -351,15 +351,7 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
-
-    // Normalize "vf*" to "vf"
     const char *name = co->name;
-    bstr bname = bstr0(name);
-    char tmp[50];
-    if (bstr_eatend0(&bname, "*")) {
-        snprintf(tmp, sizeof(tmp), "%.*s", BSTR_P(bname));
-        name = tmp;
-    }
 
     // Skip going through mp_property_generic_option (typically), because the
     // property implementation is trivial, and can break some obscure features
@@ -428,17 +420,6 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-// Dumb special-case: the option name ends in a "*".
-static int mp_property_generic_option_star(void *ctx, struct m_property *prop,
-                                           int action, void *arg)
-{
-    struct m_property prop2 = *prop;
-    char name[80];
-    snprintf(name, sizeof(name), "%s*", prop->name);
-    prop2.name = name;
-    return mp_property_generic_option(ctx, &prop2, action, arg);
 }
 
 /// Playback speed (RW)
@@ -5721,12 +5702,6 @@ void command_init(struct MPContext *mpctx)
                 .call = mp_property_generic_option,
                 .is_option = true,
             };
-
-            bstr bname = bstr0(prop.name);
-            if (bstr_eatend0(&bname, "*")) {
-                prop.name = bstrto0(ctx, bname);
-                prop.call = mp_property_generic_option_star;
-            }
         }
 
         if (prop.name) {

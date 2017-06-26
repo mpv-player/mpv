@@ -89,25 +89,13 @@ int m_option_required_params(const m_option_t *opt)
     return 1;
 }
 
-static const struct m_option *m_option_list_findb(const struct m_option *list,
-                                                  struct bstr name)
+const m_option_t *m_option_list_find(const m_option_t *list, const char *name)
 {
     for (int i = 0; list[i].name; i++) {
-        struct bstr lname = bstr0(list[i].name);
-        if ((list[i].type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
-                && bstr_endswith0(lname, "*")) {
-            lname.len--;
-            if (bstrcmp(bstr_splice(name, 0, lname.len), lname) == 0)
-                return &list[i];
-        } else if (bstrcmp(lname, name) == 0)
+        if (strcmp(list[i].name, name) == 0)
             return &list[i];
     }
     return NULL;
-}
-
-const m_option_t *m_option_list_find(const m_option_t *list, const char *name)
-{
-    return m_option_list_findb(list, bstr0(name));
 }
 
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
@@ -1223,20 +1211,17 @@ static int parse_str_list(struct mp_log *log, const m_option_t *opt,
 {
     char **res;
     int op = OP_NONE;
-    if (bstr_endswith0(bstr0(opt->name), "*")) {
-        struct bstr suffix = bstr_cut(name, strlen(opt->name) - 1);
-        if (bstrcmp0(suffix, "-add") == 0)
-            op = OP_ADD;
-        else if (bstrcmp0(suffix, "-pre") == 0)
-            op = OP_PRE;
-        else if (bstrcmp0(suffix, "-del") == 0)
-            op = OP_DEL;
-        else if (bstrcmp0(suffix, "-clr") == 0)
-            op = OP_CLR;
-        else if (suffix.len == 0)
-            op = OP_NONE;
-        else
-            return M_OPT_UNKNOWN;
+
+    if (bstr_endswith0(name, "-add")) {
+        op = OP_ADD;
+    } else if (bstr_endswith0(name, "-pre")) {
+        op = OP_PRE;
+    } else if (bstr_endswith0(name, "-del")) {
+        op = OP_DEL;
+    } else if (bstr_endswith0(name, "-clr")) {
+        op = OP_CLR;
+    } else if (bstr_endswith0(name, "-set")) {
+        op = OP_NONE;
     }
 
     // Clear the list ??
@@ -1382,23 +1367,22 @@ static int str_list_get(const m_option_t *opt, void *ta_parent,
 }
 
 const m_option_type_t m_option_type_string_list = {
-    /* A list of strings separated by ','.
-     * Option with a name ending in '*' permits using the following suffixes:
-     *     -add: Add the given parameters at the end of the list.
-     *     -pre: Add the given parameters at the beginning of the list.
-     *     -del: Remove the entry at the given indices.
-     *     -clr: Clear the list.
-     * e.g: -vf-add flip,mirror -vf-del 2,5
-     */
     .name  = "String list",
     .size  = sizeof(char **),
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD,
     .parse = parse_str_list,
     .print = print_str_list,
     .copy  = copy_str_list,
     .free  = free_str_list,
     .get   = str_list_get,
     .set   = str_list_set,
+    .actions = (const struct m_option_action[]){
+        {"set"},
+        {"add"},
+        {"pre"},
+        {"del"},
+        {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {0}
+    },
 };
 
 static void str_list_append(void *dst, bstr s)
@@ -1627,7 +1611,7 @@ static int parse_print(struct mp_log *log, const m_option_t *opt,
 
 const m_option_type_t m_option_type_print_fn = {
     .name  = "Print",
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD | M_OPT_TYPE_OPTIONAL_PARAM,
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_print,
 };
 
@@ -2916,46 +2900,39 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
 
     assert(opt->priv);
 
-    if (bstr_endswith0(bstr0(opt->name), "*")) {
-        struct bstr suffix = bstr_cut(name, strlen(opt->name) - 1);
-        if (bstrcmp0(suffix, "-add") == 0)
-            op = OP_ADD;
-        else if (bstrcmp0(suffix, "-set") == 0)
-            op = OP_NONE;
-        else if (bstrcmp0(suffix, "-pre") == 0)
-            op = OP_PRE;
-        else if (bstrcmp0(suffix, "-del") == 0)
-            op = OP_DEL;
-        else if (bstrcmp0(suffix, "-clr") == 0)
-            op = OP_CLR;
-        else if (bstrcmp0(suffix, "-toggle") == 0)
-            op = OP_TOGGLE;
-        else if (suffix.len == 0)
-            op = OP_NONE;
-        else {
-            char pre[80];
-            snprintf(pre, sizeof(pre), "%.*s", (int)(strlen(opt->name) - 1),
-                     opt->name);
-            mp_err(log, "Option %.*s: unknown postfix %.*s\n"
-                   "Supported postfixes are:\n"
-                   "  %s-set\n"
-                   " Overwrite the old list with the given list\n\n"
-                   "  %s-add\n"
-                   " Append the given list to the current list\n\n"
-                   "  %s-pre\n"
-                   " Prepend the given list to the current list\n\n"
-                   "  %s-del x,y,...\n"
-                   " Remove the given elements. Take the list element index (starting from 0).\n"
-                   " Negative index can be used (i.e. -1 is the last element).\n"
-                   " Filter names work as well.\n\n"
-                   "  %s-toggle\n"
-                   " Add the filter to the list, or remove it if it's already added.\n\n"
-                   "  %s-clr\n"
-                   " Clear the current list.\n\n",
-                   BSTR_P(name), BSTR_P(suffix), pre, pre, pre, pre, pre, pre);
+    if (bstr_endswith0(name, "-add")) {
+        op = OP_ADD;
+    } else if (bstr_endswith0(name, "-set")) {
+        op = OP_NONE;
+    } else if (bstr_endswith0(name, "-pre")) {
+        op = OP_PRE;
+    } else if (bstr_endswith0(name, "-del")) {
+        op = OP_DEL;
+    } else if (bstr_endswith0(name, "-clr")) {
+        op = OP_CLR;
+    } else if (bstr_endswith0(name, "-toggle")) {
+        op = OP_TOGGLE;
+    } else if (bstr_endswith0(name, "-help")) {
+        mp_err(log, "Option %s:\n"
+                "Supported operations are:\n"
+                "  %s-set\n"
+                " Overwrite the old list with the given list\n\n"
+                "  %s-add\n"
+                " Append the given list to the current list\n\n"
+                "  %s-pre\n"
+                " Prepend the given list to the current list\n\n"
+                "  %s-del x,y,...\n"
+                " Remove the given elements. Take the list element index (starting from 0).\n"
+                " Negative index can be used (i.e. -1 is the last element).\n"
+                " Filter names work as well.\n\n"
+                "  %s-toggle\n"
+                " Add the filter to the list, or remove it if it's already added.\n\n"
+                "  %s-clr\n"
+                " Clear the current list.\n\n",
+                opt->name, opt->name, opt->name, opt->name, opt->name,
+                opt->name, opt->name);
 
-            return M_OPT_UNKNOWN;
-        }
+        return M_OPT_EXIT;
     }
 
     if (!bstrcmp0(param, "help")) {
@@ -3243,13 +3220,22 @@ static int get_obj_settings_list(const m_option_t *opt, void *ta_parent,
 const m_option_type_t m_option_type_obj_settings_list = {
     .name  = "Object settings list",
     .size  = sizeof(m_obj_settings_t *),
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD,
     .parse = parse_obj_settings_list,
     .print = print_obj_settings_list,
     .copy  = copy_obj_settings_list,
     .free  = free_obj_settings_list,
     .set   = set_obj_settings_list,
     .get   = get_obj_settings_list,
+    .actions = (const struct m_option_action[]){
+        {"add"},
+        {"set"},
+        {"pre"},
+        {"del"},
+        {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {"help",    M_OPT_TYPE_OPTIONAL_PARAM},
+        {"toggle"},
+        {0}
+    },
 };
 
 #undef VAL

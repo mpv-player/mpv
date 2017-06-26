@@ -536,14 +536,8 @@ struct m_config_option *m_config_get_co_raw(const struct m_config *config,
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
         struct bstr coname = bstr0(co->name);
-        if ((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
-                && bstr_endswith0(coname, "*")) {
-            coname.len--;
-            if (bstrcmp(bstr_splice(name, 0, coname.len), coname) == 0)
-                return co;
-        } else if (bstrcmp(coname, name) == 0) {
+        if (bstrcmp(coname, name) == 0)
             return co;
-        }
     }
 
     return NULL;
@@ -782,25 +776,61 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
     }
 }
 
+// Handle CLI exceptions to option handling.
 // Used to turn "--no-foo" into "--foo=no".
-static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
-                                                          struct bstr *name)
+// It also handles looking up "--vf-add" as "--vf".
+static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
+                                                        struct bstr *name,
+                                                        bool *out_negate,
+                                                        int *out_add_flags)
 {
-    assert(!m_config_get_co(config, *name));
-
-    if (!bstr_eatstart0(name, "no-"))
-        return NULL;
+    *out_negate = false;
+    *out_add_flags = 0;
 
     struct m_config_option *co = m_config_get_co(config, *name);
+    if (co)
+        return co;
 
-    // Not all choice types have this value - if they don't, then parsing them
-    // will simply result in an error. Good enough.
-    if (co && co->opt->type != CONF_TYPE_FLAG &&
-              co->opt->type != CONF_TYPE_CHOICE &&
-              co->opt->type != &m_option_type_aspect)
-        co = NULL;
+    // Turn "--no-foo" into "foo" + set *out_negate.
+    if (!co && bstr_eatstart0(name, "no-")) {
+        co = m_config_get_co(config, *name);
 
-    return co;
+        // Not all choice types have this value - if they don't, then parsing
+        // them will simply result in an error. Good enough.
+        if (co && co->opt->type != CONF_TYPE_FLAG &&
+                  co->opt->type != CONF_TYPE_CHOICE &&
+                  co->opt->type != &m_option_type_aspect)
+            return NULL;
+
+        *out_negate = true;
+        return co;
+    }
+
+    // Might be a suffix "action", like "--vf-add". Expensively check for
+    // matches. (Also, we don't allow you to combine them with "--no-".)
+    for (int n = 0; n < config->num_opts; n++) {
+        co = &config->opts[n];
+        const struct m_option_type *type = co->opt->type;
+        struct bstr coname = bstr0(co->name);
+
+        if (!bstr_startswith(*name, coname))
+            continue;
+
+        for (int i = 0; type->actions && type->actions[i].name; i++) {
+            const struct m_option_action *action = &type->actions[i];
+            bstr suffix = bstr0(action->name);
+
+            if (bstr_endswith(*name, suffix) &&
+                (name->len == coname.len + 1 + suffix.len) &&
+                name->start[coname.len] == '-')
+            {
+                *out_add_flags = action->flags;
+                return co;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 static int m_config_parse_option(struct m_config *config, struct bstr name,
@@ -808,12 +838,14 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 {
     assert(config != NULL);
 
-    struct m_config_option *co = m_config_get_co(config, name);
-    if (!co) {
-        co = m_config_find_negation_opt(config, &name);
-        if (!co)
-            return M_OPT_UNKNOWN;
+    bool negate;
+    struct m_config_option *co =
+        m_config_mogrify_cli_opt(config, &name, &negate, &(int){0});
 
+    if (!co)
+        return M_OPT_UNKNOWN;
+
+    if (negate) {
         if (param.len)
             return M_OPT_DISALLOW_PARAM;
 
@@ -904,11 +936,17 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 
 int m_config_option_requires_param(struct m_config *config, bstr name)
 {
-    struct m_config_option *co = m_config_get_co(config, name);
+    bool negate;
+    int flags;
+    struct m_config_option *co =
+        m_config_mogrify_cli_opt(config, &name, &negate, &flags);
+
     if (!co)
-        return m_config_find_negation_opt(config, &name) ? 0 : M_OPT_UNKNOWN;
-    if (bstr_endswith0(name, "-clr"))
+        return M_OPT_UNKNOWN;
+
+    if (negate || (flags & M_OPT_TYPE_OPTIONAL_PARAM))
         return 0;
+
     return m_option_required_params(co->opt);
 }
 
