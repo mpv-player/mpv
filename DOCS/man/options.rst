@@ -4472,7 +4472,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     buffer before rendering a new frame to it. For this reason, Microsoft
     recommends at least 4.
 
-    Windows 8+ with ANGLE only.
+    Windows with ANGLE only.
 
 ``--cocoa-force-dedicated-gpu=<yes|no>``
     Deactivates the automatic graphics switching and forces the dedicated GPU.
