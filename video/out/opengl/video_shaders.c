@@ -415,8 +415,7 @@ void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak)
     case MP_CSP_LIGHT_SCENE_HLG:
         // HLG OOTF from BT.2100, assuming a reference display with a
         // peak of 1000 cd/m² -> gamma = 1.2
-        GLSL(float luma = dot(color.rgb, vec3(0.2627, 0.6780, 0.0593));)
-        GLSLF("color.rgb *= vec3(%f * pow(luma, 0.2));\n",
+        GLSLF("color.rgb *= vec3(%f * pow(dot(src_luma, color.rgb), 0.2));\n",
               (1000 / MP_REF_WHITE) / pow(12, 1.2));
         break;
     case MP_CSP_LIGHT_SCENE_709_1886:
@@ -480,9 +479,13 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 {
     GLSLF("// HDR tone mapping\n");
 
+    // To prevent discoloration, we tone map on the luminance only
+    GLSL(float luma = dot(src_luma, color.rgb);)
+    GLSL(float luma_orig = luma;)
+
     switch (algo) {
     case TONE_MAPPING_CLIP:
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        GLSL(luma = clamp(luma, 0.0, 1.0);)
         break;
 
     case TONE_MAPPING_MOBIUS: {
@@ -492,10 +495,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         float a = -j*j * (ref_peak - 1) / (j*j - 2*j + ref_peak),
               b = (j*j - 2*j*ref_peak + ref_peak) / (ref_peak - 1);
 
-        GLSLF("color.rgb = mix(vec3(%f) * (color.rgb + vec3(%f))\n"
-              "                         / (color.rgb + vec3(%f)),\n"
-              "                color.rgb,\n"
-              "                lessThanEqual(color.rgb, vec3(%f)));\n",
+        GLSLF("luma = mix(%f * (luma + %f) / (luma + %f), luma, luma <= %f);\n",
               (b*b + 2*b*j + j*j) / (b - a), a, b, j);
         break;
     }
@@ -503,38 +503,40 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
     case TONE_MAPPING_REINHARD: {
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
-        GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
-        GLSLF("color.rgb *= vec3(%f);\n", (ref_peak + offset) / ref_peak);
+        GLSLF("luma = luma / (luma + %f);\n", offset);
+        GLSLF("luma *= %f;\n", (ref_peak + offset) / ref_peak);
         break;
     }
 
     case TONE_MAPPING_HABLE: {
         float A = 0.15, B = 0.50, C = 0.10, D = 0.20, E = 0.02, F = 0.30;
-        GLSLHF("vec3 hable(vec3 x) {\n");
+        GLSLHF("float hable(float x) {\n");
         GLSLHF("return ((x * (%f*x + %f)+%f)/(x * (%f*x + %f) + %f)) - %f;\n",
                A, C*B, D*E, A, B, D*F, E/F);
         GLSLHF("}\n");
 
-        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", ref_peak);
+        GLSLF("luma = hable(luma) / hable(%f);\n", ref_peak);
         break;
     }
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
-        GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
-              ref_peak, 1.0/gamma);
+        GLSLF("luma = pow(luma / %f, %f);\n", ref_peak, 1.0/gamma);
         break;
     }
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / ref_peak);
+        GLSLF("luma = %f * luma;\n", coeff / ref_peak);
         break;
     }
 
     default:
         abort();
     }
+
+    // Apply the computed brightness difference back to the original color
+    GLSL(color.rgb *= luma / luma_orig;)
 }
 
 // Map colors from one source space to another. These source spaces must be
@@ -551,6 +553,13 @@ void pass_color_map(struct gl_shader_cache *sc,
     // Compute the highest encodable level
     float src_range = mp_trc_nom_peak(src.gamma),
           dst_range = mp_trc_nom_peak(dst.gamma);
+
+    // Some operations need access to the video's luma coefficients (src
+    // colorspace), so make it available
+    struct mp_csp_primaries prim = mp_get_csp_primaries(src.primaries);
+    float rgb2xyz[3][3];
+    mp_get_rgb2xyz_matrix(prim, rgb2xyz);
+    gl_sc_uniform_vec3(sc, "src_luma", rgb2xyz[1]);
 
     // All operations from here on require linear light as a starting point,
     // so we linearize even if src.gamma == dst.gamma when one of the other
@@ -579,26 +588,8 @@ void pass_color_map(struct gl_shader_cache *sc,
 
     // Tone map to prevent clipping when the source signal peak exceeds the
     // encodable range
-    if (src.sig_peak > dst_range) {
-        // Convert to linear, relative XYZ before tone mapping to preserve
-        // channel balance better
-        struct mp_csp_primaries prim = mp_get_csp_primaries(src.primaries);
-        float rgb2xyz[3][3];
-        mp_get_rgb2xyz_matrix(prim, rgb2xyz);
-        gl_sc_uniform_mat3(sc, "rgb2xyz", true, &rgb2xyz[0][0]);
-        mp_invert_matrix3x3(rgb2xyz);
-        gl_sc_uniform_mat3(sc, "xyz2rgb", true, &rgb2xyz[0][0]);
-        // White balance, calculated from the relative XYZ coefficients of
-        // the white point. Failing to multiply in this difference causes
-        // the tone mapping process to shift the color temperature.
-        gl_sc_uniform_vec2(sc, "balance", (float[]){mp_xy_X(prim.white),
-                                                    mp_xy_Z(prim.white)});
-        GLSL(color.xyz = rgb2xyz * color.rgb;)
-        GLSL(color.xz /= balance;)
+    if (src.sig_peak > dst_range)
         pass_tone_map(sc, src.sig_peak / dst_range, algo, tone_mapping_param);
-        GLSL(color.xz *= balance;)
-        GLSL(color.rgb = xyz2rgb * color.xyz;)
-    }
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
