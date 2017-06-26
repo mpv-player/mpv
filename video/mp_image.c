@@ -685,10 +685,15 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.gamma = MP_CSP_TRC_AUTO;
     }
 
-    // If the signal peak is unknown, we're forced to pick the TRC's nominal
-    // range as the signal peak to prevent clipping
-    if (!params->color.sig_peak)
-        params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
+    if (!params->color.sig_peak) {
+        if (params->color.gamma == MP_CSP_TRC_HLG) {
+            params->color.sig_peak = 1000 / MP_REF_WHITE; // reference display
+        } else {
+            // If the signal peak is unknown, we're forced to pick the TRC's
+            // nominal range as the signal peak to prevent clipping
+            params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
+        }
+    }
 
     if (params->color.light == MP_CSP_LIGHT_AUTO) {
         // HLG is always scene-referred (using its own OOTF), everything else
