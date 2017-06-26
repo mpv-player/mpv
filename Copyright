@@ -35,6 +35,7 @@ Source files with specific licenses:
 - etc/input.conf is LGPLv2.1+
 - etc/builtin.conf is LGPLv2.1+
 - etc/encoding-profiles.conf is LGPLv2.1+
+- all mpv icons and derived files are LGPLv2.1+ (mpv-icon-8bit-16x16.png etc.)
 - everything else under etc/ is unknown
 - everything under DOCS/man/ is GPLv2+
 - sub/osd_font.otf is LGPLv2.1+
@@ -341,7 +342,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/out/win32/*               LGPL
     video/out/win_state.*           LGPL
     video/out/x11_common.*          probably impossible
-    video/out/x11_icon.bin          must stay GPL
+    video/out/x11_icon.bin          LGPL
     video/sws_utils.*               LGPL
     video/vaapi.*                   hard (GPL-only parts must be ifdefed)
     video/vdpau.c                   hard (GPL-only parts must be ifdefed)
@@ -349,6 +350,3 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
     video/vt.*                      LGPL
-
-Other:
-x   Logo                            GPL (?), might have to exclude from LGPL builds
