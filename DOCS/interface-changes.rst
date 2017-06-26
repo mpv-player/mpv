@@ -37,6 +37,7 @@ Interface changes
     - the "osd" command is deprecated (use "cycle osd-level")
     - --field-dominance is deprecated (use --vf=setfield=bff or tff)
     - --really-quiet subtle behavior change
+    - the deprecated handling of setting "no-" options via client API is dropped
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

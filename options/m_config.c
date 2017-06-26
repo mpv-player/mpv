@@ -236,9 +236,6 @@ void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
     }
 }
 
-static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
-                                                          struct bstr *name);
-
 static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
                                    struct mpv_global *global,
                                    struct m_obj_desc *desc, char **args)
@@ -874,28 +871,11 @@ int m_config_set_option(struct m_config *config, struct bstr name,
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags)
 {
-    struct mpv_node tmp;
     int r;
 
     struct m_config_option *co = m_config_get_co(config, name);
-    if (!co) {
-        bstr orig_name = name;
-        co = m_config_find_negation_opt(config, &name);
-        if (!co)
-            return M_OPT_UNKNOWN;
-        if (!(data->format == MPV_FORMAT_STRING && !bstr0(data->u.string).len) &&
-            !(data->format == MPV_FORMAT_FLAG && data->u.flag == 1))
-            return M_OPT_INVALID;
-        tmp.format = MPV_FORMAT_STRING;
-        tmp.u.string = "no";
-        data = &tmp;
-
-        if (!co->warning_was_printed) {
-            MP_WARN(config, "Option '%.*s': setting 'no-' option via API is "
-                    "deprecated and will stop working.\n", BSTR_P(orig_name));
-            co->warning_was_printed = true;
-        }
-    }
+    if (!co)
+        return M_OPT_UNKNOWN;
 
     // Do this on an "empty" type to make setting the option strictly overwrite
     // the old value, as opposed to e.g. appending to lists.

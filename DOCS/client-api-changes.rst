@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ --- mpv 0.26.0 ---
+ 1.25   - remove setting "no-" options via mpv_set_option*(). (See corresponding
+          deprecation in 0.23.0.)
  --- mpv 0.25.0 ---
  1.24   - add a MPV_ENABLE_DEPRECATED preprocessor symbol, which can be defined
           by the user to exclude deprecated API symbols from the C headers
