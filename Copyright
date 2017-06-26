@@ -246,7 +246,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     stream/frequencies.*            must stay GPL
     stream/rar.*                    LGPL
     stream/stream_avdevice.c        LGPL
-    stream/stream_bluray.c          unknown
+    stream/stream_bluray.c          LGPL
     stream/stream.*                 LGPL
     stream/stream_cb.c              LGPL
     stream/stream_cdda.c            unknown
