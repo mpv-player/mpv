@@ -218,14 +218,9 @@ STOP
 PREVIOUS and NEXT
     Seek backward/forward 1 minute.
 
-(The following keys are only valid if you compiled with TV or DVB input
-support.)
 
-h and k
-    Select previous/next tv-channel.
-
-H and K
-    Select previous/next dvb-channel.
+If you miss some older key bindings, look at ``etc/restore-old-bindings.conf``
+in the mpv git repository.
 
 Mouse Control
 -------------
