@@ -29,6 +29,16 @@
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 
+#if HAVE_UWP
+// Missing from MinGW headers.
+#include <windows.h>
+WINBASEAPI UINT WINAPI GetTempFileNameW(LPCWSTR lpPathName, LPCWSTR lpPrefixString,
+                                        UINT uUnique, LPWSTR lpTempFileName);
+WINBASEAPI DWORD WINAPI GetCurrentDirectoryW(DWORD nBufferLength, LPWSTR lpBuffer);
+WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
+                                         LPWSTR lpBuffer, LPWSTR *lpFilePart);
+#endif
+
 // Set the CLOEXEC flag on the given fd.
 // On error, false is returned (and errno set).
 bool mp_set_cloexec(int fd)
@@ -164,6 +174,12 @@ int mp_fstat(int fd, struct mp_stat *buf)
     return res;
 }
 
+#if HAVE_UWP
+static int mp_vfprintf(FILE *stream, const char *format, va_list args)
+{
+    return vfprintf(stream, format, args);
+}
+#else
 static int mp_check_console(HANDLE wstream)
 {
     if (wstream != INVALID_HANDLE_VALUE) {
@@ -215,6 +231,7 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 
     return done;
 }
+#endif
 
 int mp_fprintf(FILE *stream, const char *format, ...)
 {
@@ -412,8 +429,7 @@ static void free_env(void)
 // at runtime, and converting/allocating them in advance is ok.
 static void init_getenv(void)
 {
-    if (utf8_environ_ctx)
-        return;
+#if !HAVE_UWP
     wchar_t *wenv = GetEnvironmentStringsW();
     if (!wenv)
         return;
@@ -430,6 +446,7 @@ static void init_getenv(void)
     MP_TARRAY_APPEND(utf8_environ_ctx, utf8_environ, num_env, NULL);
     // Avoid showing up in leak detectors etc.
     atexit(free_env);
+#endif
 }
 
 char *mp_getenv(const char *name)
@@ -457,6 +474,25 @@ off_t mp_lseek(int fd, off_t offset, int whence)
     return _lseeki64(fd, offset, whence);
 }
 
+#if HAVE_UWP
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
+{
+    errno = ENOSYS;
+    return MAP_FAILED;
+}
+
+int munmap(void *addr, size_t length)
+{
+    errno = ENOSYS;
+    return -1;
+}
+
+int msync(void *addr, size_t length, int flags)
+{
+    errno = ENOSYS;
+    return -1;
+}
+#else
 // Limited mmap() wrapper, inspired by:
 // http://code.google.com/p/mman-win32/source/browse/trunk/mman.c
 
@@ -514,5 +550,6 @@ int msync(void *addr, size_t length, int flags)
     FlushViewOfFile(addr, length);
     return 0;
 }
+#endif
 
 #endif // __MINGW32__

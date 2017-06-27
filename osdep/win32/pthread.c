@@ -244,6 +244,7 @@ done:
 
 void pthread_set_name_np(pthread_t thread, const char *name)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && defined(_PROCESSTHREADSAPI_H_)
     HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
     if (!kernel32)
         return;
@@ -263,6 +264,7 @@ void pthread_set_name_np(pthread_t thread, const char *name)
         pSetThreadDescription(th, wname);
     }
     CloseHandle(th);
+#endif
 }
 
 int sem_init(sem_t *sem, int pshared, unsigned int value)

@@ -684,6 +684,7 @@ int get_cache_buffering_percentage(struct MPContext *mpctx)
 
 static void handle_heartbeat_cmd(struct MPContext *mpctx)
 {
+#if !HAVE_UWP
     struct MPOpts *opts = mpctx->opts;
     if (opts->heartbeat_cmd && !mpctx->paused && mpctx->video_out) {
         double now = mp_time_sec();
@@ -693,6 +694,7 @@ static void handle_heartbeat_cmd(struct MPContext *mpctx)
         }
         mp_set_timeout(mpctx, mpctx->next_heartbeat - now);
     }
+#endif
 }
 
 static void handle_cursor_autohide(struct MPContext *mpctx)

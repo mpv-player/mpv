@@ -22,6 +22,7 @@ Dependency identifiers (for win32 vs. Unix):
                                         (Windows without Cygwin)
     os-win32 / _WIN32:                  defined if basic windows.h API is available
     win32-desktop / HAVE_WIN32_DESKTOP: defined if desktop windows.h API is available
+    uwp / HAVE_UWP:                     defined if building for UWP (basic Windows only)
 """
 
 build_options = [
@@ -144,9 +145,17 @@ main_dependencies = [
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
     }, {
+        'name': '--uwp',
+        'desc': 'Universal Windows Platform',
+        'default': 'disable',
+        'deps': [ 'os-win32', 'mingw' ],
+        'deps_neg': [ 'cplayer' ],
+        'func': check_cc(lib=['windowsapp']),
+    }, {
         'name': 'win32-desktop',
         'desc': 'win32 desktop APIs',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'deps_neg': [ 'uwp' ],
         'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
@@ -519,7 +528,7 @@ audio_output_features = [
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
-        'deps': ['win32-desktop'],
+        'deps': ['os-win32'],
         'func': check_cc(fragment=load_fragment('wasapi.c')),
     }
 ]
