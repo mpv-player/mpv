@@ -213,22 +213,10 @@ for ideas on what you could contribute with.
 
 ## Relation to MPlayer and mplayer2
 
+mpv is a fork of MPlayer. Much has changed, and in general, mpv should be
+considered a completely new program, rather than a MPlayer drop-in replacement.
 
-mpv is based on mplayer2, which in turn is based on the original MPlayer
-(also called mplayer, mplayer-svn, mplayer1). Many changes have been made,
-many of which are incompatible or completely changed how the player
-behaves. Although there are still many similarities to its ancestors, mpv
-should generally be treated as a completely separate program.
-
-mpv was forked because we wanted to modernize MPlayer. This includes
-removing cruft (including features which stopped making sense 10 years ago),
-and of course adding modern features. Such huge and intrusive changes made it
-infeasible to work directly with MPlayer, which is mostly focused on
-preservation, so a fork had to be made. (Actually, mpv is based on mplayer2,
-which already started this process of removing cruft.)
-
-In general, mpv should be considered a completely new program, rather than a
-MPlayer drop-in replacement.
+For details see [FAQ entry](https://github.com/mpv-player/mpv/wiki/FAQ#How_is_mpv_related_to_MPlayer).
 
 If you are wondering what's different from mplayer2 and MPlayer, an incomplete
 and largely unmaintained list of changes is located [here][mplayer-changes].
