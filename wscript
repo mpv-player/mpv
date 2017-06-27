@@ -74,11 +74,6 @@ build_options = [
         'deps_neg': [ 'os-win32' ],
         'func': check_cc(linkflags=['-rdynamic']),
     }, {
-        'name': 'dlopen',
-        'desc': 'dlopen',
-        'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
-        'func': check_true
-    }, {
         'name': '--zsh-comp',
         'desc': 'zsh completion',
         'func': check_ctx_vars('BIN_PERL'),
