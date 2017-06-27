@@ -26,7 +26,7 @@
 struct input_ctx;
 
 /* Global initialization for terminal output. */
-int terminal_init(void);
+void terminal_init(void);
 
 /* Setup ictx to read keys from the terminal */
 void terminal_setup_getch(struct input_ctx *ictx);

@@ -285,7 +285,7 @@ bool terminal_try_attach(void)
     return true;
 }
 
-int terminal_init(void)
+void terminal_init(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     DWORD cmode = 0;
@@ -295,5 +295,4 @@ int terminal_init(void)
     SetConsoleMode(hSTDERR, cmode);
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
-    return 0;
 }

@@ -474,7 +474,7 @@ void terminal_get_size(int *w, int *h)
     *h = ws.ws_row;
 }
 
-int terminal_init(void)
+void terminal_init(void)
 {
     assert(!getch2_enabled);
     getch2_enabled = 1;
@@ -486,6 +486,4 @@ int terminal_init(void)
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 
     getch2_poll();
-
-    return 0;
 }
