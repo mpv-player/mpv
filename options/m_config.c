@@ -985,7 +985,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             if (opt->flags & (M_OPT_MIN | M_OPT_MAX))
                 MP_INFO(config, " (or an integer)");
         } else {
-            MP_INFO(config, " %s", co->opt->type->name);
+            MP_INFO(config, " %s", opt->type->name);
         }
         if (opt->flags & (M_OPT_MIN | M_OPT_MAX)) {
             snprintf(min, sizeof(min), "any");
@@ -998,7 +998,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         }
         char *def = NULL;
         if (co->default_data)
-            def = m_option_print(co->opt, co->default_data);
+            def = m_option_print(opt, co->default_data);
         if (def) {
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);
@@ -1010,6 +1010,11 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         if (opt->flags & M_OPT_FIXED)
             MP_INFO(config, " [no runtime changes]");
         MP_INFO(config, "\n");
+        for (int n = 0; opt->type->actions && opt->type->actions[n].name; n++) {
+            const struct m_option_action *action = &opt->type->actions[n];
+            MP_INFO(config, "    %s%s-%s\n", prefix, co->name, action->name);
+            count++;
+        }
         count++;
     }
     MP_INFO(config, "\nTotal: %d options\n", count);
