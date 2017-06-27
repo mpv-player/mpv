@@ -208,13 +208,9 @@ iconv support use --disable-iconv.",
         'func': check_true,
         'deps_any': ['posix-spawn', 'mingw'],
     }, {
-        'name': 'glob',
-        'desc': 'glob()',
-        'func': check_statement('glob.h', 'glob("filename", 0, 0, 0)')
-    }, {
-        'name': 'glob-win32-replacement',
+        'name': 'glob-win32',
         'desc': 'glob() win32 replacement',
-        'deps_neg': [ 'glob' ],
+        'deps_neg': [ 'posix' ],
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {

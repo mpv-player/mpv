@@ -432,7 +432,7 @@ def build(ctx):
         ( "osdep/path-unix.c"),
         ( "osdep/path-win.c",                    "os-win32" ),
         ( "osdep/path-win.c",                    "os-cygwin" ),
-        ( "osdep/glob-win.c",                    "glob-win32-replacement" ),
+        ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/w32_keyboard.c",                "os-win32" ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
         ( "osdep/windows_utils.c",               "win32" ),

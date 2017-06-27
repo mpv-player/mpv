@@ -103,7 +103,7 @@ static bool split_opt(struct parse_state *p)
     return false;
 }
 
-#if defined(__MINGW32__) && (HAVE_GLOB || HAVE_GLOB_WIN32_REPLACEMENT)
+#ifdef __MINGW32__
 static void process_non_option(struct playlist *files, const char *arg)
 {
     glob_t gg;

@@ -115,7 +115,6 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filenam
 
     char *fname = talloc_size(mf, strlen(filename) + 32);
 
-#if HAVE_GLOB || HAVE_GLOB_WIN32_REPLACEMENT
     if (!strchr(filename, '%')) {
         strcpy(fname, filename);
         if (!strchr(filename, '*'))
@@ -138,7 +137,6 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filenam
         globfree(&gg);
         goto exit_mf;
     }
-#endif
 
     mp_info(log, "search expr: %s\n", filename);
 
