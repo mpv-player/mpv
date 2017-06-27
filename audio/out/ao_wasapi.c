@@ -422,7 +422,7 @@ static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
 
             SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
             IAudioSessionControl_GetDisplayName(state->pSessionControl, &tmp);
-        } while (lstrcmpW(title, tmp));
+        } while (wcscmp(title, tmp));
         SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
         talloc_free(title);
         return CONTROL_OK;
