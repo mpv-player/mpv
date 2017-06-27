@@ -1399,12 +1399,12 @@ const m_option_type_t m_option_type_string_list = {
     .get   = str_list_get,
     .set   = str_list_set,
     .actions = (const struct m_option_action[]){
-        {"add-str"},
-        {"set"},
         {"add"},
-        {"pre"},
+        {"add-str"},
+        {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
         {"del"},
-        {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {"pre"},
+        {"set"},
         {0}
     },
 };
@@ -1425,12 +1425,12 @@ const m_option_type_t m_option_type_string_append_list = {
     .get   = str_list_get,
     .set   = str_list_set,
     .actions = (const struct m_option_action[]){
-        {"add-str"},
-        {"set"},
         {"add"},
-        {"pre"},
+        {"add-str"},
+        {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
         {"del"},
-        {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {"pre"},
+        {"set"},
         {0}
     },
 };
@@ -3243,11 +3243,11 @@ const m_option_type_t m_option_type_obj_settings_list = {
     .get   = get_obj_settings_list,
     .actions = (const struct m_option_action[]){
         {"add"},
-        {"set"},
-        {"pre"},
-        {"del"},
         {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {"del"},
         {"help",    M_OPT_TYPE_OPTIONAL_PARAM},
+        {"pre"},
+        {"set"},
         {"toggle"},
         {0}
     },
