@@ -212,6 +212,17 @@ def filtered_sources(ctx, sources):
     return [__source_file__(source) for source in sources \
             if __unpack_and_check_filter__(source)]
 
+"""
+Like filtered_sources(), but pick only the first entry that matches, and
+return its filename.
+"""
+def pick_first_matching_dep(ctx, deps):
+    files = filtered_sources(ctx, deps)
+    if len(files) > 0:
+        return files[0]
+    else:
+        raise DependencyError
+
 def env_fetch(tx):
     def fn(ctx):
         deps = ctx.env.satisfied_deps
@@ -223,6 +234,7 @@ def dependencies_use(ctx):
     return [inflector.storage_key(dep) for dep in ctx.env.satisfied_deps]
 
 BuildContext.filtered_sources = filtered_sources
+BuildContext.pick_first_matching_dep = pick_first_matching_dep
 BuildContext.dependencies_use = dependencies_use
 BuildContext.dependencies_includes  = env_fetch(lambda x: "INCLUDES_{0}".format(x))
 BuildContext.dependency_satisfied = dependency_satisfied

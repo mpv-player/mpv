@@ -259,6 +259,8 @@ void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 
 struct mp_ipc_ctx;
 struct mp_client_api;
+
+// Platform specific implementation, provided by ipc-*.c.
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global);
 void mp_uninit_ipc(struct mp_ipc_ctx *ctx);

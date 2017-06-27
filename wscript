@@ -12,6 +12,18 @@ from waftools.checks.custom import *
 c_preproc.go_absolute=True # enable system folders
 c_preproc.standard_includes.append('/usr/local/include')
 
+"""
+Dependency identifiers (for win32 vs. Unix):
+    wscript / C source      meaning
+    --------------------------------------------------------------------------
+    posix / HAVE_POSIX:                 defined on Linux, OSX, Cygwin
+                                        (Cygwin emulates POSIX APIs on Windows)
+    mingw / __MINGW32__:                defined if posix is not defined
+                                        (Windows without Cygwin)
+    os-win32 / _WIN32:                  defined if basic windows.h API is available
+    win32-desktop / HAVE_WIN32_DESKTOP: defined if desktop windows.h API is available
+"""
+
 build_options = [
     {
         'name': '--cplayer',
@@ -132,15 +144,15 @@ main_dependencies = [
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
     }, {
-        'name': 'win32',
-        'desc': 'win32',
+        'name': 'win32-desktop',
+        'desc': 'win32 desktop APIs',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
         'deps_neg': [ 'posix' ],
-        'deps': [ 'win32' ],
+        'deps': [ 'os-win32' ],
         'func': check_true,
     }, {
         'name': 'pthreads',
@@ -203,10 +215,11 @@ iconv support use --disable-iconv.",
             'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
         'deps_neg': ['mingw'],
     }, {
-        'name': 'subprocess',
-        'desc': 'posix_spawnp() or MinGW',
+        'name': 'win32-pipes',
+        'desc': 'Windows pipe support',
         'func': check_true,
-        'deps_any': ['posix-spawn', 'mingw'],
+        'deps': [ 'win32-desktop' ],
+        'deps_neg': [ 'posix' ],
     }, {
         'name': 'glob-win32',
         'desc': 'glob() win32 replacement',
@@ -506,7 +519,7 @@ audio_output_features = [
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
-        'deps': ['win32'],
+        'deps': ['win32-desktop'],
         'func': check_cc(fragment=load_fragment('wasapi.c')),
     }
 ]
@@ -583,7 +596,7 @@ video_output_features = [
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
-        'deps': [ 'win32' ],
+        'deps': [ 'win32-desktop' ],
         'groups': [ 'gl' ],
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
@@ -671,7 +684,7 @@ video_output_features = [
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
-        'deps': [ 'win32' ],
+        'deps': [ 'win32-desktop' ],
         'func': check_cc(header_name='d3d9.h'),
     }, {
         'name': '--android',
@@ -774,7 +787,7 @@ hwaccel_features = [
     }, {
         'name': '--d3d-hwaccel',
         'desc': 'DXVA2 and D3D11VA hwaccel',
-        'deps': [ 'win32' ],
+        'deps': [ 'win32-desktop' ],
         'func': check_true,
     }, {
         'name': '--d3d-hwaccel-new',

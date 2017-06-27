@@ -61,13 +61,3 @@ void mp_subprocess_detached(struct mp_log *log, char **args)
     if (pthread_create(&thread, NULL, run_subprocess, p))
         talloc_free(p);
 }
-
-#if !HAVE_SUBPROCESS
-int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
-                  char **error)
-{
-    *error = "unsupported";
-    return -1;
-}
-#endif

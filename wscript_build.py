@@ -101,21 +101,35 @@ def build(ctx):
     ctx(features = "ebml_header", target = "ebml_types.h")
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
-    if ctx.env.DEST_OS == 'win32':
-        main_fn_c = 'osdep/main-fn-win.c'
-    elif ctx.dependency_satisfied('cocoa'):
-        main_fn_c = 'osdep/main-fn-cocoa.c'
-    else:
-        main_fn_c = 'osdep/main-fn-unix.c'
+    main_fn_c = ctx.pick_first_matching_dep([
+        ( "osdep/main-fn-win.c",                 "win32-desktop" ),
+        ( "osdep/main-fn-cocoa.c",               "cocoa" ),
+        ( "osdep/main-fn-unix.c" ),
+    ])
 
-    getch2_c = {
-        'win32':  'osdep/terminal-win.c',
-    }.get(ctx.env.DEST_OS, "osdep/terminal-unix.c")
+    getch2_c = ctx.pick_first_matching_dep([
+        ( "osdep/terminal-unix.c",               "posix" ),
+        ( "osdep/terminal-win.c",                "win32-desktop" ),
+        ( "osdep/terminal-dummy.c" ),
+    ])
 
-    timer_c = {
-        'win32':  'osdep/timer-win2.c',
-        'darwin': 'osdep/timer-darwin.c',
-    }.get(ctx.env.DEST_OS, "osdep/timer-linux.c")
+    timer_c = ctx.pick_first_matching_dep([
+        ( "osdep/timer-win2.c",                  "os-win32" ),
+        ( "osdep/timer-darwin.c",                "os-darwin" ),
+        ( "osdep/timer-linux.c",                 "posix" ),
+    ])
+
+    ipc_c = ctx.pick_first_matching_dep([
+        ( "input/ipc-unix.c",                    "posix" ),
+        ( "input/ipc-win.c",                     "win32-desktop" ),
+        ( "input/ipc-dummy.c" ),
+    ])
+
+    subprocess_c = ctx.pick_first_matching_dep([
+        ( "osdep/subprocess-posix.c",            "posix-spawn" ),
+        ( "osdep/subprocess-win.c",              "win32-desktop" ),
+        ( "osdep/subprocess-dummy.c" ),
+    ])
 
     sources = [
         ## Audio
@@ -208,10 +222,9 @@ def build(ctx):
         ( "input/event.c" ),
         ( "input/input.c" ),
         ( "input/ipc.c" ),
-        ( "input/ipc-unix.c",                    "!mingw" ),
-        ( "input/ipc-win.c",                     "mingw" ),
+        ( ipc_c ),
         ( "input/keycodes.c" ),
-        ( "input/pipe-win32.c",                  "mingw" ),
+        ( "input/pipe-win32.c",                  "win32-pipes" ),
 
         ## Misc
         ( "misc/bstr.c" ),
@@ -312,7 +325,7 @@ def build(ctx):
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/vt.c",                          "videotoolbox-hwaccel" ),
-        ( "video/decode/d3d.c",                  "win32" ),
+        ( "video/decode/d3d.c",                  "win32-desktop" ),
         ( "video/decode/dec_video.c"),
         ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),
         ( "video/decode/hw_dxva2.c",             "d3d-hwaccel" ),
@@ -402,9 +415,9 @@ def build(ctx):
         ( "video/out/vo_wayland.c",              "wayland" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
-        ( "video/out/w32_common.c",              "win32" ),
-        ( "video/out/win32/displayconfig.c",     "win32" ),
-        ( "video/out/win32/droptarget.c",        "win32" ),
+        ( "video/out/w32_common.c",              "win32-desktop" ),
+        ( "video/out/win32/displayconfig.c",     "win32-desktop" ),
+        ( "video/out/win32/droptarget.c",        "win32-desktop" ),
         ( "video/out/win32/exclusive_hack.c",    "gl-win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/wayland/buffer.c",          "wayland" ),
@@ -426,8 +439,7 @@ def build(ctx):
         ( "osdep/macosx_touchbar.m",             "macos-touchbar" ),
         ( "osdep/semaphore_osx.c" ),
         ( "osdep/subprocess.c" ),
-        ( "osdep/subprocess-posix.c",            "posix-spawn" ),
-        ( "osdep/subprocess-win.c",              "os-win32" ),
+        ( subprocess_c ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
         ( "osdep/path-unix.c"),
         ( "osdep/path-win.c",                    "os-win32" ),
@@ -435,7 +447,7 @@ def build(ctx):
         ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/w32_keyboard.c",                "os-win32" ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
-        ( "osdep/windows_utils.c",               "win32" ),
+        ( "osdep/windows_utils.c",               "os-win32" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
         ( "osdep/android/strnlen.c",             "android"),

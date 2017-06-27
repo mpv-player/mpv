@@ -1392,7 +1392,7 @@ void mp_input_load_config(struct input_ctx *ictx)
         talloc_free(tmp);
     }
 
-#if defined(__MINGW32__)
+#if HAVE_WIN32_PIPES
     if (ictx->global->opts->input_file && *ictx->global->opts->input_file)
         mp_input_pipe_add(ictx, ictx->global->opts->input_file);
 #endif
