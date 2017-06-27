@@ -368,7 +368,16 @@ static void continue_sighandler(int signum)
 
 static pthread_t input_thread;
 static struct input_ctx *input_ctx;
-static int death_pipe[2];
+static int death_pipe[2] = {-1, -1};
+
+static void close_death_pipe(void)
+{
+    for (int n = 0; n < 2; n++) {
+        if (death_pipe[n] >= 0)
+            close(death_pipe[n]);
+        death_pipe[n] = -1;
+    }
+}
 
 static void quit_request_sighandler(int signum)
 {
@@ -421,8 +430,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (pthread_create(&input_thread, NULL, terminal_thread, NULL)) {
         input_ctx = NULL;
-        close(death_pipe[0]);
-        close(death_pipe[1]);
+        close_death_pipe();
         return;
     }
 
@@ -450,8 +458,7 @@ void terminal_uninit(void)
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
         pthread_join(input_thread, NULL);
-        close(death_pipe[0]);
-        close(death_pipe[1]);
+        close_death_pipe();
         input_ctx = NULL;
     }
 

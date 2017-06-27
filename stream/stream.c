@@ -885,8 +885,10 @@ struct mp_cancel {
 static void cancel_destroy(void *p)
 {
     struct mp_cancel *c = p;
-    close(c->wakeup_pipe[0]);
-    close(c->wakeup_pipe[1]);
+    if (c->wakeup_pipe[0] >= 0) {
+        close(c->wakeup_pipe[0]);
+        close(c->wakeup_pipe[1]);
+    }
 }
 
 struct mp_cancel *mp_cancel_new(void *talloc_ctx)

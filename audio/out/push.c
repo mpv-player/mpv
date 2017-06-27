@@ -423,8 +423,11 @@ static void destroy_no_thread(struct ao *ao)
 
     ao->driver->uninit(ao);
 
-    for (int n = 0; n < 2; n++)
-        close(p->wakeup_pipe[n]);
+    for (int n = 0; n < 2; n++) {
+        int h = p->wakeup_pipe[n];
+        if (h >= 0)
+            close(h);
+    }
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);

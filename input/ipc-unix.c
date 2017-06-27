@@ -402,8 +402,10 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     return arg;
 
 out:
-    close(arg->death_pipe[0]);
-    close(arg->death_pipe[1]);
+    if (arg->death_pipe[0] >= 0) {
+        close(arg->death_pipe[0]);
+        close(arg->death_pipe[1]);
+    }
     talloc_free(arg);
     return NULL;
 }

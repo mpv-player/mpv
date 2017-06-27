@@ -762,8 +762,10 @@ void vo_x11_uninit(struct vo *vo)
         sem_destroy(&x11->screensaver_sem);
     }
 
-    for (int n = 0; n < 2; n++)
-        close(x11->wakeup_pipe[n]);
+    if (x11->wakeup_pipe[0] >= 0) {
+        close(x11->wakeup_pipe[0]);
+        close(x11->wakeup_pipe[1]);
+    }
 
     talloc_free(x11);
     vo->x11 = NULL;
