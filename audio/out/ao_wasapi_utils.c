@@ -922,15 +922,45 @@ HRESULT wasapi_thread_init(struct ao *ao)
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
     bool align_hack = false;
+    HRESULT hr;
 retry: ;
-    HRESULT hr = load_device(ao->log, &state->pDevice, state->deviceID);
-    EXIT_ON_ERROR(hr);
+    if (state->deviceID) {
+        hr = load_device(ao->log, &state->pDevice, state->deviceID);
+        EXIT_ON_ERROR(hr);
 
-    MP_DBG(ao, "Activating pAudioClient interface\n");
-    hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
-                                     CLSCTX_ALL, NULL,
+        MP_DBG(ao, "Activating pAudioClient interface\n");
+        hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
+                                        CLSCTX_ALL, NULL,
+                                        (void **)&state->pAudioClient);
+        EXIT_ON_ERROR(hr);
+    } else {
+        MP_VERBOSE(ao, "Trying UWP wrapper.\n");
+
+        HRESULT (*wuCreateDefaultAudioRenderer)(IUnknown **res) = NULL;
+        HANDLE lib = LoadLibraryW(L"wasapiuwp2.dll");
+        if (!lib) {
+            MP_ERR(ao, "Wrapper not found: %d\n", (int)GetLastError());
+            hr = E_FAIL;
+            EXIT_ON_ERROR(hr);
+        }
+        if (lib) {
+            wuCreateDefaultAudioRenderer =
+                (void*)GetProcAddress(lib, "wuCreateDefaultAudioRenderer");
+        }
+        if (!wuCreateDefaultAudioRenderer) {
+            MP_ERR(ao, "Function not found.\n");
+            hr = E_FAIL;
+            EXIT_ON_ERROR(hr);
+        }
+        IUnknown *res = NULL;
+        hr = wuCreateDefaultAudioRenderer(&res);
+        MP_VERBOSE(ao, "Device: %s %p\n", mp_HRESULT_to_str(hr), res);
+        EXIT_ON_ERROR(hr);
+        hr = IUnknown_QueryInterface(res, &IID_IAudioClient,
                                      (void **)&state->pAudioClient);
-    EXIT_ON_ERROR(hr);
+        IUnknown_Release(res);
+        EXIT_ON_ERROR(hr);
+    }
 
     MP_DBG(ao, "Probing formats\n");
     if (!find_formats(ao)) {
