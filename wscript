@@ -789,10 +789,13 @@ hwaccel_features = [
         'name': '--d3d-hwaccel-new',
         'desc': 'DXVA2 and D3D11VA hwaccel (new API)',
         'func': check_statement('libavcodec/version.h',
-        'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 4, 0) && '
-        '       LIBAVCODEC_VERSION_MICRO < 100)'
-        '      ? 1 : -1]',
-        use='libav'),
+            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 4, 0) && '
+            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
+            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 100, 100) && '
+            '       LIBAVCODEC_VERSION_MICRO >= 100)'
+            '      ? 1 : -1]',
+            use='libav'),
+        'deps': [ 'd3d-hwaccel' ],
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
@@ -803,6 +806,7 @@ hwaccel_features = [
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
         'deps_any': [ 'd3d-hwaccel' ],
+        'deps_neg': [ 'd3d-hwaccel-new' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
