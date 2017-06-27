@@ -1090,6 +1090,7 @@ const m_option_type_t m_option_type_string = {
 #define OP_DEL 3
 #define OP_CLR 4
 #define OP_TOGGLE 5
+#define OP_ADD_STR 6
 
 static void free_str_list(void *dst)
 {
@@ -1206,14 +1207,17 @@ static struct bstr get_nextsep(struct bstr *ptr, char sep, bool modify)
     return bstr_splice(orig, 0, str.start - orig.start);
 }
 
-static int parse_str_list(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, struct bstr param, void *dst)
+static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param, void *dst,
+                               int default_op)
 {
     char **res;
-    int op = OP_NONE;
+    int op = default_op;
 
     if (bstr_endswith0(name, "-add")) {
         op = OP_ADD;
+    } else if (bstr_endswith0(name, "-add-str")) {
+        op = OP_ADD_STR;
     } else if (bstr_endswith0(name, "-pre")) {
         op = OP_PRE;
     } else if (bstr_endswith0(name, "-del")) {
@@ -1234,6 +1238,19 @@ static int parse_str_list(struct mp_log *log, const m_option_t *opt,
     // All other ops need a param
     if (param.len == 0 && op != OP_NONE)
         return M_OPT_MISSING_PARAM;
+
+    if (op == OP_ADD_STR) {
+        if (dst) {
+            char **list= VAL(dst);
+            int len = 0;
+            while (list && list[len])
+                len++;
+            MP_TARRAY_APPEND(NULL, list, len, bstrto0(NULL, param));
+            MP_TARRAY_APPEND(NULL, list, len, NULL);
+            VAL(dst) = list;
+        }
+        return 1;
+    }
 
     // custom type for "profile" calls this but uses ->priv for something else
     char separator = opt->type == &m_option_type_string_list && opt->priv ?
@@ -1366,6 +1383,12 @@ static int str_list_get(const m_option_t *opt, void *ta_parent,
     return 1;
 }
 
+static int parse_str_list(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, struct bstr param, void *dst)
+{
+    return parse_str_list_impl(log, opt, name, param, dst, OP_NONE);
+}
+
 const m_option_type_t m_option_type_string_list = {
     .name  = "String list",
     .size  = sizeof(char **),
@@ -1376,6 +1399,7 @@ const m_option_type_t m_option_type_string_list = {
     .get   = str_list_get,
     .set   = str_list_set,
     .actions = (const struct m_option_action[]){
+        {"add-str"},
         {"set"},
         {"add"},
         {"pre"},
@@ -1385,32 +1409,14 @@ const m_option_type_t m_option_type_string_list = {
     },
 };
 
-static void str_list_append(void *dst, bstr s)
-{
-    if (!dst)
-        return;
-    char **list= VAL(dst);
-    int len = 0;
-    while (list && list[len])
-        len++;
-    MP_TARRAY_APPEND(NULL, list, len, bstrto0(NULL, s));
-    MP_TARRAY_APPEND(NULL, list, len, NULL);
-    VAL(dst) = list;
-}
-
 static int parse_str_append_list(struct mp_log *log, const m_option_t *opt,
                                  struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    str_list_append(dst, param);
-
-    return 1;
+    return parse_str_list_impl(log, opt, name, param, dst, OP_ADD_STR);
 }
 
 const m_option_type_t m_option_type_string_append_list = {
-    .name  = "String list",
+    .name  = "String list (append by default)",
     .size  = sizeof(char **),
     .parse = parse_str_append_list,
     .print = print_str_list,
@@ -1418,6 +1424,15 @@ const m_option_type_t m_option_type_string_append_list = {
     .free  = free_str_list,
     .get   = str_list_get,
     .set   = str_list_set,
+    .actions = (const struct m_option_action[]){
+        {"add-str"},
+        {"set"},
+        {"add"},
+        {"pre"},
+        {"del"},
+        {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
+        {0}
+    },
 };
 
 static int read_subparam(struct mp_log *log, bstr optname, char *termset,
