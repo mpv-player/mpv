@@ -44,10 +44,6 @@
 #include "video/out/dither.h"
 #include "video/out/vo.h"
 
-// Maximal number of saved textures (for user script purposes)
-#define MAX_TEXTURE_HOOKS 16
-#define MAX_SAVED_TEXTURES 32
-
 // scale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
 static const char *const fixed_scale_filters[] = {
@@ -244,11 +240,11 @@ struct gl_video {
     float user_gamma;
 
     // hooks and saved textures
-    struct saved_tex saved_tex[MAX_SAVED_TEXTURES];
+    struct saved_tex saved_tex[SHADER_MAX_SAVED];
     int saved_tex_num;
-    struct tex_hook tex_hooks[MAX_TEXTURE_HOOKS];
+    struct tex_hook tex_hooks[SHADER_MAX_HOOKS];
     int tex_hook_num;
-    struct fbotex hook_fbos[MAX_SAVED_TEXTURES];
+    struct fbotex hook_fbos[SHADER_MAX_SAVED];
     int hook_fbo_num;
 
     int frames_uploaded;
@@ -508,7 +504,7 @@ static void uninit_rendering(struct gl_video *p)
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
 
-    for (int n = 0; n < MAX_SAVED_TEXTURES; n++)
+    for (int n = 0; n < SHADER_MAX_SAVED; n++)
         fbotex_uninit(&p->hook_fbos[n]);
 
     for (int n = 0; n < 2; n++)
@@ -1088,7 +1084,7 @@ static void saved_tex_store(struct gl_video *p, const char *name,
         }
     }
 
-    assert(p->saved_tex_num < MAX_SAVED_TEXTURES);
+    assert(p->saved_tex_num < SHADER_MAX_SAVED);
     p->saved_tex[p->saved_tex_num++] = (struct saved_tex) {
         .name = name,
         .tex = tex
@@ -1159,7 +1155,7 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
         int w = lroundf(fabs(sz.x1 - sz.x0));
         int h = lroundf(fabs(sz.y1 - sz.y0));
 
-        assert(p->hook_fbo_num < MAX_SAVED_TEXTURES);
+        assert(p->hook_fbo_num < SHADER_MAX_SAVED);
         struct fbotex *fbo = &p->hook_fbos[p->hook_fbo_num++];
         finish_pass_fbo(p, fbo, w, h, 0);
 
@@ -1216,7 +1212,7 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     return;
 
 found:
-    assert(p->hook_fbo_num < MAX_SAVED_TEXTURES);
+    assert(p->hook_fbo_num < SHADER_MAX_SAVED);
     struct fbotex *fbo = &p->hook_fbos[p->hook_fbo_num++];
     finish_pass_fbo(p, fbo, p->texture_w, p->texture_h, 0);
 
@@ -1479,10 +1475,10 @@ static bool img_tex_equiv(struct img_tex a, struct img_tex b)
 
 static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
 {
-    if (p->tex_hook_num < MAX_TEXTURE_HOOKS) {
+    if (p->tex_hook_num < SHADER_MAX_HOOKS) {
         p->tex_hooks[p->tex_hook_num++] = hook;
     } else {
-        MP_ERR(p, "Too many hooks! Limit is %d.\n", MAX_TEXTURE_HOOKS);
+        MP_ERR(p, "Too many hooks! Limit is %d.\n", SHADER_MAX_HOOKS);
 
         if (hook.free)
             hook.free(&hook);

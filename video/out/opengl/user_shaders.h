@@ -24,6 +24,7 @@
 #define SHADER_API 1
 #define SHADER_MAX_HOOKS 64
 #define SHADER_MAX_BINDS 6
+#define SHADER_MAX_SAVED 64
 #define MAX_SZEXP_SIZE 32
 
 enum szexp_op {
