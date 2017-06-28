@@ -596,20 +596,17 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
 {
     struct wasapi_state *state = ao->priv;
 
-    REFERENCE_TIME devicePeriod, bufferDuration, bufferPeriod;
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
+    REFERENCE_TIME devicePeriod;
     HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod,
                                               NULL);
     MP_VERBOSE(state, "Device period: %.2g ms\n",
                (double) devicePeriod / 10000.0 );
 
+    REFERENCE_TIME bufferDuration = devicePeriod;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
         // for shared mode, use integer multiple of device period close to 50ms
         bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
-        bufferPeriod   = 0;
-    } else {
-        // in exclusive mode, these should all be the same
-        bufferPeriod = bufferDuration = devicePeriod;
     }
 
     // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
@@ -620,9 +617,11 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
         bufferDuration = (REFERENCE_TIME) (0.5 +
             (10000.0 * 1000 / state->format.Format.nSamplesPerSec
              * state->bufferFrameCount));
-        if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
-            bufferPeriod = bufferDuration;
     }
+
+    // in exclusive mode, these should all be the same
+    REFERENCE_TIME bufferPeriod =
+        state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
 
     ao->format = af_fmt_from_planar(ao->format);
 
