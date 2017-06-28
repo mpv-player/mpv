@@ -30,15 +30,15 @@ struct mp_ring {
     /* Positions of the first readable/writeable chunks. Do not read this
      * fields but use the atomic private accessors `mp_ring_get_wpos`
      * and `mp_ring_get_rpos`. */
-    atomic_ulong rpos, wpos;
+    atomic_ullong rpos, wpos;
 };
 
-static unsigned long mp_ring_get_wpos(struct mp_ring *buffer)
+static unsigned long long mp_ring_get_wpos(struct mp_ring *buffer)
 {
     return atomic_load(&buffer->wpos);
 }
 
-static unsigned long mp_ring_get_rpos(struct mp_ring *buffer)
+static unsigned long long mp_ring_get_rpos(struct mp_ring *buffer)
 {
     return atomic_load(&buffer->rpos);
 }
