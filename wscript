@@ -312,7 +312,7 @@ iconv support use --disable-iconv.",
         'deps_neg': [ 'libass-osd' ],
         'func': check_true,
     } , {
-        'name': 'zlib',
+        'name': '--zlib',
         'desc': 'zlib',
         'func': check_libs(['z'],
                     check_statement('zlib.h', 'inflate(0, Z_NO_FLUSH)')),
