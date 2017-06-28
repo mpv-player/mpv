@@ -592,7 +592,7 @@ exit_label:
             mp_HRESULT_to_str(hr));
 }
 
-static HRESULT fix_format(struct ao *ao)
+static HRESULT fix_format(struct ao *ao, bool align_hack)
 {
     struct wasapi_state *state = ao->priv;
 
@@ -612,13 +612,20 @@ static HRESULT fix_format(struct ao *ao)
         bufferPeriod = bufferDuration = devicePeriod;
     }
 
+    // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
+    // returned in a previous attempt. hopefully this shouldn't happen because
+    // of the above integer device period
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
+    if (align_hack) {
+        bufferDuration = (REFERENCE_TIME) (0.5 +
+            (10000.0 * 1000 / state->format.Format.nSamplesPerSec
+             * state->bufferFrameCount));
+        if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+            bufferPeriod = bufferDuration;
+    }
+
     ao->format = af_fmt_from_planar(ao->format);
 
-    // handle unsupported buffer size hopefully this shouldn't happen because of
-    // the above integer device period
-    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
-    int retries=0;
-reinit:
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
@@ -627,33 +634,6 @@ reinit:
                                  bufferPeriod,
                                  &(state->format.Format),
                                  NULL);
-    // something about buffer sizes on Win7
-    if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
-        if (retries > 0) {
-            EXIT_ON_ERROR(hr);
-        } else {
-            retries ++;
-        }
-        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s,"
-                   "used %lld * 100ns\n",
-                   mp_HRESULT_to_str(hr), bufferDuration);
-
-        IAudioClient_GetBufferSize(state->pAudioClient,
-                                   &state->bufferFrameCount);
-        bufferDuration = (REFERENCE_TIME) (0.5 +
-            (10000.0 * 1000 / state->format.Format.nSamplesPerSec
-             * state->bufferFrameCount));
-        if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
-            bufferPeriod = bufferDuration;
-
-
-        IAudioClient_Release(state->pAudioClient);
-        state->pAudioClient = NULL;
-        hr = IMMDeviceActivator_Activate(state->pDevice,
-                                         &IID_IAudioClient, CLSCTX_ALL,
-                                         NULL, (void **)&state->pAudioClient);
-        goto reinit;
-    }
     EXIT_ON_ERROR(hr);
 
     MP_DBG(state, "IAudioClient::Initialize pRenderClient\n");
@@ -940,6 +920,7 @@ HRESULT wasapi_thread_init(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
+    bool align_hack = false;
 retry: ;
     HRESULT hr = load_device(ao->log, &state->pDevice, state->deviceID);
     EXIT_ON_ERROR(hr);
@@ -957,7 +938,16 @@ retry: ;
     }
 
     MP_DBG(ao, "Fixing format\n");
-    hr = fix_format(ao);
+    hr = fix_format(ao, align_hack);
+    if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED && !align_hack) {
+        // According to MSDN, we must use this as base after the failure.
+        IAudioClient_GetBufferSize(state->pAudioClient,
+                                   &state->bufferFrameCount);
+        SAFE_RELEASE(state->pAudioClient);
+        align_hack = true;
+        MP_WARN(ao, "This appears to require a weird Windows 7 hack. Retrying.\n");
+        goto retry;
+    }
     if ((hr == AUDCLNT_E_DEVICE_IN_USE || hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
         retry_wait <= 8)
     {
