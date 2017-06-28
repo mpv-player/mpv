@@ -55,6 +55,13 @@ struct ao_pull_state {
     // AO_STATE_*
     atomic_int state;
 
+    // Set when the buffer is intentionally not fed anymore in PLAY state.
+    atomic_bool draining;
+
+    // Set by the audio thread when an underflow was detected.
+    // It adds the number of samples.
+    atomic_int underflow;
+
     // Device delay of the last written sample, in realtime.
     atomic_llong end_time_us;
 };
@@ -100,10 +107,19 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     int state = atomic_load(&p->state);
     if (!IS_PLAYING(state)) {
+        atomic_store(&p->draining, false);
+        atomic_store(&p->underflow, 0);
         set_state(ao, AO_STATE_PLAY);
         if (!ao->stream_silence)
             ao->driver->resume(ao);
     }
+
+    bool draining = write_samples == samples && (flags & AOPLAY_FINAL_CHUNK);
+    atomic_store(&p->draining, draining);
+
+    int underflow = atomic_fetch_and(&p->underflow, 0);
+    if (underflow)
+        MP_WARN(ao, "Audio underflow by %d samples.\n", underflow);
 
     return write_samples;
 }
@@ -134,6 +150,9 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     // of data is the minimum amount across all planes.
     int buffered_bytes = mp_ring_buffered(p->buffers[0]);
     bytes = MPMIN(buffered_bytes, full_bytes);
+
+    if (buffered_bytes < bytes && !atomic_load(&p->draining))
+        atomic_fetch_add(&p->underflow, (bytes - buffered_bytes) / ao->sstride);
 
     if (bytes > 0)
         atomic_store(&p->end_time_us, out_time_us);
@@ -221,6 +240,7 @@ static void drain(struct ao *ao)
     struct ao_pull_state *p = ao->api_priv;
     int state = atomic_load(&p->state);
     if (IS_PLAYING(state)) {
+        atomic_store(&p->draining, true);
         // Wait for lower bound.
         mp_sleep_us(mp_ring_buffered(p->buffers[0]) / (double)ao->bps * 1e6);
         // And then poll for actual end. (Unfortunately, this code considers
