@@ -825,15 +825,18 @@ Video
                 switches mid-stream, switch to preferring the bitstream aspect.
                 This was the default in older mpv and mplayer2. Deprecated.
     :container: Strictly prefer the container aspect ratio. This is apparently
-                the default behavior with VLC, at least with Matroska.
+                the default behavior with VLC, at least with Matroska. Note that
+                if the container has no aspect ratio set, the behavior is the
+                same as with bitstream.
     :bitstream: Strictly prefer the bitstream aspect ratio, unless the bitstream
                 aspect ratio is not set. This is apparently the default behavior
-                with XBMC/kodi, at least with Matroska, and the current default
-                for mpv.
+                with XBMC/kodi, at least with Matroska.
 
-    Normally you should not set this. Try the ``container`` and ``bitstream``
-    choices if you encounter video that has the wrong aspect ratio in mpv,
-    but seems to be correct in other players.
+    The current default for mpv is ``container``.
+
+    Normally you should not set this. Try the various choices if you encounter
+    video that has the wrong aspect ratio in mpv, but seems to be correct in
+    other players.
 
 ``--video-unscaled=<no|yes|downscale-big>``
     Disable scaling of the video. If the window is larger than the video,
