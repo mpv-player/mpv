@@ -169,7 +169,7 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
-void gl_sc_generate(struct gl_shader_cache *sc);
+struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
 struct mpv_global;
 void gl_sc_set_cache_dir(struct gl_shader_cache *sc, struct mpv_global *global,
@@ -180,12 +180,8 @@ struct gl_timer;
 struct gl_timer *gl_timer_create(GL *gl);
 void gl_timer_free(struct gl_timer *timer);
 void gl_timer_start(struct gl_timer *timer);
-void gl_timer_stop(struct gl_timer *timer);
-
-int gl_timer_sample_count(struct gl_timer *timer);
-uint64_t gl_timer_last_us(struct gl_timer *timer);
-uint64_t gl_timer_avg_us(struct gl_timer *timer);
-uint64_t gl_timer_peak_us(struct gl_timer *timer);
+void gl_timer_stop(GL *gl);
+struct mp_pass_perf gl_timer_measure(struct gl_timer *timer);
 
 #define NUM_PBO_BUFFERS 3
 

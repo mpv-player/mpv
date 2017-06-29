@@ -60,6 +60,7 @@ struct gl_user_shader {
     struct bstr bind_tex[SHADER_MAX_BINDS];
     struct bstr save_tex;
     struct bstr pass_body;
+    struct bstr desc;
     struct gl_transform offset;
     struct szexp width[MAX_SZEXP_SIZE];
     struct szexp height[MAX_SZEXP_SIZE];

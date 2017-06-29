@@ -64,6 +64,7 @@
 #include "video/out/bitmap_packer.h"
 #include "options/path.h"
 #include "screenshot.h"
+#include "misc/node.h"
 
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
@@ -2913,8 +2914,41 @@ static int mp_property_vo_configured(void *ctx, struct m_property *prop,
                         mpctx->video_out && mpctx->video_out->config_ok);
 }
 
-static int mp_property_vo_performance(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
+static void get_frame_perf(struct mpv_node *node, struct mp_frame_perf *perf)
+{
+    for (int i = 0; i < perf->count; i++) {
+        struct mp_pass_perf *data = &perf->perf[i];
+        struct mpv_node *pass = node_array_add(node, MPV_FORMAT_NODE_MAP);
+
+        node_map_add_string(pass, "desc", perf->desc[i]);
+        node_map_add(pass, "last", MPV_FORMAT_INT64)->u.int64 = data->last;
+        node_map_add(pass, "avg", MPV_FORMAT_INT64)->u.int64 = data->avg;
+        node_map_add(pass, "peak", MPV_FORMAT_INT64)->u.int64 = data->peak;
+        node_map_add(pass, "count", MPV_FORMAT_INT64)->u.int64 = data->count;
+        struct mpv_node *samples = node_map_add(pass, "samples", MPV_FORMAT_NODE_ARRAY);
+
+        int idx = data->index;
+        for (int n = 0; n < data->count; n++) {
+            node_array_add(samples, MPV_FORMAT_INT64)->u.int64 = data->samples[idx];
+            idx = (idx + 1) % PERF_SAMPLE_COUNT;
+        }
+    }
+}
+
+static char *asprint_perf(char *res, struct mp_frame_perf *perf)
+{
+    for (int i = 0; i < perf->count; i++) {
+        struct mp_pass_perf *pass = &perf->perf[i];
+        res = talloc_asprintf_append(res,
+                  "- %s: last %dus avg %dus peak %dus\n", perf->desc[i],
+                  (int)pass->last/1000, (int)pass->avg/1000, (int)pass->peak/1000);
+    }
+
+    return res;
+}
+
+static int mp_property_vo_passes(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (!mpctx->video_out)
@@ -2931,19 +2965,30 @@ static int mp_property_vo_performance(void *ctx, struct m_property *prop,
     if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
-#define SUB_PROP_PERFDATA(N) \
-    {#N "-last", SUB_PROP_INT64(data.N.last)}, \
-    {#N "-avg",  SUB_PROP_INT64(data.N.avg)},  \
-    {#N "-peak", SUB_PROP_INT64(data.N.peak)}
+    switch (action) {
+    case M_PROPERTY_PRINT: {
+        char *res = NULL;
+        res = talloc_asprintf_append(res, "fresh:\n");
+        res = asprint_perf(res, &data.fresh);
+        res = talloc_asprintf_append(res, "\nredraw:\n");
+        res = asprint_perf(res, &data.redraw);
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
 
-    struct m_sub_property props[] = {
-        SUB_PROP_PERFDATA(upload),
-        SUB_PROP_PERFDATA(render),
-        SUB_PROP_PERFDATA(present),
-        {0}
-    };
+    case M_PROPERTY_GET: {
+        struct mpv_node node;
+        node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
+        struct mpv_node *fresh = node_map_add(&node, "fresh", MPV_FORMAT_NODE_ARRAY);
+        struct mpv_node *redraw = node_map_add(&node, "redraw", MPV_FORMAT_NODE_ARRAY);
+        get_frame_perf(fresh, &data.fresh);
+        get_frame_perf(redraw, &data.redraw);
+        *(struct mpv_node *)arg = node;
+        return M_PROPERTY_OK;
+    }
+    }
 
-    return m_property_read_sub(props, action, arg);
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
@@ -3975,7 +4020,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("height", "video-params/h"),
     {"window-scale", mp_property_window_scale},
     {"vo-configured", mp_property_vo_configured},
-    {"vo-performance", mp_property_vo_performance},
+    {"vo-passes", mp_property_vo_passes},
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},

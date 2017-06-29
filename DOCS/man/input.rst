@@ -1883,32 +1883,43 @@ Property list
     whether the video window is visible. If the ``--force-window`` option is
     used, this is usually always returns ``yes``.
 
-``vo-performance``
-    Some video output performance metrics. Not implemented by all VOs. This has
-    a number of sup-properties, of the form ``vo-performance/<metric>-<value>``,
-    all of them in milliseconds.
+``vo-passes``
+    Contains introspection about the VO's active render passes and their
+    execution times. Not implemented by all VOs.
 
-    ``<metric>`` refers to one of:
+    This is further subdivided into two frame types, ``vo-passes/fresh`` for
+    fresh frames (which have to be uploaded, scaled, etc.) and
+    ``vo-passes/redraw`` for redrawn frames (which only have to be re-painted).
+    The number of passes for any given subtype can change from frame to frame,
+    and should not be relied upon.
 
-    ``upload``
-        Time needed to make the frame available to the GPU (if necessary).
-    ``render``
-        Time needed to perform all necessary video postprocessing and rendering
-        passes (if necessary).
-    ``present``
-        Time needed to present a rendered frame on-screen.
+    Each frame type has a number of further sub-properties. Replace ``TYPE``
+    with the frame type, ``N`` with the 0-based pass index, and ``M`` with the
+    0-based sample index.
 
-    When a step is unnecessary or skipped, it will have the value 0.
+    ``vo-passes/TYPE/count``
+        Number of passes.
 
-    ``<value>`` refers to one of:
+    ``vo-passes/TYPE/N/desc``
+        Human-friendy description of the pass.
 
-    ``last``
-        Last measured value.
-    ``avg``
-        Average over a fixed number of past samples. (The exact timeframe
-        varies, but it should generally be a handful of seconds)
-    ``peak``
-        The peak (highest value) within this averaging range.
+    ``vo-passes/TYPE/N/last``
+        Last measured execution time, in nanoseconds.
+
+    ``vo-passes/TYPE/N/avg``
+        Average execution time of this pass, in nanoseconds. The exact
+        timeframe varies, but it should generally be a handful of seconds.
+
+    ``vo-passes/TYPE/N/peak``
+        The peak execution time (highest value) within this averaging range, in
+        nanoseconds.
+
+    ``vo-passes/TYPE/N/count``
+        The number of samples for this pass.
+
+    ``vo-passes/TYPE/N/samples/M``
+        The raw execution time of a specific sample for this pass, in
+        nanoseconds.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -1917,9 +1928,18 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-            "<metric>-<value>"  MPV_FORMAT_INT64
+        "TYPE" MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP
+                "desc"    MPV_FORMAT_STRING
+                "last"    MPV_FORMAT_INT64
+                "avg"     MPV_FORMAT_INT64
+                "peak"    MPV_FORMAT_INT64
+                "count"   MPV_FORMAT_INT64
+                "samples" MPV_FORMAT_NODE_ARRAY
+                     MP_FORMAT_INT64
 
-    (One entry for each ``<metric>`` and ``<value>`` combination)
+    Note that directly accessing this structure via subkeys is not supported,
+    the only access is through aforementioned ``MPV_FORMAT_NODE``.
 
 ``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the

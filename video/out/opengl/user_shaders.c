@@ -166,6 +166,7 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         return false;
 
     *out = (struct gl_user_shader){
+        .desc = bstr0("(unknown)"),
         .offset = identity_trans,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
         .height = {{ SZEXP_VAR_H, { .varname = bstr0("HOOKED") }}},
@@ -217,6 +218,11 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
 
         if (bstr_eatstart0(&line, "SAVE")) {
             out->save_tex = bstr_strip(line);
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "DESC")) {
+            out->desc = bstr_strip(line);
             continue;
         }
 

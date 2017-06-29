@@ -46,6 +46,8 @@ Interface changes
         --audio-file-paths => --audio-file-path
         --sub-paths => --sub-file-path
         --opengl-shaders => --opengl-shader
+    - remove property `vo-performance`, and add `vo-passes` as a more general
+      replacement
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

@@ -466,6 +466,7 @@ struct sc_entry {
     int num_uniforms;
     bstr frag;
     bstr vert;
+    struct gl_timer *timer;
 };
 
 struct gl_shader_cache {
@@ -520,6 +521,7 @@ void gl_sc_reset(struct gl_shader_cache *sc)
     GL *gl = sc->gl;
 
     if (sc->needs_reset) {
+        gl_timer_stop(gl);
         gl->UseProgram(0);
 
         for (int n = 0; n < sc->num_uniforms; n++) {
@@ -552,6 +554,7 @@ static void sc_flush_cache(struct gl_shader_cache *sc)
         talloc_free(e->vert.start);
         talloc_free(e->frag.start);
         talloc_free(e->uniforms);
+        gl_timer_free(e->timer);
     }
     sc->num_entries = 0;
 }
@@ -1029,7 +1032,10 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
 // 1. Unbind the program and all textures.
 // 2. Reset the sc state and prepare for a new shader program. (All uniforms
 //    and fragment operations needed for the next program have to be re-added.)
-void gl_sc_generate(struct gl_shader_cache *sc)
+// The return value is a mp_pass_perf containing performance metrics for the
+// execution of the generated shader. (Note: execution is measured up until
+// the corresponding gl_sc_reset call)
+struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
 {
     GL *gl = sc->gl;
 
@@ -1137,6 +1143,7 @@ void gl_sc_generate(struct gl_shader_cache *sc)
         *entry = (struct sc_entry){
             .vert = bstrdup(NULL, *vert),
             .frag = bstrdup(NULL, *frag),
+            .timer = gl_timer_create(gl),
         };
     }
     // build vertex shader from vao and cache the locations of the uniform variables
@@ -1161,7 +1168,10 @@ void gl_sc_generate(struct gl_shader_cache *sc)
 
     gl->ActiveTexture(GL_TEXTURE0);
 
+    gl_timer_start(entry->timer);
     sc->needs_reset = true;
+
+    return gl_timer_measure(entry->timer);
 }
 
 // Maximum number of simultaneous query objects to keep around. Reducing this
@@ -1169,16 +1179,13 @@ void gl_sc_generate(struct gl_shader_cache *sc)
 // available
 #define QUERY_OBJECT_NUM 8
 
-// How many samples to keep around, for the sake of average and peak
-// calculations. This corresponds to a few seconds (exact time variable)
-#define QUERY_SAMPLE_SIZE 256u
-
 struct gl_timer {
     GL *gl;
     GLuint query[QUERY_OBJECT_NUM];
     int query_idx;
 
-    GLuint64 samples[QUERY_SAMPLE_SIZE];
+    // these numbers are all in nanoseconds
+    uint64_t samples[PERF_SAMPLE_COUNT];
     int sample_idx;
     int sample_count;
 
@@ -1186,27 +1193,23 @@ struct gl_timer {
     uint64_t peak;
 };
 
-int gl_timer_sample_count(struct gl_timer *timer)
+struct mp_pass_perf gl_timer_measure(struct gl_timer *timer)
 {
-    return timer->sample_count;
-}
+    assert(timer);
+    struct mp_pass_perf res = {
+        .count = timer->sample_count,
+        .index = (timer->sample_idx - timer->sample_count) % PERF_SAMPLE_COUNT,
+        .peak = timer->peak,
+        .samples = timer->samples,
+    };
 
-uint64_t gl_timer_last_us(struct gl_timer *timer)
-{
-    return timer->samples[(timer->sample_idx - 1) % QUERY_SAMPLE_SIZE] / 1000;
-}
+    res.last = timer->samples[(timer->sample_idx - 1) % PERF_SAMPLE_COUNT];
 
-uint64_t gl_timer_avg_us(struct gl_timer *timer)
-{
-    if (timer->sample_count <= 0)
-        return 0;
+    if (timer->sample_count > 0) {
+        res.avg  = timer->avg_sum / timer->sample_count;
+    }
 
-    return timer->avg_sum / timer->sample_count / 1000;
-}
-
-uint64_t gl_timer_peak_us(struct gl_timer *timer)
-{
-    return timer->peak / 1000;
+    return res;
 }
 
 struct gl_timer *gl_timer_create(GL *gl)
@@ -1237,13 +1240,13 @@ void gl_timer_free(struct gl_timer *timer)
 static void gl_timer_record(struct gl_timer *timer, GLuint64 new)
 {
     // Input res into the buffer and grab the previous value
-    GLuint64 old = timer->samples[timer->sample_idx];
+    uint64_t old = timer->samples[timer->sample_idx];
     timer->samples[timer->sample_idx++] = new;
-    timer->sample_idx %= QUERY_SAMPLE_SIZE;
+    timer->sample_idx %= PERF_SAMPLE_COUNT;
 
     // Update average and sum
     timer->avg_sum = timer->avg_sum + new - old;
-    timer->sample_count = MPMIN(timer->sample_count + 1, QUERY_SAMPLE_SIZE);
+    timer->sample_count = MPMIN(timer->sample_count + 1, PERF_SAMPLE_COUNT);
 
     // Update peak if necessary
     if (new >= timer->peak) {
@@ -1252,7 +1255,7 @@ static void gl_timer_record(struct gl_timer *timer, GLuint64 new)
         // It's possible that the last peak was the value we just removed,
         // if so we need to scan for the new peak
         uint64_t peak = new;
-        for (int i = 0; i < QUERY_SAMPLE_SIZE; i++)
+        for (int i = 0; i < PERF_SAMPLE_COUNT; i++)
             peak = MPMAX(peak, timer->samples[i]);
         timer->peak = peak;
     }
@@ -1264,6 +1267,7 @@ static void gl_timer_record(struct gl_timer *timer, GLuint64 new)
 // The caling code *MUST* ensure this
 void gl_timer_start(struct gl_timer *timer)
 {
+    assert(timer);
     GL *gl = timer->gl;
     if (!gl->BeginQuery)
         return;
@@ -1283,9 +1287,8 @@ void gl_timer_start(struct gl_timer *timer)
     gl->BeginQuery(GL_TIME_ELAPSED, id);
 }
 
-void gl_timer_stop(struct gl_timer *timer)
+void gl_timer_stop(GL *gl)
 {
-    GL *gl = timer->gl;
     if (gl->EndQuery)
         gl->EndQuery(GL_TIME_ELAPSED);
 }
