@@ -1146,7 +1146,8 @@ Audio
     If both ``dts`` and ``dts-hd`` are specified, it behaves equivalent to
     specifying ``dts-hd`` only.
 
-    In earlier mpv versions
+    In earlier mpv versions you could use ``--ad`` to force the spdif wrapper.
+    This does not work anymore.
 
     .. admonition:: Warning
 
