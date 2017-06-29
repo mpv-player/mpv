@@ -142,26 +142,7 @@ enum mp_imgfmt {
 
     // Planar YUV formats
     IMGFMT_444P,                // 1x1
-    IMGFMT_422P,                // 2x1
-    IMGFMT_440P,                // 1x2
     IMGFMT_420P,                // 2x2
-    IMGFMT_411P,                // 4x1
-    IMGFMT_410P,                // 4x4
-
-    // YUV formats with 2 bytes per plane-pixel. Formats with 9-15 bits pad the
-    // most significant bits with 0 (use shifts to expand them to 16 bits).
-
-    IMGFMT_444P16,
-    IMGFMT_444P10,
-    IMGFMT_444P9,
-
-    IMGFMT_422P16,
-    IMGFMT_422P10,
-    IMGFMT_422P9,
-
-    IMGFMT_420P16,
-    IMGFMT_420P10,
-    IMGFMT_420P9,
 
     // Gray
     IMGFMT_Y8,
@@ -179,8 +160,6 @@ enum mp_imgfmt {
 
     // Like IMGFMT_NV12, but with 10 bits per component (and 6 bits of padding)
     IMGFMT_P010,
-    // Like IMGFMT_NV12, but with 16 bits per component
-    IMGFMT_P016,
 
     // RGB/BGR Formats
 
