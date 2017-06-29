@@ -36,6 +36,9 @@
 
 #include <CoreAudio/HostTime.h>
 
+#include <libavutil/intreadwrite.h>
+#include <libavutil/intfloat.h>
+
 #include "config.h"
 #include "ao.h"
 #include "internal.h"
@@ -68,6 +71,9 @@ struct priv {
     // format we changed the stream to, and the original format to restore
     AudioStreamBasicDescription stream_asbd;
     AudioStreamBasicDescription original_asbd;
+
+    // Output s16 physical format, float32 virtual format, ac3/dts mpv format
+    int spdif_hack;
 
     bool changed_mixing;
 
@@ -134,6 +140,24 @@ static OSStatus enable_property_listener(struct ao *ao, bool enabled)
     return status;
 }
 
+// This is a hack for passing through AC3/DTS on drivers which don't support it.
+// The goal is to have the driver output the AC3 data bitexact, so basically we
+// feed it float data by converting the AC3 data to float in the reverse way we
+// assume the driver outputs it.
+// Input: data_as_int16[0..samples]
+// Output: data_as_float[0..samples]
+// The conversion is done in-place.
+static void bad_hack_mygodwhy(char *data, int samples)
+{
+    // In reverse, so we can do it in-place.
+    for (int n = samples - 1; n >= 0; n--) {
+        int16_t val = AV_RN16(data + n * 2);
+        float fval = val / (float)(1 << 15);
+        uint32_t ival = av_float2int(fval);
+        AV_WN32(data + n * 4, ival);
+    }
+}
+
 static OSStatus render_cb_compressed(
         AudioDeviceID device, const AudioTimeStamp *ts,
         const void *in_data, const AudioTimeStamp *in_ts,
@@ -143,11 +167,12 @@ static OSStatus render_cb_compressed(
     struct priv *p   = ao->priv;
     AudioBuffer buf  = out_data->mBuffers[p->stream_idx];
     int requested    = buf.mDataByteSize;
+    int sstride      = p->spdif_hack ? 4 * ao->channels.num : ao->sstride;
 
-    int pseudo_frames = requested / ao->sstride;
+    int pseudo_frames = requested / sstride;
 
     // we expect the callback to read full frames, which are aligned accordingly
-    if (pseudo_frames * ao->sstride != requested) {
+    if (pseudo_frames * sstride != requested) {
         MP_ERR(ao, "Unsupported unaligned read of %d bytes.\n", requested);
         return kAudioHardwareUnspecifiedError;
     }
@@ -157,6 +182,9 @@ static OSStatus render_cb_compressed(
         + ca_frames_to_us(ao, pseudo_frames);
 
     ao_read_data(ao, &buf.mData, pseudo_frames, end);
+
+    if (p->spdif_hack)
+        bad_hack_mygodwhy(buf.mData, pseudo_frames * ao->channels.num);
 
     return noErr;
 }
@@ -187,8 +215,8 @@ static int select_stream(struct ao *ao)
             continue;
         }
 
-        if (af_fmt_is_pcm(ao->format) || ca_stream_supports_compressed(ao,
-                                                                   streams[i]))
+        if (af_fmt_is_pcm(ao->format) || p->spdif_hack ||
+            ca_stream_supports_compressed(ao, streams[i]))
         {
             MP_VERBOSE(ao, "Using substream %d/%zd.\n", i, n_streams);
             p->stream = streams[i];
@@ -253,6 +281,7 @@ coreaudio_error:
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
+    int original_format = ao->format;
 
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
     CHECK_CA_ERROR_L(coreaudio_error_nounlock, "failed to select device");
@@ -264,12 +293,24 @@ static int init(struct ao *ao)
         goto coreaudio_error_nounlock;
     }
 
+    if (af_fmt_is_pcm(ao->format))
+        p->spdif_hack = false;
+
+    if (p->spdif_hack) {
+        if (af_fmt_to_bytes(ao->format) != 2) {
+            MP_ERR(ao, "HD formats not supported with spdif hack.\n");
+            goto coreaudio_error_nounlock;
+        }
+        // Let the pure evil begin!
+        ao->format = AF_FORMAT_S16;
+    }
+
     uint32_t is_alive = 1;
     err = CA_GET(p->device, kAudioDevicePropertyDeviceIsAlive, &is_alive);
     CHECK_CA_WARN("could not check whether device is alive");
 
     if (!is_alive)
-        MP_WARN(ao , "device is not alive\n");
+        MP_WARN(ao, "device is not alive\n");
 
     err = ca_lock_device(p->device, &p->hog_pid);
     CHECK_CA_WARN("failed to set hogmode");
@@ -327,6 +368,20 @@ static int init(struct ao *ao)
     if (!ao->channels.num) {
         MP_ERR(ao, "number of channels changed, and unknown channel layout!\n");
         goto coreaudio_error;
+    }
+
+    if (p->spdif_hack) {
+        AudioStreamBasicDescription physical_format = {0};
+        err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat,
+                     &physical_format);
+        CHECK_CA_ERROR("could not get stream's physical format");
+        int ph_format = ca_asbd_to_mp_format(&physical_format);
+        if (ao->format != AF_FORMAT_FLOAT || ph_format != AF_FORMAT_S16) {
+            MP_ERR(ao, "Wrong parameters for spdif hack (%d / %d)\n",
+                   ao->format, ph_format);
+        }
+        ao->format = original_format; // pretend AC3 or DTS *evil laughter*
+        MP_WARN(ao, "Using spdif passthrough hack. This could produce noise.\n");
     }
 
     p->hw_latency_us = ca_get_device_latency_us(ao, p->device);
@@ -409,4 +464,9 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
         .stream_idx = -1,
         .changed_mixing = false,
     },
+    .options = (const struct m_option[]){
+        OPT_FLAG("spdif-hack", spdif_hack, 0),
+        {0}
+    },
+    .options_prefix = "coreaudio",
 };

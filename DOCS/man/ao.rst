@@ -95,6 +95,15 @@ Available audio output drivers are:
         setting in the ``Audio Devices`` dialog in the ``Audio MIDI Setup``
         utility. Note that this does not affect the selected speaker setup.
 
+    ``--coreaudio-spdif-hack=<yes|no>``
+        Try to pass through AC3/DTS data as PCM. This is useful for drivers
+        which do not report AC3 support. It converts the AC3 data to float,
+        and assumes the driver will do the inverse conversion, which means
+        a typical A/V receiver will pick it up as compressed IEC framed AC3
+        stream, ignoring that it's marked as PCM. This disables normal AC3
+        passthrough (even if the device reports it as supported). Use with
+        extreme care.
+
 
 ``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
