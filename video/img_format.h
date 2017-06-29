@@ -64,7 +64,7 @@
 // The only real paletted format we support is IMGFMT_PAL8, so check for that
 // format directly if you want an actual paletted format.
 #define MP_IMGFLAG_PAL 0x8000
-// planes don't contain real data; planes[3] contains an API-specific pointer
+// planes don't contain real data
 #define MP_IMGFLAG_HWACCEL 0x10000
 // Set if the chroma resolution is lower than luma resolution. Unset for non-YUV.
 #define MP_IMGFLAG_SUBSAMPLED 0x20000
@@ -169,7 +169,6 @@ enum mp_imgfmt {
 
     // Gray with alpha (packed)
     IMGFMT_YA8,
-    IMGFMT_YA16,
 
     // Packed YUV formats (components are byte-accessed)
     IMGFMT_YUYV,                // Y0 U  Y1 V
@@ -177,7 +176,6 @@ enum mp_imgfmt {
 
     // Y plane + packed plane for chroma
     IMGFMT_NV12,
-    IMGFMT_NV21,
 
     // Like IMGFMT_NV12, but with 10 bits per component (and 6 bits of padding)
     IMGFMT_P010,
@@ -193,9 +191,6 @@ enum mp_imgfmt {
     IMGFMT_RGBA,
     IMGFMT_BGR24,               // 3 bytes per pixel
     IMGFMT_RGB24,
-    IMGFMT_RGB48,               // 6 bytes per pixel, uint16_t channels
-    IMGFMT_RGBA64,              // 8 bytes per pixel, uint16_t channels
-    IMGFMT_BGRA64,
 
     // Like e.g. IMGFMT_ARGB, but has a padding byte instead of alpha
     IMGFMT_0RGB,
@@ -208,14 +203,6 @@ enum mp_imgfmt {
 
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
-
-    // The first plane has 1 byte per pixel. The second plane is a palette with
-    // 256 entries, with each entry encoded like in IMGFMT_BGR32.
-    IMGFMT_PAL8,
-
-    // XYZ colorspace, similar organization to RGB48. Even though it says "12",
-    // the components are stored as 16 bit, with lower 4 bits set to 0.
-    IMGFMT_XYZ12,
 
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
