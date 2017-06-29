@@ -417,8 +417,7 @@ const struct m_sub_options gl_video_conf = {
 static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
-static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
-                                  uint64_t id);
+static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t id);
 static const char *handle_scaler_opt(const char *name, bool tscale);
 static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
@@ -2442,9 +2441,9 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
 // The main rendering function, takes care of everything up to and including
 // upscaling. p->image is rendered.
-static void pass_render_frame(struct gl_video *p)
+static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t id)
 {
-    // initialize the texture parameters
+    // initialize the texture parameters and temporary variables
     p->texture_w = p->image_params.w;
     p->texture_h = p->image_params.h;
     p->texture_offset = identity_trans;
@@ -2453,12 +2452,15 @@ static void pass_render_frame(struct gl_video *p)
     p->hook_fbo_num = 0;
     p->use_linear = false;
 
+    // try uploading the frame
+    if (!pass_upload_image(p, mpi, id))
+        return false;
+
     if (p->image_params.rotate % 180 == 90)
         MPSWAP(int, p->texture_w, p->texture_h);
 
     if (p->dumb_mode)
-        return;
-
+        return true;
 
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     pass_read_video(p);
@@ -2518,6 +2520,8 @@ static void pass_render_frame(struct gl_video *p)
     }
 
     pass_opt_hook_point(p, "SCALED", NULL);
+
+    return true;
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
@@ -2577,9 +2581,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     if (p->surfaces[p->surface_now].id == 0) {
         is_new = true;
         pass_info_reset(p, false);
-        if (!gl_video_upload_image(p, t->current, t->frame_id))
+        if (!pass_render_frame(p, t->current, t->frame_id))
             return;
-        pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, FBOTEX_FUZZY);
         p->surfaces[p->surface_now].id = p->image.id;
@@ -2641,9 +2644,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         if (f_id > p->surfaces[p->surface_idx].id) {
             is_new = true;
             pass_info_reset(p, false);
-            if (!gl_video_upload_image(p, f, f_id))
+            if (!pass_render_frame(p, f, f_id))
                 return;
-            pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                             vp_w, vp_h, FBOTEX_FUZZY);
             p->surfaces[surface_dst].id = f_id;
@@ -2823,9 +2825,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 p->output_fbo_valid = false;
 
                 pass_info_reset(p, false);
-                if (!gl_video_upload_image(p, frame->current, frame->frame_id))
+                if (!pass_render_frame(p, frame->current, frame->frame_id))
                     goto done;
-                pass_render_frame(p);
 
                 // For the non-interpolation case, we draw to a single "cache"
                 // FBO to speed up subsequent re-draws (if any exist)
@@ -2997,8 +2998,7 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
 }
 
 // Returns false on failure.
-static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
-                                  uint64_t id)
+static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t id)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
