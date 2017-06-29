@@ -22,6 +22,7 @@
 
 #include "osdep/endian.h"
 #include "misc/bstr.h"
+#include "video/csputils.h"
 
 #if BYTE_ORDER == BIG_ENDIAN
 #define MP_SELECT_LE_BE(LE, BE) BE
@@ -100,6 +101,38 @@ struct mp_imgfmt_desc {
 };
 
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int imgfmt);
+
+// MP_CSP_AUTO for YUV, MP_CSP_RGB or MP_CSP_XYZ otherwise.
+// (Because IMGFMT/AV_PIX_FMT conflate format and csp for RGB and XYZ.)
+enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt);
+
+#define MP_NUM_COMPONENTS 4
+
+struct mp_regular_imgfmt_plane {
+    uint8_t num_components;
+    // 1 is luminance/red/gray, 2 is green/Cb, 3 is blue/Cr, 4 is alpha.
+    // 0 is used for padding (undefined contents).
+    uint8_t components[MP_NUM_COMPONENTS];
+};
+
+// This describes pixel formats that are byte aligned, have byte aligned
+// components, native endian, etc.
+struct mp_regular_imgfmt {
+    // Size of each component in bytes.
+    uint8_t component_size;
+
+    // If >0, LSB padding, if <0, MSB padding. The padding bits are always 0.
+    // This applies: bit_depth = component_size * 8 - abs(component_pad)
+    int8_t component_pad;
+
+    uint8_t num_planes;
+    struct mp_regular_imgfmt_plane planes[MP_MAX_PLANES];
+
+    // Chroma pixel size (1x1 is 4:4:4)
+    uint8_t chroma_w, chroma_h;
+};
+
+bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);
 
 enum mp_imgfmt {
     IMGFMT_NONE = 0,

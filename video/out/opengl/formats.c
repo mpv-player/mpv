@@ -106,36 +106,6 @@ static const int special_formats[][2] = {
     {0}
 };
 
-struct packed_fmt_entry {
-    int fmt;
-    int8_t component_size;
-    int8_t components[4]; // source component - 0 means unmapped
-};
-
-// Regular packed formats, which can be mapped to GL formats by finding a
-// texture format with same component count/size, and swizzling the result.
-static const struct packed_fmt_entry mp_packed_formats[] = {
-    //                  w   R  G  B  A
-    {IMGFMT_Y8,         1, {1, 0, 0, 0}},
-    {IMGFMT_Y16,        2, {1, 0, 0, 0}},
-    {IMGFMT_YA8,        1, {1, 0, 0, 2}},
-    {IMGFMT_YA16,       2, {1, 0, 0, 2}},
-    {IMGFMT_ARGB,       1, {2, 3, 4, 1}},
-    {IMGFMT_0RGB,       1, {2, 3, 4, 0}},
-    {IMGFMT_BGRA,       1, {3, 2, 1, 4}},
-    {IMGFMT_BGR0,       1, {3, 2, 1, 0}},
-    {IMGFMT_ABGR,       1, {4, 3, 2, 1}},
-    {IMGFMT_0BGR,       1, {4, 3, 2, 0}},
-    {IMGFMT_RGBA,       1, {1, 2, 3, 4}},
-    {IMGFMT_RGB0,       1, {1, 2, 3, 0}},
-    {IMGFMT_BGR24,      1, {3, 2, 1, 0}},
-    {IMGFMT_RGB24,      1, {1, 2, 3, 0}},
-    {IMGFMT_RGB48,      2, {1, 2, 3, 0}},
-    {IMGFMT_RGBA64,     2, {1, 2, 3, 4}},
-    {IMGFMT_BGRA64,     2, {3, 2, 1, 4}},
-    {0},
-};
-
 // Return an or-ed combination of all F_ flags that apply.
 int gl_format_feature_flags(GL *gl)
 {
@@ -317,23 +287,23 @@ bool gl_format_is_regular(const struct gl_format *fmt)
     return bpp == gl_bytes_per_pixel(fmt->format, fmt->type);
 }
 
-// dest = src.<w> (always using 4 components)
-static void packed_fmt_swizzle(char w[5], const struct packed_fmt_entry *fmt)
-{
-    for (int c = 0; c < 4; c++)
-        w[c] = "rgba"[MPMAX(fmt->components[c] - 1, 0)];
-    w[4] = '\0';
-}
-
 // Like gl_find_unorm_format(), but takes bits (not bytes), and if no fixed
 // point format is available, return an unsigned integer format.
-static const struct gl_format *find_plane_format(GL *gl, int bits, int n_channels)
+static const struct gl_format *find_plane_format(GL *gl, int bytes, int n_channels)
 {
-    int bytes = (bits + 7) / 8;
     const struct gl_format *f = gl_find_unorm_format(gl, bytes, n_channels);
     if (f)
         return f;
     return gl_find_uint_format(gl, bytes, n_channels);
+}
+
+static int find_comp(uint8_t *components, int num_components, int component)
+{
+    for (int n = 0; n < num_components; n++) {
+        if (components[n] == component)
+            return n;
+    }
+    return -1;
 }
 
 // Put a mapping of imgfmt to OpenGL textures into *out. Basically it selects
@@ -356,50 +326,27 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
         return false;
 
     const struct gl_format *planes[4] = {0};
-    char swizzle_tmp[5] = {0};
+    char swizzle_tmp[MP_NUM_COMPONENTS + 1] = {0};
     char *swizzle = "rgba";
+    struct mp_regular_imgfmt regfmt = {0};
 
-    // YUV/planar formats
-    if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
-        int bits = desc.component_bits;
-        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            planes[0] = find_plane_format(gl, bits, 1);
-            for (int n = 1; n < desc.num_planes; n++)
-                planes[n] = planes[0];
-            // RGB/planar
-            if (desc.flags & MP_IMGFLAG_RGB_P)
-                swizzle = "brga";
-            goto supported;
+    if (mp_get_regular_imgfmt(&regfmt, imgfmt)) {
+        uint8_t components[MP_NUM_COMPONENTS + 1] = {0};
+        int num_components = 0;
+        for (int n = 0; n < regfmt.num_planes; n++) {
+            struct mp_regular_imgfmt_plane *plane = &regfmt.planes[n];
+            planes[n] = find_plane_format(gl, regfmt.component_size,
+                                          plane->num_components);
+            for (int i = 0; i < plane->num_components; i++)
+                components[num_components++] = plane->components[i];
         }
-    }
-
-    // YUV/half-packed
-    if (desc.flags & MP_IMGFLAG_YUV_NV) {
-        int bits = desc.component_bits;
-        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            planes[0] = find_plane_format(gl, bits, 1);
-            planes[1] = find_plane_format(gl, bits, 2);
-            if (desc.flags & MP_IMGFLAG_YUV_NV_SWAP)
-                swizzle = "rbga";
-            goto supported;
+        swizzle = swizzle_tmp;
+        for (int c = 0; c < 4; c++) {
+            int loc = find_comp(components, num_components, c + 1);
+            swizzle[c] = "rgba"[loc >= 0 && loc < 4 ? loc : 0];
         }
-    }
-
-    // XYZ (same organization as RGB packed, but requires conversion matrix)
-    if (imgfmt == IMGFMT_XYZ12) {
-        planes[0] = gl_find_unorm_format(gl, 2, 3);
+        swizzle[4] = '\0';
         goto supported;
-    }
-
-    // Packed RGB(A) formats
-    for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
-        if (e->fmt == imgfmt) {
-            int n_comp = desc.bytes[0] / e->component_size;
-            planes[0] = gl_find_unorm_format(gl, e->component_size, n_comp);
-            swizzle = swizzle_tmp;
-            packed_fmt_swizzle(swizzle, e);
-            goto supported;
-        }
     }
 
     // Special formats for which OpenGL happens to have direct support.
