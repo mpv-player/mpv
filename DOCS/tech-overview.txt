@@ -46,9 +46,7 @@ player/*.c:
     - most state is in MPContext (core.h), which is not available to the
       subsystems
     - the currently played tracks are in mpctx->current_tracks, and decoder
-      state in d_video/d_audio/d_sub
-    - the timeline stuff is used only with MKV ordered chapters (and some other
-      minor features: cue, edl)
+      state in track.d_video/d_audio/d_sub
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
     - one exceptions are wakeup callbacks, which notify a "higher" component
@@ -56,23 +54,15 @@ player/*.c:
 
     I like to call the player/*.c files the "frontend".
 
-talloc.h & talloc.c:
-    Hierarchical memory manager copied from Samba. It's like a malloc() with
-    more features. Most importantly, each talloc allocation can have a parent,
-    and if the parent is free'd, all children will be free'd as well. The
-    parent is an arbitrary talloc allocation. It's either set by the allocation
-    call by passing a talloc parent, usually as first argument to the allocation
-    function. It can also be set or reset later by other calls (at least
-    talloc_steal()). A talloc allocation that is used as parent is often called
-    a talloc context.
-
-    Lots of code still uses malloc() proper, and you should be careful what
-    type of allocation you're dealing with when returning or free'ing an
-    allocation. (Needless to say, talloc_free() and free() are completely
-    different things.)
-
-    The copy in mpv has been modified to abort on OOM conditions. An
-    allocation call will never return NULL.
+ta.h & ta.c:
+    Hierarchical memory manager inspired by talloc from Samba. It's like a
+    malloc() with more features. Most importantly, each talloc allocation can
+    have a parent, and if the parent is free'd, all children will be free'd as
+    well. The parent is an arbitrary talloc allocation. It's either set by the
+    allocation call by passing a talloc parent, usually as first argument to the
+    allocation function. It can also be set or reset later by other calls (at
+    least talloc_steal()). A talloc allocation that is used as parent is often
+    called a talloc context.
 
     One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
     as in it doesn't require valgrind.) You can enable it by setting the
@@ -83,15 +73,13 @@ talloc.h & talloc.c:
     Documentation can be found here:
         http://git.samba.org/?p=samba.git;a=blob;f=lib/talloc/talloc.h;hb=HEAD
 
+    For some reason, we're still using API-compatible wrappers instead of TA
+    directly. The talloc wrapper has only a subset of the functionality, and
+    in particular the wrappers abort() on memory allocation failure.
+
     Note: unlike tcmalloc, jemalloc, etc., talloc() is not actually a malloc
           replacement. It works on top of system malloc and provides additional
           features that are supposed to make memory management easier.
-
-    Warning: actually, we're not using talloc anymore. talloc in mpv has been
-             replaced by a custom re-implementation (TA in ta/). It provides
-             some talloc emulation (just the parts needed by mpv). We will get
-             rid of the talloc emulation later and use TA natively.
-             (See ta/README for details.)
 
 player/command.c:
     This contains the implementation for client API commands and properties.
@@ -120,7 +108,7 @@ options/options.h, options/options.c
     their own sub-option tables separate from MPOpts.
 
     The actual option parser is spread over m_option.c, m_config.c, and
-    parser-mpcmd.c, and uses the option table in options.c.
+    parse_commandline.c, and uses the option table in options.c.
 
 input/input.c:
     This translates keyboard input coming from VOs and other sources (such
@@ -161,8 +149,7 @@ demux/:
 
     Most demuxers have been removed from this fork, and the only important and
     "actual" demuxers left are demux_mkv.c and demux_lavf.c (uses libavformat).
-    There are some pseudo demuxers like demux_cue.c, which exist only to invoke
-    other frontend code (tl_cue.c in this case).
+    There are some pseudo demuxers like demux_cue.c.
 
     The main interface is in demux.h. The stream headers are in stheader.h.
     There is a stream header for each audio/video/sub stream, and each of them
@@ -176,8 +163,8 @@ video/:
     internally.
 
 video/decode/:
-    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c/vd.c
-    handle most of connecting the frontend with the actual decoder.
+    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c
+    handles most of connecting the frontend with the actual decoder.
 
 video/filter/:
     vf_*.c and vf.c form the video filter chain. They are fed by the video
@@ -193,24 +180,23 @@ video/out/:
     vo_opengl can pick a windowing system at runtime, e.g. the same binary can
     provide both X11 and Cocoa support on OSX.
 
-    VOs can be reconfigured at runtime. A vo_config() call can change the video
+    VOs can be reconfigured at runtime. A vo_reconfig() call can change the video
     resolution and format, without destroying the window.
 
-    vo_vdpau and vo_opengl should be taken as reference.
+    vo_opengl should be taken as reference.
 
 audio/:
     format.h/format.c define the uncompressed audio formats. (As well as some
     compressed formats used for spdif.)
 
 audio/decode/:
-    ad_*.c and dec_audio.c/ad.c handle audio decoding. ad_lavc.c is the
+    ad_*.c and dec_audio.c handle audio decoding. ad_lavc.c is the
     decoder using ffmpeg. ad_spdif.c is not really a decoder, but is used for
     compressed audio passthrough.
 
 audio/filter/:
     Audio filter chain. af_lavrresample is inserted if any form of conversion
-    between audio formats is needed. (af_convert24.c and af_convertsignendian.c
-    are also used for some formats not directly supported by FFmpeg.)
+    between audio formats is needed.
 
 audio/out/:
     Audio outputs.
@@ -244,22 +230,12 @@ sub/:
 
     The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
     as they are demuxed. All text subtitles are rendered by sd_ass.c. If text
-    subtitles are not in the ASS format, subtitle converters are inserted, for
-    example sd_srt.c, which is used to convert SRT->ASS. sd_srt.c is also used
-    as general converter for text->ASS (to prevent interpretation of text as
-    ASS tags).
+    subtitles are not in the ASS format, the libavcodec subtitle converters are
+    used (lavc_conv.c).
 
     Text subtitles can be preloaded, in which case they are read fully as soon
-    as the subtitle is selected, and then effectively stored in an ASS_Track.
-    It's used for external text subtitles, and required to make codepage
-    detection as well as timing postprocessing work. (Timing postprocessing
-    removes tiny gaps or overlaps between subtitle events.)
-
-player/timeline/:
-    A timeline is the abstraction used by loadfile.c to combine several files
-    into one seemingly linear video. It's mainly used for ordered chapters
-    playback. The high level code to find and load other files containing the
-    segments for playing an ordered chapters file is in tl_matroska.c.
+    as the subtitle is selected. In this case, they are effectively stored in
+    sd_ass.c's internal state.
 
 etc/:
     The file input.conf is actually integrated into the mpv binary by the
