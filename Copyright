@@ -41,7 +41,7 @@ Source files with specific licenses:
 - sub/osd_font.otf is LGPLv2.1+
 - version.sh is LGPLv2+
 - bootstrap.py is unknown (probably GPLv2+ or LGPLv2+)
-- wscript: GPLv2+ (due to 98fca3531841221b)
+- the build system (wscript, waftools/*) is LGPLv2+, some parts BSD
 
 Some files are marked with "Almost LGPL." These files are GPL, but all authors
 have agreed to relicense them to LGPL. the problem is that one of the authors is
