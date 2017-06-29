@@ -701,7 +701,6 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
 
 // Assumes the texture was hooked
 void pass_sample_unsharp(struct gl_shader_cache *sc, float param) {
-    GLSLF("// unsharp\n");
     GLSLF("{\n");
     GLSL(float st1 = 1.2;)
     GLSL(vec4 p = HOOKED_tex(HOOKED_pos);)

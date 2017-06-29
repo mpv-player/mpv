@@ -4195,6 +4195,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Each block of metadata, along with the non-metadata lines after it, defines
     a single pass. Each pass can set the following metadata:
 
+    DESC <title>
+        User-friendly description of the pass. This is the name used when
+        representing this shader in the list of passes for property
+        `vo-passes`.
+
     HOOK <name> (required)
         The texture which to hook into. May occur multiple times within a
         metadata block, up to a predetermined limit. See below for a list of

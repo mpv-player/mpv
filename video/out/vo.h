@@ -143,13 +143,31 @@ struct voctrl_playback_state {
 };
 
 // VOCTRL_PERFORMANCE_DATA
-struct voctrl_performance_entry {
-    // Times are in microseconds
+#define PERF_SAMPLE_COUNT 256u
+
+struct mp_pass_perf {
+    // times are all in nanoseconds
     uint64_t last, avg, peak;
+    // this is a ring buffer, indices are relative to index and modulo
+    // PERF_SAMPLE_COUNT
+    uint64_t *samples;
+    int count;
+    int index;
+};
+
+#define VO_PASS_PERF_MAX 128
+
+struct mp_frame_perf {
+    int count;
+    struct mp_pass_perf perf[VO_PASS_PERF_MAX];
+    // The owner of this struct does not have ownership over the names, and
+    // they may change at any time - so this struct should not be stored
+    // anywhere or the results reused
+    char *desc[VO_PASS_PERF_MAX];
 };
 
 struct voctrl_performance_data {
-    struct voctrl_performance_entry upload, render, present;
+    struct mp_frame_perf fresh, redraw;
 };
 
 enum {
