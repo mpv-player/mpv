@@ -66,8 +66,6 @@
 #define MP_IMGFLAG_PAL 0x8000
 // planes don't contain real data
 #define MP_IMGFLAG_HWACCEL 0x10000
-// Set if the chroma resolution is lower than luma resolution. Unset for non-YUV.
-#define MP_IMGFLAG_SUBSAMPLED 0x20000
 // Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
 // are always shuffled (G - B - R [- A]).
 #define MP_IMGFLAG_RGB_P 0x40000
@@ -92,9 +90,6 @@ struct mp_imgfmt_desc {
     int8_t bpp[MP_MAX_PLANES];   // bits per pixel
     int8_t plane_bits;           // number of bits in use for plane 0
     int8_t component_bits;       // number of bits per component (0 if uneven)
-    int8_t component_full_bits;  // number of bits per component including
-                                 // internal padding (0 if uneven)
-    int8_t components[MP_MAX_PLANES]; // number of components for each plane
     // chroma shifts per plane (provided for convenience with planar formats)
     int8_t xs[MP_MAX_PLANES];
     int8_t ys[MP_MAX_PLANES];

@@ -155,7 +155,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             shift = d.shift;
         if (shift != d.shift)
             shift = -1;
-        desc.components[d.plane] += 1;
     }
 
     for (int p = 0; p < 4; p++) {
@@ -164,7 +163,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     }
 
     desc.plane_bits = planedepth[0];
-    desc.component_full_bits = desc.component_bits;
 
     // Check whether any components overlap other components (per plane).
     // We're cheating/simplifying here: we assume that this happens if a shift
@@ -256,10 +254,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                 desc.flags |= MP_IMGFLAG_YUV_NV_SWAP;
         }
         if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
-        {
             desc.component_bits += shift;
-            desc.component_full_bits = (desc.component_bits + 7) / 8 * 8;
-        }
     }
 
     for (int p = 0; p < desc.num_planes; p++) {
@@ -275,12 +270,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if (desc.flags & MP_IMGFLAG_HWACCEL) {
         desc.component_bits = 0;
-        desc.component_full_bits = 0;
         desc.plane_bits = 0;
     }
-
-    if (desc.chroma_xs || desc.chroma_ys)
-        desc.flags |= MP_IMGFLAG_SUBSAMPLED;
 
     return desc;
 }
@@ -510,9 +501,9 @@ int main(int argc, char **argv)
         printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
                d.plane_bits, d.component_bits);
-        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d cfbits=%d\n",
+        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
-               d.plane_bits, d.component_bits, d.component_full_bits);
+               d.plane_bits, d.component_bits);
         printf("  {");
         for (int n = 0; n < MP_MAX_PLANES; n++)
             printf("%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n], d.xs[n], d.ys[n]);
