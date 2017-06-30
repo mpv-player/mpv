@@ -42,6 +42,7 @@ struct d3d_decoder_fmt {
 // Must call d3d_load_dlls() before accessing. Once this is done, the DLLs
 // remain loaded forever.
 extern HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
+extern PFN_D3D11_CREATE_DEVICE d3d11_D3D11CreateDevice;
 
 void d3d_load_dlls(void);
 

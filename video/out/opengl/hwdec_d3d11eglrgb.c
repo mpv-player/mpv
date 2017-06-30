@@ -105,20 +105,15 @@ static int create(struct gl_hwdec *hw)
 
     p->egl_display = egl_display;
 
-    if (!d3d11_dll) {
+    if (!d3d11_D3D11CreateDevice) {
         if (!hw->probing)
             MP_ERR(hw, "Failed to load D3D11 library\n");
         goto fail;
     }
 
-    PFN_D3D11_CREATE_DEVICE CreateDevice =
-        (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
-    if (!CreateDevice)
-        goto fail;
-
-    hr = CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
-                      D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
-                      D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
+    hr = d3d11_D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+                                 D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
+                                 D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
     if (FAILED(hr)) {
         int lev = hw->probing ? MSGL_V : MSGL_ERR;
         mp_msg(hw->log, lev, "Failed to create D3D11 Device: %s\n",
