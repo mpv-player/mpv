@@ -611,7 +611,9 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(imgfmt);
     if (!fmt.id)
         return;
-    if (fmt.flags & MP_IMGFLAG_YUV) {
+
+    enum mp_csp forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
+    if (forced_csp == MP_CSP_AUTO) { // YUV/other
         if (params->color.space != MP_CSP_BT_601 &&
             params->color.space != MP_CSP_BT_709 &&
             params->color.space != MP_CSP_BT_2020_NC &&
@@ -646,7 +648,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         }
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_BT_1886;
-    } else if (fmt.flags & MP_IMGFLAG_RGB) {
+    } else if (forced_csp == MP_CSP_RGB) {
         params->color.space = MP_CSP_RGB;
         params->color.levels = MP_CSP_LEVELS_PC;
 
@@ -659,7 +661,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->color.primaries = MP_CSP_PRIM_BT_709;
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_SRGB;
-    } else if (fmt.flags & MP_IMGFLAG_XYZ) {
+    } else if (forced_csp == MP_CSP_XYZ) {
         params->color.space = MP_CSP_XYZ;
         params->color.levels = MP_CSP_LEVELS_PC;
 
