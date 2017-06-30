@@ -5643,7 +5643,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_LOAD_SCRIPT: {
         char *script = cmd->args[0].v.s;
-        if (mp_load_script(mpctx, script) < 0)
+        if (mp_load_user_script(mpctx, script) < 0)
             return -1;
         break;
     }

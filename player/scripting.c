@@ -155,6 +155,14 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     return 0;
 }
 
+int mp_load_user_script(struct MPContext *mpctx, const char *fname)
+{
+    char *path = mp_get_user_path(NULL, mpctx->global, fname);
+    int ret = mp_load_script(mpctx, path);
+    talloc_free(path);
+    return ret;
+}
+
 static int compare_filename(const void *pa, const void *pb)
 {
     char *a = (char *)pa;
@@ -219,11 +227,8 @@ void mp_load_scripts(struct MPContext *mpctx)
     // Load scripts from options
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
-        if (files[n][0]) {
-            char *path = mp_get_user_path(NULL, mpctx->global, files[n]);
-            mp_load_script(mpctx, path);
-            talloc_free(path);
-        }
+        if (files[n][0])
+            mp_load_user_script(mpctx, files[n]);
     }
     if (!mpctx->opts->auto_load_scripts)
         return;
