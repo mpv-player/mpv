@@ -699,7 +699,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
 #endif
 
-#if HAVE_EGL_ANGLE
+#if HAVE_EGL_ANGLE_WIN32
     OPT_SUBSTRUCT("", angle_opts, angle_conf, 0),
 #endif
 

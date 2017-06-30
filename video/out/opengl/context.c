@@ -56,7 +56,7 @@ static const struct mpgl_driver *const backends[] = {
 #if HAVE_GL_COCOA
     &mpgl_driver_cocoa,
 #endif
-#if HAVE_EGL_ANGLE
+#if HAVE_EGL_ANGLE_WIN32
     &mpgl_driver_angle,
 #endif
 #if HAVE_GL_WIN32

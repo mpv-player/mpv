@@ -377,8 +377,11 @@ AVBufferRef *d3d9_wrap_device_ref(struct IDirect3DDevice9 *device) { return NULL
 #else /* !HAVE_D3D_HWACCEL_NEW */
 
 #include <libavutil/hwcontext.h>
-#include <libavutil/hwcontext_dxva2.h>
 #include <libavutil/hwcontext_d3d11va.h>
+
+#if HAVE_D3D9_HWACCEL
+#include <libavutil/hwcontext_dxva2.h>
+#endif
 
 void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
 {
@@ -400,11 +403,13 @@ void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
     fctx->width  = FFALIGN(fctx->width,  alignment);
     fctx->height = FFALIGN(fctx->height, alignment);
 
+#if HAVE_D3D9_HWACCEL
     if (fctx->format == AV_PIX_FMT_DXVA2_VLD) {
         AVDXVA2FramesContext *hwctx = fctx->hwctx;
 
         hwctx->surface_type = DXVA2_VideoDecoderRenderTarget;
     }
+#endif
 
     if (fctx->format == AV_PIX_FMT_D3D11) {
         AVD3D11VAFramesContext *hwctx = fctx->hwctx;

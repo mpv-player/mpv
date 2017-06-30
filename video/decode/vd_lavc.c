@@ -265,8 +265,11 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_D3D_HWACCEL
     &mp_vd_lavc_d3d11va,
+
+ #if HAVE_D3D9_HWACCEL
     &mp_vd_lavc_dxva2,
     &mp_vd_lavc_dxva2_copy,
+ #endif
     &mp_vd_lavc_d3d11va_copy,
 #endif
 #if HAVE_ANDROID

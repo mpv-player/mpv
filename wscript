@@ -619,7 +619,7 @@ video_output_features = [
             check_statement('d3d9.h', 'IDirect3D9Ex *d'))
     } , {
         'name': '--egl-angle',
-        'desc': 'OpenGL Win32 ANGLE Backend',
+        'desc': 'OpenGL ANGLE headers',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'groups': [ 'gl' ],
         'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
@@ -635,6 +635,12 @@ video_output_features = [
                                         '-DANGLE_NO_ALIASES', '-DANGLE_EXPORT='],
                                 lib=['EGL', 'GLESv2', 'dxguid', 'd3d9',
                                      'gdi32', 'stdc++'])
+    }, {
+        'name': '--egl-angle-win32',
+        'desc': 'OpenGL Win32 ANGLE Backend',
+        'deps': [ 'egl-angle', 'win32-desktop' ],
+        'groups': [ 'gl' ],
+        'func': check_true,
     } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
@@ -736,7 +742,7 @@ video_output_features = [
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm',
-                      'egl-angle' ],
+                      'egl-angle-win32' ],
         'func': check_true
     }
 ]
@@ -794,13 +800,14 @@ hwaccel_features = [
             '      ? 1 : -1]',
             use='libav'),
     }, {
+        # (conflated with ANGLE for easier deps)
         'name': '--d3d-hwaccel',
-        'desc': 'DXVA2 and D3D11VA hwaccel',
-        'deps': [ 'win32-desktop' ],
+        'desc': 'D3D11VA hwaccel (plus ANGLE)',
+        'deps': [ 'os-win32', 'egl-angle' ],
         'func': check_true,
     }, {
         'name': '--d3d-hwaccel-new',
-        'desc': 'DXVA2 and D3D11VA hwaccel (new API)',
+        'desc': 'D3D11VA hwaccel (new API)',
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 4, 0) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
@@ -809,6 +816,17 @@ hwaccel_features = [
             '      ? 1 : -1]',
             use='libav'),
         'deps': [ 'd3d-hwaccel' ],
+    }, {
+        'name': '--d3d9-hwaccel',
+        'desc': 'DXVA2 hwaccel (plus ANGLE)',
+        'deps': [ 'd3d-hwaccel', 'egl-angle-win32' ],
+        'func': check_true,
+    }, {
+        'name': '--gl-dxinterop-d3d9',
+        'desc': 'OpenGL/DirectX Interop Backend DXVA2 interop',
+        'deps': [ 'gl-dxinterop', 'd3d9-hwaccel' ],
+        'groups': [ 'gl' ],
+        'func': check_true,
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
