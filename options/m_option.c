@@ -1164,6 +1164,8 @@ static int str_list_del(struct mp_log *log, char **del, int n, void *dst)
         talloc_free(lst[idx]);
         lst[idx] = NULL;
         s--;
+        if (i > 0)
+            mp_warn(log, "Passing multiple -del arguments is deprecated!\n");
     }
     talloc_free(del);
 
@@ -1252,9 +1254,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         return 1;
     }
 
-    // custom type for "profile" calls this but uses ->priv for something else
-    char separator = opt->type == &m_option_type_string_list && opt->priv ?
-                     *(char *)opt->priv : OPTION_LIST_SEPARATOR;
+    char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
     int n = 0;
     struct bstr str = param;
     while (str.len) {

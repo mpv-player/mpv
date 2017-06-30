@@ -416,6 +416,35 @@ file stops playing. If option ``--c`` is changed during playback of
 file-local options. The option ``--a`` is never reset here.
 
 
+List Options
+------------
+
+Some options which store lists of option values can have action suffixes. For
+example, you can set a ``,``-separated list of filters with ``--vf``, but the
+option also allows you to append filters with ``--vf-append``.
+
+Options for filenames do not use ``,`` as separator, but ``:`` (Unix) or ``;``
+(Windows).
+
+============= ===============================================
+Suffix        Meaning
+============= ===============================================
+-add          Append 1 or more items
+-add-str      Append single item (avoids need for escaping)
+-clr          Clear the option
+-del          Delete an existing item by integer index
+-pre          Prepend 1 or more items
+-set          Set a list of items
+============= ===============================================
+
+Although some operations allow specifiying multiple ``,``-separated items, using
+this is strongly discouraged and deprecated, except for ``-set``.
+
+Without suffix, the action taken is normally ``-set``.
+
+Some options (like ``--sub-file``, ``--audio-file``, ``--opengl-shader``) append
+one file per option use. Their default action is ``-add-str``.
+
 Playing DVDs
 ------------
 

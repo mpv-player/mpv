@@ -579,14 +579,11 @@ extern const char m_option_path_separator;
 #define OPT_STRINGLIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
 
-#define OPT_STRING_APPEND_LIST(...) \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_append_list)
-
 #define OPT_KEYVALUELIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_keyvalue_list)
 
 #define OPT_PATHLIST(...)                                                \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list, \
+    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_append_list, \
                 .priv = (void *)&m_option_path_separator)
 
 #define OPT_INT(...) \

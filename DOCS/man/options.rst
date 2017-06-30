@@ -1367,6 +1367,8 @@ Audio
     option will add a new audio track. The details are similar to how
     ``--sub-file`` works.
 
+    This is a list option. See `List Options`_ for details.
+
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to
     the sound card. The values that ``<format>`` can adopt are listed below in
@@ -1433,11 +1435,14 @@ Audio
     :no:    Don't automatically load external audio files.
     :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
-    :all:   Load all audio files in the current and ``--audio-file-paths``
+    :all:   Load all audio files in the current and ``--audio-file-path``
             directories.
 
 ``--audio-file-paths=<path1:path2:...>``
-    Equivalent to ``--sub-paths`` option, but for auto-loaded audio files.
+    Deprecated, use ``--audio-file-path``.
+
+``--audio-file-path=path1>``
+    Equivalent to ``--sub-file-path`` option, but for auto-loaded audio files.
 
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
@@ -1511,6 +1516,8 @@ Subtitles
     two subtitles at once: use ``--sid`` to select the first subtitle index,
     and ``--secondary-sid`` to select the second index. (The index is printed
     on the terminal output after the ``--sid=`` in the list of streams.)
+
+    This is a list option. See `List Options`_ for details.
 
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
@@ -1786,7 +1793,7 @@ Subtitles
     :no:    Don't automatically load external subtitle files.
     :exact: Load the media filename with subtitle file extension (default).
     :fuzzy: Load all subs containing media filename.
-    :all:   Load all subs in the current and ``--sub-paths`` directories.
+    :all:   Load all subs in the current and ``--sub-file-path`` directories.
 
 ``--sub-codepage=<codepage>``
     You can use this option to specify the subtitle codepage. uchardet will be
@@ -1854,6 +1861,9 @@ Subtitles
         Never applied to text subtitles.
 
 ``--sub-paths=<path1:path2:...>``
+    Deprecated, use ``--sub-file-path``.
+
+``--sub-file-path=path``
     Specify extra directories to search for subtitles matching the video.
     Multiple directories can be separated by ":" (";" on Windows).
     Paths can be relative or absolute. Relative paths are interpreted relative
@@ -1864,14 +1874,15 @@ Subtitles
     .. admonition:: Example
 
         Assuming that ``/path/to/video/video.avi`` is played and
-        ``--sub-paths=sub:subtitles:/tmp/subs`` is specified, mpv searches for
-        subtitle files in these directories:
+        ``--sub-file-path=sub --sub-file-path=subtitles`` is specified, mpv
+        searches for subtitle files in these directories:
 
         - ``/path/to/video/``
         - ``/path/to/video/sub/``
         - ``/path/to/video/subtitles/``
-        - ``/tmp/subs/``
         -  the ``sub`` configuration subdirectory (usually ``~/.config/mpv/sub/``)
+
+    This is a list option. See `List Options`_ for details.
 
 ``--sub-visibility``, ``--no-sub-visibility``
     Can be used to disable display of subtitles, but still select and decode
@@ -4156,10 +4167,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
 
-``--opengl-shaders=<files>``
+``--opengl-shader=<file>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
     which can be injected at almost arbitrary points in the rendering pipeline,
-    and access all previous intermediate textures.
+    and access all previous intermediate textures. Each use of the option will
+    add another file to the internal list of shaders (see `List Options`_).
 
     .. admonition:: Warning
 
@@ -4315,6 +4327,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Only the textures labelled with ``resizable`` may be transformed by the
     pass. When overwriting a texture marked ``fixed``, the WIDTH, HEIGHT and
     OFFSET must be left at their default values.
+
+``--opengl-shaders=<files>``
+    Deprecated option for ``--opengl-shader``. Command line parsing behaves
+    slightly diffent. ``--opengl-shader-set`` gives exactly the same behavior.
 
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
@@ -4998,6 +5014,8 @@ Miscellaneous
     Unlike ``--sub-file`` and ``--audio-file``, this includes all tracks, and
     does not cause default stream selection over the "proper" file. This makes
     it slightly less intrusive.
+
+    This is a list option. See `List Options`_ for details.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).

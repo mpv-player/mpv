@@ -289,7 +289,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA || HAVE_JAVASCRIPT
-    OPT_STRINGLIST("script", script_files, M_OPT_FIXED | M_OPT_FILE),
+    OPT_PATHLIST("script", script_files, M_OPT_FIXED),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("load-scripts", auto_load_scripts, 0),
 #endif
@@ -375,7 +375,7 @@ const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    OPT_STRING_APPEND_LIST("audio-file", audio_files, M_OPT_FILE),
+    OPT_PATHLIST("audio-file", audio_files, 0),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
@@ -459,10 +459,10 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_STRING_APPEND_LIST("sub-file", sub_name, M_OPT_FILE),
-    OPT_PATHLIST("sub-paths", sub_paths, 0),
-    OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
-    OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
+    OPT_PATHLIST("sub-file", sub_name, 0),
+    OPT_PATHLIST("sub-file-path", sub_paths, 0),
+    OPT_PATHLIST("audio-file-path", audiofile_paths, 0),
+    OPT_PATHLIST("external-file", external_files, 0),
     OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_FLOAT("sub-delay", sub_delay, UPDATE_OSD),
     OPT_FLOAT("sub-fps", sub_fps, UPDATE_OSD),
@@ -832,6 +832,10 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("fs-black-out-screens", NULL),
     OPT_REPLACED_MSG("loop", "loop-playlist", "--loop will be changed to map to"
         " --loop-file in future releases."),
+    OPT_REPLACED_MSG("sub-paths", "sub-file-path",
+                     "passing multiple paths works differently now"),
+    OPT_REPLACED_MSG("audio-file-paths", "audio-file-path",
+                     "passing multiple paths works differently now"),
 
     {0}
 };

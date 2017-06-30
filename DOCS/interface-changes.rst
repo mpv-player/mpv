@@ -38,6 +38,14 @@ Interface changes
     - --field-dominance is deprecated (use --vf=setfield=bff or tff)
     - --really-quiet subtle behavior change
     - the deprecated handling of setting "no-" options via client API is dropped
+    - the following options change to append-by-default (and possibly separator):
+        --script
+        --audio-file-paths
+        --sub-paths
+      also, the following options are deprecated:
+        --audio-file-paths => --audio-file-path
+        --sub-paths => --sub-file-path
+        --opengl-shaders => --opengl-shader
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")
