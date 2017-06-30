@@ -151,9 +151,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         };
     }
 
-    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s",
-             p->desc.swizzle);
-
     return 0;
 }
 

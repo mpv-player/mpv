@@ -381,8 +381,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (va_image->format.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct gl_hwdec_plane, out_frame->planes[1], out_frame->planes[2]);
 
-    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s", desc.swizzle);
-
     return 0;
 
 err:

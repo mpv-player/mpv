@@ -193,6 +193,7 @@ struct gl_video {
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
+    struct gl_imgfmt_desc gl_format;            // texture format
     int plane_count;
 
     bool is_yuv, is_packed_yuv;
@@ -397,8 +398,6 @@ const struct m_sub_options gl_video_conf = {
 static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
-static bool init_format(struct gl_video *p, int fmt, bool test_only);
-static void init_image_desc(struct gl_video *p, int fmt);
 static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
                                   uint64_t id);
 static const char *handle_scaler_opt(const char *name, bool tscale);
@@ -745,14 +744,33 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     }
 }
 
+// Return the index of the given component (assuming all non-padding components
+// of all planes are concatenated into a linear list).
+static int find_comp(struct gl_imgfmt_desc *desc, int component)
+{
+    int cur = 0;
+    for (int n = 0; n < desc->num_planes; n++) {
+        for (int i = 0; i < 4; i++) {
+            if (desc->components[n][i]) {
+                if (desc->components[n][i] == component)
+                    return cur;
+                cur++;
+            }
+        }
+    }
+    return -1;
+}
+
 static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
 
+    p->hwdec_active = false;
+    p->use_integer_conversion = false;
+
     if (p->hwdec && gl_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
-        init_image_desc(p, p->image_params.imgfmt);
         const char **exts = p->hwdec->glsl_extensions;
         for (int n = 0; exts && exts[n]; n++)
             gl_sc_enable_extension(p->sc, (char *)exts[n]);
@@ -761,9 +779,24 @@ static void init_video(struct gl_video *p)
             MP_WARN(p, "Using HW-overlay mode. No GL filtering is performed "
                        "on the video!\n");
         }
-    } else {
-        init_format(p, p->image_params.imgfmt, false);
     }
+
+    p->gl_format = (struct gl_imgfmt_desc){0};
+    gl_get_imgfmt_desc(p->gl, p->image_params.imgfmt, &p->gl_format);
+
+    p->plane_count = p->gl_format.num_planes;
+
+    p->image_desc = mp_imgfmt_get_desc(p->image_params.imgfmt);
+    p->is_yuv = p->image_desc.flags & MP_IMGFLAG_YUV;
+    p->has_alpha = p->image_desc.flags & MP_IMGFLAG_ALPHA;
+    p->is_packed_yuv = p->image_params.imgfmt == IMGFMT_UYVY ||
+                       p->image_params.imgfmt == IMGFMT_YUYV;
+
+    for (int c = 0; c < 4; c++) {
+        int loc = find_comp(&p->gl_format, c + 1);
+        p->color_swizzle[c] = "rgba"[loc >= 0 && loc < 4 ? loc : 0];
+    }
+    p->color_swizzle[4] = '\0';
 
     // Format-dependent checks.
     check_gl_features(p);
@@ -792,8 +825,14 @@ static void init_video(struct gl_video *p)
 
         for (int n = 0; n < p->plane_count; n++) {
             struct texplane *plane = &vimg->planes[n];
+            const struct gl_format *format = p->gl_format.planes[n];
 
             plane->gl_target = gl_target;
+            plane->gl_format = format->format;
+            plane->gl_internal_format = format->internal_format;
+            plane->gl_type = format->type;
+
+            p->use_integer_conversion |= gl_is_integer_format(plane->gl_format);
 
             plane->w = mp_image_plane_w(&layout, n);
             plane->h = mp_image_plane_h(&layout, n);
@@ -2917,8 +2956,6 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
                     .gl_format = plane->gl_format,
                 };
             }
-            snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s",
-                     gl_frame.swizzle);
         } else {
             MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
             goto error;
@@ -3197,34 +3234,19 @@ bool gl_video_showing_interpolated_frame(struct gl_video *p)
     return p->is_interpolated;
 }
 
-static void init_image_desc(struct gl_video *p, int fmt)
+static bool is_imgfmt_desc_supported(struct gl_video *p,
+                                     const struct gl_imgfmt_desc *desc)
 {
-    p->image_desc = mp_imgfmt_get_desc(fmt);
-
-    p->plane_count = p->image_desc.num_planes;
-    p->is_yuv = p->image_desc.flags & MP_IMGFLAG_YUV;
-    p->has_alpha = p->image_desc.flags & MP_IMGFLAG_ALPHA;
-    p->use_integer_conversion = false;
-    p->color_swizzle[0] = '\0';
-    p->is_packed_yuv = fmt == IMGFMT_UYVY || fmt == IMGFMT_YUYV;
-    p->hwdec_active = false;
-}
-
-// test_only=true checks if the format is supported
-// test_only=false also initializes some rendering parameters accordingly
-static bool init_format(struct gl_video *p, int fmt, bool test_only)
-{
-    int cdepth = mp_imgfmt_get_desc(fmt).component_bits;
-    if (cdepth > 8 && cdepth < 16 && p->texture_16bit_depth < 16)
+    if (!desc->num_planes)
         return false;
 
-    struct gl_imgfmt_desc desc;
-    if (!gl_get_imgfmt_desc(p->gl, fmt, &desc))
+    if (desc->component_bits > 8 && desc->component_bits < 16 &&
+        desc->component_pad < 0 && p->texture_16bit_depth < 16)
         return false;
 
     int use_integer = -1;
-    for (int n = 0; n < desc.num_planes; n++) {
-        int use_int_plane = gl_is_integer_format(desc.planes[n]->format);
+    for (int n = 0; n < desc->num_planes; n++) {
+        int use_int_plane = gl_is_integer_format(desc->planes[n]->format);
         if (use_integer < 0)
             use_integer = use_int_plane;
         if (use_integer != use_int_plane)
@@ -3234,27 +3256,14 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
     if (use_integer && p->forced_dumb_mode)
         return false;
 
-    if (!test_only) {
-        for (int n = 0; n < desc.num_planes; n++) {
-            struct texplane *plane = &p->image.planes[n];
-            const struct gl_format *format = desc.planes[n];
-            plane->gl_format = format->format;
-            plane->gl_internal_format = format->internal_format;
-            plane->gl_type = format->type;
-        }
-
-        init_image_desc(p, fmt);
-
-        p->use_integer_conversion = use_integer;
-        snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s", desc.swizzle);
-    }
-
     return true;
 }
 
 bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
-    if (init_format(p, mp_format, true))
+    struct gl_imgfmt_desc desc;
+    if (gl_get_imgfmt_desc(p->gl, mp_format, &desc) &&
+        is_imgfmt_desc_supported(p, &desc))
         return true;
     if (p->hwdec && gl_hwdec_test_format(p->hwdec, mp_format))
         return true;

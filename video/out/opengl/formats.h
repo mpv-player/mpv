@@ -40,7 +40,6 @@ enum {
 
 int gl_format_feature_flags(GL *gl);
 const struct gl_format *gl_find_internal_format(GL *gl, GLint internal_format);
-const struct gl_format *gl_find_special_format(GL *gl, int mpfmt);
 const struct gl_format *gl_find_format(GL *gl, int type, int flags,
                                        int bytes_per_component, int n_components);
 const struct gl_format *gl_find_unorm_format(GL *gl, int bytes_per_component,
@@ -59,12 +58,19 @@ int gl_bytes_per_pixel(GLenum format, GLenum type);
 struct gl_imgfmt_desc {
     int num_planes;
     const struct gl_format *planes[4];
-    // Chroma shift (sub-sampling) for each plane.
-    int xs[4], ys[4];
-    // Component order (e.g. "rgba"), applied after all planes are combined.
-    // This has always 4 components (the excess components have no meaning).
-    // (For GL_LUMINANCE_ALPHA, it is assumed "ra" has been assigned to "rg".)
-    char swizzle[5];
+    // Component storage size in bits (possibly padded). For formats with
+    // different sizes per component, this is arbitrary. For padded formats
+    // like P010 or YUV420P10, padding is included.
+    int component_bits;
+    // Like mp_regular_imgfmt.component_pad.
+    int component_pad;
+    // For each texture and each texture output (rgba order) describe what
+    // component it returns.
+    // The values are like the values in mp_regular_imgfmt_plane.components[].
+    // Access as components[plane_nr][component_index]. Set unused items to 0.
+    // This pretends GL_RG is used instead of GL_LUMINANCE_ALPHA. The renderer
+    // fixes this later.
+    uint8_t components[4][4];
 };
 
 bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out);

@@ -32,7 +32,6 @@ struct gl_hwdec_plane {
 struct gl_hwdec_frame {
     struct gl_hwdec_plane planes[4];
     bool vdpau_fields;
-    char swizzle[5]; // optional component swizzle (4 components if set)
 };
 
 struct gl_hwdec_driver {

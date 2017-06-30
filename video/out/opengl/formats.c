@@ -96,16 +96,6 @@ static const struct gl_format gl_formats[] = {
     {0}
 };
 
-// Pairs of mpv formats and OpenGL types that match directly. Code using this
-// is supposed to look through the gl_formats table, and there is supposed to
-// be exactly 1 matching entry (which tells you format/internal format).
-static const int special_formats[][2] = {
-    {IMGFMT_RGB565,     GL_UNSIGNED_SHORT_5_6_5},
-    {IMGFMT_UYVY,       GL_UNSIGNED_SHORT_8_8_APPLE},
-    {IMGFMT_YUYV,       GL_UNSIGNED_SHORT_8_8_REV_APPLE},
-    {0}
-};
-
 // Return an or-ed combination of all F_ flags that apply.
 int gl_format_feature_flags(GL *gl)
 {
@@ -136,19 +126,14 @@ const struct gl_format *gl_find_internal_format(GL *gl, GLint internal_format)
     return NULL;
 }
 
-const struct gl_format *gl_find_special_format(GL *gl, int mpfmt)
+// Find the first supported format with a specific gl_format.type
+static const struct gl_format *gl_find_gl_type_format(GL *gl, GLenum type)
 {
     int features = gl_format_feature_flags(gl);
-    for (int n = 0; special_formats[n][0]; n++) {
-        if (special_formats[n][0] == mpfmt) {
-            GLenum type = special_formats[n][1];
-            for (int i = 0; gl_formats[i].type; i++) {
-                const struct gl_format *f = &gl_formats[i];
-                if (f->type == type && (f->flags & features))
-                    return f;
-            }
-            break;
-        }
+    for (int i = 0; gl_formats[i].type; i++) {
+        const struct gl_format *f = &gl_formats[i];
+        if (f->type == type && (f->flags & features))
+            return f;
     }
     return NULL;
 }
@@ -297,64 +282,55 @@ static const struct gl_format *find_plane_format(GL *gl, int bytes, int n_channe
     return gl_find_uint_format(gl, bytes, n_channels);
 }
 
-static int find_comp(uint8_t *components, int num_components, int component)
-{
-    for (int n = 0; n < num_components; n++) {
-        if (components[n] == component)
-            return n;
-    }
-    return -1;
-}
-
 // Put a mapping of imgfmt to OpenGL textures into *out. Basically it selects
 // the correct texture formats needed to represent an imgfmt in OpenGL, with
 // textures using the same memory organization as on the CPU.
 // Each plane is represented by a texture, and each texture has a RGBA
-// component order. out->color_swizzle is set to permute the components back.
+// component order. out->components describes the meaning of them.
 // May return integer formats for >8 bit formats, if the driver has no
 // normalized 16 bit formats.
-// Returns false (and *out is set to all-0) if no format found.
+// Returns false (and *out is not touched) if no format found.
 bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
 {
-    *out = (struct gl_imgfmt_desc){0};
+    struct gl_imgfmt_desc res = {0};
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
-    if (!desc.id)
-        return false;
-
-    if (desc.num_planes > 4 || (desc.flags & MP_IMGFLAG_HWACCEL))
-        return false;
-
-    const struct gl_format *planes[4] = {0};
-    char swizzle_tmp[MP_NUM_COMPONENTS + 1] = {0};
-    char *swizzle = "rgba";
-    struct mp_regular_imgfmt regfmt = {0};
-
+    struct mp_regular_imgfmt regfmt;
     if (mp_get_regular_imgfmt(&regfmt, imgfmt)) {
-        uint8_t components[MP_NUM_COMPONENTS + 1] = {0};
-        int num_components = 0;
+        res.num_planes = regfmt.num_planes;
+        res.component_bits = regfmt.component_size * 8;
+        res.component_pad = regfmt.component_pad;
         for (int n = 0; n < regfmt.num_planes; n++) {
             struct mp_regular_imgfmt_plane *plane = &regfmt.planes[n];
-            planes[n] = find_plane_format(gl, regfmt.component_size,
-                                          plane->num_components);
+            res.planes[n] = find_plane_format(gl, regfmt.component_size,
+                                              plane->num_components);
+            if (!res.planes[n])
+                return false;
             for (int i = 0; i < plane->num_components; i++)
-                components[num_components++] = plane->components[i];
+                res.components[n][i] = plane->components[i];
         }
-        swizzle = swizzle_tmp;
-        for (int c = 0; c < 4; c++) {
-            int loc = find_comp(components, num_components, c + 1);
-            swizzle[c] = "rgba"[loc >= 0 && loc < 4 ? loc : 0];
-        }
-        swizzle[4] = '\0';
         goto supported;
     }
 
     // Special formats for which OpenGL happens to have direct support.
-    planes[0] = gl_find_special_format(gl, imgfmt);
-    if (planes[0]) {
-        // Packed YUV Apple formats color permutation
-        if (planes[0]->format == GL_RGB_422_APPLE)
-            swizzle = "gbra";
+    if (imgfmt == IMGFMT_RGB565) {
+        res.num_planes = 1;
+        res.planes[0] = gl_find_gl_type_format(gl, GL_UNSIGNED_SHORT_5_6_5);
+        if (!res.planes[0])
+            return false;
+        for (int n = 0; n < 3; n++)
+            res.components[0][n] = n + 1;
+        goto supported;
+    }
+    if (imgfmt == IMGFMT_UYVY || imgfmt == IMGFMT_YUYV) {
+        res.num_planes = 1;
+        res.planes[0] = gl_find_gl_type_format(gl, imgfmt == IMGFMT_UYVY
+                                            ? GL_UNSIGNED_SHORT_8_8_APPLE
+                                            : GL_UNSIGNED_SHORT_8_8_REV_APPLE);
+        if (!res.planes[0])
+            return false;
+        res.components[0][0] = 3;
+        res.components[0][1] = 1;
+        res.components[0][2] = 2;
         goto supported;
     }
 
@@ -363,14 +339,6 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
 
 supported:
 
-    snprintf(out->swizzle, sizeof(out->swizzle), "%s", swizzle);
-    out->num_planes = desc.num_planes;
-    for (int n = 0; n < desc.num_planes; n++) {
-        if (!planes[n])
-            return false;
-        out->xs[n] = desc.xs[n];
-        out->ys[n] = desc.ys[n];
-        out->planes[n] = planes[n];
-    }
+    *out = res;
     return true;
 }
