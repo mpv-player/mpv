@@ -173,9 +173,11 @@ end
 -- len   : The length/amount of numbers in `values`.
 -- v_max : The maximum number in `values`. It is used to scale all data
 --         values to a range of 0 to `v_max`.
+-- v_avg : The average number in `values`. It is used to try and center graphs
+--         if possible. May be left as nil
 -- scale : A value that will be multiplied with all data values.
 -- x_tics: Horizontal width multiplier for the steps
-local function generate_graph(values, i, len, v_max, scale, x_tics)
+local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
     -- Check if at least one value exists
     if not values[i] then
         return ""
@@ -185,6 +187,11 @@ local function generate_graph(values, i, len, v_max, scale, x_tics)
     local y_offset = o.border_size
     local y_max = o.font_size * 0.66
     local x = 0
+
+    -- try and center the graph if possible, but avoid going above `scale`
+    if v_avg then
+        scale = math.min(scale, v_max / (2 * v_avg))
+    end
 
     local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
     i = ((i - 2) % len) + 1
@@ -306,7 +313,7 @@ local function append_perfdata(s, full)
                 if o.plot_perfdata and o.ass_formatting then
                     s[#s+1] = generate_graph(pass["samples"], pass["count"],
                                              pass["count"], pass["peak"],
-                                             0.8, 0.25)
+                                             pass["avg"], 0.9, 0.25)
                 end
             end
 
@@ -346,10 +353,10 @@ local function append_display_sync(s)
         local ratio_graph = ""
         local jitter_graph = ""
         if o.plot_vsync_ratio then
-            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos, vsratio_buf.len, vsratio_buf.max, 0.8, 1)
+            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos, vsratio_buf.len, vsratio_buf.max, nil, 0.8, 1)
         end
         if o.plot_vsync_jitter then
-            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos, vsjitter_buf.len, vsjitter_buf.max, 0.8, 1)
+            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos, vsjitter_buf.len, vsjitter_buf.max, nil, 0.8, 1)
         end
         append_property(s, "vsync-ratio", {prefix="VSync Ratio:", suffix=o.prefix_sep .. ratio_graph})
         append_property(s, "vsync-jitter", {prefix="VSync Jitter:", suffix=o.prefix_sep .. jitter_graph})
