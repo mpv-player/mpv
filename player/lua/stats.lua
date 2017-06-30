@@ -21,6 +21,7 @@ local o = {
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     print_perfdata_total = false,    -- prints an additional line adding up the perfdata lines
+    print_perfdata_passes = false,   -- when true, print the full information about all passes
     debug = false,
 
     -- Graph options and style
@@ -80,11 +81,8 @@ local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
 -- .max is the max value in the corresponding buffer as computed in record_data().
--- `plast_buf` is a table of buffers for the "last" value of performance data
--- for render/present/upload.
-local plast_buf, vsratio_buf, vsjitter_buf
+local vsratio_buf, vsjitter_buf
 local function init_buffers()
-    plast_buf = {{0, max = 0}, {0, max = 0}, {0, max = 0}, pos = 1, len = 50}
     vsratio_buf = {0, pos = 1, len = 50, max = 0}
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
 end
@@ -176,13 +174,13 @@ end
 -- v_max : The maximum number in `values`. It is used to scale all data
 --         values to a range of 0 to `v_max`.
 -- scale : A value that will be multiplied with all data values.
-local function generate_graph(values, i, len, v_max, scale)
+-- x_tics: Horizontal width multiplier for the steps
+local function generate_graph(values, i, len, v_max, scale, x_tics)
     -- Check if at least one value exists
     if not values[i] then
         return ""
     end
 
-    local x_tics = 1
     local x_max = (len - 1) * x_tics
     local y_offset = o.border_size
     local y_max = o.font_size * 0.66
@@ -244,9 +242,8 @@ local function append_property(s, prop, attr, excluded)
     return true
 end
 
-
-local function append_perfdata(s)
-    local vo_p = mp.get_property_native("vo-performance")
+local function append_perfdata(s, full)
+    local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
     end
@@ -254,15 +251,29 @@ local function append_perfdata(s)
     local ds = mp.get_property_bool("display-sync-active", false)
     local target_fps = ds and mp.get_property_number("display-fps", 0)
                        or mp.get_property_number(compat("container-fps"), 0)
-    if target_fps > 0 then target_fps = 1 / target_fps * 1e6 end
+    if target_fps > 0 then target_fps = 1 / target_fps * 1e9 end
 
-    local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
-    local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
-    local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
+    local last_s, avg_s, peak_s = {}, {}, {}
+
+    for frame, data in pairs(vo_p) do
+        last_s[frame], avg_s[frame], peak_s[frame] = 0, 0, 0
+        for _, pass in ipairs(data) do
+            last_s[frame] = last_s[frame] + pass["last"]
+            avg_s[frame]  = avg_s[frame]  + pass["avg"]
+            peak_s[frame] = peak_s[frame] + pass["peak"]
+        end
+    end
 
     -- Highlight i with a red border when t exceeds the time for one frame
     -- or yellow when it exceeds a given threshold
     local function hl(i, t)
+        if t == nil then
+            t = i
+        end
+
+        -- rescale to microseconds for a saner display
+        i = i / 1000
+
         if o.timing_warning and target_fps > 0 then
             if t > target_fps then
                 return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
@@ -275,49 +286,43 @@ local function append_perfdata(s)
         return format("%05d", i)
     end
 
+    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
+                     b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
+                     "(last/average/peak  μs)", o.font_size)
 
-    local rsuffix, psuffix, usuffix
+    for frame, data in pairs(vo_p) do
+        local f = "%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s%s"
 
-    -- Plot graphs when configured and we are toggled
-    if o.plot_perfdata and o.ass_formatting and timer:is_enabled() then
-        local pmax = {plast_buf[1].max, plast_buf[2].max, plast_buf[3].max}
-        if o.global_max then
-            pmax[1] = max(pmax[1], pmax[2], pmax[3])
-            pmax[2], pmax[3] = pmax[1], pmax[1]
+        if full then
+            s[#s+1] = format("%s%s%s%s:", o.nl, o.indent, o.indent,
+                             b(frame:gsub("^%l", string.upper)))
+
+            for _, pass in ipairs(data) do
+                s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
+                                 o.font_mono, hl(pass["last"], last_s[frame]),
+                                 hl(pass["avg"], avg_s[frame]), hl(pass["peak"]),
+                                 o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
+
+                if o.plot_perfdata and o.ass_formatting then
+                    s[#s+1] = generate_graph(pass["samples"], pass["count"],
+                                             pass["count"], pass["peak"],
+                                             0.8, 0.25)
+                end
+            end
+
+            if o.print_perfdata_total then
+                s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
+                                 o.font_mono, hl(last_s[frame]),
+                                 hl(avg_s[frame]), hl(peak_s[frame]), o.font,
+                                 o.prefix_sep, o.prefix_sep, b("Total"))
+            end
+        else
+            -- for the simplified view, we just print the sum of each pass
+            s[#s+1] = format(f, o.nl, o.indent .. o.indent, o.font_mono,
+                            hl(last_s[frame]), hl(avg_s[frame]),
+                            hl(peak_s[frame]), o.font, o.prefix_sep,
+                            o.prefix_sep, frame:gsub("^%l", string.upper))
         end
-
-        rsuffix = generate_graph(plast_buf[1], plast_buf.pos, plast_buf.len, pmax[1], 0.8)
-        psuffix = generate_graph(plast_buf[2], plast_buf.pos, plast_buf.len, pmax[2], 0.8)
-        usuffix = generate_graph(plast_buf[3], plast_buf.pos, plast_buf.len, pmax[3], 0.8)
-
-        s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s%s{\\fs%s}", o.nl, o.indent,
-                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                         "Render  ⏎  Present  ⏎  Upload", o.prefix_sep,
-                         "(last/average/peak  μs)", o.font_size)
-    else
-        rsuffix = o.prefix_sep .. "Render"
-        psuffix = o.prefix_sep .. "Present"
-        usuffix = o.prefix_sep .. "Upload"
-
-        s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
-                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                         "(last/average/peak  μs)", o.font_size)
-    end
-
-    local f = "%s%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s"
-    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
-                    hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
-                    hl(vo_p["render-peak"], -math.huge), o.font, o.prefix_sep, rsuffix)
-    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
-                    hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
-                    hl(vo_p["present-peak"], -math.huge), o.font, o.prefix_sep, psuffix)
-    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
-                    hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
-                    hl(vo_p["upload-peak"], -math.huge), o.font, o.prefix_sep, usuffix)
-    if o.print_perfdata_total then
-        s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
-                        hl(last_s, last_s), hl(avg_s, avg_s),
-                        hl(peak_s, peak_s), o.font, o.prefix_sep, o.prefix_sep .. "Total")
     end
 end
 
@@ -341,10 +346,10 @@ local function append_display_sync(s)
         local ratio_graph = ""
         local jitter_graph = ""
         if o.plot_vsync_ratio then
-            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos, vsratio_buf.len, vsratio_buf.max, 0.8)
+            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos, vsratio_buf.len, vsratio_buf.max, 0.8, 1)
         end
         if o.plot_vsync_jitter then
-            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos, vsjitter_buf.len, vsjitter_buf.max, 0.8)
+            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos, vsjitter_buf.len, vsjitter_buf.max, 0.8, 1)
         end
         append_property(s, "vsync-ratio", {prefix="VSync Ratio:", suffix=o.prefix_sep .. ratio_graph})
         append_property(s, "vsync-jitter", {prefix="VSync Jitter:", suffix=o.prefix_sep .. jitter_graph})
@@ -411,7 +416,7 @@ local function add_video(s)
     end
 
     append_display_sync(s)
-    append_perfdata(s)
+    append_perfdata(s, o.print_perfdata_passes)
 
     if append_property(s, "video-params/w", {prefix="Native Resolution:"}) then
         append_property(s, "video-params/h",
@@ -496,19 +501,6 @@ local function record_data(skip)
             i = 0
         end
 
-        if o.plot_perfdata then
-            local vo_p = mp.get_property_native("vo-performance")
-            if vo_p then
-                plast_buf.pos = (plast_buf.pos % plast_buf.len) + 1
-                plast_buf[1][plast_buf.pos] = vo_p["render-last"]
-                plast_buf[1].max = max(plast_buf[1].max, plast_buf[1][plast_buf.pos])
-                plast_buf[2][plast_buf.pos] = vo_p["present-last"]
-                plast_buf[2].max = max(plast_buf[2].max, plast_buf[2][plast_buf.pos])
-                plast_buf[3][plast_buf.pos] = vo_p["upload-last"]
-                plast_buf[3].max = max(plast_buf[3].max, plast_buf[3][plast_buf.pos])
-            end
-        end
-
         if o.plot_vsync_jitter then
             local r = mp.get_property_number("vsync-jitter", nil)
             if r then
@@ -541,7 +533,7 @@ local function toggle_stats()
         mp.osd_message("", 0)
     -- Enable
     else
-        if o.plot_perfdata or o.plot_vsync_jitter or o.plot_vsync_ratio then
+        if o.plot_vsync_jitter or o.plot_vsync_ratio then
             recorder = record_data(o.skip_frames)
             mp.register_event("tick", recorder)
         end
