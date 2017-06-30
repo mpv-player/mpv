@@ -31,6 +31,7 @@
 #include "input/cmd_list.h"
 #include "misc/ctype.h"
 #include "misc/dispatch.h"
+#include "misc/rendezvous.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
@@ -440,12 +441,25 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     pthread_join(playthread, NULL);
 }
 
-static void *playback_thread(void *p)
+static void *core_thread(void *tag)
 {
-    struct MPContext *mpctx = p;
-    mpctx->autodetach = true;
-
     mpthread_set_name("mpv core");
+
+    struct MPContext *mpctx = mp_create();
+    mpctx->autodetach = true;
+    mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
+    if (ctx) {
+        ctx->owner = true;
+        ctx->fuzzy_initialized = true;
+        m_config_set_profile(mpctx->mconfig, "libmpv", 0);
+    } else {
+        mp_destroy(mpctx);
+    }
+
+    // Let mpv_create() return, and pass it the handle.
+    mp_rendezvous(tag, (intptr_t)(void *)ctx);
+    if (!ctx)
+        return NULL;
 
     while (!mpctx->initialized && mpctx->stop_play != PT_QUIT)
         mp_idle(mpctx);
@@ -477,23 +491,17 @@ mpv_handle *mpv_create(void)
                         "Call 'setlocale(LC_NUMERIC, \"C\");' in your code.\n");
         return NULL;
     }
-    struct MPContext *mpctx = mp_create();
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
-    if (ctx) {
-        ctx->owner = true;
-        ctx->fuzzy_initialized = true;
-        m_config_set_profile(mpctx->mconfig, "libmpv", 0);
-    } else {
-        mp_destroy(mpctx);
-    }
 
+    char tag;
     pthread_t thread;
-    if (pthread_create(&thread, NULL, playback_thread, ctx->mpctx) != 0) {
-        mpv_terminate_destroy(ctx);
+    if (pthread_create(&thread, NULL, core_thread, &tag) != 0)
         return NULL;
-    }
 
-    return ctx;
+    mpv_handle *res = (void *)mp_rendezvous(&tag, 0);
+    if (!res)
+        pthread_join(thread, NULL);
+
+    return res;
 }
 
 mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name)
