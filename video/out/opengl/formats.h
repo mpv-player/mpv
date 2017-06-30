@@ -58,6 +58,8 @@ int gl_bytes_per_pixel(GLenum format, GLenum type);
 struct gl_imgfmt_desc {
     int num_planes;
     const struct gl_format *planes[4];
+    // Chroma pixel size (1x1 is 4:4:4)
+    uint8_t chroma_w, chroma_h;
     // Component storage size in bits (possibly padded). For formats with
     // different sizes per component, this is arbitrary. For padded formats
     // like P010 or YUV420P10, padding is included.

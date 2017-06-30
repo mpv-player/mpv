@@ -192,11 +192,10 @@ struct gl_video {
 
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
-    struct mp_imgfmt_desc image_desc;
     struct gl_imgfmt_desc gl_format;            // texture format
     int plane_count;
 
-    bool is_yuv, is_packed_yuv;
+    bool is_gray;
     bool has_alpha;
     char color_swizzle[5];
     bool use_integer_conversion;
@@ -640,9 +639,9 @@ static void get_transform(float w, float h, int rotate, bool flip,
 
 // Return the chroma plane upscaled to luma size, but with additional padding
 // for image sizes not aligned to subsampling.
-static int chroma_upsize(int size, int shift)
+static int chroma_upsize(int size, int pixel)
 {
-    return mp_chroma_div_up(size, shift) << shift;
+    return (size + pixel - 1) / pixel * pixel;
 }
 
 // Places a video_image's image textures + associated metadata into tex[]. The
@@ -657,8 +656,8 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     int h = p->image_params.h;
 
     // Determine the chroma offset
-    float ls_w = 1.0 / (1 << p->image_desc.chroma_xs);
-    float ls_h = 1.0 / (1 << p->image_desc.chroma_ys);
+    float ls_w = 1.0 / p->gl_format.chroma_w;
+    float ls_h = 1.0 / p->gl_format.chroma_h;
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
@@ -674,11 +673,13 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
         chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
     }
 
+    int msb_valid_bits =
+        p->gl_format.component_bits + MPMIN(p->gl_format.component_pad, 0);
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
     float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.color.space,
-                                         p->image_desc.component_bits,
-                                         p->image_desc.component_full_bits);
+                                         msb_valid_bits,
+                                         p->gl_format.component_bits);
 
     memset(tex, 0, 4 * sizeof(tex[0]));
     for (int n = 0; n < p->plane_count; n++) {
@@ -687,14 +688,12 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
         enum plane_type type;
         if (n >= 3) {
             type = PLANE_ALPHA;
-        } else if (p->image_desc.flags & MP_IMGFLAG_RGB) {
+        } else if (p->image_params.color.space == MP_CSP_RGB) {
             type = PLANE_RGB;
-        } else if (p->image_desc.flags & MP_IMGFLAG_YUV) {
-            type = n == 0 ? PLANE_LUMA : PLANE_CHROMA;
-        } else if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        } else if (p->image_params.color.space == MP_CSP_XYZ) {
             type = PLANE_XYZ;
         } else {
-            abort();
+            type = n == 0 ? PLANE_LUMA : PLANE_CHROMA;
         }
 
         tex[n] = (struct img_tex){
@@ -707,8 +706,11 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .tex_h = t->tex_h,
             .w = t->w,
             .h = t->h,
-            .components = p->image_desc.components[n],
         };
+
+        for (int i = 0; i < 4; i++)
+            tex[n].components += !!p->gl_format.components[n][i];
+
         get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
                       &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
@@ -723,8 +725,8 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             struct gl_transform tr = chroma;
             gl_transform_vec(rot, &tr.t[0], &tr.t[1]);
 
-            float dx = (chroma_upsize(w, p->image_desc.xs[n]) - w) * ls_w;
-            float dy = (chroma_upsize(h, p->image_desc.ys[n]) - h) * ls_h;
+            float dx = (chroma_upsize(w, p->gl_format.chroma_w) - w) * ls_w;
+            float dy = (chroma_upsize(h, p->gl_format.chroma_h) - h) * ls_h;
 
             // Adjust the chroma offset if the real chroma size is fractional
             // due image sizes not aligned to chroma subsampling.
@@ -786,11 +788,18 @@ static void init_video(struct gl_video *p)
 
     p->plane_count = p->gl_format.num_planes;
 
-    p->image_desc = mp_imgfmt_get_desc(p->image_params.imgfmt);
-    p->is_yuv = p->image_desc.flags & MP_IMGFLAG_YUV;
-    p->has_alpha = p->image_desc.flags & MP_IMGFLAG_ALPHA;
-    p->is_packed_yuv = p->image_params.imgfmt == IMGFMT_UYVY ||
-                       p->image_params.imgfmt == IMGFMT_YUYV;
+    p->has_alpha = false;
+    p->is_gray = true;
+
+    for (int n = 0; n < p->gl_format.num_planes; n++) {
+        for (int i = 0; i < 4; i++) {
+            if (p->gl_format.components[n][i]) {
+                p->has_alpha |= p->gl_format.components[n][i] == 4;
+                p->is_gray &= p->gl_format.components[n][i] == 1 ||
+                              p->gl_format.components[n][i] == 4;
+            }
+        }
+    }
 
     for (int c = 0; c < 4; c++) {
         int loc = find_comp(&p->gl_format, c + 1);
@@ -806,7 +815,7 @@ static void init_video(struct gl_video *p)
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->image_params.color.space != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ)
+    if (p->image_params.color.space == MP_CSP_XYZ)
         eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
     p->video_eq.capabilities = eq_caps;
 
@@ -1046,7 +1055,7 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     }
 
     if (gl_is_integer_format(img.gl_format)) {
-        uint64_t tex_max = 1ull << p->image_desc.component_full_bits;
+        uint64_t tex_max = 1ull << p->gl_format.component_bits;
         img.multiplier *= 1.0 / (tex_max - 1);
     }
 
@@ -1899,9 +1908,7 @@ static void pass_convert_yuv(struct gl_video *p)
     struct gl_shader_cache *sc = p->sc;
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
-    cparams.gray = p->is_yuv && !p->is_packed_yuv && p->plane_count == 1;
-    cparams.input_bits = p->image_desc.component_bits;
-    cparams.texture_bits = p->image_desc.component_full_bits;
+    cparams.gray = p->is_gray;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
@@ -2317,9 +2324,9 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
     gl_sc_set_vao(p->sc, &p->vao);
 }
 
-static float chroma_realign(int size, int shift)
+static float chroma_realign(int size, int pixel)
 {
-    return size / (float)(mp_chroma_div_up(size, shift) << shift);
+    return size / (float)chroma_upsize(size, pixel);
 }
 
 // Minimal rendering code path, for GLES or OpenGL 2.1 without proper FBOs.
@@ -2336,17 +2343,17 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
     int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
-        int xs = p->image_desc.xs[i];
-        int ys = p->image_desc.ys[i];
+        int cw = p->gl_format.chroma_w;
+        int ch = p->gl_format.chroma_h;
         if (p->image_params.rotate % 180 == 90)
-            MPSWAP(int, xs, ys);
+            MPSWAP(int, cw, ch);
 
         struct gl_transform t = transform;
-        t.m[0][0] *= chroma_realign(p->texture_w, xs);
-        t.m[1][1] *= chroma_realign(p->texture_h, ys);
+        t.m[0][0] *= chroma_realign(p->texture_w, cw);
+        t.m[1][1] *= chroma_realign(p->texture_h, ch);
 
-        t.t[0] /= 1 << xs;
-        t.t[1] /= 1 << ys;
+        t.t[0] /= cw;
+        t.t[1] /= ch;
 
         t.t[0] += off[i].t[0];
         t.t[1] += off[i].t[1];

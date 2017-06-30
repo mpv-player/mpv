@@ -308,6 +308,8 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
             for (int i = 0; i < plane->num_components; i++)
                 res.components[n][i] = plane->components[i];
         }
+        res.chroma_w = regfmt.chroma_w;
+        res.chroma_h = regfmt.chroma_h;
         goto supported;
     }
 
@@ -319,6 +321,7 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
             return false;
         for (int n = 0; n < 3; n++)
             res.components[0][n] = n + 1;
+        res.chroma_w = res.chroma_h = 1;
         goto supported;
     }
     if (imgfmt == IMGFMT_UYVY || imgfmt == IMGFMT_YUYV) {
@@ -331,6 +334,7 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
         res.components[0][0] = 3;
         res.components[0][1] = 1;
         res.components[0][2] = 2;
+        res.chroma_w = res.chroma_h = 1;
         goto supported;
     }
 
