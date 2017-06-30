@@ -36,8 +36,6 @@ static const struct {
     {IMGFMT_UYVY,  AV_PIX_FMT_UYVY422},
     {IMGFMT_NV12,  AV_PIX_FMT_NV12},
     {IMGFMT_Y8,    AV_PIX_FMT_GRAY8},
-    // FFmpeg prefers AV_PIX_FMT_GRAY8A, but Libav has only Y400A
-    {IMGFMT_YA8,   AV_PIX_FMT_Y400A},
     {IMGFMT_Y16, AV_PIX_FMT_GRAY16},
     {IMGFMT_420P,  AV_PIX_FMT_YUV420P},
     {IMGFMT_444P,  AV_PIX_FMT_YUV444P},
