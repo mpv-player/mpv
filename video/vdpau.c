@@ -527,10 +527,6 @@ bool mp_vdpau_get_format(int imgfmt, VdpChromaType *out_chroma_type,
     case IMGFMT_NV12:
         ycbcr = VDP_YCBCR_FORMAT_NV12;
         break;
-    case IMGFMT_YUYV:
-        ycbcr = VDP_YCBCR_FORMAT_YUYV;
-        chroma = VDP_CHROMA_TYPE_422;
-        break;
     case IMGFMT_UYVY:
         ycbcr = VDP_YCBCR_FORMAT_UYVY;
         chroma = VDP_CHROMA_TYPE_422;

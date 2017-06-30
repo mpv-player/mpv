@@ -207,7 +207,6 @@ static const struct fmt_entry fmt_table[] = {
     {IMGFMT_420P,  MAKEFOURCC('I','Y','U','V')},
     {IMGFMT_NV12,  MAKEFOURCC('N','V','1','2')},
     // packed YUV
-    {IMGFMT_YUYV,  D3DFMT_YUY2},
     {IMGFMT_UYVY,  D3DFMT_UYVY},
     // packed RGB
     {IMGFMT_BGR32, D3DFMT_X8R8G8B8},

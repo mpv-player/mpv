@@ -461,9 +461,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 
     uint32_t plane_clear[MP_MAX_PLANES] = {0};
 
-    if (area.imgfmt == IMGFMT_YUYV) {
-        plane_clear[0] = av_le2ne16(0x8000);
-    } else if (area.imgfmt == IMGFMT_UYVY) {
+    if (area.imgfmt == IMGFMT_UYVY) {
         plane_clear[0] = av_le2ne16(0x0080);
     } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
         plane_clear[1] = 0x8080;

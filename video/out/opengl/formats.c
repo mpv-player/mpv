@@ -90,8 +90,6 @@ static const struct gl_format gl_formats[] = {
      GL_UNSIGNED_SHORT_5_6_5,                           F_TF | F_GL2 | F_GL3},
     {GL_RGB,                 GL_RGB_422_APPLE,
      GL_UNSIGNED_SHORT_8_8_APPLE,                       F_TF | F_APPL},
-    {GL_RGB,                 GL_RGB_422_APPLE,
-     GL_UNSIGNED_SHORT_8_8_REV_APPLE,                   F_TF | F_APPL},
 
     {0}
 };
@@ -324,11 +322,9 @@ bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
         res.chroma_w = res.chroma_h = 1;
         goto supported;
     }
-    if (imgfmt == IMGFMT_UYVY || imgfmt == IMGFMT_YUYV) {
+    if (imgfmt == IMGFMT_UYVY) {
         res.num_planes = 1;
-        res.planes[0] = gl_find_gl_type_format(gl, imgfmt == IMGFMT_UYVY
-                                            ? GL_UNSIGNED_SHORT_8_8_APPLE
-                                            : GL_UNSIGNED_SHORT_8_8_REV_APPLE);
+        res.planes[0] = gl_find_gl_type_format(gl, GL_UNSIGNED_SHORT_8_8_APPLE);
         if (!res.planes[0])
             return false;
         res.components[0][0] = 3;

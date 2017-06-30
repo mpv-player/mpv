@@ -59,7 +59,6 @@ static const struct fmtentry va_to_imgfmt[] = {
     {VA_FOURCC_YV12, IMGFMT_420P},
     {VA_FOURCC_IYUV, IMGFMT_420P},
     {VA_FOURCC_UYVY, IMGFMT_UYVY},
-    {VA_FOURCC_YUY2, IMGFMT_YUYV},
     // Note: not sure about endian issues (the mp formats are byte-addressed)
     {VA_FOURCC_RGBA, IMGFMT_RGBA},
     {VA_FOURCC_RGBX, IMGFMT_RGBA},

@@ -54,7 +54,6 @@ struct formatmap_entry {
 const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_YV12, IMGFMT_420P, 0},
     {SDL_PIXELFORMAT_IYUV, IMGFMT_420P, 0},
-    {SDL_PIXELFORMAT_YUY2, IMGFMT_YUYV, 0},
     {SDL_PIXELFORMAT_UYVY, IMGFMT_UYVY, 0},
     //{SDL_PIXELFORMAT_YVYU, IMGFMT_YVYU, 0},
 #if BYTE_ORDER == BIG_ENDIAN

@@ -152,7 +152,6 @@ enum mp_imgfmt {
     IMGFMT_YA8,
 
     // Packed YUV formats (components are byte-accessed)
-    IMGFMT_YUYV,                // Y0 U  Y1 V
     IMGFMT_UYVY,                // U  Y0 V  Y1
 
     // Y plane + packed plane for chroma
