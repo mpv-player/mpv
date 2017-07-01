@@ -891,6 +891,9 @@ static void init_video(struct gl_video *p)
     debug_check_gl(p, "after video texture creation");
 
     gl_video_setup_hooks(p);
+
+    // make sure this variable is initialized to *something*
+    p->pass = p->pass_fresh;
 }
 
 // Release any texture mappings associated with the current frame.
@@ -2748,7 +2751,6 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 {
     GL *gl = p->gl;
-    pass_info_reset(p, false);
 
     if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
         MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
@@ -2825,6 +2827,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
+                pass_info_reset(p, false);
                 if (!pass_render_frame(p, frame->current, frame->frame_id))
                     goto done;
 
@@ -2875,6 +2878,12 @@ done:
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     if (p->osd) {
+        // If we haven't actually drawn anything so far, then we technically
+        // need to consider this the start of a new pass. Let's call it a
+        // redraw just because, since it's basically a blank frame anyway
+        if (!has_frame)
+            pass_info_reset(p, true);
+
         pass_draw_osd(p, p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0,
                       p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, true);
         debug_check_gl(p, "after OSD rendering");
