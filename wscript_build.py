@@ -59,8 +59,20 @@ def build(ctx):
 
     ctx(
         features = "file2string",
-        source = "video/out/x11_icon.bin",
-        target = "video/out/x11_icon.inc",
+        source = "etc/mpv-icon-8bit-16x16.png",
+        target = "video/out/x11_icon_16.inc",
+    )
+
+    ctx(
+        features = "file2string",
+        source = "etc/mpv-icon-8bit-32x32.png",
+        target = "video/out/x11_icon_32.inc",
+    )
+
+    ctx(
+        features = "file2string",
+        source = "etc/mpv-icon-8bit-64x64.png",
+        target = "video/out/x11_icon_64.inc",
     )
 
     ctx(
@@ -315,6 +327,7 @@ def build(ctx):
         ( "video/csputils.c" ),
         ( "video/fmt-conversion.c" ),
         ( "video/gpu_memcpy.c",                  "sse4-intrinsics" ),
+        ( "video/image_loader.c" ),
         ( "video/image_writer.c" ),
         ( "video/img_format.c" ),
         ( "video/hwdec.c" ),
