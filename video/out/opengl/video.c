@@ -2748,6 +2748,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 {
     GL *gl = p->gl;
+    pass_info_reset(p, false);
 
     if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
         MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
@@ -2824,7 +2825,6 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
-                pass_info_reset(p, false);
                 if (!pass_render_frame(p, frame->current, frame->frame_id))
                     goto done;
 
