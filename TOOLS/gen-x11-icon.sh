@@ -4,8 +4,7 @@
 # etc/mpv-icon...), and it will write video/out/x11_icon.bin.
 
 conv() {
-    echo
-    echo `identify -format "icon: %w %h" "$1"`
+    printf '\n%s\n' "$(identify -format "icon: %w %h" "$1")"
     convert "$1" -depth 8 rgba:-
 }
 
