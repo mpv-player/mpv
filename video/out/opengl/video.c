@@ -2993,6 +2993,7 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
 
         fbotex_change(fbo, p->gl, p->log, w, h * 2, n == 0 ? GL_R8 : GL_RG8, 0);
 
+        pass_describe(p, "vdpau reinterleaving");
         finish_pass_direct(p, fbo->fbo, fbo->rw, fbo->rh,
                            &(struct mp_rect){0, 0, w, h * 2});
 
