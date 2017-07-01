@@ -554,14 +554,6 @@ end
 timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
 timer:kill()
 
--- Check if timer has required method
-if not pcall(function() timer:is_enabled() end) then
-    local txt = "Stats.lua: your version of mpv does not possess required functionality. \nPlease upgrade mpv or use an older version of this script."
-    print(txt)
-    mp.osd_message(txt, 15)
-    return
-end
-
 -- Single invocation key binding
 mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
 
