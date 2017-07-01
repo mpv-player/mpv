@@ -343,7 +343,7 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/out/win_state.*           LGPL
     video/out/x11_common.*          probably impossible
     video/out/x11_icon.bin          LGPL
-    video/sws_utils.*               LGPL
+    video/sws_utils.*               almost LGPL
     video/vaapi.*                   hard (GPL-only parts must be ifdefed)
     video/vdpau.c                   hard (GPL-only parts must be ifdefed)
     video/vdpau_functions.inc       LGPL
