@@ -1159,8 +1159,6 @@ static int str_list_del(struct mp_log *log, char **del, int n, void *dst)
         talloc_free(lst[idx]);
         lst[idx] = NULL;
         s--;
-        if (i > 0)
-            mp_warn(log, "Passing multiple -del arguments is deprecated!\n");
     }
     talloc_free(del);
 
@@ -1281,6 +1279,11 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     }
     res[n] = NULL;
     talloc_free(ptr);
+
+    if (op != OP_NONE && n > 1) {
+        mp_warn(log, "Passing multiple arguments to %.*s is deprecated!\n",
+                BSTR_P(name));
+    }
 
     switch (op) {
     case OP_ADD:
@@ -2974,6 +2977,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 }
             }
         }
+    }
+
+    if (op != OP_NONE && res && res[0].name && res[1].name) {
+        mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
+                BSTR_P(name));
     }
 
     if (dst) {

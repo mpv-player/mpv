@@ -50,6 +50,8 @@ Interface changes
         (the compatibility hacks for this will be removed after this release)
     - remove property `vo-performance`, and add `vo-passes` as a more general
       replacement
+    - deprecate passing multiple arguments to -add/-pre options (affects the
+      vf/af commands too)
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")
