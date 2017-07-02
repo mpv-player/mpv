@@ -14,8 +14,11 @@ local o = {
     -- Default key bindings
     key_oneshot = "i",
     key_toggle = "I",
+    key_page_1 = "1",
+    key_page_2 = "2",
+    key_page_3 = "3",
 
-    duration = 3,
+    duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
     timing_warning = true,
@@ -70,17 +73,24 @@ options.read_options(o)
 
 local format = string.format
 local max = math.max
+
 -- Function used to record performance data
 local recorder = nil
 -- Timer used for toggling
-local timer = nil
+local toggle_timer = nil
+-- Timer used to remove forced keybindings
+local binding_timer = nil
+-- Current page and <page key>:<page function> mappings
+local curr_page = o.key_page_1
+local pages = {}
+
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
--- .max is the max value in the corresponding buffer as computed in record_data().
+-- .max is the max value in the corresponding buffer
 local vsratio_buf, vsjitter_buf
 local function init_buffers()
     vsratio_buf = {0, pos = 1, len = 50, max = 0}
@@ -96,6 +106,8 @@ local property_aliases = {
     ["frame-drop-count"] = "vo-drop-frame-count",
     ["container-fps"] = "fps",
 }
+
+
 -- Return deprecated name for the given property
 local function compat(p)
     while not property_list[p] and property_aliases[p] do
@@ -167,7 +179,7 @@ end
 -- Generate a graph from the given values.
 -- Returns an ASS formatted vector drawing as string.
 --
--- values: Array/Table of numbers representing the data. Used like a ring buffer
+-- values: Array/table of numbers representing the data. Used like a ring buffer
 --         it will get iterated backwards `len` times starting at position `i`.
 -- i     : Index of the latest data value in `values`.
 -- len   : The length/amount of numbers in `values`.
@@ -248,6 +260,7 @@ local function append_property(s, prop, attr, excluded)
                      attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
+
 
 local function append_perfdata(s, full)
     local vo_p = mp.get_property_native("vo-passes")
@@ -349,7 +362,7 @@ local function append_display_sync(s)
     end
 
     -- As we need to plot some graphs we print jitter and ratio on their own lines
-    if timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.ass_formatting then
+    if toggle_timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.ass_formatting then
         local ratio_graph = ""
         local jitter_graph = ""
         if o.plot_vsync_ratio then
@@ -463,14 +476,8 @@ local function add_audio(s)
 end
 
 
-local function print_stats(duration)
-    local stats = {
-        header = {},
-        file = {},
-        video = {},
-        audio = {},
-    }
-
+-- Determine whether ASS formatting shall/can be used
+local function eval_ass_formatting()
     o.ass_formatting = o.ass_formatting and has_vo_window()
     if not o.ass_formatting then
         o.nl = o.no_ass_nl
@@ -484,18 +491,76 @@ local function print_stats(duration)
             o.b0 = o.no_ass_b0
         end
     end
+end
 
+
+-- Returns an ASS string with "normal" stats
+local function default_stats()
+    local stats = {
+        header = {},
+        file = {},
+        video = {},
+        audio = {},
+    }
+
+    eval_ass_formatting()
     add_header(stats.header)
     add_file(stats.file)
     add_video(stats.video)
     add_audio(stats.audio)
 
-    mp.osd_message(table.concat(stats.header) .. table.concat(stats.file) ..
-                   table.concat(stats.video) .. table.concat(stats.audio),
-                   duration or o.duration)
+    return table.concat(stats.header) .. table.concat(stats.file) ..
+           table.concat(stats.video) .. table.concat(stats.audio)
 end
 
 
+-- Returns an ASS string with extended VO stats
+local function vo_stats()
+    local stats = {}
+    eval_ass_formatting()
+    add_header(stats)
+    append_perfdata(stats, true)
+    return table.concat(stats)
+end
+
+
+-- Returns an ASS string with stats about filters/profiles/shaders
+local function filter_stats()
+    return "filters/profiles/shaders"
+end
+
+
+-- Call the function for `page` and print it to OSD
+local function print_page(page, duration)
+    mp.osd_message(pages[page](), duration or o.duration)
+end
+
+
+-- Add keybindings for every page
+local function add_page_bindings()
+    local function a(k)
+        return function()
+            curr_page = k
+            binding_timer:kill()
+            binding_timer:resume()
+            print_page(k, toggle_timer:is_enabled() and o.redraw_delay + 1 or nil)
+        end
+    end
+
+    for k, _ in pairs(pages) do
+        mp.add_forced_key_binding(k, k, a(k), {repeatable=false})
+    end
+end
+
+
+local function remove_page_bindings()
+    for k, _ in pairs(pages) do
+        mp.remove_key_binding(k)
+    end
+end
+
+
+-- Returns a function to record vsratio/jitter with the specified `skip` value
 local function record_data(skip)
     init_buffers()
     skip = max(skip, 0)
@@ -530,38 +595,71 @@ end
 
 
 local function toggle_stats()
+    -- In case stats are toggled while oneshot-stats are still visible the
+    -- oneshot-stats will remove our keybindings
+    if binding_timer:is_enabled() then
+        binding_timer:kill()
+    end
+
     -- Disable
-    if timer:is_enabled() then
+    if toggle_timer:is_enabled() then
         if recorder then
             mp.unregister_event(recorder)
             recorder = nil
         end
-        timer:kill()
-        mp.osd_message("", 0)
+        toggle_timer:kill()
+        mp.osd_message("", 0)   -- clear the screen
+        remove_page_bindings()
     -- Enable
     else
         if o.plot_vsync_jitter or o.plot_vsync_ratio then
             recorder = record_data(o.skip_frames)
             mp.register_event("tick", recorder)
         end
-        timer:resume()
-        print_stats(o.redraw_delay + 1)
+        add_page_bindings()
+        toggle_timer:resume()
+        print_page(curr_page, o.redraw_delay + 1)
     end
 end
 
 
+-- Current page and <page key>:<page function> mapping
+curr_page = o.key_page_1
+pages = {
+    [o.key_page_1] = default_stats,
+    [o.key_page_2] = vo_stats,
+    [o.key_page_3] = filter_stats,
+}
+
+
 -- Create timer used for toggling, pause it immediately
-timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
-timer:kill()
+toggle_timer = mp.add_periodic_timer(o.redraw_delay, function() print_page(curr_page, o.redraw_delay + 1) end)
+toggle_timer:kill()
+
+-- Create timer used to remove forced key bindings, only in the "single invocation" case
+binding_timer = mp.add_periodic_timer(o.duration, function() remove_page_bindings() end)
+binding_timer.oneshot = true
+binding_timer:kill()
 
 -- Single invocation key binding
-mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
+mp.add_key_binding(o.key_oneshot, "display_stats",
+    function()
+        if toggle_timer:is_enabled() then
+            return
+        end
+        binding_timer:kill()
+        binding_timer:resume()
+        add_page_bindings()
+        print_page(curr_page)
+    end, {repeatable=true})
 
 -- Toggling key binding
 mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
+
+-- Reprint stats
 mp.register_event("video-reconfig",
         function()
-            if timer:is_enabled() then
-                print_stats(o.redraw_delay + 1)
+            if toggle_timer:is_enabled() then
+                print_page(curr_page, o.redraw_delay + 1)
             end
         end)
