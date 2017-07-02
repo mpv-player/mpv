@@ -189,12 +189,12 @@ static inline int bstrcmp0(struct bstr str1, const char *str2)
 
 static inline bool bstr_equals(struct bstr str1, struct bstr str2)
 {
-    return bstrcmp(str1, str2) == 0;
+    return str1.len == str2.len && bstrcmp(str1, str2) == 0;
 }
 
 static inline bool bstr_equals0(struct bstr str1, const char *str2)
 {
-    return bstrcmp(str1, bstr0(str2)) == 0;
+    return bstr_equals(str1, bstr0(str2));
 }
 
 static inline int bstrcasecmp0(struct bstr str1, const char *str2)
