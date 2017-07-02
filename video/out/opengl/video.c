@@ -395,9 +395,8 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", BLEND_SUBS_NO},
                     {"yes", BLEND_SUBS_YES},
                     {"video", BLEND_SUBS_VIDEO})),
-        OPT_STRINGLIST("opengl-shaders", user_shaders_old, M_OPT_FILE,
-            .deprecation_message = "use --opengl-shader (1 for each file)"),
-        OPT_PATHLIST("opengl-shader", user_shaders, 0),
+        OPT_PATHLIST("opengl-shaders", user_shaders, 0),
+        OPT_CLI_ALIAS("opengl-shader", "opengl-shaders-append"),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
@@ -1769,7 +1768,6 @@ static void gl_video_setup_hooks(struct gl_video *p)
         });
     }
 
-    pass_hook_user_shaders(p, p->opts.user_shaders_old);
     pass_hook_user_shaders(p, p->opts.user_shaders);
 }
 
@@ -3127,8 +3125,6 @@ static bool check_dumb_mode(struct gl_video *p)
                 return false;
         }
     }
-    if (o->user_shaders_old && o->user_shaders_old[0])
-        return false;
     if (o->user_shaders && o->user_shaders[0])
         return false;
     if (p->use_lut_3d)

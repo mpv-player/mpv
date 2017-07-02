@@ -65,6 +65,7 @@ extern const m_option_type_t m_option_type_node;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
+extern const m_option_type_t m_option_type_cli_alias;
 extern const m_option_type_t m_option_type_removed;
 extern const m_option_type_t m_option_type_subconfig;
 
@@ -579,8 +580,8 @@ extern const char m_option_path_separator;
 #define OPT_KEYVALUELIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_keyvalue_list)
 
-#define OPT_PATHLIST(...)                                                \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_append_list, \
+#define OPT_PATHLIST(...)                                               \
+    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list,\
                 .priv = (void *)&m_option_path_separator)
 
 #define OPT_INT(...) \
@@ -712,6 +713,11 @@ extern const char m_option_path_separator;
 
 // Same, with a generic deprecation message.
 #define OPT_REPLACED(optname, newname) OPT_REPLACED_MSG(optname, newname, "")
+
+// Alias, resolved on the CLI/config file/profile parser level only.
+#define OPT_CLI_ALIAS(optname, newname) \
+    {.name = optname, .type = &m_option_type_cli_alias, .priv = newname, \
+     .flags = M_OPT_NOPROP, .offset = -1}
 
 // "--optname" doesn't exist, but inform the user about a replacement with msg.
 #define OPT_REMOVED(optname, msg) \

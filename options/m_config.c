@@ -566,6 +566,9 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
             co->warning_was_printed = true;
         }
         return m_config_get_co(config, bstr0(alias));
+    } else if (co->opt->type == &m_option_type_cli_alias) {
+        // Pretend it does not exist.
+        return NULL;
     } else if (co->opt->type == &m_option_type_removed) {
         if (!co->warning_was_printed) {
             char *msg = co->opt->priv;
@@ -806,8 +809,13 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
         return co;
     }
 
+    // Resolve CLI alias. (We don't allow you to combine them with "--no-".)
+    co = m_config_get_co_raw(config, *name);
+    if (co && co->opt->type == &m_option_type_cli_alias)
+        *name = bstr0((char *)co->opt->priv);
+
     // Might be a suffix "action", like "--vf-add". Expensively check for
-    // matches. (Also, we don't allow you to combine them with "--no-".)
+    // matches. (We don't allow you to combine them with "--no-".)
     for (int n = 0; n < config->num_opts; n++) {
         co = &config->opts[n];
         const struct m_option_type *type = co->opt->type;
@@ -902,8 +910,19 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     int r;
 
     struct m_config_option *co = m_config_get_co(config, name);
-    if (!co)
-        return M_OPT_UNKNOWN;
+    if (!co) {
+        co = m_config_get_co_raw(config, name);
+        if (co && co->opt->type == &m_option_type_cli_alias) {
+            /*bstr old_name = name;
+            co = m_config_mogrify_cli_opt(config, &name, &(bool){0}, &(int){0});
+            */
+            name = bstr0((char *)co->opt->priv);
+            MP_WARN(config, "Setting %.*s via API is deprecated, set %s instead.\n",
+                    BSTR_P(name), co->opt->name);
+        } else {
+            return M_OPT_UNKNOWN;
+        }
+    }
 
     // Do this on an "empty" type to make setting the option strictly overwrite
     // the old value, as opposed to e.g. appending to lists.
@@ -1005,6 +1024,10 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " [file]");
         if (opt->flags & M_OPT_FIXED)
             MP_INFO(config, " [no runtime changes]");
+        if (opt->type == &m_option_type_alias)
+            MP_INFO(config, " for %s", (char *)opt->priv);
+        if (opt->type == &m_option_type_cli_alias)
+            MP_INFO(config, " for %s (CLI/config files only)", (char *)opt->priv);
         MP_INFO(config, "\n");
         for (int n = 0; opt->type->actions && opt->type->actions[n].name; n++) {
             const struct m_option_action *action = &opt->type->actions[n];

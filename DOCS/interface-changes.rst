@@ -40,12 +40,14 @@ Interface changes
     - the deprecated handling of setting "no-" options via client API is dropped
     - the following options change to append-by-default (and possibly separator):
         --script
-        --audio-file-paths
-        --sub-paths
       also, the following options are deprecated:
-        --audio-file-paths => --audio-file-path
-        --sub-paths => --sub-file-path
-        --opengl-shaders => --opengl-shader
+        --sub-paths => --sub-file-paths
+      the following options are deprecated for setting via API:
+        "script" (use "scripts")
+        "sub-file" (use "sub-files")
+        "audio-file" (use "audio-files")
+        "external-file" (use "external-files")
+        (the compatibility hacks for this will be removed after this release)
     - remove property `vo-performance`, and add `vo-passes` as a more general
       replacement
  --- mpv 0.25.0 ---

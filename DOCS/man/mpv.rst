@@ -429,8 +429,8 @@ Options for filenames do not use ``,`` as separator, but ``:`` (Unix) or ``;``
 ============= ===============================================
 Suffix        Meaning
 ============= ===============================================
--add          Append 1 or more items
--add-str      Append single item (avoids need for escaping)
+-add          Append 1 or more items (may become alias for -append)
+-append       Append single item (avoids need for escaping)
 -clr          Clear the option
 -del          Delete an existing item by integer index
 -pre          Prepend 1 or more items
@@ -442,8 +442,9 @@ this is strongly discouraged and deprecated, except for ``-set``.
 
 Without suffix, the action taken is normally ``-set``.
 
-Some options (like ``--sub-file``, ``--audio-file``, ``--opengl-shader``) append
-one file per option use. Their default action is ``-add-str``.
+Some options (like ``--sub-file``, ``--audio-file``, ``--opengl-shader``) are
+aliases for the proper option with ``-append`` action. For example,
+``--sub-file`` is an alias for ``--sub-files-append``.
 
 Playing DVDs
 ------------

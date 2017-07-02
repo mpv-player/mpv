@@ -1213,7 +1213,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
 
     if (bstr_endswith0(name, "-add")) {
         op = OP_ADD;
-    } else if (bstr_endswith0(name, "-add-str")) {
+    } else if (bstr_endswith0(name, "-append")) {
         op = OP_ADD_STR;
     } else if (bstr_endswith0(name, "-pre")) {
         op = OP_PRE;
@@ -1395,33 +1395,7 @@ const m_option_type_t m_option_type_string_list = {
     .set   = str_list_set,
     .actions = (const struct m_option_action[]){
         {"add"},
-        {"add-str"},
-        {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
-        {"del"},
-        {"pre"},
-        {"set"},
-        {0}
-    },
-};
-
-static int parse_str_append_list(struct mp_log *log, const m_option_t *opt,
-                                 struct bstr name, struct bstr param, void *dst)
-{
-    return parse_str_list_impl(log, opt, name, param, dst, OP_ADD_STR);
-}
-
-const m_option_type_t m_option_type_string_append_list = {
-    .name  = "String list (append by default)",
-    .size  = sizeof(char **),
-    .parse = parse_str_append_list,
-    .print = print_str_list,
-    .copy  = copy_str_list,
-    .free  = free_str_list,
-    .get   = str_list_get,
-    .set   = str_list_set,
-    .actions = (const struct m_option_action[]){
-        {"add"},
-        {"add-str"},
+        {"append"},
         {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
         {"del"},
         {"pre"},
@@ -3370,6 +3344,9 @@ const m_option_type_t m_option_type_node = {
 
 // Special-cased by m_config.c.
 const m_option_type_t m_option_type_alias = {
+    .name  = "alias",
+};
+const m_option_type_t m_option_type_cli_alias = {
     .name  = "alias",
 };
 const m_option_type_t m_option_type_removed = {

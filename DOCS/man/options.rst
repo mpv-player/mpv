@@ -67,7 +67,7 @@ Track Selection
     stream index is relatively arbitrary, but useful when interacting with
     other software using FFmpeg (consider ``ffprobe``).
 
-    Note that with external tracks (added with ``--sub-file`` and similar
+    Note that with external tracks (added with ``--sub-files`` and similar
     options), there will be streams with duplicate IDs. In this case, the
     first stream in order is selected.
 
@@ -1362,12 +1362,15 @@ Audio
 
     This option has no influence on files with normal video tracks.
 
-``--audio-file=<filename>``
-    Play audio from an external file while viewing a video. Each use of this
-    option will add a new audio track. The details are similar to how
-    ``--sub-file`` works.
+``--audio-files=<files>``
+    Play audio from an external file while viewing a video.
 
     This is a list option. See `List Options`_ for details.
+
+``--audio-file=<file>``
+    CLI/config file only alias for ``--audio-files-append``. Each use of this
+    option will add a new audio track. The details are similar to how
+    ``--sub-file`` works.
 
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to
@@ -1439,10 +1442,7 @@ Audio
             directories.
 
 ``--audio-file-paths=<path1:path2:...>``
-    Deprecated, use ``--audio-file-path``.
-
-``--audio-file-path=path1>``
-    Equivalent to ``--sub-file-path`` option, but for auto-loaded audio files.
+    Equivalent to ``--sub-file-paths`` option, but for auto-loaded audio files.
 
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
@@ -1505,7 +1505,7 @@ Subtitles
 ``--sub-delay=<sec>``
     Delays subtitles by ``<sec>`` seconds. Can be negative.
 
-``--sub-file=subtitlefile``
+``--sub-files=<file-list>``
     Add a subtitle file to the list of external subtitles.
 
     If you use ``--sub-file`` only once, this subtitle file is displayed by
@@ -1861,9 +1861,9 @@ Subtitles
         Never applied to text subtitles.
 
 ``--sub-paths=<path1:path2:...>``
-    Deprecated, use ``--sub-file-path``.
+    Deprecated, use ``--sub-file-paths``.
 
-``--sub-file-path=path``
+``--sub-file-paths=<path-list>``
     Specify extra directories to search for subtitles matching the video.
     Multiple directories can be separated by ":" (";" on Windows).
     Paths can be relative or absolute. Relative paths are interpreted relative
@@ -1874,7 +1874,7 @@ Subtitles
     .. admonition:: Example
 
         Assuming that ``/path/to/video/video.avi`` is played and
-        ``--sub-file-path=sub --sub-file-path=subtitles`` is specified, mpv
+        ``--sub-file-paths=sub:subtitles`` is specified, mpv
         searches for subtitle files in these directories:
 
         - ``/path/to/video/``
@@ -4167,7 +4167,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
 
-``--opengl-shader=<file>``
+``--opengl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
     which can be injected at almost arbitrary points in the rendering pipeline,
     and access all previous intermediate textures. Each use of the option will
@@ -4333,9 +4333,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     pass. When overwriting a texture marked ``fixed``, the WIDTH, HEIGHT and
     OFFSET must be left at their default values.
 
-``--opengl-shaders=<files>``
-    Deprecated option for ``--opengl-shader``. Command line parsing behaves
-    slightly diffent. ``--opengl-shader-set`` gives exactly the same behavior.
+``--opengl-shader=<file>``
+    CLI/config file only alias for ``--opengl-shaders-append``.
 
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
@@ -5010,24 +5009,28 @@ Miscellaneous
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
 
-``--external-file=<filename>``
+``--external-files=<file-list>``
     Load a file and add all of its tracks. This is useful to play different
     files together (for example audio from one file, video from another), or
     for advanced ``--lavfi-complex`` used (like playing two video files at
     the same time).
 
-    Unlike ``--sub-file`` and ``--audio-file``, this includes all tracks, and
+    Unlike ``--sub-files`` and ``--audio-files``, this includes all tracks, and
     does not cause default stream selection over the "proper" file. This makes
     it slightly less intrusive.
 
     This is a list option. See `List Options`_ for details.
+
+``--external-file=<file>``
+    CLI/config file only alias for ``--external-files-append``. Each use of this
+    option will add a new external files.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
 
     If set to ``no``, then do not automatically load external files as specified
     by ``--sub-auto`` and ``--audio-file-auto``. If external files are forcibly
-    added (like with ``--sub-file``), they will not be auto-selected.
+    added (like with ``--sub-files``), they will not be auto-selected.
 
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
