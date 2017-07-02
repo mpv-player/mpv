@@ -458,11 +458,8 @@ struct m_option {
 // The option doesn't take a parameter.
 #define M_OPT_DISALLOW_PARAM    -5
 
-// Returned if the parser failed for any other reason than a bad parameter.
-#define M_OPT_PARSER_ERR        -6
-
 // Returned when MPlayer should exit. Used by various help stuff.
-#define M_OPT_EXIT              -7
+#define M_OPT_EXIT              -6
 
 char *m_option_strerror(int code);
 

@@ -67,7 +67,6 @@ char *m_option_strerror(int code)
         return "parameter is outside values allowed for option";
     case M_OPT_DISALLOW_PARAM:
         return "option doesn't take a parameter";
-    case M_OPT_PARSER_ERR:
     default:
         return "parser error";
     }
@@ -1109,8 +1108,6 @@ static void free_str_list(void *dst)
 
 static int str_list_add(char **add, int n, void *dst, int pre)
 {
-    if (!dst)
-        return M_OPT_PARSER_ERR;
     char **lst = VAL(dst);
 
     int ln;
@@ -1140,8 +1137,6 @@ static int str_list_del(struct mp_log *log, char **del, int n, void *dst)
     int i, ln, s;
     long idx;
 
-    if (!dst)
-        return M_OPT_PARSER_ERR;
     lst = VAL(dst);
 
     for (ln = 0; lst && lst[ln]; ln++)
