@@ -193,8 +193,18 @@ local function add_single_video(json)
         end
     end
 
-    -- add chapters from description
-    if not (json.description == nil) and not (json.duration == nil) then
+    -- add chapters
+    if json.chapters then
+        msg.debug("Adding pre-parsed chapters")
+        for i = 1, #json.chapters do
+            local chapter = json.chapters[i]
+            local title = chapter.title or ""
+            if title == "" then
+                title = string.format('Chapter %02d', i)
+            end
+            table.insert(chapter_list, {time=chapter.start_time, title=title})
+        end
+    elseif not (json.description == nil) and not (json.duration == nil) then
         chapter_list = extract_chapters(json.description, json.duration)
     end
 
@@ -419,7 +429,7 @@ end)
 
 mp.add_hook("on_preloaded", 10, function ()
     if next(chapter_list) ~= nil then
-        msg.verbose("Setting chapters from video's description")
+        msg.verbose("Setting chapters")
 
         mp.set_property_native("chapter-list", chapter_list)
         chapter_list = {}
