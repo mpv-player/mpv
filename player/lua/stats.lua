@@ -496,21 +496,13 @@ end
 
 -- Returns an ASS string with "normal" stats
 local function default_stats()
-    local stats = {
-        header = {},
-        file = {},
-        video = {},
-        audio = {},
-    }
-
+    local stats = {}
     eval_ass_formatting()
-    add_header(stats.header)
-    add_file(stats.file)
-    add_video(stats.video)
-    add_audio(stats.audio)
-
-    return table.concat(stats.header) .. table.concat(stats.file) ..
-           table.concat(stats.video) .. table.concat(stats.audio)
+    add_header(stats)
+    add_file(stats)
+    add_video(stats)
+    add_audio(stats)
+    return table.concat(stats)
 end
 
 
