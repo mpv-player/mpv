@@ -163,26 +163,8 @@ enum {
 // Flags for safe option setting during runtime.
 #define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
 
-// Set the named option to the given string.
-// flags: combination of M_SETOPT_* flags (0 for normal operation)
-// Returns >= 0 on success, otherwise see OptionParserReturn.
-int m_config_set_option_ext(struct m_config *config, struct bstr name,
+int m_config_set_option_cli(struct m_config *config, struct bstr name,
                             struct bstr param, int flags);
-
-/*  Set an option. (Like: m_config_set_option_ext(config, name, param, 0))
- *  \param config The config object.
- *  \param name The option's name.
- *  \param param The value of the option, can be NULL.
- *  \return See \ref OptionParserReturn.
- */
-int m_config_set_option(struct m_config *config, struct bstr name,
-                        struct bstr param);
-
-static inline int m_config_set_option0(struct m_config *config,
-                                       const char *name, const char *param)
-{
-    return m_config_set_option(config, bstr0(name), bstr0(param));
-}
 
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
@@ -193,7 +175,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,
                                    void *data, int flags);
 
-// Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags);

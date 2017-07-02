@@ -2621,7 +2621,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
     if (val.start || m_config_option_requires_param(config, name) == 0 || nopos) {
-        r = m_config_set_option_ext(config, name, val, flags);
+        r = m_config_set_option_cli(config, name, val, flags);
         if (r < 0) {
             if (r == M_OPT_UNKNOWN) {
                 mp_err(log, "Option %.*s: %.*s doesn't have a %.*s parameter.\n",
@@ -2652,7 +2652,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
                    BSTR_P(opt_name), BSTR_P(obj_name), *nold, *nold);
             return M_OPT_OUT_OF_RANGE;
         }
-        r = m_config_set_option_ext(config, bstr0(opt), val, flags);
+        r = m_config_set_option_cli(config, bstr0(opt), val, flags);
         if (r < 0) {
             if (r != M_OPT_EXIT)
                 mp_err(log, "Option %.*s: "
