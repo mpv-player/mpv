@@ -540,9 +540,13 @@ end
 local function add_page_bindings()
     local function a(k)
         return function()
+            -- In single invocation case we need to reset the timer because
+            -- stats are printed again for o.duration
+            if not toggle_timer:is_enabled() then
+                binding_timer:kill()
+                binding_timer:resume()
+            end
             curr_page = k
-            binding_timer:kill()
-            binding_timer:resume()
             print_page(k, toggle_timer:is_enabled() and o.redraw_delay + 1 or nil)
         end
     end
@@ -595,12 +599,6 @@ end
 
 
 local function toggle_stats()
-    -- In case stats are toggled while oneshot-stats are still visible the
-    -- oneshot-stats will remove our keybindings
-    if binding_timer:is_enabled() then
-        binding_timer:kill()
-    end
-
     -- Disable
     if toggle_timer:is_enabled() then
         if recorder then
@@ -649,7 +647,12 @@ toggle_timer = mp.add_periodic_timer(o.redraw_delay, function() print_page(curr_
 toggle_timer:kill()
 
 -- Create timer used to remove forced key bindings, only in the "single invocation" case
-binding_timer = mp.add_periodic_timer(o.duration, function() remove_page_bindings() end)
+binding_timer = mp.add_periodic_timer(o.duration,
+    function()
+        if not toggle_timer:is_enabled() then
+            remove_page_bindings()
+        end
+    end)
 binding_timer.oneshot = true
 binding_timer:kill()
 
