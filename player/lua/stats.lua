@@ -623,6 +623,18 @@ local function toggle_stats()
 end
 
 
+local function oneshot_stats(page)
+    -- Ignore single invocations while stats are toggled
+    if toggle_timer:is_enabled() then
+        return
+    end
+    binding_timer:kill()
+    binding_timer:resume()
+    add_page_bindings()
+    print_page(page or curr_page)
+end
+
+
 -- Current page and <page key>:<page function> mapping
 curr_page = o.key_page_1
 pages = {
@@ -642,21 +654,18 @@ binding_timer.oneshot = true
 binding_timer:kill()
 
 -- Single invocation key binding
-mp.add_key_binding(o.key_oneshot, "display_stats",
-    function()
-        if toggle_timer:is_enabled() then
-            return
-        end
-        binding_timer:kill()
-        binding_timer:resume()
-        add_page_bindings()
-        print_page(curr_page)
-    end, {repeatable=true})
+mp.add_key_binding(o.key_oneshot, "display-stats", oneshot_stats, {repeatable=true})
+
+-- Single invocation bindings without key, can be used in input.conf to create
+-- bindings for a specific page: "e script-binding stats/display-page-2"
+for k, _ in pairs(pages) do
+    mp.add_key_binding(nil, "display-page-" .. k, function() oneshot_stats(k) end, {repeatable=true})
+end
 
 -- Toggling key binding
-mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
+mp.add_key_binding(o.key_toggle, "display-stats-toggle", toggle_stats, {repeatable=false})
 
--- Reprint stats
+-- Reprint stats immediately when VO was reconfigured, only when toggled
 mp.register_event("video-reconfig",
         function()
             if toggle_timer:is_enabled() then
