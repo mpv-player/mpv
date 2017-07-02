@@ -118,11 +118,16 @@ static const char x11_icon_64[] =
 #include "video/out/x11_icon_64.inc"
 ;
 
+static const char x11_icon_128[] =
+  #include "video/out/x11_icon_128.inc"
+;
+
 #define ICON_ENTRY(var) { (char *)var, sizeof(var) }
 static const struct bstr x11_icons[] = {
     ICON_ENTRY(x11_icon_16),
     ICON_ENTRY(x11_icon_32),
     ICON_ENTRY(x11_icon_64),
+    ICON_ENTRY(x11_icon_128),
     {0}
 };
 
