@@ -77,6 +77,12 @@ def build(ctx):
 
     ctx(
         features = "file2string",
+        source = "etc/mpv-icon-8bit-128x128.png",
+        target = "video/out/x11_icon_128.inc",
+    )
+
+    ctx(
+        features = "file2string",
         source = "etc/input.conf",
         target = "input/input_conf.h",
     )
