@@ -18,7 +18,7 @@
 * [#License](#license)
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
 * [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
-* [Man pages](http://mpv.io/manual/master/)
+* [Man pages](https://mpv.io/manual/master/)
 
 ## Overview
 
@@ -46,7 +46,7 @@ Releases can be found on the [release list][releases].
 
 
 For semi-official builds and third-party packages please see
-[mpv.io/installation](http://mpv.io/installation/).
+https://mpv.io/installation/.
 
 ## Changelogs
 
