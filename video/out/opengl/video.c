@@ -294,10 +294,13 @@ static const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
-        {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
-        {{NULL,         .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
-        {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+         .cutoff = 0.001}, // scale
+        {{NULL,       .params={NAN, NAN}}, {.params = {NAN, NAN}},
+         .cutoff = 0.001}, // dscale
+        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+         .cutoff = 0.001}, // cscale
+        {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
     .scaler_resizes_only = 1,
@@ -324,6 +327,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     OPT_FLOAT(n"-param1", scaler[i].kernel.params[0], 0),                  \
     OPT_FLOAT(n"-param2", scaler[i].kernel.params[1], 0),                  \
     OPT_FLOAT(n"-blur",   scaler[i].kernel.blur, 0),                       \
+    OPT_FLOATRANGE(n"-cutoff", scaler[i].cutoff, 0, 0.0, 1.0),             \
     OPT_FLOATRANGE(n"-taper", scaler[i].kernel.taper, 0, 0.0, 1.0),        \
     OPT_FLOAT(n"-wparam", scaler[i].window.params[0], 0),                  \
     OPT_FLOAT(n"-wblur",  scaler[i].window.blur, 0),                       \
@@ -1437,6 +1441,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         scaler->kernel->f.radius = conf->radius;
 
     scaler->kernel->clamp = conf->clamp;
+    scaler->kernel->value_cutoff = conf->cutoff;
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 

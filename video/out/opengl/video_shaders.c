@@ -108,8 +108,10 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
 {
     double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
-    int bound = ceil(radius);
+    double radius_cutoff = scaler->kernel->radius_cutoff;
+    int bound = ceil(radius_cutoff);
     bool use_ar = scaler->conf.antiring > 0;
+
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
@@ -130,12 +132,13 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
             int xx = x > 0 ? x-1 : x;
             double dmax = sqrt(xx*xx + yy*yy);
             // Skip samples definitely outside the radius
-            if (dmax >= radius)
+            if (dmax >= radius_cutoff)
                 continue;
             GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
             // Check for samples that might be skippable
-            if (dmax >= radius - M_SQRT2)
-                GLSLF("if (d < 1.0) {\n");
+            bool maybe_skippable = dmax >= radius_cutoff - M_SQRT2;
+            if (maybe_skippable)
+                GLSLF("if (d < %f) {\n", radius_cutoff / radius);
             if (scaler->gl_target == GL_TEXTURE_1D) {
                 GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
                       scaler->lut_size);
@@ -150,7 +153,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
                 GLSL(lo = min(lo, c);)
                 GLSL(hi = max(hi, c);)
             }
-            if (dmax >= radius - M_SQRT2)
+            if (maybe_skippable)
                 GLSLF("}\n");
         }
     }

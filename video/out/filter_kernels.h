@@ -29,6 +29,7 @@ struct filter_kernel {
     struct filter_window f; // the kernel itself
     struct filter_window w; // window storage
     bool clamp; // clamp to the range [0-1]
+    double value_cutoff; // discard all contributions below this value (polar)
     // Constant values
     const char *window; // default window
     bool polar;         // whether or not the filter uses polar coordinates
@@ -38,6 +39,7 @@ struct filter_kernel {
                           // function radius to the possibly wider
                           // (in the case of downsampling) filter sample
                           // radius.
+    double radius_cutoff; // the true radius at which we can cut off the filter
 };
 
 extern const struct filter_window mp_filter_windows[];
