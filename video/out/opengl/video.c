@@ -894,9 +894,6 @@ static void init_video(struct gl_video *p)
     debug_check_gl(p, "after video texture creation");
 
     gl_video_setup_hooks(p);
-
-    // make sure this variable is initialized to *something*
-    p->pass = p->pass_fresh;
 }
 
 // Release any texture mappings associated with the current frame.
@@ -958,7 +955,9 @@ static void uninit_video(struct gl_video *p)
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 {
-    assert(p->pass_idx < PASS_INFO_MAX);
+    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+        return;
+
     struct pass_info *pass = &p->pass[p->pass_idx];
     pass->perf = perf;
 
@@ -970,7 +969,9 @@ static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 
 static void pass_describe(struct gl_video *p, const char *textf, ...)
 {
-    assert(p->pass_idx < PASS_INFO_MAX);
+    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+        return;
+
     struct pass_info *pass = &p->pass[p->pass_idx];
 
     if (pass->desc.len > 0)
@@ -990,6 +991,23 @@ static void pass_info_reset(struct gl_video *p, bool is_redraw)
     for (int i = 0; i < PASS_INFO_MAX; i++) {
         p->pass[i].desc.len = 0;
         p->pass[i].perf = (struct mp_pass_perf){0};
+    }
+}
+
+static void pass_report_performance(struct gl_video *p)
+{
+    if (!p->pass)
+        return;
+
+    for (int i = 0; i < PASS_INFO_MAX; i++) {
+        struct pass_info *pass = &p->pass[i];
+        if (pass->desc.len) {
+            MP_DBG(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
+                   BSTR_P(pass->desc),
+                   (int)pass->perf.last/1000,
+                   (int)pass->perf.avg/1000,
+                   (int)pass->perf.peak/1000);
+        }
     }
 }
 
@@ -2912,18 +2930,7 @@ done:
     }
 
     p->frames_rendered++;
-
-    // Report performance metrics
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
-        struct pass_info *pass = &p->pass[i];
-        if (pass->desc.len) {
-            MP_DBG(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
-                   BSTR_P(pass->desc),
-                   (int)pass->perf.last/1000,
-                   (int)pass->perf.avg/1000,
-                   (int)pass->perf.peak/1000);
-        }
-    }
+    pass_report_performance(p);
 }
 
 // vp_w/vp_h is the implicit size of the target framebuffer.
@@ -3410,6 +3417,8 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .sc = gl_sc_create(gl, log),
         .opts_cache = m_config_cache_alloc(p, g, &gl_video_conf),
     };
+    // make sure this variable is initialized to *something*
+    p->pass = p->pass_fresh;
     struct gl_video_opts *opts = p->opts_cache->opts;
     p->cms = gl_lcms_init(p, log, g, opts->icc_opts),
     p->opts = *opts;
