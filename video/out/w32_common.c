@@ -445,7 +445,14 @@ static void signal_events(struct vo_w32_state *w32, int events)
 static void wakeup_gui_thread(void *ctx)
 {
     struct vo_w32_state *w32 = ctx;
-    PostMessage(w32->window, WM_USER, 0, 0);
+    // Wake up the window procedure (which processes the dispatch queue)
+    if (GetWindowThreadProcessId(w32->window, NULL) == GetCurrentThreadId()) {
+        PostMessageW(w32->window, WM_NULL, 0, 0);
+    } else {
+        // Use a sent message when cross-thread, since the queue of sent
+        // messages is processed in some cases when posted messages are blocked
+        SendNotifyMessageW(w32->window, WM_NULL, 0, 0);
+    }
 }
 
 static double get_refresh_rate_from_gdi(const wchar_t *device)
@@ -888,11 +895,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)w32);
     }
 
+    // The dispatch queue should be processed as soon as possible to prevent
+    // playback glitches, since it is likely blocking the VO thread
+    mp_dispatch_queue_process(w32->dispatch, 0);
+
     switch (message) {
-    case WM_USER:
-        // This message is used to wakeup the GUI thread, see wakeup_gui_thread.
-        mp_dispatch_queue_process(w32->dispatch, 0);
-        break;
     case WM_ERASEBKGND: // no need to erase background separately
         return 1;
     case WM_PAINT:
