@@ -544,7 +544,7 @@ local function add_page_bindings()
     end
 
     for k, _ in pairs(pages) do
-        mp.add_forced_key_binding(k, k, a(k), {repeatable=false})
+        mp.add_forced_key_binding(k, k, a(k), {repeatable=true})
     end
 end
 
