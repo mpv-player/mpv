@@ -1168,7 +1168,7 @@ static void resize_child_win(HWND parent)
     if (EqualRect(&rm, &rp))
         return;
     SetWindowPos(child, NULL, 0, 0, rp.right, rp.bottom, SWP_ASYNCWINDOWPOS |
-        SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+        SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
 }
 
 static LRESULT CALLBACK parent_win_hook(int nCode, WPARAM wParam, LPARAM lParam)
