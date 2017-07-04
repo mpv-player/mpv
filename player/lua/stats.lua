@@ -57,11 +57,11 @@ local o = {
 
     -- Text formatting
     -- With ASS
-    nl = "\\N",
-    indent = "\\h\\h\\h\\h\\h",
-    prefix_sep = "\\h\\h",
-    b1 = "{\\b1}",
-    b0 = "{\\b0}",
+    ass_nl = "\\N",
+    ass_indent = "\\h\\h\\h\\h\\h",
+    ass_prefix_sep = "\\h\\h",
+    ass_b1 = "{\\b1}",
+    ass_b0 = "{\\b0}",
     -- Without ASS
     no_ass_nl = "\n",
     no_ass_indent = "\t",
@@ -118,7 +118,7 @@ end
 
 
 local function set_ASS(b)
-    if not o.ass_formatting then
+    if not o.use_ass then
         return ""
     end
     return b and ass_start or ass_stop
@@ -136,7 +136,7 @@ end
 
 
 local function text_style()
-    if not o.ass_formatting then
+    if not o.use_ass then
         return ""
     end
     if o.custom_header and o.custom_header ~= "" then
@@ -323,7 +323,7 @@ local function append_perfdata(s, full)
                                  hl(pass["avg"], avg_s[frame]), hl(pass["peak"]),
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
-                if o.plot_perfdata and o.ass_formatting then
+                if o.plot_perfdata and o.use_ass then
                     s[#s+1] = generate_graph(pass["samples"], pass["count"],
                                              pass["count"], pass["peak"],
                                              pass["avg"], 0.9, 0.25)
@@ -362,7 +362,7 @@ local function append_display_sync(s)
     end
 
     -- As we need to plot some graphs we print jitter and ratio on their own lines
-    if toggle_timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.ass_formatting then
+    if toggle_timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
         local ratio_graph = ""
         local jitter_graph = ""
         if o.plot_vsync_ratio then
@@ -478,8 +478,14 @@ end
 
 -- Determine whether ASS formatting shall/can be used
 local function eval_ass_formatting()
-    o.ass_formatting = o.ass_formatting and has_vo_window()
-    if not o.ass_formatting then
+    o.use_ass = o.ass_formatting and has_vo_window()
+    if o.use_ass then
+        o.nl = o.ass_nl
+        o.indent = o.ass_indent
+        o.prefix_sep = o.ass_prefix_sep
+        o.b1 = o.ass_b1
+        o.b0 = o.ass_b0
+    else
         o.nl = o.no_ass_nl
         o.indent = o.no_ass_indent
         o.prefix_sep = o.no_ass_prefix_sep
