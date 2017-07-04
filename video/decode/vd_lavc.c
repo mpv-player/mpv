@@ -308,42 +308,6 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
     return false;
 }
 
-// Find the correct profile entry for the current codec and profile.
-// Assumes the table has higher profiles first (for each codec).
-const struct hwdec_profile_entry *hwdec_find_profile(
-    struct lavc_ctx *ctx, const struct hwdec_profile_entry *table)
-{
-    assert(AV_CODEC_ID_NONE == 0);
-    struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
-    enum AVCodecID codec = ctx->avctx->codec_id;
-    int profile = ctx->avctx->profile;
-    // Assume nobody cares about these aspects of the profile
-    if (codec == AV_CODEC_ID_H264) {
-        if (profile == FF_PROFILE_H264_CONSTRAINED_BASELINE)
-            profile = FF_PROFILE_H264_MAIN;
-    }
-    for (int n = 0; table[n].av_codec; n++) {
-        if (table[n].av_codec == codec) {
-            if (table[n].ff_profile == profile ||
-                !lavc_param->check_hw_profile)
-                return &table[n];
-        }
-    }
-    return NULL;
-}
-
-// Check codec support, without checking the profile.
-bool hwdec_check_codec_support(const char *codec,
-                               const struct hwdec_profile_entry *table)
-{
-    enum AVCodecID codecid = mp_codec_to_av_codec_id(codec);
-    for (int n = 0; table[n].av_codec; n++) {
-        if (table[n].av_codec == codecid)
-            return true;
-    }
-    return false;
-}
-
 int hwdec_get_max_refs(struct lavc_ctx *ctx)
 {
     switch (ctx->avctx->codec_id) {
@@ -363,7 +327,7 @@ int hwdec_get_max_refs(struct lavc_ctx *ctx)
 // hwdec_find_decoder("h264", "_mmal").
 // Just concatenating the two names will not always work due to inconsistencies
 // (e.g. "mpeg2video" vs. "mpeg2").
-const char *hwdec_find_decoder(const char *codec, const char *suffix)
+static const char *hwdec_find_decoder(const char *codec, const char *suffix)
 {
     enum AVCodecID codec_id = mp_codec_to_av_codec_id(codec);
     if (codec_id == AV_CODEC_ID_NONE)

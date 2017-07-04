@@ -133,15 +133,9 @@ struct hwdec_profile_entry {
     uint64_t hw_profile;
 };
 
-const struct hwdec_profile_entry *hwdec_find_profile(
-    struct lavc_ctx *ctx, const struct hwdec_profile_entry *table);
-bool hwdec_check_codec_support(const char *codec,
-                               const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
 int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
                               int av_sw_format, int initial_pool_size);
-
-const char *hwdec_find_decoder(const char *codec, const char *suffix);
 
 #define NEW_CUDA_HWACCEL \
     (HAVE_CUDA_HWACCEL && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 94, 100))
