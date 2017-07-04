@@ -4034,7 +4034,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     0.0 and 1.0. The default value of 0.0 disables antiringing entirely.
 
     Note that this doesn't affect the special filters ``bilinear`` and
-    ``bicubic_fast``.
+    ``bicubic_fast``, nor does it affect any polar (EWA) scalers.
 
 ``--scale-window=<window>``, ``--cscale-window=<window>``, ``--dscale-window=<window>``, ``--tscale-window=<window>``
     (Advanced users only) Choose a custom windowing function for the kernel.

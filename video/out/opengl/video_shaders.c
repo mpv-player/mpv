@@ -105,62 +105,106 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
     GLSLF("}\n");
 }
 
-void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
+// Subroutine for computing and adding an individual texel contribution
+// If subtexel < 0, samples directly. Otherwise, takes the texel from cN[comp]
+static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
+                         int x, int y, int subtexel, int components)
 {
     double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
     double radius_cutoff = scaler->kernel->radius_cutoff;
-    int bound = ceil(radius_cutoff);
-    bool use_ar = scaler->conf.antiring > 0;
 
+    // Since we can't know the subpixel position in advance, assume a
+    // worst case scenario
+    int yy = y > 0 ? y-1 : y;
+    int xx = x > 0 ? x-1 : x;
+    double dmax = sqrt(xx*xx + yy*yy);
+    // Skip samples definitely outside the radius
+    if (dmax >= radius_cutoff)
+        return;
+    GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
+    // Check for samples that might be skippable
+    bool maybe_skippable = dmax >= radius_cutoff - M_SQRT2;
+    if (maybe_skippable)
+        GLSLF("if (d < %f) {\n", radius_cutoff / radius);
+
+    // get the weight for this pixel
+    if (scaler->gl_target == GL_TEXTURE_1D) {
+        GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
+              scaler->lut_size);
+    } else {
+        GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d, %d.0))).r;\n",
+              scaler->lut_size);
+    }
+    GLSL(wsum += w;)
+
+    if (subtexel < 0) {
+        GLSLF("c0 = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
+        GLSL(color += vec4(w) * c0;)
+    } else {
+        for (int n = 0; n < components; n++)
+            GLSLF("color[%d] += w * c%d[%d];\n", n, n, subtexel);
+    }
+
+    if (maybe_skippable)
+        GLSLF("}\n");
+}
+
+void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
+                       int components, int glsl_version)
+{
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     GLSL(vec2 base = pos - fcoord * pt;)
-    GLSL(vec4 c;)
     GLSLF("float w, d, wsum = 0.0;\n");
-    if (use_ar) {
-        GLSL(vec4 lo = vec4(1.0);)
-        GLSL(vec4 hi = vec4(0.0);)
-    }
+    for (int n = 0; n < components; n++)
+        GLSLF("vec4 c%d;\n", n);
+
     gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
+
     GLSLF("// scaler samples\n");
-    for (int y = 1-bound; y <= bound; y++) {
-        for (int x = 1-bound; x <= bound; x++) {
-            // Since we can't know the subpixel position in advance, assume a
-            // worst case scenario
-            int yy = y > 0 ? y-1 : y;
-            int xx = x > 0 ? x-1 : x;
-            double dmax = sqrt(xx*xx + yy*yy);
-            // Skip samples definitely outside the radius
-            if (dmax >= radius_cutoff)
-                continue;
-            GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
-            // Check for samples that might be skippable
-            bool maybe_skippable = dmax >= radius_cutoff - M_SQRT2;
-            if (maybe_skippable)
-                GLSLF("if (d < %f) {\n", radius_cutoff / radius);
-            if (scaler->gl_target == GL_TEXTURE_1D) {
-                GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
-                      scaler->lut_size);
+    int bound = ceil(scaler->kernel->radius_cutoff);
+    for (int y = 1-bound; y <= bound; y += 2) {
+        for (int x = 1-bound; x <= bound; x += 2) {
+            // First we figure out whether it's more efficient to use direct
+            // sampling or gathering. The problem is that gathering 4 texels
+            // only to discard some of them is very wasteful, so only do it if
+            // we suspect it will be a win rather than a loss. This is the case
+            // exactly when all four texels are within bounds
+            bool use_gather = sqrt(x*x + y*y) < scaler->kernel->radius_cutoff;
+
+            // textureGather is only supported in GLSL 400+
+            if (glsl_version < 400)
+                use_gather = false;
+
+            if (use_gather) {
+                // Gather the four surrounding texels simultaneously
+                for (int n = 0; n < components; n++) {
+                    GLSLF("c%d = textureGatherOffset(tex, base, ivec2(%d, %d), %d);\n",
+                          n, x, y, n);
+                }
+
+                // Mix in all of the points with their weights
+                for (int p = 0; p < 4; p++) {
+                    // The four texels are gathered counterclockwise starting
+                    // from the bottom left
+                    static const int xo[4] = {0, 1, 1, 0};
+                    static const int yo[4] = {1, 1, 0, 0};
+                    if (x+xo[p] > bound || y+yo[p] > bound)
+                        continue;
+                    polar_sample(sc, scaler, x+xo[p], y+yo[p], p, components);
+                }
             } else {
-                GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d, %d.0))).r;\n",
-                      scaler->lut_size);
+                // switch to direct sampling instead, for efficiency/compatibility
+                for (int yy = y; yy <= bound && yy <= y+1; yy++) {
+                    for (int xx = x; xx <= bound && xx <= x+1; xx++)
+                        polar_sample(sc, scaler, xx, yy, -1, components);
+                }
             }
-            GLSL(wsum += w;)
-            GLSLF("c = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
-            GLSL(color += vec4(w) * c;)
-            if (use_ar && x >= 0 && y >= 0 && x <= 1 && y <= 1) {
-                GLSL(lo = min(lo, c);)
-                GLSL(hi = max(hi, c);)
-            }
-            if (maybe_skippable)
-                GLSLF("}\n");
         }
     }
+
     GLSL(color = color / vec4(wsum);)
-    if (use_ar)
-        GLSLF("color = mix(color, clamp(color, lo, hi), %f);\n",
-              scaler->conf.antiring);
     GLSLF("}\n");
 }
 

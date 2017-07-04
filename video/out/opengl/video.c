@@ -1583,7 +1583,7 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
-        pass_sample_polar(p->sc, scaler);
+        pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
     } else if (scaler->kernel) {
         pass_sample_separated(p, tex, scaler, w, h);
     } else {
