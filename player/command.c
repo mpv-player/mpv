@@ -5338,6 +5338,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_PLAYLIST_SHUFFLE: {
         playlist_shuffle(mpctx->playlist);
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         break;
     }
 
