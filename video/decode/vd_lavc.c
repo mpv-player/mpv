@@ -600,8 +600,12 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (ctx->hwdec) {
         avctx->opaque = vd;
         avctx->thread_count = 1;
-#if HAVE_VDPAU_HWACCEL
+#ifdef AV_HWACCEL_FLAG_IGNORE_LEVEL
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
+#endif
+#ifdef AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH
+        if (!lavc_param->check_hw_profile)
+            avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
 #endif
         if (ctx->hwdec->image_format)
             avctx->get_format = get_format_hwdec;
