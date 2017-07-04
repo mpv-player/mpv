@@ -2507,7 +2507,6 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
         finish_pass_fbo(p, &p->blend_subs_fbo, rect.w, rect.h, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       rect.w, rect.h, p->blend_subs_fbo.fbo, false);
-        GLSL(color = texture(texture0, texcoord0);)
         pass_read_fbo(p, &p->blend_subs_fbo);
         pass_describe(p, "blend subs video");
     }
