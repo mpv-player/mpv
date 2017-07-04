@@ -698,6 +698,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
         {AV_PIX_FMT_NONE}
     },
 };
@@ -714,6 +715,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
         {AV_PIX_FMT_NONE}
     },
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
