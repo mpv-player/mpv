@@ -1989,13 +1989,11 @@ static void pass_read_video(struct gl_video *p)
 }
 
 // Utility function that simply binds an FBO and reads from it, without any
-// transformations. Returns the ID of the texture unit it was bound to
-static int pass_read_fbo(struct gl_video *p, struct fbotex *fbo)
+// transformations.
+static void pass_read_fbo(struct gl_video *p, struct fbotex *fbo)
 {
     struct img_tex tex = img_tex_fbo(fbo, PLANE_RGB, p->components);
     copy_img_tex(p, &(int){0}, tex);
-
-    return pass_bind(p, tex);
 }
 
 // yuv conversion, and any other conversions before main up/down-scaling
