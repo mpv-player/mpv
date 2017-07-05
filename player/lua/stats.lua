@@ -23,7 +23,7 @@ local o = {
     ass_formatting = true,
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
-    print_perfdata_total = false,    -- prints an additional line adding up the perfdata lines
+    print_perfdata_total = true,     -- prints an additional line adding up the perfdata lines
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     debug = false,
 
