@@ -524,7 +524,7 @@ end
 
 -- Returns an ASS string with stats about filters/profiles/shaders
 local function filter_stats()
-    return "filters/profiles/shaders"
+    return "coming soon"
 end
 
 
