@@ -1,4 +1,4 @@
-JavaScript
+JAVASCRIPT
 ==========
 
 JavaScript support in mpv is near identical to its Lua support. Use this section
