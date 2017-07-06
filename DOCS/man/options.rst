@@ -681,7 +681,7 @@ Video
     :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=angle``
                 (Windows 8+ only)
     :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
-    :mediacodec: copies video back to system RAM (Android only)
+    :mediacodec-copy: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
