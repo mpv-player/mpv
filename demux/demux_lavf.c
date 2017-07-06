@@ -490,25 +490,6 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
-static uint8_t char2int(char c)
-{
-    if (c >= '0' && c <= '9') return c - '0';
-    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-    return 0;
-}
-
-static void parse_cryptokey(AVFormatContext *avfc, const char *str)
-{
-    int len = strlen(str) / 2;
-    uint8_t *key = av_mallocz(len);
-    int i;
-    avfc->keylen = len;
-    avfc->key = key;
-    for (i = 0; i < len; i++, str += 2)
-        *key++ = (char2int(str[0]) << 4) | char2int(str[1]);
-}
-
 static char *replace_idx_ext(void *ta_ctx, bstr f)
 {
     if (f.len < 4 || f.start[f.len - 4] != '.')
@@ -811,8 +792,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!avfc)
         return -1;
 
-    if (lavfdopts->cryptokey)
-        parse_cryptokey(avfc, lavfdopts->cryptokey);
     if (lavfdopts->genptsmode)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode != 1)
@@ -881,6 +860,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (priv->format_hack.fix_editlists)
         av_dict_set(&dopts, "advanced_editlist", "0", 0);
+
+    if (lavfdopts->cryptokey && lavfdopts->cryptokey[0])
+        av_dict_set(&dopts, "decryption_key", lavfdopts->cryptokey, 0);
 
     avfc->interrupt_callback = (AVIOInterruptCB){
         .callback = interrupt_cb,
