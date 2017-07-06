@@ -2687,10 +2687,6 @@ Demuxer
     libavformat might reallocate the buffer internally, or not fully use all
     of it.
 
-``--demuxer-lavf-cryptokey=<hexstring>``
-    Encryption key the demuxer should use. This is the raw binary data of
-    the key converted to a hexadecimal string.
-
 ``--demuxer-mkv-subtitle-preroll=<yes|index|no>``, ``--mkv-subtitle-preroll``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how

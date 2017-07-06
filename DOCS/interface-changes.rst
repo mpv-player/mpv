@@ -52,6 +52,8 @@ Interface changes
       replacement
     - deprecate passing multiple arguments to -add/-pre options (affects the
       vf/af commands too)
+    - remove --demuxer-lavf-cryptokey. Use --demux-lavf-o=cryptokey=<hex> or
+      --demux-lavf-o=decryption_key=<hex> instead (whatever fits your situation).
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

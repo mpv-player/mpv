@@ -69,7 +69,6 @@ struct demux_lavf_opts {
     int buffersize;
     int allow_mimetype;
     char *format;
-    char *cryptokey;
     char **avopts;
     int hacks;
     int genptsmode;
@@ -90,7 +89,6 @@ const struct m_sub_options demux_lavf_conf = {
         OPT_FLAG("demuxer-lavf-allow-mimetype", allow_mimetype, 0),
         OPT_INTRANGE("demuxer-lavf-probescore", probescore, 0,
                      1, AVPROBE_SCORE_MAX),
-        OPT_STRING("demuxer-lavf-cryptokey", cryptokey, 0),
         OPT_FLAG("demuxer-lavf-hacks", hacks, 0),
         OPT_CHOICE("demuxer-lavf-genpts-mode", genptsmode, 0,
                    ({"lavf", 1}, {"no", 0})),
@@ -860,9 +858,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (priv->format_hack.fix_editlists)
         av_dict_set(&dopts, "advanced_editlist", "0", 0);
-
-    if (lavfdopts->cryptokey && lavfdopts->cryptokey[0])
-        av_dict_set(&dopts, "decryption_key", lavfdopts->cryptokey, 0);
 
     avfc->interrupt_callback = (AVIOInterruptCB){
         .callback = interrupt_cb,
