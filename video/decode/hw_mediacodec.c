@@ -15,7 +15,54 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+
+#include <libavcodec/mediacodec.h>
+
+#include "options/options.h"
 #include "video/decode/lavc.h"
+
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
+                 const char *codec)
+{
+    if (ctx->opts->vo->WinID == 0)
+        return HWDEC_ERR_NO_CTX;
+
+    return 0;
+}
+
+static int init(struct lavc_ctx *ctx)
+{
+    return 0;
+}
+
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
+{
+    av_mediacodec_default_free(ctx->avctx);
+
+    AVMediaCodecContext *mcctx = av_mediacodec_alloc_context();
+    if (!mcctx)
+        return -1;
+
+    void *surface = (void *)(intptr_t)(ctx->opts->vo->WinID);
+    return av_mediacodec_default_init(ctx->avctx, mcctx, surface);
+}
+
+static void uninit(struct lavc_ctx *ctx)
+{
+    if (ctx->avctx)
+        av_mediacodec_default_free(ctx->avctx);
+}
+
+const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
+    .type = HWDEC_MEDIACODEC,
+    .image_format = IMGFMT_MEDIACODEC,
+    .lavc_suffix = "_mediacodec",
+    .probe = probe,
+    .init = init,
+    .init_decoder = init_decoder,
+    .uninit = uninit,
+};
 
 const struct vd_lavc_hwdec mp_vd_lavc_mediacodec_copy = {
     .type = HWDEC_MEDIACODEC_COPY,
