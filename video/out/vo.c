@@ -882,6 +882,11 @@ static bool render_frame(struct vo *vo)
         update_vsync_timing_after_swap(vo);
     }
 
+    if (vo->driver->caps & VO_CAP_NOREDRAW) {
+        talloc_free(in->current_frame);
+        in->current_frame = NULL;
+    }
+
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
     } else {
@@ -903,7 +908,7 @@ static void do_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    if (!vo->config_ok)
+    if (!vo->config_ok || (vo->driver->caps & VO_CAP_NOREDRAW))
         return;
 
     pthread_mutex_lock(&in->lock);

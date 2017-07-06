@@ -172,6 +172,8 @@ enum {
     VO_CAP_ROTATE90     = 1 << 0,
     // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
     VO_CAP_FRAMEDROP    = 1 << 1,
+    // VO does not support redraws (vo_mediacodec_embed).
+    VO_CAP_NOREDRAW     = 1 << 2,
 };
 
 #define VO_MAX_REQ_FRAMES 10
