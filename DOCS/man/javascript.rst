@@ -196,7 +196,8 @@ Additional utilities
     Like ``print`` but also expands objects and arrays recursively.
 
 ``mp.utils.getenv(name)``
-    Returns the value of the host environment variable ``name``, or empty str.
+    Returns the value of the host environment variable ``name``, or
+    ``undefined`` if the variable is not defined.
 
 ``mp.utils.get_user_path(path)``
     Expands (mpv) meta paths like ``~/x``, ``~~/y``, ``~~desktop/z`` etc.

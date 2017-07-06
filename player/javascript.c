@@ -981,7 +981,12 @@ static void script_write_file(js_State *J, void *af)
 // args: env var name
 static void script_getenv(js_State *J)
 {
-    js_pushstring(J, getenv(js_tostring(J, 1)));
+    const char *v = getenv(js_tostring(J, 1));
+    if (v) {
+        js_pushstring(J, v);
+    } else {
+        js_pushundefined(J);
+    }
 }
 
 // args: as-filename, content-string, returns the compiled result as a function
