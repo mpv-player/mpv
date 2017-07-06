@@ -504,3 +504,11 @@ Available video output drivers are:
         Mode ID to use (resolution, bit depth and frame rate).
         (default: 0)
 
+``mediacodec_embed`` (Android)
+    Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
+    Requires ``--hwdec=mediacodec`` for hardware decoding, along with
+    ``--vo=mediacodec_embed`` and ``--wid=(intptr_t)(*android.view.Surface)``.
+
+    Since this video output driver uses native decoding and rendering routines,
+    many of mpv's features (subtitle rendering, OSD/OSC, video filters, etc)
+    are not available with this driver.
