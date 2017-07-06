@@ -1171,10 +1171,11 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_size texture_size%d\n", name, id);
     GLSLHF("#define %s_rot texture_rot%d\n", name, id);
     GLSLHF("#define %s_pt pixel_size%d\n", name, id);
+    GLSLHF("#define %s_mul %f\n", name, tex.multiplier);
 
     // Set up the sampling functions
-    GLSLHF("#define %s_tex(pos) (%f * vec4(texture(%s_raw, pos)).%s)\n",
-           name, tex.multiplier, name, get_tex_swizzle(&tex));
+    GLSLHF("#define %s_tex(pos) (%s_mul * vec4(texture(%s_raw, pos)).%s)\n",
+           name, name, name, get_tex_swizzle(&tex));
 
     // Since the extra matrix multiplication impacts performance,
     // skip it unless the texture was actually rotated

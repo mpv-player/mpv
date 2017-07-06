@@ -4274,9 +4274,17 @@ The following video options are currently all specific to ``--vo=opengl`` and
         to texture coordinates)
     vec2 NAME_pt
         The (unrotated) size of a single pixel, range [0,1].
+    float NAME_mul
+        The coefficient that needs to be multiplied into the texture contents
+        in order to normalize it to the range [0,1].
     sampler NAME_raw
         The raw bound texture itself. The use of this should be avoided unless
         absolutely necessary.
+
+    Normally, users should use either NAME_tex or NAME_texOff to read from the
+    texture. For some shaders however , it can be better for performance to do
+    custom sampling from NAME_raw, in which case care needs to be taken to
+    respect NAME_mul and NAME_rot.
 
     In addition to these parameters, the following uniforms are also globally
     available:
