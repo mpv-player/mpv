@@ -113,9 +113,7 @@ static int init(struct sd *sd)
 
  error:
     MP_FATAL(sd, "Could not open libavcodec subtitle decoder\n");
-    if (ctx)
-        av_free(ctx->extradata);
-    av_free(ctx);
+    avcodec_free_context(&ctx);
     talloc_free(priv);
     return -1;
 }

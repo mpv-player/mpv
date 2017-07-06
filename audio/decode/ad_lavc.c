@@ -147,14 +147,8 @@ static void uninit(struct dec_audio *da)
     struct priv *ctx = da->priv;
     if (!ctx)
         return;
-    AVCodecContext *lavc_context = ctx->avctx;
 
-    if (lavc_context) {
-        if (avcodec_close(lavc_context) < 0)
-            MP_ERR(da, "Could not close codec.\n");
-        av_freep(&lavc_context->extradata);
-        av_freep(&lavc_context);
-    }
+    avcodec_free_context(&ctx->avctx);
     av_frame_free(&ctx->avframe);
 }
 
