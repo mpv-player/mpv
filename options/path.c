@@ -173,7 +173,10 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
                     talloc_free(tmp);
                 }
             } else if (bstr_equals0(prefix, "")) {
-                res = mp_path_join_bstr(talloc_ctx, bstr0(getenv("HOME")), rest);
+                char *home = getenv("HOME");
+                if (!home)
+                    home = getenv("USERPROFILE");
+                res = mp_path_join_bstr(talloc_ctx, bstr0(home), rest);
             } else if (bstr_eatstart0(&prefix, "~")) {
                 void *tmp = talloc_new(NULL);
                 char type[80];
