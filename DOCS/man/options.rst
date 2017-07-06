@@ -4723,6 +4723,16 @@ The following video options are currently all specific to ``--vo=opengl`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
+``--tone-mapping-desaturate=<value>``
+    Apply desaturation for highlights that exceed this level of brightness. The
+    higher the parameter, the more color information will be preserved. This
+    setting helps prevent unnaturally blown-out colors for super-highlights, by
+    (smoothly) turning into white instead. This makes images feel more natural,
+    at the cost of reducing information about out-of-range colors.
+
+    The default of 2.0 is somewhat conservative and will mostly just apply to
+    skies or directly sunlit surfaces. A setting of 0.0 disables this option.
+
 ``--icc-profile=<file>``
     Load an ICC profile and use it to transform video RGB to screen output.
     Needs LittleCMS 2 support compiled in. This option overrides the

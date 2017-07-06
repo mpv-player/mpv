@@ -311,6 +311,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .gamma = 1.0f,
     .hdr_tone_mapping = TONE_MAPPING_MOBIUS,
     .tone_mapping_param = NAN,
+    .tone_mapping_desat = 2.0,
     .early_flush = -1,
 };
 
@@ -352,6 +353,7 @@ const struct m_sub_options gl_video_conf = {
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
+        OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2251,7 +2253,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
 
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
-                   p->opts.tone_mapping_param, p->use_linear && !osd);
+                   p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
+                   p->use_linear && !osd);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
@@ -3201,6 +3204,7 @@ static void check_gl_features(struct gl_video *p)
             .tex_pad_y = p->opts.tex_pad_y,
             .hdr_tone_mapping = p->opts.hdr_tone_mapping,
             .tone_mapping_param = p->opts.tone_mapping_param,
+            .tone_mapping_desat = p->opts.tone_mapping_desat,
             .early_flush = p->opts.early_flush,
         };
         for (int n = 0; n < SCALER_COUNT; n++)

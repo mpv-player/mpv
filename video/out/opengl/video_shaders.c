@@ -522,13 +522,19 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
 
 // Tone map from a known peak brightness to the range [0,1]
 static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
-                          enum tone_mapping algo, float param)
+                          enum tone_mapping algo, float param, float desat)
 {
     GLSLF("// HDR tone mapping\n");
 
     // To prevent discoloration, we tone map on the luminance only
     GLSL(float luma = dot(src_luma, color.rgb);)
     GLSL(float luma_orig = luma;)
+
+    // Desaturate the color using a coefficient dependent on the brightness
+    if (desat > 0 && ref_peak > desat) {
+        GLSLF("float overbright = max(0.0, (luma - %f) / luma);\n", desat);
+        GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
+    }
 
     switch (algo) {
     case TONE_MAPPING_CLIP:
@@ -593,7 +599,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 void pass_color_map(struct gl_shader_cache *sc,
                     struct mp_colorspace src, struct mp_colorspace dst,
                     enum tone_mapping algo, float tone_mapping_param,
-                    bool is_linear)
+                    float tone_mapping_desat, bool is_linear)
 {
     GLSLF("// color mapping\n");
 
@@ -635,8 +641,10 @@ void pass_color_map(struct gl_shader_cache *sc,
 
     // Tone map to prevent clipping when the source signal peak exceeds the
     // encodable range
-    if (src.sig_peak > dst_range)
-        pass_tone_map(sc, src.sig_peak / dst_range, algo, tone_mapping_param);
+    if (src.sig_peak > dst_range) {
+        pass_tone_map(sc, src.sig_peak / dst_range, algo, tone_mapping_param,
+                      tone_mapping_desat);
+    }
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
