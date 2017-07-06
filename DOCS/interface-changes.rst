@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.28.0 ---
+    - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
+      conventions followed by other hardware video decoding APIs
     - drop previously deprecated --heartbeat-cmd and --heartbeat--interval
       options
     - rename --vo=opengl to --vo=gpu
