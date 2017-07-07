@@ -90,10 +90,6 @@ static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
 #define AFMT_S16_NE MP_SELECT_LE_BE(AFMT_S16_LE, AFMT_S16_BE)
 #endif
 
-#if !defined(AFMT_S24_NE) && defined(AFMT_S24_LE) && defined(AFMT_S24_BE)
-#define AFMT_S24_NE MP_SELECT_LE_BE(AFMT_S24_LE, AFMT_S24_BE)
-#endif
-
 #if !defined(AFMT_S32_NE) && defined(AFMT_S32_LE) && defined(AFMT_S32_BE)
 #define AFMT_S32_NE AFMT_S32MP_SELECT_LE_BE(AFMT_S32_LE, AFMT_S32_BE)
 #endif
@@ -101,9 +97,6 @@ static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
 static const int format_table[][2] = {
     {AFMT_U8,           AF_FORMAT_U8},
     {AFMT_S16_NE,       AF_FORMAT_S16},
-#ifdef AFMT_S24_NE
-    {AFMT_S24_NE,       AF_FORMAT_S24},
-#endif
 #ifdef AFMT_S32_NE
     {AFMT_S32_NE,       AF_FORMAT_S32},
 #endif
