@@ -4712,6 +4712,9 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Set tone mapping parameters. Ignored if the tone mapping algorithm is not
     tunable. This affects the following tone mapping algorithms:
 
+    clip
+        Specifies an extra linear coefficient to multiply into the signal
+        before clipping. Defaults to 1.0.
     mobius
         Specifies the transition point from linear to mobius transform. Every
         value below this point is guaranteed to be mapped 1:1. The higher the

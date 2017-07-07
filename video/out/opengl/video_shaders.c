@@ -538,7 +538,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 
     switch (algo) {
     case TONE_MAPPING_CLIP:
-        GLSL(luma = clamp(luma, 0.0, 1.0);)
+        GLSLF("luma = clamp(%f * luma, 0.0, 1.0);\n", isnan(param) ? 1.0 : param);
         break;
 
     case TONE_MAPPING_MOBIUS: {
