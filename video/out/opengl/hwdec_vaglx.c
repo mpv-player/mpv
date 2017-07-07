@@ -74,10 +74,6 @@ static int create(struct gl_hwdec *hw)
     Display *x11disp = glXGetCurrentDisplay();
     if (!x11disp)
         return -1;
-    if (hw->probing) {
-        MP_VERBOSE(hw, "Not using this by default.\n");
-        return -1;
-    }
     int x11scr = DefaultScreen(x11disp);
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
@@ -205,6 +201,7 @@ const struct gl_hwdec_driver gl_hwdec_vaglx = {
     .name = "vaapi-glx",
     .api = HWDEC_VAAPI,
     .imgfmt = IMGFMT_VAAPI,
+    .testing_only = true,
     .create = create,
     .reinit = reinit,
     .map_frame = map_frame,

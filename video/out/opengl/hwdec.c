@@ -101,7 +101,7 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
     bool is_auto = HWDEC_IS_AUTO(api);
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if (is_auto || api == drv->api) {
+        if ((is_auto || api == drv->api) && !drv->testing_only) {
             struct gl_hwdec *r = load_hwdec_driver(log, gl, g, devs, drv, is_auto);
             if (r)
                 return r;

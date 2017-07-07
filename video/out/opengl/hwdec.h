@@ -42,6 +42,8 @@ struct gl_hwdec_driver {
     // The hardware surface IMGFMT_ that must be passed to map_image later.
     // If the test_format callback is set, this field is ignored!
     int imgfmt;
+    // Dosn't load this unless requested by name.
+    bool testing_only;
     // Create the hwdec device. It must add it to hw->devs, if applicable.
     int (*create)(struct gl_hwdec *hw);
     // Prepare for rendering video. (E.g. create textures.)
