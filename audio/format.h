@@ -26,7 +26,6 @@ enum af_format {
 
     AF_FORMAT_U8,
     AF_FORMAT_S16,
-    AF_FORMAT_S24,
     AF_FORMAT_S32,
     AF_FORMAT_FLOAT,
     AF_FORMAT_DOUBLE,
@@ -53,7 +52,6 @@ enum af_format {
 const char *af_fmt_to_str(int format);
 
 int af_fmt_to_bytes(int format);
-int af_fmt_change_bytes(int format, int bytes);
 
 bool af_fmt_is_valid(int format);
 bool af_fmt_is_unsigned(int format);

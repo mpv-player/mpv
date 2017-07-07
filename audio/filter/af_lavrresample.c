@@ -152,17 +152,6 @@ static int rate_from_speed(int rate, double speed)
     return lrint(rate * speed);
 }
 
-// Return the format libavresample should convert to, given the final output
-// format mp_format. In some cases (S24) we perform an extra conversion step,
-// and signal here what exactly libavresample should output. It will be the
-// input to the final conversion to mp_format.
-static int check_output_conversion(int mp_format)
-{
-    if (mp_format == AF_FORMAT_S24)
-        return AV_SAMPLE_FMT_S32;
-    return af_to_avformat(mp_format);
-}
-
 static struct mp_chmap fudge_pairs[][2] = {
     {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
     {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
@@ -223,7 +212,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
         goto error;
 
     enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
-    enum AVSampleFormat out_samplefmt = check_output_conversion(out->format);
+    enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
     enum AVSampleFormat out_samplefmtp = av_get_planar_sample_fmt(out_samplefmt);
 
     if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
@@ -305,7 +294,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_audio_set_format(&s->avrctx_fmt, af_from_avformat(out_samplefmtp));
 
     s->pre_out_fmt = *out;
-    mp_audio_set_format(&s->pre_out_fmt, af_from_avformat(out_samplefmt));
 
     // If there are NA channels, the final output will have more channels than
     // the avrctx output. Also, avrctx will output planar (out_samplefmtp was
@@ -380,7 +368,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT);
-        if (check_output_conversion(out->format) == AV_SAMPLE_FMT_NONE)
+        if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
 
         int r = ((in->format == orig_in.format) &&
@@ -426,18 +414,6 @@ static void uninit(struct af_instance *af)
 
 static void extra_output_conversion(struct af_instance *af, struct mp_audio *mpa)
 {
-    if (mpa->format == AF_FORMAT_S32 && af->data->format == AF_FORMAT_S24) {
-        size_t len = mp_audio_psize(mpa) / mpa->bps;
-        for (int s = 0; s < len; s++) {
-            uint32_t val = *((uint32_t *)mpa->planes[0] + s);
-            uint8_t *ptr = (uint8_t *)mpa->planes[0] + s * 3;
-            ptr[0] = val >> SHIFT24(0);
-            ptr[1] = val >> SHIFT24(1);
-            ptr[2] = val >> SHIFT24(2);
-        }
-        mp_audio_set_format(mpa, AF_FORMAT_S24);
-    }
-
     for (int p = 0; p < mpa->num_planes; p++) {
         void *ptr = mpa->planes[p];
         int total = mpa->samples * mpa->spf;

@@ -28,27 +28,12 @@ int af_fmt_to_bytes(int format)
     switch (af_fmt_from_planar(format)) {
     case AF_FORMAT_U8:      return 1;
     case AF_FORMAT_S16:     return 2;
-    case AF_FORMAT_S24:     return 3;
     case AF_FORMAT_S32:     return 4;
     case AF_FORMAT_FLOAT:   return 4;
     case AF_FORMAT_DOUBLE:  return 8;
     }
     if (af_fmt_is_spdif(format))
         return 2;
-    return 0;
-}
-
-int af_fmt_change_bytes(int format, int bytes)
-{
-    if (!af_fmt_is_valid(format) || !bytes)
-        return 0;
-    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
-        if (af_fmt_to_bytes(fmt) == bytes &&
-            af_fmt_is_float(fmt) == af_fmt_is_float(format) &&
-            af_fmt_is_planar(fmt) == af_fmt_is_planar(format) &&
-            (fmt == format || (!af_fmt_is_spdif(fmt) && !af_fmt_is_spdif(format))))
-            return fmt;
-    }
     return 0;
 }
 
@@ -130,7 +115,6 @@ const char *af_fmt_to_str(int format)
     switch (format) {
     case AF_FORMAT_U8:          return "u8";
     case AF_FORMAT_S16:         return "s16";
-    case AF_FORMAT_S24:         return "s24";
     case AF_FORMAT_S32:         return "s32";
     case AF_FORMAT_FLOAT:       return "float";
     case AF_FORMAT_DOUBLE:      return "double";
