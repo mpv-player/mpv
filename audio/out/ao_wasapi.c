@@ -129,8 +129,9 @@ static bool thread_feed(struct ao *ao)
 
     BYTE *data[1] = {pData};
 
-    ao_read_data(ao, (void **)data, frame_count,
-                 mp_time_us() + (int64_t)llrint(delay_us));
+    ao_read_data_converted(ao, &state->convert_format,
+                           (void **)data, frame_count,
+                           mp_time_us() + (int64_t)llrint(delay_us));
 
     // note, we can't use ao_read_data return value here since we already
     // committed to frame_count above in the GetBuffer call

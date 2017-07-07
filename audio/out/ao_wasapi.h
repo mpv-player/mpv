@@ -101,6 +101,7 @@ typedef struct wasapi_state {
     WAVEFORMATEXTENSIBLE format;
     AUDCLNT_SHAREMODE share_mode; // AUDCLNT_SHAREMODE_EXCLUSIVE / SHARED
     UINT32 bufferFrameCount;      // number of frames in buffer
+    struct ao_convert_fmt convert_format;
 
     change_notify change;
 } wasapi_state;
