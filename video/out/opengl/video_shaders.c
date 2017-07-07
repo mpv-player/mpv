@@ -532,7 +532,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 
     // Desaturate the color using a coefficient dependent on the brightness
     if (desat > 0 && ref_peak > desat) {
-        GLSLF("float overbright = max(0.0, (luma - %f) / (luma + 1e-6));\n", desat);
+        GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
         GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
     }
 
