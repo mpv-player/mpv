@@ -130,7 +130,6 @@ static int init(struct ao *ao)
         switch (ao->format) {
         case AF_FORMAT_U8:
         case AF_FORMAT_S16:
-        case AF_FORMAT_S24:
         case AF_FORMAT_S32:
         case AF_FORMAT_FLOAT:
              break;
