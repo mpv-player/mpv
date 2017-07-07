@@ -54,6 +54,8 @@ Interface changes
       vf/af commands too)
     - remove --demuxer-lavf-cryptokey. Use --demux-lavf-o=cryptokey=<hex> or
       --demux-lavf-o=decryption_key=<hex> instead (whatever fits your situation).
+    - rename --opengl-dumb-mode=no to --opengl-dumb-mode=auto, and make `no`
+      always disable it (unless forced on by hardware limitation).
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

@@ -4845,17 +4845,17 @@ The following video options are currently all specific to ``--vo=opengl`` and
     flipping GL front and backbuffers immediately (i.e. it doesn't call it
     in display-sync mode).
 
-``--opengl-dumb-mode=<yes|no>``
+``--opengl-dumb-mode=<yes|no|auto>``
     This mode is extremely restricted, and will disable most extended OpenGL
-    features. This includes high quality scalers and custom shaders!
+    features. That includes high quality scalers and custom shaders!
 
     It is intended for hardware that does not support FBOs (including GLES,
     which supports it insufficiently), or to get some more performance out of
     bad or old hardware.
 
     This mode is forced automatically if needed, and this option is mostly
-    useful for debugging. It's also enabled automatically if nothing uses
-    features which require FBOs.
+    useful for debugging. The default of ``auto`` will enable it automatically
+    if nothing uses features which require FBOs.
 
     This option might be silently removed in the future.
 

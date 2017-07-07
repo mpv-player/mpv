@@ -340,7 +340,8 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
 
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLAG("opengl-dumb-mode", dumb_mode, 0),
+        OPT_CHOICE("opengl-dumb-mode", dumb_mode, 0,
+                   ({"auto", 0}, {"yes", 1}, {"no", -1})),
         OPT_FLOATRANGE("opengl-gamma", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
@@ -3124,8 +3125,12 @@ static bool check_dumb_mode(struct gl_video *p)
     struct gl_video_opts *o = &p->opts;
     if (p->use_integer_conversion)
         return false;
-    if (o->dumb_mode)
+    if (o->dumb_mode > 0) // requested by user
         return true;
+    if (o->dumb_mode < 0) // disabled by user
+        return false;
+
+    // otherwise, use auto-detection
     if (o->target_prim || o->target_trc || o->linear_scaling ||
         o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
         o->blend_subs || o->deband || o->unsharp)
@@ -3176,12 +3181,12 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling PBOs (GL2.1/GLES2 unsupported).\n");
     }
 
-    p->forced_dumb_mode = p->opts.dumb_mode || !have_fbo || !have_texrg;
+    p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
     bool voluntarily_dumb = check_dumb_mode(p);
     if (p->forced_dumb_mode || voluntarily_dumb) {
         if (voluntarily_dumb) {
             MP_VERBOSE(p, "No advanced processing required. Enabling dumb mode.\n");
-        } else if (!p->opts.dumb_mode) {
+        } else if (p->opts.dumb_mode <= 0) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
                        "Most extended features will be disabled.\n");
         }
