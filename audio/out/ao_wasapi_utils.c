@@ -153,7 +153,12 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 static void set_waveformat_with_ao(WAVEFORMATEXTENSIBLE *wformat, struct ao *ao)
 {
     struct mp_chmap channels = ao->channels;
+
+    if (mp_chmap_is_unknown(&channels))
+        mp_chmap_from_channels(&channels, channels.num);
     mp_chmap_reorder_to_waveext(&channels);
+    if (!mp_chmap_is_valid(&channels))
+        mp_chmap_from_channels(&channels, 2);
 
     // First find a format that is actually representable.
     // (Notably excludes AF_FORMAT_DOUBLE.)
