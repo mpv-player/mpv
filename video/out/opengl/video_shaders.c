@@ -251,7 +251,7 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
                                    int w, int h)
 {
     GLSLF("{\n");
-    GLSL(vec2 pos = pos + vec2(0.5) * pt;) // round to nearest
+    GLSL(vec2 pos = pos - vec2(0.5) * pt;) // round to nearest
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     // Determine the mixing coefficient vector
     gl_sc_uniform_vec2(sc, "output_size", (float[2]){w, h});
