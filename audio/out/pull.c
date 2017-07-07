@@ -64,6 +64,8 @@ struct ao_pull_state {
 
     // Device delay of the last written sample, in realtime.
     atomic_llong end_time_us;
+
+    char *convert_buffer;
 };
 
 static void set_state(struct ao *ao, int new_state)
@@ -180,6 +182,45 @@ end:
     return bytes / ao->sstride;
 }
 
+// Same as ao_read_data(), but read pre-converted data according to *fmt.
+// fmt->src_fmt and fmt->channels must be the same as the AO parameters.
+int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
+                           void **data, int samples, int64_t out_time_us)
+{
+    assert(ao->api == &ao_api_pull);
+
+    struct ao_pull_state *p = ao->api_priv;
+    void *ndata[MP_NUM_CHANNELS];
+
+    if (!ao_need_conversion(fmt))
+        return ao_read_data(ao, data, samples, out_time_us);
+
+    assert(ao->format == fmt->src_fmt);
+    assert(ao->channels.num == fmt->channels);
+
+    bool planar = af_fmt_is_planar(fmt->src_fmt);
+    int planes = planar ? fmt->channels : 1;
+    int plane_size = af_fmt_to_bytes(fmt->src_fmt) * samples *
+                     (planar ? 1: fmt->channels);
+
+    int needed = plane_size * planes * fmt->channels * samples;
+    if (needed > talloc_get_size(p->convert_buffer) || !p->convert_buffer) {
+        talloc_free(p->convert_buffer);
+        p->convert_buffer = talloc_size(NULL, needed);
+    }
+
+    for (int n = 0; n < planes; n++)
+        ndata[n] = p->convert_buffer + n * plane_size;
+
+    int res = ao_read_data(ao, ndata, samples, out_time_us);
+
+    ao_convert_inplace(fmt, ndata, samples);
+    for (int n = 0; n < planes; n++)
+        memcpy(data[n], ndata[n], plane_size);
+
+    return res;
+}
+
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     if (ao->driver->control)
@@ -256,7 +297,11 @@ static void drain(struct ao *ao)
 
 static void uninit(struct ao *ao)
 {
+    struct ao_pull_state *p = ao->api_priv;
+
     ao->driver->uninit(ao);
+
+    talloc_free(p->convert_buffer);
 }
 
 static int init(struct ao *ao)

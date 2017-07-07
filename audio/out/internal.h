@@ -215,4 +215,19 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e);
 
+struct ao_convert_fmt {
+    int src_fmt;        // source AF_FORMAT_*
+    int channels;       // number of channels
+    int dst_bits;       // total target data sample size
+    int pad_msb;        // padding in the MSB (i.e. required shifting)
+    int pad_lsb;        // padding in LSB (required 0 bits) (ignored)
+};
+
+bool ao_can_convert_inplace(struct ao_convert_fmt *fmt);
+bool ao_need_conversion(struct ao_convert_fmt *fmt);
+void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples);
+
+int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
+                           void **data, int samples, int64_t out_time_us);
+
 #endif

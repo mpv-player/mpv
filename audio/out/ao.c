@@ -30,6 +30,7 @@
 
 #include "options/options.h"
 #include "options/m_config.h"
+#include "osdep/endian.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "common/global.h"
@@ -643,4 +644,72 @@ void ao_print_devices(struct mpv_global *global, struct mp_log *log)
         mp_info(log, "  '%s' (%s)\n", desc->name, desc->desc);
     }
     ao_hotplug_destroy(hp);
+}
+
+static int get_conv_type(struct ao_convert_fmt *fmt)
+{
+    if (af_fmt_to_bytes(fmt->src_fmt) * 8 == fmt->dst_bits && !fmt->pad_msb)
+        return 0; // passthrough
+    if (fmt->src_fmt == AF_FORMAT_S32 && fmt->dst_bits == 24 && !fmt->pad_msb)
+        return 1; // simple 32->24 bit conversion
+    if (fmt->src_fmt == AF_FORMAT_S32 && fmt->dst_bits == 32 && fmt->pad_msb == 8)
+        return 2; // simple 32->24 bit conversion, with MSB padding
+    return -1; // unsupported
+}
+
+// Check whether ao_convert_inplace() can be called. As an exception, the
+// planar-ness of the sample format and the number of channels is ignored.
+// All other parameters must be as passed to ao_convert_inplace().
+bool ao_can_convert_inplace(struct ao_convert_fmt *fmt)
+{
+    return get_conv_type(fmt) >= 0;
+}
+
+bool ao_need_conversion(struct ao_convert_fmt *fmt)
+{
+    return get_conv_type(fmt) != 0;
+}
+
+// The LSB is always ignored.
+#if BYTE_ORDER == BIG_ENDIAN
+#define SHIFT24(x) ((3-(x))*8)
+#else
+#define SHIFT24(x) (((x)+1)*8)
+#endif
+
+static void convert_plane(int type, void *data, int num_samples)
+{
+    switch (type) {
+    case 0:
+        break;
+    case 1: /* fall through */
+    case 2: {
+        int bytes = type == 1 ? 3 : 4;
+        for (int s = 0; s < num_samples; s++) {
+            uint32_t val = *((uint32_t *)data + s);
+            uint8_t *ptr = (uint8_t *)data + s * bytes;
+            ptr[0] = val >> SHIFT24(0);
+            ptr[1] = val >> SHIFT24(1);
+            ptr[2] = val >> SHIFT24(2);
+            if (type == 2)
+                ptr[3] = 0;
+        }
+        break;
+    }
+    default:
+        abort();
+    }
+}
+
+// data[n] contains the pointer to the first sample of the n-th plane, in the
+// format implied by fmt->src_fmt. src_fmt also controls whether the data is
+// all in one plane, or of there is a plane per channel.
+void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples)
+{
+    int type = get_conv_type(fmt);
+    bool planar = af_fmt_is_planar(fmt->src_fmt);
+    int planes = planar ? fmt->channels : 1;
+    int plane_samples = num_samples * (planar ? 1: fmt->channels);
+    for (int n = 0; n < planes; n++)
+        convert_plane(type, data[n], plane_samples);
 }
