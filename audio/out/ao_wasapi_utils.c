@@ -169,10 +169,13 @@ static void set_waveformat_with_ao(WAVEFORMATEXTENSIBLE *wformat, struct ao *ao)
     af_get_best_sample_formats(ao->format, alt_formats);
     for (int n = 0; alt_formats[n]; n++) {
         for (int i = 0; wasapi_formats[i].mp_format; i++) {
-            if (wasapi_formats[i].mp_format == alt_formats[n])
+            if (wasapi_formats[i].mp_format == alt_formats[n]) {
                 format = wasapi_formats[i];
+                goto found_format;
+            }
         }
     }
+ found_format:
 
     set_waveformat(wformat, format, ao->samplerate, &channels);
 }
