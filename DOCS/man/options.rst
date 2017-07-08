@@ -3901,6 +3901,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
 ``--vo=opengl-cb`` only, which are the only VOs that implement them.
 
 ``--scale=<filter>``
+    The filter function to use when upscaling video.
 
     ``bilinear``
         Bilinear hardware texture filtering (fastest, very low quality). This
