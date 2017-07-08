@@ -1,9 +1,15 @@
 local utils = require 'mp.utils'
 local msg = require 'mp.msg'
+local options = require 'mp.options'
+
+local o = {
+    exclude = ""
+}
 
 local ytdl = {
     path = "youtube-dl",
-    searched = false
+    searched = false,
+    blacklisted = {}
 }
 
 local chapter_list = {}
@@ -91,6 +97,27 @@ local function extract_chapters(data, video_length)
     end
     table.sort(ret, function(a, b) return a.time < b.time end)
     return ret
+end
+
+local function is_blacklisted(url)
+    if o.blacklist == "" then return false end
+    if #ytdl.blacklisted == 0 then
+        local joined = o.blacklist
+        while joined:match(',?[^,]+') do
+            local _, e, domain = joined:find(',?([^,]+)')
+            table.insert(ytdl.blacklisted, domain)
+            joined = joined:sub(e+1)
+        end
+    end
+    if #ytdl.blacklisted > 0 then
+        url = url:match('https?://(.+)')
+        for _, exclude in ipairs(ytdl.blacklisted) do
+            if url:match(exclude) then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 local function edl_track_joined(fragments, protocol, is_live)
@@ -244,9 +271,8 @@ end
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
     local start_time = os.clock()
-
-    if (url:find("http://") == 1) or (url:find("https://") == 1)
-        or (url:find("ytdl://") == 1) then
+    if (url:find("ytdl://") == 1) or
+        ((url:find("https?://") == 1) and not is_blacklisted(url)) then
 
         -- check for youtube-dl in mpv's config dir
         if not (ytdl.searched) then

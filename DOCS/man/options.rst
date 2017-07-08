@@ -531,6 +531,26 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
+    The `exclude` script option accepts a comma-separated list of URL patterns
+    which mpv should not use with youtube-dl. The patterns are matched after
+    the ``http(s)://`` part of the URL.
+
+    ``^`` matches the beginning of the URL, ``$`` matches its end, and you
+    should use ``%`` before any of the characters ``^$()%,.[]*+-?`` to match
+    that character.
+
+    .. admonition:: Example
+
+        ``--script-opts=ytdl_hook-exclude='^youtube%.com'`` will exclude any
+            URL that starts with ``http://youtube.com`` or
+            ``https://youtube.com``.
+        ``--script-opts=ytdl_hook-exclude='%.mkv$,%.mp4$'`` will exclude any
+            URL that ends with ``.mkv`` or ``.mp4``.
+
+    See more `lua patterns here`__.
+    __ https://www.lua.org/manual/5.1/manual.html#5.4.1
+
+
 ``--ytdl-format=<best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
     values are specific to the website and the video, for a given url the
