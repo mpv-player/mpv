@@ -243,6 +243,7 @@ end
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
+    local start_time = os.clock()
 
     if (url:find("http://") == 1) or (url:find("https://") == 1)
         or (url:find("ytdl://") == 1) then
@@ -319,6 +320,7 @@ mp.add_hook("on_load", 10, function ()
         end
 
         msg.verbose("youtube-dl succeeded!")
+        msg.debug('ytdl parsing took '..os.clock()-start_time..' seconds')
 
         -- what did we get?
         if not (json["direct"] == nil) and (json["direct"] == true) then
@@ -424,6 +426,7 @@ mp.add_hook("on_load", 10, function ()
             add_single_video(json)
         end
     end
+    msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end)
 
 
