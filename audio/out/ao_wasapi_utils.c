@@ -945,15 +945,15 @@ HRESULT wasapi_thread_init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-retry: ;
+retry:
     if (state->deviceID) {
         hr = load_device(ao->log, &state->pDevice, state->deviceID);
         EXIT_ON_ERROR(hr);
 
         MP_DBG(ao, "Activating pAudioClient interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
-                                        CLSCTX_ALL, NULL,
-                                        (void **)&state->pAudioClient);
+                                         CLSCTX_ALL, NULL,
+                                         (void **)&state->pAudioClient);
         EXIT_ON_ERROR(hr);
     } else {
         MP_VERBOSE(ao, "Trying UWP wrapper.\n");
