@@ -995,7 +995,10 @@ retry:
 
     MP_DBG(ao, "Fixing format\n");
     hr = fix_format(ao, align_hack);
-    if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED && !align_hack) {
+    switch (hr) {
+    case AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED:
+        if (align_hack)
+            break;
         // According to MSDN, we must use this as base after the failure.
         IAudioClient_GetBufferSize(state->pAudioClient,
                                    &state->bufferFrameCount);
@@ -1003,10 +1006,10 @@ retry:
         align_hack = true;
         MP_WARN(ao, "This appears to require a weird Windows 7 hack. Retrying.\n");
         goto retry;
-    }
-    if ((hr == AUDCLNT_E_DEVICE_IN_USE || hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
-        retry_wait <= 8)
-    {
+    case AUDCLNT_E_DEVICE_IN_USE:
+    case AUDCLNT_E_DEVICE_INVALIDATED:
+        if (retry_wait > 8)
+            break;
         wasapi_thread_uninit(ao);
         MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
         mp_sleep_us(retry_wait);
