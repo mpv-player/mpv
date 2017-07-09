@@ -996,7 +996,7 @@ retry:
         // According to MSDN, we must use this as base after the failure.
         IAudioClient_GetBufferSize(state->pAudioClient,
                                    &state->bufferFrameCount);
-        SAFE_RELEASE(state->pAudioClient);
+        wasapi_thread_uninit(ao);
         align_hack = true;
         MP_WARN(ao, "This appears to require a weird Windows 7 hack. Retrying.\n");
         goto retry;
