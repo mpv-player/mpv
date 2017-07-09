@@ -1356,6 +1356,7 @@ found:
     p->texture_w = img.w;
     p->texture_h = img.h;
     p->components = img.components;
+    pass_describe(p, "(remainder pass)");
 }
 
 static void load_shader(struct gl_video *p, struct bstr body)
