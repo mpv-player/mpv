@@ -703,7 +703,7 @@ static void convert_plane(int type, void *data, int num_samples)
 
 // data[n] contains the pointer to the first sample of the n-th plane, in the
 // format implied by fmt->src_fmt. src_fmt also controls whether the data is
-// all in one plane, or of there is a plane per channel.
+// all in one plane, or if there is a plane per channel.
 void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples)
 {
     int type = get_conv_type(fmt);
