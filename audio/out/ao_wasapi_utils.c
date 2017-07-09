@@ -640,7 +640,6 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
              * state->bufferFrameCount));
     }
 
-    // in exclusive mode, these should all be the same
     REFERENCE_TIME bufferPeriod =
         state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
 
