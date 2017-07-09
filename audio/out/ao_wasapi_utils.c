@@ -984,10 +984,13 @@ retry:
         EXIT_ON_ERROR(hr);
     }
 
-    MP_DBG(ao, "Probing formats\n");
-    if (!find_formats(ao)) {
-        hr = E_FAIL;
-        EXIT_ON_ERROR(hr);
+    // In the event of an align hack, we've already done this.
+    if (!align_hack) {
+        MP_DBG(ao, "Probing formats\n");
+        if (!find_formats(ao)) {
+            hr = E_FAIL;
+            EXIT_ON_ERROR(hr);
+        }
     }
 
     MP_DBG(ao, "Fixing format\n");
