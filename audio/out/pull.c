@@ -182,7 +182,7 @@ end:
     return bytes / ao->sstride;
 }
 
-// Same as ao_read_data(), but read pre-converted data according to *fmt.
+// Same as ao_read_data(), but convert data according to *fmt.
 // fmt->src_fmt and fmt->channels must be the same as the AO parameters.
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
                            void **data, int samples, int64_t out_time_us)
@@ -200,23 +200,24 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
 
     bool planar = af_fmt_is_planar(fmt->src_fmt);
     int planes = planar ? fmt->channels : 1;
-    int plane_size = af_fmt_to_bytes(fmt->src_fmt) * samples *
-                     (planar ? 1: fmt->channels);
+    int plane_samples = samples * (planar ? 1: fmt->channels);
+    int src_plane_size = plane_samples * af_fmt_to_bytes(fmt->src_fmt);
+    int dst_plane_size = plane_samples * fmt->dst_bits / 8;
 
-    int needed = plane_size * planes * fmt->channels * samples;
+    int needed = src_plane_size * planes;
     if (needed > talloc_get_size(p->convert_buffer) || !p->convert_buffer) {
         talloc_free(p->convert_buffer);
         p->convert_buffer = talloc_size(NULL, needed);
     }
 
     for (int n = 0; n < planes; n++)
-        ndata[n] = p->convert_buffer + n * plane_size;
+        ndata[n] = p->convert_buffer + n * src_plane_size;
 
     int res = ao_read_data(ao, ndata, samples, out_time_us);
 
     ao_convert_inplace(fmt, ndata, samples);
     for (int n = 0; n < planes; n++)
-        memcpy(data[n], ndata[n], plane_size);
+        memcpy(data[n], ndata[n], dst_plane_size);
 
     return res;
 }
