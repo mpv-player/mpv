@@ -82,7 +82,7 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
     // compatible, assume LSBs are ignored
     {AF_FORMAT_S32,     32, 24, &KSDATAFORMAT_SUBTYPE_PCM},
     // aka S24 (with conversion) - untested, thus commented.
-    //{AF_FORMAT_S32,     24, 24, &KSDATAFORMAT_SUBTYPE_PCM},
+    {AF_FORMAT_S32,     24, 24, &KSDATAFORMAT_SUBTYPE_PCM},
     {AF_FORMAT_FLOAT,   32, 32, &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT},
     {AF_FORMAT_S_AC3,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL},
     {AF_FORMAT_S_DTS,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS},
