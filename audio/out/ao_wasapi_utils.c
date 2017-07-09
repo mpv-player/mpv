@@ -372,9 +372,9 @@ static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
 static bool search_samplerates(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                struct mp_chmap *channels)
 {
-    // try list of typical sample rates (requests welcome)
-    int try[] = {8000, 11025, 16000, 22050, 32000, 44100, 48000, 88200, 96000,
-                 176400, 192000, 352800, 384000, 0};
+    // put common samplerates first so that we find format early
+    int try[] = {48000, 44100, 96000, 88200, 192000, 176400,
+                 32000, 22050, 11025, 8000, 16000, 352800, 384000, 0};
 
     // get a list of supported rates
     int n = 0;
@@ -410,7 +410,7 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     struct mp_chmap entry;
     // put common layouts first so that we find sample rate/format early
     char *channel_layouts[] =
-        {"mono", "stereo", "2.1", "4.0", "5.0", "5.1", "6.1", "7.1",
+        {"stereo", "5.1", "7.1", "6.1", "mono", "2.1", "4.0", "5.0",
          "3.0", "3.0(back)",
          "quad", "quad(side)", "3.1",
          "5.0(side)", "4.1",
