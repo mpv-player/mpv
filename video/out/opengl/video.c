@@ -669,6 +669,20 @@ static int chroma_upsize(int size, int pixel)
     return (size + pixel - 1) / pixel * pixel;
 }
 
+// If a and b are on the same plane, return what plane type should be used.
+// If a or b are none, the other type always wins.
+// Usually: LUMA/RGB/XYZ > CHROMA > ALPHA
+static enum plane_type merge_plane_types(enum plane_type a, enum plane_type b)
+{
+    if (a == PLANE_NONE)
+        return b;
+    if (b == PLANE_LUMA || b == PLANE_RGB || b == PLANE_XYZ)
+        return b;
+    if (b != PLANE_NONE && a == PLANE_ALPHA)
+        return b;
+    return a;
+}
+
 // Places a video_image's image textures + associated metadata into tex[]. The
 // number of textures is equal to p->plane_count. Any necessary plane offsets
 // are stored in off. (e.g. chroma position)
@@ -710,15 +724,22 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *t = &vimg->planes[n];
 
-        enum plane_type type;
-        if (n >= 3) {
-            type = PLANE_ALPHA;
-        } else if (p->image_params.color.space == MP_CSP_RGB) {
-            type = PLANE_RGB;
-        } else if (p->image_params.color.space == MP_CSP_XYZ) {
-            type = PLANE_XYZ;
-        } else {
-            type = n == 0 ? PLANE_LUMA : PLANE_CHROMA;
+        enum plane_type type = PLANE_NONE;
+        for (int i = 0; i < 4; i++) {
+            int c = p->gl_format.components[n][i];
+            enum plane_type ctype;
+            if (c == 0) {
+                ctype = PLANE_NONE;
+            } else if (c == 4) {
+                ctype = PLANE_ALPHA;
+            } else if (p->image_params.color.space == MP_CSP_RGB) {
+                ctype = PLANE_RGB;
+            } else if (p->image_params.color.space == MP_CSP_XYZ) {
+                ctype = PLANE_XYZ;
+            } else {
+                ctype = c == 1 ? PLANE_LUMA : PLANE_CHROMA;
+            }
+            type = merge_plane_types(type, ctype);
         }
 
         tex[n] = (struct img_tex){
