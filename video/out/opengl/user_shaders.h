@@ -21,8 +21,8 @@
 #include "common.h"
 #include "utils.h"
 
-#define SHADER_API 1
-#define SHADER_MAX_HOOKS 64
+#define SHADER_MAX_PASSES 32
+#define SHADER_MAX_HOOKS 16
 #define SHADER_MAX_BINDS 6
 #define SHADER_MAX_SAVED 64
 #define MAX_SZEXP_SIZE 32
@@ -56,11 +56,11 @@ struct szexp {
 };
 
 struct gl_user_shader {
+    struct bstr pass_desc;
     struct bstr hook_tex[SHADER_MAX_HOOKS];
     struct bstr bind_tex[SHADER_MAX_BINDS];
     struct bstr save_tex;
     struct bstr pass_body;
-    struct bstr desc;
     struct gl_transform offset;
     struct szexp width[MAX_SZEXP_SIZE];
     struct szexp height[MAX_SZEXP_SIZE];
@@ -70,8 +70,8 @@ struct gl_user_shader {
     int compute_h;
 };
 
-// Parse the next shader pass from 'body'. Returns false if the end of the
-// string was reached
+// Parse the next shader pass from `body`. The `struct bstr` is modified by the
+// function. Returns false if the end of the string was reached (or on error).
 bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
                             struct gl_user_shader *out);
 

@@ -158,7 +158,6 @@ done:
     return true;
 }
 
-// Returns false if no more shaders could be parsed
 bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
                             struct gl_user_shader *out)
 {
@@ -166,7 +165,7 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         return false;
 
     *out = (struct gl_user_shader){
-        .desc = bstr0("(unknown)"),
+        .pass_desc = bstr0("(unknown)"),
         .offset = identity_trans,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
         .height = {{ SZEXP_VAR_H, { .varname = bstr0("HOOKED") }}},
@@ -179,12 +178,12 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
     // Skip all garbage (e.g. comments) before the first header
     int pos = bstr_find(*body, bstr0("//!"));
     if (pos < 0) {
-        mp_warn(log, "Shader appears to contain no passes!\n");
+        mp_warn(log, "Shader appears to contain no headers!\n");
         return false;
     }
     *body = bstr_cut(*body, pos);
 
-    // First parse all the headers
+    // Parse all headers
     while (true) {
         struct bstr rest;
         struct bstr line = bstr_strip(bstr_getline(*body, &rest));
@@ -222,7 +221,7 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         }
 
         if (bstr_eatstart0(&line, "DESC")) {
-            out->desc = bstr_strip(line);
+            out->pass_desc = bstr_strip(line);
             continue;
         }
 

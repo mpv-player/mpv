@@ -145,14 +145,13 @@ struct saved_tex {
 // A texture hook. This is some operation that transforms a named texture as
 // soon as it's generated
 struct tex_hook {
-    char *hook_tex;
-    char *save_tex;
-    char *bind_tex[TEXUNIT_VIDEO_NUM];
+    const char *save_tex;
+    const char *hook_tex[SHADER_MAX_HOOKS];
+    const char *bind_tex[TEXUNIT_VIDEO_NUM];
     int components; // how many components are relevant (0 = same as input)
-    void *priv; // this can be set to whatever the hook wants
+    void *priv; // this gets talloc_freed when the tex_hook is removed
     void (*hook)(struct gl_video *p, struct img_tex tex, // generates GLSL
                  struct gl_transform *trans, void *priv);
-    void (*free)(struct tex_hook *hook);
     bool (*cond)(struct gl_video *p, struct img_tex tex, void *priv);
 };
 
@@ -174,7 +173,7 @@ struct pass_info {
     struct mp_pass_perf perf;
 };
 
-#define PASS_INFO_MAX (SHADER_MAX_HOOKS + 32)
+#define PASS_INFO_MAX (SHADER_MAX_PASSES + 32)
 
 struct dr_buffer {
     struct ra_mapped_buffer *buffer;
@@ -276,10 +275,10 @@ struct gl_video {
     struct gl_timer *blit_timer;
 
     // hooks and saved textures
+    struct tex_hook tex_hooks[SHADER_MAX_PASSES];
+    int tex_hook_num;
     struct saved_tex saved_tex[SHADER_MAX_SAVED];
     int saved_tex_num;
-    struct tex_hook tex_hooks[SHADER_MAX_HOOKS];
-    int tex_hook_num;
     struct fbotex hook_fbos[SHADER_MAX_SAVED];
     int hook_fbo_num;
 
@@ -501,10 +500,8 @@ static void gl_video_reset_surfaces(struct gl_video *p)
 
 static void gl_video_reset_hooks(struct gl_video *p)
 {
-    for (int i = 0; i < p->tex_hook_num; i++) {
-        if (p->tex_hooks[i].free)
-            p->tex_hooks[i].free(&p->tex_hooks[i]);
-    }
+    for (int i = 0; i < p->tex_hook_num; i++)
+        talloc_free(p->tex_hooks[i].priv);
 
     p->tex_hook_num = 0;
 }
@@ -1395,9 +1392,15 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
     for (int i = 0; i < p->tex_hook_num; i++) {
         struct tex_hook *hook = &p->tex_hooks[i];
 
-        if (strcmp(hook->hook_tex, name) != 0)
-            continue;
+        // Figure out if this pass hooks this texture
+        for (int h = 0; h < SHADER_MAX_HOOKS; h++) {
+            if (hook->hook_tex[h] && strcmp(hook->hook_tex[h], name) == 0)
+                goto found;
+        }
 
+        continue;
+
+found:
         // Check the hook's condition
         if (hook->cond && !hook->cond(p, tex, hook->priv)) {
             MP_DBG(p, "Skipping hook on %s due to condition.\n", name);
@@ -1489,8 +1492,10 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     for (int i = 0; i < p->tex_hook_num; i++) {
         struct tex_hook *hook = &p->tex_hooks[i];
 
-        if (strcmp(hook->hook_tex, name) == 0)
-            goto found;
+        for (int h = 0; h < SHADER_MAX_HOOKS; h++) {
+            if (hook->hook_tex[h] && strcmp(hook->hook_tex[h], name) == 0)
+                goto found;
+        }
 
         for (int b = 0; b < TEXUNIT_VIDEO_NUM; b++) {
             if (hook->bind_tex[b] && strcmp(hook->bind_tex[b], name) == 0)
@@ -1822,25 +1827,11 @@ static bool img_tex_equiv(struct img_tex a, struct img_tex b)
 
 static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
 {
-    if (p->tex_hook_num < SHADER_MAX_HOOKS) {
+    if (p->tex_hook_num < SHADER_MAX_PASSES) {
         p->tex_hooks[p->tex_hook_num++] = hook;
     } else {
-        MP_ERR(p, "Too many hooks! Limit is %d.\n", SHADER_MAX_HOOKS);
-
-        if (hook.free)
-            hook.free(&hook);
-    }
-}
-
-// Adds a hook multiple times, one per name. The last name must be NULL to
-// signal the end of the argument list.
-#define HOOKS(...) ((char*[]){__VA_ARGS__, NULL})
-static void pass_add_hooks(struct gl_video *p, struct tex_hook hook,
-                           char **names)
-{
-    for (int i = 0; names[i] != NULL; i++) {
-        hook.hook_tex = names[i];
-        pass_add_hook(p, hook);
+        MP_ERR(p, "Too many passes! Limit is %d.\n", SHADER_MAX_PASSES);
+        talloc_free(hook.priv);
     }
 }
 
@@ -1919,7 +1910,7 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     struct gl_user_shader *shader = priv;
     assert(shader);
 
-    pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->desc),
+    pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->pass_desc),
                   plane_names[tex.type]);
 
     compute_size_minimum(p, shader->compute_w, shader->compute_h);
@@ -1937,15 +1928,6 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     gl_transform_trans(shader->offset, trans);
 }
 
-static void user_hook_free(struct tex_hook *hook)
-{
-    talloc_free(hook->hook_tex);
-    talloc_free(hook->save_tex);
-    for (int i = 0; i < TEXUNIT_VIDEO_NUM; i++)
-        talloc_free(hook->bind_tex[i]);
-    talloc_free(hook->priv);
-}
-
 static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
 {
     if (!shaders)
@@ -1955,26 +1937,23 @@ static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
         struct bstr file = load_cached_file(p, shaders[n]);
         struct gl_user_shader out;
         while (parse_user_shader_pass(p->log, &file, &out)) {
-            struct tex_hook hook = {
-                .components = out.components,
+            struct gl_user_shader *hook = talloc_ptrtype(p, hook);
+            *hook = out;
+
+            struct tex_hook texhook = {
+                .save_tex = bstrdup0(hook, hook->save_tex),
+                .components = hook->components,
                 .hook = user_hook,
-                .free = user_hook_free,
                 .cond = user_hook_cond,
+                .priv = hook,
             };
 
-            for (int i = 0; i < SHADER_MAX_HOOKS; i++) {
-                hook.hook_tex = bstrdup0(p, out.hook_tex[i]);
-                if (!hook.hook_tex)
-                    continue;
+            for (int h = 0; h < SHADER_MAX_HOOKS; h++)
+                texhook.hook_tex[h] = bstrdup0(hook, hook->hook_tex[h]);
+            for (int h = 0; h < SHADER_MAX_BINDS; h++)
+                texhook.bind_tex[h] = bstrdup0(hook, hook->bind_tex[h]);
 
-                struct gl_user_shader *out_copy = talloc_ptrtype(p, out_copy);
-                *out_copy = out;
-                hook.priv = out_copy;
-                for (int o = 0; o < SHADER_MAX_BINDS; o++)
-                    hook.bind_tex[o] = bstrdup0(p, out.bind_tex[o]);
-                hook.save_tex = bstrdup0(p, out.save_tex),
-                pass_add_hook(p, hook);
-            }
+            pass_add_hook(p, texhook);
         }
     }
 }
@@ -1984,14 +1963,16 @@ static void gl_video_setup_hooks(struct gl_video *p)
     gl_video_reset_hooks(p);
 
     if (p->opts.deband) {
-        pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook,
-                                             .bind_tex = {"HOOKED"}},
-                       HOOKS("LUMA", "CHROMA", "RGB", "XYZ"));
+        pass_add_hook(p, (struct tex_hook) {
+            .hook_tex = {"LUMA", "CHROMA", "RGB", "XYZ"},
+            .bind_tex = {"HOOKED"},
+            .hook = deband_hook,
+        });
     }
 
     if (p->opts.unsharp != 0.0) {
         pass_add_hook(p, (struct tex_hook) {
-            .hook_tex = "MAIN",
+            .hook_tex = {"MAIN"},
             .bind_tex = {"HOOKED"},
             .hook = unsharp_hook,
         });
