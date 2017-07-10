@@ -107,6 +107,10 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
         parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
 
         ctx = avcodec_alloc_context3(NULL);
+        if (!ctx) {
+            av_parser_close(parser);
+            goto done;
+        }
 
         uint8_t *d = NULL;
         int s = 0;
@@ -114,7 +118,7 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
         *out_profile = profile = ctx->profile;
         *out_rate = ctx->sample_rate;
 
-        av_free(ctx);
+        avcodec_free_context(&ctx);
         av_parser_close(parser);
     }
 
@@ -149,8 +153,6 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
 
 done:
     av_frame_free(&frame);
-    if (ctx)
-        avcodec_close(ctx);
     avcodec_free_context(&ctx);
 
     if (profile == FF_PROFILE_UNKNOWN)
