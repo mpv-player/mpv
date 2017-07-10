@@ -91,6 +91,8 @@ static void destroy(struct gl_hwdec *hw)
         IDirect3D9Ex_Release(p->d3d9ex);
 }
 
+static int reinit(struct gl_hwdec *hw, struct mp_image_params *params);
+
 static int create(struct gl_hwdec *hw)
 {
     if (!angle_load())
@@ -206,6 +208,16 @@ static int create(struct gl_hwdec *hw)
         MP_FATAL(hw, "Failed to query EGL surface alpha\n");
         goto fail;
     }
+
+
+    struct mp_image_params dummy_params = {
+        .imgfmt = IMGFMT_DXVA2,
+        .w = 256,
+        .h = 256,
+    };
+    if (reinit(hw, &dummy_params) < 0)
+        goto fail;
+    destroy_textures(hw);
 
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_DXVA2,
