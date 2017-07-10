@@ -142,7 +142,7 @@ local function text_style()
     if o.custom_header and o.custom_header ~= "" then
         return set_ASS(true) .. o.custom_header
     else
-        return format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
+        return format("%s{\\r}{\\an7}{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
                         set_ASS(true), o.font_size, o.font, o.border_size,
                         o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
                         o.shadow_y_offset, o.shadow_color)
@@ -220,7 +220,7 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
 
     local bg_box = format("{\\bord0.5}{\\3c&H%s&}{\\1c&H%s&}m 0 %f l %f %f %f 0 0 0",
                           o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
-    return format("%s{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
+    return format("%s{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}%s",
                   o.prefix_sep, y_offset, bg_box, o.plot_color, table.concat(s), text_style())
 end
 
@@ -382,7 +382,7 @@ end
 
 
 local function add_header(s)
-    s[1] = text_style()
+    s[#s+1] = text_style()
 end
 
 
@@ -530,7 +530,7 @@ end
 
 -- Call the function for `page` and print it to OSD
 local function print_page(page, duration)
-    mp.osd_message(pages[page](), duration or o.duration)
+    mp.osd_message(pages[page].f(), duration or o.duration)
 end
 
 
@@ -634,9 +634,9 @@ end
 -- Current page and <page key>:<page function> mapping
 curr_page = o.key_page_1
 pages = {
-    [o.key_page_1] = default_stats,
-    [o.key_page_2] = vo_stats,
-    [o.key_page_3] = filter_stats,
+    [o.key_page_1] = { f = default_stats, desc = "Default" },
+    [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings" },
+    [o.key_page_3] = { f = filter_stats, desc = "Dummy" },
 }
 
 
