@@ -2443,8 +2443,8 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
     int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
-        int cw = p->gl_format.chroma_w;
-        int ch = p->gl_format.chroma_h;
+        int cw = tex[i].type == PLANE_CHROMA ? p->gl_format.chroma_w : 1;
+        int ch = tex[i].type == PLANE_CHROMA ? p->gl_format.chroma_h : 1;
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, cw, ch);
 
