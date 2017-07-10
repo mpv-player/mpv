@@ -664,19 +664,17 @@ static void uninit_avctx(struct dec_video *vd)
     av_frame_free(&ctx->pic);
     av_buffer_unref(&ctx->cached_hw_frames_ctx);
 
+    if (ctx->hwdec && ctx->hwdec->uninit)
+        ctx->hwdec->uninit(ctx);
+    ctx->hwdec = NULL;
+    assert(ctx->hwdec_priv == NULL);
+
     avcodec_free_context(&ctx->avctx);
 
     if (ctx->hwdec_dev && ctx->hwdec && ctx->hwdec->generic_hwaccel &&
         ctx->hwdec_dev->destroy)
         ctx->hwdec_dev->destroy(ctx->hwdec_dev);
     ctx->hwdec_dev = NULL;
-
-    if (ctx->hwdec && ctx->hwdec->uninit)
-        ctx->hwdec->uninit(ctx);
-    ctx->hwdec = NULL;
-    assert(ctx->hwdec_priv == NULL);
-
-    av_freep(&ctx->avctx);
 
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
