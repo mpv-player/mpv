@@ -19,6 +19,7 @@
 
 #include "misc/ctype.h"
 #include "user_shaders.h"
+#include "formats.h"
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 {
@@ -158,13 +159,10 @@ done:
     return true;
 }
 
-bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
-                            struct gl_user_shader *out)
+static bool parse_hook(struct mp_log *log, struct bstr *body,
+                       struct gl_user_shader_hook *out)
 {
-    if (!body || !out || !body->start || body->len == 0)
-        return false;
-
-    *out = (struct gl_user_shader){
+    *out = (struct gl_user_shader_hook){
         .pass_desc = bstr0("(unknown)"),
         .offset = identity_trans,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
@@ -174,14 +172,6 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
 
     int hook_idx = 0;
     int bind_idx = 0;
-
-    // Skip all garbage (e.g. comments) before the first header
-    int pos = bstr_find(*body, bstr0("//!"));
-    if (pos < 0) {
-        mp_warn(log, "Shader appears to contain no headers!\n");
-        return false;
-    }
-    *body = bstr_cut(*body, pos);
 
     // Parse all headers
     while (true) {
@@ -294,4 +284,163 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         mp_warn(log, "Pass has no hooked textures (will be ignored)!\n");
 
     return true;
+}
+
+static bool parse_tex(struct mp_log *log, struct bstr *body,
+                      struct gl_user_shader_tex *out)
+{
+    *out = (struct gl_user_shader_tex){
+        .name = bstr0("USER_TEX"),
+        .w = 1, .h = 1, .d = 1,
+        .components = 1,
+        .bytes = 1,
+        .mpgl_type = MPGL_TYPE_UINT,
+        .gl_filter = GL_LINEAR,
+        .gl_target = GL_TEXTURE_1D,
+        .gl_border = GL_CLAMP_TO_EDGE,
+    };
+
+    while (true) {
+        struct bstr rest;
+        struct bstr line = bstr_strip(bstr_getline(*body, &rest));
+
+        if (!bstr_eatstart0(&line, "//!"))
+            break;
+
+        *body = rest;
+
+        if (bstr_eatstart0(&line, "TEXTURE")) {
+            out->name = bstr_strip(line);
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "SIZE")) {
+            int num = bstr_sscanf(line, "%d %d %d", &out->w, &out->h, &out->d);
+            if (num < 1 || num > 3 || out->w < 1 || out->h < 1 || out->d < 1) {
+                mp_err(log, "Error while parsing SIZE!\n");
+                return false;
+            }
+            static GLenum tgt[] = {GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D};
+            out->gl_target = tgt[num - 1];
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "COMPONENTS")) {
+            if (bstr_sscanf(line, "%d", &out->components) != 1) {
+                mp_err(log, "Error while parsing COMPONENTS!\n");
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "FORMAT")) {
+            int bits;
+            char fmt;
+            if (bstr_sscanf(line, "%d%c", &bits, &fmt) != 2) {
+                mp_err(log, "Error while parsing FORMAT!\n");
+                return false;
+            }
+
+            out->bytes = bits / 8;
+            switch (fmt) {
+            case 'f': out->mpgl_type = MPGL_TYPE_FLOAT; break;
+            case 'i': out->mpgl_type = MPGL_TYPE_UINT;  break;
+            case 'u': out->mpgl_type = MPGL_TYPE_UNORM; break;
+            default:
+                mp_err(log, "Unrecognized FORMAT description: '%c'!\n", fmt);
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "FILTER")) {
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "LINEAR")) {
+                out->gl_filter = GL_LINEAR;
+            } else if (bstr_equals0(line, "NEAREST")) {
+                out->gl_filter = GL_NEAREST;
+            } else {
+                mp_err(log, "Unrecognized FILTER: '%.*s'!\n", BSTR_P(line));
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "BORDER")) {
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "CLAMP")) {
+                out->gl_border = GL_CLAMP_TO_EDGE;
+            } else if (bstr_equals0(line, "REPEAT")) {
+                out->gl_border = GL_REPEAT;
+            } else if (bstr_equals0(line, "MIRROR")) {
+                out->gl_border = GL_MIRRORED_REPEAT;
+            } else {
+                mp_err(log, "Unrecognized BORDER: '%.*s'!\n", BSTR_P(line));
+                return false;
+            }
+            continue;
+        }
+
+        mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
+        return false;
+    }
+
+    // Decode the rest of the section (up to the next //! marker) as raw hex
+    // data for the texture
+    struct bstr hexdata;
+    if (bstr_split_tok(*body, "//!", &hexdata, body)) {
+        // Make sure the magic line is part of the rest
+        body->start -= 3;
+        body->len += 3;
+    }
+
+    struct bstr tex;
+    if (!bstr_decode_hex(NULL, bstr_strip(hexdata), &tex)) {
+        mp_err(log, "Error while parsing TEXTURE body: must be a valid "
+                    "hexadecimal sequence, on a single line!\n");
+        return false;
+    }
+
+    int expected_len = out->w * out->h * out->d * out->components * out->bytes;
+    if (tex.len != expected_len) {
+        mp_err(log, "Shader TEXTURE size mismatch: got %zd bytes, expected %d!\n",
+               tex.len, expected_len);
+        talloc_free(tex.start);
+        return false;
+    }
+
+    out->texdata = tex.start;
+    return true;
+}
+
+void parse_user_shader(struct mp_log *log, struct bstr shader, void *priv,
+                       bool (*dohook)(void *p, struct gl_user_shader_hook hook),
+                       bool (*dotex)(void *p, struct gl_user_shader_tex tex))
+{
+    if (!dohook || !dotex || !shader.len)
+        return;
+
+    // Skip all garbage (e.g. comments) before the first header
+    int pos = bstr_find(shader, bstr0("//!"));
+    if (pos < 0) {
+        mp_warn(log, "Shader appears to contain no headers!\n");
+        return;
+    }
+    shader = bstr_cut(shader, pos);
+
+    // Loop over the file
+    while (shader.len > 0)
+    {
+        // Peek at the first header to dispatch the right type
+        if (bstr_startswith0(shader, "//!TEXTURE")) {
+            struct gl_user_shader_tex t;
+            if (!parse_tex(log, &shader, &t) || !dotex(priv, t))
+                return;
+            continue;
+        }
+
+        struct gl_user_shader_hook h;
+        if (!parse_hook(log, &shader, &h) || !dohook(priv, h))
+            return;
+    }
 }

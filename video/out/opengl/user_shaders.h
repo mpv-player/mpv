@@ -55,7 +55,7 @@ struct szexp {
     } val;
 };
 
-struct gl_user_shader {
+struct gl_user_shader_hook {
     struct bstr pass_desc;
     struct bstr hook_tex[SHADER_MAX_HOOKS];
     struct bstr bind_tex[SHADER_MAX_BINDS];
@@ -70,10 +70,25 @@ struct gl_user_shader {
     int compute_h;
 };
 
-// Parse the next shader pass from `body`. The `struct bstr` is modified by the
-// function. Returns false if the end of the string was reached (or on error).
-bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
-                            struct gl_user_shader *out);
+struct gl_user_shader_tex {
+    struct bstr name;
+    int w, h, d;
+    int components;
+    int bytes;
+    int mpgl_type;
+    GLenum gl_target;
+    GLenum gl_filter;
+    GLenum gl_border;
+    void *texdata;
+    // for video.c
+    GLenum gl_tex;
+};
+
+// Parse the next shader block from `body`. The callbacks are invoked on every
+// valid shader block parsed.
+void parse_user_shader(struct mp_log *log, struct bstr shader, void *priv,
+                       bool (*dohook)(void *p, struct gl_user_shader_hook hook),
+                       bool (*dotex)(void *p, struct gl_user_shader_tex tex));
 
 // Evaluate a szexp, given a lookup function for named textures
 bool eval_szexpr(struct mp_log *log, void *priv,

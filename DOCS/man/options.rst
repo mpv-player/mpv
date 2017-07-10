@@ -4239,24 +4239,59 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
         ...
 
-    Each block of metadata, along with the non-metadata lines after it, defines
-    a single pass. Each pass can set the following metadata:
+    Each section of metadata, along with the non-metadata lines after it,
+    defines a single block. There are currently two types of blocks, HOOKs and
+    TEXTUREs.
 
-    DESC <title>
-        User-friendly description of the pass. This is the name used when
-        representing this shader in the list of passes for property
-        `vo-passes`.
+    A ``TEXTURE`` block can set the following options:
+
+    TEXTURE <name> (required)
+        The name of this texture. Hooks can then bind the texture under this
+        name using BIND. This must be the first option of the texture block.
+
+    SIZE <width> [<height>] [<depth>]
+        The dimensions of the texture. The height and depth are optional. The
+        type of texture (1D, 2D or 3D) depends on the number of components
+        specified.
+
+    COMPONENTS <n>
+        The number of components per texel contained in the texture. Defaults
+        to 1.
+
+    FORMAT <spec>
+        The texture format for the samples. A valid texture specification is
+        the number of bits followed by a single letter which is either ``f``
+        (for float), ``i`` (for uint) or ``u`` (for unorm), for example
+        ``32f``. Defaults to ``8i``.
+
+    FILTER <LINEAR|NEAREST>
+        The min/magnification filter used when sampling from this texture.
+
+    BORDER <CLAMP|REPEAT|MIRROR>
+        The border wrapping mode used when sampling from this texture.
+
+    Following the metadata is a string of bytes in hexadecimal notation that
+    define the raw texture data, corresponding to the format specified by
+    `FORMAT`, on a single line with no extra whitespace.
+
+    A ``HOOK`` block can set the following options:
 
     HOOK <name> (required)
         The texture which to hook into. May occur multiple times within a
         metadata block, up to a predetermined limit. See below for a list of
         hookable textures.
 
+    DESC <title>
+        User-friendly description of the pass. This is the name used when
+        representing this shader in the list of passes for property
+        `vo-passes`.
+
     BIND <name>
-        Loads a texture and makes it available to the pass, and sets up macros
-        to enable accessing it. See below for a list of set macros. By default,
-        no textures are bound. The special name HOOKED can be used to refer to
-        the texture that triggered this pass.
+        Loads a texture (either coming from mpv or from a ``TEXTURE`` block)
+        and makes it available to the pass. When binding textures from mpv,
+        this will also set up macros to facilitate accessing it properly. See
+        below for a list. By default, no textures are bound. The special name
+        HOOKED can be used to refer to the texture that triggered this pass.
 
     SAVE <name>
         Gives the name of the texture to save the result of this pass into. By
@@ -4280,14 +4315,14 @@ The following video options are currently all specific to ``--vo=opengl`` and
         hook point can still cause that hook point to be saved, which has some
         minor overhead)
 
-    OFFSET ox oy
+    OFFSET <ox> <oy>
         Indicates a pixel shift (offset) introduced by this pass. These pixel
         offsets will be accumulated and corrected during the next scaling pass
         (``cscale`` or ``scale``). The default values are 0 0 which correspond
         to no shift. Note that offsets are ignored when not overwriting the
         hooked texture.
 
-    COMPONENTS n
+    COMPONENTS <n>
         Specifies how many components of this pass's output are relevant and
         should be stored in the texture, up to 4 (rgba). By default, this value
         is equal to the number of components in HOOKED.
@@ -4303,7 +4338,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         difference is the fact that you can use shared memory inside compute
         shaders.
 
-    Each bound texture (via ``BIND``) will make available the following
+    Each bound mpv texture (via ``BIND``) will make available the following
     definitions to that shader pass, where NAME is the name of the bound
     texture:
 

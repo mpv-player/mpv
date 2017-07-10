@@ -80,6 +80,10 @@ double bstrtod(struct bstr str, struct bstr *rest);
 void bstr_lower(struct bstr str);
 int bstr_sscanf(struct bstr str, const char *format, ...);
 
+// Decode a string containing hexadecimal data. All whitespace will be silently
+// ignored. When successful, this allocates a new array to store the output.
+bool bstr_decode_hex(void *talloc_ctx, struct bstr hex, struct bstr *out);
+
 // Decode the UTF-8 code point at the start of the string, and return the
 // character.
 // After calling this function, *out_next will point to the next character.

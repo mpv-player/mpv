@@ -240,6 +240,12 @@ struct gl_video {
     struct fbotex vdpau_deinterleave_fbo[2];
     GLuint hdr_peak_ssbo;
 
+    // user pass descriptions and textures
+    struct tex_hook tex_hooks[SHADER_MAX_PASSES];
+    int tex_hook_num;
+    struct gl_user_shader_tex user_textures[SHADER_MAX_PASSES];
+    int user_tex_num;
+
     int surface_idx;
     int surface_now;
     int frames_drawn;
@@ -274,9 +280,7 @@ struct gl_video {
     struct gl_timer *upload_timer;
     struct gl_timer *blit_timer;
 
-    // hooks and saved textures
-    struct tex_hook tex_hooks[SHADER_MAX_PASSES];
-    int tex_hook_num;
+    // intermediate textures
     struct saved_tex saved_tex[SHADER_MAX_SAVED];
     int saved_tex_num;
     struct fbotex hook_fbos[SHADER_MAX_SAVED];
@@ -503,7 +507,11 @@ static void gl_video_reset_hooks(struct gl_video *p)
     for (int i = 0; i < p->tex_hook_num; i++)
         talloc_free(p->tex_hooks[i].priv);
 
+    for (int i = 0; i < p->user_tex_num; i++)
+        p->gl->DeleteTextures(1, &p->user_textures[i].gl_tex);
+
     p->tex_hook_num = 0;
+    p->user_tex_num = 0;
 }
 
 static inline int fbosurface_wrap(int id)
@@ -1378,6 +1386,51 @@ static void saved_tex_store(struct gl_video *p, const char *name,
     };
 }
 
+static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
+                                  struct img_tex tex, struct tex_hook *hook)
+{
+    for (int t = 0; t < TEXUNIT_VIDEO_NUM; t++) {
+        char *bind_name = (char *)hook->bind_tex[t];
+
+        if (!bind_name)
+            continue;
+
+        // This is a special name that means "currently hooked texture"
+        if (strcmp(bind_name, "HOOKED") == 0) {
+            int id = pass_bind(p, tex);
+            hook_prelude(p, "HOOKED", id, tex);
+            hook_prelude(p, name, id, tex);
+            continue;
+        }
+
+        // BIND can also be used to load user-defined textures, in which
+        // case we will directly load them as a uniform instead of
+        // generating the hook_prelude boilerplate
+        for (int u = 0; u < p->user_tex_num; u++) {
+            struct gl_user_shader_tex *utex = &p->user_textures[u];
+            if (bstr_equals0(utex->name, bind_name)) {
+                gl_sc_uniform_tex(p->sc, bind_name, utex->gl_target, utex->gl_tex);
+                goto next_bind;
+            }
+        }
+
+        struct img_tex bind_tex;
+        if (!saved_tex_find(p, bind_name, &bind_tex)) {
+            // Clean up texture bindings and move on to the next hook
+            MP_DBG(p, "Skipping hook on %s due to no texture named %s.\n",
+                   name, bind_name);
+            p->pass_tex_num -= t;
+            return false;
+        }
+
+        hook_prelude(p, bind_name, pass_bind(p, bind_tex), bind_tex);
+
+next_bind: ;
+    }
+
+    return true;
+}
+
 // Process hooks for a plane, saving the result and returning a new img_tex
 // If 'trans' is NULL, the shader is forbidden from transforming tex
 static struct img_tex pass_hook(struct gl_video *p, const char *name,
@@ -1407,32 +1460,8 @@ found:
             continue;
         }
 
-        // Bind all necessary textures and add them to the prelude
-        for (int t = 0; t < TEXUNIT_VIDEO_NUM; t++) {
-            const char *bind_name = hook->bind_tex[t];
-            struct img_tex bind_tex;
-
-            if (!bind_name)
-                continue;
-
-            // This is a special name that means "currently hooked texture"
-            if (strcmp(bind_name, "HOOKED") == 0) {
-                int id = pass_bind(p, tex);
-                hook_prelude(p, "HOOKED", id, tex);
-                hook_prelude(p, name, id, tex);
-                continue;
-            }
-
-            if (!saved_tex_find(p, bind_name, &bind_tex)) {
-                // Clean up texture bindings and move on to the next hook
-                MP_DBG(p, "Skipping hook on %s due to no texture named %s.\n",
-                       name, bind_name);
-                p->pass_tex_num -= t;
-                goto next_hook;
-            }
-
-            hook_prelude(p, bind_name, pass_bind(p, bind_tex), bind_tex);
-        }
+        if (!pass_hook_setup_binds(p, name, tex, hook))
+            continue;
 
         // Run the actual hook. This generates a series of GLSL shader
         // instructions sufficient for drawing the hook's output
@@ -1471,8 +1500,6 @@ found:
         }
 
         saved_tex_store(p, store_name, saved_tex);
-
-next_hook: ;
     }
 
     return tex;
@@ -1825,13 +1852,15 @@ static bool img_tex_equiv(struct img_tex a, struct img_tex b)
            gl_transform_eq(a.transform, b.transform);
 }
 
-static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
+static bool add_hook(struct gl_video *p, struct tex_hook hook)
 {
     if (p->tex_hook_num < SHADER_MAX_PASSES) {
         p->tex_hooks[p->tex_hook_num++] = hook;
+        return true;
     } else {
         MP_ERR(p, "Too many passes! Limit is %d.\n", SHADER_MAX_PASSES);
         talloc_free(hook.priv);
+        return false;
     }
 }
 
@@ -1896,7 +1925,7 @@ static bool szexp_lookup(void *priv, struct bstr var, float size[2])
 
 static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
 {
-    struct gl_user_shader *shader = priv;
+    struct gl_user_shader_hook *shader = priv;
     assert(shader);
 
     float res = false;
@@ -1907,7 +1936,7 @@ static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
 static void user_hook(struct gl_video *p, struct img_tex tex,
                       struct gl_transform *trans, void *priv)
 {
-    struct gl_user_shader *shader = priv;
+    struct gl_user_shader_hook *shader = priv;
     assert(shader);
 
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->pass_desc),
@@ -1928,33 +1957,91 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     gl_transform_trans(shader->offset, trans);
 }
 
-static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
+static bool add_user_hook(void *priv, struct gl_user_shader_hook hook)
+{
+    struct gl_video *p = priv;
+    struct gl_user_shader_hook *copy = talloc_ptrtype(p, copy);
+    *copy = hook;
+
+    struct tex_hook texhook = {
+        .save_tex = bstrdup0(copy, hook.save_tex),
+        .components = hook.components,
+        .hook = user_hook,
+        .cond = user_hook_cond,
+        .priv = copy,
+    };
+
+    for (int h = 0; h < SHADER_MAX_HOOKS; h++)
+        texhook.hook_tex[h] = bstrdup0(copy, hook.hook_tex[h]);
+    for (int h = 0; h < SHADER_MAX_BINDS; h++)
+        texhook.bind_tex[h] = bstrdup0(copy, hook.bind_tex[h]);
+
+    return add_hook(p, texhook);
+}
+
+static bool add_user_tex(void *priv, struct gl_user_shader_tex tex)
+{
+    struct gl_video *p = priv;
+    GL *gl = p->gl;
+
+    if (p->user_tex_num == SHADER_MAX_PASSES) {
+        MP_ERR(p, "Too many textures! Limit is %d.\n", SHADER_MAX_PASSES);
+        goto err;
+    }
+
+    const struct gl_format *format = gl_find_format(gl, tex.mpgl_type,
+            tex.gl_filter == GL_LINEAR ? F_TF : 0, tex.bytes, tex.components);
+
+    if (!format) {
+        MP_ERR(p, "Could not satisfy format requirements for user "
+                  "shader texture '%.*s'!\n", BSTR_P(tex.name));
+        goto err;
+    }
+
+    GLenum type = format->type,
+           ifmt = format->internal_format,
+            fmt = format->format;
+
+    GLenum tgt = tex.gl_target;
+    gl->GenTextures(1, &tex.gl_tex);
+    gl->BindTexture(tgt, tex.gl_tex);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    if (tgt == GL_TEXTURE_3D) {
+        gl->TexImage3D(tgt, 0, ifmt, tex.w, tex.h, tex.d, 0, fmt, type, tex.texdata);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_T, tex.gl_border);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_R, tex.gl_border);
+    } else if (tgt == GL_TEXTURE_2D) {
+        gl->TexImage2D(tgt, 0, ifmt, tex.w, tex.h, 0, fmt, type, tex.texdata);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_T, tex.gl_border);
+    } else {
+        gl->TexImage1D(tgt, 0, ifmt, tex.w, 0, fmt, type, tex.texdata);
+        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
+    }
+    talloc_free(tex.texdata);
+
+    gl->TexParameteri(tgt, GL_TEXTURE_MIN_FILTER, tex.gl_filter);
+    gl->TexParameteri(tgt, GL_TEXTURE_MAG_FILTER, tex.gl_filter);
+    gl->BindTexture(tgt, 0);
+
+    p->user_textures[p->user_tex_num++] = tex;
+    return true;
+
+err:
+    talloc_free(tex.texdata);
+    return false;
+}
+
+static void load_user_shaders(struct gl_video *p, char **shaders)
 {
     if (!shaders)
         return;
 
     for (int n = 0; shaders[n] != NULL; n++) {
         struct bstr file = load_cached_file(p, shaders[n]);
-        struct gl_user_shader out;
-        while (parse_user_shader_pass(p->log, &file, &out)) {
-            struct gl_user_shader *hook = talloc_ptrtype(p, hook);
-            *hook = out;
-
-            struct tex_hook texhook = {
-                .save_tex = bstrdup0(hook, hook->save_tex),
-                .components = hook->components,
-                .hook = user_hook,
-                .cond = user_hook_cond,
-                .priv = hook,
-            };
-
-            for (int h = 0; h < SHADER_MAX_HOOKS; h++)
-                texhook.hook_tex[h] = bstrdup0(hook, hook->hook_tex[h]);
-            for (int h = 0; h < SHADER_MAX_BINDS; h++)
-                texhook.bind_tex[h] = bstrdup0(hook, hook->bind_tex[h]);
-
-            pass_add_hook(p, texhook);
-        }
+        parse_user_shader(p->log, file, p, add_user_hook, add_user_tex);
     }
 }
 
@@ -1963,7 +2050,7 @@ static void gl_video_setup_hooks(struct gl_video *p)
     gl_video_reset_hooks(p);
 
     if (p->opts.deband) {
-        pass_add_hook(p, (struct tex_hook) {
+        add_hook(p, (struct tex_hook) {
             .hook_tex = {"LUMA", "CHROMA", "RGB", "XYZ"},
             .bind_tex = {"HOOKED"},
             .hook = deband_hook,
@@ -1971,14 +2058,14 @@ static void gl_video_setup_hooks(struct gl_video *p)
     }
 
     if (p->opts.unsharp != 0.0) {
-        pass_add_hook(p, (struct tex_hook) {
+        add_hook(p, (struct tex_hook) {
             .hook_tex = {"MAIN"},
             .bind_tex = {"HOOKED"},
             .hook = unsharp_hook,
         });
     }
 
-    pass_hook_user_shaders(p, p->opts.user_shaders);
+    load_user_shaders(p, p->opts.user_shaders);
 }
 
 // sample from video textures, set "color" variable to yuv value
