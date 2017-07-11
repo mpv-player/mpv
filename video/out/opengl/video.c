@@ -1384,7 +1384,7 @@ static void load_shader(struct gl_video *p, struct bstr body)
 {
     gl_sc_hadd_bstr(p->sc, body);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
-    gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
+    gl_sc_uniform_i(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "input_size",
                        (GLfloat[]){(p->src_rect.x1 - p->src_rect.x0) *
                                    p->texture_offset.m[0][0],
