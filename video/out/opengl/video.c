@@ -2970,7 +2970,6 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
     p->vp_h = vp_h;
 
     gl_video_reset_surfaces(p);
-    gl_video_setup_hooks(p);
 
     if (p->osd)
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
