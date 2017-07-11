@@ -5,6 +5,7 @@ local options = require 'mp.options'
 local o = {
     exclude = ""
 }
+options.read_options(o)
 
 local ytdl = {
     path = "youtube-dl",
@@ -100,12 +101,12 @@ local function extract_chapters(data, video_length)
 end
 
 local function is_blacklisted(url)
-    if o.blacklist == "" then return false end
+    if o.exclude == "" then return false end
     if #ytdl.blacklisted == 0 then
-        local joined = o.blacklist
-        while joined:match(',?[^,]+') do
-            local _, e, domain = joined:find(',?([^,]+)')
-            table.insert(ytdl.blacklisted, domain)
+        local joined = o.exclude
+        while joined:match('%|?[^|]+') do
+            local _, e, substring = joined:find('%|?([^|]+)')
+            table.insert(ytdl.blacklisted, substring)
             joined = joined:sub(e+1)
         end
     end
@@ -113,6 +114,7 @@ local function is_blacklisted(url)
         url = url:match('https?://(.+)')
         for _, exclude in ipairs(ytdl.blacklisted) do
             if url:match(exclude) then
+                msg.verbose('URL matches excluded substring. Skipping.')
                 return true
             end
         end
