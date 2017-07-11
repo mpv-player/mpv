@@ -12,11 +12,10 @@ Track Selection
 
     .. admonition:: Examples
 
-        ``mpv dvd://1 --alang=hu,en``
-            Chooses the Hungarian language track on a DVD and falls back on
-            English if Hungarian is not available.
-        ``mpv --alang=jpn example.mkv``
-            Plays a Matroska file in Japanese.
+        - ``mpv dvd://1 --alang=hu,en`` chooses the Hungarian language track
+          on a DVD and falls back on English if Hungarian is not available.
+        - ``mpv --alang=jpn example.mkv`` plays a Matroska file with Japanese
+          audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
     Specify a priority list of subtitle languages to use. Different container
@@ -539,16 +538,15 @@ Program Behavior
     should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
     that character.
 
-    .. admonition:: Example
+    .. admonition:: Examples
 
-        ``--script-opts=ytdl_hook-exclude='^youtube%.com'`` will exclude any
-            URL that starts with ``http://youtube.com`` or
-            ``https://youtube.com``.
-        ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'`` will exclude any
-            URL that ends with ``.mkv`` or ``.mp4``.
+        - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
+          will exclude any URL that starts with ``http://youtube.com`` or
+          ``https://youtube.com``.
+        - ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'``
+          will exclude any URL that ends with ``.mkv`` or ``.mp4``.
 
-    See more `lua patterns here`__.
-    __ https://www.lua.org/manual/5.1/manual.html#5.4.1
+    See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
 
 
 ``--ytdl-format=<best|worst|mp4|webm|...>``
@@ -568,8 +566,8 @@ Program Behavior
 
     .. admonition:: Example
 
-        ``--ytdl-raw-options=username=user,password=pass``
-        ``--ytdl-raw-options=force-ipv6=``
+        - ``--ytdl-raw-options=username=user,password=pass``
+        - ``--ytdl-raw-options=force-ipv6=``
 
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
@@ -1619,7 +1617,7 @@ Subtitles
 
     .. admonition:: Example
 
-        `--sub-speed=25/23.976`` plays frame based subtitles which have been
+        ``--sub-speed=25/23.976`` plays frame based subtitles which have been
         loaded assuming a framerate of 23.976 at 25 FPS.
 
 ``--sub-ass-force-style=<[Style.]Param=Value[,...]>``
