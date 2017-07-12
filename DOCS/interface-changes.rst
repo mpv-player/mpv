@@ -56,6 +56,9 @@ Interface changes
       --demux-lavf-o=decryption_key=<hex> instead (whatever fits your situation).
     - rename --opengl-dumb-mode=no to --opengl-dumb-mode=auto, and make `no`
       always disable it (unless forced on by hardware limitation).
+    - generalize --scale-clamp, --cscale-clamp etc. to accept a float between
+      0.0 and 1.0 instead of just being a flag. A value of 1.0 corresponds to
+      the old `yes`, and a value of 0.0 corresponds to the old `no`.
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

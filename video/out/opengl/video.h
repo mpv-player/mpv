@@ -44,7 +44,7 @@ struct scaler_config {
     float radius;
     float antiring;
     float cutoff;
-    int clamp;
+    float clamp;
 };
 
 struct scaler {

@@ -28,7 +28,7 @@ struct filter_window {
 struct filter_kernel {
     struct filter_window f; // the kernel itself
     struct filter_window w; // window storage
-    bool clamp; // clamp to the range [0-1]
+    double clamp; // clamping factor, affects negative weights
     double value_cutoff; // discard all contributions below this value (polar)
     // Constant values
     const char *window; // default window

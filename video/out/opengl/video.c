@@ -333,7 +333,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     OPT_FLOAT(n"-wparam", scaler[i].window.params[0], 0),                  \
     OPT_FLOAT(n"-wblur",  scaler[i].window.blur, 0),                       \
     OPT_FLOATRANGE(n"-wtaper", scaler[i].window.taper, 0, 0.0, 1.0),       \
-    OPT_FLAG(n"-clamp",   scaler[i].clamp, 0),                             \
+    OPT_FLOATRANGE(n"-clamp", scaler[i].clamp, 0, 0.0, 1.0),               \
     OPT_FLOATRANGE(n"-radius",    scaler[i].radius, 0, 0.5, 16.0),         \
     OPT_FLOATRANGE(n"-antiring",  scaler[i].antiring, 0, 0.0, 1.0),        \
     OPT_STRING_VALIDATE(n"-window", scaler[i].window.name, 0, validate_window_opt)

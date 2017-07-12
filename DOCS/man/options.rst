@@ -4012,12 +4012,16 @@ The following video options are currently all specific to ``--vo=opengl`` and
     this too low (eg. 0.5) leads to bad results. It's generally recommended to
     stick to values between 0.8 and 1.2.
 
-``--scale-clamp``, ``--cscale-clamp``, ``--dscale-clamp``, ``--tscale-clamp``
-    Clamp the filter kernel's value range to [0-1]. This is especially useful
-    for ``--tscale``, where it reduces excessive ringing artifacts in the
-    temporal domain (which typically manifest themselves as short flashes or
-    fringes of black, mostly around moving edges) in exchange for potentially
-    adding more blur.
+``--scale-clamp=<0.0-1.0>``, ``--cscale-clamp``, ``--dscale-clamp``, ``--tscale-clamp``
+    Specifies a weight bias to multiply into negative coefficients. Specifying
+    ``--scale-clamp=1`` has the effect of removing negative weights completely,
+    thus effectively clamping the value range to [0-1]. Values between 0.0 and
+    1.0 can be specified to apply only a moderate diminishment of negative
+    weights. This is especially useful for ``--tscale``, where it reduces
+    excessive ringing artifacts in the temporal domain (which typically
+    manifest themselves as short flashes or fringes of black, mostly around
+    moving edges) in exchange for potentially adding more blur. The default for
+    ``--tscale-clamp`` is 1.0, the others default to 0.0.
 
 ``--scale-cutoff=<value>``, ``--cscale-cutoff=<value>``, ``--dscale-cutoff=<value>``
     Cut off the filter kernel prematurely once the value range drops below
