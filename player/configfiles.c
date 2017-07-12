@@ -71,10 +71,10 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     // So we "divert" normal options into a separate section, and the diverted
     // section is never used - unless maybe it's explicitly referenced from an
     // encoding profile.
-    if (encoding)
+    if (encoding) {
         section = "playback-default";
-
-    load_all_cfgfiles(mpctx, SECT_ENCODE, "encoding-profiles.conf");
+        load_all_cfgfiles(mpctx, SECT_ENCODE, "encoding-profiles.conf");
+    }
 
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
 
