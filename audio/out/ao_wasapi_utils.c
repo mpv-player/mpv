@@ -103,18 +103,6 @@ static const GUID *format_to_subtype(int format)
     return &KSDATAFORMAT_SPECIFIER_NONE;
 }
 
-// "solve" the under-determined inverse of format_to_subtype by assuming the
-// input subtype is "special" (i.e. IEC61937)
-static int special_subtype_to_format(const GUID *subtype)
-{
-    for (int i = 0; wasapi_formats[i].mp_format; i++) {
-        if (IsEqualGUID(subtype, wasapi_formats[i].subtype) &&
-            af_fmt_is_spdif(wasapi_formats[i].mp_format))
-            return wasapi_formats[i].mp_format;
-    }
-    return 0;
-}
-
 char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
 {
     buf = mp_GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
@@ -319,6 +307,13 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf,
     }
     waveformat_copy(&state->format, wf);
     state->share_mode = share_mode;
+
+    MP_VERBOSE(ao, "Accepted as %s %s @ %dhz -> %s (%s)\n",
+               mp_chmap_to_str(&ao->channels),
+               af_fmt_to_str(ao->format), ao->samplerate,
+               waveformat_to_str(wf),
+               state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE
+               ? "exclusive" : "shared");
     return true;
 }
 
@@ -331,23 +326,6 @@ static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     MP_VERBOSE(ao, "Trying %s (exclusive) -> %s\n",
                waveformat_to_str(&wformat->Format), mp_format_res_str(hr));
     return SUCCEEDED(hr);
-}
-
-// This works like try_format_exclusive(), but will try to fallback to the AC3
-// format if the format is a non-AC3 passthrough format. *wformat will be
-// adjusted accordingly.
-static bool try_format_exclusive_with_spdif_fallback(struct ao *ao,
-                                                WAVEFORMATEXTENSIBLE *wformat)
-{
-    if (try_format_exclusive(ao, wformat))
-        return true;
-    int special_format = special_subtype_to_format(&wformat->SubFormat);
-    if (special_format && special_format != AF_FORMAT_S_AC3) {
-        MP_VERBOSE(ao, "Retrying as AC3.\n");
-        wformat->SubFormat = *format_to_subtype(AF_FORMAT_S_AC3);
-        return try_format_exclusive(ao, wformat);
-    }
-    return false;
 }
 
 static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
@@ -441,40 +419,39 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     return false;
 }
 
-static bool find_formats_exclusive(struct ao *ao, bool do_search)
+static bool find_formats_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
-    WAVEFORMATEXTENSIBLE wformat;
-    set_waveformat_with_ao(&wformat, ao);
+    // Try the specified format as is
+    if (try_format_exclusive(ao, wformat))
+        return true;
 
-    // Try the requested format as is. If that doesn't work, and the do_search
-    // argument is set, do the pcm format search.
-    if (!try_format_exclusive_with_spdif_fallback(ao, &wformat) &&
-        (!do_search || !search_channels(ao, &wformat)))
+    if (af_fmt_is_spdif(ao->format)) {
+        if (ao->format != AF_FORMAT_S_AC3) {
+            // If the requested format failed and it is passthrough, but not
+            // AC3, try lying and saying it is.
+            MP_VERBOSE(ao, "Retrying as AC3.\n");
+            wformat->SubFormat = *format_to_subtype(AF_FORMAT_S_AC3);
+            if (try_format_exclusive(ao, wformat))
+                return true;
+        }
         return false;
+    }
 
-    if (!set_ao_format(ao, &wformat.Format, AUDCLNT_SHAREMODE_EXCLUSIVE))
-        return false;
-
-    MP_VERBOSE(ao, "Accepted as %s %s @ %dhz (exclusive) -> %s\n",
-               mp_chmap_to_str(&ao->channels),
-               af_fmt_to_str(ao->format), ao->samplerate,
-               waveformat_to_str(&wformat.Format));
-    return true;
+    // Fallback on the PCM format search
+    return search_channels(ao, wformat);
 }
 
-static bool find_formats_shared(struct ao *ao)
+static bool find_formats_shared(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
     struct wasapi_state *state = ao->priv;
-
-    WAVEFORMATEXTENSIBLE wformat;
-    set_waveformat_with_ao(&wformat, ao);
 
     WAVEFORMATEX *closestMatch;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_SHARED,
-                                                &wformat.Format, &closestMatch);
+                                                &wformat->Format,
+                                                &closestMatch);
     MP_VERBOSE(ao, "Trying %s (shared) -> %s\n",
-               waveformat_to_str(&wformat.Format), mp_format_res_str(hr));
+               waveformat_to_str(&wformat->Format), mp_format_res_str(hr));
     if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
         EXIT_ON_ERROR(hr);
 
@@ -482,27 +459,20 @@ static bool find_formats_shared(struct ao *ao)
     case S_OK:
         break;
     case S_FALSE:
-        waveformat_copy(&wformat, closestMatch);
+        waveformat_copy(wformat, closestMatch);
         CoTaskMemFree(closestMatch);
         MP_VERBOSE(ao, "Closest match is %s\n",
-                   waveformat_to_str(&wformat.Format));
+                   waveformat_to_str(&wformat->Format));
         break;
     default:
         hr = IAudioClient_GetMixFormat(state->pAudioClient, &closestMatch);
         EXIT_ON_ERROR(hr);
-        waveformat_copy(&wformat, closestMatch);
+        waveformat_copy(wformat, closestMatch);
         MP_VERBOSE(ao, "Fallback to mix format %s\n",
-                   waveformat_to_str(&wformat.Format));
+                   waveformat_to_str(&wformat->Format));
         CoTaskMemFree(closestMatch);
     }
 
-    if (!set_ao_format(ao, &wformat.Format, AUDCLNT_SHAREMODE_SHARED))
-        return false;
-
-    MP_VERBOSE(ao, "Accepted as %s %s @ %dhz (shared) -> %s\n",
-               mp_chmap_to_str(&ao->channels),
-               af_fmt_to_str(ao->format), ao->samplerate,
-               waveformat_to_str(&wformat.Format));
     return true;
 exit_label:
     MP_ERR(state, "Error finding shared mode format: %s\n",
@@ -513,22 +483,22 @@ exit_label:
 static bool find_formats(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
+    AUDCLNT_SHAREMODE share_mode;
+    WAVEFORMATEXTENSIBLE wformat;
 
-    if (state->opt_exclusive) {
-        // If exclusive is requested, try the requested format (which
-        // might be passthrough). If that fails, do a pcm format
-        // search.
-        return find_formats_exclusive(ao, true);
-    } else if (af_fmt_is_spdif(ao->format)) {
-        // If a passthrough format is requested, but exclusive mode
-        // was not explicitly set, try only the requested passthrough
-        // format in exclusive mode. Fall back on shared mode if that
-        // fails without doing the exclusive pcm format search.
-        if (find_formats_exclusive(ao, false))
-            return true;
+    set_waveformat_with_ao(&wformat, ao);
+
+    if (state->opt_exclusive || af_fmt_is_spdif(ao->format)) {
+        share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
+        if(!find_formats_exclusive(ao, &wformat))
+            return false;
+    } else {
+        share_mode = AUDCLNT_SHAREMODE_SHARED;
+        if(!find_formats_shared(ao, &wformat))
+            return false;
     }
-    // Default is to use shared mode
-    return find_formats_shared(ao);
+
+    return set_ao_format(ao, &wformat.Format, share_mode);
 }
 
 static HRESULT init_clock(struct wasapi_state *state) {
