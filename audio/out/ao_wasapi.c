@@ -201,9 +201,9 @@ static DWORD __stdcall AudioThread(void *lpParameter)
     mpthread_set_name("wasapi event");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    state->init_ret = wasapi_thread_init(ao);
+    state->init_ok = wasapi_thread_init(ao);
     SetEvent(state->hInitDone);
-    if (FAILED(state->init_ret))
+    if (!state->init_ok)
         goto exit_label;
 
     MP_DBG(ao, "Entering dispatch loop\n");
@@ -302,7 +302,7 @@ static int init(struct ao *ao)
     state->dispatch = mp_dispatch_create(state);
     mp_dispatch_set_wakeup_fn(state->dispatch, thread_wakeup, ao);
 
-    state->init_ret = E_FAIL;
+    state->init_ok = false;
     state->hAudioThread = CreateThread(NULL, 0, &AudioThread, ao, 0, NULL);
     if (!state->hAudioThread) {
         MP_FATAL(ao, "Failed to create audio thread\n");
@@ -312,7 +312,7 @@ static int init(struct ao *ao)
 
     WaitForSingleObject(state->hInitDone, INFINITE); // wait on init complete
     SAFE_DESTROY(state->hInitDone,CloseHandle(state->hInitDone));
-    if (FAILED(state->init_ret)) {
+    if (!state->init_ok) {
         if (!ao->probing)
             MP_FATAL(ao, "Received failure from audio thread\n");
         uninit(ao);

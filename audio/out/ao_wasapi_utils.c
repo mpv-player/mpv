@@ -833,7 +833,7 @@ exit_label:
     destroy_enumerator(enumerator);
 }
 
-static HRESULT load_device(struct mp_log *l,
+static bool load_device(struct mp_log *l,
                            IMMDevice **ppDevice, LPWSTR deviceID)
 {
     IMMDeviceEnumerator *pEnumerator = NULL;
@@ -849,7 +849,7 @@ exit_label:
     if (FAILED(hr))
         mp_err(l, "Error loading selected device: %s\n", mp_HRESULT_to_str(hr));
     SAFE_RELEASE(pEnumerator);
-    return hr;
+    return SUCCEEDED(hr);
 }
 
 static LPWSTR select_device(struct mp_log *l, struct device_desc *d)
@@ -934,7 +934,7 @@ exit_label:
     return deviceID;
 }
 
-HRESULT wasapi_thread_init(struct ao *ao)
+bool wasapi_thread_init(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
@@ -946,14 +946,18 @@ HRESULT wasapi_thread_init(struct ao *ao)
 
 retry:
     if (state->deviceID) {
-        hr = load_device(ao->log, &state->pDevice, state->deviceID);
-        EXIT_ON_ERROR(hr);
+        if (!load_device(ao->log, &state->pDevice, state->deviceID))
+            return false;
 
         MP_DBG(ao, "Activating pAudioClient interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
                                          CLSCTX_ALL, NULL,
                                          (void **)&state->pAudioClient);
-        EXIT_ON_ERROR(hr);
+        if (FAILED(hr)) {
+            MP_FATAL(ao, "Error activating device: %s\n",
+                     mp_HRESULT_to_str(hr));
+            return false;
+        }
     } else {
         MP_VERBOSE(ao, "Trying UWP wrapper.\n");
 
@@ -961,67 +965,73 @@ retry:
         HANDLE lib = LoadLibraryW(L"wasapiuwp2.dll");
         if (!lib) {
             MP_ERR(ao, "Wrapper not found: %d\n", (int)GetLastError());
-            hr = E_FAIL;
-            EXIT_ON_ERROR(hr);
+            return false;
         }
-        if (lib) {
-            wuCreateDefaultAudioRenderer =
-                (void*)GetProcAddress(lib, "wuCreateDefaultAudioRenderer");
-        }
+
+        wuCreateDefaultAudioRenderer =
+            (void*)GetProcAddress(lib, "wuCreateDefaultAudioRenderer");
         if (!wuCreateDefaultAudioRenderer) {
             MP_ERR(ao, "Function not found.\n");
-            hr = E_FAIL;
-            EXIT_ON_ERROR(hr);
+            return false;
         }
         IUnknown *res = NULL;
         hr = wuCreateDefaultAudioRenderer(&res);
         MP_VERBOSE(ao, "Device: %s %p\n", mp_HRESULT_to_str(hr), res);
-        EXIT_ON_ERROR(hr);
+        if (FAILED(hr)) {
+            MP_FATAL(ao, "Error activating device: %s\n",
+                     mp_HRESULT_to_str(hr));
+            return false;
+        }
         hr = IUnknown_QueryInterface(res, &IID_IAudioClient,
                                      (void **)&state->pAudioClient);
         IUnknown_Release(res);
-        EXIT_ON_ERROR(hr);
+        if (FAILED(hr)) {
+            MP_FATAL(ao, "Failed to get UWP audio client: %s\n",
+                     mp_HRESULT_to_str(hr));
+            return false;
+        }
     }
 
     // In the event of an align hack, we've already done this.
     if (!align_hack) {
         MP_DBG(ao, "Probing formats\n");
-        if (!find_formats(ao)) {
-            hr = E_FAIL;
-            EXIT_ON_ERROR(hr);
-        }
+        if (!find_formats(ao))
+            return false;
     }
 
     MP_DBG(ao, "Fixing format\n");
     hr = fix_format(ao, align_hack);
     switch (hr) {
     case AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED:
-        if (align_hack)
+        if (align_hack) {
+            MP_FATAL(ao, "Align hack failed\n");
             break;
+        }
         // According to MSDN, we must use this as base after the failure.
-        IAudioClient_GetBufferSize(state->pAudioClient,
-                                   &state->bufferFrameCount);
+        hr = IAudioClient_GetBufferSize(state->pAudioClient,
+                                        &state->bufferFrameCount);
+        if (FAILED(hr)) {
+            MP_FATAL(ao, "Error getting buffer size for align hack: %s\n",
+                     mp_HRESULT_to_str(hr));
+            return false;
+        }
         wasapi_thread_uninit(ao);
         align_hack = true;
         MP_WARN(ao, "This appears to require a weird Windows 7 hack. Retrying.\n");
         goto retry;
     case AUDCLNT_E_DEVICE_IN_USE:
     case AUDCLNT_E_DEVICE_INVALIDATED:
-        if (retry_wait > 8)
-            break;
+        if (retry_wait > 8) {
+            MP_FATAL(ao, "Bad device retry failed\n");
+            return false;
+        }
         wasapi_thread_uninit(ao);
         MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
         mp_sleep_us(retry_wait);
         retry_wait *= 2;
         goto retry;
     }
-    EXIT_ON_ERROR(hr);
-
-    MP_DBG(ao, "Init wasapi thread done\n");
-    return S_OK;
-exit_label:
-    MP_FATAL(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
-    return hr;
+    return SUCCEEDED(hr);
 }
 
 void wasapi_thread_uninit(struct ao *ao)

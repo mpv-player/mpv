@@ -64,8 +64,8 @@ enum wasapi_thread_state {
 typedef struct wasapi_state {
     struct mp_log *log;
 
+    bool init_ok;            // status of init phase
     // Thread handles
-    HRESULT init_ret;        // status of init phase
     HANDLE hInitDone;        // set when init is complete in audio thread
     HANDLE hAudioThread;     // the audio thread itself
     HANDLE hWake;            // thread wakeup event
@@ -114,7 +114,7 @@ bstr wasapi_get_specified_device_string(struct ao *ao);
 LPWSTR wasapi_find_deviceID(struct ao *ao);
 
 void wasapi_dispatch(struct ao *ao);
-HRESULT wasapi_thread_init(struct ao *ao);
+bool wasapi_thread_init(struct ao *ao);
 void wasapi_thread_uninit(struct ao *ao);
 
 void wasapi_receive_proxies(wasapi_state *state);
