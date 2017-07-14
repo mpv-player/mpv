@@ -729,7 +729,7 @@ Video
         In some cases, RGB conversion is forced, which means the RGB conversion
         is performed by the hardware decoding API, instead of the OpenGL code
         used by ``--vo=opengl``. This means certain obscure colorspaces may
-        not display correctly, not certain filtering (such as debanding)
+        not display correctly, and certain filtering (such as debanding)
         cannot be applied in an ideal way.
 
         ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
