@@ -232,7 +232,7 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
 
     if (ptr) {
         gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
-        gl->BufferData(GL_ARRAY_BUFFER, num * vao->stride, ptr, GL_DYNAMIC_DRAW);
+        gl->BufferData(GL_ARRAY_BUFFER, num * vao->stride, ptr, GL_STREAM_DRAW);
         gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -1328,8 +1328,17 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
         pbo->buffer_size = buffer_size;
         gl->GenBuffers(1, &pbo->buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
+        // Magic time: Because we memcpy once from RAM to the buffer, and then
+        // the GPU needs to read from this anyway, we actually *don't* want
+        // this buffer to be allocated in RAM. If we allocate it in VRAM
+        // instead, we can reduce this to a single copy: from RAM into VRAM.
+        // Unfortunately, drivers e.g. nvidia will think GL_STREAM_DRAW is best
+        // allocated on host memory instead of device memory, so we lie about
+        // the usage to fool the driver into giving us a buffer in VRAM instead
+        // of RAM, which can be significantly faster for our use case.
+        // Seriously, fuck OpenGL.
         gl->BufferData(GL_PIXEL_UNPACK_BUFFER, NUM_PBO_BUFFERS * buffer_size,
-                       NULL, GL_DYNAMIC_COPY);
+                       NULL, GL_STREAM_COPY);
     }
 
     size_t offset = buffer_size * pbo->index;
