@@ -188,7 +188,7 @@ struct mp_pass_perf gl_timer_measure(struct gl_timer *timer);
 struct gl_pbo_upload {
     GL *gl;
     int index;
-    GLuint buffers[NUM_PBO_BUFFERS];
+    GLuint buffer;
     size_t buffer_size;
 };
 
