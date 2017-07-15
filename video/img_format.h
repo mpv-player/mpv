@@ -180,9 +180,8 @@ enum mp_imgfmt {
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
     // NV12/P010/P016
-    // plane 1: ID3D11Texture2D
-    // plane 2: slice index casted to pointer
-    // plane 3: ID3D11VideoDecoderOutputView (can be absent in filters/VO)
+    // plane 0: ID3D11Texture2D
+    // plane 1: slice index casted to pointer
     IMGFMT_D3D11VA,
     // Like IMGFMT_D3D11VA, but format is restricted to NV12.
     IMGFMT_D3D11NV12,
