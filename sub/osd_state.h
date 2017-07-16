@@ -22,6 +22,7 @@ struct ass_state {
     struct ass_track *track;
     struct ass_renderer *render;
     struct ass_library *library;
+    int res_x, res_y;
 };
 
 struct osd_object {
