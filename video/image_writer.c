@@ -160,9 +160,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     success = !!got_output;
 error_exit:
-    if (avctx)
-        avcodec_close(avctx);
-    av_free(avctx);
+    avcodec_free_context(&avctx);
     av_frame_free(&pic);
     av_packet_unref(&pkt);
     return success;

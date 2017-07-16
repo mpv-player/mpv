@@ -500,9 +500,7 @@ static void uninit(struct sd *sd)
 
     for (int n = 0; n < MAX_QUEUE; n++)
         clear_sub(&priv->subs[n]);
-    avcodec_close(priv->avctx);
-    av_free(priv->avctx->extradata);
-    av_free(priv->avctx);
+    avcodec_free_context(&priv->avctx);
     talloc_free(priv);
 }
 

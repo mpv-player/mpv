@@ -137,11 +137,8 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
     if (!ctx)
         goto done;
 
-    if (avcodec_open2(ctx, codec, NULL) < 0) {
-        av_free(ctx); // don't attempt to avcodec_close() an unopened ctx
-        ctx = NULL;
+    if (avcodec_open2(ctx, codec, NULL) < 0)
         goto done;
-    }
 
     if (avcodec_send_packet(ctx, pkt) < 0)
         goto done;

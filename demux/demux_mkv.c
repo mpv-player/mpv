@@ -2239,11 +2239,7 @@ static void mkv_seek_reset(demuxer_t *demuxer)
         if (track->av_parser)
             av_parser_close(track->av_parser);
         track->av_parser = NULL;
-        if (track->av_parser_codec) {
-            avcodec_close(track->av_parser_codec);
-            av_free(track->av_parser_codec);
-        }
-        track->av_parser_codec = NULL;
+        avcodec_free_context(&track->av_parser_codec);
     }
 
     free_block(&mkv_d->tmp_block);

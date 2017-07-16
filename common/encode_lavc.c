@@ -384,10 +384,7 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
                     stream_write_buffer(ctx->twopass_bytebuffer_v,
                                         stats, strlen(stats));
             }
-            avcodec_close(ctx->vcc);
-            talloc_free(ctx->vcc->stats_in);
-            av_free(ctx->vcc);
-            ctx->vcc = NULL;
+            avcodec_free_context(&ctx->vcc);
         }
 
         if (ctx->acc) {
@@ -397,10 +394,7 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
                     stream_write_buffer(ctx->twopass_bytebuffer_a,
                                         stats, strlen(stats));
             }
-            avcodec_close(ctx->acc);
-            talloc_free(ctx->acc->stats_in);
-            av_free(ctx->acc);
-            ctx->acc = NULL;
+            avcodec_free_context(&ctx->acc);
         }
 
         for (i = 0; i < ctx->avc->nb_streams; i++) {
