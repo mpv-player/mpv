@@ -1319,7 +1319,7 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
     // dependencies. This is not a strict requirement (the spec requires no
     // alignment), but a good precaution for performance reasons
     size_t needed_size = stride * h;
-    size_t buffer_size = FFALIGN(needed_size, 4096);
+    size_t buffer_size = MP_ALIGN_UP(needed_size, 4096);
 
     if (buffer_size != pbo->buffer_size)
         gl_pbo_upload_uninit(pbo);
