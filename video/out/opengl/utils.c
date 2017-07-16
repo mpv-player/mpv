@@ -1342,7 +1342,7 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
                        NULL, GL_STREAM_COPY);
     }
 
-    size_t offset = buffer_size * pbo->index;
+    uintptr_t offset = buffer_size * pbo->index;
     pbo->index = (pbo->index + 1) % NUM_PBO_BUFFERS;
 
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
