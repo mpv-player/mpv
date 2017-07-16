@@ -4136,9 +4136,6 @@ The following video options are currently all specific to ``--vo=opengl`` and
     source video size is huge (e.g. so called "4K" video). On other drivers it
     might be slower or cause latency issues.
 
-    In theory, this can sometimes lead to sporadic and temporary image
-    corruption (because reupload is not retried when it fails).
-
 ``--dither-depth=<N|no|auto>``
     Set dither target depth to N. Default: no.
 

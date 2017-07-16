@@ -95,6 +95,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(BindTexture),
             DEF_FN(BlendFuncSeparate),
             DEF_FN(BufferData),
+            DEF_FN(BufferSubData),
             DEF_FN(Clear),
             DEF_FN(ClearColor),
             DEF_FN(CompileShader),

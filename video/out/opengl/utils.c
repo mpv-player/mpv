@@ -1310,15 +1310,16 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
     assert(x >= 0 && y >= 0 && w >= 0 && h >= 0);
     assert(x + w <= tex_w && y + h <= tex_h);
 
-    if (!use_pbo || !gl->MapBufferRange)
-        goto no_pbo;
+    if (!use_pbo) {
+        gl_upload_tex(gl, target, format, type, dataptr, stride, x, y, w, h);
+        return;
+    }
 
     // We align the buffer size to 4096 to avoid possible subregion
     // dependencies. This is not a strict requirement (the spec requires no
     // alignment), but a good precaution for performance reasons
-    size_t pix_stride = gl_bytes_per_pixel(format, type);
-    size_t buffer_size = FFALIGN(pix_stride * tex_w * tex_h, 4096);
-    size_t needed_size = pix_stride * w * h;
+    size_t needed_size = stride * h;
+    size_t buffer_size = FFALIGN(needed_size, 4096);
 
     if (buffer_size != pbo->buffer_size)
         gl_pbo_upload_uninit(pbo);
@@ -1345,26 +1346,9 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
     pbo->index = (pbo->index + 1) % NUM_PBO_BUFFERS;
 
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
-    void *data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, needed_size,
-                                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
-    if (!data)
-        goto no_pbo;
-
-    memcpy_pic(data, dataptr, pix_stride * w,  h, pix_stride * w, stride);
-
-    if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER)) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        goto no_pbo;
-    }
-
-    gl_upload_tex(gl, target, format, type, (void *)offset, pix_stride * w, x, y, w, h);
-
+    gl->BufferSubData(GL_PIXEL_UNPACK_BUFFER, offset, needed_size, dataptr);
+    gl_upload_tex(gl, target, format, type, (void *)offset, stride, x, y, w, h);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-    return;
-
-no_pbo:
-    gl_upload_tex(gl, target, format, type, dataptr, stride, x, y, w, h);
 }
 
 void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo)

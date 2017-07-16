@@ -128,6 +128,7 @@ struct GL {
                                           GLbitfield);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
+    void (GLAPIENTRY *BufferSubData)(GLenum, GLintptr, GLsizeiptr, const GLvoid *);
     void (GLAPIENTRY *ActiveTexture)(GLenum);
     void (GLAPIENTRY *BindTexture)(GLenum, GLuint);
     int (GLAPIENTRY *SwapInterval)(int);
