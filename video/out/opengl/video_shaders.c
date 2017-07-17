@@ -121,19 +121,19 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
     // Skip samples definitely outside the radius
     if (dmax >= radius_cutoff)
         return;
-    GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
+    GLSLF("d = length(vec2(%d.0, %d.0) - fcoord);\n", x, y);
     // Check for samples that might be skippable
     bool maybe_skippable = dmax >= radius_cutoff - M_SQRT2;
     if (maybe_skippable)
-        GLSLF("if (d < %f) {\n", radius_cutoff / radius);
+        GLSLF("if (d < %f) {\n", radius_cutoff);
 
     // get the weight for this pixel
     if (scaler->gl_target == GL_TEXTURE_1D) {
-        GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
-              scaler->lut_size);
+        GLSLF("w = texture1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
+              radius, scaler->lut_size);
     } else {
-        GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d, %d.0))).r;\n",
-              scaler->lut_size);
+        GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d * 1.0/%f, %d.0))).r;\n",
+              radius, scaler->lut_size);
     }
     GLSL(wsum += w;)
 
@@ -258,7 +258,7 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSL(vec2 coeff = fcoord * output_size/size;)
     float threshold = scaler->conf.kernel.params[0];
     threshold = isnan(threshold) ? 0.0 : threshold;
-    GLSLF("coeff = (coeff - %f) / %f;\n", threshold, 1.0 - 2 * threshold);
+    GLSLF("coeff = (coeff - %f) * 1.0/%f;\n", threshold, 1.0 - 2 * threshold);
     GLSL(coeff = clamp(coeff, 0.0, 1.0);)
     // Compute the right blend of colors
     GLSL(color = texture(tex, pos + pt * (coeff - fcoord));)
@@ -309,7 +309,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
     switch (trc) {
     case MP_CSP_TRC_SRGB:
-        GLSL(color.rgb = mix(color.rgb / vec3(12.92),
+        GLSL(color.rgb = mix(color.rgb * vec3(1.0/12.92),
                              pow((color.rgb + vec3(0.055))/vec3(1.055), vec3(2.4)),
                              lessThan(vec3(0.04045), color.rgb));)
         break;
@@ -326,7 +326,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
         GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
         break;
     case MP_CSP_TRC_PRO_PHOTO:
-        GLSL(color.rgb = mix(color.rgb / vec3(16.0),
+        GLSL(color.rgb = mix(color.rgb * vec3(1.0/16.0),
                              pow(color.rgb, vec3(1.8)),
                              lessThan(vec3(0.03125), color.rgb));)
         break;
@@ -342,27 +342,27 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
         break;
     case MP_CSP_TRC_HLG:
         GLSLF("color.rgb = mix(vec3(4.0) * color.rgb * color.rgb,\n"
-              "                exp((color.rgb - vec3(%f)) / vec3(%f)) + vec3(%f),\n"
+              "                exp((color.rgb - vec3(%f)) * vec3(1.0/%f)) + vec3(%f),\n"
               "                lessThan(vec3(0.5), color.rgb));\n",
               HLG_C, HLG_A, HLG_B);
         break;
     case MP_CSP_TRC_V_LOG:
-        GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) / vec3(5.6), \n"
-              "    pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f)) \n"
-              "              - vec3(%f),                              \n"
-              "    lessThanEqual(vec3(0.181), color.rgb));            \n",
+        GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) * vec3(1.0/5.6), \n"
+              "    pow(vec3(10.0), (color.rgb - vec3(%f)) * vec3(1.0/%f)) \n"
+              "              - vec3(%f),                                  \n"
+              "    lessThanEqual(vec3(0.181), color.rgb));                \n",
               VLOG_D, VLOG_C, VLOG_B);
         break;
     case MP_CSP_TRC_S_LOG1:
-        GLSLF("color.rgb = pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f))\n"
+        GLSLF("color.rgb = pow(vec3(10.0), (color.rgb - vec3(%f)) * vec3(1.0/%f))\n"
               "            - vec3(%f);\n",
               SLOG_C, SLOG_A, SLOG_B);
         break;
     case MP_CSP_TRC_S_LOG2:
-        GLSLF("color.rgb = mix((color.rgb - vec3(%f)) / vec3(%f),      \n"
-              "    (pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f)) \n"
-              "              - vec3(%f)) / vec3(%f),                   \n"
-              "    lessThanEqual(vec3(%f), color.rgb));                \n",
+        GLSLF("color.rgb = mix((color.rgb - vec3(%f)) * vec3(1.0/%f),      \n"
+              "    (pow(vec3(10.0), (color.rgb - vec3(%f)) * vec3(1.0/%f)) \n"
+              "              - vec3(%f)) * vec3(1.0/%f),                   \n"
+              "    lessThanEqual(vec3(%f), color.rgb));                    \n",
               SLOG_Q, SLOG_P, SLOG_C, SLOG_A, SLOG_B, SLOG_K2, SLOG_Q);
         break;
     default:
@@ -370,7 +370,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
     }
 
     // Rescale to prevent clipping on non-float textures
-    GLSLF("color.rgb /= vec3(%f);\n", mp_trc_nom_peak(trc));
+    GLSLF("color.rgb *= vec3(1.0/%f);\n", mp_trc_nom_peak(trc));
 }
 
 // Delinearize (compress), given a TRC as output. This corresponds to the
@@ -410,7 +410,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              lessThanEqual(vec3(0.001953), color.rgb));)
         break;
     case MP_CSP_TRC_PQ:
-        GLSLF("color.rgb /= vec3(%f);\n", 10000 / MP_REF_WHITE);
+        GLSLF("color.rgb *= vec3(1.0/%f);\n", 10000 / MP_REF_WHITE);
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", PQ_M1);
         GLSLF("color.rgb = (vec3(%f) + vec3(%f) * color.rgb) \n"
               "             / (vec3(1.0) + vec3(%f) * color.rgb);\n",
@@ -481,7 +481,7 @@ void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak)
         abort();
     }
 
-    GLSLF("color.rgb /= vec3(%f);\n", peak);
+    GLSLF("color.rgb *= vec3(1.0/%f);\n", peak);
 }
 
 // Inverse of the function pass_ootf, for completeness' sake. Note that the
@@ -505,19 +505,20 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
         abort();
         break;
     case MP_CSP_LIGHT_SCENE_709_1886:
-        GLSL(color.rgb = pow(color.rgb, vec3(1/2.4));)
-        GLSL(color.rgb = mix(color.rgb / vec3(4.5),
-                             pow((color.rgb + vec3(0.0993)) / vec3(1.0993), vec3(1/0.45)),
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
+        GLSL(color.rgb = mix(color.rgb * vec3(1.0/4.5),
+                             pow((color.rgb + vec3(0.0993)) * vec3(1.0/1.0993),
+                                 vec3(1/0.45)),
                              lessThan(vec3(0.08145), color.rgb));)
         break;
     case MP_CSP_LIGHT_SCENE_1_2:
-        GLSL(color.rgb = pow(color.rgb, vec3(1/1.2));)
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.2));)
         break;
     default:
         abort();
     }
 
-    GLSLF("color.rgb /= vec3(%f);\n", peak);
+    GLSLF("color.rgb *= vec3(1.0/%f);\n", peak);
 }
 
 // Tone map from a known peak brightness to the range [0,1]
@@ -574,7 +575,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
-        GLSLF("luma = pow(luma / %f, %f);\n", ref_peak, 1.0/gamma);
+        GLSLF("luma = pow(luma * 1.0/%f, %f);\n", ref_peak, 1.0/gamma);
         break;
     }
 
@@ -668,9 +669,9 @@ void pass_color_map(struct gl_shader_cache *sc,
 // update the state. Assumes the texture was hooked.
 static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 {
-    GLSLH(float mod289(float x)  { return x - floor(x / 289.0) * 289.0; })
+    GLSLH(float mod289(float x)  { return x - floor(x * 1.0/289.0) * 289.0; })
     GLSLH(float permute(float x) { return mod289((34.0*x + 1.0) * x); })
-    GLSLH(float rand(float x)    { return fract(x / 41.0); })
+    GLSLH(float rand(float x)    { return fract(x * 1.0/41.0); })
 
     // Initialize the PRNG by hashing the position + a random uniform
     GLSL(vec3 _m = vec3(HOOKED_pos, random) + vec3(1.0);)
@@ -730,7 +731,7 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
         GLSLH(ref[3] = HOOKED_texOff(vec2( o.y, -o.x));)
 
         // Return the (normalized) average
-        GLSLH(return (ref[0] + ref[1] + ref[2] + ref[3])/4.0;)
+        GLSLH(return (ref[0] + ref[1] + ref[2] + ref[3])*0.25;)
     GLSLHF("}\n");
 
     // Sample the source pixel

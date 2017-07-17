@@ -2074,12 +2074,13 @@ static void pass_convert_yuv(struct gl_video *p)
         // assumes everything uses the BT.2020 12-bit gamma function, since the
         // difference between 10 and 12-bit is negligible for anything other
         // than 12-bit content.
-        GLSL(color.rgb = mix(color.rgb / vec3(4.5),
-                             pow((color.rgb + vec3(0.0993))/vec3(1.0993), vec3(1.0/0.45)),
+        GLSL(color.rgb = mix(color.rgb * vec3(1.0/4.5),
+                             pow((color.rgb + vec3(0.0993))*vec3(1.0/1.0993),
+                                 vec3(1.0/0.45)),
                              lessThanEqual(vec3(0.08145), color.rgb));)
         // Calculate the green channel from the expanded RYcB
         // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
-        GLSL(color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;)
+        GLSL(color.g = (color.g - 0.2627*color.r - 0.0593*color.b)*1.0/0.6780;)
         // Recompress to receive the R'G'B' result, same as other systems
         GLSL(color.rgb = mix(color.rgb * vec3(4.5),
                              vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993),
@@ -2178,7 +2179,7 @@ static void pass_scale_main(struct gl_video *p)
         // values at 1 and 0, and then scale/shift them, respectively.
         sig_offset = 1.0/(1+expf(sig_slope * sig_center));
         sig_scale  = 1.0/(1+expf(sig_slope * (sig_center-1))) - sig_offset;
-        GLSLF("color.rgb = %f - log(1.0/(color.rgb * %f + %f) - 1.0)/%f;\n",
+        GLSLF("color.rgb = %f - log(1.0/(color.rgb * %f + %f) - 1.0) * 1.0/%f;\n",
                 sig_center, sig_scale, sig_offset, sig_slope);
         pass_opt_hook_point(p, "SIGMOID", NULL);
     }
@@ -2205,7 +2206,7 @@ static void pass_scale_main(struct gl_video *p)
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
         // Inverse of the transformation above
-        GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) / %f;\n",
+        GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) * 1.0/%f;\n",
                 sig_slope, sig_center, sig_offset, sig_scale);
     }
 }
@@ -2377,7 +2378,7 @@ static void pass_dither(struct gl_video *p)
 
     gl_sc_uniform_tex(p->sc, "dither", GL_TEXTURE_2D, p->dither_texture);
 
-    GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d.0;\n", p->dither_size);
+    GLSLF("vec2 dither_pos = gl_FragCoord.xy * 1.0/%d.0;\n", p->dither_size);
 
     if (p->opts.temporal_dither) {
         int phase = (p->frames_rendered / p->opts.temporal_dither_period) % 8u;
@@ -2392,7 +2393,7 @@ static void pass_dither(struct gl_video *p)
     }
 
     GLSL(float dither_value = texture(dither, dither_pos).r;)
-    GLSLF("color = floor(color * %d.0 + dither_value + 0.5 / %d.0) / %d.0;\n",
+    GLSLF("color = floor(color * %d.0 + dither_value + 0.5 / %d.0) * 1.0/%d.0;\n",
           dither_quantization, p->dither_size * p->dither_size,
           dither_quantization);
 }
@@ -2590,7 +2591,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         if (p->opts.alpha_mode == ALPHA_BLEND_TILES) {
             // Draw checkerboard pattern to indicate transparency
             GLSLF("// transparency checkerboard\n");
-            GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
+            GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy * 1.0/32.0), vec2(0.5));)
             GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
             GLSL(color.rgb = mix(background, color.rgb, color.a);)
         } else if (p->opts.alpha_mode == ALPHA_BLEND) {
@@ -3020,7 +3021,7 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
             });
         }
 
-        GLSLF("color = fract(gl_FragCoord.y / 2) < 0.5\n");
+        GLSLF("color = fract(gl_FragCoord.y * 0.5) < 0.5\n");
         GLSLF("      ? texture(texture%d, texcoord%d)\n", ids[0], ids[0]);
         GLSLF("      : texture(texture%d, texcoord%d);", ids[1], ids[1]);
 
