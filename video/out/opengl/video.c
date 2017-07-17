@@ -260,6 +260,7 @@ struct gl_video {
     struct img_tex pass_tex[TEXUNIT_VIDEO_NUM];
     int pass_tex_num;
     int texture_w, texture_h;
+    int compute_w, compute_h; // presence indicates the use of a compute shader
     struct gl_transform texture_offset; // texture transform without rotation
     int components;
     bool use_linear;
@@ -446,6 +447,7 @@ static void gl_video_setup_hooks(struct gl_video *p);
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
 #define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
+#define PRELUDE(...) gl_sc_paddf(p->sc, __VA_ARGS__)
 
 static struct bstr load_cached_file(struct gl_video *p, const char *path)
 {
@@ -1107,6 +1109,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
         char *texture_name = mp_tprintf(32, "texture%d", n);
         char *texture_size = mp_tprintf(32, "texture_size%d", n);
         char *texture_rot = mp_tprintf(32, "texture_rot%d", n);
+        char *texture_off = mp_tprintf(32, "texture_off%d", n);
         char *pixel_size = mp_tprintf(32, "pixel_size%d", n);
 
         if (gl_is_integer_format(s->gl_format)) {
@@ -1121,9 +1124,78 @@ static void pass_prepare_src_tex(struct gl_video *p)
         }
         gl_sc_uniform_vec2(sc, texture_size, f);
         gl_sc_uniform_mat2(sc, texture_rot, true, (float *)s->transform.m);
+        gl_sc_uniform_vec2(sc, texture_off, (float *)s->transform.t);
         gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
                                                        1.0f / f[1]});
     }
+}
+
+// Update the compute work group size requirements for the current shader.
+// Since we assume that all shaders can work with bigger working groups, just
+// never smaller ones, this effectively becomes the maximum of all size
+// requirements
+static void compute_size_minimum(struct gl_video *p, int bw, int bh)
+{
+    p->compute_w = MPMAX(p->compute_w, bw);
+    p->compute_h = MPMAX(p->compute_h, bh);
+}
+
+// w/h: the width/height of the compute shader's operating domain (e.g. the
+// target target that needs to be written, or the source texture that needs to
+// be reduced)
+// bw/bh: the width/height of the block (working group), which is tiled over
+// w/h as necessary
+static void dispatch_compute(struct gl_video *p, int w, int h, int bw, int bh)
+{
+    GL *gl = p->gl;
+
+    PRELUDE("layout (local_size_x = %d, local_size_y = %d) in;\n", bw, bh);
+
+    pass_prepare_src_tex(p);
+    gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
+
+    // Since we don't actually have vertices, we pretend for convenience
+    // reasons that we do and calculate the right texture coordinates based on
+    // the output sample ID
+    gl_sc_uniform_vec2(p->sc, "out_scale", (GLfloat[2]){ 1.0 / w, 1.0 / h });
+    PRELUDE("#define outcoord(id) (out_scale * (vec2(id) + vec2(0.5)))\n");
+
+    for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
+        struct img_tex *s = &p->pass_tex[n];
+        if (!s->gl_tex)
+            continue;
+
+        // We need to rescale the coordinates to the true texture size
+        char tex_scale[32];
+        snprintf(tex_scale, sizeof(tex_scale), "tex_scale%d", n);
+        gl_sc_uniform_vec2(p->sc, tex_scale, (GLfloat[2]){
+                (float)s->w / s->tex_w,
+                (float)s->h / s->tex_h,
+        });
+
+        PRELUDE("#define texcoord%d_raw(id) (tex_scale%d * outcoord(id))\n", n, n);
+        PRELUDE("#define texcoord%d_rot(id) (texture_rot%d * texcoord%d_raw(id) + "
+               "pixel_size%d * texture_off%d)\n", n, n, n, n, n);
+        // Clamp the texture coordinates to prevent sampling out-of-bounds in
+        // threads that exceed the requested width/height
+        PRELUDE("#define texmap%d(id) min(texcoord%d_rot(id), vec2(1.0))\n", n, n);
+        PRELUDE("const vec2 texcoord%d = texmap%d(gl_GlobalInvocationID);\n", n, n);
+    }
+
+    pass_record(p, gl_sc_generate(p->sc, GL_COMPUTE_SHADER));
+
+    // always round up when dividing to make sure we don't leave off a part of
+    // the image
+    int num_x = (w + bw - 1) / bw,
+        num_y = (h + bh - 1) / bh;
+
+    gl->DispatchCompute(num_x, num_y, 1);
+    gl_sc_reset(p->sc);
+
+    debug_check_gl(p, "after dispatching compute shader");
+
+    memset(&p->pass_tex, 0, sizeof(p->pass_tex));
+    p->pass_tex_num = 0;
 }
 
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
@@ -1169,7 +1241,7 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
-    pass_record(p, gl_sc_generate(p->sc));
+    pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     render_pass_quad(p, vp_w, vp_h, dst);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1187,10 +1259,23 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                             int w, int h, int flags)
 {
+    bool use_compute = p->compute_w > 0 && p->compute_h > 0;
+    if (use_compute)
+        flags |= FBOTEX_COMPUTE;
+
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
-    finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
-                       &(struct mp_rect){0, 0, w, h});
+    if (use_compute) {
+        gl_sc_uniform_image2D(p->sc, "out_image", dst_fbo->texture,
+                              dst_fbo->iformat, GL_WRITE_ONLY);
+        GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
+        dispatch_compute(p, w, h, p->compute_w, p->compute_h);
+    } else {
+        finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
+                           &(struct mp_rect){0, 0, w, h});
+    }
+
+    p->compute_w = p->compute_h = 0;
 }
 
 static const char *get_tex_swizzle(struct img_tex *img)
@@ -2479,7 +2564,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 
             pass_colormanage(p, csp_srgb, true);
         }
-        pass_record(p, gl_sc_generate(p->sc));
+        pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
         mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc);
         gl_sc_reset(p->sc);
     }

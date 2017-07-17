@@ -265,8 +265,11 @@ bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
 // Like fbotex_init(), except it can be called on an already initialized FBO;
 // and if the parameters are the same as the previous call, do not touch it.
-// flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
+// flags can be 0, or a combination of FBOTEX_FUZZY_W, FBOTEX_FUZZY_H and
+// FBOTEX_COMPUTE.
 // Enabling FUZZY for W or H means the w or h does not need to be exact.
+// FBOTEX_COMPUTE means that the texture will be written to by a compute shader
+// instead of actually being attached to an FBO.
 bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
                    GLenum iformat, int flags)
 {
@@ -315,7 +318,6 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
         .iformat = iformat,
     };
 
-    gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
     gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
     gl->TexImage2D(GL_TEXTURE_2D, 0, format->internal_format, fbo->rw, fbo->rh, 0,
@@ -328,20 +330,23 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     gl_check_error(gl, log, "after creating framebuffer texture");
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             GL_TEXTURE_2D, fbo->texture, 0);
+    bool skip_fbo = flags & FBOTEX_COMPUTE;
+    if (!skip_fbo) {
+        gl->GenFramebuffers(1, &fbo->fbo);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                 GL_TEXTURE_2D, fbo->texture, 0);
 
-    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (err != GL_FRAMEBUFFER_COMPLETE) {
-        mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
-               (int)err);
-        res = false;
+        GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (err != GL_FRAMEBUFFER_COMPLETE) {
+            mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
+                   (int)err);
+            res = false;
+        }
+
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl_check_error(gl, log, "after creating framebuffer");
     }
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    gl_check_error(gl, log, "after creating framebuffer");
 
     return res;
 }
@@ -462,6 +467,10 @@ struct sc_uniform {
     // Set for sampler uniforms.
     GLenum tex_target;
     GLuint tex_handle;
+    // Set for image uniforms
+    GLuint img_handle;
+    GLenum img_access;
+    GLenum img_iformat;
 };
 
 struct sc_cached_uniform {
@@ -475,6 +484,7 @@ struct sc_entry {
     int num_uniforms;
     bstr frag;
     bstr vert;
+    bstr comp;
     struct gl_timer *timer;
     struct gl_vao vao;
 };
@@ -492,6 +502,7 @@ struct gl_shader_cache {
     bstr header_text;
     bstr text;
     int next_texture_unit;
+    int next_image_unit;
     struct gl_vao *vao; // deprecated
 
     struct sc_entry *entries;
@@ -545,6 +556,10 @@ void gl_sc_reset(struct gl_shader_cache *sc)
                 gl->ActiveTexture(GL_TEXTURE0 + u->v.i[0]);
                 gl->BindTexture(u->tex_target, 0);
             }
+            if (u->type == UT_i && u->img_access) {
+                gl->BindImageTexture(u->v.i[0], 0, 0, GL_FALSE, 0,
+                                     u->img_access, u->img_iformat);
+            }
         }
         gl->ActiveTexture(GL_TEXTURE0);
     }
@@ -556,6 +571,7 @@ void gl_sc_reset(struct gl_shader_cache *sc)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
     sc->next_texture_unit = 1; // not 0, as 0 is "free for use"
+    sc->next_image_unit = 1;
     sc->vertex_entries = NULL;
     sc->vertex_size = 0;
     sc->current_shader = NULL;
@@ -571,6 +587,7 @@ static void sc_flush_cache(struct gl_shader_cache *sc)
         sc->gl->DeleteProgram(e->gl_shader);
         talloc_free(e->vert.start);
         talloc_free(e->frag.start);
+        talloc_free(e->comp.start);
         talloc_free(e->uniforms);
         gl_timer_free(e->timer);
         gl_vao_uninit(&e->vao);
@@ -639,6 +656,14 @@ void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text)
     bstr_xappend(sc, &sc->header_text, text);
 }
 
+void gl_sc_paddf(struct gl_shader_cache *sc, const char *textf, ...)
+{
+    va_list ap;
+    va_start(ap, textf);
+    bstr_xappend_vasprintf(sc, &sc->prelude_text, textf, ap);
+    va_end(ap);
+}
+
 static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
                                        const char *name)
 {
@@ -688,6 +713,29 @@ void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture
     u->v.i[0] = sc->next_texture_unit++;
     u->tex_target = GL_TEXTURE_2D;
     u->tex_handle = texture;
+}
+
+static const char *mp_image2D_type(GLenum access)
+{
+    switch (access) {
+    case GL_WRITE_ONLY: return "writeonly image2D";
+    case GL_READ_ONLY:  return "readonly image2D";
+    case GL_READ_WRITE: return "image2D";
+    default: abort();
+    }
+}
+
+void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint texture,
+                           GLuint iformat, GLenum access)
+{
+    struct sc_uniform *u = find_uniform(sc, name);
+    u->type = UT_i;
+    u->size = 1;
+    u->glsl_type = mp_image2D_type(access);
+    u->v.i[0] = sc->next_image_unit++;
+    u->img_handle = texture;
+    u->img_access = access;
+    u->img_iformat = iformat;
 }
 
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f)
@@ -809,6 +857,10 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
             gl->ActiveTexture(GL_TEXTURE0 + u->v.i[0]);
             gl->BindTexture(u->tex_target, u->tex_handle);
         }
+        if (u->img_handle) {
+            gl->BindImageTexture(u->v.i[0], u->img_handle, 0, GL_FALSE, 0,
+                                 u->img_access, u->img_iformat);
+        }
         break;
     case UT_f:
         if (memcmp(un->v.f, u->v.f, sizeof(u->v.f)) != 0) {
@@ -846,6 +898,16 @@ void gl_sc_set_cache_dir(struct gl_shader_cache *sc, struct mpv_global *global,
     sc->global = global;
 }
 
+static const char *shader_typestr(GLenum type)
+{
+    switch (type) {
+    case GL_VERTEX_SHADER:   return "vertex";
+    case GL_FRAGMENT_SHADER: return "fragment";
+    case GL_COMPUTE_SHADER:  return "compute";
+    default: abort();
+    }
+}
+
 static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
                                   GLenum type, const char *source)
 {
@@ -860,7 +922,7 @@ static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
     gl->GetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
     int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
-    const char *typestr = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
+    const char *typestr = shader_typestr(type);
     if (mp_msg_test(sc->log, pri)) {
         MP_MSG(sc, pri, "%s shader source:\n", typestr);
         mp_log_source(sc->log, pri, source);
@@ -911,23 +973,28 @@ static void link_shader(struct gl_shader_cache *sc, GLuint program)
         sc->error_state = true;
 }
 
-static GLuint compile_program(struct gl_shader_cache *sc, const char *vertex,
-                              const char *frag)
+// either 'compute' or both 'vertex' and 'frag' are needed
+static GLuint compile_program(struct gl_shader_cache *sc, struct bstr *vertex,
+                              struct bstr *frag, struct bstr *compute)
 {
     GL *gl = sc->gl;
     GLuint prog = gl->CreateProgram();
-    compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
-    compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag);
-    for (int n = 0; sc->vertex_entries[n].name; n++) {
-        char *vname = mp_tprintf(80, "vertex_%s", sc->vertex_entries[n].name);
-        gl->BindAttribLocation(prog, n, vname);
+    if (compute)
+        compile_attach_shader(sc, prog, GL_COMPUTE_SHADER, compute->start);
+    if (vertex && frag) {
+        compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex->start);
+        compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag->start);
+        for (int n = 0; sc->vertex_entries[n].name; n++) {
+            char *vname = mp_tprintf(80, "vertex_%s", sc->vertex_entries[n].name);
+            gl->BindAttribLocation(prog, n, vname);
+        }
     }
     link_shader(sc, prog);
     return prog;
 }
 
-static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
-                           const char *frag)
+static GLuint load_program(struct gl_shader_cache *sc, struct bstr *vertex,
+                           struct bstr *frag, struct bstr *compute)
 {
     GL *gl = sc->gl;
 
@@ -941,7 +1008,7 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
         mp_log_source(sc->log, MSGL_V, sc->text.start);
 
     if (!sc->cache_dir || !sc->cache_dir[0] || !gl->ProgramBinary)
-        return compile_program(sc, vertex, frag);
+        return compile_program(sc, vertex, frag, compute);
 
     // Try to load it from a disk cache, or compiling + saving it.
 
@@ -954,8 +1021,12 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
         abort();
     av_sha_init(sha, 256);
 
-    av_sha_update(sha, vertex, strlen(vertex) + 1);
-    av_sha_update(sha, frag, strlen(frag) + 1);
+    if (vertex)
+        av_sha_update(sha, vertex->start, vertex->len + 1);
+    if (frag)
+        av_sha_update(sha, frag->start, frag->len + 1);
+    if (compute)
+        av_sha_update(sha, compute->start, compute->len + 1);
 
     // In theory, the array could change order, breaking old binaries.
     for (int n = 0; sc->vertex_entries[n].name; n++) {
@@ -997,7 +1068,7 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
     }
 
     if (!prog) {
-        prog = compile_program(sc, vertex, frag);
+        prog = compile_program(sc, vertex, frag, compute);
 
         GLint size = 0;
         gl->GetProgramiv(prog, GL_PROGRAM_BINARY_LENGTH, &size);
@@ -1040,7 +1111,8 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
 // The return value is a mp_pass_perf containing performance metrics for the
 // execution of the generated shader. (Note: execution is measured up until
 // the corresponding gl_sc_reset call)
-struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
+// 'type' can be either GL_FRAGMENT_SHADER or GL_COMPUTE_SHADER
+struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc, GLenum type)
 {
     GL *gl = sc->gl;
 
@@ -1065,81 +1137,106 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
         if (gl->mpgl_caps & MPGL_CAP_3D_TEX)
             ADD(header, "precision mediump sampler3D;\n");
     }
-    ADD_BSTR(header, sc->prelude_text);
+
+    if (gl->glsl_version >= 130) {
+        ADD(header, "#define texture1D texture\n");
+        ADD(header, "#define texture3D texture\n");
+    } else {
+        ADD(header, "#define texture texture2D\n");
+    }
+
+    // Additional helpers.
+    ADD(header, "#define LUT_POS(x, lut_size)"
+                " mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
+
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
     char *vert_out = gl->glsl_version >= 130 ? "out" : "varying";
     char *frag_in = gl->glsl_version >= 130 ? "in" : "varying";
 
-    // vertex shader: we don't use the vertex shader, so just setup a dummy,
-    // which passes through the vertex array attributes.
-    bstr *vert_head = &sc->tmp[1];
-    ADD_BSTR(vert_head, *header);
-    bstr *vert_body = &sc->tmp[2];
-    ADD(vert_body, "void main() {\n");
-    bstr *frag_vaos = &sc->tmp[3];
-    for (int n = 0; sc->vertex_entries[n].name; n++) {
-        const struct gl_vao_entry *e = &sc->vertex_entries[n];
-        const char *glsl_type = vao_glsl_type(e);
-        if (strcmp(e->name, "position") == 0) {
-            // setting raster pos. requires setting gl_Position magic variable
-            assert(e->num_elems == 2 && e->type == GL_FLOAT);
-            ADD(vert_head, "%s vec2 vertex_position;\n", vert_in);
-            ADD(vert_body, "gl_Position = vec4(vertex_position, 1.0, 1.0);\n");
-        } else {
-            ADD(vert_head, "%s %s vertex_%s;\n", vert_in, glsl_type, e->name);
-            ADD(vert_head, "%s %s %s;\n", vert_out, glsl_type, e->name);
-            ADD(vert_body, "%s = vertex_%s;\n", e->name, e->name);
-            ADD(frag_vaos, "%s %s %s;\n", frag_in, glsl_type, e->name);
+    struct bstr *vert = NULL, *frag = NULL, *comp = NULL;
+
+    if (type == GL_FRAGMENT_SHADER) {
+        // vertex shader: we don't use the vertex shader, so just setup a
+        // dummy, which passes through the vertex array attributes.
+        bstr *vert_head = &sc->tmp[1];
+        ADD_BSTR(vert_head, *header);
+        bstr *vert_body = &sc->tmp[2];
+        ADD(vert_body, "void main() {\n");
+        bstr *frag_vaos = &sc->tmp[3];
+        for (int n = 0; sc->vertex_entries[n].name; n++) {
+            const struct gl_vao_entry *e = &sc->vertex_entries[n];
+            const char *glsl_type = vao_glsl_type(e);
+            if (strcmp(e->name, "position") == 0) {
+                // setting raster pos. requires setting gl_Position magic variable
+                assert(e->num_elems == 2 && e->type == GL_FLOAT);
+                ADD(vert_head, "%s vec2 vertex_position;\n", vert_in);
+                ADD(vert_body, "gl_Position = vec4(vertex_position, 1.0, 1.0);\n");
+            } else {
+                ADD(vert_head, "%s %s vertex_%s;\n", vert_in, glsl_type, e->name);
+                ADD(vert_head, "%s %s %s;\n", vert_out, glsl_type, e->name);
+                ADD(vert_body, "%s = vertex_%s;\n", e->name, e->name);
+                ADD(frag_vaos, "%s %s %s;\n", frag_in, glsl_type, e->name);
+            }
         }
-    }
-    ADD(vert_body, "}\n");
-    bstr *vert = vert_head;
-    ADD_BSTR(vert, *vert_body);
+        ADD(vert_body, "}\n");
+        vert = vert_head;
+        ADD_BSTR(vert, *vert_body);
 
-    // fragment shader; still requires adding used uniforms and VAO elements
-    bstr *frag = &sc->tmp[4];
-    ADD_BSTR(frag, *header);
-    if (gl->glsl_version >= 130) {
-        ADD(frag, "#define texture1D texture\n");
-        ADD(frag, "#define texture3D texture\n");
-        ADD(frag, "out vec4 out_color;\n");
-    } else {
-        ADD(frag, "#define texture texture2D\n");
-    }
-    ADD_BSTR(frag, *frag_vaos);
-    for (int n = 0; n < sc->num_uniforms; n++) {
-        struct sc_uniform *u = &sc->uniforms[n];
-        ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
-    }
+        // fragment shader; still requires adding used uniforms and VAO elements
+        frag = &sc->tmp[4];
+        ADD_BSTR(frag, *header);
+        if (gl->glsl_version >= 130)
+            ADD(frag, "out vec4 out_color;\n");
+        ADD_BSTR(frag, *frag_vaos);
+        for (int n = 0; n < sc->num_uniforms; n++) {
+            struct sc_uniform *u = &sc->uniforms[n];
+            ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
+        }
 
-    // Additional helpers.
-    ADD(frag, "#define LUT_POS(x, lut_size)"
-              " mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
-
-    // custom shader header
-    if (sc->header_text.len) {
-        ADD(frag, "// header\n");
+        ADD_BSTR(frag, sc->prelude_text);
         ADD_BSTR(frag, sc->header_text);
-        ADD(frag, "// body\n");
+
+        ADD(frag, "void main() {\n");
+        // we require _all_ frag shaders to write to a "vec4 color"
+        ADD(frag, "vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n");
+        ADD_BSTR(frag, sc->text);
+        if (gl->glsl_version >= 130) {
+            ADD(frag, "out_color = color;\n");
+        } else {
+            ADD(frag, "gl_FragColor = color;\n");
+        }
+        ADD(frag, "}\n");
     }
-    ADD(frag, "void main() {\n");
-    // we require _all_ frag shaders to write to a "vec4 color"
-    ADD(frag, "vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n");
-    ADD_BSTR(frag, sc->text);
-    if (gl->glsl_version >= 130) {
-        ADD(frag, "out_color = color;\n");
-    } else {
-        ADD(frag, "gl_FragColor = color;\n");
+
+    if (type == GL_COMPUTE_SHADER) {
+        comp = &sc->tmp[4];
+        ADD_BSTR(comp, *header);
+
+        for (int n = 0; n < sc->num_uniforms; n++) {
+            struct sc_uniform *u = &sc->uniforms[n];
+            ADD(comp, "uniform %s %s;\n", u->glsl_type, u->name);
+        }
+
+        ADD_BSTR(comp, sc->prelude_text);
+        ADD_BSTR(comp, sc->header_text);
+
+        ADD(comp, "void main() {\n");
+        ADD(comp, "vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n"); // convenience
+        ADD_BSTR(comp, sc->text);
+        ADD(comp, "}\n");
     }
-    ADD(frag, "}\n");
 
     struct sc_entry *entry = NULL;
     for (int n = 0; n < sc->num_entries; n++) {
         struct sc_entry *cur = &sc->entries[n];
-        if (bstr_equals(cur->frag, *frag) && bstr_equals(cur->vert, *vert)) {
-            entry = cur;
-            break;
-        }
+        if (frag && !bstr_equals(cur->frag, *frag))
+            continue;
+        if (vert && !bstr_equals(cur->vert, *vert))
+            continue;
+        if (comp && !bstr_equals(cur->comp, *comp))
+            continue;
+        entry = cur;
+        break;
     }
     if (!entry) {
         if (sc->num_entries == SC_MAX_ENTRIES)
@@ -1147,14 +1244,15 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
         MP_TARRAY_GROW(sc, sc->entries, sc->num_entries);
         entry = &sc->entries[sc->num_entries++];
         *entry = (struct sc_entry){
-            .vert = bstrdup(NULL, *vert),
-            .frag = bstrdup(NULL, *frag),
+            .vert = vert ? bstrdup(NULL, *vert) : (struct bstr){0},
+            .frag = frag ? bstrdup(NULL, *frag) : (struct bstr){0},
+            .comp = comp ? bstrdup(NULL, *comp) : (struct bstr){0},
             .timer = gl_timer_create(gl),
         };
     }
-    // build vertex shader from vao and cache the locations of the uniform variables
+    // build shader program and cache the locations of the uniform variables
     if (!entry->gl_shader) {
-        entry->gl_shader = load_program(sc, vert->start, frag->start);
+        entry->gl_shader = load_program(sc, vert, frag, comp);
         entry->num_uniforms = 0;
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_cached_uniform un = {

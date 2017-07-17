@@ -66,6 +66,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 #define FBOTEX_FUZZY_W 1
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
+#define FBOTEX_COMPUTE 4
 void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
 void fbotex_invalidate(struct fbotex *fbo);
 
@@ -141,9 +142,13 @@ void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
     PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text);
+void gl_sc_paddf(struct gl_shader_cache *sc, const char *textf, ...)
+    PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
                        GLuint texture);
 void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture);
+void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint texture,
+                           GLuint iformat, GLenum access);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, GLint f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);
@@ -156,7 +161,7 @@ void gl_sc_set_vertex_format(struct gl_shader_cache *sc,
                              const struct gl_vao_entry *entries,
                              size_t vertex_size);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
-struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc);
+struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc, GLenum type);
 void gl_sc_draw_data(struct gl_shader_cache *sc, GLenum prim, void *ptr,
                      size_t num);
 void gl_sc_reset(struct gl_shader_cache *sc);

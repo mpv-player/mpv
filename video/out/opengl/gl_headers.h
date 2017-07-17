@@ -48,7 +48,9 @@
 
 // --- GL 1.5
 
+#define GL_READ_ONLY                      0x88B8
 #define GL_WRITE_ONLY                     0x88B9
+#define GL_READ_WRITE                     0x88BA
 
 // --- GL 3.0
 
@@ -76,6 +78,10 @@
 #define GL_MAP_COHERENT_BIT               0x0080
 #define GL_DYNAMIC_STORAGE_BIT            0x0100
 #define GL_CLIENT_STORAGE_BIT             0x0200
+
+// -- GL 4.3 or GL_ARB_compute_shader
+
+#define GL_COMPUTE_SHADER                 0x91B9
 
 // --- GL_NV_vdpau_interop
 

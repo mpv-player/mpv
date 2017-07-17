@@ -335,6 +335,23 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .ver_core = 420,
+        .extension = "GL_ARB_shader_image_load_store",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(BindImageTexture),
+            DEF_FN(MemoryBarrier),
+            {0}
+        },
+    },
+    {
+        .ver_core = 430,
+        .extension = "GL_ARB_compute_shader",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(DispatchCompute),
+            {0},
+        },
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {
@@ -589,7 +606,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (shader && sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
             gl->glsl_version = glsl_major * 100 + glsl_minor;
         // restrict GLSL version to be forwards compatible
-        gl->glsl_version = MPMIN(gl->glsl_version, 400);
+        gl->glsl_version = MPMIN(gl->glsl_version, 430);
     }
 
     if (is_software_gl(gl)) {
