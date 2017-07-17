@@ -473,6 +473,13 @@ struct sc_uniform {
     GLenum img_iformat;
 };
 
+struct sc_buffer {
+    char *name;
+    char *format;
+    GLuint binding;
+    GLuint ssbo;
+};
+
 struct sc_cached_uniform {
     GLint loc;
     union uniform_val v;
@@ -503,6 +510,7 @@ struct gl_shader_cache {
     bstr text;
     int next_texture_unit;
     int next_image_unit;
+    int next_buffer_binding;
     struct gl_vao *vao; // deprecated
 
     struct sc_entry *entries;
@@ -512,6 +520,8 @@ struct gl_shader_cache {
 
     struct sc_uniform *uniforms;
     int num_uniforms;
+    struct sc_buffer *buffers;
+    int num_buffers;
 
     const struct gl_vao_entry *vertex_entries;
     size_t vertex_size;
@@ -562,6 +572,11 @@ void gl_sc_reset(struct gl_shader_cache *sc)
             }
         }
         gl->ActiveTexture(GL_TEXTURE0);
+
+        for (int n = 0; n < sc->num_buffers; n++) {
+            struct sc_buffer *b = &sc->buffers[n];
+            gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, b->binding, 0);
+        }
     }
 
     sc->prelude_text.len = 0;
@@ -570,8 +585,14 @@ void gl_sc_reset(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
+    for (int n = 0; n < sc->num_buffers; n++) {
+        talloc_free(sc->buffers[n].name);
+        talloc_free(sc->buffers[n].format);
+    }
+    sc->num_buffers = 0;
     sc->next_texture_unit = 1; // not 0, as 0 is "free for use"
     sc->next_image_unit = 1;
+    sc->next_buffer_binding = 1;
     sc->vertex_entries = NULL;
     sc->vertex_size = 0;
     sc->current_shader = NULL;
@@ -680,6 +701,21 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
     return &sc->uniforms[sc->num_uniforms - 1];
 }
 
+static struct sc_buffer *find_buffer(struct gl_shader_cache *sc,
+                                     const char *name)
+{
+    for (int n = 0; n < sc->num_buffers; n++) {
+        if (strcmp(sc->buffers[n].name, name) == 0)
+            return &sc->buffers[n];
+    }
+    // not found -> add it
+    struct sc_buffer new = {
+        .name = talloc_strdup(NULL, name),
+    };
+    MP_TARRAY_APPEND(sc, sc->buffers, sc->num_buffers, new);
+    return &sc->buffers[sc->num_buffers - 1];
+}
+
 const char *mp_sampler_type(GLenum texture_target)
 {
     switch (texture_target) {
@@ -736,6 +772,20 @@ void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint textur
     u->img_handle = texture;
     u->img_access = access;
     u->img_iformat = iformat;
+}
+
+void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, GLuint ssbo,
+                char *format, ...)
+{
+    struct sc_buffer *b = find_buffer(sc, name);
+    b->binding = sc->next_buffer_binding++;
+    b->ssbo = ssbo;
+    b->format = format;
+
+    va_list ap;
+    va_start(ap, format);
+    b->format = ta_vasprintf(sc, format, ap);
+    va_end(ap);
 }
 
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f)
@@ -1217,6 +1267,12 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc, GLenum type)
             ADD(comp, "uniform %s %s;\n", u->glsl_type, u->name);
         }
 
+        for (int n = 0; n < sc->num_buffers; n++) {
+            struct sc_buffer *b = &sc->buffers[n];
+            ADD(comp, "layout(std430, binding=%d) buffer %s { %s };\n",
+                b->binding, b->name, b->format);
+        }
+
         ADD_BSTR(comp, sc->prelude_text);
         ADD_BSTR(comp, sc->header_text);
 
@@ -1271,6 +1327,10 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc, GLenum type)
 
     for (int n = 0; n < sc->num_uniforms; n++)
         update_uniform(gl, entry, &sc->uniforms[n], n);
+    for (int n = 0; n < sc->num_buffers; n++) {
+        struct sc_buffer *b = &sc->buffers[n];
+        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, b->binding, b->ssbo);
+    }
 
     gl->ActiveTexture(GL_TEXTURE0);
 

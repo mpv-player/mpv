@@ -346,6 +346,11 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 430,
+        .extension = "GL_ARB_shader_storage_buffer_object",
+        .provides = MPGL_CAP_SSBO,
+    },
+    {
+        .ver_core = 430,
         .extension = "GL_ARB_compute_shader",
         .functions = (const struct gl_function[]) {
             DEF_FN(DispatchCompute),

@@ -236,9 +236,11 @@ struct gl_video {
     struct fbotex integer_fbo[4];
     struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
+    struct fbotex screen_fbo;
     struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
     struct fbotex vdpau_deinterleave_fbo[2];
+    GLuint hdr_peak_ssbo;
 
     int surface_idx;
     int surface_now;
@@ -368,6 +370,7 @@ const struct m_sub_options gl_video_conf = {
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
+        OPT_FLAG("hdr-compute-peak", compute_hdr_peak, 0),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
@@ -541,6 +544,7 @@ static void uninit_rendering(struct gl_video *p)
 
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
+    fbotex_uninit(&p->screen_fbo);
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -2358,6 +2362,8 @@ static void pass_scale_main(struct gl_video *p)
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
+    GL *gl = p->gl;
+
     // Figure out the target color space from the options, or auto-guess if
     // none were set
     struct mp_colorspace dst = {
@@ -2417,10 +2423,42 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
+    bool detect_peak = p->opts.compute_hdr_peak && mp_trc_is_hdr(src.gamma);
+    if (detect_peak) {
+        pass_describe(p, "detect HDR peak");
+        compute_size_minimum(p, 8, 8); // 8x8 is good for performance
+
+        if (!p->hdr_peak_ssbo) {
+            struct {
+                GLuint sig_peak_raw;
+                GLuint index;
+                GLuint frame_max[PEAK_DETECT_FRAMES+1];
+            } peak_ssbo = {0};
+
+            // Prefill with safe values
+            int safe = MP_REF_WHITE * mp_trc_nom_peak(p->image_params.color.gamma);
+            peak_ssbo.sig_peak_raw = PEAK_DETECT_FRAMES * safe;
+            for (int i = 0; i < PEAK_DETECT_FRAMES+1; i++)
+                peak_ssbo.frame_max[i] = safe;
+
+            gl->GenBuffers(1, &p->hdr_peak_ssbo);
+            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, p->hdr_peak_ssbo);
+            gl->BufferData(GL_SHADER_STORAGE_BUFFER, sizeof(peak_ssbo),
+                           &peak_ssbo, GL_STREAM_COPY);
+            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
+
+        gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
+            "uint sig_peak_raw;"
+            "uint index;"
+            "uint frame_max[%d];", PEAK_DETECT_FRAMES + 1
+        );
+    }
+
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
                    p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
-                   p->use_linear && !osd);
+                   detect_peak, p->use_linear && !osd);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
@@ -2709,6 +2747,17 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
     }
 
     pass_colormanage(p, p->image_params.color, false);
+
+    // Since finish_pass_direct doesn't work with compute shaders, and neither
+    // does the checkerboard/dither code, we may need an indirection via
+    // p->screen_fbo here.
+    if (p->compute_w > 0 && p->compute_h > 0) {
+        int o_w = p->dst_rect.x1 - p->dst_rect.x0,
+            o_h = p->dst_rect.y1 - p->dst_rect.y0;
+        finish_pass_fbo(p, &p->screen_fbo, o_w, o_h, FBOTEX_FUZZY);
+        struct img_tex tmp = img_tex_fbo(&p->screen_fbo, PLANE_RGB, p->components);
+        copy_img_tex(p, &(int){0}, tmp);
+    }
 
     if (p->has_alpha){
         if (p->opts.alpha_mode == ALPHA_BLEND_TILES) {
@@ -3326,6 +3375,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
     bool have_tex16 = !gl->es || (gl->mpgl_caps & MPGL_CAP_EXT16);
+    bool have_compute = gl->glsl_version >= 430; // easiest way to ensure all
 
     const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
                                    GL_RGBA8, 0};
@@ -3436,6 +3486,10 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
+    if (!have_compute && p->opts.compute_hdr_peak) {
+        p->opts.compute_hdr_peak = 0;
+        MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
+    }
 }
 
 static void init_gl(struct gl_video *p)
@@ -3471,6 +3525,7 @@ void gl_video_uninit(struct gl_video *p)
     gl_sc_destroy(p->sc);
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
+    gl->DeleteBuffers(1, &p->hdr_peak_ssbo);
 
     gl_timer_free(p->upload_timer);
     gl_timer_free(p->blit_timer);

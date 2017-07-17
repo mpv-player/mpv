@@ -149,6 +149,8 @@ void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
 void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture);
 void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint texture,
                            GLuint iformat, GLenum access);
+void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, GLuint ssbo,
+                char *format, ...);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, GLint f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);

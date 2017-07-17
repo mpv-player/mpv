@@ -521,7 +521,8 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
     GLSLF("color.rgb *= vec3(1.0/%f);\n", peak);
 }
 
-// Tone map from a known peak brightness to the range [0,1]
+// Tone map from a known peak brightness to the range [0,1]. If ref_peak
+// is 0, we will use peak detection instead
 static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
                           enum tone_mapping algo, float param, float desat)
 {
@@ -531,8 +532,42 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
     GLSL(float luma = dot(src_luma, color.rgb);)
     GLSL(float luma_orig = luma;)
 
+    if (!ref_peak) {
+        // For performance, we want to do as few atomic operations on global
+        // memory as possible, so use an atomic in shmem for the work group.
+        // We also want slightly more stable values, so use the group average
+        // instead of the group max
+        GLSLHF("shared uint group_sum = 0;\n");
+        GLSLF("atomicAdd(group_sum, uint(luma * %f));\n", MP_REF_WHITE);
+
+        // Have one thread in each work group update the frame maximum
+        GLSL(memoryBarrierBuffer();)
+        GLSL(barrier();)
+        GLSL(if (gl_LocalInvocationIndex == 0))
+            GLSL(atomicMax(frame_max[index], group_sum /
+                 (gl_WorkGroupSize.x * gl_WorkGroupSize.y));)
+
+        // Finally, have one thread per invocation update the total maximum
+        // and advance the index
+        GLSL(memoryBarrierBuffer();)
+        GLSL(barrier();)
+        GLSL(if (gl_GlobalInvocationID == ivec3(0)) {) // do this once per invocation
+            GLSLF("uint next = (index + 1) %% %d;\n", PEAK_DETECT_FRAMES+1);
+            GLSLF("sig_peak_raw = sig_peak_raw + frame_max[index] - frame_max[next];\n");
+            GLSLF("frame_max[next] = %d;\n", (int)MP_REF_WHITE);
+            GLSL(index = next;)
+        GLSL(})
+
+        GLSL(memoryBarrierBuffer();)
+        GLSL(barrier();)
+        GLSLF("const float sig_peak = 1.0/%f * float(sig_peak_raw);\n",
+              MP_REF_WHITE * PEAK_DETECT_FRAMES);
+    } else {
+        GLSLHF("const float sig_peak = %f;\n", ref_peak);
+    }
+
     // Desaturate the color using a coefficient dependent on the brightness
-    if (desat > 0 && ref_peak > desat) {
+    if (desat > 0) {
         GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
         GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
     }
@@ -542,23 +577,23 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLF("luma = clamp(%f * luma, 0.0, 1.0);\n", isnan(param) ? 1.0 : param);
         break;
 
-    case TONE_MAPPING_MOBIUS: {
-        float j = isnan(param) ? 0.3 : param;
-        // solve for M(j) = j; M(ref_peak) = 1.0; M'(j) = 1.0
+    case TONE_MAPPING_MOBIUS:
+        GLSLF("const float j = %f;\n", isnan(param) ? 0.3 : param);
+        // solve for M(j) = j; M(sig_peak) = 1.0; M'(j) = 1.0
         // where M(x) = scale * (x+a)/(x+b)
-        float a = -j*j * (ref_peak - 1) / (j*j - 2*j + ref_peak),
-              b = (j*j - 2*j*ref_peak + ref_peak) / (ref_peak - 1);
-
-        GLSLF("luma = mix(%f * (luma + %f) / (luma + %f), luma, luma <= %f);\n",
-              (b*b + 2*b*j + j*j) / (b - a), a, b, j);
+        GLSLF("const float a = -j*j * (sig_peak - 1) / (j*j - 2*j + sig_peak);\n");
+        GLSLF("const float b = (j*j - 2*j*sig_peak + sig_peak) / "
+              "max(1e-6, sig_peak - 1);\n");
+        GLSLF("const float scale = (b*b + 2*b*j + j*j) / (b-a);\n");
+        GLSL(luma = mix(luma, scale * (luma + a) / (luma + b), luma > j);)
         break;
-    }
 
     case TONE_MAPPING_REINHARD: {
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("luma = luma / (luma + %f);\n", offset);
-        GLSLF("luma *= %f;\n", (ref_peak + offset) / ref_peak);
+        GLSLF("const float lumascale = (sig_peak + %f) / sig_peak;\n", offset);
+        GLSL(luma *= lumascale;)
         break;
     }
 
@@ -568,20 +603,19 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLHF("return ((x * (%f*x + %f)+%f)/(x * (%f*x + %f) + %f)) - %f;\n",
                A, C*B, D*E, A, B, D*F, E/F);
         GLSLHF("}\n");
-
-        GLSLF("luma = hable(luma) / hable(%f);\n", ref_peak);
+        GLSL(luma = hable(luma) / hable(sig_peak);)
         break;
     }
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
-        GLSLF("luma = pow(luma * 1.0/%f, %f);\n", ref_peak, 1.0/gamma);
+        GLSLF("luma = pow(luma / sig_peak, %f);\n", 1.0/gamma);
         break;
     }
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("luma = %f * luma;\n", coeff / ref_peak);
+        GLSLF("luma = %f / sig_peak * luma;\n", coeff);
         break;
     }
 
@@ -596,11 +630,15 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 // Map colors from one source space to another. These source spaces must be
 // known (i.e. not MP_CSP_*_AUTO), as this function won't perform any
 // auto-guessing. If is_linear is true, we assume the input has already been
-// linearized (e.g. for linear-scaling)
+// linearized (e.g. for linear-scaling). If `detect_peak` is true, we will
+// detect the peak instead of relying on metadata. Note that this requires
+// the caller to have already bound the appropriate SSBO and set up the
+// compute shader metadata
 void pass_color_map(struct gl_shader_cache *sc,
                     struct mp_colorspace src, struct mp_colorspace dst,
                     enum tone_mapping algo, float tone_mapping_param,
-                    float tone_mapping_desat, bool is_linear)
+                    float tone_mapping_desat, bool detect_peak,
+                    bool is_linear)
 {
     GLSLF("// color mapping\n");
 
@@ -643,8 +681,8 @@ void pass_color_map(struct gl_shader_cache *sc,
     // Tone map to prevent clipping when the source signal peak exceeds the
     // encodable range
     if (src.sig_peak > dst_range) {
-        pass_tone_map(sc, src.sig_peak / dst_range, algo, tone_mapping_param,
-                      tone_mapping_desat);
+        float ref_peak = detect_peak ? 0 : src.sig_peak / dst_range;
+        pass_tone_map(sc, ref_peak, algo, tone_mapping_param, tone_mapping_desat);
     }
 
     // Adapt to the right colorspace if necessary
