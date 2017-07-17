@@ -93,6 +93,7 @@ static const struct mpgl_driver *const backends[] = {
 // initialize. The first entry is the most preferred version.
 const int mpgl_preferred_gl_versions[] = {
     440,
+    430,
     400,
     330,
     320,

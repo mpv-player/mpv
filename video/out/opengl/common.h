@@ -163,6 +163,11 @@ struct GL {
                                         void *);
     void (GLAPIENTRY *ProgramBinary)(GLuint, GLenum, const void *, GLsizei);
 
+    void (GLAPIENTRY *DispatchCompute)(GLuint, GLuint, GLuint);
+    void (GLAPIENTRY *BindImageTexture)(GLuint, GLuint, GLint, GLboolean,
+                                        GLint, GLenum, GLenum);
+    void (GLAPIENTRY *MemoryBarrier)(GLbitfield);
+
     const GLubyte* (GLAPIENTRY *GetStringi)(GLenum, GLuint);
     void (GLAPIENTRY *BindAttribLocation)(GLuint, GLuint, const GLchar *);
     void (GLAPIENTRY *BindFramebuffer)(GLenum, GLuint);
