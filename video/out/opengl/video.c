@@ -2052,8 +2052,7 @@ static void pass_read_video(struct gl_video *p)
         if (strcmp(conf->kernel.name, "bilinear") != 0) {
             GLSLF("// upscaling plane %d\n", n);
             pass_sample(p, tex[n], scaler, conf, 1.0, p->texture_w, p->texture_h);
-            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h,
-                            FBOTEX_FUZZY);
+            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h, 0);
             tex[n] = img_tex_fbo(&p->scale_fbo[n], tex[n].type, tex[n].components);
         }
 
@@ -2600,8 +2599,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
             pass_delinearize(p->sc, p->image_params.color.gamma);
             p->use_linear = false;
         }
-        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h,
-                        FBOTEX_FUZZY);
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         pass_read_fbo(p, &p->blend_subs_fbo);
