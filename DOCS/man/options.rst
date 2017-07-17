@@ -4752,6 +4752,14 @@ The following video options are currently all specific to ``--vo=opengl`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
+``--hdr-compute-peak``
+    Compute the HDR peak per-frame of relying on tagged metadata. These values
+    are averaged over local regions as well as over several frames to prevent
+    the value from jittering around too much. This option basically gives you
+    dynamic, per-scene tone mapping. Requires compute shaders, which is a
+    fairly recent OpenGL feature, and will probably also perform horribly on
+    some drivers, so enable at your own risk.
+
 ``--tone-mapping-desaturate=<value>``
     Apply desaturation for highlights that exceed this level of brightness. The
     higher the parameter, the more color information will be preserved. This

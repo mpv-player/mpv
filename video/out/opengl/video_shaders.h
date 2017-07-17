@@ -44,7 +44,8 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
 void pass_color_map(struct gl_shader_cache *sc,
                     struct mp_colorspace src, struct mp_colorspace dst,
                     enum tone_mapping algo, float tone_mapping_param,
-                    float tone_mapping_desat, bool is_linear);
+                    float tone_mapping_desat, bool use_detected_peak,
+                    bool is_linear);
 
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
                         AVLFG *lfg);
