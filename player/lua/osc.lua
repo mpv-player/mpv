@@ -1314,6 +1314,133 @@ layouts["bottombar"] = function()
     lo.slider.stype = user_opts["seekbarstyle"]
 end
 
+layouts["slimbottombar"] = function()
+    local osc_geo = {
+        x = -2,
+        y = osc_param.playresy - 30 - user_opts.barmargin,
+        an = 7,
+        w = osc_param.playresx + 4,
+        h = 30,
+    }
+
+    local padX = 9
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 170 or 110
+    local tsW = 90
+    local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = osc_param.playresy - 30 - user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
+    osc_param.areas = {}
+
+    add_area("input", get_hitbox_coords(osc_geo.x, osc_geo.y, osc_geo.an,
+                                        osc_geo.w, osc_geo.h))
+
+    local sh_area_y0, sh_area_y1
+    sh_area_y0 = get_align(-1 + (2*user_opts.deadzonesize),
+                           osc_geo.y - (osc_geo.h / 2), 0, 0)
+    sh_area_y1 = osc_param.playresy - user_opts.barmargin
+    add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
+
+    local lo, geo
+
+    -- Background bar
+    new_element("bgbox", "box")
+    lo = add_layout("bgbox")
+
+    lo.geometry = osc_geo
+    lo.layer = 10
+    lo.style = osc_styles.box
+    lo.alpha[1] = user_opts.boxalpha
+
+    -- Playback control buttons
+    geo = { x = osc_geo.x + padX, y = osc_geo.y + (osc_geo.h / 2), an = 4,
+            w = buttonW, h = osc_geo.h }
+    lo = add_layout("playpause")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_prev")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_next")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Left timecode
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_left")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_l = geo.x + padX
+
+    -- Fullscreen button
+    geo = { x = osc_geo.x + osc_geo.w - buttonW - padX, y = geo.y, an = 4,
+            w = buttonW, h = geo.h }
+    lo = add_layout("tog_fs")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Volume
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("volume")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Track selection buttons
+    geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
+    lo = add_layout("cy_sub")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("cy_audio")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+
+    -- Right timecode
+    geo = { x = geo.x - padX - tcW - 10, y = geo.y, an = geo.an,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_right")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_r = geo.x - padX
+
+
+    -- Seekbar
+    geo = { x = sb_l, y = geo.y, an = geo.an,
+            w = math.max(0, sb_r - sb_l), h = geo.h }
+    new_element("bgbar1", "box")
+    lo = add_layout("bgbar1")
+
+    lo.geometry = geo
+    lo.layer = 15
+    lo.style = osc_styles.timecodesBar
+    lo.alpha[1] =
+        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+
+    lo = add_layout("seekbar")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodes
+    lo.slider.border = 0
+    lo.slider.gap = 2
+    lo.slider.tooltip_style = osc_styles.timePosBar
+    lo.slider.tooltip_an = 5
+    lo.slider.stype = user_opts["seekbarstyle"]
+end
+
 layouts["topbar"] = function()
     local osc_geo = {
         x = -2,
@@ -1478,6 +1605,136 @@ layouts["topbar"] = function()
     lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
         osc_styles.vidtitleBar,
         geo.x, geo.y-geo.h, geo.w, geo.y+geo.h)
+end
+
+layouts["slimtopbar"] = function()
+    local osc_geo = {
+        x = -2,
+        y = 30 + user_opts.barmargin,
+        an = 1,
+        w = osc_param.playresx + 4,
+        h = 30,
+    }
+
+    local padX = 9
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 170 or 110
+    local tsW = 90
+    local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = 30 + user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
+    osc_param.areas = {}
+
+    add_area("input", get_hitbox_coords(osc_geo.x, osc_geo.y + 1, osc_geo.an,
+                                        osc_geo.w, osc_geo.h + 1))
+
+    local sh_area_y0, sh_area_y1
+    sh_area_y0 = user_opts.barmargin
+    sh_area_y1 = (osc_geo.y + (osc_geo.h / 2)) +
+                 get_align(1 - (2*user_opts.deadzonesize),
+                 osc_param.playresy - (osc_geo.y + (osc_geo.h / 2)), 0, 0)
+    add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
+
+    local lo, geo
+
+    -- Background bar
+    new_element("bgbox", "box")
+    lo = add_layout("bgbox")
+
+    lo.geometry = osc_geo
+    lo.layer = 10
+    lo.style = osc_styles.box
+    lo.alpha[1] = user_opts.boxalpha
+
+
+    -- Playback control buttons
+    geo = { x = osc_geo.x + padX, y = (osc_geo.y - osc_geo.h / 2), an = 4,
+            w = buttonW, h = osc_geo.h }
+    lo = add_layout("playpause")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_prev")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_next")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+
+    -- Left timecode
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_left")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_l = geo.x + padX
+
+    -- Fullscreen button
+    geo = { x = osc_geo.x + osc_geo.w - buttonW - padX, y = geo.y, an = 4,
+            w = buttonW, h = geo.h }
+    lo = add_layout("tog_fs")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Volume
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("volume")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Track selection buttons
+    geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
+    lo = add_layout("cy_sub")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("cy_audio")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+
+    -- Right timecode
+    geo = { x = geo.x - geo.w - padX - tcW - 10, y = geo.y, an = 4,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_right")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_r = geo.x - padX
+
+
+    -- Seekbar
+    geo = { x = sb_l, y = user_opts.barmargin, an = 7,
+        w = math.max(0, sb_r - sb_l), h = geo.h }
+    new_element("bgbar1", "box")
+    lo = add_layout("bgbar1")
+
+    lo.geometry = geo
+    lo.layer = 15
+    lo.style = osc_styles.timecodesBar
+    lo.alpha[1] =
+        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+
+    lo = add_layout("seekbar")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+    lo.slider.border = 0
+    lo.slider.gap = 2
+    lo.slider.tooltip_style = osc_styles.timePosBar
+    lo.slider.stype = user_opts["seekbarstyle"]
+    lo.slider.tooltip_an = 5
 end
 
 -- Validate string type user options

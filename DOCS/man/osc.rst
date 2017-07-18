@@ -162,7 +162,8 @@ Configurable Options
     Default: bottombar
 
     The layout for the OSC. Currently available are: box, slimbox,
-    bottombar and topbar. Default pre-0.21.0 was 'box'.
+    bottombar, slimbottombar, topbar and slimtopbar.
+    Default pre-0.21.0 was 'box'.
 
 ``seekbarstyle``
     Default: bar
