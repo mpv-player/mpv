@@ -813,6 +813,7 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.levels == c2.levels &&
            c1.primaries == c2.primaries &&
            c1.gamma == c2.gamma &&
+           c1.light == c2.light &&
            c1.sig_peak == c2.sig_peak;
 }
 
