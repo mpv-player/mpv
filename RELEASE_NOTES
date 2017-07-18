@@ -1,3 +1,146 @@
+Release 0.26.0
+==============
+
+VA-API/VDPAU hardware decoding now requires FFmpeg > 3.2.
+DVB support is disabled by default since it does not work with some older kernels.
+Built-in V4L TV support is disabled by default. av://v4l2 can be used instead.
+Support for C plugins is now enabled by default (#4491).
+
+Many more parts of the player are now licensed under LGPL, see Copyright file.
+Thanks to all contributors who have agreed to relicensing of their changes!
+See #2033 for details.
+
+
+Features
+--------
+
+Added
+~~~~~
+
+- Universal Windows Plaform (UWP) support (libmpv only)
+- csputils: implement sony s-gamut
+- js: add javascript scripting support using MuJS
+  See DOCS/man/javascript.rst for more details
+- vo_opengl: add new HDR tone mapping algorithm (mobius, now default)
+- vo_opengl: hwdec_cuda: Support separate decode and display devices
+- vo_opengl: implement sony s-log1 and s-log2 trc
+- vo_opengl: implement support for OOTFs and non-display referred content
+
+
+Removed
+~~~~~~~
+
+- vf_dlopen: remove this filter
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- vo_opengl: add --tone-mapping-desaturate
+- vo_opengl: support tone-mapping-param for `clip`
+- ytdl_hook: add option to exclude URLs from being parsed
+
+
+Changed
+~~~~~~~
+
+- allow setting profile option with libmpv
+- audio: move replaygain control to top-level options
+- external_files: parse ~ in --{sub,audio}-paths
+- options: change --sub-fix-timing default to no (#4484)
+- options: expose string list actions for --sub-file option
+- options: slight cleanup of --sub-ass-style-override
+  * signfs → scale
+  * --sub-ass-style-override → --sub-ass-override
+- renamed the HDR TRCs `st2084` and `std-b67` to `pq` and `hlg` respectively
+- replace vf_format's `peak` suboption by `sig-peak`, which is relative to the reference white level instead of in cd/m^2
+- the following options change to append-by-default (and possibly separator):
+  * --script
+- video: change --video-aspect-method default value to `container`
+
+
+Deprecated
+~~~~~~~~~~
+
+- m_option: deprecate multiple items for -add etc.
+- player: deprecate "osd" command
+- --audio-file-paths => --audio-file-path
+- --sub-paths => --sub-file-path
+- --opengl-shaders => --opengl-shader
+- --sub-paths => --sub-file-paths
+- the following options are deprecated for setting via API:
+  * "script" (use "scripts")
+  * "sub-file" (use "sub-files")
+  * "audio-file" (use "audio-files")
+  * "external-file" (use "external-files")
+  (the compatibility hacks for this will be removed after this release)
+
+
+Removed
+~~~~~~~
+
+- chmap: remove misleading "downmix" channel layout name (#4545)
+- demux_lavf: remove --demuxer-lavf-cryptokey option (#4579)
+- input.conf: drop TV/DVB bindings
+- options: remove remaining deprecated audio device selection options
+  * --alsa-device
+  * --oss-device
+  * --coreaudio-exclusive
+  * --pulse-sink
+  * --rsound-host/--rsound-port
+  * --ao-sndio-device
+  * --ao-wasapi-exclusive
+  * --ao-wasapi-device
+- remove option --target-brightness
+- remove property "video-params/nom-peak"
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- TOOLS/lua/autoload.lua: actually sort files case insensitive (#4398)
+- TOOLS/lua/autoload.lua: ignores all files starting with "."
+- ao_openal: kill off device listing (#4311)
+- ao_pulse: reorder format choice to prefer float and S32 over S16 as fallback format
+- ao_wasapi: try correct initial format (#4582)
+- command: add missing change notification for playlist-shuffle (#4573)
+- demux_disc: fix bluray subtitle language retrieval (#4611)
+- demux_mkv: fix alpha with vp9 + libvpx
+- demux_mkv: support FFmpeg A_MS/ACM extensions
+- ipc-unix: don’t truncate the message on EAGAIN (#4452)
+- ipc: raise json nesting limit (#4394)
+- macOS: fix mpv-wrapper.sh when used with csh or tcsh shell
+- macOS: properly unhide Dock when quitting during System fs animation
+- mpv_identify: replace deprecated fps property (#4550)
+- options/path: fallback to USERPROFILE if HOME isn't set
+- player: close audio device on no audio track
+- player: fix potential segfault when playing dvd:// with DVD disabled (#4393)
+- player: prevent seek position to jump around adjacent keyframes, e.g. when dragging the OSC bar on short videos (#4183)
+- vo_opengl: bump up SHADER_MAX_HOOKS and MAX_TEXTURE_HOOKS to 64
+- vo_opengl: correct off-by-one in scale=oversample
+- vo_opengl: do not use vaapi-over-GLX (#4555)
+- vo_opengl: fall back to ordered dither instead of blowing up (#4519)
+- vo_opengl: tone map in linear XYZ instead of RGB
+- x11: add 128x128 sized icon support
+- ytdl_hook: add a header to support geo-bypass
+- ytdl_hook: don't override start time set by saved state
+- ytdl_hook: don't override user-set start time
+- ytdl_hook: treat single-entry playlists as a single video
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.25.0..v0.26.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.25.0...v0.26.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.25.0..v0.26.0
+
+
 Release 0.25.0
 ==============
 
