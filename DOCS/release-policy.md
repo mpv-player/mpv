@@ -1,8 +1,8 @@
 Release Policy
 ==============
 
-Once or twice a month, a new release is cut off of the master branch and is
-assigned a 0.X.Y version number, where X is incremented each time a release
+Whenever lachs0r feels like it, a new release is cut off of the master branch and
+is assigned a 0.X.Y version number, where X is incremented each time a release
 contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
 changes.
