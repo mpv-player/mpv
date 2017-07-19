@@ -437,7 +437,7 @@ Suffix        Meaning
 -set          Set a list of items
 ============= ===============================================
 
-Although some operations allow specifiying multiple ``,``-separated items, using
+Although some operations allow specifying multiple ``,``-separated items, using
 this is strongly discouraged and deprecated, except for ``-set``.
 
 Without suffix, the action taken is normally ``-set``.
