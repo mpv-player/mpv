@@ -1339,6 +1339,7 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_size texture_size%d\n", name, id);
     GLSLHF("#define %s_rot texture_rot%d\n", name, id);
     GLSLHF("#define %s_pt pixel_size%d\n", name, id);
+    GLSLHF("#define %s_map texmap%d\n", name, id);
     GLSLHF("#define %s_mul %f\n", name, tex.multiplier);
 
     // Set up the sampling functions
@@ -1903,6 +1904,7 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->desc),
                   plane_names[tex.type]);
 
+    compute_size_minimum(p, shader->compute_w, shader->compute_h);
     load_shader(p, shader->pass_body);
     GLSLF("color = hook();\n");
 
