@@ -1755,7 +1755,21 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
-        pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+        // Use a compute shader where possible, fallback to the slower texture
+        // fragment sampler otherwise. Also use the fragment shader for
+        // very large kernels to avoid exhausting shmem
+        if (p->gl->glsl_version < 430 || scaler->kernel->f.radius > 16) {
+            pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+        } else {
+            // For performance we want to load at least as many pixels
+            // horizontally as there are threads in a warp (32 for nvidia), as
+            // well as enough to take advantage of shmem parallelism
+            const int warp_size = 32, threads = 256;
+            compute_size_minimum(p, warp_size, threads / warp_size);
+            pass_compute_polar(p->sc, scaler, tex.components,
+                               p->compute_w, p->compute_h,
+                               (float)w / tex.w, (float)h / tex.h);
+        }
     } else if (scaler->kernel) {
         pass_sample_separated(p, tex, scaler, w, h);
     } else {
