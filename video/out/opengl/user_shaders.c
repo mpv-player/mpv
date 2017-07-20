@@ -269,6 +269,14 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
             continue;
         }
 
+        if (bstr_eatstart0(&line, "COMPUTE")) {
+            if (bstr_sscanf(line, "%d %d", &out->compute_w, &out->compute_h) != 2) {
+                mp_err(log, "Error while parsing COMPUTE!\n");
+                return false;
+            }
+            continue;
+        }
+
         // Unknown command type
         mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
         return false;

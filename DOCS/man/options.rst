@@ -4271,6 +4271,17 @@ The following video options are currently all specific to ``--vo=opengl`` and
         should be stored in the texture, up to 4 (rgba). By default, this value
         is equal to the number of components in HOOKED.
 
+    COMPUTE bw bh
+        Specifies that this shader should be treated as a compute shader, with
+        the block size bw and bh. The compute shader will be dispatched with
+        however many blocks are necessary to completely tile over the output.
+        Compute shaders in mpv are treated similarly to fragment shaders, and
+        are still required to produce an output color. In addition, mpv
+        provides a special function NAME_map(id) to map from the global ID
+        space to the texture coordinates for all bound textures. The only real
+        difference is the fact that you can use shared memory inside compute
+        shaders.
+
     Each bound texture (via ``BIND``) will make available the following
     definitions to that shader pass, where NAME is the name of the bound
     texture:

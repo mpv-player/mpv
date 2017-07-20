@@ -66,6 +66,8 @@ struct gl_user_shader {
     struct szexp height[MAX_SZEXP_SIZE];
     struct szexp cond[MAX_SZEXP_SIZE];
     int components;
+    int compute_w;
+    int compute_h;
 };
 
 // Parse the next shader pass from 'body'. Returns false if the end of the
