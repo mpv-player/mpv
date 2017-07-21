@@ -955,18 +955,6 @@ Video
     added to the filter chain manually with ``--vf``. Then the core shouldn't
     disable deinterlacing just because the ``--deinterlace`` was not set.
 
-``--field-dominance=<auto|top|bottom>``
-    Set first field for interlaced content.
-
-    :auto:    (default) If the decoder does not export the appropriate
-              information, it falls back on ``top`` (top field first).
-    :top:     top field first
-    :bottom:  bottom field first
-
-    .. note::
-
-        Setting either ``top`` or ``bottom`` will flag all frames as interlaced.
-
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
 

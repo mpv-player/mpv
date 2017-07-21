@@ -327,15 +327,6 @@ static bool receive_frame(struct dec_video *d_video, struct mp_image **out_image
     if (!mpi)
         return progress;
 
-#if HAVE_GPL
-    if (opts->field_dominance == 0) {
-        mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
-    } else if (opts->field_dominance == 1) {
-        mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
-        mpi->fields |= MP_IMGFIELD_INTERLACED;
-    }
-#endif
-
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = mpi->pts;
     double dts = mpi->dts;

@@ -253,7 +253,6 @@ typedef struct MPOpts {
     int deinterlace;
     float movie_aspect;
     int aspect_method;
-    int field_dominance;
     char **sub_name;
     char **sub_paths;
     char **audiofile_paths;

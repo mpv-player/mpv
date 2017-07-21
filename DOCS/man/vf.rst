@@ -787,7 +787,7 @@ Available mpv-only filters are:
         no
             Don't perform deinterlacing.
         first-field
-            Show only first field (going by ``--field-dominance``).
+            Show only first field.
         bob
             bob deinterlacing (default).
         weave, motion-adaptive, motion-compensated

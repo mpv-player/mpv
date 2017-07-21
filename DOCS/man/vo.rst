@@ -356,7 +356,7 @@ Available video output drivers are:
         no
             Don't allow deinterlacing (default for newer libva).
         first-field
-            Show only first field (going by ``--field-dominance``).
+            Show only first field.
         bob
             bob deinterlacing (default for older libva).
 

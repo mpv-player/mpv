@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.27.0 ---
+    - drop previously deprecated --field-dominance option
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.
