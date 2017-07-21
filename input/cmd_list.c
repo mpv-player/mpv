@@ -98,9 +98,6 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_PLAYLIST_SHUFFLE, "playlist-shuffle", },
   { MP_CMD_SUB_STEP, "sub-step", { ARG_INT }, .allow_auto_repeat = true },
   { MP_CMD_SUB_SEEK, "sub-seek", { ARG_INT }, .allow_auto_repeat = true },
-#if HAVE_GPL
-  { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
-#endif
   { MP_CMD_PRINT_TEXT, "print-text", { ARG_STRING }, .allow_auto_repeat = true },
   { MP_CMD_SHOW_TEXT, "show-text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) },
     .allow_auto_repeat = true},
