@@ -1146,8 +1146,6 @@ static void demux_close_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     if (priv) {
-        if (priv->avfc)
-            av_freep(&priv->avfc->key);
         avformat_close_input(&priv->avfc);
         if (priv->pb)
             av_freep(&priv->pb->buffer);
