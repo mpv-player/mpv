@@ -25,6 +25,7 @@ Interface changes
     - remove client API compatibility handling for "script", "sub-file",
       "audio-file", "external-file" (these cases used to log a deprecation
       warning)
+    - drop deprecated --video-aspect-method=hybrid option choice
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

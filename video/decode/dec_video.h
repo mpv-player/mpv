@@ -72,7 +72,6 @@ struct dec_video {
     double decoded_pts;
 
     struct mp_image_params dec_format, last_format, fixed_format;
-    float initial_decoder_aspect;
 
     double start_pts;
     double start, end;

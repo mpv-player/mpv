@@ -205,35 +205,10 @@ static void fix_image_params(struct dec_video *d_video,
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
-    float dec_aspect = p.p_w > 0 && p.p_h > 0 ? p.p_w / (float)p.p_h : 0;
-
-#if HAVE_GPL
-    if (d_video->initial_decoder_aspect == 0)
-        d_video->initial_decoder_aspect = dec_aspect;
-#endif
-
     bool use_container = true;
-    switch (opts->aspect_method) {
-    case 0:
-#if HAVE_GPL
-        // We normally prefer the container aspect, unless the decoder aspect
-        // changes at least once.
-        if (dec_aspect > 0 && d_video->initial_decoder_aspect != dec_aspect) {
-            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
-            // Even if the aspect switches back, don't use container aspect again.
-            d_video->initial_decoder_aspect = -1;
-            use_container = false;
-        }
-        break;
-#else
-        /* fall through, behave as "bitstream" */
-#endif
-    case 1:
-        if (dec_aspect) {
-            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
-            use_container = false;
-        }
-        break;
+    if (opts->aspect_method == 1 && p.p_w > 0 && p.p_h > 0) {
+        MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
+        use_container = false;
     }
 
     if (use_container && c->par_w > 0 && c->par_h) {

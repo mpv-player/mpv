@@ -443,7 +443,7 @@ const m_option_t mp_opts[] = {
     //  0 means square pixels
     OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
-               ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
+               ({"bitstream", 1}, {"container", 2})),
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),

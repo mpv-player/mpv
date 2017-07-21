@@ -835,13 +835,10 @@ Video
         - ``--video-aspect=16:9`` or ``--video-aspect=1.7777``
         - ``--no-video-aspect`` or ``--video-aspect=no``
 
-``--video-aspect-method=<hybrid|bitstream|container>``
+``--video-aspect-method=<bitstream|container>``
     This sets the default video aspect determination method (if the aspect is
     _not_ overridden by the user with ``--video-aspect`` or others).
 
-    :hybrid:    Prefer the container aspect ratio. If the bitstream aspect
-                switches mid-stream, switch to preferring the bitstream aspect.
-                This was the default in older mpv and mplayer2. Deprecated.
     :container: Strictly prefer the container aspect ratio. This is apparently
                 the default behavior with VLC, at least with Matroska. Note that
                 if the container has no aspect ratio set, the behavior is the
