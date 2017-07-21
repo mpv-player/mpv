@@ -910,19 +910,8 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     int r;
 
     struct m_config_option *co = m_config_get_co(config, name);
-    if (!co) {
-        co = m_config_get_co_raw(config, name);
-        if (co && co->opt->type == &m_option_type_cli_alias) {
-            /*bstr old_name = name;
-            co = m_config_mogrify_cli_opt(config, &name, &(bool){0}, &(int){0});
-            */
-            name = bstr0((char *)co->opt->priv);
-            MP_WARN(config, "Setting %.*s via API is deprecated, set %s instead.\n",
-                    BSTR_P(name), co->opt->name);
-        } else {
-            return M_OPT_UNKNOWN;
-        }
-    }
+    if (!co)
+        return M_OPT_UNKNOWN;
 
     // Do this on an "empty" type to make setting the option strictly overwrite
     // the old value, as opposed to e.g. appending to lists.

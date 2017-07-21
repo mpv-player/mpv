@@ -22,6 +22,9 @@ Interface changes
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command
+    - remove client API compatibility handling for "script", "sub-file",
+      "audio-file", "external-file" (these cases used to log a deprecation
+      warning)
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.
