@@ -124,3 +124,5 @@ mp.add_key_binding("Shift+F5", 'acompressor-dec-attack', function() update_param
 
 mp.add_key_binding("F6", 'acompressor-inc-release', function() update_param('Release', 10); end, { repeatable = true })
 mp.add_key_binding("Shift+F6", 'acompressor-dec-release', function() update_param('Release', -10); end, { repeatable = true })
+
+update_filter()
