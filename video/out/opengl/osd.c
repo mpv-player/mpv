@@ -25,6 +25,8 @@
 #include "utils.h"
 #include "osd.h"
 
+#define GLSL(x) gl_sc_add(sc, #x "\n");
+
 // glBlendFuncSeparate() arguments
 static const int blend_factors[SUBBITMAP_COUNT][4] = {
     [SUBBITMAP_LIBASS] = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
@@ -67,7 +69,6 @@ struct mpgl_osd {
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct gl_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
-    struct gl_vao vao;
     int64_t change_counter;
     // temporary
     int stereo_mode;
@@ -94,8 +95,6 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
     for (int n = 0; n < SUBBITMAP_COUNT; n++)
         ctx->formats[n] = !!ctx->fmt_table[n];
 
-    gl_vao_init(&ctx->vao, gl, sizeof(struct vertex), vertex_vao);
-
     return ctx;
 }
 
@@ -105,8 +104,6 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
         return;
 
     GL *gl = ctx->gl;
-
-    gl_vao_uninit(&ctx->vao);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = ctx->parts[n];
@@ -209,6 +206,36 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
            osd->num_subparts * sizeof(osd->subparts[0]));
 }
 
+bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
+                           struct gl_shader_cache *sc)
+{
+    assert(index >= 0 && index < MAX_OSD_PARTS);
+    struct mpgl_osd_part *part = ctx->parts[index];
+
+    enum sub_bitmap_format fmt = part->format;
+    if (!fmt || !part->num_subparts)
+        return false;
+
+    gl_sc_uniform_tex(sc, "osdtex", GL_TEXTURE_2D, part->texture);
+    switch (fmt) {
+    case SUBBITMAP_RGBA: {
+        GLSL(color = texture(osdtex, texcoord).bgra;)
+        break;
+    }
+    case SUBBITMAP_LIBASS: {
+        GLSL(color =
+            vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
+        break;
+    }
+    default:
+        abort();
+    }
+
+    gl_sc_set_vertex_format(sc, vertex_vao, sizeof(struct vertex));
+
+    return true;
+}
+
 static void write_quad(struct vertex *va, struct gl_transform t,
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
@@ -263,7 +290,8 @@ static void get_3d_side_by_side(int stereo_mode, int div[2])
     }
 }
 
-void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
+void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int vp_w, int vp_h, int index,
+                          struct gl_shader_cache *sc)
 {
     GL *gl = ctx->gl;
     struct mpgl_osd_part *part = ctx->parts[index];
@@ -297,27 +325,10 @@ void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
 
     ctx->gl->Viewport(0, 0, vp_w, abs(vp_h));
 
-    gl_vao_draw_data(&ctx->vao, GL_TRIANGLES, part->vertices, part->num_vertices);
+    gl_sc_draw_data(sc, GL_TRIANGLES, part->vertices, part->num_vertices);
 
     gl->BindTexture(GL_TEXTURE_2D, 0);
     gl->Disable(GL_BLEND);
-}
-
-enum sub_bitmap_format mpgl_osd_get_part_format(struct mpgl_osd *ctx, int index)
-{
-    assert(index >= 0 && index < MAX_OSD_PARTS);
-    return ctx->parts[index]->format;
-}
-
-GLuint mpgl_osd_get_part_texture(struct mpgl_osd *ctx, int index)
-{
-    assert(index >= 0 && index < MAX_OSD_PARTS);
-    return ctx->parts[index]->texture;
-}
-
-struct gl_vao *mpgl_osd_get_vao(struct mpgl_osd *ctx)
-{
-    return &ctx->vao;
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)

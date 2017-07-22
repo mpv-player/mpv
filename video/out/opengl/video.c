@@ -2407,26 +2407,10 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 
     p->gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
-        if (!fmt)
+        // (This returns false if this part is empty with nothing to draw.)
+        if (!mpgl_osd_draw_prepare(p->osd, n, p->sc))
             continue;
-        gl_sc_uniform_tex(p->sc, "osdtex", GL_TEXTURE_2D,
-                          mpgl_osd_get_part_texture(p->osd, n));
-        switch (fmt) {
-        case SUBBITMAP_RGBA: {
-            pass_describe(p, "drawing osd (rgba)");
-            GLSL(color = texture(osdtex, texcoord).bgra;)
-            break;
-        }
-        case SUBBITMAP_LIBASS: {
-            pass_describe(p, "drawing osd (libass)");
-            GLSL(color =
-                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
-            break;
-        }
-        default:
-            abort();
-        }
+        pass_describe(p, "drawing osd");
         // When subtitles need to be color managed, assume they're in sRGB
         // (for lack of anything saner to do)
         if (cms) {
@@ -2438,11 +2422,9 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 
             pass_colormanage(p, csp_srgb, true);
         }
-        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         pass_record(p, gl_sc_generate(p->sc));
-        mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
+        mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc);
         gl_sc_reset(p->sc);
-        gl_sc_set_vao(p->sc, NULL);
     }
 }
 
