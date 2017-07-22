@@ -989,6 +989,7 @@ static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
     p->pass_idx++;
 }
 
+PRINTF_ATTRIBUTE(2, 3)
 static void pass_describe(struct gl_video *p, const char *textf, ...)
 {
     if (!p->pass || p->pass_idx == PASS_INFO_MAX)
