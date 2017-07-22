@@ -648,19 +648,6 @@ const char *mp_sampler_type(GLenum texture_target)
     }
 }
 
-// gl_sc_uniform_tex() should be preferred.
-void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
-                           int unit)
-{
-    struct sc_uniform *u = find_uniform(sc, name);
-    u->type = UT_i;
-    u->size = 1;
-    u->glsl_type = mp_sampler_type(target);
-    u->v.i[0] = unit;
-    u->tex_target = 0;
-    u->tex_handle = 0;
-}
-
 void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
                        GLuint texture)
 {

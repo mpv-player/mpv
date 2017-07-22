@@ -55,6 +55,7 @@ struct mpgl_osd_part {
     int num_subparts;
     int prev_num_subparts;
     struct sub_bitmap *subparts;
+    int num_vertices;
     struct vertex *vertices;
 };
 
@@ -226,14 +227,14 @@ static void write_quad(struct vertex *va, struct gl_transform t,
 #undef COLOR_INIT
 }
 
-static int generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
+static void generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
 {
     int num_vertices = part->num_subparts * 6;
-    MP_TARRAY_GROW(part, part->vertices, num_vertices);
+    MP_TARRAY_GROW(part, part->vertices, part->num_vertices + num_vertices);
 
     for (int n = 0; n < part->num_subparts; n++) {
         struct sub_bitmap *b = &part->subparts[n];
-        struct vertex *va = part->vertices;
+        struct vertex *va = &part->vertices[part->num_vertices];
 
         // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
         //       doesn't matter that we upload garbage for the other formats
@@ -247,28 +248,7 @@ static int generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
                    part->w, part->h, color);
     }
 
-    return num_vertices;
-}
-
-static void draw_part(struct mpgl_osd *ctx, int index, struct gl_transform t)
-{
-    GL *gl = ctx->gl;
-    struct mpgl_osd_part *part = ctx->parts[index];
-
-    int num_vertices = generate_verts(part, t);
-    if (!num_vertices)
-        return;
-
-    gl->Enable(GL_BLEND);
-    gl->BindTexture(GL_TEXTURE_2D, part->texture);
-
-    const int *factors = &blend_factors[part->format][0];
-    gl->BlendFuncSeparate(factors[0], factors[1], factors[2], factors[3]);
-
-    gl_vao_draw_data(&ctx->vao, GL_TRIANGLES, part->vertices, num_vertices);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    gl->Disable(GL_BLEND);
+    part->num_vertices += num_vertices;
 }
 
 // number of screen divisions per axis (x=0, y=1) for the current 3D mode
@@ -285,10 +265,13 @@ static void get_3d_side_by_side(int stereo_mode, int div[2])
 
 void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
 {
+    GL *gl = ctx->gl;
+    struct mpgl_osd_part *part = ctx->parts[index];
+
     int div[2];
     get_3d_side_by_side(ctx->stereo_mode, div);
 
-    ctx->gl->Viewport(0, 0, vp_w, abs(vp_h));
+    part->num_vertices = 0;
 
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
@@ -300,15 +283,36 @@ void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
             t.t[0] += a_x * t.m[0][0] + a_y * t.m[1][0];
             t.t[1] += a_x * t.m[0][1] + a_y * t.m[1][1];
 
-            draw_part(ctx, index, t);
+            generate_verts(part, t);
         }
     }
+
+    if (!part->num_vertices)
+        return;
+
+    gl->Enable(GL_BLEND);
+
+    const int *factors = &blend_factors[part->format][0];
+    gl->BlendFuncSeparate(factors[0], factors[1], factors[2], factors[3]);
+
+    ctx->gl->Viewport(0, 0, vp_w, abs(vp_h));
+
+    gl_vao_draw_data(&ctx->vao, GL_TRIANGLES, part->vertices, part->num_vertices);
+
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+    gl->Disable(GL_BLEND);
 }
 
 enum sub_bitmap_format mpgl_osd_get_part_format(struct mpgl_osd *ctx, int index)
 {
     assert(index >= 0 && index < MAX_OSD_PARTS);
     return ctx->parts[index]->format;
+}
+
+GLuint mpgl_osd_get_part_texture(struct mpgl_osd *ctx, int index)
+{
+    assert(index >= 0 && index < MAX_OSD_PARTS);
+    return ctx->parts[index]->texture;
 }
 
 struct gl_vao *mpgl_osd_get_vao(struct mpgl_osd *ctx)

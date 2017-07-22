@@ -2411,7 +2411,8 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
         if (!fmt)
             continue;
-        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
+        gl_sc_uniform_tex(p->sc, "osdtex", GL_TEXTURE_2D,
+                          mpgl_osd_get_part_texture(p->osd, n));
         switch (fmt) {
         case SUBBITMAP_RGBA: {
             pass_describe(p, "drawing osd (rgba)");
