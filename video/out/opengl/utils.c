@@ -467,6 +467,7 @@ struct sc_entry {
     bstr frag;
     bstr vert;
     struct gl_timer *timer;
+    struct gl_vao vao;
 };
 
 struct gl_shader_cache {
@@ -482,13 +483,18 @@ struct gl_shader_cache {
     bstr header_text;
     bstr text;
     int next_texture_unit;
-    struct gl_vao *vao;
+    struct gl_vao *vao; // deprecated
 
     struct sc_entry *entries;
     int num_entries;
 
+    struct sc_entry *current_shader; // set by gl_sc_generate()
+
     struct sc_uniform *uniforms;
     int num_uniforms;
+
+    const struct gl_vao_entry *vertex_entries;
+    size_t vertex_size;
 
     // For checking that the user is calling gl_sc_reset() properly.
     bool needs_reset;
@@ -541,6 +547,9 @@ void gl_sc_reset(struct gl_shader_cache *sc)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
     sc->next_texture_unit = 1; // not 0, as 0 is "free for use"
+    sc->vertex_entries = NULL;
+    sc->vertex_size = 0;
+    sc->current_shader = NULL;
     sc->needs_reset = false;
 }
 
@@ -555,6 +564,7 @@ static void sc_flush_cache(struct gl_shader_cache *sc)
         talloc_free(e->frag.start);
         talloc_free(e->uniforms);
         gl_timer_free(e->timer);
+        gl_vao_uninit(&e->vao);
     }
     sc->num_entries = 0;
 }
@@ -754,9 +764,21 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
 // The vertex shader is setup such that the elements are available as fragment
 // shader variables using the names in the vao entries, which "position" being
 // set to gl_Position.
+// Deprecated.
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao)
 {
     sc->vao = vao;
+}
+
+// Tell the shader generator (and later gl_sc_draw_data()) about the vertex
+// data layout and attribute names. The entries array is terminated with a {0}
+// entry. The array memory must remain valid indefinitely (for now).
+void gl_sc_set_vertex_format(struct gl_shader_cache *sc,
+                             const struct gl_vao_entry *entries,
+                             size_t vertex_size)
+{
+    sc->vertex_entries = entries;
+    sc->vertex_size = vertex_size;
 }
 
 static const char *vao_glsl_type(const struct gl_vao_entry *e)
@@ -899,9 +921,9 @@ static GLuint compile_program(struct gl_shader_cache *sc, const char *vertex,
     GLuint prog = gl->CreateProgram();
     compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
     compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag);
-    for (int n = 0; sc->vao->entries[n].name; n++) {
+    for (int n = 0; sc->vertex_entries[n].name; n++) {
         char vname[80];
-        snprintf(vname, sizeof(vname), "vertex_%s", sc->vao->entries[n].name);
+        snprintf(vname, sizeof(vname), "vertex_%s", sc->vertex_entries[n].name);
         gl->BindAttribLocation(prog, n, vname);
     }
     link_shader(sc, prog);
@@ -940,9 +962,9 @@ static GLuint load_program(struct gl_shader_cache *sc, const char *vertex,
     av_sha_update(sha, frag, strlen(frag) + 1);
 
     // In theory, the array could change order, breaking old binaries.
-    for (int n = 0; sc->vao->entries[n].name; n++) {
-        av_sha_update(sha, sc->vao->entries[n].name,
-                      strlen(sc->vao->entries[n].name) + 1);
+    for (int n = 0; sc->vertex_entries[n].name; n++) {
+        av_sha_update(sha, sc->vertex_entries[n].name,
+                      strlen(sc->vertex_entries[n].name) + 1);
     }
 
     uint8_t hash[256 / 8];
@@ -1030,7 +1052,16 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
     // and before starting a new one.
     assert(!sc->needs_reset);
 
-    assert(sc->vao);
+    if (sc->vertex_entries) {
+        assert(!sc->vao);
+    } else {
+        // gl_sc_set_vertex_format() must always be called - except in the
+        // compat code path, where sc->vao must be set.
+        assert(sc->vao);
+        assert(sc->vao->entries);
+        sc->vertex_entries = sc->vao->entries;
+        sc->vertex_size = sc->vao->stride;
+    }
 
     for (int n = 0; n < MP_ARRAY_SIZE(sc->tmp); n++)
         sc->tmp[n].len = 0;
@@ -1058,8 +1089,8 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
     bstr *vert_body = &sc->tmp[2];
     ADD(vert_body, "void main() {\n");
     bstr *frag_vaos = &sc->tmp[3];
-    for (int n = 0; sc->vao->entries[n].name; n++) {
-        const struct gl_vao_entry *e = &sc->vao->entries[n];
+    for (int n = 0; sc->vertex_entries[n].name; n++) {
+        const struct gl_vao_entry *e = &sc->vertex_entries[n];
         const char *glsl_type = vao_glsl_type(e);
         if (strcmp(e->name, "position") == 0) {
             // setting raster pos. requires setting gl_Position magic variable
@@ -1144,6 +1175,8 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
             };
             MP_TARRAY_APPEND(sc, entry->uniforms, entry->num_uniforms, un);
         }
+        assert(!entry->vao.vao);
+        gl_vao_init(&entry->vao, gl, sc->vertex_size, sc->vertex_entries);
     }
 
     gl->UseProgram(entry->gl_shader);
@@ -1157,8 +1190,22 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
 
     gl_timer_start(entry->timer);
     sc->needs_reset = true;
+    sc->current_shader = entry;
 
     return gl_timer_measure(entry->timer);
+}
+
+// Draw the vertex data (as described by the gl_vao_entry entries) in ptr
+// to the screen. num is the number of vertexes. prim is usually GL_TRIANGLES.
+// gl_sc_generate() must have been called before this. Some additional setup
+// might be needed (like setting the viewport).
+void gl_sc_draw_data(struct gl_shader_cache *sc, GLenum prim, void *ptr,
+                     size_t num)
+{
+    assert(ptr);
+    assert(sc->current_shader);
+
+    gl_vao_draw_data(&sc->current_shader->vao, prim, ptr, num);
 }
 
 // Maximum number of simultaneous query objects to keep around. Reducing this

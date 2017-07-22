@@ -189,8 +189,6 @@ struct gl_video {
 
     struct gl_shader_cache *sc;
 
-    struct gl_vao vao;
-
     struct osd_state *osd_state;
     struct mpgl_osd *osd;
     double osd_pts;
@@ -1102,7 +1100,7 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
     }
 
     p->gl->Viewport(0, 0, vp_w, abs(vp_h));
-    gl_vao_draw_data(&p->vao, GL_TRIANGLE_STRIP, va, 4);
+    gl_sc_draw_data(p->sc, GL_TRIANGLE_STRIP, va, 4);
 
     debug_check_gl(p, "after rendering");
 }
@@ -1112,6 +1110,7 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 {
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
+    gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
     pass_record(p, gl_sc_generate(p->sc));
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     render_pass_quad(p, vp_w, vp_h, dst);
@@ -2443,8 +2442,8 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         pass_record(p, gl_sc_generate(p->sc));
         mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
         gl_sc_reset(p->sc);
+        gl_sc_set_vao(p->sc, NULL);
     }
-    gl_sc_set_vao(p->sc, &p->vao);
 }
 
 static float chroma_realign(int size, int pixel)
@@ -2852,8 +2851,6 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     }
 
     if (has_frame) {
-        gl_sc_set_vao(p->sc, &p->vao);
-
         bool interpolate = p->opts.interpolation && frame->display_synced &&
                            (p->frames_drawn || !frame->still);
         if (interpolate) {
@@ -3302,8 +3299,6 @@ static void init_gl(struct gl_video *p)
 
     gl->Disable(GL_DITHER);
 
-    gl_vao_init(&p->vao, gl, sizeof(struct vertex), vertex_vao);
-
     gl_video_set_gl_state(p);
 
     // Test whether we can use 10 bit.
@@ -3327,8 +3322,6 @@ void gl_video_uninit(struct gl_video *p)
     uninit_video(p);
 
     gl_sc_destroy(p->sc);
-
-    gl_vao_uninit(&p->vao);
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
 

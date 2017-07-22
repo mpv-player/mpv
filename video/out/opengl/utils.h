@@ -166,8 +166,13 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
+void gl_sc_set_vertex_format(struct gl_shader_cache *sc,
+                             const struct gl_vao_entry *entries,
+                             size_t vertex_size);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc);
+void gl_sc_draw_data(struct gl_shader_cache *sc, GLenum prim, void *ptr,
+                     size_t num);
 void gl_sc_reset(struct gl_shader_cache *sc);
 struct mpv_global;
 void gl_sc_set_cache_dir(struct gl_shader_cache *sc, struct mpv_global *global,
