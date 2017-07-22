@@ -145,6 +145,15 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
     }
 }
 
+
+struct gl_vao {
+    GL *gl;
+    GLuint vao;     // the VAO object, or 0 if unsupported by driver
+    GLuint buffer;  // GL_ARRAY_BUFFER used for the data
+    int stride;     // size of each element (interleaved elements are assumed)
+    const struct gl_vao_entry *entries;
+};
+
 static void gl_vao_enable_attribs(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
@@ -158,8 +167,8 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
     }
 }
 
-void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
-                 const struct gl_vao_entry *entries)
+static void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
+                        const struct gl_vao_entry *entries)
 {
     assert(!vao->vao);
     assert(!vao->buffer);
@@ -184,7 +193,7 @@ void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
     }
 }
 
-void gl_vao_uninit(struct gl_vao *vao)
+static void gl_vao_uninit(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
     if (!gl)
@@ -197,7 +206,7 @@ void gl_vao_uninit(struct gl_vao *vao)
     *vao = (struct gl_vao){0};
 }
 
-void gl_vao_bind(struct gl_vao *vao)
+static void gl_vao_bind(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
 
@@ -210,7 +219,7 @@ void gl_vao_bind(struct gl_vao *vao)
     }
 }
 
-void gl_vao_unbind(struct gl_vao *vao)
+static void gl_vao_unbind(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
 
@@ -226,7 +235,7 @@ void gl_vao_unbind(struct gl_vao *vao)
 // to the screen. num is the number of vertexes. prim is usually GL_TRIANGLES.
 // If ptr is NULL, then skip the upload, and use the data uploaded with the
 // previous call.
-void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
+static void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
 {
     GL *gl = vao->gl;
 
@@ -758,18 +767,6 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
         transpose3x3(&u->v.f[0]);
 }
 
-// This will call glBindAttribLocation() on the shader before it's linked
-// (OpenGL requires this to happen before linking). Basically, it associates
-// the input variable names with the fields in the vao.
-// The vertex shader is setup such that the elements are available as fragment
-// shader variables using the names in the vao entries, which "position" being
-// set to gl_Position.
-// Deprecated.
-void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao)
-{
-    sc->vao = vao;
-}
-
 // Tell the shader generator (and later gl_sc_draw_data()) about the vertex
 // data layout and attribute names. The entries array is terminated with a {0}
 // entry. The array memory must remain valid indefinitely (for now).
@@ -1052,16 +1049,8 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc)
     // and before starting a new one.
     assert(!sc->needs_reset);
 
-    if (sc->vertex_entries) {
-        assert(!sc->vao);
-    } else {
-        // gl_sc_set_vertex_format() must always be called - except in the
-        // compat code path, where sc->vao must be set.
-        assert(sc->vao);
-        assert(sc->vao->entries);
-        sc->vertex_entries = sc->vao->entries;
-        sc->vertex_size = sc->vao->stride;
-    }
+    // gl_sc_set_vertex_format() must always be called
+    assert(sc->vertex_entries);
 
     for (int n = 0; n < MP_ARRAY_SIZE(sc->tmp); n++)
         sc->tmp[n].len = 0;
