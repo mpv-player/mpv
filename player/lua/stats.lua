@@ -23,7 +23,6 @@ local o = {
     ass_formatting = true,
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
-    print_perfdata_total = true,     -- prints an additional line adding up the perfdata lines
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     debug = false,
 
@@ -330,12 +329,10 @@ local function append_perfdata(s, full)
                 end
             end
 
-            if o.print_perfdata_total then
-                s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
-                                 o.font_mono, hl(last_s[frame]),
-                                 hl(avg_s[frame]), hl(peak_s[frame]), o.font,
-                                 o.prefix_sep, o.prefix_sep, b("Total"))
-            end
+            s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
+                             o.font_mono, hl(last_s[frame]),
+                             hl(avg_s[frame]), hl(peak_s[frame]), o.font,
+                             o.prefix_sep, o.prefix_sep, b("Total"))
         else
             -- for the simplified view, we just print the sum of each pass
             s[#s+1] = format(f, o.nl, o.indent .. o.indent, o.font_mono,
