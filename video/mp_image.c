@@ -41,42 +41,145 @@
 #define HAVE_OPAQUE_REF (LIBAVUTIL_VERSION_MICRO >= 100 && \
                          LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 47, 100))
 
-static bool mp_image_alloc_planes(struct mp_image *mpi)
+// Determine strides, plane sizes, and total required size for an image
+// allocation. Returns total size on success, <0 on error. Unused planes
+// have out_stride/out_plane_size to 0, and out_plane_offset set to -1 up
+// until MP_MAX_PLANES-1.
+static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
+                           int out_stride[MP_MAX_PLANES],
+                           int out_plane_offset[MP_MAX_PLANES],
+                           int out_plane_size[MP_MAX_PLANES])
 {
-    assert(!mpi->planes[0]);
-    assert(!mpi->bufs[0]);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    struct mp_image_params params = {.imgfmt = imgfmt, .w = w, .h = h};
 
-    if (!mp_image_params_valid(&mpi->params) || mpi->fmt.flags & MP_IMGFLAG_HWACCEL)
-        return false;
+    if (!mp_image_params_valid(&params) || desc.flags & MP_IMGFLAG_HWACCEL)
+        return -1;
 
     // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
     //       top/right border. This is needed for correct handling of such
     //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
 
-    size_t plane_size[MP_MAX_PLANES];
     for (int n = 0; n < MP_MAX_PLANES; n++) {
-        int alloc_h = MP_ALIGN_UP(mpi->h, 32) >> mpi->fmt.ys[n];
-        int line_bytes = (mp_image_plane_w(mpi, n) * mpi->fmt.bpp[n] + 7) / 8;
-        mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
-        plane_size[n] = mpi->stride[n] * alloc_h;
+        int alloc_w = mp_chroma_div_up(w, desc.xs[n]);
+        int alloc_h = MP_ALIGN_UP(h, 32) >> desc.ys[n];
+        int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
+        out_stride[n] = MP_ALIGN_UP(line_bytes, stride_align);
+        out_plane_size[n] = out_stride[n] * alloc_h;
     }
-    if (mpi->fmt.flags & MP_IMGFLAG_PAL)
-        plane_size[1] = MP_PALETTE_SIZE;
+    if (desc.flags & MP_IMGFLAG_PAL)
+        out_plane_size[1] = MP_PALETTE_SIZE;
 
-    size_t sum = 0;
-    for (int n = 0; n < MP_MAX_PLANES; n++)
-        sum += plane_size[n];
+    int sum = 0;
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        out_plane_offset[n] = out_plane_size[n] ? sum : -1;
+        sum += out_plane_size[n];
+    }
+
+    return sum;
+}
+
+// Return the total size needed for an image allocation of the given
+// configuration (imgfmt, w, h must be set). Returns -1 on error.
+// Assumes the allocation is already aligned on stride_align (otherwise you
+// need to add padding yourself).
+int mp_image_get_alloc_size(int imgfmt, int w, int h, int stride_align)
+{
+    int stride[MP_MAX_PLANES];
+    int plane_offset[MP_MAX_PLANES];
+    int plane_size[MP_MAX_PLANES];
+    return mp_image_layout(imgfmt, w, h, stride_align, stride, plane_offset,
+                           plane_size);
+}
+
+// Fill the mpi->planes and mpi->stride fields of the given mpi with data
+// from buffer according to the mpi's w/h/imgfmt fields. See mp_image_from_buffer
+// aboud remarks how to allocate/use buffer/buffer_size.
+// This does not free the data. You are expected to setup refcounting by
+// setting mp_image.bufs before or after this function is called.
+// Returns true on success, false on failure.
+static bool mp_image_fill_alloc(struct mp_image *mpi, int stride_align,
+                                void *buffer, int buffer_size)
+{
+    int stride[MP_MAX_PLANES];
+    int plane_offset[MP_MAX_PLANES];
+    int plane_size[MP_MAX_PLANES];
+    int size = mp_image_layout(mpi->imgfmt, mpi->w, mpi->h, stride_align,
+                               stride, plane_offset, plane_size);
+    if (size < 0 || size > buffer_size)
+        return false;
+
+    int align = MP_ALIGN_UP((uintptr_t)buffer, stride_align) - (uintptr_t)buffer;
+    if (buffer_size - size < align)
+        return false;
+    uint8_t *s = buffer;
+    s += align;
+
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        mpi->planes[n] = plane_offset[n] >= 0 ? s + plane_offset[n] : NULL;
+        mpi->stride[n] = stride[n];
+    }
+
+    return true;
+}
+
+// Create a mp_image from the provided buffer. The mp_image is filled according
+// to the imgfmt/w/h parameters, and respecting the stride_align parameter to
+// align the plane start pointers and strides. Once the last reference to the
+// returned image is destroyed, free(free_opaque, buffer) is called. (Be aware
+// that this can happen from any thread.)
+// The allocated size of buffer must be given by buffer_size. buffer_size should
+// be at least the value returned by mp_image_get_alloc_size(). If buffer is not
+// already aligned to stride_align, the function will attempt to align the
+// pointer itself by incrementing the buffer pointer until ther alignment is
+// achieved (if buffer_size is not large enough to allow aligning the buffer
+// safely, the function fails). To be safe, you may want to overallocate the
+// buffer by stride_align bytes, and include the overallocation in buffer_size.
+// Returns NULL on failure. On failure, the free() callback is not called.
+struct mp_image *mp_image_from_buffer(int imgfmt, int w, int h, int stride_align,
+                                      uint8_t *buffer, int buffer_size,
+                                      void *free_opaque,
+                                      void (*free)(void *opaque, uint8_t *data))
+{
+    struct mp_image *mpi = mp_image_new_dummy_ref(NULL);
+    mp_image_setfmt(mpi, imgfmt);
+    mp_image_set_size(mpi, w, h);
+
+    if (!mp_image_fill_alloc(mpi, stride_align, buffer, buffer_size))
+        goto fail;
+
+    mpi->bufs[0] = av_buffer_create(buffer, buffer_size, free, free_opaque, 0);
+    if (!mpi->bufs[0])
+        goto fail;
+
+    return mpi;
+
+fail:
+    talloc_free(mpi);
+    return NULL;
+}
+
+static bool mp_image_alloc_planes(struct mp_image *mpi)
+{
+    assert(!mpi->planes[0]);
+    assert(!mpi->bufs[0]);
+
+    int align = SWS_MIN_BYTE_ALIGN;
+
+    int size = mp_image_get_alloc_size(mpi->imgfmt, mpi->w, mpi->h, align);
+    if (size < 0)
+        return false;
 
     // Note: mp_image_pool assumes this creates only 1 AVBufferRef.
-    mpi->bufs[0] = av_buffer_alloc(FFMAX(sum, 1));
+    mpi->bufs[0] = av_buffer_alloc(size + align);
     if (!mpi->bufs[0])
         return false;
 
-    uint8_t *data = mpi->bufs[0]->data;
-    for (int n = 0; n < MP_MAX_PLANES; n++) {
-        mpi->planes[n] = plane_size[n] ? data : NULL;
-        data += plane_size[n];
+    if (!mp_image_fill_alloc(mpi, align, mpi->bufs[0]->data, mpi->bufs[0]->size)) {
+        av_buffer_unref(&mpi->bufs[0]);
+        return false;
     }
+
     return true;
 }
 
