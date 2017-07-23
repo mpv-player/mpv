@@ -1013,6 +1013,23 @@ Video
     (default: 3). If this is a number, then fallback will be triggered if
     N frames fail to decode in a row. 1 is equivalent to ``yes``.
 
+``--vd-lavc-dr=<yes|no>``
+    Enable direct rendering (default: no). If this is set to ``yes``, the
+    video will be decoded directly to GPU video memory (or staging buffers).
+    This can speed up video upload, and may help with large resolutions or
+    slow hardware. This works only with the following VOs:
+
+        - ``opengl``: requires at least OpenGL 4.4.
+
+    (In particular, this can't be made work with ``opengl-cb``.)
+
+    Using video filters of any kind that write to the image data (or output
+    newly allocated frames) will silently disable the DR code path.
+
+    There are some corner cases that will result in undefined behavior (crashes
+    and other strange behavior) if this option is enabled. These are pending
+    towards being fixed properly at a later point.
+
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).
 

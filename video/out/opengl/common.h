@@ -192,6 +192,8 @@ struct GL {
     GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
     void (GLAPIENTRY *DeleteSync)(GLsync sync);
 
+    void (GLAPIENTRY *BufferStorage)(GLenum, intptr_t, const GLvoid *, GLenum);
+
     void (GLAPIENTRY *GenQueries)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteQueries)(GLsizei, const GLuint *);
     void (GLAPIENTRY *BeginQuery)(GLenum,  GLuint);

@@ -57,6 +57,7 @@
 #include "demux/packet.h"
 #include "video/csputils.h"
 #include "video/sws_utils.h"
+#include "video/out/vo.h"
 
 #if LIBAVCODEC_VERSION_MICRO >= 100
 #include <libavutil/mastering_display_metadata.h>
@@ -74,6 +75,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
                        struct vd_lavc_hwdec *hwdec);
 static void uninit_avctx(struct dec_video *vd);
 
+static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags);
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags);
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *pix_fmt);
@@ -92,6 +94,7 @@ struct vd_lavc_params {
     int check_hw_profile;
     int software_fallback;
     char **avopts;
+    int dr;
 };
 
 static const struct m_opt_choice_alternatives discard_names[] = {
@@ -121,6 +124,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_CHOICE_OR_INT("software-fallback", software_fallback, 0, 1, INT_MAX,
                           ({"no", INT_MAX}, {"yes", 1})),
         OPT_KEYVALUELIST("o", avopts, 0),
+        OPT_FLAG("dr", dr, 0),
         {0}
     },
     .size = sizeof(struct vd_lavc_params),
@@ -425,7 +429,11 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
 
 static void uninit(struct dec_video *vd)
 {
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
     uninit_avctx(vd);
+
+    pthread_mutex_destroy(&ctx->dr_lock);
     talloc_free(vd->priv);
 }
 
@@ -514,6 +522,9 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_devs = vd->hwdec_devs;
     ctx->hwdec_swpool = talloc_steal(ctx, mp_image_pool_new(17));
+    ctx->dr_pool = talloc_steal(ctx, mp_image_pool_new(INT_MAX));
+
+    pthread_mutex_init(&ctx->dr_lock, NULL);
 
     reinit(vd);
 
@@ -595,6 +606,12 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         ctx->hw_probing = true;
     } else {
         mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
+    }
+
+    if (!ctx->hwdec && vd->vo && lavc_param->dr) {
+        avctx->opaque = vd;
+        avctx->get_buffer2 = get_buffer2_direct;
+        avctx->thread_safe_callbacks = 1;
     }
 
     avctx->flags |= lavc_param->bitexact ? AV_CODEC_FLAG_BITEXACT : 0;
@@ -915,6 +932,87 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     const char *name = av_get_pix_fmt_name(select);
     MP_VERBOSE(vd, "Requesting pixfmt '%s' from decoder.\n", name ? name : "-");
     return select;
+}
+
+static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
+{
+    struct dec_video *vd = avctx->opaque;
+    vd_ffmpeg_ctx *p = vd->priv;
+
+    pthread_mutex_lock(&p->dr_lock);
+
+    int w = pic->width;
+    int h = pic->height;
+    int linesize_align[AV_NUM_DATA_POINTERS] = {0};
+    avcodec_align_dimensions2(avctx, &w, &h, linesize_align);
+
+    // We assume that different alignments are just different power-of-2s.
+    // Thus, a higher alignment always satisfies a lower alignment.
+    int stride_align = 0;
+    for (int n = 0; n < AV_NUM_DATA_POINTERS; n++)
+        stride_align = MPMAX(stride_align, linesize_align[n]);
+
+    int imgfmt = pixfmt2imgfmt(pic->format);
+    if (!imgfmt)
+        goto fallback;
+
+    if (p->dr_failed)
+        goto fallback;
+
+    // (For simplicity, we realloc on any parameter change, instead of trying
+    // to be clever.)
+    if (stride_align != p->dr_stride_align || w != p->dr_w || h != p->dr_h ||
+        imgfmt != p->dr_imgfmt)
+    {
+        mp_image_pool_clear(p->dr_pool);
+        p->dr_imgfmt = imgfmt;
+        p->dr_w = w;
+        p->dr_h = h;
+        p->dr_stride_align = stride_align;
+        MP_VERBOSE(p, "DR parameter change to %dx%d %s align=%d\n", w, h,
+                   mp_imgfmt_to_name(imgfmt), stride_align);
+    }
+
+    struct mp_image *img = mp_image_pool_get_no_alloc(p->dr_pool, imgfmt, w, h);
+    if (!img) {
+        MP_VERBOSE(p, "Allocating new DR image...\n");
+        img = vo_get_image(vd->vo, imgfmt, w, h, stride_align);
+        if (!img) {
+            MP_VERBOSE(p, "...failed..\n");
+            goto fallback;
+        }
+
+        // Now make the mp_image part of the pool. This requires doing magic to
+        // the image, so just add it to the pool and get it back to avoid
+        // dealing with magic ourselves. (Normally this never fails.)
+        mp_image_pool_add(p->dr_pool, img);
+        img = mp_image_pool_get_no_alloc(p->dr_pool, imgfmt, w, h);
+        if (!img)
+            goto fallback;
+    }
+
+    // get_buffer2 callers seem very unappreciative of overwriting pic with a
+    // new reference. The AVCodecContext.get_buffer2 comments tell us exactly
+    // what we should do, so follow that.
+    for (int n = 0; n < 4; n++) {
+        pic->data[n] = img->planes[n];
+        pic->linesize[n] = img->stride[n];
+        pic->buf[n] = img->bufs[n];
+        img->bufs[n] = NULL;
+    }
+    talloc_free(img);
+
+    pthread_mutex_unlock(&p->dr_lock);
+
+    return 0;
+
+fallback:
+    if (!p->dr_failed)
+        MP_VERBOSE(p, "DR failed - disabling.\n");
+    p->dr_failed = true;
+    pthread_mutex_unlock(&p->dr_lock);
+
+    return avcodec_default_get_buffer2(avctx, pic, flags);
 }
 
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)

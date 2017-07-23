@@ -280,6 +280,36 @@ struct vo_driver {
     int (*control)(struct vo *vo, uint32_t request, void *data);
 
     /*
+     * lavc callback for direct rendering
+     *
+     * Optional. To make implementation easier, the callback is always run on
+     * the VO thread. The returned mp_image's destructor callback is also called
+     * on the VO thread, even if it's actually unref'ed from another thread.
+     *
+     * It is guaranteed that the last reference to an image is destroyed before
+     * ->uninit is called (except it's not - libmpv screenshots can hold the
+     * reference longer, fuck).
+     *
+     * The allocated image - or a part of it, can be passed to draw_frame(). The
+     * point of this mechanism is that the decoder directly renders to GPU
+     * staging memory, to avoid a memcpy on frame upload. But this is not a
+     * guarantee. A filter could change the data pointers or return a newly
+     * allocated image. It's even possible that only 1 plane uses the buffer
+     * allocated by the get_image function. The VO has to check for this.
+     *
+     * stride_align is always a value >=1 that is a power of 2. The stride
+     * values of the returned image must be divisible by this value.
+     *
+     * Currently, the returned image must have exactly 1 AVBufferRef set, for
+     * internal implementation simplicity.
+     *
+     * returns: an allocated, refcounted image; if NULL is returned, the caller
+     * will silently fallback to a default allocator
+     */
+    struct mp_image *(*get_image)(struct vo *vo, int imgfmt, int w, int h,
+                                  int stride_align);
+
+    /*
      * Render the given frame to the VO's backbuffer. This operation will be
      * followed by a draw_osd and a flip_page[_timed] call.
      * mpi belongs to the VO; the VO must free it eventually.
@@ -410,6 +440,8 @@ double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 double vo_get_delay(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
+struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
+                              int stride_align);
 
 void vo_wakeup(struct vo *vo);
 void vo_wait_default(struct vo *vo, int64_t until_time);

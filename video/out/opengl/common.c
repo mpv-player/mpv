@@ -327,6 +327,14 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .ver_core = 440,
+        .extension = "GL_ARB_buffer_storage",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(BufferStorage),
+            {0}
+        },
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {

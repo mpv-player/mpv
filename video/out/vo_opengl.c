@@ -343,6 +343,34 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
     }
 }
 
+static void vo_opengl_free_dr(void *opaque, uint8_t *data)
+{
+    struct gl_priv *p = opaque;
+    gl_video_dr_free_buffer(p->renderer, data);
+}
+
+static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
+                                  int stride_align)
+{
+    struct gl_priv *p = vo->priv;
+
+    int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
+    if (size < 0)
+        return NULL;
+
+    int alloc_size = size + stride_align;
+    void *ptr = gl_video_dr_alloc_buffer(p->renderer, alloc_size);
+    if (!ptr)
+        return NULL;
+
+    struct mp_image *res = mp_image_from_buffer(imgfmt, w, h, stride_align,
+                                                ptr, alloc_size, p,
+                                                vo_opengl_free_dr);
+    if (!res)
+        gl_video_dr_free_buffer(p->renderer, ptr);
+    return res;
+}
+
 static void uninit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
@@ -427,6 +455,7 @@ const struct vo_driver video_out_opengl = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
+    .get_image = get_image,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
     .wait_events = wait_events,

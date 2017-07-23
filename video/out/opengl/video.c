@@ -174,6 +174,17 @@ struct pass_info {
 
 #define PASS_INFO_MAX (SHADER_MAX_HOOKS + 32)
 
+struct dr_buffer {
+    void *ptr;
+    size_t size;
+    GLuint pbo;
+    // While a PBO is read-accessed by GL, we must not write to the mapped data.
+    // The fence tells us when GL is done, and the mpi reference will keep the
+    // data from being recycled (or from other references gaining write access).
+    GLsync fence;
+    struct mp_image *mpi;
+};
+
 struct gl_video {
     GL *gl;
 
@@ -211,6 +222,11 @@ struct gl_video {
     bool use_integer_conversion;
 
     struct video_image image;
+
+    struct dr_buffer *dr_buffers;
+    int num_dr_buffers;
+
+    bool using_dr_path;
 
     bool dumb_mode;
     bool forced_dumb_mode;
@@ -933,11 +949,56 @@ static void unmap_current_image(struct gl_video *p)
     }
 }
 
+static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
+{
+   for (int i = 0; i < p->num_dr_buffers; i++) {
+        struct dr_buffer *buf = &p->dr_buffers[i];
+        if (ptr >= (uint8_t *)buf->ptr && ptr < (uint8_t *)buf->ptr + buf->size)
+            return buf;
+    }
+
+    return NULL;
+}
+
+static void gc_pending_dr_fences(struct gl_video *p, bool force)
+{
+    GL *gl = p->gl;
+
+again:;
+    for (int n = 0; n < p->num_dr_buffers; n++) {
+        struct dr_buffer *buffer = &p->dr_buffers[n];
+        if (!buffer->fence)
+            continue;
+
+        GLenum res = gl->ClientWaitSync(buffer->fence, 0, 0); // non-blocking
+        if (res == GL_ALREADY_SIGNALED || force) {
+            gl->DeleteSync(buffer->fence);
+            buffer->fence = NULL;
+            // Unreferencing the image could cause gl_video_dr_free_buffer()
+            // to be called by the talloc destructor (if it was the last
+            // reference). This will implicitly invalidate the buffer pointer
+            // and change the p->dr_buffers array. To make it worse, it could
+            // free multiple dr_buffers due to weird theoretical corner cases.
+            // This is also why we use the goto to iterate again from the
+            // start, because everything gets fucked up. Hail satan!
+            struct mp_image *ref = buffer->mpi;
+            buffer->mpi = NULL;
+            talloc_free(ref);
+            goto again;
+        }
+    }
+}
+
 static void unref_current_image(struct gl_video *p)
 {
     unmap_current_image(p);
-    mp_image_unrefp(&p->image.mpi);
     p->image.id = 0;
+
+    mp_image_unrefp(&p->image.mpi);
+
+    // While we're at it, also garbage collect pending fences in here to
+    // get it out of the way.
+    gc_pending_dr_fences(p, false);
 }
 
 // If overlay mode is used, make sure to remove the overlay.
@@ -3088,10 +3149,34 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         plane->flipped = mpi->stride[0] < 0;
 
         gl->BindTexture(plane->gl_target, plane->gl_texture);
-        gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
-                          plane->gl_format, plane->gl_type, plane->w, plane->h,
-                          mpi->planes[n], mpi->stride[n],
+
+        struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
+        if (mapped) {
+            assert(mapped->pbo > 0);
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, mapped->pbo);
+            uintptr_t offset = mpi->planes[n] - (uint8_t *)mapped->ptr;
+            gl_upload_tex(gl, plane->gl_target,
+                          plane->gl_format, plane->gl_type,
+                          (void *)offset, mpi->stride[n],
                           0, 0, plane->w, plane->h);
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+            // Make sure the PBO is not reused until GL is done with it. If a
+            // previous operation is pending, "update" it by creating a new
+            // fence that will cover the previous operation as well.
+            gl->DeleteSync(mapped->fence);
+            mapped->fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+            if (!mapped->mpi)
+                mapped->mpi = mp_image_new_ref(mpi);
+        } else {
+            gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
+                              plane->gl_format, plane->gl_type, plane->w, plane->h,
+                              mpi->planes[n], mpi->stride[n],
+                              0, 0, plane->w, plane->h);
+        }
+        if (p->using_dr_path != !!mapped) {
+            p->using_dr_path = !!mapped;
+            MP_VERBOSE(p, "DR enabled: %s\n", p->using_dr_path ? "yes" : "no");
+        }
         gl->BindTexture(plane->gl_target, 0);
     }
     gl_timer_stop(gl);
@@ -3318,6 +3403,13 @@ void gl_video_uninit(struct gl_video *p)
     mpgl_osd_destroy(p->osd);
 
     gl_set_debug_logger(gl, NULL);
+
+    // Forcibly destroy possibly remaining image references. This should also
+    // cause gl_video_dr_free_buffer() to be called for the remaining buffers.
+    gc_pending_dr_fences(p, true);
+
+    // Should all have been unreffed already.
+    assert(!p->num_dr_buffers);
 
     talloc_free(p);
 }
@@ -3602,4 +3694,59 @@ void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 {
     p->hwdec = hwdec;
     unref_current_image(p);
+}
+
+void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
+{
+    GL *gl = p->gl;
+
+    if (gl->version < 440)
+        return NULL;
+
+    MP_TARRAY_GROW(p, p->dr_buffers, p->num_dr_buffers);
+    int index = p->num_dr_buffers++;
+    struct dr_buffer *buffer = &p->dr_buffers[index];
+
+    *buffer = (struct dr_buffer){
+        .size = size,
+    };
+
+    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
+                     GL_MAP_COHERENT_BIT;
+
+    gl->GenBuffers(1, &buffer->pbo);
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->pbo);
+    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags);
+    buffer->ptr = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, flags);
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    if (!buffer->ptr) {
+        gl_check_error(p->gl, p->log, "mapping buffer");
+        gl->DeleteBuffers(1, &buffer->pbo);
+        MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, index);
+        return NULL;
+    }
+
+    return buffer->ptr;
+};
+
+void gl_video_dr_free_buffer(struct gl_video *p, void *ptr)
+{
+    GL *gl = p->gl;
+
+    for (int n = 0; n < p->num_dr_buffers; n++) {
+        struct dr_buffer *buffer = &p->dr_buffers[n];
+        if (buffer->ptr == ptr) {
+            assert(!buffer->mpi); // can't be freed while it has a ref
+            gl->DeleteSync(buffer->fence);
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->pbo);
+            gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+            gl->DeleteBuffers(1, &buffer->pbo);
+
+            MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
+            return;
+        }
+    }
+    // not found - must not happen
+    assert(0);
 }

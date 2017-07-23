@@ -2,6 +2,7 @@
 #define MPV_LAVC_H
 
 #include <stdbool.h>
+#include <pthread.h>
 
 #include <libavcodec/avcodec.h>
 
@@ -72,6 +73,12 @@ typedef struct lavc_ctx {
     struct mp_image_pool *hwdec_swpool;
 
     AVBufferRef *cached_hw_frames_ctx;
+
+    // --- The following fields are protected by dr_lock.
+    pthread_mutex_t dr_lock;
+    bool dr_failed;
+    struct mp_image_pool *dr_pool;
+    int dr_imgfmt, dr_w, dr_h, dr_stride_align;
 } vd_ffmpeg_ctx;
 
 struct vd_lavc_hwdec {

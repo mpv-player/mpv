@@ -182,4 +182,7 @@ void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec);
 struct vo;
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo);
 
+void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size);
+void gl_video_dr_free_buffer(struct gl_video *p, void *ptr);
+
 #endif
