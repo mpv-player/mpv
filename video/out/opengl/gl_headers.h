@@ -79,6 +79,10 @@
 #define GL_DYNAMIC_STORAGE_BIT            0x0100
 #define GL_CLIENT_STORAGE_BIT             0x0200
 
+// --- GL 4.2 or GL_ARB_image_load_store
+
+#define GL_TEXTURE_FETCH_BARRIER_BIT      0x00000008
+
 // -- GL 4.3 or GL_ARB_compute_shader
 
 #define GL_COMPUTE_SHADER                 0x91B9

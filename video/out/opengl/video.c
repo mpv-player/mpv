@@ -1274,6 +1274,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                               dst_fbo->iformat, GL_WRITE_ONLY);
         GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
         dispatch_compute(p, w, h, p->compute_w, p->compute_h);
+        p->gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
     } else {
         finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
                            &(struct mp_rect){0, 0, w, h});
