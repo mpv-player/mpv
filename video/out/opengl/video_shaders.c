@@ -454,7 +454,7 @@ void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak)
     if (light == MP_CSP_LIGHT_DISPLAY)
         return;
 
-    GLSLF("// apply ootf\n", sc);
+    GLSLF("// apply ootf\n");
     GLSLF("color.rgb *= vec3(%f);\n", peak);
 
     switch (light)

@@ -135,9 +135,11 @@ void gl_sc_destroy(struct gl_shader_cache *sc);
 bool gl_sc_error_state(struct gl_shader_cache *sc);
 void gl_sc_reset_error(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
-void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
+void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...)
+    PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
-void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
+void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
+    PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text);
 void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
                        GLuint texture);
