@@ -777,6 +777,8 @@ void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint textur
 void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, GLuint ssbo,
                 char *format, ...)
 {
+    gl_sc_enable_extension(sc, "GL_ARB_shader_storage_buffer_object");
+
     struct sc_buffer *b = find_buffer(sc, name);
     b->binding = sc->next_buffer_binding++;
     b->ssbo = ssbo;
@@ -1179,6 +1181,11 @@ struct mp_pass_perf gl_sc_generate(struct gl_shader_cache *sc, GLenum type)
     // set up shader text (header + uniforms + body)
     bstr *header = &sc->tmp[0];
     ADD(header, "#version %d%s\n", gl->glsl_version, gl->es >= 300 ? " es" : "");
+    if (type == GL_COMPUTE_SHADER) {
+        // This extension cannot be enabled in fragment shader. Enable it as
+        // an exception for compute shader.
+        ADD(header, "#extension GL_ARB_compute_shader : enable\n");
+    }
     for (int n = 0; n < sc->num_exts; n++)
         ADD(header, "#extension %s : enable\n", sc->exts[n]);
     if (gl->es) {

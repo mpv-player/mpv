@@ -357,6 +357,11 @@ static const struct gl_functions gl_functions[] = {
             {0},
         },
     },
+    {
+        .ver_core = 430,
+        .extension = "GL_ARB_arrays_of_arrays",
+        .provides = MPGL_CAP_NESTED_ARRAY,
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {
@@ -618,6 +623,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
     }
+
+    // GL_ARB_compute_shader & GL_ARB_shader_image_load_store
+    if (gl->DispatchCompute && gl->BindImageTexture)
+        gl->mpgl_caps |= MPGL_CAP_COMPUTE_SHADER;
 
     // Provided for simpler handling if no framebuffer support is available.
     if (!gl->BindFramebuffer)

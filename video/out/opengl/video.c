@@ -1183,7 +1183,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h, int bw, int bh)
         // Clamp the texture coordinates to prevent sampling out-of-bounds in
         // threads that exceed the requested width/height
         PRELUDE("#define texmap%d(id) min(texcoord%d_rot(id), vec2(1.0))\n", n, n);
-        PRELUDE("const vec2 texcoord%d = texmap%d(gl_GlobalInvocationID);\n", n, n);
+        PRELUDE("vec2 texcoord%d = texmap%d(gl_GlobalInvocationID);\n", n, n);
     }
 
     pass_record(p, gl_sc_generate(p->sc, GL_COMPUTE_SHADER));
@@ -1756,10 +1756,12 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
+        bool use_compute_polar = (p->gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER) &&
+                                 (p->gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY);
         // Use a compute shader where possible, fallback to the slower texture
         // fragment sampler otherwise. Also use the fragment shader for
         // very large kernels to avoid exhausting shmem
-        if (p->gl->glsl_version < 430 || scaler->kernel->f.radius > 16) {
+        if (!use_compute_polar || scaler->kernel->f.radius > 16) {
             pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
         } else {
             // For performance we want to load at least as many pixels
@@ -3391,7 +3393,8 @@ static void check_gl_features(struct gl_video *p)
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
     bool have_tex16 = !gl->es || (gl->mpgl_caps & MPGL_CAP_EXT16);
-    bool have_compute = gl->glsl_version >= 430; // easiest way to ensure all
+    bool have_compute = gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER;
+    bool have_ssbo = gl->mpgl_caps & MPGL_CAP_SSBO;
 
     const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
                                    GL_RGBA8, 0};
@@ -3502,7 +3505,7 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
-    if (!have_compute && p->opts.compute_hdr_peak) {
+    if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak) {
         p->opts.compute_hdr_peak = 0;
         MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
     }

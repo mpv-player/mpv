@@ -241,6 +241,7 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
 
     // Load all relevant texels into shmem
+    gl_sc_enable_extension(sc, "GL_ARB_arrays_of_arrays");
     for (int c = 0; c < components; c++)
         GLSLHF("shared float in%d[%d][%d];\n", c, ih, iw);
 
