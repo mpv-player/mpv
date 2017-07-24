@@ -262,7 +262,7 @@ local function append_property(s, prop, attr, excluded)
 end
 
 
-local function append_perfdata(s, full)
+local function append_perfdata(s, dedicated_page)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
@@ -317,23 +317,23 @@ local function append_perfdata(s, full)
         return format("{\\b%d}%02d{\\b0}%%", w, i * 100)
     end
 
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
+    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak  μs)", o.font_size)
 
     for frame, data in pairs(vo_p) do
-        local f = "%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s"
+        local f = "%s%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s%s"
 
-        if full then
-            s[#s+1] = format("%s%s%s%s:", o.nl, o.indent, o.indent,
+        if dedicated_page then
+            s[#s+1] = format("%s%s%s:", o.nl, o.indent,
                              b(frame:gsub("^%l", string.upper)))
 
             for _, pass in ipairs(data) do
-                s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
+                s[#s+1] = format(f, o.nl, o.indent, o.indent,
                                  o.font_mono, hl(pass["last"], last_s[frame]),
                                  hl(pass["avg"], avg_s[frame]), hl(pass["peak"]),
                                  o.prefix_sep .. o.prefix_sep, p(pass["last"], last_s[frame]),
-                                 o.font, o.prefix_sep .. o.prefix_sep, pass["desc"])
+                                 o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
                     s[#s+1] = generate_graph(pass["samples"], pass["count"],
@@ -343,15 +343,15 @@ local function append_perfdata(s, full)
             end
 
             -- Print sum of timing values as "Total"
-            s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
+            s[#s+1] = format(f, o.nl, o.indent, o.indent,
                              o.font_mono, hl(last_s[frame]),
                              hl(avg_s[frame]), hl(peak_s[frame]), "", "", o.font,
-                             o.prefix_sep .. o.prefix_sep, b("Total"))
+                             o.prefix_sep, o.prefix_sep, b("Total"))
         else
             -- for the simplified view, we just print the sum of each pass
-            s[#s+1] = format(f, o.nl, o.indent .. o.indent, o.font_mono,
+            s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                             hl(last_s[frame]), hl(avg_s[frame]), hl(peak_s[frame]),
-                            "", "", o.font, o.prefix_sep .. o.prefix_sep,
+                            "", "", o.font, o.prefix_sep, o.prefix_sep,
                             frame:gsub("^%l", string.upper))
         end
     end
