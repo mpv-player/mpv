@@ -127,6 +127,7 @@ struct GL {
     void (GLAPIENTRY *BindBufferBase)(GLenum, GLuint, GLuint);
     GLvoid * (GLAPIENTRY *MapBufferRange)(GLenum, GLintptr, GLsizeiptr,
                                           GLbitfield);
+    void (GLAPIENTRY *FlushMappedBufferRange)(GLenum, GLintptr, GLsizeiptr);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
     void (GLAPIENTRY *BufferSubData)(GLenum, GLintptr, GLsizeiptr, const GLvoid *);
