@@ -236,9 +236,11 @@ struct gl_video {
     struct fbotex integer_fbo[4];
     struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
+    struct fbotex screen_fbo;
     struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
     struct fbotex vdpau_deinterleave_fbo[2];
+    GLuint hdr_peak_ssbo;
 
     int surface_idx;
     int surface_now;
@@ -260,6 +262,7 @@ struct gl_video {
     struct img_tex pass_tex[TEXUNIT_VIDEO_NUM];
     int pass_tex_num;
     int texture_w, texture_h;
+    int compute_w, compute_h; // presence indicates the use of a compute shader
     struct gl_transform texture_offset; // texture transform without rotation
     int components;
     bool use_linear;
@@ -367,6 +370,7 @@ const struct m_sub_options gl_video_conf = {
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
+        OPT_FLAG("hdr-compute-peak", compute_hdr_peak, 0),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
@@ -446,6 +450,7 @@ static void gl_video_setup_hooks(struct gl_video *p);
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
 #define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
+#define PRELUDE(...) gl_sc_paddf(p->sc, __VA_ARGS__)
 
 static struct bstr load_cached_file(struct gl_video *p, const char *path)
 {
@@ -539,6 +544,7 @@ static void uninit_rendering(struct gl_video *p)
 
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
+    fbotex_uninit(&p->screen_fbo);
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -1107,6 +1113,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
         char *texture_name = mp_tprintf(32, "texture%d", n);
         char *texture_size = mp_tprintf(32, "texture_size%d", n);
         char *texture_rot = mp_tprintf(32, "texture_rot%d", n);
+        char *texture_off = mp_tprintf(32, "texture_off%d", n);
         char *pixel_size = mp_tprintf(32, "pixel_size%d", n);
 
         if (gl_is_integer_format(s->gl_format)) {
@@ -1121,9 +1128,78 @@ static void pass_prepare_src_tex(struct gl_video *p)
         }
         gl_sc_uniform_vec2(sc, texture_size, f);
         gl_sc_uniform_mat2(sc, texture_rot, true, (float *)s->transform.m);
+        gl_sc_uniform_vec2(sc, texture_off, (float *)s->transform.t);
         gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
                                                        1.0f / f[1]});
     }
+}
+
+// Update the compute work group size requirements for the current shader.
+// Since we assume that all shaders can work with bigger working groups, just
+// never smaller ones, this effectively becomes the maximum of all size
+// requirements
+static void compute_size_minimum(struct gl_video *p, int bw, int bh)
+{
+    p->compute_w = MPMAX(p->compute_w, bw);
+    p->compute_h = MPMAX(p->compute_h, bh);
+}
+
+// w/h: the width/height of the compute shader's operating domain (e.g. the
+// target target that needs to be written, or the source texture that needs to
+// be reduced)
+// bw/bh: the width/height of the block (working group), which is tiled over
+// w/h as necessary
+static void dispatch_compute(struct gl_video *p, int w, int h, int bw, int bh)
+{
+    GL *gl = p->gl;
+
+    PRELUDE("layout (local_size_x = %d, local_size_y = %d) in;\n", bw, bh);
+
+    pass_prepare_src_tex(p);
+    gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
+
+    // Since we don't actually have vertices, we pretend for convenience
+    // reasons that we do and calculate the right texture coordinates based on
+    // the output sample ID
+    gl_sc_uniform_vec2(p->sc, "out_scale", (GLfloat[2]){ 1.0 / w, 1.0 / h });
+    PRELUDE("#define outcoord(id) (out_scale * (vec2(id) + vec2(0.5)))\n");
+
+    for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
+        struct img_tex *s = &p->pass_tex[n];
+        if (!s->gl_tex)
+            continue;
+
+        // We need to rescale the coordinates to the true texture size
+        char tex_scale[32];
+        snprintf(tex_scale, sizeof(tex_scale), "tex_scale%d", n);
+        gl_sc_uniform_vec2(p->sc, tex_scale, (GLfloat[2]){
+                (float)s->w / s->tex_w,
+                (float)s->h / s->tex_h,
+        });
+
+        PRELUDE("#define texcoord%d_raw(id) (tex_scale%d * outcoord(id))\n", n, n, n);
+        PRELUDE("#define texcoord%d_rot(id) (texture_rot%d * texcoord%d_raw(id) + "
+               "pixel_size%d * texture_off%d)\n", n, n, n, n, n);
+        // Clamp the texture coordinates to prevent sampling out-of-bounds in
+        // threads that exceed the requested width/height
+        PRELUDE("#define texmap%d(id) min(texcoord%d_rot(id), vec2(1.0))\n", n, n);
+        PRELUDE("const vec2 texcoord%d = texmap%d(gl_GlobalInvocationID);\n", n, n);
+    }
+
+    pass_record(p, gl_sc_generate(p->sc, GL_COMPUTE_SHADER));
+
+    // always round up when dividing to make sure we don't leave off a part of
+    // the image
+    int num_x = (w + bw - 1) / bw,
+        num_y = (h + bh - 1) / bh;
+
+    gl->DispatchCompute(num_x, num_y, 1);
+    gl_sc_reset(p->sc);
+
+    debug_check_gl(p, "after dispatching compute shader");
+
+    memset(&p->pass_tex, 0, sizeof(p->pass_tex));
+    p->pass_tex_num = 0;
 }
 
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
@@ -1169,7 +1245,7 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
-    pass_record(p, gl_sc_generate(p->sc));
+    pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     render_pass_quad(p, vp_w, vp_h, dst);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1187,10 +1263,23 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                             int w, int h, int flags)
 {
+    bool use_compute = p->compute_w > 0 && p->compute_h > 0;
+    if (use_compute)
+        flags |= FBOTEX_COMPUTE;
+
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
-    finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
-                       &(struct mp_rect){0, 0, w, h});
+    if (use_compute) {
+        gl_sc_uniform_image2D(p->sc, "out_image", dst_fbo->texture,
+                              dst_fbo->iformat, GL_WRITE_ONLY);
+        GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
+        dispatch_compute(p, w, h, p->compute_w, p->compute_h);
+    } else {
+        finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
+                           &(struct mp_rect){0, 0, w, h});
+    }
+
+    p->compute_w = p->compute_h = 0;
 }
 
 static const char *get_tex_swizzle(struct img_tex *img)
@@ -1250,6 +1339,7 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_size texture_size%d\n", name, id);
     GLSLHF("#define %s_rot texture_rot%d\n", name, id);
     GLSLHF("#define %s_pt pixel_size%d\n", name, id);
+    GLSLHF("#define %s_map texmap%d\n", name, id);
     GLSLHF("#define %s_mul %f\n", name, tex.multiplier);
 
     // Set up the sampling functions
@@ -1666,7 +1756,21 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
-        pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+        // Use a compute shader where possible, fallback to the slower texture
+        // fragment sampler otherwise. Also use the fragment shader for
+        // very large kernels to avoid exhausting shmem
+        if (p->gl->glsl_version < 430 || scaler->kernel->f.radius > 16) {
+            pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+        } else {
+            // For performance we want to load at least as many pixels
+            // horizontally as there are threads in a warp (32 for nvidia), as
+            // well as enough to take advantage of shmem parallelism
+            const int warp_size = 32, threads = 256;
+            compute_size_minimum(p, warp_size, threads / warp_size);
+            pass_compute_polar(p->sc, scaler, tex.components,
+                               p->compute_w, p->compute_h,
+                               (float)w / tex.w, (float)h / tex.h);
+        }
     } else if (scaler->kernel) {
         pass_sample_separated(p, tex, scaler, w, h);
     } else {
@@ -1800,6 +1904,7 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->desc),
                   plane_names[tex.type]);
 
+    compute_size_minimum(p, shader->compute_w, shader->compute_h);
     load_shader(p, shader->pass_body);
     GLSLF("color = hook();\n");
 
@@ -2052,8 +2157,7 @@ static void pass_read_video(struct gl_video *p)
         if (strcmp(conf->kernel.name, "bilinear") != 0) {
             GLSLF("// upscaling plane %d\n", n);
             pass_sample(p, tex[n], scaler, conf, 1.0, p->texture_w, p->texture_h);
-            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h,
-                            FBOTEX_FUZZY);
+            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h, 0);
             tex[n] = img_tex_fbo(&p->scale_fbo[n], tex[n].type, tex[n].components);
         }
 
@@ -2274,6 +2378,8 @@ static void pass_scale_main(struct gl_video *p)
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
+    GL *gl = p->gl;
+
     // Figure out the target color space from the options, or auto-guess if
     // none were set
     struct mp_colorspace dst = {
@@ -2333,10 +2439,42 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
+    bool detect_peak = p->opts.compute_hdr_peak && mp_trc_is_hdr(src.gamma);
+    if (detect_peak) {
+        pass_describe(p, "detect HDR peak");
+        compute_size_minimum(p, 8, 8); // 8x8 is good for performance
+
+        if (!p->hdr_peak_ssbo) {
+            struct {
+                GLuint sig_peak_raw;
+                GLuint index;
+                GLuint frame_max[PEAK_DETECT_FRAMES+1];
+            } peak_ssbo = {0};
+
+            // Prefill with safe values
+            int safe = MP_REF_WHITE * mp_trc_nom_peak(p->image_params.color.gamma);
+            peak_ssbo.sig_peak_raw = PEAK_DETECT_FRAMES * safe;
+            for (int i = 0; i < PEAK_DETECT_FRAMES+1; i++)
+                peak_ssbo.frame_max[i] = safe;
+
+            gl->GenBuffers(1, &p->hdr_peak_ssbo);
+            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, p->hdr_peak_ssbo);
+            gl->BufferData(GL_SHADER_STORAGE_BUFFER, sizeof(peak_ssbo),
+                           &peak_ssbo, GL_STREAM_COPY);
+            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
+
+        gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
+            "uint sig_peak_raw;"
+            "uint index;"
+            "uint frame_max[%d];", PEAK_DETECT_FRAMES + 1
+        );
+    }
+
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
                    p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
-                   p->use_linear && !osd);
+                   detect_peak, p->use_linear && !osd);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
@@ -2480,7 +2618,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 
             pass_colormanage(p, csp_srgb, true);
         }
-        pass_record(p, gl_sc_generate(p->sc));
+        pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
         mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc);
         gl_sc_reset(p->sc);
     }
@@ -2600,8 +2738,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
             pass_delinearize(p->sc, p->image_params.color.gamma);
             p->use_linear = false;
         }
-        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h,
-                        FBOTEX_FUZZY);
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         pass_read_fbo(p, &p->blend_subs_fbo);
@@ -2626,6 +2763,17 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
     }
 
     pass_colormanage(p, p->image_params.color, false);
+
+    // Since finish_pass_direct doesn't work with compute shaders, and neither
+    // does the checkerboard/dither code, we may need an indirection via
+    // p->screen_fbo here.
+    if (p->compute_w > 0 && p->compute_h > 0) {
+        int o_w = p->dst_rect.x1 - p->dst_rect.x0,
+            o_h = p->dst_rect.y1 - p->dst_rect.y0;
+        finish_pass_fbo(p, &p->screen_fbo, o_w, o_h, FBOTEX_FUZZY);
+        struct img_tex tmp = img_tex_fbo(&p->screen_fbo, PLANE_RGB, p->components);
+        copy_img_tex(p, &(int){0}, tmp);
+    }
 
     if (p->has_alpha){
         if (p->opts.alpha_mode == ALPHA_BLEND_TILES) {
@@ -3243,6 +3391,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
     bool have_tex16 = !gl->es || (gl->mpgl_caps & MPGL_CAP_EXT16);
+    bool have_compute = gl->glsl_version >= 430; // easiest way to ensure all
 
     const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
                                    GL_RGBA8, 0};
@@ -3353,6 +3502,10 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
+    if (!have_compute && p->opts.compute_hdr_peak) {
+        p->opts.compute_hdr_peak = 0;
+        MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
+    }
 }
 
 static void init_gl(struct gl_video *p)
@@ -3388,6 +3541,7 @@ void gl_video_uninit(struct gl_video *p)
     gl_sc_destroy(p->sc);
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
+    gl->DeleteBuffers(1, &p->hdr_peak_ssbo);
 
     gl_timer_free(p->upload_timer);
     gl_timer_free(p->blit_timer);

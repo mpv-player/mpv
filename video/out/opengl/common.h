@@ -54,6 +54,7 @@ enum {
     MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
     MPGL_CAP_ARB_FLOAT          = (1 << 19),    // GL_ARB_texture_float
     MPGL_CAP_EXT_CR_HFLOAT      = (1 << 20),    // GL_EXT_color_buffer_half_float
+    MPGL_CAP_SSBO               = (1 << 21),    // GL_ARB_shader_storage_buffer_object
 
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
@@ -162,6 +163,11 @@ struct GL {
     void (GLAPIENTRY *GetProgramBinary)(GLuint, GLsizei, GLsizei *, GLenum *,
                                         void *);
     void (GLAPIENTRY *ProgramBinary)(GLuint, GLenum, const void *, GLsizei);
+
+    void (GLAPIENTRY *DispatchCompute)(GLuint, GLuint, GLuint);
+    void (GLAPIENTRY *BindImageTexture)(GLuint, GLuint, GLint, GLboolean,
+                                        GLint, GLenum, GLenum);
+    void (GLAPIENTRY *MemoryBarrier)(GLbitfield);
 
     const GLubyte* (GLAPIENTRY *GetStringi)(GLenum, GLuint);
     void (GLAPIENTRY *BindAttribLocation)(GLuint, GLuint, const GLchar *);

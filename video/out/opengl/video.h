@@ -99,6 +99,9 @@ enum tone_mapping {
     TONE_MAPPING_LINEAR,
 };
 
+// How many frames to average over for HDR peak detection
+#define PEAK_DETECT_FRAMES 100
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
@@ -109,6 +112,7 @@ struct gl_video_opts {
     int target_trc;
     int target_brightness;
     int hdr_tone_mapping;
+    int compute_hdr_peak;
     float tone_mapping_param;
     float tone_mapping_desat;
     int linear_scaling;
