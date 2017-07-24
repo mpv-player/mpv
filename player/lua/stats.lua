@@ -72,6 +72,7 @@ options.read_options(o)
 
 local format = string.format
 local max = math.max
+local min = math.min
 
 -- Function used to record performance data
 local recorder = nil
@@ -201,7 +202,7 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
 
     -- try and center the graph if possible, but avoid going above `scale`
     if v_avg then
-        scale = math.min(scale, v_max / (2 * v_avg))
+        scale = min(scale, v_max / (2 * v_avg))
     end
 
     local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
@@ -272,8 +273,8 @@ local function append_perfdata(s, full)
                        or mp.get_property_number(compat("container-fps"), 0)
     if target_fps > 0 then target_fps = 1 / target_fps * 1e9 end
 
+    -- Sums of all last/avg/peak values
     local last_s, avg_s, peak_s = {}, {}, {}
-
     for frame, data in pairs(vo_p) do
         last_s[frame], avg_s[frame], peak_s[frame] = 0, 0, 0
         for _, pass in ipairs(data) do
@@ -305,12 +306,23 @@ local function append_perfdata(s, full)
         return format("%05d", i)
     end
 
+    -- Format n/m with a font weight based on the ratio
+    local function p(n, m)
+        local i = 0
+        if m > 0 then
+            i = tonumber(n) / m
+        end
+        -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
+        local w = (700 * math.sqrt(i)) + 200
+        return format("{\\b%d}%02d{\\b0}%%", w, i * 100)
+    end
+
     s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak  μs)", o.font_size)
 
     for frame, data in pairs(vo_p) do
-        local f = "%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s%s"
+        local f = "%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s"
 
         if full then
             s[#s+1] = format("%s%s%s%s:", o.nl, o.indent, o.indent,
@@ -320,7 +332,8 @@ local function append_perfdata(s, full)
                 s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
                                  o.font_mono, hl(pass["last"], last_s[frame]),
                                  hl(pass["avg"], avg_s[frame]), hl(pass["peak"]),
-                                 o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
+                                 o.prefix_sep .. o.prefix_sep, p(pass["last"], last_s[frame]),
+                                 o.font, o.prefix_sep .. o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
                     s[#s+1] = generate_graph(pass["samples"], pass["count"],
@@ -329,16 +342,17 @@ local function append_perfdata(s, full)
                 end
             end
 
+            -- Print sum of timing values as "Total"
             s[#s+1] = format(f, o.nl, o.indent .. o.indent .. o.indent,
                              o.font_mono, hl(last_s[frame]),
-                             hl(avg_s[frame]), hl(peak_s[frame]), o.font,
-                             o.prefix_sep, o.prefix_sep, b("Total"))
+                             hl(avg_s[frame]), hl(peak_s[frame]), "", "", o.font,
+                             o.prefix_sep .. o.prefix_sep, b("Total"))
         else
             -- for the simplified view, we just print the sum of each pass
             s[#s+1] = format(f, o.nl, o.indent .. o.indent, o.font_mono,
-                            hl(last_s[frame]), hl(avg_s[frame]),
-                            hl(peak_s[frame]), o.font, o.prefix_sep,
-                            o.prefix_sep, frame:gsub("^%l", string.upper))
+                            hl(last_s[frame]), hl(avg_s[frame]), hl(peak_s[frame]),
+                            "", "", o.font, o.prefix_sep .. o.prefix_sep,
+                            frame:gsub("^%l", string.upper))
         end
     end
 end
