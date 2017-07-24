@@ -4110,7 +4110,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
 ``--linear-scaling``
     Scale in linear light. It should only be used with a
-    ``--opengl-fbo-format`` that has at least 16 bit precision.
+    ``--opengl-fbo-format`` that has at least 16 bit precision. This option
+    has no effect on HDR content.
 
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
@@ -4133,7 +4134,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     the ``--tscale`` setting.
 
     Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
-    more information.
+    more information. It should also only be used with an ``--opengl-fbo-format``
+    that has at least 16 bit precision.
 
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:

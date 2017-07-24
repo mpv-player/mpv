@@ -2326,12 +2326,21 @@ static void pass_scale_main(struct gl_video *p)
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
-    if (p->use_linear) {
+    bool use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
+
+    // Linear light downscaling results in nasty artifacts for HDR curves due
+    // to the potentially extreme brightness differences severely compounding
+    // any ringing. So just scale in gamma light instead.
+    if (mp_trc_is_hdr(p->image_params.color.gamma) && downscaling)
+        use_linear = false;
+
+    if (use_linear) {
+        p->use_linear = true;
         pass_linearize(p->sc, p->image_params.color.gamma);
         pass_opt_hook_point(p, "LINEAR", NULL);
     }
 
-    bool use_sigmoid = p->use_linear && p->opts.sigmoid_upscaling && upscaling;
+    bool use_sigmoid = use_linear && p->opts.sigmoid_upscaling && upscaling;
     float sig_center, sig_slope, sig_offset, sig_scale;
     if (use_sigmoid) {
         // Coefficients for the sigmoidal transform are taken from the
@@ -2692,7 +2701,6 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
     if (p->dumb_mode)
         return true;
 
-    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     pass_read_video(p);
     pass_opt_hook_point(p, "NATIVE", &p->texture_offset);
     pass_convert_yuv(p);
@@ -2800,13 +2808,34 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
     finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
 }
 
-// Draws an interpolate frame to fbo, based on the frame timing in t
-static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
-                                       int fbo)
+static bool update_fbosurface(struct gl_video *p, struct mp_image *mpi,
+                              uint64_t id, struct fbosurface *surf)
 {
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
 
+    pass_info_reset(p, false);
+    if (!pass_render_frame(p, mpi, id))
+        return false;
+
+    // Frame blending should always be done in linear light to preserve the
+    // overall brightness, otherwise this will result in flashing dark frames
+    // because mixing in compressed light artificially darkens the results
+    if (!p->use_linear) {
+        p->use_linear = true;
+        pass_linearize(p->sc, p->image_params.color.gamma);
+    }
+
+    finish_pass_fbo(p, &surf->fbotex, vp_w, vp_h, FBOTEX_FUZZY);
+    surf->id  = id;
+    surf->pts = mpi->pts;
+    return true;
+}
+
+// Draws an interpolate frame to fbo, based on the frame timing in t
+static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
+                                       int fbo)
+{
     bool is_new = false;
 
     // Reset the queue completely if this is a still image, to avoid any
@@ -2818,15 +2847,11 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // First of all, figure out if we have a frame available at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].id == 0) {
-        is_new = true;
-        pass_info_reset(p, false);
-        if (!pass_render_frame(p, t->current, t->frame_id))
+        struct fbosurface *now = &p->surfaces[p->surface_now];
+        if (!update_fbosurface(p, t->current, t->frame_id, now))
             return;
-        finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
-                        vp_w, vp_h, FBOTEX_FUZZY);
-        p->surfaces[p->surface_now].id = p->image.id;
-        p->surfaces[p->surface_now].pts = p->image.mpi->pts;
         p->surface_idx = p->surface_now;
+        is_new = true;
     }
 
     // Find the right frame for this instant
@@ -2881,16 +2906,12 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             continue;
 
         if (f_id > p->surfaces[p->surface_idx].id) {
-            is_new = true;
-            pass_info_reset(p, false);
-            if (!pass_render_frame(p, f, f_id))
+            struct fbosurface *dst = &p->surfaces[surface_dst];
+            if (!update_fbosurface(p, f, f_id, dst))
                 return;
-            finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
-                            vp_w, vp_h, FBOTEX_FUZZY);
-            p->surfaces[surface_dst].id = f_id;
-            p->surfaces[surface_dst].pts = f->pts;
             p->surface_idx = surface_dst;
             surface_dst = fbosurface_wrap(surface_dst + 1);
+            is_new = true;
         }
     }
 
