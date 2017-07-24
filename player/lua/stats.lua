@@ -314,7 +314,7 @@ local function append_perfdata(s, dedicated_page)
         end
         -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
         local w = (700 * math.sqrt(i)) + 200
-        return format("{\\b%d}%02d{\\b0}%%", w, i * 100)
+        return format("{\\b%d}%02d%%{\\b0}", w, i * 100)
     end
 
     s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
