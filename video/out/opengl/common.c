@@ -174,6 +174,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(BlitFramebuffer),
             DEF_FN(GetStringi),
             DEF_FN(MapBufferRange),
+            DEF_FN(FlushMappedBufferRange),
             // for ES 3.0
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),

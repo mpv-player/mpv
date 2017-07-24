@@ -4153,9 +4153,19 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Set this to ``-1`` to disable this logic.
 
 ``--opengl-pbo``
-    Enable use of PBOs. On some drivers this can be faster, especially if the
-    source video size is huge (e.g. so called "4K" video). On other drivers it
-    might be slower or cause latency issues.
+    Enable use of PBOs for the stand-alone texture upload path. On some drivers
+    this can be faster, especially if the source video size is huge (e.g. so
+    called "4K" video). On other drivers it might be slower or cause latency
+    issues. This option has no effect when using direct rendering
+    (``-vd-lavc-dr=yes``), which always uses PBOs regardless of this setting.
+
+ ``--opengl-pbo-explicit-flush``
+    By default, PBOs in use for direct rendering (``--vd-lavc-dr=yes``) will be
+    mapped coherently and never flushed. In theory, this could be bad for
+    performance. Enabling this option will map the PBOs non-coherently instead,
+    and use explicit flushing a few vsyncs ahead of time (currently 2). Could
+    perhaps help with direct rendering performance on some drivers. This option
+    has no interaction with ``--opengl-pbo``.
 
 ``--dither-depth=<N|no|auto>``
     Set dither target depth to N. Default: no.
