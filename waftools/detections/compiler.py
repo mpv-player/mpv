@@ -36,7 +36,8 @@ def __add_generic_flags__(ctx):
                                  "-Wstrict-prototypes",
                                  "-Wno-format-zero-length",
                                  "-Werror=format-security",
-                                 "-Wno-redundant-decls"])
+                                 "-Wno-redundant-decls",
+                                 "-Wvla"])
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
