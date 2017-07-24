@@ -287,3 +287,12 @@ char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag)
     }
     return buf;
 }
+
+char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(buf, buf_size, format, ap);
+    va_end(ap);
+    return buf;
+}

@@ -919,8 +919,7 @@ static GLuint compile_program(struct gl_shader_cache *sc, const char *vertex,
     compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
     compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag);
     for (int n = 0; sc->vertex_entries[n].name; n++) {
-        char vname[80];
-        snprintf(vname, sizeof(vname), "vertex_%s", sc->vertex_entries[n].name);
+        char *vname = mp_tprintf(80, "vertex_%s", sc->vertex_entries[n].name);
         gl->BindAttribLocation(prog, n, vname);
     }
     link_shader(sc, prog);

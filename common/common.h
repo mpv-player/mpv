@@ -101,4 +101,12 @@ char *mp_strerror_buf(char *buf, size_t buf_size, int errnum);
 char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag);
 #define mp_tag_str(t) mp_tag_str_buf((char[22]){0}, 22, t)
 
+// Return a printf(format, ...) formatted string of the given SIZE. SIZE must
+// be a compile time constant. The result is allocated on the stack and valid
+// only within the current block scope.
+#define mp_tprintf(SIZE, format, ...) \
+    mp_tprintf_buf((char[SIZE]){0}, (SIZE), (format), __VA_ARGS__)
+char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
+    PRINTF_ATTRIBUTE(3, 4);
+
 #endif /* MPLAYER_MPCOMMON_H */

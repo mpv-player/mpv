@@ -1104,14 +1104,10 @@ static void pass_prepare_src_tex(struct gl_video *p)
         if (!s->gl_tex)
             continue;
 
-        char texture_name[32];
-        char texture_size[32];
-        char texture_rot[32];
-        char pixel_size[32];
-        snprintf(texture_name, sizeof(texture_name), "texture%d", n);
-        snprintf(texture_size, sizeof(texture_size), "texture_size%d", n);
-        snprintf(texture_rot, sizeof(texture_rot), "texture_rot%d", n);
-        snprintf(pixel_size, sizeof(pixel_size), "pixel_size%d", n);
+        char *texture_name = mp_tprintf(32, "texture%d", n);
+        char *texture_size = mp_tprintf(32, "texture_size%d", n);
+        char *texture_rot = mp_tprintf(32, "texture_rot%d", n);
+        char *pixel_size = mp_tprintf(32, "pixel_size%d", n);
 
         if (gl_is_integer_format(s->gl_format)) {
             gl_sc_uniform_tex_ui(sc, texture_name, s->gl_tex);
