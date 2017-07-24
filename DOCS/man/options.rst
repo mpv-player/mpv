@@ -712,7 +712,8 @@ Video
     The ``...-copy`` modes (e.g. ``dxva2-copy``) allow you to use hardware
     decoding with any VO, backend or filter. Because these copy the decoded
     video back to system RAM, they're likely less efficient than the direct
-    modes (like e.g. ``dxva2``).
+    modes (like e.g. ``dxva2``), and probably not more efficient than software
+    decoding except for some codecs (e.g. HEVC).
 
     .. note::
 
@@ -722,15 +723,19 @@ Video
 
     .. admonition:: Quality reduction with hardware decoding
 
-        Normally, hardware decoding does not reduce video quality (at least for
-        the codecs h264 and HEVC). However, due to restrictions in video output
-        APIs, there can be some loss, or blatantly incorrect results.
+        In theory, hardware decoding does not reduce video quality (at least
+        for the codecs h264 and HEVC). However, due to restrictions in video
+        output APIs, as well as bugs in the actual hardware decoders, there can
+        be some loss, or even blatantly incorrect results.
 
         In some cases, RGB conversion is forced, which means the RGB conversion
         is performed by the hardware decoding API, instead of the OpenGL code
-        used by ``--vo=opengl``. This means certain obscure colorspaces may
-        not display correctly, not certain filtering (such as debanding)
-        cannot be applied in an ideal way.
+        used by ``--vo=opengl``. This means certain colorspaces may not display
+        correctly, and certain filtering (such as debanding) cannot be applied
+        in an ideal way. This will also usually force the use of low quality
+        chroma scalers instead of the one specified by ``--cscale``. In other
+        cases, hardware decoding can also reduce the bit depth of the decoded
+        image, which can introduce banding or precision loss for 10-bit files.
 
         ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
         video filter is active in general), it forces RGB conversion. The latter
@@ -739,14 +744,15 @@ Video
         filter retrieves image data without RGB conversion and is safe (but
         precludes use of vdpau postprocessing).
 
-        ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
-        If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601
-        or BT.709, a forced but correct RGB conversion is performed. Otherwise,
-        the result will be incorrect.
+        ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the
+        logs. If ``vaapi-glx`` is indicated, and the video colorspace is either
+        BT.601 or BT.709, a forced, low-quality but correct RGB conversion is
+        performed. Otherwise, the result will be totally incorrect.
 
         ``d3d11va`` is usually safe (if used with ANGLE builds that support
         ``EGL_KHR_stream path`` - otherwise, it converts to RGB), except that
-        10 bit input (HEVC main 10 profiles) will be rounded down to 8 bits.
+        10 bit input (HEVC main 10 profiles) will be rounded down to 8 bits,
+        which results in reduced quality.
 
         ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
         conversion, but actual behavior depends on the GPU drivers. Some drivers
@@ -758,17 +764,30 @@ Video
         ``rpi`` always uses the hardware overlay renderer, even with
         ``--vo=opengl``.
 
+        ``cuda`` should be safe, but it has been reported to corrupt the
+        timestamps causing glitched, flashing frames on some files. It can also
+        sometimes cause massive framedrops for unknown reasons. Caution is
+        advised.
+
         ``crystalhd`` is not safe. It always converts to 4:2:2 YUV, which
         may be lossy, depending on how chroma sub-sampling is done during
         conversion. It also discards the top left pixel of each frame for
         some reason.
 
         All other methods, in particular the copy-back methods (like
-        ``dxva2-copy`` etc.) are either fully safe, or not worse than software
-        decoding.
+        ``dxva2-copy`` etc.) should hopefully be safe, although they can still
+        cause random decoding issues. At the very least, they shouldn't affect
+        the colors of the image.
 
-        In particular, ``auto-copy`` will only select safe modes
-        (although potentially slower than other methods).
+        In particular, ``auto-copy`` will only select "safe" modes
+        (although potentially slower than other methods), but there's still no
+        guarantee the chosen hardware decoder will actually work correctly.
+
+        In general, it's very strongly advised to avoid hardware decoding
+        unless **absolutely** necessary, i.e. if your CPU is insufficient to
+        decode the file in questions. If you run into any weird decoding issues,
+        frame glitches or discoloration, and you have ``--hwdec`` turned on,
+        the first thing you should try is disabling it.
 
 ``--opengl-hwdec-interop=<name>``
     This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
