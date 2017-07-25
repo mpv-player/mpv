@@ -86,6 +86,7 @@
 // --- GL 4.3 or GL_ARB_compute_shader
 
 #define GL_COMPUTE_SHADER                 0x91B9
+#define GL_MAX_COMPUTE_SHARED_MEMORY_SIZE 0x8262
 
 // --- GL 4.3 or GL_ARB_shader_storage_buffer_object
 

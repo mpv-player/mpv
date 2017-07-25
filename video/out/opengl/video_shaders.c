@@ -217,18 +217,13 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSLF("}\n");
 }
 
+// bw/bh: block size
+// iw/ih: input size (pre-calculated to fit all required texels)
 void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
-                        int components, int bw, int bh, float ratiox,
-                        float ratioy)
+                        int components, int bw, int bh, int iw, int ih)
 {
     int bound = ceil(scaler->kernel->radius_cutoff);
     int offset = bound - 1; // padding top/left
-    int padding = offset + bound; // total padding
-
-    // We need to sample everything from base_min to base_max, so make sure
-    // we have enough space to fit all relevant texels in shmem
-    int iw = (int)ceil(bw / ratiox) + padding + 1,
-        ih = (int)ceil(bh / ratioy) + padding + 1;
 
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");

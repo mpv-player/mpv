@@ -1714,6 +1714,50 @@ static void pass_sample_separated(struct gl_video *p, struct img_tex src,
     pass_sample_separated_gen(p->sc, scaler, 1, 0);
 }
 
+// Picks either the compute shader version or the regular sampler version
+// depending on hardware support
+static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler,
+                                       struct img_tex tex, int w, int h)
+{
+    GL *gl = p->gl;
+
+    GLenum reqs = MPGL_CAP_COMPUTE_SHADER | MPGL_CAP_NESTED_ARRAY;
+    if (!(gl->mpgl_caps & reqs))
+        goto fallback;
+
+    int bound = ceil(scaler->kernel->radius_cutoff);
+    int offset = bound - 1; // padding top/left
+    int padding = offset + bound; // total padding
+
+    float ratiox = (float)w / tex.w,
+          ratioy = (float)h / tex.h;
+
+    // For performance we want to load at least as many pixels
+    // horizontally as there are threads in a warp (32 for nvidia), as
+    // well as enough to take advantage of shmem parallelism
+    const int warp_size = 32, threads = 256;
+    int bw = warp_size;
+    int bh = threads / bw;
+
+    // We need to sample everything from base_min to base_max, so make sure
+    // we have enough room in shmem
+    int iw = (int)ceil(bw / ratiox) + padding + 1,
+        ih = (int)ceil(bh / ratioy) + padding + 1;
+
+    int shmem_req = iw * ih * tex.components * sizeof(GLfloat);
+    if (shmem_req > gl->max_shmem)
+        goto fallback;
+
+    compute_size_minimum(p, bw, bh);
+    pass_compute_polar(p->sc, scaler, tex.components, bw, bh, iw, ih);
+    return;
+
+fallback:
+    // Fall back to regular polar shader when compute shaders are unsupported
+    // or the kernel is too big for shmem
+    pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+}
+
 // Sample from img_tex, with the src rectangle given by it.
 // The dst rectangle is implicit by what the caller will do next, but w and h
 // must still be what is going to be used (to dimension FBOs correctly).
@@ -1753,21 +1797,7 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
-        GLenum reqs = MPGL_CAP_COMPUTE_SHADER | MPGL_CAP_NESTED_ARRAY;
-        if ((p->gl->mpgl_caps & reqs) && scaler->kernel->f.radius <= 16) {
-            // For performance we want to load at least as many pixels
-            // horizontally as there are threads in a warp (32 for nvidia), as
-            // well as enough to take advantage of shmem parallelism
-            const int warp_size = 32, threads = 256;
-            compute_size_minimum(p, warp_size, threads / warp_size);
-            pass_compute_polar(p->sc, scaler, tex.components,
-                               p->compute_w, p->compute_h,
-                               (float)w / tex.w, (float)h / tex.h);
-        } else {
-            // Fall back to regular polar shader when compute shaders are
-            // unsupported or the kernel is too big for shmem
-            pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
-        }
+        pass_dispatch_sample_polar(p, scaler, tex, w, h);
     } else if (scaler->kernel) {
         pass_sample_separated(p, tex, scaler, w, h);
     } else {

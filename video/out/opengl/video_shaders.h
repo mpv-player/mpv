@@ -33,8 +33,7 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
                        int components, int glsl_version);
 void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
-                        int components, int bw, int bh, float ratiox,
-                        float ratioy);
+                        int components, int bw, int bh, int iw, int ih);
 void pass_sample_bicubic_fast(struct gl_shader_cache *sc);
 void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
                             int w, int h);

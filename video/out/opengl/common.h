@@ -87,6 +87,7 @@ struct GL {
     int glsl_version;           // e.g. 130 for GLSL 1.30
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
+    int max_shmem;              // Maximum shared memory for compute shaders
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
 
     // Use mpgl_get_native_display() instead. Also, this is set to use the
