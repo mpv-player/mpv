@@ -2986,7 +2986,7 @@ Input
     Support depends on the VO in use.
 
 ``--input-media-keys=<yes|no>``
-    (OS X only)
+    (OS X and Windows only)
     Enable/disable media keys support. Enabled by default (except for libmpv).
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``

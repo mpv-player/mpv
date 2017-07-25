@@ -250,6 +250,9 @@ void mp_input_set_cancel(struct input_ctx *ictx, void (*cb)(void *c), void *c);
 // characters. If false, count Right Alt as the modifier Alt key.
 bool mp_input_use_alt_gr(struct input_ctx *ictx);
 
+// Return true if mpv should intercept keyboard media keys
+bool mp_input_use_media_keys(struct input_ctx *ictx);
+
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 

@@ -23,4 +23,7 @@
 /* Convert a Windows virtual key code to an mpv key */
 int mp_w32_vkey_to_mpkey(UINT vkey, bool extended);
 
+/* Convert a WM_APPCOMMAND value to an mpv key */
+int mp_w32_appcmd_to_mpkey(UINT appcmd);
+
 #endif

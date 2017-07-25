@@ -200,9 +200,9 @@ const struct m_sub_options input_config = {
         OPT_INTRANGE("input-key-fifo-size", key_fifo_size, 0, 2, 65000),
         OPT_FLAG("input-cursor", enable_mouse_movements, 0),
         OPT_FLAG("input-vo-keyboard", vo_key_input, 0),
+        OPT_FLAG("input-media-keys", use_media_keys, 0),
 #if HAVE_COCOA
         OPT_FLAG("input-appleremote", use_appleremote, 0),
-        OPT_FLAG("input-media-keys", use_media_keys, 0),
 #endif
         OPT_FLAG("window-dragging", allow_win_drag, 0),
         OPT_REPLACED("input-x11-keyboard", "input-vo-keyboard"),
@@ -216,9 +216,9 @@ const struct m_sub_options input_config = {
         .ar_rate = 40,
         .use_alt_gr = 1,
         .enable_mouse_movements = 1,
+        .use_media_keys = 1,
 #if HAVE_COCOA
         .use_appleremote = 1,
-        .use_media_keys = 1,
 #endif
         .default_bindings = 1,
         .vo_key_input = 1,
@@ -1437,6 +1437,14 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool r = ictx->opts->use_alt_gr;
+    input_unlock(ictx);
+    return r;
+}
+
+bool mp_input_use_media_keys(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    bool r = ictx->opts->use_media_keys;
     input_unlock(ictx);
     return r;
 }
