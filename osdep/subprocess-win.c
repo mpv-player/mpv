@@ -173,8 +173,10 @@ error:
 static int sparse_wait(HANDLE *handles, unsigned num_handles)
 {
     unsigned w_num_handles = 0;
-    HANDLE w_handles[num_handles];
-    int map[num_handles];
+    HANDLE w_handles[10];
+    int map[10];
+    if (num_handles > MP_ARRAY_SIZE(w_handles))
+        return -1;
 
     for (unsigned i = 0; i < num_handles; i++) {
         if (!handles[i])
