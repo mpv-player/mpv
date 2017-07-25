@@ -5136,6 +5136,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Note that when using the ``cuda-copy`` hwdec, a different option must be
     passed: ``--vd-lavc-o=gpu=<0..>``.
 
+``--vaapi-device=<device path>``
+    Specify the DRM device to use for VAAPI decoding.
+
+    By default there is only one device, usually at /dev/dri/renderD128, but
+    some systems with e. g. both integrated and discrete GPUs may have the
+    necessary DRM device at /dev/dri/renderD129.
+
 Miscellaneous
 -------------
 
