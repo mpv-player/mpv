@@ -4851,6 +4851,12 @@ The following video options are currently all specific to ``--vo=opengl`` and
     The default of 2.0 is somewhat conservative and will mostly just apply to
     skies or directly sunlit surfaces. A setting of 0.0 disables this option.
 
+``--use-embedded-icc-profile``
+    Load the embedded ICC profile contained in media files such as PNG images.
+    (Default: yes). Note that this option only works when also using a display
+    ICC profile (``--icc-profile`` or ``--icc-profile-auto``), and also
+    requires LittleCMS 2 support.
+
 ``--icc-profile=<file>``
     Load an ICC profile and use it to transform video RGB to screen output.
     Needs LittleCMS 2 support compiled in. This option overrides the

@@ -593,7 +593,11 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     if (!p->use_lut_3d)
         return false;
 
-    if (p->lut_3d_texture && !gl_lcms_has_changed(p->cms, prim, trc))
+    struct AVBufferRef *icc = NULL;
+    if (p->image.mpi)
+        icc = p->image.mpi->icc_profile;
+
+    if (p->lut_3d_texture && !gl_lcms_has_changed(p->cms, prim, trc, icc))
         return true;
 
     // GLES3 doesn't provide filtered 16 bit integer textures
@@ -606,7 +610,7 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     }
 
     struct lut3d *lut3d = NULL;
-    if (!fmt || !gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc) || !lut3d) {
+    if (!fmt || !gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc, icc) || !lut3d) {
         p->use_lut_3d = false;
         return false;
     }

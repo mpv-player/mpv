@@ -42,6 +42,7 @@
 struct gl_lcms {
     void *icc_data;
     size_t icc_size;
+    struct AVBufferRef *vid_profile;
     char *current_profile;
     bool using_memory_profile;
     bool changed;
@@ -77,6 +78,7 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct mp_icc_opts
 const struct m_sub_options mp_icc_conf = {
     .opts = (const m_option_t[]) {
+        OPT_FLAG("use-embedded-icc-profile", use_embedded, 0),
         OPT_STRING("icc-profile", profile, M_OPT_FILE),
         OPT_FLAG("icc-profile-auto", profile_auto, 0),
         OPT_STRING("icc-cache-dir", cache_dir, M_OPT_FILE),
@@ -92,6 +94,7 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {
         .size_str = "64x64x64",
         .intent = INTENT_RELATIVE_COLORIMETRIC,
+        .use_embedded = true,
     },
 };
 
@@ -129,11 +132,18 @@ static void load_profile(struct gl_lcms *p)
     p->current_profile = talloc_strdup(p, p->opts->profile);
 }
 
+static void gl_lcms_destructor(void *ptr)
+{
+    struct gl_lcms *p = ptr;
+    av_buffer_unref(&p->vid_profile);
+}
+
 struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
                              struct mpv_global *global,
                              struct mp_icc_opts *opts)
 {
     struct gl_lcms *p = talloc_ptrtype(talloc_ctx, p);
+    talloc_set_destructor(p, gl_lcms_destructor);
     *p = (struct gl_lcms) {
         .global = global,
         .log = log,
@@ -184,12 +194,25 @@ bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile)
     return true;
 }
 
+// Guards against NULL and uses bstr_equals to short-circuit some special cases
+static bool vid_profile_eq(struct AVBufferRef *a, struct AVBufferRef *b)
+{
+    if (!a || !b)
+        return a == b;
+
+    return bstr_equals((struct bstr){ a->data, a->size },
+                       (struct bstr){ b->data, b->size });
+}
+
 // Return whether the profile or config has changed since the last time it was
 // retrieved. If it has changed, gl_lcms_get_lut3d() should be called.
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
-                         enum mp_csp_trc trc)
+                         enum mp_csp_trc trc, struct AVBufferRef *vid_profile)
 {
-    return p->changed || p->current_prim != prim || p->current_trc != trc;
+    if (p->changed || p->current_prim != prim || p->current_trc != trc)
+        return true;
+
+    return !vid_profile_eq(p->vid_profile, vid_profile);
 }
 
 // Whether a profile is set. (gl_lcms_get_lut3d() is expected to return a lut,
@@ -203,6 +226,19 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
                                    cmsHPROFILE disp_profile,
                                    enum mp_csp_prim prim, enum mp_csp_trc trc)
 {
+    if (p->opts->use_embedded && p->vid_profile) {
+        // Try using the embedded ICC profile
+        cmsHPROFILE prof = cmsOpenProfileFromMemTHR(cms, p->vid_profile->data,
+                                                    p->vid_profile->size);
+        if (prof) {
+            MP_VERBOSE(p, "Using embedded ICC profile.\n");
+            return prof;
+        }
+
+        // Otherwise, warn the user and generate the profile as usual
+        MP_WARN(p, "Video contained an invalid ICC profile! Ignoring..\n");
+    }
+
     // The input profile for the transformation is dependent on the video
     // primaries and transfer characteristics
     struct mp_csp_primaries csp = mp_get_csp_primaries(prim);
@@ -306,7 +342,8 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
 }
 
 bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
-                       enum mp_csp_prim prim, enum mp_csp_trc trc)
+                       enum mp_csp_prim prim, enum mp_csp_trc trc,
+                       struct AVBufferRef *vid_profile)
 {
     int s_r, s_g, s_b;
     bool result = false;
@@ -314,6 +351,16 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     p->changed = false;
     p->current_prim = prim;
     p->current_trc = trc;
+
+    // We need to hold on to a reference to the video's ICC profile for as long
+    // as we still need to perform equality checking, so generate a new
+    // reference here
+    av_buffer_unref(&p->vid_profile);
+    if (vid_profile) {
+        p->vid_profile = av_buffer_ref(vid_profile);
+        if (!p->vid_profile)
+            abort();
+    }
 
     if (!parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
         return false;
@@ -342,6 +389,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
             abort();
         av_sha_init(sha, 256);
         av_sha_update(sha, cache_info, strlen(cache_info));
+        if (vid_profile)
+            av_sha_update(sha, vid_profile->data, vid_profile->size);
         av_sha_update(sha, p->icc_data, p->icc_size);
         av_sha_final(sha, hash);
         av_free(sha);
@@ -378,19 +427,19 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (!profile)
         goto error_exit;
 
-    cmsHPROFILE vid_profile = get_vid_profile(p, cms, profile, prim, trc);
-    if (!vid_profile) {
+    cmsHPROFILE vid_hprofile = get_vid_profile(p, cms, profile, prim, trc);
+    if (!vid_hprofile) {
         cmsCloseProfile(profile);
         goto error_exit;
     }
 
-    cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
+    cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_hprofile, TYPE_RGB_16,
                                                 profile, TYPE_RGB_16,
                                                 p->opts->intent,
                                                 cmsFLAGS_HIGHRESPRECALC |
                                                 cmsFLAGS_BLACKPOINTCOMPENSATION);
     cmsCloseProfile(profile);
-    cmsCloseProfile(vid_profile);
+    cmsCloseProfile(vid_hprofile);
 
     if (!trafo)
         goto error_exit;
@@ -461,7 +510,7 @@ void gl_lcms_update_options(struct gl_lcms *p) { }
 bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) {return false;}
 
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
-                         enum mp_csp_trc trc)
+                         enum mp_csp_trc trc, struct AVBufferRef *vid_profile)
 {
     return false;
 }
@@ -472,7 +521,8 @@ bool gl_lcms_has_profile(struct gl_lcms *p)
 }
 
 bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
-                       enum mp_csp_prim prim, enum mp_csp_trc trc)
+                       enum mp_csp_prim prim, enum mp_csp_trc trc,
+                       struct AVBufferRef *vid_profile)
 {
     return false;
 }
