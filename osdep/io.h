@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if HAVE_POSIX
+#if HAVE_GLOB_POSIX
 #include <glob.h>
 #endif
 
