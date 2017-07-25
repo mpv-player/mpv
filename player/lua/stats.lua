@@ -24,6 +24,7 @@ local o = {
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     print_perfdata_passes = false,   -- when true, print the full information about all passes
+    filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
     debug = false,
 
     -- Graph options and style
@@ -61,12 +62,16 @@ local o = {
     ass_prefix_sep = "\\h\\h",
     ass_b1 = "{\\b1}",
     ass_b0 = "{\\b0}",
+    ass_it1 = "{\\i1}",
+    ass_it0 = "{\\i0}",
     -- Without ASS
     no_ass_nl = "\n",
     no_ass_indent = "\t",
     no_ass_prefix_sep = " ",
     no_ass_b1 = "\027[1m",
     no_ass_b0 = "\027[0m",
+    no_ass_it1 = "\027[3m",
+    no_ass_it0 = "\027[0m",
 }
 options.read_options(o)
 
@@ -132,6 +137,11 @@ end
 
 local function b(t)
     return o.b1 .. t .. o.b0
+end
+
+
+local function it(t)
+    return o.it1 .. t .. o.it0
 end
 
 
@@ -395,6 +405,43 @@ local function append_display_sync(s)
 end
 
 
+local function append_filters(s, prop, prefix)
+    local length = 0
+    local filters = {}
+
+    for _,f in ipairs(mp.get_property_native(prop, {})) do
+        local n = f.name
+        if f.enabled ~= nil and not f.enabled then
+            n = n .. " (disabled)"
+        end
+
+        local p = {}
+        for key,value in pairs(f.params) do
+            p[#p+1] = key .. "=" .. value
+        end
+        if #p > 0 then
+            p = " [" .. table.concat(p, " ") .. "]"
+        else
+            p = ""
+        end
+
+        length = length + n:len() + p:len()
+        filters[#filters+1] = no_ASS(n) .. it(no_ASS(p))
+    end
+
+    if #filters > 0 then
+        local ret
+        if length < o.filter_params_max_length then
+            ret = table.concat(filters, ", ")
+        else
+            local sep = o.nl .. o.indent .. o.indent
+            ret = sep .. table.concat(filters, sep)
+        end
+        s[#s+1] = o.nl .. o.indent .. b(prefix) .. o.prefix_sep .. ret
+    end
+end
+
+
 local function add_header(s)
     s[#s+1] = text_style()
 end
@@ -473,6 +520,7 @@ local function add_video(s)
 
     append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_filters(s, "vf", "Filters:")
 end
 
 
@@ -485,6 +533,7 @@ local function add_audio(s)
     append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
     append_property(s, "audio-params/channel-count", {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_filters(s, "af", "Filters:")
 end
 
 
@@ -497,6 +546,8 @@ local function eval_ass_formatting()
         o.prefix_sep = o.ass_prefix_sep
         o.b1 = o.ass_b1
         o.b0 = o.ass_b0
+        o.it1 = o.ass_it1
+        o.it0 = o.ass_it0
     else
         o.nl = o.no_ass_nl
         o.indent = o.no_ass_indent
@@ -504,9 +555,13 @@ local function eval_ass_formatting()
         if not has_ansi() then
             o.b1 = ""
             o.b0 = ""
+            o.it1 = ""
+            o.it0 = ""
         else
             o.b1 = o.no_ass_b1
             o.b0 = o.no_ass_b0
+            o.it1 = o.no_ass_it1
+            o.it0 = o.no_ass_it0
         end
     end
 end
