@@ -100,6 +100,8 @@ typedef struct mp_image {
     struct AVBufferRef *bufs[MP_MAX_PLANES];
     // Points to AVHWFramesContext* (same as AVFrame.hw_frames_ctx)
     struct AVBufferRef *hwctx;
+    // Embedded ICC profile, if any
+    struct AVBufferRef *icc_profile;
 } mp_image_t;
 
 int mp_chroma_div_up(int size, int shift);

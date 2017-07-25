@@ -461,6 +461,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_CONTENT_LIGHT_LEVEL',
                                 use='libav'),
+    }, {
+        'name': 'avutil-icc-profile',
+        'desc': 'libavutil ICC profile side data',
+        'func': check_statement('libavutil/frame.h',
+                                'AV_FRAME_DATA_ICC_PROFILE',
+                                use='libav'),
     },
 ]
 

@@ -200,6 +200,7 @@ static void mp_image_destructor(void *ptr)
     for (int p = 0; p < MP_MAX_PLANES; p++)
         av_buffer_unref(&mpi->bufs[p]);
     av_buffer_unref(&mpi->hwctx);
+    av_buffer_unref(&mpi->icc_profile);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -313,6 +314,12 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     if (new->hwctx) {
         new->hwctx = av_buffer_ref(new->hwctx);
         if (!new->hwctx)
+            fail = true;
+    }
+
+    if (new->icc_profile) {
+        new->icc_profile = av_buffer_ref(new->icc_profile);
+        if (!new->icc_profile)
             fail = true;
     }
 
@@ -524,6 +531,13 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
             if (mp_image_make_writeable(dst))
                 memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
         }
+    }
+    av_buffer_unref(&dst->icc_profile);
+    dst->icc_profile = src->icc_profile;
+    if (dst->icc_profile) {
+        dst->icc_profile = av_buffer_ref(dst->icc_profile);
+        if (!dst->icc_profile)
+            abort();
     }
 }
 
