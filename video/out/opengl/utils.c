@@ -265,11 +265,8 @@ bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
 // Like fbotex_init(), except it can be called on an already initialized FBO;
 // and if the parameters are the same as the previous call, do not touch it.
-// flags can be 0, or a combination of FBOTEX_FUZZY_W, FBOTEX_FUZZY_H and
-// FBOTEX_COMPUTE.
+// flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
 // Enabling FUZZY for W or H means the w or h does not need to be exact.
-// FBOTEX_COMPUTE means that the texture will be written to by a compute shader
-// instead of actually being attached to an FBO.
 bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
                    GLenum iformat, int flags)
 {
@@ -318,6 +315,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
         .iformat = iformat,
     };
 
+    gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
     gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
     gl->TexImage2D(GL_TEXTURE_2D, 0, format->internal_format, fbo->rw, fbo->rh, 0,
@@ -330,23 +328,20 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     gl_check_error(gl, log, "after creating framebuffer texture");
 
-    bool skip_fbo = flags & FBOTEX_COMPUTE;
-    if (!skip_fbo) {
-        gl->GenFramebuffers(1, &fbo->fbo);
-        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                 GL_TEXTURE_2D, fbo->texture, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                             GL_TEXTURE_2D, fbo->texture, 0);
 
-        GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (err != GL_FRAMEBUFFER_COMPLETE) {
-            mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
-                   (int)err);
-            res = false;
-        }
-
-        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl_check_error(gl, log, "after creating framebuffer");
+    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
+        mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
+               (int)err);
+        res = false;
     }
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    gl_check_error(gl, log, "after creating framebuffer");
 
     return res;
 }

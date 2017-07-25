@@ -1263,13 +1263,9 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                             int w, int h, int flags)
 {
-    bool use_compute = p->compute_w > 0 && p->compute_h > 0;
-    if (use_compute)
-        flags |= FBOTEX_COMPUTE;
-
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
-    if (use_compute) {
+    if (p->compute_w > 0 && p->compute_h > 0) {
         gl_sc_uniform_image2D(p->sc, "out_image", dst_fbo->texture,
                               dst_fbo->iformat, GL_WRITE_ONLY);
         GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
