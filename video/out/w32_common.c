@@ -354,6 +354,17 @@ static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     return c;
 }
 
+static bool handle_appcommand(struct vo_w32_state *w32, UINT cmd)
+{
+    if (!mp_input_use_media_keys(w32->input_ctx))
+        return false;
+    int mpkey = mp_w32_appcmd_to_mpkey(cmd);
+    if (!mpkey)
+        return false;
+    mp_input_put_key(w32->input_ctx, mpkey | mod_state(w32));
+    return true;
+}
+
 static void handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
 {
     // Ignore key repeat
@@ -1019,6 +1030,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             return borderless_nchittest(w32, GET_X_LPARAM(lParam),
                                         GET_Y_LPARAM(lParam));
         }
+        break;
+    case WM_APPCOMMAND:
+        if (handle_appcommand(w32, GET_APPCOMMAND_LPARAM(lParam)))
+            return TRUE;
         break;
     case WM_SYSKEYDOWN:
         // Open the window menu on Alt+Space. Normally DefWindowProc opens the

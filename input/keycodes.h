@@ -73,6 +73,9 @@
 #define MP_KEY_SEARCH           (MP_KEY_MM_BASE+17)
 #define MP_KEY_SLEEP            (MP_KEY_MM_BASE+18)
 #define MP_KEY_CANCEL           (MP_KEY_MM_BASE+19)
+#define MP_KEY_RECORD           (MP_KEY_MM_BASE+20)
+#define MP_KEY_CHANNEL_UP       (MP_KEY_MM_BASE+21)
+#define MP_KEY_CHANNEL_DOWN     (MP_KEY_MM_BASE+22)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)
