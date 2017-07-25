@@ -2476,6 +2476,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
 
+        gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
             "uint sig_peak_raw;"
             "uint index;"
