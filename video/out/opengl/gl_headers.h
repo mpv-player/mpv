@@ -83,11 +83,11 @@
 
 #define GL_TEXTURE_FETCH_BARRIER_BIT      0x00000008
 
-// -- GL 4.3 or GL_ARB_compute_shader
+// --- GL 4.3 or GL_ARB_compute_shader
 
 #define GL_COMPUTE_SHADER                 0x91B9
 
-// -- GL 4.3 or GL_ARB_shader_storage_buffer_object
+// --- GL 4.3 or GL_ARB_shader_storage_buffer_object
 
 #define GL_SHADER_STORAGE_BUFFER          0x90D2
 #define GL_SHADER_STORAGE_BARRIER_BIT     0x00002000
