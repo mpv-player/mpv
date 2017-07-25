@@ -1753,14 +1753,8 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
-        bool use_compute_polar = (p->gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER) &&
-                                 (p->gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY);
-        // Use a compute shader where possible, fallback to the slower texture
-        // fragment sampler otherwise. Also use the fragment shader for
-        // very large kernels to avoid exhausting shmem
-        if (!use_compute_polar || scaler->kernel->f.radius > 16) {
-            pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
-        } else {
+        GLenum reqs = MPGL_CAP_COMPUTE_SHADER | MPGL_CAP_NESTED_ARRAY;
+        if ((p->gl->mpgl_caps & reqs) && scaler->kernel->f.radius <= 16) {
             // For performance we want to load at least as many pixels
             // horizontally as there are threads in a warp (32 for nvidia), as
             // well as enough to take advantage of shmem parallelism
@@ -1769,6 +1763,10 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
             pass_compute_polar(p->sc, scaler, tex.components,
                                p->compute_w, p->compute_h,
                                (float)w / tex.w, (float)h / tex.h);
+        } else {
+            // Fall back to regular polar shader when compute shaders are
+            // unsupported or the kernel is too big for shmem
+            pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
         }
     } else if (scaler->kernel) {
         pass_sample_separated(p, tex, scaler, w, h);
