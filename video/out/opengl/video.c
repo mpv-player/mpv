@@ -1713,7 +1713,7 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
     GL *gl = p->gl;
 
     GLenum reqs = MPGL_CAP_COMPUTE_SHADER | MPGL_CAP_NESTED_ARRAY;
-    if (!(gl->mpgl_caps & reqs))
+    if ((gl->mpgl_caps & reqs) != reqs)
         goto fallback;
 
     int bound = ceil(scaler->kernel->radius_cutoff);
