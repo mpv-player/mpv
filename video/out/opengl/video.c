@@ -178,6 +178,7 @@ struct dr_buffer {
     void *ptr;
     size_t size;
     GLuint pbo;
+    bool flushed;
     // While a PBO is read-accessed by GL, we must not write to the mapped data.
     // The fence tells us when GL is done, and the mpi reference will keep the
     // data from being recycled (or from other references gaining write access).
@@ -374,6 +375,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
+        OPT_FLAG("opengl-pbo-explicit-flush", pbo_explicit_flush, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
         SCALER_OPTS("cscale", SCALER_CSCALE),
@@ -966,6 +968,18 @@ static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
     return NULL;
 }
 
+// This only flushes when required
+static void gl_flush_dr_buffer(struct gl_video *p, struct dr_buffer *buf)
+{
+    GL *gl = p->gl;
+    if (buf && !buf->flushed && p->opts.pbo_explicit_flush) {
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf->pbo);
+        gl->FlushMappedBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buf->size);
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        buf->flushed = true;
+    }
+}
+
 static void gc_pending_dr_fences(struct gl_video *p, bool force)
 {
     GL *gl = p->gl;
@@ -980,6 +994,7 @@ again:;
         if (res == GL_ALREADY_SIGNALED || force) {
             gl->DeleteSync(buffer->fence);
             buffer->fence = NULL;
+            buffer->flushed = false;
             // Unreferencing the image could cause gl_video_dr_free_buffer()
             // to be called by the talloc destructor (if it was the last
             // reference). This will implicitly invalidate the buffer pointer
@@ -2921,7 +2936,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // it only barely matters at the very beginning of playback, and this way
     // makes the code much more linear.
     int surface_dst = fbosurface_wrap(p->surface_idx + 1);
-    for (int i = 0; i < t->num_frames; i++) {
+    for (int i = 0; i < MPMIN(t->num_frames, radius + 1); i++) {
         // Avoid overwriting data we might still need
         if (surface_dst == surface_bse - 1)
             break;
@@ -3156,6 +3171,13 @@ done:
 
     debug_check_gl(p, "after video rendering");
 
+    // Flush some future buffers for performance. This loop is a fancy no-op
+    // when not using direct rendering, or when flushing is not required.
+    for (int n = 0; n < frame->num_frames; n++) {
+        for (int m = 0; m < p->plane_count; m++)
+            gl_flush_dr_buffer(p, gl_find_dr_buffer(p, frame->frames[n]->planes[m]));
+    }
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     if (p->osd) {
@@ -3345,6 +3367,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
         if (mapped) {
             assert(mapped->pbo > 0);
+            gl_flush_dr_buffer(p, mapped);
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, mapped->pbo);
             uintptr_t offset = mpi->planes[n] - (uint8_t *)mapped->ptr;
             gl_upload_tex(gl, plane->gl_target,
@@ -3800,6 +3823,9 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
         }
     }
 
+    if (p->opts.pbo_explicit_flush)
+        queue_size += 2; // add some extra frames to flush ahead of time
+
     vo_set_queue_params(vo, 0, queue_size);
 }
 
@@ -3912,13 +3938,19 @@ void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
         .size = size,
     };
 
-    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
-                     GL_MAP_COHERENT_BIT;
+    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT;
+    unsigned mapflags = flags;
+
+    if (p->opts.pbo_explicit_flush) {
+        mapflags |= GL_MAP_FLUSH_EXPLICIT_BIT;
+    } else {
+        flags |= GL_MAP_COHERENT_BIT;
+    }
 
     gl->GenBuffers(1, &buffer->pbo);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->pbo);
     gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags);
-    buffer->ptr = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, flags);
+    buffer->ptr = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, mapflags);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     if (!buffer->ptr) {
         gl_check_error(p->gl, p->log, "mapping buffer");
