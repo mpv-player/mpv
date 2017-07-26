@@ -1,3 +1,4 @@
 #!/bin/bash -l
 export MPVBUNDLE="true"
-$SHELL -c "$(dirname "$0")/mpv --player-operation-mode=pseudo-gui"
+cd "$(dirname "$0")"
+$SHELL -c "./mpv --player-operation-mode=pseudo-gui"
