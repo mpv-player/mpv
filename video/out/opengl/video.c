@@ -3334,7 +3334,6 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     // Software decoding
     assert(mpi->num_planes == p->plane_count);
 
-    pass_describe(p, "upload frame (swdec)");
     gl_timer_start(p->upload_timer);
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
@@ -3373,6 +3372,8 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         gl->BindTexture(plane->gl_target, 0);
     }
     gl_timer_stop(gl);
+    const char *mode = p->using_dr_path ? "DR" : p->opts.pbo ? "PBO" : "naive";
+    pass_describe(p, "upload frame (%s)", mode);
     pass_record(p, gl_timer_measure(p->upload_timer));
 
     return true;
