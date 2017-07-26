@@ -2,8 +2,10 @@
 #define MPGL_FORMATS_H_
 
 #include "common.h"
+#include "ra.h"
 
 struct gl_format {
+    const char *name;           // symbolic name for user interaction/debugging
     GLint internal_format;      // glTexImage argument
     GLenum format;              // glTexImage argument
     GLenum type;                // e.g. GL_UNSIGNED_SHORT
@@ -33,10 +35,12 @@ enum {
                            // the format is still GL_FLOAT (32 bit)
 
     // --- Other constants.
-    MPGL_TYPE_UNORM = 1,    // normalized integer (fixed point) formats
-    MPGL_TYPE_UINT  = 2,    // full integer formats
-    MPGL_TYPE_FLOAT = 3,    // float formats (both full and half)
+    MPGL_TYPE_UNORM = RA_CTYPE_UNORM,   // normalized integer (fixed point) formats
+    MPGL_TYPE_UINT  = RA_CTYPE_UINT,    // full integer formats
+    MPGL_TYPE_FLOAT = RA_CTYPE_FLOAT,   // float formats (both full and half)
 };
+
+extern const struct gl_format gl_formats[];
 
 int gl_format_feature_flags(GL *gl);
 const struct gl_format *gl_find_internal_format(GL *gl, GLint internal_format);

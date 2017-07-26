@@ -36,6 +36,8 @@
 #include "utils.h"
 #include "hwdec.h"
 #include "osd.h"
+#include "ra.h"
+#include "ra_gl.h"
 #include "stream/stream.h"
 #include "video_shaders.h"
 #include "user_shaders.h"
@@ -84,6 +86,7 @@ static const struct gl_vao_entry vertex_vao[] = {
 };
 
 struct texplane {
+    struct ra_tex *texture;
     int w, h;
     int tex_w, tex_h;
     GLint gl_internal_format;
@@ -92,7 +95,6 @@ struct texplane {
     GLenum gl_type;
     GLuint gl_texture;
     bool flipped;
-    struct gl_pbo_upload pbo;
 };
 
 struct video_image {
@@ -175,18 +177,15 @@ struct pass_info {
 #define PASS_INFO_MAX (SHADER_MAX_HOOKS + 32)
 
 struct dr_buffer {
-    void *ptr;
-    size_t size;
-    GLuint pbo;
-    // While a PBO is read-accessed by GL, we must not write to the mapped data.
-    // The fence tells us when GL is done, and the mpi reference will keep the
-    // data from being recycled (or from other references gaining write access).
-    GLsync fence;
+    struct ra_mapped_buffer *buffer;
+    // The mpi reference will keep the data from being recycled (or from other
+    // references gaining write access) while the GPU is accessing the buffer.
     struct mp_image *mpi;
 };
 
 struct gl_video {
     GL *gl;
+    struct ra *ra;
 
     struct mpv_global *global;
     struct mp_log *log;
@@ -213,7 +212,7 @@ struct gl_video {
 
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
-    struct gl_imgfmt_desc gl_format;            // texture format
+    struct ra_imgfmt_desc ra_format;            // texture format
     int plane_count;
 
     bool is_gray;
@@ -715,8 +714,8 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     int h = p->image_params.h;
 
     // Determine the chroma offset
-    float ls_w = 1.0 / p->gl_format.chroma_w;
-    float ls_h = 1.0 / p->gl_format.chroma_h;
+    float ls_w = 1.0 / p->ra_format.chroma_w;
+    float ls_h = 1.0 / p->ra_format.chroma_h;
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
@@ -733,12 +732,12 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     }
 
     int msb_valid_bits =
-        p->gl_format.component_bits + MPMIN(p->gl_format.component_pad, 0);
+        p->ra_format.component_bits + MPMIN(p->ra_format.component_pad, 0);
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
     float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.color.space,
                                          msb_valid_bits,
-                                         p->gl_format.component_bits);
+                                         p->ra_format.component_bits);
 
     memset(tex, 0, 4 * sizeof(tex[0]));
     for (int n = 0; n < p->plane_count; n++) {
@@ -746,7 +745,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 
         enum plane_type type = PLANE_NONE;
         for (int i = 0; i < 4; i++) {
-            int c = p->gl_format.components[n][i];
+            int c = p->ra_format.components[n][i];
             enum plane_type ctype;
             if (c == 0) {
                 ctype = PLANE_NONE;
@@ -775,7 +774,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
         };
 
         for (int i = 0; i < 4; i++)
-            tex[n].components += !!p->gl_format.components[n][i];
+            tex[n].components += !!p->ra_format.components[n][i];
 
         get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
                       &tex[n].transform);
@@ -791,8 +790,8 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             struct gl_transform tr = chroma;
             gl_transform_vec(rot, &tr.t[0], &tr.t[1]);
 
-            float dx = (chroma_upsize(w, p->gl_format.chroma_w) - w) * ls_w;
-            float dy = (chroma_upsize(h, p->gl_format.chroma_h) - h) * ls_h;
+            float dx = (chroma_upsize(w, p->ra_format.chroma_w) - w) * ls_w;
+            float dy = (chroma_upsize(h, p->ra_format.chroma_h) - h) * ls_h;
 
             // Adjust the chroma offset if the real chroma size is fractional
             // due image sizes not aligned to chroma subsampling.
@@ -814,7 +813,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 
 // Return the index of the given component (assuming all non-padding components
 // of all planes are concatenated into a linear list).
-static int find_comp(struct gl_imgfmt_desc *desc, int component)
+static int find_comp(struct ra_imgfmt_desc *desc, int component)
 {
     int cur = 0;
     for (int n = 0; n < desc->num_planes; n++) {
@@ -831,8 +830,6 @@ static int find_comp(struct gl_imgfmt_desc *desc, int component)
 
 static void init_video(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
     p->hwdec_active = false;
     p->use_integer_conversion = false;
 
@@ -849,26 +846,26 @@ static void init_video(struct gl_video *p)
         }
     }
 
-    p->gl_format = (struct gl_imgfmt_desc){0};
-    gl_get_imgfmt_desc(p->gl, p->image_params.imgfmt, &p->gl_format);
+    p->ra_format = (struct ra_imgfmt_desc){0};
+    ra_get_imgfmt_desc(p->ra, p->image_params.imgfmt, &p->ra_format);
 
-    p->plane_count = p->gl_format.num_planes;
+    p->plane_count = p->ra_format.num_planes;
 
     p->has_alpha = false;
     p->is_gray = true;
 
-    for (int n = 0; n < p->gl_format.num_planes; n++) {
+    for (int n = 0; n < p->ra_format.num_planes; n++) {
         for (int i = 0; i < 4; i++) {
-            if (p->gl_format.components[n][i]) {
-                p->has_alpha |= p->gl_format.components[n][i] == 4;
-                p->is_gray &= p->gl_format.components[n][i] == 1 ||
-                              p->gl_format.components[n][i] == 4;
+            if (p->ra_format.components[n][i]) {
+                p->has_alpha |= p->ra_format.components[n][i] == 4;
+                p->is_gray &= p->ra_format.components[n][i] == 1 ||
+                              p->ra_format.components[n][i] == 4;
             }
         }
     }
 
     for (int c = 0; c < 4; c++) {
-        int loc = find_comp(&p->gl_format, c + 1);
+        int loc = find_comp(&p->ra_format, c + 1);
         p->color_swizzle[c] = "rgba"[loc >= 0 && loc < 4 ? loc : 0];
     }
     p->color_swizzle[4] = '\0';
@@ -892,43 +889,41 @@ static void init_video(struct gl_video *p)
     if (!p->hwdec_active) {
         struct video_image *vimg = &p->image;
 
-        GLenum gl_target =
-            p->opts.use_rectangle ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
-
         struct mp_image layout = {0};
         mp_image_set_params(&layout, &p->image_params);
 
         for (int n = 0; n < p->plane_count; n++) {
             struct texplane *plane = &vimg->planes[n];
-            const struct gl_format *format = p->gl_format.planes[n];
-
-            plane->gl_target = gl_target;
-            plane->gl_format = format->format;
-            plane->gl_internal_format = format->internal_format;
-            plane->gl_type = format->type;
-
-            p->use_integer_conversion |= gl_is_integer_format(plane->gl_format);
+            const struct ra_format *format = p->ra_format.planes[n];
 
             plane->w = mp_image_plane_w(&layout, n);
             plane->h = mp_image_plane_h(&layout, n);
             plane->tex_w = plane->w + p->opts.tex_pad_x;
             plane->tex_h = plane->h + p->opts.tex_pad_y;
 
-            gl->GenTextures(1, &plane->gl_texture);
-            gl->BindTexture(gl_target, plane->gl_texture);
+            struct ra_tex_params params = {
+                .dimensions = 2,
+                .w = plane->tex_w,
+                .h = plane->tex_h,
+                .d = 1,
+                .format = format,
+                .src_linear = format->linear_filter,
+                .non_normalized = p->opts.use_rectangle,
+            };
 
-            gl->TexImage2D(gl_target, 0, plane->gl_internal_format,
-                           plane->tex_w, plane->tex_h, 0,
-                           plane->gl_format, plane->gl_type, NULL);
+            plane->texture = p->ra->fns->tex_create(p->ra, &params);
+            if (!plane->texture)
+                abort(); // shit happens
 
-            int filter = gl_is_integer_format(plane->gl_format)
-                         ? GL_NEAREST : GL_LINEAR;
-            gl->TexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, filter);
-            gl->TexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, filter);
-            gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            struct ra_tex_gl *tex_gl = plane->texture->priv;
 
-            gl->BindTexture(gl_target, 0);
+            plane->gl_texture = tex_gl->texture;
+            plane->gl_target = tex_gl->target;
+            plane->gl_format = tex_gl->format;
+            plane->gl_internal_format = tex_gl->internal_format;
+            plane->gl_type = tex_gl->type;
+
+            p->use_integer_conversion |= format->ctype == RA_CTYPE_UINT;
 
             MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n,
                        plane->tex_w, plane->tex_h);
@@ -958,9 +953,11 @@ static void unmap_current_image(struct gl_video *p)
 static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
 {
    for (int i = 0; i < p->num_dr_buffers; i++) {
-        struct dr_buffer *buf = &p->dr_buffers[i];
-        if (ptr >= (uint8_t *)buf->ptr && ptr < (uint8_t *)buf->ptr + buf->size)
-            return buf;
+       struct dr_buffer *buffer = &p->dr_buffers[i];
+        uint8_t *buf = buffer->buffer->data;
+        size_t size = buffer->buffer->size;
+        if (ptr >= buf && ptr < buf + size)
+            return buffer;
     }
 
     return NULL;
@@ -968,18 +965,14 @@ static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
 
 static void gc_pending_dr_fences(struct gl_video *p, bool force)
 {
-    GL *gl = p->gl;
-
 again:;
     for (int n = 0; n < p->num_dr_buffers; n++) {
         struct dr_buffer *buffer = &p->dr_buffers[n];
-        if (!buffer->fence)
+        if (!buffer->mpi)
             continue;
 
-        GLenum res = gl->ClientWaitSync(buffer->fence, 0, 0); // non-blocking
-        if (res == GL_ALREADY_SIGNALED || force) {
-            gl->DeleteSync(buffer->fence);
-            buffer->fence = NULL;
+        bool res = p->ra->fns->poll_mapped_buffer(p->ra, buffer->buffer);
+        if (res || force) {
             // Unreferencing the image could cause gl_video_dr_free_buffer()
             // to be called by the talloc destructor (if it was the last
             // reference). This will implicitly invalidate the buffer pointer
@@ -1018,8 +1011,6 @@ static void unmap_overlay(struct gl_video *p)
 
 static void uninit_video(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
     uninit_rendering(p);
 
     struct video_image *vimg = &p->image;
@@ -1030,8 +1021,8 @@ static void uninit_video(struct gl_video *p)
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
-        gl->DeleteTextures(1, &plane->gl_texture);
-        gl_pbo_upload_uninit(&plane->pbo);
+        if (plane->texture)
+            p->ra->fns->tex_destroy(p->ra, plane->texture);
     }
     *vimg = (struct video_image){0};
 
@@ -1302,7 +1293,7 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     }
 
     if (gl_is_integer_format(img.gl_format)) {
-        uint64_t tex_max = 1ull << p->gl_format.component_bits;
+        uint64_t tex_max = 1ull << p->ra_format.component_bits;
         img.multiplier *= 1.0 / (tex_max - 1);
     }
 
@@ -2680,8 +2671,8 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
     int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
-        int cw = tex[i].type == PLANE_CHROMA ? p->gl_format.chroma_w : 1;
-        int ch = tex[i].type == PLANE_CHROMA ? p->gl_format.chroma_h : 1;
+        int cw = tex[i].type == PLANE_CHROMA ? p->ra_format.chroma_w : 1;
+        int ch = tex[i].type == PLANE_CHROMA ? p->ra_format.chroma_h : 1;
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, cw, ch);
 
@@ -3340,36 +3331,21 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
         plane->flipped = mpi->stride[0] < 0;
 
-        gl->BindTexture(plane->gl_target, plane->gl_texture);
+        // (It's unclear whether this should be changeable on the fly.)
+        plane->texture->use_pbo = p->opts.pbo;
 
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
-        if (mapped) {
-            assert(mapped->pbo > 0);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, mapped->pbo);
-            uintptr_t offset = mpi->planes[n] - (uint8_t *)mapped->ptr;
-            gl_upload_tex(gl, plane->gl_target,
-                          plane->gl_format, plane->gl_type,
-                          (void *)offset, mpi->stride[n],
-                          0, 0, plane->w, plane->h);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-            // Make sure the PBO is not reused until GL is done with it. If a
-            // previous operation is pending, "update" it by creating a new
-            // fence that will cover the previous operation as well.
-            gl->DeleteSync(mapped->fence);
-            mapped->fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-            if (!mapped->mpi)
-                mapped->mpi = mp_image_new_ref(mpi);
-        } else {
-            gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
-                              plane->gl_format, plane->gl_type, plane->w, plane->h,
-                              mpi->planes[n], mpi->stride[n],
-                              0, 0, plane->w, plane->h);
-        }
+
+        p->ra->fns->tex_upload(p->ra, plane->texture, mpi->planes[n],
+                               mpi->stride[n], mapped ? mapped->buffer : NULL);
+
+        if (mapped && !mapped->mpi)
+            mapped->mpi = mp_image_new_ref(mpi);
+
         if (p->using_dr_path != !!mapped) {
             p->using_dr_path = !!mapped;
             MP_VERBOSE(p, "DR enabled: %s\n", p->using_dr_path ? "yes" : "no");
         }
-        gl->BindTexture(plane->gl_target, 0);
     }
     gl_timer_stop(gl);
     const char *mode = p->using_dr_path ? "DR" : p->opts.pbo ? "PBO" : "naive";
@@ -3565,8 +3541,6 @@ static void init_gl(struct gl_video *p)
 
     debug_check_gl(p, "before init_gl");
 
-    gl->Disable(GL_DITHER);
-
     gl_video_set_gl_state(p);
 
     // Test whether we can use 10 bit.
@@ -3578,6 +3552,9 @@ static void init_gl(struct gl_video *p)
     p->blit_timer = gl_timer_create(gl);
 
     debug_check_gl(p, "after init_gl");
+
+    ra_dump_tex_formats(p->ra, MSGL_DEBUG);
+    ra_dump_img_formats(p->ra, MSGL_DEBUG);
 }
 
 void gl_video_uninit(struct gl_video *p)
@@ -3612,6 +3589,8 @@ void gl_video_uninit(struct gl_video *p)
     // Should all have been unreffed already.
     assert(!p->num_dr_buffers);
 
+    p->ra->fns->destroy(p->ra);
+    talloc_free(p->ra);
     talloc_free(p);
 }
 
@@ -3703,14 +3682,17 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
 
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
 {
-    if (gl->version < 210 && gl->es < 200) {
-        mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
+    struct ra *ra = talloc_zero(NULL, struct ra);
+    ra->log = log;
+    if (ra_init_gl(ra, gl) < 0) {
+        talloc_free(ra);
         return NULL;
     }
 
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
+        .ra = ra,
         .global = g,
         .log = log,
         .sc = gl_sc_create(gl, log),
@@ -3899,9 +3881,7 @@ void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 
 void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
 {
-    GL *gl = p->gl;
-
-    if (gl->version < 440)
+    if (!p->ra->fns->create_mapped_buffer)
         return NULL;
 
     MP_TARRAY_GROW(p, p->dr_buffers, p->num_dr_buffers);
@@ -3909,40 +3889,24 @@ void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
     struct dr_buffer *buffer = &p->dr_buffers[index];
 
     *buffer = (struct dr_buffer){
-        .size = size,
+        .buffer = p->ra->fns->create_mapped_buffer(p->ra, size),
     };
 
-    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
-                     GL_MAP_COHERENT_BIT;
-
-    gl->GenBuffers(1, &buffer->pbo);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->pbo);
-    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags);
-    buffer->ptr = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, flags);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    if (!buffer->ptr) {
-        gl_check_error(p->gl, p->log, "mapping buffer");
-        gl->DeleteBuffers(1, &buffer->pbo);
+    if (!buffer->buffer) {
         MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, index);
         return NULL;
     }
 
-    return buffer->ptr;
+    return buffer->buffer->data;
 };
 
 void gl_video_dr_free_buffer(struct gl_video *p, void *ptr)
 {
-    GL *gl = p->gl;
-
     for (int n = 0; n < p->num_dr_buffers; n++) {
         struct dr_buffer *buffer = &p->dr_buffers[n];
-        if (buffer->ptr == ptr) {
+        if (buffer->buffer->data == ptr) {
             assert(!buffer->mpi); // can't be freed while it has a ref
-            gl->DeleteSync(buffer->fence);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->pbo);
-            gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-            gl->DeleteBuffers(1, &buffer->pbo);
+            p->ra->fns->destroy_mapped_buffer(p->ra, buffer->buffer);
 
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
             return;

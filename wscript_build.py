@@ -413,6 +413,8 @@ def build(ctx):
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/lcms.c",             "gl" ),
         ( "video/out/opengl/osd.c",              "gl" ),
+        ( "video/out/opengl/ra.c",               "gl" ),
+        ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/user_shaders.c",     "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/opengl/video.c",            "gl" ),
