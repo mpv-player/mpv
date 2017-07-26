@@ -268,8 +268,18 @@
         [self preciseScroll:event];
     } else {
         const int modifiers = [event modifierFlags];
-        const int mpkey = ([event deltaX] + [event deltaY]) > 0 ?
-                            MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        const float deltaX = (modifiers & NSEventModifierFlagShift) ?
+                             [event scrollingDeltaY] : [event scrollingDeltaX];
+        const float deltaY = (modifiers & NSEventModifierFlagShift) ?
+                             [event scrollingDeltaX] : [event scrollingDeltaY];
+        int mpkey;
+
+        if (fabs(deltaY) >= fabs(deltaX)) {
+            mpkey = deltaY > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        } else {
+            mpkey = deltaX > 0 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+        }
+
         [self.adapter putKey:mpkey withModifiers:modifiers];
     }
 }
