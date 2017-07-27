@@ -581,9 +581,18 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 {
     GLSLF("// HDR tone mapping\n");
 
-    // To prevent discoloration, we tone map on the luminance only
+    // Desaturate the color using a coefficient dependent on the luminance
     GLSL(float luma = dot(src_luma, color.rgb);)
-    GLSL(float luma_orig = luma;)
+    if (desat > 0) {
+        GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
+        GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
+    }
+
+    // To prevent discoloration due to out-of-bounds clipping, we need to make
+    // sure to reduce the value range as far as necessary to keep the entire
+    // signal in range, so tone map based on the brightest component.
+    GLSL(float sig = max(max(color.r, color.g), color.b);)
+    GLSL(float sig_orig = sig;)
 
     if (!ref_peak) {
         // For performance, we want to do as few atomic operations on global
@@ -591,7 +600,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         // We also want slightly more stable values, so use the group average
         // instead of the group max
         GLSLHF("shared uint group_sum = 0;\n");
-        GLSLF("atomicAdd(group_sum, uint(luma * %f));\n", MP_REF_WHITE);
+        GLSLF("atomicAdd(group_sum, uint(sig * %f));\n", MP_REF_WHITE);
 
         // Have one thread in each work group update the frame maximum
         GLSL(memoryBarrierBuffer();)
@@ -619,15 +628,9 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLHF("const float sig_peak = %f;\n", ref_peak);
     }
 
-    // Desaturate the color using a coefficient dependent on the brightness
-    if (desat > 0) {
-        GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
-        GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
-    }
-
     switch (algo) {
     case TONE_MAPPING_CLIP:
-        GLSLF("luma = clamp(%f * luma, 0.0, 1.0);\n", isnan(param) ? 1.0 : param);
+        GLSLF("sig = clamp(%f * sig, 0.0, 1.0);\n", isnan(param) ? 1.0 : param);
         break;
 
     case TONE_MAPPING_MOBIUS:
@@ -638,15 +641,15 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLF("const float b = (j*j - 2*j*sig_peak + sig_peak) / "
               "max(1e-6, sig_peak - 1);\n");
         GLSLF("const float scale = (b*b + 2*b*j + j*j) / (b-a);\n");
-        GLSL(luma = mix(luma, scale * (luma + a) / (luma + b), luma > j);)
+        GLSL(sig = mix(sig, scale * (sig + a) / (sig + b), sig > j);)
         break;
 
     case TONE_MAPPING_REINHARD: {
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
-        GLSLF("luma = luma / (luma + %f);\n", offset);
-        GLSLF("const float lumascale = (sig_peak + %f) / sig_peak;\n", offset);
-        GLSL(luma *= lumascale;)
+        GLSLF("sig = sig / (sig + %f);\n", offset);
+        GLSLF("const float scale = (sig_peak + %f) / sig_peak;\n", offset);
+        GLSL(sig *= scale;)
         break;
     }
 
@@ -656,19 +659,21 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLHF("return ((x * (%f*x + %f)+%f)/(x * (%f*x + %f) + %f)) - %f;\n",
                A, C*B, D*E, A, B, D*F, E/F);
         GLSLHF("}\n");
-        GLSL(luma = hable(luma) / hable(sig_peak);)
+        GLSL(sig = hable(sig) / hable(sig_peak);)
         break;
     }
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
-        GLSLF("luma = pow(luma / sig_peak, %f);\n", 1.0/gamma);
+        GLSLF("const float cutoff = 0.05, gamma = %f;\n", 1.0/gamma);
+        GLSL(float scale = pow(cutoff / sig_peak, gamma) / cutoff;)
+        GLSL(sig = sig > cutoff ? pow(sig / sig_peak, gamma) : scale * sig;)
         break;
     }
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("luma = %f / sig_peak * luma;\n", coeff);
+        GLSLF("sig = %f / sig_peak * sig;\n", coeff);
         break;
     }
 
@@ -676,8 +681,9 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         abort();
     }
 
-    // Apply the computed brightness difference back to the original color
-    GLSL(color.rgb *= luma / luma_orig;)
+    // Apply the computed scale factor to the color, linearly to prevent
+    // discoloration
+    GLSL(color.rgb *= sig / sig_orig;)
 }
 
 // Map colors from one source space to another. These source spaces must be
