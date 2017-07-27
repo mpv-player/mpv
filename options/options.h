@@ -40,6 +40,7 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int keepaspect_window;
     int hidpi_window_scale;
+    int native_fs;
 
     int64_t WinID;
 

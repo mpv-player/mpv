@@ -106,7 +106,8 @@
         [self setFrame:frame display:YES];
     }
 
-    [super toggleFullScreen:sender];
+    if ([self.adapter wantsNativeFullscreen])
+        [super toggleFullScreen:sender];
 
     if (![self.adapter isInFullScreenMode]) {
         [self setToFullScreen];
@@ -119,7 +120,16 @@
 {
     [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
     NSRect frame = [[self targetScreen] frame];
-    [self setFrame:frame display:YES];
+
+    if ([self.adapter wantsNativeFullscreen]) {
+        [self setFrame:frame display:YES];
+    } else {
+        [NSApp setPresentationOptions:NSApplicationPresentationAutoHideMenuBar|
+                                      NSApplicationPresentationAutoHideDock];
+        [self setFrame:frame display:YES];
+        _is_animating = 0;
+        [self.adapter windowDidEnterFullScreen];
+    }
 }
 
 - (void)setToWindow
@@ -127,9 +137,19 @@
     [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
     NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
                     withoutBounds:[[self targetScreen] isEqual:[self screen]]];
-    [self setFrame:frame display:YES];
-    [self setContentAspectRatio:_unfs_content_frame.size];
-    [self setCenteredContentSize:_unfs_content_frame.size];
+
+    if ([self.adapter wantsNativeFullscreen]) {
+        [self setFrame:frame display:YES];
+        [self setContentAspectRatio:_unfs_content_frame.size];
+        [self setCenteredContentSize:_unfs_content_frame.size];
+    } else {
+        [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+        [self setFrame:frame display:YES];
+        [self setContentAspectRatio:_unfs_content_frame.size];
+        [self setCenteredContentSize:_unfs_content_frame.size];
+        _is_animating = 0;
+        [self.adapter windowDidExitFullScreen];
+    }
 }
 
 - (NSArray *)customWindowsToEnterFullScreenForWindow:(NSWindow *)window
@@ -150,13 +170,13 @@
 - (void)windowDidEnterFullScreen:(NSNotification *)notification
 {
     _is_animating = 0;
-    [self.adapter windowDidEnterFullScreen:notification];
+    [self.adapter windowDidEnterFullScreen];
 }
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification
 {
     _is_animating = 0;
-    [self.adapter windowDidExitFullScreen:notification];
+    [self.adapter windowDidExitFullScreen];
 }
 
 - (void)windowWillEnterFullScreen:(NSNotification *)notification
@@ -390,7 +410,8 @@
     if (NSMaxX(nf) < NSMinX(vf))
         nf.origin.x = NSMinX(vf);
 
-    if (NSHeight(nf) < NSHeight(vf) && NSHeight(of) > NSHeight(vf))
+    if (NSHeight(nf) < NSHeight(vf) && NSHeight(of) > NSHeight(vf) &&
+        ![self.adapter isInFullScreenMode])
         // If the window height is smaller than the visible frame, but it was
         // bigger previously recenter the smaller window vertically. This is
         // needed to counter the 'snap to top' behaviour.

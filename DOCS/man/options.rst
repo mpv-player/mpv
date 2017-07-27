@@ -2477,6 +2477,10 @@ Window
     as having the same size as on none-HiDPI resolutions. This is the default OS X
     behavior.
 
+``--native-fs``, ``--no-native-fs``
+    (OS X only)
+    Uses the native fullscreen mechanism of the OS (default: yes).
+
 ``--monitorpixelaspect=<ratio>``
     Set the aspect of a single pixel of your monitor or TV screen (default:
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See

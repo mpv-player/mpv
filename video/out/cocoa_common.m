@@ -1014,6 +1014,11 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     return self.vout->cocoa->fullscreen;
 }
 
+- (BOOL)wantsNativeFullscreen
+{
+    return self.vout->opts->native_fs;
+}
+
 - (NSScreen *)getTargetScreen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
@@ -1039,7 +1044,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     flag_events(self.vout, VO_EVENT_WIN_STATE);
 }
 
-- (void)windowDidEnterFullScreen:(NSNotification *)notification
+- (void)windowDidEnterFullScreen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 1;
@@ -1047,7 +1052,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     vo_cocoa_anim_unlock(self.vout);
 }
 
-- (void)windowDidExitFullScreen:(NSNotification *)notification
+- (void)windowDidExitFullScreen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 0;
