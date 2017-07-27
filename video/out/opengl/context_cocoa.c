@@ -67,22 +67,31 @@ static CGLError test_gl_version(struct MPGLContext *ctx, CGLOpenGLProfile ver)
     struct priv *p = ctx->priv;
 
     CGLPixelFormatAttribute attrs[] = {
+        // let this array ordered by the inverse order of the most probably
+        // rejected attribute to preserve the fallback code
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) ver,
         kCGLPFAAccelerated,
-        // leave this as the last entry of the array to not break the fallback
-        // code
+        kCGLPFAAllowOfflineRenderers,
+        // keep this one last to apply the cocoa-force-dedicated-gpu option
         kCGLPFASupportsAutomaticGraphicsSwitching,
         0
     };
 
     GLint npix;
     CGLError err;
+    int supported_attribute = MP_ARRAY_SIZE(attrs)-1;
+
+    if (p->opts->cocoa_force_dedicated_gpu)
+        attrs[--supported_attribute] = 0;
+
     err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
-    if (p->opts->cocoa_force_dedicated_gpu || err == kCGLBadAttribute) {
-        // kCGLPFASupportsAutomaticGraphicsSwitching is probably not supported
-        // by the current hardware. Falling back to not using it.
-        attrs[MP_ARRAY_SIZE(attrs) - 2] = 0;
+    while (err == kCGLBadAttribute && supported_attribute > 3) {
+        // kCGLPFASupportsAutomaticGraphicsSwitching is probably not
+        // supported by the current hardware. Falling back to not using
+        // it and disallowing Offline Renderers if further restrictions
+        // apply
+        attrs[--supported_attribute] = 0;
         err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
     }
 
