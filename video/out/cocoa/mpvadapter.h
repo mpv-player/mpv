@@ -28,8 +28,11 @@
 - (void)didChangeWindowedScreenProfile:(NSNotification *)notification;
 - (void)performAsyncResize:(NSSize)size;
 - (void)windowDidChangePhysicalScreen;
+- (void)windowDidEnterFullScreen;
+- (void)windowDidExitFullScreen;
 
 - (BOOL)isInFullScreenMode;
+- (BOOL)wantsNativeFullscreen;
 - (BOOL)keyboardEnabled;
 - (BOOL)mouseEnabled;
 
