@@ -778,7 +778,7 @@ hwaccel_features = [
     }, {
         'name': '--videotoolbox-hwaccel-new',
         'desc': 'libavcodec videotoolbox hwaccel (new API)',
-        'deps': [ 'gl-cocoa' ],
+        'deps_any': [ 'gl-cocoa', 'ios-gl' ],
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 96, 100) && '
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
@@ -787,7 +787,7 @@ hwaccel_features = [
     }, {
         'name': '--videotoolbox-hwaccel-old',
         'desc': 'libavcodec videotoolbox hwaccel (old API)',
-        'deps': [ 'gl-cocoa' ],
+        'deps_any': [ 'gl-cocoa', 'ios-gl' ],
         'deps_neg': [ 'videotoolbox-hwaccel-new' ],
         'func': compose_checks(
             check_headers('VideoToolbox/VideoToolbox.h'),
