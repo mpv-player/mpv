@@ -4,6 +4,8 @@ branches:
     - appveyor
 
 environment:
+  global:
+    PATH: C:\msys64\usr\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem
   matrix:
     - MSYSTEM: MINGW64
     - MSYSTEM: MINGW32
