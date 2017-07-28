@@ -317,9 +317,8 @@ local function append_perfdata(s, dedicated_page)
         return format("{\\b%d}%02d%%{\\b0}", w, i * 100)
     end
 
-    local title = "Frame Timings" .. (mp.get_property_bool("vd-lavc-dr", false) and " (DR):" or ":")
     s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
-                     b(title), o.prefix_sep, o.font_size * 0.66,
+                     b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak  μs)", o.font_size)
 
     for frame, data in pairs(vo_p) do
