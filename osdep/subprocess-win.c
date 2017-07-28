@@ -126,8 +126,10 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     // Open the write end of the pipe as a synchronous handle
     *write = CreateFileW(buf, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, NULL);
-    if (*write == INVALID_HANDLE_VALUE)
+    if (*write == INVALID_HANDLE_VALUE) {
+        CloseHandle(*read);
         goto error;
+    }
 
     return 0;
 error:
