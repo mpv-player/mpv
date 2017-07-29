@@ -2597,10 +2597,8 @@ static void pass_dither(struct gl_video *p)
 
         int tex_size = 0;
         void *tex_data = NULL;
-        GLint tex_iformat = 0;
-        GLint tex_format = 0;
-        GLenum tex_type = 0;
-        unsigned char temp[256];
+        const struct gl_format *fmt = NULL;
+        void *temp = NULL;
 
         if (p->opts.dither_algo == DITHER_FRUIT) {
             int sizeb = p->opts.dither_size;
@@ -2614,15 +2612,18 @@ static void pass_dither(struct gl_video *p)
             }
 
             // Prefer R16 texture since they provide higher precision.
-            const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
-            if (!fmt || gl->es)
+            fmt = gl_find_unorm_format(gl, 2, 1);
+            if (!fmt)
                 fmt = gl_find_float16_format(gl, 1);
             if (fmt) {
                 tex_size = size;
-                tex_iformat = fmt->internal_format;
-                tex_format = fmt->format;
-                tex_type = GL_FLOAT;
                 tex_data = p->last_dither_matrix;
+                if (fmt->type == GL_UNSIGNED_SHORT) {
+                    uint16_t *t = temp = talloc_array(NULL, uint16_t, size * size);
+                    for (int n = 0; n < size * size; n++)
+                        t[n] = p->last_dither_matrix[n] * UINT16_MAX;
+                    tex_data = t;
+                }
             } else {
                 MP_VERBOSE(p, "GL too old. Falling back to ordered dither.\n");
                 p->opts.dither_algo = DITHER_ORDERED;
@@ -2630,14 +2631,11 @@ static void pass_dither(struct gl_video *p)
         }
 
         if (p->opts.dither_algo == DITHER_ORDERED) {
-            assert(sizeof(temp) >= 8 * 8);
+            temp = talloc_array(NULL, char, 8 * 8);
             mp_make_ordered_dither_matrix(temp, 8);
 
-            const struct gl_format *fmt = gl_find_unorm_format(gl, 1, 1);
+            fmt = gl_find_unorm_format(gl, 1, 1);
             tex_size = 8;
-            tex_iformat = fmt->internal_format;
-            tex_format = fmt->format;
-            tex_type = fmt->type;
             tex_data = temp;
         }
 
@@ -2646,8 +2644,8 @@ static void pass_dither(struct gl_video *p)
         gl->GenTextures(1, &p->dither_texture);
         gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0,
-                       tex_format, tex_type, tex_data);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, tex_size, tex_size,
+                       0, fmt->format, fmt->type, tex_data);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -2656,6 +2654,8 @@ static void pass_dither(struct gl_video *p)
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
         debug_check_gl(p, "dither setup");
+
+        talloc_free(temp);
     }
 
     GLSLF("// dithering\n");
