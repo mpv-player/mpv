@@ -38,7 +38,7 @@ void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
                                               struct scaler *scaler)
 {
-    gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
+    gl_sc_uniform_texture(sc, "lut", scaler->lut);
     // Define a new variable to cache the corrected fcoord.
     GLSLF("float fcoord_lut = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
@@ -130,7 +130,7 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
         GLSLF("if (d < %f) {\n", radius_cutoff);
 
     // get the weight for this pixel
-    if (scaler->gl_target == GL_TEXTURE_1D) {
+    if (scaler->lut->params.dimensions == 1) {
         GLSLF("w = texture1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
               radius, scaler->lut_size);
     } else {
@@ -169,7 +169,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     for (int n = 0; n < components; n++)
         GLSLF("vec4 c%d;\n", n);
 
-    gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
+    gl_sc_uniform_texture(sc, "lut", scaler->lut);
 
     GLSLF("// scaler samples\n");
     int bound = ceil(scaler->kernel->radius_cutoff);
@@ -233,7 +233,7 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSL(vec2 base = pos - pt * fcoord;)
     GLSL(ivec2 rel = ivec2(round((base - wbase) * size));)
     GLSLF("float w, d, wsum = 0.0;\n");
-    gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
+    gl_sc_uniform_texture(sc, "lut", scaler->lut);
 
     // Load all relevant texels into shmem
     gl_sc_enable_extension(sc, "GL_ARB_arrays_of_arrays");

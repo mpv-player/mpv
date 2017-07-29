@@ -53,8 +53,7 @@ struct scaler {
     double scale_factor;
     bool initialized;
     struct filter_kernel *kernel;
-    GLuint gl_lut;
-    GLenum gl_target;
+    struct ra_tex *lut;
     struct fbotex sep_fbo;
     bool insufficient;
     int lut_size;

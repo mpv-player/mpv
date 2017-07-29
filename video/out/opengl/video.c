@@ -1311,10 +1311,8 @@ static void skip_unused(struct gl_video *p, int num_components)
 
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
 {
-    GL *gl = p->gl;
     fbotex_uninit(&scaler->sep_fbo);
-    gl->DeleteTextures(1, &scaler->gl_lut);
-    scaler->gl_lut = 0;
+    ra_tex_free(p->ra, &scaler->lut);
     scaler->kernel = NULL;
     scaler->initialized = false;
 }
@@ -1595,8 +1593,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
                           double scale_factor,
                           int sizes[])
 {
-    GL *gl = p->gl;
-
     if (scaler_conf_eq(scaler->conf, *conf) &&
         scaler->scale_factor == scale_factor &&
         scaler->initialized)
@@ -1651,12 +1647,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
-    if (scaler->kernel->polar && (gl->mpgl_caps & MPGL_CAP_1D_TEX)) {
-        scaler->gl_target = GL_TEXTURE_1D;
-    } else {
-        scaler->gl_target = GL_TEXTURE_2D;
-    }
-
     int size = scaler->kernel->size;
     int elems_per_pixel = 4;
     if (size == 1) {
@@ -1668,36 +1658,29 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     }
     int width = size / elems_per_pixel;
     assert(size == width * elems_per_pixel);
-    const struct gl_format *fmt = gl_find_float16_format(gl, elems_per_pixel);
-    GLenum target = scaler->gl_target;
-
-    if (!scaler->gl_lut)
-        gl->GenTextures(1, &scaler->gl_lut);
-
-    gl->BindTexture(target, scaler->gl_lut);
+    const struct ra_format *fmt = ra_find_float16_format(p->ra, elems_per_pixel);
+    assert(fmt);
 
     scaler->lut_size = 1 << p->opts.scaler_lut_size;
 
     float *weights = talloc_array(NULL, float, scaler->lut_size * size);
     mp_compute_lut(scaler->kernel, scaler->lut_size, weights);
 
-    if (target == GL_TEXTURE_1D) {
-        gl->TexImage1D(target, 0, fmt->internal_format, scaler->lut_size,
-                       0, fmt->format, GL_FLOAT, weights);
-    } else {
-        gl->TexImage2D(target, 0, fmt->internal_format, width, scaler->lut_size,
-                       0, fmt->format, GL_FLOAT, weights);
-    }
+    bool use_1d = scaler->kernel->polar && (p->ra->caps & RA_CAP_TEX_1D);
+
+    struct ra_tex_params lut_params = {
+        .dimensions = use_1d ? 1 : 2,
+        .w = use_1d ? scaler->lut_size : width,
+        .h = use_1d ? 1 : scaler->lut_size,
+        .d = 1,
+        .format = fmt,
+        .render_src = true,
+        .src_linear = true,
+        .initial_data = weights,
+    };
+    scaler->lut = ra_tex_create(p->ra, &lut_params);
 
     talloc_free(weights);
-
-    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    if (target != GL_TEXTURE_1D)
-        gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    gl->BindTexture(target, 0);
 
     debug_check_gl(p, "after initializing scaler");
 }

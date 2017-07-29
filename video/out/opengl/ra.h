@@ -19,8 +19,8 @@ struct ra {
 };
 
 enum {
-    RA_CAP_TEX_1D = 0 << 0,     // supports 1D textures (as shader source textures)
-    RA_CAP_TEX_3D = 0 << 1,     // supports 3D textures (as shader source textures)
+    RA_CAP_TEX_1D = 1 << 0,     // supports 1D textures (as shader source textures)
+    RA_CAP_TEX_3D = 1 << 1,     // supports 3D textures (as shader source textures)
 };
 
 enum ra_ctype {
