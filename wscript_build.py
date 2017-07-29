@@ -461,6 +461,7 @@ def build(ctx):
         ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
         ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
+        ( "osdep/macosx_menubar.m",              "cocoa" ),
         ( "osdep/macosx_touchbar.m",             "macos-touchbar" ),
         ( "osdep/semaphore_osx.c" ),
         ( "osdep/subprocess.c" ),

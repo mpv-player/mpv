@@ -18,14 +18,7 @@
 #ifndef MPV_MACOSX_APPLICATION
 #define MPV_MACOSX_APPLICATION
 
-// Menu Keys identifing menu items
-typedef enum {
-    MPM_H_SIZE,
-    MPM_N_SIZE,
-    MPM_D_SIZE,
-    MPM_MINIMIZE,
-    MPM_ZOOM,
-} MPMenuKey;
+#include "osdep/macosx_menubar.h"
 
 // multithreaded wrapper for mpv_main
 int cocoa_main(int argc, char *argv[]);
