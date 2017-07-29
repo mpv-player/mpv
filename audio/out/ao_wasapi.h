@@ -45,15 +45,6 @@ typedef struct change_notify {
 HRESULT wasapi_change_init(struct ao* ao, bool is_hotplug);
 void wasapi_change_uninit(struct ao* ao);
 
-#define EXIT_ON_ERROR(hres)  \
-              do { if (FAILED(hres)) { goto exit_label; } } while(0)
-#define SAFE_DESTROY(unk, release) \
-              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
-
-#define mp_format_res_str(hres) \
-    (SUCCEEDED(hres) ? "ok" : ((hres) == AUDCLNT_E_UNSUPPORTED_FORMAT) \
-     ? "unsupported" : mp_HRESULT_to_str(hres))
-
 enum wasapi_thread_state {
     WASAPI_THREAD_FEED = 0,
     WASAPI_THREAD_RESUME,
@@ -113,11 +104,12 @@ void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
 bstr wasapi_get_specified_device_string(struct ao *ao);
 LPWSTR wasapi_find_deviceID(struct ao *ao);
 
-void wasapi_dispatch(struct ao *ao);
 bool wasapi_thread_init(struct ao *ao);
 void wasapi_thread_uninit(struct ao *ao);
 
-void wasapi_receive_proxies(wasapi_state *state);
-void wasapi_release_proxies(wasapi_state *state);
+#define EXIT_ON_ERROR(hres)  \
+              do { if (FAILED(hres)) { goto exit_label; } } while(0)
+#define SAFE_DESTROY(unk, release) \
+              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
 
 #endif
