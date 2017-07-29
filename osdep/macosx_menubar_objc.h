@@ -22,6 +22,4 @@
 
 - (void)registerSelector:(SEL)action forKey:(MPMenuKey)key;
 
-@property(nonatomic, retain) NSMutableDictionary *menuItems;
-
 @end

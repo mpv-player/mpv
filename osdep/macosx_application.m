@@ -66,7 +66,7 @@ static void terminate_cocoa_application(void)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    if (![_eventsResponder processKeyEvent:event])
+    if ([self modalWindow] || ![_eventsResponder processKeyEvent:event])
         [super sendEvent:event];
     [_eventsResponder wakeup];
 }
@@ -166,6 +166,11 @@ static void terminate_cocoa_application(void)
         mpv_shared_app().openCount--;
         return;
     }
+    [self openFiles:filenames];
+}
+
+- (void)openFiles:(NSArray *)filenames
+{
     SEL cmpsel = @selector(localizedStandardCompare:);
     NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
     [_eventsResponder handleFilesArray:files];
