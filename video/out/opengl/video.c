@@ -262,9 +262,9 @@ struct gl_video {
 
     // temporary during rendering
     struct img_tex pass_tex[TEXUNIT_VIDEO_NUM];
+    struct compute_info pass_compute; // compute shader metadata for this pass
     int pass_tex_num;
     int texture_w, texture_h;
-    int compute_w, compute_h; // presence indicates the use of a compute shader
     struct gl_transform texture_offset; // texture transform without rotation
     int components;
     bool use_linear;
@@ -1132,26 +1132,28 @@ static void pass_prepare_src_tex(struct gl_video *p)
     }
 }
 
-// Update the compute work group size requirements for the current shader.
-// Since we assume that all shaders can work with bigger working groups, just
-// never smaller ones, this effectively becomes the maximum of all size
-// requirements
-static void compute_size_minimum(struct gl_video *p, int bw, int bh)
+// Sets the appropriate compute shader metadata for an implicit compute pass
+// bw/bh: block size
+static void pass_is_compute(struct gl_video *p, int bw, int bh)
 {
-    p->compute_w = MPMAX(p->compute_w, bw);
-    p->compute_h = MPMAX(p->compute_h, bh);
+    p->pass_compute = (struct compute_info){
+        .active = true,
+        .block_w = bw,
+        .block_h = bh,
+    };
 }
 
 // w/h: the width/height of the compute shader's operating domain (e.g. the
 // target target that needs to be written, or the source texture that needs to
 // be reduced)
-// bw/bh: the width/height of the block (working group), which is tiled over
-// w/h as necessary
-static void dispatch_compute(struct gl_video *p, int w, int h, int bw, int bh)
+static void dispatch_compute(struct gl_video *p, int w, int h,
+                             struct compute_info info)
 {
     GL *gl = p->gl;
 
-    PRELUDE("layout (local_size_x = %d, local_size_y = %d) in;\n", bw, bh);
+    PRELUDE("layout (local_size_x = %d, local_size_y = %d) in;\n",
+            info.threads_w > 0 ? info.threads_w : info.block_w,
+            info.threads_h > 0 ? info.threads_h : info.block_h);
 
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
@@ -1188,8 +1190,8 @@ static void dispatch_compute(struct gl_video *p, int w, int h, int bw, int bh)
 
     // always round up when dividing to make sure we don't leave off a part of
     // the image
-    int num_x = (w + bw - 1) / bw,
-        num_y = (h + bh - 1) / bh;
+    int num_x = info.block_w > 0 ? (w + info.block_w - 1) / info.block_w : 1,
+        num_y = info.block_h > 0 ? (h + info.block_h - 1) / info.block_h : 1;
 
     gl->DispatchCompute(num_x, num_y, 1);
     gl_sc_reset(p->sc);
@@ -1263,18 +1265,19 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
 {
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
-    if (p->compute_w > 0 && p->compute_h > 0) {
+    if (p->pass_compute.active) {
         gl_sc_uniform_image2D(p->sc, "out_image", dst_fbo->texture,
                               dst_fbo->iformat, GL_WRITE_ONLY);
-        GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
-        dispatch_compute(p, w, h, p->compute_w, p->compute_h);
+        if (!p->pass_compute.directly_writes)
+            GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
+
+        dispatch_compute(p, w, h, p->pass_compute);
         p->gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+        p->pass_compute = (struct compute_info){0};
     } else {
         finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
                            &(struct mp_rect){0, 0, w, h});
     }
-
-    p->compute_w = p->compute_h = 0;
 }
 
 static const char *get_tex_swizzle(struct img_tex *img)
@@ -1756,7 +1759,7 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
     if (shmem_req > gl->max_shmem)
         goto fallback;
 
-    compute_size_minimum(p, bw, bh);
+    pass_is_compute(p, bw, bh);
     pass_compute_polar(p->sc, scaler, tex.components, bw, bh, iw, ih);
     return;
 
@@ -1923,13 +1926,17 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
 {
     struct gl_user_shader_hook *shader = priv;
     assert(shader);
+    load_shader(p, shader->pass_body);
 
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->pass_desc),
                   plane_names[tex.type]);
 
-    compute_size_minimum(p, shader->compute_w, shader->compute_h);
-    load_shader(p, shader->pass_body);
-    GLSLF("color = hook();\n");
+    if (shader->compute.active) {
+        p->pass_compute = shader->compute;
+        GLSLF("hook();\n");
+    } else {
+        GLSLF("color = hook();\n");
+    }
 
     // Make sure we at least create a legal FBO on failure, since it's better
     // to do this and display an error message than just crash OpenGL
@@ -2487,7 +2494,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     bool detect_peak = p->opts.compute_hdr_peak && mp_trc_is_hdr(src.gamma);
     if (detect_peak) {
         pass_describe(p, "detect HDR peak");
-        compute_size_minimum(p, 8, 8); // 8x8 is good for performance
+        pass_is_compute(p, 8, 8); // 8x8 is good for performance
 
         if (!p->hdr_peak_ssbo) {
             struct {
@@ -2808,7 +2815,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
     // Since finish_pass_direct doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
     // p->screen_fbo here.
-    if (p->compute_w > 0 && p->compute_h > 0) {
+    if (p->pass_compute.active) {
         int o_w = p->dst_rect.x1 - p->dst_rect.x0,
             o_h = p->dst_rect.y1 - p->dst_rect.y0;
         finish_pass_fbo(p, &p->screen_fbo, o_w, o_h, FBOTEX_FUZZY);

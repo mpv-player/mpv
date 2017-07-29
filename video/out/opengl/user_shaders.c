@@ -259,7 +259,14 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
         }
 
         if (bstr_eatstart0(&line, "COMPUTE")) {
-            if (bstr_sscanf(line, "%d %d", &out->compute_w, &out->compute_h) != 2) {
+            struct compute_info *ci = &out->compute;
+            int num = bstr_sscanf(line, "%d %d %d %d", &ci->block_w, &ci->block_h,
+                                  &ci->threads_w, &ci->threads_h);
+
+            if (num == 2 || num == 4) {
+                ci->active = true;
+                ci->directly_writes = true;
+            } else {
                 mp_err(log, "Error while parsing COMPUTE!\n");
                 return false;
             }

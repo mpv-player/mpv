@@ -4329,16 +4329,26 @@ The following video options are currently all specific to ``--vo=opengl`` and
         should be stored in the texture, up to 4 (rgba). By default, this value
         is equal to the number of components in HOOKED.
 
-    COMPUTE bw bh
+    COMPUTE <bw> <bh> [<tw> <th>]
         Specifies that this shader should be treated as a compute shader, with
         the block size bw and bh. The compute shader will be dispatched with
         however many blocks are necessary to completely tile over the output.
-        Compute shaders in mpv are treated similarly to fragment shaders, and
-        are still required to produce an output color. In addition, mpv
-        provides a special function NAME_map(id) to map from the global ID
-        space to the texture coordinates for all bound textures. The only real
-        difference is the fact that you can use shared memory inside compute
-        shaders.
+        Within each block, there will bw tw*th threads, forming a single work
+        group. In other words: tw and th specify the work group size, which can
+        be different from the block size. So for example, a compute shader with
+        bw, bh = 32 and tw, th = 8 running on a 500x500 texture would dispatch
+        16x16 blocks (rounded up), each with 8x8 threads.
+
+        Compute shaders in mpv are treated a bit different from fragment
+        shaders. Instead of defining a ``vec4 hook`` that produces an output
+        sample, you directly define ``void hook`` which writes to a fixed
+        writeonly image unit named ``out_image`` (this is bound by mpv) using
+        `imageStore`. To help translate texture coordinates in the absence of
+        vertices, mpv provides a special function ``NAME_map(id)`` to map from
+        the texel space of the output image to the texture coordinates for all
+        bound textures. In particular, ``NAME_pos`` is equivalent to
+        ``NAME_map(gl_GlobalInvocationID)``, although using this only really
+        makes sense if (tw,th) == (bw,bh).
 
     Each bound mpv texture (via ``BIND``) will make available the following
     definitions to that shader pass, where NAME is the name of the bound

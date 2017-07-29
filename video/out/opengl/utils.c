@@ -768,8 +768,8 @@ static const char *mp_image2D_type(GLenum access)
     }
 }
 
-void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint texture,
-                           GLuint iformat, GLenum access)
+void gl_sc_uniform_image2D(struct gl_shader_cache *sc, const char *name,
+                           GLuint texture, GLuint iformat, GLenum access)
 {
     gl_sc_enable_extension(sc, "GL_ARB_shader_image_load_store");
 

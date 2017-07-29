@@ -55,6 +55,13 @@ struct szexp {
     } val;
 };
 
+struct compute_info {
+    bool active;
+    int block_w, block_h;     // Block size (each block corresponds to one WG)
+    int threads_w, threads_h; // How many threads form a working group
+    bool directly_writes;     // If true, shader is assumed to imageStore(out_image)
+};
+
 struct gl_user_shader_hook {
     struct bstr pass_desc;
     struct bstr hook_tex[SHADER_MAX_HOOKS];
@@ -66,8 +73,7 @@ struct gl_user_shader_hook {
     struct szexp height[MAX_SZEXP_SIZE];
     struct szexp cond[MAX_SZEXP_SIZE];
     int components;
-    int compute_w;
-    int compute_h;
+    struct compute_info compute;
 };
 
 struct gl_user_shader_tex {
