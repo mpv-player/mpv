@@ -94,6 +94,20 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
     {0},
 };
 
+static void wasapi_get_best_sample_formats(
+    int src_format, struct wasapi_sample_fmt *out_formats)
+{
+    int mp_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(src_format, mp_formats);
+    for (int n = 0; mp_formats[n]; n++) {
+        for (int i = 0; wasapi_formats[i].mp_format; i++) {
+            if (wasapi_formats[i].mp_format == mp_formats[n])
+                *out_formats++ = wasapi_formats[i];
+        }
+    }
+    *out_formats = (struct wasapi_sample_fmt) {0};
+}
+
 static const GUID *format_to_subtype(int format)
 {
     for (int i = 0; wasapi_formats[i].mp_format; i++) {
@@ -120,52 +134,19 @@ static void update_waveformat_datarate(WAVEFORMATEXTENSIBLE *wformat)
 }
 
 static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
-                           struct wasapi_sample_fmt format,
+                           struct wasapi_sample_fmt *format,
                            DWORD samplerate, struct mp_chmap *channels)
 {
     wformat->Format.wFormatTag     = WAVE_FORMAT_EXTENSIBLE;
     wformat->Format.nChannels      = channels->num;
     wformat->Format.nSamplesPerSec = samplerate;
-    wformat->Format.wBitsPerSample = format.bits;
+    wformat->Format.wBitsPerSample = format->bits;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 
-    wformat->SubFormat                   = *format_to_subtype(format.mp_format);
-    wformat->Samples.wValidBitsPerSample = format.used_msb;
+    wformat->SubFormat                   = *format_to_subtype(format->mp_format);
+    wformat->Samples.wValidBitsPerSample = format->used_msb;
     wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
-}
-
-// This implicitly transforms all pcm formats to: interleaved / signed (except
-// 8-bit is unsigned) / waveext channel order.  "Special" formats should be
-// exempt as they should already satisfy these properties.
-static void set_waveformat_with_ao(WAVEFORMATEXTENSIBLE *wformat, struct ao *ao)
-{
-    struct mp_chmap channels = ao->channels;
-
-    if (mp_chmap_is_unknown(&channels))
-        mp_chmap_from_channels(&channels, channels.num);
-    mp_chmap_reorder_to_waveext(&channels);
-    if (!mp_chmap_is_valid(&channels))
-        mp_chmap_from_channels(&channels, 2);
-
-    // First find a format that is actually representable.
-    // (Notably excludes AF_FORMAT_DOUBLE.)
-    struct wasapi_sample_fmt format =
-        {AF_FORMAT_S16, 16, 16, &KSDATAFORMAT_SUBTYPE_PCM};
-
-    int alt_formats[AF_FORMAT_COUNT];
-    af_get_best_sample_formats(ao->format, alt_formats);
-    for (int n = 0; alt_formats[n]; n++) {
-        for (int i = 0; wasapi_formats[i].mp_format; i++) {
-            if (wasapi_formats[i].mp_format == alt_formats[n]) {
-                format = wasapi_formats[i];
-                goto found_format;
-            }
-        }
-    }
- found_format:
-
-    set_waveformat(wformat, format, ao->samplerate, &channels);
 }
 
 // other wformat parameters must already be set with set_waveformat
@@ -331,16 +312,12 @@ static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                   int samplerate, struct mp_chmap *channels)
 {
-    int alt_formats[AF_FORMAT_COUNT];
-    af_get_best_sample_formats(ao->format, alt_formats);
-    for (int n = 0; alt_formats[n]; n++) {
-        for (int i = 0; wasapi_formats[i].mp_format; i++) {
-            if (wasapi_formats[i].mp_format == alt_formats[n]) {
-                set_waveformat(wformat, wasapi_formats[i], samplerate, channels);
-                if (try_format_exclusive(ao, wformat))
-                    return true;
-            }
-        }
+    struct wasapi_sample_fmt alt_formats[MP_ARRAY_SIZE(wasapi_formats)];
+    wasapi_get_best_sample_formats(ao->format, alt_formats);
+    for (int n = 0; alt_formats[n].mp_format; n++) {
+        set_waveformat(wformat, &alt_formats[n], samplerate, channels);
+        if (try_format_exclusive(ao, wformat))
+            return true;
     }
 
     wformat->Format.wBitsPerSample = 0;
@@ -483,10 +460,24 @@ exit_label:
 static bool find_formats(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
+    struct mp_chmap channels = ao->channels;
+
+    if (mp_chmap_is_unknown(&channels))
+        mp_chmap_from_channels(&channels, channels.num);
+    mp_chmap_reorder_to_waveext(&channels);
+    if (!mp_chmap_is_valid(&channels))
+        mp_chmap_from_channels(&channels, 2);
+
+    struct wasapi_sample_fmt alt_formats[MP_ARRAY_SIZE(wasapi_formats)];
+    wasapi_get_best_sample_formats(ao->format, alt_formats);
+    struct wasapi_sample_fmt wasapi_format =
+        {AF_FORMAT_S16, 16, 16, &KSDATAFORMAT_SUBTYPE_PCM};;
+    if (alt_formats[0].mp_format)
+        wasapi_format = alt_formats[0];
+
     AUDCLNT_SHAREMODE share_mode;
     WAVEFORMATEXTENSIBLE wformat;
-
-    set_waveformat_with_ao(&wformat, ao);
+    set_waveformat(&wformat, &wasapi_format, ao->samplerate, &channels);
 
     if (state->opt_exclusive || af_fmt_is_spdif(ao->format)) {
         share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
