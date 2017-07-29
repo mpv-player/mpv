@@ -19,8 +19,10 @@
 #ifndef MP_GL_UTILS_
 #define MP_GL_UTILS_
 
+#include <math.h>
+
 #include "common.h"
-#include "math.h"
+#include "ra.h"
 
 struct mp_log;
 
@@ -145,6 +147,8 @@ void gl_sc_paddf(struct gl_shader_cache *sc, const char *textf, ...)
     PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
                        GLuint texture);
+void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
+                           struct ra_tex *tex);
 void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture);
 void gl_sc_uniform_image2D(struct gl_shader_cache *sc, char *name, GLuint texture,
                            GLuint iformat, GLenum access);

@@ -33,6 +33,7 @@
 #include "options/path.h"
 #include "stream/stream.h"
 #include "formats.h"
+#include "ra_gl.h"
 #include "utils.h"
 
 // GLU has this as gluErrorString (we don't use GLU, as it is legacy-OpenGL)
@@ -744,6 +745,17 @@ void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture
     u->v.i[0] = sc->next_texture_unit++;
     u->tex_target = GL_TEXTURE_2D;
     u->tex_handle = texture;
+}
+
+void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
+                           struct ra_tex *tex)
+{
+    struct ra_tex_gl *tex_gl = tex->priv;
+    if (tex->params.format->ctype == RA_CTYPE_UINT) {
+        gl_sc_uniform_tex_ui(sc, name, tex_gl->texture);
+    } else {
+        gl_sc_uniform_tex(sc, name, tex_gl->target, tex_gl->texture);
+    }
 }
 
 static const char *mp_image2D_type(GLenum access)

@@ -144,23 +144,28 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
     if (params->dimensions > 2)
         gl->TexParameteri(tex_gl->target, GL_TEXTURE_WRAP_R, wrap);
 
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     switch (params->dimensions) {
     case 1:
         gl->TexImage1D(tex_gl->target, 0, tex_gl->internal_format, params->w,
-                       0, tex_gl->format, tex_gl->type, NULL);
+                       0, tex_gl->format, tex_gl->type, params->initial_data);
         break;
     case 2:
         gl->TexImage2D(tex_gl->target, 0, tex_gl->internal_format, params->w,
-                       params->h, 0, tex_gl->format, tex_gl->type, NULL);
+                       params->h, 0, tex_gl->format, tex_gl->type,
+                       params->initial_data);
         break;
     case 3:
         gl->TexImage3D(tex_gl->target, 0, tex_gl->internal_format, params->w,
                        params->h, params->d, 0, tex_gl->format, tex_gl->type,
-                       NULL);
+                       params->initial_data);
         break;
     }
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     gl->BindTexture(tex_gl->target, 0);
+
+    tex->params.initial_data = NULL;
 
     return tex;
 }

@@ -71,6 +71,9 @@ struct ra_tex_params {
                             // if true, repeat texture coordinates
     bool non_normalized;    // hack for GL_TEXTURE_RECTANGLE OSX idiocy
                             // always set to false, except in OSX code
+    // If non-NULL, the texture will be created with these contents, and is
+    // considered immutable afterwards (no upload, mapping, or rendering to it).
+    void *initial_data;
 };
 
 struct ra_tex {
@@ -136,6 +139,9 @@ struct ra_fns {
     // Optional, only available if flush_mapping is.
     bool (*poll_mapped_buffer)(struct ra *ra, struct ra_mapped_buffer *buf);
 };
+
+struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);
+void ra_tex_free(struct ra *ra, struct ra_tex **tex);
 
 const struct ra_format *ra_find_unorm_format(struct ra *ra,
                                              int bytes_per_component,

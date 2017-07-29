@@ -205,8 +205,7 @@ struct gl_video {
     bool use_lut_3d;
     int lut_3d_size[3];
 
-    GLuint dither_texture;
-    int dither_size;
+    struct ra_tex *dither_texture;
 
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
@@ -531,13 +530,10 @@ static void reinit_osd(struct gl_video *p)
 
 static void uninit_rendering(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
     for (int n = 0; n < SCALER_COUNT; n++)
         uninit_scaler(p, &p->scaler[n]);
 
-    gl->DeleteTextures(1, &p->dither_texture);
-    p->dither_texture = 0;
+    ra_tex_free(p->ra, &p->dither_texture);
 
     for (int n = 0; n < 4; n++) {
         fbotex_uninit(&p->merge_fbo[n]);
@@ -2582,8 +2578,6 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
 
 static void pass_dither(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
     // Assume 8 bits per component if unknown.
     int dst_depth = p->fb_depth;
     if (p->opts.dither_depth > 0)
@@ -2597,7 +2591,7 @@ static void pass_dither(struct gl_video *p)
 
         int tex_size = 0;
         void *tex_data = NULL;
-        const struct gl_format *fmt = NULL;
+        const struct ra_format *fmt = NULL;
         void *temp = NULL;
 
         if (p->opts.dither_algo == DITHER_FRUIT) {
@@ -2612,13 +2606,13 @@ static void pass_dither(struct gl_video *p)
             }
 
             // Prefer R16 texture since they provide higher precision.
-            fmt = gl_find_unorm_format(gl, 2, 1);
+            fmt = ra_find_unorm_format(p->ra, 2, 1);
             if (!fmt)
-                fmt = gl_find_float16_format(gl, 1);
+                fmt = ra_find_float16_format(p->ra, 1);
             if (fmt) {
                 tex_size = size;
                 tex_data = p->last_dither_matrix;
-                if (fmt->type == GL_UNSIGNED_SHORT) {
+                if (fmt->ctype == RA_CTYPE_UNORM) {
                     uint16_t *t = temp = talloc_array(NULL, uint16_t, size * size);
                     for (int n = 0; n < size * size; n++)
                         t[n] = p->last_dither_matrix[n] * UINT16_MAX;
@@ -2634,24 +2628,23 @@ static void pass_dither(struct gl_video *p)
             temp = talloc_array(NULL, char, 8 * 8);
             mp_make_ordered_dither_matrix(temp, 8);
 
-            fmt = gl_find_unorm_format(gl, 1, 1);
+            fmt = ra_find_unorm_format(p->ra, 1, 1);
             tex_size = 8;
             tex_data = temp;
         }
 
-        p->dither_size = tex_size;
-
-        gl->GenTextures(1, &p->dither_texture);
-        gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
-        gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, tex_size, tex_size,
-                       0, fmt->format, fmt->type, tex_data);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = tex_size,
+            .h = tex_size,
+            .d = 1,
+            .format = fmt,
+            .render_src = true,
+            .src_linear = true,
+            .src_repeat = true,
+            .initial_data = tex_data,
+        };
+        p->dither_texture = ra_tex_create(p->ra, &params);
 
         debug_check_gl(p, "dither setup");
 
@@ -2665,10 +2658,11 @@ static void pass_dither(struct gl_video *p)
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
     int dither_quantization = (1 << dst_depth) - 1;
+    int dither_size = p->dither_texture->params.w;
 
-    gl_sc_uniform_tex(p->sc, "dither", GL_TEXTURE_2D, p->dither_texture);
+    gl_sc_uniform_texture(p->sc, "dither", p->dither_texture);
 
-    GLSLF("vec2 dither_pos = gl_FragCoord.xy * 1.0/%d.0;\n", p->dither_size);
+    GLSLF("vec2 dither_pos = gl_FragCoord.xy * 1.0/%d.0;\n", dither_size);
 
     if (p->opts.temporal_dither) {
         int phase = (p->frames_rendered / p->opts.temporal_dither_period) % 8u;
@@ -2684,8 +2678,7 @@ static void pass_dither(struct gl_video *p)
 
     GLSL(float dither_value = texture(dither, dither_pos).r;)
     GLSLF("color = floor(color * %d.0 + dither_value + 0.5 / %d.0) * 1.0/%d.0;\n",
-          dither_quantization, p->dither_size * p->dither_size,
-          dither_quantization);
+          dither_quantization, dither_size * dither_size, dither_quantization);
 }
 
 // Draws the OSD, in scene-referred colors.. If cms is true, subtitles are

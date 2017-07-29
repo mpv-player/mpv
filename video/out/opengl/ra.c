@@ -4,6 +4,18 @@
 
 #include "ra.h"
 
+struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params)
+{
+    return ra->fns->tex_create(ra, params);
+}
+
+void ra_tex_free(struct ra *ra, struct ra_tex **tex)
+{
+    if (*tex)
+        ra->fns->tex_destroy(ra, *tex);
+    *tex = NULL;
+}
+
 // Return whether this is a tightly packed format with no external padding and
 // with the same bit size/depth in all components.
 static bool ra_format_is_regular(const struct ra_format *fmt)
