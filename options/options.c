@@ -460,7 +460,7 @@ const m_option_t mp_opts[] = {
     OPT_PATHLIST("sub-file-paths", sub_paths, 0),
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
     OPT_PATHLIST("external-files", external_files, 0),
-    OPT_CLI_ALIAS("external-file", "external-file-append"),
+    OPT_CLI_ALIAS("external-file", "external-files-append"),
     OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_FLOAT("sub-delay", sub_delay, UPDATE_OSD),
     OPT_FLOAT("sub-fps", sub_fps, UPDATE_OSD),
