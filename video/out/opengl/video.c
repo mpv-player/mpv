@@ -193,7 +193,6 @@ struct gl_video {
     struct gl_lcms *cms;
     bool gl_debug;
 
-    int texture_16bit_depth;    // actual bits available in 16 bit textures
     int fb_depth;               // actual bits available in GL main framebuffer
 
     struct gl_shader_cache *sc;
@@ -3611,11 +3610,6 @@ static void init_gl(struct gl_video *p)
 
     gl_video_set_gl_state(p);
 
-    // Test whether we can use 10 bit.
-    p->texture_16bit_depth = gl_determine_16bit_tex_depth(gl);
-    if (p->texture_16bit_depth > 0)
-        MP_VERBOSE(p, "16 bit texture depth: %d.\n", p->texture_16bit_depth);
-
     p->upload_timer = gl_timer_create(gl);
     p->blit_timer = gl_timer_create(gl);
 
@@ -3689,25 +3683,12 @@ bool gl_video_showing_interpolated_frame(struct gl_video *p)
 }
 
 static bool is_imgfmt_desc_supported(struct gl_video *p,
-                                     const struct gl_imgfmt_desc *desc)
+                                     const struct ra_imgfmt_desc *desc)
 {
     if (!desc->num_planes)
         return false;
 
-    if (desc->component_bits > 8 && desc->component_bits < 16 &&
-        desc->component_pad < 0 && p->texture_16bit_depth < 16)
-        return false;
-
-    int use_integer = -1;
-    for (int n = 0; n < desc->num_planes; n++) {
-        int use_int_plane = gl_is_integer_format(desc->planes[n]->format);
-        if (use_integer < 0)
-            use_integer = use_int_plane;
-        if (use_integer != use_int_plane)
-            return false; // mixed planes not supported
-    }
-
-    if (use_integer && p->forced_dumb_mode)
+    if (desc->planes[0]->ctype == RA_CTYPE_UINT && p->forced_dumb_mode)
         return false;
 
     return true;
@@ -3715,8 +3696,8 @@ static bool is_imgfmt_desc_supported(struct gl_video *p,
 
 bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
-    struct gl_imgfmt_desc desc;
-    if (gl_get_imgfmt_desc(p->gl, mp_format, &desc) &&
+    struct ra_imgfmt_desc desc;
+    if (ra_get_imgfmt_desc(p->ra, mp_format, &desc) &&
         is_imgfmt_desc_supported(p, &desc))
         return true;
     if (p->hwdec && gl_hwdec_test_format(p->hwdec, mp_format))

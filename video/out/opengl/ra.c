@@ -20,7 +20,7 @@ static bool ra_format_is_regular(const struct ra_format *fmt)
     return true;
 }
 
-// Return a regular format using RA_CTYPE_UNORM.
+// Return a regular filterable format using RA_CTYPE_UNORM.
 const struct ra_format *ra_find_unorm_format(struct ra *ra,
                                              int bytes_per_component,
                                              int n_components)
@@ -30,7 +30,7 @@ const struct ra_format *ra_find_unorm_format(struct ra *ra,
         if (fmt->ctype == RA_CTYPE_UNORM && fmt->num_components == n_components &&
             fmt->pixel_size == bytes_per_component * n_components &&
             fmt->component_depth[0] == bytes_per_component * 8 &&
-            ra_format_is_regular(fmt))
+            fmt->linear_filter && ra_format_is_regular(fmt))
             return fmt;
     }
     return NULL;
@@ -52,7 +52,7 @@ const struct ra_format *ra_find_uint_format(struct ra *ra,
     return NULL;
 }
 
-// Return a regular format that uses float16 internally, but does 32 bit
+// Return a filterable regular format that uses float16 internally, but does 32 bit
 // transfer. (This is just so we don't need 32->16 bit conversion on CPU,
 // which would be ok but messy.)
 const struct ra_format *ra_find_float16_format(struct ra *ra, int n_components)
@@ -62,15 +62,15 @@ const struct ra_format *ra_find_float16_format(struct ra *ra, int n_components)
         if (fmt->ctype == RA_CTYPE_FLOAT && fmt->num_components == n_components &&
             fmt->pixel_size == sizeof(float) * n_components &&
             fmt->component_depth[0] == 16 &&
-            ra_format_is_regular(fmt))
+            fmt->linear_filter && ra_format_is_regular(fmt))
             return fmt;
     }
     return NULL;
 }
 
 
-// Like ra_find_unorm_format(), but takes bits (not bytes), and if no fixed
-// point format is available, return an unsigned integer format.
+// Like ra_find_unorm_format(), but if no fixed point format is available,
+// return an unsigned integer format.
 static const struct ra_format *find_plane_format(struct ra *ra, int bytes,
                                                  int n_channels)
 {
@@ -94,6 +94,7 @@ bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out)
 
     struct mp_regular_imgfmt regfmt;
     if (mp_get_regular_imgfmt(&regfmt, imgfmt)) {
+        enum ra_ctype ctype = RA_CTYPE_UNKNOWN;
         res.num_planes = regfmt.num_planes;
         res.component_bits = regfmt.component_size * 8;
         res.component_pad = regfmt.component_pad;
@@ -105,6 +106,14 @@ bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out)
                 return false;
             for (int i = 0; i < plane->num_components; i++)
                 res.components[n][i] = plane->components[i];
+            // Dropping LSBs when shifting will lead to dropped MSBs.
+            if (res.component_bits > res.planes[n]->component_depth[0] &&
+                res.component_pad < 0)
+                return false;
+            // Renderer restriction, but actually an unwanted corner case.
+            if (ctype != RA_CTYPE_UNKNOWN && ctype != res.planes[n]->ctype)
+                return false;
+            ctype = res.planes[n]->ctype;
         }
         res.chroma_w = regfmt.chroma_w;
         res.chroma_h = regfmt.chroma_h;

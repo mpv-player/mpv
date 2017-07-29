@@ -22,7 +22,10 @@ int ra_init_gl(struct ra *ra, GL *gl)
         ra->caps |= RA_CAP_TEX_3D;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
+
+    // Test whether we can use 10 bit.
     int depth16 = gl_determine_16bit_tex_depth(gl);
+    MP_VERBOSE(ra, "16 bit texture depth: %d.\n", depth16);
 
     for (int n = 0; gl_formats[n].internal_format; n++) {
         const struct gl_format *gl_fmt = &gl_formats[n];
