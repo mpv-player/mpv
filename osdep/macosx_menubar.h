@@ -15,19 +15,16 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_application.h"
-#import "osdep/macosx_menubar_objc.h"
+#ifndef MPV_MACOSX_MENU
+#define MPV_MACOSX_MENU
 
-struct mpv_event;
+// Menu Keys identifing menu items
+typedef enum {
+    MPM_H_SIZE,
+    MPM_N_SIZE,
+    MPM_D_SIZE,
+    MPM_MINIMIZE,
+    MPM_ZOOM,
+} MPMenuKey;
 
-@interface Application : NSApplication
-
-- (void)processEvent:(struct mpv_event *)event;
-- (void)queueCommand:(char *)cmd;
-- (void)stopMPV:(char *)cmd;
-
-@property(nonatomic, retain) MenuBar *menuBar;
-@property(nonatomic, retain) NSArray *files;
-@property(nonatomic, assign) size_t openCount;
-@end
+#endif /* MPV_MACOSX_MENU */
