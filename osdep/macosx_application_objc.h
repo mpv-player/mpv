@@ -26,6 +26,7 @@ struct mpv_event;
 - (void)processEvent:(struct mpv_event *)event;
 - (void)queueCommand:(char *)cmd;
 - (void)stopMPV:(char *)cmd;
+- (void)openFiles:(NSArray *)filenames;
 
 @property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, retain) NSArray *files;
