@@ -201,7 +201,7 @@ struct gl_video {
     struct mpgl_osd *osd;
     double osd_pts;
 
-    GLuint lut_3d_texture;
+    struct ra_tex *lut_3d_texture;
     bool use_lut_3d;
     int lut_3d_size[3];
 
@@ -589,34 +589,40 @@ bool gl_video_icc_auto_enabled(struct gl_video *p)
 static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
                                enum mp_csp_trc trc)
 {
-    GL *gl = p->gl;
-
     if (!p->use_lut_3d)
         return false;
 
     if (p->lut_3d_texture && !gl_lcms_has_changed(p->cms, prim, trc))
         return true;
 
+    // GLES3 doesn't provide filtered 16 bit integer textures
+    // GLES2 doesn't even provide 3D textures
+    const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 3);
+    if (!fmt || !(p->ra->caps & RA_CAP_TEX_3D)) {
+        p->use_lut_3d = false;
+        MP_WARN(p, "Disabling color management (no RGB16 3D textures).\n");
+        return false;
+    }
+
     struct lut3d *lut3d = NULL;
-    if (!gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc) || !lut3d) {
+    if (!fmt || !gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc) || !lut3d) {
         p->use_lut_3d = false;
         return false;
     }
 
-    if (!p->lut_3d_texture)
-        gl->GenTextures(1, &p->lut_3d_texture);
+    ra_tex_free(p->ra, &p->lut_3d_texture);
 
-    gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    gl->TexImage3D(GL_TEXTURE_3D, 0, GL_RGB16, lut3d->size[0], lut3d->size[1],
-                   lut3d->size[2], 0, GL_RGB, GL_UNSIGNED_SHORT, lut3d->data);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    gl->BindTexture(GL_TEXTURE_3D, 0);
+    struct ra_tex_params params = {
+        .dimensions = 3,
+        .w = lut3d->size[0],
+        .h = lut3d->size[1],
+        .d = lut3d->size[2],
+        .format = fmt,
+        .render_src = true,
+        .src_linear = true,
+        .initial_data = lut3d->data,
+    };
+    p->lut_3d_texture = ra_tex_create(p->ra, &params);
 
     debug_check_gl(p, "after 3d lut creation");
 
@@ -2551,7 +2557,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
                    detect_peak, p->use_linear && !osd);
 
     if (p->use_lut_3d) {
-        gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
+        gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
         GLSL(vec3 cpos;)
         for (int i = 0; i < 3; i++)
             GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
@@ -3456,10 +3462,8 @@ static void check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
     bool have_float_tex = !!gl_find_float16_format(gl, 1);
-    bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
-    bool have_tex16 = !gl->es || (gl->mpgl_caps & MPGL_CAP_EXT16);
     bool have_compute = gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER;
     bool have_ssbo = gl->mpgl_caps & MPGL_CAP_SSBO;
 
@@ -3546,13 +3550,6 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    // GLES3 doesn't provide filtered 16 bit integer textures
-    // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && (!have_3d_tex || !have_tex16)) {
-        p->use_lut_3d = false;
-        MP_WARN(p, "Disabling color management (no RGB16 3D textures).\n");
-    }
-
     int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
                   p->opts.target_trc != MP_CSP_TRC_AUTO || p->use_lut_3d;
 
@@ -3606,7 +3603,7 @@ void gl_video_uninit(struct gl_video *p)
 
     gl_sc_destroy(p->sc);
 
-    gl->DeleteTextures(1, &p->lut_3d_texture);
+    ra_tex_free(p->ra, &p->lut_3d_texture);
     gl->DeleteBuffers(1, &p->hdr_peak_ssbo);
 
     gl_timer_free(p->upload_timer);
