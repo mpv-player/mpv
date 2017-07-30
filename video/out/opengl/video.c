@@ -2629,7 +2629,6 @@ static void pass_dither(struct gl_video *p)
             .d = 1,
             .format = fmt,
             .render_src = true,
-            .src_linear = true,
             .src_repeat = true,
             .initial_data = tex_data,
         };
