@@ -506,7 +506,7 @@ static void gl_video_reset_hooks(struct gl_video *p)
         talloc_free(p->tex_hooks[i].priv);
 
     for (int i = 0; i < p->user_tex_num; i++)
-        p->gl->DeleteTextures(1, &p->user_textures[i].gl_tex);
+        ra_tex_free(p->ra, &p->user_textures[i].tex);
 
     p->tex_hook_num = 0;
     p->user_tex_num = 0;
@@ -1408,7 +1408,7 @@ static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
         for (int u = 0; u < p->user_tex_num; u++) {
             struct gl_user_shader_tex *utex = &p->user_textures[u];
             if (bstr_equals0(utex->name, bind_name)) {
-                gl_sc_uniform_tex(p->sc, bind_name, utex->gl_target, utex->gl_tex);
+                gl_sc_uniform_texture(p->sc, bind_name, utex->tex);
                 goto next_bind;
             }
         }
@@ -1966,15 +1966,14 @@ static bool add_user_hook(void *priv, struct gl_user_shader_hook hook)
 static bool add_user_tex(void *priv, struct gl_user_shader_tex tex)
 {
     struct gl_video *p = priv;
-    GL *gl = p->gl;
 
     if (p->user_tex_num == SHADER_MAX_PASSES) {
         MP_ERR(p, "Too many textures! Limit is %d.\n", SHADER_MAX_PASSES);
         goto err;
     }
 
-    const struct gl_format *format = gl_find_format(gl, tex.mpgl_type,
-            tex.gl_filter == GL_LINEAR ? F_TF : 0, tex.bytes, tex.components);
+    const struct ra_format *format = ra_find_unorm_format(p->ra, tex.components,
+                                                          tex.bytes);
 
     if (!format) {
         MP_ERR(p, "Could not satisfy format requirements for user "
@@ -1982,33 +1981,19 @@ static bool add_user_tex(void *priv, struct gl_user_shader_tex tex)
         goto err;
     }
 
-    GLenum type = format->type,
-           ifmt = format->internal_format,
-            fmt = format->format;
-
-    GLenum tgt = tex.gl_target;
-    gl->GenTextures(1, &tex.gl_tex);
-    gl->BindTexture(tgt, tex.gl_tex);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    if (tgt == GL_TEXTURE_3D) {
-        gl->TexImage3D(tgt, 0, ifmt, tex.w, tex.h, tex.d, 0, fmt, type, tex.texdata);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_T, tex.gl_border);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_R, tex.gl_border);
-    } else if (tgt == GL_TEXTURE_2D) {
-        gl->TexImage2D(tgt, 0, ifmt, tex.w, tex.h, 0, fmt, type, tex.texdata);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_T, tex.gl_border);
-    } else {
-        gl->TexImage1D(tgt, 0, ifmt, tex.w, 0, fmt, type, tex.texdata);
-        gl->TexParameteri(tgt, GL_TEXTURE_WRAP_S, tex.gl_border);
-    }
+    struct ra_tex_params params = {
+        .dimensions = tex.dimensions,
+        .w = tex.w,
+        .h = tex.h,
+        .d = tex.d,
+        .format = format,
+        .render_src = true,
+        .src_linear = tex.filter,
+        .src_repeat = tex.border,
+        .initial_data = tex.texdata,
+    };
+    tex.tex = ra_tex_create(p->ra, &params);
     talloc_free(tex.texdata);
-
-    gl->TexParameteri(tgt, GL_TEXTURE_MIN_FILTER, tex.gl_filter);
-    gl->TexParameteri(tgt, GL_TEXTURE_MAG_FILTER, tex.gl_filter);
-    gl->BindTexture(tgt, 0);
 
     p->user_textures[p->user_tex_num++] = tex;
     return true;

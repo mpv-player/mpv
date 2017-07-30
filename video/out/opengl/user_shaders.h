@@ -72,16 +72,16 @@ struct gl_user_shader_hook {
 
 struct gl_user_shader_tex {
     struct bstr name;
+    int dimensions;
     int w, h, d;
     int components;
     int bytes;
-    int mpgl_type;
-    GLenum gl_target;
-    GLenum gl_filter;
-    GLenum gl_border;
+    enum ra_ctype ctype;
+    bool filter;
+    bool border;
     void *texdata;
     // for video.c
-    GLenum gl_tex;
+    struct ra_tex *tex;
 };
 
 // Parse the next shader block from `body`. The callbacks are invoked on every

@@ -294,10 +294,7 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         .w = 1, .h = 1, .d = 1,
         .components = 1,
         .bytes = 1,
-        .mpgl_type = MPGL_TYPE_UINT,
-        .gl_filter = GL_LINEAR,
-        .gl_target = GL_TEXTURE_1D,
-        .gl_border = GL_CLAMP_TO_EDGE,
+        .ctype = RA_CTYPE_UINT,
     };
 
     while (true) {
@@ -320,8 +317,7 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
                 mp_err(log, "Error while parsing SIZE!\n");
                 return false;
             }
-            static GLenum tgt[] = {GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D};
-            out->gl_target = tgt[num - 1];
+            out->dimensions = num;
             continue;
         }
 
@@ -343,9 +339,7 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
 
             out->bytes = bits / 8;
             switch (fmt) {
-            case 'f': out->mpgl_type = MPGL_TYPE_FLOAT; break;
-            case 'i': out->mpgl_type = MPGL_TYPE_UINT;  break;
-            case 'u': out->mpgl_type = MPGL_TYPE_UNORM; break;
+            case 'u': out->ctype = RA_CTYPE_UINT; break;
             default:
                 mp_err(log, "Unrecognized FORMAT description: '%c'!\n", fmt);
                 return false;
@@ -356,9 +350,9 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "FILTER")) {
             line = bstr_strip(line);
             if (bstr_equals0(line, "LINEAR")) {
-                out->gl_filter = GL_LINEAR;
+                out->filter = true;
             } else if (bstr_equals0(line, "NEAREST")) {
-                out->gl_filter = GL_NEAREST;
+                out->filter = false;
             } else {
                 mp_err(log, "Unrecognized FILTER: '%.*s'!\n", BSTR_P(line));
                 return false;
@@ -369,11 +363,9 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "BORDER")) {
             line = bstr_strip(line);
             if (bstr_equals0(line, "CLAMP")) {
-                out->gl_border = GL_CLAMP_TO_EDGE;
+                out->border = GL_CLAMP_TO_EDGE;
             } else if (bstr_equals0(line, "REPEAT")) {
-                out->gl_border = GL_REPEAT;
-            } else if (bstr_equals0(line, "MIRROR")) {
-                out->gl_border = GL_MIRRORED_REPEAT;
+                out->border = true;
             } else {
                 mp_err(log, "Unrecognized BORDER: '%.*s'!\n", BSTR_P(line));
                 return false;
