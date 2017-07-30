@@ -555,13 +555,30 @@ video_output_features = [
                                  'wayland-cursor', '>= 1.6.0',
                                  'xkbcommon',      '>= 0.3.0'),
     } , {
+        'name': 'x11-dev',
+        'desc': 'x11-dev',
+        'func': check_pkg_config('x11', '>= 1.0.0'),
+    } , {
+        'name': 'xscrnsaver-dev',
+        'desc': 'xscrnsaver-dev',
+        'func': check_pkg_config('xscrnsaver', '>= 1.0.0'),
+    } , {
+        'name': 'xext-dev',
+        'desc': 'xext-dev',
+        'func': check_pkg_config('xext', '>= 1.0.0'),
+    } , {
+        'name': 'xinerama-dev',
+        'desc': 'xinerama-dev',
+        'func': check_pkg_config('xinerama', '>= 1.0.0'),
+    } , {
+        'name': 'xrandr-dev',
+        'desc': 'xrandr-dev',
+        'func': check_pkg_config('xrandr', '>= 1.2.0'),
+    } , {
         'name': '--x11',
         'desc': 'X11',
-        'func': check_pkg_config('x11',         '>= 1.0.0',
-                                 'xscrnsaver',  '>= 1.0.0',
-                                 'xext',        '>= 1.0.0',
-                                 'xinerama',    '>= 1.0.0',
-                                 'xrandr',      '>= 1.2.0'),
+        'deps': ['x11-dev', 'xscrnsaver-dev', 'xext-dev', 'xinerama-dev', 'xrandr-dev' ],
+        'func': check_true,
     } , {
         'name': '--xv',
         'desc': 'Xv video output',
