@@ -233,11 +233,21 @@ iconv support use --disable-iconv.",
         'desc': 'nanosleep',
         'func': check_statement('time.h', 'nanosleep(0,0)')
     }, {
-        'name': 'posix-spawn',
-        'desc': 'POSIX spawnp()/kill()',
+        'name': 'posix-spawn-native',
+        'desc': 'spawnp()/kill() POSIX support',
         'func': check_statement(['spawn.h', 'signal.h'],
             'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
         'deps': '!mingw',
+    }, {
+        'name': 'posix-spawn-android',
+        'desc': 'spawnp()/kill() Android replacement',
+        'func': check_true,
+        'deps': 'android && !posix-spawn-native',
+    },{
+        'name': 'posix-spawn',
+        'desc': 'any spawnp()/kill() support',
+        'deps': 'posix-spawn-native || posix-spawn-android',
+        'func': check_true,
     }, {
         'name': 'win32-pipes',
         'desc': 'Windows pipe support',

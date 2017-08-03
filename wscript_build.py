@@ -479,6 +479,7 @@ def build(ctx):
         ( "osdep/windows_utils.c",               "os-cygwin" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
+        ( "osdep/android/posix-spawn.c",         "android"),
         ( "osdep/android/strnlen.c",             "android"),
 
         ## tree_allocator
