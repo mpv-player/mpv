@@ -478,6 +478,7 @@ def build(ctx):
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
         ( "osdep/android/strnlen.c",             "android"),
+        ( "osdep/android/posix-spawn.c",         "android"),
 
         ## tree_allocator
         "ta/ta.c", "ta/ta_talloc.c", "ta/ta_utils.c"
