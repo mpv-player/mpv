@@ -1973,34 +1973,14 @@ static bool add_user_tex(void *priv, struct gl_user_shader_tex tex)
         goto err;
     }
 
-    const struct ra_format *format = ra_find_unorm_format(p->ra, tex.components,
-                                                          tex.bytes);
-
-    if (!format) {
-        MP_ERR(p, "Could not satisfy format requirements for user "
-                  "shader texture '%.*s'!\n", BSTR_P(tex.name));
-        goto err;
-    }
-
-    struct ra_tex_params params = {
-        .dimensions = tex.dimensions,
-        .w = tex.w,
-        .h = tex.h,
-        .d = tex.d,
-        .format = format,
-        .render_src = true,
-        .src_linear = tex.filter,
-        .src_repeat = tex.border,
-        .initial_data = tex.texdata,
-    };
-    tex.tex = ra_tex_create(p->ra, &params);
-    talloc_free(tex.texdata);
+    tex.tex = ra_tex_create(p->ra, &tex.params);
+    TA_FREEP(&tex.params.initial_data);
 
     p->user_textures[p->user_tex_num++] = tex;
     return true;
 
 err:
-    talloc_free(tex.texdata);
+    talloc_free(tex.params.initial_data);
     return false;
 }
 
@@ -2011,7 +1991,7 @@ static void load_user_shaders(struct gl_video *p, char **shaders)
 
     for (int n = 0; shaders[n] != NULL; n++) {
         struct bstr file = load_cached_file(p, shaders[n]);
-        parse_user_shader(p->log, file, p, add_user_hook, add_user_tex);
+        parse_user_shader(p->log, p->ra, file, p, add_user_hook, add_user_tex);
     }
 }
 

@@ -4249,20 +4249,22 @@ The following video options are currently all specific to ``--vo=opengl`` and
         The name of this texture. Hooks can then bind the texture under this
         name using BIND. This must be the first option of the texture block.
 
-    SIZE <width> [<height>] [<depth>]
+    SIZE <width> [<height>] [<depth>] (required)
         The dimensions of the texture. The height and depth are optional. The
         type of texture (1D, 2D or 3D) depends on the number of components
         specified.
 
-    COMPONENTS <n>
-        The number of components per texel contained in the texture. Defaults
-        to 1.
+    FORMAT <name> (required)
+        The texture format for the samples. Supported texture formats are listed
+        in debug logging when the ``opengl`` VO is initialized (look for
+        ``Texture formats:``). Usually, this follows OpenGL naming conventions.
+        For example, ``rgb16`` provides 3 channels with normalized 16 bit
+        components. One oddity are float formats: for example, ``rgba16f`` has
+        16 bit internal precision, but the texture data is provided as 32 bit
+        floats, and the driver converts the data on texture upload.
 
-    FORMAT <spec>
-        The texture format for the samples. A valid texture specification is
-        the number of bits followed by a single letter which is either ``f``
-        (for float), ``i`` (for uint) or ``u`` (for unorm), for example
-        ``32f``. Defaults to ``8i``.
+        Although format names follow a common naming convention, not all of them
+        are available on all hardware, drivers, GL versions, and so on.
 
     FILTER <LINEAR|NEAREST>
         The min/magnification filter used when sampling from this texture.

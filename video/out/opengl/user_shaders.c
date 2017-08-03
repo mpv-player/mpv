@@ -286,16 +286,19 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
     return true;
 }
 
-static bool parse_tex(struct mp_log *log, struct bstr *body,
+static bool parse_tex(struct mp_log *log, struct ra *ra, struct bstr *body,
                       struct gl_user_shader_tex *out)
 {
     *out = (struct gl_user_shader_tex){
         .name = bstr0("USER_TEX"),
-        .w = 1, .h = 1, .d = 1,
-        .components = 1,
-        .bytes = 1,
-        .ctype = RA_CTYPE_UINT,
+        .params = {
+            .dimensions = 2,
+            .w = 1, .h = 1, .d = 1,
+            .render_src = true,
+            .src_linear = true,
+        },
     };
+    struct ra_tex_params *p = &out->params;
 
     while (true) {
         struct bstr rest;
@@ -312,36 +315,29 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         }
 
         if (bstr_eatstart0(&line, "SIZE")) {
-            int num = bstr_sscanf(line, "%d %d %d", &out->w, &out->h, &out->d);
-            if (num < 1 || num > 3 || out->w < 1 || out->h < 1 || out->d < 1) {
+            p->dimensions = bstr_sscanf(line, "%d %d %d", &p->w, &p->h, &p->d);
+            if (p->dimensions < 1 || p->dimensions > 3 ||
+                p->w < 1 || p->h < 1 || p->d < 1)
+            {
                 mp_err(log, "Error while parsing SIZE!\n");
                 return false;
             }
-            out->dimensions = num;
             continue;
         }
 
-        if (bstr_eatstart0(&line, "COMPONENTS")) {
-            if (bstr_sscanf(line, "%d", &out->components) != 1) {
-                mp_err(log, "Error while parsing COMPONENTS!\n");
-                return false;
+        if (bstr_eatstart0(&line, "FORMAT ")) {
+            p->format = NULL;
+            for (int n = 0; n < ra->num_formats; n++) {
+                const struct ra_format *fmt = ra->formats[n];
+                if (bstr_equals0(line, fmt->name)) {
+                    p->format = fmt;
+                    break;
+                }
             }
-            continue;
-        }
-
-        if (bstr_eatstart0(&line, "FORMAT")) {
-            int bits;
-            char fmt;
-            if (bstr_sscanf(line, "%d%c", &bits, &fmt) != 2) {
-                mp_err(log, "Error while parsing FORMAT!\n");
-                return false;
-            }
-
-            out->bytes = bits / 8;
-            switch (fmt) {
-            case 'u': out->ctype = RA_CTYPE_UINT; break;
-            default:
-                mp_err(log, "Unrecognized FORMAT description: '%c'!\n", fmt);
+            // (pixel_size==0 is for opaque formats)
+            if (!p->format || !p->format->pixel_size) {
+                mp_err(log, "Unrecognized/unavailable FORMAT name: '%.*s'!\n",
+                       BSTR_P(line));
                 return false;
             }
             continue;
@@ -350,9 +346,9 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "FILTER")) {
             line = bstr_strip(line);
             if (bstr_equals0(line, "LINEAR")) {
-                out->filter = true;
+                p->src_linear = true;
             } else if (bstr_equals0(line, "NEAREST")) {
-                out->filter = false;
+                p->src_linear = false;
             } else {
                 mp_err(log, "Unrecognized FILTER: '%.*s'!\n", BSTR_P(line));
                 return false;
@@ -363,9 +359,9 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "BORDER")) {
             line = bstr_strip(line);
             if (bstr_equals0(line, "CLAMP")) {
-                out->border = GL_CLAMP_TO_EDGE;
+                p->src_repeat = false;
             } else if (bstr_equals0(line, "REPEAT")) {
-                out->border = true;
+                p->src_repeat = true;
             } else {
                 mp_err(log, "Unrecognized BORDER: '%.*s'!\n", BSTR_P(line));
                 return false;
@@ -374,6 +370,16 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         }
 
         mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
+        return false;
+    }
+
+    if (!p->format) {
+        mp_err(log, "No FORMAT specified.\n");
+        return false;
+    }
+
+    if (p->src_linear && !p->format->linear_filter) {
+        mp_err(log, "The specified texture format cannot be filtered!\n");
         return false;
     }
 
@@ -393,7 +399,7 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         return false;
     }
 
-    int expected_len = out->w * out->h * out->d * out->components * out->bytes;
+    int expected_len = p->w * p->h * p->d * p->format->pixel_size;
     if (tex.len != expected_len) {
         mp_err(log, "Shader TEXTURE size mismatch: got %zd bytes, expected %d!\n",
                tex.len, expected_len);
@@ -401,11 +407,12 @@ static bool parse_tex(struct mp_log *log, struct bstr *body,
         return false;
     }
 
-    out->texdata = tex.start;
+    p->initial_data = tex.start;
     return true;
 }
 
-void parse_user_shader(struct mp_log *log, struct bstr shader, void *priv,
+void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
+                       void *priv,
                        bool (*dohook)(void *p, struct gl_user_shader_hook hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex))
 {
@@ -426,7 +433,7 @@ void parse_user_shader(struct mp_log *log, struct bstr shader, void *priv,
         // Peek at the first header to dispatch the right type
         if (bstr_startswith0(shader, "//!TEXTURE")) {
             struct gl_user_shader_tex t;
-            if (!parse_tex(log, &shader, &t) || !dotex(priv, t))
+            if (!parse_tex(log, ra, &shader, &t) || !dotex(priv, t))
                 return;
             continue;
         }

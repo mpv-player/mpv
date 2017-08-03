@@ -72,21 +72,15 @@ struct gl_user_shader_hook {
 
 struct gl_user_shader_tex {
     struct bstr name;
-    int dimensions;
-    int w, h, d;
-    int components;
-    int bytes;
-    enum ra_ctype ctype;
-    bool filter;
-    bool border;
-    void *texdata;
+    struct ra_tex_params params;
     // for video.c
     struct ra_tex *tex;
 };
 
 // Parse the next shader block from `body`. The callbacks are invoked on every
 // valid shader block parsed.
-void parse_user_shader(struct mp_log *log, struct bstr shader, void *priv,
+void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
+                       void *priv,
                        bool (*dohook)(void *p, struct gl_user_shader_hook hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex));
 
