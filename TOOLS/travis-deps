@@ -87,10 +87,6 @@ end
 class Libav < TravisDepsBuilder
   def build_map
     {
-      "libav-stable" => {
-        :action => :stable,
-        :url    => 'http://libav.org/releases/libav-12.tar.gz'
-      },
       "libav-git" => {
         :action => :git,
         :url    => "git://git.libav.org/libav.git"
