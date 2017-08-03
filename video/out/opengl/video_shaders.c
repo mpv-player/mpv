@@ -537,12 +537,7 @@ void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak)
     GLSLF("color.rgb *= vec3(1.0/%f);\n", peak);
 }
 
-// Inverse of the function pass_ootf, for completeness' sake. Note that the
-// inverse OOTF for MP_CSP_LIGHT_SCENE_HLG has no analytical solution and is
-// therefore unimplemented. Care must be used to never call this function
-// in that way.(In principle, a iterative algorithm can approach
-// the solution numerically, but this is tricky and we don't really need it
-// since mpv currently only supports outputting display-referred light)
+// Inverse of the function pass_ootf, for completeness' sake.
 void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak)
 {
     if (light == MP_CSP_LIGHT_DISPLAY)
@@ -554,8 +549,8 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
     switch (light)
     {
     case MP_CSP_LIGHT_SCENE_HLG:
-        // Has no analytical solution
-        abort();
+        GLSLF("color.rgb *= vec3(1.0/%f);\n", (1000 / MP_REF_WHITE) / pow(12, 1.2));
+        GLSL(color.rgb *= vec3(pow(dot(src_luma, color.rgb), 0.2/1.2));)
         break;
     case MP_CSP_LIGHT_SCENE_709_1886:
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
