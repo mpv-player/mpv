@@ -617,7 +617,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 
         GLSL(memoryBarrierBuffer();)
         GLSL(barrier();)
-        GLSLF("const float sig_peak = 1.0/%f * float(sig_peak_raw);\n",
+        GLSLF("float sig_peak = 1.0/%f * float(sig_peak_raw);\n",
               MP_REF_WHITE * PEAK_DETECT_FRAMES);
     } else {
         GLSLHF("const float sig_peak = %f;\n", ref_peak);
@@ -632,10 +632,10 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLF("const float j = %f;\n", isnan(param) ? 0.3 : param);
         // solve for M(j) = j; M(sig_peak) = 1.0; M'(j) = 1.0
         // where M(x) = scale * (x+a)/(x+b)
-        GLSLF("const float a = -j*j * (sig_peak - 1) / (j*j - 2*j + sig_peak);\n");
-        GLSLF("const float b = (j*j - 2*j*sig_peak + sig_peak) / "
-              "max(1e-6, sig_peak - 1);\n");
-        GLSLF("const float scale = (b*b + 2*b*j + j*j) / (b-a);\n");
+        GLSLF("float a = -j*j * (sig_peak - 1.0) / (j*j - 2.0*j + sig_peak);\n");
+        GLSLF("float b = (j*j - 2.0*j*sig_peak + sig_peak) / "
+              "max(1e-6, sig_peak - 1.0);\n");
+        GLSLF("float scale = (b*b + 2.0*b*j + j*j) / (b-a);\n");
         GLSL(sig = mix(sig, scale * (sig + a) / (sig + b), sig > j);)
         break;
 
@@ -643,7 +643,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("sig = sig / (sig + %f);\n", offset);
-        GLSLF("const float scale = (sig_peak + %f) / sig_peak;\n", offset);
+        GLSLF("float scale = (sig_peak + %f) / sig_peak;\n", offset);
         GLSL(sig *= scale;)
         break;
     }
