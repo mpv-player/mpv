@@ -256,7 +256,7 @@ static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
 
     gl->GenBuffers(1, &buf_gl->pbo);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
-    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags);
+    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags | GL_CLIENT_STORAGE_BIT);
     buf->data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buf->size, flags);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     if (!buf->data) {
