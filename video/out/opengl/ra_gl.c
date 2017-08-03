@@ -247,7 +247,6 @@ static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
 
     struct ra_mapped_buffer *buf = talloc_zero(NULL, struct ra_mapped_buffer);
     buf->size = size;
-    buf->preferred_align = 1;
 
     struct ra_mapped_buffer_gl *buf_gl = buf->priv =
         talloc_zero(NULL, struct ra_mapped_buffer_gl);

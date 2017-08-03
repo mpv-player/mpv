@@ -91,7 +91,6 @@ struct ra_mapped_buffer {
     void *priv;
     void *data;             // pointer to first usable byte
     size_t size;            // total size of the mapping, starting at data
-    size_t preferred_align; // preferred stride/start alignment for optimal copy
 };
 
 // Rendering API entrypoints. (Note: there are some additional hidden features
