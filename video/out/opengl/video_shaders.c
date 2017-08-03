@@ -550,7 +550,7 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
     {
     case MP_CSP_LIGHT_SCENE_HLG:
         GLSLF("color.rgb *= vec3(1.0/%f);\n", (1000 / MP_REF_WHITE) / pow(12, 1.2));
-        GLSL(color.rgb *= vec3(pow(dot(src_luma, color.rgb), 0.2/1.2));)
+        GLSL(color.rgb /= vec3(max(1e-6, pow(dot(src_luma, color.rgb), 0.2/1.2)));)
         break;
     case MP_CSP_LIGHT_SCENE_709_1886:
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
