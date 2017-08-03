@@ -1183,7 +1183,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
         // Clamp the texture coordinates to prevent sampling out-of-bounds in
         // threads that exceed the requested width/height
         PRELUDE("#define texmap%d(id) min(texcoord%d_rot(id), vec2(1.0))\n", n, n);
-        PRELUDE("vec2 texcoord%d = texmap%d(gl_GlobalInvocationID);\n", n, n);
+        PRELUDE("#define texcoord%d texmap%d(gl_GlobalInvocationID)\n", n, n);
     }
 
     pass_record(p, gl_sc_generate(p->sc, GL_COMPUTE_SHADER));
