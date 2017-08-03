@@ -26,6 +26,7 @@ Interface changes
       "audio-file", "external-file" (these cases used to log a deprecation
       warning)
     - drop deprecated --video-aspect-method=hybrid option choice
+    - rename --hdr-tone-mapping to --tone-mapping (and generalize it)
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

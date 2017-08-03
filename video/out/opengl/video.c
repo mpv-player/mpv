@@ -326,7 +326,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .hdr_tone_mapping = TONE_MAPPING_MOBIUS,
+    .tone_mapping = TONE_MAPPING_MOBIUS,
     .tone_mapping_param = NAN,
     .tone_mapping_desat = 2.0,
     .early_flush = -1,
@@ -363,7 +363,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
-        OPT_CHOICE("hdr-tone-mapping", hdr_tone_mapping, 0,
+        OPT_CHOICE("tone-mapping", tone_mapping, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"mobius",   TONE_MAPPING_MOBIUS},
                     {"reinhard", TONE_MAPPING_REINHARD},
@@ -431,6 +431,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE("opengl-early-flush", early_flush, 0,
                    ({"no", 0}, {"yes", 1}, {"auto", -1})),
         OPT_STRING("opengl-shader-cache-dir", shader_cache_dir, 0),
+        OPT_REPLACED("hdr-tone-mapping", "tone-mapping"),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2537,7 +2538,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     }
 
     // Adapt from src to dst as necessary
-    pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
+    pass_color_map(p->sc, src, dst, p->opts.tone_mapping,
                    p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
                    detect_peak, p->use_linear && !osd);
 
@@ -3499,7 +3500,7 @@ static void check_gl_features(struct gl_video *p)
             .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
             .tex_pad_y = p->opts.tex_pad_y,
-            .hdr_tone_mapping = p->opts.hdr_tone_mapping,
+            .tone_mapping = p->opts.tone_mapping,
             .tone_mapping_param = p->opts.tone_mapping_param,
             .tone_mapping_desat = p->opts.tone_mapping_desat,
             .early_flush = p->opts.early_flush,

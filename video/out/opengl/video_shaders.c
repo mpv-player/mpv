@@ -577,7 +577,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
     GLSLF("// HDR tone mapping\n");
 
     // Desaturate the color using a coefficient dependent on the luminance
-    GLSL(float luma = dot(src_luma, color.rgb);)
+    GLSL(float luma = dot(dst_luma, color.rgb);)
     if (desat > 0) {
         GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
         GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
@@ -699,13 +699,15 @@ void pass_color_map(struct gl_shader_cache *sc,
     // Compute the highest encodable level
     float src_range = mp_trc_nom_peak(src.gamma),
           dst_range = mp_trc_nom_peak(dst.gamma);
+    float ref_peak = src.sig_peak / dst_range;
 
-    // Some operations need access to the video's luma coefficients (src
-    // colorspace), so make it available
-    struct mp_csp_primaries prim = mp_get_csp_primaries(src.primaries);
+    // Some operations need access to the video's luma coefficients, so make
+    // them available
     float rgb2xyz[3][3];
-    mp_get_rgb2xyz_matrix(prim, rgb2xyz);
+    mp_get_rgb2xyz_matrix(mp_get_csp_primaries(src.primaries), rgb2xyz);
     gl_sc_uniform_vec3(sc, "src_luma", rgb2xyz[1]);
+    mp_get_rgb2xyz_matrix(mp_get_csp_primaries(dst.primaries), rgb2xyz);
+    gl_sc_uniform_vec3(sc, "dst_luma", rgb2xyz[1]);
 
     // All operations from here on require linear light as a starting point,
     // so we linearize even if src.gamma == dst.gamma when one of the other
@@ -732,13 +734,6 @@ void pass_color_map(struct gl_shader_cache *sc,
         GLSLF("color.rgb *= vec3(%f);\n", src_range / dst_range);
     }
 
-    // Tone map to prevent clipping when the source signal peak exceeds the
-    // encodable range
-    if (src.sig_peak > dst_range) {
-        float ref_peak = detect_peak ? 0 : src.sig_peak / dst_range;
-        pass_tone_map(sc, ref_peak, algo, tone_mapping_param, tone_mapping_desat);
-    }
-
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
         struct mp_csp_primaries csp_src = mp_get_csp_primaries(src.primaries),
@@ -747,6 +742,16 @@ void pass_color_map(struct gl_shader_cache *sc,
         mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
+        // Since this can reduce the gamut, figure out by how much
+        for (int c = 0; c < 3; c++)
+            ref_peak = MPMAX(ref_peak, m[c][c]);
+    }
+
+    // Tone map to prevent clipping when the source signal peak exceeds the
+    // encodable range or we've reduced the gamut
+    if (ref_peak > 1) {
+        pass_tone_map(sc, detect_peak ? 0 : ref_peak, algo,
+                      tone_mapping_param, tone_mapping_desat);
     }
 
     if (src.light != dst.light)

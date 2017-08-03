@@ -4765,9 +4765,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
         The user should independently guarantee this before using these signal
         formats for display.
 
-``--hdr-tone-mapping=<value>``
-    Specifies the algorithm used for tone-mapping HDR images onto the target
-    display. Valid values are:
+``--tone-mapping=<value>``
+    Specifies the algorithm used for tone-mapping images onto the target
+    display. This is relevant for both HDR->SDR conversion as well as gamut
+    reduction (e.g. playing back BT.2020 content on a standard gamut display).
+    Valid values are:
 
     clip
         Hard-clip any out-of-range values. Use this when you care about
@@ -4786,10 +4788,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
         results in flattening of details and degradation in color accuracy.
     hable
         Similar to ``reinhard`` but preserves both dark and bright details
-        better (slightly sigmoidal), at the cost of slightly darkening
-        everything. Developed by John Hable for use in video games. Use this
-        when you care about detail preservation more than color/brightness
-        accuracy. This is roughly equivalent to
+        better (slightly sigmoidal), at the cost of slightly darkening /
+        desaturating everything. Developed by John Hable for use in video
+        games. Use this when you care about detail preservation more than
+        color/brightness accuracy. This is roughly equivalent to
         ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``.
     gamma
         Fits a logarithmic transfer between the tone curves.

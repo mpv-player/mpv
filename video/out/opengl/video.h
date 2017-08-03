@@ -110,7 +110,7 @@ struct gl_video_opts {
     int target_prim;
     int target_trc;
     int target_brightness;
-    int hdr_tone_mapping;
+    int tone_mapping;
     int compute_hdr_peak;
     float tone_mapping_param;
     float tone_mapping_desat;
