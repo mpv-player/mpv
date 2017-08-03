@@ -15,8 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Almost LGPL.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License forever.
  */
 
 #include <stdio.h>
