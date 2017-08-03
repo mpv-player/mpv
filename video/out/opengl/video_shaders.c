@@ -29,7 +29,9 @@
 void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 {
     GLSLF("#undef tex\n");
+    GLSLF("#undef texmap\n");
     GLSLF("#define tex texture%d\n", tex_num);
+    GLSLF("#define texmap texmap%d\n", tex_num);
     GLSLF("vec2 pos = texcoord%d;\n", tex_num);
     GLSLF("vec2 size = texture_size%d;\n", tex_num);
     GLSLF("vec2 pt = pixel_size%d;\n", tex_num);
@@ -227,7 +229,7 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
 
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");
-    GLSL(vec2 wpos = texmap0(gl_WorkGroupID * gl_WorkGroupSize);)
+    GLSL(vec2 wpos = texmap(gl_WorkGroupID * gl_WorkGroupSize);)
     GLSL(vec2 wbase = wpos - pt * fract(wpos * size - vec2(0.5));)
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     GLSL(vec2 base = pos - pt * fcoord;)
