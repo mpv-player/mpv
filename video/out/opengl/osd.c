@@ -22,7 +22,6 @@
 #include <libavutil/common.h>
 
 #include "formats.h"
-#include "utils.h"
 #include "osd.h"
 
 #define GLSL(x) gl_sc_add(sc, #x "\n");

@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "ra.h"
-#include "utils.h"
+#include "gl_utils.h"
 
 // For ra.priv
 struct ra_gl {

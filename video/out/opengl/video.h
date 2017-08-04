@@ -24,7 +24,9 @@
 #include "sub/osd.h"
 #include "common.h"
 #include "utils.h"
+#include "gl_utils.h"
 #include "lcms.h"
+#include "shader_cache.h"
 #include "video/out/filter_kernels.h"
 
 // Assume we have this many texture units for sourcing additional passes.

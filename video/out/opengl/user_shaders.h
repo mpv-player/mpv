@@ -20,6 +20,7 @@
 
 #include "common.h"
 #include "utils.h"
+#include "ra.h"
 
 #define SHADER_MAX_PASSES 32
 #define SHADER_MAX_HOOKS 16

@@ -5,6 +5,8 @@
 #include <inttypes.h>
 
 #include "utils.h"
+#include "gl_utils.h"
+#include "shader_cache.h"
 #include "sub/osd.h"
 
 struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);
