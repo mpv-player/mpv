@@ -1172,7 +1172,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
                              const struct mp_rect *dst)
 {
-    struct vertex va[4] = {0};
+    struct vertex va[6] = {0};
 
     struct gl_transform t;
     gl_transform_ortho(&t, 0, vp_w, 0, vp_h);
@@ -1200,8 +1200,11 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
         }
     }
 
+    va[4] = va[2];
+    va[5] = va[1];
+
     p->gl->Viewport(0, 0, vp_w, abs(vp_h));
-    gl_sc_draw_data(p->sc, GL_TRIANGLE_STRIP, va, 4);
+    gl_sc_draw_data(p->sc, GL_TRIANGLES, va, 6);
 
     debug_check_gl(p, "after rendering");
 }
