@@ -51,23 +51,20 @@ struct gl_vao_entry {
 };
 
 struct fbotex {
-    GL *gl;
-    GLuint fbo;
-    GLuint texture;
-    GLenum iformat;
-    int rw, rh; // real (texture) size
-    int lw, lh; // logical (configured) size
+    struct ra *ra;
+    struct ra_tex *tex;
+    int rw, rh; // real (texture) size, same as tex->params.w/h
+    int lw, lh; // logical (configured) size, <= than texture size
 };
 
-bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
-                 GLenum iformat);
+bool fbotex_init(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+                 int w, int h, const struct ra_format *fmt);
 void fbotex_uninit(struct fbotex *fbo);
-bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
-                   GLenum iformat, int flags);
+bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+                   int w, int h, const struct ra_format *fmt, int flags);
 #define FBOTEX_FUZZY_W 1
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
-void fbotex_invalidate(struct fbotex *fbo);
 
 // A 3x2 matrix, with the translation part separate.
 struct gl_transform {

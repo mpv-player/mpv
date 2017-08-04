@@ -227,6 +227,7 @@ struct gl_video {
     bool dumb_mode;
     bool forced_dumb_mode;
 
+    const struct ra_format *fbo_format;
     struct fbotex merge_fbo[4];
     struct fbotex scale_fbo[4];
     struct fbotex integer_fbo[4];
@@ -307,7 +308,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
-    .fbo_format = 0,
+    .fbo_format = "auto",
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
@@ -385,19 +386,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
-        OPT_CHOICE("opengl-fbo-format", fbo_format, 0,
-                   ({"rgb8",   GL_RGB8},
-                    {"rgba8",  GL_RGBA8},
-                    {"rgb10",  GL_RGB10},
-                    {"rgb10_a2", GL_RGB10_A2},
-                    {"rgb16",  GL_RGB16},
-                    {"rgb16f", GL_RGB16F},
-                    {"rgb32f", GL_RGB32F},
-                    {"rgba12", GL_RGBA12},
-                    {"rgba16", GL_RGBA16},
-                    {"rgba16f", GL_RGBA16F},
-                    {"rgba32f", GL_RGBA32F},
-                    {"auto",   0})),
+        OPT_STRING("opengl-fbo-format", fbo_format, 0),
         OPT_CHOICE_OR_INT("dither-depth", dither_depth, 0, -1, 16,
                           ({"no", -1}, {"auto", 0})),
         OPT_CHOICE("dither", dither_algo, 0,
@@ -452,6 +441,14 @@ static void gl_video_setup_hooks(struct gl_video *p);
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
 #define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
 #define PRELUDE(...) gl_sc_paddf(p->sc, __VA_ARGS__)
+
+static GLuint get_fbo(struct fbotex *fbo)
+{
+    if (!fbo->tex)
+        return -1;
+    struct ra_tex_gl *tex_gl = fbo->tex->priv;
+    return tex_gl->fbo ? tex_gl->fbo : -1;
+}
 
 static struct bstr load_cached_file(struct gl_video *p, const char *path)
 {
@@ -644,9 +641,10 @@ static struct img_tex img_tex_fbo(struct fbotex *fbo, enum plane_type type,
                                   int components)
 {
     assert(type != PLANE_NONE);
+    struct ra_tex_gl *tex_gl = fbo->tex->priv;
     return (struct img_tex){
         .type = type,
-        .gl_tex = fbo->texture,
+        .gl_tex = tex_gl->texture,
         .gl_target = GL_TEXTURE_2D,
         .multiplier = 1.0,
         .tex_w = fbo->rw,
@@ -1267,11 +1265,14 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                             int w, int h, int flags)
 {
-    fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
+    fbotex_change(dst_fbo, p->ra, p->log, w, h, p->fbo_format, flags);
 
     if (p->pass_compute.active) {
-        gl_sc_uniform_image2D(p->sc, "out_image", dst_fbo->texture,
-                              dst_fbo->iformat, GL_WRITE_ONLY);
+        if (!dst_fbo->tex)
+            return;
+        struct ra_tex_gl *tex_gl = dst_fbo->tex->priv;
+        gl_sc_uniform_image2D(p->sc, "out_image", tex_gl->texture,
+                              tex_gl->internal_format, GL_WRITE_ONLY);
         if (!p->pass_compute.directly_writes)
             GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
 
@@ -1279,7 +1280,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
         p->gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         p->pass_compute = (struct compute_info){0};
     } else {
-        finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
+        finish_pass_direct(p, get_fbo(dst_fbo), dst_fbo->rw, dst_fbo->rh,
                            &(struct mp_rect){0, 0, w, h});
     }
 }
@@ -2762,7 +2763,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
         };
         finish_pass_fbo(p, &p->blend_subs_fbo, rect.w, rect.h, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
-                      rect.w, rect.h, p->blend_subs_fbo.fbo, false);
+                      rect.w, rect.h, get_fbo(&p->blend_subs_fbo), false);
         pass_read_fbo(p, &p->blend_subs_fbo);
         pass_describe(p, "blend subs video");
     }
@@ -2792,7 +2793,8 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
         }
         finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
-                      p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
+                      p->texture_w, p->texture_h, get_fbo(&p->blend_subs_fbo),
+                      false);
         pass_read_fbo(p, &p->blend_subs_fbo);
         pass_describe(p, "blend subs");
     }
@@ -3134,10 +3136,10 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
                     !p->dumb_mode && gl->BlitFramebuffer)
                 {
-                    fbotex_change(&p->output_fbo, p->gl, p->log,
+                    fbotex_change(&p->output_fbo, p->ra, p->log,
                                   p->vp_w, abs(p->vp_h),
-                                  p->opts.fbo_format, FBOTEX_FUZZY);
-                    dest_fbo = p->output_fbo.fbo;
+                                  p->fbo_format, FBOTEX_FUZZY);
+                    dest_fbo = get_fbo(&p->output_fbo);
                     p->output_fbo_valid = true;
                 }
                 pass_draw_to_screen(p, dest_fbo);
@@ -3147,7 +3149,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             if (p->output_fbo_valid) {
                 pass_info_reset(p, true);
                 pass_describe(p, "redraw cached frame");
-                gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->output_fbo.fbo);
+                gl->BindFramebuffer(GL_READ_FRAMEBUFFER, get_fbo(&p->output_fbo));
                 gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
                 struct mp_rect rc = p->dst_rect;
                 if (p->vp_h < 0) {
@@ -3276,14 +3278,21 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
         GLSLF("      ? texture(texture%d, texcoord%d)\n", ids[0], ids[0]);
         GLSLF("      : texture(texture%d, texcoord%d);", ids[1], ids[1]);
 
-        fbotex_change(fbo, p->gl, p->log, w, h * 2, n == 0 ? GL_R8 : GL_RG8, 0);
+        const struct ra_format *fmt =
+            ra_find_unorm_format(p->ra, 1, n == 0 ? 1 : 2);
+        fbotex_change(fbo, p->ra, p->log, w, h * 2, fmt, 0);
 
         pass_describe(p, "vdpau reinterleaving");
-        finish_pass_direct(p, fbo->fbo, fbo->rw, fbo->rh,
+        finish_pass_direct(p, get_fbo(fbo), fbo->rw, fbo->rh,
                            &(struct mp_rect){0, 0, w, h * 2});
 
+        GLuint tex = 0;
+        if (fbo->tex) {
+            struct ra_tex_gl *tex_gl = fbo->tex->priv;
+            tex = tex_gl->texture;
+        }
         res.planes[n] = (struct gl_hwdec_plane){
-            .gl_texture = fbo->texture,
+            .gl_texture = tex,
             .gl_target = GL_TEXTURE_2D,
             .tex_w = w,
             .tex_h = h * 2,
@@ -3385,19 +3394,12 @@ error:
     return false;
 }
 
-static bool test_fbo(struct gl_video *p, GLint format)
+static bool test_fbo(struct gl_video *p, const struct ra_format *fmt)
 {
-    GL *gl = p->gl;
-    bool success = false;
-    MP_VERBOSE(p, "Testing FBO format 0x%x\n", (unsigned)format);
+    MP_VERBOSE(p, "Testing FBO format %s\n", fmt->name);
     struct fbotex fbo = {0};
-    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, format)) {
-        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
-        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        success = true;
-    }
+    bool success = fbotex_init(&fbo, p->ra, p->log, 16, 16, fmt);
     fbotex_uninit(&fbo);
-    gl_check_error(gl, p->log, "FBO test");
     return success;
 }
 
@@ -3443,18 +3445,21 @@ static void check_gl_features(struct gl_video *p)
     bool have_compute = gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER;
     bool have_ssbo = gl->mpgl_caps & MPGL_CAP_SSBO;
 
-    const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
-                                   GL_RGBA8, 0};
-    GLint user_fbo_fmts[] = {p->opts.fbo_format, 0};
-    const GLint *fbo_fmts = user_fbo_fmts[0] ? user_fbo_fmts : auto_fbo_fmts;
+    const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgb10_a2", "rgba8", 0};
+    const char *user_fbo_fmts[] = {p->opts.fbo_format, 0};
+    const char **fbo_fmts = user_fbo_fmts[0] && strcmp(user_fbo_fmts[0], "auto")
+                          ? user_fbo_fmts : auto_fbo_fmts;
     bool have_fbo = false;
+    p->fbo_format = NULL;
     for (int n = 0; fbo_fmts[n]; n++) {
-        GLint fmt = fbo_fmts[n];
-        const struct gl_format *f = gl_find_internal_format(gl, fmt);
-        if (f && (f->flags & F_CF) == F_CF && test_fbo(p, fmt)) {
-            MP_VERBOSE(p, "Using FBO format 0x%x.\n", (unsigned)fmt);
+        const char *fmt = fbo_fmts[n];
+        const struct ra_format *f = ra_find_named_format(p->ra, fmt);
+        if (!f && fbo_fmts == user_fbo_fmts)
+            MP_WARN(p, "FBO format '%s' not found!\n", fmt);
+        if (f && f->renderable && f->linear_filter && test_fbo(p, f)) {
+            MP_VERBOSE(p, "Using FBO format %s.\n", f->name);
             have_fbo = true;
-            p->opts.fbo_format = fmt;
+            p->fbo_format = f;
             break;
         }
     }

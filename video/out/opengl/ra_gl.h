@@ -13,6 +13,7 @@ struct ra_gl {
 struct ra_tex_gl {
     GLenum target;
     GLuint texture;
+    GLuint fbo; // 0 if no rendering requested
     // These 3 fields can be 0 if unknown.
     GLint internal_format;
     GLenum format;

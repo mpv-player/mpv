@@ -126,7 +126,7 @@ struct gl_video_opts {
     int dither_size;
     int temporal_dither;
     int temporal_dither_period;
-    int fbo_format;
+    char *fbo_format;
     int alpha_mode;
     int use_rectangle;
     struct m_color background;

@@ -76,6 +76,13 @@ struct ra_tex_params {
     void *initial_data;
 };
 
+// Conflates the following typical GPU API concepts:
+// - texture itself
+// - sampler state
+// - staging buffers for texture upload
+// - framebuffer objects
+// - wrappers for swapchain framebuffers
+// - synchronization needed for upload/rendering/etc.
 struct ra_tex {
     // All fields are read-only after creation.
     struct ra_tex_params params;
@@ -149,6 +156,7 @@ const struct ra_format *ra_find_uint_format(struct ra *ra,
                                             int bytes_per_component,
                                             int n_components);
 const struct ra_format *ra_find_float16_format(struct ra *ra, int n_components);
+const struct ra_format *ra_find_named_format(struct ra *ra, const char *name);
 
 struct ra_imgfmt_desc {
     int num_planes;

@@ -80,6 +80,15 @@ const struct ra_format *ra_find_float16_format(struct ra *ra, int n_components)
     return NULL;
 }
 
+const struct ra_format *ra_find_named_format(struct ra *ra, const char *name)
+{
+    for (int n = 0; n < ra->num_formats; n++) {
+        const struct ra_format *fmt = ra->formats[n];
+        if (strcmp(fmt->name, name) == 0)
+            return fmt;
+    }
+    return NULL;
+}
 
 // Like ra_find_unorm_format(), but if no fixed point format is available,
 // return an unsigned integer format.

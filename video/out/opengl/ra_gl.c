@@ -42,7 +42,8 @@ int ra_init_gl(struct ra *ra, GL *gl)
             .pixel_size     = gl_bytes_per_pixel(gl_fmt->format, gl_fmt->type),
             .luminance_alpha = gl_fmt->format == GL_LUMINANCE_ALPHA,
             .linear_filter  = gl_fmt->flags & F_TF,
-            .renderable     = gl_fmt->flags & F_CR,
+            .renderable     = (gl_fmt->flags & F_CR) &&
+                              (gl->mpgl_caps & MPGL_CAP_FB),
         };
 
         int csize = gl_component_size(gl_fmt->type) * 8;
@@ -99,6 +100,9 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
 {
     struct ra_gl *p = ra->priv;
     struct ra_tex_gl *tex_gl = tex->priv;
+
+    if (tex_gl->fbo)
+        p->gl->DeleteFramebuffers(1, &tex_gl->fbo);
 
     p->gl->DeleteTextures(1, &tex_gl->texture);
     gl_pbo_upload_uninit(&tex_gl->pbo);
@@ -166,6 +170,36 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
     gl->BindTexture(tex_gl->target, 0);
 
     tex->params.initial_data = NULL;
+
+    gl_check_error(gl, ra->log, "after creating texture");
+
+    if (tex->params.render_dst) {
+        if (!tex->params.format->renderable) {
+            MP_ERR(ra, "Trying to create renderable texture with unsupported "
+                   "format.\n");
+            ra_tex_free(ra, &tex);
+            return NULL;
+        }
+
+        assert(gl->mpgl_caps & MPGL_CAP_FB);
+
+        gl->GenFramebuffers(1, &tex_gl->fbo);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, tex_gl->fbo);
+        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                GL_TEXTURE_2D, tex_gl->texture, 0);
+        GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if (err != GL_FRAMEBUFFER_COMPLETE) {
+            MP_ERR(ra, "Error: framebuffer completeness check failed (error=%d).\n",
+                   (int)err);
+            ra_tex_free(ra, &tex);
+            return NULL;
+        }
+
+
+        gl_check_error(gl, ra->log, "after creating framebuffer");
+    }
 
     return tex;
 }
@@ -294,4 +328,3 @@ static struct ra_fns ra_fns_gl = {
     .destroy_mapped_buffer  = gl_destroy_mapped_buffer,
     .poll_mapped_buffer     = gl_poll_mapped_buffer,
 };
-

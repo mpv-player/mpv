@@ -254,37 +254,36 @@ static void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t 
 }
 
 // Create a texture and a FBO using the texture as color attachments.
-//  iformat: texture internal format
+//  fmt: texture internal format
 // Returns success.
-bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
-                 GLenum iformat)
+bool fbotex_init(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+                 int w, int h, const struct ra_format *fmt)
 {
-    assert(!fbo->fbo);
-    assert(!fbo->texture);
-    return fbotex_change(fbo, gl, log, w, h, iformat, 0);
+    assert(!fbo->tex);
+    return fbotex_change(fbo, ra, log, w, h, fmt, 0);
 }
 
 // Like fbotex_init(), except it can be called on an already initialized FBO;
 // and if the parameters are the same as the previous call, do not touch it.
 // flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
 // Enabling FUZZY for W or H means the w or h does not need to be exact.
-bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
-                   GLenum iformat, int flags)
+bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+                   int w, int h, const struct ra_format *fmt, int flags)
 {
-    bool res = true;
+    if (fbo->tex) {
+        int cw = w, ch = h;
+        int rw = fbo->tex->params.w, rh = fbo->tex->params.h;
 
-    int cw = w, ch = h;
+        if ((flags & FBOTEX_FUZZY_W) && cw < rw)
+            cw = rw;
+        if ((flags & FBOTEX_FUZZY_H) && ch < rh)
+            ch = rh;
 
-    if ((flags & FBOTEX_FUZZY_W) && cw < fbo->rw)
-        cw = fbo->rw;
-    if ((flags & FBOTEX_FUZZY_H) && ch < fbo->rh)
-        ch = fbo->rh;
-
-    if (fbo->rw == cw && fbo->rh == ch && fbo->iformat == iformat) {
-        fbo->lw = w;
-        fbo->lh = h;
-        fbotex_invalidate(fbo);
-        return true;
+        if (rw == cw && rh == ch && fbo->tex->params.format == fmt) {
+            fbo->lw = w;
+            fbo->lh = h;
+            return true;
+        }
     }
 
     int lw = w, lh = h;
@@ -296,78 +295,49 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     mp_verbose(log, "Create FBO: %dx%d (%dx%d)\n", lw, lh, w, h);
 
-    const struct gl_format *format = gl_find_internal_format(gl, iformat);
-    if (!format || (format->flags & F_CF) != F_CF) {
-        mp_verbose(log, "Format 0x%x not supported.\n", (unsigned)iformat);
+    if (!fmt || !fmt->renderable || !fmt->linear_filter) {
+        mp_err(log, "Format %s not supported.\n", fmt ? fmt->name : "(unset)");
         return false;
     }
-    assert(gl->mpgl_caps & MPGL_CAP_FB);
 
     fbotex_uninit(fbo);
 
     *fbo = (struct fbotex) {
-        .gl = gl,
+        .ra = ra,
         .rw = w,
         .rh = h,
         .lw = lw,
         .lh = lh,
-        .iformat = iformat,
     };
 
-    gl->GenFramebuffers(1, &fbo->fbo);
-    gl->GenTextures(1, &fbo->texture);
-    gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, format->internal_format, fbo->rw, fbo->rh, 0,
-                   format->format, format->type, NULL);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->BindTexture(GL_TEXTURE_2D, 0);
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = w,
+        .h = h,
+        .d = 1,
+        .format = fmt,
+        .src_linear = true,
+        .render_src = true,
+        .render_dst = true,
+    };
 
-    gl_check_error(gl, log, "after creating framebuffer texture");
+    fbo->tex = ra_tex_create(fbo->ra, &params);
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             GL_TEXTURE_2D, fbo->texture, 0);
-
-    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (err != GL_FRAMEBUFFER_COMPLETE) {
-        mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
-               (int)err);
-        res = false;
+    if (!fbo->tex) {
+        mp_err(log, "Error: framebuffer could not be created.\n");
+        fbotex_uninit(fbo);
+        return false;
     }
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    gl_check_error(gl, log, "after creating framebuffer");
-
-    return res;
+    return true;
 }
 
 void fbotex_uninit(struct fbotex *fbo)
 {
-    GL *gl = fbo->gl;
-
-    if (gl && (gl->mpgl_caps & MPGL_CAP_FB)) {
-        gl->DeleteFramebuffers(1, &fbo->fbo);
-        gl->DeleteTextures(1, &fbo->texture);
+    if (fbo->ra) {
+        ra_tex_free(fbo->ra, &fbo->tex);
         *fbo = (struct fbotex) {0};
     }
-}
-
-// Mark framebuffer contents as unneeded.
-void fbotex_invalidate(struct fbotex *fbo)
-{
-    GL *gl = fbo->gl;
-
-    if (!fbo->fbo || !gl->InvalidateFramebuffer)
-        return;
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-    gl->InvalidateFramebuffer(GL_FRAMEBUFFER, 1,
-                              (GLenum[]){GL_COLOR_ATTACHMENT0});
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // Standard parallel 2D projection, except y1 < y0 means that the coordinate
