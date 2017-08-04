@@ -21,6 +21,7 @@ struct ra {
 enum {
     RA_CAP_TEX_1D = 1 << 0,     // supports 1D textures (as shader source textures)
     RA_CAP_TEX_3D = 1 << 1,     // supports 3D textures (as shader source textures)
+    RA_CAP_BLIT   = 1 << 2,     // supports ra_fns.blit
 };
 
 enum ra_ctype {
@@ -144,6 +145,26 @@ struct ra_fns {
     // whether it was signalled yet. If true, write accesses are allowed again.
     // Optional, only available if flush_mapping is.
     bool (*poll_mapped_buffer)(struct ra *ra, struct ra_mapped_buffer *buf);
+
+    // Clear the dst with the given color (rgba) and within the given scissor.
+    // dst must have dst->params.render_dst==true. Content outside of the
+    // scissor is preserved.
+    void (*clear)(struct ra *ra, struct ra_tex *dst, float color[4],
+                  struct mp_rect *scissor);
+
+    // Copy a sub-rectangle from one texture to another. The source/dest region
+    // is always within the texture bounds. Areas outside the dest region are
+    // preserved. The formats of the textures will be losely compatible (this
+    // probably has to be defined strictly). The dst texture can be a swapchain
+    // framebuffer, but src can not. Only 2D textures are supported.
+    // Both textures must have tex->params.render_dst==true (even src, which is
+    // an odd GL requirement).
+    // A rectangle with negative width or height means a flipped copy should be
+    // done. Coordinates are always in pixels.
+    // Optional. Only available if RA_CAP_BLIT is set (if it's not set, the must
+    // not be called, even if it's non-NULL).
+    void (*blit)(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
+                 int dst_x, int dst_y, struct mp_rect *src_rc);
 };
 
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);

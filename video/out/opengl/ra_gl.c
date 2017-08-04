@@ -20,6 +20,8 @@ int ra_init_gl(struct ra *ra, GL *gl)
         ra->caps |= RA_CAP_TEX_1D;
     if (gl->mpgl_caps & MPGL_CAP_3D_TEX)
         ra->caps |= RA_CAP_TEX_3D;
+    if (gl->BlitFramebuffer)
+        ra->caps |= RA_CAP_BLIT;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
 
@@ -101,10 +103,12 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
     struct ra_gl *p = ra->priv;
     struct ra_tex_gl *tex_gl = tex->priv;
 
-    if (tex_gl->fbo)
-        p->gl->DeleteFramebuffers(1, &tex_gl->fbo);
+    if (tex_gl->own_objects) {
+        if (tex_gl->fbo)
+            p->gl->DeleteFramebuffers(1, &tex_gl->fbo);
 
-    p->gl->DeleteTextures(1, &tex_gl->texture);
+        p->gl->DeleteTextures(1, &tex_gl->texture);
+    }
     gl_pbo_upload_uninit(&tex_gl->pbo);
     talloc_free(tex_gl);
     talloc_free(tex);
@@ -121,6 +125,7 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
     struct ra_tex_gl *tex_gl = tex->priv = talloc_zero(NULL, struct ra_tex_gl);
 
     const struct gl_format *fmt = params->format->priv;
+    tex_gl->own_objects = true;
     tex_gl->internal_format = fmt->internal_format;
     tex_gl->format = fmt->format;
     tex_gl->type = fmt->type;
@@ -202,6 +207,103 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
     }
 
     return tex;
+}
+
+static const struct ra_format fbo_dummy_format = {
+    .name = "unknown_fbo",
+    .priv = (void *)&(const struct gl_format){
+        .name = "unknown",
+        .format = GL_RGBA,
+        .flags = F_CR,
+    },
+    .renderable = true,
+};
+
+static const struct ra_format tex_dummy_format = {
+    .name = "unknown_tex",
+    .priv = (void *)&(const struct gl_format){
+        .name = "unknown",
+        .format = GL_RGBA,
+        .flags = F_TF,
+    },
+    .renderable = true,
+    .linear_filter = true,
+};
+
+static const struct ra_format *find_similar_format(struct ra *ra,
+                                                   GLint gl_iformat,
+                                                   GLenum gl_format,
+                                                   GLenum gl_type)
+{
+    if (gl_iformat || gl_format || gl_type) {
+        for (int n = 0; n < ra->num_formats; n++) {
+            const struct ra_format *fmt = ra->formats[n];
+            const struct gl_format *gl_fmt = fmt->priv;
+            if ((gl_fmt->internal_format == gl_iformat || !gl_iformat) &&
+                (gl_fmt->format == gl_format || !gl_format) &&
+                (gl_fmt->type == gl_type || !gl_type))
+                return fmt;
+        }
+    }
+    return NULL;
+}
+
+static struct ra_tex *wrap_tex_fbo(struct ra *ra, GLuint gl_obj, bool is_fbo,
+                                   GLenum gl_target, GLint gl_iformat,
+                                   GLenum gl_format, GLenum gl_type,
+                                   int w, int h)
+{
+    const struct ra_format *format =
+        find_similar_format(ra, gl_iformat, gl_format, gl_type);
+    if (!format)
+        format = is_fbo ? &fbo_dummy_format : &tex_dummy_format;
+
+    struct ra_tex *tex = talloc_zero(ra, struct ra_tex);
+    *tex = (struct ra_tex){
+        .params = {
+            .dimensions = 2,
+            .w = w, .h = h, .d = 1,
+            .format = format,
+            .render_dst = is_fbo,
+            .render_src = !is_fbo,
+            .non_normalized = gl_target == GL_TEXTURE_RECTANGLE,
+        },
+    };
+
+    struct ra_tex_gl *tex_gl = tex->priv = talloc_zero(NULL, struct ra_tex_gl);
+    *tex_gl = (struct ra_tex_gl){
+        .target = gl_target,
+        .texture = is_fbo ? 0 : gl_obj,
+        .fbo = is_fbo ? gl_obj : 0,
+        .internal_format = gl_iformat,
+        .format = gl_format,
+        .type = gl_type,
+    };
+
+    return tex;
+}
+
+// Create a ra_tex that merely wraps an existing texture. gl_format and gl_type
+// can be 0, in which case possibly nonsensical fallbacks are chosen.
+// Works for 2D textures only. Integer textures are not supported.
+// The returned object is freed with ra_tex_free(), but this will not delete
+// the texture passed to this function.
+struct ra_tex *ra_create_wrapped_texture(struct ra *ra, GLuint gl_texture,
+                                         GLenum gl_target, GLint gl_iformat,
+                                         GLenum gl_format, GLenum gl_type,
+                                         int w, int h)
+{
+    return wrap_tex_fbo(ra, gl_texture, false, gl_target, gl_iformat, gl_format,
+                        gl_type, w, h);
+}
+
+// Create a ra_tex that merely wraps an existing framebuffer. gl_fbo can be 0
+// to wrap the default framebuffer.
+// The returned object is freed with ra_tex_free(), but this will not delete
+// the framebuffer object passed to this function.
+struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h)
+{
+    return wrap_tex_fbo(ra, gl_fbo, true, 0, GL_RGBA, 0, 0, w, h);
 }
 
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
@@ -319,6 +421,53 @@ static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
     return !buf_gl->fence;
 }
 
+static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
+                     struct mp_rect *scissor)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    assert(dst->params.render_dst);
+    struct ra_tex_gl *dst_gl = dst->priv;
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, dst_gl->fbo);
+
+    gl->Scissor(scissor->x0, scissor->y0,
+                scissor->x1 - scissor->x0,
+                scissor->y1 - scissor->y0);
+
+    gl->Enable(GL_SCISSOR_TEST);
+    gl->ClearColor(color[0], color[1], color[2], color[3]);
+    gl->Clear(GL_COLOR_BUFFER_BIT);
+    gl->Disable(GL_SCISSOR_TEST);
+
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
+static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
+                    int dst_x, int dst_y, struct mp_rect *src_rc)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    assert(dst->params.render_dst);
+    assert(src->params.render_dst); // even src must have a FBO
+
+    struct ra_tex_gl *src_gl = src->priv;
+    struct ra_tex_gl *dst_gl = dst->priv;
+
+    int w = mp_rect_w(*src_rc);
+    int h = mp_rect_h(*src_rc);
+
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, src_gl->fbo);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, dst_gl->fbo);
+    gl->BlitFramebuffer(src_rc->x0, src_rc->y0, src_rc->x1, src_rc->y1,
+                        dst_x, dst_y, dst_x + w, dst_y + h,
+                        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
 static struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
@@ -327,4 +476,6 @@ static struct ra_fns ra_fns_gl = {
     .create_mapped_buffer   = gl_create_mapped_buffer,
     .destroy_mapped_buffer  = gl_destroy_mapped_buffer,
     .poll_mapped_buffer     = gl_poll_mapped_buffer,
+    .clear                  = gl_clear,
+    .blit                   = gl_blit,
 };
