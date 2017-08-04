@@ -231,7 +231,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
         cmsHPROFILE prof = cmsOpenProfileFromMemTHR(cms, p->vid_profile->data,
                                                     p->vid_profile->size);
         if (prof) {
-            MP_VERBOSE(p, "Using embedded ICC profile.\n");
+            MP_VERBOSE(p, "Successfully opened embedded ICC profile\n");
             return prof;
         }
 
@@ -357,6 +357,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     // reference here
     av_buffer_unref(&p->vid_profile);
     if (vid_profile) {
+        MP_VERBOSE(p, "Got an embedded ICC profile.\n");
         p->vid_profile = av_buffer_ref(vid_profile);
         if (!p->vid_profile)
             abort();
