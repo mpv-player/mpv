@@ -137,6 +137,10 @@ main_dependencies = [
         'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
             'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
     }, {
+        'name': '--android',
+        'desc': 'Android environment',
+        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
+    }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
         'deps_any': [ 'posix', 'mingw' ],
@@ -707,10 +711,6 @@ video_output_features = [
         'desc': 'Direct3D support',
         'deps': [ 'win32-desktop' ],
         'func': check_cc(header_name='d3d9.h'),
-    }, {
-        'name': '--android',
-        'desc': 'Android support',
-        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
