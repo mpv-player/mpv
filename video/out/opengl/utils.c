@@ -303,8 +303,6 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
     }
     assert(gl->mpgl_caps & MPGL_CAP_FB);
 
-    GLenum filter = fbo->tex_filter;
-
     fbotex_uninit(fbo);
 
     *fbo = (struct fbotex) {
@@ -323,9 +321,9 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
                    format->format, format->type, NULL);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->BindTexture(GL_TEXTURE_2D, 0);
-
-    fbotex_set_filter(fbo, filter ? filter : GL_LINEAR);
 
     gl_check_error(gl, log, "after creating framebuffer texture");
 
@@ -345,19 +343,6 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
     gl_check_error(gl, log, "after creating framebuffer");
 
     return res;
-}
-
-void fbotex_set_filter(struct fbotex *fbo, GLenum tex_filter)
-{
-    GL *gl = fbo->gl;
-
-    if (fbo->tex_filter != tex_filter && fbo->texture) {
-        gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, tex_filter);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, tex_filter);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-    }
-    fbo->tex_filter = tex_filter;
 }
 
 void fbotex_uninit(struct fbotex *fbo)
