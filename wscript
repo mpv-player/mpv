@@ -234,11 +234,21 @@ iconv support use --disable-iconv.",
         'deps': [ 'win32-desktop' ],
         'deps_neg': [ 'posix' ],
     }, {
+        'name': 'glob-posix',
+        'desc': 'glob() POSIX support',
+        'deps_neg': [ 'os-win32', 'os-cygwin' ],
+        'func': check_statement('glob.h', 'glob("filename", 0, 0, 0)'),
+    }, {
         'name': 'glob-win32',
         'desc': 'glob() win32 replacement',
         'deps_neg': [ 'posix' ],
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
+    }, {
+        'name': 'glob',
+        'desc': 'any glob() support',
+        'deps_any': [ 'glob-posix', 'glob-win32' ],
+        'func': check_true,
     }, {
         'name': 'fchmod',
         'desc': 'fchmod()',
