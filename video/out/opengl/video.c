@@ -505,10 +505,8 @@ static void reinit_osd(struct gl_video *p)
 {
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
-    if (p->osd_state) {
+    if (p->osd_state)
         p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state);
-        mpgl_osd_set_options(p->osd, p->opts.pbo);
-    }
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -3320,9 +3318,6 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
         plane->flipped = mpi->stride[0] < 0;
 
-        // (It's unclear whether this should be changeable on the fly.)
-        plane->tex->use_pbo = p->opts.pbo;
-
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
 
         p->ra->fns->tex_upload(p->ra, plane->tex, mpi->planes[n],
@@ -3709,6 +3704,7 @@ static void reinit_from_options(struct gl_video *p)
     check_gl_features(p);
     uninit_rendering(p);
     gl_sc_set_cache_dir(p->sc, p->global, p->opts.shader_cache_dir);
+    p->ra->use_pbo = p->opts.pbo;
     gl_video_setup_hooks(p);
     reinit_osd(p);
 

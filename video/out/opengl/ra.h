@@ -20,6 +20,11 @@ struct ra {
     // Set of supported texture formats. Must be added by RA backend at init time.
     struct ra_format **formats;
     int num_formats;
+
+    // GL-specific: if set, accelerate texture upload by using an additional
+    // buffer (i.e. uses more memory). Does not affect uploads done by
+    // ra_tex_create (if initial_data is set). Set by the RA user.
+    bool use_pbo;
 };
 
 enum {
@@ -92,8 +97,6 @@ struct ra_tex {
     // All fields are read-only after creation.
     struct ra_tex_params params;
     void *priv;
-    // Set by user, GL only: attempt to accelerate upload with PBOs.
-    bool use_pbo;
 };
 
 // A persistent mapping, which can be used for texture upload.

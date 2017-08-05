@@ -66,7 +66,6 @@ struct mpgl_osd {
     struct osd_state *osd;
     struct ra *ra;
     GL *gl;
-    bool use_pbo;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct ra_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
@@ -113,11 +112,6 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
         ra_tex_free(ctx->ra, &p->texture);
     }
     talloc_free(ctx);
-}
-
-void mpgl_osd_set_options(struct mpgl_osd *ctx, bool pbo)
-{
-    ctx->use_pbo = pbo;
 }
 
 static int next_pow2(int v)
@@ -174,8 +168,6 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         if (!osd->texture)
             goto done;
     }
-
-    osd->texture->use_pbo = ctx->use_pbo;
 
     struct mp_rect rc = {0, 0, imgs->packed_w, imgs->packed_h};
     ra->fns->tex_upload(ra, osd->texture, imgs->packed->planes[0],

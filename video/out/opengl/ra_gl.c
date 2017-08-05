@@ -338,7 +338,7 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
     case 2:
         if (!rc)
             rc = &full;
-        gl_pbo_upload_tex(&tex_gl->pbo, gl, tex->use_pbo && !buf,
+        gl_pbo_upload_tex(&tex_gl->pbo, gl, ra->use_pbo && !buf,
                           tex_gl->target, tex_gl->format, tex_gl->type,
                           tex->params.w, tex->params.h, src, stride,
                           rc->x0, rc->y0, rc->x1 - rc->x0, rc->y1 - rc->y0);
