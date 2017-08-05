@@ -264,6 +264,10 @@ enum {
     RA_TEX_UPLOAD_DISCARD = 1 << 0, // discard pre-existing data not in the region
 };
 
+// This is an opaque type provided by the implementation, but we want to at
+// least give it a saner name than void* for code readability purposes.
+typedef void ra_timer;
+
 // Rendering API entrypoints. (Note: there are some additional hidden features
 // you need to take care of. For example, hwdec mapping will be provided
 // separately from ra, but might need to call into ra private code.)
@@ -347,6 +351,24 @@ struct ra_fns {
     // This is an extremely common operation.
     void (*renderpass_run)(struct ra *ra,
                            const struct ra_renderpass_run_params *params);
+
+    // Create a timer object. Returns NULL on failure, or if timers are
+    // unavailable.
+    ra_timer *(*timer_create)(struct ra *ra);
+
+    void (*timer_destroy)(struct ra *ra, ra_timer *timer);
+
+    // Start recording a timer. Note that valid usage requires you to pair
+    // every start with a stop. Trying to start a timer twice, or trying to
+    // stop a timer before having started it, consistutes invalid usage.
+    void (*timer_start)(struct ra *ra, ra_timer *timer);
+
+    // Stop recording a timer. This also returns any results that have been
+    // measured since the last usage of this ra_timer. It's important to note
+    // that GPU timer measurement are asynchronous, so this function does not
+    // always produce a value - and the values it does produce are typically
+    // delayed by a few frames. When no value is available, this returns 0.
+    uint64_t (*timer_stop)(struct ra *ra, ra_timer *timer);
 };
 
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);

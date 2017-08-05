@@ -269,8 +269,8 @@ struct gl_video {
     struct pass_info pass_redraw[PASS_INFO_MAX];
     struct pass_info *pass;
     int pass_idx;
-    struct gl_timer *upload_timer;
-    struct gl_timer *blit_timer;
+    struct timer_pool *upload_timer;
+    struct timer_pool *blit_timer;
 
     // intermediate textures
     struct saved_tex saved_tex[SHADER_MAX_SAVED];
@@ -3097,11 +3097,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                     rc.y1 = -p->vp_h - p->dst_rect.y0;
                     rc.y0 = -p->vp_h - p->dst_rect.y1;
                 }
-                gl_timer_start(p->blit_timer);
+                timer_pool_start(p->blit_timer);
                 p->ra->fns->blit(p->ra, target, p->output_fbo.tex,
                                  rc.x0, rc.y0, &rc);
-                gl_timer_stop(gl);
-                pass_record(p, gl_timer_measure(p->blit_timer));
+                timer_pool_stop(p->blit_timer);
+                pass_record(p, timer_pool_measure(p->blit_timer));
             }
         }
     }
@@ -3233,7 +3233,6 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame,
 // Returns false on failure.
 static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t id)
 {
-    GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
     if (vimg->id == id)
@@ -3255,10 +3254,10 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         struct gl_hwdec_frame gl_frame = {0};
 
         pass_describe(p, "map frame (hwdec)");
-        gl_timer_start(p->upload_timer);
+        timer_pool_start(p->upload_timer);
         bool ok = p->hwdec->driver->map_frame(p->hwdec, vimg->mpi, &gl_frame) >= 0;
-        gl_timer_stop(gl);
-        pass_record(p, gl_timer_measure(p->upload_timer));
+        timer_pool_stop(p->upload_timer);
+        pass_record(p, timer_pool_measure(p->upload_timer));
 
         vimg->hwdec_mapped = true;
         if (ok) {
@@ -3290,7 +3289,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     // Software decoding
     assert(mpi->num_planes == p->plane_count);
 
-    gl_timer_start(p->upload_timer);
+    timer_pool_start(p->upload_timer);
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
@@ -3310,10 +3309,10 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
             MP_VERBOSE(p, "DR enabled: %s\n", p->using_dr_path ? "yes" : "no");
         }
     }
-    gl_timer_stop(gl);
+    timer_pool_stop(p->upload_timer);
     const char *mode = p->using_dr_path ? "DR" : p->opts.pbo ? "PBO" : "naive";
     pass_describe(p, "upload frame (%s)", mode);
-    pass_record(p, gl_timer_measure(p->upload_timer));
+    pass_record(p, timer_pool_measure(p->upload_timer));
 
     return true;
 
@@ -3488,12 +3487,10 @@ static void check_gl_features(struct gl_video *p)
 
 static void init_gl(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
     debug_check_gl(p, "before init_gl");
 
-    p->upload_timer = gl_timer_create(gl);
-    p->blit_timer = gl_timer_create(gl);
+    p->upload_timer = timer_pool_create(p->ra);
+    p->blit_timer = timer_pool_create(p->ra);
 
     debug_check_gl(p, "after init_gl");
 
@@ -3515,8 +3512,9 @@ void gl_video_uninit(struct gl_video *p)
     ra_tex_free(p->ra, &p->lut_3d_texture);
     gl->DeleteBuffers(1, &p->hdr_peak_ssbo);
 
-    gl_timer_free(p->upload_timer);
-    gl_timer_free(p->blit_timer);
+    timer_pool_destroy(p->upload_timer);
+    timer_pool_destroy(p->blit_timer);
+
     for (int i = 0; i < PASS_INFO_MAX; i++) {
         talloc_free(p->pass_fresh[i].desc.start);
         talloc_free(p->pass_redraw[i].desc.start);
