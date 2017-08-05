@@ -77,3 +77,12 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
 #define FBOTEX_FUZZY_W 1
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
+
+// A wrapper around ra_timer that does result pooling, averaging etc.
+struct timer_pool;
+
+struct timer_pool *timer_pool_create(struct ra *ra);
+void timer_pool_destroy(struct timer_pool *pool);
+void timer_pool_start(struct timer_pool *pool);
+void timer_pool_stop(struct timer_pool *pool);
+struct mp_pass_perf timer_pool_measure(struct timer_pool *pool);

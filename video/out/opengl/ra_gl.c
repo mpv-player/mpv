@@ -840,6 +840,75 @@ static void gl_renderpass_run(struct ra *ra,
     pass_gl->first_run = false;
 }
 
+// Timers in GL use query objects, and are asynchronous. So pool a few of
+// these together. GL_QUERY_OBJECT_NUM should be large enough to avoid this
+// ever blocking. We can afford to throw query objects around, there's no
+// practical limit on them and their overhead is small.
+
+#define GL_QUERY_OBJECT_NUM 8
+
+struct gl_timer {
+    GLuint start[GL_QUERY_OBJECT_NUM];
+    GLuint stop[GL_QUERY_OBJECT_NUM];
+    int idx;
+    uint64_t result;
+};
+
+static ra_timer *gl_timer_create(struct ra *ra)
+{
+    GL *gl = ra_gl_get(ra);
+
+    if (!gl->GenQueries)
+        return NULL;
+
+    struct gl_timer *timer = talloc_zero(NULL, struct gl_timer);
+    gl->GenQueries(GL_QUERY_OBJECT_NUM, timer->start);
+    gl->GenQueries(GL_QUERY_OBJECT_NUM, timer->stop);
+
+    return (ra_timer *)timer;
+}
+
+static void gl_timer_destroy(struct ra *ra, ra_timer *ratimer)
+{
+    if (!ratimer)
+        return;
+
+    GL *gl = ra_gl_get(ra);
+    struct gl_timer *timer = ratimer;
+
+    gl->DeleteQueries(GL_QUERY_OBJECT_NUM, timer->start);
+    gl->DeleteQueries(GL_QUERY_OBJECT_NUM, timer->stop);
+    talloc_free(timer);
+}
+
+static void gl_timer_start(struct ra *ra, ra_timer *ratimer)
+{
+    GL *gl = ra_gl_get(ra);
+    struct gl_timer *timer = ratimer;
+
+    // If this query object already contains a result, we need to retrieve it
+    timer->result = 0;
+    if (gl->IsQuery(timer->start[timer->idx])) {
+        uint64_t start = 0, stop = 0;
+        gl->GetQueryObjectui64v(timer->start[timer->idx], GL_QUERY_RESULT, &start);
+        gl->GetQueryObjectui64v(timer->stop[timer->idx], GL_QUERY_RESULT, &stop);
+        timer->result = stop - start;
+    }
+
+    gl->QueryCounter(timer->start[timer->idx], GL_TIMESTAMP);
+}
+
+static uint64_t gl_timer_stop(struct ra *ra, ra_timer *ratimer)
+{
+    GL *gl = ra_gl_get(ra);
+    struct gl_timer *timer = ratimer;
+
+    gl->QueryCounter(timer->stop[timer->idx++], GL_TIMESTAMP);
+    timer->idx %= GL_QUERY_OBJECT_NUM;
+
+    return timer->result;
+}
+
 static struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
@@ -853,4 +922,8 @@ static struct ra_fns ra_fns_gl = {
     .renderpass_create      = gl_renderpass_create,
     .renderpass_destroy     = gl_renderpass_destroy,
     .renderpass_run         = gl_renderpass_run,
+    .timer_create           = gl_timer_create,
+    .timer_destroy          = gl_timer_destroy,
+    .timer_start            = gl_timer_start,
+    .timer_stop             = gl_timer_stop,
 };

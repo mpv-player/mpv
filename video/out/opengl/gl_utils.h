@@ -55,14 +55,6 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
 
-struct gl_timer;
-
-struct gl_timer *gl_timer_create(GL *gl);
-void gl_timer_free(struct gl_timer *timer);
-void gl_timer_start(struct gl_timer *timer);
-void gl_timer_stop(GL *gl);
-struct mp_pass_perf gl_timer_measure(struct gl_timer *timer);
-
 #define NUM_PBO_BUFFERS 3
 
 struct gl_pbo_upload {

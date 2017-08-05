@@ -61,9 +61,10 @@
 
 #define GL_TEXTURE_RECTANGLE              0x84F5
 
-// --- GL 3.3
+// --- GL 3.3 or GL_ARB_timer_query
 
 #define GL_TIME_ELAPSED                   0x88BF
+#define GL_TIMESTAMP                      0x8E28
 
 // --- GL 4.3 or GL_ARB_debug_output
 
