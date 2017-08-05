@@ -26,7 +26,7 @@ void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
                            struct ra_tex *tex);
 void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
                               struct ra_tex *tex);
-void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, int gl_ssbo,
+void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
                 char *format, ...) PRINTF_ATTRIBUTE(4, 5);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int f);

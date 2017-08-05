@@ -169,7 +169,7 @@ struct pass_info {
 #define PASS_INFO_MAX (SHADER_MAX_PASSES + 32)
 
 struct dr_buffer {
-    struct ra_mapped_buffer *buffer;
+    struct ra_buf *buf;
     // The mpi reference will keep the data from being recycled (or from other
     // references gaining write access) while the GPU is accessing the buffer.
     struct mp_image *mpi;
@@ -230,7 +230,7 @@ struct gl_video {
     struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
     struct fbotex vdpau_deinterleave_fbo[2];
-    GLuint hdr_peak_ssbo;
+    struct ra_buf *hdr_peak_ssbo;
 
     // user pass descriptions and textures
     struct tex_hook tex_hooks[SHADER_MAX_PASSES];
@@ -933,9 +933,9 @@ static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
 {
    for (int i = 0; i < p->num_dr_buffers; i++) {
        struct dr_buffer *buffer = &p->dr_buffers[i];
-        uint8_t *buf = buffer->buffer->data;
-        size_t size = buffer->buffer->size;
-        if (ptr >= buf && ptr < buf + size)
+        uint8_t *bufptr = buffer->buf->data;
+        size_t size = buffer->buf->params.size;
+        if (ptr >= bufptr && ptr < bufptr + size)
             return buffer;
     }
 
@@ -950,7 +950,7 @@ again:;
         if (!buffer->mpi)
             continue;
 
-        bool res = p->ra->fns->poll_mapped_buffer(p->ra, buffer->buffer);
+        bool res = p->ra->fns->poll_mapped_buffer(p->ra, buffer->buf);
         if (res || force) {
             // Unreferencing the image could cause gl_video_dr_free_buffer()
             // to be called by the talloc destructor (if it was the last
@@ -2388,7 +2388,7 @@ static void pass_scale_main(struct gl_video *p)
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
-    GL *gl = p->gl;
+    struct ra *ra = p->ra;
 
     // Figure out the target color space from the options, or auto-guess if
     // none were set
@@ -2450,31 +2450,35 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     }
 
     bool detect_peak = p->opts.compute_hdr_peak && mp_trc_is_hdr(src.gamma);
+    if (detect_peak && !p->hdr_peak_ssbo) {
+        struct {
+            unsigned int sig_peak_raw;
+            unsigned int index;
+            unsigned int frame_max[PEAK_DETECT_FRAMES+1];
+        } peak_ssbo = {0};
+
+        // Prefill with safe values
+        int safe = MP_REF_WHITE * mp_trc_nom_peak(p->image_params.color.gamma);
+        peak_ssbo.sig_peak_raw = PEAK_DETECT_FRAMES * safe;
+        for (int i = 0; i < PEAK_DETECT_FRAMES+1; i++)
+            peak_ssbo.frame_max[i] = safe;
+
+        struct ra_buf_params params = {
+            .type = RA_BUF_TYPE_SHADER_STORAGE,
+            .size = sizeof(peak_ssbo),
+            .initial_data = &peak_ssbo,
+        };
+
+        p->hdr_peak_ssbo = ra_buf_create(ra, &params);
+        if (!p->hdr_peak_ssbo) {
+            MP_WARN(p, "Failed to create HDR peak detection SSBO, disabling.\n");
+            detect_peak = (p->opts.compute_hdr_peak = false);
+        }
+    }
+
     if (detect_peak) {
         pass_describe(p, "detect HDR peak");
         pass_is_compute(p, 8, 8); // 8x8 is good for performance
-
-        if (!p->hdr_peak_ssbo) {
-            struct {
-                GLuint sig_peak_raw;
-                GLuint index;
-                GLuint frame_max[PEAK_DETECT_FRAMES+1];
-            } peak_ssbo = {0};
-
-            // Prefill with safe values
-            int safe = MP_REF_WHITE * mp_trc_nom_peak(p->image_params.color.gamma);
-            peak_ssbo.sig_peak_raw = PEAK_DETECT_FRAMES * safe;
-            for (int i = 0; i < PEAK_DETECT_FRAMES+1; i++)
-                peak_ssbo.frame_max[i] = safe;
-
-            gl->GenBuffers(1, &p->hdr_peak_ssbo);
-            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, p->hdr_peak_ssbo);
-            gl->BufferData(GL_SHADER_STORAGE_BUFFER, sizeof(peak_ssbo),
-                           &peak_ssbo, GL_STREAM_COPY);
-            gl->BindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        }
-
-        gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
             "uint sig_peak_raw;"
             "uint index;"
@@ -3304,7 +3308,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
         p->ra->fns->tex_upload(p->ra, plane->tex, mpi->planes[n],
                                mpi->stride[n], NULL, 0,
-                               mapped ? mapped->buffer : NULL);
+                               mapped ? mapped->buf : NULL);
 
         if (mapped && !mapped->mpi)
             mapped->mpi = mp_image_new_ref(mpi);
@@ -3377,7 +3381,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_mglsl = ra->glsl_version >= 130; // modern GLSL
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
     bool have_compute = ra->caps & RA_CAP_COMPUTE;
-    bool have_ssbo = gl->mpgl_caps & MPGL_CAP_SSBO;
+    bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
 
     const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgb10_a2", "rgba8", 0};
     const char *user_fbo_fmts[] = {p->opts.fbo_format, 0};
@@ -3516,7 +3520,7 @@ void gl_video_uninit(struct gl_video *p)
     gl_sc_destroy(p->sc);
 
     ra_tex_free(p->ra, &p->lut_3d_texture);
-    gl->DeleteBuffers(1, &p->hdr_peak_ssbo);
+    ra_buf_free(p->ra, &p->hdr_peak_ssbo);
 
     timer_pool_destroy(p->upload_timer);
     timer_pool_destroy(p->blit_timer);
@@ -3802,33 +3806,29 @@ void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 
 void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
 {
-    if (!p->ra->fns->create_mapped_buffer)
+    struct ra_buf_params params = {
+        .type = RA_BUF_TYPE_TEX_UPLOAD,
+        .host_mapped = true,
+        .size = size,
+    };
+
+    struct ra_buf *buf = ra_buf_create(p->ra, &params);
+    if (!buf)
         return NULL;
 
     MP_TARRAY_GROW(p, p->dr_buffers, p->num_dr_buffers);
-    int index = p->num_dr_buffers++;
-    struct dr_buffer *buffer = &p->dr_buffers[index];
+    p->dr_buffers[p->num_dr_buffers++] = (struct dr_buffer){ .buf = buf };
 
-    *buffer = (struct dr_buffer){
-        .buffer = p->ra->fns->create_mapped_buffer(p->ra, size),
-    };
-
-    if (!buffer->buffer) {
-        MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, index);
-        return NULL;
-    }
-
-    return buffer->buffer->data;
+    return buf->data;
 };
 
 void gl_video_dr_free_buffer(struct gl_video *p, void *ptr)
 {
     for (int n = 0; n < p->num_dr_buffers; n++) {
         struct dr_buffer *buffer = &p->dr_buffers[n];
-        if (buffer->buffer->data == ptr) {
+        if (buffer->buf->data == ptr) {
             assert(!buffer->mpi); // can't be freed while it has a ref
-            p->ra->fns->destroy_mapped_buffer(p->ra, buffer->buffer);
-
+            ra_buf_free(p->ra, &buffer->buf);
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
             return;
         }

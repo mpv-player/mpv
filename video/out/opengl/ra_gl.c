@@ -30,6 +30,8 @@ int ra_init_gl(struct ra *ra, GL *gl)
         ra->caps |= RA_CAP_PBO;
     if (gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY)
         ra->caps |= RA_CAP_NESTED_ARRAY;
+    if (gl->mpgl_caps & MPGL_CAP_SSBO)
+        ra->caps |= RA_CAP_BUF_RW;
     ra->glsl_version = gl->glsl_version;
     ra->glsl_es = gl->es > 0;
 
@@ -329,16 +331,16 @@ GL *ra_gl_get(struct ra *ra)
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
                           const void *src, ptrdiff_t stride,
                           struct mp_rect *rc, uint64_t flags,
-                          struct ra_mapped_buffer *buf)
+                          struct ra_buf *buf)
 {
     GL *gl = ra_gl_get(ra);
     struct ra_tex_gl *tex_gl = tex->priv;
-    struct ra_mapped_buffer_gl *buf_gl = NULL;
+    struct ra_buf_gl *buf_gl = NULL;
     struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
 
     if (buf) {
         buf_gl = buf->priv;
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->buffer);
         src = (void *)((uintptr_t)src - (uintptr_t)buf->data);
     }
 
@@ -380,57 +382,87 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
     }
 }
 
-static void gl_destroy_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
+static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
 {
+    if (!buf)
+        return;
+
     GL *gl = ra_gl_get(ra);
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv;
+    struct ra_buf_gl *buf_gl = buf->priv;
 
     gl->DeleteSync(buf_gl->fence);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
-    if (buf->data)
-        gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    gl->DeleteBuffers(1, &buf_gl->pbo);
+    if (buf->data) {
+        // The target type used here doesn't matter at all to OpenGL
+        gl->BindBuffer(GL_ARRAY_BUFFER, buf_gl->buffer);
+        gl->UnmapBuffer(GL_ARRAY_BUFFER);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+    gl->DeleteBuffers(1, &buf_gl->buffer);
 
     talloc_free(buf_gl);
     talloc_free(buf);
 }
 
-static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
-                                                        size_t size)
+static struct ra_buf *gl_buf_create(struct ra *ra,
+                                    const struct ra_buf_params *params)
 {
     GL *gl = ra_gl_get(ra);
 
-    if (gl->version < 440)
+    if (params->host_mapped && gl->version < 440)
         return NULL;
 
-    struct ra_mapped_buffer *buf = talloc_zero(NULL, struct ra_mapped_buffer);
-    buf->size = size;
+    struct ra_buf *buf = talloc_zero(NULL, struct ra_buf);
+    buf->params = *params;
+    buf->params.initial_data = NULL;
 
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv =
-        talloc_zero(NULL, struct ra_mapped_buffer_gl);
+    struct ra_buf_gl *buf_gl = buf->priv = talloc_zero(NULL, struct ra_buf_gl);
+    gl->GenBuffers(1, &buf_gl->buffer);
 
-    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
-                     GL_MAP_COHERENT_BIT;
+    GLenum target;
+    switch (params->type) {
+    case RA_BUF_TYPE_TEX_UPLOAD:     target = GL_PIXEL_UNPACK_BUFFER;   break;
+    case RA_BUF_TYPE_SHADER_STORAGE: target = GL_SHADER_STORAGE_BUFFER; break;
+    default: abort();
+    };
 
-    gl->GenBuffers(1, &buf_gl->pbo);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
-    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags | GL_CLIENT_STORAGE_BIT);
-    buf->data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buf->size, flags);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    if (!buf->data) {
-        gl_check_error(gl, ra->log, "mapping buffer");
-        gl_destroy_mapped_buffer(ra, buf);
-        return NULL;
+    gl->BindBuffer(target, buf_gl->buffer);
+
+    if (params->host_mapped) {
+        unsigned flags = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT |
+                         GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
+
+        unsigned storflags = flags;
+        if (params->type == RA_BUF_TYPE_TEX_UPLOAD)
+            storflags |= GL_CLIENT_STORAGE_BIT;
+
+        gl->BufferStorage(target, params->size, params->initial_data, storflags);
+        buf->data = gl->MapBufferRange(target, 0, params->size, flags);
+        if (!buf->data) {
+            gl_check_error(gl, ra->log, "mapping buffer");
+            gl_buf_destroy(ra, buf);
+            buf = NULL;
+        }
+    } else {
+        GLenum hint;
+        switch (params->type) {
+        case RA_BUF_TYPE_TEX_UPLOAD:     hint = GL_STREAM_DRAW; break;
+        case RA_BUF_TYPE_SHADER_STORAGE: hint = GL_STREAM_COPY; break;
+        default: abort();
+        }
+
+        gl->BufferData(target, params->size, params->initial_data, hint);
     }
 
+    gl->BindBuffer(target, 0);
     return buf;
 }
 
-static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
+static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_buf *buf)
 {
+    assert(buf->data);
+
     GL *gl = ra_gl_get(ra);
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv;
+    struct ra_buf_gl *buf_gl = buf->priv;
 
     if (buf_gl->fence) {
         GLenum res = gl->ClientWaitSync(buf_gl->fence, 0, 0); // non-blocking
@@ -743,9 +775,11 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         }
         break;
     }
-    case RA_VARTYPE_SSBO: {
-        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding,
-                           *(int *)val->data);
+    case RA_VARTYPE_BUF_RW: {
+        struct ra_buf *buf = *(struct ra_buf **)val->data;
+        struct ra_buf_gl *buf_gl = buf->priv;
+        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding, buf_gl->buffer);
+        gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         break;
     }
     default:
@@ -775,10 +809,9 @@ static void disable_binding(struct ra *ra, struct ra_renderpass *pass,
         }
         break;
     }
-    case RA_VARTYPE_SSBO: {
+    case RA_VARTYPE_BUF_RW:
         gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding, 0);
         break;
-    }
     }
 }
 
@@ -915,8 +948,8 @@ static struct ra_fns ra_fns_gl = {
     .tex_create             = gl_tex_create,
     .tex_destroy            = gl_tex_destroy,
     .tex_upload             = gl_tex_upload,
-    .create_mapped_buffer   = gl_create_mapped_buffer,
-    .destroy_mapped_buffer  = gl_destroy_mapped_buffer,
+    .buf_create             = gl_buf_create,
+    .buf_destroy            = gl_buf_destroy,
     .poll_mapped_buffer     = gl_poll_mapped_buffer,
     .clear                  = gl_clear,
     .blit                   = gl_blit,

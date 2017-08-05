@@ -22,15 +22,16 @@
 
 union uniform_val {
     float f[9];         // RA_VARTYPE_FLOAT
-    int i[4];           // RA_VARTYPE_INT, RA_VARTYPE_SSBO
+    int i[4];           // RA_VARTYPE_INT
     struct ra_tex *tex; // RA_VARTYPE_TEX, RA_VARTYPE_IMG_*
+    struct ra_buf *buf; // RA_VARTYPE_BUF_*
 };
 
 struct sc_uniform {
     struct ra_renderpass_input input;
     const char *glsl_type;
     union uniform_val v;
-    char *ssbo_format;
+    char *buffer_format;
 };
 
 struct sc_cached_uniform {
@@ -264,20 +265,20 @@ void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
     u->v.tex = tex;
 }
 
-void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, int gl_ssbo,
+void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
                 char *format, ...)
 {
     gl_sc_enable_extension(sc, "GL_ARB_shader_storage_buffer_object");
 
     struct sc_uniform *u = find_uniform(sc, name);
-    u->input.type = RA_VARTYPE_SSBO;
+    u->input.type = RA_VARTYPE_BUF_RW;
     u->glsl_type = "";
     u->input.binding = sc->next_buffer_binding++;
-    u->v.i[0] = gl_ssbo;
+    u->v.buf = buf;
 
     va_list ap;
     va_start(ap, format);
-    u->ssbo_format = ta_vasprintf(sc, format, ap);
+    u->buffer_format = ta_vasprintf(sc, format, ap);
     va_end(ap);
 }
 
@@ -516,9 +517,9 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
         case RA_VARTYPE_IMG_W:
             ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);
             break;
-        case RA_VARTYPE_SSBO:
+        case RA_VARTYPE_BUF_RW:
             ADD(dst, "layout(std430, binding=%d) buffer %s { %s };\n",
-                u->input.binding, u->input.name, u->ssbo_format);
+                u->input.binding, u->input.name, u->buffer_format);
             break;
         default: abort();
         }

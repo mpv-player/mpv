@@ -37,6 +37,7 @@ enum {
     RA_CAP_BLIT   = 1 << 2,     // supports ra_fns.blit
     RA_CAP_COMPUTE = 1 << 3,    // supports compute shaders
     RA_CAP_PBO    = 1 << 4,     // supports ra.use_pbo
+    RA_CAP_BUF_RW = 1 << 5,     // supports RA_VARTYPE_BUF_RW
     RA_CAP_NESTED_ARRAY = 1 << 5,
 };
 
@@ -107,13 +108,31 @@ struct ra_tex {
     void *priv;
 };
 
-// A persistent mapping, which can be used for texture upload.
-struct ra_mapped_buffer {
-    // All fields are read-only after creation. The data is read/write, but
-    // requires explicit fence usage.
+// Buffer type hint. Setting this may result in more or less efficient
+// operation, although it shouldn't technically prohibit anything
+enum ra_buf_type {
+    RA_BUF_TYPE_INVALID,
+    RA_BUF_TYPE_TEX_UPLOAD, // texture upload buffer (pixel buffer object)
+    RA_BUF_TYPE_SHADER_STORAGE // shader buffer, used for RA_VARTYPE_BUF_RW
+};
+
+struct ra_buf_params {
+    enum ra_buf_type type;
+    size_t size;
+    // Creates a read-writable persistent mapping (ra_buf.data)
+    bool host_mapped;
+    // If non-NULL, the buffer will be created with these contents. Otherwise,
+    // the initial data is undefined.
+    void *initial_data;
+};
+
+// A generic buffer, which can be used for many purposes (texture upload,
+// storage buffer, uniform buffer, etc.)
+struct ra_buf {
+    // All fields are read-only after creation.
+    struct ra_buf_params params;
+    void *data; // for persistently mapped buffers, points to the first byte
     void *priv;
-    void *data;             // pointer to first usable byte
-    size_t size;            // total size of the mapping, starting at data
 };
 
 // Type of a shader uniform variable, or a vertex attribute. In all cases,
@@ -127,7 +146,7 @@ enum ra_vartype {
     RA_VARTYPE_IMG_W,           // C: ra_tex*, GLSL: various image types
                                 // write-only (W) image for compute shaders
     RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
-    RA_VARTYPE_SSBO,            // a hack for GL
+    RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: buffer block
 };
 
 // Represents a uniform, texture input parameter, and similar things.
@@ -140,7 +159,7 @@ struct ra_renderpass_input {
     // Vertex data: byte offset of the attribute into the vertex struct
     // RA_VARTYPE_TEX: texture unit
     // RA_VARTYPE_IMG_W: image unit
-    // RA_VARTYPE_SSBO: whatever?
+    // RA_VARTYPE_BUF_* buffer binding point
     // Other uniforms: unused
     int binding;
 };
@@ -304,20 +323,23 @@ struct ra_fns {
     void (*tex_upload)(struct ra *ra, struct ra_tex *tex,
                        const void *src, ptrdiff_t stride,
                        struct mp_rect *region, uint64_t flags,
-                       struct ra_mapped_buffer *buf);
+                       struct ra_buf *buf);
 
-    // Create a persistently mapped buffer for tex_upload.
-    // Optional, can be NULL or return NULL if unavailable.
-    struct ra_mapped_buffer *(*create_mapped_buffer)(struct ra *ra, size_t size);
+    // Create a buffer. This can be used as a persistently mapped buffer,
+    // a uniform buffer, a shader storage buffer or possibly others.
+    // Not all usage types must be supported; may return NULL if unavailable.
+    struct ra_buf *(*buf_create)(struct ra *ra,
+                                 const struct ra_buf_params *params);
 
-    void (*destroy_mapped_buffer)(struct ra *ra, struct ra_mapped_buffer *buf);
+    void (*buf_destroy)(struct ra *ra, struct ra_buf *buf);
 
     // Essentially a fence: once the GPU uses the mapping for read-access (e.g.
     // by starting a texture upload), the host must not write to the mapped
     // data until an internal object has been signalled. This call returns
     // whether it was signalled yet. If true, write accesses are allowed again.
-    // Optional, only available if flush_mapping is.
-    bool (*poll_mapped_buffer)(struct ra *ra, struct ra_mapped_buffer *buf);
+    // Optional, may be NULL if unavailable. This is only usable for buffers
+    // which have been persistently mapped.
+    bool (*poll_mapped_buffer)(struct ra *ra, struct ra_buf *buf);
 
     // Clear the dst with the given color (rgba) and within the given scissor.
     // dst must have dst->params.render_dst==true. Content outside of the
@@ -373,6 +395,9 @@ struct ra_fns {
 
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);
 void ra_tex_free(struct ra *ra, struct ra_tex **tex);
+
+struct ra_buf *ra_buf_create(struct ra *ra, const struct ra_buf_params *params);
+void ra_buf_free(struct ra *ra, struct ra_buf **buf);
 
 const struct ra_format *ra_find_unorm_format(struct ra *ra,
                                              int bytes_per_component,

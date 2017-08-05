@@ -16,6 +16,18 @@ void ra_tex_free(struct ra *ra, struct ra_tex **tex)
     *tex = NULL;
 }
 
+struct ra_buf *ra_buf_create(struct ra *ra, const struct ra_buf_params *params)
+{
+    return ra->fns->buf_create(ra, params);
+}
+
+void ra_buf_free(struct ra *ra, struct ra_buf **buf)
+{
+    if (*buf)
+        ra->fns->buf_destroy(ra, *buf);
+    *buf = NULL;
+}
+
 static size_t vartype_size(enum ra_vartype type)
 {
     switch (type) {
