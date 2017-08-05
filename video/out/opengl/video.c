@@ -74,14 +74,14 @@ struct vertex {
     struct vertex_pt texcoord[TEXUNIT_VIDEO_NUM];
 };
 
-static const struct gl_vao_entry vertex_vao[] = {
-    {"position", 2, GL_FLOAT, false, offsetof(struct vertex, position)},
-    {"texcoord0", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[0])},
-    {"texcoord1", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[1])},
-    {"texcoord2", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[2])},
-    {"texcoord3", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[3])},
-    {"texcoord4", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[4])},
-    {"texcoord5", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[5])},
+static const struct ra_renderpass_input vertex_vao[] = {
+    {"position",  RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, position)},
+    {"texcoord0", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[0])},
+    {"texcoord1", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[1])},
+    {"texcoord2", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[2])},
+    {"texcoord3", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[3])},
+    {"texcoord4", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[4])},
+    {"texcoord5", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[5])},
     {0}
 };
 
@@ -890,6 +890,7 @@ static void init_video(struct gl_video *p)
                 .h = plane->h + p->opts.tex_pad_y,
                 .d = 1,
                 .format = format,
+                .render_src = true,
                 .src_linear = format->linear_filter,
                 .non_normalized = p->opts.use_rectangle,
             };
@@ -1114,8 +1115,6 @@ static void pass_is_compute(struct gl_video *p, int bw, int bh)
 static void dispatch_compute(struct gl_video *p, int w, int h,
                              struct compute_info info)
 {
-    GL *gl = p->gl;
-
     PRELUDE("layout (local_size_x = %d, local_size_y = %d) in;\n",
             info.threads_w > 0 ? info.threads_w : info.block_w,
             info.threads_h > 0 ? info.threads_h : info.block_h);
@@ -1126,7 +1125,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
     // Since we don't actually have vertices, we pretend for convenience
     // reasons that we do and calculate the right texture coordinates based on
     // the output sample ID
-    gl_sc_uniform_vec2(p->sc, "out_scale", (GLfloat[2]){ 1.0 / w, 1.0 / h });
+    gl_sc_uniform_vec2(p->sc, "out_scale", (float[2]){ 1.0 / w, 1.0 / h });
     PRELUDE("#define outcoord(id) (out_scale * (vec2(id) + vec2(0.5)))\n");
 
     for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
@@ -1151,24 +1150,20 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
         PRELUDE("#define texcoord%d texmap%d(gl_GlobalInvocationID)\n", n, n);
     }
 
-    pass_record(p, gl_sc_generate(p->sc, GL_COMPUTE_SHADER));
-
     // always round up when dividing to make sure we don't leave off a part of
     // the image
     int num_x = info.block_w > 0 ? (w + info.block_w - 1) / info.block_w : 1,
         num_y = info.block_h > 0 ? (h + info.block_h - 1) / info.block_h : 1;
 
-    gl->DispatchCompute(num_x, num_y, 1);
-    gl_sc_reset(p->sc);
-
-    debug_check_gl(p, "after dispatching compute shader");
+    pass_record(p, gl_sc_dispatch_compute(p->sc, num_x, num_y, 1));
 
     memset(&p->pass_tex, 0, sizeof(p->pass_tex));
     p->pass_tex_num = 0;
 }
 
-static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
-                             const struct mp_rect *dst)
+static struct mp_pass_perf render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
+                                            struct ra_tex *target,
+                                            const struct mp_rect *dst)
 {
     struct vertex va[6] = {0};
 
@@ -1201,25 +1196,16 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
     va[4] = va[2];
     va[5] = va[1];
 
-    p->gl->Viewport(0, 0, vp_w, abs(vp_h));
-    gl_sc_draw_data(p->sc, GL_TRIANGLES, va, 6);
-
-    debug_check_gl(p, "after rendering");
+    return gl_sc_dispatch_draw(p->sc, target, va, 6);
 }
 
 static void finish_pass_direct(struct gl_video *p, struct ra_tex *target,
                                int vp_w, int vp_h, const struct mp_rect *dst)
 {
-    GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
-    pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
-    struct ra_tex_gl *tex_gl = target ? target->priv : NULL;
-    int fbo = tex_gl ? tex_gl->fbo : 0;
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    render_pass_quad(p, vp_w, vp_h, dst);
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl_sc_reset(p->sc);
+    pass_record(p, render_pass_quad(p, vp_w, vp_h, target, dst));
+    debug_check_gl(p, "after rendering");
     memset(&p->pass_tex, 0, sizeof(p->pass_tex));
     p->pass_tex_num = 0;
 }
@@ -1238,15 +1224,14 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
     if (p->pass_compute.active) {
         if (!dst_fbo->tex)
             return;
-        struct ra_tex_gl *tex_gl = dst_fbo->tex->priv;
-        gl_sc_uniform_image2D(p->sc, "out_image", tex_gl->texture,
-                              tex_gl->internal_format, GL_WRITE_ONLY);
+        gl_sc_uniform_image2D_wo(p->sc, "out_image", dst_fbo->tex);
         if (!p->pass_compute.directly_writes)
             GLSL(imageStore(out_image, ivec2(gl_GlobalInvocationID), color);)
 
         dispatch_compute(p, w, h, p->pass_compute);
-        p->gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         p->pass_compute = (struct compute_info){0};
+
+        debug_check_gl(p, "after dispatching compute shader");
     } else {
         finish_pass_direct(p, dst_fbo->tex, dst_fbo->rw, dst_fbo->rh,
                            &(struct mp_rect){0, 0, w, h});
@@ -1705,8 +1690,8 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
 {
     GL *gl = p->gl;
 
-    GLenum reqs = MPGL_CAP_COMPUTE_SHADER | MPGL_CAP_NESTED_ARRAY;
-    if ((gl->mpgl_caps & reqs) != reqs)
+    uint64_t reqs = RA_CAP_COMPUTE | RA_CAP_NESTED_ARRAY;
+    if ((p->ra->caps & reqs) != reqs)
         goto fallback;
 
     int bound = ceil(scaler->kernel->radius_cutoff);
@@ -1739,7 +1724,7 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
 fallback:
     // Fall back to regular polar shader when compute shaders are unsupported
     // or the kernel is too big for shmem
-    pass_sample_polar(p->sc, scaler, tex.components, p->gl->glsl_version);
+    pass_sample_polar(p->sc, scaler, tex.components, p->ra->glsl_version);
 }
 
 // Sample from img_tex, with the src rectangle given by it.
@@ -2620,11 +2605,8 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
                           struct mp_osd_res rect, int vp_w, int vp_h,
                           struct ra_tex *target, bool cms)
 {
-    struct ra_tex_gl *tex_gl = target->priv;
-
     mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
 
-    p->gl->BindFramebuffer(GL_FRAMEBUFFER, tex_gl->fbo);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         // (This returns false if this part is empty with nothing to draw.)
         if (!mpgl_osd_draw_prepare(p->osd, n, p->sc))
@@ -2641,9 +2623,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 
             pass_colormanage(p, csp_srgb, true);
         }
-        pass_record(p, gl_sc_generate(p->sc, GL_FRAGMENT_SHADER));
-        mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc);
-        gl_sc_reset(p->sc);
+        mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc, target);
     }
 }
 
@@ -3151,8 +3131,6 @@ done:
         p->ra->fns->clear(p->ra, target, color, &target_rc);
     }
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-
     ra_tex_free(p->ra, &target);
 
     // The playloop calls this last before waiting some time until it decides
@@ -3389,11 +3367,12 @@ static bool check_dumb_mode(struct gl_video *p)
 // Disable features that are not supported with the current OpenGL version.
 static void check_gl_features(struct gl_video *p)
 {
+    struct ra *ra = p->ra;
     GL *gl = p->gl;
-    bool have_float_tex = !!gl_find_float16_format(gl, 1);
-    bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
+    bool have_float_tex = !!ra_find_float16_format(ra, 1);
+    bool have_mglsl = ra->glsl_version >= 130; // modern GLSL
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
-    bool have_compute = gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER;
+    bool have_compute = ra->caps & RA_CAP_COMPUTE;
     bool have_ssbo = gl->mpgl_caps & MPGL_CAP_SSBO;
 
     const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgb10_a2", "rgba8", 0};
@@ -3415,7 +3394,7 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    if (!gl->MapBufferRange && p->opts.pbo) {
+    if (!(ra->caps & RA_CAP_PBO) && p->opts.pbo) {
         p->opts.pbo = 0;
         MP_WARN(p, "Disabling PBOs (GL2.1/GLES2 unsupported).\n");
     }
@@ -3649,7 +3628,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .ra = ra,
         .global = g,
         .log = log,
-        .sc = gl_sc_create(gl, log),
+        .sc = gl_sc_create(ra, g, log),
         .opts_cache = m_config_cache_alloc(p, g, &gl_video_conf),
     };
     // make sure this variable is initialized to *something*
@@ -3703,7 +3682,7 @@ static void reinit_from_options(struct gl_video *p)
 
     check_gl_features(p);
     uninit_rendering(p);
-    gl_sc_set_cache_dir(p->sc, p->global, p->opts.shader_cache_dir);
+    gl_sc_set_cache_dir(p->sc, p->opts.shader_cache_dir);
     p->ra->use_pbo = p->opts.pbo;
     gl_video_setup_hooks(p);
     reinit_osd(p);

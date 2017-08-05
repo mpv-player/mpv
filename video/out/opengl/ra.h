@@ -1,11 +1,15 @@
 #pragma once
 
 #include "common/common.h"
+#include "misc/bstr.h"
 
 // Handle for a rendering API backend.
 struct ra {
     struct ra_fns *fns;
     void *priv;
+
+    int glsl_version;       // GLSL version (e.g. 300 => 3.0)
+    bool glsl_es;           // use ES dialect
 
     struct mp_log *log;
 
@@ -31,6 +35,9 @@ enum {
     RA_CAP_TEX_1D = 1 << 0,     // supports 1D textures (as shader source textures)
     RA_CAP_TEX_3D = 1 << 1,     // supports 3D textures (as shader source textures)
     RA_CAP_BLIT   = 1 << 2,     // supports ra_fns.blit
+    RA_CAP_COMPUTE = 1 << 3,    // supports compute shaders
+    RA_CAP_PBO    = 1 << 4,     // supports ra.use_pbo
+    RA_CAP_NESTED_ARRAY = 1 << 5,
 };
 
 enum ra_ctype {
@@ -81,6 +88,7 @@ struct ra_tex_params {
                             // if true, repeat texture coordinates
     bool non_normalized;    // hack for GL_TEXTURE_RECTANGLE OSX idiocy
                             // always set to false, except in OSX code
+    bool external_oes;      // hack for GL_TEXTURE_EXTERNAL_OES idiocy
     // If non-NULL, the texture will be created with these contents, and is
     // considered immutable afterwards (no upload, mapping, or rendering to it).
     void *initial_data;
@@ -106,6 +114,149 @@ struct ra_mapped_buffer {
     void *priv;
     void *data;             // pointer to first usable byte
     size_t size;            // total size of the mapping, starting at data
+};
+
+// Type of a shader uniform variable, or a vertex attribute. In all cases,
+// vectors are matrices are done by having more than 1 value.
+enum ra_vartype {
+    RA_VARTYPE_INVALID,
+    RA_VARTYPE_INT,             // C: int, GLSL: int, ivec*
+    RA_VARTYPE_FLOAT,           // C: float, GLSL: float, vec*, mat*
+    RA_VARTYPE_TEX,             // C: ra_tex*, GLSL: various sampler types
+                                // ra_tex.params.render_src must be true
+    RA_VARTYPE_IMG_W,           // C: ra_tex*, GLSL: various image types
+                                // write-only (W) image for compute shaders
+    RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
+    RA_VARTYPE_SSBO,            // a hack for GL
+};
+
+// Represents a uniform, texture input parameter, and similar things.
+struct ra_renderpass_input {
+    const char *name;       // name as used in the shader
+    enum ra_vartype type;
+    // The total number of values is given by dim_v * dim_m.
+    int dim_v;              // vector dimension (1 for non-vector and non-matrix)
+    int dim_m;              // additional matrix dimension (dim_v x dim_m)
+    // Vertex data: byte offset of the attribute into the vertex struct
+    // RA_VARTYPE_TEX: texture unit
+    // RA_VARTYPE_IMG_W: image unit
+    // RA_VARTYPE_SSBO: whatever?
+    // Other uniforms: unused
+    int binding;
+};
+
+size_t ra_render_pass_input_data_size(struct ra_renderpass_input *input);
+
+enum ra_blend {
+    RA_BLEND_ZERO,
+    RA_BLEND_ONE,
+    RA_BLEND_SRC_ALPHA,
+    RA_BLEND_ONE_MINUS_SRC_ALPHA,
+};
+
+enum ra_renderpass_type {
+    RA_RENDERPASS_TYPE_INVALID,
+    RA_RENDERPASS_TYPE_RASTER,  // vertex+fragment shader
+    RA_RENDERPASS_TYPE_COMPUTE, // compute shader
+};
+
+// Static part of a rendering pass. It conflates the following:
+//  - compiled shader and its list of uniforms
+//  - vertex attributes and its shader mappings
+//  - blending parameters
+// (For Vulkan, this would be shader module + pipeline state.)
+// Upon creation, the values of dynamic values such as uniform contents (whose
+// initial values are not provided here) are required to be 0.
+struct ra_renderpass_params {
+    enum ra_renderpass_type type;
+
+    // Uniforms, including texture/sampler inputs.
+    struct ra_renderpass_input *inputs;
+    int num_inputs;
+
+    // Highly implementation-specific byte array storing a compiled version
+    // of the program. Can be used to speed up shader compilation. A backend
+    // xan read this in renderpass_create, or set this on the newly created
+    // ra_renderpass params field.
+    bstr cached_program;
+
+    // --- type==RA_RENDERPASS_TYPE_RASTER only
+
+    // Describes the format of the vertex data.
+    struct ra_renderpass_input *vertex_attribs;
+    int num_vertex_attribs;
+    int vertex_stride;
+
+    // Shader text, in GLSL. (Yes, you need a GLSL compiler.)
+    // These are complete shaders, including prelude and declarations.
+    const char *vertex_shader;
+    const char *frag_shader;
+
+    // Target blending mode. If enable_blend is false, the blend_ fields can
+    // be ignored.
+    bool enable_blend;
+    enum ra_blend blend_src_rgb;
+    enum ra_blend blend_dst_rgb;
+    enum ra_blend blend_src_alpha;
+    enum ra_blend blend_dst_alpha;
+
+    // --- type==RA_RENDERPASS_TYPE_COMPUTE only
+
+    // Shader text, like vertex_shader/frag_shader.
+    const char *compute_shader;
+};
+
+struct ra_renderpass_params *ra_render_pass_params_copy(void *ta_parent,
+        const struct ra_renderpass_params *params);
+
+// Conflates the following typical GPU API concepts:
+// - various kinds of shaders
+// - rendering pipelines
+// - descriptor sets, uniforms, other bindings
+// - all synchronization necessary
+// - the current values of all uniforms (this one makes it relatively stateful
+//   from an API perspective)
+struct ra_renderpass {
+    // All fields are read-only after creation.
+    struct ra_renderpass_params params;
+    void *priv;
+};
+
+// An input value (see ra_renderpass_input).
+struct ra_renderpass_input_val {
+    int index;  // index into ra_renderpass_params.inputs[]
+    void *data; // pointer to data according to ra_renderpass_input
+                // (e.g. type==RA_VARTYPE_FLOAT+dim_v=3,dim_m=3 => float[9])
+};
+
+// Parameters for performing a rendering pass (basically the dynamic params).
+// These change potentially every time.
+struct ra_renderpass_run_params {
+    struct ra_renderpass *pass;
+
+    // Generally this lists parameters only which changed since the last
+    // invocation and need to be updated. The ra_renderpass instance is
+    // supposed to keep unchanged values from the previous run.
+    // For non-primitive types like textures, these entries are always added,
+    // even if they do not change.
+    struct ra_renderpass_input_val *values;
+    int num_values;
+
+    // --- pass->params.type==RA_RENDERPASS_TYPE_RASTER only
+
+    // target->params.render_dst must be true.
+    struct ra_tex *target;
+    struct mp_rect viewport;
+    struct mp_rect scissors;
+
+    // (The primitive type is always a triangle list.)
+    void *vertex_data;
+    int vertex_count;   // number of vertex elements, not bytes
+
+    // --- pass->params.type==RA_RENDERPASS_TYPE_COMPUTE only
+
+    // Number of work groups to be run in X/Y/Z dimensions.
+    int compute_groups[3];
 };
 
 enum {
@@ -183,6 +334,19 @@ struct ra_fns {
     // not be called, even if it's non-NULL).
     void (*blit)(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
                  int dst_x, int dst_y, struct mp_rect *src_rc);
+
+    // Compile a shader and create a pipeline. This is a rare operation.
+    // The params pointer and anything it points to must stay valid until
+    // renderpass_destroy.
+    struct ra_renderpass *(*renderpass_create)(struct ra *ra,
+                                    const struct ra_renderpass_params *params);
+
+    void (*renderpass_destroy)(struct ra *ra, struct ra_renderpass *pass);
+
+    // Perform a render pass, basically drawing a list of triangles to a FBO.
+    // This is an extremely common operation.
+    void (*renderpass_run)(struct ra *ra,
+                           const struct ra_renderpass_run_params *params);
 };
 
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);

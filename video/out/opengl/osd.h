@@ -5,7 +5,6 @@
 #include <inttypes.h>
 
 #include "utils.h"
-#include "gl_utils.h"
 #include "shader_cache.h"
 #include "sub/osd.h"
 
@@ -19,7 +18,7 @@ void mpgl_osd_resize(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mod
 bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
                            struct gl_shader_cache *sc);
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int vp_w, int vp_h, int index,
-                          struct gl_shader_cache *sc);
+                          struct gl_shader_cache *sc, struct ra_tex *target);
 int64_t mpgl_get_change_counter(struct mpgl_osd *ctx);
 
 #endif

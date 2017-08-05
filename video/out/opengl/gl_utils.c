@@ -150,17 +150,32 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
 
-    for (int n = 0; vao->entries[n].name; n++) {
-        const struct gl_vao_entry *e = &vao->entries[n];
+    for (int n = 0; n < vao->num_entries; n++) {
+        const struct ra_renderpass_input *e = &vao->entries[n];
+        GLenum type = 0;
+        bool normalized = false;
+        switch (e->type) {
+        case RA_VARTYPE_FLOAT:
+            type = GL_FLOAT;
+            break;
+        case RA_VARTYPE_BYTE_UNORM:
+            type = GL_UNSIGNED_BYTE;
+            normalized = true;
+            break;
+        default:
+            abort();
+        }
+        assert(e->dim_m == 1);
 
         gl->EnableVertexAttribArray(n);
-        gl->VertexAttribPointer(n, e->num_elems, e->type, e->normalized,
-                                vao->stride, (void *)(intptr_t)e->offset);
+        gl->VertexAttribPointer(n, e->dim_v, type, normalized,
+                                vao->stride, (void *)(intptr_t)e->binding);
     }
 }
 
 void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
-                 const struct gl_vao_entry *entries)
+                 const struct ra_renderpass_input *entries,
+                 int num_entries)
 {
     assert(!vao->vao);
     assert(!vao->buffer);
@@ -169,6 +184,7 @@ void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
         .gl = gl,
         .stride = stride,
         .entries = entries,
+        .num_entries = num_entries,
     };
 
     gl->GenBuffers(1, &vao->buffer);

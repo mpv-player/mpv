@@ -1,5 +1,6 @@
-#include "formats.h"
+#include <libavutil/intreadwrite.h>
 
+#include "formats.h"
 #include "ra_gl.h"
 
 static struct ra_fns ra_fns_gl;
@@ -22,6 +23,14 @@ int ra_init_gl(struct ra *ra, GL *gl)
         ra->caps |= RA_CAP_TEX_3D;
     if (gl->BlitFramebuffer)
         ra->caps |= RA_CAP_BLIT;
+    if (gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER)
+        ra->caps |= RA_CAP_COMPUTE;
+    if (gl->MapBufferRange)
+        ra->caps |= RA_CAP_PBO;
+    if (gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY)
+        ra->caps |= RA_CAP_NESTED_ARRAY;
+    ra->glsl_version = gl->glsl_version;
+    ra->glsl_es = gl->es > 0;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
 
@@ -271,6 +280,7 @@ static struct ra_tex *wrap_tex_fbo(struct ra *ra, GLuint gl_obj, bool is_fbo,
             .render_dst = is_fbo,
             .render_src = !is_fbo,
             .non_normalized = gl_target == GL_TEXTURE_RECTANGLE,
+            .external_oes = gl_target == GL_TEXTURE_EXTERNAL_OES,
         },
     };
 
@@ -308,6 +318,12 @@ struct ra_tex *ra_create_wrapped_texture(struct ra *ra, GLuint gl_texture,
 struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h)
 {
     return wrap_tex_fbo(ra, gl_fbo, true, 0, GL_RGBA, 0, 0, w, h);
+}
+
+GL *ra_gl_get(struct ra *ra)
+{
+    struct ra_gl *p = ra->priv;
+    return p->gl;
 }
 
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
@@ -478,6 +494,367 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
+static void gl_renderpass_destroy(struct ra *ra, struct ra_renderpass *pass)
+{
+    struct ra_gl *p = ra->priv;
+    struct ra_renderpass_gl *pass_gl = pass->priv;
+    p->gl->DeleteProgram(pass_gl->program);
+    gl_vao_uninit(&pass_gl->vao);
+
+    talloc_free(pass_gl);
+    talloc_free(pass);
+}
+
+static const char *shader_typestr(GLenum type)
+{
+    switch (type) {
+    case GL_VERTEX_SHADER:   return "vertex";
+    case GL_FRAGMENT_SHADER: return "fragment";
+    case GL_COMPUTE_SHADER:  return "compute";
+    default: abort();
+    }
+}
+
+static void compile_attach_shader(struct ra *ra, GLuint program,
+                                  GLenum type, const char *source, bool *ok)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    GLuint shader = gl->CreateShader(type);
+    gl->ShaderSource(shader, 1, &source, NULL);
+    gl->CompileShader(shader);
+    GLint status = 0;
+    gl->GetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    GLint log_length = 0;
+    gl->GetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
+    const char *typestr = shader_typestr(type);
+    if (mp_msg_test(ra->log, pri)) {
+        MP_MSG(ra, pri, "%s shader source:\n", typestr);
+        mp_log_source(ra->log, pri, source);
+    }
+    if (log_length > 1) {
+        GLchar *logstr = talloc_zero_size(NULL, log_length + 1);
+        gl->GetShaderInfoLog(shader, log_length, NULL, logstr);
+        MP_MSG(ra, pri, "%s shader compile log (status=%d):\n%s\n",
+               typestr, status, logstr);
+        talloc_free(logstr);
+    }
+    if (gl->GetTranslatedShaderSourceANGLE && mp_msg_test(ra->log, MSGL_DEBUG)) {
+        GLint len = 0;
+        gl->GetShaderiv(shader, GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE, &len);
+        if (len > 0) {
+            GLchar *sstr = talloc_zero_size(NULL, len + 1);
+            gl->GetTranslatedShaderSourceANGLE(shader, len, NULL, sstr);
+            MP_DBG(ra, "Translated shader:\n");
+            mp_log_source(ra->log, MSGL_DEBUG, sstr);
+        }
+    }
+
+    gl->AttachShader(program, shader);
+    gl->DeleteShader(shader);
+
+    *ok &= status;
+}
+
+static void link_shader(struct ra *ra, GLuint program, bool *ok)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    gl->LinkProgram(program);
+    GLint status = 0;
+    gl->GetProgramiv(program, GL_LINK_STATUS, &status);
+    GLint log_length = 0;
+    gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
+    if (mp_msg_test(ra->log, pri)) {
+        GLchar *logstr = talloc_zero_size(NULL, log_length + 1);
+        gl->GetProgramInfoLog(program, log_length, NULL, logstr);
+        MP_MSG(ra, pri, "shader link log (status=%d): %s\n", status, logstr);
+        talloc_free(logstr);
+    }
+
+    *ok &= status;
+}
+
+// either 'compute' or both 'vertex' and 'frag' are needed
+static GLuint compile_program(struct ra *ra, const struct ra_renderpass_params *p)
+{
+    struct ra_gl *priv = ra->priv;
+    GL *gl = priv->gl;
+
+    GLuint prog = gl->CreateProgram();
+    bool ok = true;
+    if (p->type == RA_RENDERPASS_TYPE_COMPUTE)
+        compile_attach_shader(ra, prog, GL_COMPUTE_SHADER, p->compute_shader, &ok);
+    if (p->type == RA_RENDERPASS_TYPE_RASTER) {
+        compile_attach_shader(ra, prog, GL_VERTEX_SHADER, p->vertex_shader, &ok);
+        compile_attach_shader(ra, prog, GL_FRAGMENT_SHADER, p->frag_shader, &ok);
+        for (int n = 0; n < p->num_vertex_attribs; n++)
+            gl->BindAttribLocation(prog, n, p->vertex_attribs[n].name);
+    }
+    link_shader(ra, prog, &ok);
+    if (!ok) {
+        gl->DeleteProgram(prog);
+        prog = 0;
+    }
+    return prog;
+}
+
+static GLuint load_program(struct ra *ra, const struct ra_renderpass_params *p,
+                           bstr *out_cached_data)
+{
+    struct ra_gl *priv = ra->priv;
+    GL *gl = priv->gl;
+
+    GLuint prog = 0;
+
+    if (gl->ProgramBinary && p->cached_program.len > 4) {
+        GLenum format = AV_RL32(p->cached_program.start);
+        prog = gl->CreateProgram();
+        gl_check_error(gl, ra->log, "before loading program");
+        gl->ProgramBinary(prog, format, p->cached_program.start + 4,
+                                        p->cached_program.len - 4);
+        gl->GetError(); // discard potential useless error
+        GLint status = 0;
+        gl->GetProgramiv(prog, GL_LINK_STATUS, &status);
+        if (status) {
+            MP_VERBOSE(ra, "Loading binary program succeeded.\n");
+        } else {
+            gl->DeleteProgram(prog);
+            prog = 0;
+        }
+    }
+
+    if (!prog) {
+        prog = compile_program(ra, p);
+
+        if (gl->GetProgramBinary && prog) {
+            GLint size = 0;
+            gl->GetProgramiv(prog, GL_PROGRAM_BINARY_LENGTH, &size);
+            uint8_t *buffer = talloc_size(NULL, size + 4);
+            GLsizei actual_size = 0;
+            GLenum binary_format = 0;
+            gl->GetProgramBinary(prog, size, &actual_size, &binary_format,
+                                 buffer + 4);
+            AV_WL32(buffer, binary_format);
+            if (actual_size)
+                *out_cached_data = (bstr){buffer, actual_size + 4};
+        }
+    }
+
+    return prog;
+}
+
+static struct ra_renderpass *gl_renderpass_create(struct ra *ra,
+                                    const struct ra_renderpass_params *params)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    struct ra_renderpass *pass = talloc_zero(NULL, struct ra_renderpass);
+    pass->params = *ra_render_pass_params_copy(pass, params);
+    pass->params.cached_program = (bstr){0};
+    struct ra_renderpass_gl *pass_gl = pass->priv =
+        talloc_zero(NULL, struct ra_renderpass_gl);
+
+    bstr cached = {0};
+    pass_gl->program = load_program(ra, params, &cached);
+    if (!pass_gl->program) {
+        gl_renderpass_destroy(ra, pass);
+        return NULL;
+    }
+
+    talloc_steal(pass, cached.start);
+    pass->params.cached_program = cached;
+
+    for (int n = 0; n < params->num_inputs; n++) {
+        GLint loc =
+            gl->GetUniformLocation(pass_gl->program, params->inputs[n].name);
+        MP_TARRAY_APPEND(pass_gl, pass_gl->uniform_loc, pass_gl->num_uniform_loc,
+                         loc);
+    }
+
+    gl_vao_init(&pass_gl->vao, gl, params->vertex_stride, params->vertex_attribs,
+                params->num_vertex_attribs);
+
+    pass_gl->first_run = true;
+
+    return pass;
+}
+
+static GLenum map_blend(enum ra_blend blend)
+{
+    switch (blend) {
+    case RA_BLEND_ZERO:                 return GL_ZERO;
+    case RA_BLEND_ONE:                  return GL_ONE;
+    case RA_BLEND_SRC_ALPHA:            return GL_SRC_ALPHA;
+    case RA_BLEND_ONE_MINUS_SRC_ALPHA:  return GL_ONE_MINUS_SRC_ALPHA;
+    default: return 0;
+    }
+}
+
+// Assumes program is current (gl->UseProgram(program)).
+static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
+                           struct ra_renderpass_input_val *val)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+    struct ra_renderpass_gl *pass_gl = pass->priv;
+
+    struct ra_renderpass_input *input = &pass->params.inputs[val->index];
+    assert(val->index >= 0 && val->index < pass_gl->num_uniform_loc);
+    GLint loc = pass_gl->uniform_loc[val->index];
+
+    switch (input->type) {
+    case RA_VARTYPE_INT: {
+        assert(input->dim_v * input->dim_m == 1);
+        if (loc < 0)
+            break;
+        gl->Uniform1i(loc, *(int *)val->data);
+        break;
+    }
+    case RA_VARTYPE_FLOAT: {
+        float *f = val->data;
+        if (loc < 0)
+            break;
+        if (input->dim_m == 1) {
+            switch (input->dim_v) {
+            case 1: gl->Uniform1f(loc, f[0]); break;
+            case 2: gl->Uniform2f(loc, f[0], f[1]); break;
+            case 3: gl->Uniform3f(loc, f[0], f[1], f[2]); break;
+            case 4: gl->Uniform4f(loc, f[0], f[1], f[2], f[3]); break;
+            default: abort();
+            }
+        } else if (input->dim_v == 2 && input->dim_m == 2) {
+            gl->UniformMatrix2fv(loc, 1, GL_FALSE, f);
+        } else if (input->dim_v == 3 && input->dim_m == 3) {
+            gl->UniformMatrix3fv(loc, 1, GL_FALSE, f);
+        } else {
+            abort();
+        }
+        break;
+    }
+    case RA_VARTYPE_IMG_W: /* fall through */
+    case RA_VARTYPE_TEX: {
+        struct ra_tex *tex = *(struct ra_tex **)val->data;
+        struct ra_tex_gl *tex_gl = tex->priv;
+        assert(tex->params.render_src);
+        if (pass_gl->first_run)
+            gl->Uniform1i(loc, input->binding);
+        if (input->type == RA_VARTYPE_TEX) {
+            gl->ActiveTexture(GL_TEXTURE0 + input->binding);
+            gl->BindTexture(tex_gl->target, tex_gl->texture);
+        } else {
+            gl->BindImageTexture(input->binding, tex_gl->texture, 0, GL_FALSE, 0,
+                                 GL_WRITE_ONLY, tex_gl->internal_format);
+        }
+        break;
+    }
+    case RA_VARTYPE_SSBO: {
+        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding,
+                           *(int *)val->data);
+        break;
+    }
+    default:
+        abort();
+    }
+}
+
+static void disable_binding(struct ra *ra, struct ra_renderpass *pass,
+                           struct ra_renderpass_input_val *val)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+
+    struct ra_renderpass_input *input = &pass->params.inputs[val->index];
+
+    switch (input->type) {
+    case RA_VARTYPE_IMG_W: /* fall  through */
+    case RA_VARTYPE_TEX: {
+        struct ra_tex *tex = *(struct ra_tex **)val->data;
+        struct ra_tex_gl *tex_gl = tex->priv;
+        assert(tex->params.render_src);
+        if (input->type == RA_VARTYPE_TEX) {
+            gl->ActiveTexture(GL_TEXTURE0 + input->binding);
+            gl->BindTexture(tex_gl->target, 0);
+        } else {
+            gl->BindImageTexture(input->binding, 0, 0, GL_FALSE, 0,
+                                 GL_WRITE_ONLY, tex_gl->internal_format);
+        }
+        break;
+    }
+    case RA_VARTYPE_SSBO: {
+        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding, 0);
+        break;
+    }
+    }
+}
+
+static void gl_renderpass_run(struct ra *ra,
+                              const struct ra_renderpass_run_params *params)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
+    struct ra_renderpass *pass = params->pass;
+    struct ra_renderpass_gl *pass_gl = pass->priv;
+
+    gl->UseProgram(pass_gl->program);
+
+    for (int n = 0; n < params->num_values; n++)
+        update_uniform(ra, pass, &params->values[n]);
+    gl->ActiveTexture(GL_TEXTURE0);
+
+    switch (pass->params.type) {
+    case RA_RENDERPASS_TYPE_RASTER: {
+        struct ra_tex_gl *target_gl = params->target->priv;
+        assert(params->target->params.render_dst);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, target_gl->fbo);
+        gl->Viewport(params->viewport.x0, params->viewport.y0,
+                     mp_rect_w(params->viewport),
+                     mp_rect_h(params->viewport));
+        gl->Scissor(params->scissors.x0, params->scissors.y0,
+                    mp_rect_w(params->scissors),
+                    mp_rect_h(params->scissors));
+        gl->Enable(GL_SCISSOR_TEST);
+        if (pass->params.enable_blend) {
+            gl->BlendFuncSeparate(map_blend(pass->params.blend_src_rgb),
+                                  map_blend(pass->params.blend_dst_rgb),
+                                  map_blend(pass->params.blend_src_alpha),
+                                  map_blend(pass->params.blend_dst_alpha));
+            gl->Enable(GL_BLEND);
+        }
+        gl_vao_draw_data(&pass_gl->vao, GL_TRIANGLES, params->vertex_data,
+                         params->vertex_count);
+        gl->Disable(GL_SCISSOR_TEST);
+        gl->Disable(GL_BLEND);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+        break;
+    }
+    case RA_RENDERPASS_TYPE_COMPUTE: {
+        gl->DispatchCompute(params->compute_groups[0],
+                            params->compute_groups[1],
+                            params->compute_groups[2]);
+
+        gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+        break;
+    }
+    default: abort();
+    }
+
+    for (int n = 0; n < params->num_values; n++)
+        disable_binding(ra, pass, &params->values[n]);
+    gl->ActiveTexture(GL_TEXTURE0);
+
+    gl->UseProgram(0);
+
+    pass_gl->first_run = false;
+}
+
 static struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
@@ -488,4 +865,7 @@ static struct ra_fns ra_fns_gl = {
     .poll_mapped_buffer     = gl_poll_mapped_buffer,
     .clear                  = gl_clear,
     .blit                   = gl_blit,
+    .renderpass_create      = gl_renderpass_create,
+    .renderpass_destroy     = gl_renderpass_destroy,
+    .renderpass_run         = gl_renderpass_run,
 };

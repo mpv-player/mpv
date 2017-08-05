@@ -34,32 +34,22 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
 
 mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h);
 
-const char* mp_sampler_type(GLenum texture_target);
-
 // print a multi line string with line numbers (e.g. for shader sources)
 // log, lev: module and log level, as in mp_msg()
 void mp_log_source(struct mp_log *log, int lev, const char *src);
-
-struct gl_vao_entry {
-    // used for shader / glBindAttribLocation
-    const char *name;
-    // glVertexAttribPointer() arguments
-    int num_elems;      // size (number of elements)
-    GLenum type;
-    bool normalized;
-    int offset;
-};
 
 struct gl_vao {
     GL *gl;
     GLuint vao;     // the VAO object, or 0 if unsupported by driver
     GLuint buffer;  // GL_ARRAY_BUFFER used for the data
     int stride;     // size of each element (interleaved elements are assumed)
-    const struct gl_vao_entry *entries;
+    const struct ra_renderpass_input *entries;
+    int num_entries;
 };
 
 void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
-                 const struct gl_vao_entry *entries);
+                 const struct ra_renderpass_input *entries,
+                 int num_entries);
 void gl_vao_uninit(struct gl_vao *vao);
 void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 

@@ -22,17 +22,16 @@
 #include <libavutil/common.h>
 
 #include "formats.h"
-#include "ra_gl.h"
 #include "osd.h"
 
 #define GLSL(x) gl_sc_add(sc, #x "\n");
 
 // glBlendFuncSeparate() arguments
 static const int blend_factors[SUBBITMAP_COUNT][4] = {
-    [SUBBITMAP_LIBASS] = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
-                          GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
-    [SUBBITMAP_RGBA] =   {GL_ONE,       GL_ONE_MINUS_SRC_ALPHA,
-                          GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
+    [SUBBITMAP_LIBASS] = {RA_BLEND_SRC_ALPHA, RA_BLEND_ONE_MINUS_SRC_ALPHA,
+                          RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA},
+    [SUBBITMAP_RGBA] =   {RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA,
+                          RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA},
 };
 
 struct vertex {
@@ -41,10 +40,10 @@ struct vertex {
     uint8_t ass_color[4];
 };
 
-static const struct gl_vao_entry vertex_vao[] = {
-    {"position",    2, GL_FLOAT,         false, offsetof(struct vertex, position)},
-    {"texcoord" ,   2, GL_FLOAT,         false, offsetof(struct vertex, texcoord)},
-    {"ass_color",   4, GL_UNSIGNED_BYTE, true,  offsetof(struct vertex, ass_color)},
+static const struct ra_renderpass_input vertex_vao[] = {
+    {"position",  RA_VARTYPE_FLOAT,      2, 1, offsetof(struct vertex, position)},
+    {"texcoord" , RA_VARTYPE_FLOAT,      2, 1, offsetof(struct vertex, texcoord)},
+    {"ass_color", RA_VARTYPE_BYTE_UNORM, 4, 1, offsetof(struct vertex, ass_color)},
     {0}
 };
 
@@ -53,7 +52,6 @@ struct mpgl_osd_part {
     int change_id;
     struct ra_tex *texture;
     int w, h;
-    struct gl_pbo_upload pbo;
     int num_subparts;
     int prev_num_subparts;
     struct sub_bitmap *subparts;
@@ -65,7 +63,6 @@ struct mpgl_osd {
     struct mp_log *log;
     struct osd_state *osd;
     struct ra *ra;
-    GL *gl;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct ra_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
@@ -79,14 +76,11 @@ struct mpgl_osd {
 struct mpgl_osd *mpgl_osd_init(struct ra *ra, struct mp_log *log,
                                struct osd_state *osd)
 {
-    struct ra_gl *ra_gl = ra->priv;
-
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
         .log = log,
         .osd = osd,
         .ra = ra,
-        .gl = ra_gl->gl,
         .scratch = talloc_zero_size(ctx, 1),
     };
 
@@ -289,9 +283,8 @@ static void get_3d_side_by_side(int stereo_mode, int div[2])
 }
 
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int vp_w, int vp_h, int index,
-                          struct gl_shader_cache *sc)
+                          struct gl_shader_cache *sc, struct ra_tex *target)
 {
-    GL *gl = ctx->gl;
     struct mpgl_osd_part *part = ctx->parts[index];
 
     int div[2];
@@ -313,20 +306,10 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int vp_w, int vp_h, int index,
         }
     }
 
-    if (!part->num_vertices)
-        return;
-
-    gl->Enable(GL_BLEND);
-
     const int *factors = &blend_factors[part->format][0];
-    gl->BlendFuncSeparate(factors[0], factors[1], factors[2], factors[3]);
+    gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    ctx->gl->Viewport(0, 0, vp_w, abs(vp_h));
-
-    gl_sc_draw_data(sc, GL_TRIANGLES, part->vertices, part->num_vertices);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    gl->Disable(GL_BLEND);
+    gl_sc_dispatch_draw(sc, target, part->vertices, part->num_vertices);
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)

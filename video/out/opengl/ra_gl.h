@@ -28,9 +28,21 @@ struct ra_mapped_buffer_gl {
     GLsync fence;
 };
 
+// For ra_renderpass.priv
+struct ra_renderpass_gl {
+    GLuint program;
+    // 1 entry for each ra_renderpass_params.inputs[] entry
+    GLint *uniform_loc;
+    int num_uniform_loc; // == ra_renderpass_params.num_inputs
+    struct gl_vao vao;
+    bool first_run;
+};
+
 int ra_init_gl(struct ra *ra, GL *gl);
 struct ra_tex *ra_create_wrapped_texture(struct ra *ra, GLuint gl_texture,
                                          GLenum gl_target, GLint gl_iformat,
                                          GLenum gl_format, GLenum gl_type,
                                          int w, int h);
 struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h);
+
+GL *ra_gl_get(struct ra *ra);

@@ -16,6 +16,51 @@ void ra_tex_free(struct ra *ra, struct ra_tex **tex)
     *tex = NULL;
 }
 
+static size_t vartype_size(enum ra_vartype type)
+{
+    switch (type) {
+    case RA_VARTYPE_INT:        return sizeof(int);
+    case RA_VARTYPE_FLOAT:      return sizeof(float);
+    case RA_VARTYPE_BYTE_UNORM: return 1;
+    default: return 0;
+    }
+}
+
+// Return the size of the data ra_renderpass_input_val.data is going to point
+// to. This returns 0 for non-primitive types such as textures.
+size_t ra_render_pass_input_data_size(struct ra_renderpass_input *input)
+{
+    size_t el_size = vartype_size(input->type);
+    return el_size * input->dim_v * input->dim_m;
+}
+
+static struct ra_renderpass_input *dup_inputs(void *ta_parent,
+            const struct ra_renderpass_input *inputs, int num_inputs)
+{
+    struct ra_renderpass_input *res =
+        talloc_memdup(ta_parent, (void *)inputs, num_inputs * sizeof(inputs[0]));
+    for (int n = 0; n < num_inputs; n++)
+        res[n].name = talloc_strdup(res, res[n].name);
+    return res;
+}
+
+// Return a newly allocated deep-copy of params.
+struct ra_renderpass_params *ra_render_pass_params_copy(void *ta_parent,
+        const struct ra_renderpass_params *params)
+{
+    struct ra_renderpass_params *res = talloc_ptrtype(ta_parent, res);
+    *res = *params;
+    res->inputs = dup_inputs(res, res->inputs, res->num_inputs);
+    res->vertex_attribs =
+        dup_inputs(res, res->vertex_attribs, res->num_vertex_attribs);
+    res->cached_program = bstrdup(res, res->cached_program);
+    res->vertex_shader = talloc_strdup(res, res->vertex_shader);
+    res->frag_shader = talloc_strdup(res, res->frag_shader);
+    res->compute_shader = talloc_strdup(res, res->compute_shader);
+    return res;
+};
+
+
 // Return whether this is a tightly packed format with no external padding and
 // with the same bit size/depth in all components.
 static bool ra_format_is_regular(const struct ra_format *fmt)
