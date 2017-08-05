@@ -88,6 +88,10 @@ int ra_init_gl(struct ra *ra, GL *gl)
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
     }
 
+    GLint max_wh;
+    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_wh);
+    ra->max_texture_wh = max_wh;
+
     gl->Disable(GL_DITHER);
 
     return 0;
@@ -307,13 +311,15 @@ struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h)
 }
 
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
-                         const void *src, ptrdiff_t stride,
-                         struct ra_mapped_buffer *buf)
+                          const void *src, ptrdiff_t stride,
+                          struct mp_rect *rc, uint64_t flags,
+                          struct ra_mapped_buffer *buf)
 {
     struct ra_gl *p = ra->priv;
     GL *gl = p->gl;
     struct ra_tex_gl *tex_gl = tex->priv;
     struct ra_mapped_buffer_gl *buf_gl = NULL;
+    struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
 
     if (buf) {
         buf_gl = buf->priv;
@@ -325,16 +331,20 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
 
     switch (tex->params.dimensions) {
     case 1:
+        assert(!rc);
         gl->TexImage1D(tex_gl->target, 0, tex_gl->internal_format,
                        tex->params.w, 0, tex_gl->format, tex_gl->type, src);
         break;
     case 2:
+        if (!rc)
+            rc = &full;
         gl_pbo_upload_tex(&tex_gl->pbo, gl, tex->use_pbo && !buf,
                           tex_gl->target, tex_gl->format, tex_gl->type,
                           tex->params.w, tex->params.h, src, stride,
-                          0, 0, tex->params.w, tex->params.h);
+                          rc->x0, rc->y0, rc->x1 - rc->x0, rc->y1 - rc->y0);
         break;
     case 3:
+        assert(!rc);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
         gl->TexImage3D(GL_TEXTURE_3D, 0, tex_gl->internal_format, tex->params.w,
                        tex->params.h, tex->params.d, 0, tex_gl->format,

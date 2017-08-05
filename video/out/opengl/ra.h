@@ -13,6 +13,10 @@ struct ra {
     // time.
     uint64_t caps;
 
+    // Maximum supported width and height of a 2D texture. Set by the RA backend
+    // at init time.
+    int max_texture_wh;
+
     // Set of supported texture formats. Must be added by RA backend at init time.
     struct ra_format **formats;
     int num_formats;
@@ -101,6 +105,11 @@ struct ra_mapped_buffer {
     size_t size;            // total size of the mapping, starting at data
 };
 
+enum {
+    // Flags for the texture_upload flags parameter.
+    RA_TEX_UPLOAD_DISCARD = 1 << 0, // discard pre-existing data not in the region
+};
+
 // Rendering API entrypoints. (Note: there are some additional hidden features
 // you need to take care of. For example, hwdec mapping will be provided
 // separately from ra, but might need to call into ra private code.)
@@ -120,10 +129,15 @@ struct ra_fns {
     // This is an extremely common operation.
     // Unlike with OpenGL, the src data has to have exactly the same format as
     // the texture, and no conversion is supported.
-    // tex->params.require_upload must be true.
-    // For 1D textures, stride is ignored.
+    // region can be NULL - if it's not NULL, then the provided pointer only
+    // contains data for the given region. Only part of the texture data is
+    // updated, and ptr points to the first pixel in the region. If
+    // RA_TEX_UPLOAD_DISCARD is set, data outside of the region can return to
+    // an uninitialized state. The region is always strictly within the texture
+    // and has a size >0 in both dimensions. 2D textures only.
+    // For 1D textures, stride is ignored, and region must be NULL.
     // For 3D textures, stride is not supported. All data is fully packed with
-    // no padding, and stride is ignored.
+    // no padding, and stride is ignored, and region must be NULL.
     // If buf is not NULL, then src must be within the provided buffer. The
     // operation is implied to have dramatically better performance, but
     // requires correct flushing and fencing operations by the caller to deal
@@ -131,6 +145,7 @@ struct ra_fns {
     // met, undefined behavior will result.
     void (*tex_upload)(struct ra *ra, struct ra_tex *tex,
                        const void *src, ptrdiff_t stride,
+                       struct mp_rect *region, uint64_t flags,
                        struct ra_mapped_buffer *buf);
 
     // Create a persistently mapped buffer for tex_upload.

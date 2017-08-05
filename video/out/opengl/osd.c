@@ -22,6 +22,7 @@
 #include <libavutil/common.h>
 
 #include "formats.h"
+#include "ra_gl.h"
 #include "osd.h"
 
 #define GLSL(x) gl_sc_add(sc, #x "\n");
@@ -50,7 +51,7 @@ static const struct gl_vao_entry vertex_vao[] = {
 struct mpgl_osd_part {
     enum sub_bitmap_format format;
     int change_id;
-    GLuint texture;
+    struct ra_tex *texture;
     int w, h;
     struct gl_pbo_upload pbo;
     int num_subparts;
@@ -63,10 +64,11 @@ struct mpgl_osd_part {
 struct mpgl_osd {
     struct mp_log *log;
     struct osd_state *osd;
+    struct ra *ra;
     GL *gl;
     bool use_pbo;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
-    const struct gl_format *fmt_table[SUBBITMAP_COUNT];
+    const struct ra_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
     int64_t change_counter;
     // temporary
@@ -75,18 +77,22 @@ struct mpgl_osd {
     void *scratch;
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd)
+struct mpgl_osd *mpgl_osd_init(struct ra *ra, struct mp_log *log,
+                               struct osd_state *osd)
 {
+    struct ra_gl *ra_gl = ra->priv;
+
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
         .log = log,
         .osd = osd,
-        .gl = gl,
+        .ra = ra,
+        .gl = ra_gl->gl,
         .scratch = talloc_zero_size(ctx, 1),
     };
 
-    ctx->fmt_table[SUBBITMAP_LIBASS] = gl_find_unorm_format(gl, 1, 1);
-    ctx->fmt_table[SUBBITMAP_RGBA]   = gl_find_unorm_format(gl, 1, 4);
+    ctx->fmt_table[SUBBITMAP_LIBASS] = ra_find_unorm_format(ra, 1, 1);
+    ctx->fmt_table[SUBBITMAP_RGBA]   = ra_find_unorm_format(ra, 1, 4);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         ctx->parts[n] = talloc_zero(ctx, struct mpgl_osd_part);
@@ -102,12 +108,9 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
     if (!ctx)
         return;
 
-    GL *gl = ctx->gl;
-
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = ctx->parts[n];
-        gl->DeleteTextures(1, &p->texture);
-        gl_pbo_upload_uninit(&p->pbo);
+        ra_tex_free(ctx->ra, &p->texture);
     }
     talloc_free(ctx);
 }
@@ -129,7 +132,7 @@ static int next_pow2(int v)
 static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
                        struct sub_bitmaps *imgs)
 {
-    GL *gl = ctx->gl;
+    struct ra *ra = ctx->ra;
     bool ok = false;
 
     assert(imgs->packed);
@@ -137,47 +140,51 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     int req_w = next_pow2(imgs->packed_w);
     int req_h = next_pow2(imgs->packed_h);
 
-    const struct gl_format *fmt = ctx->fmt_table[imgs->format];
+    const struct ra_format *fmt = ctx->fmt_table[imgs->format];
     assert(fmt);
 
-    if (!osd->texture)
-        gl->GenTextures(1, &osd->texture);
+    if (!osd->texture || req_w > osd->w || req_h > osd->h ||
+        osd->format != imgs->format)
+    {
+        ra_tex_free(ra, &osd->texture);
 
-    gl->BindTexture(GL_TEXTURE_2D, osd->texture);
-
-    if (req_w > osd->w || req_h > osd->h || osd->format != imgs->format) {
         osd->format = imgs->format;
         osd->w = FFMAX(32, req_w);
         osd->h = FFMAX(32, req_h);
 
         MP_VERBOSE(ctx, "Reallocating OSD texture to %dx%d.\n", osd->w, osd->h);
 
-        GLint max_wh;
-        gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_wh);
-
-        if (osd->w > max_wh || osd->h > max_wh) {
+        if (osd->w > ra->max_texture_wh || osd->h > ra->max_texture_wh) {
             MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
-                   "supported size %dx%d.\n", max_wh, max_wh);
+                   "supported size %dx%d.\n", ra->max_texture_wh,
+                   ra->max_texture_wh);
             goto done;
         }
 
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, osd->w, osd->h,
-                       0, fmt->format, fmt->type, NULL);
-
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = osd->w,
+            .h = osd->h,
+            .d = 1,
+            .format = fmt,
+            .render_src = true,
+            .src_linear = true,
+        };
+        osd->texture = ra_tex_create(ra, &params);
+        if (!osd->texture)
+            goto done;
     }
 
-    gl_pbo_upload_tex(&osd->pbo, gl, ctx->use_pbo, GL_TEXTURE_2D, fmt->format,
-                      fmt->type, osd->w, osd->h, imgs->packed->planes[0],
-                      imgs->packed->stride[0], 0, 0,
-                      imgs->packed_w, imgs->packed_h);
+    osd->texture->use_pbo = ctx->use_pbo;
+
+    struct mp_rect rc = {0, 0, imgs->packed_w, imgs->packed_h};
+    ra->fns->tex_upload(ra, osd->texture, imgs->packed->planes[0],
+                        imgs->packed->stride[0], &rc, RA_TEX_UPLOAD_DISCARD,
+                        NULL);
+
     ok = true;
 
 done:
-    gl->BindTexture(GL_TEXTURE_2D, 0);
     return ok;
 }
 
@@ -215,7 +222,7 @@ bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
     if (!fmt || !part->num_subparts)
         return false;
 
-    gl_sc_uniform_tex(sc, "osdtex", GL_TEXTURE_2D, part->texture);
+    gl_sc_uniform_texture(sc, "osdtex", part->texture);
     switch (fmt) {
     case SUBBITMAP_RGBA: {
         GLSL(color = texture(osdtex, texcoord).bgra;)

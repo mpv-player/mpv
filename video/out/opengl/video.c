@@ -506,7 +506,7 @@ static void reinit_osd(struct gl_video *p)
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
     if (p->osd_state) {
-        p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
+        p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state);
         mpgl_osd_set_options(p->osd, p->opts.pbo);
     }
 }
@@ -3326,7 +3326,8 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
 
         p->ra->fns->tex_upload(p->ra, plane->tex, mpi->planes[n],
-                               mpi->stride[n], mapped ? mapped->buffer : NULL);
+                               mpi->stride[n], NULL, 0,
+                               mapped ? mapped->buffer : NULL);
 
         if (mapped && !mapped->mpi)
             mapped->mpi = mp_image_new_ref(mpi);
