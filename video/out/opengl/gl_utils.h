@@ -34,10 +34,6 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
 
 mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h);
 
-// print a multi line string with line numbers (e.g. for shader sources)
-// log, lev: module and log level, as in mp_msg()
-void mp_log_source(struct mp_log *log, int lev, const char *src);
-
 struct gl_vao {
     GL *gl;
     GLuint vao;     // the VAO object, or 0 if unsupported by driver

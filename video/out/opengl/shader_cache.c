@@ -15,7 +15,6 @@
 #include "stream/stream.h"
 #include "shader_cache.h"
 #include "formats.h"
-#include "ra_gl.h"
 #include "utils.h"
 
 // Force cache flush if more than this number of shaders is created.
@@ -48,7 +47,6 @@ struct sc_entry {
 
 struct gl_shader_cache {
     struct ra *ra;
-    GL *gl;
     struct mp_log *log;
 
     // permanent
@@ -97,7 +95,6 @@ struct gl_shader_cache *gl_sc_create(struct ra *ra, struct mpv_global *global,
     struct gl_shader_cache *sc = talloc_ptrtype(NULL, sc);
     *sc = (struct gl_shader_cache){
         .ra = ra,
-        .gl = ra_gl_get(ra),
         .global = global,
         .log = log,
     };
@@ -105,8 +102,8 @@ struct gl_shader_cache *gl_sc_create(struct ra *ra, struct mpv_global *global,
     return sc;
 }
 
-// Reset the previous pass. This must be called after
-// Unbind all GL state managed by sc - the current program and texture units.
+// Reset the previous pass. This must be called after gl_sc_generate and before
+// starting a new shader.
 static void gl_sc_reset(struct gl_shader_cache *sc)
 {
     sc->prelude_text.len = 0;

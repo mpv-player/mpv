@@ -130,22 +130,6 @@ mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h)
     return image;
 }
 
-void mp_log_source(struct mp_log *log, int lev, const char *src)
-{
-    int line = 1;
-    if (!src)
-        return;
-    while (*src) {
-        const char *end = strchr(src, '\n');
-        const char *next = end + 1;
-        if (!end)
-            next = end = src + strlen(src);
-        mp_msg(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
-        line++;
-        src = next;
-    }
-}
-
 static void gl_vao_enable_attribs(struct gl_vao *vao)
 {
     GL *gl = vao->gl;
