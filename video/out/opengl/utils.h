@@ -86,3 +86,7 @@ void timer_pool_destroy(struct timer_pool *pool);
 void timer_pool_start(struct timer_pool *pool);
 void timer_pool_stop(struct timer_pool *pool);
 struct mp_pass_perf timer_pool_measure(struct timer_pool *pool);
+
+// print a multi line string with line numbers (e.g. for shader sources)
+// log, lev: module and log level, as in mp_msg()
+void mp_log_source(struct mp_log *log, int lev, const char *src);

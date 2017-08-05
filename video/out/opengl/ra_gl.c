@@ -1,6 +1,7 @@
 #include <libavutil/intreadwrite.h>
 
 #include "formats.h"
+#include "utils.h"
 #include "ra_gl.h"
 
 static struct ra_fns ra_fns_gl;
