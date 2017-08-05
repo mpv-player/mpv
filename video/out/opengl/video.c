@@ -271,6 +271,7 @@ struct gl_video {
     int pass_idx;
     struct timer_pool *upload_timer;
     struct timer_pool *blit_timer;
+    struct timer_pool *osd_timer;
 
     // intermediate textures
     struct saved_tex saved_tex[SHADER_MAX_SAVED];
@@ -2607,11 +2608,11 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 {
     mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
 
+    timer_pool_start(p->osd_timer);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         // (This returns false if this part is empty with nothing to draw.)
         if (!mpgl_osd_draw_prepare(p->osd, n, p->sc))
             continue;
-        pass_describe(p, "drawing osd");
         // When subtitles need to be color managed, assume they're in sRGB
         // (for lack of anything saner to do)
         if (cms) {
@@ -2625,6 +2626,10 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         }
         mpgl_osd_draw_finish(p->osd, vp_w, vp_h, n, p->sc, target);
     }
+
+    timer_pool_stop(p->osd_timer);
+    pass_describe(p, "drawing osd");
+    pass_record(p, timer_pool_measure(p->osd_timer));
 }
 
 static float chroma_realign(int size, int pixel)
@@ -3491,6 +3496,7 @@ static void init_gl(struct gl_video *p)
 
     p->upload_timer = timer_pool_create(p->ra);
     p->blit_timer = timer_pool_create(p->ra);
+    p->osd_timer = timer_pool_create(p->ra);
 
     debug_check_gl(p, "after init_gl");
 
@@ -3514,6 +3520,7 @@ void gl_video_uninit(struct gl_video *p)
 
     timer_pool_destroy(p->upload_timer);
     timer_pool_destroy(p->blit_timer);
+    timer_pool_destroy(p->osd_timer);
 
     for (int i = 0; i < PASS_INFO_MAX; i++) {
         talloc_free(p->pass_fresh[i].desc.start);
