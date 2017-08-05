@@ -144,6 +144,16 @@ void mpv_opengl_cb_set_update_callback(struct mpv_opengl_cb_context *ctx,
     pthread_mutex_unlock(&ctx->lock);
 }
 
+// Reset some GL attributes the user might clobber. For mid-term compatibility
+// only - we expect both user code and our code to do this correctly.
+static void reset_gl_state(GL *gl)
+{
+    gl->ActiveTexture(GL_TEXTURE0);
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+}
+
 int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
                           mpv_opengl_cb_get_proc_address_fn get_proc_address,
                           void *get_proc_address_ctx)
@@ -184,7 +194,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     ctx->initialized = true;
     pthread_mutex_unlock(&ctx->lock);
 
-    gl_video_unset_gl_state(ctx->renderer);
+    reset_gl_state(ctx->gl);
     return 0;
 }
 
@@ -222,7 +232,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
 
-    gl_video_set_gl_state(ctx->renderer);
+    reset_gl_state(ctx->gl);
 
     pthread_mutex_lock(&ctx->lock);
 
@@ -307,7 +317,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     MP_STATS(ctx, "glcb-render");
     gl_video_render_frame(ctx->renderer, frame, fbo);
 
-    gl_video_unset_gl_state(ctx->renderer);
+    reset_gl_state(ctx->gl);
 
     if (frame != &dummy)
         talloc_free(frame);

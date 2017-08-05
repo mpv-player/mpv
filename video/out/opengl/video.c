@@ -3492,8 +3492,6 @@ static void init_gl(struct gl_video *p)
 
     debug_check_gl(p, "before init_gl");
 
-    gl_video_set_gl_state(p);
-
     p->upload_timer = gl_timer_create(gl);
     p->blit_timer = gl_timer_create(gl);
 
@@ -3538,22 +3536,6 @@ void gl_video_uninit(struct gl_video *p)
     p->ra->fns->destroy(p->ra);
     talloc_free(p->ra);
     talloc_free(p);
-}
-
-void gl_video_set_gl_state(struct gl_video *p)
-{
-    // This resets certain important state to defaults.
-    gl_video_unset_gl_state(p);
-}
-
-void gl_video_unset_gl_state(struct gl_video *p)
-{
-    GL *gl = p->gl;
-
-    gl->ActiveTexture(GL_TEXTURE0);
-    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
-        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
 void gl_video_reset(struct gl_video *p)

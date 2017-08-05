@@ -69,6 +69,9 @@ extern "C" {
  * standard defaults. The following state is excluded from this:
  *
  *      - the current viewport (can have/is set to an arbitrary value)
+ *      - the glScissor state (but GL_SCISSOR_TEST is expected disabled)
+ *      - glBlendFuncSeparate() state (but GL_BLEND is expected disabled)
+ *      - mpv always disables GL_DITHER at init
  *
  * Messing with the state could be avoided by creating shared OpenGL contexts,
  * but this is avoided for the sake of compatibility and interoperability.
