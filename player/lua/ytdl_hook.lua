@@ -122,7 +122,17 @@ local function is_blacklisted(url)
     return false
 end
 
-local function edl_track_joined(fragments, protocol, is_live)
+local function join_url(base_url, fragment)
+    local res = ""
+    if base_url and fragment.path then
+        res = base_url .. fragment.path
+    elseif fragment.url then
+        res = fragment.url
+    end
+    return res
+end
+
+local function edl_track_joined(fragments, protocol, is_live, base)
     if not (type(fragments) == "table") or not fragments[1] then
         msg.debug("No fragments to join into EDL")
         return nil
@@ -136,7 +146,7 @@ local function edl_track_joined(fragments, protocol, is_live)
         not fragments[1].duration and not is_live then
         -- assume MP4 DASH initialization segment
         table.insert(parts,
-            "!mp4_dash,init=" .. edl_escape(fragments[1].url))
+            "!mp4_dash,init=" .. edl_escape(join_url(base, fragments[1])))
         offset = 2
 
         -- Check remaining fragments for duration;
@@ -152,7 +162,7 @@ local function edl_track_joined(fragments, protocol, is_live)
 
     for i = offset, #fragments do
         local fragment = fragments[i]
-        table.insert(parts, edl_escape(fragment.url))
+        table.insert(parts, edl_escape(join_url(base, fragment)))
         if fragment.duration then
             parts[#parts] =
                 parts[#parts] .. ",length="..fragment.duration
@@ -169,7 +179,8 @@ local function add_single_video(json)
         for _, track in pairs(json.requested_formats) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
-                track.protocol, json.is_live)
+                track.protocol, json.is_live,
+                track.fragment_base_url)
             if track.acodec and track.acodec ~= "none" then
                 -- audio track
                 mp.commandv("audio-add",
@@ -184,7 +195,7 @@ local function add_single_video(json)
     elseif not (json.url == nil) then
         local edl_track = nil
         edl_track = edl_track_joined(json.fragments, json.protocol,
-            json.is_live)
+            json.is_live, json.fragment_base_url)
 
         -- normal video or single track
         streamurl = edl_track or json.url
