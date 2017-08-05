@@ -113,14 +113,14 @@ static void gl_destroy(struct ra *ra)
 
 static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
 {
-    struct ra_gl *p = ra->priv;
+    GL *gl = ra_gl_get(ra);
     struct ra_tex_gl *tex_gl = tex->priv;
 
     if (tex_gl->own_objects) {
         if (tex_gl->fbo)
-            p->gl->DeleteFramebuffers(1, &tex_gl->fbo);
+            gl->DeleteFramebuffers(1, &tex_gl->fbo);
 
-        p->gl->DeleteTextures(1, &tex_gl->texture);
+        gl->DeleteTextures(1, &tex_gl->texture);
     }
     gl_pbo_upload_uninit(&tex_gl->pbo);
     talloc_free(tex_gl);
@@ -130,8 +130,7 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
 static struct ra_tex *gl_tex_create(struct ra *ra,
                                     const struct ra_tex_params *params)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     struct ra_tex *tex = talloc_zero(NULL, struct ra_tex);
     tex->params = *params;
@@ -331,8 +330,7 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
                           struct mp_rect *rc, uint64_t flags,
                           struct ra_mapped_buffer *buf)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
     struct ra_tex_gl *tex_gl = tex->priv;
     struct ra_mapped_buffer_gl *buf_gl = NULL;
     struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
@@ -383,8 +381,7 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
 
 static void gl_destroy_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
     struct ra_mapped_buffer_gl *buf_gl = buf->priv;
 
     gl->DeleteSync(buf_gl->fence);
@@ -401,8 +398,7 @@ static void gl_destroy_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf
 static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
                                                         size_t size)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     if (gl->version < 440)
         return NULL;
@@ -432,8 +428,7 @@ static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
 
 static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
     struct ra_mapped_buffer_gl *buf_gl = buf->priv;
 
     if (buf_gl->fence) {
@@ -450,8 +445,7 @@ static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
 static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
                      struct mp_rect *scissor)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     assert(dst->params.render_dst);
     struct ra_tex_gl *dst_gl = dst->priv;
@@ -473,8 +467,7 @@ static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
 static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
                     int dst_x, int dst_y, struct mp_rect *src_rc)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     assert(dst->params.render_dst);
     assert(src->params.render_dst); // even src must have a FBO
@@ -496,9 +489,9 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
 
 static void gl_renderpass_destroy(struct ra *ra, struct ra_renderpass *pass)
 {
-    struct ra_gl *p = ra->priv;
+    GL *gl = ra_gl_get(ra);
     struct ra_renderpass_gl *pass_gl = pass->priv;
-    p->gl->DeleteProgram(pass_gl->program);
+    gl->DeleteProgram(pass_gl->program);
     gl_vao_uninit(&pass_gl->vao);
 
     talloc_free(pass_gl);
@@ -518,8 +511,7 @@ static const char *shader_typestr(GLenum type)
 static void compile_attach_shader(struct ra *ra, GLuint program,
                                   GLenum type, const char *source, bool *ok)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     GLuint shader = gl->CreateShader(type);
     gl->ShaderSource(shader, 1, &source, NULL);
@@ -561,8 +553,7 @@ static void compile_attach_shader(struct ra *ra, GLuint program,
 
 static void link_shader(struct ra *ra, GLuint program, bool *ok)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     gl->LinkProgram(program);
     GLint status = 0;
@@ -584,8 +575,7 @@ static void link_shader(struct ra *ra, GLuint program, bool *ok)
 // either 'compute' or both 'vertex' and 'frag' are needed
 static GLuint compile_program(struct ra *ra, const struct ra_renderpass_params *p)
 {
-    struct ra_gl *priv = ra->priv;
-    GL *gl = priv->gl;
+    GL *gl = ra_gl_get(ra);
 
     GLuint prog = gl->CreateProgram();
     bool ok = true;
@@ -608,8 +598,7 @@ static GLuint compile_program(struct ra *ra, const struct ra_renderpass_params *
 static GLuint load_program(struct ra *ra, const struct ra_renderpass_params *p,
                            bstr *out_cached_data)
 {
-    struct ra_gl *priv = ra->priv;
-    GL *gl = priv->gl;
+    GL *gl = ra_gl_get(ra);
 
     GLuint prog = 0;
 
@@ -653,8 +642,7 @@ static GLuint load_program(struct ra *ra, const struct ra_renderpass_params *p,
 static struct ra_renderpass *gl_renderpass_create(struct ra *ra,
                                     const struct ra_renderpass_params *params)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     struct ra_renderpass *pass = talloc_zero(NULL, struct ra_renderpass);
     pass->params = *ra_render_pass_params_copy(pass, params);
@@ -702,8 +690,7 @@ static GLenum map_blend(enum ra_blend blend)
 static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
                            struct ra_renderpass_input_val *val)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
     struct ra_renderpass_gl *pass_gl = pass->priv;
 
     struct ra_renderpass_input *input = &pass->params.inputs[val->index];
@@ -768,8 +755,7 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
 static void disable_binding(struct ra *ra, struct ra_renderpass *pass,
                            struct ra_renderpass_input_val *val)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
 
     struct ra_renderpass_input *input = &pass->params.inputs[val->index];
 
@@ -798,8 +784,7 @@ static void disable_binding(struct ra *ra, struct ra_renderpass *pass,
 static void gl_renderpass_run(struct ra *ra,
                               const struct ra_renderpass_run_params *params)
 {
-    struct ra_gl *p = ra->priv;
-    GL *gl = p->gl;
+    GL *gl = ra_gl_get(ra);
     struct ra_renderpass *pass = params->pass;
     struct ra_renderpass_gl *pass_gl = pass->priv;
 
