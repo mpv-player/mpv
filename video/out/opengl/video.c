@@ -3074,7 +3074,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
-                pass_info_reset(p, false);
+                pass_info_reset(p, !is_new);
                 if (!pass_render_frame(p, frame->current, frame->frame_id))
                     goto done;
 
