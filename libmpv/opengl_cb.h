@@ -68,9 +68,11 @@ extern "C" {
  * defaults. Likewise, mpv will attempt to leave the OpenGL context with
  * standard defaults. The following state is excluded from this:
  *
- *      - the current viewport (can have/is set to an arbitrary value)
- *      - the glScissor state (but GL_SCISSOR_TEST is expected disabled)
- *      - glBlendFuncSeparate() state (but GL_BLEND is expected disabled)
+ *      - the glViewport state
+ *      - the glScissor state (but GL_SCISSOR_TEST is in its default value)
+ *      - glBlendFuncSeparate() state (but GL_BLEND is in its default value)
+ *      - glClearColor() state
+ *      - mpv may overwrite the callback set with glDebugMessageCallback()
  *      - mpv always disables GL_DITHER at init
  *
  * Messing with the state could be avoided by creating shared OpenGL contexts,
@@ -78,7 +80,8 @@ extern "C" {
  *
  * On OpenGL 2.1, mpv will strictly call functions like glGenTextures() to
  * create OpenGL objects. You will have to do the same. This ensures that
- * objects created by mpv and the API users don't clash.
+ * objects created by mpv and the API users don't clash. Also, legacy state
+ * must be either in its defaults, or not interfere with core state.
  *
  * Threading
  * ---------

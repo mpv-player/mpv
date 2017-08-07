@@ -235,7 +235,7 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
         gl->GenFramebuffers(1, &tex_gl->fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, tex_gl->fbo);
         gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                GL_TEXTURE_2D, tex_gl->texture, 0);
+                                 GL_TEXTURE_2D, tex_gl->texture, 0);
         GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
