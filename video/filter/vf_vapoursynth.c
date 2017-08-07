@@ -128,7 +128,7 @@ static bool compare_fmt(int imgfmt, const struct mpvs_fmt *vs)
         return false;
     if (rfmt.chroma_w != vs->cw || rfmt.chroma_h != vs->ch)
         return false;
-    if (rfmt.component_size * 8 - rfmt.component_pad != vs->bits)
+    if (rfmt.component_size * 8 + rfmt.component_pad != vs->bits)
         return false;
     if (rfmt.num_planes != 3)
         return false;
