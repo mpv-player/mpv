@@ -388,6 +388,7 @@ static void uninit(struct vo *vo)
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
     }
+    ra_free(&p->ra);
     mpgl_uninit(p->glctx);
 }
 

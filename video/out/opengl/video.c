@@ -3499,7 +3499,6 @@ void gl_video_uninit(struct gl_video *p)
     // Should all have been unreffed already.
     assert(!p->num_dr_buffers);
 
-    ra_free(&p->ra);
     talloc_free(p);
 }
 
