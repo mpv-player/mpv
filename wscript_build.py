@@ -120,9 +120,9 @@ def build(ctx):
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
     main_fn_c = ctx.pick_first_matching_dep([
+        ( "osdep/main-fn-unix.c",                "posix" ),
         ( "osdep/main-fn-win.c",                 "win32-desktop" ),
         ( "osdep/main-fn-cocoa.c",               "cocoa" ),
-        ( "osdep/main-fn-unix.c" ),
     ])
 
     getch2_c = ctx.pick_first_matching_dep([
@@ -466,12 +466,12 @@ def build(ctx):
         ( "osdep/path-macosx.m",                 "cocoa" ),
         ( "osdep/path-unix.c"),
         ( "osdep/path-win.c",                    "win32-desktop" ),
-        ( "osdep/path-win.c",                    "os-cygwin" ),
         ( "osdep/path-uwp.c",                    "uwp" ),
         ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/w32_keyboard.c",                "os-win32" ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
         ( "osdep/windows_utils.c",               "os-win32" ),
+        ( "osdep/windows_utils.c",               "os-cygwin" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
         ( "osdep/android/strnlen.c",             "android"),
