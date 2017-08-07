@@ -33,6 +33,12 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
     gl_transform_vec(t, &x->t[0], &x->t[1]);
 }
 
+void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo)
+{
+    int y_dir = fbo.flip ? -1 : 1;
+    gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
+}
+
 // Create a texture and a FBO using the texture as color attachments.
 //  fmt: texture internal format
 // If the parameters are the same as the previous call, do not touch it.
@@ -41,6 +47,8 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
 bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
                    int w, int h, const struct ra_format *fmt, int flags)
 {
+    int lw = w, lh = h;
+
     if (fbo->tex) {
         int cw = w, ch = h;
         int rw = fbo->tex->params.w, rh = fbo->tex->params.h;
@@ -50,14 +58,9 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         if ((flags & FBOTEX_FUZZY_H) && ch < rh)
             ch = rh;
 
-        if (rw == cw && rh == ch && fbo->tex->params.format == fmt) {
-            fbo->lw = w;
-            fbo->lh = h;
-            return true;
-        }
+        if (rw == cw && rh == ch && fbo->tex->params.format == fmt)
+            goto done;
     }
-
-    int lw = w, lh = h;
 
     if (flags & FBOTEX_FUZZY_W)
         w = MP_ALIGN_UP(w, 256);
@@ -75,10 +78,6 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
 
     *fbo = (struct fbotex) {
         .ra = ra,
-        .rw = w,
-        .rh = h,
-        .lw = lw,
-        .lh = lh,
     };
 
     struct ra_tex_params params = {
@@ -99,6 +98,15 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         fbotex_uninit(fbo);
         return false;
     }
+
+done:
+
+    fbo->lw = lw;
+    fbo->lh = lh;
+
+    fbo->fbo = (struct fbodst){
+        .tex = fbo->tex,
+    };
 
     return true;
 }

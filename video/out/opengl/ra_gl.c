@@ -498,7 +498,7 @@ static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
 }
 
 static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
-                    int dst_x, int dst_y, struct mp_rect *src_rc)
+                    struct mp_rect *dst_rc, struct mp_rect *src_rc)
 {
     GL *gl = ra_gl_get(ra);
 
@@ -508,13 +508,10 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     struct ra_tex_gl *src_gl = src->priv;
     struct ra_tex_gl *dst_gl = dst->priv;
 
-    int w = mp_rect_w(*src_rc);
-    int h = mp_rect_h(*src_rc);
-
     gl->BindFramebuffer(GL_READ_FRAMEBUFFER, src_gl->fbo);
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, dst_gl->fbo);
     gl->BlitFramebuffer(src_rc->x0, src_rc->y0, src_rc->x1, src_rc->y1,
-                        dst_x, dst_y, dst_x + w, dst_y + h,
+                        dst_rc->x0, dst_rc->y0, dst_rc->x1, dst_rc->y1,
                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
     gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

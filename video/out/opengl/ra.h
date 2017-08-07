@@ -349,17 +349,17 @@ struct ra_fns {
 
     // Copy a sub-rectangle from one texture to another. The source/dest region
     // is always within the texture bounds. Areas outside the dest region are
-    // preserved. The formats of the textures will be losely compatible (this
-    // probably has to be defined strictly). The dst texture can be a swapchain
-    // framebuffer, but src can not. Only 2D textures are supported.
+    // preserved. The formats of the textures must be losely compatible. The
+    // dst texture can be a swapchain framebuffer, but src can not. Only 2D
+    // textures are supported.
     // Both textures must have tex->params.render_dst==true (even src, which is
     // an odd GL requirement).
-    // A rectangle with negative width or height means a flipped copy should be
-    // done. Coordinates are always in pixels.
+    // Rectangle with negative width/height lead to flipping, different src/dst
+    // sizes lead to point scaling. Coordinates are always in pixels.
     // Optional. Only available if RA_CAP_BLIT is set (if it's not set, the must
     // not be called, even if it's non-NULL).
     void (*blit)(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
-                 int dst_x, int dst_y, struct mp_rect *src_rc);
+                 struct mp_rect *dst_rc, struct mp_rect *src_rc);
 
     // Compile a shader and create a pipeline. This is a rare operation.
     // The params pointer and anything it points to must stay valid until

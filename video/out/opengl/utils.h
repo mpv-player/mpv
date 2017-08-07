@@ -62,11 +62,18 @@ static inline bool gl_transform_eq(struct gl_transform a, struct gl_transform b)
 
 void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
 
+struct fbodst {
+    struct ra_tex *tex;
+    bool flip; // mirror vertically
+};
+
+void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo);
+
 struct fbotex {
     struct ra *ra;
     struct ra_tex *tex;
-    int rw, rh; // real (texture) size, same as tex->params.w/h
     int lw, lh; // logical (configured) size, <= than texture size
+    struct fbodst fbo;
 };
 
 void fbotex_uninit(struct fbotex *fbo);
