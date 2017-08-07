@@ -3335,7 +3335,7 @@ static bool test_fbo(struct gl_video *p, const struct ra_format *fmt)
 {
     MP_VERBOSE(p, "Testing FBO format %s\n", fmt->name);
     struct fbotex fbo = {0};
-    bool success = fbotex_init(&fbo, p->ra, p->log, 16, 16, fmt);
+    bool success = fbotex_change(&fbo, p->ra, p->log, 16, 16, fmt, 0);
     fbotex_uninit(&fbo);
     return success;
 }

@@ -69,8 +69,6 @@ struct fbotex {
     int lw, lh; // logical (configured) size, <= than texture size
 };
 
-bool fbotex_init(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
-                 int w, int h, const struct ra_format *fmt);
 void fbotex_uninit(struct fbotex *fbo);
 bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
                    int w, int h, const struct ra_format *fmt, int flags);

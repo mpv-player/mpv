@@ -35,16 +35,7 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
 
 // Create a texture and a FBO using the texture as color attachments.
 //  fmt: texture internal format
-// Returns success.
-bool fbotex_init(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
-                 int w, int h, const struct ra_format *fmt)
-{
-    assert(!fbo->tex);
-    return fbotex_change(fbo, ra, log, w, h, fmt, 0);
-}
-
-// Like fbotex_init(), except it can be called on an already initialized FBO;
-// and if the parameters are the same as the previous call, do not touch it.
+// If the parameters are the same as the previous call, do not touch it.
 // flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
 // Enabling FUZZY for W or H means the w or h does not need to be exact.
 bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
