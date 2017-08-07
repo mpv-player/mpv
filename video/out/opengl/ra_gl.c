@@ -661,8 +661,11 @@ static GLuint load_program(struct ra *ra, const struct ra_renderpass_params *p,
             gl->GetProgramBinary(prog, size, &actual_size, &binary_format,
                                  buffer + 4);
             AV_WL32(buffer, binary_format);
-            if (actual_size)
+            if (actual_size) {
                 *out_cached_data = (bstr){buffer, actual_size + 4};
+            } else {
+                talloc_free(buffer);
+            }
         }
     }
 
