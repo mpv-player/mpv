@@ -176,7 +176,6 @@ struct dr_buffer {
 };
 
 struct gl_video {
-    GL *gl;
     struct ra *ra;
 
     struct mpv_global *global;
@@ -184,7 +183,6 @@ struct gl_video {
     struct gl_video_opts opts;
     struct m_config_cache *opts_cache;
     struct gl_lcms *cms;
-    bool gl_debug;
 
     int fb_depth;               // actual bits available in GL main framebuffer
 
@@ -252,7 +250,6 @@ struct gl_video {
     struct mp_rect src_rect;    // displayed part of the source video
     struct mp_rect dst_rect;    // video rectangle on output window
     struct mp_osd_res osd_rect; // OSD size/margins
-    int vp_w, vp_h;
 
     // temporary during rendering
     struct img_tex pass_tex[TEXUNIT_VIDEO_NUM];
@@ -459,17 +456,8 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
 
 static void debug_check_gl(struct gl_video *p, const char *msg)
 {
-    if (p->gl_debug)
-        gl_check_error(p->gl, p->log, msg);
-}
-
-void gl_video_set_debug(struct gl_video *p, bool enable)
-{
-    GL *gl = p->gl;
-
-    p->gl_debug = enable;
-    if (p->gl->debug_context)
-        gl_set_debug_logger(gl, enable ? p->log : NULL);
+    if (p->ra->fns->debug_marker)
+        p->ra->fns->debug_marker(p->ra, msg);
 }
 
 static void gl_video_reset_surfaces(struct gl_video *p)
@@ -1094,8 +1082,8 @@ static void pass_prepare_src_tex(struct gl_video *p)
         gl_sc_uniform_vec2(sc, texture_size, f);
         gl_sc_uniform_mat2(sc, texture_rot, true, (float *)s->transform.m);
         gl_sc_uniform_vec2(sc, texture_off, (float *)s->transform.t);
-        gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
-                                                       1.0f / f[1]});
+        gl_sc_uniform_vec2(sc, pixel_size, (float[]){1.0f / f[0],
+                                                     1.0f / f[1]});
     }
 }
 
@@ -1137,7 +1125,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
         // We need to rescale the coordinates to the true texture size
         char tex_scale[32];
         snprintf(tex_scale, sizeof(tex_scale), "tex_scale%d", n);
-        gl_sc_uniform_vec2(p->sc, tex_scale, (GLfloat[2]){
+        gl_sc_uniform_vec2(p->sc, tex_scale, (float[2]){
                 (float)s->w / s->tex->params.w,
                 (float)s->h / s->tex->params.h,
         });
@@ -1514,18 +1502,18 @@ static void load_shader(struct gl_video *p, struct bstr body)
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
     gl_sc_uniform_i(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "input_size",
-                       (GLfloat[]){(p->src_rect.x1 - p->src_rect.x0) *
-                                   p->texture_offset.m[0][0],
-                                   (p->src_rect.y1 - p->src_rect.y0) *
-                                   p->texture_offset.m[1][1]});
+                       (float[]){(p->src_rect.x1 - p->src_rect.x0) *
+                                  p->texture_offset.m[0][0],
+                                  (p->src_rect.y1 - p->src_rect.y0) *
+                                  p->texture_offset.m[1][1]});
     gl_sc_uniform_vec2(p->sc, "target_size",
-                       (GLfloat[]){p->dst_rect.x1 - p->dst_rect.x0,
-                                   p->dst_rect.y1 - p->dst_rect.y0});
+                       (float[]){p->dst_rect.x1 - p->dst_rect.x0,
+                                 p->dst_rect.y1 - p->dst_rect.y0});
     gl_sc_uniform_vec2(p->sc, "tex_offset",
-                       (GLfloat[]){p->src_rect.x0 * p->texture_offset.m[0][0] +
-                                   p->texture_offset.t[0],
-                                   p->src_rect.y0 * p->texture_offset.m[1][1] +
-                                   p->texture_offset.t[1]});
+                       (float[]){p->src_rect.x0 * p->texture_offset.m[0][0] +
+                                 p->texture_offset.t[0],
+                                 p->src_rect.y0 * p->texture_offset.m[1][1] +
+                                 p->texture_offset.t[1]});
 }
 
 // Semantic equality
@@ -1688,8 +1676,6 @@ static void pass_sample_separated(struct gl_video *p, struct img_tex src,
 static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler,
                                        struct img_tex tex, int w, int h)
 {
-    GL *gl = p->gl;
-
     uint64_t reqs = RA_CAP_COMPUTE | RA_CAP_NESTED_ARRAY;
     if ((p->ra->caps & reqs) != reqs)
         goto fallback;
@@ -1713,8 +1699,8 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
     int iw = (int)ceil(bw / ratiox) + padding + 1,
         ih = (int)ceil(bh / ratioy) + padding + 1;
 
-    int shmem_req = iw * ih * tex.components * sizeof(GLfloat);
-    if (shmem_req > gl->max_shmem)
+    int shmem_req = iw * ih * tex.components * sizeof(float);
+    if (shmem_req > p->ra->max_shmem)
         goto fallback;
 
     pass_is_compute(p, bw, bh);
@@ -2499,10 +2485,15 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     }
 }
 
+void gl_video_set_fb_depth(struct gl_video *p, int fb_depth)
+{
+    p->fb_depth = fb_depth;
+}
+
 static void pass_dither(struct gl_video *p)
 {
     // Assume 8 bits per component if unknown.
-    int dst_depth = p->fb_depth;
+    int dst_depth = p->fb_depth > 0 ? p->fb_depth : 8;
     if (p->opts.dither_depth > 0)
         dst_depth = p->opts.dither_depth;
 
@@ -3001,40 +2992,16 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     p->frames_drawn += 1;
 }
 
-// (fbo==0 makes BindFramebuffer select the screen backbuffer)
-void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
+void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
+                           struct fbodst target)
 {
-    GL *gl = p->gl;
-
-    if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
-        MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
-        return;
-    }
-
-    if (p->fb_depth == 0) {
-        debug_check_gl(p, "before retrieving framebuffer depth");
-        p->fb_depth = gl_get_fb_depth(gl, fbo);
-        debug_check_gl(p, "retrieving framebuffer depth");
-        if (p->fb_depth > 0) {
-            MP_VERBOSE(p, "Reported display depth: %d\n", p->fb_depth);
-        } else {
-            p->fb_depth = 8;
-        }
-    }
-
-    struct fbodst target = {
-        .tex = ra_create_wrapped_fb(p->ra, fbo, p->vp_w, abs(p->vp_h)),
-        .flip = p->vp_h < 0,
-    };
-    struct mp_rect target_rc = {0, 0, p->vp_w, abs(p->vp_h)};
+    struct mp_rect target_rc = {0, 0, target.tex->params.w, target.tex->params.h};
 
     p->broken_frame = false;
 
     bool has_frame = !!frame->current;
 
-    if (!has_frame || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
-        p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
-    {
+    if (!has_frame || !mp_rect_equals(&p->dst_rect, &target_rc)) {
         struct m_color c = p->opts.background;
         float color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
         p->ra->fns->clear(p->ra, target.tex, color, &target_rc);
@@ -3140,32 +3107,27 @@ done:
         p->ra->fns->clear(p->ra, target.tex, color, &target_rc);
     }
 
-    ra_tex_free(p->ra, &target.tex);
-
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
     // while we sleep (this happens asynchronously).
     if ((p->opts.early_flush == -1 && !frame->display_synced) ||
         p->opts.early_flush == 1)
     {
-        gl->Flush();
+        if (p->ra->fns->flush)
+            p->ra->fns->flush(p->ra);
     }
 
     p->frames_rendered++;
     pass_report_performance(p);
 }
 
-// vp_w/vp_h is the implicit size of the target framebuffer.
-// vp_h can be negative to flip the screen.
-void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
+void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd)
 {
     p->src_rect = *src;
     p->dst_rect = *dst;
     p->osd_rect = *osd;
-    p->vp_w = vp_w;
-    p->vp_h = vp_h;
 
     gl_video_reset_surfaces(p);
 
@@ -3173,7 +3135,7 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
 
     if (p->hwdec && p->hwdec->driver->overlay_adjust)
-        p->hwdec->driver->overlay_adjust(p->hwdec, vp_w, abs(vp_h), src, dst);
+        p->hwdec->driver->overlay_adjust(p->hwdec, src, dst);
 }
 
 static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)
@@ -3375,10 +3337,10 @@ static bool check_dumb_mode(struct gl_video *p)
 static void check_gl_features(struct gl_video *p)
 {
     struct ra *ra = p->ra;
-    GL *gl = p->gl;
     bool have_float_tex = !!ra_find_float16_format(ra, 1);
     bool have_mglsl = ra->glsl_version >= 130; // modern GLSL
-    bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
+    const struct ra_format *rg_tex = ra_find_unorm_format(p->ra, 1, 2);
+    bool have_texrg = rg_tex && !rg_tex->luminance_alpha;
     bool have_compute = ra->caps & RA_CAP_COMPUTE;
     bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
 
@@ -3512,8 +3474,6 @@ void gl_video_uninit(struct gl_video *p)
     if (!p)
         return;
 
-    GL *gl = p->gl;
-
     uninit_video(p);
 
     gl_sc_destroy(p->sc);
@@ -3532,8 +3492,6 @@ void gl_video_uninit(struct gl_video *p)
 
     mpgl_osd_destroy(p->osd);
 
-    gl_set_debug_logger(gl, NULL);
-
     // Forcibly destroy possibly remaining image references. This should also
     // cause gl_video_dr_free_buffer() to be called for the remaining buffers.
     gc_pending_dr_fences(p, true);
@@ -3541,8 +3499,7 @@ void gl_video_uninit(struct gl_video *p)
     // Should all have been unreffed already.
     assert(!p->num_dr_buffers);
 
-    p->ra->fns->destroy(p->ra);
-    talloc_free(p->ra);
+    ra_free(&p->ra);
     talloc_free(p);
 }
 
@@ -3603,18 +3560,11 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     reinit_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
+struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
+                               struct mpv_global *g)
 {
-    struct ra *ra = talloc_zero(NULL, struct ra);
-    ra->log = log;
-    if (ra_init_gl(ra, gl) < 0) {
-        talloc_free(ra);
-        return NULL;
-    }
-
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
-        .gl = gl,
         .ra = ra,
         .global = g,
         .log = log,
@@ -3628,7 +3578,6 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
     p->opts = *opts;
     for (int n = 0; n < SCALER_COUNT; n++)
         p->scaler[n] = (struct scaler){.index = n};
-    gl_video_set_debug(p, true);
     init_gl(p);
     reinit_from_options(p);
     return p;

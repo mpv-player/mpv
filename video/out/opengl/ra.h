@@ -21,6 +21,10 @@ struct ra {
     // at init time.
     int max_texture_wh;
 
+    // Maximum shared memory for compute shaders. Set by the RA backend at init
+    // time.
+    size_t max_shmem;
+
     // Set of supported texture formats. Must be added by RA backend at init time.
     struct ra_format **formats;
     int num_formats;
@@ -391,6 +395,12 @@ struct ra_fns {
     // always produce a value - and the values it does produce are typically
     // delayed by a few frames. When no value is available, this returns 0.
     uint64_t (*timer_stop)(struct ra *ra, ra_timer *timer);
+
+    // Hint that possibly queued up commands should be sent to the GPU. Optional.
+    void (*flush)(struct ra *ra);
+
+    // Optional.
+    void (*debug_marker)(struct ra *ra, const char *msg);
 };
 
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params);
@@ -398,6 +408,8 @@ void ra_tex_free(struct ra *ra, struct ra_tex **tex);
 
 struct ra_buf *ra_buf_create(struct ra *ra, const struct ra_buf_params *params);
 void ra_buf_free(struct ra *ra, struct ra_buf **buf);
+
+void ra_free(struct ra **ra);
 
 const struct ra_format *ra_find_unorm_format(struct ra *ra,
                                              int bytes_per_component,

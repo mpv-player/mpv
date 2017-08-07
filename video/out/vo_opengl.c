@@ -45,6 +45,7 @@
 #include "filter_kernels.h"
 #include "video/hwdec.h"
 #include "opengl/video.h"
+#include "opengl/ra_gl.h"
 
 #define NUM_VSYNC_FENCES 10
 
@@ -65,6 +66,7 @@ struct gl_priv {
     struct mp_log *log;
     MPGLContext *glctx;
     GL *gl;
+    struct ra *ra;
 
     struct vo_opengl_opts opts;
 
@@ -95,8 +97,7 @@ static void resize(struct gl_priv *p)
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
 
-    int height = p->glctx->flip_v ? vo->dheight : -vo->dheight;
-    gl_video_resize(p->renderer, vo->dwidth, height, &src, &dst, &osd);
+    gl_video_resize(p->renderer, &src, &dst, &osd);
 
     vo->want_redraw = true;
 }
@@ -130,7 +131,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             p->vsync_fences[p->num_vsync_fences++] = fence;
     }
 
-    gl_video_render_frame(p->renderer, frame, p->glctx->main_fb);
+    struct fbodst target = {
+        .tex = ra_create_wrapped_fb(p->ra, p->glctx->main_fb,
+                                    vo->dwidth, vo->dheight),
+        .flip = !p->glctx->flip_v,
+    };
+    gl_video_render_frame(p->renderer, frame, target);
+    ra_tex_free(p->ra, &target.tex);
 
     if (p->opts.use_glFinish)
         gl->Finish();
@@ -145,7 +152,7 @@ static void flip_page(struct vo *vo)
 
     p->frames_rendered++;
     if (p->frames_rendered > 5 && !p->opts.use_gl_debug)
-        gl_video_set_debug(p->renderer, false);
+        ra_gl_set_debug(p->ra, false);
 
     if (p->opts.use_glFinish)
         gl->Finish();
@@ -422,9 +429,11 @@ static int preinit(struct vo *vo)
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
 
-    p->renderer = gl_video_init(p->gl, vo->log, vo->global);
-    if (!p->renderer)
+    p->ra = ra_create_gl(p->gl, vo->log);
+    if (!p->ra)
         goto err_out;
+
+    p->renderer = gl_video_init(p->ra, vo->log, vo->global);
     gl_video_set_osd_source(p->renderer, vo->osd);
     gl_video_configure_queue(p->renderer, vo);
 
@@ -437,6 +446,13 @@ static int preinit(struct vo *vo)
     p->hwdec = gl_hwdec_load(p->vo->log, p->gl, vo->global,
                              vo->hwdec_devs, vo->opts->gl_hwdec_interop);
     gl_video_set_hwdec(p->renderer, p->hwdec);
+
+    gl_check_error(p->gl, p->log, "before retrieving framebuffer depth");
+    int fb_depth = gl_get_fb_depth(p->gl, p->glctx->main_fb);
+    gl_check_error(p->gl, p->log, "retrieving framebuffer depth");
+    if (fb_depth)
+        MP_VERBOSE(p, "Reported display depth: %d\n", fb_depth);
+    gl_video_set_fb_depth(p->renderer, fb_depth);
 
     return 0;
 

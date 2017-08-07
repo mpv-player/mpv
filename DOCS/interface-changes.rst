@@ -30,6 +30,11 @@ Interface changes
     - --opengl-fbo-format changes from a choice to a string. Also, its value
       will be checked only on renderer initialization, rather than when the
       option is set.
+    - Using opengl-cb now always assumes 8 bit per component depth, and dithers
+      to this size. Before, it tried to figure out the depth of the first
+      framebuffer that was ever passed to the renderer. Having GL framebuffers
+      with a size larger than 8 bit per component is quite rare. If you need
+      it, set the --dither-depth option instead.
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

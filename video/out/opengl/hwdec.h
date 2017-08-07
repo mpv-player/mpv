@@ -76,7 +76,7 @@ struct gl_hwdec_driver {
     int (*overlay_frame)(struct gl_hwdec *hw, struct mp_image *hw_image);
 
     // Move overlay position within the "window".
-    void (*overlay_adjust)(struct gl_hwdec *hw, int w, int h,
+    void (*overlay_adjust)(struct gl_hwdec *hw,
                            struct mp_rect *src, struct mp_rect *dst);
 };
 

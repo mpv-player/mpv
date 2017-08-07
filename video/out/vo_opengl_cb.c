@@ -27,6 +27,7 @@
 #include "opengl/common.h"
 #include "opengl/video.h"
 #include "opengl/hwdec.h"
+#include "opengl/ra_gl.h"
 
 #include "libmpv/opengl_cb.h"
 
@@ -87,6 +88,7 @@ struct mpv_opengl_cb_context {
     //     application's OpenGL context is current - i.e. only while the
     //     host application is calling certain mpv_opengl_cb_* APIs.
     GL *gl;
+    struct ra *ra;
     struct gl_video *renderer;
     struct gl_hwdec *hwdec;
     struct m_config_cache *vo_opts_cache;
@@ -171,9 +173,11 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
         return MPV_ERROR_UNSUPPORTED;
     }
 
-    ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->global);
-    if (!ctx->renderer)
+    ctx->ra = ra_create_gl(ctx->gl, ctx->log);
+    if (!ctx->ra)
         return MPV_ERROR_UNSUPPORTED;
+
+    ctx->renderer = gl_video_init(ctx->ra, ctx->log, ctx->global);
 
     m_config_cache_update(ctx->vo_opts_cache);
 
@@ -223,6 +227,7 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->hwdec = NULL;
     hwdec_devices_destroy(ctx->hwdec_devs);
     ctx->hwdec_devs = NULL;
+    ra_free(&ctx->ra);
     talloc_free(ctx->gl);
     ctx->gl = NULL;
     return 0;
@@ -231,6 +236,16 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
+
+    if (fbo && !(ctx->gl->mpgl_caps & MPGL_CAP_FB)) {
+        MP_FATAL(ctx, "Rendering to FBO requested, but no FBO extension found!\n");
+        return MPV_ERROR_UNSUPPORTED;
+    }
+
+    struct fbodst target = {
+        .tex = ra_create_wrapped_fb(ctx->ra, fbo, vp_w, abs(vp_h)),
+        .flip = vp_h < 0,
+    };
 
     reset_gl_state(ctx->gl);
 
@@ -256,7 +271,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
                              &ctx->img_params, vp_w, abs(vp_h),
                              1.0, &src, &dst, &osd);
 
-        gl_video_resize(ctx->renderer, vp_w, vp_h, &src, &dst, &osd);
+        gl_video_resize(ctx->renderer, &src, &dst, &osd);
     }
 
     if (ctx->reconfigured) {
@@ -272,7 +287,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         mp_read_option_raw(ctx->global, "opengl-debug", &m_option_type_flag,
                            &debug);
         ctx->gl->debug_context = debug;
-        gl_video_set_debug(ctx->renderer, debug);
+        ra_gl_set_debug(ctx->ra, debug);
         if (gl_video_icc_auto_enabled(ctx->renderer))
             MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
@@ -315,7 +330,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     pthread_mutex_unlock(&ctx->lock);
 
     MP_STATS(ctx, "glcb-render");
-    gl_video_render_frame(ctx->renderer, frame, fbo);
+    gl_video_render_frame(ctx->renderer, frame, target);
 
     reset_gl_state(ctx->gl);
 
@@ -326,6 +341,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     while (wait_present_count > ctx->present_count)
         pthread_cond_wait(&ctx->wakeup, &ctx->lock);
     pthread_mutex_unlock(&ctx->lock);
+
+    ra_tex_free(ctx->ra, &target.tex);
 
     return 0;
 }

@@ -24,7 +24,6 @@
 #include "sub/osd.h"
 #include "common.h"
 #include "utils.h"
-#include "gl_utils.h"
 #include "lcms.h"
 #include "shader_cache.h"
 #include "video/out/filter_kernels.h"
@@ -150,23 +149,24 @@ extern const struct m_sub_options gl_video_conf;
 struct gl_video;
 struct vo_frame;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
+struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
+                               struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_update_options(struct gl_video *p);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
-void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo);
-void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
+void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
+                           struct fbodst target);
+void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
+void gl_video_set_fb_depth(struct gl_video *p, int fb_depth);
 void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out);
 struct mp_csp_equalizer;
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
 void gl_video_eq_update(struct gl_video *p);
-
-void gl_video_set_debug(struct gl_video *p, bool enable);
 
 float gl_video_scale_ambient_lux(float lmin, float lmax,
                                  float rmin, float rmax, float lux);

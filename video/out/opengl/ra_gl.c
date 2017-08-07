@@ -6,7 +6,7 @@
 
 static struct ra_fns ra_fns_gl;
 
-int ra_init_gl(struct ra *ra, GL *gl)
+static int ra_init_gl(struct ra *ra, GL *gl)
 {
     if (gl->version < 210 && gl->es < 200) {
         MP_ERR(ra, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -15,6 +15,8 @@ int ra_init_gl(struct ra *ra, GL *gl)
 
     struct ra_gl *p = ra->priv = talloc_zero(NULL, struct ra_gl);
     p->gl = gl;
+
+    ra_gl_set_debug(ra, true);
 
     ra->fns = &ra_fns_gl;
     ra->caps = 0;
@@ -100,18 +102,44 @@ int ra_init_gl(struct ra *ra, GL *gl)
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
     }
 
-    GLint max_wh;
-    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_wh);
-    ra->max_texture_wh = max_wh;
+    GLint ival;
+    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &ival);
+    ra->max_texture_wh = ival;
+
+    if (ra->caps & RA_CAP_COMPUTE) {
+        gl->GetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, &ival);
+        ra->max_shmem = ival;
+    }
 
     gl->Disable(GL_DITHER);
 
     return 0;
 }
 
+struct ra *ra_create_gl(GL *gl, struct mp_log *log)
+{
+    struct ra *ra = talloc_zero(NULL, struct ra);
+    ra->log = log;
+    if (ra_init_gl(ra, gl) < 0) {
+        talloc_free(ra);
+        return NULL;
+    }
+    return ra;
+}
+
 static void gl_destroy(struct ra *ra)
 {
     talloc_free(ra->priv);
+}
+
+void ra_gl_set_debug(struct ra *ra, bool enable)
+{
+    struct ra_gl *p = ra->priv;
+    GL *gl = ra_gl_get(ra);
+
+    p->debug_enable = enable;
+    if (gl->debug_context)
+        gl_set_debug_logger(gl, enable ? ra->log : NULL);
 }
 
 static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
@@ -949,6 +977,20 @@ static uint64_t gl_timer_stop(struct ra *ra, ra_timer *ratimer)
     return timer->result;
 }
 
+static void gl_flush(struct ra *ra)
+{
+    GL *gl = ra_gl_get(ra);
+    gl->Flush();
+}
+
+static void gl_debug_marker(struct ra *ra, const char *msg)
+{
+    struct ra_gl *p = ra->priv;
+
+    if (p->debug_enable)
+        gl_check_error(p->gl, ra->log, msg);
+}
+
 static struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
@@ -966,4 +1008,6 @@ static struct ra_fns ra_fns_gl = {
     .timer_destroy          = gl_timer_destroy,
     .timer_start            = gl_timer_start,
     .timer_stop             = gl_timer_stop,
+    .flush                  = gl_flush,
+    .debug_marker           = gl_debug_marker,
 };

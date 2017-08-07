@@ -7,6 +7,7 @@
 // For ra.priv
 struct ra_gl {
     GL *gl;
+    bool debug_enable;
 };
 
 // For ra_tex.priv
@@ -37,11 +38,11 @@ struct ra_renderpass_gl {
     struct gl_vao vao;
 };
 
-int ra_init_gl(struct ra *ra, GL *gl);
+struct ra *ra_create_gl(GL *gl, struct mp_log *log);
 struct ra_tex *ra_create_wrapped_texture(struct ra *ra, GLuint gl_texture,
                                          GLenum gl_target, GLint gl_iformat,
                                          GLenum gl_format, GLenum gl_type,
                                          int w, int h);
 struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h);
-
 GL *ra_gl_get(struct ra *ra);
+void ra_gl_set_debug(struct ra *ra, bool enable);

@@ -28,6 +28,14 @@ void ra_buf_free(struct ra *ra, struct ra_buf **buf)
     *buf = NULL;
 }
 
+void ra_free(struct ra **ra)
+{
+    if (*ra)
+        (*ra)->fns->destroy(*ra);
+    talloc_free(*ra);
+    *ra = NULL;
+}
+
 static size_t vartype_size(enum ra_vartype type)
 {
     switch (type) {

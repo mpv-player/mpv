@@ -50,7 +50,6 @@ struct priv {
 
     struct mp_image *current_frame;
 
-    int w, h;
     struct mp_rect src, dst;
     int cur_window[4]; // raw user params
 };
@@ -130,9 +129,6 @@ static void update_overlay(struct gl_hwdec *hw, bool check_window_only)
     MMAL_PORT_T *input = p->renderer->input[0];
     struct mp_rect src = p->src;
     struct mp_rect dst = p->dst;
-
-    if (!p->w || !p->h)
-        return;
 
     int defs[4] = {0, 0, 0, 0};
     int *z = mpgl_get_native_display(gl, "MPV_RPI_WINDOW");
@@ -248,13 +244,11 @@ static int enable_renderer(struct gl_hwdec *hw)
     return 0;
 }
 
-static void overlay_adjust(struct gl_hwdec *hw, int w, int h,
+static void overlay_adjust(struct gl_hwdec *hw,
                            struct mp_rect *src, struct mp_rect *dst)
 {
     struct priv *p = hw->priv;
 
-    p->w = w;
-    p->h = h;
     p->src = *src;
     p->dst = *dst;
 
