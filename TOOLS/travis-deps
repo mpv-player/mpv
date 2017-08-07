@@ -129,7 +129,7 @@ end
 class Dependencies < TravisDepsBuilder
   def deps
     packages = {
-      'linux' => 'pkg-config fontconfig libfribidi-dev yasm',
+      'linux' => 'pkg-config fontconfig libfribidi-dev yasm libxinerama-dev libxrandr-dev',
       'osx'   => 'pkg-config fontconfig freetype fribidi yasm'
     }
     package_manager_update
