@@ -139,6 +139,9 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
         GLenum type = 0;
         bool normalized = false;
         switch (e->type) {
+            case RA_VARTYPE_INT:
+            type = GL_INT;
+            break;
         case RA_VARTYPE_FLOAT:
             type = GL_FLOAT;
             break;
