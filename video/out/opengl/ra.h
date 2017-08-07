@@ -107,16 +107,27 @@ struct ra_tex {
     void *priv;
 };
 
-// Buffer usage hints. Which hint is specified may affect which operations can
-// be done on the buffer.
+// Buffer storage location hints. No effect on semantics, and can be completely
+// ignored by the backend.
+enum ra_buf_loc {
+    RA_BUF_CPU_MEMORY,
+    RA_BUF_GPU_MEMORY,
+};
+
+// Buffer usage mode hint. Setting this may result in more or less efficient
+// operation
 enum ra_buf_usage {
-    RA_BUF_HOST_MAPPED,    // Host-visible, will be persistently mapped
-    RA_BUF_SHADER_STORAGE, // Will be used for on-GPU shader operations only
+    RA_BUF_STREAMED, // will be updated and consumed in lockstep
+    RA_BUF_STATIC,   // will be updated once and reused often (static data)
+    RA_BUF_DYNAMIC,  // will be written to and read from often and in any order
 };
 
 struct ra_buf_params {
+    enum ra_buf_loc location;
     enum ra_buf_usage usage;
     size_t size;
+    // Creates a read-writable persistent mapping (ra_buf.data)
+    bool host_mapped;
     // If non-NULL, the buffer will be created with these contents. Otherwise,
     // the initial data is undefined.
     void *initial_data;

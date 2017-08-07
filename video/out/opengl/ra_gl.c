@@ -405,12 +405,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
 {
     GL *gl = ra_gl_get(ra);
 
-    static const int min_gl_ver[] = {
-        [RA_BUF_HOST_MAPPED]    = 440,
-        [RA_BUF_SHADER_STORAGE] = 430,
-    };
-
-    if (gl->version < min_gl_ver[params->usage])
+    if (params->host_mapped && gl->version < 440)
         return NULL;
 
     struct ra_buf *buf = talloc_zero(NULL, struct ra_buf);
@@ -421,12 +416,16 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
     gl->GenBuffers(1, &buf_gl->buffer);
     gl->BindBuffer(GL_ARRAY_BUFFER, buf_gl->buffer);
 
-    if (params->usage == RA_BUF_HOST_MAPPED) {
-        unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT |
-                         GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+    if (params->host_mapped) {
+        unsigned flags = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT |
+                         GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
+
+        unsigned storflags = 0;
+        if (params->location == RA_BUF_CPU_MEMORY)
+            storflags |= GL_CLIENT_STORAGE_BIT;
 
         gl->BufferStorage(GL_ARRAY_BUFFER, params->size, params->initial_data,
-                          flags | GL_CLIENT_STORAGE_BIT);
+                          flags | storflags);
         buf->data = gl->MapBufferRange(GL_ARRAY_BUFFER, 0, params->size, flags);
         if (!buf->data) {
             gl_check_error(gl, ra->log, "mapping buffer");
@@ -434,12 +433,19 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
             buf = NULL;
         }
     } else {
-        static const GLenum gl_hint[] = {
-            [RA_BUF_SHADER_STORAGE] = GL_STREAM_COPY,
+        static const GLenum gl_hint[2][3] = {
+            // _DRAW and _COPY seem to relatively reliably map to CPU and GPU
+            [RA_BUF_CPU_MEMORY][RA_BUF_STREAMED] = GL_STREAM_DRAW,
+            [RA_BUF_CPU_MEMORY][RA_BUF_STATIC]   = GL_STATIC_DRAW,
+            [RA_BUF_CPU_MEMORY][RA_BUF_DYNAMIC]  = GL_DYNAMIC_DRAW,
+
+            [RA_BUF_GPU_MEMORY][RA_BUF_STREAMED] = GL_STREAM_COPY,
+            [RA_BUF_GPU_MEMORY][RA_BUF_STATIC]   = GL_STATIC_COPY,
+            [RA_BUF_GPU_MEMORY][RA_BUF_DYNAMIC]  = GL_DYNAMIC_COPY,
         };
 
         gl->BufferData(GL_ARRAY_BUFFER, params->size, params->initial_data,
-                       gl_hint[params->usage]);
+                       gl_hint[params->location][params->usage]);
     }
 
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);

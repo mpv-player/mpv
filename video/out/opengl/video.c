@@ -2464,7 +2464,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             peak_ssbo.frame_max[i] = safe;
 
         struct ra_buf_params params = {
-            .usage = RA_BUF_SHADER_STORAGE,
+            .location = RA_BUF_GPU_MEMORY,
+            .usage = RA_BUF_STREAMED,
             .size = sizeof(peak_ssbo),
             .initial_data = &peak_ssbo,
         };
@@ -3807,7 +3808,9 @@ void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
 {
     struct ra_buf_params params = {
-        .usage = RA_BUF_HOST_MAPPED,
+        .location = RA_BUF_CPU_MEMORY,
+        .usage = RA_BUF_STREAMED,
+        .host_mapped = true,
         .size = size,
     };
 
