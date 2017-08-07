@@ -55,6 +55,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             .priv           = (void *)gl_fmt,
             .ctype          = gl_format_type(gl_fmt),
             .num_components = gl_format_components(gl_fmt->format),
+            .ordered        = gl_fmt->format != GL_RGB_422_APPLE,
             .pixel_size     = gl_bytes_per_pixel(gl_fmt->format, gl_fmt->type),
             .luminance_alpha = gl_fmt->format == GL_LUMINANCE_ALPHA,
             .linear_filter  = gl_fmt->flags & F_TF,

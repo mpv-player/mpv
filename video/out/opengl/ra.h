@@ -60,6 +60,8 @@ struct ra_format {
     const char *name;       // symbolic name for user interaction/debugging
     void *priv;
     enum ra_ctype ctype;    // data type of each component
+    bool ordered;           // components are sequential in memory, and returned
+                            // by the shader in memory order
     int num_components;     // component count, 0 if not applicable, max. 4
     int component_size[4];  // in bits, all entries 0 if not applicable
     int component_depth[4]; // bits in use for each component, 0 if not applicable

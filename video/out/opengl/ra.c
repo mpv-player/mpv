@@ -82,10 +82,11 @@ struct ra_renderpass_params *ra_render_pass_params_copy(void *ta_parent,
 
 
 // Return whether this is a tightly packed format with no external padding and
-// with the same bit size/depth in all components.
+// with the same bit size/depth in all components, and the shader returns
+// components in the same order as in memory.
 static bool ra_format_is_regular(const struct ra_format *fmt)
 {
-    if (!fmt->pixel_size || !fmt->num_components)
+    if (!fmt->pixel_size || !fmt->num_components || !fmt->ordered)
         return false;
     for (int n = 1; n < fmt->num_components; n++) {
         if (fmt->component_size[n] != fmt->component_size[0] ||
