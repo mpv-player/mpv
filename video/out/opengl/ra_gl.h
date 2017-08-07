@@ -35,7 +35,6 @@ struct ra_renderpass_gl {
     GLint *uniform_loc;
     int num_uniform_loc; // == ra_renderpass_params.num_inputs
     struct gl_vao vao;
-    bool first_run;
 };
 
 int ra_init_gl(struct ra *ra, GL *gl);

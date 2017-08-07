@@ -690,17 +690,27 @@ static struct ra_renderpass *gl_renderpass_create(struct ra *ra,
     talloc_steal(pass, cached.start);
     pass->params.cached_program = cached;
 
+    gl->UseProgram(pass_gl->program);
     for (int n = 0; n < params->num_inputs; n++) {
         GLint loc =
             gl->GetUniformLocation(pass_gl->program, params->inputs[n].name);
         MP_TARRAY_APPEND(pass_gl, pass_gl->uniform_loc, pass_gl->num_uniform_loc,
                          loc);
+
+        // For compatibility with older OpenGL, we need to explicitly update
+        // the texture/image unit bindings after creating the shader program,
+        // since specifying it directly requires GLSL 4.20+
+        switch (params->inputs[n].type) {
+        case RA_VARTYPE_TEX:
+        case RA_VARTYPE_IMG_W:
+            gl->Uniform1i(loc, params->inputs[n].binding);
+            break;
+        }
     }
+    gl->UseProgram(0);
 
     gl_vao_init(&pass_gl->vao, gl, params->vertex_stride, params->vertex_attribs,
                 params->num_vertex_attribs);
-
-    pass_gl->first_run = true;
 
     return pass;
 }
@@ -761,8 +771,6 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         struct ra_tex *tex = *(struct ra_tex **)val->data;
         struct ra_tex_gl *tex_gl = tex->priv;
         assert(tex->params.render_src);
-        if (pass_gl->first_run)
-            gl->Uniform1i(loc, input->binding);
         if (input->type == RA_VARTYPE_TEX) {
             gl->ActiveTexture(GL_TEXTURE0 + input->binding);
             gl->BindTexture(tex_gl->target, tex_gl->texture);
@@ -867,8 +875,6 @@ static void gl_renderpass_run(struct ra *ra,
     gl->ActiveTexture(GL_TEXTURE0);
 
     gl->UseProgram(0);
-
-    pass_gl->first_run = false;
 }
 
 // Timers in GL use query objects, and are asynchronous. So pool a few of
