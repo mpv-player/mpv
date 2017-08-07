@@ -329,16 +329,16 @@ GL *ra_gl_get(struct ra *ra)
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
                           const void *src, ptrdiff_t stride,
                           struct mp_rect *rc, uint64_t flags,
-                          struct ra_mapped_buffer *buf)
+                          struct ra_buf *buf)
 {
     GL *gl = ra_gl_get(ra);
     struct ra_tex_gl *tex_gl = tex->priv;
-    struct ra_mapped_buffer_gl *buf_gl = NULL;
+    struct ra_buf_gl *buf_gl = NULL;
     struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
 
     if (buf) {
         buf_gl = buf->priv;
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->buffer);
         src = (void *)((uintptr_t)src - (uintptr_t)buf->data);
     }
 
@@ -380,57 +380,84 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
     }
 }
 
-static void gl_destroy_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
+static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
 {
+    if (!buf)
+        return;
+
     GL *gl = ra_gl_get(ra);
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv;
+    struct ra_buf_gl *buf_gl = buf->priv;
 
     gl->DeleteSync(buf_gl->fence);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
-    if (buf->data)
-        gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    gl->DeleteBuffers(1, &buf_gl->pbo);
+    if (buf->data) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, buf_gl->buffer);
+        gl->UnmapBuffer(GL_ARRAY_BUFFER);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+    gl->DeleteBuffers(1, &buf_gl->buffer);
 
     talloc_free(buf_gl);
     talloc_free(buf);
 }
 
-static struct ra_mapped_buffer *gl_create_mapped_buffer(struct ra *ra,
-                                                        size_t size)
+static struct ra_buf *gl_buf_create(struct ra *ra,
+                                    const struct ra_buf_params *params)
 {
     GL *gl = ra_gl_get(ra);
 
-    if (gl->version < 440)
+    if (params->host_mapped && gl->version < 440)
         return NULL;
 
-    struct ra_mapped_buffer *buf = talloc_zero(NULL, struct ra_mapped_buffer);
-    buf->size = size;
+    struct ra_buf *buf = talloc_zero(NULL, struct ra_buf);
+    buf->params = *params;
+    buf->params.initial_data = NULL;
 
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv =
-        talloc_zero(NULL, struct ra_mapped_buffer_gl);
+    struct ra_buf_gl *buf_gl = buf->priv = talloc_zero(NULL, struct ra_buf_gl);
+    gl->GenBuffers(1, &buf_gl->buffer);
+    gl->BindBuffer(GL_ARRAY_BUFFER, buf_gl->buffer);
 
-    unsigned flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
-                     GL_MAP_COHERENT_BIT;
+    if (params->host_mapped) {
+        unsigned flags = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT |
+                         GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
 
-    gl->GenBuffers(1, &buf_gl->pbo);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->pbo);
-    gl->BufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, flags | GL_CLIENT_STORAGE_BIT);
-    buf->data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buf->size, flags);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    if (!buf->data) {
-        gl_check_error(gl, ra->log, "mapping buffer");
-        gl_destroy_mapped_buffer(ra, buf);
-        return NULL;
+        unsigned storflags = 0;
+        if (params->location == RA_BUF_CPU_MEMORY)
+            storflags |= GL_CLIENT_STORAGE_BIT;
+
+        gl->BufferStorage(GL_ARRAY_BUFFER, params->size, params->initial_data,
+                          flags | storflags);
+        buf->data = gl->MapBufferRange(GL_ARRAY_BUFFER, 0, params->size, flags);
+        if (!buf->data) {
+            gl_check_error(gl, ra->log, "mapping buffer");
+            gl_buf_destroy(ra, buf);
+            buf = NULL;
+        }
+    } else {
+        static const GLenum gl_hint[2][3] = {
+            // _DRAW and _COPY seem to relatively reliably map to CPU and GPU
+            [RA_BUF_CPU_MEMORY][RA_BUF_STREAMED] = GL_STREAM_DRAW,
+            [RA_BUF_CPU_MEMORY][RA_BUF_STATIC]   = GL_STATIC_DRAW,
+            [RA_BUF_CPU_MEMORY][RA_BUF_DYNAMIC]  = GL_DYNAMIC_DRAW,
+
+            [RA_BUF_GPU_MEMORY][RA_BUF_STREAMED] = GL_STREAM_COPY,
+            [RA_BUF_GPU_MEMORY][RA_BUF_STATIC]   = GL_STATIC_COPY,
+            [RA_BUF_GPU_MEMORY][RA_BUF_DYNAMIC]  = GL_DYNAMIC_COPY,
+        };
+
+        gl->BufferData(GL_ARRAY_BUFFER, params->size, params->initial_data,
+                       gl_hint[params->location][params->usage]);
     }
 
+    gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     return buf;
 }
 
-static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_mapped_buffer *buf)
+static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_buf *buf)
 {
+    assert(buf->data);
+
     GL *gl = ra_gl_get(ra);
-    struct ra_mapped_buffer_gl *buf_gl = buf->priv;
+    struct ra_buf_gl *buf_gl = buf->priv;
 
     if (buf_gl->fence) {
         GLenum res = gl->ClientWaitSync(buf_gl->fence, 0, 0); // non-blocking
@@ -744,8 +771,10 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         break;
     }
     case RA_VARTYPE_SSBO: {
-        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding,
-                           *(int *)val->data);
+        struct ra_buf *buf = *(struct ra_buf **)val->data;
+        struct ra_buf_gl *buf_gl = buf->priv;
+        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding, buf_gl->buffer);
+        gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         break;
     }
     default:
@@ -915,8 +944,8 @@ static struct ra_fns ra_fns_gl = {
     .tex_create             = gl_tex_create,
     .tex_destroy            = gl_tex_destroy,
     .tex_upload             = gl_tex_upload,
-    .create_mapped_buffer   = gl_create_mapped_buffer,
-    .destroy_mapped_buffer  = gl_destroy_mapped_buffer,
+    .buf_create             = gl_buf_create,
+    .buf_destroy            = gl_buf_destroy,
     .poll_mapped_buffer     = gl_poll_mapped_buffer,
     .clear                  = gl_clear,
     .blit                   = gl_blit,

@@ -22,9 +22,9 @@ struct ra_tex_gl {
     struct gl_pbo_upload pbo;
 };
 
-// For ra_mapped_buffer.priv
-struct ra_mapped_buffer_gl {
-    GLuint pbo;
+// For ra_buf.priv
+struct ra_buf_gl {
+    GLuint buffer;
     GLsync fence;
 };
 
