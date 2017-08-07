@@ -32,13 +32,13 @@ struct ra {
 };
 
 enum {
-    RA_CAP_TEX_1D = 1 << 0,     // supports 1D textures (as shader source textures)
-    RA_CAP_TEX_3D = 1 << 1,     // supports 3D textures (as shader source textures)
-    RA_CAP_BLIT   = 1 << 2,     // supports ra_fns.blit
-    RA_CAP_COMPUTE = 1 << 3,    // supports compute shaders
-    RA_CAP_PBO    = 1 << 4,     // supports ra.use_pbo
-    RA_CAP_BUF_RW = 1 << 5,     // supports RA_VARTYPE_BUF_RW
-    RA_CAP_NESTED_ARRAY = 1 << 5,
+    RA_CAP_TEX_1D         = 1 << 0, // supports 1D textures (as shader inputs)
+    RA_CAP_TEX_3D         = 1 << 1, // supports 3D textures (as shader inputs)
+    RA_CAP_BLIT           = 1 << 2, // supports ra_fns.blit
+    RA_CAP_COMPUTE        = 1 << 3, // supports compute shaders
+    RA_CAP_PBO            = 1 << 4, // supports ra.use_pbo
+    RA_CAP_BUF_RW         = 1 << 5, // supports RA_VARTYPE_BUF_RW
+    RA_CAP_NESTED_ARRAY   = 1 << 6, // supports nested arrays
 };
 
 enum ra_ctype {
