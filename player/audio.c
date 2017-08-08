@@ -878,7 +878,9 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
             break;
 
         res = decode_new_frame(ao_c);
-        if (res == AD_NO_PROGRESS || res == AD_WAIT)
+        if (res == AD_NO_PROGRESS)
+            continue;
+        if (res == AD_WAIT)
             break;
         if (res < 0) {
             // drain filters first (especially for true EOF case)
@@ -970,7 +972,9 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (ao_c->af->initialized < 1 || !mpctx->ao) {
         // Probe the initial audio format. Returns AD_OK (and does nothing) if
         // the format is already known.
-        int r = decode_new_frame(mpctx->ao_chain);
+        int r = AD_NO_PROGRESS;
+        while (r == AD_NO_PROGRESS)
+            r = decode_new_frame(mpctx->ao_chain);
         if (r == AD_WAIT)
             return; // continue later when new data is available
         if (r == AD_EOF) {
