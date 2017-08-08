@@ -26,6 +26,8 @@ struct ra {
     size_t max_shmem;
 
     // Set of supported texture formats. Must be added by RA backend at init time.
+    // If there are equivalent formats with different caveats, the preferred
+    // formats should have a lower index. (E.g. GLES3 should put rg8 before la.)
     struct ra_format **formats;
     int num_formats;
 
@@ -61,7 +63,8 @@ struct ra_format {
     void *priv;
     enum ra_ctype ctype;    // data type of each component
     bool ordered;           // components are sequential in memory, and returned
-                            // by the shader in memory order
+                            // by the shader in memory order (the shader can
+                            // return arbitrary values for unused components)
     int num_components;     // component count, 0 if not applicable, max. 4
     int component_size[4];  // in bits, all entries 0 if not applicable
     int component_depth[4]; // bits in use for each component, 0 if not applicable
