@@ -291,7 +291,7 @@
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
     self.hasMouseDown = (state == MP_KEY_STATE_DOWN);
-    int mpkey = (MP_MOUSE_BASE + [self mpvButtonNumber:event]);
+    int mpkey = [self mpvButtonNumber:event];
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }
 
@@ -326,9 +326,12 @@
 {
     int buttonNumber = [event buttonNumber];
     switch (buttonNumber) {
-        case 1:  return 2;
-        case 2:  return 1;
-        default: return buttonNumber;
+        case 0:  return MP_MBTN_LEFT;
+        case 1:  return MP_MBTN_RIGHT;
+        case 2:  return MP_MBTN_MID;
+        case 3:  return MP_MBTN_BACK;
+        case 4:  return MP_MBTN_FORWARD;
+        default: return MP_MBTN9 - 5 + buttonNumber;
     }
 }
 @end
