@@ -608,11 +608,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
             break;
         case SDL_MOUSEBUTTONDOWN:
             mp_input_put_key(vo->input_ctx,
-                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
+                (MP_MOUSE_BASE + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
             mp_input_put_key(vo->input_ctx,
-                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_UP);
+                (MP_MOUSE_BASE + ev.button.button - 1) | MP_KEY_STATE_UP);
             break;
         case SDL_MOUSEWHEEL:
             break;

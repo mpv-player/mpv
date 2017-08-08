@@ -403,7 +403,7 @@ static void pointer_handle_enter(void *data,
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
-    mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
+    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
     show_cursor(wl);
 }
 
@@ -448,13 +448,13 @@ static void pointer_handle_button(void *data,
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
-    button = button == BTN_LEFT   ? MP_MOUSE_BTN0 :
-             button == BTN_MIDDLE ? MP_MOUSE_BTN1 : MP_MOUSE_BTN2;
+    button = button == BTN_LEFT   ? MP_MBTN_LEFT :
+             button == BTN_MIDDLE ? MP_MBTN_MID : MP_MBTN_RIGHT;
 
     mp_input_put_key(wl->vo->input_ctx, button | state);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->window.mouse_x, wl->window.mouse_y) &&
-        (button == MP_MOUSE_BTN0) && (state == MP_KEY_STATE_DOWN))
+        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
         window_move(wl, serial);
 }
 

@@ -413,13 +413,13 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
 
-    if (btn == MP_MOUSE_BTN0 && !w32->current_fs &&
+    if (btn == MP_MBTN_LEFT && !w32->current_fs &&
         !mp_input_test_dragging(w32->input_ctx, x, y))
     {
         // Window dragging hack
         ReleaseCapture();
         SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-        mp_input_put_key(w32->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
+        mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 
         // Indicate the message was handled, so DefWindowProc won't be called
         return true;
@@ -1096,26 +1096,26 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_LBUTTONDOWN:
-        if (handle_mouse_down(w32, MP_MOUSE_BTN0, GET_X_LPARAM(lParam),
-                                                  GET_Y_LPARAM(lParam)))
+        if (handle_mouse_down(w32, MP_MBTN_LEFT, GET_X_LPARAM(lParam),
+                                                 GET_Y_LPARAM(lParam)))
             return 0;
         break;
     case WM_LBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN0);
+        handle_mouse_up(w32, MP_MBTN_LEFT);
         break;
     case WM_MBUTTONDOWN:
-        handle_mouse_down(w32, MP_MOUSE_BTN1, GET_X_LPARAM(lParam),
-                                              GET_Y_LPARAM(lParam));
+        handle_mouse_down(w32, MP_MBTN_MID, GET_X_LPARAM(lParam),
+                                            GET_Y_LPARAM(lParam));
         break;
     case WM_MBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN1);
+        handle_mouse_up(w32, MP_MBTN_MID);
         break;
     case WM_RBUTTONDOWN:
-        handle_mouse_down(w32, MP_MOUSE_BTN2, GET_X_LPARAM(lParam),
+        handle_mouse_down(w32, MP_MBTN_RIGHT, GET_X_LPARAM(lParam),
                                               GET_Y_LPARAM(lParam));
         break;
     case WM_RBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN2);
+        handle_mouse_up(w32, MP_MBTN_RIGHT);
         break;
     case WM_MOUSEWHEEL:
         handle_mouse_wheel(w32, false, GET_WHEEL_DELTA_WPARAM(wParam));
@@ -1127,11 +1127,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         return TRUE;
     case WM_XBUTTONDOWN:
         handle_mouse_down(w32,
-                          HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8,
-                          GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD,
+            GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         break;
     case WM_XBUTTONUP:
-        handle_mouse_up(w32, HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8);
+        handle_mouse_up(w32,
+            HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD);
         break;
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
