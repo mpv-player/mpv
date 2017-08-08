@@ -8,6 +8,7 @@
 struct ra_gl {
     GL *gl;
     bool debug_enable;
+    bool timer_active; // hack for GL_TIME_ELAPSED limitations
 };
 
 // For ra_tex.priv

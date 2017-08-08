@@ -919,10 +919,10 @@ static void gl_renderpass_run(struct ra *ra,
 #define GL_QUERY_OBJECT_NUM 8
 
 struct gl_timer {
-    GLuint start[GL_QUERY_OBJECT_NUM];
-    GLuint stop[GL_QUERY_OBJECT_NUM];
+    GLuint query[GL_QUERY_OBJECT_NUM];
     int idx;
     uint64_t result;
+    bool active;
 };
 
 static ra_timer *gl_timer_create(struct ra *ra)
@@ -933,8 +933,7 @@ static ra_timer *gl_timer_create(struct ra *ra)
         return NULL;
 
     struct gl_timer *timer = talloc_zero(NULL, struct gl_timer);
-    gl->GenQueries(GL_QUERY_OBJECT_NUM, timer->start);
-    gl->GenQueries(GL_QUERY_OBJECT_NUM, timer->stop);
+    gl->GenQueries(GL_QUERY_OBJECT_NUM, timer->query);
 
     return (ra_timer *)timer;
 }
@@ -947,35 +946,45 @@ static void gl_timer_destroy(struct ra *ra, ra_timer *ratimer)
     GL *gl = ra_gl_get(ra);
     struct gl_timer *timer = ratimer;
 
-    gl->DeleteQueries(GL_QUERY_OBJECT_NUM, timer->start);
-    gl->DeleteQueries(GL_QUERY_OBJECT_NUM, timer->stop);
+    gl->DeleteQueries(GL_QUERY_OBJECT_NUM, timer->query);
     talloc_free(timer);
 }
 
 static void gl_timer_start(struct ra *ra, ra_timer *ratimer)
 {
-    GL *gl = ra_gl_get(ra);
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
     struct gl_timer *timer = ratimer;
+
+    // GL_TIME_ELAPSED queries are not re-entrant, so just do nothing instead
+    // of crashing. Work-around for shitty GL limitations
+    if (p->timer_active)
+        return;
 
     // If this query object already contains a result, we need to retrieve it
     timer->result = 0;
-    if (gl->IsQuery(timer->start[timer->idx])) {
-        uint64_t start = 0, stop = 0;
-        gl->GetQueryObjectui64v(timer->start[timer->idx], GL_QUERY_RESULT, &start);
-        gl->GetQueryObjectui64v(timer->stop[timer->idx], GL_QUERY_RESULT, &stop);
-        timer->result = stop - start;
+    if (gl->IsQuery(timer->query[timer->idx])) {
+        gl->GetQueryObjectui64v(timer->query[timer->idx], GL_QUERY_RESULT,
+                                &timer->result);
     }
 
-    gl->QueryCounter(timer->start[timer->idx], GL_TIMESTAMP);
+    gl->BeginQuery(GL_TIME_ELAPSED, timer->query[timer->idx++]);
+    timer->idx %= GL_QUERY_OBJECT_NUM;
+
+    p->timer_active = timer->active = true;
 }
 
 static uint64_t gl_timer_stop(struct ra *ra, ra_timer *ratimer)
 {
-    GL *gl = ra_gl_get(ra);
+    struct ra_gl *p = ra->priv;
+    GL *gl = p->gl;
     struct gl_timer *timer = ratimer;
 
-    gl->QueryCounter(timer->stop[timer->idx++], GL_TIMESTAMP);
-    timer->idx %= GL_QUERY_OBJECT_NUM;
+    if (!timer->active)
+        return 0;
+
+    gl->EndQuery(GL_TIME_ELAPSED);
+    p->timer_active = timer->active = false;
 
     return timer->result;
 }
