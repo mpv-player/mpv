@@ -120,9 +120,9 @@ def build(ctx):
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
     main_fn_c = ctx.pick_first_matching_dep([
+        ( "osdep/main-fn-cocoa.c",               "cocoa" ),
         ( "osdep/main-fn-unix.c",                "posix" ),
         ( "osdep/main-fn-win.c",                 "win32-desktop" ),
-        ( "osdep/main-fn-cocoa.c",               "cocoa" ),
     ])
 
     getch2_c = ctx.pick_first_matching_dep([
