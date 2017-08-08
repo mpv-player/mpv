@@ -152,9 +152,9 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     // This assumes the buffer is at this point exclusively owned by us: we
     // can't track whether the buffer is unique otherwise.
     // (av_buffer_is_writable() checks the refcount of the new buffer only.)
-    assert(av_buffer_is_writable(new->bufs[0]));
+    int flags = av_buffer_is_writable(new->bufs[0]) ? 0 : AV_BUFFER_FLAG_READONLY;
     ref->bufs[0] = av_buffer_create(new->bufs[0]->data, new->bufs[0]->size,
-                                    unref_image, new, 0);
+                                    unref_image, new, flags);
     if (!ref->bufs[0]) {
         talloc_free(ref);
         return NULL;
@@ -169,10 +169,6 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
 
 void mp_image_pool_add(struct mp_image_pool *pool, struct mp_image *new)
 {
-    assert(new->bufs[0]);
-    assert(!new->bufs[1]);
-    assert(mp_image_is_writeable(new));
-
     struct image_flags *it = talloc_ptrtype(new, it);
     *it = (struct image_flags) { .pool_alive = true };
     new->priv = it;
