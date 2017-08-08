@@ -800,8 +800,11 @@ static bool copy_output(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
         if (endpts != MP_NOPTS_VALUE) {
             double rate = afs->output.rate / mpctx->audio_speed;
             double curpts = written_audio_pts(mpctx);
-            if (curpts != MP_NOPTS_VALUE)
-                maxsamples = (endpts - curpts - mpctx->opts->audio_delay) * rate;
+            if (curpts != MP_NOPTS_VALUE) {
+                double remaining =
+                    (endpts - curpts - mpctx->opts->audio_delay) * rate;
+                maxsamples = MPCLAMP(remaining, 0, INT_MAX);
+            }
         }
 
         struct mp_audio *mpa = af_read_output_frame(afs);
