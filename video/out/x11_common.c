@@ -1136,7 +1136,7 @@ void vo_x11_check_events(struct vo *vo)
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = true;
             mp_input_put_key(x11->input_ctx,
-                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
+                             (MP_MOUSE_BASE + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
             long msg[4] = {XEMBED_REQUEST_FOCUS};
             vo_x11_xembed_send_message(x11, msg);
@@ -1145,7 +1145,7 @@ void vo_x11_check_events(struct vo *vo)
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = false;
             mp_input_put_key(x11->input_ctx,
-                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
+                             (MP_MOUSE_BASE + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
         case MapNotify:

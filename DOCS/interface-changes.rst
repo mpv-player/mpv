@@ -59,6 +59,10 @@ Interface changes
       obscure use that stopped working with the change above. It was also
       prone to be confused with a feature not implemented by it: auto did _not_
       mean that deinterlacing was enabled on demand.)
+    - add shortened mnemonic names for mouse button bindings, eg. mbtn_left
+      the old numeric names (mouse_btn0) are deprecated
+    - remove mouse_btn3_dbl and up, since they are only generated for buttons
+      0-2 (these now print an error when sent from the 'mouse' command)
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

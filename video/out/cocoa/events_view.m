@@ -266,9 +266,9 @@
         int mpkey;
 
         if (fabs(deltaY) >= fabs(deltaX)) {
-            mpkey = deltaY > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+            mpkey = deltaY > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
         } else {
-            mpkey = deltaX > 0 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+            mpkey = deltaX > 0 ? MP_WHEEL_LEFT : MP_WHEEL_RIGHT;
         }
 
         [self.adapter putKey:mpkey withModifiers:modifiers];
@@ -291,7 +291,7 @@
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
     self.hasMouseDown = (state == MP_KEY_STATE_DOWN);
-    int mpkey = (MP_MOUSE_BTN0 + [self mpvButtonNumber:event]);
+    int mpkey = (MP_MOUSE_BASE + [self mpvButtonNumber:event]);
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }
 

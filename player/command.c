@@ -5601,7 +5601,12 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         }
         const bool dbc = cmd->args[3].v.i;
-        button += dbc ? MP_MOUSE_BASE_DBL : MP_MOUSE_BASE;
+        if (dbc && button > (MP_MBTN_RIGHT - MP_MOUSE_BASE)) {
+            MP_ERR(mpctx, "%d is not a valid mouse button for double-clicks.\n",
+                   button);
+            return -1;
+        }
+        button += dbc ? MP_MOUSE_DBL_BASE : MP_MOUSE_BASE;
         mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
         mp_input_put_key_artificial(mpctx->input, button);
         break;
