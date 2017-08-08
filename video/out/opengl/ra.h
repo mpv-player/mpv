@@ -307,9 +307,7 @@ struct ra_fns {
 
     void (*tex_destroy)(struct ra *ra, struct ra_tex *tex);
 
-    // Copy from CPU RAM to the texture. The image dimensions are as specified
-    // in tex->params.
-    // This is an extremely common operation.
+    // Copy from CPU RAM to the texture. This is an extremely common operation.
     // Unlike with OpenGL, the src data has to have exactly the same format as
     // the texture, and no conversion is supported.
     // region can be NULL - if it's not NULL, then the provided pointer only
@@ -360,9 +358,9 @@ struct ra_fns {
     // textures are supported.
     // Both textures must have tex->params.render_dst==true (even src, which is
     // an odd GL requirement).
-    // Rectangle with negative width/height lead to flipping, different src/dst
+    // Rectangles with negative width/height lead to flipping, different src/dst
     // sizes lead to point scaling. Coordinates are always in pixels.
-    // Optional. Only available if RA_CAP_BLIT is set (if it's not set, the must
+    // Optional. Only available if RA_CAP_BLIT is set (if it's not set, it must
     // not be called, even if it's non-NULL).
     void (*blit)(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
                  struct mp_rect *dst_rc, struct mp_rect *src_rc);
