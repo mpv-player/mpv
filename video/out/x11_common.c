@@ -33,7 +33,6 @@
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
 
-#include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
@@ -1908,20 +1907,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11)
     {
         x11->screensaver_time_last = time;
         sem_post(&x11->screensaver_sem);
-        XResetScreenSaver(x11->display);
     }
-}
-
-static int xss_suspend(Display *mDisplay, Bool suspend)
-{
-    int event, error, major, minor;
-    if (XScreenSaverQueryExtension(mDisplay, &event, &error) != True ||
-        XScreenSaverQueryVersion(mDisplay, &major, &minor) != True)
-        return 0;
-    if (major < 1 || (major == 1 && minor < 1))
-        return 0;
-    XScreenSaverSuspend(mDisplay, suspend);
-    return 1;
 }
 
 static void set_screensaver(struct vo_x11_state *x11, bool enabled)
@@ -1931,8 +1917,6 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled)
         return;
     MP_VERBOSE(x11, "%s screensaver.\n", enabled ? "Enabling" : "Disabling");
     x11->screensaver_enabled = enabled;
-    if (xss_suspend(mDisplay, !enabled))
-        return;
     int nothing;
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
         BOOL onoff = 0;
