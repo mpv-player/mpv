@@ -1965,6 +1965,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         }
         if (id == MATROSKA_ID_CLUSTER) {
             MP_VERBOSE(demuxer, "|+ found cluster\n");
+            mkv_d->cluster_start = start_pos;
             break;
         }
         int res = read_header_element(demuxer, id, start_pos);
