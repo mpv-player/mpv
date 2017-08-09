@@ -244,17 +244,6 @@ static int enable_renderer(struct gl_hwdec *hw)
     return 0;
 }
 
-static void overlay_adjust(struct gl_hwdec *hw,
-                           struct mp_rect *src, struct mp_rect *dst)
-{
-    struct priv *p = hw->priv;
-
-    p->src = *src;
-    p->dst = *dst;
-
-    update_overlay(hw, false);
-}
-
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
@@ -306,9 +295,19 @@ static struct mp_image *upload(struct gl_hwdec *hw, struct mp_image *hw_image)
     return new_ref;
 }
 
-static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image)
+static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                         struct mp_rect *src, struct mp_rect *dst, bool newframe)
 {
     struct priv *p = hw->priv;
+
+    if (hw_image && p->current_frame && !newframe) {
+        if (!mp_rect_equals(&p->src, src) ||mp_rect_equals(&p->dst, dst)) {
+            p->src = *src;
+            p->dst = *dst;
+            update_overlay(hw, false);
+        }
+        return;
+    }
 
     mp_image_unrefp(&p->current_frame);
 

@@ -973,7 +973,7 @@ static void unref_current_image(struct gl_video *p)
 static void unmap_overlay(struct gl_video *p)
 {
     if (p->hwdec_active && p->hwdec->driver->overlay_frame)
-        p->hwdec->driver->overlay_frame(p->hwdec, NULL);
+        p->hwdec->driver->overlay_frame(p->hwdec, NULL, NULL, NULL, true);
 }
 
 static void uninit_video(struct gl_video *p)
@@ -3013,8 +3013,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
             p->ra->fns->clear(p->ra, target.tex, color, &p->dst_rect);
         }
 
-        if (frame->frame_id != p->image.id || !frame->current)
-            p->hwdec->driver->overlay_frame(p->hwdec, frame->current);
+        p->hwdec->driver->overlay_frame(p->hwdec, frame->current,
+                                        &p->src_rect, &p->dst_rect,
+                                        frame->frame_id != p->image.id);
 
         if (frame->current)
             p->osd_pts = frame->current->pts;
@@ -3133,9 +3134,6 @@ void gl_video_resize(struct gl_video *p,
 
     if (p->osd)
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
-
-    if (p->hwdec && p->hwdec->driver->overlay_adjust)
-        p->hwdec->driver->overlay_adjust(p->hwdec, src, dst);
 }
 
 static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)

@@ -71,13 +71,11 @@ struct gl_hwdec_driver {
     // layer below it.
     // Non-overlay mode is strictly preferred, so try not to use overlay mode.
 
-    // Set the given frame as overlay, replacing the previous one.
-    // hw_image==NULL is passed to clear the overlay.
-    int (*overlay_frame)(struct gl_hwdec *hw, struct mp_image *hw_image);
-
-    // Move overlay position within the "window".
-    void (*overlay_adjust)(struct gl_hwdec *hw,
-                           struct mp_rect *src, struct mp_rect *dst);
+    // Set the given frame as overlay, replacing the previous one. This can also
+    // just change the position of the overlay.
+    // hw_image==src==dst==NULL is passed to clear the overlay.
+    int (*overlay_frame)(struct gl_hwdec *hw, struct mp_image *hw_image,
+                         struct mp_rect *src, struct mp_rect *dst, bool newframe);
 };
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
