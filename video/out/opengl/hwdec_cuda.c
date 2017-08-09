@@ -201,7 +201,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         p->plane_bytes[n] = gl_bytes_per_pixel(fmt->format, fmt->type);
 
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        GLenum filter = GL_NEAREST;
+        GLenum filter = GL_LINEAR;
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
