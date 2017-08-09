@@ -592,6 +592,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
                 goto error;
+            ctx->owns_hwdec_dev = !!ctx->hwdec->create_dev;
             if (ctx->hwdec_dev->restore_device)
                 ctx->hwdec_dev->restore_device(ctx->hwdec_dev);
             if (!ctx->hwdec->set_hwframes) {
@@ -688,10 +689,10 @@ static void uninit_avctx(struct dec_video *vd)
 
     avcodec_free_context(&ctx->avctx);
 
-    if (ctx->hwdec_dev && ctx->hwdec && ctx->hwdec->generic_hwaccel &&
-        ctx->hwdec_dev->destroy)
+    if (ctx->hwdec_dev && ctx->owns_hwdec_dev && ctx->hwdec_dev->destroy)
         ctx->hwdec_dev->destroy(ctx->hwdec_dev);
     ctx->hwdec_dev = NULL;
+    ctx->owns_hwdec_dev = false;
 
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;

@@ -61,6 +61,7 @@ typedef struct lavc_ctx {
 
     // Set by generic hwaccels.
     struct mp_hwdec_ctx *hwdec_dev;
+    bool owns_hwdec_dev;
 
     int hwdec_fmt;
     int hwdec_w;
