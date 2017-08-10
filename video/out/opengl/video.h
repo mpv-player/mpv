@@ -22,10 +22,10 @@
 
 #include "options/m_option.h"
 #include "sub/osd.h"
-#include "common.h"
 #include "utils.h"
 #include "lcms.h"
 #include "shader_cache.h"
+#include "video/csputils.h"
 #include "video/out/filter_kernels.h"
 
 // Assume we have this many texture units for sourcing additional passes.
@@ -163,6 +163,7 @@ void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
 void gl_video_set_fb_depth(struct gl_video *p, int fb_depth);
+struct voctrl_performance_data;
 void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out);
 struct mp_csp_equalizer;
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);

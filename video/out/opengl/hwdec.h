@@ -1,7 +1,7 @@
 #ifndef MPGL_HWDEC_H_
 #define MPGL_HWDEC_H_
 
-#include "common.h"
+#include "video/mp_image.h"
 #include "ra.h"
 #include "video/hwdec.h"
 

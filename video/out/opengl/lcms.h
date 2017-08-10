@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "misc/bstr.h"
+#include "video/csputils.h"
 #include <libavutil/buffer.h>
 
 extern const struct m_sub_options mp_icc_conf;

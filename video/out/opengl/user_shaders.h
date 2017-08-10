@@ -18,7 +18,6 @@
 #ifndef MP_GL_USER_SHADERS_H
 #define MP_GL_USER_SHADERS_H
 
-#include "common.h"
 #include "utils.h"
 #include "ra.h"
 
