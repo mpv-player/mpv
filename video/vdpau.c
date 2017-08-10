@@ -474,6 +474,9 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
 
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
 {
+    if (!ctx)
+        return;
+
     struct vdp_functions *vdp = &ctx->vdp;
     VdpStatus vdp_st;
 

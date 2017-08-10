@@ -159,17 +159,15 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
     talloc_free(tex);
 }
 
-static struct ra_tex *gl_tex_create(struct ra *ra,
-                                    const struct ra_tex_params *params)
+static struct ra_tex *gl_tex_create_blank(struct ra *ra,
+                                          const struct ra_tex_params *params)
 {
-    GL *gl = ra_gl_get(ra);
-
     struct ra_tex *tex = talloc_zero(NULL, struct ra_tex);
     tex->params = *params;
+    tex->params.initial_data = NULL;
     struct ra_tex_gl *tex_gl = tex->priv = talloc_zero(NULL, struct ra_tex_gl);
 
     const struct gl_format *fmt = params->format->priv;
-    tex_gl->own_objects = true;
     tex_gl->internal_format = fmt->internal_format;
     tex_gl->format = fmt->format;
     tex_gl->type = fmt->type;
@@ -183,6 +181,24 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
         assert(params->dimensions == 2);
         tex_gl->target = GL_TEXTURE_RECTANGLE;
     }
+    if (params->external_oes) {
+        assert(params->dimensions == 2 && !params->non_normalized);
+        tex_gl->target = GL_TEXTURE_EXTERNAL_OES;
+    }
+
+    return tex;
+}
+
+static struct ra_tex *gl_tex_create(struct ra *ra,
+                                    const struct ra_tex_params *params)
+{
+    GL *gl = ra_gl_get(ra);
+    struct ra_tex *tex = gl_tex_create_blank(ra, params);
+    if (!tex)
+        return NULL;
+    struct ra_tex_gl *tex_gl = tex->priv;
+
+    tex_gl->own_objects = true;
 
     gl->GenTextures(1, &tex_gl->texture);
     gl->BindTexture(tex_gl->target, tex_gl->texture);
@@ -218,8 +234,6 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
 
     gl->BindTexture(tex_gl->target, 0);
 
-    tex->params.initial_data = NULL;
-
     gl_check_error(gl, ra->log, "after creating texture");
 
     if (tex->params.render_dst) {
@@ -253,6 +267,22 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
     return tex;
 }
 
+// Create a ra_tex that merely wraps an existing texture. The returned object
+// is freed with ra_tex_free(), but this will not delete the texture passed to
+// this function.
+// Some features are unsupported, e.g. setting params->initial_data or render_dst.
+struct ra_tex *ra_create_wrapped_tex(struct ra *ra,
+                                     const struct ra_tex_params *params,
+                                     GLuint gl_texture)
+{
+    struct ra_tex *tex = gl_tex_create_blank(ra, params);
+    if (!tex)
+        return NULL;
+    struct ra_tex_gl *tex_gl = tex->priv;
+    tex_gl->texture = gl_texture;
+    return tex;
+}
+
 static const struct ra_format fbo_dummy_format = {
     .name = "unknown_fbo",
     .priv = (void *)&(const struct gl_format){
@@ -263,98 +293,63 @@ static const struct ra_format fbo_dummy_format = {
     .renderable = true,
 };
 
-static const struct ra_format tex_dummy_format = {
-    .name = "unknown_tex",
-    .priv = (void *)&(const struct gl_format){
-        .name = "unknown",
-        .format = GL_RGBA,
-        .flags = F_TF,
-    },
-    .renderable = true,
-    .linear_filter = true,
-};
-
-static const struct ra_format *find_similar_format(struct ra *ra,
-                                                   GLint gl_iformat,
-                                                   GLenum gl_format,
-                                                   GLenum gl_type)
-{
-    if (gl_iformat || gl_format || gl_type) {
-        for (int n = 0; n < ra->num_formats; n++) {
-            const struct ra_format *fmt = ra->formats[n];
-            const struct gl_format *gl_fmt = fmt->priv;
-            if ((gl_fmt->internal_format == gl_iformat || !gl_iformat) &&
-                (gl_fmt->format == gl_format || !gl_format) &&
-                (gl_fmt->type == gl_type || !gl_type))
-                return fmt;
-        }
-    }
-    return NULL;
-}
-
-static struct ra_tex *wrap_tex_fbo(struct ra *ra, GLuint gl_obj, bool is_fbo,
-                                   GLenum gl_target, GLint gl_iformat,
-                                   GLenum gl_format, GLenum gl_type,
-                                   int w, int h)
-{
-    const struct ra_format *format =
-        find_similar_format(ra, gl_iformat, gl_format, gl_type);
-    if (!format)
-        format = is_fbo ? &fbo_dummy_format : &tex_dummy_format;
-
-    struct ra_tex *tex = talloc_zero(ra, struct ra_tex);
-    *tex = (struct ra_tex){
-        .params = {
-            .dimensions = 2,
-            .w = w, .h = h, .d = 1,
-            .format = format,
-            .render_dst = is_fbo,
-            .render_src = !is_fbo,
-            .non_normalized = gl_target == GL_TEXTURE_RECTANGLE,
-            .external_oes = gl_target == GL_TEXTURE_EXTERNAL_OES,
-        },
-    };
-
-    struct ra_tex_gl *tex_gl = tex->priv = talloc_zero(NULL, struct ra_tex_gl);
-    *tex_gl = (struct ra_tex_gl){
-        .target = gl_target,
-        .texture = is_fbo ? 0 : gl_obj,
-        .fbo = is_fbo ? gl_obj : 0,
-        .internal_format = gl_iformat,
-        .format = gl_format,
-        .type = gl_type,
-    };
-
-    return tex;
-}
-
-// Create a ra_tex that merely wraps an existing texture. gl_format and gl_type
-// can be 0, in which case possibly nonsensical fallbacks are chosen.
-// Works for 2D textures only. Integer textures are not supported.
-// The returned object is freed with ra_tex_free(), but this will not delete
-// the texture passed to this function.
-struct ra_tex *ra_create_wrapped_texture(struct ra *ra, GLuint gl_texture,
-                                         GLenum gl_target, GLint gl_iformat,
-                                         GLenum gl_format, GLenum gl_type,
-                                         int w, int h)
-{
-    return wrap_tex_fbo(ra, gl_texture, false, gl_target, gl_iformat, gl_format,
-                        gl_type, w, h);
-}
-
 // Create a ra_tex that merely wraps an existing framebuffer. gl_fbo can be 0
 // to wrap the default framebuffer.
 // The returned object is freed with ra_tex_free(), but this will not delete
 // the framebuffer object passed to this function.
 struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h)
 {
-    return wrap_tex_fbo(ra, gl_fbo, true, 0, GL_RGBA, 0, 0, w, h);
+    struct ra_tex *tex = talloc_zero(ra, struct ra_tex);
+    *tex = (struct ra_tex){
+        .params = {
+            .dimensions = 2,
+            .w = w, .h = h, .d = 1,
+            .format = &fbo_dummy_format,
+            .render_dst = true,
+        },
+    };
+
+    struct ra_tex_gl *tex_gl = tex->priv = talloc_zero(NULL, struct ra_tex_gl);
+    *tex_gl = (struct ra_tex_gl){
+        .fbo = gl_fbo,
+        .internal_format = 0,
+        .format = GL_RGBA,
+        .type = 0,
+    };
+
+    return tex;
 }
 
 GL *ra_gl_get(struct ra *ra)
 {
     struct ra_gl *p = ra->priv;
     return p->gl;
+}
+
+// Return the associate glTexImage arguments for the given format. Sets all
+// fields to 0 on failure.
+void ra_gl_get_format(const struct ra_format *fmt, GLint *out_internal_format,
+                      GLenum *out_format, GLenum *out_type)
+{
+    const struct gl_format *gl_format = fmt->priv;
+    *out_internal_format = gl_format->internal_format;
+    *out_format = gl_format->format;
+    *out_type = gl_format->type;
+}
+
+void ra_gl_get_raw_tex(struct ra *ra, struct ra_tex *tex,
+                       GLuint *out_texture, GLenum *out_target)
+{
+    struct ra_tex_gl *tex_gl = tex->priv;
+    *out_texture = tex_gl->texture;
+    *out_target = tex_gl->target;
+}
+
+// Return whether the ra instance was created with ra_create_gl(). This is the
+// _only_ function that can be called on a ra instance of any type.
+bool ra_is_gl(struct ra *ra)
+{
+    return ra->fns == &ra_fns_gl;
 }
 
 static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,

@@ -72,7 +72,7 @@ struct gl_priv {
 
     struct gl_video *renderer;
 
-    struct gl_hwdec *hwdec;
+    struct ra_hwdec *hwdec;
 
     int events;
 
@@ -210,7 +210,7 @@ static void request_hwdec_api(struct vo *vo, void *api)
     if (p->hwdec)
         return;
 
-    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global,
+    p->hwdec = ra_hwdec_load_api(p->vo->log, p->ra, p->vo->global,
                                  vo->hwdec_devs, (intptr_t)api);
     gl_video_set_hwdec(p->renderer, p->hwdec);
 }
@@ -383,7 +383,7 @@ static void uninit(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     gl_video_uninit(p->renderer);
-    gl_hwdec_uninit(p->hwdec);
+    ra_hwdec_uninit(p->hwdec);
     if (vo->hwdec_devs) {
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
@@ -444,7 +444,7 @@ static int preinit(struct vo *vo)
 
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    p->hwdec = gl_hwdec_load(p->vo->log, p->gl, vo->global,
+    p->hwdec = ra_hwdec_load(p->vo->log, p->ra, vo->global,
                              vo->hwdec_devs, vo->opts->gl_hwdec_interop);
     gl_video_set_hwdec(p->renderer, p->hwdec);
 

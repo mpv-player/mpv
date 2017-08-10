@@ -179,8 +179,8 @@ struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p);
 void gl_video_reset(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);
 
-struct gl_hwdec;
-void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec);
+struct ra_hwdec;
+void gl_video_set_hwdec(struct gl_video *p, struct ra_hwdec *hwdec);
 
 struct vo;
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo);

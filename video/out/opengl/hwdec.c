@@ -25,84 +25,85 @@
 #include "options/m_config.h"
 #include "hwdec.h"
 
-extern const struct gl_hwdec_driver gl_hwdec_vaegl;
-extern const struct gl_hwdec_driver gl_hwdec_vaglx;
-extern const struct gl_hwdec_driver gl_hwdec_videotoolbox;
-extern const struct gl_hwdec_driver gl_hwdec_vdpau;
-extern const struct gl_hwdec_driver gl_hwdec_dxva2egl;
-extern const struct gl_hwdec_driver gl_hwdec_d3d11egl;
-extern const struct gl_hwdec_driver gl_hwdec_d3d11eglrgb;
-extern const struct gl_hwdec_driver gl_hwdec_dxva2gldx;
-extern const struct gl_hwdec_driver gl_hwdec_dxva2;
-extern const struct gl_hwdec_driver gl_hwdec_cuda;
-extern const struct gl_hwdec_driver gl_hwdec_rpi_overlay;
+extern const struct ra_hwdec_driver ra_hwdec_vaegl;
+extern const struct ra_hwdec_driver ra_hwdec_vaglx;
+extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
+extern const struct ra_hwdec_driver ra_hwdec_vdpau;
+extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
+extern const struct ra_hwdec_driver ra_hwdec_d3d11egl;
+extern const struct ra_hwdec_driver ra_hwdec_d3d11eglrgb;
+extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
+extern const struct ra_hwdec_driver ra_hwdec_dxva2;
+extern const struct ra_hwdec_driver ra_hwdec_cuda;
+extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 
-static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
+static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
-    &gl_hwdec_vaegl,
+    &ra_hwdec_vaegl,
 #endif
 #if HAVE_VAAPI_GLX
-    &gl_hwdec_vaglx,
+    &ra_hwdec_vaglx,
 #endif
 #if HAVE_VDPAU_GL_X11
-    &gl_hwdec_vdpau,
+    &ra_hwdec_vdpau,
 #endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
-    &gl_hwdec_videotoolbox,
+    &ra_hwdec_videotoolbox,
 #endif
 #if HAVE_D3D_HWACCEL
-    &gl_hwdec_d3d11egl,
-    &gl_hwdec_d3d11eglrgb,
+    &ra_hwdec_d3d11egl,
+    &ra_hwdec_d3d11eglrgb,
  #if HAVE_D3D9_HWACCEL
-    &gl_hwdec_dxva2egl,
+    &ra_hwdec_dxva2egl,
  #endif
 #endif
 #if HAVE_GL_DXINTEROP_D3D9
-    &gl_hwdec_dxva2gldx,
+    &ra_hwdec_dxva2gldx,
 #endif
 #if HAVE_CUDA_HWACCEL
-    &gl_hwdec_cuda,
+    &ra_hwdec_cuda,
 #endif
 #if HAVE_RPI
-    &gl_hwdec_rpi_overlay,
+    &ra_hwdec_rpi_overlay,
 #endif
     NULL
 };
 
-static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
+static struct ra_hwdec *load_hwdec_driver(struct mp_log *log, struct ra *ra,
                                           struct mpv_global *global,
                                           struct mp_hwdec_devices *devs,
-                                          const struct gl_hwdec_driver *drv,
+                                          const struct ra_hwdec_driver *drv,
                                           bool is_auto)
 {
-    struct gl_hwdec *hwdec = talloc(NULL, struct gl_hwdec);
-    *hwdec = (struct gl_hwdec) {
+    struct ra_hwdec *hwdec = talloc(NULL, struct ra_hwdec);
+    *hwdec = (struct ra_hwdec) {
         .driver = drv,
         .log = mp_log_new(hwdec, log, drv->name),
         .global = global,
-        .gl = gl,
+        .ra = ra,
         .devs = devs,
         .probing = is_auto,
+        .priv = talloc_zero_size(hwdec, drv->priv_size),
     };
     mp_verbose(log, "Loading hwdec driver '%s'\n", drv->name);
-    if (hwdec->driver->create(hwdec) < 0) {
-        talloc_free(hwdec);
+    if (hwdec->driver->init(hwdec) < 0) {
+        ra_hwdec_uninit(hwdec);
         mp_verbose(log, "Loading failed.\n");
         return NULL;
     }
     return hwdec;
 }
 
-struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
+struct ra_hwdec *ra_hwdec_load_api(struct mp_log *log, struct ra *ra,
                                    struct mpv_global *g,
                                    struct mp_hwdec_devices *devs,
                                    enum hwdec_type api)
 {
     bool is_auto = HWDEC_IS_AUTO(api);
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
+        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if ((is_auto || api == drv->api) && !drv->testing_only) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, devs, drv, is_auto);
+            struct ra_hwdec *r = load_hwdec_driver(log, ra, g, devs, drv, is_auto);
             if (r)
                 return r;
         }
@@ -111,7 +112,7 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
 }
 
 // Load by option name.
-struct gl_hwdec *gl_hwdec_load(struct mp_log *log, GL *gl,
+struct ra_hwdec *ra_hwdec_load(struct mp_log *log, struct ra *ra,
                                struct mpv_global *g,
                                struct mp_hwdec_devices *devs,
                                const char *name)
@@ -128,25 +129,25 @@ struct gl_hwdec *gl_hwdec_load(struct mp_log *log, GL *gl,
     }
 
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
+        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if (name && strcmp(drv->name, name) == 0) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, devs, drv, false);
+            struct ra_hwdec *r = load_hwdec_driver(log, ra, g, devs, drv, false);
             if (r)
                 return r;
         }
     }
 
-    return gl_hwdec_load_api(log, gl, g, devs, api_id);
+    return ra_hwdec_load_api(log, ra, g, devs, api_id);
 }
 
-int gl_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param)
 {
     bool help = bstr_equals0(param, "help");
     if (help)
         mp_info(log, "Available hwdecs:\n");
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
+        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         const char *api_name = m_opt_choice_str(mp_hwdec_names, drv->api);
         if (help) {
             mp_info(log, "    %s [%s]\n", drv->name, api_name);
@@ -172,18 +173,67 @@ int gl_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
     return M_OPT_INVALID;
 }
 
-void gl_hwdec_uninit(struct gl_hwdec *hwdec)
+void ra_hwdec_uninit(struct ra_hwdec *hwdec)
 {
     if (hwdec)
-        hwdec->driver->destroy(hwdec);
+        hwdec->driver->uninit(hwdec);
     talloc_free(hwdec);
 }
 
-bool gl_hwdec_test_format(struct gl_hwdec *hwdec, int imgfmt)
+bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt)
 {
-    if (!imgfmt)
-        return false;
-    if (hwdec->driver->test_format)
-        return hwdec->driver->test_format(hwdec, imgfmt);
-    return hwdec->driver->imgfmt == imgfmt;
+    for (int n = 0; hwdec->driver->imgfmts[n]; n++) {
+        if (hwdec->driver->imgfmts[n] == imgfmt)
+            return true;
+    }
+    return false;
+}
+
+struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
+                                               struct mp_image_params *params)
+{
+    assert(ra_hwdec_test_format(hwdec, params->imgfmt));
+
+    struct ra_hwdec_mapper *mapper = talloc_ptrtype(NULL, mapper);
+    *mapper = (struct ra_hwdec_mapper){
+        .owner = hwdec,
+        .driver = hwdec->driver->mapper,
+        .log = hwdec->log,
+        .ra = hwdec->ra,
+        .priv = talloc_zero_size(mapper, hwdec->driver->mapper->priv_size),
+        .src_params = *params,
+        .dst_params = *params,
+    };
+    if (mapper->driver->init(mapper) < 0)
+        ra_hwdec_mapper_free(&mapper);
+    return mapper;
+}
+
+void ra_hwdec_mapper_free(struct ra_hwdec_mapper **mapper)
+{
+    struct ra_hwdec_mapper *p = *mapper;
+    if (p) {
+        ra_hwdec_mapper_unmap(p);
+        p->driver->uninit(p);
+        talloc_free(p);
+    }
+    *mapper = NULL;
+}
+
+void ra_hwdec_mapper_unmap(struct ra_hwdec_mapper *mapper)
+{
+    if (mapper->driver->unmap)
+        mapper->driver->unmap(mapper);
+    mp_image_unrefp(&mapper->src);
+}
+
+int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img)
+{
+    ra_hwdec_mapper_unmap(mapper);
+    mp_image_setrefp(&mapper->src, img);
+    if (mapper->driver->map(mapper) < 0) {
+        ra_hwdec_mapper_unmap(mapper);
+        return -1;
+    }
+    return 0;
 }

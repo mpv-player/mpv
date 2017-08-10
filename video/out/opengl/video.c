@@ -96,8 +96,6 @@ struct video_image {
     struct mp_image *mpi;       // original input image
     uint64_t id;                // unique ID identifying mpi contents
     bool hwdec_mapped;
-    // Temporary wrappers for GL hwdec textures.
-    struct ra_tex *hwdec_tex[4];
 };
 
 enum plane_type {
@@ -287,7 +285,8 @@ struct gl_video {
     struct cached_file *files;
     int num_files;
 
-    struct gl_hwdec *hwdec;
+    struct ra_hwdec *hwdec;
+    struct ra_hwdec_mapper *hwdec_mapper;
     bool hwdec_active;
 
     bool dsi_warned;
@@ -804,12 +803,14 @@ static int find_comp(struct ra_imgfmt_desc *desc, int component)
 
 static void init_video(struct gl_video *p)
 {
-    p->hwdec_active = false;
     p->use_integer_conversion = false;
 
-    if (p->hwdec && gl_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
-        if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
+    if (p->hwdec && ra_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
+        p->hwdec_mapper = ra_hwdec_mapper_create(p->hwdec, &p->image_params);
+        if (!p->hwdec_mapper)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
+        if (p->hwdec_mapper)
+            p->image_params = p->hwdec_mapper->dst_params;
         const char **exts = p->hwdec->glsl_extensions;
         for (int n = 0; exts && exts[n]; n++)
             gl_sc_enable_extension(p->sc, (char *)exts[n]);
@@ -906,11 +907,8 @@ static void unmap_current_image(struct gl_video *p)
     struct video_image *vimg = &p->image;
 
     if (vimg->hwdec_mapped) {
-        assert(p->hwdec_active);
-        for (int n = 0; n < 4; n++)
-            ra_tex_free(p->ra, &vimg->hwdec_tex[n]);
-        if (p->hwdec->driver->unmap)
-            p->hwdec->driver->unmap(p->hwdec);
+        assert(p->hwdec_active && p->hwdec_mapper);
+        ra_hwdec_mapper_unmap(p->hwdec_mapper);
         memset(vimg->planes, 0, sizeof(vimg->planes));
         vimg->hwdec_mapped = false;
         vimg->id = 0; // needs to be mapped again
@@ -997,6 +995,7 @@ static void uninit_video(struct gl_video *p)
     p->real_image_params = (struct mp_image_params){0};
     p->image_params = p->real_image_params;
     p->hwdec_active = false;
+    ra_hwdec_mapper_free(&p->hwdec_mapper);
 }
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
@@ -1228,6 +1227,8 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
 
 static const char *get_tex_swizzle(struct img_tex *img)
 {
+    if (!img->tex)
+        return "rgba";
     return img->tex->params.format->luminance_alpha ? "raaa" : "rgba";
 }
 
@@ -3155,23 +3156,19 @@ void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out)
 }
 
 // This assumes nv12, with textures set to GL_NEAREST filtering.
-static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame,
-                               struct ra_tex *output[4])
+static void reinterleave_vdpau(struct gl_video *p,
+                               struct ra_tex *input[4], struct ra_tex *output[2])
 {
-    struct gl_hwdec_frame res = {0};
     for (int n = 0; n < 2; n++) {
         struct fbotex *fbo = &p->vdpau_deinterleave_fbo[n];
         // This is an array of the 2 to-merge planes.
-        struct gl_hwdec_plane *src = &frame->planes[n * 2];
-        int w = src[0].tex_w;
-        int h = src[0].tex_h;
+        struct ra_tex **src = &input[n * 2];
+        int w = src[0]->params.w;
+        int h = src[0]->params.h;
         int ids[2];
-        struct ra_tex *tmp[2];
         for (int t = 0; t < 2; t++) {
-            tmp[t] = ra_create_wrapped_texture(p->ra, src[t].gl_texture,
-                                               GL_TEXTURE_2D, 0, 0, 0, w, h);
             ids[t] = pass_bind(p, (struct img_tex){
-                .tex = tmp[t],
+                .tex = src[t],
                 .multiplier = 1.0,
                 .transform = identity_trans,
                 .w = w,
@@ -3190,12 +3187,8 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame,
         pass_describe(p, "vdpau reinterleaving");
         finish_pass_direct(p, fbo->fbo, &(struct mp_rect){0, 0, w, h * 2});
 
-        for (int t = 0; t < 2; t++)
-            ra_tex_free(p->ra, &tmp[t]);
-
         output[n] = fbo->tex;
     }
-    *frame = res;
 }
 
 // Returns false on failure.
@@ -3219,11 +3212,13 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
     if (p->hwdec_active) {
         // Hardware decoding
-        struct gl_hwdec_frame gl_frame = {0};
+
+        if (!p->hwdec_mapper)
+            goto error;
 
         pass_describe(p, "map frame (hwdec)");
         timer_pool_start(p->upload_timer);
-        bool ok = p->hwdec->driver->map_frame(p->hwdec, vimg->mpi, &gl_frame) >= 0;
+        bool ok = ra_hwdec_mapper_map(p->hwdec_mapper, vimg->mpi) >= 0;
         timer_pool_stop(p->upload_timer);
         pass_record(p, timer_pool_measure(p->upload_timer));
 
@@ -3231,20 +3226,17 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         if (ok) {
             struct mp_image layout = {0};
             mp_image_set_params(&layout, &p->image_params);
-            struct ra_tex *tex[4] = {0};
-            if (gl_frame.vdpau_fields)
-                reinterleave_vdpau(p, &gl_frame, tex);
+            struct ra_tex **tex = p->hwdec_mapper->tex;
+            struct ra_tex *tmp[4] = {0};
+            if (p->hwdec_mapper->vdpau_fields) {
+                reinterleave_vdpau(p, tex, tmp);
+                tex = tmp;
+            }
             for (int n = 0; n < p->plane_count; n++) {
-                struct gl_hwdec_plane *plane = &gl_frame.planes[n];
-                if (!tex[n]) {
-                    vimg->hwdec_tex[n] = ra_create_wrapped_texture(p->ra,
-                        plane->gl_texture, plane->gl_target, 0,
-                        plane->gl_format, 0, plane->tex_w, plane->tex_h);
-                }
                 vimg->planes[n] = (struct texplane){
                     .w = mp_image_plane_w(&layout, n),
                     .h = mp_image_plane_h(&layout, n),
-                    .tex = tex[n] ? tex[n] : vimg->hwdec_tex[n],
+                    .tex = tex[n],
                 };
             }
         } else {
@@ -3528,7 +3520,7 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
     if (ra_get_imgfmt_desc(p->ra, mp_format, &desc) &&
         is_imgfmt_desc_supported(p, &desc))
         return true;
-    if (p->hwdec && gl_hwdec_test_format(p->hwdec, mp_format))
+    if (p->hwdec && ra_hwdec_test_format(p->hwdec, mp_format))
         return true;
     return false;
 }
@@ -3743,10 +3735,11 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux)
     }
 }
 
-void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
+void gl_video_set_hwdec(struct gl_video *p, struct ra_hwdec *hwdec)
 {
-    p->hwdec = hwdec;
     unref_current_image(p);
+    ra_hwdec_mapper_free(&p->hwdec_mapper);
+    p->hwdec = hwdec;
 }
 
 void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)

@@ -179,7 +179,7 @@ static const m_option_t mp_vo_opt_list[] = {
 #endif
 #if HAVE_GL
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
-                        gl_hwdec_validate_opt),
+                        ra_hwdec_validate_opt),
     OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
 #endif
     {0}
