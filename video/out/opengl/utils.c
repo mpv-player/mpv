@@ -134,6 +134,9 @@ struct timer_pool {
 
 struct timer_pool *timer_pool_create(struct ra *ra)
 {
+    if (!ra->fns->timer_create)
+        return NULL;
+
     ra_timer *timer = ra->fns->timer_create(ra);
     if (!timer)
         return NULL;

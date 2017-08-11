@@ -382,7 +382,7 @@ struct ra_fns {
                            const struct ra_renderpass_run_params *params);
 
     // Create a timer object. Returns NULL on failure, or if timers are
-    // unavailable.
+    // unavailable for some reason. Optional.
     ra_timer *(*timer_create)(struct ra *ra);
 
     void (*timer_destroy)(struct ra *ra, ra_timer *timer);
