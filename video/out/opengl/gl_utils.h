@@ -66,7 +66,6 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
                        int x, int y, int w, int h);
 void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo);
 
-int gl_determine_16bit_tex_depth(GL *gl);
 int gl_get_fb_depth(GL *gl, int fbo);
 
 #endif

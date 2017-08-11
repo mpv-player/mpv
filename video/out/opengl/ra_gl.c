@@ -41,6 +41,42 @@ struct ra_renderpass_gl {
     struct gl_vao vao;
 };
 
+// (Init time only.)
+static void probe_real_size(GL *gl, struct ra_format *fmt)
+{
+    const struct gl_format *gl_fmt = fmt->priv;
+
+    if (!gl->GetTexLevelParameteriv)
+        return; // GLES
+
+    bool is_la = gl_fmt->format == GL_LUMINANCE ||
+                 gl_fmt->format == GL_LUMINANCE_ALPHA;
+    if (is_la && gl->es)
+        return; // GLES doesn't provide GL_TEXTURE_LUMINANCE_SIZE.
+
+    GLuint tex;
+    gl->GenTextures(1, &tex);
+    gl->BindTexture(GL_TEXTURE_2D, tex);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, gl_fmt->internal_format, 64, 64, 0,
+                   gl_fmt->format, gl_fmt->type, NULL);
+    for (int i = 0; i < fmt->num_components; i++) {
+        const GLenum pnames[] = {
+            GL_TEXTURE_RED_SIZE,
+            GL_TEXTURE_GREEN_SIZE,
+            GL_TEXTURE_BLUE_SIZE,
+            GL_TEXTURE_ALPHA_SIZE,
+            GL_TEXTURE_LUMINANCE_SIZE,
+            GL_TEXTURE_ALPHA_SIZE,
+        };
+        int comp = is_la ? i + 4 : i;
+        assert(comp < MP_ARRAY_SIZE(pnames));
+        GLint param = -1;
+        gl->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, pnames[comp], &param);
+        fmt->component_depth[i] = param > 0 ? param : 0;
+    }
+    gl->DeleteTextures(1, &tex);
+}
+
 static int ra_init_gl(struct ra *ra, GL *gl)
 {
     if (gl->version < 210 && gl->es < 200) {
@@ -74,10 +110,6 @@ static int ra_init_gl(struct ra *ra, GL *gl)
 
     int gl_fmt_features = gl_format_feature_flags(gl);
 
-    // Test whether we can use 10 bit.
-    int depth16 = gl_determine_16bit_tex_depth(gl);
-    MP_VERBOSE(ra, "16 bit texture depth: %d.\n", depth16);
-
     for (int n = 0; gl_formats[n].internal_format; n++) {
         const struct gl_format *gl_fmt = &gl_formats[n];
 
@@ -100,8 +132,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
 
         int csize = gl_component_size(gl_fmt->type) * 8;
         int depth = csize;
-        if (fmt->ctype == RA_CTYPE_UNORM)
-            depth = MPMIN(csize, depth16); // naive/approximate
+
         if (gl_fmt->flags & F_F16) {
             depth = 16;
             csize = 32; // always upload as GL_FLOAT (simpler for us)
@@ -111,6 +142,9 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             fmt->component_size[i] = csize;
             fmt->component_depth[i] = depth;
         }
+
+        if (fmt->ctype == RA_CTYPE_UNORM && depth != 8)
+            probe_real_size(gl, fmt);
 
         // Special formats for which OpenGL happens to have direct support.
         if (strcmp(fmt->name, "rgb565") == 0) {
@@ -148,6 +182,9 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     }
 
     gl->Disable(GL_DITHER);
+
+    if (!ra_find_unorm_format(ra, 2, 1))
+        MP_VERBOSE(ra, "16 bit UNORM textures not available.\n");
 
     return 0;
 }

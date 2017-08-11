@@ -335,35 +335,6 @@ void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo)
     *pbo = (struct gl_pbo_upload){0};
 }
 
-// The intention is to return the actual depth of any fixed point 16 bit
-// textures. (Actually tests only 1 format - hope that is good enough.)
-int gl_determine_16bit_tex_depth(GL *gl)
-{
-    const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
-    if (!gl->GetTexLevelParameteriv || !fmt) {
-        // ANGLE supports ES 3.0 and the extension, but lacks the function above.
-        if (gl->mpgl_caps & MPGL_CAP_EXT16)
-            return 16;
-        return -1;
-    }
-
-    GLuint tex;
-    gl->GenTextures(1, &tex);
-    gl->BindTexture(GL_TEXTURE_2D, tex);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, 64, 64, 0,
-                   fmt->format, fmt->type, NULL);
-    GLenum pname = 0;
-    switch (fmt->format) {
-    case GL_RED:        pname = GL_TEXTURE_RED_SIZE; break;
-    case GL_LUMINANCE:  pname = GL_TEXTURE_LUMINANCE_SIZE; break;
-    }
-    GLint param = -1;
-    if (pname)
-        gl->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, pname, &param);
-    gl->DeleteTextures(1, &tex);
-    return param;
-}
-
 int gl_get_fb_depth(GL *gl, int fbo)
 {
     if ((gl->es < 300 && !gl->version) || !(gl->mpgl_caps & MPGL_CAP_FB))

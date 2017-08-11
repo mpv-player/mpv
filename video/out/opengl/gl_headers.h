@@ -37,6 +37,9 @@
 #define GL_RGBA12                         0x805A
 #define GL_RGBA16                         0x805B
 #define GL_TEXTURE_RED_SIZE               0x805C
+#define GL_TEXTURE_GREEN_SIZE             0x805D
+#define GL_TEXTURE_BLUE_SIZE              0x805E
+#define GL_TEXTURE_ALPHA_SIZE             0x805F
 
 // --- GL 1.1 (removed from 3.0 core and not in GLES 2/3)
 
