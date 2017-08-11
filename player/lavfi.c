@@ -716,12 +716,12 @@ static int lavfi_request_frame(struct lavfi_pad *pad)
     } else if (pad->main->all_waiting) {
         return DATA_WAIT;
     }
-    return DATA_AGAIN;
+    return DATA_STARVE;
 }
 
 // Try to read a new frame from an output pad. Returns one of the following:
 //      DATA_OK: a frame is returned
-//      DATA_AGAIN: needs more input data
+//      DATA_STARVE: needs more input data
 //      DATA_WAIT: needs more input data, and all inputs in LAVFI_WAIT state
 //      DATA_EOF: no more data
 int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_audio **out_aframe)
@@ -750,7 +750,7 @@ bool lavfi_needs_input(struct lavfi_pad *pad)
 
 // A filter user is supposed to call lavfi_needs_input(), and if that returns
 // true, send either a new status or a frame. A status can be one of:
-//      DATA_AGAIN: a new frame/status will come, caller will retry
+//      DATA_STARVE: a new frame/status will come, caller will retry
 //      DATA_WAIT: a new frame/status will come, but caller goes to sleep
 //      DATA_EOF: no more input possible (in near time)
 // If you have a new frame, use lavfi_send_frame_ instead.
@@ -764,7 +764,7 @@ void lavfi_send_status(struct lavfi_pad *pad, int status)
     assert(!pad->pending_v && !pad->pending_a);
 
     pad->input_waiting = status == DATA_WAIT || status == DATA_EOF;
-    pad->input_again = status == DATA_AGAIN;
+    pad->input_again = status == DATA_STARVE;
     pad->input_eof = status == DATA_EOF;
 }
 

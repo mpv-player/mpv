@@ -617,6 +617,7 @@ static int decode_image(struct MPContext *mpctx)
     switch (res) {
     case DATA_WAIT:     return VD_WAIT;
     case DATA_OK:
+    case DATA_STARVE:
     case DATA_AGAIN:    return VD_PROGRESS;
     case DATA_EOF:      return VD_EOF;
     default:            abort();

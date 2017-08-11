@@ -51,6 +51,7 @@ enum {
     AD_NEW_FMT = -3,
     AD_WAIT = -4,
     AD_NO_PROGRESS = -5,
+    AD_STARVE = -6,
 };
 
 // Use pitch correction only for speed adjustments by the user, not minor sync
@@ -846,6 +847,7 @@ static int decode_new_frame(struct ao_chain *ao_c)
     case DATA_OK:       return AD_OK;
     case DATA_WAIT:     return AD_WAIT;
     case DATA_AGAIN:    return AD_NO_PROGRESS;
+    case DATA_STARVE:   return AD_STARVE;
     case DATA_EOF:      return AD_EOF;
     default:            abort();
     }
@@ -880,7 +882,7 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
         res = decode_new_frame(ao_c);
         if (res == AD_NO_PROGRESS)
             continue;
-        if (res == AD_WAIT)
+        if (res == AD_WAIT || res == AD_STARVE)
             break;
         if (res < 0) {
             // drain filters first (especially for true EOF case)
