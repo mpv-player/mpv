@@ -21,7 +21,10 @@
 
 #include <libavutil/common.h>
 
-#include "formats.h"
+#include "common/common.h"
+#include "common/msg.h"
+#include "video/csputils.h"
+#include "video/mp_image.h"
 #include "osd.h"
 
 #define GLSL(x) gl_sc_add(sc, #x "\n");
