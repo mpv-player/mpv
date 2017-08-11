@@ -189,7 +189,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(mapper->ra);
 
     CVPixelBufferRelease(p->pbuf);
     p->pbuf = (CVPixelBufferRef)mapper->src->planes[3];
