@@ -728,6 +728,11 @@ PROTOCOLS
     you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directory directly.
 
+    ``title`` can be: ``longest`` or ``first`` (selects the default
+    playlist); ``mpls/<number>`` (selects <number>.mpls playlist);
+    ``<number>`` (select playlist with the same index). You can list
+    the available playlists with ``--msg-level=bd=v``.
+
 ``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
 
     Play a DVD. DVD menus are not supported. If no title is given, the longest
