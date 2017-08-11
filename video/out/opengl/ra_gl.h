@@ -4,41 +4,6 @@
 #include "ra.h"
 #include "gl_utils.h"
 
-// For ra.priv
-struct ra_gl {
-    GL *gl;
-    bool debug_enable;
-    bool timer_active; // hack for GL_TIME_ELAPSED limitations
-};
-
-// For ra_tex.priv
-struct ra_tex_gl {
-    bool own_objects;
-    GLenum target;
-    GLuint texture; // 0 if no texture data associated
-    GLuint fbo; // 0 if no rendering requested, or it default framebuffer
-    // These 3 fields can be 0 if unknown.
-    GLint internal_format;
-    GLenum format;
-    GLenum type;
-    struct gl_pbo_upload pbo;
-};
-
-// For ra_buf.priv
-struct ra_buf_gl {
-    GLuint buffer;
-    GLsync fence;
-};
-
-// For ra_renderpass.priv
-struct ra_renderpass_gl {
-    GLuint program;
-    // 1 entry for each ra_renderpass_params.inputs[] entry
-    GLint *uniform_loc;
-    int num_uniform_loc; // == ra_renderpass_params.num_inputs
-    struct gl_vao vao;
-};
-
 struct ra *ra_create_gl(GL *gl, struct mp_log *log);
 struct ra_tex *ra_create_wrapped_tex(struct ra *ra,
                                      const struct ra_tex_params *params,
