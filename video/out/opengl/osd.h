@@ -19,6 +19,7 @@ bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
                            struct gl_shader_cache *sc);
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
                           struct gl_shader_cache *sc, struct fbodst target);
-int64_t mpgl_get_change_counter(struct mpgl_osd *ctx);
+bool mpgl_osd_check_change(struct mpgl_osd *ctx, struct mp_osd_res *res,
+                           double pts);
 
 #endif

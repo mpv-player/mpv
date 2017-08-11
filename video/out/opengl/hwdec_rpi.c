@@ -36,6 +36,7 @@
 
 #include "hwdec.h"
 #include "common.h"
+#include "ra_gl.h"
 
 struct priv {
     struct mp_log *log;
@@ -125,13 +126,13 @@ static void disable_renderer(struct ra_hwdec *hw)
 static void update_overlay(struct ra_hwdec *hw, bool check_window_only)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    GL *gl = ra_is_gl(hw->ra) ? ra_gl_get(hw->ra) : NULL;
     MMAL_PORT_T *input = p->renderer->input[0];
     struct mp_rect src = p->src;
     struct mp_rect dst = p->dst;
 
     int defs[4] = {0, 0, 0, 0};
-    int *z = mpgl_get_native_display(gl, "MPV_RPI_WINDOW");
+    int *z = gl ? mpgl_get_native_display(gl, "MPV_RPI_WINDOW") : NULL;
     if (!z)
         z = defs;
 
@@ -285,7 +286,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
     struct priv *p = hw->priv;
 
     if (hw_image && !mp_image_params_equal(&p->params, &hw_image->params)) {
-        p->params = *params;
+        p->params = hw_image->params;
 
         disable_renderer(hw);
         mp_image_unrefp(&p->current_frame);
@@ -300,7 +301,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
             p->dst = *dst;
             update_overlay(hw, false);
         }
-        return;
+        return 0; // don't reupload
     }
 
     mp_image_unrefp(&p->current_frame);
@@ -382,6 +383,5 @@ const struct ra_hwdec_driver ra_hwdec_rpi_overlay = {
     .imgfmts = {IMGFMT_MMAL, IMGFMT_420P, 0},
     .init = create,
     .overlay_frame = overlay_frame,
-    .overlay_adjust = overlay_adjust,
     .uninit = destroy,
 };

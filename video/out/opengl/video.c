@@ -180,6 +180,8 @@ struct gl_video {
     struct gl_lcms *cms;
 
     int fb_depth;               // actual bits available in GL main framebuffer
+    struct m_color clear_color;
+    bool force_clear_color;
 
     struct gl_shader_cache *sc;
 
@@ -3000,7 +3002,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
     bool has_frame = !!frame->current;
 
     if (!has_frame || !mp_rect_equals(&p->dst_rect, &target_rc)) {
-        struct m_color c = p->opts.background;
+        struct m_color c = p->clear_color;
         float color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
         p->ra->fns->clear(p->ra, target.tex, color, &target_rc);
     }
@@ -3118,6 +3120,19 @@ done:
 
     p->frames_rendered++;
     pass_report_performance(p);
+}
+
+// Use this color instead of the global option.
+void gl_video_set_clear_color(struct gl_video *p, struct m_color c)
+{
+    p->force_clear_color = true;
+    p->clear_color = c;
+}
+
+bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *res,
+                               double pts)
+{
+    return p->osd ? mpgl_osd_check_change(p->osd, res, pts) : false;
 }
 
 void gl_video_resize(struct gl_video *p,
@@ -3604,6 +3619,9 @@ static void reinit_from_options(struct gl_video *p)
     // This works only for the fields themselves of course, not for any memory
     // referenced by them.
     p->opts = *(struct gl_video_opts *)p->opts_cache->opts;
+
+    if (!p->force_clear_color)
+        p->clear_color = p->opts.background;
 
     check_gl_features(p);
     uninit_rendering(p);
