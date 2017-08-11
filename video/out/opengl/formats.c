@@ -119,74 +119,6 @@ int gl_format_feature_flags(GL *gl)
          | (gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422 ? F_APPL : 0);
 }
 
-// Return the entry for the given internal format. Return NULL if unsupported.
-const struct gl_format *gl_find_internal_format(GL *gl, GLint internal_format)
-{
-    int features = gl_format_feature_flags(gl);
-    for (int n = 0; gl_formats[n].type; n++) {
-        const struct gl_format *f = &gl_formats[n];
-        if (f->internal_format == internal_format && (f->flags & features))
-            return f;
-    }
-    return NULL;
-}
-
-// Find the first supported format with a specific gl_format.type
-static const struct gl_format *gl_find_gl_type_format(GL *gl, GLenum type)
-{
-    int features = gl_format_feature_flags(gl);
-    for (int i = 0; gl_formats[i].type; i++) {
-        const struct gl_format *f = &gl_formats[i];
-        if (f->type == type && (f->flags & features))
-            return f;
-    }
-    return NULL;
-}
-
-// type: one of MPGL_TYPE_*
-// flags: bitset of F_*, all flags must be present
-const struct gl_format *gl_find_format(GL *gl, int type, int flags,
-                                       int bytes_per_component, int n_components)
-{
-    if (!bytes_per_component || !n_components || !type)
-        return NULL;
-    int features = gl_format_feature_flags(gl);
-    for (int n = 0; gl_formats[n].type; n++) {
-        const struct gl_format *f = &gl_formats[n];
-        if ((f->flags & features) &&
-            ((f->flags & flags) == flags) &&
-            gl_format_type(f) == type &&
-            gl_component_size(f->type) == bytes_per_component &&
-            gl_format_components(f->format) == n_components)
-            return f;
-    }
-    return NULL;
-}
-
-// Return a texture-filterable unsigned normalized fixed point format.
-const struct gl_format *gl_find_unorm_format(GL *gl, int bytes_per_component,
-                                             int n_components)
-{
-    return gl_find_format(gl, MPGL_TYPE_UNORM, F_TF, bytes_per_component,
-                          n_components);
-}
-
-// Return an unsigned integer format.
-const struct gl_format *gl_find_uint_format(GL *gl, int bytes_per_component,
-                                            int n_components)
-{
-    return gl_find_format(gl, MPGL_TYPE_UINT, 0, bytes_per_component,
-                          n_components);
-}
-
-// Return a 16 bit float format. Note that this will return a GL_FLOAT format
-// with 32 bit per component; just the internal representation is smaller.
-// Some GL versions will allow upload with GL_HALF_FLOAT as well.
-const struct gl_format *gl_find_float16_format(GL *gl, int n_components)
-{
-    return gl_find_format(gl, MPGL_TYPE_FLOAT, F_F16, 4, n_components);
-}
-
 int gl_format_type(const struct gl_format *format)
 {
     if (!format)
@@ -209,13 +141,6 @@ GLenum gl_integer_format_to_base(GLenum format)
     case GL_RGBA_INTEGER:       return GL_RGBA;
     }
     return 0;
-}
-
-// Return whether it's a non-normalized integer format.
-// "format" is like in struct gl_format.
-bool gl_is_integer_format(GLenum format)
-{
-    return !!gl_integer_format_to_base(format);
 }
 
 // Return the number of bytes per component this format implies.
@@ -268,84 +193,4 @@ int gl_bytes_per_pixel(GLenum format, GLenum type)
     }
 
     return gl_component_size(type) * gl_format_components(format);
-}
-
-// The format has cleanly separated components (on byte boundaries).
-bool gl_format_is_regular(const struct gl_format *fmt)
-{
-    int bpp = gl_component_size(fmt->type) * gl_format_components(fmt->format);
-    return bpp == gl_bytes_per_pixel(fmt->format, fmt->type);
-}
-
-// Like gl_find_unorm_format(), but takes bits (not bytes), and if no fixed
-// point format is available, return an unsigned integer format.
-static const struct gl_format *find_plane_format(GL *gl, int bytes, int n_channels)
-{
-    const struct gl_format *f = gl_find_unorm_format(gl, bytes, n_channels);
-    if (f)
-        return f;
-    return gl_find_uint_format(gl, bytes, n_channels);
-}
-
-// Put a mapping of imgfmt to OpenGL textures into *out. Basically it selects
-// the correct texture formats needed to represent an imgfmt in OpenGL, with
-// textures using the same memory organization as on the CPU.
-// Each plane is represented by a texture, and each texture has a RGBA
-// component order. out->components describes the meaning of them.
-// May return integer formats for >8 bit formats, if the driver has no
-// normalized 16 bit formats.
-// Returns false (and *out is not touched) if no format found.
-bool gl_get_imgfmt_desc(GL *gl, int imgfmt, struct gl_imgfmt_desc *out)
-{
-    struct gl_imgfmt_desc res = {0};
-
-    struct mp_regular_imgfmt regfmt;
-    if (mp_get_regular_imgfmt(&regfmt, imgfmt)) {
-        res.num_planes = regfmt.num_planes;
-        res.component_bits = regfmt.component_size * 8;
-        res.component_pad = regfmt.component_pad;
-        for (int n = 0; n < regfmt.num_planes; n++) {
-            struct mp_regular_imgfmt_plane *plane = &regfmt.planes[n];
-            res.planes[n] = find_plane_format(gl, regfmt.component_size,
-                                              plane->num_components);
-            if (!res.planes[n])
-                return false;
-            for (int i = 0; i < plane->num_components; i++)
-                res.components[n][i] = plane->components[i];
-        }
-        res.chroma_w = regfmt.chroma_w;
-        res.chroma_h = regfmt.chroma_h;
-        goto supported;
-    }
-
-    // Special formats for which OpenGL happens to have direct support.
-    if (imgfmt == IMGFMT_RGB565) {
-        res.num_planes = 1;
-        res.planes[0] = gl_find_gl_type_format(gl, GL_UNSIGNED_SHORT_5_6_5);
-        if (!res.planes[0])
-            return false;
-        for (int n = 0; n < 3; n++)
-            res.components[0][n] = n + 1;
-        res.chroma_w = res.chroma_h = 1;
-        goto supported;
-    }
-    if (imgfmt == IMGFMT_UYVY) {
-        res.num_planes = 1;
-        res.planes[0] = gl_find_gl_type_format(gl, GL_UNSIGNED_SHORT_8_8_APPLE);
-        if (!res.planes[0])
-            return false;
-        res.components[0][0] = 3;
-        res.components[0][1] = 1;
-        res.components[0][2] = 2;
-        res.chroma_w = res.chroma_h = 1;
-        goto supported;
-    }
-
-    // Unsupported format
-    return false;
-
-supported:
-
-    *out = res;
-    return true;
 }
