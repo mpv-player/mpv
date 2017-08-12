@@ -1039,7 +1039,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         status = filter_audio(mpctx, ao_c->ao_buffer, playsize);
         if (status == AD_WAIT)
             return;
-        if (status == AD_NO_PROGRESS) {
+        if (status == AD_NO_PROGRESS || status == AD_STARVE) {
             mp_wakeup_core(mpctx);
             return;
         }
