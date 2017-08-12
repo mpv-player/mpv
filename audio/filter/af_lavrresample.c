@@ -76,6 +76,7 @@ struct af_resample {
     int allow_detach;
     char **avopts;
     double playback_speed;
+    bool is_resampling;
     struct AVAudioResampleContext *avrctx;
     struct mp_audio avrctx_fmt; // output format of avrctx
     struct mp_audio pool_fmt; // format used to allocate frames for avrctx output
@@ -332,6 +333,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     //  * Also, the input channel layout must have already been set.
     avresample_set_channel_mapping(s->avrctx, s->reorder_in);
 
+    s->is_resampling = false;
+
     if (avresample_open(s->avrctx) < 0 || avresample_open(s->avrctx_out) < 0) {
         MP_ERR(af, "Cannot open Libavresample Context. \n");
         goto error;
@@ -518,9 +521,7 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     struct af_resample *s = af->priv;
 
     int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
-    bool need_reinit = fabs(new_rate / (double)s->in_rate - 1) > 0.01;
-
-    if (s->avrctx) {
+    if (s->avrctx && !(!s->is_resampling && new_rate == s->in_rate)) {
         AVRational r = av_d2q(s->playback_speed * s->in_rate_af / s->in_rate,
                               INT_MAX / 2);
         // Essentially, swr/avresample_set_compensation() does 2 things:
@@ -531,10 +532,13 @@ static int filter(struct af_instance *af, struct mp_audio *in)
         // feeding it, until the next filter() call.
         int mult = INT_MAX / 2 / MPMAX(MPMAX(abs(r.num), abs(r.den)), 1);
         r = (AVRational){ r.num * mult, r.den * mult };
-        if (avresample_set_compensation(s->avrctx, r.den - r.num, r.den) < 0)
-            need_reinit = true;
+        if (avresample_set_compensation(s->avrctx, r.den - r.num, r.den) >= 0) {
+            new_rate = s->in_rate;
+            s->is_resampling = true;
+        }
     }
 
+    bool need_reinit = fabs(new_rate / (double)s->in_rate - 1) > 0.01;
     if (need_reinit && new_rate != s->in_rate) {
         // Before reconfiguring, drain the audio that is still buffered
         // in the resampler.
