@@ -38,6 +38,8 @@ Interface changes
     - --lavfi-complex can now be set during runtime. If you set this in
       expectation it would be applied only after a reload, you might observe
       weird behavior.
+    - add --track-auto-selection to help with scripts/applications that
+      make exclusive use of --lavfi-complex.
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

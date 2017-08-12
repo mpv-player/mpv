@@ -76,6 +76,18 @@ Track Selection
     to ``auto`` (the default), mpv will choose the first edition declared as a
     default, or if there is no default, the first edition defined.
 
+``--track-auto-selection=<yes|no>``
+    Enable the default track auto-selection (default: yes). Enabling this will
+    make the player select streams according to ``--aid``, ``--alang``, and
+    others. If it is disabled, no tracks are selected. In addition, the player
+    will not exit if no tracks are selected, and wait instead (this wait mode
+    is similar to pausing, but the pause option is not set).
+
+    This is useful with ``--lavfi-complex``: you can start playback in this
+    mode, and then set select tracks at runtime by setting the filter graph.
+    Note that if ``--lavfi-complex`` is set before playback is started, the
+    referenced tracks are always selected.
+
 
 Playback Control
 ----------------

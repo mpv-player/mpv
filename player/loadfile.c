@@ -1269,7 +1269,7 @@ reopen_file:
             struct track *sel = NULL;
             bool taken = (t == STREAM_VIDEO && mpctx->vo_chain) ||
                          (t == STREAM_AUDIO && mpctx->ao_chain);
-            if (!taken)
+            if (!taken && opts->stream_auto_sel)
                 sel = select_default_track(mpctx, i, t);
             mpctx->current_track[i][t] = sel;
         }
@@ -1311,7 +1311,7 @@ reopen_file:
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
 
-    if (!mpctx->vo_chain && !mpctx->ao_chain) {
+    if (!mpctx->vo_chain && !mpctx->ao_chain && opts->stream_auto_sel) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
         mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
         goto terminate_playback;
