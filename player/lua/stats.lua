@@ -372,6 +372,9 @@ local function append_display_sync(s)
                         {prefix="DS:" .. o.prefix_sep .. " - / ", prefix_sep=""})
     end
 
+    append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
+    append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+
     -- As we need to plot some graphs we print jitter and ratio on their own lines
     if toggle_timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
         local ratio_graph = ""
@@ -426,10 +429,8 @@ local function add_video(s)
                         {no=true, [""]=true})
     end
     append_property(s, "avsync", {prefix="A-V:"})
-    if append_property(s, compat("decoder-frame-drop-count"), {prefix="Dropped:"}) then
-        append_property(s, compat("frame-drop-count"), {prefix="VO:", nl=""})
-        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    if append_property(s, compat("decoder-frame-drop-count"), {prefix="Dropped Frames:", suffix=" (decoder)"}) then
+        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
     end
     if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-display-fps",
