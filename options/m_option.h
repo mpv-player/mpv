@@ -408,7 +408,8 @@ struct m_option {
 #define UPDATE_PRIORITY         (1 << 15) // --priority (Windows-only)
 #define UPDATE_SCREENSAVER      (1 << 16) // --stop-screensaver
 #define UPDATE_VOL              (1 << 17) // softvol related options
-#define UPDATE_OPT_LAST         (1 << 17)
+#define UPDATE_LAVFI_COMPLEX    (1 << 18) // --lavfi-complex
+#define UPDATE_OPT_LAST         (1 << 18)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \

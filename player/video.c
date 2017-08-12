@@ -456,23 +456,20 @@ err_out:
     return 0;
 }
 
-int reinit_video_chain(struct MPContext *mpctx)
+void reinit_video_chain(struct MPContext *mpctx)
 {
-    return reinit_video_chain_src(mpctx, NULL);
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    if (!track || !track->stream) {
+        error_on_track(mpctx, track);
+        handle_force_window(mpctx, true);
+        return;
+    }
+    reinit_video_chain_src(mpctx, track);
 }
 
-int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
+// (track=NULL creates a blank chain, used for lavfi-complex)
+void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 {
-    struct track *track = NULL;
-    struct sh_stream *sh = NULL;
-    if (!src) {
-        track = mpctx->current_track[0][STREAM_VIDEO];
-        if (!track)
-            return 0;
-        sh = track->stream;
-        if (!sh)
-            goto no_video;
-    }
     assert(!mpctx->vo_chain);
 
     if (!mpctx->video_out) {
@@ -504,11 +501,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     vo_c->hwdec_devs = vo_c->vo->hwdec_devs;
 
-    if (mpctx->lavfi)
-        lavfi_set_hwdec_devs(mpctx->lavfi, vo_c->hwdec_devs);
-
-    vo_c->filter_src = src;
-    if (!vo_c->filter_src) {
+    if (track) {
         vo_c->track = track;
         track->vo_c = vo_c;
         if (!init_video_decoder(mpctx, track))
@@ -516,7 +509,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
         vo_c->video_src = track->d_video;
         vo_c->container_fps = vo_c->video_src->fps;
-        vo_c->is_coverart = !!sh->attached_picture;
+        vo_c->is_coverart = !!track->stream->attached_picture;
 
         track->vo_c = vo_c;
         vo_c->track = track;
@@ -540,14 +533,12 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     reset_video_state(mpctx);
     reset_subtitle_state(mpctx);
 
-    return 1;
+    return;
 
 err_out:
-no_video:
     uninit_video_chain(mpctx);
     error_on_track(mpctx, track);
     handle_force_window(mpctx, true);
-    return 0;
 }
 
 // Try to refresh the video by doing a precise seek to the currently displayed

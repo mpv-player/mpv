@@ -376,6 +376,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         !hr_seek && !(demux_flags & SEEK_FORWARD);
 
     mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
+
+    mpctx->canonical_pts = mpctx->last_seek_pts;
 }
 
 // This combines consecutive seek requests.
@@ -956,6 +958,8 @@ static void handle_playback_time(struct MPContext *mpctx)
     {
         mpctx->playback_pts = playing_audio_pts(mpctx);
     }
+    if (mpctx->playback_pts != MP_NOPTS_VALUE)
+        mpctx->canonical_pts = mpctx->playback_pts;
 }
 
 // We always make sure audio and video buffers are filled before actually

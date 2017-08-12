@@ -945,21 +945,83 @@ void prefetch_next(struct MPContext *mpctx)
     }
 }
 
-static bool init_complex_filters(struct MPContext *mpctx)
+// Destroy the complex filter, and remove the references to the filter pads.
+// (Call cleanup_deassociated_complex_filters() to close decoders/VO/AO
+// that are not connected anymore due to this.)
+static void deassociate_complex_filters(struct MPContext *mpctx)
 {
-    assert(!mpctx->lavfi);
+    for (int n = 0; n < mpctx->num_tracks; n++)
+        mpctx->tracks[n]->sink = NULL;
+    if (mpctx->vo_chain)
+        mpctx->vo_chain->filter_src = NULL;
+    if (mpctx->ao_chain)
+        mpctx->ao_chain->filter_src = NULL;
+    lavfi_destroy(mpctx->lavfi);
+    mpctx->lavfi = NULL;
+}
 
+// Close all decoders and sinks (AO/VO) that are not connected to either
+// a track or a filter pad.
+static void cleanup_deassociated_complex_filters(struct MPContext *mpctx)
+{
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (!(track->sink || track->vo_c || track->ao_c)) {
+            if (track->d_video && !track->vo_c) {
+                video_uninit(track->d_video);
+                track->d_video = NULL;
+            }
+            if (track->d_audio && !track->ao_c) {
+                audio_uninit(track->d_audio);
+                track->d_audio = NULL;
+            }
+            track->selected = false;
+        }
+    }
+
+    if (mpctx->vo_chain && !mpctx->vo_chain->video_src &&
+        !mpctx->vo_chain->filter_src)
+    {
+        uninit_video_chain(mpctx);
+    }
+    if (mpctx->ao_chain && !mpctx->ao_chain->audio_src &&
+        !mpctx->ao_chain->filter_src)
+    {
+        uninit_audio_chain(mpctx);
+    }
+}
+
+// >0: changed, 0: no change, -1: error
+static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
+{
     char *graph = mpctx->opts->lavfi_complex;
+    bool have_graph = graph && graph[0] && !force_uninit;
+    if (have_graph && mpctx->lavfi &&
+        strcmp(graph, lavfi_get_graph(mpctx->lavfi)) == 0 &&
+        !lavfi_has_failed(mpctx->lavfi))
+        return 0;
+    if (!mpctx->lavfi && !have_graph)
+        return 0;
 
-    if (!graph || !graph[0])
-        return true;
+    // Deassociate the old filter pads. We leave both sources (tracks) and
+    // sinks (AO/VO) "dangling", connected to neither track or filter pad.
+    // Later, we either reassociate them with new pads, or uninit them if
+    // they are still dangling. This avoids too interruptive actions like
+    // recreating the VO.
+    deassociate_complex_filters(mpctx);
+
+    bool success = false;
+    if (!have_graph) {
+        success = true; // normal full removal of graph
+        goto done;
+    }
 
     mpctx->lavfi = lavfi_create(mpctx->log, graph);
     if (!mpctx->lavfi)
-        return false;
+        goto done;
 
     if (lavfi_has_failed(mpctx->lavfi))
-        return false;
+        goto done;
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -983,6 +1045,12 @@ static bool init_complex_filters(struct MPContext *mpctx)
         if (lavfi_get_connected(pad))
             continue;
 
+        assert(!track->sink);
+        if (track->vo_c || track->ao_c) {
+            MP_ERR(mpctx, "Pad %s tries to connect to already selected track.\n",
+                   label);
+            goto done;
+        }
         track->sink = pad;
         lavfi_set_connected(pad, true);
         track->selected = true;
@@ -992,66 +1060,81 @@ static bool init_complex_filters(struct MPContext *mpctx)
     if (pad && lavfi_pad_type(pad) == STREAM_VIDEO &&
         lavfi_pad_direction(pad) == LAVFI_OUT)
     {
+        if (mpctx->vo_chain) {
+            if (mpctx->vo_chain->video_src) {
+                MP_ERR(mpctx, "Pad vo tries to connected to already used VO.\n");
+                goto done;
+            }
+        } else {
+            reinit_video_chain_src(mpctx, NULL);
+            if (!mpctx->vo_chain)
+                goto done;
+        }
         lavfi_set_connected(pad, true);
-        reinit_video_chain_src(mpctx, pad);
+        struct vo_chain *vo_c = mpctx->vo_chain;
+        vo_c->filter_src = pad;
+        lavfi_pad_set_hwdec_devs(vo_c->filter_src, vo_c->hwdec_devs);
     }
 
     pad = lavfi_find_pad(mpctx->lavfi, "ao");
     if (pad && lavfi_pad_type(pad) == STREAM_AUDIO &&
         lavfi_pad_direction(pad) == LAVFI_OUT)
     {
+        if (mpctx->ao_chain) {
+            if (mpctx->ao_chain->audio_src) {
+                MP_ERR(mpctx, "Pad ao tries to connected to already used AO.\n");
+                goto done;
+            }
+        } else {
+            reinit_audio_chain_src(mpctx, NULL);
+            if (!mpctx->ao_chain)
+                goto done;
+        }
         lavfi_set_connected(pad, true);
-        reinit_audio_chain_src(mpctx, pad);
+        mpctx->ao_chain->filter_src = pad;
     }
-
-    return true;
-}
-
-static bool init_complex_filter_decoders(struct MPContext *mpctx)
-{
-    if (!mpctx->lavfi)
-        return true;
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track->sink && track->type == STREAM_VIDEO) {
-            if (!init_video_decoder(mpctx, track))
-                return false;
+            if (!track->d_video && !init_video_decoder(mpctx, track))
+                goto done;
         }
         if (track->sink && track->type == STREAM_AUDIO) {
-            if (!init_audio_decoder(mpctx, track))
-                return false;
+            if (!track->d_audio && !init_audio_decoder(mpctx, track))
+                goto done;
         }
     }
 
-    return true;
+    success = true;
+done:
+
+    if (!success)
+        deassociate_complex_filters(mpctx);
+
+    cleanup_deassociated_complex_filters(mpctx);
+
+    if (mpctx->playback_initialized) {
+        for (int n = 0; n < mpctx->num_tracks; n++)
+            reselect_demux_stream(mpctx, mpctx->tracks[n]);
+    }
+
+    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+
+    return success ? 1 : -1;
 }
 
-static void uninit_complex_filters(struct MPContext *mpctx)
+void update_lavfi_complex(struct MPContext *mpctx)
 {
-    if (!mpctx->lavfi)
-        return;
-
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-
-        if (track->d_video && !track->vo_c) {
-            video_uninit(track->d_video);
-            track->d_video = NULL;
-        }
-        if (track->d_audio && !track->ao_c) {
-            audio_uninit(track->d_audio);
-            track->d_audio = NULL;
+    if (mpctx->playback_initialized) {
+        if (reinit_complex_filters(mpctx, false) != 0 &&
+            mpctx->canonical_pts != MP_NOPTS_VALUE)
+        {
+            // Refresh seek to avoid weird situations.
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->canonical_pts,
+                       MPSEEK_EXACT, 0);
         }
     }
-
-    if (mpctx->vo_chain && mpctx->vo_chain->filter_src)
-        uninit_video_chain(mpctx);
-    if (mpctx->ao_chain && mpctx->ao_chain->filter_src)
-        uninit_audio_chain(mpctx);
-
-    lavfi_destroy(mpctx->lavfi);
-    mpctx->lavfi = NULL;
 }
 
 // Start playing the current playlist entry.
@@ -1083,6 +1166,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
     mpctx->display_sync_error = 0.0;
     mpctx->display_sync_active = false;
+    mpctx->canonical_pts = MP_NOPTS_VALUE;
     mpctx->seek = (struct seek_params){ 0 };
 
     reset_playback_state(mpctx);
@@ -1176,7 +1260,7 @@ reopen_file:
     if (process_preloaded_hooks(mpctx))
         goto terminate_playback;
 
-    if (!init_complex_filters(mpctx))
+    if (reinit_complex_filters(mpctx, false) < 0)
         goto terminate_playback;
 
     assert(NUM_PTRACKS == 2); // opts->stream_id is hardcoded to 2
@@ -1222,9 +1306,6 @@ reopen_file:
 #endif
 
     update_playback_speed(mpctx);
-
-    if (!init_complex_filter_decoders(mpctx))
-        goto terminate_playback;
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
@@ -1307,7 +1388,7 @@ terminate_playback:
     close_recorder(mpctx);
 
     // time to uninit all, except global stuff:
-    uninit_complex_filters(mpctx);
+    reinit_complex_filters(mpctx, true);
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);

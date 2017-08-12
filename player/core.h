@@ -367,6 +367,8 @@ typedef struct MPContext {
     double last_frame_duration;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
+    // Last known "good" PTS
+    double canonical_pts;
     // audio stats only
     int64_t audio_stat_start;
     double written_audio;
@@ -478,7 +480,7 @@ void update_playback_speed(struct MPContext *mpctx);
 void uninit_audio_out(struct MPContext *mpctx);
 void uninit_audio_chain(struct MPContext *mpctx);
 int init_audio_decoder(struct MPContext *mpctx, struct track *track);
-void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
+void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
@@ -522,6 +524,7 @@ void prefetch_next(struct MPContext *mpctx);
 void close_recorder(struct MPContext *mpctx);
 void close_recorder_and_error(struct MPContext *mpctx);
 void open_recorder(struct MPContext *mpctx, bool on_init);
+void update_lavfi_complex(struct MPContext *mpctx);
 
 // main.c
 int mp_initialize(struct MPContext *mpctx, char **argv);
@@ -611,8 +614,8 @@ int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
 int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
-int reinit_video_chain(struct MPContext *mpctx);
-int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
+void reinit_video_chain(struct MPContext *mpctx);
+void reinit_video_chain_src(struct MPContext *mpctx, struct track *track);
 int reinit_video_filters(struct MPContext *mpctx);
 void write_video(struct MPContext *mpctx);
 void mp_force_video_refresh(struct MPContext *mpctx);

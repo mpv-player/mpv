@@ -35,6 +35,9 @@ Interface changes
       framebuffer that was ever passed to the renderer. Having GL framebuffers
       with a size larger than 8 bit per component is quite rare. If you need
       it, set the --dither-depth option instead.
+    - --lavfi-complex can now be set during runtime. If you set this in
+      expectation it would be applied only after a reload, you might observe
+      weird behavior.
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

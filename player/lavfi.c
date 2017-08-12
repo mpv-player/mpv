@@ -249,10 +249,17 @@ struct lavfi *lavfi_create(struct mp_log *log, char *graph_string)
 
 void lavfi_destroy(struct lavfi *c)
 {
+    if (!c)
+        return;
     free_graph(c);
     clear_data(c);
     av_frame_free(&c->tmp_frame);
     talloc_free(c);
+}
+
+const char *lavfi_get_graph(struct lavfi *c)
+{
+    return c->graph_string;
 }
 
 struct lavfi_pad *lavfi_find_pad(struct lavfi *c, char *name)
@@ -484,9 +491,11 @@ static void dump_graph(struct lavfi *c)
 #endif
 }
 
-void lavfi_set_hwdec_devs(struct lavfi *c, struct mp_hwdec_devices *hwdevs)
+void lavfi_pad_set_hwdec_devs(struct lavfi_pad *pad,
+                              struct mp_hwdec_devices *hwdevs)
 {
-    c->hwdec_devs = hwdevs;
+    // We don't actually treat this per-pad.
+    pad->main->hwdec_devs = hwdevs;
 }
 
 // Initialize the graph if all inputs have formats set. If it's already

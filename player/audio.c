@@ -557,25 +557,19 @@ init_error:
 
 void reinit_audio_chain(struct MPContext *mpctx)
 {
-    reinit_audio_chain_src(mpctx, NULL);
+    struct track *track = NULL;
+    track = mpctx->current_track[0][STREAM_AUDIO];
+    if (!track || !track->stream) {
+        uninit_audio_out(mpctx);
+        error_on_track(mpctx, track);
+        return;
+    }
+    reinit_audio_chain_src(mpctx, track);
 }
 
-void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
+// (track=NULL creates a blank chain, used for lavfi-complex)
+void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
 {
-    struct track *track = NULL;
-    struct sh_stream *sh = NULL;
-    if (!src) {
-        track = mpctx->current_track[0][STREAM_AUDIO];
-        if (!track) {
-            uninit_audio_out(mpctx);
-            return;
-        }
-        sh = track->stream;
-        if (!sh) {
-            uninit_audio_out(mpctx);
-            goto no_audio;
-        }
-    }
     assert(!mpctx->ao_chain);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
@@ -584,15 +578,14 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     mpctx->ao_chain = ao_c;
     ao_c->log = mpctx->log;
     ao_c->af = af_new(mpctx->global);
-    if (sh)
-        ao_c->af->replaygain_data = sh->codec->replaygain_data;
+    if (track && track->stream)
+        ao_c->af->replaygain_data = track->stream->codec->replaygain_data;
     ao_c->spdif_passthrough = true;
     ao_c->pts = MP_NOPTS_VALUE;
     ao_c->ao_buffer = mp_audio_buffer_create(NULL);
     ao_c->ao = mpctx->ao;
 
-    ao_c->filter_src = src;
-    if (!ao_c->filter_src) {
+    if (track) {
         ao_c->track = track;
         track->ao_c = ao_c;
         if (!init_audio_decoder(mpctx, track))
@@ -614,7 +607,6 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 init_error:
     uninit_audio_chain(mpctx);
     uninit_audio_out(mpctx);
-no_audio:
     error_on_track(mpctx, track);
 }
 

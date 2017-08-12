@@ -362,7 +362,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("alang", stream_lang[STREAM_AUDIO], 0),
     OPT_STRINGLIST("slang", stream_lang[STREAM_SUB], 0),
 
-    OPT_STRING("lavfi-complex", lavfi_complex, 0),
+    OPT_STRING("lavfi-complex", lavfi_complex, UPDATE_LAVFI_COMPLEX),
 
     OPT_CHOICE("audio-display", audio_display, 0,
                ({"no", 0}, {"attachment", 1})),
