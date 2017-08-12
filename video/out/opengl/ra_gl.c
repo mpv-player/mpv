@@ -308,7 +308,8 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
 
     gl_check_error(gl, ra->log, "after creating texture");
 
-    if (tex->params.render_dst) {
+    // Even blitting needs an FBO in OpenGL for strange reasons
+    if (tex->params.render_dst || tex->params.blit_src || tex->params.blit_dst) {
         if (!tex->params.format->renderable) {
             MP_ERR(ra, "Trying to create renderable texture with unsupported "
                    "format.\n");
@@ -378,6 +379,8 @@ struct ra_tex *ra_create_wrapped_fb(struct ra *ra, GLuint gl_fbo, int w, int h)
             .w = w, .h = h, .d = 1,
             .format = &fbo_dummy_format,
             .render_dst = true,
+            .blit_src = true,
+            .blit_dst = true,
         },
     };
 
@@ -598,8 +601,8 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
 {
     GL *gl = ra_gl_get(ra);
 
-    assert(dst->params.render_dst);
-    assert(src->params.render_dst); // even src must have a FBO
+    assert(src->params.blit_src);
+    assert(dst->params.blit_dst);
 
     struct ra_tex_gl *src_gl = src->priv;
     struct ra_tex_gl *dst_gl = dst->priv;

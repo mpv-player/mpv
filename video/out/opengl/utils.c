@@ -89,6 +89,7 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         .src_linear = true,
         .render_src = true,
         .render_dst = true,
+        .blit_src = true,
     };
 
     fbo->tex = ra_tex_create(fbo->ra, &params);

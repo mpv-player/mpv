@@ -90,7 +90,8 @@ struct ra_tex_params {
     const struct ra_format *format;
     bool render_src;        // must be useable as source texture in a shader
     bool render_dst;        // must be useable as target texture in a shader
-                            // this requires creation of a FBO
+    bool blit_src;          // must be usable as a blit source
+    bool blit_dst;          // must be usable as a blit destination
     // When used as render source texture.
     bool src_linear;        // if false, use nearest sampling (whether this can
                             // be true depends on ra_format.linear_filter)
@@ -359,8 +360,7 @@ struct ra_fns {
     // preserved. The formats of the textures must be losely compatible. The
     // dst texture can be a swapchain framebuffer, but src can not. Only 2D
     // textures are supported.
-    // Both textures must have tex->params.render_dst==true (even src, which is
-    // an odd GL requirement).
+    // The textures must have blit_src and blit_dst set, respectively.
     // Rectangles with negative width/height lead to flipping, different src/dst
     // sizes lead to point scaling. Coordinates are always in pixels.
     // Optional. Only available if RA_CAP_BLIT is set (if it's not set, it must
