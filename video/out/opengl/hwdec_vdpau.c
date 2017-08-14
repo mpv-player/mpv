@@ -81,6 +81,9 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     struct priv *p = mapper->priv;
     GL *gl = p->gl;
 
+    for (int n = 0; n < 4; n++)
+        ra_tex_free(mapper->ra, &mapper->tex[n]);
+
     if (p->mapped) {
         gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
         if (p->direct_mode) {
@@ -113,10 +116,6 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     p->vdpgl_surface = 0;
 
     gl->DeleteTextures(4, p->gl_textures);
-    for (int n = 0; n < 4; n++) {
-        p->gl_textures[n] = 0;
-        ra_tex_free(mapper->ra, &mapper->tex[n]);
-    }
 
     if (p->vdp_surface != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(p->vdp_surface);
@@ -179,25 +178,6 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
             gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             gl->BindTexture(GL_TEXTURE_2D, 0);
-
-            bool chroma = n >= 2;
-
-            struct ra_tex_params params = {
-                .dimensions = 2,
-                .w = mapper->src_params.w / (chroma ? 2 : 1),
-                .h = mapper->src_params.h / (chroma ? 4 : 2),
-                .d = 1,
-                .format = ra_find_unorm_format(mapper->ra, 1, chroma ? 2 : 1),
-                .render_src = true,
-            };
-
-            if (!params.format)
-                return -1;
-
-            mapper->tex[n] =
-                ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[n]);
-            if (!mapper->tex[n])
-                return -1;
         }
     } else {
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[0]);
@@ -207,27 +187,11 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
-        struct ra_tex_params params = {
-            .dimensions = 2,
-            .w = mapper->src_params.w,
-            .h = mapper->src_params.h,
-            .d = 1,
-            .format = ra_find_unorm_format(mapper->ra, 1, 4),
-            .render_src = true,
-            .src_linear = true,
-        };
-
-        if (!params.format)
-            return -1;
-
-        mapper->tex[0] =
-            ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[0]);
-        if (!mapper->tex[0])
-            return -1;
-
         vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
                                             VDP_RGBA_FORMAT_B8G8R8A8,
-                                            params.w, params.h, &p->vdp_surface);
+                                            mapper->src_params.w,
+                                            mapper->src_params.h,
+                                            &p->vdp_surface);
         CHECK_VDP_ERROR(mapper, "Error when calling vdp_output_surface_create");
 
         p->vdpgl_surface = gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(p->vdp_surface),
@@ -283,6 +247,27 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
 
         p->mapped = true;
+
+        for (int n = 0; n < 4; n++) {
+            bool chroma = n >= 2;
+
+            struct ra_tex_params params = {
+                .dimensions = 2,
+                .w = s_w / (chroma ? 2 : 1),
+                .h = s_h / (chroma ? 4 : 2),
+                .d = 1,
+                .format = ra_find_unorm_format(mapper->ra, 1, chroma ? 2 : 1),
+                .render_src = true,
+            };
+
+            if (!params.format)
+                return -1;
+
+            mapper->tex[n] =
+                ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[n]);
+            if (!mapper->tex[n])
+                return -1;
+        }
     } else {
         if (!p->vdpgl_surface)
             return -1;
@@ -293,6 +278,24 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
 
         p->mapped = true;
+
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = mapper->src_params.w,
+            .h = mapper->src_params.h,
+            .d = 1,
+            .format = ra_find_unorm_format(mapper->ra, 1, 4),
+            .render_src = true,
+            .src_linear = true,
+        };
+
+        if (!params.format)
+            return -1;
+
+        mapper->tex[0] =
+            ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[0]);
+        if (!mapper->tex[0])
+            return -1;
     }
 
     return 0;
