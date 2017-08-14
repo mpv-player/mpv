@@ -40,6 +40,9 @@ Interface changes
       weird behavior.
     - add --track-auto-selection to help with scripts/applications that
       make exclusive use of --lavfi-complex.
+    - undeprecate --loop, and map it from --loop-playlist to --loop-file (the
+      deprecation was to make sure no API user gets broken by a sudden behavior
+      change)
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

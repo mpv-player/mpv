@@ -614,6 +614,7 @@ const m_option_t mp_opts[] = {
                       ({"no", 0},
                        {"yes", -1},
                        {"inf", -1})),
+    OPT_ALIAS("loop", "loop-file"),
 
     OPT_FLAG("resume-playback", position_resume, 0),
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
@@ -831,8 +832,6 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
     OPT_REPLACED("sub-ass-style-override", "sub-ass-override"),
     OPT_REMOVED("fs-black-out-screens", NULL),
-    OPT_REPLACED_MSG("loop", "loop-playlist", "--loop will be changed to map to"
-        " --loop-file in future releases."),
     OPT_REPLACED("sub-paths", "sub-file-paths"),
 
     {0}

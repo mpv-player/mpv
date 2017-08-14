@@ -299,11 +299,7 @@ Playback Control
     time trying to loop a file that doesn't exist. But it might be useful for
     playing webradios under very bad network conditions.
 
-``--loop``
-    Currently a deprecated alias to ``--loop-playlist``. After a deprecation
-    period, it will be undeprecated, but changed to alias ``--loop-file``.
-
-``--loop-file=<N|inf|no>``
+``--loop-file=<N|inf|no>``, ``--loop=<N|inf|no>``
     Loop a single file N times. ``inf`` means forever, ``no`` means normal
     playback. For compatibility, ``--loop-file`` and ``--loop-file=yes`` are
     also accepted, and are the same as ``--loop-file=inf``.
@@ -312,6 +308,8 @@ Playback Control
     just the file itself. If the playlist contains only a single file, the
     difference between the two option is that this option performs a seek on
     loop, instead of reloading the file.
+
+    ``--loop`` is an alias for this option.
 
 ``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
     Set loop points. If playback passes the ``b`` timestamp, it will seek to
