@@ -3757,7 +3757,7 @@ void gl_video_set_hwdec(struct gl_video *p, struct ra_hwdec *hwdec)
     p->hwdec = hwdec;
 }
 
-void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
+static void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
 {
     struct ra_buf_params params = {
         .type = RA_BUF_TYPE_TEX_UPLOAD,
@@ -3775,11 +3775,13 @@ void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
     return buf->data;
 };
 
-void gl_video_dr_free_buffer(struct gl_video *p, void *ptr)
+static void gl_video_dr_free_buffer(void *opaque, uint8_t *data)
 {
+    struct gl_video *p = opaque;
+
     for (int n = 0; n < p->num_dr_buffers; n++) {
         struct dr_buffer *buffer = &p->dr_buffers[n];
-        if (buffer->buf->data == ptr) {
+        if (buffer->buf->data == data) {
             assert(!buffer->mpi); // can't be freed while it has a ref
             ra_buf_free(p->ra, &buffer->buf);
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
@@ -3788,4 +3790,26 @@ void gl_video_dr_free_buffer(struct gl_video *p, void *ptr)
     }
     // not found - must not happen
     assert(0);
+}
+
+struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h,
+                                    int stride_align)
+{
+    int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
+    if (size < 0)
+        return NULL;
+
+    int alloc_size = size + stride_align;
+    void *ptr = gl_video_dr_alloc_buffer(p, alloc_size);
+    if (!ptr)
+        return NULL;
+
+    // (we expect vo.c to proxy the free callback, so it happens in the same
+    // thread it was allocated in, removing the need for synchronization)
+    struct mp_image *res = mp_image_from_buffer(imgfmt, w, h, stride_align,
+                                                ptr, alloc_size, p,
+                                                gl_video_dr_free_buffer);
+    if (!res)
+        gl_video_dr_free_buffer(p, ptr);
+    return res;
 }
