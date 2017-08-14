@@ -461,7 +461,6 @@ void reinit_video_chain(struct MPContext *mpctx)
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     if (!track || !track->stream) {
         error_on_track(mpctx, track);
-        handle_force_window(mpctx, true);
         return;
     }
     reinit_video_chain_src(mpctx, track);
