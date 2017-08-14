@@ -73,8 +73,8 @@ enum seek_type {
 };
 
 enum seek_precision {
-    MPSEEK_DEFAULT = 0,
     // The following values are numerically sorted by increasing precision
+    MPSEEK_DEFAULT = 0,
     MPSEEK_KEYFRAME,
     MPSEEK_EXACT,
     MPSEEK_VERY_EXACT,
@@ -83,6 +83,13 @@ enum seek_precision {
 enum seek_flags {
     MPSEEK_FLAG_DELAY = 1 << 0, // give player chance to coalesce multiple seeks
     MPSEEK_FLAG_NOFLUSH = 1 << 1, // keeping remaining data for seamless loops
+};
+
+struct seek_params {
+    enum seek_type type;
+    enum seek_precision exact;
+    double amount;
+    unsigned flags; // MPSEEK_FLAG_*
 };
 
 enum video_sync {
@@ -339,6 +346,7 @@ typedef struct MPContext {
     bool hrseek_lastframe;  // drop everything until last frame reached
     bool hrseek_backstep;   // go to frame before seek target
     double hrseek_pts;
+    struct seek_params current_seek;
     bool ab_loop_clip;      // clip to the "b" part of an A-B loop if available
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
@@ -367,8 +375,6 @@ typedef struct MPContext {
     double last_frame_duration;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
-    // Last known "good" PTS
-    double canonical_pts;
     // audio stats only
     int64_t audio_stat_start;
     double written_audio;
@@ -398,13 +404,7 @@ typedef struct MPContext {
     // Used to turn a new time value to a delta from last time.
     int64_t last_time;
 
-    // Used to communicate the parameters of a seek between parts
-    struct seek_params {
-        enum seek_type type;
-        enum seek_precision exact;
-        double amount;
-        unsigned flags; // MPSEEK_FLAG_*
-    } seek;
+    struct seek_params seek;
 
     // Allow audio to issue a second seek if audio is too far ahead (for non-hr
     // seeks with external audio tracks).
@@ -532,6 +532,7 @@ struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);
 void mp_print_version(struct mp_log *log, int always);
 void mp_update_logging(struct MPContext *mpctx, bool preinit);
+void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec);
 
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);

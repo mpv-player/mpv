@@ -279,12 +279,8 @@ int reinit_audio_filters(struct MPContext *mpctx)
 
     // Only force refresh if the amount of dropped buffered data is going to
     // cause "issues" for the A/V sync logic.
-    if (mpctx->audio_status == STATUS_PLAYING &&
-        mpctx->playback_pts != MP_NOPTS_VALUE && delay > 0.2)
-    {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->playback_pts,
-                   MPSEEK_EXACT, 0);
-    }
+    if (mpctx->audio_status == STATUS_PLAYING && delay > 0.2)
+        issue_refresh_seek(mpctx, MPSEEK_EXACT);
     return 1;
 }
 

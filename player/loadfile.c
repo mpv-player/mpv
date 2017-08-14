@@ -1127,13 +1127,8 @@ done:
 void update_lavfi_complex(struct MPContext *mpctx)
 {
     if (mpctx->playback_initialized) {
-        if (reinit_complex_filters(mpctx, false) != 0 &&
-            mpctx->canonical_pts != MP_NOPTS_VALUE)
-        {
-            // Refresh seek to avoid weird situations.
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->canonical_pts,
-                       MPSEEK_EXACT, 0);
-        }
+        if (reinit_complex_filters(mpctx, false) != 0)
+            issue_refresh_seek(mpctx, MPSEEK_EXACT);
     }
 }
 
@@ -1166,7 +1161,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
     mpctx->display_sync_error = 0.0;
     mpctx->display_sync_active = false;
-    mpctx->canonical_pts = MP_NOPTS_VALUE;
     mpctx->seek = (struct seek_params){ 0 };
 
     reset_playback_state(mpctx);

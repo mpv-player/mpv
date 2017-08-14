@@ -232,6 +232,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_framedrop = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
+    mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
@@ -377,7 +378,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
 
-    mpctx->canonical_pts = mpctx->last_seek_pts;
+    mpctx->current_seek = seek;
 }
 
 // This combines consecutive seek requests.
@@ -958,8 +959,6 @@ static void handle_playback_time(struct MPContext *mpctx)
     {
         mpctx->playback_pts = playing_audio_pts(mpctx);
     }
-    if (mpctx->playback_pts != MP_NOPTS_VALUE)
-        mpctx->canonical_pts = mpctx->playback_pts;
 }
 
 // We always make sure audio and video buffers are filled before actually
@@ -993,6 +992,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
+        mpctx->current_seek = (struct seek_params){0};
         mpctx->audio_allow_second_chance_seek = false;
         handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
