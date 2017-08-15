@@ -4,7 +4,7 @@ from waflib import Utils
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
-           "check_cocoa", "check_openal", "check_rpi"]
+           "check_cocoa", "check_openal"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -103,24 +103,3 @@ def check_openal(ctx, dependency_identifier):
         if fn(ctx, dependency_identifier):
             return True
     return False
-
-def check_rpi(ctx, dependency_identifier):
-    # We need MMAL/bcm_host/dispmanx APIs.
-    # Upstream keeps pkgconfig files in '/opt/vc/lib/pkgconfig'.
-    # See https://github.com/raspberrypi/userland/issues/245
-    # PKG_CONFIG_SYSROOT_DIR helps with cross compilation.
-    prev_pkg_path = os.getenv('PKG_CONFIG_PATH', '')
-    os.environ['PKG_CONFIG_PATH'] = os.pathsep.join(
-        filter(None, [os.path.join(os.getenv('PKG_CONFIG_SYSROOT_DIR', '/'),
-                                   'opt/vc/lib/pkgconfig'),
-                      prev_pkg_path]))
-
-    checks = [
-        check_pkg_config('bcm_host', uselib_store='bcm_host'),
-        check_pkg_config('egl'),
-        check_cc(lib=['mmal_core', 'mmal_util', 'mmal_vc_client'], use=['bcm_host']),
-    ]
-
-    ret = all((fn(ctx, dependency_identifier) for fn in checks))
-    os.environ['PKG_CONFIG_PATH'] = prev_pkg_path
-    return ret
