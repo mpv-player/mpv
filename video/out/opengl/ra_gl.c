@@ -590,7 +590,7 @@ static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
     gl->Clear(GL_COLOR_BUFFER_BIT);
     gl->Disable(GL_SCISSOR_TEST);
 
-    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
