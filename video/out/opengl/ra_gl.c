@@ -810,8 +810,8 @@ static struct ra_renderpass *gl_renderpass_create(struct ra *ra,
     }
     gl->UseProgram(0);
 
-    gl_vao_init(&pass_gl->vao, gl, params->vertex_stride, params->vertex_attribs,
-                params->num_vertex_attribs);
+    gl_vao_init(&pass_gl->vao, gl, pass->params.vertex_stride,
+                pass->params.vertex_attribs, pass->params.num_vertex_attribs);
 
     return pass;
 }

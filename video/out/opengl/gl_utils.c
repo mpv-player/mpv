@@ -139,7 +139,7 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
         GLenum type = 0;
         bool normalized = false;
         switch (e->type) {
-            case RA_VARTYPE_INT:
+        case RA_VARTYPE_INT:
             type = GL_INT;
             break;
         case RA_VARTYPE_FLOAT:
@@ -221,7 +221,7 @@ static void gl_vao_unbind(struct gl_vao *vao)
     if (gl->BindVertexArray) {
         gl->BindVertexArray(0);
     } else {
-        for (int n = 0; vao->entries[n].name; n++)
+        for (int n = 0; n < vao->num_entries; n++)
             gl->DisableVertexAttribArray(n);
     }
 }
