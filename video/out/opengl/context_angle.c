@@ -24,6 +24,7 @@
 
 #include "angle_dynamic.h"
 #include "egl_helpers.h"
+#include "d3d11_helpers.h"
 
 #include "common/common.h"
 #include "options/m_config.h"
@@ -39,9 +40,6 @@
 #define EGL_SURFACE_ORIENTATION_ANGLE 0x33A8
 #define EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE 0x0002
 #endif
-
-// Windows 8 enum value, not present in mingw-w64 headers
-#define DXGI_ADAPTER_FLAG_SOFTWARE (2)
 
 enum {
     RENDERER_AUTO,
@@ -97,17 +95,11 @@ const struct m_sub_options angle_conf = {
 };
 
 struct priv {
-    IDXGIFactory1 *dxgi_factory;
-    IDXGIFactory2 *dxgi_factory2;
-    IDXGIAdapter1 *dxgi_adapter;
-    IDXGIDevice1 *dxgi_device;
     IDXGISwapChain *dxgi_swapchain;
-    IDXGISwapChain1 *dxgi_swapchain1;
 
     ID3D11Device *d3d11_device;
     ID3D11DeviceContext *d3d11_context;
     ID3D11Texture2D *d3d11_backbuffer;
-    D3D_FEATURE_LEVEL d3d11_level;
 
     EGLConfig egl_config;
     EGLDisplay egl_display;
@@ -223,19 +215,6 @@ static void d3d11_device_destroy(MPGLContext *ctx)
     p->egl_device = 0;
 
     SAFE_RELEASE(p->d3d11_device);
-    SAFE_RELEASE(p->dxgi_device);
-    SAFE_RELEASE(p->dxgi_adapter);
-    SAFE_RELEASE(p->dxgi_factory);
-    SAFE_RELEASE(p->dxgi_factory2);
-}
-
-static void show_sw_adapter_msg(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    if (p->sw_adapter_msg_shown)
-        return;
-    MP_WARN(ctx->vo, "Using a software adapter\n");
-    p->sw_adapter_msg_shown = true;
 }
 
 static bool d3d11_device_create(MPGLContext *ctx, int flags)
@@ -243,96 +222,17 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
     struct angle_opts *o = p->opts;
-    HRESULT hr;
 
-    HMODULE d3d11_dll = LoadLibraryW(L"d3d11.dll");
-    if (!d3d11_dll) {
-        MP_FATAL(vo, "Failed to load d3d11.dll\n");
-        return false;
-    }
-
-    PFN_D3D11_CREATE_DEVICE D3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)
-        GetProcAddress(d3d11_dll, "D3D11CreateDevice");
-    if (!D3D11CreateDevice) {
-        MP_FATAL(vo, "D3D11CreateDevice entry point not found\n");
-        return false;
-    }
-
-    D3D_FEATURE_LEVEL *levels = (D3D_FEATURE_LEVEL[]) {
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-        D3D_FEATURE_LEVEL_9_3,
+    struct d3d11_device_opts device_opts = {
+        .allow_warp = o->d3d11_warp != 0,
+        .force_warp = o->d3d11_warp == 1,
+        .max_feature_level = o->d3d11_feature_level,
+        .min_feature_level = D3D_FEATURE_LEVEL_9_3,
+        .max_frame_latency = o->max_frame_latency,
     };
-    int level_count = 4;
-
-    // Only try feature levels less than or equal to the user specified level
-    while (level_count && levels[0] > o->d3d11_feature_level) {
-        levels++;
-        level_count--;
-    }
-
-    // Try a HW adapter first unless WARP is forced
-    hr = E_FAIL;
-    if ((FAILED(hr) && o->d3d11_warp == -1) || o->d3d11_warp == 0) {
-        hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, levels,
-            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &p->d3d11_level,
-            &p->d3d11_context);
-    }
-    // Try WARP if it is forced or if the HW adapter failed
-    if ((FAILED(hr) && o->d3d11_warp == -1) || o->d3d11_warp == 1) {
-        hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_WARP, NULL, 0, levels,
-            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &p->d3d11_level,
-            &p->d3d11_context);
-        if (SUCCEEDED(hr))
-            show_sw_adapter_msg(ctx);
-    }
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't create Direct3D 11 device: %s\n",
-                 mp_HRESULT_to_str(hr));
+    if (!mp_d3d11_create_present_device(vo->log, &device_opts, &p->d3d11_device))
         return false;
-    }
-
-    hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_IDXGIDevice1,
-        (void**)&p->dxgi_device);
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't get DXGI device\n");
-        return false;
-    }
-
-    IDXGIDevice1_SetMaximumFrameLatency(p->dxgi_device, o->max_frame_latency);
-
-    hr = IDXGIDevice1_GetParent(p->dxgi_device, &IID_IDXGIAdapter1,
-        (void**)&p->dxgi_adapter);
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't get DXGI adapter\n");
-        return false;
-    }
-
-    // Query some properties of the adapter in order to warn the user if they
-    // are using a software adapter
-    DXGI_ADAPTER_DESC1 desc;
-    hr = IDXGIAdapter1_GetDesc1(p->dxgi_adapter, &desc);
-    if (SUCCEEDED(hr)) {
-        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
-            show_sw_adapter_msg(ctx);
-
-        // If the primary display adapter is a software adapter, the
-        // DXGI_ADAPTER_FLAG_SOFTWARE won't be set, but the device IDs
-        // should still match the Microsoft Basic Render Driver
-        if (desc.VendorId == 0x1414 && desc.DeviceId == 0x8c)
-            show_sw_adapter_msg(ctx);
-    }
-
-    hr = IDXGIAdapter1_GetParent(p->dxgi_adapter, &IID_IDXGIFactory1,
-        (void**)&p->dxgi_factory);
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't get DXGI factory\n");
-        return false;
-    }
-
-    IDXGIFactory1_QueryInterface(p->dxgi_factory, &IID_IDXGIFactory2,
-        (void**)&p->dxgi_factory2);
+    ID3D11Device_GetImmediateContext(p->d3d11_device, &p->d3d11_context);
 
     PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT =
         (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
@@ -367,119 +267,39 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
 static void d3d11_swapchain_surface_destroy(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
+
+    bool had_swapchain = p->dxgi_swapchain;
     SAFE_RELEASE(p->dxgi_swapchain);
-    SAFE_RELEASE(p->dxgi_swapchain1);
     d3d11_backbuffer_release(ctx);
-}
 
-static bool d3d11_swapchain_create_1_2(MPGLContext *ctx, int flags)
-{
-    struct priv *p = ctx->priv;
-    struct vo *vo = ctx->vo;
-    HRESULT hr;
-
-    update_sizes(ctx);
-    DXGI_SWAP_CHAIN_DESC1 desc1 = {
-        .Width = p->sc_width,
-        .Height = p->sc_height,
-        .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-        .SampleDesc = { .Count = 1 },
-        .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT |
-                       DXGI_USAGE_SHADER_INPUT,
-    };
-
-    if (p->opts->flip) {
-        desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-        desc1.BufferCount = p->opts->swapchain_length;
-    } else {
-        desc1.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-        desc1.BufferCount = 1;
-    }
-
-    hr = IDXGIFactory2_CreateSwapChainForHwnd(p->dxgi_factory2,
-        (IUnknown*)p->d3d11_device, vo_w32_hwnd(vo), &desc1, NULL, NULL,
-        &p->dxgi_swapchain1);
-    if (FAILED(hr) && p->opts->flip) {
-        // Try again without DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
-        desc1.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-        desc1.BufferCount = 1;
-
-        hr = IDXGIFactory2_CreateSwapChainForHwnd(p->dxgi_factory2,
-            (IUnknown*)p->d3d11_device, vo_w32_hwnd(vo), &desc1, NULL, NULL,
-            &p->dxgi_swapchain1);
-    }
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't create DXGI 1.2+ swap chain: %s\n",
-                 mp_HRESULT_to_str(hr));
-        return false;
-    }
-
-    hr = IDXGISwapChain1_QueryInterface(p->dxgi_swapchain1,
-        &IID_IDXGISwapChain, (void**)&p->dxgi_swapchain);
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't create DXGI 1.2+ swap chain\n");
-        return false;
-    }
-
-    return true;
-}
-
-static bool d3d11_swapchain_create_1_1(MPGLContext *ctx, int flags)
-{
-    struct priv *p = ctx->priv;
-    struct vo *vo = ctx->vo;
-    HRESULT hr;
-
-    update_sizes(ctx);
-    DXGI_SWAP_CHAIN_DESC desc = {
-        .BufferDesc = {
-            .Width = p->sc_width,
-            .Height = p->sc_height,
-            .Format = DXGI_FORMAT_R8G8B8A8_UNORM
-        },
-        .SampleDesc = { .Count = 1 },
-        .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT |
-                       DXGI_USAGE_SHADER_INPUT,
-        .BufferCount = 1,
-        .OutputWindow = vo_w32_hwnd(vo),
-        .Windowed = TRUE,
-        .SwapEffect = DXGI_SWAP_EFFECT_DISCARD,
-    };
-
-    hr = IDXGIFactory1_CreateSwapChain(p->dxgi_factory,
-        (IUnknown*)p->d3d11_device, &desc, &p->dxgi_swapchain);
-    if (FAILED(hr)) {
-        MP_FATAL(vo, "Couldn't create DXGI 1.1 swap chain: %s\n",
-                 mp_HRESULT_to_str(hr));
-        return false;
-    }
-
-    return true;
+    // Ensure the swapchain is destroyed by flushing the D3D11 immediate
+    // context. This is needed because the HWND may be reused. See:
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/ff476425.aspx
+    if (had_swapchain && p->d3d11_context)
+        ID3D11DeviceContext_Flush(p->d3d11_context);
 }
 
 static bool d3d11_swapchain_surface_create(MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
+    struct angle_opts *o = p->opts;
 
-    if (p->dxgi_factory2) {
-        // Create a DXGI 1.2+ (Windows 8+) swap chain if possible
-        if (!d3d11_swapchain_create_1_2(ctx, flags))
-            goto fail;
-    } else if (p->dxgi_factory) {
-        // Fall back to DXGI 1.1 (Windows 7)
-        if (!d3d11_swapchain_create_1_1(ctx, flags))
-            goto fail;
-    } else {
+    if (!p->d3d11_device)
         goto fail;
-    }
-    // Prevent DXGI from making changes to the VO window, otherwise it will
-    // hook the Alt+Enter keystroke and make it trigger an ugly transition to
-    // exclusive fullscreen mode instead of running the user-set command.
-    IDXGIFactory_MakeWindowAssociation(p->dxgi_factory, vo_w32_hwnd(vo),
-        DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER |
-        DXGI_MWA_NO_PRINT_SCREEN);
 
+    update_sizes(ctx);
+    struct d3d11_swapchain_opts swapchain_opts = {
+        .window = vo_w32_hwnd(vo),
+        .width = p->sc_width,
+        .height = p->sc_height,
+        .flip = o->flip,
+        .length = o->swapchain_length,
+        .usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT,
+    };
+    if (!mp_d3d11_create_swapchain(p->d3d11_device, vo->log, &swapchain_opts,
+                                   &p->dxgi_swapchain))
+        goto fail;
     if (!d3d11_backbuffer_get(ctx))
         goto fail;
 
@@ -677,10 +497,6 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
         context_ok = d3d11_device_create(ctx, flags);
         if (context_ok) {
-            MP_VERBOSE(vo, "Using Direct3D 11 feature level %u_%u\n",
-                ((unsigned)p->d3d11_level) >> 12,
-                (((unsigned)p->d3d11_level) >> 8) & 0xf);
-
             context_ok = context_init(ctx, flags);
             if (!context_ok)
                 d3d11_device_destroy(ctx);
@@ -706,21 +522,6 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     bool surface_ok = false;
     if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0) {
         surface_ok = d3d11_swapchain_surface_create(ctx, flags);
-        if (surface_ok) {
-            if (p->dxgi_swapchain1) {
-                MP_VERBOSE(vo, "Using DXGI 1.2+\n");
-
-                DXGI_SWAP_CHAIN_DESC1 scd = {0};
-                IDXGISwapChain1_GetDesc1(p->dxgi_swapchain1, &scd);
-                if (scd.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL) {
-                    MP_VERBOSE(vo, "Using flip-model presentation\n");
-                } else {
-                    MP_VERBOSE(vo, "Using bitblt-model presentation\n");
-                }
-            } else {
-                MP_VERBOSE(vo, "Using DXGI 1.1\n");
-            }
-        }
     }
     if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1) {
         surface_ok = egl_window_surface_create(ctx, flags);
@@ -755,15 +556,15 @@ static struct mp_image *d3d11_screenshot(MPGLContext *ctx)
     struct mp_image *img = NULL;
     HRESULT hr;
 
-    if (!p->dxgi_swapchain1)
+    if (!p->dxgi_swapchain)
         goto done;
 
     // Validate the swap chain. This screenshot method will only work on DXGI
     // 1.2+ flip/sequential swap chains. It's probably not possible at all with
     // discard swap chains, since by definition, the backbuffer contents is
     // discarded on Present().
-    DXGI_SWAP_CHAIN_DESC1 scd;
-    hr = IDXGISwapChain1_GetDesc1(p->dxgi_swapchain1, &scd);
+    DXGI_SWAP_CHAIN_DESC scd;
+    hr = IDXGISwapChain_GetDesc(p->dxgi_swapchain, &scd);
     if (FAILED(hr))
         goto done;
     if (scd.SwapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL)
