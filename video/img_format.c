@@ -438,8 +438,13 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     res.chroma_w = 1 << pixdesc->log2_chroma_w;
     res.chroma_h = 1 << pixdesc->log2_chroma_h;
 
+#if AV_PIX_FMT_FLAG_BAYER
+    if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
+        return false; // it's satan himself
+#else
     if (strncmp(pixdesc->name, "bayer_", 6) == 0)
         return false; // it's satan himself
+#endif
 
     if (!validate_regular_imgfmt(&res))
         return false;
