@@ -101,6 +101,14 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int imgfmt);
 // (Because IMGFMT/AV_PIX_FMT conflate format and csp for RGB and XYZ.)
 enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt);
 
+enum mp_component_type {
+    MP_COMPONENT_TYPE_UNKNOWN = 0,
+    MP_COMPONENT_TYPE_UINT,
+    MP_COMPONENT_TYPE_FLOAT,
+};
+
+enum mp_component_type mp_imgfmt_get_component_type(int imgfmt);
+
 #define MP_NUM_COMPONENTS 4
 
 struct mp_regular_imgfmt_plane {
@@ -113,6 +121,9 @@ struct mp_regular_imgfmt_plane {
 // This describes pixel formats that are byte aligned, have byte aligned
 // components, native endian, etc.
 struct mp_regular_imgfmt {
+    // Type of each component.
+    enum mp_component_type component_type;
+
     // Size of each component in bytes.
     uint8_t component_size;
 

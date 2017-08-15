@@ -128,6 +128,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (!pd || pd->nb_components > 4 || fmt == AV_PIX_FMT_NONE ||
         fmt == AV_PIX_FMT_UYYVYY411)
         return mp_only_imgfmt_desc(mpfmt);
+    enum mp_component_type is_uint =
+        mp_imgfmt_get_component_type(fmt) == MP_COMPONENT_TYPE_UINT;
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -229,7 +231,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
         && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
         && !component_byte_overlap
-        && shift >= 0)
+        && shift >= 0 && is_uint)
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
@@ -332,6 +334,22 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
     return MP_CSP_AUTO;
 }
 
+enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
+{
+    const AVPixFmtDescriptor *pixdesc =
+        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
+
+    if (!pixdesc)
+        return MP_COMPONENT_TYPE_UNKNOWN;
+
+#ifdef AV_PIX_FMT_FLAG_FLOAT
+    if (pixdesc->flags & AV_PIX_FMT_FLAG_FLOAT)
+        return MP_COMPONENT_TYPE_FLOAT;
+#endif
+
+    return MP_COMPONENT_TYPE_UINT;
+}
+
 static bool is_native_endian(const AVPixFmtDescriptor *pixdesc)
 {
     enum AVPixelFormat pixfmt = av_pix_fmt_desc_get_id(pixdesc);
@@ -355,6 +373,10 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
         pixdesc->nb_components < 1 ||
         pixdesc->nb_components > MP_NUM_COMPONENTS ||
         !is_native_endian(pixdesc))
+        return false;
+
+    res.component_type = mp_imgfmt_get_component_type(imgfmt);
+    if (!res.component_type)
         return false;
 
     const AVComponentDescriptor *comp0 = &pixdesc->comp[0];
@@ -497,6 +519,7 @@ int main(int argc, char **argv)
         int fcsp = mp_imgfmt_get_forced_csp(mpfmt);
         if (fcsp)
             printf(" fcsp=%d", fcsp);
+        printf(" ctype=%d", mp_imgfmt_get_component_type(mpfmt));
         printf("\n");
         printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,

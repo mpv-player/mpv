@@ -130,6 +130,23 @@ const struct ra_format *ra_find_uint_format(struct ra *ra,
     return NULL;
 }
 
+// Find a float format of any precision that matches the C type of the same
+// size for upload.
+static const struct ra_format *ra_find_float_format(struct ra *ra,
+                                                    int bytes_per_component,
+                                                    int n_components)
+{
+    // Assumes ra_format are ordered by quality.
+    for (int n = 0; n < ra->num_formats; n++) {
+        const struct ra_format *fmt = ra->formats[n];
+        if (fmt->ctype == RA_CTYPE_FLOAT && fmt->num_components == n_components &&
+            fmt->pixel_size == bytes_per_component * n_components &&
+            fmt->linear_filter && ra_format_is_regular(fmt))
+            return fmt;
+    }
+    return NULL;
+}
+
 // Return a filterable regular format that uses float16 internally, but does 32 bit
 // transfer. (This is just so we don't need 32->16 bit conversion on CPU,
 // which would be ok but messy.)
@@ -159,12 +176,20 @@ const struct ra_format *ra_find_named_format(struct ra *ra, const char *name)
 // Like ra_find_unorm_format(), but if no fixed point format is available,
 // return an unsigned integer format.
 static const struct ra_format *find_plane_format(struct ra *ra, int bytes,
-                                                 int n_channels)
+                                                 int n_channels,
+                                                 enum mp_component_type ctype)
 {
-    const struct ra_format *f = ra_find_unorm_format(ra, bytes, n_channels);
-    if (f)
-        return f;
-    return ra_find_uint_format(ra, bytes, n_channels);
+    switch (ctype) {
+    case MP_COMPONENT_TYPE_UINT: {
+        const struct ra_format *f = ra_find_unorm_format(ra, bytes, n_channels);
+        if (f)
+            return f;
+        return ra_find_uint_format(ra, bytes, n_channels);
+    }
+    case MP_COMPONENT_TYPE_FLOAT:
+        return ra_find_float_format(ra, bytes, n_channels);
+    default: return NULL;
+    }
 }
 
 // Put a mapping of imgfmt to texture formats into *out. Basically it selects
@@ -188,7 +213,8 @@ bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out)
         for (int n = 0; n < regfmt.num_planes; n++) {
             struct mp_regular_imgfmt_plane *plane = &regfmt.planes[n];
             res.planes[n] = find_plane_format(ra, regfmt.component_size,
-                                              plane->num_components);
+                                              plane->num_components,
+                                              regfmt.component_type);
             if (!res.planes[n])
                 return false;
             for (int i = 0; i < plane->num_components; i++)
