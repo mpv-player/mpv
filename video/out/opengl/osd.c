@@ -314,8 +314,6 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
     gl_sc_dispatch_draw(sc, target.tex, part->vertices, part->num_vertices);
-
-    ctx->change_flag = false;
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)
@@ -359,6 +357,7 @@ void mpgl_osd_resize(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mod
 bool mpgl_osd_check_change(struct mpgl_osd *ctx, struct mp_osd_res *res,
                            double pts)
 {
+    ctx->change_flag = false;
     mpgl_osd_generate(ctx, *res, pts, 0, 0);
     return ctx->change_flag;
 }

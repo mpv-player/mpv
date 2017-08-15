@@ -169,6 +169,7 @@ struct mp_csp_equalizer;
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
 void gl_video_eq_update(struct gl_video *p);
 void gl_video_set_clear_color(struct gl_video *p, struct m_color color);
+void gl_video_set_osd_pts(struct gl_video *p, double pts);
 bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *osd,
                                double pts);
 

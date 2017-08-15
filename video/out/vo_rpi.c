@@ -260,13 +260,12 @@ static void update_osd(struct vo *vo)
 
     MP_STATS(vo, "start rpi_osd");
 
-    struct vo_frame frame = {
-        .pts = p->osd_pts,
-    };
+    struct vo_frame frame = {0};
     struct fbodst target = {
         .tex = ra_create_wrapped_fb(p->egl.ra, 0, p->osd_res.w, p->osd_res.h),
         .flip = true,
     };
+    gl_video_set_osd_pts(p->gl_video, p->osd_pts);
     gl_video_render_frame(p->gl_video, &frame, target);
     ra_tex_free(p->egl.ra, &target.tex);
 
@@ -317,6 +316,9 @@ static void resize(struct vo *vo)
 
     if (mmal_port_parameter_set(input, &dr.hdr))
         MP_WARN(vo, "could not set video rectangle\n");
+
+    if (p->gl_video)
+        gl_video_resize(p->gl_video, &src, &dst, &p->osd_res);
 }
 
 static void destroy_overlays(struct vo *vo)
@@ -411,6 +413,7 @@ static int create_overlays(struct vo *vo)
             return -1;
         }
         p->gl_video = gl_video_init(p->egl.ra, vo->log, vo->global);
+        gl_video_set_clear_color(p->gl_video, (struct m_color){.a = 0});
         gl_video_set_osd_source(p->gl_video, vo->osd);
     }
 
@@ -431,6 +434,8 @@ static int create_overlays(struct vo *vo)
             p->display_fps = tvstate_disp.display.sdtv.frame_rate;
         }
     }
+
+    resize(vo);
 
     vo_event(vo, VO_EVENT_WIN_STATE);
 
@@ -675,6 +680,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         MP_FATAL(vo, "Failed to enable video renderer.\n");
         return -1;
     }
+
+    resize(vo);
 
     return 0;
 }
