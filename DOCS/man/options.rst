@@ -1487,7 +1487,7 @@ Audio
     :no:    Don't automatically load external audio files.
     :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
-    :all:   Load all audio files in the current and ``--audio-file-path``
+    :all:   Load all audio files in the current and ``--audio-file-paths``
             directories.
 
 ``--audio-file-paths=<path1:path2:...>``
@@ -1842,7 +1842,7 @@ Subtitles
     :no:    Don't automatically load external subtitle files.
     :exact: Load the media filename with subtitle file extension (default).
     :fuzzy: Load all subs containing media filename.
-    :all:   Load all subs in the current and ``--sub-file-path`` directories.
+    :all:   Load all subs in the current and ``--sub-file-paths`` directories.
 
 ``--sub-codepage=<codepage>``
     You can use this option to specify the subtitle codepage. uchardet will be
