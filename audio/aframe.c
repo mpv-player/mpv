@@ -16,6 +16,7 @@
  */
 
 #include <libavutil/frame.h>
+#include <libavutil/mem.h>
 
 #include "common/common.h"
 
