@@ -56,7 +56,7 @@
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
-#include "audio/audio_buffer.h"
+#include "audio/aframe.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
@@ -2019,17 +2019,20 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, c);
 }
 
-static int property_audiofmt(struct mp_audio a, int action, void *arg)
+static int property_audiofmt(struct mp_aframe *fmt, int action, void *arg)
 {
-    if (!mp_audio_config_valid(&a))
+    if (!fmt || !mp_aframe_config_is_valid(fmt))
         return M_PROPERTY_UNAVAILABLE;
 
+    struct mp_chmap chmap = {0};
+    mp_aframe_get_chmap(fmt, &chmap);
+
     struct m_sub_property props[] = {
-        {"samplerate",      SUB_PROP_INT(a.rate)},
-        {"channel-count",   SUB_PROP_INT(a.channels.num)},
-        {"channels",        SUB_PROP_STR(mp_chmap_to_str(&a.channels))},
-        {"hr-channels",     SUB_PROP_STR(mp_chmap_to_str_hr(&a.channels))},
-        {"format",          SUB_PROP_STR(af_fmt_to_str(a.format))},
+        {"samplerate",      SUB_PROP_INT(mp_aframe_get_rate(fmt))},
+        {"channel-count",   SUB_PROP_INT(chmap.num)},
+        {"channels",        SUB_PROP_STR(mp_chmap_to_str(&chmap))},
+        {"hr-channels",     SUB_PROP_STR(mp_chmap_to_str_hr(&chmap))},
+        {"format",          SUB_PROP_STR(af_fmt_to_str(mp_aframe_get_format(fmt)))},
         {0}
     };
 
@@ -2040,20 +2043,28 @@ static int mp_property_audio_params(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_audio fmt = {0};
-    if (mpctx->ao_chain)
-        fmt = mpctx->ao_chain->input_format;
-    return property_audiofmt(fmt, action, arg);
+    return property_audiofmt(mpctx->ao_chain ? mpctx->ao_chain->input_format : NULL,
+                             action, arg);
 }
 
 static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_audio fmt = {0};
-    if (mpctx->ao)
-        ao_get_format(mpctx->ao, &fmt);
-    return property_audiofmt(fmt, action, arg);
+    struct mp_aframe *frame = NULL;
+    if (mpctx->ao) {
+        frame = mp_aframe_create();
+        int samplerate;
+        int format;
+        struct mp_chmap channels;
+        ao_get_format(mpctx->ao, &samplerate, &format, &channels);
+        mp_aframe_set_rate(frame, samplerate);
+        mp_aframe_set_format(frame, format);
+        mp_aframe_set_chmap(frame, &channels);
+    }
+    int r = property_audiofmt(frame, action, arg);
+    talloc_free(frame);
+    return r;
 }
 
 /// Balance (RW)

@@ -29,6 +29,7 @@
 #include "common/common.h"
 #include "fmt-conversion.h"
 #include "audio.h"
+#include "aframe.h"
 
 static void update_redundant_info(struct mp_audio *mpa)
 {
@@ -401,6 +402,29 @@ fail:
     talloc_free(new);
     av_frame_free(&tmp);
     return NULL;
+}
+
+struct mp_audio *mp_audio_from_aframe(struct mp_aframe *aframe)
+{
+    struct AVFrame *av = mp_aframe_get_raw_avframe(aframe);
+    struct mp_audio *res = mp_audio_from_avframe(av);
+    if (!res)
+        return NULL;
+    struct mp_chmap chmap = {0};
+    mp_aframe_get_chmap(aframe, &chmap);
+    mp_audio_set_channels(res, &chmap);
+    mp_audio_set_format(res, mp_aframe_get_format(aframe));
+    res->pts = mp_aframe_get_pts(aframe);
+    return res;
+}
+
+void mp_audio_config_from_aframe(struct mp_audio *dst, struct mp_aframe *src)
+{
+    struct mp_chmap chmap = {0};
+    mp_aframe_get_chmap(src, &chmap);
+    mp_audio_set_channels(dst, &chmap);
+    mp_audio_set_format(dst, mp_aframe_get_format(src));
+    dst->rate = mp_aframe_get_rate(src);
 }
 
 int mp_audio_to_avframe(struct mp_audio *frame, struct AVFrame *avframe)

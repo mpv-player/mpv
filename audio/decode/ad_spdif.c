@@ -40,8 +40,9 @@ struct spdifContext {
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
     bool             use_dts_hd;
-    struct mp_audio  fmt;
-    struct mp_audio_pool *pool;
+    struct mp_aframe *fmt;
+    int              sstride;
+    struct mp_aframe_pool *pool;
     bool             got_eof;
     struct demux_packet *queued_packet;
 };
@@ -84,7 +85,7 @@ static int init(struct dec_audio *da, const char *decoder)
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
     spdif_ctx->use_dts_hd = da->opts->dtshd;
-    spdif_ctx->pool = mp_audio_pool_create(spdif_ctx);
+    spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
 
     if (strcmp(decoder, "spdif_dts_hd") == 0)
         spdif_ctx->use_dts_hd = true;
@@ -198,6 +199,9 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
 
     AVDictionary *format_opts = NULL;
 
+    spdif_ctx->fmt = mp_aframe_create();
+    talloc_steal(spdif_ctx, spdif_ctx->fmt);
+
     int num_channels = 0;
     int sample_format = 0;
     int samplerate = 0;
@@ -246,9 +250,14 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     default:
         abort();
     }
-    mp_audio_set_num_channels(&spdif_ctx->fmt, num_channels);
-    mp_audio_set_format(&spdif_ctx->fmt, sample_format);
-    spdif_ctx->fmt.rate = samplerate;
+
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, num_channels);
+    mp_aframe_set_chmap(spdif_ctx->fmt, &chmap);
+    mp_aframe_set_format(spdif_ctx->fmt, sample_format);
+    mp_aframe_set_rate(spdif_ctx->fmt, samplerate);
+
+    spdif_ctx->sstride = mp_aframe_get_sstride(spdif_ctx->fmt);
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         MP_FATAL(da, "libavformat spdif initialization failed.\n");
@@ -279,7 +288,7 @@ static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
     return true;
 }
 
-static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
+static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
@@ -308,13 +317,21 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
         goto done;
     }
 
-    int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
-    *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
-    if (!*out)
+    *out = mp_aframe_new_ref(spdif_ctx->fmt);
+    int samples = spdif_ctx->out_buffer_len / spdif_ctx->sstride;
+    if (mp_aframe_pool_allocate(spdif_ctx->pool, *out, samples) < 0) {
+        TA_FREEP(out);
         goto done;
+    }
 
-    memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
-    (*out)->pts = pts;
+    uint8_t **data = mp_aframe_get_data_rw(*out);
+    if (!data) {
+        TA_FREEP(out);
+        goto done;
+    }
+
+    memcpy(data[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
+    mp_aframe_set_pts(*out, pts);
 
 done:
     talloc_free(spdif_ctx->queued_packet);

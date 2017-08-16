@@ -83,6 +83,10 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
 struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame);
 int mp_audio_to_avframe(struct mp_audio *frame, struct AVFrame *avframe);
 
+struct mp_aframe;
+struct mp_audio *mp_audio_from_aframe(struct mp_aframe *aframe);
+void mp_audio_config_from_aframe(struct mp_audio *dst, struct mp_aframe *src);
+
 struct mp_audio_pool;
 struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);
 struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,

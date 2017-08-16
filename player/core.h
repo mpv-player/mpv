@@ -28,7 +28,7 @@
 #include "common/common.h"
 #include "options/options.h"
 #include "sub/osd.h"
-#include "audio/audio.h"
+#include "audio/aframe.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 
@@ -205,10 +205,10 @@ struct ao_chain {
     double ao_resume_time;
 
     // 1-element input frame queue.
-    struct mp_audio *input_frame;
+    struct mp_aframe *input_frame;
 
-    // Last known input_mpi format (so vf can be reinitialized any time).
-    struct mp_audio input_format;
+    // Last known input_mpi format (so af can be reinitialized any time).
+    struct mp_aframe *input_format;
 
     struct track *track;
     struct lavfi_pad *filter_src;
@@ -313,7 +313,7 @@ typedef struct MPContext {
     struct lavfi *lavfi;
 
     struct ao *ao;
-    struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
+    struct mp_aframe *ao_decoder_fmt; // for weak gapless audio check
     struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;

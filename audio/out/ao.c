@@ -26,7 +26,6 @@
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
-#include "audio/audio.h"
 
 #include "options/options.h"
 #include "options/m_config.h"
@@ -480,12 +479,12 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 
 // --- The following functions just return immutable information.
 
-void ao_get_format(struct ao *ao, struct mp_audio *format)
+void ao_get_format(struct ao *ao,
+                   int *samplerate, int *format, struct mp_chmap *channels)
 {
-    *format = (struct mp_audio){0};
-    mp_audio_set_format(format, ao->format);
-    mp_audio_set_channels(format, &ao->channels);
-    format->rate = ao->samplerate;
+    *samplerate = ao->samplerate;
+    *format = ao->format;
+    *channels = ao->channels;
 }
 
 const char *ao_get_name(struct ao *ao)

@@ -1053,7 +1053,7 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
             continue;
         if (track->d_audio) {
             audio_work(track->d_audio);
-            struct mp_audio *fr;
+            struct mp_aframe *fr;
             int res = audio_get_frame(track->d_audio, &fr);
             if (res == DATA_OK) {
                 lavfi_send_frame_a(track->sink, fr);

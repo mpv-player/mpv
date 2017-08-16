@@ -5,7 +5,7 @@ struct mp_log;
 struct lavfi;
 struct lavfi_pad;
 struct mp_image;
-struct mp_audio;
+struct mp_aframe;
 
 enum lavfi_direction {
     LAVFI_IN = 1,
@@ -25,11 +25,11 @@ bool lavfi_has_failed(struct lavfi *c);
 void lavfi_seek_reset(struct lavfi *c);
 void lavfi_pad_set_hwdec_devs(struct lavfi_pad *pad,
                               struct mp_hwdec_devices *hwdevs);
-int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_audio **out_aframe);
+int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_aframe **out_aframe);
 int lavfi_request_frame_v(struct lavfi_pad *pad, struct mp_image **out_vframe);
 bool lavfi_needs_input(struct lavfi_pad *pad);
 void lavfi_send_status(struct lavfi_pad *pad, int status);
-void lavfi_send_frame_a(struct lavfi_pad *pad, struct mp_audio *aframe);
+void lavfi_send_frame_a(struct lavfi_pad *pad, struct mp_aframe *aframe);
 void lavfi_send_frame_v(struct lavfi_pad *pad, struct mp_image *vframe);
 
 #endif

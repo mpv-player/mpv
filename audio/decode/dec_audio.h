@@ -19,11 +19,10 @@
 #define MPLAYER_DEC_AUDIO_H
 
 #include "audio/chmap.h"
-#include "audio/audio.h"
+#include "audio/aframe.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
 
-struct mp_audio_buffer;
 struct mp_decoder_list;
 
 struct dec_audio {
@@ -48,7 +47,7 @@ struct dec_audio {
     double start, end;
     struct demux_packet *packet;
     struct demux_packet *new_segment;
-    struct mp_audio *current_frame;
+    struct mp_aframe *current_frame;
     int current_state;
 };
 
@@ -57,7 +56,7 @@ int audio_init_best_codec(struct dec_audio *d_audio);
 void audio_uninit(struct dec_audio *d_audio);
 
 void audio_work(struct dec_audio *d_audio);
-int audio_get_frame(struct dec_audio *d_audio, struct mp_audio **out_frame);
+int audio_get_frame(struct dec_audio *d_audio, struct mp_aframe **out_frame);
 
 void audio_reset_decoding(struct dec_audio *d_audio);
 

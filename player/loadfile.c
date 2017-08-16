@@ -43,8 +43,6 @@
 #include "common/recorder.h"
 #include "input/input.h"
 
-#include "audio/audio.h"
-#include "audio/audio_buffer.h"
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
