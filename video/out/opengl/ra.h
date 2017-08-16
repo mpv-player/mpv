@@ -398,7 +398,8 @@ struct ra_fns {
     // Hint that possibly queued up commands should be sent to the GPU. Optional.
     void (*flush)(struct ra *ra);
 
-    // Optional.
+    // Associates a marker with any past error messages, for debugging
+    // purposes. Optional.
     void (*debug_marker)(struct ra *ra, const char *msg);
 };
 
