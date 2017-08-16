@@ -120,6 +120,66 @@ void fbotex_uninit(struct fbotex *fbo)
     }
 }
 
+bool tex_upload(struct ra *ra, struct tex_upload *pbo, bool want_pbo,
+                const struct ra_tex_upload_params *params)
+{
+    if (!(ra->caps & RA_CAP_DIRECT_UPLOAD))
+        want_pbo = true;
+
+    if (!want_pbo || params->buf) {
+        ra->fns->tex_upload(ra, params);
+        return true;
+    }
+
+    struct ra_tex *tex = params->tex;
+    size_t row_size = tex->params.dimensions == 2 ? params->stride :
+                      tex->params.w * tex->params.format->pixel_size;
+    size_t needed_size = row_size * tex->params.h * tex->params.d;
+
+    if (needed_size > pbo->buffer_size)
+        tex_upload_uninit(ra, pbo);
+
+    if (!pbo->buffers[0]) {
+        struct ra_buf_params bufparams = {
+            .type = RA_BUF_TYPE_TEX_UPLOAD,
+            .size = needed_size,
+            .host_mutable = true,
+        };
+
+        pbo->buffer_size = bufparams.size;
+        for (int i = 0; i < NUM_PBO_BUFFERS; i++) {
+            pbo->buffers[i] = ra_buf_create(ra, &bufparams);
+            if (!pbo->buffers[i])
+                return false;
+        }
+    }
+
+    struct ra_buf *buf = pbo->buffers[pbo->index++];
+    pbo->index %= NUM_PBO_BUFFERS;
+
+    if (!ra->fns->buf_poll(ra, buf)) {
+        MP_WARN(ra, "Texture upload buffer was not free to use! Try "
+                    "increasing NUM_PBO_BUFFERS.\n");
+        return false;
+    }
+
+    ra->fns->buf_update(ra, buf, 0, params->src, needed_size);
+
+    struct ra_tex_upload_params newparams = *params;
+    newparams.buf = buf;
+    newparams.src = NULL;
+
+    ra->fns->tex_upload(ra, &newparams);
+    return true;
+}
+
+void tex_upload_uninit(struct ra *ra, struct tex_upload *pbo)
+{
+    for (int i = 0; i < NUM_PBO_BUFFERS; i++)
+        ra_buf_free(ra, &pbo->buffers[i]);
+    *pbo = (struct tex_upload){0};
+}
+
 struct timer_pool {
     struct ra *ra;
     ra_timer *timer;

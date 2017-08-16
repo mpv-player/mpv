@@ -311,6 +311,13 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 430,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(InvalidateTexImage),
+            {0}
+        },
+    },
+    {
+        .ver_core = 430,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
             DEF_FN(InvalidateFramebuffer),

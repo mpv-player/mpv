@@ -83,6 +83,21 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
 
+#define NUM_PBO_BUFFERS 3
+
+// A wrapper around tex_upload that uses PBOs internally if requested or
+// required
+struct tex_upload {
+    size_t buffer_size;
+    struct ra_buf *buffers[NUM_PBO_BUFFERS];
+    int index;
+};
+
+bool tex_upload(struct ra *ra, struct tex_upload *pbo, bool want_pbo,
+                const struct ra_tex_upload_params *params);
+
+void tex_upload_uninit(struct ra *ra, struct tex_upload *pbo);
+
 // A wrapper around ra_timer that does result pooling, averaging etc.
 struct timer_pool;
 

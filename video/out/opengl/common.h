@@ -194,6 +194,7 @@ struct GL {
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
 
+    void (GLAPIENTRY *InvalidateTexImage)(GLuint, GLint);
     void (GLAPIENTRY *InvalidateFramebuffer)(GLenum, GLsizei, const GLenum *);
 
     GLsync (GLAPIENTRY *FenceSync)(GLenum, GLbitfield);

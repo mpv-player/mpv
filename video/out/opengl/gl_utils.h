@@ -51,21 +51,6 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
 
-#define NUM_PBO_BUFFERS 3
-
-struct gl_pbo_upload {
-    GL *gl;
-    int index;
-    GLuint buffer;
-    size_t buffer_size;
-};
-
-void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
-                       GLenum target, GLenum format,  GLenum type,
-                       int tex_w, int tex_h, const void *dataptr, int stride,
-                       int x, int y, int w, int h);
-void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo);
-
 int gl_get_fb_depth(GL *gl, int fbo);
 
 #endif

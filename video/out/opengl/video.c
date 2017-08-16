@@ -84,6 +84,7 @@ static const struct ra_renderpass_input vertex_vao[] = {
 
 struct texplane {
     struct ra_tex *tex;
+    struct tex_upload pbo;
     int w, h;
     bool flipped;
 };
@@ -493,7 +494,7 @@ static void reinit_osd(struct gl_video *p)
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
     if (p->osd_state)
-        p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state);
+        p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state, p->opts.pbo);
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -882,6 +883,7 @@ static void init_video(struct gl_video *p)
                 .render_src = true,
                 .src_linear = format->linear_filter,
                 .non_normalized = p->opts.use_rectangle,
+                .host_mutable = true,
             };
 
             MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n,
@@ -935,7 +937,7 @@ again:;
         if (!buffer->mpi)
             continue;
 
-        bool res = p->ra->fns->poll_mapped_buffer(p->ra, buffer->buf);
+        bool res = p->ra->fns->buf_poll(p->ra, buffer->buf);
         if (res || force) {
             // Unreferencing the image could cause gl_video_dr_free_buffer()
             // to be called by the talloc destructor (if it was the last
@@ -984,8 +986,8 @@ static void uninit_video(struct gl_video *p)
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-
         ra_tex_free(p->ra, &plane->tex);
+        tex_upload_uninit(p->ra, &plane->pbo);
     }
     *vimg = (struct video_image){0};
 
@@ -3269,19 +3271,33 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
         plane->flipped = mpi->stride[0] < 0;
 
+        struct ra_tex_upload_params params = {
+            .tex = plane->tex,
+            .src = mpi->planes[n],
+            .invalidate = true,
+            .stride = mpi->stride[n],
+        };
+
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
-
-        p->ra->fns->tex_upload(p->ra, plane->tex, mpi->planes[n],
-                               mpi->stride[n], NULL, 0,
-                               mapped ? mapped->buf : NULL);
-
-        if (mapped && !mapped->mpi)
-            mapped->mpi = mp_image_new_ref(mpi);
+        if (mapped) {
+            params.buf = mapped->buf;
+            params.buf_offset = (uintptr_t)params.src -
+                                (uintptr_t)mapped->buf->data;
+            params.src = NULL;
+        }
 
         if (p->using_dr_path != !!mapped) {
             p->using_dr_path = !!mapped;
             MP_VERBOSE(p, "DR enabled: %s\n", p->using_dr_path ? "yes" : "no");
         }
+
+        if (!tex_upload(p->ra, &plane->pbo, p->opts.pbo, &params)) {
+            timer_pool_stop(p->upload_timer);
+            goto error;
+        }
+
+        if (mapped && !mapped->mpi)
+            mapped->mpi = mp_image_new_ref(mpi);
     }
     timer_pool_stop(p->upload_timer);
     const char *mode = p->using_dr_path ? "DR" : p->opts.pbo ? "PBO" : "naive";
@@ -3365,11 +3381,6 @@ static void check_gl_features(struct gl_video *p)
             p->fbo_format = f;
             break;
         }
-    }
-
-    if (!(ra->caps & RA_CAP_PBO) && p->opts.pbo) {
-        p->opts.pbo = 0;
-        MP_WARN(p, "Disabling PBOs (GL2.1/GLES2 unsupported).\n");
     }
 
     p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
@@ -3628,7 +3639,6 @@ static void reinit_from_options(struct gl_video *p)
     check_gl_features(p);
     uninit_rendering(p);
     gl_sc_set_cache_dir(p->sc, p->opts.shader_cache_dir);
-    p->ra->use_pbo = p->opts.pbo;
     gl_video_setup_hooks(p);
     reinit_osd(p);
 

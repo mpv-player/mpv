@@ -23,11 +23,11 @@ struct ra_tex_gl {
     GLint internal_format;
     GLenum format;
     GLenum type;
-    struct gl_pbo_upload pbo;
 };
 
 // For ra_buf.priv
 struct ra_buf_gl {
+    GLenum target;
     GLuint buffer;
     GLsync fence;
 };
@@ -90,7 +90,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     ra_gl_set_debug(ra, true);
 
     ra->fns = &ra_fns_gl;
-    ra->caps = 0;
+    ra->caps = RA_CAP_DIRECT_UPLOAD;
     if (gl->mpgl_caps & MPGL_CAP_1D_TEX)
         ra->caps |= RA_CAP_TEX_1D;
     if (gl->mpgl_caps & MPGL_CAP_3D_TEX)
@@ -99,8 +99,6 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         ra->caps |= RA_CAP_BLIT;
     if (gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER)
         ra->caps |= RA_CAP_COMPUTE;
-    if (gl->MapBufferRange)
-        ra->caps |= RA_CAP_PBO;
     if (gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY)
         ra->caps |= RA_CAP_NESTED_ARRAY;
     if (gl->mpgl_caps & MPGL_CAP_SSBO)
@@ -226,7 +224,6 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
 
         gl->DeleteTextures(1, &tex_gl->texture);
     }
-    gl_pbo_upload_uninit(&tex_gl->pbo);
     talloc_free(tex_gl);
     talloc_free(tex);
 }
@@ -427,40 +424,42 @@ bool ra_is_gl(struct ra *ra)
     return ra->fns == &ra_fns_gl;
 }
 
-static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
-                          const void *src, ptrdiff_t stride,
-                          struct mp_rect *rc, uint64_t flags,
-                          struct ra_buf *buf)
+static void gl_tex_upload(struct ra *ra,
+                          const struct ra_tex_upload_params *params)
 {
     GL *gl = ra_gl_get(ra);
+    struct ra_tex *tex = params->tex;
+    struct ra_buf *buf = params->buf;
     struct ra_tex_gl *tex_gl = tex->priv;
-    struct ra_buf_gl *buf_gl = NULL;
-    struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
+    struct ra_buf_gl *buf_gl = buf ? buf->priv : NULL;
+    assert(tex->params.host_mutable);
+    assert(!params->buf || !params->src);
 
+    const void *src = params->src;
     if (buf) {
-        buf_gl = buf->priv;
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, buf_gl->buffer);
-        src = (void *)((uintptr_t)src - (uintptr_t)buf->data);
+        src = (void *)params->buf_offset;
     }
 
     gl->BindTexture(tex_gl->target, tex_gl->texture);
+    if (params->invalidate && gl->InvalidateTexImage)
+        gl->InvalidateTexImage(tex_gl->texture, 0);
 
     switch (tex->params.dimensions) {
     case 1:
-        assert(!rc);
         gl->TexImage1D(tex_gl->target, 0, tex_gl->internal_format,
                        tex->params.w, 0, tex_gl->format, tex_gl->type, src);
         break;
-    case 2:
-        if (!rc)
-            rc = &full;
-        gl_pbo_upload_tex(&tex_gl->pbo, gl, ra->use_pbo && !buf,
-                          tex_gl->target, tex_gl->format, tex_gl->type,
-                          tex->params.w, tex->params.h, src, stride,
-                          rc->x0, rc->y0, rc->x1 - rc->x0, rc->y1 - rc->y0);
+    case 2: {
+        struct mp_rect rc = {0, 0, tex->params.w, tex->params.h};
+        if (params->rc)
+            rc = *params->rc;
+        gl_upload_tex(gl, tex_gl->target, tex_gl->format, tex_gl->type,
+                      src, params->stride, rc.x0, rc.y0, rc.x1 - rc.x0,
+                      rc.y1 - rc.y0);
         break;
+    }
     case 3:
-        assert(!rc);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
         gl->TexImage3D(GL_TEXTURE_3D, 0, tex_gl->internal_format, tex->params.w,
                        tex->params.h, tex->params.d, 0, tex_gl->format,
@@ -473,11 +472,13 @@ static void gl_tex_upload(struct ra *ra, struct ra_tex *tex,
 
     if (buf) {
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        // Make sure the PBO is not reused until GL is done with it. If a
-        // previous operation is pending, "update" it by creating a new
-        // fence that will cover the previous operation as well.
-        gl->DeleteSync(buf_gl->fence);
-        buf_gl->fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (buf->params.host_mapped) {
+            // Make sure the PBO is not reused until GL is done with it. If a
+            // previous operation is pending, "update" it by creating a new
+            // fence that will cover the previous operation as well.
+            gl->DeleteSync(buf_gl->fence);
+            buf_gl->fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        }
     }
 }
 
@@ -491,10 +492,9 @@ static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
 
     gl->DeleteSync(buf_gl->fence);
     if (buf->data) {
-        // The target type used here doesn't matter at all to OpenGL
-        gl->BindBuffer(GL_ARRAY_BUFFER, buf_gl->buffer);
-        gl->UnmapBuffer(GL_ARRAY_BUFFER);
-        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+        gl->BindBuffer(buf_gl->target, buf_gl->buffer);
+        gl->UnmapBuffer(buf_gl->target);
+        gl->BindBuffer(buf_gl->target, 0);
     }
     gl->DeleteBuffers(1, &buf_gl->buffer);
 
@@ -517,14 +517,13 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
     struct ra_buf_gl *buf_gl = buf->priv = talloc_zero(NULL, struct ra_buf_gl);
     gl->GenBuffers(1, &buf_gl->buffer);
 
-    GLenum target;
     switch (params->type) {
-    case RA_BUF_TYPE_TEX_UPLOAD:     target = GL_PIXEL_UNPACK_BUFFER;   break;
-    case RA_BUF_TYPE_SHADER_STORAGE: target = GL_SHADER_STORAGE_BUFFER; break;
+    case RA_BUF_TYPE_TEX_UPLOAD:     buf_gl->target = GL_PIXEL_UNPACK_BUFFER;   break;
+    case RA_BUF_TYPE_SHADER_STORAGE: buf_gl->target = GL_SHADER_STORAGE_BUFFER; break;
     default: abort();
     };
 
-    gl->BindBuffer(target, buf_gl->buffer);
+    gl->BindBuffer(buf_gl->target, buf_gl->buffer);
 
     if (params->host_mapped) {
         unsigned flags = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT |
@@ -534,8 +533,9 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
         if (params->type == RA_BUF_TYPE_TEX_UPLOAD)
             storflags |= GL_CLIENT_STORAGE_BIT;
 
-        gl->BufferStorage(target, params->size, params->initial_data, storflags);
-        buf->data = gl->MapBufferRange(target, 0, params->size, flags);
+        gl->BufferStorage(buf_gl->target, params->size, params->initial_data,
+                          storflags);
+        buf->data = gl->MapBufferRange(buf_gl->target, 0, params->size, flags);
         if (!buf->data) {
             gl_check_error(gl, ra->log, "mapping buffer");
             gl_buf_destroy(ra, buf);
@@ -549,16 +549,31 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
         default: abort();
         }
 
-        gl->BufferData(target, params->size, params->initial_data, hint);
+        gl->BufferData(buf_gl->target, params->size, params->initial_data, hint);
     }
 
-    gl->BindBuffer(target, 0);
+    gl->BindBuffer(buf_gl->target, 0);
     return buf;
 }
 
-static bool gl_poll_mapped_buffer(struct ra *ra, struct ra_buf *buf)
+static void gl_buf_update(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
+                          const void *data, size_t size)
 {
-    assert(buf->data);
+    GL *gl = ra_gl_get(ra);
+    struct ra_buf_gl *buf_gl = buf->priv;
+    assert(buf->params.host_mutable);
+
+    gl->BindBuffer(buf_gl->target, buf_gl->buffer);
+    gl->BufferSubData(buf_gl->target, offset, size, data);
+    gl->BindBuffer(buf_gl->target, 0);
+}
+
+static bool gl_buf_poll(struct ra *ra, struct ra_buf *buf)
+{
+    // Non-persistently mapped buffers are always implicitly reusable in OpenGL,
+    // the implementation will create more buffers under the hood if needed.
+    if (!buf->data)
+        return true;
 
     GL *gl = ra_gl_get(ra);
     struct ra_buf_gl *buf_gl = buf->priv;
@@ -1080,7 +1095,8 @@ static struct ra_fns ra_fns_gl = {
     .tex_upload             = gl_tex_upload,
     .buf_create             = gl_buf_create,
     .buf_destroy            = gl_buf_destroy,
-    .poll_mapped_buffer     = gl_poll_mapped_buffer,
+    .buf_update             = gl_buf_update,
+    .buf_poll               = gl_buf_poll,
     .clear                  = gl_clear,
     .blit                   = gl_blit,
     .renderpass_create      = gl_renderpass_create,
