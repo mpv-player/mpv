@@ -1817,7 +1817,6 @@ static void un360_hook(struct gl_video *p, struct img_tex text,
                        struct gl_transform *trans, void *priv)
 {
     pass_describe(p, "project equirectangular video");
-    GLSLF("#define M_PI 3.1415926535897932384626433832795\n");
     pass_sample_un360(p->sc);
 }
 
