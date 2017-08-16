@@ -403,6 +403,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
+        OPT_FLAG("un360", un360, 0),
         OPT_INTRANGE("opengl-tex-pad-x", tex_pad_x, 0, 0, 4096),
         OPT_INTRANGE("opengl-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
@@ -1812,6 +1813,14 @@ static void unsharp_hook(struct gl_video *p, struct img_tex tex,
     pass_sample_unsharp(p->sc, p->opts.unsharp);
 }
 
+static void un360_hook(struct gl_video *p, struct img_tex text,
+                       struct gl_transform *trans, void *priv)
+{
+    pass_describe(p, "project equirectangular video");
+    GLSLF("#define M_PI 3.1415926535897932384626433832795\n");
+    pass_sample_un360(p->sc);
+}
+
 struct szexp_ctx {
     struct gl_video *p;
     struct img_tex tex;
@@ -1962,6 +1971,14 @@ static void gl_video_setup_hooks(struct gl_video *p)
             .hook_tex = {"MAIN"},
             .bind_tex = {"HOOKED"},
             .hook = unsharp_hook,
+        });
+    }
+
+    if (p->opts.un360) {
+        add_hook(p, (struct tex_hook) {
+            .hook_tex = {"MAINPRESUB"},
+            .bind_tex = {"HOOKED"},
+            .hook = un360_hook,
         });
     }
 

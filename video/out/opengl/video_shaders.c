@@ -872,3 +872,22 @@ void pass_sample_unsharp(struct gl_shader_cache *sc, float param) {
     GLSLF("color = p + t * %f;\n", param);
     GLSLF("}\n");
 }
+
+void pass_sample_un360(struct gl_shader_cache *sc) {
+    GLSLF("{\n");
+    GLSL(float fov = M_PI/2;)
+    GLSL(float theta0 = M_PI;)
+    GLSL(float phi0 = M_PI/2;)
+    GLSL(float focal_x = .5/tan(fov/2);)
+    GLSL(float focal_y = .5/tan(fov/4);)
+
+    GLSL(float theta = atan(HOOKED_pos.x-.5, focal_x);)
+    GLSL(float phi = atan(HOOKED_pos.y-.5, focal_y);)
+    GLSL(float x = (theta+theta0)/(2*M_PI);)
+    GLSL(if (x < 0 || x > 1) x -= floor(x);)
+    GLSL(float y = (phi+phi0)/M_PI;)
+    GLSL(if (y < 0) color = HOOKED_tex(vec2(x+.5-round(x),-y));)
+    GLSL(else if (y > 1) color = HOOKED_tex(vec2(x+.5-round(x),2-y));)
+    GLSL(else color = HOOKED_tex(vec2(x,y));)
+    GLSLF("}\n");
+}
