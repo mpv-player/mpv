@@ -1817,7 +1817,9 @@ static void un360_hook(struct gl_video *p, struct img_tex text,
                        struct gl_transform *trans, void *priv)
 {
     pass_describe(p, "project equirectangular video");
-    pass_sample_un360(p->sc);
+    float w = p->dst_rect.x1 - p->dst_rect.x0;
+    float h = p->dst_rect.y1 - p->dst_rect.y0;
+    pass_sample_un360(p->sc, w, h);
 }
 
 struct szexp_ctx {

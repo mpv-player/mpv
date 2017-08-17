@@ -52,6 +52,6 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
                         AVLFG *lfg);
 
 void pass_sample_unsharp(struct gl_shader_cache *sc, float param);
-void pass_sample_un360(struct gl_shader_cache *sc);
+void pass_sample_un360(struct gl_shader_cache *sc, float w, float h);
 
 #endif
