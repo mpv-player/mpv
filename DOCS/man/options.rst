@@ -5233,11 +5233,14 @@ Miscellaneous
     video or audio outputs are not possible, but you can use filters to merge
     them into one.
 
-    The complex filter cannot be changed yet during playback. It's also not
-    possible to change the tracks connected to the filter at runtime. Other
-    tracks, as long as they're not connected to the filter, and the
+    It's not possible to change the tracks connected to the filter at runtime,
+    unless you explicitly change the ``lavfi-complex`` property and set new
+    track assignments. When the graph is changed, the track selection is changed
+    according to the used labels as well.
+
+    Other tracks, as long as they're not connected to the filter, and the
     corresponding output is not connected to the filter, can still be freely
-    changed.
+    changed with the normal methods.
 
     Note that the normal filter chains (``--af``, ``--vf``) are applied between
     the complex graphs (e.g. ``ao`` label) and the actual output.
