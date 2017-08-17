@@ -234,7 +234,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
         memcpy(buf, priv->init_fragment.start + priv->stream_pos, ret);
         priv->stream_pos += ret;
     } else {
-        ret = stream_read(stream, buf, size);
+        ret = stream_read_partial(stream, buf, size);
         priv->stream_pos = priv->init_fragment.len + stream_tell(stream);
     }
 
