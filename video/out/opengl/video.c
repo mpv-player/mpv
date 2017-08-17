@@ -1806,9 +1806,6 @@ static void unsharp_hook(struct gl_video *p, struct img_tex tex,
                          struct gl_transform *trans, void *priv)
 {
     pass_describe(p, "unsharp masking");
-    GLSLF("#define tex HOOKED\n");
-    GLSLF("#define pos HOOKED_pos\n");
-    GLSLF("#define pt HOOKED_pt\n");
     pass_sample_unsharp(p->sc, p->opts.unsharp);
 }
 
