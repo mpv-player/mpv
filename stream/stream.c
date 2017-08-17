@@ -563,6 +563,7 @@ bool stream_seek(stream_t *s, int64_t pos)
         int64_t x = pos - (s->pos - (int)s->buf_len);
         if (x >= 0) {
             s->buf_pos = x;
+            assert(s->buf_pos <= s->buf_len);
             return true;
         }
     }
