@@ -285,6 +285,9 @@ struct ra_renderpass_params {
     enum ra_blend blend_src_alpha;
     enum ra_blend blend_dst_alpha;
 
+    // If true, the contents of `target` not written to will become undefined
+    bool invalidate_target;
+
     // --- type==RA_RENDERPASS_TYPE_COMPUTE only
 
     // Shader text, like vertex_shader/frag_shader.

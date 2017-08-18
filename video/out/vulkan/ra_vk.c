@@ -328,10 +328,12 @@ static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
     VkEvent event = NULL;
     vk_cmd_wait(vk, cmd, &tex_vk->sig, stage, &event);
 
-    // Image barriers are redundant if there's nothing to be done
-    if (imgBarrier.oldLayout != imgBarrier.newLayout ||
-        imgBarrier.srcAccessMask != imgBarrier.dstAccessMask)
-    {
+    bool need_trans = tex_vk->current_layout != newLayout ||
+                      tex_vk->current_access != newAccess;
+
+    // Transitioning to VK_IMAGE_LAYOUT_UNDEFINED is a pseudo-operation
+    // that for us means we don't need to perform the actual transition
+    if (need_trans && newLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
         if (event) {
             vkCmdWaitEvents(cmd->buf, 1, &event, tex_vk->sig_stage,
                             stage, 0, NULL, 0, NULL, 1, &imgBarrier);
@@ -1206,6 +1208,13 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
         if (pass->params.enable_blend)
             loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 
+        // If we're invalidating the target, we don't need to load or transition
+        if (pass->params.invalidate_target) {
+            pass_vk->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            pass_vk->initialAccess = 0;
+            loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        }
+
         VK(vk_create_render_pass(vk->dev, params->target_format, loadOp,
                                  pass_vk->initialLayout, pass_vk->finalLayout,
                                  &pass_vk->renderPass));
@@ -1536,7 +1545,8 @@ static void vk_renderpass_run(struct ra *ra,
 
         // The renderpass expects the images to be in a certain layout
         tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                    pass_vk->initialAccess, pass_vk->initialLayout, false);
+                    pass_vk->initialAccess, pass_vk->initialLayout,
+                    pass->params.invalidate_target);
 
         VkViewport viewport = {
             .x = params->viewport.x0,
