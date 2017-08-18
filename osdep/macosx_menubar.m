@@ -34,6 +34,9 @@
         [userDefaults setBool:YES forKey:@"NSDisabledDictationMenuItem"];
         [userDefaults setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
 
+        if ([NSWindow respondsToSelector:@selector(allowsAutomaticWindowTabbing)])
+            NSWindow.allowsAutomaticWindowTabbing = NO;
+
         menuTree = @[
             @{
                 @"name": @"Apple",
