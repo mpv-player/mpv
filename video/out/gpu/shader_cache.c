@@ -965,13 +965,14 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
 }
 
 struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
-                                        struct ra_tex *target,
+                                        struct ra_tex *target, bool discard,
                                         const struct ra_renderpass_input *vao,
                                         int vao_len, size_t vertex_stride,
                                         void *vertices, size_t num_vertices)
 {
     struct timer_pool *timer = NULL;
 
+    sc->params.invalidate_target = discard;
     gl_sc_generate(sc, RA_RENDERPASS_TYPE_RASTER, target->params.format,
                    vao, vao_len, vertex_stride);
     if (!sc->current_shader)
