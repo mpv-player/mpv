@@ -875,27 +875,27 @@ void pass_sample_unsharp(struct gl_shader_cache *sc, float param) {
 
 void pass_sample_un360(struct gl_shader_cache *sc, float w, float h) {
     float fov = M_PI/2;
-    float theta0 = M_PI;
-    float phi0 = M_PI/2*0;
+    float yaw = M_PI*1;
+    float pitch = M_PI/2*0;
 
     GLSLF("{\n");
     float t = tan(fov/2);
-    float c = cos(phi0);
-    float s = sin(phi0);
+    float c = cos(pitch);
+    float s = sin(pitch);
     float r = h/w;
     float m[3][3] = {{2*t,        0,      0},
                      {  0, 2*t*r*c, 2*t*r*s},
                      { -t,-t*r*c-s,-t*r*s+c}};
     gl_sc_uniform_mat3(sc, "m", true, &m[0][0]);
-    gl_sc_uniform_f(sc, "theta0", theta0);
+    gl_sc_uniform_f(sc, "yaw", yaw);
 
     GLSL(vec3 p = vec3(HOOKED_pos, 1.0) * m;)
 
     GLSL(float theta = atan(p.x, p.z);)
     GLSL(float phi = atan(p.y, length(p.xz));)
 
-    GLSLF("p.x = fract(%f * (theta + theta0));\n", 1.0 / (2 * M_PI));
-    GLSLF("p.y = %f * (phi + %f);\n", 1.0 / M_PI, M_PI / 2.0);
+    GLSLF("p.x = fract(%f * (theta + yaw));\n", 1.0 / (2 * M_PI));
+    GLSLF("p.y = .5 + %f * phi;\n", 1.0 / M_PI);
     GLSL(color = HOOKED_tex(p.xy);)
     GLSLF("}\n");
 }
