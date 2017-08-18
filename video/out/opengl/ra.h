@@ -287,6 +287,8 @@ struct ra_renderpass_run_params {
     struct ra_tex *target;
     struct mp_rect viewport;
     struct mp_rect scissors;
+    // If true, the contents of `target` not written to will become undefined
+    bool invalidate_target;
 
     // (The primitive type is always a triangle list.)
     void *vertex_data;
