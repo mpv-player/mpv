@@ -126,10 +126,8 @@ bool tex_upload(struct ra *ra, struct tex_upload *pbo, bool want_pbo,
     if (!(ra->caps & RA_CAP_DIRECT_UPLOAD))
         want_pbo = true;
 
-    if (!want_pbo || params->buf) {
-        ra->fns->tex_upload(ra, params);
-        return true;
-    }
+    if (!want_pbo || params->buf)
+        return ra->fns->tex_upload(ra, params);
 
     struct ra_tex *tex = params->tex;
     size_t row_size = tex->params.dimensions == 2 ? params->stride :
@@ -169,8 +167,7 @@ bool tex_upload(struct ra *ra, struct tex_upload *pbo, bool want_pbo,
     newparams.buf = buf;
     newparams.src = NULL;
 
-    ra->fns->tex_upload(ra, &newparams);
-    return true;
+    return ra->fns->tex_upload(ra, &newparams);
 }
 
 void tex_upload_uninit(struct ra *ra, struct tex_upload *pbo)

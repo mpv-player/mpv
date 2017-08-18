@@ -321,8 +321,8 @@ struct ra_fns {
     // the image - conversions between bit depth etc. are not supported.
     // The buffer *may* be marked as "in use" while this operation is going on,
     // and the contents must not be touched again by the API user until
-    // buf_poll returns true.
-    void (*tex_upload)(struct ra *ra, const struct ra_tex_upload_params *params);
+    // buf_poll returns true. Returns whether successful.
+    bool (*tex_upload)(struct ra *ra, const struct ra_tex_upload_params *params);
 
     // Create a buffer. This can be used as a persistently mapped buffer,
     // a uniform buffer, a shader storage buffer or possibly others.

@@ -424,7 +424,7 @@ bool ra_is_gl(struct ra *ra)
     return ra->fns == &ra_fns_gl;
 }
 
-static void gl_tex_upload(struct ra *ra,
+static bool gl_tex_upload(struct ra *ra,
                           const struct ra_tex_upload_params *params)
 {
     GL *gl = ra_gl_get(ra);
@@ -480,6 +480,8 @@ static void gl_tex_upload(struct ra *ra,
             buf_gl->fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         }
     }
+
+    return true;
 }
 
 static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
