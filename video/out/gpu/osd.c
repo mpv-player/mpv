@@ -314,7 +314,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     const int *factors = &blend_factors[part->format][0];
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    gl_sc_dispatch_draw(sc, fbo.tex, vertex_vao, MP_ARRAY_SIZE(vertex_vao),
+    gl_sc_dispatch_draw(sc, fbo.tex, false, vertex_vao, MP_ARRAY_SIZE(vertex_vao),
                         sizeof(struct vertex), part->vertices, part->num_vertices);
 }
 

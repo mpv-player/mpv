@@ -50,7 +50,7 @@ void gl_sc_blend(struct gl_shader_cache *sc,
                  enum ra_blend blend_dst_alpha);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
-                                        struct ra_tex *target,
+                                        struct ra_tex *target, bool discard,
                                         const struct ra_renderpass_input *vao,
                                         int vao_len, size_t vertex_stride,
                                         void *ptr, size_t num);
