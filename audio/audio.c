@@ -420,6 +420,7 @@ struct mp_audio *mp_audio_from_aframe(struct mp_aframe *aframe)
 
 void mp_audio_config_from_aframe(struct mp_audio *dst, struct mp_aframe *src)
 {
+    *dst = (struct mp_audio){0};
     struct mp_chmap chmap = {0};
     mp_aframe_get_chmap(src, &chmap);
     mp_audio_set_channels(dst, &chmap);
