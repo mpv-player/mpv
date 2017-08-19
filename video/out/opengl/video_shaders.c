@@ -878,6 +878,7 @@ void pass_sample_un360(struct gl_shader_cache *sc, float w, float h) {
     float yaw = M_PI*1;
     float pitch = M_PI/2*0;
     float roll = M_PI/2*0;
+    bool cubemap = false;
 
     GLSLF("{\n");
     float t = tan(fov/2);
@@ -894,11 +895,51 @@ void pass_sample_un360(struct gl_shader_cache *sc, float w, float h) {
 
     GLSL(vec3 p = vec3(HOOKED_pos, 1.0) * m;)
 
-    GLSL(float theta = atan(p.x, p.z);)
-    GLSL(float phi = atan(p.y, length(p.xz));)
+    GLSL(float theta = atan(p.x, p.z) + yaw;)
+    GLSLF("float phi = atan(p.y, length(p.xz)) + %f;\n", M_PI / 2);
 
-    GLSLF("p.x = fract(%f * (theta + yaw));\n", 1.0 / (2 * M_PI));
-    GLSLF("p.y = .5 + %f * phi;\n", 1.0 / M_PI);
+    if (!cubemap) {
+        GLSLF("p.x = fract(%f * theta);\n", 1.0 / (2 * M_PI));
+        GLSLF("p.y = %f * phi;\n", 1.0 / M_PI);
+    } else {
+        GLSLF("float offset = mod(theta, %f)-%f;\n", M_PI/2, M_PI/4);
+        GLSLF("float quadrant = mod(floor(theta*%f), 4);\n", 2.0/M_PI);
+        GLSL(float h = tan(phi)*cos(offset);)
+
+        GLSLF("if (abs(h) > 1) { // side\n");
+            GLSLF("if (quadrant == 3) { // back\n");
+                GLSL(p.x = .5/(tan(phi)*cos(offset))+.5;)
+                GLSL(p.y = .5*tan(offset)+.5;)
+                GLSL(p.x *= 1.0/3;)
+                GLSL(p.y *= 1.0/2;)
+
+                GLSL(p.x += 1.0/3;)
+                GLSL(p.y += 1.0/2;)
+            GLSLF("} else {\n");
+                GLSL(p.x = .5*tan(offset)+.5;)
+                GLSL(p.y = -.5/(tan(phi)*cos(offset))+.5;)
+                GLSL(p.x *= 1.0/3;)
+                GLSL(p.y *= 1.0/2;)
+
+                GLSL(p.x += quadrant/3;)
+            GLSLF("}\n");
+        GLSLF("} else if (h > 0) { // top\n");
+            GLSLF("p.x = .5*tan(%f-phi)*cos(theta+%f)+.5;", M_PI, M_PI/4);
+            GLSLF("p.y = -.5*tan(%f-phi)*sin(theta+%f)+.5;", M_PI, M_PI/4);
+            GLSL(p.x *= 1.0/3;)
+            GLSL(p.y *= 1.0/2;)
+
+            GLSL(p.x += 2.0/3;)
+            GLSL(p.y += 1.0/2;)
+        GLSLF("} else { // bottom\n");
+            GLSLF("p.x = .5*tan(%f-phi)*cos(theta+%f)+.5;\n", M_PI, M_PI/4);
+            GLSLF("p.y = .5*tan(%f-phi)*sin(theta+%f)+.5;\n", M_PI, M_PI/4);
+            GLSL(p.x *= 1.0/3;)
+            GLSL(p.y *= 1.0/2;)
+
+            GLSL(p.y += 1.0/2;)
+        GLSLF("}\n");
+    }
     GLSL(color = HOOKED_tex(p.xy);)
     GLSLF("}\n");
 }
