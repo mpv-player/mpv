@@ -877,15 +877,18 @@ void pass_sample_un360(struct gl_shader_cache *sc, float w, float h) {
     float fov = M_PI/2;
     float yaw = M_PI*1;
     float pitch = M_PI/2*0;
+    float roll = M_PI/2*0;
 
     GLSLF("{\n");
     float t = tan(fov/2);
     float c = cos(pitch);
     float s = sin(pitch);
     float r = h/w;
-    float m[3][3] = {{2*t,        0,      0},
-                     {  0, 2*t*r*c, 2*t*r*s},
-                     { -t,-t*r*c-s,-t*r*s+c}};
+    float sR = sin(roll);
+    float cR = cos(roll);
+    float m[3][3] = {{      2*cR*t,       -2*sR*t*c,       -2*sR*t*s},
+                     {    2*sR*t*r,      2*cR*t*c*r,      2*cR*t*s*r},
+                     {-t*(cR+sR*r), t*c*(sR-cR*r)-s, t*s*(sR-cR*r)+c}};
     gl_sc_uniform_mat3(sc, "m", true, &m[0][0]);
     gl_sc_uniform_f(sc, "yaw", yaw);
 
