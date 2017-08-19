@@ -670,7 +670,7 @@ static void d3d11_swap_buffers(MPGLContext *ctx)
     // Restore the RTVs and release the objects
     ID3D11DeviceContext_OMSetRenderTargets(p->d3d11_context,
         MP_ARRAY_SIZE(rtvs), rtvs, dsv);
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < MP_ARRAY_SIZE(rtvs); i++)
         SAFE_RELEASE(rtvs[i]);
     SAFE_RELEASE(dsv);
 }
