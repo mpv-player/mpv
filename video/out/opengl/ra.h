@@ -30,6 +30,11 @@ struct ra {
     // formats should have a lower index. (E.g. GLES3 should put rg8 before la.)
     struct ra_format **formats;
     int num_formats;
+
+    // Accelerate texture uploads via an extra PBO even when
+    // RA_CAP_DIRECT_UPLOAD is supported. This is basically only relevant for
+    // OpenGL. Set by the RA user.
+    bool use_pbo;
 };
 
 enum {

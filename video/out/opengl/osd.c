@@ -54,7 +54,6 @@ struct mpgl_osd_part {
     enum sub_bitmap_format format;
     int change_id;
     struct ra_tex *texture;
-    struct tex_upload pbo;
     int w, h;
     int num_subparts;
     int prev_num_subparts;
@@ -71,7 +70,6 @@ struct mpgl_osd {
     const struct ra_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
     bool change_flag; // for reporting to API user only
-    bool want_pbo;
     // temporary
     int stereo_mode;
     struct mp_osd_res osd_res;
@@ -79,7 +77,7 @@ struct mpgl_osd {
 };
 
 struct mpgl_osd *mpgl_osd_init(struct ra *ra, struct mp_log *log,
-                               struct osd_state *osd, bool want_pbo)
+                               struct osd_state *osd)
 {
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
@@ -88,7 +86,6 @@ struct mpgl_osd *mpgl_osd_init(struct ra *ra, struct mp_log *log,
         .ra = ra,
         .change_flag = true,
         .scratch = talloc_zero_size(ctx, 1),
-        .want_pbo = want_pbo,
     };
 
     ctx->fmt_table[SUBBITMAP_LIBASS] = ra_find_unorm_format(ra, 1, 1);
@@ -111,7 +108,6 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = ctx->parts[n];
         ra_tex_free(ctx->ra, &p->texture);
-        tex_upload_uninit(ctx->ra, &p->pbo);
     }
     talloc_free(ctx);
 }
@@ -180,7 +176,7 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         .stride = imgs->packed->stride[0],
     };
 
-    ok = tex_upload(ra, &osd->pbo, ctx->want_pbo, &params);
+    ok = ra->fns->tex_upload(ra, &params);
 
 done:
     return ok;

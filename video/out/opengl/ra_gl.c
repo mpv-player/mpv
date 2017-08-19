@@ -15,6 +15,7 @@ struct ra_gl {
 
 // For ra_tex.priv
 struct ra_tex_gl {
+    struct ra_buf_pool pbo; // for ra.use_pbo
     bool own_objects;
     GLenum target;
     GLuint texture; // 0 if no texture data associated
@@ -217,6 +218,8 @@ static void gl_tex_destroy(struct ra *ra, struct ra_tex *tex)
 {
     GL *gl = ra_gl_get(ra);
     struct ra_tex_gl *tex_gl = tex->priv;
+
+    ra_buf_pool_uninit(ra, &tex_gl->pbo);
 
     if (tex_gl->own_objects) {
         if (tex_gl->fbo)
@@ -434,6 +437,9 @@ static bool gl_tex_upload(struct ra *ra,
     struct ra_buf_gl *buf_gl = buf ? buf->priv : NULL;
     assert(tex->params.host_mutable);
     assert(!params->buf || !params->src);
+
+    if (ra->use_pbo && !params->buf)
+        return ra_tex_upload_pbo(ra, &tex_gl->pbo, params);
 
     const void *src = params->src;
     if (buf) {
