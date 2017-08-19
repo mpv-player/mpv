@@ -84,7 +84,6 @@ static const struct ra_renderpass_input vertex_vao[] = {
 
 struct texplane {
     struct ra_tex *tex;
-    struct tex_upload pbo;
     int w, h;
     bool flipped;
 };
@@ -494,7 +493,7 @@ static void reinit_osd(struct gl_video *p)
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
     if (p->osd_state)
-        p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state, p->opts.pbo);
+        p->osd = mpgl_osd_init(p->ra, p->log, p->osd_state);
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -987,7 +986,6 @@ static void uninit_video(struct gl_video *p)
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         ra_tex_free(p->ra, &plane->tex);
-        tex_upload_uninit(p->ra, &plane->pbo);
     }
     *vimg = (struct video_image){0};
 
@@ -3291,7 +3289,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
             MP_VERBOSE(p, "DR enabled: %s\n", p->using_dr_path ? "yes" : "no");
         }
 
-        if (!tex_upload(p->ra, &plane->pbo, p->opts.pbo, &params)) {
+        if (!p->ra->fns->tex_upload(p->ra, &params)) {
             timer_pool_stop(p->upload_timer);
             goto error;
         }
@@ -3300,7 +3298,9 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
             mapped->mpi = mp_image_new_ref(mpi);
     }
     timer_pool_stop(p->upload_timer);
-    const char *mode = p->using_dr_path ? "DR" : p->opts.pbo ? "PBO" : "naive";
+
+    bool using_pbo = p->ra->use_pbo || !(p->ra->caps & RA_CAP_DIRECT_UPLOAD);
+    const char *mode = p->using_dr_path ? "DR" : using_pbo ? "PBO" : "naive";
     pass_describe(p, "upload frame (%s)", mode);
     pass_record(p, timer_pool_measure(p->upload_timer));
 
@@ -3639,6 +3639,7 @@ static void reinit_from_options(struct gl_video *p)
     check_gl_features(p);
     uninit_rendering(p);
     gl_sc_set_cache_dir(p->sc, p->opts.shader_cache_dir);
+    p->ra->use_pbo = p->opts.pbo;
     gl_video_setup_hooks(p);
     reinit_osd(p);
 

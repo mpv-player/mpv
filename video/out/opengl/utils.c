@@ -39,6 +39,91 @@ void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo)
     gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
 }
 
+void ra_buf_pool_uninit(struct ra *ra, struct ra_buf_pool *pool)
+{
+    for (int i = 0; i < pool->num_buffers; i++)
+        ra_buf_free(ra, &pool->buffers[i]);
+
+    talloc_free(pool->buffers);
+    *pool = (struct ra_buf_pool){0};
+}
+
+static bool ra_buf_params_compatible(const struct ra_buf_params *new,
+                                     const struct ra_buf_params *old)
+{
+    return new->type == old->type &&
+           new->size <= old->size &&
+           new->host_mapped  == old->host_mapped &&
+           new->host_mutable == old->host_mutable;
+}
+
+static bool ra_buf_pool_grow(struct ra *ra, struct ra_buf_pool *pool)
+{
+    struct ra_buf *buf = ra_buf_create(ra, &pool->current_params);
+    if (!buf)
+        return false;
+
+    MP_TARRAY_INSERT_AT(NULL, pool->buffers, pool->num_buffers, pool->index, buf);
+    MP_VERBOSE(ra, "Resized buffer pool to size %d\n", pool->num_buffers);
+    return true;
+}
+
+struct ra_buf *ra_buf_pool_get(struct ra *ra, struct ra_buf_pool *pool,
+                               const struct ra_buf_params *params)
+{
+    assert(!params->initial_data);
+
+    if (!ra_buf_params_compatible(params, &pool->current_params)) {
+        ra_buf_pool_uninit(ra, pool);
+        pool->current_params = *params;
+    }
+
+    // Make sure we have at least one buffer available
+    if (!pool->buffers && !ra_buf_pool_grow(ra, pool))
+        return NULL;
+
+    // Make sure the next buffer is available for use
+    if (!ra->fns->buf_poll(ra, pool->buffers[pool->index]) &&
+        !ra_buf_pool_grow(ra, pool))
+    {
+        return NULL;
+    }
+
+    struct ra_buf *buf = pool->buffers[pool->index++];
+    pool->index %= pool->num_buffers;
+
+    return buf;
+}
+
+bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
+                       const struct ra_tex_upload_params *params)
+{
+    if (params->buf)
+        return ra->fns->tex_upload(ra, params);
+
+    struct ra_tex *tex = params->tex;
+    size_t row_size = tex->params.dimensions == 2 ? params->stride :
+                      tex->params.w * tex->params.format->pixel_size;
+
+    struct ra_buf_params bufparams = {
+        .type = RA_BUF_TYPE_TEX_UPLOAD,
+        .size = row_size * tex->params.h * tex->params.d,
+        .host_mutable = true,
+    };
+
+    struct ra_buf *buf = ra_buf_pool_get(ra, pbo, &bufparams);
+    if (!buf)
+        return false;
+
+    ra->fns->buf_update(ra, buf, 0, params->src, bufparams.size);
+
+    struct ra_tex_upload_params newparams = *params;
+    newparams.buf = buf;
+    newparams.src = NULL;
+
+    return ra->fns->tex_upload(ra, &newparams);
+}
+
 // Create a texture and a FBO using the texture as color attachments.
 //  fmt: texture internal format
 // If the parameters are the same as the previous call, do not touch it.
@@ -118,63 +203,6 @@ void fbotex_uninit(struct fbotex *fbo)
         ra_tex_free(fbo->ra, &fbo->tex);
         *fbo = (struct fbotex) {0};
     }
-}
-
-bool tex_upload(struct ra *ra, struct tex_upload *pbo, bool want_pbo,
-                const struct ra_tex_upload_params *params)
-{
-    if (!(ra->caps & RA_CAP_DIRECT_UPLOAD))
-        want_pbo = true;
-
-    if (!want_pbo || params->buf)
-        return ra->fns->tex_upload(ra, params);
-
-    struct ra_tex *tex = params->tex;
-    size_t row_size = tex->params.dimensions == 2 ? params->stride :
-                      tex->params.w * tex->params.format->pixel_size;
-    size_t needed_size = row_size * tex->params.h * tex->params.d;
-
-    if (needed_size > pbo->buffer_size)
-        tex_upload_uninit(ra, pbo);
-
-    if (!pbo->buffers[0]) {
-        struct ra_buf_params bufparams = {
-            .type = RA_BUF_TYPE_TEX_UPLOAD,
-            .size = needed_size,
-            .host_mutable = true,
-        };
-
-        pbo->buffer_size = bufparams.size;
-        for (int i = 0; i < NUM_PBO_BUFFERS; i++) {
-            pbo->buffers[i] = ra_buf_create(ra, &bufparams);
-            if (!pbo->buffers[i])
-                return false;
-        }
-    }
-
-    struct ra_buf *buf = pbo->buffers[pbo->index++];
-    pbo->index %= NUM_PBO_BUFFERS;
-
-    if (!ra->fns->buf_poll(ra, buf)) {
-        MP_WARN(ra, "Texture upload buffer was not free to use! Try "
-                    "increasing NUM_PBO_BUFFERS.\n");
-        return false;
-    }
-
-    ra->fns->buf_update(ra, buf, 0, params->src, needed_size);
-
-    struct ra_tex_upload_params newparams = *params;
-    newparams.buf = buf;
-    newparams.src = NULL;
-
-    return ra->fns->tex_upload(ra, &newparams);
-}
-
-void tex_upload_uninit(struct ra *ra, struct tex_upload *pbo)
-{
-    for (int i = 0; i < NUM_PBO_BUFFERS; i++)
-        ra_buf_free(ra, &pbo->buffers[i]);
-    *pbo = (struct tex_upload){0};
 }
 
 struct timer_pool {
