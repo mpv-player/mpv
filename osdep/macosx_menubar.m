@@ -20,6 +20,7 @@
 
 #import "macosx_menubar_objc.h"
 #import "osdep/macosx_application_objc.h"
+#include "osdep/macosx_compat.h"
 
 @implementation MenuBar
 {
@@ -34,8 +35,8 @@
         [userDefaults setBool:YES forKey:@"NSDisabledDictationMenuItem"];
         [userDefaults setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
 
-        if ([NSWindow respondsToSelector:@selector(allowsAutomaticWindowTabbing)])
-            NSWindow.allowsAutomaticWindowTabbing = NO;
+        if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)])
+            [NSWindow setAllowsAutomaticWindowTabbing: NO];
 
         menuTree = @[
             @{
