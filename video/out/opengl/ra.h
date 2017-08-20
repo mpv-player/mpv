@@ -10,6 +10,7 @@ struct ra {
 
     int glsl_version;       // GLSL version (e.g. 300 => 3.0)
     bool glsl_es;           // use ES dialect
+    bool glsl_vulkan;       // use vulkan dialect
 
     struct mp_log *log;
 
@@ -240,7 +241,8 @@ struct ra_renderpass_params {
 
     // --- type==RA_RENDERPASS_TYPE_RASTER only
 
-    // Describes the format of the vertex data.
+    // Describes the format of the vertex data. When using ra.glsl_vulkan,
+    // the order of this array must match the vertex attribute locations.
     struct ra_renderpass_input *vertex_attribs;
     int num_vertex_attribs;
     int vertex_stride;

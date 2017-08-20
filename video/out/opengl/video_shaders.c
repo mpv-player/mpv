@@ -122,7 +122,7 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
 
     // get the weight for this pixel
     if (scaler->lut->params.dimensions == 1) {
-        GLSLF("w = texture1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
+        GLSLF("w = tex1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
               radius, scaler->lut_size);
     } else {
         GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d * 1.0/%f, %d.0))).r;\n",
