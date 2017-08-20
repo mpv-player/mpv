@@ -37,8 +37,6 @@
 #include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
 
-#include "osdep/atomic.h"
-
 #include "config.h"
 #include "misc/bstr.h"
 #include "options/options.h"
@@ -137,6 +135,7 @@ static atomic_int x11_error_silence;
 
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
+static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
@@ -504,61 +503,25 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
 static void *screensaver_thread(void *arg)
 {
     struct vo_x11_state *x11 = arg;
-    bool suspend = false;
-    bool run = true;
 
-    while (run) {
-        pthread_mutex_lock(&x11->screensaver_thread_lock);
-        bool suspend_new = suspend;
-        for (;;) {
-            run = x11->screensaver_thread_running;
-            suspend_new = x11->screensaver_thread_suspend;
-            if (!run || suspend != suspend_new)
-                break;
-            pthread_cond_wait(&x11->screensaver_thread_wakeup,
-                              &x11->screensaver_thread_lock);
-        }
-        pthread_mutex_unlock(&x11->screensaver_thread_lock);
+    for (;;) {
+        sem_wait(&x11->screensaver_sem);
+        // don't queue multiple wakeups
+        while (!sem_trywait(&x11->screensaver_sem)) {}
 
-        if (!run) {
-            suspend_new = false; // make sure to resume on exit
-            if (suspend == suspend_new)
-                break;
-        }
+        if (atomic_load(&x11->screensaver_terminate))
+            break;
 
-        char *args[] = {"xdg-screensaver", suspend_new ? "suspend" : "resume",
-                        mp_tprintf(32, "%lx", x11->screensaver_thread_window),
-                        NULL};
-        int status = mp_subprocess(args, NULL, NULL, mp_devnull, mp_devnull,
-                                   &(char*){0});
+        char *args[] = {"xdg-screensaver", "reset", NULL};
+        int status = mp_subprocess(args, NULL, NULL, mp_devnull, mp_devnull, &(char*){0});
         if (status) {
-            MP_VERBOSE(x11, "Updating screensaver failed (%d). Make sure the "
+            MP_VERBOSE(x11, "Disabling screensaver failed (%d). Make sure the "
                             "xdg-screensaver script is installed.\n", status);
             break;
         }
-
-        suspend = suspend_new;
     }
 
     return NULL;
-}
-
-static void screensaver_thread_update(struct vo_x11_state *x11)
-{
-    if (!x11->screensaver_thread_running && x11->window) {
-        x11->screensaver_thread_window = x11->window;
-        x11->screensaver_thread_running = true;
-        if (pthread_create(&x11->screensaver_thread, NULL, screensaver_thread, x11))
-            x11->screensaver_thread_running = false;
-    }
-
-    if (!x11->screensaver_thread_running)
-        return;
-
-    pthread_mutex_lock(&x11->screensaver_thread_lock);
-    x11->screensaver_thread_suspend = !x11->screensaver_enabled;
-    pthread_cond_signal(&x11->screensaver_thread_wakeup);
-    pthread_mutex_unlock(&x11->screensaver_thread_lock);
 }
 
 int vo_x11_init(struct vo *vo)
@@ -581,8 +544,12 @@ int vo_x11_init(struct vo *vo)
     };
     vo->x11 = x11;
 
-    pthread_mutex_init(&x11->screensaver_thread_lock, NULL);
-    pthread_cond_init(&x11->screensaver_thread_wakeup, NULL);
+    sem_init(&x11->screensaver_sem, 0, 0);
+    if (pthread_create(&x11->screensaver_thread, NULL, screensaver_thread, x11)) {
+        sem_destroy(&x11->screensaver_sem);
+        goto error;
+    }
+    x11->screensaver_thread_running = true;
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
@@ -806,15 +773,11 @@ void vo_x11_uninit(struct vo *vo)
     }
 
     if (x11->screensaver_thread_running) {
-        pthread_mutex_lock(&x11->screensaver_thread_lock);
-        x11->screensaver_thread_running = false;
-        pthread_cond_signal(&x11->screensaver_thread_wakeup);
-        pthread_mutex_unlock(&x11->screensaver_thread_lock);
+        atomic_store(&x11->screensaver_terminate, true);
+        sem_post(&x11->screensaver_sem);
         pthread_join(x11->screensaver_thread, NULL);
+        sem_destroy(&x11->screensaver_sem);
     }
-
-    pthread_mutex_destroy(&x11->screensaver_thread_lock);
-    pthread_cond_destroy(&x11->screensaver_thread_wakeup);
 
     if (x11->wakeup_pipe[0] >= 0) {
         close(x11->wakeup_pipe[0]);
@@ -1077,6 +1040,8 @@ void vo_x11_check_events(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     Display *display = vo->x11->display;
     XEvent Event;
+
+    xscreensaver_heartbeat(vo->x11);
 
     while (XPending(display)) {
         XNextEvent(display, &Event);
@@ -1459,8 +1424,6 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
         vo_x11_set_property_utf8(vo, XA(x11, _GTK_THEME_VARIANT), "dark");
     }
     vo_x11_xembed_update(x11, 0);
-
-    screensaver_thread_update(x11);
 }
 
 static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
@@ -1935,6 +1898,18 @@ void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
         mp_flush_wakeup_pipe(x11->wakeup_pipe[0]);
 }
 
+static void xscreensaver_heartbeat(struct vo_x11_state *x11)
+{
+    double time = mp_time_sec();
+
+    if (x11->display && !x11->screensaver_enabled &&
+        (time - x11->screensaver_time_last) >= 10)
+    {
+        x11->screensaver_time_last = time;
+        sem_post(&x11->screensaver_sem);
+    }
+}
+
 static void set_screensaver(struct vo_x11_state *x11, bool enabled)
 {
     Display *mDisplay = x11->display;
@@ -1942,7 +1917,6 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled)
         return;
     MP_VERBOSE(x11, "%s screensaver.\n", enabled ? "Enabling" : "Disabling");
     x11->screensaver_enabled = enabled;
-    screensaver_thread_update(x11);
     int nothing;
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
         BOOL onoff = 0;

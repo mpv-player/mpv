@@ -24,6 +24,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "osdep/atomic.h"
+#include "osdep/semaphore.h"
+
 #include "common/common.h"
 
 struct vo;
@@ -63,13 +66,11 @@ struct vo_x11_state {
 
     bool screensaver_enabled;
     bool dpms_touched;
-
-    long screensaver_thread_window;
+    double screensaver_time_last;
     pthread_t screensaver_thread;
-    pthread_mutex_t screensaver_thread_lock;
-    pthread_cond_t screensaver_thread_wakeup;
     bool screensaver_thread_running;
-    bool screensaver_thread_suspend;
+    sem_t screensaver_sem;
+    atomic_bool screensaver_terminate;
 
     XIM xim;
     XIC xic;
