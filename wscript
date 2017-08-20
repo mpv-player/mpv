@@ -578,6 +578,7 @@ video_output_features = [
         'name': '--x11',
         'desc': 'X11',
         'func': check_pkg_config('x11',         '>= 1.0.0',
+                                 'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
                                  'xinerama',    '>= 1.0.0',
                                  'xrandr',      '>= 1.2.0'),
