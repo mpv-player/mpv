@@ -660,6 +660,12 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             // fall through
         case RA_VARTYPE_TEX:
         case RA_VARTYPE_IMG_W:
+            // Vulkan requires explicitly assigning the bindings in the shader
+            // source. For OpenGL it's optional, but requires higher GL version
+            // so we don't do it (and instead have ra_gl update the bindings
+            // after program creation).
+            if (sc->ra->glsl_vulkan)
+                ADD(dst, "layout(binding=%d) ", u->input.binding);
             ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);
             break;
         case RA_VARTYPE_BUF_RO:
@@ -670,7 +676,6 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             ADD(dst, "layout(std430, binding=%d) buffer %s { %s };\n",
                 u->input.binding, u->input.name, u->buffer_format);
             break;
-        default: abort();
         }
     }
 }
@@ -726,10 +731,17 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
     }
 
     if (glsl_version >= 130) {
-        ADD(header, "#define texture1D texture\n");
-        ADD(header, "#define texture3D texture\n");
+        ADD(header, "#define tex1D texture\n");
+        ADD(header, "#define tex3D texture\n");
     } else {
+        ADD(header, "#define tex1D texture1D\n");
+        ADD(header, "#define tex3D texture3D\n");
         ADD(header, "#define texture texture2D\n");
+    }
+
+    if (sc->ra->glsl_vulkan && type == RA_RENDERPASS_TYPE_COMPUTE) {
+        ADD(header, "#define gl_GlobalInvocationIndex "
+                    "(gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationID)\n");
     }
 
     // Additional helpers.
@@ -753,16 +765,19 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         for (int n = 0; n < sc->params.num_vertex_attribs; n++) {
             const struct ra_renderpass_input *e = &sc->params.vertex_attribs[n];
             const char *glsl_type = vao_glsl_type(e);
+            char loc[32] = {0};
+            if (sc->ra->glsl_vulkan)
+                snprintf(loc, sizeof(loc), "layout(location=%d) ", n);
             if (strcmp(e->name, "position") == 0) {
                 // setting raster pos. requires setting gl_Position magic variable
                 assert(e->dim_v == 2 && e->type == RA_VARTYPE_FLOAT);
-                ADD(vert_head, "%s vec2 vertex_position;\n", vert_in);
+                ADD(vert_head, "%s%s vec2 vertex_position;\n", loc, vert_in);
                 ADD(vert_body, "gl_Position = vec4(vertex_position, 1.0, 1.0);\n");
             } else {
-                ADD(vert_head, "%s %s vertex_%s;\n", vert_in, glsl_type, e->name);
-                ADD(vert_head, "%s %s %s;\n", vert_out, glsl_type, e->name);
+                ADD(vert_head, "%s%s %s vertex_%s;\n", loc, vert_in, glsl_type, e->name);
+                ADD(vert_head, "%s%s %s %s;\n", loc, vert_out, glsl_type, e->name);
                 ADD(vert_body, "%s = vertex_%s;\n", e->name, e->name);
-                ADD(frag_vaos, "%s %s %s;\n", frag_in, glsl_type, e->name);
+                ADD(frag_vaos, "%s%s %s %s;\n", loc, frag_in, glsl_type, e->name);
             }
         }
         ADD(vert_body, "}\n");
@@ -772,8 +787,10 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         // fragment shader; still requires adding used uniforms and VAO elements
         frag = &sc->tmp[4];
         ADD_BSTR(frag, *header);
-        if (glsl_version >= 130)
-            ADD(frag, "out vec4 out_color;\n");
+        if (glsl_version >= 130) {
+            ADD(frag, "%sout vec4 out_color;\n",
+                sc->ra->glsl_vulkan ? "layout(location=0) " : "");
+        }
         ADD_BSTR(frag, *frag_vaos);
         add_uniforms(sc, frag);
 

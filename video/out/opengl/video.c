@@ -2467,7 +2467,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         GLSL(vec3 cpos;)
         for (int i = 0; i < 3; i++)
             GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
-        GLSL(color.rgb = texture3D(lut_3d, cpos).rgb;)
+        GLSL(color.rgb = tex3D(lut_3d, cpos).rgb;)
     }
 }
 
