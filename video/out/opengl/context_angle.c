@@ -111,8 +111,6 @@ struct priv {
     int sc_width, sc_height; // Swap chain width and height
     int swapinterval;
 
-    bool sw_adapter_msg_shown;
-
     struct angle_opts *opts;
 };
 
