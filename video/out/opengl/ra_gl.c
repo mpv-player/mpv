@@ -978,6 +978,7 @@ static void gl_renderpass_run(struct ra *ra,
     case RA_RENDERPASS_TYPE_RASTER: {
         struct ra_tex_gl *target_gl = params->target->priv;
         assert(params->target->params.render_dst);
+        assert(params->target->params.format == pass->params.target_format);
         gl->BindFramebuffer(GL_FRAMEBUFFER, target_gl->fbo);
         gl->Viewport(params->viewport.x0, params->viewport.y0,
                      mp_rect_w(params->viewport),

@@ -245,6 +245,9 @@ struct ra_renderpass_params {
     int num_vertex_attribs;
     int vertex_stride;
 
+    // Format of the target texture
+    const struct ra_format *target_format;
+
     // Shader text, in GLSL. (Yes, you need a GLSL compiler.)
     // These are complete shaders, including prelude and declarations.
     const char *vertex_shader;
@@ -302,7 +305,8 @@ struct ra_renderpass_run_params {
 
     // --- pass->params.type==RA_RENDERPASS_TYPE_RASTER only
 
-    // target->params.render_dst must be true.
+    // target->params.render_dst must be true, and target->params.format must
+    // match pass->params.target_format.
     struct ra_tex *target;
     struct mp_rect viewport;
     struct mp_rect scissors;

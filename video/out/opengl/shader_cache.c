@@ -684,7 +684,9 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
 // 1. Unbind the program and all textures.
 // 2. Reset the sc state and prepare for a new shader program. (All uniforms
 //    and fragment operations needed for the next program have to be re-added.)
-static void gl_sc_generate(struct gl_shader_cache *sc, enum ra_renderpass_type type)
+static void gl_sc_generate(struct gl_shader_cache *sc,
+                           enum ra_renderpass_type type,
+                           const struct ra_format *target_format)
 {
     int glsl_version = sc->ra->glsl_version;
     int glsl_es = sc->ra->glsl_es ? glsl_version : 0;
@@ -788,6 +790,11 @@ static void gl_sc_generate(struct gl_shader_cache *sc, enum ra_renderpass_type t
             ADD(frag, "gl_FragColor = color;\n");
         }
         ADD(frag, "}\n");
+
+        // We need to fix the format of the render dst at renderpass creation
+        // time
+        assert(target_format);
+        sc->params.target_format = target_format;
     }
 
     if (type == RA_RENDERPASS_TYPE_COMPUTE) {
@@ -830,6 +837,9 @@ static void gl_sc_generate(struct gl_shader_cache *sc, enum ra_renderpass_type t
             sc->params.blend_src_rgb, sc->params.blend_dst_rgb,
             sc->params.blend_src_alpha, sc->params.blend_dst_alpha);
     }
+
+    if (sc->params.target_format)
+        ADD(hash_total, "format %s\n", sc->params.target_format->name);
 
     struct sc_entry *entry = NULL;
     for (int n = 0; n < sc->num_entries; n++) {
@@ -888,7 +898,7 @@ struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
 {
     struct timer_pool *timer = NULL;
 
-    gl_sc_generate(sc, RA_RENDERPASS_TYPE_RASTER);
+    gl_sc_generate(sc, RA_RENDERPASS_TYPE_RASTER, target->params.format);
     if (!sc->current_shader)
         goto error;
 
@@ -921,7 +931,7 @@ struct mp_pass_perf gl_sc_dispatch_compute(struct gl_shader_cache *sc,
 {
     struct timer_pool *timer = NULL;
 
-    gl_sc_generate(sc, RA_RENDERPASS_TYPE_COMPUTE);
+    gl_sc_generate(sc, RA_RENDERPASS_TYPE_COMPUTE, NULL);
     if (!sc->current_shader)
         goto error;
 
