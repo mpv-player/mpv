@@ -216,7 +216,8 @@ Available audio output drivers are:
         it will write a WAVE header every time the file is opened.
 
 ``rsound``
-    Audio output to an RSound daemon
+    Audio output to an RSound daemon. Use ``--audio-device=rsound/<hostname>``
+    to set the host name (with ``<hostname>`` replaced, without the ``< >``).
 
     .. note:: Completely useless, unless you intend to run RSound. Not to be
               confused with RoarAudio, which is something completely
