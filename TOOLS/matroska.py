@@ -137,6 +137,13 @@ elements_matroska = (
                             'LuminanceMin,            55DA, float',
                         ),
                     ),
+                    'Projection, 7670, sub', (
+                        'ProjectionType, 7671, uint',
+                        'ProjectionPrivate, 7672, binary',
+                        'ProjectionPoseYaw, 7673, float',
+                        'ProjectionPosePitch, 7674, float',
+                        'ProjectionPoseRoll, 7675, float',
+                    ),
                 ),
                 'Audio, e1, sub', (
                     'SamplingFrequency, b5, float',

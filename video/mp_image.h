@@ -36,6 +36,20 @@
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_INTERLACED 0x20
 
+enum mp_spherical_type {
+    MP_SPHERICAL_AUTO = 0,
+    MP_SPHERICAL_NONE,              // normal video
+    MP_SPHERICAL_UNKNOWN,           // unknown projection
+    MP_SPHERICAL_EQUIRECTANGULAR,   // (untiled)
+};
+
+extern const struct m_opt_choice_alternatives mp_spherical_names[];
+
+struct mp_spherical_params {
+    enum mp_spherical_type type;
+    float ref_angles[3]; // yaw/pitch/roll, refer to AVSphericalMapping
+};
+
 // Describes image parameters that usually stay constant.
 // New fields can be added in the future. Code changing the parameters should
 // usually copy the whole struct, so that fields added later will be preserved.
@@ -50,6 +64,7 @@ struct mp_image_params {
     int rotate;
     enum mp_stereo3d_mode stereo_in;    // image is encoded with this mode
     enum mp_stereo3d_mode stereo_out;   // should be displayed with this mode
+    struct mp_spherical_params spherical;
 };
 
 /* Memory management:
@@ -144,7 +159,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params);
 
 char *mp_image_params_to_str_buf(char *b, size_t bs,
                                  const struct mp_image_params *p);
-#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[99]){0}, 99, p)
+#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[256]){0}, 256, p)
 
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,

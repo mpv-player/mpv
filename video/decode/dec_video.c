@@ -244,6 +244,10 @@ static void fix_image_params(struct dec_video *d_video,
         p.color.sig_peak = 0.0;
     }
 
+    p.spherical = c->spherical;
+    if (p.spherical.type == MP_SPHERICAL_AUTO)
+        p.spherical.type = MP_SPHERICAL_NONE;
+
     // Guess missing colorspace fields from metadata. This guarantees all
     // fields are at least set to legal values afterwards.
     mp_image_params_guess_csp(&p);

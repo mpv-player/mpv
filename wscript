@@ -481,6 +481,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_ICC_PROFILE',
                                 use='libav'),
+    }, {
+        'name': 'avutil-spherical',
+        'desc': 'libavutil spherical side data',
+        'func': check_statement('libavutil/spherical.h',
+                                'AV_SPHERICAL_EQUIRECTANGULAR',
+                                use='libav'),
     },
 ]
 
