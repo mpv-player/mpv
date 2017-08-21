@@ -206,11 +206,12 @@ int pthread_detach(pthread_t thread)
 static DWORD WINAPI run_thread(LPVOID lpParameter)
 {
     pthread_mutex_lock(&pthread_table_lock);
-    struct m_thread_info *info = find_thread_info(pthread_self());
-    assert(info);
+    struct m_thread_info *pinfo = find_thread_info(pthread_self());
+    assert(pinfo);
+    struct m_thread_info info = *pinfo;
     pthread_mutex_unlock(&pthread_table_lock);
 
-    pthread_exit(info->user_fn(info->user_arg));
+    pthread_exit(info.user_fn(info.user_arg));
     abort(); // not reached
 }
 
