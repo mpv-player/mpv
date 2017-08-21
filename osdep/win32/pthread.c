@@ -205,7 +205,11 @@ int pthread_detach(pthread_t thread)
 
 static DWORD WINAPI run_thread(LPVOID lpParameter)
 {
-    struct m_thread_info *info = lpParameter;
+    pthread_mutex_lock(&pthread_table_lock);
+    struct m_thread_info *info = find_thread_info(pthread_self());
+    assert(info);
+    pthread_mutex_unlock(&pthread_table_lock);
+
     pthread_exit(info->user_fn(info->user_arg));
     abort(); // not reached
 }
@@ -228,7 +232,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
         .user_fn = start_routine,
         .user_arg = arg,
     };
-    info->handle = CreateThread(NULL, 0, run_thread, info, CREATE_SUSPENDED,
+    info->handle = CreateThread(NULL, 0, run_thread, NULL, CREATE_SUSPENDED,
                                 &info->id);
     if (!info->handle) {
         remove_thread_info(info);
