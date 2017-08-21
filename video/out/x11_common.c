@@ -997,6 +997,9 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
+    if (x11->parent)
+        return;
+
     if (x11->wm_type & vo_wm_FULLSCREEN) {
         int num_elems;
         long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
@@ -1777,7 +1780,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        if (!x11->window)
+        if (!x11->window || x11->parent)
             return VO_FALSE;
         s[0] = x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc);
         s[1] = x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc);
@@ -1785,7 +1788,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        if (!x11->window)
+        if (!x11->window || x11->parent)
             return VO_FALSE;
         struct mp_rect rc = x11->winrc;
         rc.x1 = rc.x0 + s[0];
