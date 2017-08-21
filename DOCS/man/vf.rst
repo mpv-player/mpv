@@ -838,7 +838,6 @@ Available mpv-only filters are:
         the mode selected with ``deint-mode``.
     ``deint-mode=<first-field|bob|temporal|temporal-spatial>``
         Select deinterlacing mode (default: temporal).
-        All modes respect ``--field-dominance``.
 
         Note that there's currently a mechanism that allows the ``vdpau`` VO to
         change the ``deint-mode`` of auto-inserted ``vdpaupp`` filters. To avoid
