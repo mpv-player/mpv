@@ -2179,10 +2179,6 @@ caveats with some properties (due to historical reasons):
     set this as option, and return whatever actual aspect was derived from the
     option setting.
 
-``brightness`` (and other color options)
-    If ``--vo=xv`` is used, these properties may return the adapter's current
-    values instead of the option values.
-
 ``display-fps``
     If a VO is created, this will return either the actual display FPS, or
     an invalid value, instead of the option value.
