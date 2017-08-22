@@ -346,10 +346,6 @@ List of Input Commands
     events that have already been displayed, or are within a short prefetch
     range.
 
-``osd [<level>]``
-    Toggle OSD level. If ``<level>`` is specified, set the OSD mode
-    (see ``--osd-level`` for valid values).
-
 ``print-text "<string>"``
     Print text to stdout. The string can contain properties (see
     `Property Expansion`_).
