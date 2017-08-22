@@ -1697,10 +1697,6 @@ static const struct m_option opts[] = {
     {0}
 };
 
-static const d3d_priv defaults = {
-    .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
-};
-
 const struct vo_driver video_out_direct3d = {
     .description = "Direct3D 9 Renderer",
     .name = "direct3d",
@@ -1712,7 +1708,6 @@ const struct vo_driver video_out_direct3d = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),
-    .priv_defaults = &defaults,
     .options = opts,
     .options_prefix = "vo-direct3d",
 };
