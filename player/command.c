@@ -5854,14 +5854,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
 
-    if (mpctx->video_out) {
-        if (flags & UPDATE_VIDEOPOS)
-            vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
-
-        if (flags & UPDATE_RENDERER)
-            vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
-    }
-
     if (flags & UPDATE_OSD) {
         osd_changed(mpctx->osd);
         for (int n = 0; n < NUM_PTRACKS; n++) {

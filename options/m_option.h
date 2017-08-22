@@ -398,8 +398,6 @@ struct m_option {
 // certain groups of options.
 #define UPDATE_OPT_FIRST        (1 << 7)
 #define UPDATE_TERM             (1 << 7) // terminal options
-#define UPDATE_RENDERER         (1 << 8) // mainly vo_opengl options
-#define UPDATE_VIDEOPOS         (1 << 9) // video position (panscan etc.)
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides

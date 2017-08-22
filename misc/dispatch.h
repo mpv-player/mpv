@@ -12,6 +12,10 @@ void mp_dispatch_enqueue(struct mp_dispatch_queue *queue,
                          mp_dispatch_fn fn, void *fn_data);
 void mp_dispatch_enqueue_autofree(struct mp_dispatch_queue *queue,
                                   mp_dispatch_fn fn, void *fn_data);
+void mp_dispatch_enqueue_notify(struct mp_dispatch_queue *queue,
+                                mp_dispatch_fn fn, void *fn_data);
+void mp_dispatch_cancel_fn(struct mp_dispatch_queue *queue,
+                           mp_dispatch_fn fn, void *fn_data);
 void mp_dispatch_run(struct mp_dispatch_queue *queue,
                      mp_dispatch_fn fn, void *fn_data);
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout);

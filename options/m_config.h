@@ -275,9 +275,20 @@ struct m_config_cache {
     struct m_config *shadow_config;
     long long ts;
     int group;
+    bool in_list;
+    // --- Implicitly synchronized by setting/unsetting wakeup_cb.
+    struct mp_dispatch_queue *wakeup_dispatch_queue;
+    void (*wakeup_dispatch_cb)(void *ctx);
+    void *wakeup_dispatch_cb_ctx;
+    // --- Protected by shadow->lock
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_cb_ctx;
 };
 
 // Create a mirror copy from the global options.
+// Keep in mind that a m_config_cache object is not thread-safe; it merely
+// provides thread-safe access to the global options. All API functions for
+// the same m_config_cache object must synchronized, unless otherwise noted.
 //  ta_parent: parent for the returned allocation
 //  global: option data source
 //  group: the option group to return. This can be NULL for the global option
@@ -287,6 +298,22 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
                                             struct mpv_global *global,
                                             const struct m_sub_options *group);
 
+// If any of the options in the group possibly changes, call this callback. The
+// callback must not actually access the cache or anything option related.
+// Instead, it must wake up the thread that normally accesses the cache.
+void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
+                                  void (*cb)(void *ctx), void *cb_ctx);
+
+// If any of the options in the group change, call this callback on the given
+// dispatch queue. This is higher level than m_config_cache_set_wakeup_cb(),
+// and you can do anything you want in the callback (assuming the dispatch
+// queue is processed in the same thread that accesses m_config_cache API).
+// To ensure clean shutdown, you must destroy the m_config_cache (or unset the
+// callback) before the dispatch queue is destroyed.
+void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
+                                           struct mp_dispatch_queue *dispatch,
+                                           void (*cb)(void *ctx), void *cb_ctx);
+
 // Update the options in cache->opts to current global values. Return whether
 // there was an update notification at all (which may or may not indicate that
 // some options have changed).
@@ -295,12 +322,12 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
 bool m_config_cache_update(struct m_config_cache *cache);
 
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
-// directly, with no way to update the config.
+// directly, with no way to update the config. Basically this returns a copy
+// with a snapshot of the current option values.
 // Warning: does currently not set the child as its own talloc root, which
 //          means the only way to free the struct is by freeing ta_parent.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
-
 
 // Read a single global option in a thread-safe way. For multiple options,
 // use m_config_cache. The option must exist and match the provided type (the

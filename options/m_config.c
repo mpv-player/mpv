@@ -39,6 +39,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "misc/dispatch.h"
 #include "misc/node.h"
 #include "osdep/atomic.h"
 
@@ -57,6 +58,8 @@ struct m_config_shadow {
     pthread_mutex_t lock;
     struct m_config *root;
     char *data;
+    struct m_config_cache **listeners;
+    int num_listeners;
 };
 
 // Represents a sub-struct (OPT_SUBSTRUCT()).
@@ -156,8 +159,11 @@ static void config_destroy(void *p)
             m_option_free(co->opt, config->shadow->data + co->shadow_offset);
     }
 
-    if (config->shadow)
+    if (config->shadow) {
+        // must all have been unregistered
+        assert(config->shadow->num_listeners == 0);
         pthread_mutex_destroy(&config->shadow->lock);
+    }
 }
 
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
@@ -1190,6 +1196,16 @@ static bool is_group_included(struct m_config *config, int group, int parent)
     return false;
 }
 
+static void cache_destroy(void *p)
+{
+    struct m_config_cache *cache = p;
+
+    // (technically speaking, being able to call them both without anything
+    // breaking is a feature provided by these functions)
+    m_config_cache_set_wakeup_cb(cache, NULL, NULL);
+    m_config_cache_set_dispatch_change_cb(cache, NULL, NULL, NULL);
+}
+
 struct m_config_cache *m_config_cache_alloc(void *ta_parent,
                                             struct mpv_global *global,
                                             const struct m_sub_options *group)
@@ -1198,6 +1214,7 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
     struct m_config *root = shadow->root;
 
     struct m_config_cache *cache = talloc_zero(ta_parent, struct m_config_cache);
+    talloc_set_destructor(cache, cache_destroy);
     cache->shadow = shadow;
     cache->shadow_config = m_config_new(cache, mp_null_log, root->size,
                                         root->defaults, root->options);
@@ -1292,9 +1309,81 @@ void m_config_notify_change_co(struct m_config *config,
         group = g->parent_group;
     }
 
+    if (shadow) {
+        pthread_mutex_lock(&shadow->lock);
+        for (int n = 0; n < shadow->num_listeners; n++) {
+            struct m_config_cache *cache = shadow->listeners[n];
+            if (cache->wakeup_cb)
+                cache->wakeup_cb(cache->wakeup_cb_ctx);
+        }
+        pthread_mutex_unlock(&shadow->lock);
+    }
+
     if (config->option_change_callback) {
         config->option_change_callback(config->option_change_callback_ctx, co,
                                        changed);
+    }
+}
+
+void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
+                                  void (*cb)(void *ctx), void *cb_ctx)
+{
+    struct m_config_shadow *shadow = cache->shadow;
+
+    pthread_mutex_lock(&shadow->lock);
+    if (cache->in_list) {
+        for (int n = 0; n < shadow->num_listeners; n++) {
+            if (shadow->listeners[n] == cache)
+                MP_TARRAY_REMOVE_AT(shadow->listeners, shadow->num_listeners, n);
+        }
+        if (!shadow->num_listeners) {
+            talloc_free(shadow->listeners);
+            shadow->listeners = NULL;
+        }
+    }
+    if (cb) {
+        MP_TARRAY_APPEND(NULL, shadow->listeners, shadow->num_listeners, cache);
+        cache->in_list = true;
+        cache->wakeup_cb = cb;
+        cache->wakeup_cb_ctx = cb_ctx;
+    }
+    pthread_mutex_unlock(&shadow->lock);
+}
+
+static void dispatch_notify(void *p)
+{
+    struct m_config_cache *cache = p;
+
+    assert(cache->wakeup_dispatch_queue);
+    mp_dispatch_enqueue_notify(cache->wakeup_dispatch_queue,
+                               cache->wakeup_dispatch_cb,
+                               cache->wakeup_dispatch_cb_ctx);
+}
+
+void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
+                                           struct mp_dispatch_queue *dispatch,
+                                           void (*cb)(void *ctx), void *cb_ctx)
+{
+    // Remove the old one is tricky. Firts make sure no new notifications will
+    // come.
+    m_config_cache_set_wakeup_cb(cache, NULL, NULL);
+    // Remove any pending notifications (assume we're on the same thread as
+    // any potential mp_dispatch_queue_process() callers).
+    if (cache->wakeup_dispatch_queue) {
+        mp_dispatch_cancel_fn(cache->wakeup_dispatch_queue,
+                              cache->wakeup_dispatch_cb,
+                              cache->wakeup_dispatch_cb_ctx);
+    }
+
+    cache->wakeup_dispatch_queue = NULL;
+    cache->wakeup_dispatch_cb = NULL;
+    cache->wakeup_dispatch_cb_ctx = NULL;
+
+    if (cb) {
+        cache->wakeup_dispatch_queue = dispatch;
+        cache->wakeup_dispatch_cb = cb;
+        cache->wakeup_dispatch_cb_ctx = cb_ctx;
+        m_config_cache_set_wakeup_cb(cache, dispatch_notify, cache);
     }
 }
 

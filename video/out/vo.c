@@ -167,6 +167,8 @@ struct vo_internal {
     int opt_framedrop;
 };
 
+extern const struct m_sub_options gl_video_conf;
+
 static void forget_frames(struct vo *vo);
 static void *vo_thread(void *ptr);
 
@@ -210,10 +212,33 @@ static void dispatch_wakeup_cb(void *ptr)
     vo_wakeup(vo);
 }
 
+static void update_opts(void *p)
+{
+    struct vo *vo = p;
+
+    if (m_config_cache_update(vo->opts_cache)) {
+        // "Legacy" update of video position related options.
+        if (vo->driver->control)
+            vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
+    }
+
+    if (vo->gl_opts_cache && m_config_cache_update(vo->gl_opts_cache))
+    {
+        // "Legacy" update of video GL renderer related options.
+        if (vo->driver->control)
+            vo->driver->control(vo, VOCTRL_UPDATE_RENDER_OPTS, NULL);
+    }
+}
+
 // Does not include thread- and VO uninit.
 static void dealloc_vo(struct vo *vo)
 {
     forget_frames(vo); // implicitly synchronized
+
+    // These must be free'd before vo->in->dispatch.
+    talloc_free(vo->opts_cache);
+    talloc_free(vo->gl_opts_cache);
+
     pthread_mutex_destroy(&vo->in->lock);
     pthread_cond_destroy(&vo->in->wakeup);
     talloc_free(vo);
@@ -254,8 +279,17 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     pthread_mutex_init(&vo->in->lock, NULL);
     pthread_cond_init(&vo->in->wakeup, NULL);
 
-    vo->opts_cache = m_config_cache_alloc(vo, global, &vo_sub_opts);
+    vo->opts_cache = m_config_cache_alloc(NULL, global, &vo_sub_opts);
     vo->opts = vo->opts_cache->opts;
+
+    m_config_cache_set_dispatch_change_cb(vo->opts_cache, vo->in->dispatch,
+                                          update_opts, vo);
+
+#if HAVE_GL
+    vo->gl_opts_cache = m_config_cache_alloc(NULL, global, &gl_video_conf);
+    m_config_cache_set_dispatch_change_cb(vo->gl_opts_cache, vo->in->dispatch,
+                                          update_opts, vo);
+#endif
 
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)

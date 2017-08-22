@@ -59,6 +59,7 @@ struct mp_dispatch_item {
     mp_dispatch_fn fn;
     void *fn_data;
     bool asynchronous;
+    bool mergeable;
     bool completed;
     struct mp_dispatch_item *next;
 };
@@ -113,12 +114,25 @@ static void mp_dispatch_append(struct mp_dispatch_queue *queue,
                                struct mp_dispatch_item *item)
 {
     pthread_mutex_lock(&queue->lock);
+    if (item->mergeable) {
+        for (struct mp_dispatch_item *cur = queue->head; cur; cur = cur->next) {
+            if (cur->mergeable && cur->fn == item->fn &&
+                cur->fn_data == item->fn_data)
+            {
+                talloc_free(item);
+                pthread_mutex_unlock(&queue->lock);
+                return;
+            }
+        }
+    }
+
     if (queue->tail) {
         queue->tail->next = item;
     } else {
         queue->head = item;
     }
     queue->tail = item;
+
     // Wake up the main thread; note that other threads might wait on this
     // condition for reasons, so broadcast the condition.
     pthread_cond_broadcast(&queue->cond);
@@ -127,6 +141,7 @@ static void mp_dispatch_append(struct mp_dispatch_queue *queue,
     if (!queue->wakeup_fn)
         queue->interrupted = true;
     pthread_mutex_unlock(&queue->lock);
+
     if (queue->wakeup_fn)
         queue->wakeup_fn(queue->wakeup_ctx);
 }
@@ -163,6 +178,47 @@ void mp_dispatch_enqueue_autofree(struct mp_dispatch_queue *queue,
         .asynchronous = true,
     };
     mp_dispatch_append(queue, item);
+}
+
+// Like mp_dispatch_enqueue(), but
+void mp_dispatch_enqueue_notify(struct mp_dispatch_queue *queue,
+                                mp_dispatch_fn fn, void *fn_data)
+{
+    struct mp_dispatch_item *item = talloc_ptrtype(NULL, item);
+    *item = (struct mp_dispatch_item){
+        .fn = fn,
+        .fn_data = fn_data,
+        .mergeable = true,
+        .asynchronous = true,
+    };
+    mp_dispatch_append(queue, item);
+}
+
+// Remove already queued item. Only items enqueued with the following functions
+// can be canceled:
+//  - mp_dispatch_enqueue()
+//  - mp_dispatch_enqueue_notify()
+// Items which were enqueued, and which are currently executing, can not be
+// canceled anymore. This function is mostly for being called from the same
+// context as mp_dispatch_queue_process(), where the "currently executing" case
+// can be excluded.
+void mp_dispatch_cancel_fn(struct mp_dispatch_queue *queue,
+                           mp_dispatch_fn fn, void *fn_data)
+{
+    pthread_mutex_lock(&queue->lock);
+    struct mp_dispatch_item **pcur = &queue->head;
+    queue->tail = NULL;
+    while (*pcur) {
+        struct mp_dispatch_item *cur = *pcur;
+        if (cur->fn == fn && cur->fn_data == fn_data) {
+            *pcur = cur->next;
+            talloc_free(cur);
+        } else {
+            queue->tail = cur;
+            pcur = &cur->next;
+        }
+    }
+    pthread_mutex_unlock(&queue->lock);
 }
 
 // Run fn(fn_data) on the target thread synchronously. This function enqueues
