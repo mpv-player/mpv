@@ -966,8 +966,8 @@ Video
 
         Works in ``--no-correct-pts`` mode only.
 
-``--deinterlace=<yes|no|auto>``
-    Enable or disable interlacing (default: auto, which usually means no).
+``--deinterlace=<yes|no>``
+    Enable or disable interlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
     fast movement. Enabling this typically inserts the yadif video filter in
     order to deinterlace the video, or lets the video output apply deinterlacing
@@ -976,10 +976,11 @@ Video
     This behaves exactly like the ``deinterlace`` input property (usually
     mapped to ``d``).
 
-    ``auto`` is a technicality. Strictly speaking, the default for this option
-    is deinterlacing disabled, but the ``auto`` case is needed if ``yadif`` was
-    added to the filter chain manually with ``--vf``. Then the core shouldn't
-    disable deinterlacing just because the ``--deinterlace`` was not set.
+    Keep in mind that this **will** conflict with manually inserted
+    deinterlacing filters, unless you take care. (Since mpv 0.27.0, even the
+    hardware deinterlace filters will conflict. Also since that version,
+    ``--deinterlace=auto`` was removed, which used to mean that the default
+    interlacing option of possibly inserted video filters was used.)
 
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.

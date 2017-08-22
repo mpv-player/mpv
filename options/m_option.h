@@ -397,7 +397,8 @@ struct m_option {
 // The following are also part of the M_OPT_* flags, and are used to update
 // certain groups of options.
 #define UPDATE_OPT_FIRST        (1 << 7)
-#define UPDATE_TERM             (1 << 7) // terminal options
+#define UPDATE_TERM             (1 << 7)  // terminal options
+#define UPDATE_DEINT            (1 << 8)  // --deinterlace
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides

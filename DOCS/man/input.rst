@@ -2167,12 +2167,6 @@ caveats with some properties (due to historical reasons):
 
     Option changes at runtime are affected by this as well.
 
-``deinterlace``
-    While video is active, this behaves differently from the option. It will
-    never return the ``auto`` value (but the state as observed by the video
-    chain). If you set ``auto``, the property will set this as the option value,
-    and will return the actual video chain state as observed instead of auto.
-
 ``video-aspect``
     While video is active, always returns the effective aspect ratio. Setting
     a special value (like ``no``, values ``<= 0``) will make the property

@@ -44,6 +44,21 @@ Interface changes
       deprecation was to make sure no API user gets broken by a sudden behavior
       change)
     - remove previously deprecated vf_eq
+    - remove that hardware deinterlace filters (vavpp, d3d11vpp, vdpaupp)
+      changed their deinterlacing-enabled setting depending on what the
+      --deinterlace option or property was set to. Now, a filter always does
+      what its filter options and defaults imply. The --deinterlace option and
+      property strictly add/remove its own filters. For example, if you run
+      "mpv --vf=vavpp --deinterlace=yes", this will insert another, redundant
+      filter, which is probably not what you want. For toggling a deinterlace
+      filter manually, use the "vf toggle" command, and do not set the
+      deinterlace option/property. To customize the filter that will be
+      inserted automatically, use the "@deinterlace" filter label with
+      --vf-defaults. Details how this works will probably change in the future.
+    - remove deinterlace=auto (this was not deprecated, but had only a very
+      obscure use that stopped working with the change above. It was also
+      prone to be confused with a feature not implemented by it: auto did _not_
+      mean that deinterlacing was enabled on demand.)
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

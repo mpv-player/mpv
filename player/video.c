@@ -13,8 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stddef.h>
@@ -70,18 +68,6 @@ static const char av_desync_help_text[] =
 "position will not match to the video (see A-V status field).\n"
 "\n";
 
-// Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.
-int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
-{
-    if (vo_c->vf->initialized > 0) {
-        int r = vf_control_any(vo_c->vf, vf_cmd, data);
-        if (r != CONTROL_UNKNOWN)
-            return r;
-    }
-
-    return CONTROL_UNKNOWN;
-}
-
 static void set_allowed_vo_formats(struct vo_chain *vo_c)
 {
     vo_query_formats(vo_c->vo, vo_c->vf->allowed_output_formats);
@@ -111,16 +97,6 @@ static bool check_output_format(struct vo_chain *vo_c, int imgfmt)
 
 static int probe_deint_filters(struct vo_chain *vo_c)
 {
-#if HAVE_GPL
-    // Usually, we prefer inserting/removing deint filters. But If there's VO
-    // support, or the user inserted a filter that supports swichting deint and
-    // that has no VF_DEINTERLACE_LABEL, or if the filter was auto-inserted
-    // for other reasons and supports switching deint (like vf_d3d11vpp), then
-    // use the runtime switching method.
-    if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){1}) == CONTROL_OK)
-        return 0;
-#endif
-
     if (check_output_format(vo_c, IMGFMT_VDPAU)) {
         char *args[5] = {"deint", "yes"};
         int pref = 0;
@@ -165,12 +141,6 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
             return;
     }
 
-#if HAVE_GPL
-    // Make sure to reset this even if runtime deint switching is used.
-    if (mpctx->opts->deinterlace >= 0)
-        video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
-#endif
-
     if (params.rotate) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90) || params.rotate % 90) {
             // Try to insert a rotation filter.
@@ -191,45 +161,20 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
         }
     }
 
-    if (mpctx->opts->deinterlace == 1)
+    if (mpctx->opts->deinterlace)
         probe_deint_filters(vo_c);
 }
 
-static void recreate_auto_filters(struct MPContext *mpctx)
+void recreate_auto_filters(struct MPContext *mpctx)
 {
+    if (!mpctx->vo_chain)
+        return;
+
     filter_reconfig(mpctx, mpctx->vo_chain);
 
     mp_force_video_refresh(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-}
-
-int get_deinterlacing(struct MPContext *mpctx)
-{
-    struct vo_chain *vo_c = mpctx->vo_chain;
-    int enabled = 0;
-#if HAVE_GPL
-    if (video_vf_vo_control(vo_c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
-        enabled = -1;
-#endif
-    if (enabled < 0) {
-        // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
-        if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL))
-            enabled = 1;
-    }
-    return enabled;
-}
-
-void set_deinterlacing(struct MPContext *mpctx, int opt_val)
-{
-    if ((opt_val < 0 && mpctx->opts->deinterlace == opt_val) ||
-        (opt_val == (get_deinterlacing(mpctx) > 0)))
-        return;
-
-    mpctx->opts->deinterlace = opt_val;
-    recreate_auto_filters(mpctx);
-    if (opt_val >= 0)
-        mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)

@@ -368,14 +368,7 @@ static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 
 static int control(struct vf_instance *vf, int request, void* data)
 {
-    struct vf_priv_s *p = vf->priv;
     switch (request){
-    case VFCTRL_GET_DEINTERLACE:
-        *(int*)data = !!p->do_deint;
-        return true;
-    case VFCTRL_SET_DEINTERLACE:
-        p->do_deint = *(int*)data;
-        return true;
     case VFCTRL_SEEK_RESET:
         flush_frames(vf);
         return true;

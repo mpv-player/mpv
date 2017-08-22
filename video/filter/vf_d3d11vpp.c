@@ -465,12 +465,6 @@ static int control(struct vf_instance *vf, int request, void* data)
 {
     struct vf_priv_s *p = vf->priv;
     switch (request){
-    case VFCTRL_GET_DEINTERLACE:
-        *(int*)data = !!p->deint_enabled;
-        return true;
-    case VFCTRL_SET_DEINTERLACE:
-        p->deint_enabled = !!*(int*)data;
-        return true;
     case VFCTRL_SEEK_RESET:
         flush_frames(vf);
         return true;

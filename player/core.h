@@ -612,7 +612,6 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts);
 // video.c
 int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
 int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
-int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_video_chain(struct MPContext *mpctx);
@@ -624,8 +623,7 @@ void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
-int get_deinterlacing(struct MPContext *mpctx);
-void set_deinterlacing(struct MPContext *mpctx, int opt_val);
+void recreate_auto_filters(struct MPContext *mpctx);
 
 // Values of MPOpts.softvol
 enum {

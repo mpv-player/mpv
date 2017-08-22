@@ -2481,29 +2481,6 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, name);
 }
 
-#if HAVE_GPL
-// Possibly GPL due to 7b25afd7423e9056782993cbd1b32ead64ac1462.
-static int mp_property_deinterlace(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->vo_chain)
-        return mp_property_generic_option(mpctx, prop, action, arg);
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int *)arg = get_deinterlacing(mpctx) > 0;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_CONSTRICTED_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        set_deinterlacing(mpctx, *(int *)arg);
-        return M_PROPERTY_OK;
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-#endif
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -4005,9 +3982,6 @@ static const struct m_property mp_properties_base[] = {
 
     // Video
     {"fullscreen", mp_property_fullscreen},
-#if HAVE_GPL
-    {"deinterlace", mp_property_deinterlace},
-#endif
     {"taskbar-progress", mp_property_taskbar_progress},
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
@@ -5815,6 +5789,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
+
+    if (flags & UPDATE_DEINT)
+        recreate_auto_filters(mpctx);
 
     if (flags & UPDATE_OSD) {
         osd_changed(mpctx->osd);
