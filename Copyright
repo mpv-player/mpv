@@ -283,7 +283,6 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/filter/vf_crop.c          will be deleted
     video/filter/vf_d3d11vpp.c      LGPL
     video/filter/vf_dsize.c         will be deleted
-    video/filter/vf_eq.c            will be deleted
     video/filter/vf_expand.c        will be deleted
     video/filter/vf_flip.c          will be deleted
     video/filter/vf_format.c        will be deleted

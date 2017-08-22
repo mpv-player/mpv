@@ -359,7 +359,6 @@ def build(ctx):
         ( "video/filter/vf_crop.c" ),
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
         ( "video/filter/vf_dsize.c" ),
-        ( "video/filter/vf_eq.c" ),
         ( "video/filter/vf_expand.c" ),
         ( "video/filter/vf_flip.c" ),
         ( "video/filter/vf_format.c" ),

@@ -43,6 +43,7 @@ Interface changes
     - undeprecate --loop, and map it from --loop-playlist to --loop-file (the
       deprecation was to make sure no API user gets broken by a sudden behavior
       change)
+    - remove previously deprecated vf_eq
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

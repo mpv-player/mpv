@@ -47,7 +47,6 @@ extern const vf_info_t vf_info_noformat;
 extern const vf_info_t vf_info_flip;
 extern const vf_info_t vf_info_rotate;
 extern const vf_info_t vf_info_mirror;
-extern const vf_info_t vf_info_eq;
 extern const vf_info_t vf_info_gradfun;
 extern const vf_info_t vf_info_dsize;
 extern const vf_info_t vf_info_pullup;
@@ -81,7 +80,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_yadif,
     &vf_info_stereo3d,
 
-    &vf_info_eq,
     &vf_info_dsize,
     &vf_info_sub,
     &vf_info_buffer,

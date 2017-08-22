@@ -484,32 +484,6 @@ Available mpv-only filters are:
             ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
                 forces a specific threading configuration.
 
-``eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]``
-    Software equalizer that uses lookup tables (slow), allowing gamma correction
-    in addition to simple brightness and contrast adjustment. The parameters are
-    given as floating point values.
-
-    ``<0.1-10>``
-        initial gamma value (default: 1.0)
-    ``<-2-2>``
-        initial contrast, where negative values result in a negative image
-        (default: 1.0)
-    ``<-1-1>``
-        initial brightness (default: 0.0)
-    ``<0-3>``
-        initial saturation (default: 1.0)
-    ``<0.1-10>``
-        gamma value for the red component (default: 1.0)
-    ``<0.1-10>``
-        gamma value for the green component (default: 1.0)
-    ``<0.1-10>``
-        gamma value for the blue component (default: 1.0)
-    ``<0-1>``
-        The weight parameter can be used to reduce the effect of a high gamma
-        value on bright image areas, e.g. keep them from getting overamplified
-        and just plain white. A value of 0.0 turns the gamma correction all
-        the way down while 1.0 leaves it at its full strength (default: 1.0).
-
 ``pullup[=jl:jr:jt:jb:sb:mp]``
     Pulldown reversal (inverse telecine) filter, capable of handling mixed
     hard-telecine, 24000/1001 fps progressive, and 30000/1001 fps progressive
