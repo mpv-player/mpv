@@ -165,9 +165,6 @@ void gl_video_resize(struct gl_video *p,
 void gl_video_set_fb_depth(struct gl_video *p, int fb_depth);
 struct voctrl_performance_data;
 void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out);
-struct mp_csp_equalizer;
-struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
-void gl_video_eq_update(struct gl_video *p);
 void gl_video_set_clear_color(struct gl_video *p, struct m_color color);
 void gl_video_set_osd_pts(struct gl_video *p, double pts);
 bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *osd,

@@ -76,8 +76,6 @@ struct mpv_opengl_cb_context {
     bool force_update;
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
     bool update_new_opts;
-    bool eq_changed;
-    struct mp_csp_equalizer eq;
     struct vo *active;
 
     // --- This is only mutable while initialized=false, during which nothing
@@ -187,10 +185,6 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
     pthread_mutex_lock(&ctx->lock);
-    // We don't know the exact caps yet - use a known superset
-    ctx->eq.capabilities = MP_CSP_EQ_CAPS_GAMMA | MP_CSP_EQ_CAPS_BRIGHTNESS |
-                           MP_CSP_EQ_CAPS_COLORMATRIX;
-    ctx->eq_changed = true;
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         ctx->imgfmt_supported[n - IMGFMT_START] =
             gl_video_check_format(ctx->renderer, n);
@@ -277,7 +271,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     if (ctx->reconfigured) {
         gl_video_set_osd_source(ctx->renderer, vo ? vo->osd : NULL);
         gl_video_config(ctx->renderer, &ctx->img_params);
-        ctx->eq_changed = true;
     }
     if (ctx->update_new_opts) {
         gl_video_update_options(ctx->renderer);
@@ -300,13 +293,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         if (ctx->cur_frame)
             ctx->cur_frame->still = true;
     }
-
-    struct mp_csp_equalizer *eq = gl_video_eq_ptr(ctx->renderer);
-    if (ctx->eq_changed) {
-        memcpy(eq->values, ctx->eq.values, sizeof(eq->values));
-        gl_video_eq_update(ctx->renderer);
-    }
-    ctx->eq_changed = false;
 
     struct vo_frame *frame = ctx->next_frame;
     int64_t wait_present_count = ctx->present_count;
@@ -469,24 +455,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
         return VO_TRUE;
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        pthread_mutex_lock(&p->ctx->lock);
-        bool r = mp_csp_equalizer_get(&p->ctx->eq, args->name, args->valueptr) >= 0;
-        pthread_mutex_unlock(&p->ctx->lock);
-        return r ? VO_TRUE : VO_NOTIMPL;
-    }
-    case VOCTRL_SET_EQUALIZER: {
-        struct voctrl_set_equalizer_args *args = data;
-        pthread_mutex_lock(&p->ctx->lock);
-        bool r = mp_csp_equalizer_set(&p->ctx->eq, args->name, args->value) >= 0;
-        if (r) {
-            p->ctx->eq_changed = true;
-            update(p);
-        }
-        pthread_mutex_unlock(&p->ctx->lock);
-        return r ? VO_TRUE : VO_NOTIMPL;
-    }
+    case VOCTRL_SET_EQUALIZER:
+        vo->want_redraw = true;
+        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->force_update = true;
@@ -535,8 +506,6 @@ static int preinit(struct vo *vo)
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
     p->ctx->update_new_opts = true;
-    memset(p->ctx->eq.values, 0, sizeof(p->ctx->eq.values));
-    p->ctx->eq_changed = true;
     pthread_mutex_unlock(&p->ctx->lock);
 
     vo->hwdec_devs = p->ctx->hwdec_devs;

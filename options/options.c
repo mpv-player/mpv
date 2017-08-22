@@ -572,15 +572,7 @@ const m_option_t mp_opts[] = {
                .deprecation_message = "use Lua scripting instead"),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
 
-#if HAVE_GPL
-    OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
-    OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
-    OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
-    OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
-    OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
-    OPT_CHOICE_C("video-output-levels", video_output_levels, 0,
-                 mp_csp_levels_names),
-#endif
+    OPT_SUBSTRUCT("", video_equalizer, mp_csp_equalizer_conf, 0),
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
@@ -856,11 +848,6 @@ const struct MPOpts mp_default_opts = {
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
-    .gamma_gamma = 0,
-    .gamma_brightness = 0,
-    .gamma_contrast = 0,
-    .gamma_saturation = 0,
-    .gamma_hue = 0,
     .video_osd = 1,
     .osd_level = 1,
     .osd_duration = 1000,

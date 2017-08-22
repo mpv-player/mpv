@@ -262,22 +262,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         resize(p);
         return VO_TRUE;
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        struct mp_csp_equalizer *eq = gl_video_eq_ptr(p->renderer);
-        bool r = mp_csp_equalizer_get(eq, args->name, args->valueptr) >= 0;
-        return r ? VO_TRUE : VO_NOTIMPL;
-    }
-    case VOCTRL_SET_EQUALIZER: {
-        struct voctrl_set_equalizer_args *args = data;
-        struct mp_csp_equalizer *eq = gl_video_eq_ptr(p->renderer);
-        if (mp_csp_equalizer_set(eq, args->name, args->value) >= 0) {
-            gl_video_eq_update(p->renderer);
-            vo->want_redraw = true;
-            return VO_TRUE;
-        }
-        return VO_NOTIMPL;
-    }
+    case VOCTRL_SET_EQUALIZER:
+        vo->want_redraw = true;
+        return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN: {
         struct mp_image *screen = gl_read_fbo_contents(p->gl, p->glctx->main_fb,
                                                        vo->dwidth, vo->dheight);

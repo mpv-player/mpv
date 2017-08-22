@@ -31,6 +31,7 @@
 
 #include "mp_image.h"
 #include "csputils.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 
 const struct m_opt_choice_alternatives mp_csp_names[] = {
@@ -94,15 +95,6 @@ const struct m_opt_choice_alternatives mp_csp_light_names[] = {
     {"709-1886",    MP_CSP_LIGHT_SCENE_709_1886},
     {"gamma1.2",    MP_CSP_LIGHT_SCENE_1_2},
     {0}
-};
-
-const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
-    "brightness",
-    "contrast",
-    "hue",
-    "saturation",
-    "gamma",
-    "output-levels",
 };
 
 const struct m_opt_choice_alternatives mp_chroma_names[] = {
@@ -817,9 +809,25 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.sig_peak == c2.sig_peak;
 }
 
+#define OPT_BASE_STRUCT struct mp_csp_equalizer_opts
+
+const struct m_sub_options mp_csp_equalizer_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_INTRANGE("brightness", values[MP_CSP_EQ_BRIGHTNESS], 0, -100, 100),
+        OPT_INTRANGE("saturation", values[MP_CSP_EQ_SATURATION], 0, -100, 100),
+        OPT_INTRANGE("contrast", values[MP_CSP_EQ_CONTRAST], 0, -100, 100),
+        OPT_INTRANGE("hue", values[MP_CSP_EQ_HUE], 0, -100, 100),
+        OPT_INTRANGE("gamma", values[MP_CSP_EQ_GAMMA], 0, -100, 100),
+        OPT_CHOICE_C("video-output-levels", values[MP_CSP_EQ_OUTPUT_LEVELS], 0,
+                     mp_csp_levels_names),
+        {0}
+    },
+    .size = sizeof(struct mp_csp_equalizer_opts),
+};
+
 // Copy settings from eq into params.
 void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
-                                  const struct mp_csp_equalizer *eq)
+                                  const struct mp_csp_equalizer_opts *eq)
 {
     params->brightness = eq->values[MP_CSP_EQ_BRIGHTNESS] / 100.0;
     params->contrast = (eq->values[MP_CSP_EQ_CONTRAST] + 100) / 100.0;
@@ -829,37 +837,28 @@ void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
     params->levels_out = eq->values[MP_CSP_EQ_OUTPUT_LEVELS];
 }
 
-static int find_eq(int capabilities, const char *name)
+struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,
+                                                    struct mpv_global *global)
 {
-    for (int i = 0; i < MP_CSP_EQ_COUNT; i++) {
-        if (strcmp(name, mp_csp_equalizer_names[i]) == 0)
-            return ((1 << i) & capabilities) ? i : -1;
-    }
-    return -1;
+    struct m_config_cache *c = m_config_cache_alloc(ta_parent, global,
+                                                    &mp_csp_equalizer_conf);
+    // The terrible, terrible truth.
+    return (struct mp_csp_equalizer_state *)c;
 }
 
-int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
-                         int *out_value)
+bool mp_csp_equalizer_state_changed(struct mp_csp_equalizer_state *state)
 {
-    int index = find_eq(eq->capabilities, property);
-    if (index < 0)
-        return -1;
-
-    *out_value = eq->values[index];
-
-    return 0;
+    struct m_config_cache *c = (struct m_config_cache *)state;
+    return m_config_cache_update(c);
 }
 
-int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
-                         int value)
+void mp_csp_equalizer_state_get(struct mp_csp_equalizer_state *state,
+                                struct mp_csp_params *params)
 {
-    int index = find_eq(eq->capabilities, property);
-    if (index < 0)
-        return 0;
-
-    eq->values[index] = value;
-
-    return 1;
+    struct m_config_cache *c = (struct m_config_cache *)state;
+    m_config_cache_update(c);
+    struct mp_csp_equalizer_opts *opts = c->opts;
+    mp_csp_copy_equalizer_values(params, opts);
 }
 
 void mp_invert_cmat(struct mp_cmat *out, struct mp_cmat *in)

@@ -70,37 +70,6 @@ static const char av_desync_help_text[] =
 "position will not match to the video (see A-V status field).\n"
 "\n";
 
-#if HAVE_GPL
-int video_set_colors(struct vo_chain *vo_c, const char *item, int value)
-{
-    vf_equalizer_t data;
-
-    data.item = item;
-    data.value = value;
-
-    MP_VERBOSE(vo_c, "set video colors %s=%d \n", item, value);
-    if (video_vf_vo_control(vo_c, VFCTRL_SET_EQUALIZER, &data) == CONTROL_TRUE)
-        return 1;
-    MP_VERBOSE(vo_c, "Video attribute '%s' is not supported by selected vo.\n",
-               item);
-    return 0;
-}
-
-int video_get_colors(struct vo_chain *vo_c, const char *item, int *value)
-{
-    vf_equalizer_t data;
-
-    data.item = item;
-
-    MP_VERBOSE(vo_c, "get video colors %s \n", item);
-    if (video_vf_vo_control(vo_c, VFCTRL_GET_EQUALIZER, &data) == CONTROL_TRUE) {
-        *value = data.value;
-        return 1;
-    }
-    return 0;
-}
-#endif
-
 // Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.
 int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
 {
@@ -110,26 +79,6 @@ int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
             return r;
     }
 
-    switch (vf_cmd) {
-    case VFCTRL_SET_EQUALIZER: {
-        vf_equalizer_t *eq = data;
-        if (!vo_c->vo->config_ok)
-            return CONTROL_FALSE;                       // vo not configured?
-        struct voctrl_set_equalizer_args param = {
-            eq->item, eq->value
-        };
-        return vo_control(vo_c->vo, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
-    }
-    case VFCTRL_GET_EQUALIZER: {
-        vf_equalizer_t *eq = data;
-        if (!vo_c->vo->config_ok)
-            return CONTROL_FALSE;                       // vo not configured?
-        struct voctrl_get_equalizer_args param = {
-            eq->item, &eq->value
-        };
-        return vo_control(vo_c->vo, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
-    }
-    }
     return CONTROL_UNKNOWN;
 }
 
@@ -980,28 +929,6 @@ static void update_av_diff(struct MPContext *mpctx, double offset)
     }
 }
 
-static void init_vo(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct vo_chain *vo_c = mpctx->vo_chain;
-
-#if HAVE_GPL
-    if (opts->gamma_gamma != 0)
-        video_set_colors(vo_c, "gamma", opts->gamma_gamma);
-    if (opts->gamma_brightness != 0)
-        video_set_colors(vo_c, "brightness", opts->gamma_brightness);
-    if (opts->gamma_contrast != 0)
-        video_set_colors(vo_c, "contrast", opts->gamma_contrast);
-    if (opts->gamma_saturation != 0)
-        video_set_colors(vo_c, "saturation", opts->gamma_saturation);
-    if (opts->gamma_hue != 0)
-        video_set_colors(vo_c, "hue", opts->gamma_hue);
-    video_set_colors(vo_c, "output-levels", opts->video_output_levels);
-#endif
-
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-}
-
 double calc_average_frame_duration(struct MPContext *mpctx)
 {
     double total = 0;
@@ -1445,7 +1372,7 @@ void write_video(struct MPContext *mpctx)
             mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto error;
         }
-        init_vo(mpctx);
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
 
     mpctx->time_frame -= get_relative_time(mpctx);

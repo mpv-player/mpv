@@ -185,7 +185,6 @@ typedef struct d3d_priv {
     D3DFORMAT osd_fmt_table[SUBBITMAP_COUNT];
 
     D3DMATRIX d3d_colormatrix;
-    struct mp_csp_equalizer video_eq;
 
     struct osdpart *osd[MAX_OSD_PARTS];
 } d3d_priv;
@@ -1171,7 +1170,6 @@ static void update_colorspace(d3d_priv *priv)
 {
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_set_image_params(&csp, &priv->params);
-    mp_csp_copy_equalizer_values(&csp, &priv->video_eq);
 
     if (priv->use_shaders) {
         csp.input_bits = priv->planes[0].bits_per_pixel;
@@ -1245,23 +1243,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         d3d_draw_frame(priv);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER: {
-        if (!priv->use_shaders)
-            break;
-        struct voctrl_set_equalizer_args *args = data;
-        if (mp_csp_equalizer_set(&priv->video_eq, args->name, args->value) < 0)
-            return VO_NOTIMPL;
-        update_colorspace(priv);
-        vo->want_redraw = true;
-        return VO_TRUE;
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        if (!priv->use_shaders)
-            break;
-        struct voctrl_get_equalizer_args *args = data;
-        return mp_csp_equalizer_get(&priv->video_eq, args->name, args->valueptr)
-               >= 0 ? VO_TRUE : VO_NOTIMPL;
-    }
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
         priv->vo->want_redraw = true;

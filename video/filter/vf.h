@@ -141,15 +141,8 @@ struct vf_chain {
     void *wakeup_callback_ctx;
 };
 
-typedef struct vf_seteq {
-    const char *item;
-    int value;
-} vf_equalizer_t;
-
 enum vf_ctrl {
     VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
-    VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
-    VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
 #if HAVE_GPL
     VFCTRL_SET_DEINTERLACE,  // Set deinterlacing status
     VFCTRL_GET_DEINTERLACE,  // Get deinterlacing status

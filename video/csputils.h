@@ -185,6 +185,8 @@ enum mp_chroma_location {
 
 extern const struct m_opt_choice_alternatives mp_chroma_names[];
 
+extern const struct m_sub_options mp_csp_equalizer_conf;
+
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,
     MP_CSP_EQ_CONTRAST,
@@ -195,27 +197,22 @@ enum mp_csp_equalizer_param {
     MP_CSP_EQ_COUNT,
 };
 
-#define MP_CSP_EQ_CAPS_COLORMATRIX \
-    ( (1 << MP_CSP_EQ_BRIGHTNESS) \
-    | (1 << MP_CSP_EQ_CONTRAST) \
-    | (1 << MP_CSP_EQ_HUE) \
-    | (1 << MP_CSP_EQ_SATURATION) \
-    | (1 << MP_CSP_EQ_OUTPUT_LEVELS) )
-
-#define MP_CSP_EQ_CAPS_GAMMA (1 << MP_CSP_EQ_GAMMA)
-#define MP_CSP_EQ_CAPS_BRIGHTNESS (1 << MP_CSP_EQ_BRIGHTNESS)
-
-extern const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT];
-
 // Default initialization with 0 is enough, except for the capabilities field
-struct mp_csp_equalizer {
-    // Bit field of capabilities. For example (1 << MP_CSP_EQ_HUE) means hue
-    // support is available.
-    int capabilities;
+struct mp_csp_equalizer_opts {
     // Value for each property is in the range [-100, 100].
     // 0 is default, meaning neutral or no change.
     int values[MP_CSP_EQ_COUNT];
 };
+
+void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
+                                  const struct mp_csp_equalizer_opts *eq);
+
+struct mpv_global;
+struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,
+                                                    struct mpv_global *global);
+bool mp_csp_equalizer_state_changed(struct mp_csp_equalizer_state *state);
+void mp_csp_equalizer_state_get(struct mp_csp_equalizer_state *state,
+                                struct mp_csp_params *params);
 
 struct mp_csp_col_xy {
     float x, y;
@@ -232,13 +229,6 @@ static inline float mp_xy_Z(struct mp_csp_col_xy xy) {
 struct mp_csp_primaries {
     struct mp_csp_col_xy red, green, blue, white;
 };
-
-void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
-                                  const struct mp_csp_equalizer *eq);
-int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
-                         int value);
-int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
-                         int *out_value);
 
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace);
 enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);

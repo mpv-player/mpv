@@ -878,15 +878,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER: {
-        vo->want_redraw = true;
-        struct voctrl_set_equalizer_args *args = data;
-        return xv_set_eq(vo, ctx->xv_port, args->name, args->value);
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        return xv_get_eq(vo, ctx->xv_port, args->name, args->valueptr);
-    }
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, ctx->original_image);
         return true;

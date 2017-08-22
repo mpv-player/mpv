@@ -242,7 +242,7 @@ struct gl_video {
     // state for configured scalers
     struct scaler scaler[SCALER_COUNT];
 
-    struct mp_csp_equalizer video_eq;
+    struct mp_csp_equalizer_state *video_eq;
 
     struct mp_rect src_rect;    // displayed part of the source video
     struct mp_rect dst_rect;    // video rectangle on output window
@@ -847,13 +847,6 @@ static void init_video(struct gl_video *p)
     check_gl_features(p);
 
     mp_image_params_guess_csp(&p->image_params);
-
-    int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->image_params.color.space != MP_CSP_BT_2020_C)
-        eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
-    if (p->image_params.color.space == MP_CSP_XYZ)
-        eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
-    p->video_eq.capabilities = eq_caps;
 
     av_lfg_init(&p->lfg, 1);
 
@@ -2173,7 +2166,7 @@ static void pass_convert_yuv(struct gl_video *p)
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     cparams.gray = p->is_gray;
     mp_csp_set_image_params(&cparams, &p->image_params);
-    mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
+    mp_csp_equalizer_state_get(p->video_eq, &cparams);
     p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
 
     pass_describe(p, "color conversion");
@@ -3582,6 +3575,7 @@ struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
         .global = g,
         .log = log,
         .sc = gl_sc_create(ra, g, log),
+        .video_eq = mp_csp_equalizer_create(p, g),
         .opts_cache = m_config_cache_alloc(p, g, &gl_video_conf),
     };
     // make sure this variable is initialized to *something*
@@ -3674,16 +3668,6 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
     vo_set_queue_params(vo, 0, queue_size);
 }
 
-struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
-{
-    return &p->video_eq;
-}
-
-// Call when the mp_csp_equalizer returned by gl_video_eq_ptr() was changed.
-void gl_video_eq_update(struct gl_video *p)
-{
-}
-
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param)
 {
@@ -3758,7 +3742,6 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux)
         float gamma = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, lux);
         MP_VERBOSE(p, "ambient light changed: %dlux (gamma: %f)\n", lux, gamma);
         p->opts.gamma = MPMIN(1.0, 1.961 / gamma);
-        gl_video_eq_update(p);
     }
 }
 

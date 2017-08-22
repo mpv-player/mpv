@@ -119,13 +119,7 @@ typedef struct MPOpts {
     char *media_title;
     int force_rgba_osd;
 
-    // ranges -100 - 100, 1000 if the vo default should be used
-    int gamma_gamma;
-    int gamma_brightness;
-    int gamma_contrast;
-    int gamma_saturation;
-    int gamma_hue;
-    int video_output_levels;
+    struct mp_csp_equalizer_opts *video_equalizer;
 
     int stop_screensaver;
     int cursor_autohide_delay;

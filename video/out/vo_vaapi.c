@@ -434,103 +434,11 @@ static void draw_osd(struct vo *vo)
     osd_draw(vo->osd, *res, pts, 0, osd_formats, draw_osd_cb, p);
 }
 
-static int get_displayattribtype(const char *name)
-{
-    if (!strcmp(name, "brightness"))
-        return VADisplayAttribBrightness;
-    else if (!strcmp(name, "contrast"))
-        return VADisplayAttribContrast;
-    else if (!strcmp(name, "saturation"))
-        return VADisplayAttribSaturation;
-    else if (!strcmp(name, "hue"))
-        return VADisplayAttribHue;
-    return -1;
-}
-
-static int get_display_attribute(struct priv *p, const char *name)
-{
-    int type = get_displayattribtype(name);
-    for (int n = 0; n < p->va_num_display_attrs; n++) {
-        VADisplayAttribute *attr = &p->va_display_attrs[n];
-        if (attr->type == type)
-            return n;
-    }
-    return -1;
-}
-
-static int mp_eq_to_va(VADisplayAttribute * const attr, int mpvalue)
-{
-    /* normalize to attribute value range */
-    int r = attr->max_value - attr->min_value;
-    if (r == 0)
-        return INT_MIN; // assume INT_MIN is outside allowed min/max range
-    return ((mpvalue + 100) * r + 100) / 200 + attr->min_value;
-}
-
-static int get_equalizer(struct priv *p, const char *name, int *value)
-{
-    int index = get_display_attribute(p, name);
-    if (index < 0)
-        return VO_NOTIMPL;
-
-    VADisplayAttribute *attr = &p->va_display_attrs[index];
-
-    if (!(attr->flags & VA_DISPLAY_ATTRIB_GETTABLE))
-        return VO_NOTIMPL;
-
-    /* normalize to -100 .. 100 range */
-    int r = attr->max_value - attr->min_value;
-    if (r == 0)
-        return VO_NOTIMPL;
-
-    *value = ((attr->value - attr->min_value) * 200 + r / 2) / r - 100;
-    if (mp_eq_to_va(attr, p->mp_display_attr[index]) == attr->value)
-        *value = p->mp_display_attr[index];
-
-    return VO_TRUE;
-}
-
-static int set_equalizer(struct priv *p, const char *name, int value)
-{
-    VAStatus status;
-    int index = get_display_attribute(p, name);
-    if (index < 0)
-        return VO_NOTIMPL;
-
-    VADisplayAttribute *attr = &p->va_display_attrs[index];
-
-    if (!(attr->flags & VA_DISPLAY_ATTRIB_SETTABLE))
-        return VO_NOTIMPL;
-
-    int r = mp_eq_to_va(attr, value);
-    if (r == INT_MIN)
-        return VO_NOTIMPL;
-
-    attr->value = r;
-    p->mp_display_attr[index] = value;
-
-    MP_VERBOSE(p, "Changing '%s' (range [%d, %d]) to %d\n", name,
-               attr->max_value, attr->min_value, attr->value);
-
-    status = vaSetDisplayAttributes(p->display, attr, 1);
-    if (!CHECK_VA_STATUS(p, "vaSetDisplayAttributes()"))
-        return VO_FALSE;
-    return VO_TRUE;
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_SET_EQUALIZER: {
-        struct voctrl_set_equalizer_args *eq = data;
-        return set_equalizer(p, eq->name, eq->value);
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *eq = data;
-        return get_equalizer(p, eq->name, eq->valueptr);
-    }
     case VOCTRL_REDRAW_FRAME:
         p->output_surface = p->visible_surface;
         draw_osd(vo);
