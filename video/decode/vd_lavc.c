@@ -557,6 +557,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;
+    ctx->hwdec_failed = false;
+    ctx->hwdec_request_reinit = false;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
     if (!ctx->avctx)
@@ -653,6 +655,7 @@ static void reset_avctx(struct dec_video *vd)
     if (ctx->avctx && avcodec_is_open(ctx->avctx))
         avcodec_flush_buffers(ctx->avctx);
     ctx->flushing = false;
+    ctx->hwdec_request_reinit = false;
 }
 
 static void flush_all(struct dec_video *vd)
