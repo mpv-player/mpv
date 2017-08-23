@@ -252,8 +252,8 @@ bool mp_aframe_set_format(struct mp_aframe *frame, int format)
 {
     if (mp_aframe_is_allocated(frame))
         return false;
-    enum AVSampleFormat av_format = frame->av_frame->format;
-    if (av_format == AV_SAMPLE_FMT_NONE && frame->format) {
+    enum AVSampleFormat av_format = af_to_avformat(format);
+    if (av_format == AV_SAMPLE_FMT_NONE && format) {
         if (!af_fmt_is_spdif(format))
             return false;
         av_format = AV_SAMPLE_FMT_S16;
