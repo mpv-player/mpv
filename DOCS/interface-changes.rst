@@ -53,8 +53,8 @@ Interface changes
       filter, which is probably not what you want. For toggling a deinterlace
       filter manually, use the "vf toggle" command, and do not set the
       deinterlace option/property. To customize the filter that will be
-      inserted automatically, use the "@deinterlace" filter label with
-      --vf-defaults. Details how this works will probably change in the future.
+      inserted automatically, use --vf-defaults. Details how this works will
+      probably change in the future.
     - remove deinterlace=auto (this was not deprecated, but had only a very
       obscure use that stopped working with the change above. It was also
       prone to be confused with a feature not implemented by it: auto did _not_
