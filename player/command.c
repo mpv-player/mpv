@@ -1805,9 +1805,6 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
             .max = opts->softvol_max,
         };
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET_NEUTRAL:
-        *(float *)arg = 100;
-        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         *(char **)arg = talloc_asprintf(NULL, "%i", (int)opts->softvol_volume);
         return M_PROPERTY_OK;
@@ -4301,6 +4298,8 @@ static const struct property_osd_display {
     int osd_progbar;
     // Needs special ways to display the new value (seeks are delayed)
     int seek_msg, seek_bar;
+    // Show a marker thing on OSD bar. Ignored if osd_progbar==0.
+    float marker;
     // Free-form message (if NULL, osd_name or the property name is used)
     const char *msg;
 } property_osd_display[] = {
@@ -4315,10 +4314,10 @@ static const struct property_osd_display {
     // audio
     { "volume", "Volume",
       .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
-      .osd_progbar = OSD_VOLUME },
+      .osd_progbar = OSD_VOLUME, .marker = 100 },
     { "ao-volume", "AO Volume",
       .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
-      .osd_progbar = OSD_VOLUME },
+      .osd_progbar = OSD_VOLUME, .marker = 100 },
     { "mute", "Mute" },
     { "ao-mute", "AO Mute" },
     { "audio-delay", "A-V delay" },
@@ -4416,13 +4415,15 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
     if ((osd_mode & MP_ON_OSD_BAR) && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         if (prop.type == CONF_TYPE_INT) {
             int n = prop.min;
-            mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
+            if (disp.osd_progbar)
+                n = disp.marker;
             int i;
             if (mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0)
                 set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
             float n = prop.min;
-            mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
+            if (disp.osd_progbar)
+                n = disp.marker;
             float f;
             if (mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0)
                 set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, f);
