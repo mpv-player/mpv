@@ -200,6 +200,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
         {AV_PIX_FMT_NONE}
     },
 };
@@ -217,6 +218,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
         {AV_PIX_FMT_NONE}
     },
 };
@@ -230,6 +232,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .set_hwframes = true,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_YUV420P},
         {AV_PIX_FMT_NONE}
     },
 };
@@ -245,6 +248,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
     .create_dev = vdpau_create_standalone,
     .pixfmt_map = (const enum AVPixelFormat[][2]) {
         {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_YUV420P},
+        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_YUV420P},
         {AV_PIX_FMT_NONE}
     },
 };
