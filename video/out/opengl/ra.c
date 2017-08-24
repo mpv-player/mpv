@@ -132,35 +132,31 @@ const struct ra_format *ra_find_uint_format(struct ra *ra,
 
 // Find a float format of any precision that matches the C type of the same
 // size for upload.
+// May drop bits from the mantissa (such as selecting float16 even if
+// bytes_per_component == 32); prefers possibly faster formats first.
 static const struct ra_format *ra_find_float_format(struct ra *ra,
                                                     int bytes_per_component,
                                                     int n_components)
 {
-    // Assumes ra_format are ordered by quality.
+    // Assumes ra_format are ordered by performance.
+    // The >=16 check is to avoid catching fringe formats.
     for (int n = 0; n < ra->num_formats; n++) {
         const struct ra_format *fmt = ra->formats[n];
         if (fmt->ctype == RA_CTYPE_FLOAT && fmt->num_components == n_components &&
             fmt->pixel_size == bytes_per_component * n_components &&
+            fmt->component_depth[0] >= 16 &&
             fmt->linear_filter && ra_format_is_regular(fmt))
             return fmt;
     }
     return NULL;
 }
 
-// Return a filterable regular format that uses float16 internally, but does 32 bit
-// transfer. (This is just so we don't need 32->16 bit conversion on CPU,
-// which would be ok but messy.)
+// Return a filterable regular format that uses at least float16 internally, and
+// uses a normal C float for transfer on the CPU side. (This is just so we don't
+// need 32->16 bit conversion on CPU, which would be messy.)
 const struct ra_format *ra_find_float16_format(struct ra *ra, int n_components)
 {
-    for (int n = 0; n < ra->num_formats; n++) {
-        const struct ra_format *fmt = ra->formats[n];
-        if (fmt->ctype == RA_CTYPE_FLOAT && fmt->num_components == n_components &&
-            fmt->pixel_size == sizeof(float) * n_components &&
-            fmt->component_depth[0] == 16 &&
-            fmt->linear_filter && ra_format_is_regular(fmt))
-            return fmt;
-    }
-    return NULL;
+    return ra_find_float_format(ra, sizeof(float), n_components);
 }
 
 const struct ra_format *ra_find_named_format(struct ra *ra, const char *name)
