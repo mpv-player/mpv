@@ -463,7 +463,6 @@ static bool test_conversion(int in, int out)
 
 static int control(struct vf_instance *vf, int request, void* data)
 {
-    struct vf_priv_s *p = vf->priv;
     switch (request){
     case VFCTRL_SEEK_RESET:
         flush_frames(vf);

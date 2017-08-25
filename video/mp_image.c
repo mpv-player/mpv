@@ -30,6 +30,7 @@
 
 #include "mpv_talloc.h"
 
+#include "config.h"
 #include "common/common.h"
 #include "mp_image.h"
 #include "sws_utils.h"
