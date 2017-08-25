@@ -452,7 +452,14 @@ local function add_file(s)
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
         append_property(s, "media-title", {prefix="Title:"})
     end
-    append_property(s, "chapter", {prefix="Chapter:"})
+
+    local ch_index = mp.get_property_number("chapter")
+    if ch_index and ch_index >= 0 then
+        append_property(s, "chapter-list/" .. tostring(ch_index) .. "/title", {prefix="Chapter:"})
+        append_property(s, "chapter-list/count",
+                        {prefix="(" .. tostring(ch_index + 1) .. "/", suffix=")", nl="",
+                         indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
     if append_property(s, "cache-used", {prefix="Cache:"}) then
         append_property(s, "demuxer-cache-duration",
                         {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
