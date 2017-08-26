@@ -182,6 +182,7 @@ struct ra_renderpass_input {
     int dim_v;              // vector dimension (1 for non-vector and non-matrix)
     int dim_m;              // additional matrix dimension (dim_v x dim_m)
     // Vertex data: byte offset of the attribute into the vertex struct
+    size_t offset;
     // RA_VARTYPE_TEX: texture unit
     // RA_VARTYPE_IMG_W: image unit
     // RA_VARTYPE_BUF_* buffer binding point
