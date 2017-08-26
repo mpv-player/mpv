@@ -45,6 +45,7 @@ enum {
     RA_CAP_DIRECT_UPLOAD  = 1 << 4, // supports tex_upload without ra_buf
     RA_CAP_BUF_RW         = 1 << 5, // supports RA_VARTYPE_BUF_RW
     RA_CAP_NESTED_ARRAY   = 1 << 6, // supports nested arrays
+    RA_CAP_SHARED_BINDING = 1 << 7, // sampler/image/buffer namespaces are disjoint
 };
 
 enum ra_ctype {
@@ -174,6 +175,7 @@ enum ra_vartype {
                                 // ra_tex.params.storage_dst must be true
     RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
     RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: buffer block
+    RA_VARTYPE_COUNT
 };
 
 // Represents a uniform, texture input parameter, and similar things.
@@ -189,6 +191,8 @@ struct ra_renderpass_input {
     // RA_VARTYPE_IMG_W: image unit
     // RA_VARTYPE_BUF_* buffer binding point
     // Other uniforms: unused
+    // If RA_CAP_SHARED_BINDING is set, these may only be unique per input type.
+    // Otherwise, these must be unique for all input values.
     int binding;
 };
 
