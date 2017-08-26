@@ -893,18 +893,20 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         }
         break;
     }
-    case RA_VARTYPE_IMG_W: /* fall through */
+    case RA_VARTYPE_IMG_W: {
+        struct ra_tex *tex = *(struct ra_tex **)val->data;
+        struct ra_tex_gl *tex_gl = tex->priv;
+        assert(tex->params.storage_dst);
+        gl->BindImageTexture(input->binding, tex_gl->texture, 0, GL_FALSE, 0,
+                             GL_WRITE_ONLY, tex_gl->internal_format);
+        break;
+    }
     case RA_VARTYPE_TEX: {
         struct ra_tex *tex = *(struct ra_tex **)val->data;
         struct ra_tex_gl *tex_gl = tex->priv;
         assert(tex->params.render_src);
-        if (input->type == RA_VARTYPE_TEX) {
-            gl->ActiveTexture(GL_TEXTURE0 + input->binding);
-            gl->BindTexture(tex_gl->target, tex_gl->texture);
-        } else {
-            gl->BindImageTexture(input->binding, tex_gl->texture, 0, GL_FALSE, 0,
-                                 GL_WRITE_ONLY, tex_gl->internal_format);
-        }
+        gl->ActiveTexture(GL_TEXTURE0 + input->binding);
+        gl->BindTexture(tex_gl->target, tex_gl->texture);
         break;
     }
     case RA_VARTYPE_BUF_RW: {
