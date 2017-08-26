@@ -128,7 +128,8 @@ struct ra_tex_upload_params {
     // Uploading from buffer:
     struct ra_buf *buf; // Buffer to upload from (mutually exclusive with `src`)
     size_t buf_offset;  // Start of data within buffer (bytes)
-    // Uploading directly: (requires RA_CAP_DIRECT_UPLOAD)
+    // Uploading directly: (Note: If RA_CAP_DIRECT_UPLOAD is not set, then this
+    // will be internally translated to a tex_upload buffer by the RA)
     const void *src;    // Address of data
     // For 2D textures only:
     struct mp_rect *rc; // Region to upload. NULL means entire image
