@@ -277,6 +277,7 @@ void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
 void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
                 char *format, ...)
 {
+    assert(sc->ra->caps & RA_CAP_BUF_RW);
     gl_sc_enable_extension(sc, "GL_ARB_shader_storage_buffer_object");
 
     struct sc_uniform *u = find_uniform(sc, name);
@@ -525,6 +526,10 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
         case RA_VARTYPE_TEX:
         case RA_VARTYPE_IMG_W:
             ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);
+            break;
+        case RA_VARTYPE_BUF_RO:
+            ADD(dst, "layout(std140, binding=%d) uniform %s { %s };\n",
+                u->input.binding, u->input.name, u->buffer_format);
             break;
         case RA_VARTYPE_BUF_RW:
             ADD(dst, "layout(std430, binding=%d) buffer %s { %s };\n",
