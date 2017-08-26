@@ -628,7 +628,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (shader && sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
             gl->glsl_version = glsl_major * 100 + glsl_minor;
         // restrict GLSL version to be forwards compatible
-        gl->glsl_version = MPMIN(gl->glsl_version, 430);
+        gl->glsl_version = MPMIN(gl->glsl_version, 440);
     }
 
     if (is_software_gl(gl)) {
