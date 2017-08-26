@@ -97,6 +97,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     static const int caps_map[][2] = {
         {RA_CAP_DIRECT_UPLOAD,      0},
         {RA_CAP_SHARED_BINDING,     0},
+        {RA_CAP_GLOBAL_UNIFORM,     0},
         {RA_CAP_TEX_1D,             MPGL_CAP_1D_TEX},
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
