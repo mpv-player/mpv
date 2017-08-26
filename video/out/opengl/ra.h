@@ -43,9 +43,10 @@ enum {
     RA_CAP_BLIT           = 1 << 2, // supports ra_fns.blit
     RA_CAP_COMPUTE        = 1 << 3, // supports compute shaders
     RA_CAP_DIRECT_UPLOAD  = 1 << 4, // supports tex_upload without ra_buf
-    RA_CAP_BUF_RW         = 1 << 5, // supports RA_VARTYPE_BUF_RW
-    RA_CAP_NESTED_ARRAY   = 1 << 6, // supports nested arrays
-    RA_CAP_SHARED_BINDING = 1 << 7, // sampler/image/buffer namespaces are disjoint
+    RA_CAP_BUF_RO         = 1 << 5, // supports RA_VARTYPE_BUF_RO
+    RA_CAP_BUF_RW         = 1 << 6, // supports RA_VARTYPE_BUF_RW
+    RA_CAP_NESTED_ARRAY   = 1 << 7, // supports nested arrays
+    RA_CAP_SHARED_BINDING = 1 << 8, // sampler/image/buffer namespaces are disjoint
 };
 
 enum ra_ctype {
@@ -140,8 +141,9 @@ struct ra_tex_upload_params {
 // operation, although it shouldn't technically prohibit anything
 enum ra_buf_type {
     RA_BUF_TYPE_INVALID,
-    RA_BUF_TYPE_TEX_UPLOAD, // texture upload buffer (pixel buffer object)
-    RA_BUF_TYPE_SHADER_STORAGE // shader buffer, used for RA_VARTYPE_BUF_RW
+    RA_BUF_TYPE_TEX_UPLOAD,     // texture upload buffer (pixel buffer object)
+    RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
+    RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
 };
 
 struct ra_buf_params {
@@ -175,7 +177,10 @@ enum ra_vartype {
                                 // write-only (W) image for compute shaders
                                 // ra_tex.params.storage_dst must be true
     RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
-    RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: buffer block
+    RA_VARTYPE_BUF_RO,          // C: ra_buf*, GLSL: uniform buffer block
+                                // buf type must be RA_BUF_TYPE_UNIFORM
+    RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: shader storage buffer block
+                                // buf type must be RA_BUF_TYPE_SHADER_STORAGE
     RA_VARTYPE_COUNT
 };
 

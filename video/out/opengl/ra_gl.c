@@ -101,6 +101,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
+        {RA_CAP_BUF_RO,             MPGL_CAP_UBO},
         {RA_CAP_BUF_RW,             MPGL_CAP_SSBO},
     };
 
@@ -533,6 +534,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
     switch (params->type) {
     case RA_BUF_TYPE_TEX_UPLOAD:     buf_gl->target = GL_PIXEL_UNPACK_BUFFER;   break;
     case RA_BUF_TYPE_SHADER_STORAGE: buf_gl->target = GL_SHADER_STORAGE_BUFFER; break;
+    case RA_BUF_TYPE_UNIFORM:        buf_gl->target = GL_UNIFORM_BUFFER;        break;
     default: abort();
     };
 
@@ -559,6 +561,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
         switch (params->type) {
         case RA_BUF_TYPE_TEX_UPLOAD:     hint = GL_STREAM_DRAW; break;
         case RA_BUF_TYPE_SHADER_STORAGE: hint = GL_STREAM_COPY; break;
+        case RA_BUF_TYPE_UNIFORM:        hint = GL_STATIC_DRAW; break;
         default: abort();
         }
 
@@ -914,11 +917,14 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         gl->BindTexture(tex_gl->target, tex_gl->texture);
         break;
     }
+    case RA_VARTYPE_BUF_RO: // fall through
     case RA_VARTYPE_BUF_RW: {
         struct ra_buf *buf = *(struct ra_buf **)val->data;
         struct ra_buf_gl *buf_gl = buf->priv;
-        gl->BindBufferBase(GL_SHADER_STORAGE_BUFFER, input->binding, buf_gl->buffer);
-        gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        gl->BindBufferBase(buf_gl->target, input->binding, buf_gl->buffer);
+        // SSBOs are not implicitly coherent in OpengL
+        if (input->type == RA_VARTYPE_BUF_RW)
+            gl->MemoryBarrier(buf_gl->target);
         break;
     }
     default:

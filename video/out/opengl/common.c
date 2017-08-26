@@ -352,6 +352,11 @@ static const struct gl_functions gl_functions[] = {
         },
     },
     {
+        .ver_core = 310,
+        .extension = "GL_ARB_uniform_buffer_object",
+        .provides = MPGL_CAP_UBO,
+    },
+    {
         .ver_core = 430,
         .extension = "GL_ARB_shader_storage_buffer_object",
         .provides = MPGL_CAP_SSBO,
