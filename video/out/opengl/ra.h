@@ -90,6 +90,7 @@ struct ra_tex_params {
     const struct ra_format *format;
     bool render_src;        // must be useable as source texture in a shader
     bool render_dst;        // must be useable as target texture in a shader
+    bool storage_dst;       // must be usable as a storage image (RA_VARTYPE_IMG_W)
     bool blit_src;          // must be usable as a blit source
     bool blit_dst;          // must be usable as a blit destination
     bool host_mutable;      // texture may be updated with tex_upload
@@ -170,6 +171,7 @@ enum ra_vartype {
                                 // ra_tex.params.render_src must be true
     RA_VARTYPE_IMG_W,           // C: ra_tex*, GLSL: various image types
                                 // write-only (W) image for compute shaders
+                                // ra_tex.params.storage_dst must be true
     RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
     RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: buffer block
 };
