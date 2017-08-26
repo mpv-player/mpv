@@ -91,21 +91,26 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     ra_gl_set_debug(ra, true);
 
     ra->fns = &ra_fns_gl;
-    ra->caps = RA_CAP_DIRECT_UPLOAD;
-    if (gl->mpgl_caps & MPGL_CAP_1D_TEX)
-        ra->caps |= RA_CAP_TEX_1D;
-    if (gl->mpgl_caps & MPGL_CAP_3D_TEX)
-        ra->caps |= RA_CAP_TEX_3D;
-    if (gl->BlitFramebuffer)
-        ra->caps |= RA_CAP_BLIT;
-    if (gl->mpgl_caps & MPGL_CAP_COMPUTE_SHADER)
-        ra->caps |= RA_CAP_COMPUTE;
-    if (gl->mpgl_caps & MPGL_CAP_NESTED_ARRAY)
-        ra->caps |= RA_CAP_NESTED_ARRAY;
-    if (gl->mpgl_caps & MPGL_CAP_SSBO)
-        ra->caps |= RA_CAP_BUF_RW;
     ra->glsl_version = gl->glsl_version;
     ra->glsl_es = gl->es > 0;
+
+    static const int caps_map[][2] = {
+        {RA_CAP_DIRECT_UPLOAD,      0},
+        {RA_CAP_SHARED_BINDING,     0},
+        {RA_CAP_TEX_1D,             MPGL_CAP_1D_TEX},
+        {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
+        {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
+        {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
+        {RA_CAP_BUF_RW,             MPGL_CAP_SSBO},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(caps_map); i++) {
+        if ((gl->mpgl_caps & caps_map[i][1]) == caps_map[i][1])
+            ra->caps |= caps_map[i][0];
+    }
+
+    if (gl->BlitFramebuffer)
+        ra->caps |= RA_CAP_BLIT;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
 

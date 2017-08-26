@@ -58,9 +58,10 @@ struct gl_shader_cache {
     bstr prelude_text;
     bstr header_text;
     bstr text;
-    int next_texture_unit;
-    int next_image_unit;
-    int next_buffer_binding;
+
+    // Next binding point (texture unit, image unit, buffer binding, etc.)
+    // In OpenGL these are separate for each input type
+    int next_binding[RA_VARTYPE_COUNT];
 
     struct ra_renderpass_params params;
 
@@ -113,9 +114,8 @@ static void gl_sc_reset(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free((void *)sc->uniforms[n].input.name);
     sc->num_uniforms = 0;
-    sc->next_texture_unit = 1; // not 0, as 0 is "free for use"
-    sc->next_image_unit = 1;
-    sc->next_buffer_binding = 1;
+    for (int i = 0; i < RA_VARTYPE_COUNT; i++)
+        sc->next_binding[i] = 0;
     sc->current_shader = NULL;
     sc->params = (struct ra_renderpass_params){0};
     sc->needs_reset = false;
@@ -230,6 +230,15 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
     return &sc->uniforms[sc->num_uniforms - 1];
 }
 
+static int gl_sc_next_binding(struct gl_shader_cache *sc, enum ra_vartype type)
+{
+    if (sc->ra->caps & RA_CAP_SHARED_BINDING) {
+        return sc->next_binding[type]++;
+    } else {
+        return sc->next_binding[0]++;
+    }
+}
+
 void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
                            struct ra_tex *tex)
 {
@@ -249,7 +258,7 @@ void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_TEX;
     u->glsl_type = glsl_type;
-    u->input.binding = sc->next_texture_unit++;
+    u->input.binding = gl_sc_next_binding(sc, u->input.type);
     u->v.tex = tex;
 }
 
@@ -261,7 +270,7 @@ void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_IMG_W;
     u->glsl_type = "writeonly image2D";
-    u->input.binding = sc->next_image_unit++;
+    u->input.binding = gl_sc_next_binding(sc, u->input.type);
     u->v.tex = tex;
 }
 
@@ -273,7 +282,7 @@ void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_BUF_RW;
     u->glsl_type = "";
-    u->input.binding = sc->next_buffer_binding++;
+    u->input.binding = gl_sc_next_binding(sc, u->input.type);
     u->v.buf = buf;
 
     va_list ap;
