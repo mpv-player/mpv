@@ -43,8 +43,11 @@ enum {
     RA_CAP_BLIT           = 1 << 2, // supports ra_fns.blit
     RA_CAP_COMPUTE        = 1 << 3, // supports compute shaders
     RA_CAP_DIRECT_UPLOAD  = 1 << 4, // supports tex_upload without ra_buf
-    RA_CAP_BUF_RW         = 1 << 5, // supports RA_VARTYPE_BUF_RW
-    RA_CAP_NESTED_ARRAY   = 1 << 6, // supports nested arrays
+    RA_CAP_BUF_RO         = 1 << 5, // supports RA_VARTYPE_BUF_RO
+    RA_CAP_BUF_RW         = 1 << 6, // supports RA_VARTYPE_BUF_RW
+    RA_CAP_NESTED_ARRAY   = 1 << 7, // supports nested arrays
+    RA_CAP_SHARED_BINDING = 1 << 8, // sampler/image/buffer namespaces are disjoint
+    RA_CAP_GLOBAL_UNIFORM = 1 << 9, // supports using "naked" uniforms (not UBO)
 };
 
 enum ra_ctype {
@@ -90,6 +93,7 @@ struct ra_tex_params {
     const struct ra_format *format;
     bool render_src;        // must be useable as source texture in a shader
     bool render_dst;        // must be useable as target texture in a shader
+    bool storage_dst;       // must be usable as a storage image (RA_VARTYPE_IMG_W)
     bool blit_src;          // must be usable as a blit source
     bool blit_dst;          // must be usable as a blit destination
     bool host_mutable;      // texture may be updated with tex_upload
@@ -126,7 +130,8 @@ struct ra_tex_upload_params {
     // Uploading from buffer:
     struct ra_buf *buf; // Buffer to upload from (mutually exclusive with `src`)
     size_t buf_offset;  // Start of data within buffer (bytes)
-    // Uploading directly: (requires RA_CAP_DIRECT_UPLOAD)
+    // Uploading directly: (Note: If RA_CAP_DIRECT_UPLOAD is not set, then this
+    // will be internally translated to a tex_upload buffer by the RA)
     const void *src;    // Address of data
     // For 2D textures only:
     struct mp_rect *rc; // Region to upload. NULL means entire image
@@ -137,8 +142,9 @@ struct ra_tex_upload_params {
 // operation, although it shouldn't technically prohibit anything
 enum ra_buf_type {
     RA_BUF_TYPE_INVALID,
-    RA_BUF_TYPE_TEX_UPLOAD, // texture upload buffer (pixel buffer object)
-    RA_BUF_TYPE_SHADER_STORAGE // shader buffer, used for RA_VARTYPE_BUF_RW
+    RA_BUF_TYPE_TEX_UPLOAD,     // texture upload buffer (pixel buffer object)
+    RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
+    RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
 };
 
 struct ra_buf_params {
@@ -170,8 +176,13 @@ enum ra_vartype {
                                 // ra_tex.params.render_src must be true
     RA_VARTYPE_IMG_W,           // C: ra_tex*, GLSL: various image types
                                 // write-only (W) image for compute shaders
+                                // ra_tex.params.storage_dst must be true
     RA_VARTYPE_BYTE_UNORM,      // C: uint8_t, GLSL: int, vec* (vertex data only)
-    RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: buffer block
+    RA_VARTYPE_BUF_RO,          // C: ra_buf*, GLSL: uniform buffer block
+                                // buf type must be RA_BUF_TYPE_UNIFORM
+    RA_VARTYPE_BUF_RW,          // C: ra_buf*, GLSL: shader storage buffer block
+                                // buf type must be RA_BUF_TYPE_SHADER_STORAGE
+    RA_VARTYPE_COUNT
 };
 
 // Represents a uniform, texture input parameter, and similar things.
@@ -182,10 +193,13 @@ struct ra_renderpass_input {
     int dim_v;              // vector dimension (1 for non-vector and non-matrix)
     int dim_m;              // additional matrix dimension (dim_v x dim_m)
     // Vertex data: byte offset of the attribute into the vertex struct
+    size_t offset;
     // RA_VARTYPE_TEX: texture unit
     // RA_VARTYPE_IMG_W: image unit
     // RA_VARTYPE_BUF_* buffer binding point
     // Other uniforms: unused
+    // If RA_CAP_SHARED_BINDING is set, these may only be unique per input type.
+    // Otherwise, these must be unique for all input values.
     int binding;
 };
 

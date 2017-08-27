@@ -174,6 +174,7 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         .src_linear = true,
         .render_src = true,
         .render_dst = true,
+        .storage_dst = true,
         .blit_src = true,
     };
 

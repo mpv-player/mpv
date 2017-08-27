@@ -156,7 +156,7 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
 
         gl->EnableVertexAttribArray(n);
         gl->VertexAttribPointer(n, e->dim_v, type, normalized,
-                                vao->stride, (void *)(intptr_t)e->binding);
+                                vao->stride, (void *)(intptr_t)e->offset);
     }
 }
 
