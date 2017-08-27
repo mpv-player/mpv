@@ -335,12 +335,12 @@ struct ra_fns {
 
     void (*tex_destroy)(struct ra *ra, struct ra_tex *tex);
 
-    // Copy the contents of a buffer to a texture. This is an extremely common
-    // operation. The contents of the buffer must exactly match the format of
-    // the image - conversions between bit depth etc. are not supported.
-    // The buffer *may* be marked as "in use" while this operation is going on,
-    // and the contents must not be touched again by the API user until
-    // buf_poll returns true. Returns whether successful.
+    // Upload data to a texture. This is an extremely common operation. When
+    // using a buffer, the contants of the buffer must exactly match the image
+    // - conversions between bit depth etc. are not supported. The buffer *may*
+    // be marked as "in use" while this operation is going on, and the contents
+    // must not be touched again by the API user until buf_poll returns true.
+    // Returns whether successful.
     bool (*tex_upload)(struct ra *ra, const struct ra_tex_upload_params *params);
 
     // Create a buffer. This can be used as a persistently mapped buffer,
