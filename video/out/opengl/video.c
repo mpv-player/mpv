@@ -1597,23 +1597,18 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
     int size = scaler->kernel->size;
-    int elems_per_pixel = 4;
-    if (size == 1) {
-        elems_per_pixel = 1;
-    } else if (size == 2) {
-        elems_per_pixel = 2;
-    } else if (size == 6) {
-        elems_per_pixel = 3;
-    }
-    int width = size / elems_per_pixel;
-    assert(size == width * elems_per_pixel);
-    const struct ra_format *fmt = ra_find_float16_format(p->ra, elems_per_pixel);
+    int num_components = size > 2 ? 4 : size;
+    const struct ra_format *fmt = ra_find_float16_format(p->ra, num_components);
     assert(fmt);
+
+    int width = (size + num_components - 1) / num_components; // round up
+    int stride = width * num_components;
+    assert(size <= stride);
 
     scaler->lut_size = 1 << p->opts.scaler_lut_size;
 
-    float *weights = talloc_array(NULL, float, scaler->lut_size * size);
-    mp_compute_lut(scaler->kernel, scaler->lut_size, weights);
+    float *weights = talloc_array(NULL, float, scaler->lut_size * stride);
+    mp_compute_lut(scaler->kernel, scaler->lut_size, stride, weights);
 
     bool use_1d = scaler->kernel->polar && (p->ra->caps & RA_CAP_TEX_1D);
 

@@ -41,27 +41,16 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
                                               struct scaler *scaler)
 {
     gl_sc_uniform_texture(sc, "lut", scaler->lut);
-    // Define a new variable to cache the corrected fcoord.
-    GLSLF("float fcoord_lut = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
+    GLSLF("float ypos = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
     int N = scaler->kernel->size;
-    if (N == 2) {
-        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).rg;)
-        GLSL(float weights[2] = float[](c1.r, c1.g);)
-    } else if (N == 6) {
-        GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord_lut));)
-        GLSL(vec4 c2 = texture(lut, vec2(0.75, fcoord_lut));)
-        GLSL(float weights[6] = float[](c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);)
-    } else {
-        GLSLF("float weights[%d];\n", N);
-        for (int n = 0; n < N / 4; n++) {
-            GLSLF("c = texture(lut, vec2(1.0 / %d.0 + %d.0 / %d.0, fcoord_lut));\n",
-                    N / 2, n, N / 4);
-            GLSLF("weights[%d] = c.r;\n", n * 4 + 0);
-            GLSLF("weights[%d] = c.g;\n", n * 4 + 1);
-            GLSLF("weights[%d] = c.b;\n", n * 4 + 2);
-            GLSLF("weights[%d] = c.a;\n", n * 4 + 3);
-        }
+    int width = (N + 3) / 4; // round up
+
+    GLSLF("float weights[%d];\n", N);
+    for (int i = 0; i < N; i++) {
+        if (i % 4 == 0)
+            GLSLF("c = texture(lut, vec2(%f, ypos));\n", (i / 4 + 0.5) / width);
+        GLSLF("weights[%d] = c[%d];\n", i, i % 4);
     }
 }
 
