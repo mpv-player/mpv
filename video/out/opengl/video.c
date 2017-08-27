@@ -569,10 +569,10 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 3);
+    const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 4);
     if (!fmt || !(p->ra->caps & RA_CAP_TEX_3D)) {
         p->use_lut_3d = false;
-        MP_WARN(p, "Disabling color management (no RGB16 3D textures).\n");
+        MP_WARN(p, "Disabling color management (no RGBA16 3D textures).\n");
         return false;
     }
 

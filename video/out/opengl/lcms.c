@@ -370,7 +370,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         return false;
 
     void *tmp = talloc_new(NULL);
-    uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 3);
+    uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 4);
     struct lut3d *lut = NULL;
     cmsContext cms = NULL;
 
@@ -380,7 +380,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         char *cache_info = talloc_asprintf(tmp,
-                "ver=1.3, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
+                "ver=1.4, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
                 "contrast=%d\n",
                 p->opts->intent, s_r, s_g, s_b, prim, trc, p->opts->contrast);
 
@@ -435,7 +435,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     }
 
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_hprofile, TYPE_RGB_16,
-                                                profile, TYPE_RGB_16,
+                                                profile, TYPE_RGBA_16,
                                                 p->opts->intent,
                                                 cmsFLAGS_HIGHRESPRECALC |
                                                 cmsFLAGS_BLACKPOINTCOMPENSATION);
@@ -454,7 +454,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
                 input[r * 3 + 1] = g * 65535 / (s_g - 1);
                 input[r * 3 + 2] = b * 65535 / (s_b - 1);
             }
-            size_t base = (b * s_r * s_g + g * s_r) * 3;
+            size_t base = (b * s_r * s_g + g * s_r) * 4;
             cmsDoTransform(trafo, input, output + base, s_r);
         }
     }
