@@ -142,14 +142,17 @@ static void mp_compute_weights(struct filter_kernel *filter, double f,
 }
 
 // Fill the given array with weights for the range [0.0, 1.0]. The array is
-// interpreted as rectangular array of count * filter->size items.
+// interpreted as rectangular array of count * filter->size items, with a
+// stride of `stride` floats in between each array element. (For polar filters,
+// the `count` indicates the row size and filter->size/stride are ignored)
 //
 // There will be slight sampling error if these weights are used in a OpenGL
 // texture as LUT directly. The sampling point of a texel is located at its
 // center, so out_array[0] will end up at 0.5 / count instead of 0.0.
 // Correct lookup requires a linear coordinate mapping from [0.0, 1.0] to
 // [0.5 / count, 1.0 - 0.5 / count].
-void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
+void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
+                    float *out_array)
 {
     if (filter->polar) {
         filter->radius_cutoff = 0.0;
@@ -165,7 +168,7 @@ void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
         // Compute a 2D array indexed by subpixel position
         for (int n = 0; n < count; n++) {
             mp_compute_weights(filter, n / (double)(count - 1),
-                               out_array + filter->size * n);
+                               out_array + stride * n);
         }
     }
 }
