@@ -82,6 +82,8 @@ struct mp_osd_res {
     double display_par;
 };
 
+bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b);
+
 // 0 <= sub_bitmaps.render_index < MAX_OSD_PARTS
 #define MAX_OSD_PARTS 5
 

@@ -3133,6 +3133,11 @@ void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd)
 {
+    if (mp_rect_equals(&p->src_rect, src) &&
+        mp_rect_equals(&p->dst_rect, dst) &&
+        osd_res_equals(p->osd_rect, *osd))
+        return;
+
     p->src_rect = *src;
     p->dst_rect = *dst;
     p->osd_rect = *osd;
