@@ -230,7 +230,7 @@ bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out)
     }
 
     for (int n = 0; n < ra->num_formats; n++) {
-        if (ra->formats[n]->special_imgfmt == imgfmt) {
+        if (imgfmt && ra->formats[n]->special_imgfmt == imgfmt) {
             res = *ra->formats[n]->special_imgfmt_desc;
             goto supported;
         }
