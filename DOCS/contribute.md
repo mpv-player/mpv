@@ -140,6 +140,8 @@ mpv uses C99 with K&R formatting, with some exceptions.
         ...
     }
     ```
+
+  (If the if body is simple enough, this rule can be skipped.)
 - Remove any trailing whitespace.
 
 General coding
