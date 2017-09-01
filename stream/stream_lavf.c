@@ -79,7 +79,11 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     AVIOContext *avio = s->priv;
     if (!avio)
         return -1;
+#if LIBAVFORMAT_VERSION_MICRO >= 100 && LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 81, 100)
+    int r = avio_read_partial(avio, buffer, max_len);
+#else
     int r = avio_read(avio, buffer, max_len);
+#endif
     return (r <= 0) ? -1 : r;
 }
 
