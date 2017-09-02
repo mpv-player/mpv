@@ -22,7 +22,7 @@
 - (void)setNeedsResize;
 - (void)signalMouseMovement:(NSPoint)point;
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers;
-- (void)putAxis:(int)mpkey delta:(float)delta;
+- (void)putWheel:(int)mpkey delta:(float)delta;
 - (void)putCommand:(char*)cmd;
 - (void)handleFilesArray:(NSArray *)files;
 - (void)didChangeWindowedScreenProfile:(NSNotification *)notification;

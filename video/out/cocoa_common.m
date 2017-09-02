@@ -994,9 +994,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     cocoa_put_key_with_modifiers(mpkey, modifiers);
 }
 
-- (void)putAxis:(int)mpkey delta:(float)delta;
+- (void)putWheel:(int)mpkey delta:(float)delta;
 {
-    mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
+    mp_input_put_wheel(self.vout->input_ctx, mpkey, delta);
 }
 
 - (void)putCommand:(char*)cmd

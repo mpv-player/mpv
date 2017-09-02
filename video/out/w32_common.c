@@ -441,10 +441,10 @@ static void handle_mouse_wheel(struct vo_w32_state *w32, bool horiz, int val)
 {
     int code;
     if (horiz)
-        code = val > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+        code = val > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
     else
-        code = val > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
-    mp_input_put_axis(w32->input_ctx, code | mod_state(w32), abs(val) / 120.);
+        code = val > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
+    mp_input_put_wheel(w32->input_ctx, code | mod_state(w32), abs(val) / 120.);
 }
 
 static void signal_events(struct vo_w32_state *w32, int events)

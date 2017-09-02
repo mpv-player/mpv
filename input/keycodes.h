@@ -98,40 +98,42 @@
 #define MP_KEY_KPENTER  (MP_KEY_KEYPAD+13)
 
 // Mouse events from VOs
-#define MP_MOUSE_BASE    ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY|MP_KEY_EMIT_ON_UP)
-#define MP_MBTN_LEFT     (MP_MOUSE_BASE+0)
-#define MP_MBTN_MID      (MP_MOUSE_BASE+1)
-#define MP_MBTN_RIGHT    (MP_MOUSE_BASE+2)
-#define MP_WHEEL_UP      (MP_MOUSE_BASE+3)
-#define MP_WHEEL_DOWN    (MP_MOUSE_BASE+4)
-#define MP_WHEEL_LEFT    (MP_MOUSE_BASE+5)
-#define MP_WHEEL_RIGHT   (MP_MOUSE_BASE+6)
-#define MP_MBTN_BACK     (MP_MOUSE_BASE+7)
-#define MP_MBTN_FORWARD  (MP_MOUSE_BASE+8)
-#define MP_MBTN9         (MP_MOUSE_BASE+9)
-#define MP_MBTN10        (MP_MOUSE_BASE+10)
-#define MP_MBTN11        (MP_MOUSE_BASE+11)
-#define MP_MBTN12        (MP_MOUSE_BASE+12)
-#define MP_MBTN13        (MP_MOUSE_BASE+13)
-#define MP_MBTN14        (MP_MOUSE_BASE+14)
-#define MP_MBTN15        (MP_MOUSE_BASE+15)
-#define MP_MBTN16        (MP_MOUSE_BASE+16)
-#define MP_MBTN17        (MP_MOUSE_BASE+17)
-#define MP_MBTN18        (MP_MOUSE_BASE+18)
-#define MP_MBTN19        (MP_MOUSE_BASE+19)
-#define MP_MOUSE_END     (MP_MOUSE_BASE+20)
+#define MP_MBTN_BASE     ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY|MP_KEY_EMIT_ON_UP)
+#define MP_MBTN_LEFT     (MP_MBTN_BASE+0)
+#define MP_MBTN_MID      (MP_MBTN_BASE+1)
+#define MP_MBTN_RIGHT    (MP_MBTN_BASE+2)
+#define MP_WHEEL_UP      (MP_MBTN_BASE+3)
+#define MP_WHEEL_DOWN    (MP_MBTN_BASE+4)
+#define MP_WHEEL_LEFT    (MP_MBTN_BASE+5)
+#define MP_WHEEL_RIGHT   (MP_MBTN_BASE+6)
+#define MP_MBTN_BACK     (MP_MBTN_BASE+7)
+#define MP_MBTN_FORWARD  (MP_MBTN_BASE+8)
+#define MP_MBTN9         (MP_MBTN_BASE+9)
+#define MP_MBTN10        (MP_MBTN_BASE+10)
+#define MP_MBTN11        (MP_MBTN_BASE+11)
+#define MP_MBTN12        (MP_MBTN_BASE+12)
+#define MP_MBTN13        (MP_MBTN_BASE+13)
+#define MP_MBTN14        (MP_MBTN_BASE+14)
+#define MP_MBTN15        (MP_MBTN_BASE+15)
+#define MP_MBTN16        (MP_MBTN_BASE+16)
+#define MP_MBTN17        (MP_MBTN_BASE+17)
+#define MP_MBTN18        (MP_MBTN_BASE+18)
+#define MP_MBTN19        (MP_MBTN_BASE+19)
+#define MP_MBTN_END      (MP_MBTN_BASE+20)
 
 #define MP_KEY_IS_MOUSE_BTN_SINGLE(code) \
-    ((code) >= MP_MOUSE_BASE && (code) < MP_MOUSE_END)
+    ((code) >= MP_MBTN_BASE && (code) < MP_MBTN_END)
+#define MP_KEY_IS_WHEEL(code) \
+    ((code) >= MP_WHEEL_UP && (code) < MP_WHEEL_RIGHT)
 
-#define MP_MOUSE_DBL_BASE  ((MP_KEY_BASE+0xC0)|MP_NO_REPEAT_KEY)
-#define MP_MBTN_LEFT_DBL   (MP_MOUSE_DBL_BASE+0)
-#define MP_MBTN_MID_DBL    (MP_MOUSE_DBL_BASE+1)
-#define MP_MBTN_RIGHT_DBL  (MP_MOUSE_DBL_BASE+2)
-#define MP_MOUSE_DBL_END   (MP_MOUSE_DBL_BASE+20)
+#define MP_MBTN_DBL_BASE   ((MP_KEY_BASE+0xC0)|MP_NO_REPEAT_KEY)
+#define MP_MBTN_LEFT_DBL   (MP_MBTN_DBL_BASE+0)
+#define MP_MBTN_MID_DBL    (MP_MBTN_DBL_BASE+1)
+#define MP_MBTN_RIGHT_DBL  (MP_MBTN_DBL_BASE+2)
+#define MP_MBTN_DBL_END    (MP_MBTN_DBL_BASE+20)
 
 #define MP_KEY_IS_MOUSE_BTN_DBL(code) \
-    ((code) >= MP_MOUSE_DBL_BASE && (code) < MP_MOUSE_DBL_END)
+    ((code) >= MP_MBTN_DBL_BASE && (code) < MP_MBTN_DBL_END)
 
 // Apple Remote input module
 #define MP_AR_BASE        (MP_KEY_BASE+0xE0)
@@ -149,17 +151,6 @@
 #define MP_AR_VUP_HOLD    (MP_AR_BASE + 11)
 #define MP_AR_VDOWN       (MP_AR_BASE + 12)
 #define MP_AR_VDOWN_HOLD  (MP_AR_BASE + 13)
-
-// Mouse wheels or touchpad input
-#define MP_AXIS_BASE      (MP_KEY_BASE+0x100)
-#define MP_AXIS_UP        (MP_AXIS_BASE+0)
-#define MP_AXIS_DOWN      (MP_AXIS_BASE+1)
-#define MP_AXIS_LEFT      (MP_AXIS_BASE+2)
-#define MP_AXIS_RIGHT     (MP_AXIS_BASE+3)
-#define MP_AXIS_END       (MP_AXIS_BASE+4)
-
-#define MP_KEY_IS_AXIS(code) \
-    ((code) >= MP_AXIS_BASE && (code) < MP_AXIS_END)
 
 // Reserved area. Can be used for keys that have no explicit names assigned,
 // but should be mappable by the user anyway.
@@ -183,12 +174,10 @@
 
 // Whether to dispatch the key binding by current mouse position.
 #define MP_KEY_DEPENDS_ON_MOUSE_POS(code) \
-    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_AXIS(code) || \
-     (code) == MP_KEY_MOUSE_MOVE)
+    (MP_KEY_IS_MOUSE_CLICK(code) || (code) == MP_KEY_MOUSE_MOVE)
 
 #define MP_KEY_IS_MOUSE(code) \
-    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_AXIS(code) || \
-     MP_KEY_IS_MOUSE_MOVE(code))
+    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_MOUSE_MOVE(code))
 
 // No input source should generate this.
 #define MP_KEY_UNMAPPED (MP_KEY_INTERN+4)

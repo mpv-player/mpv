@@ -2304,8 +2304,6 @@ mp.set_key_bindings({
                             function(e) process_event("mbtn_right", "down")  end},
     {"wheel_up",            function(e) process_event("wheel_up", "press") end},
     {"wheel_down",          function(e) process_event("wheel_down", "press") end},
-    {"axis_up",             function(e) process_event("wheel_up", "press") end},
-    {"axis_down",           function(e) process_event("wheel_down", "press") end},
     {"mbtn_left_dbl",       "ignore"},
     {"shift+mbtn_left_dbl", "ignore"},
     {"mbtn_right_dbl",      "ignore"},
