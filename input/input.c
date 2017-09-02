@@ -95,7 +95,7 @@ struct cmd_queue {
     struct mp_cmd *first;
 };
 
-struct axis_state {
+struct wheel_state {
     double dead_zone_accum;
     double unit_accum;
 };
@@ -135,11 +135,11 @@ struct input_ctx {
     bool mouse_mangle, mouse_src_mangle;
     struct mp_rect mouse_src, mouse_dst;
 
-    // Axis state (MP_AXIS_*)
-    struct axis_state axis_state_y; // MP_AXIS_UP/MP_AXIS_DOWN
-    struct axis_state axis_state_x; // MP_AXIS_LEFT/MP_AXIS_RIGHT
-    struct axis_state *axis_current; // Points to axis currently being scrolled
-    double last_axis_time; // mp_time_sec() of the last axis event
+    // Wheel state (MP_WHEEL_*)
+    struct wheel_state wheel_state_y; // MP_WHEEL_UP/MP_WHEEL_DOWN
+    struct wheel_state wheel_state_x; // MP_WHEEL_LEFT/MP_WHEEL_RIGHT
+    struct wheel_state *wheel_current; // The direction currently being scrolled
+    double last_wheel_time; // mp_time_sec() of the last wheel event
 
     // List of command binding sections
     struct cmd_bind_section *cmd_bind_sections;
@@ -634,10 +634,10 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
     }
 }
 
-// Pre-processing for MP_AXIS_* events. If this returns false, the caller
+// Pre-processing for MP_WHEEL_* events. If this returns false, the caller
 // should discard the event.
-static bool process_axis(struct input_ctx *ictx, int code, double *scale,
-                         int *scale_units)
+static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
+                          int *scale_units)
 {
     // Size of the deadzone in scroll units. The user must scroll at least this
     // much in any direction before their scroll is registered.
@@ -650,45 +650,45 @@ static bool process_axis(struct input_ctx *ictx, int code, double *scale,
     // sent when the user scrolls slowly.
     static const double UNIT_SCROLL_TIME = 0.5;
 
-    // Determine which axis is being scrolled
+    // Determine which direction is being scrolled
     double dir;
-    struct axis_state *state;
+    struct wheel_state *state;
     switch (code) {
-    case MP_AXIS_UP:    dir = -1; state = &ictx->axis_state_y; break;
-    case MP_AXIS_DOWN:  dir = +1; state = &ictx->axis_state_y; break;
-    case MP_AXIS_LEFT:  dir = -1; state = &ictx->axis_state_x; break;
-    case MP_AXIS_RIGHT: dir = +1; state = &ictx->axis_state_x; break;
+    case MP_WHEEL_UP:    dir = -1; state = &ictx->wheel_state_y; break;
+    case MP_WHEEL_DOWN:  dir = +1; state = &ictx->wheel_state_y; break;
+    case MP_WHEEL_LEFT:  dir = -1; state = &ictx->wheel_state_x; break;
+    case MP_WHEEL_RIGHT: dir = +1; state = &ictx->wheel_state_x; break;
     default:
         return true;
     }
 
     // Reset accumulators if it's determined that the user finished scrolling
     double now = mp_time_sec();
-    if (now > ictx->last_axis_time + DEADZONE_SCROLL_TIME) {
-        ictx->axis_current = NULL;
-        ictx->axis_state_y.dead_zone_accum = 0;
-        ictx->axis_state_x.dead_zone_accum = 0;
+    if (now > ictx->last_wheel_time + DEADZONE_SCROLL_TIME) {
+        ictx->wheel_current = NULL;
+        ictx->wheel_state_y.dead_zone_accum = 0;
+        ictx->wheel_state_x.dead_zone_accum = 0;
     }
-    if (now > ictx->last_axis_time + UNIT_SCROLL_TIME) {
-        ictx->axis_state_y.unit_accum = 0;
-        ictx->axis_state_x.unit_accum = 0;
+    if (now > ictx->last_wheel_time + UNIT_SCROLL_TIME) {
+        ictx->wheel_state_y.unit_accum = 0;
+        ictx->wheel_state_x.unit_accum = 0;
     }
-    ictx->last_axis_time = now;
+    ictx->last_wheel_time = now;
 
-    // Process axis deadzone. A lot of touchpad drivers don't filter scroll
-    // input, which makes it difficult for the user to send AXIS_UP/DOWN
-    // without accidentally triggering AXIS_LEFT/RIGHT. We try to fix this by
-    // implementing a deadzone. When the value of either axis breaks out of the
-    // deadzone, events from the other axis will be ignored until the user
-    // finishes scrolling.
-    if (ictx->axis_current == NULL) {
+    // Process wheel deadzone. A lot of touchpad drivers don't filter scroll
+    // input, which makes it difficult for the user to send WHEEL_UP/DOWN
+    // without accidentally triggering WHEEL_LEFT/RIGHT. We try to fix this by
+    // implementing a deadzone. When the value of either direction breaks out
+    // of the deadzone, events from the other direction will be ignored until
+    // the user finishes scrolling.
+    if (ictx->wheel_current == NULL) {
         state->dead_zone_accum += *scale * dir;
         if (state->dead_zone_accum * dir > DEADZONE_DIST) {
-            ictx->axis_current = state;
+            ictx->wheel_current = state;
             *scale = state->dead_zone_accum * dir;
         }
     }
-    if (ictx->axis_current != state)
+    if (ictx->wheel_current != state)
         return false;
 
     // Determine scale_units. This is incremented every time the accumulated
@@ -724,7 +724,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     int units = 1;
-    if (MP_KEY_IS_AXIS(unmod) && !process_axis(ictx, unmod, &scale, &units))
+    if (MP_KEY_IS_WHEEL(unmod) && !process_wheel(ictx, unmod, &scale, &units))
         return;
     interpret_key(ictx, code, scale, units);
     if (code & MP_KEY_STATE_DOWN) {
@@ -733,7 +733,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
             now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0)
         {
             if (code >= MP_MBTN_LEFT && code <= MP_MBTN_RIGHT) {
-                interpret_key(ictx, code - MP_MOUSE_BASE + MP_MOUSE_DBL_BASE,
+                interpret_key(ictx, code - MP_MBTN_BASE + MP_MBTN_DBL_BASE,
                               1, 1);
             }
         }
@@ -766,7 +766,7 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
     }
 }
 
-void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
+void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value)
 {
     if (value == 0.0)
         return;

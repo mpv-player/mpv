@@ -117,11 +117,6 @@ static const struct key_name key_names[] = {
   { MP_AR_VDOWN,        "AR_VDOWN" },
   { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
 
-  { MP_AXIS_UP,         "AXIS_UP" },
-  { MP_AXIS_DOWN,       "AXIS_DOWN" },
-  { MP_AXIS_LEFT,       "AXIS_LEFT" },
-  { MP_AXIS_RIGHT,      "AXIS_RIGHT" },
-
   { MP_KEY_POWER,       "POWER" },
   { MP_KEY_MENU,        "MENU" },
   { MP_KEY_PLAY,        "PLAY" },
@@ -176,6 +171,10 @@ static const struct key_name key_names[] = {
   { MP_MBTN_LEFT_DBL, "MOUSE_BTN0_DBL" },
   { MP_MBTN_MID_DBL, "MOUSE_BTN1_DBL" },
   { MP_MBTN_RIGHT_DBL, "MOUSE_BTN2_DBL" },
+  { MP_WHEEL_UP, "AXIS_UP" },
+  { MP_WHEEL_DOWN, "AXIS_DOWN" },
+  { MP_WHEEL_LEFT, "AXIS_LEFT" },
+  { MP_WHEEL_RIGHT, "AXIS_RIGHT" },
 
   { MP_KEY_CLOSE_WIN,   "CLOSE_WIN" },
   { MP_KEY_MOUSE_MOVE,  "MOUSE_MOVE" },

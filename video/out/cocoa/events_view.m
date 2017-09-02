@@ -239,13 +239,13 @@
 
     if (fabs([event deltaY]) >= fabs([event deltaX])) {
         delta = [event deltaY] * 0.1;
-        cmd   = delta > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
+        cmd   = delta > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
     } else {
         delta = [event deltaX] * 0.1;
-        cmd   = delta > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+        cmd   = delta > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
     }
 
-    [self.adapter putAxis:cmd delta:fabs(delta)];
+    [self.adapter putWheel:cmd delta:fabs(delta)];
 }
 
 - (void)scrollWheel:(NSEvent *)event

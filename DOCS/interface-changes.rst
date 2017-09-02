@@ -63,6 +63,9 @@ Interface changes
       the old numeric names (mouse_btn0) are deprecated
     - remove mouse_btn3_dbl and up, since they are only generated for buttons
       0-2 (these now print an error when sent from the 'mouse' command)
+    - rename the axis bindings to wheel_up/down/etc. axis scrolling and mouse
+      wheel scrolling are now conceptually the same thing
+      the old axis_up/down names remain as deprecated aliases
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.

@@ -470,18 +470,18 @@ static void pointer_handle_axis(void *data,
     // scale it down to 1.00 for multipliying it with the commands
     if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
         if (value > 0)
-            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_DOWN,
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN,
                     wl_fixed_to_double(value)*0.1);
         if (value < 0)
-            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_UP,
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP,
                     wl_fixed_to_double(value)*-0.1);
     }
     else if (axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
         if (value > 0)
-            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_RIGHT,
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT,
                     wl_fixed_to_double(value)*0.1);
         if (value < 0)
-            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_LEFT,
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT,
                     wl_fixed_to_double(value)*-0.1);
     }
 }
