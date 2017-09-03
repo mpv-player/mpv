@@ -1792,7 +1792,8 @@ static void deband_hook(struct gl_video *p, struct img_tex tex,
                         struct gl_transform *trans, void *priv)
 {
     pass_describe(p, "debanding (%s)", plane_names[tex.type]);
-    pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg);
+    pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg,
+                       p->image_params.color.gamma);
 }
 
 static void unsharp_hook(struct gl_video *p, struct img_tex tex,

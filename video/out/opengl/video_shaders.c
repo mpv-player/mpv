@@ -808,7 +808,7 @@ const struct m_sub_options deband_conf = {
 
 // Stochastically sample a debanded result from a hooked texture.
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        AVLFG *lfg)
+                        AVLFG *lfg, enum mp_csp_trc trc)
 {
     // Initialize the PRNG
     GLSLF("{\n");
@@ -850,7 +850,10 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSL(noise.x = rand(h); h = permute(h);)
     GLSL(noise.y = rand(h); h = permute(h);)
     GLSL(noise.z = rand(h); h = permute(h);)
-    GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", opts->grain/8192.0);
+
+    // Noise is scaled to the signal level to prevent extreme noise for HDR
+    float gain = opts->grain/8192.0 / mp_trc_nom_peak(trc);
+    GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", gain);
     GLSLF("}\n");
 }
 

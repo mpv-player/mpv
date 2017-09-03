@@ -49,7 +49,7 @@ void pass_color_map(struct gl_shader_cache *sc,
                     bool is_linear);
 
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        AVLFG *lfg);
+                        AVLFG *lfg, enum mp_csp_trc trc);
 
 void pass_sample_unsharp(struct gl_shader_cache *sc, float param);
 
