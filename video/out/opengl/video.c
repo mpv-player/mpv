@@ -569,10 +569,10 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 3);
+    const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 4);
     if (!fmt || !(p->ra->caps & RA_CAP_TEX_3D)) {
         p->use_lut_3d = false;
-        MP_WARN(p, "Disabling color management (no RGB16 3D textures).\n");
+        MP_WARN(p, "Disabling color management (no RGBA16 3D textures).\n");
         return false;
     }
 
@@ -1597,23 +1597,18 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
     int size = scaler->kernel->size;
-    int elems_per_pixel = 4;
-    if (size == 1) {
-        elems_per_pixel = 1;
-    } else if (size == 2) {
-        elems_per_pixel = 2;
-    } else if (size == 6) {
-        elems_per_pixel = 3;
-    }
-    int width = size / elems_per_pixel;
-    assert(size == width * elems_per_pixel);
-    const struct ra_format *fmt = ra_find_float16_format(p->ra, elems_per_pixel);
+    int num_components = size > 2 ? 4 : size;
+    const struct ra_format *fmt = ra_find_float16_format(p->ra, num_components);
     assert(fmt);
+
+    int width = (size + num_components - 1) / num_components; // round up
+    int stride = width * num_components;
+    assert(size <= stride);
 
     scaler->lut_size = 1 << p->opts.scaler_lut_size;
 
-    float *weights = talloc_array(NULL, float, scaler->lut_size * size);
-    mp_compute_lut(scaler->kernel, scaler->lut_size, weights);
+    float *weights = talloc_array(NULL, float, scaler->lut_size * stride);
+    mp_compute_lut(scaler->kernel, scaler->lut_size, stride, weights);
 
     bool use_1d = scaler->kernel->polar && (p->ra->caps & RA_CAP_TEX_1D);
 
@@ -2472,7 +2467,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         GLSL(vec3 cpos;)
         for (int i = 0; i < 3; i++)
             GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
-        GLSL(color.rgb = texture3D(lut_3d, cpos).rgb;)
+        GLSL(color.rgb = tex3D(lut_3d, cpos).rgb;)
     }
 }
 

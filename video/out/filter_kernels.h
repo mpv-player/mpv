@@ -50,6 +50,7 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name);
 
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double scale);
-void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array);
+void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
+                    float *out_array);
 
 #endif /* MPLAYER_FILTER_KERNELS_H */
