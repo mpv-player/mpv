@@ -122,10 +122,30 @@ local function is_blacklisted(url)
     return false
 end
 
+local function make_absolute_url(base_url, url)
+    if url:find("https?://") == 1 then return url end
+
+    local proto, domain, rest =
+        base_url:match("(https?://)([^/]+/)(.*)/?")
+    local segs = {}
+    rest:gsub("([^/]+)", function(c) table.insert(segs, c) end)
+    url:gsub("([^/]+)", function(c) table.insert(segs, c) end)
+    local resolved_url = {}
+    for i, v in ipairs(segs) do
+        if v == ".." then
+            table.remove(resolved_url)
+        elseif v ~= "." then
+            table.insert(resolved_url, v)
+        end
+    end
+    return proto .. domain ..
+        table.concat(resolved_url, "/")
+end
+
 local function join_url(base_url, fragment)
     local res = ""
     if base_url and fragment.path then
-        res = base_url .. fragment.path
+        res = make_absolute_url(base_url, fragment.path)
     elseif fragment.url then
         res = fragment.url
     end
