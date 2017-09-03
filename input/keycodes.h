@@ -124,7 +124,7 @@
 #define MP_KEY_IS_MOUSE_BTN_SINGLE(code) \
     ((code) >= MP_MBTN_BASE && (code) < MP_MBTN_END)
 #define MP_KEY_IS_WHEEL(code) \
-    ((code) >= MP_WHEEL_UP && (code) < MP_WHEEL_RIGHT)
+    ((code) >= MP_WHEEL_UP && (code) <= MP_WHEEL_RIGHT)
 
 #define MP_MBTN_DBL_BASE   ((MP_KEY_BASE+0xC0)|MP_NO_REPEAT_KEY)
 #define MP_MBTN_LEFT_DBL   (MP_MBTN_DBL_BASE+0)
