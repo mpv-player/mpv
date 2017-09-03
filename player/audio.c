@@ -389,9 +389,6 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     struct track *track = ao_c->track;
     struct af_stream *afs = ao_c->af;
 
-    if (ao_c->input_frame)
-        mp_aframe_config_copy(ao_c->input_format, ao_c->input_frame);
-
     if (!mp_aframe_config_is_valid(ao_c->input_format)) {
         // We don't know the audio format yet - so configure it later as we're
         // resyncing. fill_audio_buffers() will call this function again.
@@ -842,6 +839,9 @@ static int decode_new_frame(struct ao_chain *ao_c)
         audio_work(ao_c->audio_src);
         res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);
     }
+
+    if (ao_c->input_frame)
+        mp_aframe_config_copy(ao_c->input_format, ao_c->input_frame);
 
     switch (res) {
     case DATA_OK:       return AD_OK;
