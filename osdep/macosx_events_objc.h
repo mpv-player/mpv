@@ -40,6 +40,8 @@ struct input_ctx;
 
 - (void)putKey:(int)keycode;
 
+- (void)setHighestPriotityMediaKeysTap;
+
 - (void)handleFilesArray:(NSArray *)files;
 
 - (bool)processKeyEvent:(NSEvent *)event;

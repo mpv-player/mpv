@@ -372,6 +372,25 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     CGEventTapEnable(self->_mk_tap_port, true);
 }
 
+- (void)setHighestPriotityMediaKeysTap
+{
+    if (self->_mk_tap_port == nil)
+        return;
+
+    CGEventTapInformation *taps = ta_alloc_size(nil, sizeof(CGEventTapInformation));
+    uint32_t numTaps = 0;
+    CGError err = CGGetEventTapList(1, taps, &numTaps);
+
+    if (err == kCGErrorSuccess && numTaps > 0) {
+        pid_t processID = [NSProcessInfo processInfo].processIdentifier;
+        if (taps[0].tappingProcess != processID) {
+            [self stopMediaKeys];
+            [self startMediaKeys];
+        }
+    }
+    talloc_free(taps);
+}
+
 - (void)startMediaKeys
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -396,6 +415,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        CGEventTapEnable(self->_mk_tap_port, false);
         [[NSRunLoop mainRunLoop] removePort:port forMode:NSRunLoopCommonModes];
         CFRelease(self->_mk_tap_port);
         self->_mk_tap_port = nil;

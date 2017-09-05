@@ -139,6 +139,11 @@ static void terminate_cocoa_application(void)
              andEventID:kAEQuitApplication];
 }
 
+- (void)applicationWillBecomeActive:(NSNotification *)notification
+{
+    [_eventsResponder setHighestPriotityMediaKeysTap];
+}
+
 - (void)handleQuitEvent:(NSAppleEventDescriptor *)event
          withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
