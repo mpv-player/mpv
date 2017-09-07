@@ -686,8 +686,8 @@ Video
     :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=angle`` or
                 ``--gpu-context=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=angle``
-                (Windows 8+ only)
+    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=d3d11`` or
+                ``--gpu-context=angle`` (Windows 8+ only)
     :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
     :mediacodec: requires ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
@@ -775,10 +775,11 @@ Video
         BT.601 or BT.709, a forced, low-quality but correct RGB conversion is
         performed. Otherwise, the result will be totally incorrect.
 
-        ``d3d11va`` is usually safe (if used with ANGLE builds that support
-        ``EGL_KHR_stream path`` - otherwise, it converts to RGB), except that
-        10 bit input (HEVC main 10 profiles) will be rounded down to 8 bits,
-        which results in reduced quality.
+        ``d3d11va`` is safe when used with the ``d3d11`` backend. If used with
+        ``angle`` is it usually safe, except that 10 bit input (HEVC main 10
+        profiles) will be rounded down to 8 bits, which will result in reduced
+        quality. Also note that with very old ANGLE builds (without
+        ``EGL_KHR_stream path``,) all input will be converted to RGB.
 
         ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
         conversion, but actual behavior depends on the GPU drivers. Some drivers
@@ -4272,6 +4273,30 @@ The following video options are currently all specific to ``--vo=gpu`` and
     as mpv's vulkan implementation currently does not try and protect textures
     against concurrent access.
 
+``--d3d11-warp=<yes|no|auto>``
+    Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
+    backend (default: auto). This is a high performance software renderer. By
+    default, it is only used when the system has no hardware adapters that
+    support D3D11. While the extended GPU features will work with WARP, they
+    can be very slow.
+
+``--d3d11-feature-level=<12_1|12_0|11_1|11_0|10_1|10_0|9_3|9_2|9_1>``
+    Select a specific feature level when using the D3D11 GPU backend. By
+    default, the highest available feature level is used. This option can be
+    used to select a lower feature level, which is mainly useful for debugging.
+    Most extended GPU features will not work at 9_x feature levels.
+
+``--d3d11-flip=<yes|no>``
+    Enable flip-model presentation, which avoids unnecessarily copying the
+    backbuffer by sharing surfaces with the DWM (default: yes). This may cause
+    performance issues with older drivers. If flip-model presentation is not
+    supported (for example, on Windows 7 without the platform update), mpv will
+    automatically fall back to the older bitblt presentation model.
+
+``--d3d11-sync-interval=<0..4>``
+    Schedule each frame to be presented for this number of VBlank intervals.
+    (default: 1) Setting to 1 will enable VSync, setting to 0 will disable it.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan``. The possible choices
@@ -4694,6 +4719,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Win32, using WGL for rendering and Direct3D 9Ex for presentation. Works
         on Nvidia and AMD. Newer Intel chips with the latest drivers may also
         work.
+    d3d11
+        Win32, with native Direct3D 11 rendering.
     x11
         X11/GLX
     x11vk
@@ -4728,6 +4755,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     vulkan
         Allow only Vulkan (requires a valid/working ``--spirv-compiler``)
+    d3d11
+        Allow only ``--gpu-context=d3d11``
 
 ``--opengl-es=<mode>``
     Controls which type of OpenGL context will be accepted:

@@ -24,7 +24,7 @@
 
 #include "angle_dynamic.h"
 #include "egl_helpers.h"
-#include "d3d11_helpers.h"
+#include "video/out/gpu/d3d11_helpers.h"
 
 #include "common/common.h"
 #include "options/m_config.h"
