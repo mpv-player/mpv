@@ -46,6 +46,8 @@ static int get_feature_levels(int max_fl, int min_fl,
                               const D3D_FEATURE_LEVEL **out)
 {
     static const D3D_FEATURE_LEVEL levels[] = {
+        D3D_FEATURE_LEVEL_12_1,
+        D3D_FEATURE_LEVEL_12_0,
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0,
         D3D_FEATURE_LEVEL_10_1,
@@ -71,7 +73,8 @@ static int get_feature_levels(int max_fl, int min_fl,
 }
 
 static HRESULT create_device(struct mp_log *log, bool warp, bool bgra,
-                             int max_fl, int min_fl, ID3D11Device **dev)
+                             bool debug, int max_fl, int min_fl,
+                             ID3D11Device **dev)
 {
     const D3D_FEATURE_LEVEL *levels;
     int levels_len = get_feature_levels(max_fl, min_fl, &levels);
@@ -82,7 +85,11 @@ static HRESULT create_device(struct mp_log *log, bool warp, bool bgra,
 
     D3D_DRIVER_TYPE type = warp ? D3D_DRIVER_TYPE_WARP
                                 : D3D_DRIVER_TYPE_HARDWARE;
-    UINT flags = bgra ? D3D11_CREATE_DEVICE_BGRA_SUPPORT : 0;
+    UINT flags = 0;
+    if (bgra)
+        flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+    if (debug)
+        flags |= D3D11_CREATE_DEVICE_DEBUG;
     return pD3D11CreateDevice(NULL, type, NULL, flags, levels, levels_len,
         D3D11_SDK_VERSION, dev, NULL, NULL);
 }
@@ -116,7 +123,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         max_fl = max_fl ? max_fl : D3D_FEATURE_LEVEL_11_0;
         min_fl = min_fl ? min_fl : D3D_FEATURE_LEVEL_9_1;
 
-        hr = create_device(log, warp, bgra, max_fl, min_fl, &dev);
+        hr = create_device(log, warp, bgra, opts->debug, max_fl, min_fl, &dev);
         if (SUCCEEDED(hr))
             break;
 
@@ -127,8 +134,19 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
             continue;
         }
 
+        // Trying to create a D3D_FEATURE_LEVEL_12_0 device on Windows 8.1 or
+        // below will not succeed. Try an 11_1 device.
+        if (max_fl >= D3D_FEATURE_LEVEL_12_0 &&
+            min_fl <= D3D_FEATURE_LEVEL_11_1)
+        {
+            mp_dbg(log, "Failed to create 12_0+ device, trying 11_1\n");
+            max_fl = D3D_FEATURE_LEVEL_11_1;
+            bgra = true;
+            continue;
+        }
+
         // Trying to create a D3D_FEATURE_LEVEL_11_1 device on Windows 7
-        // without the platform update will not succeed. Try a 11_0 device.
+        // without the platform update will not succeed. Try an 11_0 device.
         if (max_fl >= D3D_FEATURE_LEVEL_11_1 &&
             min_fl <= D3D_FEATURE_LEVEL_11_0)
         {

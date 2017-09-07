@@ -53,7 +53,14 @@ extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
 extern const struct ra_ctx_fns ra_ctx_vulkan_win;
 extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
 
+/* Direct3D 11 */
+extern const struct ra_ctx_fns ra_ctx_d3d11;
+
 static const struct ra_ctx_fns *contexts[] = {
+#if HAVE_D3D11
+    &ra_ctx_d3d11,
+#endif
+
 // OpenGL contexts:
 #if HAVE_ANDROID
     &ra_ctx_android,

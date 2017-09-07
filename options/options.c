@@ -90,6 +90,7 @@ extern const struct m_obj_list ao_obj_list;
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
 extern const struct m_sub_options spirv_conf;
+extern const struct m_sub_options d3d11_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
@@ -697,6 +698,10 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_VULKAN
     OPT_SUBSTRUCT("", vulkan_opts, vulkan_conf, 0),
+#endif
+
+#if HAVE_D3D11
+    OPT_SUBSTRUCT("", d3d11_opts, d3d11_conf, 0),
 #endif
 
 #if HAVE_EGL_ANGLE_WIN32
