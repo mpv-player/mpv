@@ -281,7 +281,7 @@ struct ra_renderpass_params {
     const char *compute_shader;
 };
 
-struct ra_renderpass_params *ra_render_pass_params_copy(void *ta_parent,
+struct ra_renderpass_params *ra_renderpass_params_copy(void *ta_parent,
         const struct ra_renderpass_params *params);
 
 // Conflates the following typical GPU API concepts:

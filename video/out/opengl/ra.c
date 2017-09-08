@@ -71,7 +71,7 @@ static struct ra_renderpass_input *dup_inputs(void *ta_parent,
 }
 
 // Return a newly allocated deep-copy of params.
-struct ra_renderpass_params *ra_render_pass_params_copy(void *ta_parent,
+struct ra_renderpass_params *ra_renderpass_params_copy(void *ta_parent,
         const struct ra_renderpass_params *params)
 {
     struct ra_renderpass_params *res = talloc_ptrtype(ta_parent, res);

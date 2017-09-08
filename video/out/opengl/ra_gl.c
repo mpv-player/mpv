@@ -811,7 +811,7 @@ static struct ra_renderpass *gl_renderpass_create(struct ra *ra,
     GL *gl = ra_gl_get(ra);
 
     struct ra_renderpass *pass = talloc_zero(NULL, struct ra_renderpass);
-    pass->params = *ra_render_pass_params_copy(pass, params);
+    pass->params = *ra_renderpass_params_copy(pass, params);
     pass->params.cached_program = (bstr){0};
     struct ra_renderpass_gl *pass_gl = pass->priv =
         talloc_zero(NULL, struct ra_renderpass_gl);
