@@ -191,6 +191,7 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     ra->glsl_version = vk->spirv->glsl_version;
     ra->glsl_vulkan = true;
     ra->max_shmem = vk->limits.maxComputeSharedMemorySize;
+    ra->max_pushc_size = vk->limits.maxPushConstantsSize;
 
     if (vk->pool->props.queueFlags & VK_QUEUE_COMPUTE_BIT)
         ra->caps |= RA_CAP_COMPUTE;
@@ -1079,6 +1080,12 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = 1,
         .pSetLayouts = &pass_vk->dsLayout,
+        .pushConstantRangeCount = params->push_constants_size ? 1 : 0,
+        .pPushConstantRanges = &(VkPushConstantRange){
+            .stageFlags = stageFlags[params->type],
+            .offset = 0,
+            .size = params->push_constants_size,
+        },
     };
 
     VK(vkCreatePipelineLayout(vk->dev, &linfo, MPVK_ALLOCATOR,
@@ -1416,6 +1423,13 @@ static void vk_renderpass_run(struct ra *ra,
     vkCmdBindDescriptorSets(cmd->buf, bindPoint[pass->params.type],
                             pass_vk->pipeLayout, 0, 1, &ds, 0, NULL);
 
+    if (pass->params.push_constants_size) {
+        vkCmdPushConstants(cmd->buf, pass_vk->pipeLayout,
+                           stageFlags[pass->params.type], 0,
+                           pass->params.push_constants_size,
+                           params->push_constants);
+    }
+
     switch (pass->params.type) {
     case RA_RENDERPASS_TYPE_COMPUTE:
         vkCmdDispatch(cmd->buf, params->compute_groups[0],
@@ -1664,6 +1678,7 @@ static struct ra_fns ra_fns_vk = {
     .clear                  = vk_clear,
     .blit                   = vk_blit,
     .uniform_layout         = std140_layout,
+    .push_constant_layout   = std430_layout,
     .renderpass_create      = vk_renderpass_create,
     .renderpass_destroy     = vk_renderpass_destroy_lazy,
     .renderpass_run         = vk_renderpass_run,
