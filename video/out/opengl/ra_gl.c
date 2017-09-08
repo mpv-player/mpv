@@ -1122,6 +1122,7 @@ static struct ra_fns ra_fns_gl = {
     .buf_poll               = gl_buf_poll,
     .clear                  = gl_clear,
     .blit                   = gl_blit,
+    .uniform_layout         = std140_layout,
     .renderpass_create      = gl_renderpass_create,
     .renderpass_destroy     = gl_renderpass_destroy,
     .renderpass_run         = gl_renderpass_run,

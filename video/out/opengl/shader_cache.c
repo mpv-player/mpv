@@ -27,17 +27,20 @@ union uniform_val {
     struct ra_buf *buf; // RA_VARTYPE_BUF_*
 };
 
+enum sc_uniform_type {
+    SC_UNIFORM_TYPE_GLOBAL = 0, // global uniform (RA_CAP_GLOBAL_UNIFORM)
+    SC_UNIFORM_TYPE_UBO = 1,    // uniform buffer (RA_CAP_BUF_RO)
+};
+
 struct sc_uniform {
+    enum sc_uniform_type type;
     struct ra_renderpass_input input;
     const char *glsl_type;
     union uniform_val v;
     char *buffer_format;
-    // for UBO entries: these are all assumed to be arrays as far as updating
-    // is concerned. ("regular" values are treated like arrays of length 1)
-    size_t ubo_length;  // number of array elements (or 0 if not using UBO)
-    size_t ubo_rowsize; // size of data in each array row
-    size_t ubo_stride;  // stride of each array row
-    size_t ubo_offset;  // byte offset within the uniform buffer
+    // for SC_UNIFORM_TYPE_UBO:
+    struct ra_layout layout;
+    size_t offset; // byte offset within the buffer
 };
 
 struct sc_cached_uniform {
@@ -254,9 +257,8 @@ static int gl_sc_next_binding(struct gl_shader_cache *sc, enum ra_vartype type)
     }
 }
 
-// Updates the UBO metadata for the given sc_uniform. Assumes type, dim_v and
-// dim_m are already set. Computes the correct alignment, size and array stride
-// as per the std140 specification.
+// Updates the UBO metadata for the given sc_uniform. Assumes sc_uniform->input
+// is already set. Also updates sc_uniform->type.
 static void update_ubo_params(struct gl_shader_cache *sc, struct sc_uniform *u)
 {
     if (!(sc->ra->caps & RA_CAP_BUF_RO))
@@ -270,32 +272,10 @@ static void update_ubo_params(struct gl_shader_cache *sc, struct sc_uniform *u)
     if (sc->ra->glsl_version < 440)
         return;
 
-    size_t el_size;
-    switch (u->input.type) {
-    case RA_VARTYPE_INT:   el_size = sizeof(int);   break;
-    case RA_VARTYPE_FLOAT: el_size = sizeof(float); break;
-    default: abort();
-    }
-
-    u->ubo_rowsize = el_size * u->input.dim_v;
-
-    // std140 packing rules:
-    // 1. The alignment of generic values is their size in bytes
-    // 2. The alignment of vectors is the vector length * the base count, with
-    // the exception of vec3 which is always aligned like vec4
-    // 3. The alignment of arrays is that of the element size rounded up to
-    // the nearest multiple of vec4
-    // 4. Matrices are treated like arrays of vectors
-    // 5. Arrays/matrices are laid out with a stride equal to the alignment
-    u->ubo_stride = u->ubo_rowsize;
-    if (u->input.dim_v == 3)
-        u->ubo_stride += el_size;
-    if (u->input.dim_m > 1)
-        u->ubo_stride = MP_ALIGN_UP(u->ubo_stride, sizeof(float[4]));
-
-    u->ubo_offset = MP_ALIGN_UP(sc->ubo_size, u->ubo_stride);
-    u->ubo_length = u->input.dim_m;
-    sc->ubo_size = u->ubo_offset + u->ubo_stride * u->ubo_length;
+    u->type = SC_UNIFORM_TYPE_UBO;
+    u->layout = sc->ra->fns->uniform_layout(&u->input);
+    u->offset = MP_ALIGN_UP(sc->ubo_size, u->layout.align);
+    sc->ubo_size = u->offset + u->layout.size;
 }
 
 void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
@@ -476,14 +456,14 @@ static const char *vao_glsl_type(const struct ra_renderpass_input *e)
 static void update_ubo(struct ra *ra, struct ra_buf *ubo, struct sc_uniform *u)
 {
     uintptr_t src = (uintptr_t) &u->v;
-    size_t dst = u->ubo_offset;
-    size_t src_stride = u->ubo_rowsize;
-    size_t dst_stride = u->ubo_stride;
+    size_t dst = u->offset;
+    struct ra_layout src_layout = ra_renderpass_input_layout(&u->input);
+    struct ra_layout dst_layout = u->layout;
 
-    for (int i = 0; i < u->ubo_length; i++) {
-        ra->fns->buf_update(ra, ubo, dst, (void *)src, src_stride);
-        src += src_stride;
-        dst += dst_stride;
+    for (int i = 0; i < u->input.dim_m; i++) {
+        ra->fns->buf_update(ra, ubo, dst, (void *)src, src_layout.stride);
+        src += src_layout.stride;
+        dst += dst_layout.stride;
     }
 }
 
@@ -491,24 +471,26 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
                            struct sc_uniform *u, int n)
 {
     struct sc_cached_uniform *un = &e->cached_uniforms[n];
-    size_t size = ra_render_pass_input_data_size(&u->input);
-    bool changed = true;
-    if (size > 0)
-        changed = memcmp(&un->v, &u->v, size) != 0;
+    struct ra_layout layout = ra_renderpass_input_layout(&u->input);
+    if (layout.size > 0 && memcmp(&un->v, &u->v, layout.size) == 0)
+        return;
 
-    if (changed) {
-        un->v = u->v;
+    un->v = u->v;
 
-        if (u->ubo_length) {
-            assert(e->ubo);
-            update_ubo(sc->ra, e->ubo, u);
-        } else {
-            struct ra_renderpass_input_val value = {
-                .index = un->index,
-                .data = &un->v,
-            };
-            MP_TARRAY_APPEND(sc, sc->values, sc->num_values, value);
-        }
+    switch (u->type) {
+    case SC_UNIFORM_TYPE_GLOBAL: {
+        struct ra_renderpass_input_val value = {
+            .index = un->index,
+            .data = &un->v,
+        };
+        MP_TARRAY_APPEND(sc, sc->values, sc->num_values, value);
+        break;
+    }
+    case SC_UNIFORM_TYPE_UBO:
+        assert(e->ubo);
+        update_ubo(sc->ra, e->ubo, u);
+        break;
+    default: abort();
     }
 }
 
@@ -640,9 +622,9 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
         ADD(dst, "layout(std140, binding=%d) uniform UBO {\n", sc->ubo_binding);
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_uniform *u = &sc->uniforms[n];
-            if (!u->ubo_length)
+            if (u->type != SC_UNIFORM_TYPE_UBO)
                 continue;
-            ADD(dst, "layout(offset=%zu) %s %s;\n", u->ubo_offset,
+            ADD(dst, "layout(offset=%zu) %s %s;\n", u->offset,
                 u->glsl_type, u->input.name);
         }
         ADD(dst, "};\n");
@@ -650,7 +632,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
 
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
-        if (u->ubo_length)
+        if (u->type != SC_UNIFORM_TYPE_GLOBAL)
             continue;
         switch (u->input.type) {
         case RA_VARTYPE_INT:
@@ -875,7 +857,8 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         };
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_cached_uniform u = {0};
-            if (!sc->uniforms[n].ubo_length) {
+            if (sc->uniforms[n].type == SC_UNIFORM_TYPE_GLOBAL) {
+                // global uniforms need to be made visible to the ra_renderpass
                 u.index = sc->params.num_inputs;
                 MP_TARRAY_APPEND(sc, sc->params.inputs, sc->params.num_inputs,
                                  sc->uniforms[n].input);

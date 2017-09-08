@@ -186,6 +186,9 @@ enum ra_vartype {
     RA_VARTYPE_COUNT
 };
 
+// Returns the host size of a ra_vartype, or 0 for abstract vartypes (e.g. tex)
+size_t ra_vartype_size(enum ra_vartype type);
+
 // Represents a uniform, texture input parameter, and similar things.
 struct ra_renderpass_input {
     const char *name;       // name as used in the shader
@@ -204,7 +207,16 @@ struct ra_renderpass_input {
     int binding;
 };
 
-size_t ra_render_pass_input_data_size(struct ra_renderpass_input *input);
+// Represents the layout requirements of an input value
+struct ra_layout {
+    size_t align;  // the alignment requirements (always a power of two)
+    size_t stride; // the delta between two rows of an array/matrix
+    size_t size;   // the total size of the input
+};
+
+// Returns the host layout of a render pass input. Returns {0} for renderpass
+// inputs without a corresponding host representation (e.g. textures/buffers)
+struct ra_layout ra_renderpass_input_layout(struct ra_renderpass_input *input);
 
 enum ra_blend {
     RA_BLEND_ZERO,
@@ -369,6 +381,10 @@ struct ra_fns {
     // in use is an error and may result in graphical corruption. Optional, if
     // NULL then all buffers are always usable.
     bool (*buf_poll)(struct ra *ra, struct ra_buf *buf);
+
+    // Returns the layout requirements of a uniform buffer element. Optional,
+    // but must be implemented if RA_CAP_BUF_RO is supported.
+    struct ra_layout (*uniform_layout)(struct ra_renderpass_input *inp);
 
     // Clear the dst with the given color (rgba) and within the given scissor.
     // dst must have dst->params.render_dst==true. Content outside of the

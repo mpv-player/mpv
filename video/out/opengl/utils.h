@@ -89,6 +89,10 @@ struct ra_buf *ra_buf_pool_get(struct ra *ra, struct ra_buf_pool *pool,
 bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
                        const struct ra_tex_upload_params *params);
 
+// Layout rules for GLSL's packing modes
+struct ra_layout std140_layout(struct ra_renderpass_input *inp);
+struct ra_layout std430_layout(struct ra_renderpass_input *inp);
+
 struct fbotex {
     struct ra *ra;
     struct ra_tex *tex;

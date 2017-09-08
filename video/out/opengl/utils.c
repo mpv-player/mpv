@@ -124,6 +124,48 @@ bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
     return ra->fns->tex_upload(ra, &newparams);
 }
 
+struct ra_layout std140_layout(struct ra_renderpass_input *inp)
+{
+    size_t el_size = ra_vartype_size(inp->type);
+
+    // std140 packing rules:
+    // 1. The alignment of generic values is their size in bytes
+    // 2. The alignment of vectors is the vector length * the base count, with
+    // the exception of vec3 which is always aligned like vec4
+    // 3. The alignment of arrays is that of the element size rounded up to
+    // the nearest multiple of vec4
+    // 4. Matrices are treated like arrays of vectors
+    // 5. Arrays/matrices are laid out with a stride equal to the alignment
+    size_t size = el_size * inp->dim_v;
+    if (inp->dim_v == 3)
+        size += el_size;
+    if (inp->dim_m > 1)
+        size = MP_ALIGN_UP(size, sizeof(float[4]));
+
+    return (struct ra_layout) {
+        .align  = size,
+        .stride = size,
+        .size   = size * inp->dim_m,
+    };
+}
+
+struct ra_layout std430_layout(struct ra_renderpass_input *inp)
+{
+    size_t el_size = ra_vartype_size(inp->type);
+
+    // std430 packing rules: like std140, except arrays/matrices are always
+    // "tightly" packed, even arrays/matrices of vec3s
+    size_t align = el_size * inp->dim_v;
+    if (inp->dim_v == 3 && inp->dim_m == 1)
+        align += el_size;
+
+    return (struct ra_layout) {
+        .align  = align,
+        .stride = align,
+        .size   = align * inp->dim_m,
+    };
+}
+
 // Create a texture and a FBO using the texture as color attachments.
 //  fmt: texture internal format
 // If the parameters are the same as the previous call, do not touch it.

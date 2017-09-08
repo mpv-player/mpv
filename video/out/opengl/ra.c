@@ -36,7 +36,7 @@ void ra_free(struct ra **ra)
     *ra = NULL;
 }
 
-static size_t vartype_size(enum ra_vartype type)
+size_t ra_vartype_size(enum ra_vartype type)
 {
     switch (type) {
     case RA_VARTYPE_INT:        return sizeof(int);
@@ -46,12 +46,18 @@ static size_t vartype_size(enum ra_vartype type)
     }
 }
 
-// Return the size of the data ra_renderpass_input_val.data is going to point
-// to. This returns 0 for non-primitive types such as textures.
-size_t ra_render_pass_input_data_size(struct ra_renderpass_input *input)
+struct ra_layout ra_renderpass_input_layout(struct ra_renderpass_input *input)
 {
-    size_t el_size = vartype_size(input->type);
-    return el_size * input->dim_v * input->dim_m;
+    size_t el_size = ra_vartype_size(input->type);
+    if (!el_size)
+        return (struct ra_layout){0};
+
+    // host data is always tightly packed
+    return (struct ra_layout) {
+        .align  = 1,
+        .stride = el_size * input->dim_v,
+        .size   = el_size * input->dim_v * input->dim_m,
+    };
 }
 
 static struct ra_renderpass_input *dup_inputs(void *ta_parent,
