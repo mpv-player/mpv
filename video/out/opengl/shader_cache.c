@@ -491,8 +491,7 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
                            struct sc_uniform *u, int n)
 {
     struct sc_cached_uniform *un = &e->cached_uniforms[n];
-    struct ra_renderpass_input *input = &e->pass->params.inputs[n];
-    size_t size = ra_render_pass_input_data_size(input);
+    size_t size = ra_render_pass_input_data_size(&u->input);
     bool changed = true;
     if (size > 0)
         changed = memcmp(&un->v, &u->v, size) != 0;
