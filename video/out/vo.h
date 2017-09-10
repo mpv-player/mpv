@@ -143,16 +143,13 @@ struct voctrl_playback_state {
 };
 
 // VOCTRL_PERFORMANCE_DATA
-#define PERF_SAMPLE_COUNT 256u
+#define VO_PERF_SAMPLE_COUNT 256u
 
 struct mp_pass_perf {
     // times are all in nanoseconds
     uint64_t last, avg, peak;
-    // this is a ring buffer, indices are relative to index and modulo
-    // PERF_SAMPLE_COUNT
-    uint64_t *samples;
-    int count;
-    int index;
+    uint64_t samples[VO_PERF_SAMPLE_COUNT];
+    uint64_t count;
 };
 
 #define VO_PASS_PERF_MAX 128

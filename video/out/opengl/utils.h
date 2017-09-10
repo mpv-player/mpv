@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "video/out/vo.h"
 #include "ra.h"
 
 // A 3x2 matrix, with the translation part separate.

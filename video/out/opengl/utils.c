@@ -211,11 +211,11 @@ struct timer_pool {
     ra_timer *timer;
     bool running; // detect invalid usage
 
-    uint64_t samples[PERF_SAMPLE_COUNT];
+    uint64_t samples[VO_PERF_SAMPLE_COUNT];
     int sample_idx;
     int sample_count;
 
-    uint64_t avg_sum;
+    uint64_t sum;
     uint64_t peak;
 };
 
@@ -269,12 +269,10 @@ void timer_pool_stop(struct timer_pool *pool)
     if (res) {
         // Input res into the buffer and grab the previous value
         uint64_t old = pool->samples[pool->sample_idx];
+        pool->sample_count = MPMIN(pool->sample_count + 1, VO_PERF_SAMPLE_COUNT);
         pool->samples[pool->sample_idx++] = res;
-        pool->sample_idx %= PERF_SAMPLE_COUNT;
-
-        // Update average and sum
-        pool->avg_sum = pool->avg_sum + res - old;
-        pool->sample_count = MPMIN(pool->sample_count + 1, PERF_SAMPLE_COUNT);
+        pool->sample_idx %= VO_PERF_SAMPLE_COUNT;
+        pool->sum = pool->sum + res - old;
 
         // Update peak if necessary
         if (res >= pool->peak) {
@@ -283,7 +281,7 @@ void timer_pool_stop(struct timer_pool *pool)
             // It's possible that the last peak was the value we just removed,
             // if so we need to scan for the new peak
             uint64_t peak = res;
-            for (int i = 0; i < PERF_SAMPLE_COUNT; i++)
+            for (int i = 0; i < VO_PERF_SAMPLE_COUNT; i++)
                 peak = MPMAX(peak, pool->samples[i]);
             pool->peak = peak;
         }
@@ -296,16 +294,16 @@ struct mp_pass_perf timer_pool_measure(struct timer_pool *pool)
         return (struct mp_pass_perf){0};
 
     struct mp_pass_perf res = {
-        .count = pool->sample_count,
-        .index = (pool->sample_idx - pool->sample_count) % PERF_SAMPLE_COUNT,
+        .last = pool->samples[(pool->sample_idx - 1) % VO_PERF_SAMPLE_COUNT],
+        .avg = pool->sample_count > 0 ? pool->sum / pool->sample_count : 0,
         .peak = pool->peak,
-        .samples = pool->samples,
+        .count = pool->sample_count,
     };
 
-    res.last = pool->samples[(pool->sample_idx - 1) % PERF_SAMPLE_COUNT];
-
-    if (pool->sample_count > 0) {
-        res.avg  = pool->avg_sum / pool->sample_count;
+    int idx = (pool->sample_idx - pool->sample_count);
+    for (int i = 0; i < res.count; i++) {
+        idx %= VO_PERF_SAMPLE_COUNT;
+        res.samples[i] = pool->samples[idx++];
     }
 
     return res;

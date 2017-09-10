@@ -2882,12 +2882,8 @@ static void get_frame_perf(struct mpv_node *node, struct mp_frame_perf *perf)
         node_map_add(pass, "peak", MPV_FORMAT_INT64)->u.int64 = data->peak;
         node_map_add(pass, "count", MPV_FORMAT_INT64)->u.int64 = data->count;
         struct mpv_node *samples = node_map_add(pass, "samples", MPV_FORMAT_NODE_ARRAY);
-
-        int idx = data->index;
-        for (int n = 0; n < data->count; n++) {
-            node_array_add(samples, MPV_FORMAT_INT64)->u.int64 = data->samples[idx];
-            idx = (idx + 1) % PERF_SAMPLE_COUNT;
-        }
+        for (int n = 0; n < data->count; n++)
+            node_array_add(samples, MPV_FORMAT_INT64)->u.int64 = data->samples[n];
     }
 }
 
