@@ -4865,6 +4865,18 @@ The following video options are currently all specific to ``--vo=opengl`` and
     The default of 2.0 is somewhat conservative and will mostly just apply to
     skies or directly sunlit surfaces. A setting of 0.0 disables this option.
 
+``--gamut-warning``
+    If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a
+    given threshold (currently hard-coded to 101%). The affected pixels will be
+    inverted to make them stand out. Note: This option applies after the
+    effects of all of mpv's color space transformation / tone mapping options,
+    so it's a good idea to combine this with ``--tone-mapping=clip`` and use
+    ``--target-gamut`` to set the gamut to simulate. For example,
+    ``--target-gamut=bt.709`` would make mpv highlight all pixels that exceed the
+    gamut of a standard gamut (sRGB) display. This option also does not work
+    well with ICC profiles, since the 3DLUTs are always generated against the
+    source color space and have chromatically-accurate clipping built in.
+
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.
     (Default: yes). Note that this option only works when also using a display

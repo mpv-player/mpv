@@ -616,7 +616,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 
     switch (algo) {
     case TONE_MAPPING_CLIP:
-        GLSLF("sig = clamp(%f * sig, 0.0, 1.0);\n", isnan(param) ? 1.0 : param);
+        GLSLF("sig = %f * sig;\n", isnan(param) ? 1.0 : param);
         break;
 
     case TONE_MAPPING_MOBIUS:
@@ -683,7 +683,7 @@ void pass_color_map(struct gl_shader_cache *sc,
                     struct mp_colorspace src, struct mp_colorspace dst,
                     enum tone_mapping algo, float tone_mapping_param,
                     float tone_mapping_desat, bool detect_peak,
-                    bool is_linear)
+                    bool gamut_warning, bool is_linear)
 {
     GLSLF("// color mapping\n");
 
@@ -747,6 +747,12 @@ void pass_color_map(struct gl_shader_cache *sc,
 
     if (src.light != dst.light)
         pass_inverse_ootf(sc, dst.light, mp_trc_nom_peak(dst.gamma));
+
+    // Warn for remaining out-of-gamut colors is enabled
+    if (gamut_warning) {
+        GLSL(if (any(greaterThan(color.rgb, vec3(1.01)))))
+            GLSL(color.rgb = vec3(1.0) - color.rgb;) // invert
+    }
 
     if (is_linear)
         pass_delinearize(sc, dst.gamma);

@@ -115,6 +115,7 @@ struct gl_video_opts {
     int compute_hdr_peak;
     float tone_mapping_param;
     float tone_mapping_desat;
+    int gamut_warning;
     int linear_scaling;
     int correct_downscaling;
     int sigmoid_upscaling;

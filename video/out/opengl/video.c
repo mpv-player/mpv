@@ -363,6 +363,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("hdr-compute-peak", compute_hdr_peak, 0),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
+        OPT_FLAG("gamut-warning", gamut_warning, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2460,7 +2461,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, src, dst, p->opts.tone_mapping,
                    p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
-                   detect_peak, p->use_linear && !osd);
+                   detect_peak, p->opts.gamut_warning, p->use_linear && !osd);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
