@@ -143,7 +143,7 @@ struct voctrl_playback_state {
 };
 
 // VOCTRL_PERFORMANCE_DATA
-#define VO_PERF_SAMPLE_COUNT 256u
+#define VO_PERF_SAMPLE_COUNT 256
 
 struct mp_pass_perf {
     // times are all in nanoseconds

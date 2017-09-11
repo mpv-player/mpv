@@ -293,18 +293,20 @@ struct mp_pass_perf timer_pool_measure(struct timer_pool *pool)
     if (!pool)
         return (struct mp_pass_perf){0};
 
-    int last = (pool->sample_idx ? pool->sample_idx : VO_PERF_SAMPLE_COUNT) - 1;
     struct mp_pass_perf res = {
-        .last = pool->samples[last],
-        .avg = pool->sample_count > 0 ? pool->sum / pool->sample_count : 0,
         .peak = pool->peak,
         .count = pool->sample_count,
     };
 
-    int idx = (pool->sample_idx - pool->sample_count);
+    int idx = pool->sample_idx - pool->sample_count + VO_PERF_SAMPLE_COUNT;
     for (int i = 0; i < res.count; i++) {
         idx %= VO_PERF_SAMPLE_COUNT;
         res.samples[i] = pool->samples[idx++];
+    }
+
+    if (res.count > 0) {
+        res.last = res.samples[res.count - 1];
+        res.avg = pool->sum / res.count;
     }
 
     return res;
