@@ -2913,19 +2913,21 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
 
-    struct voctrl_performance_data data = {0};
-    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
-        return M_PROPERTY_UNAVAILABLE;
+    int ret = M_PROPERTY_UNAVAILABLE;
+    struct voctrl_performance_data *data = talloc_ptrtype(NULL, data);
+    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, data) <= 0)
+        goto out;
 
     switch (action) {
     case M_PROPERTY_PRINT: {
         char *res = NULL;
         res = talloc_asprintf_append(res, "fresh:\n");
-        res = asprint_perf(res, &data.fresh);
+        res = asprint_perf(res, &data->fresh);
         res = talloc_asprintf_append(res, "\nredraw:\n");
-        res = asprint_perf(res, &data.redraw);
+        res = asprint_perf(res, &data->redraw);
         *(char **)arg = res;
-        return M_PROPERTY_OK;
+        ret = M_PROPERTY_OK;
+        goto out;
     }
 
     case M_PROPERTY_GET: {
@@ -2933,14 +2935,19 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
         node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
         struct mpv_node *fresh = node_map_add(&node, "fresh", MPV_FORMAT_NODE_ARRAY);
         struct mpv_node *redraw = node_map_add(&node, "redraw", MPV_FORMAT_NODE_ARRAY);
-        get_frame_perf(fresh, &data.fresh);
-        get_frame_perf(redraw, &data.redraw);
+        get_frame_perf(fresh, &data->fresh);
+        get_frame_perf(redraw, &data->redraw);
         *(struct mpv_node *)arg = node;
-        return M_PROPERTY_OK;
+        ret = M_PROPERTY_OK;
+        goto out;
     }
     }
 
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    ret = M_PROPERTY_NOT_IMPLEMENTED;
+
+out:
+    talloc_free(data);
+    return ret;
 }
 
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)

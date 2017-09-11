@@ -27,6 +27,7 @@
 #include "shader_cache.h"
 #include "video/csputils.h"
 #include "video/out/filter_kernels.h"
+#include "video/out/vo.h"
 
 // Assume we have this many texture units for sourcing additional passes.
 // The actual texture unit assignment is dynamic.
@@ -164,7 +165,6 @@ void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
 void gl_video_set_fb_depth(struct gl_video *p, int fb_depth);
-struct voctrl_performance_data;
 void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out);
 void gl_video_set_clear_color(struct gl_video *p, struct m_color color);
 void gl_video_set_osd_pts(struct gl_video *p, double pts);

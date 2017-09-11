@@ -152,7 +152,7 @@ struct mp_pass_perf {
     uint64_t count;
 };
 
-#define VO_PASS_PERF_MAX 128
+#define VO_PASS_PERF_MAX 64
 
 struct mp_frame_perf {
     int count;
