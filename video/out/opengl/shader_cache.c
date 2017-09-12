@@ -46,6 +46,7 @@ struct sc_uniform {
 struct sc_cached_uniform {
     union uniform_val v;
     int index; // for ra_renderpass_input_val
+    bool set; // whether the uniform has ever been set
 };
 
 struct sc_entry {
@@ -472,10 +473,11 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
 {
     struct sc_cached_uniform *un = &e->cached_uniforms[n];
     struct ra_layout layout = ra_renderpass_input_layout(&u->input);
-    if (layout.size > 0 && memcmp(&un->v, &u->v, layout.size) == 0)
+    if (layout.size > 0 && un->set && memcmp(&un->v, &u->v, layout.size) == 0)
         return;
 
     un->v = u->v;
+    un->set = true;
 
     switch (u->type) {
     case SC_UNIFORM_TYPE_GLOBAL: {
