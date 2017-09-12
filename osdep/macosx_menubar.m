@@ -124,6 +124,11 @@ static NSString *default_input_conf = @
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Close",
+                        @"action"     : @"performClose:",
+                        @"key"        : @"w",
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Save Screenshot",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
