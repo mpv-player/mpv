@@ -85,9 +85,29 @@ static NSString *default_input_conf = @
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Services",
+                        @"key"        : @"",
+                    }],
+                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Hide mpv",
                         @"action"     : @"hide:",
                         @"key"        : @"h",
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Hide Others",
+                        @"action"     : @"hideOtherApplications:",
+                        @"key"        : @"h",
+                        @"modifiers"  : [NSNumber numberWithUnsignedInteger:
+                            NSEventModifierFlagCommand |
+                            NSEventModifierFlagOption],
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Show All",
+                        @"action"     : @"unhideAllApplications:",
+                        @"key"        : @"",
                         @"target"     : NSApp
                     }],
                     @{ @"name": @"separator" },
@@ -165,6 +185,11 @@ static NSString *default_input_conf = @
                         @"name"       : @"Paste",
                         @"action"     : @"paste:",
                         @"key"        : @"v"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Delete",
+                        @"action"     : @"delete:",
+                        @"key"        : @""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Select All",
@@ -601,6 +626,12 @@ static NSString *default_input_conf = @
                 NSMenuItem *iItem = [menu addItemWithTitle:subMenu[@"name"]
                                action:NSSelectorFromString(subMenu[@"action"])
                         keyEquivalent:subMenu[@"key"]];
+                if (subMenu[@"modifiers"]) {
+                    [iItem setKeyEquivalentModifierMask:[subMenu[@"modifiers"] unsignedIntegerValue]];
+                }
+                if ([subMenu[@"name"] isEqual:@"Services"]) {
+                    iItem.submenu = NSApp.servicesMenu = [NSMenu alloc];
+                }
                 [iItem setTarget:subMenu[@"target"]];
                 [subMenu setObject:iItem forKey:@"menuItem"];
             }
