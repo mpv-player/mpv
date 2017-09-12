@@ -89,6 +89,12 @@ def build(ctx):
 
     ctx(
         features = "file2string",
+        source = "etc/mpv.conf",
+        target = "player/mpv_conf.h",
+    )
+
+    ctx(
+        features = "file2string",
         source = "etc/builtin.conf",
         target = "player/builtin_conf.inc",
     )
