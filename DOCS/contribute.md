@@ -68,7 +68,7 @@ Sending patches
   be documented in input.rst. All changes to the user interface (options,
   properties, commands) must be documented with a small note in
   interface-changes.rst (although documenting additions is optional, and
-  obscure corner cases and potentially be skipped too). Changes to the libmpv
+  obscure corner cases can potentially be skipped too). Changes to the libmpv
   API must be reflected in the libmpv's headers doxygen, and should be
   documented in client-api-changes.rst.
 
