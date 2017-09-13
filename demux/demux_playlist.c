@@ -19,6 +19,7 @@
 #include <string.h>
 #include <strings.h>
 #include <dirent.h>
+#include <ctype.h>
 
 #include "config.h"
 #include "common/common.h"
@@ -270,9 +271,73 @@ static bool scan_dir(struct pl_parser *p, char *path,
     return true;
 }
 
+/* http://www.davekoelle.com/alphanum.html */
+static int alphanum_cmp(const char *l, const char *r)
+{
+    enum mode_t {
+        STRING,
+        NUMBER,
+    } mode = STRING;
+
+    while (*l && *r) {
+        if (mode == STRING) {
+            char l_char, r_char;
+            while ((l_char = *l) && (r_char = *r)) {
+                // check if this are digit characters
+                const int l_digit = isdigit(l_char);
+                const int r_digit = isdigit(r_char);
+                // if both characters are digits, we continue in NUMBER mode
+                if (l_digit && r_digit) {
+                    mode = NUMBER;
+                    break;
+                }
+                // if only the left character is a digit, we have a result
+                if (l_digit)
+                    return -1;
+                // if only the right character is a digit, we have a result
+                if (r_digit)
+                    return +1;
+                // compute the difference of both characters
+                const int diff = l_char - r_char;
+                // if they differ we have a result
+                if (diff != 0)
+                    return diff;
+                // otherwise process the next characters
+                ++l;
+                ++r;
+            }
+        } else { // mode == NUMBER
+            // get the left number
+            char *end;
+            unsigned long l_int = strtoul(l, &end, 10);
+            l = end;
+
+            // get the right number
+            unsigned long r_int = strtoul(r, &end, 10);
+            r = end;
+
+            // if the difference is not equal to zero, we have a comparison result
+            const long diff = l_int - r_int;
+            if (diff < 0)
+                return -1;
+            if (diff > 0)
+                return +1;
+
+            // otherwise we process the next substring in STRING mode
+            mode = STRING;
+        }
+    }
+
+    if (*r)
+        return -1;
+    if (*l)
+        return +1;
+    return 0;
+}
+
 static int cmp_filename(const void *a, const void *b)
 {
-    return strcmp(*(char **)a, *(char **)b);
+    return alphanum_cmp(*(char **)a, *(char **)b);
 }
 
 static int parse_dir(struct pl_parser *p)
