@@ -4205,6 +4205,23 @@ The following video options are currently all specific to ``--vo=gpu`` and
     as mpv's vulkan implementation currently does not try and protect textures
     against concurrent access.
 
+``--spirv-compiler=<compiler>``
+    Controls which compiler is used to translate GLSL to SPIR-V. This is
+    (currently) only relevant for ``--gpu-api=vulkan``. The possible choices
+    are:
+
+    auto
+        Use the first available compiler. (Default)
+    shaderc
+        Use libshaderc, which is an API wrapper around glslang. This is
+        generally the most preferred, if available.
+    nvidia
+        Use nvidia's built-in compiler. Only works for nvidia GPUs. Can be
+        buggy, but also supports some features glslang does not. Only works
+        with vulkan. WARNING: Pretty buggy, handles push constants incorrectly
+        (this causes graphical corruption with e.g. ``--temporal-dither``)! Use
+        only for testing.
+
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
     which can be injected at almost arbitrary points in the rendering pipeline,

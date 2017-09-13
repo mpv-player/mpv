@@ -330,6 +330,7 @@ typedef struct MPOpts {
     struct angle_opts *angle_opts;
     struct opengl_opts *opengl_opts;
     struct vulkan_opts *vulkan_opts;
+    struct spirv_opts *spirv_opts;
     struct cocoa_opts *cocoa_opts;
     struct dvd_opts *dvd_opts;
 

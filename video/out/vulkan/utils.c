@@ -1,5 +1,6 @@
 #include <libavutil/macros.h>
 
+#include "video/out/gpu/spirv.h"
 #include "utils.h"
 #include "malloc.h"
 
@@ -445,13 +446,12 @@ error:
 bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 {
     assert(vk->physd);
-
-    VkQueueFamilyProperties *qfs = NULL;
-    int qfnum;
+    void *tmp = talloc_new(NULL);
 
     // Enumerate the queue families and find suitable families for each task
+    int qfnum;
     vkGetPhysicalDeviceQueueFamilyProperties(vk->physd, &qfnum, NULL);
-    qfs = talloc_array(NULL, VkQueueFamilyProperties, qfnum);
+    VkQueueFamilyProperties *qfs = talloc_array(tmp, VkQueueFamilyProperties, qfnum);
     vkGetPhysicalDeviceQueueFamilyProperties(vk->physd, &qfnum, qfs);
 
     MP_VERBOSE(vk, "Queue families supported by device:\n");
@@ -503,20 +503,24 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
         .pQueuePriorities = priorities,
     };
 
-    static const char *exts[] = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_NV_GLSL_SHADER_EXTENSION_NAME,
-    };
+    const char **exts = NULL;
+    int num_exts = 0;
+    MP_TARRAY_APPEND(tmp, exts, num_exts, VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    if (vk->spirv->required_ext)
+        MP_TARRAY_APPEND(tmp, exts, num_exts, vk->spirv->required_ext);
 
     VkDeviceCreateInfo dinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .queueCreateInfoCount = 1,
         .pQueueCreateInfos = &qinfo,
         .ppEnabledExtensionNames = exts,
-        .enabledExtensionCount = MP_ARRAY_SIZE(exts),
+        .enabledExtensionCount = num_exts,
     };
 
-    MP_VERBOSE(vk, "Creating vulkan device...\n");
+    MP_VERBOSE(vk, "Creating vulkan device with extensions:\n");
+    for (int i = 0; i < num_exts; i++)
+        MP_VERBOSE(vk, "    %s\n", exts[i]);
+
     VK(vkCreateDevice(vk->physd, &dinfo, MPVK_ALLOCATOR, &vk->dev));
 
     vk_malloc_init(vk);
@@ -525,12 +529,12 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     if (!vk_cmdpool_init(vk, qinfo, qfs[idx], &vk->pool))
         goto error;
 
-    talloc_free(qfs);
+    talloc_free(tmp);
     return true;
 
 error:
     MP_ERR(vk, "Failed creating logical device!\n");
-    talloc_free(qfs);
+    talloc_free(tmp);
     return false;
 }
 

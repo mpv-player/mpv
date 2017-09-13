@@ -1,6 +1,8 @@
+#include "video/out/gpu/utils.h"
+#include "video/out/gpu/spirv.h"
+
 #include "ra_vk.h"
 #include "malloc.h"
-#include "video/out/opengl/utils.h"
 
 static struct ra_fns ra_fns_vk;
 
@@ -185,13 +187,10 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     struct ra_vk *p = ra->priv = talloc_zero(ra, struct ra_vk);
     p->vk = vk;
 
-    // There's no way to query the supported GLSL version from VK_NV_glsl_shader
-    // (thanks nvidia), so just pick the GL version that modern nvidia devices
-    // support..
-    ra->glsl_version = 450;
+    ra->caps |= vk->spirv->ra_caps;
+    ra->glsl_version = vk->spirv->glsl_version;
     ra->glsl_vulkan = true;
     ra->max_shmem = vk->limits.maxComputeSharedMemorySize;
-    ra->caps = RA_CAP_NESTED_ARRAY;
 
     if (vk->pool->props.queueFlags & VK_QUEUE_COMPUTE_BIT)
         ra->caps |= RA_CAP_COMPUTE;
@@ -821,14 +820,9 @@ error:
 
 // For ra_renderpass.priv
 struct ra_renderpass_vk {
-    // Compiled shaders
-    VkShaderModule vert;
-    VkShaderModule frag;
-    VkShaderModule comp;
     // Pipeline / render pass
     VkPipeline pipe;
     VkPipelineLayout pipeLayout;
-    VkPipelineCache pipeCache;
     VkRenderPass renderPass;
     // Descriptor set (bindings)
     VkDescriptorSetLayout dsLayout;
@@ -854,14 +848,10 @@ static void vk_renderpass_destroy(struct ra *ra, struct ra_renderpass *pass)
 
     ra_buf_pool_uninit(ra, &pass_vk->vbo);
     vkDestroyPipeline(vk->dev, pass_vk->pipe, MPVK_ALLOCATOR);
-    vkDestroyPipelineCache(vk->dev, pass_vk->pipeCache, MPVK_ALLOCATOR);
     vkDestroyRenderPass(vk->dev, pass_vk->renderPass, MPVK_ALLOCATOR);
     vkDestroyPipelineLayout(vk->dev, pass_vk->pipeLayout, MPVK_ALLOCATOR);
     vkDestroyDescriptorPool(vk->dev, pass_vk->dsPool, MPVK_ALLOCATOR);
     vkDestroyDescriptorSetLayout(vk->dev, pass_vk->dsLayout, MPVK_ALLOCATOR);
-    vkDestroyShaderModule(vk->dev, pass_vk->vert, MPVK_ALLOCATOR);
-    vkDestroyShaderModule(vk->dev, pass_vk->frag, MPVK_ALLOCATOR);
-    vkDestroyShaderModule(vk->dev, pass_vk->comp, MPVK_ALLOCATOR);
 
     talloc_free(pass);
 }
@@ -909,6 +899,82 @@ static bool vk_get_input_format(struct ra *ra, struct ra_renderpass_input *inp,
     return false;
 }
 
+static const char vk_cache_magic[4] = {'R','A','V','K'};
+static const int vk_cache_version = 2;
+
+struct vk_cache_header {
+    char magic[sizeof(vk_cache_magic)];
+    int cache_version;
+    char compiler[SPIRV_NAME_MAX_LEN];
+    int compiler_version;
+    size_t vert_spirv_len;
+    size_t frag_spirv_len;
+    size_t comp_spirv_len;
+    size_t pipecache_len;
+};
+
+static bool vk_use_cached_program(const struct ra_renderpass_params *params,
+                                  const struct spirv_compiler *spirv,
+                                  struct bstr *vert_spirv,
+                                  struct bstr *frag_spirv,
+                                  struct bstr *comp_spirv,
+                                  struct bstr *pipecache)
+{
+    struct bstr cache = params->cached_program;
+    if (cache.len < sizeof(struct vk_cache_header))
+        return false;
+
+    struct vk_cache_header *header = (struct vk_cache_header *)cache.start;
+    cache = bstr_cut(cache, sizeof(*header));
+
+    if (strncmp(header->magic, vk_cache_magic, sizeof(vk_cache_magic)) != 0)
+        return false;
+    if (header->cache_version != vk_cache_version)
+        return false;
+    if (strncmp(header->compiler, spirv->name, sizeof(header->compiler)) != 0)
+        return false;
+    if (header->compiler_version != spirv->compiler_version)
+        return false;
+
+#define GET(ptr) \
+    if (cache.len < header->ptr##_len)                      \
+            return false;                                   \
+        *ptr = bstr_splice(cache, 0, header->ptr##_len);    \
+        cache = bstr_cut(cache, ptr->len);
+
+    GET(vert_spirv);
+    GET(frag_spirv);
+    GET(comp_spirv);
+    GET(pipecache);
+    return true;
+}
+
+static VkResult vk_compile_glsl(struct ra *ra, void *tactx,
+                                enum glsl_shader type, const char *glsl,
+                                struct bstr *spirv)
+{
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+    VkResult ret = VK_SUCCESS;
+    int msgl = MSGL_DEBUG;
+
+    if (!vk->spirv->fns->compile_glsl(vk->spirv, tactx, type, glsl, spirv)) {
+        ret = VK_ERROR_INVALID_SHADER_NV;
+        msgl = MSGL_ERR;
+    }
+
+    static const char *shader_names[] = {
+        [GLSL_SHADER_VERTEX]   = "vertex",
+        [GLSL_SHADER_FRAGMENT] = "fragment",
+        [GLSL_SHADER_COMPUTE]  = "compute",
+    };
+
+    if (mp_msg_test(ra->log, msgl)) {
+        MP_MSG(ra, msgl, "%s shader source:\n", shader_names[type]);
+        mp_log_source(ra->log, msgl, glsl);
+    }
+    return ret;
+}
+
 static const VkPipelineStageFlagBits stageFlags[] = {
     [RA_RENDERPASS_TYPE_RASTER]  = VK_SHADER_STAGE_FRAGMENT_BIT,
     [RA_RENDERPASS_TYPE_COMPUTE] = VK_SHADER_STAGE_COMPUTE_BIT,
@@ -918,12 +984,21 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
                                     const struct ra_renderpass_params *params)
 {
     struct mpvk_ctx *vk = ra_vk_get(ra);
+    bool success = false;
+    assert(vk->spirv);
 
     struct ra_renderpass *pass = talloc_zero(NULL, struct ra_renderpass);
     pass->params = *ra_renderpass_params_copy(pass, params);
     pass->params.cached_program = (bstr){0};
     struct ra_renderpass_vk *pass_vk = pass->priv =
         talloc_zero(pass, struct ra_renderpass_vk);
+
+    // temporary allocations/objects
+    void *tmp = talloc_new(NULL);
+    VkPipelineCache pipeCache = NULL;
+    VkShaderModule vert_shader = NULL;
+    VkShaderModule frag_shader = NULL;
+    VkShaderModule comp_shader = NULL;
 
     static int dsCount[RA_VARTYPE_COUNT] = {0};
     VkDescriptorSetLayoutBinding *bindings = NULL;
@@ -943,7 +1018,7 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
                 .stageFlags = stageFlags[params->type],
             };
 
-            MP_TARRAY_APPEND(pass, bindings, num_bindings, desc);
+            MP_TARRAY_APPEND(tmp, bindings, num_bindings, desc);
             dsCount[inp->type]++;
             break;
         }
@@ -953,6 +1028,7 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
 
     VkDescriptorPoolSize *dsPoolSizes = NULL;
     int poolSizeCount = 0;
+
     for (enum ra_vartype t = 0; t < RA_VARTYPE_COUNT; t++) {
         if (dsCount[t] > 0) {
             VkDescriptorPoolSize dssize = {
@@ -960,7 +1036,7 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
                 .descriptorCount = dsCount[t] * MPVK_NUM_DS,
             };
 
-            MP_TARRAY_APPEND(pass, dsPoolSizes, poolSizeCount, dssize);
+            MP_TARRAY_APPEND(tmp, dsPoolSizes, poolSizeCount, dssize);
         }
     }
 
@@ -972,7 +1048,6 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
     };
 
     VK(vkCreateDescriptorPool(vk->dev, &pinfo, MPVK_ALLOCATOR, &pass_vk->dsPool));
-    talloc_free(dsPoolSizes);
 
     pass_vk->dswrite = talloc_array(pass, VkWriteDescriptorSet, num_bindings);
     pass_vk->dsiinfo = talloc_array(pass, VkDescriptorImageInfo, num_bindings);
@@ -1009,13 +1084,35 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
     VK(vkCreatePipelineLayout(vk->dev, &linfo, MPVK_ALLOCATOR,
                               &pass_vk->pipeLayout));
 
+    struct bstr vert = {0}, frag = {0}, comp = {0}, pipecache = {0};
+    if (vk_use_cached_program(params, vk->spirv, &vert, &frag, &comp, &pipecache)) {
+        MP_VERBOSE(ra, "Using cached SPIR-V and VkPipeline.\n");
+    } else {
+        pipecache.len = 0;
+        switch (params->type) {
+        case RA_RENDERPASS_TYPE_RASTER:
+            VK(vk_compile_glsl(ra, tmp, GLSL_SHADER_VERTEX,
+                               params->vertex_shader, &vert));
+            VK(vk_compile_glsl(ra, tmp, GLSL_SHADER_FRAGMENT,
+                               params->frag_shader, &frag));
+            comp.len = 0;
+            break;
+        case RA_RENDERPASS_TYPE_COMPUTE:
+            VK(vk_compile_glsl(ra, tmp, GLSL_SHADER_COMPUTE,
+                               params->compute_shader, &comp));
+            frag.len = 0;
+            vert.len = 0;
+            break;
+        }
+    }
+
     VkPipelineCacheCreateInfo pcinfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
-        .pInitialData = params->cached_program.start,
-        .initialDataSize = params->cached_program.len,
+        .pInitialData = pipecache.start,
+        .initialDataSize = pipecache.len,
     };
 
-    VK(vkCreatePipelineCache(vk->dev, &pcinfo, MPVK_ALLOCATOR, &pass_vk->pipeCache));
+    VK(vkCreatePipelineCache(vk->dev, &pcinfo, MPVK_ALLOCATOR, &pipeCache));
 
     VkShaderModuleCreateInfo sinfo = {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -1023,33 +1120,15 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
 
     switch (params->type) {
     case RA_RENDERPASS_TYPE_RASTER: {
-        sinfo.pCode = (uint32_t *)params->vertex_shader;
-        sinfo.codeSize = strlen(params->vertex_shader);
-        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &pass_vk->vert));
+        sinfo.pCode = (uint32_t *)vert.start;
+        sinfo.codeSize = vert.len;
+        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &vert_shader));
 
-        sinfo.pCode = (uint32_t *)params->frag_shader;
-        sinfo.codeSize = strlen(params->frag_shader);
-        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &pass_vk->frag));
+        sinfo.pCode = (uint32_t *)frag.start;
+        sinfo.codeSize = frag.len;
+        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &frag_shader));
 
-        VK(vk_create_render_pass(vk->dev, params->target_format,
-                                 params->enable_blend, &pass_vk->renderPass));
-
-        VkPipelineShaderStageCreateInfo stages[] = {
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .stage = VK_SHADER_STAGE_VERTEX_BIT,
-                .module = pass_vk->vert,
-                .pName = "main",
-            },
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-                .module = pass_vk->frag,
-                .pName = "main",
-            }
-        };
-
-        VkVertexInputAttributeDescription *attrs = talloc_array(pass,
+        VkVertexInputAttributeDescription *attrs = talloc_array(tmp,
                 VkVertexInputAttributeDescription, params->num_vertex_attribs);
 
         for (int i = 0; i < params->num_vertex_attribs; i++) {
@@ -1066,6 +1145,8 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
                 goto error;
             }
         }
+        VK(vk_create_render_pass(vk->dev, params->target_format,
+                                 params->enable_blend, &pass_vk->renderPass));
 
         static const VkBlendFactor blendFactors[] = {
             [RA_BLEND_ZERO]                = VK_BLEND_FACTOR_ZERO,
@@ -1074,24 +1155,22 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
             [RA_BLEND_ONE_MINUS_SRC_ALPHA] = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
         };
 
-        VkPipelineColorBlendAttachmentState binfo = {
-            .blendEnable = params->enable_blend,
-            .colorBlendOp = VK_BLEND_OP_ADD,
-            .srcColorBlendFactor = blendFactors[params->blend_src_rgb],
-            .dstColorBlendFactor = blendFactors[params->blend_dst_rgb],
-            .alphaBlendOp = VK_BLEND_OP_ADD,
-            .srcAlphaBlendFactor = blendFactors[params->blend_src_alpha],
-            .dstAlphaBlendFactor = blendFactors[params->blend_dst_alpha],
-            .colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
-                              VK_COLOR_COMPONENT_G_BIT |
-                              VK_COLOR_COMPONENT_B_BIT |
-                              VK_COLOR_COMPONENT_A_BIT,
-        };
-
         VkGraphicsPipelineCreateInfo cinfo = {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            .stageCount = MP_ARRAY_SIZE(stages),
-            .pStages = &stages[0],
+            .stageCount = 2,
+            .pStages = (VkPipelineShaderStageCreateInfo[]) {
+                {
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage = VK_SHADER_STAGE_VERTEX_BIT,
+                    .module = vert_shader,
+                    .pName = "main",
+                }, {
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .module = frag_shader,
+                    .pName = "main",
+                }
+            },
             .pVertexInputState = &(VkPipelineVertexInputStateCreateInfo) {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
                 .vertexBindingDescriptionCount = 1,
@@ -1125,7 +1204,19 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
             .pColorBlendState = &(VkPipelineColorBlendStateCreateInfo) {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
                 .attachmentCount = 1,
-                .pAttachments = &binfo,
+                .pAttachments = &(VkPipelineColorBlendAttachmentState) {
+                    .blendEnable = params->enable_blend,
+                    .colorBlendOp = VK_BLEND_OP_ADD,
+                    .srcColorBlendFactor = blendFactors[params->blend_src_rgb],
+                    .dstColorBlendFactor = blendFactors[params->blend_dst_rgb],
+                    .alphaBlendOp = VK_BLEND_OP_ADD,
+                    .srcAlphaBlendFactor = blendFactors[params->blend_src_alpha],
+                    .dstAlphaBlendFactor = blendFactors[params->blend_dst_alpha],
+                    .colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
+                                      VK_COLOR_COMPONENT_G_BIT |
+                                      VK_COLOR_COMPONENT_B_BIT |
+                                      VK_COLOR_COMPONENT_A_BIT,
+                },
             },
             .pDynamicState = &(VkPipelineDynamicStateCreateInfo) {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -1139,43 +1230,73 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
             .renderPass = pass_vk->renderPass,
         };
 
-        VK(vkCreateGraphicsPipelines(vk->dev, pass_vk->pipeCache, 1, &cinfo,
+        VK(vkCreateGraphicsPipelines(vk->dev, pipeCache, 1, &cinfo,
                                      MPVK_ALLOCATOR, &pass_vk->pipe));
         break;
     }
     case RA_RENDERPASS_TYPE_COMPUTE: {
-        sinfo.pCode = (uint32_t *)params->compute_shader;
-        sinfo.codeSize = strlen(params->compute_shader);
-        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &pass_vk->comp));
+        sinfo.pCode = (uint32_t *)comp.start;
+        sinfo.codeSize = comp.len;
+        VK(vkCreateShaderModule(vk->dev, &sinfo, MPVK_ALLOCATOR, &comp_shader));
 
         VkComputePipelineCreateInfo cinfo = {
             .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .stage = {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                 .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-                .module = pass_vk->comp,
+                .module = comp_shader,
                 .pName = "main",
             },
             .layout = pass_vk->pipeLayout,
         };
 
-        VK(vkCreateComputePipelines(vk->dev, pass_vk->pipeCache, 1, &cinfo,
+        VK(vkCreateComputePipelines(vk->dev, pipeCache, 1, &cinfo,
                                     MPVK_ALLOCATOR, &pass_vk->pipe));
         break;
     }
     }
 
-    // Update cached program
-    bstr *prog = &pass->params.cached_program;
-    VK(vkGetPipelineCacheData(vk->dev, pass_vk->pipeCache, &prog->len, NULL));
-    prog->start = talloc_size(pass, prog->len);
-    VK(vkGetPipelineCacheData(vk->dev, pass_vk->pipeCache, &prog->len, prog->start));
+    // Update params->cached_program
+    struct bstr cache = {0};
+    VK(vkGetPipelineCacheData(vk->dev, pipeCache, &cache.len, NULL));
+    cache.start = talloc_size(tmp, cache.len);
+    VK(vkGetPipelineCacheData(vk->dev, pipeCache, &cache.len, cache.start));
 
-    return pass;
+    struct vk_cache_header header = {
+        .cache_version = vk_cache_version,
+        .compiler_version = vk->spirv->compiler_version,
+        .vert_spirv_len = vert.len,
+        .frag_spirv_len = frag.len,
+        .comp_spirv_len = comp.len,
+        .pipecache_len = cache.len,
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(header.magic); i++)
+        header.magic[i] = vk_cache_magic[i];
+    for (int i = 0; i < sizeof(vk->spirv->name); i++)
+        header.compiler[i] = vk->spirv->name[i];
+
+    struct bstr *prog = &pass->params.cached_program;
+    bstr_xappend(pass, prog, (struct bstr){ (char *) &header, sizeof(header) });
+    bstr_xappend(pass, prog, vert);
+    bstr_xappend(pass, prog, frag);
+    bstr_xappend(pass, prog, comp);
+    bstr_xappend(pass, prog, cache);
+
+    success = true;
 
 error:
-    vk_renderpass_destroy(ra, pass);
-    return NULL;
+    if (!success) {
+        vk_renderpass_destroy(ra, pass);
+        pass = NULL;
+    }
+
+    vkDestroyShaderModule(vk->dev, vert_shader, MPVK_ALLOCATOR);
+    vkDestroyShaderModule(vk->dev, frag_shader, MPVK_ALLOCATOR);
+    vkDestroyShaderModule(vk->dev, comp_shader, MPVK_ALLOCATOR);
+    vkDestroyPipelineCache(vk->dev, pipeCache, MPVK_ALLOCATOR);
+    talloc_free(tmp);
+    return pass;
 }
 
 static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
