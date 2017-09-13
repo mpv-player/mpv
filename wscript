@@ -807,6 +807,10 @@ video_output_features = [
         'desc':  'Vulkan context support',
         'func': check_cc(header_name='vulkan/vulkan.h', lib='vulkan'),
     }, {
+        'name': '--shaderc',
+        'desc': 'libshaderc SPIR-V compiler',
+        'func': check_cc(header_name='shaderc/shaderc.h', lib='shaderc_shared'),
+    }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
