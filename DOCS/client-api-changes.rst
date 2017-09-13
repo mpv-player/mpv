@@ -32,7 +32,7 @@ API changes
 
 ::
 
- --- mpv 0.26.0 ---
+ --- mpv 0.27.0 ---
  1.25   - remove setting "no-" options via mpv_set_option*(). (See corresponding
           deprecation in 0.23.0.)
  --- mpv 0.25.0 ---

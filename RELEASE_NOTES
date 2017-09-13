@@ -1,3 +1,104 @@
+Release 0.27.0
+==============
+
+Features
+--------
+
+Added
+~~~~~
+
+- Windows: handle media keys
+- libmpv: options: add a thread-safe way to notify option updates
+- vd_lavc/vo_opengl: support embedded ICC profiles
+- vo: rendering API abstraction for future non-GL video outputs
+- vo_opengl: add a gamut warning feature to highlight out-of-gamut colors (--gamut-warning)
+- vo_opengl: add direct rendering support (--vd-lavc-dr)
+- vo_opengl: implement (faster) compute shader based EWA kernel
+- vo_opengl: implement HLG OOTF inverse
+- vo_opengl: support HDR peak detection (--hdr-compute-peak)
+- vo_opengl: support float input pixel formats
+- vo_opengl: support loading custom user textures (#4586)
+- vo_opengl: support user compute shaders
+
+
+Removed
+~~~~~~~
+
+- Remove video equalizer handling from vo_direct3d, vo_sdl, vo_vaapi, and vo_xv (GPL, not worth the effort to support legacy VOs)
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- macOS: add --no-native-fs option to disable the native macOS fullscreen (#4014)
+- player: add --track-auto-selection option
+
+
+Changed
+~~~~~~~
+
+- input: use mnemonic names for mouse buttons, same as Qt: https://doc.qt.io/qt-5/qt.html#MouseButton-enum
+- options: change --loop semantics
+- player: make --lavfi-complex changeable at runtime
+- vf_eq: remove this filter (GPL; uses libavfilter’s eq filter now, with changed semantics)
+- video: change --deinterlace behavior
+- vo_opengl: generalize HDR tone mapping to gamut mapping, --hdr-tone-mapping → --tone-mapping
+
+
+Removed
+~~~~~~~
+
+- --field-dominance (GPL-only author, no chance of relicensing)
+- input: drop deprecated "osd" command
+- options: drop --video-aspect-method=hybrid (GPL-only)
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- TOOLS/autocrop.lua: fix cropdetect black limit for 10-bit videos
+- TOOLS/lua/autodeint: update to lavfi-bridge
+- TOOLS/lua/status-line: improve and update
+- af_lavrresample: don't call swr_set_compensation() unless necessary (#4716)
+- ao_oss: fix period_size calculation (#4642)
+- ao_rsound: allow setting the host
+- audio: fix spdif mode
+- filter_kernels: correct spline64 kernel
+- macOS: fix media keys input when other Apps steal the priority (#4834)
+- macOS: fix the support of multiple renderers (GPU switch) (#2371)
+- macOS: remove the standard "Show Tab Bar" menu item
+- options: fix --include (#4673)
+- player: fix --end with large values (#4650)
+- player: fix confusion in audio resync code (#4688)
+- player: make refresh seeks slightly more robust (#4757)
+- player: readd smi subtitle extension (#4626)
+- vd_lavc: change auto-probe order to prefer cuda over vdpau-copy
+- vd_lavc: fix device leak with copy-mode hwaccels (#4735)
+- vd_lavc: fix hwdec compatibility with yuvj420p formats
+- vd_lavc: fix mid-stream hwdec fallback
+- vf_vapoursynth: fix inverted sign and restore 10 bit support (#4720)
+- video: increase --monitorpixelaspect range
+- vo_opengl: adjust the rules for linearization (#4631)
+- vo_opengl: scale deband-grain to the signal range
+- vo_opengl: tone map on the maximum signal component
+- x11: fix that window could be resized when using embedding (#4784)
+- ytdl_hook: resolve relative paths when joining segment urls (#4827)
+- ytdl_hook: support fragments with relative paths, fixes segmented DASH
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.26.0..v0.27.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.26.0...v0.27.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.26.0..v0.27.0
+
+
 Release 0.26.0
 ==============
 
