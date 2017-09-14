@@ -50,6 +50,7 @@
 extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
+extern const struct vo_driver video_out_gpu;
 extern const struct vo_driver video_out_opengl;
 extern const struct vo_driver video_out_opengl_cb;
 extern const struct vo_driver video_out_null;
@@ -69,8 +70,8 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_RPI
     &video_out_rpi,
 #endif
-#if HAVE_GL
-    &video_out_opengl,
+#if HAVE_GPU
+    &video_out_gpu,
 #endif
 #if HAVE_VDPAU
     &video_out_vdpau,
@@ -107,6 +108,7 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_lavc,
 #endif
 #if HAVE_GL
+    &video_out_opengl,
     &video_out_opengl_cb,
 #endif
     NULL

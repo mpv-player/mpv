@@ -667,29 +667,29 @@ Video
     :auto:      enable best hw decoder (see below)
     :yes:       exactly the same as ``auto``
     :auto-copy: enable best hw decoder with copy-back (see below)
-    :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
+    :vdpau:     requires ``--vo=gpu`` or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
+    :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
-    :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up),
+    :videotoolbox: requires ``--vo=gpu`` (OS X 10.8 and up),
                    or ``--vo=opengl-cb`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (OS X 10.8 or iOS 9.0 and up)
-    :dxva2:     requires ``--vo=opengl`` with ``--opengl-backend=angle`` or
-                ``--opengl-backend=dxinterop`` (Windows only)
+    :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=angle`` or
+                ``--gpu-context=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :d3d11va:   requires ``--vo=opengl`` with ``--opengl-backend=angle``
+    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=angle``
                 (Windows 8+ only)
     :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
     :mediacodec: copies video back to system RAM (Android only)
-    :rpi:       requires ``--vo=opengl`` (Raspberry Pi only - default if available)
+    :rpi:       requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
-    :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
+    :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
-    if you are not using ``--vo=vdpau`` or ``--vo=opengl``, vdpau decoding will
+    if you are not using ``--vo=gpu`` or ``--vo=vdpau``, vdpau decoding will
     never be enabled. Also note that if the first found method doesn't actually
     work, it will always fall back to software decoding, instead of trying the
     next method (might matter on some Linux systems).
@@ -701,10 +701,10 @@ Video
     guaranteed to incur no additional loss compared to software decoding, and
     will allow CPU processing with video filters.
 
-    The ``vaapi`` mode, if used with ``--vo=opengl``, requires Mesa 11 and most
+    The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11 and most
     likely works with Intel GPUs only. It also requires the opengl EGL backend
     (automatically used if available). You can also try the old GLX backend by
-    forcing it with ``--opengl-backend=x11``, but the vaapi/GLX interop is
+    forcing it with ``--gpu-context=x11``, but the vaapi/GLX interop is
     said to be slower than ``vaapi-copy``.
 
     The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
@@ -712,7 +712,7 @@ Video
     output path. To use this deinterlacing you must pass the option:
     ``vd-lavc-o=deint=[weave|bob|adaptive]``.
     Pass ``weave`` (or leave the option unset) to not attempt any
-    deinterlacing. ``cuda`` should always be preferred unless the ``opengl``
+    deinterlacing. ``cuda`` should always be preferred unless the ``gpu``
     vo is not being used or filters are required.
 
     Most video filters will not work with hardware decoding as they are
@@ -739,8 +739,8 @@ Video
         be some loss, or even blatantly incorrect results.
 
         In some cases, RGB conversion is forced, which means the RGB conversion
-        is performed by the hardware decoding API, instead of the OpenGL code
-        used by ``--vo=opengl``. This means certain colorspaces may not display
+        is performed by the hardware decoding API, instead of the shaders
+        used by ``--vo=gpu``. This means certain colorspaces may not display
         correctly, and certain filtering (such as debanding) cannot be applied
         in an ideal way. This will also usually force the use of low quality
         chroma scalers instead of the one specified by ``--cscale``. In other
@@ -772,7 +772,7 @@ Video
         completely ordinary video sources.
 
         ``rpi`` always uses the hardware overlay renderer, even with
-        ``--vo=opengl``.
+        ``--vo=gpu``.
 
         ``cuda`` should be safe, but it has been reported to corrupt the
         timestamps causing glitched, flashing frames on some files. It can also
@@ -800,13 +800,13 @@ Video
         the first thing you should try is disabling it.
 
 ``--opengl-hwdec-interop=<name>``
-    This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
+    This is useful for the ``gpu`` and ``opengl-cb`` VOs for creating the
     hardware decoding OpenGL interop context, but without actually enabling
     hardware decoding itself (like ``--hwdec`` does).
 
     If set to an empty string (default), the ``--hwdec`` option is used.
 
-    For ``opengl``, if set, do not create the interop context on demand, but
+    For ``gpu``, if set, do not create the interop context on demand, but
     when the VO is created.
 
     For ``opengl-cb``, if set, load the interop context as soon as the OpenGL
@@ -1049,7 +1049,7 @@ Video
     This can speed up video upload, and may help with large resolutions or
     slow hardware. This works only with the following VOs:
 
-        - ``opengl``: requires at least OpenGL 4.4.
+        - ``gpu``: requires at least OpenGL 4.4.
 
     (In particular, this can't be made work with ``opengl-cb``.)
 
@@ -2402,8 +2402,8 @@ Window
 ``--force-rgba-osd-rendering``
     Change how some video outputs render the OSD and text subtitles. This
     does not change appearance of the subtitles and only has performance
-    implications. For VOs which support native ASS rendering (like ``vdpau``,
-    ``opengl``, ``direct3d``), this can be slightly faster or slower,
+    implications. For VOs which support native ASS rendering (like ``gpu``,
+    ``vdpau``, ``direct3d``), this can be slightly faster or slower,
     depending on GPU drivers and hardware. For other VOs, this just makes
     rendering slower.
 
@@ -3903,10 +3903,10 @@ ALSA audio output options
     ALSA device).
 
 
-OpenGL renderer options
+GPU renderer options
 -----------------------
 
-The following video options are currently all specific to ``--vo=opengl`` and
+The following video options are currently all specific to ``--vo=gpu`` and
 ``--vo=opengl-cb`` only, which are the only VOs that implement them.
 
 ``--scale=<filter>``
@@ -3917,7 +3917,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         is the default for compatibility reasons.
 
     ``spline36``
-        Mid quality and speed. This is the default when using ``opengl-hq``.
+        Mid quality and speed. This is the default when using ``gpu-hq``.
 
     ``lanczos``
         Lanczos scaling. Provides mid quality and speed. Generally worse than
@@ -4080,7 +4080,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
 ``--linear-scaling``
     Scale in linear light. It should only be used with a
-    ``--opengl-fbo-format`` that has at least 16 bit precision. This option
+    ``--fbo-format`` that has at least 16 bit precision. This option
     has no effect on HDR content.
 
 ``--correct-downscaling``
@@ -4104,7 +4104,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     the ``--tscale`` setting.
 
     Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
-    more information. It should also only be used with an ``--opengl-fbo-format``
+    more information. It should also only be used with an ``--fbo-format``
     that has at least 16 bit precision.
 
 ``--interpolation-threshold=<0..1,-1>``
@@ -4168,10 +4168,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
     ``--temporal-dither`` is in use. 1 (the default) will update on every video
     frame, 2 on every other frame, etc.
 
-``--opengl-debug``
-    Check for OpenGL errors, i.e. call ``glGetError()``. Also, request a
-    debug OpenGL context (which does nothing with current graphics drivers
-    as of this writing).
+``--gpu-debug``
+    Enables GPU debugging. What this means depends on the API type. For OpenGL,
+    it calls ``glGetError()``, and requests a debug context. For Vulkan, it
+    enables validation layers.
 
 ``--opengl-swapinterval=<n>``
     Interval in displayed frames between two buffer swaps. 1 is equivalent to
@@ -4184,7 +4184,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
 
-``--opengl-shaders=<file-list>``
+``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
     which can be injected at almost arbitrary points in the rendering pipeline,
     and access all previous intermediate textures. Each use of the option will
@@ -4226,7 +4226,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     FORMAT <name> (required)
         The texture format for the samples. Supported texture formats are listed
-        in debug logging when the ``opengl`` VO is initialized (look for
+        in debug logging when the ``gpu`` VO is initialized (look for
         ``Texture formats:``). Usually, this follows OpenGL naming conventions.
         For example, ``rgb16`` provides 3 channels with normalized 16 bit
         components. One oddity are float formats: for example, ``rgba16f`` has
@@ -4369,8 +4369,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     vec2 tex_offset
         Texture offset introduced by user shaders or options like panscan, video-align-x/y, video-pan-x/y.
 
-    Internally, vo_opengl may generate any number of the following textures.
-    Whenever a texture is rendered and saved by vo_opengl, all of the passes
+    Internally, vo_gpu may generate any number of the following textures.
+    Whenever a texture is rendered and saved by vo_gpu, all of the passes
     that have hooked into it will run, in the order they were added by the
     user. This is a list of the legal hook points:
 
@@ -4416,8 +4416,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     pass. When overwriting a texture marked ``fixed``, the WIDTH, HEIGHT and
     OFFSET must be left at their default values.
 
-``--opengl-shader=<file>``
-    CLI/config file only alias for ``--opengl-shaders-append``.
+``--glsl-shader=<file>``
+    CLI/config file only alias for ``--glsl-shaders-append``.
 
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
@@ -4470,9 +4470,9 @@ The following video options are currently all specific to ``--vo=opengl`` and
     ``--scale-blur`` option.
 
 ``--opengl-glfinish``
-    Call ``glFinish()`` before and after swapping buffers (default: disabled).
-    Slower, but might improve results when doing framedropping. Can completely
-    ruin performance. The details depend entirely on the OpenGL driver.
+    Call ``glFinish()`` before swapping buffers (default: disabled). Slower,
+    but might improve results when doing framedropping. Can completely ruin
+    performance. The details depend entirely on the OpenGL driver.
 
 ``--opengl-waitvsync``
     Call ``glXWaitVideoSyncSGI`` after each buffer swap (default: disabled).
@@ -4480,15 +4480,6 @@ The following video options are currently all specific to ``--vo=opengl`` and
     possible that this makes video output slower, or has no effect at all.
 
     X11/GLX only.
-
-``--opengl-vsync-fences=<N>``
-    Synchronize the CPU to the Nth past frame using the ``GL_ARB_sync``
-    extension. A value of 0 disables this behavior (default). A value of 1
-    means it will synchronize to the current frame after rendering it. Like
-    ``--glfinish`` and ``--waitvsync``, this can lower or ruin performance. Its
-    advantage is that it can span multiple frames, and effectively limit the
-    number of frames the GPU queues ahead (which also has an influence on
-    vsync).
 
 ``--opengl-dwmflush=<no|windowed|yes|auto>``
     Calls ``DwmFlush`` after swapping buffers on Windows (default: auto). It
@@ -4510,7 +4501,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     used to select a lower feature level, which is mainly useful for debugging.
     Note that OpenGL ES 3.0 is only supported at feature level 10_1 or higher.
     Most extended OpenGL features will not work at lower feature levels
-    (similar to ``--opengl-dumb-mode``).
+    (similar to ``--gpu-dumb-mode``).
 
     Windows with ANGLE only.
 
@@ -4566,7 +4557,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     renderer, though ``--angle-renderer=d3d9`` may give slightly better
     performance on old hardware. Note that the D3D9 renderer only supports
     OpenGL ES 2.0, so most extended OpenGL features will not work if this
-    renderer is selected (similar to ``--opengl-dumb-mode``).
+    renderer is selected (similar to ``--gpu-dumb-mode``).
 
     Windows with ANGLE only.
 
@@ -4587,13 +4578,21 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     OS X only.
 
-``--opengl-sw``
+``--swapchain-depth=<N>``
+    Allow up to N in-flight frames. This essentially controls the frame
+    latency. Increasing the swapchain depth can improve pipelining and prevent
+    missed vsyncs, but increases visible latency. This option only mandates an
+    upper limit, the implementation can use a lower latency than requested
+    internally. A setting of 1 means that the VO will wait for every frame to
+    become visible before starting to render the next frame. (Default: 3)
+
+``--gpu-sw``
     Continue even if a software renderer is detected.
 
-``--opengl-backend=<sys>``
-    The value ``auto`` (the default) selects the windowing backend. You can
-    also pass ``help`` to get a complete list of compiled in backends (sorted
-    by autoprobe order).
+``--gpu-context=<sys>``
+    The value ``auto`` (the default) selects the GPU context. You can also pass
+    ``help`` to get a complete list of compiled in backends (sorted by
+    autoprobe order).
 
     auto
         auto-select (default)
@@ -4617,7 +4616,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     wayland
         Wayland/EGL
     drm
-        DRM/EGL (``drm-egl`` is a deprecated alias)
+        DRM/EGL
     x11egl
         X11/EGL
     mali-fbdev
@@ -4628,19 +4627,32 @@ The following video options are currently all specific to ``--vo=opengl`` and
         performance problems), and is for doing experiments only. Will not
         be used automatically.
 
-``--opengl-es=<mode>``
-    Select whether to use GLES:
+``--gpu-api=<type>``
+    Controls which type of graphics APIs will be accepted:
 
-    yes
-        Try to prefer ES over Desktop GL
-    force2
-        Try to request a ES 2.0 context (the driver might ignore this)
-    no
-        Try to prefer desktop GL over ES
     auto
-        Use the default for each backend (default)
+        Use any available API (default)
+    opengl
+        Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
 
-``--opengl-fbo-format=<fmt>``
+``--opengl-es=<mode>``
+    Controls which type of OpenGL context will be accepted:
+
+    auto
+        Allow all types of OpenGL (default)
+    yes
+        Only allow GLES
+    no
+        Only allow desktop/core GL
+
+``--opengl-restrict=<version>``
+    Restricts all OpenGL versions above a certain version. Versions are encoded
+    in hundreds, i.e. OpenGL 4.5 -> 450. As an example, --opengl-restrict=300
+    would restrict OpenGL 3.0 and higher, effectively only allowing 2.x
+    contexts. Note that this only imposes a limit on context creation APIs, the
+    actual OpenGL context may still have a higher OpenGL version. (Default: 0)
+
+``--fbo-format=<fmt>``
     Selects the internal format of textures used for FBOs. The format can
     influence performance and quality of the video output. ``fmt`` can be one
     of: rgb8, rgb10, rgb10_a2, rgb16, rgb16f, rgb32f, rgba12, rgba16, rgba16f,
@@ -4648,10 +4660,10 @@ The following video options are currently all specific to ``--vo=opengl`` and
     or rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16 is
     available.
 
-``--opengl-gamma=<0.1..2.0>``
-    Set a gamma value (default: 1.0). If gamma is adjusted in other ways (like
-    with the ``--gamma`` option or key bindings and the ``gamma`` property),
-    the value is multiplied with the other gamma value.
+``--gamma-factor=<0.1..2.0>``
+    Set an additional raw gamma factor (default: 1.0). If gamma is adjusted in
+    other ways (like with the ``--gamma`` option or key bindings and the
+    ``gamma`` property), the value is multiplied with the other gamma value.
 
     Recommended values based on the environmental brightness:
 
@@ -4888,7 +4900,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Blend subtitles directly onto upscaled video frames, before interpolation
     and/or color management (default: no). Enabling this causes subtitles to be
     affected by ``--icc-profile``, ``--target-prim``, ``--target-trc``,
-    ``--interpolation``, ``--opengl-gamma`` and ``--post-shader``. It also
+    ``--interpolation``, ``--gpu-gamma`` and ``--post-shader``. It also
     increases subtitle performance when using ``--interpolation``.
 
     The downside of enabling this is that it restricts subtitles to the visible
@@ -4918,7 +4930,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         if the video contains alpha information (which is extremely rare). May
         not be supported on all platforms. If alpha framebuffers are
         unavailable, it silently falls back on a normal framebuffer. Note that
-        if you set the ``--opengl-fbo-format`` option to a non-default value, a
+        if you set the ``--fbo-format`` option to a non-default value, a
         format with alpha must be specified, or this won't work.
         This does not work on X11 with EGL and Mesa (freedesktop bug 67676).
     no
@@ -4933,7 +4945,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Color used to draw parts of the mpv window not covered by video. See
     ``--osd-color`` option how colors are defined.
 
-``--opengl-tex-pad-x``, ``--opengl-tex-pad-y``
+``--gpu-tex-pad-x``, ``--gpu-tex-pad-y``
     Enlarge the video source textures by this many pixels. For debugging only
     (normally textures are sized exactly, but due to hardware decoding interop
     we may have to deal with additional padding, which can be tested with these
@@ -4947,8 +4959,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     flipping GL front and backbuffers immediately (i.e. it doesn't call it
     in display-sync mode).
 
-``--opengl-dumb-mode=<yes|no|auto>``
-    This mode is extremely restricted, and will disable most extended OpenGL
+``--gpu-dumb-mode=<yes|no|auto>``
+    This mode is extremely restricted, and will disable most extended
     features. That includes high quality scalers and custom shaders!
 
     It is intended for hardware that does not support FBOs (including GLES,
@@ -4961,17 +4973,15 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     This option might be silently removed in the future.
 
-``--opengl-shader-cache-dir=<dirname>``
-    Store and load compiled GL shaders in this directory. Normally, shader
-    compilation is very fast, so this is usually not needed. But some GL
-    implementations (notably ANGLE, the default on Windows) have relatively
-    slow shader compilation, and can cause startup delays.
+``--gpu-shader-cache-dir=<dirname>``
+    Store and load compiled GLSL shaders in this directory. Normally, shader
+    compilation is very fast, so this is usually not needed. It mostly matters
+    for GPU APIs that require internally recompiling shaders to other languages,
+    for example anything based on ANGLE or Vulkan. Enabling this can improve
+    startup performance on these platforms.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
-
-    This option might be silently removed in the future, if ANGLE fixes shader
-    compilation speed.
 
 ``--cuda-decode-device=<auto|0..>``
     Choose the GPU device used for decoding when using the ``cuda`` hwdec.

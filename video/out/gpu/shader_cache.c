@@ -14,7 +14,6 @@
 #include "options/path.h"
 #include "stream/stream.h"
 #include "shader_cache.h"
-#include "formats.h"
 #include "utils.h"
 
 // Force cache flush if more than this number of shaders is created.
@@ -361,7 +360,7 @@ void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, float f[2])
     u->v.f[1] = f[1];
 }
 
-void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, GLfloat f[3])
+void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, float f[3])
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_FLOAT;
@@ -379,7 +378,7 @@ static void transpose2x2(float r[2 * 2])
 }
 
 void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
-                        bool transpose, GLfloat *v)
+                        bool transpose, float *v)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_FLOAT;
@@ -401,7 +400,7 @@ static void transpose3x3(float r[3 * 3])
 }
 
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
-                        bool transpose, GLfloat *v)
+                        bool transpose, float *v)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_FLOAT;

@@ -436,9 +436,6 @@ struct ra_fns {
     // delayed by a few frames. When no value is available, this returns 0.
     uint64_t (*timer_stop)(struct ra *ra, ra_timer *timer);
 
-    // Hint that possibly queued up commands should be sent to the GPU. Optional.
-    void (*flush)(struct ra *ra);
-
     // Associates a marker with any past error messages, for debugging
     // purposes. Optional.
     void (*debug_marker)(struct ra *ra, const char *msg);

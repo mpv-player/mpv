@@ -19,6 +19,7 @@
 #include "video/out/wayland_common.h"
 #include "context.h"
 #include "egl_helpers.h"
+#include "utils.h"
 
 static void egl_resize(struct vo_wayland_state *wl)
 {
@@ -63,30 +64,42 @@ static void egl_resize(struct vo_wayland_state *wl)
     wl->vo->want_redraw = true;
 }
 
-static int egl_create_context(struct vo_wayland_state *wl, MPGLContext *ctx,
-                              int flags)
+static void waylandgl_swap_buffers(struct ra_ctx *ctx)
 {
-    GL *gl = ctx->gl;
+    struct vo_wayland_state *wl = ctx->vo->wayland;
+    vo_wayland_wait_events(ctx->vo, 0);
+    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+}
+
+static bool egl_create_context(struct ra_ctx *ctx, struct vo_wayland_state *wl)
+{
+    GL *gl = ctx->priv = talloc_zero(ctx, GL);
 
     if (!(wl->egl_context.egl.dpy = eglGetDisplay(wl->display.display)))
-        return -1;
+        return false;
 
     if (eglInitialize(wl->egl_context.egl.dpy, NULL, NULL) != EGL_TRUE)
-        return -1;
+        return false;
 
-    if (!mpegl_create_context(wl->egl_context.egl.dpy, wl->log, flags,
+    if (!mpegl_create_context(ctx, wl->egl_context.egl.dpy,
                               &wl->egl_context.egl.ctx,
                               &wl->egl_context.egl.conf))
-        return -1;
+        return false;
 
     eglMakeCurrent(wl->egl_context.egl.dpy, NULL, NULL, wl->egl_context.egl.ctx);
 
     mpegl_load_functions(gl, wl->log);
 
-    ctx->native_display_type = "wl";
-    ctx->native_display = wl->display.display;
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = waylandgl_swap_buffers,
+        .native_display_type = "wl",
+        .native_display = wl->display.display,
+    };
 
-    return 0;
+    if (!ra_gl_ctx_init(ctx, gl, params))
+        return false;
+
+    return true;
 }
 
 static void egl_create_window(struct vo_wayland_state *wl)
@@ -122,22 +135,24 @@ static void egl_create_window(struct vo_wayland_state *wl)
     eglSwapInterval(wl->egl_context.egl.dpy, 0);
 }
 
-static int waylandgl_reconfig(struct MPGLContext *ctx)
+static bool waylandgl_reconfig(struct ra_ctx *ctx)
 {
     struct vo_wayland_state * wl = ctx->vo->wayland;
 
     if (!vo_wayland_config(ctx->vo))
-        return -1;
+        return false;
 
     if (!wl->egl_context.egl_window)
         egl_create_window(wl);
 
-    return 0;
+    return true;
 }
 
-static void waylandgl_uninit(MPGLContext *ctx)
+static void waylandgl_uninit(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
+
+    ra_gl_ctx_uninit(ctx);
 
     if (wl->egl_context.egl.ctx) {
         eglReleaseThread();
@@ -153,52 +168,45 @@ static void waylandgl_uninit(MPGLContext *ctx)
     vo_wayland_uninit(ctx->vo);
 }
 
-static void waylandgl_swap_buffers(MPGLContext *ctx)
-{
-    struct vo_wayland_state *wl = ctx->vo->wayland;
-
-    vo_wayland_wait_events(ctx->vo, 0);
-
-    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
-}
-
-static int waylandgl_control(MPGLContext *ctx, int *events, int request,
+static int waylandgl_control(struct ra_ctx *ctx, int *events, int request,
                              void *data)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
     int r = vo_wayland_control(ctx->vo, events, request, data);
 
-    if (*events & VO_EVENT_RESIZE)
+    if (*events & VO_EVENT_RESIZE) {
         egl_resize(wl);
+        ra_gl_ctx_resize(ctx->swapchain, wl->vo->dwidth, wl->vo->dheight, 0);
+    }
 
     return r;
 }
 
-static void wayland_wakeup(struct MPGLContext *ctx)
+static void wayland_wakeup(struct ra_ctx *ctx)
 {
     vo_wayland_wakeup(ctx->vo);
 }
 
-static void wayland_wait_events(struct MPGLContext *ctx, int64_t until_time_us)
+static void wayland_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 {
     vo_wayland_wait_events(ctx->vo, until_time_us);
 }
 
-static int waylandgl_init(struct MPGLContext *ctx, int flags)
+static bool waylandgl_init(struct ra_ctx *ctx)
 {
     if (!vo_wayland_init(ctx->vo))
-        return -1;
+        return false;
 
-    return egl_create_context(ctx->vo->wayland, ctx, flags);
+    return egl_create_context(ctx, ctx->vo->wayland);
 }
 
-const struct mpgl_driver mpgl_driver_wayland = {
+const struct ra_ctx_fns ra_ctx_wayland_egl = {
+    .type           = "opengl",
     .name           = "wayland",
-    .init           = waylandgl_init,
     .reconfig       = waylandgl_reconfig,
-    .swap_buffers   = waylandgl_swap_buffers,
     .control        = waylandgl_control,
     .wakeup         = wayland_wakeup,
     .wait_events    = wayland_wait_events,
+    .init           = waylandgl_init,
     .uninit         = waylandgl_uninit,
 };

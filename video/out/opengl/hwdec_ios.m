@@ -27,10 +27,10 @@
 
 #include "config.h"
 
+#include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
 #include "video/vt.h"
 #include "ra_gl.h"
-#include "hwdec.h"
 
 struct priv_owner {
     struct mp_hwdec_ctx hwctx;
