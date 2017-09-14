@@ -54,8 +54,8 @@
 #include "video/out/drm_common.h"
 #endif
 
-#if HAVE_GL
-#include "video/out/opengl/hwdec.h"
+#if HAVE_GPU
+#include "video/out/gpu/hwdec.h"
 #endif
 
 static void print_version(struct mp_log *log)
@@ -87,6 +87,7 @@ extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
 
+extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
@@ -682,8 +683,12 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
 
-#if HAVE_GL
+#if HAVE_GPU
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
+#endif
+
+#if HAVE_GL
+    OPT_SUBSTRUCT("", opengl_opts, opengl_conf, 0),
 #endif
 
 #if HAVE_EGL_ANGLE_WIN32

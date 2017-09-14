@@ -1,371 +1,269 @@
-#include "common/msg.h"
-#include "video/out/vo.h"
+/*
+ * This file is part of mpv.
+ * Parts based on MPlayer code by Reimar Döffinger.
+ *
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * mpv is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <assert.h>
+
+#include <libavutil/sha.h>
+#include <libavutil/intreadwrite.h>
+#include <libavutil/mem.h>
+
+#include "osdep/io.h"
+
+#include "common/common.h"
+#include "options/path.h"
+#include "stream/stream.h"
+#include "formats.h"
 #include "utils.h"
 
-// Standard parallel 2D projection, except y1 < y0 means that the coordinate
-// system is flipped, not the projection.
-void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
-                        float y0, float y1)
+// GLU has this as gluErrorString (we don't use GLU, as it is legacy-OpenGL)
+static const char *gl_error_to_string(GLenum error)
 {
-    if (y1 < y0) {
-        float tmp = y0;
-        y0 = tmp - y1;
-        y1 = tmp;
-    }
-
-    t->m[0][0] = 2.0f / (x1 - x0);
-    t->m[0][1] = 0.0f;
-    t->m[1][0] = 0.0f;
-    t->m[1][1] = 2.0f / (y1 - y0);
-    t->t[0] = -(x1 + x0) / (x1 - x0);
-    t->t[1] = -(y1 + y0) / (y1 - y0);
-}
-
-// Apply the effects of one transformation to another, transforming it in the
-// process. In other words: post-composes t onto x
-void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
-{
-    struct gl_transform xt = *x;
-    x->m[0][0] = t.m[0][0] * xt.m[0][0] + t.m[0][1] * xt.m[1][0];
-    x->m[1][0] = t.m[1][0] * xt.m[0][0] + t.m[1][1] * xt.m[1][0];
-    x->m[0][1] = t.m[0][0] * xt.m[0][1] + t.m[0][1] * xt.m[1][1];
-    x->m[1][1] = t.m[1][0] * xt.m[0][1] + t.m[1][1] * xt.m[1][1];
-    gl_transform_vec(t, &x->t[0], &x->t[1]);
-}
-
-void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo)
-{
-    int y_dir = fbo.flip ? -1 : 1;
-    gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
-}
-
-void ra_buf_pool_uninit(struct ra *ra, struct ra_buf_pool *pool)
-{
-    for (int i = 0; i < pool->num_buffers; i++)
-        ra_buf_free(ra, &pool->buffers[i]);
-
-    talloc_free(pool->buffers);
-    *pool = (struct ra_buf_pool){0};
-}
-
-static bool ra_buf_params_compatible(const struct ra_buf_params *new,
-                                     const struct ra_buf_params *old)
-{
-    return new->type == old->type &&
-           new->size <= old->size &&
-           new->host_mapped  == old->host_mapped &&
-           new->host_mutable == old->host_mutable;
-}
-
-static bool ra_buf_pool_grow(struct ra *ra, struct ra_buf_pool *pool)
-{
-    struct ra_buf *buf = ra_buf_create(ra, &pool->current_params);
-    if (!buf)
-        return false;
-
-    MP_TARRAY_INSERT_AT(NULL, pool->buffers, pool->num_buffers, pool->index, buf);
-    MP_VERBOSE(ra, "Resized buffer pool to size %d\n", pool->num_buffers);
-    return true;
-}
-
-struct ra_buf *ra_buf_pool_get(struct ra *ra, struct ra_buf_pool *pool,
-                               const struct ra_buf_params *params)
-{
-    assert(!params->initial_data);
-
-    if (!ra_buf_params_compatible(params, &pool->current_params)) {
-        ra_buf_pool_uninit(ra, pool);
-        pool->current_params = *params;
-    }
-
-    // Make sure we have at least one buffer available
-    if (!pool->buffers && !ra_buf_pool_grow(ra, pool))
-        return NULL;
-
-    // Make sure the next buffer is available for use
-    if (!ra->fns->buf_poll(ra, pool->buffers[pool->index]) &&
-        !ra_buf_pool_grow(ra, pool))
-    {
-        return NULL;
-    }
-
-    struct ra_buf *buf = pool->buffers[pool->index++];
-    pool->index %= pool->num_buffers;
-
-    return buf;
-}
-
-bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
-                       const struct ra_tex_upload_params *params)
-{
-    if (params->buf)
-        return ra->fns->tex_upload(ra, params);
-
-    struct ra_tex *tex = params->tex;
-    size_t row_size = tex->params.dimensions == 2 ? params->stride :
-                      tex->params.w * tex->params.format->pixel_size;
-
-    struct ra_buf_params bufparams = {
-        .type = RA_BUF_TYPE_TEX_UPLOAD,
-        .size = row_size * tex->params.h * tex->params.d,
-        .host_mutable = true,
-    };
-
-    struct ra_buf *buf = ra_buf_pool_get(ra, pbo, &bufparams);
-    if (!buf)
-        return false;
-
-    ra->fns->buf_update(ra, buf, 0, params->src, bufparams.size);
-
-    struct ra_tex_upload_params newparams = *params;
-    newparams.buf = buf;
-    newparams.src = NULL;
-
-    return ra->fns->tex_upload(ra, &newparams);
-}
-
-struct ra_layout std140_layout(struct ra_renderpass_input *inp)
-{
-    size_t el_size = ra_vartype_size(inp->type);
-
-    // std140 packing rules:
-    // 1. The alignment of generic values is their size in bytes
-    // 2. The alignment of vectors is the vector length * the base count, with
-    // the exception of vec3 which is always aligned like vec4
-    // 3. The alignment of arrays is that of the element size rounded up to
-    // the nearest multiple of vec4
-    // 4. Matrices are treated like arrays of vectors
-    // 5. Arrays/matrices are laid out with a stride equal to the alignment
-    size_t size = el_size * inp->dim_v;
-    if (inp->dim_v == 3)
-        size += el_size;
-    if (inp->dim_m > 1)
-        size = MP_ALIGN_UP(size, sizeof(float[4]));
-
-    return (struct ra_layout) {
-        .align  = size,
-        .stride = size,
-        .size   = size * inp->dim_m,
-    };
-}
-
-struct ra_layout std430_layout(struct ra_renderpass_input *inp)
-{
-    size_t el_size = ra_vartype_size(inp->type);
-
-    // std430 packing rules: like std140, except arrays/matrices are always
-    // "tightly" packed, even arrays/matrices of vec3s
-    size_t align = el_size * inp->dim_v;
-    if (inp->dim_v == 3 && inp->dim_m == 1)
-        align += el_size;
-
-    return (struct ra_layout) {
-        .align  = align,
-        .stride = align,
-        .size   = align * inp->dim_m,
-    };
-}
-
-// Create a texture and a FBO using the texture as color attachments.
-//  fmt: texture internal format
-// If the parameters are the same as the previous call, do not touch it.
-// flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
-// Enabling FUZZY for W or H means the w or h does not need to be exact.
-bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
-                   int w, int h, const struct ra_format *fmt, int flags)
-{
-    int lw = w, lh = h;
-
-    if (fbo->tex) {
-        int cw = w, ch = h;
-        int rw = fbo->tex->params.w, rh = fbo->tex->params.h;
-
-        if ((flags & FBOTEX_FUZZY_W) && cw < rw)
-            cw = rw;
-        if ((flags & FBOTEX_FUZZY_H) && ch < rh)
-            ch = rh;
-
-        if (rw == cw && rh == ch && fbo->tex->params.format == fmt)
-            goto done;
-    }
-
-    if (flags & FBOTEX_FUZZY_W)
-        w = MP_ALIGN_UP(w, 256);
-    if (flags & FBOTEX_FUZZY_H)
-        h = MP_ALIGN_UP(h, 256);
-
-    mp_verbose(log, "Create FBO: %dx%d (%dx%d)\n", lw, lh, w, h);
-
-    if (!fmt || !fmt->renderable || !fmt->linear_filter) {
-        mp_err(log, "Format %s not supported.\n", fmt ? fmt->name : "(unset)");
-        return false;
-    }
-
-    fbotex_uninit(fbo);
-
-    *fbo = (struct fbotex) {
-        .ra = ra,
-    };
-
-    struct ra_tex_params params = {
-        .dimensions = 2,
-        .w = w,
-        .h = h,
-        .d = 1,
-        .format = fmt,
-        .src_linear = true,
-        .render_src = true,
-        .render_dst = true,
-        .storage_dst = true,
-        .blit_src = true,
-    };
-
-    fbo->tex = ra_tex_create(fbo->ra, &params);
-
-    if (!fbo->tex) {
-        mp_err(log, "Error: framebuffer could not be created.\n");
-        fbotex_uninit(fbo);
-        return false;
-    }
-
-done:
-
-    fbo->lw = lw;
-    fbo->lh = lh;
-
-    fbo->fbo = (struct fbodst){
-        .tex = fbo->tex,
-    };
-
-    return true;
-}
-
-void fbotex_uninit(struct fbotex *fbo)
-{
-    if (fbo->ra) {
-        ra_tex_free(fbo->ra, &fbo->tex);
-        *fbo = (struct fbotex) {0};
+    switch (error) {
+    case GL_INVALID_ENUM: return "INVALID_ENUM";
+    case GL_INVALID_VALUE: return "INVALID_VALUE";
+    case GL_INVALID_OPERATION: return "INVALID_OPERATION";
+    case GL_INVALID_FRAMEBUFFER_OPERATION: return "INVALID_FRAMEBUFFER_OPERATION";
+    case GL_OUT_OF_MEMORY: return "OUT_OF_MEMORY";
+    default: return "unknown";
     }
 }
 
-struct timer_pool {
-    struct ra *ra;
-    ra_timer *timer;
-    bool running; // detect invalid usage
-
-    uint64_t samples[VO_PERF_SAMPLE_COUNT];
-    int sample_idx;
-    int sample_count;
-
-    uint64_t sum;
-    uint64_t peak;
-};
-
-struct timer_pool *timer_pool_create(struct ra *ra)
+void gl_check_error(GL *gl, struct mp_log *log, const char *info)
 {
-    if (!ra->fns->timer_create)
-        return NULL;
-
-    ra_timer *timer = ra->fns->timer_create(ra);
-    if (!timer)
-        return NULL;
-
-    struct timer_pool *pool = talloc(NULL, struct timer_pool);
-    if (!pool) {
-        ra->fns->timer_destroy(ra, timer);
-        return NULL;
+    for (;;) {
+        GLenum error = gl->GetError();
+        if (error == GL_NO_ERROR)
+            break;
+        mp_msg(log, MSGL_ERR, "%s: OpenGL error %s.\n", info,
+               gl_error_to_string(error));
     }
-
-    *pool = (struct timer_pool){ .ra = ra, .timer = timer };
-    return pool;
 }
 
-void timer_pool_destroy(struct timer_pool *pool)
+static int get_alignment(int stride)
 {
-    if (!pool)
+    if (stride % 8 == 0)
+        return 8;
+    if (stride % 4 == 0)
+        return 4;
+    if (stride % 2 == 0)
+        return 2;
+    return 1;
+}
+
+// upload a texture, handling things like stride and slices
+//  target: texture target, usually GL_TEXTURE_2D
+//  format, type: texture parameters
+//  dataptr, stride: image data
+//  x, y, width, height: part of the image to upload
+void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   const void *dataptr, int stride,
+                   int x, int y, int w, int h)
+{
+    int bpp = gl_bytes_per_pixel(format, type);
+    const uint8_t *data = dataptr;
+    int y_max = y + h;
+    if (w <= 0 || h <= 0 || !bpp)
         return;
-
-    pool->ra->fns->timer_destroy(pool->ra, pool->timer);
-    talloc_free(pool);
+    if (stride < 0) {
+        data += (h - 1) * stride;
+        stride = -stride;
+    }
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
+    int slice = h;
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
+        // this is not always correct, but should work for MPlayer
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / bpp);
+    } else {
+        if (stride != bpp * w)
+            slice = 1; // very inefficient, but at least it works
+    }
+    for (; y + slice <= y_max; y += slice) {
+        gl->TexSubImage2D(target, 0, x, y, w, slice, format, type, data);
+        data += stride * slice;
+    }
+    if (y < y_max)
+        gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-void timer_pool_start(struct timer_pool *pool)
+mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h)
 {
-    if (!pool)
-        return;
-
-    assert(!pool->running);
-    pool->ra->fns->timer_start(pool->ra, pool->timer);
-    pool->running = true;
+    if (gl->es)
+        return NULL; // ES can't read from front buffer
+    mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, w, h);
+    if (!image)
+        return NULL;
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    GLenum obj = fbo ? GL_COLOR_ATTACHMENT0 : GL_FRONT;
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
+    gl->ReadBuffer(obj);
+    //flip image while reading (and also avoid stride-related trouble)
+    for (int y = 0; y < h; y++) {
+        gl->ReadPixels(0, h - y - 1, w, 1, GL_RGB, GL_UNSIGNED_BYTE,
+                       image->planes[0] + y * image->stride[0]);
+    }
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    return image;
 }
 
-void timer_pool_stop(struct timer_pool *pool)
+static void gl_vao_enable_attribs(struct gl_vao *vao)
 {
-    if (!pool)
-        return;
+    GL *gl = vao->gl;
 
-    assert(pool->running);
-    uint64_t res = pool->ra->fns->timer_stop(pool->ra, pool->timer);
-    pool->running = false;
-
-    if (res) {
-        // Input res into the buffer and grab the previous value
-        uint64_t old = pool->samples[pool->sample_idx];
-        pool->sample_count = MPMIN(pool->sample_count + 1, VO_PERF_SAMPLE_COUNT);
-        pool->samples[pool->sample_idx++] = res;
-        pool->sample_idx %= VO_PERF_SAMPLE_COUNT;
-        pool->sum = pool->sum + res - old;
-
-        // Update peak if necessary
-        if (res >= pool->peak) {
-            pool->peak = res;
-        } else if (pool->peak == old) {
-            // It's possible that the last peak was the value we just removed,
-            // if so we need to scan for the new peak
-            uint64_t peak = res;
-            for (int i = 0; i < VO_PERF_SAMPLE_COUNT; i++)
-                peak = MPMAX(peak, pool->samples[i]);
-            pool->peak = peak;
+    for (int n = 0; n < vao->num_entries; n++) {
+        const struct ra_renderpass_input *e = &vao->entries[n];
+        GLenum type = 0;
+        bool normalized = false;
+        switch (e->type) {
+        case RA_VARTYPE_INT:
+            type = GL_INT;
+            break;
+        case RA_VARTYPE_FLOAT:
+            type = GL_FLOAT;
+            break;
+        case RA_VARTYPE_BYTE_UNORM:
+            type = GL_UNSIGNED_BYTE;
+            normalized = true;
+            break;
+        default:
+            abort();
         }
+        assert(e->dim_m == 1);
+
+        gl->EnableVertexAttribArray(n);
+        gl->VertexAttribPointer(n, e->dim_v, type, normalized,
+                                vao->stride, (void *)(intptr_t)e->offset);
     }
 }
 
-struct mp_pass_perf timer_pool_measure(struct timer_pool *pool)
+void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
+                 const struct ra_renderpass_input *entries,
+                 int num_entries)
 {
-    if (!pool)
-        return (struct mp_pass_perf){0};
+    assert(!vao->vao);
+    assert(!vao->buffer);
 
-    struct mp_pass_perf res = {
-        .peak = pool->peak,
-        .count = pool->sample_count,
+    *vao = (struct gl_vao){
+        .gl = gl,
+        .stride = stride,
+        .entries = entries,
+        .num_entries = num_entries,
     };
 
-    int idx = pool->sample_idx - pool->sample_count + VO_PERF_SAMPLE_COUNT;
-    for (int i = 0; i < res.count; i++) {
-        idx %= VO_PERF_SAMPLE_COUNT;
-        res.samples[i] = pool->samples[idx++];
-    }
+    gl->GenBuffers(1, &vao->buffer);
 
-    if (res.count > 0) {
-        res.last = res.samples[res.count - 1];
-        res.avg = pool->sum / res.count;
-    }
+    if (gl->BindVertexArray) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
 
-    return res;
+        gl->GenVertexArrays(1, &vao->vao);
+        gl->BindVertexArray(vao->vao);
+        gl_vao_enable_attribs(vao);
+        gl->BindVertexArray(0);
+
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
-void mp_log_source(struct mp_log *log, int lev, const char *src)
+void gl_vao_uninit(struct gl_vao *vao)
 {
-    int line = 1;
-    if (!src)
+    GL *gl = vao->gl;
+    if (!gl)
         return;
-    while (*src) {
-        const char *end = strchr(src, '\n');
-        const char *next = end + 1;
-        if (!end)
-            next = end = src + strlen(src);
-        mp_msg(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
-        line++;
-        src = next;
+
+    if (gl->DeleteVertexArrays)
+        gl->DeleteVertexArrays(1, &vao->vao);
+    gl->DeleteBuffers(1, &vao->buffer);
+
+    *vao = (struct gl_vao){0};
+}
+
+static void gl_vao_bind(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+
+    if (gl->BindVertexArray) {
+        gl->BindVertexArray(vao->vao);
+    } else {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
+        gl_vao_enable_attribs(vao);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     }
+}
+
+static void gl_vao_unbind(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+
+    if (gl->BindVertexArray) {
+        gl->BindVertexArray(0);
+    } else {
+        for (int n = 0; n < vao->num_entries; n++)
+            gl->DisableVertexAttribArray(n);
+    }
+}
+
+// Draw the vertex data (as described by the gl_vao_entry entries) in ptr
+// to the screen. num is the number of vertexes. prim is usually GL_TRIANGLES.
+// If ptr is NULL, then skip the upload, and use the data uploaded with the
+// previous call.
+void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
+{
+    GL *gl = vao->gl;
+
+    if (ptr) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
+        gl->BufferData(GL_ARRAY_BUFFER, num * vao->stride, ptr, GL_STREAM_DRAW);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    gl_vao_bind(vao);
+
+    gl->DrawArrays(prim, 0, num);
+
+    gl_vao_unbind(vao);
+}
+
+static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
+                                   GLenum severity, GLsizei length,
+                                   const GLchar *message, const void *userParam)
+{
+    // keep in mind that the debug callback can be asynchronous
+    struct mp_log *log = (void *)userParam;
+    int level = MSGL_ERR;
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_NOTIFICATION:level = MSGL_V; break;
+    case GL_DEBUG_SEVERITY_LOW:         level = MSGL_INFO; break;
+    case GL_DEBUG_SEVERITY_MEDIUM:      level = MSGL_WARN; break;
+    case GL_DEBUG_SEVERITY_HIGH:        level = MSGL_ERR; break;
+    }
+    mp_msg(log, level, "GL: %s\n", message);
+}
+
+void gl_set_debug_logger(GL *gl, struct mp_log *log)
+{
+    if (gl->DebugMessageCallback)
+        gl->DebugMessageCallback(log ? gl_debug_cb : NULL, log);
 }

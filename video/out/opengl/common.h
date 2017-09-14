@@ -26,10 +26,10 @@
 #include "common/msg.h"
 #include "misc/bstr.h"
 
-#include "video/out/vo.h"
 #include "video/csputils.h"
-
 #include "video/mp_image.h"
+#include "video/out/vo.h"
+#include "video/out/gpu/ra.h"
 
 #include "gl_headers.h"
 

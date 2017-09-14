@@ -2,7 +2,6 @@
 #define MPGL_FORMATS_H_
 
 #include "common.h"
-#include "ra.h"
 
 struct gl_format {
     const char *name;           // symbolic name for user interaction/debugging

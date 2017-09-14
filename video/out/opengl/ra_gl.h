@@ -1,8 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "ra.h"
-#include "gl_utils.h"
+#include "utils.h"
 
 struct ra *ra_create_gl(GL *gl, struct mp_log *log);
 struct ra_tex *ra_create_wrapped_tex(struct ra *ra,

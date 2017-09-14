@@ -44,7 +44,7 @@
 #include "sub/osd.h"
 
 #include "opengl/ra_gl.h"
-#include "opengl/video.h"
+#include "gpu/video.h"
 
 struct mp_egl_rpi {
     struct mp_log *log;

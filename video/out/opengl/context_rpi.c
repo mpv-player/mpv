@@ -30,7 +30,7 @@
 #include "egl_helpers.h"
 
 struct priv {
-    struct mp_log *log;
+    struct GL gl;
     DISPMANX_DISPLAY_HANDLE_T display;
     DISPMANX_ELEMENT_HANDLE_T window;
     DISPMANX_UPDATE_HANDLE_T update;
@@ -49,13 +49,13 @@ struct priv {
 static void tv_callback(void *callback_data, uint32_t reason, uint32_t param1,
                         uint32_t param2)
 {
-    struct MPGLContext *ctx = callback_data;
+    struct ra_ctx *ctx = callback_data;
     struct priv *p = ctx->priv;
     atomic_store(&p->reload_display, true);
     vo_wakeup(ctx->vo);
 }
 
-static void destroy_dispmanx(struct MPGLContext *ctx)
+static void destroy_dispmanx(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -77,9 +77,10 @@ static void destroy_dispmanx(struct MPGLContext *ctx)
     p->update = 0;
 }
 
-static void rpi_uninit(MPGLContext *ctx)
+static void rpi_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    ra_gl_ctx_uninit(ctx);
 
     vc_tv_unregister_callback_full(tv_callback, ctx);
 
@@ -92,26 +93,26 @@ static void rpi_uninit(MPGLContext *ctx)
     p->egl_display = EGL_NO_DISPLAY;
 }
 
-static int recreate_dispmanx(struct MPGLContext *ctx)
+static bool recreate_dispmanx(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     int display_nr = 0;
     int layer = 0;
 
-    MP_VERBOSE(ctx->vo, "Recreating DISPMANX state...\n");
+    MP_VERBOSE(ctx, "Recreating DISPMANX state...\n");
 
     destroy_dispmanx(ctx);
 
     p->display = vc_dispmanx_display_open(display_nr);
     p->update = vc_dispmanx_update_start(0);
     if (!p->display || !p->update) {
-        MP_FATAL(ctx->vo, "Could not get DISPMANX objects.\n");
+        MP_FATAL(ctx, "Could not get DISPMANX objects.\n");
         goto fail;
     }
 
     uint32_t dispw, disph;
     if (graphics_get_display_size(0, &dispw, &disph) < 0) {
-        MP_FATAL(ctx->vo, "Could not get display size.\n");
+        MP_FATAL(ctx, "Could not get display size.\n");
         goto fail;
     }
     p->w = dispw;
@@ -145,7 +146,7 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
                                         &src, DISPMANX_PROTECTION_NONE, &alpha,
                                         0, 0);
     if (!p->window) {
-        MP_FATAL(ctx->vo, "Could not add DISPMANX element.\n");
+        MP_FATAL(ctx, "Could not add DISPMANX element.\n");
         goto fail;
     }
 
@@ -161,14 +162,14 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
                                             &p->egl_window, NULL);
 
     if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_FATAL(p, "Could not create EGL surface!\n");
+        MP_FATAL(ctx, "Could not create EGL surface!\n");
         goto fail;
     }
 
     if (!eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
                         p->egl_context))
     {
-        MP_FATAL(p, "Failed to set context!\n");
+        MP_FATAL(ctx, "Failed to set context!\n");
         goto fail;
     }
 
@@ -197,21 +198,27 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
 
     ctx->vo->dwidth = p->w;
     ctx->vo->dheight = p->h;
+    ra_gl_ctx_resize(ctx->swapchain, p->w, p->h, 0);
 
     ctx->vo->want_redraw = true;
 
     vo_event(ctx->vo, VO_EVENT_WIN_STATE);
-    return 0;
+    return true;
 
 fail:
     destroy_dispmanx(ctx);
-    return -1;
+    return false;
 }
 
-static int rpi_init(struct MPGLContext *ctx, int flags)
+static void rpi_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    p->log = ctx->vo->log;
+    eglSwapBuffers(p->egl_display, p->egl_surface);
+}
+
+static bool rpi_init(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
 
     bcm_host_init();
 
@@ -219,43 +226,40 @@ static int rpi_init(struct MPGLContext *ctx, int flags)
 
     p->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(p, "EGL failed to initialize.\n");
+        MP_FATAL(ctx, "EGL failed to initialize.\n");
         goto fail;
     }
 
-    if (!mpegl_create_context(p->egl_display, p->log, 0, &p->egl_context,
-                              &p->egl_config))
+    if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &p->egl_config))
         goto fail;
 
     if (recreate_dispmanx(ctx) < 0)
         goto fail;
 
-    ctx->gl = talloc_zero(ctx, GL);
+    mpegl_load_functions(&p->gl, ctx->log);
 
-    mpegl_load_functions(ctx->gl, p->log);
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = rpi_swap_buffers,
+        .native_display_type = "MPV_RPI_WINDOW",
+        .native_display = p->win_params,
+    };
 
-    ctx->native_display_type = "MPV_RPI_WINDOW";
-    ctx->native_display = p->win_params;
+    if (!ra_gl_ctx_init(ctx, &p->gl, params))
+        goto fail;
 
-    return 0;
+    return true;
 
 fail:
     rpi_uninit(ctx);
-    return -1;
+    return false;
 }
 
-static int rpi_reconfig(struct MPGLContext *ctx)
+static bool rpi_reconfig(struct ra_ctx *ctx)
 {
     return recreate_dispmanx(ctx);
 }
 
-static void rpi_swap_buffers(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    eglSwapBuffers(p->egl_display, p->egl_surface);
-}
-
-static struct mp_image *take_screenshot(struct MPGLContext *ctx)
+static struct mp_image *take_screenshot(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -289,21 +293,20 @@ fail:
     return NULL;
 }
 
-
-static int rpi_control(MPGLContext *ctx, int *events, int request, void *arg)
+static int rpi_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
     struct priv *p = ctx->priv;
 
     switch (request) {
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)arg = take_screenshot(ctx);
-        return true;
+        return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         recreate_dispmanx(ctx);
         return VO_TRUE;
     case VOCTRL_CHECK_EVENTS:
         if (atomic_fetch_and(&p->reload_display, 0)) {
-            MP_WARN(ctx->vo, "Recovering from display mode switch...\n");
+            MP_WARN(ctx, "Recovering from display mode switch...\n");
             recreate_dispmanx(ctx);
         }
         return VO_TRUE;
@@ -315,12 +318,11 @@ static int rpi_control(MPGLContext *ctx, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-const struct mpgl_driver mpgl_driver_rpi = {
+const struct ra_ctx_fns ra_ctx_rpi = {
+    .type           = "opengl",
     .name           = "rpi",
-    .priv_size      = sizeof(struct priv),
-    .init           = rpi_init,
     .reconfig       = rpi_reconfig,
-    .swap_buffers   = rpi_swap_buffers,
     .control        = rpi_control,
+    .init           = rpi_init,
     .uninit         = rpi_uninit,
 };

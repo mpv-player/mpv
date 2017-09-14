@@ -20,7 +20,7 @@
 
 #include <GL/glx.h>
 
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/vdpau.h"
 #include "video/vdpau_mixer.h"

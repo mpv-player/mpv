@@ -6,26 +6,23 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "video/out/gpu/context.h"
+
 struct mp_log;
 
-bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
+bool mpegl_create_context(struct ra_ctx *ctx, EGLDisplay display,
                           EGLContext *out_context, EGLConfig *out_config);
 
-struct mpegl_opts {
-    // combination of VOFLAG_* values.
-    int vo_flags;
-
-    // for callbacks
-    void *user_data;
-
+struct mpegl_cb {
     // if set, pick the desired config from the given list and return its index
     // defaults to 0 (they are sorted by eglChooseConfig)
     int (*refine_config)(void *user_data, EGLConfig *configs, int num_configs);
+    void *user_data;
 };
 
-bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
-                               struct mpegl_opts *opts,
-                               EGLContext *out_context, EGLConfig *out_config);
+bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
+                             struct mpegl_cb cb, EGLContext *out_context,
+                             EGLConfig *out_config);
 
 struct GL;
 void mpegl_load_functions(struct GL *gl, struct mp_log *log);

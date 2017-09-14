@@ -347,9 +347,9 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
 
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
-        OPT_CHOICE("opengl-dumb-mode", dumb_mode, 0,
+        OPT_CHOICE("gpu-dumb-mode", dumb_mode, 0,
                    ({"auto", 0}, {"yes", 1}, {"no", -1})),
-        OPT_FLOATRANGE("opengl-gamma", gamma, 0, 0.1, 2.0),
+        OPT_FLOATRANGE("gamma-factor", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
@@ -376,7 +376,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
-        OPT_STRING("opengl-fbo-format", fbo_format, 0),
+        OPT_STRING("fbo-format", fbo_format, 0),
         OPT_CHOICE_OR_INT("dither-depth", dither_depth, 0, -1, 16,
                           ({"no", -1}, {"auto", 0})),
         OPT_CHOICE("dither", dither_algo, 0,
@@ -399,18 +399,24 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", BLEND_SUBS_NO},
                     {"yes", BLEND_SUBS_YES},
                     {"video", BLEND_SUBS_VIDEO})),
-        OPT_PATHLIST("opengl-shaders", user_shaders, 0),
-        OPT_CLI_ALIAS("opengl-shader", "opengl-shaders-append"),
+        OPT_PATHLIST("glsl-shaders", user_shaders, 0),
+        OPT_CLI_ALIAS("glsl-shader", "glsl-shaders-append"),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
-        OPT_INTRANGE("opengl-tex-pad-x", tex_pad_x, 0, 0, 4096),
-        OPT_INTRANGE("opengl-tex-pad-y", tex_pad_y, 0, 0, 4096),
+        OPT_INTRANGE("gpu-tex-pad-x", tex_pad_x, 0, 0, 4096),
+        OPT_INTRANGE("gpu-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
-        OPT_CHOICE("opengl-early-flush", early_flush, 0,
-                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
-        OPT_STRING("opengl-shader-cache-dir", shader_cache_dir, 0),
+        OPT_STRING("gpu-shader-cache-dir", shader_cache_dir, 0),
         OPT_REPLACED("hdr-tone-mapping", "tone-mapping"),
+        OPT_REPLACED("opengl-shaders", "glsl-shaders"),
+        OPT_CLI_ALIAS("opengl-shader", "glsl-shaders-append"),
+        OPT_REPLACED("opengl-shader-cache-dir", "gpu-shader-cache-dir"),
+        OPT_REPLACED("opengl-tex-pad-x", "gpu-tex-pad-x"),
+        OPT_REPLACED("opengl-tex-pad-y", "gpu-tex-pad-y"),
+        OPT_REPLACED("opengl-fbo-format", "fbo-format"),
+        OPT_REPLACED("opengl-dumb-mode", "gpu-dumb-mode"),
+        OPT_REPLACED("opengl-gamma", "gpu-gamma"),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -3093,16 +3099,6 @@ done:
         // error has occurred
         float color[4] = {0.0, 0.05, 0.5, 1.0};
         p->ra->fns->clear(p->ra, target.tex, color, &target_rc);
-    }
-
-    // The playloop calls this last before waiting some time until it decides
-    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
-    // while we sleep (this happens asynchronously).
-    if ((p->opts.early_flush == -1 && !frame->display_synced) ||
-        p->opts.early_flush == 1)
-    {
-        if (p->ra->fns->flush)
-            p->ra->fns->flush(p->ra);
     }
 
     p->frames_rendered++;

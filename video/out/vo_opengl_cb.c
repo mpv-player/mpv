@@ -24,9 +24,10 @@
 #include "common/global.h"
 #include "player/client.h"
 
+#include "gpu/video.h"
+#include "gpu/hwdec.h"
 #include "opengl/common.h"
-#include "opengl/video.h"
-#include "opengl/hwdec.h"
+#include "opengl/context.h"
 #include "opengl/ra_gl.h"
 
 #include "libmpv/opengl_cb.h"
@@ -86,7 +87,7 @@ struct mpv_opengl_cb_context {
     //     application's OpenGL context is current - i.e. only while the
     //     host application is calling certain mpv_opengl_cb_* APIs.
     GL *gl;
-    struct ra *ra;
+    struct ra_ctx *ra_ctx;
     struct gl_video *renderer;
     struct ra_hwdec *hwdec;
     struct m_config_cache *vo_opts_cache;
@@ -171,16 +172,36 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
         return MPV_ERROR_UNSUPPORTED;
     }
 
-    ctx->ra = ra_create_gl(ctx->gl, ctx->log);
-    if (!ctx->ra)
+    // initialize a blank ra_ctx to reuse ra_gl_ctx
+    ctx->ra_ctx = talloc_zero(ctx, struct ra_ctx);
+    ctx->ra_ctx->log = ctx->log;
+    ctx->ra_ctx->global = ctx->global;
+    ctx->ra_ctx->opts = (struct ra_ctx_opts) {
+        .probing = false,
+        .allow_sw = true,
+    };
+
+    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
+    struct ra_gl_ctx_params gl_params = {
+        // vo_opengl_cb is essentially like a gigantic external swapchain where
+        // the user is in charge of presentation / swapping etc. But we don't
+        // actually need to provide any of these functions, since we can just
+        // not call them to begin with - so just set it to an empty object to
+        // signal to ra_gl_ctx that we don't care about its latency emulation
+        // functionality
+        .external_swapchain = &empty_swapchain_fns
+    };
+
+    ctx->gl->SwapInterval = NULL; // we shouldn't randomly change this, so lock it
+    if (!ra_gl_ctx_init(ctx->ra_ctx, ctx->gl, gl_params))
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->renderer = gl_video_init(ctx->ra, ctx->log, ctx->global);
+    ctx->renderer = gl_video_init(ctx->ra_ctx->ra, ctx->log, ctx->global);
 
     m_config_cache_update(ctx->vo_opts_cache);
 
     ctx->hwdec_devs = hwdec_devices_create();
-    ctx->hwdec = ra_hwdec_load(ctx->log, ctx->ra, ctx->global,
+    ctx->hwdec = ra_hwdec_load(ctx->log, ctx->ra_ctx->ra, ctx->global,
                                ctx->hwdec_devs, ctx->vo_opts->gl_hwdec_interop);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
@@ -221,7 +242,7 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->hwdec = NULL;
     hwdec_devices_destroy(ctx->hwdec_devs);
     ctx->hwdec_devs = NULL;
-    ra_free(&ctx->ra);
+    ra_ctx_destroy(&ctx->ra_ctx);
     talloc_free(ctx->gl);
     ctx->gl = NULL;
     return 0;
@@ -235,11 +256,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         MP_FATAL(ctx, "Rendering to FBO requested, but no FBO extension found!\n");
         return MPV_ERROR_UNSUPPORTED;
     }
-
-    struct fbodst target = {
-        .tex = ra_create_wrapped_fb(ctx->ra, fbo, vp_w, abs(vp_h)),
-        .flip = vp_h < 0,
-    };
 
     reset_gl_state(ctx->gl);
 
@@ -280,7 +296,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         mp_read_option_raw(ctx->global, "opengl-debug", &m_option_type_flag,
                            &debug);
         ctx->gl->debug_context = debug;
-        ra_gl_set_debug(ctx->ra, debug);
+        ra_gl_set_debug(ctx->ra_ctx->ra, debug);
         if (gl_video_icc_auto_enabled(ctx->renderer))
             MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
@@ -316,7 +332,14 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     pthread_mutex_unlock(&ctx->lock);
 
     MP_STATS(ctx, "glcb-render");
+    struct ra_swapchain *sw = ctx->ra_ctx->swapchain;
+    ra_gl_ctx_resize(sw, vp_w, abs(vp_h), fbo);
+    struct fbodst target = {
+        .tex = ra_gl_ctx_start_frame(sw),
+        .flip = vp_h < 0,
+    };
     gl_video_render_frame(ctx->renderer, frame, target);
+    ra_gl_ctx_submit_frame(sw, frame);
 
     reset_gl_state(ctx->gl);
 
@@ -327,8 +350,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     while (wait_present_count > ctx->present_count)
         pthread_cond_wait(&ctx->wakeup, &ctx->lock);
     pthread_mutex_unlock(&ctx->lock);
-
-    ra_tex_free(ctx->ra, &target.tex);
 
     return 0;
 }
