@@ -4541,14 +4541,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Windows with ANGLE only.
 
-``--angle-max-frame-latency=<1-16>``
-    Sets the maximum number of frames that the system is allowed to queue for
-    rendering with the ANGLE backend (default: 3). Lower values should make
-    VSync timing more accurate, but a value of ``1`` requires powerful
-    hardware, since the CPU will not be able to "render ahead" of the GPU.
-
-    Windows with ANGLE only.
-
 ``--angle-renderer=<d3d9|d3d11|auto>``
     Forces a specific renderer when using the ANGLE backend (default: auto). In
     auto mode this will pick D3D11 for systems that support Direct3D 11 feature
@@ -4558,17 +4550,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     performance on old hardware. Note that the D3D9 renderer only supports
     OpenGL ES 2.0, so most extended OpenGL features will not work if this
     renderer is selected (similar to ``--gpu-dumb-mode``).
-
-    Windows with ANGLE only.
-
-``--angle-swapchain-length=<2-16>``
-    Sets the number of buffers in the D3D11 presentation queue when using the
-    ANGLE backend (default: 6). At least 2 are required, since one is the back
-    buffer that mpv renders to and the other is the front buffer that is
-    presented by the DWM. Additional buffers can improve performance, because
-    for example, mpv will not have to wait on the DWM to release the front
-    buffer before rendering a new frame to it. For this reason, Microsoft
-    recommends at least 4.
 
     Windows with ANGLE only.
 

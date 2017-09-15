@@ -40,7 +40,7 @@ extern const struct ra_ctx_fns ra_ctx_cocoa;
 extern const struct ra_ctx_fns ra_ctx_wayland_egl;
 extern const struct ra_ctx_fns ra_ctx_wgl;
 extern const struct ra_ctx_fns ra_ctx_angle;
-extern const struct ra_ctx_fns ra_ctx_dxinterop;
+extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
 extern const struct ra_ctx_fns ra_ctx_mali;
 extern const struct ra_ctx_fns ra_ctx_vdpauglx;
@@ -50,7 +50,6 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_RPI
     &ra_ctx_rpi,
 #endif
-/*
 #if HAVE_GL_COCOA
     &ra_ctx_cocoa,
 #endif
@@ -61,9 +60,8 @@ static const struct ra_ctx_fns *contexts[] = {
     &ra_ctx_wgl,
 #endif
 #if HAVE_GL_DXINTEROP
-    &ra_ctx_dxinterop,
+    &ra_ctx_dxgl,
 #endif
-*/
 #if HAVE_GL_X11
     &ra_ctx_glx_probe,
 #endif

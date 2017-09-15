@@ -20,7 +20,7 @@
 
 #include "common/common.h"
 #include "osdep/windows_utils.h"
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/hwdec.h"
 #include "video/decode/d3d.h"
