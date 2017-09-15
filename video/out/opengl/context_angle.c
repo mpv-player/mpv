@@ -31,6 +31,7 @@
 #include "video/out/w32_common.h"
 #include "osdep/windows_utils.h"
 #include "context.h"
+#include "utils.h"
 
 #ifndef EGL_D3D_TEXTURE_ANGLE
 #define EGL_D3D_TEXTURE_ANGLE 0x33A3
@@ -52,8 +53,6 @@ struct angle_opts {
     int d3d11_warp;
     int d3d11_feature_level;
     int egl_windowing;
-    int swapchain_length; // Currently only works with DXGI 1.2+
-    int max_frame_latency;
     int flip;
 };
 
@@ -77,9 +76,9 @@ const struct m_sub_options angle_conf = {
                    ({"auto", -1},
                     {"no", 0},
                     {"yes", 1})),
-        OPT_INTRANGE("angle-swapchain-length", swapchain_length, 0, 2, 16),
-        OPT_INTRANGE("angle-max-frame-latency", max_frame_latency, 0, 1, 16),
         OPT_FLAG("angle-flip", flip, 0),
+        OPT_REPLACED("angle-max-frame-latency", "swapchain-depth"),
+        OPT_REMOVED("angle-swapchain-length", "controlled by --swapchain-depth"),
         {0}
     },
     .defaults = &(const struct angle_opts) {
@@ -87,14 +86,14 @@ const struct m_sub_options angle_conf = {
         .d3d11_warp = -1,
         .d3d11_feature_level = D3D_FEATURE_LEVEL_11_0,
         .egl_windowing = -1,
-        .swapchain_length = 6,
-        .max_frame_latency = 3,
         .flip = 1,
     },
     .size = sizeof(struct angle_opts),
 };
 
 struct priv {
+    GL gl;
+
     IDXGISwapChain *dxgi_swapchain;
 
     ID3D11Device *d3d11_device;
@@ -110,20 +109,21 @@ struct priv {
 
     int sc_width, sc_height; // Swap chain width and height
     int swapinterval;
+    bool flipped;
 
     struct angle_opts *opts;
 };
 
-static __thread struct MPGLContext *current_ctx;
+static __thread struct ra_ctx *current_ctx;
 
-static void update_sizes(MPGLContext *ctx)
+static void update_sizes(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     p->sc_width = ctx->vo->dwidth ? ctx->vo->dwidth : 1;
     p->sc_height = ctx->vo->dheight ? ctx->vo->dheight : 1;
 }
 
-static void d3d11_backbuffer_release(MPGLContext *ctx)
+static void d3d11_backbuffer_release(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -137,7 +137,7 @@ static void d3d11_backbuffer_release(MPGLContext *ctx)
     SAFE_RELEASE(p->d3d11_backbuffer);
 }
 
-static bool d3d11_backbuffer_get(MPGLContext *ctx)
+static bool d3d11_backbuffer_get(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -168,7 +168,7 @@ static bool d3d11_backbuffer_get(MPGLContext *ctx)
     return true;
 }
 
-static void d3d11_backbuffer_resize(MPGLContext *ctx)
+static void d3d11_backbuffer_resize(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -197,7 +197,7 @@ static void d3d11_backbuffer_resize(MPGLContext *ctx)
         MP_FATAL(vo, "Couldn't get back buffer after resize\n");
 }
 
-static void d3d11_device_destroy(MPGLContext *ctx)
+static void d3d11_device_destroy(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -215,7 +215,7 @@ static void d3d11_device_destroy(MPGLContext *ctx)
     SAFE_RELEASE(p->d3d11_device);
 }
 
-static bool d3d11_device_create(MPGLContext *ctx, int flags)
+static bool d3d11_device_create(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -226,7 +226,7 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
         .force_warp = o->d3d11_warp == 1,
         .max_feature_level = o->d3d11_feature_level,
         .min_feature_level = D3D_FEATURE_LEVEL_9_3,
-        .max_frame_latency = o->max_frame_latency,
+        .max_frame_latency = ctx->opts.swapchain_depth,
     };
     if (!mp_d3d11_create_present_device(vo->log, &device_opts, &p->d3d11_device))
         return false;
@@ -262,7 +262,7 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
     return true;
 }
 
-static void d3d11_swapchain_surface_destroy(MPGLContext *ctx)
+static void d3d11_swapchain_surface_destroy(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -277,7 +277,7 @@ static void d3d11_swapchain_surface_destroy(MPGLContext *ctx)
         ID3D11DeviceContext_Flush(p->d3d11_context);
 }
 
-static bool d3d11_swapchain_surface_create(MPGLContext *ctx, int flags)
+static bool d3d11_swapchain_surface_create(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -292,7 +292,9 @@ static bool d3d11_swapchain_surface_create(MPGLContext *ctx, int flags)
         .width = p->sc_width,
         .height = p->sc_height,
         .flip = o->flip,
-        .length = o->swapchain_length,
+        // Add one frame for the backbuffer and one frame of "slack" to reduce
+        // contention with the window manager when acquiring the backbuffer
+        .length = ctx->opts.swapchain_depth + 2,
         .usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT,
     };
     if (!mp_d3d11_create_swapchain(p->d3d11_device, vo->log, &swapchain_opts,
@@ -301,8 +303,7 @@ static bool d3d11_swapchain_surface_create(MPGLContext *ctx, int flags)
     if (!d3d11_backbuffer_get(ctx))
         goto fail;
 
-    // EGL_D3D_TEXTURE_ANGLE pbuffers are always flipped vertically
-    ctx->flip_v = true;
+    p->flipped = true;
     return true;
 
 fail:
@@ -310,7 +311,7 @@ fail:
     return false;
 }
 
-static void d3d9_device_destroy(MPGLContext *ctx)
+static void d3d9_device_destroy(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -319,7 +320,7 @@ static void d3d9_device_destroy(MPGLContext *ctx)
     p->egl_display = EGL_NO_DISPLAY;
 }
 
-static bool d3d9_device_create(MPGLContext *ctx, int flags)
+static bool d3d9_device_create(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -348,7 +349,7 @@ static bool d3d9_device_create(MPGLContext *ctx, int flags)
     return true;
 }
 
-static void egl_window_surface_destroy(MPGLContext *ctx)
+static void egl_window_surface_destroy(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     if (p->egl_window) {
@@ -357,7 +358,7 @@ static void egl_window_surface_destroy(MPGLContext *ctx)
     }
 }
 
-static bool egl_window_surface_create(MPGLContext *ctx, int flags)
+static bool egl_window_surface_create(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -374,7 +375,7 @@ static bool egl_window_surface_create(MPGLContext *ctx, int flags)
                 EGL_SURFACE_ORIENTATION_ANGLE);
             MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
                 EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE);
-            ctx->flip_v = true;
+            p->flipped = true;
             MP_VERBOSE(vo, "Rendering flipped.\n");
         }
     }
@@ -396,7 +397,7 @@ fail:
     return false;
 }
 
-static void context_destroy(struct MPGLContext *ctx)
+static void context_destroy(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     if (p->egl_context) {
@@ -407,7 +408,7 @@ static void context_destroy(struct MPGLContext *ctx)
     p->egl_context = EGL_NO_CONTEXT;
 }
 
-static bool context_init(struct MPGLContext *ctx, int flags)
+static bool context_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -421,8 +422,8 @@ static bool context_init(struct MPGLContext *ctx, int flags)
     if (exts)
         MP_DBG(vo, "EGL extensions: %s\n", exts);
 
-    if (!mpegl_create_context(p->egl_display, vo->log, flags | VOFLAG_GLES,
-                              &p->egl_context, &p->egl_config))
+    if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context,
+                              &p->egl_config))
     {
         MP_FATAL(vo, "Could not create EGL context!\n");
         goto fail;
@@ -434,9 +435,11 @@ fail:
     return false;
 }
 
-static void angle_uninit(struct MPGLContext *ctx)
+static void angle_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+
+    ra_gl_ctx_uninit(ctx);
 
     DwmEnableMMCSS(FALSE);
 
@@ -474,16 +477,55 @@ static int GLAPIENTRY angle_swap_interval(int interval)
     }
 }
 
-static int angle_init(struct MPGLContext *ctx, int flags)
+static void d3d11_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+
+    // Calling Present() on a flip-sequential swap chain will silently change
+    // the underlying storage of the back buffer to point to the next buffer in
+    // the chain. This results in the RTVs for the back buffer becoming
+    // unbound. Since ANGLE doesn't know we called Present(), it will continue
+    // using the unbound RTVs, so we must save and restore them ourselves.
+    ID3D11RenderTargetView *rtvs[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {0};
+    ID3D11DepthStencilView *dsv = NULL;
+    ID3D11DeviceContext_OMGetRenderTargets(p->d3d11_context,
+        MP_ARRAY_SIZE(rtvs), rtvs, &dsv);
+
+    HRESULT hr = IDXGISwapChain_Present(p->dxgi_swapchain, p->swapinterval, 0);
+    if (FAILED(hr))
+        MP_FATAL(ctx->vo, "Couldn't present: %s\n", mp_HRESULT_to_str(hr));
+
+    // Restore the RTVs and release the objects
+    ID3D11DeviceContext_OMSetRenderTargets(p->d3d11_context,
+        MP_ARRAY_SIZE(rtvs), rtvs, dsv);
+    for (int i = 0; i < MP_ARRAY_SIZE(rtvs); i++)
+        SAFE_RELEASE(rtvs[i]);
+    SAFE_RELEASE(dsv);
+}
+
+static void egl_swap_buffers(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    eglSwapBuffers(p->egl_display, p->egl_window);
+}
+
+static void angle_swap_buffers(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->dxgi_swapchain)
+        d3d11_swap_buffers(ctx);
+    else
+        egl_swap_buffers(ctx);
+}
+
+static bool angle_init(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     struct vo *vo = ctx->vo;
+    GL *gl = &p->gl;
 
     p->opts = mp_get_config_group(ctx, ctx->global, &angle_conf);
     struct angle_opts *o = p->opts;
-
-    // DWM MMCSS cargo-cult. The dxinterop backend also does this.
-    DwmEnableMMCSS(TRUE);
 
     if (!angle_load()) {
         MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
@@ -493,19 +535,19 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     // Create the underlying EGL device implementation
     bool context_ok = false;
     if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
-        context_ok = d3d11_device_create(ctx, flags);
+        context_ok = d3d11_device_create(ctx);
         if (context_ok) {
-            context_ok = context_init(ctx, flags);
+            context_ok = context_init(ctx);
             if (!context_ok)
                 d3d11_device_destroy(ctx);
         }
     }
     if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
-        context_ok = d3d9_device_create(ctx, flags);
+        context_ok = d3d9_device_create(ctx);
         if (context_ok) {
             MP_VERBOSE(vo, "Using Direct3D 9\n");
 
-            context_ok = context_init(ctx, flags);
+            context_ok = context_init(ctx);
             if (!context_ok)
                 d3d9_device_destroy(ctx);
         }
@@ -519,34 +561,58 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     // Create the underlying EGL surface implementation
     bool surface_ok = false;
     if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0) {
-        surface_ok = d3d11_swapchain_surface_create(ctx, flags);
+        surface_ok = d3d11_swapchain_surface_create(ctx);
     }
     if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1) {
-        surface_ok = egl_window_surface_create(ctx, flags);
+        surface_ok = egl_window_surface_create(ctx);
         if (surface_ok)
             MP_VERBOSE(vo, "Using EGL windowing\n");
     }
     if (!surface_ok)
         goto fail;
 
-    mpegl_load_functions(ctx->gl, vo->log);
+    mpegl_load_functions(gl, vo->log);
 
     current_ctx = ctx;
-    ctx->gl->SwapInterval = angle_swap_interval;
+    gl->SwapInterval = angle_swap_interval;
 
-    return 0;
+    // ANGLE doesn't actually need to override any of the functions (yet)
+    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = angle_swap_buffers,
+        .flipped = p->flipped,
+        .external_swapchain = p->dxgi_swapchain ? &empty_swapchain_fns : NULL,
+    };
+
+    if (!ra_gl_ctx_init(ctx, gl, params))
+        goto fail;
+
+    DwmEnableMMCSS(TRUE); // DWM MMCSS cargo-cult. The dxgl backend also does this.
+
+    return true;
 fail:
     angle_uninit(ctx);
-    return -1;
+    return false;
 }
 
-static int angle_reconfig(struct MPGLContext *ctx)
+static void resize(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->dxgi_swapchain)
+        d3d11_backbuffer_resize(ctx);
+    else
+        eglWaitClient(); // Should get ANGLE to resize its swapchain
+    ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
+}
+
+static bool angle_reconfig(struct ra_ctx *ctx)
 {
     vo_w32_config(ctx->vo);
-    return 0;
+    resize(ctx);
+    return true;
 }
 
-static struct mp_image *d3d11_screenshot(MPGLContext *ctx)
+static struct mp_image *d3d11_screenshot(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     ID3D11Texture2D *frontbuffer = NULL;
@@ -624,10 +690,8 @@ done:
     return img;
 }
 
-static int angle_control(MPGLContext *ctx, int *events, int request, void *arg)
+static int angle_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
-    struct priv *p = ctx->priv;
-
     // Try a D3D11-specific method of taking a window screenshot
     if (request == VOCTRL_SCREENSHOT_WIN) {
         struct mp_image *img = d3d11_screenshot(ctx);
@@ -637,63 +701,17 @@ static int angle_control(MPGLContext *ctx, int *events, int request, void *arg)
         }
     }
 
-    int r = vo_w32_control(ctx->vo, events, request, arg);
-    if (*events & VO_EVENT_RESIZE) {
-        if (p->dxgi_swapchain)
-            d3d11_backbuffer_resize(ctx);
-        else
-            eglWaitClient(); // Should get ANGLE to resize its swapchain
-    }
-    return r;
+    int ret = vo_w32_control(ctx->vo, events, request, arg);
+    if (*events & VO_EVENT_RESIZE)
+        resize(ctx);
+    return ret;
 }
 
-static void d3d11_swap_buffers(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-
-    // Calling Present() on a flip-sequential swap chain will silently change
-    // the underlying storage of the back buffer to point to the next buffer in
-    // the chain. This results in the RTVs for the back buffer becoming
-    // unbound. Since ANGLE doesn't know we called Present(), it will continue
-    // using the unbound RTVs, so we must save and restore them ourselves.
-    ID3D11RenderTargetView *rtvs[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {0};
-    ID3D11DepthStencilView *dsv = NULL;
-    ID3D11DeviceContext_OMGetRenderTargets(p->d3d11_context,
-        MP_ARRAY_SIZE(rtvs), rtvs, &dsv);
-
-    HRESULT hr = IDXGISwapChain_Present(p->dxgi_swapchain, p->swapinterval, 0);
-    if (FAILED(hr))
-        MP_FATAL(ctx->vo, "Couldn't present: %s\n", mp_HRESULT_to_str(hr));
-
-    // Restore the RTVs and release the objects
-    ID3D11DeviceContext_OMSetRenderTargets(p->d3d11_context,
-        MP_ARRAY_SIZE(rtvs), rtvs, dsv);
-    for (int i = 0; i < MP_ARRAY_SIZE(rtvs); i++)
-        SAFE_RELEASE(rtvs[i]);
-    SAFE_RELEASE(dsv);
-}
-
-static void egl_swap_buffers(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    eglSwapBuffers(p->egl_display, p->egl_window);
-}
-
-static void angle_swap_buffers(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    if (p->dxgi_swapchain)
-        d3d11_swap_buffers(ctx);
-    else
-        egl_swap_buffers(ctx);
-}
-
-const struct mpgl_driver mpgl_driver_angle = {
+const struct ra_ctx_fns ra_ctx_angle = {
+    .type           = "opengl",
     .name           = "angle",
-    .priv_size      = sizeof(struct priv),
     .init           = angle_init,
     .reconfig       = angle_reconfig,
-    .swap_buffers   = angle_swap_buffers,
     .control        = angle_control,
     .uninit         = angle_uninit,
 };
