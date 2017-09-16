@@ -2145,7 +2145,7 @@ static void pass_read_video(struct gl_video *p)
     }
 
     // All planes are of the same size and properly aligned at this point
-    GLSLF("// combining planes\n");
+    pass_describe(p, "combining planes");
     int coord = 0;
     for (int i = 0; i < 4; i++) {
         if (tex[i].type != PLANE_NONE)
