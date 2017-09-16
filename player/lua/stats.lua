@@ -21,8 +21,6 @@ local o = {
     duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
-    timing_warning = true,
-    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
     debug = false,
@@ -294,26 +292,10 @@ local function append_perfdata(s, dedicated_page)
         end
     end
 
-    -- Highlight i with a red border when t exceeds the time for one frame
-    -- or yellow when it exceeds a given threshold
-    local function hl(i, t)
-        if t == nil then
-            t = i
-        end
-
+    -- Pretty print measured time
+    local function pp(i)
         -- rescale to microseconds for a saner display
-        i = i / 1000
-
-        if o.timing_warning and target_fps > 0 then
-            if t > target_fps then
-                return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
-                                i, o.border_size, o.border_color)
-            elseif t > (target_fps * o.timing_warning_th) then
-                return format("{\\bord0.5}{\\1c&H00DDDD&}%05d{\\bord%s}{\\1c&H%s&}",
-                                i, o.border_size, o.font_color)
-            end
-        end
-        return format("%05d", i)
+        return format("%05d", i / 1000)
     end
 
     -- Format n/m with a font weight based on the ratio
@@ -340,8 +322,8 @@ local function append_perfdata(s, dedicated_page)
 
             for _, pass in ipairs(data) do
                 s[#s+1] = format(f, o.nl, o.indent, o.indent,
-                                 o.font_mono, hl(pass["last"], last_s[frame]),
-                                 hl(pass["avg"], avg_s[frame]), hl(pass["peak"]),
+                                 o.font_mono, pp(pass["last"]),
+                                 pp(pass["avg"]), pp(pass["peak"]),
                                  o.prefix_sep .. o.prefix_sep, p(pass["last"], last_s[frame]),
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
@@ -354,13 +336,13 @@ local function append_perfdata(s, dedicated_page)
 
             -- Print sum of timing values as "Total"
             s[#s+1] = format(f, o.nl, o.indent, o.indent,
-                             o.font_mono, hl(last_s[frame]),
-                             hl(avg_s[frame]), hl(peak_s[frame]), "", "", o.font,
+                             o.font_mono, pp(last_s[frame]),
+                             pp(avg_s[frame]), pp(peak_s[frame]), "", "", o.font,
                              o.prefix_sep, o.prefix_sep, b("Total"))
         else
             -- for the simplified view, we just print the sum of each pass
             s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
-                            hl(last_s[frame]), hl(avg_s[frame]), hl(peak_s[frame]),
+                            pp(last_s[frame]), pp(avg_s[frame]), pp(peak_s[frame]),
                             "", "", o.font, o.prefix_sep, o.prefix_sep,
                             frame:gsub("^%l", string.upper))
         end
