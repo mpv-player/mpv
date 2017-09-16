@@ -166,7 +166,8 @@ void mpvk_uninit(struct mpvk_ctx *vk)
     *vk = (struct mpvk_ctx){0};
 }
 
-bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log, bool debug)
+bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log,
+                        const char *surf_ext_name, bool debug)
 {
     *vk = (struct mpvk_ctx) {
         .log = log,
@@ -188,11 +189,9 @@ bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log, bool debug)
     }
 
     // Enable whatever extensions were compiled in.
-    static const char *extensions[] = {
+    const char *extensions[] = {
         VK_KHR_SURFACE_EXTENSION_NAME,
-#if HAVE_X11
-        VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
-#endif
+        surf_ext_name,
 
         // Extra extensions only used for debugging. These are toggled by
         // decreasing the enabledExtensionCount, so the number needs to be

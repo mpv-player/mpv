@@ -41,13 +41,14 @@ static bool xlib_init(struct ra_ctx *ctx)
     struct mpvk_ctx *vk = &p->vk;
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
 
+    if (!mpvk_instance_init(vk, ctx->log, VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
+                            ctx->opts.debug))
+        goto error;
+
     if (!vo_x11_init(ctx->vo))
         goto error;
 
     if (!vo_x11_create_vo_window(ctx->vo, NULL, "mpvk"))
-        goto error;
-
-    if (!mpvk_instance_init(vk, ctx->log, ctx->opts.debug))
         goto error;
 
     VkXlibSurfaceCreateInfoKHR xinfo = {

@@ -37,7 +37,8 @@ void mpvk_uninit(struct mpvk_ctx *vk);
 // finally followed by vk_swchain initialization.
 
 // Create a vulkan instance. Returns VK_NULL_HANDLE on failure
-bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log, bool debug);
+bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log,
+                        const char *surf_ext_name, bool debug);
 
 // Generate a VkSurfaceKHR usable for video output. Returns VK_NULL_HANDLE on
 // failure. Must be called after mpvk_instance_init.
