@@ -948,6 +948,9 @@ int vo_wayland_init(struct vo *vo)
 void vo_wayland_uninit(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
+    if (!wl)
+        return;
+
     destroy_cursor(wl);
     destroy_window(wl);
     destroy_input(wl);
