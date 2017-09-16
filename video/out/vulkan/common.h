@@ -13,6 +13,9 @@
 
 // We need to define all platforms we want to support. Since we have
 // our own mechanism for checking this, we re-define the right symbols
+#if HAVE_WAYLAND
+#define VK_USE_PLATFORM_WAYLAND_KHR
+#endif
 #if HAVE_X11
 #define VK_USE_PLATFORM_XLIB_KHR
 #endif

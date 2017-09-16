@@ -33,6 +33,7 @@
 #include "context.h"
 #include "spirv.h"
 
+/* OpenGL */
 extern const struct ra_ctx_fns ra_ctx_glx;
 extern const struct ra_ctx_fns ra_ctx_glx_probe;
 extern const struct ra_ctx_fns ra_ctx_x11_egl;
@@ -45,6 +46,9 @@ extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
 extern const struct ra_ctx_fns ra_ctx_mali;
 extern const struct ra_ctx_fns ra_ctx_vdpauglx;
+
+/* Vulkan */
+extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
 extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
 
 static const struct ra_ctx_fns *contexts[] = {
@@ -88,9 +92,14 @@ static const struct ra_ctx_fns *contexts[] = {
 
 // Vulkan contexts:
 #if HAVE_VULKAN
+
+#if HAVE_WAYLAND
+    &ra_ctx_vulkan_wayland,
+#endif
 #if HAVE_X11
     &ra_ctx_vulkan_xlib,
 #endif
+
 #endif
 };
 

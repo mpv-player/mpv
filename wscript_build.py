@@ -453,6 +453,7 @@ def build(ctx):
         ( "video/out/vulkan/ra_vk.c",            "vulkan" ),
         ( "video/out/vulkan/context.c",          "vulkan" ),
         ( "video/out/vulkan/context_xlib.c",     "vulkan && x11" ),
+        ( "video/out/vulkan/context_wayland.c",  "vulkan && wayland" ),
         ( "video/out/vulkan/spirv_nvidia.c",     "vulkan" ),
         ( "video/out/win32/exclusive_hack.c",    "gl-win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),

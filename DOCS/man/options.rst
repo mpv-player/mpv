@@ -4633,7 +4633,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
         directly, it could be removed without warning as autoprobing is changed.
     wayland
-        Wayland/EGL
+        Wayland/EGL, VK_KHR_wayland_surface
     drm
         DRM/EGL
     x11egl
