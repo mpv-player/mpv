@@ -76,6 +76,7 @@ struct gl_shader_cache {
     // Next binding point (texture unit, image unit, buffer binding, etc.)
     // In OpenGL these are separate for each input type
     int next_binding[RA_VARTYPE_COUNT];
+    bool next_uniform_dynamic;
 
     struct ra_renderpass_params params;
 
@@ -135,6 +136,7 @@ void gl_sc_reset(struct gl_shader_cache *sc)
     sc->pushc_size = 0;
     for (int i = 0; i < RA_VARTYPE_COUNT; i++)
         sc->next_binding[i] = 0;
+    sc->next_uniform_dynamic = false;
     sc->current_shader = NULL;
     sc->params = (struct ra_renderpass_params){0};
     sc->needs_reset = false;
@@ -259,14 +261,22 @@ static int gl_sc_next_binding(struct gl_shader_cache *sc, enum ra_vartype type)
     }
 }
 
+void gl_sc_uniform_dynamic(struct gl_shader_cache *sc)
+{
+    sc->next_uniform_dynamic = true;
+}
+
 // Updates the metadata for the given sc_uniform. Assumes sc_uniform->input
 // and glsl_type/buffer_format are already set.
 static void update_uniform_params(struct gl_shader_cache *sc, struct sc_uniform *u)
 {
+    bool dynamic = sc->next_uniform_dynamic;
+    sc->next_uniform_dynamic = false;
+
     // Try not using push constants for "large" values like matrices, since
     // this is likely to both exceed the VGPR budget as well as the pushc size
     // budget
-    bool try_pushc = u->input.dim_m == 1;
+    bool try_pushc = u->input.dim_m == 1 || dynamic;
 
     // Attempt using push constants first
     if (try_pushc && sc->ra->glsl_vulkan && sc->ra->max_pushc_size) {
@@ -287,7 +297,10 @@ static void update_uniform_params(struct gl_shader_cache *sc, struct sc_uniform 
     // to explicit offsets on UBO entries. In theory we could leave away
     // the offsets and support UBOs for older GL as well, but this is a nice
     // safety net for driver bugs (and also rules out potentially buggy drivers)
-    if (sc->ra->glsl_version >= 440 && (sc->ra->caps & RA_CAP_BUF_RO)) {
+    // Also avoid UBOs for highly dynamic stuff since that requires synchronizing
+    // the UBO writes every frame
+    bool try_ubo = !(sc->ra->caps & RA_CAP_GLOBAL_UNIFORM) || !dynamic;
+    if (try_ubo && sc->ra->glsl_version >= 440 && (sc->ra->caps & RA_CAP_BUF_RO)) {
         u->type = SC_UNIFORM_TYPE_UBO;
         u->layout = sc->ra->fns->uniform_layout(&u->input);
         u->offset = MP_ALIGN_UP(sc->ubo_size, u->layout.align);
@@ -513,6 +526,13 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
 
     un->v = u->v;
     un->set = true;
+
+    static const char *desc[] = {
+        [SC_UNIFORM_TYPE_UBO]    = "UBO",
+        [SC_UNIFORM_TYPE_PUSHC]  = "PC",
+        [SC_UNIFORM_TYPE_GLOBAL] = "global",
+    };
+    MP_TRACE(sc, "Updating %s uniform '%s'\n", desc[u->type], u->input.name);
 
     switch (u->type) {
     case SC_UNIFORM_TYPE_GLOBAL: {
