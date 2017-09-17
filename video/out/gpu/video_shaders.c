@@ -97,11 +97,11 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 }
 
 // Subroutine for computing and adding an individual texel contribution
-// If subtexel < 0 and offset < 0, samples directly.
-// If subtexel >= 0, takes the texel from cN[subtexel]
-// If offset >= 0, takes the texel from inN[rel.y+y+offset][rel.x+x+offset]
+// If planar is false, samples directly
+// If planar is true, takes the pixel from inX[idx] where X is the component and
+// `idx` must be defined by the caller
 static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
-                         int x, int y, int subtexel, int offset, int components)
+                         int x, int y, int components, bool planar)
 {
     double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
     double radius_cutoff = scaler->kernel->radius_cutoff;
@@ -130,19 +130,12 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
     }
     GLSL(wsum += w;)
 
-    if (subtexel < 0 && offset < 0) {
-        GLSLF("c0 = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
-        GLSL(color += vec4(w) * c0;)
-    } else if (subtexel >= 0) {
+    if (planar) {
         for (int n = 0; n < components; n++)
-            GLSLF("color[%d] += w * c%d[%d];\n", n, n, subtexel);
-    } else if (offset >= 0) {
-        for (int n = 0; n <components; n++)
-            GLSLF("color[%d] += w * in%d[rel.y+%d][rel.x+%d];\n", n, n,
-                  y + offset, x + offset);
+            GLSLF("color[%d] += w * in%d[idx];\n", n, n);
     } else {
-        // invalid usage
-        abort();
+        GLSLF("in0 = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
+        GLSL(color += vec4(w) * in0;)
     }
 
     if (maybe_skippable)
@@ -158,7 +151,8 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSL(vec2 base = pos - fcoord * pt;)
     GLSLF("float w, d, wsum = 0.0;\n");
     for (int n = 0; n < components; n++)
-        GLSLF("vec4 c%d;\n", n);
+        GLSLF("vec4 in%d;\n", n);
+    GLSL(int idx;)
 
     gl_sc_uniform_texture(sc, "lut", scaler->lut);
 
@@ -180,8 +174,8 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
             if (use_gather) {
                 // Gather the four surrounding texels simultaneously
                 for (int n = 0; n < components; n++) {
-                    GLSLF("c%d = textureGatherOffset(tex, base, ivec2(%d, %d), %d);\n",
-                          n, x, y, n);
+                    GLSLF("in%d = textureGatherOffset(tex, base, "
+                          "ivec2(%d, %d), %d);\n", n, x, y, n);
                 }
 
                 // Mix in all of the points with their weights
@@ -192,13 +186,14 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
                     static const int yo[4] = {1, 1, 0, 0};
                     if (x+xo[p] > bound || y+yo[p] > bound)
                         continue;
-                    polar_sample(sc, scaler, x+xo[p], y+yo[p], p, -1, components);
+                    GLSLF("idx = %d;\n", p);
+                    polar_sample(sc, scaler, x+xo[p], y+yo[p], components, true);
                 }
             } else {
                 // switch to direct sampling instead, for efficiency/compatibility
                 for (int yy = y; yy <= bound && yy <= y+1; yy++) {
                     for (int xx = x; xx <= bound && xx <= x+1; xx++)
-                        polar_sample(sc, scaler, xx, yy, -1, -1, components);
+                        polar_sample(sc, scaler, xx, yy, components, false);
                 }
             }
         }
@@ -223,20 +218,20 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     GLSL(vec2 base = pos - pt * fcoord;)
     GLSL(ivec2 rel = ivec2(round((base - wbase) * size));)
+    GLSL(int idx;)
     GLSLF("float w, d, wsum = 0.0;\n");
     gl_sc_uniform_texture(sc, "lut", scaler->lut);
 
     // Load all relevant texels into shmem
-    gl_sc_enable_extension(sc, "GL_ARB_arrays_of_arrays");
     for (int c = 0; c < components; c++)
-        GLSLHF("shared float in%d[%d][%d];\n", c, ih, iw);
+        GLSLHF("shared float in%d[%d];\n", c, ih * iw);
 
     GLSL(vec4 c;)
     GLSLF("for (int y = int(gl_LocalInvocationID.y); y < %d; y += %d) {\n", ih, bh);
     GLSLF("for (int x = int(gl_LocalInvocationID.x); x < %d; x += %d) {\n", iw, bw);
     GLSLF("c = texture(tex, wbase + pt * vec2(x - %d, y - %d));\n", offset, offset);
     for (int c = 0; c < components; c++)
-        GLSLF("in%d[y][x] = c[%d];\n", c, c);
+        GLSLF("in%d[%d * y + x] = c[%d];\n", c, iw, c);
     GLSLF("}}\n");
     GLSL(groupMemoryBarrier();)
     GLSL(barrier();)
@@ -244,8 +239,11 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
     // Dispatch the actual samples
     GLSLF("// scaler samples\n");
     for (int y = 1-bound; y <= bound; y++) {
-        for (int x = 1-bound; x <= bound; x++)
-            polar_sample(sc, scaler, x, y, -1, offset, components);
+        for (int x = 1-bound; x <= bound; x++) {
+            GLSLF("idx = %d * rel.y + rel.x + %d;\n", iw,
+                  iw * (y + offset) + x + offset);
+            polar_sample(sc, scaler, x, y, components, true);
+        }
     }
 
     GLSL(color = color / vec4(wsum);)

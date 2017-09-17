@@ -1671,7 +1671,7 @@ static void pass_sample_separated(struct gl_video *p, struct img_tex src,
 static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler,
                                        struct img_tex tex, int w, int h)
 {
-    uint64_t reqs = RA_CAP_COMPUTE | RA_CAP_NESTED_ARRAY;
+    uint64_t reqs = RA_CAP_COMPUTE;
     if ((p->ra->caps & reqs) != reqs)
         goto fallback;
 
