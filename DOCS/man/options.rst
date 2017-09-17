@@ -4103,10 +4103,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     the video along the temporal axis. The filter used can be controlled using
     the ``--tscale`` setting.
 
-    Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
-    more information. It should also only be used with an ``--fbo-format``
-    that has at least 16 bit precision.
-
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
     ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
@@ -4183,6 +4179,21 @@ The following video options are currently all specific to ``--vo=gpu`` and
     syncs to the right one. Compositing window managers can also lead to bad
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
+
+``--vulkan-swap-mode=<mode>``
+    Controls the presentation mode of the vulkan swapchain. This is similar
+    to the ``--opengl-swapinterval`` option.
+
+    auto
+        Use the preferred swapchain mode for the vulkan context. (Default)
+    fifo
+        Non-tearing, vsync blocked. Similar to "VSync on".
+    fifo-relaxed
+        Tearing, vsync blocked. Late frames will tear instead of stuttering.
+    mailbox
+        Non-tearing, not vsync blocked. Similar to "triple buffering".
+    immediate
+        Tearing, not vsync blocked. Similar to "VSync off".
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
@@ -5020,7 +5031,10 @@ Miscellaneous
     Media files must use constant framerate. Section-wise VFR might work as well
     with some container formats (but not e.g. mkv). If the sync code detects
     severe A/V desync, or the framerate cannot be detected, the player
-    automatically reverts to ``audio`` mode for some time or permanently.
+    automatically reverts to ``audio`` mode for some time or permanently. These
+    modes also require a vsync blocked presentation mode. For OpenGL, this
+    translates to ``--opengl-swapinterval=1``. For Vulkan, it translates to
+    ``--vulkan-swap-mode=fifo`` (or ``fifo-relaxed``).
 
     The modes with ``desync`` in their names do not attempt to keep audio/video
     in sync. They will slowly (or quickly) desync, until e.g. the next seek

@@ -63,7 +63,7 @@ static bool xlib_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk))
+    if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_FIFO_KHR))
         goto error;
 
     return true;

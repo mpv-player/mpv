@@ -20,8 +20,18 @@
 #include "ra_vk.h"
 #include "utils.h"
 
+enum {
+    SWAP_AUTO = 0,
+    SWAP_FIFO,
+    SWAP_FIFO_RELAXED,
+    SWAP_MAILBOX,
+    SWAP_IMMEDIATE,
+    SWAP_COUNT,
+};
+
 struct vulkan_opts {
     char *device; // force a specific GPU
+    int swap_mode;
 };
 
 static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
@@ -83,6 +93,12 @@ error:
 const struct m_sub_options vulkan_conf = {
     .opts = (const struct m_option[]) {
         OPT_STRING_VALIDATE("vulkan-device", device, 0, vk_validate_dev),
+        OPT_CHOICE("vulkan-swap-mode", swap_mode, 0,
+                   ({"auto",        SWAP_AUTO},
+                   {"fifo",         SWAP_FIFO},
+                   {"fifo-relaxed", SWAP_FIFO_RELAXED},
+                   {"mailbox",      SWAP_MAILBOX},
+                   {"immediate",    SWAP_IMMEDIATE})),
         {0}
     },
     .size = sizeof(struct vulkan_opts)
@@ -158,7 +174,7 @@ static bool update_swapchain_info(struct priv *p,
     if (caps.maxImageCount)
         info->minImageCount = MPMIN(info->minImageCount, caps.maxImageCount);
 
-    // Check the extend against the allowed parameters
+    // Check the extent against the allowed parameters
     if (caps.currentExtent.width != info->imageExtent.width &&
         caps.currentExtent.width != 0xFFFFFFFF)
     {
@@ -230,7 +246,8 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
 
 static const struct ra_swapchain_fns vulkan_swapchain;
 
-bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk)
+bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
+                    VkPresentModeKHR preferred_mode)
 {
     struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
     sw->ctx = ctx;
@@ -251,6 +268,13 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk)
     if (!ctx->ra)
         goto error;
 
+    static const VkPresentModeKHR present_modes[SWAP_COUNT] = {
+        [SWAP_FIFO]         = VK_PRESENT_MODE_FIFO_KHR,
+        [SWAP_FIFO_RELAXED] = VK_PRESENT_MODE_FIFO_RELAXED_KHR,
+        [SWAP_MAILBOX]      = VK_PRESENT_MODE_MAILBOX_KHR,
+        [SWAP_IMMEDIATE]    = VK_PRESENT_MODE_IMMEDIATE_KHR,
+    };
+
     p->protoInfo = (VkSwapchainCreateInfoKHR) {
         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .surface = vk->surf,
@@ -259,9 +283,27 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk)
         .imageArrayLayers = 1, // non-stereoscopic
         .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .minImageCount = ctx->opts.swapchain_depth + 1, // +1 for FB
-        .presentMode = VK_PRESENT_MODE_FIFO_KHR,
+        .presentMode = p->opts->swap_mode ? present_modes[p->opts->swap_mode]
+                                          : preferred_mode,
         .clipped = true,
     };
+
+    // Make sure the swapchain present mode is supported
+    int num_modes;
+    VK(vkGetPhysicalDeviceSurfacePresentModesKHR(vk->physd, vk->surf,
+                                                 &num_modes, NULL));
+    VkPresentModeKHR *modes = talloc_array(NULL, VkPresentModeKHR, num_modes);
+    VK(vkGetPhysicalDeviceSurfacePresentModesKHR(vk->physd, vk->surf,
+                                                 &num_modes, modes));
+    bool supported = false;
+    for (int i = 0; i < num_modes; i++)
+        supported |= (modes[i] == p->protoInfo.presentMode);
+    talloc_free(modes);
+
+    if (!supported) {
+        MP_ERR(ctx, "Requested swap mode unsupported by this device!\n");
+        goto error;
+    }
 
     return true;
 
