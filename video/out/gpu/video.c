@@ -1500,7 +1500,9 @@ found:
 static void load_shader(struct gl_video *p, struct bstr body)
 {
     gl_sc_hadd_bstr(p->sc, body);
+    gl_sc_uniform_dynamic(p->sc);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
+    gl_sc_uniform_dynamic(p->sc);
     gl_sc_uniform_i(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "input_size",
                        (float[]){(p->src_rect.x1 - p->src_rect.x0) *
@@ -2579,6 +2581,7 @@ static void pass_dither(struct gl_video *p)
 
         float matrix[2][2] = {{cos(r),     -sin(r)    },
                               {sin(r) * m,  cos(r) * m}};
+        gl_sc_uniform_dynamic(p->sc);
         gl_sc_uniform_mat2(p->sc, "dither_trafo", true, &matrix[0][0]);
 
         GLSL(dither_pos = dither_trafo * dither_pos;)
@@ -2957,11 +2960,13 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         // Blend the frames together
         if (oversample || linear) {
+            gl_sc_uniform_dynamic(p->sc);
             gl_sc_uniform_f(p->sc, "inter_coeff", mix);
             GLSL(color = mix(texture(texture0, texcoord0),
                              texture(texture1, texcoord1),
                              inter_coeff);)
         } else {
+            gl_sc_uniform_dynamic(p->sc);
             gl_sc_uniform_f(p->sc, "fcoord", mix);
             pass_sample_separated_gen(p->sc, tscale, 0, 0);
         }

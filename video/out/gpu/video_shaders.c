@@ -768,6 +768,7 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     // Initialize the PRNG by hashing the position + a random uniform
     GLSL(vec3 _m = vec3(HOOKED_pos, random) + vec3(1.0);)
     GLSL(float h = permute(permute(permute(_m.x)+_m.y)+_m.z);)
+    gl_sc_uniform_dynamic(sc);
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
 
