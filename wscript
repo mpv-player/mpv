@@ -728,10 +728,6 @@ video_output_features = [
         'deps': [ 'win32-desktop' ],
         'func': check_cc(header_name='d3d9.h'),
     }, {
-        'name': '--android',
-        'desc': 'Android support',
-        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
-    }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
         # every project to hardcode the paths to the include directories. Also,
         # these headers are so broken that they spam tons of warnings by merely
