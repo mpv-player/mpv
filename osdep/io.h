@@ -32,6 +32,33 @@
 #include <glob.h>
 #endif
 
+#ifdef __ANDROID__
+#  include <unistd.h>
+#  include <stdio.h>
+
+// replace lseek with the 64bit variant
+#ifdef lseek
+#  undef lseek
+#endif
+#define lseek(f,p,w) lseek64((f), (p), (w))
+
+// replace possible fseeko with a
+// lseek64 based solution.
+#ifdef fseeko
+#  undef fseeko
+#endif
+static inline int mp_fseeko(FILE* fp, off64_t offset, int whence) {
+    int ret = -1;
+    if ((ret = fflush(fp)) != 0) {
+        return ret;
+    }
+
+    return lseek64(fileno(fp), offset, whence) >= 0 ? 0 : -1;
+}
+#define fseeko(f,p,w) mp_fseeko((f), (p), (w))
+
+#endif // __ANDROID__
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
