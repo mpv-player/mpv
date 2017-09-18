@@ -871,8 +871,10 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
             sc->error_state = true;
         MP_TARRAY_APPEND(sc, sc->entries, sc->num_entries, entry);
     }
-    if (sc->error_state)
+    if (sc->error_state) {
+        sc->current_shader = NULL;
         return;
+    }
 
     assert(sc->num_uniforms == entry->num_cached_uniforms);
 
