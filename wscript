@@ -14,7 +14,7 @@ c_preproc.standard_includes.append('/usr/local/include')
 
 """
 Dependency identifiers (for win32 vs. Unix):
-    wscript / C source      meaning
+    wscript / C source                  meaning
     --------------------------------------------------------------------------
     posix / HAVE_POSIX:                 defined on Linux, OSX, Cygwin
                                         (Cygwin emulates POSIX APIs on Windows)
@@ -40,7 +40,7 @@ build_options = [
         'name': '--libmpv-static',
         'desc': 'static library',
         'default': 'disable',
-        'deps_neg': [ 'libmpv-shared' ],
+        'deps': '!libmpv-shared',
         'func': check_true
     }, {
         'name': '--static-build',
@@ -83,8 +83,7 @@ build_options = [
     }, {
         'name': '--cplugins',
         'desc': 'C plugins',
-        'deps': [ 'libdl' ],
-        'deps_neg': [ 'os-win32' ],
+        'deps': 'libdl && !os-win32',
         'func': check_cc(linkflags=['-rdynamic']),
     }, {
         'name': '--zsh-comp',
@@ -127,7 +126,7 @@ main_dependencies = [
     }, {
         'name': 'mingw',
         'desc': 'MinGW',
-        'deps': [ 'os-win32' ],
+        'deps': 'os-win32',
         'func': check_statement('stdlib.h', 'int x = __MINGW32__;'
                                             'int y = __MINGW64_VERSION_MAJOR'),
     }, {
@@ -143,7 +142,7 @@ main_dependencies = [
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
-        'deps_any': [ 'posix', 'mingw' ],
+        'deps': 'posix || mingw',
         'func': check_true,
         'req': True,
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
@@ -152,20 +151,17 @@ main_dependencies = [
         'name': '--uwp',
         'desc': 'Universal Windows Platform',
         'default': 'disable',
-        'deps': [ 'os-win32', 'mingw' ],
-        'deps_neg': [ 'cplayer' ],
+        'deps': 'os-win32 && mingw && !cplayer',
         'func': check_cc(lib=['windowsapp']),
     }, {
         'name': 'win32-desktop',
         'desc': 'win32 desktop APIs',
-        'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'deps_neg': [ 'uwp' ],
+        'deps': '(os-win32 || os-cygwin) && !uwp',
         'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
-        'deps_neg': [ 'posix' ],
-        'deps': [ 'os-win32' ],
+        'deps': 'os-win32 && !posix',
         'func': check_true,
     }, {
         'name': 'pthreads',
@@ -189,11 +185,11 @@ main_dependencies = [
         'desc': 'stdatomic.h support or slow emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'gnuc'],
+        'deps': 'stdatomic || gnuc',
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
-        'deps': [ 'pthreads' ],
+        'deps': 'pthreads',
         'func': check_cc(lib='rt')
     }, {
         'name': '--iconv',
@@ -206,7 +202,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'dos-paths',
         'desc': 'w32/dos paths',
-        'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'deps': 'os-win32 || os-cygwin',
         'func': check_true
     }, {
         'name': '--termios',
@@ -226,28 +222,26 @@ iconv support use --disable-iconv.",
         'desc': 'POSIX spawnp()/kill()',
         'func': check_statement(['spawn.h', 'signal.h'],
             'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
-        'deps_neg': ['mingw'],
+        'deps': '!mingw',
     }, {
         'name': 'win32-pipes',
         'desc': 'Windows pipe support',
         'func': check_true,
-        'deps': [ 'win32-desktop' ],
-        'deps_neg': [ 'posix' ],
+        'deps': 'win32-desktop && !posix',
     }, {
         'name': 'glob-posix',
         'desc': 'glob() POSIX support',
-        'deps_neg': [ 'os-win32', 'os-cygwin' ],
+        'deps': '!(os-win32 || os-cygwin)',
         'func': check_statement('glob.h', 'glob("filename", 0, 0, 0)'),
     }, {
         'name': 'glob-win32',
         'desc': 'glob() win32 replacement',
-        'deps_neg': [ 'posix' ],
-        'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'deps': '!posix && (os-win32 || os-cygwin)',
         'func': check_true
     }, {
         'name': 'glob',
         'desc': 'any glob() support',
-        'deps_any': [ 'glob-posix', 'glob-win32' ],
+        'deps': 'glob-posix || glob-win32',
         'func': check_true,
     }, {
         'name': 'fchmod',
@@ -271,13 +265,13 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'osx-thread-name',
         'desc': 'OSX API for setting thread name',
-        'deps_neg': [ 'glibc-thread-name' ],
+        'deps': '!glibc-thread-name',
         'func': check_statement('pthread.h',
                                 'pthread_setname_np("ducks")', use=['pthreads']),
     }, {
         'name': 'bsd-thread-name',
         'desc': 'BSD API for setting thread name',
-        'deps_neg': [ 'glibc-thread-name', 'osx-thread-name' ],
+        'deps': '!(glibc-thread-name || osx-thread-name)',
         'func': check_statement('pthread.h',
                                 'pthread_set_name_np(pthread_self(), "ducks")',
                                 use=['pthreads']),
@@ -289,13 +283,13 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'linux-fstatfs',
         'desc': "Linux's fstatfs()",
-        'deps': [ 'os-linux' ],
+        'deps': 'os-linux',
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
         'name': '--libsmbclient',
         'desc': 'Samba support (makes mpv GPLv3)',
-        'deps': [ 'libdl' ],
+        'deps': 'libdl',
         'func': check_pkg_config('smbclient'),
         'default': 'disable',
         'module': 'input',
@@ -318,12 +312,12 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--libass-osd',
         'desc': 'libass OSD support',
-        'deps': [ 'libass' ],
+        'deps': 'libass',
         'func': check_true,
     }, {
         'name': 'dummy-osd',
         'desc': 'dummy OSD support',
-        'deps_neg': [ 'libass-osd' ],
+        'deps': '!libass-osd',
         'func': check_true,
     } , {
         'name': '--zlib',
@@ -355,7 +349,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'dvdread-common',
         'desc': 'DVD/IFO support',
-        'deps_any': [ 'dvdread', 'dvdnav' ],
+        'deps': 'dvdread || dvdnav',
         'func': check_true,
     }, {
         'name': '--cdda',
@@ -365,7 +359,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--uchardet',
         'desc': 'uchardet support',
-        'deps': [ 'iconv' ],
+        'deps': 'iconv',
         'func': check_pkg_config('uchardet'),
     }, {
         'name': '--rubberband',
@@ -383,12 +377,12 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--vapoursynth-lazy',
         'desc': 'VapourSynth filter bridge (Lazy Lua)',
-        'deps': ['lua'],
+        'deps': 'lua',
         'func': check_pkg_config('vapoursynth',        '>= 24'),
     }, {
         'name': 'vapoursynth-core',
         'desc': 'VapourSynth filter bridge (core)',
-        'deps_any': ['vapoursynth', 'vapoursynth-lazy'],
+        'deps': 'vapoursynth || vapoursynth-lazy',
         'func': check_true,
     }, {
         'name': '--libarchive',
@@ -454,7 +448,7 @@ libav_dependencies = [
     }, {
         'name': 'libav',
         'desc': 'Libav/FFmpeg library versions',
-        'deps_any': [ 'is_ffmpeg', 'is_libav' ],
+        'deps': 'is_ffmpeg || is_libav',
         'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
@@ -499,14 +493,14 @@ audio_output_features = [
     }, {
         'name': '--sdl1',
         'desc': 'SDL (1.x)',
-        'deps_neg': [ 'sdl2' ],
+        'deps': '!sdl2',
         'func': check_pkg_config('sdl'),
         'default': 'disable'
     }, {
         'name': '--oss-audio',
         'desc': 'OSS',
         'func': check_cc(header_name='sys/soundcard.h'),
-        'deps': [ 'posix' ],
+        'deps': 'posix',
     }, {
         'name': '--rsound',
         'desc': 'RSound audio output',
@@ -547,14 +541,14 @@ audio_output_features = [
     }, {
         'name': '--audiounit',
         'desc': 'AudioUnit output for iOS',
-        'deps': ['atomics'],
+        'deps': 'atomics',
         'func': check_cc(
             fragment=load_fragment('audiounit.c'),
             framework_name=['Foundation', 'AudioToolbox'])
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
-        'deps_any': ['os-win32', 'os-cygwin'],
+        'deps': 'os-win32 || os-cygwin',
         'func': check_cc(fragment=load_fragment('wasapi.c')),
     }
 ]
@@ -567,12 +561,12 @@ video_output_features = [
     }, {
         'name': '--drm',
         'desc': 'DRM',
-        'deps': [ 'vt.h' ],
+        'deps': 'vt.h',
         'func': check_pkg_config('libdrm'),
     }, {
         'name': '--gbm',
         'desc': 'GBM',
-        'deps': [ 'gbm.h' ],
+        'deps': 'gbm.h',
         'func': check_pkg_config('gbm'),
     } , {
         'name': '--wayland',
@@ -591,12 +585,12 @@ video_output_features = [
     } , {
         'name': '--xv',
         'desc': 'Xv video output',
-        'deps': [ 'x11' ],
+        'deps': 'x11',
         'func': check_pkg_config('xv'),
     } , {
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',
-        'deps': [ 'cocoa' ],
+        'deps': 'cocoa',
         'groups': [ 'gl' ],
         'func': check_statement('IOSurface/IOSurface.h',
                                 'IOSurfaceRef surface;',
@@ -604,7 +598,7 @@ video_output_features = [
     } , {
         'name': '--gl-x11',
         'desc': 'OpenGL X11 Backend',
-        'deps': [ 'x11' ],
+        'deps': 'x11',
         'groups': [ 'gl' ],
         'func': check_libs(['GL', 'GL Xdamage'],
                    check_cc(fragment=load_fragment('gl_x11.c'),
@@ -612,33 +606,33 @@ video_output_features = [
     } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
-        'deps': [ 'x11' ],
+        'deps': 'x11',
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl'),
     } , {
         'name': '--egl-drm',
         'desc': 'OpenGL DRM EGL Backend',
-        'deps': [ 'drm', 'gbm' ],
+        'deps': 'drm && gbm',
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl'),
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
-        'deps': [ 'wayland' ],
+        'deps': 'wayland',
         'groups': [ 'gl' ],
         'func': check_pkg_config('wayland-egl', '>= 9.0.0',
                                  'egl',         '>= 9.0.0')
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
-        'deps': [ 'win32-desktop' ],
+        'deps': 'win32-desktop',
         'groups': [ 'gl' ],
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
     } , {
         'name': '--gl-dxinterop',
         'desc': 'OpenGL/DirectX Interop Backend',
-        'deps': [ 'gl-win32' ],
+        'deps': 'gl-win32',
         'groups': [ 'gl' ],
         'func': compose_checks(
             check_statement(['GL/gl.h', 'GL/wglext.h'], 'int i = WGL_ACCESS_WRITE_DISCARD_NV'),
@@ -646,14 +640,14 @@ video_output_features = [
     } , {
         'name': '--egl-angle',
         'desc': 'OpenGL ANGLE headers',
-        'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'deps': 'os-win32 || os-cygwin',
         'groups': [ 'gl' ],
         'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
                                 'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
     } , {
         'name': '--egl-angle-lib',
         'desc': 'OpenGL Win32 ANGLE Library',
-        'deps': [ 'egl-angle' ],
+        'deps': 'egl-angle',
         'groups': [ 'gl' ],
         'func': check_statement(['EGL/egl.h'],
                                 'eglCreateWindowSurface(0, 0, 0, 0)',
@@ -664,54 +658,53 @@ video_output_features = [
     }, {
         'name': '--egl-angle-win32',
         'desc': 'OpenGL Win32 ANGLE Backend',
-        'deps': [ 'egl-angle', 'win32-desktop' ],
+        'deps': 'egl-angle && win32-desktop',
         'groups': [ 'gl' ],
         'func': check_true,
     } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
-        'deps': [ 'x11' ],
+        'deps': 'x11',
         'func': check_pkg_config('vdpau', '>= 0.2'),
     } , {
         'name': '--vdpau-gl-x11',
         'desc': 'VDPAU with OpenGL/X11',
-        'deps': [ 'vdpau', 'gl-x11' ],
+        'deps': 'vdpau && gl-x11',
         'func': check_true,
     }, {
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
-        'deps': [ 'libdl' ],
-        'deps_any': [ 'x11', 'wayland', 'egl-drm' ],
+        'deps': 'libdl && (x11 || wayland || egl-drm)',
         'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
         'name': '--vaapi-x11',
         'desc': 'VAAPI (X11 support)',
-        'deps': [ 'vaapi', 'x11' ],
+        'deps': 'vaapi && x11',
         'func': check_pkg_config('libva-x11', '>= 0.36.0'),
     }, {
         'name': '--vaapi-wayland',
         'desc': 'VAAPI (Wayland support)',
-        'deps': [ 'vaapi', 'gl-wayland' ],
+        'deps': 'vaapi && gl-wayland',
         'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
     }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
-        'deps': [ 'vaapi', 'egl-drm' ],
+        'deps': 'vaapi && egl-drm',
         'func': check_pkg_config('libva-drm', '>= 0.36.0'),
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
-        'deps': [ 'vaapi-x11', 'gl-x11' ],
+        'deps': 'vaapi-x11 && gl-x11',
         'func': check_true,
     }, {
         'name': '--vaapi-x-egl',
         'desc': 'VAAPI EGL on X11',
-        'deps': [ 'vaapi-x11', 'egl-x11' ],
+        'deps': 'vaapi-x11 && egl-x11',
         'func': check_true,
     }, {
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
-        'deps_any': [ 'vaapi-x-egl', 'vaapi-wayland' ],
+        'deps': 'vaapi-x-egl || vaapi-wayland',
         'func': check_true,
     }, {
         'name': '--caca',
@@ -725,7 +718,7 @@ video_output_features = [
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
-        'deps': [ 'win32-desktop' ],
+        'deps': 'win32-desktop',
         'func': check_cc(header_name='d3d9.h'),
     }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
@@ -754,12 +747,12 @@ video_output_features = [
     } , {
         'name': '--plain-gl',
         'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
-        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
+        'deps': 'libmpv-shared || libmpv-static',
         'func': check_true,
     }, {
         'name': '--mali-fbdev',
         'desc': 'MALI via Linux fbdev',
-        'deps': ['libdl'],
+        'deps': 'libdl',
         'func': compose_checks(
             check_cc(lib="EGL"),
             check_statement('EGL/fbdev_window.h', 'struct fbdev_window test'),
@@ -768,9 +761,9 @@ video_output_features = [
     }, {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
-                      'gl-win32', 'gl-wayland', 'rpi', 'mali-fbdev',
-                      'plain-gl' ],
+        'deps': 'gl-cocoa || gl-x11 || egl-x11 || egl-drm || '
+                 + 'gl-win32 || gl-wayland || rpi || mali-fbdev || '
+                 + 'plain-gl',
         'func': check_true,
         'req': True,
         'fmsg': "No OpenGL video output found or enabled. " +
@@ -779,8 +772,8 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm',
-                      'egl-angle-win32' ],
+        'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
+                'egl-angle-win32',
         'func': check_true
     }
 ]
@@ -789,7 +782,7 @@ hwaccel_features = [
     {
         'name': '--vaapi-hwaccel',
         'desc': 'libavcodec VAAPI hwaccel (FFmpeg 3.3 API)',
-        'deps': [ 'vaapi' ],
+        'deps': 'vaapi',
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
@@ -800,7 +793,7 @@ hwaccel_features = [
     }, {
         'name': '--videotoolbox-hwaccel-new',
         'desc': 'libavcodec videotoolbox hwaccel (new API)',
-        'deps_any': [ 'gl-cocoa', 'ios-gl' ],
+        'deps': 'gl-cocoa || ios-gl',
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 96, 100) && '
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
@@ -809,8 +802,7 @@ hwaccel_features = [
     }, {
         'name': '--videotoolbox-hwaccel-old',
         'desc': 'libavcodec videotoolbox hwaccel (old API)',
-        'deps_any': [ 'gl-cocoa', 'ios-gl' ],
-        'deps_neg': [ 'videotoolbox-hwaccel-new' ],
+        'deps': '(gl-cocoa || ios-gl) && !videotoolbox-hwaccel-new',
         'func': compose_checks(
             check_headers('VideoToolbox/VideoToolbox.h'),
             check_statement('libavcodec/videotoolbox.h',
@@ -819,17 +811,17 @@ hwaccel_features = [
     }, {
         'name': 'videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
-        'deps_any': [ 'videotoolbox-hwaccel-new', 'videotoolbox-hwaccel-old' ],
+        'deps': 'videotoolbox-hwaccel-new || videotoolbox-hwaccel-old',
         'func': check_true,
     }, {
         'name': '--videotoolbox-gl',
         'desc': 'Videotoolbox with OpenGL',
-        'deps': [ 'gl-cocoa', 'videotoolbox-hwaccel' ],
+        'deps': 'gl-cocoa && videotoolbox-hwaccel',
         'func': check_true
     }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel (FFmpeg 3.3 API)',
-        'deps': [ 'vdpau' ],
+        'deps': 'vdpau',
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 37, 1) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
@@ -841,7 +833,7 @@ hwaccel_features = [
         # (conflated with ANGLE for easier deps)
         'name': '--d3d-hwaccel',
         'desc': 'D3D11VA hwaccel (plus ANGLE)',
-        'deps': [ 'os-win32', 'egl-angle' ],
+        'deps': 'os-win32 && egl-angle',
         'func': check_true,
     }, {
         'name': '--d3d-hwaccel-new',
@@ -853,29 +845,28 @@ hwaccel_features = [
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
             '      ? 1 : -1]',
             use='libav'),
-        'deps': [ 'd3d-hwaccel' ],
+        'deps': 'd3d-hwaccel',
     }, {
         'name': '--d3d9-hwaccel',
         'desc': 'DXVA2 hwaccel (plus ANGLE)',
-        'deps': [ 'd3d-hwaccel', 'egl-angle-win32' ],
+        'deps': 'd3d-hwaccel && egl-angle-win32',
         'func': check_true,
     }, {
         'name': '--gl-dxinterop-d3d9',
         'desc': 'OpenGL/DirectX Interop Backend DXVA2 interop',
-        'deps': [ 'gl-dxinterop', 'd3d9-hwaccel' ],
+        'deps': 'gl-dxinterop && d3d9-hwaccel',
         'groups': [ 'gl' ],
         'func': check_true,
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
-        'deps': [ 'gl' ],
+        'deps': 'gl',
         'func': check_cc(fragment=load_fragment('cuda.c'),
                          use='libav'),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'd3d-hwaccel' ],
-        'deps_neg': [ 'd3d-hwaccel-new' ],
+        'deps': 'd3d-hwaccel && !d3d-hwaccel-new',
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
@@ -890,28 +881,26 @@ radio_and_tv_features = [
         'name': 'sys_videoio_h',
         'desc': 'videoio.h',
         'func': check_cc(header_name=['sys/time.h', 'sys/videoio.h']),
-        'deps': [ 'tv' ],
+        'deps': 'tv',
     }, {
         'name': 'videodev',
         'desc': 'videodev2.h',
         'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h']),
-        'deps': [ 'tv' ],
-        'deps_neg': [ 'sys_videoio_h' ],
+        'deps': 'tv && !sys_videoio_h',
     }, {
         'name': '--tv-v4l2',
         'desc': 'Video4Linux2 TV interface',
-        'deps': [ 'tv' ],
-        'deps_any': [ 'sys_videoio_h', 'videodev' ],
+        'deps': 'tv && (sys_videoio_h || videodev)',
         'func': check_true,
     }, {
         'name': '--libv4l2',
         'desc': 'libv4l2 support',
         'func': check_pkg_config('libv4l2'),
-        'deps': [ 'tv-v4l2' ],
+        'deps': 'tv-v4l2',
     }, {
         'name': '--audio-input',
         'desc': 'audio input support',
-        'deps_any': [ 'tv-v4l2' ],
+        'deps': 'tv-v4l2',
         'func': check_true
     } , {
         'name': '--dvbin',
@@ -925,17 +914,17 @@ standalone_features = [
     {
         'name': 'win32-executable',
         'desc': 'w32 executable',
-        'deps_any': [ 'os-win32', 'os-cygwin'],
+        'deps': 'os-win32 || !(!(os-cygwin))',
         'func': check_ctx_vars('WINDRES')
     }, {
         'name': '--apple-remote',
         'desc': 'Apple Remote support',
-        'deps': [ 'cocoa' ],
+        'deps': 'cocoa',
         'func': check_true
     }, {
         'name': '--macos-touchbar',
         'desc': 'macOS Touch Bar support',
-        'deps': [ 'cocoa' ],
+        'deps': 'cocoa',
         'func': check_cc(
             fragment=load_fragment('touchbar.m'),
             framework_name=['AppKit'],
