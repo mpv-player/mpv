@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.28.0 ---
+    - drop previously deprecated --heartbeat-cmd and --heartbeat--interval
+      options
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command

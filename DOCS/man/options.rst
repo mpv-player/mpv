@@ -2412,50 +2412,6 @@ Window
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
-``--heartbeat-cmd=<command>``
-
-    .. warning::
-
-        This option is redundant with Lua scripting. Further, it shouldn't be
-        needed for disabling screensaver anyway, since mpv will call
-        ``xdg-screensaver`` when using X11 backend. As a consequence this
-        option has been deprecated with no direct replacement.
-
-    Command that is executed every 30 seconds during playback via *system()* -
-    i.e. using the shell. The time between the commands can be customized with
-    the ``--heartbeat-interval`` option. The command is not run while playback
-    is paused.
-
-    .. note::
-
-        mpv uses this command without any checking. It is your responsibility to
-        ensure it does not cause security problems (e.g. make sure to use full
-        paths if "." is in your path like on Windows). It also only works when
-        playing video (i.e. not with ``--no-video`` but works with
-        ``--vo=null``).
-
-    This can be "misused" to disable screensavers that do not support the
-    proper X API (see also ``--stop-screensaver``). If you think this is too
-    complicated, ask the author of the screensaver program to support the
-    proper X APIs. Note that the ``--stop-screensaver`` does not influence the
-    heartbeat code at all.
-
-    .. admonition:: Example for xscreensaver
-
-        ``mpv --heartbeat-cmd="xscreensaver-command -deactivate" file``
-
-    .. admonition:: Example for GNOME screensaver
-
-        ``mpv --heartbeat-cmd="gnome-screensaver-command --deactivate" file``
-
-
-``--heartbeat-interval=<sec>``
-    Time between ``--heartbeat-cmd`` invocations in seconds (default: 30).
-
-    .. note::
-
-        This does not affect the normal screensaver operation in any way.
-
 ``--no-keepaspect``, ``--keepaspect``
     ``--no-keepaspect`` will always stretch the video to window size, and will
     disable the window manager hints that force the window aspect ratio.

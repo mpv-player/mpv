@@ -386,7 +386,6 @@ typedef struct MPContext {
     struct frame_info *past_frames;
     int num_past_frames;
 
-    double next_heartbeat;
     double last_idle_tick;
     double next_cache_update;
 

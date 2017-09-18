@@ -181,8 +181,6 @@ typedef struct MPOpts {
     char *status_msg;
     char *osd_status_msg;
     char *osd_msg[3];
-    char *heartbeat_cmd;
-    float heartbeat_interval;
     int player_idle_mode;
     int consolecontrols;
     int playlist_pos;

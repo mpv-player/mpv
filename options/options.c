@@ -565,10 +565,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
     OPT_FLAG("stop-screensaver", stop_screensaver, UPDATE_SCREENSAVER),
 
-    OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0,
-               .deprecation_message = "use Lua scripting instead"),
-    OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
-
     OPT_SUBSTRUCT("", video_equalizer, mp_csp_equalizer_conf, 0),
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
@@ -822,6 +818,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("sub-ass-style-override", "sub-ass-override"),
     OPT_REMOVED("fs-black-out-screens", NULL),
     OPT_REPLACED("sub-paths", "sub-file-paths"),
+    OPT_REMOVED("heartbeat-cmd", "use Lua scripting instead"),
 
     {0}
 };
@@ -841,7 +838,6 @@ const struct MPOpts mp_default_opts = {
     .audio_device = "auto",
     .audio_client_name = "mpv",
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
-    .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
     .video_osd = 1,
