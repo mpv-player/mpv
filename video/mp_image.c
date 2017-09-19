@@ -511,6 +511,12 @@ void mp_check_gpu_memcpy(struct mp_log *log, bool *once)
     }
 }
 
+static enum mp_csp mp_image_params_get_forced_csp(struct mp_image_params *params)
+{
+    int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
+    return mp_imgfmt_get_forced_csp(imgfmt);
+}
+
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 {
     dst->pict_type = src->pict_type;
@@ -526,7 +532,10 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.color = src->params.color;
     dst->params.chroma_location = src->params.chroma_location;
     dst->params.spherical = src->params.spherical;
-    mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
+    // ensure colorspace consistency
+    if (mp_image_params_get_forced_csp(&dst->params) !=
+        mp_image_params_get_forced_csp(&src->params))
+        dst->params.color = (struct mp_colorspace){0};
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1]) {
             if (mp_image_make_writeable(dst))
@@ -733,7 +742,7 @@ void mp_image_set_attributes(struct mp_image *image,
     nparams.w = image->w;
     nparams.h = image->h;
     if (nparams.imgfmt != params->imgfmt)
-        mp_image_params_guess_csp(&nparams);
+        nparams.color = (struct mp_colorspace){0};
     mp_image_set_params(image, &nparams);
 }
 
@@ -742,12 +751,7 @@ void mp_image_set_attributes(struct mp_image *image,
 // the colorspace as implied by the pixel format.
 void mp_image_params_guess_csp(struct mp_image_params *params)
 {
-    int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
-    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(imgfmt);
-    if (!fmt.id)
-        return;
-
-    enum mp_csp forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
+    enum mp_csp forced_csp = mp_image_params_get_forced_csp(params);
     if (forced_csp == MP_CSP_AUTO) { // YUV/other
         if (params->color.space != MP_CSP_BT_601 &&
             params->color.space != MP_CSP_BT_709 &&
