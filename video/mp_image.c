@@ -521,10 +521,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.rotate = src->params.rotate;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
-    if (dst->w == src->w && dst->h == src->h) {
-        dst->params.p_w = src->params.p_w;
-        dst->params.p_h = src->params.p_h;
-    }
+    dst->params.p_w = src->params.p_w;
+    dst->params.p_h = src->params.p_h;
     dst->params.color = src->params.color;
     dst->params.chroma_location = src->params.chroma_location;
     dst->params.spherical = src->params.spherical;
