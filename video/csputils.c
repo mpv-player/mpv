@@ -79,6 +79,8 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"gamma1.8",    MP_CSP_TRC_GAMMA18},
     {"gamma2.2",    MP_CSP_TRC_GAMMA22},
     {"gamma2.8",    MP_CSP_TRC_GAMMA28},
+    {"log100",      MP_CSP_TRC_LOG100},
+    {"log316",      MP_CSP_TRC_LOG316},
     {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
     {"pq",          MP_CSP_TRC_PQ},
     {"hlg",         MP_CSP_TRC_HLG},
@@ -190,6 +192,8 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_BT1361_ECG:
     case AVCOL_TRC_BT2020_10:
     case AVCOL_TRC_BT2020_12:    return MP_CSP_TRC_BT_1886;
+    case AVCOL_TRC_LOG:          return MP_CSP_TRC_LOG100;
+    case AVCOL_TRC_LOG_SQRT:     return MP_CSP_TRC_LOG316;
     case AVCOL_TRC_IEC61966_2_1: return MP_CSP_TRC_SRGB;
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
     case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
@@ -244,6 +248,8 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
     case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
+    case MP_CSP_TRC_LOG100:       return AVCOL_TRC_LOG;
+    case MP_CSP_TRC_LOG316:       return AVCOL_TRC_LOG_SQRT;
     case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
     case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
     default:                      return AVCOL_TRC_UNSPECIFIED;

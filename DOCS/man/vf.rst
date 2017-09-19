@@ -368,6 +368,8 @@ Available mpv-only filters are:
        :v-log:        Panasonic V-Log transfer curve
        :s-log1:       Sony S-Log1 transfer curve
        :s-log2:       Sony S-Log2 transfer curve
+       :log100:       Logarithmic transfer characteristic (100:1 range)
+       :log316:       Logarithmic transfer characteristic (100 * Sqrt(10) : 1 range)
 
     ``<sig-peak>``
         Reference peak illumination for the video file, relative to the

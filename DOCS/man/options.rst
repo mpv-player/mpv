@@ -4762,6 +4762,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Sony S-Log1 curve
     s-log2
         Sony S-Log2 curve
+    log100
+        Logarithmic transfer characteristic (100:1 range)
+    log316
+        Logarithmic transfer characteristic (100 * Sqrt(10) : 1 range)
 
     .. note::
 
