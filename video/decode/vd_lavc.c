@@ -261,10 +261,15 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
+    &mp_vd_lavc_vdpau_copy,
 #endif
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     &mp_vd_lavc_videotoolbox,
     &mp_vd_lavc_videotoolbox_copy,
+#endif
+#if HAVE_VAAPI_HWACCEL
+    &mp_vd_lavc_vaapi,
+    &mp_vd_lavc_vaapi_copy,
 #endif
 #if HAVE_D3D_HWACCEL
     &mp_vd_lavc_d3d11va,
@@ -285,13 +290,6 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_cuda_old,
  #endif
     &mp_vd_lavc_cuda_copy,
-#endif
-#if HAVE_VDPAU_HWACCEL
-    &mp_vd_lavc_vdpau_copy,
-#endif
-#if HAVE_VAAPI_HWACCEL
-    &mp_vd_lavc_vaapi,
-    &mp_vd_lavc_vaapi_copy,
 #endif
     &mp_vd_lavc_crystalhd,
     NULL
