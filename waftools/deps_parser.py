@@ -173,13 +173,6 @@ def check_dependency_expr(expr, deps):
     #   1. the first missing dep of a case that has missing deps only
     #   2. the first conflicting dep at all
 
-    def do_op(ast, op, cb):
-        if isinstance(ast, AstOp) and ast.op == op:
-            for sub in ast.sub:
-                cb(sub)
-        else:
-            cb(ast)
-
     def get_sub_list(node, op):
         if isinstance(node, AstOp) and node.op == op:
             return node.sub
