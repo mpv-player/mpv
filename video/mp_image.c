@@ -525,15 +525,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->params.p_w = src->params.p_w;
         dst->params.p_h = src->params.p_h;
     }
-    dst->params.color.primaries = src->params.color.primaries;
-    dst->params.color.gamma = src->params.color.gamma;
-    dst->params.color.sig_peak = src->params.color.sig_peak;
-    dst->params.color.light = src->params.color.light;
-    if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
-        dst->params.color.space = src->params.color.space;
-        dst->params.color.levels = src->params.color.levels;
-        dst->params.chroma_location = src->params.chroma_location;
-    }
+    dst->params.color = src->params.color;
+    dst->params.chroma_location = src->params.chroma_location;
     dst->params.spherical = src->params.spherical;
     mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
