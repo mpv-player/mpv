@@ -3738,9 +3738,9 @@ float gl_video_scale_ambient_lux(float lmin, float lmax,
 void gl_video_set_ambient_lux(struct gl_video *p, int lux)
 {
     if (p->opts.gamma_auto) {
-        float gamma = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, lux);
-        MP_VERBOSE(p, "ambient light changed: %dlux (gamma: %f)\n", lux, gamma);
-        p->opts.gamma = MPMIN(1.0, 1.961 / gamma);
+        p->opts.gamma = gl_video_scale_ambient_lux(16.0, 256.0, 1.0, 1.2, lux);
+        MP_VERBOSE(p, "ambient light changed: %d lux (gamma: %f)\n", lux,
+                   p->opts.gamma);
     }
 }
 

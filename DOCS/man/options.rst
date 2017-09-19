@@ -4649,22 +4649,22 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Recommended values based on the environmental brightness:
 
     1.0
-        Brightly illuminated (default)
-    0.9
-        Slightly dim
-    0.8
-        Pitch black room
+        Pitch black or dimly lit room (default)
+    1.1
+        Moderately lit room, home
+    1.2
+        Brightly illuminated room, office
 
-    NOTE: Typical movie content (Blu-ray etc.) already contains a gamma drop of
-    about 0.8, so specifying it here as well will result in even darker
-    image than intended!
+    NOTE: This is based around the assumptions of typical movie content, which
+    contains an implicit end-to-end of about 0.8 from scene to display. For
+    bright environments it can be useful to cancel that out.
 
 ``--gamma-auto``
     Automatically corrects the gamma value depending on ambient lighting
-    conditions (adding a gamma boost for dark rooms).
+    conditions (adding a gamma boost for bright rooms).
 
-    With ambient illuminance of 64lux, mpv will pick the 1.0 gamma value (no
-    boost), and slightly increase the boost up until 0.8 for 16lux.
+    With ambient illuminance of 16 lux, mpv will pick the 1.0 gamma value (no
+    boost), and slightly increase the boost up until 1.2 for 256 lux.
 
     NOTE: Only implemented on OS X.
 
