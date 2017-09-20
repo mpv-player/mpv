@@ -33,7 +33,7 @@ class compile_sym(Task):
             raise WafError('NotImplemented')
 
 @feature('syms')
-@after_method('process_source', 'process_use', 'apply_link', 'process_uselib_local')
+@after_method('process_source', 'process_use', 'apply_link', 'process_uselib_local', 'propagate_uselib_vars')
 def do_the_symbol_stuff(self):
     tsk = self.create_task('compile_sym',
     [self.path.find_node(self.export_symbols_def)],
