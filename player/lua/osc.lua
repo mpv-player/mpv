@@ -1894,7 +1894,7 @@ function hide_osc()
         -- no-op and won't render again to remove the osc, so do that manually.
         state.osc_visible = false
         timer_stop()
-        render() -- state.osc_visible == false -> remove the osc from screen
+        render_wipe()
     elseif (user_opts.fadeduration > 0) then
         if not(state.osc_visible == false) then
             state.anitype = "out"
@@ -1971,6 +1971,11 @@ end
 
 function request_init()
     state.initREQ = true
+end
+
+function render_wipe()
+    msg.debug("render_wipe()")
+    mp.set_osd_ass(0, 0, "{}")
 end
 
 function render()
