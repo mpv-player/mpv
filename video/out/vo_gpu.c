@@ -77,18 +77,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gpu_priv *p = vo->priv;
     struct ra_swapchain *sw = p->ctx->swapchain;
 
-    struct ra_tex *tex = sw->fns->start_frame(sw);
-    if (!tex) {
-        MP_ERR(vo, "Failed starting frame!\n");
+    struct ra_fbo fbo;
+    if (!sw->fns->start_frame(sw, &fbo))
         return;
-    }
 
-    struct fbodst dst = {
-        .tex  = tex,
-        .flip = sw->flip_v,
-    };
-
-    gl_video_render_frame(p->renderer, frame, dst);
+    gl_video_render_frame(p->renderer, frame, fbo);
     if (!sw->fns->submit_frame(sw, frame)) {
         MP_ERR(vo, "Failed presenting frame!\n");
         return;

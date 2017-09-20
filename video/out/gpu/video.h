@@ -55,7 +55,7 @@ struct scaler {
     bool initialized;
     struct filter_kernel *kernel;
     struct ra_tex *lut;
-    struct fbotex sep_fbo;
+    struct ra_tex *sep_fbo;
     bool insufficient;
     int lut_size;
 
@@ -159,7 +159,7 @@ bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
-                           struct fbodst target);
+                           struct ra_fbo fbo);
 void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);

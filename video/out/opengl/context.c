@@ -155,8 +155,7 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
 {
     struct ra_swapchain *sw = ctx->swapchain = talloc_ptrtype(NULL, sw);
     *sw = (struct ra_swapchain) {
-        .ctx    = ctx,
-        .flip_v = !params.flipped, // OpenGL framebuffers are normally inverted
+        .ctx = ctx,
     };
 
     struct priv *p = sw->priv = talloc_ptrtype(sw, p);
@@ -266,11 +265,12 @@ struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw)
     return screen;
 }
 
-struct ra_tex *ra_gl_ctx_start_frame(struct ra_swapchain *sw)
+bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
-
-    return p->wrapped_fb;
+    out_fbo->tex = p->wrapped_fb;
+    out_fbo->flip = !p->params.flipped; // OpenGL FBs are normally flipped
+    return true;
 }
 
 bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)

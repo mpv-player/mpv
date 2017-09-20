@@ -33,7 +33,7 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
     gl_transform_vec(t, &x->t[0], &x->t[1]);
 }
 
-void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo)
+void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo)
 {
     int y_dir = fbo.flip ? -1 : 1;
     gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
@@ -167,35 +167,24 @@ struct ra_layout std430_layout(struct ra_renderpass_input *inp)
     };
 }
 
-// Create a texture and a FBO using the texture as color attachments.
-//  fmt: texture internal format
-// If the parameters are the same as the previous call, do not touch it.
-bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+// Resize a texture to a new desired size and format if necessary
+bool ra_tex_resize(struct ra *ra, struct mp_log *log, struct ra_tex **tex,
                    int w, int h, const struct ra_format *fmt)
 {
-    int lw = w, lh = h;
-
-    if (fbo->tex) {
-        int cw = w, ch = h;
-        int rw = fbo->tex->params.w, rh = fbo->tex->params.h;
-
-        if (rw == cw && rh == ch && fbo->tex->params.format == fmt)
-            goto done;
+    if (*tex) {
+        struct ra_tex_params cur_params = (*tex)->params;
+        if (cur_params.w == w && cur_params.h == h && cur_params.format == fmt)
+            return true;
     }
 
-    mp_verbose(log, "Create FBO: %dx%d (%dx%d)\n", lw, lh, w, h);
+    mp_verbose(log, "Resizing texture: %dx%d\n", w, h);
 
     if (!fmt || !fmt->renderable || !fmt->linear_filter) {
         mp_err(log, "Format %s not supported.\n", fmt ? fmt->name : "(unset)");
         return false;
     }
 
-    fbotex_uninit(fbo);
-
-    *fbo = (struct fbotex) {
-        .ra = ra,
-    };
-
+    ra_tex_free(ra, tex);
     struct ra_tex_params params = {
         .dimensions = 2,
         .w = w,
@@ -209,32 +198,11 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         .blit_src = true,
     };
 
-    fbo->tex = ra_tex_create(fbo->ra, &params);
+    *tex = ra_tex_create(ra, &params);
+    if (!*tex)
+        mp_err(log, "Error: texture could not be created.\n");
 
-    if (!fbo->tex) {
-        mp_err(log, "Error: framebuffer could not be created.\n");
-        fbotex_uninit(fbo);
-        return false;
-    }
-
-done:
-
-    fbo->lw = lw;
-    fbo->lh = lh;
-
-    fbo->fbo = (struct fbodst){
-        .tex = fbo->tex,
-    };
-
-    return true;
-}
-
-void fbotex_uninit(struct fbotex *fbo)
-{
-    if (fbo->ra) {
-        ra_tex_free(fbo->ra, &fbo->tex);
-        *fbo = (struct fbotex) {0};
-    }
+    return *tex;
 }
 
 struct timer_pool {

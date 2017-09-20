@@ -335,11 +335,10 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 
     MP_STATS(ctx, "glcb-render");
     struct ra_swapchain *sw = ctx->ra_ctx->swapchain;
+    struct ra_fbo target;
     ra_gl_ctx_resize(sw, vp_w, abs(vp_h), fbo);
-    struct fbodst target = {
-        .tex = ra_gl_ctx_start_frame(sw),
-        .flip = vp_h < 0,
-    };
+    ra_gl_ctx_start_frame(sw, &target);
+    target.flip = vp_h < 0;
     gl_video_render_frame(ctx->renderer, frame, target);
     ra_gl_ctx_submit_frame(sw, frame);
 

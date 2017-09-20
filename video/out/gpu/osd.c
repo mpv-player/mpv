@@ -291,7 +291,7 @@ static void get_3d_side_by_side(int stereo_mode, int div[2])
 }
 
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
-                          struct gl_shader_cache *sc, struct fbodst target)
+                          struct gl_shader_cache *sc, struct ra_fbo fbo)
 {
     struct mpgl_osd_part *part = ctx->parts[index];
 
@@ -303,7 +303,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
             struct gl_transform t;
-            gl_transform_ortho_fbodst(&t, target);
+            gl_transform_ortho_fbo(&t, fbo);
 
             float a_x = ctx->osd_res.w * x;
             float a_y = ctx->osd_res.h * y;
@@ -317,7 +317,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     const int *factors = &blend_factors[part->format][0];
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    gl_sc_dispatch_draw(sc, target.tex, part->vertices, part->num_vertices);
+    gl_sc_dispatch_draw(sc, fbo.tex, part->vertices, part->num_vertices);
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)

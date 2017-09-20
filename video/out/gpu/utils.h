@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "ra.h"
+#include "context.h"
 
 // A 3x2 matrix, with the translation part separate.
 struct gl_transform {
@@ -62,12 +63,7 @@ static inline bool gl_transform_eq(struct gl_transform a, struct gl_transform b)
 
 void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
 
-struct fbodst {
-    struct ra_tex *tex;
-    bool flip; // mirror vertically
-};
-
-void gl_transform_ortho_fbodst(struct gl_transform *t, struct fbodst fbo);
+void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo);
 
 // A pool of buffers, which can grow as needed
 struct ra_buf_pool {
@@ -92,15 +88,7 @@ bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
 struct ra_layout std140_layout(struct ra_renderpass_input *inp);
 struct ra_layout std430_layout(struct ra_renderpass_input *inp);
 
-struct fbotex {
-    struct ra *ra;
-    struct ra_tex *tex;
-    int lw, lh; // logical (configured) size, <= than texture size
-    struct fbodst fbo;
-};
-
-void fbotex_uninit(struct fbotex *fbo);
-bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
+bool ra_tex_resize(struct ra *ra, struct mp_log *log, struct ra_tex **tex,
                    int w, int h, const struct ra_format *fmt);
 
 // A wrapper around ra_timer that does result pooling, averaging etc.

@@ -51,6 +51,6 @@ void ra_gl_ctx_resize(struct ra_swapchain *sw, int w, int h, int fbo);
 // for whatever reason, these can be used to inherit the original behavior.
 int ra_gl_ctx_color_depth(struct ra_swapchain *sw);
 struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw);
-struct ra_tex *ra_gl_ctx_start_frame(struct ra_swapchain *sw);
+bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo);
 bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame);
 void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw);
