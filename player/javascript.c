@@ -616,7 +616,7 @@ static void script_set_property_native(js_State *J, void *af)
     mpv_node node;
     makenode(af, &node, J, 2);
     mpv_handle *h = jclient(J);
-    int e = mpv_get_property(h, js_tostring(J, 1), MPV_FORMAT_NODE, &node);
+    int e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_NODE, &node);
     push_status(J, e);
 }
 
@@ -647,7 +647,7 @@ static void script_set_property_number(js_State *J)
 {
     double v = js_tonumber(J, 2);
     mpv_handle *h = jclient(J);
-    int e = mpv_get_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
+    int e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
     push_status(J, e);
 }
 
