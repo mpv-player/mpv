@@ -1128,12 +1128,9 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
                 (float)s->h / s->tex->params.h,
         });
 
-        PRELUDE("#define texcoord%d_raw(id) (tex_scale%d * outcoord(id))\n", n, n);
-        PRELUDE("#define texcoord%d_rot(id) (texture_rot%d * texcoord%d_raw(id) + "
+        PRELUDE("#define texmap%d_raw(id) (tex_scale%d * outcoord(id))\n", n, n);
+        PRELUDE("#define texmap%d(id) (texture_rot%d * texmap%d_raw(id) + "
                "pixel_size%d * texture_off%d)\n", n, n, n, n, n);
-        // Clamp the texture coordinates to prevent sampling out-of-bounds in
-        // threads that exceed the requested width/height
-        PRELUDE("#define texmap%d(id) min(texcoord%d_rot(id), vec2(1.0))\n", n, n);
         PRELUDE("#define texcoord%d texmap%d(gl_GlobalInvocationID)\n", n, n);
     }
 
