@@ -138,12 +138,15 @@ static void *get_native_display(void *priv, const char *name)
 
 void ra_gl_ctx_uninit(struct ra_ctx *ctx)
 {
-    if (ctx->ra)
-        ctx->ra->fns->destroy(ctx->ra);
     if (ctx->swapchain) {
+        struct priv *p = ctx->swapchain->priv;
+        if (ctx->ra && p->wrapped_fb)
+            ra_tex_free(ctx->ra, &p->wrapped_fb);
         talloc_free(ctx->swapchain);
         ctx->swapchain = NULL;
     }
+
+    ra_free(&ctx->ra);
 }
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns;
