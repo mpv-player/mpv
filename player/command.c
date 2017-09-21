@@ -57,8 +57,8 @@
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "audio/aframe.h"
+#include "audio/format.h"
 #include "audio/out/ao.h"
-#include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "video/out/bitmap_packer.h"
@@ -70,6 +70,10 @@
 #include "osdep/subprocess.h"
 
 #include "core.h"
+
+#if HAVE_LIBAF
+#include "audio/filter/af.h"
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
@@ -1455,10 +1459,12 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
             struct vf_chain *vf = mpctx->vo_chain->vf;
             res = vf_control_by_label(vf, VFCTRL_GET_METADATA, &metadata, key);
         } else if (strcmp(type, "af") == 0) {
+#if HAVE_LIBAF
             if (!(mpctx->ao_chain && mpctx->ao_chain->af))
                 return M_PROPERTY_UNAVAILABLE;
             struct af_stream *af = mpctx->ao_chain->af;
             res = af_control_by_label(af, AF_CONTROL_GET_METADATA, &metadata, key);
+#endif
         }
         switch (res) {
         case CONTROL_UNKNOWN:
@@ -1785,8 +1791,7 @@ static int mp_property_mixer_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct ao_chain *ao_c = mpctx->ao_chain;
-    return m_property_flag_ro(action, arg, ao_c && ao_c->af->initialized > 0);
+    return m_property_flag_ro(action, arg, !!mpctx->ao);
 }
 
 /// Volume (RW)
@@ -5491,11 +5496,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         return vf_send_command(mpctx->vo_chain->vf, cmd->args[0].v.s,
                                cmd->args[1].v.s, cmd->args[2].v.s);
 
+#if HAVE_LIBAF
     case MP_CMD_AF_COMMAND:
         if (!mpctx->ao_chain)
             return -1;
         return af_send_command(mpctx->ao_chain->af, cmd->args[0].v.s,
                                cmd->args[1].v.s, cmd->args[2].v.s);
+#endif
 
     case MP_CMD_SCRIPT_BINDING: {
         mpv_event_client_message event = {0};

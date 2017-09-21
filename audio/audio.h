@@ -97,4 +97,6 @@ struct mp_audio *mp_audio_pool_new_copy(struct mp_audio_pool *pool,
 int mp_audio_pool_make_writeable(struct mp_audio_pool *pool,
                                  struct mp_audio *frame);
 
+#include "filter/af.h"
+
 #endif

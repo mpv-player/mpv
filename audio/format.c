@@ -20,7 +20,7 @@
 #include <limits.h>
 
 #include "common/common.h"
-#include "audio/filter/af.h"
+#include "format.h"
 
 // number of bytes per sample, 0 if invalid/unknown
 int af_fmt_to_bytes(int format)

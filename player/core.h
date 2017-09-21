@@ -200,6 +200,7 @@ struct ao_chain {
     bool pts_reset;
 
     struct af_stream *af;
+    struct mp_aconverter *conv; // if af unavailable
     struct ao *ao;
     struct mp_audio_buffer *ao_buffer;
     double ao_resume_time;
@@ -207,8 +208,13 @@ struct ao_chain {
     // 1-element input frame queue.
     struct mp_aframe *input_frame;
 
+    // 1-element output frame queue.
+    struct mp_aframe *output_frame;
+
     // Last known input_mpi format (so af can be reinitialized any time).
     struct mp_aframe *input_format;
+
+    struct mp_aframe *filter_input_format;
 
     struct track *track;
     struct lavfi_pad *filter_src;

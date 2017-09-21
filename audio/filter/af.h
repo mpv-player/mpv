@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#include "config.h"
+#if !HAVE_LIBAF
+#error "libaf disabled"
+#endif
+
 #include "options/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"

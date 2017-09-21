@@ -39,7 +39,6 @@
 #include "osdep/timer.h"
 
 #include "audio/decode/dec_audio.h"
-#include "audio/filter/af.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"

@@ -29,6 +29,7 @@
 #include "common/msg.h"
 #include "common/recorder.h"
 #include "misc/bstr.h"
+#include "options/options.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"
@@ -38,8 +39,6 @@
 #include "dec_audio.h"
 #include "ad.h"
 #include "audio/format.h"
-
-#include "audio/filter/af.h"
 
 extern const struct ad_functions ad_lavc;
 
