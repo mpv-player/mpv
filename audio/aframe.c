@@ -169,6 +169,7 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src)
 
     mp_aframe_copy_attributes(dst, src);
 
+    dst->av_frame->sample_rate = src->av_frame->sample_rate;
     dst->av_frame->format = src->av_frame->format;
     dst->av_frame->channel_layout = src->av_frame->channel_layout;
 #if LIBAVUTIL_VERSION_MICRO >= 100
@@ -183,8 +184,12 @@ void mp_aframe_copy_attributes(struct mp_aframe *dst, struct mp_aframe *src)
 {
     dst->pts = src->pts;
 
+    int rate = dst->av_frame->sample_rate;
+
     if (av_frame_copy_props(dst->av_frame, src->av_frame) < 0)
         abort();
+
+    dst->av_frame->sample_rate = rate;
 }
 
 // Return whether a and b use the same physical audio format. Extra metadata
