@@ -75,11 +75,31 @@ struct priv {
     struct vt_switcher vt_switcher;
 };
 
+static EGLDisplay *get_egl_display(void *device)
+{
+    const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!exts)
+        goto def;
+    if (!strstr(exts, "EGL_EXT_platform_base"))
+        goto def;
+    PFNEGLGETPLATFORMDISPLAYEXTPROC ptr_eglGetPlatformDisplayEXT =
+        (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
+    if (ptr_eglGetPlatformDisplayEXT)
+    {
+        EGLDisplay display = ptr_eglGetPlatformDisplayEXT(
+            EGL_PLATFORM_GBM_KHR, device, NULL);
+        if (display != EGL_NO_DISPLAY)
+            return display;
+    }
+def:
+    return eglGetDisplay(device);
+}
+
 static bool init_egl(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     MP_VERBOSE(ctx->vo, "Initializing EGL\n");
-    p->egl.display = eglGetDisplay(p->gbm.device);
+    p->egl.display = get_egl_display(p->gbm.device);
     if (p->egl.display == EGL_NO_DISPLAY) {
         MP_ERR(ctx->vo, "Failed to get EGL display.\n");
         return false;
