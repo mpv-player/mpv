@@ -175,6 +175,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
         .opts = s->opts,
+        .global = s->global,
         .replaygain_data = s->replaygain_data,
         .out_pool = mp_audio_pool_create(af),
     };
@@ -546,6 +547,7 @@ struct af_stream *af_new(struct mpv_global *global)
     s->first->next = s->last;
     s->last->prev = s->first;
     s->opts = global->opts;
+    s->global = global;
     return s;
 }
 

@@ -153,6 +153,7 @@ def build(ctx):
     sources = [
         ## Audio
         ( "audio/audio.c" ),
+        ( "audio/aconverter.c" ),
         ( "audio/audio_buffer.c" ),
         ( "audio/chmap.c" ),
         ( "audio/chmap_sel.c" ),

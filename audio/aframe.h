@@ -23,6 +23,8 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src);
 bool mp_aframe_config_equals(struct mp_aframe *a, struct mp_aframe *b);
 bool mp_aframe_config_is_valid(struct mp_aframe *frame);
 
+void mp_aframe_copy_attributes(struct mp_aframe *dst, struct mp_aframe *src);
+
 uint8_t **mp_aframe_get_data_ro(struct mp_aframe *frame);
 uint8_t **mp_aframe_get_data_rw(struct mp_aframe *frame);
 
@@ -40,6 +42,7 @@ bool mp_aframe_set_size(struct mp_aframe *frame, int samples);
 void mp_aframe_set_pts(struct mp_aframe *frame, double pts);
 
 int mp_aframe_get_planes(struct mp_aframe *frame);
+int mp_aframe_get_total_plane_samples(struct mp_aframe *frame);
 size_t mp_aframe_get_sstride(struct mp_aframe *frame);
 
 void mp_aframe_skip_samples(struct mp_aframe *f, int samples);
