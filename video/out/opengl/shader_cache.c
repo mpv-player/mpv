@@ -894,7 +894,7 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
 }
 
 struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
-                                        struct ra_tex *target,
+                                        struct ra_tex *target, bool discard,
                                         void *ptr, size_t num)
 {
     struct timer_pool *timer = NULL;
@@ -912,6 +912,7 @@ struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
         .values = sc->values,
         .num_values = sc->num_values,
         .target = target,
+        .invalidate_target = discard,
         .vertex_data = ptr,
         .vertex_count = num,
         .viewport = full_rc,

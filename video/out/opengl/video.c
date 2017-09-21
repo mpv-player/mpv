@@ -1143,7 +1143,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
 }
 
 static struct mp_pass_perf render_pass_quad(struct gl_video *p,
-                                            struct fbodst target,
+                                            struct fbodst target, bool discard,
                                             const struct mp_rect *dst)
 {
     struct vertex va[6] = {0};
@@ -1177,15 +1177,15 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
     va[4] = va[2];
     va[5] = va[1];
 
-    return gl_sc_dispatch_draw(p->sc, target.tex, va, 6);
+    return gl_sc_dispatch_draw(p->sc, target.tex, discard, va, 6);
 }
 
 static void finish_pass_direct(struct gl_video *p, struct fbodst target,
-                               const struct mp_rect *dst)
+                               bool discard, const struct mp_rect *dst)
 {
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
-    pass_record(p, render_pass_quad(p, target, dst));
+    pass_record(p, render_pass_quad(p, target, discard, dst));
     debug_check_gl(p, "after rendering");
     memset(&p->pass_tex, 0, sizeof(p->pass_tex));
     p->pass_tex_num = 0;
@@ -1214,7 +1214,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
 
         debug_check_gl(p, "after dispatching compute shader");
     } else {
-        finish_pass_direct(p, dst_fbo->fbo, &(struct mp_rect){0, 0, w, h});
+        finish_pass_direct(p, dst_fbo->fbo, true, &(struct mp_rect){0, 0, w, h});
     }
 }
 
@@ -2780,7 +2780,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct fbodst fbo)
 
     pass_dither(p);
     pass_describe(p, "output to screen");
-    finish_pass_direct(p, fbo, &p->dst_rect);
+    finish_pass_direct(p, fbo, false, &p->dst_rect);
 }
 
 static bool update_fbosurface(struct gl_video *p, struct mp_image *mpi,
@@ -3194,7 +3194,7 @@ static void reinterleave_vdpau(struct gl_video *p,
         fbotex_change(fbo, p->ra, p->log, w, h * 2, fmt, 0);
 
         pass_describe(p, "vdpau reinterleaving");
-        finish_pass_direct(p, fbo->fbo, &(struct mp_rect){0, 0, w, h * 2});
+        finish_pass_direct(p, fbo->fbo, true, &(struct mp_rect){0, 0, w, h * 2});
 
         output[n] = fbo->tex;
     }

@@ -317,7 +317,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     const int *factors = &blend_factors[part->format][0];
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    gl_sc_dispatch_draw(sc, target.tex, part->vertices, part->num_vertices);
+    gl_sc_dispatch_draw(sc, target.tex, false, part->vertices, part->num_vertices);
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)
