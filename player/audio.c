@@ -497,7 +497,8 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
             goto init_error;
         }
 
-        mp_audio_buffer_reinit(ao_c->ao_buffer, &fmt);
+        mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, fmt.format, &fmt.channels,
+                                   fmt.rate);
         afs->output = fmt;
         if (!mp_audio_config_equals(&afs->output, &afs->filter_output))
             afs->initialized = 0;
@@ -603,9 +604,11 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     reset_audio_state(mpctx);
 
     if (mpctx->ao) {
-        struct mp_audio fmt;
-        get_ao_format(mpctx->ao, &fmt);
-        mp_audio_buffer_reinit(ao_c->ao_buffer, &fmt);
+        int rate;
+        int format;
+        struct mp_chmap channels;
+        ao_get_format(mpctx->ao, &rate, &format, &channels);
+        mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, format, &channels, rate);
     }
 
     mp_wakeup_core(mpctx);
@@ -656,25 +659,28 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->audio_speed * ao_get_delay(mpctx->ao);
 }
 
-static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags)
+static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
+                       int flags)
 {
     if (mpctx->paused)
         return 0;
     struct ao *ao = mpctx->ao;
-    struct mp_audio out_format;
-    get_ao_format(ao, &out_format);
+    int samplerate;
+    int format;
+    struct mp_chmap channels;
+    ao_get_format(ao, &samplerate, &format, &channels);
 #if HAVE_ENCODING
     encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
 #endif
-    if (data->samples == 0)
+    if (samples == 0)
         return 0;
-    double real_samplerate = out_format.rate / mpctx->audio_speed;
-    int played = ao_play(mpctx->ao, data->planes, data->samples, flags);
-    assert(played <= data->samples);
+    double real_samplerate = samplerate / mpctx->audio_speed;
+    int played = ao_play(mpctx->ao, (void **)planes, samples, flags);
+    assert(played <= samples);
     if (played > 0) {
         mpctx->shown_aframes += played;
         mpctx->delay += played / real_samplerate;
-        mpctx->written_audio += played / (double)out_format.rate;
+        mpctx->written_audio += played / (double)samplerate;
         return played;
     }
     return 0;
@@ -812,8 +818,8 @@ static bool copy_output(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
         if (cursamples + mpa->samples > maxsamples) {
             if (cursamples < maxsamples) {
                 struct mp_audio pre = *mpa;
-                pre.samples = maxsamples - cursamples;
-                mp_audio_buffer_append(outbuf, &pre);
+                mp_audio_buffer_append(outbuf, mpa->planes,
+                                       maxsamples - cursamples);
                 mp_audio_skip_samples(mpa, pre.samples);
             }
             af_unread_output_frame(afs, mpa);
@@ -821,7 +827,7 @@ static bool copy_output(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
             return true;
         }
 
-        mp_audio_buffer_append(outbuf, mpa);
+        mp_audio_buffer_append(outbuf, mpa->planes, mpa->samples);
         talloc_free(mpa);
     }
     return true;
@@ -1157,13 +1163,14 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (audio_eof && !opts->gapless_audio)
         playflags |= AOPLAY_FINAL_CHUNK;
 
-    struct mp_audio data;
-    mp_audio_buffer_peek(ao_c->ao_buffer, &data);
-    if (audio_eof || data.samples >= align)
-        data.samples = data.samples / align * align;
-    data.samples = MPMIN(data.samples, mpctx->paused ? 0 : playsize);
-    int played = write_to_ao(mpctx, &data, playflags);
-    assert(played >= 0 && played <= data.samples);
+    uint8_t **planes;
+    int samples;
+    mp_audio_buffer_peek(ao_c->ao_buffer, &planes, &samples);
+    if (audio_eof || samples >= align)
+        samples = samples / align * align;
+    samples = MPMIN(samples, mpctx->paused ? 0 : playsize);
+    int played = write_to_ao(mpctx, planes, samples, playflags);
+    assert(played >= 0 && played <= samples);
     mp_audio_buffer_skip(ao_c->ao_buffer, played);
 
     mpctx->audio_drop_throttle =
