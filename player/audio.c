@@ -965,7 +965,6 @@ static int decode_new_frame(struct ao_chain *ao_c)
     }
 }
 
-#if HAVE_GPL
 /* Try to get at least minsamples decoded+filtered samples in outbuf
  * (total length including possible existing data).
  * Return 0 on success, or negative AD_* error code.
@@ -1064,7 +1063,6 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
 
     return res;
 }
-#endif
 
 void reload_audio_output(struct MPContext *mpctx)
 {

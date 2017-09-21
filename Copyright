@@ -11,7 +11,7 @@ files can have a standard license header).
 All new contributions must be LGPLv2.1+ licensed, or if the changes are done on
 GPL code, must come with the implicit agreement that the project can relicense
 the code to LGPLv2.1+ at a later point without asking the contributor. (This
-is a safeguard for making potential relicensing of the project to LGPLv2.1+
+is a safeguard for making potential relicensing of remaining code to LGPLv2.1+
 easier.) Using a more liberal license compatible to LGPLv2.1+ is also ok.
 
 For information about authors and contributors, consult the git log, which
@@ -31,6 +31,28 @@ under mplayer2, and has been removed from mpv.
 Some libraries are GPLv2+ or GPLv3+ only. Building mpv with Samba support makes
 it GPLv3+.
 
+mpv can be built as LGPLv3+ with the --enable-preliminary-lgpl3 configure
+option. This is a very new switch and it hasn't been confirmed yet whether
+really all GPL code is excluded (thus preliminary). In addition, it disables
+a number of useful features, some of them quite central:
+- no audio filtering, which breaks: --volume, --af, replaygain, pitch
+  correction, fine control about downmix/upmix/resampling behavior
+- Linux X11 video output
+- Linux audio output via ALSA (PulseAudio works)
+- BSD audio output via OSS
+- Linux hardware decoding (vaapi, vdpau)
+- many builtin video filters (use libavfilter instead)
+- automatic rotation and stereoscopic video handling
+- Linux TV input
+- the --frames option
+- the add/cycle and sub-add/audio-add/sub-remove/audio-remove commands
+- video format conversion (if not supported by the VO)
+- minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
+Some of these will be fixed in the future. The lack of the add/cycle commands
+makes this particularly useless for CLI mode, and most of the appeal of LGPL
+is for libmpv anyway. Thus it's not recommended to build mpv CLI in LGPL mode
+at all.
+
 Source files with specific licenses:
 - etc/input.conf is LGPLv2.1+
 - etc/builtin.conf is LGPLv2.1+
@@ -43,251 +65,43 @@ Source files with specific licenses:
 - bootstrap.py is unknown (probably GPLv2+ or LGPLv2+)
 - the build system (wscript, waftools/*) is LGPLv2+, some parts BSD
 
-Some files are marked with "Almost LGPL." These files are GPL, but all authors
-have agreed to relicense them to LGPL. the problem is that one of the authors is
-Michael Niedermayer, who cited the following conditions for relicensing:
-
-  http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2016-September/073535.html
-
-We assume the first 3 conditions are fulfilled. The last condition can be
-interpreted as that his code can be changed to LGPL only as soon as the "core"
-of mpv changes to LGPL. We interpret "core" as something minimal, that can
-actually be built and run, with all GPL code disabled.
-
 Some files are LGPLv3+. This is due to the contributions of a single developer
 going by the SVN username "iive". The chosen license of this project is
 LGPLv2.1+. The affected files will be changed to LGPLv2.1+ at the earliest
 opportunity, for example if his contributions disappear by being replaced
 or removed. All new contributions to these files are implied to be LGPLv2.1+.
 
-LGPL relicensing status. Files which require some sort of action to get a basic
-LGPL player core (relicensing, replacement, or partial/full rewrites) are marked
-with an "x".
+The following files are still GPL:
 
-    audio/decode/ad.h               LGPL
-    audio/decode/ad_lavc.c          LGPL
-    audio/decode/ad_spdif.c         LGPL
-    audio/decode/dec_audio.*        LGPL
-x   audio/filter/af.*               must be killed (main author disagreed)
-        (required for LGPL core: a new filter chain must be written)
-    audio/filter/af_channel.c       must be killed (main author disagreed)
-    audio/filter/af_equalizer.c     must be killed (main author disagreed)
-    audio/filter/af_pan.c           must be killed (main author disagreed)
-    audio/filter/af_volume.c        must be killed (main author disagreed)
-    audio/filter/equalizer.h        must be killed (main author disagreed)
-    audio/filter/tools.c            must be killed (main author disagreed)
-    audio/filter/af_format.c        LGPL
-    audio/filter/af_lavc3enc.c      LGPL
-    audio/filter/af_lavfi.c         LGPL
-    audio/filter/af_scaletempo.c    LGPL
-    audio/filter/af_rubberband.c    LGPL
-    audio/out/ao.c                  LGPL
-    audio/out/ao.h                  LGPL
-    audio/out/ao_alsa.c             extremely hard (original author did not decide)
-    audio/out/ao_audiounit.m        LGPL
-    audio/out/ao_coreaudio.c        LGPL
-    audio/out/ao_coreaudio_chmap.c  LGPL
-    audio/out/ao_coreaudio_chmap.h  LGPL
-    audio/out/ao_coreaudio_exclusiv LGPL
-    audio/out/ao_coreaudio_properti LGPL
-    audio/out/ao_coreaudio_properti LGPL
-    audio/out/ao_coreaudio_utils.c  LGPL
-    audio/out/ao_coreaudio_utils.h  LGPL
+    audio/filter/*                  will be replaced with new filter chain
+    audio/filter/af_format.c        mostly LGPL (except af glue code)
+    audio/filter/af_lavc3enc.c          as above
+    audio/filter/af_lavfi.c             as above
+    audio/filter/af_scaletempo.c        as above
+    audio/filter/af_rubberband.c        as above
+    audio/out/ao_alsa.c             chaotic history, original author did not decide
     audio/out/ao_jack.c             will stay GPL
-    audio/out/ao_lavc.c             LGPL
-    audio/out/ao_null.c             LGPL
-    audio/out/ao_openal.c           LGPL
-    audio/out/ao_opensles.c         LGPL
     audio/out/ao_oss.c              will stay GPL
-    audio/out/ao_pcm.c              LGPL
-    audio/out/ao_pulse.c            LGPL
-    audio/out/ao_rsound.c           LGPL
-    audio/out/ao_sdl.c              LGPL
-    audio/out/ao_sndio.c            LGPL (BSD)
-    audio/out/ao_wasapi.c           LGPL
-    audio/out/ao_wasapi_changenotif LGPL
-    audio/out/ao_wasapi.h           LGPL
-    audio/out/ao_wasapi_utils.c     LGPL
-    audio/out/internal.h            LGPL
-    audio/out/pull.c                LGPL
-    audio/out/push.c                LGPL
-x   audio/audio.*                   very hard (mp_audio based of anders' af_audio)
-        (required for LGPL core: determine if the struct can be used anyway, or
-         devise a cheap AVFrame wrapper)
-    audio/audio_buffer.*            LGPL
-    audio/chmap.*                   LGPL
-    audio/chmap_sel.*               LGPL
-    audio/fmt-conversion.*          LGPL
-    audio/format.*                  LGPL
-    common/av_common.*              LGPL
-    common/av_log.c                 almost LGPL
-    common/av_log.h                 LGPL
-    common/codecs.*                 LGPL
-    common/common.*                 LGPL
-    common/encode.h                 LGPL
-    common/encode_lavc.*            LGPL
-    common/global.h                 LGPL
-    common/msg.c                    almost LGPL
-    common/msg_control.h            LGPL
-    common/msg.h                    LGPL
-    common/playlist.*               LGPL
-    common/recorder.*               LGPL
-    common/tags.*                   LGPL
-    common/version.c                LGPL
-    demux/codec_tags.*              LGPL
-    demux/cue.*                     LGPL
-    demux/demux.*                   LGPL
-    demux/demux_cue.c               LGPL
-    demux/demux_disc.c              LGPL
-    demux/demux_edl.c               LGPL
-    demux/demux_lavf.c              almost LGPL
-    demux/demux_libarchive.c        LGPL
-    demux/demux_mf.c                LGPLv3+
-    demux/demux_mkv.c               LGPL (mostly)
-    demux/demux_mkv_timeline.c      LGPL
-    demux/demux_null.c              LGPL
-    demux/demux_playlist.c          LGPL
-    demux/demux_rar.c               LGPL
-    demux/demux_raw.c               almost LGPL
-    demux/demux_timeline.c          LGPL
+    audio/audio.*                   needed by af code only
     demux/demux_tv.c                will stay GPL
-    demux/ebml.*                    LGPL
-    demux/matroska.h                LGPL
-    demux/packet.*                  LGPL
-    demux/stheader.h                LGPL
-    demux/timeline.*                LGPL
-    input/cmd_*                     LGPL
-    input/event.*                   LGPL
-    input/input.*                   LGPL
-    input/ipc.c                     LGPL
-    input/ipc-unix.c                LGPL
-    input/ipc-win.c                 LGPL
-    input/keycodes.*                LGPL
-    input/pipe-win32.c              LGPL
-    libmpv/*.*                      LGPL
-    misc/*.*                        LGPL
-    options/m_config.*              LGPL
-    options/m_option.c              almost LGPL
-    options/m_option.h              LGPL
-    options/m_property.*            LGPL
-    options/options.*               LGPL
-    options/parse_commandline.*     LGPL
-    options/parse_configfile.*      LGPL
-    options/path.*                  LGPL
-    osdep/android/*                 LGPL (BSD)
-    osdep/ar/*                      LGPL (BSD)
-    osdep/atomic.h                  LGPL
-    osdep/compiler.h                LGPL
-    osdep/endian.h                  LGPL
-    osdep/glob-win.c                LGPL
-    osdep/io.*                      LGPL
-    osdep/macosx_application.h      LGPL
-    osdep/macosx_application.m      LGPL
-    osdep/macosx_application_objc.h LGPL
-    osdep/macosx_compat.h           LGPL
-    osdep/macosx_events.*           LGPL
-    osdep/macosx_events_objc.h      LGPL
-    osdep/macosx_touchbar.*         LGPL
-    osdep/macosx_versions.h         LGPL
-    osdep/main-fn-cocoa.c           LGPL
-    osdep/main-fn.h                 LGPL
-    osdep/main-fn-unix.c            LGPL
-    osdep/main-fn-win.c             LGPL
-    osdep/mpv.exe.manifest          LGPL
-    osdep/mpv.rc                    LGPL
-    osdep/path.h                    LGPL
-    osdep/path-macosx.m             LGPL
-    osdep/path-unix.c               LGPL
-    osdep/path-win.c                LGPL
-    osdep/semaphore.h               LGPL
-    osdep/semaphore_osx.c           LGPL
-    osdep/strnlen.h                 LGPL
-    osdep/subprocess.*              LGPL
-    osdep/subprocess-posix.c        LGPL
-    osdep/subprocess-win.c          LGPL
-    osdep/terminal.h                LGPL
-    osdep/terminal-unix.c           LGPL
-    osdep/terminal-win.c            LGPL
-    osdep/threads.*                 LGPL
-    osdep/timer.c                   LGPL
-    osdep/timer.h                   LGPL
-    osdep/timer-darwin.c            LGPL (MIT)
-    osdep/timer-linux.c             LGPL
-    osdep/timer-win2.c              LGPL
-    osdep/w32_keyboard.c            LGPL
-    osdep/w32_keyboard.h            LGPL
-    osdep/win32-console-wrapper.c   LGPL (BSD)
-    osdep/win32/*                   LGPL (ISC)
-    osdep/windows_utils.*           LGPL
-x   player/audio.c                  LGPL (dysfunctional due to libaf)
-    player/client.*                 LGPL (ISC)
-    player/command.c                LGPL
-    player/command.h                LGPL
-    player/configfiles.c            LGPL
-    player/core.h                   LGPL
-    player/external_files.*         LGPL
-    player/lavfi.*                  LGPL
-    player/loadfile.c               LGPL
-    player/lua/*.*                  LGPL
-    player/lua.c                    LGPL
-    player/misc.c                   LGPL
-    player/osd.c                    LGPL
-    player/playloop.c               LGPL
-    player/screenshot.*             LGPL
-    player/scripting.*              LGPL
-    player/sub.c                    LGPL
-    player/video.c                  LGPL
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
-    stream/cache.c                  LGPLv3+
-    stream/cache_file.c             LGPL
-    stream/cookies.*                LGPL
     stream/dvb*                     must stay GPL
     stream/frequencies.*            must stay GPL
-    stream/rar.*                    LGPL
-    stream/stream_avdevice.c        LGPL
-    stream/stream_bluray.c          LGPL
-    stream/stream.*                 LGPL
-    stream/stream_cb.c              LGPL
     stream/stream_cdda.c            unknown
     stream/stream_dvb.*             must stay GPL
     stream/stream_dvd.c             unknown
     stream/stream_dvd_common.*      unknown
     stream/stream_dvdnav.c          unknown
-    stream/stream_edl.c             LGPL
-    stream/stream_file.c            LGPL
-    stream/stream_lavf.c            LGPL
-    stream/stream_libarchive.*      LGPL
-    stream/stream_memory.c          LGPL
-    stream/stream_mf.c              LGPL
-    stream/stream_null.c            LGPL
-    stream/stream_rar.c             LGPL
     stream/stream_smb.c             will stay GPLv3
     stream/stream_tv.c              will stay GPL
     stream/tv*                      will stay GPL
-    sub/*                           LGPL
-    ta/*                            LGPL (ISC)
-    video/decode/d3d.*              LGPL
-    video/decode/dec_video.*        almost LGPL
-    video/decode/hw_cuda.c          LGPL
-    video/decode/hw_d3d11va.c       LGPL
-    video/decode/hw_dxva2.c         LGPL
-    video/decode/hw_videotoolbox.c  LGPL
-    video/decode/lavc.h             almost LGPLv3+
-    video/decode/vd.h               LGPL
-    video/decode/vd_lavc.c          almost LGPLv3+
-    video/filter/refqueue.*         LGPL
-    video/filter/vf.c               LGPL
-    video/filter/vf.h               LGPL (mostly)
-    video/filter/vf_buffer.c        LGPL
     video/filter/vf_crop.c          will be deleted
-    video/filter/vf_d3d11vpp.c      LGPL
     video/filter/vf_dsize.c         will be deleted
     video/filter/vf_expand.c        will be deleted
     video/filter/vf_flip.c          will be deleted
     video/filter/vf_format.c        will be deleted
     video/filter/vf_gradfun.c       will be deleted
-    video/filter/vf_lavfi.*         LGPL
     video/filter/vf_mirror.c        will be deleted
     video/filter/vf_noformat.c      will be deleted
     video/filter/vf_pullup.c        will be deleted
@@ -295,57 +109,36 @@ x   player/audio.c                  LGPL (dysfunctional due to libaf)
     video/filter/vf_scale.c         will be deleted
     video/filter/vf_stereo3d.c      will be deleted
     video/filter/vf_sub.c           will be deleted
-    video/filter/vf_vapoursynth.c   LGPL
-    video/filter/vf_vavpp.c         LGPL
-    video/filter/vf_vdpaupp.c       LGPL
     video/filter/vf_yadif.c         will be deleted
-    video/csputils.*                LGPL
-    video/fmt-conversion.*          LGPL
     video/gpu_memcpy.*              will be deleted
-    video/hwdec.*                   LGPL
-    video/image_writer.*            LGPL
-    video/img_format.*              LGPL
-    video/mp_image.*                almost LGPL
-    video/mp_image_pool.*           LGPL
-    video/out/aspect.*              LGPL
-    video/out/bitmap_packer.*       LGPL
-    video/out/cocoa*                LGPL
-    video/out/d3d_shader_420p.h     LGPL
-    video/out/d3d_shader_nv12.h     LGPL
-    video/out/d3d_shader_yuv.hlsl   LGPL
-    video/out/dither.*              LGPL
-    video/out/drm_common.*          LGPL
-    video/out/filter_kernels.*      LGPL (BSD)
     video/out/opengl/hwdec_vaglx.c  GPL
-    video/out/opengl/*              LGPL
-    video/out/vo.c                  LGPL
-    video/out/vo.h                  LGPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
-    video/out/vo_drm.c              LGPL
-    video/out/vo_image.c            LGPL
-    video/out/vo_lavc.c             LGPL
-    video/out/vo_null.c             LGPL
-    video/out/vo_opengl.c           LGPL
-    video/out/vo_opengl_cb.c        LGPL
-    video/out/vo_rpi.c              LGPL
-    video/out/vo_sdl.c              LGPL
-    video/out/vo_tct.c              LGPL
     video/out/vo_vaapi.c            probably impossible (some company's code)
     video/out/vo_vdpau.c            probably impossible (nVidia's code)
-    video/out/vo_wayland.c          LGPL
     video/out/vo_x11.c              probably impossible
     video/out/vo_xv.c               probably impossible
-    video/out/w32_common.*          LGPL
-    video/out/wayland*              LGPL
-    video/out/win32/*               LGPL
-    video/out/win_state.*           LGPL
     video/out/x11_common.*          probably impossible
-    video/out/x11_icon.bin          LGPL
-    video/sws_utils.*               almost LGPL
     video/vaapi.*                   hard (GPL-only parts must be ifdefed)
     video/vdpau.c                   hard (GPL-only parts must be ifdefed)
-    video/vdpau_functions.inc       LGPL
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
-    video/vt.*                      LGPL
+
+The following files contain some optional GPL code:
+
+    input/cmd_list.c                potentially some commands
+    demux/demux_mkv.c               some verbose message
+    options/options.c               --frames option
+    options/parse_commandline.c     dvd:// expansion
+    player/audio.c                  libaf glue code
+    player/loadfile.c               --frames option (minor but probably fatal)
+    player/osd.c                    OSD level 3
+    player/command.c                add/cycle command, possible sub-add command
+    player/main.c                   configuration output
+
+The following files are partially LGPLv3+ (otherwise LGPL):
+
+    demux/demux_mf.c                minor autodetection thing
+    stream/cache.c                  minor cache option changes
+    video/decode/lavc.h             split from vd_lavc.c
+    video/decode/vd_lavc.c          XvMC influences in get_format()

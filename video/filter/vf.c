@@ -64,24 +64,25 @@ extern const vf_info_t vf_info_d3d11vpp;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
+#if HAVE_GPL
     &vf_info_crop,
     &vf_info_expand,
     &vf_info_scale,
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_flip,
-
     &vf_info_mirror,
-    &vf_info_lavfi,
-    &vf_info_lavfi_bridge,
     &vf_info_rotate,
     &vf_info_gradfun,
     &vf_info_pullup,
     &vf_info_yadif,
     &vf_info_stereo3d,
-
     &vf_info_dsize,
     &vf_info_sub,
+#endif
+
+    &vf_info_lavfi,
+    &vf_info_lavfi_bridge,
     &vf_info_buffer,
 #if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH
     &vf_info_vapoursynth,

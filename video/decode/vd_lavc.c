@@ -1,20 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Almost LGPLv3+.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  *
  * The parts potentially making this file LGPL v3 (instead of v2.1 or later) are:
  * 376e3abf5c7d2 xvmc use get_format for IDCT/MC recognition
@@ -261,15 +259,10 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
-    &mp_vd_lavc_vdpau_copy,
 #endif
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     &mp_vd_lavc_videotoolbox,
     &mp_vd_lavc_videotoolbox_copy,
-#endif
-#if HAVE_VAAPI_HWACCEL
-    &mp_vd_lavc_vaapi,
-    &mp_vd_lavc_vaapi_copy,
 #endif
 #if HAVE_D3D_HWACCEL
     &mp_vd_lavc_d3d11va,
@@ -290,6 +283,13 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_cuda_old,
  #endif
     &mp_vd_lavc_cuda_copy,
+#endif
+#if HAVE_VDPAU_HWACCEL
+    &mp_vd_lavc_vdpau_copy,
+#endif
+#if HAVE_VAAPI_HWACCEL
+    &mp_vd_lavc_vaapi,
+    &mp_vd_lavc_vaapi_copy,
 #endif
     &mp_vd_lavc_crystalhd,
     NULL

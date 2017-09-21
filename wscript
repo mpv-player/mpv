@@ -27,6 +27,21 @@ Dependency identifiers (for win32 vs. Unix):
 
 build_options = [
     {
+        'name': '--preliminary-lgpl3',
+        'desc': 'Preliminary LGPLv3+ license',
+        'default': 'disable',
+        'func': check_true,
+    }, {
+        'name': 'gpl',
+        'desc': 'GPL build',
+        'deps': '!preliminary-lgpl3',
+        'func': check_true,
+    }, {
+        'name': 'libaf',
+        'desc': 'internal audio filter chain',
+        'deps': 'gpl',
+        'func': check_true,
+    }, {
         'name': '--cplayer',
         'desc': 'mpv CLI player',
         'default': 'enable',
@@ -289,7 +304,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--libsmbclient',
         'desc': 'Samba support (makes mpv GPLv3)',
-        'deps': 'libdl',
+        'deps': 'libdl && gpl',
         'func': check_pkg_config('smbclient'),
         'default': 'disable',
         'module': 'input',
@@ -338,22 +353,25 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--dvdread',
         'desc': 'dvdread support',
+        'deps': 'gpl',
         'func': check_pkg_config('dvdread', '>= 4.1.0'),
         'default': 'disable',
     }, {
         'name': '--dvdnav',
         'desc': 'dvdnav support',
+        'deps': 'gpl',
         'func': check_pkg_config('dvdnav',  '>= 4.2.0',
                                  'dvdread', '>= 4.1.0'),
         'default': 'disable',
     }, {
         'name': 'dvdread-common',
         'desc': 'DVD/IFO support',
-        'deps': 'dvdread || dvdnav',
+        'deps': 'gpl && (dvdread || dvdnav)',
         'func': check_true,
     }, {
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
+        'deps': 'gpl',
         'func': check_pkg_config('libcdio_paranoia'),
         'default': 'disable',
     }, {
@@ -364,6 +382,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--rubberband',
         'desc': 'librubberband support',
+        'deps': 'libaf',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
         'name': '--lcms2',
@@ -389,10 +408,6 @@ iconv support use --disable-iconv.",
         'desc': 'libarchive wrapper for reading zip files and more',
         'func': check_pkg_config('libarchive >= 3.0.0'),
         'default': 'disable',
-    }, {
-        'name': '--libaf',
-        'desc': 'internal audio filter chain',
-        'func': check_true,
     }
 ]
 
@@ -504,7 +519,7 @@ audio_output_features = [
         'name': '--oss-audio',
         'desc': 'OSS',
         'func': check_cc(header_name='sys/soundcard.h'),
-        'deps': 'posix',
+        'deps': 'posix && gpl',
     }, {
         'name': '--rsound',
         'desc': 'RSound audio output',
@@ -522,6 +537,7 @@ audio_output_features = [
     }, {
         'name': '--jack',
         'desc': 'JACK audio output',
+        'deps': 'gpl',
         'func': check_pkg_config('jack'),
     }, {
         'name': '--openal',
@@ -535,6 +551,7 @@ audio_output_features = [
     }, {
         'name': '--alsa',
         'desc': 'ALSA audio output',
+        'deps': 'gpl',
         'func': check_pkg_config('alsa', '>= 1.0.18'),
     }, {
         'name': '--coreaudio',
@@ -581,6 +598,7 @@ video_output_features = [
     } , {
         'name': '--x11',
         'desc': 'X11',
+        'deps': 'gpl',
         'func': check_pkg_config('x11',         '>= 1.0.0',
                                  'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
@@ -678,7 +696,7 @@ video_output_features = [
     }, {
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
-        'deps': 'libdl && (x11 || wayland || egl-drm)',
+        'deps': 'gpl && libdl && (x11 || wayland || egl-drm)',
         'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
         'name': '--vaapi-x11',
@@ -713,6 +731,7 @@ video_output_features = [
     }, {
         'name': '--caca',
         'desc': 'CACA',
+        'deps': 'gpl',
         'func': check_pkg_config('caca', '>= 0.99.beta18'),
     }, {
         'name': '--jpeg',
@@ -722,7 +741,7 @@ video_output_features = [
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
-        'deps': 'win32-desktop',
+        'deps': 'win32-desktop && gpl',
         'func': check_cc(header_name='d3d9.h'),
     }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
@@ -870,7 +889,7 @@ hwaccel_features = [
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps': 'd3d-hwaccel && !d3d-hwaccel-new',
+        'deps': 'd3d-hwaccel && !d3d-hwaccel-new && gpl',
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
@@ -879,6 +898,7 @@ radio_and_tv_features = [
     {
         'name': '--tv',
         'desc': 'TV interface',
+        'deps': 'gpl',
         'func': check_true,
         'default': 'disable',
     }, {
@@ -909,6 +929,7 @@ radio_and_tv_features = [
     } , {
         'name': '--dvbin',
         'desc': 'DVB input module',
+        'deps': 'gpl',
         'func': check_true,
         'default': 'disable',
     }

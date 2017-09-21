@@ -29,7 +29,6 @@ def __add_mpv_defines__(ctx):
     ctx.define("CONFIGURATION", " ".join(argv))
     ctx.define("MPV_CONFDIR", ctx.env.CONFLOADDIR)
     ctx.define("FULLCONFIG", __escape_c_string(__get_features_string__(ctx)))
-    ctx.define("HAVE_GPL", 1)
 
 def configure(ctx):
     __add_mpv_defines__(ctx)

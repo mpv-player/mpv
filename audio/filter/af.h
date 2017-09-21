@@ -23,8 +23,8 @@
 #include <sys/types.h>
 
 #include "config.h"
-#if !HAVE_LIBAF
-#error "libaf disabled"
+#if !(HAVE_LIBAF && HAVE_GPL)
+#error "libaf/GPL disabled"
 #endif
 
 #include "options/options.h"
