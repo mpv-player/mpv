@@ -139,8 +139,8 @@ struct ra_tex_upload_params {
     ptrdiff_t stride;   // The size of a horizontal line in bytes (*not* texels!)
 };
 
-// Buffer type hint. Setting this may result in more or less efficient
-// operation, although it shouldn't technically prohibit anything
+// Buffer usage type. This restricts what types of operations may be performed
+// on a buffer.
 enum ra_buf_type {
     RA_BUF_TYPE_INVALID,
     RA_BUF_TYPE_TEX_UPLOAD,     // texture upload buffer (pixel buffer object)
@@ -435,9 +435,6 @@ struct ra_fns {
     // always produce a value - and the values it does produce are typically
     // delayed by a few frames. When no value is available, this returns 0.
     uint64_t (*timer_stop)(struct ra *ra, ra_timer *timer);
-
-    // Hint that possibly queued up commands should be sent to the GPU. Optional.
-    void (*flush)(struct ra *ra);
 
     // Associates a marker with any past error messages, for debugging
     // purposes. Optional.

@@ -33,8 +33,8 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "video/mp_image.h"
+#include "video/out/gpu/hwdec.h"
 
-#include "hwdec.h"
 #include "common.h"
 #include "ra_gl.h"
 

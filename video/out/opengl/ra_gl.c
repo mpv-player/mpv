@@ -1097,12 +1097,6 @@ static uint64_t gl_timer_stop(struct ra *ra, ra_timer *ratimer)
     return timer->result;
 }
 
-static void gl_flush(struct ra *ra)
-{
-    GL *gl = ra_gl_get(ra);
-    gl->Flush();
-}
-
 static void gl_debug_marker(struct ra *ra, const char *msg)
 {
     struct ra_gl *p = ra->priv;
@@ -1130,6 +1124,5 @@ static struct ra_fns ra_fns_gl = {
     .timer_destroy          = gl_timer_destroy,
     .timer_start            = gl_timer_start,
     .timer_stop             = gl_timer_stop,
-    .flush                  = gl_flush,
     .debug_marker           = gl_debug_marker,
 };

@@ -30,9 +30,9 @@
 
 #include "config.h"
 
-#include "hwdec.h"
-#include "video/vaapi.h"
+#include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
+#include "video/vaapi.h"
 #include "common.h"
 #include "ra_gl.h"
 

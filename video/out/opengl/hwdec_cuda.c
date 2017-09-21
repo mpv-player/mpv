@@ -32,11 +32,10 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
+#include "video/out/gpu/hwdec.h"
 #include "formats.h"
-#include "hwdec.h"
 #include "options/m_config.h"
 #include "ra_gl.h"
-#include "video.h"
 
 struct priv_owner {
     struct mp_hwdec_ctx hwctx;

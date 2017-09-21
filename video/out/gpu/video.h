@@ -27,7 +27,6 @@
 #include "shader_cache.h"
 #include "video/csputils.h"
 #include "video/out/filter_kernels.h"
-#include "video/out/vo.h"
 
 // Assume we have this many texture units for sourcing additional passes.
 // The actual texture unit assignment is dynamic.

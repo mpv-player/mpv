@@ -25,6 +25,7 @@
 
 #include "egl_helpers.h"
 #include "common.h"
+#include "utils.h"
 #include "context.h"
 
 #if HAVE_EGL_ANGLE
@@ -43,41 +44,49 @@
 #define EGL_OPENGL_ES3_BIT                      0x00000040
 #endif
 
-// es_version = 0 (desktop), 2/3 (ES major version)
-static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
-                           int es_version, struct mpegl_opts *opts,
+// es_version: 0 (core), 2 or 3
+static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
+                           int es_version, struct mpegl_cb cb,
                            EGLContext *out_context, EGLConfig *out_config)
 {
-    int msgl = probing ? MSGL_V : MSGL_FATAL;
+    int msgl = ctx->opts.probing ? MSGL_V : MSGL_FATAL;
 
-    EGLenum api = EGL_OPENGL_API;
-    EGLint rend = EGL_OPENGL_BIT;
-    const char *name = "Desktop OpenGL";
-    if (es_version == 2) {
+    EGLenum api;
+    EGLint rend;
+    const char *name;
+
+    switch (es_version) {
+    case 0:
+        api = EGL_OPENGL_API;
+        rend = EGL_OPENGL_BIT;
+        name = "Desktop OpenGL";
+        break;
+    case 2:
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES2_BIT;
-        name = "GLES 2.0";
-    }
-    if (es_version == 3) {
+        name = "GLES 2.x";
+        break;
+    case 3:
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES3_BIT;
         name = "GLES 3.x";
+        break;
+    default: abort();
     }
 
-    mp_msg(log, MSGL_V, "Trying to create %s context.\n", name);
+    MP_VERBOSE(ctx, "Trying to create %s context.\n", name);
 
     if (!eglBindAPI(api)) {
-        mp_msg(log, MSGL_V, "Could not bind API!\n");
+        MP_VERBOSE(ctx, "Could not bind API!\n");
         return false;
     }
-
 
     EGLint attributes[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
         EGL_RED_SIZE, 1,
         EGL_GREEN_SIZE, 1,
         EGL_BLUE_SIZE, 1,
-        EGL_ALPHA_SIZE, (opts->vo_flags & VOFLAG_ALPHA ) ? 1 : 0,
+        EGL_ALPHA_SIZE, ctx->opts.want_alpha ? 1 : 0,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
@@ -92,29 +101,34 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
 
     if (!num_configs) {
         talloc_free(configs);
-        mp_msg(log, msgl, "Could not choose EGLConfig!\n");
+        MP_MSG(ctx, msgl, "Could not choose EGLConfig!\n");
         return false;
     }
 
     int chosen = 0;
-    if (opts->refine_config)
-        chosen = opts->refine_config(opts->user_data, configs, num_configs);
+    if (cb.refine_config)
+        chosen = cb.refine_config(cb.user_data, configs, num_configs);
     EGLConfig config = configs[chosen];
 
     talloc_free(configs);
 
-    EGLContext *ctx = NULL;
+    EGLContext *egl_ctx = NULL;
 
     if (es_version) {
+        if (!ra_gl_ctx_test_version(ctx, MPGL_VER(es_version, 0), true))
+            return false;
+
         EGLint attrs[] = {
             EGL_CONTEXT_CLIENT_VERSION, es_version,
             EGL_NONE
         };
 
-        ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
+        egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
     } else {
         for (int n = 0; mpgl_preferred_gl_versions[n]; n++) {
             int ver = mpgl_preferred_gl_versions[n];
+            if (!ra_gl_ctx_test_version(ctx, ver, false))
+                continue;
 
             EGLint attrs[] = {
                 EGL_CONTEXT_MAJOR_VERSION, MPGL_VER_GET_MAJOR(ver),
@@ -124,25 +138,25 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
                 EGL_NONE
             };
 
-            ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
-            if (ctx)
+            egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
+            if (egl_ctx)
                 break;
         }
 
-        if (!ctx) {
+        if (!egl_ctx && ra_gl_ctx_test_version(ctx, 140, false)) {
             // Fallback for EGL 1.4 without EGL_KHR_create_context.
             EGLint attrs[] = { EGL_NONE };
 
-            ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
+            egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
         }
     }
 
-    if (!ctx) {
-        mp_msg(log, msgl, "Could not create EGL context!\n");
+    if (!egl_ctx) {
+        MP_MSG(ctx, msgl, "Could not create EGL context!\n");
         return false;
     }
 
-    *out_context = ctx;
+    *out_context = egl_ctx;
     *out_config = config;
     return true;
 }
@@ -152,56 +166,36 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
 // Create a context and return it and the config it was created with. If it
 // returns false, the out_* pointers are set to NULL.
 // vo_flags is a combination of VOFLAG_* values.
-bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
+bool mpegl_create_context(struct ra_ctx *ctx, EGLDisplay display,
                           EGLContext *out_context, EGLConfig *out_config)
 {
-    return mpegl_create_context_opts(display, log,
-        &(struct mpegl_opts){.vo_flags = vo_flags}, out_context, out_config);
+    return mpegl_create_context_cb(ctx, display, (struct mpegl_cb){0},
+                                   out_context, out_config);
 }
 
 // Create a context and return it and the config it was created with. If it
 // returns false, the out_* pointers are set to NULL.
-bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
-                               struct mpegl_opts *opts,
-                               EGLContext *out_context, EGLConfig *out_config)
+bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
+                             struct mpegl_cb cb, EGLContext *out_context,
+                             EGLConfig *out_config)
 {
-    assert(opts);
-
     *out_context = NULL;
     *out_config = NULL;
 
     const char *version = eglQueryString(display, EGL_VERSION);
     const char *vendor = eglQueryString(display, EGL_VENDOR);
     const char *apis = eglQueryString(display, EGL_CLIENT_APIS);
-    mp_verbose(log, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
+    MP_VERBOSE(ctx, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    bool probing = opts->vo_flags & VOFLAG_PROBING;
-    int msgl = probing ? MSGL_V : MSGL_FATAL;
-    bool try_gles = !(opts->vo_flags & VOFLAG_NO_GLES);
-
-    if (!(opts->vo_flags & VOFLAG_GLES)) {
-        // Desktop OpenGL
-        if (create_context(display, log, try_gles | probing, 0, opts,
-                           out_context, out_config))
+    int es[] = {0, 3, 2}; // preference order
+    for (int i = 0; i < MP_ARRAY_SIZE(es); i++) {
+        if (create_context(ctx, display, es[i], cb, out_context, out_config))
             return true;
     }
 
-    if (try_gles && !(opts->vo_flags & VOFLAG_GLES2)) {
-        // ES 3.x
-        if (create_context(display, log, true, 3, opts,
-                           out_context, out_config))
-            return true;
-    }
-
-    if (try_gles) {
-        // ES 2.0
-        if (create_context(display, log, probing, 2, opts,
-                           out_context, out_config))
-            return true;
-    }
-
-    mp_msg(log, msgl, "Could not create a GL context.\n");
+    int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
+    MP_MSG(ctx, msgl, "Could not create a GL context.\n");
     return false;
 }
 

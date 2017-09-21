@@ -297,21 +297,6 @@ static bool handle_help_options(struct MPContext *mpctx)
     return false;
 }
 
-static void handle_deprecated_options(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct m_obj_settings *vo = opts->vo->video_driver_list;
-    if (vo && vo->name && strcmp(vo->name, "opengl-hq") == 0) {
-        MP_WARN(mpctx,
-            "--vo=opengl-hq is deprecated! Use --profile=opengl-hq instead.\n");
-        // Fudge it. This will replace the --vo option too, which is why we
-        // unset/safe it, and later restore it.
-        talloc_free(vo->name);
-        vo->name = talloc_strdup(NULL, "opengl");
-        m_config_set_profile(mpctx->mconfig, "opengl-hq", 0);
-    }
-}
-
 static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
@@ -444,8 +429,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (handle_help_options(mpctx))
         return -2;
-
-    handle_deprecated_options(mpctx);
 
     if (!print_libav_versions(mp_null_log, 0)) {
         // Using mismatched libraries can be legitimate, but even then it's

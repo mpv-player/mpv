@@ -17,9 +17,9 @@
 
 #include <assert.h>
 
+#include "common/msg.h"
 #include "misc/ctype.h"
 #include "user_shaders.h"
-#include "formats.h"
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 {
