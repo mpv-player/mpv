@@ -72,7 +72,6 @@ static CGLError test_gl_version(struct ra_ctx *ctx, CGLOpenGLProfile ver)
         // rejected attribute to preserve the fallback code
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) ver,
-        kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         kCGLPFAAllowOfflineRenderers,
         // keep this one last to apply the cocoa-force-dedicated-gpu option
@@ -156,7 +155,10 @@ static void cocoa_uninit(struct ra_ctx *ctx)
 
 static void cocoa_swap_buffers(struct ra_ctx *ctx)
 {
+    struct priv *p = ctx->priv;
+    GL *gl = &p->gl;
     vo_cocoa_swap_buffers(ctx->vo);
+    gl->Flush();
 }
 
 static bool cocoa_init(struct ra_ctx *ctx)
