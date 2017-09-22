@@ -441,7 +441,7 @@ error:
     return false;
 }
 
-bool mpvk_device_init(struct mpvk_ctx *vk, int queue_depth)
+bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 {
     assert(vk->physd);
     void *tmp = talloc_new(NULL);
@@ -494,6 +494,8 @@ bool mpvk_device_init(struct mpvk_ctx *vk, int queue_depth)
     bool use_transfer = false;
     int idx_tf = 0;
     for (int i = 0; i < qfnum; i++) {
+        if (!opts.async_transfer)
+            break;
         if (i == idx)
             continue;
         if (!(qfs[i].queueFlags & VK_QUEUE_TRANSFER_BIT))
@@ -505,19 +507,19 @@ bool mpvk_device_init(struct mpvk_ctx *vk, int queue_depth)
 
     // Now that we know which queue families we want, we can create the logical
     // device
-    assert(queue_depth <= MPVK_MAX_QUEUES);
+    assert(opts.queue_count <= MPVK_MAX_QUEUES);
     static const float priorities[MPVK_MAX_QUEUES] = {0};
     VkDeviceQueueCreateInfo qinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         .queueFamilyIndex = idx,
-        .queueCount = MPMIN(qfs[idx].queueCount, queue_depth),
+        .queueCount = MPMIN(qfs[idx].queueCount, opts.queue_count),
         .pQueuePriorities = priorities,
     };
 
     VkDeviceQueueCreateInfo qinfo_tf = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         .queueFamilyIndex = idx_tf,
-        .queueCount = MPMIN(qfs[idx_tf].queueCount, queue_depth),
+        .queueCount = MPMIN(qfs[idx_tf].queueCount, opts.queue_count),
         .pQueuePriorities = priorities,
     };
 

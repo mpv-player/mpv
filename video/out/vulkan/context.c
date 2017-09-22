@@ -32,6 +32,7 @@ enum {
 };
 
 struct vulkan_opts {
+    struct mpvk_device_opts dev_opts; // logical device options
     char *device; // force a specific GPU
     int swap_mode;
 };
@@ -101,6 +102,9 @@ const struct m_sub_options vulkan_conf = {
                    {"fifo-relaxed", SWAP_FIFO_RELAXED},
                    {"mailbox",      SWAP_MAILBOX},
                    {"immediate",    SWAP_IMMEDIATE})),
+        OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1,
+                     MPVK_MAX_QUEUES, OPTDEF_INT(1)),
+        OPT_FLAG("vulkan-async-transfer", dev_opts.async_transfer, 0),
         {0}
     },
     .size = sizeof(struct vulkan_opts)
@@ -277,7 +281,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     vk->spirv = ctx->spirv;
     if (!mpvk_pick_surface_format(vk))
         goto error;
-    if (!mpvk_device_init(vk, ctx->opts.swapchain_depth))
+    if (!mpvk_device_init(vk, p->opts->dev_opts))
         goto error;
 
     ctx->ra = ra_create_vk(vk, ctx->log);

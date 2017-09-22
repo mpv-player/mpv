@@ -53,8 +53,13 @@ bool mpvk_find_phys_device(struct mpvk_ctx *vk, const char *name, bool sw);
 // Pick a suitable surface format that's supported by this physical device.
 bool mpvk_pick_surface_format(struct mpvk_ctx *vk);
 
+struct mpvk_device_opts {
+    int queue_count;    // number of queues to use
+    int async_transfer; // whether or not to use async transfer (bool)
+};
+
 // Create a logical device and initialize the vk_cmdpools
-bool mpvk_device_init(struct mpvk_ctx *vk, int queue_depth);
+bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts);
 
 // Wait until all commands submitted to all queues have completed
 void mpvk_pool_wait_idle(struct mpvk_ctx *vk, struct vk_cmdpool *pool);

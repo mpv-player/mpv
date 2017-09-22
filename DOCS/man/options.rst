@@ -4195,6 +4195,26 @@ The following video options are currently all specific to ``--vo=gpu`` and
     immediate
         Tearing, not vsync blocked. Similar to "VSync off".
 
+``--vulkan-queue-count=<1..8>``
+    Controls the number of VkQueues used for rendering (limited by how many
+    your device supports). In theory, using more queues could enable some
+    parallelism between frames (when using a ``--swapchain-depth`` higher than
+    1). (Default: 1)
+
+    NOTE: Setting this to a value higher than 1 may cause graphical corruption,
+    as mpv's vulkan implementation currently does not try and protect textures
+    against concurrent access.
+
+``--vulkan-async-transfer``
+    Enables the use of asynchronous texture uploads (default: no). Enabling
+    this allows offloading texture transfers to dedicated DMA engines on
+    supported devices.
+
+    NOTE: Enabling this option may cause graphical corruption, as mpv's vulkan
+    implementation currently does not try and protect textures against
+    concurrent access. Very likely to corrupt at least the OSD. Use at your
+    own risk, and only if necessary!
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan``. The possible choices
