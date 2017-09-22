@@ -518,100 +518,6 @@ static void angle_swap_buffers(struct ra_ctx *ctx)
         egl_swap_buffers(ctx);
 }
 
-static bool angle_init(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
-    struct vo *vo = ctx->vo;
-    GL *gl = &p->gl;
-
-    p->opts = mp_get_config_group(ctx, ctx->global, &angle_conf);
-    struct angle_opts *o = p->opts;
-
-    if (!angle_load()) {
-        MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
-        goto fail;
-    }
-
-    // Create the underlying EGL device implementation
-    bool context_ok = false;
-    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
-        context_ok = d3d11_device_create(ctx);
-        if (context_ok) {
-            context_ok = context_init(ctx);
-            if (!context_ok)
-                d3d11_device_destroy(ctx);
-        }
-    }
-    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
-        context_ok = d3d9_device_create(ctx);
-        if (context_ok) {
-            MP_VERBOSE(vo, "Using Direct3D 9\n");
-
-            context_ok = context_init(ctx);
-            if (!context_ok)
-                d3d9_device_destroy(ctx);
-        }
-    }
-    if (!context_ok)
-        goto fail;
-
-    if (!vo_w32_init(vo))
-        goto fail;
-
-    // Create the underlying EGL surface implementation
-    bool surface_ok = false;
-    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0) {
-        surface_ok = d3d11_swapchain_surface_create(ctx);
-    }
-    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1) {
-        surface_ok = egl_window_surface_create(ctx);
-        if (surface_ok)
-            MP_VERBOSE(vo, "Using EGL windowing\n");
-    }
-    if (!surface_ok)
-        goto fail;
-
-    mpegl_load_functions(gl, vo->log);
-
-    current_ctx = ctx;
-    gl->SwapInterval = angle_swap_interval;
-
-    // ANGLE doesn't actually need to override any of the functions (yet)
-    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
-    struct ra_gl_ctx_params params = {
-        .swap_buffers = angle_swap_buffers,
-        .flipped = p->flipped,
-        .external_swapchain = p->dxgi_swapchain ? &empty_swapchain_fns : NULL,
-    };
-
-    if (!ra_gl_ctx_init(ctx, gl, params))
-        goto fail;
-
-    DwmEnableMMCSS(TRUE); // DWM MMCSS cargo-cult. The dxgl backend also does this.
-
-    return true;
-fail:
-    angle_uninit(ctx);
-    return false;
-}
-
-static void resize(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-    if (p->dxgi_swapchain)
-        d3d11_backbuffer_resize(ctx);
-    else
-        eglWaitClient(); // Should get ANGLE to resize its swapchain
-    ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
-}
-
-static bool angle_reconfig(struct ra_ctx *ctx)
-{
-    vo_w32_config(ctx->vo);
-    resize(ctx);
-    return true;
-}
-
 static struct mp_image *d3d11_screenshot(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -690,17 +596,134 @@ done:
     return img;
 }
 
-static int angle_control(struct ra_ctx *ctx, int *events, int request, void *arg)
+static int angle_color_depth(struct ra_swapchain *sw)
 {
-    // Try a D3D11-specific method of taking a window screenshot
-    if (request == VOCTRL_SCREENSHOT_WIN) {
-        struct mp_image *img = d3d11_screenshot(ctx);
-        if (img) {
-            *(struct mp_image **)arg = img;
-            return true;
-        }
+    // Only 8-bit output is supported at the moment
+    return 8;
+}
+
+static struct mp_image *angle_screenshot(struct ra_swapchain *sw)
+{
+    struct mp_image *img = d3d11_screenshot(sw->ctx);
+    if (img)
+        return img;
+    return ra_gl_ctx_screenshot(sw);
+}
+
+static bool angle_submit_frame(struct ra_swapchain *sw,
+                               const struct vo_frame *frame)
+{
+    struct priv *p = sw->ctx->priv;
+    bool ret = ra_gl_ctx_submit_frame(sw, frame);
+    if (p->d3d11_context) {
+        // DXGI Present doesn't flush the immediate context, which can make
+        // timers inaccurate, since the end queries might not be sent until the
+        // next frame. Fix this by flushing the context now.
+        ID3D11DeviceContext_Flush(p->d3d11_context);
+    }
+    return ret;
+}
+
+static bool angle_init(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
+    struct vo *vo = ctx->vo;
+    GL *gl = &p->gl;
+
+    p->opts = mp_get_config_group(ctx, ctx->global, &angle_conf);
+    struct angle_opts *o = p->opts;
+
+    if (!angle_load()) {
+        MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
+        goto fail;
     }
 
+    // Create the underlying EGL device implementation
+    bool context_ok = false;
+    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
+        context_ok = d3d11_device_create(ctx);
+        if (context_ok) {
+            context_ok = context_init(ctx);
+            if (!context_ok)
+                d3d11_device_destroy(ctx);
+        }
+    }
+    if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
+        context_ok = d3d9_device_create(ctx);
+        if (context_ok) {
+            MP_VERBOSE(vo, "Using Direct3D 9\n");
+
+            context_ok = context_init(ctx);
+            if (!context_ok)
+                d3d9_device_destroy(ctx);
+        }
+    }
+    if (!context_ok)
+        goto fail;
+
+    if (!vo_w32_init(vo))
+        goto fail;
+
+    // Create the underlying EGL surface implementation
+    bool surface_ok = false;
+    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0) {
+        surface_ok = d3d11_swapchain_surface_create(ctx);
+    }
+    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1) {
+        surface_ok = egl_window_surface_create(ctx);
+        if (surface_ok)
+            MP_VERBOSE(vo, "Using EGL windowing\n");
+    }
+    if (!surface_ok)
+        goto fail;
+
+    mpegl_load_functions(gl, vo->log);
+
+    current_ctx = ctx;
+    gl->SwapInterval = angle_swap_interval;
+
+    // Custom swapchain impl for the D3D11 swapchain-based surface
+    static const struct ra_swapchain_fns empty_swapchain_fns = {
+        .color_depth = angle_color_depth,
+        .screenshot = angle_screenshot,
+        .submit_frame = angle_submit_frame,
+    };
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = angle_swap_buffers,
+        .flipped = p->flipped,
+        .external_swapchain = p->dxgi_swapchain ? &empty_swapchain_fns : NULL,
+    };
+
+    if (!ra_gl_ctx_init(ctx, gl, params))
+        goto fail;
+
+    DwmEnableMMCSS(TRUE); // DWM MMCSS cargo-cult. The dxgl backend also does this.
+
+    return true;
+fail:
+    angle_uninit(ctx);
+    return false;
+}
+
+static void resize(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->dxgi_swapchain)
+        d3d11_backbuffer_resize(ctx);
+    else
+        eglWaitClient(); // Should get ANGLE to resize its swapchain
+    ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
+}
+
+static bool angle_reconfig(struct ra_ctx *ctx)
+{
+    vo_w32_config(ctx->vo);
+    resize(ctx);
+    return true;
+}
+
+static int angle_control(struct ra_ctx *ctx, int *events, int request, void *arg)
+{
     int ret = vo_w32_control(ctx->vo, events, request, arg);
     if (*events & VO_EVENT_RESIZE)
         resize(ctx);
