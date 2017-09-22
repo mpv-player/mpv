@@ -57,9 +57,7 @@
 #include "video/out/drm_common.h"
 #endif
 
-#if HAVE_GPU
 #include "video/out/gpu/hwdec.h"
-#endif
 
 static void print_version(struct mp_log *log)
 {
@@ -181,11 +179,9 @@ static const m_option_t mp_vo_opt_list[] = {
                         0, drm_validate_connector_opt),
     OPT_INT("drm-mode", drm_mode_id, 0),
 #endif
-#if HAVE_GL
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
                         ra_hwdec_validate_opt),
     OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
-#endif
     {0}
 };
 
@@ -688,9 +684,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
 
-#if HAVE_GPU
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
-#endif
 
 #if HAVE_GL
     OPT_SUBSTRUCT("", opengl_opts, opengl_conf, 0),

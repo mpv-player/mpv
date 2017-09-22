@@ -788,15 +788,10 @@ video_output_features = [
                  + 'gl-win32 || gl-wayland || rpi || mali-fbdev || '
                  + 'plain-gl',
         'func': check_true,
-    }, {
-        'name': '--gpu',
-        'desc': 'GPU-accelerated video output support',
-        'deps': 'gl',
-        'func': check_true,
         'req': True,
-        'fmsg': "No GPU context found or enabled. Aborting. " +
-                "If you really mean to compile without support for " +
-                "`--vo=gpu`, then use --disable-gpu."
+        'fmsg': "No OpenGL video output found or enabled. " +
+                "Aborting. If you really mean to compile without OpenGL " +
+                "video outputs use --disable-gl.",
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',

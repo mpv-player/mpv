@@ -70,9 +70,7 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_RPI
     &video_out_rpi,
 #endif
-#if HAVE_GPU
     &video_out_gpu,
-#endif
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif
