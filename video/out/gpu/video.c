@@ -410,7 +410,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING("gpu-shader-cache-dir", shader_cache_dir, 0),
         OPT_REPLACED("hdr-tone-mapping", "tone-mapping"),
         OPT_REPLACED("opengl-shaders", "glsl-shaders"),
-        OPT_CLI_ALIAS("opengl-shader", "glsl-shaders-append"),
+        OPT_REPLACED("opengl-shader", "glsl-shader"),
         OPT_REPLACED("opengl-shader-cache-dir", "gpu-shader-cache-dir"),
         OPT_REPLACED("opengl-tex-pad-x", "gpu-tex-pad-x"),
         OPT_REPLACED("opengl-tex-pad-y", "gpu-tex-pad-y"),

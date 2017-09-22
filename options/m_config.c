@@ -549,8 +549,9 @@ struct m_config_option *m_config_get_co_raw(const struct m_config *config,
     return NULL;
 }
 
-struct m_config_option *m_config_get_co(const struct m_config *config,
-                                        struct bstr name)
+// Like m_config_get_co_raw(), but resolve aliases.
+static struct m_config_option *m_config_get_co_any(const struct m_config *config,
+                                                   struct bstr name)
 {
     struct m_config_option *co = m_config_get_co_raw(config, name);
     if (!co)
@@ -571,10 +572,7 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
             }
             co->warning_was_printed = true;
         }
-        return m_config_get_co(config, bstr0(alias));
-    } else if (co->opt->type == &m_option_type_cli_alias) {
-        // Pretend it does not exist.
-        return NULL;
+        return m_config_get_co_any(config, bstr0(alias));
     } else if (co->opt->type == &m_option_type_removed) {
         if (!co->warning_was_printed) {
             char *msg = co->opt->priv;
@@ -596,6 +594,17 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
             co->warning_was_printed = true;
         }
     }
+    return co;
+}
+
+struct m_config_option *m_config_get_co(const struct m_config *config,
+                                        struct bstr name)
+{
+    struct m_config_option *co = m_config_get_co_any(config, name);
+    // CLI aliases should not be real options, and are explicitly handled by
+    // m_config_set_option_cli(). So petend it does not exist.
+    if (co && co->opt->type == &m_option_type_cli_alias)
+        co = NULL;
     return co;
 }
 
@@ -818,7 +827,7 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
     }
 
     // Resolve CLI alias. (We don't allow you to combine them with "--no-".)
-    co = m_config_get_co_raw(config, *name);
+    co = m_config_get_co_any(config, *name);
     if (co && co->opt->type == &m_option_type_cli_alias)
         *name = bstr0((char *)co->opt->priv);
 
@@ -826,12 +835,18 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
     // matches. (We don't allow you to combine them with "--no-".)
     for (int n = 0; n < config->num_opts; n++) {
         co = &config->opts[n];
-        const struct m_option_type *type = co->opt->type;
         struct bstr coname = bstr0(co->name);
 
         if (!bstr_startswith(*name, coname))
             continue;
 
+        // Aliased option + a suffix action, e.g. --opengl-shaders-append
+        if (co->opt->type == &m_option_type_alias)
+            co = m_config_get_co_any(config, coname);
+        if (!co)
+            continue;
+
+        const struct m_option_type *type = co->opt->type;
         for (int i = 0; type->actions && type->actions[i].name; i++) {
             const struct m_option_action *action = &type->actions[i];
             bstr suffix = bstr0(action->name);
