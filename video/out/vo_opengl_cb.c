@@ -242,8 +242,10 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->hwdec = NULL;
     hwdec_devices_destroy(ctx->hwdec_devs);
     ctx->hwdec_devs = NULL;
-    ra_ctx_destroy(&ctx->ra_ctx);
+    ra_gl_ctx_uninit(ctx->ra_ctx);
+    talloc_free(ctx->ra_ctx);
     talloc_free(ctx->gl);
+    ctx->ra_ctx = NULL;
     ctx->gl = NULL;
     return 0;
 }
