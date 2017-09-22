@@ -132,7 +132,6 @@ static const struct ra_format *find_la_variant(struct ra *ra,
 static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
-    GL *gl = ra_gl_get(mapper->ra);
 
     mapper->dst_params = mapper->src_params;
     mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
@@ -243,8 +242,11 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
             .src_linear = true,
         };
 
-        mapper->tex[i] = ra_create_wrapped_tex(mapper->ra, &params,
-                                               p->gl_planes[i]);
+        mapper->tex[i] = ra_create_wrapped_tex(
+            mapper->ra,
+            &params,
+            CVOpenGLESTextureGetName(p->gl_planes[i])
+        );
         if (!mapper->tex[i])
             return -1;
     }
