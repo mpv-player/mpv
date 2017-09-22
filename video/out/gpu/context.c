@@ -168,10 +168,12 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, const char *context_type,
         talloc_free(ctx);
     }
 
+    vo->probing = old_probing;
+
     // If we've reached this point, then none of the contexts matched the name
     // requested, or the backend creation failed for all of them.
-    MP_ERR(vo, "Failed initializing any suitable GPU context!\n");
-    vo->probing = old_probing;
+    if (!vo->probing)
+        MP_ERR(vo, "Failed initializing any suitable GPU context!\n");
     return NULL;
 }
 
