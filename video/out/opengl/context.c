@@ -260,7 +260,7 @@ struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw)
     // OpenGL FB is also read in flipped order, so we need to flip when the
     // rendering is *not* flipped, which in our case is whenever
     // p->params.flipped is true. I hope that made sense
-    if (p->params.flipped)
+    if (screen && p->params.flipped)
         mp_image_vflip(screen);
 
     return screen;
