@@ -249,6 +249,16 @@ iconv support use --disable-iconv.",
         'deps': 'posix-spawn-native || posix-spawn-android',
         'func': check_true,
     }, {
+        'name': 'posix-spawn-android',
+        'desc': 'spawnp()/kill() Android replacement',
+        'func': check_true,
+        'deps_any': ['android'],
+    },{
+        'name': 'posix-spawn',
+        'desc': 'any spawnp()/kill() support',
+        'deps_any': ['posix-spawn-native', 'posix-spawn-android'],
+        'func': check_true,
+    }, {
         'name': 'win32-pipes',
         'desc': 'Windows pipe support',
         'func': check_true,
