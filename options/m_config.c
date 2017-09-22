@@ -835,14 +835,14 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
     // matches. (We don't allow you to combine them with "--no-".)
     for (int n = 0; n < config->num_opts; n++) {
         co = &config->opts[n];
-        struct bstr coname = bstr0(co->name);
+        struct bstr basename = bstr0(co->name);
 
-        if (!bstr_startswith(*name, coname))
+        if (!bstr_startswith(*name, basename))
             continue;
 
         // Aliased option + a suffix action, e.g. --opengl-shaders-append
         if (co->opt->type == &m_option_type_alias)
-            co = m_config_get_co_any(config, coname);
+            co = m_config_get_co_any(config, basename);
         if (!co)
             continue;
 
@@ -852,8 +852,8 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
             bstr suffix = bstr0(action->name);
 
             if (bstr_endswith(*name, suffix) &&
-                (name->len == coname.len + 1 + suffix.len) &&
-                name->start[coname.len] == '-')
+                (name->len == basename.len + 1 + suffix.len) &&
+                name->start[basename.len] == '-')
             {
                 *out_add_flags = action->flags;
                 return co;
