@@ -2767,7 +2767,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
             // Draw checkerboard pattern to indicate transparency
             GLSLF("// transparency checkerboard\n");
             GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy * 1.0/32.0), vec2(0.5));)
-            GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
+            GLSL(vec3 background = vec3(tile.x == tile.y ? 0.93 : 0.87);)
             GLSL(color.rgb = mix(background, color.rgb, color.a);)
         } else if (p->opts.alpha_mode == ALPHA_BLEND) {
             // Blend into background color (usually black)
