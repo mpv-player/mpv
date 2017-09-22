@@ -170,10 +170,8 @@ struct ra_layout std430_layout(struct ra_renderpass_input *inp)
 // Create a texture and a FBO using the texture as color attachments.
 //  fmt: texture internal format
 // If the parameters are the same as the previous call, do not touch it.
-// flags can be 0, or a combination of FBOTEX_FUZZY_W and FBOTEX_FUZZY_H.
-// Enabling FUZZY for W or H means the w or h does not need to be exact.
 bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
-                   int w, int h, const struct ra_format *fmt, int flags)
+                   int w, int h, const struct ra_format *fmt)
 {
     int lw = w, lh = h;
 
@@ -181,19 +179,9 @@ bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
         int cw = w, ch = h;
         int rw = fbo->tex->params.w, rh = fbo->tex->params.h;
 
-        if ((flags & FBOTEX_FUZZY_W) && cw < rw)
-            cw = rw;
-        if ((flags & FBOTEX_FUZZY_H) && ch < rh)
-            ch = rh;
-
         if (rw == cw && rh == ch && fbo->tex->params.format == fmt)
             goto done;
     }
-
-    if (flags & FBOTEX_FUZZY_W)
-        w = MP_ALIGN_UP(w, 256);
-    if (flags & FBOTEX_FUZZY_H)
-        h = MP_ALIGN_UP(h, 256);
 
     mp_verbose(log, "Create FBO: %dx%d (%dx%d)\n", lw, lh, w, h);
 

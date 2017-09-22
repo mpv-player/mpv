@@ -1201,12 +1201,10 @@ static void finish_pass_direct(struct gl_video *p, struct fbodst target,
 //          FBO, if the required parameters have changed
 // w, h: required FBO target dimension, and also defines the target rectangle
 //       used for rasterization
-// flags: 0 or combination of FBOTEX_FUZZY_W/FBOTEX_FUZZY_H (setting the fuzzy
-//        flags allows the FBO to be larger than the w/h parameters)
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
-                            int w, int h, int flags)
+                            int w, int h)
 {
-    fbotex_change(dst_fbo, p->ra, p->log, w, h, p->fbo_format, flags);
+    fbotex_change(dst_fbo, p->ra, p->log, w, h, p->fbo_format);
 
     if (p->pass_compute.active) {
         if (!dst_fbo->tex)
@@ -1428,7 +1426,7 @@ found:
 
         assert(p->hook_fbo_num < SHADER_MAX_SAVED);
         struct fbotex *fbo = &p->hook_fbos[p->hook_fbo_num++];
-        finish_pass_fbo(p, fbo, w, h, 0);
+        finish_pass_fbo(p, fbo, w, h);
 
         const char *store_name = hook->save_tex ? hook->save_tex : name;
         struct img_tex saved_tex = img_tex_fbo(fbo, tex.type, comps);
@@ -1485,7 +1483,7 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
 found:
     assert(p->hook_fbo_num < SHADER_MAX_SAVED);
     struct fbotex *fbo = &p->hook_fbos[p->hook_fbo_num++];
-    finish_pass_fbo(p, fbo, p->texture_w, p->texture_h, 0);
+    finish_pass_fbo(p, fbo, p->texture_w, p->texture_h);
 
     struct img_tex img = img_tex_fbo(fbo, PLANE_RGB, p->components);
     img = pass_hook(p, name, img, tex_trans);
@@ -1656,7 +1654,7 @@ static void pass_sample_separated(struct gl_video *p, struct img_tex src,
     GLSLF("// first pass\n");
     pass_sample_separated_gen(p->sc, scaler, 0, 1);
     GLSLF("color *= %f;\n", src.multiplier);
-    finish_pass_fbo(p, &scaler->sep_fbo, src.w, h, FBOTEX_FUZZY_H);
+    finish_pass_fbo(p, &scaler->sep_fbo, src.w, h);
 
     // Second pass (scale only in the x dir)
     src = img_tex_fbo(&scaler->sep_fbo, src.type, src.components);
@@ -1997,7 +1995,7 @@ static void pass_read_video(struct gl_video *p)
             GLSLF("// merging plane %d ... into %d\n", n, first);
             copy_img_tex(p, &num, tex[n]);
             pass_describe(p, "merging planes");
-            finish_pass_fbo(p, &p->merge_fbo[n], tex[n].w, tex[n].h, 0);
+            finish_pass_fbo(p, &p->merge_fbo[n], tex[n].w, tex[n].h);
             tex[first] = img_tex_fbo(&p->merge_fbo[n], tex[n].type, num);
             tex[n] = (struct img_tex){0};
         }
@@ -2010,7 +2008,7 @@ static void pass_read_video(struct gl_video *p)
             GLSLF("// use_integer fix for plane %d\n", n);
             copy_img_tex(p, &(int){0}, tex[n]);
             pass_describe(p, "use_integer fix");
-            finish_pass_fbo(p, &p->integer_fbo[n], tex[n].w, tex[n].h, 0);
+            finish_pass_fbo(p, &p->integer_fbo[n], tex[n].w, tex[n].h);
             tex[n] = img_tex_fbo(&p->integer_fbo[n], tex[n].type,
                                  tex[n].components);
         }
@@ -2136,7 +2134,7 @@ static void pass_read_video(struct gl_video *p)
         if (strcmp(conf->kernel.name, "bilinear") != 0) {
             GLSLF("// upscaling plane %d\n", n);
             pass_sample(p, tex[n], scaler, conf, 1.0, p->texture_w, p->texture_h);
-            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h, 0);
+            finish_pass_fbo(p, &p->scale_fbo[n], p->texture_w, p->texture_h);
             tex[n] = img_tex_fbo(&p->scale_fbo[n], tex[n].type, tex[n].components);
         }
 
@@ -2341,7 +2339,7 @@ static void pass_scale_main(struct gl_video *p)
     compute_src_transform(p, &transform);
 
     GLSLF("// main scaling\n");
-    finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h, 0);
+    finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h);
     struct img_tex src = img_tex_fbo(&p->indirect_fbo, PLANE_RGB, p->components);
     gl_transform_trans(transform, &src.transform);
     pass_sample(p, src, scaler, &scaler_conf, scale_factor, vp_w, vp_h);
@@ -2699,7 +2697,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
             .w = p->texture_w, .h = p->texture_h,
             .display_par = scale[1] / scale[0], // counter compensate scaling
         };
-        finish_pass_fbo(p, &p->blend_subs_fbo, rect.w, rect.h, 0);
+        finish_pass_fbo(p, &p->blend_subs_fbo, rect.w, rect.h);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->blend_subs_fbo.fbo, false);
         pass_read_fbo(p, &p->blend_subs_fbo);
@@ -2729,7 +2727,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
             pass_delinearize(p->sc, p->image_params.color.gamma);
             p->use_linear = false;
         }
-        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0);
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->blend_subs_fbo.fbo, false);
         pass_read_fbo(p, &p->blend_subs_fbo);
@@ -2761,7 +2759,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct fbodst fbo)
     if (p->pass_compute.active) {
         int o_w = p->dst_rect.x1 - p->dst_rect.x0,
             o_h = p->dst_rect.y1 - p->dst_rect.y0;
-        finish_pass_fbo(p, &p->screen_fbo, o_w, o_h, FBOTEX_FUZZY);
+        finish_pass_fbo(p, &p->screen_fbo, o_w, o_h);
         struct img_tex tmp = img_tex_fbo(&p->screen_fbo, PLANE_RGB, p->components);
         copy_img_tex(p, &(int){0}, tmp);
     }
@@ -2807,7 +2805,7 @@ static bool update_fbosurface(struct gl_video *p, struct mp_image *mpi,
         pass_linearize(p->sc, p->image_params.color.gamma);
     }
 
-    finish_pass_fbo(p, &surf->fbotex, vp_w, vp_h, FBOTEX_FUZZY);
+    finish_pass_fbo(p, &surf->fbotex, vp_w, vp_h);
     surf->id  = id;
     surf->pts = mpi->pts;
     return true;
@@ -3050,7 +3048,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 {
                     fbotex_change(&p->output_fbo, p->ra, p->log,
                                   target.tex->params.w, target.tex->params.h,
-                                  p->fbo_format, FBOTEX_FUZZY);
+                                  p->fbo_format);
                     dest_fbo = p->output_fbo.fbo;
                     p->output_fbo_valid = true;
                 }
@@ -3187,7 +3185,7 @@ static void reinterleave_vdpau(struct gl_video *p,
 
         const struct ra_format *fmt =
             ra_find_unorm_format(p->ra, 1, n == 0 ? 1 : 2);
-        fbotex_change(fbo, p->ra, p->log, w, h * 2, fmt, 0);
+        fbotex_change(fbo, p->ra, p->log, w, h * 2, fmt);
 
         pass_describe(p, "vdpau reinterleaving");
         finish_pass_direct(p, fbo->fbo, &(struct mp_rect){0, 0, w, h * 2});
@@ -3307,7 +3305,7 @@ static bool test_fbo(struct gl_video *p, const struct ra_format *fmt)
 {
     MP_VERBOSE(p, "Testing FBO format %s\n", fmt->name);
     struct fbotex fbo = {0};
-    bool success = fbotex_change(&fbo, p->ra, p->log, 16, 16, fmt, 0);
+    bool success = fbotex_change(&fbo, p->ra, p->log, 16, 16, fmt);
     fbotex_uninit(&fbo);
     return success;
 }

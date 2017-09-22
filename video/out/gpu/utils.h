@@ -101,10 +101,7 @@ struct fbotex {
 
 void fbotex_uninit(struct fbotex *fbo);
 bool fbotex_change(struct fbotex *fbo, struct ra *ra, struct mp_log *log,
-                   int w, int h, const struct ra_format *fmt, int flags);
-#define FBOTEX_FUZZY_W 1
-#define FBOTEX_FUZZY_H 2
-#define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
+                   int w, int h, const struct ra_format *fmt);
 
 // A wrapper around ra_timer that does result pooling, averaging etc.
 struct timer_pool;
