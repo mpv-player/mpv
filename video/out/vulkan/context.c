@@ -349,7 +349,6 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
     struct ra *ra = sw->ctx->ra;
     struct mpvk_ctx *vk = p->vk;
     VkImage *vkimages = NULL;
-    bool ret = false;
 
     VkSwapchainCreateInfoKHR sinfo = p->protoInfo;
     sinfo.imageExtent  = (VkExtent2D){ w, h };
@@ -399,11 +398,14 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
             goto error;
     }
 
-    ret = true;
+    talloc_free(vkimages);
+    return true;
 
 error:
     talloc_free(vkimages);
-    return ret;
+    vkDestroySwapchainKHR(vk->dev, p->swapchain, MPVK_ALLOCATOR);
+    p->swapchain = NULL;
+    return false;
 }
 
 static int color_depth(struct ra_swapchain *sw)
@@ -431,6 +433,8 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct mpvk_ctx *vk = p->vk;
+    if (!p->swapchain)
+        goto error;
 
     uint32_t imgidx = 0;
     MP_TRACE(vk, "vkAcquireNextImageKHR\n");
@@ -458,6 +462,8 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     struct priv *p = sw->priv;
     struct ra *ra = sw->ctx->ra;
     struct mpvk_ctx *vk = p->vk;
+    if (!p->swapchain)
+        goto error;
 
     VkSemaphore done = p->sem_out[p->idx_sems++];
     p->idx_sems %= p->num_sems;
