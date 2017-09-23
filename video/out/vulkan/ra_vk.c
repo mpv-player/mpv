@@ -638,7 +638,7 @@ error:
 // For ra_buf.priv
 struct ra_buf_vk {
     struct vk_bufslice slice;
-    bool inuse;
+    int refcount; // 1 = object allocated but not in use, > 1 = in use
     bool needsflush;
     enum queue_type update_queue;
     // "current" metadata, can change during course of execution
@@ -646,12 +646,21 @@ struct ra_buf_vk {
     VkAccessFlagBits current_access;
 };
 
-static void buf_free_to_use(void *priv, struct ra_buf_vk *buf_vk)
+static void vk_buf_deref(struct ra *ra, struct ra_buf *buf)
 {
-    buf_vk->inuse = false;
+    if (!buf)
+        return;
+
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+    struct ra_buf_vk *buf_vk = buf->priv;
+
+    if (--buf_vk->refcount == 0) {
+        vk_free_memslice(vk, buf_vk->slice.mem);
+        talloc_free(buf);
+    }
 }
 
-static void buf_barrier(struct vk_cmd *cmd, struct ra_buf *buf,
+static void buf_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_buf *buf,
                         VkPipelineStageFlagBits newStage,
                         VkAccessFlagBits newAccess, int offset, size_t size)
 {
@@ -679,25 +688,11 @@ static void buf_barrier(struct vk_cmd *cmd, struct ra_buf *buf,
 
     buf_vk->current_stage = newStage;
     buf_vk->current_access = newAccess;
-    buf_vk->inuse = true;
-
-    vk_cmd_callback(cmd, (vk_cb) buf_free_to_use, NULL, buf_vk);
+    buf_vk->refcount++;
+    vk_cmd_callback(cmd, (vk_cb) vk_buf_deref, ra, buf);
 }
 
-static void vk_buf_destroy(struct ra *ra, struct ra_buf *buf)
-{
-    if (!buf)
-        return;
-
-    struct mpvk_ctx *vk = ra_vk_get(ra);
-    struct ra_buf_vk *buf_vk = buf->priv;
-
-    if (buf_vk->slice.buf)
-        vk_free_memslice(vk, buf_vk->slice.mem);
-
-    talloc_free(buf);
-}
-
+#define vk_buf_destroy vk_buf_deref
 MAKE_LAZY_DESTRUCTOR(vk_buf_destroy, struct ra_buf);
 
 static void vk_buf_update(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
@@ -720,7 +715,7 @@ static void vk_buf_update(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
             return;
         }
 
-        buf_barrier(cmd, buf, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_ACCESS_TRANSFER_WRITE_BIT, offset, size);
 
         VkDeviceSize bufOffset = buf_vk->slice.mem.offset + offset;
@@ -741,6 +736,7 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
     buf_vk->current_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     buf_vk->current_access = 0;
     buf_vk->update_queue = GRAPHICS;
+    buf_vk->refcount = 1;
 
     VkBufferUsageFlagBits bufFlags = 0;
     VkMemoryPropertyFlagBits memFlags = 0;
@@ -807,7 +803,7 @@ error:
 static bool vk_buf_poll(struct ra *ra, struct ra_buf *buf)
 {
     struct ra_buf_vk *buf_vk = buf->priv;
-    return !buf_vk->inuse;
+    return buf_vk->refcount == 1;
 }
 
 static bool vk_tex_upload(struct ra *ra,
@@ -855,7 +851,7 @@ static bool vk_tex_upload(struct ra *ra,
     if (!cmd)
         goto error;
 
-    buf_barrier(cmd, buf, VK_PIPELINE_STAGE_TRANSFER_BIT,
+    buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_READ_BIT, region.bufferOffset, size);
 
     tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -1361,7 +1357,7 @@ error:
     return pass;
 }
 
-static void vk_update_descriptor(struct vk_cmd *cmd,
+static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
                                  struct ra_renderpass *pass,
                                  struct ra_renderpass_input_val val,
                                  VkDescriptorSet ds, int idx)
@@ -1425,7 +1421,7 @@ static void vk_update_descriptor(struct vk_cmd *cmd,
         if (inp->type == RA_VARTYPE_BUF_RW)
             access |= VK_ACCESS_SHADER_WRITE_BIT;
 
-        buf_barrier(cmd, buf, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                     access, buf_vk->slice.mem.offset, buf->params.size);
 
         VkDescriptorBufferInfo *binfo = &pass_vk->dsbinfo[idx];
@@ -1463,7 +1459,7 @@ static void vk_renderpass_run(struct ra *ra,
     pass_vk->dindex %= MPVK_NUM_DS;
 
     for (int i = 0; i < params->num_values; i++)
-        vk_update_descriptor(cmd, pass, params->values[i], ds, i);
+        vk_update_descriptor(ra, cmd, pass, params->values[i], ds, i);
 
     if (params->num_values > 0) {
         vkUpdateDescriptorSets(vk->dev, params->num_values, pass_vk->dswrite,
@@ -1506,7 +1502,7 @@ static void vk_renderpass_run(struct ra *ra,
 
         vk_buf_update(ra, buf, 0, params->vertex_data, buf_params.size);
 
-        buf_barrier(cmd, buf, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+        buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
                     VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
                     buf_vk->slice.mem.offset, buf_params.size);
 
