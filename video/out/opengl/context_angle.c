@@ -683,7 +683,7 @@ static bool angle_init(struct ra_ctx *ctx)
     gl->SwapInterval = angle_swap_interval;
 
     // Custom swapchain impl for the D3D11 swapchain-based surface
-    static const struct ra_swapchain_fns empty_swapchain_fns = {
+    static const struct ra_swapchain_fns dxgi_swapchain_fns = {
         .color_depth = angle_color_depth,
         .screenshot = angle_screenshot,
         .submit_frame = angle_submit_frame,
@@ -691,7 +691,7 @@ static bool angle_init(struct ra_ctx *ctx)
     struct ra_gl_ctx_params params = {
         .swap_buffers = angle_swap_buffers,
         .flipped = p->flipped,
-        .external_swapchain = p->dxgi_swapchain ? &empty_swapchain_fns : NULL,
+        .external_swapchain = p->dxgi_swapchain ? &dxgi_swapchain_fns : NULL,
     };
 
     if (!ra_gl_ctx_init(ctx, gl, params))
