@@ -89,20 +89,20 @@ struct vk_callback {
 // This will essentially run once the device is completely idle.
 void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg);
 
-#define MPVK_MAX_CMD_DEPS 8
-
 // Helper wrapper around command buffers that also track dependencies,
 // callbacks and synchronization primitives
 struct vk_cmd {
     struct vk_cmdpool *pool; // pool it was allocated from
     VkCommandBuffer buf;
     VkFence fence; // the fence guards cmd buffer reuse
-    VkSemaphore done; // the semaphore signals when execution is done
     // The semaphores represent dependencies that need to complete before
-    // this command can be executed. These are *not* owned by the vk_cmd
-    VkSemaphore deps[MPVK_MAX_CMD_DEPS];
-    VkPipelineStageFlags depstages[MPVK_MAX_CMD_DEPS];
+    // this command can be executed. The signals represent semaphores that will
+    // fire once this command completes. These are *not* owned by the vk_cmd
+    VkSemaphore *deps;
+    VkPipelineStageFlags *depstages;
     int num_deps;
+    VkSemaphore *sigs;
+    int num_sigs;
     // Since VkFences are useless, we have to manually track "callbacks"
     // to fire once the VkFence completes. These are used for multiple purposes,
     // ranging from garbage collection (resource deallocation) to fencing.
@@ -119,8 +119,12 @@ void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg);
 void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
                 VkPipelineStageFlagBits depstage);
 
+// Associate a signal for the current command. This semaphore will be signalled
+// once the command completes.
+void vk_cmd_sig(struct vk_cmd *cmd, VkSemaphore sig);
+
 #define MPVK_MAX_QUEUES 8
-#define MPVK_MAX_CMDS 64
+#define MPVK_MAX_CMDS 256
 
 // Command pool / queue family hybrid abstraction
 struct vk_cmdpool {
@@ -141,10 +145,8 @@ struct vk_cmdpool {
 struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
 
 // Finish the currently recording command buffer and submit it for execution.
-// If `done` is not NULL, it will be set to a semaphore that will signal once
-// the command completes. (And MUST have a corresponding semaphore wait)
 // Returns whether successful.
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done);
+bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd);
 
 // Predefined structs for a simple non-layered, non-mipped image
 extern const VkImageSubresourceRange vk_range;

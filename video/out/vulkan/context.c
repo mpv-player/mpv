@@ -103,8 +103,9 @@ const struct m_sub_options vulkan_conf = {
                    {"mailbox",      SWAP_MAILBOX},
                    {"immediate",    SWAP_IMMEDIATE})),
         OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1,
-                     MPVK_MAX_QUEUES, OPTDEF_INT(1)),
-        OPT_FLAG("vulkan-async-transfer", dev_opts.async_transfer, 0),
+                     MPVK_MAX_QUEUES, OPTDEF_INT(8)),
+        OPT_FLAG("vulkan-async-transfer", dev_opts.async_transfer, 0,
+                 OPTDEF_INT(1)),
         {0}
     },
     .size = sizeof(struct vulkan_opts)
@@ -119,12 +120,13 @@ struct priv {
     VkSwapchainKHR swapchain;
     int frames_in_flight;
     // state of the images:
-    struct ra_tex **images;   // ra_tex wrappers for the vkimages
-    int num_images;           // size of images
-    VkSemaphore *acquired;    // pool of semaphores used to synchronize images
-    int num_acquired;         // size of this pool
-    int idx_acquired;         // index of next free semaphore within this pool
-    int last_imgidx;          // the image index last acquired (for submit)
+    struct ra_tex **images; // ra_tex wrappers for the vkimages
+    int num_images;         // size of images
+    int last_imgidx;        // the image index last acquired (for submit)
+    VkSemaphore *sem_in;    // semaphores for image acquisition
+    VkSemaphore *sem_out;   // semaphores for image rendering
+    int num_sems;           // size of this pool
+    int idx_sems;           // index of next free semaphore pair
 };
 
 static const struct ra_swapchain_fns vulkan_swapchain;
@@ -244,17 +246,16 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
         struct priv *p = ctx->swapchain->priv;
         struct mpvk_ctx *vk = p->vk;
 
-        mpvk_pool_wait_idle(vk, vk->pool);
+        mpvk_dev_wait_idle(vk);
 
         for (int i = 0; i < p->num_images; i++)
             ra_tex_free(ctx->ra, &p->images[i]);
-        for (int i = 0; i < p->num_acquired; i++)
-            vkDestroySemaphore(vk->dev, p->acquired[i], MPVK_ALLOCATOR);
+        for (int i = 0; i < p->num_sems; i++) {
+            vkDestroySemaphore(vk->dev, p->sem_in[i], MPVK_ALLOCATOR);
+            vkDestroySemaphore(vk->dev, p->sem_out[i], MPVK_ALLOCATOR);
+        }
 
         vkDestroySwapchainKHR(vk->dev, p->swapchain, MPVK_ALLOCATOR);
-
-        talloc_free(p->images);
-        talloc_free(p->acquired);
         ctx->ra->fns->destroy(ctx->ra);
         ctx->ra = NULL;
     }
@@ -373,13 +374,17 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
     VK(vkGetSwapchainImagesKHR(vk->dev, p->swapchain, &num, vkimages));
 
     // If needed, allocate some more semaphores
-    while (num > p->num_acquired) {
-        VkSemaphore sem;
+    while (num > p->num_sems) {
+        int idx = p->num_sems++;
+        MP_TARRAY_GROW(p, p->sem_in, p->num_sems);
+        MP_TARRAY_GROW(p, p->sem_out, p->num_sems);
+
         static const VkSemaphoreCreateInfo seminfo = {
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
-        VK(vkCreateSemaphore(vk->dev, &seminfo, MPVK_ALLOCATOR, &sem));
-        MP_TARRAY_APPEND(NULL, p->acquired, p->num_acquired, sem);
+
+        VK(vkCreateSemaphore(vk->dev, &seminfo, MPVK_ALLOCATOR, &p->sem_in[idx]));
+        VK(vkCreateSemaphore(vk->dev, &seminfo, MPVK_ALLOCATOR, &p->sem_out[idx]));
     }
 
     // Recreate the ra_tex wrappers
@@ -387,7 +392,7 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
         ra_tex_free(ra, &p->images[i]);
 
     p->num_images = num;
-    MP_TARRAY_GROW(NULL, p->images, p->num_images);
+    MP_TARRAY_GROW(p, p->images, p->num_images);
     for (int i = 0; i < num; i++) {
         p->images[i] = ra_vk_wrap_swapchain_img(ra, vkimages[i], sinfo);
         if (!p->images[i])
@@ -430,11 +435,12 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     uint32_t imgidx = 0;
     MP_TRACE(vk, "vkAcquireNextImageKHR\n");
     VkResult res = vkAcquireNextImageKHR(vk->dev, p->swapchain, UINT64_MAX,
-                                         p->acquired[p->idx_acquired], NULL,
+                                         p->sem_in[p->idx_sems], NULL,
                                          &imgidx);
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
         goto error; // just return in this case
     VK_ASSERT(res, "Failed acquiring swapchain image");
+    ra_vk_tex_dep(p->images[imgidx], p->sem_in[p->idx_sems]);
 
     p->last_imgidx = imgidx;
     *out_fbo = (struct ra_fbo) {
@@ -453,12 +459,10 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     struct ra *ra = sw->ctx->ra;
     struct mpvk_ctx *vk = p->vk;
 
-    VkSemaphore acquired = p->acquired[p->idx_acquired++];
-    p->idx_acquired %= p->num_acquired;
+    VkSemaphore done = p->sem_out[p->idx_sems++];
+    p->idx_sems %= p->num_sems;
 
-    VkSemaphore done;
-    if (!ra_vk_submit(ra, p->images[p->last_imgidx], acquired, &done,
-                      &p->frames_in_flight))
+    if (!ra_vk_submit(ra, p->images[p->last_imgidx], done, &p->frames_in_flight))
         goto error;
 
     struct vk_cmdpool *pool = vk->pool;

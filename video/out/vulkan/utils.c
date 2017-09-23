@@ -135,11 +135,8 @@ static void vk_cmdpool_uninit(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 
     // also frees associated command buffers
     vkDestroyCommandPool(vk->dev, pool->pool, MPVK_ALLOCATOR);
-    for (int n = 0; n < MPVK_MAX_CMDS; n++) {
+    for (int n = 0; n < MPVK_MAX_CMDS; n++)
         vkDestroyFence(vk->dev, pool->cmds[n].fence, MPVK_ALLOCATOR);
-        vkDestroySemaphore(vk->dev, pool->cmds[n].done, MPVK_ALLOCATOR);
-        talloc_free(pool->cmds[n].callbacks);
-    }
     talloc_free(pool);
 }
 
@@ -429,12 +426,6 @@ static bool vk_cmdpool_init(struct mpvk_ctx *vk, VkDeviceQueueCreateInfo qinfo,
         };
 
         VK(vkCreateFence(vk->dev, &finfo, MPVK_ALLOCATOR, &cmd->fence));
-
-        VkSemaphoreCreateInfo sinfo = {
-            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        };
-
-        VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &cmd->done));
     }
 
     return true;
@@ -658,7 +649,7 @@ void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)
 
 void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
 {
-    MP_TARRAY_GROW(NULL, cmd->callbacks, cmd->num_callbacks);
+    MP_TARRAY_GROW(cmd->pool, cmd->callbacks, cmd->num_callbacks);
     cmd->callbacks[cmd->num_callbacks++] = (struct vk_callback) {
         .run  = callback,
         .priv = p,
@@ -669,9 +660,14 @@ void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
 void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
                 VkPipelineStageFlagBits depstage)
 {
-    assert(cmd->num_deps < MPVK_MAX_CMD_DEPS);
-    cmd->deps[cmd->num_deps] = dep;
-    cmd->depstages[cmd->num_deps++] = depstage;
+    MP_TARRAY_APPEND(cmd->pool, cmd->deps, cmd->num_deps, dep);
+    MP_TARRAY_GROW(cmd->pool, cmd->depstages, cmd->num_deps);
+    cmd->depstages[cmd->num_deps - 1] = depstage;
+}
+
+void vk_cmd_sig(struct vk_cmd *cmd, VkSemaphore sig)
+{
+    MP_TARRAY_APPEND(cmd->pool, cmd->sigs, cmd->num_sigs, sig);
 }
 
 struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
@@ -703,7 +699,7 @@ error:
     return NULL;
 }
 
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
+bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 {
     VK(vkEndCommandBuffer(cmd->buf));
 
@@ -718,22 +714,17 @@ bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
         .waitSemaphoreCount = cmd->num_deps,
         .pWaitSemaphores = cmd->deps,
         .pWaitDstStageMask = cmd->depstages,
+        .signalSemaphoreCount = cmd->num_sigs,
+        .pSignalSemaphores = cmd->sigs,
     };
-
-    if (done) {
-        sinfo.signalSemaphoreCount = 1;
-        sinfo.pSignalSemaphores = &cmd->done;
-        *done = cmd->done;
-    }
 
     VK(vkResetFences(vk->dev, 1, &cmd->fence));
     VK(vkQueueSubmit(queue, 1, &sinfo, cmd->fence));
     MP_TRACE(vk, "Submitted command on queue %p (QF %d)\n", (void *)queue,
              pool->qf);
 
-    for (int i = 0; i < cmd->num_deps; i++)
-        cmd->deps[i] = NULL;
     cmd->num_deps = 0;
+    cmd->num_sigs = 0;
 
     vk->last_cmd = cmd;
     return true;

@@ -4199,21 +4199,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Controls the number of VkQueues used for rendering (limited by how many
     your device supports). In theory, using more queues could enable some
     parallelism between frames (when using a ``--swapchain-depth`` higher than
-    1). (Default: 1)
-
-    NOTE: Setting this to a value higher than 1 may cause graphical corruption,
-    as mpv's vulkan implementation currently does not try and protect textures
-    against concurrent access.
+    1). (Default: 8)
 
 ``--vulkan-async-transfer``
-    Enables the use of asynchronous texture uploads (default: no). Enabling
+    Enables the use of asynchronous texture uploads (default: yes). Enabling
     this allows offloading texture transfers to dedicated DMA engines on
-    supported devices.
-
-    NOTE: Enabling this option may cause graphical corruption, as mpv's vulkan
-    implementation currently does not try and protect textures against
-    concurrent access. Very likely to corrupt at least the OSD. Use at your
-    own risk, and only if necessary!
+    supported devices. Disabling it can be useful for debugging.
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
