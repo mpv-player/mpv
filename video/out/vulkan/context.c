@@ -483,7 +483,7 @@ static void swap_buffers(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     while (p->frames_in_flight >= sw->ctx->opts.swapchain_depth)
-        mpvk_pool_poll_cmds(p->vk, p->vk->pool, UINT64_MAX);
+        mpvk_dev_poll_cmds(p->vk, 100000); // 100μs
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {

@@ -610,13 +610,16 @@ void mpvk_pool_wait_idle(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 
 void mpvk_dev_wait_idle(struct mpvk_ctx *vk)
 {
-    mpvk_pool_wait_idle(vk, vk->pool);
     mpvk_pool_wait_idle(vk, vk->pool_transfer);
+    mpvk_pool_wait_idle(vk, vk->pool);
 }
 
 void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
                          uint64_t timeout)
 {
+    if (!pool)
+        return;
+
     // If requested, hard block until at least one command completes
     if (timeout > 0 && pool->cindex_pending != pool->cindex) {
         vkWaitForFences(vk->dev, 1, &pool->cmds[pool->cindex_pending].fence,
@@ -633,6 +636,12 @@ void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
         pool->cindex_pending++;
         pool->cindex_pending %= MPVK_MAX_CMDS;
     }
+}
+
+void mpvk_dev_poll_cmds(struct mpvk_ctx *vk, uint32_t timeout)
+{
+    mpvk_pool_poll_cmds(vk, vk->pool_transfer, timeout);
+    mpvk_pool_poll_cmds(vk, vk->pool, timeout);
 }
 
 void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)

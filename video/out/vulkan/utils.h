@@ -71,6 +71,7 @@ void mpvk_dev_wait_idle(struct mpvk_ctx *vk);
 // 0, it only garbage collects completed commands without blocking.
 void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
                          uint64_t timeout);
+void mpvk_dev_poll_cmds(struct mpvk_ctx *vk, uint32_t timeout);
 
 // Since lots of vulkan operations need to be done lazily once the affected
 // resources are no longer in use, provide an abstraction for tracking these.
