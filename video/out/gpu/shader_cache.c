@@ -104,8 +104,6 @@ struct gl_shader_cache {
     struct mpv_global *global; // can be NULL
 };
 
-static void gl_sc_reset(struct gl_shader_cache *sc);
-
 struct gl_shader_cache *gl_sc_create(struct ra *ra, struct mpv_global *global,
                                      struct mp_log *log)
 {
@@ -120,8 +118,8 @@ struct gl_shader_cache *gl_sc_create(struct ra *ra, struct mpv_global *global,
 }
 
 // Reset the previous pass. This must be called after gl_sc_generate and before
-// starting a new shader.
-static void gl_sc_reset(struct gl_shader_cache *sc)
+// starting a new shader. It may also be called on errors.
+void gl_sc_reset(struct gl_shader_cache *sc)
 {
     sc->prelude_text.len = 0;
     sc->header_text.len = 0;

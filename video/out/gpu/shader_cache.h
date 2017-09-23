@@ -53,4 +53,7 @@ struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
                                         void *ptr, size_t num);
 struct mp_pass_perf gl_sc_dispatch_compute(struct gl_shader_cache *sc,
                                            int w, int h, int d);
+// The application can call this on errors, to reset the current shader. This
+// is normally done implicitly by gl_sc_dispatch_*
+void gl_sc_reset(struct gl_shader_cache *sc);
 void gl_sc_set_cache_dir(struct gl_shader_cache *sc, const char *dir);

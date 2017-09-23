@@ -622,8 +622,8 @@ static struct image image_wrap(struct ra_tex *tex, enum plane_type type,
         .type = type,
         .tex = tex,
         .multiplier = 1.0,
-        .w = tex->params.w,
-        .h = tex->params.h,
+        .w = tex ? tex->params.w : 1,
+        .h = tex ? tex->params.h : 1,
         .transform = identity_trans,
         .components = components,
     };
@@ -1096,6 +1096,12 @@ static void pass_is_compute(struct gl_video *p, int bw, int bh)
     };
 }
 
+static void cleanup_binds(struct gl_video *p)
+{
+    memset(&p->pass_img, 0, sizeof(p->pass_img));
+    p->pass_img_num = 0;
+}
+
 // w/h: the width/height of the compute shader's operating domain (e.g. the
 // target target that needs to be written, or the source texture that needs to
 // be reduced)
@@ -1140,9 +1146,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
         num_y = info.block_h > 0 ? (h + info.block_h - 1) / info.block_h : 1;
 
     pass_record(p, gl_sc_dispatch_compute(p->sc, num_x, num_y, 1));
-
-    memset(&p->pass_img, 0, sizeof(p->pass_img));
-    p->pass_img_num = 0;
+    cleanup_binds(p);
 }
 
 static struct mp_pass_perf render_pass_quad(struct gl_video *p,
@@ -1184,14 +1188,13 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
 }
 
 static void finish_pass_fbo(struct gl_video *p, struct ra_fbo fbo,
-                               const struct mp_rect *dst)
+                            const struct mp_rect *dst)
 {
     pass_prepare_src_tex(p);
     gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
     pass_record(p, render_pass_quad(p, fbo, dst));
     debug_check_gl(p, "after rendering");
-    memset(&p->pass_img, 0, sizeof(p->pass_img));
-    p->pass_img_num = 0;
+    cleanup_binds(p);
 }
 
 // dst_fbo: this will be used for rendering; possibly reallocating the whole
@@ -1201,8 +1204,11 @@ static void finish_pass_fbo(struct gl_video *p, struct ra_fbo fbo,
 static void finish_pass_tex(struct gl_video *p, struct ra_tex **dst_tex,
                             int w, int h)
 {
-    if (!ra_tex_resize(p->ra, p->log, dst_tex, w, h, p->fbo_format))
+    if (!ra_tex_resize(p->ra, p->log, dst_tex, w, h, p->fbo_format)) {
+        cleanup_binds(p);
+        gl_sc_reset(p->sc);
         return;
+    }
 
     if (p->pass_compute.active) {
         gl_sc_uniform_image2D_wo(p->sc, "out_image", *dst_tex);
@@ -3044,12 +3050,13 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
                     !p->dumb_mode && (p->ra->caps & RA_CAP_BLIT))
                 {
-                    ra_tex_resize(p->ra, p->log, &p->output_tex,
-                                  fbo.tex->params.w, fbo.tex->params.h,
-                                  p->fbo_format);
-
-                    dest_fbo = (struct ra_fbo) { p->output_tex };
-                    p->output_tex_valid = true;
+                    bool r = ra_tex_resize(p->ra, p->log, &p->output_tex,
+                                           fbo.tex->params.w, fbo.tex->params.h,
+                                           p->fbo_format);
+                    if (r) {
+                        dest_fbo = (struct ra_fbo) { p->output_tex };
+                        p->output_tex_valid = true;
+                    }
                 }
                 pass_draw_to_screen(p, dest_fbo);
             }
