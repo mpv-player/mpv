@@ -82,15 +82,15 @@ static void slab_free(struct mpvk_ctx *vk, struct vk_slab *slab)
     vkFreeMemory(vk->dev, slab->mem, MPVK_ALLOCATOR);
     int64_t stop = mp_time_us();
 
-    MP_VERBOSE(vk, "Freeing slab of size %lu took %ld μs.\n",
-               slab->size, stop - start);
+    MP_VERBOSE(vk, "Freeing slab of size %zu took %lld μs.\n",
+               slab->size, (long long)(stop - start));
 
     talloc_free(slab);
 }
 
 static bool find_best_memtype(struct mpvk_ctx *vk, uint32_t typeBits,
                               VkMemoryPropertyFlagBits flags,
-                              VkMemoryType *out_type, uint32_t *out_index)
+                              VkMemoryType *out_type, int *out_index)
 {
     struct vk_malloc *ma = vk->alloc;
 
@@ -109,7 +109,7 @@ static bool find_best_memtype(struct mpvk_ctx *vk, uint32_t typeBits,
     }
 
     MP_ERR(vk, "Found no memory type matching property flags 0x%x and type "
-               "bits 0x%x!\n", flags, typeBits);
+               "bits 0x%x!\n", flags, (unsigned)typeBits);
     return false;
 }
 
@@ -149,12 +149,12 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
     }
 
     VkMemoryType type;
-    uint32_t index;
+    int index;
     if (!find_best_memtype(vk, typeBits, heap->flags, &type, &index))
         goto error;
 
-    MP_VERBOSE(vk, "Allocating %lu memory of type 0x%x (id %d) in heap %d.\n",
-               slab->size, type.propertyFlags, index, type.heapIndex);
+    MP_VERBOSE(vk, "Allocating %zu memory of type 0x%x (id %d) in heap %d.\n",
+               slab->size, type.propertyFlags, index, (int)type.heapIndex);
 
     minfo.memoryTypeIndex = index;
     VK(vkAllocateMemory(vk->dev, &minfo, MPVK_ALLOCATOR, &slab->mem));
@@ -262,7 +262,7 @@ void vk_free_memslice(struct mpvk_ctx *vk, struct vk_memslice slice)
     assert(slab->used >= slice.size);
     slab->used -= slice.size;
 
-    MP_DBG(vk, "Freeing slice %lu + %lu from slab with size %lu\n",
+    MP_DBG(vk, "Freeing slice %zu + %zu from slab with size %zu\n",
            slice.offset, slice.size, slab->size);
 
     if (slab->dedicated) {
@@ -389,7 +389,7 @@ static bool slice_heap(struct mpvk_ctx *vk, struct vk_heap *heap, size_t size,
         .priv = slab,
     };
 
-    MP_DBG(vk, "Sub-allocating slice %lu + %lu from slab with size %lu\n",
+    MP_DBG(vk, "Sub-allocating slice %zu + %zu from slab with size %zu\n",
            out->offset, out->size, slab->size);
 
     size_t out_end = out->offset + out->size;

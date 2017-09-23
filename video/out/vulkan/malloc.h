@@ -9,8 +9,8 @@ void vk_malloc_uninit(struct mpvk_ctx *vk);
 // metadata for accounting. This struct is essentially read-only.
 struct vk_memslice {
     VkDeviceMemory vkmem;
-    VkDeviceSize offset;
-    VkDeviceSize size;
+    size_t offset;
+    size_t size;
     void *priv;
 };
 

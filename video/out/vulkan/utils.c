@@ -118,8 +118,9 @@ static VkBool32 vk_dbg_callback(VkDebugReportFlagsEXT flags,
     case VK_DEBUG_REPORT_DEBUG_BIT_EXT:               lev = MSGL_DEBUG; break;
     };
 
-    MP_MSG(vk, lev, "vk [%s] %d: %s (obj 0x%lx (%s), loc 0x%lx)\n",
-            layer, msgCode, msg, obj, vk_dbg_type(objType), loc);
+    MP_MSG(vk, lev, "vk [%s] %d: %s (obj 0x%llx (%s), loc 0x%zx)\n",
+           layer, (int)msgCode, msg, (unsigned long long)obj,
+           vk_dbg_type(objType), loc);
 
     // The return value of this function determines whether the call will
     // be explicitly aborted (to prevent GPU errors) or not. In this case,
@@ -306,12 +307,13 @@ bool mpvk_find_phys_device(struct mpvk_ctx *vk, const char *name, bool sw)
 
             MP_VERBOSE(vk, "Chose device:\n");
             MP_VERBOSE(vk, "    Device Name: %s\n", prop.deviceName);
-            MP_VERBOSE(vk, "    Device ID: %x:%x\n", prop.vendorID, prop.deviceID);
-            MP_VERBOSE(vk, "    Driver version: %d\n", prop.driverVersion);
+            MP_VERBOSE(vk, "    Device ID: %x:%x\n",
+                       (unsigned)prop.vendorID, (unsigned)prop.deviceID);
+            MP_VERBOSE(vk, "    Driver version: %d\n", (int)prop.driverVersion);
             MP_VERBOSE(vk, "    API version: %d.%d.%d\n",
-                    VK_VERSION_MAJOR(prop.apiVersion),
-                    VK_VERSION_MINOR(prop.apiVersion),
-                    VK_VERSION_PATCH(prop.apiVersion));
+                    (int)VK_VERSION_MAJOR(prop.apiVersion),
+                    (int)VK_VERSION_MINOR(prop.apiVersion),
+                    (int)VK_VERSION_PATCH(prop.apiVersion));
             vk->physd = devices[i];
             vk->limits = prop.limits;
             talloc_free(devices);
@@ -455,8 +457,8 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     MP_VERBOSE(vk, "Queue families supported by device:\n");
 
     for (int i = 0; i < qfnum; i++) {
-        MP_VERBOSE(vk, "QF %d: flags 0x%x num %d\n", i, qfs[i].queueFlags,
-                   qfs[i].queueCount);
+        MP_VERBOSE(vk, "QF %d: flags 0x%x num %d\n", i,
+                   (unsigned)qfs[i].queueFlags, (int)qfs[i].queueCount);
     }
 
     // For most of our rendering operations, we want to use one "primary" pool,

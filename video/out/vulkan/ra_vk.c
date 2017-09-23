@@ -602,7 +602,7 @@ struct ra_tex *ra_vk_wrap_swapchain_img(struct ra *ra, VkImage vkimg,
 
     if (!format) {
         MP_ERR(ra, "Could not find ra_format suitable for wrapped swchain image "
-                   "with surface format %d\n", vk->surf_format.format);
+                   "with surface format 0x%x\n", vk->surf_format.format);
         goto error;
     }
 

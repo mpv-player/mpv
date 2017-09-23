@@ -77,7 +77,7 @@ static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
 
         if (help) {
             mp_info(log, "  '%s' (GPU %d, ID %x:%x)\n", prop.deviceName, i,
-                    prop.vendorID, prop.deviceID);
+                    (unsigned)prop.vendorID, (unsigned)prop.deviceID);
         } else if (bstr_equals0(param, prop.deviceName)) {
             ret = 0;
             break;
@@ -161,7 +161,7 @@ static bool update_swapchain_info(struct priv *p,
     }
 
     if (!info->compositeAlpha) {
-        MP_ERR(vk, "Failed picking alpha compositing mode (caps: %d)\n",
+        MP_ERR(vk, "Failed picking alpha compositing mode (caps: 0x%x)\n",
                caps.supportedCompositeAlpha);
         goto error;
     }
@@ -179,14 +179,16 @@ static bool update_swapchain_info(struct priv *p,
     }
 
     if (!info->preTransform) {
-        MP_ERR(vk, "Failed picking surface transform mode (caps: %d)\n",
+        MP_ERR(vk, "Failed picking surface transform mode (caps: 0x%x)\n",
                caps.supportedTransforms);
         goto error;
     }
 
     // Image count as required
     MP_VERBOSE(vk, "Requested image count: %d (min %d max %d)\n",
-               info->minImageCount, caps.minImageCount, caps.maxImageCount);
+               (int)info->minImageCount, (int)caps.minImageCount,
+               (int)caps.maxImageCount);
+
     info->minImageCount = MPMAX(info->minImageCount, caps.minImageCount);
     if (caps.maxImageCount)
         info->minImageCount = MPMIN(info->minImageCount, caps.maxImageCount);
@@ -196,7 +198,7 @@ static bool update_swapchain_info(struct priv *p,
         caps.currentExtent.width != 0xFFFFFFFF)
     {
         MP_WARN(vk, "Requested width %d does not match current width %d\n",
-               info->imageExtent.width, caps.currentExtent.width);
+                (int)info->imageExtent.width, (int)caps.currentExtent.width);
         info->imageExtent.width = caps.currentExtent.width;
     }
 
@@ -204,7 +206,7 @@ static bool update_swapchain_info(struct priv *p,
         caps.currentExtent.height != 0xFFFFFFFF)
     {
         MP_WARN(vk, "Requested height %d does not match current height %d\n",
-               info->imageExtent.height, caps.currentExtent.height);
+                (int)info->imageExtent.height, (int)caps.currentExtent.height);
         info->imageExtent.height = caps.currentExtent.height;
     }
 
@@ -212,8 +214,8 @@ static bool update_swapchain_info(struct priv *p,
         caps.minImageExtent.height > info->imageExtent.height)
     {
         MP_ERR(vk, "Requested size %dx%d smaller than device minimum %d%d\n",
-               info->imageExtent.width, info->imageExtent.height,
-               caps.minImageExtent.width, caps.minImageExtent.height);
+               (int)info->imageExtent.width, (int)info->imageExtent.height,
+               (int)caps.minImageExtent.width, (int)caps.minImageExtent.height);
         goto error;
     }
 
@@ -221,8 +223,8 @@ static bool update_swapchain_info(struct priv *p,
         caps.maxImageExtent.height < info->imageExtent.height)
     {
         MP_ERR(vk, "Requested size %dx%d larger than device maximum %d%d\n",
-               info->imageExtent.width, info->imageExtent.height,
-               caps.maxImageExtent.width, caps.maxImageExtent.height);
+               (int)info->imageExtent.width, (int)info->imageExtent.height,
+               (int)caps.maxImageExtent.width, (int)caps.maxImageExtent.height);
         goto error;
     }
 
