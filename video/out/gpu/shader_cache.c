@@ -571,10 +571,6 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
         MP_TARRAY_APPEND(sc, params.inputs, params.num_inputs, ubo_input);
     }
 
-    entry->pass = sc->ra->fns->renderpass_create(sc->ra, &params);
-    if (!entry->pass)
-        goto error;
-
     if (sc->ubo_size) {
         struct ra_buf_params ubo_params = {
             .type = RA_BUF_TYPE_UNIFORM,
@@ -588,6 +584,10 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
             goto error;
         }
     }
+
+    entry->pass = sc->ra->fns->renderpass_create(sc->ra, &params);
+    if (!entry->pass)
+        goto error;
 
     if (entry->pass && cache_filename) {
         bstr nc = entry->pass->params.cached_program;
@@ -869,7 +869,8 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
             sc->error_state = true;
         MP_TARRAY_APPEND(sc, sc->entries, sc->num_entries, entry);
     }
-    if (sc->error_state) {
+
+    if (!entry->pass) {
         sc->current_shader = NULL;
         return;
     }
