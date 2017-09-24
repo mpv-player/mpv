@@ -4218,7 +4218,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     nvidia
         Use nvidia's built-in compiler. Only works for nvidia GPUs. Can be
         buggy, but also supports some features glslang does not. Only works
-        with vulkan.
+        with vulkan. WARNING: Pretty buggy, handles push constants incorrectly
+        (this causes graphical corruption with e.g. ``--temporal-dither``)! Use
+        only for testing.
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
