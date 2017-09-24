@@ -133,11 +133,23 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
 
     uint32_t typeBits = heap->typeBits ? heap->typeBits : UINT32_MAX;
     if (heap->usage) {
+        // FIXME: Since we can't keep track of queue family ownership properly,
+        // and we don't know in advance what types of queue families this buffer
+        // will belong to, we're forced to share all of our buffers between all
+        // command pools.
+        uint32_t qfs[3] = {0};
+        for (int i = 0; i < vk->num_pools; i++)
+            qfs[i] = vk->pools[i]->qf;
+
         VkBufferCreateInfo binfo = {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .size  = slab->size,
             .usage = heap->usage,
+            .sharingMode = vk->num_pools > 1 ? VK_SHARING_MODE_CONCURRENT
+                                             : VK_SHARING_MODE_EXCLUSIVE,
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+            .queueFamilyIndexCount = vk->num_pools,
+            .pQueueFamilyIndices = qfs,
         };
 
         VK(vkCreateBuffer(vk->dev, &binfo, MPVK_ALLOCATOR, &slab->buffer));

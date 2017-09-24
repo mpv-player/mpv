@@ -45,11 +45,16 @@ struct mpvk_ctx {
     VkSurfaceKHR surf;
     VkSurfaceFormatKHR surf_format; // picked at surface initialization time
 
-    struct vk_malloc *alloc; // memory allocator for this device
-    struct vk_cmdpool *pool; // primary command pool for this device
-    struct vk_cmdpool *pool_transfer; // pool for async transfers (optional)
-    struct vk_cmd *last_cmd; // most recently submitted command
+    struct vk_malloc *alloc;      // memory allocator for this device
     struct spirv_compiler *spirv; // GLSL -> SPIR-V compiler
+    struct vk_cmdpool **pools;    // command pools (one per queue family)
+    int num_pools;
+    struct vk_cmd *last_cmd;      // most recently submitted command
+
+    // Pointers into *pools
+    struct vk_cmdpool *pool_graphics; // required
+    struct vk_cmdpool *pool_compute;  // optional
+    struct vk_cmdpool *pool_transfer; // optional
 
     // Cached capabilities
     VkPhysicalDeviceLimits limits;

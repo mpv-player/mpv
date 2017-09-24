@@ -8,6 +8,7 @@ static struct ra_fns ra_fns_vk;
 
 enum queue_type {
     GRAPHICS,
+    COMPUTE,
     TRANSFER,
     QUEUE_TYPE_COUNT,
 };
@@ -39,11 +40,21 @@ static struct vk_cmd *vk_require_cmd(struct ra *ra, enum queue_type type)
 
     struct vk_cmdpool *pool;
     switch (type) {
-    case GRAPHICS: pool = vk->pool; break;
-    case TRANSFER: pool = vk->pool_transfer; break;
+    case GRAPHICS: pool = vk->pool_graphics; break;
+    case COMPUTE:  pool = vk->pool_compute;  break;
+
+    // GRAPHICS and COMPUTE pools both imply TRANSFER capability (vulkan spec)
+    case TRANSFER:
+        pool = vk->pool_transfer;
+        if (!pool)
+            pool = vk->pool_compute;
+        if (!pool)
+            pool = vk->pool_graphics;
+        break;
     default: abort();
     }
 
+    assert(pool);
     p->cmds[type] = vk_cmd_begin(vk, pool);
     return p->cmds[type];
 }
@@ -62,22 +73,10 @@ static bool vk_flush(struct ra *ra)
     return true;
 }
 
-// The callback's *priv will always be set to `ra`
-static void vk_callback(struct ra *ra, vk_cb callback, void *arg)
-{
-    struct ra_vk *p = ra->priv;
-    struct mpvk_ctx *vk = ra_vk_get(ra);
-
-    if (p->cmds[GRAPHICS]) {
-        vk_cmd_callback(p->cmds[GRAPHICS], callback, ra, arg);
-    } else {
-        vk_dev_callback(vk, callback, ra, arg);
-    }
-}
-
 #define MAKE_LAZY_DESTRUCTOR(fun, argtype)                  \
     static void fun##_lazy(struct ra *ra, argtype *arg) {   \
-        vk_callback(ra, (vk_cb) fun, arg);                  \
+        struct mpvk_ctx *vk = ra_vk_get(ra);                \
+        vk_dev_callback(vk, (vk_cb) fun, ra, arg);          \
     }
 
 static void vk_destroy_ra(struct ra *ra)
@@ -204,7 +203,7 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     ra->max_shmem = vk->limits.maxComputeSharedMemorySize;
     ra->max_pushc_size = vk->limits.maxPushConstantsSize;
 
-    if (vk->pool->props.queueFlags & VK_QUEUE_COMPUTE_BIT)
+    if (vk->pool_compute)
         ra->caps |= RA_CAP_COMPUTE;
 
     if (!vk_setup_formats(ra))
@@ -533,7 +532,14 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
         return NULL;
     }
 
-    uint32_t qfs[2] = {vk->pool->qf};
+    // FIXME: Since we can't keep track of queue family ownership properly,
+    // and we don't know in advance what types of queue families this image
+    // will belong to, we're forced to share all of our images between all
+    // command pools.
+    uint32_t qfs[3] = {0};
+    for (int i = 0; i < vk->num_pools; i++)
+        qfs[i] = vk->pools[i]->qf;
+
     VkImageCreateInfo iinfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType = tex_vk->type,
@@ -545,16 +551,11 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
         .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = usage,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 1,
+        .sharingMode = vk->num_pools > 1 ? VK_SHARING_MODE_CONCURRENT
+                                         : VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = vk->num_pools,
         .pQueueFamilyIndices = qfs,
     };
-
-    if (tex_vk->upload_queue == TRANSFER) {
-        iinfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-        iinfo.queueFamilyIndexCount = 2;
-        qfs[1] = vk->pool_transfer->qf;
-    }
 
     VK(vkCreateImage(vk->dev, &iinfo, MPVK_ALLOCATOR, &tex_vk->img));
 
@@ -756,10 +757,8 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
     case RA_BUF_TYPE_TEX_UPLOAD:
         bufFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         memFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-        // Always use the transfer pool for updates, so that the texture upload
-        // buffers never need to switch QF ownership (and we can continue
-        // using EXCLUSIVE ownership for everything)
-        if (vk->pool_transfer)
+        // Use TRANSFER-style updates for large enough buffers for efficiency
+        if (params->size > 1024*1024) // 1 MB
             buf_vk->update_queue = TRANSFER;
         break;
     case RA_BUF_TYPE_UNIFORM:
@@ -771,6 +770,7 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
         bufFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         memFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         align = MP_ALIGN_UP(align, vk->limits.minStorageBufferOffsetAlignment);
+        buf_vk->update_queue = COMPUTE;
         break;
     case RA_BUF_TYPE_VERTEX:
         bufFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -1454,7 +1454,12 @@ static void vk_renderpass_run(struct ra *ra,
     struct ra_renderpass *pass = params->pass;
     struct ra_renderpass_vk *pass_vk = pass->priv;
 
-    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
+    static const enum queue_type types[] = {
+        [RA_RENDERPASS_TYPE_RASTER]  = GRAPHICS,
+        [RA_RENDERPASS_TYPE_COMPUTE] = COMPUTE,
+    };
+
+    struct vk_cmd *cmd = vk_require_cmd(ra, types[pass->params.type]);
     if (!cmd)
         goto error;
 
@@ -1568,7 +1573,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     struct ra_tex_vk *src_vk = src->priv;
     struct ra_tex_vk *dst_vk = dst->priv;
 
-    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
+    struct vk_cmd *cmd = vk_require_cmd(ra, TRANSFER);
     if (!cmd)
         return;
 

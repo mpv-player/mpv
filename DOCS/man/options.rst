@@ -4199,12 +4199,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Controls the number of VkQueues used for rendering (limited by how many
     your device supports). In theory, using more queues could enable some
     parallelism between frames (when using a ``--swapchain-depth`` higher than
-    1). (Default: 8)
-
-``--vulkan-async-transfer``
-    Enables the use of asynchronous texture uploads (default: yes). Enabling
-    this allows offloading texture transfers to dedicated DMA engines on
-    supported devices. Disabling it can be useful for debugging.
+    1), but it can also slow things down. (Default: 1)
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is

@@ -103,9 +103,7 @@ const struct m_sub_options vulkan_conf = {
                    {"mailbox",      SWAP_MAILBOX},
                    {"immediate",    SWAP_IMMEDIATE})),
         OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1,
-                     MPVK_MAX_QUEUES, OPTDEF_INT(8)),
-        OPT_FLAG("vulkan-async-transfer", dev_opts.async_transfer, 0,
-                 OPTDEF_INT(1)),
+                     MPVK_MAX_QUEUES, OPTDEF_INT(1)),
         {0}
     },
     .size = sizeof(struct vulkan_opts)
@@ -471,7 +469,7 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     if (!ra_vk_submit(ra, p->images[p->last_imgidx], done, &p->frames_in_flight))
         goto error;
 
-    struct vk_cmdpool *pool = vk->pool;
+    struct vk_cmdpool *pool = vk->pool_graphics;
     VkQueue queue = pool->queues[pool->qindex]; // reuse
 
     VkPresentInfoKHR pinfo = {

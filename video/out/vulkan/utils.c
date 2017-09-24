@@ -128,15 +128,18 @@ static VkBool32 vk_dbg_callback(VkDebugReportFlagsEXT flags,
     return (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT);
 }
 
-static void vk_cmdpool_uninit(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
+static void vk_cmdpool_destroy(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 {
     if (!pool)
         return;
+
+    mpvk_pool_wait_idle(vk, pool);
 
     // also frees associated command buffers
     vkDestroyCommandPool(vk->dev, pool->pool, MPVK_ALLOCATOR);
     for (int n = 0; n < MPVK_MAX_CMDS; n++)
         vkDestroyFence(vk->dev, pool->cmds[n].fence, MPVK_ALLOCATOR);
+
     talloc_free(pool);
 }
 
@@ -146,8 +149,9 @@ void mpvk_uninit(struct mpvk_ctx *vk)
         return;
 
     if (vk->dev) {
-        vk_cmdpool_uninit(vk, vk->pool);
-        vk_cmdpool_uninit(vk, vk->pool_transfer);
+        for (int i = 0; i < vk->num_pools; i++)
+            vk_cmdpool_destroy(vk, vk->pools[i]);
+        talloc_free(vk->pools);
         vk_malloc_uninit(vk);
         vkDestroyDevice(vk->dev, MPVK_ALLOCATOR);
     }
@@ -382,11 +386,11 @@ error:
     return false;
 }
 
-static bool vk_cmdpool_init(struct mpvk_ctx *vk, VkDeviceQueueCreateInfo qinfo,
-                            VkQueueFamilyProperties props,
-                            struct vk_cmdpool **out)
+static struct vk_cmdpool *vk_cmdpool_create(struct mpvk_ctx *vk,
+                                            VkDeviceQueueCreateInfo qinfo,
+                                            VkQueueFamilyProperties props)
 {
-    struct vk_cmdpool *pool = *out = talloc_ptrtype(NULL, pool);
+    struct vk_cmdpool *pool = talloc_ptrtype(NULL, pool);
     *pool = (struct vk_cmdpool) {
         .qf = qinfo.queueFamilyIndex,
         .props = props,
@@ -428,10 +432,58 @@ static bool vk_cmdpool_init(struct mpvk_ctx *vk, VkDeviceQueueCreateInfo qinfo,
         VK(vkCreateFence(vk->dev, &finfo, MPVK_ALLOCATOR, &cmd->fence));
     }
 
-    return true;
+    return pool;
 
 error:
-    return false;
+    return NULL;
+}
+
+// Find the most specialized queue supported a combination of flags. In cases
+// where there are multiple queue families at the same specialization level,
+// this finds the one with the most queues. Returns -1 if no queue was found.
+static int find_qf(VkQueueFamilyProperties *qfs, int qfnum, VkQueueFlags flags)
+{
+    int idx = -1;
+    for (int i = 0; i < qfnum; i++) {
+        if (!(qfs[i].queueFlags & flags))
+            continue;
+
+        // QF is more specialized
+        if (idx < 0 || qfs[i].queueFlags < qfs[idx].queueFlags)
+            idx = i;
+
+        // QF has more queues (at the same specialization level)
+        if (qfs[i].queueFlags == qfs[idx].queueFlags &&
+            qfs[i].queueCount > qfs[idx].queueCount)
+            idx = i;
+    }
+
+    return idx;
+}
+
+static void add_qinfo(void *tactx, VkDeviceQueueCreateInfo **qinfos,
+                      int *num_qinfos, VkQueueFamilyProperties *qfs, int idx,
+                      int qcount)
+{
+    if (idx < 0)
+        return;
+
+    // Check to see if we've already added this queue family
+    for (int i = 0; i < *num_qinfos; i++) {
+        if ((*qinfos)[i].queueFamilyIndex == idx)
+            return;
+    }
+
+    assert(qcount <= MPVK_MAX_QUEUES);
+    static const float priorities[MPVK_MAX_QUEUES] = {0};
+    VkDeviceQueueCreateInfo qinfo = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .queueFamilyIndex = idx,
+        .queueCount = MPMIN(qcount, qfs[idx].queueCount),
+        .pQueuePriorities = priorities,
+    };
+
+    MP_TARRAY_APPEND(tactx, *qinfos, *num_qinfos, qinfo);
 }
 
 bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
@@ -452,69 +504,34 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
                    (unsigned)qfs[i].queueFlags, (int)qfs[i].queueCount);
     }
 
-    // For most of our rendering operations, we want to use one "primary" pool,
-    // so just pick the queue family with the most features.
-    int idx = -1;
-    for (int i = 0; i < qfnum; i++) {
-        if (!(qfs[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
-            continue;
-
-        // QF supports more features
-        if (idx < 0 || qfs[i].queueFlags > qfs[idx].queueFlags)
-            idx = i;
-
-        // QF supports more queues (at the same specialization level)
-        if (qfs[i].queueFlags == qfs[idx].queueFlags &&
-            qfs[i].queueCount > qfs[idx].queueCount)
-        {
-            idx = i;
-        }
-    }
+    int idx_gfx  = find_qf(qfs, qfnum, VK_QUEUE_GRAPHICS_BIT),
+        idx_comp = find_qf(qfs, qfnum, VK_QUEUE_COMPUTE_BIT),
+        idx_tf   = find_qf(qfs, qfnum, VK_QUEUE_TRANSFER_BIT);
 
     // Vulkan requires at least one GRAPHICS queue, so if this fails something
     // is horribly wrong.
-    assert(idx >= 0);
+    assert(idx_gfx >= 0);
+    MP_VERBOSE(vk, "Using graphics queue (QF %d)\n", idx_gfx);
 
     // Ensure we can actually present to the surface using this queue
     VkBool32 sup;
-    VK(vkGetPhysicalDeviceSurfaceSupportKHR(vk->physd, idx, vk->surf, &sup));
+    VK(vkGetPhysicalDeviceSurfaceSupportKHR(vk->physd, idx_gfx, vk->surf, &sup));
     if (!sup) {
         MP_ERR(vk, "Queue family does not support surface presentation!\n");
         goto error;
     }
 
-    // We could additionally try and pick a transfer queue if there is one.
-    bool use_transfer = false;
-    int idx_tf = 0;
-    for (int i = 0; i < qfnum; i++) {
-        if (!opts.async_transfer)
-            break;
-        if (i == idx)
-            continue;
-        if (!(qfs[i].queueFlags & VK_QUEUE_TRANSFER_BIT))
-            continue;
-        use_transfer = true;
-        idx_tf = i;
-        break;
-    }
+    if (idx_comp >= 0 && idx_comp != idx_gfx)
+        MP_VERBOSE(vk, "Using async compute (QF %d)\n", idx_comp);
+    if (idx_tf >= 0 && idx_tf != idx_gfx)
+        MP_VERBOSE(vk, "Using async transfer (QF %d)\n", idx_tf);
 
-    // Now that we know which queue families we want, we can create the logical
-    // device
-    assert(opts.queue_count <= MPVK_MAX_QUEUES);
-    static const float priorities[MPVK_MAX_QUEUES] = {0};
-    VkDeviceQueueCreateInfo qinfo = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        .queueFamilyIndex = idx,
-        .queueCount = MPMIN(qfs[idx].queueCount, opts.queue_count),
-        .pQueuePriorities = priorities,
-    };
-
-    VkDeviceQueueCreateInfo qinfo_tf = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        .queueFamilyIndex = idx_tf,
-        .queueCount = MPMIN(qfs[idx_tf].queueCount, opts.queue_count),
-        .pQueuePriorities = priorities,
-    };
+    // Now that we know which QFs we want, we can create the logical device
+    VkDeviceQueueCreateInfo *qinfos = NULL;
+    int num_qinfos = 0;
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_gfx, opts.queue_count);
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_comp, opts.queue_count);
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_tf, opts.queue_count);
 
     const char **exts = NULL;
     int num_exts = 0;
@@ -524,8 +541,8 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 
     VkDeviceCreateInfo dinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .queueCreateInfoCount = use_transfer ? 2 : 1,
-        .pQueueCreateInfos = (struct VkDeviceQueueCreateInfo[]){qinfo, qinfo_tf},
+        .queueCreateInfoCount = num_qinfos,
+        .pQueueCreateInfos = qinfos,
         .ppEnabledExtensionNames = exts,
         .enabledExtensionCount = num_exts,
     };
@@ -536,16 +553,20 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 
     VK(vkCreateDevice(vk->physd, &dinfo, MPVK_ALLOCATOR, &vk->dev));
 
-    vk_malloc_init(vk);
-
-    // Create the vk_cmdpools and all required queues / synchronization objects
-    if (!vk_cmdpool_init(vk, qinfo, qfs[idx], &vk->pool))
-        goto error;
-    if (use_transfer) {
-        MP_VERBOSE(vk, "Using async transfer (QF %d)\n", idx_tf);
-        if (!vk_cmdpool_init(vk, qinfo_tf, qfs[idx_tf], &vk->pool_transfer))
+    // Create the command pools and memory allocator
+    for (int i = 0; i < num_qinfos; i++) {
+        int qf = qinfos[i].queueFamilyIndex;
+        struct vk_cmdpool *pool = vk_cmdpool_create(vk, qinfos[i], qfs[qf]);
+        if (!pool)
             goto error;
+        MP_TARRAY_APPEND(NULL, vk->pools, vk->num_pools, pool);
     }
+
+    vk->pool_graphics = vk->pools[idx_gfx];
+    vk->pool_compute  = idx_comp >= 0 ? vk->pools[idx_comp] : NULL;
+    vk->pool_transfer = idx_tf   >= 0 ? vk->pools[idx_tf] : NULL;
+
+    vk_malloc_init(vk);
 
     talloc_free(tmp);
     return true;
@@ -603,8 +624,8 @@ void mpvk_pool_wait_idle(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 
 void mpvk_dev_wait_idle(struct mpvk_ctx *vk)
 {
-    mpvk_pool_wait_idle(vk, vk->pool_transfer);
-    mpvk_pool_wait_idle(vk, vk->pool);
+    for (int i = 0; i < vk->num_pools; i++)
+        mpvk_pool_wait_idle(vk, vk->pools[i]);
 }
 
 void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
@@ -633,8 +654,8 @@ void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
 
 void mpvk_dev_poll_cmds(struct mpvk_ctx *vk, uint32_t timeout)
 {
-    mpvk_pool_poll_cmds(vk, vk->pool_transfer, timeout);
-    mpvk_pool_poll_cmds(vk, vk->pool, timeout);
+    for (int i = 0; i < vk->num_pools; i++)
+        mpvk_pool_poll_cmds(vk, vk->pools[i], timeout);
 }
 
 void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)
