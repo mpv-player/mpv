@@ -19,6 +19,9 @@
 #if HAVE_X11
 #define VK_USE_PLATFORM_XLIB_KHR
 #endif
+#if HAVE_WIN32_DESKTOP
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 
 #include <vulkan/vulkan.h>
 
