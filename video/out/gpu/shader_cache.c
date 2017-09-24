@@ -720,7 +720,6 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             assert(sc->ra->caps & RA_CAP_GLOBAL_UNIFORM);
             // fall through
         case RA_VARTYPE_TEX:
-        case RA_VARTYPE_IMG_W:
             // Vulkan requires explicitly assigning the bindings in the shader
             // source. For OpenGL it's optional, but requires higher GL version
             // so we don't do it (and instead have ra_gl update the bindings
@@ -737,6 +736,28 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             ADD(dst, "layout(std430, binding=%d) buffer %s { %s };\n",
                 u->input.binding, u->input.name, u->buffer_format);
             break;
+        case RA_VARTYPE_IMG_W: {
+            // For better compatibility, we have to explicitly label the
+            // type of data we will be reading/writing to this image. For
+            // simplicity, just pick 32-bit float with however many components.
+            static const char *fmt_mapping[] = {
+                [1] = "r32f",
+                [2] = "rg32f",
+                [3] = "rgba32f", // rgb32f doesn't exist
+                [4] = "rgba32f",
+            };
+
+            const struct ra_format *format = u->v.tex->params.format;
+            assert(format->num_components < MP_ARRAY_SIZE(fmt_mapping));
+            const char *fmt = fmt_mapping[format->num_components];
+
+            if (sc->ra->glsl_vulkan) {
+                ADD(dst, "layout(binding=%d, %s) ", u->input.binding, fmt);
+            } else {
+                ADD(dst, "layout(%s) ", fmt);
+            }
+            ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);
+        }
         }
     }
 }
