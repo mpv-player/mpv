@@ -4201,6 +4201,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
     parallelism between frames (when using a ``--swapchain-depth`` higher than
     1), but it can also slow things down. (Default: 1)
 
+    NOTE: Setting the queue count to a value higher than 1 may disable
+    timer queries, because the values are only reliable when using a single
+    graphics queue. This only affects the ``vo-passes`` property.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan``. The possible choices

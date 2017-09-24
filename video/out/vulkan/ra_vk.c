@@ -1675,6 +1675,11 @@ static ra_timer *vk_timer_create(struct ra *ra)
 {
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
+    // Timers are completely unrealiable in this scenario, so just return
+    // nothing instead of delivering bogus
+    if (vk->pool_graphics->qcount > 1)
+        return NULL;
+
     struct vk_timer *timer = talloc_zero(NULL, struct vk_timer);
 
     struct VkQueryPoolCreateInfo qinfo = {
