@@ -1210,6 +1210,11 @@ static void finish_pass_tex(struct gl_video *p, struct ra_tex **dst_tex,
         return;
     }
 
+    // If RA_CAP_PARALLEL_COMPUTE is set, try to prefer compute shaders
+    // over fragment shaders wherever possible.
+    if (!p->pass_compute.active && (p->ra->caps & RA_CAP_PARALLEL_COMPUTE))
+        pass_is_compute(p, 16, 16);
+
     if (p->pass_compute.active) {
         gl_sc_uniform_image2D_wo(p->sc, "out_image", *dst_tex);
         if (!p->pass_compute.directly_writes)

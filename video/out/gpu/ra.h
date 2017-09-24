@@ -52,6 +52,7 @@ enum {
     RA_CAP_NESTED_ARRAY   = 1 << 7, // supports nested arrays
     RA_CAP_SHARED_BINDING = 1 << 8, // sampler/image/buffer namespaces are disjoint
     RA_CAP_GLOBAL_UNIFORM = 1 << 9, // supports using "naked" uniforms (not UBO)
+    RA_CAP_PARALLEL_COMPUTE  = 1 << 10, // supports parallel compute shaders
 };
 
 enum ra_ctype {
