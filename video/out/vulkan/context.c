@@ -245,7 +245,8 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
         struct priv *p = ctx->swapchain->priv;
         struct mpvk_ctx *vk = p->vk;
 
-        mpvk_dev_wait_cmds(vk, UINT64_MAX);
+        mpvk_flush_commands(vk);
+        mpvk_poll_commands(vk, UINT64_MAX);
 
         for (int i = 0; i < p->num_images; i++)
             ra_tex_free(ctx->ra, &p->images[i]);
@@ -355,7 +356,7 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
     // more than one swapchain already active, so we need to flush any pending
     // asynchronous swapchain release operations that may be ongoing.
     while (p->old_swapchain)
-        mpvk_dev_wait_cmds(vk, 100000); // 100μs
+        mpvk_poll_commands(vk, 100000); // 100μs
 
     VkSwapchainCreateInfoKHR sinfo = p->protoInfo;
     sinfo.imageExtent  = (VkExtent2D){ w, h };
@@ -501,14 +502,14 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     vk_cmd_callback(cmd, (vk_cb) present_cb, p, NULL);
 
     vk_cmd_queue(vk, cmd);
-    if (!vk_flush_commands(vk))
+    if (!mpvk_flush_commands(vk))
         goto error;
 
     // Older nvidia drivers can spontaneously combust when submitting to the
     // same queue as we're rendering from, in a multi-queue scenario. Safest
     // option is to flush the commands first and then submit to the next queue.
     // We can drop this hack in the future, I suppose.
-    struct vk_cmdpool *pool = vk->pool;
+    struct vk_cmdpool *pool = vk->pool_graphics;
     VkQueue queue = pool->queues[pool->idx_queues];
 
     VkPresentInfoKHR pinfo = {
@@ -533,7 +534,7 @@ static void swap_buffers(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     while (p->frames_in_flight >= sw->ctx->opts.swapchain_depth)
-        mpvk_dev_wait_cmds(p->vk, 100000); // 100μs
+        mpvk_poll_commands(p->vk, 100000); // 100μs
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {

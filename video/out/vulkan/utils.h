@@ -66,9 +66,13 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts);
 // UINT64_MAX effectively means waiting until the pool/device is idle. The
 // timeout may also be passed as 0, in which case this function will not block,
 // but only poll for completed commands.
-void mpvk_pool_wait_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
-                         uint64_t timeout);
-void mpvk_dev_wait_cmds(struct mpvk_ctx *vk, uint64_t timeout);
+void mpvk_poll_commands(struct mpvk_ctx *vk, uint64_t timeout);
+
+// Flush all currently queued commands. Call this once per frame, after
+// submitting all of the command buffers for that frame. Calling this more
+// often than that is possible but bad for performance.
+// Returns whether successful. Failed commands will be implicitly dropped.
+bool mpvk_flush_commands(struct mpvk_ctx *vk);
 
 // Since lots of vulkan operations need to be done lazily once the affected
 // resources are no longer in use, provide an abstraction for tracking these.
@@ -158,13 +162,10 @@ struct vk_cmdpool {
     VkQueue *queues;
     int num_queues;
     int idx_queues;
-    // Command buffers associated with this queue
-    struct vk_cmd **cmds_available; // available for re-recording
-    struct vk_cmd **cmds_queued;    // recorded but not yet submitted
-    struct vk_cmd **cmds_pending;   // submitted but not completed
-    int num_cmds_available;
-    int num_cmds_queued;
-    int num_cmds_pending;
+    // Command buffers associated with this queue. These are available for
+    // re-recording
+    struct vk_cmd **cmds;
+    int num_cmds;
 };
 
 // Fetch a command buffer from a command pool and begin recording to it.
@@ -174,12 +175,6 @@ struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
 // Finish recording a command buffer and queue it for execution. This function
 // takes over ownership of *cmd, i.e. the caller should not touch it again.
 void vk_cmd_queue(struct mpvk_ctx *vk, struct vk_cmd *cmd);
-
-// Flush all currently queued commands. Call this once per frame, after
-// submitting all of the command buffers for that frame. Calling this more
-// often than that is possible but bad for performance.
-// Returns whether successful. Failed commands will be implicitly dropped.
-bool vk_flush_commands(struct mpvk_ctx *vk);
 
 // Predefined structs for a simple non-layered, non-mipped image
 extern const VkImageSubresourceRange vk_range;

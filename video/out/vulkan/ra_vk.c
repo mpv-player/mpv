@@ -6,6 +6,12 @@
 
 static struct ra_fns ra_fns_vk;
 
+enum queue_type {
+    GRAPHICS,
+    COMPUTE,
+    TRANSFER,
+};
+
 // For ra.priv
 struct ra_vk {
     struct mpvk_ctx *vk;
@@ -22,18 +28,6 @@ struct mpvk_ctx *ra_vk_get(struct ra *ra)
     return p->vk;
 }
 
-// Returns a command buffer, or NULL on error
-static struct vk_cmd *vk_require_cmd(struct ra *ra)
-{
-    struct ra_vk *p = ra->priv;
-    struct mpvk_ctx *vk = ra_vk_get(ra);
-
-    if (!p->cmd)
-        p->cmd = vk_cmd_begin(vk, vk->pool);
-
-    return p->cmd;
-}
-
 static void vk_submit(struct ra *ra)
 {
     struct ra_vk *p = ra->priv;
@@ -45,22 +39,46 @@ static void vk_submit(struct ra *ra)
     }
 }
 
-// The callback's *priv will always be set to `ra`
-static void vk_callback(struct ra *ra, vk_cb callback, void *arg)
+// Returns a command buffer, or NULL on error
+static struct vk_cmd *vk_require_cmd(struct ra *ra, enum queue_type type)
 {
     struct ra_vk *p = ra->priv;
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
-    if (p->cmd) {
-        vk_cmd_callback(p->cmd, callback, ra, arg);
-    } else {
-        vk_dev_callback(vk, callback, ra, arg);
+    struct vk_cmdpool *pool;
+    switch (type) {
+    case GRAPHICS: pool = vk->pool_graphics; break;
+    case COMPUTE:  pool = vk->pool_compute;  break;
+
+    // GRAPHICS and COMPUTE also imply TRANSFER capability (vulkan spec)
+    case TRANSFER:
+        pool = vk->pool_transfer;
+        if (!pool)
+            pool = vk->pool_compute;
+        if (!pool)
+            pool = vk->pool_graphics;
+        break;
+    default: abort();
     }
+
+    assert(pool);
+    if (p->cmd && p->cmd->pool == pool)
+        return p->cmd;
+
+    vk_submit(ra);
+    p->cmd = vk_cmd_begin(vk, pool);
+    return p->cmd;
 }
 
 #define MAKE_LAZY_DESTRUCTOR(fun, argtype)                  \
     static void fun##_lazy(struct ra *ra, argtype *arg) {   \
-        vk_callback(ra, (vk_cb) fun, arg);                  \
+        struct ra_vk *p = ra->priv;                         \
+        struct mpvk_ctx *vk = ra_vk_get(ra);                \
+        if (p->cmd) {                                       \
+            vk_cmd_callback(p->cmd, (vk_cb) fun, ra, arg);  \
+        } else {                                            \
+            vk_dev_callback(vk, (vk_cb) fun, ra, arg);      \
+        }                                                   \
     }
 
 static void vk_destroy_ra(struct ra *ra)
@@ -69,8 +87,8 @@ static void vk_destroy_ra(struct ra *ra)
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
     vk_submit(ra);
-    vk_flush_commands(vk);
-    mpvk_dev_wait_cmds(vk, UINT64_MAX);
+    mpvk_flush_commands(vk);
+    mpvk_poll_commands(vk, UINT64_MAX);
     ra_tex_free(ra, &p->clear_tex);
 
     talloc_free(ra);
@@ -190,7 +208,7 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     ra->max_shmem = vk->limits.maxComputeSharedMemorySize;
     ra->max_pushc_size = vk->limits.maxPushConstantsSize;
 
-    if (vk->pool->props.queueFlags & VK_QUEUE_COMPUTE_BIT)
+    if (vk->pool_compute)
         ra->caps |= RA_CAP_COMPUTE;
 
     if (!vk_setup_formats(ra))
@@ -280,6 +298,7 @@ static VkResult vk_create_render_pass(VkDevice dev, const struct ra_format *fmt,
 // For ra_tex.priv
 struct ra_tex_vk {
     bool external_img;
+    enum queue_type upload_queue;
     VkImageType type;
     VkImage img;
     struct vk_memslice mem;
@@ -480,6 +499,7 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
     tex->params.initial_data = NULL;
 
     struct ra_tex_vk *tex_vk = tex->priv = talloc_zero(tex, struct ra_tex_vk);
+    tex_vk->upload_queue = GRAPHICS;
 
     const struct vk_format *fmt = params->format->priv;
     switch (params->dimensions) {
@@ -500,6 +520,10 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
         usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     if (params->host_mutable || params->blit_dst || params->initial_data)
         usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+    // Always use the transfer pool if available, for efficiency
+    if (params->host_mutable && vk->pool_transfer)
+        tex_vk->upload_queue = TRANSFER;
 
     // Double-check image usage support and fail immediately if invalid
     VkImageFormatProperties iprop;
@@ -528,6 +552,14 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
         return NULL;
     }
 
+    // FIXME: Since we can't keep track of queue family ownership properly,
+    // and we don't know in advance what types of queue families this image
+    // will belong to, we're forced to share all of our images between all
+    // command pools.
+    uint32_t qfs[3] = {0};
+    for (int i = 0; i < vk->num_pools; i++)
+        qfs[i] = vk->pools[i]->qf;
+
     VkImageCreateInfo iinfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType = tex_vk->type,
@@ -539,9 +571,10 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
         .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = usage,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 1,
-        .pQueueFamilyIndices = &vk->pool->qf,
+        .sharingMode = vk->num_pools > 1 ? VK_SHARING_MODE_CONCURRENT
+                                         : VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = vk->num_pools,
+        .pQueueFamilyIndices = qfs,
     };
 
     VK(vkCreateImage(vk->dev, &iinfo, MPVK_ALLOCATOR, &tex_vk->img));
@@ -632,6 +665,7 @@ struct ra_buf_vk {
     struct vk_bufslice slice;
     int refcount; // 1 = object allocated but not in use, > 1 = in use
     bool needsflush;
+    enum queue_type update_queue;
     // "current" metadata, can change during course of execution
     VkPipelineStageFlags current_stage;
     VkAccessFlags current_access;
@@ -700,7 +734,7 @@ static void vk_buf_update(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
         memcpy((void *)addr, data, size);
         buf_vk->needsflush = true;
     } else {
-        struct vk_cmd *cmd = vk_require_cmd(ra);
+        struct vk_cmd *cmd = vk_require_cmd(ra, buf_vk->update_queue);
         if (!cmd) {
             MP_ERR(ra, "Failed updating buffer!\n");
             return;
@@ -736,6 +770,9 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
     case RA_BUF_TYPE_TEX_UPLOAD:
         bufFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         memFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        // Use TRANSFER-style updates for large enough buffers for efficiency
+        if (params->size > 1024*1024) // 1 MB
+            buf_vk->update_queue = TRANSFER;
         break;
     case RA_BUF_TYPE_UNIFORM:
         bufFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
@@ -746,6 +783,7 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
         bufFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         memFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         align = MP_ALIGN_UP(align, vk->limits.minStorageBufferOffsetAlignment);
+        buf_vk->update_queue = COMPUTE;
         break;
     case RA_BUF_TYPE_VERTEX:
         bufFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -832,7 +870,7 @@ static bool vk_tex_upload(struct ra *ra,
     uint64_t size = region.bufferRowLength * region.bufferImageHeight *
                     region.imageExtent.depth;
 
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    struct vk_cmd *cmd = vk_require_cmd(ra, tex_vk->upload_queue);
     if (!cmd)
         goto error;
 
@@ -1478,7 +1516,12 @@ static void vk_renderpass_run(struct ra *ra,
     struct ra_renderpass *pass = params->pass;
     struct ra_renderpass_vk *pass_vk = pass->priv;
 
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    static const enum queue_type types[] = {
+        [RA_RENDERPASS_TYPE_RASTER]  = GRAPHICS,
+        [RA_RENDERPASS_TYPE_COMPUTE] = COMPUTE,
+    };
+
+    struct vk_cmd *cmd = vk_require_cmd(ra, types[pass->params.type]);
     if (!cmd)
         goto error;
 
@@ -1603,7 +1646,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     struct ra_tex_vk *src_vk = src->priv;
     struct ra_tex_vk *dst_vk = dst->priv;
 
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
     if (!cmd)
         return;
 
@@ -1643,7 +1686,7 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
     struct ra_tex_vk *tex_vk = tex->priv;
     assert(tex->params.blit_dst);
 
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
     if (!cmd)
         return;
 
@@ -1726,7 +1769,7 @@ error:
 static void vk_timer_record(struct ra *ra, VkQueryPool pool, int index,
                             VkPipelineStageFlags stage)
 {
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
     if (!cmd)
         return;
 
@@ -1795,7 +1838,7 @@ static struct ra_fns ra_fns_vk = {
 struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex)
 {
     struct ra_vk *p = ra->priv;
-    struct vk_cmd *cmd = vk_require_cmd(ra);
+    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
     if (!cmd)
         return NULL;
 

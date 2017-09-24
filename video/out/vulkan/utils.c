@@ -139,7 +139,15 @@ void mpvk_uninit(struct mpvk_ctx *vk)
         return;
 
     if (vk->dev) {
-        vk_cmdpool_destroy(vk, vk->pool);
+        mpvk_flush_commands(vk);
+        mpvk_poll_commands(vk, UINT64_MAX);
+        assert(vk->num_cmds_queued == 0);
+        assert(vk->num_cmds_pending == 0);
+        talloc_free(vk->cmds_queued);
+        talloc_free(vk->cmds_pending);
+        for (int i = 0; i < vk->num_pools; i++)
+            vk_cmdpool_destroy(vk, vk->pools[i]);
+        talloc_free(vk->pools);
         for (int i = 0; i < vk->num_signals; i++)
             vk_signal_destroy(vk, &vk->signals[i]);
         talloc_free(vk->signals);
@@ -377,6 +385,53 @@ error:
     return false;
 }
 
+// Find the most specialized queue supported a combination of flags. In cases
+// where there are multiple queue families at the same specialization level,
+// this finds the one with the most queues. Returns -1 if no queue was found.
+static int find_qf(VkQueueFamilyProperties *qfs, int qfnum, VkQueueFlags flags)
+{
+    int idx = -1;
+    for (int i = 0; i < qfnum; i++) {
+        if (!(qfs[i].queueFlags & flags))
+            continue;
+
+        // QF is more specialized
+        if (idx < 0 || qfs[i].queueFlags < qfs[idx].queueFlags)
+            idx = i;
+
+        // QF has more queues (at the same specialization level)
+        if (qfs[i].queueFlags == qfs[idx].queueFlags &&
+            qfs[i].queueCount > qfs[idx].queueCount)
+            idx = i;
+    }
+
+    return idx;
+}
+
+static void add_qinfo(void *tactx, VkDeviceQueueCreateInfo **qinfos,
+                      int *num_qinfos, VkQueueFamilyProperties *qfs, int idx,
+                      int qcount)
+{
+    if (idx < 0)
+        return;
+
+    // Check to see if we've already added this queue family
+    for (int i = 0; i < *num_qinfos; i++) {
+        if ((*qinfos)[i].queueFamilyIndex == idx)
+            return;
+    }
+
+    float *priorities = talloc_zero_array(tactx, float, qcount);
+    VkDeviceQueueCreateInfo qinfo = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .queueFamilyIndex = idx,
+        .queueCount = MPMIN(qcount, qfs[idx].queueCount),
+        .pQueuePriorities = priorities,
+    };
+
+    MP_TARRAY_APPEND(tactx, *qinfos, *num_qinfos, qinfo);
+}
+
 bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 {
     assert(vk->physd);
@@ -395,45 +450,34 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
                    (unsigned)qfs[i].queueFlags, (int)qfs[i].queueCount);
     }
 
-    // For most of our rendering operations, we want to use one "primary" pool,
-    // so just pick the queue family with the most features.
-    int idx = -1;
-    for (int i = 0; i < qfnum; i++) {
-        if (!(qfs[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
-            continue;
-
-        // QF supports more features
-        if (idx < 0 || qfs[i].queueFlags > qfs[idx].queueFlags)
-            idx = i;
-
-        // QF supports more queues (at the same specialization level)
-        if (qfs[i].queueFlags == qfs[idx].queueFlags &&
-            qfs[i].queueCount > qfs[idx].queueCount)
-        {
-            idx = i;
-        }
-    }
+    int idx_gfx  = find_qf(qfs, qfnum, VK_QUEUE_GRAPHICS_BIT),
+        idx_comp = find_qf(qfs, qfnum, VK_QUEUE_COMPUTE_BIT),
+        idx_tf   = find_qf(qfs, qfnum, VK_QUEUE_TRANSFER_BIT);
 
     // Vulkan requires at least one GRAPHICS queue, so if this fails something
     // is horribly wrong.
-    assert(idx >= 0);
+    assert(idx_gfx >= 0);
+    MP_VERBOSE(vk, "Using graphics queue (QF %d)\n", idx_gfx);
 
     // Ensure we can actually present to the surface using this queue
     VkBool32 sup;
-    VK(vkGetPhysicalDeviceSurfaceSupportKHR(vk->physd, idx, vk->surf, &sup));
+    VK(vkGetPhysicalDeviceSurfaceSupportKHR(vk->physd, idx_gfx, vk->surf, &sup));
     if (!sup) {
         MP_ERR(vk, "Queue family does not support surface presentation!\n");
         goto error;
     }
 
+    if (idx_tf >= 0 && idx_tf != idx_gfx)
+        MP_VERBOSE(vk, "Using async transfer (QF %d)\n", idx_tf);
+    if (idx_comp >= 0 && idx_comp != idx_gfx)
+        MP_VERBOSE(vk, "Using async compute (QF %d)\n", idx_comp);
+
     // Now that we know which QFs we want, we can create the logical device
-    float *priorities = talloc_zero_array(tmp, float, opts.queue_count);
-    VkDeviceQueueCreateInfo qinfo = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        .queueFamilyIndex = idx,
-        .queueCount = MPMIN(qfs[idx].queueCount, opts.queue_count),
-        .pQueuePriorities = priorities,
-    };
+    VkDeviceQueueCreateInfo *qinfos = NULL;
+    int num_qinfos = 0;
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_gfx, opts.queue_count);
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_comp, opts.queue_count);
+    add_qinfo(tmp, &qinfos, &num_qinfos, qfs, idx_tf, opts.queue_count);
 
     const char **exts = NULL;
     int num_exts = 0;
@@ -443,8 +487,8 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 
     VkDeviceCreateInfo dinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .queueCreateInfoCount = 1,
-        .pQueueCreateInfos = &qinfo,
+        .pQueueCreateInfos = qinfos,
+        .queueCreateInfoCount = num_qinfos,
         .ppEnabledExtensionNames = exts,
         .enabledExtensionCount = num_exts,
     };
@@ -455,12 +499,20 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 
     VK(vkCreateDevice(vk->physd, &dinfo, MPVK_ALLOCATOR, &vk->dev));
 
-    vk_malloc_init(vk);
+    // Create the command pools and memory allocator
+    for (int i = 0; i < num_qinfos; i++) {
+        int qf = qinfos[i].queueFamilyIndex;
+        struct vk_cmdpool *pool = vk_cmdpool_create(vk, qinfos[i], qfs[qf]);
+        if (!pool)
+            goto error;
+        MP_TARRAY_APPEND(NULL, vk->pools, vk->num_pools, pool);
+    }
 
-    // Create the command pool(s)
-    vk->pool = vk_cmdpool_create(vk, qinfo, qfs[idx]);
-    if (!vk->pool)
-        goto error;
+    vk->pool_graphics = vk->pools[idx_gfx];
+    vk->pool_compute  = idx_comp >= 0 ? vk->pools[idx_comp] : NULL;
+    vk->pool_transfer = idx_tf   >= 0 ? vk->pools[idx_tf] : NULL;
+
+    vk_malloc_init(vk);
 
     talloc_free(tmp);
     return true;
@@ -563,10 +615,8 @@ static void vk_cmdpool_destroy(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
     if (!pool)
         return;
 
-    for (int i = 0; i < pool->num_cmds_available; i++)
-        vk_cmd_destroy(vk, pool->cmds_available[i]);
-    for (int i = 0; i < pool->num_cmds_pending; i++)
-        vk_cmd_destroy(vk, pool->cmds_pending[i]);
+    for (int i = 0; i < pool->num_cmds; i++)
+        vk_cmd_destroy(vk, pool->cmds[i]);
 
     vkDestroyCommandPool(vk->dev, pool->pool, MPVK_ALLOCATOR);
     talloc_free(pool);
@@ -603,26 +653,67 @@ error:
     return NULL;
 }
 
-void mpvk_pool_wait_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
-                         uint64_t timeout)
+void mpvk_poll_commands(struct mpvk_ctx *vk, uint64_t timeout)
 {
-    if (!pool)
-        return;
-
-    while (pool->num_cmds_pending > 0) {
-        struct vk_cmd *cmd = pool->cmds_pending[0];
+    while (vk->num_cmds_pending > 0) {
+        struct vk_cmd *cmd = vk->cmds_pending[0];
+        struct vk_cmdpool *pool = cmd->pool;
         VkResult res = vk_cmd_poll(vk, cmd, timeout);
         if (res == VK_TIMEOUT)
             break;
         vk_cmd_reset(vk, cmd);
-        MP_TARRAY_REMOVE_AT(pool->cmds_pending, pool->num_cmds_pending, 0);
-        MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
+        MP_TARRAY_REMOVE_AT(vk->cmds_pending, vk->num_cmds_pending, 0);
+        MP_TARRAY_APPEND(pool, pool->cmds, pool->num_cmds, cmd);
     }
 }
 
-void mpvk_dev_wait_cmds(struct mpvk_ctx *vk, uint64_t timeout)
+bool mpvk_flush_commands(struct mpvk_ctx *vk)
 {
-    mpvk_pool_wait_cmds(vk, vk->pool, timeout);
+    bool ret = true;
+
+    for (int i = 0; i < vk->num_cmds_queued; i++) {
+        struct vk_cmd *cmd = vk->cmds_queued[i];
+        struct vk_cmdpool *pool = cmd->pool;
+
+        VkSubmitInfo sinfo = {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &cmd->buf,
+            .waitSemaphoreCount = cmd->num_deps,
+            .pWaitSemaphores = cmd->deps,
+            .pWaitDstStageMask = cmd->depstages,
+            .signalSemaphoreCount = cmd->num_sigs,
+            .pSignalSemaphores = cmd->sigs,
+        };
+
+        VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));
+        MP_TARRAY_APPEND(NULL, vk->cmds_pending, vk->num_cmds_pending, cmd);
+
+        if (mp_msg_test(vk->log, MSGL_TRACE)) {
+            MP_TRACE(vk, "Submitted command on queue %p (QF %d):\n",
+                     (void *)cmd->queue, pool->qf);
+            for (int n = 0; n < cmd->num_deps; n++)
+                MP_TRACE(vk, "    waits on semaphore %p\n", (void *)cmd->deps[n]);
+            for (int n = 0; n < cmd->num_sigs; n++)
+                MP_TRACE(vk, "    signals semaphore %p\n", (void *)cmd->sigs[n]);
+        }
+        continue;
+
+error:
+        vk_cmd_reset(vk, cmd);
+        MP_TARRAY_APPEND(pool, pool->cmds, pool->num_cmds, cmd);
+        ret = false;
+    }
+
+    vk->num_cmds_queued = 0;
+
+    // Rotate the queues to ensure good parallelism across frames
+    for (int i = 0; i < vk->num_pools; i++) {
+        struct vk_cmdpool *pool = vk->pools[i];
+        pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
+    }
+
+    return ret;
 }
 
 void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)
@@ -639,10 +730,10 @@ struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 {
     // garbage collect the cmdpool first, to increase the chances of getting
     // an already-available command buffer
-    mpvk_pool_wait_cmds(vk, pool, 0);
+    mpvk_poll_commands(vk, 0);
 
     struct vk_cmd *cmd = NULL;
-    if (MP_TARRAY_POP(pool->cmds_available, pool->num_cmds_available, &cmd))
+    if (MP_TARRAY_POP(pool->cmds, pool->num_cmds, &cmd))
         goto done;
 
     // No free command buffers => allocate another one
@@ -675,58 +766,13 @@ void vk_cmd_queue(struct mpvk_ctx *vk, struct vk_cmd *cmd)
     VK(vkEndCommandBuffer(cmd->buf));
 
     VK(vkResetFences(vk->dev, 1, &cmd->fence));
-    MP_TARRAY_APPEND(pool, pool->cmds_queued, pool->num_cmds_queued, cmd);
+    MP_TARRAY_APPEND(NULL, vk->cmds_queued, vk->num_cmds_queued, cmd);
     vk->last_cmd = cmd;
     return;
 
 error:
     vk_cmd_reset(vk, cmd);
-    MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
-}
-
-bool vk_flush_commands(struct mpvk_ctx *vk)
-{
-    bool ret = true;
-
-    struct vk_cmdpool *pool = vk->pool;
-    for (int i = 0; i < pool->num_cmds_queued; i++) {
-        struct vk_cmd *cmd = pool->cmds_queued[i];
-
-        VkSubmitInfo sinfo = {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &cmd->buf,
-            .waitSemaphoreCount = cmd->num_deps,
-            .pWaitSemaphores = cmd->deps,
-            .pWaitDstStageMask = cmd->depstages,
-            .signalSemaphoreCount = cmd->num_sigs,
-            .pSignalSemaphores = cmd->sigs,
-        };
-
-        VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));
-        MP_TARRAY_APPEND(pool, pool->cmds_pending, pool->num_cmds_pending, cmd);
-
-        if (mp_msg_test(vk->log, MSGL_TRACE)) {
-            MP_TRACE(vk, "Submitted command on queue %p (QF %d):\n",
-                     (void *)cmd->queue, pool->qf);
-            for (int n = 0; n < cmd->num_deps; n++)
-                MP_TRACE(vk, "    waits on semaphore %p\n", (void *)cmd->deps[n]);
-            for (int n = 0; n < cmd->num_sigs; n++)
-                MP_TRACE(vk, "    signals semaphore %p\n", (void *)cmd->sigs[n]);
-        }
-        continue;
-
-error:
-        vk_cmd_reset(vk, cmd);
-        MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
-        ret = false;
-    }
-
-    pool->num_cmds_queued = 0;
-
-    // Rotate the queues to ensure good parallelism across frames
-    pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
-    return ret;
+    MP_TARRAY_APPEND(pool, pool->cmds, pool->num_cmds, cmd);
 }
 
 void vk_signal_destroy(struct mpvk_ctx *vk, struct vk_signal **sig)
@@ -762,10 +808,16 @@ struct vk_signal *vk_cmd_signal(struct mpvk_ctx *vk, struct vk_cmd *cmd,
     VK(vkCreateEvent(vk->dev, &einfo, MPVK_ALLOCATOR, &sig->event));
 
 done:
-    // Signal both the semaphore and the event. (We will only end up using one)
+    // Signal both the semaphore and the event if possible. (We will only
+    // end up using one or the other)
     vk_cmd_sig(cmd, sig->semaphore);
-    vkCmdSetEvent(cmd->buf, sig->event, stage);
-    sig->event_source = cmd->queue;
+
+    VkQueueFlags req = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+    if (cmd->pool->props.queueFlags & req) {
+        vkCmdSetEvent(cmd->buf, sig->event, stage);
+        sig->event_source = cmd->queue;
+    }
+
     return sig;
 
 error:
@@ -787,14 +839,14 @@ static bool unsignal_cmd(struct vk_cmd *cmd, VkSemaphore sem)
 
 // Attempts to remove a queued signal operation. Returns true if sucessful,
 // i.e. the signal could be removed before it ever got fired.
-static bool unsignal(struct vk_cmd *cmd, VkSemaphore sem)
+static bool unsignal(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore sem)
 {
     if (unsignal_cmd(cmd, sem))
         return true;
 
     // Attempt to remove it from any queued commands
-    for (int i = 0; i < cmd->pool->num_cmds_queued; i++) {
-        if (unsignal_cmd(cmd->pool->cmds_queued[i], sem))
+    for (int i = 0; i < vk->num_cmds_queued; i++) {
+        if (unsignal_cmd(vk->cmds_queued[i], sem))
             return true;
     }
 
@@ -806,7 +858,9 @@ static void release_signal(struct mpvk_ctx *vk, struct vk_signal *sig)
     // The semaphore never needs to be recreated, because it's either
     // unsignaled while still queued, or unsignaled as a result of a device
     // wait. But the event *may* need to be reset, so just always reset it.
-    vkResetEvent(vk->dev, sig->event);
+    if (sig->event_source)
+        vkResetEvent(vk->dev, sig->event);
+    sig->event_source = NULL;
     MP_TARRAY_APPEND(NULL, vk->signals, vk->num_signals, sig);
 }
 
@@ -819,7 +873,7 @@ void vk_cmd_wait(struct mpvk_ctx *vk, struct vk_cmd *cmd,
         return;
 
     if (out_event && sig->event && sig->event_source == cmd->queue &&
-        unsignal(cmd, sig->semaphore))
+        unsignal(vk, cmd, sig->semaphore))
     {
         // If we can remove the semaphore signal operation from the history and
         // pretend it never happened, then we get to use the VkEvent. This also
