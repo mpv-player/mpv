@@ -48,10 +48,23 @@ struct mpvk_ctx {
     VkSurfaceKHR surf;
     VkSurfaceFormatKHR surf_format; // picked at surface initialization time
 
-    struct vk_malloc *alloc; // memory allocator for this device
-    struct vk_cmdpool *pool; // primary command pool for this device
-    struct vk_cmd *last_cmd; // most recently submitted (pending) command
+    struct vk_malloc *alloc;      // memory allocator for this device
     struct spirv_compiler *spirv; // GLSL -> SPIR-V compiler
+    struct vk_cmdpool **pools;    // command pools (one per queue family)
+    int num_pools;
+    struct vk_cmd *last_cmd;      // most recently submitted command
+
+    // Queued/pending commands. These are shared for the entire mpvk_ctx to
+    // ensure submission and callbacks are FIFO
+    struct vk_cmd **cmds_queued;  // recorded but not yet submitted
+    struct vk_cmd **cmds_pending; // submitted but not completed
+    int num_cmds_queued;
+    int num_cmds_pending;
+
+    // Pointers into *pools
+    struct vk_cmdpool *pool_graphics; // required
+    struct vk_cmdpool *pool_compute;  // optional
+    struct vk_cmdpool *pool_transfer; // optional
 
     // Common pool of signals, to avoid having to re-create these objects often
     struct vk_signal **signals;

@@ -4267,7 +4267,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Controls the number of VkQueues used for rendering (limited by how many
     your device supports). In theory, using more queues could enable some
     parallelism between frames (when using a ``--swapchain-depth`` higher than
-    1). (Default: 1)
+    1), but it can also slow things down on hardware where there's no true
+    parallelism between queues. (Default: 1)
 
 ``--d3d11-warp=<yes|no|auto>``
     Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
