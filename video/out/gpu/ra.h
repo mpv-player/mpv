@@ -53,6 +53,7 @@ enum {
     RA_CAP_GLOBAL_UNIFORM = 1 << 8, // supports using "naked" uniforms (not UBO)
     RA_CAP_GATHER         = 1 << 9, // supports textureGather in GLSL
     RA_CAP_FRAGCOORD      = 1 << 10, // supports reading from gl_FragCoord
+    RA_CAP_PARALLEL_COMPUTE  = 1 << 11, // supports parallel compute shaders
 };
 
 enum ra_ctype {
