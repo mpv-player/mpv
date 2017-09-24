@@ -147,6 +147,10 @@ struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
 // Returns whether successful.
 bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd);
 
+// Rotate the queues for each vk_cmdpool. Call this once per frame to ensure
+// good parallelism between frames when using multiple queues
+void vk_cmd_cycle_queues(struct mpvk_ctx *vk);
+
 // Predefined structs for a simple non-layered, non-mipped image
 extern const VkImageSubresourceRange vk_range;
 extern const VkImageSubresourceLayers vk_layers;

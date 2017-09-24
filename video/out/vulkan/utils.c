@@ -725,8 +725,7 @@ bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd)
     VK(vkEndCommandBuffer(cmd->buf));
 
     struct vk_cmdpool *pool = cmd->pool;
-    VkQueue queue = pool->queues[pool->qindex++];
-    pool->qindex %= pool->qcount;
+    VkQueue queue = pool->queues[pool->qindex];
 
     VkSubmitInfo sinfo = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -752,6 +751,14 @@ bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 
 error:
     return false;
+}
+
+void vk_cmd_cycle_queues(struct mpvk_ctx *vk)
+{
+    for (int i = 0; i < vk->num_pools; i++) {
+        struct vk_cmdpool *pool = vk->pools[i];
+        pool->qindex = (pool->qindex + 1) % pool->qcount;
+    }
 }
 
 const VkImageSubresourceRange vk_range = {

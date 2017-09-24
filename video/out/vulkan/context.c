@@ -469,8 +469,12 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     if (!ra_vk_submit(ra, p->images[p->last_imgidx], done, &p->frames_in_flight))
         goto error;
 
+    // For some reason, nvidia absolutely shits itself when presenting from a
+    // full queue - so advance all of the cmdpool indices first and then do the
+    // present on an "empty" queue
+    vk_cmd_cycle_queues(vk);
     struct vk_cmdpool *pool = vk->pool_graphics;
-    VkQueue queue = pool->queues[pool->qindex]; // reuse
+    VkQueue queue = pool->queues[pool->qindex];
 
     VkPresentInfoKHR pinfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
