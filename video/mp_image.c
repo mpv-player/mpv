@@ -33,7 +33,6 @@
 #include "mp_image.h"
 #include "sws_utils.h"
 #include "fmt-conversion.h"
-#include "gpu_memcpy.h"
 
 #include "video/filter/vf.h"
 
@@ -476,37 +475,6 @@ static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
 void mp_image_copy(struct mp_image *dst, struct mp_image *src)
 {
     mp_image_copy_cb(dst, src, memcpy);
-}
-
-void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src)
-{
-#if HAVE_SSE4_INTRINSICS
-    if (av_get_cpu_flags() & AV_CPU_FLAG_SSE4) {
-        mp_image_copy_cb(dst, src, gpu_memcpy);
-        return;
-    }
-#endif
-    mp_image_copy(dst, src);
-}
-
-// Helper, only for outputting some log info.
-void mp_check_gpu_memcpy(struct mp_log *log, bool *once)
-{
-    if (once) {
-        if (*once)
-            return;
-        *once = true;
-    }
-
-    bool have_sse = false;
-#if HAVE_SSE4_INTRINSICS
-    have_sse = av_get_cpu_flags() & AV_CPU_FLAG_SSE4;
-#endif
-    if (have_sse) {
-        mp_verbose(log, "Using SSE4 memcpy\n");
-    } else {
-        mp_warn(log, "Using fallback memcpy (slow)\n");
-    }
 }
 
 static enum mp_csp mp_image_params_get_forced_csp(struct mp_image_params *params)
