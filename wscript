@@ -826,7 +826,7 @@ hwaccel_features = [
             '      ? 1 : -1]',
             use='libav'),
     }, {
-        'name': '--videotoolbox-hwaccel-new',
+        'name': 'videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel (new API)',
         'deps': 'gl-cocoa || ios-gl',
         'func': check_statement('libavcodec/version.h',
@@ -834,20 +834,6 @@ hwaccel_features = [
             '       LIBAVCODEC_VERSION_MICRO >= 100)'
             '      ? 1 : -1]',
             use='libav'),
-    }, {
-        'name': '--videotoolbox-hwaccel-old',
-        'desc': 'libavcodec videotoolbox hwaccel (old API)',
-        'deps': '(gl-cocoa || ios-gl) && !videotoolbox-hwaccel-new',
-        'func': compose_checks(
-            check_headers('VideoToolbox/VideoToolbox.h'),
-            check_statement('libavcodec/videotoolbox.h',
-                            'av_videotoolbox_alloc_context()',
-                            use='libav')),
-    }, {
-        'name': 'videotoolbox-hwaccel',
-        'desc': 'libavcodec videotoolbox hwaccel',
-        'deps': 'videotoolbox-hwaccel-new || videotoolbox-hwaccel-old',
-        'func': check_true,
     }, {
         'name': '--videotoolbox-gl',
         'desc': 'Videotoolbox with OpenGL',

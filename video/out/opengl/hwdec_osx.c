@@ -30,7 +30,6 @@
 
 #include "video/mp_image_pool.h"
 #include "video/out/gpu/hwdec.h"
-#include "video/vt.h"
 #include "ra_gl.h"
 
 struct priv_owner {
@@ -72,14 +71,11 @@ static int init(struct ra_hwdec *hw)
 
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_VIDEOTOOLBOX,
-        .download_image = mp_vt_download_image,
         .ctx = &p->hwctx,
     };
 
-#if HAVE_VIDEOTOOLBOX_HWACCEL_NEW
     av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
                            NULL, NULL, 0);
-#endif
 
     hwdec_devices_add(hw->devs, &p->hwctx);
 
