@@ -400,7 +400,7 @@ struct m_option {
 #define UPDATE_TERM             (1 << 7)  // terminal options
 #define UPDATE_DEINT            (1 << 8)  // --deinterlace
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
-#define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
+#define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl/stats
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides
 #define UPDATE_INPUT            (1 << 13) // mostly --input-* options
 #define UPDATE_AUDIO            (1 << 14) // --audio-channels etc.

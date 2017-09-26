@@ -580,6 +580,11 @@ Program Behavior
         - ``--ytdl-raw-options=username=user,password=pass``
         - ``--ytdl-raw-options=force-ipv6=``
 
+``--load-stats-overlay=<yes|no>``
+    Enable the builtin script that shows useful playback information on a key
+    binding (default: yes). By default, the ``i`` key is used (``I`` to make
+    the overlay permanent).
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but
