@@ -487,12 +487,6 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
-        'name': 'avutil-imgcpy-uc',
-        'desc': 'libavutil GPU memcpy for hardware decoding',
-        'func': check_statement('libavutil/imgutils.h',
-                                'av_image_copy_uc_from(0,0,0,0,0,0,0)',
-                                use='libav'),
-    }, {
         'name': 'avutil-content-light-level',
         'desc': 'libavutil content light level struct',
         'func': check_statement('libavutil/frame.h',
