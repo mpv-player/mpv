@@ -60,7 +60,7 @@ bool spirv_compiler_init(struct ra_ctx *ctx)
         if (!compilers[i])
             continue;
 
-        ctx->spirv = talloc_zero(NULL, struct spirv_compiler);
+        ctx->spirv = talloc_zero(ctx, struct spirv_compiler);
         ctx->spirv->log = ctx->log,
         ctx->spirv->fns = compilers[i];
 
