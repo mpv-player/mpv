@@ -593,7 +593,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             if (ctx->hwdec_dev->restore_device)
                 ctx->hwdec_dev->restore_device(ctx->hwdec_dev);
             if (!ctx->hwdec->set_hwframes) {
-#if HAVE_VDPAU_HWACCEL
+#if HAVE_VDPAU_HWACCEL || HAVE_CUDA_HWACCEL
                 avctx->hw_device_ctx = av_buffer_ref(ctx->hwdec_dev->av_device_ref);
 #else
                 goto error;
