@@ -256,8 +256,9 @@ static VkResult vk_create_render_pass(VkDevice dev, const struct ra_format *fmt,
             .loadOp = load_fbo ? VK_ATTACHMENT_LOAD_OP_LOAD
                                : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .initialLayout = load_fbo ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                                      : VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         },
         .subpassCount = 1,
         .pSubpasses = &(VkSubpassDescription) {
@@ -1463,9 +1464,13 @@ static void vk_renderpass_run(struct ra *ra,
         vkCmdBindVertexBuffers(cmd->buf, 0, 1, &buf_vk->slice.buf,
                                &buf_vk->slice.mem.offset);
 
-        tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, false);
+        if (pass->params.enable_blend) {
+            // Normally this transition is handled implicitly by the renderpass,
+            // but if we need to preserve the FBO we have to do it manually.
+            tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, false);
+        }
 
         VkViewport viewport = {
             .x = params->viewport.x0,
@@ -1492,6 +1497,11 @@ static void vk_renderpass_run(struct ra *ra,
         vkCmdBeginRenderPass(cmd->buf, &binfo, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdDraw(cmd->buf, params->vertex_count, 1, 0, 0);
         vkCmdEndRenderPass(cmd->buf);
+
+        // The renderPass implicitly transitions the texture to this layout
+        tex_vk->current_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        tex_vk->current_access = VK_ACCESS_SHADER_READ_BIT;
+        tex_vk->current_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         break;
     }
     default: abort();
