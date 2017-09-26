@@ -456,7 +456,7 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     MP_VERBOSE(vk, "Queue families supported by device:\n");
 
     for (int i = 0; i < qfnum; i++) {
-        MP_VERBOSE(vk, "QF %d: flags 0x%x num %d\n", i,
+        MP_VERBOSE(vk, "    QF %d: flags 0x%x num %d\n", i,
                    (unsigned)qfs[i].queueFlags, (int)qfs[i].queueCount);
     }
 
