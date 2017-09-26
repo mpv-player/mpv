@@ -290,16 +290,15 @@ struct ra_tex_vk {
     struct ra_buf_pool pbo;
     // "current" metadata, can change during the course of execution
     VkImageLayout current_layout;
-    VkPipelineStageFlagBits current_stage;
-    VkAccessFlagBits current_access;
+    VkPipelineStageFlags current_stage;
+    VkAccessFlags current_access;
 };
 
 // Small helper to ease image barrier creation. if `discard` is set, the contents
 // of the image will be undefined after the barrier
 static void tex_barrier(struct vk_cmd *cmd, struct ra_tex_vk *tex_vk,
-                        VkPipelineStageFlagBits newStage,
-                        VkAccessFlagBits newAccess, VkImageLayout newLayout,
-                        bool discard)
+                        VkPipelineStageFlags newStage, VkAccessFlags newAccess,
+                        VkImageLayout newLayout, bool discard)
 {
     VkImageMemoryBarrier imgBarrier = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -511,7 +510,7 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
 
     VK(vkCreateImage(vk->dev, &iinfo, MPVK_ALLOCATOR, &tex_vk->img));
 
-    VkMemoryPropertyFlagBits memFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    VkMemoryPropertyFlags memFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     VkMemoryRequirements reqs;
     vkGetImageMemoryRequirements(vk->dev, tex_vk->img, &reqs);
 
@@ -598,8 +597,8 @@ struct ra_buf_vk {
     int refcount; // 1 = object allocated but not in use, > 1 = in use
     bool needsflush;
     // "current" metadata, can change during course of execution
-    VkPipelineStageFlagBits current_stage;
-    VkAccessFlagBits current_access;
+    VkPipelineStageFlags current_stage;
+    VkAccessFlags current_access;
 };
 
 static void vk_buf_deref(struct ra *ra, struct ra_buf *buf)
@@ -617,8 +616,8 @@ static void vk_buf_deref(struct ra *ra, struct ra_buf *buf)
 }
 
 static void buf_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_buf *buf,
-                        VkPipelineStageFlagBits newStage,
-                        VkAccessFlagBits newAccess, int offset, size_t size)
+                        VkPipelineStageFlags newStage,
+                        VkAccessFlags newAccess, int offset, size_t size)
 {
     struct ra_buf_vk *buf_vk = buf->priv;
 
@@ -693,8 +692,8 @@ static struct ra_buf *vk_buf_create(struct ra *ra,
     buf_vk->current_access = 0;
     buf_vk->refcount = 1;
 
-    VkBufferUsageFlagBits bufFlags = 0;
-    VkMemoryPropertyFlagBits memFlags = 0;
+    VkBufferUsageFlags bufFlags = 0;
+    VkMemoryPropertyFlags memFlags = 0;
     VkDeviceSize align = 4; // alignment 4 is needed for buf_update
 
     switch (params->type) {
@@ -977,7 +976,7 @@ static VkResult vk_compile_glsl(struct ra *ra, void *tactx,
     return ret;
 }
 
-static const VkPipelineStageFlagBits stageFlags[] = {
+static const VkShaderStageFlags stageFlags[] = {
     [RA_RENDERPASS_TYPE_RASTER]  = VK_SHADER_STAGE_FRAGMENT_BIT,
     [RA_RENDERPASS_TYPE_COMPUTE] = VK_SHADER_STAGE_COMPUTE_BIT,
 };

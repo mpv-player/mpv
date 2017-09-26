@@ -54,10 +54,10 @@ struct vk_slab {
 // actually be that many in practice, because some combinations simply never
 // occur, and others will generally be the same for the same objects.
 struct vk_heap {
-    VkBufferUsageFlagBits usage;    // the buffer usage type (or 0)
-    VkMemoryPropertyFlagBits flags; // the memory type flags (or 0)
-    uint32_t typeBits;              // the memory type index requirements (or 0)
-    struct vk_slab **slabs;         // array of slabs sorted by size
+    VkBufferUsageFlags usage;    // the buffer usage type (or 0)
+    VkMemoryPropertyFlags flags; // the memory type flags (or 0)
+    uint32_t typeBits;           // the memory type index requirements (or 0)
+    struct vk_slab **slabs;      // array of slabs sorted by size
     int num_slabs;
 };
 
@@ -89,7 +89,7 @@ static void slab_free(struct mpvk_ctx *vk, struct vk_slab *slab)
 }
 
 static bool find_best_memtype(struct mpvk_ctx *vk, uint32_t typeBits,
-                              VkMemoryPropertyFlagBits flags,
+                              VkMemoryPropertyFlags flags,
                               VkMemoryType *out_type, int *out_index)
 {
     struct vk_malloc *ma = vk->alloc;
@@ -109,7 +109,7 @@ static bool find_best_memtype(struct mpvk_ctx *vk, uint32_t typeBits,
     }
 
     MP_ERR(vk, "Found no memory type matching property flags 0x%x and type "
-               "bits 0x%x!\n", flags, (unsigned)typeBits);
+               "bits 0x%x!\n", (unsigned)flags, (unsigned)typeBits);
     return false;
 }
 
@@ -154,7 +154,7 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
         goto error;
 
     MP_VERBOSE(vk, "Allocating %zu memory of type 0x%x (id %d) in heap %d.\n",
-               slab->size, type.propertyFlags, index, (int)type.heapIndex);
+               slab->size, (unsigned)type.propertyFlags, index, (int)type.heapIndex);
 
     minfo.memoryTypeIndex = index;
     VK(vkAllocateMemory(vk->dev, &minfo, MPVK_ALLOCATOR, &slab->mem));
@@ -279,9 +279,8 @@ void vk_free_memslice(struct mpvk_ctx *vk, struct vk_memslice slice)
 }
 
 // reqs: can be NULL
-static struct vk_heap *find_heap(struct mpvk_ctx *vk,
-                                 VkBufferUsageFlagBits usage,
-                                 VkMemoryPropertyFlagBits flags,
+static struct vk_heap *find_heap(struct mpvk_ctx *vk, VkBufferUsageFlags usage,
+                                 VkMemoryPropertyFlags flags,
                                  VkMemoryRequirements *reqs)
 {
     struct vk_malloc *ma = vk->alloc;
@@ -401,14 +400,14 @@ static bool slice_heap(struct mpvk_ctx *vk, struct vk_heap *heap, size_t size,
 }
 
 bool vk_malloc_generic(struct mpvk_ctx *vk, VkMemoryRequirements reqs,
-                       VkMemoryPropertyFlagBits flags, struct vk_memslice *out)
+                       VkMemoryPropertyFlags flags, struct vk_memslice *out)
 {
     struct vk_heap *heap = find_heap(vk, 0, flags, &reqs);
     return slice_heap(vk, heap, reqs.size, reqs.alignment, out);
 }
 
-bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlagBits bufFlags,
-                      VkMemoryPropertyFlagBits memFlags, VkDeviceSize size,
+bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlags bufFlags,
+                      VkMemoryPropertyFlags memFlags, VkDeviceSize size,
                       VkDeviceSize alignment, struct vk_bufslice *out)
 {
     struct vk_heap *heap = find_heap(vk, bufFlags, memFlags, NULL);

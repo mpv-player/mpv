@@ -116,7 +116,7 @@ void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg);
 // Associate a dependency for the current command. This semaphore must signal
 // by the corresponding stage before the command may execute.
 void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
-                VkPipelineStageFlagBits depstage);
+                VkPipelineStageFlags depstage);
 
 #define MPVK_MAX_QUEUES 8
 #define MPVK_MAX_CMDS 64

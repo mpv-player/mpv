@@ -637,7 +637,7 @@ void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
 }
 
 void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
-                VkPipelineStageFlagBits depstage)
+                VkPipelineStageFlags depstage)
 {
     assert(cmd->num_deps < MPVK_MAX_CMD_DEPS);
     cmd->deps[cmd->num_deps] = dep;

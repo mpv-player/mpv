@@ -148,7 +148,7 @@ static bool update_swapchain_info(struct priv *p,
     VK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk->physd, vk->surf, &caps));
 
     // Sorted by preference
-    static const VkCompositeAlphaFlagBitsKHR alphaModes[] = {
+    static const VkCompositeAlphaFlagsKHR alphaModes[] = {
         VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
     };
@@ -166,7 +166,7 @@ static bool update_swapchain_info(struct priv *p,
         goto error;
     }
 
-    static const VkSurfaceTransformFlagBitsKHR rotModes[] = {
+    static const VkSurfaceTransformFlagsKHR rotModes[] = {
         VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
         VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR,
     };

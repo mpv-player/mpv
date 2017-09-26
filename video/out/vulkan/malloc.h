@@ -16,7 +16,7 @@ struct vk_memslice {
 
 void vk_free_memslice(struct mpvk_ctx *vk, struct vk_memslice slice);
 bool vk_malloc_generic(struct mpvk_ctx *vk, VkMemoryRequirements reqs,
-                       VkMemoryPropertyFlagBits flags, struct vk_memslice *out);
+                       VkMemoryPropertyFlags flags, struct vk_memslice *out);
 
 // Represents a single "slice" of a larger buffer
 struct vk_bufslice {
@@ -30,6 +30,6 @@ struct vk_bufslice {
 // Allocate a buffer slice. This is more efficient than vk_malloc_generic for
 // when the user needs lots of buffers, since it doesn't require
 // creating/destroying lots of (little) VkBuffers.
-bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlagBits bufFlags,
-                      VkMemoryPropertyFlagBits memFlags, VkDeviceSize size,
+bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlags bufFlags,
+                      VkMemoryPropertyFlags memFlags, VkDeviceSize size,
                       VkDeviceSize alignment, struct vk_bufslice *out);
