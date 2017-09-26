@@ -695,17 +695,14 @@ Video
     next method (might matter on some Linux systems).
 
     ``auto-copy`` selects only modes that copy the video data back to system
-    memory after decoding. Currently, this selects only one of the following
-    modes: ``vaapi-copy``, ``dxva2-copy``, ``d3d11va-copy``, ``mediacodec``.
+    memory after decoding. This selects modes like ``vaapi-copy`` (and so on).
     If none of these work, hardware decoding is disabled. This mode is always
     guaranteed to incur no additional loss compared to software decoding, and
     will allow CPU processing with video filters.
 
     The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11 and most
     likely works with Intel GPUs only. It also requires the opengl EGL backend
-    (automatically used if available). You can also try the old GLX backend by
-    forcing it with ``--gpu-context=x11``, but the vaapi/GLX interop is
-    said to be slower than ``vaapi-copy``.
+    (automatically used if available).
 
     The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
     which is useful as there is no other deinterlacing mechanism in the opengl
