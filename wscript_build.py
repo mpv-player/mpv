@@ -100,7 +100,7 @@ def build(ctx):
     )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
-                 "ytdl_hook.lua"]
+                 "ytdl_hook.lua", "stats.lua"]
 
     for fn in lua_files:
         fn = "player/lua/" + fn
