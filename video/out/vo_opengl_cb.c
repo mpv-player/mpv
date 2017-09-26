@@ -295,7 +295,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         if (vo)
             gl_video_configure_queue(ctx->renderer, vo);
         int debug;
-        mp_read_option_raw(ctx->global, "opengl-debug", &m_option_type_flag,
+        mp_read_option_raw(ctx->global, "gpu-debug", &m_option_type_flag,
                            &debug);
         ctx->gl->debug_context = debug;
         ra_gl_set_debug(ctx->ra_ctx->ra, debug);
