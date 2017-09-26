@@ -1323,13 +1323,18 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         .descriptorType = dsType[inp->type],
     };
 
+    static const VkPipelineStageFlags passStages[] = {
+        [RA_RENDERPASS_TYPE_RASTER]  = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        [RA_RENDERPASS_TYPE_COMPUTE] = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+    };
+
     switch (inp->type) {
     case RA_VARTYPE_TEX: {
         struct ra_tex *tex = *(struct ra_tex **)val.data;
         struct ra_tex_vk *tex_vk = tex->priv;
 
         assert(tex->params.render_src);
-        tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        tex_barrier(cmd, tex_vk, passStages[pass->params.type],
                     VK_ACCESS_SHADER_READ_BIT,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
 
@@ -1348,7 +1353,7 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         struct ra_tex_vk *tex_vk = tex->priv;
 
         assert(tex->params.storage_dst);
-        tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        tex_barrier(cmd, tex_vk, passStages[pass->params.type],
                     VK_ACCESS_SHADER_WRITE_BIT,
                     VK_IMAGE_LAYOUT_GENERAL, false);
 
@@ -1370,7 +1375,7 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         if (inp->type == RA_VARTYPE_BUF_RW)
             access |= VK_ACCESS_SHADER_WRITE_BIT;
 
-        buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        buf_barrier(ra, cmd, buf, passStages[pass->params.type],
                     access, buf_vk->slice.mem.offset, buf->params.size);
 
         VkDescriptorBufferInfo *binfo = &pass_vk->dsbinfo[idx];
