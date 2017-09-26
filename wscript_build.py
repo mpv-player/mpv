@@ -349,7 +349,6 @@ def build(ctx):
         ( "video/vt.c",                          "videotoolbox-hwaccel" ),
         ( "video/decode/d3d.c",                  "d3d-hwaccel" ),
         ( "video/decode/dec_video.c"),
-        ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),
         ( "video/decode/hw_dxva2.c",             "d3d9-hwaccel" ),
         ( "video/decode/hw_d3d11va.c",           "d3d-hwaccel" ),
         ( "video/decode/hw_videotoolbox.c",      "videotoolbox-hwaccel" ),

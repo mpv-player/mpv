@@ -143,7 +143,6 @@ extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy;
-extern const struct vd_lavc_hwdec mp_vd_lavc_cuda_old;
 
 #if HAVE_RPI
 static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
@@ -166,15 +165,13 @@ static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
 };
 #endif
 
-#if NEW_CUDA_HWACCEL
+#if HAVE_CUDA_HWACCEL
 static const struct vd_lavc_hwdec mp_vd_lavc_cuda = {
     .type = HWDEC_CUDA,
     .image_format = IMGFMT_CUDA,
     .lavc_suffix = "_cuvid",
     .generic_hwaccel = true,
 };
-#endif
-#if HAVE_CUDA_HWACCEL
 static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
     .type = HWDEC_CUDA_COPY,
     .lavc_suffix = "_cuvid",
@@ -282,11 +279,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_mediacodec,
 #endif
 #if HAVE_CUDA_HWACCEL
- #if NEW_CUDA_HWACCEL
     &mp_vd_lavc_cuda,
- #else
-    &mp_vd_lavc_cuda_old,
- #endif
     &mp_vd_lavc_cuda_copy,
 #endif
     &mp_vd_lavc_crystalhd,

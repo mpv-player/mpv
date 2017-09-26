@@ -145,7 +145,4 @@ int hwdec_get_max_refs(struct lavc_ctx *ctx);
 int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
                               int av_sw_format, int initial_pool_size);
 
-#define NEW_CUDA_HWACCEL \
-    (HAVE_CUDA_HWACCEL && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 94, 100))
-
 #endif
