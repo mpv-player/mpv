@@ -26,6 +26,9 @@ struct ra {
     // time.
     size_t max_shmem;
 
+    // Maximum push constant size. Set by the RA backend at init time.
+    size_t max_pushc_size;
+
     // Set of supported texture formats. Must be added by RA backend at init time.
     // If there are equivalent formats with different caveats, the preferred
     // formats should have a lower index. (E.g. GLES3 should put rg8 before la.)
@@ -146,6 +149,7 @@ enum ra_buf_type {
     RA_BUF_TYPE_TEX_UPLOAD,     // texture upload buffer (pixel buffer object)
     RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
     RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
+    RA_BUF_TYPE_VERTEX,         // not publicly usable (RA-internal usage)
 };
 
 struct ra_buf_params {
@@ -244,6 +248,7 @@ struct ra_renderpass_params {
     // Uniforms, including texture/sampler inputs.
     struct ra_renderpass_input *inputs;
     int num_inputs;
+    size_t push_constants_size; // must be <= ra.max_pushc_size and a multiple of 4
 
     // Highly implementation-specific byte array storing a compiled version
     // of the program. Can be used to speed up shader compilation. A backend
@@ -316,6 +321,7 @@ struct ra_renderpass_run_params {
     // even if they do not change.
     struct ra_renderpass_input_val *values;
     int num_values;
+    void *push_constants; // must be set if params.push_constants_size > 0
 
     // --- pass->params.type==RA_RENDERPASS_TYPE_RASTER only
 
@@ -369,10 +375,10 @@ struct ra_fns {
 
     void (*buf_destroy)(struct ra *ra, struct ra_buf *buf);
 
-    // Update the contents of a buffer, starting at a given offset and up to a
-    // given size, with the contents of *data. This is an extremely common
-    // operation. Calling this while the buffer is considered "in use" is an
-    // error. (See: buf_poll)
+    // Update the contents of a buffer, starting at a given offset (*must* be a
+    // multiple of 4) and up to a given size, with the contents of *data. This
+    // is an extremely common operation. Calling this while the buffer is
+    // considered "in use" is an error. (See: buf_poll)
     void (*buf_update)(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
                        const void *data, size_t size);
 
@@ -385,6 +391,10 @@ struct ra_fns {
     // Returns the layout requirements of a uniform buffer element. Optional,
     // but must be implemented if RA_CAP_BUF_RO is supported.
     struct ra_layout (*uniform_layout)(struct ra_renderpass_input *inp);
+
+    // Returns the layout requirements of a push constant element. Optional,
+    // but must be implemented if ra.max_pushc_size > 0.
+    struct ra_layout (*push_constant_layout)(struct ra_renderpass_input *inp);
 
     // Clear the dst with the given color (rgba) and within the given scissor.
     // dst must have dst->params.render_dst==true. Content outside of the

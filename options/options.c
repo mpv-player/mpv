@@ -89,6 +89,8 @@ extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
 
 extern const struct m_sub_options opengl_conf;
+extern const struct m_sub_options vulkan_conf;
+extern const struct m_sub_options spirv_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
@@ -685,9 +687,14 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
 
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
+    OPT_SUBSTRUCT("", spirv_opts, spirv_conf, 0),
 
 #if HAVE_GL
     OPT_SUBSTRUCT("", opengl_opts, opengl_conf, 0),
+#endif
+
+#if HAVE_VULKAN
+    OPT_SUBSTRUCT("", vulkan_opts, vulkan_conf, 0),
 #endif
 
 #if HAVE_EGL_ANGLE_WIN32

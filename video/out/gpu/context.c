@@ -31,7 +31,9 @@
 #include "video/out/vo.h"
 
 #include "context.h"
+#include "spirv.h"
 
+/* OpenGL */
 extern const struct ra_ctx_fns ra_ctx_glx;
 extern const struct ra_ctx_fns ra_ctx_glx_probe;
 extern const struct ra_ctx_fns ra_ctx_x11_egl;
@@ -44,6 +46,10 @@ extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
 extern const struct ra_ctx_fns ra_ctx_mali;
 extern const struct ra_ctx_fns ra_ctx_vdpauglx;
+
+/* Vulkan */
+extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
+extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
 
 static const struct ra_ctx_fns *contexts[] = {
 // OpenGL contexts:
@@ -82,6 +88,18 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_VDPAU_GL_X11
     &ra_ctx_vdpauglx,
+#endif
+
+// Vulkan contexts:
+#if HAVE_VULKAN
+
+#if HAVE_WAYLAND
+    &ra_ctx_vulkan_wayland,
+#endif
+#if HAVE_X11
+    &ra_ctx_vulkan_xlib,
+#endif
+
 #endif
 };
 
@@ -177,10 +195,17 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, const char *context_type,
     return NULL;
 }
 
-void ra_ctx_destroy(struct ra_ctx **ctx)
+void ra_ctx_destroy(struct ra_ctx **ctx_ptr)
 {
-    if (*ctx)
-        (*ctx)->fns->uninit(*ctx);
-    talloc_free(*ctx);
-    *ctx = NULL;
+    struct ra_ctx *ctx = *ctx_ptr;
+    if (!ctx)
+        return;
+
+    if (ctx->spirv && ctx->spirv->fns->uninit)
+        ctx->spirv->fns->uninit(ctx);
+
+    ctx->fns->uninit(ctx);
+    talloc_free(ctx);
+
+    *ctx_ptr = NULL;
 }
