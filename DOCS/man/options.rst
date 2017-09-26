@@ -4653,6 +4653,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Use any available API (default)
     opengl
         Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
+    vulkan
+        Allow only Vulkan (requires a valid/working ``--spirv-compiler``)
 
 ``--opengl-es=<mode>``
     Controls which type of OpenGL context will be accepted:
