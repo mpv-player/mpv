@@ -3972,10 +3972,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
     get a list). The default is ``mitchell``.
 
-    Note that the maximum supported filter radius is currently 3, due to
-    limitations in the number of video textures that can be loaded
-    simultaneously.
-
 ``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
     Set filter parameters. Ignored if the filter is not tunable. Currently,
     this affects the following filter parameters:

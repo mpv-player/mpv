@@ -28,10 +28,6 @@
 #include "video/csputils.h"
 #include "video/out/filter_kernels.h"
 
-// Assume we have this many texture units for sourcing additional passes.
-// The actual texture unit assignment is dynamic.
-#define TEXUNIT_VIDEO_NUM 6
-
 struct scaler_fun {
     char *name;
     float params[2];

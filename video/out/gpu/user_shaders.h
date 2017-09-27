@@ -22,7 +22,7 @@
 #include "ra.h"
 
 #define SHADER_MAX_HOOKS 16
-#define SHADER_MAX_BINDS 6
+#define SHADER_MAX_BINDS 16
 #define MAX_SZEXP_SIZE 32
 
 enum szexp_op {

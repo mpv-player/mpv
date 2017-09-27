@@ -449,20 +449,6 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
         transpose3x3(&u->v.f[0]);
 }
 
-// Tell the shader generator (and later gl_sc_draw_data()) about the vertex
-// data layout and attribute names. The entries array is terminated with a {0}
-// entry. The array memory must remain valid indefinitely (for now).
-void gl_sc_set_vertex_format(struct gl_shader_cache *sc,
-                             const struct ra_renderpass_input *entries,
-                             int vertex_stride)
-{
-    sc->params.vertex_attribs = (struct ra_renderpass_input *)entries;
-    sc->params.num_vertex_attribs = 0;
-    while (entries[sc->params.num_vertex_attribs].name)
-        sc->params.num_vertex_attribs++;
-    sc->params.vertex_stride = vertex_stride;
-}
-
 void gl_sc_blend(struct gl_shader_cache *sc,
                  enum ra_blend blend_src_rgb,
                  enum ra_blend blend_dst_rgb,
@@ -576,16 +562,6 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
     }
     if (sc->text.len)
         mp_log_source(sc->log, MSGL_V, sc->text.start);
-
-    // The vertex shader uses mangled names for the vertex attributes, so that
-    // the fragment shader can use the "real" names. But the shader is expecting
-    // the vertex attribute names (at least with older GLSL targets for GL).
-    params.vertex_attribs = talloc_memdup(tmp, params.vertex_attribs,
-                params.num_vertex_attribs * sizeof(params.vertex_attribs[0]));
-    for (int n = 0; n < params.num_vertex_attribs; n++) {
-        struct ra_renderpass_input *attrib = &params.vertex_attribs[n];
-        attrib->name = talloc_asprintf(tmp, "vertex_%s", attrib->name);
-    }
 
     const char *cache_header = "mpv shader cache v1\n";
     char *cache_filename = NULL;
@@ -773,7 +749,9 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
 //    and fragment operations needed for the next program have to be re-added.)
 static void gl_sc_generate(struct gl_shader_cache *sc,
                            enum ra_renderpass_type type,
-                           const struct ra_format *target_format)
+                           const struct ra_format *target_format,
+                           const struct ra_renderpass_input *vao,
+                           int vao_len, size_t vertex_stride)
 {
     int glsl_version = sc->ra->glsl_version;
     int glsl_es = sc->ra->glsl_es ? glsl_version : 0;
@@ -784,9 +762,6 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
     // and before starting a new one.
     assert(!sc->needs_reset);
     sc->needs_reset = true;
-
-    // gl_sc_set_vertex_format() must always be called
-    assert(sc->params.vertex_attribs);
 
     // If using a UBO, pick a binding (needed for shader generation)
     if (sc->ubo_size)
@@ -844,8 +819,8 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         bstr *vert_body = &sc->tmp[2];
         ADD(vert_body, "void main() {\n");
         bstr *frag_vaos = &sc->tmp[3];
-        for (int n = 0; n < sc->params.num_vertex_attribs; n++) {
-            const struct ra_renderpass_input *e = &sc->params.vertex_attribs[n];
+        for (int n = 0; n < vao_len; n++) {
+            const struct ra_renderpass_input *e = &vao[n];
             const char *glsl_type = vao_glsl_type(e);
             char loc[32] = {0};
             if (sc->ra->glsl_vulkan)
@@ -956,6 +931,19 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
             .total = bstrdup(entry, *hash_total),
             .timer = timer_pool_create(sc->ra),
         };
+
+        // The vertex shader uses mangled names for the vertex attributes, so
+        // that the fragment shader can use the "real" names. But the shader is
+        // expecting the vertex attribute names (at least with older GLSL
+        // targets for GL).
+        sc->params.vertex_stride = vertex_stride;
+        for (int n = 0; n < vao_len; n++) {
+            struct ra_renderpass_input attrib = vao[n];
+            attrib.name = talloc_asprintf(entry, "vertex_%s", attrib.name);
+            MP_TARRAY_APPEND(sc, sc->params.vertex_attribs,
+                             sc->params.num_vertex_attribs, attrib);
+        }
+
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_cached_uniform u = {0};
             if (sc->uniforms[n].type == SC_UNIFORM_TYPE_GLOBAL) {
@@ -997,11 +985,14 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
 
 struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
                                         struct ra_tex *target,
-                                        void *ptr, size_t num)
+                                        const struct ra_renderpass_input *vao,
+                                        int vao_len, size_t vertex_stride,
+                                        void *vertices, size_t num_vertices)
 {
     struct timer_pool *timer = NULL;
 
-    gl_sc_generate(sc, RA_RENDERPASS_TYPE_RASTER, target->params.format);
+    gl_sc_generate(sc, RA_RENDERPASS_TYPE_RASTER, target->params.format,
+                   vao, vao_len, vertex_stride);
     if (!sc->current_shader)
         goto error;
 
@@ -1015,8 +1006,8 @@ struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
         .num_values = sc->num_values,
         .push_constants = sc->current_shader->pushc,
         .target = target,
-        .vertex_data = ptr,
-        .vertex_count = num,
+        .vertex_data = vertices,
+        .vertex_count = num_vertices,
         .viewport = full_rc,
         .scissors = full_rc,
     };
@@ -1035,7 +1026,7 @@ struct mp_pass_perf gl_sc_dispatch_compute(struct gl_shader_cache *sc,
 {
     struct timer_pool *timer = NULL;
 
-    gl_sc_generate(sc, RA_RENDERPASS_TYPE_COMPUTE, NULL);
+    gl_sc_generate(sc, RA_RENDERPASS_TYPE_COMPUTE, NULL, NULL, 0, 0);
     if (!sc->current_shader)
         goto error;
 
