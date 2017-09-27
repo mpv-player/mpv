@@ -60,26 +60,10 @@ static const char *const fixed_tscale_filters[] = {
 // must be sorted, and terminated with 0
 int filter_sizes[] =
     {2, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 0};
-int tscale_sizes[] = {2, 4, 6, 0}; // limited by TEXUNIT_VIDEO_NUM
+int tscale_sizes[] = {2, 4, 6, 8, 0};
 
 struct vertex_pt {
     float x, y;
-};
-
-struct vertex {
-    struct vertex_pt position;
-    struct vertex_pt texcoord[TEXUNIT_VIDEO_NUM];
-};
-
-static const struct ra_renderpass_input vertex_vao[] = {
-    {"position",  RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, position)},
-    {"texcoord0", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[0])},
-    {"texcoord1", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[1])},
-    {"texcoord2", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[2])},
-    {"texcoord3", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[3])},
-    {"texcoord4", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[4])},
-    {"texcoord5", RA_VARTYPE_FLOAT, 2, 1, offsetof(struct vertex, texcoord[5])},
-    {0}
 };
 
 struct texplane {
@@ -213,6 +197,13 @@ struct gl_video {
     bool dumb_mode;
     bool forced_dumb_mode;
 
+    // Cached vertex array, to avoid re-allocation per frame. For simplicity,
+    // our vertex format is simply a list of `vertex_pt`s, since this greatly
+    // simplifies offset calculation at the cost of (unneeded) flexibility.
+    struct vertex_pt *tmp_vertex;
+    struct ra_renderpass_input *vao;
+    int vao_len;
+
     const struct ra_format *fbo_format;
     struct ra_tex *merge_tex[4];
     struct ra_tex *scale_tex[4];
@@ -252,8 +243,8 @@ struct gl_video {
 
     // temporary during rendering
     struct compute_info pass_compute; // compute shader metadata for this pass
-    struct image pass_img[TEXUNIT_VIDEO_NUM]; // bound images for this pass
-    int pass_img_num;
+    struct image *pass_imgs;          // bound images for this pass
+    int num_pass_imgs;
     struct saved_img *saved_imgs;     // saved (named) images for this frame
     int num_saved_imgs;
 
@@ -631,13 +622,12 @@ static struct image image_wrap(struct ra_tex *tex, enum plane_type type,
     };
 }
 
-// Bind an image to a free texture unit and return its ID. At most
-// TEXUNIT_VIDEO_NUM texture units can be bound at once
+// Bind an image to a free texture unit and return its ID.
 static int pass_bind(struct gl_video *p, struct image img)
 {
-    assert(p->pass_img_num < TEXUNIT_VIDEO_NUM);
-    p->pass_img[p->pass_img_num] = img;
-    return p->pass_img_num++;
+    int idx = p->num_pass_imgs;
+    MP_TARRAY_APPEND(p, p->pass_imgs, p->num_pass_imgs, img);
+    return idx;
 }
 
 // Rotation by 90° and flipping.
@@ -1062,8 +1052,8 @@ static void pass_prepare_src_tex(struct gl_video *p)
 {
     struct gl_shader_cache *sc = p->sc;
 
-    for (int n = 0; n < p->pass_img_num; n++) {
-        struct image *s = &p->pass_img[n];
+    for (int n = 0; n < p->num_pass_imgs; n++) {
+        struct image *s = &p->pass_imgs[n];
         if (!s->tex)
             continue;
 
@@ -1087,6 +1077,11 @@ static void pass_prepare_src_tex(struct gl_video *p)
     }
 }
 
+static void cleanup_binds(struct gl_video *p)
+{
+    p->num_pass_imgs = 0;
+}
+
 // Sets the appropriate compute shader metadata for an implicit compute pass
 // bw/bh: block size
 static void pass_is_compute(struct gl_video *p, int bw, int bh)
@@ -1096,12 +1091,6 @@ static void pass_is_compute(struct gl_video *p, int bw, int bh)
         .block_w = bw,
         .block_h = bh,
     };
-}
-
-static void cleanup_binds(struct gl_video *p)
-{
-    memset(&p->pass_img, 0, sizeof(p->pass_img));
-    p->pass_img_num = 0;
 }
 
 // w/h: the width/height of the compute shader's operating domain (e.g. the
@@ -1115,7 +1104,6 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
             info.threads_h > 0 ? info.threads_h : info.block_h);
 
     pass_prepare_src_tex(p);
-    gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
 
     // Since we don't actually have vertices, we pretend for convenience
     // reasons that we do and calculate the right texture coordinates based on
@@ -1123,14 +1111,13 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
     gl_sc_uniform_vec2(p->sc, "out_scale", (float[2]){ 1.0 / w, 1.0 / h });
     PRELUDE("#define outcoord(id) (out_scale * (vec2(id) + vec2(0.5)))\n");
 
-    for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
-        struct image *s = &p->pass_img[n];
+    for (int n = 0; n < p->num_pass_imgs; n++) {
+        struct image *s = &p->pass_imgs[n];
         if (!s->tex)
             continue;
 
         // We need to rescale the coordinates to the true texture size
-        char tex_scale[32];
-        snprintf(tex_scale, sizeof(tex_scale), "tex_scale%d", n);
+        char *tex_scale = mp_tprintf(32, "tex_scale%d", n);
         gl_sc_uniform_vec2(p->sc, tex_scale, (float[2]){
                 (float)s->w / s->tex->params.w,
                 (float)s->h / s->tex->params.h,
@@ -1155,7 +1142,24 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
                                             struct ra_fbo fbo,
                                             const struct mp_rect *dst)
 {
-    struct vertex va[6] = {0};
+    // The first element is reserved for `vec2 position`
+    int num_vertex_attribs = 1 + p->num_pass_imgs;
+    size_t vertex_stride = num_vertex_attribs * sizeof(struct vertex_pt);
+
+    // Expand the VAO if necessary
+    while (p->vao_len < num_vertex_attribs) {
+        MP_TARRAY_APPEND(p, p->vao, p->vao_len, (struct ra_renderpass_input) {
+            .name = talloc_asprintf(p, "texcoord%d", p->vao_len - 1),
+            .type = RA_VARTYPE_FLOAT,
+            .dim_v = 2,
+            .dim_m = 1,
+            .offset = p->vao_len * sizeof(struct vertex_pt),
+        });
+    }
+
+    int num_vertices = 6; // quad as triangle list
+    int num_attribs_total = num_vertices * num_vertex_attribs;
+    MP_TARRAY_GROW(p, p->tmp_vertex, num_attribs_total);
 
     struct gl_transform t;
     gl_transform_ortho_fbo(&t, fbo);
@@ -1166,11 +1170,12 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
     gl_transform_vec(t, &x[1], &y[1]);
 
     for (int n = 0; n < 4; n++) {
-        struct vertex *v = &va[n];
-        v->position.x = x[n / 2];
-        v->position.y = y[n % 2];
-        for (int i = 0; i < p->pass_img_num; i++) {
-            struct image *s = &p->pass_img[i];
+        struct vertex_pt *vs = &p->tmp_vertex[num_vertex_attribs * n];
+        // vec2 position in idx 0
+        vs[0].x = x[n / 2];
+        vs[0].y = y[n % 2];
+        for (int i = 0; i < p->num_pass_imgs; i++) {
+            struct image *s = &p->pass_imgs[i];
             if (!s->tex)
                 continue;
             struct gl_transform tr = s->transform;
@@ -1178,22 +1183,28 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
             float ty = (n % 2) * s->h;
             gl_transform_vec(tr, &tx, &ty);
             bool rect = s->tex->params.non_normalized;
-            v->texcoord[i].x = tx / (rect ? 1 : s->tex->params.w);
-            v->texcoord[i].y = ty / (rect ? 1 : s->tex->params.h);
+            // vec2 texcoordN in idx N+1
+            vs[i + 1].x = tx / (rect ? 1 : s->tex->params.w);
+            vs[i + 1].y = ty / (rect ? 1 : s->tex->params.h);
         }
     }
 
-    va[4] = va[2];
-    va[5] = va[1];
+    memmove(&p->tmp_vertex[num_vertex_attribs * 4],
+            &p->tmp_vertex[num_vertex_attribs * 2],
+            vertex_stride);
 
-    return gl_sc_dispatch_draw(p->sc, fbo.tex, va, 6);
+    memmove(&p->tmp_vertex[num_vertex_attribs * 5],
+            &p->tmp_vertex[num_vertex_attribs * 1],
+            vertex_stride);
+
+    return gl_sc_dispatch_draw(p->sc, fbo.tex, p->vao, p->vao_len, vertex_stride,
+                               p->tmp_vertex, num_vertices);
 }
 
 static void finish_pass_fbo(struct gl_video *p, struct ra_fbo fbo,
                             const struct mp_rect *dst)
 {
     pass_prepare_src_tex(p);
-    gl_sc_set_vertex_format(p->sc, vertex_vao, sizeof(struct vertex));
     pass_record(p, render_pass_quad(p, fbo, dst));
     debug_check_gl(p, "after rendering");
     cleanup_binds(p);
@@ -1340,7 +1351,7 @@ static void saved_img_store(struct gl_video *p, const char *name,
 static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
                                   struct image img, struct tex_hook *hook)
 {
-    for (int t = 0; t < TEXUNIT_VIDEO_NUM; t++) {
+    for (int t = 0; t < SHADER_MAX_BINDS; t++) {
         char *bind_name = (char *)hook->bind_tex[t];
 
         if (!bind_name)
@@ -1370,7 +1381,7 @@ static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
             // Clean up texture bindings and move on to the next hook
             MP_DBG(p, "Skipping hook on %s due to no texture named %s.\n",
                    name, bind_name);
-            p->pass_img_num -= t;
+            p->num_pass_imgs -= t;
             return false;
         }
 
@@ -1481,7 +1492,7 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
                 goto found;
         }
 
-        for (int b = 0; b < TEXUNIT_VIDEO_NUM; b++) {
+        for (int b = 0; b < SHADER_MAX_BINDS; b++) {
             if (hook->bind_tex[b] && strcmp(hook->bind_tex[b], name) == 0)
                 goto found;
         }
@@ -2855,7 +2866,6 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     } else {
         assert(tscale->kernel && !tscale->kernel->polar);
         size = ceil(tscale->kernel->size);
-        assert(size <= TEXUNIT_VIDEO_NUM);
     }
 
     int radius = size/2;
@@ -3580,6 +3590,14 @@ struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
     p->opts = *opts;
     for (int n = 0; n < SCALER_COUNT; n++)
         p->scaler[n] = (struct scaler){.index = n};
+    // our VAO always has the vec2 position as the first element
+    MP_TARRAY_APPEND(p, p->vao, p->vao_len, (struct ra_renderpass_input) {
+        .name = "position",
+        .type = RA_VARTYPE_FLOAT,
+        .dim_v = 2,
+        .dim_m = 1,
+        .offset = 0,
+    });
     init_gl(p);
     reinit_from_options(p);
     return p;

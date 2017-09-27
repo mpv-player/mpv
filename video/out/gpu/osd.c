@@ -47,7 +47,6 @@ static const struct ra_renderpass_input vertex_vao[] = {
     {"position",  RA_VARTYPE_FLOAT,      2, 1, offsetof(struct vertex, position)},
     {"texcoord" , RA_VARTYPE_FLOAT,      2, 1, offsetof(struct vertex, texcoord)},
     {"ass_color", RA_VARTYPE_BYTE_UNORM, 4, 1, offsetof(struct vertex, ass_color)},
-    {0}
 };
 
 struct mpgl_osd_part {
@@ -231,8 +230,6 @@ bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
         abort();
     }
 
-    gl_sc_set_vertex_format(sc, vertex_vao, sizeof(struct vertex));
-
     return true;
 }
 
@@ -317,7 +314,8 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     const int *factors = &blend_factors[part->format][0];
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    gl_sc_dispatch_draw(sc, fbo.tex, part->vertices, part->num_vertices);
+    gl_sc_dispatch_draw(sc, fbo.tex, vertex_vao, MP_ARRAY_SIZE(vertex_vao),
+                        sizeof(struct vertex), part->vertices, part->num_vertices);
 }
 
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)

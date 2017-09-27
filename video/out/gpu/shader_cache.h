@@ -43,9 +43,6 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
-void gl_sc_set_vertex_format(struct gl_shader_cache *sc,
-                             const struct ra_renderpass_input *vertex_attribs,
-                             int vertex_stride);
 void gl_sc_blend(struct gl_shader_cache *sc,
                  enum ra_blend blend_src_rgb,
                  enum ra_blend blend_dst_rgb,
@@ -54,6 +51,8 @@ void gl_sc_blend(struct gl_shader_cache *sc,
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 struct mp_pass_perf gl_sc_dispatch_draw(struct gl_shader_cache *sc,
                                         struct ra_tex *target,
+                                        const struct ra_renderpass_input *vao,
+                                        int vao_len, size_t vertex_stride,
                                         void *ptr, size_t num);
 struct mp_pass_perf gl_sc_dispatch_compute(struct gl_shader_cache *sc,
                                            int w, int h, int d);
