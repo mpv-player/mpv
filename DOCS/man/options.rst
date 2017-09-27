@@ -5246,9 +5246,6 @@ Miscellaneous
 
     .. admonition:: Examples
 
-        - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [vo]'``
-          Play audio track 1, and visualize it as video using the ``aphasemeter``
-          filter.
         - ``--lavfi-complex='[aid1] [aid2] amix [ao]'``
           Play audio track 1 and 2 at the same time.
         - ``--lavfi-complex='[vid1] [vid2] vstack [vo]'``
@@ -5256,13 +5253,11 @@ Miscellaneous
           both tracks need to have the same width, or filter initialization
           will fail (you can add ``scale`` filters before the ``vstack`` filter
           to fix the size).
-        - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [t2] ; [vid1] [t2] overlay [vo]'``
-          Play audio track 1, and overlay its visualization over video track 1.
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
         - ``null:// --lavfi-complex='life [vo]'``
-          Conways' Life Game.
+          A libavfilter source-only filter (Conways' Life Game).
 
     See the FFmpeg libavfilter documentation for details on the available
     filters.
