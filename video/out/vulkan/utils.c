@@ -128,20 +128,10 @@ static VkBool32 vk_dbg_callback(VkDebugReportFlagsEXT flags,
     return (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT);
 }
 
-static void vk_cmdpool_uninit(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
-{
-    if (!pool)
-        return;
-
-    // also frees associated command buffers
-    vkDestroyCommandPool(vk->dev, pool->pool, MPVK_ALLOCATOR);
-    for (int n = 0; n < MPVK_MAX_CMDS; n++) {
-        vkDestroyFence(vk->dev, pool->cmds[n].fence, MPVK_ALLOCATOR);
-        vkDestroySemaphore(vk->dev, pool->cmds[n].done, MPVK_ALLOCATOR);
-        talloc_free(pool->cmds[n].callbacks);
-    }
-    talloc_free(pool);
-}
+static void vk_cmdpool_destroy(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
+static struct vk_cmdpool *vk_cmdpool_create(struct mpvk_ctx *vk,
+                                            VkDeviceQueueCreateInfo qinfo,
+                                            VkQueueFamilyProperties props);
 
 void mpvk_uninit(struct mpvk_ctx *vk)
 {
@@ -149,7 +139,7 @@ void mpvk_uninit(struct mpvk_ctx *vk)
         return;
 
     if (vk->dev) {
-        vk_cmdpool_uninit(vk, vk->pool);
+        vk_cmdpool_destroy(vk, vk->pool);
         vk_malloc_uninit(vk);
         vkDestroyDevice(vk->dev, MPVK_ALLOCATOR);
     }
@@ -384,64 +374,6 @@ error:
     return false;
 }
 
-static bool vk_cmdpool_init(struct mpvk_ctx *vk, VkDeviceQueueCreateInfo qinfo,
-                            VkQueueFamilyProperties props,
-                            struct vk_cmdpool **out)
-{
-    struct vk_cmdpool *pool = *out = talloc_ptrtype(NULL, pool);
-    *pool = (struct vk_cmdpool) {
-        .qf = qinfo.queueFamilyIndex,
-        .props = props,
-        .qcount = qinfo.queueCount,
-    };
-
-    for (int n = 0; n < pool->qcount; n++)
-        vkGetDeviceQueue(vk->dev, pool->qf, n, &pool->queues[n]);
-
-    VkCommandPoolCreateInfo cinfo = {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT |
-                 VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        .queueFamilyIndex = pool->qf,
-    };
-
-    VK(vkCreateCommandPool(vk->dev, &cinfo, MPVK_ALLOCATOR, &pool->pool));
-
-    VkCommandBufferAllocateInfo ainfo = {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .commandPool = pool->pool,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = MPVK_MAX_CMDS,
-    };
-
-    VkCommandBuffer cmdbufs[MPVK_MAX_CMDS];
-    VK(vkAllocateCommandBuffers(vk->dev, &ainfo, cmdbufs));
-
-    for (int n = 0; n < MPVK_MAX_CMDS; n++) {
-        struct vk_cmd *cmd = &pool->cmds[n];
-        cmd->pool = pool;
-        cmd->buf = cmdbufs[n];
-
-        VkFenceCreateInfo finfo = {
-            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
-        };
-
-        VK(vkCreateFence(vk->dev, &finfo, MPVK_ALLOCATOR, &cmd->fence));
-
-        VkSemaphoreCreateInfo sinfo = {
-            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        };
-
-        VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &cmd->done));
-    }
-
-    return true;
-
-error:
-    return false;
-}
-
 bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 {
     assert(vk->physd);
@@ -491,10 +423,8 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
         goto error;
     }
 
-    // Now that we know which queue families we want, we can create the logical
-    // device
-    assert(opts.queue_count <= MPVK_MAX_QUEUES);
-    static const float priorities[MPVK_MAX_QUEUES] = {0};
+    // Now that we know which QFs we want, we can create the logical device
+    float *priorities = talloc_zero_array(tmp, float, opts.queue_count);
     VkDeviceQueueCreateInfo qinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         .queueFamilyIndex = idx,
@@ -524,8 +454,9 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
 
     vk_malloc_init(vk);
 
-    // Create the vk_cmdpools and all required queues / synchronization objects
-    if (!vk_cmdpool_init(vk, qinfo, qfs[idx], &vk->pool))
+    // Create the command pool(s)
+    vk->pool = vk_cmdpool_create(vk, qinfo, qfs[idx]);
+    if (!vk->pool)
         goto error;
 
     talloc_free(tmp);
@@ -537,83 +468,160 @@ error:
     return false;
 }
 
-static void run_callbacks(struct mpvk_ctx *vk, struct vk_cmd *cmd)
+// returns VK_SUCCESS (completed), VK_TIMEOUT (not yet completed) or an error
+static VkResult vk_cmd_poll(struct mpvk_ctx *vk, struct vk_cmd *cmd,
+                            uint64_t timeout)
+{
+    return vkWaitForFences(vk->dev, 1, &cmd->fence, false, timeout);
+}
+
+static void vk_cmd_reset(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 {
     for (int i = 0; i < cmd->num_callbacks; i++) {
         struct vk_callback *cb = &cmd->callbacks[i];
         cb->run(cb->priv, cb->arg);
-        *cb = (struct vk_callback){0};
     }
 
     cmd->num_callbacks = 0;
+    cmd->num_deps = 0;
 
-    // Also reset vk->last_cmd in case this was the last command to run
+    // also make sure to reset vk->last_cmd in case this was the last command
     if (vk->last_cmd == cmd)
         vk->last_cmd = NULL;
 }
 
-static void wait_for_cmds(struct mpvk_ctx *vk, struct vk_cmd cmds[], int num)
+static void vk_cmd_destroy(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 {
-    if (!num)
+    if (!cmd)
         return;
 
-    VkFence fences[MPVK_MAX_CMDS];
-    for (int i = 0; i < num; i++)
-        fences[i] = cmds[i].fence;
+    vk_cmd_poll(vk, cmd, UINT64_MAX);
+    vk_cmd_reset(vk, cmd);
+    vkDestroySemaphore(vk->dev, cmd->done, MPVK_ALLOCATOR);
+    vkDestroyFence(vk->dev, cmd->fence, MPVK_ALLOCATOR);
+    vkFreeCommandBuffers(vk->dev, cmd->pool->pool, 1, &cmd->buf);
 
-    vkWaitForFences(vk->dev, num, fences, true, UINT64_MAX);
-
-    for (int i = 0; i < num; i++)
-        run_callbacks(vk, &cmds[i]);
+    talloc_free(cmd);
 }
 
-void mpvk_pool_wait_idle(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
+static struct vk_cmd *vk_cmd_create(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
+{
+    struct vk_cmd *cmd = talloc_zero(NULL, struct vk_cmd);
+    cmd->pool = pool;
+
+    VkCommandBufferAllocateInfo ainfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .commandPool = pool->pool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1,
+    };
+
+    VK(vkAllocateCommandBuffers(vk->dev, &ainfo, &cmd->buf));
+
+    VkFenceCreateInfo finfo = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+    };
+
+    VK(vkCreateFence(vk->dev, &finfo, MPVK_ALLOCATOR, &cmd->fence));
+
+    VkSemaphoreCreateInfo sinfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+    };
+
+    VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &cmd->done));
+
+    return cmd;
+
+error:
+    vk_cmd_destroy(vk, cmd);
+    return NULL;
+}
+
+void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
+{
+    MP_TARRAY_APPEND(cmd, cmd->callbacks, cmd->num_callbacks, (struct vk_callback) {
+        .run  = callback,
+        .priv = p,
+        .arg  = arg,
+    });
+}
+
+void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
+                VkPipelineStageFlags depstage)
+{
+    int idx = cmd->num_deps++;
+    MP_TARRAY_GROW(cmd, cmd->deps, idx);
+    MP_TARRAY_GROW(cmd, cmd->depstages, idx);
+    cmd->deps[idx] = dep;
+    cmd->depstages[idx] = depstage;
+}
+
+static void vk_cmdpool_destroy(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 {
     if (!pool)
         return;
 
-    int idx = pool->cindex, pidx = pool->cindex_pending;
-    if (pidx < idx) { // range doesn't wrap
-        wait_for_cmds(vk, &pool->cmds[pidx], idx - pidx);
-    } else if (pidx > idx) { // range wraps
-        wait_for_cmds(vk, &pool->cmds[pidx], MPVK_MAX_CMDS - pidx);
-        wait_for_cmds(vk, &pool->cmds[0], idx);
-    }
-    pool->cindex_pending = pool->cindex;
+    for (int i = 0; i < pool->num_cmds_available; i++)
+        vk_cmd_destroy(vk, pool->cmds_available[i]);
+    for (int i = 0; i < pool->num_cmds_pending; i++)
+        vk_cmd_destroy(vk, pool->cmds_pending[i]);
+
+    vkDestroyCommandPool(vk->dev, pool->pool, MPVK_ALLOCATOR);
+    talloc_free(pool);
 }
 
-void mpvk_dev_wait_idle(struct mpvk_ctx *vk)
+static struct vk_cmdpool *vk_cmdpool_create(struct mpvk_ctx *vk,
+                                            VkDeviceQueueCreateInfo qinfo,
+                                            VkQueueFamilyProperties props)
 {
-    mpvk_pool_wait_idle(vk, vk->pool);
+    struct vk_cmdpool *pool = talloc_ptrtype(NULL, pool);
+    *pool = (struct vk_cmdpool) {
+        .props = props,
+        .qf = qinfo.queueFamilyIndex,
+        .queues = talloc_array(pool, VkQueue, qinfo.queueCount),
+        .num_queues = qinfo.queueCount,
+    };
+
+    for (int n = 0; n < pool->num_queues; n++)
+        vkGetDeviceQueue(vk->dev, pool->qf, n, &pool->queues[n]);
+
+    VkCommandPoolCreateInfo cinfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT |
+                 VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .queueFamilyIndex = pool->qf,
+    };
+
+    VK(vkCreateCommandPool(vk->dev, &cinfo, MPVK_ALLOCATOR, &pool->pool));
+
+    return pool;
+
+error:
+    vk_cmdpool_destroy(vk, pool);
+    return NULL;
 }
 
-void mpvk_pool_poll_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
+void mpvk_pool_wait_cmds(struct mpvk_ctx *vk, struct vk_cmdpool *pool,
                          uint64_t timeout)
 {
     if (!pool)
         return;
 
-    // If requested, hard block until at least one command completes
-    if (timeout > 0 && pool->cindex_pending != pool->cindex) {
-        vkWaitForFences(vk->dev, 1, &pool->cmds[pool->cindex_pending].fence,
-                        true, timeout);
-    }
-
-    // Lazily garbage collect the commands based on their status
-    while (pool->cindex_pending != pool->cindex) {
-        struct vk_cmd *cmd = &pool->cmds[pool->cindex_pending];
-        VkResult res = vkGetFenceStatus(vk->dev, cmd->fence);
-        if (res != VK_SUCCESS)
+    while (pool->num_cmds_pending > 0) {
+        struct vk_cmd *cmd = pool->cmds_pending[0];
+        VkResult res = vk_cmd_poll(vk, cmd, timeout);
+        if (res == VK_TIMEOUT)
             break;
-        run_callbacks(vk, cmd);
-        pool->cindex_pending++;
-        pool->cindex_pending %= MPVK_MAX_CMDS;
+        vk_cmd_reset(vk, cmd);
+        MP_TARRAY_REMOVE_AT(pool->cmds_pending, pool->num_cmds_pending, 0);
+        MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
     }
 }
 
-void mpvk_dev_poll_cmds(struct mpvk_ctx *vk, uint32_t timeout)
+void mpvk_dev_wait_cmds(struct mpvk_ctx *vk, uint64_t timeout)
 {
-    mpvk_pool_poll_cmds(vk, vk->pool, timeout);
+    mpvk_pool_wait_cmds(vk, vk->pool, timeout);
 }
 
 void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)
@@ -626,39 +634,22 @@ void vk_dev_callback(struct mpvk_ctx *vk, vk_cb callback, void *p, void *arg)
     }
 }
 
-void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
-{
-    MP_TARRAY_GROW(NULL, cmd->callbacks, cmd->num_callbacks);
-    cmd->callbacks[cmd->num_callbacks++] = (struct vk_callback) {
-        .run  = callback,
-        .priv = p,
-        .arg  = arg,
-    };
-}
-
-void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
-                VkPipelineStageFlags depstage)
-{
-    assert(cmd->num_deps < MPVK_MAX_CMD_DEPS);
-    cmd->deps[cmd->num_deps] = dep;
-    cmd->depstages[cmd->num_deps++] = depstage;
-}
-
 struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 {
-    // Garbage collect the cmdpool first
-    mpvk_pool_poll_cmds(vk, pool, 0);
+    // garbage collect the cmdpool first, to increase the chances of getting
+    // an already-available command buffer
+    mpvk_pool_wait_cmds(vk, pool, 0);
 
-    int next = (pool->cindex + 1) % MPVK_MAX_CMDS;
-    if (next == pool->cindex_pending) {
-        MP_ERR(vk, "No free command buffers!\n");
+    struct vk_cmd *cmd = NULL;
+    if (MP_TARRAY_POP(pool->cmds_available, pool->num_cmds_available, &cmd))
+        goto done;
+
+    // No free command buffers => allocate another one
+    cmd = vk_cmd_create(vk, pool);
+    if (!cmd)
         goto error;
-    }
 
-    struct vk_cmd *cmd = &pool->cmds[pool->cindex];
-    pool->cindex = next;
-
-    VK(vkResetCommandBuffer(cmd->buf, 0));
+done: ;
 
     VkCommandBufferBeginInfo binfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -667,18 +658,20 @@ struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
 
     VK(vkBeginCommandBuffer(cmd->buf, &binfo));
 
+    cmd->queue = pool->queues[pool->idx_queues];
     return cmd;
 
 error:
+    // Something has to be seriously messed up if we get to this point
+    vk_cmd_destroy(vk, cmd);
     return NULL;
 }
 
 bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
 {
-    VK(vkEndCommandBuffer(cmd->buf));
-
     struct vk_cmdpool *pool = cmd->pool;
-    VkQueue queue = pool->queues[pool->qindex];
+
+    VK(vkEndCommandBuffer(cmd->buf));
 
     VkSubmitInfo sinfo = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -696,25 +689,24 @@ bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
     }
 
     VK(vkResetFences(vk->dev, 1, &cmd->fence));
-    VK(vkQueueSubmit(queue, 1, &sinfo, cmd->fence));
-    MP_TRACE(vk, "Submitted command on queue %p (QF %d)\n", (void *)queue,
+    VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));
+    MP_TRACE(vk, "Submitted command on queue %p (QF %d)\n", (void *)cmd->queue,
              pool->qf);
 
-    for (int i = 0; i < cmd->num_deps; i++)
-        cmd->deps[i] = NULL;
-    cmd->num_deps = 0;
-
     vk->last_cmd = cmd;
+    MP_TARRAY_APPEND(pool, pool->cmds_pending, pool->num_cmds_pending, cmd);
     return true;
 
 error:
+    vk_cmd_reset(vk, cmd);
+    MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
     return false;
 }
 
 void vk_cmd_cycle_queues(struct mpvk_ctx *vk)
 {
     struct vk_cmdpool *pool = vk->pool;
-    pool->qindex = (pool->qindex + 1) % pool->qcount;
+    pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
 }
 
 const VkImageSubresourceRange vk_range = {

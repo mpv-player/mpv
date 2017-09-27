@@ -124,6 +124,13 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         (idxvar)--;                                 \
     } while (0)
 
+// Returns whether or not there was any element to pop.
+#define MP_TARRAY_POP(p, idxvar, out)               \
+    ((idxvar) > 0                                   \
+        ? (*(out) = (p)[--(idxvar)], true)          \
+        : false                                     \
+    )
+
 #define talloc_struct(ctx, type, ...) \
     talloc_memdup(ctx, &(type) TA_EXPAND_ARGS(__VA_ARGS__), sizeof(type))
 
