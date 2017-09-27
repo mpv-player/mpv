@@ -102,8 +102,8 @@ const struct m_sub_options vulkan_conf = {
                    {"fifo-relaxed", SWAP_FIFO_RELAXED},
                    {"mailbox",      SWAP_MAILBOX},
                    {"immediate",    SWAP_IMMEDIATE})),
-        OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1,
-                     MPVK_MAX_QUEUES, OPTDEF_INT(1)),
+        OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1, 8,
+                     OPTDEF_INT(1)),
         {0}
     },
     .size = sizeof(struct vulkan_opts)
@@ -244,7 +244,7 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
         struct priv *p = ctx->swapchain->priv;
         struct mpvk_ctx *vk = p->vk;
 
-        mpvk_pool_wait_idle(vk, vk->pool);
+        mpvk_dev_wait_cmds(vk, UINT64_MAX);
 
         for (int i = 0; i < p->num_images; i++)
             ra_tex_free(ctx->ra, &p->images[i]);
@@ -355,7 +355,7 @@ bool ra_vk_ctx_resize(struct ra_swapchain *sw, int w, int h)
     // more than one swapchain already active, so we need to flush any pending
     // asynchronous swapchain release operations that may be ongoing.
     while (p->old_swapchain)
-        mpvk_dev_poll_cmds(vk, 100000); // 100μs
+        mpvk_dev_wait_cmds(vk, 100000); // 100μs
 
     VkSwapchainCreateInfoKHR sinfo = p->protoInfo;
     sinfo.imageExtent  = (VkExtent2D){ w, h };
@@ -483,7 +483,7 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     // We can drop this hack in the future, I suppose.
     vk_cmd_cycle_queues(vk);
     struct vk_cmdpool *pool = vk->pool;
-    VkQueue queue = pool->queues[pool->qindex];
+    VkQueue queue = pool->queues[pool->idx_queues];
 
     VkPresentInfoKHR pinfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -506,7 +506,7 @@ static void swap_buffers(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     while (p->frames_in_flight >= sw->ctx->opts.swapchain_depth)
-        mpvk_dev_poll_cmds(p->vk, 100000); // 100μs
+        mpvk_dev_wait_cmds(p->vk, 100000); // 100μs
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {
