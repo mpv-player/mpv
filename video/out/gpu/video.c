@@ -145,8 +145,6 @@ struct pass_info {
     struct mp_pass_perf perf;
 };
 
-#define PASS_INFO_MAX 64
-
 struct dr_buffer {
     struct ra_buf *buf;
     // The mpi reference will keep the data from being recycled (or from other
@@ -260,8 +258,8 @@ struct gl_video {
     float user_gamma;
 
     // pass info / metrics
-    struct pass_info pass_fresh[PASS_INFO_MAX];
-    struct pass_info pass_redraw[PASS_INFO_MAX];
+    struct pass_info pass_fresh[VO_PASS_PERF_MAX];
+    struct pass_info pass_redraw[VO_PASS_PERF_MAX];
     struct pass_info *pass;
     int pass_idx;
     struct timer_pool *upload_timer;
@@ -993,7 +991,7 @@ static void uninit_video(struct gl_video *p)
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 {
-    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+    if (!p->pass || p->pass_idx == VO_PASS_PERF_MAX)
         return;
 
     struct pass_info *pass = &p->pass[p->pass_idx];
@@ -1008,7 +1006,7 @@ static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 PRINTF_ATTRIBUTE(2, 3)
 static void pass_describe(struct gl_video *p, const char *textf, ...)
 {
-    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+    if (!p->pass || p->pass_idx == VO_PASS_PERF_MAX)
         return;
 
     struct pass_info *pass = &p->pass[p->pass_idx];
@@ -1027,7 +1025,7 @@ static void pass_info_reset(struct gl_video *p, bool is_redraw)
     p->pass = is_redraw ? p->pass_redraw : p->pass_fresh;
     p->pass_idx = 0;
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         p->pass[i].desc.len = 0;
         p->pass[i].perf = (struct mp_pass_perf){0};
     }
@@ -1038,7 +1036,7 @@ static void pass_report_performance(struct gl_video *p)
     if (!p->pass)
         return;
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         struct pass_info *pass = &p->pass[i];
         if (pass->desc.len) {
             MP_DBG(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
@@ -3152,7 +3150,7 @@ void gl_video_resize(struct gl_video *p,
 
 static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)
 {
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         if (!pass[i].desc.len)
             break;
         out->perf[out->count] = pass[i].perf;
@@ -3499,7 +3497,7 @@ void gl_video_uninit(struct gl_video *p)
     timer_pool_destroy(p->blit_timer);
     timer_pool_destroy(p->osd_timer);
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         talloc_free(p->pass_fresh[i].desc.start);
         talloc_free(p->pass_redraw[i].desc.start);
     }
