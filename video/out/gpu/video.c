@@ -135,7 +135,7 @@ struct saved_img {
 struct tex_hook {
     const char *save_tex;
     const char *hook_tex[SHADER_MAX_HOOKS];
-    const char *bind_tex[TEXUNIT_VIDEO_NUM];
+    const char *bind_tex[SHADER_MAX_BINDS];
     int components; // how many components are relevant (0 = same as input)
     void *priv; // this gets talloc_freed when the tex_hook is removed
     void (*hook)(struct gl_video *p, struct image img, // generates GLSL
@@ -160,8 +160,6 @@ struct pass_info {
     struct bstr desc;
     struct mp_pass_perf perf;
 };
-
-#define PASS_INFO_MAX (SHADER_MAX_PASSES + 32)
 
 struct dr_buffer {
     struct ra_buf *buf;
@@ -224,14 +222,18 @@ struct gl_video {
     struct ra_tex *screen_tex;
     struct ra_tex *output_tex;
     struct ra_tex *vdpau_deinterleave_tex[2];
+    struct ra_tex **hook_textures;
+    int num_hook_textures;
+    int idx_hook_textures;
+
     struct ra_buf *hdr_peak_ssbo;
     struct surface surfaces[SURFACES_MAX];
 
     // user pass descriptions and textures
-    struct tex_hook tex_hooks[SHADER_MAX_PASSES];
-    int tex_hook_num;
-    struct gl_user_shader_tex user_textures[SHADER_MAX_PASSES];
-    int user_tex_num;
+    struct tex_hook *tex_hooks;
+    int num_tex_hooks;
+    struct gl_user_shader_tex *user_textures;
+    int num_user_textures;
 
     int surface_idx;
     int surface_now;
@@ -249,9 +251,15 @@ struct gl_video {
     struct mp_osd_res osd_rect; // OSD size/margins
 
     // temporary during rendering
-    struct image pass_img[TEXUNIT_VIDEO_NUM];
     struct compute_info pass_compute; // compute shader metadata for this pass
+    struct image pass_img[TEXUNIT_VIDEO_NUM]; // bound images for this pass
     int pass_img_num;
+    struct saved_img *saved_imgs;     // saved (named) images for this frame
+    int num_saved_imgs;
+
+    // effective current texture metadata - this will essentially affect the
+    // next render pass target, as well as implicitly tracking what needs to
+    // be done with the image
     int texture_w, texture_h;
     struct gl_transform texture_offset; // texture transform without rotation
     int components;
@@ -259,19 +267,13 @@ struct gl_video {
     float user_gamma;
 
     // pass info / metrics
-    struct pass_info pass_fresh[PASS_INFO_MAX];
-    struct pass_info pass_redraw[PASS_INFO_MAX];
+    struct pass_info pass_fresh[VO_PASS_PERF_MAX];
+    struct pass_info pass_redraw[VO_PASS_PERF_MAX];
     struct pass_info *pass;
     int pass_idx;
     struct timer_pool *upload_timer;
     struct timer_pool *blit_timer;
     struct timer_pool *osd_timer;
-
-    // intermediate textures
-    struct saved_img saved_img[SHADER_MAX_SAVED];
-    int saved_img_num;
-    struct ra_tex *hook_fbos[SHADER_MAX_SAVED];
-    int hook_fbo_num;
 
     int frames_uploaded;
     int frames_rendered;
@@ -478,14 +480,14 @@ static void gl_video_reset_surfaces(struct gl_video *p)
 
 static void gl_video_reset_hooks(struct gl_video *p)
 {
-    for (int i = 0; i < p->tex_hook_num; i++)
+    for (int i = 0; i < p->num_tex_hooks; i++)
         talloc_free(p->tex_hooks[i].priv);
 
-    for (int i = 0; i < p->user_tex_num; i++)
+    for (int i = 0; i < p->num_user_textures; i++)
         ra_tex_free(p->ra, &p->user_textures[i].tex);
 
-    p->tex_hook_num = 0;
-    p->user_tex_num = 0;
+    p->num_tex_hooks = 0;
+    p->num_user_textures = 0;
 }
 
 static inline int surface_wrap(int id)
@@ -523,8 +525,8 @@ static void uninit_rendering(struct gl_video *p)
     for (int n = 0; n < SURFACES_MAX; n++)
         ra_tex_free(p->ra, &p->surfaces[n].tex);
 
-    for (int n = 0; n < SHADER_MAX_SAVED; n++)
-        ra_tex_free(p->ra, &p->hook_fbos[n]);
+    for (int n = 0; n < p->num_hook_textures; n++)
+        ra_tex_free(p->ra, &p->hook_textures[n]);
 
     for (int n = 0; n < 2; n++)
         ra_tex_free(p->ra, &p->vdpau_deinterleave_tex[n]);
@@ -999,7 +1001,7 @@ static void uninit_video(struct gl_video *p)
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 {
-    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+    if (!p->pass || p->pass_idx == VO_PASS_PERF_MAX)
         return;
 
     struct pass_info *pass = &p->pass[p->pass_idx];
@@ -1014,7 +1016,7 @@ static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
 PRINTF_ATTRIBUTE(2, 3)
 static void pass_describe(struct gl_video *p, const char *textf, ...)
 {
-    if (!p->pass || p->pass_idx == PASS_INFO_MAX)
+    if (!p->pass || p->pass_idx == VO_PASS_PERF_MAX)
         return;
 
     struct pass_info *pass = &p->pass[p->pass_idx];
@@ -1033,7 +1035,7 @@ static void pass_info_reset(struct gl_video *p, bool is_redraw)
     p->pass = is_redraw ? p->pass_redraw : p->pass_fresh;
     p->pass_idx = 0;
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         p->pass[i].desc.len = 0;
         p->pass[i].perf = (struct mp_pass_perf){0};
     }
@@ -1044,7 +1046,7 @@ static void pass_report_performance(struct gl_video *p)
     if (!p->pass)
         return;
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         struct pass_info *pass = &p->pass[i];
         if (pass->desc.len) {
             MP_DBG(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
@@ -1307,9 +1309,9 @@ static bool saved_img_find(struct gl_video *p, const char *name,
     if (!name || !out)
         return false;
 
-    for (int i = 0; i < p->saved_img_num; i++) {
-        if (strcmp(p->saved_img[i].name, name) == 0) {
-            *out = p->saved_img[i].img;
+    for (int i = 0; i < p->num_saved_imgs; i++) {
+        if (strcmp(p->saved_imgs[i].name, name) == 0) {
+            *out = p->saved_imgs[i].img;
             return true;
         }
     }
@@ -1322,18 +1324,17 @@ static void saved_img_store(struct gl_video *p, const char *name,
 {
     assert(name);
 
-    for (int i = 0; i < p->saved_img_num; i++) {
-        if (strcmp(p->saved_img[i].name, name) == 0) {
-            p->saved_img[i].img = img;
+    for (int i = 0; i < p->num_saved_imgs; i++) {
+        if (strcmp(p->saved_imgs[i].name, name) == 0) {
+            p->saved_imgs[i].img = img;
             return;
         }
     }
 
-    assert(p->saved_img_num < SHADER_MAX_SAVED);
-    p->saved_img[p->saved_img_num++] = (struct saved_img) {
+    MP_TARRAY_APPEND(p, p->saved_imgs, p->num_saved_imgs, (struct saved_img) {
         .name = name,
         .img = img
-    };
+    });
 }
 
 static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
@@ -1356,7 +1357,7 @@ static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
         // BIND can also be used to load user-defined textures, in which
         // case we will directly load them as a uniform instead of
         // generating the hook_prelude boilerplate
-        for (int u = 0; u < p->user_tex_num; u++) {
+        for (int u = 0; u < p->num_user_textures; u++) {
             struct gl_user_shader_tex *utex = &p->user_textures[u];
             if (bstr_equals0(utex->name, bind_name)) {
                 gl_sc_uniform_texture(p->sc, bind_name, utex->tex);
@@ -1381,10 +1382,18 @@ next_bind: ;
     return true;
 }
 
+static struct ra_tex **next_hook_tex(struct gl_video *p)
+{
+    if (p->idx_hook_textures == p->num_hook_textures)
+        MP_TARRAY_APPEND(p, p->hook_textures, p->num_hook_textures, NULL);
+
+    return &p->hook_textures[p->idx_hook_textures++];
+}
+
 // Process hooks for a plane, saving the result and returning a new image
 // If 'trans' is NULL, the shader is forbidden from transforming img
 static struct image pass_hook(struct gl_video *p, const char *name,
-                                struct image img, struct gl_transform *trans)
+                              struct image img, struct gl_transform *trans)
 {
     if (!name)
         return img;
@@ -1392,7 +1401,7 @@ static struct image pass_hook(struct gl_video *p, const char *name,
     saved_img_store(p, name, img);
 
     MP_DBG(p, "Running hooks for %s\n", name);
-    for (int i = 0; i < p->tex_hook_num; i++) {
+    for (int i = 0; i < p->num_tex_hooks; i++) {
         struct tex_hook *hook = &p->tex_hooks[i];
 
         // Figure out if this pass hooks this texture
@@ -1427,12 +1436,10 @@ found:
         int w = lroundf(fabs(sz.x1 - sz.x0));
         int h = lroundf(fabs(sz.y1 - sz.y0));
 
-        assert(p->hook_fbo_num < SHADER_MAX_SAVED);
-        struct ra_tex **fbo = &p->hook_fbos[p->hook_fbo_num++];
-        finish_pass_tex(p, fbo, w, h);
-
+        struct ra_tex **tex = next_hook_tex(p);
+        finish_pass_tex(p, tex, w, h);
         const char *store_name = hook->save_tex ? hook->save_tex : name;
-        struct image saved_img = image_wrap(*fbo, img.type, comps);
+        struct image saved_img = image_wrap(*tex, img.type, comps);
 
         // If the texture we're saving overwrites the "current" texture, also
         // update the tex parameter so that the future loop cycles will use the
@@ -1466,7 +1473,7 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     if (!name)
         return;
 
-    for (int i = 0; i < p->tex_hook_num; i++) {
+    for (int i = 0; i < p->num_tex_hooks; i++) {
         struct tex_hook *hook = &p->tex_hooks[i];
 
         for (int h = 0; h < SHADER_MAX_HOOKS; h++) {
@@ -1483,11 +1490,9 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     // Nothing uses this texture, don't bother storing it
     return;
 
-found:
-    assert(p->hook_fbo_num < SHADER_MAX_SAVED);
-    struct ra_tex **tex = &p->hook_fbos[p->hook_fbo_num++];
+found: ;
+    struct ra_tex **tex = next_hook_tex(p);
     finish_pass_tex(p, tex, p->texture_w, p->texture_h);
-
     struct image img = image_wrap(*tex, PLANE_RGB, p->components);
     img = pass_hook(p, name, img, tex_trans);
     copy_image(p, &(int){0}, img);
@@ -1781,18 +1786,6 @@ static bool image_equiv(struct image a, struct image b)
            gl_transform_eq(a.transform, b.transform);
 }
 
-static bool add_hook(struct gl_video *p, struct tex_hook hook)
-{
-    if (p->tex_hook_num < SHADER_MAX_PASSES) {
-        p->tex_hooks[p->tex_hook_num++] = hook;
-        return true;
-    } else {
-        MP_ERR(p, "Too many passes! Limit is %d.\n", SHADER_MAX_PASSES);
-        talloc_free(hook.priv);
-        return false;
-    }
-}
-
 static void deband_hook(struct gl_video *p, struct image img,
                         struct gl_transform *trans, void *priv)
 {
@@ -1839,10 +1832,10 @@ static bool szexp_lookup(void *priv, struct bstr var, float size[2])
         return true;
     }
 
-    for (int o = 0; o < p->saved_img_num; o++) {
-        if (bstr_equals0(var, p->saved_img[o].name)) {
-            size[0] = p->saved_img[o].img.w;
-            size[1] = p->saved_img[o].img.h;
+    for (int o = 0; o < p->num_saved_imgs; o++) {
+        if (bstr_equals0(var, p->saved_imgs[o].name)) {
+            size[0] = p->saved_imgs[o].img.w;
+            size[1] = p->saved_imgs[o].img.h;
             return true;
         }
     }
@@ -1908,27 +1901,22 @@ static bool add_user_hook(void *priv, struct gl_user_shader_hook hook)
     for (int h = 0; h < SHADER_MAX_BINDS; h++)
         texhook.bind_tex[h] = bstrdup0(copy, hook.bind_tex[h]);
 
-    return add_hook(p, texhook);
+    MP_TARRAY_APPEND(p, p->tex_hooks, p->num_tex_hooks, texhook);
+    return true;
 }
 
 static bool add_user_tex(void *priv, struct gl_user_shader_tex tex)
 {
     struct gl_video *p = priv;
 
-    if (p->user_tex_num == SHADER_MAX_PASSES) {
-        MP_ERR(p, "Too many textures! Limit is %d.\n", SHADER_MAX_PASSES);
-        goto err;
-    }
-
     tex.tex = ra_tex_create(p->ra, &tex.params);
     TA_FREEP(&tex.params.initial_data);
 
-    p->user_textures[p->user_tex_num++] = tex;
-    return true;
+    if (!tex.tex)
+        return false;
 
-err:
-    talloc_free(tex.params.initial_data);
-    return false;
+    MP_TARRAY_APPEND(p, p->user_textures, p->num_user_textures, tex);
+    return true;
 }
 
 static void load_user_shaders(struct gl_video *p, char **shaders)
@@ -1947,7 +1935,7 @@ static void gl_video_setup_hooks(struct gl_video *p)
     gl_video_reset_hooks(p);
 
     if (p->opts.deband) {
-        add_hook(p, (struct tex_hook) {
+        MP_TARRAY_APPEND(p, p->tex_hooks, p->num_tex_hooks, (struct tex_hook) {
             .hook_tex = {"LUMA", "CHROMA", "RGB", "XYZ"},
             .bind_tex = {"HOOKED"},
             .hook = deband_hook,
@@ -1955,7 +1943,7 @@ static void gl_video_setup_hooks(struct gl_video *p)
     }
 
     if (p->opts.unsharp != 0.0) {
-        add_hook(p, (struct tex_hook) {
+        MP_TARRAY_APPEND(p, p->tex_hooks, p->num_tex_hooks, (struct tex_hook) {
             .hook_tex = {"MAIN"},
             .bind_tex = {"HOOKED"},
             .hook = unsharp_hook,
@@ -2673,8 +2661,8 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
     p->texture_h = p->image_params.h;
     p->texture_offset = identity_trans;
     p->components = 0;
-    p->saved_img_num = 0;
-    p->hook_fbo_num = 0;
+    p->num_saved_imgs = 0;
+    p->idx_hook_textures = 0;
     p->use_linear = false;
 
     // try uploading the frame
@@ -3152,7 +3140,7 @@ void gl_video_resize(struct gl_video *p,
 
 static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)
 {
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         if (!pass[i].desc.len)
             break;
         out->perf[out->count] = pass[i].perf;
@@ -3499,7 +3487,7 @@ void gl_video_uninit(struct gl_video *p)
     timer_pool_destroy(p->blit_timer);
     timer_pool_destroy(p->osd_timer);
 
-    for (int i = 0; i < PASS_INFO_MAX; i++) {
+    for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         talloc_free(p->pass_fresh[i].desc.start);
         talloc_free(p->pass_redraw[i].desc.start);
     }
