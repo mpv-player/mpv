@@ -21,10 +21,8 @@
 #include "utils.h"
 #include "ra.h"
 
-#define SHADER_MAX_PASSES 32
 #define SHADER_MAX_HOOKS 16
 #define SHADER_MAX_BINDS 6
-#define SHADER_MAX_SAVED 64
 #define MAX_SZEXP_SIZE 32
 
 enum szexp_op {
