@@ -411,7 +411,7 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
 
     int next_na = 0;
     for (int n = 0; n < num_planes; n++)
-        next_na += newmap->speaker[n] == MP_SPEAKER_ID_NA;
+        next_na += newmap->speaker[n] != MP_SPEAKER_ID_NA;
 
     for (int n = 0; n < num_planes; n++) {
         int src = reorder[n];
