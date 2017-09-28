@@ -248,10 +248,10 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
         s->access_references = opt;
     }
 
-    MP_VERBOSE(s, "Opening %s\n", url);
+    MP_DBG(s, "Opening %s\n", url);
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
-        MP_VERBOSE(s, "No write access implemented.\n");
+        MP_DBG(s, "No write access implemented.\n");
         talloc_free(s);
         return STREAM_NO_MATCH;
     }
@@ -273,7 +273,7 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
 
-    MP_VERBOSE(s, "Stream opened successfully.\n");
+    MP_DBG(s, "Stream opened successfully.\n");
 
     *ret = s;
     return STREAM_OK;

@@ -773,7 +773,7 @@ static GLuint load_program(struct ra *ra, const struct ra_renderpass_params *p,
         GLint status = 0;
         gl->GetProgramiv(prog, GL_LINK_STATUS, &status);
         if (status) {
-            MP_VERBOSE(ra, "Loading binary program succeeded.\n");
+            MP_DBG(ra, "Loading binary program succeeded.\n");
         } else {
             gl->DeleteProgram(prog);
             prog = 0;

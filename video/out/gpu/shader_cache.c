@@ -144,7 +144,7 @@ void gl_sc_reset(struct gl_shader_cache *sc)
 
 static void sc_flush_cache(struct gl_shader_cache *sc)
 {
-    MP_VERBOSE(sc, "flushing shader cache\n");
+    MP_DBG(sc, "flushing shader cache\n");
 
     for (int n = 0; n < sc->num_entries; n++) {
         struct sc_entry *e = sc->entries[n];
@@ -554,15 +554,6 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
     void *tmp = talloc_new(NULL);
     struct ra_renderpass_params params = sc->params;
 
-    MP_VERBOSE(sc, "new shader program:\n");
-    if (sc->header_text.len) {
-        MP_VERBOSE(sc, "header:\n");
-        mp_log_source(sc->log, MSGL_V, sc->header_text.start);
-        MP_VERBOSE(sc, "body:\n");
-    }
-    if (sc->text.len)
-        mp_log_source(sc->log, MSGL_V, sc->text.start);
-
     const char *cache_header = "mpv shader cache v1\n";
     char *cache_filename = NULL;
     char *cache_dir = NULL;
@@ -587,7 +578,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
 
         cache_filename = mp_path_join(tmp, cache_dir, hashstr);
         if (stat(cache_filename, &(struct stat){0}) == 0) {
-            MP_VERBOSE(sc, "Trying to load shader from disk...\n");
+            MP_DBG(sc, "Trying to load shader from disk...\n");
             struct bstr cachedata =
                 stream_read_file(cache_filename, tmp, sc->global, 1000000000);
             if (bstr_eatstart0(&cachedata, cache_header))
@@ -637,7 +628,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
         if (nc.len && !bstr_equals(params.cached_program, nc)) {
             mp_mkdirp(cache_dir);
 
-            MP_VERBOSE(sc, "Writing shader cache file: %s\n", cache_filename);
+            MP_DBG(sc, "Writing shader cache file: %s\n", cache_filename);
             FILE *out = fopen(cache_filename, "wb");
             if (out) {
                 fwrite(cache_header, strlen(cache_header), 1, out);

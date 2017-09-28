@@ -1076,10 +1076,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     double prev_error = mpctx->display_sync_error;
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
 
-    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f/%f)\n",
-           mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
-           mpctx->display_sync_error, mpctx->display_sync_error / vsync,
-           mpctx->display_sync_error / frame_duration);
+    MP_TRACE(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f/%f)\n",
+            mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
+            mpctx->display_sync_error, mpctx->display_sync_error / vsync,
+            mpctx->display_sync_error / frame_duration);
 
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
