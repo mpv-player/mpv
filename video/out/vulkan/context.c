@@ -467,6 +467,11 @@ error:
     return false;
 }
 
+static void present_cb(struct priv *p, void *arg)
+{
+    p->frames_in_flight--;
+}
+
 static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
 {
     struct priv *p = sw->priv;
@@ -475,18 +480,32 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     if (!p->swapchain)
         goto error;
 
+    struct vk_cmd *cmd = ra_vk_submit(ra, p->images[p->last_imgidx]);
+    if (!cmd)
+        goto error;
+
     int semidx = p->idx_sems++;
     p->idx_sems %= p->num_sems;
+    vk_cmd_sig(cmd, p->sems_out[semidx]);
 
-    if (!ra_vk_submit(ra, p->images[p->last_imgidx], p->sems_in[semidx],
-                      p->sems_out[semidx], &p->frames_in_flight))
+    // XXX: These are the only two stages that we currently use/support for
+    // actually outputting to the swapchain. Normally, this would be handled by
+    // a dedicated vk_signal mechanism, but for now just hard-code it here as a
+    // quick work-around.
+    vk_cmd_dep(cmd, p->sems_in[semidx], VK_PIPELINE_STAGE_TRANSFER_BIT |
+               VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+    p->frames_in_flight++;
+    vk_cmd_callback(cmd, (vk_cb) present_cb, p, NULL);
+
+    vk_cmd_queue(vk, cmd);
+    if (!vk_flush_commands(vk))
         goto error;
 
     // Older nvidia drivers can spontaneously combust when submitting to the
     // same queue as we're rendering from, in a multi-queue scenario. Safest
-    // option is to cycle the queues first and then submit to the next queue.
+    // option is to flush the commands first and then submit to the next queue.
     // We can drop this hack in the future, I suppose.
-    vk_cmd_cycle_queues(vk);
     struct vk_cmdpool *pool = vk->pool;
     VkQueue queue = pool->queues[pool->idx_queues];
 

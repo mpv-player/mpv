@@ -131,8 +131,10 @@ struct vk_cmdpool {
     int idx_queues;
     // Command buffers associated with this queue
     struct vk_cmd **cmds_available; // available for re-recording
+    struct vk_cmd **cmds_queued;    // recorded but not yet submitted
     struct vk_cmd **cmds_pending;   // submitted but not completed
     int num_cmds_available;
+    int num_cmds_queued;
     int num_cmds_pending;
 };
 
@@ -140,14 +142,15 @@ struct vk_cmdpool {
 // Returns NULL on failure.
 struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
 
-// Finish recording a command buffer and submit it for execution. This function
+// Finish recording a command buffer and queue it for execution. This function
 // takes over ownership of *cmd, i.e. the caller should not touch it again.
-// Returns whether successful.
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd);
+void vk_cmd_queue(struct mpvk_ctx *vk, struct vk_cmd *cmd);
 
-// Rotate the queues for each vk_cmdpool. Call this once per frame to ensure
-// good parallelism between frames when using multiple queues
-void vk_cmd_cycle_queues(struct mpvk_ctx *vk);
+// Flush all currently queued commands. Call this once per frame, after
+// submitting all of the command buffers for that frame. Calling this more
+// often than that is possible but bad for performance.
+// Returns whether successful. Failed commands will be implicitly dropped.
+bool vk_flush_commands(struct mpvk_ctx *vk);
 
 // Predefined structs for a simple non-layered, non-mipped image
 extern const VkImageSubresourceRange vk_range;
