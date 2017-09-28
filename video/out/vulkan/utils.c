@@ -665,42 +665,65 @@ error:
     return NULL;
 }
 
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd)
+void vk_cmd_queue(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 {
     struct vk_cmdpool *pool = cmd->pool;
 
     VK(vkEndCommandBuffer(cmd->buf));
 
-    VkSubmitInfo sinfo = {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &cmd->buf,
-        .waitSemaphoreCount = cmd->num_deps,
-        .pWaitSemaphores = cmd->deps,
-        .pWaitDstStageMask = cmd->depstages,
-        .signalSemaphoreCount = cmd->num_sigs,
-        .pSignalSemaphores = cmd->sigs,
-    };
-
     VK(vkResetFences(vk->dev, 1, &cmd->fence));
-    VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));
-    MP_TRACE(vk, "Submitted command on queue %p (QF %d)\n", (void *)cmd->queue,
-             pool->qf);
-
+    MP_TARRAY_APPEND(pool, pool->cmds_queued, pool->num_cmds_queued, cmd);
     vk->last_cmd = cmd;
-    MP_TARRAY_APPEND(pool, pool->cmds_pending, pool->num_cmds_pending, cmd);
-    return true;
+    return;
 
 error:
     vk_cmd_reset(vk, cmd);
     MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
-    return false;
 }
 
-void vk_cmd_cycle_queues(struct mpvk_ctx *vk)
+bool vk_flush_commands(struct mpvk_ctx *vk)
 {
+    bool ret = true;
+
     struct vk_cmdpool *pool = vk->pool;
+    for (int i = 0; i < pool->num_cmds_queued; i++) {
+        struct vk_cmd *cmd = pool->cmds_queued[i];
+
+        VkSubmitInfo sinfo = {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &cmd->buf,
+            .waitSemaphoreCount = cmd->num_deps,
+            .pWaitSemaphores = cmd->deps,
+            .pWaitDstStageMask = cmd->depstages,
+            .signalSemaphoreCount = cmd->num_sigs,
+            .pSignalSemaphores = cmd->sigs,
+        };
+
+        VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));
+        MP_TARRAY_APPEND(pool, pool->cmds_pending, pool->num_cmds_pending, cmd);
+
+        if (mp_msg_test(vk->log, MSGL_TRACE)) {
+            MP_TRACE(vk, "Submitted command on queue %p (QF %d):\n",
+                     (void *)cmd->queue, pool->qf);
+            for (int n = 0; n < cmd->num_deps; n++)
+                MP_TRACE(vk, "    waits on semaphore %p\n", (void *)cmd->deps[n]);
+            for (int n = 0; n < cmd->num_sigs; n++)
+                MP_TRACE(vk, "    signals semaphore %p\n", (void *)cmd->sigs[n]);
+        }
+        continue;
+
+error:
+        vk_cmd_reset(vk, cmd);
+        MP_TARRAY_APPEND(pool, pool->cmds_available, pool->num_cmds_available, cmd);
+        ret = false;
+    }
+
+    pool->num_cmds_queued = 0;
+
+    // Rotate the queues to ensure good parallelism across frames
     pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
+    return ret;
 }
 
 const VkImageSubresourceRange vk_range = {

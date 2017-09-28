@@ -34,18 +34,15 @@ static struct vk_cmd *vk_require_cmd(struct ra *ra)
     return p->cmd;
 }
 
-static bool vk_flush(struct ra *ra)
+static void vk_submit(struct ra *ra)
 {
     struct ra_vk *p = ra->priv;
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
     if (p->cmd) {
-        if (!vk_cmd_submit(vk, p->cmd))
-            return false;
+        vk_cmd_queue(vk, p->cmd);
         p->cmd = NULL;
     }
-
-    return true;
 }
 
 // The callback's *priv will always be set to `ra`
@@ -71,7 +68,8 @@ static void vk_destroy_ra(struct ra *ra)
     struct ra_vk *p = ra->priv;
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
-    vk_flush(ra);
+    vk_submit(ra);
+    vk_flush_commands(vk);
     mpvk_dev_wait_cmds(vk, UINT64_MAX);
     ra_tex_free(ra, &p->clear_tex);
 
@@ -1706,41 +1704,19 @@ static struct ra_fns ra_fns_vk = {
     .timer_stop             = vk_timer_stop,
 };
 
-static void present_cb(void *priv, int *inflight)
+struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex)
 {
-    *inflight -= 1;
-}
-
-bool ra_vk_submit(struct ra *ra, struct ra_tex *tex, VkSemaphore acquired,
-                  VkSemaphore done, int *inflight)
-{
+    struct ra_vk *p = ra->priv;
     struct vk_cmd *cmd = vk_require_cmd(ra);
     if (!cmd)
-        goto error;
-
-    if (inflight) {
-        *inflight += 1;
-        vk_cmd_callback(cmd, (vk_cb)present_cb, NULL, inflight);
-    }
+        return NULL;
 
     struct ra_tex_vk *tex_vk = tex->priv;
     assert(tex_vk->external_img);
     tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false);
 
-    // These are the only two stages that we use/support for actually
-    // outputting to swapchain imagechain images, so just add a dependency
-    // on both of them. In theory, we could maybe come up with some more
-    // advanced mechanism of tracking dynamic dependencies, but that seems
-    // like overkill.
-    vk_cmd_dep(cmd, acquired,
-               VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-               VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-    vk_cmd_sig(cmd, done);
-
-    return vk_flush(ra);
-
-error:
-    return false;
+    // Return this directly instead of going through vk_submit
+    p->cmd = NULL;
+    return cmd;
 }
