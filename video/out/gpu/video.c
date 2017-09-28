@@ -1197,8 +1197,8 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
             &p->tmp_vertex[num_vertex_attribs * 1],
             vertex_stride);
 
-    return gl_sc_dispatch_draw(p->sc, fbo.tex, p->vao, p->vao_len, vertex_stride,
-                               p->tmp_vertex, num_vertices);
+    return gl_sc_dispatch_draw(p->sc, fbo.tex, p->vao, num_vertex_attribs,
+                               vertex_stride, p->tmp_vertex, num_vertices);
 }
 
 static void finish_pass_fbo(struct gl_video *p, struct ra_fbo fbo,
