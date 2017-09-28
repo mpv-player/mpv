@@ -409,7 +409,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("opengl-tex-pad-y", "gpu-tex-pad-y"),
         OPT_REPLACED("opengl-fbo-format", "fbo-format"),
         OPT_REPLACED("opengl-dumb-mode", "gpu-dumb-mode"),
-        OPT_REPLACED("opengl-gamma", "gpu-gamma"),
+        OPT_REPLACED("opengl-gamma", "gamma-factor"),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
