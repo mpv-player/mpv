@@ -121,6 +121,35 @@ void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep, VkPipelineStageFlags stage)
 // after the command completes.
 void vk_cmd_sig(struct vk_cmd *cmd, VkSemaphore sig);
 
+// Signal abstraction: represents an abstract synchronization mechanism.
+// Internally, this may either resolve as a semaphore or an event depending
+// on whether the appropriate conditions are met.
+struct vk_signal {
+    VkSemaphore semaphore;
+    VkEvent event;
+    VkQueue event_source;
+};
+
+// Generates a signal after the execution of all previous commands matching the
+// given the pipeline stage. The signal is owned by the caller, and must be
+// consumed eith vk_cmd_wait or released with vk_signal_cancel in order to
+// free the resources.
+struct vk_signal *vk_cmd_signal(struct mpvk_ctx *vk, struct vk_cmd *cmd,
+                                VkPipelineStageFlags stage);
+
+// Consumes a previously generated signal. This signal must fire by the
+// indicated stage before the command can run. If *event is not NULL, then it
+// MAY be set to a VkEvent which the caller MUST manually wait on in the most
+// appropriate way. This function takes over ownership of the signal (and the
+// signal will be released/reused automatically)
+void vk_cmd_wait(struct mpvk_ctx *vk, struct vk_cmd *cmd,
+                 struct vk_signal **sigptr, VkPipelineStageFlags stage,
+                 VkEvent *out_event);
+
+// Destroys a currently pending signal, for example if the resource is no
+// longer relevant.
+void vk_signal_destroy(struct mpvk_ctx *vk, struct vk_signal **sig);
+
 // Command pool / queue family hybrid abstraction
 struct vk_cmdpool {
     VkQueueFamilyProperties props;

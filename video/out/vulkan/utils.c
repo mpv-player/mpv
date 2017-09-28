@@ -140,6 +140,9 @@ void mpvk_uninit(struct mpvk_ctx *vk)
 
     if (vk->dev) {
         vk_cmdpool_destroy(vk, vk->pool);
+        for (int i = 0; i < vk->num_signals; i++)
+            vk_signal_destroy(vk, &vk->signals[i]);
+        talloc_free(vk->signals);
         vk_malloc_uninit(vk);
         vkDestroyDevice(vk->dev, MPVK_ALLOCATOR);
     }
@@ -724,6 +727,114 @@ error:
     // Rotate the queues to ensure good parallelism across frames
     pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
     return ret;
+}
+
+void vk_signal_destroy(struct mpvk_ctx *vk, struct vk_signal **sig)
+{
+    if (!*sig)
+        return;
+
+    vkDestroySemaphore(vk->dev, (*sig)->semaphore, MPVK_ALLOCATOR);
+    vkDestroyEvent(vk->dev, (*sig)->event, MPVK_ALLOCATOR);
+    talloc_free(*sig);
+    *sig = NULL;
+}
+
+struct vk_signal *vk_cmd_signal(struct mpvk_ctx *vk, struct vk_cmd *cmd,
+                                VkPipelineStageFlags stage)
+{
+    struct vk_signal *sig = NULL;
+    if (MP_TARRAY_POP(vk->signals, vk->num_signals, &sig))
+        goto done;
+
+    // no available signal => initialize a new one
+    sig = talloc_zero(NULL, struct vk_signal);
+    static const VkSemaphoreCreateInfo sinfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+    };
+
+    VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &sig->semaphore));
+
+    static const VkEventCreateInfo einfo = {
+        .sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO,
+    };
+
+    VK(vkCreateEvent(vk->dev, &einfo, MPVK_ALLOCATOR, &sig->event));
+
+done:
+    // Signal both the semaphore and the event. (We will only end up using one)
+    vk_cmd_sig(cmd, sig->semaphore);
+    vkCmdSetEvent(cmd->buf, sig->event, stage);
+    sig->event_source = cmd->queue;
+    return sig;
+
+error:
+    vk_signal_destroy(vk, &sig);
+    return NULL;
+}
+
+static bool unsignal_cmd(struct vk_cmd *cmd, VkSemaphore sem)
+{
+    for (int n = 0; n < cmd->num_sigs; n++) {
+        if (cmd->sigs[n] == sem) {
+            MP_TARRAY_REMOVE_AT(cmd->sigs, cmd->num_sigs, n);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Attempts to remove a queued signal operation. Returns true if sucessful,
+// i.e. the signal could be removed before it ever got fired.
+static bool unsignal(struct vk_cmd *cmd, VkSemaphore sem)
+{
+    if (unsignal_cmd(cmd, sem))
+        return true;
+
+    // Attempt to remove it from any queued commands
+    for (int i = 0; i < cmd->pool->num_cmds_queued; i++) {
+        if (unsignal_cmd(cmd->pool->cmds_queued[i], sem))
+            return true;
+    }
+
+    return false;
+}
+
+static void release_signal(struct mpvk_ctx *vk, struct vk_signal *sig)
+{
+    // The semaphore never needs to be recreated, because it's either
+    // unsignaled while still queued, or unsignaled as a result of a device
+    // wait. But the event *may* need to be reset, so just always reset it.
+    vkResetEvent(vk->dev, sig->event);
+    MP_TARRAY_APPEND(NULL, vk->signals, vk->num_signals, sig);
+}
+
+void vk_cmd_wait(struct mpvk_ctx *vk, struct vk_cmd *cmd,
+                 struct vk_signal **sigptr, VkPipelineStageFlags stage,
+                 VkEvent *out_event)
+{
+    struct vk_signal *sig = *sigptr;
+    if (!sig)
+        return;
+
+    if (out_event && sig->event && sig->event_source == cmd->queue &&
+        unsignal(cmd, sig->semaphore))
+    {
+        // If we can remove the semaphore signal operation from the history and
+        // pretend it never happened, then we get to use the VkEvent. This also
+        // requires that the VkEvent was signalled from the same VkQueue.
+        *out_event = sig->event;
+    } else if (sig->semaphore) {
+        // Otherwise, we use the semaphore. (This also unsignals it as a result
+        // of the command execution)
+        vk_cmd_dep(cmd, sig->semaphore, stage);
+    }
+
+    // In either case, once the command completes, we can release the signal
+    // resource back to the pool.
+    vk_cmd_callback(cmd, (vk_cb) release_signal, vk, sig);
+    *sigptr = NULL;
 }
 
 const VkImageSubresourceRange vk_range = {
