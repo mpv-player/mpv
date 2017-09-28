@@ -674,7 +674,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
 
     // Ditto for push constants
     if (sc->pushc_size > 0) {
-        ADD(dst, "layout(push_constant) uniform PushC {\n");
+        ADD(dst, "layout(std430, push_constant) uniform PushC {\n");
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_uniform *u = &sc->uniforms[n];
             if (u->type != SC_UNIFORM_TYPE_PUSHC)
