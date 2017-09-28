@@ -477,9 +477,10 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
                       &p->frames_in_flight))
         goto error;
 
-    // For some reason, nvidia absolutely shits itself when presenting from a
-    // full queue - so advance all of the cmdpool indices first and then do the
-    // present on an "empty" queue
+    // Older nvidia drivers can spontaneously combust when submitting to the
+    // same queue as we're rendering from, in a multi-queue scenario. Safest
+    // option is to cycle the queues first and then submit to the next queue.
+    // We can drop this hack in the future, I suppose.
     vk_cmd_cycle_queues(vk);
     struct vk_cmdpool *pool = vk->pool;
     VkQueue queue = pool->queues[pool->qindex];
