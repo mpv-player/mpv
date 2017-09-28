@@ -260,7 +260,7 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
     // If these assertions fail, n is an unrequested frame (or filtered twice).
     assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
     int index = n - p->out_frameno;
-    MP_DBG(vf, "filtered frame %d (%d)\n", n, index);
+    MP_TRACE(vf, "filtered frame %d (%d)\n", n, index);
     assert(p->requested[index] == &dummy_img);
 
     struct mp_image *res = NULL;
@@ -328,7 +328,7 @@ static bool locked_read_output(struct vf_instance *vf)
             //       infiltGetFrame (if it does, we would deadlock)
             p->requested[n] = (struct mp_image *)&dummy_img;
             p->failed = false;
-            MP_DBG(vf, "requesting frame %d (%d)\n", p->out_frameno + n, n);
+            MP_TRACE(vf, "requesting frame %d (%d)\n", p->out_frameno + n, n);
             p->vsapi->getFrameAsync(p->out_frameno + n, p->out_node,
                                     vs_frame_done, vf);
         }
@@ -463,7 +463,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
     VSFrameRef *ret = NULL;
 
     pthread_mutex_lock(&p->lock);
-    MP_DBG(vf, "VS asking for frame %d (at %d)\n", frameno, p->in_frameno);
+    MP_TRACE(vf, "VS asking for frame %d (at %d)\n", frameno, p->in_frameno);
     while (1) {
         if (p->shutdown) {
             p->vsapi->setFilterError("EOF or filter reinit/uninit", frameCtx);

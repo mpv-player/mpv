@@ -4845,7 +4845,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     bool async = cmd->flags & MP_ASYNC_CMD;
 
-    mp_cmd_dump(mpctx->log, cmd->id == MP_CMD_IGNORE ? MSGL_DEBUG : MSGL_V,
+    mp_cmd_dump(mpctx->log, cmd->id == MP_CMD_IGNORE ? MSGL_TRACE : MSGL_DEBUG,
                 "Run command:", cmd);
 
     if (cmd->flags & MP_EXPAND_PROPERTIES) {

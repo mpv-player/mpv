@@ -468,7 +468,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
             return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
         if (MP_KEY_IS_MOUSE_MOVE(code))
-            msgl = MSGL_DEBUG;
+            msgl = MSGL_TRACE;
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
         MP_MSG(ictx, msgl, "No key binding found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
@@ -478,8 +478,8 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     if (ret) {
         ret->input_section = cmd->owner->section;
         ret->key_name = talloc_steal(ret, mp_input_get_key_combo_name(&code, 1));
-        MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
-               ret->key_name, cmd->cmd, ret->input_section);
+        MP_TRACE(ictx, "key '%s' -> '%s' in '%s'\n",
+                 ret->key_name, cmd->cmd, ret->input_section);
         ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
@@ -501,8 +501,8 @@ static void update_mouse_section(struct input_ctx *ictx)
     ictx->mouse_section = new_section;
 
     if (strcmp(old, ictx->mouse_section) != 0) {
-        MP_DBG(ictx, "input: switch section %s -> %s\n",
-               old, ictx->mouse_section);
+        MP_TRACE(ictx, "input: switch section %s -> %s\n",
+                 old, ictx->mouse_section);
         mp_input_queue_cmd(ictx, get_cmd_from_keys(ictx, old, MP_KEY_MOUSE_LEAVE));
     }
 }
@@ -561,9 +561,9 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
 
     if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
         char *key = mp_input_get_key_name(code);
-        MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
-               code, key, (state & MP_KEY_STATE_DOWN) ? " down" : "",
-               (state & MP_KEY_STATE_UP) ? " up" : "");
+        MP_TRACE(ictx, "key code=%#x '%s'%s%s\n",
+                 code, key, (state & MP_KEY_STATE_DOWN) ? " down" : "",
+                 (state & MP_KEY_STATE_UP) ? " up" : "");
         talloc_free(key);
     }
 
@@ -708,7 +708,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     code = mp_normalize_keycode(code);
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (code == MP_INPUT_RELEASE_ALL) {
-        MP_DBG(ictx, "release all\n");
+        MP_TRACE(ictx, "release all\n");
         release_down_cmd(ictx, false);
         return;
     }
@@ -816,7 +816,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
-    MP_DBG(ictx, "mouse move %d/%d\n", x, y);
+    MP_TRACE(ictx, "mouse move %d/%d\n", x, y);
 
     if (ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) {
         input_unlock(ictx);
@@ -832,7 +832,7 @@ void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
             x = x * 1.0 / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
             y = y * 1.0 / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
         }
-        MP_DBG(ictx, "-> %d/%d\n", x, y);
+        MP_TRACE(ictx, "-> %d/%d\n", x, y);
     }
 
     ictx->mouse_event_counter++;

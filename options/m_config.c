@@ -900,8 +900,8 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
         goto done;
 
     if (r == 2) {
-        MP_VERBOSE(config, "Setting option '%.*s' = '%.*s' (flags = %d)\n",
-                   BSTR_P(name), BSTR_P(param), flags);
+        MP_DBG(config, "Setting option '%.*s' = '%.*s' (flags = %d)\n",
+               BSTR_P(name), BSTR_P(param), flags);
     }
 
     union m_option_value val = {0};
@@ -952,8 +952,8 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 
     if (mp_msg_test(config->log, MSGL_V)) {
         char *s = m_option_type_node.print(NULL, data);
-        MP_VERBOSE(config, "Setting option '%.*s' = %s (flags = %d) -> %d\n",
-                   BSTR_P(name), s ? s : "?", flags, r);
+        MP_DBG(config, "Setting option '%.*s' = %s (flags = %d) -> %d\n",
+               BSTR_P(name), s ? s : "?", flags, r);
         talloc_free(s);
     }
 

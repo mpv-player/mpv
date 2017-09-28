@@ -193,7 +193,7 @@ static void add_functions(struct script_ctx *ctx);
 static void load_file(lua_State *L, const char *fname)
 {
     struct script_ctx *ctx = get_ctx(L);
-    MP_VERBOSE(ctx, "loading file %s\n", fname);
+    MP_DBG(ctx, "loading file %s\n", fname);
     int r = luaL_loadfile(L, fname);
     if (r)
         lua_error(L);
@@ -222,7 +222,7 @@ static int load_builtin(lua_State *L)
 static void require(lua_State *L, const char *name)
 {
     struct script_ctx *ctx = get_ctx(L);
-    MP_VERBOSE(ctx, "loading %s\n", name);
+    MP_DBG(ctx, "loading %s\n", name);
     // Lazy, but better than calling the "require" function manually
     char buf[80];
     snprintf(buf, sizeof(buf), "require '%s'", name);

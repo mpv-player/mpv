@@ -109,8 +109,8 @@ static const int map_ass_level[] = {
     MSGL_INFO,
     MSGL_V,
     MSGL_V,
-    MSGL_V,             // 5 application recommended level
-    MSGL_DEBUG,
+    MSGL_DEBUG,         // 5 application recommended level
+    MSGL_TRACE,
     MSGL_TRACE,         // 7 "verbose DEBUG"
 };
 

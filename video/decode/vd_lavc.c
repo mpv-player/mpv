@@ -870,16 +870,16 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
         p->dr_w = w;
         p->dr_h = h;
         p->dr_stride_align = stride_align;
-        MP_VERBOSE(p, "DR parameter change to %dx%d %s align=%d\n", w, h,
-                   mp_imgfmt_to_name(imgfmt), stride_align);
+        MP_DBG(p, "DR parameter change to %dx%d %s align=%d\n", w, h,
+               mp_imgfmt_to_name(imgfmt), stride_align);
     }
 
     struct mp_image *img = mp_image_pool_get_no_alloc(p->dr_pool, imgfmt, w, h);
     if (!img) {
-        MP_VERBOSE(p, "Allocating new DR image...\n");
+        MP_DBG(p, "Allocating new DR image...\n");
         img = vo_get_image(vd->vo, imgfmt, w, h, stride_align);
         if (!img) {
-            MP_VERBOSE(p, "...failed..\n");
+            MP_DBG(p, "...failed..\n");
             goto fallback;
         }
 
