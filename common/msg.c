@@ -120,7 +120,7 @@ static void update_loglevel(struct mp_log *log)
     for (int n = 0; n < log->root->num_buffers; n++)
         log->level = MPMAX(log->level, log->root->buffers[n]->level);
     if (log->root->log_file)
-        log->level = MPMAX(log->level, MSGL_V);
+        log->level = MPMAX(log->level, MSGL_DEBUG);
     if (log->root->stats_file)
         log->level = MPMAX(log->level, MSGL_STATS);
     atomic_store(&log->reload_counter, atomic_load(&log->root->reload_counter));
@@ -285,7 +285,7 @@ static void write_log_file(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
 
-    if (!root->log_file || lev > MPMAX(MSGL_V, log->terminal_level))
+    if (!root->log_file || lev > MPMAX(MSGL_DEBUG, log->terminal_level))
         return;
 
     fprintf(root->log_file, "[%8.3f][%c][%s] %s",

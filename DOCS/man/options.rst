@@ -412,9 +412,9 @@ Program Behavior
 
 ``--log-file=<path>``
     Opens the given path for writing, and print log messages to it. Existing
-    files will be truncated. The log level is at least ``-v``, but can be
-    raised via ``--msg-level`` (the option cannot lower it below the forced
-    minimum log level).
+    files will be truncated. The log level is at least ``-v -v``, but
+    can be raised via ``--msg-level`` (the option cannot lower it below the
+    forced minimum log level).
 
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
