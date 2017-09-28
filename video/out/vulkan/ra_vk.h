@@ -18,13 +18,12 @@ struct ra_tex *ra_vk_wrap_swapchain_img(struct ra *ra, VkImage vkimg,
 
 // This function flushes the command buffers, transitions `tex` (which must be
 // a wrapped swapchain image) into a format suitable for presentation, and
-// submits the current rendering commands. The indicated semaphore must fire
-// before the submitted command can run. If `done` is non-NULL, it will be
-// set to a semaphore that fires once the command completes. If `inflight`
+// submits the current rendering commands. `acquired` must fire before the
+// command can run, and `done` will fire after it completes. If `inflight`
 // is non-NULL, it will be incremented when the command starts and decremented
 // when it completes.
 bool ra_vk_submit(struct ra *ra, struct ra_tex *tex, VkSemaphore acquired,
-                  VkSemaphore *done, int *inflight);
+                  VkSemaphore done, int *inflight);
 
 // May be called on a struct ra of any type. Returns NULL if the ra is not
 // a vulkan ra.
