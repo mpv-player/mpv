@@ -53,6 +53,10 @@ struct mpvk_ctx {
     struct vk_cmd *last_cmd; // most recently submitted (pending) command
     struct spirv_compiler *spirv; // GLSL -> SPIR-V compiler
 
+    // Common pool of signals, to avoid having to re-create these objects often
+    struct vk_signal **signals;
+    int num_signals;
+
     // Cached capabilities
     VkPhysicalDeviceLimits limits;
 };
