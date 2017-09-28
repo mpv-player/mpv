@@ -484,6 +484,7 @@ static void vk_cmd_reset(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 
     cmd->num_callbacks = 0;
     cmd->num_deps = 0;
+    cmd->num_sigs = 0;
 
     // also make sure to reset vk->last_cmd in case this was the last command
     if (vk->last_cmd == cmd)
@@ -497,7 +498,6 @@ static void vk_cmd_destroy(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 
     vk_cmd_poll(vk, cmd, UINT64_MAX);
     vk_cmd_reset(vk, cmd);
-    vkDestroySemaphore(vk->dev, cmd->done, MPVK_ALLOCATOR);
     vkDestroyFence(vk->dev, cmd->fence, MPVK_ALLOCATOR);
     vkFreeCommandBuffers(vk->dev, cmd->pool->pool, 1, &cmd->buf);
 
@@ -525,12 +525,6 @@ static struct vk_cmd *vk_cmd_create(struct mpvk_ctx *vk, struct vk_cmdpool *pool
 
     VK(vkCreateFence(vk->dev, &finfo, MPVK_ALLOCATOR, &cmd->fence));
 
-    VkSemaphoreCreateInfo sinfo = {
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-    };
-
-    VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &cmd->done));
-
     return cmd;
 
 error:
@@ -547,14 +541,18 @@ void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg)
     });
 }
 
-void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
-                VkPipelineStageFlags depstage)
+void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep, VkPipelineStageFlags stage)
 {
     int idx = cmd->num_deps++;
     MP_TARRAY_GROW(cmd, cmd->deps, idx);
     MP_TARRAY_GROW(cmd, cmd->depstages, idx);
     cmd->deps[idx] = dep;
-    cmd->depstages[idx] = depstage;
+    cmd->depstages[idx] = stage;
+}
+
+void vk_cmd_sig(struct vk_cmd *cmd, VkSemaphore sig)
+{
+    MP_TARRAY_APPEND(cmd, cmd->sigs, cmd->num_sigs, sig);
 }
 
 static void vk_cmdpool_destroy(struct mpvk_ctx *vk, struct vk_cmdpool *pool)
@@ -667,7 +665,7 @@ error:
     return NULL;
 }
 
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
+bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd)
 {
     struct vk_cmdpool *pool = cmd->pool;
 
@@ -680,13 +678,9 @@ bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done)
         .waitSemaphoreCount = cmd->num_deps,
         .pWaitSemaphores = cmd->deps,
         .pWaitDstStageMask = cmd->depstages,
+        .signalSemaphoreCount = cmd->num_sigs,
+        .pSignalSemaphores = cmd->sigs,
     };
-
-    if (done) {
-        sinfo.signalSemaphoreCount = 1;
-        sinfo.pSignalSemaphores = &cmd->done;
-        *done = cmd->done;
-    }
 
     VK(vkResetFences(vk->dev, 1, &cmd->fence));
     VK(vkQueueSubmit(cmd->queue, 1, &sinfo, cmd->fence));

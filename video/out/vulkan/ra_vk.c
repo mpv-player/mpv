@@ -34,16 +34,13 @@ static struct vk_cmd *vk_require_cmd(struct ra *ra)
     return p->cmd;
 }
 
-// Note: This technically follows the flush() API, but we don't need
-// to expose that (and in fact, it's a bad idea) since we control flushing
-// behavior with ra_vk_present_frame already.
-static bool vk_flush(struct ra *ra, VkSemaphore *done)
+static bool vk_flush(struct ra *ra)
 {
     struct ra_vk *p = ra->priv;
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
     if (p->cmd) {
-        if (!vk_cmd_submit(vk, p->cmd, done))
+        if (!vk_cmd_submit(vk, p->cmd))
             return false;
         p->cmd = NULL;
     }
@@ -74,7 +71,7 @@ static void vk_destroy_ra(struct ra *ra)
     struct ra_vk *p = ra->priv;
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
-    vk_flush(ra, NULL);
+    vk_flush(ra);
     mpvk_dev_wait_cmds(vk, UINT64_MAX);
     ra_tex_free(ra, &p->clear_tex);
 
@@ -1715,7 +1712,7 @@ static void present_cb(void *priv, int *inflight)
 }
 
 bool ra_vk_submit(struct ra *ra, struct ra_tex *tex, VkSemaphore acquired,
-                  VkSemaphore *done, int *inflight)
+                  VkSemaphore done, int *inflight)
 {
     struct vk_cmd *cmd = vk_require_cmd(ra);
     if (!cmd)
@@ -1740,7 +1737,9 @@ bool ra_vk_submit(struct ra *ra, struct ra_tex *tex, VkSemaphore acquired,
                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
                VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-    return vk_flush(ra, done);
+    vk_cmd_sig(cmd, done);
+
+    return vk_flush(ra);
 
 error:
     return false;

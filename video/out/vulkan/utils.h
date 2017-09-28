@@ -93,12 +93,15 @@ struct vk_cmd {
     VkQueue queue;           // the submission queue (for recording/pending)
     VkCommandBuffer buf;     // the command buffer itself
     VkFence fence;           // the fence guards cmd buffer reuse
-    VkSemaphore done;        // the semaphore signals when execution is done
     // The semaphores represent dependencies that need to complete before
     // this command can be executed. These are *not* owned by the vk_cmd
     VkSemaphore *deps;
     VkPipelineStageFlags *depstages;
     int num_deps;
+    // The signals represent semaphores that fire once the command finishes
+    // executing. These are also not owned by the vk_cmd
+    VkSemaphore *sigs;
+    int num_sigs;
     // Since VkFences are useless, we have to manually track "callbacks"
     // to fire once the VkFence completes. These are used for multiple purposes,
     // ranging from garbage collection (resource deallocation) to fencing.
@@ -110,10 +113,13 @@ struct vk_cmd {
 // bool will be set to `true` once the command completes, or shortly thereafter.
 void vk_cmd_callback(struct vk_cmd *cmd, vk_cb callback, void *p, void *arg);
 
-// Associate a dependency for the current command. This semaphore must signal
-// by the corresponding stage before the command may execute.
-void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep,
-                VkPipelineStageFlags depstage);
+// Associate a raw dependency for the current command. This semaphore must
+// signal by the corresponding stage before the command may execute.
+void vk_cmd_dep(struct vk_cmd *cmd, VkSemaphore dep, VkPipelineStageFlags stage);
+
+// Associate a raw signal with the current command. This semaphore will signal
+// after the command completes.
+void vk_cmd_sig(struct vk_cmd *cmd, VkSemaphore sig);
 
 // Command pool / queue family hybrid abstraction
 struct vk_cmdpool {
@@ -136,10 +142,8 @@ struct vk_cmd *vk_cmd_begin(struct mpvk_ctx *vk, struct vk_cmdpool *pool);
 
 // Finish recording a command buffer and submit it for execution. This function
 // takes over ownership of *cmd, i.e. the caller should not touch it again.
-// If `done` is not NULL, it will be set to a semaphore that will signal once
-// the command completes.
 // Returns whether successful.
-bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd, VkSemaphore *done);
+bool vk_cmd_submit(struct mpvk_ctx *vk, struct vk_cmd *cmd);
 
 // Rotate the queues for each vk_cmdpool. Call this once per frame to ensure
 // good parallelism between frames when using multiple queues
