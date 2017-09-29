@@ -242,12 +242,26 @@ static void macosx_redirect_output_to_logfile(const char *filename)
     [pool release];
 }
 
-static bool bundle_started_from_finder()
+static bool bundle_started_from_finder(char **argv)
 {
-    NSDictionary *env = [[NSProcessInfo processInfo] environment];
-    NSString *is_bundle = [env objectForKey:@"MPVBUNDLE"];
+    NSString *binary_path = [NSString stringWithUTF8String:argv[0]];
+    return [binary_path hasSuffix:@"mpv-bundle"];
+}
 
-    return is_bundle ? [is_bundle boolValue] : false;
+static bool is_psn_argument(char *arg_to_check)
+{
+    NSString *arg = [NSString stringWithUTF8String:arg_to_check];
+    return [arg hasPrefix:@"-psn_"];
+}
+
+static void setup_bundle(int *argc, char *argv[])
+{
+    if (*argc > 1 && is_psn_argument(argv[1])) {
+        *argc = 1;
+        argv[1] = NULL;
+    }
+
+    setenv("MPVBUNDLE", "true", 1);
 }
 
 int cocoa_main(int argc, char *argv[])
@@ -260,7 +274,8 @@ int cocoa_main(int argc, char *argv[])
         ctx.argc     = &argc;
         ctx.argv     = &argv;
 
-        if (bundle_started_from_finder()) {
+        if (bundle_started_from_finder(argv)) {
+            setup_bundle(&argc, argv);
             macosx_redirect_output_to_logfile("mpv");
             init_cocoa_application(true);
         } else {

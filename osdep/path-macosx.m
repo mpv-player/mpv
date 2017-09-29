@@ -21,7 +21,7 @@
 
 const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type)
 {
-    if (strcmp(type, "osxbundle") == 0) {
+    if (strcmp(type, "osxbundle") == 0 && getenv("MPVBUNDLE")) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         NSString *path = [[NSBundle mainBundle] resourcePath];
         char *res = talloc_strdup(talloc_ctx, [path UTF8String]);
