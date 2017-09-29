@@ -4851,8 +4851,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
     inverted to make them stand out. Note: This option applies after the
     effects of all of mpv's color space transformation / tone mapping options,
     so it's a good idea to combine this with ``--tone-mapping=clip`` and use
-    ``--target-gamut`` to set the gamut to simulate. For example,
-    ``--target-gamut=bt.709`` would make mpv highlight all pixels that exceed the
+    ``--target-prim`` to set the gamut to simulate. For example,
+    ``--target-prim=bt.709`` would make mpv highlight all pixels that exceed the
     gamut of a standard gamut (sRGB) display. This option also does not work
     well with ICC profiles, since the 3DLUTs are always generated against the
     source color space and have chromatically-accurate clipping built in.
