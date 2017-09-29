@@ -446,27 +446,43 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     struct priv *p = sw->priv;
     struct mpvk_ctx *vk = p->vk;
     if (!p->swapchain)
-        goto error;
+        return false;
 
     MP_TRACE(vk, "vkAcquireNextImageKHR signals %p\n",
              (void *)p->sems_in[p->idx_sems]);
 
-    uint32_t imgidx = 0;
-    VkResult res = vkAcquireNextImageKHR(vk->dev, p->swapchain, UINT64_MAX,
-                                         p->sems_in[p->idx_sems], NULL,
-                                         &imgidx);
-    if (res == VK_ERROR_OUT_OF_DATE_KHR)
-        goto error; // just return in this case
-    VK_ASSERT(res, "Failed acquiring swapchain image");
+    for (int attempts = 0; attempts < 2; attempts++) {
+        uint32_t imgidx = 0;
+        VkResult res = vkAcquireNextImageKHR(vk->dev, p->swapchain, UINT64_MAX,
+                                             p->sems_in[p->idx_sems], NULL,
+                                             &imgidx);
 
-    p->last_imgidx = imgidx;
-    *out_fbo = (struct ra_fbo) {
-        .tex = p->images[imgidx],
-        .flip = false,
-    };
-    return true;
+        switch (res) {
+        case VK_SUCCESS:
+            p->last_imgidx = imgidx;
+            *out_fbo = (struct ra_fbo) {
+                .tex = p->images[imgidx],
+                .flip = false,
+            };
+            return true;
 
-error:
+        case VK_ERROR_OUT_OF_DATE_KHR: {
+            // In these cases try recreating the swapchain
+            int w = p->w, h = p->h;
+            p->w = p->h = 0; // invalidate the current state
+            if (!ra_vk_ctx_resize(sw, w, h))
+                return false;
+            continue;
+        }
+
+        default:
+            MP_ERR(vk, "Failed acquiring swapchain image: %s\n", vk_err(res));
+            return false;
+        }
+    }
+
+    // If we've exhausted the number of attempts to recreate the swapchain,
+    // just give up silently.
     return false;
 }
 
@@ -481,11 +497,11 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     struct ra *ra = sw->ctx->ra;
     struct mpvk_ctx *vk = p->vk;
     if (!p->swapchain)
-        goto error;
+        return false;
 
     struct vk_cmd *cmd = ra_vk_submit(ra, p->images[p->last_imgidx]);
     if (!cmd)
-        goto error;
+        return false;
 
     int semidx = p->idx_sems++;
     p->idx_sems %= p->num_sems;
@@ -503,7 +519,7 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
 
     vk_cmd_queue(vk, cmd);
     if (!mpvk_flush_commands(vk))
-        goto error;
+        return false;
 
     // Older nvidia drivers can spontaneously combust when submitting to the
     // same queue as we're rendering from, in a multi-queue scenario. Safest
@@ -522,11 +538,22 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     };
 
     MP_TRACE(vk, "vkQueuePresentKHR waits on %p\n", (void *)p->sems_out[semidx]);
-    VK(vkQueuePresentKHR(queue, &pinfo));
-    return true;
+    VkResult res = vkQueuePresentKHR(queue, &pinfo);
+    switch (res) {
+    case VK_SUCCESS:
+    case VK_SUBOPTIMAL_KHR:
+        return true;
 
-error:
-    return false;
+    case VK_ERROR_OUT_OF_DATE_KHR:
+        // We can silently ignore this error, since the next start_frame will
+        // recreate the swapchain automatically.
+        return true;
+
+    default:
+        MP_ERR(vk, "Failed presenting to queue %p: %s\n", (void *)queue,
+               vk_err(res));
+        return false;
+    }
 }
 
 static void swap_buffers(struct ra_swapchain *sw)
