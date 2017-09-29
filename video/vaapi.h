@@ -26,16 +26,11 @@
 #include "mp_image.h"
 #include "hwdec.h"
 
-struct mp_image_pool;
-struct mp_log;
-
 struct mp_vaapi_ctx {
     struct mp_hwdec_ctx hwctx;
     struct mp_log *log;
     VADisplay display;
     struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
-    struct va_image_formats *image_formats;
-    bool gpu_memcpy_message;
     // Internal, for va_create_standalone()
     void *native_ctx;
     void (*destroy_native_ctx)(void *native_ctx);
@@ -50,23 +45,7 @@ int                      va_get_colorspace_flag(enum mp_csp csp);
 struct mp_vaapi_ctx *    va_initialize(VADisplay *display, struct mp_log *plog, bool probing);
 void                     va_destroy(struct mp_vaapi_ctx *ctx);
 
-enum mp_imgfmt           va_fourcc_to_imgfmt(uint32_t fourcc);
-uint32_t                 va_fourcc_from_imgfmt(int imgfmt);
-VAImageFormat *          va_image_format_from_imgfmt(struct mp_vaapi_ctx *ctx, int imgfmt);
-bool                     va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi);
-bool                     va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image);
-
-void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
-                           int rt_format);
-
 VASurfaceID va_surface_id(struct mp_image *mpi);
-struct mp_image *va_surface_download(struct mp_image *src,
-                                     struct mp_image_pool *pool);
-
-int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt);
-int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src);
-
-void va_surface_init_subformat(struct mp_image *mpi);
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
 
