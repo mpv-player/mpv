@@ -321,7 +321,15 @@ struct ra_tex_vk {
     // the signal guards reuse, and can be NULL
     struct vk_signal *sig;
     VkPipelineStageFlags sig_stage;
+    VkSemaphore ext_dep; // external semaphore, not owned by the ra_tex
 };
+
+void ra_tex_vk_external_dep(struct ra *ra, struct ra_tex *tex, VkSemaphore dep)
+{
+    struct ra_tex_vk *tex_vk = tex->priv;
+    assert(!tex_vk->ext_dep);
+    tex_vk->ext_dep = dep;
+}
 
 // Small helper to ease image barrier creation. if `discard` is set, the contents
 // of the image will be undefined after the barrier
@@ -331,6 +339,11 @@ static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
 {
     struct mpvk_ctx *vk = ra_vk_get(ra);
     struct ra_tex_vk *tex_vk = tex->priv;
+
+    if (tex_vk->ext_dep) {
+        vk_cmd_dep(cmd, tex_vk->ext_dep, stage);
+        tex_vk->ext_dep = NULL;
+    }
 
     VkImageMemoryBarrier imgBarrier = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,

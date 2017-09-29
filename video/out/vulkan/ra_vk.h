@@ -16,6 +16,10 @@ VkDevice ra_vk_get_dev(struct ra *ra);
 struct ra_tex *ra_vk_wrap_swapchain_img(struct ra *ra, VkImage vkimg,
                                         VkSwapchainCreateInfoKHR info);
 
+// Associates an external semaphore (dependency) with a ra_tex, such that this
+// ra_tex will not be used by the ra_vk until the external semaphore fires.
+void ra_tex_vk_external_dep(struct ra *ra, struct ra_tex *tex, VkSemaphore dep);
+
 // This function finalizes rendering, transitions `tex` (which must be a
 // wrapped swapchain image) into a format suitable for presentation, and returns
 // the resulting command buffer (or NULL on error). The caller may add their
