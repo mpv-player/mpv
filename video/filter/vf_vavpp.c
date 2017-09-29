@@ -31,14 +31,6 @@
 #include "video/hwdec.h"
 #include "video/mp_image_pool.h"
 
-static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg)
-{
-    if (status == VA_STATUS_SUCCESS)
-        return true;
-    MP_ERR(vf, "%s: %s\n", msg, vaErrorStr(status));
-    return false;
-}
-
 struct surface_refs {
     VASurfaceID *surfaces;
     int num_surfaces;
@@ -134,7 +126,7 @@ static void update_pipeline(struct vf_instance *vf)
     };
     VAStatus status = vaQueryVideoProcPipelineCaps(p->display, p->context,
                                                    filters, num_filters, &caps);
-    if (!check_error(vf, status, "vaQueryVideoProcPipelineCaps()"))
+    if (!CHECK_VA_STATUS(vf, "vaQueryVideoProcPipelineCaps()"))
         goto nodeint;
     p->pipe.filters = filters;
     p->pipe.num_filters = num_filters;
@@ -216,7 +208,7 @@ static struct mp_image *render(struct vf_instance *vf)
         goto cleanup;
 
     VAStatus status = vaBeginPicture(p->display, p->context, id);
-    if (!check_error(vf, status, "vaBeginPicture()"))
+    if (!CHECK_VA_STATUS(vf, "vaBeginPicture()"))
         goto cleanup;
 
     need_end_picture = true;
@@ -225,12 +217,12 @@ static struct mp_image *render(struct vf_instance *vf)
     status = vaCreateBuffer(p->display, p->context,
                             VAProcPipelineParameterBufferType,
                             sizeof(*param), 1, NULL, &buffer);
-    if (!check_error(vf, status, "vaCreateBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaCreateBuffer()"))
         goto cleanup;
 
     VAProcFilterParameterBufferDeinterlacing *filter_params;
     status = vaMapBuffer(p->display, *(p->pipe.filters), (void**)&filter_params);
-    if (!check_error(vf, status, "vaMapBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaMapBuffer()"))
         goto cleanup;
 
     filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
@@ -240,7 +232,7 @@ static struct mp_image *render(struct vf_instance *vf)
     vaUnmapBuffer(p->display, *(p->pipe.filters));
 
     status = vaMapBuffer(p->display, buffer, (void**)&param);
-    if (!check_error(vf, status, "vaMapBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaMapBuffer()"))
         goto cleanup;
 
     *param = (VAProcPipelineParameterBuffer){0};
@@ -271,7 +263,7 @@ static struct mp_image *render(struct vf_instance *vf)
     vaUnmapBuffer(p->display, buffer);
 
     status = vaRenderPicture(p->display, p->context, &buffer, 1);
-    if (!check_error(vf, status, "vaRenderPicture()"))
+    if (!CHECK_VA_STATUS(vf, "vaRenderPicture()"))
         goto cleanup;
 
     success = true;
@@ -427,7 +419,7 @@ static int va_query_filter_caps(struct vf_instance *vf, VAProcFilterType type,
     struct vf_priv_s *p = vf->priv;
     VAStatus status = vaQueryVideoProcFilterCaps(p->display, p->context, type,
                                                  caps, &count);
-    return check_error(vf, status, "vaQueryVideoProcFilterCaps()") ? count : 0;
+    return CHECK_VA_STATUS(vf, "vaQueryVideoProcFilterCaps()") ? count : 0;
 }
 
 static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
@@ -438,7 +430,7 @@ static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
     VAStatus status = vaCreateBuffer(p->display, p->context,
                                      VAProcFilterParameterBufferType,
                                      bytes, num, data, &buffer);
-    return check_error(vf, status, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
+    return CHECK_VA_STATUS(vf, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
 }
 
 static bool initialize(struct vf_instance *vf)
@@ -449,20 +441,20 @@ static bool initialize(struct vf_instance *vf)
     VAConfigID config;
     status = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc,
                             NULL, 0, &config);
-    if (!check_error(vf, status, "vaCreateConfig()")) // no entrypoint for video porc
+    if (!CHECK_VA_STATUS(vf, "vaCreateConfig()")) // no entrypoint for video porc
         return false;
     p->config = config;
 
     VAContextID context;
     status = vaCreateContext(p->display, p->config, 0, 0, 0, NULL, 0, &context);
-    if (!check_error(vf, status, "vaCreateContext()"))
+    if (!CHECK_VA_STATUS(vf, "vaCreateContext()"))
         return false;
     p->context = context;
 
     VAProcFilterType filters[VAProcFilterCount];
     int num_filters = VAProcFilterCount;
     status = vaQueryVideoProcFilters(p->display, p->context, filters, &num_filters);
-    if (!check_error(vf, status, "vaQueryVideoProcFilters()"))
+    if (!CHECK_VA_STATUS(vf, "vaQueryVideoProcFilters()"))
         return false;
 
     VABufferID buffers[VAProcFilterCount];
