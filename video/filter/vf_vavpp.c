@@ -20,10 +20,13 @@
 #include <va/va.h>
 #include <va/va_vpp.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "config.h"
 #include "options/options.h"
 #include "vf.h"
 #include "refqueue.h"
+#include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
 #include "video/mp_image_pool.h"
@@ -64,8 +67,9 @@ struct vf_priv_s {
     VADisplay display;
     struct mp_vaapi_ctx *va;
     struct pipeline pipe;
-    struct mp_image_pool *pool;
-    int current_rt_format;
+    AVBufferRef *hw_pool;
+    int *in_formats;
+    int num_in_formats;
 
     struct mp_refqueue *queue;
 };
@@ -156,6 +160,28 @@ nodeint:
     mp_refqueue_set_mode(p->queue, 0);
 }
 
+static struct mp_image *alloc_out(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    AVFrame *av_frame = av_frame_alloc();
+    if (!av_frame)
+        abort();
+    if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
+        MP_ERR(vf, "Failed to allocate frame from hw pool.\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *img = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!img) {
+        MP_ERR(vf, "Unknown error.\n");
+        return NULL;
+    }
+    mp_image_set_size(img, vf->fmt_in.w, vf->fmt_in.h);
+    return img;
+}
+
 static struct mp_image *render(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -167,15 +193,13 @@ static struct mp_image *render(struct vf_instance *vf)
     VABufferID buffer = VA_INVALID_ID;
 
     VASurfaceID in_id = va_surface_id(in);
-    if (!p->pipe.filters || in_id == VA_INVALID_ID)
+    if (!p->pipe.filters || in_id == VA_INVALID_ID || !p->hw_pool)
         goto cleanup;
 
-    int r_w, r_h;
-    va_surface_get_uncropped_size(in, &r_w, &r_h);
-    img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, r_w, r_h);
+    img = alloc_out(vf);
     if (!img)
         goto cleanup;
-    mp_image_set_size(img, in->w, in->h);
+
     mp_image_copy_attributes(img, in);
 
     unsigned int flags = va_get_colorspace_flag(p->params.color.space);
@@ -264,11 +288,10 @@ cleanup:
 
 static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 {
-    struct vf_priv_s *p = vf->priv;
-    struct mp_image *out = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
+    struct mp_image *out = alloc_out(vf);
     if (!out)
         return NULL;
-    if (va_surface_upload(out, in) < 0) {
+    if (!mp_image_hw_upload(out, in)) {
         talloc_free(out);
         return NULL;
     }
@@ -323,23 +346,39 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     struct vf_priv_s *p = vf->priv;
 
     flush_frames(vf);
-    talloc_free(p->pool);
-    p->pool = NULL;
+    av_buffer_unref(&p->hw_pool);
 
     p->params = *in;
-
-    p->current_rt_format = VA_RT_FORMAT_YUV420;
-    p->pool = mp_image_pool_new(20);
-    va_pool_set_allocator(p->pool, p->va, p->current_rt_format);
-
-    struct mp_image *probe = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
-    if (!probe)
-        return -1;
-    va_surface_init_subformat(probe);
     *out = *in;
-    out->imgfmt = probe->params.imgfmt;
-    out->hw_subfmt = probe->params.hw_subfmt;
-    talloc_free(probe);
+
+    int src_w = in->w;
+    int src_h = in->h;
+
+    if (in->imgfmt == IMGFMT_VAAPI) {
+        if (!vf->in_hwframes_ref)
+            return -1;
+        AVHWFramesContext *hw_frames = (void *)vf->in_hwframes_ref->data;
+        // VAAPI requires the full surface size to match for input and output.
+        src_w = hw_frames->width;
+        src_h = hw_frames->height;
+    } else {
+        out->imgfmt = IMGFMT_VAAPI;
+        out->hw_subfmt = IMGFMT_NV12;
+    }
+
+    p->hw_pool = av_hwframe_ctx_alloc(p->va->av_device_ref);
+    if (!p->hw_pool)
+        return -1;
+    AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
+    hw_frames->format = AV_PIX_FMT_VAAPI;
+    hw_frames->sw_format = imgfmt2pixfmt(out->hw_subfmt);
+    hw_frames->width = src_w;
+    hw_frames->height = src_h;
+    if (av_hwframe_ctx_init(p->hw_pool) < 0) {
+        MP_ERR(vf, "Failed to initialize libavutil vaapi frames pool.\n");
+        av_buffer_unref(&p->hw_pool);
+        return -1;
+    }
 
     return 0;
 }
@@ -353,7 +392,7 @@ static void uninit(struct vf_instance *vf)
         vaDestroyContext(p->display, p->context);
     if (p->config != VA_INVALID_ID)
         vaDestroyConfig(p->display, p->config);
-    talloc_free(p->pool);
+    av_buffer_unref(&p->hw_pool);
     flush_frames(vf);
     mp_refqueue_free(p->queue);
 }
@@ -361,7 +400,12 @@ static void uninit(struct vf_instance *vf)
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 {
     struct vf_priv_s *p = vf->priv;
-    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va, imgfmt))
+
+    bool supported = false;
+    for (int n = 0; n < p->num_in_formats; n++)
+        supported |= imgfmt == p->in_formats[n];
+
+    if (imgfmt == IMGFMT_VAAPI || supported)
         return vf_next_query_format(vf, IMGFMT_VAAPI);
     return 0;
 }
@@ -469,9 +513,23 @@ static int vf_open(vf_instance_t *vf)
     p->queue = mp_refqueue_alloc();
 
     p->va = hwdec_devices_load(vf->hwdec_devs, HWDEC_VAAPI);
-    if (!p->va)
+    if (!p->va || !p->va->av_device_ref) {
+        uninit(vf);
         return 0;
+    }
     p->display = p->va->display;
+
+    AVBufferRef *device_ref = (void *)p->va->av_device_ref;
+    AVHWFramesConstraints *constraints =
+        av_hwdevice_get_hwframe_constraints(device_ref, NULL);
+    const enum AVPixelFormat *fmts = constraints->valid_sw_formats;
+    for (int n = 0; fmts && fmts[n] != AV_PIX_FMT_NONE; n++) {
+        int mpfmt = pixfmt2imgfmt(fmts[n]);
+        if (mpfmt)
+            MP_TARRAY_APPEND(p, p->in_formats, p->num_in_formats, mpfmt);
+    }
+    av_hwframe_constraints_free(&constraints);
+
     if (initialize(vf))
         return true;
     uninit(vf);

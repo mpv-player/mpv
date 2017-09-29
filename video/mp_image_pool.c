@@ -309,3 +309,37 @@ struct mp_image *mp_image_hw_download(struct mp_image *src,
     }
     return dst;
 }
+
+bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
+{
+    if (hw_img->w != src->w || hw_img->h != src->h)
+        return false;
+
+    if (!hw_img->hwctx || src->hwctx)
+        return false;
+
+    bool ok = false;
+    AVFrame *dstav = NULL;
+    AVFrame *srcav = NULL;
+
+    // This means the destination image will not be "writable", which would be
+    // a pain if Libav enforced this - fortunately it doesn't care. We can
+    // transfer data to it even if there are multiple refs.
+    dstav = mp_image_to_av_frame(hw_img);
+    if (!dstav)
+        goto done;
+
+    srcav = mp_image_to_av_frame(src);
+    if (!srcav)
+        goto done;
+
+    ok = av_hwframe_transfer_data(dstav, srcav, 0) >= 0;
+
+done:
+    av_frame_unref(srcav);
+    av_frame_unref(dstav);
+
+    if (ok)
+        mp_image_copy_attributes(hw_img, src);
+    return ok;
+}

@@ -287,27 +287,6 @@ static struct va_surface *va_surface_in_mp_image(struct mp_image *mpi)
         (struct va_surface*)mpi->planes[0] : NULL;
 }
 
-int va_surface_rt_format(struct mp_image *mpi)
-{
-    struct va_surface *surface = va_surface_in_mp_image(mpi);
-    return surface ? surface->rt_format : 0;
-}
-
-// Return the real size of the underlying surface. (HW decoding might allocate
-// padded surfaces for example.)
-void va_surface_get_uncropped_size(struct mp_image *mpi, int *out_w, int *out_h)
-{
-    if (mpi->hwctx) {
-        AVHWFramesContext *fctx = (void *)mpi->hwctx->data;
-        *out_w = fctx->width;
-        *out_h = fctx->height;
-    } else {
-        struct va_surface *s = va_surface_in_mp_image(mpi);
-        *out_w = s ? s->w : 0;
-        *out_h = s ? s->h : 0;
-    }
-}
-
 static void release_va_surface(void *arg)
 {
     struct va_surface *surface = arg;
