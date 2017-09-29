@@ -511,6 +511,7 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
                                     const struct ra_tex_params *params)
 {
     struct mpvk_ctx *vk = ra_vk_get(ra);
+    assert(!params->format->dummy_format);
 
     struct ra_tex *tex = talloc_zero(NULL, struct ra_tex);
     tex->params = *params;
