@@ -700,7 +700,7 @@ video_output_features = [
     }, {
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
-        'deps': 'gpl && libdl && (x11 || wayland || egl-drm)',
+        'deps': 'libdl && (x11 || wayland || egl-drm)',
         'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
         'name': '--vaapi-x11',
@@ -720,7 +720,7 @@ video_output_features = [
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
-        'deps': 'vaapi-x11 && gl-x11',
+        'deps': 'gpl && vaapi-x11 && gl-x11',
         'func': check_true,
     }, {
         'name': '--vaapi-x-egl',

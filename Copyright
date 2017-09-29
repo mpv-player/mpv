@@ -40,7 +40,7 @@ a number of useful features, some of them quite central:
 - Linux X11 video output
 - Linux audio output via ALSA (PulseAudio works)
 - BSD audio output via OSS
-- Linux hardware decoding (vaapi, vdpau)
+- NVIDIA/Linux hardware decoding (vdpau, although CUDA usually works)
 - many builtin video filters (use libavfilter instead)
 - automatic rotation and stereoscopic video handling
 - Linux TV input
@@ -119,7 +119,6 @@ The following files are still GPL:
     video/out/vo_x11.c              probably impossible
     video/out/vo_xv.c               probably impossible
     video/out/x11_common.*          probably impossible
-    video/vaapi.*                   hard (GPL-only parts must be ifdefed)
     video/vdpau.c                   hard (GPL-only parts must be ifdefed)
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
