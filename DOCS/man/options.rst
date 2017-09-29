@@ -4269,10 +4269,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     parallelism between frames (when using a ``--swapchain-depth`` higher than
     1). (Default: 1)
 
-    NOTE: Setting this to a value higher than 1 may cause graphical corruption,
-    as mpv's vulkan implementation currently does not try and protect textures
-    against concurrent access.
-
 ``--d3d11-warp=<yes|no|auto>``
     Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
     backend (default: auto). This is a high performance software renderer. By

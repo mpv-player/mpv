@@ -241,9 +241,13 @@ error:
 }
 
 // Boilerplate wrapper around vkCreateRenderPass to ensure passes remain
-// compatible
+// compatible. The renderpass will automatically transition the image out of
+// initialLayout and into finalLayout.
 static VkResult vk_create_render_pass(VkDevice dev, const struct ra_format *fmt,
-                                      bool load_fbo, VkRenderPass *out)
+                                      VkAttachmentLoadOp loadOp,
+                                      VkImageLayout initialLayout,
+                                      VkImageLayout finalLayout,
+                                      VkRenderPass *out)
 {
     struct vk_format *vk_fmt = fmt->priv;
     assert(fmt->renderable);
@@ -254,12 +258,10 @@ static VkResult vk_create_render_pass(VkDevice dev, const struct ra_format *fmt,
         .pAttachments = &(VkAttachmentDescription) {
             .format = vk_fmt->iformat,
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = load_fbo ? VK_ATTACHMENT_LOAD_OP_LOAD
-                               : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .loadOp = loadOp,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .initialLayout = load_fbo ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                                      : VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .initialLayout = initialLayout,
+            .finalLayout = finalLayout,
         },
         .subpassCount = 1,
         .pSubpasses = &(VkSubpassDescription) {
@@ -291,16 +293,21 @@ struct ra_tex_vk {
     struct ra_buf_pool pbo;
     // "current" metadata, can change during the course of execution
     VkImageLayout current_layout;
-    VkPipelineStageFlags current_stage;
     VkAccessFlags current_access;
+    // the signal guards reuse, and can be NULL
+    struct vk_signal *sig;
+    VkPipelineStageFlags sig_stage;
 };
 
 // Small helper to ease image barrier creation. if `discard` is set, the contents
 // of the image will be undefined after the barrier
-static void tex_barrier(struct vk_cmd *cmd, struct ra_tex_vk *tex_vk,
-                        VkPipelineStageFlags newStage, VkAccessFlags newAccess,
+static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
+                        VkPipelineStageFlags stage, VkAccessFlags newAccess,
                         VkImageLayout newLayout, bool discard)
 {
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+    struct ra_tex_vk *tex_vk = tex->priv;
+
     VkImageMemoryBarrier imgBarrier = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .oldLayout = tex_vk->current_layout,
@@ -318,16 +325,38 @@ static void tex_barrier(struct vk_cmd *cmd, struct ra_tex_vk *tex_vk,
         imgBarrier.srcAccessMask = 0;
     }
 
+    VkEvent event = NULL;
+    vk_cmd_wait(vk, cmd, &tex_vk->sig, stage, &event);
+
+    // Image barriers are redundant if there's nothing to be done
     if (imgBarrier.oldLayout != imgBarrier.newLayout ||
         imgBarrier.srcAccessMask != imgBarrier.dstAccessMask)
     {
-        vkCmdPipelineBarrier(cmd->buf, tex_vk->current_stage, newStage, 0,
-                             0, NULL, 0, NULL, 1, &imgBarrier);
+        if (event) {
+            vkCmdWaitEvents(cmd->buf, 1, &event, tex_vk->sig_stage,
+                            stage, 0, NULL, 0, NULL, 1, &imgBarrier);
+        } else {
+            // If we're not using an event, then the source stage is irrelevant
+            // because we're coming from a different queue anyway, so we can
+            // safely set it to TOP_OF_PIPE.
+            vkCmdPipelineBarrier(cmd->buf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                 stage, 0, 0, NULL, 0, NULL, 1, &imgBarrier);
+        }
     }
 
-    tex_vk->current_stage = newStage;
     tex_vk->current_layout = newLayout;
     tex_vk->current_access = newAccess;
+}
+
+static void tex_signal(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
+                       VkPipelineStageFlags stage)
+{
+    struct ra_tex_vk *tex_vk = tex->priv;
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+    assert(!tex_vk->sig);
+
+    tex_vk->sig = vk_cmd_signal(vk, cmd, stage);
+    tex_vk->sig_stage = stage;
 }
 
 static void vk_tex_destroy(struct ra *ra, struct ra_tex *tex)
@@ -339,6 +368,7 @@ static void vk_tex_destroy(struct ra *ra, struct ra_tex *tex)
     struct ra_tex_vk *tex_vk = tex->priv;
 
     ra_buf_pool_uninit(ra, &tex_vk->pbo);
+    vk_signal_destroy(vk, &tex_vk->sig);
     vkDestroyFramebuffer(vk->dev, tex_vk->framebuffer, MPVK_ALLOCATOR);
     vkDestroyRenderPass(vk->dev, tex_vk->dummyPass, MPVK_ALLOCATOR);
     vkDestroySampler(vk->dev, tex_vk->sampler, MPVK_ALLOCATOR);
@@ -363,7 +393,6 @@ static bool vk_init_image(struct ra *ra, struct ra_tex *tex)
     assert(tex_vk->img);
 
     tex_vk->current_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    tex_vk->current_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     tex_vk->current_access = 0;
 
     if (params->render_src || params->render_dst) {
@@ -410,7 +439,11 @@ static bool vk_init_image(struct ra *ra, struct ra_tex *tex)
         // Framebuffers need to be created against a specific render pass
         // layout, so we need to temporarily create a skeleton/dummy render
         // pass for vulkan to figure out the compatibility
-        VK(vk_create_render_pass(vk->dev, params->format, false, &tex_vk->dummyPass));
+        VK(vk_create_render_pass(vk->dev, params->format,
+                                 VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                 VK_IMAGE_LAYOUT_UNDEFINED,
+                                 VK_IMAGE_LAYOUT_UNDEFINED,
+                                 &tex_vk->dummyPass));
 
         VkFramebufferCreateInfo finfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
@@ -804,13 +837,15 @@ static bool vk_tex_upload(struct ra *ra,
     buf_barrier(ra, cmd, buf, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_READ_BIT, region.bufferOffset, size);
 
-    tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_TRANSFER_BIT,
+    tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_WRITE_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 params->invalidate);
 
     vkCmdCopyBufferToImage(cmd->buf, buf_vk->slice.buf, tex_vk->img,
                            tex_vk->current_layout, 1, &region);
+
+    tex_signal(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
     return true;
 
@@ -826,6 +861,10 @@ struct ra_renderpass_vk {
     VkPipeline pipe;
     VkPipelineLayout pipeLayout;
     VkRenderPass renderPass;
+    VkImageLayout initialLayout;
+    VkImageLayout finalLayout;
+    VkAccessFlags initialAccess;
+    VkAccessFlags finalAccess;
     // Descriptor set (bindings)
     VkDescriptorSetLayout dsLayout;
     VkDescriptorPool dsPool;
@@ -1153,8 +1192,23 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
                 goto error;
             }
         }
-        VK(vk_create_render_pass(vk->dev, params->target_format,
-                                 params->enable_blend, &pass_vk->renderPass));
+
+        // This is the most common case, so optimize towards it. In this case,
+        // the renderpass will take care of almost all layout transitions
+        pass_vk->initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        pass_vk->initialAccess = VK_ACCESS_SHADER_READ_BIT;
+        pass_vk->finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        pass_vk->finalAccess = VK_ACCESS_SHADER_READ_BIT;
+        VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+
+        // If we're blending, then we need to explicitly load the previous
+        // contents of the color attachment
+        if (pass->params.enable_blend)
+            loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+
+        VK(vk_create_render_pass(vk->dev, params->target_format, loadOp,
+                                 pass_vk->initialLayout, pass_vk->finalLayout,
+                                 &pass_vk->renderPass));
 
         static const VkBlendFactor blendFactors[] = {
             [RA_BLEND_ZERO]                = VK_BLEND_FACTOR_ZERO,
@@ -1307,6 +1361,11 @@ error:
     return pass;
 }
 
+static const VkPipelineStageFlags passStages[] = {
+    [RA_RENDERPASS_TYPE_RASTER]  = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+    [RA_RENDERPASS_TYPE_COMPUTE] = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+};
+
 static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
                                  struct ra_renderpass *pass,
                                  struct ra_renderpass_input_val val,
@@ -1324,18 +1383,13 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         .descriptorType = dsType[inp->type],
     };
 
-    static const VkPipelineStageFlags passStages[] = {
-        [RA_RENDERPASS_TYPE_RASTER]  = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        [RA_RENDERPASS_TYPE_COMPUTE] = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-    };
-
     switch (inp->type) {
     case RA_VARTYPE_TEX: {
         struct ra_tex *tex = *(struct ra_tex **)val.data;
         struct ra_tex_vk *tex_vk = tex->priv;
 
         assert(tex->params.render_src);
-        tex_barrier(cmd, tex_vk, passStages[pass->params.type],
+        tex_barrier(ra, cmd, tex, passStages[pass->params.type],
                     VK_ACCESS_SHADER_READ_BIT,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
 
@@ -1354,7 +1408,7 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         struct ra_tex_vk *tex_vk = tex->priv;
 
         assert(tex->params.storage_dst);
-        tex_barrier(cmd, tex_vk, passStages[pass->params.type],
+        tex_barrier(ra, cmd, tex, passStages[pass->params.type],
                     VK_ACCESS_SHADER_WRITE_BIT,
                     VK_IMAGE_LAYOUT_GENERAL, false);
 
@@ -1387,6 +1441,22 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         };
 
         wds->pBufferInfo = binfo;
+        break;
+    }
+    }
+}
+
+static void vk_release_descriptor(struct ra *ra, struct vk_cmd *cmd,
+                                  struct ra_renderpass *pass,
+                                  struct ra_renderpass_input_val val)
+{
+    struct ra_renderpass_input *inp = &pass->params.inputs[val.index];
+
+    switch (inp->type) {
+    case RA_VARTYPE_IMG_W:
+    case RA_VARTYPE_TEX: {
+        struct ra_tex *tex = *(struct ra_tex **)val.data;
+        tex_signal(ra, cmd, tex, passStages[pass->params.type]);
         break;
     }
     }
@@ -1464,13 +1534,9 @@ static void vk_renderpass_run(struct ra *ra,
         vkCmdBindVertexBuffers(cmd->buf, 0, 1, &buf_vk->slice.buf,
                                &buf_vk->slice.mem.offset);
 
-        if (pass->params.enable_blend) {
-            // Normally this transition is handled implicitly by the renderpass,
-            // but if we need to preserve the FBO we have to do it manually.
-            tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, false);
-        }
+        // The renderpass expects the images to be in a certain layout
+        tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                    pass_vk->initialAccess, pass_vk->initialLayout, false);
 
         VkViewport viewport = {
             .x = params->viewport.x0,
@@ -1499,13 +1565,20 @@ static void vk_renderpass_run(struct ra *ra,
         vkCmdEndRenderPass(cmd->buf);
 
         // The renderPass implicitly transitions the texture to this layout
-        tex_vk->current_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        tex_vk->current_access = VK_ACCESS_SHADER_READ_BIT;
-        tex_vk->current_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        tex_vk->current_layout = pass_vk->finalLayout;
+        tex_vk->current_access = pass_vk->finalAccess;
+        tex_signal(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
         break;
     }
     default: abort();
     };
+
+    for (int i = 0; i < params->num_values; i++)
+        vk_release_descriptor(ra, cmd, pass, params->values[i]);
+
+    // flush the work so far into its own command buffer, for better cross-frame
+    // granularity
+    vk_submit(ra);
 
 error:
     return;
@@ -1524,7 +1597,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     if (!cmd)
         return;
 
-    tex_barrier(cmd, src_vk, VK_PIPELINE_STAGE_TRANSFER_BIT,
+    tex_barrier(ra, cmd, src, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_READ_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                 false);
@@ -1534,7 +1607,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
                    dst_rc->x1 == dst->params.w &&
                    dst_rc->y1 == dst->params.h;
 
-    tex_barrier(cmd, dst_vk, VK_PIPELINE_STAGE_TRANSFER_BIT,
+    tex_barrier(ra, cmd, dst, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_WRITE_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 discard);
@@ -1548,6 +1621,9 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
 
     vkCmdBlitImage(cmd->buf, src_vk->img, src_vk->current_layout, dst_vk->img,
                    dst_vk->current_layout, 1, &region, VK_FILTER_NEAREST);
+
+    tex_signal(ra, cmd, src, VK_PIPELINE_STAGE_TRANSFER_BIT);
+    tex_signal(ra, cmd, dst, VK_PIPELINE_STAGE_TRANSFER_BIT);
 }
 
 static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
@@ -1564,7 +1640,7 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
     struct mp_rect full = {0, 0, tex->params.w, tex->params.h};
     if (!rc || mp_rect_equals(rc, &full)) {
         // To clear the entire image, we can use the efficient clear command
-        tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_ACCESS_TRANSFER_WRITE_BIT,
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, true);
 
@@ -1574,6 +1650,8 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
 
         vkCmdClearColorImage(cmd->buf, tex_vk->img, tex_vk->current_layout,
                              &clearColor, 1, &vk_range);
+
+        tex_signal(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT);
     } else {
         // To simulate per-region clearing, we blit from a 1x1 texture instead
         struct ra_tex_upload_params ul_params = {
@@ -1713,7 +1791,7 @@ struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex)
 
     struct ra_tex_vk *tex_vk = tex->priv;
     assert(tex_vk->external_img);
-    tex_barrier(cmd, tex_vk, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
+    tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false);
 
     // Return this directly instead of going through vk_submit
