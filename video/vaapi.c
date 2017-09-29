@@ -192,14 +192,14 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     vaSetInfoCallback(va_info_callback);
 #endif
 
-    int major_version, minor_version;
-    int status = vaInitialize(display, &major_version, &minor_version);
-    if (status != VA_STATUS_SUCCESS && probing)
+    int major, minor;
+    int status = vaInitialize(display, &major, &minor);
+    if (status != VA_STATUS_SUCCESS) {
+        if (!probing)
+            MP_ERR(res, "Failed to initialize VAAPI: %s\n", vaErrorStr(status));
         goto error;
-    if (!check_va_status(res->log, status, "vaInitialize()"))
-        goto error;
-
-    MP_VERBOSE(res, "VA API version %d.%d\n", major_version, minor_version);
+    }
+    MP_VERBOSE(res, "Initialized VAAPI: version %d.%d\n", major, minor);
 
     va_get_formats(res);
     if (!res->image_formats)
