@@ -1684,15 +1684,38 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 discard);
 
-    VkImageBlit region = {
-        .srcSubresource = vk_layers,
-        .srcOffsets = {{src_rc->x0, src_rc->y0, 0}, {src_rc->x1, src_rc->y1, 1}},
-        .dstSubresource = vk_layers,
-        .dstOffsets = {{dst_rc->x0, dst_rc->y0, 0}, {dst_rc->x1, dst_rc->y1, 1}},
-    };
+    // Under certain conditions we can use vkCmdCopyImage instead of
+    // vkCmdBlitImage, namely when the blit operation does not require
+    // scaling. and the formats are compatible.
+    if (src->params.format->pixel_size == dst->params.format->pixel_size &&
+        mp_rect_w(*src_rc) == mp_rect_w(*dst_rc) &&
+        mp_rect_h(*src_rc) == mp_rect_h(*dst_rc) &&
+        mp_rect_w(*src_rc) >= 0 && mp_rect_h(*src_rc) >= 0)
+    {
+        VkImageCopy region = {
+            .srcSubresource = vk_layers,
+            .dstSubresource = vk_layers,
+            .srcOffset = {src_rc->x0, src_rc->y0, 0},
+            .dstOffset = {dst_rc->x0, dst_rc->y0, 0},
+            .extent = {mp_rect_w(*src_rc), mp_rect_h(*src_rc), 1},
+        };
 
-    vkCmdBlitImage(cmd->buf, src_vk->img, src_vk->current_layout, dst_vk->img,
-                   dst_vk->current_layout, 1, &region, VK_FILTER_NEAREST);
+        vkCmdCopyImage(cmd->buf, src_vk->img, src_vk->current_layout,
+                       dst_vk->img, dst_vk->current_layout, 1, &region);
+    } else {
+        VkImageBlit region = {
+            .srcSubresource = vk_layers,
+            .dstSubresource = vk_layers,
+            .srcOffsets = {{src_rc->x0, src_rc->y0, 0},
+                           {src_rc->x1, src_rc->y1, 1}},
+            .dstOffsets = {{dst_rc->x0, dst_rc->y0, 0},
+                           {dst_rc->x1, dst_rc->y1, 1}},
+        };
+
+        vkCmdBlitImage(cmd->buf, src_vk->img, src_vk->current_layout,
+                       dst_vk->img, dst_vk->current_layout, 1, &region,
+                       VK_FILTER_NEAREST);
+    }
 
     tex_signal(ra, cmd, src, VK_PIPELINE_STAGE_TRANSFER_BIT);
     tex_signal(ra, cmd, dst, VK_PIPELINE_STAGE_TRANSFER_BIT);
