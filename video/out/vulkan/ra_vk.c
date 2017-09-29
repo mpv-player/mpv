@@ -1849,8 +1849,9 @@ struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex)
 
     struct ra_tex_vk *tex_vk = tex->priv;
     assert(tex_vk->external_img);
-    tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
-                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false);
+    tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                false);
 
     // Return this directly instead of going through vk_submit
     p->cmd = NULL;
