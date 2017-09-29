@@ -283,6 +283,8 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
                                     const struct ra_tex_params *params)
 {
     GL *gl = ra_gl_get(ra);
+    assert(!params->format->dummy_format);
+
     struct ra_tex *tex = gl_tex_create_blank(ra, params);
     if (!tex)
         return NULL;
@@ -382,6 +384,7 @@ static const struct ra_format fbo_dummy_format = {
         .flags = F_CR,
     },
     .renderable = true,
+    .dummy_format = true,
 };
 
 // Create a ra_tex that merely wraps an existing framebuffer. gl_fbo can be 0

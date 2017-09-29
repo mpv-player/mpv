@@ -3058,9 +3058,15 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
                     !p->dumb_mode && (p->ra->caps & RA_CAP_BLIT))
                 {
+                    // Attempt to use the same format as the destination FBO
+                    // if possible. Some RAs use a wrapped dummy format here,
+                    // so fall back to the fbo_format in that case.
+                    const struct ra_format *fmt = fbo.tex->params.format;
+                    if (fmt->dummy_format)
+                        fmt = p->fbo_format;
                     bool r = ra_tex_resize(p->ra, p->log, &p->output_tex,
                                            fbo.tex->params.w, fbo.tex->params.h,
-                                           p->fbo_format);
+                                           fmt);
                     if (r) {
                         dest_fbo = (struct ra_fbo) { p->output_tex };
                         p->output_tex_valid = true;
