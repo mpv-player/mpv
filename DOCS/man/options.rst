@@ -4912,7 +4912,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Blend subtitles directly onto upscaled video frames, before interpolation
     and/or color management (default: no). Enabling this causes subtitles to be
     affected by ``--icc-profile``, ``--target-prim``, ``--target-trc``,
-    ``--interpolation``, ``--gpu-gamma`` and ``--post-shader``. It also
+    ``--interpolation``, ``--gamma-factor`` and ``--glsl-shaders``. It also
     increases subtitle performance when using ``--interpolation``.
 
     The downside of enabling this is that it restricts subtitles to the visible
