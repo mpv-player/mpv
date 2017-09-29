@@ -447,8 +447,10 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     if (!p->swapchain)
         goto error;
 
+    MP_TRACE(vk, "vkAcquireNextImageKHR signals %p\n",
+             (void *)p->sems_in[p->idx_sems]);
+
     uint32_t imgidx = 0;
-    MP_TRACE(vk, "vkAcquireNextImageKHR\n");
     VkResult res = vkAcquireNextImageKHR(vk->dev, p->swapchain, UINT64_MAX,
                                          p->sems_in[p->idx_sems], NULL,
                                          &imgidx);
@@ -518,6 +520,7 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
         .pImageIndices = &p->last_imgidx,
     };
 
+    MP_TRACE(vk, "vkQueuePresentKHR waits on %p\n", (void *)p->sems_out[semidx]);
     VK(vkQueuePresentKHR(queue, &pinfo));
     return true;
 
