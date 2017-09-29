@@ -261,6 +261,14 @@ static void setup_bundle(int *argc, char *argv[])
         argv[1] = NULL;
     }
 
+    NSDictionary *env = [[NSProcessInfo processInfo] environment];
+    NSString *path_bundle = [env objectForKey:@"PATH"];
+    NSString *path_new = [NSString stringWithFormat:@"%@:%@:%@:%@",
+                                                    path_bundle,
+                                                    @"/usr/local/bin",
+                                                    @"/usr/opt/bin",
+                                                    @"/usr/opt/local/bin"];
+    setenv("PATH", [path_new UTF8String], 1);
     setenv("MPVBUNDLE", "true", 1);
 }
 
