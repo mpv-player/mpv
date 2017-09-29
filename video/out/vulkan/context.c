@@ -448,14 +448,13 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     if (!p->swapchain)
         return false;
 
-    MP_TRACE(vk, "vkAcquireNextImageKHR signals %p\n",
-             (void *)p->sems_in[p->idx_sems]);
+    VkSemaphore sem_in = p->sems_in[p->idx_sems];
+    MP_TRACE(vk, "vkAcquireNextImageKHR signals %p\n", (void *)sem_in);
 
     for (int attempts = 0; attempts < 2; attempts++) {
         uint32_t imgidx = 0;
         VkResult res = vkAcquireNextImageKHR(vk->dev, p->swapchain, UINT64_MAX,
-                                             p->sems_in[p->idx_sems], NULL,
-                                             &imgidx);
+                                             sem_in, NULL, &imgidx);
 
         switch (res) {
         case VK_SUCCESS:
@@ -464,6 +463,7 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
                 .tex = p->images[imgidx],
                 .flip = false,
             };
+            ra_tex_vk_external_dep(sw->ctx->ra, out_fbo->tex, sem_in);
             return true;
 
         case VK_ERROR_OUT_OF_DATE_KHR: {
@@ -503,16 +503,9 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     if (!cmd)
         return false;
 
-    int semidx = p->idx_sems++;
+    VkSemaphore sem_out = p->sems_out[p->idx_sems++];
     p->idx_sems %= p->num_sems;
-    vk_cmd_sig(cmd, p->sems_out[semidx]);
-
-    // XXX: These are the only two stages that we currently use/support for
-    // actually outputting to the swapchain. Normally, this would be handled by
-    // a dedicated vk_signal mechanism, but for now just hard-code it here as a
-    // quick work-around.
-    vk_cmd_dep(cmd, p->sems_in[semidx], VK_PIPELINE_STAGE_TRANSFER_BIT |
-               VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+    vk_cmd_sig(cmd, sem_out);
 
     p->frames_in_flight++;
     vk_cmd_callback(cmd, (vk_cb) present_cb, p, NULL);
@@ -531,13 +524,13 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     VkPresentInfoKHR pinfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &p->sems_out[semidx],
+        .pWaitSemaphores = &sem_out,
         .swapchainCount = 1,
         .pSwapchains = &p->swapchain,
         .pImageIndices = &p->last_imgidx,
     };
 
-    MP_TRACE(vk, "vkQueuePresentKHR waits on %p\n", (void *)p->sems_out[semidx]);
+    MP_TRACE(vk, "vkQueuePresentKHR waits on %p\n", (void *)sem_out);
     VkResult res = vkQueuePresentKHR(queue, &pinfo);
     switch (res) {
     case VK_SUCCESS:
