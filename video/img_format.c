@@ -129,7 +129,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         fmt == AV_PIX_FMT_UYYVYY411)
         return mp_only_imgfmt_desc(mpfmt);
     enum mp_component_type is_uint =
-        mp_imgfmt_get_component_type(fmt) == MP_COMPONENT_TYPE_UINT;
+        mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
