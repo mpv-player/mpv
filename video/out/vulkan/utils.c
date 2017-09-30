@@ -395,8 +395,13 @@ static int find_qf(VkQueueFamilyProperties *qfs, int qfnum, VkQueueFlags flags)
         if (!(qfs[i].queueFlags & flags))
             continue;
 
-        // QF is more specialized
-        if (idx < 0 || qfs[i].queueFlags < qfs[idx].queueFlags)
+        // QF is more specialized. Since we don't care about other bits like
+        // SPARSE_BIT, mask the ones we're interestew in
+        const VkQueueFlags mask = VK_QUEUE_GRAPHICS_BIT |
+                                  VK_QUEUE_TRANSFER_BIT |
+                                  VK_QUEUE_COMPUTE_BIT;
+
+        if (idx < 0 || (qfs[i].queueFlags & mask) < (qfs[idx].queueFlags & mask))
             idx = i;
 
         // QF has more queues (at the same specialization level)
