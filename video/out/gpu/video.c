@@ -3390,7 +3390,6 @@ static void check_gl_features(struct gl_video *p)
                        "Most extended features will be disabled.\n");
         }
         p->dumb_mode = true;
-        p->use_lut_3d = false;
         // Most things don't work, so whitelist all options that still work.
         p->opts = (struct gl_video_opts){
             .gamma = p->opts.gamma,
@@ -3411,9 +3410,12 @@ static void check_gl_features(struct gl_video *p)
             .tone_mapping_param = p->opts.tone_mapping_param,
             .tone_mapping_desat = p->opts.tone_mapping_desat,
             .early_flush = p->opts.early_flush,
+            .icc_opts = p->opts.icc_opts,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             p->opts.scaler[n] = gl_video_opts_def.scaler[n];
+        if (!have_fbo)
+            p->use_lut_3d = false;
         return;
     }
     p->dumb_mode = false;
