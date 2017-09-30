@@ -60,8 +60,6 @@ struct vf_priv_s {
     struct mp_vaapi_ctx *va;
     struct pipeline pipe;
     AVBufferRef *hw_pool;
-    int *in_formats;
-    int num_in_formats;
 
     struct mp_refqueue *queue;
 };
@@ -280,6 +278,8 @@ cleanup:
 
 static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 {
+    // Since we do no scaling or csp conversion, we can allocate an output
+    // surface for input too.
     struct mp_image *out = alloc_out(vf);
     if (!out)
         return NULL;
@@ -391,13 +391,7 @@ static void uninit(struct vf_instance *vf)
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 {
-    struct vf_priv_s *p = vf->priv;
-
-    bool supported = false;
-    for (int n = 0; n < p->num_in_formats; n++)
-        supported |= imgfmt == p->in_formats[n];
-
-    if (imgfmt == IMGFMT_VAAPI || supported)
+    if (imgfmt == IMGFMT_VAAPI || imgfmt == IMGFMT_NV12 || imgfmt == IMGFMT_420P)
         return vf_next_query_format(vf, IMGFMT_VAAPI);
     return 0;
 }
@@ -510,17 +504,6 @@ static int vf_open(vf_instance_t *vf)
         return 0;
     }
     p->display = p->va->display;
-
-    AVBufferRef *device_ref = (void *)p->va->av_device_ref;
-    AVHWFramesConstraints *constraints =
-        av_hwdevice_get_hwframe_constraints(device_ref, NULL);
-    const enum AVPixelFormat *fmts = constraints->valid_sw_formats;
-    for (int n = 0; fmts && fmts[n] != AV_PIX_FMT_NONE; n++) {
-        int mpfmt = pixfmt2imgfmt(fmts[n]);
-        if (mpfmt)
-            MP_TARRAY_APPEND(p, p->in_formats, p->num_in_formats, mpfmt);
-    }
-    av_hwframe_constraints_free(&constraints);
 
     if (initialize(vf))
         return true;
