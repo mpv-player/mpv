@@ -30,15 +30,6 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
 
-bool check_va_status(struct mp_log *log, VAStatus status, const char *msg)
-{
-    if (status != VA_STATUS_SUCCESS) {
-        mp_err(log, "%s: %s\n", msg, vaErrorStr(status));
-        return false;
-    }
-    return true;
-}
-
 int va_get_colorspace_flag(enum mp_csp csp)
 {
     switch (csp) {
