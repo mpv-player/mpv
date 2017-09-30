@@ -110,7 +110,6 @@ The following files are still GPL:
     video/filter/vf_stereo3d.c      will be deleted
     video/filter/vf_sub.c           will be deleted
     video/filter/vf_yadif.c         will be deleted
-    video/gpu_memcpy.*              will be deleted
     video/out/opengl/hwdec_vaglx.c  GPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
