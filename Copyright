@@ -113,6 +113,7 @@ The following files are still GPL:
     video/out/opengl/hwdec_vaglx.c  GPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
+    video/out/vo_shablo.c           LGPL
     video/out/vo_vaapi.c            probably impossible (some company's code)
     video/out/vo_vdpau.c            probably impossible (nVidia's code)
     video/out/vo_x11.c              probably impossible

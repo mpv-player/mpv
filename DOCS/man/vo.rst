@@ -400,6 +400,19 @@ Available video output drivers are:
     ``--vo-tct-256=<yes|no>`` (default: no)
         Use 256 colors - for terminals which don't support true color.
 
+``shablo`` (experimental; perhaps will be merged with tct)
+    ANSI-color Unicode art video output driver that works on a text console.
+    Different colors are emulated by combining differently shaded blocks with
+    different foreground and background colors.
+
+    Depends on support of Unicode characters for shaded blocks (U+2591, U+2592,
+    U+2593, U+2588) and of ANSI-color terminals (8 colors or 16 colors).
+    On Windows it requires an ANSI terminal such as mintty.
+
+    ``--vo-shablo-width=<width>``  ``--vo-shablo-height=<height>``
+        Assume the terminal has the specified character width and/or height.
+        These default to 80x25 if the terminal size cannot be determined.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
