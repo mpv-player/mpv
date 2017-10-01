@@ -35,7 +35,13 @@
 #define IMGFMT IMGFMT_BGR24
 
 #define COLOR_PALETTE_PRESET_VGA 0
-#define COLOR_PALETTE_PRESETS 1
+#define COLOR_PALETTE_PRESET_CMD 1
+#define COLOR_PALETTE_PRESET_TERMINALAPP 2
+#define COLOR_PALETTE_PRESET_PUTTY 3
+#define COLOR_PALETTE_PRESET_MIRC 4
+#define COLOR_PALETTE_PRESET_XTERM 5
+#define COLOR_PALETTE_PRESET_HUMAN 6
+#define COLOR_PALETTE_PRESETS 7
 
 #define ESC_HIDE_CURSOR "\e[?25l"
 #define ESC_RESTORE_CURSOR "\e[?25h"
@@ -83,7 +89,13 @@ static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
         OPT_INT("vo-shablo-color-depth-per-channel", color_depth, 0),
         OPT_CHOICE("vo-shablo-color-palette-preset", color_palette_preset, 0,
-                   ({"vga", COLOR_PALETTE_PRESET_VGA})),
+                   ({"vga", COLOR_PALETTE_PRESET_VGA},
+                    {"cmd", COLOR_PALETTE_PRESET_CMD},
+                    {"termapp", COLOR_PALETTE_PRESET_TERMINALAPP},
+                    {"putty", COLOR_PALETTE_PRESET_PUTTY},
+                    {"mirc", COLOR_PALETTE_PRESET_MIRC},
+                    {"xterm", COLOR_PALETTE_PRESET_XTERM},
+                    {"human", COLOR_PALETTE_PRESET_HUMAN})),
         OPT_FLAG("vo-shablo-fg-ext", fg_ext, 0),
         OPT_FLAG("vo-shablo-bg-ext", bg_ext, 0),
         OPT_INT("vo-shablo-block-width", block_width, 0),
@@ -125,6 +137,36 @@ static uint32_t BASE_COLORS[COLOR_PALETTE_PRESETS][EXT_PALETTE_SIZE] =
     {
         0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
         0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+    },
+    /* CMD */
+    {
+        0x000000, 0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xc0c0c0,
+        0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
+    },
+    /* Terminal.app */
+    {
+        0x000000, 0xc23621, 0x25bc26, 0xadad27, 0x492ee1, 0xd338d3, 0x33bbc8, 0xcbcccd,
+        0x818383, 0xfc391f, 0x31e722, 0xeaec23, 0x5833ff, 0xf935f8, 0x14f0f0, 0xe9ebeb
+    },
+    /* PuTTY */
+    {
+        0x000000, 0xbb0000, 0x00bb00, 0xbbbb00, 0x0000bb, 0xbb00bb, 0x00bbbb, 0xbbbbbb,
+        0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+    },
+    /* mIRC */
+    {
+        0x000000, 0x7f0000, 0x009300, 0xfc7f00, 0x00007f, 0x9c009c, 0x009393, 0xd2d2d2,
+        0x7f7f7f, 0xff0000, 0x00fc00, 0xffff00, 0x0000fc, 0xff00ff, 0x00ffff, 0xffffff
+    },
+    /* xterm */
+    {
+        0x000000, 0xcd0000, 0x00cd00, 0xcdcd00, 0x0000ee, 0xcd00cd, 0x00cdcd, 0xe5e5e5,
+        0x7f7f7f, 0xff0000, 0x00ff00, 0xffff00, 0x5c5cff, 0xff00ff, 0x00ffff, 0xffffff
+    },
+    /* human */
+    {
+        0x010101, 0xde382b, 0x39b54a, 0xffc706, 0x006fb8, 0x762671, 0x2cb5e9, 0xcccccc,
+        0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
     }
 };
 
