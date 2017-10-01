@@ -537,6 +537,8 @@ Available video output drivers are:
             No dithering.
         fs
             Dithering algorithm by Floyd and Steinberg.
+        jjn
+            Dithering algorithm by Jarvis, Judice and Ninke.
 
     ``--vo-shablo-bg-ext=<yes|no>`` (default: no)
         Assume that the terminal is capable of 16 background colors instead

@@ -47,6 +47,9 @@
 #define DITHERING_FS 1
 #define DITHERING_FS_WIDTH_EXT 1
 #define DITHERING_FS_HEIGHT_EXT 1
+#define DITHERING_JJN 2
+#define DITHERING_JJN_WIDTH_EXT 2
+#define DITHERING_JJN_HEIGHT_EXT 2
 
 #define ESC_HIDE_CURSOR "\e[?25l"
 #define ESC_RESTORE_CURSOR "\e[?25h"
@@ -107,7 +110,8 @@ static const struct m_sub_options vo_shablo_conf = {
         OPT_CHOICE("vo-shablo-dithering", dithering, 0,
                    ({"", DITHERING_NONE},
                     {"none", DITHERING_NONE},
-                    {"fs", DITHERING_FS})),
+                    {"fs", DITHERING_FS},
+                    {"jjn", DITHERING_JJN})),
         OPT_INT("vo-shablo-block-width", block_width, 0),
         OPT_INT("vo-shablo-block-height", block_height, 0),
         OPT_INT("vo-shablo-width", width, 0),
@@ -739,6 +743,60 @@ static void dithering_fs_push_error(uint8_t r_origin, uint8_t g_origin, uint8_t 
     dithering_advance_head();
 }
 
+// Little helper for Jarvis&Judice&Ninke dithering.
+static int dithering_jjn_helper(int e) {
+    return (e + 24) / 48;
+}
+
+// Calculates the error for Jarvis&Judice&Ninke dithering and stores it into the error matrix.
+static void dithering_jjn_push_error(uint8_t r_origin, uint8_t g_origin, uint8_t b_origin, uint8_t r_effective, uint8_t g_effective, uint8_t b_effective) {
+    int error[3] = {(int) r_origin - (int) r_effective, (int) g_origin - (int) g_effective, (int) b_origin - (int) b_effective};
+
+    int* next_head = color_error_head + COLOR_CHANNELS;
+    // add error
+    size_t line_size = (color_error_width - DITHERING_JJN_WIDTH_EXT) * COLOR_CHANNELS;
+    for (int ch = 0; ch < COLOR_CHANNELS; ++ch) {
+        int e1 = error[ch];
+        int e2 = e1 << 1;
+        int e3 = e1 + e2;
+        int e4 = e2 << 1;
+        int e5 = e1 + e4;
+        int e7 = e5 + e2;
+
+        e1 = dithering_jjn_helper(e1);
+        e3 = dithering_jjn_helper(e3);
+        e5 = dithering_jjn_helper(e5);
+        e7 = dithering_jjn_helper(e7);
+
+        int* here = next_head + ch;
+        *here += e7;
+        here += COLOR_CHANNELS;
+        *here += e5;
+        here += line_size;
+        *here += e3;
+        here += COLOR_CHANNELS;
+        *here += e5;
+        here += COLOR_CHANNELS;
+        *here += e7;
+        here += COLOR_CHANNELS;
+        *here += e5;
+        here += COLOR_CHANNELS;
+        *here += e3;
+        here += line_size;
+        *here += e1;
+        here += COLOR_CHANNELS;
+        *here += e3;
+        here += COLOR_CHANNELS;
+        *here += e5;
+        here += COLOR_CHANNELS;
+        *here += e3;
+        here += COLOR_CHANNELS;
+        *here += e1;
+    }
+
+    dithering_advance_head();
+}
+
 // Writes the source image to stdout.
 static void write_shaded(
     const int dwidth, const int dheight,
@@ -756,6 +814,9 @@ static void write_shaded(
         break;
     case DITHERING_FS:
         ok = prepare_color_error_array(swidth, sheight, DITHERING_FS_WIDTH_EXT, DITHERING_FS_HEIGHT_EXT);
+        break;
+    case DITHERING_JJN:
+        ok = prepare_color_error_array(swidth, sheight, DITHERING_JJN_WIDTH_EXT, DITHERING_JJN_HEIGHT_EXT);
         break;
     }
     if (!ok) {
@@ -799,6 +860,9 @@ static void write_shaded(
                     break;
                 case DITHERING_FS:
                     dithering_fs_push_error(r, g, b, r_effective, g_effective, b_effective);
+                    break;
+                case DITHERING_JJN:
+                    dithering_jjn_push_error(r, g, b, r_effective, g_effective, b_effective);
                     break;
                 }
             }
