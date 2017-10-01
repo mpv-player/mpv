@@ -211,10 +211,10 @@ static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh) {
     return ((uint16_t) sh << 8) | ((uint16_t) fg << 4) | ((uint16_t) bg);
 }
 
-static void shfgbg_2_fg_bg_sh(uint16_t sh_fg_bg, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
-    *bg = sh_fg_bg & 0xf;
-    *fg = (sh_fg_bg >> 4) & 0xf;
-    *sh = (sh_fg_bg >> 8) & 0x7;
+static void shfgbg_2_fg_bg_sh(uint16_t shfgbg, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
+    *bg = shfgbg & 0xf;
+    *fg = (shfgbg >> 4) & 0xf;
+    *sh = (shfgbg >> 8) & 0x7;
 }
 
 static uint16_t lookup_r_g_b_2_shfgbg_map(uint8_t red, uint8_t green, uint8_t blue) {
