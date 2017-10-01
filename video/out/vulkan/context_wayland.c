@@ -26,7 +26,7 @@ struct priv {
     struct mpvk_ctx vk;
 };
 
-static void wayland_uninit(struct ra_ctx *ctx)
+static void wayland_vk_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
@@ -35,7 +35,7 @@ static void wayland_uninit(struct ra_ctx *ctx)
     vo_wayland_uninit(ctx->vo);
 }
 
-static bool wayland_init(struct ra_ctx *ctx)
+static bool wayland_vk_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     struct mpvk_ctx *vk = &p->vk;
@@ -48,13 +48,10 @@ static bool wayland_init(struct ra_ctx *ctx)
     if (!vo_wayland_init(ctx->vo))
         goto error;
 
-    if (!vo_wayland_config(ctx->vo))
-        goto error;
-
     VkWaylandSurfaceCreateInfoKHR wlinfo = {
          .sType   = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
-         .display = ctx->vo->wayland->display.display,
-         .surface = ctx->vo->wayland->window.video_surface,
+         .display = ctx->vo->wl->display,
+         .surface = ctx->vo->wl->surface,
     };
 
     VkResult res = vkCreateWaylandSurfaceKHR(vk->inst, &wlinfo, MPVK_ALLOCATOR,
@@ -73,63 +70,55 @@ static bool wayland_init(struct ra_ctx *ctx)
     if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_MAILBOX_KHR))
         goto error;
 
+    vo_wayland_set_cb_exec(ctx->vo, NULL, NULL);
+
     return true;
 
 error:
-    wayland_uninit(ctx);
+    wayland_vk_uninit(ctx);
     return false;
 }
 
-static bool resize(struct ra_ctx *ctx)
+static void resize(struct ra_ctx *ctx)
 {
-    struct vo_wayland_state *wl = ctx->vo->wayland;
-    int32_t width = wl->window.sh_width;
-    int32_t height = wl->window.sh_height;
-    int32_t scale = 1;
+    struct vo_wayland_state *wl = ctx->vo->wl;
 
-    if (wl->display.current_output)
-        scale = wl->display.current_output->scale;
+    MP_VERBOSE(wl, "Handling resizing on the vk side\n");
 
-    MP_VERBOSE(wl, "resizing %dx%d -> %dx%d\n", wl->window.width,
-                                                wl->window.height,
-                                                width,
-                                                height);
+    const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
+    const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
 
-    wl_surface_set_buffer_scale(wl->window.video_surface, scale);
-    int err = ra_vk_ctx_resize(ctx->swapchain, scale*width, scale*height);
+    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 
-    wl->window.width = width;
-    wl->window.height = height;
-
-    wl->vo->dwidth  = scale*wl->window.width;
-    wl->vo->dheight = scale*wl->window.height;
-    wl->vo->want_redraw = true;
-
-    return err;
+    wl->vo->dwidth  = width;
+    wl->vo->dheight = height;
 }
 
-static bool wayland_reconfig(struct ra_ctx *ctx)
+static bool wayland_vk_reconfig(struct ra_ctx *ctx)
 {
-    vo_wayland_config(ctx->vo);
-    return resize(ctx);
+    if (!vo_wayland_reconfig(ctx->vo))
+        return false;
+
+    return true;
 }
 
-static int wayland_control(struct ra_ctx *ctx, int *events, int request, void *arg)
+static int wayland_vk_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
     int ret = vo_wayland_control(ctx->vo, events, request, arg);
     if (*events & VO_EVENT_RESIZE) {
-        if (!resize(ctx))
+        resize(ctx);
+        if (ra_vk_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight))
             return VO_ERROR;
     }
     return ret;
 }
 
-static void wayland_wakeup(struct ra_ctx *ctx)
+static void wayland_vk_wakeup(struct ra_ctx *ctx)
 {
     vo_wayland_wakeup(ctx->vo);
 }
 
-static void wayland_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void wayland_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 {
     vo_wayland_wait_events(ctx->vo, until_time_us);
 }
@@ -137,10 +126,10 @@ static void wayland_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {
     .type           = "vulkan",
     .name           = "wayland",
-    .reconfig       = wayland_reconfig,
-    .control        = wayland_control,
-    .wakeup         = wayland_wakeup,
-    .wait_events    = wayland_wait_events,
-    .init           = wayland_init,
-    .uninit         = wayland_uninit,
+    .reconfig       = wayland_vk_reconfig,
+    .control        = wayland_vk_control,
+    .wakeup         = wayland_vk_wakeup,
+    .wait_events    = wayland_vk_wait_events,
+    .init           = wayland_vk_init,
+    .uninit         = wayland_vk_uninit,
 };
