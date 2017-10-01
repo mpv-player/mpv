@@ -190,6 +190,7 @@ static uint16_t* r_g_b_2_shfgbg_map = NULL; // how RGB colors can be emulated vi
 /* reduced palette for optimization */
 static uint16_t* reduced_fg_bg_sh_palette_indices = NULL; // (fg, bg, sh) entries that are sufficient to represent the whole fg_bg_sh_ch_2_intensity_map
 static size_t reduced_fg_bg_sh_palette_indices_size; // the number N of entries in that palette; 0 < N < fg_bg_sh_ch_2_intensity_map_size
+static double* reduced_fg_bg_sh_palette_lab = NULL; // the lab values (L*, a*, b*) of the reduced palette
 
 static int min_int(int a, int b) {
     return a < b ? a : b;
@@ -477,6 +478,33 @@ static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** 
     *result_size = res_size;
 }
 
+// Calculates the CIELAB color values of the emulated color palette.
+static double* reduced_emulated_color_palette_to_lab(void) {
+    double* res = calloc(reduced_fg_bg_sh_palette_indices_size, sizeof(double) * COLOR_CHANNELS);
+    if (res == NULL) {
+        return NULL;
+    }
+
+    double* to_head = res;
+    uint16_t* from_head = reduced_fg_bg_sh_palette_indices;
+    for (size_t i = 0; i < reduced_fg_bg_sh_palette_indices_size; ++i) {
+        uint16_t sh_fg_bg = *from_head++;
+        uint8_t fg, bg, sh;
+        shfgbg_2_fg_bg_sh(sh_fg_bg, &fg, &bg, &sh);
+        uint8_t* rgb = lookup_fg_bg_sh_2_ch_intensity_map(fg, bg, sh);
+        uint8_t r = *rgb++;
+        uint8_t g = *rgb++;
+        uint8_t b = *rgb++;
+        double ll, aa, bb;
+        r_g_b_2_l_a_b(r, g, b, &ll, &aa, &bb);
+        *to_head++ = ll;
+        *to_head++ = aa;
+        *to_head++ = bb;
+    }
+
+    return res;
+}
+
 // Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(void) {
     uint16_t* result = calloc(depth_size * depth_size * depth_size, sizeof(uint16_t));
@@ -500,21 +528,20 @@ static uint16_t* calc_lookup_table(void) {
                 double best_dist = 1e50;
                 bool is_first = true;
                 uint16_t* from = reduced_fg_bg_sh_palette_indices;
+                double* from_lab = reduced_fg_bg_sh_palette_lab;
                 // check all available colors for best match
                 for (size_t sh_fg_bg_idx = 0; sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size; ++sh_fg_bg_idx) {
-                    uint16_t shfgbg = *from++;
-                    uint8_t fg_idx, bg_idx, sh_idx;
-                    shfgbg_2_fg_bg_sh(shfgbg, &fg_idx, &bg_idx, &sh_idx);
-                    uint8_t* rgb = lookup_fg_bg_sh_2_ch_intensity_map(fg_idx, bg_idx, sh_idx);
-                    uint8_t r, g, b;
-                    r = *rgb++;
-                    g = *rgb++;
-                    b = *rgb++;
-                    double ll2, aa2, bb2;
-                    r_g_b_2_l_a_b(r, g, b, &ll2, &aa2, &bb2);
+                    double ll2 = *from_lab++;
+                    double aa2 = *from_lab++;
+                    double bb2 = *from_lab++;
+                    uint16_t sh_fg_bg = *from++;
                     double dist = get_squared_distance(ll1, aa1, bb1, ll2, aa2, bb2);
                     // check if better color found
                     if (best_dist > dist || is_first) {
+                        uint8_t fg_idx;
+                        uint8_t bg_idx;
+                        uint8_t sh_idx;
+                        shfgbg_2_fg_bg_sh(sh_fg_bg, &fg_idx, &bg_idx, &sh_idx);
                         best_dist = dist;
                         best_fg_idx = fg_idx;
                         best_bg_idx = bg_idx;
@@ -571,6 +598,13 @@ static bool init(int new_color_palette_preset, int depth_per_channel,
     }
     reduced_fg_bg_sh_palette_indices = temp2;
     reduced_fg_bg_sh_palette_indices_size = temp2_size;
+
+    double* temp3 = reduced_emulated_color_palette_to_lab();
+    if (temp3 == NULL) {
+        fprintf(stderr, "[shablo]: Out of memory error.");
+        return false;
+    }
+    reduced_fg_bg_sh_palette_lab = temp3;
 
     uint16_t* temp4 = calc_lookup_table();
     if (temp4 == NULL) {
