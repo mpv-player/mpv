@@ -477,7 +477,7 @@ static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** 
     *result_size = res_size;
 }
 
-// Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in RGB color space.
+// Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(void) {
     uint16_t* result = calloc(depth_size * depth_size * depth_size, sizeof(uint16_t));
     if (result == NULL) {
