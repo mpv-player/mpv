@@ -409,8 +409,8 @@ Available video output drivers are:
     U+2593, U+2588) and of ANSI-color terminals (8 colors or 16 colors).
     On Windows it requires an ANSI terminal such as mintty.
 
-    Currently, it is assumed that the ANSI colors of the terminal look like the
-    VGA colors. Also, only the first 8 ANSI colors of them are supported.
+    Currently, it is assumed that the 8 or 16 ANSI colors of the terminal look
+    like the VGA colors.
 
     ``--vo-shablo-block-height=<height>`` (default: 16)
         Assume each block of the terminal has the specified height (i.e. number
@@ -424,6 +424,22 @@ Available video output drivers are:
         Set the maximum color depth for each of the RGB channels.
         The bigger the value, the better the result but also the more time and
         memory will be needed at startup process.
+
+    ``--vo-shablo-bg-ext=<yes|no>`` (default: no)
+        Assume that the terminal is capable of 16 background colors instead
+        of 8.
+
+        .. note:: Make sure the terminal can display all the 8 additional
+                  light background colors.
+                  Otherwise, the result might appear darker or weird.
+
+    ``--vo-shablo-fg-ext=<yes|no>`` (default: no)
+        Assume that the terminal is capable of 16 foreground colors instead
+        of 8.
+
+        .. note:: Make sure the terminal can display all the 8 additional
+                  light foreground colors.
+                  Otherwise, the result might appear darker or weird.
 
     ``--vo-shablo-width=<width>``  ``--vo-shablo-height=<height>``
         Assume the terminal has the specified character width and/or height.

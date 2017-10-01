@@ -41,6 +41,8 @@
 #define ESC_GOTOXY "\e[%d;%df"
 #define ESC_COLOR8_FG "\e[3%cm"
 #define ESC_COLOR8_BG "\e[4%cm"
+#define ESC_COLOREXT8_FG "\e[9%cm"
+#define ESC_COLOREXT8_BG "\e[10%cm"
 
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
@@ -58,13 +60,13 @@
 #define COLOR_CHANNELS 3
 
 #define BASE_PALETTE_SIZE 8
+#define EXT_PALETTE_SIZE 16
 #define MIN_COLOR_DEPTH 1
 #define MAX_COLOR_DEPTH 8
 
-#define FG_COLORS BASE_PALETTE_SIZE
-#define BG_COLORS BASE_PALETTE_SIZE
-
 struct vo_shablo_opts {
+    int fg_ext;
+    int bg_ext;
     int color_depth; // for each channel
     int block_width;
     int block_height;
@@ -76,6 +78,8 @@ struct vo_shablo_opts {
 static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
         OPT_INT("vo-shablo-color-depth-per-channel", color_depth, 0),
+        OPT_FLAG("vo-shablo-fg-ext", fg_ext, 0),
+        OPT_FLAG("vo-shablo-bg-ext", bg_ext, 0),
         OPT_INT("vo-shablo-block-width", block_width, 0),
         OPT_INT("vo-shablo-block-height", block_height, 0),
         OPT_INT("vo-shablo-width", width, 0),
@@ -106,11 +110,16 @@ struct priv {
 static char* SHADE_CHARS[SHADES] = {" ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"};
 
 /* predefined color palettes */
-static uint32_t BASE_COLORS[BASE_PALETTE_SIZE] =
+static uint32_t BASE_COLORS[EXT_PALETTE_SIZE] =
 {
     /* VGA */
     0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
+    0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
 };
+
+/* used colors */
+static size_t fg_colors; // number of available foreground colors
+static size_t bg_colors; // number of available background colors
 
 /* used for quick calculations during playback */
 static uint8_t depth_mask;
@@ -174,6 +183,7 @@ static void color_idx_2_r_g_b(uint8_t color_idx, uint8_t* r, uint8_t* g, uint8_t
 
 // Calculates the map ((fg, bg, sh, ch) -> intensity).
 // The question to answer here is: What does (fg, bg, sh) look like, expressed as an RGB color?
+// Precondition: fg_colors and bg_colors must be initialized
 static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
     uint8_t *result = calloc(fg_bg_sh_ch_2_intensity_map_size, COLOR_CHANNELS * sizeof(uint8_t));
     if (result == NULL) {
@@ -184,9 +194,9 @@ static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
     uint8_t bg_rgb[COLOR_CHANNELS] = {0, 0, 0};
 
     uint8_t* head = result;
-    for (uint8_t fg_idx = 0; fg_idx < FG_COLORS; ++fg_idx) {
+    for (uint8_t fg_idx = 0; fg_idx < fg_colors; ++fg_idx) {
         color_idx_2_r_g_b(fg_idx, &fg_rgb[CH_R], &fg_rgb[CH_G], &fg_rgb[CH_B]);
-        for (uint8_t bg_idx = 0; bg_idx < BG_COLORS; ++bg_idx) {
+        for (uint8_t bg_idx = 0; bg_idx < bg_colors; ++bg_idx) {
             color_idx_2_r_g_b(bg_idx, &bg_rgb[CH_R], &bg_rgb[CH_G], &bg_rgb[CH_B]);
             for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
                 for (uint8_t chan = 0; chan < COLOR_CHANNELS; ++chan) {
@@ -233,8 +243,8 @@ static uint16_t* calc_lookup_table(void) {
                 bool is_first = true;
                 uint8_t* from = fg_bg_sh_ch_2_intensity_map;
                 // check all available colors for best match
-                for (uint8_t fg_idx = 0; fg_idx < FG_COLORS; ++fg_idx) {
-                    for (uint8_t bg_idx = 0; bg_idx < BG_COLORS; ++bg_idx) {
+                for (uint8_t fg_idx = 0; fg_idx < fg_colors; ++fg_idx) {
+                    for (uint8_t bg_idx = 0; bg_idx < bg_colors; ++bg_idx) {
                         for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
                             uint8_t r = *from++;
                             uint8_t g = *from++;
@@ -259,7 +269,8 @@ static uint16_t* calc_lookup_table(void) {
 }
 
 // Initializes color palettes.
-static bool init(int depth_per_channel) {
+static bool init(int depth_per_channel, bool light_fg_allowed,
+        bool light_bg_allowed) {
     if (r_g_b_2_shfgbg_map != NULL) {
         return true;
     }
@@ -273,7 +284,9 @@ static bool init(int depth_per_channel) {
         return false;
     }
 
-    fg_bg_sh_ch_2_intensity_map_size = FG_COLORS * BG_COLORS * SHADES;
+    fg_colors = light_fg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
+    bg_colors = light_bg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
+    fg_bg_sh_ch_2_intensity_map_size = fg_colors * bg_colors * SHADES;
 
     depth_shift = MAX_COLOR_DEPTH - depth_per_channel;
     depth_size = 1 << depth_per_channel;
@@ -318,18 +331,30 @@ static void write_shaded(
             unsigned char r = *row++;
 
             // deduce color emulation
-            uint8_t fg_idx, bg_idx, sh_idx;
+            uint8_t fg_idx;
+            uint8_t bg_idx;
+            uint8_t sh_idx;
             r_g_b_2_fg_bg_sh(r, g, b, &fg_idx, &bg_idx, &sh_idx);
             // draw
+            bool fg_light = (fg_idx & 0x8) != 0;
+            bool bg_light = (bg_idx & 0x8) != 0;
             unsigned char fg = '0' | (fg_idx & 0x7);
             unsigned char bg = '0' | (bg_idx & 0x7);
             // draw bg color
             if (sh_idx < MAX_SHADE_INDEX) {
-                printf(ESC_COLOR8_BG, bg);
+                if (bg_light) {
+                    printf(ESC_COLOREXT8_BG, bg);
+                } else {
+                    printf(ESC_COLOR8_BG, bg);
+                }
             }
             // draw fg color
             if (sh_idx > 0) {
-                printf(ESC_COLOR8_FG, fg);
+                if (fg_light) {
+                    printf(ESC_COLOREXT8_FG, fg);
+                } else {
+                    printf(ESC_COLOR8_FG, fg);
+                }
             }
             // draw shade char
             printf("%s", SHADE_CHARS[sh_idx]);
@@ -388,7 +413,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    if (!init(p->opts->color_depth))
+    if (!init(p->opts->color_depth, p->opts->fg_ext,
+            p->opts->bg_ext))
         return -1;
 
     printf(ESC_HIDE_CURSOR);
