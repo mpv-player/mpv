@@ -283,9 +283,78 @@ static double get_squared_distance(double a1, double b1, double c1, double a2, d
     return da * da + db * db + dc * dc;
 }
 
+// sRGB to YUV: Y = 0.299 * R + 0.587 * G + 0.114 * B
+static double r_g_b_2_y(uint8_t r, uint8_t g, uint8_t b) {
+    double sr = (double) r / 255.0;
+    double sg = (double) g / 255.0;
+    double sb = (double) b / 255.0;
+    return 0.299 * sr + 0.587 * sg + 0.114 * sb;
+}
+
+static double get_y_dist_between_index_colors(uint8_t color_idx1, uint8_t color_idx2) {
+    uint8_t r1, g1, b1;
+    color_idx_2_r_g_b(color_idx1, &r1, &g1, &b1);
+    double y1 = r_g_b_2_y(r1, g1, b1);
+
+    uint8_t r2, g2, b2;
+    color_idx_2_r_g_b(color_idx2, &r2, &g2, &b2);
+    double y2 = r_g_b_2_y(r2, g2, b2);
+
+    return fabs(y2 - y1);
+}
+
+static bool is_gray(uint8_t r, uint8_t g, uint8_t b) {
+    return r == g && g == b;
+}
+
+// Evaluates which one of two color emulations (c1, c2) is nicer to emulate a given color c (true -> c1, false -> c2).
+// Roughly said, a color emulation is nicer if foreground color and background color are more near to c than the other color emulation.
+// Both colors c1, c2 must be given by their (fg, bg, sh) values.
+// c must be given in (r, g, b).
+// Precondition: c1 and c2 do both emulate c.
+static bool is_nicer_than(uint8_t r, uint8_t g, uint8_t b, uint8_t fg1, uint8_t bg1, uint8_t sh1, uint8_t fg2, uint8_t bg2, uint8_t sh2) {
+    // plain colors
+    if (sh1 == 0 && sh2 != 0) {
+        return true;
+    }
+    if (sh2 == 0 && sh1 != 0) {
+        return false;
+    }
+    if (sh2 == MAX_SHADE_INDEX) {
+        return false;
+    }
+    if (sh1 == MAX_SHADE_INDEX) {
+        return true;
+    }
+
+    // check gray colors
+    if (is_gray(r, g, b)) {
+        // it's about gray.
+        // gray is better than color mix
+        uint8_t r1, g1, b1;
+        color_idx_2_r_g_b(fg1, &r1, &g1, &b1);
+        bool gray1 = is_gray(r1, g1, b1);
+
+        uint8_t r2, g2, b2;
+        color_idx_2_r_g_b(fg2, &r2, &g2, &b2);
+        bool gray2 = is_gray(r2, g2, b2);
+
+        if (gray1 && !gray2) {
+            return true;
+        }
+        if (gray2 && !gray1) {
+            return false;
+        }
+    }
+
+    double d1 = get_y_dist_between_index_colors(fg1, bg1);
+    double d2 = get_y_dist_between_index_colors(fg2, bg2);
+    return d1 < d2;
+}
+
 // Helper function for calc_reduced_emulated_color_palette
 // Check
-//    - (1) if this color is in the reduced emulation color palette then skip it and
+//    - (1) if this color is in the reduced emulation color palette then take the nicer one and
 //    - (2) if it is not in the reduced emulation color palette then add it.
 static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t bg_idx, uint8_t sh_idx, uint8_t from_r, uint8_t from_g, uint8_t from_b, size_t* current_palette_size, uint16_t* current_palette) {
     bool not_yet_in_the_list = true;
@@ -307,6 +376,14 @@ static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t b
         // against given color (from_r, from_g, from_b)<=>(fg_idx, bg_idx, sh_idx)
         if (r == from_r && g == from_g && b == from_b) {
             // they match.
+            // check if the given color (fg_idx, bg_idx, sh_idx)
+            // is nicer than the current color (fg, bg, sh)
+            if (is_nicer_than(r, g, b, fg_idx, bg_idx, sh_idx, fg, bg, sh)) {
+                // the given color (fg_idx, bg_idx, sh_idx) is nicer.
+                // replace color
+                *current_palette = fg_bg_sh_2_shfgbg(fg_idx, bg_idx, sh_idx);
+            }
+
             // do not add this color since it's already in the palette
             not_yet_in_the_list = false;
             break;
@@ -323,7 +400,7 @@ static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t b
 // Calculates a reduced color emulation palette.
 // A color emulation is a combination of (fg, bg, sh) which emulates a color c.
 // A color emulation duplicate c' is a color emulation (fg', bg', sh') which emulates c, too.
-// Color emulation duplicates will be eliminated.
+// Color emulation duplicates will be eliminated whereas the nicer one will be in the result.
 //
 // For example, the color emulation (fg=0, bg=1, sh=2) equals (fg=1, bg=0, sh=2) and thus, only one of them is needed.
 //
