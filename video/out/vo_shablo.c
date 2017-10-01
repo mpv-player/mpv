@@ -93,6 +93,8 @@ static const struct m_sub_options vo_shablo_conf = {
         {0}
     },
     .defaults = &(const struct vo_shablo_opts) {
+        .fg_ext = false,
+        .bg_ext = false,
         .color_palette_preset = COLOR_PALETTE_PRESET_VGA,
         .color_depth = 6,
         .block_width = DEFAULT_BLOCK_WIDTH,
