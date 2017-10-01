@@ -7,7 +7,8 @@ __all__ = [
     "check_pkg_config", "check_pkg_config_mixed", "check_pkg_config_mixed_all",
     "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "check_true", "any_version",
-    "load_fragment", "check_stub", "check_ctx_vars", "check_program"]
+    "load_fragment", "check_stub", "check_ctx_vars", "check_program",
+    "check_pkg_config_datadir"]
 
 any_version = None
 
@@ -82,6 +83,9 @@ def check_pkg_config_mixed_all(*all_args, **kw_ext):
 def check_pkg_config_cflags(*args, **kw_ext):
     return _check_pkg_config([], ["--cflags"], *args, **kw_ext)
 
+def check_pkg_config_datadir(*args, **kw_ext):
+    return _check_pkg_config([], ["--variable=pkgdatadir"], *args, **kw_ext)
+
 def _check_pkg_config(_dyn_libs, _pkgc_args, *args, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
         argsl     = list(args)
@@ -113,7 +117,7 @@ def _check_pkg_config(_dyn_libs, _pkgc_args, *args, **kw_ext):
         # added only at its first occurrence.
         original_append_unique  = ConfigSet.append_unique
         ConfigSet.append_unique = ConfigSet.append_value
-        result = bool(ctx.check_cfg(**opts))
+        result = ctx.check_cfg(**opts)
         ConfigSet.append_unique = original_append_unique
 
         defkey = inflector.define_key(dependency_identifier)

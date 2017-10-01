@@ -9,6 +9,9 @@ def __zshcomp_cmd__(ctx, argument):
     return '"${{BIN_PERL}}" "{0}/TOOLS/zsh.pl" "{1}" > "${{TGT}}"' \
                 .format(ctx.srcnode.abspath(), argument)
 
+def __wayland_scanner_cmd__(ctx, mode, dir, src):
+    return "${{WAYSCAN}} {0} < {1}/{2} > ${{TGT}}".format(mode, dir, src)
+
 def __file2string__(ctx, **kwargs):
     ctx(
         rule   = __file2string_cmd__(ctx),
@@ -51,5 +54,24 @@ def __zshcomp__(ctx, **kwargs):
         **kwargs
     )
 
-BuildContext.file2string = __file2string__
-BuildContext.zshcomp = __zshcomp__
+def __wayland_protocol_code__(ctx, **kwargs):
+    ctx(
+        rule   = __wayland_scanner_cmd__(ctx, 'code', kwargs['proto_dir'],
+                                         kwargs['protocol'] + '.xml'),
+        name   = os.path.basename(kwargs['target']),
+        **kwargs
+    )
+
+def __wayland_protocol_header__(ctx, **kwargs):
+    ctx(
+        rule   = __wayland_scanner_cmd__(ctx, 'client-header', kwargs['proto_dir'],
+                                         kwargs['protocol'] + '.xml'),
+        before = ('c',),
+        name   = os.path.basename(kwargs['target']),
+        **kwargs
+    )
+
+BuildContext.file2string             = __file2string__
+BuildContext.wayland_protocol_code   = __wayland_protocol_code__
+BuildContext.wayland_protocol_header = __wayland_protocol_header__
+BuildContext.zshcomp                 = __zshcomp__

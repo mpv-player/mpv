@@ -4,7 +4,7 @@ from waflib import Utils
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
-           "check_cocoa", "check_openal"]
+           "check_cocoa", "check_openal", "check_wl_protocols"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -82,6 +82,15 @@ def check_lua(ctx, dependency_identifier):
                                      'version found: ' + lua_version)
             return True
     return False
+
+def check_wl_protocols(ctx, dependency_identifier):
+    def fn(ctx, dependency_identifier):
+        ret = check_pkg_config_datadir("wayland-protocols")
+        ret = ret(ctx, dependency_identifier)
+        if ret != None:
+            ctx.env.WL_PROTO_DIR = ret.split()[0]
+        return ret
+    return fn(ctx, dependency_identifier)
 
 def check_cocoa(ctx, dependency_identifier):
     fn = check_cc(

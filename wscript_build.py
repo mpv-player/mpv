@@ -116,6 +116,26 @@ def build(ctx):
         target = "player/javascript/defaults.js.inc",
     )
 
+    if ctx.dependency_satisfied('wayland'):
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/xdg-shell/xdg-shell-unstable-v6",
+            target    = "video/out/wayland/xdg-shell-v6.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/xdg-shell/xdg-shell-unstable-v6",
+            target    = "video/out/wayland/xdg-shell-v6.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
+            target    = "video/out/wayland/idle-inhibit-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
+            target    = "video/out/wayland/idle-inhibit-v1.h")
+        ctx.wayland_protocol_code(proto_dir = "../video/out/wayland",
+            protocol = "server-decoration",
+            target   = "video/out/wayland/srv-decor.c")
+        ctx.wayland_protocol_header(proto_dir = "../video/out/wayland",
+            protocol = "server-decoration",
+            target   = "video/out/wayland/srv-decor.h")
+
     ctx(features = "ebml_header", target = "ebml_types.h")
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
@@ -454,6 +474,9 @@ def build(ctx):
         ( "video/out/vulkan/spirv_nvidia.c",     "vulkan" ),
         ( "video/out/win32/exclusive_hack.c",    "gl-win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
+        ( "video/out/wayland/xdg-shell-v6.c",    "wayland" ),
+        ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
+        ( "video/out/wayland/srv-decor.c",       "wayland" ),
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
         ( "video/out/drm_common.c",              "drm" ),
