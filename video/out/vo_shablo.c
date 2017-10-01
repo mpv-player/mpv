@@ -44,7 +44,12 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
+#define DEFAULT_BLOCK_WIDTH 8
+#define DEFAULT_BLOCK_HEIGHT 16
+
 struct vo_shablo_opts {
+    int block_width;
+    int block_height;
     int width;   // 0 -> default
     int height;  // 0 -> default
 };
@@ -52,11 +57,15 @@ struct vo_shablo_opts {
 #define OPT_BASE_STRUCT struct vo_shablo_opts
 static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
+        OPT_INT("vo-shablo-block-width", block_width, 0),
+        OPT_INT("vo-shablo-block-height", block_height, 0),
         OPT_INT("vo-shablo-width", width, 0),
         OPT_INT("vo-shablo-height", height, 0),
         {0}
     },
     .defaults = &(const struct vo_shablo_opts) {
+        .block_width = DEFAULT_BLOCK_WIDTH,
+        .block_height = DEFAULT_BLOCK_HEIGHT,
     },
     .size = sizeof(struct vo_shablo_opts),
 };
@@ -203,12 +212,12 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
-    // most terminal characters aren't 1:1, so we default to 2:1.
+    // most terminal characters aren't 1:1, so we default to 16:8.
     // if user passes their own value of choice, it'll be scaled accordingly.
 
     struct priv *p = vo->priv;
     p->opts = mp_get_config_group(vo, vo->global, &vo_shablo_conf);
-    vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
+    vo->monitor_par = (double) ((double) (vo->opts->monitor_pixel_aspect) * (double) p->opts->block_height / (double) p->opts->block_width);
     p->sws = mp_sws_alloc(vo);
     return 0;
 }

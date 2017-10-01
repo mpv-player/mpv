@@ -409,6 +409,14 @@ Available video output drivers are:
     U+2593, U+2588) and of ANSI-color terminals (8 colors or 16 colors).
     On Windows it requires an ANSI terminal such as mintty.
 
+    ``--vo-shablo-block-height=<height>`` (default: 16)
+        Assume each block of the terminal has the specified height (i.e. number
+        of vertical pixels).
+
+    ``--vo-shablo-block-width=<width>`` (default: 8)
+        Assume each block of the terminal has the specified width (i.e. number
+        of horizontal pixels).
+
     ``--vo-shablo-width=<width>``  ``--vo-shablo-height=<height>``
         Assume the terminal has the specified character width and/or height.
         These default to 80x25 if the terminal size cannot be determined.
