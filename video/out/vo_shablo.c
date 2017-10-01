@@ -187,6 +187,10 @@ static size_t fg_bg_sh_ch_2_intensity_map_size; // the number of ((fg, bg, sh) -
 
 static uint16_t* r_g_b_2_shfgbg_map = NULL; // how RGB colors can be emulated via (fg, bg, sh)
 
+/* reduced palette for optimization */
+static uint16_t* reduced_fg_bg_sh_palette_indices = NULL; // (fg, bg, sh) entries that are sufficient to represent the whole fg_bg_sh_ch_2_intensity_map
+static size_t reduced_fg_bg_sh_palette_indices_size; // the number N of entries in that palette; 0 < N < fg_bg_sh_ch_2_intensity_map_size
+
 static int min_int(int a, int b) {
     return a < b ? a : b;
 }
@@ -197,6 +201,10 @@ static double min_double(double a, double b) {
 
 static double max_double(double a, double b) {
     return a > b ? a : b;
+}
+
+static uint8_t* lookup_fg_bg_sh_2_ch_intensity_map(uint8_t fg, uint8_t bg, uint8_t sh) {
+    return fg_bg_sh_ch_2_intensity_map + (COLOR_CHANNELS * (sh + SHADES * (bg + bg_colors * (fg))));
 }
 
 static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh) {
@@ -275,6 +283,82 @@ static double get_squared_distance(double a1, double b1, double c1, double a2, d
     return da * da + db * db + dc * dc;
 }
 
+// Helper function for calc_reduced_emulated_color_palette
+// Check
+//    - (1) if this color is in the reduced emulation color palette then skip it and
+//    - (2) if it is not in the reduced emulation color palette then add it.
+static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t bg_idx, uint8_t sh_idx, uint8_t from_r, uint8_t from_g, uint8_t from_b, size_t* current_palette_size, uint16_t* current_palette) {
+    bool not_yet_in_the_list = true;
+
+    // go through all colors in the current palette
+    for (size_t to_idx = 0; to_idx < *current_palette_size; ++to_idx, ++current_palette) {
+        // get color
+        uint16_t shfgbg = *current_palette;
+
+        // get color's (fg, bg, sh) and (r, g, b)
+        uint8_t fg, bg, sh;
+        shfgbg_2_fg_bg_sh(shfgbg, &fg, &bg, &sh);
+        uint8_t* rgb = lookup_fg_bg_sh_2_ch_intensity_map(fg, bg, sh);
+        uint8_t r = *rgb++;
+        uint8_t g = *rgb++;
+        uint8_t b = *rgb++;
+
+        // check current color (r, g, b)<=>(fg, bg, sh)
+        // against given color (from_r, from_g, from_b)<=>(fg_idx, bg_idx, sh_idx)
+        if (r == from_r && g == from_g && b == from_b) {
+            // they match.
+            // do not add this color since it's already in the palette
+            not_yet_in_the_list = false;
+            break;
+        }
+    }
+    if (not_yet_in_the_list) {
+        // the given color (from_r, from_g, from_b) is not yet in the palette.
+        // add that color
+        *current_palette = fg_bg_sh_2_shfgbg(fg_idx, bg_idx, sh_idx);
+        (*current_palette_size)++;
+    }
+}
+
+// Calculates a reduced color emulation palette.
+// A color emulation is a combination of (fg, bg, sh) which emulates a color c.
+// A color emulation duplicate c' is a color emulation (fg', bg', sh') which emulates c, too.
+// Color emulation duplicates will be eliminated.
+//
+// For example, the color emulation (fg=0, bg=1, sh=2) equals (fg=1, bg=0, sh=2) and thus, only one of them is needed.
+//
+// Precondition:
+//    fg_bg_sh_ch_2_intensity_map_size,
+//    fg_bg_sh_ch_2_intensity_map,
+//    fg_colors and
+//    bg_colors must be initialized.
+static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** result) {
+    uint16_t* res = calloc(fg_bg_sh_ch_2_intensity_map_size, sizeof(uint16_t));
+    if (res == NULL) {
+        result = NULL;
+        return;
+    }
+    size_t res_size = 0;
+
+    // go through all emulated colors in the full palette
+    uint8_t* from_head = fg_bg_sh_ch_2_intensity_map;
+    for (uint8_t fg = 0; fg < fg_colors; ++fg) {
+        for (uint8_t bg = 0; bg < bg_colors; ++bg) {
+            for (uint8_t sh = 0; sh < SHADES; ++sh) {
+                // get emulated color's (r, g, b)
+                uint8_t from_r = *from_head++;
+                uint8_t from_g = *from_head++;
+                uint8_t from_b = *from_head++;
+
+                // add color if new to the reduced palette
+                calc_reduced_emulated_color_palette_helper(fg, bg, sh, from_r, from_g, from_b, &res_size, res);
+            }
+        }
+    }
+    *result = res;
+    *result_size = res_size;
+}
+
 // Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in RGB color space.
 static uint16_t* calc_lookup_table(void) {
     uint16_t* result = calloc(depth_size * depth_size * depth_size, sizeof(uint16_t));
@@ -295,24 +379,25 @@ static uint16_t* calc_lookup_table(void) {
                 uint8_t best_sh_idx = 0;
                 double best_dist = 1e50;
                 bool is_first = true;
-                uint8_t* from = fg_bg_sh_ch_2_intensity_map;
+                uint16_t* from = reduced_fg_bg_sh_palette_indices;
                 // check all available colors for best match
-                for (uint8_t fg_idx = 0; fg_idx < fg_colors; ++fg_idx) {
-                    for (uint8_t bg_idx = 0; bg_idx < bg_colors; ++bg_idx) {
-                        for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
-                            uint8_t r = *from++;
-                            uint8_t g = *from++;
-                            uint8_t b = *from++;
-                            double dist = get_squared_distance(red, green, blue, r, g, b);
-                            // check if better color found
-                            if (best_dist > dist || is_first) {
-                                best_dist = dist;
-                                best_fg_idx = fg_idx;
-                                best_bg_idx = bg_idx;
-                                best_sh_idx = sh_idx;
-                                is_first = false;
-                            }
-                        }
+                for (size_t sh_fg_bg_idx = 0; sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size; ++sh_fg_bg_idx) {
+                    uint16_t shfgbg = *from++;
+                    uint8_t fg_idx, bg_idx, sh_idx;
+                    shfgbg_2_fg_bg_sh(shfgbg, &fg_idx, &bg_idx, &sh_idx);
+                    uint8_t* rgb = lookup_fg_bg_sh_2_ch_intensity_map(fg_idx, bg_idx, sh_idx);
+                    uint8_t r, g, b;
+                    r = *rgb++;
+                    g = *rgb++;
+                    b = *rgb++;
+                    double dist = get_squared_distance(red, green, blue, r, g, b);
+                    // check if better color found
+                    if (best_dist > dist || is_first) {
+                        best_dist = dist;
+                        best_fg_idx = fg_idx;
+                        best_bg_idx = bg_idx;
+                        best_sh_idx = sh_idx;
+                        is_first = false;
                     }
                 }
                 *to_head++ = fg_bg_sh_2_shfgbg(best_fg_idx, best_bg_idx, best_sh_idx);
@@ -354,6 +439,16 @@ static bool init(int new_color_palette_preset, int depth_per_channel,
         return false;
     }
     fg_bg_sh_ch_2_intensity_map = temp;
+
+    uint16_t* temp2 = NULL;
+    size_t temp2_size = 0;
+    calc_reduced_emulated_color_palette(&temp2_size, &temp2);
+    if (temp2 == NULL) {
+        fprintf(stderr, "[shablo]: Out of memory error.");
+        return false;
+    }
+    reduced_fg_bg_sh_palette_indices = temp2;
+    reduced_fg_bg_sh_palette_indices_size = temp2_size;
 
     uint16_t* temp4 = calc_lookup_table();
     if (temp4 == NULL) {
