@@ -425,6 +425,43 @@ Available video output drivers are:
         The bigger the value, the better the result but also the more time and
         memory will be needed at startup process.
 
+    ``--vo-shablo-color-palette-preset=<preset>`` (default: vga)
+        Assume the 8 (or 16) terminal colors look like the colors in the preset
+        <preset>.
+
+        .. note:: This is probably the most important switch since a wrong
+                  color palette could lead to color distortion.
+                  Make sure you get a palette that fits your terminal colors.
+
+        The names of the first 8 normal ANSI colors (0-7) and their light
+        versions (8-F) are:
+
+            normal | light | color name
+            ---------------------------
+            0      |  8    | black
+            1      |  9    | red
+            2      |  A    | green
+            3      |  B    | yellow
+            4      |  C    | blue
+            5      |  D    | magenta
+            6      |  E    | cyan
+            7      |  F    | white
+
+        Available palettes with their 8 normal and 8 light #RRGGBB colors values
+        are:
+
+        vga
+            normal colors   light colors
+            -------------   ------------
+            0 | #444444     8 | #555555
+            1 | #aa0000     9 | #ff5555
+            2 | #00aa00     A | #55ff55
+            3 | #aa5500     B | #ffff55
+            4 | #0000aa     C | #5555ff
+            5 | #aa00aa     D | #ff55ff
+            6 | #00aaaa     E | #55ffff
+            7 | #aaaaaa     F | #ffffff
+
     ``--vo-shablo-bg-ext=<yes|no>`` (default: no)
         Assume that the terminal is capable of 16 background colors instead
         of 8.

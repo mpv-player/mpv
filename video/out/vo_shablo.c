@@ -34,6 +34,9 @@
 
 #define IMGFMT IMGFMT_BGR24
 
+#define COLOR_PALETTE_PRESET_VGA 0
+#define COLOR_PALETTE_PRESETS 1
+
 #define ESC_HIDE_CURSOR "\e[?25l"
 #define ESC_RESTORE_CURSOR "\e[?25h"
 #define ESC_CLEAR_SCREEN "\e[2J"
@@ -67,6 +70,7 @@
 struct vo_shablo_opts {
     int fg_ext;
     int bg_ext;
+    int color_palette_preset;
     int color_depth; // for each channel
     int block_width;
     int block_height;
@@ -78,6 +82,8 @@ struct vo_shablo_opts {
 static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
         OPT_INT("vo-shablo-color-depth-per-channel", color_depth, 0),
+        OPT_CHOICE("vo-shablo-color-palette-preset", color_palette_preset, 0,
+                   ({"vga", COLOR_PALETTE_PRESET_VGA})),
         OPT_FLAG("vo-shablo-fg-ext", fg_ext, 0),
         OPT_FLAG("vo-shablo-bg-ext", bg_ext, 0),
         OPT_INT("vo-shablo-block-width", block_width, 0),
@@ -87,6 +93,7 @@ static const struct m_sub_options vo_shablo_conf = {
         {0}
     },
     .defaults = &(const struct vo_shablo_opts) {
+        .color_palette_preset = COLOR_PALETTE_PRESET_VGA,
         .color_depth = 6,
         .block_width = DEFAULT_BLOCK_WIDTH,
         .block_height = DEFAULT_BLOCK_HEIGHT,
@@ -110,16 +117,19 @@ struct priv {
 static char* SHADE_CHARS[SHADES] = {" ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"};
 
 /* predefined color palettes */
-static uint32_t BASE_COLORS[EXT_PALETTE_SIZE] =
+static uint32_t BASE_COLORS[COLOR_PALETTE_PRESETS][EXT_PALETTE_SIZE] =
 {
     /* VGA */
-    0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
-    0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+    {
+        0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
+        0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+    }
 };
 
 /* used colors */
 static size_t fg_colors; // number of available foreground colors
 static size_t bg_colors; // number of available background colors
+static size_t color_palette_preset; // index of preset color palette
 
 /* used for quick calculations during playback */
 static uint8_t depth_mask;
@@ -174,7 +184,7 @@ static void rgb_2_r_g_b(uint32_t rgb, uint8_t* r, uint8_t* g, uint8_t* b) {
 }
 
 static uint32_t color_idx_2_rgb(uint8_t color_idx) {
-    return BASE_COLORS[color_idx];
+    return BASE_COLORS[color_palette_preset][color_idx];
 }
 
 static void color_idx_2_r_g_b(uint8_t color_idx, uint8_t* r, uint8_t* g, uint8_t* b) {
@@ -269,8 +279,8 @@ static uint16_t* calc_lookup_table(void) {
 }
 
 // Initializes color palettes.
-static bool init(int depth_per_channel, bool light_fg_allowed,
-        bool light_bg_allowed) {
+static bool init(int new_color_palette_preset, int depth_per_channel,
+        bool light_fg_allowed, bool light_bg_allowed) {
     if (r_g_b_2_shfgbg_map != NULL) {
         return true;
     }
@@ -284,6 +294,7 @@ static bool init(int depth_per_channel, bool light_fg_allowed,
         return false;
     }
 
+    color_palette_preset = new_color_palette_preset;
     fg_colors = light_fg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
     bg_colors = light_bg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
     fg_bg_sh_ch_2_intensity_map_size = fg_colors * bg_colors * SHADES;
@@ -413,8 +424,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    if (!init(p->opts->color_depth, p->opts->fg_ext,
-            p->opts->bg_ext))
+    if (!init(p->opts->color_palette_preset,p->opts->color_depth,
+            p->opts->fg_ext, p->opts->bg_ext))
         return -1;
 
     printf(ESC_HIDE_CURSOR);
