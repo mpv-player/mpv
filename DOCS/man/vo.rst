@@ -525,6 +525,17 @@ Available video output drivers are:
             6 | #2cb5e9     E | #00ffff
             7 | #cccccc     F | #ffffff
 
+    ``--vo-shablo-dithering=<algo>`` (default: none)
+        Use a color dithering algorithm to compensate for loss in color depth.
+
+        The lower the resolution is the more it will look like artifacts.
+        See ``--vo-shablo-width`` and `--vo-shablo-height`.
+
+        Following algorithms are available:
+
+        none
+            No dithering.
+
     ``--vo-shablo-bg-ext=<yes|no>`` (default: no)
         Assume that the terminal is capable of 16 background colors instead
         of 8.

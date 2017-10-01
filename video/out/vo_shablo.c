@@ -43,6 +43,8 @@
 #define COLOR_PALETTE_PRESET_HUMAN 6
 #define COLOR_PALETTE_PRESETS 7
 
+#define DITHERING_NONE 0
+
 #define ESC_HIDE_CURSOR "\e[?25l"
 #define ESC_RESTORE_CURSOR "\e[?25h"
 #define ESC_CLEAR_SCREEN "\e[2J"
@@ -76,6 +78,7 @@
 struct vo_shablo_opts {
     int fg_ext;
     int bg_ext;
+    int dithering;
     int color_palette_preset;
     int color_depth; // for each channel
     int block_width;
@@ -98,6 +101,9 @@ static const struct m_sub_options vo_shablo_conf = {
                     {"human", COLOR_PALETTE_PRESET_HUMAN})),
         OPT_FLAG("vo-shablo-fg-ext", fg_ext, 0),
         OPT_FLAG("vo-shablo-bg-ext", bg_ext, 0),
+        OPT_CHOICE("vo-shablo-dithering", dithering, 0,
+                   ({"", DITHERING_NONE},
+                    {"none", DITHERING_NONE})),
         OPT_INT("vo-shablo-block-width", block_width, 0),
         OPT_INT("vo-shablo-block-height", block_height, 0),
         OPT_INT("vo-shablo-width", width, 0),
@@ -193,6 +199,10 @@ static size_t reduced_fg_bg_sh_palette_indices_size; // the number N of entries 
 static double* reduced_fg_bg_sh_palette_lab = NULL; // the lab values (L*, a*, b*) of the reduced palette
 
 static int min_int(int a, int b) {
+    return a < b ? a : b;
+}
+
+static int max_int(int a, int b) {
     return a < b ? a : b;
 }
 
@@ -616,13 +626,95 @@ static bool init(int new_color_palette_preset, int depth_per_channel,
     return true;
 }
 
+// variables for error diffusion dithering
+static int* color_error = NULL;
+static size_t color_error_width = 0;
+static size_t color_error_height = 0;
+static size_t color_error_width_ext = 0;
+static size_t color_error_height_ext = 0;
+static int* color_error_head = NULL;
+static size_t color_error_head_x = 0;
+static size_t color_error_head_y = 0;
+
+// Creates and/or resets the matrix containing the errors used in error diffusion dithering.
+static bool prepare_color_error_array(size_t width, size_t height, size_t width_ext, size_t height_ext) {
+    size_t size = COLOR_CHANNELS * (width + width_ext) * (height + height_ext);
+
+    if (color_error != NULL && width == color_error_width && height == color_error_height
+            && color_error_width_ext == width_ext && color_error_height_ext == height_ext) {
+        memset(color_error, 0, size * sizeof(int));
+        color_error_head = color_error;
+        color_error_head_x = 0;
+        color_error_head_y = 0;
+        return true;
+    }
+
+    if (color_error != NULL) {
+         free(color_error);
+    }
+
+    int* result = calloc(size, sizeof(int));
+    if (result == NULL) {
+        return false;
+    }
+
+    color_error_width = width;
+    color_error_height = height;
+    color_error_width_ext = width_ext;
+    color_error_height_ext = height_ext;
+
+    color_error = result;
+
+    color_error_head = color_error;
+    color_error_head_x = 0;
+    color_error_head_y = 0;
+
+    return true;
+}
+
+// Goes to the next entity for error diffusion dithering.
+static void dithering_advance_head(void) {
+    int* advanced_head = color_error_head + COLOR_CHANNELS;
+
+    // check edges
+    if (++color_error_head_x >= color_error_width) {
+        color_error_head_x = 0;
+        advanced_head += color_error_width_ext * COLOR_CHANNELS;
+        if (++color_error_head_y >= color_error_height) {
+            color_error_head_y = 0;
+            advanced_head = color_error;
+        }
+    }
+
+    color_error_head = advanced_head;
+}
+
+// Accumulates the error diffusion dithering error onto call-by-reference RGB values.
+static void dithering_pull_error(uint8_t* r, uint8_t* g, uint8_t* b) {
+    *r = max_int(min_int((int) (*r) + color_error_head[CH_R], 0xff), 0);
+    *g = max_int(min_int((int) (*g) + color_error_head[CH_G], 0xff), 0);
+    *b = max_int(min_int((int) (*b) + color_error_head[CH_B], 0xff), 0);
+}
+
 // Writes the source image to stdout.
 static void write_shaded(
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
-    const unsigned char *source, const int source_stride)
+    const unsigned char *source, const int source_stride,
+    const size_t dithering)
 {
     assert(source);
+
+    // prepare dithering
+    bool ok = false;
+    switch (dithering) {
+    case DITHERING_NONE:
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        return;
+    }
 
     // the big loops
     const int tx = (dwidth - swidth) >> 1;
@@ -636,11 +728,32 @@ static void write_shaded(
             unsigned char g = *row++;
             unsigned char r = *row++;
 
+            // dithering.read
+            uint8_t r_effective = r;
+            uint8_t g_effective = g;
+            uint8_t b_effective = b;
+            if (dithering != DITHERING_NONE) {
+                dithering_pull_error(&r_effective, &g_effective, &b_effective);
+            }
+
             // deduce color emulation
             uint8_t fg_idx;
             uint8_t bg_idx;
             uint8_t sh_idx;
-            r_g_b_2_fg_bg_sh(r, g, b, &fg_idx, &bg_idx, &sh_idx);
+            r_g_b_2_fg_bg_sh(r_effective, g_effective, b_effective, &fg_idx, &bg_idx, &sh_idx);
+
+            // dithering.write
+            if (dithering != DITHERING_NONE) {
+                uint8_t* effective = lookup_fg_bg_sh_2_ch_intensity_map(fg_idx, bg_idx, sh_idx);
+                r_effective = *effective++;
+                g_effective = *effective++;
+                b_effective = *effective++;
+                switch (dithering) {
+                case DITHERING_NONE:
+                    break;
+                }
+            }
+
             // draw
             bool fg_light = (fg_idx & 0x8) != 0;
             bool bg_light = (bg_idx & 0x8) != 0;
@@ -744,7 +857,8 @@ static void flip_page(struct vo *vo)
     struct priv *p = vo->priv;
     write_shaded(
         vo->dwidth, vo->dheight, p->swidth, p->sheight,
-        p->frame->planes[0], p->frame->stride[0]);
+        p->frame->planes[0], p->frame->stride[0],
+        p->opts->dithering);
     fflush(stdout);
 }
 
