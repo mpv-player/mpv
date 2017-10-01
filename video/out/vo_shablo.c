@@ -39,6 +39,7 @@
 #define ESC_CLEAR_SCREEN "\e[2J"
 #define ESC_CLEAR_COLORS "\e[0m"
 #define ESC_GOTOXY "\e[%d;%df"
+#define ESC_COLOR8_FG "\e[3%cm"
 #define ESC_COLOR8_BG "\e[4%cm"
 
 #define DEFAULT_WIDTH 80
@@ -47,7 +48,24 @@
 #define DEFAULT_BLOCK_WIDTH 8
 #define DEFAULT_BLOCK_HEIGHT 16
 
+#define SHADES 5
+#define MAX_SHADE_INDEX (SHADES - 1)
+#define SHADE_ADDEND (MAX_SHADE_INDEX >> 1)
+
+#define CH_R 0
+#define CH_G 1
+#define CH_B 2
+#define COLOR_CHANNELS 3
+
+#define BASE_PALETTE_SIZE 8
+#define MIN_COLOR_DEPTH 1
+#define MAX_COLOR_DEPTH 8
+
+#define FG_COLORS BASE_PALETTE_SIZE
+#define BG_COLORS BASE_PALETTE_SIZE
+
 struct vo_shablo_opts {
+    int color_depth; // for each channel
     int block_width;
     int block_height;
     int width;   // 0 -> default
@@ -57,6 +75,7 @@ struct vo_shablo_opts {
 #define OPT_BASE_STRUCT struct vo_shablo_opts
 static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
+        OPT_INT("vo-shablo-color-depth-per-channel", color_depth, 0),
         OPT_INT("vo-shablo-block-width", block_width, 0),
         OPT_INT("vo-shablo-block-height", block_height, 0),
         OPT_INT("vo-shablo-width", width, 0),
@@ -64,6 +83,7 @@ static const struct m_sub_options vo_shablo_conf = {
         {0}
     },
     .defaults = &(const struct vo_shablo_opts) {
+        .color_depth = 6,
         .block_width = DEFAULT_BLOCK_WIDTH,
         .block_height = DEFAULT_BLOCK_HEIGHT,
     },
@@ -82,8 +102,199 @@ struct priv {
     struct mp_sws_context *sws;
 };
 
-static void r_g_b_2_bg(uint8_t r, uint8_t g, uint8_t b, uint8_t* bg) {
-    *bg = ((r >= 0x80) ? 1 : 0) | ((g >= 0x80) ? 2 : 0) | ((b >= 0x80) ? 4 : 0);
+/* shade characters */
+static char* SHADE_CHARS[SHADES] = {" ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"};
+
+/* predefined color palettes */
+static uint32_t BASE_COLORS[BASE_PALETTE_SIZE] =
+{
+    /* VGA */
+    0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
+};
+
+/* used for quick calculations during playback */
+static uint8_t depth_mask;
+static size_t depth_size;
+static size_t depth_shift;
+static uint8_t round_addend;
+
+/* maps between true colors and emulated colors */
+static uint8_t* fg_bg_sh_ch_2_intensity_map = NULL; // what emulated colors look like in RGB
+static size_t fg_bg_sh_ch_2_intensity_map_size; // the number of ((fg, bg, sh) -> *) entries in that map
+
+static uint16_t* r_g_b_2_shfgbg_map = NULL; // how RGB colors can be emulated via (fg, bg, sh)
+
+static int min_int(int a, int b) {
+    return a < b ? a : b;
+}
+
+static double min_double(double a, double b) {
+    return a < b ? a : b;
+}
+
+static double max_double(double a, double b) {
+    return a > b ? a : b;
+}
+
+static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh) {
+    return ((uint16_t) sh << 8) | ((uint16_t) fg << 4) | ((uint16_t) bg);
+}
+
+static void shfgbg_2_fg_bg_sh(uint16_t sh_fg_bg, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
+    *bg = sh_fg_bg & 0xf;
+    *fg = (sh_fg_bg >> 4) & 0xf;
+    *sh = (sh_fg_bg >> 8) & 0x7;
+}
+
+static uint16_t lookup_r_g_b_2_shfgbg_map(uint8_t red, uint8_t green, uint8_t blue) {
+    int r = depth_mask & (min_int((int) red + round_addend, 0xff) >> depth_shift);
+    int g = depth_mask & (min_int((int) green + round_addend, 0xff) >> depth_shift);
+    int b = depth_mask & (min_int((int) blue + round_addend, 0xff) >> depth_shift);
+    return r_g_b_2_shfgbg_map[b + depth_size * (g + depth_size * (r))];
+}
+
+static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
+    uint16_t shfgbg = lookup_r_g_b_2_shfgbg_map(r, g, b);
+    shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
+}
+
+static void rgb_2_r_g_b(uint32_t rgb, uint8_t* r, uint8_t* g, uint8_t* b) {
+    *r = (rgb >> 16) & 0xff;
+    *g = (rgb >> 8) & 0xff;
+    *b = rgb & 0xff;
+}
+
+static uint32_t color_idx_2_rgb(uint8_t color_idx) {
+    return BASE_COLORS[color_idx];
+}
+
+static void color_idx_2_r_g_b(uint8_t color_idx, uint8_t* r, uint8_t* g, uint8_t* b) {
+    rgb_2_r_g_b(color_idx_2_rgb(color_idx), r, g, b);
+}
+
+// Calculates the map ((fg, bg, sh, ch) -> intensity).
+// The question to answer here is: What does (fg, bg, sh) look like, expressed as an RGB color?
+static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
+    uint8_t *result = calloc(fg_bg_sh_ch_2_intensity_map_size, COLOR_CHANNELS * sizeof(uint8_t));
+    if (result == NULL) {
+        return NULL;
+    }
+
+    uint8_t fg_rgb[COLOR_CHANNELS] = {0, 0, 0};
+    uint8_t bg_rgb[COLOR_CHANNELS] = {0, 0, 0};
+
+    uint8_t* head = result;
+    for (uint8_t fg_idx = 0; fg_idx < FG_COLORS; ++fg_idx) {
+        color_idx_2_r_g_b(fg_idx, &fg_rgb[CH_R], &fg_rgb[CH_G], &fg_rgb[CH_B]);
+        for (uint8_t bg_idx = 0; bg_idx < BG_COLORS; ++bg_idx) {
+            color_idx_2_r_g_b(bg_idx, &bg_rgb[CH_R], &bg_rgb[CH_G], &bg_rgb[CH_B]);
+            for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
+                for (uint8_t chan = 0; chan < COLOR_CHANNELS; ++chan) {
+                    // add background color and foreground color parts
+                    double fg_part = ((double) fg_rgb[chan] * sh_idx);
+                    double bg_part = ((double) bg_rgb[chan] * (MAX_SHADE_INDEX - sh_idx));
+                    double value = ((fg_part + bg_part + SHADE_ADDEND) / MAX_SHADE_INDEX);
+                    value = min_double(0xff, max_double(0x00, value));
+                    *head++ = (uint8_t) value;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+// Returns the squared Euclidean distance between (a1, b1, c1) and (a2, b2, c2).
+static double get_squared_distance(double a1, double b1, double c1, double a2, double b2, double c2) {
+    double da = a2 - a1;
+    double db = b2 - b1;
+    double dc = c2 - c1;
+    return da * da + db * db + dc * dc;
+}
+
+// Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in RGB color space.
+static uint16_t* calc_lookup_table(void) {
+    uint16_t* result = calloc(depth_size * depth_size * depth_size, sizeof(uint16_t));
+    if (result == NULL) {
+        return NULL;
+    }
+
+    uint16_t* to_head = result;
+    for (uint16_t r_idx = 0; r_idx < depth_size; ++r_idx) {
+        uint8_t red = r_idx << depth_shift;
+        for (uint16_t g_idx = 0; g_idx < depth_size; ++g_idx) {
+            uint8_t green = g_idx << depth_shift;
+            for (uint16_t b_idx = 0; b_idx < depth_size; ++b_idx) {
+                uint8_t blue = b_idx << depth_shift;
+                // calc lookup table cell values by brute force
+                uint8_t best_fg_idx = 0;
+                uint8_t best_bg_idx = 0;
+                uint8_t best_sh_idx = 0;
+                double best_dist = 1e50;
+                bool is_first = true;
+                uint8_t* from = fg_bg_sh_ch_2_intensity_map;
+                // check all available colors for best match
+                for (uint8_t fg_idx = 0; fg_idx < FG_COLORS; ++fg_idx) {
+                    for (uint8_t bg_idx = 0; bg_idx < BG_COLORS; ++bg_idx) {
+                        for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
+                            uint8_t r = *from++;
+                            uint8_t g = *from++;
+                            uint8_t b = *from++;
+                            double dist = get_squared_distance(red, green, blue, r, g, b);
+                            // check if better color found
+                            if (best_dist > dist || is_first) {
+                                best_dist = dist;
+                                best_fg_idx = fg_idx;
+                                best_bg_idx = bg_idx;
+                                best_sh_idx = sh_idx;
+                                is_first = false;
+                            }
+                        }
+                    }
+                }
+                *to_head++ = fg_bg_sh_2_shfgbg(best_fg_idx, best_bg_idx, best_sh_idx);
+            }
+        }
+    }
+    return result;
+}
+
+// Initializes color palettes.
+static bool init(int depth_per_channel) {
+    if (r_g_b_2_shfgbg_map != NULL) {
+        return true;
+    }
+
+    if (depth_per_channel < MIN_COLOR_DEPTH) {
+        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: too low (min value: %d)", depth_per_channel, MIN_COLOR_DEPTH);
+        return false;
+    }
+    if (depth_per_channel > MAX_COLOR_DEPTH) {
+        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: too high (max value: %d)", depth_per_channel, MAX_COLOR_DEPTH);
+        return false;
+    }
+
+    fg_bg_sh_ch_2_intensity_map_size = FG_COLORS * BG_COLORS * SHADES;
+
+    depth_shift = MAX_COLOR_DEPTH - depth_per_channel;
+    depth_size = 1 << depth_per_channel;
+    depth_mask = depth_size - 1;
+    round_addend = depth_shift >> 1;
+
+    uint8_t* temp = calc_fg_bg_sh_ch_2_intensity_map();
+    if (temp == NULL) {
+        fprintf(stderr, "[shablo]: Out of memory error.");
+        return false;
+    }
+    fg_bg_sh_ch_2_intensity_map = temp;
+
+    uint16_t* temp4 = calc_lookup_table();
+    if (temp4 == NULL) {
+        fprintf(stderr, "[shablo]: Out of memory error.");
+        return false;
+    }
+    r_g_b_2_shfgbg_map = temp4;
+
+    return true;
 }
 
 // Writes the source image to stdout.
@@ -107,17 +318,21 @@ static void write_shaded(
             unsigned char r = *row++;
 
             // deduce color emulation
-            uint8_t bg_idx;
-            r_g_b_2_bg(r, g, b, &bg_idx);
-
+            uint8_t fg_idx, bg_idx, sh_idx;
+            r_g_b_2_fg_bg_sh(r, g, b, &fg_idx, &bg_idx, &sh_idx);
             // draw
+            unsigned char fg = '0' | (fg_idx & 0x7);
             unsigned char bg = '0' | (bg_idx & 0x7);
-
             // draw bg color
-            printf(ESC_COLOR8_BG, bg);
-
+            if (sh_idx < MAX_SHADE_INDEX) {
+                printf(ESC_COLOR8_BG, bg);
+            }
+            // draw fg color
+            if (sh_idx > 0) {
+                printf(ESC_COLOR8_FG, fg);
+            }
             // draw shade char
-            printf(" ");
+            printf("%s", SHADE_CHARS[sh_idx]);
         }
         printf(ESC_CLEAR_COLORS);
     }
@@ -171,6 +386,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     if (mp_sws_reinit(p->sws) < 0)
+        return -1;
+
+    if (!init(p->opts->color_depth))
         return -1;
 
     printf(ESC_HIDE_CURSOR);
