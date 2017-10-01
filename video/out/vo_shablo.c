@@ -283,6 +283,47 @@ static double get_squared_distance(double a1, double b1, double c1, double a2, d
     return da * da + db * db + dc * dc;
 }
 
+// transforms RGB color to XYZ color
+static void r_g_b_2_x_y_z(uint8_t red, uint8_t green, uint8_t blue, double* x, double* y, double* z) {
+    // RGB to sRGB
+    double sr = (double) red * 100.0;
+    double sg = (double) green * 100.0;
+    double sb = (double) blue * 100.0;
+
+    // sRGB to XYZ
+    *x = 0.4124564 * sr + 0.3575761 * sg + 0.1804375 * sb;
+    *y = 0.2126729 * sr + 0.7151522 * sg + 0.0721750 * sb;
+    *z = 0.0193339 * sr + 0.1191920 * sg + 0.9503041 * sb;
+}
+
+#define X_N_D65_2DEG 95.047
+#define Y_N_D65_2DEG 100.0
+#define Z_N_D65_2DEG 108.883
+
+// helper function to calculate cbrt(p/p_n) for CIELAB
+static double lab_cbrt(double p, double p_n) {
+    double ppn = p / p_n;
+    return ppn < (216.0 / 24389.0) ? ((1.0 / 116.0) * (24389.0 / 27.0 * p / p_n + 16.0)) : cbrt(ppn);
+}
+
+// transforms color from CIEXYZ (CIE 1931 color space) to CIELAB, for (D65, 2 degrees)
+static void x_y_z_2_l_a_b(double x, double y, double z, double* l, double* a, double* b) {
+    double cbrt_x = lab_cbrt(x, X_N_D65_2DEG);
+    double cbrt_y = lab_cbrt(y, Y_N_D65_2DEG);
+    double cbrt_z = lab_cbrt(z, Z_N_D65_2DEG);
+
+    *l = 116.0 * cbrt_y - 16.0;
+    *a = 500.0 * (cbrt_x - cbrt_y);
+    *b = 200.0 * (cbrt_y - cbrt_z);
+}
+
+// transforms color from sRGB to CIELAB, for (D65, 2 degrees)
+static void r_g_b_2_l_a_b(uint8_t r, uint8_t g, uint8_t b, double* ll, double* aa, double* bb) {
+    double x, y, z;
+    r_g_b_2_x_y_z(r, g, b, &x, &y, &z);
+    x_y_z_2_l_a_b(x, y, z, ll, aa, bb);
+}
+
 // sRGB to YUV: Y = 0.299 * R + 0.587 * G + 0.114 * B
 static double r_g_b_2_y(uint8_t r, uint8_t g, uint8_t b) {
     double sr = (double) r / 255.0;
@@ -454,6 +495,8 @@ static uint16_t* calc_lookup_table(void) {
                 uint8_t best_fg_idx = 0;
                 uint8_t best_bg_idx = 0;
                 uint8_t best_sh_idx = 0;
+                double ll1, aa1, bb1;
+                r_g_b_2_l_a_b(red, green, blue, &ll1, &aa1, &bb1);
                 double best_dist = 1e50;
                 bool is_first = true;
                 uint16_t* from = reduced_fg_bg_sh_palette_indices;
@@ -467,7 +510,9 @@ static uint16_t* calc_lookup_table(void) {
                     r = *rgb++;
                     g = *rgb++;
                     b = *rgb++;
-                    double dist = get_squared_distance(red, green, blue, r, g, b);
+                    double ll2, aa2, bb2;
+                    r_g_b_2_l_a_b(r, g, b, &ll2, &aa2, &bb2);
+                    double dist = get_squared_distance(ll1, aa1, bb1, ll2, aa2, bb2);
                     // check if better color found
                     if (best_dist > dist || is_first) {
                         best_dist = dist;
