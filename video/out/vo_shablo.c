@@ -113,6 +113,7 @@ static const struct m_sub_options vo_shablo_conf = {
     .defaults = &(const struct vo_shablo_opts) {
         .fg_ext = false,
         .bg_ext = false,
+        .dithering = DITHERING_NONE,
         .color_palette_preset = COLOR_PALETTE_PRESET_VGA,
         .color_depth = 6,
         .block_width = DEFAULT_BLOCK_WIDTH,
@@ -203,7 +204,7 @@ static int min_int(int a, int b) {
 }
 
 static int max_int(int a, int b) {
-    return a < b ? a : b;
+    return a > b ? a : b;
 }
 
 static double min_double(double a, double b) {
