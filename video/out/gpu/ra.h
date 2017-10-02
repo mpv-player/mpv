@@ -51,6 +51,8 @@ enum {
     RA_CAP_BUF_RW         = 1 << 6, // supports RA_VARTYPE_BUF_RW
     RA_CAP_NESTED_ARRAY   = 1 << 7, // supports nested arrays
     RA_CAP_GLOBAL_UNIFORM = 1 << 8, // supports using "naked" uniforms (not UBO)
+    RA_CAP_GATHER         = 1 << 9, // supports textureGather in GLSL
+    RA_CAP_FRAGCOORD      = 1 << 10, // supports reading from gl_FragCoord
 };
 
 enum ra_ctype {

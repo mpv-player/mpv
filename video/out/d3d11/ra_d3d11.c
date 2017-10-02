@@ -2161,6 +2161,11 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         ra->max_texture_wh = D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION;
     }
 
+    if (p->fl >= D3D_FEATURE_LEVEL_11_0)
+        ra->caps |= RA_CAP_GATHER;
+    if (p->fl >= D3D_FEATURE_LEVEL_10_0)
+        ra->caps |= RA_CAP_FRAGCOORD;
+
     // Some 10_0 hardware has compute shaders, but only 11_0 has image load/store
     if (p->fl >= D3D_FEATURE_LEVEL_11_0) {
         ra->caps |= RA_CAP_COMPUTE | RA_CAP_BUF_RW;
