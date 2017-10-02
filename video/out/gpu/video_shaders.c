@@ -143,7 +143,7 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
 }
 
 void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
-                       int components, int glsl_version)
+                       int components, bool sup_gather)
 {
     GLSL(color = vec4(0.0);)
     GLSLF("{\n");
@@ -167,8 +167,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler,
             // exactly when all four texels are within bounds
             bool use_gather = sqrt(x*x + y*y) < scaler->kernel->radius_cutoff;
 
-            // textureGather is only supported in GLSL 400+
-            if (glsl_version < 400)
+            if (!sup_gather)
                 use_gather = false;
 
             if (use_gather) {

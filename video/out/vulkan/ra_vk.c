@@ -202,7 +202,11 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
         goto error;
 
     // UBO support is required
-    ra->caps |= RA_CAP_BUF_RO;
+    ra->caps |= RA_CAP_BUF_RO | RA_CAP_FRAGCOORD;
+
+    // textureGather is only supported in GLSL 400+
+    if (ra->glsl_version >= 400)
+        ra->caps |= RA_CAP_GATHER;
 
     // Try creating a shader storage buffer
     struct ra_buf_params ssbo_params = {

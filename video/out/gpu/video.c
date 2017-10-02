@@ -1719,7 +1719,8 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
 fallback:
     // Fall back to regular polar shader when compute shaders are unsupported
     // or the kernel is too big for shmem
-    pass_sample_polar(p->sc, scaler, img.components, p->ra->glsl_version);
+    pass_sample_polar(p->sc, scaler, img.components,
+                      p->ra->caps & RA_CAP_GATHER);
 }
 
 // Sample from image, with the src rectangle given by it.
@@ -3464,6 +3465,19 @@ static void check_gl_features(struct gl_video *p)
     if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak) {
         p->opts.compute_hdr_peak = 0;
         MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
+    }
+    if (!(ra->caps & RA_CAP_FRAGCOORD) && p->opts.dither_depth >= 0 &&
+        p->opts.dither_algo != DITHER_NONE)
+    {
+        p->opts.dither_algo = DITHER_NONE;
+        MP_WARN(p, "Disabling dithering (no gl_FragCoord).\n");
+    }
+    if (!(ra->caps & RA_CAP_FRAGCOORD) &&
+        p->opts.alpha_mode == ALPHA_BLEND_TILES)
+    {
+        p->opts.alpha_mode = ALPHA_BLEND;
+        // Verbose, since this is the default setting
+        MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
 }
 

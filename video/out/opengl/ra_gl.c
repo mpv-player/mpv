@@ -97,6 +97,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     static const int caps_map[][2] = {
         {RA_CAP_DIRECT_UPLOAD,      0},
         {RA_CAP_GLOBAL_UNIFORM,     0},
+        {RA_CAP_FRAGCOORD,          0},
         {RA_CAP_TEX_1D,             MPGL_CAP_1D_TEX},
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
@@ -114,6 +115,10 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         if (gl->mpgl_caps & MPGL_CAP_SSBO)
             ra->caps |= RA_CAP_BUF_RW;
     }
+
+    // textureGather is only supported in GLSL 400+
+    if (ra->glsl_version >= 400)
+        ra->caps |= RA_CAP_GATHER;
 
     if (gl->BlitFramebuffer)
         ra->caps |= RA_CAP_BLIT;
