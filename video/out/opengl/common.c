@@ -31,6 +31,7 @@
 
 #include "common.h"
 #include "common/common.h"
+#include "utils.h"
 
 // This guesses if the current GL context is a suspected software renderer.
 static bool is_software_gl(GL *gl)
@@ -47,14 +48,6 @@ static bool is_software_gl(GL *gl)
 static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
     assert(framebuffer == 0);
-}
-
-static bool check_ext(GL *gl, const char *name)
-{
-    const char *exts = gl->extensions;
-    char *s = strstr(exts, name);
-    char *e = s ? s + strlen(name) : NULL;
-    return s && (s == exts || s[-1] == ' ') && (e[0] == ' ' || !e[0]);
 }
 
 #define FN_OFFS(name) offsetof(GL, name)
@@ -581,8 +574,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (ver_core)
             must_exist = version >= ver_core;
 
-        if (section->extension && check_ext(gl, section->extension))
-            exists = true;
+        if (section->extension)
+            exists = gl_check_extension(gl->extensions, section->extension);
 
         exists |= must_exist;
         if (!exists)

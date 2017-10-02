@@ -51,4 +51,6 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
 
+bool gl_check_extension(const char *extensions, const char *ext);
+
 #endif

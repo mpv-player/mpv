@@ -267,3 +267,21 @@ void gl_set_debug_logger(GL *gl, struct mp_log *log)
     if (gl->DebugMessageCallback)
         gl->DebugMessageCallback(log ? gl_debug_cb : NULL, log);
 }
+
+// Given a GL combined extension string in extensions, find out whether ext
+// is included in it. Basically, a word search.
+bool gl_check_extension(const char *extensions, const char *ext)
+{
+    int len = strlen(ext);
+    const char *cur = extensions;
+    while (cur) {
+        cur = strstr(cur, ext);
+        if (!cur)
+            break;
+        if ((cur == extensions || cur[-1] == ' ') &&
+            (cur[len] == '\0' || cur[len] == ' '))
+            return true;
+        cur += len;
+    }
+    return false;
+}
