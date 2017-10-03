@@ -143,7 +143,8 @@ struct priv {
 };
 
 /* shade characters */
-static char* SHADE_CHARS[SHADES] = {
+static char* SHADE_CHARS[SHADES] =
+{
     " ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"
 };
 
@@ -202,9 +203,15 @@ static uint32_t BASE_COLORS[COLOR_PALETTE_PRESETS][EXT_PALETTE_SIZE] =
 };
 
 /* used colors */
-static size_t fg_colors; // number of available foreground colors
-static size_t bg_colors; // number of available background colors
-static size_t color_palette_preset; // index of preset color palette
+
+// number of available foreground colors
+static size_t fg_colors;
+
+// number of available background colors
+static size_t bg_colors;
+
+// index of preset color palette
+static size_t color_palette_preset;
 
 /* used for quick calculations during playback */
 static uint8_t depth_mask;
@@ -236,19 +243,23 @@ static size_t reduced_fg_bg_sh_palette_indices_size;
 // the lab values (L*, a*, b*) of the reduced palette
 static double* reduced_fg_bg_sh_palette_lab = NULL;
 
-static int min_int(int a, int b) {
+static int min_int(int a, int b)
+{
     return a < b ? a : b;
 }
 
-static int max_int(int a, int b) {
+static int max_int(int a, int b)
+{
     return a > b ? a : b;
 }
 
-static double min_double(double a, double b) {
+static double min_double(double a, double b)
+{
     return a < b ? a : b;
 }
 
-static double max_double(double a, double b) {
+static double max_double(double a, double b)
+{
     return a > b ? a : b;
 }
 
@@ -259,7 +270,8 @@ static uint8_t* lookup_fg_bg_sh_2_ch_intensity_map(
         (bg + bg_colors * (fg))));
 }
 
-static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh) {
+static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh)
+{
     return ((uint16_t) sh << 8) | ((uint16_t) fg << 4) | ((uint16_t) bg);
 }
 
@@ -290,13 +302,15 @@ static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
     shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
 }
 
-static void rgb_2_r_g_b(uint32_t rgb, uint8_t* r, uint8_t* g, uint8_t* b) {
+static void rgb_2_r_g_b(uint32_t rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
     *r = (rgb >> 16) & 0xff;
     *g = (rgb >> 8) & 0xff;
     *b = rgb & 0xff;
 }
 
-static uint32_t color_idx_2_rgb(uint8_t color_idx) {
+static uint32_t color_idx_2_rgb(uint8_t color_idx)
+{
     return BASE_COLORS[color_palette_preset][color_idx];
 }
 
@@ -310,7 +324,8 @@ static void color_idx_2_r_g_b(uint8_t color_idx,
 // The question to answer here is: What does (fg, bg, sh) look like,
 //     expressed as an RGB color?
 // Precondition: fg_colors and bg_colors must be initialized
-static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
+static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void)
+{
     uint8_t *result = calloc(fg_bg_sh_ch_2_intensity_map_size,
         COLOR_CHANNELS * sizeof(uint8_t));
     if (result == NULL) {
@@ -374,7 +389,8 @@ static void r_g_b_2_x_y_z(uint8_t red, uint8_t green, uint8_t blue,
 #define Z_N_D65_2DEG 108.883
 
 // helper function to calculate cbrt(p/p_n) for CIELAB
-static double lab_cbrt(double p, double p_n) {
+static double lab_cbrt(double p, double p_n)
+{
     double ppn = p / p_n;
     return ppn < (216.0 / 24389.0) ?
         ((1.0 / 116.0) * (24389.0 / 27.0 * p / p_n + 16.0)) :
@@ -405,7 +421,8 @@ static void r_g_b_2_l_a_b(uint8_t r, uint8_t g, uint8_t b,
 }
 
 // sRGB to YUV: Y = 0.299 * R + 0.587 * G + 0.114 * B
-static double r_g_b_2_y(uint8_t r, uint8_t g, uint8_t b) {
+static double r_g_b_2_y(uint8_t r, uint8_t g, uint8_t b)
+{
     double sr = (double) r / 255.0;
     double sg = (double) g / 255.0;
     double sb = (double) b / 255.0;
@@ -426,7 +443,8 @@ static double get_y_dist_between_index_colors(
     return fabs(y2 - y1);
 }
 
-static bool is_gray(uint8_t r, uint8_t g, uint8_t b) {
+static bool is_gray(uint8_t r, uint8_t g, uint8_t b)
+{
     return r == g && g == b;
 }
 
@@ -550,8 +568,8 @@ static void calc_reduced_emulated_color_palette_helper(
 //    fg_colors and
 //    bg_colors must be initialized.
 static void calc_reduced_emulated_color_palette(
-    size_t* result_size, uint16_t** result
-) {
+    size_t* result_size, uint16_t** result)
+{
     uint16_t* res = calloc(fg_bg_sh_ch_2_intensity_map_size, sizeof(uint16_t));
     if (res == NULL) {
         result = NULL;
@@ -580,7 +598,8 @@ static void calc_reduced_emulated_color_palette(
 }
 
 // Calculates the CIELAB color values of the emulated color palette.
-static double* reduced_emulated_color_palette_to_lab(void) {
+static double* reduced_emulated_color_palette_to_lab(void)
+{
     double* res = calloc(reduced_fg_bg_sh_palette_indices_size,
         sizeof(double) * COLOR_CHANNELS);
     if (res == NULL) {
@@ -609,7 +628,8 @@ static double* reduced_emulated_color_palette_to_lab(void) {
 
 // Calculates the main lookup table (rgb -> shfgbg) by approximating
 // the rgb color using nearest neighbour applied in CIELAB color space.
-static uint16_t* calc_lookup_table(void) {
+static uint16_t* calc_lookup_table(void)
+{
     uint16_t* result = calloc(depth_size * depth_size * depth_size,
         sizeof(uint16_t));
     if (result == NULL) {
@@ -667,7 +687,8 @@ static uint16_t* calc_lookup_table(void) {
 
 // Initializes color palettes.
 static bool init(int new_color_palette_preset, int depth_per_channel,
-        bool light_fg_allowed, bool light_bg_allowed) {
+    bool light_fg_allowed, bool light_bg_allowed)
+{
     if (r_g_b_2_shfgbg_map != NULL) {
         return true;
     }
@@ -779,7 +800,8 @@ static bool prepare_color_error_array(size_t width, size_t height,
 }
 
 // Goes to the next entity for error diffusion dithering.
-static void dithering_advance_head(void) {
+static void dithering_advance_head(void)
+{
     int* advanced_head = color_error_head + COLOR_CHANNELS;
 
     // check edges
@@ -797,14 +819,16 @@ static void dithering_advance_head(void) {
 
 // Accumulates the error diffusion dithering error onto
 //     call-by-reference RGB values.
-static void dithering_pull_error(uint8_t* r, uint8_t* g, uint8_t* b) {
+static void dithering_pull_error(uint8_t* r, uint8_t* g, uint8_t* b)
+{
     *r = max_int(min_int((int) (*r) + color_error_head[CH_R], 0xff), 0);
     *g = max_int(min_int((int) (*g) + color_error_head[CH_G], 0xff), 0);
     *b = max_int(min_int((int) (*b) + color_error_head[CH_B], 0xff), 0);
 }
 
 // Little helper for Floyd&Steinberg dithering.
-static int dithering_fs_helper(int e) {
+static int dithering_fs_helper(int e)
+{
     return ((e >> 3) + 1) >> 1;
 }
 
@@ -851,7 +875,8 @@ static void dithering_fs_push_error(
 }
 
 // Little helper for Jarvis&Judice&Ninke dithering.
-static int dithering_jjn_helper(int e) {
+static int dithering_jjn_helper(int e)
+{
     return (e + 24) / 48;
 }
 
@@ -1018,7 +1043,8 @@ static void write_shaded(
     printf("\n");
 }
 
-static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
+static void get_win_size(struct vo *vo, int *out_width, int *out_height)
+{
     struct priv *p = vo->priv;
     *out_width = DEFAULT_WIDTH;
     *out_height = DEFAULT_HEIGHT;
