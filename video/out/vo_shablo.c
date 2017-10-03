@@ -143,45 +143,61 @@ struct priv {
 };
 
 /* shade characters */
-static char* SHADE_CHARS[SHADES] = {" ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"};
+static char* SHADE_CHARS[SHADES] = {
+    " ", "\xe2\x96\x91", "\xe2\x96\x92", "\xe2\x96\x93", "\xe2\x96\x88"
+};
 
 /* predefined color palettes */
 static uint32_t BASE_COLORS[COLOR_PALETTE_PRESETS][EXT_PALETTE_SIZE] =
 {
     /* VGA */
     {
-        0x000000, 0xaa0000, 0x00aa00, 0xaa5500, 0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
-        0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+        0x000000, 0xaa0000, 0x00aa00, 0xaa5500,
+        0x0000aa, 0xaa00aa, 0x00aaaa, 0xaaaaaa,
+        0x555555, 0xff5555, 0x55ff55, 0xffff55,
+        0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
     },
     /* CMD */
     {
-        0x000000, 0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xc0c0c0,
-        0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
+        0x000000, 0x800000, 0x008000, 0x808000,
+        0x000080, 0x800080, 0x008080, 0xc0c0c0,
+        0x808080, 0xff0000, 0x00ff00, 0xffff00,
+        0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
     },
     /* Terminal.app */
     {
-        0x000000, 0xc23621, 0x25bc26, 0xadad27, 0x492ee1, 0xd338d3, 0x33bbc8, 0xcbcccd,
-        0x818383, 0xfc391f, 0x31e722, 0xeaec23, 0x5833ff, 0xf935f8, 0x14f0f0, 0xe9ebeb
+        0x000000, 0xc23621, 0x25bc26, 0xadad27,
+        0x492ee1, 0xd338d3, 0x33bbc8, 0xcbcccd,
+        0x818383, 0xfc391f, 0x31e722, 0xeaec23,
+        0x5833ff, 0xf935f8, 0x14f0f0, 0xe9ebeb
     },
     /* PuTTY */
     {
-        0x000000, 0xbb0000, 0x00bb00, 0xbbbb00, 0x0000bb, 0xbb00bb, 0x00bbbb, 0xbbbbbb,
-        0x555555, 0xff5555, 0x55ff55, 0xffff55, 0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
+        0x000000, 0xbb0000, 0x00bb00, 0xbbbb00,
+        0x0000bb, 0xbb00bb, 0x00bbbb, 0xbbbbbb,
+        0x555555, 0xff5555, 0x55ff55, 0xffff55,
+        0x5555ff, 0xff55ff, 0x55ffff, 0xffffff
     },
     /* mIRC */
     {
-        0x000000, 0x7f0000, 0x009300, 0xfc7f00, 0x00007f, 0x9c009c, 0x009393, 0xd2d2d2,
-        0x7f7f7f, 0xff0000, 0x00fc00, 0xffff00, 0x0000fc, 0xff00ff, 0x00ffff, 0xffffff
+        0x000000, 0x7f0000, 0x009300, 0xfc7f00,
+        0x00007f, 0x9c009c, 0x009393, 0xd2d2d2,
+        0x7f7f7f, 0xff0000, 0x00fc00, 0xffff00,
+        0x0000fc, 0xff00ff, 0x00ffff, 0xffffff
     },
     /* xterm */
     {
-        0x000000, 0xcd0000, 0x00cd00, 0xcdcd00, 0x0000ee, 0xcd00cd, 0x00cdcd, 0xe5e5e5,
-        0x7f7f7f, 0xff0000, 0x00ff00, 0xffff00, 0x5c5cff, 0xff00ff, 0x00ffff, 0xffffff
+        0x000000, 0xcd0000, 0x00cd00, 0xcdcd00,
+        0x0000ee, 0xcd00cd, 0x00cdcd, 0xe5e5e5,
+        0x7f7f7f, 0xff0000, 0x00ff00, 0xffff00,
+        0x5c5cff, 0xff00ff, 0x00ffff, 0xffffff
     },
     /* human */
     {
-        0x010101, 0xde382b, 0x39b54a, 0xffc706, 0x006fb8, 0x762671, 0x2cb5e9, 0xcccccc,
-        0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
+        0x010101, 0xde382b, 0x39b54a, 0xffc706,
+        0x006fb8, 0x762671, 0x2cb5e9, 0xcccccc,
+        0x808080, 0xff0000, 0x00ff00, 0xffff00,
+        0x0000ff, 0xff00ff, 0x00ffff, 0xffffff
     }
 };
 
@@ -197,15 +213,28 @@ static size_t depth_shift;
 static uint8_t round_addend;
 
 /* maps between true colors and emulated colors */
-static uint8_t* fg_bg_sh_ch_2_intensity_map = NULL; // what emulated colors look like in RGB
-static size_t fg_bg_sh_ch_2_intensity_map_size; // the number of ((fg, bg, sh) -> *) entries in that map
 
-static uint16_t* r_g_b_2_shfgbg_map = NULL; // how RGB colors can be emulated via (fg, bg, sh)
+// what emulated colors look like in RGB
+static uint8_t* fg_bg_sh_ch_2_intensity_map = NULL;
+
+// the number of ((fg, bg, sh) -> *) entries in that map
+static size_t fg_bg_sh_ch_2_intensity_map_size;
+
+// how RGB colors can be emulated via (fg, bg, sh)
+static uint16_t* r_g_b_2_shfgbg_map = NULL;
 
 /* reduced palette for optimization */
-static uint16_t* reduced_fg_bg_sh_palette_indices = NULL; // (fg, bg, sh) entries that are sufficient to represent the whole fg_bg_sh_ch_2_intensity_map
-static size_t reduced_fg_bg_sh_palette_indices_size; // the number N of entries in that palette; 0 < N < fg_bg_sh_ch_2_intensity_map_size
-static double* reduced_fg_bg_sh_palette_lab = NULL; // the lab values (L*, a*, b*) of the reduced palette
+
+// (fg, bg, sh) entries that are sufficient
+// to represent the whole fg_bg_sh_ch_2_intensity_map
+static uint16_t* reduced_fg_bg_sh_palette_indices = NULL;
+
+// the number N of entries in that palette;
+// 0 < N < fg_bg_sh_ch_2_intensity_map_size
+static size_t reduced_fg_bg_sh_palette_indices_size;
+
+// the lab values (L*, a*, b*) of the reduced palette
+static double* reduced_fg_bg_sh_palette_lab = NULL;
 
 static int min_int(int a, int b) {
     return a < b ? a : b;
@@ -223,28 +252,40 @@ static double max_double(double a, double b) {
     return a > b ? a : b;
 }
 
-static uint8_t* lookup_fg_bg_sh_2_ch_intensity_map(uint8_t fg, uint8_t bg, uint8_t sh) {
-    return fg_bg_sh_ch_2_intensity_map + (COLOR_CHANNELS * (sh + SHADES * (bg + bg_colors * (fg))));
+static uint8_t* lookup_fg_bg_sh_2_ch_intensity_map(
+    uint8_t fg, uint8_t bg, uint8_t sh)
+{
+    return fg_bg_sh_ch_2_intensity_map + (COLOR_CHANNELS * (sh + SHADES *
+        (bg + bg_colors * (fg))));
 }
 
 static uint16_t fg_bg_sh_2_shfgbg(uint8_t fg, uint8_t bg, uint8_t sh) {
     return ((uint16_t) sh << 8) | ((uint16_t) fg << 4) | ((uint16_t) bg);
 }
 
-static void shfgbg_2_fg_bg_sh(uint16_t shfgbg, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
+static void shfgbg_2_fg_bg_sh(uint16_t shfgbg,
+    uint8_t* fg, uint8_t* bg, uint8_t* sh)
+{
     *bg = shfgbg & 0xf;
     *fg = (shfgbg >> 4) & 0xf;
     *sh = (shfgbg >> 8) & 0x7;
 }
 
-static uint16_t lookup_r_g_b_2_shfgbg_map(uint8_t red, uint8_t green, uint8_t blue) {
-    int r = depth_mask & (min_int((int) red + round_addend, 0xff) >> depth_shift);
-    int g = depth_mask & (min_int((int) green + round_addend, 0xff) >> depth_shift);
-    int b = depth_mask & (min_int((int) blue + round_addend, 0xff) >> depth_shift);
+static uint16_t lookup_r_g_b_2_shfgbg_map(
+    uint8_t red, uint8_t green, uint8_t blue)
+{
+    int r = depth_mask & (min_int((int) red + round_addend, 0xff)
+        >> depth_shift);
+    int g = depth_mask & (min_int((int) green + round_addend, 0xff)
+        >> depth_shift);
+    int b = depth_mask & (min_int((int) blue + round_addend, 0xff)
+        >> depth_shift);
     return r_g_b_2_shfgbg_map[b + depth_size * (g + depth_size * (r))];
 }
 
-static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b, uint8_t* fg, uint8_t* bg, uint8_t* sh) {
+static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
+    uint8_t* fg, uint8_t* bg, uint8_t* sh)
+{
     uint16_t shfgbg = lookup_r_g_b_2_shfgbg_map(r, g, b);
     shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
 }
@@ -259,15 +300,19 @@ static uint32_t color_idx_2_rgb(uint8_t color_idx) {
     return BASE_COLORS[color_palette_preset][color_idx];
 }
 
-static void color_idx_2_r_g_b(uint8_t color_idx, uint8_t* r, uint8_t* g, uint8_t* b) {
+static void color_idx_2_r_g_b(uint8_t color_idx,
+    uint8_t* r, uint8_t* g, uint8_t* b)
+{
     rgb_2_r_g_b(color_idx_2_rgb(color_idx), r, g, b);
 }
 
 // Calculates the map ((fg, bg, sh, ch) -> intensity).
-// The question to answer here is: What does (fg, bg, sh) look like, expressed as an RGB color?
+// The question to answer here is: What does (fg, bg, sh) look like,
+//     expressed as an RGB color?
 // Precondition: fg_colors and bg_colors must be initialized
 static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
-    uint8_t *result = calloc(fg_bg_sh_ch_2_intensity_map_size, COLOR_CHANNELS * sizeof(uint8_t));
+    uint8_t *result = calloc(fg_bg_sh_ch_2_intensity_map_size,
+        COLOR_CHANNELS * sizeof(uint8_t));
     if (result == NULL) {
         return NULL;
     }
@@ -277,15 +322,19 @@ static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
 
     uint8_t* head = result;
     for (uint8_t fg_idx = 0; fg_idx < fg_colors; ++fg_idx) {
-        color_idx_2_r_g_b(fg_idx, &fg_rgb[CH_R], &fg_rgb[CH_G], &fg_rgb[CH_B]);
+        color_idx_2_r_g_b(fg_idx,
+            &fg_rgb[CH_R], &fg_rgb[CH_G], &fg_rgb[CH_B]);
         for (uint8_t bg_idx = 0; bg_idx < bg_colors; ++bg_idx) {
-            color_idx_2_r_g_b(bg_idx, &bg_rgb[CH_R], &bg_rgb[CH_G], &bg_rgb[CH_B]);
+            color_idx_2_r_g_b(bg_idx,
+                &bg_rgb[CH_R], &bg_rgb[CH_G], &bg_rgb[CH_B]);
             for (uint8_t sh_idx = 0; sh_idx < SHADES; ++sh_idx) {
                 for (uint8_t chan = 0; chan < COLOR_CHANNELS; ++chan) {
                     // add background color and foreground color parts
                     double fg_part = ((double) fg_rgb[chan] * sh_idx);
-                    double bg_part = ((double) bg_rgb[chan] * (MAX_SHADE_INDEX - sh_idx));
-                    double value = ((fg_part + bg_part + SHADE_ADDEND) / MAX_SHADE_INDEX);
+                    double bg_part = ((double) bg_rgb[chan] *
+                        (MAX_SHADE_INDEX - sh_idx));
+                    double value = ((fg_part + bg_part + SHADE_ADDEND) /
+                        MAX_SHADE_INDEX);
                     value = min_double(0xff, max_double(0x00, value));
                     *head++ = (uint8_t) value;
                 }
@@ -296,7 +345,9 @@ static uint8_t* calc_fg_bg_sh_ch_2_intensity_map(void) {
 }
 
 // Returns the squared Euclidean distance between (a1, b1, c1) and (a2, b2, c2).
-static double get_squared_distance(double a1, double b1, double c1, double a2, double b2, double c2) {
+static double get_squared_distance(double a1, double b1, double c1,
+    double a2, double b2, double c2)
+{
     double da = a2 - a1;
     double db = b2 - b1;
     double dc = c2 - c1;
@@ -304,7 +355,9 @@ static double get_squared_distance(double a1, double b1, double c1, double a2, d
 }
 
 // transforms RGB color to XYZ color
-static void r_g_b_2_x_y_z(uint8_t red, uint8_t green, uint8_t blue, double* x, double* y, double* z) {
+static void r_g_b_2_x_y_z(uint8_t red, uint8_t green, uint8_t blue,
+    double* x, double* y, double* z)
+{
     // RGB to sRGB
     double sr = (double) red * 100.0;
     double sg = (double) green * 100.0;
@@ -323,11 +376,16 @@ static void r_g_b_2_x_y_z(uint8_t red, uint8_t green, uint8_t blue, double* x, d
 // helper function to calculate cbrt(p/p_n) for CIELAB
 static double lab_cbrt(double p, double p_n) {
     double ppn = p / p_n;
-    return ppn < (216.0 / 24389.0) ? ((1.0 / 116.0) * (24389.0 / 27.0 * p / p_n + 16.0)) : cbrt(ppn);
+    return ppn < (216.0 / 24389.0) ?
+        ((1.0 / 116.0) * (24389.0 / 27.0 * p / p_n + 16.0)) :
+        cbrt(ppn);
 }
 
-// transforms color from CIEXYZ (CIE 1931 color space) to CIELAB, for (D65, 2 degrees)
-static void x_y_z_2_l_a_b(double x, double y, double z, double* l, double* a, double* b) {
+// transforms color from CIEXYZ (CIE 1931 color space) to CIELAB,
+// for (D65, 2 degrees)
+static void x_y_z_2_l_a_b(double x, double y, double z,
+    double* l, double* a, double* b)
+{
     double cbrt_x = lab_cbrt(x, X_N_D65_2DEG);
     double cbrt_y = lab_cbrt(y, Y_N_D65_2DEG);
     double cbrt_z = lab_cbrt(z, Z_N_D65_2DEG);
@@ -338,7 +396,9 @@ static void x_y_z_2_l_a_b(double x, double y, double z, double* l, double* a, do
 }
 
 // transforms color from sRGB to CIELAB, for (D65, 2 degrees)
-static void r_g_b_2_l_a_b(uint8_t r, uint8_t g, uint8_t b, double* ll, double* aa, double* bb) {
+static void r_g_b_2_l_a_b(uint8_t r, uint8_t g, uint8_t b,
+    double* ll, double* aa, double* bb)
+{
     double x, y, z;
     r_g_b_2_x_y_z(r, g, b, &x, &y, &z);
     x_y_z_2_l_a_b(x, y, z, ll, aa, bb);
@@ -352,7 +412,9 @@ static double r_g_b_2_y(uint8_t r, uint8_t g, uint8_t b) {
     return 0.299 * sr + 0.587 * sg + 0.114 * sb;
 }
 
-static double get_y_dist_between_index_colors(uint8_t color_idx1, uint8_t color_idx2) {
+static double get_y_dist_between_index_colors(
+    uint8_t color_idx1, uint8_t color_idx2)
+{
     uint8_t r1, g1, b1;
     color_idx_2_r_g_b(color_idx1, &r1, &g1, &b1);
     double y1 = r_g_b_2_y(r1, g1, b1);
@@ -368,12 +430,17 @@ static bool is_gray(uint8_t r, uint8_t g, uint8_t b) {
     return r == g && g == b;
 }
 
-// Evaluates which one of two color emulations (c1, c2) is nicer to emulate a given color c (true -> c1, false -> c2).
-// Roughly said, a color emulation is nicer if foreground color and background color are more near to c than the other color emulation.
+// Evaluates which one of two color emulations (c1, c2) is nicer to emulate
+//     a given color c (true -> c1, false -> c2).
+// Roughly said, a color emulation is nicer if foreground color and
+// background color are more near to c than the other color emulation.
 // Both colors c1, c2 must be given by their (fg, bg, sh) values.
 // c must be given in (r, g, b).
 // Precondition: c1 and c2 do both emulate c.
-static bool is_nicer_than(uint8_t r, uint8_t g, uint8_t b, uint8_t fg1, uint8_t bg1, uint8_t sh1, uint8_t fg2, uint8_t bg2, uint8_t sh2) {
+static bool is_nicer_than(uint8_t r, uint8_t g, uint8_t b,
+    uint8_t fg1, uint8_t bg1, uint8_t sh1,
+    uint8_t fg2, uint8_t bg2, uint8_t sh2)
+{
     // plain colors
     if (sh1 == 0 && sh2 != 0) {
         return true;
@@ -415,13 +482,21 @@ static bool is_nicer_than(uint8_t r, uint8_t g, uint8_t b, uint8_t fg1, uint8_t 
 
 // Helper function for calc_reduced_emulated_color_palette
 // Check
-//    - (1) if this color is in the reduced emulation color palette then take the nicer one and
+//    - (1) if this color is in the reduced emulation color palette then
+//          take the nicer one and
 //    - (2) if it is not in the reduced emulation color palette then add it.
-static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t bg_idx, uint8_t sh_idx, uint8_t from_r, uint8_t from_g, uint8_t from_b, size_t* current_palette_size, uint16_t* current_palette) {
+static void calc_reduced_emulated_color_palette_helper(
+    uint8_t fg_idx, uint8_t bg_idx, uint8_t sh_idx,
+    uint8_t from_r, uint8_t from_g, uint8_t from_b,
+    size_t* current_palette_size, uint16_t* current_palette)
+{
     bool not_yet_in_the_list = true;
 
     // go through all colors in the current palette
-    for (size_t to_idx = 0; to_idx < *current_palette_size; ++to_idx, ++current_palette) {
+    for (size_t to_idx = 0;
+        to_idx < *current_palette_size;
+        ++to_idx, ++current_palette)
+    {
         // get color
         uint16_t shfgbg = *current_palette;
 
@@ -434,7 +509,8 @@ static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t b
         uint8_t b = *rgb++;
 
         // check current color (r, g, b)<=>(fg, bg, sh)
-        // against given color (from_r, from_g, from_b)<=>(fg_idx, bg_idx, sh_idx)
+        // against given color (from_r, from_g, from_b)
+        //                  <=>(fg_idx, bg_idx, sh_idx)
         if (r == from_r && g == from_g && b == from_b) {
             // they match.
             // check if the given color (fg_idx, bg_idx, sh_idx)
@@ -460,17 +536,22 @@ static void calc_reduced_emulated_color_palette_helper(uint8_t fg_idx, uint8_t b
 
 // Calculates a reduced color emulation palette.
 // A color emulation is a combination of (fg, bg, sh) which emulates a color c.
-// A color emulation duplicate c' is a color emulation (fg', bg', sh') which emulates c, too.
-// Color emulation duplicates will be eliminated whereas the nicer one will be in the result.
+// A color emulation duplicate c' is a color emulation (fg', bg', sh') which
+//     emulates c, too.
+// Color emulation duplicates will be eliminated whereas the nicer one will be
+//     in the result.
 //
-// For example, the color emulation (fg=0, bg=1, sh=2) equals (fg=1, bg=0, sh=2) and thus, only one of them is needed.
+// For example, the color emulation (fg=0, bg=1, sh=2) equals (fg=1, bg=0, sh=2)
+//     and thus, only one of them is needed.
 //
 // Precondition:
 //    fg_bg_sh_ch_2_intensity_map_size,
 //    fg_bg_sh_ch_2_intensity_map,
 //    fg_colors and
 //    bg_colors must be initialized.
-static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** result) {
+static void calc_reduced_emulated_color_palette(
+    size_t* result_size, uint16_t** result
+) {
     uint16_t* res = calloc(fg_bg_sh_ch_2_intensity_map_size, sizeof(uint16_t));
     if (res == NULL) {
         result = NULL;
@@ -489,7 +570,8 @@ static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** 
                 uint8_t from_b = *from_head++;
 
                 // add color if new to the reduced palette
-                calc_reduced_emulated_color_palette_helper(fg, bg, sh, from_r, from_g, from_b, &res_size, res);
+                calc_reduced_emulated_color_palette_helper(fg, bg, sh,
+                    from_r, from_g, from_b, &res_size, res);
             }
         }
     }
@@ -499,7 +581,8 @@ static void calc_reduced_emulated_color_palette(size_t* result_size, uint16_t** 
 
 // Calculates the CIELAB color values of the emulated color palette.
 static double* reduced_emulated_color_palette_to_lab(void) {
-    double* res = calloc(reduced_fg_bg_sh_palette_indices_size, sizeof(double) * COLOR_CHANNELS);
+    double* res = calloc(reduced_fg_bg_sh_palette_indices_size,
+        sizeof(double) * COLOR_CHANNELS);
     if (res == NULL) {
         return NULL;
     }
@@ -524,9 +607,11 @@ static double* reduced_emulated_color_palette_to_lab(void) {
     return res;
 }
 
-// Calculates the main lookup table (rgb -> shfgbg) by approximating the rgb color using nearest neighbour applied in CIELAB color space.
+// Calculates the main lookup table (rgb -> shfgbg) by approximating
+// the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(void) {
-    uint16_t* result = calloc(depth_size * depth_size * depth_size, sizeof(uint16_t));
+    uint16_t* result = calloc(depth_size * depth_size * depth_size,
+        sizeof(uint16_t));
     if (result == NULL) {
         return NULL;
     }
@@ -549,12 +634,16 @@ static uint16_t* calc_lookup_table(void) {
                 uint16_t* from = reduced_fg_bg_sh_palette_indices;
                 double* from_lab = reduced_fg_bg_sh_palette_lab;
                 // check all available colors for best match
-                for (size_t sh_fg_bg_idx = 0; sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size; ++sh_fg_bg_idx) {
+                for (size_t sh_fg_bg_idx = 0;
+                    sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size;
+                    ++sh_fg_bg_idx)
+                {
                     double ll2 = *from_lab++;
                     double aa2 = *from_lab++;
                     double bb2 = *from_lab++;
                     uint16_t sh_fg_bg = *from++;
-                    double dist = get_squared_distance(ll1, aa1, bb1, ll2, aa2, bb2);
+                    double dist = get_squared_distance(ll1, aa1, bb1,
+                        ll2, aa2, bb2);
                     // check if better color found
                     if (best_dist > dist || is_first) {
                         uint8_t fg_idx;
@@ -568,7 +657,8 @@ static uint16_t* calc_lookup_table(void) {
                         is_first = false;
                     }
                 }
-                *to_head++ = fg_bg_sh_2_shfgbg(best_fg_idx, best_bg_idx, best_sh_idx);
+                *to_head++ = fg_bg_sh_2_shfgbg(best_fg_idx, best_bg_idx,
+                    best_sh_idx);
             }
         }
     }
@@ -583,11 +673,13 @@ static bool init(int new_color_palette_preset, int depth_per_channel,
     }
 
     if (depth_per_channel < MIN_COLOR_DEPTH) {
-        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: too low (min value: %d)", depth_per_channel, MIN_COLOR_DEPTH);
+        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: "
+            "too low (min value: %d)", depth_per_channel, MIN_COLOR_DEPTH);
         return false;
     }
     if (depth_per_channel > MAX_COLOR_DEPTH) {
-        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: too high (max value: %d)", depth_per_channel, MAX_COLOR_DEPTH);
+        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: "
+            "too high (max value: %d)", depth_per_channel, MAX_COLOR_DEPTH);
         return false;
     }
 
@@ -645,12 +737,17 @@ static int* color_error_head = NULL;
 static size_t color_error_head_x = 0;
 static size_t color_error_head_y = 0;
 
-// Creates and/or resets the matrix containing the errors used in error diffusion dithering.
-static bool prepare_color_error_array(size_t width, size_t height, size_t width_ext, size_t height_ext) {
+// Creates and/or resets the matrix containing the errors
+//     used in error diffusion dithering.
+static bool prepare_color_error_array(size_t width, size_t height,
+    size_t width_ext, size_t height_ext)
+{
     size_t size = COLOR_CHANNELS * (width + width_ext) * (height + height_ext);
 
-    if (color_error != NULL && width == color_error_width && height == color_error_height
-            && color_error_width_ext == width_ext && color_error_height_ext == height_ext) {
+    if (color_error != NULL && width == color_error_width &&
+        height == color_error_height && color_error_width_ext == width_ext &&
+        color_error_height_ext == height_ext)
+    {
         memset(color_error, 0, size * sizeof(int));
         color_error_head = color_error;
         color_error_head_x = 0;
@@ -698,7 +795,8 @@ static void dithering_advance_head(void) {
     color_error_head = advanced_head;
 }
 
-// Accumulates the error diffusion dithering error onto call-by-reference RGB values.
+// Accumulates the error diffusion dithering error onto
+//     call-by-reference RGB values.
 static void dithering_pull_error(uint8_t* r, uint8_t* g, uint8_t* b) {
     *r = max_int(min_int((int) (*r) + color_error_head[CH_R], 0xff), 0);
     *g = max_int(min_int((int) (*g) + color_error_head[CH_G], 0xff), 0);
@@ -710,13 +808,22 @@ static int dithering_fs_helper(int e) {
     return ((e >> 3) + 1) >> 1;
 }
 
-// Calculates the error for Floyd&Steinberg dithering and stores it into the error matrix.
-static void dithering_fs_push_error(uint8_t r_origin, uint8_t g_origin, uint8_t b_origin, uint8_t r_effective, uint8_t g_effective, uint8_t b_effective) {
-    int error[3] = {(int) r_origin - (int) r_effective, (int) g_origin - (int) g_effective, (int) b_origin - (int) b_effective};
+// Calculates the error for Floyd&Steinberg dithering and stores it
+//     into the error matrix.
+static void dithering_fs_push_error(
+    uint8_t r_origin, uint8_t g_origin, uint8_t b_origin,
+    uint8_t r_effective, uint8_t g_effective, uint8_t b_effective)
+{
+    int error[3] = {
+        (int) r_origin - (int) r_effective,
+        (int) g_origin - (int) g_effective,
+        (int) b_origin - (int) b_effective
+    };
 
     int* next_head = color_error_head + COLOR_CHANNELS;
     // add error
-    size_t line_size = (color_error_width - DITHERING_FS_WIDTH_EXT) * COLOR_CHANNELS;
+    size_t line_size = (color_error_width - DITHERING_FS_WIDTH_EXT) *
+        COLOR_CHANNELS;
     for (int ch = 0; ch < COLOR_CHANNELS; ++ch) {
         int e1 = error[ch];
         int e2 = e1 << 1;
@@ -748,13 +855,22 @@ static int dithering_jjn_helper(int e) {
     return (e + 24) / 48;
 }
 
-// Calculates the error for Jarvis&Judice&Ninke dithering and stores it into the error matrix.
-static void dithering_jjn_push_error(uint8_t r_origin, uint8_t g_origin, uint8_t b_origin, uint8_t r_effective, uint8_t g_effective, uint8_t b_effective) {
-    int error[3] = {(int) r_origin - (int) r_effective, (int) g_origin - (int) g_effective, (int) b_origin - (int) b_effective};
+// Calculates the error for Jarvis&Judice&Ninke dithering and
+// stores it into the error matrix.
+static void dithering_jjn_push_error(
+    uint8_t r_origin, uint8_t g_origin, uint8_t b_origin,
+    uint8_t r_effective, uint8_t g_effective, uint8_t b_effective)
+{
+    int error[3] = {
+        (int) r_origin - (int) r_effective,
+        (int) g_origin - (int) g_effective,
+        (int) b_origin - (int) b_effective
+    };
 
     int* next_head = color_error_head + COLOR_CHANNELS;
     // add error
-    size_t line_size = (color_error_width - DITHERING_JJN_WIDTH_EXT) * COLOR_CHANNELS;
+    size_t line_size = (color_error_width - DITHERING_JJN_WIDTH_EXT) *
+        COLOR_CHANNELS;
     for (int ch = 0; ch < COLOR_CHANNELS; ++ch) {
         int e1 = error[ch];
         int e2 = e1 << 1;
@@ -813,10 +929,12 @@ static void write_shaded(
         ok = true;
         break;
     case DITHERING_FS:
-        ok = prepare_color_error_array(swidth, sheight, DITHERING_FS_WIDTH_EXT, DITHERING_FS_HEIGHT_EXT);
+        ok = prepare_color_error_array(swidth, sheight,
+            DITHERING_FS_WIDTH_EXT, DITHERING_FS_HEIGHT_EXT);
         break;
     case DITHERING_JJN:
-        ok = prepare_color_error_array(swidth, sheight, DITHERING_JJN_WIDTH_EXT, DITHERING_JJN_HEIGHT_EXT);
+        ok = prepare_color_error_array(swidth, sheight,
+            DITHERING_JJN_WIDTH_EXT, DITHERING_JJN_HEIGHT_EXT);
         break;
     }
     if (!ok) {
@@ -847,11 +965,13 @@ static void write_shaded(
             uint8_t fg_idx;
             uint8_t bg_idx;
             uint8_t sh_idx;
-            r_g_b_2_fg_bg_sh(r_effective, g_effective, b_effective, &fg_idx, &bg_idx, &sh_idx);
+            r_g_b_2_fg_bg_sh(r_effective, g_effective, b_effective,
+                &fg_idx, &bg_idx, &sh_idx);
 
             // dithering.write
             if (dithering != DITHERING_NONE) {
-                uint8_t* effective = lookup_fg_bg_sh_2_ch_intensity_map(fg_idx, bg_idx, sh_idx);
+                uint8_t* effective = lookup_fg_bg_sh_2_ch_intensity_map(
+                    fg_idx, bg_idx, sh_idx);
                 r_effective = *effective++;
                 g_effective = *effective++;
                 b_effective = *effective++;
@@ -859,10 +979,12 @@ static void write_shaded(
                 case DITHERING_NONE:
                     break;
                 case DITHERING_FS:
-                    dithering_fs_push_error(r, g, b, r_effective, g_effective, b_effective);
+                    dithering_fs_push_error(r, g, b,
+                        r_effective, g_effective, b_effective);
                     break;
                 case DITHERING_JJN:
-                    dithering_jjn_push_error(r, g, b, r_effective, g_effective, b_effective);
+                    dithering_jjn_push_error(r, g, b,
+                        r_effective, g_effective, b_effective);
                     break;
                 }
             }
@@ -994,7 +1116,8 @@ static int preinit(struct vo *vo)
 
     struct priv *p = vo->priv;
     p->opts = mp_get_config_group(vo, vo->global, &vo_shablo_conf);
-    vo->monitor_par = (double) ((double) (vo->opts->monitor_pixel_aspect) * (double) p->opts->block_height / (double) p->opts->block_width);
+    vo->monitor_par = (double) ((double) (vo->opts->monitor_pixel_aspect) *
+        (double) p->opts->block_height / (double) p->opts->block_width);
     p->sws = mp_sws_alloc(vo);
     return 0;
 }
