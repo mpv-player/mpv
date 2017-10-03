@@ -26,6 +26,7 @@ enum hwdec_type {
     HWDEC_CUDA,
     HWDEC_CUDA_COPY,
     HWDEC_CRYSTALHD,
+    HWDEC_RKMPP,
 };
 
 #define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)

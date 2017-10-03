@@ -589,6 +589,11 @@ video_output_features = [
         'deps': 'vt.h',
         'func': check_pkg_config('libdrm'),
     }, {
+        'name': '--drmprime',
+        'desc': 'DRM Prime ffmpeg support',
+        'func': check_statement('libavutil/pixfmt.h',
+                                'int i = AV_PIX_FMT_DRM_PRIME')
+    }, {
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',
@@ -629,6 +634,11 @@ video_output_features = [
         'func': check_libs(['GL', 'GL Xdamage'],
                    check_cc(fragment=load_fragment('gl_x11.c'),
                             use=['x11', 'libdl', 'pthreads']))
+    } , {
+        'name': '--egl',
+        'desc': 'OpenGL EGL Support',
+        'groups': [ 'gl' ],
+        'func': check_pkg_config('egl'),
     } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
@@ -767,11 +777,18 @@ video_output_features = [
             check_cc(lib="EGL"),
             check_cc(lib="GLESv2"),
         ),
-    } , {
+    }, {
+         'name': '--rkmpp',
+         'desc': 'RockChip MPP  support',
+         'func': compose_checks(
+                 check_pkg_config('rockchip_mpp'),
+                 check_cc(lib="GLESv2")
+                 ),
+    }, {
         'name': '--ios-gl',
         'desc': 'iOS OpenGL ES hardware decoding interop support',
         'func': check_statement('OpenGLES/ES3/glext.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
-    } , {
+    }, {
         'name': '--plain-gl',
         'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
         'deps': 'libmpv-shared || libmpv-static',

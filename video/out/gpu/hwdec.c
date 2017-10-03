@@ -36,6 +36,9 @@ extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
 extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
+#if HAVE_DRMPRIME && HAVE_EGL
+extern const struct ra_hwdec_driver ra_hwdec_drmprime_egl;
+#endif
 
 static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
@@ -65,6 +68,9 @@ static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #endif
 #if HAVE_RPI
     &ra_hwdec_rpi_overlay,
+#endif
+#if HAVE_DRMPRIME && HAVE_EGL
+    &ra_hwdec_drmprime_egl,
 #endif
     NULL
 };
