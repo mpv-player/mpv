@@ -30,7 +30,7 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, or Windows Vista or later, or OSX 10.8 or later.
+- A not too ancient Linux, or Windows 7 or later, or OSX 10.8 or later.
 - A somewhat capable CPU. Hardware decoding might sometimes help if the CPU
   is too slow to decode video realtime, but must be explicitly enabled with
   the `--hwdec` option.
