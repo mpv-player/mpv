@@ -793,7 +793,7 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVStream *stream,
     if (ctx->header_written <= 0)
         return -1;
 
-    MP_DBG(ctx,
+    MP_TRACE(ctx,
         "write frame: stream %d ptsi %d (%f) dtsi %d (%f) size %d\n",
         (int)packet->stream_index,
         (int)packet->pts,

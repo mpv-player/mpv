@@ -1039,11 +1039,11 @@ static void pass_report_performance(struct gl_video *p)
     for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         struct pass_info *pass = &p->pass[i];
         if (pass->desc.len) {
-            MP_DBG(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
-                   BSTR_P(pass->desc),
-                   (int)pass->perf.last/1000,
-                   (int)pass->perf.avg/1000,
-                   (int)pass->perf.peak/1000);
+            MP_TRACE(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
+                     BSTR_P(pass->desc),
+                     (int)pass->perf.last/1000,
+                     (int)pass->perf.avg/1000,
+                     (int)pass->perf.peak/1000);
         }
     }
 }
@@ -1379,8 +1379,8 @@ static bool pass_hook_setup_binds(struct gl_video *p, const char *name,
         struct image bind_img;
         if (!saved_img_find(p, bind_name, &bind_img)) {
             // Clean up texture bindings and move on to the next hook
-            MP_DBG(p, "Skipping hook on %s due to no texture named %s.\n",
-                   name, bind_name);
+            MP_TRACE(p, "Skipping hook on %s due to no texture named %s.\n",
+                     name, bind_name);
             p->num_pass_imgs -= t;
             return false;
         }
@@ -1411,7 +1411,7 @@ static struct image pass_hook(struct gl_video *p, const char *name,
 
     saved_img_store(p, name, img);
 
-    MP_DBG(p, "Running hooks for %s\n", name);
+    MP_TRACE(p, "Running hooks for %s\n", name);
     for (int i = 0; i < p->num_tex_hooks; i++) {
         struct tex_hook *hook = &p->tex_hooks[i];
 
@@ -1426,7 +1426,7 @@ static struct image pass_hook(struct gl_video *p, const char *name,
 found:
         // Check the hook's condition
         if (hook->cond && !hook->cond(p, img, hook->priv)) {
-            MP_DBG(p, "Skipping hook on %s due to condition.\n", name);
+            MP_TRACE(p, "Skipping hook on %s due to condition.\n", name);
             continue;
         }
 
@@ -2058,7 +2058,6 @@ static void pass_read_video(struct gl_video *p)
     struct mp_rect_f src = {0.0, 0.0, p->image_params.w, p->image_params.h};
     struct mp_rect_f ref = src;
     gl_transform_rect(p->texture_offset, &ref);
-    MP_DBG(p, "ref rect: {%f %f} {%f %f}\n", ref.x0, ref.y0, ref.x1, ref.y1);
 
     // Explicitly scale all of the textures that don't match
     for (int n = 0; n < 4; n++) {
@@ -2069,9 +2068,6 @@ static void pass_read_video(struct gl_video *p)
         // exact same source rectangle.
         struct mp_rect_f rect = src;
         gl_transform_rect(offsets[n], &rect);
-        MP_DBG(p, "rect[%d]: {%f %f} {%f %f}\n", n,
-               rect.x0, rect.y0, rect.x1, rect.y1);
-
         if (mp_rect_f_seq(ref, rect))
             continue;
 
@@ -2083,8 +2079,6 @@ static void pass_read_video(struct gl_video *p)
                   {0.0, (ref.y1 - ref.y0) / (rect.y1 - rect.y0)}},
             .t = {ref.x0, ref.y0},
         };
-        MP_DBG(p, "-> fix[%d] = {%f %f} + off {%f %f}\n", n,
-               fix.m[0][0], fix.m[1][1], fix.t[0], fix.t[1]);
 
         // Since the scale in texture space is different from the scale in
         // absolute terms, we have to scale the coefficients down to be
@@ -2098,8 +2092,6 @@ static void pass_read_video(struct gl_video *p)
             MPSWAP(double, scale.m[0][0], scale.m[1][1]);
 
         gl_transform_trans(scale, &fix);
-        MP_DBG(p, "-> scaled[%d] = {%f %f} + off {%f %f}\n", n,
-               fix.m[0][0], fix.m[1][1], fix.t[0], fix.t[1]);
 
         // Since the texture transform is a function of the texture coordinates
         // to texture space, rather than the other way around, we have to
@@ -2981,8 +2973,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             assert(id == i);
         }
 
-        MP_DBG(p, "inter frame dur: %f vsync: %f, mix: %f\n",
-               t->ideal_frame_duration, t->vsync_interval, mix);
+        MP_TRACE(p, "inter frame dur: %f vsync: %f, mix: %f\n",
+                 t->ideal_frame_duration, t->vsync_interval, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
@@ -3755,8 +3747,8 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux)
 {
     if (p->opts.gamma_auto) {
         p->opts.gamma = gl_video_scale_ambient_lux(16.0, 256.0, 1.0, 1.2, lux);
-        MP_VERBOSE(p, "ambient light changed: %d lux (gamma: %f)\n", lux,
-                   p->opts.gamma);
+        MP_TRACE(p, "ambient light changed: %d lux (gamma: %f)\n", lux,
+                 p->opts.gamma);
     }
 }
 

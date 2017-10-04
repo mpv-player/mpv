@@ -140,7 +140,7 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
     arg->log = mp_client_get_log(arg->client);
 
-    MP_VERBOSE(arg, "Loading %s %s...\n", backend->name, fname);
+    MP_DBG(arg, "Loading %s %s...\n", backend->name, fname);
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, script_thread, arg)) {
@@ -150,7 +150,7 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
 
     wait_loaded(mpctx);
-    MP_VERBOSE(mpctx, "Done loading %s.\n", fname);
+    MP_DBG(mpctx, "Done loading %s.\n", fname);
 
     return 0;
 }

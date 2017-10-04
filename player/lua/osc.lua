@@ -1876,7 +1876,7 @@ function show_osc()
     -- show when disabled can happen (e.g. mouse_move) due to async/delayed unbinding
     if not state.enabled then return end
 
-    msg.debug("show_osc")
+    msg.trace("show_osc")
     --remember last time of invocation (mouse move)
     state.showtime = mp.get_time()
 
@@ -1888,7 +1888,7 @@ function show_osc()
 end
 
 function hide_osc()
-    msg.debug("hide_osc")
+    msg.trace("hide_osc")
     if not state.enabled then
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
@@ -1932,7 +1932,7 @@ end
 
 function timer_start()
     if not (state.timer_active) then
-        msg.debug("timer start")
+        msg.trace("timer start")
 
         if (state.timer == nil) then
             -- create new timer
@@ -1948,7 +1948,7 @@ end
 
 function timer_stop()
     if (state.timer_active) then
-        msg.debug("timer stop")
+        msg.trace("timer stop")
 
         if not (state.timer == nil) then
             -- kill timer
@@ -1974,12 +1974,12 @@ function request_init()
 end
 
 function render_wipe()
-    msg.debug("render_wipe()")
+    msg.trace("render_wipe()")
     mp.set_osd_ass(0, 0, "{}")
 end
 
 function render()
-    msg.debug("rendering")
+    msg.trace("rendering")
     local current_screen_sizeX, current_screen_sizeY, aspect = mp.get_osd_size()
     local mouseX, mouseY = get_virt_mouse_pos()
     local now = mp.get_time()
@@ -2182,7 +2182,7 @@ function tick()
     if (state.idle) then
 
         -- render idle message
-        msg.debug("idle message")
+        msg.trace("idle message")
         local icon_x, icon_y = 320 - 26, 140
 
         local ass = assdraw.ass_new()

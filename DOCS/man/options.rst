@@ -403,7 +403,7 @@ Program Behavior
 
 ``--log-file=<path>``
     Opens the given path for writing, and print log messages to it. Existing
-    files will be truncated. The log level always corresponds to ``-v``,
+    files will be truncated. The log level always corresponds to ``-v -v``,
     regardless of terminal verbosity levels.
 
 ``--config-dir=<path>``

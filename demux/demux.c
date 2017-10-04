@@ -583,9 +583,9 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (ds->base_ts == MP_NOPTS_VALUE)
         ds->base_ts = ds->last_ts;
 
-    MP_DBG(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
-           "[num=%zd size=%zd]\n", stream_type_name(stream->type),
-           dp->len, dp->pts, dp->dts, dp->pos, ds->packs, ds->bytes);
+    MP_TRACE(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
+             "[num=%zd size=%zd]\n", stream_type_name(stream->type),
+             dp->len, dp->pts, dp->dts, dp->pos, ds->packs, ds->bytes);
 
     if (ds->in->wakeup_cb && !ds->head->next)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
@@ -614,8 +614,8 @@ static bool read_packet(struct demux_internal *in)
             ds->last_ts >= ds->base_ts)
             read_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
-    MP_DBG(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
-           packs, bytes, active, read_more);
+    MP_TRACE(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
+             packs, bytes, active, read_more);
     if (packs >= in->max_packs || bytes >= in->max_bytes) {
         if (!in->warned_queue_overflow) {
             in->warned_queue_overflow = true;
