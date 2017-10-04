@@ -49,9 +49,8 @@ enum {
     RA_CAP_DIRECT_UPLOAD  = 1 << 4, // supports tex_upload without ra_buf
     RA_CAP_BUF_RO         = 1 << 5, // supports RA_VARTYPE_BUF_RO
     RA_CAP_BUF_RW         = 1 << 6, // supports RA_VARTYPE_BUF_RW
-    RA_CAP_NESTED_ARRAY   = 1 << 7, // supports nested arrays
-    RA_CAP_SHARED_BINDING = 1 << 8, // sampler/image/buffer namespaces are disjoint
-    RA_CAP_GLOBAL_UNIFORM = 1 << 9, // supports using "naked" uniforms (not UBO)
+    RA_CAP_SHARED_BINDING = 1 << 7, // sampler/image/buffer namespaces are disjoint
+    RA_CAP_GLOBAL_UNIFORM = 1 << 8, // supports using "naked" uniforms (not UBO)
 };
 
 enum ra_ctype {

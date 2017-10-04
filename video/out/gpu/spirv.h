@@ -21,7 +21,6 @@ struct spirv_compiler {
     const char *required_ext; // or NULL
     int glsl_version;         // GLSL version supported
     int compiler_version;     // for cache invalidation, may be left as 0
-    int ra_caps;              // RA_CAP_* provided by this implementation, if any
 };
 
 struct spirv_compiler_fns {

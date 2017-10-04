@@ -362,11 +362,6 @@ static const struct gl_functions gl_functions[] = {
             {0},
         },
     },
-    {
-        .ver_core = 430,
-        .extension = "GL_ARB_arrays_of_arrays",
-        .provides = MPGL_CAP_NESTED_ARRAY,
-    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {

@@ -22,7 +22,6 @@ static bool nv_glsl_init(struct ra_ctx *ctx)
     struct spirv_compiler *spv = ctx->spirv;
     spv->required_ext = VK_NV_GLSL_SHADER_EXTENSION_NAME;
     spv->glsl_version = 450; // impossible to query, so hard-code it..
-    spv->ra_caps = RA_CAP_NESTED_ARRAY;
 
     // Make sure the extension is actually available, and fail gracefully
     // if it isn't

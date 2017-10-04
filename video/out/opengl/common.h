@@ -57,7 +57,6 @@ enum {
     MPGL_CAP_UBO                = (1 << 21),    // GL_ARB_uniform_buffer_object
     MPGL_CAP_SSBO               = (1 << 22),    // GL_ARB_shader_storage_buffer_object
     MPGL_CAP_COMPUTE_SHADER     = (1 << 23),    // GL_ARB_compute_shader & GL_ARB_shader_image_load_store
-    MPGL_CAP_NESTED_ARRAY       = (1 << 24),    // GL_ARB_arrays_of_arrays
 
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };

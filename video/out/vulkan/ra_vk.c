@@ -187,7 +187,6 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     struct ra_vk *p = ra->priv = talloc_zero(ra, struct ra_vk);
     p->vk = vk;
 
-    ra->caps |= vk->spirv->ra_caps;
     ra->glsl_version = vk->spirv->glsl_version;
     ra->glsl_vulkan = true;
     ra->max_shmem = vk->limits.maxComputeSharedMemorySize;
