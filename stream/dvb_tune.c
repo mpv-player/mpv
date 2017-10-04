@@ -714,8 +714,18 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
 
     int tune_status = check_status(priv, fd_frontend, timeout);
     if (tune_status != 0) {
-         MP_ERR(priv, "ERROR locking to channel when tuning with S2API, falling back to DVBv3-tuning.\n");
-         goto old_api;
+        MP_ERR(priv, "ERROR locking to channel when tuning with S2API, clearing and falling back to DVBv3-tuning.\n");
+        struct dtv_property p_clear[] = {
+            { .cmd = DTV_CLEAR },
+        };
+        struct dtv_properties cmdseq_clear = {
+            .num = 1,
+            .props = p_clear
+        };
+        if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq_clear) < 0) {
+            MP_ERR(priv, "FE_SET_PROPERTY DTV_CLEAR failed\n");
+        }
+        goto old_api;
     } else {
         return tune_status;
     }
