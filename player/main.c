@@ -13,8 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stdio.h>
@@ -149,10 +147,7 @@ void mp_print_version(struct mp_log *log, int always)
     mp_msg(log, v, "\n");
     // Only in verbose mode.
     if (!always) {
-#if HAVE_GPL
-        // Possibly GPL due to 0810e42750fb2e2e0d602388cef1b8ea8015d935.
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
-#endif
         mp_msg(log, MSGL_V, "List of enabled features: %s\n", FULLCONFIG);
     }
 }
