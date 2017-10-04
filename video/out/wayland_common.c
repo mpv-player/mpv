@@ -673,12 +673,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     int found = 1;
     struct vo_wayland_state *wl = data;
 
-    if (!strcmp(interface, "wl_compositor") && found++) {
+    if (!strcmp(interface, wl_compositor_interface.name) && found++) {
         ver = MPMIN(ver, 4); /* Cap the version */
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
     }
 
-    if (!strcmp(interface, "wl_output") && found++) {
+    if (!strcmp(interface, wl_output_interface.name) && found++) {
         struct vo_wayland_output *output = talloc_zero(wl, struct vo_wayland_output);
 
         output->id     = id;
@@ -690,29 +690,29 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_list_insert(&wl->output_list, &output->link);
     }
 
-    if (!strcmp(interface, "zxdg_shell_v6") && found++) {
+    if (!strcmp(interface, zxdg_shell_v6_interface.name) && found++) {
         wl->shell = wl_registry_bind(reg, id, &zxdg_shell_v6_interface, 1);
         zxdg_shell_v6_add_listener(wl->shell, &xdg_shell_listener, wl);
     }
 
-    if (!strcmp(interface, "wl_seat") && found++) {
+    if (!strcmp(interface, wl_seat_interface.name) && found++) {
         wl->seat = wl_registry_bind(reg, id, &wl_seat_interface, 1);
         wl_seat_add_listener(wl->seat, &seat_listener, wl);
     }
 
-    if (!strcmp(interface, "wl_shm") && found++) {
+    if (!strcmp(interface, wl_shm_interface.name) && found++) {
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
     }
 
-    if (!strcmp(interface, "wl_data_device_manager") && (ver >= 3) && found++) {
+    if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
         wl->dnd_devman = wl_registry_bind(reg, id, &wl_data_device_manager_interface, 3);
     }
 
-    if (!strcmp(interface, "org_kde_kwin_server_decoration_manager") && found++) {
+    if (!strcmp(interface, org_kde_kwin_server_decoration_manager_interface.name) && found++) {
         wl->server_decoration_manager = wl_registry_bind(reg, id, &org_kde_kwin_server_decoration_manager_interface, 1);
     }
 
-    if (!strcmp(interface, "zwp_idle_inhibit_manager_v1") && found++) {
+    if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++) {
         wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, 1);
     }
 
