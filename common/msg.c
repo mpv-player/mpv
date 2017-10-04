@@ -285,7 +285,7 @@ static void write_log_file(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
 
-    if (lev > MSGL_V || !root->log_file)
+    if (!root->log_file || lev > MPMAX(MSGL_V, log->terminal_level))
         return;
 
     fprintf(root->log_file, "[%8.3f][%c][%s] %s",

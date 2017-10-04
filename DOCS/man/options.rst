@@ -403,8 +403,9 @@ Program Behavior
 
 ``--log-file=<path>``
     Opens the given path for writing, and print log messages to it. Existing
-    files will be truncated. The log level always corresponds to ``-v``,
-    regardless of terminal verbosity levels.
+    files will be truncated. The log level is at least ``-v``, but can be
+    raised via ``--msg-level`` (the option cannot lower it below the forced
+    minimum log level).
 
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
@@ -3379,6 +3380,8 @@ Terminal
     Run mpv with ``--msg-level=all=trace`` to see all messages mpv outputs. You
     can use the module names printed in the output (prefixed to each line in
     ``[...]``) to limit the output to interesting modules.
+
+    This also affects ``--log-file``, and in certain cases libmpv API logging.
 
     .. note::
 
