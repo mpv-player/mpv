@@ -2471,6 +2471,10 @@ Window
     window fully. The value ``0`` is interpreted specially, and mpv will
     draw directly on the root window.
 
+    On wayland, the ID is interpreted as ``struct zxdg_toplevel_v6 *``. Pass it
+    as value cast to ``intptr_t``. mpv will create its own window, and set the
+    wid toplevel as its parent.
+
     On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
     ``intptr_t``. mpv will create its own window, and set the wid window as
     parent, like with X11.
