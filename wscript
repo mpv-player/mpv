@@ -153,7 +153,10 @@ main_dependencies = [
     }, {
         'name': '--android',
         'desc': 'Android environment',
-        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
+        'func': compose_checks(
+            check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
+            check_cc(lib="android"),
+        )
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
@@ -817,7 +820,7 @@ video_output_features = [
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
-                'egl-angle-win32',
+                'egl-angle-win32 || android',
         'func': check_true
     }
 ]

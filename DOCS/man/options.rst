@@ -2483,7 +2483,8 @@ Window
 
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
-    ``--hwdec=mediacodec`` for direct rendering using MediaCodec.
+    ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
+    ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec-copy``).
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
@@ -4637,6 +4638,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
         DRM/EGL
     x11egl
         X11/EGL
+    android
+	Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
     mali-fbdev
         Direct fbdev/EGL support on some ARM/MALI devices.
     vdpauglx

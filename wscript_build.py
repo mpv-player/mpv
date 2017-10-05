@@ -425,6 +425,7 @@ def build(ctx):
         ( "video/out/opengl/context_drm_egl.c",  "egl-drm" ),
         ( "video/out/opengl/context_dxinterop.c","gl-dxinterop" ),
         ( "video/out/opengl/context_mali_fbdev.c","mali-fbdev" ),
+        ( "video/out/opengl/context_android.c",  "android" ),
         ( "video/out/opengl/context_rpi.c",      "rpi" ),
         ( "video/out/opengl/context_vdpau.c",    "vdpau-gl-x11" ),
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
