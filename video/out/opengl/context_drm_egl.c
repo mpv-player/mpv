@@ -39,10 +39,9 @@
 
 struct framebuffer
 {
-    struct gbm_bo *bo;
-    int width, height;
     int fd;
-    int id;
+    uint32_t width, height;
+    uint32_t id;
 };
 
 struct gbm
@@ -69,7 +68,7 @@ struct priv {
 
     struct egl egl;
     struct gbm gbm;
-    struct framebuffer fb;
+    struct framebuffer *fb;
 
     bool active;
     bool waiting_for_flip;
@@ -137,23 +136,29 @@ static void framebuffer_destroy_callback(struct gbm_bo *bo, void *data)
     }
 }
 
-static void update_framebuffer_from_bo(
-    const struct ra_ctx *ctx, struct gbm_bo *bo)
+static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
 {
     struct priv *p = ctx->priv;
-    p->fb.bo = bo;
-    p->fb.fd = p->kms->fd;
-    p->fb.width = gbm_bo_get_width(bo);
-    p->fb.height = gbm_bo_get_height(bo);
-    int stride = gbm_bo_get_stride(bo);
-    int handle = gbm_bo_get_handle(bo).u32;
+    struct framebuffer *fb = gbm_bo_get_user_data(bo);
+    if (fb) {
+        p->fb = fb;
+        return;
+    }
 
-    int ret = drmModeAddFB(p->kms->fd, p->fb.width, p->fb.height,
-                           24, 32, stride, handle, &p->fb.id);
+    fb = talloc_zero(ctx, struct framebuffer);
+    fb->fd     = p->kms->fd;
+    fb->width  = gbm_bo_get_width(bo);
+    fb->height = gbm_bo_get_height(bo);
+    uint32_t stride = gbm_bo_get_stride(bo);
+    uint32_t handle = gbm_bo_get_handle(bo).u32;
+
+    int ret = drmModeAddFB(fb->fd, fb->width, fb->height,
+                           24, 32, stride, handle, &fb->id);
     if (ret) {
         MP_ERR(ctx->vo, "Failed to create framebuffer: %s\n", mp_strerror(errno));
     }
-    gbm_bo_set_user_data(bo, &p->fb, framebuffer_destroy_callback);
+    gbm_bo_set_user_data(bo, fb, framebuffer_destroy_callback);
+    p->fb = fb;
 }
 
 static void page_flipped(int fd, unsigned int frame, unsigned int sec,
@@ -169,7 +174,7 @@ static bool crtc_setup(struct ra_ctx *ctx)
     if (p->active)
         return true;
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
-    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb.id,
+    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb->id,
                              0, 0, &p->kms->connector->connector_id, 1,
                              &p->kms->mode);
     p->active = true;
@@ -243,7 +248,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
     p->waiting_for_flip = true;
     update_framebuffer_from_bo(ctx, p->gbm.next_bo);
-    int ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb.id,
+    int ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
                               DRM_MODE_PAGE_FLIP_EVENT, p);
     if (ret) {
         MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
@@ -344,7 +349,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         return false;
     }
     update_framebuffer_from_bo(ctx, p->gbm.bo);
-    if (!p->fb.id) {
+    if (!p->fb || !p->fb->id) {
         MP_ERR(ctx, "Failed to create framebuffer.\n");
         return false;
     }
@@ -369,9 +374,9 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 static bool drm_egl_reconfig(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    ctx->vo->dwidth = p->fb.width;
-    ctx->vo->dheight = p->fb.height;
-    ra_gl_ctx_resize(ctx->swapchain, p->fb.width, p->fb.height, 0);
+    ctx->vo->dwidth  = p->fb->width;
+    ctx->vo->dheight = p->fb->height;
+    ra_gl_ctx_resize(ctx->swapchain, p->fb->width, p->fb->height, 0);
     return true;
 }
 
