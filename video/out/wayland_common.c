@@ -826,6 +826,9 @@ static void handle_toplevel_config(void *data, struct zxdg_toplevel_v6 *toplevel
         }
     }
 
+    if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
+        vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
+
     if (width > 0 && height > 0) {
         if (!wl->fullscreen) {
             if (wl->vo->opts->keepaspect && wl->vo->opts->keepaspect_window &&
@@ -941,19 +944,20 @@ int vo_wayland_init(struct vo *vo)
     /* Do a roundtrip to run the registry */
     wl_display_roundtrip(wl->display);
 
+    if (!wl->idle_inhibit_manager)
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   zwp_idle_inhibit_manager_v1_interface.name);
+    if (!wl->dnd_devman)
+        MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
+                   wl_data_device_manager_interface.name);
+    if (!wl->server_decoration_manager)
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   org_kde_kwin_server_decoration_manager_interface.name);
     if (!wl->shell) {
-        MP_FATAL(wl, "Compositor doesn't support the zxdg_shell_v6 protocol!\n");
+        MP_FATAL(wl, "Compositor doesn't support the required %s protocol!\n",
+                 zxdg_shell_v6_interface.name);
         return false;
     }
-    if (!wl->idle_inhibit_manager)
-        MP_VERBOSE(wl, "Compositor doesn't support the "
-                       "zwp_idle_inhibit_manager_v1 protocol!\n");
-    if (!wl->dnd_devman)
-        MP_VERBOSE(wl, "Compositor doesn't support the "
-                       "wl_data_device_manager (v3) protocol!\n");
-    if (!wl->server_decoration_manager)
-        MP_VERBOSE(wl, "Compositor doesn't support the "
-                       "org_kde_kwin_server_decoration_manager protocol!\n");
 
     if (spawn_cursor(wl))
         return false;
