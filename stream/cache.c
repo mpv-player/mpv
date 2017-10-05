@@ -4,7 +4,7 @@
  * mpv is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,13 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * The parts making this file LGPL v3 (instead of v2.1 or later) are:
- *  84ec57750883 remove unused cache-prefill and create cache-seek-min that...
- *  9b0d8c680f63 cache min fill adjustment, based on patch by Jeremy Huddleston
- * (iive agreed to LGPL v3+ only. Jeremy agreed to LGPL v2.1 or later.)
- * Once these changes are not relevant to for copyright anymore (e.g. because
- * they have been removed), this file will change to LGPLv2.1+.
  */
 
 // Time in seconds the main thread waits for the cache thread. On wakeups, the

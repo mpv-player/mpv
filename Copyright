@@ -31,7 +31,7 @@ under mplayer2, and has been removed from mpv.
 Some libraries are GPLv2+ or GPLv3+ only. Building mpv with Samba support makes
 it GPLv3+.
 
-mpv can be built as LGPLv3+ with the --enable-preliminary-lgpl3 configure
+mpv can be built as LGPLv2.1+ with the --enable-preliminary-lgpl2 configure
 option. This is a very new switch and it hasn't been confirmed yet whether
 really all GPL code is excluded (thus preliminary). In addition, it disables
 a number of useful features, some of them quite central:
@@ -64,12 +64,6 @@ Source files with specific licenses:
 - version.sh is LGPLv2+
 - bootstrap.py is unknown (probably GPLv2+ or LGPLv2+)
 - the build system (wscript, waftools/*) is LGPLv2+, some parts BSD
-
-Some files are LGPLv3+. This is due to the contributions of a single developer
-going by the SVN username "iive". The chosen license of this project is
-LGPLv2.1+. The affected files will be changed to LGPLv2.1+ at the earliest
-opportunity, for example if his contributions disappear by being replaced
-or removed. All new contributions to these files are implied to be LGPLv2.1+.
 
 The following files are still GPL:
 
@@ -131,12 +125,4 @@ The following files contain some optional GPL code:
     player/audio.c                  libaf glue code
     player/loadfile.c               --frames option (minor but probably fatal)
     player/osd.c                    OSD level 3
-    player/command.c                add/cycle command, possible sub-add command
-    player/main.c                   configuration output
-
-The following files are partially LGPLv3+ (otherwise LGPL):
-
-    demux/demux_mf.c                minor autodetection thing
-    stream/cache.c                  minor cache option changes
-    video/decode/lavc.h             split from vd_lavc.c
-    video/decode/vd_lavc.c          XvMC influences in get_format()
+    player/command.c                add/cycle command, possibly sub-add command

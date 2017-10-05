@@ -27,14 +27,14 @@ Dependency identifiers (for win32 vs. Unix):
 
 build_options = [
     {
-        'name': '--preliminary-lgpl3',
-        'desc': 'Preliminary LGPLv3+ license',
+        'name': '--preliminary-lgpl2',
+        'desc': 'Preliminary LGPLv2.1+ license',
         'default': 'disable',
         'func': check_true,
     }, {
         'name': 'gpl',
         'desc': 'GPL build',
-        'deps': '!preliminary-lgpl3',
+        'deps': '!preliminary-lgpl2',
         'func': check_true,
     }, {
         'name': 'libaf',
