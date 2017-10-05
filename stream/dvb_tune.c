@@ -464,6 +464,26 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
                            ((sat_no / 4) % 2) ? SEC_MINI_B : SEC_MINI_A);
 }
 
+#ifdef DVB_USE_S2API
+static int dvbv5_tune(dvb_priv_t *priv, int fd_frontend,
+                       unsigned int delsys, struct dtv_properties* cmdseq)
+{
+    MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
+               get_dvb_delsys(delsys));
+    MP_VERBOSE(priv, "Dumping raw tuning commands and values:\n");
+    for (int i = 0; i < cmdseq->num; ++i) {
+        MP_VERBOSE(priv, "%02d: 0x%x(%d) => 0x%x(%d)\n",
+                   i, cmdseq->props[i].cmd, cmdseq->props[i].cmd,
+                   cmdseq->props[i].u.data, cmdseq->props[i].u.data);
+    }
+    if (ioctl(fd_frontend, FE_SET_PROPERTY, cmdseq) < 0) {
+        MP_ERR(priv, "ERROR tuning channel\n");
+        return -1;
+    }
+    return 0;
+}
+#endif
+
 static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                    unsigned int freq, unsigned int srate, char pol,
                    int stream_id,
@@ -625,10 +645,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 .num = sizeof(p) / sizeof(p[0]),
                 .props = p
             };
-            MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-                       get_dvb_delsys(delsys));
-            if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
-                MP_ERR(priv, "ERROR tuning channel\n");
+            if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
                 goto old_api;
             }
         }
@@ -655,10 +672,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 .num = sizeof(p) / sizeof(p[0]),
                 .props = p
             };
-            MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-                       get_dvb_delsys(delsys));
-            if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
-                MP_ERR(priv, "ERROR tuning channel\n");
+            if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
                 goto old_api;
             }
         }
@@ -679,10 +693,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 .num = sizeof(p) / sizeof(p[0]),
                 .props = p
             };
-            MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-                       get_dvb_delsys(delsys));
-            if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
-                MP_ERR(priv, "ERROR tuning channel\n");
+            if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
                 goto old_api;
             }
         }
@@ -701,10 +712,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 .num = sizeof(p) / sizeof(p[0]),
                 .props = p
             };
-            MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-                       get_dvb_delsys(delsys));
-            if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
-                MP_ERR(priv, "ERROR tuning channel\n");
+            if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
                 goto old_api;
             }
         }
@@ -715,13 +723,6 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     int tune_status = check_status(priv, fd_frontend, timeout);
     if (tune_status != 0) {
         MP_ERR(priv, "ERROR locking to channel when tuning with S2API, clearing and falling back to DVBv3-tuning.\n");
-        struct dtv_property p_clear[] = {
-            { .cmd = DTV_CLEAR },
-        };
-        struct dtv_properties cmdseq_clear = {
-            .num = 1,
-            .props = p_clear
-        };
         if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq_clear) < 0) {
             MP_ERR(priv, "FE_SET_PROPERTY DTV_CLEAR failed\n");
         }
