@@ -38,6 +38,7 @@ Interface changes
     - remove the (deprecated) alias --gpu-context=drm-egl
     - remove the (deprecated) --vo=opengl-hq
     - remove --opengl-es=force2 (use --opengl-es=yes --opengl-restrict=300)
+    - the --msg-level option now affects --log-file
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command
