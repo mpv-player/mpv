@@ -881,11 +881,6 @@ static int create_surface(struct vo_wayland_state *wl)
     wl->xdg_toplevel = zxdg_surface_v6_get_toplevel(wl->xdg_surface);
     zxdg_toplevel_v6_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
-    if (wl->vo->opts->WinID >= 0) {
-        wl->xdg_tl_parent = (struct zxdg_toplevel_v6 *)(intptr_t)wl->vo->opts->WinID;
-        zxdg_toplevel_v6_set_parent(wl->xdg_toplevel, wl->xdg_tl_parent);
-    }
-
     zxdg_toplevel_v6_set_title (wl->xdg_toplevel, "mpv");
     zxdg_toplevel_v6_set_app_id(wl->xdg_toplevel, "mpv");
 
