@@ -717,7 +717,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (found > 1)
-        MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
+        MP_VERBOSE(wl, "Registered for protocol %s, ver %i\n", interface, ver);
 }
 
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
@@ -862,6 +862,8 @@ static void handle_toplevel_config(void *data, struct zxdg_toplevel_v6 *toplevel
 
 static void handle_toplevel_close(void *data, struct zxdg_toplevel_v6 *xdg_toplevel)
 {
+    struct vo_wayland_state *wl = data;
+    mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
 static const struct zxdg_toplevel_v6_listener xdg_toplevel_listener = {
@@ -879,9 +881,10 @@ static int create_surface(struct vo_wayland_state *wl)
     wl->xdg_toplevel = zxdg_surface_v6_get_toplevel(wl->xdg_surface);
     zxdg_toplevel_v6_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
-    if (wl->vo->opts->WinID >= 0)
+    if (wl->vo->opts->WinID >= 0) {
         wl->xdg_tl_parent = (struct zxdg_toplevel_v6 *)(intptr_t)wl->vo->opts->WinID;
-    zxdg_toplevel_v6_set_parent(wl->xdg_toplevel, wl->xdg_tl_parent);
+        zxdg_toplevel_v6_set_parent(wl->xdg_toplevel, wl->xdg_tl_parent);
+    }
 
     zxdg_toplevel_v6_set_title (wl->xdg_toplevel, "mpv");
     zxdg_toplevel_v6_set_app_id(wl->xdg_toplevel, "mpv");
@@ -1070,6 +1073,9 @@ int vo_wayland_reconfig(struct vo *vo)
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
+    /* Surface enter events happen later but we already know the outputs and we'd
+     * like to know the output the surface would be on (for scaling or fullscreen),
+     * so if fsscreen_id is set or there's only one possible output, use it. */
     if ((wl_list_length(&wl->output_list) == 1) || (vo->opts->fsscreen_id >= 0)) {
         int idx = wl_list_length(&wl->output_list) == 1 ? 0 : vo->opts->fsscreen_id;
         struct vo_wayland_output *out = out = find_output(wl, idx);
