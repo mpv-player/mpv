@@ -512,3 +512,6 @@ Available video output drivers are:
     Since this video output driver uses native decoding and rendering routines,
     many of mpv's features (subtitle rendering, OSD/OSC, video filters, etc)
     are not available with this driver.
+
+    To use hardware decoding with ``--vo-gpu`` instead, use
+    ``--hwdec=mediacodec-copy`` along with ``--gpu-context=android``.
