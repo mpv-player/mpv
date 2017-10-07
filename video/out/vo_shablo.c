@@ -78,8 +78,10 @@
 
 #define BASE_PALETTE_SIZE 8
 #define EXT_PALETTE_SIZE 16
-#define MIN_COLOR_DEPTH 1
-#define MAX_COLOR_DEPTH 8
+
+#define COLOR_DEPTH 8
+#define COLOR_DEPTH_SIZE (1 << COLOR_DEPTH)
+#define COLOR_DEPTH_MASK (COLOR_DEPTH_SIZE - 1)
 
 struct vo_shablo_opts {
     int fg_ext;
@@ -213,12 +215,6 @@ static size_t bg_colors;
 // index of preset color palette
 static size_t color_palette_preset;
 
-/* used for quick calculations during playback */
-static uint8_t depth_mask;
-static size_t depth_size;
-static size_t depth_shift;
-static uint8_t round_addend;
-
 /* maps between true colors and emulated colors */
 
 // what emulated colors look like in RGB24
@@ -242,11 +238,6 @@ static size_t reduced_fg_bg_sh_palette_indices_size;
 
 // the lab values (L*, a*, b*) of the reduced palette
 static double* reduced_fg_bg_sh_palette_lab = NULL;
-
-static int min_int(int a, int b)
-{
-    return a < b ? a : b;
-}
 
 static double min_double(double a, double b)
 {
@@ -281,25 +272,19 @@ static void shfgbg_2_fg_bg_sh(uint16_t shfgbg,
 static uint16_t lookup_r_g_b_2_shfgbg_map(
     uint8_t r, uint8_t g, uint8_t b)
 {
-    int ir = depth_mask & (min_int((int) r + round_addend, 0xff)
-        >> depth_shift);
-    int ig = depth_mask & (min_int((int) g + round_addend, 0xff)
-        >> depth_shift);
-    int ib = depth_mask & (min_int((int) b + round_addend, 0xff)
-        >> depth_shift);
-    return r_g_b_2_shfgbg_map[ib + depth_size * (ig + depth_size * (ir))];
+    size_t ir = (size_t) r;
+    size_t ig = (size_t) g;
+    size_t ib = (size_t) b;
+    return r_g_b_2_shfgbg_map[ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))];
 }
 
 static void set_r_g_b_2_shfgbg(uint8_t r, uint8_t g, uint8_t b,
     uint16_t shfgbg)
 {
-    int ir = depth_mask & (min_int((int) r + round_addend, 0xff)
-        >> depth_shift);
-    int ig = depth_mask & (min_int((int) g + round_addend, 0xff)
-        >> depth_shift);
-    int ib = depth_mask & (min_int((int) b + round_addend, 0xff)
-        >> depth_shift);
-    r_g_b_2_shfgbg_map[ib + depth_size * (ig + depth_size * (ir))] = shfgbg;
+    size_t ir = (size_t) r;
+    size_t ig = (size_t) g;
+    size_t ib = (size_t) b;
+    r_g_b_2_shfgbg_map[ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))] = shfgbg;
 }
 
 static void rgb_2_r_g_b(uint32_t rgb,
@@ -708,7 +693,7 @@ static void r_g_b_2_nearest_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
 // the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(bool lazy)
 {
-    uint16_t* result = calloc(depth_size * depth_size * depth_size,
+    uint16_t* result = calloc(COLOR_DEPTH_SIZE * COLOR_DEPTH_SIZE * COLOR_DEPTH_SIZE,
         sizeof(uint16_t));
     if (result == NULL) {
         return NULL;
@@ -716,12 +701,12 @@ static uint16_t* calc_lookup_table(bool lazy)
 
     if (!lazy) {
         uint16_t* to_head = result;
-        for (uint16_t r_idx = 0; r_idx < depth_size; ++r_idx) {
-            uint8_t r = r_idx << depth_shift;
-            for (uint16_t g_idx = 0; g_idx < depth_size; ++g_idx) {
-                uint8_t g = g_idx << depth_shift;
-                for (uint16_t b_idx = 0; b_idx < depth_size; ++b_idx) {
-                    uint8_t b = b_idx << depth_shift;
+        for (size_t r_idx = 0; r_idx < COLOR_DEPTH_SIZE; ++r_idx) {
+            uint8_t r = (uint8_t) r_idx;
+            for (size_t g_idx = 0; g_idx < COLOR_DEPTH_SIZE; ++g_idx) {
+                uint8_t g = (uint8_t) g_idx;
+                for (size_t b_idx = 0; b_idx < COLOR_DEPTH_SIZE; ++b_idx) {
+                    uint8_t b = (uint8_t) b_idx;
                     // calc lookup table cell values by brute force
                     uint8_t best_fg = 0;
                     uint8_t best_bg = 0;
@@ -756,17 +741,10 @@ static bool init(int new_color_palette_preset, bool lazy,
         return true;
     }
 
-    const int depth_per_channel = 8;
-
     color_palette_preset = new_color_palette_preset;
     fg_colors = light_fg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
     bg_colors = light_bg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
     fg_bg_sh_ch_2_intensity_map_size = fg_colors * bg_colors * SHADES;
-
-    depth_shift = MAX_COLOR_DEPTH - depth_per_channel;
-    depth_size = 1 << depth_per_channel;
-    depth_mask = depth_size - 1;
-    round_addend = depth_shift >> 1;
 
     uint8_t* temp = calc_fg_bg_sh_ch_2_intensity_map();
     if (temp == NULL) {
