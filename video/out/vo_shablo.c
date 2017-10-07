@@ -83,6 +83,8 @@
 #define COLOR_DEPTH_SIZE (1 << COLOR_DEPTH)
 #define COLOR_DEPTH_MASK (COLOR_DEPTH_SIZE - 1)
 
+#define ENTRY_EXISTS_FLAG 0x8000
+
 struct vo_shablo_opts {
     int fg_ext;
     int bg_ext;
@@ -715,7 +717,7 @@ static uint16_t* calc_lookup_table(bool lazy)
                     uint8_t best_sh = 0;
                     r_g_b_2_nearest_fg_bg_sh(r, g, b,
                         &best_fg, &best_bg, &best_sh);
-                    *to_head++ = 0x8000 |
+                    *to_head++ = ENTRY_EXISTS_FLAG |
                         fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
                 }
             }
@@ -728,10 +730,10 @@ static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
     uint8_t* fg, uint8_t* bg, uint8_t* sh)
 {
     uint16_t shfgbg = lookup_r_g_b_2_shfgbg_map(r, g, b);
-    if ((shfgbg & 0x8000) == 0) {
+    if ((shfgbg & ENTRY_EXISTS_FLAG) == 0) {
         // lazy lookup cell calculation
         r_g_b_2_nearest_fg_bg_sh(r, g, b, fg, bg, sh);
-        shfgbg = 0x8000 | fg_bg_sh_2_shfgbg(*fg, *bg, *sh);
+        shfgbg = ENTRY_EXISTS_FLAG | fg_bg_sh_2_shfgbg(*fg, *bg, *sh);
         set_r_g_b_2_shfgbg(r, g, b, shfgbg);
     }
     shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
