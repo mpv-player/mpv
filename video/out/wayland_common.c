@@ -987,6 +987,8 @@ int vo_wayland_init(struct vo *vo)
 void vo_wayland_uninit(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
+    if (!wl)
+        return;
 
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
