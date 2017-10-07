@@ -660,6 +660,45 @@ static double* reduced_emulated_color_palette_to_lab(void)
     return res;
 }
 
+// Calculates (rgb -> shfgbg) by approximating the RGB24 color
+// using nearest neighbour applied in CIELAB color space.
+static void r_g_b_2_nearest_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
+    uint8_t* best_fg, uint8_t* best_bg, uint8_t* best_sh)
+{
+    // calc result by brute force
+    *best_fg = 0;
+    *best_bg = 0;
+    *best_sh = 0;
+    double ll1, aa1, bb1;
+    r_g_b_2_l_a_b(r, g, b, &ll1, &aa1, &bb1);
+    double best_dist = 1e50;
+    bool is_first = true;
+    uint16_t* from = reduced_fg_bg_sh_palette_indices;
+    double* from_lab = reduced_fg_bg_sh_palette_lab;
+    // check all available colors for *best match
+    for (size_t sh_fg_bg_idx = 0;
+        sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size;
+        ++sh_fg_bg_idx)
+    {
+        double ll2 = *from_lab++;
+        double aa2 = *from_lab++;
+        double bb2 = *from_lab++;
+        uint16_t sh_fg_bg = *from++;
+        double dist = get_squared_distance(ll1, aa1, bb1,
+            ll2, aa2, bb2);
+        // check if better color found
+        if (best_dist > dist || is_first) {
+            uint8_t fg, bg, sh;
+            shfgbg_2_fg_bg_sh(sh_fg_bg, &fg, &bg, &sh);
+            best_dist = dist;
+            *best_fg = fg;
+            *best_bg = bg;
+            *best_sh = sh;
+            is_first = false;
+        }
+    }
+}
+
 // Calculates the main lookup table (rgb -> shfgbg) by approximating
 // the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(void)
@@ -678,41 +717,11 @@ static uint16_t* calc_lookup_table(void)
             for (uint16_t b_idx = 0; b_idx < depth_size; ++b_idx) {
                 uint8_t b = b_idx << depth_shift;
                 // calc lookup table cell values by brute force
-                uint8_t best_fg_idx = 0;
-                uint8_t best_bg_idx = 0;
-                uint8_t best_sh_idx = 0;
-                double ll1, aa1, bb1;
-                r_g_b_2_l_a_b(r, g, b, &ll1, &aa1, &bb1);
-                double best_dist = 1e50;
-                bool is_first = true;
-                uint16_t* from = reduced_fg_bg_sh_palette_indices;
-                double* from_lab = reduced_fg_bg_sh_palette_lab;
-                // check all available colors for best match
-                for (size_t sh_fg_bg_idx = 0;
-                    sh_fg_bg_idx < reduced_fg_bg_sh_palette_indices_size;
-                    ++sh_fg_bg_idx)
-                {
-                    double ll2 = *from_lab++;
-                    double aa2 = *from_lab++;
-                    double bb2 = *from_lab++;
-                    uint16_t sh_fg_bg = *from++;
-                    double dist = get_squared_distance(ll1, aa1, bb1,
-                        ll2, aa2, bb2);
-                    // check if better color found
-                    if (best_dist > dist || is_first) {
-                        uint8_t fg_idx;
-                        uint8_t bg_idx;
-                        uint8_t sh_idx;
-                        shfgbg_2_fg_bg_sh(sh_fg_bg, &fg_idx, &bg_idx, &sh_idx);
-                        best_dist = dist;
-                        best_fg_idx = fg_idx;
-                        best_bg_idx = bg_idx;
-                        best_sh_idx = sh_idx;
-                        is_first = false;
-                    }
-                }
-                *to_head++ = fg_bg_sh_2_shfgbg(best_fg_idx, best_bg_idx,
-                    best_sh_idx);
+                uint8_t best_fg = 0;
+                uint8_t best_bg = 0;
+                uint8_t best_sh = 0;
+                r_g_b_2_nearest_fg_bg_sh(r, g, b, &best_fg, &best_bg, &best_sh);
+                *to_head++ = fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
             }
         }
     }
