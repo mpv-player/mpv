@@ -86,7 +86,7 @@ struct vo_shablo_opts {
     int bg_ext;
     int dithering;
     int color_palette_preset;
-    int color_depth; // for each channel
+    int lazy;
     int block_width;
     int block_height;
     int width;   // 0 -> default
@@ -96,7 +96,7 @@ struct vo_shablo_opts {
 #define OPT_BASE_STRUCT struct vo_shablo_opts
 static const struct m_sub_options vo_shablo_conf = {
     .opts = (const m_option_t[]) {
-        OPT_INT("vo-shablo-color-depth-per-channel", color_depth, 0),
+        OPT_FLAG("vo-shablo-lazy", lazy, 0),
         OPT_CHOICE("vo-shablo-color-palette-preset", color_palette_preset, 0,
                    ({"vga", COLOR_PALETTE_PRESET_VGA},
                     {"cmd", COLOR_PALETTE_PRESET_CMD},
@@ -123,7 +123,7 @@ static const struct m_sub_options vo_shablo_conf = {
         .bg_ext = false,
         .dithering = DITHERING_NONE,
         .color_palette_preset = COLOR_PALETTE_PRESET_VGA,
-        .color_depth = 6,
+        .lazy = true,
         .block_width = DEFAULT_BLOCK_WIDTH,
         .block_height = DEFAULT_BLOCK_HEIGHT,
     },
@@ -290,11 +290,16 @@ static uint16_t lookup_r_g_b_2_shfgbg_map(
     return r_g_b_2_shfgbg_map[ib + depth_size * (ig + depth_size * (ir))];
 }
 
-static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
-    uint8_t* fg, uint8_t* bg, uint8_t* sh)
+static void set_r_g_b_2_shfgbg(uint8_t r, uint8_t g, uint8_t b,
+    uint16_t shfgbg)
 {
-    uint16_t shfgbg = lookup_r_g_b_2_shfgbg_map(r, g, b);
-    shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
+    int ir = depth_mask & (min_int((int) r + round_addend, 0xff)
+        >> depth_shift);
+    int ig = depth_mask & (min_int((int) g + round_addend, 0xff)
+        >> depth_shift);
+    int ib = depth_mask & (min_int((int) b + round_addend, 0xff)
+        >> depth_shift);
+    r_g_b_2_shfgbg_map[ib + depth_size * (ig + depth_size * (ir))] = shfgbg;
 }
 
 static void rgb_2_r_g_b(uint32_t rgb,
@@ -701,7 +706,7 @@ static void r_g_b_2_nearest_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
 
 // Calculates the main lookup table (rgb -> shfgbg) by approximating
 // the rgb color using nearest neighbour applied in CIELAB color space.
-static uint16_t* calc_lookup_table(void)
+static uint16_t* calc_lookup_table(bool lazy)
 {
     uint16_t* result = calloc(depth_size * depth_size * depth_size,
         sizeof(uint16_t));
@@ -709,43 +714,49 @@ static uint16_t* calc_lookup_table(void)
         return NULL;
     }
 
-    uint16_t* to_head = result;
-    for (uint16_t r_idx = 0; r_idx < depth_size; ++r_idx) {
-        uint8_t r = r_idx << depth_shift;
-        for (uint16_t g_idx = 0; g_idx < depth_size; ++g_idx) {
-            uint8_t g = g_idx << depth_shift;
-            for (uint16_t b_idx = 0; b_idx < depth_size; ++b_idx) {
-                uint8_t b = b_idx << depth_shift;
-                // calc lookup table cell values by brute force
-                uint8_t best_fg = 0;
-                uint8_t best_bg = 0;
-                uint8_t best_sh = 0;
-                r_g_b_2_nearest_fg_bg_sh(r, g, b, &best_fg, &best_bg, &best_sh);
-                *to_head++ = fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
+    if (!lazy) {
+        uint16_t* to_head = result;
+        for (uint16_t r_idx = 0; r_idx < depth_size; ++r_idx) {
+            uint8_t r = r_idx << depth_shift;
+            for (uint16_t g_idx = 0; g_idx < depth_size; ++g_idx) {
+                uint8_t g = g_idx << depth_shift;
+                for (uint16_t b_idx = 0; b_idx < depth_size; ++b_idx) {
+                    uint8_t b = b_idx << depth_shift;
+                    // calc lookup table cell values by brute force
+                    uint8_t best_fg = 0;
+                    uint8_t best_bg = 0;
+                    uint8_t best_sh = 0;
+                    r_g_b_2_nearest_fg_bg_sh(r, g, b, &best_fg, &best_bg, &best_sh);
+                    *to_head++ = 0x8000 | fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
+                }
             }
         }
     }
     return result;
 }
 
+static void r_g_b_2_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
+    uint8_t* fg, uint8_t* bg, uint8_t* sh)
+{
+    uint16_t shfgbg = lookup_r_g_b_2_shfgbg_map(r, g, b);
+    if ((shfgbg & 0x8000) == 0) {
+        // lazy lookup cell calculation
+        r_g_b_2_nearest_fg_bg_sh(r, g, b, fg, bg, sh);
+        shfgbg = 0x8000 | fg_bg_sh_2_shfgbg(*fg, *bg, *sh);
+        set_r_g_b_2_shfgbg(r, g, b, shfgbg);
+    }
+    shfgbg_2_fg_bg_sh(shfgbg, fg, bg, sh);
+}
+
 // Initializes color palettes.
-static bool init(int new_color_palette_preset, int depth_per_channel,
+static bool init(int new_color_palette_preset, bool lazy,
     bool light_fg_allowed, bool light_bg_allowed)
 {
     if (r_g_b_2_shfgbg_map != NULL) {
         return true;
     }
 
-    if (depth_per_channel < MIN_COLOR_DEPTH) {
-        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: "
-            "too low (min value: %d)", depth_per_channel, MIN_COLOR_DEPTH);
-        return false;
-    }
-    if (depth_per_channel > MAX_COLOR_DEPTH) {
-        fprintf(stderr, "[shablo]: --vo-shablo-color-depth-per-channel=%d: "
-            "too high (max value: %d)", depth_per_channel, MAX_COLOR_DEPTH);
-        return false;
-    }
+    const int depth_per_channel = 8;
 
     color_palette_preset = new_color_palette_preset;
     fg_colors = light_fg_allowed ? EXT_PALETTE_SIZE : BASE_PALETTE_SIZE;
@@ -781,7 +792,7 @@ static bool init(int new_color_palette_preset, int depth_per_channel,
     }
     reduced_fg_bg_sh_palette_lab = temp3;
 
-    uint16_t* temp4 = calc_lookup_table();
+    uint16_t* temp4 = calc_lookup_table(lazy);
     if (temp4 == NULL) {
         fprintf(stderr, "[shablo]: Out of memory error.");
         return false;
@@ -1144,7 +1155,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    if (!init(p->opts->color_palette_preset,p->opts->color_depth,
+    if (!init(p->opts->color_palette_preset,p->opts->lazy,
             p->opts->fg_ext, p->opts->bg_ext))
         return -1;
 

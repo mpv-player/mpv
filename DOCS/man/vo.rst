@@ -417,10 +417,8 @@ Available video output drivers are:
         Assume each block of the terminal has the specified width (i.e. number
         of horizontal pixels).
 
-    ``--vo-shablo-color-depth-per-channel=<1-8>`` (default: 6)
-        Set the maximum color depth for each of the RGB channels.
-        The bigger the value, the better the result but also the more time and
-        memory will be needed at startup process.
+    ``--vo-shablo-lazy=<yes|no>`` (default: yes)
+        Do not precalculate an internal lookup table (reduces startup time).
 
     ``--vo-shablo-color-palette-preset=<preset>`` (default: vga)
         Assume the 8 (or 16) terminal colors look like the colors in the preset
