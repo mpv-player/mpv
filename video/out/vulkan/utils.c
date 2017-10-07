@@ -455,9 +455,12 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
                    (unsigned)qfs[i].queueFlags, (int)qfs[i].queueCount);
     }
 
-    int idx_gfx  = find_qf(qfs, qfnum, VK_QUEUE_GRAPHICS_BIT),
-        idx_comp = find_qf(qfs, qfnum, VK_QUEUE_COMPUTE_BIT),
-        idx_tf   = find_qf(qfs, qfnum, VK_QUEUE_TRANSFER_BIT);
+    int idx_gfx = -1, idx_comp = -1, idx_tf = -1;
+    idx_gfx = find_qf(qfs, qfnum, VK_QUEUE_GRAPHICS_BIT);
+    if (opts.async_compute)
+        idx_comp = find_qf(qfs, qfnum, VK_QUEUE_COMPUTE_BIT);
+    if (opts.async_transfer)
+        idx_tf = find_qf(qfs, qfnum, VK_QUEUE_TRANSFER_BIT);
 
     // Vulkan requires at least one GRAPHICS queue, so if this fails something
     // is horribly wrong.
@@ -476,6 +479,11 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
         MP_VERBOSE(vk, "Using async transfer (QF %d)\n", idx_tf);
     if (idx_comp >= 0 && idx_comp != idx_gfx)
         MP_VERBOSE(vk, "Using async compute (QF %d)\n", idx_comp);
+
+    // Fall back to supporting compute shaders via the graphics pool for
+    // devices which support compute shaders but not async compute.
+    if (idx_comp < 0 && qfs[idx_gfx].queueFlags & VK_QUEUE_COMPUTE_BIT)
+        idx_comp = idx_gfx;
 
     // Now that we know which QFs we want, we can create the logical device
     VkDeviceQueueCreateInfo *qinfos = NULL;
