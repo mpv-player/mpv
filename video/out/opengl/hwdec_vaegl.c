@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -127,6 +128,11 @@ struct priv {
     EGLImageKHR images[4];
     VAImage current_image;
     bool buffer_acquired;
+#if VA_CHECK_VERSION(1, 0, 0)
+    bool esh_not_implemented;
+    VADRMPRIMESurfaceDescriptor desc;
+    bool surface_acquired;
+#endif
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
@@ -208,6 +214,14 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
             p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
         p->images[n] = 0;
     }
+
+#if VA_CHECK_VERSION(1, 0, 0)
+    if (p->surface_acquired) {
+        for (int n = 0; n < p->desc.num_objects; n++)
+            close(p->desc.objects[n].fd);
+        p->surface_acquired = false;
+    }
+#endif
 
     if (p->buffer_acquired) {
         status = vaReleaseBufferHandle(display, p->current_image.buf);
@@ -329,6 +343,72 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     VAStatus status;
     VAImage *va_image = &p->current_image;
     VADisplay *display = p_owner->display;
+
+#if VA_CHECK_VERSION(1, 0, 0)
+    if (p->esh_not_implemented)
+        goto esh_failed;
+
+    status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
+                                   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                   VA_EXPORT_SURFACE_READ_ONLY |
+                                   VA_EXPORT_SURFACE_SEPARATE_LAYERS,
+                                   &p->desc);
+    if (!CHECK_VA_STATUS(mapper, "vaAcquireSurfaceHandle()")) {
+        if (status == VA_STATUS_ERROR_UNIMPLEMENTED)
+            p->esh_not_implemented = true;
+        goto esh_failed;
+    }
+    p->surface_acquired = true;
+
+    for (int n = 0; n < p->num_planes; n++) {
+        int attribs[20] = {EGL_NONE};
+        int num_attribs = 0;
+
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p->desc.layers[n].drm_format);
+        ADD_ATTRIB(EGL_WIDTH,  p->tex[n]->params.w);
+        ADD_ATTRIB(EGL_HEIGHT, p->tex[n]->params.h);
+
+#define ADD_PLANE_ATTRIBS(plane) do { \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
+                       p->desc.objects[p->desc.layers[n].object_index[plane]].fd); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
+                       p->desc.layers[n].offset[plane]); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
+                       p->desc.layers[n].pitch[plane]); \
+        } while (0)
+
+        ADD_PLANE_ATTRIBS(0);
+        if (p->desc.layers[n].num_planes > 1)
+            ADD_PLANE_ATTRIBS(1);
+        if (p->desc.layers[n].num_planes > 2)
+            ADD_PLANE_ATTRIBS(2);
+        if (p->desc.layers[n].num_planes > 3)
+            ADD_PLANE_ATTRIBS(3);
+
+        p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
+            EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
+        if (!p->images[n])
+            goto esh_failed;
+
+        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
+        p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+
+        mapper->tex[n] = p->tex[n];
+    }
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+
+    if (p->desc.fourcc == VA_FOURCC_YV12)
+        MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
+
+    return 0;
+
+esh_failed:
+    if (p->surface_acquired) {
+        for (int n = 0; n < p->desc.num_objects; n++)
+            close(p->desc.objects[n].fd);
+        p->surface_acquired = false;
+    }
+#endif
 
     status = vaDeriveImage(display, va_surface_id(mapper->src), va_image);
     if (!CHECK_VA_STATUS(mapper, "vaDeriveImage()"))
