@@ -275,7 +275,8 @@ static uint16_t lookup_r_g_b_2_shfgbg_map(
     size_t ir = (size_t) r;
     size_t ig = (size_t) g;
     size_t ib = (size_t) b;
-    return r_g_b_2_shfgbg_map[ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))];
+    return r_g_b_2_shfgbg_map[
+        ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))];
 }
 
 static void set_r_g_b_2_shfgbg(uint8_t r, uint8_t g, uint8_t b,
@@ -284,7 +285,8 @@ static void set_r_g_b_2_shfgbg(uint8_t r, uint8_t g, uint8_t b,
     size_t ir = (size_t) r;
     size_t ig = (size_t) g;
     size_t ib = (size_t) b;
-    r_g_b_2_shfgbg_map[ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))] = shfgbg;
+    r_g_b_2_shfgbg_map[
+        ib + COLOR_DEPTH_SIZE * (ig + COLOR_DEPTH_SIZE * (ir))] = shfgbg;
 }
 
 static void rgb_2_r_g_b(uint32_t rgb,
@@ -693,8 +695,8 @@ static void r_g_b_2_nearest_fg_bg_sh(uint8_t r, uint8_t g, uint8_t b,
 // the rgb color using nearest neighbour applied in CIELAB color space.
 static uint16_t* calc_lookup_table(bool lazy)
 {
-    uint16_t* result = calloc(COLOR_DEPTH_SIZE * COLOR_DEPTH_SIZE * COLOR_DEPTH_SIZE,
-        sizeof(uint16_t));
+    uint16_t* result = calloc(COLOR_DEPTH_SIZE * COLOR_DEPTH_SIZE *
+        COLOR_DEPTH_SIZE, sizeof(uint16_t));
     if (result == NULL) {
         return NULL;
     }
@@ -711,8 +713,10 @@ static uint16_t* calc_lookup_table(bool lazy)
                     uint8_t best_fg = 0;
                     uint8_t best_bg = 0;
                     uint8_t best_sh = 0;
-                    r_g_b_2_nearest_fg_bg_sh(r, g, b, &best_fg, &best_bg, &best_sh);
-                    *to_head++ = 0x8000 | fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
+                    r_g_b_2_nearest_fg_bg_sh(r, g, b,
+                        &best_fg, &best_bg, &best_sh);
+                    *to_head++ = 0x8000 |
+                        fg_bg_sh_2_shfgbg(best_fg, best_bg, best_sh);
                 }
             }
         }
@@ -863,7 +867,8 @@ static void dithering_pull_error(uint8_t* r, uint8_t* g, uint8_t* b)
 }
 
 static double dithering_calc_error(uint8_t origin, uint8_t effective) {
-    return exp_2_lin_color(c8_2_cexp(origin)) - exp_2_lin_color(c8_2_cexp(effective));
+    return exp_2_lin_color(c8_2_cexp(origin)) -
+        exp_2_lin_color(c8_2_cexp(effective));
 }
 
 // Little helper for Floyd&Steinberg dithering.
