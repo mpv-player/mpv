@@ -266,8 +266,9 @@ static void setup_bundle(int *argc, char *argv[])
     NSString *path_new = [NSString stringWithFormat:@"%@:%@:%@:%@",
                                                     path_bundle,
                                                     @"/usr/local/bin",
-                                                    @"/usr/opt/bin",
-                                                    @"/usr/opt/local/bin"];
+                                                    @"/usr/local/sbin",
+                                                    @"/opt/local/bin",
+                                                    @"/opt/local/sbin"];
     setenv("PATH", [path_new UTF8String], 1);
     setenv("MPVBUNDLE", "true", 1);
 }
