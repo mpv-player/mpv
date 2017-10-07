@@ -433,97 +433,104 @@ Available video output drivers are:
         The names of the first 8 normal ANSI colors (0-7) and their light
         versions (8-F) are:
 
-            normal | light | color name
-            ---------------------------
-            0      |  8    | black
-            1      |  9    | red
-            2      |  A    | green
-            3      |  B    | yellow
-            4      |  C    | blue
-            5      |  D    | magenta
-            6      |  E    | cyan
-            7      |  F    | white
+            ======   =====   ==========
+            normal   light   color name
+            0        8       black
+            1        9       red
+            2        A       green
+            3        B       yellow
+            4        C       blue
+            5        D       magenta
+            6        E       cyan
+            7        F       white
+            ======   =====   ==========
 
         Available palettes with their 8 normal and 8 light #RRGGBB colors values
         are:
 
         vga
-            normal colors   light colors
-            -------------   ------------
-            0 | #444444     8 | #555555
-            1 | #aa0000     9 | #ff5555
-            2 | #00aa00     A | #55ff55
-            3 | #aa5500     B | #ffff55
-            4 | #0000aa     C | #5555ff
-            5 | #aa00aa     D | #ff55ff
-            6 | #00aaaa     E | #55ffff
-            7 | #aaaaaa     F | #ffffff
+            =   =======   =   =======
+            0   #444444   8   #555555
+            1   #aa0000   9   #ff5555
+            2   #00aa00   A   #55ff55
+            3   #aa5500   B   #ffff55
+            4   #0000aa   C   #5555ff
+            5   #aa00aa   D   #ff55ff
+            6   #00aaaa   E   #55ffff
+            7   #aaaaaa   F   #ffffff
+            =   =======   =   =======
+
         cmd
-            normal colors   light colors
-            -------------   ------------
-            0 | #000000     8 | #808080
-            1 | #800000     9 | #ff0000
-            2 | #008000     A | #00ff00
-            3 | #808000     B | #ffff00
-            4 | #000080     C | #0000ff
-            5 | #800080     D | #ff00ff
-            6 | #008080     E | #00ffff
-            7 | #c0c0c0     F | #ffffff
+            =   =======   =   =======
+            0   #000000   8   #808080
+            1   #800000   9   #ff0000
+            2   #008000   A   #00ff00
+            3   #808000   B   #ffff00
+            4   #000080   C   #0000ff
+            5   #800080   D   #ff00ff
+            6   #008080   E   #00ffff
+            7   #c0c0c0   F   #ffffff
+            =   =======   =   =======
+
         termapp
-            normal colors   light colors
-            -------------   ------------
-            0 | #000000     8 | #818383
-            1 | #c23621     9 | #fc391f
-            2 | #25bc26     A | #31e722
-            3 | #adad27     B | #eaec23
-            4 | #492ee1     C | #5833ff
-            5 | #d338d3     D | #f935f8
-            6 | #33bbc8     E | #14f0f0
-            7 | #cbcccd     F | #e9ebeb
+            =   =======   =   =======
+            0   #000000   8   #818383
+            1   #c23621   9   #fc391f
+            2   #25bc26   A   #31e722
+            3   #adad27   B   #eaec23
+            4   #492ee1   C   #5833ff
+            5   #d338d3   D   #f935f8
+            6   #33bbc8   E   #14f0f0
+            7   #cbcccd   F   #e9ebeb
+            =   =======   =   =======
+
         putty
-            normal colors   light colors
-            -------------   ------------
-            0 | #000000     8 | #555555
-            1 | #bb0000     9 | #ff5555
-            2 | #00bb00     A | #55ff55
-            3 | #bbbb00     B | #ffff55
-            4 | #0000bb     C | #5555ff
-            5 | #bb00bb     D | #ff55ff
-            6 | #00bbbb     E | #55ffff
-            7 | #bbbbbb     F | #ffffff
+            =   =======   =   =======
+            0   #000000   8   #555555
+            1   #bb0000   9   #ff5555
+            2   #00bb00   A   #55ff55
+            3   #bbbb00   B   #ffff55
+            4   #0000bb   C   #5555ff
+            5   #bb00bb   D   #ff55ff
+            6   #00bbbb   E   #55ffff
+            7   #bbbbbb   F   #ffffff
+            =   =======   =   =======
+
         mirc
-            normal colors   light colors
-            -------------   ------------
-            0 | #000000     8 | #7f7f7f
-            1 | #7f0000     9 | #ff0000
-            2 | #009300     A | #00fc00
-            3 | #fc7f00     B | #ffff00
-            4 | #00007f     C | #0000fc
-            5 | #9c009c     D | #ff00ff
-            6 | #009393     E | #00ffff
-            7 | #d2d2d2     F | #ffffff
+            =   =======   =   =======
+            0   #000000   8   #7f7f7f
+            1   #7f0000   9   #ff0000
+            2   #009300   A   #00fc00
+            3   #fc7f00   B   #ffff00
+            4   #00007f   C   #0000fc
+            5   #9c009c   D   #ff00ff
+            6   #009393   E   #00ffff
+            7   #d2d2d2   F   #ffffff
+            =   =======   =   =======
+
         xterm
-            normal colors   light colors
-            -------------   ------------
-            0 | #000000     8 | #7f7f7f
-            1 | #cd0000     9 | #ff0000
-            2 | #00cd00     A | #00ff00
-            3 | #cdcd00     B | #ffff00
-            4 | #0000ee     C | #5c5cff
-            5 | #cd00cd     D | #ff00ff
-            6 | #00cdcd     E | #00ffff
-            7 | #e5e5e5     F | #ffffff
+            =   =======   =   =======
+            0   #000000   8   #7f7f7f
+            1   #cd0000   9   #ff0000
+            2   #00cd00   A   #00ff00
+            3   #cdcd00   B   #ffff00
+            4   #0000ee   C   #5c5cff
+            5   #cd00cd   D   #ff00ff
+            6   #00cdcd   E   #00ffff
+            7   #e5e5e5   F   #ffffff
+            =   =======   =   =======
+
         human
-            normal colors   light colors
-            -------------   ------------
-            0 | #010101     8 | #808080
-            1 | #de382b     9 | #ff0000
-            2 | #39b54a     A | #00ff00
-            3 | #ffc706     B | #ffff00
-            4 | #006fb8     C | #0000ff
-            5 | #762671     D | #ff00ff
-            6 | #2cb5e9     E | #00ffff
-            7 | #cccccc     F | #ffffff
+            =   =======   =   =======
+            0   #010101   8   #808080
+            1   #de382b   9   #ff0000
+            2   #39b54a   A   #00ff00
+            3   #ffc706   B   #ffff00
+            4   #006fb8   C   #0000ff
+            5   #762671   D   #ff00ff
+            6   #2cb5e9   E   #00ffff
+            7   #cccccc   F   #ffffff
+            =   =======   =   =======
 
     ``--vo-shablo-dithering=<algo>`` (default: none)
         Use a color dithering algorithm to compensate for loss in color depth.
