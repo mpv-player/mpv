@@ -440,6 +440,7 @@ mp.msg = {
     info = function(...) return mp.log("info", ...) end,
     verbose = function(...) return mp.log("v", ...) end,
     debug = function(...) return mp.log("debug", ...) end,
+    trace = function(...) return mp.log("trace", ...) end,
 }
 
 _G.print = mp.msg.info
