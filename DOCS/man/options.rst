@@ -4270,6 +4270,23 @@ The following video options are currently all specific to ``--vo=gpu`` and
     1), but it can also slow things down on hardware where there's no true
     parallelism between queues. (Default: 1)
 
+``--vulkan-async-transfer``
+    Enables the use of async transfer queues on supported vulkan devices. Using
+    them allows transfer operations like texture uploads and blits to happen
+    concurrently with the actual rendering, thus improving overall throughput
+    and power consumption. Enabled by default, and should be relatively safe.
+
+``--vulkan-async-compute``
+    Enables the use of async compute queues on supported vulkan devices. Using
+    this, in theory, allows out-of-order scheduling of compute shaders with
+    graphics shaders, thus enabling the hardware to do more effective work while
+    waiting for pipeline bubbles and memory operations. Not beneficial on all
+    GPUs. It's worth noting that if async compute is enabled, and the device
+    supports more compute queues than graphics queues (bound by the restrictions
+    set by ``--vulkan-queue-count``), mpv will internally try and prefer the
+    use of compute shaders over fragment shaders wherever possible. Not enabled
+    by default, since it seems to cause issues with some drivers.
+
 ``--d3d11-warp=<yes|no|auto>``
     Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
     backend (default: auto). This is a high performance software renderer. By

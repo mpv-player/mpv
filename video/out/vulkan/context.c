@@ -104,9 +104,16 @@ const struct m_sub_options vulkan_conf = {
                    {"immediate",    SWAP_IMMEDIATE})),
         OPT_INTRANGE("vulkan-queue-count", dev_opts.queue_count, 0, 1, 8,
                      OPTDEF_INT(1)),
+        OPT_FLAG("vulkan-async-transfer", dev_opts.async_transfer, 0),
+        OPT_FLAG("vulkan-async-compute", dev_opts.async_compute, 0),
         {0}
     },
-    .size = sizeof(struct vulkan_opts)
+    .size = sizeof(struct vulkan_opts),
+    .defaults = &(struct vulkan_opts) {
+        .dev_opts = {
+            .async_transfer = 1,
+        },
+    },
 };
 
 struct priv {

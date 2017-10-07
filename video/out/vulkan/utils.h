@@ -55,6 +55,8 @@ bool mpvk_pick_surface_format(struct mpvk_ctx *vk);
 
 struct mpvk_device_opts {
     int queue_count;    // number of queues to use
+    int async_transfer; // enable async transfer
+    int async_compute;  // enable async compute
 };
 
 // Create a logical device and initialize the vk_cmdpools
