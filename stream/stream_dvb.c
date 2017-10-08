@@ -86,6 +86,50 @@ const struct m_sub_options stream_dvb_conf = {
 
 void dvbin_close(stream_t *stream);
 
+static fe_modulation_t parse_vdr_modulation(const char** modstring) {
+    if (!strncmp(*modstring, "16", 2)) {
+        (*modstring)+=2;
+        return QAM_16;
+    } else if (!strncmp(*modstring, "32", 2)) {
+        (*modstring)+=2;
+        return QAM_32;
+    } else if (!strncmp(*modstring, "64", 2)) {
+        (*modstring)+=2;
+        return QAM_64;
+    } else if (!strncmp(*modstring, "128", 3)) {
+        (*modstring)+=3;
+        return QAM_128;
+    } else if (!strncmp(*modstring, "256", 3)) {
+        (*modstring)+=3;
+        return QAM_256;
+    } else if (!strncmp(*modstring, "998", 3)) {
+        (*modstring)+=3;
+        return QAM_AUTO;
+    } else if (!strncmp(*modstring, "2", 1)) {
+        (*modstring)++;
+        return QPSK;
+    } else if (!strncmp(*modstring, "5", 1)) {
+        (*modstring)++;
+        return PSK_8;
+    } else if (!strncmp(*modstring, "6", 1)) {
+        (*modstring)++;
+        return APSK_16;
+    } else if (!strncmp(*modstring, "7", 1)) {
+        (*modstring)++;
+        return APSK_32;
+    } else if (!strncmp(*modstring, "10", 2)) {
+        (*modstring)+=2;
+        return VSB_8;
+    } else if (!strncmp(*modstring, "11", 2)) {
+        (*modstring)+=2;
+        return VSB_16;
+    } else if (!strncmp(*modstring, "12", 2)) {
+        (*modstring)+=2;
+        return DQPSK;
+    } else {
+        return QAM_AUTO;
+    }
+}
 
 static void parse_vdr_par_string(const char *vdr_par_str, dvb_channel_t *ptr)
 {
@@ -130,6 +174,10 @@ static void parse_vdr_par_string(const char *vdr_par_str, dvb_channel_t *ptr)
                     ptr->inv = INVERSION_OFF;
                 }
                 vdr_par++;
+                break;
+            case 'M':
+                vdr_par++;
+                ptr->mod = parse_vdr_modulation(&vdr_par);
                 break;
             default:
                 vdr_par++;
@@ -299,6 +347,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                         &num_chars);
 
         if (num_chars == strlen(&line[k])) {
+            // Modulation parsed here, not via old xine-parsing path.
+            mod[0] = '\0';
             // It's a VDR-style config line.
             parse_vdr_par_string(vdr_par_str, ptr);
             // Units in VDR-style config files are divided by 1000.
