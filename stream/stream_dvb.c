@@ -319,6 +319,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             case SYS_DVBC_ANNEX_A:
             case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
+            case SYS_DVBC_ANNEX_B:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d",
                            get_dvb_delsys(delsys),
@@ -390,6 +391,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 break;
 #ifdef DVB_ATSC
             case SYS_ATSC:
+            case SYS_DVBC_ANNEX_B:
                 fields = sscanf(&line[k], atsc_conf,
                                 &ptr->freq, mod, vpid_str, apid_str);
                 mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
@@ -523,6 +525,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
         case SYS_ATSC:
+        case SYS_DVBC_ANNEX_B:
             if (!strcmp(mod, "QAM_128")) {
                 ptr->mod = QAM_128;
             } else if (!strcmp(mod, "QAM_256")) {
@@ -541,6 +544,19 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 #endif
             }
         }
+#ifdef DVB_ATSC
+        /* Modulation defines real delsys for ATSC:
+           Terrestrial (VSB) is SYS_ATSC, Cable (QAM) is SYS_DVBC_ANNEX_B. */
+        if (delsys == SYS_ATSC || delsys == SYS_DVBC_ANNEX_B) {
+            if (ptr->mod == VSB_8 || ptr->mod == VSB_16) {
+                delsys = SYS_ATSC;
+            } else {
+                delsys = SYS_DVBC_ANNEX_B;
+            }
+            mp_verbose(log, "Defined delivery system for ATSC as %s from modulation.\n",
+                       get_dvb_delsys(delsys));
+        }
+#endif
 
         switch (delsys) {
         case SYS_DVBT:

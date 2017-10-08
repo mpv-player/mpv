@@ -152,11 +152,9 @@ old_api:
         if ((FE_CAN_8VSB | FE_CAN_16VSB) & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_ATSC);
         }
-#if 0 /* Not used now. */
         if ((FE_CAN_QAM_64 | FE_CAN_QAM_256 | FE_CAN_QAM_AUTO) & fe_info.caps) {
             DELSYS_SET(ret_mask, SYS_DVBC_ANNEX_B);
         }
-#endif
         break;
 #endif
     default:
@@ -598,6 +596,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         break;
 #ifdef DVB_ATSC
     case SYS_ATSC:
+    case SYS_DVBC_ANNEX_B:
         MP_VERBOSE(priv, "tuning %s to %d, modulation=%d\n",
                    get_dvb_delsys(delsys), freq, modulation);
         break;
@@ -700,6 +699,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         break;
 #ifdef DVB_ATSC
     case SYS_ATSC:
+    case SYS_DVBC_ANNEX_B:
         {
             struct dtv_property p[] = {
                 { .cmd = DTV_DELIVERY_SYSTEM, .u.data = delsys },
@@ -768,6 +768,7 @@ old_api:
         break;
 #ifdef DVB_ATSC
     case SYS_ATSC:
+    case SYS_DVBC_ANNEX_B:
         feparams.u.vsb.modulation = modulation;
         break;
 #endif
