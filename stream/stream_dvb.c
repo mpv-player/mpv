@@ -603,7 +603,9 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             } else {
                 delsys = SYS_DVBC_ANNEX_B;
             }
-            mp_verbose(log, "Defined delivery system for ATSC as %s from modulation.\n",
+            if (!DELSYS_IS_SET(delsys_mask, delsys))
+                continue; /* Skip channel. */
+            mp_verbose(log, "Switched to delivery system for ATSC: %s (guessed from modulation).\n",
                        get_dvb_delsys(delsys));
         }
 #endif
