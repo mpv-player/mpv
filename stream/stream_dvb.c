@@ -301,7 +301,9 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         if (num_chars == strlen(&line[k])) {
             // It's a VDR-style config line.
             parse_vdr_par_string(vdr_par_str, ptr);
-            // We still need the special SAT-handling here.
+            // Units in VDR-style config files are divided by 1000.
+            ptr->freq *=  1000UL;
+            ptr->srate *=  1000UL;
             switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
@@ -333,9 +335,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 }
                 if (!DELSYS_IS_SET(delsys_mask, delsys))
                     continue; /* Skip channel. */
-
-                ptr->freq *=  1000UL;
-                ptr->srate *=  1000UL;
 
                 if (vdr_loc_str[0]) {
                     // In older vdr config format, this field contained the DISEQc information.
