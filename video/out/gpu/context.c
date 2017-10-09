@@ -44,6 +44,7 @@ extern const struct ra_ctx_fns ra_ctx_wgl;
 extern const struct ra_ctx_fns ra_ctx_angle;
 extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
+extern const struct ra_ctx_fns ra_ctx_android;
 extern const struct ra_ctx_fns ra_ctx_mali;
 extern const struct ra_ctx_fns ra_ctx_vdpauglx;
 
@@ -54,6 +55,9 @@ extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
 
 static const struct ra_ctx_fns *contexts[] = {
 // OpenGL contexts:
+#if HAVE_ANDROID
+    &ra_ctx_android,
+#endif
 #if HAVE_RPI
     &ra_ctx_rpi,
 #endif

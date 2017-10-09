@@ -156,6 +156,7 @@ main_dependencies = [
         'func': compose_checks(
             check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
             check_cc(lib="android"),
+            check_cc(lib="EGL"),
         )
     }, {
         'name': 'posix-or-mingw',
