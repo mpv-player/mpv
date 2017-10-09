@@ -1970,17 +1970,6 @@ static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg
                                     mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
 }
 
-static int mp_property_ao_detected_device(void *ctx,struct m_property *prop,
-                                          int action, void *arg)
-{
-    struct MPContext *mpctx = ctx;
-    struct command_ctx *cmd = mpctx->command_ctx;
-    create_hotplug(mpctx);
-
-    const char *d = ao_hotplug_get_detected_device(cmd->hotplug);
-    return m_property_strdup_ro(action, arg, d);
-}
-
 /// Audio delay (RW)
 static int mp_property_audio_delay(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -3983,7 +3972,6 @@ static const struct m_property mp_properties_base[] = {
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
-    {"audio-out-detected-device", mp_property_ao_detected_device},
 
     // Video
     {"fullscreen", mp_property_fullscreen},
@@ -5773,10 +5761,8 @@ void handle_command_updates(struct MPContext *mpctx)
 
     // This is a bit messy: ao_hotplug wakes up the player, and then we have
     // to recheck the state. Then the client(s) will read the property.
-    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug)) {
+    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
         mp_notify_property(mpctx, "audio-device-list");
-        mp_notify_property(mpctx, "audio-out-detected-device");
-    }
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)

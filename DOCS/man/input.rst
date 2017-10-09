@@ -2017,10 +2017,6 @@ Property list
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
 
-``audio-out-detected-device``
-    Return the audio device selected by the AO driver (only implemented for
-    some drivers: currently only ``coreaudio``).
-
 ``working-directory``
     Return the working directory of the mpv process. Can be useful for JSON IPC
     users, because the command line player usually works with relative paths.

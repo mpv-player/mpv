@@ -39,6 +39,8 @@ Interface changes
     - remove the (deprecated) --vo=opengl-hq
     - remove --opengl-es=force2 (use --opengl-es=yes --opengl-restrict=300)
     - the --msg-level option now affects --log-file
+    - drop "audio-out-detected-device" property - this was unavailable on all
+      audio output drivers for quite a while (coreaudio used to provide it)
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command

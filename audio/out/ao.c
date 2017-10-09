@@ -550,13 +550,6 @@ bool ao_hotplug_check_update(struct ao_hotplug *hp)
     return false;
 }
 
-const char *ao_hotplug_get_detected_device(struct ao_hotplug *hp)
-{
-    if (!hp || !hp->ao)
-        return NULL;
-    return hp->ao->detected_device;
-}
-
 // The return value is valid until the next call to this API.
 struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
 {
