@@ -52,7 +52,6 @@ extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
 extern const struct vo_driver video_out_gpu;
-extern const struct vo_driver video_out_opengl;
 extern const struct vo_driver video_out_opengl_cb;
 extern const struct vo_driver video_out_null;
 extern const struct vo_driver video_out_image;
@@ -106,7 +105,6 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_lavc,
 #endif
 #if HAVE_GL
-    &video_out_opengl,
     &video_out_opengl_cb,
 #endif
     NULL
@@ -196,8 +194,9 @@ const struct m_obj_list vo_obj_list = {
     .get_desc = get_desc,
     .description = "video outputs",
     .aliases = {
-        {"gl", "opengl"},
+        {"gl", "gpu"},
         {"direct3d_shaders", "direct3d"},
+        {"opengl", "gpu"},
         {0}
     },
     .allow_unknown_entries = true,

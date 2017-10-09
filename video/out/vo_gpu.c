@@ -349,31 +349,3 @@ const struct vo_driver video_out_gpu = {
     .priv_defaults = &defaults,
     .options = options,
 };
-
-static int preinit_opengl(struct vo *vo)
-{
-    MP_WARN(vo, "--vo=opengl was replaced by --vo=gpu --gpu-api=opengl, and will"
-            " be removed in the future!\n");
-
-    struct gpu_priv *p = vo->priv;
-    p->force_gl = true;
-    return preinit(vo);
-}
-
-const struct vo_driver video_out_opengl = {
-    .description = "Shader-based GPU Renderer",
-    .name = "opengl",
-    .caps = VO_CAP_ROTATE90,
-    .preinit = preinit_opengl,
-    .query_format = query_format,
-    .reconfig = reconfig,
-    .control = control,
-    .get_image = get_image,
-    .draw_frame = draw_frame,
-    .flip_page = flip_page,
-    .wait_events = wait_events,
-    .wakeup = wakeup,
-    .uninit = uninit,
-    .priv_size = sizeof(struct gpu_priv),
-    .priv_defaults = &defaults,
-};
