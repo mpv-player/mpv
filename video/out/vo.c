@@ -47,7 +47,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 
-extern const struct vo_driver video_out_android;
+extern const struct vo_driver video_out_mediacodec_embed;
 extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
@@ -67,7 +67,7 @@ extern const struct vo_driver video_out_tct;
 const struct vo_driver *const video_out_drivers[] =
 {
 #if HAVE_ANDROID
-    &video_out_android,
+    &video_out_mediacodec_embed,
 #endif
 #if HAVE_RPI
     &video_out_rpi,
