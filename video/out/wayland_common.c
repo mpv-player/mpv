@@ -44,15 +44,15 @@ static const struct zxdg_shell_v6_listener xdg_shell_listener = {
     xdg_shell_ping,
 };
 
-static void set_cursor_visibility(struct vo_wayland_state *wl, int on)
+static int set_cursor_visibility(struct vo_wayland_state *wl, int on)
 {
     if (!wl->pointer)
-        return;
+        return VO_NOTAVAIL;
     if (on) {
         struct wl_cursor_image *image  = wl->default_cursor->images[0];
         struct wl_buffer *buffer = wl_cursor_image_get_buffer(image);
         if (!buffer)
-            return;
+            return VO_FALSE;
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
                               image->hotspot_x, image->hotspot_y);
         wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
@@ -61,6 +61,7 @@ static void set_cursor_visibility(struct vo_wayland_state *wl, int on)
     } else {
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
     }
+    return VO_TRUE;
 }
 
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
@@ -360,7 +361,7 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 
 static bool create_input(struct vo_wayland_state *wl)
 {
-    wl->xkb_context = xkb_context_new(0);
+    wl->xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
 
     if (!wl->xkb_context) {
         MP_ERR(wl, "failed to initialize input: check xkbcommon\n");
@@ -502,10 +503,12 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t transform)
 {
     struct vo_wayland_output *output = data;
-    output->make = make;
-    output->model = model;
+    output->make = talloc_strdup(output->wl, make);
+    output->model = talloc_strdup(output->wl, model);
     output->geometry.x0 = x;
     output->geometry.y0 = y;
+    output->phys_width = phys_width;
+    output->phys_height = phys_height;
 }
 
 static void output_handle_mode(void *data, struct wl_output *wl_output,
@@ -515,19 +518,29 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
     struct vo_wayland_output *output = data;
 
     /* Only save current mode */
-    if (!output || !(flags & WL_OUTPUT_MODE_CURRENT))
+    if (!(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
-    output->width = width;
-    output->height = height;
-    output->geometry.x1 = width  + output->geometry.x0;
-    output->geometry.y1 = height + output->geometry.y0;
+    output->geometry.x1 = width;
+    output->geometry.y1 = height;
     output->flags = flags;
     output->refresh_rate = (double)refresh * 0.001;
 }
 
 static void output_handle_done(void* data, struct wl_output *wl_output)
 {
+    struct vo_wayland_output *o = data;
+
+    o->geometry.x1 += o->geometry.x0;
+    o->geometry.y1 += o->geometry.y0;
+
+    MP_VERBOSE(o->wl, "Registered output %s %s (0x%x):\n"
+               "\tx: %dpx, y: %dpx\n"
+               "\tw: %dpx (%dmm), h: %dpx (%dmm)\n"
+               "\tscale: %d\n"
+               "\tHz: %f\n", o->make, o->model, o->id, o->geometry.x0,
+               o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
+               mp_rect_h(o->geometry), o->phys_height, o->scale, o->refresh_rate);
 }
 
 static void output_handle_scale(void* data, struct wl_output *wl_output,
@@ -667,6 +680,68 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection,
 };
 
+static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    struct vo_wayland_state *wl = data;
+    wl->current_output = NULL;
+
+    struct vo_wayland_output *o;
+    wl_list_for_each(o, &wl->output_list, link) {
+        if (o->output == output) {
+            wl->current_output = o;
+            break;
+        }
+    }
+
+    wl->current_output->has_surface = true;
+    if (wl->scaling != wl->current_output->scale)
+        wl->pending_vo_events |= VO_EVENT_RESIZE;
+    wl->scaling = wl->current_output->scale;
+
+    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i\n", o->make,
+               o->model, o->id, wl->scaling);
+
+    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+}
+
+static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    struct vo_wayland_state *wl = data;
+
+    struct vo_wayland_output *o;
+    wl_list_for_each(o, &wl->output_list, link) {
+        if (o->output == output) {
+            o->has_surface = false;
+            wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+            return;
+        }
+    }
+}
+
+static const struct wl_surface_listener surface_listener = {
+    surface_handle_enter,
+    surface_handle_leave,
+};
+
+static const struct wl_callback_listener frame_listener;
+
+static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    struct vo_wayland_state *wl = data;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_callback,
+};
+
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -676,15 +751,21 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wl_compositor_interface.name) && found++) {
         ver = MPMIN(ver, 4); /* Cap the version */
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
+        wl->surface = wl_compositor_create_surface(wl->compositor);
+        wl_surface_add_listener(wl->surface, &surface_listener, wl);
+        wl->frame_callback = wl_surface_frame(wl->surface);
+        wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     }
 
     if (!strcmp(interface, wl_output_interface.name) && found++) {
         struct vo_wayland_output *output = talloc_zero(wl, struct vo_wayland_output);
 
-        output->id     = id;
-        output->scale  = 1;
-        output->output = wl_registry_bind(reg, id, &wl_output_interface,
-                                          MPMIN(2, ver));
+        output->wl       = wl;
+        output->id       = id;
+        output->scale    = 1;
+        output->geometry = (struct mp_rect){ -1, -1, -1, -1 };
+        output->output   = wl_registry_bind(reg, id, &wl_output_interface,
+                                            MPMIN(2, ver));
 
         wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&wl->output_list, &output->link);
@@ -720,54 +801,35 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         MP_VERBOSE(wl, "Registered for protocol %s, ver %i\n", interface, ver);
 }
 
+static void remove_output(struct vo_wayland_output *out)
+{
+    if (!out)
+        return;
+
+    MP_VERBOSE(out->wl, "Deregistering output %s %s (0x%x)\n", out->make,
+               out->model, out->id);
+    wl_list_remove(&out->link);
+    talloc_free(out->make);
+    talloc_free(out->model);
+    talloc_free(out);
+    return;
+}
+
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
 {
-}
-
-static const struct wl_registry_listener registry_listener = {
-    registry_handle_add,
-    registry_handle_remove,
-};
-
-static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
-                                 struct wl_output *output)
-{
     struct vo_wayland_state *wl = data;
-    wl->current_output = NULL;
-
-    struct vo_wayland_output *o;
-    wl_list_for_each(o, &wl->output_list, link) {
-        if (o->output == output) {
-            wl->current_output = o;
-            break;
-        }
-    }
-
-    wl->current_output->has_surface = 1;
-    wl->scaling = wl->current_output->scale;
-
-    MP_VERBOSE(wl, "Surface entered an output, scale = %i\n", wl->scaling);
-
-    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
-}
-
-static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
-                                 struct wl_output *output)
-{
-    struct vo_wayland_state *wl = data;
-
-    struct vo_wayland_output *o;
-    wl_list_for_each(o, &wl->output_list, link) {
-        if (o->output == output) {
-            o->has_surface = 0;
+    struct vo_wayland_output *output, *tmp;
+    wl_list_for_each_safe(output, tmp, &wl->output_list, link) {
+        if (output->id == id) {
+            remove_output(output);
             return;
         }
     }
 }
 
-static const struct wl_surface_listener surface_listener = {
-    surface_handle_enter,
-    surface_handle_leave,
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_add,
+    registry_handle_remove,
 };
 
 static int spawn_cursor(struct vo_wayland_state *wl)
@@ -802,30 +864,31 @@ static const struct zxdg_surface_v6_listener xdg_surface_listener = {
 static void handle_toplevel_config(void *data, struct zxdg_toplevel_v6 *toplevel,
                                    int32_t width, int32_t height, struct wl_array *states)
 {
-    uint32_t *p;
     struct vo_wayland_state *wl = data;
     struct mp_rect old_geometry = wl->geometry;
 
     int prev_fs_state = wl->fullscreen;
-    int maximized = 0;
-    wl->fullscreen = 0;
-    wl_array_for_each(p, states) {
-        enum zxdg_toplevel_v6_state state = *p;
-        switch (state) {
-            case ZXDG_TOPLEVEL_V6_STATE_FULLSCREEN:
-                wl->fullscreen = 1;
-                break;
-            case ZXDG_TOPLEVEL_V6_STATE_RESIZING:
-                wl->pending_vo_events |= VO_EVENT_LIVE_RESIZING;
-                break;
-            case ZXDG_TOPLEVEL_V6_STATE_MAXIMIZED:
-                maximized = 1;
-                break;
-            case ZXDG_TOPLEVEL_V6_STATE_ACTIVATED:
-                break;
+    bool maximized = false;
+    wl->fullscreen = false;
+    enum zxdg_toplevel_v6_state *state;
+    wl_array_for_each(state, states) {
+        switch (*state) {
+        case ZXDG_TOPLEVEL_V6_STATE_FULLSCREEN:
+            wl->fullscreen = true;
+            break;
+        case ZXDG_TOPLEVEL_V6_STATE_RESIZING:
+            wl->pending_vo_events |= VO_EVENT_LIVE_RESIZING;
+            break;
+        case ZXDG_TOPLEVEL_V6_STATE_MAXIMIZED:
+            maximized = true;
+            break;
+        case ZXDG_TOPLEVEL_V6_STATE_ACTIVATED:
+            break;
         }
     }
 
+    if (prev_fs_state != wl->fullscreen)
+        wl->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
     if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
         vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
 
@@ -851,12 +914,13 @@ static void handle_toplevel_config(void *data, struct zxdg_toplevel_v6 *toplevel
         wl->geometry = wl->window_size;
     }
 
+    if (mp_rect_equals(&old_geometry, &wl->geometry))
+        return;
+
     MP_VERBOSE(wl, "Resizing due to xdg from %ix%i to %ix%i\n",
                mp_rect_w(old_geometry)*wl->scaling, mp_rect_h(old_geometry)*wl->scaling,
                mp_rect_w(wl->geometry)*wl->scaling, mp_rect_h(wl->geometry)*wl->scaling);
 
-    if (prev_fs_state != wl->fullscreen)
-        wl->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
     wl->pending_vo_events |= VO_EVENT_RESIZE;
 }
 
@@ -871,10 +935,8 @@ static const struct zxdg_toplevel_v6_listener xdg_toplevel_listener = {
     handle_toplevel_close,
 };
 
-static int create_surface(struct vo_wayland_state *wl)
+static int create_xdg_surface(struct vo_wayland_state *wl)
 {
-    wl->surface = wl_compositor_create_surface(wl->compositor);
-
     wl->xdg_surface = zxdg_shell_v6_get_xdg_surface(wl->shell, wl->surface);
     zxdg_surface_v6_add_listener(wl->xdg_surface, &xdg_surface_listener, wl);
 
@@ -887,34 +949,18 @@ static int create_surface(struct vo_wayland_state *wl)
     return 0;
 }
 
-static const struct wl_callback_listener frame_listener;
-
-static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
-{
-    struct vo_wayland_state *wl = data;
-
-    wl_callback_destroy(callback);
-
-    wl->frame_callback = wl_surface_frame(wl->surface);
-    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-
-    if (wl->callback_exec)
-        wl->callback_exec(wl, wl->callback_exec_priv, time);
-}
-
-static const struct wl_callback_listener frame_listener = {
-    frame_callback,
-};
-
 static int set_border_decorations(struct vo_wayland_state *wl, int state)
 {
     if (!wl->server_decoration)
         return VO_NOTIMPL;
     enum org_kde_kwin_server_decoration_mode mode;
-    if (state)
+    if (state) {
+        MP_VERBOSE(wl, "Enabling server decorations\n");
         mode = ORG_KDE_KWIN_SERVER_DECORATION_MODE_SERVER;
-    else
+    } else {
+        MP_VERBOSE(wl, "Disabling server decorations\n");
         mode = ORG_KDE_KWIN_SERVER_DECORATION_MODE_NONE;
+    }
     org_kde_kwin_server_decoration_request_mode(wl->server_decoration, mode);
     return VO_TRUE;
 }
@@ -946,37 +992,37 @@ int vo_wayland_init(struct vo *vo)
     /* Do a roundtrip to run the registry */
     wl_display_roundtrip(wl->display);
 
-    if (!wl->idle_inhibit_manager)
-        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
-                   zwp_idle_inhibit_manager_v1_interface.name);
-    if (!wl->dnd_devman)
-        MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
-                   wl_data_device_manager_interface.name);
-    if (!wl->server_decoration_manager)
-        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
-                   org_kde_kwin_server_decoration_manager_interface.name);
     if (!wl->shell) {
         MP_FATAL(wl, "Compositor doesn't support the required %s protocol!\n",
                  zxdg_shell_v6_interface.name);
         return false;
     }
 
+    /* Can't be initialized during registry, as they depend on 2 or more protocols */
     if (spawn_cursor(wl))
         return false;
-    if (create_surface(wl))
+    if (create_xdg_surface(wl))
         return false;
-
-    wl_surface_add_listener(wl->surface, &surface_listener, wl);
 
     if (wl->dnd_devman) {
         wl->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, wl->seat);
         wl_data_device_add_listener(wl->dnd_ddev, &data_device_listener, wl);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
+                   wl_data_device_manager_interface.name);
     }
 
     if (wl->server_decoration_manager) {
         wl->server_decoration = org_kde_kwin_server_decoration_manager_create(wl->server_decoration_manager, wl->surface);
         set_border_decorations(wl, vo->opts->border);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   org_kde_kwin_server_decoration_manager_interface.name);
     }
+
+    if (!wl->idle_inhibit_manager)
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   zwp_idle_inhibit_manager_v1_interface.name);
 
     wl->display_fd = wl_display_get_fd(wl->display);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
@@ -1031,33 +1077,25 @@ void vo_wayland_uninit(struct vo *vo)
         wl_display_disconnect(wl->display);
     }
 
+    struct vo_wayland_output *output, *tmp;
+    wl_list_for_each_safe(output, tmp, &wl->output_list, link)
+        remove_output(output);
+
+    talloc_free(wl->dnd_mime_type);
+
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
     talloc_free(wl);
     vo->wl = NULL;
 }
 
-void vo_wayland_set_cb_exec(struct vo *vo, vo_wayland_frame_cb cb, void *cb_priv)
-{
-    struct vo_wayland_state *wl = vo->wl;
-
-    if (cb) {
-        wl->callback_exec      = cb;
-        wl->callback_exec_priv = cb_priv;
-        wl->frame_callback     = wl_surface_frame(wl->surface);
-        wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-    }
-}
-
 static struct vo_wayland_output *find_output(struct vo_wayland_state *wl, int index)
 {
     int screen_id = 0;
     struct vo_wayland_output *output;
-    wl_list_for_each_reverse(output, &wl->output_list, link) {
-        if (index == screen_id)
+    wl_list_for_each(output, &wl->output_list, link) {
+        if (index == screen_id++)
             return output;
-
-        screen_id++;
     }
     return NULL;
 }
@@ -1073,9 +1111,12 @@ int vo_wayland_reconfig(struct vo *vo)
     /* Surface enter events happen later but we already know the outputs and we'd
      * like to know the output the surface would be on (for scaling or fullscreen),
      * so if fsscreen_id is set or there's only one possible output, use it. */
-    if ((wl_list_length(&wl->output_list) == 1) || (vo->opts->fsscreen_id >= 0)) {
-        int idx = wl_list_length(&wl->output_list) == 1 ? 0 : vo->opts->fsscreen_id;
-        struct vo_wayland_output *out = out = find_output(wl, idx);
+    if (((!wl->current_output) && (wl_list_length(&wl->output_list) == 1)) ||
+        (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))) {
+        int idx = 0;
+        if (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))
+            idx = vo->opts->fsscreen_id;
+        struct vo_wayland_output *out = find_output(wl, idx);
         if (!out) {
             MP_ERR(wl, "Screen index %i not found/unavailable!\n", idx);
         } else {
@@ -1102,8 +1143,8 @@ int vo_wayland_reconfig(struct vo *vo)
         if (wl->fullscreen && wl->current_output) {
             wl->geometry.x0  = 0;
             wl->geometry.y0  = 0;
-            wl->geometry.x1  = wl->current_output->width  / wl->scaling;
-            wl->geometry.y1  = wl->current_output->height / wl->scaling;
+            wl->geometry.x1  = mp_rect_w(wl->current_output->geometry)/wl->scaling;
+            wl->geometry.y1  = mp_rect_h(wl->current_output->geometry)/wl->scaling;
         } else {
             zxdg_toplevel_v6_set_fullscreen(wl->xdg_toplevel, wl_out);
         }
@@ -1111,19 +1152,21 @@ int vo_wayland_reconfig(struct vo *vo)
 
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
     wl_surface_commit(wl->surface);
-    if (wl->configured)
-        wl->pending_vo_events |= VO_EVENT_RESIZE;
-    wl->configured = 1;
+    wl->pending_vo_events |= VO_EVENT_RESIZE;
+    if (!wl->configured) {
+        wl_display_roundtrip(wl->display);
+        wl->configured = true;
+    }
 
     return true;
 }
 
-static int toggle_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
+static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 {
     if (!wl->idle_inhibit_manager)
-        return 1;
+        return VO_NOTIMPL;
     if (state == (!!wl->idle_inhibitor))
-        return 0;
+        return VO_TRUE;
     if (state) {
         MP_VERBOSE(wl, "Enabling idle inhibitor\n");
         struct zwp_idle_inhibit_manager_v1 *mgr = wl->idle_inhibit_manager;
@@ -1132,23 +1175,26 @@ static int toggle_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
         MP_VERBOSE(wl, "Disabling the idle inhibitor\n");
         zwp_idle_inhibitor_v1_destroy(wl->idle_inhibitor);
     }
-    return 0;
+    return VO_TRUE;
 }
 
-static void toggle_fullscreen(struct vo_wayland_state *wl)
+static int toggle_fullscreen(struct vo_wayland_state *wl)
 {
+    if (!wl->xdg_toplevel)
+        return VO_NOTAVAIL;
     if (wl->fullscreen)
         zxdg_toplevel_v6_unset_fullscreen(wl->xdg_toplevel);
     else
         zxdg_toplevel_v6_set_fullscreen(wl->xdg_toplevel, NULL);
+    return VO_TRUE;
 }
 
-static void update_window_title(struct vo_wayland_state *wl, char *title)
+static int update_window_title(struct vo_wayland_state *wl, char *title)
 {
-    talloc_free(wl->window_title);
-    wl->window_title = talloc_strdup(wl, title);
-    if (wl->xdg_toplevel)
-        zxdg_toplevel_v6_set_title(wl->xdg_toplevel, wl->window_title);
+    if (!wl->xdg_toplevel)
+        return VO_NOTAVAIL;
+    zxdg_toplevel_v6_set_title(wl->xdg_toplevel, title);
+    return VO_TRUE;
 }
 
 static void check_dnd_fd(struct vo_wayland_state *wl)
@@ -1200,7 +1246,7 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     char **names = NULL;
     int displays_spanned = 0;
     struct vo_wayland_output *output;
-    wl_list_for_each_reverse(output, &wl->output_list, link) {
+    wl_list_for_each(output, &wl->output_list, link) {
         if (output->has_surface)
             MP_TARRAY_APPEND(NULL, names, displays_spanned,
                              talloc_strdup(NULL, output->model));
@@ -1215,59 +1261,55 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     wl_display_dispatch_pending(wl->display);
 
     switch (request) {
-        case VOCTRL_CHECK_EVENTS:
-            check_dnd_fd(wl);
-            *events |= wl->pending_vo_events;
-            wl->pending_vo_events = 0;
-            return VO_TRUE;
-        case VOCTRL_UPDATE_WINDOW_TITLE:
-            update_window_title(wl, (char *)arg);
-            return VO_TRUE;
-        case VOCTRL_FULLSCREEN:
-            toggle_fullscreen(wl);
-            return VO_TRUE;
-        case VOCTRL_GET_FULLSCREEN:
-            *(int *)arg = wl->fullscreen;
-            return VO_TRUE;
-        case VOCTRL_SET_CURSOR_VISIBILITY:
-            set_cursor_visibility(wl, *(bool *)arg);
-            return VO_TRUE;
-        case VOCTRL_BORDER:
-            return set_border_decorations(wl, vo->opts->border);
-        case VOCTRL_GET_DISPLAY_NAMES: {
-            *(char ***)arg = get_displays_spanned(wl);
-            return VO_TRUE;
+    case VOCTRL_CHECK_EVENTS: {
+        check_dnd_fd(wl);
+        *events |= wl->pending_vo_events;
+        wl->pending_vo_events = 0;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_FULLSCREEN: {
+        *(int *)arg = wl->fullscreen;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_DISPLAY_NAMES: {
+        *(char ***)arg = get_displays_spanned(wl);
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
+        int *s = arg;
+        s[0] = mp_rect_w(wl->geometry)*wl->scaling;
+        s[1] = mp_rect_h(wl->geometry)*wl->scaling;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_UNFS_WINDOW_SIZE: {
+        int *s = arg;
+        if (!wl->fullscreen) {
+            wl->geometry.x0 = 0;
+            wl->geometry.y0 = 0;
+            wl->geometry.x1 = s[0]/wl->scaling;
+            wl->geometry.y1 = s[1]/wl->scaling;
+            wl->pending_vo_events |= VO_EVENT_RESIZE;
         }
-        case VOCTRL_KILL_SCREENSAVER:
-            if (toggle_screensaver_inhibitor(wl, true))
-                return VO_NOTAVAIL;
-            return VO_TRUE;
-        case VOCTRL_RESTORE_SCREENSAVER:
-            if (toggle_screensaver_inhibitor(wl, false))
-                return VO_NOTAVAIL;
-            return VO_TRUE;
-        case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-            int *s = arg;
-            s[0] = mp_rect_w(wl->geometry)*wl->scaling;
-            s[1] = mp_rect_h(wl->geometry)*wl->scaling;
-            return VO_TRUE;
-        }
-        case VOCTRL_SET_UNFS_WINDOW_SIZE: {
-            int *s = arg;
-            if (!wl->fullscreen) {
-                wl->geometry.x0 = 0;
-                wl->geometry.y0 = 0;
-                wl->geometry.x1 = s[0]/wl->scaling;
-                wl->geometry.y1 = s[1]/wl->scaling;
-                wl->pending_vo_events |= VO_EVENT_RESIZE;
-            }
-            return VO_TRUE;
-        }
-        case VOCTRL_GET_DISPLAY_FPS:
-            if (!wl->current_output)
-                return VO_NOTAVAIL;
-            *(double *)arg = wl->current_output->refresh_rate;
-            return VO_TRUE;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_DISPLAY_FPS: {
+        if (!wl->current_output)
+            return VO_NOTAVAIL;
+        *(double *)arg = wl->current_output->refresh_rate;
+        return VO_TRUE;
+    }
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+        return update_window_title(wl, (char *)arg);
+    case VOCTRL_FULLSCREEN:
+        return toggle_fullscreen(wl);
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        return set_cursor_visibility(wl, *(bool *)arg);
+    case VOCTRL_BORDER:
+        return set_border_decorations(wl, vo->opts->border);
+    case VOCTRL_KILL_SCREENSAVER:
+        return set_screensaver_inhibitor(wl, true);
+    case VOCTRL_RESTORE_SCREENSAVER:
+        return set_screensaver_inhibitor(wl, false);
     }
 
     return VO_NOTIMPL;

@@ -25,20 +25,19 @@
 #include "vo.h"
 #include "input/event.h"
 
-typedef void (*vo_wayland_frame_cb)(struct vo_wayland_state *wl, void *priv, uint32_t time);
-
 struct vo_wayland_output {
+    struct vo_wayland_state *wl;
     uint32_t id;
     struct wl_output *output;
     struct mp_rect geometry;
-    int width;
-    int height;
+    int phys_width;
+    int phys_height;
     int scale;
     uint32_t flags;
     double refresh_rate;
-    const char *make;
-    const char *model;
-    int has_surface;
+    char *make;
+    char *model;
+    bool has_surface;
     struct wl_list link;
 };
 
@@ -54,8 +53,8 @@ struct vo_wayland_state {
     struct mp_rect geometry;
     struct mp_rect window_size;
     float aspect_ratio;
-    int fullscreen;
-    char *window_title;
+    bool fullscreen;
+    bool configured;
     int wakeup_pipe[2];
     int pending_vo_events;
     int mouse_x;
@@ -64,9 +63,6 @@ struct vo_wayland_state {
     int touch_entries;
     uint32_t pointer_id;
     int display_fd;
-    int configured;
-    vo_wayland_frame_cb callback_exec;
-    void *callback_exec_priv;
     struct wl_callback       *frame_callback;
     struct wl_list            output_list;
     struct vo_wayland_output *current_output;
@@ -112,6 +108,5 @@ void vo_wayland_check_events(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
-void vo_wayland_set_cb_exec(struct vo *vo, vo_wayland_frame_cb cb, void *cb_priv);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */

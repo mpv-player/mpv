@@ -39,7 +39,7 @@ static void resize(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    MP_VERBOSE(wl, "Handling resizing on the egl side\n");
+    MP_VERBOSE(wl, "Handling resize on the egl side\n");
 
     const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
@@ -85,8 +85,6 @@ static bool egl_create_context(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
 
-    vo_wayland_set_cb_exec(ctx->vo, NULL, NULL);
-
     return true;
 }
 
@@ -104,8 +102,6 @@ static void egl_create_window(struct ra_ctx *ctx)
     eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface, p->egl_context);
 
     eglSwapInterval(p->egl_display, 0);
-
-    wl_display_roundtrip(wl->display);
 }
 
 static bool wayland_egl_reconfig(struct ra_ctx *ctx)

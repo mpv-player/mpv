@@ -70,8 +70,6 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
     if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_MAILBOX_KHR))
         goto error;
 
-    vo_wayland_set_cb_exec(ctx->vo, NULL, NULL);
-
     return true;
 
 error:
@@ -83,7 +81,7 @@ static void resize(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    MP_VERBOSE(wl, "Handling resizing on the vk side\n");
+    MP_VERBOSE(wl, "Handling resize on the vk side\n");
 
     const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
