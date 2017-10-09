@@ -4,7 +4,7 @@ import os
 def _add_rst_manual_dependencies(ctx):
     manpage_sources_basenames = """
         options.rst ao.rst vo.rst af.rst vf.rst encode.rst
-        input.rst osc.rst lua.rst ipc.rst changes.rst""".split()
+        input.rst osc.rst stats.rst lua.rst ipc.rst changes.rst""".split()
 
     manpage_sources = ['DOCS/man/'+x for x in manpage_sources_basenames]
 
@@ -100,7 +100,7 @@ def build(ctx):
     )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
-                 "ytdl_hook.lua"]
+                 "ytdl_hook.lua", "stats.lua"]
 
     for fn in lua_files:
         fn = "player/lua/" + fn

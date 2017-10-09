@@ -304,6 +304,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
+    OPT_FLAG("stats", lua_load_stats, UPDATE_BUILTIN_SCRIPTS),
 #endif
 
 // ------------------------- stream options --------------------
@@ -871,6 +872,7 @@ const struct MPOpts mp_default_opts = {
     .lua_load_ytdl = 1,
     .lua_ytdl_format = NULL,
     .lua_ytdl_raw_options = NULL,
+    .lua_load_stats = 1,
 #endif
     .auto_load_scripts = 1,
     .loop_times = 1,

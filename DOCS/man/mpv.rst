@@ -877,6 +877,8 @@ works like in older mpv releases. The profiles are currently defined as follows:
 
 .. include:: osc.rst
 
+.. include:: stats.rst
+
 .. include:: lua.rst
 
 .. include:: javascript.rst
