@@ -204,6 +204,8 @@ recommended (see [Contact](#Contact) below).
 ## Contributing
 
 
+Please read [contribute.md][contribute.md].
+
 For small changes you can just send us pull requests through GitHub. For bigger
 changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
@@ -221,6 +223,11 @@ For details see [FAQ entry](https://github.com/mpv-player/mpv/wiki/FAQ#How_is_mp
 
 If you are wondering what's different from mplayer2 and MPlayer, an incomplete
 and largely unmaintained list of changes is located [here][mplayer-changes].
+
+## License
+
+Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
+
 
 ## Contact
 
@@ -245,8 +252,4 @@ only if discretion is required.
 [interface-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/interface-changes.rst
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
-
-## License
-
-
-Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
+[contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
