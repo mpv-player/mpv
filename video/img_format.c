@@ -321,14 +321,17 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
 
 enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 {
-    const AVPixFmtDescriptor *pixdesc =
-        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
+    enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
+    const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
 
     // FFmpeg does not provide a flag for XYZ, so this is the best we can do.
     if (pixdesc && strncmp(pixdesc->name, "xyz", 3) == 0)
         return MP_CSP_XYZ;
 
     if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_RGB))
+        return MP_CSP_RGB;
+
+    if (pixfmt == AV_PIX_FMT_PAL8 || pixfmt == AV_PIX_FMT_MONOBLACK)
         return MP_CSP_RGB;
 
     return MP_CSP_AUTO;
