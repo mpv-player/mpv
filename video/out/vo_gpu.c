@@ -376,5 +376,4 @@ const struct vo_driver video_out_opengl = {
     .uninit = uninit,
     .priv_size = sizeof(struct gpu_priv),
     .priv_defaults = &defaults,
-    .options = options,
 };
