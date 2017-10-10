@@ -49,13 +49,14 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, int on)
     if (!wl->pointer)
         return VO_NOTAVAIL;
     if (on) {
-        struct wl_cursor_image *image  = wl->default_cursor->images[0];
+        struct wl_cursor_image *image = wl->default_cursor->images[0];
         struct wl_buffer *buffer = wl_cursor_image_get_buffer(image);
         if (!buffer)
             return VO_FALSE;
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
                               image->hotspot_x, image->hotspot_y);
         wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
+        wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
         wl_surface_damage(wl->cursor_surface, 0, 0, image->width, image->height);
         wl_surface_commit(wl->cursor_surface);
     } else {
@@ -834,7 +835,7 @@ static const struct wl_registry_listener registry_listener = {
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    wl->cursor_theme = wl_cursor_theme_load(NULL, 24, wl->shm);
+    wl->cursor_theme = wl_cursor_theme_load(NULL, 32, wl->shm);
     if (!wl->cursor_theme) {
         MP_ERR(wl, "Unable to load cursor theme!\n");
         return 1;
