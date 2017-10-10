@@ -25,7 +25,7 @@ const struct vk_format vk_formats[] = {
     {"rg4",      VK_FORMAT_R4G4_UNORM_PACK8,          2,  1,   {4,  4         }, RA_CTYPE_UNORM },
     {"rgba4",    VK_FORMAT_R4G4B4A4_UNORM_PACK16,     4,  2,   {4,  4,  4,  4 }, RA_CTYPE_UNORM },
     {"rgb565",   VK_FORMAT_R5G6B5_UNORM_PACK16,       3,  2,   {5,  6,  5     }, RA_CTYPE_UNORM },
-    {"rgb565a1", VK_FORMAT_R5G5B5A1_UNORM_PACK16,     4,  2,   {5,  5,  5,  1 }, RA_CTYPE_UNORM },
+    {"rgb5a1",   VK_FORMAT_R5G5B5A1_UNORM_PACK16,     4,  2,   {5,  5,  5,  1 }, RA_CTYPE_UNORM },
 
     // Float formats (native formats, hf = half float, df = double float)
     {"r16hf",    VK_FORMAT_R16_SFLOAT,                1,  2,   {16            }, RA_CTYPE_FLOAT },
@@ -46,7 +46,7 @@ const struct vk_format vk_formats[] = {
     {"bgra8",    VK_FORMAT_B8G8R8A8_UNORM,            4,  4,   {8,  8,  8,  8 }, RA_CTYPE_UNORM, true },
     {"bgra4",    VK_FORMAT_B4G4R4A4_UNORM_PACK16,     4,  2,   {4,  4,  4,  4 }, RA_CTYPE_UNORM, true },
     {"bgr565",   VK_FORMAT_B5G6R5_UNORM_PACK16,       3,  2,   {5,  6,  5     }, RA_CTYPE_UNORM, true },
-    {"bgr565a1", VK_FORMAT_B5G5R5A1_UNORM_PACK16,     4,  2,   {5,  5,  5,  1 }, RA_CTYPE_UNORM, true },
+    {"bgr5a1",   VK_FORMAT_B5G5R5A1_UNORM_PACK16,     4,  2,   {5,  5,  5,  1 }, RA_CTYPE_UNORM, true },
     {"a1rgb5",   VK_FORMAT_A1R5G5B5_UNORM_PACK16,     4,  2,   {1,  5,  5,  5 }, RA_CTYPE_UNORM, true },
     {"a2rgb10",  VK_FORMAT_A2R10G10B10_UNORM_PACK32,  4,  4,   {2,  10, 10, 10}, RA_CTYPE_UNORM, true },
     {"a2bgr10",  VK_FORMAT_A2B10G10R10_UNORM_PACK32,  4,  4,   {2,  10, 10, 10}, RA_CTYPE_UNORM, true },
