@@ -106,7 +106,6 @@ The following files are still GPL only (--enable-lgpl disables them):
 The following files contain some optional GPL code (--enable-lgpl disables it):
 
     input/cmd_list.c                potentially some commands
-    demux/demux_mkv.c               some verbose message
     options/options.c               --frames option
     options/parse_commandline.c     dvd:// expansion
     player/audio.c                  libaf glue code

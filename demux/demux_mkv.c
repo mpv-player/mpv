@@ -18,8 +18,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stdlib.h>
@@ -702,12 +700,7 @@ static void parse_trackentry(struct demuxer *demuxer,
     }
     track->uid = entry->track_uid;
 
-    if (entry->name) {
-        track->name = talloc_strdup(track, entry->name);
-#if HAVE_GPL
-        MP_VERBOSE(demuxer, "|  + Name: %s\n", track->name);
-#endif
-    }
+    track->name = talloc_strdup(track, entry->name);
 
     track->type = entry->track_type;
     MP_VERBOSE(demuxer, "|  + Track type: ");
