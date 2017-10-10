@@ -8,33 +8,27 @@ to know details. C source files without Copyright notice are licensed as
 LGPLv2.1+. Also see the list of files with specific licenses below (not all
 files can have a standard license header).
 
-All new contributions must be LGPLv2.1+ licensed, or if the changes are done on
-GPL code, must come with the implicit agreement that the project can relicense
-the code to LGPLv2.1+ at a later point without asking the contributor. (This
-is a safeguard for making potential relicensing of remaining code to LGPLv2.1+
-easier.) Using a more liberal license compatible to LGPLv2.1+ is also ok.
+All new contributions must be LGPLv2.1+ licensed. Using a more liberal license
+compatible to LGPLv2.1+ is also ok.
+
+If changes are done on GPL code, must come with the implicit agreement that the
+project can relicense the code to LGPLv2.1+ at a later point without asking the
+contributor. This is a safeguard for making potential relicensing of remaining
+GPL code to LGPLv2.1+ easier.
 
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
-
-Note that mplayer2 as a whole is licensed under GPLv3+. This is because it uses
-a copy of talloc (part of Samba), which is LGPLv3+, and the next compatible
-license for this mix is GPLv3+.
-
-MPlayer as a whole is licensed under GPLv2 (incompatible to GPLv3!), because
-some files are licensed to GPLv2 (and _not_ any later version of the license).
-In particular, this affects the file libmpdemux/demux_ty_osd.c. It is disabled
-under mplayer2, and has been removed from mpv.
 
 "v2.1+" in this context means "version 2.1 or later".
 
 Some libraries are GPLv2+ or GPLv3+ only. Building mpv with Samba support makes
 it GPLv3+.
 
-mpv can be built as LGPLv2.1+ with the --enable-preliminary-lgpl2 configure
-option. This is a very new switch and it hasn't been confirmed yet whether
-really all GPL code is excluded (thus preliminary). In addition, it disables
-a number of useful features, some of them quite central:
+mpv can be built as LGPLv2.1+ with the --enable-lgpl configure option. To add
+a LGPL mode to mpv, MPlayer code had to be relicensed from GPLv2+ to LGPLv2.1+
+by asking the MPlayer authors for permission. Since permission could not be
+obtained from everyone, LGPL mode disables the following features, some of
+them quite central:
 - no audio filtering, which breaks: --volume, --af, replaygain, pitch
   correction, fine control about downmix/upmix/resampling behavior
 - Linux X11 video output
@@ -53,19 +47,7 @@ makes this particularly useless for CLI mode, and most of the appeal of LGPL
 is for libmpv anyway. Thus it's not recommended to build mpv CLI in LGPL mode
 at all.
 
-Source files with specific licenses:
-- etc/input.conf is LGPLv2.1+
-- etc/builtin.conf is LGPLv2.1+
-- etc/encoding-profiles.conf is LGPLv2.1+
-- all mpv icons and derived files are LGPLv2.1+ (mpv-icon-8bit-16x16.png etc.)
-- everything else under etc/ is unknown
-- everything under DOCS/man/ is GPLv2+
-- sub/osd_font.otf is LGPLv2.1+
-- version.sh is LGPLv2+
-- bootstrap.py is unknown (probably GPLv2+ or LGPLv2+)
-- the build system (wscript, waftools/*) is LGPLv2+, some parts BSD
-
-The following files are still GPL:
+The following files are still GPL only (--enable-lgpl disables them):
 
     audio/filter/*                  will be replaced with new filter chain
     audio/filter/af_format.c        mostly LGPL (except af glue code)
@@ -73,7 +55,7 @@ The following files are still GPL:
     audio/filter/af_lavfi.c             as above
     audio/filter/af_scaletempo.c        as above
     audio/filter/af_rubberband.c        as above
-    audio/out/ao_alsa.c             chaotic history, original author did not decide
+    audio/out/ao_alsa.c             chaotic history, one later author did not decide
     audio/out/ao_jack.c             will stay GPL
     audio/out/ao_oss.c              will stay GPL
     audio/audio.*                   needed by af code only
@@ -115,8 +97,13 @@ The following files are still GPL:
     video/vdpau.c                   hard (GPL-only parts must be ifdefed)
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
+    DOCS/man/                       GPLv2+
+    bootstrap.py                    unknown license, probably GPLv2+ or LGPLv2+
+    etc/mplayer-input.conf          unknown license, probably GPLv2+
+    mpv.desktop                     unknown license, probably GPLv2+
+    etc/restore-old-bindings.conf   unkniwn license, probably GPLv2+
 
-The following files contain some optional GPL code:
+The following files contain some optional GPL code (--enable-lgpl disables it):
 
     input/cmd_list.c                potentially some commands
     demux/demux_mkv.c               some verbose message
@@ -126,3 +113,7 @@ The following files contain some optional GPL code:
     player/loadfile.c               --frames option (minor but probably fatal)
     player/osd.c                    OSD level 3
     player/command.c                add/cycle command, possibly sub-add command
+
+None of the exceptions listed above affect the final binary if it's built as
+LGPL. Linked libraries still can affect the final license (for example if
+FFmpeg was built as GPL).
