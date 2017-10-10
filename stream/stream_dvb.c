@@ -58,6 +58,10 @@
 #include "dvbin.h"
 #include "dvb_tune.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #define MAX_ADAPTERS 16
 #define CHANNEL_LINE_LEN 256
 #define min(a, b) ((a) <= (b) ? (a) : (b))

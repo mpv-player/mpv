@@ -30,6 +30,11 @@
 
 #include "ra_gl.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct priv_owner {
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;

@@ -24,6 +24,10 @@
 
 #include "config.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct mp_log;
 
 #if HAVE_ALSA

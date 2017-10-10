@@ -49,6 +49,10 @@
 #include "internal.h"
 #include "audio/format.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct ao_alsa_opts {
     char *mixer_device;
     char *mixer_name;

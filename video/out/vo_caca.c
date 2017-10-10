@@ -42,6 +42,11 @@
 #include "common/msg.h"
 #include "input/input.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct priv {
     caca_canvas_t  *canvas;
     caca_display_t *display;

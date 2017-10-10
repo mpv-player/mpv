@@ -26,6 +26,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
         struct pullup_context *ctx;
         int init;

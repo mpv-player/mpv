@@ -41,6 +41,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static struct vf_priv_s {
     int w, h;
     int cfg_w, cfg_h;

@@ -26,6 +26,11 @@
 
 #include "osdep/endian.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct mp_log;
 
 typedef struct tv_params {

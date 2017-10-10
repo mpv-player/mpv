@@ -40,6 +40,10 @@
 
 #include <jack/jack.h>
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct jack_opts {
     char *port;
     char *client_name;

@@ -12,6 +12,11 @@
 #include "common/msg.h"
 #include "hwdec.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #define CHECK_VDP_ERROR_ST(ctx, message, statement) \
     do { \
         if (vdp_st != VDP_STATUS_OK) { \

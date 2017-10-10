@@ -11,6 +11,10 @@
 #include "config.h"
 #include "stream.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #define SLOF (11700 * 1000UL)
 #define LOF1 (9750 * 1000UL)
 #define LOF2 (10600 * 1000UL)

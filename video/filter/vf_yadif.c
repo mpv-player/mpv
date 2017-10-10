@@ -28,6 +28,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
     int mode;
     int interlaced_only;

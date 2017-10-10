@@ -20,6 +20,11 @@
 #include "vf.h"
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static int vf_open(vf_instance_t *vf)
 {
     MP_WARN(vf, "This filter is deprecated. Use lavfi hflip instead.\n");

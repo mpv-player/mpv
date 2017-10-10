@@ -29,6 +29,11 @@
 #include "video/mp_image.h"
 #include "vf.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
     int w, h;
     int method; // aspect method, 0 -> downscale, 1-> upscale. +2 -> original aspect.
