@@ -758,15 +758,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     }
 
-    if (!strcmp(interface, wl_output_interface.name) && found++) {
+    if (!strcmp(interface, wl_output_interface.name) && (ver >= 2) && found++) {
         struct vo_wayland_output *output = talloc_zero(wl, struct vo_wayland_output);
 
-        output->wl       = wl;
-        output->id       = id;
-        output->scale    = 1;
-        output->geometry = (struct mp_rect){ -1, -1, -1, -1 };
-        output->output   = wl_registry_bind(reg, id, &wl_output_interface,
-                                            MPMIN(2, ver));
+        output->wl     = wl;
+        output->id     = id;
+        output->output = wl_registry_bind(reg, id, &wl_output_interface, 2);
 
         wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&wl->output_list, &output->link);
@@ -799,7 +796,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (found > 1)
-        MP_VERBOSE(wl, "Registered for protocol %s, ver %i\n", interface, ver);
+        MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
 }
 
 static void remove_output(struct vo_wayland_output *out)
@@ -999,6 +996,12 @@ int vo_wayland_init(struct vo *vo)
         return false;
     }
 
+    if (!wl_list_length(&wl->output_list)) {
+        MP_FATAL(wl, "No outputs found or compositor doesn't support %s (ver. 2)\n",
+                 wl_output_interface.name);
+        return false;
+    }
+
     /* Can't be initialized during registry, as they depend on 2 or more protocols */
     if (spawn_cursor(wl))
         return false;
@@ -1036,6 +1039,8 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     if (!wl)
         return;
+
+    mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
