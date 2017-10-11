@@ -913,8 +913,8 @@ Property list
 
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as
-    ``${stream-end}``. For ordered chapters and such, the
-    size of the currently played segment is returned.)
+    ``${stream-end}``. For segmented/multi-part files, this will return the
+    size of the main or manifest file, whatever it is.)
 
 ``estimated-frame-count``
     Total number of frames in current file.
@@ -954,8 +954,7 @@ Property list
 
 ``stream-path``
     Filename (full path) of the stream layer filename. (This is probably
-    useless. It looks like this can be different from ``path`` only when
-    using e.g. ordered chapters.)
+    useless and is almost never different from ``path``.)
 
 ``stream-pos``
     Raw byte position in source stream. Technically, this returns the position
@@ -1287,8 +1286,8 @@ Property list
 ``seeking``
     Returns ``yes`` if the player is currently seeking, or otherwise trying
     to restart playback. (It's possible that it returns ``yes`` while a file
-    is loaded, or when switching ordered chapter segments. This is because
-    the same underlying code is used for seeking and resyncing.)
+    is loadedThis is because the same underlying code is used for seeking and
+    resyncing.)
 
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise.
