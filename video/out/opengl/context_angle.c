@@ -518,83 +518,6 @@ static void angle_swap_buffers(struct ra_ctx *ctx)
         egl_swap_buffers(ctx);
 }
 
-static struct mp_image *d3d11_screenshot(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-    ID3D11Texture2D *frontbuffer = NULL;
-    ID3D11Texture2D *staging = NULL;
-    struct mp_image *img = NULL;
-    HRESULT hr;
-
-    if (!p->dxgi_swapchain)
-        goto done;
-
-    // Validate the swap chain. This screenshot method will only work on DXGI
-    // 1.2+ flip/sequential swap chains. It's probably not possible at all with
-    // discard swap chains, since by definition, the backbuffer contents is
-    // discarded on Present().
-    DXGI_SWAP_CHAIN_DESC scd;
-    hr = IDXGISwapChain_GetDesc(p->dxgi_swapchain, &scd);
-    if (FAILED(hr))
-        goto done;
-    if (scd.SwapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL)
-        goto done;
-
-    // Get the last buffer that was presented with Present(). This should be
-    // the n-1th buffer for a swap chain of length n.
-    hr = IDXGISwapChain_GetBuffer(p->dxgi_swapchain, scd.BufferCount - 1,
-        &IID_ID3D11Texture2D, (void**)&frontbuffer);
-    if (FAILED(hr))
-        goto done;
-
-    D3D11_TEXTURE2D_DESC td;
-    ID3D11Texture2D_GetDesc(frontbuffer, &td);
-    if (td.SampleDesc.Count > 1)
-        goto done;
-
-    // Validate the backbuffer format and convert to an mpv IMGFMT
-    enum mp_imgfmt fmt;
-    switch (td.Format) {
-    case DXGI_FORMAT_B8G8R8A8_UNORM: fmt = IMGFMT_BGR0; break;
-    case DXGI_FORMAT_R8G8B8A8_UNORM: fmt = IMGFMT_RGB0; break;
-    default:
-        goto done;
-    }
-
-    // Create a staging texture based on the frontbuffer with CPU access
-    td.BindFlags = 0;
-    td.MiscFlags = 0;
-    td.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-    td.Usage = D3D11_USAGE_STAGING;
-    hr = ID3D11Device_CreateTexture2D(p->d3d11_device, &td, 0, &staging);
-    if (FAILED(hr))
-        goto done;
-
-    ID3D11DeviceContext_CopyResource(p->d3d11_context,
-        (ID3D11Resource*)staging, (ID3D11Resource*)frontbuffer);
-
-    // Attempt to map the staging texture to CPU-accessible memory
-    D3D11_MAPPED_SUBRESOURCE lock;
-    hr = ID3D11DeviceContext_Map(p->d3d11_context, (ID3D11Resource*)staging,
-                                 0, D3D11_MAP_READ, 0, &lock);
-    if (FAILED(hr))
-        goto done;
-
-    img = mp_image_alloc(fmt, td.Width, td.Height);
-    if (!img)
-        return NULL;
-    for (int i = 0; i < td.Height; i++) {
-        memcpy(img->planes[0] + img->stride[0] * i,
-               (char*)lock.pData + lock.RowPitch * i, td.Width * 4);
-    }
-
-    ID3D11DeviceContext_Unmap(p->d3d11_context, (ID3D11Resource*)staging, 0);
-
-done:
-    SAFE_RELEASE(frontbuffer);
-    SAFE_RELEASE(staging);
-    return img;
-}
 
 static int angle_color_depth(struct ra_swapchain *sw)
 {
@@ -604,9 +527,12 @@ static int angle_color_depth(struct ra_swapchain *sw)
 
 static struct mp_image *angle_screenshot(struct ra_swapchain *sw)
 {
-    struct mp_image *img = d3d11_screenshot(sw->ctx);
-    if (img)
-        return img;
+    struct priv *p = sw->ctx->priv;
+    if (p->dxgi_swapchain) {
+        struct mp_image *img = mp_d3d11_screenshot(p->dxgi_swapchain);
+        if (img)
+            return img;
+    }
     return ra_gl_ctx_screenshot(sw);
 }
 

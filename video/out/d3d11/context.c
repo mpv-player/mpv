@@ -70,6 +70,14 @@ struct priv {
     IDXGISwapChain *swapchain;
 };
 
+static struct mp_image *d3d11_screenshot(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->ctx->priv;
+    if (!p->swapchain)
+        return NULL;
+    return mp_d3d11_screenshot(p->swapchain);
+}
+
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -169,6 +177,7 @@ static void d3d11_uninit(struct ra_ctx *ctx)
 
 static const struct ra_swapchain_fns d3d11_swapchain = {
     .color_depth  = d3d11_color_depth,
+    .screenshot   = d3d11_screenshot,
     .start_frame  = d3d11_start_frame,
     .submit_frame = d3d11_submit_frame,
     .swap_buffers = d3d11_swap_buffers,
