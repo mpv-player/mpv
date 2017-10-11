@@ -120,6 +120,9 @@ typedef struct mp_image {
 int mp_chroma_div_up(int size, int shift);
 
 int mp_image_get_alloc_size(int imgfmt, int w, int h, int stride_align);
+int mp_image_params_info(struct mp_image_params *params, int stride_align,
+                         int out_stride[MP_MAX_PLANES],
+                         int out_plane_offset[MP_MAX_PLANES]);
 struct mp_image *mp_image_from_buffer(int imgfmt, int w, int h, int stride_align,
                                       uint8_t *buffer, int buffer_size,
                                       void *free_opaque,
