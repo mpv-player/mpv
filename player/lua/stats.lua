@@ -450,6 +450,7 @@ local function add_file(s)
                         {prefix="", suffix="", nl="", indent=o.prefix_sep,
                          prefix_sep="", no_prefix_markup=true})
     end
+    append_property(s, "file-size", {prefix="Size:"})
 end
 
 
@@ -588,7 +589,7 @@ curr_page = o.key_page_1
 pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
     [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings" },
-    [o.key_page_3] = { f = filter_stats, desc = "Dummy" },
+    --[o.key_page_3] = { f = filter_stats, desc = "Dummy" },
 }
 
 
