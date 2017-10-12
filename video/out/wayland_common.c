@@ -977,12 +977,13 @@ int vo_wayland_init(struct vo *vo)
         .dnd_fd = -1,
     };
 
+    wl_list_init(&wl->output_list);
+
     if (!wl->display)
         return false;
 
     if (create_input(wl))
         return false;
-    wl_list_init(&wl->output_list);
 
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
