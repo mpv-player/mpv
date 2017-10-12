@@ -365,6 +365,7 @@ const m_option_t mp_opts[] = {
     OPT_ALIAS("audio", "aid"),
     OPT_STRINGLIST("alang", stream_lang[STREAM_AUDIO], 0),
     OPT_STRINGLIST("slang", stream_lang[STREAM_SUB], 0),
+    OPT_STRINGLIST("vlang", stream_lang[STREAM_VIDEO], 0),
     OPT_FLAG("track-auto-selection", stream_auto_sel, 0),
 
     OPT_STRING("lavfi-complex", lavfi_complex, UPDATE_LAVFI_COMPLEX),

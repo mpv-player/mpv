@@ -30,6 +30,9 @@ Track Selection
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
 
+``--vlang=<...>``
+    Equivalent to ``--alang`` and ``--slang``, for video tracks.
+
 ``--aid=<ID|auto|no>``
     Select audio track. ``auto`` selects the default, ``no`` disables audio.
     See also ``--alang``. mpv normally prints available audio tracks on the
