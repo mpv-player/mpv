@@ -481,7 +481,7 @@ static bool vk_init_image(struct ra *ra, struct ra_tex *tex)
         VK(vk_create_render_pass(vk->dev, params->format,
                                  VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                                  VK_IMAGE_LAYOUT_UNDEFINED,
-                                 VK_IMAGE_LAYOUT_UNDEFINED,
+                                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                                  &tex_vk->dummyPass));
 
         VkFramebufferCreateInfo finfo = {
