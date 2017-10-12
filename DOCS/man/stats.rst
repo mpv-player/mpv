@@ -67,27 +67,27 @@ Configurable Options
     How long it takes to refresh the displayed stats in seconds (toggling).
 
 ``persistent_overlay``
-    Default: false
+    Default: no
 
-    When false, other scripts printing text to the screen can overwrite the
-    displayed stats. When true, displayed stats are persistently shown for the
+    When `no`, other scripts printing text to the screen can overwrite the
+    displayed stats. When `yes`, displayed stats are persistently shown for the
     respective duration. This can result in overlapping text when multiple
     scripts decide to print text at the same time.
 
 ``plot_perfdata``
-    Default: true
+    Default: yes
 
     Show graphs for performance data (page 2).
 
 ``plot_vsync_ratio``
-    Default: true
+    Default: yes
 ``plot_vsync_jitter``
-    Default: true
+    Default: yes
 
     Show graphs for vsync and jitter values (page 1). Only when toggled.
 
 ``flush_graph_data``
-    Default: true
+    Default: yes
 
     Clear data buffers used for drawing graphs when toggling.
 
