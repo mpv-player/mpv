@@ -223,6 +223,7 @@ struct demux_stream {
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
 static void update_cache(struct demux_internal *in);
+static int cached_demux_control(struct demux_internal *in, int cmd, void *arg);
 
 // called locked
 static void ds_flush(struct demux_stream *ds)
@@ -1413,15 +1414,20 @@ struct demuxer *demux_open_url(const char *url,
     return d;
 }
 
-static void flush_locked(demuxer_t *demuxer)
+static void flush_locked_state(demuxer_t *demuxer)
 {
-    for (int n = 0; n < demuxer->in->num_streams; n++)
-        ds_flush(demuxer->in->streams[n]->ds);
     demuxer->in->warned_queue_overflow = false;
     demuxer->in->eof = false;
     demuxer->in->last_eof = false;
     demuxer->in->idle = true;
     demuxer->filepos = -1; // implicitly synchronized
+}
+
+static void flush_locked(demuxer_t *demuxer)
+{
+    for (int n = 0; n < demuxer->in->num_streams; n++)
+        ds_flush(demuxer->in->streams[n]->ds);
+    flush_locked_state(demuxer);
 }
 
 // clear the packet queues
@@ -1430,6 +1436,87 @@ void demux_flush(demuxer_t *demuxer)
     pthread_mutex_lock(&demuxer->in->lock);
     flush_locked(demuxer);
     pthread_mutex_unlock(&demuxer->in->lock);
+}
+
+static bool demux_seek_cache_maybe(demuxer_t *demuxer, double seek_pts, int flags)
+{
+    struct demux_internal *in = demuxer->in;
+    struct demux_ctrl_reader_state rstate;
+    bool seeked = true;
+    double seek_pts_offset = MP_ADD_PTS(seek_pts, -in->ts_offset);
+    assert(demuxer == in->d_user);
+
+    if ((flags & SEEK_FACTOR))
+        return false;
+
+    if (cached_demux_control(in, DEMUXER_CTRL_GET_READER_STATE, &rstate) < 0)
+        return false;
+
+    MP_VERBOSE(in, "in-cache seek range = %f <-> %f (%f)\n",
+               rstate.ts_range[0], rstate.ts_range[1], seek_pts);
+
+    if (seek_pts < rstate.ts_range[0] ||
+        seek_pts > rstate.ts_range[1])
+        return false;
+
+    MP_VERBOSE(in, "in-cache seek is possible..\n");
+
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        demux_packet_t *dp = ds->head;
+        bool found_keyframe = false;
+        int idx = 0;
+        if (!ds->active || (ds->eof && !ds->head))
+            continue;
+        // find idx of pts
+        while (dp) {
+            demux_packet_t *dn = dp->next;
+            if (dp->pts >= seek_pts_offset)
+                break;
+            idx++;
+            dp = dn;
+        }
+        if ((flags & SEEK_FORWARD)) {
+            // increment idx until keyframe
+            while (dp) {
+                demux_packet_t *dn = dp->next;
+                if (dp->keyframe) {
+                    found_keyframe = true;
+                    break;
+                }
+                idx++;
+                dp = dn;
+            }
+        } else {
+            // find last keyframe before idx
+            int i = 0, key_idx = 0;
+            dp = ds->head;
+            while (dp && i < idx) {
+                demux_packet_t *dn = dp->next;
+                if (dp->keyframe) {
+                    found_keyframe = true;
+                    key_idx = i;
+                }
+                i++;
+                dp = dn;
+            }
+            idx = key_idx;
+        }
+
+        if (!found_keyframe) {
+            seeked = false;
+            break;
+        }
+
+        while (idx-- > 0) {
+            demux_packet_t *pkt = dequeue_packet(ds);
+            free_demux_packet(pkt);
+        }
+
+        assert(ds->head && ds->head->keyframe);
+    }
+
+    return seeked;
 }
 
 int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
@@ -1453,15 +1540,20 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
     MP_VERBOSE(in, "queuing seek to %f%s\n", seek_pts,
                in->seeking ? " (cascade)" : "");
 
-    flush_locked(demuxer);
-    in->seeking = true;
-    in->seek_flags = flags;
-    in->seek_pts = seek_pts;
-    if (!(flags & SEEK_FACTOR))
-        in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
+    if (demux_seek_cache_maybe(demuxer, seek_pts, flags)) {
+        MP_VERBOSE(in, "in-cache seek worked!\n");
+        flush_locked_state(demuxer);
+    } else {
+        flush_locked(demuxer);
+        in->seeking = true;
+        in->seek_flags = flags;
+        in->seek_pts = seek_pts;
+        if (!(flags & SEEK_FACTOR))
+            in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
 
-    if (!in->threading)
-        execute_seek(in);
+        if (!in->threading)
+            execute_seek(in);
+    }
 
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
