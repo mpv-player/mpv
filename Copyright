@@ -1,20 +1,25 @@
 mpv is a fork of mplayer2, which is a fork of MPlayer.
 
-mpv as a whole is licensed as GPL version 2 or later (see LICENSE). Most source
-files are GPLv2+, but some files are available under a more liberal license,
-such as LGPLv2.1+, BSD, MIT, ISC, and possibly others. Look at the copyright
-header of each source file, and grep the sources for "Copyright" if you need
-to know details. C source files without Copyright notice are licensed as
-LGPLv2.1+. Also see the list of files with specific licenses below (not all
-files can have a standard license header).
+mpv as a whole is licensed under the GNU General Public License GPL version 2
+or later (called GPLv2+ in this document, see LICENSE.GPL for full license
+text) by default, or the GNU Lesser General Public License LGPL version 2 or
+later (LGPLv2.1+ in this document, see LICENSE.LGPL for full license text) if
+built with the --enable-lgpl configure switch.
+
+Most source files are LGPLv2.1+ or GPLv2+, but some files are available under
+more liberal licenses, such as BSD, MIT, ISC, and possibly others. Look at the
+copyright header of each source file, and grep the sources for "Copyright" if
+you need to know details. C source files without Copyright notice are usually
+licensed as LGPLv2.1+. Also see the list of files with specific licenses below
+(not all files can have a standard license header).
 
 All new contributions must be LGPLv2.1+ licensed. Using a more liberal license
 compatible to LGPLv2.1+ is also ok.
 
 If changes are done on GPL code, must come with the implicit agreement that the
-project can relicense the code to LGPLv2.1+ at a later point without asking the
-contributor. This is a safeguard for making potential relicensing of remaining
-GPL code to LGPLv2.1+ easier.
+project can relicense the changes to LGPLv2.1+ at a later point without asking
+the contributor. This is a safeguard for making potential relicensing of
+remaining GPL code to LGPLv2.1+ easier.
 
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.

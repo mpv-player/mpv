@@ -226,7 +226,8 @@ and largely unmaintained list of changes is located [here][mplayer-changes].
 
 ## License
 
-Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
+GPLv2 "or later" by default, LGPLv2.1 "or later" with `--enable-lgpl`.
+See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
 
 ## Contact
