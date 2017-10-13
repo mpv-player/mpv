@@ -678,7 +678,7 @@ static bool read_packet(struct demux_internal *in)
                 if (in->wakeup_cb)
                     in->wakeup_cb(in->wakeup_cb_ctx);
                 pthread_cond_signal(&in->wakeup);
-                MP_VERBOSE(in, "EOF reached.\n");
+                MP_DBG(in, "EOF reached.\n");
             }
         }
         in->eof = in->last_eof = eof;
