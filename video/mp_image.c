@@ -98,6 +98,16 @@ int mp_image_get_alloc_size(int imgfmt, int w, int h, int stride_align)
                            plane_size);
 }
 
+// TODO: write desc
+int mp_image_params_info(struct mp_image_params *params, int stride_align,
+                         int out_stride[MP_MAX_PLANES],
+                         int out_plane_offset[MP_MAX_PLANES])
+{
+    int plane_size[MP_MAX_PLANES];
+    return mp_image_layout(params->imgfmt, params->w, params->h, stride_align,
+                           out_stride, out_plane_offset, plane_size);
+}
+
 // Fill the mpi->planes and mpi->stride fields of the given mpi with data
 // from buffer according to the mpi's w/h/imgfmt fields. See mp_image_from_buffer
 // aboud remarks how to allocate/use buffer/buffer_size.

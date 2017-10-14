@@ -593,6 +593,12 @@ video_output_features = [
         'deps': 'vt.h',
         'func': check_pkg_config('libdrm'),
     }, {
+        'name': '--exynos',
+        'desc': 'Exynos',
+        'deps': 'vt.h',
+        'func': check_pkg_config('libdrm', '>= 2.4.66',
+                                 'libdrm_exynos', '>= 0.7'),
+    }, {
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',

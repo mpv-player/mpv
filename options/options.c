@@ -182,6 +182,10 @@ static const m_option_t mp_vo_opt_list[] = {
                         0, drm_validate_connector_opt),
     OPT_INT("drm-mode", drm_mode_id, 0),
 #endif
+#if HAVE_EXYNOS
+    OPT_INT("exynos-ipp", exynos_ipp, 0),
+    OPT_FLAG("exynos-disable-vp", exynos_disable_vp, 0),
+#endif
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
                         ra_hwdec_validate_opt),
     OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),

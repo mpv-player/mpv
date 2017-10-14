@@ -58,6 +58,7 @@ extern const struct vo_driver video_out_image;
 extern const struct vo_driver video_out_lavc;
 extern const struct vo_driver video_out_caca;
 extern const struct vo_driver video_out_drm;
+extern const struct vo_driver video_out_exynos;
 extern const struct vo_driver video_out_direct3d;
 extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
@@ -100,6 +101,9 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_DRM
     &video_out_drm,
+#endif
+#if HAVE_EXYNOS
+    &video_out_exynos,
 #endif
 #if HAVE_ENCODING
     &video_out_lavc,

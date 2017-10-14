@@ -57,6 +57,9 @@ typedef struct mp_vo_opts {
     // vo_drm
     char *drm_connector_spec;
     int drm_mode_id;
+    // vo_exynos
+    int exynos_ipp;
+    int exynos_disable_vp;
 } mp_vo_opts;
 
 struct mp_cache_opts {
