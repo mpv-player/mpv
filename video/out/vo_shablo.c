@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <config.h>
+#include <math.h>
 
 #if HAVE_POSIX
 #include <sys/ioctl.h>
