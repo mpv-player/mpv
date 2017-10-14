@@ -4626,7 +4626,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     cocoa
         Cocoa/OS X
     win
-        Win32/WGL
+        Win32/WGL, VK_KHR_win32_surface
     angle
         Direct3D11 through the OpenGL ES translation layer ANGLE. This supports
         almost everything the ``win`` backend does (if the ANGLE build is new
