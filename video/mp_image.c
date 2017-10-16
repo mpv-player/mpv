@@ -822,11 +822,16 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     }
 }
 
-// Copy properties and data of the AVFrame into the mp_image, without taking
-// care of memory management issues.
-static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                               struct AVFrame *src)
+// Create a new mp_image reference to av_frame.
+struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 {
+    struct mp_image *dst = &(struct mp_image){0};
+
+    for (int p = 0; p < MP_MAX_PLANES; p++)
+        dst->bufs[p] = src->buf[p];
+
+    dst->hwctx = src->hw_frames_ctx;
+
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
 
@@ -874,13 +879,26 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
         dst->params.stereo_out = p->stereo_out;
     }
 #endif
+
+    return mp_image_new_ref(dst);
 }
 
-// Copy properties and data of the mp_image into the AVFrame, without taking
-// care of memory management issues.
-static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
-                                             struct mp_image *src)
+// Convert the mp_image reference to a AVFrame reference.
+struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
 {
+    struct mp_image *new_ref = mp_image_new_ref(src);
+    AVFrame *dst = av_frame_alloc();
+    if (!dst || !new_ref) {
+        talloc_free(new_ref);
+        av_frame_free(&dst);
+        return NULL;
+    }
+
+    for (int p = 0; p < MP_MAX_PLANES; p++)
+        dst->buf[p] = new_ref->bufs[p];
+
+    dst->hw_frames_ctx = new_ref->hwctx;
+
     dst->format = imgfmt2pixfmt(src->imgfmt);
     dst->width = src->w;
     dst->height = src->h;
@@ -911,44 +929,17 @@ static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
     dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
 
 #if HAVE_OPAQUE_REF
-    av_buffer_unref(&dst->opaque_ref);
     dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
     if (!dst->opaque_ref)
         abort();
     *(struct mp_image_params *)dst->opaque_ref->data = src->params;
 #endif
-}
 
-// Create a new mp_image reference to av_frame.
-struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
-{
-    struct mp_image t = {0};
-    mp_image_copy_fields_from_av_frame(&t, av_frame);
-    for (int p = 0; p < MP_MAX_PLANES; p++)
-        t.bufs[p] = av_frame->buf[p];
-    t.hwctx = av_frame->hw_frames_ctx;
-    return mp_image_new_ref(&t);
-}
-
-// Convert the mp_image reference to a AVFrame reference.
-struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
-{
-    struct mp_image *new_ref = mp_image_new_ref(img);
-    AVFrame *frame = av_frame_alloc();
-    if (!frame || !new_ref) {
-        talloc_free(new_ref);
-        av_frame_free(&frame);
-        return NULL;
-    }
-    mp_image_copy_fields_to_av_frame(frame, new_ref);
-    for (int p = 0; p < MP_MAX_PLANES; p++)
-        frame->buf[p] = new_ref->bufs[p];
-    frame->hw_frames_ctx = new_ref->hwctx;
     *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
-    if (frame->format == AV_PIX_FMT_NONE)
-        av_frame_free(&frame);
-    return frame;
+    if (dst->format == AV_PIX_FMT_NONE)
+        av_frame_free(&dst);
+    return dst;
 }
 
 // Same as mp_image_to_av_frame(), but unref img. (It does so even on failure.)
