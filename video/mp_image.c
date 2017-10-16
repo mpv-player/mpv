@@ -800,6 +800,13 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         }
     }
 
+    if (params->chroma_location == MP_CHROMA_AUTO) {
+        if (params->color.levels == MP_CSP_LEVELS_TV)
+            params->chroma_location = MP_CHROMA_LEFT;
+        if (params->color.levels == MP_CSP_LEVELS_PC)
+            params->chroma_location = MP_CHROMA_CENTER;
+    }
+
     if (params->color.light == MP_CSP_LIGHT_AUTO) {
         // HLG is always scene-referred (using its own OOTF), everything else
         // we assume is display-refered by default.
