@@ -29,6 +29,7 @@
 #include "mpv_talloc.h"
 
 #include "config.h"
+#include "common/av_common.h"
 #include "common/common.h"
 #include "hwdec.h"
 #include "mp_image.h"
@@ -826,6 +827,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
 struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 {
     struct mp_image *dst = &(struct mp_image){0};
+    AVFrameSideData *sd;
 
     for (int p = 0; p < MP_MAX_PLANES; p++)
         dst->bufs[p] = src->buf[p];
@@ -880,8 +882,15 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     }
 #endif
 
+#if HAVE_AVUTIL_ICC_PROFILE
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
+    if (sd)
+        dst->icc_profile = av_buffer_ref(sd->buf);
+#endif
+
     return mp_image_new_ref(dst);
 }
+
 
 // Convert the mp_image reference to a AVFrame reference.
 struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
@@ -894,10 +903,13 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         return NULL;
     }
 
-    for (int p = 0; p < MP_MAX_PLANES; p++)
+    for (int p = 0; p < MP_MAX_PLANES; p++) {
         dst->buf[p] = new_ref->bufs[p];
+        new_ref->bufs[p] = NULL;
+    }
 
     dst->hw_frames_ctx = new_ref->hwctx;
+    new_ref->hwctx = NULL;
 
     dst->format = imgfmt2pixfmt(src->imgfmt);
     dst->width = src->w;
@@ -935,8 +947,18 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     *(struct mp_image_params *)dst->opaque_ref->data = src->params;
 #endif
 
-    *new_ref = (struct mp_image){0};
+#if HAVE_AVUTIL_ICC_PROFILE
+    if (src->icc_profile) {
+        AVFrameSideData *sd =
+            ffmpeg_garbage(dst, AV_FRAME_DATA_ICC_PROFILE, new_ref->icc_profile);
+        if (!sd)
+            abort();
+        new_ref->icc_profile = NULL;
+    }
+#endif
+
     talloc_free(new_ref);
+
     if (dst->format == AV_PIX_FMT_NONE)
         av_frame_free(&dst);
     return dst;

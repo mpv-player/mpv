@@ -352,3 +352,38 @@ int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
     }
     return success;
 }
+
+AVFrameSideData *ffmpeg_garbage(AVFrame *frame,
+                                enum AVFrameSideDataType type,
+                                AVBufferRef *buf)
+{
+    AVFrameSideData *ret, **tmp;
+
+    if (!buf)
+        return NULL;
+
+    if (frame->nb_side_data > INT_MAX / sizeof(*frame->side_data) - 1)
+        goto fail;
+
+    tmp = av_realloc(frame->side_data,
+                     (frame->nb_side_data + 1) * sizeof(*frame->side_data));
+    if (!tmp)
+        goto fail;
+    frame->side_data = tmp;
+
+    ret = av_mallocz(sizeof(*ret));
+    if (!ret)
+        goto fail;
+
+    ret->buf = buf;
+    ret->data = ret->buf->data;
+    ret->size = buf->size;
+    ret->type = type;
+
+    frame->side_data[frame->nb_side_data++] = ret;
+
+    return ret;
+fail:
+    av_buffer_unref(&buf);
+    return NULL;
+}

@@ -1167,12 +1167,6 @@ static bool decode_frame(struct dec_video *vd)
         mp_pts_from_av(av_frame_get_pkt_duration(ctx->pic), &ctx->codec_timebase);
 #endif
 
-#if HAVE_AVUTIL_ICC_PROFILE
-    sd = av_frame_get_side_data(ctx->pic, AV_FRAME_DATA_ICC_PROFILE);
-    if (sd)
-        mpi->icc_profile = av_buffer_ref(sd->buf);
-#endif
-
     update_image_params(vd, ctx->pic, &mpi->params);
 
     av_frame_unref(ctx->pic);
