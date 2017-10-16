@@ -56,16 +56,6 @@ struct mp_hwdec_ctx {
     // Hint to generic code: it's using a wrapper API
     bool emulated;
 
-    // Optional. Legacy. (New code should use AVHWFramesContext and
-    // mp_image_hw_download().)
-    // Allocates a software image from the pool, downloads the hw image from
-    // mpi, and returns it.
-    // pool can be NULL (then just use straight allocation).
-    // Return NULL on error or if mpi has the wrong format.
-    struct mp_image *(*download_image)(struct mp_hwdec_ctx *ctx,
-                                       struct mp_image *mpi,
-                                       struct mp_image_pool *swpool);
-
     // Optional. Crap for vdpau. Makes sure preemption recovery is run if needed.
     void (*restore_device)(struct mp_hwdec_ctx *ctx);
 

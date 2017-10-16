@@ -254,8 +254,7 @@ void mp_image_pool_set_lru(struct mp_image_pool *pool)
 
 // Copies the contents of the HW surface img to system memory and retuns it.
 // If swpool is not NULL, it's used to allocate the target image.
-// img must be a hw surface with a AVHWFramesContext attached. If not, you
-// must use the legacy mp_hwdec_ctx.download_image.
+// img must be a hw surface with a AVHWFramesContext attached.
 // The returned image is cropped as needed.
 // Returns NULL on failure.
 struct mp_image *mp_image_hw_download(struct mp_image *src,
