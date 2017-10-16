@@ -292,6 +292,7 @@ typedef struct MPOpts {
     int hwdec_api;
     char *hwdec_codecs;
     int videotoolbox_format;
+    int hwdec_image_format;
 
     int w32_priority;
 

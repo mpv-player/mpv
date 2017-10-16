@@ -807,6 +807,8 @@ static int init_generic_hwaccel(struct dec_video *vd)
 
     if (hwdec->image_format == IMGFMT_VIDEOTOOLBOX)
         av_sw_format = imgfmt2pixfmt(vd->opts->videotoolbox_format);
+    if (vd->opts->hwdec_image_format)
+        av_sw_format = imgfmt2pixfmt(vd->opts->hwdec_image_format);
 
     if (av_sw_format == AV_PIX_FMT_NONE) {
         MP_VERBOSE(ctx, "Unsupported hw decoding format: %s\n",

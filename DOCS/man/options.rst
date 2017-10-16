@@ -835,6 +835,16 @@ Video
     The old alias ``--hwdec-preload`` has different behavior if the option value
     is ``no``.
 
+``--hwdec-image-format=<name>``
+    Set the internal pixel format used by hardware decoding via ``--hwdec``
+    (default ``no``). The special value ``no`` selects an implementation
+    specific standard format. Most decoder implementations support only one
+    format, and will fail to initialize if the format is not supported.
+
+    Some implementations might support multiple formats. In particular,
+    videotoolbox is known to require ``uyvy422`` for good performance on some
+    older hardware.
+
 ``--videotoolbox-format=<name>``
     Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The
     choice of the format can influence performance considerably. On the other
@@ -844,6 +854,9 @@ Video
     works.
     Since mpv 0.25.0, ``no`` is an accepted value, which lets the decoder pick
     the format on newer FFmpeg versions (will use ``nv12`` on older versions).
+
+    Deprecated. Use ``--hwdec-image-format`` if you really need this. If both
+    are specified, ``--hwdec-image-format`` wins.
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
