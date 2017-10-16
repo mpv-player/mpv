@@ -84,9 +84,6 @@ struct mp_vdpau_ctx {
         bool in_use;
         int64_t age;
     } video_surfaces[MAX_VIDEO_SURFACES];
-    struct mp_vdpau_mixer *getimg_mixer;
-    VdpOutputSurface getimg_surface;
-    int getimg_w, getimg_h;
 };
 
 struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11,

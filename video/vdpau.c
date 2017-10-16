@@ -370,7 +370,6 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
             .ctx = ctx,
             .restore_device = recheck_preemption,
         },
-        .getimg_surface = VDP_INVALID_HANDLE,
     };
     mpthread_mutex_init_recursive(&ctx->preempt_lock);
     pthread_mutex_init(&ctx->pool_lock, NULL);
@@ -407,13 +406,6 @@ void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
             vdp_st = vdp->output_surface_destroy(ctx->video_surfaces[i].osurface);
             CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
         }
-    }
-
-    if (ctx->getimg_mixer)
-        mp_vdpau_mixer_destroy(ctx->getimg_mixer);
-    if (ctx->getimg_surface != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->output_surface_destroy(ctx->getimg_surface);
-        CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
     }
 
     av_buffer_unref(&ctx->av_device_ref);
