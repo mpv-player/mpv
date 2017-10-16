@@ -47,7 +47,6 @@ struct gpu_priv {
     struct mp_log *log;
     struct ra_ctx *ctx;
 
-    bool force_gl; // for vo=opengl back-compat
     char *context_name;
     char *context_type;
     struct ra_ctx_opts opts;
@@ -289,8 +288,7 @@ static int preinit(struct vo *vo)
     struct ra_ctx_opts opts = p->opts;
     opts.want_alpha = alpha_mode == 1;
 
-    const char *type = p->force_gl ? "opengl" : p->context_type;
-    p->ctx = ra_ctx_create(vo, type, p->context_name, opts);
+    p->ctx = ra_ctx_create(vo, p->context_type, p->context_name, opts);
     if (!p->ctx)
         goto err_out;
     assert(p->ctx->ra);
