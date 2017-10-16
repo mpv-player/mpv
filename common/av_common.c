@@ -353,6 +353,7 @@ int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
     return success;
 }
 
+#if LIBAVUTIL_VERSION_MICRO >= 100
 AVFrameSideData *ffmpeg_garbage(AVFrame *frame,
                                 enum AVFrameSideDataType type,
                                 AVBufferRef *buf)
@@ -387,3 +388,15 @@ fail:
     av_buffer_unref(&buf);
     return NULL;
 }
+#else
+AVFrameSideData *ffmpeg_garbage(AVFrame *frame,
+                                enum AVFrameSideDataType type,
+                                AVBufferRef *buf)
+{
+    AVFrameSideData *sd = av_frame_new_side_data(frame, type, buf->size);
+    if (sd)
+        memcpy(sd->data, buf->data, buf->size);
+    av_buffer_unref(&buf);
+    return sd;
+}
+#endif
