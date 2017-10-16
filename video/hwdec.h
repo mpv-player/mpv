@@ -114,8 +114,7 @@ void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type);
 // - then return the mp_hwdec_ctx.ctx field
 void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
 
-struct AVHWFramesContext;
-struct mp_image_params;
+struct mp_image;
 
 // Per AV_HWDEVICE_TYPE_* functions, queryable via hwdec_get_hwcontext_fns().
 // For now, all entries are strictly optional.
