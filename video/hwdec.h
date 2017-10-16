@@ -114,4 +114,22 @@ void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type);
 // - then return the mp_hwdec_ctx.ctx field
 void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
 
+struct AVHWFramesContext;
+struct mp_image_params;
+
+// Per AV_HWDEVICE_TYPE_* functions, queryable via hwdec_get_hwcontext_fns().
+// For now, all entries are strictly optional.
+struct hwcontext_fns {
+    int av_hwdevice_type;
+    // Set any mp_image_params fields that can not be set in generic code.
+    // (Generic code sets width, height, hw_subfmt, etc., but some very specific
+    // flags or such might require specific code for some hwcontexts.)
+    void (*complete_image_params)(struct AVHWFramesContext *hw_frames,
+                                  struct mp_image_params *p);
+};
+
+// The parameter is of type enum AVHWDeviceType (as in int to avoid extensive
+// recursive includes). May return NULL for unknown device types.
+const struct hwcontext_fns *hwdec_get_hwcontext_fns(int av_hwdevice_type);
+
 #endif

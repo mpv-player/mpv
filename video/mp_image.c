@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "common/common.h"
+#include "hwdec.h"
 #include "mp_image.h"
 #include "sws_utils.h"
 #include "fmt-conversion.h"
@@ -617,6 +618,8 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         if (p->hw_subfmt)
             mp_snprintf_cat(b, bs, "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
+        if (p->hw_flags)
+            mp_snprintf_cat(b, bs, "[0x%x]", p->hw_flags);
         mp_snprintf_cat(b, bs, " %s/%s/%s/%s",
                         m_opt_choice_str(mp_csp_names, p->color.space),
                         m_opt_choice_str(mp_csp_prim_names, p->color.primaries),
@@ -688,6 +691,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
 {
     return p1->imgfmt == p2->imgfmt &&
            p1->hw_subfmt == p2->hw_subfmt &&
+           p1->hw_flags == p2->hw_flags &&
            p1->w == p2->w && p1->h == p2->h &&
            p1->p_w == p2->p_w && p1->p_h == p2->p_h &&
            mp_colorspace_equal(p1->color, p2->color) &&
@@ -847,6 +851,10 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
     if (src->hw_frames_ctx) {
         AVHWFramesContext *fctx = (void *)src->hw_frames_ctx->data;
         dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+        const struct hwcontext_fns *fns =
+            hwdec_get_hwcontext_fns(fctx->device_ctx->type);
+        if (fns && fns->complete_image_params)
+            fns->complete_image_params(fctx, &dst->params);
     }
 
     dst->params.color = (struct mp_colorspace){

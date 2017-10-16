@@ -48,12 +48,18 @@ struct mp_spherical_params {
     float ref_angles[3]; // yaw/pitch/roll, refer to AVSphericalMapping
 };
 
+enum mp_image_hw_flags {
+    MP_IMAGE_HW_FLAG_OPAQUE = 1,    // an opaque hw format is used - the exact
+                                    // format is subject to hwctx internals
+};
+
 // Describes image parameters that usually stay constant.
 // New fields can be added in the future. Code changing the parameters should
 // usually copy the whole struct, so that fields added later will be preserved.
 struct mp_image_params {
     enum mp_imgfmt imgfmt;      // pixel format
     enum mp_imgfmt hw_subfmt;   // underlying format for some hwaccel pixfmts
+    unsigned hw_flags;          // bit mask of mp_image_hw_flags
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     struct mp_colorspace color;

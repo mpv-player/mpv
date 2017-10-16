@@ -402,6 +402,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         p->out_shared = true;
         p->out_rgb = true;
     }
+    out->hw_flags = 0;
 
     p->require_filtering = in->hw_subfmt != out->hw_subfmt;
 

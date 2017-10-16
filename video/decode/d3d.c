@@ -111,7 +111,12 @@ void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
     if (fctx->format == AV_PIX_FMT_D3D11) {
         AVD3D11VAFramesContext *hwctx = fctx->hwctx;
 
-        hwctx->BindFlags |= D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE;
+        hwctx->BindFlags |= D3D11_BIND_DECODER;
+
+        // According to hwcontex_d3d11va.h, yuv420p means DXGI_FORMAT_420_OPAQUE,
+        // which has no shader support.
+        if (fctx->sw_format != AV_PIX_FMT_YUV420P)
+            hwctx->BindFlags |= D3D11_BIND_SHADER_RESOURCE;
     }
 }
 
@@ -132,3 +137,16 @@ AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device)
 
     return device_ref;
 }
+
+static void d3d11_complete_image_params(struct AVHWFramesContext *hw_frames,
+                                        struct mp_image_params *p)
+{
+    // According to hwcontex_d3d11va.h, this means DXGI_FORMAT_420_OPAQUE.
+    p->hw_flags = hw_frames->sw_format == AV_PIX_FMT_YUV420P
+                ? MP_IMAGE_HW_FLAG_OPAQUE : 0;
+}
+
+const struct hwcontext_fns hwcontext_fns_d3d11 = {
+    .av_hwdevice_type = AV_HWDEVICE_TYPE_D3D11VA,
+    .complete_image_params = d3d11_complete_image_params,
+};

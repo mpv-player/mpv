@@ -843,7 +843,8 @@ Video
 
     Some implementations might support multiple formats. In particular,
     videotoolbox is known to require ``uyvy422`` for good performance on some
-    older hardware.
+    older hardware. d3d11va can always use ``yuv420p``, which uses an opaque
+    format, with likely no advantages.
 
 ``--videotoolbox-format=<name>``
     Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The

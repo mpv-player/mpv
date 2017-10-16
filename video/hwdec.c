@@ -1,6 +1,8 @@
 #include <pthread.h>
 #include <assert.h>
 
+#include "config.h"
+
 #include "hwdec.h"
 
 struct mp_hwdec_devices {
@@ -85,4 +87,24 @@ void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type)
     hwdec_devices_request(devs, type);
     struct mp_hwdec_ctx *hwctx = hwdec_devices_get(devs, type);
     return hwctx ? hwctx->ctx : NULL;
+}
+
+#if HAVE_D3D_HWACCEL
+extern const struct hwcontext_fns hwcontext_fns_d3d11;
+#endif
+
+static const struct hwcontext_fns *const hwcontext_fns[] = {
+#if HAVE_D3D_HWACCEL
+    &hwcontext_fns_d3d11,
+#endif
+    NULL,
+};
+
+const struct hwcontext_fns *hwdec_get_hwcontext_fns(int av_hwdevice_type)
+{
+    for (int n = 0; hwcontext_fns[n]; n++) {
+        if (hwcontext_fns[n]->av_hwdevice_type == av_hwdevice_type)
+            return hwcontext_fns[n];
+    }
+    return NULL;
 }
