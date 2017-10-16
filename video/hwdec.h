@@ -121,11 +121,12 @@ struct mp_image_params;
 // For now, all entries are strictly optional.
 struct hwcontext_fns {
     int av_hwdevice_type;
-    // Set any mp_image_params fields that can not be set in generic code.
-    // (Generic code sets width, height, hw_subfmt, etc., but some very specific
-    // flags or such might require specific code for some hwcontexts.)
-    void (*complete_image_params)(struct AVHWFramesContext *hw_frames,
-                                  struct mp_image_params *p);
+    // Set any mp_image fields that require hwcontext specific code, such as
+    // fields or flags not present in AVFrame or AVHWFramesContext in a
+    // portable way. This is called directly after img is converted from an
+    // AVFrame, with all other fields already set. img.hwctx will be set, and
+    // use the correct AV_HWDEVICE_TYPE_.
+    void (*complete_image_params)(struct mp_image *img);
 };
 
 // The parameter is of type enum AVHWDeviceType (as in int to avoid extensive

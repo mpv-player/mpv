@@ -855,15 +855,6 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
-    if (src->hw_frames_ctx) {
-        AVHWFramesContext *fctx = (void *)src->hw_frames_ctx->data;
-        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
-        const struct hwcontext_fns *fns =
-            hwdec_get_hwcontext_fns(fctx->device_ctx->type);
-        if (fns && fns->complete_image_params)
-            fns->complete_image_params(fctx, &dst->params);
-    }
-
     dst->params.color = (struct mp_colorspace){
         .space = avcol_spc_to_mp_csp(src->colorspace),
         .levels = avcol_range_to_mp_csp_levels(src->color_range),
@@ -887,6 +878,15 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (sd)
         dst->icc_profile = av_buffer_ref(sd->buf);
 #endif
+
+    if (dst->hwctx) {
+        AVHWFramesContext *fctx = (void *)dst->hwctx->data;
+        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+        const struct hwcontext_fns *fns =
+            hwdec_get_hwcontext_fns(fctx->device_ctx->type);
+        if (fns && fns->complete_image_params)
+            fns->complete_image_params(dst);
+    }
 
     return mp_image_new_ref(dst);
 }
