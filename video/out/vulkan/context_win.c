@@ -97,7 +97,7 @@ static int win_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 
 const struct ra_ctx_fns ra_ctx_vulkan_win = {
     .type           = "vulkan",
-    .name           = "win",
+    .name           = "winvk",
     .reconfig       = win_reconfig,
     .control        = win_control,
     .init           = win_init,

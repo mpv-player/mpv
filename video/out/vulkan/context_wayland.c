@@ -123,7 +123,7 @@ static void wayland_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {
     .type           = "vulkan",
-    .name           = "wayland",
+    .name           = "waylandvk",
     .reconfig       = wayland_vk_reconfig,
     .control        = wayland_vk_control,
     .wakeup         = wayland_vk_wakeup,

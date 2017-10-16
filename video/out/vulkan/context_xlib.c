@@ -107,7 +107,7 @@ static void xlib_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 
 const struct ra_ctx_fns ra_ctx_vulkan_xlib = {
     .type           = "vulkan",
-    .name           = "x11",
+    .name           = "x11vk",
     .reconfig       = xlib_reconfig,
     .control        = xlib_control,
     .wakeup         = xlib_wakeup,

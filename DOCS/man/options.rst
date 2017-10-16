@@ -4626,7 +4626,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     cocoa
         Cocoa/OS X
     win
-        Win32/WGL, VK_KHR_win32_surface
+        Win32/WGL
+    winvk
+        VK_KHR_win32_surface
     angle
         Direct3D11 through the OpenGL ES translation layer ANGLE. This supports
         almost everything the ``win`` backend does (if the ANGLE build is new
@@ -4636,18 +4638,22 @@ The following video options are currently all specific to ``--vo=gpu`` and
         on Nvidia and AMD. Newer Intel chips with the latest drivers may also
         work.
     x11
-        X11/GLX, VK_KHR_xlib_surface
+        X11/GLX
+    x11vk
+        VK_KHR_xlib_surface
     x11probe
         For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
         directly, it could be removed without warning as autoprobing is changed.
     wayland
-        Wayland/EGL, VK_KHR_wayland_surface
+        Wayland/EGL
+    waylandvk
+        VK_KHR_wayland_surface
     drm
         DRM/EGL
     x11egl
         X11/EGL
     android
-	Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
+        Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
     mali-fbdev
         Direct fbdev/EGL support on some ARM/MALI devices.
     vdpauglx
