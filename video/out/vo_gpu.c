@@ -43,7 +43,6 @@
 #include "gpu/video.h"
 
 struct gpu_priv {
-    struct vo *vo;
     struct mp_log *log;
     struct ra_ctx *ctx;
 
@@ -56,9 +55,9 @@ struct gpu_priv {
     int events;
 };
 
-static void resize(struct gpu_priv *p)
+static void resize(struct vo *vo)
 {
-    struct vo *vo = p->vo;
+    struct gpu_priv *p = vo->priv;
     struct ra_swapchain *sw = p->ctx->swapchain;
 
     MP_VERBOSE(vo, "Resize: %dx%d\n", vo->dwidth, vo->dheight);
@@ -115,7 +114,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (!p->ctx->fns->reconfig(p->ctx))
         return -1;
 
-    resize(p);
+    resize(vo);
     gl_video_config(p->renderer, params);
 
     return 0;
@@ -128,7 +127,7 @@ static void request_hwdec_api(struct vo *vo, void *api)
     if (p->hwdec)
         return;
 
-    p->hwdec = ra_hwdec_load_api(p->vo->log, p->ctx->ra, p->vo->global,
+    p->hwdec = ra_hwdec_load_api(vo->log, p->ctx->ra, vo->global,
                                  vo->hwdec_devs, (intptr_t)api);
     gl_video_set_hwdec(p->renderer, p->hwdec);
 }
@@ -179,7 +178,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_SET_PANSCAN:
-        resize(p);
+        resize(vo);
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
         vo->want_redraw = true;
@@ -200,8 +199,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_UPDATE_RENDER_OPTS: {
         get_and_update_icc_profile(p);
-        gl_video_configure_queue(p->renderer, p->vo);
-        p->vo->want_redraw = true;
+        gl_video_configure_queue(p->renderer, vo);
+        vo->want_redraw = true;
         return true;
     }
     case VOCTRL_RESET:
@@ -229,7 +228,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     events |= p->events;
     p->events = 0;
     if (events & VO_EVENT_RESIZE)
-        resize(p);
+        resize(vo);
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
     vo_event(vo, events);
@@ -278,7 +277,6 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo)
 {
     struct gpu_priv *p = vo->priv;
-    p->vo = vo;
     p->log = vo->log;
 
     int alpha_mode;
@@ -303,7 +301,7 @@ static int preinit(struct vo *vo)
 
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    p->hwdec = ra_hwdec_load(p->vo->log, p->ctx->ra, vo->global,
+    p->hwdec = ra_hwdec_load(vo->log, p->ctx->ra, vo->global,
                              vo->hwdec_devs, vo->opts->gl_hwdec_interop);
     gl_video_set_hwdec(p->renderer, p->hwdec);
 
