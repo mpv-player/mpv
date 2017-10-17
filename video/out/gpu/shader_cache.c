@@ -786,11 +786,6 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         ADD(header, "#define texture texture2D\n");
     }
 
-    if (sc->ra->glsl_vulkan && type == RA_RENDERPASS_TYPE_COMPUTE) {
-        ADD(header, "#define gl_GlobalInvocationIndex "
-                    "(gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationID)\n");
-    }
-
     // Additional helpers.
     ADD(header, "#define LUT_POS(x, lut_size)"
                 " mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
