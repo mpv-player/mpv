@@ -261,7 +261,7 @@ static void update_osd(struct vo *vo)
     MP_STATS(vo, "start rpi_osd");
 
     struct vo_frame frame = {0};
-    struct fbodst target = {
+    struct ra_fbo target = {
         .tex = ra_create_wrapped_fb(p->egl.ra, 0, p->osd_res.w, p->osd_res.h),
         .flip = true,
     };
