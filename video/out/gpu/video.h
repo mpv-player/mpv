@@ -150,7 +150,6 @@ struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
                                struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
-void gl_video_update_options(struct gl_video *p);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);

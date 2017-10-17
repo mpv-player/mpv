@@ -291,7 +291,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         gl_video_config(ctx->renderer, &ctx->img_params);
     }
     if (ctx->update_new_opts) {
-        gl_video_update_options(ctx->renderer);
         if (vo)
             gl_video_configure_queue(ctx->renderer, vo);
         int debug;

@@ -424,6 +424,7 @@ static const char *handle_scaler_opt(const char *name, bool tscale);
 static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
 static void gl_video_setup_hooks(struct gl_video *p);
+static void gl_video_update_options(struct gl_video *p);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -2993,6 +2994,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                            struct ra_fbo fbo)
 {
+    gl_video_update_options(p);
+
     struct mp_rect target_rc = {0, 0, fbo.tex->params.w, fbo.tex->params.h};
 
     p->broken_frame = false;
@@ -3624,12 +3627,15 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
     return NULL;
 }
 
-void gl_video_update_options(struct gl_video *p)
+static void gl_video_update_options(struct gl_video *p)
 {
     if (m_config_cache_update(p->opts_cache)) {
         gl_lcms_update_options(p->cms);
         reinit_from_options(p);
     }
+
+    if (mp_csp_equalizer_state_changed(p->video_eq))
+        p->output_tex_valid = false;
 }
 
 static void reinit_from_options(struct gl_video *p)
@@ -3660,6 +3666,8 @@ static void reinit_from_options(struct gl_video *p)
 
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
 {
+    gl_video_update_options(p);
+
     int queue_size = 1;
 
     // Figure out an adequate size for the interpolation queue. The larger
