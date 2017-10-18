@@ -4707,9 +4707,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Selects the internal format of textures used for FBOs. The format can
     influence performance and quality of the video output. ``fmt`` can be one
     of: rgb8, rgb10, rgb10_a2, rgb16, rgb16f, rgb32f, rgba12, rgba16, rgba16f,
-    rgba32f. Default: ``auto``, which maps to rgba16 on desktop GL, and rgba16f
-    or rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16 is
-    available.
+    rgba16hf, rgba32f. Default: ``auto``, which maps to rgba16 on desktop GL,
+    and rgba16f or rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16
+    is available.
 
 ``--gamma-factor=<0.1..2.0>``
     Set an additional raw gamma factor (default: 1.0). If gamma is adjusted in
