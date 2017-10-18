@@ -319,13 +319,14 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     d_video->header = track->stream;
     d_video->codec = track->stream->codec;
     d_video->fps = d_video->header->codec->fps;
-    d_video->vo = mpctx->vo_chain->vo;
 
     // Note: at least mpv_opengl_cb_uninit_gl() relies on being able to get
     //       rid of all references to the VO by destroying the VO chain. Thus,
     //       decoders not linked to vo_chain must not use the hwdec context.
-    if (mpctx->vo_chain)
+    if (mpctx->vo_chain) {
         d_video->hwdec_devs = mpctx->vo_chain->hwdec_devs;
+        d_video->vo = mpctx->vo_chain->vo;
+    }
 
     MP_VERBOSE(d_video, "Container reported FPS: %f\n", d_video->fps);
 
