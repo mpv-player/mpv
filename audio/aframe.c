@@ -297,7 +297,7 @@ bool mp_aframe_set_chmap(struct mp_aframe *frame, struct mp_chmap *in)
 
 bool mp_aframe_set_rate(struct mp_aframe *frame, int rate)
 {
-    if (rate < 1 && rate > 10000000)
+    if (rate < 1 || rate > 10000000)
         return false;
     frame->av_frame->sample_rate = rate;
     return true;
