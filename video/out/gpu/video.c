@@ -2777,13 +2777,15 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
             GLSLF("// transparency checkerboard\n");
             GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy * 1.0/32.0), vec2(0.5));)
             GLSL(vec3 background = vec3(tile.x == tile.y ? 0.93 : 0.87);)
-            GLSL(color.rgb = mix(background, color.rgb, color.a);)
+            GLSL(color.rgb += background.rgb * (1.0 - color.a);)
+            GLSL(color.a = 1.0;)
         } else if (p->opts.alpha_mode == ALPHA_BLEND) {
             // Blend into background color (usually black)
             struct m_color c = p->opts.background;
             GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
                   c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
-            GLSL(color = mix(background, vec4(color.rgb, 1.0), color.a);)
+            GLSL(color.rgb += background.rgb * (1.0 - color.a);)
+            GLSL(color.a = background.a;)
         }
     }
 
