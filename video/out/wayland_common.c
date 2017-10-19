@@ -56,7 +56,6 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, int on)
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
                               image->hotspot_x, image->hotspot_y);
         wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
-        wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
         wl_surface_damage(wl->cursor_surface, 0, 0, image->width, image->height);
         wl_surface_commit(wl->cursor_surface);
     } else {
