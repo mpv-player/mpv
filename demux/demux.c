@@ -457,6 +457,7 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
             return;
         }
         sh->codec->codec = "eia_608";
+        sh->ignore_eof = true;
         stream->ds->cc = sh;
         demux_add_sh_stream(demuxer, sh);
     }
@@ -677,7 +678,7 @@ static bool read_packet(struct demux_internal *in)
                 if (in->wakeup_cb)
                     in->wakeup_cb(in->wakeup_cb_ctx);
                 pthread_cond_signal(&in->wakeup);
-                MP_VERBOSE(in, "EOF reached.\n");
+                MP_DBG(in, "EOF reached.\n");
             }
         }
         in->eof = in->last_eof = eof;
@@ -1659,6 +1660,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         int num_packets = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
+            if (in->streams[n]->ignore_eof)
+                continue;
             if (ds->active && !(!ds->head && ds->eof)) {
                 r->underrun |= !ds->head && !ds->eof;
                 r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
