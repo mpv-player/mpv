@@ -34,6 +34,7 @@ local user_opts = {
     layout = "bottombar",
     seekbarstyle = "bar",       -- slider (diamond marker), knob (circle
                                 -- marker with guide), or bar (fill)
+    seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     title = "${media-title}",   -- string compatible with property-expansion
                                 -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
@@ -1784,8 +1785,8 @@ function osc_init()
             local seekto = get_slider_value(element)
             if (element.state.lastseek == nil) or
                 (not (element.state.lastseek == seekto)) then
-                    mp.commandv("seek", seekto,
-                        "absolute-percent", "keyframes")
+                    mp.commandv("seek", seekto, "absolute-percent",
+                        user_opts.seekbarkeyframes and "keyframes" or "exact")
                     element.state.lastseek = seekto
             end
 

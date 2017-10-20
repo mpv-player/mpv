@@ -171,6 +171,15 @@ Configurable Options
     marker with guide), or bar (fill).
     Default pre-0.21.0 was 'slider'.
 
+``seekbarkeyframes``
+    Default: yes
+
+    Controls the mode used to seek when dragging the seekbar. By default,
+    keyframes are used. If set to false, exact seeking on mouse drags
+    will be used instead. Keyframes are preferred, but exact seeks may be
+    useful in cases where keyframes cannot be found. Note that using exact
+    seeks can potentially make mouse dragging much slower.
+
 ``deadzonesize``
     Default: 0.5
 
