@@ -109,6 +109,7 @@ struct priv {
 
     // Owned by the cache thread
     stream_t *stream;       // "real" stream, used to read from the source media
+    int64_t bytes_until_wakeup; // wakeup cache thread after this many bytes
 
     // All the following members are shared between the threads.
     // You must lock the mutex to access them.
@@ -602,8 +603,17 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
         }
     }
 
-    // wakeup the cache thread, possibly make it read more data ahead
-    pthread_cond_signal(&s->wakeup);
+    if (!s->eof) {
+        // wakeup the cache thread, possibly make it read more data ahead
+        // this is throttled to reduce excessive wakeups during normal reading
+        // (using the amount of bytes after which the cache thread most likely
+        // can actually read new data)
+        s->bytes_until_wakeup -= readb;
+        if (s->bytes_until_wakeup <= 0) {
+            s->bytes_until_wakeup = MPMAX(FILL_LIMIT, s->stream->read_chunk);
+            pthread_cond_signal(&s->wakeup);
+        }
+    }
     pthread_mutex_unlock(&s->mutex);
     return readb;
 }
@@ -648,6 +658,8 @@ static int cache_seek(stream_t *cache, int64_t pos)
             r = 1;
         }
     }
+
+    s->bytes_until_wakeup = 0;
 
     pthread_mutex_unlock(&s->mutex);
 
