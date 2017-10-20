@@ -208,6 +208,8 @@ struct demux_stream {
     struct demux_packet *attached_picture;
     bool attached_picture_added;
 
+    bool ignore_eof;        // ignore stream in underrun detection
+
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
 };
@@ -448,6 +450,7 @@ const char *stream_type_name(enum stream_type type)
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demuxer *demuxer = stream->ds->in->d_thread;
+    struct demux_internal *in = demuxer->in;
     struct sh_stream *sh = stream->ds->cc;
 
     if (!sh) {
@@ -457,13 +460,19 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
             return;
         }
         sh->codec->codec = "eia_608";
-        sh->ignore_eof = true;
         stream->ds->cc = sh;
         demux_add_sh_stream(demuxer, sh);
     }
 
-    dp->pts = MP_ADD_PTS(dp->pts, -stream->ds->in->ts_offset);
-    dp->dts = MP_ADD_PTS(dp->dts, -stream->ds->in->ts_offset);
+    pthread_mutex_lock(&in->lock);
+
+    sh->ds->ignore_eof = true;
+
+    dp->pts = MP_ADD_PTS(dp->pts, -in->ts_offset);
+    dp->dts = MP_ADD_PTS(dp->dts, -in->ts_offset);
+
+    pthread_mutex_unlock(&in->lock);
+
     demux_add_packet(sh, dp);
 }
 
@@ -569,9 +578,11 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         ds->head = ds->tail = dp;
     }
 
-    // obviously not true anymore
-    ds->eof = false;
-    in->last_eof = in->eof = false;
+    if (!ds->ignore_eof) {
+        // obviously not true anymore
+        ds->eof = false;
+        in->last_eof = in->eof = false;
+    }
 
     // For video, PTS determination is not trivial, but for other media types
     // distinguishing PTS and DTS is not useful.
@@ -1660,9 +1671,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         int num_packets = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            if (in->streams[n]->ignore_eof)
-                continue;
-            if (ds->active && !(!ds->head && ds->eof)) {
+            if (ds->active && !(!ds->head && ds->eof) && !ds->ignore_eof) {
                 r->underrun |= !ds->head && !ds->eof;
                 r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);

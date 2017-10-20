@@ -56,7 +56,6 @@ struct sh_stream {
 
     // Internal to demux.c
     struct demux_stream *ds;
-    bool ignore_eof;            // ignore stream in underrun detection
 };
 
 struct mp_codec_params {
