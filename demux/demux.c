@@ -184,6 +184,7 @@ struct demux_internal {
 
 struct demux_stream {
     struct demux_internal *in;
+    struct sh_stream *sh;
     enum stream_type type;
     // --- all fields are protected by in->lock
 
@@ -215,8 +216,6 @@ struct demux_stream {
     double bitrate;
     struct demux_packet *reader_head;   // points at current decoder position
     bool attached_picture_added;
-
-    struct demux_packet *attached_picture;
 
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
@@ -310,14 +309,13 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
     sh->ds = talloc(sh, struct demux_stream);
     *sh->ds = (struct demux_stream) {
         .in = in,
+        .sh = sh,
         .type = sh->type,
         .selected = in->autoselect,
     };
 
     if (!sh->codec->codec)
         sh->codec->codec = "";
-
-    sh->ds->attached_picture = sh->attached_picture;
 
     sh->index = in->num_streams;
     if (sh->ff_index < 0)
@@ -891,12 +889,12 @@ static void *demux_thread(void *pctx)
 
 static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 {
-    if (ds->attached_picture) {
+    if (ds->sh->attached_picture) {
         ds->eof = true;
         if (ds->attached_picture_added)
             return NULL;
         ds->attached_picture_added = true;
-        return demux_copy_packet(ds->attached_picture);
+        return demux_copy_packet(ds->sh->attached_picture);
     }
     if (!ds->reader_head)
         return NULL;
@@ -957,7 +955,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 // try to exceed default readahead in order to find a new packet.
 static bool use_lazy_packet_reading(struct demux_stream *ds)
 {
-    if (ds->attached_picture)
+    if (ds->sh->attached_picture)
         return true;
     if (ds->type != STREAM_SUB)
         return false;
@@ -965,7 +963,8 @@ static bool use_lazy_packet_reading(struct demux_stream *ds)
     // stream.
     for (int n = 0; n < ds->in->num_streams; n++) {
         struct demux_stream *s = ds->in->streams[n]->ds;
-        if (s->type != STREAM_SUB && s->selected && !s->eof && !s->attached_picture)
+        if (s->type != STREAM_SUB && s->selected && !s->eof && !
+            s->sh->attached_picture)
             return true;
     }
     return false;
