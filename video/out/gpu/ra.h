@@ -87,6 +87,10 @@ struct ra_format {
     // shader representation is given by the special_imgfmt_desc pointer.
     int special_imgfmt;
     const struct ra_imgfmt_desc *special_imgfmt_desc;
+
+    // This gives the GLSL image format corresponding to the format, if any.
+    // (e.g. rgba16ui)
+    const char *glsl_format;
 };
 
 struct ra_tex_params {
@@ -493,6 +497,8 @@ struct ra_imgfmt_desc {
     // this later.
     uint8_t components[4][4];
 };
+
+const char *ra_fmt_glsl_format(const struct ra_format *fmt);
 
 bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out);
 
