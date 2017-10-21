@@ -42,8 +42,14 @@ enum demux_ctrl {
 
 struct demux_ctrl_reader_state {
     bool eof, underrun, idle;
-    double ts_range[2]; // start, end
     double ts_duration;
+    double ts_reader; // approx. timerstamp of decoder position
+    double ts_start; // approx. timestamp for the earliest packet buffered
+    double ts_min; // timestamp of the earliest packet in backward cache
+                   // that can be seeked to (i.e. all streams have such
+                   // a packet for which SEEK_BACKWARD can be executed)
+    double ts_max; // timestamp of latest packet in forward cache that can be
+                   // seeked to
 };
 
 struct demux_ctrl_stream_ctrl {

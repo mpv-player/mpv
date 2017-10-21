@@ -1696,11 +1696,10 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
     if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    double ts = s.ts_range[1];
-    if (ts == MP_NOPTS_VALUE)
+    if (s.ts_max == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, ts);
+    return m_property_double_ro(action, arg, s.ts_max);
 }
 
 static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,

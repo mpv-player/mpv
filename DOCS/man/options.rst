@@ -2839,11 +2839,31 @@ Demuxer
 
     See ``--list-options`` for defaults and value range.
 
-``--demuxer-max-packets=<packets>``
-    Quite similar ``--demuxer-max-bytes=<bytes>``. Deprecated, because the
-    other option does basically the same job. Since mpv 0.25.0, the code
-    tries to account for per-packet overhead, which is why this option becomes
-    rather pointless.
+``--demuxer-max-back-bytes=<value>``
+    This controls how much past data the demuxer is allowed to preserve. This
+    is useful only if the ``--demuxer-seekable-cache`` option is enabled.
+    Unlike the forward cache, there is no control how many seconds are actually
+    cached - it will simply use as much memory this option allows. Setting this
+    option to 0 will strictly disable any back buffer.
+
+    Keep in mind that other buffers in the player (like decoders) will cause the
+    demuxer to cache "future" frames in the back buffer, which can skew the
+    impression about how much data the backbuffer contains.
+
+    See ``--list-options`` for defaults and value range.
+
+``--demuxer-seekable-cache=<yes|no>``
+    This controls whether seeking can use the demuxer cache (default: no). If
+    enabled, short seek offsets will not trigger a low level demuxer seek
+    (which means for example that slow network round trips or FFmpeg seek bugs
+    can be avoided). If a seek cannot happen within the cached range, a low
+    level seek will be triggered. Seeking outside of the cache will always
+    discard the full cache.
+
+    Keep in mind that some events can flush the cache or force a low level
+    seek anyway, such as switching tracks, or attmepting to seek before the
+    start or after the end of the file. This option is experimental - thus
+    disabled, and bugs are to be expected.
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
