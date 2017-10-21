@@ -710,22 +710,16 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             break;
         case RA_VARTYPE_IMG_W: {
             // For better compatibility, we have to explicitly label the
-            // type of data we will be reading/writing to this image. For
-            // simplicity, just pick 32-bit float with however many components.
-            static const char *fmt_mapping[] = {
-                [1] = "r32f",
-                [2] = "rg32f",
-                [3] = "rgba32f", // rgb32f doesn't exist
-                [4] = "rgba32f",
-            };
-
-            const struct ra_format *format = u->v.tex->params.format;
-            assert(format->num_components < MP_ARRAY_SIZE(fmt_mapping));
-            const char *fmt = fmt_mapping[format->num_components];
+            // type of data we will be reading/writing to this image.
+            const char *fmt = u->v.tex->params.format->glsl_format;
 
             if (sc->ra->glsl_vulkan) {
-                ADD(dst, "layout(binding=%d, %s) ", u->input.binding, fmt);
-            } else {
+                if (fmt) {
+                    ADD(dst, "layout(binding=%d, %s) ", u->input.binding, fmt);
+                } else {
+                    ADD(dst, "layout(binding=%d) ", u->input.binding);
+                }
+            } else if (fmt) {
                 ADD(dst, "layout(%s) ", fmt);
             }
             ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);

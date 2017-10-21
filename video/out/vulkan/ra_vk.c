@@ -114,6 +114,8 @@ static bool vk_setup_formats(struct ra *ra)
         for (int i = 0; i < 4; i++)
             fmt->component_size[i] = fmt->component_depth[i] = vk_fmt->bits[i];
 
+        fmt->glsl_format = ra_fmt_glsl_format(fmt);
+
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
     }
 

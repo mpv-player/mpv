@@ -86,6 +86,65 @@ struct ra_renderpass_params *ra_renderpass_params_copy(void *ta_parent,
     return res;
 };
 
+struct glsl_fmt {
+    enum ra_ctype ctype;
+    int num_components;
+    int component_depth[4];
+    const char *glsl_format;
+};
+
+// List taken from the GLSL specification, sans snorm and sint formats
+static const struct glsl_fmt ra_glsl_fmts[] = {
+    {RA_CTYPE_FLOAT, 1, {16},             "r16f"},
+    {RA_CTYPE_FLOAT, 1, {32},             "r32f"},
+    {RA_CTYPE_FLOAT, 2, {16, 16},         "rg16f"},
+    {RA_CTYPE_FLOAT, 2, {32, 32},         "rg32f"},
+    {RA_CTYPE_FLOAT, 4, {16, 16, 16, 16}, "rgba16f"},
+    {RA_CTYPE_FLOAT, 4, {32, 32, 32, 32}, "rgba32f"},
+    {RA_CTYPE_FLOAT, 3, {11, 11, 10},     "r11f_g11f_b10f"},
+
+    {RA_CTYPE_UNORM, 1, {8},              "r8"},
+    {RA_CTYPE_UNORM, 1, {16},             "r16"},
+    {RA_CTYPE_UNORM, 2, {8,  8},          "rg8"},
+    {RA_CTYPE_UNORM, 2, {16, 16},         "rg16"},
+    {RA_CTYPE_UNORM, 4, {8,  8,  8,  8},  "rgba8"},
+    {RA_CTYPE_UNORM, 4, {16, 16, 16, 16}, "rgba16"},
+    {RA_CTYPE_UNORM, 4, {10, 10, 10,  2}, "rgb10_a2"},
+
+    {RA_CTYPE_UINT,  1, {8},              "r8ui"},
+    {RA_CTYPE_UINT,  1, {16},             "r16ui"},
+    {RA_CTYPE_UINT,  1, {32},             "r32ui"},
+    {RA_CTYPE_UINT,  2, {8,  8},          "rg8ui"},
+    {RA_CTYPE_UINT,  2, {16, 16},         "rg16ui"},
+    {RA_CTYPE_UINT,  2, {32, 32},         "rg32ui"},
+    {RA_CTYPE_UINT,  4, {8,  8,  8,  8},  "rgba8ui"},
+    {RA_CTYPE_UINT,  4, {16, 16, 16, 16}, "rgba16ui"},
+    {RA_CTYPE_UINT,  4, {32, 32, 32, 32}, "rgba32ui"},
+    {RA_CTYPE_UINT,  4, {10, 10, 10,  2}, "rgb10_a2ui"},
+};
+
+const char *ra_fmt_glsl_format(const struct ra_format *fmt)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(ra_glsl_fmts); n++) {
+        const struct glsl_fmt *gfmt = &ra_glsl_fmts[n];
+
+        if (fmt->ctype != gfmt->ctype)
+            continue;
+        if (fmt->num_components != gfmt->num_components)
+            continue;
+
+        for (int i = 0; i < fmt->num_components; i++) {
+            if (fmt->component_depth[i] != gfmt->component_depth[i])
+                goto next_fmt;
+        }
+
+        return gfmt->glsl_format;
+
+next_fmt: ; // equivalent to `continue`
+    }
+
+    return NULL;
+}
 
 // Return whether this is a tightly packed format with no external padding and
 // with the same bit size/depth in all components, and the shader returns

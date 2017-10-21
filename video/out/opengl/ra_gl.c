@@ -179,6 +179,8 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             desc->chroma_w = desc->chroma_h = 1;
         }
 
+        fmt->glsl_format = ra_fmt_glsl_format(fmt);
+
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
     }
 
