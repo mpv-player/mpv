@@ -96,7 +96,6 @@ static int ra_init_gl(struct ra *ra, GL *gl)
 
     static const int caps_map[][2] = {
         {RA_CAP_DIRECT_UPLOAD,      0},
-        {RA_CAP_SHARED_BINDING,     0},
         {RA_CAP_GLOBAL_UNIFORM,     0},
         {RA_CAP_TEX_1D,             MPGL_CAP_1D_TEX},
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
@@ -653,6 +652,11 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
+static int gl_desc_namespace(enum ra_vartype type)
+{
+    return type;
+}
+
 static void gl_renderpass_destroy(struct ra *ra, struct ra_renderpass *pass)
 {
     GL *gl = ra_gl_get(ra);
@@ -1122,6 +1126,7 @@ static struct ra_fns ra_fns_gl = {
     .clear                  = gl_clear,
     .blit                   = gl_blit,
     .uniform_layout         = std140_layout,
+    .desc_namespace         = gl_desc_namespace,
     .renderpass_create      = gl_renderpass_create,
     .renderpass_destroy     = gl_renderpass_destroy,
     .renderpass_run         = gl_renderpass_run,
