@@ -1585,6 +1585,11 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
     }
 }
 
+static int vk_desc_namespace(enum ra_vartype type)
+{
+    return 0;
+}
+
 #define VK_QUERY_POOL_SIZE (MPVK_MAX_STREAMING_DEPTH * 4)
 
 struct vk_timer {
@@ -1688,6 +1693,7 @@ static struct ra_fns ra_fns_vk = {
     .blit                   = vk_blit,
     .uniform_layout         = std140_layout,
     .push_constant_layout   = std430_layout,
+    .desc_namespace         = vk_desc_namespace,
     .renderpass_create      = vk_renderpass_create,
     .renderpass_destroy     = vk_renderpass_destroy_lazy,
     .renderpass_run         = vk_renderpass_run,
