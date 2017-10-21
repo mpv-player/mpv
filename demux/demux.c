@@ -1078,8 +1078,6 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
     return NULL;
 }
 
-// ====================================================================
-
 void demuxer_help(struct mp_log *log)
 {
     int i;
