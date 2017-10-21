@@ -200,6 +200,8 @@ struct m_sub_property {
     .type = {.type = CONF_TYPE_DOUBLE}, .value = {.double_ = (f)}
 #define SUB_PROP_FLAG(f) \
     .type = {.type = CONF_TYPE_FLAG}, .value = {.flag = (f)}
+#define SUB_PROP_PTS(f) \
+    .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 

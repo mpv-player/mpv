@@ -1716,6 +1716,41 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, s.idle);
 }
 
+static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
+                                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct demux_ctrl_reader_state s;
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool seek_ok = s.ts_min != MP_NOPTS_VALUE &&
+                   s.ts_max != MP_NOPTS_VALUE &&
+                   s.seekable;
+
+    struct m_sub_property props[] = {
+        {"seekable-start",  SUB_PROP_PTS(s.ts_min),
+         .unavailable = !seek_ok},
+        {"seekable-end",    SUB_PROP_PTS(s.ts_max),
+         .unavailable = !seek_ok},
+        {"cache-start",     SUB_PROP_PTS(s.ts_start),
+         .unavailable = s.ts_start == MP_NOPTS_VALUE},
+        {"cache-end",       SUB_PROP_PTS(s.ts_max),
+         .unavailable = s.ts_max == MP_NOPTS_VALUE},
+        {"reader-pts",      SUB_PROP_PTS(s.ts_reader),
+         .unavailable = s.ts_reader == MP_NOPTS_VALUE},
+        {"eof",             SUB_PROP_FLAG(s.eof)},
+        {"underrun",        SUB_PROP_FLAG(s.underrun)},
+        {"idle",            SUB_PROP_FLAG(s.idle)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_demuxer_start_time(void *ctx, struct m_property *prop,
                                           int action, void *arg)
 {
@@ -3937,6 +3972,7 @@ static const struct m_property mp_properties_base[] = {
     {"demuxer-cache-time", mp_property_demuxer_cache_time},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
     {"demuxer-start-time", mp_property_demuxer_start_time},
+    {"demuxer-cache-state", mp_property_demuxer_cache_state},
     {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"demuxer-via-network", mp_property_demuxer_is_network},

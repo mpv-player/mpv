@@ -1931,6 +1931,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         struct demux_ctrl_reader_state *r = arg;
         *r = (struct demux_ctrl_reader_state){
             .eof = in->last_eof,
+            .seekable = in->seekable_cache,
             .ts_start = MP_NOPTS_VALUE,
             .ts_min = MP_NOPTS_VALUE,
             .ts_max = MP_NOPTS_VALUE,

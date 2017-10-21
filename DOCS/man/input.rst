@@ -1258,6 +1258,22 @@ Property list
     Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
     filled to the requested amount, and is currently not reading more data.
 
+``demuxer-cache-state``
+    Various undocumented things. Some fields are documented:
+
+    ``demuxer-cache-state/seekable-start``, ``demuxer-cache-state/seekable-end``
+        Seekable range within demuxer cache. Unavailable if not possible.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            "seekable-start"    MPV_FORMAT_DOUBLE
+            "seekable-end"      MPV_FORMAT_DOUBLE
+
 ``demuxer-via-network``
     Returns ``yes`` if the stream demuxed via the main demuxer is most likely
     played via network. What constitutes "network" is not always clear, might

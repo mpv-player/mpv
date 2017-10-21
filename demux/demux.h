@@ -41,7 +41,7 @@ enum demux_ctrl {
 };
 
 struct demux_ctrl_reader_state {
-    bool eof, underrun, idle;
+    bool eof, underrun, idle, seekable;
     double ts_duration;
     double ts_reader; // approx. timerstamp of decoder position
     double ts_start; // approx. timestamp for the earliest packet buffered
