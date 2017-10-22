@@ -44,19 +44,46 @@ static const struct zxdg_shell_v6_listener xdg_shell_listener = {
     xdg_shell_ping,
 };
 
+static int spawn_cursor(struct vo_wayland_state *wl)
+{
+    if (wl->allocated_cursor_scale == wl->scaling) /* Reuse if size is identical */
+        return 0;
+    else if (wl->cursor_theme)
+        wl_cursor_theme_destroy(wl->cursor_theme);
+
+    wl->cursor_theme = wl_cursor_theme_load(NULL, 32*wl->scaling, wl->shm);
+    if (!wl->cursor_theme) {
+        MP_ERR(wl, "Unable to load cursor theme!\n");
+        return 1;
+    }
+
+    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
+    if (!wl->default_cursor) {
+        MP_ERR(wl, "Unable to load cursor theme!\n");
+        return 1;
+    }
+
+    wl->allocated_cursor_scale = wl->scaling;
+
+    return 0;
+}
+
 static int set_cursor_visibility(struct vo_wayland_state *wl, int on)
 {
     if (!wl->pointer)
         return VO_NOTAVAIL;
     if (on) {
-        struct wl_cursor_image *image = wl->default_cursor->images[0];
-        struct wl_buffer *buffer = wl_cursor_image_get_buffer(image);
+        if (spawn_cursor(wl))
+            return VO_FALSE;
+        struct wl_cursor_image *img = wl->default_cursor->images[0];
+        struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
         if (!buffer)
             return VO_FALSE;
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
-                              image->hotspot_x, image->hotspot_y);
+                              img->hotspot_x/wl->scaling, img->hotspot_y/wl->scaling);
+        wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
         wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
-        wl_surface_damage(wl->cursor_surface, 0, 0, image->width, image->height);
+        wl_surface_damage(wl->cursor_surface, 0, 0, img->width, img->height);
         wl_surface_commit(wl->cursor_surface);
     } else {
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
@@ -752,6 +779,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         ver = MPMIN(ver, 4); /* Cap the version */
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
         wl->surface = wl_compositor_create_surface(wl->compositor);
+        wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
         wl->frame_callback = wl_surface_frame(wl->surface);
         wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
@@ -828,25 +856,6 @@ static const struct wl_registry_listener registry_listener = {
     registry_handle_add,
     registry_handle_remove,
 };
-
-static int spawn_cursor(struct vo_wayland_state *wl)
-{
-    wl->cursor_theme = wl_cursor_theme_load(NULL, 32, wl->shm);
-    if (!wl->cursor_theme) {
-        MP_ERR(wl, "Unable to load cursor theme!\n");
-        return 1;
-    }
-
-    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
-    if (!wl->default_cursor) {
-        MP_ERR(wl, "Unable to load cursor theme!\n");
-        return 1;
-    }
-
-    wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
-
-    return 0;
-}
 
 static void handle_surface_config(void *data, struct zxdg_surface_v6 *surface,
                                   uint32_t serial)
@@ -1002,9 +1011,7 @@ int vo_wayland_init(struct vo *vo)
         return false;
     }
 
-    /* Can't be initialized during registry, as they depend on 2 or more protocols */
-    if (spawn_cursor(wl))
-        return false;
+    /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_xdg_surface(wl))
         return false;
 
@@ -1160,6 +1167,7 @@ int vo_wayland_reconfig(struct vo *vo)
     wl_surface_commit(wl->surface);
     wl->pending_vo_events |= VO_EVENT_RESIZE;
     if (!wl->configured) {
+        spawn_cursor(wl);
         wl_display_roundtrip(wl->display);
         wl->configured = true;
     }

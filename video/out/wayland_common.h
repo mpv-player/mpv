@@ -99,6 +99,7 @@ struct vo_wayland_state {
     struct wl_cursor_theme *cursor_theme;
     struct wl_cursor       *default_cursor;
     struct wl_surface      *cursor_surface;
+    int                     allocated_cursor_scale;
 };
 
 int vo_wayland_init(struct vo *vo);
