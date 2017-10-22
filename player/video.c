@@ -548,7 +548,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
             vf->initialized = 0;
             mp_image_unrefp(&vo_c->input_mpi);
             vo_c->input_format = (struct mp_image_params){0};
-            MP_VERBOSE(mpctx, "hwdec falback due to filters.\n");
+            MP_VERBOSE(mpctx, "hwdec fallback due to filters.\n");
             return VD_PROGRESS; // try again
         }
         if (vf->initialized < 1) {
