@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ 1.26   - remove glMPGetNativeDisplay("drm") support
+        - add mpv_opengl_cb_window_pos and mpv_opengl_cb_drm_params and
+          support via glMPGetNativeDisplay() for using it
  --- mpv 0.27.0 ---
  1.25   - remove setting "no-" options via mpv_set_option*(). (See corresponding
           deprecation in 0.23.0.)

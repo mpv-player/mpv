@@ -160,6 +160,9 @@ extern "C" {
  * mpv_opengl_cb_window_pos struct pointer defined below.
  * Note : The intended use is for hardware overlays that might require
  * upscaling features (typically upscaling GL windows with drm to screen size).
+ *
+ * This is never used for GL rendering - only to map hardware overlays to
+ * GL rendering (for backends which support it).
  */
 struct mpv_opengl_cb_window_pos {
     int x;      // left coordinates of window (usually 0)
