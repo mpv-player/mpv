@@ -497,7 +497,7 @@ static void determine_working_formats(struct ra_hwdec *hw)
     AVHWFramesConstraints *fc =
             av_hwdevice_get_hwframe_constraints(p->ctx->av_device_ref, NULL);
     if (!fc) {
-        MP_WARN(hw, "failed to retrieve libavutil frame constaints\n");
+        MP_WARN(hw, "failed to retrieve libavutil frame constraints\n");
         goto done;
     }
     for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++) {

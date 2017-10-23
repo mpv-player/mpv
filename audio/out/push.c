@@ -309,7 +309,7 @@ static void ao_play_data(struct ao *ao)
         r = ao->driver->play(ao, (void **)planes, samples, flags);
     MP_STATS(ao, "end ao fill");
     if (r > samples) {
-        MP_ERR(ao, "Audio device returned non-sense value.\n");
+        MP_ERR(ao, "Audio device returned nonsense value.\n");
         r = samples;
     } else if (r < 0) {
         MP_ERR(ao, "Error writing audio to device.\n");

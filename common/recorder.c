@@ -160,7 +160,7 @@ struct mp_recorder *mp_recorder_create(struct mpv_global *global,
     av_dict_set(&priv->mux->metadata, "encoding_tool", version, 0);
 
     if (avformat_write_header(priv->mux, NULL) < 0) {
-        MP_ERR(priv, "Write header failed.\n");
+        MP_ERR(priv, "Writing header failed.\n");
         goto error;
     }
 

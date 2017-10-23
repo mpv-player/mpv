@@ -509,8 +509,8 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         bool multiple = fd->multiple;
         int *countptr = (int *) (s + fd->count_offset);
         if (*countptr >= num_elems[field_idx]) {
-            // Shouldn't happen with on any sane file without bugs
-            MP_ERR(ctx, "Too many subelems?\n");
+            // Shouldn't happen on any sane file without bugs
+            MP_ERR(ctx, "Too many subelements.\n");
             ctx->has_errors = true;
             data += length;
             continue;
