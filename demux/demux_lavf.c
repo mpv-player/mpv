@@ -242,7 +242,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 
     MP_TRACE(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
              ret, stream, buf, size, stream_tell(stream), stream->eof);
-    return ret;
+    return ret ? ret : AVERROR_EOF;
 }
 
 static int64_t mp_seek(void *opaque, int64_t pos, int whence)
