@@ -22,6 +22,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 #include "options/m_option.h"
+#include "drm_atomic.h"
 
 struct kms {
     struct mp_log *log;
@@ -31,6 +32,7 @@ struct kms {
     drmModeModeInfo mode;
     uint32_t crtc_id;
     int card_no;
+    struct drm_atomic_context *atomic_context;
 };
 
 struct vt_switcher {
@@ -51,7 +53,7 @@ void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
                          void *user_data);
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id);
+                       int mode_id, int overlay_id);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
 

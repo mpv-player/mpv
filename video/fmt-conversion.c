@@ -75,6 +75,9 @@ static const struct {
     {IMGFMT_CUDA, AV_PIX_FMT_CUDA},
 #endif
     {IMGFMT_P010, AV_PIX_FMT_P010},
+#if HAVE_DRMPRIME
+    {IMGFMT_DRMPRIME, AV_PIX_FMT_DRM_PRIME},
+#endif
 
     {0, AV_PIX_FMT_NONE}
 };

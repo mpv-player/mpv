@@ -442,6 +442,7 @@ def build(ctx):
         ( "video/out/opengl/hwdec_dxva2egl.c",   "d3d9-hwaccel" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_ios.m",        "ios-gl" ),
+        ( "video/out/opengl/hwdec_drmprime_drm.c","drmprime && drm" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
@@ -482,7 +483,9 @@ def build(ctx):
         ( "video/out/wayland/srv-decor.c",       "wayland" ),
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
+        ( "video/out/drm_atomic.c",              "drm" ),
         ( "video/out/drm_common.c",              "drm" ),
+        ( "video/out/drm_prime.c",               "drm && drmprime" ),
 
         ## osdep
         ( getch2_c ),

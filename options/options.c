@@ -111,6 +111,7 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"d3d11va-copy",HWDEC_D3D11VA_COPY},
     {"rpi",         HWDEC_RPI},
     {"rpi-copy",    HWDEC_RPI_COPY},
+    {"rkmpp",       HWDEC_RKMPP},
     {"mediacodec",  HWDEC_MEDIACODEC},
     {"mediacodec-copy",HWDEC_MEDIACODEC_COPY},
     {"cuda",        HWDEC_CUDA},
@@ -181,6 +182,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
                         0, drm_validate_connector_opt),
     OPT_INT("drm-mode", drm_mode_id, 0),
+    OPT_INT("drm-overlay", drm_overlay_id, 0),
 #endif
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
                         ra_hwdec_validate_opt),

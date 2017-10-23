@@ -593,6 +593,11 @@ video_output_features = [
         'deps': 'vt.h',
         'func': check_pkg_config('libdrm'),
     }, {
+        'name': '--drmprime',
+        'desc': 'DRM Prime ffmpeg support',
+        'func': check_statement('libavutil/pixfmt.h',
+                                'int i = AV_PIX_FMT_DRM_PRIME')
+    }, {
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',

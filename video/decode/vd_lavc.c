@@ -151,6 +151,12 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rpi_copy = {
 };
 #endif
 
+static const struct vd_lavc_hwdec mp_vd_lavc_rkmpp = {
+    .type = HWDEC_RKMPP,
+    .lavc_suffix = "_rkmpp",
+    .image_format = IMGFMT_DRMPRIME,
+};
+
 #if HAVE_CUDA_HWACCEL
 static const struct vd_lavc_hwdec mp_vd_lavc_cuda = {
     .type = HWDEC_CUDA,
@@ -270,6 +276,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_cuda_copy,
 #endif
     &mp_vd_lavc_crystalhd,
+    &mp_vd_lavc_rkmpp,
     NULL
 };
 
