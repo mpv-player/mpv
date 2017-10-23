@@ -347,8 +347,9 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     }
 
     MP_VERBOSE(ctx, "Initializing KMS\n");
-    p->kms = kms_create(ctx->log, ctx->vo->opts->drm_connector_spec,
-                        ctx->vo->opts->drm_mode_id, ctx->vo->opts->drm_overlay_id);
+    p->kms = kms_create(ctx->log, ctx->vo->opts->drm_opts->drm_connector_spec,
+                        ctx->vo->opts->drm_opts->drm_mode_id,
+                        ctx->vo->opts->drm_opts->drm_overlay_id);
     if (!p->kms) {
         MP_ERR(ctx, "Failed to create KMS.\n");
         return false;

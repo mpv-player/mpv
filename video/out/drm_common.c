@@ -41,6 +41,18 @@
 
 static int vt_switcher_pipe[2];
 
+#define OPT_BASE_STRUCT struct drm_opts
+const struct m_sub_options drm_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
+                            0, drm_validate_connector_opt),
+        OPT_INT("drm-mode", drm_mode_id, 0),
+        OPT_INT("drm-overlay", drm_overlay_id, 0),
+        {0},
+    },
+    .size = sizeof(struct drm_opts),
+};
+
 static const char *connector_names[] = {
     "Unknown",   // DRM_MODE_CONNECTOR_Unknown
     "VGA",       // DRM_MODE_CONNECTOR_VGA
