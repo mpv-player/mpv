@@ -236,7 +236,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
         }
 
         // Otherwise, warn the user and generate the profile as usual
-        MP_WARN(p, "Video contained an invalid ICC profile! Ignoring..\n");
+        MP_WARN(p, "Video contained an invalid ICC profile! Ignoring...\n");
     }
 
     // The input profile for the transformation is dependent on the video

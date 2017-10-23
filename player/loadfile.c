@@ -895,7 +895,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
             if (done) {
                 MP_VERBOSE(mpctx, "Dropping finished prefetch of wrong URL.\n");
             } else {
-                MP_VERBOSE(mpctx, "Aborting onging prefetch of wrong URL.\n");
+                MP_VERBOSE(mpctx, "Aborting ongoing prefetch of wrong URL.\n");
             }
             cancel_open(mpctx);
         }
@@ -1060,7 +1060,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
     {
         if (mpctx->vo_chain) {
             if (mpctx->vo_chain->video_src) {
-                MP_ERR(mpctx, "Pad vo tries to connected to already used VO.\n");
+                MP_ERR(mpctx, "Pad vo tries to connect to already used VO.\n");
                 goto done;
             }
         } else {
@@ -1080,7 +1080,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
     {
         if (mpctx->ao_chain) {
             if (mpctx->ao_chain->audio_src) {
-                MP_ERR(mpctx, "Pad ao tries to connected to already used AO.\n");
+                MP_ERR(mpctx, "Pad ao tries to connect to already used AO.\n");
                 goto done;
             }
         } else {

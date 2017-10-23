@@ -325,7 +325,7 @@ static bool configure_lavrr(struct mp_aconverter *p, bool verbose)
     p->is_resampling = false;
 
     if (avresample_open(p->avrctx) < 0 || avresample_open(p->avrctx_out) < 0) {
-        MP_ERR(p, "Cannot open Libavresample Context. \n");
+        MP_ERR(p, "Cannot open Libavresample context.\n");
         goto error;
     }
     return true;

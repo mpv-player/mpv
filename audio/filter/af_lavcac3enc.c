@@ -400,7 +400,7 @@ static int af_open(struct af_instance* af){
             }
         }
         if (i >= 19) {
-            MP_WARN(af, "unable set unsupported bitrate %d, use default "
+            MP_WARN(af, "unable set unsupported bitrate %d, using default "
                     "bitrate (check manpage to see supported bitrates).\n",
                     s->cfg_bit_rate);
         }
