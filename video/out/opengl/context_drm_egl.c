@@ -119,7 +119,7 @@ static bool init_gbm(struct ra_ctx *ctx)
         p->gbm.device,
         p->kms->mode.hdisplay,
         p->kms->mode.vdisplay,
-        GBM_BO_FORMAT_XRGB8888,
+        GBM_FORMAT_XRGB8888,
         GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     if (!p->gbm.surface) {
         MP_ERR(ctx->vo, "Failed to create GBM surface.\n");
@@ -153,7 +153,7 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
     uint32_t handle = gbm_bo_get_handle(bo).u32;
 
     int ret = drmModeAddFB(fb->fd, fb->width, fb->height,
-                           24, 32, stride, handle, &fb->id);
+                           32, 32, stride, handle, &fb->id);
     if (ret) {
         MP_ERR(ctx->vo, "Failed to create framebuffer: %s\n", mp_strerror(errno));
     }
