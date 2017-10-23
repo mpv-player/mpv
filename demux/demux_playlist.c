@@ -221,7 +221,7 @@ static int parse_txt(struct pl_parser *p)
 
 static bool same_st(struct stat *st1, struct stat *st2)
 {
-    return HAVE_POSIX && st1->st_dev == st2->st_dev && st1->st_ino == st2->st_ino;
+    return st1->st_dev == st2->st_dev && st1->st_ino == st2->st_ino;
 }
 
 // Return true if this was a readable directory.

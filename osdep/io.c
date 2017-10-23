@@ -141,37 +141,154 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <fcntl.h>
 #include <pthread.h>
 
-static void copy_stat(struct mp_stat *dst, struct _stat64 *src)
+static void set_errno_from_lasterror(void)
 {
-    dst->st_dev = src->st_dev;
-    dst->st_ino = src->st_ino;
-    dst->st_mode = src->st_mode;
-    dst->st_nlink = src->st_nlink;
-    dst->st_uid = src->st_uid;
-    dst->st_gid = src->st_gid;
-    dst->st_rdev = src->st_rdev;
-    dst->st_size = src->st_size;
-    dst->st_atime = src->st_atime;
-    dst->st_mtime = src->st_mtime;
-    dst->st_ctime = src->st_ctime;
+    // This just handles the error codes expected from CreateFile at the moment
+    switch (GetLastError()) {
+    case ERROR_FILE_NOT_FOUND:
+        errno = ENOENT;
+        break;
+    case ERROR_SHARING_VIOLATION:
+    case ERROR_ACCESS_DENIED:
+        errno = EACCES;
+        break;
+    case ERROR_FILE_EXISTS:
+    case ERROR_ALREADY_EXISTS:
+        errno = EEXIST;
+        break;
+    case ERROR_PIPE_BUSY:
+        errno = EAGAIN;
+        break;
+    default:
+        errno = EINVAL;
+        break;
+    }
+}
+
+static time_t filetime_to_unix_time(int64_t wintime)
+{
+    static const int64_t hns_per_second = 10000000ll;
+    static const int64_t win_to_unix_epoch = 11644473600ll;
+    return wintime / hns_per_second - win_to_unix_epoch;
+}
+
+static bool get_file_ids_win8(HANDLE h, dev_t *dev, ino_t *ino)
+{
+    FILE_ID_INFO ii;
+    if (!GetFileInformationByHandleEx(h, FileIdInfo, &ii, sizeof(ii)))
+        return false;
+    *dev = ii.VolumeSerialNumber;
+    // The definition of FILE_ID_128 differs between mingw-w64 and the Windows
+    // SDK, but we can ignore that by just memcpying it. This will also
+    // truncate the file ID on 32-bit Windows, which doesn't support __int128.
+    // 128-bit file IDs are only used for ReFS, so that should be okay.
+    assert(sizeof(*ino) <= sizeof(ii.FileId));
+    memcpy(ino, &ii.FileId, sizeof(*ino));
+    return true;
+}
+
+#if HAVE_UWP
+static bool get_file_ids(HANDLE h, dev_t *dev, ino_t *ino)
+{
+    return false;
+}
+#else
+static bool get_file_ids(HANDLE h, dev_t *dev, ino_t *ino)
+{
+    // GetFileInformationByHandle works on FAT partitions and Windows 7, but
+    // doesn't work in UWP and can produce non-unique IDs on ReFS
+    BY_HANDLE_FILE_INFORMATION bhfi;
+    if (!GetFileInformationByHandle(h, &bhfi))
+        return false;
+    *dev = bhfi.dwVolumeSerialNumber;
+    *ino = ((ino_t)bhfi.nFileIndexHigh << 32) | bhfi.nFileIndexLow;
+    return true;
+}
+#endif
+
+// Like fstat(), but with a Windows HANDLE
+static int hstat(HANDLE h, struct mp_stat *buf)
+{
+    // Handle special (or unknown) file types first
+    switch (GetFileType(h) & ~FILE_TYPE_REMOTE) {
+    case FILE_TYPE_PIPE:
+        *buf = (struct mp_stat){ .st_nlink = 1, .st_mode = _S_IFIFO | 0644 };
+        return 0;
+    case FILE_TYPE_CHAR: // character device
+        *buf = (struct mp_stat){ .st_nlink = 1, .st_mode = _S_IFCHR | 0644 };
+        return 0;
+    case FILE_TYPE_UNKNOWN:
+        errno = EBADF;
+        return -1;
+    }
+
+    struct mp_stat st = { 0 };
+
+    FILE_BASIC_INFO bi;
+    if (!GetFileInformationByHandleEx(h, FileBasicInfo, &bi, sizeof(bi))) {
+        errno = EBADF;
+        return -1;
+    }
+    st.st_atime = filetime_to_unix_time(bi.LastAccessTime.QuadPart);
+    st.st_mtime = filetime_to_unix_time(bi.LastWriteTime.QuadPart);
+    st.st_ctime = filetime_to_unix_time(bi.ChangeTime.QuadPart);
+
+    FILE_STANDARD_INFO si;
+    if (!GetFileInformationByHandleEx(h, FileStandardInfo, &si, sizeof(si))) {
+        errno = EBADF;
+        return -1;
+    }
+    st.st_nlink = si.NumberOfLinks;
+
+    // Here we pretend Windows has POSIX permissions by pretending all
+    // directories are 755 and regular files are 644
+    if (si.Directory) {
+        st.st_mode |= _S_IFDIR | 0755;
+    } else {
+        st.st_mode |= _S_IFREG | 0644;
+        st.st_size = si.EndOfFile.QuadPart;
+    }
+
+    if (!get_file_ids_win8(h, &st.st_dev, &st.st_ino)) {
+        // Fall back to the Windows 7 method (also used for FAT in Win8)
+        if (!get_file_ids(h, &st.st_dev, &st.st_ino)) {
+            errno = EBADF;
+            return -1;
+        }
+    }
+
+    *buf = st;
+    return 0;
 }
 
 int mp_stat(const char *path, struct mp_stat *buf)
 {
-    struct _stat64 buf_;
     wchar_t *wpath = mp_from_utf8(NULL, path);
-    int res = _wstat64(wpath, &buf_);
+    HANDLE h = CreateFileW(wpath, FILE_READ_ATTRIBUTES,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
+        OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | SECURITY_SQOS_PRESENT |
+        SECURITY_IDENTIFICATION, NULL);
     talloc_free(wpath);
-    copy_stat(buf, &buf_);
-    return res;
+    if (h == INVALID_HANDLE_VALUE) {
+        set_errno_from_lasterror();
+        return -1;
+    }
+
+    int ret = hstat(h, buf);
+    CloseHandle(h);
+    return ret;
 }
 
 int mp_fstat(int fd, struct mp_stat *buf)
 {
-    struct _stat64 buf_;
-    int res = _fstat64(fd, &buf_);
-    copy_stat(buf, &buf_);
-    return res;
+    HANDLE h = (HANDLE)_get_osfhandle(fd);
+    if (h == INVALID_HANDLE_VALUE) {
+        errno = EBADF;
+        return -1;
+    }
+    // Use mpv's hstat() function rather than MSVCRT's fstat() because mpv's
+    // supports directories and device/inode numbers.
+    return hstat(h, buf);
 }
 
 #if HAVE_UWP
@@ -255,31 +372,161 @@ int mp_printf(const char *format, ...)
 
 int mp_open(const char *filename, int oflag, ...)
 {
-    int mode = 0;
-    if (oflag & _O_CREAT) {
-        va_list va;
-        va_start(va, oflag);
-        mode = va_arg(va, int);
-        va_end(va);
+    // Always use all share modes, which is useful for opening files that are
+    // open in other processes, and also more POSIX-like
+    static const DWORD share =
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+    // Setting FILE_APPEND_DATA and avoiding GENERIC_WRITE/FILE_WRITE_DATA
+    // will make the file handle use atomic append behavior
+    static const DWORD append =
+        FILE_APPEND_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA;
+
+    DWORD access = 0;
+    DWORD disposition = 0;
+    DWORD flags = 0;
+
+    switch (oflag & (_O_RDONLY | _O_RDWR | _O_WRONLY | _O_APPEND)) {
+    case _O_RDONLY:
+        access = GENERIC_READ;
+        flags |= FILE_FLAG_BACKUP_SEMANTICS; // For opening directories
+        break;
+    case _O_RDWR:
+        access = GENERIC_READ | GENERIC_WRITE;
+        break;
+    case _O_RDWR | _O_APPEND:
+    case _O_RDONLY | _O_APPEND:
+        access = GENERIC_READ | append;
+        break;
+    case _O_WRONLY:
+        access = GENERIC_WRITE;
+        break;
+    case _O_WRONLY | _O_APPEND:
+        access = append;
+        break;
+    default:
+        errno = EINVAL;
+        return -1;
     }
+
+    switch (oflag & (_O_CREAT | _O_EXCL | _O_TRUNC)) {
+    case 0:
+    case _O_EXCL: // Like MSVCRT, ignore invalid use of _O_EXCL
+        disposition = OPEN_EXISTING;
+        break;
+    case _O_TRUNC:
+    case _O_TRUNC | _O_EXCL:
+        disposition = TRUNCATE_EXISTING;
+        break;
+    case _O_CREAT:
+        disposition = OPEN_ALWAYS;
+        flags |= FILE_ATTRIBUTE_NORMAL;
+        break;
+    case _O_CREAT | _O_TRUNC:
+        disposition = CREATE_ALWAYS;
+        break;
+    case _O_CREAT | _O_EXCL:
+    case _O_CREAT | _O_EXCL | _O_TRUNC:
+        disposition = CREATE_NEW;
+        flags |= FILE_ATTRIBUTE_NORMAL;
+        break;
+    }
+
+    // Opening a named pipe as a file can allow the pipe server to impersonate
+    // mpv's process, which could be a security issue. Set SQOS flags, so pipe
+    // servers can only identify the mpv process, not impersonate it.
+    if (disposition != CREATE_NEW)
+        flags |= SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION;
+
+    // Keep the same semantics for some MSVCRT-specific flags
+    if (oflag & _O_TEMPORARY) {
+        flags |= FILE_FLAG_DELETE_ON_CLOSE;
+        access |= DELETE;
+    }
+    if (oflag & _O_SHORT_LIVED)
+        flags |= FILE_ATTRIBUTE_TEMPORARY;
+    if (oflag & _O_SEQUENTIAL) {
+        flags |= FILE_FLAG_SEQUENTIAL_SCAN;
+    } else if (oflag & _O_RANDOM) {
+        flags |= FILE_FLAG_RANDOM_ACCESS;
+    }
+
+    // Open the Windows file handle
     wchar_t *wpath = mp_from_utf8(NULL, filename);
-    int res = _wopen(wpath, oflag, mode);
+    HANDLE h = CreateFileW(wpath, access, share, NULL, disposition, flags, NULL);
     talloc_free(wpath);
-    return res;
+    if (h == INVALID_HANDLE_VALUE) {
+        set_errno_from_lasterror();
+        return -1;
+    }
+
+    // Map the Windows file handle to a CRT file descriptor. Note: MSVCRT only
+    // cares about the following oflags.
+    oflag &= _O_APPEND | _O_RDONLY | _O_RDWR | _O_WRONLY;
+    oflag |= _O_NOINHERIT; // We never create inheritable handles
+    int fd = _open_osfhandle((intptr_t)h, oflag);
+    if (fd < 0) {
+        CloseHandle(h);
+        return -1;
+    }
+
+    return fd;
 }
 
 int mp_creat(const char *filename, int mode)
 {
-    return open(filename, O_CREAT|O_WRONLY|O_TRUNC, mode);
+    return mp_open(filename, _O_CREAT | _O_WRONLY | _O_TRUNC, mode);
 }
 
 FILE *mp_fopen(const char *filename, const char *mode)
 {
-    wchar_t *wpath = mp_from_utf8(NULL, filename);
-    wchar_t *wmode = mp_from_utf8(wpath, mode);
-    FILE *res = _wfopen(wpath, wmode);
-    talloc_free(wpath);
-    return res;
+    if (!mode[0]) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    int rwmode;
+    int oflags = 0;
+    switch (mode[0]) {
+    case 'r':
+        rwmode = _O_RDONLY;
+        break;
+    case 'w':
+        rwmode = _O_WRONLY;
+        oflags |= _O_CREAT | _O_TRUNC;
+        break;
+    case 'a':
+        rwmode = _O_WRONLY;
+        oflags |= _O_CREAT | _O_APPEND;
+        break;
+    default:
+        errno = EINVAL;
+        return NULL;
+    }
+
+    // Parse extra mode flags
+    for (const char *pos = mode + 1; *pos; pos++) {
+        switch (*pos) {
+        case '+': rwmode = _O_RDWR;  break;
+        case 'x': oflags |= _O_EXCL; break;
+        // Ignore unknown flags (glibc does too)
+        default: break;
+        }
+    }
+
+    // Open a CRT file descriptor
+    int fd = mp_open(filename, rwmode | oflags);
+    if (fd < 0)
+        return NULL;
+
+    // Add 'b' to the mode so the CRT knows the file is opened in binary mode
+    char bmode[] = { mode[0], 'b', rwmode == _O_RDWR ? '+' : '\0', '\0' };
+    FILE *fp = fdopen(fd, bmode);
+    if (!fp) {
+        close(fd);
+        return NULL;
+    }
+
+    return fp;
 }
 
 // Windows' MAX_PATH/PATH_MAX/FILENAME_MAX is fixed to 260, but this limit

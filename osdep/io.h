@@ -107,15 +107,25 @@ FILE *mp_tmpfile(void);
 char *mp_getenv(const char *name);
 off_t mp_lseek(int fd, off_t offset, int whence);
 
-// MinGW-w64 will define "stat" to something useless. Since this affects both
-// the type (struct stat) and the stat() function, it makes us harder to
-// override these separately.
-// Corresponds to struct _stat64 (copy & pasted, but using public types).
+// mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
+typedef uint64_t mp_dev_t_;
+#ifdef _WIN64
+typedef unsigned __int128 mp_ino_t_;
+#else
+// 32-bit Windows doesn't have a __int128-type, which means ReFS file IDs will
+// be truncated and might collide. This is probably not a problem because ReFS
+// is not available in consumer versions of Windows.
+typedef uint64_t mp_ino_t_;
+#endif
+#define dev_t mp_dev_t_
+#define ino_t mp_ino_t_
+
+// mp_stat uses a different structure to MSVCRT, with 64-bit inodes
 struct mp_stat {
     dev_t st_dev;
     ino_t st_ino;
     unsigned short st_mode;
-    short st_nlink;
+    unsigned int st_nlink;
     short st_uid;
     short st_gid;
     dev_t st_rdev;
