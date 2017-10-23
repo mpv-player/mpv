@@ -1946,8 +1946,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 // DTS or PTS, while ts_min should be as accurate as possible, as
                 // we would have to trigger a real seek if it's off and we seeked
                 // there)
-                r->ts_max = MP_PTS_MAX(r->ts_max, ds->last_ts);
                 r->ts_min = MP_PTS_MAX(r->ts_min, ds->back_pts);
+                r->ts_max = MP_PTS_MAX(r->ts_max, ds->last_ts);
                 if (ds->queue_head) {
                     double ts = PTS_OR_DEF(ds->queue_head->dts,
                                            ds->queue_head->pts);
@@ -1957,13 +1957,15 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
         r->underrun &= !r->idle;
-        if (in->seeking)
-            r->ts_max = r->ts_min = MP_NOPTS_VALUE;
         r->ts_start = MP_ADD_PTS(r->ts_start, in->ts_offset);
         r->ts_min = MP_ADD_PTS(r->ts_min, in->ts_offset);
         r->ts_max = MP_ADD_PTS(r->ts_max, in->ts_offset);
         if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_max)
             r->ts_duration = r->ts_max - r->ts_reader;
+        if (in->seeking) {
+            r->ts_max = r->ts_min = MP_NOPTS_VALUE;
+            r->ts_duration = 0;
+        }
         return CONTROL_OK;
     }
     }
