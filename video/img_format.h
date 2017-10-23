@@ -204,6 +204,7 @@ enum mp_imgfmt {
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
     IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
     IMGFMT_MEDIACODEC,      // AVMediaCodecBuffer
+    IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
 
     IMGFMT_CUDA,            // CUDA Buffer
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have

@@ -504,6 +504,11 @@ Available video output drivers are:
         Mode ID to use (resolution, bit depth and frame rate).
         (default: 0)
 
+    ``--drm-overlay=<number>``
+        Select the DRM overlay index to use.
+        Overlay index is zero based, and related to crtc.
+        (default: 0)
+
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
     Requires ``--hwdec=mediacodec`` for hardware decoding, along with

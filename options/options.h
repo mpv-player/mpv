@@ -57,6 +57,7 @@ typedef struct mp_vo_opts {
     // vo_drm
     char *drm_connector_spec;
     int drm_mode_id;
+    int drm_overlay_id;
 } mp_vo_opts;
 
 struct mp_cache_opts {

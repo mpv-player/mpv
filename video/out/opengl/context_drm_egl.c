@@ -28,6 +28,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "libmpv/opengl_cb.h"
 #include "video/out/drm_common.h"
 #include "common/common.h"
 
@@ -75,6 +76,8 @@ struct priv {
 
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
+
+    struct mpv_opengl_cb_drm_params drm_params;
 };
 
 static bool init_egl(struct ra_ctx *ctx)
@@ -161,13 +164,6 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
     p->fb = fb;
 }
 
-static void page_flipped(int fd, unsigned int frame, unsigned int sec,
-                         unsigned int usec, void *data)
-{
-    struct priv *p = data;
-    p->waiting_for_flip = false;
-}
-
 static bool crtc_setup(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -241,17 +237,47 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
+static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
+{
+    struct priv *p = sw->ctx->priv;
+    if (p->kms->atomic_context) {
+        p->kms->atomic_context->request = drmModeAtomicAlloc();
+        p->drm_params.atomic_request = p->kms->atomic_context->request;
+        return ra_gl_ctx_start_frame(sw, out_fbo);
+    }
+    return false;
+}
+
+static const struct ra_swapchain_fns drm_atomic_swapchain = {
+    .start_frame   = drm_atomic_egl_start_frame,
+};
+
 static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
+    int ret;
+
     eglSwapBuffers(p->egl.display, p->egl.surface);
     p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
     p->waiting_for_flip = true;
     update_framebuffer_from_bo(ctx, p->gbm.next_bo);
-    int ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
-                              DRM_MODE_PAGE_FLIP_EVENT, p);
-    if (ret) {
-        MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
+
+    if (atomic_ctx) {
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "FB_ID", p->fb->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "CRTC_ID", atomic_ctx->crtc->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "ZPOS", 1);
+
+        ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
+                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, NULL);
+        if (ret)
+            MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
+    } else {
+        ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
+                                  DRM_MODE_PAGE_FLIP_EVENT, p);
+        if (ret) {
+            MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
+        }
     }
 
     // poll page flip finish event
@@ -262,8 +288,15 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         ret = drmHandleEvent(p->kms->fd, &p->ev);
         if (ret != 0) {
             MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+            p->waiting_for_flip = false;
             return;
         }
+    }
+    p->waiting_for_flip = false;
+
+    if (atomic_ctx) {
+        drmModeAtomicFree(atomic_ctx->request);
+        p->drm_params.atomic_request = atomic_ctx->request = NULL;
     }
 
     gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
@@ -304,7 +337,6 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
-    p->ev.page_flip_handler = page_flipped;
 
     p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log);
     if (p->vt_switcher_active) {
@@ -316,9 +348,9 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     MP_VERBOSE(ctx, "Initializing KMS\n");
     p->kms = kms_create(ctx->log, ctx->vo->opts->drm_connector_spec,
-                        ctx->vo->opts->drm_mode_id);
+                        ctx->vo->opts->drm_mode_id, ctx->vo->opts->drm_overlay_id);
     if (!p->kms) {
-        MP_ERR(ctx->vo, "Failed to create KMS.\n");
+        MP_ERR(ctx, "Failed to create KMS.\n");
         return false;
     }
 
@@ -360,10 +392,15 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         return false;
     }
 
+    p->drm_params.fd = p->kms->fd;
+    p->drm_params.crtc_id = p->kms->crtc_id;
+    p->drm_params.atomic_request = p->kms->atomic_context->request;
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
-        .native_display_type = "drm",
-        .native_display = (void *)(intptr_t)p->kms->fd,
+        .native_display_type = "opengl-cb-drm-params",
+        .native_display = &p->drm_params,
+        .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
+                                                       NULL,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
