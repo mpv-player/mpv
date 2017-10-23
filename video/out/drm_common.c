@@ -41,6 +41,18 @@
 
 static int vt_switcher_pipe[2];
 
+#define OPT_BASE_STRUCT struct drm_opts
+const struct m_sub_options drm_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
+                            0, drm_validate_connector_opt),
+        OPT_INT("drm-mode", drm_mode_id, 0),
+        OPT_INT("drm-overlay", drm_overlay_id, 0),
+        {0},
+    },
+    .size = sizeof(struct drm_opts),
+};
+
 static const char *connector_names[] = {
     "Unknown",   // DRM_MODE_CONNECTOR_Unknown
     "VGA",       // DRM_MODE_CONNECTOR_VGA
@@ -222,7 +234,7 @@ static void parse_connector_spec(struct mp_log *log,
 
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id)
+                       int mode_id, int overlay_id)
 {
     int card_no = -1;
     char *connector_name = NULL;
@@ -260,6 +272,23 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
     if (!setup_mode(kms, mode_id))
         goto err;
 
+    // Universal planes allows accessing all the planes (including primary)
+    if (drmSetClientCap(kms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)) {
+        mp_err(log, "Failed to set Universal planes capability\n");
+    }
+
+    if (drmSetClientCap(kms->fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
+        mp_verbose(log, "No DRM Atomic support found\n");
+    } else {
+        mp_verbose(log, "DRM Atomic support found\n");
+        kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id, overlay_id);
+        if (!kms->atomic_context) {
+            mp_err(log, "Failed to create DRM atomic context\n");
+            goto err;
+        }
+    }
+
+
     drmModeFreeResources(res);
     return kms;
 
@@ -284,6 +313,10 @@ void kms_destroy(struct kms *kms)
         drmModeFreeEncoder(kms->encoder);
         kms->encoder = NULL;
     }
+    if (kms->atomic_context) {
+       drm_atomic_destroy_context(kms->atomic_context);
+    }
+
     close(kms->fd);
     talloc_free(kms);
 }
