@@ -215,6 +215,7 @@ struct demux_stream {
     size_t last_br_bytes;   // summed packet sizes since last bitrate calculation
     double bitrate;
     struct demux_packet *reader_head;   // points at current decoder position
+    bool skip_to_keyframe;
     bool attached_picture_added;
 
     // for closed captions (demuxer_feed_caption)
@@ -242,6 +243,7 @@ static void ds_clear_reader_state(struct demux_stream *ds)
     ds->base_ts = ds->last_br_ts = MP_NOPTS_VALUE;
     ds->last_br_bytes = 0;
     ds->bitrate = -1;
+    ds->skip_to_keyframe = false;
     ds->attached_picture_added = false;
 }
 
@@ -621,8 +623,10 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     }
     // (keep in mind that even if the reader went out of data, the queue is not
     // necessarily empty due to the backbuffer)
-    if (!ds->reader_head)
+    if (!ds->reader_head && (!ds->skip_to_keyframe || dp->keyframe)) {
         ds->reader_head = dp;
+        ds->skip_to_keyframe = false;
+    }
 
     // (In theory it'd be more efficient to make this incremental.)
     if (ds->back_pts == MP_NOPTS_VALUE && dp->keyframe)
@@ -650,7 +654,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
            dp->len, dp->pts, dp->dts, dp->pos, ds->fw_packs, ds->fw_bytes);
 
     // Wake up if this was the first packet after start/possible underrun.
-    if (ds->in->wakeup_cb && !ds->reader_head->next)
+    if (ds->in->wakeup_cb && ds->reader_head && !ds->reader_head->next)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
@@ -1609,8 +1613,11 @@ static struct demux_packet *find_seek_target(struct demux_stream *ds,
             continue;
 
         double diff = range_pts - pts;
-        if (flags & SEEK_FORWARD)
+        if (flags & SEEK_FORWARD) {
             diff = -diff;
+            if (diff > 0)
+                continue;
+        }
         if (target_diff != MP_NOPTS_VALUE) {
             if (diff <= 0) {
                 if (target_diff <= 0 && diff <= target_diff)
@@ -1684,6 +1691,7 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
 
         struct demux_packet *target = find_seek_target(ds, pts, flags);
         ds->reader_head = target;
+        ds->skip_to_keyframe = !target;
         recompute_buffers(ds);
 
         MP_VERBOSE(in, "seeking stream %d (%s) to ",
