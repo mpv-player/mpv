@@ -70,6 +70,7 @@ extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
 extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options sws_conf;
+extern const struct m_sub_options drm_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_lavf_conf;
@@ -179,10 +180,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
 #endif
 #if HAVE_DRM
-    OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
-                        0, drm_validate_connector_opt),
-    OPT_INT("drm-mode", drm_mode_id, 0),
-    OPT_INT("drm-overlay", drm_overlay_id, 0),
+    OPT_SUBSTRUCT("", drm_opts, drm_conf, 0),
 #endif
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
                         ra_hwdec_validate_opt),

@@ -42,6 +42,12 @@ struct vt_switcher {
     void *handler_data[2];
 };
 
+struct drm_opts {
+    char *drm_connector_spec;
+    int drm_mode_id;
+    int drm_overlay_id;
+};
+
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
 void vt_switcher_destroy(struct vt_switcher *s);
 void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);

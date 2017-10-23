@@ -37,6 +37,8 @@
 
 #include "ra_gl.h"
 
+extern const struct m_sub_options drm_conf;
+
 struct drm_frame {
     struct drm_prime_framebuffer fb;
     struct mp_image *image; // associated mpv image
@@ -202,7 +204,10 @@ static int init(struct ra_hwdec *hw)
 
     p->log = hw->log;
 
-    mp_read_option_raw(hw->global, "drm-overlay", &m_option_type_int, &drm_overlay);
+    void *tmp = talloc_new(NULL);
+    struct drm_opts *opts = mp_get_config_group(tmp, hw->global, &drm_conf);
+    drm_overlay = opts->drm_overlay_id;
+    talloc_free(tmp);
 
     GL *gl = ra_gl_get(hw->ra);
     struct mpv_opengl_cb_drm_params *params =
