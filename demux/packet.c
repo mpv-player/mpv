@@ -112,6 +112,7 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->start = src->start;
     dst->end = src->end;
     dst->new_segment = src->new_segment;
+    dst->codec = src->codec;
     dst->keyframe = src->keyframe;
     dst->stream = src->stream;
 }
