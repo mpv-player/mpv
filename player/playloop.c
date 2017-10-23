@@ -277,14 +277,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         hr_seek_very_exact = true;
         break;
     case MPSEEK_RELATIVE:
-        demux_flags = seek.amount > 0 ? SEEK_FORWARD : SEEK_BACKWARD;
+        demux_flags = seek.amount > 0 ? SEEK_FORWARD : 0;
         seek_pts = current_time + seek.amount;
         break;
     case MPSEEK_FACTOR: ;
         double len = get_time_length(mpctx);
         if (len >= 0)
             seek_pts = seek.amount * len;
-        demux_flags = SEEK_BACKWARD;
         break;
     default: abort();
     }
@@ -323,7 +322,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             hr_seek_offset = MPMAX(hr_seek_offset, -offset);
         }
         demux_pts -= hr_seek_offset;
-        demux_flags = (demux_flags | SEEK_HR | SEEK_BACKWARD) & ~SEEK_FORWARD;
+        demux_flags = (demux_flags | SEEK_HR) & ~SEEK_FORWARD;
     }
 
     demux_seek(mpctx->demuxer, demux_pts, demux_flags);

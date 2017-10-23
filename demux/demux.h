@@ -47,7 +47,7 @@ struct demux_ctrl_reader_state {
     double ts_start; // approx. timestamp for the earliest packet buffered
     double ts_min; // timestamp of the earliest packet in backward cache
                    // that can be seeked to (i.e. all streams have such
-                   // a packet for which SEEK_BACKWARD can be executed)
+                   // a packet for which normal seeks can be executed)
     double ts_max; // timestamp of latest packet in forward cache that can be
                    // seeked to
 };
@@ -60,7 +60,7 @@ struct demux_ctrl_stream_ctrl {
 
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
 #define SEEK_FORWARD  (1 << 2)      // prefer later time if not exact
-#define SEEK_BACKWARD (1 << 3)      // prefer earlier time if not exact
+                                    // (if unset, prefer earlier time)
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
 
 // Strictness of the demuxer open format check.

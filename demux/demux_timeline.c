@@ -179,8 +179,8 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
 {
     struct priv *p = demuxer->priv;
 
-    if (!(flags & (SEEK_FORWARD | SEEK_BACKWARD)))
-        flags |= SEEK_BACKWARD | SEEK_HR;
+    if (!(flags & SEEK_FORWARD))
+        flags |= SEEK_HR;
 
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
 
@@ -209,7 +209,7 @@ static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
 
     double pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
 
-    flags &= SEEK_FORWARD | SEEK_BACKWARD | SEEK_HR;
+    flags &= SEEK_FORWARD | SEEK_HR;
 
     struct segment *new = p->segments[p->num_segments - 1];
     for (int n = 0; n < p->num_segments; n++) {

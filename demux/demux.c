@@ -721,7 +721,7 @@ static bool read_packet(struct demux_internal *in)
 
     if (refresh_seek) {
         MP_VERBOSE(in, "refresh seek to %f\n", seek_pts);
-        demux->desc->seek(demux, seek_pts, SEEK_BACKWARD | SEEK_HR);
+        demux->desc->seek(demux, seek_pts, SEEK_HR);
     }
 
     bool eof = true;
@@ -1608,8 +1608,8 @@ static struct demux_packet *find_seek_target(struct demux_stream *ds,
         if (range_pts == MP_NOPTS_VALUE)
             continue;
 
-        double diff = pts - range_pts;
-        if (flags & SEEK_BACKWARD)
+        double diff = range_pts - pts;
+        if (flags & SEEK_FORWARD)
             diff = -diff;
         if (target_diff != MP_NOPTS_VALUE) {
             if (diff <= 0) {
@@ -1671,8 +1671,7 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
                         // (We assume the find_seek_target() will return the
                         // same target for the video stream.)
                         pts = target_pts;
-                        flags &= SEEK_FORWARD;
-                        flags |= SEEK_BACKWARD;
+                        flags &= ~SEEK_FORWARD;
                     }
                 }
                 break;
@@ -1712,9 +1711,6 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
 
     if (seek_pts == MP_NOPTS_VALUE)
         return 0;
-
-    if (!(flags & SEEK_FORWARD))
-        flags |= SEEK_BACKWARD;
 
     pthread_mutex_lock(&in->lock);
 
@@ -1949,7 +1945,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 // new packets if we seek there and also last_ts is the hightest
                 // DTS or PTS, while ts_min should be as accurate as possible, as
                 // we would have to trigger a real seek if it's off and we seeked
-                // there with SEEK_BACKWARD)
+                // there)
                 r->ts_max = MP_PTS_MAX(r->ts_max, ds->last_ts);
                 r->ts_min = MP_PTS_MAX(r->ts_min, ds->back_pts);
                 if (ds->queue_head) {

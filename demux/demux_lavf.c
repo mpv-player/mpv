@@ -1014,7 +1014,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     int avsflags = 0;
     int64_t seek_pts_av = 0;
 
-    if (flags & SEEK_BACKWARD)
+    if (!(flags & SEEK_FORWARD))
         avsflags = AVSEEK_FLAG_BACKWARD;
 
     if (flags & SEEK_FACTOR) {
@@ -1031,7 +1031,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
             seek_pts_av = seek_pts * priv->avfc->duration;
         }
     } else {
-        if (flags & SEEK_BACKWARD)
+        if (!(flags & SEEK_FORWARD))
             seek_pts -= priv->seek_delay;
         seek_pts_av = seek_pts * AV_TIME_BASE;
     }
