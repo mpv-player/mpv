@@ -46,7 +46,6 @@ struct segment {
 struct virtual_stream {
     struct sh_stream *sh;       // stream exported by demux_timeline
     bool selected;              // ==demux_stream_is_selected(sh)
-    bool new_segment;           // whether a new segment needs to be signaled
     int eos_packets;            // deal with b-frame delay
 };
 
@@ -196,7 +195,6 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
 
     for (int n = 0; n < p->num_streams; n++) {
         struct virtual_stream *vs = p->streams[n];
-        vs->new_segment = true;
         vs->eos_packets = 0;
     }
 
@@ -307,10 +305,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
     }
 
-    if (!p->dash)
-        pkt->new_segment |= vs->new_segment;
-    vs->new_segment = false;
-
+    pkt->segmented = true;
     demux_add_packet(vs->sh, pkt);
     return 1;
 

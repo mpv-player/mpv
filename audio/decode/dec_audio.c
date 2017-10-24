@@ -196,6 +196,12 @@ static void fix_audio_pts(struct dec_audio *da)
         da->pts += mp_aframe_duration(da->current_frame);
 }
 
+static bool is_new_segment(struct dec_audio *da, struct demux_packet *p)
+{
+    return p->segmented &&
+        (p->start != da->start || p->end != da->end || p->codec != da->codec);
+}
+
 void audio_work(struct dec_audio *da)
 {
     if (da->current_frame || !da->ad_driver)
@@ -208,7 +214,7 @@ void audio_work(struct dec_audio *da)
         return;
     }
 
-    if (da->packet && da->packet->new_segment) {
+    if (da->packet && is_new_segment(da, da->packet)) {
         assert(!da->new_segment);
         da->new_segment = da->packet;
         da->packet = NULL;
@@ -259,8 +265,6 @@ void audio_work(struct dec_audio *da)
 
         da->start = new_segment->start;
         da->end = new_segment->end;
-
-        new_segment->new_segment = false;
 
         da->packet = new_segment;
         da->current_state = DATA_AGAIN;

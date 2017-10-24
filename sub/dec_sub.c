@@ -203,7 +203,7 @@ void sub_preload(struct dec_sub *sub)
 
 static bool is_new_segment(struct dec_sub *sub, struct demux_packet *p)
 {
-    return p->new_segment &&
+    return p->segmented &&
         (p->start != sub->start || p->end != sub->end || p->codec != sub->codec);
 }
 

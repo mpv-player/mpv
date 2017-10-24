@@ -390,6 +390,13 @@ void video_set_start(struct dec_video *d_video, double start_pts)
     d_video->start_pts = start_pts;
 }
 
+static bool is_new_segment(struct dec_video *d_video, struct demux_packet *p)
+{
+    return p->segmented &&
+        (p->start != d_video->start || p->end != d_video->end ||
+         p->codec != d_video->codec);
+}
+
 void video_work(struct dec_video *d_video)
 {
     if (d_video->current_mpi || !d_video->vd_driver)
@@ -402,7 +409,7 @@ void video_work(struct dec_video *d_video)
         return;
     }
 
-    if (d_video->packet && d_video->packet->new_segment) {
+    if (d_video->packet && is_new_segment(d_video, d_video->packet)) {
         assert(!d_video->new_segment);
         d_video->new_segment = d_video->packet;
         d_video->packet = NULL;
@@ -471,8 +478,6 @@ void video_work(struct dec_video *d_video)
 
         d_video->start = new_segment->start;
         d_video->end = new_segment->end;
-
-        new_segment->new_segment = false;
 
         d_video->packet = new_segment;
         d_video->current_state = DATA_AGAIN;
