@@ -557,17 +557,25 @@ static double get_refresh_seek_pts(struct demux_internal *in)
 // This function does not assume dp->keyframe==true, because it deals with weird
 // cases like apparently seeking to non-keyframes, or pruning the complete
 // backbuffer, which might end up with non-keyframes even at queue start.
+// The caller assumption is that the first frame decoded from this packet
+// position will result in a frame with the PTS returned from this function.
+// (For corner cases with non-key frames, assuming those packets are skipped.)
 static double recompute_keyframe_target_pts(struct demux_packet *dp)
 {
-    int keyframes = 0;
+    bool in_keyframe_range = false;
     double res = MP_NOPTS_VALUE;
     while (dp) {
-        if (dp->keyframe)
-            keyframes++;
-        if (keyframes == 2)
-            break;
-        if (keyframes == 1)
-            res = MP_PTS_MIN(res, dp->pts);
+        if (dp->keyframe) {
+            if (in_keyframe_range)
+                break;
+            in_keyframe_range = true;
+        }
+        if (in_keyframe_range) {
+            double ts = dp->pts;
+            if (dp->segmented && (ts < dp->start || ts > dp->end))
+                ts = MP_NOPTS_VALUE;
+            res = MP_PTS_MIN(res, ts);
+        }
         dp = dp->next;
     }
     return res;
@@ -1966,6 +1974,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                     double ts = PTS_OR_DEF(ds->queue_head->dts,
                                            ds->queue_head->pts);
                     r->ts_start = MP_PTS_MIN(r->ts_start, ts);
+                    if (ds->queue_tail->segmented)
+                        r->ts_max = MP_PTS_MIN(r->ts_max, ds->queue_tail->end);
                 }
             }
         }
