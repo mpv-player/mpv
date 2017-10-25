@@ -802,18 +802,36 @@ static void prune_old_packets(struct demux_internal *in)
         assert(earliest_stream >= 0); // incorrect accounting of "buffered"?
         struct demux_stream *ds = in->streams[earliest_stream]->ds;
 
+        ds->back_pts = MP_NOPTS_VALUE;
+
         // Prune all packets until the next keyframe or reader_head. Keeping
         // those packets would not help with seeking at all, so we strictly
         // drop them.
+        // In addition, we need to find the new possibly min. seek target,
+        // which in the worst case could be inside the forward buffer. The fact
+        // that many keyframe ranges without keyframes exist (audio packets)
+        // makes this much harder.
         // Note: might be pretty inefficient for streams with many small audio
-        // or subtitle packets. (All are keyframe and selection logic runs for
+        // or subtitle packets. (All are keyframes, and selection logic runs for
         // every packet.)
-        bool dropped_one = false;
-        while (ds->queue_head && ds->queue_head != ds->reader_head) {
+        struct demux_packet *next_seek_target = NULL;
+        for (struct demux_packet *dp = ds->queue_head; dp; dp = dp->next) {
+            // (Has to be _after_ queue_head to drop at least 1 packet.)
+            if (dp->keyframe && dp != ds->queue_head) {
+                next_seek_target = dp;
+                // Note that we set back_pts to this even if we leave some
+                // packets before it - it will still be only viable seek target.
+                ds->back_pts = recompute_keyframe_target_pts(dp);
+                if (ds->back_pts != MP_NOPTS_VALUE)
+                    break;
+            }
+        }
+
+        while (ds->queue_head && (ds->queue_head != ds->reader_head &&
+                                  ds->queue_head != next_seek_target))
+        {
             struct demux_packet *dp = ds->queue_head;
-            if (dp->keyframe && dropped_one)
-                break;
-            dropped_one = true;
+
             size_t bytes = demux_packet_estimate_total_size(dp);
             buffered -= bytes;
             MP_TRACE(in, "dropping backbuffer packet size %zd from stream %d\n",
@@ -825,8 +843,6 @@ static void prune_old_packets(struct demux_internal *in)
             talloc_free(dp);
             ds->bw_bytes -= bytes;
         }
-
-        ds->back_pts = recompute_keyframe_target_pts(ds->queue_head);
     }
 }
 
