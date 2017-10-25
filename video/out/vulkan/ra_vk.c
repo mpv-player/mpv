@@ -378,6 +378,7 @@ static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
             // If we're not using an event, then the source stage is irrelevant
             // because we're coming from a different queue anyway, so we can
             // safely set it to TOP_OF_PIPE.
+            imgBarrier.srcAccessMask = 0;
             vkCmdPipelineBarrier(cmd->buf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                                  stage, 0, 0, NULL, 0, NULL, 1, &imgBarrier);
         }
@@ -922,8 +923,6 @@ struct ra_renderpass_vk {
     VkRenderPass renderPass;
     VkImageLayout initialLayout;
     VkImageLayout finalLayout;
-    VkAccessFlags initialAccess;
-    VkAccessFlags finalAccess;
     // Descriptor set (bindings)
     VkDescriptorSetLayout dsLayout;
     VkDescriptorPool dsPool;
@@ -1254,10 +1253,8 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
 
         // This is the most common case, so optimize towards it. In this case,
         // the renderpass will take care of almost all layout transitions
-        pass_vk->initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        pass_vk->initialAccess = VK_ACCESS_SHADER_READ_BIT;
-        pass_vk->finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        pass_vk->finalAccess = VK_ACCESS_SHADER_READ_BIT;
+        pass_vk->initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        pass_vk->finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 
         // If we're blending, then we need to explicitly load the previous
@@ -1268,7 +1265,6 @@ static struct ra_renderpass *vk_renderpass_create(struct ra *ra,
         // If we're invalidating the target, we don't need to load or transition
         if (pass->params.invalidate_target) {
             pass_vk->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            pass_vk->initialAccess = 0;
             loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         }
 
@@ -1605,9 +1601,8 @@ static void vk_renderpass_run(struct ra *ra,
         vkCmdBindVertexBuffers(cmd->buf, 0, 1, &buf_vk->slice.buf,
                                &buf_vk->slice.mem.offset);
 
-        // The renderpass expects the images to be in a certain layout
         tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                    pass_vk->initialAccess, pass_vk->initialLayout,
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, pass_vk->initialLayout,
                     pass->params.invalidate_target);
 
         VkViewport viewport = {
@@ -1638,7 +1633,7 @@ static void vk_renderpass_run(struct ra *ra,
 
         // The renderPass implicitly transitions the texture to this layout
         tex_vk->current_layout = pass_vk->finalLayout;
-        tex_vk->current_access = pass_vk->finalAccess;
+        tex_vk->current_access = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         tex_signal(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
         break;
     }
