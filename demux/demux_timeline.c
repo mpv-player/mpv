@@ -274,6 +274,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
         goto drop;
 
     if (!p->dash) {
+        pkt->segmented = true;
         if (!pkt->codec)
             pkt->codec = demux_get_stream(seg->d, pkt->stream)->codec;
         if (pkt->start == MP_NOPTS_VALUE || pkt->start < seg->start)
@@ -305,7 +306,6 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
     }
 
-    pkt->segmented = true;
     demux_add_packet(vs->sh, pkt);
     return 1;
 
