@@ -898,7 +898,11 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
         if (ds->attached_picture_added)
             return NULL;
         ds->attached_picture_added = true;
-        return demux_copy_packet(ds->sh->attached_picture);
+        struct demux_packet *pkt = demux_copy_packet(ds->sh->attached_picture);
+        if (!pkt)
+            abort();
+        pkt->stream = ds->sh->index;
+        return pkt;
     }
     if (!ds->reader_head)
         return NULL;
