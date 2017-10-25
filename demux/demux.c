@@ -1670,10 +1670,11 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
 
     MP_VERBOSE(in, "in-cache seek range = %f <-> %f (%f)\n", start, end, pts);
 
-    if (pts < start || pts > end)
+    if (start == MP_NOPTS_VALUE || end == MP_NOPTS_VALUE)
         return false;
 
-    MP_VERBOSE(in, "in-cache seek is possible..\n");
+    if (pts < start || pts > end)
+        return false;
 
     clear_reader_state(in);
 
