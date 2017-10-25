@@ -1946,6 +1946,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .ts_reader = MP_NOPTS_VALUE,
             .ts_duration = -1,
         };
+        bool any_packets = false;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             if (ds->active && !(!ds->queue_head && ds->eof) && !ds->ignore_eof)
@@ -1961,6 +1962,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 r->ts_min = MP_PTS_MAX(r->ts_min, ds->back_pts);
                 r->ts_max = MP_PTS_MAX(r->ts_max, ds->last_ts);
                 if (ds->queue_head) {
+                    any_packets = true;
                     double ts = PTS_OR_DEF(ds->queue_head->dts,
                                            ds->queue_head->pts);
                     r->ts_start = MP_PTS_MIN(r->ts_start, ts);
@@ -1974,7 +1976,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         r->ts_max = MP_ADD_PTS(r->ts_max, in->ts_offset);
         if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_max)
             r->ts_duration = r->ts_max - r->ts_reader;
-        if (in->seeking) {
+        if (in->seeking || !any_packets) {
             r->ts_max = r->ts_min = MP_NOPTS_VALUE;
             r->ts_duration = 0;
         }
