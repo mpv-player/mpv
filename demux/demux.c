@@ -571,7 +571,7 @@ static double recompute_keyframe_target_pts(struct demux_packet *dp)
             in_keyframe_range = true;
         }
         if (in_keyframe_range) {
-            double ts = dp->pts;
+            double ts = PTS_OR_DEF(dp->pts, dp->dts);
             if (dp->segmented && (ts < dp->start || ts > dp->end))
                 ts = MP_NOPTS_VALUE;
             res = MP_PTS_MIN(res, ts);
