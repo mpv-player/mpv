@@ -619,8 +619,21 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     dp->stream = stream->index;
     dp->next = NULL;
 
-    ds->fw_packs++;
-    ds->fw_bytes += demux_packet_estimate_total_size(dp);
+    // (keep in mind that even if the reader went out of data, the queue is not
+    // necessarily empty due to the backbuffer)
+    if (!ds->reader_head && (!ds->skip_to_keyframe || dp->keyframe)) {
+        ds->reader_head = dp;
+        ds->skip_to_keyframe = false;
+    }
+
+    size_t bytes = demux_packet_estimate_total_size(dp);
+    if (ds->reader_head) {
+        ds->fw_packs++;
+        ds->fw_bytes += bytes;
+    } else {
+        ds->bw_bytes += bytes;
+    }
+
     if (ds->queue_tail) {
         // next packet in stream
         ds->queue_tail->next = dp;
@@ -628,12 +641,6 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     } else {
         // first packet in stream
         ds->queue_head = ds->queue_tail = dp;
-    }
-    // (keep in mind that even if the reader went out of data, the queue is not
-    // necessarily empty due to the backbuffer)
-    if (!ds->reader_head && (!ds->skip_to_keyframe || dp->keyframe)) {
-        ds->reader_head = dp;
-        ds->skip_to_keyframe = false;
     }
 
     // (In theory it'd be more efficient to make this incremental.)
