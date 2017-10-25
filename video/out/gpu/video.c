@@ -311,7 +311,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .gamma = 1.0f,
     .tone_mapping = TONE_MAPPING_MOBIUS,
     .tone_mapping_param = NAN,
-    .tone_mapping_desat = 2.0,
+    .tone_mapping_desat = 1.0,
     .early_flush = -1,
 };
 

@@ -565,18 +565,19 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
 {
     GLSLF("// HDR tone mapping\n");
 
-    // Desaturate the color using a coefficient dependent on the luminance
-    GLSL(float luma = dot(dst_luma, color.rgb);)
-    if (desat > 0) {
-        GLSLF("float overbright = max(luma - %f, 1e-6) / max(luma, 1e-6);\n", desat);
-        GLSL(color.rgb = mix(color.rgb, vec3(luma), overbright);)
-    }
-
     // To prevent discoloration due to out-of-bounds clipping, we need to make
     // sure to reduce the value range as far as necessary to keep the entire
     // signal in range, so tone map based on the brightest component.
     GLSL(float sig = max(max(color.r, color.g), color.b);)
-    GLSL(float sig_orig = sig;)
+
+    // Desaturate the color using a coefficient dependent on the signal
+    if (desat > 0) {
+        GLSL(float luma = dot(dst_luma, color.rgb);)
+        GLSL(float coeff = max(sig - 0.18, 1e-6) / max(sig, 1e-6););
+        GLSLF("coeff = pow(coeff, %f);\n", 10.0 / desat);
+        GLSL(color.rgb = mix(color.rgb, vec3(luma), coeff);)
+        GLSL(sig = mix(sig, luma, coeff);) // also make sure to update `sig`
+    }
 
     if (!ref_peak) {
         // For performance, we want to do as few atomic operations on global
@@ -612,6 +613,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLHF("const float sig_peak = %f;\n", ref_peak);
     }
 
+    GLSL(float sig_orig = sig;)
     switch (algo) {
     case TONE_MAPPING_CLIP:
         GLSLF("sig = %f * sig;\n", isnan(param) ? 1.0 : param);

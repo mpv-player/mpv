@@ -4896,14 +4896,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
     some drivers, so enable at your own risk.
 
 ``--tone-mapping-desaturate=<value>``
-    Apply desaturation for highlights that exceed this level of brightness. The
-    higher the parameter, the more color information will be preserved. This
-    setting helps prevent unnaturally blown-out colors for super-highlights, by
-    (smoothly) turning into white instead. This makes images feel more natural,
-    at the cost of reducing information about out-of-range colors.
+    Apply desaturation for highlights. The parameter essentially controls the
+    steepness of the desaturation curve. The higher the parameter, the more
+    aggressively colors will be desaturated. This setting helps prevent
+    unnaturally blown-out colors for super-highlights, by (smoothly) turning
+    into white instead. This makes images feel more natural, at the cost of
+    reducing information about out-of-range colors.
 
-    The default of 2.0 is somewhat conservative and will mostly just apply to
-    skies or directly sunlit surfaces. A setting of 0.0 disables this option.
+    The default of 1.0 provides a good balance that roughly matches the look
+    and feel of the ACES ODT curves. A setting of 0.0 disables this option.
 
 ``--gamut-warning``
     If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a
