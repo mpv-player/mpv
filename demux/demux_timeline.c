@@ -372,6 +372,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
         new->forced_track = sh->forced_track;
         new->hls_bitrate = sh->hls_bitrate;
         new->missing_timestamps = sh->missing_timestamps;
+        new->attached_picture = sh->attached_picture;
         demux_add_sh_stream(demuxer, new);
         struct virtual_stream *vs = talloc_ptrtype(p, vs);
         *vs = (struct virtual_stream){
