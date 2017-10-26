@@ -537,6 +537,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (!lavc_codec)
         return;
 
+    const AVCodecDescriptor *desc = avcodec_descriptor_get(lavc_codec->id);
+    ctx->intra_only = desc && (desc->props & AV_CODEC_PROP_INTRA_ONLY);
+
     ctx->codec_timebase = mp_get_codec_timebase(vd->codec);
 
     // This decoder does not read pkt_timebase correctly yet.
@@ -1059,12 +1062,15 @@ static bool prepare_decoding(struct dec_video *vd)
         return false;
 
     int drop = ctx->framedrop_flags;
-    if (drop) {
-        // hr-seek framedrop vs. normal framedrop
-        avctx->skip_frame = drop == 2 ? AVDISCARD_NONREF : opts->framedrop;
+    if (drop == 1) {
+        avctx->skip_frame = opts->framedrop;    // normal framedrop
+    } else if (drop == 2) {
+        avctx->skip_frame = AVDISCARD_NONREF;   // hr-seek framedrop
+        // Can be much more aggressive for true intra codecs.
+        if (ctx->intra_only)
+            avctx->skip_frame = AVDISCARD_ALL;
     } else {
-        // normal playback
-        avctx->skip_frame = ctx->skip_frame;
+        avctx->skip_frame = ctx->skip_frame;    // normal playback
     }
 
     if (ctx->hwdec_request_reinit)
@@ -1094,6 +1100,9 @@ static bool do_send_packet(struct dec_video *vd, struct demux_packet *pkt)
 
     if (!prepare_decoding(vd))
         return false;
+
+    if (avctx->skip_frame == AVDISCARD_ALL)
+        return true;
 
     AVPacket avpkt;
     mp_set_av_packet(&avpkt, pkt, &ctx->codec_timebase);

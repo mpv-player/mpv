@@ -37,6 +37,7 @@ typedef struct lavc_ctx {
     bool hwdec_failed;
     bool hwdec_notified;
 
+    bool intra_only;
     int framedrop_flags;
 
     // For HDR side-data caching
