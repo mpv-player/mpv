@@ -1259,10 +1259,14 @@ Property list
     filled to the requested amount, and is currently not reading more data.
 
 ``demuxer-cache-state``
-    Various undocumented things. Some fields are documented:
+    Various undocumented or half-documented things.
 
-    ``demuxer-cache-state/seekable-start``, ``demuxer-cache-state/seekable-end``
-        Seekable range within demuxer cache. Unavailable if not possible.
+    Each entry in ``seekable-ranges`` represents a region in the demuxer cache
+    that can be seeked to. If there are multiple demuxers active, this only
+    returns information about the "main" demuxer, but might be changed in
+    future to return unified information about all demuxers. There is currently
+    only at most 1 range. Should the player implement caching for multiple
+    ranges, the order of the ranges will be unspecified and arbitrary.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -1270,9 +1274,11 @@ Property list
 
     ::
 
-        MPV_FORMAT_NODE_ARRAY
-            "seekable-start"    MPV_FORMAT_DOUBLE
-            "seekable-end"      MPV_FORMAT_DOUBLE
+        MPV_FORMAT_NODE_MAP
+            "seekable-ranges"   MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_NODE_MAP
+                    "start"             MPV_FORMAT_DOUBLE
+                    "end"               MPV_FORMAT_DOUBLE
 
 ``demuxer-via-network``
     Returns ``yes`` if the stream demuxed via the main demuxer is most likely

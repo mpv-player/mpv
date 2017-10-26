@@ -1723,32 +1723,39 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
+    if (action == M_PROPERTY_GET_TYPE) {
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    }
+    if (action != M_PROPERTY_GET)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
     struct demux_ctrl_reader_state s;
     if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    bool seek_ok = s.ts_min != MP_NOPTS_VALUE &&
-                   s.ts_max != MP_NOPTS_VALUE &&
-                   s.seekable;
+    struct mpv_node *r = (struct mpv_node *)arg;
+    node_init(r, MPV_FORMAT_NODE_MAP, NULL);
 
-    struct m_sub_property props[] = {
-        {"seekable-start",  SUB_PROP_PTS(s.ts_min),
-         .unavailable = !seek_ok},
-        {"seekable-end",    SUB_PROP_PTS(s.ts_max),
-         .unavailable = !seek_ok},
-        {"cache-start",     SUB_PROP_PTS(s.ts_start),
-         .unavailable = s.ts_start == MP_NOPTS_VALUE},
-        {"cache-end",       SUB_PROP_PTS(s.ts_max),
-         .unavailable = s.ts_max == MP_NOPTS_VALUE},
-        {"reader-pts",      SUB_PROP_PTS(s.ts_reader),
-         .unavailable = s.ts_reader == MP_NOPTS_VALUE},
-        {"eof",             SUB_PROP_FLAG(s.eof)},
-        {"underrun",        SUB_PROP_FLAG(s.underrun)},
-        {"idle",            SUB_PROP_FLAG(s.idle)},
-        {0}
-    };
+    struct mpv_node *ranges =
+        node_map_add(r, "seekable-ranges", MPV_FORMAT_NODE_ARRAY);
+    if (s.ts_min != MP_NOPTS_VALUE && s.ts_max != MP_NOPTS_VALUE && s.seekable) {
+        struct mpv_node *sub = node_array_add(ranges, MPV_FORMAT_NODE_MAP);
+        node_map_add_double(sub, "start", s.ts_min);
+        node_map_add_double(sub, "end", s.ts_max);
+    }
 
-    return m_property_read_sub(props, action, arg);
+    if (s.ts_start != MP_NOPTS_VALUE)
+        node_map_add_double(r, "cache-end", s.ts_max);
+
+    if (s.ts_reader != MP_NOPTS_VALUE)
+        node_map_add_double(r, "reader-pts", s.ts_reader);
+
+    node_map_add_flag(r, "eof", s.eof);
+    node_map_add_flag(r, "underrun", s.underrun);
+    node_map_add_flag(r, "idle", s.idle);
+
+    return M_PROPERTY_OK;
 }
 
 static int mp_property_demuxer_start_time(void *ctx, struct m_property *prop,
