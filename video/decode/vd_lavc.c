@@ -730,6 +730,101 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     params->stereo_in = vd->codec->stereo_mode;
 }
 
+#if HAVE_AVCODEC_HW_FRAMES_PARAMS
+
+static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
+{
+    struct lavc_ctx *ctx = vd->priv;
+    struct vd_lavc_hwdec *hwdec = ctx->hwdec;
+    AVBufferRef *new_frames_ctx = NULL;
+
+    if (!ctx->hwdec_dev)
+        goto error;
+
+    if (!hwdec->set_hwframes)
+        return 0;
+
+    if (!ctx->hwdec_dev->av_device_ref) {
+        MP_ERR(ctx, "Missing device context.\n");
+        goto error;
+    }
+
+    if (avcodec_get_hw_frames_parameters(ctx->avctx,
+            ctx->hwdec_dev->av_device_ref, hw_fmt, &new_frames_ctx) < 0)
+    {
+        MP_VERBOSE(ctx, "Hardware decoding of this stream is unsupported?\n");
+        goto error;
+    }
+
+    AVHWFramesContext *new_fctx = (void *)new_frames_ctx->data;
+
+    if (hwdec->image_format == IMGFMT_VIDEOTOOLBOX)
+        new_fctx->sw_format = imgfmt2pixfmt(vd->opts->videotoolbox_format);
+
+    // The video output might not support all formats.
+    // Note that supported_formats==NULL means any are accepted.
+    int *render_formats = ctx->hwdec_dev->supported_formats;
+    if (render_formats) {
+        int mp_format = pixfmt2imgfmt(new_fctx->sw_format);
+        bool found = false;
+        for (int n = 0; render_formats[n]; n++) {
+            if (render_formats[n] == mp_format) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            MP_WARN(ctx, "Surface format %s not supported for direct rendering.\n",
+                    mp_imgfmt_to_name(mp_format));
+            goto error;
+        }
+    }
+
+    // 1 surface is already included by libavcodec. The field is 0 if the
+    // hwaccel supports dynamic surface allocation.
+    if (new_fctx->initial_pool_size)
+        new_fctx->initial_pool_size += HWDEC_EXTRA_SURFACES - 1;
+
+    if (ctx->hwdec->hwframes_refine)
+        ctx->hwdec->hwframes_refine(ctx, new_frames_ctx);
+
+    // We might be able to reuse a previously allocated frame pool.
+    if (ctx->cached_hw_frames_ctx) {
+        AVHWFramesContext *old_fctx = (void *)ctx->cached_hw_frames_ctx->data;
+
+        if (new_fctx->format            != old_fctx->format ||
+            new_fctx->sw_format         != old_fctx->sw_format ||
+            new_fctx->width             != old_fctx->width ||
+            new_fctx->height            != old_fctx->height ||
+            new_fctx->initial_pool_size != old_fctx->initial_pool_size)
+            av_buffer_unref(&ctx->cached_hw_frames_ctx);
+    }
+
+    if (!ctx->cached_hw_frames_ctx) {
+        if (av_hwframe_ctx_init(new_frames_ctx) < 0) {
+            MP_ERR(ctx, "Failed to allocate hw frames.\n");
+            goto error;
+        }
+
+        ctx->cached_hw_frames_ctx = new_frames_ctx;
+        new_frames_ctx = NULL;
+    }
+
+    ctx->avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
+    if (!ctx->avctx->hw_frames_ctx)
+        goto error;
+
+    av_buffer_unref(&new_frames_ctx);
+    return 0;
+
+error:
+    av_buffer_unref(&new_frames_ctx);
+    av_buffer_unref(&ctx->cached_hw_frames_ctx);
+    return -1;
+}
+
+#else
+
 // Allocate and set AVCodecContext.hw_frames_ctx. Also caches them on redundant
 // calls (useful because seeks issue get_format, which clears hw_frames_ctx).
 //  device_ctx: reference to an AVHWDeviceContext
@@ -788,7 +883,7 @@ int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
     return ctx->avctx->hw_frames_ctx ? 0 : -1;
 }
 
-static int init_generic_hwaccel(struct dec_video *vd)
+static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
 {
     struct lavc_ctx *ctx = vd->priv;
     struct vd_lavc_hwdec *hwdec = ctx->hwdec;
@@ -861,6 +956,8 @@ static int init_generic_hwaccel(struct dec_video *vd)
                                      av_sw_format, pool_size);
 }
 
+#endif
+
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *fmt)
 {
@@ -885,7 +982,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
             if (ctx->hwdec->generic_hwaccel) {
-                if (init_generic_hwaccel(vd) < 0)
+                if (init_generic_hwaccel(vd, fmt[i]) < 0)
                     break;
                 select = fmt[i];
                 break;

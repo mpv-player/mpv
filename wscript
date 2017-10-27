@@ -508,6 +508,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/spherical.h',
                                 'AV_SPHERICAL_EQUIRECTANGULAR',
                                 use='libav'),
+    }, {
+        'name': 'avcodec-hw-frames-params',
+        'desc': 'libavcodec avcodec_get_hw_frames_parameters()',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'avcodec_get_hw_frames_parameters(0,0,0,0)',
+                                use='libav'),
     },
 ]
 
