@@ -253,8 +253,8 @@ static void write_quad(struct vertex *va, struct gl_transform t,
 
 static void generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
 {
-    int num_vertices = part->num_subparts * 6;
-    MP_TARRAY_GROW(part, part->vertices, part->num_vertices + num_vertices);
+    MP_TARRAY_GROW(part, part->vertices,
+                   part->num_vertices + part->num_subparts * 6);
 
     for (int n = 0; n < part->num_subparts; n++) {
         struct sub_bitmap *b = &part->subparts[n];
@@ -266,13 +266,13 @@ static void generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
         uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
                             (c >> 8) & 0xff, 255 - (c & 0xff) };
 
-        write_quad(&va[n * 6], t,
+        write_quad(va, t,
                    b->x, b->y, b->x + b->dw, b->y + b->dh,
                    b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h,
                    part->w, part->h, color);
-    }
 
-    part->num_vertices += num_vertices;
+        part->num_vertices += 6;
+    }
 }
 
 // number of screen divisions per axis (x=0, y=1) for the current 3D mode
