@@ -372,6 +372,7 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
     talloc_free(ao_c->conv);
     talloc_free(ao_c->input_frame);
     talloc_free(ao_c->input_format);
+    talloc_free(ao_c->output_frame);
     talloc_free(ao_c->filter_input_format);
     talloc_free(ao_c->ao_buffer);
     talloc_free(ao_c);
