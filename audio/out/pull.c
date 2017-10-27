@@ -190,7 +190,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     assert(ao->api == &ao_api_pull);
 
     struct ao_pull_state *p = ao->api_priv;
-    void *ndata[MP_NUM_CHANNELS];
+    void *ndata[MP_NUM_CHANNELS] = {0};
 
     if (!ao_need_conversion(fmt))
         return ao_read_data(ao, data, samples, out_time_us);
