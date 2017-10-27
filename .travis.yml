@@ -6,7 +6,6 @@ os:
 env:
   matrix:
     - LIBAV=libav-git
-    - LIBAV=ffmpeg-stable
     - LIBAV=ffmpeg-git
   global:
     # Coverity token
