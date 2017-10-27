@@ -91,13 +91,9 @@ class Libav < TravisDepsBuilder
         :action => :git,
         :url    => "git://git.libav.org/libav.git"
       },
-      "ffmpeg-stable" => {
-        :action => :stable,
-        :url    => 'http://www.ffmpeg.org/releases/ffmpeg-3.2.2.tar.gz'
-      },
       "ffmpeg-git" => {
         :action => :git,
-        :url    => "git://github.com/FFmpeg/FFmpeg.git"
+        :url    => "git://github.com/mpv-player/ffmpeg-mpv.git"
       }
     }
   end
@@ -110,7 +106,7 @@ end
 class LibavOsx < Libav
   def build_map
     {
-      "ffmpeg-stable" => { :action => :package, :url => 'ffmpeg' },
+      "ffmpeg-git" => { :action => :package, :url => 'ffmpeg' },
     }
   end
 end

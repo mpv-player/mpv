@@ -32,7 +32,7 @@ matrix:
     - os: osx
       compiler: gcc
     - os: linux
-      env: LIBAV=ffmpeg-stable
+      env: LIBAV=ffmpeg-git
     - os: linux
       compiler: clang
 
