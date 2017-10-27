@@ -367,7 +367,7 @@ static bool init_pads(struct lavfi *c)
             goto error; // can happen if pad reassociation fails
 
         if (pad->dir == LAVFI_OUT) {
-            AVFilter *dst_filter = NULL;
+            const AVFilter *dst_filter = NULL;
             if (pad->type == STREAM_AUDIO) {
                 dst_filter = avfilter_get_by_name("abuffersink");
             } else if (pad->type == STREAM_VIDEO) {
@@ -453,7 +453,7 @@ static bool init_pads(struct lavfi *c)
                 assert(0);
             }
 
-            AVFilter *filter = avfilter_get_by_name(filter_name);
+            const AVFilter *filter = avfilter_get_by_name(filter_name);
             if (filter) {
                 char name[256];
                 snprintf(name, sizeof(name), "mpv_src_%s", pad->name);
