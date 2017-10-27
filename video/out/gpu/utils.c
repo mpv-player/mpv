@@ -106,9 +106,13 @@ bool ra_tex_upload_pbo(struct ra *ra, struct ra_buf_pool *pbo,
     size_t row_size = tex->params.dimensions == 2 ? params->stride :
                       tex->params.w * tex->params.format->pixel_size;
 
+    int height = tex->params.h;
+    if (tex->params.dimensions == 2 && params->rc)
+        height = mp_rect_h(*params->rc);
+
     struct ra_buf_params bufparams = {
         .type = RA_BUF_TYPE_TEX_UPLOAD,
-        .size = row_size * tex->params.h * tex->params.d,
+        .size = row_size * height * tex->params.d,
         .host_mutable = true,
     };
 
