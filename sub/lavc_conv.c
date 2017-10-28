@@ -57,12 +57,13 @@ static const char *get_lavc_format(const char *format)
 // We always want the user defined style instead.
 static void disable_styles(bstr header)
 {
+    bstr style = bstr0("\nStyle: ");
     while (header.len) {
-        int n = bstr_find(header, bstr0("\nStyle: "));
+        int n = bstr_find(header, style);
         if (n < 0)
             break;
         header.start[n + 1] = '#'; // turn into a comment
-        header = bstr_cut(header, 2);
+        header = bstr_cut(header, n + style.len);
     }
 }
 
