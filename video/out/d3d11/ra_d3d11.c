@@ -9,6 +9,7 @@
 #include "common/msg.h"
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
+#include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 #include "video/out/gpu/spirv.h"
 #include "video/out/gpu/utils.h"
@@ -783,6 +784,16 @@ static const char *get_shader_target(struct ra *ra, enum glsl_shader type)
     return NULL;
 }
 
+static const char *shader_type_name(enum glsl_shader type)
+{
+    switch (type) {
+    case GLSL_SHADER_VERTEX:   return "vertex";
+    case GLSL_SHADER_FRAGMENT: return "fragment";
+    case GLSL_SHADER_COMPUTE:  return "compute";
+    default:                   return "unknown";
+    }
+}
+
 static bool setup_clear_rpass(struct ra *ra)
 {
     struct ra_d3d11 *p = ra->priv;
@@ -1187,9 +1198,13 @@ static bool compile_glsl(struct ra *ra, enum glsl_shader type,
         cross_shader_model = 40;
     }
 
+    int64_t start_us = mp_time_us();
+
     bstr spv_module;
     if (!spirv->fns->compile_glsl(spirv, ta_ctx, type, glsl, &spv_module))
         goto done;
+
+    int64_t shaderc_us = mp_time_us();
 
     cross = crossc_hlsl_create((uint32_t*)spv_module.start,
                                spv_module.len / sizeof(uint32_t));
@@ -1203,6 +1218,8 @@ static bool compile_glsl(struct ra *ra, enum glsl_shader type,
         goto done;
     }
 
+    int64_t cross_us = mp_time_us();
+
     hr = p->D3DCompile(hlsl, strlen(hlsl), NULL, NULL, NULL, "main",
         get_shader_target(ra, type), D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, out,
         &errors);
@@ -1212,6 +1229,15 @@ static bool compile_glsl(struct ra *ra, enum glsl_shader type,
                (char*)ID3D10Blob_GetBufferPointer(errors));
         goto done;
     }
+
+    int64_t d3dcompile_us = mp_time_us();
+
+    MP_VERBOSE(ra, "Compiled a %s shader in %lldus\n", shader_type_name(type),
+               d3dcompile_us - start_us);
+    MP_VERBOSE(ra, "shaderc: %lldus, SPIRV-Cross: %lldus, D3DCompile: %lldus\n",
+               shaderc_us - start_us,
+               cross_us - shaderc_us,
+               d3dcompile_us - cross_us);
 
     success = true;
 done:;
