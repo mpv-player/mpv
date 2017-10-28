@@ -519,14 +519,17 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
         if (!pool)
             goto error;
         MP_TARRAY_APPEND(NULL, vk->pools, vk->num_pools, pool);
+
+        // Update the pool_* pointers based on the corresponding QF index
+        if (qf == idx_gfx)
+            vk->pool_graphics = pool;
+        if (qf == idx_comp)
+            vk->pool_compute = pool;
+        if (qf == idx_tf)
+            vk->pool_transfer = pool;
     }
 
-    vk->pool_graphics = vk->pools[idx_gfx];
-    vk->pool_compute  = idx_comp >= 0 ? vk->pools[idx_comp] : NULL;
-    vk->pool_transfer = idx_tf   >= 0 ? vk->pools[idx_tf] : NULL;
-
     vk_malloc_init(vk);
-
     talloc_free(tmp);
     return true;
 
