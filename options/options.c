@@ -117,6 +117,8 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"mediacodec-copy",HWDEC_MEDIACODEC_COPY},
     {"cuda",        HWDEC_CUDA},
     {"cuda-copy",   HWDEC_CUDA_COPY},
+    {"nvdec",       HWDEC_NVDEC},
+    {"nvdec-copy",  HWDEC_NVDEC_COPY},
     {"crystalhd",   HWDEC_CRYSTALHD},
     {0}
 };

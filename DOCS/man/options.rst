@@ -695,6 +695,8 @@ Video
     :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
+    :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
+    :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
     :rkmpp:     requires ``--vo=gpu`` (some RockChip devices only)
 
@@ -722,6 +724,12 @@ Video
     Pass ``weave`` (or leave the option unset) to not attempt any
     deinterlacing. ``cuda`` should always be preferred unless the ``gpu``
     vo is not being used or filters are required.
+
+    ``nvdec`` is a newer implementation of CUVID/CUDA decoding, which uses the
+    FFmpeg decoders for file parsing. Experimental, is known not to correctly
+    check whether decoding is supported by the hardware at all. Deinterlacing
+    is not supported. Since this uses FFmpeg's codec parsers, it is expected
+    that this generally causes fewer issues than ``cuda``. Requires ffmpeg-mpv.
 
     Most video filters will not work with hardware decoding as they are
     primarily implemented on the CPU. Some exceptions are ``vdpaupp``,

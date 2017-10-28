@@ -158,6 +158,19 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rkmpp = {
 };
 
 #if HAVE_CUDA_HWACCEL
+static const struct vd_lavc_hwdec mp_vd_lavc_nvdec = {
+    .type = HWDEC_NVDEC,
+    .image_format = IMGFMT_CUDA,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+};
+static const struct vd_lavc_hwdec mp_vd_lavc_nvdec_copy = {
+    .type = HWDEC_NVDEC_COPY,
+    .image_format = IMGFMT_CUDA,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+    .copying = true,
+};
 static const struct vd_lavc_hwdec mp_vd_lavc_cuda = {
     .type = HWDEC_CUDA,
     .image_format = IMGFMT_CUDA,
@@ -272,6 +285,8 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_mediacodec_copy,
 #endif
 #if HAVE_CUDA_HWACCEL
+    &mp_vd_lavc_nvdec,
+    &mp_vd_lavc_nvdec_copy,
     &mp_vd_lavc_cuda,
     &mp_vd_lavc_cuda_copy,
 #endif
