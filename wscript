@@ -458,18 +458,11 @@ libav_dependencies = [
         'req': True,
         'fmsg': "FFmpeg/Libav development files not found.",
     }, {
-        'name': 'ffmpeg_mpv',
-        'desc': 'libav* is FFmpeg mpv modified version',
-        'func': check_statement('libavcodec/version.h',
-                                'int x[LIBAVCODEC_MPV ? 1 : -1]',
-                                use='libavcodec')
-    }, {
-        'name': 'ffmpeg_garbage',
-        'deps': '!ffmpeg_mpv',
-        'desc': 'libav* is upstream FFmpeg (unsupported)',
+        'name': 'is_ffmpeg',
+        'desc': 'libav* is FFmpeg',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
         'func': check_statement('libavcodec/version.h',
-                                'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
+                                'int x[LIBAVCODEC_MPV ? 1 : -1]',
                                 use='libavcodec')
     }, {
         # This check should always result in the opposite of is_ffmpeg.
@@ -488,9 +481,7 @@ libav_dependencies = [
         'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
-FFmpeg/Libav libraries. You need git master. For FFmpeg, the mpv fork, that \
-might contain additional fixes and features is required. It is available on \
-https://github.com/mpv-player/ffmpeg-mpv Aborting."
+FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_string)
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
