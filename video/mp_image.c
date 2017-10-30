@@ -38,9 +38,6 @@
 
 #include "video/filter/vf.h"
 
-#define HAVE_OPAQUE_REF (LIBAVUTIL_VERSION_MICRO >= 100 && \
-                         LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 47, 100))
-
 const struct m_opt_choice_alternatives mp_spherical_names[] = {
     {"auto",        MP_SPHERICAL_AUTO},
     {"none",        MP_SPHERICAL_NONE},
@@ -864,16 +861,14 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     dst->params.chroma_location = avchroma_location_to_mp(src->chroma_location);
 
-#if HAVE_OPAQUE_REF
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
         dst->params.rotate = p->rotate;
         dst->params.stereo_in = p->stereo_in;
         dst->params.stereo_out = p->stereo_out;
     }
-#endif
 
-#if HAVE_AVUTIL_ICC_PROFILE
+#if LIBAVUTIL_VERSION_MICRO >= 100
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
     if (sd)
         dst->icc_profile = av_buffer_ref(sd->buf);
@@ -940,14 +935,12 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
 
     dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
 
-#if HAVE_OPAQUE_REF
     dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
     if (!dst->opaque_ref)
         abort();
     *(struct mp_image_params *)dst->opaque_ref->data = src->params;
-#endif
 
-#if HAVE_AVUTIL_ICC_PROFILE
+#if LIBAVUTIL_VERSION_MICRO >= 100
     if (src->icc_profile) {
         AVFrameSideData *sd =
             ffmpeg_garbage(dst, AV_FRAME_DATA_ICC_PROFILE, new_ref->icc_profile);

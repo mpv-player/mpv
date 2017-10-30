@@ -100,10 +100,7 @@ Essential dependencies (incomplete list):
   libGL, GLX, EGL, xv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
-  and either libswresample or libavresample)
-  At least FFmpeg 3.2.2 or Libav 12 is required.
-  For hardware decoding with vaapi and vdpau, FFmpeg 3.3 or Libav git is
-  required.
+  and either libswresample or libavresample) from ffmpeg-mpv or Libav
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
@@ -111,7 +108,6 @@ Essential dependencies (incomplete list):
 - libjpeg (optional, used for screenshots only)
 - uchardet (optional, for subtitle charset detection)
 - vdpau and vaapi libraries for hardware decoding on Linux (optional)
-  (FFmpeg 3.3 or Libav git is also required.)
 
 Libass dependencies:
 
@@ -128,11 +124,10 @@ FFmpeg dependencies:
 - libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
   explicitly enabled when compiling FFmpeg)
 - Libav also works, but some features will not work. (See section below.)
-- FFmpeg/Libav git for Windows/D3D11 and Cuda decoding.
 
 Most of the above libraries are available in suitable versions on normal
-Linux distributions. However, FFmpeg is an exception (distro versions may be
-too old to work well or at all). For that reason you may want to use
+Linux distributions. However, FFmpeg is an exception - [ffmpeg-mpv][ffmpeg-mpv]
+or Libav git master is required. For that reason you may want to use
 the separately available build wrapper ([mpv-build][mpv-build]) that first
 compiles FFmpeg libraries and libass, and then compiles the player statically
 linked against those.
@@ -254,3 +249,4 @@ only if discretion is required.
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
+[ffmpeg-mpv]: https://github.com/mpv-player/ffmpeg-mpv

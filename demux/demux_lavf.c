@@ -33,12 +33,9 @@
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/replaygain.h>
+#include <libavutil/spherical.h>
 #include <libavutil/display.h>
 #include <libavutil/opt.h>
-
-#if HAVE_AVUTIL_SPHERICAL
-#include <libavutil/spherical.h>
-#endif
 
 #include "common/msg.h"
 #include "common/tags.h"
@@ -643,7 +640,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
 
-#if HAVE_AVUTIL_SPHERICAL
         sd = av_stream_get_side_data(st, AV_PKT_DATA_SPHERICAL, NULL);
         if (sd) {
             AVSphericalMapping *sp = (void *)sd;
@@ -654,7 +650,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             mpsp->ref_angles[1] = sp->pitch / (float)(1 << 16);
             mpsp->ref_angles[2] = sp->roll / (float)(1 << 16);
         }
-#endif
 
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
         sh->codec->avi_dts = matches_avinputformat_name(priv, "avi");
@@ -809,13 +804,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
-
-#if LIBAVFORMAT_VERSION_MICRO >= 100
-    /* Keep side data as side data instead of mashing it into the packet
-     * stream.
-     * Note: Libav doesn't have this horrible insanity. */
-    av_opt_set(avfc, "fflags", "+keepside", 0);
-#endif
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)

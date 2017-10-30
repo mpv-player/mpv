@@ -425,31 +425,27 @@ iconv support use --disable-iconv.",
     }
 ]
 
-ffmpeg_version = "3.2.2"
 ffmpeg_pkg_config_checks = [
-    'libavutil',     '>= 55.34.100',
-    'libavcodec',    '>= 57.64.100',
-    'libavformat',   '>= 57.56.100',
-    'libswscale',    '>= 4.2.100',
-    'libavfilter',   '>= 6.65.100',
-    'libswresample', '>= 2.3.100',
+    'libavutil',     '>= 56.0.100',
+    'libavcodec',    '>= 58.2.100',
+    'libavformat',   '>= 58.0.102',
+    'libswscale',    '>= 5.0.101',
+    'libavfilter',   '>= 7.0.101',
+    'libswresample', '>= 3.0.100',
 ]
-libav_version = "12"
 libav_pkg_config_checks = [
-    'libavutil',     '>= 55.20.0',
-    'libavcodec',    '>= 57.25.0',
-    'libavformat',   '>= 57.7.0',
-    'libswscale',    '>= 4.0.0',
-    'libavfilter',   '>= 6.7.0',
-    'libavresample', '>= 3.0.0',
+    'libavutil',     '>= 56.6.0',
+    'libavcodec',    '>= 58.5.0',
+    'libavformat',   '>= 58.1.0',
+    'libswscale',    '>= 5.0.0',
+    'libavfilter',   '>= 7.0.0',
+    'libavresample', '>= 4.0.0',
 ]
-
-libav_versions_string = "FFmpeg %s or Libav %s" % (ffmpeg_version, libav_version)
 
 def check_ffmpeg_or_libav_versions():
     def fn(ctx, dependency_identifier, **kw):
         versions = ffmpeg_pkg_config_checks
-        if ctx.dependency_satisfied('is_libav'):
+        if ctx.dependency_satisfied('libav'):
             versions = libav_pkg_config_checks
         return check_pkg_config(*versions)(ctx, dependency_identifier, **kw)
     return fn
@@ -462,67 +458,44 @@ libav_dependencies = [
         'req': True,
         'fmsg': "FFmpeg/Libav development files not found.",
     }, {
-        'name': 'is_ffmpeg_garbage',
+        'name': 'ffmpeg_mpv',
+        'desc': 'libav* is FFmpeg mpv modified version',
+        'func': check_statement('libavcodec/version.h',
+                                'int x[LIBAVCODEC_MPV ? 1 : -1]',
+                                use='libavcodec')
+    }, {
+        'name': 'ffmpeg_garbage',
+        'deps': '!ffmpeg_mpv',
         'desc': 'libav* is upstream FFmpeg (unsupported)',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
         'func': check_statement('libavcodec/version.h',
                                 'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
                                 use='libavcodec')
     }, {
-        'name': 'is_ffmpeg',
-        'desc': 'libav* is FFmpeg mpv modified version',
-        'func': check_statement('libavcodec/version.h',
-                                'int x[LIBAVCODEC_MPV ? 1 : -1]',
-                                use='libavcodec')
-    }, {
         # This check should always result in the opposite of is_ffmpeg.
         # Run it to make sure is_ffmpeg didn't fail for some other reason than
         # the actual version check.
-        'name': 'is_libav',
+        'name': 'libav',
         'desc': 'libav* is Libav',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
         'func': check_statement('libavcodec/version.h',
                                 'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? -1 : 1]',
                                 use='libavcodec')
     }, {
-        'name': 'libav',
+        'name': 'libav-any',
         'desc': 'Libav/FFmpeg library versions',
-        'deps': 'is_ffmpeg || is_libav',
+        'deps': 'ffmpeg_mpv || libav',
         'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
-FFmpeg/Libav libraries. You need at least {0}. For FFmpeg, the mpv fork, that \
+FFmpeg/Libav libraries. You need git master. For FFmpeg, the mpv fork, that \
 might contain additional fixes and features is required. It is available on \
-https://github.com/mpv-player/ffmpeg-mpv Aborting.".format(libav_versions_string)
+https://github.com/mpv-player/ffmpeg-mpv Aborting."
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
-    }, {
-        'name': 'avutil-content-light-level',
-        'desc': 'libavutil content light level struct',
-        'func': check_statement('libavutil/frame.h',
-                                'AV_FRAME_DATA_CONTENT_LIGHT_LEVEL',
-                                use='libav'),
-    }, {
-        'name': 'avutil-icc-profile',
-        'desc': 'libavutil ICC profile side data',
-        'func': check_statement('libavutil/frame.h',
-                                'AV_FRAME_DATA_ICC_PROFILE',
-                                use='libav'),
-    }, {
-        'name': 'avutil-spherical',
-        'desc': 'libavutil spherical side data',
-        'func': check_statement('libavutil/spherical.h',
-                                'AV_SPHERICAL_EQUIRECTANGULAR',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-hw-frames-params',
-        'desc': 'libavcodec avcodec_get_hw_frames_parameters()',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'avcodec_get_hw_frames_parameters(0,0,0,0)',
-                                use='libav'),
-    },
+    }
 ]
 
 audio_output_features = [
@@ -847,53 +820,21 @@ video_output_features = [
 
 hwaccel_features = [
     {
-        'name': '--vaapi-hwaccel',
-        'desc': 'libavcodec VAAPI hwaccel (FFmpeg 3.3 API)',
-        'deps': 'vaapi',
-        'func': check_statement('libavcodec/version.h',
-            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
-            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
-            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 74, 100) && '
-            '       LIBAVCODEC_VERSION_MICRO >= 100)'
-            '      ? 1 : -1]',
-            use='libav'),
-    }, {
         'name': 'videotoolbox-hwaccel',
-        'desc': 'libavcodec videotoolbox hwaccel (new API)',
+        'desc': 'libavcodec videotoolbox hwaccel',
         'deps': 'gl-cocoa || ios-gl',
-        'func': check_statement('libavcodec/version.h',
-            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 96, 100) && '
-            '       LIBAVCODEC_VERSION_MICRO >= 100)'
-            '      ? 1 : -1]',
-            use='libav'),
+        'func': check_true,
     }, {
         'name': '--videotoolbox-gl',
         'desc': 'Videotoolbox with OpenGL',
         'deps': 'gl-cocoa && videotoolbox-hwaccel',
         'func': check_true
     }, {
-        'name': '--vdpau-hwaccel',
-        'desc': 'libavcodec VDPAU hwaccel (FFmpeg 3.3 API)',
-        'deps': 'vdpau',
-        'func': check_statement('libavcodec/version.h',
-            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 37, 1) && '
-            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
-            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 85, 101) && '
-            '       LIBAVCODEC_VERSION_MICRO >= 100)'
-            '      ? 1 : -1]',
-            use='libav'),
-    }, {
         # (conflated with ANGLE for easier deps)
         'name': '--d3d-hwaccel',
-        'desc': 'D3D11VA hwaccel (new API, plus ANGLE)',
+        'desc': 'D3D11VA hwaccel (plus ANGLE)',
         'deps': 'os-win32 && egl-angle',
-        'func': check_statement('libavcodec/version.h',
-            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 4, 0) && '
-            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
-            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 100, 100) && '
-            '       LIBAVCODEC_VERSION_MICRO >= 100)'
-            '      ? 1 : -1]',
-            use='libav'),
+        'func': check_true,
     }, {
         'name': '--d3d9-hwaccel',
         'desc': 'DXVA2 hwaccel (plus ANGLE)',
