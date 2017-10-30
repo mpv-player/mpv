@@ -190,6 +190,7 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 
 static void mangle_ass(bstr *dst, const char *in)
 {
+    const char *start = in;
     bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
@@ -207,6 +208,12 @@ static void mangle_ass(bstr *dst, const char *in)
         }
         if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
+        // Libass will strip leading whitespace
+        if (in[0] == ' ' && in != start && in[-1] == '\n') {
+            bstr_xappend(NULL, dst, bstr0("\\h"));
+            in += 1;
+            continue;
+        }
         bstr_xappend(NULL, dst, (bstr){(char *)in, 1});
         // Break ASS escapes with U+2060 WORD JOINER
         if (escape_ass && *in == '\\')
