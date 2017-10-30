@@ -160,6 +160,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rkmpp = {
 #if HAVE_CUDA_HWACCEL
 static const struct vd_lavc_hwdec mp_vd_lavc_nvdec = {
     .type = HWDEC_NVDEC,
+    .interop_type = HWDEC_CUDA,
     .image_format = IMGFMT_CUDA,
     .generic_hwaccel = true,
     .set_hwframes = true,
@@ -369,8 +370,9 @@ static struct mp_hwdec_ctx *hwdec_create_dev(struct dec_video *vd,
     if (hwdec->create_dev)
         return hwdec->create_dev(vd->global, vd->log, autoprobe);
     if (vd->hwdec_devs) {
-        hwdec_devices_request(vd->hwdec_devs, hwdec->type);
-        return hwdec_devices_get(vd->hwdec_devs, hwdec->type);
+        int type = hwdec->interop_type ? hwdec->interop_type : hwdec->type;
+        hwdec_devices_request(vd->hwdec_devs, type);
+        return hwdec_devices_get(vd->hwdec_devs, type);
     }
     return NULL;
 }

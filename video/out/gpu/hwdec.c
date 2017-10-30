@@ -66,7 +66,6 @@ static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #endif
 #if HAVE_CUDA_HWACCEL
     &ra_hwdec_cuda,
-    &ra_hwdec_cuda_nvdec,
 #endif
 #if HAVE_RPI
     &ra_hwdec_rpi_overlay,

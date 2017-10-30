@@ -326,24 +326,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 }
 
 const struct ra_hwdec_driver ra_hwdec_cuda = {
-    .name = "cuda",
-    .api = HWDEC_CUDA,
-    .imgfmts = {IMGFMT_CUDA, 0},
-    .priv_size = sizeof(struct priv_owner),
-    .init = cuda_init,
-    .uninit = cuda_uninit,
-    .mapper = &(const struct ra_hwdec_mapper_driver){
-        .priv_size = sizeof(struct priv),
-        .init = mapper_init,
-        .uninit = mapper_uninit,
-        .map = mapper_map,
-        .unmap = mapper_unmap,
-    },
-};
-
-const struct ra_hwdec_driver ra_hwdec_cuda_nvdec = {
     .name = "cuda-nvdec",
-    .api = HWDEC_NVDEC,
+    .api = HWDEC_CUDA,
     .imgfmts = {IMGFMT_CUDA, 0},
     .priv_size = sizeof(struct priv_owner),
     .init = cuda_init,

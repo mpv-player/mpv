@@ -85,6 +85,8 @@ typedef struct lavc_ctx {
 
 struct vd_lavc_hwdec {
     enum hwdec_type type;
+    // If non-0, get this hwdec type from the VO (for the AVHWDeviceContext).
+    enum hwdec_type interop_type;
     // If not-0: the IMGFMT_ format that should be accepted in the libavcodec
     // get_format callback.
     int image_format;
