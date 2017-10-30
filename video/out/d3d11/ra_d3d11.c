@@ -20,6 +20,13 @@
 #define D3D11_1_UAV_SLOT_COUNT (64)
 #endif
 
+struct dll_version {
+    uint16_t major;
+    uint16_t minor;
+    uint16_t build;
+    uint16_t revision;
+};
+
 struct ra_d3d11 {
     struct spirv_compiler *spirv;
 
@@ -28,6 +35,8 @@ struct ra_d3d11 {
     ID3D11DeviceContext *ctx;
     ID3D11DeviceContext1 *ctx1;
     pD3DCompile D3DCompile;
+
+    struct dll_version d3d_compiler_ver;
 
     // Debug interfaces (--gpu-debug)
     ID3D11Debug *debug;
@@ -171,6 +180,14 @@ static struct d3d_fmt formats[] = {
     { "rgb10_a2", 4,  4, {10, 10, 10,  2}, DXFMT(R10G10B10A2, UNORM)  },
     { "bgra8",    4,  4, { 8,  8,  8,  8}, DXFMT(B8G8R8A8, UNORM), .unordered = false },
 };
+
+static bool dll_version_equal(struct dll_version a, struct dll_version b)
+{
+    return a.major == b.major &&
+           a.minor == b.minor &&
+           a.build == b.build &&
+           a.revision == b.revision;
+}
 
 static DXGI_FORMAT fmt_to_dxgi(const struct ra_format *fmt)
 {
@@ -1346,13 +1363,15 @@ static size_t vbuf_upload(struct ra *ra, void *data, size_t size)
 }
 
 static const char cache_magic[4] = "RD11";
-static const int cache_version = 1;
+static const int cache_version = 2;
 
 struct cache_header {
     char magic[sizeof(cache_magic)];
     int cache_version;
     char compiler[SPIRV_NAME_MAX_LEN];
-    int compiler_version;
+    int spv_compiler_version;
+    uint32_t cross_version;
+    struct dll_version d3d_compiler_version;
     int feature_level;
     size_t vert_bytecode_len;
     size_t frag_bytecode_len;
@@ -1381,7 +1400,11 @@ static void load_cached_program(struct ra *ra,
         return;
     if (strncmp(header->compiler, spirv->name, sizeof(header->compiler)) != 0)
         return;
-    if (header->compiler_version != spirv->compiler_version)
+    if (header->spv_compiler_version != spirv->compiler_version)
+        return;
+    if (header->cross_version != crossc_version())
+        return;
+    if (!dll_version_equal(header->d3d_compiler_version, p->d3d_compiler_ver))
         return;
     if (header->feature_level != p->fl)
         return;
@@ -1415,7 +1438,9 @@ static void save_cached_program(struct ra *ra, struct ra_renderpass *pass,
 
     struct cache_header header = {
         .cache_version = cache_version,
-        .compiler_version = p->spirv->compiler_version,
+        .spv_compiler_version = p->spirv->compiler_version,
+        .cross_version = crossc_version(),
+        .d3d_compiler_version = p->d3d_compiler_ver,
         .feature_level = p->fl,
         .vert_bytecode_len = vert_bc.len,
         .frag_bytecode_len = frag_bc.len,
@@ -2085,6 +2110,41 @@ static void init_debug_layer(struct ra *ra)
     ID3D11InfoQueue_PushStorageFilter(p->iqueue, &filter);
 }
 
+static struct dll_version get_dll_version(HMODULE dll)
+{
+    void *ctx = talloc_new(NULL);
+    struct dll_version ret = { 0 };
+
+    HRSRC rsrc = FindResourceW(dll, MAKEINTRESOURCEW(VS_VERSION_INFO),
+                               MAKEINTRESOURCEW(VS_FILE_INFO));
+    if (!rsrc)
+        goto done;
+    DWORD size = SizeofResource(dll, rsrc);
+    HGLOBAL res = LoadResource(dll, rsrc);
+    if (!res)
+        goto done;
+    void *ptr = LockResource(res);
+    if (!ptr)
+        goto done;
+    void *copy = talloc_memdup(ctx, ptr, size);
+
+    VS_FIXEDFILEINFO *ffi;
+    UINT ffi_len;
+    if (!VerQueryValueW(copy, L"\\", (void**)&ffi, &ffi_len))
+        goto done;
+    if (ffi_len < sizeof(*ffi))
+        goto done;
+
+    ret.major = HIWORD(ffi->dwFileVersionMS);
+    ret.minor = LOWORD(ffi->dwFileVersionMS);
+    ret.build = HIWORD(ffi->dwFileVersionLS);
+    ret.revision = LOWORD(ffi->dwFileVersionLS);
+
+done:
+    talloc_free(ctx);
+    return ret;
+}
+
 static bool load_d3d_compiler(struct ra *ra)
 {
     struct ra_d3d11 *p = ra->priv;
@@ -2107,6 +2167,8 @@ static bool load_d3d_compiler(struct ra *ra)
     // Can't find any compiler DLL, so give up
     if (!d3dcompiler)
         return false;
+
+    p->d3d_compiler_ver = get_dll_version(d3dcompiler);
 
     p->D3DCompile = (pD3DCompile)GetProcAddress(d3dcompiler, "D3DCompile");
     if (!p->D3DCompile)
@@ -2218,6 +2280,10 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         MP_FATAL(ra, "Could not find D3DCompiler DLL\n");
         goto error;
     }
+
+    MP_VERBOSE(ra, "D3DCompiler version: %u.%u.%u.%u\n",
+               p->d3d_compiler_ver.major, p->d3d_compiler_ver.minor,
+               p->d3d_compiler_ver.build, p->d3d_compiler_ver.revision);
 
     setup_formats(ra);
 
