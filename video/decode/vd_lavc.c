@@ -167,7 +167,8 @@ static const struct vd_lavc_hwdec mp_vd_lavc_nvdec = {
 };
 static const struct vd_lavc_hwdec mp_vd_lavc_nvdec_copy = {
     .type = HWDEC_NVDEC_COPY,
-    .image_format = IMGFMT_CUDA,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_CUDA,
     .generic_hwaccel = true,
     .set_hwframes = true,
     .copying = true,
@@ -363,10 +364,31 @@ static bool hwdec_is_wrapper(struct vd_lavc_hwdec *hwdec, const char *decoder)
     return bstr_endswith0(bstr0(decoder), hwdec->lavc_suffix);
 }
 
+static void standalone_dev_destroy(struct mp_hwdec_ctx *ctx)
+{
+    av_buffer_unref(&ctx->av_device_ref);
+    talloc_free(ctx);
+}
+
 static struct mp_hwdec_ctx *hwdec_create_dev(struct dec_video *vd,
                                              struct vd_lavc_hwdec *hwdec,
                                              bool autoprobe)
 {
+    if (hwdec->create_standalone_dev) {
+        struct mp_hwdec_ctx *ctx = talloc_ptrtype(NULL, ctx);
+        *ctx = (struct mp_hwdec_ctx) {
+            .type = hwdec->type,
+            .ctx = NULL,
+            .destroy = standalone_dev_destroy,
+        };
+        if (av_hwdevice_ctx_create(&ctx->av_device_ref,
+                        hwdec->create_standalone_dev_type, NULL, NULL, 0) < 0)
+        {
+            standalone_dev_destroy(ctx);
+            ctx = NULL;
+        }
+        return ctx;
+    }
     if (hwdec->create_dev)
         return hwdec->create_dev(vd->global, vd->log, autoprobe);
     if (vd->hwdec_devs) {
@@ -392,7 +414,9 @@ static int hwdec_probe(struct dec_video *vd, struct vd_lavc_hwdec *hwdec,
             return hwdec->copying ? -1 : HWDEC_ERR_NO_CTX;
         if (dev->emulated)
             r = HWDEC_ERR_EMULATED;
-        if (hwdec->create_dev && dev->destroy)
+        bool owns_hwdec_dev = !!hwdec->create_dev ||
+                              hwdec->create_standalone_dev;
+        if (owns_hwdec_dev && dev->destroy)
             dev->destroy(dev);
     }
     if (r >= 0) {
@@ -603,7 +627,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
                 goto error;
-            ctx->owns_hwdec_dev = !!ctx->hwdec->create_dev;
+            ctx->owns_hwdec_dev = !!ctx->hwdec->create_dev ||
+                                  ctx->hwdec->create_standalone_dev;
             if (ctx->hwdec_dev->restore_device)
                 ctx->hwdec_dev->restore_device(ctx->hwdec_dev);
             if (!ctx->hwdec->set_hwframes) {
