@@ -227,6 +227,9 @@ static void fix_image_params(struct dec_video *d_video,
     if (p.p_w <= 0 || p.p_h <= 0)
         p.p_w = p.p_h = 1;
 
+    p.rotate = d_video->codec->rotate;
+    p.stereo_in = d_video->codec->stereo_mode;
+
     if (opts->video_rotate < 0) {
         p.rotate = 0;
     } else {

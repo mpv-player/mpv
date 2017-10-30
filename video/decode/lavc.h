@@ -40,9 +40,6 @@ typedef struct lavc_ctx {
     bool intra_only;
     int framedrop_flags;
 
-    // For HDR side-data caching
-    float cached_sig_peak;
-
     bool hw_probing;
     struct demux_packet **sent_packets;
     int num_sent_packets;

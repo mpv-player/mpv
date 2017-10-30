@@ -26,6 +26,10 @@
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
+#if LIBAVUTIL_VERSION_MICRO >= 100
+#include <libavutil/mastering_display_metadata.h>
+#endif
+
 #include "mpv_talloc.h"
 
 #include "config.h"
@@ -872,6 +876,21 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
     if (sd)
         dst->icc_profile = av_buffer_ref(sd->buf);
+
+    // Get the content light metadata if available
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
+    if (sd) {
+        AVContentLightMetadata *clm = (AVContentLightMetadata *)sd->data;
+        dst->params.color.sig_peak = clm->MaxCLL / MP_REF_WHITE;
+    }
+
+    // Otherwise, try getting the mastering metadata if available
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+    if (!dst->params.color.sig_peak && sd) {
+        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
+        if (mdm->has_luminance)
+            dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
+    }
 #endif
 
     if (dst->hwctx) {

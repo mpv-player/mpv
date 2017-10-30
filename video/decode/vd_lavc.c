@@ -49,10 +49,6 @@
 #include "video/sws_utils.h"
 #include "video/out/vo.h"
 
-#if LIBAVCODEC_VERSION_MICRO >= 100
-#include <libavutil/mastering_display_metadata.h>
-#endif
-
 #include "lavc.h"
 
 #if AVPALETTE_SIZE != MP_PALETTE_SIZE
@@ -728,39 +724,6 @@ static void uninit_avctx(struct dec_video *vd)
     ctx->hw_probing = false;
 }
 
-static void update_image_params(struct dec_video *vd, AVFrame *frame,
-                                struct mp_image_params *params)
-{
-    vd_ffmpeg_ctx *ctx = vd->priv;
-    AVFrameSideData *sd;
-
-#if LIBAVCODEC_VERSION_MICRO >= 100
-    // Get the content light metadata if available
-    sd = av_frame_get_side_data(frame, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
-    if (sd) {
-        AVContentLightMetadata *clm = (AVContentLightMetadata *)sd->data;
-        params->color.sig_peak = clm->MaxCLL / MP_REF_WHITE;
-    }
-
-    // Otherwise, try getting the mastering metadata if available
-    sd = av_frame_get_side_data(frame, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
-    if (!params->color.sig_peak && sd) {
-        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
-        if (mdm->has_luminance)
-            params->color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
-    }
-#endif
-
-    if (params->color.sig_peak) {
-        ctx->cached_sig_peak = params->color.sig_peak;
-    } else {
-        params->color.sig_peak = ctx->cached_sig_peak;
-    }
-
-    params->rotate = vd->codec->rotate;
-    params->stereo_in = vd->codec->stereo_mode;
-}
-
 static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
 {
     struct lavc_ctx *ctx = vd->priv;
@@ -1173,8 +1136,6 @@ static bool decode_frame(struct dec_video *vd)
     mpi->pkt_duration =
         mp_pts_from_av(ctx->pic->pkt_duration, &ctx->codec_timebase);
 #endif
-
-    update_image_params(vd, ctx->pic, &mpi->params);
 
     av_frame_unref(ctx->pic);
 
