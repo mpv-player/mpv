@@ -1696,10 +1696,10 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
     if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    if (s.ts_max == MP_NOPTS_VALUE)
+    if (s.ts_end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, s.ts_max);
+    return m_property_double_ro(action, arg, s.ts_end);
 }
 
 static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
@@ -1739,14 +1739,15 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
 
     struct mpv_node *ranges =
         node_map_add(r, "seekable-ranges", MPV_FORMAT_NODE_ARRAY);
-    if (s.ts_min != MP_NOPTS_VALUE && s.ts_max != MP_NOPTS_VALUE && s.seekable) {
+    for (int n = 0; n < s.num_seek_ranges; n++) {
+        struct demux_seek_range *range = &s.seek_ranges[n];
         struct mpv_node *sub = node_array_add(ranges, MPV_FORMAT_NODE_MAP);
-        node_map_add_double(sub, "start", s.ts_min);
-        node_map_add_double(sub, "end", s.ts_max);
+        node_map_add_double(sub, "start", range->start);
+        node_map_add_double(sub, "end", range->end);
     }
 
-    if (s.ts_start != MP_NOPTS_VALUE)
-        node_map_add_double(r, "cache-end", s.ts_max);
+    if (s.ts_end != MP_NOPTS_VALUE)
+        node_map_add_double(r, "cache-end", s.ts_end);
 
     if (s.ts_reader != MP_NOPTS_VALUE)
         node_map_add_double(r, "reader-pts", s.ts_reader);

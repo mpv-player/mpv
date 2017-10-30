@@ -659,6 +659,8 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         dp->pts = dp->dts;
 
     double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
+    if (dp->segmented)
+        ts = MP_PTS_MIN(ts, dp->end);
     if (ts != MP_NOPTS_VALUE && (ts > ds->last_ts || ts + 10 < ds->last_ts))
         ds->last_ts = ts;
     if (ds->base_ts == MP_NOPTS_VALUE)
@@ -1681,15 +1683,16 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
     if (cached_demux_control(in, DEMUXER_CTRL_GET_READER_STATE, &rstate) < 0)
         return false;
 
-    double start = MP_ADD_PTS(rstate.ts_min, -in->ts_offset);
-    double end = MP_ADD_PTS(rstate.ts_max, -in->ts_offset);
+    struct demux_seek_range r = {MP_NOPTS_VALUE, MP_NOPTS_VALUE};
+    if (rstate.num_seek_ranges > 0)
+        r = rstate.seek_ranges[0];
 
-    MP_VERBOSE(in, "in-cache seek range = %f <-> %f (%f)\n", start, end, pts);
+    r.start = MP_ADD_PTS(r.start, -in->ts_offset);
+    r.end = MP_ADD_PTS(r.end, -in->ts_offset);
 
-    if (start == MP_NOPTS_VALUE || end == MP_NOPTS_VALUE)
-        return false;
+    MP_VERBOSE(in, "in-cache seek range = %f <-> %f (%f)\n", r.start, r.end, pts);
 
-    if (pts < start || pts > end)
+    if (pts < r.start || pts > r.end)
         return false;
 
     clear_reader_state(in);
@@ -1971,15 +1974,13 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         struct demux_ctrl_reader_state *r = arg;
         *r = (struct demux_ctrl_reader_state){
             .eof = in->last_eof,
-            .seekable = in->seekable_cache,
-            .ts_start = MP_NOPTS_VALUE,
-            .ts_min = MP_NOPTS_VALUE,
-            .ts_max = MP_NOPTS_VALUE,
             .ts_reader = MP_NOPTS_VALUE,
             .ts_duration = -1,
         };
         bool any_packets = false;
-        bool seek_ok = true;
+        bool seek_ok = in->seekable_cache && !in->seeking;
+        double ts_min = MP_NOPTS_VALUE;
+        double ts_max = MP_NOPTS_VALUE;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             if (ds->active && !(!ds->queue_head && ds->eof) && !ds->ignore_eof)
@@ -1988,36 +1989,35 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
                 // (yes, this is asymmetric, and uses MAX in both cases - it's ok
                 // if it's a bit off for ts_max, as the demuxer can just wait for
-                // new packets if we seek there and also last_ts is the hightest
+                // new packets if we seek there and also last_ts is the highest
                 // DTS or PTS, while ts_min should be as accurate as possible, as
                 // we would have to trigger a real seek if it's off and we seeked
                 // there)
-                r->ts_min = MP_PTS_MAX(r->ts_min, ds->back_pts);
-                r->ts_max = MP_PTS_MAX(r->ts_max, ds->last_ts);
+                ts_min = MP_PTS_MAX(ts_min, ds->back_pts);
+                ts_max = MP_PTS_MAX(ts_max, ds->last_ts);
                 if (ds->back_pts == MP_NOPTS_VALUE ||
                     ds->last_ts == MP_NOPTS_VALUE)
                     seek_ok = false;
-                if (ds->queue_head) {
-                    any_packets = true;
-                    double ts = PTS_OR_DEF(ds->queue_head->dts,
-                                           ds->queue_head->pts);
-                    r->ts_start = MP_PTS_MIN(r->ts_start, ts);
-                    if (ds->queue_tail->segmented)
-                        r->ts_max = MP_PTS_MIN(r->ts_max, ds->queue_tail->end);
-                }
+                any_packets |= !!ds->queue_head;
             }
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
         r->underrun &= !r->idle;
-        r->ts_start = MP_ADD_PTS(r->ts_start, in->ts_offset);
-        r->ts_min = MP_ADD_PTS(r->ts_min, in->ts_offset);
-        r->ts_max = MP_ADD_PTS(r->ts_max, in->ts_offset);
-        if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_max)
-            r->ts_duration = r->ts_max - r->ts_reader;
+        ts_min = MP_ADD_PTS(ts_min, in->ts_offset);
+        ts_max = MP_ADD_PTS(ts_max, in->ts_offset);
+        r->ts_reader = MP_ADD_PTS(r->ts_reader, in->ts_offset);
+        if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= ts_max)
+            r->ts_duration = ts_max - r->ts_reader;
         if (in->seeking || !any_packets)
             r->ts_duration = 0;
-        if (in->seeking || !seek_ok)
-            r->ts_max = r->ts_min = MP_NOPTS_VALUE;
+        if (seek_ok && ts_min != MP_NOPTS_VALUE && ts_max > ts_min) {
+            r->num_seek_ranges = 1;
+            r->seek_ranges[0] = (struct demux_seek_range){
+                .start = ts_min,
+                .end = ts_max,
+            };
+        }
+        r->ts_end = ts_max;
         return CONTROL_OK;
     }
     }

@@ -40,16 +40,21 @@ enum demux_ctrl {
     DEMUXER_CTRL_REPLACE_STREAM,
 };
 
+#define MAX_SEEK_RANGES 1
+
+struct demux_seek_range {
+    double start, end;
+};
+
 struct demux_ctrl_reader_state {
-    bool eof, underrun, idle, seekable;
+    bool eof, underrun, idle;
     double ts_duration;
     double ts_reader; // approx. timerstamp of decoder position
-    double ts_start; // approx. timestamp for the earliest packet buffered
-    double ts_min; // timestamp of the earliest packet in backward cache
-                   // that can be seeked to (i.e. all streams have such
-                   // a packet for which normal seeks can be executed)
-    double ts_max; // timestamp of latest packet in forward cache that can be
-                   // seeked to
+    double ts_end; // approx. timestamp of end of buffered range
+    // Positions that can be seeked to without incurring the latency of a low
+    // level seek.
+    int num_seek_ranges;
+    struct demux_seek_range seek_ranges[MAX_SEEK_RANGES];
 };
 
 struct demux_ctrl_stream_ctrl {
