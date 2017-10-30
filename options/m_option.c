@@ -3249,6 +3249,16 @@ static char *print_node(const m_option_t *opt, const void *val)
     return t;
 }
 
+static char *pretty_print_node(const m_option_t *opt, const void *val)
+{
+    char *t = talloc_strdup(NULL, "");
+    if (json_write_pretty(&t, &VAL(val)) < 0) {
+        talloc_free(t);
+        t = NULL;
+    }
+    return t;
+}
+
 static void dup_node(void *ta_parent, struct mpv_node *node)
 {
     switch (node->format) {
@@ -3342,6 +3352,7 @@ const m_option_type_t m_option_type_node = {
     .size  = sizeof(struct mpv_node),
     .parse = parse_node,
     .print = print_node,
+    .pretty_print = pretty_print_node,
     .copy  = copy_node,
     .free  = free_node,
     .set   = node_set,
