@@ -3432,7 +3432,9 @@ Terminal
 
 ``--msg-level=<module1=level1,module2=level2,...>``
     Control verbosity directly for each module. The ``all`` module changes the
-    verbosity of all the modules not explicitly specified on the command line.
+    verbosity of all the modules. The verbosity changes from this option are
+    applied in order from left to right, and each item can override a previous
+    one.
 
     Run mpv with ``--msg-level=all=trace`` to see all messages mpv outputs. You
     can use the module names printed in the output (prefixed to each line in
