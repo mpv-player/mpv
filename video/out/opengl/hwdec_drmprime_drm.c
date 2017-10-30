@@ -67,7 +67,10 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
     // We used old frame as triple buffering to make sure that the drm framebuffer
     // is not being displayed when we release it.
 
-    drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &p->old_frame.fb);
+    if (p->ctx) {
+        drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &p->old_frame.fb);
+    }
+
     mp_image_setrefp(&p->old_frame.image, p->current_frame.image);
     p->old_frame.fb = p->current_frame.fb;
 
