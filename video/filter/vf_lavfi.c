@@ -326,7 +326,7 @@ static void get_metadata_from_av_frame(struct vf_instance *vf, AVFrame *frame)
     if (!p->metadata)
         p->metadata = talloc_zero(p, struct mp_tags);
 
-    mp_tags_copy_from_av_dictionary(p->metadata, av_frame_get_metadata(frame));
+    mp_tags_copy_from_av_dictionary(p->metadata, frame->metadata);
 #endif
 }
 

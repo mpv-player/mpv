@@ -1292,7 +1292,7 @@ static bool decode_frame(struct dec_video *vd)
 
 #if LIBAVCODEC_VERSION_MICRO >= 100
     mpi->pkt_duration =
-        mp_pts_from_av(av_frame_get_pkt_duration(ctx->pic), &ctx->codec_timebase);
+        mp_pts_from_av(ctx->pic->pkt_duration, &ctx->codec_timebase);
 #endif
 
     update_image_params(vd, ctx->pic, &mpi->params);
