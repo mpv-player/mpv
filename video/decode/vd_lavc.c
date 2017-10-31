@@ -313,18 +313,6 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
     return false;
 }
 
-int hwdec_get_max_refs(struct lavc_ctx *ctx)
-{
-    switch (ctx->avctx->codec_id) {
-    case AV_CODEC_ID_H264:
-    case AV_CODEC_ID_HEVC:
-        return 16;
-    case AV_CODEC_ID_VP9:
-        return 8;
-    }
-    return 2;
-}
-
 // This is intended to return the name of a decoder for a given wrapper API.
 // Decoder wrappers are usually added to libavcodec with a specific suffix.
 // For example the mmal h264 decoder is named h264_mmal.

@@ -140,14 +140,4 @@ enum {
     HWDEC_ERR_EMULATED = -4,    // probing successful, but emulated API detected
 };
 
-struct hwdec_profile_entry {
-    enum AVCodecID av_codec;
-    int ff_profile;
-    uint64_t hw_profile;
-};
-
-int hwdec_get_max_refs(struct lavc_ctx *ctx);
-int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
-                              int av_sw_format, int initial_pool_size);
-
 #endif
