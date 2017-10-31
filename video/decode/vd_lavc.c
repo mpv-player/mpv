@@ -562,9 +562,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (strstr(decoder, "_mmal"))
         ctx->codec_timebase = (AVRational){1, 1000000};
 
-    ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
-    ctx->hwdec_fmt = 0;
     ctx->hwdec_failed = false;
     ctx->hwdec_request_reinit = false;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
@@ -590,8 +588,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
         if (ctx->hwdec->image_format)
             avctx->get_format = get_format_hwdec;
-        if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0)
-            goto error;
         if (ctx->hwdec->generic_hwaccel) {
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
@@ -818,28 +814,10 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
             if (ctx->hwdec->generic_hwaccel) {
                 if (init_generic_hwaccel(vd, fmt[i]) < 0)
                     break;
-                select = fmt[i];
-                break;
-            }
-            // There could be more reasons for a change, and it's possible
-            // that we miss some. (Might also depend on the hwaccel type.)
-            bool change =
-                ctx->hwdec_w != avctx->coded_width ||
-                ctx->hwdec_h != avctx->coded_height ||
-                ctx->hwdec_fmt != ctx->hwdec->image_format ||
-                ctx->hwdec_profile != avctx->profile ||
-                ctx->hwdec_request_reinit;
-            ctx->hwdec_w = avctx->coded_width;
-            ctx->hwdec_h = avctx->coded_height;
-            ctx->hwdec_fmt = ctx->hwdec->image_format;
-            ctx->hwdec_profile = avctx->profile;
-            ctx->hwdec_request_reinit = false;
-            if (change && ctx->hwdec->init_decoder) {
-                if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_w, ctx->hwdec_h) < 0)
-                {
-                    ctx->hwdec_fmt = 0;
+            } else {
+                ctx->hwdec_request_reinit = false;
+                if (ctx->hwdec->init_decoder && ctx->hwdec->init_decoder(ctx) < 0)
                     break;
-                }
             }
             select = fmt[i];
             break;

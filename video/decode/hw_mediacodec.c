@@ -31,12 +31,7 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
     return 0;
 }
 
-static int init(struct lavc_ctx *ctx)
-{
-    return 0;
-}
-
-static int init_decoder(struct lavc_ctx *ctx, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx)
 {
     av_mediacodec_default_free(ctx->avctx);
 
@@ -59,7 +54,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
     .image_format = IMGFMT_MEDIACODEC,
     .lavc_suffix = "_mediacodec",
     .probe = probe,
-    .init = init,
     .init_decoder = init_decoder,
     .uninit = uninit,
 };
