@@ -5,6 +5,7 @@
 #include <pthread.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/hwcontext.h>
 
 #include "config.h"
 

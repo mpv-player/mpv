@@ -24,7 +24,6 @@
 
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
-#include <libavutil/hwcontext.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
