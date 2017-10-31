@@ -126,8 +126,6 @@ const struct m_sub_options vd_lavc_conf = {
 
 extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec;
 extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec_copy;
-extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox;
-extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va;
@@ -248,6 +246,25 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
         {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_YUV420P},
         {AV_PIX_FMT_NONE}
     },
+};
+#endif
+
+#if HAVE_VIDEOTOOLBOX_HWACCEL
+static const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox = {
+    .type = HWDEC_VIDEOTOOLBOX,
+    .image_format = IMGFMT_VIDEOTOOLBOX,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+};
+static const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
+    .type = HWDEC_VIDEOTOOLBOX_COPY,
+    .copying = true,
+    .image_format = IMGFMT_VIDEOTOOLBOX,
+    .generic_hwaccel = true,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
+    .set_hwframes = true,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };
 #endif
 

@@ -370,7 +370,6 @@ def build(ctx):
         ( "video/decode/hw_dxva2.c",             "d3d9-hwaccel" ),
         ( "video/decode/hw_d3d11va.c",           "d3d-hwaccel" ),
         ( "video/decode/hw_mediacodec.c",        "android" ),
-        ( "video/decode/hw_videotoolbox.c",      "videotoolbox-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
