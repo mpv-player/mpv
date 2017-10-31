@@ -254,7 +254,7 @@ typedef int (*mpv_open_cplugin)(mpv_handle *handle);
 
 static int load_cplugin(struct mpv_handle *client, const char *fname)
 {
-    int r = -1;
+    MPContext *ctx = mp_client_get_core(client);
     void *lib = dlopen(fname, RTLD_NOW | RTLD_LOCAL);
     if (!lib)
         goto error;
@@ -263,9 +263,12 @@ static int load_cplugin(struct mpv_handle *client, const char *fname)
     mpv_open_cplugin sym = (mpv_open_cplugin)dlsym(lib, MPV_DLOPEN_FN);
     if (!sym)
         goto error;
-    r = sym(client) ? -1 : 0;
-error:
-    return r;
+    return sym(client) ? -1 : 0;
+error: ;
+    char *err = dlerror();
+    if (err)
+        MP_ERR(ctx, "C plugin error: '%s'\n", err);
+    return -1;
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
