@@ -80,7 +80,6 @@ bool d3d11_check_decoding(ID3D11Device *dev)
     return !FAILED(hr) && (supported & D3D11_BIND_DECODER);
 }
 
-#if HAVE_AVCODEC_HW_FRAMES_PARAMS
 void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
 {
     AVHWFramesContext *fctx = (void *)hw_frames_ctx->data;
@@ -91,47 +90,6 @@ void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
         hwctx->BindFlags |= D3D11_BIND_SHADER_RESOURCE;
     }
 }
-#else
-void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
-{
-    AVHWFramesContext *fctx = (void *)hw_frames_ctx->data;
-
-    int alignment = 16;
-    switch (ctx->avctx->codec_id) {
-        // decoding MPEG-2 requires additional alignment on some Intel GPUs, but it
-        // causes issues for H.264 on certain AMD GPUs.....
-    case AV_CODEC_ID_MPEG2VIDEO:
-        alignment = 32;
-        break;
-        // the HEVC DXVA2 spec asks for 128 pixel aligned surfaces to ensure
-        // all coding features have enough room to work with
-    case AV_CODEC_ID_HEVC:
-        alignment = 128;
-        break;
-    }
-    fctx->width  = FFALIGN(fctx->width,  alignment);
-    fctx->height = FFALIGN(fctx->height, alignment);
-
-#if HAVE_D3D9_HWACCEL
-    if (fctx->format == AV_PIX_FMT_DXVA2_VLD) {
-        AVDXVA2FramesContext *hwctx = fctx->hwctx;
-
-        hwctx->surface_type = DXVA2_VideoDecoderRenderTarget;
-    }
-#endif
-
-    if (fctx->format == AV_PIX_FMT_D3D11) {
-        AVD3D11VAFramesContext *hwctx = fctx->hwctx;
-
-        hwctx->BindFlags |= D3D11_BIND_DECODER;
-
-        // According to hwcontex_d3d11va.h, yuv420p means DXGI_FORMAT_420_OPAQUE,
-        // which has no shader support.
-        if (fctx->sw_format != AV_PIX_FMT_YUV420P)
-            hwctx->BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-    }
-}
-#endif
 
 AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device)
 {
