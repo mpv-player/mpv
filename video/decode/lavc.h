@@ -99,16 +99,11 @@ struct vd_lavc_hwdec {
     // efficiency by not blocking on the hardware pipeline by reading back
     // immediately after decoding.
     int delay_queue;
-    // If true, AVCodecContext will destroy the underlying decoder.
-    bool volatile_context;
     int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);
     int (*init_decoder)(struct lavc_ctx *ctx, int w, int h);
     void (*uninit)(struct lavc_ctx *ctx);
-    // Note: if init_decoder is set, this will always use the values from the
-    //       last successful init_decoder call. Otherwise, it's up to you.
-    struct mp_image *(*allocate_image)(struct lavc_ctx *ctx, int w, int h);
     // Process the image returned by the libavcodec decoder.
     struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
     // For copy hwdecs. If probing is true, don't log errors if unavailable.
@@ -126,12 +121,6 @@ struct vd_lavc_hwdec {
     // If set, AVCodecContext.hw_frames_ctx will be initialized in get_format,
     // and pixfmt_map must be non-NULL.
     bool set_hwframes;
-    // Array of pixfmt pairs. The first pixfmt is the AVCodecContext.sw_pix_fmt,
-    // the second the required AVHWFramesContext.sw_format.
-    const enum AVPixelFormat (*pixfmt_map)[2];
-    // The generic hwaccel has a fixed pool size. Enough surfaces need to be
-    // preallocated before decoding begins. If false, pool size is left to 0.
-    bool static_pool;
 };
 
 enum {

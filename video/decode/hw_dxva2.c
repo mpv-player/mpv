@@ -171,14 +171,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
     .image_format = IMGFMT_DXVA2,
     .generic_hwaccel = true,
     .set_hwframes = true,
-    .static_pool = true,
     .hwframes_refine = d3d_hwframes_refine,
-    .pixfmt_map = (const enum AVPixelFormat[][2]) {
-        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
-        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
-        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
-        {AV_PIX_FMT_NONE}
-    },
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
@@ -188,13 +181,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .generic_hwaccel = true,
     .create_dev = d3d9_create_dev,
     .set_hwframes = true,
-    .static_pool = true,
     .hwframes_refine = d3d_hwframes_refine,
-    .pixfmt_map = (const enum AVPixelFormat[][2]) {
-        {AV_PIX_FMT_YUV420P10, AV_PIX_FMT_P010},
-        {AV_PIX_FMT_YUV420P,   AV_PIX_FMT_NV12},
-        {AV_PIX_FMT_YUVJ420P,  AV_PIX_FMT_NV12},
-        {AV_PIX_FMT_NONE}
-    },
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };
