@@ -147,17 +147,14 @@ with FFmpeg only (subtitle formats in particular).
 
 ## Preferred FFmpeg version
 
+Only [ffmpeg-mpv][ffmpeg-mpv] is supported. Upstream FFmpeg can be forced by
+passing a certain switch to configure, but compilation or runtime behavior
+might be broken at times.
 
-Using the latest FFmpeg release (or FFmpeg git master) is strongly recommended.
-Older versions are unsupported, even if the build system still happens to
-accept them. The main reason mpv still builds with older FFmpeg versions is to
-evade arguing with people (users, distros) who insist on using older FFmpeg
-versions for no rational reason.
-
-If you want to use a stable FFmpeg release, use the latest release, which has
-most likely the best maintenance out of all stable releases. Older releases
-are for distros, and at best receive basic changes, like fixing critical security
-issues or build fixes, and at worst are completely abandoned.
+_If_ you force upstream FFmpeg, and it doesn't work, please contact upstream
+FFmpeg for help, instead of mpv. See
+[FFmpeg contact][http://ffmpeg.org/contact.html#MailingLists] how to contact
+FFmpeg upstream.
 
 ## FFmpeg ABI compatibility
 

@@ -44,8 +44,7 @@
 
 #if HAVE_LIBAV
 #include <libavresample/avresample.h>
-#endif
-#if HAVE_FFMPEG_MPV
+#else
 #include <libswresample/swresample.h>
 #endif
 
@@ -199,8 +198,7 @@ bool print_libav_versions(struct mp_log *log, int v)
         {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
 #if HAVE_LIBAV
         {"libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version()},
-#endif
-#if HAVE_FFMPEG_MPV
+#else
         {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
 #endif
     };

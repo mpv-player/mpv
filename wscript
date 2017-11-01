@@ -458,21 +458,22 @@ libav_dependencies = [
         'req': True,
         'fmsg': "FFmpeg/Libav development files not found.",
     }, {
-        'name': 'ffmpeg_mpv',
+        'name': 'ffmpeg-mpv',
         'desc': 'libav* is FFmpeg mpv modified version',
         'func': check_statement('libavcodec/version.h',
                                 'int x[LIBAVCODEC_MPV ? 1 : -1]',
                                 use='libavcodec')
     }, {
-        'name': 'ffmpeg_garbage',
-        'deps': '!ffmpeg_mpv',
+        'name': '--ffmpeg-garbage',
+        'deps': '!ffmpeg-mpv',
         'desc': 'libav* is upstream FFmpeg (unsupported)',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
         'func': check_statement('libavcodec/version.h',
                                 'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
-                                use='libavcodec')
+                                use='libavcodec'),
+        'default': 'disable',
     }, {
-        # This check should always result in the opposite of is_ffmpeg.
+        # This check should always result in the opposite of ffmpeg-*.
         # Run it to make sure is_ffmpeg didn't fail for some other reason than
         # the actual version check.
         'name': 'libav',
@@ -484,7 +485,7 @@ libav_dependencies = [
     }, {
         'name': 'libav-any',
         'desc': 'Libav/FFmpeg library versions',
-        'deps': 'ffmpeg_mpv || libav',
+        'deps': 'ffmpeg-mpv || ffmpeg-garbage || libav',
         'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \

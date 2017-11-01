@@ -33,7 +33,7 @@
 #include "fmt-conversion.h"
 #include "format.h"
 
-#define HAVE_LIBSWRESAMPLE HAVE_FFMPEG_MPV
+#define HAVE_LIBSWRESAMPLE (!HAVE_LIBAV)
 #define HAVE_LIBAVRESAMPLE HAVE_LIBAV
 
 #if HAVE_LIBAVRESAMPLE
