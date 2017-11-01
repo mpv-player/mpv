@@ -75,6 +75,7 @@ struct d3d_tex {
     ID3D11Texture1D *tex1d;
     ID3D11Texture2D *tex2d;
     ID3D11Texture3D *tex3d;
+    int array_slice;
 
     ID3D11ShaderResourceView *srv;
     ID3D11RenderTargetView *rtv;
@@ -259,14 +260,29 @@ static bool tex_init(struct ra *ra, struct ra_tex *tex)
         };
         switch (params->dimensions) {
         case 1:
-            srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
-            srvdesc.Texture1D.MipLevels = 1;
+            if (tex_p->array_slice >= 0) {
+                srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
+                srvdesc.Texture1DArray.MipLevels = 1;
+                srvdesc.Texture1DArray.FirstArraySlice = tex_p->array_slice;
+                srvdesc.Texture1DArray.ArraySize = 1;
+            } else {
+                srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
+                srvdesc.Texture1D.MipLevels = 1;
+            }
             break;
         case 2:
-            srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-            srvdesc.Texture2D.MipLevels = 1;
+            if (tex_p->array_slice >= 0) {
+                srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+                srvdesc.Texture2DArray.MipLevels = 1;
+                srvdesc.Texture2DArray.FirstArraySlice = tex_p->array_slice;
+                srvdesc.Texture2DArray.ArraySize = 1;
+            } else {
+                srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+                srvdesc.Texture2D.MipLevels = 1;
+            }
             break;
         case 3:
+            // D3D11 does not have Texture3D arrays
             srvdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
             srvdesc.Texture3D.MipLevels = 1;
             break;
@@ -442,6 +458,8 @@ static struct ra_tex *tex_create(struct ra *ra,
         abort();
     }
 
+    tex_p->array_slice = -1;
+
     if (!tex_init(ra, tex))
         goto error;
 
@@ -478,10 +496,18 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res)
 
         D3D11_TEXTURE2D_DESC desc2d;
         ID3D11Texture2D_GetDesc(tex_p->tex2d, &desc2d);
-        if (desc2d.MipLevels != 1 || desc2d.ArraySize != 1)
+        if (desc2d.MipLevels != 1) {
+            MP_ERR(ra, "Mipmapped textures not supported for wrapping\n");
             goto error;
-        if (desc2d.SampleDesc.Count != 1)
+        }
+        if (desc2d.ArraySize != 1) {
+            MP_ERR(ra, "Texture arrays not supported for wrapping\n");
             goto error;
+        }
+        if (desc2d.SampleDesc.Count != 1) {
+            MP_ERR(ra, "Multisampled textures not supported for wrapping\n");
+            goto error;
+        }
 
         params->dimensions = 2;
         params->w = desc2d.Width;
@@ -522,6 +548,8 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res)
         goto error;
     }
 
+    tex_p->array_slice = -1;
+
     if (!tex_init(ra, tex))
         goto error;
 
@@ -532,7 +560,7 @@ error:
 }
 
 struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
-                                       int w, int h,
+                                       int w, int h, int array_slice,
                                        const struct ra_format *fmt)
 {
     struct ra_tex *tex = talloc_zero(NULL, struct ra_tex);
@@ -558,6 +586,12 @@ struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
     params->src_linear = true;
     // fmt can be different to the texture format for planar video textures
     params->format = fmt;
+
+    if (desc2d.ArraySize > 1) {
+        tex_p->array_slice = array_slice;
+    } else {
+        tex_p->array_slice = -1;
+    }
 
     if (!tex_init(ra, tex))
         goto error;
@@ -611,12 +645,14 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
         }
     }
 
+    int subresource = tex_p->array_slice >= 0 ? tex_p->array_slice : 0;
     if (p->ctx1) {
-        ID3D11DeviceContext1_UpdateSubresource1(p->ctx1, tex_p->res, 0, rc,
-            src, stride, pitch, invalidate ? D3D11_COPY_DISCARD : 0);
+        ID3D11DeviceContext1_UpdateSubresource1(p->ctx1, tex_p->res,
+            subresource, rc, src, stride, pitch,
+            invalidate ? D3D11_COPY_DISCARD : 0);
     } else {
-        ID3D11DeviceContext_UpdateSubresource(p->ctx, tex_p->res, 0, rc,
-            src, stride, pitch);
+        ID3D11DeviceContext_UpdateSubresource(p->ctx, tex_p->res, subresource,
+            rc, src, stride, pitch);
     }
 
     return true;
@@ -1174,8 +1210,10 @@ static void blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     {
         blit_rpass(ra, dst, src, &dst_rc, &src_rc);
     } else {
-        ID3D11DeviceContext_CopySubresourceRegion(p->ctx, dst_p->res, 0,
-            dst_rc.x0, dst_rc.y0, 0, src_p->res, 0, (&(D3D11_BOX) {
+        int dst_sr = dst_p->array_slice >= 0 ? dst_p->array_slice : 0;
+        int src_sr = src_p->array_slice >= 0 ? src_p->array_slice : 0;
+        ID3D11DeviceContext_CopySubresourceRegion(p->ctx, dst_p->res, dst_sr,
+            dst_rc.x0, dst_rc.y0, 0, src_p->res, src_sr, (&(D3D11_BOX) {
                 .left = src_rc.x0,
                 .top = src_rc.y0,
                 .front = 0,

@@ -4297,6 +4297,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Schedule each frame to be presented for this number of VBlank intervals.
     (default: 1) Setting to 1 will enable VSync, setting to 0 will disable it.
 
+``--d3d11va-zero-copy=<yes|no>``
+    By default, when using hardware decoding with ``--gpu-api=d3d11``, the
+    video image will be copied (GPU-to-GPU) from the decoder surface to a
+    shader resource. Set this option to avoid that copy by sampling directly
+    from the decoder image. This may increase performance and reduce power
+    usage, but can cause the image to be sampled incorrectly on the bottom and
+    right edges due to padding, and may invoke driver bugs, since Direct3D 11
+    technically does not allow sampling from a decoder surface (though most
+    drivers support it.)
+
+    Currently only relevant for ``--gpu-api=d3d11``.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan``. The possible choices

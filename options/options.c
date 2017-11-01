@@ -91,6 +91,7 @@ extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
 extern const struct m_sub_options spirv_conf;
 extern const struct m_sub_options d3d11_conf;
+extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
@@ -702,6 +703,9 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_D3D11
     OPT_SUBSTRUCT("", d3d11_opts, d3d11_conf, 0),
+#if HAVE_D3D_HWACCEL
+    OPT_SUBSTRUCT("", d3d11va_opts, d3d11va_conf, 0),
+#endif
 #endif
 
 #if HAVE_EGL_ANGLE_WIN32
