@@ -198,8 +198,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         request_hwdec_api(vo, data);
         return true;
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        get_and_update_icc_profile(p);
         gl_video_configure_queue(p->renderer, vo);
+        get_and_update_icc_profile(p);
         vo->want_redraw = true;
         return true;
     }
