@@ -22,21 +22,45 @@
 #include "config.h"
 
 #include "common/common.h"
+#include "options/m_config.h"
 #include "osdep/windows_utils.h"
 #include "video/hwdec.h"
 #include "video/decode/d3d.h"
 #include "video/out/d3d11/ra_d3d11.h"
 #include "video/out/gpu/hwdec.h"
 
+struct d3d11va_opts {
+    int zero_copy;
+};
+
+#define OPT_BASE_STRUCT struct d3d11va_opts
+const struct m_sub_options d3d11va_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_FLAG("d3d11va-zero-copy", zero_copy, 0),
+        {0}
+    },
+    .defaults = &(const struct d3d11va_opts) {
+        .zero_copy = 0,
+    },
+    .size = sizeof(struct d3d11va_opts)
+};
+
 struct priv_owner {
+    struct d3d11va_opts *opts;
+
     struct mp_hwdec_ctx hwctx;
     ID3D11Device *device;
     ID3D11Device1 *device1;
 };
 
 struct priv {
+    // 1-copy path
     ID3D11DeviceContext1 *ctx;
     ID3D11Texture2D *copy_tex;
+
+    // zero-copy path
+    int num_planes;
+    const struct ra_format *fmt[4];
 };
 
 static void uninit(struct ra_hwdec *hw)
@@ -58,6 +82,8 @@ static int init(struct ra_hwdec *hw)
     p->device = ra_d3d11_get_device(hw->ra);
     if (!p->device)
         return -1;
+
+    p->opts = mp_get_config_group(hw->priv, hw->global, &d3d11va_conf);
 
     // D3D11VA requires Direct3D 11.1, so this should always succeed
     hr = ID3D11Device_QueryInterface(p->device, &IID_ID3D11Device1,
@@ -109,52 +135,56 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     mapper->dst_params.hw_subfmt = 0;
 
     struct ra_imgfmt_desc desc = {0};
-    struct mp_image layout = {0};
 
     if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
         return -1;
 
-    mp_image_set_params(&layout, &mapper->dst_params);
+    if (o->opts->zero_copy) {
+        // In the zero-copy path, we create the ra_tex objects in the map
+        // operation, so we just need to store the format of each plane
+        p->num_planes = desc.num_planes;
+        for (int i = 0; i < desc.num_planes; i++)
+            p->fmt[i] = desc.planes[i];
+    } else {
+        struct mp_image layout = {0};
+        mp_image_set_params(&layout, &mapper->dst_params);
 
-    DXGI_FORMAT copy_fmt;
-    switch (mapper->dst_params.imgfmt) {
-    case IMGFMT_NV12: copy_fmt = DXGI_FORMAT_NV12; break;
-    case IMGFMT_P010: copy_fmt = DXGI_FORMAT_P010; break;
-    default: return -1;
-    }
+        DXGI_FORMAT copy_fmt;
+        switch (mapper->dst_params.imgfmt) {
+        case IMGFMT_NV12: copy_fmt = DXGI_FORMAT_NV12; break;
+        case IMGFMT_P010: copy_fmt = DXGI_FORMAT_P010; break;
+        default: return -1;
+        }
 
-    // We copy decoder images to an intermediate texture. This is slower than
-    // the zero-copy path, but according to MSDN, decoder textures should not
-    // be bound to SRVs, so it is technically correct, and it works around some
-    // driver "bugs" that can happen with the zero-copy path. It also allows
-    // samplers to work correctly when the decoder image includes padding.
-    D3D11_TEXTURE2D_DESC copy_desc = {
-        .Width = mapper->dst_params.w,
-        .Height = mapper->dst_params.h,
-        .MipLevels = 1,
-        .ArraySize = 1,
-        .SampleDesc.Count = 1,
-        .Format = copy_fmt,
-        .BindFlags = D3D11_BIND_SHADER_RESOURCE,
-    };
-    hr = ID3D11Device_CreateTexture2D(o->device, &copy_desc, NULL, &p->copy_tex);
-    if (FAILED(hr)) {
-        MP_FATAL(mapper, "Could not create shader resource texture\n");
-        return -1;
-    }
-
-    for (int i = 0; i < desc.num_planes; i++) {
-        mapper->tex[i] = ra_d3d11_wrap_tex_video(mapper->ra, p->copy_tex,
-                                                 mp_image_plane_w(&layout, i),
-                                                 mp_image_plane_h(&layout, i),
-                                                 desc.planes[i]);
-        if (!mapper->tex[i]) {
-            MP_FATAL(mapper, "Could not create RA texture view\n");
+        D3D11_TEXTURE2D_DESC copy_desc = {
+            .Width = mapper->dst_params.w,
+            .Height = mapper->dst_params.h,
+            .MipLevels = 1,
+            .ArraySize = 1,
+            .SampleDesc.Count = 1,
+            .Format = copy_fmt,
+            .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+        };
+        hr = ID3D11Device_CreateTexture2D(o->device, &copy_desc, NULL,
+                                          &p->copy_tex);
+        if (FAILED(hr)) {
+            MP_FATAL(mapper, "Could not create shader resource texture\n");
             return -1;
         }
-    }
 
-    ID3D11Device1_GetImmediateContext1(o->device1, &p->ctx);
+        for (int i = 0; i < desc.num_planes; i++) {
+            mapper->tex[i] = ra_d3d11_wrap_tex_video(mapper->ra, p->copy_tex,
+                mp_image_plane_w(&layout, i), mp_image_plane_h(&layout, i), 0,
+                desc.planes[i]);
+            if (!mapper->tex[i]) {
+                MP_FATAL(mapper, "Could not create RA texture view\n");
+                return -1;
+            }
+        }
+
+        // A ref to the immediate context is needed for CopySubresourceRegion
+        ID3D11Device1_GetImmediateContext1(o->device1, &p->ctx);
+    }
 
     return 0;
 }
@@ -165,18 +195,45 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     ID3D11Texture2D *tex = (void *)mapper->src->planes[0];
     int subresource = (intptr_t)mapper->src->planes[1];
 
-    ID3D11DeviceContext1_CopySubresourceRegion1(p->ctx,
-        (ID3D11Resource *)p->copy_tex, 0, 0, 0, 0,
-        (ID3D11Resource *)tex, subresource, (&(D3D11_BOX) {
-            .left = 0,
-            .top = 0,
-            .front = 0,
-            .right = mapper->dst_params.w,
-            .bottom = mapper->dst_params.h,
-            .back = 1,
-        }), D3D11_COPY_DISCARD);
+    if (p->copy_tex) {
+        ID3D11DeviceContext1_CopySubresourceRegion1(p->ctx,
+            (ID3D11Resource *)p->copy_tex, 0, 0, 0, 0,
+            (ID3D11Resource *)tex, subresource, (&(D3D11_BOX) {
+                .left = 0,
+                .top = 0,
+                .front = 0,
+                .right = mapper->dst_params.w,
+                .bottom = mapper->dst_params.h,
+                .back = 1,
+            }), D3D11_COPY_DISCARD);
+    } else {
+        D3D11_TEXTURE2D_DESC desc2d;
+        ID3D11Texture2D_GetDesc(tex, &desc2d);
+
+        for (int i = 0; i < p->num_planes; i++) {
+            // The video decode texture may include padding, so the size of the
+            // ra_tex needs to be determined by the actual size of the Tex2D
+            bool chroma = i >= 1;
+            int w = desc2d.Width / (chroma ? 2 : 1);
+            int h = desc2d.Height / (chroma ? 2 : 1);
+
+            mapper->tex[i] = ra_d3d11_wrap_tex_video(mapper->ra, tex,
+                w, h, subresource, p->fmt[i]);
+            if (!mapper->tex[i])
+                return -1;
+        }
+    }
 
     return 0;
+}
+
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+    if (p->copy_tex)
+        return;
+    for (int i = 0; i < 4; i++)
+        ra_tex_free(mapper->ra, &mapper->tex[i]);
 }
 
 const struct ra_hwdec_driver ra_hwdec_d3d11va = {
@@ -191,5 +248,6 @@ const struct ra_hwdec_driver ra_hwdec_d3d11va = {
         .init = mapper_init,
         .uninit = mapper_uninit,
         .map = mapper_map,
+        .unmap = mapper_unmap,
     },
 };

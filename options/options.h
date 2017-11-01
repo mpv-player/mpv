@@ -333,6 +333,7 @@ typedef struct MPOpts {
     struct vulkan_opts *vulkan_opts;
     struct spirv_opts *spirv_opts;
     struct d3d11_opts *d3d11_opts;
+    struct d3d11va_opts *d3d11va_opts;
     struct cocoa_opts *cocoa_opts;
     struct dvd_opts *dvd_opts;
 

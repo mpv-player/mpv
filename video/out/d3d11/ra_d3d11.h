@@ -22,8 +22,9 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res);
 
 // As above, but for a D3D11VA video resource. The fmt parameter selects which
 // plane of a planar format will be mapped when the RA texture is used.
+// array_slice should be set for texture arrays and is ignored for non-arrays.
 struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
-                                       int w, int h,
+                                       int w, int h, int array_slice,
                                        const struct ra_format *fmt);
 
 // Get the underlying D3D11 device from an RA instance. The returned device is
