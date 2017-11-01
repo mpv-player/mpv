@@ -464,7 +464,7 @@ libav_dependencies = [
                                 'int x[LIBAVCODEC_MPV ? 1 : -1]',
                                 use='libavcodec')
     }, {
-        'name': '--ffmpeg-garbage',
+        'name': '--ffmpeg-upstream',
         'deps': '!ffmpeg-mpv',
         'desc': 'libav* is upstream FFmpeg (unsupported)',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
@@ -485,7 +485,7 @@ libav_dependencies = [
     }, {
         'name': 'libav-any',
         'desc': 'Libav/FFmpeg library versions',
-        'deps': 'ffmpeg-mpv || ffmpeg-garbage || libav',
+        'deps': 'ffmpeg-mpv || ffmpeg-upstream || libav',
         'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
