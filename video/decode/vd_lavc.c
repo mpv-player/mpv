@@ -725,6 +725,8 @@ static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
 
     if (hwdec->image_format == IMGFMT_VIDEOTOOLBOX)
         new_fctx->sw_format = imgfmt2pixfmt(vd->opts->videotoolbox_format);
+    if (vd->opts->hwdec_image_format)
+        new_fctx->sw_format = imgfmt2pixfmt(vd->opts->hwdec_image_format);
 
     // The video output might not support all formats.
     // Note that supported_formats==NULL means any are accepted.

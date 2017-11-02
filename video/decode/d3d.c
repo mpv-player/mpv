@@ -87,7 +87,10 @@ void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
     if (fctx->format == AV_PIX_FMT_D3D11) {
         AVD3D11VAFramesContext *hwctx = fctx->hwctx;
 
-        hwctx->BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+        // According to hwcontex_d3d11va.h, yuv420p means DXGI_FORMAT_420_OPAQUE,
+        // which has no shader support.
+        if (fctx->sw_format != AV_PIX_FMT_YUV420P)
+            hwctx->BindFlags |= D3D11_BIND_SHADER_RESOURCE;
     }
 }
 
