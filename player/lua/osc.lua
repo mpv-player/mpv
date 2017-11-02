@@ -600,7 +600,7 @@ function render_elements(master_ass)
                 for _,range in pairs(seekRanges) do
                     local pstart = get_slider_ele_pos_for(element, range["start"])
                     local pend = get_slider_ele_pos_for(element, range["end"])
-                    elem_ass:rect_cw(pstart, 0, pend, 5)
+                    elem_ass:rect_ccw(pstart, (elem_geo.h/2)-1, pend, (elem_geo.h/2) + 1)
                 end
             end
 
