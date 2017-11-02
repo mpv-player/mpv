@@ -209,7 +209,7 @@ static void mangle_ass(bstr *dst, const char *in)
         if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
         // Libass will strip leading whitespace
-        if (in[0] == ' ' && in != start && in[-1] == '\n') {
+        if (in[0] == ' ' && (in == start || in[-1] == '\n')) {
             bstr_xappend(NULL, dst, bstr0("\\h"));
             in += 1;
             continue;
