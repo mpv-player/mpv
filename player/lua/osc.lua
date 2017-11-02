@@ -594,6 +594,16 @@ function render_elements(master_ass)
                 end
             end
 
+            -- seek ranges
+            local seekRanges = element.slider.seekRangesF()
+            if not (seekRanges == nil) then
+                for _,range in pairs(seekRanges) do
+                    local pstart = get_slider_ele_pos_for(element, range["start"])
+                    local pend = get_slider_ele_pos_for(element, range["end"])
+                    elem_ass:rect_cw(pstart, 0, pend, 5)
+                end
+            end
+
             elem_ass:draw_stop()
 
             -- add tooltip
@@ -1745,6 +1755,22 @@ function osc_init()
         else
             return ""
         end
+    end
+    ne.slider.seekRangesF = function()
+        local cache_state = mp.get_property_native("demuxer-cache-state", nil)
+        if not cache_state then
+            return nil
+        end
+        local duration = mp.get_property_number("duration", nil)
+        if (duration == nil) or duration <= 0 then
+            return nil
+        end
+        local ranges = cache_state["seekable-ranges"]
+        for _, range in pairs(ranges) do
+            range["start"] = 100 * range["start"] / duration
+            range["end"] = 100 * range["end"] / duration
+        end
+        return ranges
     end
     ne.eventresponder["mouse_move"] = --keyframe seeking when mouse is dragged
         function (element)
