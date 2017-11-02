@@ -364,6 +364,11 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
             talloc_free(t);
         }
 
+        char *full_dir = bstrto0(fname, mp_dirname(fname));
+        if (!mp_path_exists(full_dir)) {
+            mp_mkdirp(full_dir);
+        }
+
         if (!mp_path_exists(fname))
             return fname;
 
