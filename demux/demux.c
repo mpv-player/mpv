@@ -2014,7 +2014,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         double ts_max = MP_NOPTS_VALUE;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            if (ds->active && !(!ds->queue_head && ds->eof) && !ds->ignore_eof)
+            if (ds->active && !(!ds->queue_head && ds->eof) &&
+                !ds->ignore_eof && ds->type != STREAM_SUB)
             {
                 r->underrun |= !ds->reader_head && !ds->eof;
                 r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
