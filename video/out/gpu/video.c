@@ -894,20 +894,6 @@ static void init_video(struct gl_video *p)
     gl_video_setup_hooks(p);
 }
 
-// Release any texture mappings associated with the current frame.
-static void unmap_current_image(struct gl_video *p)
-{
-    struct video_image *vimg = &p->image;
-
-    if (vimg->hwdec_mapped) {
-        assert(p->hwdec_active && p->hwdec_mapper);
-        ra_hwdec_mapper_unmap(p->hwdec_mapper);
-        memset(vimg->planes, 0, sizeof(vimg->planes));
-        vimg->hwdec_mapped = false;
-        vimg->id = 0; // needs to be mapped again
-    }
-}
-
 static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
 {
    for (int i = 0; i < p->num_dr_buffers; i++) {
@@ -948,10 +934,18 @@ again:;
 
 static void unref_current_image(struct gl_video *p)
 {
-    unmap_current_image(p);
-    p->image.id = 0;
+    struct video_image *vimg = &p->image;
 
-    mp_image_unrefp(&p->image.mpi);
+    if (vimg->hwdec_mapped) {
+        assert(p->hwdec_active && p->hwdec_mapper);
+        ra_hwdec_mapper_unmap(p->hwdec_mapper);
+        memset(vimg->planes, 0, sizeof(vimg->planes));
+        vimg->hwdec_mapped = false;
+    }
+
+    vimg->id = 0;
+
+    mp_image_unrefp(&vimg->mpi);
 
     // While we're at it, also garbage collect pending fences in here to
     // get it out of the way.
@@ -3088,8 +3082,6 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
     }
 
 done:
-
-    unmap_current_image(p);
 
     debug_check_gl(p, "after video rendering");
 
