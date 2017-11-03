@@ -702,7 +702,7 @@ static bool read_packet(struct demux_internal *in)
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
     // safe-guards against packet queue overflow.
-    bool active = false, read_more = false;
+    bool active = false, read_more = false, prefetch_more = false;
     size_t bytes = 0;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
@@ -711,11 +711,13 @@ static bool read_packet(struct demux_internal *in)
         bytes += ds->fw_bytes;
         if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0 &&
             ds->last_ts >= ds->base_ts)
-            read_more |= ds->last_ts - ds->base_ts < in->min_secs;
+            prefetch_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
-    MP_DBG(in, "bytes=%zd, active=%d, more=%d\n",
-           bytes, active, read_more);
+    MP_DBG(in, "bytes=%zd, active=%d, read_more=%d prefetch_more=%d\n",
+           bytes, active, read_more, prefetch_more);
     if (bytes >= in->max_bytes) {
+        if (!read_more)
+            return false;
         if (!in->warned_queue_overflow) {
             in->warned_queue_overflow = true;
             MP_WARN(in, "Too many packets in the demuxer packet queues:\n");
@@ -743,9 +745,8 @@ static bool read_packet(struct demux_internal *in)
 
     double seek_pts = get_refresh_seek_pts(in);
     bool refresh_seek = seek_pts != MP_NOPTS_VALUE;
-    read_more |= refresh_seek;
 
-    if (!read_more)
+    if (!read_more && !refresh_seek && !prefetch_more)
         return false;
 
     // Actually read a packet. Drop the lock while doing so, because waiting
