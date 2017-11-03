@@ -2387,6 +2387,6 @@ end
 
 visibility_mode(user_opts.visibility, true)
 mp.register_script_message("osc-visibility", visibility_mode)
-mp.add_key_binding("del", function() visibility_mode("cycle") end)
+mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
