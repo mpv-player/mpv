@@ -627,7 +627,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
         GLSLF("float b = (j*j - 2.0*j*sig_peak + sig_peak) / "
               "max(1e-6, sig_peak - 1.0);\n");
         GLSLF("float scale = (b*b + 2.0*b*j + j*j) / (b-a);\n");
-        GLSL(sig = mix(sig, scale * (sig + a) / (sig + b), sig > j);)
+        GLSL(sig = sig > j ? scale * (sig + a) / (sig + b) : sig;)
         break;
 
     case TONE_MAPPING_REINHARD: {
