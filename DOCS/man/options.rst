@@ -2134,6 +2134,18 @@ Subtitles
 
     Default: ``no``.
 
+``--sub-create-cc-track=<yes|no>``
+    For every video stream, create a closed captions track (default: no). The
+    only purpose is to make the track available for selection at the start of
+    playback, instead of creating it lazily. This applies only to
+    ``ATSC A53 Part 4 Closed Captions`` (displayed by mpv as subtitle tracks
+    using the codec ``eia_608``). The CC track is marked "default" and selected
+    according to the normal subtitle track selection rules. You can then use
+    ``--sid`` to explicitly select the correct track too.
+
+    If the video stream contains no closed captions, or if no video is being
+    decoded, the CC track will remain empty and will not show any text.
+
 Window
 ------
 

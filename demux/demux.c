@@ -91,6 +91,7 @@ struct demux_opts {
     double min_secs_cache;
     int access_references;
     int seekable_cache;
+    int create_ccs;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -104,6 +105,7 @@ const struct m_sub_options demux_conf = {
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
         OPT_FLAG("demuxer-seekable-cache", seekable_cache, 0),
+        OPT_FLAG("sub-create-cc-track", create_ccs, 0),
         {0}
     },
     .size = sizeof(struct demux_opts),
@@ -301,11 +303,9 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
 // Add a new sh_stream to the demuxer. Note that as soon as the stream has been
 // added, it must be immutable, and must not be released (this will happen when
 // the demuxer is destroyed).
-void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
+static void demux_add_sh_stream_locked(struct demux_internal *in,
+                                       struct sh_stream *sh)
 {
-    struct demux_internal *in = demuxer->in;
-    pthread_mutex_lock(&in->lock);
-
     assert(!sh->ds); // must not be added yet
 
     sh->ds = talloc(sh, struct demux_stream);
@@ -335,6 +335,14 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
     in->events |= DEMUX_EVENT_STREAMS;
     if (in->wakeup_cb)
         in->wakeup_cb(in->wakeup_cb_ctx);
+}
+
+// For demuxer implementations only.
+void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
+{
+    struct demux_internal *in = demuxer->in;
+    pthread_mutex_lock(&in->lock);
+    demux_add_sh_stream_locked(in, sh);
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -468,30 +476,38 @@ const char *stream_type_name(enum stream_type type)
     }
 }
 
-void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
+static struct sh_stream *demuxer_get_cc_track_locked(struct sh_stream *stream)
 {
-    struct demuxer *demuxer = stream->ds->in->d_thread;
-    struct demux_internal *in = demuxer->in;
     struct sh_stream *sh = stream->ds->cc;
 
     if (!sh) {
         sh = demux_alloc_sh_stream(STREAM_SUB);
-        if (!sh) {
-            talloc_free(dp);
-            return;
-        }
+        if (!sh)
+            return NULL;
         sh->codec->codec = "eia_608";
+        sh->default_track = true;
         stream->ds->cc = sh;
-        demux_add_sh_stream(demuxer, sh);
+        demux_add_sh_stream_locked(stream->ds->in, sh);
+        sh->ds->ignore_eof = true;
     }
 
-    pthread_mutex_lock(&in->lock);
+    return sh;
+}
 
-    sh->ds->ignore_eof = true;
+void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
+{
+    struct demux_internal *in = stream->ds->in;
+
+    pthread_mutex_lock(&in->lock);
+    struct sh_stream *sh = demuxer_get_cc_track_locked(stream);
+    if (!sh) {
+        pthread_mutex_unlock(&in->lock);
+        talloc_free(dp);
+        return;
+    }
 
     dp->pts = MP_ADD_PTS(dp->pts, -in->ts_offset);
     dp->dts = MP_ADD_PTS(dp->dts, -in->ts_offset);
-
     pthread_mutex_unlock(&in->lock);
 
     demux_add_packet(sh, dp);
@@ -1397,6 +1413,20 @@ static void demux_maybe_replace_stream(struct demuxer *demuxer)
     }
 }
 
+static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
+{
+    struct demux_internal *in = demuxer->in;
+    if (!opts->create_ccs)
+        return;
+    pthread_mutex_lock(&in->lock);
+    for (int n = 0; n < in->num_streams; n++) {
+        struct sh_stream *sh = in->streams[n];
+        if (sh->type == STREAM_VIDEO)
+            demuxer_get_cc_track_locked(sh);
+    }
+    pthread_mutex_unlock(&in->lock);
+}
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -1477,6 +1507,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         }
         demux_init_cuesheet(in->d_thread);
         demux_init_cache(demuxer);
+        demux_init_ccs(demuxer, opts);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
         stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD,
