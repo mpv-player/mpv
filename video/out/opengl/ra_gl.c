@@ -102,13 +102,18 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
-        {RA_CAP_BUF_RO,             MPGL_CAP_UBO},
-        {RA_CAP_BUF_RW,             MPGL_CAP_SSBO},
     };
 
     for (int i = 0; i < MP_ARRAY_SIZE(caps_map); i++) {
         if ((gl->mpgl_caps & caps_map[i][1]) == caps_map[i][1])
             ra->caps |= caps_map[i][0];
+    }
+
+    if (gl->BindBufferBase) {
+        if (gl->mpgl_caps & MPGL_CAP_UBO)
+            ra->caps |= RA_CAP_BUF_RO;
+        if (gl->mpgl_caps & MPGL_CAP_SSBO)
+            ra->caps |= RA_CAP_BUF_RW;
     }
 
     if (gl->BlitFramebuffer)
