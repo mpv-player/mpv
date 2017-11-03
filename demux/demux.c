@@ -736,10 +736,10 @@ static bool read_packet(struct demux_internal *in)
             if (eof && !ds->eof) {
                 if (in->wakeup_cb)
                     in->wakeup_cb(in->wakeup_cb_ctx);
+                pthread_cond_signal(&in->wakeup);
             }
             ds->eof |= eof;
         }
-        pthread_cond_signal(&in->wakeup);
         return false;
     }
 
