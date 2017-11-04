@@ -43,6 +43,7 @@ typedef struct demux_packet {
     // private
     struct demux_packet *next;
     struct AVPacket *avpacket;   // keep the buffer allocation and sidedata
+    double kf_seek_pts; // demux.c internal: seek pts for keyframe range
 } demux_packet_t;
 
 struct demux_packet *new_demux_packet(size_t len);

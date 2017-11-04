@@ -1268,6 +1268,11 @@ Property list
     only at most 1 range. Should the player implement caching for multiple
     ranges, the order of the ranges will be unspecified and arbitrary.
 
+    The end of a seek range is usually smaller than the value returned by the
+    ``demuxer-cache-time`` property, because that property returns the guessed
+    buffering amount, while the seek ranges represent the buffered data that
+    can actually be used for cached seeking.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
