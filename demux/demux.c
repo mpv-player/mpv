@@ -660,7 +660,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     // (In theory it'd be more efficient to make this incremental.)
-    if (ds->back_pts == MP_NOPTS_VALUE && dp->keyframe)
+    if (ds->back_pts == MP_NOPTS_VALUE && dp->keyframe && ds->in->seekable_cache)
         ds->back_pts = recompute_keyframe_target_pts(ds->queue_head);
 
     if (!ds->ignore_eof) {
@@ -797,9 +797,10 @@ static void prune_old_packets(struct demux_internal *in)
     // It's not clear what the ideal way to prune old packets is. For now, we
     // prune the oldest packet runs, as long as the total cache amount is too
     // big.
-    while (buffered > in->max_bytes_bw) {
+    size_t max_bytes = in->seekable_cache ? in->max_bytes_bw : 0;
+    while (buffered > max_bytes) {
         double earliest_ts = MP_NOPTS_VALUE;
-        int earliest_stream = -1;
+        struct demux_stream *earliest_stream = NULL;
 
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
@@ -809,17 +810,19 @@ static void prune_old_packets(struct demux_internal *in)
                 double ts = PTS_OR_DEF(dp->dts, dp->pts);
                 // Note: in obscure cases, packets might have no timestamps set,
                 // in which case we still need to prune _something_.
-                if (earliest_ts == MP_NOPTS_VALUE ||
-                    (ts != MP_NOPTS_VALUE && ts < earliest_ts))
-                {
+                bool prune_always =
+                    !in->seekable_cache || ts == MP_NOPTS_VALUE || !dp->keyframe;
+                if (prune_always || !earliest_stream || ts < earliest_ts) {
                     earliest_ts = ts;
-                    earliest_stream = n;
+                    earliest_stream = ds;
+                    if (prune_always)
+                        break;
                 }
             }
         }
 
-        assert(earliest_stream >= 0); // incorrect accounting of "buffered"?
-        struct demux_stream *ds = in->streams[earliest_stream]->ds;
+        assert(earliest_stream); // incorrect accounting of "buffered"?
+        struct demux_stream *ds = earliest_stream;
 
         ds->back_pts = MP_NOPTS_VALUE;
 
@@ -834,15 +837,17 @@ static void prune_old_packets(struct demux_internal *in)
         // or subtitle packets. (All are keyframes, and selection logic runs for
         // every packet.)
         struct demux_packet *next_seek_target = NULL;
-        for (struct demux_packet *dp = ds->queue_head; dp; dp = dp->next) {
-            // (Has to be _after_ queue_head to drop at least 1 packet.)
-            if (dp->keyframe && dp != ds->queue_head) {
-                next_seek_target = dp;
-                // Note that we set back_pts to this even if we leave some
-                // packets before it - it will still be only viable seek target.
-                ds->back_pts = recompute_keyframe_target_pts(dp);
-                if (ds->back_pts != MP_NOPTS_VALUE)
-                    break;
+        if (in->seekable_cache) {
+            for (struct demux_packet *dp = ds->queue_head; dp; dp = dp->next) {
+                // (Has to be _after_ queue_head to drop at least 1 packet.)
+                if (dp->keyframe && dp != ds->queue_head) {
+                    next_seek_target = dp;
+                    // Note that we set back_pts to this even if we leave some
+                    // packets before it - it will still be only viable seek target.
+                    ds->back_pts = recompute_keyframe_target_pts(dp);
+                    if (ds->back_pts != MP_NOPTS_VALUE)
+                        break;
+                }
             }
         }
 
@@ -854,7 +859,7 @@ static void prune_old_packets(struct demux_internal *in)
             size_t bytes = demux_packet_estimate_total_size(dp);
             buffered -= bytes;
             MP_TRACE(in, "dropping backbuffer packet size %zd from stream %d\n",
-                     bytes, earliest_stream);
+                     bytes, ds->sh->index);
 
             ds->queue_head = dp->next;
             if (!ds->queue_head)
