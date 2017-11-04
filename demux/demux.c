@@ -710,7 +710,7 @@ static bool read_packet(struct demux_internal *in)
         read_more |= (ds->active && !ds->reader_head) || ds->refreshing;
         bytes += ds->fw_bytes;
         if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0 &&
-            ds->last_ts >= ds->base_ts)
+            ds->base_ts != MP_NOPTS_VALUE && ds->last_ts >= ds->base_ts)
             prefetch_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
     MP_DBG(in, "bytes=%zd, active=%d, read_more=%d prefetch_more=%d\n",
@@ -1769,6 +1769,8 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
         ds->reader_head = target;
         ds->skip_to_keyframe = !target;
         recompute_buffers(ds);
+        if (ds->reader_head)
+            ds->base_ts = PTS_OR_DEF(ds->reader_head->pts, ds->reader_head->dts);
 
         MP_VERBOSE(in, "seeking stream %d (%s) to ",
                    n, stream_type_name(ds->type));
