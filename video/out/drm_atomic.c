@@ -203,6 +203,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
             }
         }
         drmModeFreePlane(drmplane);
+        drmplane = NULL;
     }
 
     if (!ctx->primary_plane) {
@@ -232,7 +233,7 @@ fail:
         drmModeFreePlane(drmplane);
     if (plane)
         drm_object_free(plane);
-    return false;
+    return NULL;
 }
 
 void drm_atomic_destroy_context(struct drm_atomic_context *ctx)
