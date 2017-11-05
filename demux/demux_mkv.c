@@ -159,8 +159,9 @@ struct block_info {
     bool simple, keyframe, duration_known;
     int64_t timecode;
     mkv_track_t *track;
-    bstr data;
-    void *alloc;
+    // Actual packet data.
+    AVBufferRef *laces[MAX_NUM_LACES];
+    int num_laces;
     int64_t filepos;
     struct ebml_block_additions *additions;
 };
@@ -2081,86 +2082,91 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
-static bool bstr_read_u8(bstr *buffer, uint8_t *out_u8)
+// Read the laced block data at the current stream position (until endpos as
+// indicated by the block length field) into individual buffers.
+static int demux_mkv_read_block_lacing(struct block_info *block, int type,
+                                       struct stream *s, uint64_t endpos)
 {
-    if (buffer->len > 0) {
-        *out_u8 = buffer->start[0];
-        buffer->len -= 1;
-        buffer->start += 1;
-        return true;
-    } else {
-        return false;
-    }
-}
+    int laces;
+    uint32_t lace_size[MAX_NUM_LACES];
 
-static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
-                                       uint32_t lace_size[MAX_NUM_LACES])
-{
-    uint32_t total = 0;
-    uint8_t flags, t;
-    int i;
 
-    /* lacing flags */
-    if (!bstr_read_u8(buffer, &flags))
-        goto error;
-
-    int type = (flags >> 1) & 0x03;
     if (type == 0) {           /* no lacing */
-        *laces = 1;
-        lace_size[0] = buffer->len;
+        laces = 1;
+        lace_size[0] = endpos - stream_tell(s);
     } else {
-        if (!bstr_read_u8(buffer, &t))
+        laces = stream_read_char(s);
+        if (laces < 0 || stream_tell(s) > endpos)
             goto error;
-        *laces = t + 1;
+        laces += 1;
 
         switch (type) {
-        case 1:                /* xiph lacing */
-            for (i = 0; i < *laces - 1; i++) {
+        case 1: {              /* xiph lacing */
+            uint32_t total = 0;
+            for (int i = 0; i < laces - 1; i++) {
                 lace_size[i] = 0;
+                uint8_t t;
                 do {
-                    if (!bstr_read_u8(buffer, &t))
+                    t = stream_read_char(s);
+                    if (stream_eof(s) || stream_tell(s) >= endpos)
                         goto error;
                     lace_size[i] += t;
                 } while (t == 0xFF);
                 total += lace_size[i];
             }
-            lace_size[i] = buffer->len - total;
+            uint32_t rest_length = endpos - stream_tell(s);
+            lace_size[laces - 1] = rest_length - total;
             break;
+        }
 
-        case 2:                /* fixed-size lacing */
-            for (i = 0; i < *laces; i++)
-                lace_size[i] = buffer->len / *laces;
+        case 2: {              /* fixed-size lacing */
+            uint32_t full_length = endpos - stream_tell(s);
+            for (int i = 0; i < laces; i++)
+                lace_size[i] = full_length / laces;
             break;
+        }
 
-        case 3:;                /* EBML lacing */
-            uint64_t num = ebml_read_vlen_uint(buffer);
-            if (num == EBML_UINT_INVALID)
-                goto error;
-            if (num > buffer->len)
+        case 3: {              /* EBML lacing */
+            uint64_t num = ebml_read_length(s);
+            if (num == EBML_UINT_INVALID || stream_tell(s) >= endpos)
                 goto error;
 
-            total = lace_size[0] = num;
-            for (i = 1; i < *laces - 1; i++) {
-                int64_t snum = ebml_read_vlen_int(buffer);
-                if (snum == EBML_INT_INVALID)
+            uint32_t total = lace_size[0] = num;
+            for (int i = 1; i < laces - 1; i++) {
+                int64_t snum = ebml_read_signed_length(s);
+                if (snum == EBML_INT_INVALID || stream_tell(s) >= endpos)
                     goto error;
                 lace_size[i] = lace_size[i - 1] + snum;
                 total += lace_size[i];
             }
-            lace_size[i] = buffer->len - total;
+            uint32_t rest_length = endpos - stream_tell(s);
+            lace_size[laces - 1] = rest_length - total;
             break;
+        }
 
-        default: abort();
+        default:
+            goto error;
         }
     }
 
-    total = buffer->len;
-    for (i = 0; i < *laces; i++) {
-        if (lace_size[i] > total)
+    for (int i = 0; i < laces; i++) {
+        uint32_t size = lace_size[i];
+        if (stream_tell(s) + size > endpos || size > (1 << 30))
             goto error;
-        total -= lace_size[i];
+        int pad = MPMAX(AV_INPUT_BUFFER_PADDING_SIZE, AV_LZO_INPUT_PADDING);
+        AVBufferRef *buf = av_buffer_alloc(size + pad);
+        if (!buf)
+            goto error;
+        buf->size = size;
+        if (stream_read(s, buf->data, buf->size) != buf->size) {
+            av_buffer_unref(&buf);
+            goto error;
+        }
+        memset(buf->data + buf->size, 0, pad);
+        block->laces[block->num_laces++] = buf;
     }
-    if (total != 0)
+
+    if (stream_tell(s) != endpos)
         goto error;
 
     return 0;
@@ -2465,11 +2471,10 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
 
 static void free_block(struct block_info *block)
 {
-    free(block->alloc);
-    block->alloc = NULL;
-    block->data = (bstr){0};
-    talloc_free(block->additions);
-    block->additions = NULL;
+    for (int n = 0; n < block->num_laces; n++)
+        av_buffer_unref(&block->laces[n]);
+    block->num_laces = 0;
+    TA_FREEP(&block->additions);
 }
 
 static void index_block(demuxer_t *demuxer, struct block_info *block)
@@ -2493,29 +2498,35 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
 
     free_block(block);
     length = ebml_read_length(s);
-    if (length > 500000000 || stream_tell(s) + length > (uint64_t)end)
+    if (!length || length > 500000000 || stream_tell(s) + length > (uint64_t)end)
         goto exit;
-    block->alloc = malloc(length + AV_LZO_INPUT_PADDING);
-    if (!block->alloc)
-        goto exit;
-    block->data = (bstr){block->alloc, length};
-    block->filepos = stream_tell(s);
-    if (stream_read(s, block->data.start, block->data.len) != block->data.len)
-        goto exit;
+    uint64_t endpos = stream_tell(s) + length;
 
     // Parse header of the Block element
     /* first byte(s): track num */
-    num = ebml_read_vlen_uint(&block->data);
-    if (num == EBML_UINT_INVALID)
+    num = ebml_read_length(s);
+    if (num == EBML_UINT_INVALID || stream_tell(s) >= endpos)
         goto exit;
+
     /* time (relative to cluster time) */
-    if (block->data.len < 3)
+    if (stream_tell(s) + 3 >= endpos)
         goto exit;
-    time = block->data.start[0] << 8 | block->data.start[1];
-    block->data.start += 2;
-    block->data.len -= 2;
+    uint8_t c1 = stream_read_char(s);
+    uint8_t c2 = stream_read_char(s);
+    time = c1 << 8 | c2;
+
+    if (stream_tell(s) + 2 >= endpos)
+        goto exit;
+    uint8_t header_flags = stream_read_char(s);
+
+    block->filepos = stream_tell(s);
+
+    int lace_type = (header_flags >> 1) & 0x03;
+    if (demux_mkv_read_block_lacing(block, lace_type, s, endpos))
+        goto exit;
+
     if (block->simple)
-        block->keyframe = block->data.start[0] & 0x80;
+        block->keyframe = header_flags & 0x80;
     block->timecode = time * mkv_d->tc_scale + mkv_d->cluster_tc;
     for (int i = 0; i < mkv_d->num_tracks; i++) {
         if (mkv_d->tracks[i]->tnum == num) {
@@ -2528,34 +2539,30 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
         goto exit;
     }
 
+    if (stream_tell(s) != endpos)
+        goto exit;
+
     res = 1;
 exit:
     if (res <= 0)
         free_block(block);
+    stream_seek(s, endpos);
     return res;
 }
 
 static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    int laces;
     double current_pts;
-    bstr data = block_info->data;
     bool keyframe = block_info->keyframe;
     uint64_t block_duration = block_info->duration;
     int64_t tc = block_info->timecode;
     mkv_track_t *track = block_info->track;
     struct sh_stream *stream = track->stream;
-    uint32_t lace_size[MAX_NUM_LACES];
     bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
     if (!demux_stream_is_selected(stream))
         return 0;
-
-    if (demux_mkv_read_block_lacing(&data, &laces, lace_size)) {
-        MP_ERR(demuxer, "Bad input [lacing]\n");
-        return 0;
-    }
 
     current_pts = tc / 1e9 - track->codec_delay;
 
@@ -2588,7 +2595,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             }
         }
         if (use_this_block) {
-            if (laces > 1) {
+            if (block_info->num_laces > 1) {
                 MP_WARN(demuxer, "Subtitles use Matroska "
                        "lacing. This is abnormal and not supported.\n");
                 use_this_block = 0;
@@ -2602,15 +2609,22 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     if (use_this_block) {
         uint64_t filepos = block_info->filepos;
 
-        for (int i = 0; i < laces; i++) {
-            bstr block = bstr_splice(data, 0, lace_size[i]);
-            data = bstr_cut(data, lace_size[i]);
+        for (int i = 0; i < block_info->num_laces; i++) {
+            AVBufferRef *data = block_info->laces[i];
+            demux_packet_t *dp = NULL;
 
-            block = demux_mkv_decode(demuxer->log, track, block, 1);
+            bstr block = {data->data, data->size};
+            bstr nblock = demux_mkv_decode(demuxer->log, track, block, 1);
 
-            demux_packet_t *dp = new_demux_packet_from(block.start, block.len);
+            if (block.start != nblock.start || block.len != nblock.len) {
+                // (avoidable copy of the entire data)
+                dp = new_demux_packet_from(nblock.start, nblock.len);
+            } else {
+                dp = new_demux_packet_from_buf(data);
+            }
             if (!dp)
                 break;
+
             dp->keyframe = keyframe;
             dp->pos = filepos;
             /* If default_duration is 0, assume no pts value is known
@@ -2642,7 +2656,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
             mkv_parse_and_add_packet(demuxer, track, dp);
             talloc_free_children(track->parser_tmp);
-            filepos += block.len;
+            filepos += data->size;
         }
 
         if (stream->type == STREAM_VIDEO) {
@@ -2720,7 +2734,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
         }
     }
 
-    return block->data.start ? 1 : 0;
+    return block->num_laces ? 1 : 0;
 
 error:
     free_block(block);
@@ -2732,7 +2746,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    if (mkv_d->tmp_block.alloc) {
+    if (mkv_d->tmp_block.num_laces) {
         *block = mkv_d->tmp_block;
         mkv_d->tmp_block = (struct block_info){0};
         return 1;

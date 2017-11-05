@@ -75,6 +75,17 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
     return dp;
 }
 
+// (buf must include proper padding)
+struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
+{
+    AVPacket pkt = {
+        .size = buf->size,
+        .data = buf->data,
+        .buf = buf,
+    };
+    return new_demux_packet_from_avpacket(&pkt);
+}
+
 // Input data doesn't need to be padded.
 struct demux_packet *new_demux_packet_from(void *data, size_t len)
 {

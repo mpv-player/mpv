@@ -74,56 +74,6 @@ uint32_t ebml_read_id(stream_t *s)
 }
 
 /*
- * Read a variable length unsigned int.
- */
-uint64_t ebml_read_vlen_uint(bstr *buffer)
-{
-    int i, j, num_ffs = 0, len_mask = 0x80;
-    uint64_t num;
-
-    if (buffer->len == 0)
-        return EBML_UINT_INVALID;
-
-    for (i = 0, num = buffer->start[0]; i < 8 && !(num & len_mask); i++)
-        len_mask >>= 1;
-    if (i >= 8)
-        return EBML_UINT_INVALID;
-    j = i + 1;
-    if ((int) (num &= (len_mask - 1)) == len_mask - 1)
-        num_ffs++;
-    if (j > buffer->len)
-        return EBML_UINT_INVALID;
-    for (int n = 0; n < i; n++) {
-        num = (num << 8) | buffer->start[n + 1];
-        if ((num & 0xFF) == 0xFF)
-            num_ffs++;
-    }
-    if (j == num_ffs)
-        return EBML_UINT_INVALID;
-    buffer->start += j;
-    buffer->len -= j;
-    return num;
-}
-
-/*
- * Read a variable length signed int.
- */
-int64_t ebml_read_vlen_int(bstr *buffer)
-{
-    uint64_t unum;
-    int l;
-
-    /* read as unsigned number first */
-    size_t len = buffer->len;
-    unum = ebml_read_vlen_uint(buffer);
-    if (unum == EBML_UINT_INVALID)
-        return EBML_INT_INVALID;
-    l = len - buffer->len;
-
-    return unum - ((1LL << ((7 * l) - 1)) - 1);
-}
-
-/*
  * Read: element content length.
  */
 uint64_t ebml_read_length(stream_t *s)
@@ -148,6 +98,25 @@ uint64_t ebml_read_length(stream_t *s)
     if (len >= 1ULL<<63)   // Can happen if stream_read_char returns EOF
         return EBML_UINT_INVALID;
     return len;
+}
+
+
+/*
+ * Read a variable length signed int.
+ */
+int64_t ebml_read_signed_length(stream_t *s)
+{
+    uint64_t unum;
+    int l;
+
+    /* read as unsigned number first */
+    uint64_t offset = stream_tell(s);
+    unum = ebml_read_length(s);
+    if (unum == EBML_UINT_INVALID)
+        return EBML_INT_INVALID;
+    l = stream_tell(s) - offset;
+
+    return unum - ((1LL << ((7 * l) - 1)) - 1);
 }
 
 /*
