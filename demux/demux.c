@@ -938,15 +938,11 @@ static bool read_packet(struct demux_internal *in)
 
 static void prune_old_packets(struct demux_internal *in)
 {
-    size_t buffered = in->total_bytes - in->fw_bytes;
-
-    MP_TRACE(in, "total backbuffer = %zd\n", buffered);
-
     // It's not clear what the ideal way to prune old packets is. For now, we
     // prune the oldest packet runs, as long as the total cache amount is too
     // big.
     size_t max_bytes = in->seekable_cache ? in->max_bytes_bw : 0;
-    while (buffered > max_bytes) {
+    while (in->total_bytes - in->fw_bytes > max_bytes) {
         double earliest_ts = MP_NOPTS_VALUE;
         struct demux_stream *earliest_stream = NULL;
 
@@ -969,7 +965,7 @@ static void prune_old_packets(struct demux_internal *in)
             }
         }
 
-        assert(earliest_stream); // incorrect accounting of "buffered"?
+        assert(earliest_stream); // incorrect accounting of buffered sizes?
         struct demux_stream *ds = earliest_stream;
 
         // Prune all packets until the next keyframe or reader_head. Keeping
@@ -1004,7 +1000,6 @@ static void prune_old_packets(struct demux_internal *in)
             struct demux_packet *dp = ds->queue->head;
 
             size_t bytes = demux_packet_estimate_total_size(dp);
-            buffered -= bytes;
             MP_TRACE(in, "dropping backbuffer packet size %zd from stream %d\n",
                      bytes, ds->sh->index);
 
