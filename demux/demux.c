@@ -748,7 +748,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
-    if (!dp || !ds) {
+    if (!dp || !dp->len || !ds) {
         talloc_free(dp);
         return;
     }
