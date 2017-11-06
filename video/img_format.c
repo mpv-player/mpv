@@ -345,7 +345,7 @@ enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
     if (!pixdesc)
         return MP_COMPONENT_TYPE_UNKNOWN;
 
-#ifdef AV_PIX_FMT_FLAG_FLOAT
+#if LIBAVUTIL_VERSION_MICRO >= 100
     if (pixdesc->flags & AV_PIX_FMT_FLAG_FLOAT)
         return MP_COMPONENT_TYPE_FLOAT;
 #endif
@@ -441,11 +441,8 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     res.chroma_w = 1 << pixdesc->log2_chroma_w;
     res.chroma_h = 1 << pixdesc->log2_chroma_h;
 
-#ifdef AV_PIX_FMT_FLAG_BAYER
+#if LIBAVUTIL_VERSION_MICRO >= 100
     if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
-        return false; // it's satan himself
-#else
-    if (strncmp(pixdesc->name, "bayer_", 6) == 0)
         return false; // it's satan himself
 #endif
 
