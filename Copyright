@@ -43,7 +43,6 @@ them quite central:
 - many builtin video filters (use libavfilter instead)
 - automatic rotation and stereoscopic video handling
 - Linux TV input
-- the --frames option
 - the add/cycle and sub-add/audio-add/sub-remove/audio-remove commands
 - video format conversion (if not supported by the VO)
 - minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
@@ -111,10 +110,8 @@ The following files are still GPL only (--enable-lgpl disables them):
 The following files contain some optional GPL code (--enable-lgpl disables it):
 
     input/cmd_list.c                potentially some commands
-    options/options.c               --frames option
     options/parse_commandline.c     dvd:// expansion
     player/audio.c                  libaf glue code
-    player/loadfile.c               --frames option (minor but probably fatal)
     player/osd.c                    OSD level 3
     player/command.c                add/cycle command, possibly sub-add command
 
