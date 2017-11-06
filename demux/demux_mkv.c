@@ -2515,7 +2515,7 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
     uint8_t c2 = stream_read_char(s);
     time = c1 << 8 | c2;
 
-    if (stream_tell(s) + 2 >= endpos)
+    if (stream_tell(s) + 2 > endpos)
         goto exit;
     uint8_t header_flags = stream_read_char(s);
 
