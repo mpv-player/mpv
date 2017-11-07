@@ -49,7 +49,6 @@ struct priv {
     int64_t mindeltapts;
     double expected_next_pts;
     mp_image_t *lastimg;
-    int lastimg_wants_osd;
     int lastdisplaycount;
 
     AVRational worst_time_base;
@@ -287,6 +286,14 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 
     double pts = mpi ? mpi->pts : MP_NOPTS_VALUE;
 
+    if (mpi) {
+        assert(vo->params);
+
+        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
+
+        osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
+    }
+
     if (!vc || vc->shutdown)
         goto done;
     if (!encode_lavc_start(ectx)) {
@@ -451,7 +458,6 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
             talloc_free(vc->lastimg);
             vc->lastimg = mpi;
             mpi = NULL;
-            vc->lastimg_wants_osd = true;
 
             vc->lastframeipts = vc->lastipts = frameipts;
             if (ectx->options->rawts && vc->lastipts < 0) {
@@ -462,15 +468,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         } else {
             MP_INFO(vo, "Frame at pts %d got dropped "
                     "entirely because pts went backwards\n", (int) frameipts);
-            vc->lastimg_wants_osd = false;
         }
-    }
-
-    if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
-        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
-
-        osd_draw_on_image(vo->osd, dim, vc->lastimg->pts, OSD_DRAW_SUB_ONLY,
-                          vc->lastimg);
     }
 
 done:
