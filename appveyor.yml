@@ -19,9 +19,9 @@ install:
   # Update non-core packages
   - C:\msys64\usr\bin\pacman -Suu --noconfirm
   # Install required MSYS2 packages
-  - C:\msys64\usr\bin\pacman -S --noconfirm --needed perl python pkg-config
+  - C:\msys64\usr\bin\pacman -S --noconfirm --needed base-devel perl python pkg-config
   # Now MSYS2 is up to date, do the rest of the install from a bash script
-  - C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./TOOLS/appveyor-install.sh"
+  - C:\msys64\usr\bin\bash -lc "cd && exec \"$APPVEYOR_BUILD_FOLDER\"/TOOLS/appveyor-install.sh"
 build_script:
   - C:\msys64\usr\bin\bash -lc "cd \"$APPVEYOR_BUILD_FOLDER\" && exec ./TOOLS/appveyor-build.sh"
 on_failure:
