@@ -395,7 +395,8 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     p->drm_params.fd = p->kms->fd;
     p->drm_params.crtc_id = p->kms->crtc_id;
-    p->drm_params.atomic_request = p->kms->atomic_context->request;
+    if (p->kms->atomic_context)
+        p->drm_params.atomic_request = p->kms->atomic_context->request;
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
         .native_display_type = "opengl-cb-drm-params",
