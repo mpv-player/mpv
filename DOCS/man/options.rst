@@ -2879,11 +2879,12 @@ Demuxer
     enabled, short seek offsets will not trigger a low level demuxer seek
     (which means for example that slow network round trips or FFmpeg seek bugs
     can be avoided). If a seek cannot happen within the cached range, a low
-    level seek will be triggered. Seeking outside of the cache will always
-    discard the full cache.
+    level seek will be triggered. Seeking outside of the cache will start a new
+    cached range, but can discard the old cache range if the demuxer exhibits
+    certain unsupported behavior.
 
     Keep in mind that some events can flush the cache or force a low level
-    seek anyway, such as switching tracks, or attmepting to seek before the
+    seek anyway, such as switching tracks, or attempting to seek before the
     start or after the end of the file. This option is experimental - thus
     disabled, and bugs are to be expected.
 

@@ -40,7 +40,7 @@ enum demux_ctrl {
     DEMUXER_CTRL_REPLACE_STREAM,
 };
 
-#define MAX_SEEK_RANGES 1
+#define MAX_SEEK_RANGES 10
 
 struct demux_seek_range {
     double start, end;

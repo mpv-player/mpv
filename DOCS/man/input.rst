@@ -1264,9 +1264,9 @@ Property list
     Each entry in ``seekable-ranges`` represents a region in the demuxer cache
     that can be seeked to. If there are multiple demuxers active, this only
     returns information about the "main" demuxer, but might be changed in
-    future to return unified information about all demuxers. There is currently
-    only at most 1 range. Should the player implement caching for multiple
-    ranges, the order of the ranges will be unspecified and arbitrary.
+    future to return unified information about all demuxers. The ranges are in
+    arbitrary order. Often, ranges will overlap for a bit, before being joined.
+    In broken corner cases, ranges may overlap all over the place.
 
     The end of a seek range is usually smaller than the value returned by the
     ``demuxer-cache-time`` property, because that property returns the guessed
