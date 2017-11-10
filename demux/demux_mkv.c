@@ -2494,13 +2494,14 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
     uint64_t num;
     int16_t time;
     uint64_t length;
-    int res = -1;
 
     free_block(block);
     length = ebml_read_length(s);
     if (!length || length > 500000000 || stream_tell(s) + length > (uint64_t)end)
-        goto exit;
+        return -1;
+
     uint64_t endpos = stream_tell(s) + length;
+    int res = -1;
 
     // Parse header of the Block element
     /* first byte(s): track num */
