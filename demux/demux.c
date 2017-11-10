@@ -725,7 +725,7 @@ void free_demuxer(demuxer_t *demuxer)
     demux_flush(demuxer);
     assert(in->total_bytes == 0);
 
-    for (int n = in->num_streams - 1; n >= 0; n--)
+    for (int n = 0; n < in->num_streams; n++)
         talloc_free(in->streams[n]);
     pthread_mutex_destroy(&in->lock);
     pthread_cond_destroy(&in->wakeup);
