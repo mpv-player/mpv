@@ -233,6 +233,7 @@ struct demux_queue {
 
     // incrementally maintained seek range, possibly invalid
     double seek_start, seek_end;
+    double last_pruned;     // timestamp of last pruned keyframe
 };
 
 struct demux_stream {
@@ -393,16 +394,40 @@ static void update_seek_ranges(struct demux_cached_range *range)
 
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
-        if (queue->ds->selected) {
+
+        if (queue->ds->selected && queue->ds->eager) {
             range->seek_start = MP_PTS_MAX(range->seek_start, queue->seek_start);
             range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
 
-            if (queue->seek_start == MP_NOPTS_VALUE ||
-                queue->seek_end == MP_NOPTS_VALUE)
-            {
+            if (queue->seek_start >= queue->seek_end) {
                 range->seek_start = range->seek_end = MP_NOPTS_VALUE;
                 break;
             }
+        }
+    }
+
+    // Sparse stream behavior is not very clearly defined, but usually we don't
+    // want it to restrict the range of other streams, unless
+    // This is incorrect in any of these cases:
+    //  - sparse streams only (it's unknown how to determine an accurate range)
+    //  - if sparse streams have non-keyframe packets (we set queue->last_pruned
+    //    to the start of the pruned keyframe range - we'd need the end or so)
+    // We also assume that ds->eager equals to a stream being sparse (usually
+    // true, except if only sparse streams are selected).
+    // We also rely on the fact that the demuxer position will always be ahead
+    // of the seek_end for audio/video, because they need to prefetch at least
+    // 1 packet to detect the end of a keyframe range. This means that we're
+    // relatively guaranteed to have all sparse (subtitle) packets within the
+    // seekable range.
+    for (int n = 0; n < range->num_streams; n++) {
+        struct demux_queue *queue = range->streams[n];
+        if (queue->ds->selected && !queue->ds->eager &&
+            queue->last_pruned != MP_NOPTS_VALUE)
+        {
+            // (last_pruned is _exclusive_ to the seekable range, so add a small
+            // value to exclude it from the valid range.)
+            range->seek_start =
+                MP_PTS_MAX(range->seek_start, queue->last_pruned + 0.1);
         }
     }
 
@@ -459,7 +484,7 @@ static void clear_queue(struct demux_queue *queue)
     queue->head = queue->tail = NULL;
     queue->next_prune_target = NULL;
     queue->keyframe_latest = NULL;
-    queue->seek_start = queue->seek_end = MP_NOPTS_VALUE;
+    queue->seek_start = queue->seek_end = queue->last_pruned = MP_NOPTS_VALUE;
 
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
@@ -933,6 +958,7 @@ static void attempt_range_joining(struct demux_internal *in)
         }
         q2->next_prune_target = q1->next_prune_target;
         q2->seek_start = q1->seek_start;
+        q2->last_pruned = q1->last_pruned;
         q2->correct_dts &= q1->correct_dts;
         q2->correct_pos &= q1->correct_pos;
 
@@ -1253,6 +1279,8 @@ static void prune_old_packets(struct demux_internal *in)
         if (in->seekable_cache && !queue->next_prune_target) {
             // (Has to be _after_ queue->head to drop at least 1 packet.)
             struct demux_packet *prev = queue->head;
+            if (queue->seek_start != MP_NOPTS_VALUE)
+                queue->last_pruned = queue->seek_start;
             queue->seek_start = MP_NOPTS_VALUE;
             queue->next_prune_target = queue->tail; // (prune all if none found)
             while (prev->next) {
