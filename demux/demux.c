@@ -1005,7 +1005,7 @@ static void attempt_range_joining(struct demux_internal *in)
         in->fw_bytes += ds->fw_bytes;
 
         // For moving demuxer position.
-        ds->refreshing = true;
+        ds->refreshing = ds->selected;
     }
 
     next->seek_start = in->current_range->seek_start;
@@ -1203,10 +1203,11 @@ static bool read_packet(struct demux_internal *in)
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
                 if (ds->selected) {
-                    MP_WARN(in, "  %s/%d: %zd packets, %zd bytes%s\n",
+                    MP_WARN(in, "  %s/%d: %zd packets, %zd bytes%s%s\n",
                             stream_type_name(ds->type), n,
                             ds->fw_packs, ds->fw_bytes,
-                            ds->eager ? "" : " (lazy)");
+                            ds->eager ? "" : " (lazy)",
+                            ds->refreshing ? " (refreshing)" : "");
                 }
             }
         }
@@ -2288,7 +2289,7 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
 
-            ds->refreshing = true;
+            ds->refreshing = ds->selected;
         }
 
         MP_VERBOSE(in, "resuming demuxer to end of cached range\n");
