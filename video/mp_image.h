@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_MP_IMAGE_H
@@ -34,12 +34,32 @@
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_INTERLACED 0x20
 
+enum mp_spherical_type {
+    MP_SPHERICAL_AUTO = 0,
+    MP_SPHERICAL_NONE,              // normal video
+    MP_SPHERICAL_UNKNOWN,           // unknown projection
+    MP_SPHERICAL_EQUIRECTANGULAR,   // (untiled)
+};
+
+extern const struct m_opt_choice_alternatives mp_spherical_names[];
+
+struct mp_spherical_params {
+    enum mp_spherical_type type;
+    float ref_angles[3]; // yaw/pitch/roll, refer to AVSphericalMapping
+};
+
+enum mp_image_hw_flags {
+    MP_IMAGE_HW_FLAG_OPAQUE = 1,    // an opaque hw format is used - the exact
+                                    // format is subject to hwctx internals
+};
+
 // Describes image parameters that usually stay constant.
 // New fields can be added in the future. Code changing the parameters should
 // usually copy the whole struct, so that fields added later will be preserved.
 struct mp_image_params {
     enum mp_imgfmt imgfmt;      // pixel format
     enum mp_imgfmt hw_subfmt;   // underlying format for some hwaccel pixfmts
+    unsigned hw_flags;          // bit mask of mp_image_hw_flags
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     struct mp_colorspace color;
@@ -48,6 +68,7 @@ struct mp_image_params {
     int rotate;
     enum mp_stereo3d_mode stereo_in;    // image is encoded with this mode
     enum mp_stereo3d_mode stereo_out;   // should be displayed with this mode
+    struct mp_spherical_params spherical;
 };
 
 /* Memory management:
@@ -98,13 +119,20 @@ typedef struct mp_image {
     struct AVBufferRef *bufs[MP_MAX_PLANES];
     // Points to AVHWFramesContext* (same as AVFrame.hw_frames_ctx)
     struct AVBufferRef *hwctx;
+    // Embedded ICC profile, if any
+    struct AVBufferRef *icc_profile;
 } mp_image_t;
 
 int mp_chroma_div_up(int size, int shift);
 
+int mp_image_get_alloc_size(int imgfmt, int w, int h, int stride_align);
+struct mp_image *mp_image_from_buffer(int imgfmt, int w, int h, int stride_align,
+                                      uint8_t *buffer, int buffer_size,
+                                      void *free_opaque,
+                                      void (*free)(void *opaque, uint8_t *data));
+
 struct mp_image *mp_image_alloc(int fmt, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
-void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src);
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
 struct mp_image *mp_image_new_copy(struct mp_image *img);
 struct mp_image *mp_image_new_ref(struct mp_image *img);
@@ -134,7 +162,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params);
 
 char *mp_image_params_to_str_buf(char *b, size_t bs,
                                  const struct mp_image_params *p);
-#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[99]){0}, 99, p)
+#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[256]){0}, 256, p)
 
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,
@@ -159,7 +187,5 @@ void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
                 int dstStride, int srcStride);
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride);
 void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride);
-
-void mp_check_gpu_memcpy(struct mp_log *log, bool *once);
 
 #endif /* MPLAYER_MP_IMAGE_H */

@@ -41,6 +41,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static struct vf_priv_s {
     int w, h;
     int cfg_w, cfg_h;
@@ -202,24 +207,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     return dmpi;
 }
 
-static int control(struct vf_instance *vf, int request, void *data)
-{
-    struct mp_sws_context *sws = vf->priv->sws;
-
-    switch (request) {
-    case VFCTRL_GET_EQUALIZER:
-        if (mp_sws_get_vf_equalizer(sws, data) < 1)
-            break;
-        return CONTROL_TRUE;
-    case VFCTRL_SET_EQUALIZER:
-        if (mp_sws_set_vf_equalizer(sws, data) < 1)
-            break;
-        return CONTROL_TRUE;
-    }
-
-    return CONTROL_UNKNOWN;
-}
-
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     if (IMGFMT_IS_HWACCEL(fmt) || sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
@@ -236,7 +223,6 @@ static int vf_open(vf_instance_t *vf)
     vf->reconfig = reconfig;
     vf->filter = filter;
     vf->query_format = query_format;
-    vf->control = control;
     vf->uninit = uninit;
     vf->priv->sws = mp_sws_alloc(vf);
     vf->priv->sws->log = vf->log;

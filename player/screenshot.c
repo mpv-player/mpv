@@ -364,6 +364,11 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
             talloc_free(t);
         }
 
+        char *full_dir = bstrto0(fname, mp_dirname(fname));
+        if (!mp_path_exists(full_dir)) {
+            mp_mkdirp(full_dir);
+        }
+
         if (!mp_path_exists(fname))
             return fname;
 
@@ -404,12 +409,6 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 
     if (image && (image->fmt.flags & MP_IMGFLAG_HWACCEL)) {
         struct mp_image *nimage = mp_image_hw_download(image, NULL);
-        if (!nimage && mpctx->vo_chain && mpctx->vo_chain->hwdec_devs) {
-            struct mp_hwdec_ctx *ctx =
-                hwdec_devices_get_first(mpctx->vo_chain->hwdec_devs);
-            if (ctx && ctx->download_image)
-                nimage = ctx->download_image(ctx, image, NULL);
-        }
         talloc_free(image);
         image = nimage;
     }

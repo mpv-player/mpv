@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -114,6 +114,8 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
 
 void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
+    bool had_log_file = mp_msg_has_log_file(mpctx->global);
+
     mp_msg_update_msglevels(mpctx->global);
 
     bool enable = mpctx->opts->use_terminal;
@@ -127,6 +129,9 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
             cas_terminal_owner(mpctx, NULL);
         }
     }
+
+    if (mp_msg_has_log_file(mpctx->global) && !had_log_file)
+        mp_print_version(mpctx->log, false); // for log-file=... in config files
 
     if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);
@@ -144,6 +149,9 @@ void mp_print_version(struct mp_log *log, int always)
     if (!always) {
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
         mp_msg(log, MSGL_V, "List of enabled features: %s\n", FULLCONFIG);
+        #ifdef NDEBUGs
+            mp_msg(log, MSGL_V, "Built with NDEBUG.\n");
+        #endif
     }
 }
 
@@ -249,58 +257,42 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct mp_log *log = mpctx->log;
-    int opt_exit = 0;
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
         struct mp_decoder_list *list = audio_decoder_list();
         mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);
         talloc_free(list);
-        opt_exit = 1;
+        return true;
     }
     if (opts->audio_spdif && strcmp(opts->audio_spdif, "help") == 0) {
         MP_INFO(mpctx, "Choices: ac3,dts-hd,dts (and possibly more)\n");
-        opt_exit = 1;
+        return true;
     }
     if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
         struct mp_decoder_list *list = video_decoder_list();
         mp_print_decoders(log, MSGL_INFO, "Video decoders:", list);
         talloc_free(list);
-        opt_exit = 1;
+        return true;
     }
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
         demuxer_help(log);
         MP_INFO(mpctx, "\n");
-        opt_exit = 1;
+        return true;
     }
     if (opts->audio_device && strcmp(opts->audio_device, "help") == 0) {
         ao_print_devices(mpctx->global, log);
-        opt_exit = 1;
+        return true;
     }
     if (opts->property_print_help) {
         property_print_help(mpctx);
-        opt_exit = 1;
+        return true;
     }
 #if HAVE_ENCODING
     if (encode_lavc_showhelp(log, opts->encode_opts))
-        opt_exit = 1;
+        return true;
 #endif
-    return opt_exit;
-}
-
-static void handle_deprecated_options(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct m_obj_settings *vo = opts->vo->video_driver_list;
-    if (vo && vo->name && strcmp(vo->name, "opengl-hq") == 0) {
-        MP_WARN(mpctx,
-            "--vo=opengl-hq is deprecated! Use --profile=opengl-hq instead.\n");
-        // Fudge it. This will replace the --vo option too, which is why we
-        // unset/safe it, and later restore it.
-        talloc_free(vo->name);
-        vo->name = talloc_strdup(NULL, "opengl");
-        m_config_set_profile(mpctx->mconfig, "opengl-hq", 0);
-    }
+    return false;
 }
 
 static int cfg_include(void *ctx, char *filename, int flags)
@@ -435,8 +427,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (handle_help_options(mpctx))
         return -2;
-
-    handle_deprecated_options(mpctx);
 
     if (!print_libav_versions(mp_null_log, 0)) {
         // Using mismatched libraries can be legitimate, but even then it's

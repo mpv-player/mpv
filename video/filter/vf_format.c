@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <math.h>
 
 #include <libavutil/rational.h>
 
@@ -31,6 +32,11 @@
 
 #include "options/m_option.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
     int fmt;
     int outfmt;
@@ -38,13 +44,16 @@ struct vf_priv_s {
     int colorlevels;
     int primaries;
     int gamma;
-    float peak;
+    float sig_peak;
+    int light;
     int chroma_location;
     int stereo_in;
     int stereo_out;
     int rotate;
     int dw, dh;
     double dar;
+    int spherical;
+    float spherical_ref_angles[3];
 };
 
 static bool is_compatible(int fmt1, int fmt2)
@@ -93,10 +102,20 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->color.levels = p->colorlevels;
     if (p->primaries)
         out->color.primaries = p->primaries;
-    if (p->gamma)
+    if (p->gamma) {
         out->color.gamma = p->gamma;
-    if (p->peak)
-        out->color.sig_peak = p->peak;
+        if (in->color.gamma != out->color.gamma) {
+            // When changing the gamma function explicitly, also reset stuff
+            // related to the gamma function since that information will almost
+            // surely be false now and have to be re-inferred
+            out->color.sig_peak = 0.0;
+            out->color.light = MP_CSP_LIGHT_AUTO;
+        }
+    }
+    if (p->sig_peak)
+        out->color.sig_peak = p->sig_peak;
+    if (p->light)
+        out->color.light = p->light;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)
@@ -115,6 +134,13 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     if (p->dar > 0)
         dsize = av_d2q(p->dar, INT_MAX);
     mp_image_params_set_dsize(out, dsize.num, dsize.den);
+
+    if (p->spherical)
+        out->spherical.type = p->spherical;
+    for (int n = 0; n < 3; n++) {
+        if (isfinite(p->spherical_ref_angles[n]))
+            out->spherical.ref_angles[n] = p->spherical_ref_angles[n];
+    }
 
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(out);
@@ -145,7 +171,8 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("colorlevels", colorlevels, 0, mp_csp_levels_names),
     OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
     OPT_CHOICE_C("gamma", gamma, 0, mp_csp_trc_names),
-    OPT_FLOAT("peak", peak, 0),
+    OPT_FLOAT("sig-peak", sig_peak, 0),
+    OPT_CHOICE_C("light", light, 0, mp_csp_light_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     OPT_CHOICE_C("stereo-in", stereo_in, 0, mp_stereo3d_names),
     OPT_CHOICE_C("stereo-out", stereo_out, 0, mp_stereo3d_names),
@@ -153,7 +180,12 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),
     OPT_DOUBLE("dar", dar, 0),
+    OPT_CHOICE_C("spherical", spherical, 0, mp_spherical_names),
+    OPT_FLOAT("spherical-yaw", spherical_ref_angles[0], 0),
+    OPT_FLOAT("spherical-pitch", spherical_ref_angles[1], 0),
+    OPT_FLOAT("spherical-roll", spherical_ref_angles[2], 0),
     OPT_REMOVED("outputlevels", "use the --video-output-levels global option"),
+    OPT_REMOVED("peak", "use sig-peak instead (changed value scale!)"),
     {0}
 };
 
@@ -165,5 +197,6 @@ const vf_info_t vf_info_format = {
     .options = vf_opts_fields,
     .priv_defaults = &(const struct vf_priv_s){
         .rotate = -1,
+        .spherical_ref_angles = {NAN, NAN, NAN},
     },
 };

@@ -111,6 +111,25 @@ double get_track_seek_offset(struct MPContext *mpctx, struct track *track)
     return 0;
 }
 
+void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec)
+{
+    // let queued seeks execute at a slightly later point
+    if (mpctx->seek.type) {
+        mp_wakeup_core(mpctx);
+        return;
+    }
+    // repeat currently ongoing seeks
+    if (mpctx->current_seek.type) {
+        mpctx->seek = mpctx->current_seek;
+        mp_wakeup_core(mpctx);
+        return;
+    }
+    // maybe happens when changing filters while file is loaded - ignore for now
+    if (mpctx->playback_pts == MP_NOPTS_VALUE)
+        return;
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->playback_pts, min_prec, 0);
+}
+
 float mp_get_cache_percent(struct MPContext *mpctx)
 {
     struct stream_cache_info info = {0};

@@ -20,21 +20,16 @@
 #include <va/va.h>
 #include <va/va_vpp.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "config.h"
 #include "options/options.h"
 #include "vf.h"
 #include "refqueue.h"
+#include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
 #include "video/mp_image_pool.h"
-
-static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg)
-{
-    if (status == VA_STATUS_SUCCESS)
-        return true;
-    MP_ERR(vf, "%s: %s\n", msg, vaErrorStr(status));
-    return false;
-}
 
 struct surface_refs {
     VASurfaceID *surfaces;
@@ -64,8 +59,7 @@ struct vf_priv_s {
     VADisplay display;
     struct mp_vaapi_ctx *va;
     struct pipeline pipe;
-    struct mp_image_pool *pool;
-    int current_rt_format;
+    AVBufferRef *hw_pool;
 
     struct mp_refqueue *queue;
 };
@@ -130,7 +124,7 @@ static void update_pipeline(struct vf_instance *vf)
     };
     VAStatus status = vaQueryVideoProcPipelineCaps(p->display, p->context,
                                                    filters, num_filters, &caps);
-    if (!check_error(vf, status, "vaQueryVideoProcPipelineCaps()"))
+    if (!CHECK_VA_STATUS(vf, "vaQueryVideoProcPipelineCaps()"))
         goto nodeint;
     p->pipe.filters = filters;
     p->pipe.num_filters = num_filters;
@@ -156,6 +150,28 @@ nodeint:
     mp_refqueue_set_mode(p->queue, 0);
 }
 
+static struct mp_image *alloc_out(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    AVFrame *av_frame = av_frame_alloc();
+    if (!av_frame)
+        abort();
+    if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
+        MP_ERR(vf, "Failed to allocate frame from hw pool.\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *img = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!img) {
+        MP_ERR(vf, "Unknown error.\n");
+        return NULL;
+    }
+    mp_image_set_size(img, vf->fmt_in.w, vf->fmt_in.h);
+    return img;
+}
+
 static struct mp_image *render(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -167,15 +183,13 @@ static struct mp_image *render(struct vf_instance *vf)
     VABufferID buffer = VA_INVALID_ID;
 
     VASurfaceID in_id = va_surface_id(in);
-    if (!p->pipe.filters || in_id == VA_INVALID_ID)
+    if (!p->pipe.filters || in_id == VA_INVALID_ID || !p->hw_pool)
         goto cleanup;
 
-    int r_w, r_h;
-    va_surface_get_uncropped_size(in, &r_w, &r_h);
-    img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, r_w, r_h);
+    img = alloc_out(vf);
     if (!img)
         goto cleanup;
-    mp_image_set_size(img, in->w, in->h);
+
     mp_image_copy_attributes(img, in);
 
     unsigned int flags = va_get_colorspace_flag(p->params.color.space);
@@ -192,7 +206,7 @@ static struct mp_image *render(struct vf_instance *vf)
         goto cleanup;
 
     VAStatus status = vaBeginPicture(p->display, p->context, id);
-    if (!check_error(vf, status, "vaBeginPicture()"))
+    if (!CHECK_VA_STATUS(vf, "vaBeginPicture()"))
         goto cleanup;
 
     need_end_picture = true;
@@ -201,12 +215,12 @@ static struct mp_image *render(struct vf_instance *vf)
     status = vaCreateBuffer(p->display, p->context,
                             VAProcPipelineParameterBufferType,
                             sizeof(*param), 1, NULL, &buffer);
-    if (!check_error(vf, status, "vaCreateBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaCreateBuffer()"))
         goto cleanup;
 
     VAProcFilterParameterBufferDeinterlacing *filter_params;
     status = vaMapBuffer(p->display, *(p->pipe.filters), (void**)&filter_params);
-    if (!check_error(vf, status, "vaMapBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaMapBuffer()"))
         goto cleanup;
 
     filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
@@ -216,7 +230,7 @@ static struct mp_image *render(struct vf_instance *vf)
     vaUnmapBuffer(p->display, *(p->pipe.filters));
 
     status = vaMapBuffer(p->display, buffer, (void**)&param);
-    if (!check_error(vf, status, "vaMapBuffer()"))
+    if (!CHECK_VA_STATUS(vf, "vaMapBuffer()"))
         goto cleanup;
 
     *param = (VAProcPipelineParameterBuffer){0};
@@ -247,7 +261,7 @@ static struct mp_image *render(struct vf_instance *vf)
     vaUnmapBuffer(p->display, buffer);
 
     status = vaRenderPicture(p->display, p->context, &buffer, 1);
-    if (!check_error(vf, status, "vaRenderPicture()"))
+    if (!CHECK_VA_STATUS(vf, "vaRenderPicture()"))
         goto cleanup;
 
     success = true;
@@ -264,11 +278,12 @@ cleanup:
 
 static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 {
-    struct vf_priv_s *p = vf->priv;
-    struct mp_image *out = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
+    // Since we do no scaling or csp conversion, we can allocate an output
+    // surface for input too.
+    struct mp_image *out = alloc_out(vf);
     if (!out)
         return NULL;
-    if (va_surface_upload(out, in) < 0) {
+    if (!mp_image_hw_upload(out, in)) {
         talloc_free(out);
         return NULL;
     }
@@ -323,23 +338,39 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     struct vf_priv_s *p = vf->priv;
 
     flush_frames(vf);
-    talloc_free(p->pool);
-    p->pool = NULL;
+    av_buffer_unref(&p->hw_pool);
 
     p->params = *in;
-
-    p->current_rt_format = VA_RT_FORMAT_YUV420;
-    p->pool = mp_image_pool_new(20);
-    va_pool_set_allocator(p->pool, p->va, p->current_rt_format);
-
-    struct mp_image *probe = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
-    if (!probe)
-        return -1;
-    va_surface_init_subformat(probe);
     *out = *in;
-    out->imgfmt = probe->params.imgfmt;
-    out->hw_subfmt = probe->params.hw_subfmt;
-    talloc_free(probe);
+
+    int src_w = in->w;
+    int src_h = in->h;
+
+    if (in->imgfmt == IMGFMT_VAAPI) {
+        if (!vf->in_hwframes_ref)
+            return -1;
+        AVHWFramesContext *hw_frames = (void *)vf->in_hwframes_ref->data;
+        // VAAPI requires the full surface size to match for input and output.
+        src_w = hw_frames->width;
+        src_h = hw_frames->height;
+    } else {
+        out->imgfmt = IMGFMT_VAAPI;
+        out->hw_subfmt = IMGFMT_NV12;
+    }
+
+    p->hw_pool = av_hwframe_ctx_alloc(p->va->av_device_ref);
+    if (!p->hw_pool)
+        return -1;
+    AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
+    hw_frames->format = AV_PIX_FMT_VAAPI;
+    hw_frames->sw_format = imgfmt2pixfmt(out->hw_subfmt);
+    hw_frames->width = src_w;
+    hw_frames->height = src_h;
+    if (av_hwframe_ctx_init(p->hw_pool) < 0) {
+        MP_ERR(vf, "Failed to initialize libavutil vaapi frames pool.\n");
+        av_buffer_unref(&p->hw_pool);
+        return -1;
+    }
 
     return 0;
 }
@@ -353,29 +384,21 @@ static void uninit(struct vf_instance *vf)
         vaDestroyContext(p->display, p->context);
     if (p->config != VA_INVALID_ID)
         vaDestroyConfig(p->display, p->config);
-    talloc_free(p->pool);
+    av_buffer_unref(&p->hw_pool);
     flush_frames(vf);
     mp_refqueue_free(p->queue);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 {
-    struct vf_priv_s *p = vf->priv;
-    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va, imgfmt))
+    if (imgfmt == IMGFMT_VAAPI || imgfmt == IMGFMT_NV12 || imgfmt == IMGFMT_420P)
         return vf_next_query_format(vf, IMGFMT_VAAPI);
     return 0;
 }
 
 static int control(struct vf_instance *vf, int request, void* data)
 {
-    struct vf_priv_s *p = vf->priv;
     switch (request){
-    case VFCTRL_GET_DEINTERLACE:
-        *(int*)data = !!p->do_deint;
-        return true;
-    case VFCTRL_SET_DEINTERLACE:
-        p->do_deint = *(int*)data;
-        return true;
     case VFCTRL_SEEK_RESET:
         flush_frames(vf);
         return true;
@@ -390,7 +413,7 @@ static int va_query_filter_caps(struct vf_instance *vf, VAProcFilterType type,
     struct vf_priv_s *p = vf->priv;
     VAStatus status = vaQueryVideoProcFilterCaps(p->display, p->context, type,
                                                  caps, &count);
-    return check_error(vf, status, "vaQueryVideoProcFilterCaps()") ? count : 0;
+    return CHECK_VA_STATUS(vf, "vaQueryVideoProcFilterCaps()") ? count : 0;
 }
 
 static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
@@ -401,7 +424,7 @@ static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
     VAStatus status = vaCreateBuffer(p->display, p->context,
                                      VAProcFilterParameterBufferType,
                                      bytes, num, data, &buffer);
-    return check_error(vf, status, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
+    return CHECK_VA_STATUS(vf, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
 }
 
 static bool initialize(struct vf_instance *vf)
@@ -412,20 +435,20 @@ static bool initialize(struct vf_instance *vf)
     VAConfigID config;
     status = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc,
                             NULL, 0, &config);
-    if (!check_error(vf, status, "vaCreateConfig()")) // no entrypoint for video porc
+    if (!CHECK_VA_STATUS(vf, "vaCreateConfig()")) // no entrypoint for video porc
         return false;
     p->config = config;
 
     VAContextID context;
     status = vaCreateContext(p->display, p->config, 0, 0, 0, NULL, 0, &context);
-    if (!check_error(vf, status, "vaCreateContext()"))
+    if (!CHECK_VA_STATUS(vf, "vaCreateContext()"))
         return false;
     p->context = context;
 
     VAProcFilterType filters[VAProcFilterCount];
     int num_filters = VAProcFilterCount;
     status = vaQueryVideoProcFilters(p->display, p->context, filters, &num_filters);
-    if (!check_error(vf, status, "vaQueryVideoProcFilters()"))
+    if (!CHECK_VA_STATUS(vf, "vaQueryVideoProcFilters()"))
         return false;
 
     VABufferID buffers[VAProcFilterCount];
@@ -476,9 +499,12 @@ static int vf_open(vf_instance_t *vf)
     p->queue = mp_refqueue_alloc();
 
     p->va = hwdec_devices_load(vf->hwdec_devs, HWDEC_VAAPI);
-    if (!p->va)
+    if (!p->va || !p->va->av_device_ref) {
+        uninit(vf);
         return 0;
+    }
     p->display = p->va->display;
+
     if (initialize(vf))
         return true;
     uninit(vf);

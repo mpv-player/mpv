@@ -37,7 +37,8 @@
 #include "common/av_common.h"
 #include "common/msg.h"
 
-#include "audio/audio.h"
+#include "audio/format.h"
+#include "audio/aframe.h"
 #include "video/mp_image.h"
 #include "audio/fmt-conversion.h"
 #include "video/fmt-conversion.h"
@@ -96,7 +97,7 @@ struct lavfi_pad {
 
     // 1-frame queue (used for both input and output)
     struct mp_image *pending_v;
-    struct mp_audio *pending_a;
+    struct mp_aframe *pending_a;
 
     // -- dir==LAVFI_IN
 
@@ -107,7 +108,7 @@ struct lavfi_pad {
 
     // used to check for format changes manually
     struct mp_image *in_fmt_v;
-    struct mp_audio in_fmt_a;
+    struct mp_aframe *in_fmt_a;
 
     // -- dir==LAVFI_OUT
 
@@ -199,7 +200,7 @@ static void free_graph(struct lavfi *c)
         pad->filter_pad = -1;
         pad->buffer = NULL;
         TA_FREEP(&pad->in_fmt_v);
-        pad->in_fmt_a = (struct mp_audio){0};
+        TA_FREEP(&pad->in_fmt_a);
         pad->buffer_is_eof = false;
         pad->input_needed = false;
         pad->input_waiting = false;
@@ -249,10 +250,17 @@ struct lavfi *lavfi_create(struct mp_log *log, char *graph_string)
 
 void lavfi_destroy(struct lavfi *c)
 {
+    if (!c)
+        return;
     free_graph(c);
     clear_data(c);
     av_frame_free(&c->tmp_frame);
     talloc_free(c);
+}
+
+const char *lavfi_get_graph(struct lavfi *c)
+{
+    return c->graph_string;
 }
 
 struct lavfi_pad *lavfi_find_pad(struct lavfi *c, char *name)
@@ -305,9 +313,14 @@ static void send_global_eof(struct lavfi *c)
 
 // libavfilter allows changing some parameters on the fly, but not
 // others.
-static bool is_aformat_ok(struct mp_audio *a, struct mp_audio *b)
+static bool is_aformat_ok(struct mp_aframe *a, struct mp_aframe *b)
 {
-    return mp_audio_config_equals(a, b);
+    struct mp_chmap ca = {0}, cb = {0};
+    mp_aframe_get_chmap(a, &ca);
+    mp_aframe_get_chmap(b, &cb);
+    return mp_chmap_equals(&ca, &cb) &&
+           mp_aframe_get_rate(a) == mp_aframe_get_rate(b) &&
+           mp_aframe_get_format(a) == mp_aframe_get_format(b);
 }
 static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
@@ -324,9 +337,9 @@ static void check_format_changes(struct lavfi *c)
         if (!pad->buffer || pad->dir != LAVFI_IN)
             continue;
 
-        if (pad->type == STREAM_AUDIO && pad->pending_a && pad->in_fmt_a.format) {
+        if (pad->type == STREAM_AUDIO && pad->pending_a && pad->in_fmt_a) {
             c->draining_new_format |= !is_aformat_ok(pad->pending_a,
-                                                     &pad->in_fmt_a);
+                                                     pad->in_fmt_a);
         }
         if (pad->type == STREAM_VIDEO && pad->pending_v && pad->in_fmt_v) {
             c->draining_new_format |= !is_vformat_ok(pad->pending_v,
@@ -354,7 +367,7 @@ static bool init_pads(struct lavfi *c)
             goto error; // can happen if pad reassociation fails
 
         if (pad->dir == LAVFI_OUT) {
-            AVFilter *dst_filter = NULL;
+            const AVFilter *dst_filter = NULL;
             if (pad->type == STREAM_AUDIO) {
                 dst_filter = avfilter_get_by_name("abuffersink");
             } else if (pad->type == STREAM_VIDEO) {
@@ -382,7 +395,10 @@ static bool init_pads(struct lavfi *c)
 
             if (pad->pending_a) {
                 assert(pad->type == STREAM_AUDIO);
-                mp_audio_copy_config(&pad->in_fmt_a, pad->pending_a);
+                pad->in_fmt_a = mp_aframe_new_ref(pad->pending_a);
+                if (!pad->in_fmt_a)
+                    goto error;
+                mp_aframe_unref_data(pad->in_fmt_a);
             } else if (pad->pending_v) {
                 assert(pad->type == STREAM_VIDEO);
                 pad->in_fmt_v = mp_image_new_ref(pad->pending_v);
@@ -393,9 +409,11 @@ static bool init_pads(struct lavfi *c)
                 // libavfilter makes this painful. Init it with a dummy config,
                 // just so we can tell it the stream is EOF.
                 if (pad->type == STREAM_AUDIO) {
-                    mp_audio_set_format(&pad->in_fmt_a, AF_FORMAT_FLOAT);
-                    mp_audio_set_num_channels(&pad->in_fmt_a, 2);
-                    pad->in_fmt_a.rate = 48000;
+                    pad->in_fmt_a = mp_aframe_create();
+                    mp_aframe_set_format(pad->in_fmt_a, AF_FORMAT_FLOAT);
+                    mp_aframe_set_chmap(pad->in_fmt_a,
+                                        &(struct mp_chmap)MP_CHMAP_INIT_STEREO);
+                    mp_aframe_set_rate(pad->in_fmt_a, 48000);
                 } else if (pad->type == STREAM_VIDEO) {
                     pad->in_fmt_v = talloc_zero(NULL, struct mp_image);
                     mp_image_setfmt(pad->in_fmt_v, IMGFMT_420P);
@@ -414,11 +432,13 @@ static bool init_pads(struct lavfi *c)
             char *filter_name = NULL;
             if (pad->type == STREAM_AUDIO) {
                 params->time_base = pad->timebase =
-                    (AVRational){1, pad->in_fmt_a.rate};
-                params->format = af_to_avformat(pad->in_fmt_a.format);
-                params->sample_rate = pad->in_fmt_a.rate;
-                params->channel_layout =
-                    mp_chmap_to_lavc(&pad->in_fmt_a.channels);
+                    (AVRational){1, mp_aframe_get_rate(pad->in_fmt_a)};
+                params->format =
+                    af_to_avformat(mp_aframe_get_format(pad->in_fmt_a));
+                params->sample_rate = mp_aframe_get_rate(pad->in_fmt_a);
+                struct mp_chmap chmap = {0};
+                mp_aframe_get_chmap(pad->in_fmt_a, &chmap);
+                params->channel_layout = mp_chmap_to_lavc(&chmap);
                 filter_name = "abuffer";
             } else if (pad->type == STREAM_VIDEO) {
                 params->time_base = pad->timebase = AV_TIME_BASE_Q;
@@ -433,7 +453,7 @@ static bool init_pads(struct lavfi *c)
                 assert(0);
             }
 
-            AVFilter *filter = avfilter_get_by_name(filter_name);
+            const AVFilter *filter = avfilter_get_by_name(filter_name);
             if (filter) {
                 char name[256];
                 snprintf(name, sizeof(name), "mpv_src_%s", pad->name);
@@ -484,9 +504,11 @@ static void dump_graph(struct lavfi *c)
 #endif
 }
 
-void lavfi_set_hwdec_devs(struct lavfi *c, struct mp_hwdec_devices *hwdevs)
+void lavfi_pad_set_hwdec_devs(struct lavfi_pad *pad,
+                              struct mp_hwdec_devices *hwdevs)
 {
-    c->hwdec_devs = hwdevs;
+    // We don't actually treat this per-pad.
+    pad->main->hwdec_devs = hwdevs;
 }
 
 // Initialize the graph if all inputs have formats set. If it's already
@@ -556,8 +578,8 @@ static void feed_input_pads(struct lavfi *c)
             frame = mp_image_to_av_frame_and_unref(pad->pending_v);
             pad->pending_v = NULL;
         } else if (pad->pending_a) {
-            pts = pad->pending_a->pts;
-            frame = mp_audio_to_avframe_and_unref(pad->pending_a);
+            pts = mp_aframe_get_pts(pad->pending_a);
+            frame = mp_aframe_to_avframe_and_unref(pad->pending_a);
             pad->pending_a = NULL;
         } else {
             if (!pad->input_eof) {
@@ -612,9 +634,9 @@ static void read_output_pads(struct lavfi *c)
             pad->output_needed = false;
             double pts = mp_pts_from_av(c->tmp_frame->pts, &pad->timebase);
             if (pad->type == STREAM_AUDIO) {
-                pad->pending_a = mp_audio_from_avframe(c->tmp_frame);
+                pad->pending_a = mp_aframe_from_avframe(c->tmp_frame);
                 if (pad->pending_a)
-                    pad->pending_a->pts = pts;
+                    mp_aframe_set_pts(pad->pending_a, pts);
             } else if (pad->type == STREAM_VIDEO) {
                 pad->pending_v = mp_image_from_av_frame(c->tmp_frame);
                 if (pad->pending_v)
@@ -716,15 +738,15 @@ static int lavfi_request_frame(struct lavfi_pad *pad)
     } else if (pad->main->all_waiting) {
         return DATA_WAIT;
     }
-    return DATA_AGAIN;
+    return DATA_STARVE;
 }
 
 // Try to read a new frame from an output pad. Returns one of the following:
 //      DATA_OK: a frame is returned
-//      DATA_AGAIN: needs more input data
+//      DATA_STARVE: needs more input data
 //      DATA_WAIT: needs more input data, and all inputs in LAVFI_WAIT state
 //      DATA_EOF: no more data
-int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_audio **out_aframe)
+int lavfi_request_frame_a(struct lavfi_pad *pad, struct mp_aframe **out_aframe)
 {
     int r = lavfi_request_frame(pad);
     *out_aframe = pad->pending_a;
@@ -750,7 +772,7 @@ bool lavfi_needs_input(struct lavfi_pad *pad)
 
 // A filter user is supposed to call lavfi_needs_input(), and if that returns
 // true, send either a new status or a frame. A status can be one of:
-//      DATA_AGAIN: a new frame/status will come, caller will retry
+//      DATA_STARVE: a new frame/status will come, caller will retry
 //      DATA_WAIT: a new frame/status will come, but caller goes to sleep
 //      DATA_EOF: no more input possible (in near time)
 // If you have a new frame, use lavfi_send_frame_ instead.
@@ -764,7 +786,7 @@ void lavfi_send_status(struct lavfi_pad *pad, int status)
     assert(!pad->pending_v && !pad->pending_a);
 
     pad->input_waiting = status == DATA_WAIT || status == DATA_EOF;
-    pad->input_again = status == DATA_AGAIN;
+    pad->input_again = status == DATA_STARVE;
     pad->input_eof = status == DATA_EOF;
 }
 
@@ -778,7 +800,7 @@ static void lavfi_sent_frame(struct lavfi_pad *pad)
 }
 
 // See lavfi_send_status() for remarks.
-void lavfi_send_frame_a(struct lavfi_pad *pad, struct mp_audio *aframe)
+void lavfi_send_frame_a(struct lavfi_pad *pad, struct mp_aframe *aframe)
 {
     assert(pad->type == STREAM_AUDIO);
     assert(!pad->pending_a);

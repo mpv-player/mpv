@@ -1,22 +1,18 @@
 /*
- * The sample format system used lin libaf is based on bitmasks.
- * The format definition only refers to the storage format,
- * not the resolution.
- *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_AF_FORMAT_H
@@ -30,7 +26,6 @@ enum af_format {
 
     AF_FORMAT_U8,
     AF_FORMAT_S16,
-    AF_FORMAT_S24,
     AF_FORMAT_S32,
     AF_FORMAT_FLOAT,
     AF_FORMAT_DOUBLE,
@@ -57,7 +52,6 @@ enum af_format {
 const char *af_fmt_to_str(int format);
 
 int af_fmt_to_bytes(int format);
-int af_fmt_change_bytes(int format, int bytes);
 
 bool af_fmt_is_valid(int format);
 bool af_fmt_is_unsigned(int format);

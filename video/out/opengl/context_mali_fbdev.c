@@ -50,8 +50,7 @@ static bool get_fbdev_size(int *w, int *h)
 }
 
 struct priv {
-    struct mp_log *log;
-    struct GL *gl;
+    struct GL gl;
     EGLDisplay egl_display;
     EGLConfig egl_config;
     EGLContext egl_context;
@@ -60,9 +59,10 @@ struct priv {
     int w, h;
 };
 
-static void mali_uninit(struct MPGLContext *ctx)
+static void mali_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    ra_gl_ctx_uninit(ctx);
 
     if (p->egl_surface) {
         eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -74,25 +74,29 @@ static void mali_uninit(struct MPGLContext *ctx)
     eglReleaseThread();
 }
 
-static int mali_init(struct MPGLContext *ctx, int flags)
+static void mali_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    p->log = ctx->vo->log;
+    eglSwapBuffers(p->egl_display, p->egl_surface);
+}
+
+static bool mali_init(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
 
     if (!get_fbdev_size(&p->w, &p->h)) {
-        MP_FATAL(p, "Could not get fbdev size.\n");
+        MP_FATAL(ctx, "Could not get fbdev size.\n");
         goto fail;
     }
 
     p->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(p, "EGL failed to initialize.\n");
+        MP_FATAL(ctx, "EGL failed to initialize.\n");
         goto fail;
     }
 
     EGLConfig config;
-    if (!mpegl_create_context(p->egl_display, p->log, flags, &p->egl_context,
-                              &config))
+    if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &config))
         goto fail;
 
     p->egl_window = (struct fbdev_window){
@@ -104,53 +108,51 @@ static int mali_init(struct MPGLContext *ctx, int flags)
                                     (EGLNativeWindowType)&p->egl_window, NULL);
 
     if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_FATAL(p, "Could not create EGL surface!\n");
+        MP_FATAL(ctx, "Could not create EGL surface!\n");
         goto fail;
     }
 
     if (!eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
                         p->egl_context))
     {
-        MP_FATAL(p, "Failed to set context!\n");
+        MP_FATAL(ctx, "Failed to set context!\n");
         goto fail;
     }
 
-    ctx->gl = talloc_zero(ctx, GL);
+    mpegl_load_functions(&p->gl, ctx->log);
 
-    mpegl_load_functions(ctx->gl, p->log);
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = mali_swap_buffers,
+    };
 
-    return 0;
+    if (!ra_gl_ctx_init(ctx, &p->gl, params))
+        goto fail;
+
+    return true;
 
 fail:
     mali_uninit(ctx);
-    return -1;
+    return false;
 }
 
-static int mali_reconfig(struct MPGLContext *ctx)
+static bool mali_reconfig(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     ctx->vo->dwidth = p->w;
     ctx->vo->dheight = p->h;
-    return 0;
+    ra_gl_ctx_resize(ctx->swapchain, p->w, p->h, 0);
 }
 
-static void mali_swap_buffers(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    eglSwapBuffers(p->egl_display, p->egl_surface);
-}
-
-static int mali_control(MPGLContext *ctx, int *events, int request, void *arg)
+static int mali_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
     return VO_NOTIMPL;
 }
 
-const struct mpgl_driver mpgl_driver_mali = {
+const struct ra_ctx_fns ra_ctx_mali_fbdev = {
+    .type           = "opengl",
     .name           = "mali-fbdev",
-    .priv_size      = sizeof(struct priv),
-    .init           = mali_init,
     .reconfig       = mali_reconfig,
-    .swap_buffers   = mali_swap_buffers,
     .control        = mali_control,
+    .init           = mali_init,
     .uninit         = mali_uninit,
 };

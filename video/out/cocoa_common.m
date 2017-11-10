@@ -3,18 +3,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #import <Cocoa/Cocoa.h>
@@ -93,6 +93,10 @@ struct vo_cocoa_state {
     uint32_t old_dwidth;
     uint32_t old_dheight;
 
+    pthread_mutex_t anim_lock;
+    pthread_cond_t anim_wakeup;
+    bool is_animating;
+
     CVDisplayLinkRef link;
     pthread_mutex_t sync_lock;
     pthread_cond_t sync_wakeup;
@@ -125,7 +129,6 @@ static void run_on_main_thread(struct vo *vo, void(^block)(void))
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts  = vo->opts;
     id<MpvWindowUpdate> win = (id<MpvWindowUpdate>) s->window;
     NSRect r = NSMakeRect(0, 0, w, h);
     r = [s->current_screen convertRectFromBacking:r];
@@ -294,6 +297,23 @@ static void vo_cocoa_update_screen_info(struct vo *vo)
     s->display_id = [[sinfo objectForKey:@"NSScreenNumber"] longValue];
 }
 
+static void vo_cocoa_anim_lock(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    pthread_mutex_lock(&s->anim_lock);
+    s->is_animating = true;
+    pthread_mutex_unlock(&s->anim_lock);
+}
+
+static void vo_cocoa_anim_unlock(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    pthread_mutex_lock(&s->anim_lock);
+    s->is_animating = false;
+    pthread_cond_signal(&s->anim_wakeup);
+    pthread_mutex_unlock(&s->anim_lock);
+}
+
 static void vo_cocoa_signal_swap(struct vo_cocoa_state *s)
 {
     pthread_mutex_lock(&s->sync_lock);
@@ -363,6 +383,8 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     pthread_mutex_init(&s->sync_lock, NULL);
     pthread_cond_init(&s->sync_wakeup, NULL);
+    pthread_mutex_init(&s->anim_lock, NULL);
+    pthread_cond_init(&s->anim_wakeup, NULL);
     vo->cocoa = s;
     vo_cocoa_update_screen_info(vo);
     vo_cocoa_init_displaylink(vo);
@@ -407,6 +429,11 @@ void vo_cocoa_uninit(struct vo *vo)
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->lock);
 
+    pthread_mutex_lock(&s->anim_lock);
+    while(s->is_animating)
+        pthread_cond_wait(&s->anim_wakeup, &s->anim_lock);
+    pthread_mutex_unlock(&s->anim_lock);
+
     // close window beforehand to prevent undefined behavior when in fullscreen
     // that resets the desktop to space 1
     run_on_main_thread(vo, ^{
@@ -436,6 +463,8 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->view removeFromSuperview];
         [s->view release];
 
+        pthread_cond_destroy(&s->anim_wakeup);
+        pthread_mutex_destroy(&s->anim_lock);
         pthread_cond_destroy(&s->sync_wakeup);
         pthread_mutex_destroy(&s->sync_lock);
         pthread_cond_destroy(&s->wakeup);
@@ -925,7 +954,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)performAsyncResize:(NSSize)size
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
     vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
@@ -966,9 +994,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     cocoa_put_key_with_modifiers(mpkey, modifiers);
 }
 
-- (void)putAxis:(int)mpkey delta:(float)delta;
+- (void)putWheel:(int)mpkey delta:(float)delta;
 {
-    mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
+    mp_input_put_wheel(self.vout->input_ctx, mpkey, delta);
 }
 
 - (void)putCommand:(char*)cmd
@@ -982,6 +1010,11 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (BOOL)isInFullScreenMode
 {
     return self.vout->cocoa->fullscreen;
+}
+
+- (BOOL)wantsNativeFullscreen
+{
+    return self.vout->opts->native_fs;
 }
 
 - (NSScreen *)getTargetScreen
@@ -1009,18 +1042,40 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     flag_events(self.vout, VO_EVENT_WIN_STATE);
 }
 
-- (void)windowDidEnterFullScreen:(NSNotification *)notification
+- (void)windowDidEnterFullScreen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 1;
     s->pending_events |= VO_EVENT_FULLSCREEN_STATE;
+    vo_cocoa_anim_unlock(self.vout);
 }
 
-- (void)windowDidExitFullScreen:(NSNotification *)notification
+- (void)windowDidExitFullScreen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->fullscreen = 0;
     s->pending_events |= VO_EVENT_FULLSCREEN_STATE;
+    vo_cocoa_anim_unlock(self.vout);
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification *)notification
+{
+    vo_cocoa_anim_lock(self.vout);
+}
+
+- (void)windowWillExitFullScreen:(NSNotification *)notification
+{
+    vo_cocoa_anim_lock(self.vout);
+}
+
+- (void)windowDidFailToEnterFullScreen:(NSWindow *)window
+{
+    vo_cocoa_anim_unlock(self.vout);
+}
+
+- (void)windowDidFailToExitFullScreen:(NSWindow *)window
+{
+    vo_cocoa_anim_unlock(self.vout);
 }
 
 - (void)windowWillStartLiveResize:(NSNotification *)notification

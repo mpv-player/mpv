@@ -21,141 +21,137 @@
 
 #include "common/common.h"
 
+#include "chmap.h"
 #include "audio_buffer.h"
-#include "audio.h"
 #include "format.h"
 
 struct mp_audio_buffer {
-    struct mp_audio *buffer;
+    int format;
+    struct mp_chmap channels;
+    int srate;
+    int sstride;
+    int num_planes;
+    uint8_t *data[MP_NUM_CHANNELS];
+    int allocated;
+    int num_samples;
 };
 
 struct mp_audio_buffer *mp_audio_buffer_create(void *talloc_ctx)
 {
-    struct mp_audio_buffer *ab = talloc(talloc_ctx, struct mp_audio_buffer);
-    *ab = (struct mp_audio_buffer) {
-        .buffer = talloc_zero(ab, struct mp_audio),
-    };
-    return ab;
+    return talloc_zero(talloc_ctx, struct mp_audio_buffer);
 }
 
 // Reinitialize the buffer, set a new format, drop old data.
 // The audio data in fmt is not used, only the format.
-void mp_audio_buffer_reinit(struct mp_audio_buffer *ab, struct mp_audio *fmt)
-{
-    mp_audio_copy_config(ab->buffer, fmt);
-    mp_audio_realloc(ab->buffer, 1);
-    ab->buffer->samples = 0;
-}
-
 void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
                                 const struct mp_chmap *channels, int srate)
 {
-    struct mp_audio mpa = {0};
-    mp_audio_set_format(&mpa, format);
-    mp_audio_set_channels(&mpa, channels);
-    mpa.rate = srate;
-    mp_audio_buffer_reinit(ab, &mpa);
-}
-
-void mp_audio_buffer_get_format(struct mp_audio_buffer *ab,
-                                struct mp_audio *out_fmt)
-{
-    *out_fmt = (struct mp_audio){0};
-    mp_audio_copy_config(out_fmt, ab->buffer);
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        TA_FREEP(&ab->data[n]);
+    ab->format = format;
+    ab->channels = *channels;
+    ab->srate = srate;
+    ab->allocated = 0;
+    ab->num_samples = 0;
+    ab->sstride = af_fmt_to_bytes(ab->format);
+    ab->num_planes = 1;
+    if (af_fmt_is_planar(ab->format)) {
+        ab->num_planes = ab->channels.num;
+    } else {
+        ab->sstride *= ab->channels.num;
+    }
 }
 
 // Make the total size of the internal buffer at least this number of samples.
 void mp_audio_buffer_preallocate_min(struct mp_audio_buffer *ab, int samples)
 {
-    mp_audio_realloc_min(ab->buffer, samples);
+    if (samples > ab->allocated) {
+        for (int n = 0; n < ab->num_planes; n++) {
+            ab->data[n] = talloc_realloc(ab, ab->data[n], char,
+                                         ab->sstride * samples);
+        }
+        ab->allocated = samples;
+    }
 }
 
 // Get number of samples that can be written without forcing a resize of the
 // internal buffer.
 int mp_audio_buffer_get_write_available(struct mp_audio_buffer *ab)
 {
-    return mp_audio_get_allocated_size(ab->buffer) - ab->buffer->samples;
+    return ab->allocated - ab->num_samples;
 }
 
-// Get a pointer to the end of the buffer (where writing would append). If the
-// internal buffer is too small for the given number of samples, it's resized.
-// After writing to the buffer, mp_audio_buffer_finish_write() has to be used
-// to make the written data part of the readable buffer.
-void mp_audio_buffer_get_write_buffer(struct mp_audio_buffer *ab, int samples,
-                                      struct mp_audio *out_buffer)
+// All integer parameters are in samples.
+// dst and src can overlap.
+static void copy_planes(struct mp_audio_buffer *ab,
+                        uint8_t **dst, int dst_offset,
+                        uint8_t **src, int src_offset, int length)
 {
-    assert(samples >= 0);
-    mp_audio_realloc_min(ab->buffer, ab->buffer->samples + samples);
-    *out_buffer = *ab->buffer;
-    out_buffer->samples = ab->buffer->samples + samples;
-    mp_audio_skip_samples(out_buffer, ab->buffer->samples);
-}
-
-void mp_audio_buffer_finish_write(struct mp_audio_buffer *ab, int samples)
-{
-    assert(samples >= 0 && samples <= mp_audio_buffer_get_write_available(ab));
-    ab->buffer->samples += samples;
+    for (int n = 0; n < ab->num_planes; n++) {
+        memmove((char *)dst[n] + dst_offset * ab->sstride,
+                (char *)src[n] + src_offset * ab->sstride,
+                length * ab->sstride);
+    }
 }
 
 // Append data to the end of the buffer.
 // If the buffer is not large enough, it is transparently resized.
-// For now always copies the data.
-void mp_audio_buffer_append(struct mp_audio_buffer *ab, struct mp_audio *mpa)
+void mp_audio_buffer_append(struct mp_audio_buffer *ab, void **ptr, int samples)
 {
-    int offset = ab->buffer->samples;
-    ab->buffer->samples += mpa->samples;
-    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
-    mp_audio_copy(ab->buffer, offset, mpa, 0, mpa->samples);
+    mp_audio_buffer_preallocate_min(ab, ab->num_samples + samples);
+    copy_planes(ab, ab->data, ab->num_samples, (uint8_t **)ptr, 0, samples);
+    ab->num_samples += samples;
 }
 
 // Prepend silence to the start of the buffer.
 void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples)
 {
     assert(samples >= 0);
-    int oldlen = ab->buffer->samples;
-    ab->buffer->samples += samples;
-    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
-    mp_audio_copy(ab->buffer, samples, ab->buffer, 0, oldlen);
-    mp_audio_fill_silence(ab->buffer, 0, samples);
+    mp_audio_buffer_preallocate_min(ab, ab->num_samples + samples);
+    copy_planes(ab, ab->data, samples, ab->data, 0, ab->num_samples);
+    ab->num_samples += samples;
+    for (int n = 0; n < ab->num_planes; n++)
+        af_fill_silence(ab->data[n], samples * ab->sstride, ab->format);
 }
 
 void mp_audio_buffer_duplicate(struct mp_audio_buffer *ab, int samples)
 {
-    assert(samples >= 0 && samples <= ab->buffer->samples);
-    int oldlen = ab->buffer->samples;
-    ab->buffer->samples += samples;
-    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
-    mp_audio_copy(ab->buffer, oldlen, ab->buffer, oldlen - samples, samples);
+    assert(samples >= 0 && samples <= ab->num_samples);
+    mp_audio_buffer_preallocate_min(ab, ab->num_samples + samples);
+    copy_planes(ab, ab->data, ab->num_samples,
+                ab->data, ab->num_samples - samples, samples);
+    ab->num_samples += samples;
 }
 
 // Get the start of the current readable buffer.
-void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *out_mpa)
+void mp_audio_buffer_peek(struct mp_audio_buffer *ab, uint8_t ***ptr,
+                          int *samples)
 {
-    *out_mpa = *ab->buffer;
+    *ptr = ab->data;
+    *samples = ab->num_samples;
 }
 
 // Skip leading samples. (Used with mp_audio_buffer_peek() to read data.)
 void mp_audio_buffer_skip(struct mp_audio_buffer *ab, int samples)
 {
-    assert(samples >= 0 && samples <= ab->buffer->samples);
-    mp_audio_copy(ab->buffer, 0, ab->buffer, samples,
-                  ab->buffer->samples - samples);
-    ab->buffer->samples -= samples;
+    assert(samples >= 0 && samples <= ab->num_samples);
+    copy_planes(ab, ab->data, 0, ab->data, samples, ab->num_samples - samples);
+    ab->num_samples -= samples;
 }
 
 void mp_audio_buffer_clear(struct mp_audio_buffer *ab)
 {
-    ab->buffer->samples = 0;
+    ab->num_samples = 0;
 }
 
 // Return number of buffered audio samples
 int mp_audio_buffer_samples(struct mp_audio_buffer *ab)
 {
-    return ab->buffer->samples;
+    return ab->num_samples;
 }
 
 // Return amount of buffered audio in seconds.
 double mp_audio_buffer_seconds(struct mp_audio_buffer *ab)
 {
-    return ab->buffer->samples / (double)ab->buffer->rate;
+    return ab->num_samples / (double)ab->srate;
 }

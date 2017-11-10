@@ -454,3 +454,40 @@ struct bstr bstr_get_ext(struct bstr s)
         return (struct bstr){NULL, 0};
     return bstr_splice(s, dotpos + 1, s.len);
 }
+
+static int h_to_i(unsigned char c)
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+
+    return -1; // invalid char
+}
+
+bool bstr_decode_hex(void *talloc_ctx, struct bstr hex, struct bstr *out)
+{
+    if (!out)
+        return false;
+
+    char *arr = talloc_array(talloc_ctx, char, hex.len / 2);
+    int len = 0;
+
+    while (hex.len >= 2) {
+        int a = h_to_i(hex.start[0]);
+        int b = h_to_i(hex.start[1]);
+        hex = bstr_splice(hex, 2, hex.len);
+
+        if (a < 0 || b < 0) {
+            talloc_free(arr);
+            return false;
+        }
+
+        arr[len++] = (a << 4) | b;
+    }
+
+    *out = (struct bstr){ .start = arr, .len = len };
+    return true;
+}

@@ -59,10 +59,11 @@ enum stream_type {
 };
 
 enum {
-    DATA_OK     = 1,
-    DATA_WAIT   = 0,
-    DATA_AGAIN  = -1,
-    DATA_EOF    = -2,
+    DATA_OK     = 1,        // data is actually being returned
+    DATA_WAIT   = 0,        // async wait: check state again after next wakeup
+    DATA_AGAIN  = -2,       // repeat request (internal progress was made)
+    DATA_STARVE = -1,       // need input (might require to drain other outputs)
+    DATA_EOF    = -3,       // no more data available
 };
 
 extern const char mpv_version[];
@@ -82,6 +83,7 @@ struct mp_rect {
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
 bool mp_rect_contains(struct mp_rect *rc, int x, int y);
+bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2);
 
 int mp_snprintf_cat(char *str, size_t size, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
@@ -100,5 +102,13 @@ char *mp_strerror_buf(char *buf, size_t buf_size, int errnum);
 
 char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag);
 #define mp_tag_str(t) mp_tag_str_buf((char[22]){0}, 22, t)
+
+// Return a printf(format, ...) formatted string of the given SIZE. SIZE must
+// be a compile time constant. The result is allocated on the stack and valid
+// only within the current block scope.
+#define mp_tprintf(SIZE, format, ...) \
+    mp_tprintf_buf((char[SIZE]){0}, (SIZE), (format), __VA_ARGS__)
+char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
+    PRINTF_ATTRIBUTE(3, 4);
 
 #endif /* MPLAYER_MPCOMMON_H */

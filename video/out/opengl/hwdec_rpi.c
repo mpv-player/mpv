@@ -33,9 +33,10 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "video/mp_image.h"
+#include "video/out/gpu/hwdec.h"
 
-#include "hwdec.h"
 #include "common.h"
+#include "ra_gl.h"
 
 struct priv {
     struct mp_log *log;
@@ -50,7 +51,6 @@ struct priv {
 
     struct mp_image *current_frame;
 
-    int w, h;
     struct mp_rect src, dst;
     int cur_window[4]; // raw user params
 };
@@ -104,7 +104,7 @@ static void input_port_cb(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
     talloc_free(mpi);
 }
 
-static void disable_renderer(struct gl_hwdec *hw)
+static void disable_renderer(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
 
@@ -123,19 +123,16 @@ static void disable_renderer(struct gl_hwdec *hw)
 }
 
 // check_window_only: assume params and dst/src rc are unchanged
-static void update_overlay(struct gl_hwdec *hw, bool check_window_only)
+static void update_overlay(struct ra_hwdec *hw, bool check_window_only)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    GL *gl = ra_is_gl(hw->ra) ? ra_gl_get(hw->ra) : NULL;
     MMAL_PORT_T *input = p->renderer->input[0];
     struct mp_rect src = p->src;
     struct mp_rect dst = p->dst;
 
-    if (!p->w || !p->h)
-        return;
-
     int defs[4] = {0, 0, 0, 0};
-    int *z = mpgl_get_native_display(gl, "MPV_RPI_WINDOW");
+    int *z = gl ? mpgl_get_native_display(gl, "MPV_RPI_WINDOW") : NULL;
     if (!z)
         z = defs;
 
@@ -187,7 +184,7 @@ static void update_overlay(struct gl_hwdec *hw, bool check_window_only)
         MP_WARN(p, "could not set video rectangle\n");
 }
 
-static int enable_renderer(struct gl_hwdec *hw)
+static int enable_renderer(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
     MMAL_PORT_T *input = p->renderer->input[0];
@@ -248,42 +245,13 @@ static int enable_renderer(struct gl_hwdec *hw)
     return 0;
 }
 
-static void overlay_adjust(struct gl_hwdec *hw, int w, int h,
-                           struct mp_rect *src, struct mp_rect *dst)
-{
-    struct priv *p = hw->priv;
-
-    p->w = w;
-    p->h = h;
-    p->src = *src;
-    p->dst = *dst;
-
-    update_overlay(hw, false);
-}
-
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
-{
-    struct priv *p = hw->priv;
-
-    p->params = *params;
-
-    *params = (struct mp_image_params){0};
-
-    disable_renderer(hw);
-
-    if (enable_renderer(hw) < 0)
-        return -1;
-
-    return 0;
-}
-
 static void free_mmal_buffer(void *arg)
 {
     MMAL_BUFFER_HEADER_T *buffer = arg;
     mmal_buffer_header_release(buffer);
 }
 
-static struct mp_image *upload(struct gl_hwdec *hw, struct mp_image *hw_image)
+static struct mp_image *upload(struct ra_hwdec *hw, struct mp_image *hw_image)
 {
     struct priv *p = hw->priv;
 
@@ -312,9 +280,29 @@ static struct mp_image *upload(struct gl_hwdec *hw, struct mp_image *hw_image)
     return new_ref;
 }
 
-static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image)
+static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
+                         struct mp_rect *src, struct mp_rect *dst, bool newframe)
 {
     struct priv *p = hw->priv;
+
+    if (hw_image && !mp_image_params_equal(&p->params, &hw_image->params)) {
+        p->params = hw_image->params;
+
+        disable_renderer(hw);
+        mp_image_unrefp(&p->current_frame);
+
+        if (enable_renderer(hw) < 0)
+            return -1;
+    }
+
+    if (hw_image && p->current_frame && !newframe) {
+        if (!mp_rect_equals(&p->src, src) ||mp_rect_equals(&p->dst, dst)) {
+            p->src = *src;
+            p->dst = *dst;
+            update_overlay(hw, false);
+        }
+        return 0; // don't reupload
+    }
 
     mp_image_unrefp(&p->current_frame);
 
@@ -354,7 +342,7 @@ static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image)
     return 0;
 }
 
-static void destroy(struct gl_hwdec *hw)
+static void destroy(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
 
@@ -366,10 +354,9 @@ static void destroy(struct gl_hwdec *hw)
     mmal_vc_deinit();
 }
 
-static int create(struct gl_hwdec *hw)
+static int create(struct ra_hwdec *hw)
 {
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
+    struct priv *p = hw->priv;
     p->log = hw->log;
 
     bcm_host_init();
@@ -389,18 +376,12 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static bool test_format(struct gl_hwdec *hw, int imgfmt)
-{
-    return imgfmt == IMGFMT_MMAL || imgfmt == IMGFMT_420P;
-}
-
-const struct gl_hwdec_driver gl_hwdec_rpi_overlay = {
+const struct ra_hwdec_driver ra_hwdec_rpi_overlay = {
     .name = "rpi-overlay",
     .api = HWDEC_RPI,
-    .test_format = test_format,
-    .create = create,
-    .reinit = reinit,
+    .priv_size = sizeof(struct priv),
+    .imgfmts = {IMGFMT_MMAL, IMGFMT_420P, 0},
+    .init = create,
     .overlay_frame = overlay_frame,
-    .overlay_adjust = overlay_adjust,
-    .destroy = destroy,
+    .uninit = destroy,
 };

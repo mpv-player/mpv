@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_M_OPTION_H
@@ -37,7 +37,7 @@ struct mpv_node;
 
 // Simple types
 extern const m_option_type_t m_option_type_flag;
-extern const m_option_type_t m_option_type_store;
+extern const m_option_type_t m_option_type_dummy_flag;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_intpair;
@@ -65,6 +65,7 @@ extern const m_option_type_t m_option_type_node;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
+extern const m_option_type_t m_option_type_cli_alias;
 extern const m_option_type_t m_option_type_removed;
 extern const m_option_type_t m_option_type_subconfig;
 
@@ -201,7 +202,6 @@ struct m_sub_options {
 };
 
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
-#define CONF_TYPE_STORE         (&m_option_type_store)
 #define CONF_TYPE_INT           (&m_option_type_int)
 #define CONF_TYPE_INT64         (&m_option_type_int64)
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
@@ -222,7 +222,6 @@ struct m_sub_options {
 // size/alignment requirements for option values in general.
 union m_option_value {
     int flag; // not the C type "bool"!
-    int store;
     int int_;
     int64_t int64;
     int intpair[2];
@@ -244,6 +243,15 @@ union m_option_value {
 };
 
 ////////////////////////////////////////////////////////////////////////////
+
+struct m_option_action {
+    // The name of the suffix, e.g. "add" for a list. If the option is named
+    // "foo", this will be available as "--foo-add". Note that no suffix (i.e.
+    // "--foo" is implicitly always available.
+    const char *name;
+    // One of M_OPT_TYPE*.
+    unsigned int flags;
+};
 
 // Option type description
 struct m_option_type {
@@ -320,6 +328,10 @@ struct m_option_type {
     // static strings (and even mpv_node_list.keys), though.
     int (*get)(const m_option_t *opt, void *ta_parent, struct mpv_node *dst,
                void *src);
+
+    // Optional: list of suffixes, terminated with a {0} entry. An empty list
+    // behaves like the list being NULL.
+    const struct m_option_action *actions;
 };
 
 // Option description
@@ -385,22 +397,25 @@ struct m_option {
 // The following are also part of the M_OPT_* flags, and are used to update
 // certain groups of options.
 #define UPDATE_OPT_FIRST        (1 << 7)
-#define UPDATE_TERM             (1 << 7) // terminal options
-#define UPDATE_RENDERER         (1 << 8) // mainly vo_opengl options
-#define UPDATE_VIDEOPOS         (1 << 9) // video position (panscan etc.)
+#define UPDATE_TERM             (1 << 7)  // terminal options
+#define UPDATE_DEINT            (1 << 8)  // --deinterlace
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
-#define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
+#define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl/stats
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides
 #define UPDATE_INPUT            (1 << 13) // mostly --input-* options
 #define UPDATE_AUDIO            (1 << 14) // --audio-channels etc.
 #define UPDATE_PRIORITY         (1 << 15) // --priority (Windows-only)
 #define UPDATE_SCREENSAVER      (1 << 16) // --stop-screensaver
 #define UPDATE_VOL              (1 << 17) // softvol related options
-#define UPDATE_OPT_LAST         (1 << 17)
+#define UPDATE_LAVFI_COMPLEX    (1 << 18) // --lavfi-complex
+#define UPDATE_OPT_LAST         (1 << 18)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
     (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
+
+// Like M_OPT_TYPE_OPTIONAL_PARAM.
+#define M_OPT_OPTIONAL_PARAM    (1 << 30)
 
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
@@ -411,17 +426,11 @@ struct m_option {
 
 // These flags are used to describe special parser capabilities or behavior.
 
-// Wildcard matching flag.
-/** If set the option type has a use for option names ending with a *
- *  (used for -aa*), this only affects the option name matching.
- */
-#define M_OPT_TYPE_ALLOW_WILDCARD       (1 << 1)
-
 // The parameter is optional and by default no parameter is preferred. If
 // ambiguous syntax is used ("--opt value"), the command line parser will
 // assume that the argument takes no parameter. In config files, these
 // options can be used without "=" and value.
-#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 2)
+#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 0)
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
@@ -450,23 +459,12 @@ struct m_option {
 // The option doesn't take a parameter.
 #define M_OPT_DISALLOW_PARAM    -5
 
-// Returned if the parser failed for any other reason than a bad parameter.
-#define M_OPT_PARSER_ERR        -6
-
 // Returned when MPlayer should exit. Used by various help stuff.
-#define M_OPT_EXIT              -7
+#define M_OPT_EXIT              -6
 
 char *m_option_strerror(int code);
 
 // Find the option matching the given name in the list.
-/** \ingroup Options
- *  This function takes the possible wildcards into account (see
- *  \ref M_OPT_TYPE_ALLOW_WILDCARD).
- *
- *  \param list Pointer to an array of \ref m_option.
- *  \param name Name of the option.
- *  \return The matching option or NULL.
- */
 const m_option_t *m_option_list_find(const m_option_t *list, const char *name);
 
 // Helper to parse options, see \ref m_option_type::parse.
@@ -576,21 +574,14 @@ extern const char m_option_path_separator;
 #define OPT_FLAG(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
 
-#define OPT_FLAG_STORE(optname, varname, flags, value)          \
-    OPT_GENERAL(int, optname, varname, flags, .max = value,     \
-                .type = &m_option_type_store)
-
 #define OPT_STRINGLIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
-
-#define OPT_STRING_APPEND_LIST(...) \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_append_list)
 
 #define OPT_KEYVALUELIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_keyvalue_list)
 
-#define OPT_PATHLIST(...)                                                \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list, \
+#define OPT_PATHLIST(...)                                               \
+    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list,\
                 .priv = (void *)&m_option_path_separator)
 
 #define OPT_INT(...) \
@@ -693,7 +684,7 @@ extern const char m_option_path_separator;
 
 #define OPT_PRINT(optname, fn)                                              \
     {.name = optname,                                                       \
-     .flags = M_OPT_FIXED | M_OPT_NOCFG | M_OPT_PRE_PARSE,   \
+     .flags = M_OPT_FIXED | M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP,   \
      .type = &m_option_type_print_fn,                                       \
      .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn),                            \
      .offset = -1}
@@ -723,9 +714,14 @@ extern const char m_option_path_separator;
 // Same, with a generic deprecation message.
 #define OPT_REPLACED(optname, newname) OPT_REPLACED_MSG(optname, newname, "")
 
+// Alias, resolved on the CLI/config file/profile parser level only.
+#define OPT_CLI_ALIAS(optname, newname) \
+    {.name = optname, .type = &m_option_type_cli_alias, .priv = newname, \
+     .flags = M_OPT_NOPROP, .offset = -1}
+
 // "--optname" doesn't exist, but inform the user about a replacement with msg.
 #define OPT_REMOVED(optname, msg) \
     {.name = optname, .type = &m_option_type_removed, .priv = msg, \
-     .deprecation_message = "", .offset = -1}
+     .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */

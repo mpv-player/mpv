@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_AUDIO_OUT_H
@@ -81,7 +81,6 @@ struct ao;
 struct mpv_global;
 struct input_ctx;
 struct encode_lavc_context;
-struct mp_audio;
 
 struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
@@ -89,7 +88,8 @@ struct ao *ao_init_best(struct mpv_global *global,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);
 void ao_uninit(struct ao *ao);
-void ao_get_format(struct ao *ao, struct mp_audio *format);
+void ao_get_format(struct ao *ao,
+                   int *samplerate, int *format, struct mp_chmap *channels);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
 bool ao_untimed(struct ao *ao);
@@ -112,7 +112,6 @@ struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
                                      void *wakeup_ctx);
 void ao_hotplug_destroy(struct ao_hotplug *hp);
 bool ao_hotplug_check_update(struct ao_hotplug *hp);
-const char *ao_hotplug_get_detected_device(struct ao_hotplug *hp);
 struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp);
 
 void ao_print_devices(struct mpv_global *global, struct mp_log *log);

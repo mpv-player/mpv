@@ -2,6 +2,7 @@ from waflib.Errors import ConfigurationError, WafError
 from waflib.Configure import conf
 from waflib.Build import BuildContext
 from waflib.Logs import pprint
+import deps_parser
 import inflector
 
 class DependencyError(Exception):
@@ -16,11 +17,9 @@ class Dependency(object):
         self.attributes = self.__parse_attributes__(dependency)
 
         known_deps.add(self.identifier)
-        for dep_key in ['deps', 'deps_any', 'deps_neg']:
-            if dep_key in self.attributes:
-                deps = self.attributes[dep_key]
-                self.ctx.ensure_dependency_is_known(*deps)
 
+        if 'deps' in self.attributes:
+            self.ctx.ensure_dependency_is_known(self.attributes['deps'])
 
     def __parse_attributes__(self, dependency):
         if 'os_specific_checks' in dependency:
@@ -36,9 +35,7 @@ class Dependency(object):
         try:
             self.check_group_disabled()
             self.check_disabled()
-            self.check_any_dependencies()
             self.check_dependencies()
-            self.check_negative_dependencies()
         except DependencyError:
             # No check was run, since the prerequisites of the dependency are
             # not satisfied. Make sure the define is 'undefined' so that we
@@ -67,27 +64,12 @@ class Dependency(object):
             self.attributes['fmsg'] = "You manually enabled the feature '{0}', but \
 the autodetection check failed.".format(self.identifier)
 
-    def check_any_dependencies(self):
-        if 'deps_any' in self.attributes:
-            deps = set(self.attributes['deps_any'])
-            if len(deps & self.satisfied_deps) == 0:
-                self.skip("not found any of {0}".format(", ".join(deps)))
-                raise DependencyError
-
     def check_dependencies(self):
         if 'deps' in self.attributes:
-            deps = set(self.attributes['deps'])
-            if not deps <= self.satisfied_deps:
-                missing_deps = deps - self.satisfied_deps
-                self.skip("{0} not found".format(", ".join(missing_deps)))
-                raise DependencyError
-
-    def check_negative_dependencies(self):
-        if 'deps_neg' in self.attributes:
-            deps = set(self.attributes['deps_neg'])
-            conflicting_deps = deps & self.satisfied_deps
-            if len(conflicting_deps) > 0:
-                self.skip("{0} found".format(", ".join(conflicting_deps)), 'CYAN')
+            ok, why = deps_parser.check_dependency_expr(self.attributes['deps'],
+                                                        self.satisfied_deps)
+            if not ok:
+                self.skip(why)
                 raise DependencyError
 
     def check_autodetect_func(self):
@@ -145,13 +127,19 @@ def configure(ctx):
     __detect_target_os_dependency__(ctx)
 
 @conf
-def ensure_dependency_is_known(ctx, *depnames):
-    deps = set([d for d in depnames if not d.startswith('os-')])
-    if not deps <= ctx.known_deps:
-        raise ConfigurationError(
-            "error in dependencies definition: some dependencies in"
-            " {0} are unknown.".format(deps))
-
+def ensure_dependency_is_known(ctx, depnames):
+    def check(ast):
+        if isinstance(ast, deps_parser.AstSym):
+            if (not ast.name.startswith('os-')) and ast.name not in ctx.known_deps:
+                raise ConfigurationError(
+                    "error in dependencies definition: dependency {0} in"
+                    " {1} is unknown.".format(ast.name, depnames))
+        elif isinstance(ast, deps_parser.AstOp):
+            for sub in ast.sub:
+                check(sub)
+        else:
+            assert False
+    check(deps_parser.parse_expr(depnames))
 
 @conf
 def mark_satisfied(ctx, dependency_identifier):
@@ -174,7 +162,9 @@ def parse_dependencies(ctx, dependencies):
 @conf
 def dependency_satisfied(ctx, dependency_identifier):
     ctx.ensure_dependency_is_known(dependency_identifier)
-    return dependency_identifier in ctx.satisfied_deps
+    ok, _ = deps_parser.check_dependency_expr(dependency_identifier,
+                                              ctx.satisfied_deps)
+    return ok
 
 @conf
 def store_dependencies_lists(ctx):
@@ -194,13 +184,7 @@ def filtered_sources(ctx, sources):
             return source
 
     def __check_filter__(dependency):
-        if dependency.find('!') == 0:
-            dependency = dependency.lstrip('!')
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency not in ctx.satisfied_deps
-        else:
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency in ctx.satisfied_deps
+        return dependency_satisfied(ctx, dependency)
 
     def __unpack_and_check_filter__(source):
         try:
@@ -211,6 +195,17 @@ def filtered_sources(ctx, sources):
 
     return [__source_file__(source) for source in sources \
             if __unpack_and_check_filter__(source)]
+
+"""
+Like filtered_sources(), but pick only the first entry that matches, and
+return its filename.
+"""
+def pick_first_matching_dep(ctx, deps):
+    files = filtered_sources(ctx, deps)
+    if len(files) > 0:
+        return files[0]
+    else:
+        raise DependencyError
 
 def env_fetch(tx):
     def fn(ctx):
@@ -223,6 +218,7 @@ def dependencies_use(ctx):
     return [inflector.storage_key(dep) for dep in ctx.env.satisfied_deps]
 
 BuildContext.filtered_sources = filtered_sources
+BuildContext.pick_first_matching_dep = pick_first_matching_dep
 BuildContext.dependencies_use = dependencies_use
 BuildContext.dependencies_includes  = env_fetch(lambda x: "INCLUDES_{0}".format(x))
 BuildContext.dependency_satisfied = dependency_satisfied

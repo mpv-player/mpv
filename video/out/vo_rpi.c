@@ -35,6 +35,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "opengl/common.h"
 #include "options/m_config.h"
 #include "osdep/timer.h"
 #include "vo.h"
@@ -42,11 +43,13 @@
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
-#include "opengl/osd.h"
+#include "opengl/ra_gl.h"
+#include "gpu/video.h"
 
 struct mp_egl_rpi {
     struct mp_log *log;
     struct GL *gl;
+    struct ra *ra;
     EGLDisplay egl_display;
     EGLConfig egl_config;
     EGLContext egl_context;
@@ -68,9 +71,8 @@ struct priv {
     struct mp_osd_res osd_res;
 
     struct mp_egl_rpi egl;
-    struct gl_shader_cache *sc;
+    struct gl_video *gl_video;
     struct mpgl_osd *osd;
-    int64_t osd_change_counter;
 
     MMAL_COMPONENT_T *renderer;
     bool renderer_enabled;
@@ -210,6 +212,10 @@ static int mp_egl_rpi_init(struct mp_egl_rpi *p, DISPMANX_ELEMENT_HANDLE_T windo
     if (!p->gl->version && !p->gl->es)
         goto fail;
 
+    p->ra = ra_create_gl(p->gl, p->log);
+    if (!p->ra)
+        goto fail;
+
     return 0;
 
 fail:
@@ -241,54 +247,27 @@ static size_t layout_buffer(struct mp_image *mpi, MMAL_BUFFER_HEADER_T *buffer,
     return size;
 }
 
-#define GLSL(x) gl_sc_add(p->sc, #x "\n");
-#define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
-
 static void update_osd(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (!p->enable_osd)
         return;
 
-    mpgl_osd_generate(p->osd, p->osd_res, p->osd_pts, 0, 0);
-
-    int64_t osd_change_counter = mpgl_get_change_counter(p->osd);
-    if (p->osd_change_counter == osd_change_counter) {
+    if (!gl_video_check_osd_change(p->gl_video, &p->osd_res, p->osd_pts)) {
         p->skip_osd = true;
         return;
     }
-    p->osd_change_counter = osd_change_counter;
 
     MP_STATS(vo, "start rpi_osd");
 
-    p->egl.gl->ClearColor(0, 0, 0, 0);
-    p->egl.gl->Clear(GL_COLOR_BUFFER_BIT);
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
-        if (!fmt)
-            continue;
-        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
-        switch (fmt) {
-        case SUBBITMAP_RGBA: {
-            GLSLF("// OSD (RGBA)\n");
-            GLSL(color = texture(osdtex, texcoord).bgra;)
-            break;
-        }
-        case SUBBITMAP_LIBASS: {
-            GLSLF("// OSD (libass)\n");
-            GLSL(color =
-                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
-            break;
-        }
-        default:
-            abort();
-        }
-        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
-        gl_sc_generate(p->sc);
-        mpgl_osd_draw_part(p->osd, p->osd_res.w, -p->osd_res.h, n);
-        gl_sc_reset(p->sc);
-    }
+    struct vo_frame frame = {0};
+    struct ra_fbo target = {
+        .tex = ra_create_wrapped_fb(p->egl.ra, 0, p->osd_res.w, p->osd_res.h),
+        .flip = true,
+    };
+    gl_video_set_osd_pts(p->gl_video, p->osd_pts);
+    gl_video_render_frame(p->gl_video, &frame, target);
+    ra_tex_free(p->egl.ra, &target.tex);
 
     MP_STATS(vo, "stop rpi_osd");
 }
@@ -337,6 +316,9 @@ static void resize(struct vo *vo)
 
     if (mmal_port_parameter_set(input, &dr.hdr))
         MP_WARN(vo, "could not set video rectangle\n");
+
+    if (p->gl_video)
+        gl_video_resize(p->gl_video, &src, &dst, &p->osd_res);
 }
 
 static void destroy_overlays(struct vo *vo)
@@ -347,10 +329,9 @@ static void destroy_overlays(struct vo *vo)
         vc_dispmanx_element_remove(p->update, p->window);
     p->window = 0;
 
-    mpgl_osd_destroy(p->osd);
-    p->osd = NULL;
-    gl_sc_destroy(p->sc);
-    p->sc = NULL;
+    gl_video_uninit(p->gl_video);
+    p->gl_video = NULL;
+    ra_free(&p->egl.ra);
     mp_egl_rpi_destroy(&p->egl);
 
     if (p->osd_overlay)
@@ -431,9 +412,9 @@ static int create_overlays(struct vo *vo)
             MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
             return -1;
         }
-        p->sc = gl_sc_create(p->egl.gl, vo->log),
-        p->osd = mpgl_osd_init(p->egl.gl, vo->log, vo->osd);
-        p->osd_change_counter = -1; // force initial overlay rendering
+        p->gl_video = gl_video_init(p->egl.ra, vo->log, vo->global);
+        gl_video_set_clear_color(p->gl_video, (struct m_color){.a = 0});
+        gl_video_set_osd_source(p->gl_video, vo->osd);
     }
 
     p->display_fps = 0;
@@ -453,6 +434,8 @@ static int create_overlays(struct vo *vo)
             p->display_fps = tvstate_disp.display.sdtv.frame_rate;
         }
     }
+
+    resize(vo);
 
     vo_event(vo, VO_EVENT_WIN_STATE);
 
@@ -698,6 +681,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
     }
 
+    resize(vo);
+
     return 0;
 }
 
@@ -751,7 +736,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
-        p->osd_change_counter = -1;
         update_osd(vo);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:

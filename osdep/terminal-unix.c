@@ -1,24 +1,20 @@
 /*
- * GyS-TermIO v2.0 (for GySmail v3)
- * a very small replacement of ncurses library
+ * Based on GyS-TermIO v2.0 (for GySmail v3) (copyright (C) 1999 A'rpi/ESP-team)
  *
- * copyright (C) 1999 A'rpi/ESP-team
+ * This file is part of mpv.
  *
- * This file is part of MPlayer.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * MPlayer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -372,7 +368,16 @@ static void continue_sighandler(int signum)
 
 static pthread_t input_thread;
 static struct input_ctx *input_ctx;
-static int death_pipe[2];
+static int death_pipe[2] = {-1, -1};
+
+static void close_death_pipe(void)
+{
+    for (int n = 0; n < 2; n++) {
+        if (death_pipe[n] >= 0)
+            close(death_pipe[n]);
+        death_pipe[n] = -1;
+    }
+}
 
 static void quit_request_sighandler(int signum)
 {
@@ -425,8 +430,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (pthread_create(&input_thread, NULL, terminal_thread, NULL)) {
         input_ctx = NULL;
-        close(death_pipe[0]);
-        close(death_pipe[1]);
+        close_death_pipe();
         return;
     }
 
@@ -454,8 +458,7 @@ void terminal_uninit(void)
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
         pthread_join(input_thread, NULL);
-        close(death_pipe[0]);
-        close(death_pipe[1]);
+        close_death_pipe();
         input_ctx = NULL;
     }
 
@@ -478,7 +481,7 @@ void terminal_get_size(int *w, int *h)
     *h = ws.ws_row;
 }
 
-int terminal_init(void)
+void terminal_init(void)
 {
     assert(!getch2_enabled);
     getch2_enabled = 1;
@@ -490,6 +493,4 @@ int terminal_init(void)
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 
     getch2_poll();
-
-    return 0;
 }

@@ -3,29 +3,24 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
 #include <limits.h>
-#include <assert.h>
 
 #include "common/common.h"
-#include "audio/filter/af.h"
+#include "format.h"
 
 // number of bytes per sample, 0 if invalid/unknown
 int af_fmt_to_bytes(int format)
@@ -33,27 +28,12 @@ int af_fmt_to_bytes(int format)
     switch (af_fmt_from_planar(format)) {
     case AF_FORMAT_U8:      return 1;
     case AF_FORMAT_S16:     return 2;
-    case AF_FORMAT_S24:     return 3;
     case AF_FORMAT_S32:     return 4;
     case AF_FORMAT_FLOAT:   return 4;
     case AF_FORMAT_DOUBLE:  return 8;
     }
     if (af_fmt_is_spdif(format))
         return 2;
-    return 0;
-}
-
-int af_fmt_change_bytes(int format, int bytes)
-{
-    if (!af_fmt_is_valid(format) || !bytes)
-        return 0;
-    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
-        if (af_fmt_to_bytes(fmt) == bytes &&
-            af_fmt_is_float(fmt) == af_fmt_is_float(format) &&
-            af_fmt_is_planar(fmt) == af_fmt_is_planar(format) &&
-            (fmt == format || (!af_fmt_is_spdif(fmt) && !af_fmt_is_spdif(format))))
-            return fmt;
-    }
     return 0;
 }
 
@@ -135,7 +115,6 @@ const char *af_fmt_to_str(int format)
     switch (format) {
     case AF_FORMAT_U8:          return "u8";
     case AF_FORMAT_S16:         return "s16";
-    case AF_FORMAT_S24:         return "s24";
     case AF_FORMAT_S32:         return "s32";
     case AF_FORMAT_FLOAT:       return "float";
     case AF_FORMAT_DOUBLE:      return "double";

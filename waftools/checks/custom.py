@@ -3,8 +3,8 @@ from waftools.checks.generic import *
 from waflib import Utils
 import os
 
-__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front",
-           "check_cocoa", "check_openal", "check_rpi"]
+__all__ = ["check_pthreads", "check_iconv", "check_lua",
+           "check_cocoa", "check_openal", "check_wl_protocols"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -83,30 +83,13 @@ def check_lua(ctx, dependency_identifier):
             return True
     return False
 
-def __get_osslibdir():
-    cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
-    p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
-                                    stdout=Utils.subprocess.PIPE,
-                                    stderr=Utils.subprocess.PIPE)
-    return p.communicate()[0].decode().rstrip()
-
-def check_oss_4front(ctx, dependency_identifier):
-    oss_libdir = __get_osslibdir()
-
-    # avoid false positive from native sys/soundcard.h
-    if not oss_libdir:
-        ctx.undefine(inflector.define_key(dependency_identifier))
-        return False
-
-    soundcard_h = os.path.join(oss_libdir, "include/sys/soundcard.h")
-    include_dir = os.path.join(oss_libdir, "include")
-
-    fn = check_cc(header_name=soundcard_h,
-                  defines=['PATH_DEV_DSP="/dev/dsp"',
-                           'PATH_DEV_MIXER="/dev/mixer"'],
-                  cflags='-I{0}'.format(include_dir),
-                  fragment=load_fragment('oss_audio.c'))
-
+def check_wl_protocols(ctx, dependency_identifier):
+    def fn(ctx, dependency_identifier):
+        ret = check_pkg_config_datadir("wayland-protocols")
+        ret = ret(ctx, dependency_identifier)
+        if ret != None:
+            ctx.env.WL_PROTO_DIR = ret.split()[0]
+        return ret
     return fn(ctx, dependency_identifier)
 
 def check_cocoa(ctx, dependency_identifier):
@@ -129,24 +112,3 @@ def check_openal(ctx, dependency_identifier):
         if fn(ctx, dependency_identifier):
             return True
     return False
-
-def check_rpi(ctx, dependency_identifier):
-    # We need MMAL/bcm_host/dispmanx APIs.
-    # Upstream keeps pkgconfig files in '/opt/vc/lib/pkgconfig'.
-    # See https://github.com/raspberrypi/userland/issues/245
-    # PKG_CONFIG_SYSROOT_DIR helps with cross compilation.
-    prev_pkg_path = os.getenv('PKG_CONFIG_PATH', '')
-    os.environ['PKG_CONFIG_PATH'] = os.pathsep.join(
-        filter(None, [os.path.join(os.getenv('PKG_CONFIG_SYSROOT_DIR', '/'),
-                                   'opt/vc/lib/pkgconfig'),
-                      prev_pkg_path]))
-
-    checks = [
-        check_pkg_config('bcm_host', uselib_store='bcm_host'),
-        check_pkg_config('egl'),
-        check_cc(lib=['mmal_core', 'mmal_util', 'mmal_vc_client'], use=['bcm_host']),
-    ]
-
-    ret = all((fn(ctx, dependency_identifier) for fn in checks))
-    os.environ['PKG_CONFIG_PATH'] = prev_pkg_path
-    return ret

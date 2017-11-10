@@ -117,8 +117,8 @@ static double sample_filter(struct filter_kernel *filter, double x)
 {
     // The window is always stretched to the entire kernel
     double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
-    double k = sample_window(&filter->f, x);
-    return filter->clamp ? fmax(0.0, fmin(1.0, w * k)) : w * k;
+    double k = w * sample_window(&filter->f, x);
+    return k < 0 ? (1 - filter->clamp) * k : k;
 }
 
 // Calculate the 1D filtering kernel for N sample points.
@@ -142,26 +142,33 @@ static void mp_compute_weights(struct filter_kernel *filter, double f,
 }
 
 // Fill the given array with weights for the range [0.0, 1.0]. The array is
-// interpreted as rectangular array of count * filter->size items.
+// interpreted as rectangular array of count * filter->size items, with a
+// stride of `stride` floats in between each array element. (For polar filters,
+// the `count` indicates the row size and filter->size/stride are ignored)
 //
 // There will be slight sampling error if these weights are used in a OpenGL
 // texture as LUT directly. The sampling point of a texel is located at its
 // center, so out_array[0] will end up at 0.5 / count instead of 0.0.
 // Correct lookup requires a linear coordinate mapping from [0.0, 1.0] to
 // [0.5 / count, 1.0 - 0.5 / count].
-void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
+void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
+                    float *out_array)
 {
     if (filter->polar) {
+        filter->radius_cutoff = 0.0;
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
             double r = x * filter->f.radius / (count - 1);
             out_array[x] = sample_filter(filter, r);
+
+            if (fabs(out_array[x]) > filter->value_cutoff)
+                filter->radius_cutoff = r;
         }
     } else {
         // Compute a 2D array indexed by subpixel position
         for (int n = 0; n < count; n++) {
             mp_compute_weights(filter, n / (double)(count - 1),
-                               out_array + filter->size * n);
+                               out_array + stride * n);
         }
     }
 }
@@ -289,13 +296,13 @@ static double spline36(params *p, double x)
 static double spline64(params *p, double x)
 {
     if (x < 1.0) {
-        return ((49.0/41.0 * x - 6387.0/2911.0) * x - 3.0/911.0) * x + 1.0;
+        return ((49.0/41.0 * x - 6387.0/2911.0) * x - 3.0/2911.0) * x + 1.0;
     } else if (x < 2.0) {
-        return ((-24.0/42.0 * (x-1) + 4032.0/2911.0) * (x-1) - 2328.0/ 2911.0) * (x-1);
+        return ((-24.0/41.0 * (x-1) + 4032.0/2911.0) * (x-1) - 2328.0/2911.0) * (x-1);
     } else if (x < 3.0) {
-        return ((6.0/41.0 * (x-2) - 1008.0/2911.0) * (x-2) +  582.0/2911.0) * (x-2);
+        return ((6.0/41.0 * (x-2) - 1008.0/2911.0) * (x-2) + 582.0/2911.0) * (x-2);
     } else {
-        return ((-1.0/41.0 * (x-3) - 168.0/2911.0) * (x-3) +  97.0/2911.0) * (x-3);
+        return ((-1.0/41.0 * (x-3) + 168.0/2911.0) * (x-3) - 97.0/2911.0) * (x-3);
     }
 }
 

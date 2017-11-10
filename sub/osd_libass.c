@@ -96,34 +96,40 @@ void osd_destroy_backend(struct osd_state *osd)
     }
 }
 
-static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
-                             struct ass_state *ass, int res_x, int res_y)
+static void update_playres(struct ass_state *ass, struct mp_osd_res *vo_res)
 {
-    create_ass_renderer(osd, ass);
-
     ASS_Track *track = ass->track;
-    if (!track)
-        track = ass_new_track(ass->library);
-
     int old_res_x = track->PlayResX;
     int old_res_y = track->PlayResY;
 
-    double aspect = 1.0 * obj->vo_res.w / FFMAX(obj->vo_res.h, 1) /
-                    obj->vo_res.display_par;
+    double aspect = 1.0 * vo_res->w / MPMAX(vo_res->h, 1);
+    if (vo_res->display_par > 0)
+        aspect = aspect / vo_res->display_par;
 
-    track->track_type = TRACK_TYPE_ASS;
-    track->Timer = 100.;
-    track->PlayResY = res_y ? res_y : MP_ASS_FONT_PLAYRESY;
-    track->PlayResX = res_x ? res_x : track->PlayResY * aspect;
-    track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
-    track->Kerning = true;
+    track->PlayResY = ass->res_y ? ass->res_y : MP_ASS_FONT_PLAYRESY;
+    track->PlayResX = ass->res_x ? ass->res_x : track->PlayResY * aspect;
 
     // Force libass to clear its internal cache - it doesn't check for
     // PlayRes changes itself.
     if (old_res_x != track->PlayResX || old_res_y != track->PlayResY)
         ass_set_frame_size(ass->render, 1, 1);
+}
 
-    ass->track = track;
+static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
+                             struct ass_state *ass)
+{
+    create_ass_renderer(osd, ass);
+
+    ASS_Track *track = ass->track;
+    if (!track)
+        track = ass->track = ass_new_track(ass->library);
+
+    track->track_type = TRACK_TYPE_ASS;
+    track->Timer = 100.;
+    track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
+    track->Kerning = true;
+
+    update_playres(ass, &obj->vo_res);
 }
 
 static int find_style(ASS_Track *track, const char *name, int def)
@@ -184,6 +190,7 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 
 static void mangle_ass(bstr *dst, const char *in)
 {
+    const char *start = in;
     bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
@@ -201,6 +208,12 @@ static void mangle_ass(bstr *dst, const char *in)
         }
         if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
+        // Libass will strip leading whitespace
+        if (in[0] == ' ' && (in == start || in[-1] == '\n')) {
+            bstr_xappend(NULL, dst, bstr0("\\h"));
+            in += 1;
+            continue;
+        }
         bstr_xappend(NULL, dst, (bstr){(char *)in, 1});
         // Break ASS escapes with U+2060 WORD JOINER
         if (escape_ass && *in == '\\')
@@ -223,7 +236,7 @@ static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
 
-    create_ass_track(osd, obj, &obj->ass, 0, 0);
+    create_ass_track(osd, obj, &obj->ass);
 
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
@@ -338,7 +351,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 {
     struct MPOpts *opts = osd->opts;
 
-    create_ass_track(osd, obj, &obj->ass, 0, 0);
+    create_ass_track(osd, obj, &obj->ass);
     ASS_Track *track = obj->ass.track;
 
     ASS_Style *style = get_style(&obj->ass, "progbar");
@@ -461,7 +474,9 @@ static void update_external(struct osd_state *osd, struct osd_object *obj,
     bstr t = bstr0(ext->text);
     if (!t.len)
         return;
-    create_ass_track(osd, obj, &ext->ass, ext->res_x, ext->res_y);
+    ext->ass.res_x = ext->res_x;
+    ext->ass.res_y = ext->res_y;
+    create_ass_track(osd, obj, &ext->ass);
 
     clear_ass(&ext->ass);
 
@@ -536,6 +551,8 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
         *img_list = NULL;
         return;
     }
+
+    update_playres(ass, res);
 
     ass_set_frame_size(ass->render, res->w, res->h);
     ass_set_aspect_ratio(ass->render, res->display_par, 1.0);

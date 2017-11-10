@@ -346,10 +346,6 @@ List of Input Commands
     events that have already been displayed, or are within a short prefetch
     range.
 
-``osd [<level>]``
-    Toggle OSD level. If ``<level>`` is specified, set the OSD mode
-    (see ``--osd-level`` for valid values).
-
 ``print-text "<string>"``
     Print text to stdout. The string can contain properties (see
     `Property Expansion`_).
@@ -917,8 +913,8 @@ Property list
 
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as
-    ``${stream-end}``. For ordered chapters and such, the
-    size of the currently played segment is returned.)
+    ``${stream-end}``. For segmented/multi-part files, this will return the
+    size of the main or manifest file, whatever it is.)
 
 ``estimated-frame-count``
     Total number of frames in current file.
@@ -958,8 +954,7 @@ Property list
 
 ``stream-path``
     Filename (full path) of the stream layer filename. (This is probably
-    useless. It looks like this can be different from ``path`` only when
-    using e.g. ordered chapters.)
+    useless and is almost never different from ``path``.)
 
 ``stream-pos``
     Raw byte position in source stream. Technically, this returns the position
@@ -1263,6 +1258,33 @@ Property list
     Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
     filled to the requested amount, and is currently not reading more data.
 
+``demuxer-cache-state``
+    Various undocumented or half-documented things.
+
+    Each entry in ``seekable-ranges`` represents a region in the demuxer cache
+    that can be seeked to. If there are multiple demuxers active, this only
+    returns information about the "main" demuxer, but might be changed in
+    future to return unified information about all demuxers. The ranges are in
+    arbitrary order. Often, ranges will overlap for a bit, before being joined.
+    In broken corner cases, ranges may overlap all over the place.
+
+    The end of a seek range is usually smaller than the value returned by the
+    ``demuxer-cache-time`` property, because that property returns the guessed
+    buffering amount, while the seek ranges represent the buffered data that
+    can actually be used for cached seeking.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "seekable-ranges"   MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_NODE_MAP
+                    "start"             MPV_FORMAT_DOUBLE
+                    "end"               MPV_FORMAT_DOUBLE
+
 ``demuxer-via-network``
     Returns ``yes`` if the stream demuxed via the main demuxer is most likely
     played via network. What constitutes "network" is not always clear, might
@@ -1291,8 +1313,8 @@ Property list
 ``seeking``
     Returns ``yes`` if the player is currently seeking, or otherwise trying
     to restart playback. (It's possible that it returns ``yes`` while a file
-    is loaded, or when switching ordered chapter segments. This is because
-    the same underlying code is used for seeking and resyncing.)
+    is loadedThis is because the same underlying code is used for seeking and
+    resyncing.)
 
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise.
@@ -1456,11 +1478,11 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
-    ``video-params/nom-peak``
-        The video encoding's nominal peak brightness as float.
-
     ``video-params/sig-peak``
         The video file's tagged signal peak as float.
+
+    ``video-params/light``
+        The light type in use as a string. (Exact values subject to change.)
 
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
@@ -1489,8 +1511,8 @@ Property list
             "colorlevels"       MPV_FORMAT_STRING
             "primaries"         MPV_FORMAT_STRING
             "gamma"             MPV_FORMAT_STRING
-            "nom-peak"          MPV_FORMAT_DOUBLE
             "sig-peak"          MPV_FORMAT_DOUBLE
+            "light"             MPV_FORMAT_STRING
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64
             "stereo-in"         MPV_FORMAT_STRING
@@ -1883,32 +1905,43 @@ Property list
     whether the video window is visible. If the ``--force-window`` option is
     used, this is usually always returns ``yes``.
 
-``vo-performance``
-    Some video output performance metrics. Not implemented by all VOs. This has
-    a number of sup-properties, of the form ``vo-performance/<metric>-<value>``,
-    all of them in milliseconds.
+``vo-passes``
+    Contains introspection about the VO's active render passes and their
+    execution times. Not implemented by all VOs.
 
-    ``<metric>`` refers to one of:
+    This is further subdivided into two frame types, ``vo-passes/fresh`` for
+    fresh frames (which have to be uploaded, scaled, etc.) and
+    ``vo-passes/redraw`` for redrawn frames (which only have to be re-painted).
+    The number of passes for any given subtype can change from frame to frame,
+    and should not be relied upon.
 
-    ``upload``
-        Time needed to make the frame available to the GPU (if necessary).
-    ``render``
-        Time needed to perform all necessary video postprocessing and rendering
-        passes (if necessary).
-    ``present``
-        Time needed to present a rendered frame on-screen.
+    Each frame type has a number of further sub-properties. Replace ``TYPE``
+    with the frame type, ``N`` with the 0-based pass index, and ``M`` with the
+    0-based sample index.
 
-    When a step is unnecessary or skipped, it will have the value 0.
+    ``vo-passes/TYPE/count``
+        Number of passes.
 
-    ``<value>`` refers to one of:
+    ``vo-passes/TYPE/N/desc``
+        Human-friendy description of the pass.
 
-    ``last``
-        Last measured value.
-    ``avg``
-        Average over a fixed number of past samples. (The exact timeframe
-        varies, but it should generally be a handful of seconds)
-    ``peak``
-        The peak (highest value) within this averaging range.
+    ``vo-passes/TYPE/N/last``
+        Last measured execution time, in nanoseconds.
+
+    ``vo-passes/TYPE/N/avg``
+        Average execution time of this pass, in nanoseconds. The exact
+        timeframe varies, but it should generally be a handful of seconds.
+
+    ``vo-passes/TYPE/N/peak``
+        The peak execution time (highest value) within this averaging range, in
+        nanoseconds.
+
+    ``vo-passes/TYPE/N/count``
+        The number of samples for this pass.
+
+    ``vo-passes/TYPE/N/samples/M``
+        The raw execution time of a specific sample for this pass, in
+        nanoseconds.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -1917,9 +1950,18 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-            "<metric>-<value>"  MPV_FORMAT_INT64
+        "TYPE" MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP
+                "desc"    MPV_FORMAT_STRING
+                "last"    MPV_FORMAT_INT64
+                "avg"     MPV_FORMAT_INT64
+                "peak"    MPV_FORMAT_INT64
+                "count"   MPV_FORMAT_INT64
+                "samples" MPV_FORMAT_NODE_ARRAY
+                     MP_FORMAT_INT64
 
-    (One entry for each ``<metric>`` and ``<value>`` combination)
+    Note that directly accessing this structure via subkeys is not supported,
+    the only access is through aforementioned ``MPV_FORMAT_NODE``.
 
 ``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the
@@ -2000,10 +2042,6 @@ Property list
 
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
-
-``audio-out-detected-device``
-    Return the audio device selected by the AO driver (only implemented for
-    some drivers: currently only ``coreaudio``).
 
 ``working-directory``
     Return the working directory of the mpv process. Can be useful for JSON IPC
@@ -2151,21 +2189,11 @@ caveats with some properties (due to historical reasons):
 
     Option changes at runtime are affected by this as well.
 
-``deinterlace``
-    While video is active, this behaves differently from the option. It will
-    never return the ``auto`` value (but the state as observed by the video
-    chain). If you set ``auto``, the property will set this as the option value,
-    and will return the actual video chain state as observed instead of auto.
-
 ``video-aspect``
     While video is active, always returns the effective aspect ratio. Setting
     a special value (like ``no``, values ``<= 0``) will make the property
     set this as option, and return whatever actual aspect was derived from the
     option setting.
-
-``brightness`` (and other color options)
-    If ``--vo=xv`` is used, these properties may return the adapter's current
-    values instead of the option values.
 
 ``display-fps``
     If a VO is created, this will return either the actual display FPS, or
@@ -2209,6 +2237,14 @@ caveats with some properties (due to historical reasons):
 ``playlist-pos``, ``chapter``
     These properties behave different from the deprecated options with the same
     names.
+
+``profile``, ``include``
+    These are write-only, and will perform actions as they are written to,
+    exactly as if they were used on the mpv CLI commandline. Their only use is
+    when using libmpv before ``mpv_initialize()``, which in turn is probably
+    only useful in encoding mode. Normal libmpv users should use other
+    mechanisms, such as the ``apply-profile`` command, and the
+    ``mpv_load_config_file`` API function. Avoid these properties.
 
 Property Expansion
 ------------------

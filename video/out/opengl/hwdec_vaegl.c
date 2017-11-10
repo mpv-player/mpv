@@ -18,23 +18,24 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 #include <va/va_drmcommon.h>
 
+#include <libavutil/common.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
 
 #include "config.h"
 
-#include "hwdec.h"
-#include "video/vaapi.h"
-#include "video/img_fourcc.h"
+#include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
+#include "video/vaapi.h"
 #include "common.h"
-#include "formats.h"
+#include "ra_gl.h"
 
 #ifndef GL_OES_EGL_image
 typedef void* GLeglImageOES;
@@ -113,17 +114,25 @@ static VADisplay *create_native_va_display(GL *gl, struct mp_log *log)
     return NULL;
 }
 
-struct priv {
-    struct mp_log *log;
+struct priv_owner {
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
+    int *formats;
+    bool probing_formats; // temporary during init
+};
+
+struct priv {
+    int num_planes;
+    struct ra_tex *tex[4];
     GLuint gl_textures[4];
     EGLImageKHR images[4];
     VAImage current_image;
     bool buffer_acquired;
-    int current_mpfmt;
-    int *formats;
-    bool probing_formats; // temporary during init
+#if 0
+    bool esh_not_implemented;
+    VADRMPRIMESurfaceDescriptor desc;
+    bool surface_acquired;
+#endif
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
@@ -132,11 +141,72 @@ struct priv {
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 };
 
-static void determine_working_formats(struct gl_hwdec *hw);
+static void determine_working_formats(struct ra_hwdec *hw);
 
-static void unmap_frame(struct gl_hwdec *hw)
+static void uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
+    struct priv_owner *p = hw->priv;
+    if (p->ctx)
+        hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
+    va_destroy(p->ctx);
+}
+
+static int init(struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
+
+    if (!ra_is_gl(hw->ra) || !eglGetCurrentContext())
+        return -1;
+
+    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    if (!exts)
+        return -1;
+
+    GL *gl = ra_gl_get(hw->ra);
+    if (!strstr(exts, "EXT_image_dma_buf_import") ||
+        !strstr(exts, "EGL_KHR_image_base") ||
+        !strstr(gl->extensions, "GL_OES_EGL_image") ||
+        !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
+        return -1;
+
+    p->display = create_native_va_display(gl, hw->log);
+    if (!p->display) {
+        MP_VERBOSE(hw, "Could not create a VA display.\n");
+        return -1;
+    }
+
+    p->ctx = va_initialize(p->display, hw->log, true);
+    if (!p->ctx) {
+        vaTerminate(p->display);
+        return -1;
+    }
+    if (!p->ctx->av_device_ref) {
+        MP_VERBOSE(hw, "libavutil vaapi code rejected the driver?\n");
+        return -1;
+    }
+
+    if (hw->probing && va_guess_if_emulated(p->ctx)) {
+        return -1;
+    }
+
+    MP_VERBOSE(hw, "using VAAPI EGL interop\n");
+
+    determine_working_formats(hw);
+    if (!p->formats || !p->formats[0]) {
+        return -1;
+    }
+
+    p->ctx->hwctx.supported_formats = p->formats;
+    p->ctx->hwctx.driver_name = hw->driver->name;
+    hwdec_devices_add(hw->devs, &p->ctx->hwctx);
+    return 0;
+}
+
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    VADisplay *display = p_owner->display;
+    struct priv *p = mapper->priv;
     VAStatus status;
 
     for (int n = 0; n < 4; n++) {
@@ -145,59 +215,55 @@ static void unmap_frame(struct gl_hwdec *hw)
         p->images[n] = 0;
     }
 
+#if 0
+    if (p->surface_acquired) {
+        for (int n = 0; n < p->desc.num_objects; n++)
+            close(p->desc.objects[n].fd);
+        p->surface_acquired = false;
+    }
+#endif
+
     if (p->buffer_acquired) {
-        status = vaReleaseBufferHandle(p->display, p->current_image.buf);
-        CHECK_VA_STATUS(p, "vaReleaseBufferHandle()");
+        status = vaReleaseBufferHandle(display, p->current_image.buf);
+        CHECK_VA_STATUS(mapper, "vaReleaseBufferHandle()");
         p->buffer_acquired = false;
     }
     if (p->current_image.image_id != VA_INVALID_ID) {
-        status = vaDestroyImage(p->display, p->current_image.image_id);
-        CHECK_VA_STATUS(p, "vaDestroyImage()");
+        status = vaDestroyImage(display, p->current_image.image_id);
+        CHECK_VA_STATUS(mapper, "vaDestroyImage()");
         p->current_image.image_id = VA_INVALID_ID;
     }
 }
 
-static void destroy_textures(struct gl_hwdec *hw)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
     gl->DeleteTextures(4, p->gl_textures);
-    for (int n = 0; n < 4; n++)
+    for (int n = 0; n < 4; n++) {
         p->gl_textures[n] = 0;
+        ra_tex_free(mapper->ra, &p->tex[n]);
+    }
 }
 
-static void destroy(struct gl_hwdec *hw)
+static bool check_fmt(struct ra_hwdec_mapper *mapper, int fmt)
 {
-    struct priv *p = hw->priv;
-    unmap_frame(hw);
-    destroy_textures(hw);
-    if (p->ctx)
-        hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
-    va_destroy(p->ctx);
+    struct priv_owner *p_owner = mapper->owner->priv;
+    for (int n = 0; p_owner->formats && p_owner->formats[n]; n++) {
+        if (p_owner->formats[n] == fmt)
+            return true;
+    }
+    return false;
 }
 
-static int create(struct gl_hwdec *hw)
+static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
-    GL *gl = hw->gl;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
     p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
-    p->log = hw->log;
-
-    if (!eglGetCurrentContext())
-        return -1;
-
-    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
-    if (!exts)
-        return -1;
-
-    if (!strstr(exts, "EXT_image_dma_buf_import") ||
-        !strstr(exts, "EGL_KHR_image_base") ||
-        !strstr(gl->extensions, "GL_OES_EGL_image") ||
-        !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
-        return -1;
 
     // EGL_KHR_image_base
     p->CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR");
@@ -210,79 +276,53 @@ static int create(struct gl_hwdec *hw)
         !p->EGLImageTargetTexture2DOES)
         return -1;
 
-    p->display = create_native_va_display(gl, hw->log);
-    if (!p->display) {
-        MP_VERBOSE(hw, "Could not create a VA display.\n");
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
+    mapper->dst_params.hw_subfmt = 0;
+
+    struct ra_imgfmt_desc desc = {0};
+    struct mp_image layout = {0};
+
+    if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
         return -1;
-    }
 
-    p->ctx = va_initialize(p->display, p->log, true);
-    if (!p->ctx) {
-        vaTerminate(p->display);
-        return -1;
-    }
-    if (!p->ctx->av_device_ref) {
-        MP_VERBOSE(hw, "libavutil vaapi code rejected the driver?\n");
-        destroy(hw);
-        return -1;
-    }
-
-    if (hw->probing && va_guess_if_emulated(p->ctx)) {
-        destroy(hw);
-        return -1;
-    }
-
-    MP_VERBOSE(p, "using VAAPI EGL interop\n");
-
-    determine_working_formats(hw);
-    if (!p->formats || !p->formats[0]) {
-        destroy(hw);
-        return -1;
-    }
-
-    p->ctx->hwctx.supported_formats = p->formats;
-    p->ctx->hwctx.driver_name = hw->driver->name;
-    hwdec_devices_add(hw->devs, &p->ctx->hwctx);
-    return 0;
-}
-
-static bool check_fmt(struct priv *p, int fmt)
-{
-    for (int n = 0; p->formats[n]; n++) {
-        if (p->formats[n] == fmt)
-            return true;
-    }
-    return false;
-}
-
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
-{
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-
-    // Recreate them to get rid of all previous image data (possibly).
-    destroy_textures(hw);
+    p->num_planes = desc.num_planes;
+    mp_image_set_params(&layout, &mapper->dst_params);
 
     gl->GenTextures(4, p->gl_textures);
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < desc.num_planes; n++) {
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
+
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = mp_image_plane_w(&layout, n),
+            .h = mp_image_plane_h(&layout, n),
+            .d = 1,
+            .format = desc.planes[n],
+            .render_src = true,
+            .src_linear = true,
+        };
+
+        if (params.format->ctype != RA_CTYPE_UNORM)
+            return -1;
+
+        p->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
+                                          p->gl_textures[n]);
+        if (!p->tex[n])
+            return -1;
     }
-    gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    p->current_mpfmt = params->hw_subfmt;
-
-    if (!p->probing_formats && !check_fmt(p, p->current_mpfmt)) {
-        MP_FATAL(p, "unsupported VA image format %s\n",
-                 mp_imgfmt_to_name(p->current_mpfmt));
+    if (!p_owner->probing_formats && !check_fmt(mapper, mapper->dst_params.imgfmt))
+    {
+        MP_FATAL(mapper, "unsupported VA image format %s\n",
+                 mp_imgfmt_to_name(mapper->dst_params.imgfmt));
         return -1;
     }
-
-    params->imgfmt = p->current_mpfmt;
-    params->hw_subfmt = 0;
 
     return 0;
 }
@@ -295,59 +335,111 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     attribs[num_attribs] = EGL_NONE;                    \
     } while(0)
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
     VAStatus status;
     VAImage *va_image = &p->current_image;
+    VADisplay *display = p_owner->display;
 
-    unmap_frame(hw);
+#if 0
+    if (p->esh_not_implemented)
+        goto esh_failed;
 
-    status = vaDeriveImage(p->display, va_surface_id(hw_image), va_image);
-    if (!CHECK_VA_STATUS(p, "vaDeriveImage()"))
+    status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
+                                   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                   VA_EXPORT_SURFACE_READ_ONLY |
+                                   VA_EXPORT_SURFACE_SEPARATE_LAYERS,
+                                   &p->desc);
+    if (!CHECK_VA_STATUS(mapper, "vaAcquireSurfaceHandle()")) {
+        if (status == VA_STATUS_ERROR_UNIMPLEMENTED)
+            p->esh_not_implemented = true;
+        goto esh_failed;
+    }
+    p->surface_acquired = true;
+
+    for (int n = 0; n < p->num_planes; n++) {
+        int attribs[20] = {EGL_NONE};
+        int num_attribs = 0;
+
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p->desc.layers[n].drm_format);
+        ADD_ATTRIB(EGL_WIDTH,  p->tex[n]->params.w);
+        ADD_ATTRIB(EGL_HEIGHT, p->tex[n]->params.h);
+
+#define ADD_PLANE_ATTRIBS(plane) do { \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
+                       p->desc.objects[p->desc.layers[n].object_index[plane]].fd); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
+                       p->desc.layers[n].offset[plane]); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
+                       p->desc.layers[n].pitch[plane]); \
+        } while (0)
+
+        ADD_PLANE_ATTRIBS(0);
+        if (p->desc.layers[n].num_planes > 1)
+            ADD_PLANE_ATTRIBS(1);
+        if (p->desc.layers[n].num_planes > 2)
+            ADD_PLANE_ATTRIBS(2);
+        if (p->desc.layers[n].num_planes > 3)
+            ADD_PLANE_ATTRIBS(3);
+
+        p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
+            EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
+        if (!p->images[n])
+            goto esh_failed;
+
+        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
+        p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+
+        mapper->tex[n] = p->tex[n];
+    }
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+
+    if (p->desc.fourcc == VA_FOURCC_YV12)
+        MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
+
+    return 0;
+
+esh_failed:
+    if (p->surface_acquired) {
+        for (int n = 0; n < p->desc.num_objects; n++)
+            close(p->desc.objects[n].fd);
+        p->surface_acquired = false;
+    }
+#endif
+
+    status = vaDeriveImage(display, va_surface_id(mapper->src), va_image);
+    if (!CHECK_VA_STATUS(mapper, "vaDeriveImage()"))
         goto err;
 
     VABufferInfo buffer_info = {.mem_type = VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME};
-    status = vaAcquireBufferHandle(p->display, va_image->buf, &buffer_info);
-    if (!CHECK_VA_STATUS(p, "vaAcquireBufferHandle()"))
+    status = vaAcquireBufferHandle(display, va_image->buf, &buffer_info);
+    if (!CHECK_VA_STATUS(mapper, "vaAcquireBufferHandle()"))
         goto err;
     p->buffer_acquired = true;
 
-    struct mp_image layout = {0};
-    mp_image_set_params(&layout, &hw_image->params);
-    mp_image_setfmt(&layout, p->current_mpfmt);
-
-    struct gl_imgfmt_desc desc;
-    if (!gl_get_imgfmt_desc(gl, p->current_mpfmt, &desc))
-        goto err;
-
     int drm_fmts[8] = {
         // 1 bytes per component, 1-4 components
-        MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
-        MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
+        MKTAG('R', '8', ' ', ' '),       // DRM_FORMAT_R8
+        MKTAG('G', 'R', '8', '8'),       // DRM_FORMAT_GR88
         0,                               // untested (DRM_FORMAT_RGB888?)
         0,                               // untested (DRM_FORMAT_RGBA8888?)
         // 2 bytes per component, 1-4 components
-        MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
-        MP_FOURCC('G', 'R', '3', '2'),   // proposed DRM_FORMAT_GR32
+        MKTAG('R', '1', '6', ' '),       // proposed DRM_FORMAT_R16
+        MKTAG('G', 'R', '3', '2'),       // proposed DRM_FORMAT_GR32
         0,                               // N/A
         0,                               // N/A
     };
 
-    for (int n = 0; n < layout.num_planes; n++) {
+    for (int n = 0; n < p->num_planes; n++) {
         int attribs[20] = {EGL_NONE};
         int num_attribs = 0;
 
-        const struct gl_format *fmt = desc.planes[n];
-        if (gl_format_type(fmt) != MPGL_TYPE_UNORM)
-            goto err;
-
-        int n_comp = gl_format_components(fmt->format);
-        int comp_s = gl_component_size(fmt->type);
-        if (!gl_format_is_regular(fmt))
-            goto err;
+        const struct ra_format *fmt = p->tex[n]->params.format;
+        int n_comp = fmt->num_components;
+        int comp_s = fmt->component_size[n] / 8;
         if (n_comp < 1 || n_comp > 3 || comp_s < 1 || comp_s > 2)
             goto err;
         int drm_fmt = drm_fmts[n_comp - 1 + (comp_s - 1) * 4];
@@ -355,8 +447,8 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             goto err;
 
         ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmt);
-        ADD_ATTRIB(EGL_WIDTH, mp_image_plane_w(&layout, n));
-        ADD_ATTRIB(EGL_HEIGHT, mp_image_plane_h(&layout, n));
+        ADD_ATTRIB(EGL_WIDTH, p->tex[n]->params.w);
+        ADD_ATTRIB(EGL_HEIGHT, p->tex[n]->params.h);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_FD_EXT, buffer_info.handle);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_OFFSET_EXT, va_image->offsets[n]);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_PITCH_EXT, va_image->pitches[n]);
@@ -369,44 +461,34 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
 
-        out_frame->planes[n] = (struct gl_hwdec_plane){
-            .gl_texture = p->gl_textures[n],
-            .gl_target = GL_TEXTURE_2D,
-            .tex_w = mp_image_plane_w(&layout, n),
-            .tex_h = mp_image_plane_h(&layout, n),
-        };
+        mapper->tex[n] = p->tex[n];
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
     if (va_image->format.fourcc == VA_FOURCC_YV12)
-        MPSWAP(struct gl_hwdec_plane, out_frame->planes[1], out_frame->planes[2]);
-
-    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s", desc.swizzle);
+        MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
 
     return 0;
 
 err:
-    if (!p->probing_formats)
-        MP_FATAL(p, "mapping VAAPI EGL image failed\n");
-    unmap_frame(hw);
+    if (!p_owner->probing_formats)
+        MP_FATAL(mapper, "mapping VAAPI EGL image failed\n");
     return -1;
 }
 
-static bool try_format(struct gl_hwdec *hw, struct mp_image *surface)
+static bool try_format(struct ra_hwdec *hw, struct mp_image *surface)
 {
     bool ok = false;
-    struct mp_image_params params = surface->params;
-    if (reinit(hw, &params) >= 0) {
-        struct gl_hwdec_frame frame = {0};
-        ok = map_frame(hw, surface, &frame) >= 0;
-    }
-    unmap_frame(hw);
+    struct ra_hwdec_mapper *mapper = ra_hwdec_mapper_create(hw, &surface->params);
+    if (mapper)
+        ok = ra_hwdec_mapper_map(mapper, surface) >= 0;
+    ra_hwdec_mapper_free(&mapper);
     return ok;
 }
 
-static void determine_working_formats(struct gl_hwdec *hw)
+static void determine_working_formats(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
+    struct priv_owner *p = hw->priv;
     int num_formats = 0;
     int *formats = NULL;
 
@@ -459,13 +541,18 @@ done:
         MP_VERBOSE(hw, " %s\n", mp_imgfmt_to_name(formats[n]));
 }
 
-const struct gl_hwdec_driver gl_hwdec_vaegl = {
+const struct ra_hwdec_driver ra_hwdec_vaegl = {
     .name = "vaapi-egl",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_VAAPI,
-    .imgfmt = IMGFMT_VAAPI,
-    .create = create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .unmap = unmap_frame,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_VAAPI, 0},
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
 };

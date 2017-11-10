@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_IMG_FORMAT_H
@@ -22,6 +22,7 @@
 
 #include "osdep/endian.h"
 #include "misc/bstr.h"
+#include "video/csputils.h"
 
 #if BYTE_ORDER == BIG_ENDIAN
 #define MP_SELECT_LE_BE(LE, BE) BE
@@ -63,10 +64,8 @@
 // The only real paletted format we support is IMGFMT_PAL8, so check for that
 // format directly if you want an actual paletted format.
 #define MP_IMGFLAG_PAL 0x8000
-// planes don't contain real data; planes[3] contains an API-specific pointer
+// planes don't contain real data
 #define MP_IMGFLAG_HWACCEL 0x10000
-// Set if the chroma resolution is lower than luma resolution. Unset for non-YUV.
-#define MP_IMGFLAG_SUBSAMPLED 0x20000
 // Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
 // are always shuffled (G - B - R [- A]).
 #define MP_IMGFLAG_RGB_P 0x40000
@@ -91,15 +90,55 @@ struct mp_imgfmt_desc {
     int8_t bpp[MP_MAX_PLANES];   // bits per pixel
     int8_t plane_bits;           // number of bits in use for plane 0
     int8_t component_bits;       // number of bits per component (0 if uneven)
-    int8_t component_full_bits;  // number of bits per component including
-                                 // internal padding (0 if uneven)
-    int8_t components[MP_MAX_PLANES]; // number of components for each plane
     // chroma shifts per plane (provided for convenience with planar formats)
     int8_t xs[MP_MAX_PLANES];
     int8_t ys[MP_MAX_PLANES];
 };
 
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int imgfmt);
+
+// MP_CSP_AUTO for YUV, MP_CSP_RGB or MP_CSP_XYZ otherwise.
+// (Because IMGFMT/AV_PIX_FMT conflate format and csp for RGB and XYZ.)
+enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt);
+
+enum mp_component_type {
+    MP_COMPONENT_TYPE_UNKNOWN = 0,
+    MP_COMPONENT_TYPE_UINT,
+    MP_COMPONENT_TYPE_FLOAT,
+};
+
+enum mp_component_type mp_imgfmt_get_component_type(int imgfmt);
+
+#define MP_NUM_COMPONENTS 4
+
+struct mp_regular_imgfmt_plane {
+    uint8_t num_components;
+    // 1 is luminance/red/gray, 2 is green/Cb, 3 is blue/Cr, 4 is alpha.
+    // 0 is used for padding (undefined contents).
+    uint8_t components[MP_NUM_COMPONENTS];
+};
+
+// This describes pixel formats that are byte aligned, have byte aligned
+// components, native endian, etc.
+struct mp_regular_imgfmt {
+    // Type of each component.
+    enum mp_component_type component_type;
+
+    // Size of each component in bytes.
+    uint8_t component_size;
+
+    // If >0, LSB padding, if <0, MSB padding. The padding bits are always 0.
+    // This applies: bit_depth = component_size * 8 - abs(component_pad)
+    int8_t component_pad;
+
+    uint8_t num_planes;
+    struct mp_regular_imgfmt_plane planes[MP_MAX_PLANES];
+
+    // Chroma pixel size (1x1 is 4:4:4)
+    uint8_t chroma_w, chroma_h;
+};
+
+bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);
 
 enum mp_imgfmt {
     IMGFMT_NONE = 0,
@@ -109,52 +148,20 @@ enum mp_imgfmt {
 
     // Planar YUV formats
     IMGFMT_444P,                // 1x1
-    IMGFMT_422P,                // 2x1
-    IMGFMT_440P,                // 1x2
     IMGFMT_420P,                // 2x2
-    IMGFMT_411P,                // 4x1
-    IMGFMT_410P,                // 4x4
-
-    // YUV formats with 2 bytes per plane-pixel. Formats with 9-15 bits pad the
-    // most significant bits with 0 (use shifts to expand them to 16 bits).
-
-    IMGFMT_444P16,
-    IMGFMT_444P10,
-    IMGFMT_444P9,
-
-    IMGFMT_422P16,
-    IMGFMT_422P10,
-    IMGFMT_422P9,
-
-    IMGFMT_420P16,
-    IMGFMT_420P10,
-    IMGFMT_420P9,
-
-    // Planar YUV with alpha (4th plane)
-    IMGFMT_444AP,
-    IMGFMT_422AP,
-    IMGFMT_420AP,
 
     // Gray
     IMGFMT_Y8,
     IMGFMT_Y16,
 
-    // Gray with alpha (packed)
-    IMGFMT_YA8,
-    IMGFMT_YA16,
-
     // Packed YUV formats (components are byte-accessed)
-    IMGFMT_YUYV,                // Y0 U  Y1 V
     IMGFMT_UYVY,                // U  Y0 V  Y1
 
     // Y plane + packed plane for chroma
     IMGFMT_NV12,
-    IMGFMT_NV21,
 
     // Like IMGFMT_NV12, but with 10 bits per component (and 6 bits of padding)
     IMGFMT_P010,
-    // Like IMGFMT_NV12, but with 16 bits per component
-    IMGFMT_P016,
 
     // RGB/BGR Formats
 
@@ -165,9 +172,6 @@ enum mp_imgfmt {
     IMGFMT_RGBA,
     IMGFMT_BGR24,               // 3 bytes per pixel
     IMGFMT_RGB24,
-    IMGFMT_RGB48,               // 6 bytes per pixel, uint16_t channels
-    IMGFMT_RGBA64,              // 8 bytes per pixel, uint16_t channels
-    IMGFMT_BGRA64,
 
     // Like e.g. IMGFMT_ARGB, but has a padding byte instead of alpha
     IMGFMT_0RGB,
@@ -181,23 +185,14 @@ enum mp_imgfmt {
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
 
-    // The first plane has 1 byte per pixel. The second plane is a palette with
-    // 256 entries, with each entry encoded like in IMGFMT_BGR32.
-    IMGFMT_PAL8,
-
-    // XYZ colorspace, similar organization to RGB48. Even though it says "12",
-    // the components are stored as 16 bit, with lower 4 bits set to 0.
-    IMGFMT_XYZ12,
-
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
     IMGFMT_VDPAU,           // VdpVideoSurface
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
     // NV12/P010/P016
-    // plane 1: ID3D11Texture2D
-    // plane 2: slice index casted to pointer
-    // plane 3: ID3D11VideoDecoderOutputView (can be absent in filters/VO)
+    // plane 0: ID3D11Texture2D
+    // plane 1: slice index casted to pointer
     IMGFMT_D3D11VA,
     // Like IMGFMT_D3D11VA, but format is restricted to NV12.
     IMGFMT_D3D11NV12,
@@ -208,6 +203,8 @@ enum mp_imgfmt {
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12/P010/P016)
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
     IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
+    IMGFMT_MEDIACODEC,      // AVMediaCodecBuffer
+    IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
 
     IMGFMT_CUDA,            // CUDA Buffer
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
@@ -236,7 +233,7 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 #define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
 #define IMGFMT_IS_HWACCEL(fmt) (mp_imgfmt_get_desc(fmt).flags & MP_IMGFLAG_HWACCEL)
 
-int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
+int mp_imgfmt_from_name(bstr name);
 char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);
 #define mp_imgfmt_to_name(fmt) mp_imgfmt_to_name_buf((char[16]){0}, 16, (fmt))
 

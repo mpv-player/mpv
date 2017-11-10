@@ -3,18 +3,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Carbon header is included but Carbon is NOT linked to mpv's binary. This
@@ -142,7 +142,7 @@ static int mk_flags(NSEvent *event)
     return ([event data1] & 0x0000FFFF);
 }
 
-static  int mk_down(NSEvent *event)
+static int mk_down(NSEvent *event)
 {
     return (((mk_flags(event) & 0xFF00) >> 8)) == 0xA;
 }
@@ -254,7 +254,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     [_input_lock unlock];
 }
 
-- (void)setInputContext:(struct input_ctx *)ctx;
+- (void)setInputContext:(struct input_ctx *)ctx
 {
     [_input_lock lock];
     _inputContext = ctx;
@@ -346,7 +346,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 - (void)startAppleRemote
 {
-
 #if HAVE_APPLE_REMOTE
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_remote = [[HIDRemote alloc] init];
@@ -356,8 +355,8 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         }
     });
 #endif
-
 }
+
 - (void)stopAppleRemote
 {
 #if HAVE_APPLE_REMOTE
@@ -367,10 +366,31 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     });
 #endif
 }
+
 - (void)restartMediaKeys
 {
     CGEventTapEnable(self->_mk_tap_port, true);
 }
+
+- (void)setHighestPriotityMediaKeysTap
+{
+    if (self->_mk_tap_port == nil)
+        return;
+
+    CGEventTapInformation *taps = ta_alloc_size(nil, sizeof(CGEventTapInformation));
+    uint32_t numTaps = 0;
+    CGError err = CGGetEventTapList(1, taps, &numTaps);
+
+    if (err == kCGErrorSuccess && numTaps > 0) {
+        pid_t processID = [NSProcessInfo processInfo].processIdentifier;
+        if (taps[0].tappingProcess != processID) {
+            [self stopMediaKeys];
+            [self startMediaKeys];
+        }
+    }
+    talloc_free(taps);
+}
+
 - (void)startMediaKeys
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -390,10 +410,12 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         [[NSRunLoop mainRunLoop] addPort:port forMode:NSRunLoopCommonModes];
     });
 }
+
 - (void)stopMediaKeys
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        CGEventTapEnable(self->_mk_tap_port, false);
         [[NSRunLoop mainRunLoop] removePort:port forMode:NSRunLoopCommonModes];
         CFRelease(self->_mk_tap_port);
         self->_mk_tap_port = nil;

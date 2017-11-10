@@ -29,4 +29,6 @@ bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
 struct mp_image *mp_image_hw_download(struct mp_image *img,
                                       struct mp_image_pool *swpool);
 
+bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src);
+
 #endif

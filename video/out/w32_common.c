@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -61,8 +61,6 @@ typedef enum MONITOR_DPI_TYPE {
     MDT_DEFAULT = MDT_EFFECTIVE_DPI
 } MONITOR_DPI_TYPE;
 #endif
-
-static __thread struct vo_w32_state *w32_thread_context;
 
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
@@ -356,6 +354,17 @@ static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     return c;
 }
 
+static bool handle_appcommand(struct vo_w32_state *w32, UINT cmd)
+{
+    if (!mp_input_use_media_keys(w32->input_ctx))
+        return false;
+    int mpkey = mp_w32_appcmd_to_mpkey(cmd);
+    if (!mpkey)
+        return false;
+    mp_input_put_key(w32->input_ctx, mpkey | mod_state(w32));
+    return true;
+}
+
 static void handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
 {
     // Ignore key repeat
@@ -404,13 +413,13 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
 
-    if (btn == MP_MOUSE_BTN0 && !w32->current_fs &&
+    if (btn == MP_MBTN_LEFT && !w32->current_fs &&
         !mp_input_test_dragging(w32->input_ctx, x, y))
     {
         // Window dragging hack
         ReleaseCapture();
         SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-        mp_input_put_key(w32->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
+        mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 
         // Indicate the message was handled, so DefWindowProc won't be called
         return true;
@@ -432,10 +441,10 @@ static void handle_mouse_wheel(struct vo_w32_state *w32, bool horiz, int val)
 {
     int code;
     if (horiz)
-        code = val > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+        code = val > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
     else
-        code = val > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
-    mp_input_put_axis(w32->input_ctx, code | mod_state(w32), abs(val) / 120.);
+        code = val > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
+    mp_input_put_wheel(w32->input_ctx, code | mod_state(w32), abs(val) / 120.);
 }
 
 static void signal_events(struct vo_w32_state *w32, int events)
@@ -447,7 +456,14 @@ static void signal_events(struct vo_w32_state *w32, int events)
 static void wakeup_gui_thread(void *ctx)
 {
     struct vo_w32_state *w32 = ctx;
-    PostMessage(w32->window, WM_USER, 0, 0);
+    // Wake up the window procedure (which processes the dispatch queue)
+    if (GetWindowThreadProcessId(w32->window, NULL) == GetCurrentThreadId()) {
+        PostMessageW(w32->window, WM_NULL, 0, 0);
+    } else {
+        // Use a sent message when cross-thread, since the queue of sent
+        // messages is processed in some cases when posted messages are blocked
+        SendNotifyMessageW(w32->window, WM_NULL, 0, 0);
+    }
 }
 
 static double get_refresh_rate_from_gdi(const wchar_t *device)
@@ -874,17 +890,27 @@ static void reinit_window_state(struct vo_w32_state *w32)
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
-    assert(w32_thread_context);
-    struct vo_w32_state *w32 = w32_thread_context;
-    if (!w32->window)
-        w32->window = hWnd; // can happen during CreateWindow*!
-    assert(w32->window == hWnd);
+    struct vo_w32_state *w32 = (void*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
+    if (!w32) {
+        // WM_NCCREATE is supposed to be the first message that a window
+        // receives. It allows struct vo_w32_state to be passed from
+        // CreateWindow's lpParam to the window procedure. However, as a
+        // longstanding Windows bug, overlapped top-level windows will get a
+        // WM_GETMINMAXINFO before WM_NCCREATE. This can be ignored.
+        if (message != WM_NCCREATE)
+            return DefWindowProcW(hWnd, message, wParam, lParam);
+
+        CREATESTRUCTW *cs = (CREATESTRUCTW *)lParam;
+        w32 = cs->lpCreateParams;
+        w32->window = hWnd;
+        SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)w32);
+    }
+
+    // The dispatch queue should be processed as soon as possible to prevent
+    // playback glitches, since it is likely blocking the VO thread
+    mp_dispatch_queue_process(w32->dispatch, 0);
 
     switch (message) {
-    case WM_USER:
-        // This message is used to wakeup the GUI thread, see wakeup_gui_thread.
-        mp_dispatch_queue_process(w32->dispatch, 0);
-        break;
     case WM_ERASEBKGND: // no need to erase background separately
         return 1;
     case WM_PAINT:
@@ -1005,6 +1031,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                         GET_Y_LPARAM(lParam));
         }
         break;
+    case WM_APPCOMMAND:
+        if (handle_appcommand(w32, GET_APPCOMMAND_LPARAM(lParam)))
+            return TRUE;
+        break;
     case WM_SYSKEYDOWN:
         // Open the window menu on Alt+Space. Normally DefWindowProc opens the
         // window menu in response to WM_SYSCHAR, but since mpv translates its
@@ -1066,26 +1096,26 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_LBUTTONDOWN:
-        if (handle_mouse_down(w32, MP_MOUSE_BTN0, GET_X_LPARAM(lParam),
-                                                  GET_Y_LPARAM(lParam)))
+        if (handle_mouse_down(w32, MP_MBTN_LEFT, GET_X_LPARAM(lParam),
+                                                 GET_Y_LPARAM(lParam)))
             return 0;
         break;
     case WM_LBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN0);
+        handle_mouse_up(w32, MP_MBTN_LEFT);
         break;
     case WM_MBUTTONDOWN:
-        handle_mouse_down(w32, MP_MOUSE_BTN1, GET_X_LPARAM(lParam),
-                                              GET_Y_LPARAM(lParam));
+        handle_mouse_down(w32, MP_MBTN_MID, GET_X_LPARAM(lParam),
+                                            GET_Y_LPARAM(lParam));
         break;
     case WM_MBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN1);
+        handle_mouse_up(w32, MP_MBTN_MID);
         break;
     case WM_RBUTTONDOWN:
-        handle_mouse_down(w32, MP_MOUSE_BTN2, GET_X_LPARAM(lParam),
+        handle_mouse_down(w32, MP_MBTN_RIGHT, GET_X_LPARAM(lParam),
                                               GET_Y_LPARAM(lParam));
         break;
     case WM_RBUTTONUP:
-        handle_mouse_up(w32, MP_MOUSE_BTN2);
+        handle_mouse_up(w32, MP_MBTN_RIGHT);
         break;
     case WM_MOUSEWHEEL:
         handle_mouse_wheel(w32, false, GET_WHEEL_DELTA_WPARAM(wParam));
@@ -1097,11 +1127,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         return TRUE;
     case WM_XBUTTONDOWN:
         handle_mouse_down(w32,
-                          HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8,
-                          GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD,
+            GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         break;
     case WM_XBUTTONUP:
-        handle_mouse_up(w32, HIWORD(wParam) == 1 ? MP_MOUSE_BTN7 : MP_MOUSE_BTN8);
+        handle_mouse_up(w32,
+            HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD);
         break;
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
@@ -1160,7 +1191,7 @@ static void resize_child_win(HWND parent)
     if (EqualRect(&rm, &rp))
         return;
     SetWindowPos(child, NULL, 0, 0, rp.right, rp.bottom, SWP_ASYNCWINDOWPOS |
-        SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+        SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
 }
 
 static LRESULT CALLBACK parent_win_hook(int nCode, WPARAM wParam, LPARAM lParam)
@@ -1321,8 +1352,6 @@ static void *gui_thread(void *ptr)
     w32_api_load(w32);
     thread_disable_ime();
 
-    w32_thread_context = w32;
-
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
 
@@ -1330,20 +1359,17 @@ static void *gui_thread(void *ptr)
     if (w32->parent) {
         RECT r;
         GetClientRect(w32->parent, &r);
-        w32->window = CreateWindowExW(WS_EX_NOPARENTNOTIFY,
-                                      (LPWSTR)MAKEINTATOM(cls), L"mpv",
-                                      WS_CHILD | WS_VISIBLE,
-                                      0, 0, r.right, r.bottom,
-                                      w32->parent, 0, HINST_THISCOMPONENT, NULL);
+        CreateWindowExW(WS_EX_NOPARENTNOTIFY, (LPWSTR)MAKEINTATOM(cls), L"mpv",
+                        WS_CHILD | WS_VISIBLE, 0, 0, r.right, r.bottom,
+                        w32->parent, 0, HINST_THISCOMPONENT, w32);
 
         // Install a hook to get notifications when the parent changes size
         if (w32->window)
             install_parent_hook(w32);
     } else {
-        w32->window = CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), L"mpv",
-                                      update_style(w32, 0),
-                                      CW_USEDEFAULT, SW_HIDE, 100, 100,
-                                      0, 0, HINST_THISCOMPONENT, NULL);
+        CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), L"mpv",
+                        update_style(w32, 0), CW_USEDEFAULT, SW_HIDE, 100, 100,
+                        0, 0, HINST_THISCOMPONENT, w32);
     }
 
     if (!w32->window) {
@@ -1423,8 +1449,6 @@ done:
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
-
-    w32_thread_context = NULL;
     return NULL;
 }
 

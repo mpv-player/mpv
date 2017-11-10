@@ -55,32 +55,6 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int h_to_i(unsigned char c)
-{
-    if (c >= '0' && c <= '9')
-        return c - '0';
-    if (c >= 'a' && c <= 'f')
-        return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F')
-        return c - 'A' + 10;
-    return -1;
-}
-
-static bool bstr_to_hex_inplace(bstr *h)
-{
-    if (h->len % 2)
-        return false;
-    for (int n = 0; n < h->len / 2; n++) {
-        int hi = h_to_i(h->start[n * 2 + 0]);
-        int lo = h_to_i(h->start[n * 2 + 1]);
-        if (hi < 0 || lo < 0)
-            return false;
-        h->start[n] = (hi << 4) | lo;
-    }
-    h->len /= 2;
-    return true;
-}
-
 static int open_f(stream_t *stream)
 {
     stream->fill_buffer = fill_buffer;
@@ -100,7 +74,7 @@ static int open_f(stream_t *stream)
         bstr_eatstart0(&data, "memory://");
     stream_control(stream, STREAM_CTRL_SET_CONTENTS, &data);
 
-    if (use_hex && !bstr_to_hex_inplace(&p->data)) {
+    if (use_hex && !bstr_decode_hex(stream, p->data, &p->data)) {
         MP_FATAL(stream, "Invalid data.\n");
         return STREAM_ERROR;
     }

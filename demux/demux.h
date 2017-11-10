@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_DEMUXER_H
@@ -30,14 +30,8 @@
 #include "packet.h"
 #include "stheader.h"
 
-// DEMUXER control commands/answers
-#define DEMUXER_CTRL_NOTIMPL -1
-#define DEMUXER_CTRL_DONTKNOW 0
-#define DEMUXER_CTRL_OK 1
-
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_GET_TIME_LENGTH,
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
@@ -46,10 +40,21 @@ enum demux_ctrl {
     DEMUXER_CTRL_REPLACE_STREAM,
 };
 
+#define MAX_SEEK_RANGES 10
+
+struct demux_seek_range {
+    double start, end;
+};
+
 struct demux_ctrl_reader_state {
     bool eof, underrun, idle;
-    double ts_range[2]; // start, end
     double ts_duration;
+    double ts_reader; // approx. timerstamp of decoder position
+    double ts_end; // approx. timestamp of end of buffered range
+    // Positions that can be seeked to without incurring the latency of a low
+    // level seek.
+    int num_seek_ranges;
+    struct demux_seek_range seek_ranges[MAX_SEEK_RANGES];
 };
 
 struct demux_ctrl_stream_ctrl {
@@ -60,7 +65,7 @@ struct demux_ctrl_stream_ctrl {
 
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
 #define SEEK_FORWARD  (1 << 2)      // prefer later time if not exact
-#define SEEK_BACKWARD (1 << 3)      // prefer earlier time if not exact
+                                    // (if unset, prefer earlier time)
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
 
 // Strictness of the demuxer open format check.
@@ -180,6 +185,7 @@ typedef struct demuxer {
     bool seekable;
     bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;
+    double duration;  // -1 if unknown
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
     // The file data was fully read, and there is no need to keep the stream
@@ -284,8 +290,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
 void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
                            struct mp_tags *tags);
-
-double demuxer_get_time_length(struct demuxer *demuxer);
 
 int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 

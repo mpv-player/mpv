@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <windows.h>
@@ -69,6 +69,21 @@ static const struct keymap vk_map[] = {
     {0, 0}
 };
 
+static const struct keymap appcmd_map[] = {
+    {APPCOMMAND_MEDIA_NEXTTRACK,     MP_KEY_NEXT},
+    {APPCOMMAND_MEDIA_PREVIOUSTRACK, MP_KEY_PREV},
+    {APPCOMMAND_MEDIA_STOP,          MP_KEY_STOP},
+    {APPCOMMAND_MEDIA_PLAY_PAUSE,    MP_KEY_PLAYPAUSE},
+    {APPCOMMAND_MEDIA_PLAY,          MP_KEY_PLAY},
+    {APPCOMMAND_MEDIA_PAUSE,         MP_KEY_PAUSE},
+    {APPCOMMAND_MEDIA_RECORD,        MP_KEY_RECORD},
+    {APPCOMMAND_MEDIA_FAST_FORWARD,  MP_KEY_FORWARD},
+    {APPCOMMAND_MEDIA_REWIND,        MP_KEY_REWIND},
+    {APPCOMMAND_MEDIA_CHANNEL_UP,    MP_KEY_CHANNEL_UP},
+    {APPCOMMAND_MEDIA_CHANNEL_DOWN,  MP_KEY_CHANNEL_DOWN},
+    {0, 0}
+};
+
 static int lookup_keymap(const struct keymap *map, int key)
 {
     while (map->from && map->from != key) map++;
@@ -88,4 +103,9 @@ int mp_w32_vkey_to_mpkey(UINT vkey, bool extended)
         mpkey = lookup_keymap(vk_map, vkey);
 
     return mpkey;
+}
+
+int mp_w32_appcmd_to_mpkey(UINT appcmd)
+{
+    return lookup_keymap(appcmd_map, appcmd);
 }

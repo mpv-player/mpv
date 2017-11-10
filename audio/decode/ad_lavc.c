@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -40,7 +40,6 @@
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
-    struct mp_audio frame;
     bool force_channel_map;
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
@@ -147,14 +146,8 @@ static void uninit(struct dec_audio *da)
     struct priv *ctx = da->priv;
     if (!ctx)
         return;
-    AVCodecContext *lavc_context = ctx->avctx;
 
-    if (lavc_context) {
-        if (avcodec_close(lavc_context) < 0)
-            MP_ERR(da, "Could not close codec.\n");
-        av_freep(&lavc_context->extradata);
-        av_freep(&lavc_context);
-    }
+    avcodec_free_context(&ctx->avctx);
     av_frame_free(&ctx->avframe);
 }
 
@@ -197,7 +190,7 @@ static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
     return true;
 }
 
-static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
+static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
@@ -223,25 +216,18 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
 
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
-    struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
+    struct mp_aframe *mpframe = mp_aframe_from_avframe(priv->avframe);
     if (!mpframe)
         return true;
 
-    struct mp_chmap lavc_chmap = mpframe->channels;
-    if (lavc_chmap.num != avctx->channels)
-        mp_chmap_from_channels(&lavc_chmap, avctx->channels);
-    if (priv->force_channel_map) {
-        if (lavc_chmap.num == da->codec->channels.num)
-            lavc_chmap = da->codec->channels;
-    }
-    mp_audio_set_channels(mpframe, &lavc_chmap);
+    if (priv->force_channel_map)
+        mp_aframe_set_chmap(mpframe, &da->codec->channels);
 
-    mpframe->pts = out_pts;
+    if (out_pts == MP_NOPTS_VALUE)
+        out_pts = priv->next_pts;
+    mp_aframe_set_pts(mpframe, out_pts);
 
-    if (mpframe->pts == MP_NOPTS_VALUE)
-        mpframe->pts = priv->next_pts;
-    if (mpframe->pts != MP_NOPTS_VALUE)
-        priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
+    priv->next_pts = mp_aframe_end_pts(mpframe);
 
 #if LIBAVCODEC_VERSION_MICRO >= 100
     AVFrameSideData *sd =
@@ -260,14 +246,14 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
         priv->preroll_done = true;
     }
 
-    uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
+    uint32_t skip = MPMIN(priv->skip_samples, mp_aframe_get_size(mpframe));
     if (skip) {
-        mp_audio_skip_samples(mpframe, skip);
+        mp_aframe_skip_samples(mpframe, skip);
         priv->skip_samples -= skip;
     }
-    uint32_t trim = MPMIN(priv->trim_samples, mpframe->samples);
+    uint32_t trim = MPMIN(priv->trim_samples, mp_aframe_get_size(mpframe));
     if (trim) {
-        mpframe->samples -= trim;
+        mp_aframe_set_size(mpframe, mp_aframe_get_size(mpframe) - trim);
         priv->trim_samples -= trim;
     }
 
@@ -275,7 +261,6 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
 
     av_frame_unref(priv->avframe);
 
-    MP_DBG(da, "Decoded %d samples\n", mpframe->samples);
     return true;
 }
 

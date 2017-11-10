@@ -23,9 +23,13 @@ enum hwdec_type {
     HWDEC_RPI,
     HWDEC_RPI_COPY,
     HWDEC_MEDIACODEC,
+    HWDEC_MEDIACODEC_COPY,
     HWDEC_CUDA,
     HWDEC_CUDA_COPY,
+    HWDEC_NVDEC,
+    HWDEC_NVDEC_COPY,
     HWDEC_CRYSTALHD,
+    HWDEC_RKMPP,
 };
 
 #define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)
@@ -43,12 +47,11 @@ struct mp_hwdec_ctx {
     //  HWDEC_VAAPI:            struct mp_vaapi_ctx*
     //  HWDEC_D3D11VA:          ID3D11Device*
     //  HWDEC_DXVA2:            IDirect3DDevice9*
-    //  HWDEC_DXVA2_COPY:       IDirect3DDevice9*
     //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
     // libavutil-wrapped context, if available.
-    struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
+    struct AVBufferRef *av_device_ref; // AVHWDeviceContext*
 
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
     int *supported_formats;
@@ -56,15 +59,8 @@ struct mp_hwdec_ctx {
     // Hint to generic code: it's using a wrapper API
     bool emulated;
 
-    // Optional. Legacy. (New code should use AVHWFramesContext and
-    // mp_image_hw_download().)
-    // Allocates a software image from the pool, downloads the hw image from
-    // mpi, and returns it.
-    // pool can be NULL (then just use straight allocation).
-    // Return NULL on error or if mpi has the wrong format.
-    struct mp_image *(*download_image)(struct mp_hwdec_ctx *ctx,
-                                       struct mp_image *mpi,
-                                       struct mp_image_pool *swpool);
+    // Optional. Crap for vdpau. Makes sure preemption recovery is run if needed.
+    void (*restore_device)(struct mp_hwdec_ctx *ctx);
 
     // Optional. Do not set for VO-bound devices.
     void (*destroy)(struct mp_hwdec_ctx *ctx);
@@ -110,5 +106,23 @@ void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type);
 // - call hwdec_devices_get(devs, type)
 // - then return the mp_hwdec_ctx.ctx field
 void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
+
+struct mp_image;
+
+// Per AV_HWDEVICE_TYPE_* functions, queryable via hwdec_get_hwcontext_fns().
+// For now, all entries are strictly optional.
+struct hwcontext_fns {
+    int av_hwdevice_type;
+    // Set any mp_image fields that require hwcontext specific code, such as
+    // fields or flags not present in AVFrame or AVHWFramesContext in a
+    // portable way. This is called directly after img is converted from an
+    // AVFrame, with all other fields already set. img.hwctx will be set, and
+    // use the correct AV_HWDEVICE_TYPE_.
+    void (*complete_image_params)(struct mp_image *img);
+};
+
+// The parameter is of type enum AVHWDeviceType (as in int to avoid extensive
+// recursive includes). May return NULL for unknown device types.
+const struct hwcontext_fns *hwdec_get_hwcontext_fns(int av_hwdevice_type);
 
 #endif

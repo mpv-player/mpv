@@ -1,9 +1,16 @@
 local utils = require 'mp.utils'
 local msg = require 'mp.msg'
+local options = require 'mp.options'
+
+local o = {
+    exclude = ""
+}
+options.read_options(o)
 
 local ytdl = {
     path = "youtube-dl",
-    searched = false
+    searched = false,
+    blacklisted = {}
 }
 
 local chapter_list = {}
@@ -19,6 +26,11 @@ local function option_was_set(name)
                                 false)
 end
 
+-- return true if the option was set locally
+local function option_was_set_locally(name)
+    return mp.get_property_bool("option-info/" ..name.. "/set-locally", false)
+end
+
 -- youtube-dl may set special http headers for some sites (user-agent, cookies)
 local function set_http_headers(http_headers)
     if not http_headers then
@@ -29,7 +41,7 @@ local function set_http_headers(http_headers)
     if useragent and not option_was_set("user-agent") then
         mp.set_property("file-local-options/user-agent", useragent)
     end
-    local additional_fields = {"Cookie", "Referer"}
+    local additional_fields = {"Cookie", "Referer", "X-Forwarded-For"}
     for idx, item in pairs(additional_fields) do
         local field_value = http_headers[item]
         if field_value then
@@ -88,7 +100,59 @@ local function extract_chapters(data, video_length)
     return ret
 end
 
-local function edl_track_joined(fragments, protocol, is_live)
+local function is_blacklisted(url)
+    if o.exclude == "" then return false end
+    if #ytdl.blacklisted == 0 then
+        local joined = o.exclude
+        while joined:match('%|?[^|]+') do
+            local _, e, substring = joined:find('%|?([^|]+)')
+            table.insert(ytdl.blacklisted, substring)
+            joined = joined:sub(e+1)
+        end
+    end
+    if #ytdl.blacklisted > 0 then
+        url = url:match('https?://(.+)')
+        for _, exclude in ipairs(ytdl.blacklisted) do
+            if url:match(exclude) then
+                msg.verbose('URL matches excluded substring. Skipping.')
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function make_absolute_url(base_url, url)
+    if url:find("https?://") == 1 then return url end
+
+    local proto, domain, rest =
+        base_url:match("(https?://)([^/]+/)(.*)/?")
+    local segs = {}
+    rest:gsub("([^/]+)", function(c) table.insert(segs, c) end)
+    url:gsub("([^/]+)", function(c) table.insert(segs, c) end)
+    local resolved_url = {}
+    for i, v in ipairs(segs) do
+        if v == ".." then
+            table.remove(resolved_url)
+        elseif v ~= "." then
+            table.insert(resolved_url, v)
+        end
+    end
+    return proto .. domain ..
+        table.concat(resolved_url, "/")
+end
+
+local function join_url(base_url, fragment)
+    local res = ""
+    if base_url and fragment.path then
+        res = make_absolute_url(base_url, fragment.path)
+    elseif fragment.url then
+        res = fragment.url
+    end
+    return res
+end
+
+local function edl_track_joined(fragments, protocol, is_live, base)
     if not (type(fragments) == "table") or not fragments[1] then
         msg.debug("No fragments to join into EDL")
         return nil
@@ -102,7 +166,7 @@ local function edl_track_joined(fragments, protocol, is_live)
         not fragments[1].duration and not is_live then
         -- assume MP4 DASH initialization segment
         table.insert(parts,
-            "!mp4_dash,init=" .. edl_escape(fragments[1].url))
+            "!mp4_dash,init=" .. edl_escape(join_url(base, fragments[1])))
         offset = 2
 
         -- Check remaining fragments for duration;
@@ -118,7 +182,7 @@ local function edl_track_joined(fragments, protocol, is_live)
 
     for i = offset, #fragments do
         local fragment = fragments[i]
-        table.insert(parts, edl_escape(fragment.url))
+        table.insert(parts, edl_escape(join_url(base, fragment)))
         if fragment.duration then
             parts[#parts] =
                 parts[#parts] .. ",length="..fragment.duration
@@ -135,7 +199,8 @@ local function add_single_video(json)
         for _, track in pairs(json.requested_formats) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
-                track.protocol, json.is_live)
+                track.protocol, json.is_live,
+                track.fragment_base_url)
             if track.acodec and track.acodec ~= "none" then
                 -- audio track
                 mp.commandv("audio-add",
@@ -150,7 +215,7 @@ local function add_single_video(json)
     elseif not (json.url == nil) then
         local edl_track = nil
         edl_track = edl_track_joined(json.fragments, json.protocol,
-            json.is_live)
+            json.is_live, json.fragment_base_url)
 
         -- normal video or single track
         streamurl = edl_track or json.url
@@ -188,13 +253,25 @@ local function add_single_video(json)
         end
     end
 
-    -- add chapters from description
-    if not (json.description == nil) and not (json.duration == nil) then
+    -- add chapters
+    if json.chapters then
+        msg.debug("Adding pre-parsed chapters")
+        for i = 1, #json.chapters do
+            local chapter = json.chapters[i]
+            local title = chapter.title or ""
+            if title == "" then
+                title = string.format('Chapter %02d', i)
+            end
+            table.insert(chapter_list, {time=chapter.start_time, title=title})
+        end
+    elseif not (json.description == nil) and not (json.duration == nil) then
         chapter_list = extract_chapters(json.description, json.duration)
     end
 
     -- set start time
-    if not (json.start_time == nil) then
+    if not (json.start_time == nil) and
+        not option_was_set("start") and
+        not option_was_set_locally("start") then
         msg.debug("Setting start to: " .. json.start_time .. " secs")
         mp.set_property("file-local-options/start", json.start_time)
     end
@@ -226,9 +303,9 @@ end
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
-
-    if (url:find("http://") == 1) or (url:find("https://") == 1)
-        or (url:find("ytdl://") == 1) then
+    local start_time = os.clock()
+    if (url:find("ytdl://") == 1) or
+        ((url:find("https?://") == 1) and not is_blacklisted(url)) then
 
         -- check for youtube-dl in mpv's config dir
         if not (ytdl.searched) then
@@ -302,6 +379,7 @@ mp.add_hook("on_load", 10, function ()
         end
 
         msg.verbose("youtube-dl succeeded!")
+        msg.debug('ytdl parsing took '..os.clock()-start_time..' seconds')
 
         -- what did we get?
         if not (json["direct"] == nil) and (json["direct"] == true) then
@@ -407,12 +485,13 @@ mp.add_hook("on_load", 10, function ()
             add_single_video(json)
         end
     end
+    msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end)
 
 
 mp.add_hook("on_preloaded", 10, function ()
     if next(chapter_list) ~= nil then
-        msg.verbose("Setting chapters from video's description")
+        msg.verbose("Setting chapters")
 
         mp.set_property_native("chapter-list", chapter_list)
         chapter_list = {}

@@ -36,6 +36,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 //==types==//
 typedef enum stereo_code {
     ANAGLYPH_RC_GRAY,   //anaglyph red/cyan gray

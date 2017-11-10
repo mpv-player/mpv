@@ -19,6 +19,10 @@
 
 #include "config.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>

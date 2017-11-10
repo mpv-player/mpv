@@ -5,20 +5,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Almost LGPL.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -44,10 +42,9 @@
 #include <libavdevice/avdevice.h>
 #endif
 
-#if HAVE_IS_LIBAV
+#if HAVE_LIBAV
 #include <libavresample/avresample.h>
-#endif
-#if HAVE_IS_FFMPEG
+#else
 #include <libswresample/swresample.h>
 #endif
 
@@ -199,10 +196,9 @@ bool print_libav_versions(struct mp_log *log, int v)
         {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
         {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
         {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
-#if HAVE_IS_LIBAV
+#if HAVE_LIBAV
         {"libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version()},
-#endif
-#if HAVE_IS_FFMPEG
+#else
         {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
 #endif
     };

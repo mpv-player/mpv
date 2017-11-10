@@ -125,4 +125,9 @@ struct CHANLISTS {
 extern const struct CHANLISTS   chanlists[];
 extern const int                chancount;
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #endif /* MPLAYER_FREQUENCIES_H */

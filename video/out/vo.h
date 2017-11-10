@@ -143,13 +143,28 @@ struct voctrl_playback_state {
 };
 
 // VOCTRL_PERFORMANCE_DATA
-struct voctrl_performance_entry {
-    // Times are in microseconds
+#define VO_PERF_SAMPLE_COUNT 256
+
+struct mp_pass_perf {
+    // times are all in nanoseconds
     uint64_t last, avg, peak;
+    uint64_t samples[VO_PERF_SAMPLE_COUNT];
+    uint64_t count;
+};
+
+#define VO_PASS_PERF_MAX 64
+
+struct mp_frame_perf {
+    int count;
+    struct mp_pass_perf perf[VO_PASS_PERF_MAX];
+    // The owner of this struct does not have ownership over the names, and
+    // they may change at any time - so this struct should not be stored
+    // anywhere or the results reused
+    char *desc[VO_PASS_PERF_MAX];
 };
 
 struct voctrl_performance_data {
-    struct voctrl_performance_entry upload, render, present;
+    struct mp_frame_perf fresh, redraw;
 };
 
 enum {
@@ -157,6 +172,8 @@ enum {
     VO_CAP_ROTATE90     = 1 << 0,
     // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
     VO_CAP_FRAMEDROP    = 1 << 1,
+    // VO does not support redraws (vo_mediacodec_embed).
+    VO_CAP_NOREDRAW     = 1 << 2,
 };
 
 #define VO_MAX_REQ_FRAMES 10
@@ -262,6 +279,36 @@ struct vo_driver {
     int (*control)(struct vo *vo, uint32_t request, void *data);
 
     /*
+     * lavc callback for direct rendering
+     *
+     * Optional. To make implementation easier, the callback is always run on
+     * the VO thread. The returned mp_image's destructor callback is also called
+     * on the VO thread, even if it's actually unref'ed from another thread.
+     *
+     * It is guaranteed that the last reference to an image is destroyed before
+     * ->uninit is called (except it's not - libmpv screenshots can hold the
+     * reference longer, fuck).
+     *
+     * The allocated image - or a part of it, can be passed to draw_frame(). The
+     * point of this mechanism is that the decoder directly renders to GPU
+     * staging memory, to avoid a memcpy on frame upload. But this is not a
+     * guarantee. A filter could change the data pointers or return a newly
+     * allocated image. It's even possible that only 1 plane uses the buffer
+     * allocated by the get_image function. The VO has to check for this.
+     *
+     * stride_align is always a value >=1 that is a power of 2. The stride
+     * values of the returned image must be divisible by this value.
+     *
+     * Currently, the returned image must have exactly 1 AVBufferRef set, for
+     * internal implementation simplicity.
+     *
+     * returns: an allocated, refcounted image; if NULL is returned, the caller
+     * will silently fallback to a default allocator
+     */
+    struct mp_image *(*get_image)(struct vo *vo, int imgfmt, int w, int h,
+                                  int stride_align);
+
+    /*
      * Render the given frame to the VO's backbuffer. This operation will be
      * followed by a draw_osd and a flip_page[_timed] call.
      * mpi belongs to the VO; the VO must free it eventually.
@@ -329,7 +376,7 @@ struct vo {
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
     struct vo_cocoa_state *cocoa;
-    struct vo_wayland_state *wayland;
+    struct vo_wayland_state *wl;
     struct mp_hwdec_devices *hwdec_devs;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
@@ -352,6 +399,8 @@ struct vo {
 
     struct m_config_cache *opts_cache; // cache for ->opts
     struct mp_vo_opts *opts;
+    struct m_config_cache *gl_opts_cache;
+    struct m_config_cache *eq_opts_cache;
 
     bool want_redraw;   // redraw as soon as possible
 
@@ -392,6 +441,8 @@ double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 double vo_get_delay(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
+struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
+                              int stride_align);
 
 void vo_wakeup(struct vo *vo);
 void vo_wait_default(struct vo *vo, int64_t until_time);

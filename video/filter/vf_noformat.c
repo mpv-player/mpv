@@ -29,6 +29,11 @@
 
 #include "options/m_option.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static struct vf_priv_s {
     int fmt;
 } const vf_priv_dflt = {

@@ -173,7 +173,7 @@
       </dict>
     </array>
     <key>CFBundleExecutable</key>
-    <string>mpv-wrapper.sh</string>
+    <string>mpv-bundle</string>
     <key>CFBundleIconFile</key>
     <string>icon</string>
     <key>CFBundleIdentifier</key>

@@ -116,7 +116,6 @@ static int init(struct ao *ao)
     static const struct af_to_par af_to_par[] = {
         {AF_FORMAT_U8,   8, 0},
         {AF_FORMAT_S16, 16, 1},
-        {AF_FORMAT_S24, 24, 1},
         {AF_FORMAT_S32, 32, 1},
     };
     const struct af_to_par *ap;
@@ -177,8 +176,6 @@ static int init(struct ao *ao)
         ao->format = AF_FORMAT_U8;
     } else if (p->par.bits == 16 && p->par.bps == 2 && p->par.sig) {
         ao->format = AF_FORMAT_S16;
-    } else if ((p->par.bits == 24 || p->par.msb) && p->par.bps == 3 && p->par.sig) {
-        ao->format = AF_FORMAT_S24;
     } else if ((p->par.bits == 32 || p->par.msb) && p->par.bps == 4 && p->par.sig) {
         ao->format = AF_FORMAT_S32;
     } else {
@@ -194,6 +191,8 @@ static int init(struct ao *ao)
     p->pfd = calloc (sio_nfds(p->hdl), sizeof (struct pollfd));
     if (!p->pfd)
         goto error;
+
+    ao->period_size = p->par.round;
 
     return 0;
 

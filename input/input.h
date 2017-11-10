@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_INPUT_H
@@ -143,7 +143,7 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 
 // Process scrolling input. Support for precise scrolling. Scales the given
 // scroll amount add multiplies it with the command (seeking, sub-delay, etc)
-void mp_input_put_axis(struct input_ctx *ictx, int direction, double value);
+void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value);
 
 // Update mouse position (in window coordinates).
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
@@ -250,6 +250,9 @@ void mp_input_set_cancel(struct input_ctx *ictx, void (*cb)(void *c), void *c);
 // characters. If false, count Right Alt as the modifier Alt key.
 bool mp_input_use_alt_gr(struct input_ctx *ictx);
 
+// Return true if mpv should intercept keyboard media keys
+bool mp_input_use_media_keys(struct input_ctx *ictx);
+
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 
@@ -259,6 +262,8 @@ void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 
 struct mp_ipc_ctx;
 struct mp_client_api;
+
+// Platform specific implementation, provided by ipc-*.c.
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global);
 void mp_uninit_ipc(struct mp_ipc_ctx *ctx);

@@ -36,7 +36,8 @@ def __add_generic_flags__(ctx):
                                  "-Wstrict-prototypes",
                                  "-Wno-format-zero-length",
                                  "-Werror=format-security",
-                                 "-Wno-redundant-decls"])
+                                 "-Wno-redundant-decls",
+                                 "-Wvla"])
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
@@ -51,7 +52,7 @@ def __add_clang_flags__(ctx):
                        "-Wno-tautological-constant-out-of-range-compare" ]
 
 def __add_mswin_flags__(ctx):
-    ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x0601', '-DUNICODE', '-DCOBJMACROS',
+    ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
                        '-DINITGUID', '-U__STRICT_ANSI__']
     ctx.env.LAST_LINKFLAGS += ['-Wl,--major-os-version=6,--minor-os-version=0',
                  '-Wl,--major-subsystem-version=6,--minor-subsystem-version=0']

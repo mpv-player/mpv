@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_DEC_VIDEO_H
@@ -35,6 +35,7 @@ struct dec_video {
     struct mp_hwdec_devices *hwdec_devs; // video output hwdec handles
     struct sh_stream *header;
     struct mp_codec_params *codec;
+    struct vo *vo; // required for direct rendering into video memory
 
     char *decoder_desc;
 
@@ -70,7 +71,6 @@ struct dec_video {
     double decoded_pts;
 
     struct mp_image_params dec_format, last_format, fixed_format;
-    float initial_decoder_aspect;
 
     double start_pts;
     double start, end;

@@ -38,6 +38,7 @@
 
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;
+extern const struct mp_scripting mp_scripting_js;
 
 static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
@@ -45,6 +46,9 @@ static const struct mp_scripting *const scripting_backends[] = {
 #endif
 #if HAVE_CPLUGINS
     &mp_scripting_cplugin,
+#endif
+#if HAVE_JAVASCRIPT
+    &mp_scripting_js,
 #endif
     NULL
 };
@@ -151,6 +155,14 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     return 0;
 }
 
+int mp_load_user_script(struct MPContext *mpctx, const char *fname)
+{
+    char *path = mp_get_user_path(NULL, mpctx->global, fname);
+    int ret = mp_load_script(mpctx, path);
+    talloc_free(path);
+    return ret;
+}
+
 static int compare_filename(const void *pa, const void *pb)
 {
     char *a = (char *)pa;
@@ -208,6 +220,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
 {
     load_builtin_script(mpctx, mpctx->opts->lua_load_osc, "@osc.lua");
     load_builtin_script(mpctx, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
+    load_builtin_script(mpctx, mpctx->opts->lua_load_stats, "@stats.lua");
 }
 
 void mp_load_scripts(struct MPContext *mpctx)
@@ -216,7 +229,7 @@ void mp_load_scripts(struct MPContext *mpctx)
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
-            mp_load_script(mpctx, files[n]);
+            mp_load_user_script(mpctx, files[n]);
     }
     if (!mpctx->opts->auto_load_scripts)
         return;

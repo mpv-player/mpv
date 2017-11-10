@@ -64,10 +64,10 @@ static void reselect_streams(demuxer_t *demuxer)
     }
 }
 
-static void get_disc_lang(struct stream *stream, struct sh_stream *sh)
+static void get_disc_lang(struct stream *stream, struct sh_stream *sh, bool dvd)
 {
     struct stream_lang_req req = {.type = sh->type, .id = sh->demuxer_id};
-    if (sh->type == STREAM_SUB)
+    if (dvd && sh->type == STREAM_SUB)
         req.id = req.id & 0x1F; // mpeg ID to index
     stream_control(stream, STREAM_CTRL_GET_LANG, &req);
     if (req.name[0])
@@ -86,7 +86,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
             struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
             sh->demuxer_id = n + 0x20;
             sh->codec->codec = "dvd_subtitle";
-            get_disc_lang(stream, sh);
+            get_disc_lang(stream, sh, true);
             // p->streams _must_ match with p->slave->streams, so we can't add
             // it yet - it has to be done when the real stream appears, which
             // could be right on start, or any time later.
@@ -154,7 +154,7 @@ static void add_streams(demuxer_t *demuxer)
                 sh->codec->par_h = f.p_h;
             }
         }
-        get_disc_lang(demuxer->stream, sh);
+        get_disc_lang(demuxer->stream, sh, p->is_dvd);
         demux_add_sh_stream(demuxer, sh);
     }
     reselect_streams(demuxer);
@@ -338,6 +338,10 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     add_streams(demuxer);
     add_stream_chapters(demuxer);
 
+    double len;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
+        demuxer->duration = len;
+
     return 0;
 }
 
@@ -352,19 +356,12 @@ static int d_control(demuxer_t *demuxer, int cmd, void *arg)
     struct priv *p = demuxer->priv;
 
     switch (cmd) {
-    case DEMUXER_CTRL_GET_TIME_LENGTH: {
-        double len;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) < 1)
-            break;
-        *(double *)arg = len;
-        return DEMUXER_CTRL_OK;
-    }
     case DEMUXER_CTRL_RESYNC:
         demux_flush(p->slave);
         break; // relay to slave demuxer
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         reselect_streams(demuxer);
-        return DEMUXER_CTRL_OK;
+        return CONTROL_OK;
     }
     return demux_control(p->slave, cmd, arg);
 }

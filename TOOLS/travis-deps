@@ -87,21 +87,13 @@ end
 class Libav < TravisDepsBuilder
   def build_map
     {
-      "libav-stable" => {
-        :action => :stable,
-        :url    => 'http://libav.org/releases/libav-12.tar.gz'
-      },
       "libav-git" => {
         :action => :git,
         :url    => "git://git.libav.org/libav.git"
       },
-      "ffmpeg-stable" => {
-        :action => :stable,
-        :url    => 'http://www.ffmpeg.org/releases/ffmpeg-3.2.2.tar.gz'
-      },
       "ffmpeg-git" => {
         :action => :git,
-        :url    => "git://github.com/FFmpeg/FFmpeg.git"
+        :url    => "git://github.com/mpv-player/ffmpeg-mpv.git"
       }
     }
   end
@@ -114,7 +106,7 @@ end
 class LibavOsx < Libav
   def build_map
     {
-      "ffmpeg-stable" => { :action => :package, :url => 'ffmpeg' },
+      "ffmpeg-git" => { :action => :package, :url => 'ffmpeg' },
     }
   end
 end
@@ -133,7 +125,7 @@ end
 class Dependencies < TravisDepsBuilder
   def deps
     packages = {
-      'linux' => 'pkg-config fontconfig libfribidi-dev yasm',
+      'linux' => 'pkg-config fontconfig libfribidi-dev yasm libxinerama-dev libxrandr-dev',
       'osx'   => 'pkg-config fontconfig freetype fribidi yasm'
     }
     package_manager_update

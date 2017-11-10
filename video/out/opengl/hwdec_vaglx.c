@@ -25,77 +25,54 @@
 #include <va/va_x11.h>
 
 #include "video/out/x11_common.h"
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
 #include "video/vaapi.h"
 
-struct priv {
-    struct mp_log *log;
+#include "ra_gl.h"
+
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
+struct priv_owner {
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
     Display *xdisplay;
-    GLuint gl_texture;
     GLXFBConfig fbc;
+};
+
+struct priv {
+    GLuint gl_texture;
     Pixmap pixmap;
     GLXPixmap glxpixmap;
     void (*glXBindTexImage)(Display *dpy, GLXDrawable draw, int buffer, int *a);
     void (*glXReleaseTexImage)(Display *dpy, GLXDrawable draw, int buffer);
 };
 
-static void destroy_texture(struct gl_hwdec *hw)
+static void uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-
-    if (p->glxpixmap) {
-        p->glXReleaseTexImage(p->xdisplay, p->glxpixmap, GLX_FRONT_EXT);
-        glXDestroyPixmap(p->xdisplay, p->glxpixmap);
-    }
-    p->glxpixmap = 0;
-
-    if (p->pixmap)
-        XFreePixmap(p->xdisplay, p->pixmap);
-    p->pixmap = 0;
-
-    gl->DeleteTextures(1, &p->gl_texture);
-    p->gl_texture = 0;
-}
-
-static void destroy(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-    destroy_texture(hw);
+    struct priv_owner *p = hw->priv;
     if (p->ctx)
         hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
     va_destroy(p->ctx);
 }
 
-static int create(struct gl_hwdec *hw)
+static int init(struct ra_hwdec *hw)
 {
     Display *x11disp = glXGetCurrentDisplay();
-    if (!x11disp)
+    if (!x11disp || !ra_is_gl(hw->ra))
         return -1;
-    if (hw->probing) {
-        MP_VERBOSE(hw, "Not using this by default.\n");
-        return -1;
-    }
     int x11scr = DefaultScreen(x11disp);
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
-    p->log = hw->log;
+    struct priv_owner *p = hw->priv;
     p->xdisplay = x11disp;
     const char *glxext = glXQueryExtensionsString(x11disp, x11scr);
     if (!glxext || !strstr(glxext, "GLX_EXT_texture_from_pixmap"))
         return -1;
-    p->glXBindTexImage =
-        (void*)glXGetProcAddressARB((void*)"glXBindTexImageEXT");
-    p->glXReleaseTexImage =
-        (void*)glXGetProcAddressARB((void*)"glXReleaseTexImageEXT");
-    if (!p->glXBindTexImage || !p->glXReleaseTexImage)
-        return -1;
     p->display = vaGetDisplay(x11disp);
     if (!p->display)
         return -1;
-    p->ctx = va_initialize(p->display, p->log, true);
+    p->ctx = va_initialize(p->display, hw->log, true);
     if (!p->ctx) {
         vaTerminate(p->display);
         return -1;
@@ -121,8 +98,7 @@ static int create(struct gl_hwdec *hw)
     if (fbc)
         XFree(fbc);
     if (!fbcount) {
-        MP_VERBOSE(p, "No texture-from-pixmap support.\n");
-        destroy(hw);
+        MP_VERBOSE(hw, "No texture-from-pixmap support.\n");
         return -1;
     }
 
@@ -131,12 +107,19 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+    Display *xdisplay = p_owner->xdisplay;
 
-    destroy_texture(hw);
+    p->glXBindTexImage =
+        (void*)glXGetProcAddressARB((void*)"glXBindTexImageEXT");
+    p->glXReleaseTexImage =
+        (void*)glXGetProcAddressARB((void*)"glXReleaseTexImageEXT");
+    if (!p->glXBindTexImage || !p->glXReleaseTexImage)
+        return -1;
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
@@ -146,11 +129,11 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    p->pixmap = XCreatePixmap(p->xdisplay,
-                        RootWindow(p->xdisplay, DefaultScreen(p->xdisplay)),
-                        params->w, params->h, 24);
+    p->pixmap = XCreatePixmap(xdisplay,
+                        RootWindow(xdisplay, DefaultScreen(xdisplay)),
+                        mapper->src_params.w, mapper->src_params.h, 24);
     if (!p->pixmap) {
-        MP_FATAL(hw, "could not create pixmap\n");
+        MP_FATAL(mapper, "could not create pixmap\n");
         return -1;
     }
 
@@ -160,53 +143,90 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         GLX_MIPMAP_TEXTURE_EXT, False,
         None,
     };
-    p->glxpixmap = glXCreatePixmap(p->xdisplay, p->fbc, p->pixmap, attribs);
+    p->glxpixmap = glXCreatePixmap(xdisplay, p_owner->fbc, p->pixmap, attribs);
 
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
-    p->glXBindTexImage(p->xdisplay, p->glxpixmap, GLX_FRONT_EXT, NULL);
+    p->glXBindTexImage(xdisplay, p->glxpixmap, GLX_FRONT_EXT, NULL);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    params->imgfmt = IMGFMT_RGB0;
-    params->hw_subfmt = 0;
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = mapper->src_params.w,
+        .h = mapper->src_params.h,
+        .d = 1,
+        .format = ra_find_unorm_format(mapper->ra, 1, 4), // unsure
+        .render_src = true,
+        .src_linear = true,
+    };
+    if (!params.format)
+        return -1;
+
+    mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
+    if (!mapper->tex[0])
+        return -1;
+
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.hw_subfmt = 0;
 
     return 0;
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+    Display *xdisplay = p_owner->xdisplay;
+
+    if (p->glxpixmap) {
+        p->glXReleaseTexImage(xdisplay, p->glxpixmap, GLX_FRONT_EXT);
+        glXDestroyPixmap(xdisplay, p->glxpixmap);
+    }
+    p->glxpixmap = 0;
+
+    if (p->pixmap)
+        XFreePixmap(xdisplay, p->pixmap);
+    p->pixmap = 0;
+
+    ra_tex_free(mapper->ra, &mapper->tex[0]);
+    gl->DeleteTextures(1, &p->gl_texture);
+    p->gl_texture = 0;
+}
+
+static int mapper_map(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
     VAStatus status;
+
+    struct mp_image *hw_image = mapper->src;
 
     if (!p->pixmap)
         return -1;
 
-    status = vaPutSurface(p->display, va_surface_id(hw_image), p->pixmap,
+    status = vaPutSurface(p_owner->display, va_surface_id(hw_image), p->pixmap,
                           0, 0, hw_image->w, hw_image->h,
                           0, 0, hw_image->w, hw_image->h,
                           NULL, 0,
                           va_get_colorspace_flag(hw_image->params.color.space));
-    CHECK_VA_STATUS(p, "vaPutSurface()");
+    CHECK_VA_STATUS(mapper, "vaPutSurface()");
 
-    *out_frame = (struct gl_hwdec_frame){
-        .planes = {
-            {
-                .gl_texture = p->gl_texture,
-                .gl_target = GL_TEXTURE_2D,
-                .tex_w = hw_image->w,
-                .tex_h = hw_image->h,
-            },
-        },
-    };
     return 0;
 }
 
-const struct gl_hwdec_driver gl_hwdec_vaglx = {
+const struct ra_hwdec_driver ra_hwdec_vaglx = {
     .name = "vaapi-glx",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_VAAPI,
-    .imgfmt = IMGFMT_VAAPI,
-    .create = create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_VAAPI, 0},
+    .testing_only = true,
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+    },
 };

@@ -40,6 +40,7 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int keepaspect_window;
     int hidpi_window_scale;
+    int native_fs;
 
     int64_t WinID;
 
@@ -54,8 +55,7 @@ typedef struct mp_vo_opts {
     // vo_opengl, vo_opengl_cb
     char *gl_hwdec_interop;
     // vo_drm
-    char *drm_connector_spec;
-    int drm_mode_id;
+    struct drm_opts *drm_opts;
 } mp_vo_opts;
 
 struct mp_cache_opts {
@@ -73,6 +73,7 @@ typedef struct MPOpts {
     int use_terminal;
     char *dump_stats;
     int verbose;
+    int msg_really_quiet;
     char **msg_levels;
     int msg_color;
     int msg_module;
@@ -88,6 +89,7 @@ typedef struct MPOpts {
     int lua_load_ytdl;
     char *lua_ytdl_format;
     char **lua_ytdl_raw_options;
+    int lua_load_stats;
 
     int auto_load_scripts;
 
@@ -117,13 +119,7 @@ typedef struct MPOpts {
     char *media_title;
     int force_rgba_osd;
 
-    // ranges -100 - 100, 1000 if the vo default should be used
-    int gamma_gamma;
-    int gamma_brightness;
-    int gamma_contrast;
-    int gamma_saturation;
-    int gamma_hue;
-    int video_output_levels;
+    struct mp_csp_equalizer_opts *video_equalizer;
 
     int stop_screensaver;
     int cursor_autohide_delay;
@@ -185,8 +181,6 @@ typedef struct MPOpts {
     char *status_msg;
     char *osd_status_msg;
     char *osd_msg[3];
-    char *heartbeat_cmd;
-    float heartbeat_interval;
     int player_idle_mode;
     int consolecontrols;
     int playlist_pos;
@@ -210,6 +204,7 @@ typedef struct MPOpts {
     int stream_id[2][STREAM_TYPE_COUNT];
     int stream_id_ff[STREAM_TYPE_COUNT];
     char **stream_lang[STREAM_TYPE_COUNT];
+    int stream_auto_sel;
     int audio_display;
     char **display_tags;
     int sub_visibility;
@@ -252,7 +247,6 @@ typedef struct MPOpts {
     int deinterlace;
     float movie_aspect;
     int aspect_method;
-    int field_dominance;
     char **sub_name;
     char **sub_paths;
     char **audiofile_paths;
@@ -297,6 +291,7 @@ typedef struct MPOpts {
     int hwdec_api;
     char *hwdec_codecs;
     int videotoolbox_format;
+    int hwdec_image_format;
 
     int w32_priority;
 
@@ -334,8 +329,15 @@ typedef struct MPOpts {
 
     struct gl_video_opts *gl_video_opts;
     struct angle_opts *angle_opts;
+    struct opengl_opts *opengl_opts;
+    struct vulkan_opts *vulkan_opts;
+    struct spirv_opts *spirv_opts;
+    struct d3d11_opts *d3d11_opts;
+    struct d3d11va_opts *d3d11va_opts;
     struct cocoa_opts *cocoa_opts;
     struct dvd_opts *dvd_opts;
+
+    int cuda_device;
 } MPOpts;
 
 struct dvd_opts {

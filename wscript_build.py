@@ -4,7 +4,7 @@ import os
 def _add_rst_manual_dependencies(ctx):
     manpage_sources_basenames = """
         options.rst ao.rst vo.rst af.rst vf.rst encode.rst
-        input.rst osc.rst lua.rst ipc.rst changes.rst""".split()
+        input.rst osc.rst stats.rst lua.rst ipc.rst changes.rst""".split()
 
     manpage_sources = ['DOCS/man/'+x for x in manpage_sources_basenames]
 
@@ -59,8 +59,26 @@ def build(ctx):
 
     ctx(
         features = "file2string",
-        source = "video/out/x11_icon.bin",
-        target = "video/out/x11_icon.inc",
+        source = "etc/mpv-icon-8bit-16x16.png",
+        target = "video/out/x11_icon_16.inc",
+    )
+
+    ctx(
+        features = "file2string",
+        source = "etc/mpv-icon-8bit-32x32.png",
+        target = "video/out/x11_icon_32.inc",
+    )
+
+    ctx(
+        features = "file2string",
+        source = "etc/mpv-icon-8bit-64x64.png",
+        target = "video/out/x11_icon_64.inc",
+    )
+
+    ctx(
+        features = "file2string",
+        source = "etc/mpv-icon-8bit-128x128.png",
+        target = "video/out/x11_icon_128.inc",
     )
 
     ctx(
@@ -82,7 +100,7 @@ def build(ctx):
     )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
-                 "ytdl_hook.lua"]
+                 "ytdl_hook.lua", "stats.lua"]
 
     for fn in lua_files:
         fn = "player/lua/" + fn
@@ -92,48 +110,91 @@ def build(ctx):
             target = os.path.splitext(fn)[0] + ".inc",
         )
 
+    ctx(
+        features = "file2string",
+        source = "player/javascript/defaults.js",
+        target = "player/javascript/defaults.js.inc",
+    )
+
+    if ctx.dependency_satisfied('wayland'):
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/xdg-shell/xdg-shell-unstable-v6",
+            target    = "video/out/wayland/xdg-shell-v6.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/xdg-shell/xdg-shell-unstable-v6",
+            target    = "video/out/wayland/xdg-shell-v6.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
+            target    = "video/out/wayland/idle-inhibit-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
+            target    = "video/out/wayland/idle-inhibit-v1.h")
+        ctx.wayland_protocol_code(proto_dir = "../video/out/wayland",
+            protocol = "server-decoration",
+            target   = "video/out/wayland/srv-decor.c")
+        ctx.wayland_protocol_header(proto_dir = "../video/out/wayland",
+            protocol = "server-decoration",
+            target   = "video/out/wayland/srv-decor.h")
+
     ctx(features = "ebml_header", target = "ebml_types.h")
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
-    if ctx.env.DEST_OS == 'win32':
-        main_fn_c = 'osdep/main-fn-win.c'
-    elif ctx.dependency_satisfied('cocoa'):
-        main_fn_c = 'osdep/main-fn-cocoa.c'
-    else:
-        main_fn_c = 'osdep/main-fn-unix.c'
+    if ctx.dependency_satisfied('cplayer'):
+        main_fn_c = ctx.pick_first_matching_dep([
+            ( "osdep/main-fn-cocoa.c",               "cocoa" ),
+            ( "osdep/main-fn-unix.c",                "posix" ),
+            ( "osdep/main-fn-win.c",                 "win32-desktop" ),
+        ])
 
-    getch2_c = {
-        'win32':  'osdep/terminal-win.c',
-    }.get(ctx.env.DEST_OS, "osdep/terminal-unix.c")
+    getch2_c = ctx.pick_first_matching_dep([
+        ( "osdep/terminal-unix.c",               "posix" ),
+        ( "osdep/terminal-win.c",                "win32-desktop" ),
+        ( "osdep/terminal-dummy.c" ),
+    ])
 
-    timer_c = {
-        'win32':  'osdep/timer-win2.c',
-        'darwin': 'osdep/timer-darwin.c',
-    }.get(ctx.env.DEST_OS, "osdep/timer-linux.c")
+    timer_c = ctx.pick_first_matching_dep([
+        ( "osdep/timer-win2.c",                  "os-win32" ),
+        ( "osdep/timer-darwin.c",                "os-darwin" ),
+        ( "osdep/timer-linux.c",                 "posix" ),
+    ])
+
+    ipc_c = ctx.pick_first_matching_dep([
+        ( "input/ipc-unix.c",                    "posix" ),
+        ( "input/ipc-win.c",                     "win32-desktop" ),
+        ( "input/ipc-dummy.c" ),
+    ])
+
+    subprocess_c = ctx.pick_first_matching_dep([
+        ( "osdep/subprocess-posix.c",            "posix-spawn" ),
+        ( "osdep/subprocess-win.c",              "win32-desktop" ),
+        ( "osdep/subprocess-dummy.c" ),
+    ])
 
     sources = [
         ## Audio
-        ( "audio/audio.c" ),
+        ( "audio/aconverter.c" ),
+        ( "audio/audio.c",                       "libaf" ),
         ( "audio/audio_buffer.c" ),
         ( "audio/chmap.c" ),
         ( "audio/chmap_sel.c" ),
         ( "audio/fmt-conversion.c" ),
         ( "audio/format.c" ),
+        ( "audio/aframe.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),
         ( "audio/decode/dec_audio.c" ),
-        ( "audio/filter/af.c" ),
-        ( "audio/filter/af_channels.c" ),
-        ( "audio/filter/af_equalizer.c" ),
-        ( "audio/filter/af_format.c" ),
-        ( "audio/filter/af_lavcac3enc.c" ),
-        ( "audio/filter/af_lavfi.c" ),
-        ( "audio/filter/af_lavrresample.c" ),
-        ( "audio/filter/af_pan.c" ),
+        ( "audio/filter/af.c",                   "libaf" ),
+        ( "audio/filter/af_channels.c",          "libaf" ),
+        ( "audio/filter/af_equalizer.c",         "libaf" ),
+        ( "audio/filter/af_format.c",            "libaf" ),
+        ( "audio/filter/af_lavcac3enc.c",        "libaf" ),
+        ( "audio/filter/af_lavfi.c",             "libaf" ),
+        ( "audio/filter/af_lavrresample.c",      "libaf" ),
+        ( "audio/filter/af_pan.c",               "libaf" ),
         ( "audio/filter/af_rubberband.c",        "rubberband" ),
-        ( "audio/filter/af_scaletempo.c" ),
-        ( "audio/filter/af_volume.c" ),
-        ( "audio/filter/tools.c" ),
+        ( "audio/filter/af_scaletempo.c",        "libaf" ),
+        ( "audio/filter/af_volume.c",            "libaf" ),
+        ( "audio/filter/tools.c",                "libaf" ),
         ( "audio/out/ao.c" ),
         ( "audio/out/ao_alsa.c",                 "alsa" ),
         ( "audio/out/ao_audiounit.m",            "audiounit" ),
@@ -202,10 +263,9 @@ def build(ctx):
         ( "input/event.c" ),
         ( "input/input.c" ),
         ( "input/ipc.c" ),
-        ( "input/ipc-unix.c",                    "!mingw" ),
-        ( "input/ipc-win.c",                     "mingw" ),
+        ( ipc_c ),
         ( "input/keycodes.c" ),
-        ( "input/pipe-win32.c",                  "mingw" ),
+        ( "input/pipe-win32.c",                  "win32-pipes" ),
 
         ## Misc
         ( "misc/bstr.c" ),
@@ -237,6 +297,7 @@ def build(ctx):
         ( "player/misc.c" ),
         ( "player/lavfi.c" ),
         ( "player/lua.c",                        "lua" ),
+        ( "player/javascript.c",                 "javascript" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),
@@ -294,7 +355,7 @@ def build(ctx):
         ## Video
         ( "video/csputils.c" ),
         ( "video/fmt-conversion.c" ),
-        ( "video/gpu_memcpy.c",                  "sse4-intrinsics" ),
+        ( "video/image_loader.c" ),
         ( "video/image_writer.c" ),
         ( "video/img_format.c" ),
         ( "video/hwdec.c" ),
@@ -304,38 +365,34 @@ def build(ctx):
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
-        ( "video/vt.c",                          "videotoolbox-hwaccel" ),
-        ( "video/decode/d3d.c",                  "win32" ),
+        ( "video/decode/d3d.c",                  "d3d-hwaccel" ),
         ( "video/decode/dec_video.c"),
-        ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),
-        ( "video/decode/hw_dxva2.c",             "d3d-hwaccel" ),
+        ( "video/decode/hw_dxva2.c",             "d3d9-hwaccel" ),
         ( "video/decode/hw_d3d11va.c",           "d3d-hwaccel" ),
-        ( "video/decode/hw_videotoolbox.c",      "videotoolbox-hwaccel" ),
+        ( "video/decode/hw_mediacodec.c",        "android" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
         ( "video/filter/vf_buffer.c" ),
-        ( "video/filter/vf_crop.c" ),
+        ( "video/filter/vf_crop.c",              "gpl" ),
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
-        ( "video/filter/vf_dlopen.c",            "dlopen" ),
-        ( "video/filter/vf_dsize.c" ),
-        ( "video/filter/vf_eq.c" ),
-        ( "video/filter/vf_expand.c" ),
-        ( "video/filter/vf_flip.c" ),
-        ( "video/filter/vf_format.c" ),
-        ( "video/filter/vf_gradfun.c" ),
+        ( "video/filter/vf_dsize.c",             "gpl" ),
+        ( "video/filter/vf_expand.c",            "gpl" ),
+        ( "video/filter/vf_flip.c",              "gpl" ),
+        ( "video/filter/vf_format.c",            "gpl" ),
+        ( "video/filter/vf_gradfun.c",           "gpl" ),
         ( "video/filter/vf_lavfi.c" ),
-        ( "video/filter/vf_mirror.c" ),
-        ( "video/filter/vf_noformat.c" ),
-        ( "video/filter/vf_pullup.c" ),
-        ( "video/filter/vf_rotate.c" ),
-        ( "video/filter/vf_scale.c" ),
-        ( "video/filter/vf_stereo3d.c" ),
-        ( "video/filter/vf_sub.c" ),
+        ( "video/filter/vf_mirror.c",            "gpl" ),
+        ( "video/filter/vf_noformat.c",          "gpl" ),
+        ( "video/filter/vf_pullup.c",            "gpl" ),
+        ( "video/filter/vf_rotate.c",            "gpl" ),
+        ( "video/filter/vf_scale.c",             "gpl" ),
+        ( "video/filter/vf_stereo3d.c",          "gpl" ),
+        ( "video/filter/vf_sub.c",               "gpl" ),
         ( "video/filter/vf_vapoursynth.c",       "vapoursynth-core" ),
         ( "video/filter/vf_vavpp.c",             "vaapi" ),
         ( "video/filter/vf_vdpaupp.c",           "vdpau" ),
-        ( "video/filter/vf_yadif.c" ),
+        ( "video/filter/vf_yadif.c",             "gpl" ),
         ( "video/out/aspect.c" ),
         ( "video/out/bitmap_packer.c" ),
         ( "video/out/cocoa/video_view.m",        "cocoa" ),
@@ -344,42 +401,56 @@ def build(ctx):
         ( "video/out/cocoa_common.m",            "cocoa" ),
         ( "video/out/dither.c" ),
         ( "video/out/filter_kernels.c" ),
+        ( "video/out/d3d11/context.c",           "d3d11" ),
+        ( "video/out/d3d11/hwdec_d3d11va.c",     "d3d11 && d3d-hwaccel" ),
+        ( "video/out/d3d11/ra_d3d11.c",          "d3d11" ),
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
+        ( "video/out/gpu/context.c" ),
+        ( "video/out/gpu/d3d11_helpers.c",       "d3d11 || egl-angle-win32" ),
+        ( "video/out/gpu/hwdec.c" ),
+        ( "video/out/gpu/lcms.c" ),
+        ( "video/out/gpu/osd.c" ),
+        ( "video/out/gpu/ra.c" ),
+        ( "video/out/gpu/spirv.c" ),
+        ( "video/out/gpu/spirv_shaderc.c",       "shaderc" ),
+        ( "video/out/gpu/shader_cache.c" ),
+        ( "video/out/gpu/user_shaders.c" ),
+        ( "video/out/gpu/utils.c" ),
+        ( "video/out/gpu/video.c" ),
+        ( "video/out/gpu/video_shaders.c" ),
         ( "video/out/opengl/common.c",           "gl" ),
+        ( "video/out/opengl/formats.c",          "gl" ),
+        ( "video/out/opengl/utils.c",            "gl" ),
+        ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/context.c",          "gl" ),
-        ( "video/out/opengl/context_angle.c",    "egl-angle" ),
+        ( "video/out/opengl/context_angle.c",    "egl-angle-win32" ),
         ( "video/out/opengl/context_cocoa.c",    "gl-cocoa" ),
         ( "video/out/opengl/context_drm_egl.c",  "egl-drm" ),
         ( "video/out/opengl/context_dxinterop.c","gl-dxinterop" ),
         ( "video/out/opengl/context_mali_fbdev.c","mali-fbdev" ),
+        ( "video/out/opengl/context_android.c",  "android" ),
         ( "video/out/opengl/context_rpi.c",      "rpi" ),
         ( "video/out/opengl/context_vdpau.c",    "vdpau-gl-x11" ),
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
-        ( "video/out/opengl/context_w32.c",      "gl-win32" ),
-        ( "video/out/opengl/context_x11.c",      "gl-x11" ),
+        ( "video/out/opengl/context_win.c",      "gl-win32" ),
+        ( "video/out/opengl/context_glx.c",      "gl-x11" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
         ( "video/out/opengl/cuda_dynamic.c",     "cuda-hwaccel" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
-        ( "video/out/opengl/formats.c",          "gl" ),
-        ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_cuda.c",       "cuda-hwaccel" ),
-        ( "video/out/opengl/hwdec_d3d11egl.c",   "egl-angle" ),
-        ( "video/out/opengl/hwdec_d3d11eglrgb.c","egl-angle" ),
-        ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
-        ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),
+        ( "video/out/opengl/hwdec_d3d11egl.c",   "d3d-hwaccel" ),
+        ( "video/out/opengl/hwdec_d3d11eglrgb.c","d3d-hwaccel" ),
+        ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop-d3d9" ),
+        ( "video/out/opengl/hwdec_dxva2egl.c",   "d3d9-hwaccel" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_ios.m",        "ios-gl" ),
+        ( "video/out/opengl/hwdec_drmprime_drm.c","drmprime && drm" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
-        ( "video/out/opengl/lcms.c",             "gl" ),
-        ( "video/out/opengl/osd.c",              "gl" ),
-        ( "video/out/opengl/user_shaders.c",     "gl" ),
-        ( "video/out/opengl/utils.c",            "gl" ),
-        ( "video/out/opengl/video.c",            "gl" ),
-        ( "video/out/opengl/video_shaders.c",    "gl" ),
         ( "video/out/vo.c" ),
+        ( "video/out/vo_mediacodec_embed.c",     "android" ),
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
@@ -387,25 +458,36 @@ def build(ctx):
         ( "video/out/vo_lavc.c",                 "encoding" ),
         ( "video/out/vo_rpi.c",                  "rpi" ),
         ( "video/out/vo_null.c" ),
-        ( "video/out/vo_opengl.c",               "gl" ),
+        ( "video/out/vo_gpu.c" ),
         ( "video/out/vo_opengl_cb.c",            "gl" ),
         ( "video/out/vo_sdl.c",                  "sdl2" ),
         ( "video/out/vo_tct.c" ),
-        ( "video/out/vo_vaapi.c",                "vaapi-x11" ),
+        ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
-        ( "video/out/vo_wayland.c",              "wayland" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
-        ( "video/out/w32_common.c",              "win32" ),
-        ( "video/out/win32/displayconfig.c",     "win32" ),
-        ( "video/out/win32/droptarget.c",        "win32" ),
+        ( "video/out/w32_common.c",              "win32-desktop" ),
+        ( "video/out/win32/displayconfig.c",     "win32-desktop" ),
+        ( "video/out/win32/droptarget.c",        "win32-desktop" ),
+        ( "video/out/vulkan/utils.c",            "vulkan" ),
+        ( "video/out/vulkan/malloc.c",           "vulkan" ),
+        ( "video/out/vulkan/formats.c",          "vulkan" ),
+        ( "video/out/vulkan/ra_vk.c",            "vulkan" ),
+        ( "video/out/vulkan/context.c",          "vulkan" ),
+        ( "video/out/vulkan/context_xlib.c",     "vulkan && x11" ),
+        ( "video/out/vulkan/context_wayland.c",  "vulkan && wayland" ),
+        ( "video/out/vulkan/context_win.c",      "vulkan && win32-desktop" ),
+        ( "video/out/vulkan/spirv_nvidia.c",     "vulkan" ),
         ( "video/out/win32/exclusive_hack.c",    "gl-win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
-        ( "video/out/wayland/buffer.c",          "wayland" ),
-        ( "video/out/wayland/memfile.c",         "wayland" ),
+        ( "video/out/wayland/xdg-shell-v6.c",    "wayland" ),
+        ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
+        ( "video/out/wayland/srv-decor.c",       "wayland" ),
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
+        ( "video/out/drm_atomic.c",              "drm" ),
         ( "video/out/drm_common.c",              "drm" ),
+        ( "video/out/drm_prime.c",               "drm && drmprime" ),
 
         ## osdep
         ( getch2_c ),
@@ -417,21 +499,23 @@ def build(ctx):
         ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
         ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
+        ( "osdep/macosx_menubar.m",              "cocoa" ),
         ( "osdep/macosx_touchbar.m",             "macos-touchbar" ),
         ( "osdep/semaphore_osx.c" ),
         ( "osdep/subprocess.c" ),
-        ( "osdep/subprocess-posix.c",            "posix-spawn" ),
-        ( "osdep/subprocess-win.c",              "os-win32" ),
+        ( subprocess_c ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
         ( "osdep/path-unix.c"),
-        ( "osdep/path-win.c",                    "os-win32" ),
-        ( "osdep/path-win.c",                    "os-cygwin" ),
-        ( "osdep/glob-win.c",                    "glob-win32-replacement" ),
+        ( "osdep/path-win.c",                    "win32-desktop" ),
+        ( "osdep/path-uwp.c",                    "uwp" ),
+        ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/w32_keyboard.c",                "os-win32" ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
-        ( "osdep/windows_utils.c",               "win32" ),
+        ( "osdep/windows_utils.c",               "os-win32" ),
+        ( "osdep/windows_utils.c",               "os-cygwin" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
+        ( "osdep/android/posix-spawn.c",         "android"),
         ( "osdep/android/strnlen.c",             "android"),
 
         ## tree_allocator
@@ -590,17 +674,6 @@ def build(ctx):
             ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
 
         ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
-
-    if ctx.dependency_satisfied("vf-dlopen-filters"):
-        dlfilters = "telecine tile rectangle framestep ildetect".split()
-        for dlfilter in dlfilters:
-            ctx(
-                target       = dlfilter,
-                source       = ['TOOLS/vf_dlopen/'+dlfilter+'.c',
-                                'TOOLS/vf_dlopen/filterutils.c'],
-                includes     = [ctx.srcnode.abspath() + '/video/filter'],
-                features     = 'c cshlib',
-                install_path = ctx.env.LIBDIR + '/mpv' )
 
     if ctx.dependency_satisfied('html-build'):
         _build_html(ctx)

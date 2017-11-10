@@ -11,6 +11,10 @@
 #include "config.h"
 #include "stream.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #define SLOF (11700 * 1000UL)
 #define LOF1 (9750 * 1000UL)
 #define LOF2 (10600 * 1000UL)
@@ -124,6 +128,7 @@ typedef struct {
 /* Keep in sync with enum fe_delivery_system. */
 #ifndef DVB_USE_S2API
 #    define SYS_DVBC_ANNEX_A        1
+#    define SYS_DVBC_ANNEX_B        1
 #    define SYS_DVBT                3
 #    define SYS_DVBS                5
 #    define SYS_DVBS2               6
@@ -151,6 +156,7 @@ typedef struct {
         DELSYS_BIT(SYS_DVBS) |                                          \
         DELSYS_BIT(SYS_DVBS2) |                                         \
         DELSYS_BIT(SYS_ATSC) |                                          \
+        DELSYS_BIT(SYS_DVBC_ANNEX_B) |                                  \
         DELSYS_BIT(SYS_DVBT2) |                                         \
         DELSYS_BIT(SYS_DVBC_ANNEX_C)                                    \
     )

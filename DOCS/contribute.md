@@ -17,6 +17,14 @@ Sending patches
 - All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
   that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
   repository root directory).
+- You must be either the exclusive author of the patch, or acknowledge all
+  authors involved in the commit message. If you take 3rd party code, authorship
+  and copyright must be properly acknowledged. If the license of the code is not
+  LGPLv2.1+, this must be mentioned.
+- Don't use fake names (something that looks like an actual names, and may be
+  someone else's name, but is not your legal name). Using a pseudonyms is
+  allowed if it can be used to identify or contact you, even if whatever
+  account you used to submit the patch dies.
 - When creating pull requests, be sure to test your changes. If you didn't,
   please say so in the pull request message.
 - Write informative commit messages. Use present tense to describe the
@@ -24,8 +32,9 @@ Sending patches
   the change.
 - The subject line (the first line in a commit message) should contain a
   prefix identifying the sub system, followed by a short description what
-  impact this commit has. This subject line shouldn't be longer than 72
-  characters, because it messes up the output of many git tools otherwise.
+  impact this commit has. This subject line and the commit message body
+  shouldn't be longer than 72 characters per line, because it messes up the
+  output of many git tools otherwise.
 
   For example, you fixed a crash in af_volume.c:
 
@@ -54,11 +63,14 @@ Sending patches
   additional cosmetic changes in the same file you're working on. But don't do
   something like reformatting a whole file, and hiding an actual functional
   change in the same commit.
-- If you add a new command line option, document it in options.rst. If you
-  add a new input property, document it in input.rst. Changes to the user
-  interface (options, properties, commands) should be documented in
-  interface-changes.rst. Changes to libmpv should be documented in
-  client-api-changes.rst.
+- Changes to command line options (addition/modification/removal) must be
+  documented in options.rst. Changes to input properties or input commands must
+  be documented in input.rst. All changes to the user interface (options,
+  properties, commands) must be documented with a small note in
+  interface-changes.rst (although documenting additions is optional, and
+  obscure corner cases and potentially be skipped too). Changes to the libmpv
+  API must be reflected in the libmpv's headers doxygen, and should be
+  documented in client-api-changes.rst.
 
 Code formatting
 ---------------
@@ -128,12 +140,9 @@ mpv uses C99 with K&R formatting, with some exceptions.
         ...
     }
     ```
+
+  (If the if body is simple enough, this rule can be skipped.)
 - Remove any trailing whitespace.
-- If the file you're editing uses formatting different from from what is
-  described here, it's probably an old file from times when nobody followed a
-  consistent style. You're free to use the existing style, or the new style, or
-  to send a patch to reformat the file to the new style before making functional
-  changes.
 
 General coding
 --------------
@@ -149,7 +158,35 @@ General coding
 - Prefer fusing declaration and initialization, rather than putting declarations
   on the top of a block. Obvious data flow is more important than avoiding
   mixing declarations and statements, which is just a C90 artifact.
-- tech-overview.txt might help to get an overview how mpv is structured.
 - If you add features that require intrusive changes, discuss them on the dev
   channel first. There might be a better way to add a feature and it can avoid
   wasted work.
+
+Rules for git push access
+-------------------------
+
+Push access to the main git repository is handed out on an arbitrary basis. If
+you got access, the following rules must be followed:
+
+- You are expected to follow the general development rules as outlined in this
+  whole document.
+- You must be present on the IRC dev channel when you push something.
+- Anyone can push small fixes: typo corrections, small/obvious/uncontroversial
+  bug fixes, edits to the user documentation or code comments, and so on.
+- You can freely make changes to parts of the code which you maintain. For
+  larger changes, it's recommended to let others review the changes first.
+- You automatically maintain code if you wrote or modified most of it before
+  (e.g. you made larger changes to it before, did partial or full rewrites, did
+  major bug fixes, or you're the original author of the code). If there is more
+  than one maintainer, you may need to come to an agreement with the others how
+  to handle this to avoid conflict.
+- As a maintainer, you can approve pushes by others to "your" code.
+- If you approve or merge 3rd party changes, make sure they follow the general
+  development rules.
+- Changes to user interface and public API must always be approved by the
+  project leader.
+- Seasoned project members are allowed to revert commits that broke the build,
+  or broke basic functionality in a catastrophic way, and the developer who
+  broke it is unavailable. (Depending on severity.)
+- Adhere to the CoC.
+- The project leader is not bound by these rules.

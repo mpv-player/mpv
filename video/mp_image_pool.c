@@ -254,8 +254,7 @@ void mp_image_pool_set_lru(struct mp_image_pool *pool)
 
 // Copies the contents of the HW surface img to system memory and retuns it.
 // If swpool is not NULL, it's used to allocate the target image.
-// img must be a hw surface with a AVHWFramesContext attached. If not, you
-// must use the legacy mp_hwdec_ctx.download_image.
+// img must be a hw surface with a AVHWFramesContext attached.
 // The returned image is cropped as needed.
 // Returns NULL on failure.
 struct mp_image *mp_image_hw_download(struct mp_image *src,
@@ -308,4 +307,38 @@ struct mp_image *mp_image_hw_download(struct mp_image *src,
         mp_image_unrefp(&dst);
     }
     return dst;
+}
+
+bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
+{
+    if (hw_img->w != src->w || hw_img->h != src->h)
+        return false;
+
+    if (!hw_img->hwctx || src->hwctx)
+        return false;
+
+    bool ok = false;
+    AVFrame *dstav = NULL;
+    AVFrame *srcav = NULL;
+
+    // This means the destination image will not be "writable", which would be
+    // a pain if Libav enforced this - fortunately it doesn't care. We can
+    // transfer data to it even if there are multiple refs.
+    dstav = mp_image_to_av_frame(hw_img);
+    if (!dstav)
+        goto done;
+
+    srcav = mp_image_to_av_frame(src);
+    if (!srcav)
+        goto done;
+
+    ok = av_hwframe_transfer_data(dstav, srcav, 0) >= 0;
+
+done:
+    av_frame_unref(srcav);
+    av_frame_unref(dstav);
+
+    if (ok)
+        mp_image_copy_attributes(hw_img, src);
+    return ok;
 }

@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -184,6 +184,11 @@ bool video_init_best_codec(struct dec_video *d_video)
     return !!d_video->vd_driver;
 }
 
+static bool is_valid_peak(float sig_peak)
+{
+    return !sig_peak || (sig_peak >= 1 && sig_peak <= 100);
+}
+
 static void fix_image_params(struct dec_video *d_video,
                              struct mp_image_params *params)
 {
@@ -196,25 +201,10 @@ static void fix_image_params(struct dec_video *d_video,
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
-    float dec_aspect = p.p_w > 0 && p.p_h > 0 ? p.p_w / (float)p.p_h : 0;
-    if (d_video->initial_decoder_aspect == 0)
-        d_video->initial_decoder_aspect = dec_aspect;
-
     bool use_container = true;
-    switch (opts->aspect_method) {
-    case 0:
-        // We normally prefer the container aspect, unless the decoder aspect
-        // changes at least once.
-        if (dec_aspect > 0 && d_video->initial_decoder_aspect != dec_aspect) {
-            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
-            // Even if the aspect switches back, don't use container aspect again.
-            d_video->initial_decoder_aspect = -1;
-            use_container = false;
-        }
-        break;
-    case 1:
+    if (opts->aspect_method == 1 && p.p_w > 0 && p.p_h > 0) {
+        MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
         use_container = false;
-        break;
     }
 
     if (use_container && c->par_w > 0 && c->par_h) {
@@ -237,6 +227,9 @@ static void fix_image_params(struct dec_video *d_video,
     if (p.p_w <= 0 || p.p_h <= 0)
         p.p_w = p.p_h = 1;
 
+    p.rotate = d_video->codec->rotate;
+    p.stereo_in = d_video->codec->stereo_mode;
+
     if (opts->video_rotate < 0) {
         p.rotate = 0;
     } else {
@@ -244,8 +237,20 @@ static void fix_image_params(struct dec_video *d_video,
     }
     p.stereo_out = opts->video_stereo_mode;
 
-    // Detect colorspace from resolution.
     mp_colorspace_merge(&p.color, &c->color);
+
+    // Sanitize the HDR peak. Sadly necessary
+    if (!is_valid_peak(p.color.sig_peak)) {
+        MP_WARN(d_video, "Invalid HDR peak in stream: %f\n", p.color.sig_peak);
+        p.color.sig_peak = 0.0;
+    }
+
+    p.spherical = c->spherical;
+    if (p.spherical.type == MP_SPHERICAL_AUTO)
+        p.spherical.type = MP_SPHERICAL_NONE;
+
+    // Guess missing colorspace fields from metadata. This guarantees all
+    // fields are at least set to legal values afterwards.
     mp_image_params_guess_csp(&p);
 
     d_video->last_format = *params;
@@ -299,13 +304,6 @@ static bool receive_frame(struct dec_video *d_video, struct mp_image **out_image
     // Error, EOF, discarded frame, dropped frame, or initial codec delay.
     if (!mpi)
         return progress;
-
-    if (opts->field_dominance == 0) {
-        mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
-    } else if (opts->field_dominance == 1) {
-        mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
-        mpi->fields |= MP_IMGFIELD_INTERLACED;
-    }
 
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = mpi->pts;
@@ -395,6 +393,13 @@ void video_set_start(struct dec_video *d_video, double start_pts)
     d_video->start_pts = start_pts;
 }
 
+static bool is_new_segment(struct dec_video *d_video, struct demux_packet *p)
+{
+    return p->segmented &&
+        (p->start != d_video->start || p->end != d_video->end ||
+         p->codec != d_video->codec);
+}
+
 void video_work(struct dec_video *d_video)
 {
     if (d_video->current_mpi || !d_video->vd_driver)
@@ -407,7 +412,7 @@ void video_work(struct dec_video *d_video)
         return;
     }
 
-    if (d_video->packet && d_video->packet->new_segment) {
+    if (d_video->packet && is_new_segment(d_video, d_video->packet)) {
         assert(!d_video->new_segment);
         d_video->new_segment = d_video->packet;
         d_video->packet = NULL;
@@ -476,8 +481,6 @@ void video_work(struct dec_video *d_video)
 
         d_video->start = new_segment->start;
         d_video->end = new_segment->end;
-
-        new_segment->new_segment = false;
 
         d_video->packet = new_segment;
         d_video->current_state = DATA_AGAIN;

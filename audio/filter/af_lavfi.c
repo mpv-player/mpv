@@ -92,6 +92,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     void *tmp = talloc_new(NULL);
     struct priv *p = af->priv;
     AVFilterContext *in = NULL, *out = NULL;
+    bool ok = false;
 
     if (!p->is_bridge && bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(af, "lavfi: no filter graph set\n");
@@ -177,14 +178,17 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     assert(out->nb_inputs == 1);
     assert(in->nb_outputs == 1);
 
-    talloc_free(tmp);
-    return true;
-
+    ok = true;
 error:
-    MP_FATAL(af, "Can't configure libavfilter graph.\n");
-    avfilter_graph_free(&graph);
+
+    if (!ok) {
+        MP_FATAL(af, "Can't configure libavfilter graph.\n");
+        avfilter_graph_free(&graph);
+    }
+    avfilter_inout_free(&inputs);
+    avfilter_inout_free(&outputs);
     talloc_free(tmp);
-    return false;
+    return ok;
 }
 
 static void reset(struct af_instance *af)
@@ -261,7 +265,7 @@ static void get_metadata_from_av_frame(struct af_instance *af, AVFrame *frame)
     if (!p->metadata)
         p->metadata = talloc_zero(p, struct mp_tags);
 
-    mp_tags_copy_from_av_dictionary(p->metadata, av_frame_get_metadata(frame));
+    mp_tags_copy_from_av_dictionary(p->metadata, frame->metadata);
 #endif
 }
 

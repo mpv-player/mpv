@@ -76,8 +76,8 @@ Video
 
 * Wayland support.
 * Native support for VAAPI and VDA. Improved VDPAU video output.
-* Improved OpenGL output (see the ``opengl-hq`` video output).
-* Make hardware decoding work with the ``opengl`` video output.
+* Improved GPU-accelerated video output (see the ``gpu-hq`` preset).
+* Make hardware decoding work with the ``gpu`` video output.
 * Support for libavfilter (for video->video and audio->audio). This allows
   using most of FFmpeg's filters, which improve greatly on the old MPlayer
   filters in features, performance, and correctness.
@@ -85,7 +85,7 @@ Video
   for BT.2020 (Ultra HD). linear XYZ (Digital Cinema) and SMPTE ST2084 (HDR)
   inputs.
 * Support for color managed displays, via ICC profiles.
-* High-quality image resamplers (see the ``opengl`` ``scale`` suboption).
+* High-quality image resamplers (see the ``--scale`` suboption).
 * Support for scaling in (sigmoidized) linear light.
 * Better subtitle rendering using libass by default.
 * Improvements when playing multiple files (``-fixed-vo`` is default, do not

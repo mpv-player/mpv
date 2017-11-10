@@ -3,18 +3,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <string.h>
@@ -40,8 +40,9 @@ struct spdifContext {
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
     bool             use_dts_hd;
-    struct mp_audio  fmt;
-    struct mp_audio_pool *pool;
+    struct mp_aframe *fmt;
+    int              sstride;
+    struct mp_aframe_pool *pool;
     bool             got_eof;
     struct demux_packet *queued_packet;
 };
@@ -84,7 +85,7 @@ static int init(struct dec_audio *da, const char *decoder)
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
     spdif_ctx->use_dts_hd = da->opts->dtshd;
-    spdif_ctx->pool = mp_audio_pool_create(spdif_ctx);
+    spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
 
     if (strcmp(decoder, "spdif_dts_hd") == 0)
         spdif_ctx->use_dts_hd = true;
@@ -107,6 +108,10 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
         parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
 
         ctx = avcodec_alloc_context3(NULL);
+        if (!ctx) {
+            av_parser_close(parser);
+            goto done;
+        }
 
         uint8_t *d = NULL;
         int s = 0;
@@ -114,7 +119,7 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
         *out_profile = profile = ctx->profile;
         *out_rate = ctx->sample_rate;
 
-        av_free(ctx);
+        avcodec_free_context(&ctx);
         av_parser_close(parser);
     }
 
@@ -133,11 +138,8 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
     if (!ctx)
         goto done;
 
-    if (avcodec_open2(ctx, codec, NULL) < 0) {
-        av_free(ctx); // don't attempt to avcodec_close() an unopened ctx
-        ctx = NULL;
+    if (avcodec_open2(ctx, codec, NULL) < 0)
         goto done;
-    }
 
     if (avcodec_send_packet(ctx, pkt) < 0)
         goto done;
@@ -149,8 +151,6 @@ static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
 
 done:
     av_frame_free(&frame);
-    if (ctx)
-        avcodec_close(ctx);
     avcodec_free_context(&ctx);
 
     if (profile == FF_PROFILE_UNKNOWN)
@@ -198,6 +198,9 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     stream->codecpar->codec_id = spdif_ctx->codec_id;
 
     AVDictionary *format_opts = NULL;
+
+    spdif_ctx->fmt = mp_aframe_create();
+    talloc_steal(spdif_ctx, spdif_ctx->fmt);
 
     int num_channels = 0;
     int sample_format = 0;
@@ -247,9 +250,14 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     default:
         abort();
     }
-    mp_audio_set_num_channels(&spdif_ctx->fmt, num_channels);
-    mp_audio_set_format(&spdif_ctx->fmt, sample_format);
-    spdif_ctx->fmt.rate = samplerate;
+
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, num_channels);
+    mp_aframe_set_chmap(spdif_ctx->fmt, &chmap);
+    mp_aframe_set_format(spdif_ctx->fmt, sample_format);
+    mp_aframe_set_rate(spdif_ctx->fmt, samplerate);
+
+    spdif_ctx->sstride = mp_aframe_get_sstride(spdif_ctx->fmt);
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         MP_FATAL(da, "libavformat spdif initialization failed.\n");
@@ -280,7 +288,7 @@ static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
     return true;
 }
 
-static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
+static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
@@ -309,13 +317,21 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
         goto done;
     }
 
-    int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
-    *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
-    if (!*out)
+    *out = mp_aframe_new_ref(spdif_ctx->fmt);
+    int samples = spdif_ctx->out_buffer_len / spdif_ctx->sstride;
+    if (mp_aframe_pool_allocate(spdif_ctx->pool, *out, samples) < 0) {
+        TA_FREEP(out);
         goto done;
+    }
 
-    memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
-    (*out)->pts = pts;
+    uint8_t **data = mp_aframe_get_data_rw(*out);
+    if (!data) {
+        TA_FREEP(out);
+        goto done;
+    }
+
+    memcpy(data[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
+    mp_aframe_set_pts(*out, pts);
 
 done:
     talloc_free(spdif_ctx->queued_packet);

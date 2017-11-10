@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <dirent.h>
@@ -32,9 +32,9 @@
 #include "options/path.h"
 #include "external_files.h"
 
-static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
-                                       "smi", "rt", "ssa", "aqt", "jss",
-                                       "js", "ass", "mks", "vtt", "sup", "scc",
+static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub",
+                                       "srt", "rt", "ssa", "ass", "mks", "vtt",
+                                       "sup", "scc", "smi",
                                        NULL};
 
 static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
@@ -261,9 +261,13 @@ static void load_paths(struct mpv_global *global, struct subfn **slist,
                        char *cfg_path, int type)
 {
     for (int i = 0; paths && paths[i]; i++) {
-        char *path = mp_path_join_bstr(*slist, mp_dirname(fname),
-                                       bstr0(paths[i]));
-        append_dir_subtitles(global, slist, nsubs, bstr0(path), fname, 0, type);
+        char *expanded_path = mp_get_user_path(NULL, global, paths[i]);
+        char *path = mp_path_join_bstr(
+            *slist, mp_dirname(fname),
+            bstr0(expanded_path ? expanded_path : paths[i]));
+        append_dir_subtitles(global, slist, nsubs, bstr0(path),
+                             fname, 0, type);
+        talloc_free(expanded_path);
     }
 
     // Load subtitles in ~/.mpv/sub (or similar) limiting sub fuzziness

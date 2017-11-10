@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <assert.h>
 
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 {
@@ -113,46 +114,76 @@ int pthread_cond_wait(pthread_cond_t *restrict cond,
     return cond_wait(cond, mutex, INFINITE);
 }
 
+static pthread_mutex_t pthread_table_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct m_thread_info *pthread_table;
+size_t pthread_table_num;
+
 struct m_thread_info {
+    DWORD id;
     HANDLE handle;
     void *(*user_fn)(void *);
     void *user_arg;
     void *res;
 };
 
-// Assuming __thread maps to __declspec(thread)
-static __thread struct m_thread_info *self;
-
-pthread_t pthread_self(void)
+static struct m_thread_info *find_thread_info(DWORD id)
 {
-    return (pthread_t){GetCurrentThreadId(), self};
+    for (int n = 0; n < pthread_table_num; n++) {
+        if (id == pthread_table[n].id)
+            return &pthread_table[n];
+    }
+    return NULL;
+}
+
+static void remove_thread_info(struct m_thread_info *info)
+{
+    assert(pthread_table_num);
+    assert(info >= &pthread_table[0] && info < &pthread_table[pthread_table_num]);
+
+    pthread_table[info - pthread_table] = pthread_table[pthread_table_num - 1];
+    pthread_table_num -= 1;
+
+    // Avoid upsetting leak detectors.
+    if (pthread_table_num == 0) {
+        free(pthread_table);
+        pthread_table = NULL;
+    }
 }
 
 void pthread_exit(void *retval)
 {
-    if (!self)
-        abort(); // not started with pthread_create
-    self->res = retval;
-    if (!self->handle) {
-        // detached case
-        free(self);
-        self = NULL;
-    }
+    pthread_mutex_lock(&pthread_table_lock);
+    struct m_thread_info *info = find_thread_info(pthread_self());
+    assert(info); // not started with pthread_create, or pthread_join() race
+    info->res = retval;
+    if (!info->handle)
+        remove_thread_info(info); // detached case
+    pthread_mutex_unlock(&pthread_table_lock);
+
     ExitThread(0);
 }
 
 int pthread_join(pthread_t thread, void **retval)
 {
-    if (!thread.info)
-        abort(); // not started with pthread_create
-    HANDLE h = thread.info->handle;
-    if (!h)
-        abort(); // thread was detached
+    pthread_mutex_lock(&pthread_table_lock);
+    struct m_thread_info *info = find_thread_info(thread);
+    assert(info); // not started with pthread_create, or pthread_join() race
+    HANDLE h = info->handle;
+    assert(h); // thread was detached
+    pthread_mutex_unlock(&pthread_table_lock);
+
     WaitForSingleObject(h, INFINITE);
+
+    pthread_mutex_lock(&pthread_table_lock);
+    info = find_thread_info(thread);
+    assert(info);
+    assert(info->handle == h);
     CloseHandle(h);
     if (retval)
-        *retval = thread.info->res;
-    free(thread.info);
+        *retval = info->res;
+    remove_thread_info(info);
+    pthread_mutex_unlock(&pthread_table_lock);
+
     return 0;
 }
 
@@ -160,40 +191,85 @@ int pthread_detach(pthread_t thread)
 {
     if (!pthread_equal(thread, pthread_self()))
         abort(); // restriction of this wrapper
-    if (!thread.info)
-        abort(); // not started with pthread_create
-    if (!thread.info->handle)
-        abort(); // already deatched
-    CloseHandle(thread.info->handle);
-    thread.info->handle = NULL;
+
+    pthread_mutex_lock(&pthread_table_lock);
+    struct m_thread_info *info = find_thread_info(thread);
+    assert(info); // not started with pthread_create
+    assert(info->handle); // already detached
+    CloseHandle(info->handle);
+    info->handle = NULL;
+    pthread_mutex_unlock(&pthread_table_lock);
+
     return 0;
 }
 
 static DWORD WINAPI run_thread(LPVOID lpParameter)
 {
-    struct m_thread_info *info = lpParameter;
-    self = info;
-    pthread_exit(info->user_fn(info->user_arg));
+    pthread_mutex_lock(&pthread_table_lock);
+    struct m_thread_info *pinfo = find_thread_info(pthread_self());
+    assert(pinfo);
+    struct m_thread_info info = *pinfo;
+    pthread_mutex_unlock(&pthread_table_lock);
+
+    pthread_exit(info.user_fn(info.user_arg));
     abort(); // not reached
 }
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine) (void *), void *arg)
 {
-    struct m_thread_info *info = calloc(1, sizeof(*info));
-    if (!info)
-        return EAGAIN;
-    info->user_fn = start_routine;
-    info->user_arg = arg;
-    HANDLE h = CreateThread(NULL, 0, run_thread, info, CREATE_SUSPENDED, NULL);
-    if (!h) {
-        free(info);
-        return EAGAIN;
+    int res = 0;
+    pthread_mutex_lock(&pthread_table_lock);
+    void *nalloc =
+        realloc(pthread_table, (pthread_table_num + 1) * sizeof(pthread_table[0]));
+    if (!nalloc) {
+        res = EAGAIN;
+        goto done;
     }
-    info->handle = h;
-    *thread = (pthread_t){GetThreadId(h), info};
-    ResumeThread(h);
-    return 0;
+    pthread_table = nalloc;
+    pthread_table_num += 1;
+    struct m_thread_info *info = &pthread_table[pthread_table_num - 1];
+    *info = (struct m_thread_info) {
+        .user_fn = start_routine,
+        .user_arg = arg,
+    };
+    info->handle = CreateThread(NULL, 0, run_thread, NULL, CREATE_SUSPENDED,
+                                &info->id);
+    if (!info->handle) {
+        remove_thread_info(info);
+        res = EAGAIN;
+        goto done;
+    }
+    *thread = info->id;
+    ResumeThread(info->handle);
+done:
+    pthread_mutex_unlock(&pthread_table_lock);
+    return res;
+}
+
+void pthread_set_name_np(pthread_t thread, const char *name)
+{
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && defined(_PROCESSTHREADSAPI_H_)
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    if (!kernel32)
+        return;
+    HRESULT (WINAPI *pSetThreadDescription)(HANDLE, PCWSTR) =
+        (void*)GetProcAddress(kernel32, "SetThreadDescription");
+    if (!pSetThreadDescription)
+        return;
+
+    HANDLE th = OpenThread(THREAD_SET_LIMITED_INFORMATION, FALSE, thread);
+    if (!th)
+        return;
+    wchar_t wname[80];
+    int wc = MultiByteToWideChar(CP_UTF8, 0, name, -1, wname,
+                                 sizeof(wname) / sizeof(wchar_t) - 1);
+    if (wc > 0) {
+        wname[wc] = L'\0';
+        pSetThreadDescription(th, wname);
+    }
+    CloseHandle(th);
+#endif
 }
 
 int sem_init(sem_t *sem, int pshared, unsigned int value)

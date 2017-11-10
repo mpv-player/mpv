@@ -21,6 +21,13 @@
 #include "osdep/io.h"
 #include "mpv_talloc.h"
 
+#if HAVE_UWP
+// Missing from MinGW headers.
+WINBASEAPI HANDLE WINAPI FindFirstFileExW(LPCWSTR lpFileName,
+    FINDEX_INFO_LEVELS fInfoLevelId, LPVOID lpFindFileData,
+    FINDEX_SEARCH_OPS fSearchOp, LPVOID lpSearchFilter, DWORD dwAdditionalFlags);
+#endif
+
 static wchar_t *talloc_wcsdup(void *ctx, const wchar_t *wcs)
 {
     size_t len = (wcslen(wcs) + 1) * sizeof(wchar_t);
@@ -88,7 +95,7 @@ int mp_glob(const char *restrict pattern, int flags,
 
     wchar_t *wpattern = mp_from_utf8(NULL, pattern);
     WIN32_FIND_DATAW data;
-    HANDLE find = FindFirstFileW(wpattern, &data);
+    HANDLE find = FindFirstFileExW(wpattern, FindExInfoBasic, &data, FindExSearchNameMatch, NULL, 0);
     talloc_free(wpattern);
 
     // Assume an error means there were no matches. mpv doesn't check for

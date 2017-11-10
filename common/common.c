@@ -115,6 +115,12 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
     return rc->x1 > rc->x0 && rc->y1 > rc->y0;
 }
 
+bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2)
+{
+    return rc1->x0 == rc2->x0 && rc1->y0 == rc2->y0 &&
+           rc1->x1 == rc2->x1 && rc1->y1 == rc2->y1;
+}
+
 // This works like snprintf(), except that it starts writing the first output
 // character to str[strlen(str)]. This returns the number of characters the
 // string would have *appended* assuming a large enough buffer, will make sure
@@ -285,5 +291,14 @@ char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag)
             mp_snprintf_cat(buf, buf_size, "[%d]", val);
         }
     }
+    return buf;
+}
+
+char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(buf, buf_size, format, ap);
+    va_end(ap);
     return buf;
 }

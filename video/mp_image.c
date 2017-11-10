@@ -1,25 +1,20 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include <pthread.h>
 #include <assert.h>
@@ -31,55 +26,169 @@
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
+#if LIBAVUTIL_VERSION_MICRO >= 100
+#include <libavutil/mastering_display_metadata.h>
+#endif
+
 #include "mpv_talloc.h"
 
-#include "img_format.h"
+#include "config.h"
+#include "common/av_common.h"
+#include "common/common.h"
+#include "hwdec.h"
 #include "mp_image.h"
 #include "sws_utils.h"
 #include "fmt-conversion.h"
-#include "gpu_memcpy.h"
 
 #include "video/filter/vf.h"
 
-#define HAVE_OPAQUE_REF (LIBAVUTIL_VERSION_MICRO >= 100 && \
-                         LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 47, 100))
+const struct m_opt_choice_alternatives mp_spherical_names[] = {
+    {"auto",        MP_SPHERICAL_AUTO},
+    {"none",        MP_SPHERICAL_NONE},
+    {"unknown",     MP_SPHERICAL_UNKNOWN},
+    {"equirect",    MP_SPHERICAL_EQUIRECTANGULAR},
+    {0}
+};
+
+// Determine strides, plane sizes, and total required size for an image
+// allocation. Returns total size on success, <0 on error. Unused planes
+// have out_stride/out_plane_size to 0, and out_plane_offset set to -1 up
+// until MP_MAX_PLANES-1.
+static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
+                           int out_stride[MP_MAX_PLANES],
+                           int out_plane_offset[MP_MAX_PLANES],
+                           int out_plane_size[MP_MAX_PLANES])
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    struct mp_image_params params = {.imgfmt = imgfmt, .w = w, .h = h};
+
+    if (!mp_image_params_valid(&params) || desc.flags & MP_IMGFLAG_HWACCEL)
+        return -1;
+
+    // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
+    //       top/right border. This is needed for correct handling of such
+    //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
+
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        int alloc_w = mp_chroma_div_up(w, desc.xs[n]);
+        int alloc_h = MP_ALIGN_UP(h, 32) >> desc.ys[n];
+        int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
+        out_stride[n] = MP_ALIGN_UP(line_bytes, stride_align);
+        out_plane_size[n] = out_stride[n] * alloc_h;
+    }
+    if (desc.flags & MP_IMGFLAG_PAL)
+        out_plane_size[1] = MP_PALETTE_SIZE;
+
+    int sum = 0;
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        out_plane_offset[n] = out_plane_size[n] ? sum : -1;
+        sum += out_plane_size[n];
+    }
+
+    return sum;
+}
+
+// Return the total size needed for an image allocation of the given
+// configuration (imgfmt, w, h must be set). Returns -1 on error.
+// Assumes the allocation is already aligned on stride_align (otherwise you
+// need to add padding yourself).
+int mp_image_get_alloc_size(int imgfmt, int w, int h, int stride_align)
+{
+    int stride[MP_MAX_PLANES];
+    int plane_offset[MP_MAX_PLANES];
+    int plane_size[MP_MAX_PLANES];
+    return mp_image_layout(imgfmt, w, h, stride_align, stride, plane_offset,
+                           plane_size);
+}
+
+// Fill the mpi->planes and mpi->stride fields of the given mpi with data
+// from buffer according to the mpi's w/h/imgfmt fields. See mp_image_from_buffer
+// aboud remarks how to allocate/use buffer/buffer_size.
+// This does not free the data. You are expected to setup refcounting by
+// setting mp_image.bufs before or after this function is called.
+// Returns true on success, false on failure.
+static bool mp_image_fill_alloc(struct mp_image *mpi, int stride_align,
+                                void *buffer, int buffer_size)
+{
+    int stride[MP_MAX_PLANES];
+    int plane_offset[MP_MAX_PLANES];
+    int plane_size[MP_MAX_PLANES];
+    int size = mp_image_layout(mpi->imgfmt, mpi->w, mpi->h, stride_align,
+                               stride, plane_offset, plane_size);
+    if (size < 0 || size > buffer_size)
+        return false;
+
+    int align = MP_ALIGN_UP((uintptr_t)buffer, stride_align) - (uintptr_t)buffer;
+    if (buffer_size - size < align)
+        return false;
+    uint8_t *s = buffer;
+    s += align;
+
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        mpi->planes[n] = plane_offset[n] >= 0 ? s + plane_offset[n] : NULL;
+        mpi->stride[n] = stride[n];
+    }
+
+    return true;
+}
+
+// Create a mp_image from the provided buffer. The mp_image is filled according
+// to the imgfmt/w/h parameters, and respecting the stride_align parameter to
+// align the plane start pointers and strides. Once the last reference to the
+// returned image is destroyed, free(free_opaque, buffer) is called. (Be aware
+// that this can happen from any thread.)
+// The allocated size of buffer must be given by buffer_size. buffer_size should
+// be at least the value returned by mp_image_get_alloc_size(). If buffer is not
+// already aligned to stride_align, the function will attempt to align the
+// pointer itself by incrementing the buffer pointer until ther alignment is
+// achieved (if buffer_size is not large enough to allow aligning the buffer
+// safely, the function fails). To be safe, you may want to overallocate the
+// buffer by stride_align bytes, and include the overallocation in buffer_size.
+// Returns NULL on failure. On failure, the free() callback is not called.
+struct mp_image *mp_image_from_buffer(int imgfmt, int w, int h, int stride_align,
+                                      uint8_t *buffer, int buffer_size,
+                                      void *free_opaque,
+                                      void (*free)(void *opaque, uint8_t *data))
+{
+    struct mp_image *mpi = mp_image_new_dummy_ref(NULL);
+    mp_image_setfmt(mpi, imgfmt);
+    mp_image_set_size(mpi, w, h);
+
+    if (!mp_image_fill_alloc(mpi, stride_align, buffer, buffer_size))
+        goto fail;
+
+    mpi->bufs[0] = av_buffer_create(buffer, buffer_size, free, free_opaque, 0);
+    if (!mpi->bufs[0])
+        goto fail;
+
+    return mpi;
+
+fail:
+    talloc_free(mpi);
+    return NULL;
+}
 
 static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
     assert(!mpi->bufs[0]);
 
-    if (!mp_image_params_valid(&mpi->params) || mpi->fmt.flags & MP_IMGFLAG_HWACCEL)
+    int align = SWS_MIN_BYTE_ALIGN;
+
+    int size = mp_image_get_alloc_size(mpi->imgfmt, mpi->w, mpi->h, align);
+    if (size < 0)
         return false;
 
-    // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
-    //       top/right border. This is needed for correct handling of such
-    //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
-
-    size_t plane_size[MP_MAX_PLANES];
-    for (int n = 0; n < MP_MAX_PLANES; n++) {
-        int alloc_h = MP_ALIGN_UP(mpi->h, 32) >> mpi->fmt.ys[n];
-        int line_bytes = (mp_image_plane_w(mpi, n) * mpi->fmt.bpp[n] + 7) / 8;
-        mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
-        plane_size[n] = mpi->stride[n] * alloc_h;
-    }
-    if (mpi->fmt.flags & MP_IMGFLAG_PAL)
-        plane_size[1] = MP_PALETTE_SIZE;
-
-    size_t sum = 0;
-    for (int n = 0; n < MP_MAX_PLANES; n++)
-        sum += plane_size[n];
-
     // Note: mp_image_pool assumes this creates only 1 AVBufferRef.
-    mpi->bufs[0] = av_buffer_alloc(FFMAX(sum, 1));
+    mpi->bufs[0] = av_buffer_alloc(size + align);
     if (!mpi->bufs[0])
         return false;
 
-    uint8_t *data = mpi->bufs[0]->data;
-    for (int n = 0; n < MP_MAX_PLANES; n++) {
-        mpi->planes[n] = plane_size[n] ? data : NULL;
-        data += plane_size[n];
+    if (!mp_image_fill_alloc(mpi, align, mpi->bufs[0]->data, mpi->bufs[0]->size)) {
+        av_buffer_unref(&mpi->bufs[0]);
+        return false;
     }
+
     return true;
 }
 
@@ -100,6 +209,7 @@ static void mp_image_destructor(void *ptr)
     for (int p = 0; p < MP_MAX_PLANES; p++)
         av_buffer_unref(&mpi->bufs[p]);
     av_buffer_unref(&mpi->hwctx);
+    av_buffer_unref(&mpi->icc_profile);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -213,6 +323,12 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     if (new->hwctx) {
         new->hwctx = av_buffer_ref(new->hwctx);
         if (!new->hwctx)
+            fail = true;
+    }
+
+    if (new->icc_profile) {
+        new->icc_profile = av_buffer_ref(new->icc_profile);
+        if (!new->icc_profile)
             fail = true;
     }
 
@@ -364,35 +480,10 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
     mp_image_copy_cb(dst, src, memcpy);
 }
 
-void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src)
+static enum mp_csp mp_image_params_get_forced_csp(struct mp_image_params *params)
 {
-#if HAVE_SSE4_INTRINSICS
-    if (av_get_cpu_flags() & AV_CPU_FLAG_SSE4) {
-        mp_image_copy_cb(dst, src, gpu_memcpy);
-        return;
-    }
-#endif
-    mp_image_copy(dst, src);
-}
-
-// Helper, only for outputting some log info.
-void mp_check_gpu_memcpy(struct mp_log *log, bool *once)
-{
-    if (once) {
-        if (*once)
-            return;
-        *once = true;
-    }
-
-    bool have_sse = false;
-#if HAVE_SSE4_INTRINSICS
-    have_sse = av_get_cpu_flags() & AV_CPU_FLAG_SSE4;
-#endif
-    if (have_sse) {
-        mp_verbose(log, "Using SSE4 memcpy\n");
-    } else {
-        mp_warn(log, "Using fallback memcpy (slow)\n");
-    }
+    int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
+    return mp_imgfmt_get_forced_csp(imgfmt);
 }
 
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
@@ -405,25 +496,27 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.rotate = src->params.rotate;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
-    if (dst->w == src->w && dst->h == src->h) {
-        dst->params.p_w = src->params.p_w;
-        dst->params.p_h = src->params.p_h;
-    }
-    dst->params.color.primaries = src->params.color.primaries;
-    dst->params.color.gamma = src->params.color.gamma;
-    dst->params.color.nom_peak = src->params.color.nom_peak;
-    dst->params.color.sig_peak = src->params.color.sig_peak;
-    if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
-        dst->params.color.space = src->params.color.space;
-        dst->params.color.levels = src->params.color.levels;
-        dst->params.chroma_location = src->params.chroma_location;
-    }
-    mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
+    dst->params.p_w = src->params.p_w;
+    dst->params.p_h = src->params.p_h;
+    dst->params.color = src->params.color;
+    dst->params.chroma_location = src->params.chroma_location;
+    dst->params.spherical = src->params.spherical;
+    // ensure colorspace consistency
+    if (mp_image_params_get_forced_csp(&dst->params) !=
+        mp_image_params_get_forced_csp(&src->params))
+        dst->params.color = (struct mp_colorspace){0};
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1]) {
             if (mp_image_make_writeable(dst))
                 memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
         }
+    }
+    av_buffer_unref(&dst->icc_profile);
+    dst->icc_profile = src->icc_profile;
+    if (dst->icc_profile) {
+        dst->icc_profile = av_buffer_ref(dst->icc_profile);
+        if (!dst->icc_profile)
+            abort();
     }
 }
 
@@ -464,9 +557,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 
     uint32_t plane_clear[MP_MAX_PLANES] = {0};
 
-    if (area.imgfmt == IMGFMT_YUYV) {
-        plane_clear[0] = av_le2ne16(0x8000);
-    } else if (area.imgfmt == IMGFMT_UYVY) {
+    if (area.imgfmt == IMGFMT_UYVY) {
         plane_clear[0] = av_le2ne16(0x0080);
     } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
         plane_clear[1] = 0x8080;
@@ -529,13 +620,13 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         if (p->hw_subfmt)
             mp_snprintf_cat(b, bs, "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
+        if (p->hw_flags)
+            mp_snprintf_cat(b, bs, "[0x%x]", p->hw_flags);
         mp_snprintf_cat(b, bs, " %s/%s/%s/%s",
                         m_opt_choice_str(mp_csp_names, p->color.space),
                         m_opt_choice_str(mp_csp_prim_names, p->color.primaries),
                         m_opt_choice_str(mp_csp_trc_names, p->color.gamma),
                         m_opt_choice_str(mp_csp_levels_names, p->color.levels));
-        if (p->color.nom_peak)
-            mp_snprintf_cat(b, bs, " NP=%f", p->color.nom_peak);
         if (p->color.sig_peak)
             mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
@@ -546,6 +637,12 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, " stereo=%s/%s",
                             MP_STEREO3D_NAME_DEF(p->stereo_in, "?"),
                             MP_STEREO3D_NAME_DEF(p->stereo_out, "?"));
+        }
+        if (p->spherical.type != MP_SPHERICAL_NONE) {
+            const float *a = p->spherical.ref_angles;
+            mp_snprintf_cat(b, bs, " (%s %f/%f/%f)",
+                            m_opt_choice_str(mp_spherical_names, p->spherical.type),
+                            a[0], a[1], a[2]);
         }
     } else {
         snprintf(b, bs, "???");
@@ -581,18 +678,30 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     return true;
 }
 
+static bool mp_spherical_equal(const struct mp_spherical_params *p1,
+                               const struct mp_spherical_params *p2)
+{
+    for (int n = 0; n < 3; n++) {
+        if (p1->ref_angles[n] != p2->ref_angles[n])
+            return false;
+    }
+    return p1->type == p2->type;
+}
+
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2)
 {
     return p1->imgfmt == p2->imgfmt &&
            p1->hw_subfmt == p2->hw_subfmt &&
+           p1->hw_flags == p2->hw_flags &&
            p1->w == p2->w && p1->h == p2->h &&
            p1->p_w == p2->p_w && p1->p_h == p2->p_h &&
            mp_colorspace_equal(p1->color, p2->color) &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
            p1->stereo_in == p2->stereo_in &&
-           p1->stereo_out == p2->stereo_out;
+           p1->stereo_out == p2->stereo_out &&
+           mp_spherical_equal(&p1->spherical, &p2->spherical);
 }
 
 // Set most image parameters, but not image format or size.
@@ -605,7 +714,7 @@ void mp_image_set_attributes(struct mp_image *image,
     nparams.w = image->w;
     nparams.h = image->h;
     if (nparams.imgfmt != params->imgfmt)
-        mp_image_params_guess_csp(&nparams);
+        nparams.color = (struct mp_colorspace){0};
     mp_image_set_params(image, &nparams);
 }
 
@@ -614,11 +723,8 @@ void mp_image_set_attributes(struct mp_image *image,
 // the colorspace as implied by the pixel format.
 void mp_image_params_guess_csp(struct mp_image_params *params)
 {
-    int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
-    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(imgfmt);
-    if (!fmt.id)
-        return;
-    if (fmt.flags & MP_IMGFLAG_YUV) {
+    enum mp_csp forced_csp = mp_image_params_get_forced_csp(params);
+    if (forced_csp == MP_CSP_AUTO) { // YUV/other
         if (params->color.space != MP_CSP_BT_601 &&
             params->color.space != MP_CSP_BT_709 &&
             params->color.space != MP_CSP_BT_2020_NC &&
@@ -653,7 +759,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         }
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_BT_1886;
-    } else if (fmt.flags & MP_IMGFLAG_RGB) {
+    } else if (forced_csp == MP_CSP_RGB) {
         params->color.space = MP_CSP_RGB;
         params->color.levels = MP_CSP_LEVELS_PC;
 
@@ -666,7 +772,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->color.primaries = MP_CSP_PRIM_BT_709;
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_SRGB;
-    } else if (fmt.flags & MP_IMGFLAG_XYZ) {
+    } else if (forced_csp == MP_CSP_XYZ) {
         params->color.space = MP_CSP_XYZ;
         params->color.levels = MP_CSP_LEVELS_PC;
 
@@ -690,18 +796,45 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.gamma = MP_CSP_TRC_AUTO;
     }
 
-    // Guess the nominal peak (independent of the colorspace)
-    if (params->color.gamma == MP_CSP_TRC_SMPTE_ST2084) {
-        if (!params->color.nom_peak)
-            params->color.nom_peak = 10000; // As per the spec
+    if (!params->color.sig_peak) {
+        if (params->color.gamma == MP_CSP_TRC_HLG) {
+            params->color.sig_peak = 1000 / MP_REF_WHITE; // reference display
+        } else {
+            // If the signal peak is unknown, we're forced to pick the TRC's
+            // nominal range as the signal peak to prevent clipping
+            params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
+        }
+    }
+
+    if (params->chroma_location == MP_CHROMA_AUTO) {
+        if (params->color.levels == MP_CSP_LEVELS_TV)
+            params->chroma_location = MP_CHROMA_LEFT;
+        if (params->color.levels == MP_CSP_LEVELS_PC)
+            params->chroma_location = MP_CHROMA_CENTER;
+    }
+
+    if (params->color.light == MP_CSP_LIGHT_AUTO) {
+        // HLG is always scene-referred (using its own OOTF), everything else
+        // we assume is display-refered by default.
+        if (params->color.gamma == MP_CSP_TRC_HLG) {
+            params->color.light = MP_CSP_LIGHT_SCENE_HLG;
+        } else {
+            params->color.light = MP_CSP_LIGHT_DISPLAY;
+        }
     }
 }
 
-// Copy properties and data of the AVFrame into the mp_image, without taking
-// care of memory management issues.
-static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                               struct AVFrame *src)
+// Create a new mp_image reference to av_frame.
+struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 {
+    struct mp_image *dst = &(struct mp_image){0};
+    AVFrameSideData *sd;
+
+    for (int p = 0; p < MP_MAX_PLANES; p++)
+        dst->bufs[p] = src->buf[p];
+
+    dst->hwctx = src->hw_frames_ctx;
+
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
 
@@ -723,11 +856,6 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
-    if (src->hw_frames_ctx) {
-        AVHWFramesContext *fctx = (void *)src->hw_frames_ctx->data;
-        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
-    }
-
     dst->params.color = (struct mp_colorspace){
         .space = avcol_spc_to_mp_csp(src->colorspace),
         .levels = avcol_range_to_mp_csp_levels(src->color_range),
@@ -737,21 +865,66 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 
     dst->params.chroma_location = avchroma_location_to_mp(src->chroma_location);
 
-#if HAVE_OPAQUE_REF
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
         dst->params.rotate = p->rotate;
         dst->params.stereo_in = p->stereo_in;
         dst->params.stereo_out = p->stereo_out;
     }
+
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
+    if (sd)
+        dst->icc_profile = av_buffer_ref(sd->buf);
+
+    // Get the content light metadata if available
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
+    if (sd) {
+        AVContentLightMetadata *clm = (AVContentLightMetadata *)sd->data;
+        dst->params.color.sig_peak = clm->MaxCLL / MP_REF_WHITE;
+    }
+
+    // Otherwise, try getting the mastering metadata if available
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+    if (!dst->params.color.sig_peak && sd) {
+        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
+        if (mdm->has_luminance)
+            dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
+    }
 #endif
+
+    if (dst->hwctx) {
+        AVHWFramesContext *fctx = (void *)dst->hwctx->data;
+        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+        const struct hwcontext_fns *fns =
+            hwdec_get_hwcontext_fns(fctx->device_ctx->type);
+        if (fns && fns->complete_image_params)
+            fns->complete_image_params(dst);
+    }
+
+    return mp_image_new_ref(dst);
 }
 
-// Copy properties and data of the mp_image into the AVFrame, without taking
-// care of memory management issues.
-static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
-                                             struct mp_image *src)
+
+// Convert the mp_image reference to a AVFrame reference.
+struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
 {
+    struct mp_image *new_ref = mp_image_new_ref(src);
+    AVFrame *dst = av_frame_alloc();
+    if (!dst || !new_ref) {
+        talloc_free(new_ref);
+        av_frame_free(&dst);
+        return NULL;
+    }
+
+    for (int p = 0; p < MP_MAX_PLANES; p++) {
+        dst->buf[p] = new_ref->bufs[p];
+        new_ref->bufs[p] = NULL;
+    }
+
+    dst->hw_frames_ctx = new_ref->hwctx;
+    new_ref->hwctx = NULL;
+
     dst->format = imgfmt2pixfmt(src->imgfmt);
     dst->width = src->w;
     dst->height = src->h;
@@ -781,43 +954,26 @@ static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
 
     dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
 
-#if HAVE_OPAQUE_REF
-    av_buffer_unref(&dst->opaque_ref);
     dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
     if (!dst->opaque_ref)
         abort();
     *(struct mp_image_params *)dst->opaque_ref->data = src->params;
-#endif
-}
 
-// Create a new mp_image reference to av_frame.
-struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
-{
-    struct mp_image t = {0};
-    mp_image_copy_fields_from_av_frame(&t, av_frame);
-    for (int p = 0; p < MP_MAX_PLANES; p++)
-        t.bufs[p] = av_frame->buf[p];
-    t.hwctx = av_frame->hw_frames_ctx;
-    return mp_image_new_ref(&t);
-}
-
-// Convert the mp_image reference to a AVFrame reference.
-struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
-{
-    struct mp_image *new_ref = mp_image_new_ref(img);
-    AVFrame *frame = av_frame_alloc();
-    if (!frame || !new_ref) {
-        talloc_free(new_ref);
-        av_frame_free(&frame);
-        return NULL;
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    if (src->icc_profile) {
+        AVFrameSideData *sd =
+            ffmpeg_garbage(dst, AV_FRAME_DATA_ICC_PROFILE, new_ref->icc_profile);
+        if (!sd)
+            abort();
+        new_ref->icc_profile = NULL;
     }
-    mp_image_copy_fields_to_av_frame(frame, new_ref);
-    for (int p = 0; p < MP_MAX_PLANES; p++)
-        frame->buf[p] = new_ref->bufs[p];
-    frame->hw_frames_ctx = new_ref->hwctx;
-    *new_ref = (struct mp_image){0};
+#endif
+
     talloc_free(new_ref);
-    return frame;
+
+    if (dst->format == AV_PIX_FMT_NONE)
+        av_frame_free(&dst);
+    return dst;
 }
 
 // Same as mp_image_to_av_frame(), but unref img. (It does so even on failure.)

@@ -63,3 +63,18 @@ void node_map_add_string(struct mpv_node *dst, const char *key, const char *val)
     entry->format = MPV_FORMAT_STRING;
     entry->u.string = talloc_strdup(dst->u.list, val);
 }
+
+void node_map_add_int64(struct mpv_node *dst, const char *key, int64_t v)
+{
+    node_map_add(dst, key, MPV_FORMAT_INT64)->u.int64 = v;
+}
+
+void node_map_add_double(struct mpv_node *dst, const char *key, double v)
+{
+    node_map_add(dst, key, MPV_FORMAT_DOUBLE)->u.double_ = v;
+}
+
+void node_map_add_flag(struct mpv_node *dst, const char *key, bool v)
+{
+    node_map_add(dst, key, MPV_FORMAT_FLAG)->u.flag = v;
+}

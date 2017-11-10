@@ -145,7 +145,7 @@ Ctrl + and Ctrl -
 u
     Switch between applying no style overrides to SSA/ASS subtitles, and
     overriding them almost completely with the normal subtitle style. See
-    ``--sub-ass-style-override`` for more info.
+    ``--sub-ass-override`` for more info.
 
 V
     Toggle subtitle VSFilter aspect compatibility mode. See
@@ -164,9 +164,6 @@ S
 Ctrl s
     Take a screenshot, as the window shows it (with subtitles, OSD, and scaled
     video).
-
-I
-    Show filename on the OSD.
 
 PGUP and PGDWN
     Seek to the beginning of the previous/next chapter. In most cases,
@@ -221,14 +218,9 @@ STOP
 PREVIOUS and NEXT
     Seek backward/forward 1 minute.
 
-(The following keys are only valid if you compiled with TV or DVB input
-support.)
 
-h and k
-    Select previous/next tv-channel.
-
-H and K
-    Select previous/next dvb-channel.
+If you miss some older key bindings, look at ``etc/restore-old-bindings.conf``
+in the mpv git repository.
 
 Mouse Control
 -------------
@@ -424,6 +416,36 @@ file stops playing. If option ``--c`` is changed during playback of
 file-local options. The option ``--a`` is never reset here.
 
 
+List Options
+------------
+
+Some options which store lists of option values can have action suffixes. For
+example, you can set a ``,``-separated list of filters with ``--vf``, but the
+option also allows you to append filters with ``--vf-append``.
+
+Options for filenames do not use ``,`` as separator, but ``:`` (Unix) or ``;``
+(Windows).
+
+============= ===============================================
+Suffix        Meaning
+============= ===============================================
+-add          Append 1 or more items (may become alias for -append)
+-append       Append single item (avoids need for escaping)
+-clr          Clear the option
+-del          Delete an existing item by integer index
+-pre          Prepend 1 or more items
+-set          Set a list of items
+============= ===============================================
+
+Although some operations allow specifying multiple ``,``-separated items, using
+this is strongly discouraged and deprecated, except for ``-set``.
+
+Without suffix, the action taken is normally ``-set``.
+
+Some options (like ``--sub-file``, ``--audio-file``, ``--opengl-shader``) are
+aliases for the proper option with ``-append`` action. For example,
+``--sub-file`` is an alias for ``--sub-files-append``.
+
 Playing DVDs
 ------------
 
@@ -488,8 +510,8 @@ setting them to *no*. Even suboptions can be specified in this way.
 
     ::
 
-        # Use opengl video output by default.
-        vo=opengl
+        # Use GPU-accelerated video output by default.
+        vo=gpu
         # Use quotes for text that can contain spaces:
         status-msg="Time: ${time-pos}"
 
@@ -560,7 +582,7 @@ profile name ``default`` to continue with normal options.
         [slow]
         profile-desc="some profile name"
         # reference a builtin profile
-        profile=opengl-hq
+        profile=gpu-hq
 
         [fast]
         vo=vdpau
@@ -706,6 +728,11 @@ PROTOCOLS
     you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directory directly.
 
+    ``title`` can be: ``longest`` or ``first`` (selects the default
+    playlist); ``mpls/<number>`` (selects <number>.mpls playlist);
+    ``<number>`` (select playlist with the same index). You can list
+    the available playlists with ``--msg-level=bd=v``.
+
 ``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
 
     Play a DVD. DVD menus are not supported. If no title is given, the longest
@@ -768,6 +795,11 @@ PROTOCOLS
 
     Read data from the given file descriptor (for example 123). This is similar
     to piping data to stdin via ``-``, but can use an arbitrary file descriptor.
+
+``fdclose://123``
+
+    Like ``fd://``, but the file descriptor is closed after use. When using this
+    you need to ensure that the same fd URL will only be used once.
 
 ``edl://[edl specification as in edl-mpv.rst]``
 
@@ -845,7 +877,11 @@ works like in older mpv releases. The profiles are currently defined as follows:
 
 .. include:: osc.rst
 
+.. include:: stats.rst
+
 .. include:: lua.rst
+
+.. include:: javascript.rst
 
 .. include:: ipc.rst
 

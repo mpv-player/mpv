@@ -27,7 +27,8 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
+#include "ra_gl.h"
 #include "video/hwdec.h"
 #include "video/decode/d3d.h"
 
@@ -35,14 +36,11 @@
 #define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x33AB
 #endif
 
-struct priv {
+struct priv_owner {
     struct mp_hwdec_ctx hwctx;
 
     ID3D11Device *d3d11_device;
     EGLDisplay egl_display;
-
-    EGLStreamKHR egl_stream;
-    GLuint gl_textures[3];
 
     // EGL_KHR_stream
     EGLStreamKHR (EGLAPIENTRY *CreateStreamKHR)(EGLDisplay dpy,
@@ -68,36 +66,29 @@ struct priv {
              const EGLAttrib *attrib_list);
 };
 
-static void destroy_objects(struct gl_hwdec *hw)
+struct priv {
+    EGLStreamKHR egl_stream;
+    GLuint gl_textures[2];
+};
+
+static void uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *p = hw->priv;
 
-    if (p->egl_stream)
-        p->DestroyStreamKHR(p->egl_display, p->egl_stream);
-    p->egl_stream = 0;
-
-    for (int n = 0; n < 3; n++) {
-        gl->DeleteTextures(1, &p->gl_textures[n]);
-        p->gl_textures[n] = 0;
-    }
-}
-
-static void destroy(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-
-    destroy_objects(hw);
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
+    if (p->hwctx.ctx)
+        hwdec_devices_remove(hw->devs, &p->hwctx);
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
-    p->d3d11_device = NULL;
 }
 
-static int create(struct gl_hwdec *hw)
+static int init(struct ra_hwdec *hw)
 {
+    struct priv_owner *p = hw->priv;
+    HRESULT hr;
+
+    if (!ra_is_gl(hw->ra))
+        return -1;
     if (!angle_load())
         return -1;
 
@@ -108,18 +99,16 @@ static int create(struct gl_hwdec *hw)
     if (!eglGetCurrentContext())
         return -1;
 
+    GL *gl = ra_gl_get(hw->ra);
+
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
     if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||
         !strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") ||
-        !(strstr(hw->gl->extensions, "GL_OES_EGL_image_external_essl3") ||
-          hw->gl->es == 200) ||
+        !(strstr(gl->extensions, "GL_OES_EGL_image_external_essl3") ||
+          gl->es == 200) ||
         !strstr(exts, "EGL_EXT_device_query") ||
-        !(hw->gl->mpgl_caps & MPGL_CAP_TEX_RG))
+        !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
-
-    HRESULT hr;
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
 
     p->egl_display = egl_display;
 
@@ -149,7 +138,7 @@ static int create(struct gl_hwdec *hw)
     static const char *es2_exts[] = {"GL_NV_EGL_stream_consumer_external", 0};
     static const char *es3_exts[] = {"GL_NV_EGL_stream_consumer_external",
                                      "GL_OES_EGL_image_external_essl3", 0};
-    hw->glsl_extensions = hw->gl->es == 200 ? es2_exts : es3_exts;
+    hw->glsl_extensions = gl->es == 200 ? es2_exts : es3_exts;
 
     PFNEGLQUERYDISPLAYATTRIBEXTPROC p_eglQueryDisplayAttribEXT =
         (void *)eglGetProcAddress("eglQueryDisplayAttribEXT");
@@ -194,36 +183,50 @@ static int create(struct gl_hwdec *hw)
         .type = HWDEC_D3D11VA,
         .driver_name = hw->driver->name,
         .ctx = p->d3d11_device,
-        .download_image = d3d11_download_image,
+        .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 fail:
-    destroy(hw);
     return -1;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
-    destroy_objects(hw);
+    if (p->egl_stream)
+        o->DestroyStreamKHR(o->egl_display, p->egl_stream);
+    p->egl_stream = 0;
 
-    if (params->hw_subfmt != IMGFMT_NV12) {
-        MP_FATAL(hw, "Format not supported.\n");
+    gl->DeleteTextures(2, p->gl_textures);
+}
+
+static int mapper_init(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+
+    if (mapper->src_params.hw_subfmt != IMGFMT_NV12) {
+        MP_FATAL(mapper, "Format not supported.\n");
         return -1;
     }
 
-    // Hope that the given texture unit range is not "in use" by anything.
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
+    mapper->dst_params.hw_subfmt = 0;
+
     // The texture units need to be bound during init only, and are free for
     // use again after the initialization here is done.
     int texunits = 0; // [texunits, texunits + num_planes)
     int num_planes = 2;
     int gl_target = GL_TEXTURE_EXTERNAL_OES;
 
-    p->egl_stream = p->CreateStreamKHR(p->egl_display, (EGLint[]){EGL_NONE});
+    p->egl_stream = o->CreateStreamKHR(o->egl_display, (EGLint[]){EGL_NONE});
     if (!p->egl_stream)
         goto fail;
 
@@ -245,16 +248,13 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         EGL_NONE,
     };
 
-    if (!p->StreamConsumerGLTextureExternalAttribsNV(p->egl_display, p->egl_stream,
+    if (!o->StreamConsumerGLTextureExternalAttribsNV(o->egl_display, p->egl_stream,
                                                      attrs))
         goto fail;
 
-    if (!p->CreateStreamProducerD3DTextureNV12ANGLE(p->egl_display, p->egl_stream,
+    if (!o->CreateStreamProducerD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
                                                     (EGLAttrib[]){EGL_NONE}))
         goto fail;
-
-    params->imgfmt = params->hw_subfmt;
-    params->hw_subfmt = 0;
 
     for (int n = 0; n < num_planes; n++) {
         gl->ActiveTexture(GL_TEXTURE0 + texunits + n);
@@ -263,24 +263,18 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->ActiveTexture(GL_TEXTURE0);
     return 0;
 fail:
-    MP_ERR(hw, "Failed to create EGLStream\n");
-    if (p->egl_stream)
-        p->DestroyStreamKHR(p->egl_display, p->egl_stream);
-    p->egl_stream = 0;
     gl->ActiveTexture(GL_TEXTURE0);
+    MP_ERR(mapper, "Failed to create EGLStream\n");
     return -1;
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
 
-    if (!p->gl_textures[0])
-        return -1;
-
-    ID3D11Texture2D *d3d_tex = (void *)hw_image->planes[0];
-    int d3d_subindex = (intptr_t)hw_image->planes[1];
+    ID3D11Texture2D *d3d_tex = (void *)mapper->src->planes[0];
+    int d3d_subindex = (intptr_t)mapper->src->planes[1];
     if (!d3d_tex)
         return -1;
 
@@ -288,55 +282,68 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE, d3d_subindex,
         EGL_NONE,
     };
-    if (!p->StreamPostD3DTextureNV12ANGLE(p->egl_display, p->egl_stream,
+    if (!o->StreamPostD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
                                           (void *)d3d_tex, attrs))
     {
         // ANGLE changed the enum ID of this without warning at one point.
         attrs[0] = attrs[0] == 0x33AB ? 0x3AAB : 0x33AB;
-        if (!p->StreamPostD3DTextureNV12ANGLE(p->egl_display, p->egl_stream,
-                                          (void *)d3d_tex, attrs))
+        if (!o->StreamPostD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
+                                              (void *)d3d_tex, attrs))
             return -1;
     }
 
-    if (!p->StreamConsumerAcquireKHR(p->egl_display, p->egl_stream))
+    if (!o->StreamConsumerAcquireKHR(o->egl_display, p->egl_stream))
         return -1;
 
     D3D11_TEXTURE2D_DESC texdesc;
     ID3D11Texture2D_GetDesc(d3d_tex, &texdesc);
 
-    *out_frame = (struct gl_hwdec_frame){
-        .planes = {
-            {
-                .gl_texture = p->gl_textures[0],
-                .gl_target = GL_TEXTURE_EXTERNAL_OES,
-                .tex_w = texdesc.Width,
-                .tex_h = texdesc.Height,
-            },
-            {
-                .gl_texture = p->gl_textures[1],
-                .gl_target = GL_TEXTURE_EXTERNAL_OES,
-                .tex_w = texdesc.Width / 2,
-                .tex_h = texdesc.Height / 2,
-            },
-        },
-    };
+    for (int n = 0; n < 2; n++) {
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = texdesc.Width / (n ? 2 : 1),
+            .h = texdesc.Height / (n ? 2 : 1),
+            .d = 1,
+            .format = ra_find_unorm_format(mapper->ra, 1, n ? 2 : 1),
+            .render_src = true,
+            .src_linear = true,
+            .external_oes = true,
+        };
+        if (!params.format)
+            return -1;
+
+        mapper->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
+                                               p->gl_textures[n]);
+        if (!mapper->tex[n])
+            return -1;
+    }
+
     return 0;
 }
 
-static void unmap(struct gl_hwdec *hw)
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+
+    for (int n = 0; n < 2; n++)
+        ra_tex_free(mapper->ra, &mapper->tex[n]);
     if (p->egl_stream)
-        p->StreamConsumerReleaseKHR(p->egl_display, p->egl_stream);
+        o->StreamConsumerReleaseKHR(o->egl_display, p->egl_stream);
 }
 
-const struct gl_hwdec_driver gl_hwdec_d3d11egl = {
+const struct ra_hwdec_driver ra_hwdec_d3d11egl = {
     .name = "d3d11-egl",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_D3D11VA,
-    .imgfmt = IMGFMT_D3D11NV12,
-    .create = create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .unmap = unmap,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_D3D11NV12, 0},
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
 };

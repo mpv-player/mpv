@@ -20,7 +20,6 @@
 
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memset */
-#include "video/img_fourcc.h"
 #include "tv.h"
 
 static int init(priv_t *priv);

@@ -32,22 +32,26 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
+#include "video/out/gpu/hwdec.h"
 #include "formats.h"
-#include "hwdec.h"
-#include "video.h"
+#include "options/m_config.h"
+#include "ra_gl.h"
 
-struct priv {
+struct priv_owner {
     struct mp_hwdec_ctx hwctx;
-    struct mp_image layout;
-    GLuint gl_textures[4];
-    CUgraphicsResource cu_res[4];
-    CUarray cu_array[4];
-    int plane_bytes[4];
-
-    CUcontext cuda_ctx;
+    CUcontext display_ctx;
+    CUcontext decode_ctx;
 };
 
-static int check_cu(struct gl_hwdec *hw, CUresult err, const char *func)
+struct priv {
+    struct mp_image layout;
+    CUgraphicsResource cu_res[4];
+    CUarray cu_array[4];
+
+    CUcontext display_ctx;
+};
+
+static int check_cu(struct ra_hwdec *hw, CUresult err, const char *func)
 {
     const char *err_name;
     const char *err_string;
@@ -70,22 +74,23 @@ static int check_cu(struct gl_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
-static int cuda_create(struct gl_hwdec *hw)
+static int cuda_init(struct ra_hwdec *hw)
 {
-    CUdevice device;
-    CUcontext cuda_ctx = NULL;
+    CUdevice display_dev;
     AVBufferRef *hw_device_ctx = NULL;
     CUcontext dummy;
     unsigned int device_count;
     int ret = 0;
+    struct priv_owner *p = hw->priv;
 
-    if (hw->gl->version < 210 && hw->gl->es < 300) {
+    if (!ra_is_gl(hw->ra))
+        return -1;
+
+    GL *gl = ra_gl_get(hw->ra);
+    if (gl->version < 210 && gl->es < 300) {
         MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
         return -1;
     }
-
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
 
     bool loaded = cuda_load();
     if (!loaded) {
@@ -97,16 +102,43 @@ static int cuda_create(struct gl_hwdec *hw)
     if (ret < 0)
         goto error;
 
-    ret = CHECK_CU(cuGLGetDevices(&device_count, &device, 1,
+    // Allocate display context
+    ret = CHECK_CU(cuGLGetDevices(&device_count, &display_dev, 1,
                                   CU_GL_DEVICE_LIST_ALL));
     if (ret < 0)
         goto error;
 
-    ret = CHECK_CU(cuCtxCreate(&cuda_ctx, CU_CTX_SCHED_BLOCKING_SYNC, device));
+    ret = CHECK_CU(cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                               display_dev));
     if (ret < 0)
         goto error;
 
-    p->cuda_ctx = cuda_ctx;
+    p->decode_ctx = p->display_ctx;
+
+    int decode_dev_idx = -1;
+    mp_read_option_raw(hw->global, "cuda-decode-device", &m_option_type_choice,
+                       &decode_dev_idx);
+
+    if (decode_dev_idx > -1) {
+        CUdevice decode_dev;
+        ret = CHECK_CU(cuDeviceGet(&decode_dev, decode_dev_idx));
+        if (ret < 0)
+            goto error;
+
+        if (decode_dev != display_dev) {
+            MP_INFO(hw, "Using separate decoder and display devices\n");
+
+            // Pop the display context. We won't use it again during init()
+            ret = CHECK_CU(cuCtxPopCurrent(&dummy));
+            if (ret < 0)
+                goto error;
+
+            ret = CHECK_CU(cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                       decode_dev));
+            if (ret < 0)
+                goto error;
+        }
+    }
 
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA);
     if (!hw_device_ctx)
@@ -115,7 +147,7 @@ static int cuda_create(struct gl_hwdec *hw)
     AVHWDeviceContext *device_ctx = (void *)hw_device_ctx->data;
 
     AVCUDADeviceContext *device_hwctx = device_ctx->hwctx;
-    device_hwctx->cuda_ctx = cuda_ctx;
+    device_hwctx->cuda_ctx = p->decode_ctx;
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
@@ -128,8 +160,8 @@ static int cuda_create(struct gl_hwdec *hw)
         goto error;
 
     p->hwctx = (struct mp_hwdec_ctx) {
-        .type = HWDEC_CUDA,
-        .ctx = cuda_ctx,
+        .type = hw->driver->api,
+        .ctx = p->decode_ctx,
         .av_device_ref = hw_device_ctx,
     };
     p->hwctx.driver_name = hw->driver->name;
@@ -143,49 +175,74 @@ static int cuda_create(struct gl_hwdec *hw)
     return -1;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static void cuda_uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *p = hw->priv;
+
+    if (p->hwctx.ctx)
+        hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
+
+    if (p->decode_ctx && p->decode_ctx != p->display_ctx)
+        CHECK_CU(cuCtxDestroy(p->decode_ctx));
+
+    if (p->display_ctx)
+        CHECK_CU(cuCtxDestroy(p->display_ctx));
+}
+
+#undef CHECK_CU
+#define CHECK_CU(x) check_cu((mapper)->owner, (x), #x)
+
+static int mapper_init(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
     CUcontext dummy;
     int ret = 0, eret = 0;
 
-    assert(params->imgfmt == hw->driver->imgfmt);
-    params->imgfmt = params->hw_subfmt;
-    params->hw_subfmt = 0;
+    p->display_ctx = p_owner->display_ctx;
 
-    mp_image_set_params(&p->layout, params);
+    int imgfmt = mapper->src_params.hw_subfmt;
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = imgfmt;
+    mapper->dst_params.hw_subfmt = 0;
 
-    struct gl_imgfmt_desc desc;
-    if (!gl_get_imgfmt_desc(gl, params->imgfmt, &desc)) {
-        MP_ERR(hw, "Unsupported format: %s\n", mp_imgfmt_to_name(params->imgfmt));
+    mp_image_set_params(&p->layout, &mapper->dst_params);
+
+    struct ra_imgfmt_desc desc;
+    if (!ra_get_imgfmt_desc(mapper->ra, imgfmt, &desc)) {
+        MP_ERR(mapper, "Unsupported format: %s\n", mp_imgfmt_to_name(imgfmt));
         return -1;
     }
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
-    gl->GenTextures(4, p->gl_textures);
     for (int n = 0; n < desc.num_planes; n++) {
-        const struct gl_format *fmt = desc.planes[n];
+        const struct ra_format *format = desc.planes[n];
 
-        p->plane_bytes[n] = gl_bytes_per_pixel(fmt->format, fmt->type);
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = mp_image_plane_w(&p->layout, n),
+            .h = mp_image_plane_h(&p->layout, n),
+            .d = 1,
+            .format = format,
+            .render_src = true,
+            .src_linear = format->linear_filter,
+        };
 
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        GLenum filter = GL_NEAREST;
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format,
-                       mp_image_plane_w(&p->layout, n),
-                       mp_image_plane_h(&p->layout, n),
-                       0, fmt->format, fmt->type, NULL);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
+        mapper->tex[n] = ra_tex_create(mapper->ra, &params);
+        if (!mapper->tex[n]) {
+            ret = -1;
+            goto error;
+        }
 
-        ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], p->gl_textures[n],
-                                                 GL_TEXTURE_2D,
+        GLuint texture;
+        GLenum target;
+        ra_gl_get_raw_tex(mapper->ra, mapper->tex[n], &texture, &target);
+
+        ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], texture, target,
                                                  CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
         if (ret < 0)
             goto error;
@@ -212,65 +269,51 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     return ret;
 }
 
-static void destroy(struct gl_hwdec *hw)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv *p = mapper->priv;
     CUcontext dummy;
 
     // Don't bail if any CUDA calls fail. This is all best effort.
-    CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     for (int n = 0; n < 4; n++) {
         if (p->cu_res[n] > 0)
             CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
         p->cu_res[n] = 0;
+        ra_tex_free(mapper->ra, &mapper->tex[n]);
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
-
-    CHECK_CU(cuCtxDestroy(p->cuda_ctx));
-
-    gl->DeleteTextures(4, p->gl_textures);
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
-    av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
+}
+
+static int mapper_map(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
     CUcontext dummy;
     int ret = 0, eret = 0;
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
+    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
-    *out_frame = (struct gl_hwdec_frame) { 0, };
-
     for (int n = 0; n < p->layout.num_planes; n++) {
-        // widthInBytes must account for the chroma plane
-        // elements being two samples wide.
         CUDA_MEMCPY2D cpy = {
             .srcMemoryType = CU_MEMORYTYPE_DEVICE,
             .dstMemoryType = CU_MEMORYTYPE_ARRAY,
-            .srcDevice     = (CUdeviceptr)hw_image->planes[n],
-            .srcPitch      = hw_image->stride[n],
+            .srcDevice     = (CUdeviceptr)mapper->src->planes[n],
+            .srcPitch      = mapper->src->stride[n],
             .srcY          = 0,
             .dstArray      = p->cu_array[n],
-            .WidthInBytes  = mp_image_plane_w(&p->layout, n) * p->plane_bytes[n],
+            .WidthInBytes  = mp_image_plane_w(&p->layout, n) *
+                             mapper->tex[n]->params.format->pixel_size,
             .Height        = mp_image_plane_h(&p->layout, n),
         };
         ret = CHECK_CU(cuMemcpy2D(&cpy));
         if (ret < 0)
             goto error;
-
-        out_frame->planes[n] = (struct gl_hwdec_plane){
-            .gl_texture = p->gl_textures[n],
-            .gl_target = GL_TEXTURE_2D,
-            .tex_w = mp_image_plane_w(&p->layout, n),
-            .tex_h = mp_image_plane_h(&p->layout, n),
-        };
     }
 
 
@@ -282,12 +325,18 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
    return ret;
 }
 
-const struct gl_hwdec_driver gl_hwdec_cuda = {
-    .name = "cuda",
+const struct ra_hwdec_driver ra_hwdec_cuda = {
+    .name = "cuda-nvdec",
     .api = HWDEC_CUDA,
-    .imgfmt = IMGFMT_CUDA,
-    .create = cuda_create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_CUDA, 0},
+    .priv_size = sizeof(struct priv_owner),
+    .init = cuda_init,
+    .uninit = cuda_uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
 };

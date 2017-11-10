@@ -1,5 +1,5 @@
 #include "test_helpers.h"
-#include "video/out/opengl/video.h"
+#include "video/out/gpu/video.h"
 
 static void test_scale_ambient_lux_limits(void **state) {
     float x;

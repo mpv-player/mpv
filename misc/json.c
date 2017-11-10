@@ -223,7 +223,7 @@ static void write_json_str(bstr *b, unsigned char *str)
     APPEND(b, "\"");
     while (1) {
         unsigned char *cur = str;
-        while (cur[0] && cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
+        while (cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
             cur++;
         if (!cur[0])
             break;
@@ -235,7 +235,16 @@ static void write_json_str(bstr *b, unsigned char *str)
     APPEND(b, "\"");
 }
 
-static int json_append(bstr *b, const struct mpv_node *src)
+static void add_indent(bstr *b, int indent)
+{
+    if (indent < 0)
+        return;
+    bstr_xappend(NULL, b, bstr0("\n"));
+    for (int n = 0; n < indent; n++)
+        bstr_xappend(NULL, b, bstr0(" "));
+}
+
+static int json_append(bstr *b, const struct mpv_node *src, int indent)
 {
     switch (src->format) {
     case MPV_FORMAT_NONE:
@@ -258,20 +267,31 @@ static int json_append(bstr *b, const struct mpv_node *src)
         struct mpv_node_list *list = src->u.list;
         bool is_obj = src->format == MPV_FORMAT_NODE_MAP;
         APPEND(b, is_obj ? "{" : "[");
+        int next_indent = indent >= 0 ? indent + 1 : -1;
         for (int n = 0; n < list->num; n++) {
             if (n)
                 APPEND(b, ",");
+            add_indent(b, next_indent);
             if (is_obj) {
                 write_json_str(b, list->keys[n]);
                 APPEND(b, ":");
             }
-            json_append(b, &list->values[n]);
+            json_append(b, &list->values[n], next_indent);
         }
+        add_indent(b, indent);
         APPEND(b, is_obj ? "}" : "]");
         return 0;
     }
     }
     return -1; // unknown format
+}
+
+static int json_append_str(char **dst, struct mpv_node *src, int indent)
+{
+    bstr buffer = bstr0(*dst);
+    int r = json_append(&buffer, src, indent);
+    *dst = buffer.start;
+    return r;
 }
 
 /* Write the contents of *src as JSON, and append the JSON string to *dst.
@@ -281,8 +301,11 @@ static int json_append(bstr *b, const struct mpv_node *src)
  */
 int json_write(char **dst, struct mpv_node *src)
 {
-    bstr buffer = bstr0(*dst);
-    int r = json_append(&buffer, src);
-    *dst = buffer.start;
-    return r;
+    return json_append_str(dst, src, -1);
+}
+
+// Same as json_write(), but add whitespace to make it readable.
+int json_write_pretty(char **dst, struct mpv_node *src)
+{
+    return json_append_str(dst, src, 0);
 }

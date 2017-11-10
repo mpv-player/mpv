@@ -46,7 +46,6 @@
 #include "common/msg.h"
 #include "vo.h"
 #include "video/mp_image.h"
-#include "video/img_fourcc.h"
 #include "x11_common.h"
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
@@ -99,6 +98,13 @@ struct xvctx {
 #endif
 };
 
+#define MP_FOURCC(a,b,c,d) ((a) | ((b)<<8) | ((c)<<16) | ((unsigned)(d)<<24))
+
+#define MP_FOURCC_YV12  MP_FOURCC('Y', 'V', '1', '2')
+#define MP_FOURCC_I420  MP_FOURCC('I', '4', '2', '0')
+#define MP_FOURCC_IYUV  MP_FOURCC('I', 'Y', 'U', 'V')
+#define MP_FOURCC_UYVY  MP_FOURCC('U', 'Y', 'V', 'Y')
+
 struct fmt_entry {
     int imgfmt;
     int fourcc;
@@ -106,7 +112,6 @@ struct fmt_entry {
 static const struct fmt_entry fmt_table[] = {
     {IMGFMT_420P,       MP_FOURCC_YV12},
     {IMGFMT_420P,       MP_FOURCC_I420},
-    {IMGFMT_YUYV,       MP_FOURCC_YUY2},
     {IMGFMT_UYVY,       MP_FOURCC_UYVY},
     {0}
 };
@@ -873,15 +878,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER: {
-        vo->want_redraw = true;
-        struct voctrl_set_equalizer_args *args = data;
-        return xv_set_eq(vo, ctx->xv_port, args->name, args->value);
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        return xv_get_eq(vo, ctx->xv_port, args->name, args->valueptr);
-    }
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, ctx->original_image);
         return true;

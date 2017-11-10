@@ -68,14 +68,20 @@ extern "C" {
  * defaults. Likewise, mpv will attempt to leave the OpenGL context with
  * standard defaults. The following state is excluded from this:
  *
- *      - the current viewport (can have/is set to an arbitrary value)
+ *      - the glViewport state
+ *      - the glScissor state (but GL_SCISSOR_TEST is in its default value)
+ *      - glBlendFuncSeparate() state (but GL_BLEND is in its default value)
+ *      - glClearColor() state
+ *      - mpv may overwrite the callback set with glDebugMessageCallback()
+ *      - mpv always disables GL_DITHER at init
  *
  * Messing with the state could be avoided by creating shared OpenGL contexts,
  * but this is avoided for the sake of compatibility and interoperability.
  *
  * On OpenGL 2.1, mpv will strictly call functions like glGenTextures() to
  * create OpenGL objects. You will have to do the same. This ensures that
- * objects created by mpv and the API users don't clash.
+ * objects created by mpv and the API users don't clash. Also, legacy state
+ * must be either in its defaults, or not interfere with core state.
  *
  * Threading
  * ---------
@@ -145,6 +151,27 @@ extern "C" {
  * up until mpv_opengl_cb_uninit_gl() is called. If the name is not anything
  * you know/expected, return NULL from the function.
  *
+ * * Windowing system scaling
+ * ------------------------------------
+ *
+ * When using GL, sometimes GL rendering window is upscaled to display buffer.
+ * Typically with drm where GL framebuffer can be upscaled at later stage.
+ * In That case glMPGetNativeDisplay("opengl-cb-window-pos") should return an
+ * mpv_opengl_cb_window_pos struct pointer defined below.
+ * Note : The intended use is for hardware overlays that might require
+ * upscaling features (typically upscaling GL windows with drm to screen size).
+ *
+ * This is never used for GL rendering - only to map hardware overlays to
+ * GL rendering (for backends which support it).
+ */
+struct mpv_opengl_cb_window_pos {
+    int x;      // left coordinates of window (usually 0)
+    int y;      // top coordinates of window (usually 0)
+    int width;  // width of GL window
+    int height; // height of GL window
+};
+
+/**
  * Windowing system interop on Intel/Linux with VAAPI
  * --------------------------------------------------
  *
@@ -157,10 +184,22 @@ extern "C" {
  *
  * glMPGetNativeDisplay("wl") should return a Wayland "struct wl_display *".
  *
- * glMPGetNativeDisplay("drm") should return a DRM FD casted to intptr_t (note
- * that a 0 FD is not supported - if this can happen in your case, you must
- * dup2() it to a non-0 FD).
- *
+ * glMPGetNativeDisplay("opengl-cb-drm-params") should return an
+ * mpv_opengl_cb_drm_params structure pointer :
+ */
+struct mpv_opengl_cb_drm_params {
+    // DRM fd (int). set this to -1 if invalid.
+    int fd;
+
+    // currently used crtc id
+    int crtc_id;
+
+    // pointer to the drmModeAtomicReq that is being used for the renderloop.
+    // This atomic request pointer should be usually created at every renderloop.
+    struct _drmModeAtomicReq *atomic_request;
+};
+
+/**
  * nVidia/Linux via VDPAU requires GLX, which does not have this problem (the
  * GLX API can return the current X11 Display).
  *

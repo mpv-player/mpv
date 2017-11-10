@@ -29,6 +29,11 @@
 
 #include "common/common.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vo;
 struct mp_log;
 

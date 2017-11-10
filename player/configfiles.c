@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stddef.h>
@@ -54,6 +54,7 @@ static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
     talloc_free(cf);
 }
 
+// This name is used in builtin.conf to force encoding defaults (like ao/vo).
 #define SECT_ENCODE "encoding"
 
 void mp_parse_cfgfiles(struct MPContext *mpctx)
@@ -70,10 +71,10 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     // So we "divert" normal options into a separate section, and the diverted
     // section is never used - unless maybe it's explicitly referenced from an
     // encoding profile.
-    if (encoding) {
+    if (encoding)
         section = "playback-default";
-        load_all_cfgfiles(mpctx, SECT_ENCODE, "encoding-profiles.conf");
-    }
+
+    load_all_cfgfiles(mpctx, NULL, "encoding-profiles.conf");
 
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
 
@@ -246,7 +247,7 @@ static const char *const backup_properties[] = {
     "sub-use-margins",
     "sub-ass-force-margins",
     "sub-ass-vsfilter-aspect-compat",
-    "sub-ass-style-override",
+    "sub-style-override",
     "ab-loop-a",
     "ab-loop-b",
     "options/video-aspect",

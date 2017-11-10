@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <libavutil/pixdesc.h>
@@ -30,51 +30,20 @@ static const struct {
     {IMGFMT_BGRA, AV_PIX_FMT_BGRA},
     {IMGFMT_BGR24, AV_PIX_FMT_BGR24},
     {IMGFMT_RGB565, AV_PIX_FMT_RGB565},
-    {IMGFMT_RGB48, AV_PIX_FMT_RGB48},
     {IMGFMT_ABGR, AV_PIX_FMT_ABGR},
     {IMGFMT_RGBA, AV_PIX_FMT_RGBA},
     {IMGFMT_RGB24, AV_PIX_FMT_RGB24},
-    {IMGFMT_PAL8,  AV_PIX_FMT_PAL8},
-    {IMGFMT_YUYV,  AV_PIX_FMT_YUYV422},
     {IMGFMT_UYVY,  AV_PIX_FMT_UYVY422},
     {IMGFMT_NV12,  AV_PIX_FMT_NV12},
-    {IMGFMT_NV21,  AV_PIX_FMT_NV21},
     {IMGFMT_Y8,    AV_PIX_FMT_GRAY8},
-    // FFmpeg prefers AV_PIX_FMT_GRAY8A, but Libav has only Y400A
-    {IMGFMT_YA8,   AV_PIX_FMT_Y400A},
     {IMGFMT_Y16, AV_PIX_FMT_GRAY16},
-    {IMGFMT_410P,  AV_PIX_FMT_YUV410P},
     {IMGFMT_420P,  AV_PIX_FMT_YUV420P},
-    {IMGFMT_411P,  AV_PIX_FMT_YUV411P},
-    {IMGFMT_422P,  AV_PIX_FMT_YUV422P},
     {IMGFMT_444P,  AV_PIX_FMT_YUV444P},
-    {IMGFMT_440P,  AV_PIX_FMT_YUV440P},
-
-    {IMGFMT_420P16,  AV_PIX_FMT_YUV420P16},
-    {IMGFMT_420P9,   AV_PIX_FMT_YUV420P9},
-    {IMGFMT_420P10,  AV_PIX_FMT_YUV420P10},
-    {IMGFMT_422P10,  AV_PIX_FMT_YUV422P10},
-    {IMGFMT_444P9,   AV_PIX_FMT_YUV444P9},
-    {IMGFMT_444P10,  AV_PIX_FMT_YUV444P10},
-    {IMGFMT_422P16,  AV_PIX_FMT_YUV422P16},
-    {IMGFMT_422P9,   AV_PIX_FMT_YUV422P9},
-    {IMGFMT_444P16,  AV_PIX_FMT_YUV444P16},
 
     // YUVJ are YUV formats that use the full Y range. Decoder color range
     // information is used instead. Deprecated in ffmpeg.
     {IMGFMT_420P,  AV_PIX_FMT_YUVJ420P},
-    {IMGFMT_422P,  AV_PIX_FMT_YUVJ422P},
     {IMGFMT_444P,  AV_PIX_FMT_YUVJ444P},
-    {IMGFMT_440P,  AV_PIX_FMT_YUVJ440P},
-
-    {IMGFMT_420AP, AV_PIX_FMT_YUVA420P},
-    {IMGFMT_422AP, AV_PIX_FMT_YUVA422P},
-    {IMGFMT_444AP, AV_PIX_FMT_YUVA444P},
-
-    {IMGFMT_XYZ12,   AV_PIX_FMT_XYZ12},
-
-    {IMGFMT_RGBA64,  AV_PIX_FMT_RGBA64},
-    {IMGFMT_BGRA64,  AV_PIX_FMT_BGRA64},
 
 #if LIBAVUTIL_VERSION_MICRO >= 100
     {IMGFMT_BGR0,  AV_PIX_FMT_BGR0},
@@ -88,24 +57,26 @@ static const struct {
     {IMGFMT_0BGR,  AV_PIX_FMT_ABGR},
 #endif
 
-    {IMGFMT_YA16,  AV_PIX_FMT_YA16},
-
     {IMGFMT_VDPAU, AV_PIX_FMT_VDPAU},
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     {IMGFMT_VIDEOTOOLBOX,   AV_PIX_FMT_VIDEOTOOLBOX},
 #endif
-    {IMGFMT_VAAPI, AV_PIX_FMT_VAAPI_VLD},
+#if HAVE_ANDROID
+    {IMGFMT_MEDIACODEC, AV_PIX_FMT_MEDIACODEC},
+#endif
+    {IMGFMT_VAAPI, AV_PIX_FMT_VAAPI},
     {IMGFMT_DXVA2, AV_PIX_FMT_DXVA2_VLD},
 #if HAVE_D3D_HWACCEL
-    {IMGFMT_D3D11VA, AV_PIX_FMT_D3D11VA_VLD},
+    {IMGFMT_D3D11VA, AV_PIX_FMT_D3D11},
+    {IMGFMT_D3D11NV12, AV_PIX_FMT_D3D11},
 #endif
     {IMGFMT_MMAL, AV_PIX_FMT_MMAL},
 #if HAVE_CUDA_HWACCEL
     {IMGFMT_CUDA, AV_PIX_FMT_CUDA},
 #endif
     {IMGFMT_P010, AV_PIX_FMT_P010},
-#ifdef AV_PIX_FMT_P016
-    {IMGFMT_P016, AV_PIX_FMT_P016},
+#if HAVE_DRMPRIME
+    {IMGFMT_DRMPRIME, AV_PIX_FMT_DRM_PRIME},
 #endif
 
     {0, AV_PIX_FMT_NONE}

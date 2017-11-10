@@ -32,6 +32,11 @@
 
 #include "options/m_option.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static struct vf_priv_s {
     // These four values are a backup of the values parsed from the command line.
     // This is necessary so that we do not get a mess upon filter reinit due to

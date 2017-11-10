@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_CFG_MPLAYER_H
@@ -42,37 +42,33 @@
 #include "video/hwdec.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
-#include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
 #include "player/command.h"
 #include "stream/stream.h"
 
+#if HAVE_LIBAF
+#include "audio/filter/af.h"
+#endif
+
 #if HAVE_DRM
 #include "video/out/drm_common.h"
 #endif
 
-#if HAVE_GL
-#include "video/out/opengl/hwdec.h"
-#endif
-
-extern const char mp_help_text[];
+#include "video/out/gpu/hwdec.h"
 
 static void print_version(struct mp_log *log)
 {
     mp_print_version(log, true);
 }
 
-static void print_help(struct mp_log *log)
-{
-    mp_info(log, "%s", mp_help_text);
-}
-
 extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
+extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options sws_conf;
+extern const struct m_sub_options drm_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_lavf_conf;
@@ -91,6 +87,11 @@ extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
 
+extern const struct m_sub_options opengl_conf;
+extern const struct m_sub_options vulkan_conf;
+extern const struct m_sub_options spirv_conf;
+extern const struct m_sub_options d3d11_conf;
+extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
@@ -111,9 +112,13 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"d3d11va-copy",HWDEC_D3D11VA_COPY},
     {"rpi",         HWDEC_RPI},
     {"rpi-copy",    HWDEC_RPI_COPY},
+    {"rkmpp",       HWDEC_RKMPP},
     {"mediacodec",  HWDEC_MEDIACODEC},
+    {"mediacodec-copy",HWDEC_MEDIACODEC_COPY},
     {"cuda",        HWDEC_CUDA},
     {"cuda-copy",   HWDEC_CUDA_COPY},
+    {"nvdec",       HWDEC_NVDEC},
+    {"nvdec-copy",  HWDEC_NVDEC_COPY},
     {"crystalhd",   HWDEC_CRYSTALHD},
     {0}
 };
@@ -122,34 +127,6 @@ static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
     .defaults = &image_writer_opts_defaults,
-};
-
-#define OPT_BASE_STRUCT struct mp_cache_opts
-
-const struct m_sub_options stream_cache_conf = {
-    .opts = (const struct m_option[]){
-        OPT_CHOICE_OR_INT("cache", size, 0, 32, 0x7fffffff,
-                          ({"no", 0},
-                           {"auto", -1},
-                           {"yes", -2})),
-        OPT_CHOICE_OR_INT("cache-default", def_size, 0, 32, 0x7fffffff,
-                          ({"no", 0})),
-        OPT_INTRANGE("cache-initial", initial, 0, 0, 0x7fffffff),
-        OPT_INTRANGE("cache-seek-min", seek_min, 0, 0, 0x7fffffff),
-        OPT_INTRANGE("cache-backbuffer", back_buffer, 0, 0, 0x7fffffff),
-        OPT_STRING("cache-file", file, M_OPT_FILE),
-        OPT_INTRANGE("cache-file-size", file_max, 0, 0, 0x7fffffff),
-        {0}
-    },
-    .size = sizeof(struct mp_cache_opts),
-    .defaults = &(const struct mp_cache_opts){
-        .size = -1,
-        .def_size = 75000,
-        .initial = 0,
-        .seek_min = 500,
-        .back_buffer = 75000,
-        .file_max = 1024 * 1024,
-    },
 };
 
 #undef OPT_BASE_STRUCT
@@ -174,45 +151,42 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("force-window-position", force_window_position, 0),
     OPT_STRING("x11-name", winname, 0),
     OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
-    OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
+    OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 1.0/32.0, 32.0),
     OPT_FLAG("fullscreen", fullscreen, 0),
     OPT_ALIAS("fs", "fullscreen"),
     OPT_FLAG("native-keyrepeat", native_keyrepeat, 0),
-    OPT_FLOATRANGE("panscan", panscan, UPDATE_VIDEOPOS, 0.0, 1.0),
-    OPT_FLOATRANGE("video-zoom", zoom, UPDATE_VIDEOPOS, -20.0, 20.0),
-    OPT_FLOATRANGE("video-pan-x", pan_x, UPDATE_VIDEOPOS, -3.0, 3.0),
-    OPT_FLOATRANGE("video-pan-y", pan_y, UPDATE_VIDEOPOS, -3.0, 3.0),
-    OPT_FLOATRANGE("video-align-x", align_x, UPDATE_VIDEOPOS, -1.0, 1.0),
-    OPT_FLOATRANGE("video-align-y", align_y, UPDATE_VIDEOPOS, -1.0, 1.0),
-    OPT_CHOICE("video-unscaled", unscaled, UPDATE_VIDEOPOS,
+    OPT_FLOATRANGE("panscan", panscan, 0, 0.0, 1.0),
+    OPT_FLOATRANGE("video-zoom", zoom, 0, -20.0, 20.0),
+    OPT_FLOATRANGE("video-pan-x", pan_x, 0, -3.0, 3.0),
+    OPT_FLOATRANGE("video-pan-y", pan_y, 0, -3.0, 3.0),
+    OPT_FLOATRANGE("video-align-x", align_x, 0, -1.0, 1.0),
+    OPT_FLOATRANGE("video-align-y", align_y, 0, -1.0, 1.0),
+    OPT_CHOICE("video-unscaled", unscaled, 0,
                ({"no", 0}, {"yes", 1}, {"downscale-big", 2})),
     OPT_INT64("wid", WinID, 0),
     OPT_CHOICE_OR_INT("screen", screen_id, 0, 0, 32,
                       ({"default", -1})),
     OPT_CHOICE_OR_INT("fs-screen", fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
-    OPT_FLAG("keepaspect", keepaspect, UPDATE_VIDEOPOS),
+    OPT_FLAG("keepaspect", keepaspect, 0),
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
+    OPT_FLAG("native-fs", native_fs, 0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
     OPT_CHOICE("x11-bypass-compositor", x11_bypass_compositor, 0,
                ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})),
 #endif
-#if HAVE_WIN32
+#if HAVE_WIN32_DESKTOP
     OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
 #endif
 #if HAVE_DRM
-    OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
-                        0, drm_validate_connector_opt),
-    OPT_INT("drm-mode", drm_mode_id, 0),
+    OPT_SUBSTRUCT("", drm_opts, drm_conf, 0),
 #endif
-#if HAVE_GL
     OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
-                        gl_hwdec_validate_opt),
+                        ra_hwdec_validate_opt),
     OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
-#endif
     {0}
 };
 
@@ -228,6 +202,7 @@ const struct m_sub_options vo_sub_opts = {
         .keepaspect = 1,
         .keepaspect_window = 1,
         .hidpi_window_scale = 1,
+        .native_fs = 1,
         .taskbar_progress = 1,
         .snap_window = 0,
         .border = 1,
@@ -261,19 +236,32 @@ const struct m_sub_options dvd_conf = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", CONF_TYPE_STORE, M_OPT_FIXED | CONF_NOCFG, .offset = -1},
+    {"v", &m_option_type_dummy_flag, M_OPT_FIXED | CONF_NOCFG | M_OPT_NOPROP,
+     .offset = -1},
     {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
      .min = 1, .offset = -1},
-    {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
-    {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    {"{", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+     .offset = -1},
+    {"}", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+     .offset = -1},
 
     // handled in m_config.c
     { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
     { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
-    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
-    { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+      .offset = -1},
+    { "list-options", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED |
+      M_OPT_NOPROP, .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
+    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
+              M_OPT_OPTIONAL_PARAM, .offset = -1},
+    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
+           M_OPT_OPTIONAL_PARAM, .offset = -1},
+
+    OPT_PRINT("list-protocols", stream_print_proto_list),
+    OPT_PRINT("version", print_version),
+    OPT_PRINT("V", print_version),
 
     OPT_CHOICE("player-operation-mode", operation_mode,
                M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
@@ -283,8 +271,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, 0),
-    OPT_FLAG_STORE("really-quiet", verbose,
-                   M_OPT_FIXED | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
+    OPT_FLAG("really-quiet", msg_really_quiet, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_FLAG("terminal", use_terminal, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | UPDATE_TERM,
                 .type = &m_option_type_msglevels),
@@ -293,7 +280,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("log-file", log_file, CONF_PRE_PARSE | M_OPT_FILE | UPDATE_TERM),
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
-#ifdef _WIN32
+#if HAVE_WIN32_DESKTOP
     OPT_CHOICE("priority", w32_priority, UPDATE_PRIORITY,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
@@ -308,14 +295,18 @@ const m_option_t mp_opts[] = {
                M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
-#if HAVE_LUA
-    OPT_STRINGLIST("script", script_files, M_OPT_FIXED | M_OPT_FILE),
+#if HAVE_LUA || HAVE_JAVASCRIPT
+    OPT_PATHLIST("scripts", script_files, M_OPT_FIXED),
+    OPT_CLI_ALIAS("script", "scripts-append"),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
+    OPT_FLAG("load-scripts", auto_load_scripts, 0),
+#endif
+#if HAVE_LUA
     OPT_FLAG("osc", lua_load_osc, UPDATE_BUILTIN_SCRIPTS),
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
-    OPT_FLAG("load-scripts", auto_load_scripts, 0),
+    OPT_FLAG("load-stats-overlay", lua_load_stats, UPDATE_BUILTIN_SCRIPTS),
 #endif
 
 // ------------------------- stream options --------------------
@@ -373,8 +364,10 @@ const m_option_t mp_opts[] = {
     OPT_ALIAS("audio", "aid"),
     OPT_STRINGLIST("alang", stream_lang[STREAM_AUDIO], 0),
     OPT_STRINGLIST("slang", stream_lang[STREAM_SUB], 0),
+    OPT_STRINGLIST("vlang", stream_lang[STREAM_VIDEO], 0),
+    OPT_FLAG("track-auto-selection", stream_auto_sel, 0),
 
-    OPT_STRING("lavfi-complex", lavfi_complex, 0),
+    OPT_STRING("lavfi-complex", lavfi_complex, UPDATE_LAVFI_COMPLEX),
 
     OPT_CHOICE("audio-display", audio_display, 0,
                ({"no", 0}, {"attachment", 1})),
@@ -382,7 +375,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("hls-bitrate", hls_bitrate, 0, 0, INT_MAX,
                       ({"no", -1}, {"min", 0}, {"max", INT_MAX})),
 
-    OPT_STRINGLIST("display-tags*", display_tags, 0),
+    OPT_STRINGLIST("display-tags", display_tags, 0),
 
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
@@ -390,7 +383,8 @@ const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    OPT_STRING_APPEND_LIST("audio-file", audio_files, M_OPT_FILE),
+    OPT_PATHLIST("audio-files", audio_files, 0),
+    OPT_CLI_ALIAS("audio-file", "audio-files-append"),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
@@ -428,15 +422,14 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
+#if HAVE_LIBAF
     OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list, ),
-    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list, ),
+    OPT_SETTINGSLIST("af", af_settings, 0, &af_obj_list, ),
+#endif
     OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list, ),
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list, ),
+    OPT_SETTINGSLIST("vf", vf_settings, 0, &vf_obj_list, ),
 
-    OPT_CHOICE("deinterlace", deinterlace, 0,
-               ({"auto", -1},
-                {"no", 0},
-                {"yes", 1})),
+    OPT_FLAG("deinterlace", deinterlace, UPDATE_DEINT),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
@@ -449,17 +442,16 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 #if HAVE_VIDEOTOOLBOX_HWACCEL
-    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0, .min = -1),
+    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0, .min = -1,
+                    .deprecation_message = "use --hwdec-image-format instead"),
 #endif
+    OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
     OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
-               ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
-
-    OPT_CHOICE("field-dominance", field_dominance, UPDATE_IMGPAR,
-               ({"auto", -1}, {"top", 0}, {"bottom", 1})),
+               ({"bitstream", 1}, {"container", 2})),
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
@@ -471,10 +463,12 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_STRING_APPEND_LIST("sub-file", sub_name, M_OPT_FILE),
-    OPT_PATHLIST("sub-paths", sub_paths, 0),
+    OPT_PATHLIST("sub-files", sub_name, 0),
+    OPT_CLI_ALIAS("sub-file", "sub-files-append"),
+    OPT_PATHLIST("sub-file-paths", sub_paths, 0),
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
-    OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
+    OPT_PATHLIST("external-files", external_files, 0),
+    OPT_CLI_ALIAS("external-file", "external-files-append"),
     OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_FLOAT("sub-delay", sub_delay, UPDATE_OSD),
     OPT_FLOAT("sub-fps", sub_fps, UPDATE_OSD),
@@ -511,8 +505,8 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("sub-ass-shaper", ass_shaper, UPDATE_OSD,
                ({"simple", 0}, {"complex", 1})),
     OPT_FLAG("sub-ass-justify", ass_justify, 0),
-    OPT_CHOICE("sub-ass-style-override", ass_style_override, UPDATE_OSD,
-               ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4}, {"strip", 5})),
+    OPT_CHOICE("sub-ass-override", ass_style_override, UPDATE_OSD,
+               ({"no", 0}, {"yes", 1}, {"force", 3}, {"scale", 4}, {"strip", 5})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, UPDATE_OSD),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, UPDATE_OSD),
     OPT_FLAG("sub-ass-scale-with-window", ass_scale_with_window, UPDATE_OSD),
@@ -579,17 +573,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
     OPT_FLAG("stop-screensaver", stop_screensaver, UPDATE_SCREENSAVER),
 
-    OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0,
-               .deprecation_message = "use Lua scripting instead"),
-    OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
-
-    OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
-    OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
-    OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
-    OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
-    OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
-    OPT_CHOICE_C("video-output-levels", video_output_levels, 0,
-                 mp_csp_levels_names),
+    OPT_SUBSTRUCT("", video_equalizer, mp_csp_equalizer_conf, 0),
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
@@ -623,6 +607,7 @@ const m_option_t mp_opts[] = {
                       ({"no", 0},
                        {"yes", -1},
                        {"inf", -1})),
+    OPT_ALIAS("loop", "loop-file"),
 
     OPT_FLAG("resume-playback", position_resume, 0),
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
@@ -702,20 +687,28 @@ const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("", input_opts, input_config, 0),
 
-    OPT_PRINT("list-protocols", stream_print_proto_list),
-    OPT_PRINT("help", print_help),
-    OPT_PRINT("h", print_help),
-    OPT_PRINT("version", print_version),
-    OPT_PRINT("V", print_version),
-
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
 
-#if HAVE_GL
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
+    OPT_SUBSTRUCT("", spirv_opts, spirv_conf, 0),
+
+#if HAVE_GL
+    OPT_SUBSTRUCT("", opengl_opts, opengl_conf, 0),
 #endif
 
-#if HAVE_EGL_ANGLE
+#if HAVE_VULKAN
+    OPT_SUBSTRUCT("", vulkan_opts, vulkan_conf, 0),
+#endif
+
+#if HAVE_D3D11
+    OPT_SUBSTRUCT("", d3d11_opts, d3d11_conf, 0),
+#if HAVE_D3D_HWACCEL
+    OPT_SUBSTRUCT("", d3d11va_opts, d3d11va_conf, 0),
+#endif
+#endif
+
+#if HAVE_EGL_ANGLE_WIN32
     OPT_SUBSTRUCT("", angle_opts, angle_conf, 0),
 #endif
 
@@ -726,6 +719,11 @@ const m_option_t mp_opts[] = {
 #if HAVE_GL_WIN32
     OPT_CHOICE("opengl-dwmflush", wingl_dwm_flush, 0,
                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
+#endif
+
+#if HAVE_CUDA_HWACCEL
+    OPT_CHOICE_OR_INT("cuda-decode-device", cuda_device, 0,
+                      0, INT_MAX, ({"auto", -1})),
 #endif
 
 #if HAVE_ENCODING
@@ -839,9 +837,10 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-shaper", "sub-ass-shaper"),
     OPT_REPLACED("ass-style-override", "sub-ass-style-override"),
     OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
+    OPT_REPLACED("sub-ass-style-override", "sub-ass-override"),
     OPT_REMOVED("fs-black-out-screens", NULL),
-    OPT_REPLACED_MSG("loop", "loop-playlist", "--loop will be changed to map to"
-        " --loop-file in future releases."),
+    OPT_REPLACED("sub-paths", "sub-file-paths"),
+    OPT_REMOVED("heartbeat-cmd", "use Lua scripting instead"),
 
     {0}
 };
@@ -852,7 +851,6 @@ const struct MPOpts mp_default_opts = {
     .audio_driver_list = NULL,
     .audio_decoders = NULL,
     .video_decoders = NULL,
-    .deinterlace = -1,
     .softvol = SOFTVOL_AUTO,
     .softvol_max = 130,
     .softvol_volume = 100,
@@ -862,14 +860,8 @@ const struct MPOpts mp_default_opts = {
     .audio_device = "auto",
     .audio_client_name = "mpv",
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
-    .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
-    .gamma_gamma = 0,
-    .gamma_brightness = 0,
-    .gamma_contrast = 0,
-    .gamma_saturation = 0,
-    .gamma_hue = 0,
     .video_osd = 1,
     .osd_level = 1,
     .osd_duration = 1000,
@@ -889,6 +881,7 @@ const struct MPOpts mp_default_opts = {
     .lua_load_ytdl = 1,
     .lua_ytdl_format = NULL,
     .lua_ytdl_raw_options = NULL,
+    .lua_load_stats = 1,
 #endif
     .auto_load_scripts = 1,
     .loop_times = 1,
@@ -930,6 +923,7 @@ const struct MPOpts mp_default_opts = {
     .stream_id_ff = { [STREAM_AUDIO] = -1,
                       [STREAM_VIDEO] = -1,
                       [STREAM_SUB] = -1, },
+    .stream_auto_sel = 1,
     .audio_display = 1,
     .sub_visibility = 1,
     .sub_pos = 100,
@@ -938,7 +932,7 @@ const struct MPOpts mp_default_opts = {
     .playback_speed = 1.,
     .pitch_correction = 1,
     .movie_aspect = -1.,
-    .field_dominance = -1,
+    .aspect_method = 2,
     .sub_auto = 0,
     .audiofile_auto = -1,
     .osd_bar_visible = 1,
@@ -952,7 +946,6 @@ const struct MPOpts mp_default_opts = {
     .ass_style_override = 1,
     .ass_shaper = 1,
     .use_embedded_fonts = 1,
-    .sub_fix_timing = 1,
     .screenshot_template = "mpv-shot%n",
 
     .hwdec_api = HAVE_RPI ? HWDEC_RPI : 0,
@@ -973,6 +966,8 @@ const struct MPOpts mp_default_opts = {
         "Performer", "Title", "Track", "icy-title", "service_name",
         NULL
     },
+
+    .cuda_device = -1,
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

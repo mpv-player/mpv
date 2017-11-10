@@ -36,18 +36,22 @@ typedef struct demux_packet {
     int stream;         // source stream index
 
     // segmentation (ordered chapters, EDL)
-    struct mp_codec_params *codec;
-    double start, end;
-    bool new_segment;
+    bool segmented;
+    struct mp_codec_params *codec;  // set to non-NULL iff segmented is set
+    double start, end;              // set to non-NOPTS iff segmented is set
 
     // private
     struct demux_packet *next;
     struct AVPacket *avpacket;   // keep the buffer allocation and sidedata
+    double kf_seek_pts; // demux.c internal: seek pts for keyframe range
 } demux_packet_t;
+
+struct AVBufferRef;
 
 struct demux_packet *new_demux_packet(size_t len);
 struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt);
 struct demux_packet *new_demux_packet_from(void *data, size_t len);
+struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf);
 void demux_packet_shorten(struct demux_packet *dp, size_t len);
 void free_demux_packet(struct demux_packet *dp);
 struct demux_packet *demux_copy_packet(struct demux_packet *dp);

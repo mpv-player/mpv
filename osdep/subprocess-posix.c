@@ -15,7 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <spawn.h>
+#include "osdep/posix-spawn.h"
 #include <poll.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -31,6 +31,8 @@
 #include "stream/stream.h"
 
 extern char **environ;
+
+#define SAFE_CLOSE(fd) do { if ((fd) >= 0) close((fd)); (fd) = -1; } while (0)
 
 // A silly helper: automatically skips entries with negative FDs
 static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
@@ -93,12 +95,9 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     }
     spawned = true;
 
-    close(p_stdout[1]);
-    p_stdout[1] = -1;
-    close(p_stderr[1]);
-    p_stderr[1] = -1;
-    close(devnull);
-    devnull = -1;
+    SAFE_CLOSE(p_stdout[1]);
+    SAFE_CLOSE(p_stderr[1]);
+    SAFE_CLOSE(devnull);
 
     int *read_fds[2] = {&p_stdout[0], &p_stderr[0]};
     subprocess_read_cb read_cbs[2] = {on_stdout, on_stderr};
@@ -119,10 +118,8 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
                     continue;
                 if (r > 0 && read_cbs[n])
                     read_cbs[n](ctx, buf, r);
-                if (r <= 0) {
-                    close(*read_fds[n]);
-                    *read_fds[n] = -1;
-                }
+                if (r <= 0)
+                    SAFE_CLOSE(*read_fds[n]);
             }
         }
         if (fds[2].revents) {
@@ -141,11 +138,11 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
 done:
     if (fa_destroy)
         posix_spawn_file_actions_destroy(&fa);
-    close(p_stdout[0]);
-    close(p_stdout[1]);
-    close(p_stderr[0]);
-    close(p_stderr[1]);
-    close(devnull);
+    SAFE_CLOSE(p_stdout[0]);
+    SAFE_CLOSE(p_stdout[1]);
+    SAFE_CLOSE(p_stderr[0]);
+    SAFE_CLOSE(p_stderr[1]);
+    SAFE_CLOSE(devnull);
 
     if (!spawned || (WIFEXITED(status) && WEXITSTATUS(status) == 127)) {
         *error = "init";

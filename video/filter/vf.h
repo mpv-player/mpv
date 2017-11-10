@@ -13,16 +13,12 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #ifndef MPLAYER_VF_H
 #define MPLAYER_VF_H
 
 #include <stdbool.h>
-
-#include "config.h"
 
 #include "video/mp_image.h"
 #include "common/common.h"
@@ -46,6 +42,7 @@ typedef struct vf_info {
 
 typedef struct vf_instance {
     const vf_info_t *info;
+    char *full_name;
 
     // Initialize the filter. The filter must set *out to the same image
     // params as the images the filter functions will return for the given
@@ -140,19 +137,8 @@ struct vf_chain {
     void *wakeup_callback_ctx;
 };
 
-typedef struct vf_seteq {
-    const char *item;
-    int value;
-} vf_equalizer_t;
-
 enum vf_ctrl {
     VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
-    VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
-    VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
-#if HAVE_GPL
-    VFCTRL_SET_DEINTERLACE,  // Set deinterlacing status
-    VFCTRL_GET_DEINTERLACE,  // Get deinterlacing status
-#endif
     VFCTRL_GET_METADATA,     // Get frame metadata from lavfi filters (e.g., cropdetect)
     /* Hack to make the OSD state object available to vf_sub which
      * access OSD/subtitle state outside of normal OSD draw time. */

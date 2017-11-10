@@ -24,5 +24,6 @@
 int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth);
 void json_skip_whitespace(char **src);
 int json_write(char **s, struct mpv_node *src);
+int json_write_pretty(char **s, struct mpv_node *src);
 
 #endif

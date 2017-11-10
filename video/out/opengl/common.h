@@ -26,10 +26,10 @@
 #include "common/msg.h"
 #include "misc/bstr.h"
 
-#include "video/out/vo.h"
 #include "video/csputils.h"
-
 #include "video/mp_image.h"
+#include "video/out/vo.h"
+#include "video/out/gpu/ra.h"
 
 #include "gl_headers.h"
 
@@ -54,6 +54,10 @@ enum {
     MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
     MPGL_CAP_ARB_FLOAT          = (1 << 19),    // GL_ARB_texture_float
     MPGL_CAP_EXT_CR_HFLOAT      = (1 << 20),    // GL_EXT_color_buffer_half_float
+    MPGL_CAP_UBO                = (1 << 21),    // GL_ARB_uniform_buffer_object
+    MPGL_CAP_SSBO               = (1 << 22),    // GL_ARB_shader_storage_buffer_object
+    MPGL_CAP_COMPUTE_SHADER     = (1 << 23),    // GL_ARB_compute_shader & GL_ARB_shader_image_load_store
+    MPGL_CAP_NESTED_ARRAY       = (1 << 24),    // GL_ARB_arrays_of_arrays
 
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
@@ -128,6 +132,7 @@ struct GL {
                                           GLbitfield);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
+    void (GLAPIENTRY *BufferSubData)(GLenum, GLintptr, GLsizeiptr, const GLvoid *);
     void (GLAPIENTRY *ActiveTexture)(GLenum);
     void (GLAPIENTRY *BindTexture)(GLenum, GLuint);
     int (GLAPIENTRY *SwapInterval)(int);
@@ -162,6 +167,11 @@ struct GL {
                                         void *);
     void (GLAPIENTRY *ProgramBinary)(GLuint, GLenum, const void *, GLsizei);
 
+    void (GLAPIENTRY *DispatchCompute)(GLuint, GLuint, GLuint);
+    void (GLAPIENTRY *BindImageTexture)(GLuint, GLuint, GLint, GLboolean,
+                                        GLint, GLenum, GLenum);
+    void (GLAPIENTRY *MemoryBarrier)(GLbitfield);
+
     const GLubyte* (GLAPIENTRY *GetStringi)(GLenum, GLuint);
     void (GLAPIENTRY *BindAttribLocation)(GLuint, GLuint, const GLchar *);
     void (GLAPIENTRY *BindFramebuffer)(GLenum, GLuint);
@@ -185,11 +195,14 @@ struct GL {
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
 
+    void (GLAPIENTRY *InvalidateTexImage)(GLuint, GLint);
     void (GLAPIENTRY *InvalidateFramebuffer)(GLenum, GLsizei, const GLenum *);
 
     GLsync (GLAPIENTRY *FenceSync)(GLenum, GLbitfield);
     GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
     void (GLAPIENTRY *DeleteSync)(GLsync sync);
+
+    void (GLAPIENTRY *BufferStorage)(GLenum, intptr_t, const GLvoid *, GLenum);
 
     void (GLAPIENTRY *GenQueries)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteQueries)(GLsizei, const GLuint *);

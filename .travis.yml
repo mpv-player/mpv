@@ -5,9 +5,7 @@ os:
   #- osx
 env:
   matrix:
-    - LIBAV=libav-stable
     - LIBAV=libav-git
-    - LIBAV=ffmpeg-stable
     - LIBAV=ffmpeg-git
   global:
     # Coverity token
@@ -27,15 +25,13 @@ branches:
 matrix:
   exclude:
     - os: osx
-      env: LIBAV=libav-stable
-    - os: osx
       env: LIBAV=libav-git
     - os: osx
       env: LIBAV=ffmpeg-git
     - os: osx
       compiler: gcc
     - os: linux
-      env: LIBAV=ffmpeg-stable
+      env: LIBAV=ffmpeg-git
     - os: linux
       compiler: clang
 
@@ -44,6 +40,7 @@ script:
   - ./bootstrap.py
   - ./waf configure
   - ./waf build
+after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
 
 notifications:

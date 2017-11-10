@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_M_CONFIG_H
@@ -163,26 +163,8 @@ enum {
 // Flags for safe option setting during runtime.
 #define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
 
-// Set the named option to the given string.
-// flags: combination of M_SETOPT_* flags (0 for normal operation)
-// Returns >= 0 on success, otherwise see OptionParserReturn.
-int m_config_set_option_ext(struct m_config *config, struct bstr name,
+int m_config_set_option_cli(struct m_config *config, struct bstr name,
                             struct bstr param, int flags);
-
-/*  Set an option. (Like: m_config_set_option_ext(config, name, param, 0))
- *  \param config The config object.
- *  \param name The option's name.
- *  \param param The value of the option, can be NULL.
- *  \return See \ref OptionParserReturn.
- */
-int m_config_set_option(struct m_config *config, struct bstr name,
-                        struct bstr param);
-
-static inline int m_config_set_option0(struct m_config *config,
-                                       const char *name, const char *param)
-{
-    return m_config_set_option(config, bstr0(name), bstr0(param));
-}
 
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
@@ -193,7 +175,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,
                                    void *data, int flags);
 
-// Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags);
@@ -294,9 +275,20 @@ struct m_config_cache {
     struct m_config *shadow_config;
     long long ts;
     int group;
+    bool in_list;
+    // --- Implicitly synchronized by setting/unsetting wakeup_cb.
+    struct mp_dispatch_queue *wakeup_dispatch_queue;
+    void (*wakeup_dispatch_cb)(void *ctx);
+    void *wakeup_dispatch_cb_ctx;
+    // --- Protected by shadow->lock
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_cb_ctx;
 };
 
 // Create a mirror copy from the global options.
+// Keep in mind that a m_config_cache object is not thread-safe; it merely
+// provides thread-safe access to the global options. All API functions for
+// the same m_config_cache object must synchronized, unless otherwise noted.
 //  ta_parent: parent for the returned allocation
 //  global: option data source
 //  group: the option group to return. This can be NULL for the global option
@@ -306,6 +298,22 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
                                             struct mpv_global *global,
                                             const struct m_sub_options *group);
 
+// If any of the options in the group possibly changes, call this callback. The
+// callback must not actually access the cache or anything option related.
+// Instead, it must wake up the thread that normally accesses the cache.
+void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
+                                  void (*cb)(void *ctx), void *cb_ctx);
+
+// If any of the options in the group change, call this callback on the given
+// dispatch queue. This is higher level than m_config_cache_set_wakeup_cb(),
+// and you can do anything you want in the callback (assuming the dispatch
+// queue is processed in the same thread that accesses m_config_cache API).
+// To ensure clean shutdown, you must destroy the m_config_cache (or unset the
+// callback) before the dispatch queue is destroyed.
+void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
+                                           struct mp_dispatch_queue *dispatch,
+                                           void (*cb)(void *ctx), void *cb_ctx);
+
 // Update the options in cache->opts to current global values. Return whether
 // there was an update notification at all (which may or may not indicate that
 // some options have changed).
@@ -314,12 +322,12 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
 bool m_config_cache_update(struct m_config_cache *cache);
 
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
-// directly, with no way to update the config.
+// directly, with no way to update the config. Basically this returns a copy
+// with a snapshot of the current option values.
 // Warning: does currently not set the child as its own talloc root, which
 //          means the only way to free the struct is by freeing ta_parent.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
-
 
 // Read a single global option in a thread-safe way. For multiple options,
 // use m_config_cache. The option must exist and match the provided type (the

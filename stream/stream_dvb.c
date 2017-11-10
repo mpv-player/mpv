@@ -58,6 +58,10 @@
 #include "dvbin.h"
 #include "dvb_tune.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 #define MAX_ADAPTERS 16
 #define CHANNEL_LINE_LEN 256
 #define min(a, b) ((a) <= (b) ? (a) : (b))
@@ -86,6 +90,50 @@ const struct m_sub_options stream_dvb_conf = {
 
 void dvbin_close(stream_t *stream);
 
+static fe_modulation_t parse_vdr_modulation(const char** modstring) {
+    if (!strncmp(*modstring, "16", 2)) {
+        (*modstring)+=2;
+        return QAM_16;
+    } else if (!strncmp(*modstring, "32", 2)) {
+        (*modstring)+=2;
+        return QAM_32;
+    } else if (!strncmp(*modstring, "64", 2)) {
+        (*modstring)+=2;
+        return QAM_64;
+    } else if (!strncmp(*modstring, "128", 3)) {
+        (*modstring)+=3;
+        return QAM_128;
+    } else if (!strncmp(*modstring, "256", 3)) {
+        (*modstring)+=3;
+        return QAM_256;
+    } else if (!strncmp(*modstring, "998", 3)) {
+        (*modstring)+=3;
+        return QAM_AUTO;
+    } else if (!strncmp(*modstring, "2", 1)) {
+        (*modstring)++;
+        return QPSK;
+    } else if (!strncmp(*modstring, "5", 1)) {
+        (*modstring)++;
+        return PSK_8;
+    } else if (!strncmp(*modstring, "6", 1)) {
+        (*modstring)++;
+        return APSK_16;
+    } else if (!strncmp(*modstring, "7", 1)) {
+        (*modstring)++;
+        return APSK_32;
+    } else if (!strncmp(*modstring, "10", 2)) {
+        (*modstring)+=2;
+        return VSB_8;
+    } else if (!strncmp(*modstring, "11", 2)) {
+        (*modstring)+=2;
+        return VSB_16;
+    } else if (!strncmp(*modstring, "12", 2)) {
+        (*modstring)+=2;
+        return DQPSK;
+    } else {
+        return QAM_AUTO;
+    }
+}
 
 static void parse_vdr_par_string(const char *vdr_par_str, dvb_channel_t *ptr)
 {
@@ -130,6 +178,10 @@ static void parse_vdr_par_string(const char *vdr_par_str, dvb_channel_t *ptr)
                     ptr->inv = INVERSION_OFF;
                 }
                 vdr_par++;
+                break;
+            case 'M':
+                vdr_par++;
+                ptr->mod = parse_vdr_modulation(&vdr_par);
                 break;
             default:
                 vdr_par++;
@@ -299,9 +351,13 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                         &num_chars);
 
         if (num_chars == strlen(&line[k])) {
+            // Modulation parsed here, not via old xine-parsing path.
+            mod[0] = '\0';
             // It's a VDR-style config line.
             parse_vdr_par_string(vdr_par_str, ptr);
-            // We still need the special SAT-handling here.
+            // Units in VDR-style config files are divided by 1000.
+            ptr->freq *=  1000UL;
+            ptr->srate *=  1000UL;
             switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
@@ -317,6 +373,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             case SYS_DVBC_ANNEX_A:
             case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
+            case SYS_DVBC_ANNEX_B:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d",
                            get_dvb_delsys(delsys),
@@ -333,9 +390,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 }
                 if (!DELSYS_IS_SET(delsys_mask, delsys))
                     continue; /* Skip channel. */
-
-                ptr->freq *=  1000UL;
-                ptr->srate *=  1000UL;
 
                 if (vdr_loc_str[0]) {
                     // In older vdr config format, this field contained the DISEQc information.
@@ -391,6 +445,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 break;
 #ifdef DVB_ATSC
             case SYS_ATSC:
+            case SYS_DVBC_ANNEX_B:
                 fields = sscanf(&line[k], atsc_conf,
                                 &ptr->freq, mod, vpid_str, apid_str);
                 mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
@@ -524,6 +579,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
         case SYS_ATSC:
+        case SYS_DVBC_ANNEX_B:
             if (!strcmp(mod, "QAM_128")) {
                 ptr->mod = QAM_128;
             } else if (!strcmp(mod, "QAM_256")) {
@@ -542,6 +598,21 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 #endif
             }
         }
+#ifdef DVB_ATSC
+        /* Modulation defines real delsys for ATSC:
+           Terrestrial (VSB) is SYS_ATSC, Cable (QAM) is SYS_DVBC_ANNEX_B. */
+        if (delsys == SYS_ATSC || delsys == SYS_DVBC_ANNEX_B) {
+            if (ptr->mod == VSB_8 || ptr->mod == VSB_16) {
+                delsys = SYS_ATSC;
+            } else {
+                delsys = SYS_DVBC_ANNEX_B;
+            }
+            if (!DELSYS_IS_SET(delsys_mask, delsys))
+                continue; /* Skip channel. */
+            mp_verbose(log, "Switched to delivery system for ATSC: %s (guessed from modulation).\n",
+                       get_dvb_delsys(delsys));
+        }
+#endif
 
         switch (delsys) {
         case SYS_DVBT:

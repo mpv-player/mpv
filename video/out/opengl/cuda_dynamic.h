@@ -94,6 +94,7 @@ typedef CUresult CUDAAPI tcuCtxCreate_v2(CUcontext *pctx, unsigned int flags, CU
 typedef CUresult CUDAAPI tcuCtxPushCurrent_v2(CUcontext *pctx);
 typedef CUresult CUDAAPI tcuCtxPopCurrent_v2(CUcontext *pctx);
 typedef CUresult CUDAAPI tcuCtxDestroy_v2(CUcontext ctx);
+typedef CUresult CUDAAPI tcuDeviceGet(CUdevice *pdevice, int ordinal);
 typedef CUresult CUDAAPI tcuMemcpy2D_v2(const CUDA_MEMCPY2D *pcopy);
 typedef CUresult CUDAAPI tcuGetErrorName(CUresult error, const char** pstr);
 typedef CUresult CUDAAPI tcuGetErrorString(CUresult error, const char** pstr);
@@ -110,6 +111,7 @@ typedef CUresult CUDAAPI tcuGraphicsSubResourceGetMappedArray(CUarray* pArray, C
     FN(cuCtxPushCurrent_v2, tcuCtxPushCurrent_v2) \
     FN(cuCtxPopCurrent_v2, tcuCtxPopCurrent_v2) \
     FN(cuCtxDestroy_v2, tcuCtxDestroy_v2) \
+    FN(cuDeviceGet, tcuDeviceGet) \
     FN(cuMemcpy2D_v2, tcuMemcpy2D_v2) \
     FN(cuGetErrorName, tcuGetErrorName) \
     FN(cuGetErrorString, tcuGetErrorString) \
@@ -130,6 +132,7 @@ CUDA_FNS(CUDA_EXT_DECL)
 #define cuCtxPushCurrent mpv_cuCtxPushCurrent_v2
 #define cuCtxPopCurrent mpv_cuCtxPopCurrent_v2
 #define cuCtxDestroy mpv_cuCtxDestroy_v2
+#define cuDeviceGet mpv_cuDeviceGet
 #define cuMemcpy2D mpv_cuMemcpy2D_v2
 #define cuGetErrorName mpv_cuGetErrorName
 #define cuGetErrorString mpv_cuGetErrorString

@@ -289,37 +289,6 @@ int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
     return res;
 }
 
-int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
-{
-    if (!sws->supports_csp)
-        return 0;
-    if (!strcmp(eq->item, "brightness"))
-        eq->value =  ((sws->brightness * 100) + (1 << 15)) >> 16;
-    else if (!strcmp(eq->item, "contrast"))
-        eq->value = (((sws->contrast  * 100) + (1 << 15)) >> 16) - 100;
-    else if (!strcmp(eq->item, "saturation"))
-        eq->value = (((sws->saturation * 100) + (1 << 15)) >> 16) - 100;
-    else
-        return 0;
-    return 1;
-}
-
-int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
-{
-    if (!sws->supports_csp)
-        return 0;
-    if (!strcmp(eq->item, "brightness"))
-        sws->brightness = ((eq->value << 16) + 50) / 100;
-    else if (!strcmp(eq->item, "contrast"))
-        sws->contrast   = MPMAX(1, (((eq->value + 100) << 16) + 50) / 100);
-    else if (!strcmp(eq->item, "saturation"))
-        sws->saturation = (((eq->value + 100) << 16) + 50) / 100;
-    else
-        return 0;
-
-    return mp_sws_reinit(sws) >= 0 ? 1 : -1;
-}
-
 static const int endian_swaps[][2] = {
 #if BYTE_ORDER == LITTLE_ENDIAN
 #if defined(AV_PIX_FMT_YA16) && defined(AV_PIX_FMT_RGBA64)

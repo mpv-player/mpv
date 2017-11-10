@@ -192,10 +192,7 @@ static void uninit(struct af_instance* af)
     af_ac3enc_t *s = af->priv;
 
     if (s) {
-        if(s->lavc_actx) {
-            avcodec_close(s->lavc_actx);
-            av_free(s->lavc_actx);
-        }
+        avcodec_free_context(&s->lavc_actx);
         talloc_free(s->pending);
     }
 }

@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include "stream.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 extern const char * const dvd_audio_stream_channels[6];
 extern const char * const dvd_audio_stream_types[8];
 

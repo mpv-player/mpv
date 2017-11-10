@@ -112,7 +112,8 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     unsigned long id = atomic_fetch_add(&counter, 1);
     unsigned pid = GetCurrentProcessId();
     wchar_t buf[36];
-    swprintf(buf, sizeof(buf), L"\\\\.\\pipe\\mpv-anon-%08x-%08lx", pid, id);
+    swprintf(buf, MP_ARRAY_SIZE(buf), L"\\\\.\\pipe\\mpv-anon-%08x-%08lx",
+             pid, id);
 
     // The function for creating anonymous pipes (CreatePipe) can't create
     // overlapped pipes, so instead, use a named pipe with a unique name
@@ -126,8 +127,10 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     // Open the write end of the pipe as a synchronous handle
     *write = CreateFileW(buf, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, NULL);
-    if (*write == INVALID_HANDLE_VALUE)
+    if (*write == INVALID_HANDLE_VALUE) {
+        CloseHandle(*read);
         goto error;
+    }
 
     return 0;
 error:
@@ -173,8 +176,10 @@ error:
 static int sparse_wait(HANDLE *handles, unsigned num_handles)
 {
     unsigned w_num_handles = 0;
-    HANDLE w_handles[num_handles];
-    int map[num_handles];
+    HANDLE w_handles[10];
+    int map[10];
+    if (num_handles > MP_ARRAY_SIZE(w_handles))
+        return -1;
 
     for (unsigned i = 0; i < num_handles; i++) {
         if (!handles[i])

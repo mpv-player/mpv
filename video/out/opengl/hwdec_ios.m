@@ -23,23 +23,32 @@
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGLES/EAGL.h>
 
+#include <libavutil/hwcontext.h>
+
+#include "config.h"
+
+#include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
-#include "video/vt.h"
-#include "formats.h"
-#include "hwdec.h"
+#include "ra_gl.h"
+
+struct priv_owner {
+    struct mp_hwdec_ctx hwctx;
+};
 
 struct priv {
-    struct mp_hwdec_ctx hwctx;
-
     CVPixelBufferRef pbuf;
     CVOpenGLESTextureCacheRef gl_texture_cache;
     CVOpenGLESTextureRef gl_planes[MP_MAX_PLANES];
-    struct gl_imgfmt_desc desc;
+    struct ra_imgfmt_desc desc;
 };
 
-static bool check_hwdec(struct gl_hwdec *hw)
+static bool check_hwdec(struct ra_hwdec *hw)
 {
-    if (hw->gl->es < 200) {
+    if (!ra_is_gl(hw->ra))
+        return false;
+
+    GL *gl = ra_gl_get(hw->ra);
+    if (gl->es < 200) {
         MP_ERR(hw, "need OpenGLES 2.0 for CVOpenGLESTextureCacheCreateTextureFromImage()\n");
         return false;
     }
@@ -52,13 +61,95 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static int create_hwdec(struct gl_hwdec *hw)
+static int init(struct ra_hwdec *hw)
 {
+    struct priv_owner *p = hw->priv;
+
     if (!check_hwdec(hw))
         return -1;
 
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_VIDEOTOOLBOX,
+        .ctx = &p->hwctx,
+    };
+
+    av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
+                           NULL, NULL, 0);
+
+    hwdec_devices_add(hw->devs, &p->hwctx);
+
+    return 0;
+}
+
+static void uninit(struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
+
+    if (p->hwctx.ctx)
+        hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
+}
+
+// In GLES3 mode, CVOpenGLESTextureCacheCreateTextureFromImage()
+// will return error -6683 unless invoked with GL_LUMINANCE and
+// GL_LUMINANCE_ALPHA (http://stackoverflow.com/q/36213994/332798)
+// If a format trues to use GL_RED/GL_RG instead, try to find a format
+// that uses GL_LUMINANCE[_ALPHA] instead.
+static const struct ra_format *find_la_variant(struct ra *ra,
+                                               const struct ra_format *fmt)
+{
+    GLint internal_format;
+    GLenum format;
+    GLenum type;
+    ra_gl_get_format(fmt, &internal_format, &format, &type);
+
+    if (format == GL_RED) {
+        format = internal_format = GL_LUMINANCE;
+    } else if (format == GL_RG) {
+        format = internal_format = GL_LUMINANCE_ALPHA;
+    } else {
+        return fmt;
+    }
+
+    for (int n = 0; n < ra->num_formats; n++) {
+        const struct ra_format *fmt2 = ra->formats[n];
+        GLint internal_format2;
+        GLenum format2;
+        GLenum type2;
+        ra_gl_get_format(fmt2, &internal_format2, &format2, &type2);
+        if (internal_format2 == internal_format &&
+            format2 == format && type2 == type)
+            return fmt2;
+    }
+
+    return NULL;
+}
+
+static int mapper_init(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
+    mapper->dst_params.hw_subfmt = 0;
+
+    if (!mapper->dst_params.imgfmt) {
+        MP_ERR(mapper, "Unsupported CVPixelBuffer format.\n");
+        return -1;
+    }
+
+    if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &p->desc)) {
+        MP_ERR(mapper, "Unsupported texture format.\n");
+        return -1;
+    }
+
+    for (int n = 0; n < p->desc.num_planes; n++) {
+        p->desc.planes[n] = find_la_variant(mapper->ra, p->desc.planes[n]);
+        if (!p->desc.planes[n] || p->desc.planes[n]->ctype != RA_CTYPE_UNORM) {
+            MP_ERR(mapper, "Format unsupported.\n");
+            return -1;
+        }
+    }
 
     CVReturn err = CVOpenGLESTextureCacheCreate(
         kCFAllocatorDefault,
@@ -68,46 +159,19 @@ static int create_hwdec(struct gl_hwdec *hw)
         &p->gl_texture_cache);
 
     if (err != noErr) {
-        MP_ERR(hw, "Failure in CVOpenGLESTextureCacheCreate: %d\n", err);
+        MP_ERR(mapper, "Failure in CVOpenGLESTextureCacheCreate: %d\n", err);
         return -1;
     }
-
-    p->hwctx = (struct mp_hwdec_ctx){
-        .type = HWDEC_VIDEOTOOLBOX,
-        .download_image = mp_vt_download_image,
-        .ctx = &p->hwctx,
-    };
-    hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    assert(params->imgfmt == hw->driver->imgfmt);
+    struct priv *p = mapper->priv;
 
-    if (!params->hw_subfmt) {
-        MP_ERR(hw, "Unsupported CVPixelBuffer format.\n");
-        return -1;
-    }
-
-    if (!gl_get_imgfmt_desc(hw->gl, params->hw_subfmt, &p->desc)) {
-        MP_ERR(hw, "Unsupported texture format.\n");
-        return -1;
-    }
-
-    params->imgfmt = params->hw_subfmt;
-    params->hw_subfmt = 0;
-    return 0;
-}
-
-static void cleanup_textures(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-    int i;
-
-    for (i = 0; i < MP_MAX_PLANES; i++) {
+    for (int i = 0; i < p->desc.num_planes; i++) {
+        ra_tex_free(mapper->ra, &mapper->tex[i]);
         if (p->gl_planes[i]) {
             CFRelease(p->gl_planes[i]);
             p->gl_planes[i] = NULL;
@@ -117,37 +181,26 @@ static void cleanup_textures(struct gl_hwdec *hw)
     CVOpenGLESTextureCacheFlush(p->gl_texture_cache, 0);
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
     CVPixelBufferRelease(p->pbuf);
-    p->pbuf = (CVPixelBufferRef)hw_image->planes[3];
+    p->pbuf = (CVPixelBufferRef)mapper->src->planes[3];
     CVPixelBufferRetain(p->pbuf);
 
     const bool planar = CVPixelBufferIsPlanar(p->pbuf);
     const int planes  = CVPixelBufferGetPlaneCount(p->pbuf);
     assert((planar && planes == p->desc.num_planes) || p->desc.num_planes == 1);
 
-    cleanup_textures(hw);
-
     for (int i = 0; i < p->desc.num_planes; i++) {
-        const struct gl_format *fmt = p->desc.planes[i];
-        GLenum format = fmt->format;
-        GLenum internal_format = fmt->internal_format;
+        const struct ra_format *fmt = p->desc.planes[i];
 
-        if (hw->gl->es >= 300) {
-            // In GLES3 mode, CVOpenGLESTextureCacheCreateTextureFromImage()
-            // will return error -6683 unless invoked with GL_LUMINANCE and
-            // GL_LUMINANCE_ALPHA (http://stackoverflow.com/q/36213994/332798)
-            if (format == GL_RED) {
-                format = internal_format = GL_LUMINANCE;
-            } else if (format == GL_RG) {
-                format = internal_format = GL_LUMINANCE_ALPHA;
-            }
-        }
+        GLint internal_format;
+        GLenum format;
+        GLenum type;
+        ra_gl_get_format(fmt, &internal_format, &format, &type);
 
         CVReturn err = CVOpenGLESTextureCacheCreateTextureFromImage(
             kCFAllocatorDefault,
@@ -159,12 +212,12 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             CVPixelBufferGetWidthOfPlane(p->pbuf, i),
             CVPixelBufferGetHeightOfPlane(p->pbuf, i),
             format,
-            fmt->type,
+            type,
             i,
             &p->gl_planes[i]);
 
         if (err != noErr) {
-            MP_ERR(hw, "error creating texture for plane %d: %d\n", i, err);
+            MP_ERR(mapper, "error creating texture for plane %d: %d\n", i, err);
             return -1;
         }
 
@@ -175,40 +228,49 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
-        out_frame->planes[i] = (struct gl_hwdec_plane){
-            .gl_texture = CVOpenGLESTextureGetName(p->gl_planes[i]),
-            .gl_target = GL_TEXTURE_2D,
-            .gl_format = format,
-            .tex_w = CVPixelBufferGetWidthOfPlane(p->pbuf, i),
-            .tex_h = CVPixelBufferGetHeightOfPlane(p->pbuf, i),
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = CVPixelBufferGetWidthOfPlane(p->pbuf, i),
+            .h = CVPixelBufferGetHeightOfPlane(p->pbuf, i),
+            .d = 1,
+            .format = fmt,
+            .render_src = true,
+            .src_linear = true,
         };
-    }
 
-    snprintf(out_frame->swizzle, sizeof(out_frame->swizzle), "%s",
-             p->desc.swizzle);
+        mapper->tex[i] = ra_create_wrapped_tex(
+            mapper->ra,
+            &params,
+            CVOpenGLESTextureGetName(p->gl_planes[i])
+        );
+        if (!mapper->tex[i])
+            return -1;
+    }
 
     return 0;
 }
 
-static void destroy(struct gl_hwdec *hw)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-
-    cleanup_textures(hw);
+    struct priv *p = mapper->priv;
 
     CVPixelBufferRelease(p->pbuf);
     CFRelease(p->gl_texture_cache);
     p->gl_texture_cache = NULL;
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
 }
 
-const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
+const struct ra_hwdec_driver ra_hwdec_videotoolbox = {
     .name = "videotoolbox",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_VIDEOTOOLBOX,
-    .imgfmt = IMGFMT_VIDEOTOOLBOX,
-    .create = create_hwdec,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_VIDEOTOOLBOX, 0},
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
 };

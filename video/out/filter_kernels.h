@@ -28,7 +28,8 @@ struct filter_window {
 struct filter_kernel {
     struct filter_window f; // the kernel itself
     struct filter_window w; // window storage
-    bool clamp; // clamp to the range [0-1]
+    double clamp; // clamping factor, affects negative weights
+    double value_cutoff; // discard all contributions below this value (polar)
     // Constant values
     const char *window; // default window
     bool polar;         // whether or not the filter uses polar coordinates
@@ -38,6 +39,7 @@ struct filter_kernel {
                           // function radius to the possibly wider
                           // (in the case of downsampling) filter sample
                           // radius.
+    double radius_cutoff; // the true radius at which we can cut off the filter
 };
 
 extern const struct filter_window mp_filter_windows[];
@@ -48,6 +50,7 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name);
 
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double scale);
-void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array);
+void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
+                    float *out_array);
 
 #endif /* MPLAYER_FILTER_KERNELS_H */

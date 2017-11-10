@@ -27,62 +27,39 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
+#include "ra_gl.h"
 #include "video/hwdec.h"
 #include "video/decode/d3d.h"
 
-struct priv {
+struct priv_owner {
     struct mp_hwdec_ctx hwctx;
-
     IDirect3D9Ex       *d3d9ex;
     IDirect3DDevice9Ex *device9ex;
+
+    EGLDisplay egl_display;
+    EGLConfig  egl_config;
+    EGLint     alpha;
+};
+
+struct priv {
+    IDirect3DDevice9Ex *device9ex; // (no own reference)
     IDirect3DQuery9    *query9;
     IDirect3DTexture9  *texture9;
     IDirect3DSurface9  *surface9;
 
     EGLDisplay egl_display;
-    EGLConfig  egl_config;
-    EGLint     alpha;
     EGLSurface egl_surface;
 
     GLuint gl_texture;
 };
 
-static void destroy_textures(struct gl_hwdec *hw)
+static void uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *p = hw->priv;
 
-    gl->DeleteTextures(1, &p->gl_texture);
-    p->gl_texture = 0;
-
-    if (p->egl_display && p->egl_surface) {
-        eglReleaseTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
-        eglDestroySurface(p->egl_display, p->egl_surface);
-        p->egl_surface = NULL;
-    }
-
-    if (p->surface9) {
-        IDirect3DSurface9_Release(p->surface9);
-        p->surface9 = NULL;
-    }
-
-    if (p->texture9) {
-        IDirect3DTexture9_Release(p->texture9);
-        p->texture9 = NULL;
-    }
-}
-
-static void destroy(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-
-    destroy_textures(hw);
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
-
-    if (p->query9)
-        IDirect3DQuery9_Release(p->query9);
+    if (p->hwctx.ctx)
+        hwdec_devices_remove(hw->devs, &p->hwctx);
 
     if (p->device9ex)
         IDirect3DDevice9Ex_Release(p->device9ex);
@@ -91,8 +68,13 @@ static void destroy(struct gl_hwdec *hw)
         IDirect3D9Ex_Release(p->d3d9ex);
 }
 
-static int create(struct gl_hwdec *hw)
+static int init(struct ra_hwdec *hw)
 {
+    struct priv_owner *p = hw->priv;
+    HRESULT hr;
+
+    if (!ra_is_gl(hw->ra))
+        return -1;
     if (!angle_load())
         return -1;
 
@@ -110,10 +92,6 @@ static int create(struct gl_hwdec *hw)
         !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer")) {
         return -1;
     }
-
-    HRESULT hr;
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
 
     p->egl_display = egl_display;
 
@@ -169,22 +147,6 @@ static int create(struct gl_hwdec *hw)
         goto fail;
     }
 
-    hr = IDirect3DDevice9_CreateQuery(p->device9ex, D3DQUERYTYPE_EVENT,
-                                      &p->query9);
-    if (FAILED(hr)) {
-        MP_FATAL(hw, "Failed to create Direct3D query interface: %s\n",
-                 mp_HRESULT_to_str(hr));
-        goto fail;
-    }
-
-    // Test the query API
-    hr = IDirect3DQuery9_Issue(p->query9, D3DISSUE_END);
-    if (FAILED(hr)) {
-        MP_FATAL(hw, "Failed to issue Direct3D END test query: %s\n",
-                 mp_HRESULT_to_str(hr));
-        goto fail;
-    }
-
     EGLint attrs[] = {
         EGL_BUFFER_SIZE, 32,
         EGL_RED_SIZE, 8,
@@ -207,60 +169,113 @@ static int create(struct gl_hwdec *hw)
         goto fail;
     }
 
+    struct mp_image_params dummy_params = {
+        .imgfmt = IMGFMT_DXVA2,
+        .w = 256,
+        .h = 256,
+    };
+    struct ra_hwdec_mapper *mapper = ra_hwdec_mapper_create(hw, &dummy_params);
+    if (!mapper)
+        goto fail;
+    ra_hwdec_mapper_free(&mapper);
+
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_DXVA2,
         .driver_name = hw->driver->name,
         .ctx = (IDirect3DDevice9 *)p->device9ex,
+        .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device9ex),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 fail:
-    destroy(hw);
     return -1;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+
+    ra_tex_free(mapper->ra, &mapper->tex[0]);
+    gl->DeleteTextures(1, &p->gl_texture);
+
+    if (p->egl_display && p->egl_surface) {
+        eglReleaseTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
+        eglDestroySurface(p->egl_display, p->egl_surface);
+    }
+
+    if (p->surface9)
+        IDirect3DSurface9_Release(p->surface9);
+
+    if (p->texture9)
+        IDirect3DTexture9_Release(p->texture9);
+
+    if (p->query9)
+        IDirect3DQuery9_Release(p->query9);
+}
+
+static int mapper_init(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
     HRESULT hr;
 
-    destroy_textures(hw);
+    p->device9ex = p_owner->device9ex;
+    p->egl_display = p_owner->egl_display;
+
+    hr = IDirect3DDevice9_CreateQuery(p->device9ex, D3DQUERYTYPE_EVENT,
+                                      &p->query9);
+    if (FAILED(hr)) {
+        MP_FATAL(mapper, "Failed to create Direct3D query interface: %s\n",
+                 mp_HRESULT_to_str(hr));
+        goto fail;
+    }
+
+    // Test the query API
+    hr = IDirect3DQuery9_Issue(p->query9, D3DISSUE_END);
+    if (FAILED(hr)) {
+        MP_FATAL(mapper, "Failed to issue Direct3D END test query: %s\n",
+                 mp_HRESULT_to_str(hr));
+        goto fail;
+    }
 
     HANDLE share_handle = NULL;
     hr = IDirect3DDevice9Ex_CreateTexture(p->device9ex,
-                                          params->w, params->h,
+                                          mapper->src_params.w,
+                                          mapper->src_params.h,
                                           1, D3DUSAGE_RENDERTARGET,
-                                          p->alpha ?  D3DFMT_A8R8G8B8 : D3DFMT_X8R8G8B8,
+                                          p_owner->alpha ?
+                                            D3DFMT_A8R8G8B8 : D3DFMT_X8R8G8B8,
                                           D3DPOOL_DEFAULT,
                                           &p->texture9,
                                           &share_handle);
     if (FAILED(hr)) {
-        MP_ERR(hw, "Failed to create Direct3D9 texture: %s\n",
+        MP_ERR(mapper, "Failed to create Direct3D9 texture: %s\n",
                mp_HRESULT_to_str(hr));
         goto fail;
     }
 
     hr = IDirect3DTexture9_GetSurfaceLevel(p->texture9, 0, &p->surface9);
     if (FAILED(hr)) {
-        MP_ERR(hw, "Failed to get Direct3D9 surface from texture: %s\n",
+        MP_ERR(mapper, "Failed to get Direct3D9 surface from texture: %s\n",
                mp_HRESULT_to_str(hr));
         goto fail;
     }
 
     EGLint attrib_list[] = {
-        EGL_WIDTH, params->w,
-        EGL_HEIGHT, params->h,
-        EGL_TEXTURE_FORMAT, p->alpha ? EGL_TEXTURE_RGBA : EGL_TEXTURE_RGB,
+        EGL_WIDTH, mapper->src_params.w,
+        EGL_HEIGHT, mapper->src_params.h,
+        EGL_TEXTURE_FORMAT, p_owner->alpha ? EGL_TEXTURE_RGBA : EGL_TEXTURE_RGB,
         EGL_TEXTURE_TARGET, EGL_TEXTURE_2D,
         EGL_NONE
     };
     p->egl_surface = eglCreatePbufferFromClientBuffer(
         p->egl_display, EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE,
-        share_handle, p->egl_config, attrib_list);
+        share_handle, p_owner->egl_config, attrib_list);
     if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_ERR(hw, "Failed to create EGL surface\n");
+        MP_ERR(mapper, "Failed to create EGL surface\n");
         goto fail;
     }
 
@@ -272,38 +287,51 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    params->imgfmt = IMGFMT_RGB0;
-    params->hw_subfmt = 0;
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = mapper->src_params.w,
+        .h = mapper->src_params.h,
+        .d = 1,
+        .format = ra_find_unorm_format(mapper->ra, 1, p_owner->alpha ? 4 : 3),
+        .render_src = true,
+        .src_linear = true,
+    };
+    if (!params.format)
+        goto fail;
+
+    mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
+    if (!mapper->tex[0])
+        goto fail;
+
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.hw_subfmt = 0;
     return 0;
 fail:
-    destroy_textures(hw);
     return -1;
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-    if (!p->surface9 || !p->egl_surface || !p->gl_texture)
-        return -1;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
     HRESULT hr;
-    RECT rc = {0, 0, hw_image->w, hw_image->h};
-    IDirect3DSurface9* hw_surface = (IDirect3DSurface9 *)hw_image->planes[3];
+    RECT rc = {0, 0, mapper->src->w, mapper->src->h};
+    IDirect3DSurface9* hw_surface = (IDirect3DSurface9 *)mapper->src->planes[3];
     hr = IDirect3DDevice9Ex_StretchRect(p->device9ex,
                                         hw_surface, &rc,
                                         p->surface9, &rc,
                                         D3DTEXF_NONE);
     if (FAILED(hr)) {
-        MP_ERR(hw, "Direct3D RGB conversion failed: %s\n",
+        MP_ERR(mapper, "Direct3D RGB conversion failed: %s\n",
                mp_HRESULT_to_str(hr));
         return -1;
     }
 
     hr = IDirect3DQuery9_Issue(p->query9, D3DISSUE_END);
     if (FAILED(hr)) {
-        MP_ERR(hw, "Failed to issue Direct3D END query\n");
+        MP_ERR(mapper, "Failed to issue Direct3D END query\n");
         return -1;
     }
 
@@ -316,11 +344,11 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     while (true) {
         hr = IDirect3DQuery9_GetData(p->query9, NULL, 0, D3DGETDATA_FLUSH);
         if (FAILED(hr)) {
-            MP_ERR(hw, "Failed to query Direct3D flush state\n");
+            MP_ERR(mapper, "Failed to query Direct3D flush state\n");
             return -1;
         } else if (hr == S_FALSE) {
             if (++retries > max_retries) {
-                MP_VERBOSE(hw, "Failed to flush frame after %lld ms\n",
+                MP_VERBOSE(mapper, "Failed to flush frame after %lld ms\n",
                            (long long)(wait_us * max_retries) / 1000);
                 break;
             }
@@ -334,25 +362,20 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    *out_frame = (struct gl_hwdec_frame){
-        .planes = {
-            {
-                .gl_texture = p->gl_texture,
-                .gl_target = GL_TEXTURE_2D,
-                .tex_w = hw_image->w,
-                .tex_h = hw_image->h,
-            },
-        },
-    };
     return 0;
 }
 
-const struct gl_hwdec_driver gl_hwdec_dxva2egl = {
+const struct ra_hwdec_driver ra_hwdec_dxva2egl = {
     .name = "dxva2-egl",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_DXVA2,
-    .imgfmt = IMGFMT_DXVA2,
-    .create = create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_DXVA2, 0},
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+    },
 };

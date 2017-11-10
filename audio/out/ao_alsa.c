@@ -49,6 +49,10 @@
 #include "internal.h"
 #include "audio/format.h"
 
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct ao_alsa_opts {
     char *mixer_device;
     char *mixer_name;
@@ -90,6 +94,8 @@ struct priv {
     snd_pcm_uframes_t outburst;
 
     snd_output_t *output;
+
+    struct ao_convert_fmt convert;
 
     struct ao_alsa_opts *opts;
 };
@@ -246,28 +252,36 @@ alsa_error:
     return CONTROL_ERROR;
 }
 
-static const int mp_to_alsa_format[][2] = {
+struct alsa_fmt {
+    int mp_format;
+    int alsa_format;
+    int bits;           // alsa format full sample size (optional)
+    int pad_msb;        // how many MSB bits are 0 (optional)
+};
+
+// Entries that have the same mp_format must be:
+//  1. consecutive
+//  2. sorted by preferred format (worst comes last)
+static const struct alsa_fmt mp_alsa_formats[] = {
     {AF_FORMAT_U8,          SND_PCM_FORMAT_U8},
     {AF_FORMAT_S16,         SND_PCM_FORMAT_S16},
     {AF_FORMAT_S32,         SND_PCM_FORMAT_S32},
-    {AF_FORMAT_S24,
-            MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
+    {AF_FORMAT_S32,         SND_PCM_FORMAT_S24, .bits = 32, .pad_msb = 8},
+    {AF_FORMAT_S32,
+            MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE),
+            .bits = 24, .pad_msb = 0},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
     {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
-    {AF_FORMAT_S_MP3,       SND_PCM_FORMAT_MPEG},
-    {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
+    {0},
 };
 
-static int find_alsa_format(int af_format)
+static const struct alsa_fmt *find_alsa_format(int mp_format)
 {
-    af_format = af_fmt_from_planar(af_format);
-    for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
-        if (mp_to_alsa_format[n][0] == af_format)
-            return mp_to_alsa_format[n][1];
+    for (int n = 0; mp_alsa_formats[n].mp_format; n++) {
+        if (mp_alsa_formats[n].mp_format == mp_format)
+            return &mp_alsa_formats[n];
     }
-    if (af_fmt_is_spdif(af_format))
-        return SND_PCM_FORMAT_S16;
-    return SND_PCM_FORMAT_UNKNOWN;
+    return NULL;
 }
 
 #if HAVE_CHMAP_API
@@ -648,6 +662,8 @@ static int init_device(struct ao *ao, int mode)
     size_t tmp_s;
     int err;
 
+    p->alsa_fmt = SND_PCM_FORMAT_UNKNOWN;
+
     err = snd_output_buffer_open(&p->output);
     CHECK_ALSA_ERROR("Unable to create output buffer");
 
@@ -699,15 +715,34 @@ static int init_device(struct ao *ao, int mode)
     bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, try_formats);
-    for (int n = 0; try_formats[n]; n++) {
-        if (af_fmt_is_planar(ao->format) != af_fmt_is_planar(try_formats[n]))
+    for (int n = 0; try_formats[n] && !found_format; n++) {
+        int mp_format = try_formats[n];
+        if (af_fmt_is_planar(ao->format) != af_fmt_is_planar(mp_format))
             continue; // implied SND_PCM_ACCESS mismatches
-        p->alsa_fmt = find_alsa_format(try_formats[n]);
-        MP_VERBOSE(ao, "trying format %s\n", af_fmt_to_str(try_formats[n]));
-        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
-            ao->format = try_formats[n];
-            found_format = true;
-            break;
+        int mp_pformat = af_fmt_from_planar(mp_format);
+        if (af_fmt_is_spdif(mp_pformat))
+            mp_pformat = AF_FORMAT_S16;
+        const struct alsa_fmt *fmt = find_alsa_format(mp_pformat);
+        if (!fmt)
+            continue;
+        for (; fmt->mp_format == mp_pformat; fmt++) {
+            p->alsa_fmt = fmt->alsa_format;
+            p->convert = (struct ao_convert_fmt){
+                .src_fmt = mp_format,
+                .dst_bits = fmt->bits ? fmt->bits : af_fmt_to_bytes(mp_format) * 8,
+                .pad_msb = fmt->pad_msb,
+            };
+            if (!ao_can_convert_inplace(&p->convert))
+                continue;
+            MP_VERBOSE(ao, "trying format %s/%d\n", af_fmt_to_str(mp_pformat),
+                       p->alsa_fmt);
+            if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams,
+                                              p->alsa_fmt) >= 0)
+            {
+                ao->format = mp_format;
+                found_format = true;
+                break;
+            }
         }
     }
 
@@ -840,6 +875,9 @@ static int init_device(struct ao *ao, int mode)
     MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
     ao->device_buffer = p->buffersize;
+    ao->period_size = p->outburst;
+
+    p->convert.channels = ao->channels.num;
 
     return 0;
 
@@ -1066,6 +1104,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         return 0;
 
     do {
+        ao_convert_inplace(&p->convert, data, samples);
+
         if (af_fmt_is_planar(ao->format)) {
             res = snd_pcm_writen(p->alsa, data, samples);
         } else {

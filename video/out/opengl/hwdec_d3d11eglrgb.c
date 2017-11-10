@@ -27,7 +27,8 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
-#include "hwdec.h"
+#include "video/out/gpu/hwdec.h"
+#include "ra_gl.h"
 #include "video/hwdec.h"
 #include "video/decode/d3d.h"
 
@@ -35,54 +36,38 @@
 #define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x3AAB
 #endif
 
-struct priv {
+struct priv_owner {
     struct mp_hwdec_ctx hwctx;
 
     ID3D11Device *d3d11_device;
 
     EGLDisplay egl_display;
     EGLConfig  egl_config;
-    EGLSurface egl_surface;
+};
 
+struct priv {
+    EGLSurface egl_surface;
     GLuint gl_texture;
 };
 
-static void unmap(struct gl_hwdec *hw)
+static void uninit(struct ra_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    if (p->egl_surface) {
-        eglReleaseTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
-        eglDestroySurface(p->egl_display, p->egl_surface);
-    }
-    p->egl_surface = NULL;
-}
+    struct priv_owner *p = hw->priv;
 
-static void destroy_objects(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-
-    unmap(hw);
-
-    gl->DeleteTextures(1, &p->gl_texture);
-    p->gl_texture = 0;
-}
-
-static void destroy(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-
-    destroy_objects(hw);
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
+    if (p->hwctx.ctx)
+        hwdec_devices_remove(hw->devs, &p->hwctx);
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
-    p->d3d11_device = NULL;
 }
 
-static int create(struct gl_hwdec *hw)
+static int init(struct ra_hwdec *hw)
 {
+    struct priv_owner *p = hw->priv;
+    HRESULT hr;
+
+    if (!ra_is_gl(hw->ra))
+        return -1;
     if (!angle_load())
         return -1;
 
@@ -99,26 +84,17 @@ static int create(struct gl_hwdec *hw)
     if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer"))
         return -1;
 
-    HRESULT hr;
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
-
     p->egl_display = egl_display;
 
-    if (!d3d11_dll) {
+    if (!d3d11_D3D11CreateDevice) {
         if (!hw->probing)
             MP_ERR(hw, "Failed to load D3D11 library\n");
         goto fail;
     }
 
-    PFN_D3D11_CREATE_DEVICE CreateDevice =
-        (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
-    if (!CreateDevice)
-        goto fail;
-
-    hr = CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
-                      D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
-                      D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
+    hr = d3d11_D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+                                 D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
+                                 D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
     if (FAILED(hr)) {
         int lev = hw->probing ? MSGL_V : MSGL_ERR;
         mp_msg(hw->log, lev, "Failed to create D3D11 Device: %s\n",
@@ -164,21 +140,27 @@ static int create(struct gl_hwdec *hw)
         .type = HWDEC_D3D11VA,
         .driver_name = hw->driver->name,
         .ctx = p->d3d11_device,
+        .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 fail:
-    destroy(hw);
     return -1;
 }
 
-static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
+static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
-    destroy_objects(hw);
+    gl->DeleteTextures(1, &p->gl_texture);
+}
+
+static int mapper_init(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
@@ -188,22 +170,35 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    params->imgfmt = IMGFMT_RGB0;
-    params->hw_subfmt = 0;
+    mapper->dst_params = mapper->src_params;
+    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.hw_subfmt = 0;
     return 0;
 }
 
-static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     struct gl_hwdec_frame *out_frame)
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    ra_tex_free(mapper->ra, &mapper->tex[0]);
+    if (p->egl_surface) {
+        eglReleaseTexImage(o->egl_display, p->egl_surface, EGL_BACK_BUFFER);
+        eglDestroySurface(o->egl_display, p->egl_surface);
+    }
+    p->egl_surface = NULL;
+}
+
+static int mapper_map(struct ra_hwdec_mapper *mapper)
+{
+    struct priv_owner *o = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
     HRESULT hr;
 
     if (!p->gl_texture)
         return -1;
 
-    ID3D11Texture2D *d3d_tex = (void *)hw_image->planes[0];
+    ID3D11Texture2D *d3d_tex = (void *)mapper->src->planes[0];
     if (!d3d_tex)
         return -1;
 
@@ -233,37 +228,48 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         EGL_NONE
     };
     p->egl_surface = eglCreatePbufferFromClientBuffer(
-        p->egl_display, EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE,
-        share_handle, p->egl_config, attrib_list);
+        o->egl_display, EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE,
+        share_handle, o->egl_config, attrib_list);
     if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_ERR(hw, "Failed to create EGL surface\n");
+        MP_ERR(mapper, "Failed to create EGL surface\n");
         return -1;
     }
 
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
-    eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
+    eglBindTexImage(o->egl_display, p->egl_surface, EGL_BACK_BUFFER);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    *out_frame = (struct gl_hwdec_frame){
-        .planes = {
-            {
-                .gl_texture = p->gl_texture,
-                .gl_target = GL_TEXTURE_2D,
-                .tex_w = texdesc.Width,
-                .tex_h = texdesc.Height,
-            },
-        },
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = mapper->src_params.w,
+        .h = mapper->src_params.h,
+        .d = 1,
+        .format = ra_find_unorm_format(mapper->ra, 1, 4),
+        .render_src = true,
+        .src_linear = true,
     };
+    if (!params.format)
+        return -1;
+
+    mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
+    if (!mapper->tex[0])
+        return -1;
+
     return 0;
 }
 
-const struct gl_hwdec_driver gl_hwdec_d3d11eglrgb = {
+const struct ra_hwdec_driver ra_hwdec_d3d11eglrgb = {
     .name = "d3d11-egl-rgb",
+    .priv_size = sizeof(struct priv_owner),
     .api = HWDEC_D3D11VA,
-    .imgfmt = IMGFMT_D3D11RGB,
-    .create = create,
-    .reinit = reinit,
-    .map_frame = map_frame,
-    .unmap = unmap,
-    .destroy = destroy,
+    .imgfmts = {IMGFMT_D3D11RGB, 0},
+    .init = init,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
 };

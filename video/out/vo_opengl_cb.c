@@ -24,9 +24,11 @@
 #include "common/global.h"
 #include "player/client.h"
 
+#include "gpu/video.h"
+#include "gpu/hwdec.h"
 #include "opengl/common.h"
-#include "opengl/video.h"
-#include "opengl/hwdec.h"
+#include "opengl/context.h"
+#include "opengl/ra_gl.h"
 
 #include "libmpv/opengl_cb.h"
 
@@ -75,8 +77,6 @@ struct mpv_opengl_cb_context {
     bool force_update;
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
     bool update_new_opts;
-    bool eq_changed;
-    struct mp_csp_equalizer eq;
     struct vo *active;
 
     // --- This is only mutable while initialized=false, during which nothing
@@ -87,8 +87,9 @@ struct mpv_opengl_cb_context {
     //     application's OpenGL context is current - i.e. only while the
     //     host application is calling certain mpv_opengl_cb_* APIs.
     GL *gl;
+    struct ra_ctx *ra_ctx;
     struct gl_video *renderer;
-    struct gl_hwdec *hwdec;
+    struct ra_hwdec *hwdec;
     struct m_config_cache *vo_opts_cache;
     struct mp_vo_opts *vo_opts;
 };
@@ -144,6 +145,16 @@ void mpv_opengl_cb_set_update_callback(struct mpv_opengl_cb_context *ctx,
     pthread_mutex_unlock(&ctx->lock);
 }
 
+// Reset some GL attributes the user might clobber. For mid-term compatibility
+// only - we expect both user code and our code to do this correctly.
+static void reset_gl_state(GL *gl)
+{
+    gl->ActiveTexture(GL_TEXTURE0);
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+}
+
 int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
                           mpv_opengl_cb_get_proc_address_fn get_proc_address,
                           void *get_proc_address_ctx)
@@ -161,22 +172,40 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
         return MPV_ERROR_UNSUPPORTED;
     }
 
-    ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->global);
-    if (!ctx->renderer)
+    // initialize a blank ra_ctx to reuse ra_gl_ctx
+    ctx->ra_ctx = talloc_zero(ctx, struct ra_ctx);
+    ctx->ra_ctx->log = ctx->log;
+    ctx->ra_ctx->global = ctx->global;
+    ctx->ra_ctx->opts = (struct ra_ctx_opts) {
+        .probing = false,
+        .allow_sw = true,
+    };
+
+    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
+    struct ra_gl_ctx_params gl_params = {
+        // vo_opengl_cb is essentially like a gigantic external swapchain where
+        // the user is in charge of presentation / swapping etc. But we don't
+        // actually need to provide any of these functions, since we can just
+        // not call them to begin with - so just set it to an empty object to
+        // signal to ra_gl_ctx that we don't care about its latency emulation
+        // functionality
+        .external_swapchain = &empty_swapchain_fns
+    };
+
+    ctx->gl->SwapInterval = NULL; // we shouldn't randomly change this, so lock it
+    if (!ra_gl_ctx_init(ctx->ra_ctx, ctx->gl, gl_params))
         return MPV_ERROR_UNSUPPORTED;
+
+    ctx->renderer = gl_video_init(ctx->ra_ctx->ra, ctx->log, ctx->global);
 
     m_config_cache_update(ctx->vo_opts_cache);
 
     ctx->hwdec_devs = hwdec_devices_create();
-    ctx->hwdec = gl_hwdec_load(ctx->log, ctx->gl, ctx->global,
+    ctx->hwdec = ra_hwdec_load(ctx->log, ctx->ra_ctx->ra, ctx->global,
                                ctx->hwdec_devs, ctx->vo_opts->gl_hwdec_interop);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
     pthread_mutex_lock(&ctx->lock);
-    // We don't know the exact caps yet - use a known superset
-    ctx->eq.capabilities = MP_CSP_EQ_CAPS_GAMMA | MP_CSP_EQ_CAPS_BRIGHTNESS |
-                           MP_CSP_EQ_CAPS_COLORMATRIX;
-    ctx->eq_changed = true;
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         ctx->imgfmt_supported[n - IMGFMT_START] =
             gl_video_check_format(ctx->renderer, n);
@@ -184,7 +213,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     ctx->initialized = true;
     pthread_mutex_unlock(&ctx->lock);
 
-    gl_video_unset_gl_state(ctx->renderer);
+    reset_gl_state(ctx->gl);
     return 0;
 }
 
@@ -209,11 +238,14 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 
     gl_video_uninit(ctx->renderer);
     ctx->renderer = NULL;
-    gl_hwdec_uninit(ctx->hwdec);
+    ra_hwdec_uninit(ctx->hwdec);
     ctx->hwdec = NULL;
     hwdec_devices_destroy(ctx->hwdec_devs);
     ctx->hwdec_devs = NULL;
+    ra_gl_ctx_uninit(ctx->ra_ctx);
+    talloc_free(ctx->ra_ctx);
     talloc_free(ctx->gl);
+    ctx->ra_ctx = NULL;
     ctx->gl = NULL;
     return 0;
 }
@@ -222,7 +254,12 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
 
-    gl_video_set_gl_state(ctx->renderer);
+    if (fbo && !(ctx->gl->mpgl_caps & MPGL_CAP_FB)) {
+        MP_FATAL(ctx, "Rendering to FBO requested, but no FBO extension found!\n");
+        return MPV_ERROR_UNSUPPORTED;
+    }
+
+    reset_gl_state(ctx->gl);
 
     pthread_mutex_lock(&ctx->lock);
 
@@ -246,23 +283,21 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
                              &ctx->img_params, vp_w, abs(vp_h),
                              1.0, &src, &dst, &osd);
 
-        gl_video_resize(ctx->renderer, vp_w, vp_h, &src, &dst, &osd);
+        gl_video_resize(ctx->renderer, &src, &dst, &osd);
     }
 
     if (ctx->reconfigured) {
         gl_video_set_osd_source(ctx->renderer, vo ? vo->osd : NULL);
         gl_video_config(ctx->renderer, &ctx->img_params);
-        ctx->eq_changed = true;
     }
     if (ctx->update_new_opts) {
-        gl_video_update_options(ctx->renderer);
         if (vo)
             gl_video_configure_queue(ctx->renderer, vo);
         int debug;
-        mp_read_option_raw(ctx->global, "opengl-debug", &m_option_type_flag,
+        mp_read_option_raw(ctx->global, "gpu-debug", &m_option_type_flag,
                            &debug);
         ctx->gl->debug_context = debug;
-        gl_video_set_debug(ctx->renderer, debug);
+        ra_gl_set_debug(ctx->ra_ctx->ra, debug);
         if (gl_video_icc_auto_enabled(ctx->renderer))
             MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
@@ -275,13 +310,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         if (ctx->cur_frame)
             ctx->cur_frame->still = true;
     }
-
-    struct mp_csp_equalizer *eq = gl_video_eq_ptr(ctx->renderer);
-    if (ctx->eq_changed) {
-        memcpy(eq->values, ctx->eq.values, sizeof(eq->values));
-        gl_video_eq_update(ctx->renderer);
-    }
-    ctx->eq_changed = false;
 
     struct vo_frame *frame = ctx->next_frame;
     int64_t wait_present_count = ctx->present_count;
@@ -305,9 +333,15 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     pthread_mutex_unlock(&ctx->lock);
 
     MP_STATS(ctx, "glcb-render");
-    gl_video_render_frame(ctx->renderer, frame, fbo);
+    struct ra_swapchain *sw = ctx->ra_ctx->swapchain;
+    struct ra_fbo target;
+    ra_gl_ctx_resize(sw, vp_w, abs(vp_h), fbo);
+    ra_gl_ctx_start_frame(sw, &target);
+    target.flip = vp_h < 0;
+    gl_video_render_frame(ctx->renderer, frame, target);
+    ra_gl_ctx_submit_frame(sw, frame);
 
-    gl_video_unset_gl_state(ctx->renderer);
+    reset_gl_state(ctx->gl);
 
     if (frame != &dummy)
         talloc_free(frame);
@@ -442,24 +476,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
         return VO_TRUE;
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        pthread_mutex_lock(&p->ctx->lock);
-        bool r = mp_csp_equalizer_get(&p->ctx->eq, args->name, args->valueptr) >= 0;
-        pthread_mutex_unlock(&p->ctx->lock);
-        return r ? VO_TRUE : VO_NOTIMPL;
-    }
-    case VOCTRL_SET_EQUALIZER: {
-        struct voctrl_set_equalizer_args *args = data;
-        pthread_mutex_lock(&p->ctx->lock);
-        bool r = mp_csp_equalizer_set(&p->ctx->eq, args->name, args->value) >= 0;
-        if (r) {
-            p->ctx->eq_changed = true;
-            update(p);
-        }
-        pthread_mutex_unlock(&p->ctx->lock);
-        return r ? VO_TRUE : VO_NOTIMPL;
-    }
+    case VOCTRL_SET_EQUALIZER:
+        vo->want_redraw = true;
+        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->force_update = true;
@@ -508,8 +527,6 @@ static int preinit(struct vo *vo)
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
     p->ctx->update_new_opts = true;
-    memset(p->ctx->eq.values, 0, sizeof(p->ctx->eq.values));
-    p->ctx->eq_changed = true;
     pthread_mutex_unlock(&p->ctx->lock);
 
     vo->hwdec_devs = p->ctx->hwdec_devs;

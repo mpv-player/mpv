@@ -30,10 +30,9 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-
-- A not too ancient Linux, Windows Vista or later, or OSX 10.8 or later.
-- A somewhat capable CPU. Hardware decoding might help if the CPU is too
-  slow to decode video in realtime, but must be explicitly enabled with
+- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
+- A somewhat capable CPU. Hardware decoding might sometimes help if the CPU
+  is too slow to decode video in realtime, but must be explicitly enabled with
   the `--hwdec` option.
 - A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
   many caveats with drivers or system compositors causing tearing, stutter,
@@ -51,13 +50,15 @@ https://mpv.io/installation/.
 ## Changelogs
 
 
-Changes to the core player interface are listed in the [interface changelog][interface-changes].
+There is no complete changelog; however, changes to the player core interface
+are listed in the [interface changelog][interface-changes].
 
 Changes to the C API are documented in the [client API changelog][api-changes].
 
 The major changes of releases are documented in the [release list][releases].
 
-Changes to the default key bindings are indicated in [restore-old-bindings.conf][restore-old-bindings].
+Changes to the default key bindings are indicated in
+[restore-old-bindings.conf][restore-old-bindings].
 
 ## Compilation
 
@@ -66,7 +67,7 @@ Compiling with all features requires the development files of several
 external libraries. Below is a list of some important requirements.
 
 The mpv build system uses [Waf](https://waf.io/), but we don't store it in the
-source tree. Run the `bootstrap.py` script to download the latest version of
+repository. The `bootstrap.py` script will download the latest version of
 Waf that was tested with the build system.
 
 For a list of the available build options see `./waf configure --help`. If
@@ -79,17 +80,21 @@ To build the software you can use `./waf build`: the result of the compilation
 will be located in `build/mpv`. You can use `./waf install` to install mpv
 to the *prefix* after it is compiled.
 
-Essential dependencies (incomplete):
+Example:
+
+    ./bootstrap.py
+    ./waf configure
+    ./waf
+    ./waf install
+
+Essential dependencies (incomplete list):
 
 - gcc or clang
 - X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
   libGL, GLX, EGL, xv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
-  and either libswresample or libavresample)
-  At least FFmpeg 3.2.2 or Libav 12 is required.
-  For hardware decoding with vaapi and vdpau, FFmpeg 3.3 or Libav git is
-  required.
+  and either libswresample or libavresample) from ffmpeg-mpv or Libav
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
@@ -97,7 +102,6 @@ Essential dependencies (incomplete):
 - libjpeg (optional, used for screenshots only)
 - uchardet (optional, for subtitle charset detection)
 - vdpau and vaapi libraries for hardware decoding on Linux (optional)
-  (FFmpeg 3.3 or Libav git is also required.)
 
 Libass dependencies:
 
@@ -110,14 +114,14 @@ Libass dependencies:
 FFmpeg dependencies:
 
 - gcc or clang, yasm on x86 and x86_64
-- OpenSSL (has to be explicitly enabled when compiling ffmpeg)
-- libx264/libmp3lame/libfdk-aac if you want to use encoding (has to be
-  explicitly enabled when compiling ffmpeg)
+- OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
+- libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
+  explicitly enabled when compiling FFmpeg)
 - Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
-Linux distributions. However FFmpeg is an exception (distro versions may be
-too old to work at all or work well). For that reason you may want to use
+Linux distributions. However, FFmpeg is an exception - [ffmpeg-mpv][ffmpeg-mpv]
+or Libav git master is required. For that reason you may want to use
 the separately available build wrapper ([mpv-build][mpv-build]) that first
 compiles FFmpeg libraries and libass, and then compiles the player statically
 linked against those.
@@ -137,17 +141,14 @@ with FFmpeg only (subtitle formats in particular).
 
 ## Preferred FFmpeg version
 
+Only [ffmpeg-mpv][ffmpeg-mpv] is supported. Upstream FFmpeg can be forced by
+passing a certain switch to configure, but compilation or runtime behavior
+might be broken at times.
 
-Using the latest FFmpeg release (or FFmpeg git master) is strongly recommended.
-Older versions are unsupported, even if the build system still happens to
-accept them. The main reason mpv still builds with older FFmpeg versions is to
-evade arguing with people (users, distros) who insist on using older FFmpeg
-versions for no rational reason.
-
-If you want to use a stable FFmpeg release, use the latest release, which has
-most likely the best maintenance out of all stable releases. Older releases
-are for distros, and at best receive basic changes like fixing critical security
-issues or build fixes, and at worst are completely abandoned.
+_If_ you force upstream FFmpeg, and it doesn't work, please contact upstream
+FFmpeg for help, instead of mpv. See
+[FFmpeg contact][http://ffmpeg.org/contact.html#MailingLists] how to contact
+FFmpeg upstream.
 
 ## FFmpeg ABI compatibility
 
@@ -180,42 +181,45 @@ See the [release policy document][release-policy] for more information.
 
 
 Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
-reports or feature requests.
+reports or feature requests. Follow the template's instructions or the issue
+will likely be ignored or closed as invalid.
+
+Using the bug tracker as place for simple questions is fine but IRC is
+recommended (see [Contact](#Contact) below).
 
 ## Contributing
 
+
+Please read [contribute.md][contribute.md].
 
 For small changes you can just send us pull requests through GitHub. For bigger
 changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
 
+You can check [the wiki](https://github.com/mpv-player/mpv/wiki/Stuff-to-do)
+or the [issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22)
+for ideas on what you could contribute with.
+
 ## Relation to MPlayer and mplayer2
 
+mpv is a fork of MPlayer. Much has changed, and in general, mpv should be
+considered a completely new program, rather than a MPlayer drop-in replacement.
 
-mpv is based on mplayer2, which in turn is based on the original MPlayer
-(also called mplayer, mplayer-svn, mplayer1). Many changes have been made, a
-large part of which is incompatible or completely changes how the player
-behaves. Although there are still many similarities to its ancestors, mpv
-should generally be treated as a completely different program.
-
-mpv was forked because we wanted to modernize MPlayer. This includes
-removing cruft (including features which stopped making sense 10 years ago),
-and of course adding modern features. Such huge and intrusive changes made it
-infeasible to work directly with MPlayer, which is mostly focused on
-preservation, so a fork had to be made. (Actually, mpv is based on mplayer2,
-which already started this process of removing cruft.)
-
-In general, mpv should be considered a completely new program, rather than a
-MPlayer drop-in replacement.
+For details see [FAQ entry](https://github.com/mpv-player/mpv/wiki/FAQ#How_is_mpv_related_to_MPlayer).
 
 If you are wondering what's different from mplayer2 and MPlayer, an incomplete
-and now unmaintained list of changes is located [here][mplayer-changes].
+and largely unmaintained list of changes is located [here][mplayer-changes].
+
+## License
+
+GPLv2 "or later" by default, LGPLv2.1 "or later" with `--enable-lgpl`.
+See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
+
 
 ## Contact
 
 
-Most activity happens on the IRC channel and the github issue tracker. The
-mailing lists are mostly unused.
+Most activity happens on the IRC channel and the github issue tracker.
 
  - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
  - **User IRC Channel**: `#mpv` on `irc.freenode.net`
@@ -235,8 +239,5 @@ only if discretion is required.
 [interface-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/interface-changes.rst
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
-
-## License
-
-
-Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
+[contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
+[ffmpeg-mpv]: https://github.com/mpv-player/ffmpeg-mpv

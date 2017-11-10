@@ -54,7 +54,6 @@ struct formatmap_entry {
 const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_YV12, IMGFMT_420P, 0},
     {SDL_PIXELFORMAT_IYUV, IMGFMT_420P, 0},
-    {SDL_PIXELFORMAT_YUY2, IMGFMT_YUYV, 0},
     {SDL_PIXELFORMAT_UYVY, IMGFMT_UYVY, 0},
     //{SDL_PIXELFORMAT_YVYU, IMGFMT_YVYU, 0},
 #if BYTE_ORDER == BIG_ENDIAN
@@ -609,11 +608,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
             break;
         case SDL_MOUSEBUTTONDOWN:
             mp_input_put_key(vo->input_ctx,
-                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
+                (MP_MBTN_BASE + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
             mp_input_put_key(vo->input_ctx,
-                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_UP);
+                (MP_MBTN_BASE + ev.button.button - 1) | MP_KEY_STATE_UP);
             break;
         case SDL_MOUSEWHEEL:
             break;
@@ -845,44 +844,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
 
-    // decode brightness/contrast
-    int color_add = 0;
-    int color_mod = 255;
-    int brightness = vc->brightness;
-    int contrast = vc->contrast;
-
-    // only in this range it is possible to do brightness/contrast control
-    // properly, using just additive render operations and color modding
-    // (SDL2 provides no subtractive rendering, sorry)
-    if (2 * brightness < contrast) {
-        //brightness = (brightness + 2 * contrast) / 5; // closest point
-        brightness = (brightness + contrast) / 3; // equal adjustment
-        contrast = 2 * brightness;
-    }
-
-    // convert to values SDL2 likes
-    color_mod = ((contrast + 100) * 255 + 50) / 100;
-    color_add = ((2 * brightness - contrast) * 255 + 100) / 200;
-
-    // clamp
-    if (color_mod < 0)
-        color_mod = 0;
-    if (color_mod > 255)
-        color_mod = 255;
-    // color_add can't be < 0
-    if (color_add > 255)
-        color_add = 255;
-
     // typically this runs in parallel with the following mp_image_copy call
-    SDL_SetRenderDrawColor(vc->renderer, color_add, color_add, color_add, 255);
+    SDL_SetRenderDrawColor(vc->renderer, 0, 0, 0, 255);
     SDL_RenderClear(vc->renderer);
 
-    // use additive blending for the video texture only if the clear color is
-    // not black (faster especially for the software renderer)
-    if (color_add)
-        SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_ADD);
-    else
-        SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_NONE);
+    SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_NONE);
 
     if (mpi) {
         vc->osd_pts = mpi->pts;
@@ -910,15 +876,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     dst.w = vc->dst_rect.x1 - vc->dst_rect.x0;
     dst.h = vc->dst_rect.y1 - vc->dst_rect.y0;
 
-    // typically this runs in parallel with the following mp_image_copy call
-    if (color_mod > 255) {
-        SDL_SetTextureColorMod(vc->tex, color_mod / 2, color_mod / 2, color_mod / 2);
-        SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
-        SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
-    } else {
-        SDL_SetTextureColorMod(vc->tex, color_mod, color_mod, color_mod);
-        SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
-    }
+    SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
 
     draw_osd(vo);
 }
@@ -939,36 +897,6 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     return image;
 }
 
-static int set_eq(struct vo *vo, const char *name, int value)
-{
-    struct priv *vc = vo->priv;
-
-    if (!strcmp(name, "brightness"))
-        vc->brightness = value;
-    else if (!strcmp(name, "contrast"))
-        vc->contrast = value;
-    else
-        return VO_NOTIMPL;
-
-    vo->want_redraw = true;
-
-    return VO_TRUE;
-}
-
-static int get_eq(struct vo *vo, const char *name, int *value)
-{
-    struct priv *vc = vo->priv;
-
-    if (!strcmp(name, "brightness"))
-        *value = vc->brightness;
-    else if (!strcmp(name, "contrast"))
-        *value = vc->contrast;
-    else
-        return VO_NOTIMPL;
-
-    return VO_TRUE;
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *vc = vo->priv;
@@ -983,14 +911,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER: {
-        struct voctrl_set_equalizer_args *args = data;
-        return set_eq(vo, args->name, args->value);
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        return get_eq(vo, args->name, args->valueptr);
-    }
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = get_window_screenshot(vo);
         return true;

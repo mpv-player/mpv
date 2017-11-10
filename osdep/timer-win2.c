@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include "timer.h"
 
+#include "config.h"
+
 static LARGE_INTEGER perf_freq;
 
 void mp_sleep_us(int64_t us)
@@ -50,5 +52,7 @@ uint64_t mp_raw_time_us(void)
 void mp_raw_time_init(void)
 {
     QueryPerformanceFrequency(&perf_freq);
+#if !HAVE_UWP
     timeBeginPeriod(1); // request 1ms timer resolution
+#endif
 }

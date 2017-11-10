@@ -27,6 +27,11 @@
 
 #include "video/out/vo.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_vflip(mpi);

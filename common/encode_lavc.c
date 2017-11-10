@@ -1,22 +1,23 @@
 /*
  * muxing using libavformat
+ *
  * Copyright (C) 2010 Nicolas George <george@nsup.org>
  * Copyright (C) 2011-2012 Rudolf Polzer <divVerent@xonotic.org>
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <libavutil/avutil.h>
@@ -38,13 +39,13 @@ const struct m_sub_options encode_config = {
     .opts = (const m_option_t[]) {
         OPT_STRING("o", file, M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
         OPT_STRING("of", format, M_OPT_FIXED),
-        OPT_STRINGLIST("ofopts*", fopts, M_OPT_FIXED),
+        OPT_STRINGLIST("ofopts", fopts, M_OPT_FIXED),
         OPT_FLOATRANGE("ofps", fps, M_OPT_FIXED, 0.0, 1000000.0),
         OPT_FLOATRANGE("omaxfps", maxfps, M_OPT_FIXED, 0.0, 1000000.0),
         OPT_STRING("ovc", vcodec, M_OPT_FIXED),
-        OPT_STRINGLIST("ovcopts*", vopts, M_OPT_FIXED),
+        OPT_STRINGLIST("ovcopts", vopts, M_OPT_FIXED),
         OPT_STRING("oac", acodec, M_OPT_FIXED),
-        OPT_STRINGLIST("oacopts*", aopts, M_OPT_FIXED),
+        OPT_STRINGLIST("oacopts", aopts, M_OPT_FIXED),
         OPT_FLAG("oharddup", harddup, M_OPT_FIXED),
         OPT_FLOATRANGE("ovoffset", voffset, M_OPT_FIXED, -1000000.0, 1000000.0),
         OPT_FLOATRANGE("oaoffset", aoffset, M_OPT_FIXED, -1000000.0, 1000000.0),
@@ -383,10 +384,7 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
                     stream_write_buffer(ctx->twopass_bytebuffer_v,
                                         stats, strlen(stats));
             }
-            avcodec_close(ctx->vcc);
-            talloc_free(ctx->vcc->stats_in);
-            av_free(ctx->vcc);
-            ctx->vcc = NULL;
+            avcodec_free_context(&ctx->vcc);
         }
 
         if (ctx->acc) {
@@ -396,10 +394,7 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
                     stream_write_buffer(ctx->twopass_bytebuffer_a,
                                         stats, strlen(stats));
             }
-            avcodec_close(ctx->acc);
-            talloc_free(ctx->acc->stats_in);
-            av_free(ctx->acc);
-            ctx->acc = NULL;
+            avcodec_free_context(&ctx->acc);
         }
 
         for (i = 0; i < ctx->avc->nb_streams; i++) {

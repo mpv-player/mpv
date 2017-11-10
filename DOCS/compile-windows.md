@@ -101,11 +101,14 @@ Installing MSYS2
 
 1. Download an installer from https://msys2.github.io/
 
-   It doesn't matter whether the i686 or the x86_64 version is used. Both can
-   build 32-bit and 64-bit binaries when running on a 64-bit version of Windows.
+   Both the i686 and the x86_64 version of MSYS2 can build 32-bit and 64-bit
+   mpv binaries when running on a 64-bit version of Windows, but the x86_64
+   version is preferred since the larger address space makes it less prone to
+   fork() errors.
 
-2. Start a MinGW-w64 shell (``mingw64.exe``). Note that this is different
-   from the MSYS2 shell that is started from the final installation dialog.
+2. Start a MinGW-w64 shell (``mingw64.exe``). **Note:** This is different from
+   the MSYS2 shell that is started from the final installation dialog. You must
+   close that shell and open a new one.
 
    For a 32-bit build, use ``mingw32.exe``.
 
@@ -129,42 +132,37 @@ Installing mpv dependencies
 
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git mingw-w64-x86_64-pkg-config python mingw-w64-x86_64-gcc
+pacman -S git python $MINGW_PACKAGE_PREFIX-{pkg-config,gcc}
 
-# Install the most important MinGW-w64 dependencies. libass, libbluray and
-# lcms2 are also pulled in as dependencies of ffmpeg.
-pacman -S mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-lua51
-
-# Install additional (optional) dependencies
-pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-libguess mingw-w64-x86_64-angleproject-git
+# Install the most important MinGW-w64 dependencies. libass and lcms2 are also
+# pulled in as dependencies of ffmpeg.
+pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51,angleproject-git}
 ```
-
-For a 32-bit build, install ``mingw-w64-i686-*`` packages instead.
 
 Building mpv
 ------------
 
-Clone the latest mpv from git and install waf:
+Clone the latest mpv from git and install waf. **Note:** ``/usr/bin/python3``
+is invoked directly here, since an MSYS2 version of Python is required.
 
 ```bash
 git clone https://github.com/mpv-player/mpv.git && cd mpv
-./bootstrap.py
+/usr/bin/python3 bootstrap.py
 ```
 
 Finally, compile and install mpv. Binaries will be installed to
-``/mingw64/bin``.
+``/mingw64/bin`` or ``/mingw32/bin``.
 
 ```bash
-# For a 32-bit build, use --prefix=/mingw32 instead
-./waf configure CC=gcc.exe --check-c-compiler=gcc --prefix=/mingw64
-./waf install
+/usr/bin/python3 waf configure CC=gcc.exe --check-c-compiler=gcc --prefix=$MSYSTEM_PREFIX
+/usr/bin/python3 waf install
 ```
 
 Or, compile and install both libmpv and mpv:
 
 ```bash
-./waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=/mingw64
-./waf install
+/usr/bin/python3 waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=$MSYSTEM_PREFIX
+/usr/bin/python3 waf install
 ```
 
 Linking libmpv with MSVC programs

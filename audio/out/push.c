@@ -37,7 +37,6 @@
 #include "osdep/timer.h"
 #include "osdep/atomic.h"
 
-#include "audio/audio.h"
 #include "audio/audio_buffer.h"
 
 struct ao_push_state {
@@ -49,7 +48,8 @@ struct ao_push_state {
 
     struct mp_audio_buffer *buffer;
 
-    struct mp_audio *silence;
+    uint8_t *silence[MP_NUM_CHANNELS];
+    int silence_samples;
 
     bool terminate;
     bool wait_on_ao;
@@ -237,12 +237,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         flags = flags & ~AOPLAY_FINAL_CHUNK;
     bool is_final = flags & AOPLAY_FINAL_CHUNK;
 
-    struct mp_audio audio;
-    mp_audio_buffer_get_format(p->buffer, &audio);
-    for (int n = 0; n < ao->num_planes; n++)
-        audio.planes[n] = data[n];
-    audio.samples = write_samples;
-    mp_audio_buffer_append(p->buffer, &audio);
+    mp_audio_buffer_append(p->buffer, data, samples);
 
     bool got_data = write_samples > 0 || p->paused || p->final_chunk != is_final;
 
@@ -260,22 +255,26 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     return write_samples;
 }
 
-static void ao_get_silence(struct ao *ao, struct mp_audio *data, int size)
+static bool realloc_silence(struct ao *ao, int samples)
 {
     struct ao_push_state *p = ao->api_priv;
-    if (!p->silence) {
-        p->silence = talloc_zero(p, struct mp_audio);
-        mp_audio_set_format(p->silence, ao->format);
-        mp_audio_set_channels(p->silence, &ao->channels);
-        p->silence->rate = ao->samplerate;
+
+    if (samples <= 0 || !af_fmt_is_pcm(ao->format))
+        return false;
+
+    if (samples > p->silence_samples) {
+        talloc_free(p->silence[0]);
+
+        int bytes = af_fmt_to_bytes(ao->format) * samples * ao->channels.num;
+        p->silence[0] = talloc_size(p, bytes);
+        for (int n = 1; n < MP_NUM_CHANNELS; n++)
+            p->silence[n] = p->silence[0];
+        p->silence_samples = samples;
+
+        af_fill_silence(p->silence[0], bytes, ao->format);
     }
-    if (p->silence->samples < size) {
-        mp_audio_realloc_min(p->silence, size);
-        p->silence->samples = size;
-        mp_audio_fill_silence(p->silence, 0, size);
-    }
-    *data = *p->silence;
-    data->samples = size;
+
+    return true;
 }
 
 // called locked
@@ -285,30 +284,43 @@ static void ao_play_data(struct ao *ao)
     int space = ao->driver->get_space(ao);
     bool play_silence = p->paused || (ao->stream_silence && !p->still_playing);
     space = MPMAX(space, 0);
-    struct mp_audio data;
+    if (space % ao->period_size)
+        MP_ERR(ao, "Audio device reports unaligned available buffer size.\n");
+    uint8_t **planes;
+    int samples;
     if (play_silence) {
-        ao_get_silence(ao, &data, space);
+        planes = p->silence;
+        samples = realloc_silence(ao, space) ? space : 0;
     } else {
-        mp_audio_buffer_peek(p->buffer, &data);
+        mp_audio_buffer_peek(p->buffer, &planes, &samples);
     }
-    int max = data.samples;
-    if (data.samples > space)
-        data.samples = space;
+    int max = samples;
+    if (samples > space)
+        samples = space;
     int flags = 0;
-    if (p->final_chunk && data.samples == max)
+    if (p->final_chunk && samples == max) {
         flags |= AOPLAY_FINAL_CHUNK;
+    } else {
+        samples = samples / ao->period_size * ao->period_size;
+    }
     MP_STATS(ao, "start ao fill");
     int r = 0;
-    if (data.samples)
-        r = ao->driver->play(ao, data.planes, data.samples, flags);
+    if (samples)
+        r = ao->driver->play(ao, (void **)planes, samples, flags);
     MP_STATS(ao, "end ao fill");
-    if (r > data.samples) {
-        MP_WARN(ao, "Audio device returned non-sense value.\n");
-        r = data.samples;
+    if (r > samples) {
+        MP_ERR(ao, "Audio device returned non-sense value.\n");
+        r = samples;
+    } else if (r < 0) {
+        MP_ERR(ao, "Error writing audio to device.\n");
+    } else if (r != samples) {
+        MP_ERR(ao, "Audio device returned broken buffer state (sent %d samples, "
+               "got %d samples, %d period%s)!\n", samples, r,
+               ao->period_size, flags & AOPLAY_FINAL_CHUNK ? " final" : "");
     }
     r = MPMAX(r, 0);
     // Probably can't copy the rest of the buffer due to period alignment.
-    bool stuck_eof = r <= 0 && space >= max && data.samples > 0;
+    bool stuck_eof = r <= 0 && space >= max && samples > 0;
     if ((flags & AOPLAY_FINAL_CHUNK) && stuck_eof) {
         MP_ERR(ao, "Audio output driver seems to ignore AOPLAY_FINAL_CHUNK.\n");
         r = max;
@@ -412,8 +424,11 @@ static void destroy_no_thread(struct ao *ao)
 
     ao->driver->uninit(ao);
 
-    for (int n = 0; n < 2; n++)
-        close(p->wakeup_pipe[n]);
+    for (int n = 0; n < 2; n++) {
+        int h = p->wakeup_pipe[n];
+        if (h >= 0)
+            close(h);
+    }
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
@@ -477,17 +492,13 @@ const struct ao_driver ao_api_push = {
 int ao_play_silence(struct ao *ao, int samples)
 {
     assert(ao->api == &ao_api_push);
-    if (samples <= 0 || !af_fmt_is_pcm(ao->format) || !ao->driver->play)
+
+    struct ao_push_state *p = ao->api_priv;
+
+    if (!realloc_silence(ao, samples) || !ao->driver->play)
         return 0;
-    int bytes = af_fmt_to_bytes(ao->format) * samples * ao->channels.num;
-    char *p = talloc_size(NULL, bytes);
-    af_fill_silence(p, bytes, ao->format);
-    void *tmp[MP_NUM_CHANNELS];
-    for (int n = 0; n < MP_NUM_CHANNELS; n++)
-        tmp[n] = p;
-    int r = ao->driver->play(ao, tmp, samples, 0);
-    talloc_free(p);
-    return r;
+
+    return ao->driver->play(ao, (void **)p->silence, samples, 0);
 }
 
 #ifndef __MINGW32__

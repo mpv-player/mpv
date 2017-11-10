@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPV_VAAPI_H
@@ -26,50 +26,26 @@
 #include "mp_image.h"
 #include "hwdec.h"
 
-struct mp_image_pool;
-struct mp_log;
-
 struct mp_vaapi_ctx {
     struct mp_hwdec_ctx hwctx;
     struct mp_log *log;
     VADisplay display;
     struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
-    struct va_image_formats *image_formats;
-    bool gpu_memcpy_message;
     // Internal, for va_create_standalone()
     void *native_ctx;
     void (*destroy_native_ctx)(void *native_ctx);
 };
 
-bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
-
-#define CHECK_VA_STATUS(ctx, msg) check_va_status((ctx)->log, status, msg)
+#define CHECK_VA_STATUS(ctx, msg) \
+    (status == VA_STATUS_SUCCESS ? true \
+        : (MP_ERR(ctx, "%s failed (%s)\n", msg, vaErrorStr(status)), false))
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 
 struct mp_vaapi_ctx *    va_initialize(VADisplay *display, struct mp_log *plog, bool probing);
 void                     va_destroy(struct mp_vaapi_ctx *ctx);
 
-enum mp_imgfmt           va_fourcc_to_imgfmt(uint32_t fourcc);
-uint32_t                 va_fourcc_from_imgfmt(int imgfmt);
-VAImageFormat *          va_image_format_from_imgfmt(struct mp_vaapi_ctx *ctx, int imgfmt);
-bool                     va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi);
-bool                     va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image);
-
-void va_surface_get_uncropped_size(struct mp_image *mpi, int *out_w, int *out_h);
-
-void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
-                           int rt_format);
-
 VASurfaceID va_surface_id(struct mp_image *mpi);
-int va_surface_rt_format(struct mp_image *mpi);
-struct mp_image *va_surface_download(struct mp_image *src,
-                                     struct mp_image_pool *pool);
-
-int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt);
-int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src);
-
-void va_surface_init_subformat(struct mp_image *mpi);
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
 

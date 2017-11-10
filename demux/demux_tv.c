@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2001 Alex Beregszaszi
+ *
+ * Feb 19, 2002: Significant rewrites by Charles R. Henrich (henrich@msu.edu)
+ *               to add support for audio, and bktr *BSD support.
+ *
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * mpv is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <assert.h>
 
 #include "common/common.h"
@@ -11,7 +33,6 @@
 #include "codec_tags.h"
 
 #include "audio/format.h"
-#include "video/img_fourcc.h"
 #include "osdep/endian.h"
 
 #include "stream/stream.h"
@@ -228,10 +249,10 @@ static int demux_tv_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     if (cmd != DEMUXER_CTRL_STREAM_CTRL)
-        return DEMUXER_CTRL_NOTIMPL;
+        return CONTROL_UNKNOWN;
     struct demux_ctrl_stream_ctrl *ctrl = arg;
     ctrl->res = tv_stream_control(tvh, ctrl->ctrl, ctrl->arg);
-    return DEMUXER_CTRL_OK;
+    return CONTROL_OK;
 }
 
 const demuxer_desc_t demuxer_desc_tv = {

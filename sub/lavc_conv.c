@@ -57,12 +57,13 @@ static const char *get_lavc_format(const char *format)
 // We always want the user defined style instead.
 static void disable_styles(bstr header)
 {
+    bstr style = bstr0("\nStyle: ");
     while (header.len) {
-        int n = bstr_find(header, bstr0("\nStyle: "));
+        int n = bstr_find(header, style);
         if (n < 0)
             break;
         header.start[n + 1] = '#'; // turn into a comment
-        header = bstr_cut(header, 2);
+        header = bstr_cut(header, n + style.len);
     }
 }
 
@@ -237,6 +238,8 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
     avsubtitle_free(&priv->cur);
 
     mp_set_av_packet(&pkt, packet, &avctx->time_base);
+    if (pkt.pts < 0)
+        pkt.pts = 0;
 
     if (strcmp(priv->codec, "webvtt-webm") == 0) {
         if (parse_webvtt(&pkt, &parsed_pkt) < 0) {

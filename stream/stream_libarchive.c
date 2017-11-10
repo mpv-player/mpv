@@ -126,12 +126,30 @@ static int switch_cb(struct archive *arch, void *oldpriv, void *newpriv)
     return open_cb(arch, newpriv);
 }
 
-void mp_archive_free(struct mp_archive *mpa)
+static void mp_archive_close(struct mp_archive *mpa)
 {
     if (mpa && mpa->arch) {
         archive_read_close(mpa->arch);
         archive_read_free(mpa->arch);
+        mpa->arch = NULL;
     }
+}
+
+// Supposedly we're not allowed to continue reading on FATAL returns. Otherwise
+// crashes and other UB is possible. Assume calling the close/free functions is
+// still ok. Return true if it was fatal and the archive was closed.
+static bool mp_archive_check_fatal(struct mp_archive *mpa, int r)
+{
+    if (r > ARCHIVE_FATAL)
+        return false;
+    MP_FATAL(mpa, "fatal error received - cllsing archive\n");
+    mp_archive_close(mpa);
+    return true;
+}
+
+void mp_archive_free(struct mp_archive *mpa)
+{
+    mp_archive_close(mpa);
     talloc_free(mpa);
 }
 
@@ -274,6 +292,9 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
     talloc_free(mpa->entry_filename);
     mpa->entry_filename = NULL;
 
+    if (!mpa->arch)
+        return false;
+
     while (!mp_cancel_test(mpa->primary_src->cancel)) {
         struct archive_entry *entry;
         int r = archive_read_next_header(mpa->arch, &entry);
@@ -283,6 +304,7 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
             MP_ERR(mpa, "%s\n", archive_error_string(mpa->arch));
         if (r < ARCHIVE_WARN) {
             MP_FATAL(mpa, "could not read archive entry\n");
+            mp_archive_check_fatal(mpa, r);
             break;
         }
         if (archive_entry_filetype(entry) != AE_IFREG)
@@ -341,8 +363,13 @@ static int archive_entry_fill_buffer(stream_t *s, char *buffer, int max_len)
     if (!p->mpa)
         return 0;
     int r = archive_read_data(p->mpa->arch, buffer, max_len);
-    if (r < 0)
+    if (r < 0) {
         MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
+        if (mp_archive_check_fatal(p->mpa, r)) {
+            mp_archive_free(p->mpa);
+            p->mpa = NULL;
+        }
+    }
     return r;
 }
 
@@ -351,8 +378,14 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
     struct priv *p = s->priv;
     if (!p->mpa)
         return -1;
-    if (archive_seek_data(p->mpa->arch, newpos, SEEK_SET) >= 0)
+    int r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
+    if (r >= 0)
         return 1;
+    if (mp_archive_check_fatal(p->mpa, r)) {
+        mp_archive_free(p->mpa);
+        p->mpa = NULL;
+        return -1;
+    }
     // libarchive can't seek in most formats.
     if (newpos < s->pos) {
         // Hack seeking backwards into working by reopening the archive and
@@ -371,9 +404,13 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
                 return -1;
 
             int size = MPMIN(newpos - s->pos, sizeof(buffer));
-            int r = archive_read_data(p->mpa->arch, buffer, size);
+            r = archive_read_data(p->mpa->arch, buffer, size);
             if (r < 0) {
                 MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
+                if (mp_archive_check_fatal(p->mpa, r)) {
+                    mp_archive_free(p->mpa);
+                    p->mpa = NULL;
+                }
                 return -1;
             }
             s->pos += r;

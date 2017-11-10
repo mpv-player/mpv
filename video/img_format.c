@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -41,24 +41,7 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // FFmpeg names have an annoying "_vld" suffix
     {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
     {"vaapi",           IMGFMT_VAAPI},
-    // names below this are not preferred over the FFmpeg names
-    // the "none" entry makes mp_imgfmt_to_name prefer FFmpeg names
     {"none",            0},
-    // endian-specific aliases (not in FFmpeg)
-    {"rgb32",           IMGFMT_RGB32},
-    {"bgr32",           IMGFMT_BGR32},
-    // old names we keep around
-    {"y8",              IMGFMT_Y8},
-    {"420p",            IMGFMT_420P},
-    {"yv12",            IMGFMT_420P},
-    {"420p16",          IMGFMT_420P16},
-    {"420p10",          IMGFMT_420P10},
-    {"444p",            IMGFMT_444P},
-    {"444p9",           IMGFMT_444P9},
-    {"444p10",          IMGFMT_444P10},
-    {"422p",            IMGFMT_422P},
-    {"422p9",           IMGFMT_422P9},
-    {"422p10",          IMGFMT_422P10},
     {0}
 };
 
@@ -69,13 +52,13 @@ char **mp_imgfmt_name_list(void)
     int num = 0;
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         const char *name = mp_imgfmt_to_name(n);
-        if (strcmp(name, "none") != 0 && strcmp(name, "unknown") != 0)
+        if (strcmp(name, "unknown") != 0)
             list[num++] = talloc_strdup(list, name);
     }
     return list;
 }
 
-int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
+int mp_imgfmt_from_name(bstr name)
 {
     int img_fmt = 0;
     for (const struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
@@ -89,8 +72,6 @@ int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
         img_fmt = pixfmt2imgfmt(av_get_pix_fmt(t));
         talloc_free(t);
     }
-    if (!allow_hwaccel && IMGFMT_IS_HWACCEL(img_fmt))
-        return 0;
     return img_fmt;
 }
 
@@ -147,6 +128,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (!pd || pd->nb_components > 4 || fmt == AV_PIX_FMT_NONE ||
         fmt == AV_PIX_FMT_UYYVYY411)
         return mp_only_imgfmt_desc(mpfmt);
+    enum mp_component_type is_uint =
+        mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -174,7 +157,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             shift = d.shift;
         if (shift != d.shift)
             shift = -1;
-        desc.components[d.plane] += 1;
     }
 
     for (int p = 0; p < 4; p++) {
@@ -183,7 +165,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     }
 
     desc.plane_bits = planedepth[0];
-    desc.component_full_bits = desc.component_bits;
 
     // Check whether any components overlap other components (per plane).
     // We're cheating/simplifying here: we assume that this happens if a shift
@@ -250,7 +231,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
         && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
         && !component_byte_overlap
-        && shift >= 0)
+        && shift >= 0 && is_uint)
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
@@ -275,10 +256,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                 desc.flags |= MP_IMGFLAG_YUV_NV_SWAP;
         }
         if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
-        {
             desc.component_bits += shift;
-            desc.component_full_bits = (desc.component_bits + 7) / 8 * 8;
-        }
     }
 
     for (int p = 0; p < desc.num_planes; p++) {
@@ -294,15 +272,187 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if (desc.flags & MP_IMGFLAG_HWACCEL) {
         desc.component_bits = 0;
-        desc.component_full_bits = 0;
         desc.plane_bits = 0;
     }
 
-    if (desc.chroma_xs || desc.chroma_ys)
-        desc.flags |= MP_IMGFLAG_SUBSAMPLED;
-
     return desc;
 }
+
+static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
+{
+    bool present[MP_NUM_COMPONENTS] = {0};
+    int n_comp = 0;
+
+    for (int n = 0; n < fmt->num_planes; n++) {
+        const struct mp_regular_imgfmt_plane *plane = &fmt->planes[n];
+        n_comp += plane->num_components;
+        if (n_comp > MP_NUM_COMPONENTS)
+            return false;
+        if (!plane->num_components)
+            return false; // no empty planes in between allowed
+
+        bool pad_only = true;
+        int chroma_luma = 0; // luma: 1, chroma: 2, both: 3
+        for (int i = 0; i < plane->num_components; i++) {
+            int comp = plane->components[i];
+            if (comp > MP_NUM_COMPONENTS)
+                return false;
+            if (comp == 0)
+                continue;
+            pad_only = false;
+            if (present[comp - 1])
+                return false; // no duplicates
+            present[comp - 1] = true;
+            chroma_luma |= (comp == 2 || comp == 3) ? 2 : 1;
+        }
+        if (pad_only)
+            return false; // no planes with only padding allowed
+        if ((fmt->chroma_w > 1 || fmt->chroma_h > 1) && chroma_luma == 3)
+            return false; // separate chroma/luma planes required
+    }
+
+    if (!(present[0] || present[3]) ||  // at least component 1 or alpha needed
+        (present[1] && !present[0]) ||  // component 2 requires component 1
+        (present[2] && !present[1]))    // component 3 requires component 2
+        return false;
+
+    return true;
+}
+
+enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
+{
+    enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
+    const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
+
+    // FFmpeg does not provide a flag for XYZ, so this is the best we can do.
+    if (pixdesc && strncmp(pixdesc->name, "xyz", 3) == 0)
+        return MP_CSP_XYZ;
+
+    if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_RGB))
+        return MP_CSP_RGB;
+
+    if (pixfmt == AV_PIX_FMT_PAL8 || pixfmt == AV_PIX_FMT_MONOBLACK)
+        return MP_CSP_RGB;
+
+    return MP_CSP_AUTO;
+}
+
+enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
+{
+    const AVPixFmtDescriptor *pixdesc =
+        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
+
+    if (!pixdesc)
+        return MP_COMPONENT_TYPE_UNKNOWN;
+
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    if (pixdesc->flags & AV_PIX_FMT_FLAG_FLOAT)
+        return MP_COMPONENT_TYPE_FLOAT;
+#endif
+
+    return MP_COMPONENT_TYPE_UINT;
+}
+
+static bool is_native_endian(const AVPixFmtDescriptor *pixdesc)
+{
+    enum AVPixelFormat pixfmt = av_pix_fmt_desc_get_id(pixdesc);
+    enum AVPixelFormat other = av_pix_fmt_swap_endianness(pixfmt);
+    if (other == AV_PIX_FMT_NONE || other == pixfmt)
+        return true; // no endian nonsense
+    bool is_le = *(char *)&(uint32_t){1};
+    return pixdesc && (is_le != !!(pixdesc->flags & AV_PIX_FMT_FLAG_BE));
+}
+
+bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
+{
+    struct mp_regular_imgfmt res = {0};
+
+    const AVPixFmtDescriptor *pixdesc =
+        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
+
+    if (!pixdesc || (pixdesc->flags & AV_PIX_FMT_FLAG_BITSTREAM) ||
+        (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL) ||
+        (pixdesc->flags & AV_PIX_FMT_FLAG_PAL) ||
+        pixdesc->nb_components < 1 ||
+        pixdesc->nb_components > MP_NUM_COMPONENTS ||
+        !is_native_endian(pixdesc))
+        return false;
+
+    res.component_type = mp_imgfmt_get_component_type(imgfmt);
+    if (!res.component_type)
+        return false;
+
+    const AVComponentDescriptor *comp0 = &pixdesc->comp[0];
+
+    int depth = comp0->depth + comp0->shift;
+    if (depth < 1 || depth > 64)
+        return false;
+    res.component_size = (depth + 7) / 8;
+
+    for (int n = 0; n < pixdesc->nb_components; n++) {
+        const AVComponentDescriptor *comp = &pixdesc->comp[n];
+
+        if (comp->plane < 0 || comp->plane >= MP_MAX_PLANES)
+            return false;
+
+        res.num_planes = MPMAX(res.num_planes, comp->plane + 1);
+
+        // We support uniform depth only.
+        if (comp->depth != comp0->depth || comp->shift != comp0->shift)
+            return false;
+
+        // Uniform component size; even the padding must have same size.
+        int ncomp = comp->step / res.component_size;
+        if (!ncomp || ncomp * res.component_size != comp->step)
+            return false;
+
+        struct mp_regular_imgfmt_plane *plane = &res.planes[comp->plane];
+
+        if (plane->num_components && plane->num_components != ncomp)
+            return false;
+        plane->num_components = ncomp;
+
+        int pos = comp->offset / res.component_size;
+        if (pos < 0 || pos >= ncomp || ncomp > MP_NUM_COMPONENTS)
+            return false;
+        if (plane->components[pos])
+            return false;
+        plane->components[pos] = n + 1;
+    }
+
+    // Make sure alpha is always component 4.
+    if (pixdesc->nb_components == 2 && (pixdesc->flags & AV_PIX_FMT_FLAG_ALPHA)) {
+        for (int n = 0; n < res.num_planes; n++) {
+            for (int i = 0; i < res.planes[n].num_components; i++) {
+                if (res.planes[n].components[i] == 2)
+                    res.planes[n].components[i] = 4;
+            }
+        }
+    }
+
+    res.component_pad = comp0->depth - res.component_size * 8;
+    if (comp0->shift) {
+        // We support padding only on 1 side.
+        if (comp0->shift + comp0->depth != res.component_size * 8)
+            return false;
+        res.component_pad = -res.component_pad;
+    }
+
+    res.chroma_w = 1 << pixdesc->log2_chroma_w;
+    res.chroma_h = 1 << pixdesc->log2_chroma_h;
+
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
+        return false; // it's satan himself
+#endif
+
+    if (!validate_regular_imgfmt(&res))
+        return false;
+
+    *dst = res;
+    return true;
+}
+
 
 // Find a format that has the given flags set with the following configuration.
 int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags)
@@ -371,13 +521,17 @@ int main(int argc, char **argv)
         FLAG(MP_IMGFLAG_BE, "be")
         FLAG(MP_IMGFLAG_PAL, "pal")
         FLAG(MP_IMGFLAG_HWACCEL, "hw")
+        int fcsp = mp_imgfmt_get_forced_csp(mpfmt);
+        if (fcsp)
+            printf(" fcsp=%d", fcsp);
+        printf(" ctype=%d", mp_imgfmt_get_component_type(mpfmt));
         printf("\n");
         printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
                d.plane_bits, d.component_bits);
-        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d cfbits=%d\n",
+        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
-               d.plane_bits, d.component_bits, d.component_full_bits);
+               d.plane_bits, d.component_bits);
         printf("  {");
         for (int n = 0; n < MP_MAX_PLANES; n++)
             printf("%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n], d.xs[n], d.ys[n]);
@@ -399,6 +553,23 @@ int main(int argc, char **argv)
             }
             talloc_free(mpi);
             av_frame_free(&fr);
+        }
+        struct mp_regular_imgfmt reg;
+        if (mp_get_regular_imgfmt(&reg, mpfmt)) {
+            printf("  Regular: %d planes, %d bytes per comp., %d bit-pad "
+                   "%dx%d chroma\n",
+                   reg.num_planes, reg.component_size, reg.component_pad,
+                   reg.chroma_w, reg.chroma_h);
+            for (int n = 0; n < reg.num_planes; n++) {
+                struct mp_regular_imgfmt_plane *plane = &reg.planes[n];
+                printf("     %d: {", n);
+                for (int i = 0; i < plane->num_components; i++) {
+                    if (i > 0)
+                        printf(", ");
+                    printf("%d", plane->components[i]);
+                }
+                printf("}\n");
+            }
         }
     }
 }

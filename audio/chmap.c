@@ -95,7 +95,6 @@ static const char *const std_layout_names[][2] = {
     {"7.1(wide-side)",  "fl-fr-fc-lfe-flc-frc-sl-sr"},
     {"7.1(rear)",       "fl-fr-fc-lfe-bl-br-sdl-sdr"}, // not in lavc
     {"octagonal",       "fl-fr-fc-bl-br-bc-sl-sr"},
-    {"downmix",         "dl-dr"},
     {"auto",            ""}, // not in lavc
     {0}
 };

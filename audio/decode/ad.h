@@ -23,12 +23,12 @@
 #include "demux/demux.h"
 
 #include "audio/format.h"
-#include "audio/audio.h"
+#include "audio/aframe.h"
 #include "dec_audio.h"
 
 struct mp_decoder_list;
 
-/* interface of video decoder drivers */
+/* interface of audio decoder drivers */
 struct ad_functions {
     const char *name;
     void (*add_decoders)(struct mp_decoder_list *list);
@@ -39,7 +39,7 @@ struct ad_functions {
     bool (*send_packet)(struct dec_audio *da, struct demux_packet *pkt);
     // Return whether decoding is still going on (false if EOF was reached).
     // Never returns false & *out set, but can return true with !*out.
-    bool (*receive_frame)(struct dec_audio *da, struct mp_audio **out);
+    bool (*receive_frame)(struct dec_audio *da, struct mp_aframe **out);
 };
 
 enum ad_ctrl {

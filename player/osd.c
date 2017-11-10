@@ -1,18 +1,20 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stddef.h>
@@ -441,6 +443,8 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
             talloc_free(text);
         } else {
             sadd_hhmmssff_u(buffer, get_playback_time(mpctx), fractions);
+#if HAVE_GPL
+            // Potentially GPL due to 8d190244d21a4d40bb9e8f7d51aa09ca1888de09.
             if (level == 3) {
                 double len = get_time_length(mpctx);
                 if (len >= 0) {
@@ -449,6 +453,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
                 }
                 sadd_percentage(buffer, get_percent_pos(mpctx));
             }
+#endif
         }
     }
 }

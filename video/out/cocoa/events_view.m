@@ -1,21 +1,19 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <libavutil/common.h>
 
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -25,7 +23,6 @@
 #include "events_view.h"
 
 @interface MpvEventsView()
-@property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
 - (int)mpvButtonNumber:(NSEvent*)event;
@@ -34,7 +31,6 @@
 @end
 
 @implementation MpvEventsView
-@synthesize clearing = _clearing;
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
@@ -112,6 +108,7 @@
 {
     return [self.adapter mouseEnabled];
 }
+
 - (BOOL)acceptsFirstResponder
 {
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
@@ -145,14 +142,6 @@
     } else {
         [super mouseExited:event];
     }
-}
-
-- (void)setFrameSize:(NSSize)size
-{
-    [super setFrameSize:size];
-
-    if (self.clearing)
-        return;
 }
 
 - (NSPoint)convertPointToPixels:(NSPoint)point
@@ -197,6 +186,7 @@
         [super mouseDown:event];
     }
 }
+
 - (void)mouseUp:(NSEvent *)event
 {
     if ([self.adapter mouseEnabled]) {
@@ -205,6 +195,7 @@
         [super mouseUp:event];
     }
 }
+
 - (void)rightMouseDown:(NSEvent *)event
 {
     if ([self.adapter mouseEnabled]) {
@@ -246,15 +237,15 @@
     CGFloat delta;
     int cmd;
 
-    if (FFABS([event deltaY]) >= FFABS([event deltaX])) {
+    if (fabs([event deltaY]) >= fabs([event deltaX])) {
         delta = [event deltaY] * 0.1;
-        cmd   = delta > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
+        cmd   = delta > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
     } else {
         delta = [event deltaX] * 0.1;
-        cmd   = delta > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+        cmd   = delta > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
     }
 
-    [self.adapter putAxis:cmd delta:FFABS(delta)];
+    [self.adapter putWheel:cmd delta:fabs(delta)];
 }
 
 - (void)scrollWheel:(NSEvent *)event
@@ -268,8 +259,18 @@
         [self preciseScroll:event];
     } else {
         const int modifiers = [event modifierFlags];
-        const int mpkey = ([event deltaX] + [event deltaY]) > 0 ?
-                            MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        const float deltaX = (modifiers & NSEventModifierFlagShift) ?
+                             [event scrollingDeltaY] : [event scrollingDeltaX];
+        const float deltaY = (modifiers & NSEventModifierFlagShift) ?
+                             [event scrollingDeltaX] : [event scrollingDeltaY];
+        int mpkey;
+
+        if (fabs(deltaY) >= fabs(deltaX)) {
+            mpkey = deltaY > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
+        } else {
+            mpkey = deltaX > 0 ? MP_WHEEL_LEFT : MP_WHEEL_RIGHT;
+        }
+
         [self.adapter putKey:mpkey withModifiers:modifiers];
     }
 }
@@ -290,7 +291,7 @@
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
     self.hasMouseDown = (state == MP_KEY_STATE_DOWN);
-    int mpkey = (MP_MOUSE_BTN0 + [self mpvButtonNumber:event]);
+    int mpkey = [self mpvButtonNumber:event];
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }
 
@@ -325,9 +326,12 @@
 {
     int buttonNumber = [event buttonNumber];
     switch (buttonNumber) {
-        case 1:  return 2;
-        case 2:  return 1;
-        default: return buttonNumber;
+        case 0:  return MP_MBTN_LEFT;
+        case 1:  return MP_MBTN_RIGHT;
+        case 2:  return MP_MBTN_MID;
+        case 3:  return MP_MBTN_BACK;
+        case 4:  return MP_MBTN_FORWARD;
+        default: return MP_MBTN9 - 5 + buttonNumber;
     }
 }
 @end

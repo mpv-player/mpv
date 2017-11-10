@@ -37,6 +37,9 @@
 #define GL_RGBA12                         0x805A
 #define GL_RGBA16                         0x805B
 #define GL_TEXTURE_RED_SIZE               0x805C
+#define GL_TEXTURE_GREEN_SIZE             0x805D
+#define GL_TEXTURE_BLUE_SIZE              0x805E
+#define GL_TEXTURE_ALPHA_SIZE             0x805F
 
 // --- GL 1.1 (removed from 3.0 core and not in GLES 2/3)
 
@@ -48,7 +51,9 @@
 
 // --- GL 1.5
 
+#define GL_READ_ONLY                      0x88B8
 #define GL_WRITE_ONLY                     0x88B9
+#define GL_READ_WRITE                     0x88BA
 
 // --- GL 3.0
 
@@ -59,9 +64,10 @@
 
 #define GL_TEXTURE_RECTANGLE              0x84F5
 
-// --- GL 3.3
+// --- GL 3.3 or GL_ARB_timer_query
 
 #define GL_TIME_ELAPSED                   0x88BF
+#define GL_TIMESTAMP                      0x8E28
 
 // --- GL 4.3 or GL_ARB_debug_output
 
@@ -69,6 +75,27 @@
 #define GL_DEBUG_SEVERITY_MEDIUM          0x9147
 #define GL_DEBUG_SEVERITY_LOW             0x9148
 #define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
+
+// --- GL 4.4 or GL_ARB_buffer_storage
+
+#define GL_MAP_PERSISTENT_BIT             0x0040
+#define GL_MAP_COHERENT_BIT               0x0080
+#define GL_DYNAMIC_STORAGE_BIT            0x0100
+#define GL_CLIENT_STORAGE_BIT             0x0200
+
+// --- GL 4.2 or GL_ARB_image_load_store
+
+#define GL_TEXTURE_FETCH_BARRIER_BIT      0x00000008
+
+// --- GL 4.3 or GL_ARB_compute_shader
+
+#define GL_COMPUTE_SHADER                 0x91B9
+#define GL_MAX_COMPUTE_SHARED_MEMORY_SIZE 0x8262
+
+// --- GL 4.3 or GL_ARB_shader_storage_buffer_object
+
+#define GL_SHADER_STORAGE_BUFFER          0x90D2
+#define GL_SHADER_STORAGE_BARRIER_BIT     0x00002000
 
 // --- GL_NV_vdpau_interop
 

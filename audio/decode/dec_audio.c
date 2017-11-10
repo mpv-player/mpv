@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -29,6 +29,7 @@
 #include "common/msg.h"
 #include "common/recorder.h"
 #include "misc/bstr.h"
+#include "options/options.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"
@@ -38,10 +39,6 @@
 #include "dec_audio.h"
 #include "ad.h"
 #include "audio/format.h"
-#include "audio/audio.h"
-#include "audio/audio_buffer.h"
-
-#include "audio/filter/af.h"
 
 extern const struct ad_functions ad_lavc;
 
@@ -179,25 +176,30 @@ static void fix_audio_pts(struct dec_audio *da)
     if (!da->current_frame)
         return;
 
-    if (da->current_frame->pts != MP_NOPTS_VALUE) {
-        double newpts = da->current_frame->pts;
-
+    double frame_pts = mp_aframe_get_pts(da->current_frame);
+    if (frame_pts != MP_NOPTS_VALUE) {
         if (da->pts != MP_NOPTS_VALUE)
-            MP_STATS(da, "value %f audio-pts-err", da->pts - newpts);
+            MP_STATS(da, "value %f audio-pts-err", da->pts - frame_pts);
 
         // Keep the interpolated timestamp if it doesn't deviate more
         // than 1 ms from the real one. (MKV rounded timestamps.)
-        if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - newpts) > 0.001)
-            da->pts = newpts;
+        if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - frame_pts) > 0.001)
+            da->pts = frame_pts;
     }
 
     if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
         da->pts = 0;
 
-    da->current_frame->pts = da->pts;
+    mp_aframe_set_pts(da->current_frame, da->pts);
 
     if (da->pts != MP_NOPTS_VALUE)
-        da->pts += da->current_frame->samples / (double)da->current_frame->rate;
+        da->pts += mp_aframe_duration(da->current_frame);
+}
+
+static bool is_new_segment(struct dec_audio *da, struct demux_packet *p)
+{
+    return p->segmented &&
+        (p->start != da->start || p->end != da->end || p->codec != da->codec);
 }
 
 void audio_work(struct dec_audio *da)
@@ -212,7 +214,7 @@ void audio_work(struct dec_audio *da)
         return;
     }
 
-    if (da->packet && da->packet->new_segment) {
+    if (da->packet && is_new_segment(da, da->packet)) {
         assert(!da->new_segment);
         da->new_segment = da->packet;
         da->packet = NULL;
@@ -228,11 +230,6 @@ void audio_work(struct dec_audio *da)
 
     bool progress = da->ad_driver->receive_frame(da, &da->current_frame);
 
-    if (da->current_frame && !mp_audio_config_valid(da->current_frame)) {
-        talloc_free(da->current_frame);
-        da->current_frame = NULL;
-    }
-
     da->current_state = da->current_frame ? DATA_OK : DATA_AGAIN;
     if (!progress)
         da->current_state = DATA_EOF;
@@ -242,10 +239,11 @@ void audio_work(struct dec_audio *da)
     bool segment_end = da->current_state == DATA_EOF;
 
     if (da->current_frame) {
-        mp_audio_clip_timestamps(da->current_frame, da->start, da->end);
-        if (da->current_frame->pts != MP_NOPTS_VALUE && da->start != MP_NOPTS_VALUE)
-            segment_end = da->current_frame->pts >= da->end;
-        if (da->current_frame->samples == 0) {
+        mp_aframe_clip_timestamps(da->current_frame, da->start, da->end);
+        double frame_pts = mp_aframe_get_pts(da->current_frame);
+        if (frame_pts != MP_NOPTS_VALUE && da->start != MP_NOPTS_VALUE)
+            segment_end = frame_pts >= da->end;
+        if (mp_aframe_get_size(da->current_frame) == 0) {
             talloc_free(da->current_frame);
             da->current_frame = NULL;
         }
@@ -268,8 +266,6 @@ void audio_work(struct dec_audio *da)
         da->start = new_segment->start;
         da->end = new_segment->end;
 
-        new_segment->new_segment = false;
-
         da->packet = new_segment;
         da->current_state = DATA_AGAIN;
     }
@@ -280,7 +276,7 @@ void audio_work(struct dec_audio *da)
 //  DATA_WAIT:  waiting for demuxer; will receive a wakeup signal
 //  DATA_EOF:   end of file, no more frames to be expected
 //  DATA_AGAIN: dropped frame or something similar
-int audio_get_frame(struct dec_audio *da, struct mp_audio **out_frame)
+int audio_get_frame(struct dec_audio *da, struct mp_aframe **out_frame)
 {
     *out_frame = NULL;
     if (da->current_frame) {

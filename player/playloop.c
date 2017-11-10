@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stddef.h>
@@ -39,7 +39,6 @@
 #include "osdep/timer.h"
 
 #include "audio/decode/dec_audio.h"
-#include "audio/filter/af.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
@@ -232,6 +231,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_framedrop = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
+    mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
@@ -277,14 +277,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         hr_seek_very_exact = true;
         break;
     case MPSEEK_RELATIVE:
-        demux_flags = seek.amount > 0 ? SEEK_FORWARD : SEEK_BACKWARD;
+        demux_flags = seek.amount > 0 ? SEEK_FORWARD : 0;
         seek_pts = current_time + seek.amount;
         break;
     case MPSEEK_FACTOR: ;
         double len = get_time_length(mpctx);
         if (len >= 0)
             seek_pts = seek.amount * len;
-        demux_flags = seek_pts > current_time ? SEEK_FORWARD : SEEK_BACKWARD;
         break;
     default: abort();
     }
@@ -323,7 +322,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             hr_seek_offset = MPMAX(hr_seek_offset, -offset);
         }
         demux_pts -= hr_seek_offset;
-        demux_flags = (demux_flags | SEEK_HR | SEEK_BACKWARD) & ~SEEK_FORWARD;
+        demux_flags = (demux_flags | SEEK_HR) & ~SEEK_FORWARD;
     }
 
     demux_seek(mpctx->demuxer, demux_pts, demux_flags);
@@ -376,6 +375,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         !hr_seek && !(demux_flags & SEEK_FORWARD);
 
     mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
+
+    mpctx->current_seek = seek;
 }
 
 // This combines consecutive seek requests.
@@ -441,14 +442,7 @@ void execute_queued_seek(struct MPContext *mpctx)
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
-        return -1;
-
-    double len = demuxer_get_time_length(demuxer);
-    if (len >= 0)
-        return len;
-
-    return -1; // unknown
+    return demuxer ? demuxer->duration : -1;
 }
 
 double get_current_time(struct MPContext *mpctx)
@@ -687,19 +681,6 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 int get_cache_buffering_percentage(struct MPContext *mpctx)
 {
     return mpctx->demuxer ? mpctx->cache_buffer : -1;
-}
-
-static void handle_heartbeat_cmd(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    if (opts->heartbeat_cmd && !mpctx->paused && mpctx->video_out) {
-        double now = mp_time_sec();
-        if (mpctx->next_heartbeat <= now) {
-            mpctx->next_heartbeat = now + opts->heartbeat_interval;
-            (void)system(opts->heartbeat_cmd);
-        }
-        mp_set_timeout(mpctx, mpctx->next_heartbeat - now);
-    }
 }
 
 static void handle_cursor_autohide(struct MPContext *mpctx)
@@ -994,6 +975,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
+        mpctx->current_seek = (struct seek_params){0};
         mpctx->audio_allow_second_chance_seek = false;
         handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
@@ -1054,7 +1036,7 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
             continue;
         if (track->d_audio) {
             audio_work(track->d_audio);
-            struct mp_audio *fr;
+            struct mp_aframe *fr;
             int res = audio_get_frame(track->d_audio, &fr);
             if (res == DATA_OK) {
                 lavfi_send_frame_a(track->sink, fr);
@@ -1090,7 +1072,6 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);
-    handle_heartbeat_cmd(mpctx);
     handle_command_updates(mpctx);
 
     if (mpctx->lavfi) {

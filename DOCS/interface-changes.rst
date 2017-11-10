@@ -19,11 +19,120 @@ Interface changes
 
 ::
 
+ --- mpv 0.28.0 ---
+    - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
+      conventions followed by other hardware video decoding APIs
+    - drop previously deprecated --heartbeat-cmd and --heartbeat--interval
+      options
+    - rename --vo=opengl to --vo=gpu
+    - rename --opengl-backend to --gpu-context
+    - rename --opengl-shaders to --glsl-shaders
+    - rename --opengl-shader-cache-dir to --gpu-shader-cache-dir
+    - rename --opengl-tex-pad-x/y to --gpu-tex-pad-x/y
+    - rename --opengl-fbo-format to --fbo-format
+    - rename --opengl-gamma to --gamma-factor
+    - rename --opengl-debug to --gpu-debug
+    - rename --opengl-sw to --gpu-sw
+    - rename --opengl-vsync-fences to --swapchain-depth, and the interpretation
+      slightly changed. Now defaults to 3.
+    - rename the built-in profile `opengl-hq` to `gpu-hq`
+    - the semantics of --opengl-es=yes are slightly changed -> now requires GLES
+    - remove the (deprecated) alias --gpu-context=drm-egl
+    - remove the (deprecated) --vo=opengl-hq
+    - remove --opengl-es=force2 (use --opengl-es=yes --opengl-restrict=300)
+    - the --msg-level option now affects --log-file
+    - drop "audio-out-detected-device" property - this was unavailable on all
+      audio output drivers for quite a while (coreaudio used to provide it)
+    - deprecate --videotoolbox-format (use --hwdec-image-format, which affects
+      most other hwaccels)
+    - remove deprecated --demuxer-max-packets
+ --- mpv 0.27.0 ---
+    - drop previously deprecated --field-dominance option
+    - drop previously deprecated "osd" command
+    - remove client API compatibility handling for "script", "sub-file",
+      "audio-file", "external-file" (these cases used to log a deprecation
+      warning)
+    - drop deprecated --video-aspect-method=hybrid option choice
+    - rename --hdr-tone-mapping to --tone-mapping (and generalize it)
+    - --opengl-fbo-format changes from a choice to a string. Also, its value
+      will be checked only on renderer initialization, rather than when the
+      option is set.
+    - Using opengl-cb now always assumes 8 bit per component depth, and dithers
+      to this size. Before, it tried to figure out the depth of the first
+      framebuffer that was ever passed to the renderer. Having GL framebuffers
+      with a size larger than 8 bit per component is quite rare. If you need
+      it, set the --dither-depth option instead.
+    - --lavfi-complex can now be set during runtime. If you set this in
+      expectation it would be applied only after a reload, you might observe
+      weird behavior.
+    - add --track-auto-selection to help with scripts/applications that
+      make exclusive use of --lavfi-complex.
+    - undeprecate --loop, and map it from --loop-playlist to --loop-file (the
+      deprecation was to make sure no API user gets broken by a sudden behavior
+      change)
+    - remove previously deprecated vf_eq
+    - remove that hardware deinterlace filters (vavpp, d3d11vpp, vdpaupp)
+      changed their deinterlacing-enabled setting depending on what the
+      --deinterlace option or property was set to. Now, a filter always does
+      what its filter options and defaults imply. The --deinterlace option and
+      property strictly add/remove its own filters. For example, if you run
+      "mpv --vf=vavpp --deinterlace=yes", this will insert another, redundant
+      filter, which is probably not what you want. For toggling a deinterlace
+      filter manually, use the "vf toggle" command, and do not set the
+      deinterlace option/property. To customize the filter that will be
+      inserted automatically, use --vf-defaults. Details how this works will
+      probably change in the future.
+    - remove deinterlace=auto (this was not deprecated, but had only a very
+      obscure use that stopped working with the change above. It was also
+      prone to be confused with a feature not implemented by it: auto did _not_
+      mean that deinterlacing was enabled on demand.)
+    - add shortened mnemonic names for mouse button bindings, eg. mbtn_left
+      the old numeric names (mouse_btn0) are deprecated
+    - remove mouse_btn3_dbl and up, since they are only generated for buttons
+      0-2 (these now print an error when sent from the 'mouse' command)
+    - rename the axis bindings to wheel_up/down/etc. axis scrolling and mouse
+      wheel scrolling are now conceptually the same thing
+      the old axis_up/down names remain as deprecated aliases
  --- mpv 0.26.0 ---
     - remove remaining deprecated audio device options, like --alsa-device
       Some of them were removed in earlier releases.
     - introduce --replaygain... options, which replace the same functionality
       provided by the deprecated --af=volume:replaygain... mechanism.
+    - drop the internal "mp-rawvideo" codec (used by --demuxer=rawvideo)
+    - rename --sub-ass-style-override to --sub-ass-override, and rename the
+      `--sub-ass-override=signfs` setting to `--sub-ass-override=scale`.
+    - change default of --video-aspect-method to "bitstream". The "hybrid"
+      method (old default) is deprecated.
+    - remove property "video-params/nom-peak"
+    - remove option --target-brightness
+    - replace vf_format's `peak` suboption by `sig-peak`, which is relative to
+      the reference white level instead of in cd/m^2
+    - renamed the TRCs `st2084` and `std-b67` to `pq` and `hlg` respectively
+    - the "osd" command is deprecated (use "cycle osd-level")
+    - --field-dominance is deprecated (use --vf=setfield=bff or tff)
+    - --really-quiet subtle behavior change
+    - the deprecated handling of setting "no-" options via client API is dropped
+    - the following options change to append-by-default (and possibly separator):
+        --script
+      also, the following options are deprecated:
+        --sub-paths => --sub-file-paths
+      the following options are deprecated for setting via API:
+        "script" (use "scripts")
+        "sub-file" (use "sub-files")
+        "audio-file" (use "audio-files")
+        "external-file" (use "external-files")
+        (the compatibility hacks for this will be removed after this release)
+    - remove property `vo-performance`, and add `vo-passes` as a more general
+      replacement
+    - deprecate passing multiple arguments to -add/-pre options (affects the
+      vf/af commands too)
+    - remove --demuxer-lavf-cryptokey. Use --demux-lavf-o=cryptokey=<hex> or
+      --demux-lavf-o=decryption_key=<hex> instead (whatever fits your situation).
+    - rename --opengl-dumb-mode=no to --opengl-dumb-mode=auto, and make `no`
+      always disable it (unless forced on by hardware limitation).
+    - generalize --scale-clamp, --cscale-clamp etc. to accept a float between
+      0.0 and 1.0 instead of just being a flag. A value of 1.0 corresponds to
+      the old `yes`, and a value of 0.0 corresponds to the old `no`.
  --- mpv 0.25.0 ---
     - remove opengl-cb dxva2 dummy hwdec interop
       (see git "vo_opengl: remove dxva2 dummy hwdec backend")

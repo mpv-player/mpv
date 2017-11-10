@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MP_AO_INTERNAL_H_
@@ -48,13 +48,18 @@ struct ao {
     int init_flags; // AO_INIT_* flags
     bool stream_silence;        // if audio inactive, just play silence
 
+    // Set by the driver on init. This is typically the period size, and the
+    // smallest unit the driver will accept in one piece (although if
+    // AOPLAY_FINAL_CHUNK is set, the driver must accept everything).
+    // This value is in complete samples (i.e. 1 for stereo means 1 sample
+    // for both channels each).
+    // Used for push based API only.
+    int period_size;
+
     // The device as selected by the user, usually using ao_device_desc.name
     // from an entry from the list returned by driver->list_devices. If the
     // default device should be used, this is set to NULL.
     char *device;
-
-    // Device actually chosen by the AO
-    char *detected_device;
 
     // Application name to report to the audio API.
     char *client_name;
@@ -206,5 +211,20 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 // Call from ao_driver->list_devs callback only.
 void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e);
+
+struct ao_convert_fmt {
+    int src_fmt;        // source AF_FORMAT_*
+    int channels;       // number of channels
+    int dst_bits;       // total target data sample size
+    int pad_msb;        // padding in the MSB (i.e. required shifting)
+    int pad_lsb;        // padding in LSB (required 0 bits) (ignored)
+};
+
+bool ao_can_convert_inplace(struct ao_convert_fmt *fmt);
+bool ao_need_conversion(struct ao_convert_fmt *fmt);
+void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples);
+
+int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
+                           void **data, int samples, int64_t out_time_us);
 
 #endif

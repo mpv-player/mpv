@@ -27,6 +27,11 @@
 #include "vf.h"
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
     int angle;
     int warn;

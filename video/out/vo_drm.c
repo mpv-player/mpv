@@ -250,6 +250,8 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
         int64_t wait_us = until_time_us - mp_time_us();
         int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
         vt_switcher_poll(&p->vt_switcher, timeout_ms);
+    } else {
+        vo_wait_default(vo, until_time_us);
     }
 }
 
@@ -410,7 +412,9 @@ static int preinit(struct vo *vo)
     }
 
     p->kms = kms_create(
-        vo->log, vo->opts->drm_connector_spec, vo->opts->drm_mode_id);
+        vo->log, vo->opts->drm_opts->drm_connector_spec,
+                 vo->opts->drm_opts->drm_mode_id,
+                 vo->opts->drm_opts->drm_overlay_id);
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
         goto err;

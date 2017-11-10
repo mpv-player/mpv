@@ -54,6 +54,7 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         .end = MP_NOPTS_VALUE,
         .stream = -1,
         .avpacket = talloc_zero(dp, AVPacket),
+        .kf_seek_pts = MP_NOPTS_VALUE,
     };
     av_init_packet(dp->avpacket);
     int r = -1;
@@ -72,6 +73,17 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
     dp->buffer = dp->avpacket->data;
     dp->len = dp->avpacket->size;
     return dp;
+}
+
+// (buf must include proper padding)
+struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
+{
+    AVPacket pkt = {
+        .size = buf->size,
+        .data = buf->data,
+        .buf = buf,
+    };
+    return new_demux_packet_from_avpacket(&pkt);
 }
 
 // Input data doesn't need to be padded.
@@ -109,9 +121,10 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->dts = src->dts;
     dst->duration = src->duration;
     dst->pos = src->pos;
+    dst->segmented = src->segmented;
     dst->start = src->start;
     dst->end = src->end;
-    dst->new_segment = src->new_segment;
+    dst->codec = src->codec;
     dst->keyframe = src->keyframe;
     dst->stream = src->stream;
 }

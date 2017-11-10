@@ -29,6 +29,11 @@
 
 #include "options/m_option.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 static const struct vf_priv_s {
     int crop_w,crop_h;
     int crop_x,crop_y;

@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -47,7 +47,6 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .png_compression = 7,
     .png_filter = 5,
     .jpeg_quality = 90,
-    .jpeg_smooth = 0,
     .jpeg_source_chroma = 1,
     .tag_csp = 0,
 };
@@ -64,7 +63,6 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
 const struct m_option image_writer_opts[] = {
     OPT_CHOICE_C("format", format, 0, mp_image_writer_formats),
     OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
-    OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
     OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
     OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
     OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
@@ -162,9 +160,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     success = !!got_output;
 error_exit:
-    if (avctx)
-        avcodec_close(avctx);
-    av_free(avctx);
+    avcodec_free_context(&avctx);
     av_frame_free(&pic);
     av_packet_unref(&pkt);
     return success;
@@ -210,7 +206,6 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, 0);
-    cinfo.smoothing_factor = ctx->opts->jpeg_smooth;
 
     if (ctx->opts->jpeg_source_chroma) {
         cinfo.comp_info[0].h_samp_factor = 1 << ctx->original_format.chroma_xs;

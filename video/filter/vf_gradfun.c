@@ -29,6 +29,11 @@
 
 #include "vf_lavfi.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct vf_priv_s {
     float cfg_thresh;
     int cfg_radius;

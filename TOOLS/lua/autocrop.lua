@@ -66,8 +66,8 @@ function autocrop_start()
     -- insert the cropdetect filter
     ret=mp.command(
         string.format(
-            'vf add @%s:lavfi=graph="cropdetect=limit=24:round=2:reset=0"',
-            cropdetect_label
+            'vf add @%s:cropdetect=limit=%f:round=2:reset=0',
+            cropdetect_label, 24/255
         )
     )
     -- wait to gather data
@@ -79,6 +79,7 @@ function do_crop()
     local cropdetect_metadata = mp.get_property_native(
         string.format("vf-metadata/%s", cropdetect_label)
     )
+
     -- use it to crop if its valid
     if cropdetect_metadata then
         if cropdetect_metadata["lavfi.cropdetect.w"]
@@ -86,7 +87,7 @@ function do_crop()
             and cropdetect_metadata["lavfi.cropdetect.x"]
             and cropdetect_metadata["lavfi.cropdetect.y"]
         then
-            mp.command(string.format("vf add @%s:crop=%s:%s:%s:%s",
+            mp.command(string.format("vf add @%s:lavfi-crop=w=%s:h=%s:x=%s:y=%s",
                                      crop_label,
                                      cropdetect_metadata["lavfi.cropdetect.w"],
                                      cropdetect_metadata["lavfi.cropdetect.h"],

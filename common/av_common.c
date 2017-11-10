@@ -90,10 +90,6 @@ AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
     // Video only
     avp->width = c->disp_w;
     avp->height = c->disp_h;
-    if (c->codec && strcmp(c->codec, "mp-rawvideo") == 0) {
-        avp->format = imgfmt2pixfmt(c->codec_tag);
-        avp->codec_tag = 0;
-    }
 
     // Audio only
     avp->sample_rate = c->samplerate;
@@ -356,3 +352,51 @@ int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
     }
     return success;
 }
+
+#if LIBAVUTIL_VERSION_MICRO >= 100
+AVFrameSideData *ffmpeg_garbage(AVFrame *frame,
+                                enum AVFrameSideDataType type,
+                                AVBufferRef *buf)
+{
+    AVFrameSideData *ret, **tmp;
+
+    if (!buf)
+        return NULL;
+
+    if (frame->nb_side_data > INT_MAX / sizeof(*frame->side_data) - 1)
+        goto fail;
+
+    tmp = av_realloc(frame->side_data,
+                     (frame->nb_side_data + 1) * sizeof(*frame->side_data));
+    if (!tmp)
+        goto fail;
+    frame->side_data = tmp;
+
+    ret = av_mallocz(sizeof(*ret));
+    if (!ret)
+        goto fail;
+
+    ret->buf = buf;
+    ret->data = ret->buf->data;
+    ret->size = buf->size;
+    ret->type = type;
+
+    frame->side_data[frame->nb_side_data++] = ret;
+
+    return ret;
+fail:
+    av_buffer_unref(&buf);
+    return NULL;
+}
+#else
+AVFrameSideData *ffmpeg_garbage(AVFrame *frame,
+                                enum AVFrameSideDataType type,
+                                AVBufferRef *buf)
+{
+    AVFrameSideData *sd = av_frame_new_side_data(frame, type, buf->size);
+    if (sd)
+        memcpy(sd->data, buf->data, buf->size);
+    av_buffer_unref(&buf);
+    return sd;
+}
+#endif

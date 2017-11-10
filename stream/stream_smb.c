@@ -26,6 +26,11 @@
 #include "stream.h"
 #include "options/m_option.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 struct priv {
     int fd;
 };

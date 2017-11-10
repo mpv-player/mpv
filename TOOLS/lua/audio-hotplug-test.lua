@@ -6,8 +6,3 @@ mp.observe_property("audio-device-list", "native", function(name, val)
         print("  - '" .. e.name .. "' (" .. e.description .. ")")
     end
 end)
-
-mp.observe_property("audio-out-detected-device", "native", function(name, val)
-    print("Detected audio device changed:")
-    print("  - '" .. val)
-end)

@@ -23,9 +23,12 @@
 #include <pthread.h>
 #include <math.h>
 
+#include <libavutil/buffer.h>
+
 #include "mpv_talloc.h"
 
 #include "config.h"
+#include "osdep/atomic.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "misc/dispatch.h"
@@ -44,10 +47,11 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 
+extern const struct vo_driver video_out_mediacodec_embed;
 extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
-extern const struct vo_driver video_out_opengl;
+extern const struct vo_driver video_out_gpu;
 extern const struct vo_driver video_out_opengl_cb;
 extern const struct vo_driver video_out_null;
 extern const struct vo_driver video_out_image;
@@ -57,26 +61,23 @@ extern const struct vo_driver video_out_drm;
 extern const struct vo_driver video_out_direct3d;
 extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
-extern const struct vo_driver video_out_wayland;
 extern const struct vo_driver video_out_rpi;
 extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
+#if HAVE_ANDROID
+    &video_out_mediacodec_embed,
+#endif
 #if HAVE_RPI
     &video_out_rpi,
 #endif
-#if HAVE_GL
-    &video_out_opengl,
-#endif
+    &video_out_gpu,
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif
 #if HAVE_DIRECT3D
     &video_out_direct3d,
-#endif
-#if HAVE_WAYLAND
-    &video_out_wayland,
 #endif
 #if HAVE_XV
     &video_out_xv,
@@ -84,7 +85,7 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_SDL2
     &video_out_sdl,
 #endif
-#if HAVE_VAAPI_X11
+#if HAVE_VAAPI_X11 && HAVE_GPL
     &video_out_vaapi,
 #endif
 #if HAVE_X11
@@ -112,6 +113,8 @@ const struct vo_driver *const video_out_drivers[] =
 struct vo_internal {
     pthread_t thread;
     struct mp_dispatch_queue *dispatch;
+
+    atomic_ullong dr_in_flight;
 
     // --- The following fields are protected by lock
     pthread_mutex_t lock;
@@ -162,6 +165,8 @@ struct vo_internal {
     int opt_framedrop;
 };
 
+extern const struct m_sub_options gl_video_conf;
+
 static void forget_frames(struct vo *vo);
 static void *vo_thread(void *ptr);
 
@@ -189,8 +194,9 @@ const struct m_obj_list vo_obj_list = {
     .get_desc = get_desc,
     .description = "video outputs",
     .aliases = {
-        {"gl", "opengl"},
+        {"gl", "gpu"},
         {"direct3d_shaders", "direct3d"},
+        {"opengl", "gpu"},
         {0}
     },
     .allow_unknown_entries = true,
@@ -205,10 +211,40 @@ static void dispatch_wakeup_cb(void *ptr)
     vo_wakeup(vo);
 }
 
+static void update_opts(void *p)
+{
+    struct vo *vo = p;
+
+    if (m_config_cache_update(vo->opts_cache)) {
+        // "Legacy" update of video position related options.
+        if (vo->driver->control)
+            vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
+    }
+
+    if (vo->gl_opts_cache && m_config_cache_update(vo->gl_opts_cache))
+    {
+        // "Legacy" update of video GL renderer related options.
+        if (vo->driver->control)
+            vo->driver->control(vo, VOCTRL_UPDATE_RENDER_OPTS, NULL);
+    }
+
+    if (m_config_cache_update(vo->eq_opts_cache)) {
+        // "Legacy" update of video equalizer related options.
+        if (vo->driver->control)
+            vo->driver->control(vo, VOCTRL_SET_EQUALIZER, NULL);
+    }
+}
+
 // Does not include thread- and VO uninit.
 static void dealloc_vo(struct vo *vo)
 {
     forget_frames(vo); // implicitly synchronized
+
+    // These must be free'd before vo->in->dispatch.
+    talloc_free(vo->opts_cache);
+    talloc_free(vo->gl_opts_cache);
+    talloc_free(vo->eq_opts_cache);
+
     pthread_mutex_destroy(&vo->in->lock);
     pthread_cond_destroy(&vo->in->wakeup);
     talloc_free(vo);
@@ -249,8 +285,21 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     pthread_mutex_init(&vo->in->lock, NULL);
     pthread_cond_init(&vo->in->wakeup, NULL);
 
-    vo->opts_cache = m_config_cache_alloc(vo, global, &vo_sub_opts);
+    vo->opts_cache = m_config_cache_alloc(NULL, global, &vo_sub_opts);
     vo->opts = vo->opts_cache->opts;
+
+    m_config_cache_set_dispatch_change_cb(vo->opts_cache, vo->in->dispatch,
+                                          update_opts, vo);
+
+#if HAVE_GL
+    vo->gl_opts_cache = m_config_cache_alloc(NULL, global, &gl_video_conf);
+    m_config_cache_set_dispatch_change_cb(vo->gl_opts_cache, vo->in->dispatch,
+                                          update_opts, vo);
+#endif
+
+    vo->eq_opts_cache = m_config_cache_alloc(NULL, global, &mp_csp_equalizer_conf);
+    m_config_cache_set_dispatch_change_cb(vo->eq_opts_cache, vo->in->dispatch,
+                                          update_opts, vo);
 
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
@@ -836,6 +885,11 @@ static bool render_frame(struct vo *vo)
         update_vsync_timing_after_swap(vo);
     }
 
+    if (vo->driver->caps & VO_CAP_NOREDRAW) {
+        talloc_free(in->current_frame);
+        in->current_frame = NULL;
+    }
+
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
     } else {
@@ -857,7 +911,7 @@ static void do_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    if (!vo->config_ok)
+    if (!vo->config_ok || (vo->driver->caps & VO_CAP_NOREDRAW))
         return;
 
     pthread_mutex_lock(&in->lock);
@@ -955,6 +1009,7 @@ static void *vo_thread(void *ptr)
     talloc_free(in->current_frame);
     in->current_frame = NULL;
     vo->driver->uninit(vo);
+    assert(atomic_load(&vo->in->dr_in_flight) == 0);
     return NULL;
 }
 
@@ -1257,4 +1312,89 @@ int lookup_keymap_table(const struct mp_keymap *map, int key)
     while (map->from && map->from != key)
         map++;
     return map->to;
+}
+
+struct free_dr_context {
+    struct vo *vo;
+    AVBufferRef *ref;
+};
+
+static void vo_thread_free(void *ptr)
+{
+    struct free_dr_context *ctx = ptr;
+
+    unsigned long long v = atomic_fetch_add(&ctx->vo->in->dr_in_flight, -1);
+    assert(v); // value before sub is 0 - unexpected underflow.
+
+    av_buffer_unref(&ctx->ref);
+    talloc_free(ctx);
+}
+
+static void free_dr_buffer_on_vo_thread(void *opaque, uint8_t *data)
+{
+    struct free_dr_context *ctx = opaque;
+
+    // The image could be unreffed even on the VO thread. In practice, this
+    // matters most on VO destruction.
+    if (pthread_equal(ctx->vo->in->thread, pthread_self())) {
+        vo_thread_free(ctx);
+    } else {
+        mp_dispatch_run(ctx->vo->in->dispatch, vo_thread_free, ctx);
+    }
+}
+
+struct get_image_cmd {
+    struct vo *vo;
+    int imgfmt, w, h, stride_align;
+    struct mp_image *res;
+};
+
+static void sync_get_image(void *ptr)
+{
+    struct get_image_cmd *cmd = ptr;
+    struct vo *vo = cmd->vo;
+
+    cmd->res = vo->driver->get_image(vo, cmd->imgfmt, cmd->w, cmd->h,
+                                     cmd->stride_align);
+    if (!cmd->res)
+        return;
+
+    // We require exactly 1 AVBufferRef.
+    assert(cmd->res->bufs[0]);
+    assert(!cmd->res->bufs[1]);
+
+    // Apply some magic to get it free'd on the VO thread as well. For this to
+    // work, we create a dummy-ref that aliases the original ref, which is why
+    // the original ref must be writable in the first place. (A newly allocated
+    // image should be always writable of course.)
+    assert(mp_image_is_writeable(cmd->res));
+
+    struct free_dr_context *ctx = talloc_zero(NULL, struct free_dr_context);
+    *ctx = (struct free_dr_context){
+        .vo = vo,
+        .ref = cmd->res->bufs[0],
+    };
+
+    AVBufferRef *new_ref = av_buffer_create(ctx->ref->data, ctx->ref->size,
+                                            free_dr_buffer_on_vo_thread, ctx, 0);
+    if (!new_ref)
+        abort(); // tiny malloc OOM
+
+    cmd->res->bufs[0] = new_ref;
+
+    atomic_fetch_add(&vo->in->dr_in_flight, 1);
+}
+
+struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
+                              int stride_align)
+{
+    if (!vo->driver->get_image)
+        return NULL;
+
+    struct get_image_cmd cmd = {
+        .vo = vo,
+        .imgfmt = imgfmt, .w = w, .h = h, .stride_align = stride_align,
+    };
+    mp_dispatch_run(vo->in->dispatch, sync_get_image, &cmd);
+    return cmd.res;
 }

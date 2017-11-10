@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#include "config.h"
+#if !(HAVE_LIBAF && HAVE_GPL)
+#error "libaf/GPL disabled"
+#endif
+
 #include "options/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"
@@ -52,8 +57,10 @@ struct af_info {
 // Linked list of audio filters
 struct af_instance {
     const struct af_info *info;
+    char *full_name;
     struct mp_log *log;
     struct MPOpts *opts;
+    struct mpv_global *global;
     struct replaygain_data *replaygain_data;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
@@ -97,6 +104,7 @@ struct af_stream {
 
     struct mp_log *log;
     struct MPOpts *opts;
+    struct mpv_global *global;
     struct replaygain_data *replaygain_data;
 };
 

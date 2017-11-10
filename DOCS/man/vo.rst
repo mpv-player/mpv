@@ -14,7 +14,7 @@ in the list.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output driver is ``--vo=opengl``, which is the default. All
+    The recommended output driver is ``--vo=gpu``, which is the default. All
     other drivers are for compatibility or special purposes. If the default
     does not work, it will fallback to other drivers (in the same order as
     listed by ``--vo=help``).
@@ -273,37 +273,34 @@ Available video output drivers are:
     ``--vo-direct3d-exact-backbuffer``
         Always resize the backbuffer to window size.
 
-``opengl``
-    OpenGL video output driver. It supports extended scaling methods, dithering
-    and color management.
+``gpu``
+    General purpose, customizable, GPU-accelerated video output driver. It
+    supports extended scaling methods, dithering, color management, custom
+    shaders, HDR, and more.
 
-    See `OpenGL renderer options`_ for options specific to this VO.
+    See `GPU renderer options`_ for options specific to this VO.
 
     By default, it tries to use fast and fail-safe settings. Use the
-    ``opengl-hq`` profile to use this driver with defaults set to high
-    quality rendering. (This profile is also the replacement for
-    ``--vo=opengl-hq``.) The profile can be applied with ``--profile=opengl-hq``
-    and its contents can be viewed with ``--show-profile=opengl-hq``.
+    ``gpu-hq`` profile to use this driver with defaults set to high quality
+    rendering. The profile can be applied with ``--profile=gpu-hq`` and its
+    contents can be viewed with ``--show-profile=gpu-hq``.
 
-    Requires at least OpenGL 2.1.
-
-    Some features are available with OpenGL 3 capable graphics drivers only
-    (or if the necessary extensions are available).
-
-    OpenGL ES 2.0 and 3.0 are supported as well.
+    This VO abstracts over several possible graphics APIs and windowing
+    contexts, which can be influenced using the ``--gpu-api`` and
+    ``--gpu-context`` options.
 
     Hardware decoding over OpenGL-interop is supported to some degree. Note
     that in this mode, some corner case might not be gracefully handled, and
     color space conversion and chroma upsampling is generally in the hand of
     the hardware decoder APIs.
 
-    ``opengl`` makes use of FBOs by default. Sometimes you can achieve better
-    quality or performance by changing the ``--opengl-fbo-format`` option to
+    ``gpu`` makes use of FBOs by default. Sometimes you can achieve better
+    quality or performance by changing the ``--gpu-fbo-format`` option to
     ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include Mesa/Intel not
     accepting ``rgb16``, Mesa sometimes not being compiled with float texture
     support, and some OS X setups being very slow with ``rgb16`` but fast
     with ``rgb32f``. If you have problems, you can also try enabling the
-    ``--opengl-dumb-mode=yes`` option.
+    ``--gpu-dumb-mode=yes`` option.
 
 ``sdl``
     SDL 2.0+ Render video output driver, depending on system with or without
@@ -356,7 +353,7 @@ Available video output drivers are:
         no
             Don't allow deinterlacing (default for newer libva).
         first-field
-            Show only first field (going by ``--field-dominance``).
+            Show only first field.
         bob
             bob deinterlacing (default for older libva).
 
@@ -426,16 +423,8 @@ Available video output drivers are:
         3 = average; 4 = Paeth; 5 = mixed) (default: 5)
     ``--vo-image-jpeg-quality=<0-100>``
         JPEG quality factor (default: 90)
-    ``--vo-image-jpeg-progressive=<yes|no>``
-        Specify standard or progressive JPEG (default: no).
-    ``--vo-image-jpeg-baseline=<yes|no>``
-        Specify use of JPEG baseline or not (default: yes).
     ``--vo-image-jpeg-optimize=<0-100>``
         JPEG optimization factor (default: 100)
-    ``--vo-image-jpeg-smooth=<0-100>``
-        smooth factor (default: 0)
-    ``--vo-image-jpeg-dpi=<1->``
-        JPEG DPI (default: 72)
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
@@ -515,3 +504,19 @@ Available video output drivers are:
         Mode ID to use (resolution, bit depth and frame rate).
         (default: 0)
 
+    ``--drm-overlay=<number>``
+        Select the DRM overlay index to use.
+        Overlay index is zero based, and related to crtc.
+        (default: 0)
+
+``mediacodec_embed`` (Android)
+    Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
+    Requires ``--hwdec=mediacodec`` for hardware decoding, along with
+    ``--vo=mediacodec_embed`` and ``--wid=(intptr_t)(*android.view.Surface)``.
+
+    Since this video output driver uses native decoding and rendering routines,
+    many of mpv's features (subtitle rendering, OSD/OSC, video filters, etc)
+    are not available with this driver.
+
+    To use hardware decoding with ``--vo-gpu`` instead, use
+    ``--hwdec=mediacodec-copy`` along with ``--gpu-context=android``.

@@ -1,25 +1,20 @@
 /*
- * Get path to config dir/file.
- *
- * Return Values:
- *   Returns the pointer to the ALLOCATED buffer containing the
- *   zero terminated path string. This buffer has to be FREED
- *   by the caller.
- *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * Get path to config dir/file.
+ *
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -51,7 +46,9 @@ static const mp_get_platform_path_cb path_resolvers[] = {
 #if !defined(_WIN32) || defined(__CYGWIN__)
     mp_get_platform_path_unix,
 #endif
-#if defined(_WIN32)
+#if HAVE_UWP
+    mp_get_platform_path_uwp,
+#elif defined(_WIN32)
     mp_get_platform_path_win,
 #endif
 };
@@ -176,7 +173,10 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
                     talloc_free(tmp);
                 }
             } else if (bstr_equals0(prefix, "")) {
-                res = mp_path_join_bstr(talloc_ctx, bstr0(getenv("HOME")), rest);
+                char *home = getenv("HOME");
+                if (!home)
+                    home = getenv("USERPROFILE");
+                res = mp_path_join_bstr(talloc_ctx, bstr0(home), rest);
             } else if (bstr_eatstart0(&prefix, "~")) {
                 void *tmp = talloc_new(NULL);
                 char type[80];

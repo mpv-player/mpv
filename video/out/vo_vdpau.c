@@ -135,9 +135,6 @@ struct vdpctx {
         int render_count;
         int change_id;
     } osd_surfaces[MAX_OSD_PARTS];
-
-    // Video equalizer
-    struct mp_csp_equalizer video_eq;
 };
 
 static bool status_ok(struct vo *vo);
@@ -1026,6 +1023,7 @@ static int preinit(struct vo *vo)
     hwdec_devices_add(vo->hwdec_devs, &vc->mpvdp->hwctx);
 
     vc->video_mixer = mp_vdpau_mixer_create(vc->mpvdp, vo->log);
+    vc->video_mixer->video_eq = mp_csp_equalizer_create(vo, vo->global);
 
     if (mp_vdpau_guess_if_emulated(vc->mpvdp)) {
         MP_WARN(vo, "VDPAU is most likely emulated via VA-API.\n"
@@ -1044,33 +1042,7 @@ static int preinit(struct vo *vo)
     vc->vdp->bitmap_surface_query_capabilities(vc->vdp_device, VDP_RGBA_FORMAT_A8,
                             &vc->supports_a8, &(uint32_t){0}, &(uint32_t){0});
 
-    vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
-
     return 0;
-}
-
-static int get_equalizer(struct vo *vo, const char *name, int *value)
-{
-    struct vdpctx *vc = vo->priv;
-
-    if (vc->rgb_mode)
-        return false;
-
-    return mp_csp_equalizer_get(&vc->video_mixer->video_eq, name, value) >= 0 ?
-           VO_TRUE : VO_NOTIMPL;
-}
-
-static int set_equalizer(struct vo *vo, const char *name, int value)
-{
-    struct vdpctx *vc = vo->priv;
-
-    if (vc->rgb_mode)
-        return false;
-
-    if (mp_csp_equalizer_set(&vc->video_mixer->video_eq, name, value) < 0)
-        return VO_NOTIMPL;
-    vc->video_mixer->initialized = false;
-    return true;
 }
 
 static void checked_resize(struct vo *vo)
@@ -1090,15 +1062,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         checked_resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER: {
+    case VOCTRL_SET_EQUALIZER:
         vo->want_redraw = true;
-        struct voctrl_set_equalizer_args *args = data;
-        return set_equalizer(vo, args->name, args->value);
-    }
-    case VOCTRL_GET_EQUALIZER: {
-        struct voctrl_get_equalizer_args *args = data;
-        return get_equalizer(vo, args->name, args->valueptr);
-    }
+        return true;
     case VOCTRL_RESET:
         forget_frames(vo, true);
         return true;

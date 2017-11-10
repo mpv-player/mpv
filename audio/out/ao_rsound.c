@@ -64,6 +64,9 @@ static int init(struct ao *ao)
     if (rsd_init(&priv->rd) < 0)
         return -1;
 
+    if (ao->device)
+        rsd_set_param(priv->rd, RSD_HOST, ao->device);
+
     // Actual channel layout unknown.
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext_def(&sel);

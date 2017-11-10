@@ -1,10 +1,4 @@
 /*
- * common OpenGL routines
- *
- * copyleft (C) 2005-2010 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
- * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
- * gave me lots of good ideas.
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -21,77 +15,17 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <math.h>
-#include <assert.h>
-
+#include "options/m_config.h"
 #include "context.h"
-#include "common/common.h"
-#include "options/options.h"
-#include "options/m_option.h"
-
-extern const struct mpgl_driver mpgl_driver_x11;
-extern const struct mpgl_driver mpgl_driver_x11egl;
-extern const struct mpgl_driver mpgl_driver_x11_probe;
-extern const struct mpgl_driver mpgl_driver_drm_egl;
-extern const struct mpgl_driver mpgl_driver_drm;
-extern const struct mpgl_driver mpgl_driver_cocoa;
-extern const struct mpgl_driver mpgl_driver_wayland;
-extern const struct mpgl_driver mpgl_driver_w32;
-extern const struct mpgl_driver mpgl_driver_angle;
-extern const struct mpgl_driver mpgl_driver_angle_es2;
-extern const struct mpgl_driver mpgl_driver_dxinterop;
-extern const struct mpgl_driver mpgl_driver_rpi;
-extern const struct mpgl_driver mpgl_driver_mali;
-extern const struct mpgl_driver mpgl_driver_vdpauglx;
-
-static const struct mpgl_driver *const backends[] = {
-#if HAVE_RPI
-    &mpgl_driver_rpi,
-#endif
-#if HAVE_GL_COCOA
-    &mpgl_driver_cocoa,
-#endif
-#if HAVE_EGL_ANGLE
-    &mpgl_driver_angle,
-#endif
-#if HAVE_GL_WIN32
-    &mpgl_driver_w32,
-#endif
-#if HAVE_GL_DXINTEROP
-    &mpgl_driver_dxinterop,
-#endif
-#if HAVE_GL_X11
-    &mpgl_driver_x11_probe,
-#endif
-#if HAVE_EGL_X11
-    &mpgl_driver_x11egl,
-#endif
-#if HAVE_GL_X11
-    &mpgl_driver_x11,
-#endif
-#if HAVE_GL_WAYLAND
-    &mpgl_driver_wayland,
-#endif
-#if HAVE_EGL_DRM
-    &mpgl_driver_drm,
-    &mpgl_driver_drm_egl,
-#endif
-#if HAVE_MALI_FBDEV
-    &mpgl_driver_mali,
-#endif
-#if HAVE_VDPAU_GL_X11
-    &mpgl_driver_vdpauglx,
-#endif
-};
+#include "ra_gl.h"
+#include "utils.h"
 
 // 0-terminated list of desktop GL versions a backend should try to
 // initialize. The first entry is the most preferred version.
 const int mpgl_preferred_gl_versions[] = {
+    440,
+    430,
+    400,
     330,
     320,
     310,
@@ -100,140 +34,322 @@ const int mpgl_preferred_gl_versions[] = {
     0
 };
 
-int mpgl_find_backend(const char *name)
+enum {
+    FLUSH_NO = 0,
+    FLUSH_YES,
+    FLUSH_AUTO,
+};
+
+enum {
+    GLES_AUTO = 0,
+    GLES_YES,
+    GLES_NO,
+};
+
+struct opengl_opts {
+    int use_glfinish;
+    int waitvsync;
+    int vsync_pattern[2];
+    int swapinterval;
+    int early_flush;
+    int restrict_version;
+    int gles_mode;
+};
+
+#define OPT_BASE_STRUCT struct opengl_opts
+const struct m_sub_options opengl_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_FLAG("opengl-glfinish", use_glfinish, 0),
+        OPT_FLAG("opengl-waitvsync", waitvsync, 0),
+        OPT_INT("opengl-swapinterval", swapinterval, 0),
+        OPT_INTPAIR("opengl-check-pattern", vsync_pattern, 0),
+        OPT_INT("opengl-restrict", restrict_version, 0),
+        OPT_CHOICE("opengl-es", gles_mode, 0,
+                ({"auto", GLES_AUTO}, {"yes", GLES_YES}, {"no", GLES_NO})),
+        OPT_CHOICE("opengl-early-flush", early_flush, 0,
+                ({"no", FLUSH_NO}, {"yes", FLUSH_YES}, {"auto", FLUSH_AUTO})),
+
+        OPT_REPLACED("opengl-debug", "gpu-debug"),
+        OPT_REPLACED("opengl-sw", "gpu-sw"),
+        OPT_REPLACED("opengl-vsync-fences", "swapchain-depth"),
+        OPT_REPLACED("opengl-backend", "gpu-context"),
+        {0},
+    },
+    .defaults = &(const struct opengl_opts) {
+        .swapinterval = 1,
+    },
+    .size = sizeof(struct opengl_opts),
+};
+
+struct priv {
+    GL *gl;
+    struct mp_log *log;
+    struct ra_gl_ctx_params params;
+    struct opengl_opts *opts;
+    struct ra_swapchain_fns fns;
+    GLuint main_fb;
+    struct ra_tex *wrapped_fb; // corresponds to main_fb
+    // for debugging:
+    int frames_rendered;
+    unsigned int prev_sgi_sync_count;
+    // for gl_vsync_pattern
+    int last_pattern;
+    int matches, mismatches;
+    // for swapchain_depth simulation
+    GLsync *vsync_fences;
+    int num_vsync_fences;
+};
+
+bool ra_gl_ctx_test_version(struct ra_ctx *ctx, int version, bool es)
 {
-    if (name == NULL || strcmp(name, "auto") == 0)
-        return -1;
-    for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
-        if (strcmp(backends[n]->name, name) == 0)
-            return n;
+    bool ret;
+    struct opengl_opts *opts;
+    void *tmp = talloc_new(NULL);
+    opts = mp_get_config_group(tmp, ctx->global, &opengl_conf);
+
+    // Version too high
+    if (opts->restrict_version && version >= opts->restrict_version) {
+        ret = false;
+        goto done;
     }
-    return -2;
+
+    switch (opts->gles_mode) {
+    case GLES_YES:  ret = es;   goto done;
+    case GLES_NO:   ret = !es;  goto done;
+    case GLES_AUTO: ret = true; goto done;
+    default: abort();
+    }
+
+done:
+    talloc_free(tmp);
+    return ret;
 }
 
-int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name, struct bstr param)
+static void *get_native_display(void *priv, const char *name)
 {
-    if (bstr_equals0(param, "help")) {
-        mp_info(log, "OpenGL windowing backends:\n");
-        mp_info(log, "    auto (autodetect)\n");
-        for (int n = 0; n < MP_ARRAY_SIZE(backends); n++)
-            mp_info(log, "    %s\n", backends[n]->name);
-        return M_OPT_EXIT;
-    }
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
-}
-
-static void *get_native_display(void *pctx, const char *name)
-{
-    MPGLContext *ctx = pctx;
-    if (!ctx->native_display_type || !name)
+    struct priv *p = priv;
+    if (!p->params.native_display_type || !name)
         return NULL;
-    return strcmp(ctx->native_display_type, name) == 0 ? ctx->native_display : NULL;
+    if (strcmp(p->params.native_display_type, name) != 0)
+        return NULL;
+
+    return p->params.native_display;
 }
 
-static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver,
-                                 bool probing, int vo_flags)
+void ra_gl_ctx_uninit(struct ra_ctx *ctx)
 {
-    MPGLContext *ctx = talloc_ptrtype(NULL, ctx);
-    *ctx = (MPGLContext) {
-        .gl = talloc_zero(ctx, GL),
-        .vo = vo,
-        .global = vo->global,
-        .driver = driver,
-        .log = vo->log,
+    if (ctx->swapchain) {
+        struct priv *p = ctx->swapchain->priv;
+        if (ctx->ra && p->wrapped_fb)
+            ra_tex_free(ctx->ra, &p->wrapped_fb);
+        talloc_free(ctx->swapchain);
+        ctx->swapchain = NULL;
+    }
+
+    ra_free(&ctx->ra);
+}
+
+static const struct ra_swapchain_fns ra_gl_swapchain_fns;
+
+bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
+{
+    struct ra_swapchain *sw = ctx->swapchain = talloc_ptrtype(NULL, sw);
+    *sw = (struct ra_swapchain) {
+        .ctx = ctx,
     };
-    if (probing)
-        vo_flags |= VOFLAG_PROBING;
-    bool old_probing = vo->probing;
-    vo->probing = probing; // hack; kill it once backends are separate
-    MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", ctx->driver->name);
-    ctx->priv = talloc_zero_size(ctx, ctx->driver->priv_size);
-    if (ctx->driver->init(ctx, vo_flags) < 0) {
-        vo->probing = old_probing;
-        talloc_free(ctx);
-        return NULL;
+
+    struct priv *p = sw->priv = talloc_ptrtype(sw, p);
+    *p = (struct priv) {
+        .gl     = gl,
+        .log    = ctx->log,
+        .params = params,
+        .opts   = mp_get_config_group(p, ctx->global, &opengl_conf),
+        .fns    = ra_gl_swapchain_fns,
+    };
+
+    sw->fns = &p->fns;
+
+    const struct ra_swapchain_fns *ext = p->params.external_swapchain;
+    if (ext) {
+        if (ext->color_depth)
+            p->fns.color_depth = ext->color_depth;
+        if (ext->screenshot)
+            p->fns.screenshot = ext->screenshot;
+        if (ext->start_frame)
+            p->fns.start_frame = ext->start_frame;
+        if (ext->submit_frame)
+            p->fns.submit_frame = ext->submit_frame;
+        if (ext->swap_buffers)
+            p->fns.swap_buffers = ext->swap_buffers;
     }
-    vo->probing = old_probing;
 
-    if (!ctx->gl->version && !ctx->gl->es)
-        goto cleanup;
+    if (!gl->version && !gl->es)
+        return false;
 
-    if (probing && ctx->gl->es && (vo_flags & VOFLAG_NO_GLES)) {
-        MP_VERBOSE(ctx->vo, "Skipping GLES backend.\n");
-        goto cleanup;
+    if (gl->mpgl_caps & MPGL_CAP_SW) {
+        MP_WARN(p, "Suspected software renderer or indirect context.\n");
+        if (ctx->opts.probing && !ctx->opts.allow_sw)
+            return false;
     }
 
-    if (ctx->gl->mpgl_caps & MPGL_CAP_SW) {
-        MP_WARN(ctx->vo, "Suspected software renderer or indirect context.\n");
-        if (vo->probing && !(vo_flags & VOFLAG_SW))
-            goto cleanup;
+    gl->debug_context = ctx->opts.debug;
+    gl->get_native_display_ctx = p;
+    gl->get_native_display = get_native_display;
+
+    if (gl->SwapInterval) {
+        gl->SwapInterval(p->opts->swapinterval);
+    } else {
+        MP_VERBOSE(p, "GL_*_swap_control extension missing.\n");
     }
 
-    ctx->gl->debug_context = !!(vo_flags & VOFLAG_GL_DEBUG);
-
-    ctx->gl->get_native_display_ctx = ctx;
-    ctx->gl->get_native_display = get_native_display;
-
-    return ctx;
-
-cleanup:
-    mpgl_uninit(ctx);
-    return NULL;
+    ctx->ra = ra_create_gl(p->gl, ctx->log);
+    return !!ctx->ra;
 }
 
-// Create a VO window and create a GL context on it.
-//  vo_flags: passed to the backend's create window function
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
+void ra_gl_ctx_resize(struct ra_swapchain *sw, int w, int h, int fbo)
 {
-    MPGLContext *ctx = NULL;
-    int index = mpgl_find_backend(backend_name);
-    if (index == -1) {
-        for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
-            ctx = init_backend(vo, backends[n], true, vo_flags);
-            if (ctx)
-                break;
-        }
-        // VO forced, but no backend is ok => force the first that works at all
-        if (!ctx && !vo->probing) {
-            for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
-                ctx = init_backend(vo, backends[n], false, vo_flags);
-                if (ctx)
-                    break;
-            }
-        }
-    } else if (index >= 0) {
-        ctx = init_backend(vo, backends[index], false, vo_flags);
+    struct priv *p = sw->priv;
+    if (p->main_fb == fbo && p->wrapped_fb && p->wrapped_fb->params.w == w
+        && p->wrapped_fb->params.h == h)
+        return;
+
+    if (p->wrapped_fb)
+        ra_tex_free(sw->ctx->ra, &p->wrapped_fb);
+
+    p->main_fb = fbo;
+    p->wrapped_fb = ra_create_wrapped_fb(sw->ctx->ra, fbo, w, h);
+}
+
+int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    GL *gl = p->gl;
+
+    if (!p->wrapped_fb)
+        return 0;
+
+    if ((gl->es < 300 && !gl->version) || !(gl->mpgl_caps & MPGL_CAP_FB))
+        return 0;
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, p->main_fb);
+
+    GLenum obj = gl->version ? GL_BACK_LEFT : GL_BACK;
+    if (p->main_fb)
+        obj = GL_COLOR_ATTACHMENT0;
+
+    GLint depth_g = 0;
+
+    gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
+                            GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &depth_g);
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return depth_g;
+}
+
+struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+
+    assert(p->wrapped_fb);
+    struct mp_image *screen = gl_read_fbo_contents(p->gl, p->main_fb,
+                                                   p->wrapped_fb->params.w,
+                                                   p->wrapped_fb->params.h);
+
+    // OpenGL FB is also read in flipped order, so we need to flip when the
+    // rendering is *not* flipped, which in our case is whenever
+    // p->params.flipped is true. I hope that made sense
+    if (screen && p->params.flipped)
+        mp_image_vflip(screen);
+
+    return screen;
+}
+
+bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
+{
+    struct priv *p = sw->priv;
+    out_fbo->tex = p->wrapped_fb;
+    out_fbo->flip = !p->params.flipped; // OpenGL FBs are normally flipped
+    return true;
+}
+
+bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
+{
+    struct priv *p = sw->priv;
+    GL *gl = p->gl;
+
+    if (p->opts->use_glfinish)
+        gl->Finish();
+
+    if (gl->FenceSync && !p->params.external_swapchain) {
+        GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (fence)
+            MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
     }
-    return ctx;
+
+    switch (p->opts->early_flush) {
+    case FLUSH_AUTO:
+        if (frame->display_synced)
+            break;
+        // fall through
+    case FLUSH_YES:
+        gl->Flush();
+    }
+
+    return true;
 }
 
-int mpgl_reconfig_window(struct MPGLContext *ctx)
+static void check_pattern(struct priv *p, int item)
 {
-    return ctx->driver->reconfig(ctx);
+    int expected = p->opts->vsync_pattern[p->last_pattern];
+    if (item == expected) {
+        p->last_pattern++;
+        if (p->last_pattern >= 2)
+            p->last_pattern = 0;
+        p->matches++;
+    } else {
+        p->mismatches++;
+        MP_WARN(p, "wrong pattern, expected %d got %d (hit: %d, mis: %d)\n",
+                expected, item, p->matches, p->mismatches);
+    }
 }
 
-int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg)
+void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
 {
-    return ctx->driver->control(ctx, events, request, arg);
+    struct priv *p = sw->priv;
+    GL *gl = p->gl;
+
+    p->params.swap_buffers(sw->ctx);
+    p->frames_rendered++;
+
+    if (p->frames_rendered > 5 && !sw->ctx->opts.debug)
+        ra_gl_set_debug(sw->ctx->ra, false);
+
+    if ((p->opts->waitvsync || p->opts->vsync_pattern[0])
+        && gl->GetVideoSync)
+    {
+        unsigned int n1 = 0, n2 = 0;
+        gl->GetVideoSync(&n1);
+        if (p->opts->waitvsync)
+            gl->WaitVideoSync(2, (n1 + 1) % 2, &n2);
+        int step = n1 - p->prev_sgi_sync_count;
+        p->prev_sgi_sync_count = n1;
+        MP_DBG(p, "Flip counts: %u->%u, step=%d\n", n1, n2, step);
+        if (p->opts->vsync_pattern[0])
+            check_pattern(p, step);
+    }
+
+    while (p->num_vsync_fences >= sw->ctx->opts.swapchain_depth) {
+        gl->ClientWaitSync(p->vsync_fences[0], GL_SYNC_FLUSH_COMMANDS_BIT, 1e9);
+        gl->DeleteSync(p->vsync_fences[0]);
+        MP_TARRAY_REMOVE_AT(p->vsync_fences, p->num_vsync_fences, 0);
+    }
 }
 
-void mpgl_start_frame(struct MPGLContext *ctx)
-{
-    if (ctx->driver->start_frame)
-        ctx->driver->start_frame(ctx);
-}
-
-void mpgl_swap_buffers(struct MPGLContext *ctx)
-{
-    ctx->driver->swap_buffers(ctx);
-}
-
-void mpgl_uninit(MPGLContext *ctx)
-{
-    if (ctx)
-        ctx->driver->uninit(ctx);
-    talloc_free(ctx);
-}
+static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
+    .color_depth   = ra_gl_ctx_color_depth,
+    .screenshot    = ra_gl_ctx_screenshot,
+    .start_frame   = ra_gl_ctx_start_frame,
+    .submit_frame  = ra_gl_ctx_submit_frame,
+    .swap_buffers  = ra_gl_ctx_swap_buffers,
+};

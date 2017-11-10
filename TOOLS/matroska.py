@@ -5,21 +5,20 @@ Can also be used to directly parse Matroska files and display their contents.
 """
 
 #
-# This file is part of MPlayer.
+# This file is part of mpv.
 #
-# MPlayer is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
+# mpv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
 #
-# MPlayer is distributed in the hope that it will be useful,
+# mpv is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# GNU Lesser General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along
-# with MPlayer; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# You should have received a copy of the GNU Lesser General Public
+# License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
 # for compatibility with Python 2.x
@@ -137,6 +136,13 @@ elements_matroska = (
                             'LuminanceMax,            55D9, float',
                             'LuminanceMin,            55DA, float',
                         ),
+                    ),
+                    'Projection, 7670, sub', (
+                        'ProjectionType, 7671, uint',
+                        'ProjectionPrivate, 7672, binary',
+                        'ProjectionPoseYaw, 7673, float',
+                        'ProjectionPosePitch, 7674, float',
+                        'ProjectionPoseRoll, 7675, float',
                     ),
                 ),
                 'Audio, e1, sub', (

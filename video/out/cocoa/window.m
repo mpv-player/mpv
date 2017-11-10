@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <libavutil/common.h>
@@ -47,7 +47,7 @@
 @synthesize currentScreen = _current_screen;
 @synthesize unfScreen = _unf_Screen;
 - (id)initWithContentRect:(NSRect)content_rect
-                styleMask:(NSUInteger)style_mask
+                styleMask:(NSWindowStyleMask)style_mask
                   backing:(NSBackingStoreType)buffering_type
                     defer:(BOOL)flag
                    screen:(NSScreen *)screen
@@ -106,7 +106,8 @@
         [self setFrame:frame display:YES];
     }
 
-    [super toggleFullScreen:sender];
+    if ([self.adapter wantsNativeFullscreen])
+        [super toggleFullScreen:sender];
 
     if (![self.adapter isInFullScreenMode]) {
         [self setToFullScreen];
@@ -119,7 +120,16 @@
 {
     [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
     NSRect frame = [[self targetScreen] frame];
-    [self setFrame:frame display:YES];
+
+    if ([self.adapter wantsNativeFullscreen]) {
+        [self setFrame:frame display:YES];
+    } else {
+        [NSApp setPresentationOptions:NSApplicationPresentationAutoHideMenuBar|
+                                      NSApplicationPresentationAutoHideDock];
+        [self setFrame:frame display:YES];
+        _is_animating = 0;
+        [self.adapter windowDidEnterFullScreen];
+    }
 }
 
 - (void)setToWindow
@@ -127,9 +137,19 @@
     [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
     NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]
                     withoutBounds:[[self targetScreen] isEqual:[self screen]]];
-    [self setFrame:frame display:YES];
-    [self setContentAspectRatio:_unfs_content_frame.size];
-    [self setCenteredContentSize:_unfs_content_frame.size];
+
+    if ([self.adapter wantsNativeFullscreen]) {
+        [self setFrame:frame display:YES];
+        [self setContentAspectRatio:_unfs_content_frame.size];
+        [self setCenteredContentSize:_unfs_content_frame.size];
+    } else {
+        [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+        [self setFrame:frame display:YES];
+        [self setContentAspectRatio:_unfs_content_frame.size];
+        [self setCenteredContentSize:_unfs_content_frame.size];
+        _is_animating = 0;
+        [self.adapter windowDidExitFullScreen];
+    }
 }
 
 - (NSArray *)customWindowsToEnterFullScreenForWindow:(NSWindow *)window
@@ -150,25 +170,37 @@
 - (void)windowDidEnterFullScreen:(NSNotification *)notification
 {
     _is_animating = 0;
-    [self.adapter windowDidEnterFullScreen:notification];
+    [self.adapter windowDidEnterFullScreen];
 }
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification
 {
     _is_animating = 0;
-    [self.adapter windowDidExitFullScreen:notification];
+    [self.adapter windowDidExitFullScreen];
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification *)notification
+{
+    [self.adapter windowWillEnterFullScreen:notification];
+}
+
+- (void)windowWillExitFullScreen:(NSNotification *)notification
+{
+    [self.adapter windowWillExitFullScreen:notification];
 }
 
 - (void)windowDidFailToEnterFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
     [self setToWindow];
+    [self.adapter windowDidFailToEnterFullScreen:window];
 }
 
 - (void)windowDidFailToExitFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
     [self setToFullScreen];
+    [self.adapter windowDidFailToExitFullScreen:window];
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
@@ -223,6 +255,7 @@
 
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
+
 - (BOOL)windowShouldClose:(id)sender
 {
     cocoa_put_key(MP_KEY_CLOSE_WIN);
@@ -378,7 +411,8 @@
     if (NSMaxX(nf) < NSMinX(vf))
         nf.origin.x = NSMinX(vf);
 
-    if (NSHeight(nf) < NSHeight(vf) && NSHeight(of) > NSHeight(vf))
+    if (NSHeight(nf) < NSHeight(vf) && NSHeight(of) > NSHeight(vf) &&
+        ![self.adapter isInFullScreenMode])
         // If the window height is smaller than the visible frame, but it was
         // bigger previously recenter the smaller window vertically. This is
         // needed to counter the 'snap to top' behaviour.

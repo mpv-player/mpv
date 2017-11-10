@@ -18,6 +18,8 @@
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
+
 #include "codec_tags.h"
 #include "stheader.h"
 #include "common/av_common.h"
@@ -48,14 +50,49 @@ static const char *lookup_tag(int type, uint32_t tag)
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
+static const unsigned char guid_pcm[16] =
+    {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
+     0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
+static const unsigned char guid_float[16] =
+    {0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
+     0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
+// Corresponds to FF_MEDIASUBTYPE_BASE_GUID (plus 4 bytes of padding).
+static const unsigned char guid_ffext[16] =
+    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
+     0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
+
 static void map_audio_pcm_tag(struct mp_codec_params *c)
 {
+    // MS PCM, Extended
+    if (c->codec_tag == 0xfffe && c->extradata_size >= 22) {
+        // WAVEFORMATEXTENSIBLE.dwChannelMask
+        uint64_t chmask = AV_RL32(c->extradata + 2);
+        struct mp_chmap chmap;
+        mp_chmap_from_waveext(&chmap, chmask);
+        if (c->channels.num == chmap.num)
+            c->channels = chmap;
+
+        // WAVEFORMATEXTENSIBLE.SubFormat
+        unsigned char *subformat = c->extradata + 6;
+        if (memcmp(subformat + 4, guid_ffext + 4, 12) == 0) {
+            c->codec_tag = AV_RL32(subformat);
+            c->codec = lookup_tag(c->type, c->codec_tag);
+        }
+        if (memcmp(subformat, guid_pcm, 16) == 0)
+            c->codec_tag = 0x0;
+        if (memcmp(subformat, guid_float, 16) == 0)
+            c->codec_tag = 0x3;
+
+        // Compressed formats might use this.
+        c->extradata += 22;
+        c->extradata_size += 22;
+    }
+
     int bits = c->bits_per_coded_sample;
     int bytes = (bits + 7) / 8;
     switch (c->codec_tag) {
     case 0x0:       // Microsoft PCM
     case 0x1:
-    case 0xfffe:    // MS PCM, Extended
         if (bytes >= 1 && bytes <= 4)
             mp_set_pcm_codec(c, bytes > 1, false, bytes * 8, false);
         break;

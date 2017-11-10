@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -21,6 +21,8 @@
 #include <errno.h>
 #include <assert.h>
 #include <stdbool.h>
+
+#include "config.h"
 
 #include "osdep/io.h"
 #include "common/global.h"
@@ -34,9 +36,6 @@
 
 #define GLOBAL 0
 #define LOCAL 1
-
-#define dvd_range(a)  (a >= 0 && a < 255)
-
 
 struct parse_state {
     struct m_config *config;
@@ -79,9 +78,6 @@ static int split_opt_silent(struct parse_state *p)
 
     bool ambiguous = !bstr_split_tok(p->arg, "=", &p->arg, &p->param);
 
-    if (!p->arg.len)
-        return M_OPT_INVALID;
-
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
     if (ambiguous && need_param) {
@@ -102,12 +98,12 @@ static bool split_opt(struct parse_state *p)
         return r == 0;
     p->error = true;
 
-    MP_FATAL(p->config, "Error parsing command line option '%.*s': %s\n",
+    MP_FATAL(p->config, "Error parsing commandline option %.*s: %s\n",
              BSTR_P(p->arg), m_option_strerror(r));
     return false;
 }
 
-#if defined(__MINGW32__) && (HAVE_GLOB || HAVE_GLOB_WIN32_REPLACEMENT)
+#ifdef __MINGW32__
 static void process_non_option(struct playlist *files, const char *arg)
 {
     glob_t gg;
@@ -150,12 +146,12 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             int flags = M_SETOPT_FROM_CMDLINE;
             if (mode == LOCAL)
                 flags |= M_SETOPT_BACKUP | M_SETOPT_CHECK_ONLY;
-            int r = m_config_set_option_ext(config, p.arg, p.param, flags);
+            int r = m_config_set_option_cli(config, p.arg, p.param, flags);
             if (r == M_OPT_EXIT) {
                 ret = r;
                 goto err_out;
             } else if (r < 0) {
-                MP_FATAL(config, "Setting command line option '--%.*s=%.*s' failed.\n",
+                MP_FATAL(config, "Setting commandline option --%.*s=%.*s failed.\n",
                          BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;
             }
@@ -224,6 +220,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             void *tmp = talloc_new(NULL);
             bstr file = p.arg;
             char *file0 = bstrdup0(tmp, p.arg);
+#if HAVE_GPL
             // expand DVD filename entries like dvd://1-3 into component titles
             if (bstr_startswith0(file, "dvd://")) {
                 int offset = 6;
@@ -239,6 +236,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     } else
                         end_title = strtol(splitpos + 1, &endpos, 10);
 
+                    #define dvd_range(a)  (a >= 0 && a < 255)
                     if (dvd_range(start_title) && dvd_range(end_title)
                             && (start_title < end_title)) {
                         for (int j = start_title; j <= end_title; j++) {
@@ -254,6 +252,9 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             } else {
                 process_non_option(files, file0);
             }
+#else
+            process_non_option(files, file0);
+#endif
             talloc_free(tmp);
         }
     }
@@ -290,7 +291,7 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
             // Ignore non-pre-parse options. They will be set later.
             // Option parsing errors will be handled later as well.
             int flags = M_SETOPT_FROM_CMDLINE | M_SETOPT_PRE_PARSE_ONLY;
-            m_config_set_option_ext(config, p.arg, p.param, flags);
+            m_config_set_option_cli(config, p.arg, p.param, flags);
             if (bstrcmp0(p.arg, "v") == 0)
                 opts->verbose++;
         }

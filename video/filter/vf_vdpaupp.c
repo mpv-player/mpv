@@ -151,13 +151,6 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         mp_refqueue_flush(p->queue);
         return CONTROL_OK;
-    case VFCTRL_GET_DEINTERLACE:
-        *(int *)data = !!p->deint_enabled;
-        return true;
-    case VFCTRL_SET_DEINTERLACE:
-        p->deint_enabled = !!*(int *)data;
-        p->opts.deint = p->deint_enabled ? p->def_deintmode : 0;
-        return true;
     }
     return CONTROL_UNKNOWN;
 }

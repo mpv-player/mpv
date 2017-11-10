@@ -46,6 +46,11 @@
 
 #include "common/msg.h"
 
+#include "config.h"
+#if !HAVE_GPL
+#error GPL only
+#endif
+
 typedef struct cdda_params {
     cdrom_drive_t *cd;
     cdrom_paranoia_t *cdp;

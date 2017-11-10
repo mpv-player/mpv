@@ -31,6 +31,7 @@
 
 #include "mp_image.h"
 #include "csputils.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 
 const struct m_opt_choice_alternatives mp_csp_names[] = {
@@ -66,6 +67,7 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"cie1931",     MP_CSP_PRIM_CIE_1931},
     {"dci-p3",      MP_CSP_PRIM_DCI_P3},
     {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
+    {"s-gamut",     MP_CSP_PRIM_S_GAMUT},
     {0}
 };
 
@@ -78,19 +80,21 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"gamma2.2",    MP_CSP_TRC_GAMMA22},
     {"gamma2.8",    MP_CSP_TRC_GAMMA28},
     {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
-    {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
-    {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
+    {"pq",          MP_CSP_TRC_PQ},
+    {"hlg",         MP_CSP_TRC_HLG},
     {"v-log",       MP_CSP_TRC_V_LOG},
+    {"s-log1",      MP_CSP_TRC_S_LOG1},
+    {"s-log2",      MP_CSP_TRC_S_LOG2},
     {0}
 };
 
-const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
-    "brightness",
-    "contrast",
-    "hue",
-    "saturation",
-    "gamma",
-    "output-levels",
+const struct m_opt_choice_alternatives mp_csp_light_names[] = {
+    {"auto",        MP_CSP_LIGHT_AUTO},
+    {"display",     MP_CSP_LIGHT_DISPLAY},
+    {"hlg",         MP_CSP_LIGHT_SCENE_HLG},
+    {"709-1886",    MP_CSP_LIGHT_SCENE_709_1886},
+    {"gamma1.2",    MP_CSP_LIGHT_SCENE_1_2},
+    {0}
 };
 
 const struct m_opt_choice_alternatives mp_chroma_names[] = {
@@ -110,10 +114,10 @@ void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
         orig->primaries = new->primaries;
     if (!orig->gamma)
         orig->gamma = new->gamma;
-    if (!orig->nom_peak)
-        orig->nom_peak = new->nom_peak;
     if (!orig->sig_peak)
         orig->sig_peak = new->sig_peak;
+    if (!orig->light)
+        orig->light = new->light;
 }
 
 // The short name _must_ match with what vf_stereo3d accepts (if supported).
@@ -190,8 +194,8 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
     case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
-    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_SMPTE_ST2084;
-    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_ARIB_STD_B67;
+    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_PQ;
+    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_HLG;
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -240,8 +244,8 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
     case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
-    case MP_CSP_TRC_SMPTE_ST2084: return AVCOL_TRC_SMPTEST2084;
-    case MP_CSP_TRC_ARIB_STD_B67: return AVCOL_TRC_ARIB_STD_B67;
+    case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
+    case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
     default:                      return AVCOL_TRC_UNSPECIFIED;
     }
 }
@@ -444,40 +448,43 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .blue  = {0.100, -0.03},
             .white = d65
         };
+    // From Sony S-Log reference manual
+    case MP_CSP_PRIM_S_GAMUT:
+        return (struct mp_csp_primaries) {
+            .red   = {0.730, 0.280},
+            .green = {0.140, 0.855},
+            .blue  = {0.100, -0.05},
+            .white = d65
+        };
     default:
         return (struct mp_csp_primaries) {{0}};
     }
 }
 
-// Get the nominal peak for a given colorspace, based on a known reference peak
-// (i.e. the display of a reference white illuminant. This may or may not
-// be the actual signal peak)
-float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
+// Get the nominal peak for a given colorspace, relative to the reference white
+// level. In other words, this returns the brightest encodable value that can
+// be represented by a given transfer curve.
+float mp_trc_nom_peak(enum mp_csp_trc trc)
 {
     switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
-    case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
-    case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
+    case MP_CSP_TRC_PQ:           return 10000.0 / MP_REF_WHITE;
+    case MP_CSP_TRC_HLG:          return 12.0;
+    case MP_CSP_TRC_V_LOG:        return 46.0855;
+    case MP_CSP_TRC_S_LOG1:       return 6.52;
+    case MP_CSP_TRC_S_LOG2:       return 9.212;
     }
 
-    return ref_peak;
+    return 1.0;
 }
 
 bool mp_trc_is_hdr(enum mp_csp_trc trc)
 {
-    switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084:
-    case MP_CSP_TRC_ARIB_STD_B67:
-    case MP_CSP_TRC_V_LOG:
-        return true;
-    }
-
-    return false;
+    return mp_trc_nom_peak(trc) > 1.0;
 }
 
 // Compute the RGB/XYZ matrix as described here:
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-static void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
 {
     float S[3], X[4], Z[4];
 
@@ -535,14 +542,14 @@ static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
 
     for (int i = 0; i < 3; i++) {
         // source cone
-        C[i][0] = bradford[i][0] * src.x / src.y
+        C[i][0] = bradford[i][0] * mp_xy_X(src)
                 + bradford[i][1] * 1
-                + bradford[i][2] * (1 - src.x - src.y) / src.y;
+                + bradford[i][2] * mp_xy_Z(src);
 
         // dest cone
-        C[i][1] = bradford[i][0] * dest.x / dest.y
+        C[i][1] = bradford[i][0] * mp_xy_X(dest)
                 + bradford[i][1] * 1
-                + bradford[i][2] * (1 - dest.x - dest.y) / dest.y;
+                + bradford[i][2] * mp_xy_Z(dest);
     }
 
     // tmp := I * [Cd/Cs] * Ma
@@ -798,13 +805,29 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.levels == c2.levels &&
            c1.primaries == c2.primaries &&
            c1.gamma == c2.gamma &&
-           c1.sig_peak == c2.sig_peak &&
-           c1.nom_peak == c2.nom_peak;
+           c1.light == c2.light &&
+           c1.sig_peak == c2.sig_peak;
 }
+
+#define OPT_BASE_STRUCT struct mp_csp_equalizer_opts
+
+const struct m_sub_options mp_csp_equalizer_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_INTRANGE("brightness", values[MP_CSP_EQ_BRIGHTNESS], 0, -100, 100),
+        OPT_INTRANGE("saturation", values[MP_CSP_EQ_SATURATION], 0, -100, 100),
+        OPT_INTRANGE("contrast", values[MP_CSP_EQ_CONTRAST], 0, -100, 100),
+        OPT_INTRANGE("hue", values[MP_CSP_EQ_HUE], 0, -100, 100),
+        OPT_INTRANGE("gamma", values[MP_CSP_EQ_GAMMA], 0, -100, 100),
+        OPT_CHOICE_C("video-output-levels", values[MP_CSP_EQ_OUTPUT_LEVELS], 0,
+                     mp_csp_levels_names),
+        {0}
+    },
+    .size = sizeof(struct mp_csp_equalizer_opts),
+};
 
 // Copy settings from eq into params.
 void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
-                                  const struct mp_csp_equalizer *eq)
+                                  const struct mp_csp_equalizer_opts *eq)
 {
     params->brightness = eq->values[MP_CSP_EQ_BRIGHTNESS] / 100.0;
     params->contrast = (eq->values[MP_CSP_EQ_CONTRAST] + 100) / 100.0;
@@ -814,37 +837,28 @@ void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
     params->levels_out = eq->values[MP_CSP_EQ_OUTPUT_LEVELS];
 }
 
-static int find_eq(int capabilities, const char *name)
+struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,
+                                                    struct mpv_global *global)
 {
-    for (int i = 0; i < MP_CSP_EQ_COUNT; i++) {
-        if (strcmp(name, mp_csp_equalizer_names[i]) == 0)
-            return ((1 << i) & capabilities) ? i : -1;
-    }
-    return -1;
+    struct m_config_cache *c = m_config_cache_alloc(ta_parent, global,
+                                                    &mp_csp_equalizer_conf);
+    // The terrible, terrible truth.
+    return (struct mp_csp_equalizer_state *)c;
 }
 
-int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
-                         int *out_value)
+bool mp_csp_equalizer_state_changed(struct mp_csp_equalizer_state *state)
 {
-    int index = find_eq(eq->capabilities, property);
-    if (index < 0)
-        return -1;
-
-    *out_value = eq->values[index];
-
-    return 0;
+    struct m_config_cache *c = (struct m_config_cache *)state;
+    return m_config_cache_update(c);
 }
 
-int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
-                         int value)
+void mp_csp_equalizer_state_get(struct mp_csp_equalizer_state *state,
+                                struct mp_csp_params *params)
 {
-    int index = find_eq(eq->capabilities, property);
-    if (index < 0)
-        return 0;
-
-    eq->values[index] = value;
-
-    return 1;
+    struct m_config_cache *c = (struct m_config_cache *)state;
+    m_config_cache_update(c);
+    struct mp_csp_equalizer_opts *opts = c->opts;
+    mp_csp_copy_equalizer_values(params, opts);
 }
 
 void mp_invert_cmat(struct mp_cmat *out, struct mp_cmat *in)

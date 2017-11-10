@@ -36,6 +36,7 @@ const struct m_sub_options cocoa_conf = {
 };
 
 struct priv {
+    GL gl;
     CGLPixelFormatObj pix;
     CGLContextObj ctx;
 
@@ -62,27 +63,36 @@ static void *cocoa_glgetaddr(const char *s)
     return ret;
 }
 
-static CGLError test_gl_version(struct MPGLContext *ctx, CGLOpenGLProfile ver)
+static CGLError test_gl_version(struct ra_ctx *ctx, CGLOpenGLProfile ver)
 {
     struct priv *p = ctx->priv;
 
     CGLPixelFormatAttribute attrs[] = {
+        // let this array ordered by the inverse order of the most probably
+        // rejected attribute to preserve the fallback code
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) ver,
         kCGLPFAAccelerated,
-        // leave this as the last entry of the array to not break the fallback
-        // code
+        kCGLPFAAllowOfflineRenderers,
+        // keep this one last to apply the cocoa-force-dedicated-gpu option
         kCGLPFASupportsAutomaticGraphicsSwitching,
         0
     };
 
     GLint npix;
     CGLError err;
+    int supported_attribute = MP_ARRAY_SIZE(attrs)-1;
+
+    if (p->opts->cocoa_force_dedicated_gpu)
+        attrs[--supported_attribute] = 0;
+
     err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
-    if (p->opts->cocoa_force_dedicated_gpu || err == kCGLBadAttribute) {
-        // kCGLPFASupportsAutomaticGraphicsSwitching is probably not supported
-        // by the current hardware. Falling back to not using it.
-        attrs[MP_ARRAY_SIZE(attrs) - 2] = 0;
+    while (err == kCGLBadAttribute && supported_attribute > 3) {
+        // kCGLPFASupportsAutomaticGraphicsSwitching is probably not
+        // supported by the current hardware. Falling back to not using
+        // it and disallowing Offline Renderers if further restrictions
+        // apply
+        attrs[--supported_attribute] = 0;
         err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
     }
 
@@ -98,9 +108,10 @@ error_out:
     return err;
 }
 
-static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
+static bool create_gl_context(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    GL *gl = &p->gl;
     CGLError err;
 
     CGLOpenGLProfile gl_versions[] = {
@@ -123,60 +134,83 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
     vo_cocoa_set_opengl_ctx(ctx->vo, p->ctx);
     CGLSetCurrentContext(p->ctx);
 
-    if (vo_flags & VOFLAG_ALPHA)
+    if (ctx->opts.want_alpha)
         CGLSetParameter(p->ctx, kCGLCPSurfaceOpacity, &(GLint){0});
 
-    mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
+    mpgl_load_functions(gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
+    gl->SwapInterval = set_swap_interval;
 
     CGLReleasePixelFormat(p->pix);
 
     return true;
 }
 
-static void cocoa_uninit(MPGLContext *ctx)
+static void cocoa_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    ra_gl_ctx_uninit(ctx);
     CGLReleaseContext(p->ctx);
     vo_cocoa_uninit(ctx->vo);
 }
 
-static int cocoa_init(MPGLContext *ctx, int vo_flags)
+static void cocoa_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    GL *gl = &p->gl;
+    vo_cocoa_swap_buffers(ctx->vo);
+    gl->Flush();
+}
+
+static bool cocoa_init(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
+    GL *gl = &p->gl;
     p->opts = mp_get_config_group(ctx, ctx->global, &cocoa_conf);
     vo_cocoa_init(ctx->vo);
 
-    if (!create_gl_context(ctx, vo_flags))
-        return -1;
+    if (!create_gl_context(ctx))
+        goto fail;
 
-    ctx->gl->SwapInterval = set_swap_interval;
-    return 0;
+    struct ra_gl_ctx_params params = {
+        .swap_buffers = cocoa_swap_buffers,
+    };
+
+    if (!ra_gl_ctx_init(ctx, gl, params))
+        goto fail;
+
+    return true;
+
+fail:
+    cocoa_uninit(ctx);
+    return false;
 }
 
-static int cocoa_reconfig(struct MPGLContext *ctx)
+static void resize(struct ra_ctx *ctx)
+{
+    ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
+}
+
+static bool cocoa_reconfig(struct ra_ctx *ctx)
 {
     vo_cocoa_config_window(ctx->vo);
-    return 0;
+    resize(ctx);
+    return true;
 }
 
-static int cocoa_control(struct MPGLContext *ctx, int *events, int request,
+static int cocoa_control(struct ra_ctx *ctx, int *events, int request,
                          void *arg)
 {
-    return vo_cocoa_control(ctx->vo, events, request, arg);
+    int ret = vo_cocoa_control(ctx->vo, events, request, arg);
+    if (*events & VO_EVENT_RESIZE)
+        resize(ctx);
+    return ret;
 }
 
-static void cocoa_swap_buffers(struct MPGLContext *ctx)
-{
-    vo_cocoa_swap_buffers(ctx->vo);
-    ctx->gl->Flush();
-}
-
-const struct mpgl_driver mpgl_driver_cocoa = {
+const struct ra_ctx_fns ra_ctx_cocoa = {
+    .type           = "opengl",
     .name           = "cocoa",
-    .priv_size      = sizeof(struct priv),
     .init           = cocoa_init,
     .reconfig       = cocoa_reconfig,
-    .swap_buffers   = cocoa_swap_buffers,
     .control        = cocoa_control,
     .uninit         = cocoa_uninit,
 };

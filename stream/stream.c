@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -122,36 +122,48 @@ static const stream_info_t *const stream_list[] = {
 
 static bool stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
-static int from_hex(unsigned char c)
+// return -1 if not hex char
+static int hex2dec(char c)
 {
-    if (c >= 'a' && c <= 'f')
-        return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F')
-        return c - 'A' + 10;
     if (c >= '0' && c <= '9')
         return c - '0';
+    if (c >= 'A' && c <= 'F')
+        return 10 + c - 'A';
+    if (c >= 'a' && c <= 'f')
+        return 10 + c - 'a';
     return -1;
 }
 
 // Replace escape sequences in an URL (or a part of an URL)
-void mp_url_unescape_inplace(char *buf)
+void mp_url_unescape_inplace(char *url)
 {
-    int len = strlen(buf);
-    int o = 0;
-    for (int i = 0; i < len; i++) {
-        unsigned char c = buf[i];
-        if (c == '%' && i + 2 < len) { //must have 2 more chars
-            int c1 = from_hex(buf[i + 1]);
-            int c2 = from_hex(buf[i + 2]);
-            if (c1 >= 0 && c2 >= 0) {
-                c = c1 * 16 + c2;
-                i = i + 2; //only skip next 2 chars if valid esc
-            }
+    for (int len = strlen(url), i = 0, o = 0; i <= len;) {
+        if ((url[i] != '%') || (i > len - 3)) {  // %NN can't start after len-3
+            url[o++] = url[i++];
+            continue;
         }
-        buf[o++] = c;
+
+        int msd = hex2dec(url[i + 1]),
+            lsd = hex2dec(url[i + 2]);
+
+        if (msd >= 0 && lsd >= 0) {
+            url[o++] = 16 * msd + lsd;
+            i += 3;
+        } else {
+            url[o++] = url[i++];
+            url[o++] = url[i++];
+            url[o++] = url[i++];
+        }
     }
-    buf[o++] = '\0';
 }
+
+static const char hex_digits[] = "0123456789ABCDEF";
+
+
+static const char url_default_ok[] = "abcdefghijklmnopqrstuvwxyz"
+                                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                     "0123456789"
+                                     "-._~";
 
 // Escape according to http://tools.ietf.org/html/rfc3986#section-2.1
 // Only unreserved characters are not escaped.
@@ -160,27 +172,27 @@ void mp_url_unescape_inplace(char *buf)
 //      ok[0] == '~': do not escape anything but these characters
 //                    (can't override the unreserved characters, which are
 //                     never escaped)
-char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok)
+char *mp_url_escape(void *talloc_ctx, const char *url, const char *ok)
 {
-    int len = strlen(s);
-    char *buf = talloc_array(talloc_ctx, char, len * 3 + 1);
-    int o = 0;
-    for (int i = 0; i < len; i++) {
-        unsigned char c = s[i];
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-            (c >= '0' && c <= '9') || strchr("-._~", c) ||
-            (ok && ((ok[0] != '~') == !!strchr(ok, c))))
-        {
-            buf[o++] = c;
+    char *rv = talloc_size(talloc_ctx, strlen(url) * 3 + 1);
+    char *out = rv;
+    bool negate = ok && ok[0] == '~';
+
+    for (char c; (c = *url); url++) {
+        bool as_is = negate ? !strchr(ok + 1, c)
+                            : (strchr(url_default_ok, c) || (ok && strchr(ok, c)));
+        if (as_is) {
+            *out++ = c;
         } else {
-            const char hex[] = "0123456789ABCDEF";
-            buf[o++] = '%';
-            buf[o++] = hex[c / 16];
-            buf[o++] = hex[c % 16];
+            unsigned char v = c;
+            *out++ = '%';
+            *out++ = hex_digits[v / 16];
+            *out++ = hex_digits[v % 16];
         }
     }
-    buf[o++] = '\0';
-    return buf;
+
+    *out = 0;
+    return rv;
 }
 
 static stream_t *new_stream(void)
@@ -483,19 +495,21 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
     return rd;
 }
 
+// Drop len bytes form input, possibly reading more until all is skipped. If
+// EOF or an error was encountered before all could be skipped, return false,
+// otherwise return true.
 static bool stream_skip_read(struct stream *s, int64_t len)
 {
     while (len > 0) {
-        int x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!stream_fill_buffer_by(s, len))
-                return false; // EOF
-            x = s->buf_len - s->buf_pos;
+        unsigned int left = s->buf_len - s->buf_pos;
+        if (!left) {
+            if (!stream_fill_buffer_by(s, left))
+                return false;
+            continue;
         }
-        if (x > len)
-            x = len;
-        s->buf_pos += x;
-        len -= x;
+        unsigned skip = MPMIN(len, left);
+        s->buf_pos += skip;
+        len -= skip;
     }
     return true;
 }
@@ -549,6 +563,7 @@ bool stream_seek(stream_t *s, int64_t pos)
         int64_t x = pos - (s->pos - (int)s->buf_len);
         if (x >= 0) {
             s->buf_pos = x;
+            assert(s->buf_pos <= s->buf_len);
             return true;
         }
     }
@@ -569,11 +584,7 @@ bool stream_seek(stream_t *s, int64_t pos)
         return false;
     }
 
-    bool r = pos >= s->pos && stream_skip_read(s, pos - s->pos);
-    if (!r)
-        MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
-    s->eof = 0;
-    return r;
+    return stream_skip_read(s, pos - stream_tell(s));
 }
 
 bool stream_skip(stream_t *s, int64_t len)
@@ -875,8 +886,10 @@ struct mp_cancel {
 static void cancel_destroy(void *p)
 {
     struct mp_cancel *c = p;
-    close(c->wakeup_pipe[0]);
-    close(c->wakeup_pipe[1]);
+    if (c->wakeup_pipe[0] >= 0) {
+        close(c->wakeup_pipe[0]);
+        close(c->wakeup_pipe[1]);
+    }
 }
 
 struct mp_cancel *mp_cancel_new(void *talloc_ctx)

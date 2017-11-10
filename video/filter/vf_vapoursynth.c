@@ -97,44 +97,73 @@ struct script_driver {
 
 struct mpvs_fmt {
     VSPresetFormat vs;
-    int mp;
+    int bits, cw, ch;
 };
 
 static const struct mpvs_fmt mpvs_fmt_table[] = {
-    {pfYUV420P8, IMGFMT_420P},
-    {pfYUV422P8, IMGFMT_422P},
-    {pfYUV444P8, IMGFMT_444P},
-    {pfYUV410P8, IMGFMT_410P},
-    {pfYUV411P8, IMGFMT_411P},
-    {pfYUV440P8, IMGFMT_440P},
-    {pfYUV420P9, IMGFMT_420P9},
-    {pfYUV422P9, IMGFMT_422P9},
-    {pfYUV444P9, IMGFMT_444P9},
-    {pfYUV420P10, IMGFMT_420P10},
-    {pfYUV422P10, IMGFMT_422P10},
-    {pfYUV444P10, IMGFMT_444P10},
-    {pfYUV420P16, IMGFMT_420P16},
-    {pfYUV422P16, IMGFMT_422P16},
-    {pfYUV444P16, IMGFMT_444P16},
+    {pfYUV420P8,  8,  2, 2},
+    {pfYUV420P9,  9,  2, 2},
+    {pfYUV420P10, 10, 2, 2},
+    {pfYUV420P16, 16, 2, 2},
+    {pfYUV422P8,  8,  2, 1},
+    {pfYUV422P9,  9,  2, 1},
+    {pfYUV422P10, 10, 2, 1},
+    {pfYUV422P16, 16, 2, 1},
+    {pfYUV410P8,  8,  4, 4},
+    {pfYUV411P8,  8,  4, 1},
+    {pfYUV440P8,  8,  1, 2},
+    {pfYUV444P8,  8,  1, 1},
+    {pfYUV444P9,  9,  1, 1},
+    {pfYUV444P10, 10, 1, 1},
+    {pfYUV444P16, 16, 1, 1},
     {pfNone}
 };
 
+static bool compare_fmt(int imgfmt, const struct mpvs_fmt *vs)
+{
+    struct mp_regular_imgfmt rfmt;
+    if (!mp_get_regular_imgfmt(&rfmt, imgfmt))
+        return false;
+    if (rfmt.component_pad > 0)
+        return false;
+    if (rfmt.chroma_w != vs->cw || rfmt.chroma_h != vs->ch)
+        return false;
+    if (rfmt.component_size * 8 + rfmt.component_pad != vs->bits)
+        return false;
+    if (rfmt.num_planes != 3)
+        return false;
+    for (int n = 0; n < 3; n++) {
+        if (rfmt.planes[n].num_components != 1)
+            return false;
+        if (rfmt.planes[n].components[0] != n + 1)
+            return false;
+    }
+    return true;
+}
+
 static VSPresetFormat mp_to_vs(int imgfmt)
 {
-    for (int n = 0; mpvs_fmt_table[n].mp; n++) {
-        if (mpvs_fmt_table[n].mp == imgfmt)
-            return mpvs_fmt_table[n].vs;
+    for (int n = 0; mpvs_fmt_table[n].bits; n++) {
+        const struct mpvs_fmt *vsentry = &mpvs_fmt_table[n];
+        if (compare_fmt(imgfmt, vsentry))
+            return vsentry->vs;
     }
     return pfNone;
 }
 
 static int mp_from_vs(VSPresetFormat vs)
 {
-    for (int n = 0; mpvs_fmt_table[n].mp; n++) {
-        if (mpvs_fmt_table[n].vs == vs)
-            return mpvs_fmt_table[n].mp;
+    for (int n = 0; mpvs_fmt_table[n].bits; n++) {
+        const struct mpvs_fmt *vsentry = &mpvs_fmt_table[n];
+        if (vsentry->vs == vs) {
+            for (int imgfmt = IMGFMT_START; imgfmt < IMGFMT_END; imgfmt++) {
+                if (compare_fmt(imgfmt, vsentry))
+                    return imgfmt;
+            }
+            break;
+        }
     }
-    return pfNone;
+    return 0;
 }
 
 static void copy_mp_to_vs_frame_props_map(struct vf_priv_s *p, VSMap *map,
