@@ -1385,37 +1385,45 @@ static void execute_seek(struct demux_internal *in)
     pthread_mutex_lock(&in->lock);
 }
 
+// Make demuxing progress. Return whether progress was made.
+static bool thread_work(struct demux_internal *in)
+{
+    if (in->run_fn) {
+        in->run_fn(in->run_fn_arg);
+        in->run_fn = NULL;
+        pthread_cond_signal(&in->wakeup);
+        return true;
+    }
+    if (in->tracks_switched) {
+        execute_trackswitch(in);
+        return true;
+    }
+    if (in->seeking) {
+        execute_seek(in);
+        return true;
+    }
+    if (!in->eof) {
+        if (read_packet(in))
+            return true; // read_packet unlocked, so recheck conditions
+    }
+    if (in->force_cache_update) {
+        pthread_mutex_unlock(&in->lock);
+        update_cache(in);
+        pthread_mutex_lock(&in->lock);
+        in->force_cache_update = false;
+        return true;
+    }
+    return false;
+}
+
 static void *demux_thread(void *pctx)
 {
     struct demux_internal *in = pctx;
     mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
     while (!in->thread_terminate) {
-        if (in->run_fn) {
-            in->run_fn(in->run_fn_arg);
-            in->run_fn = NULL;
-            pthread_cond_signal(&in->wakeup);
+        if (thread_work(in))
             continue;
-        }
-        if (in->tracks_switched) {
-            execute_trackswitch(in);
-            continue;
-        }
-        if (in->seeking) {
-            execute_seek(in);
-            continue;
-        }
-        if (!in->eof) {
-            if (read_packet(in))
-                continue; // read_packet unlocked, so recheck conditions
-        }
-        if (in->force_cache_update) {
-            pthread_mutex_unlock(&in->lock);
-            update_cache(in);
-            pthread_mutex_lock(&in->lock);
-            in->force_cache_update = false;
-            continue;
-        }
         pthread_cond_signal(&in->wakeup);
         pthread_cond_wait(&in->wakeup, &in->lock);
     }
@@ -1509,7 +1517,7 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
                     pthread_cond_signal(&in->wakeup);
                     pthread_cond_wait(&in->wakeup, &in->lock);
                 } else {
-                    read_packet(in);
+                    thread_work(in);
                 }
                 if (ds->eof)
                     break;
@@ -1586,8 +1594,8 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
                 return pkt;
         }
         // retry after calling this
-        pthread_mutex_lock(&in->lock); // lock only because read_packet unlocks
-        read_more = read_packet(in);
+        pthread_mutex_lock(&in->lock); // lock only because thread_work unlocks
+        read_more = thread_work(in);
         read_more &= !in->eof;
         pthread_mutex_unlock(&in->lock);
     }
