@@ -3262,14 +3262,19 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
-        plane->flipped = mpi->stride[0] < 0;
-
         struct ra_tex_upload_params params = {
             .tex = plane->tex,
             .src = mpi->planes[n],
             .invalidate = true,
             .stride = mpi->stride[n],
         };
+
+        plane->flipped = params.stride < 0;
+        if (plane->flipped) {
+            int h = mp_image_plane_h(mpi, n);
+            params.src = (char *)params.src + (h - 1) * params.stride;
+            params.stride = -params.stride;
+        }
 
         struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
         if (mapped) {
