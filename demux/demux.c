@@ -1050,8 +1050,8 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 
     struct demux_queue *queue = ds->queue;
 
-    bool drop = ds->refreshing;
-    if (ds->refreshing) {
+    bool drop = !ds->selected || in->seeking;
+    if (!drop && ds->refreshing) {
         // Resume reading once the old position was reached (i.e. we start
         // returning packets where we left off before the refresh).
         // If it's the same position, drop, but continue normally next time.
@@ -1063,9 +1063,10 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
             ds->refreshing = false; // should not happen
             MP_WARN(in, "stream %d: demux refreshing failed\n", ds->index);
         }
+        drop = true;
     }
 
-    if (!ds->selected || in->seeking || drop) {
+    if (drop) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
         return;
