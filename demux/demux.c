@@ -209,6 +209,8 @@ struct demux_cached_range {
     double seek_start, seek_end;
 };
 
+#define MAX_INDEX_ENTRIES 16
+
 // A continuous list of cached packets for a single stream/range. There is one
 // for each stream and range. Also contains some state for use during demuxing
 // (keeping it across seeks makes it easier to resume demuxing).
@@ -234,6 +236,12 @@ struct demux_queue {
     // incrementally maintained seek range, possibly invalid
     double seek_start, seek_end;
     double last_pruned;     // timestamp of last pruned keyframe
+
+    // incomplete index to somewhat speed up seek operations
+    // the entries in index[] must be in packet queue append/removal order
+    int num_index;          // valid index[] entries
+    double index_distance;  // minimum keyframe distance to add index element
+    struct demux_packet *index[MAX_INDEX_ENTRIES];
 };
 
 struct demux_stream {
@@ -311,6 +319,7 @@ static void check_queue_consistency(struct demux_internal *in)
             bool is_forward = false;
             bool kf_found = false;
             bool npt_found = false;
+            int next_index = 0;
             for (struct demux_packet *dp = queue->head; dp; dp = dp->next) {
                 is_forward |= dp == queue->ds->reader_head;
                 kf_found |= dp == queue->keyframe_latest;
@@ -327,9 +336,13 @@ static void check_queue_consistency(struct demux_internal *in)
 
                 if (!dp->next)
                     assert(queue->tail == dp);
+
+                if (next_index < queue->num_index && queue->index[next_index] == dp)
+                    next_index += 1;
             }
             if (!queue->head)
                 assert(!queue->tail);
+            assert(next_index == queue->num_index);
 
             // If the queue is currently used...
             if (queue->ds->queue == queue) {
@@ -447,6 +460,9 @@ static void remove_head_packet(struct demux_queue *queue)
 
     queue->ds->in->total_bytes -= demux_packet_estimate_total_size(dp);
 
+    if (queue->num_index && queue->index[0] == dp)
+        MP_TARRAY_REMOVE_AT(queue->index, queue->num_index, 0);
+
     queue->head = dp->next;
     if (!queue->head)
         queue->tail = NULL;
@@ -471,6 +487,9 @@ static void clear_queue(struct demux_queue *queue)
     queue->next_prune_target = NULL;
     queue->keyframe_latest = NULL;
     queue->seek_start = queue->seek_end = queue->last_pruned = MP_NOPTS_VALUE;
+
+    queue->num_index = 0;
+    queue->index_distance = 1.0;
 
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
@@ -832,6 +851,27 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
     demux_add_packet(sh, dp);
 }
 
+// Add the keyframe to the end of the index. Not all packets are actually added.
+static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
+{
+    assert(dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE);
+
+    if (queue->num_index) {
+        double prev = queue->index[queue->num_index - 1]->kf_seek_pts;
+        if (dp->kf_seek_pts < prev + queue->index_distance)
+            return;
+    }
+
+    if (queue->num_index == MAX_INDEX_ENTRIES) {
+        for (int n = 0; n < MAX_INDEX_ENTRIES / 2; n++)
+            queue->index[n] = queue->index[n * 2];
+        queue->num_index = MAX_INDEX_ENTRIES / 2;
+        queue->index_distance *= 2;
+    }
+
+    queue->index[queue->num_index++] = dp;
+}
+
 // Check whether the next range in the list is, and if it appears to overlap,
 // try joining it into a single range.
 static void attempt_range_joining(struct demux_internal *in)
@@ -965,6 +1005,10 @@ static void attempt_range_joining(struct demux_internal *in)
         q2->next_prune_target = NULL;
         q2->keyframe_latest = NULL;
 
+        for (int i = 0; i < q2->num_index; i++)
+            add_index_entry(q1, q2->index[i]);
+        q2->num_index = 0;
+
         recompute_buffers(ds);
         in->fw_bytes += ds->fw_bytes;
 
@@ -1010,6 +1054,8 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
                 queue->seek_end = queue->keyframe_end_pts;
             update_seek_ranges(queue->range);
             attempt_range_join = queue->range->seek_end > old_end;
+            if (queue->keyframe_latest->kf_seek_pts != MP_NOPTS_VALUE)
+                add_index_entry(queue, queue->keyframe_latest);
         }
         queue->keyframe_latest = dp;
         queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
@@ -2118,9 +2164,16 @@ static void switch_current_range(struct demux_internal *in,
 static struct demux_packet *find_seek_target(struct demux_queue *queue,
                                              double pts, int flags)
 {
+    struct demux_packet *start = queue->head;
+    for (int n = 0; n < queue->num_index; n++) {
+        if (queue->index[n]->kf_seek_pts > pts)
+            break;
+        start = queue->index[n];
+    }
+
     struct demux_packet *target = NULL;
     double target_diff = MP_NOPTS_VALUE;
-    for (struct demux_packet *dp = queue->head; dp; dp = dp->next) {
+    for (struct demux_packet *dp = start; dp; dp = dp->next) {
         double range_pts = dp->kf_seek_pts;
         if (!dp->keyframe || range_pts == MP_NOPTS_VALUE)
             continue;
