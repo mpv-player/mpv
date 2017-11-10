@@ -2866,7 +2866,9 @@ Demuxer
     is useful only if the ``--demuxer-seekable-cache`` option is enabled.
     Unlike the forward cache, there is no control how many seconds are actually
     cached - it will simply use as much memory this option allows. Setting this
-    option to 0 will strictly disable any back buffer.
+    option to 0 will strictly disable any back buffer, but this will lead to
+    the situation that the forward seek range starts after the current playback
+    position (as it removes past packets that are seek points).
 
     Keep in mind that other buffers in the player (like decoders) will cause the
     demuxer to cache "future" frames in the back buffer, which can skew the
