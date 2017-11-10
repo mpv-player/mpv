@@ -7,7 +7,7 @@
 * [#Overview](#overview)
 * [#System requirements](#system-requirements)
 * [#Downloads](#downloads)
-* [#Changelogs](#changelogs)
+* [#Changelog](#changelog)
 * [#Compilation](#compilation)
 * [#FFmpeg vs. Libav](#ffmpeg-vs-libav)
 * [#Release cycle](#release-cycle)
@@ -47,7 +47,7 @@ Releases can be found on the [release list][releases].
 For semi-official builds and third-party packages please see
 https://mpv.io/installation/.
 
-## Changelogs
+## Changelog
 
 
 There is no complete changelog; however, changes to the player core interface
