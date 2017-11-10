@@ -48,7 +48,7 @@ struct priv {
     struct mp_log *log;
 
     struct mp_image_params params;
-  
+
     struct drm_atomic_context *ctx;
     struct drm_frame current_frame, old_frame;
 
@@ -182,7 +182,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
     set_current_frame(hw, &next_frame);
     return 0;
-    
+
  fail:
     drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &next_frame.fb);
     return ret;
