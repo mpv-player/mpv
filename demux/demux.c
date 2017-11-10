@@ -1002,7 +1002,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
     if (dp) {
         dp->kf_seek_pts = MP_NOPTS_VALUE;
 
-        double ts = dp->pts == MP_NOPTS_VALUE ? dp->dts : dp->pts;
+        double ts = PTS_OR_DEF(dp->pts, dp->dts);
         if (dp->segmented && (ts < dp->start || ts > dp->end))
             ts = MP_NOPTS_VALUE;
 
@@ -1100,9 +1100,9 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (ds->base_ts == MP_NOPTS_VALUE)
         ds->base_ts = queue->last_ts;
 
-    MP_DBG(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
-           "[num=%zd size=%zd]\n", stream_type_name(stream->type),
-           dp->len, dp->pts, dp->dts, dp->pos, ds->fw_packs, ds->fw_bytes);
+    MP_TRACE(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
+             "[num=%zd size=%zd]\n", stream_type_name(stream->type),
+             dp->len, dp->pts, dp->dts, dp->pos, ds->fw_packs, ds->fw_bytes);
 
     adjust_seek_range_on_packet(ds, dp);
 
@@ -1134,8 +1134,8 @@ static bool read_packet(struct demux_internal *in)
             ds->queue->last_ts >= ds->base_ts)
             prefetch_more |= ds->queue->last_ts - ds->base_ts < in->min_secs;
     }
-    MP_DBG(in, "bytes=%zd, read_more=%d prefetch_more=%d\n",
-           in->fw_bytes, read_more, prefetch_more);
+    MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d\n",
+             in->fw_bytes, read_more, prefetch_more);
     if (in->fw_bytes >= in->max_bytes) {
         if (!read_more)
             return false;
@@ -1423,8 +1423,10 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
     pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
 
-    pkt->start = MP_ADD_PTS(pkt->start, ds->in->ts_offset);
-    pkt->end = MP_ADD_PTS(pkt->end, ds->in->ts_offset);
+    if (pkt->segmented) {
+        pkt->start = MP_ADD_PTS(pkt->start, ds->in->ts_offset);
+        pkt->end = MP_ADD_PTS(pkt->end, ds->in->ts_offset);
+    }
 
     prune_old_packets(ds->in);
     return pkt;
@@ -1486,13 +1488,13 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
         if (ds->in->threading) {
             pthread_mutex_lock(&ds->in->lock);
             *out_pkt = dequeue_packet(ds);
-            if (!ds->eager) {
-                r = *out_pkt ? 1 : -1;
-            } else {
+            if (ds->eager) {
                 r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
                 ds->in->reading = true; // enable readahead
                 ds->in->eof = false; // force retry
                 pthread_cond_signal(&ds->in->wakeup); // possibly read more
+            } else {
+                r = *out_pkt ? 1 : -1;
             }
             pthread_mutex_unlock(&ds->in->lock);
         } else {
@@ -2564,9 +2566,9 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             r->ts_duration = r->ts_end - r->ts_reader;
         if (in->seeking || !any_packets)
             r->ts_duration = 0;
-        for (int n = 0; n < in->num_ranges; n++) {
+        for (int n = 0; n < MPMIN(in->num_ranges, MAX_SEEK_RANGES); n++) {
             struct demux_cached_range *range = in->ranges[n];
-            if (range->seek_start != MP_NOPTS_VALUE && n < MAX_SEEK_RANGES) {
+            if (range->seek_start != MP_NOPTS_VALUE) {
                 r->seek_ranges[r->num_seek_ranges++] =
                     (struct demux_seek_range){
                         .start = MP_ADD_PTS(range->seek_start, in->ts_offset),
