@@ -70,8 +70,9 @@ The mpv build system uses [Waf](https://waf.io/), but we don't store it in the
 repository. The `bootstrap.py` script will download the latest version of
 Waf that was tested with the build system.
 
-For a list of the available build options see `./waf configure --help`. If
-configure doesn't recognize some features you have installed see `build/config.log`.
+For a list of the available build options see `./waf configure --help`. If you
+have support for some feature installed but configure fails to detect it, check
+out the file `build/config.log` as it may contain information about the failure.
 
 NOTE: To avoid cluttering the output, `--help` only shows the switch to change the
 default, but you can always use `--enable-*` and `--disable-*`.
