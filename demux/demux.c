@@ -506,31 +506,27 @@ static void ds_clear_reader_state(struct demux_stream *ds)
 }
 
 static void update_stream_selection_state(struct demux_internal *in,
-                                          struct demux_stream *ds,
-                                          bool selected, bool new)
+                                          struct demux_stream *ds)
 {
-    if (ds->selected != selected || new) {
-        ds->selected = selected;
-        ds->eof = false;
-        ds->refreshing = false;
-        ds->need_refresh = false;
+    ds->eof = false;
+    ds->refreshing = false;
+    ds->need_refresh = false;
 
-        ds_clear_reader_state(ds);
+    ds_clear_reader_state(ds);
 
-        // Make sure any stream reselection or addition is reflected in the seek
-        // ranges, and also get rid of data that is not needed anymore (or
-        // rather, which can't be kept consistent).
-        for (int n = 0; n < in->num_ranges; n++) {
-            struct demux_cached_range *range = in->ranges[n];
+    // Make sure any stream reselection or addition is reflected in the seek
+    // ranges, and also get rid of data that is not needed anymore (or
+    // rather, which can't be kept consistent).
+    for (int n = 0; n < in->num_ranges; n++) {
+        struct demux_cached_range *range = in->ranges[n];
 
-            if (!ds->selected)
-                clear_queue(range->streams[ds->index]);
+        if (!ds->selected)
+            clear_queue(range->streams[ds->index]);
 
-            update_seek_ranges(range);
-        }
-
-        free_empty_cached_ranges(in);
+        update_seek_ranges(range);
     }
+
+    free_empty_cached_ranges(in);
 
     // We still have to go over the whole stream list to update ds->eager for
     // other streams too, because they depend on other stream's selections.
@@ -616,6 +612,7 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         .sh = sh,
         .type = sh->type,
         .index = sh->index,
+        .selected = in->autoselect,
         .global_correct_dts = true,
         .global_correct_pos = true,
     };
@@ -641,7 +638,7 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
 
     sh->ds->queue = in->current_range->streams[sh->ds->index];
 
-    update_stream_selection_state(in, sh->ds, in->autoselect, true);
+    update_stream_selection_state(in, sh->ds);
 
     in->events |= DEMUX_EVENT_STREAMS;
     if (in->wakeup_cb)
@@ -2379,7 +2376,8 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     pthread_mutex_lock(&in->lock);
     // don't flush buffers if stream is already selected / unselected
     if (stream->ds->selected != selected) {
-        update_stream_selection_state(in, stream->ds, selected, false);
+        stream->ds->selected = selected;
+        update_stream_selection_state(in, stream->ds);
         in->tracks_switched = true;
         stream->ds->need_refresh = selected && !in->initial_state;
         initiate_refresh_seek(in, MP_ADD_PTS(ref_pts, -in->ts_offset));
