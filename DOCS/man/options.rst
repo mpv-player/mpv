@@ -2876,8 +2876,8 @@ Demuxer
 
     See ``--list-options`` for defaults and value range.
 
-``--demuxer-seekable-cache=<yes|no>``
-    This controls whether seeking can use the demuxer cache (default: no). If
+``--demuxer-seekable-cache=<yes|no|auto>``
+    This controls whether seeking can use the demuxer cache (default: auto). If
     enabled, short seek offsets will not trigger a low level demuxer seek
     (which means for example that slow network round trips or FFmpeg seek bugs
     can be avoided). If a seek cannot happen within the cached range, a low
@@ -2889,6 +2889,10 @@ Demuxer
     seek anyway, such as switching tracks, or attempting to seek before the
     start or after the end of the file. This option is experimental - thus
     disabled, and bugs are to be expected.
+
+    The special value ``auto`` means ``yes`` in the same situation as
+    ``--cache-secs`` is used (i.e. when the stream appears to be a network
+    stream or the stream cache is enabled).
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
@@ -3818,7 +3822,7 @@ Cache
 ``--cache-secs=<seconds>``
     How many seconds of audio/video to prefetch if the cache is active. This
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
-    is enabled and the value is larger. (Default: 10.)
+    is enabled and the value is larger. (Default: 120.)
 
 ``--cache-pause``, ``--no-cache-pause``
     Whether the player should automatically pause when the cache runs low,

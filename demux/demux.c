@@ -104,7 +104,8 @@ const struct m_sub_options demux_conf = {
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
-        OPT_FLAG("demuxer-seekable-cache", seekable_cache, 0),
+        OPT_CHOICE("demuxer-seekable-cache", seekable_cache, 0,
+                   ({"auto", -1}, {"no", 0}, {"yes", 1})),
         OPT_FLAG("sub-create-cc-track", create_ccs, 0),
         {0}
     },
@@ -113,7 +114,8 @@ const struct m_sub_options demux_conf = {
         .max_bytes = 400 * 1024 * 1024,
         .max_bytes_bw = 400 * 1024 * 1024,
         .min_secs = 1.0,
-        .min_secs_cache = 10.0,
+        .min_secs_cache = 120.0,
+        .seekable_cache = -1,
         .access_references = 1,
     },
 };
@@ -155,7 +157,7 @@ struct demux_internal {
     double min_secs;
     int max_bytes;
     int max_bytes_bw;
-    int seekable_cache;
+    bool seekable_cache;
 
     // At least one decoder actually requested data since init or the last seek.
     // Do this to allow the decoder thread to select streams before starting.
@@ -1947,7 +1949,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .min_secs = opts->min_secs,
         .max_bytes = opts->max_bytes,
         .max_bytes_bw = opts->max_bytes_bw,
-        .seekable_cache = opts->seekable_cache,
         .initial_state = true,
     };
     pthread_mutex_init(&in->lock, NULL);
@@ -2016,8 +2017,13 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 }
             }
         }
-        if (demuxer->is_network || stream->caching)
+        int seekable = opts->seekable_cache;
+        if (demuxer->is_network || stream->caching) {
             in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
+            if (seekable < 0)
+                seekable = 1;
+        }
+        in->seekable_cache = seekable == 1;
         return demuxer;
     }
 
