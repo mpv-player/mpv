@@ -18,7 +18,7 @@
 * [#License](#license)
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
 * [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
-* [Man pages](https://mpv.io/manual/master/)
+* [Manual](https://mpv.io/manual/master/)
 
 ## Overview
 
