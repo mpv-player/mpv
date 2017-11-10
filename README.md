@@ -147,7 +147,7 @@ might be broken at times.
 
 _If_ you force upstream FFmpeg, and it doesn't work, please contact upstream
 FFmpeg for help, instead of mpv. See
-[FFmpeg contact][http://ffmpeg.org/contact.html#MailingLists] how to contact
+[FFmpeg contact](https://ffmpeg.org/contact.html#MailingLists) how to contact
 FFmpeg upstream.
 
 ## FFmpeg ABI compatibility
