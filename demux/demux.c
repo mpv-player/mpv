@@ -2131,7 +2131,7 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
             if (diff > 0)
                 continue;
         }
-        if (target_diff != MP_NOPTS_VALUE) {
+        if (target) {
             if (diff <= 0) {
                 if (target_diff <= 0 && diff <= target_diff)
                     continue;
@@ -2140,6 +2140,8 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
         }
         target_diff = diff;
         target = dp;
+        if (range_pts > pts)
+            break;
     }
 
     return target;
