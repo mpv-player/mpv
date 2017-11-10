@@ -905,10 +905,8 @@ static void attempt_range_joining(struct demux_internal *in)
                     goto failed;
                 }
 
-                // (Check for ">" too, to avoid incorrect joining in weird
-                // corner cases, where the next range misses the end packet.)
-                if ((ds->global_correct_dts && dp->dts >= end->dts) ||
-                    (ds->global_correct_pos && dp->pos >= end->pos))
+                if ((ds->global_correct_dts && dp->dts == end->dts) ||
+                    (ds->global_correct_pos && dp->pos == end->pos))
                 {
                     // Do some additional checks as a (imperfect) sanity check
                     // in case pos/dts are not "correct" across the ranges (we
@@ -924,6 +922,16 @@ static void attempt_range_joining(struct demux_internal *in)
                     join_point_found = true;
                     break;
                 }
+
+                // This happens if the next range misses the end packet. For
+                // normal streams (ds->eager==true), this is a failure to find
+                // an overlap. For subtitles, this can mean the current_range
+                // has a subtitle somewhere before the end of its range, and
+                // next has another subtitle somewhere after the start of its
+                // range.
+                if ((ds->global_correct_dts && dp->dts > end->dts) ||
+                    (ds->global_correct_pos && dp->pos > end->pos))
+                    break;
 
                 remove_packet(q2, NULL, dp);
             }
