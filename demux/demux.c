@@ -248,7 +248,6 @@ struct demux_stream {
     bool eager;             // try to keep at least 1 packet queued
                             // if false, this stream is disabled, or passively
                             // read (like subtitles)
-    bool need_refresh;      // enabled mid-stream
     bool refreshing;
 
     bool global_correct_dts;// all observed so far
@@ -535,7 +534,6 @@ static void update_stream_selection_state(struct demux_internal *in,
 {
     ds->eof = false;
     ds->refreshing = false;
-    ds->need_refresh = false;
 
     ds_clear_reader_state(ds);
 
@@ -1067,7 +1065,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         }
     }
 
-    if (!ds->selected || ds->need_refresh || in->seeking || drop) {
+    if (!ds->selected || in->seeking || drop) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
         return;
@@ -2117,7 +2115,7 @@ static void switch_current_range(struct demux_internal *in,
         struct demux_stream *ds = in->streams[n]->ds;
 
         ds->queue = range->streams[n];
-        ds->refreshing = ds->need_refresh = false;
+        ds->refreshing = false;
         ds->eof = false;
     }
 
@@ -2343,13 +2341,14 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
 // current position
 // On a switch, it seeks back, and then grabs all packets that were
 // "missing" from the packet queue of the newly selected stream.
-static void initiate_refresh_seek(struct demux_internal *in, double start_ts)
+static void initiate_refresh_seek(struct demux_internal *in,
+                                  struct demux_stream *stream,
+                                  double start_ts)
 {
     struct demuxer *demux = in->d_thread;
     bool seekable = demux->desc->seek && demux->seekable &&
                     !demux->partially_seekable;
 
-    bool needed = false;
     bool normal_seek = true;
     bool refresh_possible = true;
     for (int n = 0; n < in->num_streams; n++) {
@@ -2361,15 +2360,13 @@ static void initiate_refresh_seek(struct demux_internal *in, double start_ts)
         if (ds->type == STREAM_VIDEO || ds->type == STREAM_AUDIO)
             start_ts = MP_PTS_MIN(start_ts, ds->base_ts);
 
-        needed |= ds->need_refresh;
         // If there were no other streams selected, we can use a normal seek.
-        normal_seek &= ds->need_refresh;
-        ds->need_refresh = false;
+        normal_seek &= stream == ds;
 
         refresh_possible &= ds->queue->correct_dts || ds->queue->correct_pos;
     }
 
-    if (!needed || start_ts == MP_NOPTS_VALUE || !seekable)
+    if (start_ts == MP_NOPTS_VALUE || !seekable)
         return;
 
     if (!normal_seek) {
@@ -2402,14 +2399,15 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           double ref_pts, bool selected)
 {
     struct demux_internal *in = demuxer->in;
+    struct demux_stream *ds = stream->ds;
     pthread_mutex_lock(&in->lock);
     // don't flush buffers if stream is already selected / unselected
-    if (stream->ds->selected != selected) {
-        stream->ds->selected = selected;
-        update_stream_selection_state(in, stream->ds);
+    if (ds->selected != selected) {
+        ds->selected = selected;
+        update_stream_selection_state(in, ds);
         in->tracks_switched = true;
-        stream->ds->need_refresh = selected && !in->initial_state;
-        initiate_refresh_seek(in, MP_ADD_PTS(ref_pts, -in->ts_offset));
+        if (ds->selected && !in->initial_state)
+            initiate_refresh_seek(in, ds, MP_ADD_PTS(ref_pts, -in->ts_offset));
         if (in->threading) {
             pthread_cond_signal(&in->wakeup);
         } else {
