@@ -1438,32 +1438,31 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 struct demux_packet *demux_read_packet(struct sh_stream *sh)
 {
     struct demux_stream *ds = sh ? sh->ds : NULL;
-    struct demux_packet *pkt = NULL;
-    if (ds) {
-        struct demux_internal *in = ds->in;
-        pthread_mutex_lock(&in->lock);
-        if (ds->eager) {
-            const char *t = stream_type_name(ds->type);
-            MP_DBG(in, "reading packet for %s\n", t);
-            in->eof = false; // force retry
-            while (ds->selected && !ds->reader_head) {
-                in->reading = true;
-                // Note: the following code marks EOF if it can't continue
-                if (in->threading) {
-                    MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
-                    pthread_cond_signal(&in->wakeup);
-                    pthread_cond_wait(&in->wakeup, &in->lock);
-                } else {
-                    thread_work(in);
-                }
-                if (ds->eof)
-                    break;
+    if (!ds)
+        return NULL;
+    struct demux_internal *in = ds->in;
+    pthread_mutex_lock(&in->lock);
+    if (ds->eager) {
+        const char *t = stream_type_name(ds->type);
+        MP_DBG(in, "reading packet for %s\n", t);
+        in->eof = false; // force retry
+        while (ds->selected && !ds->reader_head) {
+            in->reading = true;
+            // Note: the following code marks EOF if it can't continue
+            if (in->threading) {
+                MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
+                pthread_cond_signal(&in->wakeup);
+                pthread_cond_wait(&in->wakeup, &in->lock);
+            } else {
+                thread_work(in);
             }
+            if (ds->eof)
+                break;
         }
-        pkt = dequeue_packet(ds);
-        pthread_cond_signal(&in->wakeup); // possibly read more
-        pthread_mutex_unlock(&in->lock);
     }
+    struct demux_packet *pkt = dequeue_packet(ds);
+    pthread_cond_signal(&in->wakeup); // possibly read more
+    pthread_mutex_unlock(&in->lock);
     return pkt;
 }
 
@@ -1484,23 +1483,23 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
     struct demux_stream *ds = sh ? sh->ds : NULL;
     int r = -1;
     *out_pkt = NULL;
-    if (ds) {
-        if (ds->in->threading) {
-            pthread_mutex_lock(&ds->in->lock);
-            *out_pkt = dequeue_packet(ds);
-            if (ds->eager) {
-                r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
-                ds->in->reading = true; // enable readahead
-                ds->in->eof = false; // force retry
-                pthread_cond_signal(&ds->in->wakeup); // possibly read more
-            } else {
-                r = *out_pkt ? 1 : -1;
-            }
-            pthread_mutex_unlock(&ds->in->lock);
+    if (!ds)
+        return r;
+    if (ds->in->threading) {
+        pthread_mutex_lock(&ds->in->lock);
+        *out_pkt = dequeue_packet(ds);
+        if (ds->eager) {
+            r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
+            ds->in->reading = true; // enable readahead
+            ds->in->eof = false; // force retry
+            pthread_cond_signal(&ds->in->wakeup); // possibly read more
         } else {
-            *out_pkt = demux_read_packet(sh);
             r = *out_pkt ? 1 : -1;
         }
+        pthread_mutex_unlock(&ds->in->lock);
+    } else {
+        *out_pkt = demux_read_packet(sh);
+        r = *out_pkt ? 1 : -1;
     }
     return r;
 }
