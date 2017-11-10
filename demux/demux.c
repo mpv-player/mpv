@@ -172,8 +172,6 @@ struct demux_internal {
     int seek_flags;             // flags for next seek (if seeking==true)
     double seek_pts;
 
-    double ref_pts;             // assumed player position (only for track switches)
-
     double ts_offset;           // timestamp offset to apply to everything
 
     void (*run_fn)(void *);     // if non-NULL, function queued to be run on
@@ -827,59 +825,6 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
     demux_add_packet(sh, dp);
 }
 
-// An obscure mechanism to get stream switching to be executed faster.
-// On a switch, it seeks back, and then grabs all packets that were
-// "missing" from the packet queue of the newly selected stream.
-// Returns MP_NOPTS_VALUE if no seek should happen.
-static double get_refresh_seek_pts(struct demux_internal *in)
-{
-    struct demuxer *demux = in->d_thread;
-
-    double start_ts = in->ref_pts;
-    bool needed = false;
-    bool normal_seek = true;
-    bool refresh_possible = true;
-    for (int n = 0; n < in->num_streams; n++) {
-        struct demux_stream *ds = in->streams[n]->ds;
-
-        if (!ds->selected)
-            continue;
-
-        if (ds->type == STREAM_VIDEO || ds->type == STREAM_AUDIO)
-            start_ts = MP_PTS_MIN(start_ts, ds->base_ts);
-
-        needed |= ds->need_refresh;
-        // If there were no other streams selected, we can use a normal seek.
-        normal_seek &= ds->need_refresh;
-        ds->need_refresh = false;
-
-        refresh_possible &= ds->queue->correct_dts || ds->queue->correct_pos;
-    }
-
-    if (!needed || start_ts == MP_NOPTS_VALUE || !demux->desc->seek ||
-        !demux->seekable || demux->partially_seekable)
-        return MP_NOPTS_VALUE;
-
-    if (normal_seek)
-        return start_ts;
-
-    if (!refresh_possible) {
-        MP_VERBOSE(in, "can't issue refresh seek\n");
-        return MP_NOPTS_VALUE;
-    }
-
-    for (int n = 0; n < in->num_streams; n++) {
-        struct demux_stream *ds = in->streams[n]->ds;
-        // Streams which didn't have any packets yet will return all packets,
-        // other streams return packets only starting from the last position.
-        if (ds->queue->last_pos != -1 || ds->queue->last_dts != MP_NOPTS_VALUE)
-            ds->refreshing |= ds->selected;
-    }
-
-    // Seek back to player's current position, with a small offset added.
-    return start_ts - 1.0;
-}
-
 // Check whether the next range in the list is, and if it appears to overlap,
 // try joining it into a single range.
 static void attempt_range_joining(struct demux_internal *in)
@@ -1224,10 +1169,7 @@ static bool read_packet(struct demux_internal *in)
         return false;
     }
 
-    double seek_pts = get_refresh_seek_pts(in);
-    bool refresh_seek = seek_pts != MP_NOPTS_VALUE;
-
-    if (!read_more && !refresh_seek && !prefetch_more)
+    if (!read_more && !prefetch_more)
         return false;
 
     // Actually read a packet. Drop the lock while doing so, because waiting
@@ -1237,11 +1179,6 @@ static bool read_packet(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 
     struct demuxer *demux = in->d_thread;
-
-    if (refresh_seek) {
-        MP_VERBOSE(in, "refresh seek to %f\n", seek_pts);
-        demux->desc->seek(demux, seek_pts, SEEK_HR);
-    }
 
     bool eof = true;
     if (demux->desc->fill_buffer && !demux_cancel_test(demux))
@@ -2375,6 +2312,63 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
     return NULL;
 }
 
+// An obscure mechanism to get stream switching to be executed "faster" (as
+// perceived by the user), by making the stream return packets from the
+// current position
+// On a switch, it seeks back, and then grabs all packets that were
+// "missing" from the packet queue of the newly selected stream.
+static void initiate_refresh_seek(struct demux_internal *in, double start_ts)
+{
+    struct demuxer *demux = in->d_thread;
+    bool seekable = demux->desc->seek && demux->seekable &&
+                    !demux->partially_seekable;
+
+    bool needed = false;
+    bool normal_seek = true;
+    bool refresh_possible = true;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+
+        if (!ds->selected)
+            continue;
+
+        if (ds->type == STREAM_VIDEO || ds->type == STREAM_AUDIO)
+            start_ts = MP_PTS_MIN(start_ts, ds->base_ts);
+
+        needed |= ds->need_refresh;
+        // If there were no other streams selected, we can use a normal seek.
+        normal_seek &= ds->need_refresh;
+        ds->need_refresh = false;
+
+        refresh_possible &= ds->queue->correct_dts || ds->queue->correct_pos;
+    }
+
+    if (!needed || start_ts == MP_NOPTS_VALUE || !seekable)
+        return;
+
+    if (!normal_seek) {
+        if (!refresh_possible) {
+            MP_VERBOSE(in, "can't issue refresh seek\n");
+            return;
+        }
+
+        for (int n = 0; n < in->num_streams; n++) {
+            struct demux_stream *ds = in->streams[n]->ds;
+            // Streams which didn't have any packets yet will return all packets,
+            // other streams return packets only starting from the last position.
+            if (ds->queue->last_pos != -1 || ds->queue->last_dts != MP_NOPTS_VALUE)
+                ds->refreshing |= ds->selected;
+        }
+
+        start_ts -= 1.0; // small offset to get correct overlap
+    }
+
+    MP_VERBOSE(in, "refresh seek to %f\n", start_ts);
+    in->seeking = true;
+    in->seek_flags = SEEK_HR;
+    in->seek_pts = start_ts;
+}
+
 // Set whether the given stream should return packets.
 // ref_pts is used only if the stream is enabled. Then it serves as approximate
 // start pts for this stream (in the worst case it is ignored).
@@ -2388,8 +2382,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
         update_stream_selection_state(in, stream->ds, selected, false);
         in->tracks_switched = true;
         stream->ds->need_refresh = selected && !in->initial_state;
-        if (stream->ds->need_refresh)
-            in->ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
+        initiate_refresh_seek(in, MP_ADD_PTS(ref_pts, -in->ts_offset));
         if (in->threading) {
             pthread_cond_signal(&in->wakeup);
         } else {
