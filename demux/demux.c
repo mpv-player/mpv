@@ -506,17 +506,32 @@ static void clear_cached_range(struct demux_internal *in,
     update_seek_ranges(range);
 }
 
+// Remove ranges with no data (except in->current_range). Also remove excessive
+// ranges.
 static void free_empty_cached_ranges(struct demux_internal *in)
 {
     assert(in->current_range && in->num_ranges > 0);
     assert(in->current_range == in->ranges[in->num_ranges - 1]);
 
-    for (int n = in->num_ranges - 2; n >= 0; n--) {
-        struct demux_cached_range *range = in->ranges[n];
-        if (range->seek_start == MP_NOPTS_VALUE) {
-            clear_cached_range(in, range);
-            MP_TARRAY_REMOVE_AT(in->ranges, in->num_ranges, n);
+    while (1) {
+        struct demux_cached_range *worst = NULL;
+
+        for (int n = in->num_ranges - 2; n >= 0; n--) {
+            struct demux_cached_range *range = in->ranges[n];
+            if (range->seek_start == MP_NOPTS_VALUE) {
+                clear_cached_range(in, range);
+                MP_TARRAY_REMOVE_AT(in->ranges, in->num_ranges, n);
+            } else {
+                if (!worst || (range->seek_end - range->seek_start <
+                               worst->seek_end - worst->seek_start))
+                    worst = range;
+            }
         }
+
+        if (in->num_ranges <= MAX_SEEK_RANGES)
+            break;
+
+        clear_cached_range(in, worst);
     }
 }
 
