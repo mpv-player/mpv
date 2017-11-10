@@ -1285,6 +1285,27 @@ Property list
                     "start"             MPV_FORMAT_DOUBLE
                     "end"               MPV_FORMAT_DOUBLE
 
+    Other fields (might be changed or removed in the future):
+
+    ``eof``
+        True if the reader thread has hit the end of the file.
+
+    ``underrun``
+        True if the reader thread could not satisfy a decoder's request for a
+        new packet.
+
+    ``idle``
+        True if the thread is currently not reading.
+
+    ``total-bytes``
+        Sum of packet bytes (plus some overhead estimation) of the entire packet
+        queue, including cached seekable ranges.
+
+    ``fw-bytes``
+        Sum of packet bytes (plus some overhead estimation) of the readahead
+        packet queue (packets between current decoder reader positions and
+        demuxer position).
+
 ``demuxer-via-network``
     Returns ``yes`` if the stream demuxed via the main demuxer is most likely
     played via network. What constitutes "network" is not always clear, might

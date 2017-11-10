@@ -2639,6 +2639,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .ts_reader = MP_NOPTS_VALUE,
             .ts_end = MP_NOPTS_VALUE,
             .ts_duration = -1,
+            .total_bytes = in->total_bytes,
+            .fw_bytes = in->fw_bytes,
         };
         bool any_packets = false;
         for (int n = 0; n < in->num_streams; n++) {

@@ -1755,6 +1755,8 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     node_map_add_flag(r, "eof", s.eof);
     node_map_add_flag(r, "underrun", s.underrun);
     node_map_add_flag(r, "idle", s.idle);
+    node_map_add_int64(r, "total-bytes", s.total_bytes);
+    node_map_add_int64(r, "fw-bytes", s.fw_bytes);
 
     return M_PROPERTY_OK;
 }
