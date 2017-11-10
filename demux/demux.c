@@ -434,17 +434,10 @@ static void update_seek_ranges(struct demux_cached_range *range)
         range->seek_start = range->seek_end = MP_NOPTS_VALUE;
 }
 
-// Remove the packet dp from the queue. prev must be the packet before dp, or
-// NULL if dp is the first packet.
-// This does not update in->fw_bytes/in->fw_packs.
-static void remove_packet(struct demux_queue *queue, struct demux_packet *prev,
-                          struct demux_packet *dp)
+// Remove queue->head from the queue. Does not update in->fw_bytes/in->fw_packs.
+static void remove_head_packet(struct demux_queue *queue)
 {
-    if (prev) {
-        assert(prev->next == dp);
-    } else {
-        assert(queue->head == dp);
-    }
+    struct demux_packet *dp = queue->head;
 
     assert(queue->ds->reader_head != dp);
     if (queue->next_prune_target == dp)
@@ -454,15 +447,9 @@ static void remove_packet(struct demux_queue *queue, struct demux_packet *prev,
 
     queue->ds->in->total_bytes -= demux_packet_estimate_total_size(dp);
 
-    if (prev) {
-        prev->next = dp->next;
-        if (!prev->next)
-            queue->tail = prev;
-    } else {
-        queue->head = dp->next;
-        if (!queue->head)
-            queue->tail = NULL;
-    }
+    queue->head = dp->next;
+    if (!queue->head)
+        queue->tail = NULL;
 
     talloc_free(dp);
 }
@@ -918,7 +905,7 @@ static void attempt_range_joining(struct demux_internal *in)
                         goto failed;
                     }
 
-                    remove_packet(q2, NULL, dp);
+                    remove_head_packet(q2);
                     join_point_found = true;
                     break;
                 }
@@ -933,7 +920,7 @@ static void attempt_range_joining(struct demux_internal *in)
                     (ds->global_correct_pos && dp->pos > end->pos))
                     break;
 
-                remove_packet(q2, NULL, dp);
+                remove_head_packet(q2);
             }
         }
 
@@ -1304,9 +1291,8 @@ static void prune_old_packets(struct demux_internal *in)
 
         bool done = false;
         while (!done && queue->head && queue->head != ds->reader_head) {
-            struct demux_packet *dp = queue->head;
-            done = queue->next_prune_target == dp;
-            remove_packet(queue, NULL, dp);
+            done = queue->next_prune_target == queue->head;
+            remove_head_packet(queue);
         }
 
         if (range != in->current_range && range->seek_start == MP_NOPTS_VALUE)
@@ -2100,7 +2086,7 @@ static void switch_current_range(struct demux_internal *in,
 
         // Remove all packets from head up until including next_prune_target.
         while (queue->next_prune_target)
-            remove_packet(queue, NULL, queue->head);
+            remove_head_packet(queue);
     }
 
     // Exclude weird corner cases that break resuming.
