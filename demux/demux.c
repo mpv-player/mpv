@@ -937,8 +937,7 @@ static void attempt_range_joining(struct demux_internal *in)
     }
 
     // Actually join the ranges. Now that we think it will work, mutate the
-    // data associated with the current range. We actually make the next range
-    // the current range.
+    // data associated with the current range.
 
     in->fw_bytes = 0;
 
@@ -948,24 +947,28 @@ static void attempt_range_joining(struct demux_internal *in)
 
         struct demux_stream *ds = in->streams[n]->ds;
 
-        if (q1->head) {
-            q1->tail->next = q2->head;
-            q2->head = q1->head;
-            if (!q2->head || !q2->head->next)
-                q2->tail = q2->head;
+        if (q2->head) {
+            if (q1->head) {
+                q1->tail->next = q2->head;
+            } else {
+                q1->head = q2->head;
+            }
+            q1->tail = q2->tail;
         }
-        q2->next_prune_target = q1->next_prune_target;
-        q2->seek_start = q1->seek_start;
-        q2->last_pruned = q1->last_pruned;
-        q2->correct_dts &= q1->correct_dts;
-        q2->correct_pos &= q1->correct_pos;
 
-        q1->head = q1->tail = NULL;
-        q1->next_prune_target = NULL;
-        q1->keyframe_latest = NULL;
+        q1->seek_end = q2->seek_end;
+        q1->correct_dts &= q2->correct_dts;
+        q1->correct_pos &= q2->correct_pos;
+        q1->last_pos = q2->last_pos;
+        q1->last_dts = q2->last_dts;
+        q1->last_ts = q2->last_ts;
+        q1->keyframe_pts = q2->keyframe_pts;
+        q1->keyframe_end_pts = q2->keyframe_end_pts;
+        q1->keyframe_latest = q2->keyframe_latest;
 
-        assert(ds->queue == q1);
-        ds->queue = q2;
+        q2->head = q2->tail = NULL;
+        q2->next_prune_target = NULL;
+        q2->keyframe_latest = NULL;
 
         recompute_buffers(ds);
         in->fw_bytes += ds->fw_bytes;
@@ -974,23 +977,17 @@ static void attempt_range_joining(struct demux_internal *in)
         ds->refreshing = ds->selected;
     }
 
-    next->seek_start = in->current_range->seek_start;
+    update_seek_ranges(in->current_range);
 
     // Move demuxing position to after the current range.
     in->seeking = true;
     in->seek_flags = SEEK_HR;
     in->seek_pts = next->seek_end - 1.0;
 
-    struct demux_cached_range *old = in->current_range;
-    set_current_range(in, next);
-    clear_cached_range(in, old);
-
     MP_VERBOSE(in, "ranges joined!\n");
 
-    next = NULL;
 failed:
-    if (next)
-        clear_cached_range(in, next);
+    clear_cached_range(in, next);
     free_empty_cached_ranges(in);
 }
 
