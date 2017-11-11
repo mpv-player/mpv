@@ -386,8 +386,11 @@
 
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
-    if (_is_animating && ![self.adapter isInFullScreenMode])
+    if ((_is_animating && ![self.adapter isInFullScreenMode]) ||
+        (!_is_animating && [self.adapter isInFullScreenMode]))
+    {
         return nf;
+    }
 
     screen = screen ?: self.screen ?: [NSScreen mainScreen];
     NSRect of  = [self frame];
