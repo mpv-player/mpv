@@ -622,14 +622,6 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
     if (tex->params.dimensions == 2) {
         stride = params->stride;
 
-        // stride can be negative, but vo_gpu expects the RA backend to ignore
-        // the negative stride and upload the image "upside-down" for now
-        if (stride < 0) {
-            int h = params->rc ? mp_rect_h(*params->rc) : tex->params.h;
-            src += (h - 1) * stride;
-            stride = -stride;
-        }
-
         if (params->rc && (params->rc->x0 != 0 || params->rc->y0 != 0 ||
             params->rc->x1 != tex->params.w || params->rc->y1 != tex->params.h))
         {
