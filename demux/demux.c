@@ -1208,7 +1208,8 @@ static bool read_packet(struct demux_internal *in)
     bool read_more = false, prefetch_more = false;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
-        read_more |= (ds->eager && !ds->reader_head) || ds->refreshing;
+        read_more |= ds->eager && !ds->reader_head;
+        prefetch_more |= ds->refreshing;
         if (ds->eager && ds->queue->last_ts != MP_NOPTS_VALUE &&
             in->min_secs > 0 && ds->base_ts != MP_NOPTS_VALUE &&
             ds->queue->last_ts >= ds->base_ts)
@@ -1217,6 +1218,7 @@ static bool read_packet(struct demux_internal *in)
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d\n",
              in->fw_bytes, read_more, prefetch_more);
     if (in->fw_bytes >= in->max_bytes) {
+        // if we hit the limit just by prefetching, simply stop prefetching
         if (!read_more)
             return false;
         if (!in->warned_queue_overflow) {
