@@ -418,6 +418,14 @@
         // needed to counter the 'snap to top' behaviour.
         nf.origin.y = (NSHeight(vf) - NSHeight(nf)) / 2;
 
+    // Mavericks fullscreen bug workaround
+    if ((NSAppKitVersionNumber >= 1244 && NSAppKitVersionNumber < 1334)
+            && [self.adapter isInFullScreenMode]
+            && !_is_animating
+            && nf.origin.y != vf.origin.y) {
+        nf.origin.y = vf.origin.y;
+    }
+
     return nf;
 }
 
