@@ -263,7 +263,7 @@ static void setup_bundle(int *argc, char *argv[])
 
     NSDictionary *env = [[NSProcessInfo processInfo] environment];
     NSString *path_bundle = [env objectForKey:@"PATH"];
-    NSString *path_new = [NSString stringWithFormat:@"%@:%@:%@:%@",
+    NSString *path_new = [NSString stringWithFormat:@"%@:%@:%@:%@:%@",
                                                     path_bundle,
                                                     @"/usr/local/bin",
                                                     @"/usr/local/sbin",
