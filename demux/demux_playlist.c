@@ -177,12 +177,13 @@ static int parse_ref_init(struct pl_parser *p)
     return 0;
 }
 
-static int parse_pls(struct pl_parser *p)
+static int parse_ini_thing(struct pl_parser *p, const char *header,
+                           const char *entry)
 {
     bstr line = {0};
     while (!line.len && !pl_eof(p))
         line = bstr_strip(pl_get_line(p));
-    if (bstrcasecmp0(line, "[playlist]") != 0)
+    if (bstrcasecmp0(line, header) != 0)
         return -1;
     if (p->probing)
         return 0;
@@ -190,7 +191,7 @@ static int parse_pls(struct pl_parser *p)
         line = bstr_strip(pl_get_line(p));
         bstr key, value;
         if (bstr_split_tok(line, "=", &key, &value) &&
-            bstr_case_startswith(key, bstr0("File")))
+            bstr_case_startswith(key, bstr0(entry)))
         {
             value = bstr_strip(value);
             if (bstr_startswith0(value, "\"") && bstr_endswith0(value, "\""))
@@ -199,6 +200,16 @@ static int parse_pls(struct pl_parser *p)
         }
     }
     return 0;
+}
+
+static int parse_pls(struct pl_parser *p)
+{
+    return parse_ini_thing(p, "[playlist]", "File");
+}
+
+static int parse_url(struct pl_parser *p)
+{
+    return parse_ini_thing(p, "[InternetShortcut]", "URL");
 }
 
 static int parse_txt(struct pl_parser *p)
@@ -319,6 +330,7 @@ static const struct pl_format formats[] = {
     {"ini", parse_ref_init},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
+    {"url", parse_url},
     {"txt", parse_txt},
 };
 
