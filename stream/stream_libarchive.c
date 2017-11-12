@@ -150,6 +150,8 @@ static bool mp_archive_check_fatal(struct mp_archive *mpa, int r)
 void mp_archive_free(struct mp_archive *mpa)
 {
     mp_archive_close(mpa);
+    if (mpa && mpa->locale)
+        freelocale(mpa->locale);
     talloc_free(mpa);
 }
 
@@ -229,7 +231,10 @@ static bool add_volume(struct mp_log *log, struct mp_archive *mpa,
     vol->mpa = mpa;
     vol->src = src;
     vol->url = talloc_strdup(vol, url);
-    return archive_read_append_callback_data(mpa->arch, vol) == ARCHIVE_OK;
+    locale_t oldlocale = uselocale(mpa->locale);
+    bool res = archive_read_append_callback_data(mpa->arch, vol) == ARCHIVE_OK;
+    uselocale(oldlocale);
+    return res;
 }
 
 struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
@@ -237,6 +242,9 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
 {
     struct mp_archive *mpa = talloc_zero(NULL, struct mp_archive);
     mpa->log = log;
+    mpa->locale = newlocale(LC_ALL_MASK, "C.UTF-8", (locale_t)0);
+    if (!mpa->locale)
+        goto err;
     mpa->arch = archive_read_new();
     mpa->primary_src = src;
     if (!mpa->arch)
@@ -255,6 +263,8 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
         }
     }
     talloc_free(volumes);
+
+    locale_t oldlocale = uselocale(mpa->locale);
 
     archive_read_support_format_7zip(mpa->arch);
     archive_read_support_format_iso9660(mpa->arch);
@@ -275,7 +285,11 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     archive_read_set_close_callback(mpa->arch, close_cb);
     if (mpa->primary_src->seekable)
         archive_read_set_seek_callback(mpa->arch, seek_cb);
-    if (archive_read_open1(mpa->arch) < ARCHIVE_OK)
+    bool fail = archive_read_open1(mpa->arch) < ARCHIVE_OK;
+
+    uselocale(oldlocale);
+
+    if (fail)
         goto err;
     return mpa;
 
@@ -294,6 +308,9 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
 
     if (!mpa->arch)
         return false;
+
+    locale_t oldlocale = uselocale(mpa->locale);
+    bool success = false;
 
     while (!mp_cancel_test(mpa->primary_src->cancel)) {
         struct archive_entry *entry;
@@ -319,10 +336,13 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
         mpa->entry = entry;
         mpa->entry_filename = talloc_strdup(mpa, fn);
         mpa->entry_num += 1;
-        return true;
+        success = true;
+        break;
     }
 
-    return false;
+    uselocale(oldlocale);
+
+    return success;
 }
 
 struct priv {
@@ -344,9 +364,11 @@ static int reopen_archive(stream_t *s)
     struct mp_archive *mpa = p->mpa;
     while (mp_archive_next_entry(mpa)) {
         if (strcmp(p->entry_name, mpa->entry_filename) == 0) {
+            locale_t oldlocale = uselocale(mpa->locale);
             p->entry_size = -1;
             if (archive_entry_size_is_set(mpa->entry))
                 p->entry_size = archive_entry_size(mpa->entry);
+            uselocale(oldlocale);
             return STREAM_OK;
         }
     }
@@ -362,6 +384,7 @@ static int archive_entry_fill_buffer(stream_t *s, char *buffer, int max_len)
     struct priv *p = s->priv;
     if (!p->mpa)
         return 0;
+    locale_t oldlocale = uselocale(p->mpa->locale);
     int r = archive_read_data(p->mpa->arch, buffer, max_len);
     if (r < 0) {
         MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
@@ -370,6 +393,7 @@ static int archive_entry_fill_buffer(stream_t *s, char *buffer, int max_len)
             p->mpa = NULL;
         }
     }
+    uselocale(oldlocale);
     return r;
 }
 
@@ -378,7 +402,9 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
     struct priv *p = s->priv;
     if (!p->mpa)
         return -1;
+    locale_t oldlocale = uselocale(p->mpa->locale);
     int r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
+    uselocale(oldlocale);
     if (r >= 0)
         return 1;
     if (mp_archive_check_fatal(p->mpa, r)) {
@@ -404,15 +430,18 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
                 return -1;
 
             int size = MPMIN(newpos - s->pos, sizeof(buffer));
+            oldlocale = uselocale(p->mpa->locale);
             r = archive_read_data(p->mpa->arch, buffer, size);
             if (r < 0) {
                 MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
+                uselocale(oldlocale);
                 if (mp_archive_check_fatal(p->mpa, r)) {
                     mp_archive_free(p->mpa);
                     p->mpa = NULL;
                 }
                 return -1;
             }
+            uselocale(oldlocale);
             s->pos += r;
         }
     }

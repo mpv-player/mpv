@@ -1,6 +1,9 @@
+#include <locale.h>
+
 struct mp_log;
 
 struct mp_archive {
+    locale_t locale;
     struct mp_log *log;
     struct archive *arch;
     struct stream *primary_src;
