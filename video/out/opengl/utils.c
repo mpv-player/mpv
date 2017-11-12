@@ -84,10 +84,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     int y_max = y + h;
     if (w <= 0 || h <= 0 || !bpp)
         return;
-    if (stride < 0) {
-        data += (h - 1) * stride;
-        stride = -stride;
-    }
+    assert(stride > 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
     int slice = h;
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
