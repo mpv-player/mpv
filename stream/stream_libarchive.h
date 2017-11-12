@@ -1,4 +1,5 @@
 #include <locale.h>
+#include "osdep/io.h"
 
 struct mp_log;
 

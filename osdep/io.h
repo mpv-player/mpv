@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <locale.h>
 
 #if HAVE_GLOB_POSIX
 #include <glob.h>
@@ -191,6 +192,12 @@ int msync(void *addr, size_t length, int flags);
 #define glob_t mp_glob_t
 #define glob(...) mp_glob(__VA_ARGS__)
 #define globfree(...) mp_globfree(__VA_ARGS__)
+
+// There is not anything that helps with this on Windows.
+#define locale_t int
+#define newlocale(a, b, c) 1
+#define uselocale(a) 1
+#define freelocale(a)
 
 #else /* __MINGW32__ */
 
