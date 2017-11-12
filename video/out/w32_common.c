@@ -605,7 +605,32 @@ static void update_playback_state(struct vo_w32_state *w32)
                                                     TBPF_NORMAL);
 }
 
-static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
+static bool snap_rect_to_area(RECT *rect, RECT *area, int threshold)
+{
+    bool snapped = false;
+
+    // Adjust X position
+    if (abs(rect->left - area->left) < threshold) {
+        snapped = true;
+        OffsetRect(rect, area->left - rect->left, 0);
+    } else if (abs(rect->right - area->right) < threshold) {
+        snapped = true;
+        OffsetRect(rect, area->right - rect->right, 0);
+    }
+
+    // Adjust Y position
+    if (abs(rect->top - area->top) < threshold) {
+        snapped = true;
+        OffsetRect(rect, 0, area->top - rect->top);
+    } else if (abs(rect->bottom - area->bottom) < threshold) {
+        snapped = true;
+        OffsetRect(rect, 0, area->bottom - rect->bottom);
+    }
+
+    return snapped;
+}
+
+static bool snap_window(struct vo_w32_state *w32, RECT *rc)
 {
     if (!w32->opts->snap_window) {
         w32->snapped = false;
@@ -624,17 +649,25 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     MONITORINFO mi = { .cbSize = sizeof(mi) };
     if (!GetMonitorInfoW(w32->monitor, &mi))
         return false;
-    // Get the work area to let the window snap to taskbar
-    RECT wr = mi.rcWork;
 
-    // Check for invisible borders and adjust the work area size
+    // Check for invisible borders and adjust rect sizes
     RECT frame = {0};
     if (DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
                               &frame, sizeof(RECT)) == S_OK) {
-        wr.left -= frame.left - rect.left;
-        wr.top -= frame.top - rect.top;
-        wr.right += rect.right - frame.right;
-        wr.bottom += rect.bottom - frame.bottom;
+        frame.left = rect.left - frame.left;
+        frame.top = rect.top - frame.top;
+        frame.right -= rect.right;
+        frame.bottom -= rect.bottom;
+
+        mi.rcMonitor.left += frame.left;
+        mi.rcMonitor.top += frame.top;
+        mi.rcMonitor.right -= frame.right;
+        mi.rcMonitor.bottom -= frame.bottom;
+
+        mi.rcWork.left += frame.left;
+        mi.rcWork.top += frame.top;
+        mi.rcWork.right -= frame.right;
+        mi.rcWork.bottom -= frame.bottom;
     }
 
     // Let the window to unsnap by changing its position,
@@ -646,23 +679,10 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     }
 
     int threshold = (w32->dpi * 16) / 96;
-    bool snapped = false;
-    // Adjust X position
-    if (abs(rect.left - wr.left) < threshold) {
-        snapped = true;
-        OffsetRect(&rect, wr.left - rect.left, 0);
-    } else if (abs(rect.right - wr.right) < threshold) {
-        snapped = true;
-        OffsetRect(&rect, wr.right - rect.right, 0);
-    }
-    // Adjust Y position
-    if (abs(rect.top - wr.top) < threshold) {
-        snapped = true;
-        OffsetRect(&rect, 0, wr.top - rect.top);
-    } else if (abs(rect.bottom - wr.bottom) < threshold) {
-        snapped = true;
-        OffsetRect(&rect, 0, wr.bottom - rect.bottom);
-    }
+    // Snap to screen
+    bool snapped = snap_rect_to_area(&rect, &mi.rcMonitor, threshold);
+    // Snap to taskbar
+    snapped = snap_rect_to_area(&rect, &mi.rcWork, threshold) || snapped;
 
     if (!w32->snapped && snapped) {
         w32->snap_dx = cursor.x - rc->left;
@@ -931,7 +951,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
     case WM_MOVING: {
         RECT *rc = (RECT*)lParam;
-        if (snap_to_screen_edges(w32, rc))
+        if (snap_window(w32, rc))
             return TRUE;
         break;
     }
