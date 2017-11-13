@@ -66,8 +66,7 @@ pacman -Sc --noconfirm
 # Compile crossc
 (
     git clone --depth=1 https://github.com/rossy/crossc && cd crossc
-    git submodule init
-    git submodule update
+    git submodule update --init
 
     make -j4 install prefix=$MINGW_PREFIX
 )
