@@ -33,7 +33,6 @@ struct priv {
     EGLContext egl_context;
     EGLSurface egl_surface;
     ANativeWindow *native_window;
-    int w, h;
 };
 
 static void android_swap_buffers(struct ra_ctx *ctx)
@@ -106,12 +105,6 @@ static bool android_init(struct ra_ctx *ctx)
         goto fail;
     }
 
-    if (!eglQuerySurface(p->egl_display, p->egl_surface, EGL_WIDTH, &p->w) ||
-        !eglQuerySurface(p->egl_display, p->egl_surface, EGL_HEIGHT, &p->h)) {
-        MP_FATAL(ctx, "Failed to get height and width!\n");
-        goto fail;
-    }
-
     mpegl_load_functions(&p->gl, ctx->log);
 
     struct ra_gl_ctx_params params = {
@@ -130,9 +123,17 @@ fail:
 static bool android_reconfig(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    ctx->vo->dwidth = p->w;
-    ctx->vo->dheight = p->h;
-    ra_gl_ctx_resize(ctx->swapchain, p->w, p->h, 0);
+    int w, h;
+
+    if (!eglQuerySurface(p->egl_display, p->egl_surface, EGL_WIDTH, &w) ||
+        !eglQuerySurface(p->egl_display, p->egl_surface, EGL_HEIGHT, &h)) {
+        MP_FATAL(ctx, "Failed to get height and width!\n");
+        return false;
+    }
+
+    ctx->vo->dwidth = w;
+    ctx->vo->dheight = h;
+    ra_gl_ctx_resize(ctx->swapchain, w, h, 0);
     return true;
 }
 
