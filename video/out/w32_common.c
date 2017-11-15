@@ -64,6 +64,7 @@ typedef enum MONITOR_DPI_TYPE {
 
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
+    BOOL (WINAPI *pImmDisableIME)(DWORD);
 };
 
 struct vo_w32_state {
@@ -1320,25 +1321,18 @@ void vo_w32_config(struct vo *vo)
     mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
 }
 
-static void thread_disable_ime(void)
-{
-    // Disables the IME for windows on this thread. imm32.dll must be loaded
-    // dynamically to account for machines without East Asian language support.
-    HMODULE imm32 = LoadLibraryW(L"imm32.dll");
-    if (!imm32)
-        return;
-    BOOL (WINAPI *pImmDisableIME)(DWORD) = (BOOL (WINAPI*)(DWORD))
-        GetProcAddress(imm32, "ImmDisableIME");
-    if (pImmDisableIME)
-        pImmDisableIME(0);
-    FreeLibrary(imm32);
-}
-
 static void w32_api_load(struct vo_w32_state *w32)
 {
     HMODULE shcore_dll = LoadLibraryW(L"shcore.dll");
+    // Available since Win8.1
     w32->api.pGetDpiForMonitor = !shcore_dll ? NULL :
                 (void *)GetProcAddress(shcore_dll, "GetDpiForMonitor");
+
+    // imm32.dll must be loaded dynamically
+    // to account for machines without East Asian language support
+    HMODULE imm32_dll = LoadLibraryW(L"imm32.dll");
+    w32->api.pImmDisableIME = !imm32_dll ? NULL :
+                (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
 }
 
 static void *gui_thread(void *ptr)
@@ -1350,7 +1344,10 @@ static void *gui_thread(void *ptr)
     mpthread_set_name("win32 window");
 
     w32_api_load(w32);
-    thread_disable_ime();
+
+    // Disables the IME for windows on this thread
+    if (w32->api.pImmDisableIME)
+        w32->api.pImmDisableIME(0);
 
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
