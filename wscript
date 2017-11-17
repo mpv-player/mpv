@@ -426,7 +426,7 @@ iconv support use --disable-iconv.",
 
 ffmpeg_pkg_config_checks = [
     'libavutil',     '>= 56.0.100',
-    'libavcodec',    '>= 58.2.100',
+    'libavcodec',    '>= 58.4.100',
     'libavformat',   '>= 58.0.102',
     'libswscale',    '>= 5.0.101',
     'libavfilter',   '>= 7.0.101',

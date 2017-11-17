@@ -1462,12 +1462,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     }
 
     const char *codec = sh_v->codec ? sh_v->codec : "";
-    if (!strcmp(codec, "vp9")) {
-        track->parse = true;
-        track->parse_timebase = 1e9;
-    } else if (!strcmp(codec, "mjpeg")) {
+    if (!strcmp(codec, "mjpeg"))
         sh_v->codec_tag = MKTAG('m', 'j', 'p', 'g');
-    }
 
     if (extradata_size > 0x1000000) {
         MP_WARN(demuxer, "Invalid CodecPrivate\n");
