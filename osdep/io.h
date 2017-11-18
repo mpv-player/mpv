@@ -193,11 +193,12 @@ int msync(void *addr, size_t length, int flags);
 #define glob(...) mp_glob(__VA_ARGS__)
 #define globfree(...) mp_globfree(__VA_ARGS__)
 
-// There is not anything that helps with this on Windows.
+// These are stubs since there is not anything that helps with this on Windows.
 #define locale_t int
-#define newlocale(a, b, c) 1
-#define uselocale(a) 1
-#define freelocale(a)
+#define LC_ALL_MASK 0
+locale_t newlocale(int, const char *, locale_t);
+locale_t uselocale(locale_t);
+void freelocale(locale_t);
 
 #else /* __MINGW32__ */
 
