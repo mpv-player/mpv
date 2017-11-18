@@ -799,4 +799,18 @@ int msync(void *addr, size_t length, int flags)
 }
 #endif
 
+locale_t newlocale(int category, const char *locale, locale_t base)
+{
+    return (locale_t)1;
+}
+
+locale_t uselocale(locale_t locobj)
+{
+    return (locale_t)1;
+}
+
+void freelocale(locale_t locobj)
+{
+}
+
 #endif // __MINGW32__
