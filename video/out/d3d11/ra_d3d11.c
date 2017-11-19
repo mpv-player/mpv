@@ -179,7 +179,7 @@ static struct d3d_fmt formats[] = {
     { "rgba32f",  4, 16, {32, 32, 32, 32}, DXFMT(R32G32B32A32, FLOAT) },
 
     { "rgb10_a2", 4,  4, {10, 10, 10,  2}, DXFMT(R10G10B10A2, UNORM)  },
-    { "bgra8",    4,  4, { 8,  8,  8,  8}, DXFMT(B8G8R8A8, UNORM), .unordered = false },
+    { "bgra8",    4,  4, { 8,  8,  8,  8}, DXFMT(B8G8R8A8, UNORM), .unordered = true },
 };
 
 static bool dll_version_equal(struct dll_version a, struct dll_version b)
