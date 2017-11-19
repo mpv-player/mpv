@@ -1224,11 +1224,11 @@ Audio
     List of codecs for which compressed audio passthrough should be used. This
     works for both classic S/PDIF and HDMI.
 
-    Possible codecs are ``ac3``, ``dts``, ``dts-hd``. Multiple codecs can be
-    specified by separating them with ``,``. ``dts`` refers to low bitrate DTS
-    core, while ``dts-hd`` refers to DTS MA (receiver and OS support varies).
-    If both ``dts`` and ``dts-hd`` are specified, it behaves equivalent to
-    specifying ``dts-hd`` only.
+    Possible codecs are ``ac3``, ``dts``, ``dts-hd``, ``eac3``, ``truehd``.
+    Multiple codecs can be specified by separating them with ``,``. ``dts``
+    refers to low bitrate DTS core, while ``dts-hd`` refers to DTS MA (receiver
+    and OS support varies). If both ``dts`` and ``dts-hd`` are specified, it
+    behaves equivalent to specifying ``dts-hd`` only.
 
     In earlier mpv versions you could use ``--ad`` to force the spdif wrapper.
     This does not work anymore.
@@ -1409,6 +1409,10 @@ Audio
 
     If the channel layout of the media file (i.e. the decoder) and the AO's
     channel layout don't match, mpv will attempt to insert a conversion filter.
+    You may need to change the channel layout of the system mixer to achieve
+    your desired output as mpv does not have control over it. Another
+    work-around for this on some AOs is to use ``--audio-exclusive=yes`` to
+    circumvent the system mixer entirely.
 
     .. admonition:: Warning
 
