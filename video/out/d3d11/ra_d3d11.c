@@ -2290,7 +2290,7 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         ra->max_shmem = 32 * 1024;
     }
 
-    if (p->fl >= D3D_FEATURE_LEVEL_11_1 && minor >= 1) {
+    if (p->fl >= D3D_FEATURE_LEVEL_11_1) {
         p->max_uavs = D3D11_1_UAV_SLOT_COUNT;
     } else {
         p->max_uavs = D3D11_PS_CS_UAV_REGISTER_COUNT;
