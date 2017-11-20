@@ -356,7 +356,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("terminal", use_terminal, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | UPDATE_TERM,
                 .type = &m_option_type_msglevels),
-    OPT_STRING("dump-stats", dump_stats, UPDATE_TERM | CONF_PRE_PARSE),
+    OPT_STRING("dump-stats", dump_stats, UPDATE_TERM | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_FLAG("msg-color", msg_color, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_STRING("log-file", log_file, CONF_PRE_PARSE | M_OPT_FILE | UPDATE_TERM),
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
@@ -377,7 +377,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA || HAVE_JAVASCRIPT
-    OPT_PATHLIST("scripts", script_files, M_OPT_FIXED),
+    OPT_PATHLIST("scripts", script_files, M_OPT_FIXED | M_OPT_FILE),
     OPT_CLI_ALIAS("script", "scripts-append"),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("load-scripts", auto_load_scripts, 0),
@@ -462,7 +462,7 @@ const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    OPT_PATHLIST("audio-files", audio_files, 0),
+    OPT_PATHLIST("audio-files", audio_files, M_OPT_FILE),
     OPT_CLI_ALIAS("audio-file", "audio-files-append"),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
@@ -532,11 +532,11 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_PATHLIST("sub-files", sub_name, 0),
+    OPT_PATHLIST("sub-files", sub_name, M_OPT_FILE),
     OPT_CLI_ALIAS("sub-file", "sub-files-append"),
-    OPT_PATHLIST("sub-file-paths", sub_paths, 0),
-    OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
-    OPT_PATHLIST("external-files", external_files, 0),
+    OPT_PATHLIST("sub-file-paths", sub_paths, M_OPT_FILE),
+    OPT_PATHLIST("audio-file-paths", audiofile_paths, M_OPT_FILE),
+    OPT_PATHLIST("external-files", external_files, M_OPT_FILE),
     OPT_CLI_ALIAS("external-file", "external-files-append"),
     OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_CHOICE("sub-auto", sub_auto, 0,
