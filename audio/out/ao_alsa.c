@@ -1102,10 +1102,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     if (samples == 0)
         return 0;
+    ao_convert_inplace(&p->convert, data, samples);
 
     do {
-        ao_convert_inplace(&p->convert, data, samples);
-
         if (af_fmt_is_planar(ao->format)) {
             res = snd_pcm_writen(p->alsa, data, samples);
         } else {
