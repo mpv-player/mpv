@@ -679,7 +679,7 @@ Video
     :vdpau:     requires ``--vo=gpu`` or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
-    :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
+    :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
     :videotoolbox: requires ``--vo=gpu`` (OS X 10.8 and up),
                    or ``--vo=opengl-cb`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (OS X 10.8 or iOS 9.0 and up)
