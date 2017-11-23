@@ -104,12 +104,6 @@ build_options = [
         'deps': 'libdl && !os-win32',
         'func': check_cc(linkflags=['-rdynamic']),
     }, {
-        'name': '--zsh-comp',
-        'desc': 'zsh completion',
-        'func': check_ctx_vars('BIN_PERL'),
-        'func': check_true,
-        'default': 'disable',
-    }, {
         # does nothing - left for backward and forward compatibility
         'name': '--asm',
         'desc': 'inline assembly (currently without effect)',

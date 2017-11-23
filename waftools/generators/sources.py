@@ -5,10 +5,6 @@ from TOOLS.matroska import generate_C_header, generate_C_definitions
 from TOOLS.file2string import file2string
 import os
 
-def __zshcomp_cmd__(ctx, argument):
-    return '"${{BIN_PERL}}" "{0}/TOOLS/zsh.pl" "{1}" > "${{TGT}}"' \
-                .format(ctx.srcnode.abspath(), argument)
-
 def __wayland_scanner_cmd__(ctx, mode, dir, src, vendored_file):
     return "${{WAYSCAN}} {0} < {1} > ${{TGT}}".format(
         mode,
@@ -48,14 +44,6 @@ def ebml_header(self):
 @TaskGen.feature('ebml_definitions')
 def ebml_definitions(self):
     execf(self, generate_C_definitions)
-
-def __zshcomp__(ctx, **kwargs):
-    ctx(
-        rule   = __zshcomp_cmd__(ctx, ctx.bldnode.abspath() + '/mpv'),
-        after = ("c", "cprogram",),
-        name   = os.path.basename(kwargs['target']),
-        **kwargs
-    )
 
 def __wayland_protocol_code__(ctx, **kwargs):
     protocol_is_vendored = kwargs.get("vendored_protocol", False)
@@ -105,4 +93,3 @@ def handle_add_object(tgen):
 BuildContext.file2string             = __file2string__
 BuildContext.wayland_protocol_code   = __wayland_protocol_code__
 BuildContext.wayland_protocol_header = __wayland_protocol_header__
-BuildContext.zshcomp                 = __zshcomp__
