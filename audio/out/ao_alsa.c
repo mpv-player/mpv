@@ -12,18 +12,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <errno.h>
@@ -48,10 +48,6 @@
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
-
-#if !HAVE_GPL
-#error GPL only
-#endif
 
 struct ao_alsa_opts {
     char *mixer_device;
@@ -186,15 +182,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             ao_control_vol_t *vol = arg;
             set_vol = vol->left / f_multi + pmin + 0.5;
 
-            err = snd_mixer_selem_set_playback_volume
-                    (elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol);
+            err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol);
             CHECK_ALSA_ERROR("Error setting left channel");
             MP_DBG(ao, "left=%li, ", set_vol);
 
             set_vol = vol->right / f_multi + pmin + 0.5;
 
-            err = snd_mixer_selem_set_playback_volume
-                    (elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol);
+            err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol);
             CHECK_ALSA_ERROR("Error setting right channel");
             MP_DBG(ao, "right=%li, pmin=%li, pmax=%li, mult=%f\n",
                    set_vol, pmin, pmax, f_multi);
@@ -202,11 +196,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         }
         case AOCONTROL_GET_VOLUME: {
             ao_control_vol_t *vol = arg;
-            snd_mixer_selem_get_playback_volume
-                (elem, SND_MIXER_SCHN_FRONT_LEFT, &get_vol);
+            snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
             vol->left = (get_vol - pmin) * f_multi;
-            snd_mixer_selem_get_playback_volume
-                (elem, SND_MIXER_SCHN_FRONT_RIGHT, &get_vol);
+            snd_mixer_selem_get_playback_volume(elem, 1, &get_vol);
             vol->right = (get_vol - pmin) * f_multi;
             MP_DBG(ao, "left=%f, right=%f\n", vol->left, vol->right);
             break;
@@ -216,11 +208,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!snd_mixer_selem_has_playback_switch(elem))
                 goto alsa_error;
             if (!snd_mixer_selem_has_playback_switch_joined(elem)) {
-                snd_mixer_selem_set_playback_switch
-                    (elem, SND_MIXER_SCHN_FRONT_RIGHT, !*mute);
+                snd_mixer_selem_set_playback_switch(elem, 1, !*mute);
             }
-            snd_mixer_selem_set_playback_switch
-                (elem, SND_MIXER_SCHN_FRONT_LEFT, !*mute);
+            snd_mixer_selem_set_playback_switch(elem, 0, !*mute);
             break;
         }
         case AOCONTROL_GET_MUTE: {
@@ -228,12 +218,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!snd_mixer_selem_has_playback_switch(elem))
                 goto alsa_error;
             int tmp = 1;
-            snd_mixer_selem_get_playback_switch
-                (elem, SND_MIXER_SCHN_FRONT_LEFT, &tmp);
+            snd_mixer_selem_get_playback_switch(elem, 0, &tmp);
             *mute = !tmp;
             if (!snd_mixer_selem_has_playback_switch_joined(elem)) {
-                snd_mixer_selem_get_playback_switch
-                    (elem, SND_MIXER_SCHN_FRONT_RIGHT, &tmp);
+                snd_mixer_selem_get_playback_switch(elem, 1, &tmp);
                 *mute &= !tmp;
             }
             break;

@@ -37,7 +37,6 @@ them quite central:
 - no audio filtering, which breaks: --volume, --af, replaygain, pitch
   correction, fine control about downmix/upmix/resampling behavior
 - Linux X11 video output
-- Linux audio output via ALSA (PulseAudio works)
 - BSD audio output via OSS
 - NVIDIA/Linux hardware decoding (vdpau, although CUDA usually works)
 - many builtin video filters (use libavfilter instead)
@@ -59,7 +58,6 @@ The following files are still GPL only (--enable-lgpl disables them):
     audio/filter/af_lavfi.c             as above
     audio/filter/af_scaletempo.c        as above
     audio/filter/af_rubberband.c        as above
-    audio/out/ao_alsa.c             chaotic history, one later author did not decide
     audio/out/ao_jack.c             will stay GPL
     audio/out/ao_oss.c              will stay GPL
     audio/audio.*                   needed by af code only
