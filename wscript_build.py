@@ -715,11 +715,8 @@ def build(ctx):
 
     if ctx.dependency_satisfied('cplayer'):
 
-        if ctx.dependency_satisfied('zsh-comp'):
-            ctx.zshcomp(target = "etc/_mpv", source = "TOOLS/zsh.pl")
-            ctx.install_files(
-                ctx.env.ZSHDIR,
-                ['etc/_mpv'])
+        if ctx.env.ZSHDIR:
+            ctx.install_as(ctx.env.ZSHDIR + '/_mpv', 'etc/_mpv.zsh')
 
         ctx.install_files(
             ctx.env.DATADIR + '/applications',
