@@ -1163,6 +1163,9 @@ static void play_current_file(struct MPContext *mpctx)
 
     reset_playback_state(mpctx);
 
+    // let get_current_time() show 0 as start time (before playback_pts is set)
+    mpctx->last_seek_pts = 0.0;
+
     mpctx->playing = mpctx->playlist->current;
     if (!mpctx->playing || !mpctx->playing->filename)
         goto terminate_playback;

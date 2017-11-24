@@ -837,7 +837,7 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
     double len = get_time_length(mpctx);
     double playback = get_playback_time(mpctx);
 
-    if (playback == MP_NOPTS_VALUE)
+    if (playback == MP_NOPTS_VALUE || len <= 0)
         return false;
 
     *remaining = len - playback;

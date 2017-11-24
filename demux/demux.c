@@ -1937,6 +1937,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .is_network = stream->is_network,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
+        .duration = -1,
     };
     demuxer->seekable = stream->seekable;
     if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)

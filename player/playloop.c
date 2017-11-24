@@ -438,11 +438,11 @@ void execute_queued_seek(struct MPContext *mpctx)
     }
 }
 
-// -1 if unknown
+// NOPTS (i.e. <0) if unknown
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
-    return demuxer ? demuxer->duration : -1;
+    return demuxer && demuxer->duration >= 0 ? demuxer->duration : MP_NOPTS_VALUE;
 }
 
 double get_current_time(struct MPContext *mpctx)
