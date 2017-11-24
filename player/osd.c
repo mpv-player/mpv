@@ -13,8 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stddef.h>
@@ -431,14 +429,11 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
             talloc_free(text);
         } else {
             sadd_hhmmssff(buffer, get_playback_time(mpctx), fractions);
-#if HAVE_GPL
-            // Potentially GPL due to 8d190244d21a4d40bb9e8f7d51aa09ca1888de09.
             if (level == 3) {
                 saddf(buffer, " / ");
                 sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
                 sadd_percentage(buffer, get_percent_pos(mpctx));
             }
-#endif
         }
     }
 }

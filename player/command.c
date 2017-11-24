@@ -13,8 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <stdlib.h>
@@ -5002,8 +5000,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
-#if HAVE_GPL
-    // Possibly GPL due to 7a71da01d64374ce22b430590f3df32c881288bd.
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
@@ -5033,14 +5029,12 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 return -1;
             } else if (r <= 0) {
                 set_osd_msg(mpctx, osdl, osd_duration,
-                            "Failed to increment property '%s' by %g",
-                            property, s.inc);
+                        "Failed to change property '%s'", property);
                 return -1;
             }
         }
         break;
     }
-#endif
 
     case MP_CMD_MULTIPLY: {
         char *property = cmd->args[0].v.s;
@@ -5331,8 +5325,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
-#if HAVE_GPL
-    // Possibly GPL due to 2f376d1b39913e8ff4c4499e7cf7148ec331d4db.
     case MP_CMD_SUB_ADD:
     case MP_CMD_AUDIO_ADD: {
         if (!mpctx->playing)
@@ -5384,7 +5376,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             print_track_list(mpctx, "Track removed:");
         break;
     }
-#endif
 
     case MP_CMD_SUB_RELOAD:
     case MP_CMD_AUDIO_RELOAD: {

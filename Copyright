@@ -42,12 +42,10 @@ them quite central:
 - many builtin video filters (use libavfilter instead)
 - automatic rotation and stereoscopic video handling
 - Linux TV input
-- the add/cycle and sub-add/audio-add/sub-remove/audio-remove commands
 - video format conversion (if not supported by the VO)
 - minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
-Some of these will be fixed in the future. The lack of the add/cycle commands
-makes this particularly useless for CLI mode, and most of the appeal of LGPL
-is for libmpv anyway. Thus it's not recommended to build mpv CLI in LGPL mode
+Some of these will be fixed in the future. The intended use for LGPL mode is
+with libmpv, and currently it's not recommended to  build mpv CLI in LGPL mode
 at all.
 
 The following files are still GPL only (--enable-lgpl disables them):
@@ -107,11 +105,8 @@ The following files are still GPL only (--enable-lgpl disables them):
 
 The following files contain some optional GPL code (--enable-lgpl disables it):
 
-    input/cmd_list.c                potentially some commands
     options/parse_commandline.c     dvd:// expansion
     player/audio.c                  libaf glue code
-    player/osd.c                    OSD level 3
-    player/command.c                add/cycle command, possibly sub-add command
 
 None of the exceptions listed above affect the final binary if it's built as
 LGPL. Linked libraries still can affect the final license (for example if

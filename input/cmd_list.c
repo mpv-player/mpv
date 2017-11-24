@@ -13,8 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Parts under HAVE_GPL are licensed under GNU General Public License.
  */
 
 #include <limits.h>
@@ -103,12 +101,10 @@ const struct mp_cmd_def mp_cmds[] = {
     .allow_auto_repeat = true},
   { MP_CMD_EXPAND_TEXT, "expand-text", { ARG_STRING } },
   { MP_CMD_SHOW_PROGRESS, "show-progress",  .allow_auto_repeat = true},
-#if HAVE_GPL
   { MP_CMD_SUB_ADD, "sub-add", { ARG_STRING,
       OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
       OARG_STRING(""), OARG_STRING("") } },
   { MP_CMD_SUB_REMOVE, "sub-remove", { OARG_INT(-1) } },
-#endif
   { MP_CMD_SUB_RELOAD, "sub-reload", { OARG_INT(-1) } },
 
   { MP_CMD_TV_LAST_CHANNEL, "tv-last-channel", },
@@ -153,7 +149,6 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_RUN, "run", { ARG_STRING, ARG_STRING }, .vararg = true },
 
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
-#if HAVE_GPL
   { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(1) },
     .allow_auto_repeat = true,
     .scalable = true,
@@ -165,7 +160,6 @@ const struct mp_cmd_def mp_cmds[] = {
     .allow_auto_repeat = true,
     .scalable = true,
   },
-#endif
   { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE },
     .allow_auto_repeat = true},
 
