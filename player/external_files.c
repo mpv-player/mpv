@@ -123,10 +123,6 @@ static void append_dir_subtitles(struct mpv_global *global,
     if (f_fbname.start != f_fname.start)
         talloc_steal(tmpmem, f_fname.start);
 
-    // 0 = nothing
-    // 1 = any subtitle file
-    // 2 = any sub file containing movie name
-    // 3 = sub file containing movie name and the lang extension
     char *path0 = bstrdup0(tmpmem, path);
 
     if (mp_is_url(bstr0(path0)))
@@ -170,24 +166,25 @@ static void append_dir_subtitles(struct mpv_global *global,
             goto next_sub;
 
         // we have a (likely) subtitle file
+        // 0 = nothing
+        // 1 = any subtitle file
+        // 2 = any sub file containing movie name
+        // 3 = sub file containing movie name and the lang extension
         int prio = 0;
-        char *found_lang = NULL;
-        if (langs) {
-            if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
-                struct bstr lang = guess_lang_from_filename(tmp_fname_trim);
-                if (lang.len) {
-                    for (int n = 0; langs[n]; n++) {
-                        if (bstr_startswith0(lang, langs[n])) {
-                            prio = 4; // matches the movie name + lang extension
-                            found_lang = langs[n];
-                            break;
-                        }
-                    }
-                }
+
+        bstr lang = {0};
+        if (bstr_startswith(tmp_fname_trim, f_fname_trim))
+            lang = guess_lang_from_filename(tmp_fname_trim);
+        for (int n = 0; langs && langs[n]; n++) {
+            if (lang.len && bstr_startswith0(lang, langs[n])) {
+                prio = 4; // matches the movie name + lang extension
+                break;
             }
         }
         if (!prio && bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
             prio = 3; // matches the movie name
+        if (!prio && lang.len)
+            prio = 3; // matches the movie name + a language was matched
         if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0 && fuzz >= 1)
             prio = 2; // contains the movie name
         if (!prio) {
@@ -215,7 +212,7 @@ static void append_dir_subtitles(struct mpv_global *global,
                 sub->type     = type;
                 sub->priority = prio;
                 sub->fname    = subpath;
-                sub->lang     = found_lang;
+                sub->lang     = lang.len ? bstrdup0(*slist, lang) : NULL;
             } else
                 talloc_free(subpath);
         }
