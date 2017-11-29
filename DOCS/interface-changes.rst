@@ -46,6 +46,8 @@ Interface changes
     - deprecate --videotoolbox-format (use --hwdec-image-format, which affects
       most other hwaccels)
     - remove deprecated --demuxer-max-packets
+    - remove most of the deprecated audio and filter filters
+    - remove the deprecated --balance option/property
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command
