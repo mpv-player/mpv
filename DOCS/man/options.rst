@@ -947,8 +947,8 @@ Video
     rotation metadata.)
 
 ``--video-stereo-mode=<no|mode>``
-    Set the stereo 3D output mode (default: ``mono``). This is done by inserting
-    the ``stereo3d`` conversion filter.
+    Set the stereo 3D output mode (default: ``mono``). This is mostly broken and
+    thus deprecated.
 
     The pseudo-mode ``no`` disables automatic conversion completely.
 

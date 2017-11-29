@@ -638,10 +638,10 @@ extern const char m_option_path_separator;
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
 // Variant which takes a pointer to struct m_opt_choice_alternatives directly
-#define OPT_CHOICE_C(optname, varname, flags, choices) \
+#define OPT_CHOICE_C(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, .priv = (void *) \
                 MP_EXPECT_TYPE(const struct m_opt_choice_alternatives*, choices), \
-                .type = &m_option_type_choice)
+                .type = &m_option_type_choice, __VA_ARGS__)
 
 #define OPT_FLAGS(...) \
     OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)
