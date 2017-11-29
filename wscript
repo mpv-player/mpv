@@ -470,7 +470,6 @@ libav_dependencies = [
         'func': check_statement('libavcodec/version.h',
                                 'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
                                 use='libavcodec'),
-        'default': 'disable',
     }, {
         # This check should always result in the opposite of ffmpeg-*.
         # Run it to make sure is_ffmpeg didn't fail for some other reason than
