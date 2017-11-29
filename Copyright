@@ -38,9 +38,7 @@ them quite central:
   correction, fine control about downmix/upmix/resampling behavior
 - Linux X11 video output
 - BSD audio output via OSS
-- NVIDIA/Linux hardware decoding (vdpau, although CUDA usually works)
-- many builtin video filters (use libavfilter instead)
-- automatic rotation and stereoscopic video handling
+- NVIDIA/Linux hardware decoding (vdpau, although nvdec usually works)
 - Linux TV input
 - minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
 Some of these will be fixed in the future. The intended use for LGPL mode is

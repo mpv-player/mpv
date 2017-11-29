@@ -116,7 +116,7 @@ static int probe_deint_filters(struct vo_chain *vo_c)
     if (check_output_format(vo_c, IMGFMT_D3D11VA) ||
         check_output_format(vo_c, IMGFMT_D3D11NV12))
         return try_filter(vo_c, "d3d11vpp", VF_DEINTERLACE_LABEL, NULL);
-    char *args[] = {"warn", "no", NULL};
+    char *args[] = {"mode", "send_field", "deint", "interlaced", NULL};
     return try_filter(vo_c, "yadif", VF_DEINTERLACE_LABEL, args);
 }
 
@@ -144,7 +144,11 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
     if (params.rotate) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90) || params.rotate % 90) {
             // Try to insert a rotation filter.
-            char *args[] = {"angle", "auto", "warn", "no", NULL};
+            double angle = params.rotate / 360.0 * M_PI * 2;
+            char *args[] = {"angle", mp_tprintf(30, "%f", angle),
+                            "ow", mp_tprintf(30, "rotw(%f)", angle),
+                            "oh", mp_tprintf(30, "roth(%f)", angle),
+                            NULL};
             if (try_filter(vo_c, "rotate", "autorotate", args) < 0)
                 MP_ERR(vo_c, "Can't insert rotation filter.\n");
         }
