@@ -42,7 +42,6 @@ them quite central:
 - many builtin video filters (use libavfilter instead)
 - automatic rotation and stereoscopic video handling
 - Linux TV input
-- video format conversion (if not supported by the VO)
 - minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
 Some of these will be fixed in the future. The intended use for LGPL mode is
 with libmpv, and currently it's not recommended to build mpv CLI in LGPL mode

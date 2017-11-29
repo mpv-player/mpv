@@ -53,6 +53,7 @@ extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
+extern const vf_info_t vf_info_convert;
 extern const vf_info_t vf_info_lavfi;
 extern const vf_info_t vf_info_lavfi_bridge;
 extern const vf_info_t vf_info_vaapi;
@@ -81,6 +82,7 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_sub,
 #endif
 
+    &vf_info_convert,
     &vf_info_lavfi,
     &vf_info_lavfi_bridge,
     &vf_info_buffer,
@@ -553,7 +555,7 @@ static void query_formats(uint8_t *fmts, struct vf_instance *vf)
 
 static bool is_conv_filter(struct vf_instance *vf)
 {
-    return vf && (strcmp(vf->info->name, "scale") == 0 || vf->autoinserted);
+    return vf && (strcmp(vf->info->name, "convert") == 0 || vf->autoinserted);
 }
 
 static const char *find_conv_filter(uint8_t *fmts_in, uint8_t *fmts_out)
@@ -569,7 +571,7 @@ static const char *find_conv_filter(uint8_t *fmts_in, uint8_t *fmts_out)
             }
         }
     }
-    return "scale";
+    return "convert";
 }
 
 static void update_formats(struct vf_chain *c, struct vf_instance *vf,
