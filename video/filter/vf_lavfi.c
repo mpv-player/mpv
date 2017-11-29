@@ -50,7 +50,6 @@
 #include "video/sws_utils.h"
 #include "video/fmt-conversion.h"
 #include "vf.h"
-#include "vf_lavfi.h"
 
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
 // unnecessary pain. <Expletive deleted.>
@@ -516,94 +515,3 @@ const vf_info_t vf_info_lavfi_bridge = {
     },
     .print_help = print_help,
 };
-
-// The following code is for the old filters wrapper code.
-
-struct vf_lw_opts {
-    int64_t sws_flags;
-    char **avopts;
-};
-
-#undef OPT_BASE_STRUCT
-#define OPT_BASE_STRUCT struct vf_lw_opts
-const struct m_sub_options vf_lw_conf = {
-    .opts = (const m_option_t[]) {
-        OPT_INT64("lavfi-sws-flags", sws_flags, 0),
-        OPT_KEYVALUELIST("lavfi-o", avopts, 0),
-        {0}
-    },
-    .defaults = &(const struct vf_lw_opts){
-        .sws_flags = SWS_BICUBIC,
-    },
-    .size = sizeof(struct vf_lw_opts),
-};
-
-static bool have_filter(const char *name)
-{
-    for (const AVFilter *filter = avfilter_next(NULL); filter;
-         filter = avfilter_next(filter))
-    {
-        if (strcmp(filter->name, name) == 0)
-            return true;
-    }
-    return false;
-}
-
-// This is used by "old" filters for wrapping lavfi if possible.
-// On success, this overwrites all vf callbacks and literally takes over the
-// old filter and replaces it with vf_lavfi.
-// On error (<0), nothing is changed.
-int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
-                    char *filter, char *opts, ...)
-{
-    if (!lavfi_opts)
-        lavfi_opts = (struct vf_lw_opts *)vf_lw_conf.defaults;
-    if (filter && !have_filter(filter))
-        return -1;
-    MP_VERBOSE(vf, "Using libavfilter for '%s'\n", vf->info->name);
-    void *old_priv = vf->priv;
-    struct vf_priv_s *p = talloc(vf, struct vf_priv_s);
-    vf->priv = p;
-    *p = *(const struct vf_priv_s *)vf_info_lavfi.priv_defaults;
-    p->cfg_sws_flags = lavfi_opts->sws_flags;
-    p->cfg_avopts = lavfi_opts->avopts;
-    va_list ap;
-    va_start(ap, opts);
-    char *s = talloc_vasprintf(vf, opts, ap);
-    p->cfg_graph = filter ? talloc_asprintf(vf, "%s=%s", filter, s)
-                          : talloc_strdup(vf, s);
-    talloc_free(s);
-    va_end(ap);
-    p->old_priv = old_priv;
-    // Note: we should be sure vf_open really overwrites _all_ vf callbacks.
-    if (vf_open(vf) < 1)
-        abort();
-    return 1;
-}
-
-void *vf_lw_old_priv(struct vf_instance *vf)
-{
-    struct vf_priv_s *p = vf->priv;
-    return p->old_priv;
-}
-
-void vf_lw_update_graph(struct vf_instance *vf, char *filter, char *opts, ...)
-{
-    struct vf_priv_s *p = vf->priv;
-    va_list ap;
-    va_start(ap, opts);
-    char *s = talloc_vasprintf(vf, opts, ap);
-    talloc_free(p->cfg_graph);
-    p->cfg_graph = filter ? talloc_asprintf(vf, "%s=%s", filter, s)
-                          : talloc_strdup(vf, s);
-    talloc_free(s);
-    va_end(ap);
-}
-
-void vf_lw_set_reconfig_cb(struct vf_instance *vf,
-                                int (*reconfig_)(struct vf_instance *vf,
-                                                 struct mp_image_params *in,
-                                                 struct mp_image_params *out))
-{
-    vf->priv->lw_reconfig_cb = reconfig_;
-}
