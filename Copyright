@@ -45,7 +45,7 @@ them quite central:
 - video format conversion (if not supported by the VO)
 - minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
 Some of these will be fixed in the future. The intended use for LGPL mode is
-with libmpv, and currently it's not recommended to  build mpv CLI in LGPL mode
+with libmpv, and currently it's not recommended to build mpv CLI in LGPL mode
 at all.
 
 The following files are still GPL only (--enable-lgpl disables them):
@@ -101,7 +101,7 @@ The following files are still GPL only (--enable-lgpl disables them):
     bootstrap.py                    unknown license, probably GPLv2+ or LGPLv2+
     etc/mplayer-input.conf          unknown license, probably GPLv2+
     mpv.desktop                     unknown license, probably GPLv2+
-    etc/restore-old-bindings.conf   unkniwn license, probably GPLv2+
+    etc/restore-old-bindings.conf   unknown license, probably GPLv2+
 
 The following files contain some optional GPL code (--enable-lgpl disables it):
 
