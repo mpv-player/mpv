@@ -71,20 +71,8 @@ The following files are still GPL only (--enable-lgpl disables them):
     stream/stream_smb.c             will stay GPLv3
     stream/stream_tv.c              will stay GPL
     stream/tv*                      will stay GPL
-    video/filter/vf_crop.c          will be deleted
-    video/filter/vf_dsize.c         will be deleted
-    video/filter/vf_expand.c        will be deleted
-    video/filter/vf_flip.c          will be deleted
     video/filter/vf_format.c        will be deleted
-    video/filter/vf_gradfun.c       will be deleted
-    video/filter/vf_mirror.c        will be deleted
-    video/filter/vf_noformat.c      will be deleted
-    video/filter/vf_pullup.c        will be deleted
-    video/filter/vf_rotate.c        will be deleted
-    video/filter/vf_scale.c         will be deleted
-    video/filter/vf_stereo3d.c      will be deleted
     video/filter/vf_sub.c           will be deleted
-    video/filter/vf_yadif.c         will be deleted
     video/out/opengl/hwdec_vaglx.c  GPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown

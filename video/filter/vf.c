@@ -39,20 +39,8 @@
 #include "video/mp_image_pool.h"
 #include "vf.h"
 
-extern const vf_info_t vf_info_crop;
-extern const vf_info_t vf_info_expand;
-extern const vf_info_t vf_info_scale;
 extern const vf_info_t vf_info_format;
-extern const vf_info_t vf_info_noformat;
-extern const vf_info_t vf_info_flip;
-extern const vf_info_t vf_info_rotate;
-extern const vf_info_t vf_info_mirror;
-extern const vf_info_t vf_info_gradfun;
-extern const vf_info_t vf_info_dsize;
-extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_sub;
-extern const vf_info_t vf_info_yadif;
-extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_convert;
 extern const vf_info_t vf_info_lavfi;
 extern const vf_info_t vf_info_lavfi_bridge;
@@ -66,19 +54,7 @@ extern const vf_info_t vf_info_d3d11vpp;
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
 #if HAVE_GPL
-    &vf_info_crop,
-    &vf_info_expand,
-    &vf_info_scale,
     &vf_info_format,
-    &vf_info_noformat,
-    &vf_info_flip,
-    &vf_info_mirror,
-    &vf_info_rotate,
-    &vf_info_gradfun,
-    &vf_info_pullup,
-    &vf_info_yadif,
-    &vf_info_stereo3d,
-    &vf_info_dsize,
     &vf_info_sub,
 #endif
 
