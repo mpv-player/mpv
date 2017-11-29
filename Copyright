@@ -34,8 +34,8 @@ a LGPL mode to mpv, MPlayer code had to be relicensed from GPLv2+ to LGPLv2.1+
 by asking the MPlayer authors for permission. Since permission could not be
 obtained from everyone, LGPL mode disables the following features, some of
 them quite central:
-- no audio filtering, which breaks: --volume, --af, replaygain, pitch
-  correction, fine control about downmix/upmix/resampling behavior
+- no audio filtering, which breaks: --af, pitch correction, fine control over
+  downmix/upmix/resampling behavior
 - Linux X11 video output
 - BSD audio output via OSS
 - NVIDIA/Linux hardware decoding (vdpau, although nvdec usually works)

@@ -179,6 +179,8 @@ end:
     for (int n = 0; n < ao->num_planes; n++)
         af_fill_silence((char *)data[n] + bytes, full_bytes - bytes, ao->format);
 
+    ao_post_process_data(ao, data, samples);
+
     return bytes / ao->sstride;
 }
 

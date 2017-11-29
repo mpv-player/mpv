@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 
 #include "mpv_talloc.h"
@@ -159,6 +160,7 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
     ao->priv = m_config_group_from_desc(ao, ao->log, global, &desc, name);
     if (!ao->priv)
         goto error;
+    ao_set_gain(ao, 1.0f);
     return ao;
 error:
     talloc_free(ao);
@@ -636,6 +638,70 @@ void ao_print_devices(struct mpv_global *global, struct mp_log *log)
         mp_info(log, "  '%s' (%s)\n", desc->name, desc->desc);
     }
     ao_hotplug_destroy(hp);
+}
+
+void ao_set_gain(struct ao *ao, float gain)
+{
+    uint_least32_t v = 0;
+    assert(sizeof(gain) <= sizeof(v));
+    memcpy(&v, &gain, sizeof(gain));
+    atomic_store(&ao->gain_fi, v);
+}
+
+static float ao_get_gain(struct ao *ao)
+{
+    uint_least32_t v = atomic_load_explicit(&ao->gain_fi, memory_order_relaxed);
+    float gain;
+    assert(sizeof(gain) <= sizeof(v));
+    memcpy(&gain, &v, sizeof(gain));
+    return gain;
+}
+
+#define MUL_GAIN_i(d, num_samples, gain, low, center, high)                     \
+    for (int n = 0; n < (num_samples); n++)                                     \
+        (d)[n] = MPCLAMP(                                                       \
+            ((((int64_t)((d)[n]) - (center)) * (gain) + 128) >> 8) + (center),  \
+            (low), (high))
+
+#define MUL_GAIN_f(d, num_samples, gain)                                        \
+    for (int n = 0; n < (num_samples); n++)                                     \
+        (d)[n] = MPCLAMP(((d)[n]) * (gain), -1.0, 1.0)
+
+static void process_plane(struct ao *ao, void *data, int num_samples)
+{
+    float gain = ao_get_gain(ao);
+    int format = af_fmt_from_planar(ao->format);
+    if (gain == 1.0f)
+        return;
+    int gi = lrint(256.0 * gain);
+    switch (format) {
+    case AF_FORMAT_U8:
+        MUL_GAIN_i((uint8_t *)data, num_samples, gi, 0, 128, 255);
+        break;
+    case AF_FORMAT_S16:
+        MUL_GAIN_i((int16_t *)data, num_samples, gi, INT16_MIN, 0, INT16_MAX);
+        break;
+    case AF_FORMAT_S32:
+        MUL_GAIN_i((int32_t *)data, num_samples, gi, INT32_MIN, 0, INT32_MAX);
+        break;
+    case AF_FORMAT_FLOAT:
+        MUL_GAIN_f((float *)data, num_samples, gain);
+        break;
+    case AF_FORMAT_DOUBLE:
+        MUL_GAIN_f((double *)data, num_samples, gain);
+        break;
+    default:;
+        // all other sample formats are simply not supported
+    }
+}
+
+void ao_post_process_data(struct ao *ao, void **data, int num_samples)
+{
+    bool planar = af_fmt_is_planar(ao->format);
+    int planes = planar ? ao->channels.num : 1;
+    int plane_samples = num_samples * (planar ? 1: ao->channels.num);
+    for (int n = 0; n < planes; n++)
+        process_plane(ao, data[n], plane_samples);
 }
 
 static int get_conv_type(struct ao_convert_fmt *fmt)

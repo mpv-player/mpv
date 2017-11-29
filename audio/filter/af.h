@@ -61,7 +61,6 @@ struct af_instance {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
-    struct replaygain_data *replaygain_data;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
     /* Feed a frame. The frame is NULL if EOF was reached, and the filter
@@ -105,7 +104,6 @@ struct af_stream {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
-    struct replaygain_data *replaygain_data;
 };
 
 // Return values
