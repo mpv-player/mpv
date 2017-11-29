@@ -219,12 +219,10 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_KEYDOWN, "keydown", { ARG_STRING } },
   { MP_CMD_KEYUP, "keyup", { OARG_STRING("") } },
 
-#if HAVE_GPL
   { MP_CMD_AUDIO_ADD, "audio-add", { ARG_STRING,
       OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
       OARG_STRING(""), OARG_STRING("") } },
   { MP_CMD_AUDIO_REMOVE, "audio-remove", { OARG_INT(-1) } },
-#endif
   { MP_CMD_AUDIO_RELOAD, "audio-reload", { OARG_INT(-1) } },
 
   { MP_CMD_RESCAN_EXTERNAL_FILES, "rescan-external-files", {
