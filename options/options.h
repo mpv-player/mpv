@@ -107,7 +107,6 @@ typedef struct MPOpts {
     float rgain_preamp;         // Set replaygain pre-amplification
     int rgain_clip;             // Enable/disable clipping prevention
     float rgain_fallback;
-    float balance;
     int softvol_mute;
     float softvol_max;
     int gapless_audio;

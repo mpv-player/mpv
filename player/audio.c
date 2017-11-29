@@ -185,57 +185,6 @@ void audio_update_volume(struct MPContext *mpctx)
     gain *= compute_replaygain(mpctx);
     if (opts->softvol_mute == 1)
         gain = 0.0;
-
-    if (!af_control_any_rev(ao_c->af, AF_CONTROL_SET_VOLUME, &gain)) {
-        if (gain == 1.0)
-            return;
-        MP_VERBOSE(mpctx, "Inserting volume filter.\n");
-        char *args[] = {"warn", "no", NULL};
-        if (!(af_add(ao_c->af, "volume", "softvol", args)
-              && af_control_any_rev(ao_c->af, AF_CONTROL_SET_VOLUME, &gain)))
-            MP_ERR(mpctx, "No volume control available.\n");
-    }
-}
-
-/* NOTE: Currently the balance code is seriously buggy: it always changes
- * the af_pan mapping between the first two input channels and first two
- * output channels to particular values. These values make sense for an
- * af_pan instance that was automatically inserted for balance control
- * only and is otherwise an identity transform, but if the filter was
- * there for another reason, then ignoring and overriding the original
- * values is completely wrong.
- */
-void audio_update_balance(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct ao_chain *ao_c = mpctx->ao_chain;
-    if (!ao_c || ao_c->af->initialized < 1)
-        return;
-
-    float val = opts->balance;
-
-    if (af_control_any_rev(ao_c->af, AF_CONTROL_SET_PAN_BALANCE, &val))
-        return;
-
-    if (val == 0)
-        return;
-
-    struct af_instance *af_pan_balance;
-    if (!(af_pan_balance = af_add(ao_c->af, "pan", "autopan", NULL))) {
-        MP_ERR(mpctx, "No balance control available.\n");
-        return;
-    }
-
-    /* make all other channels pass through since by default pan blocks all */
-    for (int i = 2; i < AF_NCH; i++) {
-        float level[AF_NCH] = {0};
-        level[i] = 1.f;
-        af_control_ext_t arg_ext = { .ch = i, .arg = level };
-        af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_LEVEL,
-                                &arg_ext);
-    }
-
-    af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_BALANCE, &val);
 }
 
 static int recreate_audio_filters(struct MPContext *mpctx)
@@ -254,7 +203,6 @@ static int recreate_audio_filters(struct MPContext *mpctx)
         MP_ERR(mpctx, "--softvol=no is not supported anymore.\n");
 
     audio_update_volume(mpctx);
-    audio_update_balance(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
@@ -289,7 +237,6 @@ int reinit_audio_filters(struct MPContext *mpctx)
 #else /* HAVE_LIBAV */
 
 void audio_update_volume(struct MPContext *mpctx) {}
-void audio_update_balance(struct MPContext *mpctx) {}
 int reinit_audio_filters(struct MPContext *mpctx) { return 0; }
 
 #endif /* else HAVE_LIBAF */

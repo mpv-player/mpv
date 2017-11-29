@@ -557,7 +557,6 @@ const m_option_t mp_opts[] = {
                 {"weak", -1})),
     OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
                .min = 0, .max = 10),
-    OPT_FLOATRANGE("balance", balance, 0, -1, 1),
 
     OPT_STRING("title", wintitle, 0),
     OPT_STRING("force-media-title", media_title, 0),

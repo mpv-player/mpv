@@ -1289,14 +1289,6 @@ Audio
     is always applied if the replaygain logic is somehow inactive. If this
     is applied, no other replaygain options are applied.
 
-``--balance=<value>``
-    How much left/right channels contribute to the audio. (The implementation
-    of this feature is rather odd. It doesn't change the volumes of each
-    channel, but instead sets up a pan matrix to mix the left and right
-    channels.)
-
-    Deprecated.
-
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Positive values
     delay the audio, and negative values delay the video.

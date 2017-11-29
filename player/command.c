@@ -2100,35 +2100,6 @@ static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
     return r;
 }
 
-/// Balance (RW)
-static int mp_property_balance(void *ctx, struct m_property *prop,
-                               int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-
-    if (action == M_PROPERTY_PRINT) {
-        char **str = arg;
-        float bal = mpctx->opts->balance;
-        if (bal == 0.f)
-            *str = talloc_strdup(NULL, "center");
-        else if (bal == -1.f)
-            *str = talloc_strdup(NULL, "left only");
-        else if (bal == 1.f)
-            *str = talloc_strdup(NULL, "right only");
-        else {
-            unsigned right = (bal + 1.f) / 2.f * 100.f;
-            *str = talloc_asprintf(NULL, "left %d%%, right %d%%",
-                                   100 - right, right);
-        }
-        return M_PROPERTY_OK;
-    }
-
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET)
-        audio_update_balance(mpctx);
-    return r;
-}
-
 static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
                                 int direction, struct track *track)
 {
@@ -4011,7 +3982,6 @@ static const struct m_property mp_properties_base[] = {
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
     {"aid", mp_property_audio},
-    {"balance", mp_property_balance},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
@@ -4167,7 +4137,7 @@ static const char *const *const mp_event_property_change[] = {
       "colormatrix-primaries", "video-aspect", "video-dec-params",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
-      "samplerate", "channels", "audio", "volume", "mute", "balance",
+      "samplerate", "channels", "audio", "volume", "mute",
       "current-ao", "audio-codec-name", "audio-params",
       "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
@@ -4361,7 +4331,6 @@ static const struct property_osd_display {
     { "ao-mute", "AO Mute" },
     { "audio-delay", "A-V delay" },
     { "audio", "Audio" },
-    { "balance", "Balance", .osd_progbar = OSD_BALANCE },
     // video
     { "panscan", "Panscan", .osd_progbar = OSD_PANSCAN },
     { "taskbar-progress", "Progress in taskbar" },
