@@ -128,7 +128,7 @@ struct priv {
     EGLImageKHR images[4];
     VAImage current_image;
     bool buffer_acquired;
-#if 0
+#if VA_CHECK_VERSION(1, 1, 0)
     bool esh_not_implemented;
     VADRMPRIMESurfaceDescriptor desc;
     bool surface_acquired;
@@ -215,7 +215,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
         p->images[n] = 0;
     }
 
-#if 0
+#if VA_CHECK_VERSION(1, 1, 0)
     if (p->surface_acquired) {
         for (int n = 0; n < p->desc.num_objects; n++)
             close(p->desc.objects[n].fd);
@@ -344,7 +344,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     VAImage *va_image = &p->current_image;
     VADisplay *display = p_owner->display;
 
-#if 0
+#if VA_CHECK_VERSION(1, 1, 0)
     if (p->esh_not_implemented)
         goto esh_failed;
 
