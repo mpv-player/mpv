@@ -432,7 +432,6 @@ def build(ctx):
         ( "video/out/opengl/hwdec_drmprime_drm.c","drmprime && drm" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
-        ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_mediacodec_embed.c",     "android" ),
