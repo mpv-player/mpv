@@ -658,11 +658,10 @@ void ao_set_gain(struct ao *ao, float gain)
 static void process_plane(struct ao *ao, void *data, int num_samples)
 {
     float gain = atomic_load_explicit(&ao->gain, memory_order_relaxed);
-    int format = af_fmt_from_planar(ao->format);
-    if (gain == 1.0f)
-        return;
     int gi = lrint(256.0 * gain);
-    switch (format) {
+    if (gi == 256)
+        return;
+    switch (af_fmt_from_planar(ao->format)) {
     case AF_FORMAT_U8:
         MUL_GAIN_i((uint8_t *)data, num_samples, gi, 0, 128, 255);
         break;
