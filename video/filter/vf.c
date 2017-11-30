@@ -53,11 +53,8 @@ extern const vf_info_t vf_info_d3d11vpp;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
-#if HAVE_GPL
     &vf_info_format,
     &vf_info_sub,
-#endif
-
     &vf_info_convert,
     &vf_info_lavfi,
     &vf_info_lavfi_bridge,
