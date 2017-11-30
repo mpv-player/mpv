@@ -479,7 +479,7 @@ static void *core_thread(void *tag)
 static bool check_locale(void)
 {
     char *name = setlocale(LC_NUMERIC, NULL);
-    return !name || strcmp(name, "C") == 0;
+    return !name || strcmp(name, "C") == 0 || strcmp(name, "C.UTF-8") == 0;
 }
 
 mpv_handle *mpv_create(void)
