@@ -733,6 +733,8 @@ PROTOCOLS
     ``<number>`` (select playlist with the same index). You can list
     the available playlists with ``--msg-level=bd=v``.
 
+    ``bluray://`` is an alias.
+
 ``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
 
     Play a DVD. DVD menus are not supported. If no title is given, the longest
