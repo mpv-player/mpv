@@ -44,9 +44,6 @@ static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
     &ra_hwdec_vaegl,
 #endif
-#if HAVE_VDPAU_GL_X11
-    &ra_hwdec_vdpau,
-#endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
     &ra_hwdec_videotoolbox,
 #endif
@@ -65,6 +62,9 @@ static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #endif
 #if HAVE_CUDA_HWACCEL
     &ra_hwdec_cuda,
+#endif
+#if HAVE_VDPAU_GL_X11
+    &ra_hwdec_vdpau,
 #endif
 #if HAVE_RPI
     &ra_hwdec_rpi_overlay,

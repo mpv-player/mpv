@@ -244,9 +244,22 @@ static const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
 #endif
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
+#if HAVE_D3D_HWACCEL
+    &mp_vd_lavc_d3d11va,
+
+ #if HAVE_D3D9_HWACCEL
+    &mp_vd_lavc_dxva2,
+    &mp_vd_lavc_dxva2_copy,
+ #endif
+    &mp_vd_lavc_d3d11va_copy,
+#endif
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
     &mp_vd_lavc_rpi_copy,
+#endif
+#if HAVE_CUDA_HWACCEL
+    &mp_vd_lavc_nvdec,
+    &mp_vd_lavc_nvdec_copy,
 #endif
 #if HAVE_VDPAU
     &mp_vd_lavc_vdpau,
@@ -260,22 +273,11 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_vaapi,
     &mp_vd_lavc_vaapi_copy,
 #endif
-#if HAVE_D3D_HWACCEL
-    &mp_vd_lavc_d3d11va,
-
- #if HAVE_D3D9_HWACCEL
-    &mp_vd_lavc_dxva2,
-    &mp_vd_lavc_dxva2_copy,
- #endif
-    &mp_vd_lavc_d3d11va_copy,
-#endif
 #if HAVE_ANDROID
     &mp_vd_lavc_mediacodec,
     &mp_vd_lavc_mediacodec_copy,
 #endif
 #if HAVE_CUDA_HWACCEL
-    &mp_vd_lavc_nvdec,
-    &mp_vd_lavc_nvdec_copy,
     &mp_vd_lavc_cuda,
     &mp_vd_lavc_cuda_copy,
 #endif
