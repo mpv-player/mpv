@@ -642,19 +642,7 @@ void ao_print_devices(struct mpv_global *global, struct mp_log *log)
 
 void ao_set_gain(struct ao *ao, float gain)
 {
-    uint_least32_t v = 0;
-    assert(sizeof(gain) <= sizeof(v));
-    memcpy(&v, &gain, sizeof(gain));
-    atomic_store(&ao->gain_fi, v);
-}
-
-static float ao_get_gain(struct ao *ao)
-{
-    uint_least32_t v = atomic_load_explicit(&ao->gain_fi, memory_order_relaxed);
-    float gain;
-    assert(sizeof(gain) <= sizeof(v));
-    memcpy(&gain, &v, sizeof(gain));
-    return gain;
+    atomic_store(&ao->gain, gain);
 }
 
 #define MUL_GAIN_i(d, num_samples, gain, low, center, high)                     \
@@ -669,7 +657,7 @@ static float ao_get_gain(struct ao *ao)
 
 static void process_plane(struct ao *ao, void *data, int num_samples)
 {
-    float gain = ao_get_gain(ao);
+    float gain = atomic_load_explicit(&ao->gain, memory_order_relaxed);
     int format = af_fmt_from_planar(ao->format);
     if (gain == 1.0f)
         return;

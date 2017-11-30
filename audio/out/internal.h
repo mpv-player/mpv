@@ -70,8 +70,8 @@ struct ao {
     // Internal events (use ao_request_reload(), ao_hotplug_event())
     atomic_int events_;
 
-    // Float gain multiplicator, reinterpret-casted to int.
-    atomic_uint_least32_t gain_fi;
+    // Float gain multiplicator
+    mp_atomic_float gain;
 
     int buffer;
     double def_buffer;
