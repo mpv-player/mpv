@@ -28,10 +28,10 @@
 #include <libavutil/hwcontext_dxva2.h>
 #endif
 
-#include "lavc.h"
 #include "common/common.h"
 #include "common/av_common.h"
 #include "video/fmt-conversion.h"
+#include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 #include "osdep/windows_utils.h"

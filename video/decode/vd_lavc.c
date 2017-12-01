@@ -125,10 +125,6 @@ const struct m_sub_options vd_lavc_conf = {
 
 extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec;
 extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec_copy;
-extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
-extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
-extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va;
-extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy;
 
 #if HAVE_RPI
 static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
@@ -240,6 +236,44 @@ static const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
     .generic_hwaccel = true,
     .create_standalone_dev = true,
     .create_standalone_dev_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
+    .set_hwframes = true,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
+};
+#endif
+
+#if HAVE_D3D_HWACCEL
+static const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
+    .type = HWDEC_D3D11VA,
+    .image_format = IMGFMT_D3D11VA,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+};
+static const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
+    .type = HWDEC_D3D11VA_COPY,
+    .copying = true,
+    .image_format = IMGFMT_D3D11VA,
+    .generic_hwaccel = true,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_D3D11VA,
+    .set_hwframes = true,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
+};
+#endif
+
+#if HAVE_D3D9_HWACCEL
+static const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
+    .type = HWDEC_DXVA2,
+    .image_format = IMGFMT_DXVA2,
+    .generic_hwaccel = true,
+    .set_hwframes = true,
+};
+static const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
+    .type = HWDEC_DXVA2_COPY,
+    .copying = true,
+    .image_format = IMGFMT_DXVA2,
+    .generic_hwaccel = true,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_DXVA2,
     .set_hwframes = true,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

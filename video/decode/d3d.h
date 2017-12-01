@@ -24,8 +24,6 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-struct lavc_ctx;
-
 // Must call d3d_load_dlls() before accessing. Once this is done, the DLLs
 // remain loaded forever.
 extern HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
