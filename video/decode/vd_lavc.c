@@ -123,9 +123,6 @@ const struct m_sub_options vd_lavc_conf = {
     },
 };
 
-extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec;
-extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec_copy;
-
 #if HAVE_RPI
 static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
     .type = HWDEC_RPI,
@@ -279,6 +276,14 @@ static const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
 };
 #endif
 
+#if HAVE_ANDROID
+static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec_copy = {
+    .type = HWDEC_MEDIACODEC_COPY,
+    .lavc_suffix = "_mediacodec",
+    .copying = true,
+};
+#endif
+
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_D3D_HWACCEL
     &mp_vd_lavc_d3d11va,
@@ -310,7 +315,6 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_vaapi_copy,
 #endif
 #if HAVE_ANDROID
-    &mp_vd_lavc_mediacodec,
     &mp_vd_lavc_mediacodec_copy,
 #endif
 #if HAVE_CUDA_HWACCEL

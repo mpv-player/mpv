@@ -363,7 +363,6 @@ def build(ctx):
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/decode/dec_video.c"),
-        ( "video/decode/hw_mediacodec.c",        "android" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
