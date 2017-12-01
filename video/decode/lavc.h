@@ -88,18 +88,15 @@ struct vd_lavc_hwdec {
     int image_format;
     // Always returns a non-hwaccel image format.
     bool copying;
-    // Setting this will queue the given number of frames before calling
-    // process_image() or returning them to the renderer. This can increase
-    // efficiency by not blocking on the hardware pipeline by reading back
-    // immediately after decoding.
+    // Setting this will queue the given number of frames before returning them
+    // to the renderer. This can increase efficiency by not blocking on the
+    // hardware pipeline by reading back immediately after decoding.
     int delay_queue;
     int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);
     int (*init_decoder)(struct lavc_ctx *ctx);
     void (*uninit)(struct lavc_ctx *ctx);
-    // Process the image returned by the libavcodec decoder.
-    struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
     // For copy hwdecs. If probing is true, don't log errors if unavailable.
     // The returned device will be freed with mp_hwdec_ctx->destroy.
     struct mp_hwdec_ctx *(*create_dev)(struct mpv_global *global,

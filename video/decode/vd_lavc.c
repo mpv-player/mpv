@@ -1092,9 +1092,6 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
     struct mp_image *res = ctx->delay_queue[0];
     MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
 
-    if (ctx->hwdec && ctx->hwdec->process_image)
-        res = ctx->hwdec->process_image(ctx, res);
-
     res = res ? mp_img_swap_to_native(res) : NULL;
     if (!res)
         return progress;
