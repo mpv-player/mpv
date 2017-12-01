@@ -995,9 +995,6 @@ static int clamp_str(const m_option_t *opt, void *val)
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
-    if (param.start == NULL)
-        return M_OPT_MISSING_PARAM;
-
     m_opt_string_validate_fn validate = opt->priv;
     if (validate) {
         int r = validate(log, opt, name, param);
