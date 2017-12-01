@@ -30,7 +30,7 @@
 #include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/hwdec.h"
-#include "video/decode/d3d.h"
+#include "video/d3d.h"
 
 struct priv_owner {
     struct mp_hwdec_ctx hwctx;

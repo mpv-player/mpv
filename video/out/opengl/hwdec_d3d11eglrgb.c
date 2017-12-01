@@ -30,7 +30,7 @@
 #include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/hwdec.h"
-#include "video/decode/d3d.h"
+#include "video/d3d.h"
 
 #ifndef EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE
 #define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x3AAB

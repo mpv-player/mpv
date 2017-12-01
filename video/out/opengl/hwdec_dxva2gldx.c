@@ -23,7 +23,7 @@
 #include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/hwdec.h"
-#include "video/decode/d3d.h"
+#include "video/d3d.h"
 
 // for  WGL_ACCESS_READ_ONLY_NV
 #include <GL/wglext.h>

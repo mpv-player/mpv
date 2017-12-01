@@ -25,7 +25,7 @@
 #include "options/m_config.h"
 #include "osdep/windows_utils.h"
 #include "video/hwdec.h"
-#include "video/decode/d3d.h"
+#include "video/d3d.h"
 #include "video/out/d3d11/ra_d3d11.h"
 #include "video/out/gpu/hwdec.h"
 

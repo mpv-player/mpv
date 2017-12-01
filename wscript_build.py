@@ -350,6 +350,7 @@ def build(ctx):
 
         ## Video
         ( "video/csputils.c" ),
+        ( "video/d3d.c",                         "d3d-hwaccel" ),
         ( "video/fmt-conversion.c" ),
         ( "video/image_loader.c" ),
         ( "video/image_writer.c" ),
@@ -361,7 +362,6 @@ def build(ctx):
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
-        ( "video/decode/d3d.c",                  "d3d-hwaccel" ),
         ( "video/decode/dec_video.c"),
         ( "video/decode/hw_mediacodec.c",        "android" ),
         ( "video/decode/vd_lavc.c" ),
