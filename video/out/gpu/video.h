@@ -139,6 +139,7 @@ struct gl_video_opts {
     struct mp_icc_opts *icc_opts;
     int early_flush;
     char *shader_cache_dir;
+    char *hwdec_interop;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -176,8 +177,10 @@ struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p);
 void gl_video_reset(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);
 
-struct ra_hwdec;
-void gl_video_set_hwdec(struct gl_video *p, struct ra_hwdec *hwdec);
+struct mp_hwdec_devices;
+void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
+                          bool load_all_by_default);
+void gl_video_load_hwdecs_all(struct gl_video *p, struct mp_hwdec_devices *devs);
 
 struct vo;
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo);

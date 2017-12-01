@@ -50,7 +50,6 @@ struct gpu_priv {
     char *context_type;
     struct ra_ctx_opts opts;
     struct gl_video *renderer;
-    struct ra_hwdec *hwdec;
 
     int events;
 };
@@ -120,23 +119,18 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void request_hwdec_api(struct vo *vo, void *api)
+static void request_hwdec_api(struct vo *vo)
 {
     struct gpu_priv *p = vo->priv;
 
-    if (p->hwdec)
-        return;
-
-    p->hwdec = ra_hwdec_load_api(vo->log, p->ctx->ra, vo->global,
-                                 vo->hwdec_devs, (intptr_t)api);
-    gl_video_set_hwdec(p->renderer, p->hwdec);
+    gl_video_load_hwdecs_all(p->renderer, vo->hwdec_devs);
 }
 
-static void call_request_hwdec_api(void *ctx, enum hwdec_type type)
+static void call_request_hwdec_api(void *ctx)
 {
     // Roundabout way to run hwdec loading on the VO thread.
     // Redirects to request_hwdec_api().
-    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t)type);
+    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, NULL);
 }
 
 static void get_and_update_icc_profile(struct gpu_priv *p)
@@ -195,7 +189,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     case VOCTRL_LOAD_HWDEC_API:
-        request_hwdec_api(vo, data);
+        request_hwdec_api(vo);
         return true;
     case VOCTRL_UPDATE_RENDER_OPTS: {
         gl_video_configure_queue(p->renderer, vo);
@@ -266,7 +260,6 @@ static void uninit(struct vo *vo)
     struct gpu_priv *p = vo->priv;
 
     gl_video_uninit(p->renderer);
-    ra_hwdec_uninit(p->hwdec);
     if (vo->hwdec_devs) {
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
@@ -298,12 +291,9 @@ static int preinit(struct vo *vo)
     get_and_update_icc_profile(p);
 
     vo->hwdec_devs = hwdec_devices_create();
-
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    p->hwdec = ra_hwdec_load(vo->log, p->ctx->ra, vo->global,
-                             vo->hwdec_devs, vo->opts->gl_hwdec_interop);
-    gl_video_set_hwdec(p->renderer, p->hwdec);
+    gl_video_load_hwdecs(p->renderer, vo->hwdec_devs, false);
 
     return 0;
 

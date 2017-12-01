@@ -277,8 +277,12 @@ struct gl_video {
     struct cached_file *files;
     int num_files;
 
-    struct ra_hwdec *hwdec;
+    bool hwdec_interop_loading_done;
+    struct ra_hwdec **hwdecs;
+    int num_hwdecs;
+
     struct ra_hwdec_mapper *hwdec_mapper;
+    struct ra_hwdec *hwdec_overlay;
     bool hwdec_active;
 
     bool dsi_warned;
@@ -401,6 +405,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_INTRANGE("gpu-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
         OPT_STRING("gpu-shader-cache-dir", shader_cache_dir, 0),
+        OPT_STRING_VALIDATE("gpu-hwdec-interop", hwdec_interop, 0,
+                             ra_hwdec_validate_opt),
+        OPT_REPLACED("opengl-hwdec-interop", "gpu-hwdec-interop"),
+        OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
         OPT_REPLACED("hdr-tone-mapping", "tone-mapping"),
         OPT_REPLACED("opengl-shaders", "glsl-shaders"),
         OPT_REPLACED("opengl-shader", "glsl-shader"),
@@ -803,18 +811,27 @@ static void init_video(struct gl_video *p)
 {
     p->use_integer_conversion = false;
 
-    if (p->hwdec && ra_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
-        if (p->hwdec->driver->overlay_frame) {
+    struct ra_hwdec *hwdec = NULL;
+    for (int n = 0; n < p->num_hwdecs; n++) {
+        if (ra_hwdec_test_format(p->hwdecs[n], p->image_params.imgfmt)) {
+            hwdec = p->hwdecs[n];
+            break;
+        }
+    }
+
+    if (hwdec) {
+        if (hwdec->driver->overlay_frame) {
             MP_WARN(p, "Using HW-overlay mode. No GL filtering is performed "
                        "on the video!\n");
+            p->hwdec_overlay = hwdec;
         } else {
-            p->hwdec_mapper = ra_hwdec_mapper_create(p->hwdec, &p->image_params);
+            p->hwdec_mapper = ra_hwdec_mapper_create(hwdec, &p->image_params);
             if (!p->hwdec_mapper)
                 MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         }
         if (p->hwdec_mapper)
             p->image_params = p->hwdec_mapper->dst_params;
-        const char **exts = p->hwdec->glsl_extensions;
+        const char **exts = hwdec->glsl_extensions;
         for (int n = 0; exts && exts[n]; n++)
             gl_sc_enable_extension(p->sc, (char *)exts[n]);
         p->hwdec_active = true;
@@ -957,8 +974,8 @@ static void unref_current_image(struct gl_video *p)
 // lead to flickering artifacts.
 static void unmap_overlay(struct gl_video *p)
 {
-    if (p->hwdec_active && p->hwdec->driver->overlay_frame)
-        p->hwdec->driver->overlay_frame(p->hwdec, NULL, NULL, NULL, true);
+    if (p->hwdec_overlay)
+        p->hwdec_overlay->driver->overlay_frame(p->hwdec_overlay, NULL, NULL, NULL, true);
 }
 
 static void uninit_video(struct gl_video *p)
@@ -981,6 +998,7 @@ static void uninit_video(struct gl_video *p)
     p->real_image_params = (struct mp_image_params){0};
     p->image_params = p->real_image_params;
     p->hwdec_active = false;
+    p->hwdec_overlay = NULL;
     ra_hwdec_mapper_free(&p->hwdec_mapper);
 }
 
@@ -3005,15 +3023,15 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
         p->ra->fns->clear(p->ra, fbo.tex, color, &target_rc);
     }
 
-    if (p->hwdec_active && p->hwdec->driver->overlay_frame) {
+    if (p->hwdec_overlay) {
         if (has_frame) {
-            float *color = p->hwdec->overlay_colorkey;
+            float *color = p->hwdec_overlay->overlay_colorkey;
             p->ra->fns->clear(p->ra, fbo.tex, color, &p->dst_rect);
         }
 
-        p->hwdec->driver->overlay_frame(p->hwdec, frame->current,
-                                        &p->src_rect, &p->dst_rect,
-                                        frame->frame_id != p->image.id);
+        p->hwdec_overlay->driver->overlay_frame(p->hwdec_overlay, frame->current,
+                                                &p->src_rect, &p->dst_rect,
+                                                frame->frame_id != p->image.id);
 
         if (frame->current)
             p->osd_pts = frame->current->pts;
@@ -3507,6 +3525,10 @@ void gl_video_uninit(struct gl_video *p)
 
     uninit_video(p);
 
+    for (int n = 0; n < p->num_hwdecs; n++)
+        ra_hwdec_uninit(p->hwdecs[n]);
+    p->num_hwdecs = 0;
+
     gl_sc_destroy(p->sc);
 
     ra_tex_free(p->ra, &p->lut_3d_texture);
@@ -3561,8 +3583,10 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
     if (ra_get_imgfmt_desc(p->ra, mp_format, &desc) &&
         is_imgfmt_desc_supported(p, &desc))
         return true;
-    if (p->hwdec && ra_hwdec_test_format(p->hwdec, mp_format))
-        return true;
+    for (int n = 0; n < p->num_hwdecs; n++) {
+        if (ra_hwdec_test_format(p->hwdecs[n], mp_format))
+            return true;
+    }
     return false;
 }
 
@@ -3782,13 +3806,6 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux)
     }
 }
 
-void gl_video_set_hwdec(struct gl_video *p, struct ra_hwdec *hwdec)
-{
-    unref_current_image(p);
-    ra_hwdec_mapper_free(&p->hwdec_mapper);
-    p->hwdec = hwdec;
-}
-
 static void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
 {
     struct ra_buf_params params = {
@@ -3844,4 +3861,48 @@ struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h
     if (!res)
         gl_video_dr_free_buffer(p, ptr);
     return res;
+}
+
+static void load_add_hwdec(struct gl_video *p, struct mp_hwdec_devices *devs,
+                           const struct ra_hwdec_driver *drv, bool is_auto)
+{
+    struct ra_hwdec *hwdec =
+        ra_hwdec_load_driver(p->ra, p->log, p->global, devs, drv, is_auto);
+    if (hwdec)
+        MP_TARRAY_APPEND(p, p->hwdecs, p->num_hwdecs, hwdec);
+}
+
+void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
+                          bool load_all_by_default)
+{
+    char *type = p->opts.hwdec_interop;
+    if (!type || !type[0] || strcmp(type, "auto") == 0) {
+        if (!load_all_by_default)
+            return;
+        type = "all";
+    }
+    if (strcmp(type, "no") == 0) {
+        // do nothing, just block further loading
+    } else if (strcmp(type, "all") == 0) {
+        for (int n = 0; ra_hwdec_drivers[n]; n++)
+            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
+    } else {
+        for (int n = 0; ra_hwdec_drivers[n]; n++) {
+            const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
+            if (strcmp(type, drv->name) == 0) {
+                load_add_hwdec(p, devs, drv, false);
+                break;
+            }
+        }
+    }
+    p->hwdec_interop_loading_done = true;
+}
+
+void gl_video_load_hwdecs_all(struct gl_video *p, struct mp_hwdec_devices *devs)
+{
+    if (!p->hwdec_interop_loading_done) {
+        for (int n = 0; ra_hwdec_drivers[n]; n++)
+            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
+        p->hwdec_interop_loading_done = true;
+    }
 }

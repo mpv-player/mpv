@@ -816,34 +816,33 @@ Video
         frame glitches or discoloration, and you have ``--hwdec`` turned on,
         the first thing you should try is disabling it.
 
-``--opengl-hwdec-interop=<name>``
-    This is useful for the ``gpu`` and ``opengl-cb`` VOs for creating the
-    hardware decoding OpenGL interop context, but without actually enabling
-    hardware decoding itself (like ``--hwdec`` does).
+``--gpu-hwdec-interop=<auto|all|no|name>``
+    This option is for troubleshooting hwdec interop issues. Since it's a
+    debugging option, its semantics may change at any time.
 
-    If set to an empty string (default), the ``--hwdec`` option is used.
+    This is useful for the ``gpu`` and ``opengl-cb`` VOs for selecting which
+    hwdec interop context to use exactly. Effectively it also can be used
+    to block loading of certain backends.
 
-    For ``gpu``, if set, do not create the interop context on demand, but
-    when the VO is created.
+    If set to ``auto`` (default), the behavior depends on the VO: for ``gpu``,
+    it does nothing, and the interop context is loaded on demand (when the
+    decoder probes for ``--hwdec`` support). For ``opengl-cb``, which has
+    has no on-demand loading, this is equivalent to ``all``.
 
-    For ``opengl-cb``, if set, load the interop context as soon as the OpenGL
-    context is created. Since ``opengl-cb`` has no on-demand loading, this
-    allows enabling hardware decoding at runtime at all, without having
-    to temporarily set the ``hwdec`` option just during OpenGL context
-    initialization with ``mpv_opengl_cb_init_gl()``.
+    The empty string is equivalent to ``auto``.
 
-    See ``--opengl-hwdec-interop=help`` for accepted values. This lists the
-    interop backend, with the ``--hwdec`` alias after it in ``[...]``. Consider
-    all values except the proper interop backend name, ``auto``, and ``no`` as
-    silently deprecated and subject to change. Also, if you use this in
-    application code (e.g. via libmpv), any value other than ``auto`` and ``no``
-    should be avoided, as backends can change.
+    If set to ``all``, it attempts to load all interop contexts at GL context
+    creation time.
 
-    Currently the option sets a single value. It is possible that the option
-    type changes to a list in the future.
+    Other than that, a specific backend can be set, and the list of them can
+    be queried with ``help`` (mpv CLI only).
 
-    The old alias ``--hwdec-preload`` has different behavior if the option value
-    is ``no``.
+    Runtime changes to this are ignored (the current option value is used
+    whenever the renderer is created).
+
+    The old aliases ``--opengl-hwdec-interop`` and ``--hwdec-preload`` are
+    barely related to this anymore, but will be somewhat compatible in some
+    cases.
 
 ``--hwdec-image-format=<name>``
     Set the internal pixel format used by hardware decoding via ``--hwdec``

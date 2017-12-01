@@ -1433,7 +1433,7 @@ Property list
     This is known only once the VO has opened (and possibly later). With some
     VOs (like ``opengl``), this might be never known in advance, but only when
     the decoder attempted to create the hw decoder successfully. (Using
-    ``--opengl-hwdec-interop`` can load it eagerly.) If there are multiple
+    ``--gpu-hwdec-interop`` can load it eagerly.) If there are multiple
     drivers loaded, they will be separated by ``,``.
 
     If no VO is active or no interop driver is known, this property is
@@ -1442,9 +1442,6 @@ Property list
     This does not necessarily use the same values as ``hwdec``. There can be
     multiple interop drivers for the same hardware decoder, depending on
     platform and VO.
-
-    This is somewhat similar to the ``--opengl-hwdec-interop`` option, but
-    it returns the actually loaded backend, not the value of this option.
 
 ``video-format``
     Video format as string.

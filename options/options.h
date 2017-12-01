@@ -50,10 +50,8 @@ typedef struct mp_vo_opts {
 
     char *mmcss_profile;
 
-    // vo_wayland, vo_drm
+    // vo_drm
     struct sws_opts *sws_opts;
-    // vo_opengl, vo_opengl_cb
-    char *gl_hwdec_interop;
     // vo_drm
     struct drm_opts *drm_opts;
 } mp_vo_opts;

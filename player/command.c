@@ -2475,14 +2475,10 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
     if (!mpctx->video_out || !mpctx->video_out->hwdec_devs)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct mp_hwdec_ctx *hwctx =
-        hwdec_devices_get_first(mpctx->video_out->hwdec_devs);
-
-    const char *name = hwctx ? hwctx->driver_name : NULL;
-    if (!name && hwctx)
-        name = m_opt_choice_str(mp_hwdec_names, hwctx->type);
-
-    return m_property_strdup_ro(action, arg, name);
+    char *names = hwdec_devices_get_names(mpctx->video_out->hwdec_devs);
+    int res = m_property_strdup_ro(action, arg, names);
+    talloc_free(names);
+    return res;
 }
 
 /// Helper to set vo flags.

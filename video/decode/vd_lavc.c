@@ -370,7 +370,7 @@ static struct mp_hwdec_ctx *hwdec_create_dev(struct dec_video *vd,
         return hwdec->create_dev(vd->global, vd->log, autoprobe);
     if (vd->hwdec_devs) {
         int type = hwdec->interop_type ? hwdec->interop_type : hwdec->type;
-        hwdec_devices_request(vd->hwdec_devs, type);
+        hwdec_devices_request_all(vd->hwdec_devs);
         return hwdec_devices_get(vd->hwdec_devs, type);
     }
     return NULL;

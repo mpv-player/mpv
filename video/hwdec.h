@@ -87,18 +87,18 @@ struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs);
 void hwdec_devices_add(struct mp_hwdec_devices *devs, struct mp_hwdec_ctx *ctx);
 
 // Remove this from the list of internal devices. Idempotent/ignores entries
-// not added yet.
+// not added yet. This is not thread-safe.
 void hwdec_devices_remove(struct mp_hwdec_devices *devs, struct mp_hwdec_ctx *ctx);
 
 // Can be used to enable lazy loading of an API with hwdec_devices_request().
 // If used at all, this must be set/unset during initialization/uninitialization,
 // as concurrent use with hwdec_devices_request() is a race condition.
 void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
-    void (*load_api)(void *ctx, enum hwdec_type type), void *load_api_ctx);
+    void (*load_api)(void *ctx), void *load_api_ctx);
 
-// Cause VO to lazily load the requested device, and will block until this is
-// done (even if not available).
-void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type);
+// Cause VO to lazily load all devices, and will block until this is done (even
+// if not available).
+void hwdec_devices_request_all(struct mp_hwdec_devices *devs);
 
 // Convenience function:
 // - return NULL if devs==NULL
@@ -106,6 +106,9 @@ void hwdec_devices_request(struct mp_hwdec_devices *devs, enum hwdec_type type);
 // - call hwdec_devices_get(devs, type)
 // - then return the mp_hwdec_ctx.ctx field
 void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
+
+// Return "," concatenated list (for introspection/debugging). Use talloc_free().
+char *hwdec_devices_get_names(struct mp_hwdec_devices *devs);
 
 struct mp_image;
 

@@ -104,15 +104,13 @@ struct ra_hwdec_driver {
                          struct mp_rect *src, struct mp_rect *dst, bool newframe);
 };
 
-struct ra_hwdec *ra_hwdec_load_api(struct mp_log *log, struct ra *ra,
-                                   struct mpv_global *g,
-                                   struct mp_hwdec_devices *devs,
-                                   enum hwdec_type api);
+extern const struct ra_hwdec_driver *const ra_hwdec_drivers[];
 
-struct ra_hwdec *ra_hwdec_load(struct mp_log *log, struct ra *ra,
-                               struct mpv_global *g,
-                               struct mp_hwdec_devices *devs,
-                               const char *name);
+struct ra_hwdec *ra_hwdec_load_driver(struct ra *ra, struct mp_log *log,
+                                      struct mpv_global *global,
+                                      struct mp_hwdec_devices *devs,
+                                      const struct ra_hwdec_driver *drv,
+                                      bool is_auto);
 
 int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param);

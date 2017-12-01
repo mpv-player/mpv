@@ -48,6 +48,15 @@ Interface changes
     - remove deprecated --demuxer-max-packets
     - remove most of the deprecated audio and video filters
     - remove the deprecated --balance option/property
+    - rename the --opengl-hwdec-interop option to --gpu-hwdec-interop, and
+      change some of its semantics: extend it take the strings "auto" and
+      "all". "all" loads all backends. "auto" behaves like "all" for
+      vo_opengl_cb, while on vo_gpu it loads nothing, but allows on demand
+      loading by the decoder. The empty string as option value behaves like
+      "auto". Old --hwdec values do not work anymore.
+      This option is hereby declared as unstable and may change any time - its
+      old use is deprecated, and it has very little use outside of debugging
+      now.
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command

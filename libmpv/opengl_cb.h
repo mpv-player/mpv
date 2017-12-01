@@ -116,17 +116,18 @@ extern "C" {
  *
  * While "normal" mpv loads the OpenGL hardware decoding interop on demand,
  * this can't be done with opengl_cb for internal technical reasons. Instead,
- * make it load the interop at load time by setting the
- * "opengl-hwdec-interop"="auto" option before calling mpv_opengl_cb_init_gl()
- * ("hwdec-preload" in older mpv releases).
+ * it loads them by default, even if hardware decoding is not going to be used.
+ * In older mpv relases, this had to be done by setting the
+ * "opengl-hwdec-interop" or "hwdec-preload" options before calling
+ * mpv_opengl_cb_init_gl(). You can still use the newer "gpu-hwdec-interop"
+ * option to prevent loading of interop, or to load only a specific interop.
  *
  * There may be certain requirements on the OpenGL implementation:
  * - Windows: ANGLE is required (although in theory GL/DX interop could be used)
  * - Intel/Linux: EGL is required, and also a glMPGetNativeDisplay() callback
  *                must be provided (see sections below)
- * - nVidia/Linux: GLX is required (if you force "cuda", it should work on EGL
- *                 as well, if you have recent enough drivers and the
- *                 "hwaccel" option is set to "cuda" as well)
+ * - nVidia/Linux: Both GLX and EGL should work (GLX is required if vdpau is
+ *                 used, e.g. due to old drivers.)
  * - OSX: CGL is required (CGLGetCurrentContext() returning non-NULL)
  * - iOS: EAGL is required (EAGLContext.currentContext returning non-nil)
  *

@@ -89,7 +89,6 @@ struct mpv_opengl_cb_context {
     GL *gl;
     struct ra_ctx *ra_ctx;
     struct gl_video *renderer;
-    struct ra_hwdec *hwdec;
     struct m_config_cache *vo_opts_cache;
     struct mp_vo_opts *vo_opts;
 };
@@ -198,12 +197,8 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     ctx->renderer = gl_video_init(ctx->ra_ctx->ra, ctx->log, ctx->global);
 
-    m_config_cache_update(ctx->vo_opts_cache);
-
     ctx->hwdec_devs = hwdec_devices_create();
-    ctx->hwdec = ra_hwdec_load(ctx->log, ctx->ra_ctx->ra, ctx->global,
-                               ctx->hwdec_devs, ctx->vo_opts->gl_hwdec_interop);
-    gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
+    gl_video_load_hwdecs(ctx->renderer, ctx->hwdec_devs, true);
 
     pthread_mutex_lock(&ctx->lock);
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
@@ -238,8 +233,6 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 
     gl_video_uninit(ctx->renderer);
     ctx->renderer = NULL;
-    ra_hwdec_uninit(ctx->hwdec);
-    ctx->hwdec = NULL;
     hwdec_devices_destroy(ctx->hwdec_devs);
     ctx->hwdec_devs = NULL;
     ra_gl_ctx_uninit(ctx->ra_ctx);

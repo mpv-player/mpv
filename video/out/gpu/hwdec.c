@@ -40,7 +40,7 @@ extern const struct ra_hwdec_driver ra_hwdec_cuda_nvdec;
 extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_drm;
 
-static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
+const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
     &ra_hwdec_vaegl,
 #endif
@@ -76,11 +76,11 @@ static const struct ra_hwdec_driver *const mpgl_hwdec_drivers[] = {
     NULL
 };
 
-static struct ra_hwdec *load_hwdec_driver(struct mp_log *log, struct ra *ra,
-                                          struct mpv_global *global,
-                                          struct mp_hwdec_devices *devs,
-                                          const struct ra_hwdec_driver *drv,
-                                          bool is_auto)
+struct ra_hwdec *ra_hwdec_load_driver(struct ra *ra, struct mp_log *log,
+                                      struct mpv_global *global,
+                                      struct mp_hwdec_devices *devs,
+                                      const struct ra_hwdec_driver *drv,
+                                      bool is_auto)
 {
     struct ra_hwdec *hwdec = talloc(NULL, struct ra_hwdec);
     *hwdec = (struct ra_hwdec) {
@@ -101,81 +101,30 @@ static struct ra_hwdec *load_hwdec_driver(struct mp_log *log, struct ra *ra,
     return hwdec;
 }
 
-struct ra_hwdec *ra_hwdec_load_api(struct mp_log *log, struct ra *ra,
-                                   struct mpv_global *g,
-                                   struct mp_hwdec_devices *devs,
-                                   enum hwdec_type api)
-{
-    bool is_auto = HWDEC_IS_AUTO(api);
-    for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if ((is_auto || api == drv->api) && !drv->testing_only) {
-            struct ra_hwdec *r = load_hwdec_driver(log, ra, g, devs, drv, is_auto);
-            if (r)
-                return r;
-        }
-    }
-    return NULL;
-}
-
-// Load by option name.
-struct ra_hwdec *ra_hwdec_load(struct mp_log *log, struct ra *ra,
-                               struct mpv_global *g,
-                               struct mp_hwdec_devices *devs,
-                               const char *name)
-{
-    int g_hwdec_api;
-    mp_read_option_raw(g, "hwdec", &m_option_type_choice, &g_hwdec_api);
-    if (!name || !name[0])
-        name = m_opt_choice_str(mp_hwdec_names, g_hwdec_api);
-
-    int api_id = HWDEC_NONE;
-    for (int n = 0; mp_hwdec_names[n].name; n++) {
-        if (name && strcmp(mp_hwdec_names[n].name, name) == 0)
-            api_id = mp_hwdec_names[n].value;
-    }
-
-    for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if (name && strcmp(drv->name, name) == 0) {
-            struct ra_hwdec *r = load_hwdec_driver(log, ra, g, devs, drv, false);
-            if (r)
-                return r;
-        }
-    }
-
-    return ra_hwdec_load_api(log, ra, g, devs, api_id);
-}
-
 int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param)
 {
     bool help = bstr_equals0(param, "help");
     if (help)
         mp_info(log, "Available hwdecs:\n");
-    for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct ra_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        const char *api_name = m_opt_choice_str(mp_hwdec_names, drv->api);
+    for (int n = 0; ra_hwdec_drivers[n]; n++) {
+        const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
         if (help) {
-            mp_info(log, "    %s [%s]\n", drv->name, api_name);
-        } else if (bstr_equals0(param, drv->name) ||
-                   bstr_equals0(param, api_name))
-        {
+            mp_info(log, "    %s\n", drv->name);
+        } else if (bstr_equals0(param, drv->name)) {
             return 1;
         }
     }
     if (help) {
-        mp_info(log, "    auto (loads best)\n"
-                     "    (other --hwdec values)\n"
-                     "Setting an empty string means use --hwdec.\n");
+        mp_info(log, "    auto (behavior depends on context)\n"
+                     "    no (do not load any and block loading on demand)\n");
         return M_OPT_EXIT;
     }
     if (!param.len)
         return 1; // "" is treated specially
-    for (int n = 0; mp_hwdec_names[n].name; n++) {
-        if (bstr_equals0(param, mp_hwdec_names[n].name))
-            return 1;
-    }
+    if (bstr_equals0(param, "all") || bstr_equals0(param, "auto") ||
+        bstr_equals0(param, "no"))
+        return 1;
     mp_fatal(log, "No hwdec backend named '%.*s' found!\n", BSTR_P(param));
     return M_OPT_INVALID;
 }
