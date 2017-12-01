@@ -8,34 +8,16 @@ struct mp_image_pool;
 // (for some legacy stuff)
 enum hwdec_type {
     HWDEC_NONE = 0,
-    HWDEC_AUTO,
-    HWDEC_AUTO_COPY,
     HWDEC_VDPAU,
-    HWDEC_VDPAU_COPY,
     HWDEC_VIDEOTOOLBOX,
-    HWDEC_VIDEOTOOLBOX_COPY,
     HWDEC_VAAPI,
-    HWDEC_VAAPI_COPY,
     HWDEC_DXVA2,
-    HWDEC_DXVA2_COPY,
     HWDEC_D3D11VA,
-    HWDEC_D3D11VA_COPY,
-    HWDEC_RPI,
-    HWDEC_RPI_COPY,
-    HWDEC_MEDIACODEC,
-    HWDEC_MEDIACODEC_COPY,
     HWDEC_CUDA,
-    HWDEC_CUDA_COPY,
-    HWDEC_NVDEC,
-    HWDEC_NVDEC_COPY,
-    HWDEC_CRYSTALHD,
-    HWDEC_RKMPP,
 };
 
-#define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)
-
 struct mp_hwdec_ctx {
-    enum hwdec_type type; // (never HWDEC_NONE or HWDEC_IS_AUTO)
+    enum hwdec_type type; // (never HWDEC_NONE)
     const char *driver_name; // NULL if unknown/not loaded
 
     // This is never NULL. Its meaning depends on the .type field:
