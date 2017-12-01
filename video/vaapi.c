@@ -97,35 +97,56 @@ static void va_info_callback(const char *msg)
 }
 #endif
 
-static void open_lavu_vaapi_device(struct mp_vaapi_ctx *ctx)
+static void free_device_ref(struct AVHWDeviceContext *hwctx)
 {
-    ctx->av_device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VAAPI);
-    if (!ctx->av_device_ref)
-        return;
+    struct mp_vaapi_ctx *ctx = hwctx->user_opaque;
 
-    AVHWDeviceContext *hwctx = (void *)ctx->av_device_ref->data;
-    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
+    if (ctx->display)
+        vaTerminate(ctx->display);
 
-    vactx->display = ctx->display;
+    if (ctx->destroy_native_ctx)
+        ctx->destroy_native_ctx(ctx->native_ctx);
 
-    if (av_hwdevice_ctx_init(ctx->av_device_ref) < 0)
-        av_buffer_unref(&ctx->av_device_ref);
+#if !VA_CHECK_VERSION(1, 0, 0)
+    pthread_mutex_lock(&va_log_mutex);
+    for (int n = 0; n < num_va_mpv_clients; n++) {
+        if (va_mpv_clients[n] == ctx) {
+            MP_TARRAY_REMOVE_AT(va_mpv_clients, num_va_mpv_clients, n);
+            break;
+        }
+    }
+    if (num_va_mpv_clients == 0)
+        TA_FREEP(&va_mpv_clients); // avoid triggering leak detectors
+    pthread_mutex_unlock(&va_log_mutex);
+#endif
 
-    ctx->hwctx.av_device_ref = ctx->av_device_ref;
+    talloc_free(ctx);
 }
 
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
                                    bool probing)
 {
+    AVBufferRef *avref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VAAPI);
+    if (!avref)
+        return NULL;
+
+    AVHWDeviceContext *hwctx = (void *)avref->data;
+    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
+
     struct mp_vaapi_ctx *res = talloc_ptrtype(NULL, res);
     *res = (struct mp_vaapi_ctx) {
         .log = mp_log_new(res, plog, "/vaapi"),
         .display = display,
+        .av_device_ref = avref,
         .hwctx = {
             .type = HWDEC_VAAPI,
             .ctx = res,
+            .av_device_ref = avref,
         },
     };
+
+    hwctx->free = free_device_ref;
+    hwctx->user_opaque = res;
 
 #if VA_CHECK_VERSION(1, 0, 0)
     vaSetErrorCallback(display, va_error_callback, res);
@@ -152,9 +173,10 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     }
     MP_VERBOSE(res, "Initialized VAAPI: version %d.%d\n", major, minor);
 
-    // For now, some code will still work even if libavutil fails on old crap
-    // libva drivers (such as the vdpau wraper). So don't error out on failure.
-    open_lavu_vaapi_device(res);
+    vactx->display = res->display;
+
+    if (av_hwdevice_ctx_init(res->av_device_ref) < 0)
+        goto error;
 
     res->hwctx.emulated = va_guess_if_emulated(res);
 
@@ -169,30 +191,11 @@ error:
 // Undo va_initialize, and close the VADisplay.
 void va_destroy(struct mp_vaapi_ctx *ctx)
 {
-    if (ctx) {
-        av_buffer_unref(&ctx->av_device_ref);
+    if (!ctx)
+        return;
 
-        if (ctx->display)
-            vaTerminate(ctx->display);
-
-        if (ctx->destroy_native_ctx)
-            ctx->destroy_native_ctx(ctx->native_ctx);
-
-#if !VA_CHECK_VERSION(1, 0, 0)
-        pthread_mutex_lock(&va_log_mutex);
-        for (int n = 0; n < num_va_mpv_clients; n++) {
-            if (va_mpv_clients[n] == ctx) {
-                MP_TARRAY_REMOVE_AT(va_mpv_clients, num_va_mpv_clients, n);
-                break;
-            }
-        }
-        if (num_va_mpv_clients == 0)
-            TA_FREEP(&va_mpv_clients); // avoid triggering leak detectors
-        pthread_mutex_unlock(&va_log_mutex);
-#endif
-
-        talloc_free(ctx);
-    }
+    AVBufferRef *ref = ctx->av_device_ref;
+    av_buffer_unref(&ref); // frees ctx as well
 }
 
 VASurfaceID va_surface_id(struct mp_image *mpi)
@@ -298,20 +301,16 @@ static const struct va_native_display *const native_displays[] = {
     NULL
 };
 
-static void va_destroy_ctx(struct mp_hwdec_ctx *ctx)
-{
-    va_destroy(ctx->ctx);
-}
-
-struct mp_hwdec_ctx *va_create_standalone(struct mpv_global *global,
-                                          struct mp_log *plog, bool probing)
+static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
+        struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
         void *native_ctx = NULL;
         native_displays[n]->create(&display, &native_ctx);
         if (display) {
-            struct mp_vaapi_ctx *ctx = va_initialize(display, plog, probing);
+            struct mp_vaapi_ctx *ctx =
+                va_initialize(display, log, params->probing);
             if (!ctx) {
                 vaTerminate(display);
                 native_displays[n]->destroy(native_ctx);
@@ -319,9 +318,13 @@ struct mp_hwdec_ctx *va_create_standalone(struct mpv_global *global,
             }
             ctx->native_ctx = native_ctx;
             ctx->destroy_native_ctx = native_displays[n]->destroy;
-            ctx->hwctx.destroy = va_destroy_ctx;
-            return &ctx->hwctx;
+            return ctx->hwctx.av_device_ref;
         }
     }
     return NULL;
 }
+
+const struct hwcontext_fns hwcontext_fns_vaapi = {
+    .av_hwdevice_type = AV_HWDEVICE_TYPE_VAAPI,
+    .create_dev = va_create_standalone,
+};

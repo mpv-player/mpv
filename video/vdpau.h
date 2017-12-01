@@ -51,6 +51,7 @@ struct vdp_functions {
 struct mp_vdpau_ctx {
     struct mp_log *log;
     Display *x11;
+    bool close_display;
 
     struct mp_hwdec_ctx hwctx;
     struct AVBufferRef *av_device_ref;
@@ -89,10 +90,6 @@ struct mp_vdpau_ctx {
 struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11,
                                                 bool probing);
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
-
-struct mpv_global;
-struct mp_hwdec_ctx *vdpau_create_standalone(struct mpv_global *global,
-                                             struct mp_log *plog, bool probing);
 
 int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter);
 

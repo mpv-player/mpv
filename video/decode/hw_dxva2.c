@@ -88,15 +88,8 @@ fail:
     return NULL;
 }
 
-static void d3d9_destroy_dev(struct mp_hwdec_ctx *ctx)
-{
-    av_buffer_unref(&ctx->av_device_ref);
-    IDirect3DDevice9_Release((IDirect3DDevice9 *)ctx->ctx);
-    talloc_free(ctx);
-}
-
-static struct mp_hwdec_ctx *d3d9_create_dev(struct mpv_global *global,
-                                            struct mp_log *plog, bool probing)
+static struct AVBufferRef *d3d9_create_standalone(struct mpv_global *global,
+        struct mp_log *plog, struct hwcontext_create_dev_params *params)
 {
     d3d_load_dlls();
     if (!d3d9_dll || !dxva2_dll) {
@@ -149,22 +142,18 @@ static struct mp_hwdec_ctx *d3d9_create_dev(struct mpv_global *global,
         return NULL;
     }
 
-    struct mp_hwdec_ctx *ctx = talloc_ptrtype(NULL, ctx);
-    *ctx = (struct mp_hwdec_ctx) {
-        .type = HWDEC_D3D11VA_COPY,
-        .ctx = exdev,
-        .destroy = d3d9_destroy_dev,
-        .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)exdev),
-    };
-
-    if (!ctx->av_device_ref) {
+    AVBufferRef *avref = d3d9_wrap_device_ref((IDirect3DDevice9 *)exdev);
+    IDirect3DDevice9Ex_Release(exdev);
+    if (!avref)
         mp_err(plog, "Failed to allocate AVHWDeviceContext.\n");
-        d3d9_destroy_dev(ctx);
-        return NULL;
-    }
 
-    return ctx;
+    return avref;
 }
+
+const struct hwcontext_fns hwcontext_fns_dxva2 = {
+    .av_hwdevice_type       = AV_HWDEVICE_TYPE_DXVA2,
+    .create_dev             = d3d9_create_standalone,
+};
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
     .type = HWDEC_DXVA2,
@@ -178,7 +167,8 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .copying = true,
     .image_format = IMGFMT_DXVA2,
     .generic_hwaccel = true,
-    .create_dev = d3d9_create_dev,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_DXVA2,
     .set_hwframes = true,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

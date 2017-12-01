@@ -33,50 +33,6 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_d3d11va.h>
 
-static void d3d11_destroy_dev(struct mp_hwdec_ctx *ctx)
-{
-    av_buffer_unref(&ctx->av_device_ref);
-    ID3D11Device_Release((ID3D11Device *)ctx->ctx);
-    talloc_free(ctx);
-}
-
-static struct mp_hwdec_ctx *d3d11_create_dev(struct mpv_global *global,
-                                             struct mp_log *plog, bool probing)
-{
-    ID3D11Device *device = NULL;
-    HRESULT hr;
-
-    d3d_load_dlls();
-    if (!d3d11_D3D11CreateDevice) {
-        mp_err(plog, "Failed to load D3D11 library\n");
-        return NULL;
-    }
-
-    hr = d3d11_D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
-                                 D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
-                                 D3D11_SDK_VERSION, &device, NULL, NULL);
-    if (FAILED(hr)) {
-        mp_err(plog, "Failed to create D3D11 Device: %s\n",
-               mp_HRESULT_to_str(hr));
-        return NULL;
-    }
-
-    struct mp_hwdec_ctx *ctx = talloc_ptrtype(NULL, ctx);
-    *ctx = (struct mp_hwdec_ctx) {
-        .type = HWDEC_D3D11VA_COPY,
-        .ctx = device,
-        .destroy = d3d11_destroy_dev,
-        .av_device_ref = d3d11_wrap_device_ref(device),
-    };
-
-    if (!ctx->av_device_ref) {
-        mp_err(plog, "Failed to allocate AVHWDeviceContext.\n");
-        d3d11_destroy_dev(ctx);
-        return NULL;
-    }
-
-    return ctx;
-}
 
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
     .type = HWDEC_D3D11VA,
@@ -90,7 +46,8 @@ const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .copying = true,
     .image_format = IMGFMT_D3D11VA,
     .generic_hwaccel = true,
-    .create_dev = d3d11_create_dev,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_D3D11VA,
     .set_hwframes = true,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

@@ -200,7 +200,8 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .image_format = IMGFMT_VAAPI,
     .generic_hwaccel = true,
     .set_hwframes = true,
-    .create_dev = va_create_standalone,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_VAAPI,
 };
 #endif
 
@@ -220,7 +221,8 @@ static const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
     .image_format = IMGFMT_VDPAU,
     .generic_hwaccel = true,
     .set_hwframes = true,
-    .create_dev = vdpau_create_standalone,
+    .create_standalone_dev = true,
+    .create_standalone_dev_type = AV_HWDEVICE_TYPE_VDPAU,
 };
 #endif
 
@@ -358,16 +360,27 @@ static struct mp_hwdec_ctx *hwdec_create_dev(struct dec_video *vd,
             .ctx = NULL,
             .destroy = standalone_dev_destroy,
         };
-        if (av_hwdevice_ctx_create(&ctx->av_device_ref,
+        const struct hwcontext_fns *fns =
+            hwdec_get_hwcontext_fns(hwdec->create_standalone_dev_type);
+        if (fns && fns->create_dev) {
+            struct hwcontext_create_dev_params params = {
+                .probing = autoprobe,
+            };
+            ctx->av_device_ref = fns->create_dev(vd->global, vd->log, &params);
+            if (!ctx->av_device_ref) {
+                standalone_dev_destroy(ctx);
+                ctx = NULL;
+            }
+        } else {
+            if (av_hwdevice_ctx_create(&ctx->av_device_ref,
                         hwdec->create_standalone_dev_type, NULL, NULL, 0) < 0)
-        {
-            standalone_dev_destroy(ctx);
-            ctx = NULL;
+            {
+                standalone_dev_destroy(ctx);
+                ctx = NULL;
+            }
         }
         return ctx;
     }
-    if (hwdec->create_dev)
-        return hwdec->create_dev(vd->global, vd->log, autoprobe);
     if (vd->hwdec_devs) {
         int type = hwdec->interop_type ? hwdec->interop_type : hwdec->type;
         hwdec_devices_request_all(vd->hwdec_devs);
@@ -391,8 +404,7 @@ static int hwdec_probe(struct dec_video *vd, struct vd_lavc_hwdec *hwdec,
             return hwdec->copying ? -1 : HWDEC_ERR_NO_CTX;
         if (dev->emulated)
             r = HWDEC_ERR_EMULATED;
-        bool owns_hwdec_dev = !!hwdec->create_dev ||
-                              hwdec->create_standalone_dev;
+        bool owns_hwdec_dev = !!hwdec->create_standalone_dev;
         if (owns_hwdec_dev && dev->destroy)
             dev->destroy(dev);
     }
@@ -594,8 +606,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             ctx->hwdec_dev = hwdec_create_dev(vd, ctx->hwdec, false);
             if (!ctx->hwdec_dev)
                 goto error;
-            ctx->owns_hwdec_dev = !!ctx->hwdec->create_dev ||
-                                  ctx->hwdec->create_standalone_dev;
+            ctx->owns_hwdec_dev = ctx->hwdec->create_standalone_dev;
             if (ctx->hwdec_dev->restore_device)
                 ctx->hwdec_dev->restore_device(ctx->hwdec_dev);
             if (!ctx->hwdec->set_hwframes)

@@ -97,10 +97,6 @@ struct vd_lavc_hwdec {
     int (*init)(struct lavc_ctx *ctx);
     int (*init_decoder)(struct lavc_ctx *ctx);
     void (*uninit)(struct lavc_ctx *ctx);
-    // For copy hwdecs. If probing is true, don't log errors if unavailable.
-    // The returned device will be freed with mp_hwdec_ctx->destroy.
-    struct mp_hwdec_ctx *(*create_dev)(struct mpv_global *global,
-                                       struct mp_log *log, bool probing);
     // Suffix for libavcodec decoder. If non-NULL, the codec is overridden
     // with hwdec_find_decoder.
     // Intuitively, this will force the corresponding wrapper decoder.

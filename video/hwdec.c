@@ -107,13 +107,18 @@ char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)
     return res;
 }
 
-#if HAVE_D3D_HWACCEL
-extern const struct hwcontext_fns hwcontext_fns_d3d11;
-#endif
-
 static const struct hwcontext_fns *const hwcontext_fns[] = {
 #if HAVE_D3D_HWACCEL
     &hwcontext_fns_d3d11,
+#endif
+#if HAVE_D3D9_HWACCEL
+    &hwcontext_fns_dxva2,
+#endif
+#if HAVE_VAAPI
+    &hwcontext_fns_vaapi,
+#endif
+#if HAVE_VDPAU
+    &hwcontext_fns_vdpau,
 #endif
     NULL,
 };

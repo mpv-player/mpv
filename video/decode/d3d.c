@@ -124,8 +124,38 @@ static void d3d11_complete_image_params(struct mp_image *img)
         mp_image_setfmt(img, IMGFMT_D3D11NV12);
 }
 
+static struct AVBufferRef *d3d11_create_standalone(struct mpv_global *global,
+        struct mp_log *plog, struct hwcontext_create_dev_params *params)
+{
+    ID3D11Device *device = NULL;
+    HRESULT hr;
+
+    d3d_load_dlls();
+    if (!d3d11_D3D11CreateDevice) {
+        mp_err(plog, "Failed to load D3D11 library\n");
+        return NULL;
+    }
+
+    hr = d3d11_D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+                                 D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
+                                 D3D11_SDK_VERSION, &device, NULL, NULL);
+    if (FAILED(hr)) {
+        mp_err(plog, "Failed to create D3D11 Device: %s\n",
+               mp_HRESULT_to_str(hr));
+        return NULL;
+    }
+
+    AVBufferRef *avref = d3d11_wrap_device_ref(device);
+    ID3D11Device_Release(device);
+    if (!avref)
+        mp_err(plog, "Failed to allocate AVHWDeviceContext.\n");
+
+    return avref;
+}
+
 const struct hwcontext_fns hwcontext_fns_d3d11 = {
-    .av_hwdevice_type = AV_HWDEVICE_TYPE_D3D11VA,
-    .complete_image_params = d3d11_complete_image_params,
-    .refine_hwframes = d3d11_refine_hwframes,
+    .av_hwdevice_type       = AV_HWDEVICE_TYPE_D3D11VA,
+    .complete_image_params  = d3d11_complete_image_params,
+    .refine_hwframes        = d3d11_refine_hwframes,
+    .create_dev             = d3d11_create_standalone,
 };

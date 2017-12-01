@@ -111,9 +111,14 @@ void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs);
 
 struct mp_image;
+struct mpv_global;
+
+struct hwcontext_create_dev_params {
+    bool probing;   // if true, don't log errors if unavailable
+};
 
 // Per AV_HWDEVICE_TYPE_* functions, queryable via hwdec_get_hwcontext_fns().
-// For now, all entries are strictly optional.
+// All entries are strictly optional.
 struct hwcontext_fns {
     int av_hwdevice_type;
     // Set any mp_image fields that require hwcontext specific code, such as
@@ -124,10 +129,19 @@ struct hwcontext_fns {
     void (*complete_image_params)(struct mp_image *img);
     // Fill in special format-specific requirements.
     void (*refine_hwframes)(struct AVBufferRef *hw_frames_ctx);
+    // Returns a AVHWDeviceContext*. Used for copy hwdecs.
+    struct AVBufferRef *(*create_dev)(struct mpv_global *global,
+                                      struct mp_log *log,
+                                      struct hwcontext_create_dev_params *params);
 };
 
 // The parameter is of type enum AVHWDeviceType (as in int to avoid extensive
 // recursive includes). May return NULL for unknown device types.
 const struct hwcontext_fns *hwdec_get_hwcontext_fns(int av_hwdevice_type);
+
+extern const struct hwcontext_fns hwcontext_fns_d3d11;
+extern const struct hwcontext_fns hwcontext_fns_dxva2;
+extern const struct hwcontext_fns hwcontext_fns_vaapi;
+extern const struct hwcontext_fns hwcontext_fns_vdpau;
 
 #endif

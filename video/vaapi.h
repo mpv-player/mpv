@@ -49,8 +49,4 @@ VASurfaceID va_surface_id(struct mp_image *mpi);
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
 
-struct mpv_global;
-struct mp_hwdec_ctx *va_create_standalone(struct mpv_global *global,
-                                          struct mp_log *plog, bool probing);
-
 #endif
