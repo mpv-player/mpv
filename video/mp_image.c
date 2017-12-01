@@ -77,7 +77,7 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
         out_plane_size[n] = out_stride[n] * alloc_h;
     }
     if (desc.flags & MP_IMGFLAG_PAL)
-        out_plane_size[1] = MP_PALETTE_SIZE;
+        out_plane_size[1] = AVPALETTE_SIZE;
 
     int sum = 0;
     for (int n = 0; n < MP_MAX_PLANES; n++) {
@@ -472,7 +472,7 @@ static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
     }
     // Watch out for AV_PIX_FMT_FLAG_PSEUDOPAL retardation
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && dst->planes[1] && src->planes[1])
-        memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+        memcpy(dst->planes[1], src->planes[1], AVPALETTE_SIZE);
 }
 
 void mp_image_copy(struct mp_image *dst, struct mp_image *src)
@@ -508,7 +508,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1]) {
             if (mp_image_make_writeable(dst))
-                memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+                memcpy(dst->planes[1], src->planes[1], AVPALETTE_SIZE);
         }
     }
     av_buffer_unref(&dst->icc_profile);

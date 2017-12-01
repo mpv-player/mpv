@@ -28,8 +28,6 @@
 #include "csputils.h"
 #include "video/img_format.h"
 
-#define MP_PALETTE_SIZE (256 * 4)
-
 #define MP_IMGFIELD_TOP_FIRST 0x02
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_INTERLACED 0x20

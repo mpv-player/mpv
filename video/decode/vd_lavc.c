@@ -52,10 +52,6 @@
 #include "video/sws_utils.h"
 #include "video/out/vo.h"
 
-#if AVPALETTE_SIZE != MP_PALETTE_SIZE
-#error palette too large, adapt video/mp_image.h:MP_PALETTE_SIZE
-#endif
-
 #include "options/m_option.h"
 
 static void init_avctx(struct dec_video *vd);
