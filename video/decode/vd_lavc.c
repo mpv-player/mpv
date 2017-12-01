@@ -226,7 +226,7 @@ static int hwdec_compare(const void *p1, const void *p2)
 
     if (h1->auto_pos > h2->auto_pos)
         return 1;
-    else if (h1->auto_pos < h2->auto_pos)
+    if (h1->auto_pos < h2->auto_pos)
         return -1;
     return h1->rank < h2->rank ? 1 :-1;
 }
