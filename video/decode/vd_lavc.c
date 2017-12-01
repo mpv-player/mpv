@@ -435,7 +435,8 @@ static void select_and_set_hwdec(struct dec_video *vd)
             if (!hw_codec || strcmp(hw_codec, codec) != 0)
                 continue;
 
-            if (!hwdec_auto && !bstr_equals0(opt, hwdec->method_name))
+            if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
+                                 bstr_equals0(opt, hwdec->name)))
                 continue;
 
             MP_VERBOSE(vd, "Looking at hwdec %s...\n", hwdec->name);
@@ -483,7 +484,7 @@ int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
         int num_hwdecs = 0;
         add_all_hwdec_methods(&hwdecs, &num_hwdecs);
 
-        mp_info(log, "Valid values:\n");
+        mp_info(log, "Valid values (with alternative full names):\n");
 
         for (int n = 0; n < num_hwdecs; n++) {
             struct hwdec_info *hwdec = &hwdecs[n];
