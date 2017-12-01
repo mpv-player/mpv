@@ -1,6 +1,8 @@
 #include <pthread.h>
 #include <assert.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "config.h"
 
 #include "hwdec.h"
@@ -41,6 +43,26 @@ struct mp_hwdec_ctx *hwdec_devices_get(struct mp_hwdec_devices *devs,
         if (devs->hwctxs[n]->type == type) {
             res = devs->hwctxs[n];
             break;
+        }
+    }
+    pthread_mutex_unlock(&devs->lock);
+    return res;
+}
+
+struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
+                                           int av_hwdevice_type)
+{
+    AVBufferRef *res = NULL;
+    pthread_mutex_lock(&devs->lock);
+    for (int n = 0; n < devs->num_hwctxs; n++) {
+        struct mp_hwdec_ctx *dev = devs->hwctxs[n];
+        if (dev->av_device_ref) {
+            AVHWDeviceContext *hwctx = (void *)dev->av_device_ref->data;
+            if (hwctx->type == av_hwdevice_type) {
+                if (dev->av_device_ref)
+                    res = av_buffer_ref(dev->av_device_ref);
+                break;
+            }
         }
     }
     pthread_mutex_unlock(&devs->lock);

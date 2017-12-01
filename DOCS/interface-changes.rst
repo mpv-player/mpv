@@ -57,6 +57,8 @@ Interface changes
       This option is hereby declared as unstable and may change any time - its
       old use is deprecated, and it has very little use outside of debugging
       now.
+    - change the --hwdec option from a choice to a plain string (affects
+      introspection of the option/property), also affects some properties
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command

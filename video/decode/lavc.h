@@ -24,12 +24,28 @@
 
 struct mpv_global;
 
+struct hwdec_info {
+    char name[64];
+    char method_name[16]; // non-unique name describing the hwdec method
+    const AVCodec *codec; // implemented by this codec
+    enum AVHWDeviceType lavc_device; // if not NONE, get a hwdevice
+    bool copying; // if true, outputs sw frames, or copy to sw ourselves
+    enum AVPixelFormat pix_fmt; // if not NONE, select in get_format
+    bool use_hw_frames; // set AVCodecContext.hw_frames_ctx
+    bool use_hw_device; // set AVCodecContext.hw_device_ctx
+
+    // for internal sorting
+    int auto_pos;
+    int rank;
+};
+
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;
     AVCodecContext *avctx;
     AVFrame *pic;
-    struct vd_lavc_hwdec *hwdec;
+    bool use_hwdec;
+    struct hwdec_info hwdec; // valid only if use_hwdec==true
     AVRational codec_timebase;
     enum AVDiscard skip_frame;
     bool flushing;
@@ -54,12 +70,8 @@ typedef struct lavc_ctx {
     // From VO
     struct mp_hwdec_devices *hwdec_devs;
 
-    // For free use by hwdec implementation
-    void *hwdec_priv;
-
-    // Set by generic hwaccels.
-    struct mp_hwdec_ctx *hwdec_dev;
-    bool owns_hwdec_dev;
+    // Wrapped AVHWDeviceContext* used for decoding.
+    AVBufferRef *hwdec_dev;
 
     bool hwdec_request_reinit;
     int hwdec_fail_count;
@@ -74,44 +86,5 @@ typedef struct lavc_ctx {
     struct mp_image_pool *dr_pool;
     int dr_imgfmt, dr_w, dr_h, dr_stride_align;
 } vd_ffmpeg_ctx;
-
-struct vd_lavc_hwdec {
-    enum hwdec_type type;
-    // If non-0, get this hwdec type from the VO (for the AVHWDeviceContext).
-    enum hwdec_type interop_type;
-    // If true, create a AVHWDeviceContext with default parameters. In this
-    // case, create_standalone_dev_type is set to a valid value.
-    bool create_standalone_dev;
-    enum AVHWDeviceType create_standalone_dev_type;
-    // If not-0: the IMGFMT_ format that should be accepted in the libavcodec
-    // get_format callback.
-    int image_format;
-    // Always returns a non-hwaccel image format.
-    bool copying;
-    // Setting this will queue the given number of frames before returning them
-    // to the renderer. This can increase efficiency by not blocking on the
-    // hardware pipeline by reading back immediately after decoding.
-    int delay_queue;
-    int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
-                 const char *codec);
-    int (*init)(struct lavc_ctx *ctx);
-    int (*init_decoder)(struct lavc_ctx *ctx);
-    void (*uninit)(struct lavc_ctx *ctx);
-    // Suffix for libavcodec decoder. If non-NULL, the codec is overridden
-    // with hwdec_find_decoder.
-    // Intuitively, this will force the corresponding wrapper decoder.
-    const char *lavc_suffix;
-    // Generic hwaccels set AVCodecContext.hw_frames_ctx in get_format().
-    bool generic_hwaccel;
-    // If set, AVCodecContext.hw_frames_ctx will be initialized in get_format,
-    // and pixfmt_map must be non-NULL.
-    bool set_hwframes;
-};
-
-enum {
-    HWDEC_ERR_NO_CTX = -2,
-    HWDEC_ERR_NO_CODEC = -3,
-    HWDEC_ERR_EMULATED = -4,    // probing successful, but emulated API detected
-};
 
 #endif

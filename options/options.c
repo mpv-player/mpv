@@ -93,34 +93,6 @@ extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 
-const struct m_opt_choice_alternatives mp_hwdec_names[] = {
-    {"no",          HWDEC_NONE},
-    {"auto",        HWDEC_AUTO},
-    {"yes" ,        HWDEC_AUTO},
-    {"auto-copy",   HWDEC_AUTO_COPY},
-    {"vdpau",       HWDEC_VDPAU},
-    {"vdpau-copy",  HWDEC_VDPAU_COPY},
-    {"videotoolbox",HWDEC_VIDEOTOOLBOX},
-    {"videotoolbox-copy",HWDEC_VIDEOTOOLBOX_COPY},
-    {"vaapi",       HWDEC_VAAPI},
-    {"vaapi-copy",  HWDEC_VAAPI_COPY},
-    {"dxva2",       HWDEC_DXVA2},
-    {"dxva2-copy",  HWDEC_DXVA2_COPY},
-    {"d3d11va",     HWDEC_D3D11VA},
-    {"d3d11va-copy",HWDEC_D3D11VA_COPY},
-    {"rpi",         HWDEC_RPI},
-    {"rpi-copy",    HWDEC_RPI_COPY},
-    {"rkmpp",       HWDEC_RKMPP},
-    {"mediacodec",  HWDEC_MEDIACODEC},
-    {"mediacodec-copy",HWDEC_MEDIACODEC_COPY},
-    {"cuda",        HWDEC_CUDA},
-    {"cuda-copy",   HWDEC_CUDA_COPY},
-    {"nvdec",       HWDEC_NVDEC},
-    {"nvdec-copy",  HWDEC_NVDEC_COPY},
-    {"crystalhd",   HWDEC_CRYSTALHD},
-    {0}
-};
-
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
@@ -434,7 +406,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0,
              .deprecation_message = "use --audio-spdif instead"),
 
-    OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
+    OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
+                        hwdec_validate_opt),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0, .min = -1,
@@ -943,7 +916,7 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .screenshot_template = "mpv-shot%n",
 
-    .hwdec_api = HAVE_RPI ? HWDEC_RPI : 0,
+    .hwdec_api = HAVE_RPI ? "mmal" : "no",
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
     .videotoolbox_format = IMGFMT_NV12,
 

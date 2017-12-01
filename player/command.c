@@ -2419,24 +2419,22 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     struct MPOpts *opts = mpctx->opts;
 
     if (action == M_PROPERTY_SET) {
-        int new = *(int *)arg;
+        char *new = *(char **)arg;
 
-        if (opts->hwdec_api == new)
+        if (strcmp(opts->hwdec_api, new) == 0)
             return M_PROPERTY_OK;
 
-        opts->hwdec_api = new;
+        talloc_free(opts->hwdec_api);
+        opts->hwdec_api = talloc_strdup(NULL, new);
 
         if (!vd)
             return M_PROPERTY_OK;
 
-        int current = -2;
-        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-        if (current != opts->hwdec_api) {
-            video_vd_control(vd, VDCTRL_REINIT, NULL);
-            double last_pts = mpctx->last_vo_pts;
-            if (last_pts != MP_NOPTS_VALUE)
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
-        }
+        video_vd_control(vd, VDCTRL_REINIT, NULL);
+        double last_pts = mpctx->last_vo_pts;
+        if (last_pts != MP_NOPTS_VALUE)
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
+
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -2452,20 +2450,11 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
     if (!vd)
         return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_GET_TYPE: {
-        // Abuse another hwdec option to resolve the value names
-        struct m_property dummy = {.name = "hwdec"};
-        return mp_property_generic_option(mpctx, &dummy, action, arg);
-    }
-    case M_PROPERTY_GET: {
-        int current = HWDEC_NONE;
-        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-        *(int *)arg = current;
-        return M_PROPERTY_OK;
-    }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    char *current = NULL;
+    video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+    if (!current)
+        current = "no";
+    return m_property_strdup_ro(action, arg, current);
 }
 
 static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,

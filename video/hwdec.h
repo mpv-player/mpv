@@ -5,7 +5,7 @@
 
 struct mp_image_pool;
 
-// keep in sync with --hwdec option (see mp_hwdec_names)
+// (for some legacy stuff)
 enum hwdec_type {
     HWDEC_NONE = 0,
     HWDEC_AUTO,
@@ -33,9 +33,6 @@ enum hwdec_type {
 };
 
 #define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)
-
-// hwdec_type names (options.c)
-extern const struct m_opt_choice_alternatives mp_hwdec_names[];
 
 struct mp_hwdec_ctx {
     enum hwdec_type type; // (never HWDEC_NONE or HWDEC_IS_AUTO)
@@ -78,6 +75,14 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs);
 // hwdec_devices_request() may be used before this to lazily load devices.
 struct mp_hwdec_ctx *hwdec_devices_get(struct mp_hwdec_devices *devs,
                                        enum hwdec_type type);
+
+struct AVBufferRef;
+
+// Like hwdec_devices_get(), but search by AV_HWDEVICE_TYPE_* type.
+// Contains a wrapped AVHWDeviceContext.
+// Beware that this creates a _new_ reference.
+struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
+                                           int av_hwdevice_type);
 
 // For code which still strictly assumes there is 1 (or none) device.
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs);

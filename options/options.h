@@ -285,7 +285,7 @@ typedef struct MPOpts {
     int sub_clear_on_seek;
     int teletext_page;
 
-    int hwdec_api;
+    char *hwdec_api;
     char *hwdec_codecs;
     int videotoolbox_format;
     int hwdec_image_format;
@@ -348,5 +348,8 @@ extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options dvd_conf;
+
+int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                       struct bstr name, struct bstr param);
 
 #endif
