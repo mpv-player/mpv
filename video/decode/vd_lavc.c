@@ -154,6 +154,7 @@ typedef struct lavc_ctx {
     enum AVDiscard skip_frame;
     bool flushing;
     const char *decoder;
+    bool hwdec_requested;
     bool hwdec_failed;
     bool hwdec_notified;
 
@@ -430,6 +431,8 @@ static void select_and_set_hwdec(struct dec_video *vd)
         struct hwdec_info *hwdecs = NULL;
         int num_hwdecs = 0;
         add_all_hwdec_methods(&hwdecs, &num_hwdecs);
+
+        ctx->hwdec_requested = true;
 
         for (int n = 0; n < num_hwdecs; n++) {
             struct hwdec_info *hwdec = &hwdecs[n];
@@ -1101,7 +1104,7 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
         }
     }
 
-    if (!ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
+    if (!ctx->hwdec_notified && ctx->hwdec_requested) {
         if (ctx->use_hwdec) {
             MP_INFO(vd, "Using hardware decoding (%s).\n",
                     ctx->hwdec.method_name);
