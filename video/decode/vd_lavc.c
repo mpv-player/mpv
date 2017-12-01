@@ -237,6 +237,28 @@ static bool test_decoder_suffix(const char *name, const char *suffix)
     return bstr_eatend0(&bname, suffix) && bstr_eatend0(&bname, "_");
 }
 
+// (This takes care of some bookkeeping too, like setting info.name)
+static void add_hwdec_item(struct hwdec_info **infos, int *num_infos,
+                           struct hwdec_info info)
+{
+    if (info.copying)
+        mp_snprintf_cat(info.method_name, sizeof(info.method_name), "-copy");
+
+    // (Including the codec name in case this is a wrapper looks pretty dumb,
+    // but better not have them clash with hwaccels and others.)
+    snprintf(info.name, sizeof(info.name), "%s-%s",
+             info.codec->name, info.method_name);
+
+    info.rank = *num_infos;
+    info.auto_pos = MP_ARRAY_SIZE(hwdec_autoprobe_order);
+    for (int x = 0; hwdec_autoprobe_order[x]; x++) {
+        if (strcmp(hwdec_autoprobe_order[x], info.method_name) == 0)
+            info.auto_pos = x;
+    }
+
+    MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
+}
+
 static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
 {
     AVCodec *codec = NULL;
@@ -286,8 +308,6 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                     name = "nvdec";
 
                 snprintf(info.method_name, sizeof(info.method_name), "%s", name);
-                snprintf(info.name, sizeof(info.name), "%s-%s",
-                         codec->name, info.method_name);
 
                 // Usually we want to prefer using hw_frames_ctx for true
                 // hwaccels only, but we actually don't have any way to detect
@@ -299,7 +319,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 }
 
                 // Direct variant.
-                MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
+                add_hwdec_item(infos, num_infos, info);
 
                 // Copy variant.
                 info.copying = true;
@@ -307,11 +327,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                     info.use_hw_frames = false;
                     info.use_hw_device = true;
                 }
-                mp_snprintf_cat(info.method_name, sizeof(info.method_name),
-                                "-copy");
-                snprintf(info.name, sizeof(info.name), "%s-%s",
-                         codec->name, info.method_name);
-                MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
+                add_hwdec_item(infos, num_infos, info);
 
                 found_any = true;
             } else if (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_INTERNAL) {
@@ -324,18 +340,13 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 assert(name); // API violation by libavcodec
 
                 snprintf(info.method_name, sizeof(info.method_name), "%s", name);
-                snprintf(info.name, sizeof(info.name), "%s-%s",
-                         codec->name, info.method_name);
 
                 // Direct variant.
-                MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
+                add_hwdec_item(infos, num_infos, info);
 
                 // Copy variant.
-                mp_snprintf_cat(info.method_name, sizeof(info.method_name),
-                                "-copy");
-                snprintf(info.name, sizeof(info.name), "%s-%s",
-                         codec->name, info.method_name);
-                MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
+                info.copying = true;
+                add_hwdec_item(infos, num_infos, info);
 
                 found_any = true;
             }
@@ -349,24 +360,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
             info.copying = true; // probably
 
             snprintf(info.method_name, sizeof(info.method_name), "%s", wrapper);
-            // (Including the codec name for wrappers looks pretty dumb, but
-            // better not have them clash with hwaccels and others.)
-            snprintf(info.name, sizeof(info.name), "%s-%s",
-                     codec->name, info.method_name);
-
-            MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
-        }
-    }
-
-    for (int n = 0; n < *num_infos; n++) {
-        struct hwdec_info *hwdec = &(*infos)[n];
-
-        hwdec->rank = n;
-        hwdec->auto_pos = MP_ARRAY_SIZE(hwdec_autoprobe_order);
-
-        for (int x = 0; hwdec_autoprobe_order[x]; x++) {
-            if (strcmp(hwdec_autoprobe_order[x], hwdec->method_name) == 0)
-                hwdec->auto_pos = x;
+            add_hwdec_item(infos, num_infos, info);
         }
     }
 
