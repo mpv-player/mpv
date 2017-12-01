@@ -261,7 +261,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_d3d11eglrgb = {
     .name = "d3d11-egl-rgb",
     .priv_size = sizeof(struct priv_owner),
-    .api = HWDEC_D3D11VA,
     .imgfmts = {IMGFMT_D3D11RGB, 0},
     .init = init,
     .uninit = uninit,

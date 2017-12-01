@@ -257,7 +257,6 @@ err:
 
 const struct ra_hwdec_driver ra_hwdec_drmprime_drm = {
     .name = "drmprime-drm",
-    .api = HWDEC_RKMPP,
     .priv_size = sizeof(struct priv),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
     .init = init,

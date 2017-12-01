@@ -544,7 +544,6 @@ done:
 const struct ra_hwdec_driver ra_hwdec_vaegl = {
     .name = "vaapi-egl",
     .priv_size = sizeof(struct priv_owner),
-    .api = HWDEC_VAAPI,
     .imgfmts = {IMGFMT_VAAPI, 0},
     .init = init,
     .uninit = uninit,

@@ -229,7 +229,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_dxva2gldx = {
     .name = "dxva2-dxinterop",
     .priv_size = sizeof(struct priv_owner),
-    .api = HWDEC_DXVA2,
     .imgfmts = {IMGFMT_DXVA2, 0},
     .init = init,
     .uninit = uninit,

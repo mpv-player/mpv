@@ -160,7 +160,7 @@ static int cuda_init(struct ra_hwdec *hw)
         goto error;
 
     p->hwctx = (struct mp_hwdec_ctx) {
-        .type = hw->driver->api,
+        .type = HWDEC_CUDA,
         .ctx = p->decode_ctx,
         .av_device_ref = hw_device_ctx,
     };
@@ -327,7 +327,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 
 const struct ra_hwdec_driver ra_hwdec_cuda = {
     .name = "cuda-nvdec",
-    .api = HWDEC_CUDA,
     .imgfmts = {IMGFMT_CUDA, 0},
     .priv_size = sizeof(struct priv_owner),
     .init = cuda_init,

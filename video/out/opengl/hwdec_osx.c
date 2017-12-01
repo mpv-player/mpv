@@ -210,7 +210,6 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_videotoolbox = {
     .name = "videotoolbox",
     .priv_size = sizeof(struct priv_owner),
-    .api = HWDEC_VIDEOTOOLBOX,
     .imgfmts = {IMGFMT_VIDEOTOOLBOX, 0},
     .init = init,
     .uninit = uninit,

@@ -72,17 +72,14 @@ struct ra_hwdec_mapper_driver {
 };
 
 struct ra_hwdec_driver {
-    // Name of the interop backend. This is used for informational purposes only.
+    // Name of the interop backend. This is used for informational purposes and
+    // for use with debugging options.
     const char *name;
     // Used to create ra_hwdec.priv.
     size_t priv_size;
-    // Used to explicitly request a specific API.
-    enum hwdec_type api;
     // One of the hardware surface IMGFMT_ that must be passed to map_image later.
     // Terminated with a 0 entry. (Extend the array size as needed.)
     const int imgfmts[3];
-    // Dosn't load this unless requested by name.
-    bool testing_only;
 
     // Create the hwdec device. It must add it to hw->devs, if applicable.
     int (*init)(struct ra_hwdec *hw);

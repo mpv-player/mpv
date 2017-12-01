@@ -239,7 +239,6 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_d3d11va = {
     .name = "d3d11va",
     .priv_size = sizeof(struct priv_owner),
-    .api = HWDEC_D3D11VA,
     .imgfmts = {IMGFMT_D3D11VA, IMGFMT_D3D11NV12, 0},
     .init = init,
     .uninit = uninit,
