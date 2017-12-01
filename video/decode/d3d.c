@@ -119,6 +119,9 @@ static void d3d11_complete_image_params(struct mp_image *img)
     // According to hwcontex_d3d11va.h, this means DXGI_FORMAT_420_OPAQUE.
     img->params.hw_flags = hw_frames->sw_format == AV_PIX_FMT_YUV420P
                          ? MP_IMAGE_HW_FLAG_OPAQUE : 0;
+
+    if (img->params.hw_subfmt == IMGFMT_NV12)
+        mp_image_setfmt(img, IMGFMT_D3D11NV12);
 }
 
 const struct hwcontext_fns hwcontext_fns_d3d11 = {

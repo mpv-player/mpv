@@ -78,22 +78,12 @@ static struct mp_hwdec_ctx *d3d11_create_dev(struct mpv_global *global,
     return ctx;
 }
 
-static struct mp_image *d3d11_update_image_attribs(struct lavc_ctx *s,
-                                                   struct mp_image *img)
-{
-    if (img->params.hw_subfmt == IMGFMT_NV12)
-        mp_image_setfmt(img, IMGFMT_D3D11NV12);
-
-    return img;
-}
-
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
     .type = HWDEC_D3D11VA,
     .image_format = IMGFMT_D3D11VA,
     .generic_hwaccel = true,
     .set_hwframes = true,
     .hwframes_refine = d3d_hwframes_refine,
-    .process_image = d3d11_update_image_attribs,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
