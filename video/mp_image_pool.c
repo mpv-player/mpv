@@ -297,9 +297,9 @@ struct mp_image *mp_image_hw_download(struct mp_image *src,
     }
 
     int res = av_hwframe_transfer_data(dstav, srcav, 0);
-    av_frame_unref(srcav);
+    av_frame_free(&srcav);
     dst = mp_image_from_av_frame(dstav);
-    av_frame_unref(dstav);
+    av_frame_free(&dstav);
     if (res >= 0 && dst) {
         mp_image_set_size(dst, src->w, src->h);
         mp_image_copy_attributes(dst, src);
