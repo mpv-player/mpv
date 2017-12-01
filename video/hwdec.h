@@ -122,6 +122,8 @@ struct hwcontext_fns {
     // AVFrame, with all other fields already set. img.hwctx will be set, and
     // use the correct AV_HWDEVICE_TYPE_.
     void (*complete_image_params)(struct mp_image *img);
+    // Fill in special format-specific requirements.
+    void (*refine_hwframes)(struct AVBufferRef *hw_frames_ctx);
 };
 
 // The parameter is of type enum AVHWDeviceType (as in int to avoid extensive

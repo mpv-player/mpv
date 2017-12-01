@@ -38,8 +38,6 @@ bool d3d11_check_decoding(ID3D11Device *dev);
 struct AVBufferRef;
 struct IDirect3DDevice9;
 
-void d3d_hwframes_refine(struct lavc_ctx *ctx, struct AVBufferRef *hw_frames_ctx);
-
 struct AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device);
 struct AVBufferRef *d3d9_wrap_device_ref(struct IDirect3DDevice9 *device);
 

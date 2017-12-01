@@ -171,7 +171,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
     .image_format = IMGFMT_DXVA2,
     .generic_hwaccel = true,
     .set_hwframes = true,
-    .hwframes_refine = d3d_hwframes_refine,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
@@ -181,6 +180,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .generic_hwaccel = true,
     .create_dev = d3d9_create_dev,
     .set_hwframes = true,
-    .hwframes_refine = d3d_hwframes_refine,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

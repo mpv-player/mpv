@@ -754,8 +754,11 @@ static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
     if (new_fctx->initial_pool_size)
         new_fctx->initial_pool_size += HWDEC_EXTRA_SURFACES - 1;
 
-    if (ctx->hwdec->hwframes_refine)
-        ctx->hwdec->hwframes_refine(ctx, new_frames_ctx);
+    const struct hwcontext_fns *fns =
+        hwdec_get_hwcontext_fns(new_fctx->device_ctx->type);
+
+    if (fns && fns->refine_hwframes)
+        fns->refine_hwframes(new_frames_ctx);
 
     // We might be able to reuse a previously allocated frame pool.
     if (ctx->cached_hw_frames_ctx) {

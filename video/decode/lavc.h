@@ -101,8 +101,6 @@ struct vd_lavc_hwdec {
     // The returned device will be freed with mp_hwdec_ctx->destroy.
     struct mp_hwdec_ctx *(*create_dev)(struct mpv_global *global,
                                        struct mp_log *log, bool probing);
-    // Optional. Fill in special hwaccel- and codec-specific requirements.
-    void (*hwframes_refine)(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx);
     // Suffix for libavcodec decoder. If non-NULL, the codec is overridden
     // with hwdec_find_decoder.
     // Intuitively, this will force the corresponding wrapper decoder.

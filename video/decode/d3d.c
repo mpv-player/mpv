@@ -80,7 +80,7 @@ bool d3d11_check_decoding(ID3D11Device *dev)
     return !FAILED(hr) && (supported & D3D11_BIND_DECODER);
 }
 
-void d3d_hwframes_refine(struct lavc_ctx *ctx, AVBufferRef *hw_frames_ctx)
+static void d3d11_refine_hwframes(AVBufferRef *hw_frames_ctx)
 {
     AVHWFramesContext *fctx = (void *)hw_frames_ctx->data;
 
@@ -127,4 +127,5 @@ static void d3d11_complete_image_params(struct mp_image *img)
 const struct hwcontext_fns hwcontext_fns_d3d11 = {
     .av_hwdevice_type = AV_HWDEVICE_TYPE_D3D11VA,
     .complete_image_params = d3d11_complete_image_params,
+    .refine_hwframes = d3d11_refine_hwframes,
 };
