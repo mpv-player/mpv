@@ -538,6 +538,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 #endif
 
     update_playback_speed(mpctx);
+    audio_update_volume(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
@@ -629,6 +630,8 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
         struct mp_chmap channels;
         ao_get_format(mpctx->ao, &rate, &format, &channels);
         mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, format, &channels, rate);
+
+        audio_update_volume(mpctx);
     }
 
     mp_wakeup_core(mpctx);
