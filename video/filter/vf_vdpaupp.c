@@ -21,6 +21,8 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -166,6 +168,9 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    if (!vf->hwdec_devs)
+        return 0;
+
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
@@ -175,9 +180,15 @@ static int vf_open(vf_instance_t *vf)
 
     p->queue = mp_refqueue_alloc();
 
-    p->ctx = hwdec_devices_load(vf->hwdec_devs, HWDEC_VDPAU);
-    if (!p->ctx)
+    hwdec_devices_request_all(vf->hwdec_devs);
+    AVBufferRef *ref =
+        hwdec_devices_get_lavc(vf->hwdec_devs, AV_HWDEVICE_TYPE_VDPAU);
+    struct mp_vdpau_ctx *ctx = mp_vdpau_get_ctx_from_av(ref);
+    av_buffer_unref(&ref);
+    if (!ctx) {
+        uninit(vf);
         return 0;
+    }
 
     p->def_deintmode = p->opts.deint;
     if (!p->deint_enabled)

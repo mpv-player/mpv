@@ -75,8 +75,7 @@ static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
 
-    if (p->hwctx.ctx)
-        hwdec_devices_remove(hw->devs, &p->hwctx);
+    hwdec_devices_remove(hw->devs, &p->hwctx);
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
@@ -180,9 +179,7 @@ static int init(struct ra_hwdec *hw)
     ID3D10Multithread_Release(multithread);
 
     p->hwctx = (struct mp_hwdec_ctx){
-        .type = HWDEC_D3D11VA,
         .driver_name = hw->driver->name,
-        .ctx = p->d3d11_device,
         .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);

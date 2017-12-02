@@ -139,8 +139,6 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
         .display = display,
         .av_device_ref = avref,
         .hwctx = {
-            .type = HWDEC_VAAPI,
-            .ctx = res,
             .av_device_ref = avref,
         },
     };

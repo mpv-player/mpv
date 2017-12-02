@@ -330,13 +330,6 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
     return mp_vdpau_get_surface(ctx, chroma, 0, false, w, h);
 }
 
-static void recheck_preemption(struct mp_hwdec_ctx *hwctx)
-{
-    struct mp_vdpau_ctx *ctx = hwctx->ctx;
-
-    mp_vdpau_handle_preemption(ctx, NULL);
-}
-
 static void free_device_ref(struct AVHWDeviceContext *hwctx)
 {
     struct mp_vdpau_ctx *ctx = hwctx->user_opaque;
@@ -392,9 +385,6 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .preemption_counter = 1,
         .av_device_ref = avref,
         .hwctx = {
-            .type = HWDEC_VDPAU,
-            .ctx = ctx,
-            .restore_device = recheck_preemption,
             .av_device_ref = avref,
         },
     };

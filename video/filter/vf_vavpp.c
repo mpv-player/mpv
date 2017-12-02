@@ -21,6 +21,7 @@
 #include <va/va_vpp.h>
 
 #include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_vaapi.h>
 
 #include "config.h"
 #include "options/options.h"
@@ -57,7 +58,7 @@ struct vf_priv_s {
     VAContextID context;
     struct mp_image_params params;
     VADisplay display;
-    struct mp_vaapi_ctx *va;
+    AVBufferRef *av_device_ref;
     struct pipeline pipe;
     AVBufferRef *hw_pool;
 
@@ -358,7 +359,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->hw_subfmt = IMGFMT_NV12;
     }
 
-    p->hw_pool = av_hwframe_ctx_alloc(p->va->av_device_ref);
+    p->hw_pool = av_hwframe_ctx_alloc(p->av_device_ref);
     if (!p->hw_pool)
         return -1;
     AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
@@ -387,6 +388,7 @@ static void uninit(struct vf_instance *vf)
     av_buffer_unref(&p->hw_pool);
     flush_frames(vf);
     mp_refqueue_free(p->queue);
+    av_buffer_unref(&p->av_device_ref);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
@@ -489,6 +491,9 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    if (!vf->hwdec_devs)
+        return 0;
+
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
@@ -498,12 +503,18 @@ static int vf_open(vf_instance_t *vf)
 
     p->queue = mp_refqueue_alloc();
 
-    p->va = hwdec_devices_load(vf->hwdec_devs, HWDEC_VAAPI);
-    if (!p->va || !p->va->av_device_ref) {
+    hwdec_devices_request_all(vf->hwdec_devs);
+    p->av_device_ref =
+        hwdec_devices_get_lavc(vf->hwdec_devs, AV_HWDEVICE_TYPE_VAAPI);
+    if (!p->av_device_ref) {
         uninit(vf);
         return 0;
     }
-    p->display = p->va->display;
+
+    AVHWDeviceContext *hwctx = (void *)p->av_device_ref->data;
+    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
+
+    p->display = vactx->display;
 
     if (initialize(vf))
         return true;

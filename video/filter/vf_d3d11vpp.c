@@ -19,6 +19,9 @@
 #include <windows.h>
 #include <d3d11.h>
 
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_d3d11va.h>
+
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
@@ -477,6 +480,9 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    if (!vf->hwdec_devs)
+        return 0;
+
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
@@ -484,13 +490,21 @@ static int vf_open(vf_instance_t *vf)
     vf->uninit = uninit;
     vf->control = control;
 
-    p->queue = mp_refqueue_alloc();
-
-    p->vo_dev = hwdec_devices_load(vf->hwdec_devs, HWDEC_D3D11VA);
-    if (!p->vo_dev)
+    hwdec_devices_request_all(vf->hwdec_devs);
+    AVBufferRef *ref =
+        hwdec_devices_get_lavc(vf->hwdec_devs, AV_HWDEVICE_TYPE_D3D11VA);
+    if (!ref)
         return 0;
 
+    AVHWDeviceContext *hwctx = (void *)ref->data;
+    AVD3D11VADeviceContext *d3dctx = hwctx->hwctx;
+
+    p->vo_dev = d3dctx->device;
     ID3D11Device_AddRef(p->vo_dev);
+
+    av_buffer_unref(&ref);
+
+    p->queue = mp_refqueue_alloc();
 
     HRESULT hr;
 

@@ -34,21 +34,6 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs)
     talloc_free(devs);
 }
 
-struct mp_hwdec_ctx *hwdec_devices_get(struct mp_hwdec_devices *devs,
-                                       enum hwdec_type type)
-{
-    struct mp_hwdec_ctx *res = NULL;
-    pthread_mutex_lock(&devs->lock);
-    for (int n = 0; n < devs->num_hwctxs; n++) {
-        if (type && devs->hwctxs[n]->type == type) {
-            res = devs->hwctxs[n];
-            break;
-        }
-    }
-    pthread_mutex_unlock(&devs->lock);
-    return res;
-}
-
 struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
                                            int av_hwdevice_type)
 {
@@ -107,15 +92,6 @@ void hwdec_devices_request_all(struct mp_hwdec_devices *devs)
 {
     if (devs->load_api && !hwdec_devices_get_first(devs))
         devs->load_api(devs->load_api_ctx);
-}
-
-void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type)
-{
-    if (!devs)
-        return NULL;
-    hwdec_devices_request_all(devs);
-    struct mp_hwdec_ctx *hwctx = hwdec_devices_get(devs, type);
-    return hwctx ? hwctx->ctx : NULL;
 }
 
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)

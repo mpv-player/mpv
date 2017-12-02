@@ -7,26 +7,8 @@
 
 struct mp_image_pool;
 
-// (for some legacy stuff)
-enum hwdec_type {
-    HWDEC_NONE = 0,
-    HWDEC_VDPAU,
-    HWDEC_VAAPI,
-    HWDEC_D3D11VA,
-};
-
 struct mp_hwdec_ctx {
-    // Only needed for some filters. The main effect is that hwdec_devices_get()
-    // can be used. Leave unsert (i.e. HWDEC_NONE) if not needed.
-    enum hwdec_type type;
-
     const char *driver_name; // NULL if unknown/not loaded
-
-    // The meaning depends on the .type field:
-    //  HWDEC_VDPAU:            struct mp_vdpau_ctx*
-    //  HWDEC_VAAPI:            struct mp_vaapi_ctx*
-    //  HWDEC_D3D11VA:          ID3D11Device*
-    void *ctx;
 
     // libavutil-wrapped context, if available.
     struct AVBufferRef *av_device_ref; // AVHWDeviceContext*
@@ -36,9 +18,6 @@ struct mp_hwdec_ctx {
 
     // Hint to generic code: it's using a wrapper API
     bool emulated;
-
-    // Optional. Crap for vdpau. Makes sure preemption recovery is run if needed.
-    void (*restore_device)(struct mp_hwdec_ctx *ctx);
 
     // Optional. Do not set for VO-bound devices.
     void (*destroy)(struct mp_hwdec_ctx *ctx);
@@ -54,12 +33,6 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs);
 // available. Logically, the returned pointer remains valid until VO
 // uninitialization is started (all users of it must be uninitialized before).
 // hwdec_devices_request() may be used before this to lazily load devices.
-struct mp_hwdec_ctx *hwdec_devices_get(struct mp_hwdec_devices *devs,
-                                       enum hwdec_type type);
-
-struct AVBufferRef;
-
-// Like hwdec_devices_get(), but search by AV_HWDEVICE_TYPE_* type.
 // Contains a wrapped AVHWDeviceContext.
 // Beware that this creates a _new_ reference.
 struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
@@ -85,13 +58,6 @@ void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
 // Cause VO to lazily load all devices, and will block until this is done (even
 // if not available).
 void hwdec_devices_request_all(struct mp_hwdec_devices *devs);
-
-// Convenience function:
-// - return NULL if devs==NULL
-// - call hwdec_devices_request(devs, type)
-// - call hwdec_devices_get(devs, type)
-// - then return the mp_hwdec_ctx.ctx field
-void *hwdec_devices_load(struct mp_hwdec_devices *devs, enum hwdec_type type);
 
 // Return "," concatenated list (for introspection/debugging). Use talloc_free().
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs);
