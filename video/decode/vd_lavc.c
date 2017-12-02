@@ -224,11 +224,17 @@ static int hwdec_compare(const void *p1, const void *p2)
     if (h1 == h2)
         return 0;
 
-    if (h1->auto_pos > h2->auto_pos)
-        return 1;
-    if (h1->auto_pos < h2->auto_pos)
-        return -1;
-    return h1->rank < h2->rank ? 1 :-1;
+    // Strictly put non-preferred hwdecs to the end of the list.
+    if ((h1->auto_pos == INT_MAX) != (h2->auto_pos == INT_MAX))
+        return h1->auto_pos == INT_MAX ? 1 : -1;
+    // List non-copying entries first, so --hwdec=auto takes them.
+    if (h1->copying != h2->copying)
+        return h1->copying ? 1 : -1;
+    // Order by autoprobe preferrence order.
+    if (h1->auto_pos != h2->auto_pos)
+        return h1->auto_pos > h2->auto_pos ? 1 : -1;
+    // Fallback sort order to make sorting stable.
+    return h1->rank > h2->rank ? 1 :-1;
 }
 
 static bool test_decoder_suffix(const char *name, const char *suffix)
@@ -250,7 +256,7 @@ static void add_hwdec_item(struct hwdec_info **infos, int *num_infos,
              info.codec->name, info.method_name);
 
     info.rank = *num_infos;
-    info.auto_pos = MP_ARRAY_SIZE(hwdec_autoprobe_order);
+    info.auto_pos = INT_MAX;
     for (int x = 0; hwdec_autoprobe_order[x]; x++) {
         if (strcmp(hwdec_autoprobe_order[x], info.method_name) == 0)
             info.auto_pos = x;
