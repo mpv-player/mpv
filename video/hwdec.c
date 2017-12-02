@@ -40,7 +40,7 @@ struct mp_hwdec_ctx *hwdec_devices_get(struct mp_hwdec_devices *devs,
     struct mp_hwdec_ctx *res = NULL;
     pthread_mutex_lock(&devs->lock);
     for (int n = 0; n < devs->num_hwctxs; n++) {
-        if (devs->hwctxs[n]->type == type) {
+        if (type && devs->hwctxs[n]->type == type) {
             res = devs->hwctxs[n];
             break;
         }

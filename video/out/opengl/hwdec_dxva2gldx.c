@@ -48,8 +48,8 @@ static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
 
-    if (p->hwctx.ctx)
-        hwdec_devices_remove(hw->devs, &p->hwctx);
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
 
     if (p->device)
         IDirect3DDevice9Ex_Release(p->device);
@@ -78,9 +78,7 @@ static int init(struct ra_hwdec *hw)
     IDirect3DDevice9Ex_AddRef(p->device);
 
     p->hwctx = (struct mp_hwdec_ctx){
-        .type = HWDEC_DXVA2,
         .driver_name = hw->driver->name,
-        .ctx = (IDirect3DDevice9 *)p->device,
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device),
     };
     hwdec_devices_add(hw->devs, &p->hwctx);

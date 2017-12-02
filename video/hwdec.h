@@ -1,6 +1,8 @@
 #ifndef MP_HWDEC_H_
 #define MP_HWDEC_H_
 
+#include <libavutil/buffer.h>
+
 #include "options/m_option.h"
 
 struct mp_image_pool;
@@ -9,24 +11,21 @@ struct mp_image_pool;
 enum hwdec_type {
     HWDEC_NONE = 0,
     HWDEC_VDPAU,
-    HWDEC_VIDEOTOOLBOX,
     HWDEC_VAAPI,
-    HWDEC_DXVA2,
     HWDEC_D3D11VA,
-    HWDEC_CUDA,
 };
 
 struct mp_hwdec_ctx {
-    enum hwdec_type type; // (never HWDEC_NONE)
+    // Only needed for some filters. The main effect is that hwdec_devices_get()
+    // can be used. Leave unsert (i.e. HWDEC_NONE) if not needed.
+    enum hwdec_type type;
+
     const char *driver_name; // NULL if unknown/not loaded
 
-    // This is never NULL. Its meaning depends on the .type field:
+    // The meaning depends on the .type field:
     //  HWDEC_VDPAU:            struct mp_vdpau_ctx*
-    //  HWDEC_VIDEOTOOLBOX:     non-NULL dummy pointer
     //  HWDEC_VAAPI:            struct mp_vaapi_ctx*
     //  HWDEC_D3D11VA:          ID3D11Device*
-    //  HWDEC_DXVA2:            IDirect3DDevice9*
-    //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
     // libavutil-wrapped context, if available.

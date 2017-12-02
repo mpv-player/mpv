@@ -160,11 +160,9 @@ static int cuda_init(struct ra_hwdec *hw)
         goto error;
 
     p->hwctx = (struct mp_hwdec_ctx) {
-        .type = HWDEC_CUDA,
-        .ctx = p->decode_ctx,
+        .driver_name = hw->driver->name,
         .av_device_ref = hw_device_ctx,
     };
-    p->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;
 
@@ -179,8 +177,7 @@ static void cuda_uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
 
-    if (p->hwctx.ctx)
-        hwdec_devices_remove(hw->devs, &p->hwctx);
+    hwdec_devices_remove(hw->devs, &p->hwctx);
     av_buffer_unref(&p->hwctx.av_device_ref);
 
     if (p->decode_ctx && p->decode_ctx != p->display_ctx)
