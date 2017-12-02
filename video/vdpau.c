@@ -537,6 +537,26 @@ bool mp_vdpau_guess_if_emulated(struct mp_vdpau_ctx *ctx)
     return vdp_st == VDP_STATUS_OK && info && strstr(info, "VAAPI");
 }
 
+// (This clearly works only for contexts wrapped by our code.)
+struct mp_vdpau_ctx *mp_vdpau_get_ctx_from_av(AVBufferRef *hw_device_ctx)
+{
+    AVHWDeviceContext *hwctx = (void *)hw_device_ctx->data;
+
+    if (hwctx->free != free_device_ref)
+        return NULL; // not ours
+
+    return hwctx->user_opaque;
+}
+
+static bool is_emulated(struct AVBufferRef *hw_device_ctx)
+{
+    struct mp_vdpau_ctx *ctx = mp_vdpau_get_ctx_from_av(hw_device_ctx);
+    if (!ctx)
+        return false;
+
+    return mp_vdpau_guess_if_emulated(ctx);
+}
+
 static struct AVBufferRef *vdpau_create_standalone(struct mpv_global *global,
         struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
@@ -555,11 +575,11 @@ static struct AVBufferRef *vdpau_create_standalone(struct mpv_global *global,
 
     vdp->hwctx.emulated = mp_vdpau_guess_if_emulated(vdp);
     vdp->close_display = true;
-    mp_warn(log, "idk\n");
     return vdp->hwctx.av_device_ref;
 }
 
 const struct hwcontext_fns hwcontext_fns_vdpau = {
     .av_hwdevice_type = AV_HWDEVICE_TYPE_VDPAU,
     .create_dev = vdpau_create_standalone,
+    .is_emulated = is_emulated,
 };

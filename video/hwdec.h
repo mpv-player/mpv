@@ -119,6 +119,8 @@ struct hwcontext_fns {
     struct AVBufferRef *(*create_dev)(struct mpv_global *global,
                                       struct mp_log *log,
                                       struct hwcontext_create_dev_params *params);
+    // Return whether this is using some sort of sub-optimal emulation layer.
+    bool (*is_emulated)(struct AVBufferRef *hw_device_ctx);
 };
 
 // The parameter is of type enum AVHWDeviceType (as in int to avoid extensive

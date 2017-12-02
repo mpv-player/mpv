@@ -103,6 +103,8 @@ bool mp_vdpau_get_rgb_format(int imgfmt, VdpRGBAFormat *out_rgba_format);
 struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
                                                struct mp_image *mpi);
 
+struct mp_vdpau_ctx *mp_vdpau_get_ctx_from_av(struct AVBufferRef *hw_device_ctx);
+
 bool mp_vdpau_guess_if_emulated(struct mp_vdpau_ctx *ctx);
 
 #endif

@@ -204,10 +204,19 @@ VASurfaceID va_surface_id(struct mp_image *mpi)
         (VASurfaceID)(uintptr_t)mpi->planes[3] : VA_INVALID_ID;
 }
 
+static bool is_emulated(struct AVBufferRef *hw_device_ctx)
+{
+    AVHWDeviceContext *hwctx = (void *)hw_device_ctx->data;
+    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
+
+    const char *s = vaQueryVendorString(vactx->display);
+    return s && strstr(s, "VDPAU backend");
+}
+
+
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 {
-    const char *s = vaQueryVendorString(ctx->display);
-    return s && strstr(s, "VDPAU backend");
+    return is_emulated(ctx->av_device_ref);
 }
 
 struct va_native_display {
@@ -327,4 +336,5 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
 const struct hwcontext_fns hwcontext_fns_vaapi = {
     .av_hwdevice_type = AV_HWDEVICE_TYPE_VAAPI,
     .create_dev = va_create_standalone,
+    .is_emulated = is_emulated,
 };

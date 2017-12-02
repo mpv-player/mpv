@@ -458,6 +458,17 @@ static void select_and_set_hwdec(struct dec_video *vd)
                     MP_VERBOSE(vd, "Could not create device.\n");
                     continue;
                 }
+
+                const struct hwcontext_fns *fns =
+                            hwdec_get_hwcontext_fns(hwdec->lavc_device);
+                if (fns && fns->is_emulated && fns->is_emulated(ctx->hwdec_dev)) {
+                    if (hwdec_auto) {
+                        MP_VERBOSE(vd, "Not using emulated API.\n");
+                        av_buffer_unref(&ctx->hwdec_dev);
+                        continue;
+                    }
+                    MP_WARN(vd, "Using emulated hardware decoding API.\n");
+                }
             }
 
             ctx->use_hwdec = true;
