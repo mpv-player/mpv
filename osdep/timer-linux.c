@@ -25,7 +25,6 @@
 #include "config.h"
 #include "timer.h"
 
-#if HAVE_NANOSLEEP
 void mp_sleep_us(int64_t us)
 {
     if (us < 0)
@@ -35,14 +34,6 @@ void mp_sleep_us(int64_t us)
     ts.tv_nsec = (us % 1000000) * 1000;
     nanosleep(&ts, NULL);
 }
-#else
-void mp_sleep_us(int64_t us)
-{
-    if (us < 0)
-        return;
-    usleep(us);
-}
-#endif
 
 #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(CLOCK_MONOTONIC)
 uint64_t mp_raw_time_us(void)

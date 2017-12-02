@@ -224,10 +224,6 @@ iconv support use --disable-iconv.",
         'deps': 'os-win32 || os-cygwin',
         'func': check_true
     }, {
-        'name': 'nanosleep',
-        'desc': 'nanosleep',
-        'func': check_statement('time.h', 'nanosleep(0,0)')
-    }, {
         'name': 'posix-spawn-native',
         'desc': 'spawnp()/kill() POSIX support',
         'func': check_statement(['spawn.h', 'signal.h'],
