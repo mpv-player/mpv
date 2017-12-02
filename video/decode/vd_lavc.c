@@ -1091,9 +1091,7 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
     if (!res)
         return progress;
 
-    if (ctx->use_hwdec && ctx->hwdec.copying &&
-        (res->fmt.flags & MP_IMGFLAG_HWACCEL))
-    {
+    if (ctx->use_hwdec && ctx->hwdec.copying && res->hwctx) {
         struct mp_image *sw = mp_image_hw_download(res, ctx->hwdec_swpool);
         mp_image_unrefp(&res);
         res = sw;
