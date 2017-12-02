@@ -224,10 +224,6 @@ iconv support use --disable-iconv.",
         'deps': 'os-win32 || os-cygwin',
         'func': check_true
     }, {
-        'name': '--termios',
-        'desc': 'termios',
-        'func': check_headers('termios.h', 'sys/termios.h'),
-    }, {
         'name': 'nanosleep',
         'desc': 'nanosleep',
         'func': check_statement('time.h', 'nanosleep(0,0)')

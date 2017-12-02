@@ -28,15 +28,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#if HAVE_TERMIOS
-#if HAVE_TERMIOS_H
 #include <termios.h>
-#endif
-#if HAVE_SYS_TERMIOS_H
-#include <sys/termios.h>
-#endif
-#endif
-
 #include <unistd.h>
 #include <poll.h>
 
@@ -50,10 +42,8 @@
 #include "misc/ctype.h"
 #include "terminal.h"
 
-#if HAVE_TERMIOS
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
-#endif
 
 struct key_entry {
     const char *seq;
@@ -282,7 +272,6 @@ static void do_activate_getch2(void)
 
     enable_kx(true);
 
-#if HAVE_TERMIOS
     struct termios tio_new;
     tcgetattr(0,&tio_new);
 
@@ -295,7 +284,6 @@ static void do_activate_getch2(void)
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
-#endif
 
     getch2_active = 1;
 }
@@ -307,13 +295,11 @@ static void do_deactivate_getch2(void)
 
     enable_kx(false);
 
-#if HAVE_TERMIOS
     if (tio_orig_set) {
         // once set, it will never be set again
         // so we can cast away volatile here
         tcsetattr(0, TCSANOW, (const struct termios *) &tio_orig);
     }
-#endif
 
     getch2_active = 0;
 }
