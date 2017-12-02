@@ -714,8 +714,7 @@ Video
     will allow CPU processing with video filters.
 
     The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11 and most
-    likely works with Intel GPUs only. It also requires the opengl EGL backend
-    (automatically used if available).
+    likely works with Intel GPUs only. It also requires the opengl EGL backend.
 
     The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
     which is useful as there is no other deinterlacing mechanism in the opengl
