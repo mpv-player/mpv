@@ -352,6 +352,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
 
                 // Copy variant.
                 info.copying = true;
+                info.pix_fmt = AV_PIX_FMT_NONE; // trust it can do sw output
                 add_hwdec_item(infos, num_infos, info);
 
                 found_any = true;
