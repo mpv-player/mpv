@@ -2324,6 +2324,11 @@ static int parse_rel_time(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
+    if (bstr_equals0(param, "none")) {
+        t.type = REL_TIME_NONE;
+        goto out;
+    }
+
     // Percent pos
     if (bstr_endswith0(param, "%")) {
         double percent = bstrtod(bstr_splice(param, 0, -1), &param);

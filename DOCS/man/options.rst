@@ -107,6 +107,8 @@ Playback Control
 
     ``#c`` seeks to chapter number c. (Chapters start from 1.)
 
+    ``none`` resets any previously set option (useful for libmpv).
+
     .. admonition:: Examples
 
         ``--start=+56``, ``--start=+00:56``
