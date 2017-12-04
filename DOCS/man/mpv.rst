@@ -1109,15 +1109,22 @@ wrapper script just setting ``$MPV_HOME``, like you could do it on other
 systems, won't work. ``portable_config`` is provided for convenience to get
 around this restriction.)
 
+If mpv.exe is located in ``[...]/bin/mpv.exe``, and ``portable_config``
+does not exists, the directory ``[...]/etc/mpv/`` would also be searched.
+This behave the same way as ``portable_config``.
+
 Config files located in the same directory as ``mpv.exe`` are loaded with
 lower priority. Some config files are loaded only once, which means that
 e.g. of 2 ``input.conf`` files located in two config directories, only the
 one from the directory with higher priority will be loaded.
 
-A third config directory with the lowest priority is the directory named ``mpv``
-in the same directory as ``mpv.exe``. This used to be the directory with the
-highest priority, but is now discouraged to use and might be removed in the
-future.
+A third config directory with the lowest priority is ``%ALLUSERSPROFILE%/mpv/``.
+This system path could serve the purpose for storing global config files, which
+usually maps to, on Windows 7 and laters
+
+    ``C:\ProgramData\mpv\``
+
+You can find the exact path by running ``echo %ALLUSERSPROFILE%\mpv\`` in cmd.exe.
 
 Note that mpv likes to mix ``/`` and ``\`` path separators for simplicity.
 kernel32.dll accepts this, but cmd.exe does not.

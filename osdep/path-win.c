@@ -48,9 +48,26 @@ static char *mp_get_win_exe_dir(void *talloc_ctx)
     return mp_to_utf8(talloc_ctx, w_exedir);
 }
 
-static char *mp_get_win_exe_subdir(void *ta_ctx, const char *name)
+static char **mp_get_win_portable_dirs(void *ta_ctx)
 {
-    return talloc_asprintf(ta_ctx, "%s/%s", mp_get_win_exe_dir(ta_ctx), name);
+    size_t idx = 0;
+    size_t lmt = 2;
+    char **list = talloc_array_size(ta_ctx, sizeof (char *), lmt + 1);
+
+    if (!list)
+        return NULL;
+
+    char *path = mp_get_win_exe_dir(ta_ctx);
+    char *base = strrchr(path, '/');
+    list[idx < lmt ? idx++ : lmt] = talloc_asprintf(ta_ctx, "%s/portable_config", path);
+    if (strcmp(base, "/bin") == 0) {
+        strcpy(base, "/etc");
+        list[idx < lmt ? idx++ : lmt] = talloc_asprintf(ta_ctx, "%s/mpv", path);
+    }
+
+    list[lmt] = NULL;
+
+    return list;
 }
 
 static char *mp_get_win_shell_dir(void *talloc_ctx, REFKNOWNFOLDERID folder)
@@ -71,13 +88,22 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
     return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
+static char *mp_get_win_program_dir(void *talloc_ctx)
+{
+    char *path = mp_get_win_shell_dir(talloc_ctx, &FOLDERID_ProgramData);
+    return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
+}
 
 static void path_init(void)
 {
     void *tmp = talloc_new(NULL);
-    char *path = mp_get_win_exe_subdir(tmp, "portable_config");
-    if (path && mp_path_exists(path))
-        portable_path = talloc_strdup(NULL, path);
+    char **paths = mp_get_win_portable_dirs(tmp);
+    for (int i = 0; paths && paths[i]; i++) {
+        if (mp_path_exists(paths[i])) {
+            portable_path = talloc_strdup(NULL, paths[i]);
+            break;
+        }
+    }
     talloc_free(tmp);
 }
 
@@ -94,7 +120,7 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
             return mp_get_win_exe_dir(talloc_ctx);
         // Not really true, but serves as a way to return a lowest-priority dir.
         if (strcmp(type, "global") == 0)
-            return mp_get_win_exe_subdir(talloc_ctx, "mpv");
+            return mp_get_win_program_dir(talloc_ctx);
     }
     if (strcmp(type, "desktop") == 0)
         return mp_get_win_shell_dir(talloc_ctx, &FOLDERID_Desktop);
