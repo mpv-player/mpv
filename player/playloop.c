@@ -482,7 +482,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     double start = 0;
     double len = get_time_length(mpctx);
     if (use_range) {
-        double startpos = rel_time_to_abs(mpctx, mpctx->opts->play_start);
+        double startpos = get_play_start_pts(mpctx);
         double endpos = get_play_end_pts(mpctx);
         if (endpos == MP_NOPTS_VALUE || endpos > MPMAX(0, len))
             endpos = MPMAX(0, len);

@@ -1330,17 +1330,16 @@ reopen_file:
         goto terminate_playback;
     }
 
-    double startpos = rel_time_to_abs(mpctx, opts->play_start);
-    if (startpos == MP_NOPTS_VALUE && opts->chapterrange[0] > 0) {
-        double start = chapter_start_time(mpctx, opts->chapterrange[0] - 1);
-        if (start != MP_NOPTS_VALUE)
-            startpos = start;
-    }
-    if (startpos != MP_NOPTS_VALUE) {
-        if (!opts->rebase_start_time) {
-            startpos += mpctx->demuxer->start_time;
+    double play_start_pts = get_play_start_pts(mpctx);
+    if (play_start_pts != MP_NOPTS_VALUE) {
+        /*
+         * get_play_start_pts returns rebased values, but
+         * we want an un rebased value to feed to seeker.
+         */
+        if (!opts->rebase_start_time){
+            play_start_pts += mpctx->demuxer->start_time;
         }
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, MPSEEK_DEFAULT, 0);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, play_start_pts, MPSEEK_DEFAULT, 0);
         execute_queued_seek(mpctx);
     }
 
