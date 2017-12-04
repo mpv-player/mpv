@@ -181,11 +181,13 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
                (((unsigned)selected_level) >> 8) & 0xf);
 
     char *dev_name = mp_to_utf8(NULL, desc.Description);
-    mp_verbose(log, "Device: %s\n"
-                    "VendorId: 0x%04d\n"
-                    "DeviceId: 0x%04d\n"
+    mp_verbose(log, "Device Name: %s\n"
+                    "Device ID: %04x:%04x (rev %02x)\n"
+                    "Subsystem ID: %04x:%04x\n"
                     "LUID: %08lx%08lx\n",
-               dev_name, desc.VendorId, desc.DeviceId,
+               dev_name,
+               desc.VendorId, desc.DeviceId, desc.Revision,
+               LOWORD(desc.SubSysId), HIWORD(desc.SubSysId),
                desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart);
     talloc_free(dev_name);
 
