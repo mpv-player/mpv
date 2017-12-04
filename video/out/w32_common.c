@@ -617,16 +617,26 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     POINT cursor;
     if (!GetWindowRect(w32->window, &rect) || !GetCursorPos(&cursor))
         return false;
-    // Check for aero snapping
+    // Check if window is going to be aero-snapped
     if ((rc->right - rc->left != rect.right - rect.left) ||
         (rc->bottom - rc->top != rect.bottom - rect.top))
+        return false;
+
+    // Check if window has already been aero-snapped
+    WINDOWPLACEMENT wp = {0};
+    wp.length = sizeof(wp);
+    if (!GetWindowPlacement(w32->window, &wp))
+        return false;
+    RECT wr = wp.rcNormalPosition;
+    if ((rc->right - rc->left != wr.right - wr.left) ||
+        (rc->bottom - rc->top != wr.bottom - wr.top))
         return false;
 
     MONITORINFO mi = { .cbSize = sizeof(mi) };
     if (!GetMonitorInfoW(w32->monitor, &mi))
         return false;
     // Get the work area to let the window snap to taskbar
-    RECT wr = mi.rcWork;
+    wr = mi.rcWork;
 
     // Check for invisible borders and adjust the work area size
     RECT frame = {0};
