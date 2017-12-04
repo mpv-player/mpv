@@ -768,15 +768,16 @@ static void handle_loop_file(struct MPContext *mpctx)
         // Assumes execute_queued_seek() happens before next audio/video is
         // attempted to be decoded or filtered.
         mpctx->stop_play = KEEP_PLAYING;
-        double start = 0;
-        if (opts->ab_loop[0] != MP_NOPTS_VALUE)
-            start = opts->ab_loop[0];
+        double start = get_ab_loop_start_time(mpctx);
+        if (start == MP_NOPTS_VALUE)
+            start = 0;
         mark_seek(mpctx);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, start, MPSEEK_EXACT,
                    MPSEEK_FLAG_NOFLUSH);
     }
 
-    if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
+    // Do not attempt to loop-file if --ab-loop is active.
+    else if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, MPSEEK_FLAG_NOFLUSH);
