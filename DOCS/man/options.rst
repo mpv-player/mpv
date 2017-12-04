@@ -133,6 +133,9 @@ Playback Control
     Stop after a given time relative to the start time.
     See ``--start`` for valid option values and examples.
 
+    If both ``--end`` and ``--length`` are provided, playback will stop when it
+    reaches either of the two endpoints.
+
 ``--rebase-start-time=<yes|no>``
     Whether to move the file start time to ``00:00:00`` (default: yes). This
     is less awkward for files which start at a random timestamp, such as

@@ -91,12 +91,13 @@ double get_play_end_pts(struct MPContext *mpctx)
     double end = MP_NOPTS_VALUE;
     if (opts->play_end.type) {
         end = rel_time_to_abs(mpctx, opts->play_end);
-    } else if (opts->play_length.type) {
+    }
+    if (opts->play_length.type) {
         double start = get_play_start_pts(mpctx);
         if (start == MP_NOPTS_VALUE)
             start = 0;
         double length = rel_time_to_abs(mpctx, opts->play_length);
-        if (length != MP_NOPTS_VALUE)
+        if (length != MP_NOPTS_VALUE && (end == MP_NOPTS_VALUE || start + length < end))
             end = start + length;
     }
     if (opts->chapterrange[1] > 0) {
