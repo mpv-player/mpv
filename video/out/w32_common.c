@@ -141,6 +141,7 @@ struct vo_w32_state {
     // updates on move/resize/displaychange
     double display_fps;
 
+    bool moving;
     bool snapped;
     int snap_dx;
     int snap_dy;
@@ -941,12 +942,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_MOVING: {
+        w32->moving = true;
         RECT *rc = (RECT*)lParam;
-        if (snap_to_screen_edges(w32, rc))
+        if (!w32->current_fs && !w32->parent && snap_to_screen_edges(w32, rc))
             return TRUE;
         break;
     }
     case WM_ENTERSIZEMOVE:
+        w32->moving = true;
         if (w32->snapped) {
             // Save the cursor offset from the window borders,
             // so the player window can be unsnapped later
@@ -958,7 +961,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
         }
         break;
+    case WM_EXITSIZEMOVE:
+        w32->moving = false;
+        break;
     case WM_SIZE: {
+        if (w32->moving)
+            w32->snapped = false;
+
         RECT r;
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
             w32->dw = r.right;
@@ -1430,6 +1439,9 @@ static void *gui_thread(void *ptr)
         EnableWindow(w32->window, 0);
 
     w32->cursor_visible = true;
+    w32->moving = false;
+    w32->snapped = false;
+    w32->snap_dx = w32->snap_dy = 0;
 
     update_screen_rect(w32);
 
