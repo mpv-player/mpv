@@ -48,6 +48,8 @@
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
+    // declaration up here because of C grammar quirk
+    double chapter_start_pts;
     switch (t.type) {
     case REL_TIME_ABSOLUTE:
         return t.pos;
@@ -64,8 +66,20 @@ double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
             return length * (t.pos / 100.0);
         break;
     case REL_TIME_CHAPTER:
-        if (chapter_start_time(mpctx, t.pos) != MP_NOPTS_VALUE)
-            return chapter_start_time(mpctx, t.pos);
+        chapter_start_pts = chapter_start_time(mpctx, t.pos);
+        if (chapter_start_pts != MP_NOPTS_VALUE){
+            /*
+             * rel_time_to_abs always returns rebased timetamps,
+             * even with --rebase-start-time=no. (See the above two
+             * cases.) chapter_start_time values are not rebased without
+             * --rebase-start-time=yes, so we need to rebase them
+             * here to be consistent with the rest of rel_time_to_abs.
+             */
+            if (mpctx->demuxer && !mpctx->opts->rebase_start_time){
+                chapter_start_pts -= mpctx->demuxer->start_time;
+            }
+            return chapter_start_pts;
+        }
         break;
     }
     return MP_NOPTS_VALUE;
@@ -78,7 +92,7 @@ double get_play_end_pts(struct MPContext *mpctx)
     if (opts->play_end.type) {
         end = rel_time_to_abs(mpctx, opts->play_end);
     } else if (opts->play_length.type) {
-        double start = rel_time_to_abs(mpctx, opts->play_start);
+        double start = get_play_start_pts(mpctx);
         if (start == MP_NOPTS_VALUE)
             start = 0;
         double length = rel_time_to_abs(mpctx, opts->play_length);
@@ -97,6 +111,38 @@ double get_play_end_pts(struct MPContext *mpctx)
             end = opts->ab_loop[1];
     }
     return end;
+}
+
+/**
+ * Get the rebased PTS for which playback should start.
+ * The order of priority is as follows:
+ *   1. --start, if set.
+ *   2. The start chapter, if set.
+ *   3. MP_NOPTS_VALUE.
+ * If unspecified, return MP_NOPTS_VALUE.
+ * Does not return zero unless the start time is explicitly set to zero.
+ */
+double get_play_start_pts(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    double play_start_pts = rel_time_to_abs(mpctx, opts->play_start);
+    if (play_start_pts == MP_NOPTS_VALUE && opts->chapterrange[0] > 0) {
+        double chapter_start_pts = chapter_start_time(mpctx, opts->chapterrange[0] - 1);
+        if (chapter_start_pts != MP_NOPTS_VALUE) {
+            /*
+             * get_play_start_pts always returns rebased timetamps,
+             * even with --rebase-start-time=no. chapter_start_time
+             * values are not rebased without --rebase-start-time=yes,
+             * so we need to rebase them here to be consistent with
+             * the rest of get_play_start_pts.
+             */
+            if (mpctx->demuxer && !mpctx->opts->rebase_start_time){
+                chapter_start_pts -= mpctx->demuxer->start_time;
+            }
+            play_start_pts = chapter_start_pts;
+        }
+    }
+    return play_start_pts;
 }
 
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track)
