@@ -134,9 +134,30 @@ Installing mpv dependencies
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
 pacman -S git python $MINGW_PACKAGE_PREFIX-{pkg-config,gcc}
 
-# Install the most important MinGW-w64 dependencies. libass and lcms2 are also
-# pulled in as dependencies of ffmpeg.
-pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51,angleproject-git}
+# Install dependencies for ffmpeg-mpv.
+pacman -S yasm diffutils make
+
+# Install the most important dependencies for mpv. Do not install ffmpeg, as
+# only ffmpeg-mpv is supported.
+pacman -S $MINGW_PACKAGE_PREFIX-{libass,lcms2,libjpeg-turbo,lua51,angleproject-git,vulkan}
+```
+
+Building ffmpeg-mpv
+-------------------
+
+Clone the latest ffmpeg-mpv from git, then auto-configure it.
+
+```bash
+git clone https://github.com/mpv-player/ffmpeg-mpv.git && cd ffmpeg-mpv
+./configure --prefix=$MSYSTEM_PREFIX
+```
+
+Compile and install ffmpeg-mpv. Libraries will be installed to ``/mingw64/lib``
+or ``/mingw32/lib``. Be careful not to install ffmpeg from MSYS2 repository
+again, or ffmpeg-mpv will get overwritten.
+
+```bash
+make -j4 && make install && cd -
 ```
 
 Building mpv
