@@ -767,6 +767,9 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
 
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+
+    if (!vo_render_frame_external(wl->vo))
+        wl_surface_commit(wl->surface);
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -785,6 +788,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
+        vo_enable_external_renderloop(wl->vo);
         wl->frame_callback = wl_surface_frame(wl->surface);
         wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     }
@@ -1293,6 +1297,17 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_DISPLAY_NAMES: {
         *(char ***)arg = get_displays_spanned(wl);
+        return VO_TRUE;
+    }
+    case VOCTRL_PAUSE: {
+        wl_callback_destroy(wl->frame_callback);
+        wl->frame_callback = NULL;
+        vo_disable_external_renderloop(wl->vo);
+        return VO_TRUE;
+    }
+    case VOCTRL_RESUME: {
+        vo_enable_external_renderloop(wl->vo);
+        frame_callback(wl, NULL, 0);
         return VO_TRUE;
     }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {

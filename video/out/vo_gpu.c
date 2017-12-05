@@ -203,7 +203,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         if (gl_video_showing_interpolated_frame(p->renderer))
             vo->want_redraw = true;
-        return true;
+        break;
     case VOCTRL_PERFORMANCE_DATA:
         gl_video_perfdata(p->renderer, (struct voctrl_performance_data *)data);
         return true;
