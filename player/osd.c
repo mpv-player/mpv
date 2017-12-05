@@ -357,7 +357,8 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type)
     double len = get_time_length(mpctx);
     if (len > 0) {
         double ab_loop_start_time = get_ab_loop_start_time(mpctx);
-        if (ab_loop_start_time != MP_NOPTS_VALUE) {
+        if (opts->ab_loop[0] != MP_NOPTS_VALUE ||
+            ab_loop_start_time != MP_NOPTS_VALUE && opts->ab_loop[1] != MP_NOPTS_VALUE) {
             MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
                         mpctx->osd_progbar.num_stops, ab_loop_start_time / len);
         }
