@@ -100,7 +100,7 @@ Essential dependencies (incomplete list):
   libGL, GLX, EGL, xv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
-  and either libswresample or libavresample) from ffmpeg-mpv or Libav
+  and either libswresample or libavresample)
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
@@ -126,11 +126,10 @@ FFmpeg dependencies:
 - Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
-Linux distributions. However, FFmpeg is an exception - [ffmpeg-mpv][ffmpeg-mpv]
-or Libav git master is required. For that reason you may want to use
-the separately available build wrapper ([mpv-build][mpv-build]) that first
-compiles FFmpeg libraries and libass, and then compiles the player statically
-linked against those.
+Linux distributions. For ease of compiling the latest git master of everything,
+you may wish to use the separately available build wrapper ([mpv-build][mpv-build])
+which first compiles FFmpeg libraries and libass, and then compiles the player
+statically linked against those.
 
 If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
 or cross-compile from Linux with MinGW. See
@@ -144,17 +143,6 @@ Generally, mpv should work with the latest release as well as the git version
 of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
 with FFmpeg only (subtitle formats in particular).
 
-
-## Preferred FFmpeg version
-
-Only [ffmpeg-mpv][ffmpeg-mpv] is supported. Upstream FFmpeg can be forced by
-passing a certain switch to configure, but compilation or runtime behavior
-might be broken at times.
-
-_If_ you force upstream FFmpeg, and it doesn't work, please contact upstream
-FFmpeg for help, instead of mpv. See
-[FFmpeg contact](http://ffmpeg.org/contact.html#MailingLists) on how to contact
-FFmpeg upstream.
 
 ## FFmpeg ABI compatibility
 
@@ -246,4 +234,3 @@ only if discretion is required.
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
-[ffmpeg-mpv]: https://github.com/mpv-player/ffmpeg-mpv

@@ -731,7 +731,7 @@ Video
     FFmpeg decoders for file parsing. Experimental, is known not to correctly
     check whether decoding is supported by the hardware at all. Deinterlacing
     is not supported. Since this uses FFmpeg's codec parsers, it is expected
-    that this generally causes fewer issues than ``cuda``. Requires ffmpeg-mpv.
+    that this generally causes fewer issues than ``cuda``.
 
     Most video filters will not work with hardware decoding as they are
     primarily implemented on the CPU. Some exceptions are ``vdpaupp``,

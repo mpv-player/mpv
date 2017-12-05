@@ -27,9 +27,9 @@ pacman -S --noconfirm --needed \
 # Delete unused packages to reduce space used in the Appveyor cache
 pacman -Sc --noconfirm
 
-# Compile ffmpeg-mpv
+# Compile ffmpeg
 (
-    git clone --depth=1 https://github.com/mpv-player/ffmpeg-mpv.git && cd ffmpeg-mpv
+    git clone --depth=1 https://git.ffmpeg.org/ffmpeg.git && cd ffmpeg
 
     mkdir build && cd build
     ../configure \
