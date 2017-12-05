@@ -322,8 +322,9 @@ Playback Control
     the ``a`` timestamp. Seeking past the ``b`` point doesn't loop (this is
     intentional).
 
-    If both options are set to ``no``, looping is disabled. Otherwise, the
-    start/end of the file is used if one of the options is set to ``no``.
+    If both options are set to ``no`` or unset, looping is disabled.
+    Otherwise, the start/end of playback is used if one of the options
+    is set to ``no`` or unset.
 
     The loop-points can be adjusted at runtime with the corresponding
     properties. See also ``ab-loop`` command.
@@ -451,7 +452,7 @@ Program Behavior
 ``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in input mode, where mpv can be controlled through input
-    commands.
+    commands. (Default: ``no``)
 
     ``once`` will only idle at start and let the player close once the
     first playlist has finished playing back.
@@ -526,6 +527,7 @@ Program Behavior
 
 ``--ignore-path-in-watch-later-config``
     Ignore path (i.e. use filename only) when using watch later feature.
+    (Default: disabled)
 
 ``--show-profile=<profile>``
     Show the description and content of a profile.
@@ -4058,6 +4060,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     used if ``--interpolation`` is enabled. The only valid choices for
     ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
     get a list). The default is ``mitchell``.
+
+    Common ``--tscale`` choices include ``oversample``, ``linear``,
+    ``catmull_rom``, ``mitchell``, ``gaussian``, or ``bicubic``. These are
+    listed in increasing order of smoothness/blurriness, with ``bicubic``
+    being the smoothest/blurriest and ``oversample`` being the sharpest/least
+    smooth.
 
 ``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
     Set filter parameters. Ignored if the filter is not tunable. Currently,
