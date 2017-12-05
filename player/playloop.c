@@ -779,8 +779,10 @@ static void handle_loop_file(struct MPContext *mpctx)
     // Do not attempt to loop-file if --ab-loop is active.
     else if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         double play_start_pts = get_play_start_pts(mpctx);
+        if (play_start_pts == MP_NOPTS_VALUE)
+            play_start_pts = 0;
         double play_end_pts = get_play_end_pts(mpctx);
-        if (play_start_pts < play_end_pts){
+        if (play_end_pts == MP_NOPTS_VALUE || play_start_pts < play_end_pts){
             mpctx->stop_play = KEEP_PLAYING;
             set_osd_function(mpctx, OSD_FFW);
             queue_seek(mpctx, MPSEEK_ABSOLUTE, play_start_pts, MPSEEK_EXACT,
