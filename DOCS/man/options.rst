@@ -689,8 +689,9 @@ Video
     :videotoolbox: requires ``--vo=gpu`` (OS X 10.8 and up),
                    or ``--vo=opengl-cb`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (OS X 10.8 or iOS 9.0 and up)
-    :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=angle`` or
-                ``--gpu-context=dxinterop`` (Windows only)
+    :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=d3d11``,
+                ``--gpu-context=angle`` or ``--gpu-context=dxinterop``
+                (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
     :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=d3d11`` or
                 ``--gpu-context=angle`` (Windows 8+ only)

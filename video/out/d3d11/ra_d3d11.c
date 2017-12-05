@@ -181,6 +181,7 @@ static struct d3d_fmt formats[] = {
 
     { "rgb10_a2", 4,  4, {10, 10, 10,  2}, DXFMT(R10G10B10A2, UNORM)  },
     { "bgra8",    4,  4, { 8,  8,  8,  8}, DXFMT(B8G8R8A8, UNORM), .unordered = true },
+    { "bgrx8",    3,  4, { 8,  8,  8},     DXFMT(B8G8R8X8, UNORM), .unordered = true },
 };
 
 static bool dll_version_equal(struct dll_version a, struct dll_version b)
