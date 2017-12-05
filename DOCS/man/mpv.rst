@@ -442,7 +442,7 @@ this is strongly discouraged and deprecated, except for ``-set``.
 
 Without suffix, the action taken is normally ``-set``.
 
-Some options (like ``--sub-file``, ``--audio-file``, ``--opengl-shader``) are
+Some options (like ``--sub-file``, ``--audio-file``, ``--glsl-shader``) are
 aliases for the proper option with ``-append`` action. For example,
 ``--sub-file`` is an alias for ``--sub-files-append``.
 

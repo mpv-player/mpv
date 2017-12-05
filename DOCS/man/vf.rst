@@ -286,11 +286,14 @@ Available mpv-only filters are:
 
             If you want to use the full filter syntax with this option, you have
             to quote the filter graph in order to prevent mpv's syntax and the
-            filter graph syntax from clashing.
+            filter graph syntax from clashing. To prevent a quoting and escaping
+            mess, consider using ``--lavfi-complex`` if you know which video
+            track you want to use from the input file. (There is only one video
+            track for nearly all video files anyway.)
 
         .. admonition:: Examples
 
-            ``-vf lavfi=[gradfun=20:30,vflip]``
+            ``--vf=lavfi=[gradfun=20:30,vflip]``
                 ``gradfun`` filter with nonsense parameters, followed by a
                 ``vflip`` filter. (This demonstrates how libavfilter takes a
                 graph and not just a single filter.) The filter graph string is
