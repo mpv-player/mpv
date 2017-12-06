@@ -39,7 +39,10 @@ option. Some scripts are loaded internally (like ``--osc``). Each script runs in
 its own thread. Your script is first run "as is", and once that is done, the event loop
 is entered. This event loop will dispatch events received by mpv and call your
 own event handlers which you have registered with ``mp.register_event``, or
-timers added with ``mp.add_timeout`` or similar.
+timers added with ``mp.add_timeout`` or similar. Note that since the
+script starts execution concurrently with player initialization, some properties
+may not be populated with meaningful values until the relevant subsystems have
+initialized.
 
 When the player quits, all scripts will be asked to terminate. This happens via
 a ``shutdown`` event, which by default will make the event loop return. If your
