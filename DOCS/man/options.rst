@@ -381,7 +381,7 @@ Program Behavior
     all top-level options.
 
 ``--v``
-    Increment verbosity level, one level for each ``-v`` found on the command
+    Increment verbosity level, one level for each ``--v`` found on the command
     line.
 
 ``--version, --V``
