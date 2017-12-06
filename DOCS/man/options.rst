@@ -380,11 +380,11 @@ Program Behavior
     options that contain the word ``scale``. The special string ``*`` lists
     all top-level options.
 
-``--v``
-    Increment verbosity level, one level for each ``--v`` found on the command
+``-v``
+    Increment verbosity level, one level for each ``-v`` found on the command
     line.
 
-``--version, --V``
+``--version, -V``
     Print version string and exit.
 
 ``--no-config``
@@ -410,7 +410,7 @@ Program Behavior
 
 ``--log-file=<path>``
     Opens the given path for writing, and print log messages to it. Existing
-    files will be truncated. The log level is at least ``--v``, but can be
+    files will be truncated. The log level is at least ``-v``, but can be
     raised via ``--msg-level`` (the option cannot lower it below the forced
     minimum log level).
 
