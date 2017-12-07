@@ -382,7 +382,10 @@ mp.add_hook("on_load", 10, function ()
         msg.debug('ytdl parsing took '..os.clock()-start_time..' seconds')
 
         -- what did we get?
-        if not (json["direct"] == nil) and (json["direct"] == true) then
+        if json["protocol"] == "m3u8" then
+            msg.verbose("Playing directly with protocol " .. json["protocol"])
+            return
+        elseif not (json["direct"] == nil) and (json["direct"] == true) then
             -- direct URL, nothing to do
             msg.verbose("Got direct URL")
             return
