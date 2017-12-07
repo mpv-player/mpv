@@ -1586,7 +1586,7 @@ Subtitles
 ``--sub-delay=<sec>``
     Delays subtitles by ``<sec>`` seconds. Can be negative.
 
-``--sub-files=<file-list>``
+``--sub-files=<file-list>``, ``--sub-file=<filename>``
     Add a subtitle file to the list of external subtitles.
 
     If you use ``--sub-file`` only once, this subtitle file is displayed by
@@ -1598,7 +1598,11 @@ Subtitles
     and ``--secondary-sid`` to select the second index. (The index is printed
     on the terminal output after the ``--sid=`` in the list of streams.)
 
-    This is a list option. See `List Options`_ for details.
+    ``--sub-files`` is a list option (see `List Options`_  for details), and
+    can take multiple file names separated by ``:`` (Unix) or ``;`` (Windows),
+    while  ``--sub-file`` takes a single filename, but can be used multiple
+    times to add multiple files. Technically, ``--sub-file`` is a CLI/config
+    file only alias for  ``--sub-files-append``.
 
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
