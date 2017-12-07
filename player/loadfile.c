@@ -601,23 +601,34 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (opts->rebase_start_time)
         demux_set_ts_offset(demuxer, -demuxer->start_time);
 
+    bool has_any = false;
+    for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
+        struct sh_stream *sh = demux_get_stream(demuxer, n);
+        if (sh->type == filter || filter == STREAM_TYPE_COUNT) {
+            has_any = true;
+            break;
+        }
+    }
+
+    if (!has_any) {
+        free_demuxer_and_stream(demuxer);
+        char *tname = mp_tprintf(20, "%s ", stream_type_name(filter));
+        if (filter == STREAM_TYPE_COUNT)
+            tname = "";
+        MP_ERR(mpctx, "No %sstreams in file %s.\n", tname, disp_filename);
+        return false;
+    }
+
     struct track *first = NULL;
     for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
-        if (filter == STREAM_TYPE_COUNT || sh->type == filter) {
-            struct track *t = add_stream_track(mpctx, demuxer, sh);
-            t->is_external = true;
-            t->title = talloc_strdup(t, mp_basename(disp_filename));
-            t->external_filename = talloc_strdup(t, filename);
+        struct track *t = add_stream_track(mpctx, demuxer, sh);
+        t->is_external = true;
+        t->title = talloc_strdup(t, mp_basename(disp_filename));
+        t->external_filename = talloc_strdup(t, filename);
+        t->no_default = sh->type != filter;
+        if (!first && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first = t;
-            // --external-file special semantics
-            t->no_default = filter == STREAM_TYPE_COUNT;
-        }
-    }
-    if (!first) {
-        free_demuxer_and_stream(demuxer);
-        MP_WARN(mpctx, "No streams added from file %s.\n", disp_filename);
-        goto err_out;
     }
 
     return first;
