@@ -441,6 +441,15 @@ const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
     return NULL;
 }
 
+static void print_choice_values(struct mp_log *log, const struct m_option *opt)
+{
+    struct m_opt_choice_alternatives *alt = opt->priv;
+    for ( ; alt->name; alt++)
+        mp_info(log, "    %s\n", alt->name[0] ? alt->name : "(passing nothing)");
+    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX))
+        mp_info(log, "    %g-%g (integer range)\n", opt->min, opt->max);
+}
+
 static int parse_choice(struct mp_log *log, const struct m_option *opt,
                         struct bstr name, struct bstr param, void *dst)
 {
@@ -457,6 +466,11 @@ static int parse_choice(struct mp_log *log, const struct m_option *opt,
         }
     }
     if (!alt->name) {
+        if (!bstrcmp0(param, "help")) {
+            mp_info(log, "Valid values for option %.*s are:\n", BSTR_P(name));
+            print_choice_values(log, opt);
+            return M_OPT_EXIT;
+        }
         if (param.len == 0)
             return M_OPT_MISSING_PARAM;
         if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
@@ -470,10 +484,7 @@ static int parse_choice(struct mp_log *log, const struct m_option *opt,
         mp_fatal(log, "Invalid value for option %.*s: %.*s\n",
                  BSTR_P(name), BSTR_P(param));
         mp_info(log, "Valid values are:\n");
-        for (alt = opt->priv; alt->name; alt++)
-            mp_info(log, "    %s\n", alt->name[0] ? alt->name : "(passing nothing)");
-        if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX))
-            mp_info(log, "    %g-%g (integer range)\n", opt->min, opt->max);
+        print_choice_values(log, opt);
         return M_OPT_INVALID;
     }
     if (dst)
