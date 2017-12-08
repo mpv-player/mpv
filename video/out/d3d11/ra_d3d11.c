@@ -45,6 +45,7 @@ struct ra_d3d11 {
     // Device capabilities
     D3D_FEATURE_LEVEL fl;
     bool has_clear_view;
+    bool has_timestamp_queries;
     int max_uavs;
 
     // Streaming dynamic vertex buffer, which is used for all renderpasses
@@ -1878,6 +1879,9 @@ static void timer_destroy(struct ra *ra, ra_timer *ratimer)
 static ra_timer *timer_create(struct ra *ra)
 {
     struct ra_d3d11 *p = ra->priv;
+    if (!p->has_timestamp_queries)
+        return NULL;
+
     struct d3d_timer *timer = talloc_zero(NULL, struct d3d_timer);
     HRESULT hr;
 
@@ -2298,6 +2302,11 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
 
     if (ID3D11Device_GetCreationFlags(p->dev) & D3D11_CREATE_DEVICE_DEBUG)
         init_debug_layer(ra);
+
+    // Some level 9_x devices don't have timestamp queries
+    hr = ID3D11Device_CreateQuery(p->dev,
+        &(D3D11_QUERY_DESC) { D3D11_QUERY_TIMESTAMP }, NULL);
+    p->has_timestamp_queries = SUCCEEDED(hr);
 
     // According to MSDN, the above texture sizes are just minimums and drivers
     // may support larger textures. See:
