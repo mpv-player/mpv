@@ -46,7 +46,7 @@
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 
-static int tty_in, tty_out;
+static int tty_in = -1, tty_out = -1;
 
 struct key_entry {
     const char *seq;
@@ -423,12 +423,6 @@ void terminal_setup_getch(struct input_ctx *ictx)
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
 
-    tty_in = tty_out = open("/dev/tty", O_RDWR | O_CLOEXEC);
-    if (tty_in < 0) {
-        tty_in = STDIN_FILENO;
-        tty_out = STDOUT_FILENO;
-    }
-
     // Disable reading from the terminal even if stdout is not a tty, to make
     //   mpv ... | less
     // do the right thing.
@@ -462,15 +456,15 @@ void terminal_uninit(void)
     setsigaction(SIGTTIN, SIG_DFL, 0, false);
     setsigaction(SIGTTOU, SIG_DFL, 0, false);
 
-    do_deactivate_getch2();
-
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
         pthread_join(input_thread, NULL);
         close_death_pipe();
-        close_tty();
         input_ctx = NULL;
     }
+
+    do_deactivate_getch2();
+    close_tty();
 
     getch2_enabled = 0;
     read_terminal = false;
@@ -495,6 +489,12 @@ void terminal_init(void)
 {
     assert(!getch2_enabled);
     getch2_enabled = 1;
+
+    tty_in = tty_out = open("/dev/tty", O_RDWR | O_CLOEXEC);
+    if (tty_in < 0) {
+        tty_in = STDIN_FILENO;
+        tty_out = STDOUT_FILENO;
+    }
 
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);
