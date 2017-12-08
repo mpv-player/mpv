@@ -389,13 +389,12 @@ static void *terminal_thread(void *ptr)
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
     fd_set readfds;
     int max = death_pipe[0] > tty_in ? death_pipe[0] : tty_in;
-    struct timeval timeout = { .tv_sec = 0, .tv_usec = 100000 };
     while (1) {
         FD_ZERO(&readfds);
         FD_SET(death_pipe[0], &readfds);
         FD_SET(tty_in, &readfds);
         getch2_poll();
-        int s = select(max + 1, &readfds, NULL, NULL, &timeout);
+        int s = select(max + 1, &readfds, NULL, NULL, NULL);
         if (s == -1) {
             break;
         } else if (s != 0) {
