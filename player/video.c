@@ -553,6 +553,8 @@ static int video_filter(struct MPContext *mpctx, bool eof)
 
     // If something was decoded, and the filter chain is ready, filter it.
     if (!need_vf_reconfig && vo_c->input_mpi) {
+        if (osd_get_render_subs_in_filter(mpctx->osd))
+            update_subtitles(mpctx, vo_c->input_mpi->pts);
         vf_filter_frame(vf, vo_c->input_mpi);
         vo_c->input_mpi = NULL;
         return VD_PROGRESS;
