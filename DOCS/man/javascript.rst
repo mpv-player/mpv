@@ -222,7 +222,7 @@ Note: ``read_file`` and ``write_file`` throw on errors, allow text content only.
 
 ``exit()`` (global)
     Make the script exit at the end of the current event loop iteration.
-    Note: please reomve added key bindings before calling ``exit()``.
+    Note: please remove added key bindings before calling ``exit()``.
 
 ``mp.utils.compile_js(fname, content_str)``
     Compiles the JS code ``content_str`` as file name ``fname`` (without loading
