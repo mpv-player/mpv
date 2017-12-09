@@ -25,9 +25,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <sys/ioctl.h>
-#include <sys/select.h>
 #include <pthread.h>
-#include <time.h>
 #include <assert.h>
 
 #include <termios.h>
@@ -35,6 +33,7 @@
 
 #include "osdep/io.h"
 #include "osdep/threads.h"
+#include "osdep/polldev.h"
 
 #include "common/common.h"
 #include "misc/bstr.h"
@@ -387,22 +386,17 @@ static void *terminal_thread(void *ptr)
 {
     mpthread_set_name("terminal");
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
-    fd_set readfds;
-    int max = death_pipe[0] > tty_in ? death_pipe[0] : tty_in;
     while (1) {
-        FD_ZERO(&readfds);
-        FD_SET(death_pipe[0], &readfds);
-        FD_SET(tty_in, &readfds);
         getch2_poll();
-        int s = select(max + 1, &readfds, NULL, NULL, NULL);
-        if (s == -1) {
+        struct pollfd fds[2] = {
+            { .events = POLLIN, .fd = death_pipe[0] },
+            { .events = POLLIN, .fd = tty_in }
+        };
+        polldev(fds, stdin_ok ? 2 : 1, -1);
+        if (fds[0].revents)
             break;
-        } else if (s != 0) {
-            if (FD_ISSET(death_pipe[0], &readfds))
-                break;
-            if (stdin_ok && FD_ISSET(tty_in, &readfds))
-                stdin_ok = getch2(input_ctx);
-        }
+        if (fds[1].revents)
+            getch2(input_ctx);
     }
     char c;
     bool quit = read(death_pipe[0], &c, 1) == 1 && c == 1;
