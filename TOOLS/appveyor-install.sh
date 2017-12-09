@@ -29,7 +29,7 @@ pacman -Sc --noconfirm
 
 # Compile ffmpeg
 (
-    git clone --depth=1 https://git.ffmpeg.org/ffmpeg.git && cd ffmpeg
+    git clone --depth=1 https://github.com/FFmpeg/ffmpeg.git && cd ffmpeg
 
     mkdir build && cd build
     ../configure \
