@@ -569,7 +569,10 @@ bool stream_seek(stream_t *s, int64_t pos)
     }
 
     if (s->mode == STREAM_WRITE)
-        return s->seekable && s->seek(s, pos);
+        if (s->seekable)
+            return s->seek(s, pos);
+        else
+            return s->seekable;
 
     int64_t newpos = pos;
     if (s->sector_size)
