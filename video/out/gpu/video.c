@@ -3886,8 +3886,7 @@ void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
     if (strcmp(type, "no") == 0) {
         // do nothing, just block further loading
     } else if (strcmp(type, "all") == 0) {
-        for (int n = 0; ra_hwdec_drivers[n]; n++)
-            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
+        gl_video_load_hwdecs_all(p, devs);
     } else {
         for (int n = 0; ra_hwdec_drivers[n]; n++) {
             const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
