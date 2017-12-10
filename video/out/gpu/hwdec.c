@@ -117,6 +117,7 @@ int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
     }
     if (help) {
         mp_info(log, "    auto (behavior depends on context)\n"
+                     "    all (load all hwdecs)\n"
                      "    no (do not load any and block loading on demand)\n");
         return M_OPT_EXIT;
     }
