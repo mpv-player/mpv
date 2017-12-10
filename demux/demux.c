@@ -520,7 +520,7 @@ static void free_empty_cached_ranges(struct demux_internal *in)
 
         for (int n = in->num_ranges - 2; n >= 0; n--) {
             struct demux_cached_range *range = in->ranges[n];
-            if (range->seek_start == MP_NOPTS_VALUE) {
+            if (range->seek_start == MP_NOPTS_VALUE || !in->seekable_cache) {
                 clear_cached_range(in, range);
                 MP_TARRAY_REMOVE_AT(in->ranges, in->num_ranges, n);
             } else {
@@ -2006,6 +2006,13 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_update(demuxer);
         stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD,
                        &(int){params ? params->initial_readahead : false});
+        int seekable = opts->seekable_cache;
+        if (demuxer->is_network || stream->caching) {
+            in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
+            if (seekable < 0)
+                seekable = 1;
+        }
+        in->seekable_cache = seekable == 1;
         if (!(params && params->disable_timeline)) {
             struct timeline *tl = timeline_load(global, log, demuxer);
             if (tl) {
@@ -2021,13 +2028,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 }
             }
         }
-        int seekable = opts->seekable_cache;
-        if (demuxer->is_network || stream->caching) {
-            in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
-            if (seekable < 0)
-                seekable = 1;
-        }
-        in->seekable_cache = seekable == 1;
         return demuxer;
     }
 
@@ -2558,6 +2558,24 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
     mp_tags_set_str(new.metadata, "TITLE", name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return demuxer->num_chapters - 1;
+}
+
+void demux_disable_cache(demuxer_t *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    pthread_mutex_lock(&in->lock);
+    if (in->seekable_cache) {
+        MP_VERBOSE(demuxer, "disabling persistent packet cache\n");
+        in->seekable_cache = false;
+
+        // Get rid of potential buffered ranges floating around.
+        free_empty_cached_ranges(in);
+        // Get rid of potential old packets in the current range.
+        prune_old_packets(in);
+    }
+    pthread_mutex_unlock(&in->lock);
 }
 
 // must be called not locked
