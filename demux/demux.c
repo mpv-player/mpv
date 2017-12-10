@@ -560,20 +560,6 @@ static void update_stream_selection_state(struct demux_internal *in,
 
     ds_clear_reader_state(ds);
 
-    // Make sure any stream reselection or addition is reflected in the seek
-    // ranges, and also get rid of data that is not needed anymore (or
-    // rather, which can't be kept consistent).
-    for (int n = 0; n < in->num_ranges; n++) {
-        struct demux_cached_range *range = in->ranges[n];
-
-        if (!ds->selected)
-            clear_queue(range->streams[ds->index]);
-
-        update_seek_ranges(range);
-    }
-
-    free_empty_cached_ranges(in);
-
     // We still have to go over the whole stream list to update ds->eager for
     // other streams too, because they depend on other stream's selections.
 
@@ -597,6 +583,21 @@ static void update_stream_selection_state(struct demux_internal *in,
                 s->eager = false;
         }
     }
+
+    // Make sure any stream reselection or addition is reflected in the seek
+    // ranges, and also get rid of data that is not needed anymore (or
+    // rather, which can't be kept consistent). This has to happen after we've
+    // updated all the subtle state (like s->eager).
+    for (int n = 0; n < in->num_ranges; n++) {
+        struct demux_cached_range *range = in->ranges[n];
+
+        if (!ds->selected)
+            clear_queue(range->streams[ds->index]);
+
+        update_seek_ranges(range);
+    }
+
+    free_empty_cached_ranges(in);
 }
 
 void demux_set_ts_offset(struct demuxer *demuxer, double offset)
@@ -2474,6 +2475,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     pthread_mutex_lock(&in->lock);
     // don't flush buffers if stream is already selected / unselected
     if (ds->selected != selected) {
+        MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
         ds->selected = selected;
         update_stream_selection_state(in, ds);
         in->tracks_switched = true;
