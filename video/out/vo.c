@@ -964,7 +964,7 @@ static void drop_unrendered_frame(struct vo *vo)
     if ((in->frame_queued->pts + in->frame_queued->duration) > mp_time_us())
         goto end;
 
-    MP_VERBOSE(vo, "Dropping unrendered frame (pts %li)\n", in->frame_queued->pts);
+    MP_VERBOSE(vo, "Dropping unrendered frame (pts %"PRId64")\n", in->frame_queued->pts);
 
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
