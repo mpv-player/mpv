@@ -298,6 +298,8 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 void demux_changed(demuxer_t *demuxer, int events);
 void demux_update(demuxer_t *demuxer);
 
+void demux_disable_cache(demuxer_t *demuxer);
+
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
 

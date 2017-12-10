@@ -170,6 +170,8 @@ static void reopen_lazy_segments(struct demuxer *demuxer)
                                    demuxer->stream->cancel, demuxer->global);
     if (!p->current->d && !demux_cancel_test(demuxer))
         MP_ERR(demuxer, "failed to load segment\n");
+    if (p->current->d)
+        demux_disable_cache(p->current->d);
     associate_streams(demuxer, p->current);
 }
 
@@ -384,6 +386,11 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     for (int n = 0; n < p->tl->num_parts; n++) {
         struct timeline_part *part = &p->tl->parts[n];
         struct timeline_part *next = &p->tl->parts[n + 1];
+
+        // demux_timeline already does caching, doing it for the sub-demuxers
+        // would be pointless and wasteful.
+        if (part->source)
+            demux_disable_cache(part->source);
 
         struct segment *seg = talloc_ptrtype(p, seg);
         *seg = (struct segment){
