@@ -317,6 +317,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .tone_mapping_param = NAN,
     .tone_mapping_desat = 1.0,
     .early_flush = -1,
+    .hwdec_interop = "auto",
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -3433,6 +3434,7 @@ static void check_gl_features(struct gl_video *p)
             .tone_mapping_desat = p->opts.tone_mapping_desat,
             .early_flush = p->opts.early_flush,
             .icc_opts = p->opts.icc_opts,
+            .hwdec_interop = p->opts.hwdec_interop,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             p->opts.scaler[n] = gl_video_opts_def.scaler[n];
@@ -3884,8 +3886,7 @@ void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
     if (strcmp(type, "no") == 0) {
         // do nothing, just block further loading
     } else if (strcmp(type, "all") == 0) {
-        for (int n = 0; ra_hwdec_drivers[n]; n++)
-            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
+        gl_video_load_hwdecs_all(p, devs);
     } else {
         for (int n = 0; ra_hwdec_drivers[n]; n++) {
             const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
