@@ -471,6 +471,10 @@ static void select_and_set_hwdec(struct dec_video *vd)
                     }
                     MP_WARN(vd, "Using emulated hardware decoding API.\n");
                 }
+            } else if (!hwdec->copying) {
+                // Most likely METHOD_INTERNAL, which often use delay-loaded
+                // VO support as well.
+                hwdec_devices_request_all(vd->hwdec_devs);
             }
 
             ctx->use_hwdec = true;
