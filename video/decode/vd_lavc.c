@@ -213,6 +213,7 @@ static const char *const hwdec_wrappers[] = {
     "crystalhd",
     "v4l2m2m",
     "cuvid",
+    "rkmpp",
     NULL
 };
 
