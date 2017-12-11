@@ -1746,6 +1746,10 @@ static int parse_color(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
+    bool is_help = bstr_equals0(param, "help");
+    if (is_help)
+        goto error;
+
     bstr val = param;
     struct m_color color = {0};
 
@@ -1790,12 +1794,14 @@ static int parse_color(struct mp_log *log, const m_option_t *opt,
     return 1;
 
 error:
-    mp_err(log, "Option %.*s: invalid color: '%.*s'\n",
-           BSTR_P(name), BSTR_P(param));
-    mp_err(log, "Valid colors must be in the form #RRGGBB or #AARRGGBB (in hex)\n"
-                "Or in the form 'r/g/b/a', where each component is a value in the\n"
-                "range 0.0-1.0. (Also allowed: 'gray', 'gray/a', 'r/g/b'.\n");
-    return M_OPT_INVALID;
+    if (!is_help) {
+        mp_err(log, "Option %.*s: invalid color: '%.*s'\n",
+               BSTR_P(name), BSTR_P(param));
+    }
+    mp_info(log, "Valid colors must be in the form #RRGGBB or #AARRGGBB (in hex)\n"
+            "or in the form 'r/g/b/a', where each component is a value in the\n"
+            "range 0.0-1.0. (Also allowed: 'gray', 'gray/a', 'r/g/b').\n");
+    return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
 const m_option_type_t m_option_type_color = {
