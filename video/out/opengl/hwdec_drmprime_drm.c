@@ -217,7 +217,7 @@ static int init(struct ra_hwdec *hw)
             gl ? (struct mpv_opengl_cb_drm_params *)
             mpgl_get_native_display(gl, "opengl-cb-drm-params") : NULL;
     if (!params) {
-        MP_ERR(hw, "Could not get drm interop info.\n");
+        MP_VERBOSE(hw, "Could not get drm interop info.\n");
         goto err;
     }
 
