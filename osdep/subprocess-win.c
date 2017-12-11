@@ -251,7 +251,7 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     STARTUPINFOEXW si = {
         .StartupInfo = {
             .cb = sizeof(si),
-            .dwFlags = STARTF_USESTDHANDLES,
+            .dwFlags = STARTF_USESTDHANDLES | STARTF_FORCEOFFFEEDBACK,
             .hStdInput = NULL,
             .hStdOutput = pipes[0].write,
             .hStdError = pipes[1].write,
