@@ -1008,8 +1008,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_display_info(w32);
         break;
     case WM_CLOSE:
-        // Don't actually allow it to destroy the window, or whatever else it
-        // is that will make us lose WM_USER wakeups.
+        // Don't destroy the window yet to not lose wakeup events.
         mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
         return 0;
     case WM_NCDESTROY: // Sometimes only WM_NCDESTROY is received in --wid mode
