@@ -71,6 +71,11 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     *out = *in;
     out->imgfmt = best;
 
+    // If we convert from RGB to YUV, default to limited range.
+    if (mp_imgfmt_get_forced_csp(in->imgfmt) == MP_CSP_RGB &&
+        mp_imgfmt_get_forced_csp(out->imgfmt) == MP_CSP_AUTO)
+        out->color.levels = MP_CSP_LEVELS_TV;
+
     mp_image_params_guess_csp(out);
 
     mp_sws_set_from_cmdline(vf->priv->sws, vf->chain->opts->vo->sws_opts);
