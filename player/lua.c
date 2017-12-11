@@ -1085,6 +1085,48 @@ static int script_readdir(lua_State *L)
     return 1;
 }
 
+static int script_file_info(lua_State *L)
+{
+    const char *path = luaL_checkstring(L, 1);
+
+    struct stat statbuf;
+    if (stat(path, &statbuf) != 0) {
+        lua_pushnil(L);
+        lua_pushstring(L, "error");
+        return 2;
+    }
+
+    lua_newtable(L); // Result stat table
+
+    const char * stat_names[] = {
+        "mode", "size",
+        "atime", "mtime", "ctime", NULL
+    };
+    const unsigned int stat_values[] = {
+        statbuf.st_mode,
+        statbuf.st_size,
+        statbuf.st_atime,
+        statbuf.st_mtime,
+        statbuf.st_ctime
+    };
+
+    // Add all fields
+    for (int i = 0; stat_names[i]; i++) {
+        lua_pushinteger(L, stat_values[i]);
+        lua_setfield(L, -2, stat_names[i]);
+    }
+
+    // Convenience booleans
+    lua_pushboolean(L, S_ISREG(statbuf.st_mode));
+    lua_setfield(L, -2, "is_file");
+
+    lua_pushboolean(L, S_ISDIR(statbuf.st_mode));
+    lua_setfield(L, -2, "is_dir");
+
+    // Return table
+    return 1;
+}
+
 static int script_split_path(lua_State *L)
 {
     const char *p = luaL_checkstring(L, 1);
@@ -1291,6 +1333,7 @@ static const struct fn_entry main_fns[] = {
 
 static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
+    FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
     FN_ENTRY(subprocess),

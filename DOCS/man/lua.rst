@@ -591,6 +591,34 @@ strictly part of the guaranteed API.
 
     On error, ``nil, error`` is returned.
 
+``utils.file_info(path)``
+    Stats the given path for information and returns a table with the
+    following entries:
+
+        ``mode``
+            protection bits (on Windows, always 755 (octal) for directories
+            and 644 (octal) for files)
+        ``size``
+            size in bytes
+        ``atime``
+            time of last access
+        ``mtime``
+            time of last modification
+        ``ctime``
+            time of last metadata change (Linux) / time of creation (Windows)
+        ``is_file``
+            Whether ``path`` is a regular file (boolean)
+        ``is_dir``
+            Whether ``path`` is a directory (boolean)
+
+    ``mode`` and ``size`` are integers.
+    Timestamps (``atime``, ``mtime`` and ``ctime``) are integer seconds since
+    the Unix epoch (Unix time).
+    The booleans ``is_file`` and ``is_dir`` are provided as a convenience;
+    they can be and are derived from ``mode``.
+
+    On error (eg. path does not exist), ``nil, error`` is returned.
+
 ``utils.split_path(path)``
     Split a path into directory component and filename component, and return
     them. The first return value is always the directory. The second return

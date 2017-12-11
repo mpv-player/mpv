@@ -836,6 +836,41 @@ static void script_readdir(js_State *J, void *af)
     }
 }
 
+static void script_file_info(js_State *J)
+{
+    const char *path = js_tostring(J, 1);
+
+    struct stat statbuf;
+    if (stat(path, &statbuf) != 0) {
+        push_failure(J, "Cannot stat path");
+        return;
+    }
+    // Clear last error
+    set_last_error(jctx(J), 0, NULL);
+
+    const char * stat_names[] = {
+        "mode", "size",
+        "atime", "mtime", "ctime", NULL
+    };
+    const double stat_values[] = {
+        statbuf.st_mode,
+        statbuf.st_size,
+        statbuf.st_atime,
+        statbuf.st_mtime,
+        statbuf.st_ctime
+    };
+    // Create an object and add all fields
+    push_nums_obj(J, stat_names, stat_values);
+
+    // Convenience booleans
+    js_pushboolean(J, S_ISREG(statbuf.st_mode));
+    js_setproperty(J, -2, "is_file");
+
+    js_pushboolean(J, S_ISDIR(statbuf.st_mode));
+    js_setproperty(J, -2, "is_dir");
+}
+
+
 static void script_split_path(js_State *J)
 {
     const char *p = js_tostring(J, 1);
@@ -1255,6 +1290,7 @@ static const struct fn_entry main_fns[] = {
 
 static const struct fn_entry utils_fns[] = {
     AF_ENTRY(readdir, 2),
+    FN_ENTRY(file_info, 1),
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
