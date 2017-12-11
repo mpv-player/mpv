@@ -135,13 +135,18 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
             VAL(dst) = 0;
         return 1;
     }
-    mp_fatal(log, "Invalid parameter for %.*s flag: %.*s\n",
-                BSTR_P(name), BSTR_P(param));
-    mp_info(log, "Valid values are:\n");
+    bool is_help = bstr_equals0(param, "help");
+    if (is_help) {
+        mp_info(log, "Valid values for %.*s flag are:\n", BSTR_P(name));
+    } else {
+        mp_fatal(log, "Invalid parameter for %.*s flag: %.*s\n",
+                 BSTR_P(name), BSTR_P(param));
+        mp_info(log, "Valid values are:\n");
+    }
     mp_info(log, "    yes\n");
     mp_info(log, "    no\n");
     mp_info(log, "    (passing nothing)\n");
-    return M_OPT_INVALID;
+    return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
 static char *print_flag(const m_option_t *opt, const void *val)
