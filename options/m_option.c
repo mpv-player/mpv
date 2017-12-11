@@ -1962,6 +1962,10 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
 static int parse_geometry(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param, void *dst)
 {
+    bool is_help = bstr_equals0(param, "help");
+    if (is_help)
+        goto error;
+
     struct m_geometry gm;
     if (!parse_geometry_str(&gm, param))
         goto error;
@@ -1972,10 +1976,13 @@ static int parse_geometry(struct mp_log *log, const m_option_t *opt,
     return 1;
 
 error:
-    mp_err(log, "Option %.*s: invalid geometry: '%.*s'\n",
-           BSTR_P(name), BSTR_P(param));
-    mp_err(log, "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]] | [X[%%]:Y[%%]]\n");
-    return M_OPT_INVALID;
+    if (!is_help) {
+        mp_err(log, "Option %.*s: invalid geometry: '%.*s'\n",
+               BSTR_P(name), BSTR_P(param));
+    }
+    mp_info(log,
+         "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]] | [X[%%]:Y[%%]]\n");
+    return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
 const m_option_type_t m_option_type_geometry = {
