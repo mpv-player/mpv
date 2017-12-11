@@ -591,6 +591,43 @@ strictly part of the guaranteed API.
 
     On error, ``nil, error`` is returned.
 
+``utils.stat(path)``
+    Stats the given path and returns a table with the following entries:
+
+        ``dev``
+            device id (may be unavailable on Windows)
+        ``ino``
+            inode number (may be unavailable on Windows)
+        ``mode``
+            protection bits (on Windows, always 755 for directories and 644
+            for files)
+        ``nlink``
+            number of hard links
+        ``uid``
+            owner user id (unavailable on Windows)
+        ``gid``
+            owner group id (unavailable on Windows)
+        ``size``
+            size in bytes
+        ``atime``
+            time of last access
+        ``mtime``
+            time of last modification
+        ``ctime``
+            time of last metadata change (Linux) / time of creation (Windows)
+        ``is_file``
+            Whether ``path`` is a regular file (boolean)
+        ``is_dir``
+            Whether ``path`` is a directory (boolean)
+
+    All values (if not otherwise specified) are integers.
+    Timestamps (``atime``, ``mtime`` and ``ctime``) are in seconds since the
+    Unix epoch (Unix time).
+    ``is_file`` and ``is_dir`` are provided as a convenience; they are and can
+    be derived from ``mode``.
+
+    On error, ``nil, error`` is returned.
+
 ``utils.split_path(path)``
     Split a path into directory component and filename component, and return
     them. The first return value is always the directory. The second return
