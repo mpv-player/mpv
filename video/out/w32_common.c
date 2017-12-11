@@ -99,6 +99,8 @@ struct vo_w32_state {
 
     // whether the window position and size were intialized
     bool window_bounds_initialized;
+    // whether the window was displayed
+    bool window_state_initialized;
 
     bool current_fs;
     bool toggle_fs; // whether the current fullscreen state needs to be switched
@@ -775,10 +777,18 @@ static void reinit_window_state(struct vo_w32_state *w32)
     if (w32->parent)
         return;
 
-    bool new_fs = w32->toggle_fs ? !w32->current_fs : w32->opts->fullscreen;
+    bool new_fs;
+    if (!w32->window_state_initialized) {
+        new_fs = false;
+    } else if (w32->toggle_fs) {
+        new_fs = !w32->current_fs;
+        w32->toggle_fs = false;
+    } else {
+        new_fs = w32->opts->fullscreen;
+    }
+
     bool toggle_fs = w32->current_fs != new_fs;
     w32->current_fs = new_fs;
-    w32->toggle_fs = false;
 
     if (w32->taskbar_list) {
         ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
@@ -1331,6 +1341,14 @@ static void gui_thread_reconfig(void *ptr)
     w32->dh = vo->dheight;
 
     reinit_window_state(w32);
+
+    // On the first init the window was displayed in normal mode,
+    // now it should be switched to fullscreen mode if needed.
+    if (!w32->window_state_initialized) {
+        w32->window_state_initialized = true;
+        if (w32->opts->fullscreen)
+            reinit_window_state(w32);
+    }
 }
 
 // Resize the window. On the first call, it's also made visible.
@@ -1370,6 +1388,9 @@ static void *gui_thread(void *ptr)
 
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
+
+    w32->window_state_initialized = false;
+    w32->current_fs = w32->toggle_fs = false;
 
     ATOM cls = get_window_class();
     if (w32->parent) {
