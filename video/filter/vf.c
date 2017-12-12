@@ -58,7 +58,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_convert,
     &vf_info_lavfi,
     &vf_info_lavfi_bridge,
-    &vf_info_buffer,
 #if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH
     &vf_info_vapoursynth,
 #endif

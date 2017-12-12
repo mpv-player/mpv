@@ -366,7 +366,6 @@ def build(ctx):
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
-        ( "video/filter/vf_buffer.c" ),
         ( "video/filter/vf_convert.c" ),
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
         ( "video/filter/vf_format.c" ),

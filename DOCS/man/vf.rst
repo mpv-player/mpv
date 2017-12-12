@@ -556,9 +556,3 @@ Available mpv-only filters are:
         which algorithm is actually selected. ``none`` always falls back. On
         most if not all hardware, this option will probably do nothing, because
         a video processor usually supports all modes or none.
-
-``buffer=<num>``
-    Buffer ``<num>`` frames in the filter chain. This filter is probably pretty
-    useless, except for debugging. (Note that this won't help to smooth out
-    latencies with decoding, because the filter will never output a frame if
-    the buffer isn't full, except on EOF.)
