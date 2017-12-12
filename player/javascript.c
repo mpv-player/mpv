@@ -28,6 +28,7 @@
 #include <mujs.h>
 
 #include "osdep/io.h"
+#include "osdep/getpid.h"
 #include "mpv_talloc.h"
 #include "common/common.h"
 #include "options/m_property.h"
@@ -858,6 +859,11 @@ static void script_get_user_path(js_State *J, void *af)
     js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
 }
 
+static void script_getpid(js_State *J)
+{
+    js_pushnumber(J, getpid());
+}
+
 struct subprocess_cb_ctx {
     struct mp_log *log;
     void *talloc_ctx;
@@ -1258,6 +1264,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
+    FN_ENTRY(getpid, 0),
     AF_ENTRY(subprocess, 1),
     AF_ENTRY(subprocess_detached, 1),
 
