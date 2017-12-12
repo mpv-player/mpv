@@ -564,6 +564,9 @@ strictly part of the guaranteed API.
     Returns the directory that mpv was launched from. On error, ``nil, error``
     is returned.
 
+``utils.getpid()``
+    Returns the PID of the currently running mpv process.
+
 ``utils.readdir(path [, filter])``
     Enumerate all entries at the given path on the filesystem, and return them
     as array. Each entry is a directory entry (without the path).

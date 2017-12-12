@@ -29,6 +29,7 @@
 #include <lauxlib.h>
 
 #include "osdep/io.h"
+#include "osdep/getpid.h"
 
 #include "mpv_talloc.h"
 
@@ -1104,6 +1105,12 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
+static int script_getpid(lua_State *L)
+{
+    lua_pushinteger(L, getpid());
+    return 1;
+}
+
 struct subprocess_cb_ctx {
     struct mp_log *log;
     void* talloc_ctx;
@@ -1293,6 +1300,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
+    FN_ENTRY(getpid),
     FN_ENTRY(subprocess),
     FN_ENTRY(subprocess_detached),
     FN_ENTRY(parse_json),
