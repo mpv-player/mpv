@@ -94,7 +94,7 @@ static const char *const font_mimetypes[] = {
     NULL
 };
 
-static const char *const font_exts[] = {".ttf", ".ttc", ".otf", NULL};
+static const char *const font_exts[] = {".ttf", ".ttc", ".otf", ".otc", NULL};
 
 static bool attachment_is_font(struct mp_log *log, struct demux_attachment *f)
 {
