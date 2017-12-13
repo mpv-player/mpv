@@ -39,10 +39,10 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, or Windows 7 or later, or OSX 10.8 or later.
-- A somewhat capable CPU. Hardware decoding might sometimes help if the CPU
-  is too slow to decode video realtime, but must be explicitly enabled with
-  the `--hwdec` option.
+- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
+- A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
+  decode video in realtime, but must be explicitly enabled with the `--hwdec`
+  option.
 - A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
   many caveats with drivers or system compositors causing tearing, stutter,
   etc. On Windows, you might want to make sure the graphics drivers are
@@ -54,7 +54,7 @@ Releases can be found on the [release list][releases].
 
 
 For semi-official builds and third-party packages please see
-[mpv.io](http://mpv.io/installation/).
+[mpv.io/installation](http://mpv.io/installation/).
 
 ## Changelog
 
@@ -76,9 +76,9 @@ Changes to the default key bindings are indicated in
 Compiling with full features requires development files for several
 external libraries. Below is a list of some important requirements.
 
-The mpv build system uses *waf*, but we don't store it in your source tree. The
-script './bootstrap.py' will download the latest version of waf that was tested
-with the build system.
+The mpv build system uses [waf](https://waf.io/), but we don't store it in the
+repository. The `./bootstrap.py` script will download the latest version
+of waf that was tested with the build system.
 
 For a list of the available build options use `./waf configure --help`. If
 you think you have support for some feature installed but configure fails to
