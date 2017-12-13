@@ -168,7 +168,7 @@ Otherwise, where the Lua APIs return ``nil`` on error, JS returns ``undefined``.
 
 ``mp.utils.readdir(path [, filter])`` (LE)
 
-``mp.utils.stat(path)`` (LE)
+``mp.utils.file_info(path)`` (LE)
 
 ``mp.utils.split_path(path)``
 

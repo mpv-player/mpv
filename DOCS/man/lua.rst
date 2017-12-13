@@ -591,22 +591,13 @@ strictly part of the guaranteed API.
 
     On error, ``nil, error`` is returned.
 
-``utils.stat(path)``
-    Stats the given path and returns a table with the following entries:
+``utils.file_info(path)``
+    Stats the given path for information and returns a table with the
+    following entries:
 
-        ``dev``
-            device id (may be unavailable on Windows)
-        ``ino``
-            inode number (may be unavailable on Windows)
         ``mode``
-            protection bits (on Windows, always 755 for directories and 644
-            for files)
-        ``nlink``
-            number of hard links
-        ``uid``
-            owner user id (unavailable on Windows)
-        ``gid``
-            owner group id (unavailable on Windows)
+            protection bits (on Windows, always 755 (octal) for directories
+            and 644 (octal) for files)
         ``size``
             size in bytes
         ``atime``
@@ -620,13 +611,13 @@ strictly part of the guaranteed API.
         ``is_dir``
             Whether ``path`` is a directory (boolean)
 
-    All values (if not otherwise specified) are integers.
-    Timestamps (``atime``, ``mtime`` and ``ctime``) are in seconds since the
-    Unix epoch (Unix time).
-    ``is_file`` and ``is_dir`` are provided as a convenience; they are and can
-    be derived from ``mode``.
+    ``mode`` and ``size`` are integers.
+    Timestamps (``atime``, ``mtime`` and ``ctime``) are integer seconds since
+    the Unix epoch (Unix time).
+    The booleans ``is_file`` and ``is_dir`` are provided as a convenience;
+    they can be and are derived from ``mode``.
 
-    On error, ``nil, error`` is returned.
+    On error (eg. path does not exist), ``nil, error`` is returned.
 
 ``utils.split_path(path)``
     Split a path into directory component and filename component, and return

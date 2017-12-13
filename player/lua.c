@@ -1085,7 +1085,7 @@ static int script_readdir(lua_State *L)
     return 1;
 }
 
-static int script_stat(lua_State *L)
+static int script_file_info(lua_State *L)
 {
     const char *path = luaL_checkstring(L, 1);
 
@@ -1099,16 +1099,11 @@ static int script_stat(lua_State *L)
     lua_newtable(L); // Result stat table
 
     const char * stat_names[] = {
-        "dev", "ino", "mode", "nlink", "uid", "gid",
-        "size", "atime", "mtime", "ctime", NULL
+        "mode", "size",
+        "atime", "mtime", "ctime", NULL
     };
     const unsigned int stat_values[] = {
-        statbuf.st_dev,
-        statbuf.st_ino,
         statbuf.st_mode,
-        statbuf.st_nlink,
-        statbuf.st_uid,
-        statbuf.st_gid,
         statbuf.st_size,
         statbuf.st_atime,
         statbuf.st_mtime,
@@ -1338,7 +1333,7 @@ static const struct fn_entry main_fns[] = {
 
 static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
-    FN_ENTRY(stat),
+    FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
     FN_ENTRY(subprocess),

@@ -836,7 +836,7 @@ static void script_readdir(js_State *J, void *af)
     }
 }
 
-static void script_stat(js_State *J)
+static void script_file_info(js_State *J)
 {
     const char *path = js_tostring(J, 1);
 
@@ -849,16 +849,11 @@ static void script_stat(js_State *J)
     set_last_error(jctx(J), 0, NULL);
 
     const char * stat_names[] = {
-        "dev", "ino", "mode", "nlink", "uid", "gid",
-        "size", "atime", "mtime", "ctime", NULL
+        "mode", "size",
+        "atime", "mtime", "ctime", NULL
     };
     const double stat_values[] = {
-        statbuf.st_dev,
-        statbuf.st_ino,
         statbuf.st_mode,
-        statbuf.st_nlink,
-        statbuf.st_uid,
-        statbuf.st_gid,
         statbuf.st_size,
         statbuf.st_atime,
         statbuf.st_mtime,
@@ -1295,7 +1290,7 @@ static const struct fn_entry main_fns[] = {
 
 static const struct fn_entry utils_fns[] = {
     AF_ENTRY(readdir, 2),
-    FN_ENTRY(stat, 1),
+    FN_ENTRY(file_info, 1),
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
