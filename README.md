@@ -5,20 +5,29 @@
 --------------
 
 
+* [External links](#external-links)
 * [Overview](#overview)
+* [System requirements](#system-requirements)
 * [Downloads](#downloads)
 * [Changelog](#changelog)
 * [Compilation](#compilation)
 * [FFmpeg vs. Libav](#ffmpeg-vs-libav)
+* [FFmpeg ABI compatibility](#ffmpeg-abi-compatibility)
 * [Release cycle](#release-cycle)
 * [Bug reports](#bug-reports)
 * [Contributing](#contributing)
 * [Relation to MPlayer and mplayer2](#relation-to-mplayer-and-mplayer2)
+* [License](#license)
+* [Contact](#contact)
+
+
+## External links
+
+
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
 * [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
-* [Man pages](http://mpv.io/manual/master/)
-* [Contact](#contact)
-* [License](#license)
+* [Manual](http://mpv.io/manual/master/)
+
 
 ## Overview
 
