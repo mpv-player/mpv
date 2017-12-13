@@ -85,6 +85,7 @@ Interface changes
       (such as "sub-file"), deprecated in mpv 0.26.0
     - deprecate the old command based hook API, and introduce a proper C API
       (the high level Lua API for this does not change)
+    - rename the the lua-settings/ config directory to script-opts/
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

@@ -1172,7 +1172,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     ``--write-filename-in-watch-later-config`` option, and the player will
     add the media filename to the contents of the resume config file.
 
-``~/.config/mpv/lua-settings/osc.conf``
+``~/.config/mpv/script-opts/osc.conf``
     This is loaded by the OSC script. See the `ON SCREEN CONTROLLER`_ docs
     for details.
 

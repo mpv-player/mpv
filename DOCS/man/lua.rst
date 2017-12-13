@@ -531,7 +531,7 @@ Example implementation::
     print(options.optionA)
 
 
-The config file will be stored in ``lua-settings/identifier.conf`` in mpv's user
+The config file will be stored in ``script-opts/identifier.conf`` in mpv's user
 folder. Comment lines can be started with # and stray spaces are not removed.
 Boolean values will be represented with yes/no.
 

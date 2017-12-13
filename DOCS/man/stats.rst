@@ -35,7 +35,7 @@ monospaced digits is recommended. By default, the open source font
 Configuration
 -------------
 
-This script can be customized through a config file ``lua-settings/stats.conf``
+This script can be customized through a config file ``script-opts/stats.conf``
 placed in mpv's user directory and through the ``--script-opts`` command-line
 option. The configuration syntax is described in `ON SCREEN CONTROLLER`_.
 

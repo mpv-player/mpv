@@ -128,7 +128,7 @@ Configuration
 -------------
 
 The OSC offers limited configuration through a config file
-``lua-settings/osc.conf`` placed in mpv's user dir and through the
+``script-opts/osc.conf`` placed in mpv's user dir and through the
 ``--script-opts`` command-line option. Options provided through the command-line
 will override those from the config file.
 
