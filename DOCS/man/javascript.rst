@@ -27,16 +27,16 @@ otherwise, the documented Lua options, script directories, loading, etc apply to
 JavaScript files too.
 
 Script initialization and lifecycle is the same as with Lua, and most of the Lua
-functions at the modules ``mp``, ``mp.utils`` and ``mp.msg`` are available to
-JavaScript with identical APIs - including running commands, getting/setting
-properties, registering events/key-bindings/property-changes/hooks, etc.
+functions at the modules ``mp``, ``mp.utils``, ``mp.msg`` and ``mp.options`` are
+available to JavaScript with identical APIs - including running commands,
+getting/setting properties, registering events/key-bindings/hooks, etc.
 
 Differences from Lua
 --------------------
 
-No need to load modules. ``mp``, ``mp.utils`` and ``mp.msg`` are preloaded, and
-you can use e.g. ``var cwd = mp.utils.getcwd();`` without prior setup.
-``mp.options`` is currently not implemented, but ``mp.get_opt(...)`` is.
+No need to load modules. ``mp``, ``mp.utils``,  ``mp.msg`` and ``mp.options``
+are preloaded, and you can use e.g. ``var cwd = mp.utils.getcwd();`` without
+prior setup.
 
 Errors are slightly different. Where the Lua APIs return ``nil`` for error,
 the JavaScript ones return ``undefined``. Where Lua returns ``something, error``
@@ -86,8 +86,6 @@ Unsupported Lua APIs and their JS alternatives
 ``mp.get_next_timeout()`` see event loop below.
 
 ``mp.dispatch_events([allow_wait])`` see event loop below.
-
-``mp.options`` module is not implemented currently for JS.
 
 Scripting APIs - identical to Lua
 ---------------------------------
@@ -183,6 +181,8 @@ Otherwise, where the Lua APIs return ``nil`` on error, JS returns ``undefined``.
 ``mp.utils.getpid()`` (LE)
 
 ``mp.add_hook(type, priority, fn)``
+
+``mp.options.read_options(obj [, identifier])`` (types: string/boolean/number)
 
 Additional utilities
 --------------------

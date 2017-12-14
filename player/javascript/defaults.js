@@ -420,6 +420,58 @@ function new_require(base_id) {
 g.require = new_require(SCRIPTDIR_META + "/" + main_script[1]);
 
 /**********************************************************************
+ *  mp.options
+ *********************************************************************/
+function read_options(opts, id) {
+    id = String(typeof id != "undefined" ? id : mp.get_script_name());
+    mp.msg.debug("reading options for " + id);
+
+    var conf, fname = "~~/script-opts/" + id + ".conf";
+    try {
+        conf = mp.utils.read_file(fname);
+    } catch (e) {
+        mp.msg.verbose(fname + " not found.");
+    }
+
+    // data as config file lines array, or empty array
+    var data = conf ? conf.replace(/\r\n/g, "\n").split("\n") : [],
+        conf_len = data.length;  // before we append script-opts below
+
+    // Append relevant script-opts as <key-sans-id>=<value> to data
+    var sopts = mp.get_property_native("options/script-opts"),
+        prefix = id + "-";
+    for (var key in sopts) {
+        if (key.indexOf(prefix) == 0)
+            data.push(key.substring(prefix.length) + "=" + sopts[key]);
+    }
+
+    // Update opts from data
+    data.forEach(function(line, i) {
+        if (line[0] == "#" || line.trim() == "")
+            return;
+
+        var key = line.substring(0, line.indexOf("=")),
+            val = line.substring(line.indexOf("=") + 1),
+            type = typeof opts[key],
+            info = i < conf_len ? fname + ":" + (i + 1)  // 1-based line number
+                                : "script-opts:" + prefix + key;
+
+        if (!opts.hasOwnProperty(key))
+            mp.msg.warn(info, "Ignoring unknown key '" + key + "'");
+        else if (type == "string")
+            opts[key] = val;
+        else if (type == "boolean" && (val == "yes" || val == "no"))
+            opts[key] = (val == "yes");
+        else if (type == "number" && val.trim() != "" && !isNaN(val))
+            opts[key] = Number(val);
+        else
+            mp.msg.error(info, "Error: can't convert '" + val + "' to " + type);
+    });
+}
+
+mp.options = { read_options: read_options };
+
+/**********************************************************************
  *  various
  *********************************************************************/
 g.print = mp.msg.info;  // convenient alias
