@@ -363,6 +363,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
         d50 = {0.34577, 0.35850},
         d65 = {0.31271, 0.32902},
         c   = {0.31006, 0.31616},
+        dci = {0.31400, 0.35100},
         e   = {1.0/3.0, 1.0/3.0};
 
     switch (spc) {
@@ -438,7 +439,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .red   = {0.680, 0.320},
             .green = {0.265, 0.690},
             .blue  = {0.150, 0.060},
-            .white = d65
+            .white = dci
         };
     // From Panasonic VARICAM reference manual
     case MP_CSP_PRIM_V_GAMUT:
