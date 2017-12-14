@@ -269,10 +269,6 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
         if (codec->capabilities & (AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_HYBRID))
             wrapper = codec->wrapper_name;
 
-        // Different lavc/mpv names.
-        if (wrapper && strcmp(wrapper, "mmal") == 0)
-            wrapper = "rpi";
-
         // A decoder can provide multiple methods. In particular, hwaccels
         // provide various methods (e.g. native h264 with vaapi & d3d11), but
         // even wrapper decoders could provide multiple methods.

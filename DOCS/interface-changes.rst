@@ -59,6 +59,8 @@ Interface changes
       now.
     - change the --hwdec option from a choice to a plain string (affects
       introspection of the option/property), also affects some properties
+    - rename --hwdec=rpi to --hwdec=mmal, sane for the -copy variant (no
+      backwards compatibility)
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command
