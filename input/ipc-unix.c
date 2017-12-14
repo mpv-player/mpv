@@ -216,16 +216,26 @@ done:
 
 static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 {
-    client->client = mp_new_client(ctx->client_api, client->client_name),
-    client->log    = mp_client_get_log(client->client);
+    client->client = mp_new_client(ctx->client_api, client->client_name);
+    if (!client->client)
+        goto err;
+
+    client->log = mp_client_get_log(client->client);
 
     pthread_t client_thr;
-    if (pthread_create(&client_thr, NULL, client_thread, client)) {
+    if (pthread_create(&client_thr, NULL, client_thread, client))
+        goto err;
+
+    return;
+
+err:
+    if (client->client)
         mpv_detach_destroy(client->client);
-        if (client->close_client_fd)
-            close(client->client_fd);
-        talloc_free(client);
-    }
+
+    if (client->close_client_fd)
+        close(client->client_fd);
+
+    talloc_free(client);
 }
 
 static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
