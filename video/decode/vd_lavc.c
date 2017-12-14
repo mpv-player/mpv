@@ -207,16 +207,6 @@ static const char *const hwdec_autoprobe_order[] = {
     0
 };
 
-static const char *const hwdec_wrappers[] = {
-    "mmal",
-    "mediacodec",
-    "crystalhd",
-    "v4l2m2m",
-    "cuvid",
-    "rkmpp",
-    NULL
-};
-
 static int hwdec_compare(const void *p1, const void *p2)
 {
     struct hwdec_info *h1 = (void *)p1;
@@ -236,12 +226,6 @@ static int hwdec_compare(const void *p1, const void *p2)
         return h1->auto_pos > h2->auto_pos ? 1 : -1;
     // Fallback sort order to make sorting stable.
     return h1->rank > h2->rank ? 1 :-1;
-}
-
-static bool test_decoder_suffix(const char *name, const char *suffix)
-{
-    bstr bname = bstr0(name);
-    return bstr_eatend0(&bname, suffix) && bstr_eatend0(&bname, "_");
 }
 
 // (This takes care of some bookkeeping too, like setting info.name)
@@ -273,6 +257,8 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
         codec = av_codec_next(codec);
         if (!codec)
             break;
+        if (codec->type != AVMEDIA_TYPE_VIDEO || !av_codec_is_decoder(codec))
+            continue;
 
         struct hwdec_info info_template = {
             .pix_fmt = AV_PIX_FMT_NONE,
@@ -280,15 +266,12 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
         };
 
         const char *wrapper = NULL;
-        for (int n = 0; hwdec_wrappers[n]; n++) {
-            if (test_decoder_suffix(codec->name, hwdec_wrappers[n])) {
-                wrapper = hwdec_wrappers[n];
-                // Different lavc/mpv names.
-                if (strcmp(wrapper, "mmal") == 0)
-                    wrapper = "rpi";
-                break;
-            }
-        }
+        if (codec->capabilities & (AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_HYBRID))
+            wrapper = codec->wrapper_name;
+
+        // Different lavc/mpv names.
+        if (wrapper && strcmp(wrapper, "mmal") == 0)
+            wrapper = "rpi";
 
         // A decoder can provide multiple methods. In particular, hwaccels
         // provide various methods (e.g. native h264 with vaapi & d3d11), but
