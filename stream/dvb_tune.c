@@ -1,7 +1,7 @@
 /* dvbtune - tune.c
 
    Copyright (C) Dave Chapman 2001,2002
-   Copyright (C) Rozhuk Ivan <rozhuk.im@gmail.com> 2016
+   Copyright (C) Rozhuk Ivan <rozhuk.im@gmail.com> 2016 - 2017
 
    Modified for use with MPlayer, for details see the changelog at
    http://svn.mplayerhq.hu/mplayer/trunk/
@@ -82,7 +82,7 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
 #ifdef DVB_USE_S2API
     /* S2API is the DVB API new since 2.6.28.
        It allows to query frontends with multiple delivery systems. */
-    mp_verbose(log, "Querying tuner type via DVBv5 API for frontend FD %d\n",
+    mp_verbose(log, "Querying tuner frontend type via DVBv5 API for frontend FD %d\n",
                fe_fd);
     prop[0].cmd = DTV_ENUM_DELSYS;
     if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
@@ -98,14 +98,14 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
     for (i = 0; i < delsys_count; i++) {
         delsys = (unsigned int)prop[0].u.buffer.data[i];
         DELSYS_SET(ret_mask, delsys);
-        mp_verbose(log, "DVBv5: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
+        mp_verbose(log, "DVBv5: Tuner frontend type seems to be %s\n", get_dvb_delsys(delsys));
     }
 
     return ret_mask;
 
 old_api:
 #endif
-    mp_verbose(log, "Querying tuner type via pre-DVBv5 API for frontend FD %d\n",
+    mp_verbose(log, "Querying tuner frontend type via pre-DVBv5 API for frontend FD %d\n",
                fe_fd);
 
     memset(&fe_info, 0x00, sizeof(struct dvb_frontend_info));
@@ -119,7 +119,7 @@ old_api:
         prop[0].u.data = 0x0300; /* Fail, assume 3.0 */
     }
 
-    mp_verbose(log, "DVBv3: Queried tuner type of device named '%s', FD: %d\n",
+    mp_verbose(log, "DVBv3: Queried tuner frontend type of device named '%s', FD: %d\n",
                fe_info.name, fe_fd);
     switch (fe_info.type) {
     case FE_OFDM:
@@ -158,29 +158,30 @@ old_api:
         break;
 #endif
     default:
-        mp_err(log, "DVBv3: Unknown tuner type: %d\n", fe_info.type);
+        mp_err(log, "DVBv3: Unknown tuner frontend type: %d\n", fe_info.type);
         return ret_mask;
     }
 
     for (delsys = 0; delsys < SYS_DVB__COUNT__; delsys ++) {
         if (!DELSYS_IS_SET(ret_mask, delsys))
             continue; /* Skip unsupported. */
-        mp_verbose(log, "DVBv3: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
+        mp_verbose(log, "DVBv3: Tuner frontend type seems to be %s\n", get_dvb_delsys(delsys));
     }
 
     return ret_mask;
 }
 
-int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt)
+int dvb_open_devices(dvb_priv_t *priv, unsigned int adapter,
+    unsigned int frontend, unsigned int demux_cnt)
 {
     unsigned int i;
     char frontend_dev[PATH_MAX], dvr_dev[PATH_MAX], demux_dev[PATH_MAX];
-
     dvb_state_t* state = priv->state;
 
-    snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%u/frontend0", n);
-    snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%u/dvr0", n);
-    snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%u/demux0", n);
+    snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%u/frontend%u", adapter, frontend);
+    snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%u/dvr0", adapter);
+    snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%u/demux0", adapter);
+    MP_VERBOSE(priv, "DVB_OPEN_DEVICES: frontend: %s\n", frontend_dev);
     state->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (state->fe_fd < 0) {
         MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n",

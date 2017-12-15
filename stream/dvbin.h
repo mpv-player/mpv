@@ -26,6 +26,9 @@
 #include <linux/dvb/audio.h>
 #include <linux/dvb/version.h>
 
+#define MAX_ADAPTERS 16
+#define MAX_FRONTENDS 8
+
 #undef DVB_ATSC
 #if defined(DVB_API_VERSION_MINOR)
 
@@ -69,7 +72,8 @@ typedef struct {
     unsigned int freq, srate, diseqc;
     char pol;
     unsigned int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
-    bool is_dvb_x2;
+    bool is_dvb_x2; /* Used only in dvb_get_channels() and parse_vdr_par_string(), use delsys. */
+    unsigned int frontend;
     unsigned int delsys;
     unsigned int stream_id;
     unsigned int service_id;
@@ -90,7 +94,7 @@ typedef struct {
 
 typedef struct {
     int devno;
-    unsigned int delsys_mask;
+    unsigned int delsys_mask[MAX_FRONTENDS];
     dvb_channels_list_t *list;
 } dvb_adapter_config_t;
 
@@ -98,6 +102,7 @@ typedef struct {
     unsigned int adapters_count;
     dvb_adapter_config_t *adapters;
     unsigned int cur_adapter;
+    unsigned int cur_frontend;
 
     int fe_fd;
     int dvr_fd;
