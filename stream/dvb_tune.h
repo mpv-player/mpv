@@ -26,7 +26,8 @@ struct mp_log;
 
 const char *get_dvb_delsys(unsigned int delsys);
 unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log);
-int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt);
+int dvb_open_devices(dvb_priv_t *priv, unsigned int adapter,
+                     unsigned int frontend, unsigned int demux_cnt);
 int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt);
 int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid, dmx_pes_type_t pestype);
 int dvb_get_pmt_pid(dvb_priv_t *priv, int card, int service_id);
