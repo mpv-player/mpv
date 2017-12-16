@@ -792,6 +792,7 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("fs-black-out-screens", NULL),
     OPT_REPLACED("sub-paths", "sub-file-paths"),
     OPT_REMOVED("heartbeat-cmd", "use Lua scripting instead"),
+    OPT_REMOVED("no-ometadata", "use --no-ocopy-metadata"),
 
     {0}
 };

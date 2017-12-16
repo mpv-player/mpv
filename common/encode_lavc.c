@@ -55,12 +55,12 @@ const struct m_sub_options encode_config = {
         OPT_FLAG("oneverdrop", neverdrop, M_OPT_FIXED),
         OPT_FLAG("ovfirst", video_first, M_OPT_FIXED),
         OPT_FLAG("oafirst", audio_first, M_OPT_FIXED),
-        OPT_FLAG("ometadata", metadata, M_OPT_FIXED),
+        OPT_FLAG("ocopy-metadata", copy_metadata, M_OPT_FIXED),
         {0}
     },
     .size = sizeof(struct encode_opts),
     .defaults = &(const struct encode_opts){
-        .metadata = 1,
+        .copy_metadata = 1,
     },
 };
 
@@ -278,7 +278,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata)
 {
-    if (ctx->options->metadata)
+    if (ctx->options->copy_metadata)
         ctx->metadata = metadata;
 }
 
