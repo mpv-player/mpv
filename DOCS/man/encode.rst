@@ -153,3 +153,24 @@ You can encode files from one format/codec to another using this facility.
 ``--no-ocopy-metadata``
     Turns off copying of metadata from input files to output files when
     encoding (which is enabled by default).
+
+``--oset-metadata=<metadata-tag[,metadata-tag,...]>``
+    Specifies metadata to include in the output file.
+    Supported keys vary between output formats. For example, Matroska (MKV) and
+    FLAC allow almost arbitrary keys, while support in MP4 and MP3 is more
+    limited.
+
+    .. admonition:: Example
+
+        "``--oset-metadata=title="Output title",comment="Another tag"``"
+            adds a title and a comment to the output file.
+
+``--oremove-metadata=<metadata-tag[,metadata-tag,...]>``
+    Specifies metadata to exclude from the output file when copying from the
+    input file.
+
+    .. admonition:: Example
+
+        "``--oremove-metadata=comment,genre``"
+            excludes copying of the the comment and genre tags to the output
+            file.

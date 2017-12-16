@@ -56,6 +56,8 @@ const struct m_sub_options encode_config = {
         OPT_FLAG("ovfirst", video_first, M_OPT_FIXED),
         OPT_FLAG("oafirst", audio_first, M_OPT_FIXED),
         OPT_FLAG("ocopy-metadata", copy_metadata, M_OPT_FIXED),
+        OPT_KEYVALUELIST("oset-metadata", set_metadata, M_OPT_FIXED),
+        OPT_STRINGLIST("oremove-metadata", remove_metadata, M_OPT_FIXED),
         {0}
     },
     .size = sizeof(struct encode_opts),
@@ -278,8 +280,30 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata)
 {
-    if (ctx->options->copy_metadata)
+    if (ctx->options->copy_metadata) {
         ctx->metadata = metadata;
+    } else {
+        ctx->metadata = talloc_zero(ctx, struct mp_tags);
+    }
+
+    if (ctx->options->set_metadata) {
+        char **kv = ctx->options->set_metadata;
+        // Set all user-provided metadata tags
+        for (int n = 0; kv[n * 2]; n++) {
+            MP_VERBOSE(ctx, "setting metadata value '%s' for key '%s'\n",
+                       kv[n*2 + 0], kv[n*2 +1]);
+            mp_tags_set_str(ctx->metadata, kv[n*2 + 0], kv[n*2 +1]);
+        }
+    }
+
+    if (ctx->options->remove_metadata) {
+        char **k = ctx->options->remove_metadata;
+        // Remove all user-provided metadata tags
+        for (int n = 0; k[n]; n++) {
+            MP_VERBOSE(ctx, "removing metadata key '%s'\n", k[n]);
+            mp_tags_remove_str(ctx->metadata, k[n]);
+        }
+    }
 }
 
 int encode_lavc_start(struct encode_lavc_context *ctx)
