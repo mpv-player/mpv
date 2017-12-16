@@ -164,6 +164,8 @@ Otherwise, where the Lua APIs return ``nil`` on error, JS returns ``undefined``.
 
 ``mp.msg.debug(...)``
 
+``mp.msg.trace(...)``
+
 ``mp.utils.getcwd()`` (LE)
 
 ``mp.utils.readdir(path [, filter])`` (LE)

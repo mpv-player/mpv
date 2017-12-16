@@ -7,7 +7,7 @@
 
 mp.msg = { log: mp.log };
 mp.msg.verbose = mp.log.bind(null, "v");
-var levels = ["fatal", "error", "warn", "info", "debug"];
+var levels = ["fatal", "error", "warn", "info", "debug", "trace"];
 levels.forEach(function(l) { mp.msg[l] = mp.log.bind(null, l) });
 
 // same as {} but without inherited stuff, e.g. o["toString"] doesn't exist.

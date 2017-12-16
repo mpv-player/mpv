@@ -487,16 +487,17 @@ with ``require 'mp.msg'``.
 
 ``msg.log(level, ...)``
     The level parameter is the message priority. It's a string and one of
-    ``fatal``, ``error``, ``warn``, ``info``, ``v``, ``debug``. The user's
-    settings will determine which of these messages will be visible. Normally,
-    all messages are visible, except ``v`` and ``debug``.
+    ``fatal``, ``error``, ``warn``, ``info``, ``v``, ``debug``, ``trace``. The
+    user's settings will determine which of these messages will be
+    visible. Normally, all messages are visible, except ``v``, ``debug`` and
+    ``trace``.
 
     The parameters after that are all converted to strings. Spaces are inserted
     to separate multiple parameters.
 
     You don't need to add newlines.
 
-``msg.fatal(...)``, ``msg.error(...)``, ``msg.warn(...)``, ``msg.info(...)``, ``msg.verbose(...)``, ``msg.debug(...)``
+``msg.fatal(...)``, ``msg.error(...)``, ``msg.warn(...)``, ``msg.info(...)``, ``msg.verbose(...)``, ``msg.debug(...)``, ``msg.trace(...)``
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
 
