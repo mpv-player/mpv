@@ -126,6 +126,9 @@ struct vo_w32_state {
     // UTF-16 decoding state for WM_CHAR and VK_PACKET
     int high_surrogate;
 
+    // Whether to fit the window on screen on next window state updating
+    bool fit_on_screen;
+
     ITaskbarList2 *taskbar_list;
     ITaskbarList3 *taskbar_list3;
     UINT tbtnCreatedMsg;
@@ -604,6 +607,9 @@ static void update_playback_state(struct vo_w32_state *w32)
 
 static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
 {
+    if (w32->parent || w32->current_fs || IsMaximized(w32->window))
+        return false;
+
     if (!w32->opts->snap_window) {
         w32->snapped = false;
         return false;
@@ -751,125 +757,146 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
     return style;
 }
 
-// Update the window title, position, size, and border style.
-static void reinit_window_state(struct vo_w32_state *w32)
+static void update_window_style(struct vo_w32_state *w32)
 {
-    HWND layer = HWND_NOTOPMOST;
-    RECT r;
-
     if (w32->parent)
         return;
 
-    bool new_fs = w32->toggle_fs ? !w32->current_fs : w32->opts->fullscreen;
+    // SetWindowLongPtr can trigger a WM_SIZE event, so window rect
+    // has to be saved now and restored after setting the new style.
+    const RECT wr = w32->windowrc;
+    const DWORD style = GetWindowLongPtrW(w32->window, GWL_STYLE);
+    SetWindowLongPtrW(w32->window, GWL_STYLE, update_style(w32, style));
+    w32->windowrc = wr;
+}
+
+// Adjust rc size and position if its size is larger than rc2.
+// returns true if the rectangle was modified.
+static bool fit_rect(RECT *rc, RECT *rc2)
+{
+    // Calculate old size and maximum new size
+    int o_w = rect_w(*rc), o_h = rect_h(*rc);
+    int n_w = rect_w(*rc2), n_h = rect_h(*rc2);
+    if (o_w <= n_w && o_h <= n_h)
+        return false;
+
+    // Apply letterboxing
+    const float o_asp = o_w / (float)MPMAX(o_h, 1);
+    const float n_asp = n_w / (float)MPMAX(n_h, 1);
+    if (o_asp > n_asp) {
+        n_h = n_w / o_asp;
+    } else {
+        n_w = n_h * o_asp;
+    }
+
+    // Calculate new position and save the rect
+    const int x = rc->left + o_w / 2 - n_w / 2;
+    const int y = rc->top + o_h / 2 - n_h / 2;
+    SetRect(rc, x, y, x + n_w, y + n_h);
+    return true;
+}
+
+// Adjust window size and position if its size is larger than the screen size.
+static void fit_window_on_screen(struct vo_w32_state *w32)
+{
+    if (w32->parent || w32->current_fs || IsMaximized(w32->window))
+        return;
+
+    RECT screen = w32->screenrc;
+    if (w32->opts->border && w32->opts->fit_border)
+        subtract_window_borders(w32->window, &screen);
+
+    if (fit_rect(&w32->windowrc, &screen)) {
+        MP_VERBOSE(w32, "adjusted window bounds: %d:%d:%d:%d\n",
+                   (int)w32->windowrc.left, (int)w32->windowrc.top,
+                   (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
+    }
+}
+
+// Calculate new fullscreen state and change window size and position.
+// returns true if fullscreen state was changed.
+static bool update_fullscreen_state(struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return false;
+
+    bool new_fs = w32->opts->fullscreen;
+    if (w32->toggle_fs) {
+        new_fs = !w32->current_fs;
+        w32->toggle_fs = false;
+    }
+
     bool toggle_fs = w32->current_fs != new_fs;
     w32->current_fs = new_fs;
-    w32->toggle_fs = false;
 
+    update_screen_rect(w32);
+
+    if (toggle_fs) {
+        RECT rc;
+        char msg[50];
+        if (w32->current_fs) {
+            // Save window rect when switching to fullscreen.
+            rc = w32->prev_windowrc = w32->windowrc;
+            sprintf(msg, "save window bounds");
+        } else {
+            // Restore window rect when switching from fullscreen.
+            rc = w32->windowrc = w32->prev_windowrc;
+            sprintf(msg, "restore window bounds");
+        }
+        MP_VERBOSE(w32, "%s: %d:%d:%d:%d\n", msg,
+                   (int)rc.left, (int)rc.top, (int)rect_w(rc), (int)rect_h(rc));
+    }
+
+    if (w32->current_fs)
+        w32->windowrc = w32->screenrc;
+
+    MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
+               (int)w32->windowrc.left, (int)w32->windowrc.top,
+               (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
+    return toggle_fs;
+}
+
+static void update_window_state(struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    RECT wr = w32->windowrc;
+    add_window_borders(w32->window, &wr);
+
+    SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
+                 wr.left, wr.top, rect_w(wr), rect_h(wr),
+                 SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+    // Notify the taskbar about the fullscreen state only after the window
+    // is visible, to make sure the taskbar item has already been created
     if (w32->taskbar_list) {
         ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
                                            w32->window, w32->current_fs);
     }
 
-    DWORD style = update_style(w32, GetWindowLongPtrW(w32->window, GWL_STYLE));
-
-    if (w32->opts->ontop)
-        layer = HWND_TOPMOST;
-
-    // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
-    update_screen_rect(w32);
-
-    if (w32->current_fs) {
-        // Save window position and size when switching to fullscreen.
-        if (toggle_fs) {
-            w32->prev_windowrc = w32->windowrc;
-            MP_VERBOSE(w32, "save window bounds: %d:%d:%d:%d\n",
-                       (int)w32->windowrc.left, (int)w32->windowrc.top,
-                       (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
-        }
-        w32->windowrc = w32->screenrc;
-    } else {
-        // Restore window position and size when switching from fullscreen.
-        if (toggle_fs) {
-            w32->windowrc = w32->prev_windowrc;
-            MP_VERBOSE(w32, "restore window bounds: %d:%d:%d:%d\n",
-                       (int)w32->windowrc.left, (int)w32->windowrc.top,
-                       (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
-        }
-    }
-
-    r = w32->windowrc;
-    SetWindowLongPtrW(w32->window, GWL_STYLE, style);
-
-    RECT cr = r;
-    add_window_borders(w32->window, &r);
-    // Check on client area size instead of window size on --fit-border=no
-    long o_w;
-    long o_h;
-    if( w32->opts->fit_border ) {
-        o_w = r.right - r.left;
-        o_h = r.bottom - r.top;
-    } else {
-        o_w = cr.right - cr.left;
-        o_h = cr.bottom - cr.top;
-    }
-
-    const int screen_w = rect_w(w32->screenrc);
-    const int screen_h = rect_h(w32->screenrc);
-
-    if ( !w32->current_fs && ( o_w > screen_w || o_h > screen_h ) )
-    {
-        MP_VERBOSE(w32, "requested window size larger than the screen\n");
-        // Use the aspect of the client area, not the full window size.
-        // Basically, try to compute the maximum window size.
-        long n_w;
-        long n_h;
-        if( w32->opts->fit_border ) {
-            n_w = screen_w - (r.right - cr.right) - (cr.left - r.left);
-            n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top);
-        } else {
-            n_w = screen_w;
-            n_h = screen_h;
-        }
-        // Letterbox
-        double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
-        double s_asp = n_w / (double)n_h;
-        if (asp > s_asp) {
-            n_h = n_w / asp;
-        } else {
-            n_w = n_h * asp;
-        }
-        // Save new size
-        w32->windowrc.right = w32->windowrc.left + n_w;
-        w32->windowrc.bottom = w32->windowrc.top + n_h;
-        // Get old window center
-        long o_cx = r.left + (r.right - r.left) / 2;
-        long o_cy = r.top + (r.bottom - r.top) / 2;
-        // Add window borders to the new window size
-        r = (RECT){.right = n_w, .bottom = n_h};
-        add_window_borders(w32->window, &r);
-        // Get top and left border size for client area position calculation
-        long b_top = -r.top;
-        long b_left = -r.left;
-        // Center the final window around the old window center
-        n_w = r.right - r.left;
-        n_h = r.bottom - r.top;
-        r.left = o_cx - n_w / 2;
-        r.top = o_cy - n_h / 2;
-        r.right = r.left + n_w;
-        r.bottom = r.top + n_h;
-        // Save new client area position
-        OffsetRect(&w32->windowrc, r.left + b_left - w32->windowrc.left,
-                                   r.top + b_top - w32->windowrc.top);
-    }
-
-    MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
-               (int) r.left, (int) r.top, (int)(r.right - r.left),
-               (int)(r.bottom - r.top));
-
-    SetWindowPos(w32->window, layer, r.left, r.top, r.right - r.left,
-                 r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-
     signal_events(w32, VO_EVENT_RESIZE);
+}
+
+static void reinit_window_state(struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    // The order matters: fs state should be updated prior to changing styles
+    bool toggle_fs = update_fullscreen_state(w32);
+    update_window_style(w32);
+
+    // Assume that the window has already been fit on screen before switching fs
+    if (!toggle_fs || w32->fit_on_screen) {
+        fit_window_on_screen(w32);
+        // The fullscreen state might still be active, so set the flag
+        // to fit on screen next time the window leaves the fullscreen.
+        w32->fit_on_screen = w32->current_fs;
+    }
+
+    // Show and activate the window after all window state parameters were set
+    update_window_state(w32);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -916,7 +943,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_MOVING: {
         w32->moving = true;
         RECT *rc = (RECT*)lParam;
-        if (!w32->current_fs && !w32->parent && snap_to_screen_edges(w32, rc))
+        if (snap_to_screen_edges(w32, rc))
             return TRUE;
         break;
     }
@@ -1261,50 +1288,41 @@ static void gui_thread_reconfig(void *ptr)
 
     bool reset_size = w32->o_dwidth != vo->dwidth ||
                       w32->o_dheight != vo->dheight;
-    bool pos_init = false;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
 
-    // the desired size is ignored in wid mode, it always matches the window size.
-    if (!w32->parent) {
-        if (w32->window_bounds_initialized) {
-            // restore vo_dwidth/vo_dheight, which are reset against our will
-            // in vo_config()
-            RECT r;
-            GetClientRect(w32->window, &r);
-            vo->dwidth = r.right;
-            vo->dheight = r.bottom;
-        } else {
-            w32->window_bounds_initialized = true;
-            reset_size = true;
-            pos_init = true;
-            w32->windowrc.left = w32->prev_windowrc.left = geo.win.x0;
-            w32->windowrc.top = w32->prev_windowrc.top = geo.win.y0;
-        }
+    if (!w32->parent && !w32->window_bounds_initialized) {
+        SetRect(&w32->windowrc, geo.win.x0, geo.win.y0,
+                geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
+        w32->prev_windowrc = w32->windowrc;
+        w32->window_bounds_initialized = true;
+        w32->fit_on_screen = true;
+        goto finish;
+    }
 
-        if (reset_size) {
-            vo->dwidth = w32->o_dwidth;
-            vo->dheight = w32->o_dheight;
-            w32->prev_windowrc.right = w32->prev_windowrc.left + vo->dwidth;
-            w32->prev_windowrc.bottom = w32->prev_windowrc.top + vo->dheight;
-        }
-    } else {
+    // The rect which size is going to be modified.
+    RECT *rc = &w32->windowrc;
+
+    // The desired size always matches the window size in wid mode.
+    if (!reset_size || w32->parent) {
         RECT r;
         GetClientRect(w32->window, &r);
+        // Restore vo_dwidth and vo_dheight, which were reset in vo_config()
         vo->dwidth = r.right;
         vo->dheight = r.bottom;
+    } else {
+        if (w32->current_fs)
+            rc = &w32->prev_windowrc;
+        w32->fit_on_screen = true;
     }
 
-    // Recenter window around old position on new video size
-    // excluding the case when initial position handled by win_state.
-    if (!pos_init) {
-        w32->windowrc.left += rect_w(w32->windowrc) / 2 - vo->dwidth / 2;
-        w32->windowrc.top += rect_h(w32->windowrc) / 2 - vo->dheight / 2;
-    }
-    w32->windowrc.right = w32->windowrc.left + vo->dwidth;
-    w32->windowrc.bottom = w32->windowrc.top + vo->dheight;
+    // Save new window size and position.
+    const int x = rc->left + rect_w(*rc) / 2 - vo->dwidth / 2;
+    const int y = rc->top + rect_h(*rc) / 2 - vo->dheight / 2;
+    SetRect(rc, x, y, x + vo->dwidth, y + vo->dheight);
 
+finish:
     reinit_window_state(w32);
 }
 
@@ -1538,10 +1556,11 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        reinit_window_state(w32);
+        update_window_state(w32);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        reinit_window_state(w32);
+        update_window_style(w32);
+        update_window_state(w32);
         return VO_TRUE;
     case VOCTRL_GET_FULLSCREEN:
         *(bool *)arg = w32->current_fs;
@@ -1568,6 +1587,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         const int y = rc->top + rect_h(*rc) / 2 - s[1] / 2;
         SetRect(rc, x, y, x + s[0], y + s[1]);
 
+        w32->fit_on_screen = true;
         reinit_window_state(w32);
         return VO_TRUE;
     }
