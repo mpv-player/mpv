@@ -365,11 +365,10 @@ Playback Control
         Without ``--hr-seek``, skipping will snap to keyframes.
 
 ``--stop-playback-on-init-failure=<yes|no>``
-    Stop playback if either audio or video fails to initialize. Currently,
-    the default behavior is ``no`` for the command line player, but ``yes``
-    for libmpv. With ``no``, playback will continue in video-only or audio-only
-    mode if one of them fails. This doesn't affect playback of audio-only or
-    video-only files.
+    Stop playback if either audio or video fails to initialize (default: no).
+    With ``no``, playback will continue in video-only or audio-only mode if one
+    of them fails. This doesn't affect playback of audio-only or video-only
+    files.
 
 Program Behavior
 ----------------
