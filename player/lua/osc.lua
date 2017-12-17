@@ -1835,12 +1835,16 @@ function osc_init()
 
     ne.content = function ()
         local dmx_cache = mp.get_property_number("demuxer-cache-duration")
-        local cache_used = mp.get_property_number("cache-used")
+        local cache_used = mp.get_property_number("cache-used", 0)
+        local dmx_cache_state = mp.get_property_native("demuxer-cache-state", {})
         local is_network = mp.get_property_native("demuxer-via-network")
         if dmx_cache then
             dmx_cache = string.format("%3.0fs", dmx_cache)
         end
-        if cache_used then
+        if dmx_cache_state["fw-bytes"] then
+            cache_used = cache_used + dmx_cache_state["fw-bytes"] / 1024
+        end
+        if cache_used > 0 then
             local suffix = " KiB"
             if (cache_used >= 1024) then
                 cache_used = cache_used/1024
