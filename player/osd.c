@@ -261,11 +261,12 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
             } else {
                 saddf(&line, "%2ds", (int)s.ts_duration);
             }
-            if (info.size > 0) {
-                if (info.fill >= 1024 * 1024) {
-                    saddf(&line, "+%lldMB", (long long)(info.fill / 1024 / 1024));
+            int64_t cache_size = s.fw_bytes + info.fill;
+            if (cache_size > 0) {
+                if (cache_size >= 1024 * 1024) {
+                    saddf(&line, "+%lldMB", (long long)(cache_size / 1024 / 1024));
                 } else {
-                    saddf(&line, "+%lldKB", (long long)(info.fill / 1024));
+                    saddf(&line, "+%lldKB", (long long)(cache_size / 1024));
                 }
             }
         }
