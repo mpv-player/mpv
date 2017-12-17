@@ -180,6 +180,8 @@ Otherwise, where the Lua APIs return ``nil`` on error, JS returns ``undefined``.
 
 ``mp.utils.subprocess_detached(t)``
 
+``mp.utils.getpid()`` (LE)
+
 ``mp.add_hook(type, priority, fn)``
 
 Additional utilities

@@ -682,6 +682,10 @@ strictly part of the guaranteed API.
 
     The function returns ``nil``.
 
+``utils.getpid()``
+    Returns the process ID of the running mpv process. This can be used to identify
+    the calling mpv when launching (detached) subprocesses.
+
 ``utils.parse_json(str [, trail])``
     Parses the given string argument as JSON, and returns it as a Lua table. On
     error, returns ``nil, error``. (Currently, ``error`` is just a string
