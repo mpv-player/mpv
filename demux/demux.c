@@ -86,6 +86,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 struct demux_opts {
     int max_bytes;
     int max_bytes_bw;
+    int max_spill_bytes;
     double min_secs;
     int force_seekable;
     double min_secs_cache;
@@ -101,6 +102,7 @@ const struct m_sub_options demux_conf = {
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
         OPT_INTRANGE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
         OPT_INTRANGE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, INT_MAX),
+        OPT_INTRANGE("demuxer-max-spill-bytes", max_spill_bytes, 0, 0, INT_MAX),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
@@ -113,6 +115,7 @@ const struct m_sub_options demux_conf = {
     .defaults = &(const struct demux_opts){
         .max_bytes = 400 * 1024 * 1024,
         .max_bytes_bw = 400 * 1024 * 1024,
+        .max_spill_bytes = 1 * 1024 * 1024,
         .min_secs = 1.0,
         .min_secs_cache = 120.0,
         .seekable_cache = -1,
@@ -156,6 +159,7 @@ struct demux_internal {
     bool autoselect;
     double min_secs;
     int max_bytes;
+    int max_bytes_with_spill;
     int max_bytes_bw;
     bool seekable_cache;
 
@@ -1206,19 +1210,21 @@ static bool read_packet(struct demux_internal *in)
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
     // safe-guards against packet queue overflow.
-    bool read_more = false, prefetch_more = false;
+    bool read_more = false, prefetch_more = false, refresh_more = false;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
         read_more |= ds->eager && !ds->reader_head;
-        prefetch_more |= ds->refreshing;
+        refresh_more |= ds->refreshing;
         if (ds->eager && ds->queue->last_ts != MP_NOPTS_VALUE &&
             in->min_secs > 0 && ds->base_ts != MP_NOPTS_VALUE &&
             ds->queue->last_ts >= ds->base_ts)
             prefetch_more |= ds->queue->last_ts - ds->base_ts < in->min_secs;
     }
-    MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d\n",
-             in->fw_bytes, read_more, prefetch_more);
-    if (in->fw_bytes >= in->max_bytes) {
+    MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
+             in->fw_bytes, read_more, prefetch_more, refresh_more);
+    if (in->fw_bytes >= in->max_bytes &&
+        !(read_more && refresh_more && in->fw_bytes < in->max_bytes_with_spill))
+    {
         // if we hit the limit just by prefetching, simply stop prefetching
         if (!read_more)
             return false;
@@ -1249,7 +1255,7 @@ static bool read_packet(struct demux_internal *in)
         return false;
     }
 
-    if (!read_more && !prefetch_more)
+    if (!read_more && !prefetch_more && !refresh_more)
         return false;
 
     // Actually read a packet. Drop the lock while doing so, because waiting
@@ -1952,6 +1958,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_user = demuxer,
         .min_secs = opts->min_secs,
         .max_bytes = opts->max_bytes,
+        .max_bytes_with_spill =
+            MPMIN(INT_MAX, (int64_t)opts->max_bytes + opts->max_spill_bytes),
         .max_bytes_bw = opts->max_bytes_bw,
         .initial_state = true,
     };

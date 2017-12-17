@@ -2874,6 +2874,12 @@ Demuxer
 
     See ``--list-options`` for defaults and value range.
 
+``--demuxer-max-spill-bytes=<value>``
+    Maximum bytes which the demuxer is allowed to buffer in addition to
+    ``--demuxer-max-bytes`` if a decoder is in immediate need of new data. This
+    option is mostly for debugging, and you probably never need to rouch it. It
+    might change arbitrarily or get removed in the future.
+
 ``--demuxer-max-back-bytes=<value>``
     This controls how much past data the demuxer is allowed to preserve. This
     is useful only if the ``--demuxer-seekable-cache`` option is enabled.
