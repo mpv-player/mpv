@@ -683,8 +683,10 @@ listed.
   (``drop-frame-count`` property.)
 - Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
-  the second value shows *additional* data buffered in the stream cache in
-  kilobytes. (``demuxer-cache-duration`` and ``cache-used`` properties.)
+  the second value shows the sum of the demuxer forward cache size and the
+  *additional* data buffered in the stream cache in kilobytes.
+  (``demuxer-cache-duration``, ``demuxer-cache-state``, ``cache-used``
+  properties.)
 
 
 PROTOCOLS
