@@ -40,6 +40,7 @@
 #include "osdep/subprocess.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
+#include "osdep/getpid.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
 #include "core.h"
@@ -990,6 +991,12 @@ static void script_subprocess_detached(js_State *J, void *af)
     af_subprocess_common(J, 1, af);
 }
 
+// args: none
+static void script_getpid(js_State *J)
+{
+    js_pushnumber(J, mp_getpid());
+}
+
 // args: prefixed file name, data (c-str)
 static void script_write_file(js_State *J, void *af)
 {
@@ -1296,6 +1303,7 @@ static const struct fn_entry utils_fns[] = {
     AF_ENTRY(get_user_path, 1),
     AF_ENTRY(subprocess, 1),
     AF_ENTRY(subprocess_detached, 1),
+    FN_ENTRY(getpid, 0),
 
     FN_ENTRY(read_file, 2),
     AF_ENTRY(write_file, 2),
