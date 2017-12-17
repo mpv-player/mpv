@@ -3762,7 +3762,7 @@ Cache
     between readahead and backbuffer sizes.
 
 ``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 75000 KB). Using ``no``
+    Set the size of the cache in kilobytes (default: 10000 KB). Using ``no``
     will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
@@ -3783,7 +3783,7 @@ Cache
     This option allows control over this.
 
 ``--cache-backbuffer=<kBytes>``
-    Size of the cache back buffer (default: 75000 KB). This will add to the total
+    Size of the cache back buffer (default: 10000 KB). This will add to the total
     cache size, and reserved the amount for seeking back. The reserved amount
     will not be used for readahead, and instead preserves already read data to
     enable fast seeking back.
