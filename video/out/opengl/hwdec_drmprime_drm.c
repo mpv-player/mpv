@@ -205,6 +205,9 @@ static int init(struct ra_hwdec *hw)
     struct priv *p = hw->priv;
     int drm_overlay;
 
+    if (!ra_is_gl(hw->ra))
+        return -1;
+
     p->log = hw->log;
 
     void *tmp = talloc_new(NULL);
