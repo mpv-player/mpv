@@ -86,7 +86,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 struct demux_opts {
     int max_bytes;
     int max_bytes_bw;
-    int max_spill_bytes;
     double min_secs;
     int force_seekable;
     double min_secs_cache;
@@ -102,7 +101,6 @@ const struct m_sub_options demux_conf = {
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
         OPT_INTRANGE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
         OPT_INTRANGE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, INT_MAX),
-        OPT_INTRANGE("demuxer-max-spill-bytes", max_spill_bytes, 0, 0, INT_MAX),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
@@ -115,7 +113,6 @@ const struct m_sub_options demux_conf = {
     .defaults = &(const struct demux_opts){
         .max_bytes = 400 * 1024 * 1024,
         .max_bytes_bw = 400 * 1024 * 1024,
-        .max_spill_bytes = 1 * 1024 * 1024,
         .min_secs = 1.0,
         .min_secs_cache = 10.0 * 60 * 60,
         .seekable_cache = -1,
@@ -159,7 +156,6 @@ struct demux_internal {
     bool autoselect;
     double min_secs;
     int max_bytes;
-    int max_bytes_with_spill;
     int max_bytes_bw;
     bool seekable_cache;
 
@@ -262,7 +258,8 @@ struct demux_stream {
     bool eager;             // try to keep at least 1 packet queued
                             // if false, this stream is disabled, or passively
                             // read (like subtitles)
-    bool refreshing;
+    bool refreshing;        // finding old position after track switches
+    bool eof;               // end of demuxed stream? (true if no more packets)
 
     bool global_correct_dts;// all observed so far
     bool global_correct_pos;
@@ -278,10 +275,13 @@ struct demux_stream {
     double bitrate;
     size_t fw_packs;        // number of packets in buffer (forward)
     size_t fw_bytes;        // total bytes of packets in buffer (forward)
-    bool eof;               // end of demuxed stream? (true if no more packets)
     struct demux_packet *reader_head;   // points at current decoder position
     bool skip_to_keyframe;
     bool attached_picture_added;
+
+    // for refresh seeks: pos/dts of last packet returned to reader
+    int64_t last_ret_pos;
+    double last_ret_dts;
 
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
@@ -541,19 +541,26 @@ static void free_empty_cached_ranges(struct demux_internal *in)
     }
 }
 
-static void ds_clear_reader_state(struct demux_stream *ds)
+static void ds_clear_reader_queue_state(struct demux_stream *ds)
 {
     ds->in->fw_bytes -= ds->fw_bytes;
-
     ds->reader_head = NULL;
+    ds->fw_bytes = 0;
+    ds->fw_packs = 0;
     ds->eof = false;
+}
+
+static void ds_clear_reader_state(struct demux_stream *ds)
+{
+    ds_clear_reader_queue_state(ds);
+
     ds->base_ts = ds->last_br_ts = MP_NOPTS_VALUE;
     ds->last_br_bytes = 0;
     ds->bitrate = -1;
     ds->skip_to_keyframe = false;
     ds->attached_picture_added = false;
-    ds->fw_bytes = 0;
-    ds->fw_packs = 0;
+    ds->last_ret_pos = -1;
+    ds->last_ret_dts = MP_NOPTS_VALUE;
 }
 
 static void update_stream_selection_state(struct demux_internal *in,
@@ -1222,9 +1229,7 @@ static bool read_packet(struct demux_internal *in)
     }
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
              in->fw_bytes, read_more, prefetch_more, refresh_more);
-    if (in->fw_bytes >= in->max_bytes &&
-        !(read_more && refresh_more && in->fw_bytes < in->max_bytes_with_spill))
-    {
+    if (in->fw_bytes >= in->max_bytes) {
         // if we hit the limit just by prefetching, simply stop prefetching
         if (!read_more)
             return false;
@@ -1479,6 +1484,9 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     size_t bytes = demux_packet_estimate_total_size(pkt);
     ds->fw_bytes -= bytes;
     ds->in->fw_bytes -= bytes;
+
+    ds->last_ret_pos = pkt->pos;
+    ds->last_ret_dts = pkt->dts;
 
     // The returned packet is mutated etc. and will be owned by the user.
     pkt = demux_copy_packet(pkt);
@@ -1958,8 +1966,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_user = demuxer,
         .min_secs = opts->min_secs,
         .max_bytes = opts->max_bytes,
-        .max_bytes_with_spill =
-            MPMIN(INT_MAX, (int64_t)opts->max_bytes + opts->max_spill_bytes),
         .max_bytes_bw = opts->max_bytes_bw,
         .initial_state = true,
     };
@@ -2457,10 +2463,31 @@ static void initiate_refresh_seek(struct demux_internal *in,
 
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
+
+            bool correct_pos = ds->queue->correct_pos;
+            bool correct_dts = ds->queue->correct_dts;
+
+            // We need to re-read all packets anyway, so discard the buffered
+            // data. (In theory, we could keep the packets, and be able to use
+            // it for seeking if partially read streams are deselected again,
+            // but this causes other problems like queue overflows when
+            // selecting a new stream.)
+            ds_clear_reader_queue_state(ds);
+            clear_queue(ds->queue);
+
             // Streams which didn't have any packets yet will return all packets,
             // other streams return packets only starting from the last position.
-            if (ds->queue->last_pos != -1 || ds->queue->last_dts != MP_NOPTS_VALUE)
-                ds->refreshing |= ds->selected;
+            if (ds->selected && (ds->last_ret_pos != -1 ||
+                                 ds->last_ret_dts != MP_NOPTS_VALUE))
+            {
+                ds->refreshing = true;
+                ds->queue->correct_dts = correct_dts;
+                ds->queue->correct_pos = correct_pos;
+                ds->queue->last_pos = ds->last_ret_pos;
+                ds->queue->last_dts = ds->last_ret_dts;
+            }
+
+            update_seek_ranges(in->current_range);
         }
 
         start_ts -= 1.0; // small offset to get correct overlap
