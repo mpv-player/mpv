@@ -16,17 +16,44 @@
  */
 
 #include <libavcodec/mediacodec.h>
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_mediacodec.h>
 
 #include "common/common.h"
 #include "vo.h"
 #include "video/mp_image.h"
+#include "video/hwdec.h"
 
 struct priv {
     struct mp_image *next_image;
+    struct mp_hwdec_ctx hwctx;
 };
+
+static AVBufferRef *create_mediacodec_device_ref(struct vo *vo)
+{
+    AVBufferRef *device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_MEDIACODEC);
+    if (!device_ref)
+        return NULL;
+
+    AVHWDeviceContext *ctx = (void *)device_ref->data;
+    AVMediaCodecDeviceContext *hwctx = ctx->hwctx;
+    hwctx->surface = (void *)(intptr_t)(vo->opts->WinID);
+
+    if (av_hwdevice_ctx_init(device_ref) < 0)
+        av_buffer_unref(&device_ref);
+
+    return device_ref;
+}
 
 static int preinit(struct vo *vo)
 {
+    struct priv *p = vo->priv;
+    vo->hwdec_devs = hwdec_devices_create();
+    p->hwctx = (struct mp_hwdec_ctx){
+        .driver_name = "mediacodec_embed",
+        .av_device_ref = create_mediacodec_device_ref(vo),
+    };
+    hwdec_devices_add(vo->hwdec_devs, &p->hwctx);
     return 0;
 }
 
@@ -72,6 +99,9 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     mp_image_unrefp(&p->next_image);
+
+    hwdec_devices_remove(vo->hwdec_devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
 const struct vo_driver video_out_mediacodec_embed = {
