@@ -421,7 +421,7 @@ ffmpeg_pkg_config_checks = [
 ]
 libav_pkg_config_checks = [
     'libavutil',     '>= 56.6.0',
-    'libavcodec',    '>= 58.5.0',
+    'libavcodec',    '>= 58.8.0',
     'libavformat',   '>= 58.1.0',
     'libswscale',    '>= 5.0.0',
     'libavfilter',   '>= 7.0.0',
