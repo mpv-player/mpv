@@ -563,7 +563,6 @@ static struct AVBufferRef *vdpau_create_standalone(struct mpv_global *global,
         return NULL;
     }
 
-    vdp->hwctx.emulated = mp_vdpau_guess_if_emulated(vdp);
     vdp->close_display = true;
     return vdp->hwctx.av_device_ref;
 }
