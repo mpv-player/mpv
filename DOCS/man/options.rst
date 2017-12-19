@@ -2540,7 +2540,6 @@ Window
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
     ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec-copy``).
-    This is currently broken.
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
