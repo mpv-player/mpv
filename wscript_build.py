@@ -458,7 +458,6 @@ def build(ctx):
         ( "video/out/vulkan/context_wayland.c",  "vulkan && wayland" ),
         ( "video/out/vulkan/context_win.c",      "vulkan && win32-desktop" ),
         ( "video/out/vulkan/spirv_nvidia.c",     "vulkan" ),
-        ( "video/out/win32/exclusive_hack.c",    "gl-win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/wayland/xdg-shell-v6.c",    "wayland" ),
         ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
