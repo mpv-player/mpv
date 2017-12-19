@@ -871,8 +871,8 @@ static void update_window_state(struct vo_w32_state *w32)
     // Notify the taskbar about the fullscreen state only after the window
     // is visible, to make sure the taskbar item has already been created
     if (w32->taskbar_list) {
-        ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
-                                           w32->window, w32->current_fs);
+        ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list, w32->window,
+                                           w32->current_fs || w32->opts->ontop);
     }
 
     signal_events(w32, VO_EVENT_RESIZE);
