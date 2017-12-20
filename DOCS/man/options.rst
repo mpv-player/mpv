@@ -3755,7 +3755,7 @@ Cache
     between readahead and backbuffer sizes.
 
 ``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 75000 KB). Using ``no``
+    Set the size of the cache in kilobytes (default: 10000 KB). Using ``no``
     will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
@@ -3776,7 +3776,7 @@ Cache
     This option allows control over this.
 
 ``--cache-backbuffer=<kBytes>``
-    Size of the cache back buffer (default: 75000 KB). This will add to the total
+    Size of the cache back buffer (default: 10000 KB). This will add to the total
     cache size, and reserved the amount for seeking back. The reserved amount
     will not be used for readahead, and instead preserves already read data to
     enable fast seeking back.
@@ -3834,7 +3834,9 @@ Cache
 ``--cache-secs=<seconds>``
     How many seconds of audio/video to prefetch if the cache is active. This
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
-    is enabled and the value is larger. (Default: 120.)
+    is enabled and the value is larger. The default value is set to something
+    very high, so the actually achieved readahead will usually be limited by
+    the value of the ``--demuxer-max-bytes`` option.
 
 ``--cache-pause``, ``--no-cache-pause``
     Whether the player should automatically pause when the cache runs low,

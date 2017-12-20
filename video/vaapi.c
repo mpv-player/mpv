@@ -176,8 +176,6 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     if (av_hwdevice_ctx_init(res->av_device_ref) < 0)
         goto error;
 
-    res->hwctx.emulated = va_guess_if_emulated(res);
-
     return res;
 
 error:

@@ -15,12 +15,6 @@ struct mp_hwdec_ctx {
 
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
     int *supported_formats;
-
-    // Hint to generic code: it's using a wrapper API
-    bool emulated;
-
-    // Optional. Do not set for VO-bound devices.
-    void (*destroy)(struct mp_hwdec_ctx *ctx);
 };
 
 // Used to communicate hardware decoder device handles from VO to video decoder.

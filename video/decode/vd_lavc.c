@@ -738,8 +738,10 @@ static int init_generic_hwaccel(struct dec_video *vd, enum AVPixelFormat hw_fmt)
 
     AVHWFramesContext *new_fctx = (void *)new_frames_ctx->data;
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
     if (ctx->hwdec.pix_fmt == AV_PIX_FMT_VIDEOTOOLBOX)
         new_fctx->sw_format = imgfmt2pixfmt(vd->opts->videotoolbox_format);
+#endif
     if (vd->opts->hwdec_image_format)
         new_fctx->sw_format = imgfmt2pixfmt(vd->opts->hwdec_image_format);
 
