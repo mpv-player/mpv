@@ -749,10 +749,10 @@ video_output_features = [
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
         'func': compose_checks(
-            check_cc(cflags="-isystem/opt/vc/include/ "+
-                            "-isystem/opt/vc/include/interface/vcos/pthreads " +
-                            "-isystem/opt/vc/include/interface/vmcs_host/linux " +
-                            "-fgnu89-inline",
+            check_cc(cflags=["-isystem/opt/vc/include",
+                             "-isystem/opt/vc/include/interface/vcos/pthreads",
+                             "-isystem/opt/vc/include/interface/vmcs_host/linux",
+                             "-fgnu89-inline"],
                      linkflags="-L/opt/vc/lib",
                      header_name="bcm_host.h",
                      lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
