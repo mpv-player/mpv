@@ -73,6 +73,8 @@ Track Selection
     options), there will be streams with duplicate IDs. In this case, the
     first stream in order is selected.
 
+    Deprecated.
+
 ``--edition=<ID|auto>``
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set

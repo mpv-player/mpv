@@ -670,8 +670,9 @@ extern const char m_option_path_separator;
 #define OPT_SIZE_BOX(...) \
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
 
-#define OPT_TRACKCHOICE(name, var) \
-    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
+#define OPT_TRACKCHOICE(name, var, ...) \
+    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}), \
+    ## __VA_ARGS__)
 
 #define OPT_ASPECT(...) \
     OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_aspect)
