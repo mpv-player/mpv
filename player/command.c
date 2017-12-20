@@ -2193,6 +2193,8 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
         *(int *) arg = track ? track->ff_index : -2;
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
+        MP_WARN(mpctx, "Warning: property '%s' is deprecated and "
+                "will be removed in the future.\n", prop->name);
         int id = *(int *)arg;
         if (mpctx->playback_initialized) {
             track = NULL;
