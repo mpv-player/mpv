@@ -79,10 +79,10 @@ const struct m_sub_options stream_cache_conf = {
     .size = sizeof(struct mp_cache_opts),
     .defaults = &(const struct mp_cache_opts){
         .size = -1,
-        .def_size = 75000,
+        .def_size = 10000,
         .initial = 0,
         .seek_min = 500,
-        .back_buffer = 75000,
+        .back_buffer = 10000,
         .file_max = 1024 * 1024,
     },
 };
