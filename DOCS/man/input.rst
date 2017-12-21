@@ -1273,6 +1273,9 @@ Property list
     buffering amount, while the seek ranges represent the buffered data that
     can actually be used for cached seeking.
 
+    ``fw-bytes`` is the number of bytes of packets buffered in the range
+    starting from the current decoding position.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1284,6 +1287,7 @@ Property list
                 MPV_FORMAT_NODE_MAP
                     "start"             MPV_FORMAT_DOUBLE
                     "end"               MPV_FORMAT_DOUBLE
+            "fw-bytes"          MPV_FORMAT_INT64
 
     Other fields (might be changed or removed in the future):
 
