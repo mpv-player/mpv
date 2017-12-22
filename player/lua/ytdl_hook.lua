@@ -475,7 +475,11 @@ mp.add_hook("on_load", 10, function ()
                         site = entry["webpage_url"]
                     end
 
-                    playlist = playlist .. "ytdl://" .. site .. "\n"
+                    if not (site:find("https?://") == 1) then
+                        site = "ytdl://" .. site
+                    end
+                    playlist = playlist .. site .. "\n"
+
                 end
 
                 mp.set_property("stream-open-filename", "memory://" .. playlist)
