@@ -93,7 +93,7 @@ class Libav < TravisDepsBuilder
       },
       "ffmpeg-git" => {
         :action => :git,
-        :url    => "git://git.ffmpeg.org/ffmpeg.git"
+        :url    => "https://github.com/FFmpeg/FFmpeg.git"
       }
     }
   end
