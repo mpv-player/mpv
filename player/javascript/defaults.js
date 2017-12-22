@@ -17,7 +17,7 @@ function new_cache() {
 }
 
 /**********************************************************************
- *  event handlers, property observers, client messages, hooks
+ *  event handlers, property observers, idle, client messages, hooks
  *********************************************************************/
 var ehandlers = new_cache() // items of event-name: array of {maybe cb: fn}
 
@@ -51,6 +51,31 @@ function dispatch_event(e) {
             if (cb)                   // could remove cb from some items
                 cb(e);
         }
+    }
+}
+
+//  ----- idle observers -----
+var iobservers = [],  // array of callbacks
+    ideleted = false;
+
+mp.register_idle = function(fn) {
+    iobservers.push(fn);
+}
+
+mp.unregister_idle = function(fn) {
+    iobservers.forEach(function(f, i) {
+        if (f == fn)
+             delete iobservers[i];  // -> same length but [more] sparse
+    });
+    ideleted = true;
+}
+
+function notify_idle_observers() {
+    // forEach and filter skip deleted items and newly added items
+    iobservers.forEach(function(f) { f() });
+    if (ideleted) {
+        iobservers = iobservers.filter(function() { return true });
+        ideleted = false;
     }
 }
 
@@ -252,6 +277,10 @@ g.clearTimeout = g.clearInterval = function(id) {
 // arr: ordered timers array. ret: -1: no timers, 0: due, positive: ms to wait
 function peek_wait(arr) {
     return arr.length ? Math.max(0, arr[arr.length - 1].when - now()) : -1;
+}
+
+function peek_timers_wait() {
+    return peek_wait(timers);  // must not be called while in process_timers
 }
 
 // Callback all due non-canceled timers which were inserted before calling us.
@@ -481,6 +510,8 @@ mp.get_time = function() { return mp.get_time_ms() / 1000 };
 mp.utils.getcwd = function() { return mp.get_property("working-directory") };
 mp.dispatch_event = dispatch_event;
 mp.process_timers = process_timers;
+mp.notify_idle_observers = notify_idle_observers;
+mp.peek_timers_wait = peek_timers_wait;
 
 mp.get_opt = function(key, def) {
     var v = mp.get_property_native("options/script-opts")[key];
@@ -533,13 +564,17 @@ mp.register_script_message("key-binding", dispatch_key_binding);
 
 g.mp_event_loop = function mp_event_loop() {
     var wait = 0;  // seconds
-    do {  // distapch events as long as they arrive, then do the timers
+    do {  // distapch events as long as they arrive, then do the timers/idle
         var e = mp.wait_event(wait);
         if (e.event != "none") {
             dispatch_event(e);
             wait = 0;  // poll the next one
         } else {
             wait = process_timers() / 1000;
+            if (wait != 0) {
+                notify_idle_observers();  // can add timers -> recalculate wait
+                wait = peek_timers_wait() / 1000;
+            }
         }
     } while (mp.keep_running);
 };
