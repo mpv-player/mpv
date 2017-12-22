@@ -1217,18 +1217,18 @@ static bool read_packet(struct demux_internal *in)
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
     // safe-guards against packet queue overflow.
-    bool read_more = false, prefetch_more = false;
+    bool read_more = false, prefetch_more = false, refresh_more = false;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
         read_more |= ds->eager && !ds->reader_head;
-        prefetch_more |= ds->refreshing;
+        refresh_more |= ds->refreshing;
         if (ds->eager && ds->queue->last_ts != MP_NOPTS_VALUE &&
             in->min_secs > 0 && ds->base_ts != MP_NOPTS_VALUE &&
             ds->queue->last_ts >= ds->base_ts)
             prefetch_more |= ds->queue->last_ts - ds->base_ts < in->min_secs;
     }
-    MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d\n",
-             in->fw_bytes, read_more, prefetch_more);
+    MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
+             in->fw_bytes, read_more, prefetch_more, refresh_more);
     if (in->fw_bytes >= in->max_bytes) {
         // if we hit the limit just by prefetching, simply stop prefetching
         if (!read_more)
@@ -1260,7 +1260,7 @@ static bool read_packet(struct demux_internal *in)
         return false;
     }
 
-    if (!read_more && !prefetch_more)
+    if (!read_more && !prefetch_more && !refresh_more)
         return false;
 
     // Actually read a packet. Drop the lock while doing so, because waiting
