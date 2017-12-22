@@ -100,9 +100,7 @@ struct vo_w32_state {
     bool toggle_fs; // whether the current fullscreen state needs to be switched
 
     RECT windowrc; // currently known window rect
-    RECT screenrc; // current screen rect
-    // last non-fullscreen rect, updated only on fullscreen or on initialization
-    RECT prev_windowrc;
+    RECT prev_windowrc; // last non-fullscreen window rect
 
     // video size
     uint32_t o_dwidth;
@@ -605,6 +603,80 @@ static void update_playback_state(struct vo_w32_state *w32)
                                                     TBPF_NORMAL);
 }
 
+struct get_monitor_data {
+    int i;
+    int target;
+    HMONITOR mon;
+};
+
+static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
+{
+    struct get_monitor_data *data = (struct get_monitor_data*)p;
+
+    if (data->i == data->target) {
+        data->mon = mon;
+        return FALSE;
+    }
+    data->i++;
+    return TRUE;
+}
+
+static HMONITOR get_monitor(int id)
+{
+    struct get_monitor_data data = { .target = id };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
+    return data.mon;
+}
+
+static HMONITOR get_default_monitor(struct vo_w32_state *w32)
+{
+    const int id = w32->current_fs ? w32->opts->fsscreen_id :
+                                     w32->opts->screen_id;
+
+    // Handle --fs-screen=<all|default> and --screen=default
+    if (id < 0)
+        return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+
+    HMONITOR mon = get_monitor(id);
+    if (mon)
+        return mon;
+    MP_VERBOSE(w32, "Screen %d does not exist, falling back to primary\n", id);
+    return MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
+}
+
+static MONITORINFO get_monitor_info(struct vo_w32_state *w32)
+{
+    HMONITOR mon;
+    if (IsWindowVisible(w32->window) && !w32->current_fs) {
+        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    } else {
+        // The window is not visible during initialization, so get the
+        // monitor by --screen or --fs-screen id, or fallback to primary.
+        mon = get_default_monitor(w32);
+    }
+    MONITORINFO mi = { .cbSize = sizeof(mi) };
+    GetMonitorInfoW(mon, &mi);
+    return mi;
+}
+
+static RECT get_screen_area(struct vo_w32_state *w32)
+{
+    // Handle --fs-screen=all
+    if (w32->current_fs && w32->opts->fsscreen_id == -2) {
+        const int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        const int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        return (RECT) { x, y, x + GetSystemMetrics(SM_CXVIRTUALSCREEN),
+                              y + GetSystemMetrics(SM_CYVIRTUALSCREEN) };
+    }
+    return get_monitor_info(w32).rcMonitor;
+}
+
+static RECT get_working_area(struct vo_w32_state *w32)
+{
+    return w32->current_fs ? get_screen_area(w32) :
+                             get_monitor_info(w32).rcWork;
+}
+
 static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
 {
     if (w32->parent || w32->current_fs || IsMaximized(w32->window))
@@ -632,11 +704,8 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     if (rect_w(*rc) != rect_w(wr) || rect_h(*rc) != rect_h(wr))
         return false;
 
-    MONITORINFO mi = { .cbSize = sizeof(mi) };
-    if (!GetMonitorInfoW(w32->monitor, &mi))
-        return false;
     // Get the work area to let the window snap to taskbar
-    wr = mi.rcWork;
+    wr = get_working_area(w32);
 
     // Check for invisible borders and adjust the work area size
     RECT frame = {0};
@@ -683,64 +752,6 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     w32->snapped = snapped;
     *rc = rect;
     return true;
-}
-
-struct get_monitor_data {
-    int i;
-    int target;
-    HMONITOR mon;
-};
-
-static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
-{
-    struct get_monitor_data *data = (struct get_monitor_data*)p;
-
-    if (data->i == data->target) {
-        data->mon = mon;
-        return FALSE;
-    }
-    data->i++;
-    return TRUE;
-}
-
-static HMONITOR get_monitor(int id)
-{
-    struct get_monitor_data data = { .target = id };
-    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
-    return data.mon;
-}
-
-static void update_screen_rect(struct vo_w32_state *w32)
-{
-    struct mp_vo_opts *opts = w32->opts;
-    int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
-
-    // Handle --fs-screen=all
-    if (w32->current_fs && screen == -2) {
-        const int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        const int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        SetRect(&w32->screenrc, x, y, x + GetSystemMetrics(SM_CXVIRTUALSCREEN),
-                                      y + GetSystemMetrics(SM_CYVIRTUALSCREEN));
-        return;
-    }
-
-    // When not using --fs-screen=all, mpv belongs to a specific HMONITOR
-    HMONITOR mon;
-    if (screen == -1) {
-        // Handle --fs-screen=current and --screen=default
-        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-    } else {
-        mon = get_monitor(screen);
-        if (!mon) {
-            MP_INFO(w32, "Screen %d does not exist, falling back to primary\n",
-                    screen);
-            mon = MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
-        }
-    }
-
-    MONITORINFO mi = { .cbSize = sizeof(mi) };
-    GetMonitorInfoW(mon, &mi);
-    w32->screenrc = mi.rcMonitor;
 }
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
@@ -802,7 +813,7 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
     if (w32->parent || w32->current_fs || IsMaximized(w32->window))
         return;
 
-    RECT screen = w32->screenrc;
+    RECT screen = get_working_area(w32);
     if (w32->opts->border && w32->opts->fit_border)
         subtract_window_borders(w32->window, &screen);
 
@@ -829,8 +840,6 @@ static bool update_fullscreen_state(struct vo_w32_state *w32)
     bool toggle_fs = w32->current_fs != new_fs;
     w32->current_fs = new_fs;
 
-    update_screen_rect(w32);
-
     if (toggle_fs) {
         RECT rc;
         char msg[50];
@@ -848,7 +857,7 @@ static bool update_fullscreen_state(struct vo_w32_state *w32)
     }
 
     if (w32->current_fs)
-        w32->windowrc = w32->screenrc;
+        w32->windowrc = get_screen_area(w32);
 
     MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
                (int)w32->windowrc.left, (int)w32->windowrc.top,
@@ -1280,9 +1289,10 @@ static void gui_thread_reconfig(void *ptr)
     struct vo_w32_state *w32 = ptr;
     struct vo *vo = w32->vo;
 
+    RECT r = get_working_area(w32);
+    struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
-    struct mp_rect screen = { w32->screenrc.left, w32->screenrc.top,
-                              w32->screenrc.right, w32->screenrc.bottom };
+
     vo_calc_window_geometry(vo, &screen, &geo);
     vo_apply_window_geometry(vo, &geo);
 
@@ -1306,7 +1316,6 @@ static void gui_thread_reconfig(void *ptr)
 
     // The desired size always matches the window size in wid mode.
     if (!reset_size || w32->parent) {
-        RECT r;
         GetClientRect(w32->window, &r);
         // Restore vo_dwidth and vo_dheight, which were reset in vo_config()
         vo->dwidth = r.right;
@@ -1435,8 +1444,6 @@ static void *gui_thread(void *ptr)
     w32->moving = false;
     w32->snapped = false;
     w32->snap_dx = w32->snap_dy = 0;
-
-    update_screen_rect(w32);
 
     mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
 
