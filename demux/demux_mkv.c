@@ -2506,14 +2506,12 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
         goto exit;
 
     /* time (relative to cluster time) */
-    if (stream_tell(s) + 3 >= endpos)
+    if (stream_tell(s) + 3 > endpos)
         goto exit;
     uint8_t c1 = stream_read_char(s);
     uint8_t c2 = stream_read_char(s);
     time = c1 << 8 | c2;
 
-    if (stream_tell(s) + 2 > endpos)
-        goto exit;
     uint8_t header_flags = stream_read_char(s);
 
     block->filepos = stream_tell(s);
