@@ -253,12 +253,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!mpctx->demuxer || seek.type == MPSEEK_NONE || seek.amount == MP_NOPTS_VALUE)
         return;
 
-    if (!mpctx->demuxer->seekable) {
-        MP_ERR(mpctx, "Cannot seek in this file.\n");
-        MP_ERR(mpctx, "You can forcibly enable it with '--force-seekable=yes'.\n");
-        return;
-    }
-
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     double current_time = get_current_time(mpctx);
     if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
@@ -325,7 +319,16 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         demux_flags = (demux_flags | SEEK_HR) & ~SEEK_FORWARD;
     }
 
-    demux_seek(mpctx->demuxer, demux_pts, demux_flags);
+    if (!mpctx->demuxer->seekable)
+        demux_flags |= SEEK_CACHED;
+
+    if (!demux_seek(mpctx->demuxer, demux_pts, demux_flags)) {
+        if (!mpctx->demuxer->seekable) {
+            MP_ERR(mpctx, "Cannot seek in this file.\n");
+            MP_ERR(mpctx, "You can force it with '--force-seekable=yes'.\n");
+        }
+        return;
+    }
 
     // Seek external, extra files too:
     for (int t = 0; t < mpctx->num_tracks; t++) {
