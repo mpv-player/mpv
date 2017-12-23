@@ -296,7 +296,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 static int match_lang(char **langs, char *lang)
 {
     for (int idx = 0; langs && langs[idx]; idx++) {
-        if (lang && strcmp(langs[idx], lang) == 0)
+        if (lang && strcasecmp(langs[idx], lang) == 0)
             return INT_MAX - idx;
     }
     return 0;

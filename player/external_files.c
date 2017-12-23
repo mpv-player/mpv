@@ -176,7 +176,7 @@ static void append_dir_subtitles(struct mpv_global *global,
         if (bstr_startswith(tmp_fname_trim, f_fname_trim))
             lang = guess_lang_from_filename(tmp_fname_trim);
         for (int n = 0; langs && langs[n]; n++) {
-            if (lang.len && bstr_startswith0(lang, langs[n])) {
+            if (lang.len && bstr_case_startswith(lang, bstr0(langs[n]))) {
                 prio = 4; // matches the movie name + lang extension
                 break;
             }
