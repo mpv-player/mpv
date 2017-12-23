@@ -2240,17 +2240,16 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
 }
 
 // must be called locked
-static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
+static struct demux_cached_range *find_cache_seek_target(struct demux_internal *in,
+                                                         double pts, int flags)
 {
-    if ((flags & SEEK_FACTOR) || !in->seekable_cache)
-        return false;
-
     // Note about queued low level seeks: in->seeking can be true here, and it
     // might come from a previous resume seek to the current range. If we end
     // up seeking into the current range (i.e. just changing time offset), the
     // seek needs to continue. Otherwise, we override the queued seek anyway.
+    if ((flags & SEEK_FACTOR) || !in->seekable_cache)
+        return NULL;
 
-    struct demux_cached_range *range = NULL;
     for (int n = 0; n < in->num_ranges; n++) {
         struct demux_cached_range *r = in->ranges[n];
         if (r->seek_start != MP_NOPTS_VALUE) {
@@ -2259,15 +2258,21 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
 
             if (pts >= r->seek_start && pts <= r->seek_end) {
                 MP_VERBOSE(in, "...using this range for in-cache seek.\n");
-                range = r;
-                break;
+                return r;
             }
         }
     }
 
-    if (!range)
-        return false;
+    return NULL;
+}
 
+// must be called locked
+// range must be non-NULL and from find_cache_seek_target() using the same pts
+// and flags, before any other changes to the cached state
+static void execute_cache_seek(struct demux_internal *in,
+                               struct demux_cached_range *range,
+                               double pts, int flags)
+{
     // Adjust the seek target to the found video key frames. Otherwise the
     // video will undershoot the seek target, while audio will be closer to it.
     // The player frontend will play the additional video without audio, so
@@ -2341,8 +2346,6 @@ static bool try_seek_cache(struct demux_internal *in, double pts, int flags)
 
         MP_VERBOSE(in, "resuming demuxer to end of cached range\n");
     }
-
-    return true;
 }
 
 // Create a new blank ache range, and backup the old one. If the seekable
@@ -2369,22 +2372,35 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
-
-    if (!demuxer->seekable) {
-        MP_WARN(demuxer, "Cannot seek in this file.\n");
-        return 0;
-    }
-
-    if (seek_pts == MP_NOPTS_VALUE)
-        return 0;
+    int res = 0;
 
     pthread_mutex_lock(&in->lock);
+
+    if (seek_pts == MP_NOPTS_VALUE)
+        goto done;
 
     MP_VERBOSE(in, "queuing seek to %f%s\n", seek_pts,
                in->seeking ? " (cascade)" : "");
 
     if (!(flags & SEEK_FACTOR))
         seek_pts = MP_ADD_PTS(seek_pts, -in->ts_offset);
+
+    bool require_cache = flags & SEEK_CACHED;
+    flags &= ~(unsigned)SEEK_CACHED;
+
+    struct demux_cached_range *cache_target =
+        find_cache_seek_target(in, seek_pts, flags);
+
+    if (!cache_target) {
+        if (require_cache) {
+            MP_VERBOSE(demuxer, "Cached seek not possible.\n");
+            goto done;
+        }
+        if (!demuxer->seekable) {
+            MP_WARN(demuxer, "Cannot seek in this file.\n");
+            goto done;
+        }
+    }
 
     clear_reader_state(in);
 
@@ -2393,7 +2409,9 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
     in->idle = true;
     in->reading = false;
 
-    if (!try_seek_cache(in, seek_pts, flags)) {
+    if (cache_target) {
+        execute_cache_seek(in, cache_target, seek_pts, flags);
+    } else {
         switch_to_fresh_cache_range(in);
 
         in->seeking = true;
@@ -2404,10 +2422,12 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
     if (!in->threading && in->seeking)
         execute_seek(in);
 
+    res = 1;
+
+done:
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
-
-    return 1;
+    return res;
 }
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
