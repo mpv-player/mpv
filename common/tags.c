@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <limits.h>
 #include <strings.h>
+#include <assert.h>
 #include <libavutil/dict.h>
 #include "tags.h"
 #include "misc/bstr.h"
@@ -42,6 +43,24 @@ void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value)
     tags->keys[tags->num_keys]   = bstrto0(tags, key);
     tags->values[tags->num_keys] = bstrto0(tags, value);
     tags->num_keys++;
+}
+
+void mp_tags_remove_str(struct mp_tags *tags, const char *key)
+{
+    mp_tags_remove_bstr(tags, bstr0(key));
+}
+
+void mp_tags_remove_bstr(struct mp_tags *tags, bstr key)
+{
+    for (int n = 0; n < tags->num_keys; n++) {
+        if (bstrcasecmp0(key, tags->keys[n]) == 0) {
+            talloc_free(tags->keys[n]);
+            talloc_free(tags->values[n]);
+            int num_keys = tags->num_keys; // copy so it's only decremented once
+            MP_TARRAY_REMOVE_AT(tags->keys, num_keys, n);
+            MP_TARRAY_REMOVE_AT(tags->values, tags->num_keys, n);
+        }
+    }
 }
 
 char *mp_tags_get_str(struct mp_tags *tags, const char *key)
