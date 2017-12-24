@@ -4117,6 +4117,7 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-display-fps", "vsync-jitter", "sub-text", "audio-bitrate",
       "video-bitrate", "sub-bitrate", "decoder-frame-drop-count",
       "frame-drop-count", "video-frame-info"),
+    E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

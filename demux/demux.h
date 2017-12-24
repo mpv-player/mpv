@@ -91,6 +91,7 @@ enum demux_event {
     DEMUX_EVENT_INIT = 1 << 0,      // complete (re-)initialization
     DEMUX_EVENT_STREAMS = 1 << 1,   // a stream was added
     DEMUX_EVENT_METADATA = 1 << 2,  // metadata or stream_metadata changed
+    DEMUX_EVENT_DURATION = 1 << 3,  // duration updated
     DEMUX_EVENT_ALL = 0xFFFF,
 };
 
