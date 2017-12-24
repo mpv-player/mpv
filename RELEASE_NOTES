@@ -1,5 +1,18 @@
-Release 0.27.0
+Release 0.28.0
 ==============
+
+This release needs recent FFmpeg (newer than 3.4) due to major refactoring.
+Required library versions:
+
+  * libavutil >= 56.6.100
+  * libavcodec >= 58.7.100
+  * libavformat >= 58.0.102
+  * libswscale >= 5.0.101
+  * libavfilter >= 7.0.101
+  * libswresample >= 3.0.100
+
+The LGPL 2.1+ relicensing process is now mostly complete. The remaining GPL-only
+code (see Copyright file) can be disabled at build time by using --enable-lgpl.
 
 Features
 --------
@@ -7,24 +20,33 @@ Features
 Added
 ~~~~~
 
-- Windows: handle media keys
-- libmpv: options: add a thread-safe way to notify option updates
-- vd_lavc/vo_opengl: support embedded ICC profiles
-- vo: rendering API abstraction for future non-GL video outputs
-- vo_opengl: add a gamut warning feature to highlight out-of-gamut colors (--gamut-warning)
-- vo_opengl: add direct rendering support (--vd-lavc-dr)
-- vo_opengl: implement (faster) compute shader based EWA kernel
-- vo_opengl: implement HLG OOTF inverse
-- vo_opengl: support HDR peak detection (--hdr-compute-peak)
-- vo_opengl: support float input pixel formats
-- vo_opengl: support loading custom user textures (#4586)
-- vo_opengl: support user compute shaders
+- Add DRM_PRIME Format Handling and Display for RockChip MPP decoders
+- csputils: Add support for Display P3 primaries
+- demux: support multiple seekable cached ranges, display cache ranges on OSC
+- demux_playlist: support .url files (#5107)
+- dvb: Add multiple frontends support (up to 8)
+- dvb: implement parsing of modulation for VDR-style channels config
+- hwdec: add mediacodec hardware decoder for IMGFMT_MEDIACODEC frames,
+  rename mediacodec to mediacodec-copy
+- lua: integrate stats.lua script (bound to i/I by default)
+- vd_lavc: add support for nvdec hwaccel
+- vo_gpu: add android opengl backend
+- vo_gpu: initial d3d11 support
+- vo_gpu: vulkan support
 
 
 Removed
 ~~~~~~~
 
-- Remove video equalizer handling from vo_direct3d, vo_sdl, vo_vaapi, and vo_xv (GPL, not worth the effort to support legacy VOs)
+- af: remove deprecated audio filters (channels, equalizer, pan, volume;
+  replacements in lavfi)
+- vf: remove most GPL video filters (crop, dsize, expand, flip, gradfun, mirror,
+  noformat, pullup, rotate, scale, stereo3d, yadif; replacements in lavfi)
+- vf_buffer: remove this filter
+- video: remove automatic stereo3d filter insertion
+- vo_gpu: remove hwdec_vaglx interop
+- vo_opengl: refactor into vo_gpu
+- vo_wayland: remove
 
 
 Options and Commands
@@ -33,68 +55,106 @@ Options and Commands
 Added
 ~~~~~
 
-- macOS: add --no-native-fs option to disable the native macOS fullscreen (#4014)
-- player: add --track-auto-selection option
+- demux: add option to create CC tracks eagerly (--sub-create-cc-track)
+- options: add --start=none to reset previously set start time
+- options: add --vlang switch
 
 
 Changed
 ~~~~~~~
 
-- input: use mnemonic names for mouse buttons, same as Qt: https://doc.qt.io/qt-5/qt.html#MouseButton-enum
-- options: change --loop semantics
-- player: make --lavfi-complex changeable at runtime
-- vf_eq: remove this filter (GPL; uses libavfilter’s eq filter now, with changed semantics)
-- video: change --deinterlace behavior
-- vo_opengl: generalize HDR tone mapping to gamut mapping, --hdr-tone-mapping → --tone-mapping
+- cache: lower default size to 2*10MB
+- demux: bump the demuxer cache readahead duration to 10 hours
+- demux: use seekable cache for network by default, bump prefetch limit
+- msg: make --msg-level affect --log-file too
+- player/misc.c: allow both --length and --end to control play endpoint
+- player: match subtitles with language tags with --sub-auto=exact
+- rename --opengl-hwdec-interop to --gpu-hwdec-interop (now mostly useless)
+- vd_lavc: prefer nvdec over vdpau with --hwdec=auto (better codec and surface
+  format support)
+- vd_lavc: rename --hwdec=rpi to --hwdec=mmal
 
 
 Removed
 ~~~~~~~
 
-- --field-dominance (GPL-only author, no chance of relicensing)
-- input: drop deprecated "osd" command
-- options: drop --video-aspect-method=hybrid (GPL-only)
+- options: remove --heartbeat-cmd and --heartbeat-interval
+  (incidentally fixes #4888)
 
 
 Fixes and Minor Enhancements
 ----------------------------
 
-- TOOLS/autocrop.lua: fix cropdetect black limit for 10-bit videos
-- TOOLS/lua/autodeint: update to lavfi-bridge
-- TOOLS/lua/status-line: improve and update
-- af_lavrresample: don't call swr_set_compensation() unless necessary (#4716)
-- ao_oss: fix period_size calculation (#4642)
-- ao_rsound: allow setting the host
-- audio: fix spdif mode
-- filter_kernels: correct spline64 kernel
-- macOS: fix media keys input when other Apps steal the priority (#4834)
-- macOS: fix the support of multiple renderers (GPU switch) (#2371)
-- macOS: remove the standard "Show Tab Bar" menu item
-- options: fix --include (#4673)
-- player: fix --end with large values (#4650)
-- player: fix confusion in audio resync code (#4688)
-- player: make refresh seeks slightly more robust (#4757)
-- player: readd smi subtitle extension (#4626)
-- vd_lavc: change auto-probe order to prefer cuda over vdpau-copy
-- vd_lavc: fix device leak with copy-mode hwaccels (#4735)
-- vd_lavc: fix hwdec compatibility with yuvj420p formats
-- vd_lavc: fix mid-stream hwdec fallback
-- vf_vapoursynth: fix inverted sign and restore 10 bit support (#4720)
-- video: increase --monitorpixelaspect range
-- vo_opengl: adjust the rules for linearization (#4631)
-- vo_opengl: scale deband-grain to the signal range
-- vo_opengl: tone map on the maximum signal component
-- x11: fix that window could be resized when using embedding (#4784)
-- ytdl_hook: resolve relative paths when joining segment urls (#4827)
-- ytdl_hook: support fragments with relative paths, fixes segmented DASH
+- TOOLS/autoload.lua: add ogm, ogg and opus extensions
+- Use /dev/tty instead of stdin for terminal input (#4190)
+- audio: add audio softvol processing to AO (replaces previously GPL’d code)
+- audio: fix channel conversion with NA channels (e.g. with ALSA)
+- audio: fix missing volume update on init and reinit
+- csputils: Fix DCI P3 primaries white point
+- demux: don't allow subtitles to mess up buffered time display
+- demux: fix .cue files with audio files that contain attached pictures
+- demux: fix accounting for seekable ranges on track switches (fixes missing
+  audio when cycling through audio tracks with e.g. EDL, --merge-files, ordered
+  chapters and youtube-dl pseudo DASH)
+- demux: fix crash with cue/ordered chapter files (#5027)
+- demux: speed up cache seeking with a coarse index
+- demux_lavf: always give libavformat the filename when probing
+  (helps with mp3 files)
+- demux_mkv: add V_SNOW tag to mkv_video_tags
+- dvb: Fix long channel switching: next/prev channel
+- dvb: fixes for ATSC tuning
+- lavc_conv: clamp timestamps to positive (#5047)
+- macOS: fix bundle on macOS High Sierra (10.13) (#4926, #4866)
+- mp_image: always copy color attributes on hw download (#4804)
+- mp_image: select an explicit fallback for chroma location (#4804)
+- msg: bump log level of --log-file to -v -v
+- msg: reinterpret a bunch of message levels
+- osc: fix rare stack overflow when changing visibility mode
+- osdep/io: add android-related bullshit to fix files >2 GiB
+- player/playloop.c: respect playback start time when using --loop-file
+- player: allow seeking in cached parts of unseekable streams
+- player: make track language matching case insensitive (#5272)
+- player: use start timestamp for ab-looping if --ab-loop-a is absent
+- player: when loading external file, always add all track types (#5132)
+- restore-old-bindings.conf: add old macOS/Wayland AXIS bindings
+- screenshot: create directories from template
+- scripting: report dlerror() output
+- sd_ass: accept RFC8081 font media types
+- sd_ass: accept otc as fallback OpenType collection file extension
+- stream_libarchive: work around various types of locale braindeath
+  (https://git.io/vbiFJ)
+- subprocess-win: don't change the mouse cursor when creating processes
+- video: add a hack to avoid missing subtitles with vf_sub (#5194)
+- video: fix alpha handling (#4983)
+- video: fix memory leaks (roughly 1 KB per decoded frame) with hwdec copy modes
+- video: fix rotation and deinterlace auto filters
+- video: properly pass through ICC data
+- vo: add support for externally driven renderloop and make wayland use it
+  (partially fixes display-sync under wayland; disables rendering when window
+  is invisible)
+- vo_gpu: change --tone-mapping-desaturate algorithm
+- vo_gpu: enable 3DLUTs in dumb mode
+- vo_gpu: fix gamma scale
+- vo_gpu: fix mobius tone mapping compatibility to GLSL 120 (#5069)
+- vo_gpu: fix video sometimes not being rerendered on equalizer change
+- vo_gpu: kill off FBOTEX_FUZZY (#1814)
+- vo_gpu: opengl: fix possible screenshot window crash (#4905)
+- vo_gpu: opengl: use GLX_MESA_swap_control where available
+- vo_gpu: reduce the --alpha=blend-tiles checkerboard intensity
+- vo_gpu: win: remove exclusive-fullscreen detection hack
+- vo_lavc: remove messy delayed subtitle rendering logic (#4689)
+- wayland_common: implement output tracking, many cleanups and bugfixes
+- Windows: skip window snapping if Windows handled it
+- Windows: add more-POSIXy versions of open() and fstat() (#4711)
+- ytdl_hook: don't prepend ytdl:// to non-youtube links in playlists (#5003)
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.26.0..v0.27.0`
+A complete changelog can be seen by running `git log v0.27.0..v0.28.0`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.26.0...v0.27.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.26.0..v0.27.0
+https://github.com/mpv-player/mpv/compare/v0.27.0...v0.28.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.27.0..v0.28.0
 
