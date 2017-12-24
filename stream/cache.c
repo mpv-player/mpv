@@ -135,6 +135,8 @@ struct priv {
 
     int64_t eof_pos;
 
+    bool read_seek_failed;  // let a read fail because an async seek failed
+
     int control;            // requested STREAM_CTRL_... or CACHE_CTRL_...
     void *control_arg;      // temporary for executing STREAM_CTRLs
     int control_res;
@@ -246,6 +248,8 @@ static bool cache_update_stream_position(struct priv *s)
 {
     int64_t read = s->read_filepos;
 
+    s->read_seek_failed = false;
+
     if (needs_seek(s, read)) {
         MP_VERBOSE(s, "Dropping cache at pos %"PRId64", "
                    "cached range: %"PRId64"-%"PRId64".\n", read,
@@ -256,8 +260,10 @@ static bool cache_update_stream_position(struct priv *s)
     if (stream_tell(s->stream) != s->max_filepos && s->seekable) {
         MP_VERBOSE(s, "Seeking underlying stream: %"PRId64" -> %"PRId64"\n",
                    stream_tell(s->stream), s->max_filepos);
-        if (!stream_seek(s->stream, s->max_filepos))
+        if (!stream_seek(s->stream, s->max_filepos)) {
+            s->read_seek_failed = true;
             return false;
+        }
     }
 
     return stream_tell(s->stream) == s->max_filepos;
@@ -600,6 +606,11 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
             s->idle = false;
             if (!cache_wakeup_and_wait(s, &retry_time))
                 break;
+            if (s->read_seek_failed) {
+                MP_ERR(s, "error reading after async seek failed\n");
+                s->read_seek_failed = false;
+                break;
+            }
         }
     }
 
