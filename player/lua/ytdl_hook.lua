@@ -454,15 +454,14 @@ mp.add_hook("on_load", 10, function ()
                 msg.verbose("Playlist with single entry detected.")
                 add_single_video(json.entries[1])
             else
-
-                local playlist = "#EXTM3U\n"
+                local playlist = {"#EXTM3U"}
                 for i, entry in pairs(json.entries) do
                     local site = entry.url
                     local title = entry.title
 
                     if not (title == nil) then
                         title = string.gsub(title, '%s+', ' ')
-                        playlist = playlist .. "#EXTINF:0," .. title .. "\n"
+                        table.insert(playlist, "#EXTINF:0," .. title)
                     end
 
                     -- some extractors will still return the full info for
@@ -478,11 +477,11 @@ mp.add_hook("on_load", 10, function ()
                     if not (site:find("https?://") == 1) then
                         site = "ytdl://" .. site
                     end
-                    playlist = playlist .. site .. "\n"
+                    table.insert(playlist, site)
 
                 end
 
-                mp.set_property("stream-open-filename", "memory://" .. playlist)
+                mp.set_property("stream-open-filename", "memory://" .. table.concat(playlist, "\n"))
             end
 
         else -- probably a video
