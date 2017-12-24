@@ -383,8 +383,9 @@ mp.add_hook("on_load", 10, function ()
 
         -- what did we get?
         if not (json["direct"] == nil) and (json["direct"] == true) then
-            -- direct URL, nothing to do
+            -- direct URL, nothing else to do
             msg.verbose("Got direct URL")
+            mp.set_property("stream-open-filename", url)                            
             return
         elseif not (json["_type"] == nil)
             and ((json["_type"] == "playlist")
