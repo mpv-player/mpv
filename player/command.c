@@ -327,15 +327,15 @@ static char *format_file_size(int64_t size)
         return talloc_asprintf(NULL, "%.0f", s);
 
     if (size < (1024 * 1024))
-        return talloc_asprintf(NULL, "%.3f Kb", s / (1024.0));
+        return talloc_asprintf(NULL, "%.3f KiB", s / (1024.0));
 
     if (size < (1024 * 1024 * 1024))
-        return talloc_asprintf(NULL, "%.3f Mb", s / (1024.0 * 1024.0));
+        return talloc_asprintf(NULL, "%.3f MiB", s / (1024.0 * 1024.0));
 
     if (size < (1024LL * 1024LL * 1024LL * 1024LL))
-        return talloc_asprintf(NULL, "%.3f Gb", s / (1024.0 * 1024.0 * 1024.0));
+        return talloc_asprintf(NULL, "%.3f GiB", s / (1024.0 * 1024.0 * 1024.0));
 
-    return talloc_asprintf(NULL, "%.3f Tb", s / (1024.0 * 1024.0 * 1024.0 * 1024.0));
+    return talloc_asprintf(NULL, "%.3f TiB", s / (1024.0 * 1024.0 * 1024.0 * 1024.0));
 }
 
 static char *format_delay(double time)
