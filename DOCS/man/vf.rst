@@ -541,6 +541,12 @@ Available mpv-only filters are:
             Use default VDPAU scaling (default).
         1-9
             Apply high quality VDPAU scaling (needs capable hardware).
+            
+        .. admonition:: Example:
+
+            ::
+
+                --vf=vdpaupp=denoise=0.3:deint-mode=temporal-spatial:sharpen=0.5
 
 ``d3d11vpp``
     Direct3D 11 video post processing. Currently requires D3D11 hardware
