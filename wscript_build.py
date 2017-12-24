@@ -666,6 +666,9 @@ def build(ctx):
 
     if ctx.dependency_satisfied('cplayer'):
 
+        if ctx.dependency_satisfied('encoding'):
+            ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
+
         if ctx.dependency_satisfied('zsh-comp'):
             ctx.zshcomp(target = "etc/_mpv", source = "TOOLS/zsh.pl")
             ctx.install_files(
@@ -675,9 +678,6 @@ def build(ctx):
         ctx.install_files(
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
-
-        if ctx.dependency_satisfied('encoding'):
-            ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64'.split():
             ctx.install_as(
