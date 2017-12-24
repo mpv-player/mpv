@@ -190,6 +190,8 @@ struct demux_internal {
     // This is never NULL. This is always ranges[num_ranges - 1].
     struct demux_cached_range *current_range;
 
+    double highest_av_pts;      // highest non-subtitle PTS seen - for duration
+
     // Cached state.
     bool force_cache_update;
     struct mp_tags *stream_metadata;
@@ -1198,6 +1200,23 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 
     adjust_seek_range_on_packet(ds, dp);
 
+    // Possible update duration based on highest TS demuxed (but ignore subs).
+    if (stream->type != STREAM_SUB) {
+        if (dp->segmented)
+            ts = MP_PTS_MIN(ts, dp->end);
+        if (ts > in->highest_av_pts) {
+            in->highest_av_pts = ts;
+            double duration = in->highest_av_pts - in->d_thread->start_time;
+            if (duration > in->d_thread->duration) {
+                in->d_thread->duration = duration;
+                // (Don't wakeup like like demux_changed(), would be too noisy.)
+                in->d_thread->events |= DEMUX_EVENT_DURATION;
+                in->d_buffer->duration = duration;
+                in->d_buffer->events |= DEMUX_EVENT_DURATION;
+            }
+        }
+    }
+
     // Wake up if this was the first packet after start/possible underrun.
     if (ds->in->wakeup_cb && ds->reader_head && !ds->reader_head->next)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
@@ -1798,6 +1817,9 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         }
     }
 
+    if (src->events & DEMUX_EVENT_DURATION)
+        dst->duration = src->duration;
+
     dst->events |= src->events;
     src->events = 0;
 }
@@ -1968,6 +1990,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .max_bytes = opts->max_bytes,
         .max_bytes_bw = opts->max_bytes_bw,
         .initial_state = true,
+        .highest_av_pts = MP_NOPTS_VALUE,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
