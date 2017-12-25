@@ -740,8 +740,7 @@ video_output_features = [
         'deps': '!shaderc-shared',
         'groups': ['shaderc'],
         'func': check_cc(header_name='shaderc/shaderc.h',
-                         lib=['shaderc_combined', 'glslang', 'SPIRV-Tools',
-                              'SPIRV-Tools-opt', 'stdc++']),
+                         lib=['shaderc_combined', 'stdc++']),
     }, {
         'name': '--shaderc',
         'desc': 'libshaderc SPIR-V compiler',
