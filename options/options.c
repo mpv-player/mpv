@@ -92,6 +92,7 @@ extern const struct m_sub_options d3d11_conf;
 extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
+extern const struct m_sub_options android_conf;
 
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
@@ -685,6 +686,10 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_GL_COCOA
     OPT_SUBSTRUCT("", cocoa_opts, cocoa_conf, 0),
+#endif
+
+#if HAVE_ANDROID
+    OPT_SUBSTRUCT("", android_opts, android_conf, 0),
 #endif
 
 #if HAVE_GL_WIN32
