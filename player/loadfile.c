@@ -360,11 +360,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
-    int ffid = order == 0 ? opts->stream_id_ff[type] : -1;
     char **langs = order == 0 ? opts->stream_lang[type] : NULL;
-    if (ffid != -1)
-        tid = -1; // prefer selecting ffid
-    if (tid == -2 || ffid == -2)
+    if (tid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
     struct track *pick = NULL;
@@ -373,8 +370,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         if (track->type != type)
             continue;
         if (track->user_tid == tid)
-            return track;
-        if (track->ff_index == ffid)
             return track;
         if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;

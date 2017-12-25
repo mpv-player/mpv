@@ -323,12 +323,6 @@ const m_option_t mp_opts[] = {
     OPT_TRACKCHOICE("vid", stream_id[0][STREAM_VIDEO]),
     OPT_TRACKCHOICE("sid", stream_id[0][STREAM_SUB]),
     OPT_TRACKCHOICE("secondary-sid", stream_id[1][STREAM_SUB]),
-    OPT_TRACKCHOICE("ff-aid", stream_id_ff[STREAM_AUDIO],
-                    .deprecation_message = "no replacement"),
-    OPT_TRACKCHOICE("ff-vid", stream_id_ff[STREAM_VIDEO],
-                    .deprecation_message = "no replacement"),
-    OPT_TRACKCHOICE("ff-sid", stream_id_ff[STREAM_SUB],
-                    .deprecation_message = "no replacement"),
     OPT_ALIAS("sub", "sid"),
     OPT_ALIAS("video", "vid"),
     OPT_ALIAS("audio", "aid"),
@@ -406,16 +400,9 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
 
-    OPT_FLAG("ad-spdif-dtshd", dtshd, 0,
-             .deprecation_message = "use --audio-spdif instead"),
-
     OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
                         hwdec_validate_opt),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
-#if HAVE_VIDEOTOOLBOX_HWACCEL
-    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0, .min = -1,
-                    .deprecation_message = "use --hwdec-image-format instead"),
-#endif
     OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
 
     // -1 means auto aspect (prefer container size until aspect change)
@@ -502,12 +489,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
 
-    OPT_CHOICE("softvol", softvol, 0,
-               ({"no", SOFTVOL_NO},
-                {"yes", SOFTVOL_YES},
-                {"auto", SOFTVOL_AUTO}),
-               .deprecation_message = "softvol is always active, and behaves "
-                                      "as if --softvol=yes is always set"),
     OPT_FLOATRANGE("volume-max", softvol_max, 0, 100, 1000),
     // values <0 for volume and mute are legacy and ignored
     OPT_FLOATRANGE("volume", softvol_volume, UPDATE_VOL, -1, 1000),
@@ -774,7 +755,6 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("volstep", "edit input.conf directly instead"),
     OPT_REMOVED("fixed-vo", "--fixed-vo=yes is now the default"),
     OPT_REPLACED("mkv-subtitle-preroll", "demuxer-mkv-subtitle-preroll"),
-    OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
     OPT_REPLACED("ass-use-margins", "sub-use-margins"),
     OPT_REPLACED("media-title", "force-media-title"),
     OPT_REPLACED("input-unix-socket", "input-ipc-server"),
@@ -822,7 +802,6 @@ const struct MPOpts mp_default_opts = {
     .audio_driver_list = NULL,
     .audio_decoders = NULL,
     .video_decoders = NULL,
-    .softvol = SOFTVOL_AUTO,
     .softvol_max = 130,
     .softvol_volume = 100,
     .softvol_mute = 0,
@@ -891,9 +870,6 @@ const struct MPOpts mp_default_opts = {
                    { [STREAM_AUDIO] = -2,
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
-    .stream_id_ff = { [STREAM_AUDIO] = -1,
-                      [STREAM_VIDEO] = -1,
-                      [STREAM_SUB] = -1, },
     .stream_auto_sel = 1,
     .audio_display = 1,
     .sub_visibility = 1,
@@ -921,7 +897,6 @@ const struct MPOpts mp_default_opts = {
 
     .hwdec_api = HAVE_RPI ? "mmal" : "no",
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
-    .videotoolbox_format = IMGFMT_NV12,
 
     .audio_output_channels = {
         .set = 1,

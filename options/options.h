@@ -99,7 +99,6 @@ typedef struct MPOpts {
     int audio_stream_silence;
     float audio_wait_open;
     int force_vo;
-    int softvol;
     float softvol_volume;
     int rgain_mode;
     float rgain_preamp;         // Set replaygain pre-amplification
@@ -199,7 +198,6 @@ typedef struct MPOpts {
     double image_display_duration;
     char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];
-    int stream_id_ff[STREAM_TYPE_COUNT];
     char **stream_lang[STREAM_TYPE_COUNT];
     int stream_auto_sel;
     int audio_display;
@@ -236,7 +234,6 @@ typedef struct MPOpts {
     int audio_output_format;
     int audio_normalize;
     int force_srate;
-    int dtshd;
     double playback_speed;
     int pitch_correction;
     struct m_obj_settings *vf_settings, *vf_defs;
@@ -287,7 +284,6 @@ typedef struct MPOpts {
 
     char *hwdec_api;
     char *hwdec_codecs;
-    int videotoolbox_format;
     int hwdec_image_format;
 
     int w32_priority;

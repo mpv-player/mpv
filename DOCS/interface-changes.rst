@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.29.0 ---
+    - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
+      --ad-spdif-dtshd, --softvol options
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
