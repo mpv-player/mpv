@@ -632,11 +632,4 @@ double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 void recreate_auto_filters(struct MPContext *mpctx);
 
-// Values of MPOpts.softvol
-enum {
-    SOFTVOL_NO = 0,
-    SOFTVOL_YES = 1,
-    SOFTVOL_AUTO = 2,
-};
-
 #endif /* MPLAYER_MP_CORE_H */

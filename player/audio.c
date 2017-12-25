@@ -140,9 +140,6 @@ static int recreate_audio_filters(struct MPContext *mpctx)
     if (afs->initialized < 1 && af_init(afs) < 0)
         goto fail;
 
-    if (mpctx->opts->softvol == SOFTVOL_NO)
-        MP_ERR(mpctx, "--softvol=no is not supported anymore.\n");
-
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
     return 0;

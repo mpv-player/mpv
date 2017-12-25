@@ -2180,44 +2180,6 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-// Similar, less featured, for selecting by ff-index.
-static int property_switch_track_ff(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    enum stream_type type = (intptr_t)prop->priv;
-    struct track *track = mpctx->current_track[0][type];
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int *) arg = track ? track->ff_index : -2;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET: {
-        MP_WARN(mpctx, "Warning: property '%s' is deprecated and "
-                "will be removed in the future.\n", prop->name);
-        int id = *(int *)arg;
-        if (mpctx->playback_initialized) {
-            track = NULL;
-            for (int n = 0; n < mpctx->num_tracks; n++) {
-                struct track *cur = mpctx->tracks[n];
-                if (cur->type == type && cur->ff_index == id) {
-                    track = cur;
-                    break;
-                }
-            }
-            if (!track && id >= 0)
-                return M_PROPERTY_ERROR;
-            mp_switch_track_n(mpctx, 0, type, track, 0);
-            print_track_list(mpctx, "Track switched:");
-        } else {
-            mpctx->opts->stream_id_ff[type] = *(int *)arg;
-        }
-        return M_PROPERTY_OK;
-    }
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 static int track_channels(struct track *track)
 {
     return track->stream ? track->stream->codec->channels.num : 0;
@@ -4050,12 +4012,6 @@ static const struct m_property mp_properties_base[] = {
     {"dvb-channel-name", mp_property_dvb_channel_name},
 
     {"cursor-autohide", mp_property_cursor_autohide},
-
-#define TRACK_FF(name, type) \
-    {name, property_switch_track_ff, (void *)(intptr_t)type}
-    TRACK_FF("ff-vid", STREAM_VIDEO),
-    TRACK_FF("ff-aid", STREAM_AUDIO),
-    TRACK_FF("ff-sid", STREAM_SUB),
 
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},

@@ -84,7 +84,6 @@ static int init(struct dec_audio *da, const char *decoder)
     struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
-    spdif_ctx->use_dts_hd = da->opts->dtshd;
     spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
 
     if (strcmp(decoder, "spdif_dts_hd") == 0)
