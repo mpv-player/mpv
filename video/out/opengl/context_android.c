@@ -26,6 +26,20 @@
 #include "options/m_config.h"
 #include "context.h"
 
+struct android_opts {
+    int w, h;
+};
+
+#define OPT_BASE_STRUCT struct android_opts
+const struct m_sub_options android_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_INT("android-surface-width", w, 0),
+        OPT_INT("android-surface-height", h, 0),
+        {0}
+    },
+    .size = sizeof(struct android_opts),
+};
+
 struct priv {
     struct GL gl;
     EGLDisplay egl_display;
@@ -122,18 +136,14 @@ fail:
 
 static bool android_reconfig(struct ra_ctx *ctx)
 {
-    struct priv *p = ctx->priv;
-    int w, h;
+    void *tmp = talloc_new(NULL);
+    struct android_opts *opts = mp_get_config_group(tmp, ctx->global, &android_conf);
 
-    if (!eglQuerySurface(p->egl_display, p->egl_surface, EGL_WIDTH, &w) ||
-        !eglQuerySurface(p->egl_display, p->egl_surface, EGL_HEIGHT, &h)) {
-        MP_FATAL(ctx, "Failed to get height and width!\n");
-        return false;
-    }
+    ctx->vo->dwidth = opts->w;
+    ctx->vo->dheight = opts->h;
+    ra_gl_ctx_resize(ctx->swapchain, opts->w, opts->h, 0);
 
-    ctx->vo->dwidth = w;
-    ctx->vo->dheight = h;
-    ra_gl_ctx_resize(ctx->swapchain, w, h, 0);
+    talloc_free(tmp);
     return true;
 }
 
