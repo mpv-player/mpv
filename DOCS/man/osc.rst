@@ -272,6 +272,11 @@ Configurable Options
 
     Display timecodes with milliseconds
 
+``seekranges``
+    Default: yes
+
+    Display seekable ranges on the seekbar
+
 ``visibility``
     Default: auto (auto hide/show on mouse move)
 

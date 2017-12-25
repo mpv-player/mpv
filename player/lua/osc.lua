@@ -39,6 +39,7 @@ local user_opts = {
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
+    seekranges = true,          -- display seek ranges?
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
 }
@@ -1757,6 +1758,9 @@ function osc_init()
         end
     end
     ne.slider.seekRangesF = function()
+        if not (user_opts.seekranges) then
+            return nil
+        end
         local cache_state = mp.get_property_native("demuxer-cache-state", nil)
         if not cache_state then
             return nil
