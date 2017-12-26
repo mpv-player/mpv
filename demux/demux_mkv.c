@@ -207,7 +207,10 @@ typedef struct mkv_demuxer {
 
     bool eof_warning, keyframe_warning;
 
-    struct block_info tmp_block;
+    // Small queue of read but not yet returned packets. This is mostly
+    // temporary data, and not normally larger than 0 or 1 elements.
+    struct block_info *blocks;
+    int num_blocks;
 } mkv_demuxer_t;
 
 #define OPT_BASE_STRUCT struct demux_mkv_opts
@@ -2285,7 +2288,9 @@ static void mkv_seek_reset(demuxer_t *demuxer)
         avcodec_free_context(&track->av_parser_codec);
     }
 
-    free_block(&mkv_d->tmp_block);
+    for (int n = 0; n < mkv_d->num_blocks; n++)
+        free_block(&mkv_d->blocks[n]);
+    mkv_d->num_blocks = 0;
 
     mkv_d->skip_to_timecode = INT64_MIN;
 }
@@ -2736,16 +2741,11 @@ error:
     return -1;
 }
 
-static int read_next_block(demuxer_t *demuxer, struct block_info *block)
+static int read_next_block_into_queue(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
-
-    if (mkv_d->tmp_block.num_laces) {
-        *block = mkv_d->tmp_block;
-        mkv_d->tmp_block = (struct block_info){0};
-        return 1;
-    }
+    struct block_info block = {0};
 
     while (1) {
         while (stream_tell(s) < mkv_d->cluster_end) {
@@ -2764,21 +2764,21 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 end += stream_tell(s);
                 if (end > mkv_d->cluster_end)
                     goto find_next_cluster;
-                int res = read_block_group(demuxer, end, block);
+                int res = read_block_group(demuxer, end, &block);
                 if (res < 0)
                     goto find_next_cluster;
                 if (res > 0)
-                    return 1;
+                    goto add_block;
                 break;
             }
 
             case MATROSKA_ID_SIMPLEBLOCK: {
-                *block = (struct block_info){ .simple = true };
-                int res = read_block(demuxer, mkv_d->cluster_end, block);
+                block = (struct block_info){ .simple = true };
+                int res = read_block(demuxer, mkv_d->cluster_end, &block);
                 if (res < 0)
                     goto find_next_cluster;
                 if (res > 0)
-                    return 1;
+                    goto add_block;
                 break;
             }
 
@@ -2828,6 +2828,29 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
         if (mkv_d->cluster_end != EBML_UINT_INVALID)
             mkv_d->cluster_end += stream_tell(s);
     }
+    assert(0); // unreachable
+
+add_block:
+    index_block(demuxer, &block);
+    MP_TARRAY_APPEND(mkv_d, mkv_d->blocks, mkv_d->num_blocks, block);
+    return 1;
+}
+
+static int read_next_block(demuxer_t *demuxer, struct block_info *block)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+
+    if (!mkv_d->num_blocks) {
+        int res = read_next_block_into_queue(demuxer);
+        if (res < 1)
+            return res;
+
+        assert(mkv_d->num_blocks);
+    }
+
+    *block = mkv_d->blocks[0];
+    MP_TARRAY_REMOVE_AT(mkv_d->blocks, mkv_d->num_blocks, 0);
+    return 1;
 }
 
 static int demux_mkv_fill_buffer(demuxer_t *demuxer)
@@ -2839,7 +2862,6 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer)
         if (res < 0)
             return 0;
         if (res > 0) {
-            index_block(demuxer, &block);
             res = handle_block(demuxer, &block);
             free_block(&block);
             if (res > 0)
@@ -2887,7 +2909,6 @@ static int create_index_until(struct demuxer *demuxer, int64_t timecode)
             if (res < 0)
                 break;
             if (res > 0) {
-                index_block(demuxer, &block);
                 free_block(&block);
             }
             index = get_highest_index_entry(demuxer);
@@ -3113,7 +3134,7 @@ static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos)
         }
     }
 
-    free_block(&mkv_d->tmp_block);
+    mkv_seek_reset(demuxer);
 
     int64_t last_ts[STREAM_TYPE_COUNT] = {0};
     while (1) {
@@ -3151,11 +3172,7 @@ static void probe_first_timestamp(struct demuxer *demuxer)
     if (!mkv_d->opts->probe_start_time)
         return;
 
-    struct block_info block;
-    if (read_next_block(demuxer, &block) > 0) {
-        index_block(demuxer, &block);
-        mkv_d->tmp_block = block;
-    }
+    read_next_block_into_queue(demuxer);
 
     demuxer->start_time = mkv_d->cluster_tc / 1e9;
 
