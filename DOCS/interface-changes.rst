@@ -62,9 +62,9 @@ Interface changes
       now.
     - change the --hwdec option from a choice to a plain string (affects
       introspection of the option/property), also affects some properties
-    - rename --hwdec=rpi to --hwdec=mmal, sane for the -copy variant (no
+    - rename --hwdec=rpi to --hwdec=mmal, same for the -copy variant (no
       backwards compatibility)
-    - deprecate the --ff-aid, --ff-vid, -ff-sid options and properties (there is
+    - deprecate the --ff-aid, --ff-vid, --ff-sid options and properties (there is
       no replacement, but you can manually query the track property and use the
       "ff-index" field to find the mpv track ID to imitate this behavior)
  --- mpv 0.27.0 ---
