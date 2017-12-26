@@ -207,6 +207,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PERFORMANCE_DATA:
         gl_video_perfdata(p->renderer, (struct voctrl_performance_data *)data);
         return true;
+    case VOCTRL_EXTERNAL_RESIZE:
+        p->ctx->fns->reconfig(p->ctx);
+        resize(vo);
+        return true;
     }
 
     int events = 0;

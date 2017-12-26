@@ -4744,7 +4744,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
 ``--android-surface-width=<number>``
 ``--android-surface-height=<number>``
     Set dimensions of the rendering surface used by the Android gpu context.
-    Needs to be set by the embedding application.
+    Needs to be set by the embedding application. Setting these does not re-
+    configure the vo, thus ``vo-resize`` should be called afterwards.
 
     Android with ``--gpu-context=android`` only.
 
