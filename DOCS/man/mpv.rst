@@ -446,6 +446,8 @@ Some options (like ``--sub-file``, ``--audio-file``, ``--glsl-shader``) are
 aliases for the proper option with ``-append`` action. For example,
 ``--sub-file`` is an alias for ``--sub-files-append``.
 
+Some options only support a subset of the above.
+
 Playing DVDs
 ------------
 
