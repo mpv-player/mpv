@@ -1159,6 +1159,18 @@ Video
     on the machine and use that, up to the maximum of 16. You can set more than
     16 threads manually.
 
+``--vd-lavc-assume-old-x264=<yes|no>``
+    Assume the video was encoded by an old, buggy x264 version (default: no).
+    Normally, this is autodtected by libavcodec. But if the bitstream contains
+    no x264 version info (or it was somehow skipped), and the stream was in fact
+    encoded by an old x264 version (build 150 or earlier), and if the stream
+    uses ``4:4:4`` chroma, then libavcodec will by default show corrupted video.
+    This option sets the libavcodec ``x264_build`` option to ``150``, which
+    means that if the stream contains no version info, or was not encoded by
+    x264 at all, it assumes it was encoded by the old version. Enabling this
+    option is pretty safe if you want your broken files to work, but in theory
+    this can break on streams not encoded by x264, or if a stream encoded by a
+    newer x264 version contains no version info.
 
 
 Audio
