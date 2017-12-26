@@ -38,6 +38,7 @@ struct d3d11_opts {
     char *adapter_name;
     int output_format;
     int color_space;
+    int exclusive_fs;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -73,6 +74,7 @@ const struct m_sub_options d3d11_conf = {
             {"linear",  DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709},
             {"pq",      DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020},
             {"bt.2020", DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020})},
+        {"d3d11-exclusive-fs", OPT_FLAG(exclusive_fs)},
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -83,12 +85,16 @@ const struct m_sub_options d3d11_conf = {
         .adapter_name = NULL,
         .output_format = DXGI_FORMAT_UNKNOWN,
         .color_space = -1,
+        .exclusive_fs = 0,
     },
     .size = sizeof(struct d3d11_opts)
 };
 
 struct priv {
     struct d3d11_opts *opts;
+
+    struct mp_vo_opts *vo_opts;
+    struct m_config_cache *vo_opts_cache;
 
     struct ra_tex *backbuffer;
     ID3D11Device *device;
@@ -319,9 +325,82 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     }
 }
 
+static bool d3d11_set_fullscreen(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    HRESULT hr;
+
+    if (!p->swapchain) {
+        MP_ERR(ctx, "Full screen configuration was requested before D3D11 "
+                    "swap chain was ready!");
+        return false;
+    }
+
+    // we only want exclusive FS if we are entering FS and
+    // exclusive FS is enabled. Otherwise disable exclusive FS.
+    bool enable_exclusive_fs = p->vo_opts->fullscreen &&
+                               p->opts->exclusive_fs;
+
+    MP_VERBOSE(ctx, "%s full-screen exclusive mode while %s fullscreen\n",
+               enable_exclusive_fs ? "Enabling" : "Disabling",
+               ctx->vo->opts->fullscreen ? "entering" : "leaving");
+
+    hr = IDXGISwapChain_SetFullscreenState(p->swapchain,
+                                           enable_exclusive_fs, NULL);
+    if (FAILED(hr))
+        return false;
+
+    if (!resize(ctx))
+        return false;
+
+    return true;
+}
+
 static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
-    int ret = vo_w32_control(ctx->vo, events, request, arg);
+    struct priv *p = ctx->priv;
+    int ret = -1;
+    bool fullscreen_switch_needed = false;
+
+    switch (request) {
+    case VOCTRL_VO_OPTS_CHANGED: {
+        void *changed_option;
+
+        while (m_config_cache_get_next_changed(p->vo_opts_cache,
+                                               &changed_option))
+        {
+            struct mp_vo_opts *vo_opts = p->vo_opts_cache->opts;
+
+            if (changed_option == &vo_opts->fullscreen) {
+                fullscreen_switch_needed = true;
+            }
+        }
+
+        break;
+    }
+    default:
+        break;
+    }
+
+    // if leaving full screen, handle d3d11 stuff first, then general
+    // windowing
+    if (fullscreen_switch_needed && !p->vo_opts->fullscreen) {
+        if (!d3d11_set_fullscreen(ctx))
+            return VO_FALSE;
+
+        fullscreen_switch_needed = false;
+    }
+
+    ret = vo_w32_control(ctx->vo, events, request, arg);
+
+    // if entering full screen, handle d3d11 after general windowing stuff
+    if (fullscreen_switch_needed && p->vo_opts->fullscreen) {
+        if (!d3d11_set_fullscreen(ctx))
+            return VO_FALSE;
+
+        fullscreen_switch_needed = false;
+    }
+
     if (*events & VO_EVENT_RESIZE) {
         if (!resize(ctx))
             return VO_ERROR;
@@ -332,6 +411,9 @@ static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg
 static void d3d11_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+
+    if (p->swapchain)
+        IDXGISwapChain_SetFullscreenState(p->swapchain, FALSE, NULL);
 
     if (ctx->ra)
         ra_tex_free(ctx->ra, &p->backbuffer);
@@ -357,6 +439,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->opts = mp_get_config_group(ctx, ctx->global, &d3d11_conf);
+
+    p->vo_opts_cache = m_config_cache_alloc(ctx, ctx->vo->global, &vo_sub_opts);
+    p->vo_opts = p->vo_opts_cache->opts;
 
     LARGE_INTEGER perf_freq;
     QueryPerformanceFrequency(&perf_freq);

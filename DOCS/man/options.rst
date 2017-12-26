@@ -5158,6 +5158,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     use of compute shaders over fragment shaders wherever possible. Enabled by
     default, although Nvidia users may want to disable it.
 
+``--d3d11-exclusive-fs=<yes|no>``
+    Switches the D3D11 swap chain fullscreen state to 'fullscreen' when
+    fullscreen video is requested. Also known as "exclusive fullscreen" or
+    "D3D fullscreen" in other applications. Gives mpv full control of
+    rendering on the swap chain's screen. Off by default.
+
 ``--d3d11-warp=<yes|no|auto>``
     Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
     backend (default: auto). This is a high performance software renderer. By
