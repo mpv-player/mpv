@@ -666,6 +666,19 @@ static void init_avctx(struct dec_video *vd)
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)
         goto error;
 
+    // Sometimes, the first packet contains information required for correct
+    // decoding of the rest of the stream. The only currently known case is the
+    // x264 build number (encoded in a SEI element), needed to enable a
+    // workaround for broken 4:4:4 streams produced by older x264 versions.
+    if (lavc_codec->id == AV_CODEC_ID_H264 && c->first_packet) {
+        AVPacket avpkt;
+        mp_set_av_packet(&avpkt, c->first_packet, &ctx->codec_timebase);
+        avcodec_send_packet(avctx, &avpkt);
+        avcodec_receive_frame(avctx, ctx->pic);
+        av_frame_unref(ctx->pic);
+        avcodec_flush_buffers(ctx->avctx);
+    }
+
     return;
 
 error:
