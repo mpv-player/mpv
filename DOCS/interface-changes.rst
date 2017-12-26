@@ -67,6 +67,7 @@ Interface changes
     - deprecate the --ff-aid, --ff-vid, --ff-sid options and properties (there is
       no replacement, but you can manually query the track property and use the
       "ff-index" field to find the mpv track ID to imitate this behavior)
+    - rename --no-ometadata to --no-ocopymetadata
  --- mpv 0.27.0 ---
     - drop previously deprecated --field-dominance option
     - drop previously deprecated "osd" command

@@ -55,12 +55,13 @@ const struct m_sub_options encode_config = {
         OPT_FLAG("oneverdrop", neverdrop, M_OPT_FIXED),
         OPT_FLAG("ovfirst", video_first, M_OPT_FIXED),
         OPT_FLAG("oafirst", audio_first, M_OPT_FIXED),
-        OPT_FLAG("ometadata", metadata, M_OPT_FIXED),
+        OPT_FLAG("ocopymetadata", copymetadata, M_OPT_FIXED),
+        OPT_KEYVALUELIST("ometadata", metadata, M_OPT_FIXED),
         {0}
     },
     .size = sizeof(struct encode_opts),
     .defaults = &(const struct encode_opts){
-        .metadata = 1,
+        .copymetadata = 1,
     },
 };
 
@@ -275,11 +276,48 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
     return ctx;
 }
 
+static void set_metadata_value(struct encode_lavc_context *ctx,
+                        const char *metadata_key, const char *metadata_value)
+{
+    // Add the key-value pair or remove the key if the value is empty
+    if (metadata_value[0]) {
+        MP_VERBOSE(ctx, "setting metadata value '%s' for key '%s'\n", metadata_value, metadata_key);
+        mp_tags_set_str(ctx->metadata, metadata_key, metadata_value);
+    } else {
+        MP_VERBOSE(ctx, "removing metadata key '%s'\n", metadata_key);
+        struct bstr key = bstr0(metadata_key);
+
+        for (int n = 0; n < ctx->metadata->num_keys; n++) {
+            if (bstrcasecmp0(key, ctx->metadata->keys[n]) == 0) {
+                talloc_free(ctx->metadata->keys[n]);
+                talloc_free(ctx->metadata->values[n]);
+
+                MP_TARRAY_REMOVE_AT(ctx->metadata->keys, ctx->metadata->num_keys, n);
+                ctx->metadata->num_keys++; // Increment again for second removal
+                MP_TARRAY_REMOVE_AT(ctx->metadata->values, ctx->metadata->num_keys, n);
+
+                break;
+            }
+        }
+    }
+}
+
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata)
 {
-    if (ctx->options->metadata)
+    if (ctx->options->copymetadata) {
         ctx->metadata = metadata;
+    } else {
+        ctx->metadata = talloc_zero(ctx, struct mp_tags);
+    }
+
+    if (ctx->options->metadata) {
+        char **kv = ctx->options->metadata;
+        // Set all user-provided metadata tags
+        for (int n = 0; kv && kv[n * 2]; n++) {
+            set_metadata_value(ctx, kv[n*2 + 0], kv[n*2 + 1]);
+        }
+    }
 }
 
 int encode_lavc_start(struct encode_lavc_context *ctx)

@@ -150,6 +150,21 @@ You can encode files from one format/codec to another using this facility.
     and all pts are passed through as-is. Never seek backwards or use multiple
     input files in this mode!
 
-``--no-ometadata``
+``--no-ocopymetadata``
     Turns off copying of metadata from input files to output files when
     encoding (which is enabled by default).
+
+``--ometadata=<metadata-tag[,metadata-tag,...]>``
+    Specifies metadata to include in the output file.
+    Supported keys vary between output formats. For example, Matroska (MKV) and
+    FLAC allow almost arbitary keys, while support in MP4 and MP3 is more limited.
+    You may use an empty value ala ``key=""`` to clear the value (eg. when copying
+    original metadata with ``--ocopymetadata``.)
+
+    .. admonition:: Example
+
+        "``--ometadata=title="Output title",comment="Another tag"``"
+            adds a title and a comment to the output file.
+
+        "``--ometadata=title=""``"
+            remvoes the ``title`` tag from the copied metadata.
