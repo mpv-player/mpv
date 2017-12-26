@@ -8,6 +8,7 @@
 
 local mp = require 'mp'
 local options = require 'mp.options'
+local utils = require 'mp.utils'
 
 -- Options
 local o = {
@@ -232,6 +233,19 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
 end
 
 
+local function append(s, str, attr)
+    attr.prefix_sep = attr.prefix_sep or o.prefix_sep
+    attr.indent = attr.indent or o.indent
+    attr.nl = attr.nl or o.nl
+    attr.suffix = attr.suffix or ""
+    attr.prefix = attr.prefix or ""
+    attr.no_prefix_markup = attr.no_prefix_markup or false
+    attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
+    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
+                     attr.prefix, attr.prefix_sep, no_ASS(str), attr.suffix)
+end
+
+
 -- Format and append a property.
 -- A property whose value is either `nil` or empty (hereafter called "invalid")
 -- is skipped and not appended.
@@ -253,18 +267,7 @@ local function append_property(s, prop, attr, excluded)
         end
         return false
     end
-
-    attr.prefix_sep = attr.prefix_sep or o.prefix_sep
-    attr.indent = attr.indent or o.indent
-    attr.nl = attr.nl or o.nl
-    attr.suffix = attr.suffix or ""
-    attr.prefix = attr.prefix or ""
-    attr.no_prefix_markup = attr.no_prefix_markup or false
-    attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
-    ret = attr.no_value and "" or ret
-
-    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
-                     attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
+    append(s, ret, attr)
     return true
 end
 
@@ -442,13 +445,26 @@ local function add_file(s)
                         {prefix="(" .. tostring(ch_index + 1) .. "/", suffix=")", nl="",
                          indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
-    if append_property(s, "cache-used", {prefix="Cache:"}) then
-        append_property(s, "demuxer-cache-duration",
-                        {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
-                         prefix_sep="", no_prefix_markup=true})
-        append_property(s, "cache-speed",
-                        {prefix="", suffix="", nl="", indent=o.prefix_sep,
-                         prefix_sep="", no_prefix_markup=true})
+
+    local demuxer_cache = mp.get_property_native("demuxer-cache-state", {})
+    if demuxer_cache["fw-bytes"] then
+        demuxer_cache = demuxer_cache["fw-bytes"] -- returns bytes
+    else
+        demuxer_cache = 0
+    end
+    local demuxer_secs = mp.get_property_number("demuxer-cache-duration", 0)
+    local stream_cache = mp.get_property_number("cache-used", 0) * 1024 -- returns KiB
+    if stream_cache + demuxer_cache + demuxer_secs > 0 then
+        append(s, utils.format_bytes_humanized(stream_cache + demuxer_cache), {prefix="Total Cache:"})
+        append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="(Demuxer:",
+               suffix=",", nl="", no_prefix_markup=true, indent=o.prefix_sep})
+        append(s, format("%.1f", demuxer_secs), {suffix=" sec)", nl="", indent="",
+               no_prefix_markup=true})
+        local speed = mp.get_property_number("cache-speed", 0)
+        if speed > 0 then
+            append(s, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
+                   indent=o.prefix_sep, no_prefix_markup=true})
+        end
     end
     append_property(s, "file-size", {prefix="Size:"})
 end
