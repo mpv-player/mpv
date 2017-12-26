@@ -191,6 +191,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
   { MP_CMD_VF_COMMAND, "vf-command", { ARG_STRING, ARG_STRING, ARG_STRING } },
+  { MP_CMD_VO_RESIZE, "vo-resize", },
 
   { MP_CMD_SCRIPT_BINDING, "script-binding", { ARG_STRING },
     .allow_auto_repeat = true, .on_updown = true},
