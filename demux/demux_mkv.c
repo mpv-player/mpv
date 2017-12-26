@@ -254,6 +254,7 @@ const struct m_sub_options demux_mkv_conf = {
 
 static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos);
 static void probe_first_timestamp(struct demuxer *demuxer);
+static int read_next_block_into_queue(demuxer_t *demuxer);
 static void free_block(struct block_info *block);
 
 #define AAC_SYNC_EXTENSION_TYPE 0x02b7
@@ -1878,6 +1879,41 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
+static void probe_x264_garbage(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+
+    for (int n = 0; n < mkv_d->num_tracks; n++) {
+        mkv_track_t *track = mkv_d->tracks[n];
+        struct sh_stream *sh = track->stream;
+
+        if (!sh || sh->type != STREAM_VIDEO)
+            continue;
+
+        if (sh->codec->codec && strcmp(sh->codec->codec, "h264") != 0)
+            continue;
+
+        struct block_info *block = NULL;
+
+        // Find first block for this track.
+        // Restrict reading number of total packets. (Arbitrary to avoid bloat.)
+        for (int i = 0; i < 100; i++) {
+            if (i >= mkv_d->num_blocks && read_next_block_into_queue(demuxer) < 1)
+                break;
+            if (mkv_d->blocks[i].track == track) {
+                block = &mkv_d->blocks[i];
+                break;
+            }
+        }
+
+        if (!block || block->num_laces < 1)
+            continue;
+
+        sh->codec->first_packet = new_demux_packet_from_buf(block->laces[0]);
+        talloc_steal(mkv_d, sh->codec->first_packet);
+    }
+}
+
 static int read_ebml_header(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
@@ -2077,6 +2113,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     probe_first_timestamp(demuxer);
     if (mkv_d->opts->probe_duration)
         probe_last_timestamp(demuxer, start_pos);
+    probe_x264_garbage(demuxer);
 
     return 0;
 }
