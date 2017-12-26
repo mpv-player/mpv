@@ -80,6 +80,7 @@ struct vd_lavc_params {
     int framedrop;
     int threads;
     int bitexact;
+    int old_x264;
     int check_hw_profile;
     int software_fallback;
     char **avopts;
@@ -109,6 +110,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_DISCARD("framedrop", framedrop, 0),
         OPT_INT("threads", threads, M_OPT_MIN, .min = 0),
         OPT_FLAG("bitexact", bitexact, 0),
+        OPT_FLAG("assume-old-x264", old_x264, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
         OPT_CHOICE_OR_INT("software-fallback", software_fallback, 0, 1, INT_MAX,
                           ({"no", INT_MAX}, {"yes", 1})),
@@ -646,6 +648,9 @@ static void init_avctx(struct dec_video *vd)
     avctx->skip_loop_filter = lavc_param->skip_loop_filter;
     avctx->skip_idct = lavc_param->skip_idct;
     avctx->skip_frame = lavc_param->skip_frame;
+
+    if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
+        av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
