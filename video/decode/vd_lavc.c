@@ -648,8 +648,12 @@ static void init_avctx(struct dec_video *vd)
     avctx->skip_idct = lavc_param->skip_idct;
     avctx->skip_frame = lavc_param->skip_frame;
 
-    if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
-        av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
+    if (lavc_codec->id == AV_CODEC_ID_H264 &&
+        (c->x264_build || lavc_param->old_x264))
+    {
+        int ver = c->x264_build ? c->x264_build : 150;
+        av_opt_set_int(avctx, "x264_build", ver, AV_OPT_SEARCH_CHILDREN);
+    }
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
