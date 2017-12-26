@@ -589,4 +589,14 @@ function mp_utils.getcwd()
     return mp.get_property("working-directory")
 end
 
+function mp_utils.format_bytes_humanized(b)
+    local d = {"Bytes", "KiB", "MiB", "GiB", "TiB", "PiB"}
+    local i = 1
+    while b >= 1024 do
+        b = b / 1024
+        i = i + 1
+    end
+    return string.format("%0.2f %s", b, d[i] and d[i] or "*1024^" .. (i-1))
+end
+
 return {}
