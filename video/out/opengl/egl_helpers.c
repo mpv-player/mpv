@@ -199,6 +199,14 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     return false;
 }
 
+static int GLAPIENTRY swap_interval(int interval)
+{
+    EGLDisplay display = eglGetCurrentDisplay();
+    if (!display)
+        return 1;
+    return !eglSwapInterval(display, interval);
+}
+
 static void *mpegl_get_proc_address(void *ctx, const char *name)
 {
     void *p = eglGetProcAddress(name);
@@ -223,4 +231,6 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log)
         egl_exts = eglQueryString(display, EGL_EXTENSIONS);
 
     mpgl_load_functions2(gl, mpegl_get_proc_address, NULL, egl_exts, log);
+    if (!gl->SwapInterval)
+        gl->SwapInterval = swap_interval;
 }
