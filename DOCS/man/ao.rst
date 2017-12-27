@@ -27,7 +27,7 @@ Available audio output drivers are:
     .. warning::
 
         To get multichannel/surround audio, use ``--audio-channels=auto``. The
-        default for this option is ``auto-safe``, which makes this audio otuput
+        default for this option is ``auto-safe``, which makes this audio output
         explicitly reject multichannel output, as there is no way to detect
         whether a certain channel layout is actually supported.
 
