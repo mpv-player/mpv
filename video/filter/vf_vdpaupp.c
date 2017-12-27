@@ -183,18 +183,22 @@ static int vf_open(vf_instance_t *vf)
     hwdec_devices_request_all(vf->hwdec_devs);
     AVBufferRef *ref =
         hwdec_devices_get_lavc(vf->hwdec_devs, AV_HWDEVICE_TYPE_VDPAU);
-    struct mp_vdpau_ctx *ctx = mp_vdpau_get_ctx_from_av(ref);
+    if (!ref)
+        goto error;
+    p->ctx = mp_vdpau_get_ctx_from_av(ref);
     av_buffer_unref(&ref);
-    if (!ctx) {
-        uninit(vf);
-        return 0;
-    }
+    if (!p->ctx)
+        goto error;
 
     p->def_deintmode = p->opts.deint;
     if (!p->deint_enabled)
         p->opts.deint = 0;
 
     return 1;
+
+error:
+    uninit(vf);
+    return 0;
 }
 
 #define OPT_BASE_STRUCT struct vf_priv_s
