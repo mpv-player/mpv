@@ -346,20 +346,6 @@ uninit:
     return false;
 }
 
-static bool glx_init_probe(struct ra_ctx *ctx)
-{
-    if (!glx_init(ctx))
-        return false;
-
-    struct priv *p = ctx->priv;
-    if (!(p->gl.mpgl_caps & MPGL_CAP_VDPAU)) {
-        MP_VERBOSE(ctx, "No vdpau support found - probing more things.\n");
-        glx_uninit(ctx);
-        return false;
-    }
-
-    return true;
-}
 
 static void resize(struct ra_ctx *ctx)
 {
@@ -399,16 +385,5 @@ const struct ra_ctx_fns ra_ctx_glx = {
     .wakeup         = glx_wakeup,
     .wait_events    = glx_wait_events,
     .init           = glx_init,
-    .uninit         = glx_uninit,
-};
-
-const struct ra_ctx_fns ra_ctx_glx_probe = {
-    .type           = "opengl",
-    .name           = "x11probe",
-    .reconfig       = glx_reconfig,
-    .control        = glx_control,
-    .wakeup         = glx_wakeup,
-    .wait_events    = glx_wait_events,
-    .init           = glx_init_probe,
     .uninit         = glx_uninit,
 };
