@@ -35,7 +35,6 @@
 
 /* OpenGL */
 extern const struct ra_ctx_fns ra_ctx_glx;
-extern const struct ra_ctx_fns ra_ctx_glx_probe;
 extern const struct ra_ctx_fns ra_ctx_x11_egl;
 extern const struct ra_ctx_fns ra_ctx_drm_egl;
 extern const struct ra_ctx_fns ra_ctx_cocoa;
@@ -79,9 +78,6 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_GL_DXINTEROP
     &ra_ctx_dxgl,
-#endif
-#if HAVE_GL_X11
-    &ra_ctx_glx_probe,
 #endif
 #if HAVE_EGL_X11
     &ra_ctx_x11_egl,

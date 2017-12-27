@@ -4779,9 +4779,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
         X11/GLX
     x11vk
         VK_KHR_xlib_surface
-    x11probe
-        For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
-        directly, it could be removed without warning as autoprobing is changed.
     wayland
         Wayland/EGL
     waylandvk
