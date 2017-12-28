@@ -76,6 +76,11 @@ struct mp_codec_params {
     // Timestamp granularity for converting double<->rational timestamps.
     int native_tb_num, native_tb_den;
 
+    // Used by an obscure bug workaround mechanism. As an exception to the usual
+    // rules, demuxers are allowed to set this after adding the sh_stream, but
+    // only before the demuxer open call returns.
+    int x264_build;
+
     // STREAM_AUDIO
     int samplerate;
     struct mp_chmap channels;
