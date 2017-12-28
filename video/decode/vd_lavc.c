@@ -453,7 +453,8 @@ static void select_and_set_hwdec(struct dec_video *vd)
             } else if (!hwdec->copying) {
                 // Most likely METHOD_INTERNAL, which often use delay-loaded
                 // VO support as well.
-                hwdec_devices_request_all(vd->hwdec_devs);
+                if (vd->hwdec_devs)
+                    hwdec_devices_request_all(vd->hwdec_devs);
             }
 
             ctx->use_hwdec = true;
