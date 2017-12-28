@@ -5258,6 +5258,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     flipping GL front and backbuffers immediately (i.e. it doesn't call it
     in display-sync mode).
 
+    On OSX this is always deactivated because it only causes performance
+    problems and other regressions.
+
 ``--gpu-dumb-mode=<yes|no|auto>``
     This mode is extremely restricted, and will disable most extended
     features. That includes high quality scalers and custom shaders!

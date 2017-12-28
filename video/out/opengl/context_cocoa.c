@@ -36,6 +36,7 @@ const struct m_sub_options cocoa_conf = {
 
 struct priv {
     GL gl;
+    void (GLAPIENTRY *Flush)(void);
     CGLPixelFormatObj pix;
     CGLContextObj ctx;
 
@@ -48,6 +49,8 @@ static int set_swap_interval(int enabled)
     CGLError err = CGLSetParameter(ctx, kCGLCPSwapInterval, &enabled);
     return (err == kCGLNoError) ? 0 : -1;
 }
+
+static void glFlushDummy(void) { }
 
 static void *cocoa_glgetaddr(const char *s)
 {
@@ -138,6 +141,8 @@ static bool create_gl_context(struct ra_ctx *ctx)
 
     mpgl_load_functions(gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
     gl->SwapInterval = set_swap_interval;
+    p->Flush = gl->Flush;
+    gl->Flush = glFlushDummy;
 
     CGLReleasePixelFormat(p->pix);
 
@@ -155,9 +160,8 @@ static void cocoa_uninit(struct ra_ctx *ctx)
 static void cocoa_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    GL *gl = &p->gl;
     vo_cocoa_swap_buffers(ctx->vo);
-    gl->Flush();
+    p->Flush();
 }
 
 static bool cocoa_init(struct ra_ctx *ctx)
