@@ -1,0 +1,49 @@
+module M
+  class ReplyError < StandardError; end
+
+  class Either
+    def initialize(value)
+      @value = value
+    end
+
+    def to_s
+      "#<#{self.class.name} value=#{@value}>"
+    end
+  end
+
+  class Left < Either
+    def map(&block)
+      self
+    end
+
+    def get_or_else(value)
+      value
+    end
+
+    def get!
+      raise ReplyError, @value
+    end
+
+    def success?
+      false
+    end
+  end
+
+  class Right < Either
+    def map(&block)
+      Right.new(block.call(@value))
+    end
+
+    def get_or_else(_value)
+      @value
+    end
+
+    def get!
+      @value
+    end
+
+    def success?
+      true
+    end
+  end
+end

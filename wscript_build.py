@@ -109,7 +109,7 @@ def build(ctx):
             target = os.path.splitext(fn)[0] + ".inc",
         )
 
-    mruby_files = ['events.mrb', 'logging.mrb', 'reply.mrb']
+    mruby_files = ['events.mrb', 'logging.mrb', 'either.mrb']
     for fn in mruby_files:
         fn = "player/mruby/" + fn
         ctx(

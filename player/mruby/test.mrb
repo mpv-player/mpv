@@ -5,8 +5,8 @@ end
 
 def with_unbox(a, &block)
   case [a.class]
-  when [M::Reply] then
-    a.unbox(&block)
+  when [M::Left], [M::Right] then
+    a.map(&block).get_or_else(false)
   else
     yield(a)
   end
@@ -22,7 +22,8 @@ def assert_class(a, klass)
 end
 
 def assert_include(a, b)
-  raise "Expected:\n#{a}\nto include\n#{b}\n" unless a.include?(b)
+  raise "Expected:\n#{a}\nto include\n#{b}\n" \
+    unless with_unbox(a) { |v| v.include?(b) }
 end
 
 def ok(s)
@@ -55,7 +56,8 @@ def run
 end
 
 assert ".property_list returns an array" do
-  assert_class(M.get_property('property-list').val, Array)
+  assert_class(M.get_property('property-list').get!, Array)
+  assert_class(M.get_property('property-list'), Array)
 end
 
 assert ".property_list contains options" do
@@ -67,7 +69,7 @@ assert ".get_property returns proper values" do
   assert_class(M.get_property("volume"),    Float)
   assert_class(M.get_property("osd-width"), Fixnum)
   assert_class(M.get_property("vf"),        Array)
-  assert_include([true, false], M.get_property("mute").unbox!)
+  assert_equal(M.get_property("mute"),      false)
 end
 
 assert ".set_property works on complex types" do

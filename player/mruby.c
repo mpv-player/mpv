@@ -34,8 +34,8 @@
 #include "mpv_talloc.h"
 
 static const char * const mruby_scripts[][2] = {
-    {"mpv/reply.mrb",
-#   include "player/mruby/reply.inc"
+    {"mpv/either.mrb",
+#   include "player/mruby/either.inc"
     },
     {"mpv/logging.mrb",
 #   include "player/mruby/logging.inc"
@@ -74,11 +74,11 @@ static int get_loglevel(char *level)
 
 static mrb_value api_return(mrb_state *mrb, int err, mrb_value value)
 {
-    const char* status = mpv_error_string(err);
+    bool ok = err == MPV_ERROR_SUCCESS;
     struct RClass *M = mrb_module_get(mrb, "M");
-    struct RClass *c = mrb_class_get_under(mrb, M, "Reply");
-    mrb_value init_args[2] = { value, mrb_str_new_cstr(mrb, status) };
-    return mrb_obj_new(mrb, c, MP_ARRAY_SIZE(init_args), init_args);
+    struct RClass *c = mrb_class_get_under(mrb, M, ok ? "Right" : "Left");
+    mrb_value val = ok ? value : mrb_str_new_cstr(mrb, mpv_error_string(err));
+    return mrb_obj_new(mrb, c, 1, &val);
 }
 
 #define api_return_bool(mrb, err) api_return(mrb, err, mrb_bool_value(err >= 0))
