@@ -273,12 +273,8 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     check_obj_resize(osd, res, obj);
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
-        if (obj->sub) {
-            double sub_pts = video_pts;
-            if (sub_pts != MP_NOPTS_VALUE)
-                sub_pts -= opts->sub_delay;
-            sub_get_bitmaps(obj->sub, obj->vo_res, format, sub_pts, out_imgs);
-        }
+        if (obj->sub)
+            sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts, out_imgs);
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {
             *out_imgs = *obj->external2;

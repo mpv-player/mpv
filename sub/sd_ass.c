@@ -49,7 +49,6 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
-    double sub_speed, video_fps, frame_fps;
     int64_t *seen_packets;
     int num_seen_packets;
     bool duration_unknown;
@@ -147,24 +146,6 @@ static void enable_output(struct sd *sd, bool enable)
     }
 }
 
-static void update_subtitle_speed(struct sd *sd)
-{
-    struct MPOpts *opts = sd->opts;
-    struct sd_ass_priv *ctx = sd->priv;
-    ctx->sub_speed = 1.0;
-
-    if (ctx->video_fps > 0 && ctx->frame_fps > 0) {
-        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
-                   ctx->frame_fps, ctx->video_fps);
-        ctx->sub_speed *= ctx->frame_fps / ctx->video_fps;
-    }
-
-    if (opts->sub_fps && ctx->video_fps)
-        ctx->sub_speed *= opts->sub_fps / ctx->video_fps;
-
-    ctx->sub_speed *= opts->sub_speed;
-}
-
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
@@ -211,9 +192,6 @@ static int init(struct sd *sd)
 #if LIBASS_VERSION >= 0x01302000
     ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
 #endif
-
-    ctx->frame_fps = sd->codec->frame_based;
-    update_subtitle_speed(sd);
 
     enable_output(sd, true);
 
@@ -386,8 +364,6 @@ static long long find_timestamp(struct sd *sd, double pts)
     struct sd_ass_priv *priv = sd->priv;
     if (pts == MP_NOPTS_VALUE)
         return 0;
-
-    pts /= priv->sub_speed;
 
     long long ts = llrint(pts * 1000);
 
@@ -679,11 +655,11 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
-        long long ts = llrint(a[0] * (1000.0 / ctx->sub_speed));
+        long long ts = llrint(a[0] * 1000.0);
         long long res = ass_step_sub(ctx->ass_track, ts, a[1]);
         if (!res)
             return false;
-        a[0] = res / (1000.0 / ctx->sub_speed);
+        a[0] += res / 1000.0;
         return true;
     }
     case SD_CTRL_SET_VIDEO_PARAMS:
@@ -691,13 +667,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         return CONTROL_OK;
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
-        return CONTROL_OK;
-    case SD_CTRL_SET_VIDEO_DEF_FPS:
-        ctx->video_fps = *(double *)arg;
-        update_subtitle_speed(sd);
-        return CONTROL_OK;
-    case SD_CTRL_UPDATE_SPEED:
-        update_subtitle_speed(sd);
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;

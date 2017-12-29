@@ -3081,8 +3081,6 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
     if (!sub || pts == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    pts -= mpctx->opts->sub_delay;
-
     char *text = sub_get_text(sub, pts);
     if (!text)
         text = "";
@@ -5078,11 +5076,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         double refpts = get_current_time(mpctx);
         if (sub && refpts != MP_NOPTS_VALUE) {
             double a[2];
-            a[0] = refpts - opts->sub_delay;
+            a[0] = refpts;
             a[1] = cmd->args[0].v.i;
             if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
-                    opts->sub_delay -= a[0];
+                    opts->sub_delay -= a[0] - refpts;
                     osd_changed(mpctx->osd);
                     show_property_osd(mpctx, "sub-delay", on_osd);
                 } else {
@@ -5092,9 +5090,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                     // rounding for the mess of it.
                     a[0] += 0.01 * (a[1] >= 0 ? 1 : -1);
                     mark_seek(mpctx);
-                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], MPSEEK_EXACT,
+                    queue_seek(mpctx, MPSEEK_ABSOLUTE, a[0], MPSEEK_EXACT,
                                MPSEEK_FLAG_DELAY);
-                    set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
+                    set_osd_function(mpctx, (a[0] > refpts) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
                     if (msg_or_nobar_osd)

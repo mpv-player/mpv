@@ -84,7 +84,6 @@ void uninit_sub_all(struct MPContext *mpctx)
 static bool update_subtitle(struct MPContext *mpctx, double video_pts,
                             struct track *track)
 {
-    struct MPOpts *opts = mpctx->opts;
     struct dec_sub *dec_sub = track ? track->d_sub : NULL;
 
     if (!dec_sub || video_pts == MP_NOPTS_VALUE)
@@ -95,8 +94,6 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         if (params.imgfmt)
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
-
-    video_pts -= opts->sub_delay;
 
     if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
         // Assume fully_read implies no interleaved audio/video streams.
