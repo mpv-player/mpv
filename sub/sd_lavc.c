@@ -164,7 +164,7 @@ static void convert_pal(uint32_t *colors, size_t count, bool gray)
 // Initialize sub from sub->avsub.
 static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 {
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     struct sd_lavc_priv *priv = sd->priv;
     AVSubtitle *avsub = &sub->avsub;
 
@@ -288,7 +288,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
@@ -387,7 +387,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
                         double pts, struct sub_bitmaps *res)
 {
     struct sd_lavc_priv *priv = sd->priv;
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
 
     priv->current_pts = pts;
 

@@ -201,6 +201,10 @@ int m_config_option_requires_param(struct m_config *config, bstr name);
 // Notify m_config_cache users that the option has (probably) changed its value.
 void m_config_notify_change_co(struct m_config *config,
                                struct m_config_option *co);
+// Like m_config_notify_change_co(), but automatically find the option by its
+// pointer within the global option struct (config->optstruct). In practice,
+// it means it works only on fields in MPContext.opts.
+void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr);
 
 bool m_config_is_in_group(struct m_config *config,
                           const struct m_sub_options *group,

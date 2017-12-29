@@ -1340,6 +1340,20 @@ void m_config_notify_change_co(struct m_config *config,
     }
 }
 
+void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
+{
+    for (int n = 0; n < config->num_opts; n++) {
+        struct m_config_option *co = &config->opts[n];
+        if (co->data == ptr) {
+            m_config_notify_change_co(config, co);
+            return;
+        }
+    }
+    // ptr doesn't point to any config->optstruct field declared in the
+    // option list?
+    assert(false);
+}
+
 void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
                                   void (*cb)(void *ctx), void *cb_ctx)
 {

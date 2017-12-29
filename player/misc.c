@@ -182,7 +182,7 @@ double get_track_seek_offset(struct MPContext *mpctx, struct track *track)
         if (track->type == STREAM_AUDIO)
             return -opts->audio_delay;
         if (track->type == STREAM_SUB)
-            return -opts->sub_delay;
+            return -opts->subs_rend->sub_delay;
     }
     return 0;
 }

@@ -28,6 +28,7 @@
 #include "osdep/timer.h"
 
 #include "mpv_talloc.h"
+#include "options/m_config.h"
 #include "options/options.h"
 #include "common/global.h"
 #include "common/msg.h"
@@ -117,12 +118,13 @@ struct osd_state *osd_create(struct mpv_global *global)
 
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state) {
-        .opts = global->opts,
+        .opts_cache = m_config_cache_alloc(osd, global, &mp_osd_render_sub_opts),
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
         .force_video_pts = MP_NOPTS_VALUE,
     };
     pthread_mutex_init(&osd->lock, NULL);
+    osd->opts = osd->opts_cache->opts;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = talloc(osd, struct osd_object);
@@ -262,10 +264,8 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
                           const bool sub_formats[SUBBITMAP_COUNT],
                           struct sub_bitmaps *out_imgs)
 {
-    struct MPOpts *opts = osd->opts;
-
     int format = SUBBITMAP_LIBASS;
-    if (!sub_formats[format] || opts->force_rgba_osd)
+    if (!sub_formats[format] || osd->opts->force_rgba_osd)
         format = SUBBITMAP_RGBA;
 
     *out_imgs = (struct sub_bitmaps) {0};
@@ -406,6 +406,8 @@ void osd_changed(struct osd_state *osd)
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_OSD]->osd_changed = true;
     osd->want_redraw_notification = true;
+    // Done here for a lack of a better place.
+    m_config_cache_update(osd->opts_cache);
     pthread_mutex_unlock(&osd->lock);
 }
 
