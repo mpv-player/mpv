@@ -3040,7 +3040,7 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
     struct MPOpts *opts = mpctx->opts;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_delay(opts->sub_delay);
+        *(char **)arg = format_delay(opts->subs_rend->sub_delay);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -3053,7 +3053,8 @@ static int mp_property_sub_speed(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%4.1f%%", 100 * opts->sub_speed);
+        *(char **)arg =
+            talloc_asprintf(NULL, "%4.1f%%", 100 * opts->subs_rend->sub_speed);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -3065,7 +3066,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
+        *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->subs_rend->sub_pos);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -5065,8 +5066,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             a[1] = cmd->args[0].v.i;
             if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
-                    opts->sub_delay -= a[0] - refpts;
-                    osd_changed(mpctx->osd);
+                    opts->subs_rend->sub_delay -= a[0] - refpts;
+                    m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                                   &opts->subs_rend->sub_delay);
                     show_property_osd(mpctx, "sub-delay", on_osd);
                 } else {
                     // We can easily get stuck by failing to seek to the video
@@ -5750,13 +5752,13 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
         recreate_auto_filters(mpctx);
 
     if (flags & UPDATE_OSD) {
-        osd_changed(mpctx->osd);
         for (int n = 0; n < NUM_PTRACKS; n++) {
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
             if (sub)
-                sub_control(track->d_sub, SD_CTRL_UPDATE_SPEED, NULL);
+                sub_update_opts(track->d_sub);
         }
+        osd_changed(mpctx->osd);
         mp_wakeup_core(mpctx);
     }
 

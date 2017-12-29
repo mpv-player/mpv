@@ -12,7 +12,7 @@
 struct sd {
     struct mpv_global *global;
     struct mp_log *log;
-    struct MPOpts *opts;
+    struct mp_subtitle_opts *opts;
 
     const struct sd_functions *driver;
     void *priv;

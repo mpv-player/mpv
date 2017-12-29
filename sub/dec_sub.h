@@ -19,7 +19,6 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_PARAMS,
     SD_CTRL_SET_TOP,
     SD_CTRL_SET_VIDEO_DEF_FPS,
-    SD_CTRL_UPDATE_SPEED,
 };
 
 struct attachment_list {
@@ -41,6 +40,7 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
 char *sub_get_text(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);
+void sub_update_opts(struct dec_sub *sub);
 void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink);
 
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);

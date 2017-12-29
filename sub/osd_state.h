@@ -73,7 +73,8 @@ struct osd_state {
     bool want_redraw;
     bool want_redraw_notification;
 
-    struct MPOpts *opts;
+    struct m_config_cache *opts_cache;
+    struct mp_osd_render_opts *opts;
     struct mpv_global *global;
     struct mp_log *log;
 

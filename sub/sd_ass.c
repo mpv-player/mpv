@@ -59,7 +59,7 @@ static void fill_plaintext(struct sd *sd, double pts);
 
 // Add default styles, if the track does not have any styles yet.
 // Apply style overrides if the user provides any.
-static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
+static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts *opts)
 {
     if (opts->ass_styles_file && opts->ass_style_override)
         ass_read_styles(track, opts->ass_styles_file, NULL);
@@ -120,7 +120,7 @@ static bool attachment_is_font(struct mp_log *log, struct demux_attachment *f)
 static void add_subtitle_fonts(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     if (!opts->ass_enabled || !opts->use_embedded_fonts || !sd->attachments)
         return;
     for (int i = 0; i < sd->attachments->num_entries; i++) {
@@ -148,7 +148,7 @@ static void enable_output(struct sd *sd, bool enable)
 
 static int init(struct sd *sd)
 {
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
     sd->priv = ctx;
 
@@ -169,6 +169,7 @@ static int init(struct sd *sd)
     }
 
     ctx->ass_library = mp_ass_init(sd->global, sd->log);
+    ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);
 
@@ -279,7 +280,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                           bool converted, ASS_Track *track)
 {
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Renderer *priv = ctx->ass_renderer;
 
@@ -428,7 +429,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, int format,
                         double pts, struct sub_bitmaps *res)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     bool no_ass = !opts->ass_enabled || ctx->on_top ||
                   opts->ass_style_override == 5;
     bool converted = ctx->is_converted || no_ass;
@@ -689,7 +690,7 @@ const struct sd_functions sd_ass = {
 // Disgusting hack for (xy-)vsfilter color compatibility.
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 {
-    struct MPOpts *opts = sd->opts;
+    struct mp_subtitle_opts *opts = sd->opts;
     struct sd_ass_priv *ctx = sd->priv;
     enum mp_csp csp = 0;
     enum mp_csp_levels levels = 0;

@@ -234,7 +234,7 @@ static ASS_Event *add_osd_ass_event_escaped(ASS_Track *track, const char *style,
 
 static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
 {
-    struct MPOpts *opts = osd->opts;
+    struct mp_osd_render_opts *opts = osd->opts;
 
     create_ass_track(osd, obj, &obj->ass);
 
@@ -349,7 +349,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
                             float *o_x, float *o_y, float *o_w, float *o_h,
                             float *o_border)
 {
-    struct MPOpts *opts = osd->opts;
+    struct mp_osd_render_opts *opts = osd->opts;
 
     create_ass_track(osd, obj, &obj->ass);
     ASS_Track *track = obj->ass.track;

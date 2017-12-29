@@ -66,6 +66,56 @@ struct mp_cache_opts {
     int file_max;
 };
 
+// Subtitle options needed by the subtitle decoders/renderers.
+struct mp_subtitle_opts {
+    int sub_visibility;
+    int sub_pos;
+    float sub_delay;
+    float sub_fps;
+    float sub_speed;
+    int forced_subs_only;
+    int stretch_dvd_subs;
+    int stretch_image_subs;
+    int image_subs_video_res;
+    int sub_fix_timing;
+    int sub_scale_by_window;
+    int sub_scale_with_window;
+    int ass_scale_with_window;
+    struct osd_style_opts *sub_style;
+    float sub_scale;
+    float sub_gauss;
+    int sub_gray;
+    int sub_filter_SDH;
+    int sub_filter_SDH_harder;
+    int ass_enabled;
+    float ass_line_spacing;
+    int ass_use_margins;
+    int sub_use_margins;
+    int ass_vsfilter_aspect_compat;
+    int ass_vsfilter_color_compat;
+    int ass_vsfilter_blur_compat;
+    int use_embedded_fonts;
+    char **ass_force_style_list;
+    char *ass_styles_file;
+    int ass_style_override;
+    int ass_hinting;
+    int ass_shaper;
+    int ass_justify;
+    int sub_clear_on_seek;
+    int teletext_page;
+};
+
+struct mp_osd_render_opts {
+    float osd_bar_align_x;
+    float osd_bar_align_y;
+    float osd_bar_w;
+    float osd_bar_h;
+    float osd_scale;
+    int osd_scale_by_window;
+    struct osd_style_opts *osd_style;
+    int force_rgba_osd;
+};
+
 typedef struct MPOpts {
     int property_print_help;
     int use_terminal;
@@ -113,7 +163,6 @@ typedef struct MPOpts {
 
     char *wintitle;
     char *media_title;
-    int force_rgba_osd;
 
     struct mp_csp_equalizer_opts *video_equalizer;
 
@@ -127,6 +176,9 @@ typedef struct MPOpts {
     char *audio_decoders;
     char *video_decoders;
     char *audio_spdif;
+
+    struct mp_subtitle_opts *subs_rend;
+    struct mp_osd_render_opts *osd_rend;
 
     int osd_level;
     int osd_duration;
@@ -202,17 +254,6 @@ typedef struct MPOpts {
     int stream_auto_sel;
     int audio_display;
     char **display_tags;
-    int sub_visibility;
-    int sub_pos;
-    float sub_delay;
-    float sub_fps;
-    float sub_speed;
-    int forced_subs_only;
-    int stretch_dvd_subs;
-    int stretch_image_subs;
-    int image_subs_video_res;
-
-    int sub_fix_timing;
 
     char **audio_files;
     char *demuxer_name;
@@ -249,38 +290,6 @@ typedef struct MPOpts {
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;
-    float osd_bar_align_x;
-    float osd_bar_align_y;
-    float osd_bar_w;
-    float osd_bar_h;
-    float osd_scale;
-    int osd_scale_by_window;
-    int sub_scale_by_window;
-    int sub_scale_with_window;
-    int ass_scale_with_window;
-    struct osd_style_opts *osd_style;
-    struct osd_style_opts *sub_style;
-    float sub_scale;
-    float sub_gauss;
-    int sub_gray;
-    int sub_filter_SDH;
-    int sub_filter_SDH_harder;
-    int ass_enabled;
-    float ass_line_spacing;
-    int ass_use_margins;
-    int sub_use_margins;
-    int ass_vsfilter_aspect_compat;
-    int ass_vsfilter_color_compat;
-    int ass_vsfilter_blur_compat;
-    int use_embedded_fonts;
-    char **ass_force_style_list;
-    char *ass_styles_file;
-    int ass_style_override;
-    int ass_hinting;
-    int ass_shaper;
-    int ass_justify;
-    int sub_clear_on_seek;
-    int teletext_page;
 
     char *hwdec_api;
     char *hwdec_codecs;
@@ -345,6 +354,8 @@ extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options dvd_conf;
+extern const struct m_sub_options mp_subtitle_sub_opts;
+extern const struct m_sub_options mp_osd_render_sub_opts;
 
 int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param);

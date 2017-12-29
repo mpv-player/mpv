@@ -134,7 +134,6 @@ ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
     ass_set_message_cb(priv, message_callback, log);
     if (path)
         ass_set_fonts_dir(priv, path);
-    ass_set_extract_fonts(priv, global->opts->use_embedded_fonts);
     talloc_free(path);
     return priv;
 }
