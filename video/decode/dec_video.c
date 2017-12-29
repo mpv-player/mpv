@@ -405,6 +405,17 @@ void video_work(struct dec_video *d_video)
     if (d_video->current_mpi || !d_video->vd_driver)
         return;
 
+    if (!d_video->packet && !d_video->new_segment) {
+        bool progress = receive_frame(d_video, &d_video->current_mpi);
+        if (!progress) {
+            d_video->current_state = DATA_EOF;
+            return;
+        } else if (d_video->current_mpi) {
+            d_video->current_state = DATA_OK;
+            return;
+        }
+    }
+
     if (!d_video->packet && !d_video->new_segment &&
         demux_read_packet_async(d_video->header, &d_video->packet) == 0)
     {
