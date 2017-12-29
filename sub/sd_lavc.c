@@ -561,7 +561,7 @@ static double step_sub(struct sd *sd, double now, int movement)
         movement -= direction;
     } while (movement);
 
-    return best < 0 ? 0 : priv->seekpoints[best].pts - now;
+    return best < 0 ? now : priv->seekpoints[best].pts;
 }
 
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)

@@ -57,6 +57,8 @@ struct dec_sub {
     struct sh_stream *sh;
     double last_pkt_pts;
     bool preload_attempted;
+    double video_fps;
+    double sub_speed;
 
     struct mp_codec_params *codec;
     double start, end;
@@ -66,6 +68,44 @@ struct dec_sub {
 
     struct demux_packet *new_segment;
 };
+
+static void update_subtitle_speed(struct dec_sub *sub)
+{
+    struct MPOpts *opts = sub->opts;
+    sub->sub_speed = 1.0;
+
+    if (sub->video_fps > 0 && sub->codec->frame_based > 0) {
+        MP_VERBOSE(sub, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   sub->codec->frame_based, sub->video_fps);
+        sub->sub_speed *= sub->codec->frame_based / sub->video_fps;
+    }
+
+    if (opts->sub_fps && sub->video_fps)
+        sub->sub_speed *= opts->sub_fps / sub->video_fps;
+
+    sub->sub_speed *= opts->sub_speed;
+}
+
+// Return the subtitle PTS used for a given video PTS.
+static double pts_to_subtitle(struct dec_sub *sub, double pts)
+{
+    struct MPOpts *opts = sub->opts;
+
+    if (pts != MP_NOPTS_VALUE)
+        pts = (pts - opts->sub_delay) / sub->sub_speed;
+
+    return pts;
+}
+
+static double pts_from_subtitle(struct dec_sub *sub, double pts)
+{
+    struct MPOpts *opts = sub->opts;
+
+    if (pts != MP_NOPTS_VALUE)
+        pts = pts * sub->sub_speed + opts->sub_delay;
+
+    return pts;
+}
 
 void sub_lock(struct dec_sub *sub)
 {
@@ -140,8 +180,10 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
     mpthread_mutex_init_recursive(&sub->lock);
 
     sub->sd = init_decoder(sub);
-    if (sub->sd)
+    if (sub->sd) {
+        update_subtitle_speed(sub);
         return sub;
+    }
 
     talloc_free(sub);
     return NULL;
@@ -164,6 +206,7 @@ static void update_segment(struct dec_sub *sub)
             sub->sd->driver->uninit(sub->sd);
             talloc_free(sub->sd);
             sub->sd = new;
+            update_subtitle_speed(sub);
         } else {
             // We'll just keep the current decoder, and feed it possibly
             // invalid data (not our fault if it crashes or something).
@@ -214,6 +257,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
 {
     bool r = true;
     pthread_mutex_lock(&sub->lock);
+    video_pts = pts_to_subtitle(sub, video_pts);
     while (1) {
         bool read_more = true;
         if (sub->sd->driver->accepts_packet)
@@ -272,6 +316,8 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
 {
     struct MPOpts *opts = sub->opts;
 
+    pts = pts_to_subtitle(sub, pts);
+
     sub->last_vo_pts = pts;
     update_segment(sub);
 
@@ -290,6 +336,8 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     pthread_mutex_lock(&sub->lock);
     struct MPOpts *opts = sub->opts;
     char *text = NULL;
+
+    pts = pts_to_subtitle(sub, pts);
 
     sub->last_vo_pts = pts;
     update_segment(sub);
@@ -324,8 +372,28 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
 {
     int r = CONTROL_UNKNOWN;
     pthread_mutex_lock(&sub->lock);
-    if (sub->sd->driver->control)
-        r = sub->sd->driver->control(sub->sd, cmd, arg);
+    switch (cmd) {
+    case SD_CTRL_SET_VIDEO_DEF_FPS:
+        sub->video_fps = *(double *)arg;
+        update_subtitle_speed(sub);
+        break;
+    case SD_CTRL_UPDATE_SPEED:
+        update_subtitle_speed(sub);
+        break;
+    case SD_CTRL_SUB_STEP: {
+        double *a = arg;
+        double arg2[2] = {a[0], a[1]};
+        arg2[0] = pts_to_subtitle(sub, arg2[0]);
+        if (sub->sd->driver->control)
+            r = sub->sd->driver->control(sub->sd, cmd, arg2);
+        if (r == CONTROL_OK)
+            a[0] = pts_from_subtitle(sub, arg2[0]);
+        break;
+    }
+    default:
+        if (sub->sd->driver->control)
+            r = sub->sd->driver->control(sub->sd, cmd, arg);
+    }
     pthread_mutex_unlock(&sub->lock);
     return r;
 }
