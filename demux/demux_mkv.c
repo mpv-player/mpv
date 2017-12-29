@@ -1909,8 +1909,14 @@ static void probe_x264_garbage(demuxer_t *demuxer)
         if (!block || block->num_laces < 1)
             continue;
 
-        sh->codec->first_packet = new_demux_packet_from_buf(block->laces[0]);
+        bstr sblock = {block->laces[0]->data, block->laces[0]->size};
+        bstr nblock = demux_mkv_decode(demuxer->log, track, sblock, 1);
+
+        sh->codec->first_packet = new_demux_packet_from(nblock.start, nblock.len);
         talloc_steal(mkv_d, sh->codec->first_packet);
+
+        if (nblock.start != sblock.start)
+            talloc_free(nblock.start);
     }
 }
 
