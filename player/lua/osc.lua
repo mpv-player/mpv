@@ -1839,15 +1839,15 @@ function osc_init()
 
     ne.content = function ()
         local dmx_cache = mp.get_property_number("demuxer-cache-duration")
-        local cache_used = mp.get_property_number("cache-used", 0) * 1024
+        local cache_used = mp.get_property_number("cache-used")
         local dmx_cache_state = mp.get_property_native("demuxer-cache-state", {})
         local is_network = mp.get_property_native("demuxer-via-network")
-        local show_cache = cache_used > 0
+        local show_cache = cache_used and not dmx_cache_state["eof"]
         if dmx_cache then
             dmx_cache = string.format("%3.0fs", dmx_cache)
         end
         if dmx_cache_state["fw-bytes"] then
-            cache_used = cache_used + dmx_cache_state["fw-bytes"]
+            cache_used = (cache_used or 0)*1024 + dmx_cache_state["fw-bytes"]
         end
         if (is_network and dmx_cache) or show_cache then
             -- Only show dmx-cache-duration by itself if it's a network file.
