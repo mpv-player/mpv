@@ -68,6 +68,7 @@ void video_reset(struct dec_video *d_video)
     d_video->has_broken_decoded_pts = 0;
     d_video->last_format = d_video->fixed_format = (struct mp_image_params){0};
     d_video->dropped_frames = 0;
+    d_video->may_decoder_framedrop = false;
     d_video->current_state = DATA_AGAIN;
     mp_image_unrefp(&d_video->current_mpi);
     talloc_free(d_video->packet);
@@ -400,7 +401,7 @@ static bool is_new_segment(struct dec_video *d_video, struct demux_packet *p)
          p->codec != d_video->codec);
 }
 
-void video_work(struct dec_video *d_video)
+static void feed_packet(struct dec_video *d_video)
 {
     if (d_video->current_mpi || !d_video->vd_driver)
         return;
@@ -439,7 +440,17 @@ void video_work(struct dec_video *d_video)
 
         talloc_free(d_video->packet);
         d_video->packet = NULL;
+
+        d_video->may_decoder_framedrop = framedrop_type == 1;
     }
+
+    d_video->current_state = DATA_AGAIN;
+}
+
+static void read_frame(struct dec_video *d_video)
+{
+    if (d_video->current_mpi || !d_video->vd_driver)
+        return;
 
     bool progress = receive_frame(d_video, &d_video->current_mpi);
 
@@ -447,10 +458,11 @@ void video_work(struct dec_video *d_video)
     if (!progress) {
         d_video->current_state = DATA_EOF;
     } else if (!d_video->current_mpi) {
-        if (framedrop_type == 1)
+        if (d_video->may_decoder_framedrop)
             d_video->dropped_frames += 1;
         d_video->current_state = DATA_AGAIN;
     }
+    d_video->may_decoder_framedrop = false;
 
     bool segment_ended = d_video->current_state == DATA_EOF;
 
@@ -484,6 +496,15 @@ void video_work(struct dec_video *d_video)
 
         d_video->packet = new_segment;
         d_video->current_state = DATA_AGAIN;
+    }
+}
+
+void video_work(struct dec_video *d_video)
+{
+    read_frame(d_video);
+    if (!d_video->current_mpi) {
+        feed_packet(d_video);
+        read_frame(d_video); // retry, to avoid redundant iterations
     }
 }
 
