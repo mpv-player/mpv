@@ -53,6 +53,7 @@ def run
     end
   end
   puts "\n done! All tests pass!\n\n" unless failed
+  M.commandv "quit", 'asd'
 end
 
 assert ".property_list returns an array" do
