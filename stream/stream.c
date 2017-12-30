@@ -341,7 +341,6 @@ static bool stream_reconnect(stream_t *s)
     if (!s->streaming || s->caching || !s->seekable || !s->cancel)
         return false;
 
-    int64_t pos = s->pos;
     double sleep_secs = 0;
     for (int retry = 0; retry < 6; retry++) {
         if (mp_cancel_wait(s->cancel, sleep_secs))
@@ -350,7 +349,7 @@ static bool stream_reconnect(stream_t *s)
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
             break;
-        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) && s->pos == pos) {
+        if (r == STREAM_OK) {
             MP_WARN(s, "Reconnected successfully.\n");
             return true;
         }

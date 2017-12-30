@@ -178,12 +178,21 @@ static int control(stream_t *s, int cmd, void *arg)
     case STREAM_CTRL_RECONNECT: {
         if (avio && avio->write_flag)
             break; // don't bother with this
-        // avio doesn't seem to support this - emulate it by reopening
+        // avio supports reconneting for http (as private avio option), but it
+        // seems somewhat broken and drops part of the stream if the first
+        // reconnect does not work. emulate it.
         close_f(s);
         s->priv = NULL;
-        stream_drop_buffers(s);
-        s->pos = 0;
-        return open_f(s);
+        int res = open_f(s);
+        if (res == STREAM_OK) {
+            if (!seek(s, s->pos)) {
+                MP_WARN(s, "Reconnecting failed.\n");
+                close_f(s);
+                s->priv = NULL;
+                return STREAM_UNSUPPORTED;
+            }
+        }
+        return res;
     }
     }
     return STREAM_UNSUPPORTED;
