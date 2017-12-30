@@ -136,12 +136,24 @@ fail:
 
 static bool android_reconfig(struct ra_ctx *ctx)
 {
+    struct priv *p = ctx->priv;
     void *tmp = talloc_new(NULL);
     struct android_opts *opts = mp_get_config_group(tmp, ctx->global, &android_conf);
+    int w = opts->w, h = opts->h;
 
-    ctx->vo->dwidth = opts->w;
-    ctx->vo->dheight = opts->h;
-    ra_gl_ctx_resize(ctx->swapchain, opts->w, opts->h, 0);
+    if (!w)
+        eglQuerySurface(p->egl_display, p->egl_surface, EGL_WIDTH, &w);
+    if (!h)
+        eglQuerySurface(p->egl_display, p->egl_surface, EGL_HEIGHT, &h);
+
+    if (!w || !h) {
+        MP_FATAL(ctx, "Failed to get height and width!\n");
+        return false;
+    }
+
+    ctx->vo->dwidth = w;
+    ctx->vo->dheight = h;
+    ra_gl_ctx_resize(ctx->swapchain, w, h, 0);
 
     talloc_free(tmp);
     return true;
