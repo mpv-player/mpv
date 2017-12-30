@@ -86,9 +86,9 @@ struct d3d_tex {
 
 struct d3d_buf {
     ID3D11Buffer *buf;
-    ID3D11Buffer *staging;
     ID3D11UnorderedAccessView *uav;
-    void *data; // Data for mapped staging texture
+    void *data; // System-memory mirror of the data in buf
+    bool dirty; // Is buf out of date?
 };
 
 struct d3d_rpass {
@@ -655,13 +655,8 @@ static void buf_destroy(struct ra *ra, struct ra_buf *buf)
 {
     if (!buf)
         return;
-    struct ra_d3d11 *p = ra->priv;
     struct d3d_buf *buf_p = buf->priv;
-
-    if (buf_p->data)
-        ID3D11DeviceContext_Unmap(p->ctx, (ID3D11Resource *)buf_p->staging, 0);
     SAFE_RELEASE(buf_p->buf);
-    SAFE_RELEASE(buf_p->staging);
     SAFE_RELEASE(buf_p->uav);
     talloc_free(buf);
 }
@@ -705,24 +700,13 @@ static struct ra_buf *buf_create(struct ra *ra,
         goto error;
     }
 
-    if (params->host_mutable) {
-        // D3D11 doesn't allow constant buffer updates that aren't aligned to a
-        // full constant boundary (vec4,) and some drivers don't allow partial
-        // constant buffer updates at all, but the RA consumer is allowed to
-        // partially update an ra_buf. The best way to handle partial updates
-        // without causing a pipeline stall is probably to keep a copy of the
-        // data in a staging buffer.
-
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        desc.BindFlags = 0;
-        hr = ID3D11Device_CreateBuffer(p->dev, &desc, NULL, &buf_p->staging);
-        if (FAILED(hr)) {
-            MP_ERR(ra, "Failed to create staging buffer: %s\n",
-                   mp_HRESULT_to_str(hr));
-            goto error;
-        }
-    }
+    // D3D11 doesn't allow constant buffer updates that aren't aligned to a
+    // full constant boundary (vec4,) and some drivers don't allow partial
+    // constant buffer updates at all. To support partial buffer updates, keep
+    // a mirror of the buffer data in system memory and upload the whole thing
+    // before the buffer is used.
+    if (params->host_mutable)
+        buf_p->data = talloc_zero_size(buf, desc.ByteWidth);
 
     if (params->type == RA_BUF_TYPE_SHADER_STORAGE) {
         D3D11_UNORDERED_ACCESS_VIEW_DESC udesc = {
@@ -752,40 +736,23 @@ static void buf_resolve(struct ra *ra, struct ra_buf *buf)
     struct ra_d3d11 *p = ra->priv;
     struct d3d_buf *buf_p = buf->priv;
 
-    assert(buf->params.host_mutable);
-    if (!buf_p->data)
+    if (!buf->params.host_mutable || !buf_p->dirty)
         return;
 
-    ID3D11DeviceContext_Unmap(p->ctx, (ID3D11Resource *)buf_p->staging, 0);
-    buf_p->data = NULL;
-
-    // Synchronize the GPU buffer with the staging buffer
-    ID3D11DeviceContext_CopyResource(p->ctx, (ID3D11Resource *)buf_p->buf,
-                                     (ID3D11Resource *)buf_p->staging);
+    // Synchronize the GPU buffer with the system-memory copy
+    ID3D11DeviceContext_UpdateSubresource(p->ctx, (ID3D11Resource *)buf_p->buf,
+        0, NULL, buf_p->data, 0, 0);
+    buf_p->dirty = false;
 }
 
 static void buf_update(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
                        const void *data, size_t size)
 {
-    struct ra_d3d11 *p = ra->priv;
     struct d3d_buf *buf_p = buf->priv;
-    HRESULT hr;
-
-    if (!buf_p->data) {
-        // If this is the first update after the buffer was created or after it
-        // has been used in a renderpass, it will be unmapped, so map it
-        D3D11_MAPPED_SUBRESOURCE map = {0};
-        hr = ID3D11DeviceContext_Map(p->ctx, (ID3D11Resource *)buf_p->staging,
-                                     0, D3D11_MAP_WRITE, 0, &map);
-        if (FAILED(hr)) {
-            MP_ERR(ra, "Failed to map resource\n");
-            return;
-        }
-        buf_p->data = map.pData;
-    }
 
     char *cdata = buf_p->data;
     memcpy(cdata + offset, data, size);
+    buf_p->dirty = true;
 }
 
 static const char *get_shader_target(struct ra *ra, enum glsl_shader type)
