@@ -357,12 +357,14 @@ static mrb_value _command(mrb_state *mrb, mrb_value self)
     return api_return_bool(mrb, mpv_command_string(ctx->client, command));
 }
 
+// XXX crashes with M.commandv "quit", 0
 static mrb_value _commandv(mrb_state *mrb, mrb_value self)
 {
     struct script_ctx *ctx = get_ctx(mrb);
     mrb_value *commands;
     mrb_int size;
     mrb_get_args(mrb, "*", &commands, &size);
+
     char **args = talloc_zero_array(NULL, char *, size + 1);
     for (int i = 0; i < size; i++)
         args[i] = talloc_strdup(args, RSTRING_PTR(commands[i]));
