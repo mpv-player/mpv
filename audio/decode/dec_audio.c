@@ -202,7 +202,7 @@ static bool is_new_segment(struct dec_audio *da, struct demux_packet *p)
         (p->start != da->start || p->end != da->end || p->codec != da->codec);
 }
 
-void audio_work(struct dec_audio *da)
+static void feed_packet(struct dec_audio *da)
 {
     if (da->current_frame || !da->ad_driver)
         return;
@@ -227,6 +227,14 @@ void audio_work(struct dec_audio *da)
         talloc_free(da->packet);
         da->packet = NULL;
     }
+
+    da->current_state = DATA_AGAIN;
+}
+
+static void read_frame(struct dec_audio *da)
+{
+    if (da->current_frame || !da->ad_driver)
+        return;
 
     bool progress = da->ad_driver->receive_frame(da, &da->current_frame);
 
@@ -268,6 +276,15 @@ void audio_work(struct dec_audio *da)
 
         da->packet = new_segment;
         da->current_state = DATA_AGAIN;
+    }
+}
+
+void audio_work(struct dec_audio *da)
+{
+    read_frame(da);
+    if (!da->current_frame) {
+        feed_packet(da);
+        read_frame(da); // retry, to avoid redundant iterations
     }
 }
 

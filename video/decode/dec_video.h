@@ -77,6 +77,7 @@ struct dec_video {
     struct demux_packet *new_segment;
     struct demux_packet *packet;
     bool framedrop_enabled;
+    bool may_decoder_framedrop;
     struct mp_image *current_mpi;
     int current_state;
 };
