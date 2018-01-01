@@ -140,9 +140,8 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
 void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
-    mp_msg(log, v,
-           "%s (C) 2000-2017 mpv/MPlayer/mplayer2 projects\n built on %s\n",
-           mpv_version, mpv_builddate);
+    mp_msg(log, v, "%s %s\n built on %s\n",
+           mpv_version, mpv_copyright, mpv_builddate);
     print_libav_versions(log, v);
     mp_msg(log, v, "\n");
     // Only in verbose mode.
