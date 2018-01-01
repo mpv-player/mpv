@@ -1061,7 +1061,12 @@ def build(ctx):
             'The project was not configured: run "waf --variant={0} configure" first!'
                 .format(ctx.options.variant))
     ctx.unpack_dependencies_lists()
+    ctx.add_group('versionh')
+    ctx.add_group('sources')
+
+    ctx.set_group('versionh')
     __write_version__(ctx)
+    ctx.set_group('sources')
     ctx.load('wscript_build')
 
 def init(ctx):
