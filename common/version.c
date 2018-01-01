@@ -24,3 +24,4 @@
 
 const char mpv_version[]  = "mpv " VERSION;
 const char mpv_builddate[] = BUILDDATE;
+const char mpv_copyright[] = MPVCOPYRIGHT;

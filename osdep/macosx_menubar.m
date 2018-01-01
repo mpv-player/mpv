@@ -612,7 +612,7 @@
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
         @"mpv", @"ApplicationName",
         [self getMPVIcon], @"ApplicationIcon",
-         @"Copyright © 2000-2017 mpv/MPlayer/mplayer2 projects", @"Copyright",
+        [NSString stringWithUTF8String:mpv_copyright], @"Copyright",
         [NSString stringWithUTF8String:mpv_version], @"ApplicationVersion",
         nil];
     [NSApp orderFrontStandardAboutPanelWithOptions:options];
