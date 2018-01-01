@@ -514,7 +514,8 @@ def build(ctx):
 
         ctx.env.WINDRES_FLAGS = [
             '--include-dir={0}'.format(ctx.bldnode.abspath()),
-            '--include-dir={0}'.format(ctx.srcnode.abspath())
+            '--include-dir={0}'.format(ctx.srcnode.abspath()),
+            '--codepage=65001' # Unicode codepage
         ]
 
         for node in 'osdep/mpv.exe.manifest etc/mpv-icon.ico'.split():
