@@ -149,7 +149,7 @@ void mp_print_version(struct mp_log *log, int always)
     if (!always) {
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
         mp_msg(log, MSGL_V, "List of enabled features: %s\n", FULLCONFIG);
-        #ifdef NDEBUGs
+        #ifdef NDEBUG
             mp_msg(log, MSGL_V, "Built with NDEBUG.\n");
         #endif
     }
