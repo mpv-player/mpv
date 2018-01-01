@@ -32,7 +32,7 @@ VS_VERSION_INFO VERSIONINFO
                 VALUE "CompanyName", "mpv"
                 VALUE "FileDescription", "mpv"
                 VALUE "FileVersion", "2.0.0.0"
-                VALUE "LegalCopyright", "(C) 2000-2017 mpv/mplayer2/MPlayer"
+                VALUE "LegalCopyright", "(C) 2000-2018 mpv/mplayer2/MPlayer"
                 VALUE "OriginalFilename", "mpv.exe"
                 VALUE "ProductName", "mpv"
                 VALUE "ProductVersion", "2.0.0.0"
