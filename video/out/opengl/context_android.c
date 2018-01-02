@@ -27,14 +27,13 @@
 #include "context.h"
 
 struct android_opts {
-    int w, h;
+    struct m_geometry surface_size;
 };
 
 #define OPT_BASE_STRUCT struct android_opts
 const struct m_sub_options android_conf = {
     .opts = (const struct m_option[]) {
-        OPT_INT("android-surface-width", w, 0),
-        OPT_INT("android-surface-height", h, 0),
+        OPT_SIZE_BOX("android-surface-size", surface_size, UPDATE_VO_RESIZE),
         {0}
     },
     .size = sizeof(struct android_opts),
@@ -139,7 +138,7 @@ static bool android_reconfig(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     void *tmp = talloc_new(NULL);
     struct android_opts *opts = mp_get_config_group(tmp, ctx->global, &android_conf);
-    int w = opts->w, h = opts->h;
+    int w = opts->surface_size.w, h = opts->surface_size.h;
 
     if (!w)
         eglQuerySurface(p->egl_display, p->egl_surface, EGL_WIDTH, &w);
