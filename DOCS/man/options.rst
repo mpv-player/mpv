@@ -4753,12 +4753,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
-``--android-surface-width=<number>``, ``--android-surface-height=<number>``
+``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
     runtime (i.e. if the device is rotated), via the surfaceChanged callback.
-    Setting these does not re-configure the vo, thus ``vo-resize`` should be
-    called afterwards.
 
     Android with ``--gpu-context=android`` only.
 
