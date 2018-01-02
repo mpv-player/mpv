@@ -734,12 +734,12 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
     }
 }
 
-static int process_open_hooks(struct MPContext *mpctx)
+static int process_open_hooks(struct MPContext *mpctx, char *name)
 {
 
-    mp_hook_run(mpctx, NULL, "on_load");
+    mp_hook_run(mpctx, NULL, name);
 
-    while (!mp_hook_test_completion(mpctx, "on_load")) {
+    while (!mp_hook_test_completion(mpctx, name)) {
         mp_idle(mpctx);
         if (mpctx->stop_play) {
             // Can't exit immediately, the script would interfere with the
@@ -1214,7 +1214,7 @@ reopen_file:
 
     assert(mpctx->demuxer == NULL);
 
-    if (process_open_hooks(mpctx) < 0)
+    if (process_open_hooks(mpctx, "on_load") < 0)
         goto terminate_playback;
 
     if (opts->stream_dump && opts->stream_dump[0]) {
@@ -1224,6 +1224,13 @@ reopen_file:
     }
 
     open_demux_reentrant(mpctx);
+    if (!mpctx->stop_play && !mpctx->demuxer &&
+        process_open_hooks(mpctx, "on_load_fail") >= 0 &&
+        strcmp(mpctx->stream_open_filename, mpctx->filename) != 0)
+    {
+        mpctx->error_playing = MPV_ERROR_LOADING_FAILED;
+        open_demux_reentrant(mpctx);
+    }
     if (!mpctx->demuxer || mpctx->stop_play)
         goto terminate_playback;
 

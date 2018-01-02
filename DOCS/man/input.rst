@@ -790,6 +790,13 @@ The following hooks are currently defined:
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
+``on_load_fail``
+    Called after after a file has been opened, but failed to. This can be
+    used to provide a fallback in case native demuxers failed to recognize
+    the file, instead of always running before the native demuxers like
+    ``on_load``. Demux will only be retried if ``stream-open-filename``
+    was changed.
+
 ``on_preloaded``
     Called after a file has been opened, and before tracks are selected and
     decoders are created. This has some usefulness if an API users wants
