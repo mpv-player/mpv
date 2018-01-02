@@ -2119,6 +2119,10 @@ Property list
     The encoder names (``driver`` entries) can be passed to ``--ovc`` and
     ``--oac`` (without the ``lavc:`` prefix required by ``--vd`` and ``--ad``).
 
+``demuxer-lavf-list``
+    List of available libavformat demuxers' names. This can be used to check
+    for support for a specific format or use with ``--demuxer-lavf-format``.
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.

@@ -26,6 +26,7 @@
 #include <libavutil/error.h>
 #include <libavutil/cpu.h>
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 
 #include "config.h"
 
@@ -33,6 +34,7 @@
 #include "common/msg.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"
+#include "misc/bstr.h"
 #include "video/fmt-conversion.h"
 #include "av_common.h"
 #include "codecs.h"
@@ -244,6 +246,21 @@ void mp_add_lavc_encoders(struct mp_decoder_list *list)
                            cur->name, cur->long_name);
         }
     }
+}
+
+char **mp_get_lavf_demuxers(void)
+{
+    char **list = NULL;
+    AVInputFormat *cur = NULL;
+    int num = 0;
+    for (;;) {
+        cur = av_iformat_next(cur);
+        if (!cur)
+            break;
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, cur->name));
+    }
+    MP_TARRAY_APPEND(NULL, list, num, NULL);
+    return list;
 }
 
 int mp_codec_to_av_codec_id(const char *codec)
