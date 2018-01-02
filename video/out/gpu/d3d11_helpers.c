@@ -315,29 +315,18 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
     if (FAILED(hr))
         factory2 = NULL;
 
-    // Try B8G8R8A8_UNORM first, since at least in Windows 8, it's always the
-    // format of the desktop image
-    static const DXGI_FORMAT formats[] = {
-        DXGI_FORMAT_B8G8R8A8_UNORM,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-    };
-    static const int formats_len = MP_ARRAY_SIZE(formats);
     bool flip = factory2 && opts->flip;
 
     // Return here to retry creating the swapchain
     do {
-        for (int i = 0; i < formats_len; i++) {
-            if (factory2) {
-                // Create a DXGI 1.2+ (Windows 8+) swap chain if possible
-                hr = create_swapchain_1_2(dev, factory2, log, opts, flip,
-                                          formats[i], &swapchain);
-            } else {
-                // Fall back to DXGI 1.1 (Windows 7)
-                hr = create_swapchain_1_1(dev, factory, log, opts, formats[i],
-                                          &swapchain);
-            }
-            if (SUCCEEDED(hr))
-                break;
+        if (factory2) {
+            // Create a DXGI 1.2+ (Windows 8+) swap chain if possible
+            hr = create_swapchain_1_2(dev, factory2, log, opts, flip,
+                                      DXGI_FORMAT_R8G8B8A8_UNORM, &swapchain);
+        } else {
+            // Fall back to DXGI 1.1 (Windows 7)
+            hr = create_swapchain_1_1(dev, factory, log, opts,
+                                      DXGI_FORMAT_R8G8B8A8_UNORM, &swapchain);
         }
         if (SUCCEEDED(hr))
             break;
