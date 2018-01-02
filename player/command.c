@@ -5419,13 +5419,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         reload_audio_output(mpctx);
         break;
 
-    case MP_CMD_VO_RESIZE: {
-        if (!mpctx->video_out)
-            return -1;
-        vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
-        break;
-    }
-
     case MP_CMD_AF:
         return edit_filters_osd(mpctx, STREAM_AUDIO, cmd->args[0].v.s,
                                 cmd->args[1].v.s, msg_osd);

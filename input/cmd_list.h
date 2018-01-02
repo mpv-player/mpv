@@ -99,7 +99,6 @@ enum mp_command_type {
     /// Video filter commands
     MP_CMD_VF,
     MP_CMD_VF_COMMAND,
-    MP_CMD_VO_RESIZE,
 
     /// Internal for Lua scripts
     MP_CMD_SCRIPT_BINDING,
