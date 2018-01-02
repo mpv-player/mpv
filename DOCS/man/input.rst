@@ -732,7 +732,7 @@ Input Commands that are Possibly Subject to Change
     Load a script, similar to the ``--script`` option.
 
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
-``ao-reload``, ``vo-resize`` (experimental/internal).
+``ao-reload`` (experimental/internal).
 
 Hooks
 ~~~~~
