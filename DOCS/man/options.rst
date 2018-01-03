@@ -3865,6 +3865,20 @@ Cache
     ends before that for some other reason (like file end), playback resumes
     earlier.
 
+``--cache-pause-initial=<yes|no>``
+    Enter "buffering" mode before starting playback (default: no). This can be
+    used to ensure playback starts smoothly, in exchange for waiting some time
+    to prefetch network data (as controlled by ``--cache-pause-wait``). For
+    example, some common behavior is that playback starts, but network caches
+    immediately underrun when trying to decode more data as playback progresses.
+
+    Another thing that can happen is that the network prefetching is so CPU
+    demanding (due to demuxing in the background) that playback drops frames
+    at first. In these cases, it helps enabling this option, and setting
+    ``--cache-secs`` and ``--cache-pause-wait`` to roughly the same value.
+
+    This option also triggers when playback is restarted after seeking.
+
 
 Network
 -------
