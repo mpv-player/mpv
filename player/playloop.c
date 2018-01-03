@@ -950,6 +950,17 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->video_status < STATUS_READY)
         return;
 
+    if (opts->cache_pause_initial && (mpctx->video_status == STATUS_READY ||
+                                      mpctx->audio_status == STATUS_READY))
+    {
+        // Audio or video is restarting, and initial buffering is enabled. Make
+        // sure we actually restart them in paused mode, so no audio gets
+        // dropped and video technically doesn't start yet.
+        mpctx->paused_for_cache = true;
+        mpctx->cache_buffer = 0;
+        update_internal_pause_state(mpctx);
+    }
+
     if (mpctx->video_status == STATUS_READY) {
         mpctx->video_status = STATUS_PLAYING;
         get_relative_time(mpctx);

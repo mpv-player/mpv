@@ -263,6 +263,7 @@ typedef struct MPOpts {
     char *sub_demuxer_name;
 
     int cache_pausing;
+    int cache_pause_initial;
     float cache_pause_wait;
 
     struct image_writer_opts *screenshot_image_opts;

@@ -451,6 +451,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
     OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pausing, 0),
+    OPT_FLAG("cache-pause-initial", cache_pause_initial, 0),
     OPT_FLOAT("cache-pause-wait", cache_pause_wait, M_OPT_MIN, .min = 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
