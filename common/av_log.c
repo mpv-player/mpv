@@ -93,10 +93,10 @@ static struct mp_log *get_av_log(void *ptr)
         AVCodecContext *s = ptr;
         if (s->codec) {
             if (s->codec->type == AVMEDIA_TYPE_AUDIO) {
-                if (s->codec->decode)
+                if (av_codec_is_decoder(s->codec))
                     return log_decaudio;
             } else if (s->codec->type == AVMEDIA_TYPE_VIDEO) {
-                if (s->codec->decode)
+                if (av_codec_is_decoder(s->codec))
                     return log_decvideo;
             }
         }
