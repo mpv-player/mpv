@@ -234,7 +234,6 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
-    mpctx->cache_wait_time = 0;
     mpctx->step_frames = 0;
     mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
@@ -620,14 +619,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (mpctx->restart_complete && use_pause_on_low_cache) {
         if (mpctx->paused && mpctx->paused_for_cache) {
             if (!s.underrun && (!opts->cache_pausing || s.idle ||
-                                s.ts_duration >= mpctx->cache_wait_time))
+                                s.ts_duration >= opts->cache_pause_wait))
             {
-                double elapsed_time = now - mpctx->cache_stop_time;
-                if (elapsed_time > mpctx->cache_wait_time) {
-                    mpctx->cache_wait_time *= 1.5 + 0.1;
-                } else {
-                    mpctx->cache_wait_time /= 1.5 - 0.1;
-                }
                 mpctx->paused_for_cache = false;
                 update_internal_pause_state(mpctx);
                 force_update = true;
@@ -641,10 +634,9 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 force_update = true;
             }
         }
-        mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
         if (mpctx->paused_for_cache) {
             cache_buffer =
-                100 * MPCLAMP(s.ts_duration / mpctx->cache_wait_time, 0, 0.99);
+                100 * MPCLAMP(s.ts_duration / opts->cache_pause_wait, 0, 0.99);
         }
     }
 

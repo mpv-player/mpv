@@ -3856,6 +3856,15 @@ Cache
     data and stalls decoding/playback (default: yes). If enabled, it will
     pause and unpause once more data is available, aka "buffering".
 
+``--cache-pause-wait=<seconds>``
+    Number of seconds the packet cache should have buffered before starting
+    playback again if "buffering" was entered (default: 1). This can be used
+    to control how long the player rebuffers if ``--cache-pause`` is enabled,
+    and the demuxer underruns. If the given time is higher than the maximum
+    set with ``--cache-secs`` or  ``--demuxer-readahead-secs``, or prefetching
+    ends before that for some other reason (like file end), playback resumes
+    earlier.
+
 
 Network
 -------
