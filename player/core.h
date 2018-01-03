@@ -432,7 +432,7 @@ typedef struct MPContext {
     bool playing_msg_shown;
 
     bool paused_for_cache;
-    double cache_stop_time, cache_wait_time;
+    double cache_stop_time;
     int cache_buffer;
 
     // Set after showing warning about decoding being too slow for realtime
