@@ -262,7 +262,7 @@ typedef struct MPOpts {
     char *audio_demuxer_name;
     char *sub_demuxer_name;
 
-    int cache_pausing;
+    int cache_pause;
     int cache_pause_initial;
     float cache_pause_wait;
 

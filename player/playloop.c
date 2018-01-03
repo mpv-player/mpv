@@ -618,7 +618,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->restart_complete && use_pause_on_low_cache) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!s.underrun && (!opts->cache_pausing || s.idle ||
+            if (!s.underrun && (!opts->cache_pause || s.idle ||
                                 s.ts_duration >= opts->cache_pause_wait))
             {
                 mpctx->paused_for_cache = false;
@@ -627,7 +627,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             }
             mp_set_timeout(mpctx, 0.2);
         } else {
-            if (opts->cache_pausing && s.underrun) {
+            if (opts->cache_pause && s.underrun) {
                 mpctx->paused_for_cache = true;
                 update_internal_pause_state(mpctx);
                 mpctx->cache_stop_time = now;
