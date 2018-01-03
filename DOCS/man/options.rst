@@ -3851,9 +3851,10 @@ Cache
     very high, so the actually achieved readahead will usually be limited by
     the value of the ``--demuxer-max-bytes`` option.
 
-``--cache-pause``, ``--no-cache-pause``
-    Whether the player should automatically pause when the cache runs low,
-    and unpause once more data is available ("buffering").
+``--cache-pause=<yes|no>``
+    Whether the player should automatically pause when the cache runs out of
+    data and stalls decoding/playback (default: yes). If enabled, it will
+    pause and unpause once more data is available, aka "buffering".
 
 
 Network
