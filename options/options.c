@@ -450,7 +450,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
     OPT_FLAG("prefetch-playlist", prefetch_open, 0),
-    OPT_FLAG("cache-pause", cache_pausing, 0),
+    OPT_FLAG("cache-pause", cache_pause, 0),
     OPT_FLAG("cache-pause-initial", cache_pause_initial, 0),
     OPT_FLOAT("cache-pause-wait", cache_pause_wait, M_OPT_MIN, .min = 0),
 
@@ -895,7 +895,7 @@ const struct MPOpts mp_default_opts = {
     .autoload_files = 1,
     .demuxer_thread = 1,
     .hls_bitrate = INT_MAX,
-    .cache_pausing = 1,
+    .cache_pause = 1,
     .cache_pause_wait = 1.0,
     .chapterrange = {-1, -1},
     .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
