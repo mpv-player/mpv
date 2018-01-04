@@ -366,7 +366,7 @@ mp.add_hook("on_load_fail", 10, function ()
 
         if (es < 0) or (json == nil) or (json == "") then
             if not result.killed_by_us then
-                msg.warn("youtube-dl failed, trying to play URL directly ...")
+                msg.error("youtube-dl failed")
             end
             return
         end
