@@ -73,8 +73,6 @@ struct priv {
 static struct mp_image *d3d11_screenshot(struct ra_swapchain *sw)
 {
     struct priv *p = sw->ctx->priv;
-    if (!p->swapchain)
-        return NULL;
     return mp_d3d11_screenshot(p->swapchain);
 }
 
@@ -131,6 +129,10 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
+
+    if (!p->backbuffer)
+        return false;
+
     *out_fbo = (struct ra_fbo) {
         .tex = p->backbuffer,
         .flip = false,
@@ -226,6 +228,8 @@ static bool d3d11_init(struct ra_ctx *ctx)
         goto error;
 
     p->backbuffer = get_backbuffer(ctx);
+    if (!p->backbuffer)
+        goto error;
 
     return true;
 
