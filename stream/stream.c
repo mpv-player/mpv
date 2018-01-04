@@ -336,32 +336,6 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
     return stream_create(filename, STREAM_WRITE, NULL, global);
 }
 
-static bool stream_reconnect(stream_t *s)
-{
-    if (!s->streaming || s->caching || !s->seekable || !s->cancel)
-        return false;
-
-    double sleep_secs = 0;
-    for (int retry = 0; retry < 6; retry++) {
-        if (mp_cancel_wait(s->cancel, sleep_secs))
-            break;
-
-        int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
-        if (r == STREAM_UNSUPPORTED)
-            break;
-        if (r == STREAM_OK) {
-            MP_WARN(s, "Reconnected successfully.\n");
-            return true;
-        }
-
-        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
-
-        sleep_secs = MPMAX(sleep_secs, 0.1);
-        sleep_secs = MPMIN(sleep_secs * 4, 10.0);
-    }
-    return false;
-}
-
 // Read function bypassing the local stream buffer. This will not write into
 // s->buffer, but into buf[0..len] instead.
 // Returns 0 on error or EOF, and length of bytes read on success.
@@ -374,15 +348,6 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     if (s->fill_buffer && !mp_cancel_test(s->cancel))
         res = s->fill_buffer(s, buf, len);
     if (res <= 0) {
-        // just in case this is an error e.g. due to network
-        // timeout reset and retry
-        // do not retry if this looks like proper eof
-        int64_t size = stream_get_size(s);
-        if (!s->eof && s->pos != size && stream_reconnect(s)) {
-            s->eof = 1; // make sure EOF is set to ensure no endless recursion
-            return stream_read_unbuffered(s, buf, len);
-        }
-
         s->eof = 1;
         return 0;
     }

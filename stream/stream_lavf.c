@@ -77,8 +77,6 @@ static struct mp_tags *read_icy(stream_t *stream);
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     AVIOContext *avio = s->priv;
-    if (!avio)
-        return -1;
 #if LIBAVFORMAT_VERSION_MICRO >= 100 && LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 81, 100)
     int r = avio_read_partial(avio, buffer, max_len);
 #else
@@ -90,8 +88,6 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 static int write_buffer(stream_t *s, char *buffer, int len)
 {
     AVIOContext *avio = s->priv;
-    if (!avio)
-        return -1;
     avio_write(avio, buffer, len);
     avio_flush(avio);
     if (avio->error)
@@ -102,8 +98,6 @@ static int write_buffer(stream_t *s, char *buffer, int len)
 static int seek(stream_t *s, int64_t newpos)
 {
     AVIOContext *avio = s->priv;
-    if (!avio)
-        return -1;
     if (avio_seek(avio, newpos, SEEK_SET) < 0) {
         return 0;
     }
@@ -125,8 +119,6 @@ static void close_f(stream_t *stream)
 static int control(stream_t *s, int cmd, void *arg)
 {
     AVIOContext *avio = s->priv;
-    if (!avio && cmd != STREAM_CTRL_RECONNECT)
-        return -1;
     int64_t size;
     switch(cmd) {
     case STREAM_CTRL_GET_SIZE:
@@ -174,25 +166,6 @@ static int control(stream_t *s, int cmd, void *arg)
         if (!*(struct mp_tags **)arg)
             break;
         return 1;
-    }
-    case STREAM_CTRL_RECONNECT: {
-        if (avio && avio->write_flag)
-            break; // don't bother with this
-        // avio supports reconneting for http (as private avio option), but it
-        // seems somewhat broken and drops part of the stream if the first
-        // reconnect does not work. emulate it.
-        close_f(s);
-        s->priv = NULL;
-        int res = open_f(s);
-        if (res == STREAM_OK) {
-            if (!seek(s, s->pos)) {
-                MP_WARN(s, "Reconnecting failed.\n");
-                close_f(s);
-                s->priv = NULL;
-                return STREAM_UNSUPPORTED;
-            }
-        }
-        return res;
     }
     }
     return STREAM_UNSUPPORTED;
@@ -312,6 +285,9 @@ static int open_f(stream_t *stream)
     {
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
+
+    av_dict_set(&dict, "reconnect", "1", 0);
+    av_dict_set(&dict, "reconnect_delay_max", "7", 0);
 
     mp_setup_av_network_options(&dict, stream->global, stream->log);
 

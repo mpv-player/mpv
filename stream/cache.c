@@ -504,7 +504,6 @@ static bool control_needs_flush(int stream_ctrl)
     case STREAM_CTRL_AVSEEK:
     case STREAM_CTRL_SET_ANGLE:
     case STREAM_CTRL_SET_CURRENT_TITLE:
-    case STREAM_CTRL_RECONNECT:
     case STREAM_CTRL_DVB_SET_CHANNEL:
     case STREAM_CTRL_DVB_SET_CHANNEL_NAME:
     case STREAM_CTRL_DVB_STEP_CHANNEL:
