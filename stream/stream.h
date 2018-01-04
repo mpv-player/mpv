@@ -64,7 +64,6 @@ enum stream_ctrl {
     STREAM_CTRL_GET_BASE_FILENAME,
 
     // Certain network protocols
-    STREAM_CTRL_RECONNECT,
     STREAM_CTRL_AVSEEK,
     STREAM_CTRL_HAS_AVSEEK,
     STREAM_CTRL_GET_METADATA,
