@@ -216,6 +216,9 @@ struct demux_cached_range {
     // Computed from the stream queue's values. These fields (unlike as with
     // demux_queue) are always either NOPTS, or fully valid.
     double seek_start, seek_end;
+
+    // Set if the file ends with this range.
+    bool is_eof;
 };
 
 #define MAX_INDEX_ENTRIES 16
@@ -245,6 +248,8 @@ struct demux_queue {
     // incrementally maintained seek range, possibly invalid
     double seek_start, seek_end;
     double last_pruned;     // timestamp of last pruned keyframe
+
+    bool is_eof;            // received true EOF here
 
     // incomplete index to somewhat speed up seek operations
     // the entries in index[] must be in packet queue append/removal order
@@ -423,6 +428,7 @@ static void set_current_range(struct demux_internal *in,
 static void update_seek_ranges(struct demux_cached_range *range)
 {
     range->seek_start = range->seek_end = MP_NOPTS_VALUE;
+    range->is_eof = true;
 
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
@@ -430,6 +436,8 @@ static void update_seek_ranges(struct demux_cached_range *range)
         if (queue->ds->selected && queue->ds->eager) {
             range->seek_start = MP_PTS_MAX(range->seek_start, queue->seek_start);
             range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
+
+            range->is_eof &= queue->is_eof;
 
             if (queue->seek_start >= queue->seek_end) {
                 range->seek_start = range->seek_end = MP_NOPTS_VALUE;
@@ -517,6 +525,8 @@ static void clear_queue(struct demux_queue *queue)
     queue->last_ts = queue->last_dts = MP_NOPTS_VALUE;
     queue->keyframe_latest = NULL;
     queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
+
+    queue->is_eof = false;
 }
 
 static void clear_cached_range(struct demux_internal *in,
@@ -1044,6 +1054,7 @@ static void attempt_range_joining(struct demux_internal *in)
         q1->keyframe_pts = q2->keyframe_pts;
         q1->keyframe_end_pts = q2->keyframe_end_pts;
         q1->keyframe_latest = q2->keyframe_latest;
+        q1->is_eof = q2->is_eof;
 
         q2->head = q2->tail = NULL;
         q2->next_prune_target = NULL;
@@ -1096,6 +1107,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
                 queue->seek_start = queue->keyframe_pts;
             if (queue->keyframe_end_pts != MP_NOPTS_VALUE)
                 queue->seek_end = queue->keyframe_end_pts;
+            queue->is_eof = !dp;
             update_seek_ranges(queue->range);
             attempt_range_join = queue->range->seek_end > old_end;
             if (queue->keyframe_latest->kf_seek_pts != MP_NOPTS_VALUE)
@@ -1114,6 +1126,11 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
 
         queue->keyframe_pts = MP_PTS_MIN(queue->keyframe_pts, ts);
         queue->keyframe_end_pts = MP_PTS_MAX(queue->keyframe_end_pts, ts);
+
+        if (queue->is_eof) {
+            queue->is_eof = false;
+            update_seek_ranges(queue->range);
+        }
     }
 
     if (attempt_range_join)
@@ -2300,10 +2317,10 @@ static struct demux_cached_range *find_cache_seek_target(struct demux_internal *
     for (int n = 0; n < in->num_ranges; n++) {
         struct demux_cached_range *r = in->ranges[n];
         if (r->seek_start != MP_NOPTS_VALUE) {
-            MP_VERBOSE(in, "cached range %d: %f <-> %f\n",
-                       n, r->seek_start, r->seek_end);
+            MP_VERBOSE(in, "cached range %d: %f <-> %f (eof=%d)\n",
+                       n, r->seek_start, r->seek_end, r->is_eof);
 
-            if (pts >= r->seek_start && pts <= r->seek_end) {
+            if (pts >= r->seek_start && (pts <= r->seek_end || r->is_eof)) {
                 MP_VERBOSE(in, "...using this range for in-cache seek.\n");
                 return r;
             }
