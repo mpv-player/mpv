@@ -192,11 +192,47 @@ local function edl_track_joined(fragments, protocol, is_live, base)
     return edl .. table.concat(parts, ";") .. ";"
 end
 
+local function has_native_dash_demuxer()
+    local demuxers = mp.get_property_native("demuxer-lavf-list")
+    for _,v in ipairs(demuxers) do
+        if v == "dash" then
+            return true
+        end
+    end
+    return false
+end
+
+local function proto_is_dash(json)
+    local reqfmts = json["requested_formats"]
+    return (reqfmts ~= nil and reqfmts[1]["protocol"] == "http_dash_segments")
+           or json["protocol"] == "http_dash_segments"
+end
+
 local function add_single_video(json)
     local streamurl = ""
+    local max_bitrate = 0
+
+    if has_native_dash_demuxer() and proto_is_dash(json) then
+        local mpd_url = json["requested_formats"][1]["manifest_url"] or
+            json["manifest_url"]
+        if not mpd_url then
+            msg.error("No manifest URL found in JSON data.")
+            return
+        end
+
+        streamurl = mpd_url
+
+        if json.requested_formats then
+            for _, track in pairs(json.requested_formats) do
+                max_bitrate = track.tbr > max_bitrate and
+                    track.tbr or max_bitrate
+            end
+        elseif json.tbr then
+            max_bitrate = json.tbr > max_bitrate and json.tbr or max_bitrate
+        end
 
     -- DASH/split tracks
-    if not (json["requested_formats"] == nil) then
+    elseif not (json["requested_formats"] == nil) then
         for _, track in pairs(json.requested_formats) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
@@ -231,6 +267,13 @@ local function add_single_video(json)
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
     mp.set_property("file-local-options/force-media-title", json.title)
+
+    -- set hls-bitrate for dash track selection
+    if max_bitrate > 0 and
+        not option_was_set("hls-bitrate") and
+        not option_was_set_locally("hls-bitrate") then
+        mp.set_property_native('file-local-options/hls-bitrate', max_bitrate*1000)
+    end
 
     -- add subtitles
     if not (json.requested_subtitles == nil) then
