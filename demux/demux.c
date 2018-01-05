@@ -314,6 +314,7 @@ static void check_queue_consistency(struct demux_internal *in)
 
     for (int n = 0; n < in->num_ranges; n++) {
         struct demux_cached_range *range = in->ranges[n];
+        int range_num_packets = 0;
 
         assert(range->num_streams == in->num_streams);
 
@@ -341,6 +342,7 @@ static void check_queue_consistency(struct demux_internal *in)
                     assert(range == in->current_range);
                     assert(queue->ds->queue == queue);
                 }
+                range_num_packets += 1;
 
                 if (!dp->next)
                     assert(queue->tail == dp);
@@ -373,6 +375,11 @@ static void check_queue_consistency(struct demux_internal *in)
             if (queue->keyframe_latest)
                 assert(queue->keyframe_latest->keyframe);
         }
+
+        // Invariant needed by pruning; violation has worse effects than just
+        // e.g. broken seeking due to incorrect seek ranges.
+        if (range->seek_start != MP_NOPTS_VALUE)
+            assert(range_num_packets > 0);
     }
 
     assert(in->total_bytes == total_bytes);
@@ -442,7 +449,8 @@ static void update_seek_ranges(struct demux_cached_range *range)
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
         if (queue->ds->selected && !queue->ds->eager &&
-            queue->last_pruned != MP_NOPTS_VALUE)
+            queue->last_pruned != MP_NOPTS_VALUE &&
+            range->seek_start != MP_NOPTS_VALUE)
         {
             // (last_pruned is _exclusive_ to the seekable range, so add a small
             // value to exclude it from the valid range.)
