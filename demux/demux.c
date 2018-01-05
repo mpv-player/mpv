@@ -174,6 +174,11 @@ struct demux_internal {
     int seek_flags;             // flags for next seek (if seeking==true)
     double seek_pts;
 
+    // (fields for debugging)
+    double seeking_in_progress; // low level seek state
+    int low_level_seeks;        // number of started low level seeks
+    double demux_ts;            // last demuxed DTS or PTS
+
     double ts_offset;           // timestamp offset to apply to everything
 
     void (*run_fn)(void *);     // if non-NULL, function queued to be run on
@@ -1125,6 +1130,13 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
 
+    double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
+    if (dp->segmented)
+        ts = MP_PTS_MIN(ts, dp->end);
+
+    if (ts != MP_NOPTS_VALUE)
+        in->demux_ts = ts;
+
     struct demux_queue *queue = ds->queue;
 
     bool drop = !ds->selected || in->seeking;
@@ -1194,9 +1206,6 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
-    double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
-    if (dp->segmented)
-        ts = MP_PTS_MIN(ts, dp->end);
     if (ts != MP_NOPTS_VALUE && (ts > queue->last_ts || ts + 10 < queue->last_ts))
         queue->last_ts = ts;
     if (ds->base_ts == MP_NOPTS_VALUE)
@@ -1428,6 +1437,9 @@ static void execute_seek(struct demux_internal *in)
     int flags = in->seek_flags;
     double pts = in->seek_pts;
     in->seeking = false;
+    in->seeking_in_progress = pts;
+    in->demux_ts = MP_NOPTS_VALUE;
+    in->low_level_seeks += 1;
     in->initial_state = false;
 
     pthread_mutex_unlock(&in->lock);
@@ -1440,6 +1452,8 @@ static void execute_seek(struct demux_internal *in)
     MP_VERBOSE(in, "seek done\n");
 
     pthread_mutex_lock(&in->lock);
+
+    in->seeking_in_progress = MP_NOPTS_VALUE;
 }
 
 // Make demuxing progress. Return whether progress was made.
@@ -1999,6 +2013,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .max_bytes_bw = opts->max_bytes_bw,
         .initial_state = true,
         .highest_av_pts = MP_NOPTS_VALUE,
+        .seeking_in_progress = MP_NOPTS_VALUE,
+        .demux_ts = MP_NOPTS_VALUE,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
@@ -2750,6 +2766,9 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .ts_duration = -1,
             .total_bytes = in->total_bytes,
             .fw_bytes = in->fw_bytes,
+            .seeking = in->seeking_in_progress,
+            .low_level_seeks = in->low_level_seeks,
+            .ts_last = in->demux_ts,
         };
         bool any_packets = false;
         for (int n = 0; n < in->num_streams; n++) {
