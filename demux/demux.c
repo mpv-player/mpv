@@ -982,7 +982,7 @@ static void attempt_range_joining(struct demux_internal *in)
                 // Some weird corner-case. We'd have to search the equivalent
                 // packet in q1 to update it correctly. Better just give up.
                 if (dp == q2->keyframe_latest) {
-                    MP_WARN(in, "stream %d: not enough keyframes\n", n);
+                    MP_VERBOSE(in, "stream %d: not enough keyframes for join\n", n);
                     goto failed;
                 }
 
