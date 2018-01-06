@@ -790,9 +790,9 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
         struct stream_cache_info info;
         if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_INFO, &info) < 0)
             break;
-        MP_INFO(s, "\rCache fill: %5.2f%% "
-                "(%" PRId64 " bytes)   ", 100.0 * info.fill / s->buffer_size,
-                info.fill);
+        mp_msg(s->log, MSGL_STATUS,  "Cache fill: %5.2f%% "
+               "(%" PRId64 " bytes)", 100.0 * info.fill / s->buffer_size,
+               info.fill);
         if (info.fill >= min)
             break;
         if (info.idle)
@@ -804,6 +804,5 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
         cache_wakeup_and_wait(s, &(double){0});
         pthread_mutex_unlock(&s->mutex);
     }
-    MP_INFO(s, "\n");
     return 1;
 }
