@@ -310,6 +310,7 @@ static int match_lang(char **langs, char *lang)
  * Sort tracks based on the following criteria, and pick the first:
  * 0a) track matches ff-index (always wins)
  * 0b) track matches tid (almost always wins)
+ * 0c) track is not from --external-file
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
@@ -371,6 +372,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (track->user_tid == tid)
             return track;
+        if (track->no_auto_select)
+            continue;
         if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;
     }
@@ -624,6 +627,7 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->title = talloc_strdup(t, mp_basename(disp_filename));
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
+        t->no_auto_select = filter == STREAM_TYPE_COUNT;
         if (!first && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first = t;
     }

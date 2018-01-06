@@ -5376,7 +5376,8 @@ Miscellaneous
 
     Unlike ``--sub-files`` and ``--audio-files``, this includes all tracks, and
     does not cause default stream selection over the "proper" file. This makes
-    it slightly less intrusive.
+    it slightly less intrusive. (In mpv 0.28.0 and before, this was not quite
+    strictly enforced.)
 
     This is a list option. See `List Options`_ for details.
 
