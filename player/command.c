@@ -4821,7 +4821,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     bool auto_osd = on_osd == MP_ON_OSD_AUTO;
     bool msg_osd = auto_osd || (on_osd & MP_ON_OSD_MSG);
     bool bar_osd = auto_osd || (on_osd & MP_ON_OSD_BAR);
-    bool msg_or_nobar_osd = msg_osd && !(auto_osd && opts->osd_bar_visible);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     bool async = cmd->flags & MP_ASYNC_CMD;
 
@@ -4887,7 +4886,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }}
         if (bar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-        if (msg_or_nobar_osd)
+        if (msg_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
         break;
     }
@@ -4908,7 +4907,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             set_osd_function(mpctx, OSD_REW);
             if (bar_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-            if (msg_or_nobar_osd)
+            if (msg_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
         } else {
             return -1;
@@ -5104,7 +5103,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                     set_osd_function(mpctx, (a[0] > refpts) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-                    if (msg_or_nobar_osd)
+                    if (msg_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
                 }
             }
