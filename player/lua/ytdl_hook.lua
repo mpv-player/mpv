@@ -464,13 +464,14 @@ mp.add_hook("on_load_fail", 10, function ()
                         table.insert(playlist, "#EXTINF:0," .. title)
                     end
 
-                    -- some extractors will still return the full info for
-                    -- all clips in the playlist and the URL will point
-                    -- directly to the file in that case, which we don't
-                    -- want so get the webpage URL instead, which is what
-                    -- we want
-                    if not (json.entries[1]["_type"] == "url_transparent")
-                        and not (entry["webpage_url"] == nil) then
+                    --[[ some extractors will still return the full info for
+                         all clips in the playlist and the URL will point
+                         directly to the file in that case, which we don't
+                         want so get the webpage URL instead, which is what
+                         we want, but only if we aren't going to trigger an
+                         infinite loop
+                    --]]
+                    if not self_redirecting_url then
                         site = entry["webpage_url"]
                     end
 
