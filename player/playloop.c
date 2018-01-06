@@ -976,7 +976,15 @@ static void handle_playback_restart(struct MPContext *mpctx)
             return;
         }
 
+        // Video needed, but not started yet -> wait.
+        if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
+            mpctx->video_status <= STATUS_READY)
+            return;
+
+        MP_VERBOSE(mpctx, "starting audio playback\n");
+        mpctx->audio_status = STATUS_PLAYING;
         fill_audio_out_buffers(mpctx); // actually play prepared buffer
+        mp_wakeup_core(mpctx);
     }
 
     if (!mpctx->restart_complete) {
