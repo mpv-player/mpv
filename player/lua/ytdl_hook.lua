@@ -404,6 +404,7 @@ mp.add_hook("on_load_fail", 10, function ()
 
             -- some funky guessing to detect multi-arc videos
             if self_redirecting_url and #json.entries > 1
+                and json.entries[1].protocol == "m3u8_native"
                 and json.entries[1].url then
                 msg.verbose("multi-arc video detected, building EDL")
 
@@ -449,7 +450,7 @@ mp.add_hook("on_load_fail", 10, function ()
                     end
                 end
 
-            elseif self_redirecting_url then
+            elseif self_redirecting_url and #json.entries == 1 then
                 msg.verbose("Playlist with single entry detected.")
                 add_single_video(json.entries[1])
             else
