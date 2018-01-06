@@ -4342,7 +4342,9 @@ static const struct property_osd_display {
     {"ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"},
     {"audio-device", "Audio device"},
     // By default, don't display the following properties on OSD
-    {"pause", NULL},
+    {"pause",
+     .seek_msg = OSD_SEEK_INFO_TEXT,
+     .seek_bar = OSD_SEEK_INFO_BAR},
     {"fullscreen", NULL},
     {0}
 };
