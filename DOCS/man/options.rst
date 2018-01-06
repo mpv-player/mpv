@@ -3097,8 +3097,7 @@ OSD
     Whether to load the on-screen-controller (default: yes).
 
 ``--no-osd-bar``, ``--osd-bar``
-    Disable display of the OSD bar. This will make some things (like seeking)
-    use OSD text messages instead of the bar.
+    Disable display of the OSD bar.
 
     You can configure this on a per-command basis in input.conf using ``osd-``
     prefixes, see ``Input command prefixes``. If you want to disable the OSD
@@ -3136,16 +3135,15 @@ OSD
     shown.
 
     This is also used for the ``show-progress`` command (by default mapped to
-    ``P``), or in some non-default cases when seeking.
+    ``P``), and when seeking.
 
     ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
 
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
-    ``show-progress`` command (by default mapped to ``P``), or in some
-    non-default cases when seeking. Expands properties. See
-    `Property Expansion`_.
+    ``show-progress`` command (by default mapped to ``P``), and when
+    seeking. Expands properties. See `Property Expansion`_.
 
     This option has been replaced with ``--osd-msg3``. The only difference is
     that this option implicitly includes ``${osd-sym-cc}``. This option is
