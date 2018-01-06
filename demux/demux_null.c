@@ -24,6 +24,7 @@ static int try_open_file(struct demuxer *demux, enum demux_check check)
     if (!bstr_startswith0(bstr0(demux->filename), "null://") &&
         check != DEMUX_CHECK_REQUEST)
         return -1;
+    demux->seekable = true;
     return 0;
 }
 
