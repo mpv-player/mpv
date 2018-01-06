@@ -3378,7 +3378,7 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
 
-    struct get_playlist_ctx p = { .mpctx = mpctx };
+    struct get_playlist_ctx p = {.mpctx = mpctx};
     return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
                                 get_playlist_entry, &p);
 }
@@ -4276,79 +4276,81 @@ static const struct property_osd_display {
     const char *msg;
 } property_osd_display[] = {
     // general
-    { "loop-playlist", "Loop" },
-    { "loop-file", "Loop current file" },
-    { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
-                 .seek_bar = OSD_SEEK_INFO_BAR },
-    { "hr-seek", "hr-seek" },
-    { "speed", "Speed" },
-    { "clock", "Clock" },
+    {"loop-playlist", "Loop"},
+    {"loop-file", "Loop current file"},
+    {"chapter",
+     .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
+     .seek_bar = OSD_SEEK_INFO_BAR},
+    {"hr-seek", "hr-seek"},
+    {"speed", "Speed"},
+    {"clock", "Clock"},
     // audio
-    { "volume", "Volume",
-      .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
-      .osd_progbar = OSD_VOLUME, .marker = 100 },
-    { "ao-volume", "AO Volume",
-      .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
-      .osd_progbar = OSD_VOLUME, .marker = 100 },
-    { "mute", "Mute" },
-    { "ao-mute", "AO Mute" },
-    { "audio-delay", "A-V delay" },
-    { "audio", "Audio" },
+    {"volume", "Volume",
+     .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
+     .osd_progbar = OSD_VOLUME, .marker = 100},
+    {"ao-volume", "AO Volume",
+     .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
+     .osd_progbar = OSD_VOLUME, .marker = 100},
+    {"mute", "Mute"},
+    {"ao-mute", "AO Mute"},
+    {"audio-delay", "A-V delay"},
+    {"audio", "Audio"},
     // video
-    { "panscan", "Panscan", .osd_progbar = OSD_PANSCAN },
-    { "taskbar-progress", "Progress in taskbar" },
-    { "snap-window", "Snap to screen edges" },
-    { "ontop", "Stay on top" },
-    { "border", "Border" },
-    { "framedrop", "Framedrop" },
-    { "deinterlace", "Deinterlace" },
-    { "colormatrix",
-       .msg = "YUV colormatrix:\n${colormatrix}" },
-    { "colormatrix-input-range",
-       .msg = "YUV input range:\n${colormatrix-input-range}" },
-    { "colormatrix-output-range",
-       .msg = "RGB output range:\n${colormatrix-output-range}" },
-    { "colormatrix-primaries",
-       .msg = "Colorspace primaries:\n${colormatrix-primaries}", },
-    { "colormatrix-gamma",
-       .msg = "Colorspace gamma:\n${colormatrix-gamma}", },
-    { "gamma", "Gamma", .osd_progbar = OSD_BRIGHTNESS },
-    { "brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
-    { "contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
-    { "saturation", "Saturation", .osd_progbar = OSD_SATURATION },
-    { "hue", "Hue", .osd_progbar = OSD_HUE },
-    { "angle", "Angle" },
+    {"panscan", "Panscan", .osd_progbar = OSD_PANSCAN},
+    {"taskbar-progress", "Progress in taskbar"},
+    {"snap-window", "Snap to screen edges"},
+    {"ontop", "Stay on top"},
+    {"border", "Border"},
+    {"framedrop", "Framedrop"},
+    {"deinterlace", "Deinterlace"},
+    {"colormatrix",
+     .msg = "YUV colormatrix:\n${colormatrix}"},
+    {"colormatrix-input-range",
+     .msg = "YUV input range:\n${colormatrix-input-range}"},
+    {"colormatrix-output-range",
+     .msg = "RGB output range:\n${colormatrix-output-range}"},
+    {"colormatrix-primaries",
+     .msg = "Colorspace primaries:\n${colormatrix-primaries}"},
+    {"colormatrix-gamma",
+     .msg = "Colorspace gamma:\n${colormatrix-gamma}"},
+    {"gamma", "Gamma", .osd_progbar = OSD_BRIGHTNESS },
+    {"brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS},
+    {"contrast", "Contrast", .osd_progbar = OSD_CONTRAST},
+    {"saturation", "Saturation", .osd_progbar = OSD_SATURATION},
+    {"hue", "Hue", .osd_progbar = OSD_HUE},
+    {"angle", "Angle"},
     // subs
-    { "sub", "Subtitles" },
-    { "secondary-sid", "Secondary subtitles" },
-    { "sub-pos", "Sub position" },
-    { "sub-delay", "Sub delay" },
-    { "sub-speed", "Sub speed" },
-    { "sub-visibility", .msg = "Subtitles ${!sub-visibility==yes:hidden}"
-        "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}" },
-    { "sub-forced-only", "Forced sub only" },
-    { "sub-scale", "Sub Scale"},
-    { "sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
-    { "sub-ass-override", "ASS subtitle style override"},
-    { "vf", "Video filters", .msg = "Video filters:\n${vf}"},
-    { "af", "Audio filters", .msg = "Audio filters:\n${af}"},
-    { "tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
-    { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
-    { "tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION },
-    { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
-    { "ab-loop-a", "A-B loop start"},
-    { "ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"},
-    { "audio-device", "Audio device"},
+    {"sub", "Subtitles"},
+    {"secondary-sid", "Secondary subtitles"},
+    {"sub-pos", "Sub position"},
+    {"sub-delay", "Sub delay"},
+    {"sub-speed", "Sub speed"},
+    {"sub-visibility",
+     .msg = "Subtitles ${!sub-visibility==yes:hidden}"
+      "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}"},
+    {"sub-forced-only", "Forced sub only"},
+    {"sub-scale", "Sub Scale"},
+    {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
+    {"sub-ass-override", "ASS subtitle style override"},
+    {"vf", "Video filters", .msg = "Video filters:\n${vf}"},
+    {"af", "Audio filters", .msg = "Audio filters:\n${af}"},
+    {"tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS},
+    {"tv-hue", "Hue", .osd_progbar = OSD_HUE},
+    {"tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION},
+    {"tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST},
+    {"ab-loop-a", "A-B loop start"},
+    {"ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"},
+    {"audio-device", "Audio device"},
     // By default, don't display the following properties on OSD
-    { "pause", NULL },
-    { "fullscreen", NULL },
+    {"pause", NULL},
+    {"fullscreen", NULL},
     {0}
 };
 
 static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct property_osd_display disp = { .name = name, .osd_name = name };
+    struct property_osd_display disp = {.name = name, .osd_name = name};
 
     if (!osd_mode)
         return;
@@ -4805,10 +4807,10 @@ static struct mpv_node *add_map_entry(struct mpv_node *dst, const char *key)
 }
 
 #define ADD_MAP_INT(dst, name, i) (*add_map_entry(dst, name) = \
-    (struct mpv_node){ .format = MPV_FORMAT_INT64, .u.int64 = (i) });
+    (struct mpv_node){.format = MPV_FORMAT_INT64, .u.int64 = (i)});
 
 #define ADD_MAP_CSTR(dst, name, s) (*add_map_entry(dst, name) = \
-    (struct mpv_node){ .format = MPV_FORMAT_STRING, .u.string = (s) });
+    (struct mpv_node){.format = MPV_FORMAT_STRING, .u.string = (s)});
 
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
 {
@@ -5371,7 +5373,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         struct mpv_node_list *info = talloc_zero(NULL, struct mpv_node_list);
         talloc_steal(info, img);
-        *res = (mpv_node){ .format = MPV_FORMAT_NODE_MAP, .u.list = info };
+        *res = (mpv_node){.format = MPV_FORMAT_NODE_MAP, .u.list = info};
         ADD_MAP_INT(res, "w", img->w);
         ADD_MAP_INT(res, "h", img->h);
         ADD_MAP_INT(res, "stride", img->stride[0]);
