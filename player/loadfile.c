@@ -1159,8 +1159,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->last_chapter_pts = MP_NOPTS_VALUE;
     mpctx->last_chapter = -2;
     mpctx->paused = false;
-    mpctx->paused_for_cache = false;
-    mpctx->cache_buffer = -1;
     mpctx->playing_msg_shown = false;
     mpctx->max_frames = -1;
     mpctx->video_speed = mpctx->audio_speed = opts->playback_speed;

@@ -237,11 +237,14 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->step_frames = 0;
     mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
+    mpctx->paused_for_cache = false;
+    mpctx->cache_buffer = 100;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
 
+    update_internal_pause_state(mpctx);
     update_core_idle_state(mpctx);
 }
 
@@ -614,30 +617,38 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
     int cache_buffer = 100;
-    bool use_pause_on_low_cache = c.size > 0 || mpctx->demuxer->is_network;
+    bool use_pause_on_low_cache = (c.size > 0 || mpctx->demuxer->is_network) &&
+                                  opts->cache_pause;
 
-    if (mpctx->restart_complete && use_pause_on_low_cache) {
-        if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!s.underrun && (!opts->cache_pause || s.idle ||
-                                s.ts_duration >= opts->cache_pause_wait))
-            {
-                mpctx->paused_for_cache = false;
-                update_internal_pause_state(mpctx);
-                force_update = true;
-            }
-            mp_set_timeout(mpctx, 0.2);
-        } else {
-            if (opts->cache_pause && s.underrun) {
-                mpctx->paused_for_cache = true;
-                update_internal_pause_state(mpctx);
-                mpctx->cache_stop_time = now;
-                force_update = true;
-            }
-        }
-        if (mpctx->paused_for_cache) {
-            cache_buffer =
-                100 * MPCLAMP(s.ts_duration / opts->cache_pause_wait, 0, 0.99);
-        }
+    if (!mpctx->restart_complete) {
+        // Audio or video is restarting, and initial buffering is enabled. Make
+        // sure we actually restart them in paused mode, so no audio gets
+        // dropped and video technically doesn't start yet.
+        use_pause_on_low_cache &= opts->cache_pause_initial &&
+                                    (mpctx->video_status == STATUS_READY ||
+                                     mpctx->audio_status == STATUS_READY);
+    }
+
+    bool is_low = use_pause_on_low_cache && !s.idle &&
+                  s.ts_duration < opts->cache_pause_wait;
+
+    // Enter buffering state only if there actually was an underrun (or if
+    // initial caching before playback restart is used).
+    if (is_low && !mpctx->paused_for_cache && mpctx->restart_complete)
+        is_low = s.underrun;
+
+    if (mpctx->paused_for_cache != is_low) {
+        mpctx->paused_for_cache = is_low;
+        update_internal_pause_state(mpctx);
+        force_update = true;
+        if (is_low)
+            mpctx->cache_stop_time = now;
+    }
+
+    if (mpctx->paused_for_cache) {
+        cache_buffer =
+            100 * MPCLAMP(s.ts_duration / opts->cache_pause_wait, 0, 0.99);
+        mp_set_timeout(mpctx, 0.2);
     }
 
     // Also update cache properties.
@@ -652,9 +663,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     }
 
     if (mpctx->cache_buffer != cache_buffer) {
-        if (mpctx->cache_buffer >= 0 &&
-            (mpctx->cache_buffer == 100) != (cache_buffer == 100))
-        {
+        if ((mpctx->cache_buffer == 100) != (cache_buffer == 100)) {
             if (cache_buffer < 100) {
                 MP_VERBOSE(mpctx, "Enter buffering.\n");
             } else {
@@ -950,16 +959,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->video_status < STATUS_READY)
         return;
 
-    if (opts->cache_pause_initial && (mpctx->video_status == STATUS_READY ||
-                                      mpctx->audio_status == STATUS_READY))
-    {
-        // Audio or video is restarting, and initial buffering is enabled. Make
-        // sure we actually restart them in paused mode, so no audio gets
-        // dropped and video technically doesn't start yet.
-        mpctx->paused_for_cache = true;
-        mpctx->cache_buffer = 0;
-        update_internal_pause_state(mpctx);
-    }
+    handle_pause_on_low_cache(mpctx);
 
     if (mpctx->video_status == STATUS_READY) {
         mpctx->video_status = STATUS_PLAYING;
