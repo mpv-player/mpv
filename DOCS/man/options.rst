@@ -3122,16 +3122,16 @@ OSD
 
 ``--osd-msg1=<string>``
     Show this string as message on OSD with OSD level 1 (visible by default).
-    The message will be visible by default, and as long no other message
+    The message will be visible by default, and as long as no other message
     covers it, and the OSD level isn't changed (see ``--osd-level``).
     Expands properties; see `Property Expansion`_.
 
 ``--osd-msg2=<string>``
-    Similar as ``--osd-msg1``, but for OSD level 2. If this is an empty string
+    Similar to ``--osd-msg1``, but for OSD level 2. If this is an empty string
     (default), then the playback time is shown.
 
 ``--osd-msg3=<string>``
-    Similar as ``--osd-msg1``, but for OSD level 3. If this is an empty string
+    Similar to ``--osd-msg1``, but for OSD level 3. If this is an empty string
     (default), then the playback time, duration, and some more information is
     shown.
 
