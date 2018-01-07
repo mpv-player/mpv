@@ -552,6 +552,11 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
+    The `try_ytdl_first` script option accepts a boolean 'yes' or 'no', and if
+    'yes' will try parsing the URL with youtube-dl first, instead of the default
+    where it's only after mpv failed to open it. This mostly depends on whether
+    most of your URLs need youtube-dl parsing.
+
     The `exclude` script option accepts a ``|``-separated list of URL patterns
     which mpv should not use with youtube-dl. The patterns are matched after
     the ``http(s)://`` part of the URL.

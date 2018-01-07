@@ -3,7 +3,8 @@ local msg = require 'mp.msg'
 local options = require 'mp.options'
 
 local o = {
-    exclude = ""
+    exclude = "",
+    try_ytdl_first = false
 }
 options.read_options(o)
 
@@ -301,7 +302,7 @@ local function add_single_video(json)
     end
 end
 
-mp.add_hook("on_load_fail", 10, function ()
+mp.add_hook(try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
     local url = mp.get_property("stream-open-filename")
     local start_time = os.clock()
     if (url:find("ytdl://") == 1) or
