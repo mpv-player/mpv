@@ -45,12 +45,16 @@ static void update_speed(struct af_instance *af, double new_speed)
     rubberband_set_time_ratio(p->rubber, 1.0 / p->speed);
 }
 
-static void update_pitch(struct af_instance *af, double new_pitch)
+static bool update_pitch(struct af_instance *af, double new_pitch)
 {
+    if (new_pitch < 0.01 || new_pitch > 100.0)
+        return false;
+
     struct priv *p = af->priv;
 
     p->pitch = new_pitch;
     rubberband_set_pitch_scale(p->rubber, p->pitch);
+    return true;
 }
 
 static int control(struct af_instance *af, int cmd, void *arg)
@@ -99,13 +103,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     case AF_CONTROL_COMMAND: {
         char **args = arg;
+        char *endptr;
+        double pitch = p->pitch;
         if (!strcmp(args[0], "set-pitch")) {
-            char *endptr;
-            double pitch = strtod(args[1], &endptr);
-            if (*endptr || pitch < 0.01 || pitch > 100.0)
+            pitch = strtod(args[1], &endptr);
+            if (*endptr)
                 return CONTROL_ERROR;
-            update_pitch(af, pitch);
-            return CONTROL_OK;
+            return update_pitch(af, pitch) ? CONTROL_OK : CONTROL_ERROR;
+        } else if (!strcmp(args[0], "multiply-pitch")) {
+            double mult = strtod(args[1], &endptr);
+            if (*endptr || mult <= 0)
+                return CONTROL_ERROR;
+            pitch *= mult;
+            return update_pitch(af, pitch) ? CONTROL_OK : CONTROL_ERROR;
         } else {
             return CONTROL_ERROR;
         }
