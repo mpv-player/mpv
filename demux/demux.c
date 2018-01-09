@@ -217,8 +217,8 @@ struct demux_cached_range {
     // demux_queue) are always either NOPTS, or fully valid.
     double seek_start, seek_end;
 
-    // Set if the file ends with this range.
-    bool is_eof;
+    bool is_bof;            // set if the file begins with this range
+    bool is_eof;            // set if the file ends with this range
 };
 
 #define MAX_INDEX_ENTRIES 16
@@ -249,6 +249,7 @@ struct demux_queue {
     double seek_start, seek_end;
     double last_pruned;     // timestamp of last pruned keyframe
 
+    bool is_bof;            // started demuxing at beginning of file
     bool is_eof;            // received true EOF here
 
     // incomplete index to somewhat speed up seek operations
@@ -428,6 +429,7 @@ static void set_current_range(struct demux_internal *in,
 static void update_seek_ranges(struct demux_cached_range *range)
 {
     range->seek_start = range->seek_end = MP_NOPTS_VALUE;
+    range->is_bof = true;
     range->is_eof = true;
 
     for (int n = 0; n < range->num_streams; n++) {
@@ -438,6 +440,7 @@ static void update_seek_ranges(struct demux_cached_range *range)
             range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
 
             range->is_eof &= queue->is_eof;
+            range->is_bof &= queue->is_bof;
 
             if (queue->seek_start >= queue->seek_end) {
                 range->seek_start = range->seek_end = MP_NOPTS_VALUE;
@@ -486,6 +489,7 @@ static void remove_head_packet(struct demux_queue *queue)
         queue->next_prune_target = NULL;
     if (queue->keyframe_latest == dp)
         queue->keyframe_latest = NULL;
+    queue->is_bof = false;
 
     queue->ds->in->total_bytes -= demux_packet_estimate_total_size(dp);
 
@@ -527,6 +531,7 @@ static void clear_queue(struct demux_queue *queue)
     queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
 
     queue->is_eof = false;
+    queue->is_bof = false;
 }
 
 static void clear_cached_range(struct demux_internal *in,
@@ -1155,6 +1160,8 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
 
+    in->initial_state = false;
+
     double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
     if (dp->segmented)
         ts = MP_PTS_MIN(ts, dp->end);
@@ -1323,6 +1330,11 @@ static bool read_packet(struct demux_internal *in)
 
     if (!read_more && !prefetch_more && !refresh_more)
         return false;
+
+    if (in->initial_state) {
+        for (int n = 0; n < in->num_streams; n++)
+            in->current_range->streams[n]->is_bof = in->streams[n]->ds->selected;
+    }
 
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
@@ -2325,10 +2337,12 @@ static struct demux_cached_range *find_cache_seek_target(struct demux_internal *
     for (int n = 0; n < in->num_ranges; n++) {
         struct demux_cached_range *r = in->ranges[n];
         if (r->seek_start != MP_NOPTS_VALUE) {
-            MP_VERBOSE(in, "cached range %d: %f <-> %f (eof=%d)\n",
-                       n, r->seek_start, r->seek_end, r->is_eof);
+            MP_VERBOSE(in, "cached range %d: %f <-> %f (bof=%d, eof=%d)\n",
+                       n, r->seek_start, r->seek_end, r->is_bof, r->is_eof);
 
-            if (pts >= r->seek_start && (pts <= r->seek_end || r->is_eof)) {
+            if ((pts >= r->seek_start || r->is_bof) &&
+                (pts <= r->seek_end || r->is_eof))
+            {
                 MP_VERBOSE(in, "...using this range for in-cache seek.\n");
                 return r;
             }
