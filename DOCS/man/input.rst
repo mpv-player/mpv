@@ -1442,7 +1442,7 @@ Property list
 ``hwdec-interop``
     This returns the currently loaded hardware decoding/output interop driver.
     This is known only once the VO has opened (and possibly later). With some
-    VOs (like ``opengl``), this might be never known in advance, but only when
+    VOs (like ``gpu``), this might be never known in advance, but only when
     the decoder attempted to create the hw decoder successfully. (Using
     ``--gpu-hwdec-interop`` can load it eagerly.) If there are multiple
     drivers loaded, they will be separated by ``,``.
