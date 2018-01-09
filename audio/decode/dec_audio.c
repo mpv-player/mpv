@@ -284,6 +284,8 @@ void audio_work(struct dec_audio *da)
     read_frame(da);
     if (!da->current_frame) {
         feed_packet(da);
+        if (da->current_state == DATA_WAIT)
+            return;
         read_frame(da); // retry, to avoid redundant iterations
     }
 }

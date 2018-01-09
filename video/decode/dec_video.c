@@ -504,6 +504,8 @@ void video_work(struct dec_video *d_video)
     read_frame(d_video);
     if (!d_video->current_mpi) {
         feed_packet(d_video);
+        if (d_video->current_state == DATA_WAIT)
+            return;
         read_frame(d_video); // retry, to avoid redundant iterations
     }
 }
