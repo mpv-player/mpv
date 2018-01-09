@@ -999,6 +999,14 @@ static void attempt_range_joining(struct demux_internal *in)
                         goto failed;
                     }
 
+                    // q1 usually meets q2 at a keyframe. q1 will end on a key-
+                    // frame (because it tries joining when reading a keyframe).
+                    // Obviously, q1 can not know the kf_seek_pts yet; it would
+                    // have to read packets after it to compute it. Ideally,
+                    // we'd remove it and use q2's packet, but the linked list
+                    // makes this hard, so copy this missing metadata instead.
+                    end->kf_seek_pts = dp->kf_seek_pts;
+
                     remove_head_packet(q2);
                     join_point_found = true;
                     break;
