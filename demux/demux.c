@@ -1164,7 +1164,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 
     struct demux_queue *queue = ds->queue;
 
-    bool drop = !ds->selected || in->seeking;
+    bool drop = !ds->selected || in->seeking || ds->sh->attached_picture;
     if (!drop && ds->refreshing) {
         // Resume reading once the old position was reached (i.e. we start
         // returning packets where we left off before the refresh).
