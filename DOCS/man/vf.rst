@@ -120,7 +120,7 @@ Available mpv-only filters are:
         results in slightly under or over saturated and shifted colors.
 
         These options are not always supported. Different video outputs provide
-        varying degrees of support. The ``opengl`` and ``vdpau`` video output
+        varying degrees of support. The ``gpu`` and ``vdpau`` video output
         drivers usually offer full support. The ``xv`` output can set the color
         space if the system video driver supports it, but not input and output
         levels. The ``scale`` video filter can configure color space and input
@@ -163,7 +163,7 @@ Available mpv-only filters are:
         used to override the setting.
 
         This option only affects video output drivers that perform color
-        management, for example ``opengl`` with the ``target-prim`` or
+        management, for example ``gpu`` with the ``target-prim`` or
         ``icc-profile`` suboptions set.
 
         If this option is set to ``auto`` (which is the default), the video's
@@ -459,7 +459,7 @@ Available mpv-only filters are:
     other userdata type will result in hard crashes.
 
 ``vavpp``
-    VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=opengl``
+    VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=gpu``
     only. Currently deinterlaces. This filter is automatically inserted if
     deinterlacing is requested (either using the ``d`` key, by default mapped to
     the command ``cycle deinterlace``, or the ``--deinterlace`` option).
@@ -492,12 +492,12 @@ Available mpv-only filters are:
               algorithms.
 
 ``vdpaupp``
-    VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
+    VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=gpu``
     only. This filter is automatically inserted if deinterlacing is requested
     (either using the ``d`` key, by default mapped to the command
     ``cycle deinterlace``, or the ``--deinterlace`` option). When enabling
     deinterlacing, it is always preferred over software deinterlacer filters
-    if the ``vdpau`` VO is used, and also if ``opengl`` is used and hardware
+    if the ``vdpau`` VO is used, and also if ``gpu`` is used and hardware
     decoding was activated at least once (i.e. vdpau was loaded).
 
     ``sharpen=<-1-1>``

@@ -324,7 +324,7 @@ Available video output drivers are:
     This is low quality, and has issues with OSD.
 
     .. note:: This driver is for compatibility with crappy systems. You can
-              use vaapi hardware decoding with ``--vo=opengl`` too.
+              use vaapi hardware decoding with ``--vo=gpu`` too.
 
     The following global options are supported by this video output:
 
@@ -429,7 +429,7 @@ Available video output drivers are:
         Specify the directory to save the image files to (default: ``./``).
 
 ``wayland`` (Wayland only)
-    Wayland shared memory video output as fallback for ``opengl``.
+    Wayland shared memory video output as fallback for ``gpu``.
 
     .. note:: This driver is for compatibility with systems that don't provide
               working OpenGL drivers.
@@ -451,14 +451,14 @@ Available video output drivers are:
     For use with libmpv direct OpenGL embedding; useless in any other contexts.
     (See ``<mpv/opengl_cb.h>``.)
 
-    This also supports many of the options the ``opengl`` VO has.
+    This also supports many of the options the ``gpu`` VO has.
 
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.
 
-    This is deprecated. Use ``--vo=opengl`` instead, which is the default and
+    This is deprecated. Use ``--vo=gpu`` instead, which is the default and
     provides the same functionality. The ``rpi`` VO will be removed in
-    mpv 0.23.0. Its functionality was folded into --vo=opengl, which now uses
+    mpv 0.23.0. Its functionality was folded into --vo=gpu, which now uses
     RPI hardware decoding by treating it as a hardware overlay (without applying
     GL filtering). Also to be changed in 0.23.0: the --fs flag will be reset to
     "no" by default (like on the other platforms).
@@ -488,7 +488,7 @@ Available video output drivers are:
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Should be used when one doesn't want to install full-blown graphical
     environment (e.g. no X). Does not support hardware acceleration (if you
-    need this, check the ``drm`` backend for ``opengl`` VO).
+    need this, check the ``drm`` backend for ``gpu`` VO).
 
     The following global options are supported by this video output:
 
