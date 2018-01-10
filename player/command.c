@@ -4991,7 +4991,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_CYCLE_VALUES: {
-        char *args[MP_CMD_MAX_ARGS + 1] = {0};
+        char **args = talloc_zero_array(NULL, char *, cmd->nargs + 1);
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;
         int first = 1, dir = 1;
@@ -5015,14 +5015,17 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             } else if (r == M_PROPERTY_UNKNOWN) {
                 set_osd_msg(mpctx, osdl, osd_duration,
                             "Unknown property: '%s'", property);
+                talloc_free(args);
                 return -1;
             } else if (r <= 0) {
                 set_osd_msg(mpctx, osdl, osd_duration,
                             "Failed to set property '%s' to '%s'",
                             property, value);
+                talloc_free(args);
                 return -1;
             }
         }
+        talloc_free(args);
         break;
     }
 
@@ -5390,10 +5393,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_RUN: {
-        char *args[MP_CMD_MAX_ARGS + 1] = {0};
+        char **args = talloc_zero_array(NULL, char *, cmd->nargs + 1);
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;
         mp_subprocess_detached(mpctx->log, args);
+        talloc_free(args);
         break;
     }
 
@@ -5510,11 +5514,12 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
     case MP_CMD_SCRIPT_MESSAGE: {
-        const char *args[MP_CMD_MAX_ARGS];
+        const char **args = talloc_array(NULL, const char *, cmd->nargs);
         mpv_event_client_message event = {.args = args};
         for (int n = 0; n < cmd->nargs; n++)
             event.args[event.num_args++] = cmd->args[n].v.s;
         mp_client_broadcast_event(mpctx, MPV_EVENT_CLIENT_MESSAGE, &event);
+        talloc_free(args);
         break;
     }
 
