@@ -39,7 +39,8 @@
  * (ARG_INT, ARG_FLOAT, ARG_STRING) if any, then optional arguments
  * (OARG_INT(default), etc) if any. The command will be given the default
  * argument value if the user didn't give enough arguments to specify it.
- * A command can take a maximum of MP_CMD_MAX_ARGS arguments.
+ * A command can take a maximum of MP_CMD_DEF_MAX_ARGS arguments, or more
+ * if the command uses varargs.
  */
 
 #define ARG_INT                 OPT_INT(ARG(i), 0)
@@ -363,7 +364,7 @@ void mp_print_cmd_list(struct mp_log *out)
     for (int i = 0; mp_cmds[i].name; i++) {
         const struct mp_cmd_def *def = &mp_cmds[i];
         mp_info(out, "%-20.20s", def->name);
-        for (int j = 0; j < MP_CMD_MAX_ARGS && def->args[j].type; j++) {
+        for (int j = 0; j < MP_CMD_DEF_MAX_ARGS && def->args[j].type; j++) {
             const char *type = def->args[j].type->name;
             if (def->args[j].defval)
                 mp_info(out, " [%s]", type);

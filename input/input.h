@@ -56,6 +56,9 @@ enum mp_input_section_flags {
 struct input_ctx;
 struct mp_log;
 
+// Arbitrary upper bound for sanity.
+#define MP_CMD_MAX_ARGS 100
+
 struct mp_cmd_arg {
     const struct m_option *type;
     union {
@@ -71,7 +74,7 @@ struct mp_cmd_arg {
 typedef struct mp_cmd {
     int id;
     char *name;
-    struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
+    struct mp_cmd_arg *args;
     int nargs;
     int flags; // mp_cmd_flags bitfield
     bstr original;

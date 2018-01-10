@@ -92,46 +92,42 @@ static bool find_cmd(struct mp_log *log, struct mp_cmd *cmd, bstr name)
 
 static bool is_vararg(const struct mp_cmd_def *m, int i)
 {
-    return m->vararg && (i + 1 >= MP_CMD_MAX_ARGS || !m->args[i + 1].type);
+    return m->vararg && (i + 1 >= MP_CMD_DEF_MAX_ARGS || !m->args[i + 1].type);
 }
 
 static const struct m_option *get_arg_type(const struct mp_cmd_def *cmd, int i)
 {
-    if (i >= MP_CMD_MAX_ARGS)
-        return NULL;
-    const struct m_option *opt = &cmd->args[i];
-    if (!opt->type && is_vararg(cmd, i)) {
+    const struct m_option *opt = NULL;
+    if (is_vararg(cmd, i)) {
         // The last arg in a vararg command sets all vararg types.
-        for (int n = i; n >= 0; n--) {
+        for (int n = MPMIN(i, MP_CMD_DEF_MAX_ARGS - 1); n >= 0; n--) {
             if (cmd->args[n].type) {
                 opt = &cmd->args[n];
                 break;
             }
         }
+    } else if (i < MP_CMD_DEF_MAX_ARGS) {
+        opt = &cmd->args[i];
     }
-    return opt->type ? opt : NULL;
+    return opt && opt->type ? opt : NULL;
 }
 
-// Set correct arg count, and fill in missing optional args.
+// Verify that there are missing args, fill in missing optional args.
 static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
 {
-    cmd->nargs = 0;
-    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        if (!cmd->args[i].type) {
-            const struct m_option *opt = get_arg_type(cmd->def, i);
-            if (!opt || is_vararg(cmd->def, i))
-                break;
-            if (!opt->defval && !(opt->flags & MP_CMD_OPT_ARG)) {
-                mp_err(log, "Command %s: more than %d arguments required.\n",
-                       cmd->name, cmd->nargs);
-                return false;
-            }
-            cmd->args[i].type = opt;
-            if (opt->defval)
-                m_option_copy(opt, &cmd->args[i].v, opt->defval);
+    for (int i = cmd->nargs; i < MP_CMD_DEF_MAX_ARGS; i++) {
+        const struct m_option *opt = get_arg_type(cmd->def, i);
+        if (!opt || is_vararg(cmd->def, i))
+            break;
+        if (!opt->defval && !(opt->flags & MP_CMD_OPT_ARG)) {
+            mp_err(log, "Command %s: more than %d arguments required.\n",
+                    cmd->name, cmd->nargs);
+            return false;
         }
-        if (cmd->args[i].type)
-            cmd->nargs = i + 1;
+        struct mp_cmd_arg arg = {.type = opt};
+        if (opt->defval)
+            m_option_copy(opt, &arg.v, opt->defval);
+        MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
     }
     return true;
 }
@@ -169,8 +165,8 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
             goto error;
         }
         mpv_node *val = &args->values[cur++];
-        cmd->args[i].type = opt;
-        void *dst = &cmd->args[i].v;
+        struct mp_cmd_arg arg = {.type = opt};
+        void *dst = &arg.v;
         if (val->format == MPV_FORMAT_STRING) {
             int r = m_option_parse(log, opt, bstr0(cmd->name),
                                    bstr0(val->u.string), dst);
@@ -187,6 +183,7 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
                 goto error;
             }
         }
+        MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
     }
 
     if (!finish_cmd(log, cmd))
@@ -194,10 +191,6 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
 
     return cmd;
 error:
-    for (int n = 0; n < MP_CMD_MAX_ARGS; n++) {
-        if (cmd->args[n].type)
-            m_option_free(cmd->args[n].type, &cmd->args[n].v);
-    }
     talloc_free(cmd);
     return NULL;
 }
@@ -293,14 +286,15 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
         if (r < 1)
             break;
 
-        struct mp_cmd_arg *cmdarg = &cmd->args[i];
-        cmdarg->type = opt;
-        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &cmdarg->v);
+        struct mp_cmd_arg arg = {.type = opt};
+        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
         if (r < 0) {
             MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));
             goto error;
         }
+
+        MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
     }
 
     if (!finish_cmd(ctx->log, cmd))
@@ -360,7 +354,9 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
                 .original = bstrdup(list, original),
             };
             talloc_steal(list, cmd);
-            list->args[0].v.p = cmd;
+            struct mp_cmd_arg arg = {0};
+            arg.v.p = cmd;
+            list->args = talloc_memdup(list, &arg, sizeof(arg));
             p_prev = &cmd->queue_next;
             cmd = list;
         }
@@ -382,19 +378,19 @@ done:
 
 struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv)
 {
-    mpv_node items[MP_CMD_MAX_ARGS];
-    mpv_node_list list = {.values = items};
+    int count = 0;
+    while (argv[count])
+        count++;
+    mpv_node *items = talloc_zero_array(NULL, mpv_node, count);
+    mpv_node_list list = {.values = items, .num = count};
     mpv_node node = {.format = MPV_FORMAT_NODE_ARRAY, .u = {.list = &list}};
-    while (argv[list.num]) {
-        if (list.num >= MP_CMD_MAX_ARGS) {
-            mp_err(log, "Too many arguments to command.\n");
-            return NULL;
-        }
-        char *s = (char *)argv[list.num];
-        items[list.num++] = (mpv_node){.format = MPV_FORMAT_STRING,
-                                       .u = {.string = s}};
+    for (int n = 0; n < count; n++) {
+        items[n] = (mpv_node){.format = MPV_FORMAT_STRING,
+                              .u = {.string = (char *)argv[n]}};
     }
-    return mp_input_parse_cmd_node(log, &node);
+    struct mp_cmd *res = mp_input_parse_cmd_node(log, &node);
+    talloc_free(items);
+    return res;
 }
 
 void mp_cmd_free(mp_cmd_t *cmd)
@@ -413,8 +409,9 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     talloc_set_destructor(ret, destroy_cmd);
     ret->name = talloc_strdup(ret, cmd->name);
+    ret->args = talloc_zero_array(ret, struct mp_cmd_arg, ret->nargs);
     for (i = 0; i < ret->nargs; i++) {
-        memset(&ret->args[i].v, 0, ret->args[i].type->type->size);
+        ret->args[i].type = cmd->args[i].type;
         m_option_copy(ret->args[i].type, &ret->args[i].v, &cmd->args[i].v);
     }
     ret->original = bstrdup(ret, cmd->original);
@@ -428,7 +425,9 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
             if (prev) {
                 prev->queue_next = sub;
             } else {
-                ret->args[0].v.p = sub;
+                struct mp_cmd_arg arg = {0};
+                arg.v.p = sub;
+                ret->args = talloc_memdup(ret, &arg, sizeof(arg));
             }
             prev = sub;
         }
