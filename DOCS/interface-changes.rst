@@ -24,6 +24,7 @@ Interface changes
       --ad-spdif-dtshd, --softvol options
     - fix --external-files: strictly never select any tracks from them, unless
       explicitly selected (this may or may not be expected)
+    - --ytdl is now always enabled, even for libmpv
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

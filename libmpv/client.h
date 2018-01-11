@@ -134,6 +134,8 @@ extern "C" {
  * - The FPU precision must be set at least to double precision.
  * - On Windows, mpv will call timeBeginPeriod(1).
  * - On memory exhaustion, mpv will kill the process.
+ * - In certain cases, mpv may start sub processes (such as with the ytdl
+ *   wrapper script).
  *
  * Encoding of filenames
  * ---------------------
