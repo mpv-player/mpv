@@ -529,19 +529,16 @@ static bool check_bdmv(const char *path)
     if (!temp)
         return false;
 
-    bool r = false;
+    char data[50] = {0};
 
-    const char *sig1 = "MOBJ020";
-    const char *sig2 = "MOBJ0100";
-    char data[50];
-
-    if (fread(data, 50, 1, temp) == 1) {
-        r = memcmp(data, sig1, strlen(sig1)) == 0 ||
-            memcmp(data, sig2, strlen(sig2)) == 0;
-    }
-
+    fread(data, 50, 1, temp);
     fclose(temp);
-    return r;
+
+    bstr bdata = {data, 50};
+
+    return bstr_startswith0(bdata, "MOBJ0100") || // AVCHD
+           bstr_startswith0(bdata, "MOBJ0200") || // Blu-ray
+           bstr_startswith0(bdata, "MOBJ0300");   // UHD BD
 }
 
 // Destructively remove the current trailing path component.
