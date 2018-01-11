@@ -428,25 +428,6 @@ Available video output drivers are:
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
-``wayland`` (Wayland only)
-    Wayland shared memory video output as fallback for ``gpu``.
-
-    .. note:: This driver is for compatibility with systems that don't provide
-              working OpenGL drivers.
-
-    The following global options are supported by this video output:
-
-    ``--vo-wayland-alpha``
-        Use a buffer format that supports videos and images with alpha
-        information
-    ``--vo-wayland-rgb565``
-        Use RGB565 as buffer format. This format is implemented on most
-        platforms, especially on embedded where it is far more efficient then
-        RGB8888.
-    ``--vo-wayland-triple-buffering``
-        Use 3 buffers instead of 2. This can lead to more fluid playback, but
-        uses more memory.
-
 ``opengl-cb``
     For use with libmpv direct OpenGL embedding; useless in any other contexts.
     (See ``<mpv/opengl_cb.h>``.)
