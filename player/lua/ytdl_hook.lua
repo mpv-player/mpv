@@ -472,7 +472,7 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
                          we want, but only if we aren't going to trigger an
                          infinite loop
                     --]]
-                    if not self_redirecting_url then
+                    if entry["webpage_url"] and not self_redirecting_url then
                         site = entry["webpage_url"]
                     end
 
