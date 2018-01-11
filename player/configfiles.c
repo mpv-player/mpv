@@ -82,11 +82,12 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
         m_config_set_profile(conf, SECT_ENCODE, 0);
 }
 
-static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
+static int try_load_config(struct MPContext *mpctx, const char *file, int flags,
+                           int msgl)
 {
     if (!mp_path_exists(file))
         return 0;
-    MP_INFO(mpctx, "Loading config '%s'\n", file);
+    MP_MSG(mpctx, msgl, "Loading config '%s'\n", file);
     m_config_parse_config_file(mpctx->mconfig, file, NULL, flags);
     return 1;
 }
@@ -114,14 +115,14 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
 
         bstr dir = mp_dirname(cfg);
         char *dircfg = mp_path_join_bstr(NULL, dir, bstr0("mpv.conf"));
-        try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
+        try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS, MSGL_INFO);
         talloc_free(dircfg);
 
-        if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
+        if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS, MSGL_INFO))
             return;
 
         if ((confpath = mp_find_config_file(NULL, mpctx->global, name))) {
-            try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
+            try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS, MSGL_INFO);
 
             talloc_free(confpath);
         }
@@ -405,7 +406,7 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
         m_config_backup_opt(mpctx->mconfig, "start");
         MP_INFO(mpctx, "Resuming playback. This behavior can "
                "be disabled with --no-resume-playback.\n");
-        try_load_config(mpctx, fname, M_SETOPT_PRESERVE_CMDLINE);
+        try_load_config(mpctx, fname, M_SETOPT_PRESERVE_CMDLINE, MSGL_V);
         unlink(fname);
     }
     talloc_free(fname);
