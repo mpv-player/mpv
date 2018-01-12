@@ -45,6 +45,7 @@ struct af_resample {
     struct mp_resample_opts opts;
     int global_normalize;
     struct mp_aconverter *converter;
+    int deprecation_warning;
 };
 
 static int control(struct af_instance *af, int cmd, void *arg)
@@ -149,6 +150,11 @@ static int af_open(struct af_instance *af)
 
     s->converter = mp_aconverter_create(af->global, af->log, &s->opts);
 
+    if (s->deprecation_warning) {
+        MP_WARN(af, "This filter is deprecated! Use the --audio-resample- options"
+                " to customize resampling, or the --af=aresample filter.\n");
+    }
+
     return AF_OK;
 }
 
@@ -183,6 +189,7 @@ const struct af_info af_info_lavrresample = {
         .opts = MP_RESAMPLE_OPTS_DEF,
         .playback_speed = 1.0,
         .allow_detach = 1,
+        .deprecation_warning = 1,
     },
     .options = (const struct m_option[]) {
         OPT_INTRANGE("filter-size", opts.filter_size, 0, 0, 32),
@@ -193,6 +200,7 @@ const struct af_info af_info_lavrresample = {
         OPT_CHOICE("normalize", opts.normalize, 0,
                    ({"no", 0}, {"yes", 1}, {"auto", -1})),
         OPT_KEYVALUELIST("o", opts.avopts, 0),
+        OPT_FLAG("deprecation-warning", deprecation_warning, 0),
         {0}
     },
     .set_defaults = set_defaults,
