@@ -5,7 +5,7 @@
 
 struct mp_image_pool;
 
-struct mp_image_pool *mp_image_pool_new(int max_count);
+struct mp_image_pool *mp_image_pool_new(void *tparent);
 struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
                                    int w, int h);
 // the reference to "new" is transferred to the pool

@@ -816,7 +816,7 @@ static int preinit(struct vo *vo)
     if (!p->image_formats)
         goto fail;
 
-    p->pool = mp_image_pool_new(MAX_OUTPUT_SURFACES + 3);
+    p->pool = mp_image_pool_new(p);
     va_pool_set_allocator(p->pool, p->mpvaapi, VA_RT_FORMAT_YUV420);
 
     int max_subpic_formats = vaMaxNumSubpictureFormats(p->display);
