@@ -1441,16 +1441,6 @@ Audio
         want. For example, most A/V receivers connected via HDMI and that can
         do 7.1 would  be served by: ``--audio-channels=7.1,5.1,stereo``
 
-``--audio-normalize-downmix=<yes|no>``
-    Enable/disable normalization if surround audio is downmixed to stereo
-    (default: no). If this is disabled, downmix can cause clipping. If it's
-    enabled, the output might be too silent. It depends on the source audio.
-
-    Technically, this changes the ``normalize`` suboption of the
-    ``lavrresample`` audio filter, which performs the downmixing.
-
-    If downmix happens outside of mpv for some reason, this has no effect.
-
 ``--audio-display=<no|attachment>``
     Setting this option to ``attachment`` (default) will display image
     attachments (e.g. album cover art) when playing audio files. It will
@@ -3453,6 +3443,44 @@ Software Scaler
 ``--sws-cvs=<v>``
     Software scaler chroma vertical shifting. See ``--sws-scaler``.
 
+Audio Resampler
+---------------
+
+This controls the default options of any resampling done by mpv (but not within
+libavfilter, within the system audio API resampler, or any other places).
+
+It also sets the defaults for the ``lavrresample`` audio filter.
+
+``--audio-resample-filter-size=<length>``
+    Length of the filter with respect to the lower sampling rate. (default:
+    16)
+
+``--audio-resample-phase-shift=<count>``
+    Log2 of the number of polyphase entries. (..., 10->1024, 11->2048,
+    12->4096, ...) (default: 10->1024)
+
+``--audio-resample-cutoff=<cutoff>``
+    Cutoff frequency (0.0-1.0), default set depending upon filter length.
+
+``--audio-resample-linear=<yes|no>``
+    If set then filters will be linearly interpolated between polyphase
+    entries. (default: no)
+
+``--audio-normalize-downmix=<yes|no>``
+    Enable/disable normalization if surround audio is downmixed to stereo
+    (default: no). If this is disabled, downmix can cause clipping. If it's
+    enabled, the output might be too quiet. It depends on the source audio.
+
+    Technically, this changes the ``normalize`` suboption of the
+    ``lavrresample`` audio filter, which performs the downmixing.
+
+    If downmix happens outside of mpv for some reason, or in the decoder
+    (decoder downmixing), or in the audio output (system mixer), this has no
+    effect.
+
+``--audio-swresample-o=<string>``
+    Set AVOptions on the SwrContext or AVAudioResampleContext. These should
+    be documented by FFmpeg or Libav.
 
 Terminal
 --------

@@ -52,6 +52,8 @@ struct af_info {
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
+    // For m_obj_desc.set_defaults
+    void (*set_defaults)(struct mpv_global *global, void *p);
 };
 
 // Linked list of audio filters

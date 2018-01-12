@@ -86,6 +86,23 @@ struct mp_aconverter {
     bool output_eof;            // queued output EOF
 };
 
+#define OPT_BASE_STRUCT struct mp_resample_opts
+const struct m_sub_options resample_config = {
+    .opts = (const m_option_t[]) {
+        OPT_INTRANGE("audio-resample-filter-size", filter_size, 0, 0, 32),
+        OPT_INTRANGE("audio-resample-phase-shift", phase_shift, 0, 0, 30),
+        OPT_FLAG("audio-resample-linear", linear, 0),
+        OPT_DOUBLE("audio-resample-cutoff", cutoff, M_OPT_RANGE,
+                   .min = 0, .max = 1),
+        OPT_FLAG("audio-normalize-downmix", normalize, 0),
+        OPT_KEYVALUELIST("audio-swresample-o", avopts, 0),
+        {0}
+    },
+    .size = sizeof(struct mp_resample_opts),
+    .defaults = &(const struct mp_resample_opts)MP_RESAMPLE_OPTS_DEF,
+    .change_flags = UPDATE_AUDIO,
+};
+
 #if HAVE_LIBAVRESAMPLE
 static double get_delay(struct mp_aconverter *p)
 {
@@ -211,12 +228,7 @@ static bool configure_lavrr(struct mp_aconverter *p, bool verbose)
         cutoff = MPMAX(1.0 - 6.5 / (p->opts->filter_size + 8), 0.80);
     av_opt_set_double(p->avrctx, "cutoff",          cutoff, 0);
 
-    int global_normalize;
-    mp_read_option_raw(p->global, "audio-normalize-downmix", &m_option_type_flag,
-                       &global_normalize);
     int normalize = p->opts->normalize;
-    if (normalize < 0)
-        normalize = global_normalize;
 #if HAVE_LIBSWRESAMPLE
     av_opt_set_double(p->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
 #else
@@ -628,9 +640,9 @@ struct mp_aconverter *mp_aconverter_create(struct mpv_global *global,
     p->log = log;
     p->global = global;
 
-    static const struct mp_resample_opts defs = MP_RESAMPLE_OPTS_DEF;
-
-    p->opts = opts ? opts : &defs;
+    p->opts = opts;
+    if (!p->opts)
+        p->opts = mp_get_config_group(p, global, &resample_config);
 
     p->reorder_buffer = mp_aframe_pool_create(p);
     p->out_pool = mp_aframe_pool_create(p);
