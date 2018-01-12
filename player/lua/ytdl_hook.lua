@@ -310,7 +310,8 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
 
         -- check for youtube-dl in mpv's config dir
         if not (ytdl.searched) then
-            local ytdl_mcd = mp.find_config_file("youtube-dl")
+            local exesuf = (package.config:sub(1,1) == '\\') and '.exe' or ''
+            local ytdl_mcd = mp.find_config_file("youtube-dl" .. exesuf)
             if not (ytdl_mcd == nil) then
                 msg.verbose("found youtube-dl at: " .. ytdl_mcd)
                 ytdl.path = ytdl_mcd
