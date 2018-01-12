@@ -110,10 +110,14 @@ static void recreate_speed_filters(struct MPContext *mpctx)
         return;
 
     int method = get_speed_method(mpctx);
-    char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
-                 ? "scaletempo" : "lavrresample";
+    char *filter = "lavrresample";
+    char *args[] = {"deprecation-warning", "no", NULL};
+    if (method == AF_CONTROL_SET_PLAYBACK_SPEED) {
+        filter = "scaletempo";
+        args[0] = NULL;
+    }
 
-    if (!af_add(afs, filter, "playback-speed", NULL))
+    if (!af_add(afs, filter, "playback-speed", args))
         goto fail;
 
     if (!update_speed_filters(mpctx))

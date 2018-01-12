@@ -29,6 +29,12 @@ Available filters are:
     This filter is automatically enabled if the audio output does not support
     the audio configuration of the file being played.
 
+    .. warning::
+
+        Deprecated. Either use the ``--audio-resample-...`` options to customize
+        resampling, or the libavfilter ``--af=aresample`` filter, which has its
+        own options.
+
     It supports only the following sample formats: u8, s16, s32, float.
 
     ``filter-size=<length>``

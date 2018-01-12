@@ -33,6 +33,8 @@ Interface changes
       its defaults), and various hw deinterlacing filters (like vf_vavpp), for
       which you will have to stop using --deinterlace=yes, and instead use the
       vf toggle commands and the filter enable/disable flag to customize it.
+    - deprecate --af=lavrresample. Use the ``--audio-resample-...`` options to
+      customize resampling, or the libavfilter ``--af=aresample`` filter.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
