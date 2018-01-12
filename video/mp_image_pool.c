@@ -43,10 +43,10 @@ static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
 // destructors are thread-safe.)
 
 struct mp_image_pool {
-    int max_count;
-
     struct mp_image **images;
     int num_images;
+
+    int fmt, w, h;
 
     mp_image_allocator allocator;
     void *allocator_ctx;
@@ -70,13 +70,12 @@ static void image_pool_destructor(void *ptr)
     mp_image_pool_clear(pool);
 }
 
-struct mp_image_pool *mp_image_pool_new(int max_count)
+// If tparent!=NULL, set it as talloc parent for the pool.
+struct mp_image_pool *mp_image_pool_new(void *tparent)
 {
-    struct mp_image_pool *pool = talloc_ptrtype(NULL, pool);
+    struct mp_image_pool *pool = talloc_ptrtype(tparent, pool);
     talloc_set_destructor(pool, image_pool_destructor);
-    *pool = (struct mp_image_pool) {
-        .max_count = max_count,
-    };
+    *pool = (struct mp_image_pool) {0};
     return pool;
 }
 
@@ -188,8 +187,11 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
         return mp_image_alloc(fmt, w, h);
     struct mp_image *new = mp_image_pool_get_no_alloc(pool, fmt, w, h);
     if (!new) {
-        if (pool->num_images >= pool->max_count)
+        if (fmt != pool->fmt || w != pool->w || h != pool->h)
             mp_image_pool_clear(pool);
+        pool->fmt = fmt;
+        pool->w = w;
+        pool->h = h;
         if (pool->allocator) {
             new = pool->allocator(pool->allocator_ctx, fmt, w, h);
         } else {

@@ -546,8 +546,8 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->opts = vd->opts;
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_devs = vd->hwdec_devs;
-    ctx->hwdec_swpool = talloc_steal(ctx, mp_image_pool_new(17));
-    ctx->dr_pool = talloc_steal(ctx, mp_image_pool_new(INT_MAX));
+    ctx->hwdec_swpool = mp_image_pool_new(ctx);
+    ctx->dr_pool = mp_image_pool_new(ctx);
 
     pthread_mutex_init(&ctx->dr_lock, NULL);
 

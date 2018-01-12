@@ -412,7 +412,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     p->params = *in;
     p->out_params = *out;
 
-    p->pool = mp_image_pool_new(20);
+    p->pool = mp_image_pool_new(vf);
     mp_image_pool_set_allocator(p->pool, alloc_pool, vf);
     mp_image_pool_set_lru(p->pool);
 

@@ -233,7 +233,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         .log = mp_log_new(vf, c->log, name),
         .hwdec_devs = c->hwdec_devs,
         .query_format = vf_default_query_format,
-        .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
+        .out_pool = mp_image_pool_new(vf),
         .chain = c,
     };
     struct m_config *config =
