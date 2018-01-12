@@ -63,6 +63,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_size = af->priv_size,
         .priv_defaults = af->priv_defaults,
         .options = af->options,
+        .set_defaults = af->set_defaults,
         .p = af,
     };
     return true;
@@ -170,7 +171,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .out_pool = mp_audio_pool_create(af),
     };
     struct m_config *config =
-        m_config_from_obj_desc_and_args(af, s->log, NULL, &desc,
+        m_config_from_obj_desc_and_args(af, s->log, s->global, &desc,
                                         name, s->opts->af_defs, args);
     if (!config)
         goto error;

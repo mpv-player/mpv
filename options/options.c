@@ -94,6 +94,8 @@ extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options android_conf;
 
+extern const struct m_sub_options resample_config;
+
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
@@ -474,7 +476,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("audio-samplerate", force_srate, UPDATE_AUDIO, 1000, 16*48000),
     OPT_CHANNELS("audio-channels", audio_output_channels, UPDATE_AUDIO),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, UPDATE_AUDIO),
-    OPT_FLAG("audio-normalize-downmix", audio_normalize, UPDATE_AUDIO),
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE, .min = 0.01, .max = 100.0),
 
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
@@ -690,6 +691,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("screenshot-directory", screenshot_directory, M_OPT_FILE),
 
     OPT_STRING("record-file", record_file, M_OPT_FILE),
+
+    OPT_SUBSTRUCT("", resample_opts, resample_config, 0),
 
     OPT_SUBSTRUCT("", input_opts, input_config, 0),
 

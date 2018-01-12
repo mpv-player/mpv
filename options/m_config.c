@@ -194,11 +194,18 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
     return config;
 }
 
-struct m_config *m_config_from_obj_desc(void *talloc_ctx, struct mp_log *log,
-                                        struct m_obj_desc *desc)
+static struct m_config *m_config_from_obj_desc(void *talloc_ctx,
+                                               struct mp_log *log,
+                                               struct mpv_global *global,
+                                               struct m_obj_desc *desc)
 {
-    return m_config_new(talloc_ctx, log, desc->priv_size, desc->priv_defaults,
-                        desc->options);
+    struct m_config *c =
+        m_config_new(talloc_ctx, log, desc->priv_size, desc->priv_defaults,
+                     desc->options);
+    c->global = global;
+    if (desc->set_defaults && c->global)
+        desc->set_defaults(c->global, c->optstruct);
+    return c;
 }
 
 // Like m_config_from_obj_desc(), but don't allocate option struct.
@@ -260,7 +267,7 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
     const char *name, struct m_obj_settings *defaults, char **args)
 {
-    struct m_config *config = m_config_from_obj_desc(ta_parent, log, desc);
+    struct m_config *config = m_config_from_obj_desc(ta_parent, log, global, desc);
 
     for (int n = 0; defaults && defaults[n].name; n++) {
         struct m_obj_settings *entry = &defaults[n];

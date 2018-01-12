@@ -23,8 +23,10 @@ struct mp_resample_opts {
     .filter_size = 16,          \
     .cutoff      = 0.0,         \
     .phase_shift = 10,          \
-    .normalize   = -1,          \
+    .normalize   = 0,           \
     }
+
+extern const struct m_sub_options resample_config;
 
 struct mp_aconverter *mp_aconverter_create(struct mpv_global *global,
                                            struct mp_log *log,

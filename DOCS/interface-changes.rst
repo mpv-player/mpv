@@ -25,6 +25,8 @@ Interface changes
     - fix --external-files: strictly never select any tracks from them, unless
       explicitly selected (this may or may not be expected)
     - --ytdl is now always enabled, even for libmpv
+    - add a number of --audio-resample-* options, which should from now on be
+      used instead of --af-defaults=lavrresample:...
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

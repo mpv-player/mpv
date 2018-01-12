@@ -123,9 +123,6 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
 // mpv_global. Expected to be called at early init on the main m_config.
 void m_config_create_shadow(struct m_config *config);
 
-struct m_config *m_config_from_obj_desc(void *talloc_ctx, struct mp_log *log,
-                                        struct m_obj_desc *desc);
-
 struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct mp_log *log,
                                                 struct m_obj_desc *desc);
