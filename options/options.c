@@ -486,10 +486,12 @@ const m_option_t mp_opts[] = {
 // ------------------------- codec/vfilter options --------------------
 
 #if HAVE_LIBAF
-    OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list, ),
+    OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list,
+                     .deprecation_message = "use --af + enable/disable flags"),
     OPT_SETTINGSLIST("af", af_settings, 0, &af_obj_list, ),
 #endif
-    OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list, ),
+    OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list,
+                     .deprecation_message = "use --vf + enable/disable flags"),
     OPT_SETTINGSLIST("vf", vf_settings, 0, &vf_obj_list, ),
 
     OPT_FLAG("deinterlace", deinterlace, UPDATE_DEINT),

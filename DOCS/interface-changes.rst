@@ -27,6 +27,12 @@ Interface changes
     - --ytdl is now always enabled, even for libmpv
     - add a number of --audio-resample-* options, which should from now on be
       used instead of --af-defaults=lavrresample:...
+    - deprecate --vf-defaults and --af-defaults. These didn't work with the
+      lavfi bridge, so they have very little use left. The only potential use
+      is with af_lavrresample (going to be deprecated, --audio-resample-... set
+      its defaults), and various hw deinterlacing filters (like vf_vavpp), for
+      which you will have to stop using --deinterlace=yes, and instead use the
+      vf toggle commands and the filter enable/disable flag to customize it.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
