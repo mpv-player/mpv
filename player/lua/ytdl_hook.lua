@@ -366,9 +366,15 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
         local es, json, result = exec(command)
 
         if (es < 0) or (json == nil) or (json == "") then
-            if not result.killed_by_us then
-                msg.error("youtube-dl failed")
+            local err = "youtube-dl failed: "
+            if result.error and result.error == "init" then
+                err = err .. "not found or not enough permissions"
+            elseif not result.killed_by_us then
+                err = err .. "unexpected error ocurred"
+            else
+                err = string.format("%s returned '%d'", err, es)
             end
+            msg.error(err)
             return
         end
 
