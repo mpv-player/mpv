@@ -106,6 +106,7 @@ local state = {
     enabled = true,
     input_enabled = true,
     showhide_enabled = false,
+    dmx_cache = 0,
 }
 
 
@@ -1839,28 +1840,24 @@ function osc_init()
     ne = new_element("cache", "button")
 
     ne.content = function ()
-        local dmx_cache = mp.get_property_number("demuxer-cache-duration")
-        local cache_used = mp.get_property_number("cache-used")
-        local dmx_cache_state = mp.get_property_native("demuxer-cache-state", {})
-        local is_network = mp.get_property_native("demuxer-via-network")
-        local show_cache = cache_used and not dmx_cache_state["eof"]
-        if dmx_cache then
-            dmx_cache = string.format("%3.0fs", dmx_cache)
-        end
-        if dmx_cache_state["fw-bytes"] then
-            cache_used = (cache_used or 0)*1024 + dmx_cache_state["fw-bytes"]
-        end
-        if (is_network and dmx_cache) or show_cache then
-            -- Only show dmx-cache-duration by itself if it's a network file.
-            -- Cache can be forced even for local files, so always show that.
-            return string.format("Cache: %s%s%s",
-                (dmx_cache and dmx_cache or ""),
-                ((dmx_cache and show_cache) and " | " or ""),
-                (show_cache and
-                    utils.format_bytes_humanized(cache_used) or ""))
-        else
+        local cache_state = mp.get_property_native("demuxer-cache-state", {})
+        if not (cache_state["seekable-ranges"] and
+            #cache_state["seekable-ranges"] > 0) then
+            -- probably not a network stream
             return ""
         end
+        local dmx_cache = mp.get_property_number("demuxer-cache-duration")
+        if dmx_cache and (dmx_cache > state.dmx_cache * 1.1 or
+                dmx_cache < state.dmx_cache * 0.9) then
+            state.dmx_cache = dmx_cache
+        else
+            dmx_cache = state.dmx_cache
+        end
+        local min = math.floor(dmx_cache / 60)
+        local sec = dmx_cache % 60
+        return "Cache: " .. (min > 0 and
+            string.format("%sm%02.0fs", min, sec) or
+            string.format("%3.0fs", dmx_cache))
     end
 
     -- volume
