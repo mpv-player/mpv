@@ -198,7 +198,8 @@ static bool recreate_dispmanx(struct ra_ctx *ctx)
 
     ctx->vo->dwidth = p->w;
     ctx->vo->dheight = p->h;
-    ra_gl_ctx_resize(ctx->swapchain, p->w, p->h, 0);
+    if (ctx->swapchain)
+        ra_gl_ctx_resize(ctx->swapchain, p->w, p->h, 0);
 
     ctx->vo->want_redraw = true;
 
@@ -247,6 +248,7 @@ static bool rpi_init(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         goto fail;
 
+    ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
     return true;
 
 fail:
