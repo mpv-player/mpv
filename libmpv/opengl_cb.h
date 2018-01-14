@@ -53,9 +53,10 @@ extern "C" {
  * pointers returned by the get_proc_address callback in mpv_opengl_cb_init_gl.
  * Generally, mpv will not load the system OpenGL library when using this API.
  *
- * Only "desktop" OpenGL version 2.1 or later is supported. With OpenGL 2.1,
- * the GL_ARB_texture_rg is required. The renderer was written against
- * OpenGL 3.x core profile, with additional support for OpenGL 2.1.
+ * Only "desktop" OpenGL version 2.1 and later and OpenGL ES version 2.0 and
+ * later are supported. With OpenGL 2.1, the GL_ARB_texture_rg is required. The
+ * renderer was written for the OpenGL 3.x core profile, with additional support
+ * for OpenGL 2.1 and OpenGL ES 2.0.
  *
  * Note that some hardware decoding interop API (as set with the "hwdec" option)
  * may actually access
