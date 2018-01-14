@@ -197,9 +197,9 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
     saddf(&line, ": ");
 
     // Playback position
-    sadd_hhmmssff(&line, get_playback_time(mpctx), mpctx->opts->osd_fractions);
+    sadd_hhmmssff(&line, get_playback_time(mpctx), opts->osd_fractions);
     saddf(&line, " / ");
-    sadd_hhmmssff(&line, get_time_length(mpctx), mpctx->opts->osd_fractions);
+    sadd_hhmmssff(&line, get_time_length(mpctx), opts->osd_fractions);
 
     sadd_percentage(&line, get_percent_pos(mpctx));
 
