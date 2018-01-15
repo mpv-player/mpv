@@ -590,10 +590,18 @@ Program Behavior
     There is no sanity checking so it's possible to break things (i.e.
     passing invalid parameters to youtube-dl).
 
+    You can also use this to pass the proxy option for youtube-dl/mpv
+    to use it for the parsed URLs. At this point, FFmpeg/libav only support
+    plain http proxies for plain http links, so https/SOCKS proxies will only
+    be used by youtube-dl. You also need to consider special escaping for the
+    colons, if not using -append.
+
     .. admonition:: Example
 
         - ``--ytdl-raw-options=username=user,password=pass``
         - ``--ytdl-raw-options=force-ipv6=``
+        - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
+        - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
 
 ``--load-stats-overlay=<yes|no>``
     Enable the builtin script that shows useful playback information on a key
