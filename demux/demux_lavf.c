@@ -149,6 +149,7 @@ static const struct format_hack format_hacks[] = {
     {"mp3", NULL,         24, .max_probe = true},
 
     {"hls", .no_stream = true, .clear_filepos = true},
+    {"dash", .no_stream = true, .clear_filepos = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
 
