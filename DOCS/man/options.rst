@@ -590,10 +590,18 @@ Program Behavior
     There is no sanity checking so it's possible to break things (i.e.
     passing invalid parameters to youtube-dl).
 
+    A proxy URL can be passed for youtube-dl to use it in parsing the website.
+    This is useful for geo-restricted URLs. After youtube-dl parsing, some
+    URLs also require a proxy for playback, so this can pass that proxy
+    information to mpv. Take note that SOCKS proxies aren't supported and
+    https URLs also bypass the proxy. This is a limitation in FFmpeg.
+
     .. admonition:: Example
 
         - ``--ytdl-raw-options=username=user,password=pass``
         - ``--ytdl-raw-options=force-ipv6=``
+        - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
+        - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
 
 ``--load-stats-overlay=<yes|no>``
     Enable the builtin script that shows useful playback information on a key
