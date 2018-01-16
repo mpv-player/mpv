@@ -1437,8 +1437,10 @@ bool m_config_is_in_group(struct m_config *config,
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group)
 {
-    assert(ta_parent); // without you'd necessarily leak memory
-    struct m_config_cache *cache = m_config_cache_alloc(ta_parent, global, group);
+    struct m_config_cache *cache = m_config_cache_alloc(NULL, global, group);
+    // Make talloc_free(cache->opts) free the entire cache.
+    ta_set_parent(cache->opts, ta_parent);
+    ta_set_parent(cache, cache->opts);
     return cache->opts;
 }
 
