@@ -244,5 +244,6 @@ char **mp_imgfmt_name_list(void);
 int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags);
 
 int mp_imgfmt_select_best(int dst1, int dst2, int src);
+int mp_imgfmt_select_best_list(int *dst, int num_dst, int src);
 
 #endif /* MPLAYER_IMG_FORMAT_H */
