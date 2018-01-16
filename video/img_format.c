@@ -486,6 +486,15 @@ int mp_imgfmt_select_best(int dst1, int dst2, int src)
     return pixfmt2imgfmt(avcodec_find_best_pix_fmt_of_list(dstlist, srcpxf, 1, 0));
 }
 
+// Same as mp_imgfmt_select_best(), but with a list of dst formats.
+int mp_imgfmt_select_best_list(int *dst, int num_dst, int src)
+{
+    int best = 0;
+    for (int n = 0; n < num_dst; n++)
+        best = best ? mp_imgfmt_select_best(best, dst[n], src) : dst[n];
+    return best;
+}
+
 #if 0
 
 #include <libavutil/frame.h>
