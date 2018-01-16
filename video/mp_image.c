@@ -620,11 +620,12 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
         if (p->hw_flags)
             mp_snprintf_cat(b, bs, "[0x%x]", p->hw_flags);
-        mp_snprintf_cat(b, bs, " %s/%s/%s/%s",
+        mp_snprintf_cat(b, bs, " %s/%s/%s/%s/%s",
                         m_opt_choice_str(mp_csp_names, p->color.space),
                         m_opt_choice_str(mp_csp_prim_names, p->color.primaries),
                         m_opt_choice_str(mp_csp_trc_names, p->color.gamma),
-                        m_opt_choice_str(mp_csp_levels_names, p->color.levels));
+                        m_opt_choice_str(mp_csp_levels_names, p->color.levels),
+                        m_opt_choice_str(mp_csp_light_names, p->color.light));
         if (p->color.sig_peak)
             mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
@@ -868,6 +869,9 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         dst->params.rotate = p->rotate;
         dst->params.stereo_in = p->stereo_in;
         dst->params.stereo_out = p->stereo_out;
+        dst->params.spherical = p->spherical;
+        // Might be incorrect if colorspace changes.
+        dst->params.color.light = p->color.light;
     }
 
 #if LIBAVUTIL_VERSION_MICRO >= 100
@@ -964,6 +968,14 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         if (!sd)
             abort();
         new_ref->icc_profile = NULL;
+    }
+
+    if (src->params.color.sig_peak) {
+        AVContentLightMetadata *clm =
+            av_content_light_metadata_create_side_data(dst);
+        if (!clm)
+            abort();
+        clm->MaxCLL = src->params.color.sig_peak * MP_REF_WHITE;
     }
 #endif
 
