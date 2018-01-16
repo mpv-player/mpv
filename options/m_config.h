@@ -325,8 +325,6 @@ bool m_config_cache_update(struct m_config_cache *cache);
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
 // with a snapshot of the current option values.
-// Warning: does currently not set the child as its own talloc root, which
-//          means the only way to free the struct is by freeing ta_parent.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
 
