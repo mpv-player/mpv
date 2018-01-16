@@ -40,8 +40,6 @@
 #include "sws_utils.h"
 #include "fmt-conversion.h"
 
-#include "video/filter/vf.h"
-
 const struct m_opt_choice_alternatives mp_spherical_names[] = {
     {"auto",        MP_SPHERICAL_AUTO},
     {"none",        MP_SPHERICAL_NONE},

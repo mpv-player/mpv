@@ -41,7 +41,6 @@
 #include "vd.h"
 #include "video/hwdec.h"
 #include "video/img_format.h"
-#include "video/filter/vf.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 #include "video/decode/dec_video.h"
