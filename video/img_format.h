@@ -231,7 +231,7 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 }
 
 #define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
-#define IMGFMT_IS_HWACCEL(fmt) (mp_imgfmt_get_desc(fmt).flags & MP_IMGFLAG_HWACCEL)
+#define IMGFMT_IS_HWACCEL(fmt) (!!(mp_imgfmt_get_desc(fmt).flags & MP_IMGFLAG_HWACCEL))
 
 int mp_imgfmt_from_name(bstr name);
 char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);
