@@ -3,21 +3,25 @@
 
 #include <stdbool.h>
 
+#include "filters/filter.h"
+
 // A helper for deinterlacers which require past/future reference frames.
 
 struct mp_refqueue;
 
-struct mp_refqueue *mp_refqueue_alloc(void);
-void mp_refqueue_free(struct mp_refqueue *q);
+struct mp_refqueue *mp_refqueue_alloc(struct mp_filter *f);
+
+void mp_refqueue_add_in_format(struct mp_refqueue *q, int fmt, int subfmt);
 
 void mp_refqueue_set_refs(struct mp_refqueue *q, int past, int future);
 void mp_refqueue_flush(struct mp_refqueue *q);
-void mp_refqueue_add_input(struct mp_refqueue *q, struct mp_image *img);
-bool mp_refqueue_need_input(struct mp_refqueue *q);
-bool mp_refqueue_has_output(struct mp_refqueue *q);
-void mp_refqueue_next(struct mp_refqueue *q);
-void mp_refqueue_next_field(struct mp_refqueue *q);
 struct mp_image *mp_refqueue_get(struct mp_refqueue *q, int pos);
+
+struct mp_image *mp_refqueue_execute_reinit(struct mp_refqueue *q);
+bool mp_refqueue_can_output(struct mp_refqueue *q);
+void mp_refqueue_write_out_pin(struct mp_refqueue *q, struct mp_image *mpi);
+
+struct mp_image *mp_refqueue_get_format(struct mp_refqueue *q);
 
 enum {
     MP_MODE_DEINT = (1 << 0),           // deinterlacing enabled

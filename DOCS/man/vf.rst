@@ -110,9 +110,7 @@ Available mpv-only filters are:
 
     ``<fmt>``
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
-    ``<outfmt>``
-        Format name that should be substituted for the output. If they do not
-        have the same bytes per pixel and chroma subsampling, it will fail.
+
     ``<colormatrix>``
         Controls the YUV to RGB color space conversion when playing video. There
         are various standards. Normally, BT.601 should be used for SD video, and

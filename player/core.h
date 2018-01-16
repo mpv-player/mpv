@@ -26,6 +26,8 @@
 #include "libmpv/client.h"
 
 #include "common/common.h"
+#include "filters/filter.h"
+#include "filters/f_output_chain.h"
 #include "options/options.h"
 #include "sub/osd.h"
 #include "audio/aframe.h"
@@ -172,14 +174,13 @@ struct vo_chain {
     struct mp_hwdec_devices *hwdec_devs;
     double container_fps;
 
-    struct vf_chain *vf;
+    struct mp_output_chain *filter;
+
+    //struct vf_chain *vf;
     struct vo *vo;
 
     // 1-element input frame queue.
     struct mp_image *input_mpi;
-
-    // Last known input_mpi format (so vf can be reinitialized any time).
-    struct mp_image_params input_format;
 
     struct track *track;
     struct lavfi_pad *filter_src;
@@ -318,6 +319,8 @@ typedef struct MPContext {
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
     struct lavfi *lavfi;
+
+    struct mp_filter *filter_root;
 
     struct ao *ao;
     struct mp_aframe *ao_decoder_fmt; // for weak gapless audio check
@@ -631,6 +634,5 @@ void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
-void recreate_auto_filters(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

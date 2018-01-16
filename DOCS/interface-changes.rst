@@ -36,6 +36,13 @@ Interface changes
     - deprecate --af=lavrresample. Use the ``--audio-resample-...`` options to
       customize resampling, or the libavfilter ``--af=aresample`` filter.
     - add --osd-on-seek
+    - remove outfmt sub-parameter from "format" video filter (no replacement)
+    - some behavior changes in the video filter chain, including:
+        - before, using an incompatible filter with hwdec would disable hwdec;
+          now it disables the filter at runtime instead
+        - inserting an incompatible filter with hwdec at runtime would refuse
+          to insert the filter; now it will add it successfully, but disables
+          the filter slightly later
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

@@ -29,11 +29,13 @@
 
 #include "config.h"
 #include "common/msg.h"
+#include "filters/filter.h"
+#include "filters/filter_internal.h"
+#include "filters/user_filters.h"
 #include "options/options.h"
-
 #include "video/img_format.h"
 #include "video/mp_image.h"
-#include "vf.h"
+#include "video/mp_image_pool.h"
 #include "sub/osd.h"
 #include "sub/dec_sub.h"
 
@@ -41,112 +43,121 @@
 
 #include "options/m_option.h"
 
-struct vf_priv_s {
-    int opt_top_margin, opt_bottom_margin;
-
-    int outh, outw;
-
-    struct osd_state *osd;
-    struct mp_osd_res dim;
+struct vf_sub_opts {
+    int top_margin, bottom_margin;
 };
 
-static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
-                    struct mp_image_params *out)
+struct priv {
+    struct vf_sub_opts *opts;
+    struct mp_image_pool *pool;
+};
+
+static void vf_sub_process(struct mp_filter *f)
 {
-    int width = in->w, height = in->h;
+    struct priv *priv = f->priv;
 
-    vf->priv->outh = height + vf->priv->opt_top_margin +
-                     vf->priv->opt_bottom_margin;
-    vf->priv->outw = width;
+    if (!mp_pin_can_transfer_data(f->ppins[1], f->ppins[0]))
+        return;
 
-    vf->priv->dim = (struct mp_osd_res) {
-        .w = vf->priv->outw,
-        .h = vf->priv->outh,
-        .mt = vf->priv->opt_top_margin,
-        .mb = vf->priv->opt_bottom_margin,
-        .display_par = in->p_w / (double)in->p_h,
-    };
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
-    *out = *in;
-    out->w = vf->priv->outw;
-    out->h = vf->priv->outh;
-    return 0;
-}
-
-static void prepare_image(struct vf_instance *vf, struct mp_image *dmpi,
-                          struct mp_image *mpi)
-{
-    int y1 = MP_ALIGN_DOWN(vf->priv->opt_top_margin, mpi->fmt.align_y);
-    int y2 = MP_ALIGN_DOWN(y1 + mpi->h, mpi->fmt.align_y);
-    struct mp_image cropped = *dmpi;
-    mp_image_crop(&cropped, 0, y1, mpi->w, y1 + mpi->h);
-    mp_image_copy(&cropped, mpi);
-    mp_image_clear(dmpi, 0, 0, dmpi->w, y1);
-    mp_image_clear(dmpi, 0, y2, dmpi->w, vf->priv->outh);
-}
-
-static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
-{
-    struct vf_priv_s *priv = vf->priv;
-    struct osd_state *osd = priv->osd;
-
-    if (vf->priv->opt_top_margin || vf->priv->opt_bottom_margin) {
-        struct mp_image *dmpi = vf_alloc_out_image(vf);
-        if (!dmpi)
-            return NULL;
-        mp_image_copy_attributes(dmpi, mpi);
-        prepare_image(vf, dmpi, mpi);
-        talloc_free(mpi);
-        mpi = dmpi;
+    if (mp_frame_is_signaling(frame)) {
+        mp_pin_in_write(f->ppins[1], frame);
+        return;
     }
+
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+    struct osd_state *osd = info ? info->osd : NULL;
 
     if (!osd)
-        return mpi;
+        goto error;
 
-    osd_draw_on_image_p(osd, priv->dim, mpi->pts, OSD_DRAW_SUB_FILTER,
-                        vf->out_pool, mpi);
+    osd_set_render_subs_in_filter(osd, true);
 
-    return mpi;
-}
+    if (frame.type != MP_FRAME_VIDEO)
+        goto error;
 
-static int query_format(struct vf_instance *vf, unsigned int fmt)
-{
-    if (!mp_sws_supported_format(fmt))
-        return 0;
-    return vf_next_query_format(vf, fmt);
-}
+    struct mp_image *mpi = frame.data;
 
-static int control(vf_instance_t *vf, int request, void *data)
-{
-    switch (request) {
-    case VFCTRL_INIT_OSD:
-        vf->priv->osd = data;
-        return CONTROL_TRUE;
+    if (!mp_sws_supported_format(mpi->imgfmt))
+        goto error;
+
+    struct mp_osd_res dim = {
+        .w = mpi->w,
+        .h = mpi->h + priv->opts->top_margin + priv->opts->bottom_margin,
+        .mt = priv->opts->top_margin,
+        .mb = priv->opts->bottom_margin,
+        .display_par = mpi->params.p_w / (double)mpi->params.p_h,
+    };
+
+    if (dim.w != mpi->w || dim.h != mpi->h) {
+        struct mp_image *dmpi =
+            mp_image_pool_get(priv->pool, mpi->imgfmt, dim.w, dim.h);
+        if (!dmpi)
+            goto error;
+        mp_image_copy_attributes(dmpi, mpi);
+        int y1 = MP_ALIGN_DOWN(priv->opts->top_margin, mpi->fmt.align_y);
+        int y2 = MP_ALIGN_DOWN(y1 + mpi->h, mpi->fmt.align_y);
+        struct mp_image cropped = *dmpi;
+        mp_image_crop(&cropped, 0, y1, mpi->w, y1 + mpi->h);
+        mp_image_copy(&cropped, mpi);
+        mp_image_clear(dmpi, 0, 0, dmpi->w, y1);
+        mp_image_clear(dmpi, 0, y2, dmpi->w, dim.h);
+        mp_frame_unref(&frame);
+        mpi = dmpi;
+        frame = (struct mp_frame){MP_FRAME_VIDEO, mpi};
     }
-    return CONTROL_UNKNOWN;
+
+    osd_draw_on_image_p(osd, dim, mpi->pts, OSD_DRAW_SUB_FILTER, priv->pool, mpi);
+
+    mp_pin_in_write(f->ppins[1], frame);
+    return;
+
+error:
+    MP_ERR(f, "unsupported format, missing OSD, or failed allocation\n");
+    mp_frame_unref(&frame);
+    mp_filter_internal_mark_failed(f);
 }
 
-static int vf_open(vf_instance_t *vf)
+static const struct mp_filter_info vf_sub_filter = {
+    .name = "sub",
+    .process = vf_sub_process,
+    .priv_size = sizeof(struct priv),
+};
+
+static struct mp_filter *vf_sub_create(struct mp_filter *parent, void *options)
 {
-    MP_WARN(vf, "This filter is deprecated and will be removed (no replacement)\n");
-    vf->reconfig = reconfig;
-    vf->query_format = query_format;
-    vf->control   = control;
-    vf->filter    = filter;
-    return 1;
+    struct mp_filter *f = mp_filter_create(parent, &vf_sub_filter);
+    if (!f) {
+        talloc_free(options);
+        return NULL;
+    }
+
+    MP_WARN(f, "This filter is deprecated and will be removed (no replacement)\n");
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct priv *priv = f->priv;
+    priv->opts = talloc_steal(priv, options);
+    priv->pool = mp_image_pool_new(priv);
+
+    return f;
 }
 
-#define OPT_BASE_STRUCT struct vf_priv_s
+#define OPT_BASE_STRUCT struct vf_sub_opts
 static const m_option_t vf_opts_fields[] = {
-    OPT_INTRANGE("bottom-margin", opt_bottom_margin, 0, 0, 2000),
-    OPT_INTRANGE("top-margin", opt_top_margin, 0, 0, 2000),
+    OPT_INTRANGE("bottom-margin", bottom_margin, 0, 0, 2000),
+    OPT_INTRANGE("top-margin", top_margin, 0, 0, 2000),
     {0}
 };
 
-const vf_info_t vf_info_sub = {
-    .description = "Render subtitles",
-    .name = "sub",
-    .open = vf_open,
-    .priv_size = sizeof(struct vf_priv_s),
-    .options = vf_opts_fields,
+const struct mp_user_filter_entry vf_sub = {
+    .desc = {
+        .description = "Render subtitles",
+        .name = "sub",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .options = vf_opts_fields,
+    },
+    .create = vf_sub_create,
 };

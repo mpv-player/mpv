@@ -39,7 +39,6 @@
 #include "stream/stream.h"
 #include "sub/osd.h"
 #include "video/hwdec.h"
-#include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
@@ -48,8 +47,6 @@
 #include "core.h"
 #include "command.h"
 #include "screenshot.h"
-
-#define VF_DEINTERLACE_LABEL "deinterlace"
 
 enum {
     // update_video() - code also uses: <0 error, 0 eof, >0 progress
@@ -68,129 +65,13 @@ static const char av_desync_help_text[] =
 "position will not match to the video (see A-V status field).\n"
 "\n";
 
-static void set_allowed_vo_formats(struct vo_chain *vo_c)
-{
-    vo_query_formats(vo_c->vo, vo_c->vf->allowed_output_formats);
-}
-
-static int try_filter(struct vo_chain *vo_c, char *name, char *label, char **args)
-{
-    struct vf_instance *vf = vf_append_filter(vo_c->vf, name, args);
-    if (!vf)
-        return -1;
-
-    vf->label = talloc_strdup(vf, label);
-
-    if (vf_reconfig(vo_c->vf, &vo_c->input_format) < 0) {
-        vf_remove_filter(vo_c->vf, vf);
-        // restore
-        vf_reconfig(vo_c->vf, &vo_c->input_format);
-        return -1;
-    }
-    return 0;
-}
-
-static bool check_output_format(struct vo_chain *vo_c, int imgfmt)
-{
-    return vo_c->vf->output_params.imgfmt == imgfmt;
-}
-
-static int probe_deint_filters(struct vo_chain *vo_c)
-{
-    if (check_output_format(vo_c, IMGFMT_VDPAU)) {
-        char *args[5] = {"deint", "yes"};
-        int pref = 0;
-        vo_control(vo_c->vo, VOCTRL_GET_PREF_DEINT, &pref);
-        pref = pref < 0 ? -pref : pref;
-        if (pref > 0 && pref <= 4) {
-            const char *types[] =
-                {"", "first-field", "bob", "temporal", "temporal-spatial"};
-            args[2] = "deint-mode";
-            args[3] = (char *)types[pref];
-        }
-
-        return try_filter(vo_c, "vdpaupp", VF_DEINTERLACE_LABEL, args);
-    }
-    if (check_output_format(vo_c, IMGFMT_VAAPI))
-        return try_filter(vo_c, "vavpp", VF_DEINTERLACE_LABEL, NULL);
-    if (check_output_format(vo_c, IMGFMT_D3D11VA) ||
-        check_output_format(vo_c, IMGFMT_D3D11NV12))
-        return try_filter(vo_c, "d3d11vpp", VF_DEINTERLACE_LABEL, NULL);
-    char *args[] = {"mode", "send_field", "deint", "interlaced", NULL};
-    return try_filter(vo_c, "yadif", VF_DEINTERLACE_LABEL, args);
-}
-
-// Reconfigure the filter chain according to the new input format.
-static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
-{
-    struct mp_image_params params = vo_c->input_format;
-    if (!params.imgfmt)
-        return;
-
-    set_allowed_vo_formats(vo_c);
-
-    char *filters[] = {"autorotate", "deinterlace", NULL};
-    for (int n = 0; filters[n]; n++) {
-        struct vf_instance *vf = vf_find_by_label(vo_c->vf, filters[n]);
-        if (vf)
-            vf_remove_filter(vo_c->vf, vf);
-    }
-
-    if (vo_c->vf->initialized < 1) {
-        if (vf_reconfig(vo_c->vf, &params) < 0)
-            return;
-    }
-
-    if (params.rotate) {
-        if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90) || params.rotate % 90) {
-            // Try to insert a rotation filter.
-            double angle = params.rotate / 360.0 * M_PI * 2;
-            char *args[] = {"angle", mp_tprintf(30, "%f", angle),
-                            "ow", mp_tprintf(30, "rotw(%f)", angle),
-                            "oh", mp_tprintf(30, "roth(%f)", angle),
-                            NULL};
-            if (try_filter(vo_c, "rotate", "autorotate", args) < 0)
-                MP_ERR(vo_c, "Can't insert rotation filter.\n");
-        }
-    }
-
-    if (mpctx->opts->deinterlace)
-        probe_deint_filters(vo_c);
-}
-
-void recreate_auto_filters(struct MPContext *mpctx)
-{
-    if (!mpctx->vo_chain)
-        return;
-
-    filter_reconfig(mpctx, mpctx->vo_chain);
-
-    mp_force_video_refresh(mpctx);
-
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-}
-
-static void recreate_video_filters(struct MPContext *mpctx)
+static bool recreate_video_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
     assert(vo_c);
 
-    vf_destroy(vo_c->vf);
-    vo_c->vf = vf_new(mpctx->global);
-    vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
-    vo_c->vf->wakeup_callback = mp_wakeup_core_cb;
-    vo_c->vf->wakeup_callback_ctx = mpctx;
-    vo_c->vf->container_fps = vo_c->container_fps;
-    vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);
-
-    vf_append_filter_list(vo_c->vf, opts->vf_settings);
-
-    // for vf_sub
-    osd_set_render_subs_in_filter(mpctx->osd,
-        vf_control_any(vo_c->vf, VFCTRL_INIT_OSD, mpctx->osd) > 0);
-
-    set_allowed_vo_formats(vo_c);
+    return mp_output_chain_update_filters(vo_c->filter, opts->vf_settings);
 }
 
 int reinit_video_filters(struct MPContext *mpctx)
@@ -199,25 +80,20 @@ int reinit_video_filters(struct MPContext *mpctx)
 
     if (!vo_c)
         return 0;
-    bool need_reconfig = vo_c->vf->initialized != 0;
 
-    recreate_video_filters(mpctx);
-
-    if (need_reconfig)
-        filter_reconfig(mpctx, vo_c);
+    if (!recreate_video_filters(mpctx))
+        return -1;
 
     mp_force_video_refresh(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
-    return vo_c->vf->initialized;
+    return 0;
 }
 
 static void vo_chain_reset_state(struct vo_chain *vo_c)
 {
     mp_image_unrefp(&vo_c->input_mpi);
-    if (vo_c->vf->initialized == 1)
-        vf_seek_reset(vo_c->vf);
     vo_seek_reset(vo_c->vo);
 
     if (vo_c->video_src)
@@ -280,7 +156,7 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
 
     mp_image_unrefp(&vo_c->input_mpi);
     mp_image_unrefp(&vo_c->cached_coverart);
-    vf_destroy(vo_c->vf);
+    talloc_free(vo_c->filter->f);
     talloc_free(vo_c);
     // this does not free the VO
 }
@@ -384,7 +260,10 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     mpctx->vo_chain = vo_c;
     vo_c->log = mpctx->log;
     vo_c->vo = mpctx->video_out;
-    vo_c->vf = vf_new(mpctx->global);
+    vo_c->filter =
+        mp_output_chain_create(mpctx->filter_root, MP_OUTPUT_CHAIN_VIDEO);
+    vo_c->filter->container_fps = vo_c->container_fps;
+    mp_output_chain_set_vo(vo_c->filter, vo_c->vo);
 
     vo_c->hwdec_devs = vo_c->vo->hwdec_devs;
 
@@ -407,7 +286,8 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
         encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, vo_c->container_fps);
 #endif
 
-    recreate_video_filters(mpctx);
+    if (!recreate_video_filters(mpctx))
+        goto err_out;
 
     update_screensaver_state(mpctx);
 
@@ -435,7 +315,7 @@ void mp_force_video_refresh(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
 
-    if (!vo_c || !vo_c->input_format.imgfmt)
+    if (!vo_c)
         return;
 
     // If not paused, the next frame should come soon enough.
@@ -499,68 +379,27 @@ static int decode_image(struct MPContext *mpctx)
     }
 }
 
-// Feed newly decoded frames to the filter, take care of format changes.
-// If eof=true, drain the filter chain, and return VD_EOF if empty.
 static int video_filter(struct MPContext *mpctx, bool eof)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
-    struct vf_chain *vf = vo_c->vf;
 
-    if (vf->initialized < 0)
-        return VD_ERROR;
-
-    // There is already a filtered frame available.
-    // If vf_needs_input() returns > 0, the filter wants input anyway.
-    if (vf_output_frame(vf, eof) > 0 && vf_needs_input(vf) < 1)
-        return VD_PROGRESS;
-
-    // Decoder output is different from filter input?
-    bool need_vf_reconfig = !vf->input_params.imgfmt || vf->initialized < 1 ||
-        !mp_image_params_equal(&vo_c->input_format, &vf->input_params);
-
-    // (If imgfmt==0, nothing was decoded yet, and the format is unknown.)
-    if (need_vf_reconfig && vo_c->input_format.imgfmt) {
-        // Drain the filter chain.
-        if (vf_output_frame(vf, true) > 0)
+    if (vo_c->input_mpi || eof) {
+        struct mp_frame frame = {MP_FRAME_VIDEO, vo_c->input_mpi};
+        if (!vo_c->input_mpi) {
+            frame = MP_EOF_FRAME;
+            if (vo_c->filter->got_input_eof)
+                return vo_c->filter->got_output_eof ? VD_EOF : VD_WAIT;
+        }
+        if (mp_pin_in_needs_data(vo_c->filter->f->pins[0])) {
+            if (osd_get_render_subs_in_filter(mpctx->osd))
+                update_subtitles(mpctx, vo_c->input_mpi->pts);
+            mp_pin_in_write(vo_c->filter->f->pins[0], frame);
+            vo_c->input_mpi = NULL;
             return VD_PROGRESS;
-
-        // The filter chain is drained; execute the filter format change.
-        vf->initialized = 0;
-        filter_reconfig(mpctx, mpctx->vo_chain);
-
-        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-
-        // Most video filters don't work with hardware decoding, so this
-        // might be the reason why filter reconfig failed.
-        if (vf->initialized < 0 && vo_c->video_src &&
-            video_vd_control(vo_c->video_src, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
-                == CONTROL_OK)
-        {
-            // Fallback active; decoder will return software format next
-            // time. Don't abort video decoding.
-            vf->initialized = 0;
-            mp_image_unrefp(&vo_c->input_mpi);
-            vo_c->input_format = (struct mp_image_params){0};
-            MP_VERBOSE(mpctx, "hwdec fallback due to filters.\n");
-            return VD_PROGRESS; // try again
         }
-        if (vf->initialized < 1) {
-            MP_FATAL(mpctx, "Cannot initialize video filters.\n");
-            return VD_ERROR;
-        }
-        return VD_RECONFIG;
     }
 
-    // If something was decoded, and the filter chain is ready, filter it.
-    if (!need_vf_reconfig && vo_c->input_mpi) {
-        if (osd_get_render_subs_in_filter(mpctx->osd))
-            update_subtitles(mpctx, vo_c->input_mpi->pts);
-        vf_filter_frame(vf, vo_c->input_mpi);
-        vo_c->input_mpi = NULL;
-        return VD_PROGRESS;
-    }
-
-    return eof ? VD_EOF : VD_PROGRESS;
+    return VD_WAIT;
 }
 
 // Make sure at least 1 filtered image is available, decode new video if needed.
@@ -589,31 +428,13 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     }
 
     if (vo_c->input_mpi) {
-        vo_c->input_format = vo_c->input_mpi->params;
-        vf_set_proto_frame(vo_c->vf, vo_c->input_mpi);
-
         if (vo_c->is_coverart && !vo_c->cached_coverart)
             vo_c->cached_coverart = mp_image_new_ref(vo_c->input_mpi);
+    } else if (r == VD_EOF) {
+        r = video_filter(mpctx, true);
     }
 
-    bool eof = !vo_c->input_mpi && (r == VD_EOF || r < 0);
-    r = video_filter(mpctx, eof);
-    if (r == VD_RECONFIG) // retry feeding decoded image
-        r = video_filter(mpctx, eof);
     return r;
-}
-
-static int video_feed_async_filter(struct MPContext *mpctx)
-{
-    struct vf_chain *vf = mpctx->vo_chain->vf;
-
-    if (vf->initialized < 0)
-        return VD_ERROR;
-
-    if (vf_needs_input(vf) < 1)
-        return 0;
-    mp_wakeup_core(mpctx); // retry until done
-    return video_decode_and_filter(mpctx);
 }
 
 /* Modify video timing to match the audio timeline. There are two main
@@ -749,16 +570,33 @@ static int video_output_image(struct MPContext *mpctx)
     int r = VD_PROGRESS;
     if (needs_new_frame(mpctx)) {
         // Filter a new frame.
-        r = video_decode_and_filter(mpctx);
-        if (r < 0)
-            return r; // error
-        struct mp_image *img = vf_read_output_frame(vo_c->vf);
+        if (!mp_pin_out_request_data(vo_c->filter->f->pins[1])) {
+            r = video_decode_and_filter(mpctx);
+            if (r < 0)
+                return r; // error
+        }
+        struct mp_image *img = NULL;
+        struct mp_frame frame = mp_pin_out_read(vo_c->filter->f->pins[1]);
+        if (frame.type == MP_FRAME_NONE && vo_c->filter->got_output_eof)
+            frame = MP_EOF_FRAME;
+        if (frame.type == MP_FRAME_NONE)
+            return video_decode_and_filter(mpctx);
+        if (frame.type == MP_FRAME_EOF) {
+            r = VD_EOF;
+        } else if (frame.type == MP_FRAME_VIDEO) {
+            img = frame.data;
+        } else {
+            MP_ERR(mpctx, "unexpected frame type %s\n",
+                   mp_frame_type_str(frame.type));
+            mp_frame_unref(&frame);
+            return VD_ERROR;
+        }
         if (img) {
             double endpts = get_play_end_pts(mpctx);
             if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
                 mpctx->max_frames == 0)
             {
-                vf_unread_output_frame(vo_c->vf, img);
+                mp_pin_out_unread(vo_c->filter->f->pins[1], frame);
                 img = NULL;
                 r = VD_EOF;
             } else if (hrseek && mpctx->hrseek_lastframe) {
@@ -797,6 +635,21 @@ static int video_output_image(struct MPContext *mpctx)
     }
 
     return have_new_frame(mpctx, r <= 0) ? VD_NEW_FRAME : r;
+}
+
+static bool check_for_hwdec_fallback(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+
+    if (!vo_c->filter->failed_output_conversion || !vo_c->video_src)
+        return false;
+
+    if (video_vd_control(vo_c->video_src, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
+                            != CONTROL_OK)
+        return false;
+
+    mp_output_chain_reset_harder(vo_c->filter);
+    return true;
 }
 
 /* Update avsync before a new video frame is displayed. Actually, this can be
@@ -1228,7 +1081,13 @@ void write_video(struct MPContext *mpctx)
     if (!mpctx->vo_chain)
         return;
     struct track *track = mpctx->vo_chain->track;
-    struct vo *vo = mpctx->vo_chain->vo;
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    struct vo *vo = vo_c->vo;
+
+    if (vo_c->filter->reconfig_happened) {
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+        vo_c->filter->reconfig_happened = false;
+    }
 
     // Actual playback starts when both audio and video are ready.
     if (mpctx->video_status == STATUS_READY)
@@ -1247,6 +1106,11 @@ void write_video(struct MPContext *mpctx)
         return;
 
     if (r == VD_EOF) {
+        if (check_for_hwdec_fallback(mpctx))
+            return;
+        if (vo_c->filter->failed_output_conversion)
+            goto error;
+
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
 
@@ -1334,7 +1198,7 @@ void write_video(struct MPContext *mpctx)
     // (NB: in theory, the 1st frame after display sync mode change uses the
     //      wrong waiting mode)
     if (!vo_is_ready_for_frame(vo, mpctx->display_sync_active ? -1 : pts)) {
-        if (video_feed_async_filter(mpctx) < 0)
+        if (video_decode_and_filter(mpctx) < 0)
             goto error;
         return;
     }

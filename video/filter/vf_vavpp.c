@@ -25,8 +25,11 @@
 
 #include "config.h"
 #include "options/options.h"
-#include "vf.h"
+#include "filters/filter.h"
+#include "filters/filter_internal.h"
+#include "filters/user_filters.h"
 #include "refqueue.h"
+
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
@@ -47,10 +50,14 @@ struct pipeline {
     struct surface_refs forward, backward;
 };
 
-struct vf_priv_s {
+struct opts {
     int deint_type;
     int interlaced_only;
     int reversal_bug;
+};
+
+struct priv {
+    struct opts *opts;
     bool do_deint;
     VABufferID buffers[VAProcFilterCount];
     int num_buffers;
@@ -65,15 +72,7 @@ struct vf_priv_s {
     struct mp_refqueue *queue;
 };
 
-static const struct vf_priv_s vf_priv_default = {
-    .config = VA_INVALID_ID,
-    .context = VA_INVALID_ID,
-    .deint_type = 2,
-    .interlaced_only = 1,
-    .reversal_bug = 1,
-};
-
-static void add_surfaces(struct vf_priv_s *p, struct surface_refs *refs, int dir)
+static void add_surfaces(struct priv *p, struct surface_refs *refs, int dir)
 {
     for (int n = 0; n < refs->max_surfaces; n++) {
         struct mp_image *s = mp_refqueue_get(p->queue, (1 + n) * dir);
@@ -96,18 +95,18 @@ static const int deint_algorithm[] = {
     [5] = VAProcDeinterlacingMotionCompensated,
 };
 
-static void flush_frames(struct vf_instance *vf)
+static void flush_frames(struct mp_filter *f)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = f->priv;
     mp_refqueue_flush(p->queue);
 }
 
-static void update_pipeline(struct vf_instance *vf)
+static void update_pipeline(struct mp_filter *vf)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
     VABufferID *filters = p->buffers;
     int num_filters = p->num_buffers;
-    if (p->deint_type && !p->do_deint) {
+    if (p->opts->deint_type && !p->do_deint) {
         filters++;
         num_filters--;
     }
@@ -133,7 +132,7 @@ static void update_pipeline(struct vf_instance *vf)
     p->pipe.num_output_colors = caps.num_output_color_standards;
     p->pipe.forward.max_surfaces = caps.num_forward_references;
     p->pipe.backward.max_surfaces = caps.num_backward_references;
-    if (p->reversal_bug) {
+    if (p->opts->reversal_bug) {
         int max = MPMAX(caps.num_forward_references, caps.num_backward_references);
         mp_refqueue_set_refs(p->queue, max, max);
     } else {
@@ -142,8 +141,8 @@ static void update_pipeline(struct vf_instance *vf)
     }
     mp_refqueue_set_mode(p->queue,
         (p->do_deint ? MP_MODE_DEINT : 0) |
-        (p->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
-        (p->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
+        (p->opts->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
+        (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
     return;
 
 nodeint:
@@ -151,9 +150,25 @@ nodeint:
     mp_refqueue_set_mode(p->queue, 0);
 }
 
-static struct mp_image *alloc_out(struct vf_instance *vf)
+static struct mp_image *alloc_out(struct mp_filter *vf)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
+
+    struct mp_image *fmt = mp_refqueue_get_format(p->queue);
+    if (!fmt || !fmt->hwctx)
+        return NULL;
+
+    AVHWFramesContext *hw_frames = (void *)fmt->hwctx->data;
+    // VAAPI requires the full surface size to match for input and output.
+    int src_w = hw_frames->width;
+    int src_h = hw_frames->height;
+
+    if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ref,
+                                     IMGFMT_VAAPI, IMGFMT_NV12, src_w, src_h))
+    {
+        MP_ERR(vf, "Failed to create hw pool.\n");
+        return NULL;
+    }
 
     AVFrame *av_frame = av_frame_alloc();
     if (!av_frame)
@@ -169,13 +184,13 @@ static struct mp_image *alloc_out(struct vf_instance *vf)
         MP_ERR(vf, "Unknown error.\n");
         return NULL;
     }
-    mp_image_set_size(img, vf->fmt_in.w, vf->fmt_in.h);
+    mp_image_set_size(img, fmt->w, fmt->h);
     return img;
 }
 
-static struct mp_image *render(struct vf_instance *vf)
+static struct mp_image *render(struct mp_filter *vf)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
 
     struct mp_image *in = mp_refqueue_get(p->queue, 0);
     struct mp_image *img = NULL;
@@ -184,7 +199,7 @@ static struct mp_image *render(struct vf_instance *vf)
     VABufferID buffer = VA_INVALID_ID;
 
     VASurfaceID in_id = va_surface_id(in);
-    if (!p->pipe.filters || in_id == VA_INVALID_ID || !p->hw_pool)
+    if (!p->pipe.filters || in_id == VA_INVALID_ID)
         goto cleanup;
 
     img = alloc_out(vf);
@@ -243,7 +258,7 @@ static struct mp_image *render(struct vf_instance *vf)
     param->filters = p->pipe.filters;
     param->num_filters = p->pipe.num_filters;
 
-    int dir = p->reversal_bug ? -1 : 1;
+    int dir = p->opts->reversal_bug ? -1 : 1;
 
     add_surfaces(p, &p->pipe.forward, 1 * dir);
     param->forward_references = p->pipe.forward.surfaces;
@@ -277,108 +292,29 @@ cleanup:
     return NULL;
 }
 
-static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
+static void vf_vavpp_process(struct mp_filter *f)
 {
-    // Since we do no scaling or csp conversion, we can allocate an output
-    // surface for input too.
-    struct mp_image *out = alloc_out(vf);
-    if (!out)
-        return NULL;
-    if (!mp_image_hw_upload(out, in)) {
-        talloc_free(out);
-        return NULL;
-    }
-    mp_image_copy_attributes(out, in);
-    return out;
-}
+    struct priv *p = f->priv;
 
-static int filter_ext(struct vf_instance *vf, struct mp_image *in)
-{
-    struct vf_priv_s *p = vf->priv;
+    update_pipeline(f);
 
-    update_pipeline(vf);
+    mp_refqueue_execute_reinit(p->queue);
 
-    if (in && in->imgfmt != IMGFMT_VAAPI) {
-        struct mp_image *tmp = upload(vf, in);
-        talloc_free(in);
-        in = tmp;
-        if (!in)
-            return -1;
-    }
+    if (!mp_refqueue_can_output(p->queue))
+        return;
 
-    mp_refqueue_add_input(p->queue, in);
-    return 0;
-}
-
-static int filter_out(struct vf_instance *vf)
-{
-    struct vf_priv_s *p = vf->priv;
-
-    if (!mp_refqueue_has_output(p->queue))
-        return 0;
-
-    // no filtering
     if (!p->pipe.num_filters || !mp_refqueue_should_deint(p->queue)) {
+        // no filtering
         struct mp_image *in = mp_refqueue_get(p->queue, 0);
-        vf_add_output_frame(vf, mp_image_new_ref(in));
-        mp_refqueue_next(p->queue);
-        return 0;
-    }
-
-    struct mp_image *out = render(vf);
-    mp_refqueue_next_field(p->queue);
-    if (!out)
-        return -1; // cannot render
-    vf_add_output_frame(vf, out);
-    return 0;
-}
-
-static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
-                    struct mp_image_params *out)
-{
-    struct vf_priv_s *p = vf->priv;
-
-    flush_frames(vf);
-    av_buffer_unref(&p->hw_pool);
-
-    p->params = *in;
-    *out = *in;
-
-    int src_w = in->w;
-    int src_h = in->h;
-
-    if (in->imgfmt == IMGFMT_VAAPI) {
-        if (!vf->in_hwframes_ref)
-            return -1;
-        AVHWFramesContext *hw_frames = (void *)vf->in_hwframes_ref->data;
-        // VAAPI requires the full surface size to match for input and output.
-        src_w = hw_frames->width;
-        src_h = hw_frames->height;
+        mp_refqueue_write_out_pin(p->queue, mp_image_new_ref(in));
     } else {
-        out->imgfmt = IMGFMT_VAAPI;
-        out->hw_subfmt = IMGFMT_NV12;
+        mp_refqueue_write_out_pin(p->queue, render(f));
     }
-
-    p->hw_pool = av_hwframe_ctx_alloc(p->av_device_ref);
-    if (!p->hw_pool)
-        return -1;
-    AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
-    hw_frames->format = AV_PIX_FMT_VAAPI;
-    hw_frames->sw_format = imgfmt2pixfmt(out->hw_subfmt);
-    hw_frames->width = src_w;
-    hw_frames->height = src_h;
-    if (av_hwframe_ctx_init(p->hw_pool) < 0) {
-        MP_ERR(vf, "Failed to initialize libavutil vaapi frames pool.\n");
-        av_buffer_unref(&p->hw_pool);
-        return -1;
-    }
-
-    return 0;
 }
 
-static void uninit(struct vf_instance *vf)
+static void uninit(struct mp_filter *vf)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
     for (int i = 0; i < p->num_buffers; i++)
         vaDestroyBuffer(p->display, p->buffers[i]);
     if (p->context != VA_INVALID_ID)
@@ -387,41 +323,23 @@ static void uninit(struct vf_instance *vf)
         vaDestroyConfig(p->display, p->config);
     av_buffer_unref(&p->hw_pool);
     flush_frames(vf);
-    mp_refqueue_free(p->queue);
+    talloc_free(p->queue);
     av_buffer_unref(&p->av_device_ref);
 }
 
-static int query_format(struct vf_instance *vf, unsigned int imgfmt)
-{
-    if (imgfmt == IMGFMT_VAAPI || imgfmt == IMGFMT_NV12 || imgfmt == IMGFMT_420P)
-        return vf_next_query_format(vf, IMGFMT_VAAPI);
-    return 0;
-}
-
-static int control(struct vf_instance *vf, int request, void* data)
-{
-    switch (request){
-    case VFCTRL_SEEK_RESET:
-        flush_frames(vf);
-        return true;
-    default:
-        return CONTROL_UNKNOWN;
-    }
-}
-
-static int va_query_filter_caps(struct vf_instance *vf, VAProcFilterType type,
+static int va_query_filter_caps(struct mp_filter *vf, VAProcFilterType type,
                                 void *caps, unsigned int count)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
     VAStatus status = vaQueryVideoProcFilterCaps(p->display, p->context, type,
                                                  caps, &count);
     return CHECK_VA_STATUS(vf, "vaQueryVideoProcFilterCaps()") ? count : 0;
 }
 
-static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
+static VABufferID va_create_filter_buffer(struct mp_filter *vf, int bytes,
                                           int num, void *data)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
     VABufferID buffer;
     VAStatus status = vaCreateBuffer(p->display, p->context,
                                      VAProcFilterParameterBufferType,
@@ -429,9 +347,9 @@ static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
     return CHECK_VA_STATUS(vf, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
 }
 
-static bool initialize(struct vf_instance *vf)
+static bool initialize(struct mp_filter *vf)
 {
-    struct vf_priv_s *p = vf->priv;
+    struct priv *p = vf->priv;
     VAStatus status;
 
     VAConfigID config;
@@ -458,14 +376,15 @@ static bool initialize(struct vf_instance *vf)
         buffers[i] = VA_INVALID_ID;
     for (int i = 0; i < num_filters; i++) {
         if (filters[i] == VAProcFilterDeinterlacing) {
-            if (p->deint_type < 1)
+            if (p->opts->deint_type < 1)
                 continue;
             VAProcFilterCapDeinterlacing caps[VAProcDeinterlacingCount];
             int num = va_query_filter_caps(vf, VAProcFilterDeinterlacing, caps,
                                            VAProcDeinterlacingCount);
             if (!num)
                 continue;
-            VAProcDeinterlacingType algorithm = deint_algorithm[p->deint_type];
+            VAProcDeinterlacingType algorithm =
+                deint_algorithm[p->opts->deint_type];
             for (int n=0; n < num; n++) { // find the algorithm
                 if (caps[n].type != algorithm)
                     continue;
@@ -482,47 +401,59 @@ static bool initialize(struct vf_instance *vf)
     p->num_buffers = 0;
     if (buffers[VAProcFilterDeinterlacing] != VA_INVALID_ID)
         p->buffers[p->num_buffers++] = buffers[VAProcFilterDeinterlacing];
-    p->do_deint = !!p->deint_type;
+    p->do_deint = !!p->opts->deint_type;
     // next filters: p->buffers[p->num_buffers++] = buffers[next_filter];
     return true;
 }
 
-static int vf_open(vf_instance_t *vf)
+static const struct mp_filter_info vf_vavpp_filter = {
+    .name = "vavpp",
+    .process = vf_vavpp_process,
+    .reset = flush_frames,
+    .destroy = uninit,
+    .priv_size = sizeof(struct priv),
+};
+
+static struct mp_filter *vf_vavpp_create(struct mp_filter *parent, void *options)
 {
-    struct vf_priv_s *p = vf->priv;
-
-    if (!vf->hwdec_devs)
-        return 0;
-
-    vf->reconfig = reconfig;
-    vf->filter_ext = filter_ext;
-    vf->filter_out = filter_out;
-    vf->query_format = query_format;
-    vf->uninit = uninit;
-    vf->control = control;
-
-    p->queue = mp_refqueue_alloc();
-
-    hwdec_devices_request_all(vf->hwdec_devs);
-    p->av_device_ref =
-        hwdec_devices_get_lavc(vf->hwdec_devs, AV_HWDEVICE_TYPE_VAAPI);
-    if (!p->av_device_ref) {
-        uninit(vf);
-        return 0;
+    struct mp_filter *f = mp_filter_create(parent, &vf_vavpp_filter);
+    if (!f) {
+        talloc_free(options);
+        return NULL;
     }
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct priv *p = f->priv;
+    p->opts = talloc_steal(p, options);
+    p->config = VA_INVALID_ID;
+    p->context = VA_INVALID_ID;
+
+    p->queue = mp_refqueue_alloc(f);
+
+    p->av_device_ref = mp_filter_load_hwdec_device(f, AV_HWDEVICE_TYPE_VAAPI);
+    if (!p->av_device_ref)
+        goto error;
 
     AVHWDeviceContext *hwctx = (void *)p->av_device_ref->data;
     AVVAAPIDeviceContext *vactx = hwctx->hwctx;
 
     p->display = vactx->display;
 
-    if (initialize(vf))
-        return true;
-    uninit(vf);
-    return false;
+    mp_refqueue_add_in_format(p->queue, IMGFMT_VAAPI, 0);
+
+    if (!initialize(f))
+        goto error;
+
+    return f;
+
+error:
+    talloc_free(f);
+    return NULL;
 }
 
-#define OPT_BASE_STRUCT struct vf_priv_s
+#define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE("deint", deint_type, 0,
                // The values must match with deint_algorithm[].
@@ -537,11 +468,17 @@ static const m_option_t vf_opts_fields[] = {
     {0}
 };
 
-const vf_info_t vf_info_vaapi = {
-    .description = "VA-API Video Post-Process Filter",
-    .name = "vavpp",
-    .open = vf_open,
-    .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_default,
-    .options = vf_opts_fields,
+const struct mp_user_filter_entry vf_vavpp = {
+    .desc = {
+        .description = "VA-API Video Post-Process Filter",
+        .name = "vavpp",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .priv_defaults = &(const OPT_BASE_STRUCT){
+            .deint_type = 2,
+            .interlaced_only = 1,
+            .reversal_bug = 1,
+        },
+        .options = vf_opts_fields,
+    },
+    .create = vf_vavpp_create,
 };

@@ -405,7 +405,6 @@ char *format_file_size(int64_t size);
 // certain groups of options.
 #define UPDATE_OPT_FIRST        (1 << 7)
 #define UPDATE_TERM             (1 << 7)  // terminal options
-#define UPDATE_DEINT            (1 << 8)  // --deinterlace
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl/stats
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides

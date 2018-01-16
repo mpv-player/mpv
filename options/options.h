@@ -281,7 +281,7 @@ typedef struct MPOpts {
     int pitch_correction;
     struct m_obj_settings *vf_settings, *vf_defs;
     struct m_obj_settings *af_settings, *af_defs;
-    int deinterlace;
+    struct filter_opts *filter_opts;
     float movie_aspect;
     int aspect_method;
     char **sub_name;
@@ -353,6 +353,10 @@ struct dvd_opts {
     char *device;
 };
 
+struct filter_opts {
+    int deinterlace;
+};
+
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
@@ -360,6 +364,7 @@ extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
+extern const struct m_sub_options filter_conf;
 
 int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param);

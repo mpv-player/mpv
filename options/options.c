@@ -297,6 +297,18 @@ const struct m_sub_options dvd_conf = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct filter_opts
+
+const struct m_sub_options filter_conf = {
+    .opts = (const struct m_option[]){
+        OPT_FLAG("deinterlace", deinterlace, 0),
+        {0}
+    },
+    .size = sizeof(OPT_BASE_STRUCT),
+    .change_flags = UPDATE_IMGPAR,
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct MPOpts
 
 const m_option_t mp_opts[] = {
@@ -494,7 +506,7 @@ const m_option_t mp_opts[] = {
                      .deprecation_message = "use --vf + enable/disable flags"),
     OPT_SETTINGSLIST("vf", vf_settings, 0, &vf_obj_list, ),
 
-    OPT_FLAG("deinterlace", deinterlace, UPDATE_DEINT),
+    OPT_SUBSTRUCT("", filter_opts, filter_conf, 0),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
