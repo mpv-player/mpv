@@ -1446,7 +1446,7 @@ void mp_read_option_raw(struct mpv_global *global, const char *name,
                         const struct m_option_type *type, void *dst)
 {
     struct m_config_shadow *shadow = global->config;
-    struct m_config_option *co = m_config_get_co(shadow->root, bstr0(name));
+    struct m_config_option *co = m_config_get_co_raw(shadow->root, bstr0(name));
     assert(co);
     assert(co->shadow_offset >= 0);
     assert(co->opt->type == type);
