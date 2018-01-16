@@ -33,7 +33,6 @@
 #include "fmt-conversion.h"
 #include "csputils.h"
 #include "common/msg.h"
-#include "video/filter/vf.h"
 #include "osdep/endian.h"
 
 //global sws_flags from the command line

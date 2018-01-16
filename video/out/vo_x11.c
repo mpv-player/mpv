@@ -28,7 +28,6 @@
 #include "vo.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
-#include "video/filter/vf.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
