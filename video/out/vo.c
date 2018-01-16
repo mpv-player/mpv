@@ -567,6 +567,8 @@ static void run_reconfig(void *p)
 
     struct vo_internal *in = vo->in;
 
+    MP_VERBOSE(vo, "reconfig to %s\n", mp_image_params_to_str(params));
+
     m_config_cache_update(vo->opts_cache);
 
     mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
