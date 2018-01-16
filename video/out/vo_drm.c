@@ -283,7 +283,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     p->osd.mr = MPMIN(0, p->osd.mr);
     p->osd.ml = MPMIN(0, p->osd.ml);
 
-    mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
+    mp_sws_set_from_cmdline(p->sws, vo->global);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,

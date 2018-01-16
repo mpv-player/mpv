@@ -6,7 +6,7 @@
 #include "mp_image.h"
 
 struct mp_image;
-struct sws_opts;
+struct mpv_global;
 
 // libswscale currently requires 16 bytes alignment for row pointers and
 // strides. Otherwise, it will print warnings and use slow codepaths.
@@ -52,7 +52,7 @@ struct mp_sws_context {
 
 struct mp_sws_context *mp_sws_alloc(void *talloc_ctx);
 int mp_sws_reinit(struct mp_sws_context *ctx);
-void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct sws_opts *opts);
+void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g);
 int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
                  struct mp_image *src);
 

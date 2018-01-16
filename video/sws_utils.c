@@ -27,6 +27,7 @@
 #include "sws_utils.h"
 
 #include "common/common.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
@@ -84,8 +85,10 @@ const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
 const int mp_sws_fast_flags = SWS_BILINEAR;
 
 // Set ctx parameters to global command line flags.
-void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct sws_opts *opts)
+void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g)
 {
+    struct sws_opts *opts = mp_get_config_group(NULL, g, &sws_conf);
+
     sws_freeFilter(ctx->src_filter);
     ctx->src_filter = sws_getDefaultFilter(opts->lum_gblur, opts->chr_gblur,
                                            opts->lum_sharpen, opts->chr_sharpen,
@@ -94,6 +97,8 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct sws_opts *opts)
 
     ctx->flags = SWS_PRINT_INFO;
     ctx->flags |= opts->scaler;
+
+    talloc_free(opts);
 }
 
 bool mp_sws_supported_format(int imgfmt)
