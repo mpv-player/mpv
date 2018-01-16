@@ -344,3 +344,76 @@ done:
         mp_image_copy_attributes(hw_img, src);
     return ok;
 }
+
+bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
+                                 struct AVBufferRef *hw_device_ctx,
+                                 int imgfmt, int sw_imgfmt, int w, int h)
+{
+    enum AVPixelFormat format = imgfmt2pixfmt(imgfmt);
+    enum AVPixelFormat sw_format = imgfmt2pixfmt(sw_imgfmt);
+
+    if (format == AV_PIX_FMT_NONE || sw_format == AV_PIX_FMT_NONE ||
+        !hw_device_ctx || w < 1 || h < 1)
+    {
+        av_buffer_unref(hw_frames_ctx);
+        return false;
+    }
+
+    if (*hw_frames_ctx) {
+        AVHWFramesContext *hw_frames = (void *)(*hw_frames_ctx)->data;
+
+        if (hw_frames->device_ref->data != hw_device_ctx->data ||
+            hw_frames->format != format || hw_frames->sw_format != sw_format ||
+            hw_frames->width != w || hw_frames->height != h)
+            av_buffer_unref(hw_frames_ctx);
+    }
+
+    if (!*hw_frames_ctx) {
+        *hw_frames_ctx = av_hwframe_ctx_alloc(hw_device_ctx);
+        if (!*hw_frames_ctx)
+            return false;
+
+        AVHWFramesContext *hw_frames = (void *)(*hw_frames_ctx)->data;
+        hw_frames->format = format;
+        hw_frames->sw_format = sw_format;
+        hw_frames->width = w;
+        hw_frames->height = h;
+        if (av_hwframe_ctx_init(*hw_frames_ctx) < 0) {
+            av_buffer_unref(hw_frames_ctx);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+struct mp_image *mp_av_pool_image_hw_upload(struct AVBufferRef *hw_frames_ctx,
+                                            struct mp_image *src)
+{
+    AVFrame *av_frame = av_frame_alloc();
+    if (!av_frame)
+        return NULL;
+    if (av_hwframe_get_buffer(hw_frames_ctx, av_frame, 0) < 0) {
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *dst = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!dst)
+        return NULL;
+
+    if (dst->w < src->w || dst->h < src->h) {
+        talloc_free(dst);
+        return NULL;
+    }
+
+    mp_image_set_size(dst, src->w, src->h);
+
+    if (!mp_image_hw_upload(dst, src)) {
+        talloc_free(dst);
+        return NULL;
+    }
+
+    mp_image_copy_attributes(dst, src);
+    return dst;
+}

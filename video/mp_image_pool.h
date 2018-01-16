@@ -31,4 +31,12 @@ struct mp_image *mp_image_hw_download(struct mp_image *img,
 
 bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src);
 
+struct AVBufferRef;
+bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
+                                 struct AVBufferRef *hw_device_ctx,
+                                 int imgfmt, int sw_imgfmt, int w, int h);
+
+struct mp_image *mp_av_pool_image_hw_upload(struct AVBufferRef *hw_frames_ctx,
+                                            struct mp_image *src);
+
 #endif
