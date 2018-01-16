@@ -244,7 +244,7 @@ static bool resize(struct vo *vo)
         return -1;
     }
 
-    mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
+    mp_sws_set_from_cmdline(p->sws, vo->global);
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = fmte->mpfmt,
         .w = p->dst_w,
