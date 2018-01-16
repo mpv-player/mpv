@@ -43,7 +43,6 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
-#include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
@@ -222,6 +221,8 @@ void reset_playback_state(struct MPContext *mpctx)
         if (mpctx->tracks[n]->d_audio)
             audio_reset_decoding(mpctx->tracks[n]->d_audio);
     }
+
+    mp_filter_reset(mpctx->filter_root);
 
     reset_video_state(mpctx);
     reset_audio_state(mpctx);
@@ -1159,6 +1160,8 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_osd_redraw(mpctx);
 
+    if (mp_filter_run(mpctx->filter_root))
+        mp_wakeup_core(mpctx);
     mp_wait_events(mpctx);
 
     handle_pause_on_low_cache(mpctx);

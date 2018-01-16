@@ -34,18 +34,17 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs)
     talloc_free(devs);
 }
 
-struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
-                                           int av_hwdevice_type)
+struct mp_hwdec_ctx *hwdec_devices_get_by_lavc(struct mp_hwdec_devices *devs,
+                                               int av_hwdevice_type)
 {
-    AVBufferRef *res = NULL;
+    struct mp_hwdec_ctx *res = NULL;
     pthread_mutex_lock(&devs->lock);
     for (int n = 0; n < devs->num_hwctxs; n++) {
         struct mp_hwdec_ctx *dev = devs->hwctxs[n];
         if (dev->av_device_ref) {
             AVHWDeviceContext *hwctx = (void *)dev->av_device_ref->data;
             if (hwctx->type == av_hwdevice_type) {
-                if (dev->av_device_ref)
-                    res = av_buffer_ref(dev->av_device_ref);
+                res = dev;
                 break;
             }
         }
@@ -54,10 +53,24 @@ struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
     return res;
 }
 
+struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
+                                           int av_hwdevice_type)
+{
+    struct mp_hwdec_ctx *ctx = hwdec_devices_get_by_lavc(devs, av_hwdevice_type);
+    if (!ctx)
+        return NULL;
+    return av_buffer_ref(ctx->av_device_ref);
+}
+
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs)
 {
+    return hwdec_devices_get_n(devs, 0);
+}
+
+struct mp_hwdec_ctx *hwdec_devices_get_n(struct mp_hwdec_devices *devs, int n)
+{
     pthread_mutex_lock(&devs->lock);
-    struct mp_hwdec_ctx *res = devs->num_hwctxs ? devs->hwctxs[0] : NULL;
+    struct mp_hwdec_ctx *res = n < devs->num_hwctxs ? devs->hwctxs[n] : NULL;
     pthread_mutex_unlock(&devs->lock);
     return res;
 }

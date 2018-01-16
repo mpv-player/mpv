@@ -14,7 +14,9 @@ struct mp_hwdec_ctx {
     struct AVBufferRef *av_device_ref; // AVHWDeviceContext*
 
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
-    int *supported_formats;
+    const int *supported_formats;
+    // HW format for which above hw_subfmts are valid.
+    int hw_imgfmt;
 };
 
 // Used to communicate hardware decoder device handles from VO to video decoder.
@@ -32,8 +34,14 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs);
 struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
                                            int av_hwdevice_type);
 
+struct mp_hwdec_ctx *hwdec_devices_get_by_lavc(struct mp_hwdec_devices *devs,
+                                               int av_hwdevice_type);
+
 // For code which still strictly assumes there is 1 (or none) device.
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs);
+
+// Return the n-th device. NULL if none.
+struct mp_hwdec_ctx *hwdec_devices_get_n(struct mp_hwdec_devices *devs, int n);
 
 // Add this to the list of internal devices. Adding the same pointer twice must
 // be avoided.

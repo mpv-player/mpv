@@ -50,7 +50,6 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "options/m_config.h"
-#include "video/filter/vf.h"
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
@@ -1432,12 +1431,25 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
         struct mp_tags metadata = {0};
+        void *metadata_mem = NULL;
         int res = CONTROL_UNKNOWN;
         if (strcmp(type, "vf") == 0) {
             if (!mpctx->vo_chain)
                 return M_PROPERTY_UNAVAILABLE;
-            struct vf_chain *vf = mpctx->vo_chain->vf;
-            res = vf_control_by_label(vf, VFCTRL_GET_METADATA, &metadata, key);
+
+            struct mp_tags *metadata_ptr = NULL;
+            struct mp_filter_command cmd = {
+                .type = MP_FILTER_COMMAND_GET_META,
+                .res = &metadata_ptr,
+            };
+            char *key0 = mp_tprintf(80, "%.*s", BSTR_P(key));
+            mp_output_chain_command(mpctx->vo_chain->filter, key0, &cmd);
+
+            if (metadata_ptr) {
+                metadata = *metadata_ptr;
+                metadata_mem = metadata_ptr;
+                res = CONTROL_OK;
+            }
         } else if (strcmp(type, "af") == 0) {
 #if HAVE_LIBAF
             if (!(mpctx->ao_chain && mpctx->ao_chain->af))
@@ -1454,11 +1466,12 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
             if (strlen(rem)) {
                 struct m_property_action_arg next_ka = *ka;
                 next_ka.key = rem;
-                return tag_property(M_PROPERTY_KEY_ACTION, &next_ka, &metadata);
+                res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, &metadata);
             } else {
-                return tag_property(ka->action, ka->arg, &metadata);
+                res = tag_property(ka->action, ka->arg, &metadata);
             }
-            return M_PROPERTY_OK;
+            talloc_free(metadata_mem);
+            return res;
         default:
             return M_PROPERTY_ERROR;
         }
@@ -2601,10 +2614,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
 
 static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 {
-    if (!mpctx->vo_chain || mpctx->vo_chain->vf->initialized < 1)
+    if (!mpctx->vo_chain)
         return (struct mp_image_params){0};
 
-    return mpctx->vo_chain->vf->output_params;
+    return mpctx->vo_chain->filter->output_params;
 }
 
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
@@ -2636,8 +2649,8 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct mp_codec_params *c =
         track && track->stream ? track->stream->codec : NULL;
-    if (vo_c->vf->input_params.imgfmt) {
-        return property_imgparams(vo_c->vf->input_params, action, arg);
+    if (vo_c->filter->input_params.imgfmt) {
+        return property_imgparams(vo_c->filter->input_params, action, arg);
     } else if (c && c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
@@ -2975,7 +2988,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
 
     float aspect = mpctx->opts->movie_aspect;
     if (mpctx->vo_chain && aspect <= 0) {
-        struct mp_image_params *params = &mpctx->vo_chain->vf->input_params;
+        struct mp_image_params *params = &mpctx->vo_chain->filter->input_params;
         if (params && params->p_w > 0 && params->p_h > 0) {
             int d_w, d_h;
             mp_image_params_get_dsize(params, &d_w, &d_h);
@@ -5470,11 +5483,17 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         return edit_filters_osd(mpctx, STREAM_VIDEO, cmd->args[0].v.s,
                                 cmd->args[1].v.s, msg_osd);
 
-    case MP_CMD_VF_COMMAND:
+    case MP_CMD_VF_COMMAND: {
         if (!mpctx->vo_chain)
             return -1;
-        return vf_send_command(mpctx->vo_chain->vf, cmd->args[0].v.s,
-                               cmd->args[1].v.s, cmd->args[2].v.s);
+        struct mp_filter_command filter_cmd = {
+            .type = MP_FILTER_COMMAND_TEXT,
+            .cmd = cmd->args[1].v.s,
+            .arg = cmd->args[2].v.s,
+        };
+        return mp_output_chain_command(mpctx->vo_chain->filter, cmd->args[0].v.s,
+                                       &filter_cmd) ? 0 : -1;
+    }
 
 #if HAVE_LIBAF
     case MP_CMD_AF_COMMAND:
@@ -5784,9 +5803,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
-
-    if (flags & UPDATE_DEINT)
-        recreate_auto_filters(mpctx);
 
     if (flags & UPDATE_OSD) {
         for (int n = 0; n < NUM_PTRACKS; n++) {

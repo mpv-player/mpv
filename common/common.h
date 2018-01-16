@@ -112,4 +112,6 @@ char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag);
 char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
 
+char **mp_dup_str_array(void *tctx, char **s);
+
 #endif /* MPLAYER_MPCOMMON_H */

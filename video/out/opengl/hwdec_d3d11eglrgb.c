@@ -135,9 +135,12 @@ static int init(struct ra_hwdec *hw)
         goto fail;
     }
 
+    static const int subfmts[] = {IMGFMT_RGB0, 0};
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
         .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
+        .supported_formats = subfmts,
+        .hw_imgfmt = IMGFMT_D3D11,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
@@ -158,6 +161,11 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
     GL *gl = ra_gl_get(mapper->ra);
+
+    if (mapper->src_params.hw_subfmt != IMGFMT_RGB0) {
+        MP_FATAL(mapper, "Format not supported.\n");
+        return -1;
+    }
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
@@ -258,7 +266,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_d3d11eglrgb = {
     .name = "d3d11-egl-rgb",
     .priv_size = sizeof(struct priv_owner),
-    .imgfmts = {IMGFMT_D3D11RGB, 0},
+    .imgfmts = {IMGFMT_D3D11, 0},
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

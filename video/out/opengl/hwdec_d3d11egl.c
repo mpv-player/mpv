@@ -178,9 +178,12 @@ static int init(struct ra_hwdec *hw)
     ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
     ID3D10Multithread_Release(multithread);
 
+    static const int subfmts[] = {IMGFMT_NV12, 0};
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
         .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
+        .supported_formats = subfmts,
+        .hw_imgfmt = IMGFMT_D3D11,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
@@ -332,7 +335,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_d3d11egl = {
     .name = "d3d11-egl",
     .priv_size = sizeof(struct priv_owner),
-    .imgfmts = {IMGFMT_D3D11NV12, 0},
+    .imgfmts = {IMGFMT_D3D11, 0},
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

@@ -302,3 +302,14 @@ char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
     va_end(ap);
     return buf;
 }
+
+char **mp_dup_str_array(void *tctx, char **s)
+{
+    char **r = NULL;
+    int num_r = 0;
+    for (int n = 0; s && s[n]; n++)
+        MP_TARRAY_APPEND(tctx, r, num_r, talloc_strdup(tctx, s[n]));
+    if (r)
+        MP_TARRAY_APPEND(tctx, r, num_r, NULL);
+    return r;
+}

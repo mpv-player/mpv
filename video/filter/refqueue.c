@@ -17,12 +17,25 @@
 
 #include <assert.h>
 
+#include <libavutil/buffer.h>
+
 #include "common/common.h"
+#include "filters/f_autoconvert.h"
+#include "filters/filter_internal.h"
 #include "video/mp_image.h"
 
 #include "refqueue.h"
 
 struct mp_refqueue {
+    struct mp_filter *filter;
+    struct mp_autoconvert *conv;
+    struct mp_pin *in, *out;
+
+    struct mp_image *in_format;
+
+    // Buffered frame in case of format changes.
+    struct mp_image *next;
+
     int needed_past_frames;
     int needed_future_frames;
     int flags;
@@ -38,17 +51,37 @@ struct mp_refqueue {
     int pos;
 };
 
-struct mp_refqueue *mp_refqueue_alloc(void)
+static bool mp_refqueue_has_output(struct mp_refqueue *q);
+
+static void refqueue_dtor(void *p)
 {
-    struct mp_refqueue *q = talloc_zero(NULL, struct mp_refqueue);
+    struct mp_refqueue *q = p;
+    mp_refqueue_flush(q);
+    mp_image_unrefp(&q->in_format);
+    talloc_free(q->conv->f);
+}
+
+struct mp_refqueue *mp_refqueue_alloc(struct mp_filter *f)
+{
+    struct mp_refqueue *q = talloc_zero(f, struct mp_refqueue);
+    talloc_set_destructor(q, refqueue_dtor);
+    q->filter = f;
+
+    q->conv = mp_autoconvert_create(f);
+    if (!q->conv)
+        abort();
+
+    q->in = q->conv->f->pins[1];
+    mp_pin_connect(q->conv->f->pins[0], f->ppins[0]);
+    q->out = f->ppins[1];
+
     mp_refqueue_flush(q);
     return q;
 }
 
-void mp_refqueue_free(struct mp_refqueue *q)
+void mp_refqueue_add_in_format(struct mp_refqueue *q, int fmt, int subfmt)
 {
-    mp_refqueue_flush(q);
-    talloc_free(q);
+    mp_autoconvert_add_imgfmt(q->conv, fmt, subfmt);
 }
 
 // The minimum number of frames required before and after the current frame.
@@ -103,18 +136,12 @@ void mp_refqueue_flush(struct mp_refqueue *q)
     q->pos = -1;
     q->second_field = false;
     q->eof = false;
+    mp_image_unrefp(&q->next);
 }
 
-// Add a new frame to the queue. (Call mp_refqueue_next() to advance the
-// current frame and to discard unneeded past frames.)
-// Ownership goes to the mp_refqueue.
-// Passing NULL means EOF, in which case mp_refqueue_need_input() will return
-// false even if not enough future frames are available.
-void mp_refqueue_add_input(struct mp_refqueue *q, struct mp_image *img)
+static void mp_refqueue_add_input(struct mp_refqueue *q, struct mp_image *img)
 {
-    q->eof = !img;
-    if (!img)
-        return;
+    assert(img);
 
     MP_TARRAY_INSERT_AT(q, q->queue, q->num_queue, 0, img);
     q->pos++;
@@ -122,12 +149,12 @@ void mp_refqueue_add_input(struct mp_refqueue *q, struct mp_image *img)
     assert(q->pos >= 0 && q->pos < q->num_queue);
 }
 
-bool mp_refqueue_need_input(struct mp_refqueue *q)
+static bool mp_refqueue_need_input(struct mp_refqueue *q)
 {
     return q->pos < q->needed_future_frames && !q->eof;
 }
 
-bool mp_refqueue_has_output(struct mp_refqueue *q)
+static bool mp_refqueue_has_output(struct mp_refqueue *q)
 {
     return q->pos >= 0 && !mp_refqueue_need_input(q);
 }
@@ -161,18 +188,8 @@ static bool output_next_field(struct mp_refqueue *q)
     return true;
 }
 
-// Advance current field, depending on interlace flags.
-void mp_refqueue_next_field(struct mp_refqueue *q)
-{
-    if (!mp_refqueue_has_output(q))
-        return;
-
-    if (!output_next_field(q))
-        mp_refqueue_next(q);
-}
-
 // Advance to next input frame (skips fields even in field output mode).
-void mp_refqueue_next(struct mp_refqueue *q)
+static void mp_refqueue_next(struct mp_refqueue *q)
 {
     if (!mp_refqueue_has_output(q))
         return;
@@ -190,6 +207,16 @@ void mp_refqueue_next(struct mp_refqueue *q)
     }
 
     assert(q->pos >= -1 && q->pos < q->num_queue);
+}
+
+// Advance current field, depending on interlace flags.
+static void mp_refqueue_next_field(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return;
+
+    if (!output_next_field(q))
+        mp_refqueue_next(q);
 }
 
 // Return a frame by relative position:
@@ -218,4 +245,115 @@ struct mp_image *mp_refqueue_get_field(struct mp_refqueue *q, int pos)
 bool mp_refqueue_is_second_field(struct mp_refqueue *q)
 {
     return mp_refqueue_has_output(q) && q->second_field;
+}
+
+// Return non-NULL if a format change happened. A format change is defined by
+// a change in image parameters, using broad enough checks that happen to be
+// sufficient for all users of refqueue.
+// On format change, the refqueue transparently drains remaining frames, and
+// once that is done, this function returns a mp_image reference of the new
+// frame. Reinit the low level video processor based on it, and then leave the
+// reference alone and continue normally.
+// All frames returned in the future will have a compatible format.
+struct mp_image *mp_refqueue_execute_reinit(struct mp_refqueue *q)
+{
+    if (mp_refqueue_has_output(q) || !q->next)
+        return NULL;
+
+    struct mp_image *cur = q->next;
+    q->next = NULL;
+
+    mp_image_unrefp(&q->in_format);
+    mp_refqueue_flush(q);
+
+    q->in_format = mp_image_new_ref(cur);
+    if (!q->in_format)
+        abort();
+    mp_image_unref_data(q->in_format);
+
+    mp_refqueue_add_input(q, cur);
+    return cur;
+}
+
+// Main processing function. Call this in the filter process function.
+// Returns if enough input frames are available for filtering, and output pin
+// needs data; in other words, if this returns true, you render a frame and
+// output it.
+// If this returns true, you must call mp_refqueue_write_out_pin() to make
+// progress.
+bool mp_refqueue_can_output(struct mp_refqueue *q)
+{
+    if (!mp_pin_in_needs_data(q->out))
+        return false;
+
+    // Strictly return any output first to reduce latency.
+    if (mp_refqueue_has_output(q))
+        return true;
+
+    if (q->next) {
+        // Make it call again for mp_refqueue_execute_reinit().
+        mp_filter_internal_mark_progress(q->filter);
+        return false;
+    }
+
+    struct mp_frame frame = mp_pin_out_read(q->in);
+    if (frame.type == MP_FRAME_NONE)
+        return false;
+
+    if (frame.type == MP_FRAME_EOF) {
+        q->eof = true;
+        if (mp_refqueue_has_output(q)) {
+            mp_pin_out_unread(q->in, frame);
+            return true;
+        }
+        mp_pin_in_write(q->out, frame);
+        mp_refqueue_flush(q);
+        return false;
+    }
+
+    if (frame.type != MP_FRAME_VIDEO) {
+        MP_ERR(q->filter, "unsupported frame type\n");
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_failed(q->filter);
+        return false;
+    }
+
+    struct mp_image *img = frame.data;
+
+    if (!q->in_format || !!q->in_format->hwctx != !!img->hwctx ||
+        (img->hwctx && img->hwctx->data != q->in_format->hwctx->data) ||
+        !mp_image_params_equal(&q->in_format->params, &img->params))
+    {
+        q->next = img;
+        q->eof = true;
+        mp_filter_internal_mark_progress(q->filter);
+        return false;
+    }
+
+    mp_refqueue_add_input(q, img);
+
+    if (mp_refqueue_has_output(q))
+        return true;
+
+    mp_pin_out_request_data(q->in);
+    return false;
+}
+
+// (Accepts NULL for generic errors.)
+void mp_refqueue_write_out_pin(struct mp_refqueue *q, struct mp_image *mpi)
+{
+    if (mpi) {
+        mp_pin_in_write(q->out, MAKE_FRAME(MP_FRAME_VIDEO, mpi));
+    } else {
+        MP_WARN(q->filter, "failed to output frame\n");
+        mp_filter_internal_mark_failed(q->filter);
+    }
+    mp_refqueue_next_field(q);
+}
+
+// Return frame for current format (without data). Reference is owned by q,
+// might go away on further queue accesses. NULL if none yet.
+struct mp_image *mp_refqueue_get_format(struct mp_refqueue *q)
+{
+    return q->in_format;
 }
