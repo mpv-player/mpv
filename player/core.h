@@ -412,9 +412,9 @@ typedef struct MPContext {
 
     struct seek_params seek;
 
-    // Allow audio to issue a second seek if audio is too far ahead (for non-hr
-    // seeks with external audio tracks).
-    bool audio_allow_second_chance_seek;
+    // Can be temporarily set to an external audio track after seeks. Then it
+    // must be seeked to the video position once video is done.
+    struct track *seek_slave;
 
     /* Heuristic for relative chapter seeks: keep track which chapter
      * the user wanted to go to, even if we aren't exactly within the

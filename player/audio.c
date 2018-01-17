@@ -283,7 +283,6 @@ void reset_audio_state(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->audio_drop_throttle = 0;
     mpctx->audio_stat_start = 0;
-    mpctx->audio_allow_second_chance_seek = false;
 }
 
 void uninit_audio_out(struct MPContext *mpctx)
@@ -799,27 +798,6 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         return true;
     }
     ptsdiff = MPCLAMP(ptsdiff, -3600, 3600);
-
-    // Heuristic: if audio is "too far" ahead, and one of them is a separate
-    // track, allow a refresh seek to the correct position to fix it.
-    if (ptsdiff > 0.2 && mpctx->audio_allow_second_chance_seek && sync_to_video) {
-        struct ao_chain *ao_c = mpctx->ao_chain;
-        if (ao_c && ao_c->track && mpctx->vo_chain && mpctx->vo_chain->track &&
-            ao_c->track->demuxer != mpctx->vo_chain->track->demuxer)
-        {
-            struct track *track = ao_c->track;
-            double pts = mpctx->video_pts;
-            if (pts != MP_NOPTS_VALUE)
-                pts += get_track_seek_offset(mpctx, track);
-            // (disable it first to make it take any effect)
-            demuxer_select_track(track->demuxer, track->stream, pts, false);
-            demuxer_select_track(track->demuxer, track->stream, pts, true);
-            reset_audio_state(mpctx);
-            MP_VERBOSE(mpctx, "retrying audio seek\n");
-            return false;
-        }
-    }
-    mpctx->audio_allow_second_chance_seek = false;
 
     int align = af_format_sample_alignment(ao_format);
     *skip = (int)(-ptsdiff * play_samplerate) / align * align;

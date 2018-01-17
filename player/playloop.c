@@ -239,6 +239,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->restart_complete = false;
     mpctx->paused_for_cache = false;
     mpctx->cache_buffer = 100;
+    mpctx->seek_slave = NULL;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -252,7 +253,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (!mpctx->demuxer || seek.type == MPSEEK_NONE || seek.amount == MP_NOPTS_VALUE)
+    if (!mpctx->demuxer || !seek.type || seek.amount == MP_NOPTS_VALUE)
         return;
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
@@ -326,13 +327,15 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     if (!demux_seek(mpctx->demuxer, demux_pts, demux_flags)) {
         if (!mpctx->demuxer->seekable) {
-            MP_ERR(mpctx, "Cannot seek in this file.\n");
+            MP_ERR(mpctx, "Cannot seek in this stream.\n");
             MP_ERR(mpctx, "You can force it with '--force-seekable=yes'.\n");
         }
         return;
     }
 
     // Seek external, extra files too:
+    bool has_video = false;
+    struct track *external_audio = NULL;
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
@@ -342,7 +345,12 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             if (demux_flags & SEEK_FACTOR)
                 main_new_pos = seek_pts;
             demux_seek(track->demuxer, main_new_pos, 0);
+            if (track->type == STREAM_AUDIO && !external_audio)
+                external_audio = track;
         }
+        if (track->selected && !track->is_external && track->stream &&
+            track->type == STREAM_VIDEO && !track->stream->attached_picture)
+            has_video = true;
     }
 
     if (!(seek.flags & MPSEEK_FLAG_NOFLUSH))
@@ -351,6 +359,17 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     reset_playback_state(mpctx);
     if (mpctx->recorder)
         mp_recorder_mark_discontinuity(mpctx->recorder);
+
+    // When doing keyframe seeks (hr_seek=false) backwards (no SEEK_FORWARD),
+    // then video can seek before the external audio track (because video seek
+    // granularity is higher than audio). The result would be playing video with
+    // silence until the audio seek target is reached. Work around by blocking
+    // the demuxer (decoders can't read) and seeking to video position later.
+    if (has_video && external_audio && !hr_seek && !(demux_flags & SEEK_FORWARD)) {
+        MP_VERBOSE(mpctx, "delayed seek for aid=%d\n", external_audio->user_tid);
+        demux_block_reading(external_audio->demuxer, true);
+        mpctx->seek_slave = external_audio;
+    }
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
@@ -375,9 +394,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
-
-    mpctx->audio_allow_second_chance_seek =
-        !hr_seek && !(demux_flags & SEEK_FORWARD);
 
     mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
 
@@ -949,6 +965,24 @@ static void handle_playback_time(struct MPContext *mpctx)
     }
 }
 
+static void handle_delayed_audio_seek(struct MPContext *mpctx)
+{
+    if (mpctx->seek_slave) {
+        if (mpctx->video_pts != MP_NOPTS_VALUE) {
+            // We know the video position now, so seek external audio to the
+            // correct position.
+            double pts = mpctx->video_pts +
+                            get_track_seek_offset(mpctx, mpctx->seek_slave);
+            demux_seek(mpctx->seek_slave->demuxer, pts, 0);
+            mpctx->seek_slave = NULL;
+        } else if (mpctx->video_status >= STATUS_EOF) {
+            // We won't get a video position; don't stall the audio stream.
+            demux_block_reading(mpctx->seek_slave->demuxer, false);
+            mpctx->seek_slave = NULL;
+        }
+    }
+}
+
 // We always make sure audio and video buffers are filled before actually
 // starting playback. This code handles starting them at the same time.
 static void handle_playback_restart(struct MPContext *mpctx)
@@ -991,7 +1025,6 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
         mpctx->current_seek = (struct seek_params){0};
-        mpctx->audio_allow_second_chance_seek = false;
         handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
         update_core_idle_state(mpctx);
@@ -1098,6 +1131,8 @@ void run_playloop(struct MPContext *mpctx)
 
     fill_audio_out_buffers(mpctx);
     write_video(mpctx);
+
+    handle_delayed_audio_seek(mpctx);
 
     handle_playback_restart(mpctx);
 
