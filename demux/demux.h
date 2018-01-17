@@ -235,8 +235,7 @@ typedef struct demuxer {
 
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
-    // You can freely use demux_stream_control() to send STREAM_CTRLs, or use
-    // demux_pause() to get exclusive access to the stream.
+    // You can freely use demux_stream_control() to send STREAM_CTRLs.
     // Also note that the stream can get replaced if fully_read is set.
     struct stream *stream;
 } demuxer_t;
