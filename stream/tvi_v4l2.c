@@ -72,7 +72,11 @@ known issues:
 #define V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC 0x2000
 #endif
 
-#define HAVE_CLOCK_GETTIME (defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0)
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
+#define HAVE_CLOCK_GETTIME 1
+#else
+#define HAVE_CLOCK_GETTIME 0
+#endif
 
 #define info tvi_info_v4l2
 static tvi_handle_t *tvi_init_v4l2(struct mp_log *log, tv_param_t* tv_param);
