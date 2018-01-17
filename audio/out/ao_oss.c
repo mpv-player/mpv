@@ -56,7 +56,11 @@
 // Define to 0 if the device must be reopened to reset it (stop all playback,
 // clear the buffer), and the device should be closed when unused.
 // Define to 1 if SNDCTL_DSP_RESET should be used to reset without close.
-#define KEEP_DEVICE (defined(SNDCTL_DSP_RESET) && !defined(__NetBSD__))
+#if defined(SNDCTL_DSP_RESET) && !defined(__NetBSD__)
+#define KEEP_DEVICE 1
+#else
+#define KEEP_DEVICE 0
+#endif
 
 #define PATH_DEV_DSP "/dev/dsp"
 #define PATH_DEV_MIXER "/dev/mixer"
