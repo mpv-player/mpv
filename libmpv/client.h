@@ -136,6 +136,8 @@ extern "C" {
  * - On memory exhaustion, mpv will kill the process.
  * - In certain cases, mpv may start sub processes (such as with the ytdl
  *   wrapper script).
+ * - Using UNIX IPC (off by default) will override the SIGPIPE signal handler,
+ *   and set it to SIG_IGN.
  *
  * Encoding of filenames
  * ---------------------
