@@ -197,6 +197,8 @@ struct demux_internal {
 
     double highest_av_pts;      // highest non-subtitle PTS seen - for duration
 
+    bool blocked;
+
     // Cached state.
     bool force_cache_update;
     struct mp_tags *stream_metadata;
@@ -605,6 +607,7 @@ static void update_stream_selection_state(struct demux_internal *in,
     // other streams too, because they depend on other stream's selections.
 
     bool any_av_streams = false;
+    bool any_streams = false;
 
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *s = in->streams[n]->ds;
@@ -612,6 +615,7 @@ static void update_stream_selection_state(struct demux_internal *in,
         s->eager = s->selected && !s->sh->attached_picture;
         if (s->eager)
             any_av_streams |= s->type != STREAM_SUB;
+        any_streams |= s->selected;
     }
 
     // Subtitles are only eagerly read if there are no other eagerly read
@@ -624,6 +628,9 @@ static void update_stream_selection_state(struct demux_internal *in,
                 s->eager = false;
         }
     }
+
+    if (!any_streams)
+        in->blocked = false;
 
     // Make sure any stream reselection or addition is reflected in the seek
     // ranges, and also get rid of data that is not needed anymore (or
@@ -1279,7 +1286,7 @@ static bool read_packet(struct demux_internal *in)
     in->eof = false;
     in->idle = true;
 
-    if (!in->reading)
+    if (!in->reading || in->blocked)
         return false;
 
     // Check if we need to read a new packet. We do this if all queues are below
@@ -1552,7 +1559,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
         pkt->stream = ds->sh->index;
         return pkt;
     }
-    if (!ds->reader_head)
+    if (!ds->reader_head || ds->in->blocked)
         return NULL;
     struct demux_packet *pkt = ds->reader_head;
     ds->reader_head = pkt->next;
@@ -1622,7 +1629,7 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
         const char *t = stream_type_name(ds->type);
         MP_DBG(in, "reading packet for %s\n", t);
         in->eof = false; // force retry
-        while (ds->selected && !ds->reader_head) {
+        while (ds->selected && !ds->reader_head && !in->blocked) {
             in->reading = true;
             // Note: the following code marks EOF if it can't continue
             if (in->threading) {
@@ -1673,6 +1680,8 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
             r = *out_pkt ? 1 : -1;
         }
         pthread_mutex_unlock(&ds->in->lock);
+    } else if (ds->in->blocked) {
+        r = 0;
     } else {
         *out_pkt = demux_read_packet(sh);
         r = *out_pkt ? 1 : -1;
@@ -1698,7 +1707,7 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
     struct demux_internal *in = demuxer->in;
     assert(!in->threading); // doesn't work with threading
     bool read_more = true;
-    while (read_more) {
+    while (read_more && !in->blocked) {
         for (int n = 0; n < in->num_streams; n++) {
             in->reading = true; // force read_packet() to read
             struct demux_packet *pkt = dequeue_packet(in->streams[n]->ds);
@@ -2223,6 +2232,7 @@ static void clear_reader_state(struct demux_internal *in)
         ds_clear_reader_state(in->streams[n]->ds);
     in->warned_queue_overflow = false;
     in->d_user->filepos = -1; // implicitly synchronized
+    in->blocked = false;
     assert(in->fw_bytes == 0);
 }
 
@@ -2716,6 +2726,19 @@ void demux_disable_cache(demuxer_t *demuxer)
         // Get rid of potential old packets in the current range.
         prune_old_packets(in);
     }
+    pthread_mutex_unlock(&in->lock);
+}
+
+// Disallow reading any packets and make readers think there is no new data
+// yet, until a seek is issued.
+void demux_block_reading(struct demuxer *demuxer, bool block)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    pthread_mutex_lock(&in->lock);
+    in->blocked = block;
+    pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
 }
 
