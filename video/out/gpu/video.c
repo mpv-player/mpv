@@ -3849,6 +3849,9 @@ static void gl_video_dr_free_buffer(void *opaque, uint8_t *data)
 struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h,
                                     int stride_align)
 {
+    if (!gl_video_check_format(p, imgfmt))
+        return NULL;
+
     int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
     if (size < 0)
         return NULL;
