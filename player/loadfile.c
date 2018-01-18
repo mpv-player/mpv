@@ -227,6 +227,8 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
     if (pts != MP_NOPTS_VALUE)
         pts += get_track_seek_offset(mpctx, track);
     demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
+    if (track == mpctx->seek_slave)
+        mpctx->seek_slave = NULL;
 }
 
 // Called from the demuxer thread if a new packet is available.
@@ -547,6 +549,9 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     struct demuxer *d = track->demuxer;
 
     sub_destroy(track->d_sub);
+
+    if (mpctx->seek_slave == track)
+        mpctx->seek_slave = NULL;
 
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
