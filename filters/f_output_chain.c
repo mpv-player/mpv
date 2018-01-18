@@ -1,3 +1,5 @@
+#include "audio/aframe.h"
+#include "audio/out/ao.h"
 #include "common/global.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -41,6 +43,22 @@ struct chain {
     struct mp_autoconvert *convert;
 
     struct vo *vo;
+    struct ao *ao;
+
+    struct mp_frame pending_input;
+
+    // Some chain types (MP_OUTPUT_CHAIN_AUDIO) require draining the entire
+    // filter chain on format changes and further complex actions:
+    //  0: normal filtering
+    //  1: input changed, flushing out remaining frames from current filters
+    //  2: flushing finished
+    //  3: sent new frame through chain for format probing
+    //  4: sent EOF through chain for format probing
+    //  5: received format probing frame; now waiting for API user to call
+    //     mp_output_chain_set_ao().
+    int format_change_phase;
+    // True if it's a second run trying to see if downmix can be moved up.
+    bool format_change_second_try;
 
     struct mp_output_chain public;
 };
@@ -60,12 +78,19 @@ struct mp_user_filter {
     char *name;
     bool is_output_converter;
     bool is_input;
+    bool is_channelremix;
 
     struct mp_image_params last_out_params;
+    struct mp_aframe *last_out_aformat;
+
+    int64_t last_in_pts, last_out_pts;
 
     bool failed;
     bool error_eof_sent;
 };
+
+static void recheck_channelremix_filter(struct chain *p);
+static void remove_channelremix_filter(struct chain *p);
 
 static void update_output_caps(struct chain *p)
 {
@@ -119,6 +144,25 @@ static bool check_out_format_change(struct mp_user_filter *u,
         }
     }
 
+    if (frame.type == MP_FRAME_AUDIO) {
+        struct mp_aframe *aframe = frame.data;
+
+        if (!mp_aframe_config_equals(aframe, u->last_out_aformat)) {
+            MP_VERBOSE(p, "[%s] %s\n", u->name,
+                       mp_aframe_format_str(aframe));
+            mp_aframe_config_copy(u->last_out_aformat, aframe);
+
+            if (u->is_input) {
+                mp_aframe_config_copy(p->public.input_aformat, aframe);
+            } else if (u->is_output_converter) {
+                mp_aframe_config_copy(p->public.output_aformat, aframe);
+            }
+
+            p->public.reconfig_happened = true;
+            changed = true;
+        }
+    }
+
     return changed;
 }
 
@@ -137,12 +181,15 @@ static void process_user(struct mp_filter *f)
             MP_FATAL(p, "Cannot convert decoder/filter output to any format "
                      "supported by the output.\n");
             p->public.failed_output_conversion = true;
+            p->format_change_phase = 0;
             mp_filter_wakeup(p->f);
         } else {
             MP_ERR(p, "Disabling filter %s because it has failed.\n", name);
             mp_filter_reset(u->f); // clear out staled buffered data
         }
         u->failed = true;
+        if (p->format_change_phase)
+            p->format_change_phase = 2; // redo without it
     }
 
     if (u->failed) {
@@ -159,12 +206,35 @@ static void process_user(struct mp_filter *f)
         return;
     }
 
-    mp_pin_transfer_data(u->f->pins[0], f->ppins[0]);
+    if (mp_pin_can_transfer_data(u->f->pins[0], f->ppins[0])) {
+        struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+
+        double pts = mp_frame_get_pts(frame);
+        if (pts != MP_NOPTS_VALUE)
+            u->last_in_pts = pts;
+
+        mp_pin_in_write(u->f->pins[0], frame);
+    }
 
     if (mp_pin_can_transfer_data(f->ppins[1], u->f->pins[1])) {
         struct mp_frame frame = mp_pin_out_read(u->f->pins[1]);
 
-        check_out_format_change(u, frame);
+        bool changed = check_out_format_change(u, frame);
+        if (p->type == MP_OUTPUT_CHAIN_AUDIO && (!p->ao || changed) &&
+            u->is_input && !p->format_change_phase)
+        {
+            // Format changed -> block filtering, start draining current filters.
+            MP_VERBOSE(p, "format changed, draining filter chain\n");
+            mp_frame_unref(&p->pending_input);
+            p->pending_input = frame;
+            p->format_change_phase = 1;
+            mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+            return;
+        }
+
+        double pts = mp_frame_get_pts(frame);
+        if (pts != MP_NOPTS_VALUE)
+            u->last_out_pts = pts;
 
         mp_pin_in_write(f->ppins[1], frame);
     }
@@ -175,6 +245,7 @@ static void reset_user(struct mp_filter *f)
     struct mp_user_filter *u = f->priv;
 
     u->error_eof_sent = false;
+    u->last_in_pts = u->last_out_pts = MP_NOPTS_VALUE;
 }
 
 static void destroy_user(struct mp_filter *f)
@@ -203,6 +274,7 @@ static struct mp_user_filter *create_wrapper_filter(struct chain *p)
     struct mp_user_filter *wrapper = f->priv;
     wrapper->wrapper = f;
     wrapper->p = p;
+    wrapper->last_out_aformat = talloc_steal(wrapper, mp_aframe_create());
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
     return wrapper;
@@ -237,9 +309,99 @@ static void relink_filter_list(struct chain *p)
     }
 }
 
+// Special logic for draining on format changes (for audio). Never used or
+// initiated video.
+static void process_format_change(struct mp_filter *f)
+{
+    struct chain *p = f->priv;
+
+    if (mp_pin_in_needs_data(p->filters_in)) {
+        if (p->format_change_phase == 2) {
+            MP_VERBOSE(p, "probing new format\n");
+            // Clear any old state.
+            if (!p->format_change_second_try) {
+                mp_autoconvert_clear(p->convert);
+                remove_channelremix_filter(p);
+            }
+            for (int n = 0; n < p->num_all_filters; n++)
+                mp_filter_reset(p->all_filters[n]->f);
+            // Filter a copy of the new input frame to see what comes out.
+            struct mp_frame frame = mp_frame_ref(p->pending_input);
+            if (!frame.type)
+                abort();
+            mp_pin_in_write(p->filters_in, frame);
+            mp_pin_out_request_data(p->filters_out);
+            p->format_change_phase = 3;
+        } else if (p->format_change_phase == 3) {
+            MP_VERBOSE(p, "probing new format (drain)\n");
+            mp_pin_in_write(p->filters_in, MP_EOF_FRAME);
+            p->format_change_phase = 4;
+        }
+    }
+
+    if (mp_pin_can_transfer_data(f->ppins[1], p->filters_out)) {
+        struct mp_frame frame = mp_pin_out_read(p->filters_out);
+
+        if (frame.type == MP_FRAME_EOF) {
+            // We're apparently draining for a format change, and we got EOF
+            // from the chain, which means we're done draining.
+            if (p->format_change_phase == 1) {
+                MP_VERBOSE(p, "done format change draining\n");
+                // Then we need to start probing the new format.
+                p->format_change_phase = 2;
+                mp_pin_out_request_data(p->filters_out);
+            } else if (!p->public.failed_output_conversion) {
+                MP_ERR(p, "we didn't get an output frame? (broken filter?)\n");
+            }
+            mp_filter_internal_mark_progress(f);
+            return;
+        }
+
+        if (p->format_change_phase >= 2) {
+            // We were filtering a "test" frame to probe the format. Now
+            // that we have it (apparently), just discard it, and make the
+            // user aware of the previously grabbed format.
+            MP_VERBOSE(p, "got output format from probing\n");
+            mp_frame_unref(&frame);
+            for (int n = 0; n < p->num_all_filters; n++)
+                mp_filter_reset(p->all_filters[n]->f);
+            if (p->format_change_second_try) {
+                p->format_change_second_try = false;
+                p->format_change_phase = 0;
+                recheck_channelremix_filter(p);
+            } else {
+                p->ao = NULL;
+                p->public.ao_needs_update = true;
+                p->format_change_phase = 5;
+            }
+            // Do something silly to ensure the f_output_chain user gets
+            // notified properly.
+            mp_filter_wakeup(f);
+            return;
+        }
+
+        // Draining remaining data.
+        mp_pin_in_write(f->ppins[1], frame);
+    }
+}
+
+
 static void process(struct mp_filter *f)
 {
     struct chain *p = f->priv;
+
+    if (p->format_change_phase) {
+        process_format_change(f);
+        return;
+    }
+
+    // Send remaining input from previous format change.
+    if (p->pending_input.type) {
+        if (mp_pin_in_needs_data(p->filters_in)) {
+            mp_pin_in_write(p->filters_in, p->pending_input);
+            p->pending_input = MP_NO_FRAME;
+        }
+    }
 
     if (mp_pin_can_transfer_data(p->filters_in, f->ppins[0])) {
         struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
@@ -267,6 +429,14 @@ static void process(struct mp_filter *f)
 static void reset(struct mp_filter *f)
 {
     struct chain *p = f->priv;
+
+    // (if format initialization was in progress, this can be repeated next time)
+    mp_frame_unref(&p->pending_input);
+    p->format_change_phase = 0;
+    if (p->format_change_second_try)
+        remove_channelremix_filter(p);
+    p->format_change_second_try = false;
+    p->public.ao_needs_update = false;
 
     p->public.got_input_eof = false;
     p->public.got_output_eof = false;
@@ -322,6 +492,120 @@ void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
     update_output_caps(p);
 }
 
+// If there are any user filters, and they don't affect the channel config,
+// then move upmix/downmix to the start of the chain.
+static void maybe_move_up_channelremix(struct chain *p, struct mp_chmap *final)
+{
+    assert(p->num_all_filters >= 2); // at least in/convert filters
+    struct mp_user_filter *first = p->all_filters[0]; // "in" pseudo filter
+    struct mp_chmap in = {0};
+    mp_aframe_get_chmap(first->last_out_aformat, &in);
+    if (mp_chmap_is_unknown(&in))
+        return;
+    mp_chmap_reorder_to_lavc(&in);
+    if (!mp_chmap_is_valid(&in) || mp_chmap_equals_reordered(&in, final))
+        return;
+    for (int n = 0; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+        struct mp_chmap chmap = {0};
+        mp_aframe_get_chmap(u->last_out_aformat, &chmap);
+        if (!mp_chmap_equals_reordered(&in, &chmap))
+            return; // some remix going in
+    }
+
+    if (!p->num_user_filters)
+        return; // would be a NOP
+
+    MP_VERBOSE(p, "trying with channel remixing moved to start of chain\n");
+
+    struct mp_user_filter *remix = create_wrapper_filter(p);
+    struct mp_autoconvert *convert = mp_autoconvert_create(remix->wrapper);
+    if (!convert)
+        abort();
+    mp_autoconvert_add_chmap(convert, final);
+    remix->name = "channelremix";
+    remix->f = convert->f;
+    remix->is_channelremix = true;
+    MP_TARRAY_APPEND(p, p->pre_filters, p->num_pre_filters, remix);
+    relink_filter_list(p);
+
+    // now run the scary state machine again in order to see what filters do
+    // with the remixed channel data and if it was a good idea
+    p->format_change_phase = 2;
+    p->format_change_second_try = true;
+}
+
+static void remove_channelremix_filter(struct chain *p)
+{
+    for (int n = 0; n < p->num_pre_filters; n++) {
+        struct mp_user_filter *u = p->pre_filters[n];
+        if (u->is_channelremix) {
+            MP_TARRAY_REMOVE_AT(p->pre_filters, p->num_pre_filters, n);
+            talloc_free(u->wrapper);
+            relink_filter_list(p);
+            break;
+        }
+    }
+}
+
+static void recheck_channelremix_filter(struct chain *p)
+{
+    struct mp_chmap in = {0};
+    int start = -1;
+    for (int n = 0; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+        if (u->is_channelremix) {
+            mp_aframe_get_chmap(u->last_out_aformat, &in);
+            start = n;
+            break;
+        }
+    }
+
+    if (start < 0 || !mp_chmap_is_valid(&in))
+        goto remove;
+
+    for (int n = start; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+        struct mp_chmap chmap = {0};
+        mp_aframe_get_chmap(u->last_out_aformat, &chmap);
+        if (!mp_chmap_equals_reordered(&in, &chmap))
+            goto remove;
+    }
+
+    return;
+remove:
+    MP_VERBOSE(p, "reverting moved up channel remixing\n");
+    remove_channelremix_filter(p);
+}
+
+void mp_output_chain_set_ao(struct mp_output_chain *c, struct ao *ao)
+{
+    struct chain *p = c->f->priv;
+
+    assert(p->public.ao_needs_update); // can't just call it any time
+    assert(p->format_change_phase == 5);
+    assert(!p->format_change_second_try);
+
+    p->public.ao_needs_update = false;
+    p->format_change_phase = 0;
+
+    p->ao = ao;
+
+    int out_format = 0;
+    int out_rate = 0;
+    struct mp_chmap out_channels = {0};
+    ao_get_format(p->ao, &out_rate, &out_format, &out_channels);
+
+    mp_autoconvert_clear(p->convert);
+    mp_autoconvert_add_afmt(p->convert, out_format);
+    mp_autoconvert_add_srate(p->convert, out_rate);
+    mp_autoconvert_add_chmap(p->convert, &out_channels);
+
+    maybe_move_up_channelremix(p, &out_channels);
+
+    mp_filter_wakeup(p->f);
+}
+
 static struct mp_user_filter *find_by_label(struct chain *p, const char *label)
 {
     for (int n = 0; n < p->num_user_filters; n++) {
@@ -352,6 +636,57 @@ bool mp_output_chain_command(struct mp_output_chain *c, const char *target,
         return false;
 
     return mp_filter_command(f->f, cmd);
+}
+
+// Set the speed on the last filter in the chain that supports it. If a filter
+// supports it, reset *speed, then keep setting the speed on the other filters.
+// The purpose of this is to make sure only 1 filter changes speed.
+static void set_speed_any(struct mp_user_filter **filters, int num_filters,
+                          bool resample, double *speed)
+{
+    for (int n = num_filters - 1; n >= 0; n--) {
+        assert(*speed);
+        struct mp_filter_command cmd = {
+            .type = resample ? MP_FILTER_COMMAND_SET_SPEED_RESAMPLE
+                             : MP_FILTER_COMMAND_SET_SPEED,
+            .speed = *speed,
+        };
+        if (mp_filter_command(filters[n]->f, &cmd))
+            *speed = 1.0;
+    }
+}
+
+void mp_output_chain_set_audio_speed(struct mp_output_chain *c,
+                                     double speed, double resample)
+{
+    struct chain *p = c->f->priv;
+
+    // We always resample with the final libavresample instance.
+    set_speed_any(p->post_filters, p->num_post_filters, true, &resample);
+
+    // If users have filters like "scaletempo" insert anywhere, use that,
+    // otherwise use the builtin ones.
+    set_speed_any(p->user_filters, p->num_user_filters, false, &speed);
+    set_speed_any(p->post_filters, p->num_post_filters, false, &speed);
+}
+
+double mp_output_get_measured_total_delay(struct mp_output_chain *c)
+{
+    struct chain *p = c->f->priv;
+
+    double delay = 0;
+
+    for (int n = 0; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+
+        if (u->last_in_pts != MP_NOPTS_VALUE &&
+            u->last_out_pts != MP_NOPTS_VALUE)
+        {
+            delay += u->last_in_pts - u->last_out_pts;
+        }
+    }
+
+    return delay;
 }
 
 static bool compare_filter(struct m_obj_settings *a, struct m_obj_settings *b)
@@ -509,6 +844,18 @@ static void create_video_things(struct chain *p)
     MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, f);
 }
 
+static void create_audio_things(struct chain *p)
+{
+    p->frame_type = MP_FRAME_AUDIO;
+
+    struct mp_user_filter *f = create_wrapper_filter(p);
+    f->name = "userspeed";
+    f->f = mp_autoaspeed_create(f->wrapper);
+    if (!f->f)
+        abort();
+    MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, f);
+}
+
 struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
                                                enum mp_output_chain_type type)
 {
@@ -522,6 +869,7 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
     const char *log_name = NULL;
     switch (type) {
     case MP_OUTPUT_CHAIN_VIDEO: log_name = "!vf"; break;
+    case MP_OUTPUT_CHAIN_AUDIO: log_name = "!af"; break;
     }
     if (log_name)
         f->log = mp_log_new(f, parent->global->log, log_name);
@@ -533,6 +881,8 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
 
     struct mp_output_chain *c = &p->public;
     c->f = f;
+    c->input_aformat = talloc_steal(p, mp_aframe_create());
+    c->output_aformat = talloc_steal(p, mp_aframe_create());
 
     // Dummy filter for reporting and logging the input format.
     p->input = create_wrapper_filter(p);
@@ -545,6 +895,7 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
 
     switch (type) {
     case MP_OUTPUT_CHAIN_VIDEO: create_video_things(p); break;
+    case MP_OUTPUT_CHAIN_AUDIO: create_audio_things(p); break;
     }
 
     p->output = create_wrapper_filter(p);

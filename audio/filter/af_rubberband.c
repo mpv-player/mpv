@@ -20,242 +20,348 @@
 
 #include <rubberband/rubberband-c.h>
 
+#include "audio/aframe.h"
+#include "audio/format.h"
 #include "common/common.h"
-#include "af.h"
+#include "filters/f_autoconvert.h"
+#include "filters/filter_internal.h"
+#include "filters/user_filters.h"
+#include "options/m_option.h"
+
+// command line options
+struct f_opts {
+    int transients, detector, phase, window,
+        smoothing, formant, pitch, channels;
+    double scale;
+};
 
 struct priv {
+    struct f_opts *opts;
+
+    struct mp_pin *in_pin;
+    struct mp_aframe *cur_format;
+    struct mp_aframe_pool *out_pool;
+    bool sent_final;
     RubberBandState rubber;
     double speed;
     double pitch;
-    struct mp_audio *pending;
-    bool needs_reset;
+    struct mp_aframe *pending;
     // Estimate how much librubberband has buffered internally.
     // I could not find a way to do this with the librubberband API.
     double rubber_delay;
-    // command line options
-    int opt_transients, opt_detector, opt_phase, opt_window,
-        opt_smoothing, opt_formant, opt_pitch, opt_channels;
 };
 
-static void update_speed(struct af_instance *af, double new_speed)
+static void update_speed(struct priv *p, double new_speed)
 {
-    struct priv *p = af->priv;
-
     p->speed = new_speed;
-    rubberband_set_time_ratio(p->rubber, 1.0 / p->speed);
+    if (p->rubber)
+        rubberband_set_time_ratio(p->rubber, 1.0 / p->speed);
 }
 
-static bool update_pitch(struct af_instance *af, double new_pitch)
+static bool update_pitch(struct priv *p, double new_pitch)
 {
     if (new_pitch < 0.01 || new_pitch > 100.0)
         return false;
 
-    struct priv *p = af->priv;
-
     p->pitch = new_pitch;
-    rubberband_set_pitch_scale(p->rubber, p->pitch);
+    if (p->rubber)
+        rubberband_set_pitch_scale(p->rubber, p->pitch);
     return true;
 }
 
-static int control(struct af_instance *af, int cmd, void *arg)
+static bool init_rubberband(struct mp_filter *f)
 {
-    struct priv *p = af->priv;
+    struct priv *p = f->priv;
 
-    switch (cmd) {
-    case AF_CONTROL_REINIT: {
-        struct mp_audio *in = arg;
-        struct mp_audio orig_in = *in;
-        struct mp_audio *out = af->data;
+    assert(!p->rubber);
+    assert(p->pending);
 
-        in->format = AF_FORMAT_FLOATP;
-        mp_audio_copy_config(out, in);
+    int opts = p->opts->transients | p->opts->detector | p->opts->phase |
+               p->opts->window | p->opts->smoothing | p->opts->formant |
+               p->opts->pitch | p-> opts->channels |
+               RubberBandOptionProcessRealTime;
 
-        if (p->rubber)
-            rubberband_delete(p->rubber);
+    int rate = mp_aframe_get_rate(p->pending);
+    int channels = mp_aframe_get_channels(p->pending);
+    if (mp_aframe_get_format(p->pending) != AF_FORMAT_FLOATP)
+        return false;
 
-        int opts = p->opt_transients | p->opt_detector | p->opt_phase |
-                   p->opt_window | p->opt_smoothing | p->opt_formant |
-                   p->opt_pitch | p-> opt_channels |
-                   RubberBandOptionProcessRealTime;
-
-        p->rubber = rubberband_new(in->rate, in->channels.num, opts, 1.0, 1.0);
-        if (!p->rubber) {
-            MP_FATAL(af, "librubberband initialization failed.\n");
-            return AF_ERROR;
-        }
-
-        update_speed(af, p->speed);
-        update_pitch(af, p->pitch);
-        control(af, AF_CONTROL_RESET, NULL);
-
-        return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
+    p->rubber = rubberband_new(rate, channels, opts, 1.0, 1.0);
+    if (!p->rubber) {
+        MP_FATAL(f, "librubberband initialization failed.\n");
+        return false;
     }
-    case AF_CONTROL_SET_PLAYBACK_SPEED: {
-        update_speed(af, *(double *)arg);
-        return AF_OK;
-    }
-    case AF_CONTROL_RESET:
-        if (p->rubber)
-            rubberband_reset(p->rubber);
-        talloc_free(p->pending);
-        p->pending = NULL;
-        p->rubber_delay = 0;
-        return AF_OK;
-    case AF_CONTROL_COMMAND: {
-        char **args = arg;
-        char *endptr;
-        double pitch = p->pitch;
-        if (!strcmp(args[0], "set-pitch")) {
-            pitch = strtod(args[1], &endptr);
-            if (*endptr)
-                return CONTROL_ERROR;
-            return update_pitch(af, pitch) ? CONTROL_OK : CONTROL_ERROR;
-        } else if (!strcmp(args[0], "multiply-pitch")) {
-            double mult = strtod(args[1], &endptr);
-            if (*endptr || mult <= 0)
-                return CONTROL_ERROR;
-            pitch *= mult;
-            return update_pitch(af, pitch) ? CONTROL_OK : CONTROL_ERROR;
-        } else {
-            return CONTROL_ERROR;
-        }
-    }
-    }
-    return AF_UNKNOWN;
+
+    mp_aframe_config_copy(p->cur_format, p->pending);
+
+    update_speed(p, p->speed);
+    update_pitch(p, p->pitch);
+
+    return true;
 }
 
-static int filter_frame(struct af_instance *af, struct mp_audio *data)
+static void process(struct mp_filter *f)
 {
-    struct priv *p = af->priv;
+    struct priv *p = f->priv;
 
-    talloc_free(p->pending);
-    p->pending = data;
+    if (!mp_pin_in_needs_data(f->ppins[1]))
+        return;
 
-    return 0;
-}
-
-static int filter_out(struct af_instance *af)
-{
-    struct priv *p = af->priv;
-
-    while (rubberband_available(p->rubber) <= 0) {
+    while (!p->rubber || !p->pending || rubberband_available(p->rubber) <= 0) {
         const float *dummy[MP_NUM_CHANNELS] = {0};
         const float **in_data = dummy;
         size_t in_samples = 0;
-        if (p->pending) {
-            if (!p->pending->samples)
-                break;
 
-            // recover from previous EOF
-            if (p->needs_reset) {
-                rubberband_reset(p->rubber);
-                p->rubber_delay = 0;
+        bool eof = false;
+        if (!p->pending || !mp_aframe_get_size(p->pending)) {
+            struct mp_frame frame = mp_pin_out_read(p->in_pin);
+            if (frame.type == MP_FRAME_AUDIO) {
+                TA_FREEP(&p->pending);
+                p->pending = frame.data;
+            } else if (frame.type == MP_FRAME_EOF) {
+                eof = true;
+            } else if (frame.type) {
+                MP_ERR(f, "unexpected frame type\n");
+                goto error;
+            } else {
+                return; // no new data yet
             }
-            p->needs_reset = false;
+        }
+        assert(p->pending || eof);
 
-            size_t needs = rubberband_get_samples_required(p->rubber);
-            in_data = (void *)&p->pending->planes;
-            in_samples = MPMIN(p->pending->samples, needs);
+        if (!p->rubber) {
+            if (!p->pending) {
+                mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+                return;
+            }
+            if (!init_rubberband(f))
+                goto error;
         }
 
-        if (p->needs_reset)
-            break; // previous EOF
-        p->needs_reset = !p->pending; // EOF
+        bool format_change =
+            p->pending && !mp_aframe_config_equals(p->pending, p->cur_format);
 
-        rubberband_process(p->rubber, in_data, in_samples, p->needs_reset);
+        if (p->pending && !format_change) {
+            size_t needs = rubberband_get_samples_required(p->rubber);
+            uint8_t **planes = mp_aframe_get_data_ro(p->pending);
+            int num_planes = mp_aframe_get_planes(p->pending);
+            for (int n = 0; n < num_planes; n++)
+                in_data[n] = (void *)planes[n];
+            in_samples = MPMIN(mp_aframe_get_size(p->pending), needs);
+        }
+
+        bool final = format_change || eof;
+        if (!p->sent_final)
+            rubberband_process(p->rubber, in_data, in_samples, final);
+        p->sent_final |= final;
+
         p->rubber_delay += in_samples;
 
-        if (!p->pending)
-            break;
-        mp_audio_skip_samples(p->pending, in_samples);
+        if (p->pending && !format_change)
+            mp_aframe_skip_samples(p->pending, in_samples);
+
+        if (rubberband_available(p->rubber) > 0) {
+            if (eof)
+                mp_pin_out_repeat_eof(p->in_pin); // drain more next time
+        } else {
+            if (eof) {
+                mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+                rubberband_reset(p->rubber);
+                TA_FREEP(&p->pending);
+                p->sent_final = false;
+                return;
+            } else if (format_change) {
+                // go on with proper reinit on the next iteration
+                rubberband_delete(p->rubber);
+                p->sent_final = false;
+                p->rubber = NULL;
+            }
+        }
     }
+
+    assert(p->pending);
 
     int out_samples = rubberband_available(p->rubber);
     if (out_samples > 0) {
-        struct mp_audio *out =
-            mp_audio_pool_get(af->out_pool, af->data, out_samples);
-        if (!out)
-            return -1;
-        if (p->pending)
-            mp_audio_copy_config(out, p->pending);
+        struct mp_aframe *out = mp_aframe_new_ref(p->cur_format);
+        if (mp_aframe_pool_allocate(p->out_pool, out, out_samples) < 0) {
+            talloc_free(out);
+            goto error;
+        }
 
-        float **out_data = (void *)&out->planes;
-        out->samples = rubberband_retrieve(p->rubber, out_data, out->samples);
-        p->rubber_delay -= out->samples * p->speed;
+        mp_aframe_copy_attributes(out, p->pending);
 
-        af_add_output_frame(af, out);
+        float *out_data[MP_NUM_CHANNELS] = {0};
+        uint8_t **planes = mp_aframe_get_data_rw(out);
+        assert(planes);
+        int num_planes = mp_aframe_get_planes(out);
+        for (int n = 0; n < num_planes; n++)
+            out_data[n] = (void *)planes[n];
+
+        out_samples = rubberband_retrieve(p->rubber, out_data, out_samples);
+
+        if (!out_samples) {
+            mp_filter_internal_mark_progress(f); // unexpected, just try again
+            talloc_free(out);
+            return;
+        }
+
+        mp_aframe_set_size(out, out_samples);
+
+        p->rubber_delay -= out_samples * p->speed;
+
+        double pts = mp_aframe_get_pts(p->pending);
+        if (pts != MP_NOPTS_VALUE) {
+            // Note: rubberband_get_latency() does not do what you'd expect.
+            double delay = p->rubber_delay / mp_aframe_get_effective_rate(out);
+            mp_aframe_set_pts(out, pts - delay);
+        }
+
+        mp_aframe_mul_speed(out, p->speed);
+
+        mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_AUDIO, out));
     }
 
-    int delay_samples = p->rubber_delay;
-    if (p->pending)
-        delay_samples += p->pending->samples;
-    af->delay = delay_samples / (af->data->rate * p->speed);
-
-    return 0;
+    return;
+error:
+    mp_filter_internal_mark_failed(f);
 }
 
-static void uninit(struct af_instance *af)
+static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
-    struct priv *p = af->priv;
+    struct priv *p = f->priv;
+
+    switch (cmd->type) {
+    case MP_FILTER_COMMAND_TEXT: {
+        char *endptr = NULL;
+        double pitch = p->pitch;
+        if (!strcmp(cmd->cmd, "set-pitch")) {
+            pitch = strtod(cmd->arg, &endptr);
+            if (*endptr)
+                return false;
+            return update_pitch(p, pitch);
+        } else if (!strcmp(cmd->cmd, "multiply-pitch")) {
+            double mult = strtod(cmd->arg, &endptr);
+            if (*endptr || mult <= 0)
+                return false;
+            pitch *= mult;
+            return update_pitch(p, pitch);
+        }
+        return false;
+    }
+    case MP_FILTER_COMMAND_SET_SPEED:
+        update_speed(p, cmd->speed);
+        return true;
+    }
+
+    return false;
+}
+
+static void reset(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    if (p->rubber)
+        rubberband_reset(p->rubber);
+    p->sent_final = false;
+    TA_FREEP(&p->pending);
+}
+
+static void destroy(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
 
     if (p->rubber)
         rubberband_delete(p->rubber);
     talloc_free(p->pending);
 }
 
-static int af_open(struct af_instance *af)
+static const struct mp_filter_info af_rubberband_filter = {
+    .name = "rubberband",
+    .priv_size = sizeof(struct priv),
+    .process = process,
+    .command = command,
+    .reset = reset,
+    .destroy = destroy,
+};
+
+static struct mp_filter *af_rubberband_create(struct mp_filter *parent,
+                                              void *options)
 {
-    af->control = control;
-    af->filter_frame = filter_frame;
-    af->filter_out = filter_out;
-    af->uninit = uninit;
-    return AF_OK;
+    struct mp_filter *f = mp_filter_create(parent, &af_rubberband_filter);
+    if (!f) {
+        talloc_free(options);
+        return NULL;
+    }
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct priv *p = f->priv;
+    p->opts = talloc_steal(p, options);
+    p->speed = 1.0;
+    p->pitch = p->opts->scale;
+    p->cur_format = talloc_steal(p, mp_aframe_create());
+    p->out_pool = mp_aframe_pool_create(p);
+
+    struct mp_autoconvert *conv = mp_autoconvert_create(f);
+    if (!conv)
+        abort();
+
+    mp_autoconvert_add_afmt(conv, AF_FORMAT_FLOATP);
+
+    mp_pin_connect(conv->f->pins[0], f->ppins[0]);
+    p->in_pin = conv->f->pins[1];
+
+    return f;
 }
 
-#define OPT_BASE_STRUCT struct priv
-const struct af_info af_info_rubberband = {
-    .info = "Pitch conversion with librubberband",
-    .name = "rubberband",
-    .open = af_open,
-    .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .speed = 1.0,
-        .pitch = 1.0,
-        .opt_pitch = RubberBandOptionPitchHighConsistency,
-        .opt_transients = RubberBandOptionTransientsMixed,
-        .opt_formant = RubberBandOptionFormantPreserved,
-        .opt_channels = RubberBandOptionChannelsTogether,
+#define OPT_BASE_STRUCT struct f_opts
+
+const struct mp_user_filter_entry af_rubberband = {
+    .desc = {
+        .description = "Pitch conversion with librubberband",
+        .name = "rubberband",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .priv_defaults = &(const OPT_BASE_STRUCT) {
+            .scale = 1.0,
+            .pitch = RubberBandOptionPitchHighConsistency,
+            .transients = RubberBandOptionTransientsMixed,
+            .formant = RubberBandOptionFormantPreserved,
+            .channels = RubberBandOptionChannelsTogether,
+        },
+        .options = (const struct m_option[]) {
+            OPT_CHOICE("transients", transients, 0,
+                    ({"crisp", RubberBandOptionTransientsCrisp},
+                     {"mixed", RubberBandOptionTransientsMixed},
+                     {"smooth", RubberBandOptionTransientsSmooth})),
+            OPT_CHOICE("detector", detector, 0,
+                    ({"compound", RubberBandOptionDetectorCompound},
+                     {"percussive", RubberBandOptionDetectorPercussive},
+                     {"soft", RubberBandOptionDetectorSoft})),
+            OPT_CHOICE("phase", phase, 0,
+                    ({"laminar", RubberBandOptionPhaseLaminar},
+                     {"independent", RubberBandOptionPhaseIndependent})),
+            OPT_CHOICE("window", window, 0,
+                    ({"standard", RubberBandOptionWindowStandard},
+                     {"short", RubberBandOptionWindowShort},
+                     {"long", RubberBandOptionWindowLong})),
+            OPT_CHOICE("smoothing", smoothing, 0,
+                    ({"off", RubberBandOptionSmoothingOff},
+                     {"on", RubberBandOptionSmoothingOn})),
+            OPT_CHOICE("formant", formant, 0,
+                    ({"shifted", RubberBandOptionFormantShifted},
+                     {"preserved", RubberBandOptionFormantPreserved})),
+            OPT_CHOICE("pitch", pitch, 0,
+                    ({"quality", RubberBandOptionPitchHighQuality},
+                     {"speed", RubberBandOptionPitchHighSpeed},
+                     {"consistency", RubberBandOptionPitchHighConsistency})),
+            OPT_CHOICE("channels", channels, 0,
+                    ({"apart", RubberBandOptionChannelsApart},
+                     {"together", RubberBandOptionChannelsTogether})),
+            OPT_DOUBLE("pitch-scale", scale, M_OPT_RANGE, .min = 0.01, .max = 100),
+            {0}
+        },
     },
-    .options = (const struct m_option[]) {
-        OPT_CHOICE("transients", opt_transients, 0,
-                   ({"crisp", RubberBandOptionTransientsCrisp},
-                    {"mixed", RubberBandOptionTransientsMixed},
-                    {"smooth", RubberBandOptionTransientsSmooth})),
-        OPT_CHOICE("detector", opt_detector, 0,
-                   ({"compound", RubberBandOptionDetectorCompound},
-                    {"percussive", RubberBandOptionDetectorPercussive},
-                    {"soft", RubberBandOptionDetectorSoft})),
-        OPT_CHOICE("phase", opt_phase, 0,
-                   ({"laminar", RubberBandOptionPhaseLaminar},
-                    {"independent", RubberBandOptionPhaseIndependent})),
-        OPT_CHOICE("window", opt_window, 0,
-                   ({"standard", RubberBandOptionWindowStandard},
-                    {"short", RubberBandOptionWindowShort},
-                    {"long", RubberBandOptionWindowLong})),
-        OPT_CHOICE("smoothing", opt_smoothing, 0,
-                   ({"off", RubberBandOptionSmoothingOff},
-                    {"on", RubberBandOptionSmoothingOn})),
-        OPT_CHOICE("formant", opt_formant, 0,
-                   ({"shifted", RubberBandOptionFormantShifted},
-                    {"preserved", RubberBandOptionFormantPreserved})),
-        OPT_CHOICE("pitch", opt_pitch, 0,
-                   ({"quality", RubberBandOptionPitchHighQuality},
-                    {"speed", RubberBandOptionPitchHighSpeed},
-                    {"consistency", RubberBandOptionPitchHighConsistency})),
-        OPT_CHOICE("channels", opt_channels, 0,
-                   ({"apart", RubberBandOptionChannelsApart},
-                    {"together", RubberBandOptionChannelsTogether})),
-        OPT_DOUBLE("pitch-scale", pitch, M_OPT_RANGE, .min = 0.01, .max = 100),
-        {0}
-    },
+    .create = af_rubberband_create,
 };

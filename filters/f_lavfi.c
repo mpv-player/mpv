@@ -71,6 +71,8 @@ struct lavfi {
     // linked.
     bool initialized;
 
+    bool warned_nospeed;
+
     // Graph is draining to either handle format changes (if input format
     // changes for one pad, recreate the graph after draining all buffered
     // frames), or undo previously sent EOF (libavfilter does not accept
@@ -597,6 +599,15 @@ static bool feed_input_pads(struct lavfi *c)
             continue;
         }
 
+        if (pad->pending.type == MP_FRAME_AUDIO && !c->warned_nospeed) {
+            struct mp_aframe *aframe = pad->pending.data;
+            if (mp_aframe_get_speed(aframe) != 1.0) {
+                MP_ERR(c, "speed changing filters before libavfilter are not "
+                       "supported and can cause desyncs\n");
+                c->warned_nospeed = true;
+            }
+        }
+
         AVFrame *frame = mp_frame_to_av(pad->pending, &pad->timebase);
         bool eof = pad->pending.type == MP_FRAME_EOF;
 
@@ -853,6 +864,7 @@ struct mp_lavfi *mp_lavfi_create_filter(struct mp_filter *parent,
 
 struct lavfi_user_opts {
     bool is_bridge;
+    enum mp_frame_type type;
 
     char *graph;
     char **avopts;
@@ -861,61 +873,108 @@ struct lavfi_user_opts {
     char **filter_opts;
 };
 
-static struct mp_filter *vf_lavfi_create(struct mp_filter *parent, void *options)
+static struct mp_filter *lavfi_create(struct mp_filter *parent, void *options)
 {
     struct lavfi_user_opts *opts = options;
     struct mp_lavfi *l;
     if (opts->is_bridge) {
-        l = mp_lavfi_create_filter(parent, MP_FRAME_VIDEO, true,
-                                   opts->avopts, opts->filter_name,
-                                   opts->filter_opts);
+        l = mp_lavfi_create_filter(parent, opts->type, true, opts->avopts,
+                                   opts->filter_name, opts->filter_opts);
     } else {
-        l = mp_lavfi_create_graph(parent, MP_FRAME_VIDEO, true,
+        l = mp_lavfi_create_graph(parent, opts->type, true,
                                   opts->avopts, opts->graph);
     }
     talloc_free(opts);
     return l ? l->f : NULL;
 }
 
-static bool is_single_video_only(const AVFilterPad *pads)
+static bool is_single_media_only(const AVFilterPad *pads, int media_type)
 {
     int count = avfilter_pad_count(pads);
     if (count != 1)
         return false;
-    return avfilter_pad_get_type(pads, 0) == AVMEDIA_TYPE_VIDEO;
+    return avfilter_pad_get_type(pads, 0) == media_type;
 }
 
 // Does it have exactly one video input and one video output?
-static bool is_usable(const AVFilter *filter)
+static bool is_usable(const AVFilter *filter, int media_type)
 {
-    return is_single_video_only(filter->inputs) &&
-           is_single_video_only(filter->outputs);
+    return is_single_media_only(filter->inputs, media_type) &&
+           is_single_media_only(filter->outputs, media_type);
 }
 
-static void print_help(struct mp_log *log)
+static void print_help(struct mp_log *log, int mediatype, char *name, char *ex)
 {
     mp_info(log, "List of libavfilter filters:\n");
     for (const AVFilter *filter = avfilter_next(NULL); filter;
          filter = avfilter_next(filter))
     {
-        if (is_usable(filter))
+        if (is_usable(filter, mediatype))
             mp_info(log, " %-16s %s\n", filter->name, filter->description);
     }
     mp_info(log, "\n"
-        "This lists video->video filters only. Refer to\n"
+        "This lists %s->%s filters only. Refer to\n"
         "\n"
         " https://ffmpeg.org/ffmpeg-filters.html\n"
         "\n"
         "to see how to use each filter and what arguments each filter takes.\n"
         "Also, be sure to quote the FFmpeg filter string properly, e.g.:\n"
         "\n"
-        " \"--vf=lavfi=[gradfun=20:30]\"\n"
+        " \"%s\"\n"
         "\n"
         "Otherwise, mpv and libavfilter syntax will conflict.\n"
-        "\n");
+        "\n", name, name, ex);
+}
+
+static void print_help_v(struct mp_log *log)
+{
+    print_help(log, AVMEDIA_TYPE_VIDEO, "video", "--vf=lavfi=[gradfun=20:30]");
+}
+
+static void print_help_a(struct mp_log *log)
+{
+    print_help(log, AVMEDIA_TYPE_AUDIO, "audio", "--af=lavfi=[volume=0.5]");
 }
 
 #define OPT_BASE_STRUCT struct lavfi_user_opts
+
+const struct mp_user_filter_entry af_lavfi = {
+    .desc = {
+        .description = "libavfilter bridge",
+        .name = "lavfi",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .options = (const m_option_t[]){
+            OPT_STRING("graph", graph, M_OPT_MIN, .min = 1),
+            OPT_KEYVALUELIST("o", avopts, 0),
+            {0}
+        },
+        .priv_defaults = &(const OPT_BASE_STRUCT){
+            .type = MP_FRAME_AUDIO,
+        },
+        .print_help = print_help_a,
+    },
+    .create = lavfi_create,
+};
+
+const struct mp_user_filter_entry af_lavfi_bridge = {
+    .desc = {
+        .description = "libavfilter bridge (explicit options)",
+        .name = "lavfi-bridge",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .options = (const m_option_t[]){
+            OPT_STRING("name", filter_name, M_OPT_MIN, .min = 1),
+            OPT_KEYVALUELIST("opts", filter_opts, 0),
+            OPT_KEYVALUELIST("o", avopts, 0),
+            {0}
+        },
+        .priv_defaults = &(const OPT_BASE_STRUCT){
+            .is_bridge = true,
+            .type = MP_FRAME_AUDIO,
+        },
+        .print_help = print_help_a,
+    },
+    .create = lavfi_create,
+};
 
 const struct mp_user_filter_entry vf_lavfi = {
     .desc = {
@@ -927,9 +986,12 @@ const struct mp_user_filter_entry vf_lavfi = {
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}
         },
-        .print_help = print_help,
+        .priv_defaults = &(const OPT_BASE_STRUCT){
+            .type = MP_FRAME_VIDEO,
+        },
+        .print_help = print_help_v,
     },
-    .create = vf_lavfi_create,
+    .create = lavfi_create,
 };
 
 const struct mp_user_filter_entry vf_lavfi_bridge = {
@@ -945,8 +1007,9 @@ const struct mp_user_filter_entry vf_lavfi_bridge = {
         },
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .is_bridge = true,
+            .type = MP_FRAME_VIDEO,
         },
-        .print_help = print_help,
+        .print_help = print_help_v,
     },
-    .create = vf_lavfi_create,
+    .create = lavfi_create,
 };

@@ -7,6 +7,7 @@
 
 enum mp_output_chain_type {
     MP_OUTPUT_CHAIN_VIDEO = 1,      // --vf
+    MP_OUTPUT_CHAIN_AUDIO,          // --af
 };
 
 // A classic single-media filter chain, which reflects --vf and --af.
@@ -31,6 +32,15 @@ struct mp_output_chain {
     struct mp_image_params input_params;
     struct mp_image_params output_params;
     double container_fps;
+
+    // --- for type==MP_OUTPUT_CHAIN_AUDIO
+    struct mp_aframe *input_aformat;
+    struct mp_aframe *output_aformat;
+    // If true, there was a format change. output_aformat might have changed,
+    // and the implementation drained the filter chain and unset the internal ao
+    // reference. The API user needs to call mp_output_chain_set_ao() again.
+    // Until this is done, the filter chain will not output new data.
+    bool ao_needs_update;
 };
 
 // (free by freeing mp_output_chain.f)
@@ -42,6 +52,13 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
 // For type==MP_OUTPUT_CHAIN_VIDEO only.
 struct vo;
 void mp_output_chain_set_vo(struct mp_output_chain *p, struct vo *vo);
+
+// Set the AO. The AO format will be used to determine the filter chain output.
+// The API user may be asked to update the AO midstream if ao_needs_update is
+// set.
+// For type==MP_OUTPUT_CHAIN_AUDIO only.
+struct ao;
+void mp_output_chain_set_ao(struct mp_output_chain *p, struct ao *ao);
 
 // Send a command to the filter with the target label.
 bool mp_output_chain_command(struct mp_output_chain *p, const char *target,
@@ -57,3 +74,13 @@ struct m_obj_settings;
 bool mp_output_chain_update_filters(struct mp_output_chain *p,
                                     struct m_obj_settings *list);
 
+// Desired audio speed, with resample being strict resampling.
+void mp_output_chain_set_audio_speed(struct mp_output_chain *p,
+                                     double speed, double resample);
+
+// Total delay incured by the filter chain, as measured by the recent filtered
+// frames. The intention is that this sums the measured delays for each filter,
+// so if a filter is removed, the caller can estimate how much audio is missing
+// due to the change.
+// Makes sense for audio only.
+double mp_output_get_measured_total_delay(struct mp_output_chain *p);

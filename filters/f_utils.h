@@ -70,3 +70,9 @@ bool mp_subfilter_drain_destroy(struct mp_subfilter *sub);
 
 // A bidrectional filter which passes through all data.
 struct mp_filter *mp_bidir_nop_filter_create(struct mp_filter *parent);
+
+// A filter which repacks audio frame to fixed frame sizes with the given
+// number of samples. On hard format changes (sample format/channels/srate),
+// the frame can be shorter, unless pad_silence is true. Fails on non-aframes.
+struct mp_filter *mp_fixed_aframe_size_create(struct mp_filter *parent,
+                                              int samples, bool pad_silence);

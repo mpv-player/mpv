@@ -23,15 +23,17 @@
 
 #include "config.h"
 
+#include "audio/aframe.h"
+#include "audio/fmt-conversion.h"
+#include "audio/format.h"
 #include "common/common.h"
 #include "common/av_common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
-#include "aconverter.h"
-#include "aframe.h"
-#include "fmt-conversion.h"
-#include "format.h"
+
+#include "f_swresample.h"
+#include "filter_internal.h"
 
 #define HAVE_LIBSWRESAMPLE (!HAVE_LIBAV)
 #define HAVE_LIBAVRESAMPLE HAVE_LIBAV
@@ -54,18 +56,15 @@
 #error "config.h broken or no resampler found"
 #endif
 
-struct mp_aconverter {
+struct priv {
     struct mp_log *log;
-    struct mpv_global *global;
-    double playback_speed;
     bool is_resampling;
-    bool passthrough_mode;
     struct AVAudioResampleContext *avrctx;
     struct mp_aframe *avrctx_fmt; // output format of avrctx
     struct mp_aframe *pool_fmt; // format used to allocate frames for avrctx output
     struct mp_aframe *pre_out_fmt; // format before final conversion
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
-    const struct mp_resample_opts *opts; // opts requested by the user
+    struct mp_resample_opts *opts; // opts requested by the user
     // At least libswresample keeps a pointer around for this:
     int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
@@ -80,14 +79,16 @@ struct mp_aconverter {
     int out_format;
     struct mp_chmap out_channels;
 
-    struct mp_aframe *input;    // queued input frame
-    bool input_eof;             // queued input EOF
-    struct mp_aframe *output;   // queued output frame
-    bool output_eof;            // queued output EOF
+    double current_pts;
+
+    double cmd_speed;
+    double speed;
+
+    struct mp_swresample public;
 };
 
 #define OPT_BASE_STRUCT struct mp_resample_opts
-const struct m_sub_options resample_config = {
+const struct m_sub_options resample_conf = {
     .opts = (const m_option_t[]) {
         OPT_INTRANGE("audio-resample-filter-size", filter_size, 0, 0, 32),
         OPT_INTRANGE("audio-resample-phase-shift", phase_shift, 0, 0, 30),
@@ -104,28 +105,28 @@ const struct m_sub_options resample_config = {
 };
 
 #if HAVE_LIBAVRESAMPLE
-static double get_delay(struct mp_aconverter *p)
+static double get_delay(struct priv *p)
 {
     return avresample_get_delay(p->avrctx) / (double)p->in_rate +
            avresample_available(p->avrctx) / (double)p->out_rate;
 }
-static int get_out_samples(struct mp_aconverter *p, int in_samples)
+static int get_out_samples(struct priv *p, int in_samples)
 {
     return avresample_get_out_samples(p->avrctx, in_samples);
 }
 #else
-static double get_delay(struct mp_aconverter *p)
+static double get_delay(struct priv *p)
 {
     int64_t base = p->in_rate * (int64_t)p->out_rate;
     return swr_get_delay(p->avrctx, base) / (double)base;
 }
-static int get_out_samples(struct mp_aconverter *p, int in_samples)
+static int get_out_samples(struct priv *p, int in_samples)
 {
     return swr_get_out_samples(p->avrctx, in_samples);
 }
 #endif
 
-static void close_lavrr(struct mp_aconverter *p)
+static void close_lavrr(struct priv *p)
 {
     if (p->avrctx)
         avresample_close(p->avrctx);
@@ -156,7 +157,7 @@ static struct mp_chmap fudge_pairs[][2] = {
 // strictly speaking incompatible channel pairs. For example, 7.1 should be
 // changed to 7.1(wide) without dropping the SL/SR channels. (We still leave
 // it to libswresample to create the remix matrix.)
-static uint64_t fudge_layout_conversion(struct mp_aconverter *p,
+static uint64_t fudge_layout_conversion(struct priv *p,
                                         uint64_t in, uint64_t out)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(fudge_pairs); n++) {
@@ -191,19 +192,17 @@ static void transpose_order(int *map, int num)
     memcpy(map, nmap, sizeof(nmap));
 }
 
-static bool configure_lavrr(struct mp_aconverter *p, bool verbose)
+static bool configure_lavrr(struct priv *p, bool verbose)
 {
     close_lavrr(p);
 
-    p->in_rate = rate_from_speed(p->in_rate_user, p->playback_speed);
+    p->in_rate = rate_from_speed(p->in_rate_user, p->speed);
 
-    p->passthrough_mode = p->opts->allow_passthrough &&
-                          p->in_rate == p->out_rate &&
-                          p->in_format == p->out_format &&
-                          mp_chmap_equals(&p->in_channels, &p->out_channels);
-
-    if (p->passthrough_mode)
-        return true;
+    MP_VERBOSE(p, "%dHz %s %s -> %dHz %s %s\n",
+               p->in_rate, mp_chmap_to_str(&p->in_channels),
+               af_fmt_to_str(p->in_format),
+               p->out_rate, mp_chmap_to_str(&p->out_channels),
+               af_fmt_to_str(p->out_format));
 
     p->avrctx = avresample_alloc_context();
     p->avrctx_out = avresample_alloc_context();
@@ -217,7 +216,11 @@ static bool configure_lavrr(struct mp_aconverter *p, bool verbose)
     if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
         out_samplefmt == AV_SAMPLE_FMT_NONE ||
         out_samplefmtp == AV_SAMPLE_FMT_NONE)
+    {
+        MP_ERR(p, "unsupported conversion: %s -> %s\n",
+               af_fmt_to_str(p->in_format), af_fmt_to_str(p->out_format));
         goto error;
+    }
 
     av_opt_set_int(p->avrctx, "filter_size",        p->opts->filter_size, 0);
     av_opt_set_int(p->avrctx, "phase_shift",        p->opts->phase_shift, 0);
@@ -344,33 +347,17 @@ static bool configure_lavrr(struct mp_aconverter *p, bool verbose)
 
 error:
     close_lavrr(p);
+    mp_filter_internal_mark_failed(p->public.f);
+    MP_FATAL(p, "libswresample failed to initialize.\n");
     return false;
 }
 
-bool mp_aconverter_reconfig(struct mp_aconverter *p,
-                    int in_rate, int in_format, struct mp_chmap in_channels,
-                    int out_rate, int out_format, struct mp_chmap out_channels)
+static void reset(struct mp_filter *f)
 {
-    close_lavrr(p);
+    struct priv *p = f->priv;
 
-    TA_FREEP(&p->input);
-    TA_FREEP(&p->output);
-    p->input_eof = p->output_eof = false;
+    p->current_pts = MP_NOPTS_VALUE;
 
-    p->playback_speed = 1.0;
-
-    p->in_rate_user = in_rate;
-    p->in_format    = in_format;
-    p->in_channels  = in_channels;
-    p->out_rate     = out_rate;
-    p->out_format   = out_format;
-    p->out_channels = out_channels;
-
-    return configure_lavrr(p, true);
-}
-
-void mp_aconverter_flush(struct mp_aconverter *p)
-{
     if (!p->avrctx)
         return;
 #if HAVE_LIBSWRESAMPLE
@@ -380,11 +367,6 @@ void mp_aconverter_flush(struct mp_aconverter *p)
 #else
     while (avresample_read(p->avrctx, NULL, 1000) > 0) {}
 #endif
-}
-
-void mp_aconverter_set_speed(struct mp_aconverter *p, double speed)
-{
-    p->playback_speed = speed;
 }
 
 static void extra_output_conversion(struct mp_aframe *mpa)
@@ -460,7 +442,8 @@ static int resample_frame(struct AVAudioResampleContext *r,
         av_i ? av_i->nb_samples : 0);
 }
 
-static void filter_resample(struct mp_aconverter *p, struct mp_aframe *in)
+static struct mp_frame filter_resample_output(struct priv *p,
+                                              struct mp_aframe *in)
 {
     struct mp_aframe *out = NULL;
 
@@ -505,43 +488,122 @@ static void filter_resample(struct mp_aconverter *p, struct mp_aframe *in)
 
     extra_output_conversion(out);
 
-    if (in)
+    if (in) {
         mp_aframe_copy_attributes(out, in);
+        p->current_pts = mp_aframe_end_pts(in);
+    }
 
     if (out_samples) {
-        p->output = out;
+        if (p->current_pts != MP_NOPTS_VALUE) {
+            double delay = get_delay(p) * mp_aframe_get_speed(out) +
+                           mp_aframe_duration(out);
+            mp_aframe_set_pts(out, p->current_pts - delay);
+            mp_aframe_mul_speed(out, p->speed);
+        }
     } else {
-        talloc_free(out);
+        TA_FREEP(&out);
     }
-    p->output_eof = !in; // we've read everything
 
-    return;
+    return out ? MAKE_FRAME(MP_FRAME_AUDIO, out) : MP_NO_FRAME;
 error:
     talloc_free(out);
     MP_ERR(p, "Error on resampling.\n");
+    mp_filter_internal_mark_failed(p->public.f);
+    return MP_NO_FRAME;
 }
 
-static void filter(struct mp_aconverter *p)
+static void process(struct mp_filter *f)
 {
-    if (p->output || p->output_eof || !(p->input || p->input_eof))
+    struct priv *p = f->priv;
+
+    if (!mp_pin_can_transfer_data(f->ppins[1], f->ppins[0]))
         return;
 
-    int new_rate = rate_from_speed(p->in_rate_user, p->playback_speed);
+    p->speed = p->cmd_speed * p->public.speed;
 
-    if (p->passthrough_mode && new_rate != p->in_rate)
-        configure_lavrr(p, false);
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
-    if (p->passthrough_mode) {
-        p->output = p->input;
-        p->input = NULL;
-        p->output_eof = p->input_eof;
-        p->input_eof = false;
+    struct mp_aframe *input = NULL;
+    if (frame.type == MP_FRAME_AUDIO) {
+        input = frame.data;
+    } else if (frame.type != MP_FRAME_EOF) {
+        MP_ERR(p, "Unsupported frame type.\n");
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_failed(f);
         return;
     }
 
+    if (!input && !p->avrctx) {
+        // Obviously no draining needed.
+        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+        return;
+    }
+
+    if (input) {
+        struct mp_swresample *s = &p->public;
+
+        int in_rate = mp_aframe_get_rate(input);
+        int in_format = mp_aframe_get_format(input);
+        struct mp_chmap in_channels = {0};
+        mp_aframe_get_chmap(input, &in_channels);
+
+        if (!in_rate || !in_format || !in_channels.num) {
+            MP_ERR(p, "Frame with invalid format unsupported\n");
+            mp_frame_unref(&frame);
+            mp_filter_internal_mark_failed(f);
+            return;
+        }
+
+        int out_rate = s->out_rate ? s->out_rate : in_rate;
+        int out_format = s->out_format ? s->out_format : in_format;
+        struct mp_chmap out_channels =
+            s->out_channels.num ? s->out_channels : in_channels;
+
+        if (p->in_rate_user != in_rate ||
+            p->in_format != in_format ||
+            !mp_chmap_equals(&p->in_channels, &in_channels) ||
+            p->out_rate != out_rate ||
+            p->out_format != out_format ||
+            !mp_chmap_equals(&p->out_channels, &out_channels) ||
+            !p->avrctx)
+        {
+            if (p->avrctx) {
+                // drain remaining audio
+                struct mp_frame out = filter_resample_output(p, NULL);
+                if (out.type) {
+                    mp_pin_in_write(f->ppins[1], out);
+                    // continue filtering next time.
+                    mp_pin_out_unread(f->ppins[0], frame);
+                    input = NULL;
+                }
+            }
+
+            MP_VERBOSE(p, "format change, reinitializing resampler\n");
+
+            p->in_rate_user = in_rate;
+            p->in_format = in_format;
+            p->in_channels = in_channels;
+            p->out_rate = out_rate;
+            p->out_format = out_format;
+            p->out_channels = out_channels;
+
+            if (!configure_lavrr(p, true)) {
+                talloc_free(input);
+                return;
+            }
+
+            if (!input) {
+                // continue filtering next time
+                mp_filter_internal_mark_progress(f);
+                return;
+            }
+        }
+    }
+
+    int new_rate = rate_from_speed(p->in_rate_user, p->speed);
     if (p->avrctx && !(!p->is_resampling && new_rate == p->in_rate)) {
-        AVRational r = av_d2q(p->playback_speed * p->in_rate_user / p->in_rate,
-                              INT_MAX / 2);
+        AVRational r =
+            av_d2q(p->speed * p->in_rate_user / p->in_rate, INT_MAX / 2);
         // Essentially, swr/avresample_set_compensation() does 2 things:
         // - adjust output sample rate by sample_delta/compensation_distance
         // - reset the adjustment after compensation_distance output samples
@@ -560,94 +622,96 @@ static void filter(struct mp_aconverter *p)
     if (need_reinit && new_rate != p->in_rate) {
         // Before reconfiguring, drain the audio that is still buffered
         // in the resampler.
-        filter_resample(p, NULL);
+        struct mp_frame out = filter_resample_output(p, NULL);
+        bool need_drain = !!out.type;
+        if (need_drain) {
+            mp_pin_in_write(f->ppins[1], out);
+            // Drain; continue filtering next time.
+            mp_pin_out_unread(f->ppins[0], frame);
+        }
         // Reinitialize resampler.
         configure_lavrr(p, false);
-        p->output_eof = false;
-        if (p->output)
-            return; // need to read output before continuing filtering
+        if (need_drain) {
+            mp_filter_internal_mark_progress(f);
+            return;
+        }
     }
 
-    filter_resample(p, p->input);
-    TA_FREEP(&p->input);
-    p->input_eof = false;
-}
+    struct mp_frame out = filter_resample_output(p, input);
 
-// Queue input. If true, ownership of in passes to mp_aconverted and the input
-// was accepted. Otherwise, return false and reject in.
-// in==NULL means trigger EOF.
-bool mp_aconverter_write_input(struct mp_aconverter *p, struct mp_aframe *in)
-{
-    if (p->input || p->input_eof)
-        return false;
-
-    p->input = in;
-    p->input_eof = !in;
-    return true;
-}
-
-// Return output frame, or NULL if nothing available.
-// *eof is set to true if NULL is returned, and it was due to EOF.
-struct mp_aframe *mp_aconverter_read_output(struct mp_aconverter *p, bool *eof)
-{
-    *eof = false;
-
-    filter(p);
-
-    if (p->output) {
-        struct mp_aframe *out = p->output;
-        p->output = NULL;
-        return out;
+    if (input && out.type) {
+        mp_pin_in_write(f->ppins[1], out);
+        mp_pin_out_request_data(f->ppins[0]);
+    } else if (!input && out.type) {
+        mp_pin_in_write(f->ppins[1], out);
+        mp_pin_out_repeat_eof(f->ppins[0]);
+    } else if (!input) {
+        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
     }
 
-    *eof = p->output_eof;
-    p->output_eof = false;
-    return NULL;
+    talloc_free(input);
 }
 
-double mp_aconverter_get_latency(struct mp_aconverter *p)
+double mp_swresample_get_delay(struct mp_swresample *s)
 {
-    double delay = get_delay(p);
+    struct priv *p = s->f->priv;
 
-    if (p->input)
-        delay += mp_aframe_duration(p->input);
-
-    // In theory this is influenced by playback speed, but other parts of the
-    // player get it wrong anyway.
-    if (p->output)
-        delay += mp_aframe_duration(p->output);
-
-    return delay;
+    return get_delay(p);
 }
 
-static void destroy_aconverter(void *ptr)
+static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
-    struct mp_aconverter *p = ptr;
+    struct priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_SET_SPEED_RESAMPLE) {
+        p->cmd_speed = cmd->speed;
+        return true;
+    }
+
+    return false;
+}
+
+static void destroy(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
 
     close_lavrr(p);
-
-    talloc_free(p->input);
-    talloc_free(p->output);
 }
 
-// If opts is not NULL, the pointer must be valid for the lifetime of the
-// mp_aconverter.
-struct mp_aconverter *mp_aconverter_create(struct mpv_global *global,
-                                           struct mp_log *log,
-                                           const struct mp_resample_opts *opts)
-{
-    struct mp_aconverter *p = talloc_zero(NULL, struct mp_aconverter);
-    p->log = log;
-    p->global = global;
+static const struct mp_filter_info swresample_filter = {
+    .name = "swresample",
+    .priv_size = sizeof(struct priv),
+    .process = process,
+    .command = command,
+    .reset = reset,
+    .destroy = destroy,
+};
 
-    p->opts = opts;
-    if (!p->opts)
-        p->opts = mp_get_config_group(p, global, &resample_config);
+struct mp_swresample *mp_swresample_create(struct mp_filter *parent,
+                                           struct mp_resample_opts *opts)
+{
+    struct mp_filter *f = mp_filter_create(parent, &swresample_filter);
+    if (!f)
+        return NULL;
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct priv *p = f->priv;
+    p->public.f = f;
+    p->public.speed = 1.0;
+    p->cmd_speed = 1.0;
+    p->log = f->log;
+
+    if (opts) {
+        p->opts = talloc_dup(p, opts);
+        p->opts->avopts = mp_dup_str_array(p, p->opts->avopts);
+    } else {
+        p->opts = mp_get_config_group(p, f->global, &resample_conf);
+    }
 
     p->reorder_buffer = mp_aframe_pool_create(p);
     p->out_pool = mp_aframe_pool_create(p);
 
-    talloc_set_destructor(p, destroy_aconverter);
-
-    return p;
+    return &p->public;
 }

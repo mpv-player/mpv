@@ -68,10 +68,6 @@
 
 #include "core.h"
 
-#if HAVE_LIBAF
-#include "audio/filter/af.h"
-#endif
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -1430,34 +1426,26 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         bstr key;
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
-        struct mp_tags metadata = {0};
-        void *metadata_mem = NULL;
+        struct mp_tags *metadata = NULL;
         int res = CONTROL_UNKNOWN;
+        struct mp_output_chain *chain = NULL;
         if (strcmp(type, "vf") == 0) {
-            if (!mpctx->vo_chain)
-                return M_PROPERTY_UNAVAILABLE;
-
-            struct mp_tags *metadata_ptr = NULL;
-            struct mp_filter_command cmd = {
-                .type = MP_FILTER_COMMAND_GET_META,
-                .res = &metadata_ptr,
-            };
-            char *key0 = mp_tprintf(80, "%.*s", BSTR_P(key));
-            mp_output_chain_command(mpctx->vo_chain->filter, key0, &cmd);
-
-            if (metadata_ptr) {
-                metadata = *metadata_ptr;
-                metadata_mem = metadata_ptr;
-                res = CONTROL_OK;
-            }
+            chain = mpctx->vo_chain ? mpctx->vo_chain->filter : NULL;
         } else if (strcmp(type, "af") == 0) {
-#if HAVE_LIBAF
-            if (!(mpctx->ao_chain && mpctx->ao_chain->af))
-                return M_PROPERTY_UNAVAILABLE;
-            struct af_stream *af = mpctx->ao_chain->af;
-            res = af_control_by_label(af, AF_CONTROL_GET_METADATA, &metadata, key);
-#endif
+            chain = mpctx->ao_chain ? mpctx->ao_chain->filter : NULL;
         }
+        if (!chain)
+            return M_PROPERTY_UNAVAILABLE;
+
+        struct mp_filter_command cmd = {
+            .type = MP_FILTER_COMMAND_GET_META,
+            .res = &metadata,
+        };
+        mp_output_chain_command(chain, mp_tprintf(80, "%.*s", BSTR_P(key)), &cmd);
+
+        if (metadata)
+            res = CONTROL_OK;
+
         switch (res) {
         case CONTROL_UNKNOWN:
             return M_PROPERTY_UNKNOWN;
@@ -1466,11 +1454,11 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
             if (strlen(rem)) {
                 struct m_property_action_arg next_ka = *ka;
                 next_ka.key = rem;
-                res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, &metadata);
+                res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, metadata);
             } else {
-                res = tag_property(ka->action, ka->arg, &metadata);
+                res = tag_property(ka->action, ka->arg, metadata);
             }
-            talloc_free(metadata_mem);
+            talloc_free(metadata);
             return res;
         default:
             return M_PROPERTY_ERROR;
@@ -2076,8 +2064,8 @@ static int mp_property_audio_params(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return property_audiofmt(mpctx->ao_chain ? mpctx->ao_chain->input_format : NULL,
-                             action, arg);
+    return property_audiofmt(mpctx->ao_chain ?
+        mpctx->ao_chain->filter->input_aformat : NULL, action, arg);
 }
 
 static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
@@ -5483,25 +5471,24 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         return edit_filters_osd(mpctx, STREAM_VIDEO, cmd->args[0].v.s,
                                 cmd->args[1].v.s, msg_osd);
 
+    case MP_CMD_AF_COMMAND:
     case MP_CMD_VF_COMMAND: {
-        if (!mpctx->vo_chain)
+        struct mp_output_chain *chain = NULL;
+        if (cmd->id == MP_CMD_VF_COMMAND) {
+            chain = mpctx->vo_chain ? mpctx->vo_chain->filter : NULL;
+        } else {
+            chain = mpctx->ao_chain ? mpctx->ao_chain->filter : NULL;
+        }
+        if (!chain)
             return -1;
         struct mp_filter_command filter_cmd = {
             .type = MP_FILTER_COMMAND_TEXT,
             .cmd = cmd->args[1].v.s,
             .arg = cmd->args[2].v.s,
         };
-        return mp_output_chain_command(mpctx->vo_chain->filter, cmd->args[0].v.s,
-                                       &filter_cmd) ? 0 : -1;
+        return mp_output_chain_command(chain, cmd->args[0].v.s, &filter_cmd)
+               ? 0 : -1;
     }
-
-#if HAVE_LIBAF
-    case MP_CMD_AF_COMMAND:
-        if (!mpctx->ao_chain)
-            return -1;
-        return af_send_command(mpctx->ao_chain->af, cmd->args[0].v.s,
-                               cmd->args[1].v.s, cmd->args[2].v.s);
-#endif
 
     case MP_CMD_SCRIPT_BINDING: {
         mpv_event_client_message event = {0};

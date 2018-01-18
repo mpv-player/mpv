@@ -1,5 +1,8 @@
 #include "config.h"
 
+#include "audio/aframe.h"
+#include "audio/chmap_sel.h"
+#include "audio/format.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "video/hwdec.h"
@@ -7,6 +10,7 @@
 
 #include "f_autoconvert.h"
 #include "f_hwtransfer.h"
+#include "f_swresample.h"
 #include "f_swscale.h"
 #include "f_utils.h"
 #include "filter.h"
@@ -28,6 +32,18 @@ struct priv {
 
     // sws state
     int in_imgfmt, in_subfmt;
+
+    int *afmts;
+    int num_afmts;
+    int *srates;
+    int num_srates;
+    struct mp_chmap_sel chmaps;
+
+    int in_afmt, in_srate;
+    struct mp_chmap in_chmap;
+
+    double audio_speed;
+    bool resampling_forced;
 
     struct mp_autoconvert public;
 };
@@ -56,6 +72,10 @@ void mp_autoconvert_clear(struct mp_autoconvert *c)
     struct priv *p = c->f->priv;
 
     p->num_imgfmts = 0;
+    p->num_afmts = 0;
+    p->num_srates = 0;
+    p->chmaps = (struct mp_chmap_sel){0};
+    p->force_update = true;
 }
 
 void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt)
@@ -108,6 +128,33 @@ void mp_autoconvert_add_vo_hwdec_subfmts(struct mp_autoconvert *c,
     }
 
     p->vo_convert = true;
+}
+
+void mp_autoconvert_add_afmt(struct mp_autoconvert *c, int afmt)
+{
+    struct priv *p = c->f->priv;
+
+    MP_TARRAY_APPEND(p, p->afmts, p->num_afmts, afmt);
+    p->force_update = true;
+}
+
+void mp_autoconvert_add_chmap(struct mp_autoconvert *c, struct mp_chmap *chmap)
+{
+    struct priv *p = c->f->priv;
+
+    mp_chmap_sel_add_map(&p->chmaps, chmap);
+    p->force_update = true;
+}
+
+void mp_autoconvert_add_srate(struct mp_autoconvert *c, int rate)
+{
+    struct priv *p = c->f->priv;
+
+    MP_TARRAY_APPEND(p, p->srates, p->num_srates, rate);
+    // Some other API we call expects a 0-terminated sample rates array.
+    MP_TARRAY_GROW(p, p->srates, p->num_srates);
+    p->srates[p->num_srates] = 0;
+    p->force_update = true;
 }
 
 static void handle_video_frame(struct mp_filter *f)
@@ -227,6 +274,94 @@ static void handle_video_frame(struct mp_filter *f)
     mp_subfilter_continue(&p->sub);
 }
 
+static void handle_audio_frame(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    struct mp_frame frame = p->sub.frame;
+    if (frame.type != MP_FRAME_AUDIO) {
+        MP_ERR(p, "audio input required!\n");
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    struct mp_aframe *aframe = frame.data;
+
+    int afmt = mp_aframe_get_format(aframe);
+    int srate = mp_aframe_get_rate(aframe);
+    struct mp_chmap chmap = {0};
+    mp_aframe_get_chmap(aframe, &chmap);
+
+    if (afmt == p->in_afmt && srate == p->in_srate &&
+        mp_chmap_equals(&chmap, &p->in_chmap) &&
+        (!p->resampling_forced || p->sub.filter) &&
+        !p->force_update)
+    {
+        goto cont;
+    }
+
+    if (!mp_subfilter_drain_destroy(&p->sub))
+        return;
+
+    p->in_afmt = afmt;
+    p->in_srate = srate;
+    p->in_chmap = chmap;
+    p->force_update = false;
+
+    int out_afmt = 0;
+    int best_score = 0;
+    for (int n = 0; n < p->num_afmts; n++) {
+        int score = af_format_conversion_score(p->afmts[n], afmt);
+        if (!out_afmt || score > best_score) {
+            best_score = score;
+            out_afmt = p->afmts[n];
+        }
+    }
+    if (!out_afmt)
+        out_afmt = afmt;
+
+    // (The p->srates array is 0-terminated already.)
+    int out_srate = af_select_best_samplerate(srate, p->srates);
+    if (out_srate <= 0)
+        out_srate = p->num_srates ? p->srates[0] : srate;
+
+    struct mp_chmap out_chmap = chmap;
+    if (p->chmaps.num_chmaps) {
+        if (!mp_chmap_sel_adjust(&p->chmaps, &out_chmap))
+            out_chmap = p->chmaps.chmaps[0]; // violently force fallback
+    }
+
+    if (out_afmt == p->in_afmt && out_srate == p->in_srate &&
+        mp_chmap_equals(&out_chmap, &p->in_chmap) && !p->resampling_forced)
+    {
+        goto cont;
+    }
+
+    MP_VERBOSE(p, "inserting resampler\n");
+
+    struct mp_swresample *s = mp_swresample_create(f, NULL);
+    if (!s)
+        abort();
+
+    s->out_format = out_afmt;
+    s->out_rate = out_srate;
+    s->out_channels = out_chmap;
+
+    p->sub.filter = s->f;
+
+cont:
+
+    if (p->sub.filter) {
+        struct mp_filter_command cmd = {
+            .type = MP_FILTER_COMMAND_SET_SPEED_RESAMPLE,
+            .speed = p->audio_speed,
+        };
+        mp_filter_command(p->sub.filter, &cmd);
+    }
+
+    mp_subfilter_continue(&p->sub);
+}
+
 static void process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
@@ -241,9 +376,31 @@ static void process(struct mp_filter *f)
             handle_video_frame(f);
             return;
         }
+        if (p->num_afmts || p->num_srates || p->chmaps.num_chmaps ||
+            p->resampling_forced)
+        {
+            handle_audio_frame(f);
+            return;
+        }
     }
 
     mp_subfilter_continue(&p->sub);
+}
+
+static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+{
+    struct priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_SET_SPEED_RESAMPLE) {
+        p->audio_speed = cmd->speed;
+        // If we needed resampling once, keep forcing resampling, as it might be
+        // quickly changing between 1.0 and other values for A/V compensation.
+        if (p->audio_speed != 1.0)
+            p->resampling_forced = true;
+        return true;
+    }
+
+    return false;
 }
 
 static void reset(struct mp_filter *f)
@@ -265,6 +422,7 @@ static const struct mp_filter_info autoconvert_filter = {
     .name = "autoconvert",
     .priv_size = sizeof(struct priv),
     .process = process,
+    .command = command,
     .reset = reset,
     .destroy = destroy,
 };
@@ -281,6 +439,7 @@ struct mp_autoconvert *mp_autoconvert_create(struct mp_filter *parent)
     struct priv *p = f->priv;
     p->public.f = f;
     p->log = f->log;
+    p->audio_speed = 1.0;
     p->sub.in = f->ppins[0];
     p->sub.out = f->ppins[1];
 
