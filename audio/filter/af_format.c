@@ -15,18 +15,14 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-
-#include <libavutil/common.h>
-
+#include "audio/aframe.h"
+#include "audio/format.h"
+#include "filters/f_autoconvert.h"
+#include "filters/filter_internal.h"
+#include "filters/user_filters.h"
 #include "options/m_option.h"
 
-#include "audio/format.h"
-#include "af.h"
-
-struct priv {
-    struct m_config *config;
-
+struct f_opts {
     int in_format;
     int in_srate;
     struct m_channels in_channels;
@@ -37,98 +33,109 @@ struct priv {
     int fail;
 };
 
-static void force_in_params(struct af_instance *af, struct mp_audio *in)
+struct priv {
+    struct f_opts *opts;
+    struct mp_pin *in_pin;
+};
+
+static void process(struct mp_filter *f)
 {
-    struct priv *priv = af->priv;
+    struct priv *p = f->priv;
 
-    if (priv->in_format != AF_FORMAT_UNKNOWN)
-        mp_audio_set_format(in, priv->in_format);
+    if (!mp_pin_can_transfer_data(f->ppins[1], p->in_pin))
+        return;
 
-    if (priv->in_channels.num_chmaps > 0)
-        mp_audio_set_channels(in, &priv->in_channels.chmaps[0]);
+    struct mp_frame frame = mp_pin_out_read(p->in_pin);
 
-    if (priv->in_srate)
-        in->rate = priv->in_srate;
-}
-
-static void force_out_params(struct af_instance *af, struct mp_audio *out)
-{
-    struct priv *priv = af->priv;
-
-    if (priv->out_format != AF_FORMAT_UNKNOWN)
-        mp_audio_set_format(out, priv->out_format);
-
-    if (priv->out_channels.num_chmaps > 0)
-        mp_audio_set_channels(out, &priv->out_channels.chmaps[0]);
-
-    if (priv->out_srate)
-        out->rate = priv->out_srate;
-}
-
-static int control(struct af_instance *af, int cmd, void *arg)
-{
-    struct priv *priv = af->priv;
-
-    switch (cmd) {
-    case AF_CONTROL_REINIT: {
-        struct mp_audio *in = arg;
-        struct mp_audio orig_in = *in;
-        struct mp_audio *out = af->data;
-
-        force_in_params(af, in);
-        mp_audio_copy_config(out, in);
-        force_out_params(af, out);
-
-        if (in->nch != out->nch || in->bps != out->bps) {
-            MP_ERR(af, "Forced input/output formats are incompatible.\n");
-            return AF_ERROR;
-        }
-
-        if (priv->fail) {
-            MP_ERR(af, "Failing on purpose.\n");
-            return AF_ERROR;
-        }
-
-        return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
+    if (p->opts->fail) {
+        MP_ERR(f, "Failing on purpose.\n");
+        goto error;
     }
+
+    if (frame.type == MP_FRAME_EOF) {
+        mp_pin_in_write(f->ppins[1], frame);
+        return;
     }
-    return AF_UNKNOWN;
+
+    if (frame.type != MP_FRAME_AUDIO) {
+        MP_ERR(f, "audio frame expected\n");
+        goto error;
+    }
+
+    struct mp_aframe *in = frame.data;
+
+    if (p->opts->out_channels.num_chmaps > 0) {
+        if (!mp_aframe_set_chmap(in, &p->opts->out_channels.chmaps[0])) {
+            MP_ERR(f, "could not force output channels\n");
+            goto error;
+        }
+    }
+
+    if (p->opts->out_srate)
+        mp_aframe_set_rate(in, p->opts->out_srate);
+
+    mp_pin_in_write(f->ppins[1], frame);
+    return;
+
+error:
+    mp_frame_unref(&frame);
+    mp_filter_internal_mark_failed(f);
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data)
-{
-    if (data)
-        mp_audio_copy_config(data, af->data);
-    af_add_output_frame(af, data);
-    return 0;
-}
-
-static int af_open(struct af_instance *af)
-{
-    af->control = control;
-    af->filter_frame = filter;
-
-    force_in_params(af, af->data);
-    force_out_params(af, af->data);
-
-    return AF_OK;
-}
-
-#define OPT_BASE_STRUCT struct priv
-
-const struct af_info af_info_format = {
-    .info = "Force audio format",
+static const struct mp_filter_info af_format_filter = {
     .name = "format",
-    .open = af_open,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_AUDIOFORMAT("format", in_format, 0),
-        OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
-        OPT_CHANNELS("channels", in_channels, 0, .min = 1),
-        OPT_AUDIOFORMAT("out-format", out_format, 0),
-        OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
-        OPT_CHANNELS("out-channels", out_channels, 0, .min = 1),
-        OPT_FLAG("fail", fail, 0),
-        {0}
+    .process = process,
+};
+
+static struct mp_filter *af_format_create(struct mp_filter *parent,
+                                              void *options)
+{
+    struct mp_filter *f = mp_filter_create(parent, &af_format_filter);
+    if (!f) {
+        talloc_free(options);
+        return NULL;
+    }
+
+    struct priv *p = f->priv;
+    p->opts = talloc_steal(p, options);
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct mp_autoconvert *conv = mp_autoconvert_create(f);
+    if (!conv)
+        abort();
+
+    if (p->opts->in_format)
+        mp_autoconvert_add_afmt(conv, p->opts->in_format);
+    if (p->opts->in_srate)
+        mp_autoconvert_add_srate(conv, p->opts->in_srate);
+    if (p->opts->in_channels.num_chmaps > 0)
+        mp_autoconvert_add_chmap(conv, &p->opts->in_channels.chmaps[0]);
+
+    mp_pin_connect(conv->f->pins[0], f->ppins[0]);
+    p->in_pin = conv->f->pins[1];
+
+    return f;
+}
+
+#define OPT_BASE_STRUCT struct f_opts
+
+const struct mp_user_filter_entry af_format = {
+    .desc = {
+        .name = "format",
+        .description = "Force audio format",
+        .priv_size = sizeof(struct f_opts),
+        .options = (const struct m_option[]) {
+            OPT_AUDIOFORMAT("format", in_format, 0),
+            OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
+            OPT_CHANNELS("channels", in_channels, 0, .min = 1),
+            OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
+            OPT_CHANNELS("out-channels", out_channels, 0, .min = 1),
+            OPT_FLAG("fail", fail, 0),
+            {0}
+        },
     },
+    .create = af_format_create,
 };

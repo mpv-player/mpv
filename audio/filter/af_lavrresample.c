@@ -32,131 +32,18 @@
 
 #include "common/av_common.h"
 #include "common/msg.h"
+#include "filters/f_swresample.h"
+#include "filters/filter_internal.h"
+#include "filters/user_filters.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
-#include "audio/filter/af.h"
-#include "audio/fmt-conversion.h"
-#include "osdep/endian.h"
-#include "audio/aconverter.h"
+#include "options/options.h"
 
 struct af_resample {
     int allow_detach;
-    double playback_speed;
     struct mp_resample_opts opts;
     int global_normalize;
-    struct mp_aconverter *converter;
-    int deprecation_warning;
 };
-
-static int control(struct af_instance *af, int cmd, void *arg)
-{
-    struct af_resample *s = af->priv;
-
-    switch (cmd) {
-    case AF_CONTROL_REINIT: {
-        struct mp_audio *in = arg;
-        struct mp_audio *out = af->data;
-        struct mp_audio orig_in = *in;
-
-        if (((out->rate    == in->rate) || (out->rate == 0)) &&
-            (out->format   == in->format) &&
-            (mp_chmap_equals(&out->channels, &in->channels) || out->nch == 0) &&
-            s->allow_detach && s->playback_speed == 1.0)
-            return AF_DETACH;
-
-        if (out->rate == 0)
-            out->rate = in->rate;
-
-        if (mp_chmap_is_empty(&out->channels))
-            mp_audio_set_channels(out, &in->channels);
-
-        if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
-            mp_audio_set_format(in, AF_FORMAT_FLOAT);
-        if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
-            mp_audio_set_format(out, in->format);
-
-        int r = ((in->format == orig_in.format) &&
-                mp_chmap_equals(&in->channels, &orig_in.channels))
-                ? AF_OK : AF_FALSE;
-
-        if (r == AF_OK) {
-            if (!mp_aconverter_reconfig(s->converter,
-                    in->rate, in->format, in->channels,
-                    out->rate, out->format, out->channels))
-                r = AF_ERROR;
-        }
-        return r;
-    }
-    case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
-        s->playback_speed = *(double *)arg;
-        return AF_OK;
-    }
-    case AF_CONTROL_RESET:
-        mp_aconverter_flush(s->converter);
-        return AF_OK;
-    }
-    return AF_UNKNOWN;
-}
-
-static void uninit(struct af_instance *af)
-{
-    struct af_resample *s = af->priv;
-
-    talloc_free(s->converter);
-}
-
-static int filter(struct af_instance *af, struct mp_audio *in)
-{
-    struct af_resample *s = af->priv;
-
-    mp_aconverter_set_speed(s->converter, s->playback_speed);
-
-    af->filter_out(af);
-
-    struct mp_aframe *aframe = mp_audio_to_aframe(in);
-    if (!aframe && in)
-        return -1;
-    talloc_free(in);
-    bool ok = mp_aconverter_write_input(s->converter, aframe);
-    if (!ok)
-        talloc_free(aframe);
-
-    return ok ? 0 : -1;
-}
-
-static int filter_out(struct af_instance *af)
-{
-    struct af_resample *s = af->priv;
-    bool eof;
-    struct mp_aframe *out = mp_aconverter_read_output(s->converter, &eof);
-    if (out)
-        af_add_output_frame(af, mp_audio_from_aframe(out));
-    talloc_free(out);
-    af->delay = mp_aconverter_get_latency(s->converter);
-    return 0;
-}
-
-static int af_open(struct af_instance *af)
-{
-    struct af_resample *s = af->priv;
-
-    af->control = control;
-    af->uninit  = uninit;
-    af->filter_frame = filter;
-    af->filter_out = filter_out;
-
-    if (s->opts.normalize < 0)
-        s->opts.normalize = s->global_normalize;
-
-    s->converter = mp_aconverter_create(af->global, af->log, &s->opts);
-
-    if (s->deprecation_warning) {
-        MP_WARN(af, "This filter is deprecated! Use the --audio-resample- options"
-                " to customize resampling, or the --af=aresample filter.\n");
-    }
-
-    return AF_OK;
-}
 
 static void set_defaults(struct mpv_global *global, void *p)
 {
@@ -165,7 +52,7 @@ static void set_defaults(struct mpv_global *global, void *p)
     struct mp_resample_opts *opts = &s->opts;
 
     struct mp_resample_opts *src_opts =
-        mp_get_config_group(s, global, &resample_config);
+        mp_get_config_group(s, global, &resample_conf);
 
     s->global_normalize = src_opts->normalize;
 
@@ -180,28 +67,46 @@ static void set_defaults(struct mpv_global *global, void *p)
 
 #define OPT_BASE_STRUCT struct af_resample
 
-const struct af_info af_info_lavrresample = {
-    .info = "Sample frequency conversion using libavresample",
-    .name = "lavrresample",
-    .open = af_open,
-    .priv_size = sizeof(struct af_resample),
-    .priv_defaults = &(const struct af_resample) {
-        .opts = MP_RESAMPLE_OPTS_DEF,
-        .playback_speed = 1.0,
-        .allow_detach = 1,
-        .deprecation_warning = 1,
+static struct mp_filter *af_lavrresample_create(struct mp_filter *parent,
+                                                void *options)
+{
+    struct af_resample *s = options;
+
+    if (s->opts.normalize < 0)
+        s->opts.normalize = s->global_normalize;
+
+    struct mp_swresample *swr = mp_swresample_create(parent, &s->opts);
+    if (!swr)
+        abort();
+
+    MP_WARN(swr->f, "This filter is deprecated! Use the --audio-resample- options"
+            " to customize resampling, or the --af=aresample filter.\n");
+
+    talloc_free(s);
+    return swr->f;
+}
+
+const struct mp_user_filter_entry af_lavrresample = {
+    .desc = {
+        .description = "Sample frequency conversion using libavresample",
+        .name = "lavrresample",
+        .priv_size = sizeof(struct af_resample),
+        .priv_defaults = &(const struct af_resample) {
+            .opts = MP_RESAMPLE_OPTS_DEF,
+            .allow_detach = 1,
+        },
+        .options = (const struct m_option[]) {
+            OPT_INTRANGE("filter-size", opts.filter_size, 0, 0, 32),
+            OPT_INTRANGE("phase-shift", opts.phase_shift, 0, 0, 30),
+            OPT_FLAG("linear", opts.linear, 0),
+            OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
+            OPT_FLAG("detach", allow_detach, 0), // does nothing
+            OPT_CHOICE("normalize", opts.normalize, 0,
+                    ({"no", 0}, {"yes", 1}, {"auto", -1})),
+            OPT_KEYVALUELIST("o", opts.avopts, 0),
+            {0}
+        },
+        .set_defaults = set_defaults,
     },
-    .options = (const struct m_option[]) {
-        OPT_INTRANGE("filter-size", opts.filter_size, 0, 0, 32),
-        OPT_INTRANGE("phase-shift", opts.phase_shift, 0, 0, 30),
-        OPT_FLAG("linear", opts.linear, 0),
-        OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
-        OPT_FLAG("detach", allow_detach, 0),
-        OPT_CHOICE("normalize", opts.normalize, 0,
-                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
-        OPT_KEYVALUELIST("o", opts.avopts, 0),
-        OPT_FLAG("deprecation-warning", deprecation_warning, 0),
-        {0}
-    },
-    .set_defaults = set_defaults,
+    .create = af_lavrresample_create,
 };

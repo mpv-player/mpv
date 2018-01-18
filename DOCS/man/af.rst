@@ -52,7 +52,8 @@ Available filters are:
         Do not detach if input and output audio format/rate/channels match.
         (If you just want to set defaults for this filter that will be used
         even by automatically inserted lavrresample instances, you should
-        prefer setting them with ``--af-defaults=lavrresample:...``.)
+        prefer setting them with the ``--audio-resample-...`` options.) This
+        does not do anything anymore and the filter will never detach.
     ``normalize=<yes|no|auto>``
         Whether to normalize when remixing channel layouts (default: auto).
         ``auto`` uses the value set by ``--audio-normalize-downmix``.
@@ -97,7 +98,7 @@ Available filters are:
         Select the libavcodec encoder used. Currently, this should be an AC-3
         encoder, and using another codec will fail horribly.
 
-``format=format:srate:channels:out-format:out-srate:out-channels``
+``format=format:srate:channels:out-srate:out-channels``
     Does not do any format conversion itself. Rather, it may cause the
     filter system to insert necessary conversion filters before or after this
     filter if needed. It is primarily useful for controlling the audio format
@@ -125,8 +126,6 @@ Available filters are:
     ``<channels>``
         Force mixing to a specific channel layout. See ``--audio-channels`` option
         for possible values.
-
-    ``<out-format>``
 
     ``<out-srate>``
 

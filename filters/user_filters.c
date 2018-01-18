@@ -18,6 +18,31 @@ static bool get_desc_from(const struct mp_user_filter_entry **list, int num,
     return true;
 }
 
+// --af option
+
+const struct mp_user_filter_entry *af_list[] = {
+    &af_lavfi,
+    &af_lavfi_bridge,
+    &af_scaletempo,
+    &af_format,
+#if HAVE_RUBBERBAND
+    &af_rubberband,
+#endif
+    &af_lavcac3enc,
+};
+
+static bool get_af_desc(struct m_obj_desc *dst, int index)
+{
+    return get_desc_from(af_list, MP_ARRAY_SIZE(af_list), dst, index);
+}
+
+const struct m_obj_list af_obj_list = {
+    .get_desc = get_af_desc,
+    .description = "audio filters",
+    .allow_disable_entries = true,
+    .allow_unknown_entries = true,
+};
+
 // --vf option
 
 const struct mp_user_filter_entry *vf_list[] = {
@@ -66,6 +91,10 @@ struct mp_filter *mp_create_user_filter(struct mp_filter *parent,
         frame_type = MP_FRAME_VIDEO;
         obj_list = &vf_obj_list;
         defs_name = "vf-defaults";
+    } else if (type == MP_OUTPUT_CHAIN_AUDIO) {
+        frame_type = MP_FRAME_AUDIO;
+        obj_list = &af_obj_list;
+        defs_name = "af-defaults";
     }
     assert(frame_type && obj_list);
 

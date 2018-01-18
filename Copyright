@@ -34,8 +34,6 @@ a LGPL mode to mpv, MPlayer code had to be relicensed from GPLv2+ to LGPLv2.1+
 by asking the MPlayer authors for permission. Since permission could not be
 obtained from everyone, LGPL mode disables the following features, some of
 them quite central:
-- no audio filtering, which breaks: --af, pitch correction, fine control over
-  downmix/upmix/resampling behavior
 - Linux X11 video output
 - BSD audio output via OSS
 - NVIDIA/Linux hardware decoding (vdpau, although nvdec usually works)
@@ -47,15 +45,8 @@ at all.
 
 The following files are still GPL only (--enable-lgpl disables them):
 
-    audio/filter/*                  will be replaced with new filter chain
-    audio/filter/af_format.c        mostly LGPL (except af glue code)
-    audio/filter/af_lavc3enc.c          as above
-    audio/filter/af_lavfi.c             as above
-    audio/filter/af_scaletempo.c        as above
-    audio/filter/af_rubberband.c        as above
     audio/out/ao_jack.c             will stay GPL
     audio/out/ao_oss.c              will stay GPL
-    audio/audio.*                   needed by af code only
     demux/demux_tv.c                will stay GPL
     stream/ai_*                     will stay GPL (TV code)
     stream/audio_in.*               will stay GPL (TV code)
@@ -88,7 +79,6 @@ The following files are still GPL only (--enable-lgpl disables them):
 The following files contain some optional GPL code (--enable-lgpl disables it):
 
     options/parse_commandline.c     dvd:// expansion
-    player/audio.c                  libaf glue code
 
 None of the exceptions listed above affect the final binary if it's built as
 LGPL. Linked libraries still can affect the final license (for example if

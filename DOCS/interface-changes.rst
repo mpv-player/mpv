@@ -43,6 +43,28 @@ Interface changes
         - inserting an incompatible filter with hwdec at runtime would refuse
           to insert the filter; now it will add it successfully, but disables
           the filter slightly later
+    - some behavior changes in the audio filter chain, including:
+        - a manually inserted lavrresample filter is not necessarily used for
+          sample format conversion anymore, so it's pretty useless
+        - changing playback speed will not respect --af-defaults anymore
+        - having libavfilter based filters after the scaletempo or rubberband
+          filters is not supported anymore, and may desync if playback speed is
+          changed (libavfilter does not support the metadata for playback speed)
+        - the lavcac3enc filter does not auto detach itself anymore; instead it
+          passes through the data after converting it to the sample rate and
+          channel configuration the ac3 encoder expects; also, if the audio
+          format changes midstream in a way that causes the filter to switch
+          between PCM and AC3 output, the audio output won't be reconfigured,
+          and audio playback will fail due to libswresample being unable to
+          convert between PCM and AC3 (Note: the responsible developer didn't
+          give a shit)
+        - inserting a filter that changes the output channel layout will not
+          reconfigure the AO - you need to run an additional "ao-reload"
+          command to force this if you want that
+        - using "string" gapless audio (--gapless-audio=yes) can fail if the
+          audio formats are not convertible (such as switching between PCM and
+          AC3 passthrough)
+    - remove out-format sub-parameter from "format" audio filter (no replacement)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

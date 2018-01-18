@@ -32,6 +32,11 @@ struct mp_aframe {
     // We support spdif formats, which are allocated as AV_SAMPLE_FMT_S16.
     int format;
     double pts;
+    double speed;
+};
+
+struct avframe_opaque {
+    double speed;
 };
 
 static void free_frame(void *ptr)
@@ -43,11 +48,11 @@ static void free_frame(void *ptr)
 struct mp_aframe *mp_aframe_create(void)
 {
     struct mp_aframe *frame = talloc_zero(NULL, struct mp_aframe);
-    frame->pts = MP_NOPTS_VALUE;
     frame->av_frame = av_frame_alloc();
     if (!frame->av_frame)
         abort();
     talloc_set_destructor(frame, free_frame);
+    mp_aframe_reset(frame);
     return frame;
 }
 
@@ -61,6 +66,7 @@ struct mp_aframe *mp_aframe_new_ref(struct mp_aframe *frame)
     dst->chmap = frame->chmap;
     dst->format = frame->format;
     dst->pts = frame->pts;
+    dst->speed = frame->speed;
 
     if (mp_aframe_is_allocated(frame)) {
         if (av_frame_ref(dst->av_frame, frame->av_frame) < 0)
@@ -80,6 +86,7 @@ void mp_aframe_reset(struct mp_aframe *frame)
     frame->chmap.num = 0;
     frame->format = 0;
     frame->pts = MP_NOPTS_VALUE;
+    frame->speed = 1.0;
 }
 
 // Remove all actual audio data and leave only the metadata.
@@ -120,6 +127,11 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
         mp_chmap_from_channels(&frame->chmap, av_frame->channels);
 #endif
 
+    if (av_frame->opaque_ref) {
+        struct avframe_opaque *op = (void *)av_frame->opaque_ref->data;
+        frame->speed = op->speed;
+    }
+
     return frame;
 }
 
@@ -136,6 +148,16 @@ struct AVFrame *mp_aframe_to_avframe(struct mp_aframe *frame)
 
     if (!mp_chmap_is_lavc(&frame->chmap))
         return NULL;
+
+    if (!frame->av_frame->opaque_ref && frame->speed != 1.0) {
+        frame->av_frame->opaque_ref =
+            av_buffer_alloc(sizeof(struct avframe_opaque));
+        if (!frame->av_frame->opaque_ref)
+            return NULL;
+
+        struct avframe_opaque *op = (void *)frame->av_frame->opaque_ref->data;
+        op->speed = frame->speed;
+    }
 
     return av_frame_clone(frame->av_frame);
 }
@@ -183,6 +205,7 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src)
 void mp_aframe_copy_attributes(struct mp_aframe *dst, struct mp_aframe *src)
 {
     dst->pts = src->pts;
+    dst->speed = src->speed;
 
     int rate = dst->av_frame->sample_rate;
 
@@ -316,6 +339,37 @@ void mp_aframe_set_pts(struct mp_aframe *frame, double pts)
     frame->pts = pts;
 }
 
+// Set a speed factor. This is multiplied with the sample rate to get the
+// "effective" samplerate (mp_aframe_get_effective_rate()), which will be used
+// to do PTS calculations. If speed!=1.0, the PTS values always refer to the
+// original PTS (before changing speed), and if you want reasonably continuous
+// PTS between frames, you need to use the effective samplerate.
+void mp_aframe_set_speed(struct mp_aframe *frame, double factor)
+{
+    frame->speed = factor;
+}
+
+// Adjust current speed factor.
+void mp_aframe_mul_speed(struct mp_aframe *frame, double factor)
+{
+    frame->speed *= factor;
+}
+
+double mp_aframe_get_speed(struct mp_aframe *frame)
+{
+    return frame->speed;
+}
+
+// Matters for speed changed frames (such as a frame which has been resampled
+// to play at a different speed).
+// Return the sample rate at which the frame would have to be played to result
+// in the same duration as the original frame before the speed change.
+// This is used for A/V sync.
+double mp_aframe_get_effective_rate(struct mp_aframe *frame)
+{
+    return mp_aframe_get_rate(frame) / frame->speed;
+}
+
 // Return number of data pointers.
 int mp_aframe_get_planes(struct mp_aframe *frame)
 {
@@ -339,6 +393,18 @@ int mp_aframe_get_total_plane_samples(struct mp_aframe *frame)
             ? 1 : mp_aframe_get_channels(frame));
 }
 
+char *mp_aframe_format_str_buf(char *buf, size_t buf_size, struct mp_aframe *fmt)
+{
+    char ch[128];
+    mp_chmap_to_str_buf(ch, sizeof(ch), &fmt->chmap);
+    char *hr_ch = mp_chmap_to_str_hr(&fmt->chmap);
+    if (strcmp(hr_ch, ch) != 0)
+        mp_snprintf_cat(ch, sizeof(ch), " (%s)", hr_ch);
+    snprintf(buf, buf_size, "%dHz %s %dch %s", fmt->av_frame->sample_rate,
+             ch, fmt->chmap.num, af_fmt_to_str(fmt->format));
+    return buf;
+}
+
 // Set data to the audio after the given number of samples (i.e. slice it).
 void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
 {
@@ -352,25 +418,25 @@ void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
     f->av_frame->nb_samples -= samples;
 
     if (f->pts != MP_NOPTS_VALUE)
-        f->pts += samples / (double)mp_aframe_get_rate(f);
+        f->pts += samples / mp_aframe_get_effective_rate(f);
 }
 
 // Return the timestamp of the sample just after the end of this frame.
 double mp_aframe_end_pts(struct mp_aframe *f)
 {
-    int rate = mp_aframe_get_rate(f);
-    if (f->pts == MP_NOPTS_VALUE || rate < 1)
+    double rate = mp_aframe_get_effective_rate(f);
+    if (f->pts == MP_NOPTS_VALUE || rate <= 0)
         return MP_NOPTS_VALUE;
-    return f->pts + f->av_frame->nb_samples / (double)rate;
+    return f->pts + f->av_frame->nb_samples / rate;
 }
 
 // Return the duration in seconds of the frame (0 if invalid).
 double mp_aframe_duration(struct mp_aframe *f)
 {
-    int rate = mp_aframe_get_rate(f);
-    if (rate < 1)
+    double rate = mp_aframe_get_effective_rate(f);
+    if (rate <= 0)
         return 0;
-    return f->av_frame->nb_samples / (double)rate;
+    return f->av_frame->nb_samples / rate;
 }
 
 // Clip the given frame to the given timestamp range. Adjusts the frame size
@@ -378,7 +444,7 @@ double mp_aframe_duration(struct mp_aframe *f)
 void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
 {
     double f_end = mp_aframe_end_pts(f);
-    int rate = mp_aframe_get_rate(f);
+    double rate = mp_aframe_get_effective_rate(f);
     if (f_end == MP_NOPTS_VALUE)
         return;
     if (end != MP_NOPTS_VALUE) {
@@ -403,6 +469,52 @@ void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
             }
         }
     }
+}
+
+bool mp_aframe_copy_samples(struct mp_aframe *dst, int dst_offset,
+                            struct mp_aframe *src, int src_offset,
+                            int samples)
+{
+    if (!mp_aframe_config_equals(dst, src))
+        return false;
+
+    if (mp_aframe_get_size(dst) < dst_offset + samples ||
+        mp_aframe_get_size(src) < src_offset + samples)
+        return false;
+
+    uint8_t **s = mp_aframe_get_data_ro(src);
+    uint8_t **d = mp_aframe_get_data_rw(dst);
+    if (!s || !d)
+        return false;
+
+    int planes = mp_aframe_get_planes(dst);
+    size_t sstride = mp_aframe_get_sstride(dst);
+
+    for (int n = 0; n < planes; n++) {
+        memcpy(d[n] + dst_offset * sstride, s[n] + src_offset * sstride,
+               samples * sstride);
+    }
+
+    return true;
+}
+
+bool mp_aframe_set_silence(struct mp_aframe *f, int offset, int samples)
+{
+    if (mp_aframe_get_size(f) < offset + samples)
+        return false;
+
+    int format = mp_aframe_get_format(f);
+    uint8_t **d = mp_aframe_get_data_rw(f);
+    if (!d)
+        return false;
+
+    int planes = mp_aframe_get_planes(f);
+    size_t sstride = mp_aframe_get_sstride(f);
+
+    for (int n = 0; n < planes; n++)
+        af_fill_silence(d[n] + offset * sstride, samples * sstride, format);
+
+    return true;
 }
 
 struct mp_aframe_pool {

@@ -18,6 +18,13 @@ struct mp_filter *mp_create_user_filter(struct mp_filter *parent,
                                         enum mp_output_chain_type type,
                                         const char *name, char **args);
 
+extern const struct mp_user_filter_entry af_lavfi;
+extern const struct mp_user_filter_entry af_lavfi_bridge;
+extern const struct mp_user_filter_entry af_scaletempo;
+extern const struct mp_user_filter_entry af_format;
+extern const struct mp_user_filter_entry af_rubberband;
+extern const struct mp_user_filter_entry af_lavcac3enc;
+
 extern const struct mp_user_filter_entry vf_lavfi;
 extern const struct mp_user_filter_entry vf_lavfi_bridge;
 extern const struct mp_user_filter_entry vf_sub;

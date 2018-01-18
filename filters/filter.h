@@ -313,6 +313,8 @@ void mp_filter_reset(struct mp_filter *filter);
 enum mp_filter_command_type {
     MP_FILTER_COMMAND_TEXT = 1,
     MP_FILTER_COMMAND_GET_META,
+    MP_FILTER_COMMAND_SET_SPEED,
+    MP_FILTER_COMMAND_SET_SPEED_RESAMPLE,
 };
 
 struct mp_filter_command {
@@ -324,6 +326,9 @@ struct mp_filter_command {
 
     // For MP_FILTER_COMMAND_GET_META
     void *res; // must point to struct mp_tags*, will be set to new instance
+
+    // For MP_FILTER_COMMAND_SET_SPEED and MP_FILTER_COMMAND_SET_SPEED_RESAMPLE
+    double speed;
 };
 
 // Run a command on the filter. Returns success. For libavfilter.

@@ -29,6 +29,17 @@ struct mp_hwdec_devices;
 void mp_autoconvert_add_vo_hwdec_subfmts(struct mp_autoconvert *c,
                                          struct mp_hwdec_devices *devs);
 
+// Add afmt (an AF_FORMAT_* value) as allowed audio format.
+// See mp_autoconvert_add_imgfmt() for other remarks.
+void mp_autoconvert_add_afmt(struct mp_autoconvert *c, int afmt);
+
+// Add allowed audio channel configuration.
+struct mp_chmap;
+void mp_autoconvert_add_chmap(struct mp_autoconvert *c, struct mp_chmap *chmap);
+
+// Add allowed audio sample rate.
+void mp_autoconvert_add_srate(struct mp_autoconvert *c, int rate);
+
 // Reset set of allowed formats back to initial state. (This does not flush
 // any frames or remove currently active filters, although to get reasonable
 // behavior, you need to readd all previously allowed formats, or reset the

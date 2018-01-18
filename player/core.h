@@ -201,8 +201,8 @@ struct ao_chain {
     bool spdif_passthrough, spdif_failed;
     bool pts_reset;
 
-    struct af_stream *af;
-    struct mp_aconverter *conv; // if af unavailable
+    struct mp_output_chain *filter;
+
     struct ao *ao;
     struct mp_audio_buffer *ao_buffer;
     double ao_resume_time;
@@ -213,10 +213,7 @@ struct ao_chain {
     // 1-element output frame queue.
     struct mp_aframe *output_frame;
 
-    // Last known input_mpi format (so af can be reinitialized any time).
-    struct mp_aframe *input_format;
-
-    struct mp_aframe *filter_input_format;
+    double last_out_pts;
 
     struct track *track;
     struct lavfi_pad *filter_src;
@@ -323,7 +320,7 @@ typedef struct MPContext {
     struct mp_filter *filter_root;
 
     struct ao *ao;
-    struct mp_aframe *ao_decoder_fmt; // for weak gapless audio check
+    struct mp_aframe *ao_filter_fmt; // for weak gapless audio check
     struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;
