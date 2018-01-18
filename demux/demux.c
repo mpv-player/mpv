@@ -1811,7 +1811,7 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
             rg.album_gain = rg.track_gain;
             rg.album_peak = rg.track_peak;
         }
-        return talloc_memdup(NULL, &rg, sizeof(rg));
+        return talloc_dup(NULL, &rg);
     }
 
     if (decode_gain(log, tags, "REPLAYGAIN_GAIN", &rg.track_gain) >= 0 &&
@@ -1819,7 +1819,7 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
     {
         rg.album_gain = rg.track_gain;
         rg.album_peak = rg.track_peak;
-        return talloc_memdup(NULL, &rg, sizeof(rg));
+        return talloc_dup(NULL, &rg);
     }
 
     return NULL;

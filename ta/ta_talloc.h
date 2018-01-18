@@ -45,6 +45,7 @@
 #define talloc_get_size                 ta_get_size
 #define talloc_free_children            ta_free_children
 #define talloc_free                     ta_free
+#define talloc_dup                      ta_xdup
 #define talloc_memdup                   ta_xmemdup
 #define talloc_strdup                   ta_xstrdup
 #define talloc_strndup                  ta_xstrndup

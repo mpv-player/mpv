@@ -1076,7 +1076,7 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
     if (ebml_read_element(s, &parse_ctx, &tags, &ebml_tags_desc) < 0)
         return -1;
 
-    mkv_d->tags = talloc_memdup(mkv_d, &tags, sizeof(tags));
+    mkv_d->tags = talloc_dup(mkv_d, &tags);
     talloc_steal(mkv_d->tags, parse_ctx.talloc_ctx);
     return 0;
 }
@@ -2758,8 +2758,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
                                   &ebml_block_additions_desc) < 0)
                 return -1;
             if (additions.n_block_more > 0) {
-                block->additions =
-                    talloc_memdup(NULL, &additions, sizeof(additions));
+                block->additions = talloc_dup(NULL, &additions);
                 talloc_steal(block->additions, parse_ctx.talloc_ctx);
                 parse_ctx.talloc_ctx = NULL;
             }

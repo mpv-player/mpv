@@ -574,7 +574,7 @@ static void run_reconfig(void *p)
     mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
 
     talloc_free(vo->params);
-    vo->params = talloc_memdup(vo, params, sizeof(*params));
+    vo->params = talloc_dup(vo, params);
 
     *ret = vo->driver->reconfig(vo, vo->params);
     vo->config_ok = *ret >= 0;
@@ -632,7 +632,7 @@ void vo_control_async(struct vo *vo, int request, void *data)
 
     switch (request) {
     case VOCTRL_UPDATE_PLAYBACK_STATE:
-        d[2] = ta_xdup_ptrtype(d, (struct voctrl_playback_state *)data);
+        d[2] = talloc_dup(d, (struct voctrl_playback_state *)data);
         break;
     case VOCTRL_KILL_SCREENSAVER:
     case VOCTRL_RESTORE_SCREENSAVER:
