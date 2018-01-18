@@ -400,17 +400,14 @@ void mp_cmd_free(mp_cmd_t *cmd)
 
 mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
 {
-    mp_cmd_t *ret;
-    int i;
-
     if (!cmd)
         return NULL;
 
-    ret = talloc_dup(NULL, cmd);
+    mp_cmd_t *ret = talloc_dup(NULL, cmd);
     talloc_set_destructor(ret, destroy_cmd);
     ret->name = talloc_strdup(ret, cmd->name);
     ret->args = talloc_zero_array(ret, struct mp_cmd_arg, ret->nargs);
-    for (i = 0; i < ret->nargs; i++) {
+    for (int i = 0; i < ret->nargs; i++) {
         ret->args[i].type = cmd->args[i].type;
         m_option_copy(ret->args[i].type, &ret->args[i].v, &cmd->args[i].v);
     }
