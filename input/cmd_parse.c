@@ -356,7 +356,7 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
             talloc_steal(list, cmd);
             struct mp_cmd_arg arg = {0};
             arg.v.p = cmd;
-            list->args = talloc_memdup(list, &arg, sizeof(arg));
+            list->args = talloc_dup(list, &arg);
             p_prev = &cmd->queue_next;
             cmd = list;
         }
@@ -406,7 +406,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     if (!cmd)
         return NULL;
 
-    ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
+    ret = talloc_dup(NULL, cmd);
     talloc_set_destructor(ret, destroy_cmd);
     ret->name = talloc_strdup(ret, cmd->name);
     ret->args = talloc_zero_array(ret, struct mp_cmd_arg, ret->nargs);
@@ -427,7 +427,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
             } else {
                 struct mp_cmd_arg arg = {0};
                 arg.v.p = sub;
-                ret->args = talloc_memdup(ret, &arg, sizeof(arg));
+                ret->args = talloc_dup(ret, &arg);
             }
             prev = sub;
         }
