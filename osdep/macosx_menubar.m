@@ -22,6 +22,14 @@
 #import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
 
+static NSString *default_mpv_conf = @
+#include "player/mpv_conf.h"
+;
+
+static NSString *default_input_conf = @
+#include "input/input_conf.h"
+;
+
 @implementation MenuBar
 {
     NSArray *menuTree;
@@ -55,41 +63,51 @@
                         @"key"        : @",",
                         @"target"     : self,
                         @"file"       : @"mpv.conf",
-                        @"alertTitle1": @"No Application found to open your config file.",
-                        @"alertText1" : @"Please open the mpv.conf file with "
+                        @"default"    : default_mpv_conf,
+                        @"alertTitle" : @"No Application found to open your "
+                                        "config file.",
+                        @"alertText"  : @"Please open the mpv.conf file with "
                                         "your preferred text editor in the now "
                                         "open folder to edit your config.",
-                        @"alertTitle2": @"No config file found.",
-                        @"alertText2" : @"Please create a mpv.conf file with your "
-                                        "preferred text editor in the now open folder.",
-                        @"alertTitle3": @"No config path or file found.",
-                        @"alertText3" : @"Please create the following path ~/.config/mpv/ "
-                                        "and a mpv.conf file within with your preferred "
-                                        "text editor."
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Keyboard Shortcuts Config…",
+                        @"name"       : @"Keyboard Shortcuts…",
                         @"action"     : @"preferences:",
                         @"key"        : @"",
                         @"target"     : self,
                         @"file"       : @"input.conf",
-                        @"alertTitle1": @"No Application found to open your config file.",
-                        @"alertText1" : @"Please open the input.conf file with "
+                        @"default"    : default_input_conf,
+                        @"alertTitle" : @"No Application found to open your "
+                                        "config file.",
+                        @"alertText"  : @"Please open the input.conf file with "
                                         "your preferred text editor in the now "
                                         "open folder to edit your config.",
-                        @"alertTitle2": @"No config file found.",
-                        @"alertText2" : @"Please create a input.conf file with your "
-                                        "preferred text editor in the now open folder.",
-                        @"alertTitle3": @"No config path or file found.",
-                        @"alertText3" : @"Please create the following path ~/.config/mpv/ "
-                                        "and a input.conf file within with your preferred "
-                                        "text editor."
+                    }],
+                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Services",
+                        @"key"        : @"",
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Hide mpv",
                         @"action"     : @"hide:",
                         @"key"        : @"h",
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Hide Others",
+                        @"action"     : @"hideOtherApplications:",
+                        @"key"        : @"h",
+                        @"modifiers"  : [NSNumber numberWithUnsignedInteger:
+                            NSEventModifierFlagCommand |
+                            NSEventModifierFlagOption],
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Show All",
+                        @"action"     : @"unhideAllApplications:",
+                        @"key"        : @"",
                         @"target"     : NSApp
                     }],
                     @{ @"name": @"separator" },
@@ -125,6 +143,11 @@
                         @"target"     : self
                     }],
                     @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Close",
+                        @"action"     : @"performClose:",
+                        @"key"        : @"w",
+                    }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Save Screenshot",
                         @"action"     : @"cmd:",
@@ -162,6 +185,11 @@
                         @"name"       : @"Paste",
                         @"action"     : @"paste:",
                         @"key"        : @"v"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Delete",
+                        @"action"     : @"delete:",
+                        @"key"        : @""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Select All",
@@ -598,6 +626,12 @@
                 NSMenuItem *iItem = [menu addItemWithTitle:subMenu[@"name"]
                                action:NSSelectorFromString(subMenu[@"action"])
                         keyEquivalent:subMenu[@"key"]];
+                if (subMenu[@"modifiers"]) {
+                    [iItem setKeyEquivalentModifierMask:[subMenu[@"modifiers"] unsignedIntegerValue]];
+                }
+                if ([subMenu[@"name"] isEqual:@"Services"]) {
+                    iItem.submenu = NSApp.servicesMenu = [NSMenu alloc];
+                }
                 [iItem setTarget:subMenu[@"target"]];
                 [subMenu setObject:iItem forKey:@"menuItem"];
             }
@@ -624,28 +658,31 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSMutableDictionary *mItemDict = [self getDictFromMenuItem:menuItem];
     NSArray *configPaths  = @[
-        [NSString stringWithFormat:@"%@/.mpv/", NSHomeDirectory()],
-        [NSString stringWithFormat:@"%@/.config/mpv/", NSHomeDirectory()]];
+        [NSString stringWithFormat:@"%@/.mpv", NSHomeDirectory()],
+        [NSString stringWithFormat:@"%@/.config/mpv", NSHomeDirectory()]];
 
+    NSUInteger remaining = [configPaths count];
     for (id path in configPaths) {
-        NSString *fileP = [path stringByAppendingString:mItemDict[@"file"]];
-        if ([fileManager fileExistsAtPath:fileP]){
-            if ([workspace openFile:fileP])
-                return;
-            [workspace openFile:path];
-            [self alertWithTitle:mItemDict[@"alertTitle1"]
-                         andText:mItemDict[@"alertText1"]];
-            return;
-        }
-        if ([workspace openFile:path]) {
-            [self alertWithTitle:mItemDict[@"alertTitle2"]
-                         andText:mItemDict[@"alertText2"]];
-            return;
-        }
-    }
+        if (--remaining && ![fileManager fileExistsAtPath:path]) continue;
 
-    [self alertWithTitle:mItemDict[@"alertTitle3"]
-                 andText:mItemDict[@"alertText3"]];
+        NSString *fileP =
+            [path stringByAppendingPathComponent:mItemDict[@"file"]];
+        if (![fileManager fileExistsAtPath:fileP]) {
+            [fileManager createDirectoryAtPath:path
+                   withIntermediateDirectories:YES
+                                    attributes:nil
+                                         error:NULL];
+            [fileManager createFileAtPath:fileP
+                                 contents:mItemDict[@"default"]
+                               attributes:nil];
+        }
+        if (![workspace openFile:fileP]) {
+            [workspace openFile:path];
+            [self alertWithTitle:mItemDict[@"alertTitle"]
+                         andText:mItemDict[@"alertText"]];
+        }
+        return;
+    }
 }
 
 - (void)quit:(NSMenuItem *)menuItem

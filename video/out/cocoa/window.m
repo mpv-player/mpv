@@ -45,7 +45,7 @@
 @synthesize targetScreen = _target_screen;
 @synthesize previousScreen = _previous_screen;
 @synthesize currentScreen = _current_screen;
-@synthesize unfScreen = _unf_Screen;
+@synthesize unfScreen = _unf_screen;
 - (id)initWithContentRect:(NSRect)content_rect
                 styleMask:(NSWindowStyleMask)style_mask
                   backing:(NSBackingStoreType)buffering_type

@@ -12,6 +12,7 @@
 /mpv.app
 /version.h
 /input/input_conf.h
+/player/mpv_conf.h
 /tags
 /TAGS
 /video/out/x11_icon.inc
