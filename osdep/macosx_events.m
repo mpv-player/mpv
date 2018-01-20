@@ -194,11 +194,6 @@ void cocoa_put_key(int keycode)
     [[EventsResponder sharedInstance] putKey:keycode];
 }
 
-void cocoa_put_key_event(void *event)
-{
-    [[EventsResponder sharedInstance] handleKey:event];
-}
-
 void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 {
     keycode |= [[EventsResponder sharedInstance] mapKeyModifiers:modifiers];
