@@ -61,7 +61,7 @@ static void terminate_cocoa_application(void)
 }
 
 @implementation Application
-@synthesize menuBar = _menu_Bar;
+@synthesize menuBar = _menu_bar;
 @synthesize openCount = _open_count;
 
 - (void)sendEvent:(NSEvent *)event

@@ -19,7 +19,6 @@
 #include <dlfcn.h>
 #include "options/m_config.h"
 #include "video/out/cocoa_common.h"
-#include "osdep/macosx_versions.h"
 #include "context.h"
 
 struct cocoa_opts {

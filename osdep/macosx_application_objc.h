@@ -29,6 +29,5 @@ struct mpv_event;
 - (void)openFiles:(NSArray *)filenames;
 
 @property(nonatomic, retain) MenuBar *menuBar;
-@property(nonatomic, retain) NSArray *files;
 @property(nonatomic, assign) size_t openCount;
 @end
