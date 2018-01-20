@@ -65,7 +65,7 @@ enum mp_voctrl {
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
 
-    /* private to vo_opengl */
+    /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
 
     // Redraw the image previously passed to draw_image() (basically, repeat

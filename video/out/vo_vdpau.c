@@ -1027,7 +1027,7 @@ static int preinit(struct vo *vo)
 
     if (mp_vdpau_guess_if_emulated(vc->mpvdp)) {
         MP_WARN(vo, "VDPAU is most likely emulated via VA-API.\n"
-                    "This is inefficient. Use --vo=opengl instead.\n");
+                    "This is inefficient. Use --vo=gpu instead.\n");
     }
 
     // Mark everything as invalid first so uninit() can tell what has been
