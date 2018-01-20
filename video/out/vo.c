@@ -1190,7 +1190,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 // flip_page[_timed] will be called offset_us microseconds too early.
 // (For vo_vdpau, which does its own timing.)
 // num_req_frames set the requested number of requested vo_frame.frames.
-// (For vo_opengl interpolation.)
+// (For vo_gpu interpolation.)
 void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames)
 {
     struct vo_internal *in = vo->in;

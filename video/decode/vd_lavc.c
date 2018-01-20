@@ -64,7 +64,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
 // Maximum number of surfaces the player wants to buffer.
 // This number might require adjustment depending on whatever the player does;
-// for example, if vo_opengl increases the number of reference surfaces for
+// for example, if vo_gpu increases the number of reference surfaces for
 // interpolation, this value has to be increased too.
 #define HWDEC_EXTRA_SURFACES 6
 

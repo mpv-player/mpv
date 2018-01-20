@@ -3344,7 +3344,7 @@ static bool test_fbo(struct gl_video *p, const struct ra_format *fmt)
 }
 
 // Return whether dumb-mode can be used without disabling any features.
-// Essentially, vo_opengl with mostly default settings will return true.
+// Essentially, vo_gpu with mostly default settings will return true.
 static bool check_dumb_mode(struct gl_video *p)
 {
     struct gl_video_opts *o = &p->opts;

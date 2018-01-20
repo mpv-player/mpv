@@ -65,7 +65,7 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
 
     // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
     //       top/right border. This is needed for correct handling of such
-    //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
+    //       images in filter and VO code (e.g. vo_vdpau or vo_gpu).
 
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         int alloc_w = mp_chroma_div_up(w, desc.xs[n]);
