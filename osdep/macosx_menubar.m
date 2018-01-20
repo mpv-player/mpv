@@ -87,9 +87,29 @@
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Services",
+                        @"key"        : @"",
+                    }],
+                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Hide mpv",
                         @"action"     : @"hide:",
                         @"key"        : @"h",
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Hide Others",
+                        @"action"     : @"hideOtherApplications:",
+                        @"key"        : @"h",
+                        @"modifiers"  : [NSNumber numberWithUnsignedInteger:
+                                            NSEventModifierFlagCommand |
+                                            NSEventModifierFlagOption],
+                        @"target"     : NSApp
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Show All",
+                        @"action"     : @"unhideAllApplications:",
+                        @"key"        : @"",
                         @"target"     : NSApp
                     }],
                     @{ @"name": @"separator" },
@@ -125,6 +145,11 @@
                         @"target"     : self
                     }],
                     @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Close",
+                        @"action"     : @"performClose:",
+                        @"key"        : @"w"
+                    }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Save Screenshot",
                         @"action"     : @"cmd:",
@@ -577,6 +602,7 @@
 - (NSMenu *)mainMenu
 {
     NSMenu *mainMenu = [[NSMenu alloc] initWithTitle:@"MainMenu"];
+    NSApp.servicesMenu = [NSMenu alloc];
 
     for(id mMenu in menuTree) {
         NSMenu *menu = [[NSMenu alloc] initWithTitle:mMenu[@"name"]];
@@ -600,6 +626,15 @@
                         keyEquivalent:subMenu[@"key"]];
                 [iItem setTarget:subMenu[@"target"]];
                 [subMenu setObject:iItem forKey:@"menuItem"];
+
+                NSNumber *m = subMenu[@"modifiers"];
+                if (m) {
+                    [iItem setKeyEquivalentModifierMask:m.unsignedIntegerValue];
+                }
+
+                if ([subMenu[@"name"] isEqual:@"Services"]) {
+                    iItem.submenu = NSApp.servicesMenu;
+                }
             }
         }
     }
