@@ -660,7 +660,7 @@
     [panel setCanChooseDirectories:YES];
     [panel setAllowsMultipleSelection:YES];
 
-    if ([panel runModal] == NSFileHandlingPanelOKButton){
+    if ([panel runModal] == NSModalResponseOK){
         NSMutableArray *fileArray = [[NSMutableArray alloc] init];
         for (id url in [panel URLs])
             [fileArray addObject:[url path]];

@@ -52,6 +52,12 @@ static const NSEventModifierFlags NSEventModifierFlagShift = NSShiftKeyMask;
 static const NSEventModifierFlags NSEventModifierFlagControl = NSControlKeyMask;
 static const NSEventModifierFlags NSEventModifierFlagCommand = NSCommandKeyMask;
 static const NSEventModifierFlags NSEventModifierFlagOption = NSAlternateKeyMask;
+
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_9)
+typedef NSUInteger NSModalResponse;
+static const NSModalResponse NSModalResponseOK = NSFileHandlingPanelOKButton
+#endif
+
 #endif
 
 #endif /* MPV_MACOSX_COMPAT */
