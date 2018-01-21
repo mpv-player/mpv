@@ -4821,6 +4821,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     bool auto_osd = on_osd == MP_ON_OSD_AUTO;
     bool msg_osd = auto_osd || (on_osd & MP_ON_OSD_MSG);
     bool bar_osd = auto_osd || (on_osd & MP_ON_OSD_BAR);
+    bool seek_msg_osd = auto_osd ? opts->osd_on_seek & 2 : msg_osd;
+    bool seek_bar_osd = auto_osd ? opts->osd_on_seek & 1 : bar_osd;
+
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     bool async = cmd->flags & MP_ASYNC_CMD;
 
@@ -4884,9 +4887,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             set_osd_function(mpctx, v > 0 ? OSD_FFW : OSD_REW);
             break;
         }}
-        if (bar_osd)
+        if (seek_bar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-        if (msg_osd)
+        if (seek_msg_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
         break;
     }
@@ -4905,9 +4908,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, MPSEEK_EXACT,
                        MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx, OSD_REW);
-            if (bar_osd)
+            if (seek_bar_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-            if (msg_osd)
+            if (seek_msg_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
         } else {
             return -1;
@@ -5104,9 +5107,9 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                     queue_seek(mpctx, MPSEEK_ABSOLUTE, a[0], MPSEEK_EXACT,
                                MPSEEK_FLAG_DELAY);
                     set_osd_function(mpctx, (a[0] > refpts) ? OSD_FFW : OSD_REW);
-                    if (bar_osd)
+                    if (seek_bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-                    if (msg_osd)
+                    if (seek_msg_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
                 }
             }

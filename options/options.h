@@ -183,6 +183,7 @@ typedef struct MPOpts {
     int osd_level;
     int osd_duration;
     int osd_fractions;
+    int osd_on_seek;
     int video_osd;
 
     int untimed;

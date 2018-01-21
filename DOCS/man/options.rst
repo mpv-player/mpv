@@ -3094,8 +3094,14 @@ OSD
     Disable display of the OSD bar.
 
     You can configure this on a per-command basis in input.conf using ``osd-``
-    prefixes, see ``Input command prefixes``. If you want to disable the OSD
+    prefixes, see ``Input Command Prefixes``. If you want to disable the OSD
     completely, use ``--osd-level=0``.
+
+``--osd-on-seek=<no,bar,msg,msg-bar>``
+    Set what is displayed on the OSD during seeks. The default is ``bar``.
+
+    You can configure this on a per-command basis in input.conf using ``osd-``
+    prefixes, see ``Input Command Prefixes``.
 
 ``--osd-duration=<time>``
     Set the duration of the OSD messages in ms (default: 1000).
@@ -3128,16 +3134,18 @@ OSD
     (default), then the playback time, duration, and some more information is
     shown.
 
-    This is also used for the ``show-progress`` command (by default mapped to
-    ``P``), and when seeking.
+    This is used for the ``show-progress`` command (by default mapped to ``P``),
+    and when seeking if enabled with ``--osd-on-seek`` or by ``osd-`` prefixes
+    in input.conf (see ``Input Command Prefixes``).
 
     ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
 
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
-    ``show-progress`` command (by default mapped to ``P``), and when
-    seeking. Expands properties. See `Property Expansion`_.
+    ``show-progress`` command (by default mapped to ``P``), and when seeking if
+    enabled with ``--osd-on-seek`` or ``osd-`` prefixes in input.conf (see
+    ``Input Command Prefixes``). Expands properties. See `Property Expansion`_.
 
     This option has been replaced with ``--osd-msg3``. The only difference is
     that this option implicitly includes ``${osd-sym-cc}``. This option is

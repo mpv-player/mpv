@@ -35,6 +35,7 @@ Interface changes
       vf toggle commands and the filter enable/disable flag to customize it.
     - deprecate --af=lavrresample. Use the ``--audio-resample-...`` options to
       customize resampling, or the libavfilter ``--af=aresample`` filter.
+    - add --osd-on-seek
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
