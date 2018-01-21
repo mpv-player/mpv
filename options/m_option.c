@@ -1830,10 +1830,17 @@ exit:
     return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
+static char *print_color(const m_option_t *opt, const void *val)
+{
+    const struct m_color *c = val;
+    return talloc_asprintf(NULL, "#%02X%02X%02X%02X", c->a, c->r, c->g, c->b);
+}
+
 const m_option_type_t m_option_type_color = {
     .name  = "Color",
     .size  = sizeof(struct m_color),
     .parse = parse_color,
+    .print = print_color,
     .copy  = copy_opt,
 };
 
