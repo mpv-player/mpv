@@ -3129,15 +3129,15 @@ OSD
     shown.
 
     This is also used for the ``show-progress`` command (by default mapped to
-    ``P``), when toggling pause, and when seeking.
+    ``P``), and when seeking.
 
     ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
 
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
-    ``show-progress`` command (by default mapped to ``P``), when toggling pause,
-    and when seeking. Expands properties. See `Property Expansion`_.
+    ``show-progress`` command (by default mapped to ``P``), and when
+    seeking. Expands properties. See `Property Expansion`_.
 
     This option has been replaced with ``--osd-msg3``. The only difference is
     that this option implicitly includes ``${osd-sym-cc}``. This option is
