@@ -589,6 +589,11 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
+    OPT_CHOICE("osd-on-seek", osd_on_seek, 0,
+               ({"no", 0},
+                {"bar", 1},
+                {"msg", 2},
+                {"msg-bar", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
 
@@ -878,6 +883,7 @@ const struct MPOpts mp_default_opts = {
     .cursor_autohide_delay = 1000,
     .video_osd = 1,
     .osd_level = 1,
+    .osd_on_seek = 1,
     .osd_duration = 1000,
 #if HAVE_LUA
     .lua_load_osc = 1,
