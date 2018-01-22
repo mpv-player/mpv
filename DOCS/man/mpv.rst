@@ -734,8 +734,8 @@ PROTOCOLS
 
     ``title`` can be: ``longest`` or ``first`` (selects the default
     playlist); ``mpls/<number>`` (selects <number>.mpls playlist);
-    ``<number>`` (select playlist with the same index). You can list
-    the available playlists with ``--msg-level=bd=v``.
+    ``<number>`` (select playlist with the same index). mpv will list
+    the available playlists on loading.
 
     ``bluray://`` is an alias.
 
