@@ -35,6 +35,7 @@
 #include <libbluray/overlay.h>
 #include <libbluray/keys.h>
 #include <libbluray/bluray-version.h>
+#include <libbluray/log_control.h>
 #include <libavutil/common.h>
 
 #include "config.h"
@@ -387,6 +388,9 @@ static int bluray_stream_open_internal(stream_t *s)
         MP_ERR(s, "No Blu-ray device/location was specified ...\n");
         return STREAM_UNSUPPORTED;
     }
+
+    if (!mp_msg_test(s->log, MSGL_DEBUG))
+        bd_set_debug_mask(0);
 
     /* open device */
     BLURAY *bd = bd_open(device, NULL);
