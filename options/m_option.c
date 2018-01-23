@@ -429,10 +429,20 @@ bad:
     return M_OPT_INVALID;
 }
 
+static char *print_intpair(const m_option_t *opt, const void *val)
+{
+    const int *p = val;
+    char *res = talloc_asprintf(NULL, "%d", p[0]);
+    if (p[1] != -1)
+        res = talloc_asprintf_append(res, "-%d", p[1]);
+    return res;
+}
+
 const struct m_option_type m_option_type_intpair = {
     .name  = "Int[-Int]",
     .size  = sizeof(int[2]),
     .parse = parse_intpair,
+    .print = print_intpair,
     .copy  = copy_opt,
 };
 
@@ -645,7 +655,7 @@ const struct m_option_type m_option_type_choice = {
     .parse = parse_choice,
     .print = print_choice,
     .copy  = copy_opt,
-    .add = add_choice,
+    .add   = add_choice,
     .set   = choice_set,
     .get   = choice_get,
 };
@@ -2098,10 +2108,17 @@ static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
+static char *print_imgfmt(const m_option_t *opt, const void *val)
+{
+    int fmt = *(int *)val;
+    return talloc_strdup(NULL, fmt ? mp_imgfmt_to_name(fmt) : "no");
+}
+
 const m_option_type_t m_option_type_imgfmt = {
     .name  = "Image format",
     .size  = sizeof(int),
     .parse = parse_imgfmt,
+    .print = print_imgfmt,
     .copy  = copy_opt,
 };
 
@@ -2132,10 +2149,17 @@ static int parse_fourcc(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
+static char *print_fourcc(const m_option_t *opt, const void *val)
+{
+    unsigned int fourcc = *(unsigned int *)val;
+    return talloc_asprintf(NULL, "%08x", fourcc);
+}
+
 const m_option_type_t m_option_type_fourcc = {
     .name  = "FourCC",
     .size  = sizeof(unsigned int),
     .parse = parse_fourcc,
+    .print = print_fourcc,
     .copy  = copy_opt,
 };
 
@@ -2167,16 +2191,22 @@ static int parse_afmt(struct mp_log *log, const m_option_t *opt,
     }
 
     if (dst)
-        *((uint32_t *)dst) = fmt;
+        *((int *)dst) = fmt;
 
     return 1;
 }
 
+static char *print_afmt(const m_option_t *opt, const void *val)
+{
+    int fmt = *(int *)val;
+    return talloc_strdup(NULL, fmt ? af_fmt_to_str(fmt) : "no");
+}
+
 const m_option_type_t m_option_type_afmt = {
-    // Please report any missing formats
     .name  = "Audio format",
-    .size  = sizeof(uint32_t),
+    .size  = sizeof(int),
     .parse = parse_afmt,
+    .print = print_afmt,
     .copy  = copy_opt,
 };
 
@@ -2376,7 +2406,7 @@ const m_option_type_t m_option_type_time = {
     .print = print_time,
     .pretty_print = pretty_print_time,
     .copy  = copy_opt,
-    .add = add_double,
+    .add   = add_double,
     .set   = time_set,
     .get   = time_get,
 };
