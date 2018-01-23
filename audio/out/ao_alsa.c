@@ -704,7 +704,7 @@ static int init_device(struct ao *ao, int mode)
     dump_hw_params(ao, MSGL_DEBUG, "HW params after access:\n", alsa_hwparams);
 
     bool found_format = false;
-    int try_formats[AF_FORMAT_COUNT];
+    int try_formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n] && !found_format; n++) {
         int mp_format = try_formats[n];

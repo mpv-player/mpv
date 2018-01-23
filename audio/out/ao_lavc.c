@@ -72,7 +72,7 @@ static bool supports_format(AVCodec *codec, int format)
 
 static void select_format(struct ao *ao, AVCodec *codec)
 {
-    int formats[AF_FORMAT_COUNT];
+    int formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(ao->format, formats);
 
     for (int n = 0; formats[n]; n++) {

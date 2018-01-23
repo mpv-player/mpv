@@ -209,10 +209,11 @@ static int cmp_entry(const void *a, const void *b)
 // and the list is terminated with 0 (AF_FORMAT_UNKNOWN).
 // Keep in mind that this also returns formats with flipped interleaving
 // (e.g. for s16, it returns [s16, s16p, ...]).
-void af_get_best_sample_formats(int src_format, int out_formats[AF_FORMAT_COUNT])
+// out_formats must be an int[AF_FORMAT_COUNT + 1] array.
+void af_get_best_sample_formats(int src_format, int *out_formats)
 {
     int num = 0;
-    struct entry e[AF_FORMAT_COUNT];
+    struct entry e[AF_FORMAT_COUNT + 1];
     for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
         int score = af_format_conversion_score(fmt, src_format);
         if (score > INT_MIN)
