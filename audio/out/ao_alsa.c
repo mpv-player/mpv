@@ -521,7 +521,7 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
 
 #endif /* else HAVE_CHMAP_API */
 
-static void dump_hw_params(struct ao *ao, int msglevel, const char *msg,
+static void dump_hw_params(struct ao *ao, const char *msg,
                            snd_pcm_hw_params_t *hw_params)
 {
     struct priv *p = ao->priv;
@@ -533,7 +533,7 @@ static void dump_hw_params(struct ao *ao, int msglevel, const char *msg,
     char *tmp = NULL;
     size_t tmp_s = snd_output_buffer_string(p->output, &tmp);
     if (tmp)
-        mp_msg(ao->log, msglevel, "%s---\n%.*s---\n", msg, (int)tmp_s, tmp);
+        mp_msg(ao->log, MSGL_DEBUG, "%s---\n%.*s---\n", msg, (int)tmp_s, tmp);
     snd_output_flush(p->output);
 }
 
@@ -681,7 +681,7 @@ static int init_device(struct ao *ao, int mode)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-    dump_hw_params(ao, MSGL_DEBUG, "Start HW params:\n", alsa_hwparams);
+    dump_hw_params(ao, "Start HW params:\n", alsa_hwparams);
 
     // Some ALSA drivers have broken delay reporting, so disable the ALSA
     // resampling plugin by default.
@@ -689,7 +689,7 @@ static int init_device(struct ao *ao, int mode)
         err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
         CHECK_ALSA_ERROR("Unable to disable resampling");
     }
-    dump_hw_params(ao, MSGL_DEBUG, "HW params after rate:\n", alsa_hwparams);
+    dump_hw_params(ao, "HW params after rate:\n", alsa_hwparams);
 
     snd_pcm_access_t access = af_fmt_is_planar(ao->format)
                                     ? SND_PCM_ACCESS_RW_NONINTERLEAVED
@@ -701,7 +701,7 @@ static int init_device(struct ao *ao, int mode)
         err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
     }
     CHECK_ALSA_ERROR("Unable to set access type");
-    dump_hw_params(ao, MSGL_DEBUG, "HW params after access:\n", alsa_hwparams);
+    dump_hw_params(ao, "HW params after access:\n", alsa_hwparams);
 
     bool found_format = false;
     int try_formats[AF_FORMAT_COUNT + 1];
@@ -744,7 +744,7 @@ static int init_device(struct ao *ao, int mode)
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
-    dump_hw_params(ao, MSGL_DEBUG, "HW params after format:\n", alsa_hwparams);
+    dump_hw_params(ao, "HW params after format:\n", alsa_hwparams);
 
     // Stereo, or mono if input is 1 channel.
     struct mp_chmap reduced;
@@ -773,7 +773,7 @@ static int init_device(struct ao *ao, int mode)
     err = snd_pcm_hw_params_set_channels_near
             (p->alsa, alsa_hwparams, &num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
-    dump_hw_params(ao, MSGL_DEBUG, "HW params after channels:\n", alsa_hwparams);
+    dump_hw_params(ao, "HW params after channels:\n", alsa_hwparams);
 
     if (num_channels > MP_NUM_CHANNELS) {
         MP_FATAL(ao, "Too many audio channels (%d).\n", num_channels);
@@ -783,7 +783,7 @@ static int init_device(struct ao *ao, int mode)
     err = snd_pcm_hw_params_set_rate_near
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
-    dump_hw_params(ao, MSGL_DEBUG, "HW params after rate-2:\n", alsa_hwparams);
+    dump_hw_params(ao, "HW params after rate-2:\n", alsa_hwparams);
 
     snd_pcm_hw_params_t *hwparams_backup;
     snd_pcm_hw_params_alloca(&hwparams_backup);
@@ -801,14 +801,14 @@ static int init_device(struct ao *ao, int mode)
     if (err < 0)
         snd_pcm_hw_params_copy(alsa_hwparams, hwparams_backup);
 
-    dump_hw_params(ao, MSGL_V, "Going to set final HW params:\n", alsa_hwparams);
+    dump_hw_params(ao, "Going to set final HW params:\n", alsa_hwparams);
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
     ret = INIT_DEVICE_ERR_HWPARAMS;
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
     ret = INIT_DEVICE_ERR_GENERIC;
-    dump_hw_params(ao, MSGL_DEBUG, "Final HW params:\n", alsa_hwparams);
+    dump_hw_params(ao, "Final HW params:\n", alsa_hwparams);
 
     if (set_chmap(ao, &dev_chmap, num_channels) < 0)
         goto alsa_error;
