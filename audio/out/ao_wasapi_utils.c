@@ -97,7 +97,7 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
 static void wasapi_get_best_sample_formats(
     int src_format, struct wasapi_sample_fmt *out_formats)
 {
-    int mp_formats[AF_FORMAT_COUNT];
+    int mp_formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(src_format, mp_formats);
     for (int n = 0; mp_formats[n]; n++) {
         for (int i = 0; wasapi_formats[i].mp_format; i++) {

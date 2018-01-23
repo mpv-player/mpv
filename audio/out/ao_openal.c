@@ -197,7 +197,7 @@ static int init(struct ao *ao)
         ao->samplerate = freq;
 
     p->al_format = AL_FALSE;
-    int try_formats[AF_FORMAT_COUNT];
+    int try_formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
         p->al_format = get_al_format(try_formats[n]);

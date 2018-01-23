@@ -315,7 +315,7 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
         }
     }
 
-    int try_formats[AF_FORMAT_COUNT];
+    int try_formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
         format = try_formats[n];

@@ -136,7 +136,7 @@ static int init(struct ao *ao)
     pcm.formatType = SL_DATAFORMAT_PCM;
     pcm.numChannels = 2;
 
-    int compatible_formats[AF_FORMAT_COUNT];
+    int compatible_formats[AF_FORMAT_COUNT + 1];
     af_get_best_sample_formats(ao->format, compatible_formats);
     pcm.bitsPerSample = 0;
     for (int i = 0; compatible_formats[i] && !pcm.bitsPerSample; ++i)
