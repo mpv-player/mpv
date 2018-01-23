@@ -4586,6 +4586,7 @@ done:
     }
 
     osd_set_external2(mpctx->osd, new);
+    mp_wakeup_core(mpctx);
     cmd->overlay_osd_current = overlay_next;
 }
 
