@@ -267,7 +267,7 @@ static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
     }
 
     double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
-    if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
+    if (d_video->first_packet_pdts == MP_NOPTS_VALUE)
         d_video->first_packet_pdts = pkt_pdts;
 
     MP_STATS(d_video, "start decode video");
