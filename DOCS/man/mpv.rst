@@ -448,6 +448,9 @@ aliases for the proper option with ``-append`` action. For example,
 
 Some options only support a subset of the above.
 
+Options of this type can be changed at runtime using the ``change-list``
+command, which takes the suffix as separate operation parameter.
+
 Playing DVDs
 ------------
 

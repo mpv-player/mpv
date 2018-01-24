@@ -4918,6 +4918,37 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_CHANGE_LIST: {
+        char *name = cmd->args[0].v.s;
+        char *op = cmd->args[1].v.s;
+        char *value = cmd->args[2].v.s;
+        struct m_config_option *co = m_config_get_co(mpctx->mconfig, bstr0(name));
+        if (!co) {
+            set_osd_msg(mpctx, osdl, osd_duration, "Unknown option: '%s'", name);
+            return -1;
+        }
+        const struct m_option_type *type = co->opt->type;
+        bool found = false;
+        for (int i = 0; type->actions && type->actions[i].name; i++) {
+            const struct m_option_action *action = &type->actions[i];
+            if (strcmp(action->name, op) == 0)
+                found = true;
+        }
+        if (!found) {
+            set_osd_msg(mpctx, osdl, osd_duration, "Unknown action: '%s'", op);
+            return -1;
+        }
+        char *optname = mp_tprintf(80, "%s-%s", name, op); // the dirty truth
+        int r = m_config_set_option_cli(mpctx->mconfig, bstr0(optname),
+                                        bstr0(value), M_SETOPT_RUNTIME);
+        if (r < 0) {
+            set_osd_msg(mpctx, osdl, osd_duration,
+                        "Failed setting option: '%s'", name);
+            return -1;
+        }
+        break;
+    }
+
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
