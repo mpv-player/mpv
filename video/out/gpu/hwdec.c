@@ -49,10 +49,12 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
     &ra_hwdec_videotoolbox,
 #endif
 #if HAVE_D3D_HWACCEL
+ #if HAVE_EGL_ANGLE
     &ra_hwdec_d3d11egl,
     &ra_hwdec_d3d11eglrgb,
- #if HAVE_D3D9_HWACCEL
+  #if HAVE_D3D9_HWACCEL
     &ra_hwdec_dxva2egl,
+  #endif
  #endif
  #if HAVE_D3D11
     &ra_hwdec_d3d11va,
