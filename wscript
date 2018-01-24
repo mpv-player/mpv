@@ -829,15 +829,14 @@ hwaccel_features = [
         'deps': 'gl-cocoa && videotoolbox-hwaccel',
         'func': check_true
     }, {
-        # (conflated with ANGLE for easier deps)
         'name': '--d3d-hwaccel',
-        'desc': 'D3D11VA hwaccel (plus ANGLE)',
-        'deps': 'os-win32 && egl-angle',
+        'desc': 'D3D11VA hwaccel',
+        'deps': 'os-win32',
         'func': check_true,
     }, {
         'name': '--d3d9-hwaccel',
-        'desc': 'DXVA2 hwaccel (plus ANGLE)',
-        'deps': 'd3d-hwaccel && egl-angle-win32',
+        'desc': 'DXVA2 hwaccel',
+        'deps': 'd3d-hwaccel',
         'func': check_true,
     }, {
         'name': '--gl-dxinterop-d3d9',
