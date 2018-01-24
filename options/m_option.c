@@ -1301,7 +1301,7 @@ static struct bstr get_nextsep(struct bstr *ptr, char sep, bool modify)
     struct bstr str = *ptr;
     struct bstr orig = str;
     for (;;) {
-        int idx = bstrchr(str, sep);
+        int idx = sep ? bstrchr(str, sep) : -1;
         if (idx > 0 && str.start[idx - 1] == '\\') {
             if (modify) {
                 memmove(str.start + idx - 1, str.start + idx, str.len - idx);
@@ -1324,11 +1324,13 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
 {
     char **res;
     int op = default_op;
+    bool multi = true;
 
     if (bstr_endswith0(name, "-add")) {
         op = OP_ADD;
     } else if (bstr_endswith0(name, "-append")) {
-        op = OP_ADD_STR;
+        op = OP_ADD;
+        multi = false;
     } else if (bstr_endswith0(name, "-pre")) {
         op = OP_PRE;
     } else if (bstr_endswith0(name, "-del")) {
@@ -1350,20 +1352,9 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0 && op != OP_NONE)
         return M_OPT_MISSING_PARAM;
 
-    if (op == OP_ADD_STR) {
-        if (dst) {
-            char **list= VAL(dst);
-            int len = 0;
-            while (list && list[len])
-                len++;
-            MP_TARRAY_APPEND(NULL, list, len, bstrto0(NULL, param));
-            MP_TARRAY_APPEND(NULL, list, len, NULL);
-            VAL(dst) = list;
-        }
-        return 1;
-    }
-
     char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
+    if (!multi)
+        separator = 0; // specially handled
     int n = 0;
     struct bstr str = param;
     while (str.len) {
