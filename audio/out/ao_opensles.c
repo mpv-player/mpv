@@ -217,7 +217,8 @@ static void set_play_state(struct ao *ao, SLuint32 state)
 
 static void reset(struct ao *ao)
 {
-    set_play_state(ao, SL_PLAYSTATE_STOPPED);
+    struct priv *p = ao->priv;
+    (*p->buffer_queue)->Clear(p->buffer_queue);
 }
 
 static void resume(struct ao *ao)
