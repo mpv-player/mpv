@@ -1318,6 +1318,15 @@ static struct bstr get_nextsep(struct bstr *ptr, char sep, bool modify)
     return bstr_splice(orig, 0, str.start - orig.start);
 }
 
+static int find_list_bstr(char **list, bstr item)
+{
+    for (int n = 0; list && list[n]; n++) {
+        if (bstr_equals0(item, list[n]))
+            return n;
+    }
+    return -1;
+}
+
 static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param, void *dst,
                                int default_op)
@@ -1339,6 +1348,20 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         op = OP_CLR;
     } else if (bstr_endswith0(name, "-set")) {
         op = OP_NONE;
+    } else if (bstr_endswith0(name, "-toggle")) {
+        if (dst) {
+            char **list = VAL(dst);
+            int index = find_list_bstr(list, param);
+            if (index >= 0) {
+                char *old = list[index];
+                for (int n = index; list[n]; n++)
+                    list[n] = list[n + 1];
+                talloc_free(old);
+                return 1;
+            }
+        }
+        op = OP_ADD;
+        multi = false;
     }
 
     // Clear the list ??
@@ -1510,6 +1533,7 @@ const m_option_type_t m_option_type_string_list = {
         {"del"},
         {"pre"},
         {"set"},
+        {"toggle"},
         {0}
     },
 };
