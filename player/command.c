@@ -320,24 +320,6 @@ static char *cut_osd_list(struct MPContext *mpctx, char *text, int pos)
     return new;
 }
 
-static char *format_file_size(int64_t size)
-{
-    double s = size;
-    if (size < 1024)
-        return talloc_asprintf(NULL, "%.0f", s);
-
-    if (size < (1024 * 1024))
-        return talloc_asprintf(NULL, "%.3f KiB", s / (1024.0));
-
-    if (size < (1024 * 1024 * 1024))
-        return talloc_asprintf(NULL, "%.3f MiB", s / (1024.0 * 1024.0));
-
-    if (size < (1024LL * 1024LL * 1024LL * 1024LL))
-        return talloc_asprintf(NULL, "%.3f GiB", s / (1024.0 * 1024.0 * 1024.0));
-
-    return talloc_asprintf(NULL, "%.3f TiB", s / (1024.0 * 1024.0 * 1024.0 * 1024.0));
-}
-
 static char *format_delay(double time)
 {
     return talloc_asprintf(NULL, "%d ms", (int)lrint(time * 1000));
