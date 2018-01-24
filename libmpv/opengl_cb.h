@@ -252,7 +252,8 @@ typedef void *(*mpv_opengl_cb_get_proc_address_fn)(void *fn_ctx, const char *nam
  * Set the callback that notifies you when a new video frame is available, or
  * if the video display configuration somehow changed and requires a redraw.
  * Similar to mpv_set_wakeup_callback(), you must not call any mpv API from
- * the callback.
+ * the callback, and all the other listed restrictions apply (such as not
+ * exiting the callback by throwing exceptions).
  *
  * @param callback callback(callback_ctx) is called if the frame should be
  *                 redrawn
