@@ -435,6 +435,7 @@ Suffix        Meaning
 -del          Delete an existing item by integer index
 -pre          Prepend 1 or more items
 -set          Set a list of items
+-toggle       Append an item, or remove if if it already exists
 ============= ===============================================
 
 Although some operations allow specifying multiple ``,``-separated items, using
