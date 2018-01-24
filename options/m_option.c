@@ -393,6 +393,101 @@ const m_option_type_t m_option_type_int64 = {
     .get   = int64_get,
 };
 
+static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
+                           struct bstr name, struct bstr param, void *dst)
+{
+    if (param.len == 0)
+        return M_OPT_MISSING_PARAM;
+
+    struct bstr r;
+    long long tmp_int = bstrtoll(param, &r, 0);
+    int64_t unit = 1;
+    if (r.len) {
+        if (bstrcasecmp0(r, "kib") == 0 || bstrcasecmp0(r, "k") == 0) {
+            unit = 1024;
+        } else if (bstrcasecmp0(r, "mib") == 0 || bstrcasecmp0(r, "m") == 0) {
+            unit = 1024 * 1024;
+        } else if (bstrcasecmp0(r, "gib") == 0 || bstrcasecmp0(r, "g") == 0) {
+            unit = 1024 * 1024 * 1024;
+        } else if (bstrcasecmp0(r, "tib") == 0 || bstrcasecmp0(r, "t") == 0) {
+            unit = 1024 * 1024 * 1024 * 1024LL;
+        } else {
+            mp_err(log, "The %.*s option must be an integer: %.*s\n",
+                   BSTR_P(name), BSTR_P(param));
+            mp_err(log, "The following suffixes are also allowed: "
+                   "KiB, MiB, GiB, TiB, K, M, G, T.\n");
+            return M_OPT_INVALID;
+        }
+    }
+
+    if (tmp_int < 0) {
+        mp_err(log, "The %.*s option does not support negative numbers: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
+
+    if (INT64_MAX / unit < tmp_int) {
+        mp_err(log, "The %.*s option overflows: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
+
+    tmp_int *= unit;
+
+    if ((opt->flags & M_OPT_MIN) && (tmp_int < opt->min)) {
+        mp_err(log, "The %.*s option must be >= %d: %.*s\n",
+               BSTR_P(name), (int) opt->min, BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
+
+    if ((opt->flags & M_OPT_MAX) && (tmp_int > opt->max)) {
+        mp_err(log, "The %.*s option must be <= %d: %.*s\n",
+               BSTR_P(name), (int) opt->max, BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
+
+    if (dst)
+        *(int64_t *)dst = tmp_int;
+
+    return 1;
+}
+
+char *format_file_size(int64_t size)
+{
+    double s = size;
+    if (size < 1024)
+        return talloc_asprintf(NULL, "%.0f", s);
+
+    if (size < (1024 * 1024))
+        return talloc_asprintf(NULL, "%.3f KiB", s / (1024.0));
+
+    if (size < (1024 * 1024 * 1024))
+        return talloc_asprintf(NULL, "%.3f MiB", s / (1024.0 * 1024.0));
+
+    if (size < (1024LL * 1024LL * 1024LL * 1024LL))
+        return talloc_asprintf(NULL, "%.3f GiB", s / (1024.0 * 1024.0 * 1024.0));
+
+    return talloc_asprintf(NULL, "%.3f TiB", s / (1024.0 * 1024.0 * 1024.0 * 1024.0));
+}
+
+static char *pretty_print_byte_size(const m_option_t *opt, const void *val)
+{
+    return format_file_size(*(int64_t *)val);
+}
+
+const m_option_type_t m_option_type_byte_size = {
+    .name  = "ByteSize",
+    .size  = sizeof(int64_t),
+    .parse = parse_byte_size,
+    .print = print_int,
+    .pretty_print = pretty_print_byte_size,
+    .copy  = copy_opt,
+    .add = add_int64,
+    .multiply = multiply_int64,
+    .set   = int64_set,
+    .get   = int64_get,
+};
+
 static int parse_intpair(struct mp_log *log, const struct m_option *opt,
                          struct bstr name, struct bstr param, void *dst)
 {

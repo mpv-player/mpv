@@ -41,6 +41,7 @@ extern const m_option_type_t m_option_type_flag;
 extern const m_option_type_t m_option_type_dummy_flag;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
+extern const m_option_type_t m_option_type_byte_size;
 extern const m_option_type_t m_option_type_intpair;
 extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
@@ -371,6 +372,7 @@ struct m_option {
     const char *deprecation_message;
 };
 
+char *format_file_size(int64_t size);
 
 // The option has a minimum set in \ref m_option::min.
 #define M_OPT_MIN               (1 << 0)
@@ -669,6 +671,9 @@ extern const char m_option_path_separator;
 
 #define OPT_COLOR(...) \
     OPT_GENERAL(struct m_color, __VA_ARGS__, .type = &m_option_type_color)
+
+#define OPT_BYTE_SIZE(...) \
+    OPT_RANGE_(int64_t, __VA_ARGS__, .type = &m_option_type_byte_size)
 
 #define OPT_GEOMETRY(...) \
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_geometry)
