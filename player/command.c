@@ -4946,6 +4946,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                         "Failed setting option: '%s'", name);
             return -1;
         }
+        show_property_osd(mpctx, name, on_osd);
         break;
     }
 
