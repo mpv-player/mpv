@@ -2020,7 +2020,8 @@ Subtitles
     Default: 55.
 
 ``--sub-back-color=<color>``
-    See ``--sub-color``. Color used for sub text background.
+    See ``--sub-color``. Color used for sub text background. You can use
+    ``--sub-shadow-offset`` to change its size relative to the text.
 
 ``--sub-blur=<0..20.0>``
     Gaussian blur factor. 0 means no blur applied (default).
