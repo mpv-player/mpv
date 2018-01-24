@@ -732,6 +732,23 @@ Input Commands that are Possibly Subject to Change
 ``load-script "<path>"``
     Load a script, similar to the ``--script`` option.
 
+``change-list "<option>" "<operation>" "<value>"``
+    This command changes list options as described in `List Options`_. The
+    ``<option>`` parameter is the normal option name, while ``<operation>`` is
+    the suffix or action used on the option.
+
+    Some operations take no value, but the command still requires the value
+    parameter. In these cases, the value must be an empty string.
+
+    .. admonition:: Example
+
+        ``change-list glsl-shaders append file.glsl``
+
+        Add a filename to the ``glsl-shaders`` list. The command line
+        equivalent is ``--glsl-shaders-append=file.glsl`` or alternatively
+        ``--glsl-shader=file.glsl``.
+
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
