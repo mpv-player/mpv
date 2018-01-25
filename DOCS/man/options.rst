@@ -3969,6 +3969,16 @@ Network
     special value 0 (default) uses the FFmpeg/Libav defaults. If a protocol
     is used which does not support timeouts, this option is silently ignored.
 
+    .. warning::
+
+        This breaks the RTSP protocol, because of inconsistent FFmpeg API
+        regarding its internal timeout option. Not only does the RTSP timeout
+        option accept different units (seconds instead of microseconds, causing
+        mpv to pass it huge values), it will also overflow FFmpeg internal
+        calculations. The worst is that merely setting the option will put RTSP
+        into listening mode, which breaks any client uses. Do not use this
+        option with RTSP URLs.
+
 ``--rtsp-transport=<lavf|udp|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``
