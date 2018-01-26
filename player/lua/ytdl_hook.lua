@@ -225,18 +225,17 @@ local function add_single_video(json)
             edl_track = edl_track_joined(track.fragments,
                 track.protocol, json.is_live,
                 track.fragment_base_url)
-            local url = edl_track or track.url
-            if not url_is_safe(url) then
+            if not edl_track and not url_is_safe(track.url) then
                 return
             end
             if track.acodec and track.acodec ~= "none" then
                 -- audio track
                 mp.commandv("audio-add",
-                    url, "auto",
+                    edl_track or track.url, "auto",
                     track.format_note or "")
             elseif track.vcodec and track.vcodec ~= "none" then
                 -- video track
-                streamurl = url
+                streamurl = edl_track or track.url
             end
         end
 
@@ -245,6 +244,9 @@ local function add_single_video(json)
         edl_track = edl_track_joined(json.fragments, json.protocol,
             json.is_live, json.fragment_base_url)
 
+        if not edl_track and not url_is_safe(json.url) then
+            return
+        end
         -- normal video or single track
         streamurl = edl_track or json.url
         set_http_headers(json.http_headers)
@@ -255,13 +257,7 @@ local function add_single_video(json)
 
     msg.debug("streamurl: " .. streamurl)
 
-    streamurl = streamurl:gsub("^data:", "data://", 1)
-
-    if not url_is_safe(streamurl) then
-        return
-    end
-
-    mp.set_property("stream-open-filename", streamurl)
+    mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
     mp.set_property("file-local-options/force-media-title", json.title)
 
@@ -441,6 +437,10 @@ mp.add_hook("on_load", 10, function ()
                 local playlist = edl_track_joined(json.entries)
 
                 msg.debug("EDL: " .. playlist)
+
+                if not playlist then
+                    return
+                end
 
                 -- can't change the http headers for each entry, so use the 1st
                 if json.entries[1] then
