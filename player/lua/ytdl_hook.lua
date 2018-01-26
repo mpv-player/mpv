@@ -235,9 +235,13 @@ end
 local function add_single_video(json)
     local streamurl = ""
     local max_bitrate = 0
+    local reqfmts = json["requested_formats"]
 
-    if has_native_dash_demuxer() and proto_is_dash(json) then
-        local mpd_url = json["requested_formats"][1]["manifest_url"] or
+    -- prefer manifest_url if present
+    if (has_native_dash_demuxer() and proto_is_dash(json)) or
+        (reqfmts and reqfmts[1]["manifest_url"]) or
+        json["manifest_url"] then
+        local mpd_url = reqfmts and reqfmts[1]["manifest_url"] or
             json["manifest_url"]
         if not mpd_url then
             msg.error("No manifest URL found in JSON data.")
@@ -248,8 +252,8 @@ local function add_single_video(json)
 
         streamurl = mpd_url
 
-        if json.requested_formats then
-            for _, track in pairs(json.requested_formats) do
+        if reqfmts then
+            for _, track in pairs(reqfmts) do
                 max_bitrate = track.tbr > max_bitrate and
                     track.tbr or max_bitrate
             end
@@ -258,8 +262,8 @@ local function add_single_video(json)
         end
 
     -- DASH/split tracks
-    elseif not (json["requested_formats"] == nil) then
-        for _, track in pairs(json.requested_formats) do
+    elseif reqfmts then
+        for _, track in pairs(reqfmts) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
                 track.protocol, json.is_live,
