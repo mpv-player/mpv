@@ -102,6 +102,8 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
     // Prepare for continued playback after a seek.
     if (!vo_c->input_mpi && vo_c->cached_coverart)
         vo_c->input_mpi = mp_image_new_ref(vo_c->cached_coverart);
+
+    vo_c->filter_src_got_eof = false;
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -152,7 +154,7 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
     }
 
     if (vo_c->filter_src)
-        lavfi_set_connected(vo_c->filter_src, false);
+        mp_pin_disconnect(vo_c->filter_src);
 
     mp_image_unrefp(&vo_c->input_mpi);
     mp_image_unrefp(&vo_c->cached_coverart);
@@ -212,7 +214,7 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
 
 err_out:
     if (track->sink)
-        lavfi_set_connected(track->sink, false);
+        mp_pin_disconnect(track->sink);
     track->sink = NULL;
     video_uninit(track->d_video);
     track->d_video = NULL;
@@ -356,7 +358,21 @@ static int decode_image(struct MPContext *mpctx)
 
     int res = DATA_EOF;
     if (vo_c->filter_src) {
-        res = lavfi_request_frame_v(vo_c->filter_src, &vo_c->input_mpi);
+        struct mp_frame frame = mp_pin_out_read(vo_c->filter_src);
+        if (frame.type == MP_FRAME_EOF) {
+            res = DATA_EOF;
+            vo_c->filter_src_got_eof = true;
+        } else if (frame.type == MP_FRAME_VIDEO) {
+            res = DATA_OK;
+            vo_c->input_mpi = frame.data;
+            vo_c->filter_src_got_eof = false;
+        } else if (frame.type) {
+            MP_ERR(vo_c, "unexpected frame type\n");
+            mp_frame_unref(&frame);
+            res = DATA_EOF;
+        } else {
+            res = vo_c->filter_src_got_eof ? DATA_EOF : DATA_WAIT;
+        }
     } else if (vo_c->video_src) {
         struct dec_video *d_video = vo_c->video_src;
         bool hrseek = mpctx->hrseek_active && mpctx->hrseek_framedrop &&

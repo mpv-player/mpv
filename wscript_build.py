@@ -298,7 +298,6 @@ def build(ctx):
         ( "player/loadfile.c" ),
         ( "player/main.c" ),
         ( "player/misc.c" ),
-        ( "player/lavfi.c" ),
         ( "player/lua.c",                        "lua" ),
         ( "player/javascript.c",                 "javascript" ),
         ( "player/osd.c" ),

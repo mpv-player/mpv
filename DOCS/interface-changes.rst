@@ -65,6 +65,11 @@ Interface changes
           audio formats are not convertible (such as switching between PCM and
           AC3 passthrough)
     - remove out-format sub-parameter from "format" audio filter (no replacement)
+    - --lavfi-complex now requires uniquely named filter pads. In addition,
+      unconnected filter pads are not allowed anymore (that means every filter
+      pad must be connected either to another filter, or to a video/audio track
+      or video/audio output). If they are disconnected at runtime, the stream
+      will probably stall.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

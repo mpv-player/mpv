@@ -212,14 +212,12 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 // Clear some playback-related fields on file loading or after seeks.
 void reset_playback_state(struct MPContext *mpctx)
 {
-    if (mpctx->lavfi)
-        lavfi_seek_reset(mpctx->lavfi);
-
     for (int n = 0; n < mpctx->num_tracks; n++) {
         if (mpctx->tracks[n]->d_video)
             video_reset(mpctx->tracks[n]->d_video);
         if (mpctx->tracks[n]->d_audio)
             audio_reset_decoding(mpctx->tracks[n]->d_audio);
+        mpctx->tracks[n]->sink_eof = false;
     }
 
     mp_filter_reset(mpctx->filter_root);
@@ -1081,16 +1079,21 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
         struct track *track = mpctx->tracks[n];
         if (!track->selected)
             continue;
-        if (!track->sink || !lavfi_needs_input(track->sink))
+        if (!track->sink || !mp_pin_in_needs_data(track->sink))
             continue;
         if (track->d_audio) {
             audio_work(track->d_audio);
             struct mp_aframe *fr;
             int res = audio_get_frame(track->d_audio, &fr);
             if (res == DATA_OK) {
-                lavfi_send_frame_a(track->sink, fr);
-            } else {
-                lavfi_send_status(track->sink, res);
+                mp_pin_in_write(track->sink, MAKE_FRAME(MP_FRAME_AUDIO, fr));
+                track->sink_eof = false;
+            } else if (res == DATA_EOF) {
+                if (!track->sink_eof)
+                    mp_pin_in_write(track->sink, MP_EOF_FRAME);
+                track->sink_eof = true;
+            } else if (res == DATA_AGAIN) {
+                mp_wakeup_core(mpctx);
             }
         }
         if (track->d_video) {
@@ -1098,9 +1101,14 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
             struct mp_image *fr;
             int res = video_get_frame(track->d_video, &fr);
             if (res == DATA_OK) {
-                lavfi_send_frame_v(track->sink, fr);
-            } else {
-                lavfi_send_status(track->sink, res);
+                mp_pin_in_write(track->sink, MAKE_FRAME(MP_FRAME_VIDEO, fr));
+                track->sink_eof = false;
+            } else if (res == DATA_EOF) {
+                if (!track->sink_eof)
+                    mp_pin_in_write(track->sink, MP_EOF_FRAME);
+                track->sink_eof = true;
+            } else if (res == DATA_AGAIN) {
+                mp_wakeup_core(mpctx);
             }
         }
     }
@@ -1123,12 +1131,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_vo_events(mpctx);
     handle_command_updates(mpctx);
 
-    if (mpctx->lavfi) {
-        if (lavfi_process(mpctx->lavfi))
-            mp_wakeup_core(mpctx);
-        if (lavfi_has_failed(mpctx->lavfi))
-            mpctx->stop_play = AT_END_OF_FILE;
-    }
+    if (mpctx->lavfi && mp_filter_has_failed(mpctx->lavfi))
+        mpctx->stop_play = AT_END_OF_FILE;
 
     fill_audio_out_buffers(mpctx);
     write_video(mpctx);
