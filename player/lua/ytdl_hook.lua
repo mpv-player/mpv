@@ -15,6 +15,18 @@ local ytdl = {
 
 local chapter_list = {}
 
+function Set (t)
+    local set = {}
+    for _, v in pairs(t) do set[v] = true end
+    return set
+end
+
+local safe_protos = Set {
+    "http", "https", "ftp", "ftps",
+    "rtmp", "rtmps", "rtmpe", "rtmpt", "rtmpts", "rtmpte",
+    "data"
+}
+
 local function exec(args)
     local ret = utils.subprocess({args = args})
     return ret.status, ret.stdout, ret
@@ -182,6 +194,9 @@ local function edl_track_joined(fragments, protocol, is_live, base)
 
     for i = offset, #fragments do
         local fragment = fragments[i]
+        if not url_is_safe(join_url(base, fragment)) then
+            return nil
+        end
         table.insert(parts, edl_escape(join_url(base, fragment)))
         if fragment.duration then
             parts[#parts] =
@@ -189,6 +204,15 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         end
     end
     return edl .. table.concat(parts, ";") .. ";"
+end
+
+local function url_is_safe(url)
+    local proto = type(url) == "string" and url:match("^(.+)://") or nil
+    local safe = proto and safe_protos[proto]
+    if not safe then
+        msg.error(("Ignoring potentially unsafe url: '%s'"):format(url))
+    end
+    return safe
 end
 
 local function add_single_video(json)
@@ -201,14 +225,18 @@ local function add_single_video(json)
             edl_track = edl_track_joined(track.fragments,
                 track.protocol, json.is_live,
                 track.fragment_base_url)
+            local url = edl_track or track.url
+            if not url_is_safe(url) then
+                return
+            end
             if track.acodec and track.acodec ~= "none" then
                 -- audio track
                 mp.commandv("audio-add",
-                    edl_track or track.url, "auto",
+                    url, "auto",
                     track.format_note or "")
             elseif track.vcodec and track.vcodec ~= "none" then
                 -- video track
-                streamurl = edl_track or track.url
+                streamurl = url
             end
         end
 
@@ -227,7 +255,13 @@ local function add_single_video(json)
 
     msg.debug("streamurl: " .. streamurl)
 
-    mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
+    streamurl = streamurl:gsub("^data:", "data://", 1)
+
+    if not url_is_safe(streamurl) then
+        return
+    end
+
+    mp.set_property("stream-open-filename", streamurl)
 
     mp.set_property("file-local-options/force-media-title", json.title)
 
@@ -455,14 +489,14 @@ mp.add_hook("on_load", 10, function ()
                 add_single_video(json.entries[1])
             else
 
-                local playlist = "#EXTM3U\n"
+                local playlist = {"#EXTM3U"}
                 for i, entry in pairs(json.entries) do
                     local site = entry.url
                     local title = entry.title
 
                     if not (title == nil) then
                         title = string.gsub(title, '%s+', ' ')
-                        playlist = playlist .. "#EXTINF:0," .. title .. "\n"
+                        table.insert(playlist, "#EXTINF:0," .. title)
                     end
 
                     -- some extractors will still return the full info for
@@ -475,10 +509,17 @@ mp.add_hook("on_load", 10, function ()
                         site = entry["webpage_url"]
                     end
 
-                    playlist = playlist .. "ytdl://" .. site .. "\n"
+                    -- links with only youtube id as returned by --flat-playlist
+                    if not site:find("://") then
+                        table.insert(playlist, "ytdl://" .. site)
+                    elseif url_is_safe(site) then
+                        table.insert(playlist, site)
+                    end
                 end
 
-                mp.set_property("stream-open-filename", "memory://" .. playlist)
+                if #playlist > 0 then
+                    mp.set_property("stream-open-filename", "memory://" .. table.concat(playlist, "\n"))
+                end
             end
 
         else -- probably a video
