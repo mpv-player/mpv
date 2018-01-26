@@ -529,9 +529,6 @@ static void uninit_rendering(struct gl_video *p)
     for (int n = 0; n < p->num_hook_textures; n++)
         ra_tex_free(p->ra, &p->hook_textures[n]);
 
-    for (int n = 0; n < 2; n++)
-        ra_tex_free(p->ra, &p->vdpau_deinterleave_tex[n]);
-
     gl_video_reset_surfaces(p);
     gl_video_reset_hooks(p);
 
@@ -1001,6 +998,9 @@ static void uninit_video(struct gl_video *p)
     p->hwdec_active = false;
     p->hwdec_overlay = NULL;
     ra_hwdec_mapper_free(&p->hwdec_mapper);
+
+    for (int n = 0; n < 2; n++)
+        ra_tex_free(p->ra, &p->vdpau_deinterleave_tex[n]);
 }
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
