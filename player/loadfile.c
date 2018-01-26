@@ -45,6 +45,8 @@
 
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
+#include "filters/f_lavfi.h"
+#include "filters/filter_internal.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/dec_sub.h"
@@ -971,8 +973,8 @@ static void deassociate_complex_filters(struct MPContext *mpctx)
         mpctx->vo_chain->filter_src = NULL;
     if (mpctx->ao_chain)
         mpctx->ao_chain->filter_src = NULL;
-    lavfi_destroy(mpctx->lavfi);
-    mpctx->lavfi = NULL;
+    TA_FREEP(&mpctx->lavfi);
+    TA_FREEP(&mpctx->lavfi_graph);
 }
 
 // Close all decoders and sinks (AO/VO) that are not connected to either
@@ -1012,8 +1014,8 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
     char *graph = mpctx->opts->lavfi_complex;
     bool have_graph = graph && graph[0] && !force_uninit;
     if (have_graph && mpctx->lavfi &&
-        strcmp(graph, lavfi_get_graph(mpctx->lavfi)) == 0 &&
-        !lavfi_has_failed(mpctx->lavfi))
+        strcmp(graph, mpctx->lavfi_graph) == 0 &&
+        !mp_filter_has_failed(mpctx->lavfi))
         return 0;
     if (!mpctx->lavfi && !have_graph)
         return 0;
@@ -1031,12 +1033,17 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         goto done;
     }
 
-    mpctx->lavfi = lavfi_create(mpctx->log, graph);
-    if (!mpctx->lavfi)
+    struct mp_lavfi *l =
+        mp_lavfi_create_graph(mpctx->filter_root, 0, false, NULL, graph);
+    if (!l)
         goto done;
+    mpctx->lavfi = l->f;
+    mpctx->lavfi_graph = talloc_strdup(NULL, graph);
 
-    if (lavfi_has_failed(mpctx->lavfi))
-        goto done;
+    mp_filter_set_error_handler(mpctx->lavfi, mpctx->filter_root);
+
+    for (int n = 0; n < mpctx->lavfi->num_pins; n++)
+        mp_pin_disconnect(mpctx->lavfi->pins[n]);
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -1050,14 +1057,12 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         }
         snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
 
-        struct lavfi_pad *pad = lavfi_find_pad(mpctx->lavfi, label);
+        struct mp_pin *pad = mp_filter_get_named_pin(mpctx->lavfi, label);
         if (!pad)
             continue;
-        if (lavfi_pad_type(pad) != track->type)
+        if (mp_pin_get_dir(pad) != MP_PIN_IN)
             continue;
-        if (lavfi_pad_direction(pad) != LAVFI_IN)
-            continue;
-        if (lavfi_get_connected(pad))
+        if (mp_pin_is_connected(pad))
             continue;
 
         assert(!track->sink);
@@ -1067,14 +1072,12 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             goto done;
         }
         track->sink = pad;
-        lavfi_set_connected(pad, true);
+        mp_pin_set_manual_connection(pad, true);
         track->selected = true;
     }
 
-    struct lavfi_pad *pad = lavfi_find_pad(mpctx->lavfi, "vo");
-    if (pad && lavfi_pad_type(pad) == STREAM_VIDEO &&
-        lavfi_pad_direction(pad) == LAVFI_OUT)
-    {
+    struct mp_pin *pad = mp_filter_get_named_pin(mpctx->lavfi, "vo");
+    if (pad && mp_pin_get_dir(pad) == MP_PIN_OUT) {
         if (mpctx->vo_chain) {
             if (mpctx->vo_chain->video_src) {
                 MP_ERR(mpctx, "Pad vo tries to connect to already used VO.\n");
@@ -1085,16 +1088,13 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             if (!mpctx->vo_chain)
                 goto done;
         }
-        lavfi_set_connected(pad, true);
+        mp_pin_set_manual_connection(pad, true);
         struct vo_chain *vo_c = mpctx->vo_chain;
         vo_c->filter_src = pad;
-        lavfi_pad_set_hwdec_devs(vo_c->filter_src, vo_c->hwdec_devs);
     }
 
-    pad = lavfi_find_pad(mpctx->lavfi, "ao");
-    if (pad && lavfi_pad_type(pad) == STREAM_AUDIO &&
-        lavfi_pad_direction(pad) == LAVFI_OUT)
-    {
+    pad = mp_filter_get_named_pin(mpctx->lavfi, "ao");
+    if (pad && mp_pin_get_dir(pad) == MP_PIN_OUT) {
         if (mpctx->ao_chain) {
             if (mpctx->ao_chain->audio_src) {
                 MP_ERR(mpctx, "Pad ao tries to connect to already used AO.\n");
@@ -1105,7 +1105,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             if (!mpctx->ao_chain)
                 goto done;
         }
-        lavfi_set_connected(pad, true);
+        mp_pin_set_manual_connection(pad, true);
         mpctx->ao_chain->filter_src = pad;
     }
 
@@ -1118,6 +1118,17 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         if (track->sink && track->type == STREAM_AUDIO) {
             if (!track->d_audio && !init_audio_decoder(mpctx, track))
                 goto done;
+        }
+    }
+
+    // Don't allow unconnected pins. Libavfilter would make the data flow a
+    // real pain anyway.
+    for (int n = 0; n < mpctx->lavfi->num_pins; n++) {
+        struct mp_pin *pin = mpctx->lavfi->pins[n];
+        if (!mp_pin_is_connected(pin)) {
+            MP_ERR(mpctx, "Pad %s is not connected to anything.\n",
+                   mp_pin_get_name(pin));
+            goto done;
         }
     }
 

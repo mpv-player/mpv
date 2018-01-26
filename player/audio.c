@@ -193,6 +193,8 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
 
     if (ao_c->audio_src)
         audio_reset_decoding(ao_c->audio_src);
+
+    ao_c->filter_src_got_eof = false;
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -231,7 +233,7 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
     }
 
     if (ao_c->filter_src)
-        lavfi_set_connected(ao_c->filter_src, false);
+        mp_pin_disconnect(ao_c->filter_src);
 
     talloc_free(ao_c->filter->f);
     talloc_free(ao_c->input_frame);
@@ -428,7 +430,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track)
 
 init_error:
     if (track->sink)
-        lavfi_set_connected(track->sink, false);
+        mp_pin_disconnect(track->sink);
     track->sink = NULL;
     audio_uninit(track->d_audio);
     track->d_audio = NULL;
@@ -708,7 +710,21 @@ static int decode_new_frame(struct ao_chain *ao_c)
 
     int res = DATA_EOF;
     if (ao_c->filter_src) {
-        res = lavfi_request_frame_a(ao_c->filter_src, &ao_c->input_frame);
+        struct mp_frame frame = mp_pin_out_read(ao_c->filter_src);
+        if (frame.type == MP_FRAME_EOF) {
+            res = DATA_EOF;
+            ao_c->filter_src_got_eof = true;
+        } else if (frame.type == MP_FRAME_AUDIO) {
+            res = DATA_OK;
+            ao_c->input_frame = frame.data;
+            ao_c->filter_src_got_eof = false;
+        } else if (frame.type) {
+            MP_ERR(ao_c, "unexpected frame type\n");
+            mp_frame_unref(&frame);
+            res = DATA_EOF;
+        } else {
+            res = ao_c->filter_src_got_eof ? DATA_EOF : DATA_WAIT;
+        }
     } else if (ao_c->audio_src) {
         audio_work(ao_c->audio_src);
         res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);

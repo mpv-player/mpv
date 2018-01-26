@@ -34,8 +34,6 @@
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 
-#include "lavfi.h"
-
 // definitions used internally by the core player code
 
 enum stop_play_reason {
@@ -161,7 +159,8 @@ struct track {
     // Where the decoded result goes to (one of them is not NULL if active)
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
-    struct lavfi_pad *sink;
+    struct mp_pin *sink;
+    bool sink_eof; // whether it got passed EOF
 
     // For stream recording (remuxing mode).
     struct mp_recorder_sink *remux_sink;
@@ -183,7 +182,8 @@ struct vo_chain {
     struct mp_image *input_mpi;
 
     struct track *track;
-    struct lavfi_pad *filter_src;
+    struct mp_pin *filter_src;
+    bool filter_src_got_eof; // whether this returned EOF last time
     struct dec_video *video_src;
 
     // - video consists of a single picture, which should be shown only once
@@ -216,7 +216,8 @@ struct ao_chain {
     double last_out_pts;
 
     struct track *track;
-    struct lavfi_pad *filter_src;
+    struct mp_pin *filter_src;
+    bool filter_src_got_eof; // whether this returned EOF last time
     struct dec_audio *audio_src;
 };
 
@@ -315,9 +316,10 @@ typedef struct MPContext {
     // Currently, this is used for the secondary subtitle track only.
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
-    struct lavfi *lavfi;
-
     struct mp_filter *filter_root;
+
+    struct mp_filter *lavfi;
+    char *lavfi_graph;
 
     struct ao *ao;
     struct mp_aframe *ao_filter_fmt; // for weak gapless audio check
