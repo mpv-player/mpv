@@ -83,6 +83,15 @@ local function edl_escape(url)
     return "%" .. string.len(url) .. "%" .. url
 end
 
+local function url_is_safe(url)
+    local proto = type(url) == "string" and url:match("^(.+)://") or nil
+    local safe = proto and safe_protos[proto]
+    if not safe then
+        msg.error(("Ignoring potentially unsafe url: '%s'"):format(url))
+    end
+    return safe
+end
+
 local function time_to_secs(time_string)
     local ret
 
@@ -204,15 +213,6 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         end
     end
     return edl .. table.concat(parts, ";") .. ";"
-end
-
-local function url_is_safe(url)
-    local proto = type(url) == "string" and url:match("^(.+)://") or nil
-    local safe = proto and safe_protos[proto]
-    if not safe then
-        msg.error(("Ignoring potentially unsafe url: '%s'"):format(url))
-    end
-    return safe
 end
 
 local function add_single_video(json)
