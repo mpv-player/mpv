@@ -920,6 +920,11 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     demuxer->fully_read = priv->format_hack.fully_read;
 
+#ifdef AVFMTCTX_UNSEEKABLE
+    if (avfc->ctx_flags & AVFMTCTX_UNSEEKABLE)
+        demuxer->seekable = false;
+#endif
+
     if (priv->avfc->duration > 0) {
         demuxer->duration = (double)priv->avfc->duration / AV_TIME_BASE;
     } else {
