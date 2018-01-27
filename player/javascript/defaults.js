@@ -537,7 +537,7 @@ function replacer(k, v) {
 
 function obj2str(v) {
     try {  // can process objects more than once, but throws on cycles
-        return JSON.stringify(v, replacer, 2);
+        return JSON.stringify(v, replacer.bind(null), 2);
     } catch (e) { // simple safe: exclude visited objects, even if not cyclic
         return JSON.stringify(v, replacer.bind([]), 2);
     }
