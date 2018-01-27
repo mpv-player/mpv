@@ -50,6 +50,9 @@
 #include "options/m_option.h"
 #include "options/path.h"
 
+#ifndef AV_DISPOSITION_TIMED_THUMBNAILS
+#define AV_DISPOSITION_TIMED_THUMBNAILS 0
+#endif
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
@@ -615,7 +618,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     case AVMEDIA_TYPE_VIDEO: {
         sh = demux_alloc_sh_stream(STREAM_VIDEO);
 
-        if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
+        if ((st->disposition & AV_DISPOSITION_ATTACHED_PIC) &&
+            !(st->disposition & AV_DISPOSITION_TIMED_THUMBNAILS))
+        {
             sh->attached_picture =
                 new_demux_packet_from_avpacket(&st->attached_pic);
             if (sh->attached_picture) {
