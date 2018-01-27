@@ -226,10 +226,14 @@ local function has_native_dash_demuxer()
     return false
 end
 
-local function proto_is_dash(json)
-    local reqfmts = json["requested_formats"]
-    return (reqfmts ~= nil and reqfmts[1]["protocol"] == "http_dash_segments")
-           or json["protocol"] == "http_dash_segments"
+local function valid_manifest(json)
+    local reqfmt = json["requested_formats"] and json["requested_formats"][1] or {}
+    if not reqfmt["manifest_url"] and not json["manifest_url"] then
+        return false
+    end
+    local proto = reqfmt["protocol"] or json["protocol"] or ""
+    return (has_native_dash_demuxer() and proto == "http_dash_segments") or
+        proto:find("^m3u8")
 end
 
 local function add_single_video(json)
@@ -238,9 +242,7 @@ local function add_single_video(json)
     local reqfmts = json["requested_formats"]
 
     -- prefer manifest_url if present
-    if (has_native_dash_demuxer() and proto_is_dash(json)) or
-        (reqfmts and reqfmts[1]["manifest_url"]) or
-        json["manifest_url"] then
+    if valid_manifest(json) then
         local mpd_url = reqfmts and reqfmts[1]["manifest_url"] or
             json["manifest_url"]
         if not mpd_url then
