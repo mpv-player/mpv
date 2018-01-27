@@ -633,8 +633,10 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = filter == STREAM_TYPE_COUNT;
-        if (!first && (filter == STREAM_TYPE_COUNT || sh->type == filter))
+        if (!first && (filter == STREAM_TYPE_COUNT || sh->type == filter)) {
             first = t;
+            first->num_tracks = demux_get_num_stream(demuxer);
+        }
     }
 
     return first;
@@ -689,9 +691,20 @@ void autoload_external_files(struct MPContext *mpctx)
             goto skip;
         struct track *track = mp_add_external_file(mpctx, filename, list[i].type);
         if (track) {
-            track->auto_loaded = true;
-            if (!track->lang)
-                track->lang = talloc_strdup(track, lang);
+            int first = 0;
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                if (t == track) {
+                    first = n;
+                    break;
+                }
+            }
+            for (int n = first; n < first + track->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                t->auto_loaded = true;
+                if (!t->lang)
+                    t->lang = talloc_strdup(t, lang);
+            }
         }
     skip:;
     }

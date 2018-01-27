@@ -144,6 +144,7 @@ struct track {
     bool no_auto_select;
     char *external_filename;
     bool auto_loaded;
+    int num_tracks;
 
     struct demuxer *demuxer;
     // Invariant: !stream || stream->demuxer == demuxer
