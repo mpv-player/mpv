@@ -5295,24 +5295,29 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 return 0;
             }
         }
-        struct track *t = mp_add_external_file(mpctx, cmd->args[0].v.s, type);
-        if (!t)
+        int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type);
+        if (first < 0)
             return -1;
-        if (cmd->args[1].v.i == 1) {
-            t->no_default = true;
-        } else {
-            if (mpctx->playback_initialized) {
-                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
-            } else {
-                opts->stream_id[0][t->type] = t->user_tid;
+
+        for (int n = first; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            if (cmd->args[1].v.i == 1){
+                t->no_default = true;
+            } else if (n == first) {
+                if (mpctx->playback_initialized) {
+                    mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+                } else {
+                    opts->stream_id[0][t->type] = t->user_tid;
+                }
             }
+            char *title = cmd->args[2].v.s;
+            if (title && title[0])
+                t->title = talloc_strdup(t, title);
+            char *lang = cmd->args[3].v.s;
+            if (lang && lang[0])
+                t->lang = talloc_strdup(t, lang);
         }
-        char *title = cmd->args[2].v.s;
-        if (title && title[0])
-            t->title = talloc_strdup(t, title);
-        char *lang = cmd->args[3].v.s;
-        if (lang && lang[0])
-            t->lang = talloc_strdup(t, lang);
+
         if (mpctx->playback_initialized)
             print_track_list(mpctx, "Track added:");
         break;
@@ -5338,14 +5343,15 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
         int type = cmd->id == MP_CMD_SUB_RELOAD ? STREAM_SUB : STREAM_AUDIO;
         struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
-        struct track *nt = NULL;
+        int nt_num = -1;
         if (t && t->is_external && t->external_filename) {
             char *filename = talloc_strdup(NULL, t->external_filename);
             mp_remove_track(mpctx, t);
-            nt = mp_add_external_file(mpctx, filename, type);
+            nt_num = mp_add_external_file(mpctx, filename, type);
             talloc_free(filename);
         }
-        if (nt) {
+        if (nt_num >= 0) {
+            struct track *nt = mpctx->tracks[nt_num];
             mp_switch_track(mpctx, nt->type, nt, 0);
             print_track_list(mpctx, "Reloaded:");
             return 0;

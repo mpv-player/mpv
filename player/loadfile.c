@@ -576,12 +576,12 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 
 // Add the given file as additional track. Only tracks of type "filter" are
 // included; pass STREAM_TYPE_COUNT to disable filtering.
-struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
-                                   enum stream_type filter)
+int mp_add_external_file(struct MPContext *mpctx, char *filename,
+                         enum stream_type filter)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename)
-        return NULL;
+        return -1;
 
     char *disp_filename = filename;
     if (strncmp(disp_filename, "memory://", 9) == 0)
@@ -622,10 +622,10 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         if (filter == STREAM_TYPE_COUNT)
             tname = "";
         MP_ERR(mpctx, "No %sstreams in file %s.\n", tname, disp_filename);
-        return false;
+        return -1;
     }
 
-    struct track *first = NULL;
+    int first_num = -1;
     for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
         struct track *t = add_stream_track(mpctx, demuxer, sh);
@@ -634,15 +634,15 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = filter == STREAM_TYPE_COUNT;
-        if (!first && (filter == STREAM_TYPE_COUNT || sh->type == filter))
-            first = t;
+        if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
+            first_num = mpctx->num_tracks - 1;
     }
 
-    return first;
+    return first_num;
 
 err_out:
     MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
-    return false;
+    return -1;
 }
 
 static void open_external_files(struct MPContext *mpctx, char **files,
@@ -688,11 +688,15 @@ void autoload_external_files(struct MPContext *mpctx)
             goto skip;
         if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
-        struct track *track = mp_add_external_file(mpctx, filename, list[i].type);
-        if (track) {
-            track->auto_loaded = true;
-            if (!track->lang)
-                track->lang = talloc_strdup(track, lang);
+        int first = mp_add_external_file(mpctx, filename, list[i].type);
+        if (first < 0)
+            goto skip;
+
+        for (int n = first; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            t->auto_loaded = true;
+            if (!t->lang)
+                t->lang = talloc_strdup(t, lang);
         }
     skip:;
     }
