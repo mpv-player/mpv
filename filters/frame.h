@@ -6,6 +6,7 @@ enum mp_frame_type {
     MP_FRAME_NONE = 0,  // NULL, placeholder, no frame available (_not_ EOF)
     MP_FRAME_VIDEO,     // struct mp_image*
     MP_FRAME_AUDIO,     // struct mp_aframe*
+    MP_FRAME_PACKET,    // struct demux_packet*
     MP_FRAME_EOF,       // NULL, signals end of stream (but frames after it can
                         // resume filtering!)
 };

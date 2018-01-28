@@ -42,6 +42,7 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "common/global.h"
+#include "filters/f_decoder_wrapper.h"
 #include "options/parse_configfile.h"
 #include "options/parse_commandline.h"
 #include "common/playlist.h"
@@ -54,7 +55,6 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
-#include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
 #include "core.h"

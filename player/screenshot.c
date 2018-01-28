@@ -34,7 +34,6 @@
 #include "options/path.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
-#include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"

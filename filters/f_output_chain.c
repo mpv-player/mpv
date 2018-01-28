@@ -406,9 +406,13 @@ static void process(struct mp_filter *f)
     if (mp_pin_can_transfer_data(p->filters_in, f->ppins[0])) {
         struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
-        if (frame.type == MP_FRAME_EOF) {
+        p->public.got_input_eof = frame.type == MP_FRAME_EOF;
+        if (p->public.got_input_eof)
             MP_VERBOSE(p, "filter input EOF\n");
-            p->public.got_input_eof = true;
+
+        if (frame.type == MP_FRAME_VIDEO && p->public.update_subtitles) {
+            p->public.update_subtitles(p->public.update_subtitles_ctx,
+                                       mp_frame_get_pts(frame));
         }
 
         mp_pin_in_write(p->filters_in, frame);
@@ -417,10 +421,9 @@ static void process(struct mp_filter *f)
     if (mp_pin_can_transfer_data(f->ppins[1], p->filters_out)) {
         struct mp_frame frame = mp_pin_out_read(p->filters_out);
 
-        if (frame.type == MP_FRAME_EOF) {
+        p->public.got_output_eof = frame.type == MP_FRAME_EOF;
+        if (p->public.got_output_eof)
             MP_VERBOSE(p, "filter output EOF\n");
-            p->public.got_output_eof = true;
-        }
 
         mp_pin_in_write(f->ppins[1], frame);
     }
@@ -488,6 +491,7 @@ void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
     p->stream_info.hwdec_devs = vo ? vo->hwdec_devs : NULL;
     p->stream_info.osd = vo ? vo->osd : NULL;
     p->stream_info.rotate90 = vo ? vo->driver->caps & VO_CAP_ROTATE90 : false;
+    p->stream_info.dr_vo = vo;
     p->vo = vo;
     update_output_caps(p);
 }

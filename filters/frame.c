@@ -2,6 +2,7 @@
 
 #include "audio/aframe.h"
 #include "common/av_common.h"
+#include "demux/packet.h"
 #include "video/mp_image.h"
 
 #include "frame.h"
@@ -11,7 +12,6 @@ struct frame_handler {
     bool is_data;
     bool is_signaling;
     void *(*new_ref)(void *data);
-    // The following must be non-NULL if new_ref is non-NULL.
     double (*get_pts)(void *data);
     void (*set_pts)(void *data, double pts);
     AVFrame *(*new_av_ref)(void *data);
@@ -69,6 +69,11 @@ static void *audio_from_av_ref(AVFrame *data)
     return mp_aframe_from_avframe(data);
 }
 
+static void *packet_ref(void *data)
+{
+    return demux_copy_packet(data);
+}
+
 static const struct frame_handler frame_handlers[] = {
     [MP_FRAME_NONE] = {
         .name = "none",
@@ -95,6 +100,12 @@ static const struct frame_handler frame_handlers[] = {
         .set_pts = audio_set_pts,
         .new_av_ref = audio_new_av_ref,
         .from_av_ref = audio_from_av_ref,
+        .free = talloc_free,
+    },
+    [MP_FRAME_PACKET] = {
+        .name = "packet",
+        .is_data = true,
+        .new_ref = packet_ref,
         .free = talloc_free,
     },
 };

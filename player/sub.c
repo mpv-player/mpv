@@ -33,7 +33,6 @@
 #include "sub/dec_sub.h"
 #include "demux/demux.h"
 #include "video/mp_image.h"
-#include "video/decode/dec_video.h"
 
 #include "core.h"
 

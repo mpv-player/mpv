@@ -36,7 +36,6 @@
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
-#include "video/decode/dec_video.h"
 
 #include "core.h"
 #include "command.h"

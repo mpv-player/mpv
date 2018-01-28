@@ -153,7 +153,7 @@ struct track {
     struct dec_sub *d_sub;
 
     // Current decoding state (NULL if selected==false)
-    struct dec_video *d_video;
+    struct mp_decoder_wrapper *dec;
     struct dec_audio *d_audio;
 
     // Where the decoded result goes to (one of them is not NULL if active)
@@ -170,7 +170,6 @@ struct track {
 struct vo_chain {
     struct mp_log *log;
 
-    struct mp_hwdec_devices *hwdec_devs;
     double container_fps;
 
     struct mp_output_chain *filter;
@@ -178,19 +177,13 @@ struct vo_chain {
     //struct vf_chain *vf;
     struct vo *vo;
 
-    // 1-element input frame queue.
-    struct mp_image *input_mpi;
-
     struct track *track;
     struct mp_pin *filter_src;
-    bool filter_src_got_eof; // whether this returned EOF last time
-    struct dec_video *video_src;
+    struct mp_pin *dec_src;
 
     // - video consists of a single picture, which should be shown only once
     // - do not sync audio to video in any way
     bool is_coverart;
-    // Just to avoid decoding the coverart picture again after a seek.
-    struct mp_image *cached_coverart;
 };
 
 // Like vo_chain, for audio.
@@ -351,7 +344,6 @@ typedef struct MPContext {
     // Number of mistimed frames.
     int mistimed_frames_total;
     bool hrseek_active;     // skip all data until hrseek_pts
-    bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
     bool hrseek_lastframe;  // drop everything until last frame reached
     bool hrseek_backstep;   // go to frame before seek target
     double hrseek_pts;
@@ -366,8 +358,6 @@ typedef struct MPContext {
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
-    // Used to compute the number of frames dropped in a row.
-    int dropped_frames_start;
     // A-V sync difference when last frame was displayed. Kept to display
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
