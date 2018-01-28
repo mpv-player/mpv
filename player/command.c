@@ -36,6 +36,7 @@
 #include "common/codecs.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "filters/f_decoder_wrapper.h"
 #include "command.h"
 #include "osdep/timer.h"
 #include "common/common.h"
@@ -50,13 +51,12 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "options/m_config.h"
-#include "video/decode/vd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
+#include "video/hwdec.h"
 #include "audio/aframe.h"
 #include "audio/format.h"
 #include "audio/out/ao.h"
-#include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "video/out/bitmap_packer.h"
 #include "options/path.h"
@@ -675,10 +675,12 @@ static int mp_property_frame_drop_dec(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->vo_chain)
+    struct mp_decoder_wrapper *dec = mpctx->vo_chain && mpctx->vo_chain->track
+        ? mpctx->vo_chain->track->dec : NULL;
+    if (!dec)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, mpctx->vo_chain->video_src->dropped_frames);
+    return m_property_int_ro(action, arg, dec->dropped_frames);
 }
 
 static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
@@ -2182,8 +2184,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
     const char *decoder_desc = NULL;
-    if (track->d_video)
-        decoder_desc = track->d_video->decoder_desc;
+    if (track->dec)
+        decoder_desc = track->dec->decoder_desc;
     if (track->d_audio)
         decoder_desc = track->d_audio->decoder_desc;
 
@@ -2367,7 +2369,7 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct dec_video *vd = track ? track->d_video : NULL;
+    struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
     struct MPOpts *opts = mpctx->opts;
 
     if (action == M_PROPERTY_SET) {
@@ -2379,10 +2381,10 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
         talloc_free(opts->hwdec_api);
         opts->hwdec_api = talloc_strdup(NULL, new);
 
-        if (!vd)
+        if (!dec)
             return M_PROPERTY_OK;
 
-        video_vd_control(vd, VDCTRL_REINIT, NULL);
+        mp_decoder_wrapper_control(dec, VDCTRL_REINIT, NULL);
         double last_pts = mpctx->last_vo_pts;
         if (last_pts != MP_NOPTS_VALUE)
             queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
@@ -2397,13 +2399,13 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct dec_video *vd = track ? track->d_video : NULL;
+    struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
 
-    if (!vd)
+    if (!dec)
         return M_PROPERTY_UNAVAILABLE;
 
     char *current = NULL;
-    video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+    mp_decoder_wrapper_control(dec, VDCTRL_GET_HWDEC, &current);
     if (!current)
         current = "no";
     return m_property_strdup_ro(action, arg, current);
@@ -2547,7 +2549,7 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    const char *c = track && track->d_video ? track->d_video->decoder_desc : NULL;
+    const char *c = track && track->dec ? track->dec->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -2620,8 +2622,8 @@ static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct mp_image_params p = {0};
     struct vo_chain *vo_c = mpctx->vo_chain;
-    if (vo_c && vo_c->video_src)
-        video_get_dec_params(vo_c->video_src, &p);
+    if (vo_c && vo_c->track)
+        mp_decoder_wrapper_get_video_dec_params(vo_c->track->dec, &p);
     if (!p.imgfmt)
         return M_PROPERTY_UNAVAILABLE;
     return property_imgparams(p, action, arg);
@@ -2984,9 +2986,8 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         }
     }
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (track && track->d_video && aspect <= 0) {
-        struct dec_video *d_video = track->d_video;
-        struct mp_codec_params *c = d_video->header->codec;
+    if (track && track->stream && aspect <= 0) {
+        struct mp_codec_params *c = track->stream->codec;
         if (c->disp_w && c->disp_h)
             aspect = (float)c->disp_w / c->disp_h;
     }
@@ -5807,8 +5808,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_IMGPAR) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        if (track && track->d_video) {
-            video_reset_params(track->d_video);
+        if (track && track->dec) {
+            mp_decoder_wrapper_reset_params(track->dec);
             mp_force_video_refresh(mpctx);
         }
     }

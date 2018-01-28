@@ -32,6 +32,8 @@ struct mp_output_chain {
     struct mp_image_params input_params;
     struct mp_image_params output_params;
     double container_fps;
+    void (*update_subtitles)(void *ctx, double pts);
+    void *update_subtitles_ctx;
 
     // --- for type==MP_OUTPUT_CHAIN_AUDIO
     struct mp_aframe *input_aformat;

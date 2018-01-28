@@ -250,6 +250,8 @@ def build(ctx):
 
         ( "filters/f_autoconvert.c" ),
         ( "filters/f_auto_filters.c" ),
+        ( "filters/f_decoder_wrapper.c" ),
+        ( "filters/f_demux_in.c" ),
         ( "filters/f_hwtransfer.c" ),
         ( "filters/f_lavfi.c" ),
         ( "filters/f_output_chain.c" ),
@@ -368,7 +370,6 @@ def build(ctx):
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
-        ( "video/decode/dec_video.c"),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),

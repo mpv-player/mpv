@@ -28,7 +28,9 @@ static void frame_duration_process(struct mp_filter *f)
             if (p->buffered->pts != MP_NOPTS_VALUE &&
                 next->pts != MP_NOPTS_VALUE &&
                 next->pts >= p->buffered->pts)
+            {
                 p->buffered->pkt_duration = next->pts - p->buffered->pts;
+            }
             mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_VIDEO, p->buffered));
         } else {
             mp_pin_out_request_data(f->ppins[0]);

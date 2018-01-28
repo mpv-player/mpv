@@ -30,6 +30,7 @@
 #include "options/options.h"
 #include "common/common.h"
 #include "options/m_property.h"
+#include "filters/f_decoder_wrapper.h"
 #include "common/encode.h"
 
 #include "osdep/terminal.h"
@@ -39,7 +40,6 @@
 #include "stream/stream.h"
 #include "sub/osd.h"
 
-#include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -221,8 +221,9 @@ static char *get_term_status_msg(struct MPContext *mpctx)
                 talloc_free(r);
             }
             int64_t c = vo_get_drop_count(mpctx->video_out);
-            struct dec_video *d_video = mpctx->vo_chain->video_src;
-            int dropped_frames = d_video ? d_video->dropped_frames : 0;
+            struct mp_decoder_wrapper *dec = mpctx->vo_chain->track
+                                        ? mpctx->vo_chain->track->dec : NULL;
+            int dropped_frames = dec ? dec->dropped_frames : 0;
             if (c > 0 || dropped_frames > 0) {
                 saddf(&line, " Dropped: %"PRId64, c);
                 if (dropped_frames)

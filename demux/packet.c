@@ -78,6 +78,8 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
 // (buf must include proper padding)
 struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
 {
+    if (!buf)
+        return NULL;
     AVPacket pkt = {
         .size = buf->size,
         .data = buf->data,

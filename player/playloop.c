@@ -29,6 +29,7 @@
 #include "common/common.h"
 #include "common/encode.h"
 #include "common/recorder.h"
+#include "filters/f_decoder_wrapper.h"
 #include "options/m_config.h"
 #include "options/m_property.h"
 #include "common/playlist.h"
@@ -43,7 +44,6 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
-#include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -213,8 +213,6 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 void reset_playback_state(struct MPContext *mpctx)
 {
     for (int n = 0; n < mpctx->num_tracks; n++) {
-        if (mpctx->tracks[n]->d_video)
-            video_reset(mpctx->tracks[n]->d_video);
         if (mpctx->tracks[n]->d_audio)
             audio_reset_decoding(mpctx->tracks[n]->d_audio);
         mpctx->tracks[n]->sink_eof = false;
@@ -227,7 +225,6 @@ void reset_playback_state(struct MPContext *mpctx)
     reset_subtitle_state(mpctx);
 
     mpctx->hrseek_active = false;
-    mpctx->hrseek_framedrop = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
     mpctx->current_seek = (struct seek_params){0};
@@ -376,13 +373,22 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     if (hr_seek) {
         mpctx->hrseek_active = true;
-        mpctx->hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
         mpctx->hrseek_backstep = seek.type == MPSEEK_BACKSTEP;
         mpctx->hrseek_pts = seek_pts;
 
+        // allow decoder to drop frames before hrseek_pts
+        bool hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
+
         MP_VERBOSE(mpctx, "hr-seek, skipping to %f%s%s\n", mpctx->hrseek_pts,
-                   mpctx->hrseek_framedrop ? "" : " (no framedrop)",
+                   hrseek_framedrop ? "" : " (no framedrop)",
                    mpctx->hrseek_backstep ? " (backstep)" : "");
+
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            struct mp_decoder_wrapper *dec = track->dec;
+            if (dec && hrseek_framedrop)
+                mp_decoder_wrapper_set_start_pts(dec, mpctx->hrseek_pts);
+        }
     }
 
     if (mpctx->stop_play == AT_END_OF_FILE)
@@ -1079,29 +1085,14 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
         struct track *track = mpctx->tracks[n];
         if (!track->selected)
             continue;
-        if (!track->sink || !mp_pin_in_needs_data(track->sink))
-            continue;
         if (track->d_audio) {
+            if (!track->sink || !mp_pin_in_needs_data(track->sink))
+                continue;
             audio_work(track->d_audio);
             struct mp_aframe *fr;
             int res = audio_get_frame(track->d_audio, &fr);
             if (res == DATA_OK) {
                 mp_pin_in_write(track->sink, MAKE_FRAME(MP_FRAME_AUDIO, fr));
-                track->sink_eof = false;
-            } else if (res == DATA_EOF) {
-                if (!track->sink_eof)
-                    mp_pin_in_write(track->sink, MP_EOF_FRAME);
-                track->sink_eof = true;
-            } else if (res == DATA_AGAIN) {
-                mp_wakeup_core(mpctx);
-            }
-        }
-        if (track->d_video) {
-            video_work(track->d_video);
-            struct mp_image *fr;
-            int res = video_get_frame(track->d_video, &fr);
-            if (res == DATA_OK) {
-                mp_pin_in_write(track->sink, MAKE_FRAME(MP_FRAME_VIDEO, fr));
                 track->sink_eof = false;
             } else if (res == DATA_EOF) {
                 if (!track->sink_eof)
