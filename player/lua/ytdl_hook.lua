@@ -570,7 +570,7 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
 
                     -- links with only youtube id as returned by --flat-playlist
                     if not site:find("://") then
-                        table.insert(playlist, "ytdl://" .. site)
+                        table.insert(playlist, "https://youtu.be/" .. site)
                     elseif url_is_safe(site) then
                         table.insert(playlist, site)
                     end
