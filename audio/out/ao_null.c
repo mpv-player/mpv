@@ -58,6 +58,7 @@ struct priv {
     int outburst;       // samples
 
     struct m_channels channel_layouts;
+    int format;
 };
 
 static void drain(struct ao *ao)
@@ -87,6 +88,9 @@ static void drain(struct ao *ao)
 static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
+
+    if (priv->format)
+        ao->format = priv->format;
 
     ao->untimed = priv->untimed;
 
@@ -241,6 +245,7 @@ const struct ao_driver audio_out_null = {
         OPT_FLAG("broken-eof", broken_eof, 0),
         OPT_FLAG("broken-delay", broken_delay, 0),
         OPT_CHANNELS("channel-layouts", channel_layouts, 0),
+        OPT_AUDIOFORMAT("format", format, 0),
         {0}
     },
     .options_prefix = "ao-null",
