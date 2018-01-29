@@ -198,6 +198,9 @@ Available audio output drivers are:
         If not empty, this is a ``,`` separated list of channel layouts the
         AO allows. This can be used to test channel layout selection.
 
+    ``--ao-null-format``
+        Force the audio output format the AO will accept. If unset accepts any.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
