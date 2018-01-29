@@ -208,6 +208,7 @@ static void mp_image_destructor(void *ptr)
         av_buffer_unref(&mpi->bufs[p]);
     av_buffer_unref(&mpi->hwctx);
     av_buffer_unref(&mpi->icc_profile);
+    av_buffer_unref(&mpi->a53_cc);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -326,6 +327,7 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
 
     fail |= !ref_buffer(&new->hwctx);
     fail |= !ref_buffer(&new->icc_profile);
+    fail |= !ref_buffer(&new->a53_cc);
 
 
     if (!fail)
@@ -891,6 +893,10 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         if (mdm->has_luminance)
             dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
     }
+
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_A53_CC);
+    if (sd)
+        dst->a53_cc = av_buffer_ref(sd->buf);
 #endif
 
     if (dst->hwctx) {
