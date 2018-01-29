@@ -296,6 +296,16 @@ void mp_image_unref_data(struct mp_image *img)
     }
 }
 
+static bool ref_buffer(AVBufferRef **dst)
+{
+    if (*dst) {
+        *dst = av_buffer_ref(*dst);
+        if (!*dst)
+            return false;
+    }
+    return true;
+}
+
 // Return a new reference to img. The returned reference is owned by the caller,
 // while img is left untouched.
 struct mp_image *mp_image_new_ref(struct mp_image *img)
@@ -311,24 +321,12 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     *new = *img;
 
     bool fail = false;
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
-        if (new->bufs[p]) {
-            new->bufs[p] = av_buffer_ref(new->bufs[p]);
-            if (!new->bufs[p])
-                fail = true;
-        }
-    }
-    if (new->hwctx) {
-        new->hwctx = av_buffer_ref(new->hwctx);
-        if (!new->hwctx)
-            fail = true;
-    }
+    for (int p = 0; p < MP_MAX_PLANES; p++)
+        fail |= !ref_buffer(&new->bufs[p]);
 
-    if (new->icc_profile) {
-        new->icc_profile = av_buffer_ref(new->icc_profile);
-        if (!new->icc_profile)
-            fail = true;
-    }
+    fail |= !ref_buffer(&new->hwctx);
+    fail |= !ref_buffer(&new->icc_profile);
+
 
     if (!fail)
         return new;
