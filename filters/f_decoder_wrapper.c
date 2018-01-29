@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 #include <assert.h>
 
 #include <libavutil/buffer.h>
@@ -36,6 +37,7 @@
 #include "common/global.h"
 #include "common/recorder.h"
 
+#include "audio/aframe.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 
@@ -149,6 +151,13 @@ struct mp_decoder_list *video_decoder_list(void)
     return list;
 }
 
+struct mp_decoder_list *audio_decoder_list(void)
+{
+    struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
+    ad_lavc.add_decoders(list);
+    return list;
+}
+
 bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 {
     struct priv *p = d->f->priv;
@@ -161,13 +170,36 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
     reset_decoder(p);
     p->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
-    const struct mp_decoder_fns *driver = &vd_lavc;
+    const struct mp_decoder_fns *driver = NULL;
+    struct mp_decoder_list *list = NULL;
+    char *user_list = NULL;
 
-    struct mp_decoder_list *full = talloc_zero(NULL, struct mp_decoder_list);
-    driver->add_decoders(full);
-    struct mp_decoder_list *list =
-        mp_select_decoders(p->log, full, p->codec->codec, opts->video_decoders);
-    talloc_free(full);
+    if (p->codec->type == STREAM_VIDEO) {
+        driver = &vd_lavc;
+        user_list = opts->video_decoders;
+    } else if (p->codec->type == STREAM_AUDIO) {
+        driver = &ad_lavc;
+        user_list = opts->audio_decoders;
+
+        if (p->public.try_spdif && p->codec->codec) {
+            struct mp_decoder_list *spdif =
+                select_spdif_codec(p->codec->codec, opts->audio_spdif);
+            if (spdif->num_entries) {
+                driver = &ad_spdif;
+                list = spdif;
+            } else {
+                talloc_free(spdif);
+            }
+        }
+    }
+
+    if (!list) {
+        struct mp_decoder_list *full = talloc_zero(NULL, struct mp_decoder_list);
+        if (driver)
+            driver->add_decoders(full);
+        list = mp_select_decoders(p->log, full, p->codec->codec, user_list);
+        talloc_free(full);
+    }
 
     mp_print_decoders(p->log, MSGL_V, "Codec list:", list);
 
@@ -363,6 +395,29 @@ void mp_decoder_wrapper_get_video_dec_params(struct mp_decoder_wrapper *d,
     *m = p->dec_format;
 }
 
+static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
+{
+    double frame_pts = mp_aframe_get_pts(aframe);
+    if (frame_pts != MP_NOPTS_VALUE) {
+        if (p->pts != MP_NOPTS_VALUE)
+            MP_STATS(p, "value %f audio-pts-err", p->pts - frame_pts);
+
+        // Keep the interpolated timestamp if it doesn't deviate more
+        // than 1 ms from the real one. (MKV rounded timestamps.)
+        if (p->pts == MP_NOPTS_VALUE || fabs(p->pts - frame_pts) > 0.001)
+            p->pts = frame_pts;
+    }
+
+    if (p->pts == MP_NOPTS_VALUE && p->header->missing_timestamps)
+        p->pts = 0;
+
+    mp_aframe_set_pts(aframe, p->pts);
+
+    if (p->pts != MP_NOPTS_VALUE)
+        p->pts += mp_aframe_duration(aframe);
+}
+
+
 // Frames before the start timestamp can be dropped. (Used for hr-seek.)
 void mp_decoder_wrapper_set_start_pts(struct mp_decoder_wrapper *d, double pts)
 {
@@ -470,6 +525,17 @@ static bool process_decoded_frame(struct priv *p, struct mp_frame *frame)
             if ((p->start != MP_NOPTS_VALUE && vpts < p->start) || segment_ended)
                 mp_frame_unref(frame);
         }
+    } else if (frame->type == MP_FRAME_AUDIO) {
+        struct mp_aframe *aframe = frame->data;
+
+        process_audio_frame(p, aframe);
+
+        mp_aframe_clip_timestamps(aframe, p->start, p->end);
+        double pts = mp_aframe_get_pts(aframe);
+        if (pts != MP_NOPTS_VALUE && p->start != MP_NOPTS_VALUE)
+            segment_ended = pts >= p->end;
+        if (mp_aframe_get_size(aframe) == 0)
+            mp_frame_unref(frame);
     } else {
         MP_ERR(p, "unknown frame type from decoder\n");
     }
@@ -588,6 +654,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
             MP_INFO(p, "FPS forced to %5.3f.\n", p->public.fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
+    } else if (p->header->type == STREAM_AUDIO) {
+        p->log = f->log = mp_log_new(f, parent->log, "!ad");
     }
 
     struct mp_filter *demux = mp_demux_in_create(f, p->header);

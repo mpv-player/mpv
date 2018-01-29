@@ -41,7 +41,6 @@
 #include "video/hwdec.h"
 #include "filters/f_decoder_wrapper.h"
 #include "video/out/vo.h"
-#include "audio/decode/dec_audio.h"
 
 #include "core.h"
 #include "command.h"

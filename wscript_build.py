@@ -180,7 +180,6 @@ def build(ctx):
         ( "audio/aframe.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),
-        ( "audio/decode/dec_audio.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_lavcac3enc.c" ),
         ( "audio/filter/af_lavrresample.c" ),
