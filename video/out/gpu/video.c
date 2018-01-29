@@ -3406,6 +3406,20 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
+    if (!(ra->caps & RA_CAP_FRAGCOORD) && p->opts.dither_depth >= 0 &&
+        p->opts.dither_algo != DITHER_NONE)
+    {
+        p->opts.dither_algo = DITHER_NONE;
+        MP_WARN(p, "Disabling dithering (no gl_FragCoord).\n");
+    }
+    if (!(ra->caps & RA_CAP_FRAGCOORD) &&
+        p->opts.alpha_mode == ALPHA_BLEND_TILES)
+    {
+        p->opts.alpha_mode = ALPHA_BLEND;
+        // Verbose, since this is the default setting
+        MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
+    }
+
     p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
     bool voluntarily_dumb = check_dumb_mode(p);
     if (p->forced_dumb_mode || voluntarily_dumb) {
@@ -3493,19 +3507,6 @@ static void check_gl_features(struct gl_video *p)
     if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak) {
         p->opts.compute_hdr_peak = 0;
         MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
-    }
-    if (!(ra->caps & RA_CAP_FRAGCOORD) && p->opts.dither_depth >= 0 &&
-        p->opts.dither_algo != DITHER_NONE)
-    {
-        p->opts.dither_algo = DITHER_NONE;
-        MP_WARN(p, "Disabling dithering (no gl_FragCoord).\n");
-    }
-    if (!(ra->caps & RA_CAP_FRAGCOORD) &&
-        p->opts.alpha_mode == ALPHA_BLEND_TILES)
-    {
-        p->opts.alpha_mode = ALPHA_BLEND;
-        // Verbose, since this is the default setting
-        MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
 }
 
