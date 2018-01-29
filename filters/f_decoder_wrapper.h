@@ -46,6 +46,11 @@ struct mp_decoder_wrapper {
     // Framedrop control for playback (not used for hr seek etc.)
     int attempt_framedrops; // try dropping this many frames
     int dropped_frames; // total frames _probably_ dropped
+
+    // --- for STREAM_AUDIO
+
+    // Prefer spdif wrapper over real decoders.
+    bool try_spdif;
 };
 
 // Create the decoder wrapper for the given stream, plus underlying decoder.
@@ -55,6 +60,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src);
 
 struct mp_decoder_list *video_decoder_list(void);
+struct mp_decoder_list *audio_decoder_list(void);
 
 // For precise seeking: if possible, try to drop frames up until the given PTS.
 // This is automatically unset if the target is reached, or on reset.
@@ -96,9 +102,14 @@ struct mp_decoder_fns {
 };
 
 extern const struct mp_decoder_fns vd_lavc;
+extern const struct mp_decoder_fns ad_lavc;
+extern const struct mp_decoder_fns ad_spdif;
 
 // Convenience wrapper for lavc based decoders. eof_flag must be set to false
 // on init and resets.
 void lavc_process(struct mp_filter *f, bool *eof_flag,
                   bool (*send)(struct mp_filter *f, struct demux_packet *pkt),
                   bool (*receive)(struct mp_filter *f, struct mp_frame *res));
+
+// ad_spdif.c
+struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);

@@ -27,27 +27,30 @@
 #include <libavutil/intreadwrite.h>
 
 #include "mpv_talloc.h"
-
-#include "config.h"
+#include "audio/aframe.h"
+#include "audio/fmt-conversion.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
+#include "common/global.h"
 #include "common/msg.h"
+#include "demux/packet.h"
+#include "demux/stheader.h"
+#include "filters/f_decoder_wrapper.h"
+#include "filters/filter_internal.h"
 #include "options/options.h"
-
-#include "ad.h"
-#include "audio/fmt-conversion.h"
 
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
-    bool force_channel_map;
+    struct mp_chmap force_channel_map;
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
     double next_pts;
     AVRational codec_timebase;
-};
+    bool eof_returned;
 
-static void uninit(struct dec_audio *da);
+    struct mp_decoder public;
+};
 
 #define OPT_BASE_STRUCT struct ad_lavc_params
 struct ad_lavc_params {
@@ -73,26 +76,24 @@ const struct m_sub_options ad_lavc_conf = {
     },
 };
 
-static int init(struct dec_audio *da, const char *decoder)
+static bool init(struct mp_filter *da, struct mp_codec_params *codec,
+                 const char *decoder)
 {
-    struct MPOpts *mpopts = da->opts;
+    struct priv *ctx = da->priv;
+    struct MPOpts *mpopts = da->global->opts;
     struct ad_lavc_params *opts = mpopts->ad_lavc_params;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
-    struct mp_codec_params *c = da->codec;
 
-    struct priv *ctx = talloc_zero(NULL, struct priv);
-    da->priv = ctx;
+    ctx->codec_timebase = mp_get_codec_timebase(codec);
 
-    ctx->codec_timebase = mp_get_codec_timebase(da->codec);
-
-    ctx->force_channel_map = c->force_channels;
+    if (codec->force_channels)
+        ctx->force_channel_map = codec->channels;
 
     lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec) {
         MP_ERR(da, "Cannot find codec '%s' in libavcodec...\n", decoder);
-        uninit(da);
-        return 0;
+        return false;
     }
 
     lavc_context = avcodec_alloc_context3(lavc_codec);
@@ -121,10 +122,9 @@ static int init(struct dec_audio *da, const char *decoder)
 
     mp_set_avopts(da->log, lavc_context, opts->avopts);
 
-    if (mp_set_avctx_codec_headers(lavc_context, c) < 0) {
+    if (mp_set_avctx_codec_headers(lavc_context, codec) < 0) {
         MP_ERR(da, "Could not set decoder parameters.\n");
-        uninit(da);
-        return 0;
+        return false;
     }
 
     mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
@@ -132,41 +132,35 @@ static int init(struct dec_audio *da, const char *decoder)
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
         MP_ERR(da, "Could not open codec.\n");
-        uninit(da);
-        return 0;
+        return false;
     }
 
     ctx->next_pts = MP_NOPTS_VALUE;
 
-    return 1;
+    return true;
 }
 
-static void uninit(struct dec_audio *da)
+static void destroy(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
-    if (!ctx)
-        return;
 
     avcodec_free_context(&ctx->avctx);
     av_frame_free(&ctx->avframe);
 }
 
-static int control(struct dec_audio *da, int cmd, void *arg)
+static void reset(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
-    switch (cmd) {
-    case ADCTRL_RESET:
-        avcodec_flush_buffers(ctx->avctx);
-        ctx->skip_samples = 0;
-        ctx->trim_samples = 0;
-        ctx->preroll_done = false;
-        ctx->next_pts = MP_NOPTS_VALUE;
-        return CONTROL_TRUE;
-    }
-    return CONTROL_UNKNOWN;
+
+    avcodec_flush_buffers(ctx->avctx);
+    ctx->skip_samples = 0;
+    ctx->trim_samples = 0;
+    ctx->preroll_done = false;
+    ctx->next_pts = MP_NOPTS_VALUE;
+    ctx->eof_returned = false;
 }
 
-static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
+static bool send_packet(struct mp_filter *da, struct demux_packet *mpkt)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
@@ -190,7 +184,7 @@ static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
     return true;
 }
 
-static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
+static bool receive_frame(struct mp_filter *da, struct mp_frame *out)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
@@ -200,7 +194,8 @@ static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
     if (ret == AVERROR_EOF) {
         // If flushing was initialized earlier and has ended now, make it start
         // over in case we get new packets at some point in the future.
-        control(da, ADCTRL_RESET, NULL);
+        // (Dont' reset the filter itself, we want to keep other state.)
+        avcodec_flush_buffers(priv->avctx);
         return false;
     } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
         MP_ERR(da, "Error decoding audio.\n");
@@ -220,8 +215,8 @@ static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
     if (!mpframe)
         return true;
 
-    if (priv->force_channel_map)
-        mp_aframe_set_chmap(mpframe, &da->codec->channels);
+    if (priv->force_channel_map.num)
+        mp_aframe_set_chmap(mpframe, &priv->force_channel_map);
 
     if (out_pts == MP_NOPTS_VALUE)
         out_pts = priv->next_pts;
@@ -257,11 +252,49 @@ static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
         priv->trim_samples -= trim;
     }
 
-    *out = mpframe;
+    *out = MAKE_FRAME(MP_FRAME_AUDIO, mpframe);
 
     av_frame_unref(priv->avframe);
 
     return true;
+}
+
+static void process(struct mp_filter *ad)
+{
+    struct priv *priv = ad->priv;
+
+    lavc_process(ad, &priv->eof_returned, send_packet, receive_frame);
+}
+
+static const struct mp_filter_info ad_lavc_filter = {
+    .name = "ad_lavc",
+    .priv_size = sizeof(struct priv),
+    .process = process,
+    .reset = reset,
+    .destroy = destroy,
+};
+
+static struct mp_decoder *create(struct mp_filter *parent,
+                                 struct mp_codec_params *codec,
+                                 const char *decoder)
+{
+    struct mp_filter *da = mp_filter_create(parent, &ad_lavc_filter);
+    if (!da)
+        return NULL;
+
+    mp_filter_add_pin(da, MP_PIN_IN, "in");
+    mp_filter_add_pin(da, MP_PIN_OUT, "out");
+
+    da->log = mp_log_new(da, parent->log, NULL);
+
+    struct priv *priv = da->priv;
+    priv->public.f = da;
+
+    if (!init(da, codec, decoder)) {
+        talloc_free(da);
+        return NULL;
+    }
+    return &priv->public;
 }
 
 static void add_decoders(struct mp_decoder_list *list)
@@ -269,12 +302,7 @@ static void add_decoders(struct mp_decoder_list *list)
     mp_add_lavc_decoders(list, AVMEDIA_TYPE_AUDIO);
 }
 
-const struct ad_functions ad_lavc = {
-    .name = "lavc",
+const struct mp_decoder_fns ad_lavc = {
+    .create = create,
     .add_decoders = add_decoders,
-    .init = init,
-    .uninit = uninit,
-    .control = control,
-    .send_packet = send_packet,
-    .receive_frame = receive_frame,
 };

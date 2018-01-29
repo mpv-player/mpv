@@ -42,7 +42,6 @@
 #include "video/hwdec.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
-#include "audio/decode/dec_audio.h"
 #include "player/core.h"
 #include "player/command.h"
 #include "stream/stream.h"

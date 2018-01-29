@@ -33,21 +33,17 @@
 
 #include "audio/audio_buffer.h"
 #include "audio/format.h"
-#include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
+#include "filters/f_decoder_wrapper.h"
 
 #include "core.h"
 #include "command.h"
 
 enum {
     AD_OK = 0,
-    AD_ERR = -1,
     AD_EOF = -2,
-    AD_NEW_FMT = -3,
     AD_WAIT = -4,
-    AD_NO_PROGRESS = -5,
-    AD_STARVE = -6,
 };
 
 // Try to reuse the existing filters to change playback speed. If it works,
@@ -183,17 +179,11 @@ void update_playback_speed(struct MPContext *mpctx)
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->last_out_pts = MP_NOPTS_VALUE;
-    ao_c->pts = MP_NOPTS_VALUE;
     ao_c->pts_reset = false;
-    TA_FREEP(&ao_c->input_frame);
     TA_FREEP(&ao_c->output_frame);
+    ao_c->out_eof = false;
 
     mp_audio_buffer_clear(ao_c->ao_buffer);
-
-    if (ao_c->audio_src)
-        audio_reset_decoding(ao_c->audio_src);
-
-    ao_c->filter_src_got_eof = false;
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -226,16 +216,16 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
     if (track) {
         assert(track->ao_c == ao_c);
         track->ao_c = NULL;
-        assert(track->d_audio == ao_c->audio_src);
-        track->d_audio = NULL;
-        audio_uninit(ao_c->audio_src);
+        if (ao_c->dec_src)
+            assert(track->dec->f->pins[0] == ao_c->dec_src);
+        talloc_free(track->dec->f);
+        track->dec = NULL;
     }
 
     if (ao_c->filter_src)
         mp_pin_disconnect(ao_c->filter_src);
 
     talloc_free(ao_c->filter->f);
-    talloc_free(ao_c->input_frame);
     talloc_free(ao_c->output_frame);
     talloc_free(ao_c->ao_buffer);
     talloc_free(ao_c);
@@ -361,12 +351,12 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 
     if (!mpctx->ao) {
         // If spdif was used, try to fallback to PCM.
-        if (spdif_fallback && ao_c->audio_src) {
+        if (spdif_fallback && ao_c->track && ao_c->track->dec) {
             MP_VERBOSE(mpctx, "Falling back to PCM output.\n");
             ao_c->spdif_passthrough = false;
             ao_c->spdif_failed = true;
-            ao_c->audio_src->try_spdif = false;
-            if (!audio_init_best_codec(ao_c->audio_src))
+            ao_c->track->dec->try_spdif = false;
+            if (!mp_decoder_wrapper_reinit(ao_c->track->dec))
                 goto init_error;
             reset_audio_state(mpctx);
             mp_output_chain_reset_harder(ao_c->filter);
@@ -408,21 +398,18 @@ init_error:
 
 int init_audio_decoder(struct MPContext *mpctx, struct track *track)
 {
-    assert(!track->d_audio);
+    assert(!track->dec);
     if (!track->stream)
         goto init_error;
 
-    track->d_audio = talloc_zero(NULL, struct dec_audio);
-    struct dec_audio *d_audio = track->d_audio;
-    d_audio->log = mp_log_new(d_audio, mpctx->log, "!ad");
-    d_audio->global = mpctx->global;
-    d_audio->opts = mpctx->opts;
-    d_audio->header = track->stream;
-    d_audio->codec = track->stream->codec;
+    track->dec = mp_decoder_wrapper_create(mpctx->filter_root, track->stream);
+    if (!track->dec)
+        goto init_error;
 
-    d_audio->try_spdif = true;
+    if (track->ao_c)
+        track->dec->try_spdif = true;
 
-    if (!audio_init_best_codec(d_audio))
+    if (!mp_decoder_wrapper_reinit(track->dec))
         goto init_error;
 
     return 1;
@@ -431,8 +418,6 @@ init_error:
     if (track->sink)
         mp_pin_disconnect(track->sink);
     track->sink = NULL;
-    audio_uninit(track->d_audio);
-    track->d_audio = NULL;
     error_on_track(mpctx, track);
     return 0;
 }
@@ -462,7 +447,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     ao_c->filter =
         mp_output_chain_create(mpctx->filter_root, MP_OUTPUT_CHAIN_AUDIO);
     ao_c->spdif_passthrough = true;
-    ao_c->pts = MP_NOPTS_VALUE;
+    ao_c->last_out_pts = MP_NOPTS_VALUE;
     ao_c->ao_buffer = mp_audio_buffer_create(NULL);
     ao_c->ao = mpctx->ao;
 
@@ -471,7 +456,8 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
         track->ao_c = ao_c;
         if (!init_audio_decoder(mpctx, track))
             goto init_error;
-        ao_c->audio_src = track->d_audio;
+        ao_c->dec_src = track->dec->f->pins[0];
+        mp_pin_connect(ao_c->filter->f->pins[0], ao_c->dec_src);
     }
 
     reset_audio_state(mpctx);
@@ -643,7 +629,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 
 
 static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
-                        int minsamples, double endpts, bool eof, bool *seteof)
+                        int minsamples, double endpts, bool *seteof)
 {
     struct mp_audio_buffer *outbuf = ao_c->ao_buffer;
 
@@ -671,16 +657,39 @@ static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
             struct mp_frame frame = mp_pin_out_read(ao_c->filter->f->pins[1]);
             if (frame.type == MP_FRAME_AUDIO) {
                 ao_c->output_frame = frame.data;
+                ao_c->out_eof = false;
+
+                double pts = mp_aframe_get_pts(ao_c->output_frame);
+                if (pts != MP_NOPTS_VALUE) {
+                    // Attempt to detect jumps in PTS. Even for the lowest
+                    // sample rates and with worst container rounded timestamp,
+                    // this should be a margin more than enough.
+                    double desync = pts - ao_c->last_out_pts;
+                    if (ao_c->last_out_pts != MP_NOPTS_VALUE && fabs(desync) > 0.1)
+                    {
+                        MP_WARN(ao_c, "Invalid audio PTS: %f -> %f\n",
+                                ao_c->last_out_pts, pts);
+                        if (desync >= 5)
+                            ao_c->pts_reset = true;
+                    }
+                }
                 ao_c->last_out_pts = mp_aframe_end_pts(ao_c->output_frame);
             } else if (frame.type == MP_FRAME_EOF) {
-                *seteof = true;
+                ao_c->out_eof = true;
             } else if (frame.type) {
                 MP_ERR(mpctx, "unknown frame type\n");
+                mp_frame_unref(&frame);
             }
         }
 
-        if (!ao_c->output_frame)
-            return false; // out of data
+        // out of data
+        if (!ao_c->output_frame) {
+            if (ao_c->out_eof) {
+                *seteof = true;
+                return true;
+            }
+            return false;
+        }
 
         if (cursamples + mp_aframe_get_size(ao_c->output_frame) > maxsamples) {
             if (cursamples < maxsamples) {
@@ -702,43 +711,6 @@ static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
     return true;
 }
 
-static int decode_new_frame(struct ao_chain *ao_c)
-{
-    if (ao_c->input_frame)
-        return AD_OK;
-
-    int res = DATA_EOF;
-    if (ao_c->filter_src) {
-        struct mp_frame frame = mp_pin_out_read(ao_c->filter_src);
-        if (frame.type == MP_FRAME_EOF) {
-            res = DATA_EOF;
-            ao_c->filter_src_got_eof = true;
-        } else if (frame.type == MP_FRAME_AUDIO) {
-            res = DATA_OK;
-            ao_c->input_frame = frame.data;
-            ao_c->filter_src_got_eof = false;
-        } else if (frame.type) {
-            MP_ERR(ao_c, "unexpected frame type\n");
-            mp_frame_unref(&frame);
-            res = DATA_EOF;
-        } else {
-            res = ao_c->filter_src_got_eof ? DATA_EOF : DATA_WAIT;
-        }
-    } else if (ao_c->audio_src) {
-        audio_work(ao_c->audio_src);
-        res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);
-    }
-
-    switch (res) {
-    case DATA_OK:       return AD_OK;
-    case DATA_WAIT:     return AD_WAIT;
-    case DATA_AGAIN:    return AD_NO_PROGRESS;
-    case DATA_STARVE:   return AD_STARVE;
-    case DATA_EOF:      return AD_EOF;
-    default:            abort();
-    }
-}
-
 /* Try to get at least minsamples decoded+filtered samples in outbuf
  * (total length including possible existing data).
  * Return 0 on success, or negative AD_* error code.
@@ -749,64 +721,12 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
 {
     struct ao_chain *ao_c = mpctx->ao_chain;
 
-    MP_STATS(ao_c, "start audio");
-
     double endpts = get_play_end_pts(mpctx);
 
     bool eof = false;
-    int res;
-    while (1) {
-        res = 0;
-
-        if (copy_output(mpctx, ao_c, minsamples, endpts, false, &eof))
-            break;
-
-        res = decode_new_frame(ao_c);
-        if (res == AD_NO_PROGRESS)
-            continue;
-        if (res == AD_WAIT || res == AD_STARVE)
-            break;
-        if (res < 0) {
-            // drain filters first (especially for true EOF case)
-            if (!ao_c->filter->got_input_eof)
-                mp_pin_in_write(ao_c->filter->f->pins[0], MP_EOF_FRAME);
-            copy_output(mpctx, ao_c, minsamples, endpts, true, &eof);
-            break;
-        }
-        assert(ao_c->input_frame);
-
-        double pts = mp_aframe_get_pts(ao_c->input_frame);
-        if (pts == MP_NOPTS_VALUE) {
-            ao_c->pts = MP_NOPTS_VALUE;
-        } else {
-            // Attempt to detect jumps in PTS. Even for the lowest sample rates
-            // and with worst container rounded timestamp, this should be a
-            // margin more than enough.
-            double desync = pts - ao_c->pts;
-            if (ao_c->pts != MP_NOPTS_VALUE && fabs(desync) > 0.1) {
-                MP_WARN(ao_c, "Invalid audio PTS: %f -> %f\n",
-                        ao_c->pts, pts);
-                if (desync >= 5)
-                    ao_c->pts_reset = true;
-            }
-            ao_c->pts = mp_aframe_end_pts(ao_c->input_frame);
-        }
-
-        if (!mp_pin_in_needs_data(ao_c->filter->f->pins[0])) {
-            res = AD_WAIT;
-            break;
-        }
-        mp_pin_in_write(ao_c->filter->f->pins[0],
-                        MAKE_FRAME(MP_FRAME_AUDIO, ao_c->input_frame));
-        ao_c->input_frame = NULL;
-    }
-
-    if (res == 0 && mp_audio_buffer_samples(outbuf) < minsamples && eof)
-        res = AD_EOF;
-
-    MP_STATS(ao_c, "end audio");
-
-    return res;
+    if (!copy_output(mpctx, ao_c, minsamples, endpts, &eof))
+        return AD_WAIT;
+    return eof ? AD_EOF : AD_OK;
 }
 
 void reload_audio_output(struct MPContext *mpctx)
@@ -818,17 +738,23 @@ void reload_audio_output(struct MPContext *mpctx)
     uninit_audio_out(mpctx);
     reinit_audio_filters(mpctx); // mostly to issue refresh seek
 
+    struct ao_chain *ao_c = mpctx->ao_chain;
+
+    if (ao_c) {
+        reset_audio_state(mpctx);
+        mp_output_chain_reset_harder(ao_c->filter);
+    }
+
     // Whether we can use spdif might have changed. If we failed to use spdif
     // in the previous initialization, try it with spdif again (we'll fallback
     // to PCM again if necessary).
-    struct ao_chain *ao_c = mpctx->ao_chain;
-    if (ao_c) {
-        struct dec_audio *d_audio = ao_c->audio_src;
-        if (d_audio && ao_c->spdif_failed) {
+    if (ao_c && ao_c->track) {
+        struct mp_decoder_wrapper *dec = ao_c->track->dec;
+        if (dec && ao_c->spdif_failed) {
             ao_c->spdif_passthrough = true;
             ao_c->spdif_failed = false;
-            d_audio->try_spdif = true;
-            if (!audio_init_best_codec(d_audio)) {
+            dec->try_spdif = true;
+            if (!mp_decoder_wrapper_reinit(dec)) {
                 MP_ERR(mpctx, "Error reinitializing audio.\n");
                 error_on_track(mpctx, ao_c->track);
             }
@@ -857,29 +783,13 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         return;
     }
 
-    if (ao_c->input_frame && mp_pin_in_needs_data(ao_c->filter->f->pins[0])) {
-        mp_pin_in_write(ao_c->filter->f->pins[0],
-                        MAKE_FRAME(MP_FRAME_AUDIO, ao_c->input_frame));
-        ao_c->input_frame = NULL;
-    }
-
     // (if AO is set due to gapless from previous file, then we can try to
     // filter normally until the filter tells us to change the AO)
     if (!mpctx->ao) {
-        mp_pin_out_request_data(ao_c->filter->f->pins[1]);
         // Probe the initial audio format. Returns AD_OK (and does nothing) if
         // the format is already known.
-        int r = AD_NO_PROGRESS;
-        while (r == AD_NO_PROGRESS)
-            r = decode_new_frame(mpctx->ao_chain);
-        if (r == AD_WAIT)
-            return; // continue later when new data is available
-        if (r == AD_EOF) {
-            mpctx->audio_status = STATUS_EOF;
-            return;
-        }
+        mp_pin_out_request_data(ao_c->filter->f->pins[1]);
         reinit_audio_filters_and_output(mpctx);
-        mp_wakeup_core(mpctx);
         return; // try again next iteration
     }
 
@@ -949,12 +859,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         }
         if (status == AD_WAIT)
             return;
-        if (status == AD_NO_PROGRESS || status == AD_STARVE) {
-            mp_wakeup_core(mpctx);
-            return;
-        }
-        if (status == AD_ERR)
-            mp_wakeup_core(mpctx);
         working = true;
     }
 

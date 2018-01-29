@@ -24,11 +24,16 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
 
-#include "config.h"
-#include "common/msg.h"
+#include "audio/aframe.h"
+#include "audio/format.h"
 #include "common/av_common.h"
+#include "common/codecs.h"
+#include "common/msg.h"
+#include "demux/packet.h"
+#include "demux/stheader.h"
+#include "filters/f_decoder_wrapper.h"
+#include "filters/filter_internal.h"
 #include "options/options.h"
-#include "ad.h"
 
 #define OUTBUF_SIZE 65536
 
@@ -43,8 +48,8 @@ struct spdifContext {
     struct mp_aframe *fmt;
     int              sstride;
     struct mp_aframe_pool *pool;
-    bool             got_eof;
-    struct demux_packet *queued_packet;
+
+    struct mp_decoder public;
 };
 
 static int write_packet(void *p, uint8_t *buf, int buf_size)
@@ -62,7 +67,8 @@ static int write_packet(void *p, uint8_t *buf, int buf_size)
     return buf_size;
 }
 
-static void uninit(struct dec_audio *da)
+// (called on both filter destruction _and_ if lavf fails to init)
+static void destroy(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
@@ -74,26 +80,11 @@ static void uninit(struct dec_audio *da)
             av_freep(&lavf_ctx->pb->buffer);
         av_freep(&lavf_ctx->pb);
         avformat_free_context(lavf_ctx);
-        talloc_free(spdif_ctx->queued_packet);
         spdif_ctx->lavf_ctx = NULL;
     }
 }
 
-static int init(struct dec_audio *da, const char *decoder)
-{
-    struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
-    da->priv = spdif_ctx;
-    spdif_ctx->log = da->log;
-    spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
-
-    if (strcmp(decoder, "spdif_dts_hd") == 0)
-        spdif_ctx->use_dts_hd = true;
-
-    spdif_ctx->codec_id = mp_codec_to_av_codec_id(da->codec->codec);
-    return spdif_ctx->codec_id != AV_CODEC_ID_NONE;
-}
-
-static void determine_codec_params(struct dec_audio *da, AVPacket *pkt,
+static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
                                    int *out_profile, int *out_rate)
 {
     struct spdifContext *spdif_ctx = da->priv;
@@ -156,7 +147,7 @@ done:
         MP_WARN(da, "Failed to parse codec profile.\n");
 }
 
-static int init_filter(struct dec_audio *da, AVPacket *pkt)
+static int init_filter(struct mp_filter *da, AVPacket *pkt)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
@@ -270,39 +261,36 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     return 0;
 
 fail:
-    uninit(da);
+    destroy(da);
+    mp_filter_internal_mark_failed(da);
     return -1;
 }
 
-
-static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
+static void process(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
-    if (spdif_ctx->queued_packet || spdif_ctx->got_eof)
-        return false;
+    if (!mp_pin_can_transfer_data(da->ppins[1], da->ppins[0]))
+        return;
 
-    spdif_ctx->queued_packet = mpkt ? demux_copy_packet(mpkt) : NULL;
-    spdif_ctx->got_eof = !mpkt;
-    return true;
-}
-
-static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
-{
-    struct spdifContext *spdif_ctx = da->priv;
-
-    if (spdif_ctx->got_eof) {
-        spdif_ctx->got_eof = false;
-        return false;
+    struct mp_frame inframe = mp_pin_out_read(da->ppins[0]);
+    if (inframe.type == MP_FRAME_EOF) {
+        mp_pin_in_write(da->ppins[1], inframe);
+        return;
+    } else if (inframe.type != MP_FRAME_PACKET) {
+        if (inframe.type) {
+            MP_ERR(da, "unknown frame type\n");
+            mp_filter_internal_mark_failed(da);
+        }
+        return;
     }
 
-    if (!spdif_ctx->queued_packet)
-        return true;
-
-    double pts = spdif_ctx->queued_packet->pts;
+    struct demux_packet *mpkt = inframe.data;
+    struct mp_aframe *out = NULL;
+    double pts = mpkt->pts;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, spdif_ctx->queued_packet, NULL);
+    mp_set_av_packet(&pkt, mpkt, NULL);
     pkt.pts = pkt.dts = 0;
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
@@ -316,39 +304,29 @@ static bool receive_frame(struct dec_audio *da, struct mp_aframe **out)
         goto done;
     }
 
-    *out = mp_aframe_new_ref(spdif_ctx->fmt);
+    out = mp_aframe_new_ref(spdif_ctx->fmt);
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->sstride;
-    if (mp_aframe_pool_allocate(spdif_ctx->pool, *out, samples) < 0) {
-        TA_FREEP(out);
+    if (mp_aframe_pool_allocate(spdif_ctx->pool, out, samples) < 0) {
+        TA_FREEP(&out);
         goto done;
     }
 
-    uint8_t **data = mp_aframe_get_data_rw(*out);
+    uint8_t **data = mp_aframe_get_data_rw(out);
     if (!data) {
-        TA_FREEP(out);
+        TA_FREEP(&out);
         goto done;
     }
 
     memcpy(data[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
-    mp_aframe_set_pts(*out, pts);
+    mp_aframe_set_pts(out, pts);
 
 done:
-    talloc_free(spdif_ctx->queued_packet);
-    spdif_ctx->queued_packet = NULL;
-    return true;
-}
-
-static int control(struct dec_audio *da, int cmd, void *arg)
-{
-    struct spdifContext *spdif_ctx = da->priv;
-    switch (cmd) {
-    case ADCTRL_RESET:
-        talloc_free(spdif_ctx->queued_packet);
-        spdif_ctx->queued_packet = NULL;
-        spdif_ctx->got_eof = false;
-        return CONTROL_TRUE;
+    talloc_free(mpkt);
+    if (out) {
+        mp_pin_in_write(da->ppins[1], MAKE_FRAME(MP_FRAME_AUDIO, out));
+    } else {
+        mp_filter_internal_mark_failed(da);
     }
-    return CONTROL_UNKNOWN;
 }
 
 static const int codecs[] = {
@@ -405,12 +383,44 @@ struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref)
     return list;
 }
 
-const struct ad_functions ad_spdif = {
-    .name = "spdif",
-    .add_decoders = NULL,
-    .init = init,
-    .uninit = uninit,
-    .control = control,
-    .send_packet = send_packet,
-    .receive_frame = receive_frame,
+static const struct mp_filter_info ad_spdif_filter = {
+    .name = "ad_spdif",
+    .priv_size = sizeof(struct spdifContext),
+    .process = process,
+    .destroy = destroy,
+};
+
+static struct mp_decoder *create(struct mp_filter *parent,
+                                 struct mp_codec_params *codec,
+                                 const char *decoder)
+{
+    struct mp_filter *da = mp_filter_create(parent, &ad_spdif_filter);
+    if (!da)
+        return NULL;
+
+    mp_filter_add_pin(da, MP_PIN_IN, "in");
+    mp_filter_add_pin(da, MP_PIN_OUT, "out");
+
+    da->log = mp_log_new(da, parent->log, NULL);
+
+    struct spdifContext *spdif_ctx = da->priv;
+    spdif_ctx->log = da->log;
+    spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
+    spdif_ctx->public.f = da;
+
+    if (strcmp(decoder, "spdif_dts_hd") == 0)
+        spdif_ctx->use_dts_hd = true;
+
+    spdif_ctx->codec_id = mp_codec_to_av_codec_id(codec->codec);
+
+
+    if (spdif_ctx->codec_id == AV_CODEC_ID_NONE) {
+        talloc_free(da);
+        return NULL;
+    }
+    return &spdif_ctx->public;
+}
+
+const struct mp_decoder_fns ad_spdif = {
+    .create = create,
 };

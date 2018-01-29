@@ -58,14 +58,6 @@ enum stream_type {
     STREAM_TYPE_COUNT,
 };
 
-enum {
-    DATA_OK     = 1,        // data is actually being returned
-    DATA_WAIT   = 0,        // async wait: check state again after next wakeup
-    DATA_AGAIN  = -2,       // repeat request (internal progress was made)
-    DATA_STARVE = -1,       // need input (might require to drain other outputs)
-    DATA_EOF    = -3,       // no more data available
-};
-
 extern const char mpv_version[];
 extern const char mpv_builddate[];
 extern const char mpv_copyright[];

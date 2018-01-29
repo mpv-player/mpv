@@ -57,7 +57,6 @@
 #include "audio/aframe.h"
 #include "audio/format.h"
 #include "audio/out/ao.h"
-#include "audio/decode/dec_audio.h"
 #include "video/out/bitmap_packer.h"
 #include "options/path.h"
 #include "screenshot.h"
@@ -2038,7 +2037,7 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    const char *c = track && track->d_audio ? track->d_audio->decoder_desc : NULL;
+    const char *c = track && track->dec ? track->dec->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -2186,8 +2185,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     const char *decoder_desc = NULL;
     if (track->dec)
         decoder_desc = track->dec->decoder_desc;
-    if (track->d_audio)
-        decoder_desc = track->d_audio->decoder_desc;
 
     bool has_rg = track->stream && track->stream->codec->replaygain_data;
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data

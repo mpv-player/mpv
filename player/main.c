@@ -50,7 +50,6 @@
 #include "options/path.h"
 #include "input/input.h"
 
-#include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"

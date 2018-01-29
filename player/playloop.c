@@ -39,7 +39,6 @@
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
 
-#include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
@@ -212,12 +211,6 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 // Clear some playback-related fields on file loading or after seeks.
 void reset_playback_state(struct MPContext *mpctx)
 {
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        if (mpctx->tracks[n]->d_audio)
-            audio_reset_decoding(mpctx->tracks[n]->d_audio);
-        mpctx->tracks[n]->sink_eof = false;
-    }
-
     mp_filter_reset(mpctx->filter_root);
 
     reset_video_state(mpctx);
@@ -1076,35 +1069,6 @@ static void handle_eof(struct MPContext *mpctx)
     }
 }
 
-static void handle_complex_filter_decoders(struct MPContext *mpctx)
-{
-    if (!mpctx->lavfi)
-        return;
-
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-        if (!track->selected)
-            continue;
-        if (track->d_audio) {
-            if (!track->sink || !mp_pin_in_needs_data(track->sink))
-                continue;
-            audio_work(track->d_audio);
-            struct mp_aframe *fr;
-            int res = audio_get_frame(track->d_audio, &fr);
-            if (res == DATA_OK) {
-                mp_pin_in_write(track->sink, MAKE_FRAME(MP_FRAME_AUDIO, fr));
-                track->sink_eof = false;
-            } else if (res == DATA_EOF) {
-                if (!track->sink_eof)
-                    mp_pin_in_write(track->sink, MP_EOF_FRAME);
-                track->sink_eof = true;
-            } else if (res == DATA_AGAIN) {
-                mp_wakeup_core(mpctx);
-            }
-        }
-    }
-}
-
 void run_playloop(struct MPContext *mpctx)
 {
 #if HAVE_ENCODING
@@ -1115,8 +1079,6 @@ void run_playloop(struct MPContext *mpctx)
 #endif
 
     update_demuxer_properties(mpctx);
-
-    handle_complex_filter_decoders(mpctx);
 
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);

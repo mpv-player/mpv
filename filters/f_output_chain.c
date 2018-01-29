@@ -452,8 +452,13 @@ void mp_output_chain_reset_harder(struct mp_output_chain *c)
     mp_filter_reset(p->f);
 
     p->public.failed_output_conversion = false;
-    for (int n = 0; n < p->num_all_filters; n++)
-        p->all_filters[n]->failed = false;
+    for (int n = 0; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+
+        u->failed = false;
+        u->last_out_params = (struct mp_image_params){0};
+        mp_aframe_reset(u->last_out_aformat);
+    }
 }
 
 static void destroy(struct mp_filter *f)

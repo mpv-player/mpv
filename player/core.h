@@ -154,13 +154,11 @@ struct track {
 
     // Current decoding state (NULL if selected==false)
     struct mp_decoder_wrapper *dec;
-    struct dec_audio *d_audio;
 
     // Where the decoded result goes to (one of them is not NULL if active)
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct mp_pin *sink;
-    bool sink_eof; // whether it got passed EOF
 
     // For stream recording (remuxing mode).
     struct mp_recorder_sink *remux_sink;
@@ -190,7 +188,6 @@ struct vo_chain {
 struct ao_chain {
     struct mp_log *log;
 
-    double pts; // timestamp of first sample output by decoder
     bool spdif_passthrough, spdif_failed;
     bool pts_reset;
 
@@ -200,18 +197,15 @@ struct ao_chain {
     struct mp_audio_buffer *ao_buffer;
     double ao_resume_time;
 
-    // 1-element input frame queue.
-    struct mp_aframe *input_frame;
-
     // 1-element output frame queue.
     struct mp_aframe *output_frame;
+    bool out_eof;
 
     double last_out_pts;
 
     struct track *track;
     struct mp_pin *filter_src;
-    bool filter_src_got_eof; // whether this returned EOF last time
-    struct dec_audio *audio_src;
+    struct mp_pin *dec_src;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
