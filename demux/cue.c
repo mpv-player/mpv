@@ -75,7 +75,7 @@ static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
             if (rest.len && !strchr(WHITESPACE, rest.start[0]))
                 continue;
             if (out_params)
-                *out_params = rest;
+                *out_params = bstr_lstrip(rest);
             return cue_command_strings[n].command;
         }
     }
@@ -103,6 +103,14 @@ static char *read_quoted(void *talloc_ctx, struct bstr *data)
     struct bstr res = bstr_splice(*data, 0, end);
     *data = bstr_cut(*data, end + 1);
     return bstrto0(talloc_ctx, res);
+}
+
+static struct bstr strip_quotes(struct bstr data)
+{
+    bstr s = data;
+    if (bstr_eatstart0(&s, "\"") && bstr_eatend0(&s, "\""))
+        return s;
+    return data;
 }
 
 // Read a 2 digit unsigned decimal integer.
@@ -193,7 +201,7 @@ struct cue_file *mp_parse_cue(struct bstr data)
                 [CUE_PERFORMER] = "performer",
             };
             struct mp_tags *tags = cur_track ? cur_track->tags : f->tags;
-            mp_tags_set_bstr(tags, bstr0(metanames[cmd]), param);
+            mp_tags_set_bstr(tags, bstr0(metanames[cmd]), strip_quotes(param));
             break;
         }
         case CUE_INDEX: {
