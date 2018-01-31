@@ -5,7 +5,8 @@ Audio filters allow you to modify the audio stream and its properties. The
 syntax is:
 
 ``--af=...``
-    Setup a chain of audio filters. See ``--vf`` for the syntax.
+    Setup a chain of audio filters. See ``--vf`` (`VIDEO FILTERS`_) for the
+    full syntax.
 
 .. note::
 

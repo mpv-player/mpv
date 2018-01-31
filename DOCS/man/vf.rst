@@ -1,8 +1,11 @@
 VIDEO FILTERS
 =============
 
-Video filters allow you to modify the video stream and its properties. The
-syntax is:
+Video filters allow you to modify the video stream and its properties. All of
+the information described in this section applies to audio filters as well
+(generally using the prefix ``--af`` instead of ``--vf``).
+
+The exact syntax is:
 
 ``--vf=<filter1[=parameter1:parameter2:...],filter2,...>``
     Setup a chain of video filters. This consists on the filter name, and an
@@ -41,11 +44,18 @@ syntax is:
     the ``lavfi`` filter, which uses a very similar syntax as mpv (MPlayer
     historically) to specify filters and their parameters.
 
+Filters can be manipulated at run time. You can use ``@`` labels as described
+above in combination with the ``vf`` command (see `COMMAND INTERFACE`_) to get
+more control over this. Initially disabled filters with ``!`` are useful for
+this as well.
+
 You can also set defaults for each filter. The defaults are applied before the
-normal filter parameters.
+normal filter parameters. This is deprecated and never worked for the
+libavfilter bridge.
 
 ``--vf-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Set defaults for each filter.
+    Set defaults for each filter. (Deprecated. ``--af-defaults`` is deprecated
+    as well.)
 
 .. note::
 
@@ -75,15 +85,20 @@ normal filter parameters.
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 
-``--vf-add=<filter1[,filter2,...]>``
-    Appends the filters given as arguments to the filter list.
+``--vf-add=filter``
+    Appends the filter given as arguments to the filter list. (Passing multiple
+    filters is currently still possible, but deprecated.)
 
-``--vf-pre=<filter1[,filter2,...]>``
-    Prepends the filters given as arguments to the filter list.
+``--vf-pre=filter``
+    Prepends the filters given as arguments to the filter list. (Passing
+    multiple filters is currently still possible, but deprecated.)
 
-``--vf-del=<index1[,index2,...]>``
-    Deletes the filters at the given indexes. Index numbers start at 0,
-    negative numbers address the end of the list (-1 is the last).
+``--vf-del=filter``
+    Deletes the filter. The filter can even given the way it was added (filter
+    name and its full argument list), by label (prefixed with ``@``), or as
+    index number. Index numbers start at 0, negative numbers address the end of
+    the list (-1 is the last). (Passing multiple filters is currently still
+    possible, but deprecated.)
 
 ``--vf-clr``
     Completely empties the filter list.
@@ -93,10 +108,6 @@ With filters that support it, you can access parameters by their name.
 ``--vf=<filter>=help``
     Prints the parameter names and parameter value ranges for a particular
     filter.
-
-``--vf=<filter=named_parameter1=value1[:named_parameter2=value2:...]>``
-    Sets a named parameter to the given value. Use on and off or yes and no to
-    set flag parameters.
 
 Available mpv-only filters are:
 
