@@ -2940,6 +2940,8 @@ print_help: ;
         if (desc->print_help)
             desc->print_help(log);
         m_config_print_option_list(config, "*");
+    } else if (list->print_unknown_entry_help) {
+        list->print_unknown_entry_help(log, mp_tprintf(80, "%.*s", BSTR_P(name)));
     } else {
         mp_warn(log, "Option %.*s: item %.*s doesn't exist.\n",
                BSTR_P(opt_name), BSTR_P(name));
@@ -3155,11 +3157,17 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             if (!ol->get_desc(&desc, n))
                 break;
             if (!desc.hidden) {
-                mp_info(log, "  %-15s: %s\n",
+                mp_info(log, "  %-16s %s\n",
                        desc.name, desc.description);
             }
         }
         mp_info(log, "\n");
+        if (ol->print_help_list)
+            ol->print_help_list(log);
+        if (!ol->use_global_options) {
+            mp_info(log, "Get help on individual entries via: --%s=entry=help\n",
+                    opt->name);
+        }
         return M_OPT_EXIT;
     }
 

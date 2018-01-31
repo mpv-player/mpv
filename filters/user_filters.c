@@ -1,3 +1,5 @@
+#include <libavutil/avutil.h>
+
 #include "config.h"
 
 #include "common/common.h"
@@ -36,11 +38,23 @@ static bool get_af_desc(struct m_obj_desc *dst, int index)
     return get_desc_from(af_list, MP_ARRAY_SIZE(af_list), dst, index);
 }
 
+static void print_af_help_list(struct mp_log *log)
+{
+    print_lavfi_help_list(log, AVMEDIA_TYPE_AUDIO);
+}
+
+static void print_af_lavfi_help(struct mp_log *log, const char *name)
+{
+    print_lavfi_help(log, name, AVMEDIA_TYPE_AUDIO);
+}
+
 const struct m_obj_list af_obj_list = {
     .get_desc = get_af_desc,
     .description = "audio filters",
     .allow_disable_entries = true,
     .allow_unknown_entries = true,
+    .print_help_list = print_af_help_list,
+    .print_unknown_entry_help = print_af_lavfi_help,
 };
 
 // --vf option
@@ -72,11 +86,23 @@ static bool get_vf_desc(struct m_obj_desc *dst, int index)
     return get_desc_from(vf_list, MP_ARRAY_SIZE(vf_list), dst, index);
 }
 
+static void print_vf_help_list(struct mp_log *log)
+{
+    print_lavfi_help_list(log, AVMEDIA_TYPE_VIDEO);
+}
+
+static void print_vf_lavfi_help(struct mp_log *log, const char *name)
+{
+    print_lavfi_help(log, name, AVMEDIA_TYPE_VIDEO);
+}
+
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_vf_desc,
     .description = "video filters",
     .allow_disable_entries = true,
     .allow_unknown_entries = true,
+    .print_help_list = print_vf_help_list,
+    .print_unknown_entry_help = print_vf_lavfi_help,
 };
 
 // Create a bidir, single-media filter from command line arguments.

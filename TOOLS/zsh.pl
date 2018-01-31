@@ -29,11 +29,11 @@ my @opts = parse_main_opts('--list-options', '^ (\-\-[^\s\*]*)\*?\s*(.*)');
 
 die "Couldn't find any options" unless (@opts);
 
-my @ao = parse_opts('--ao=help', '^  ([^\s\:]*)\s*: (.*)');
-my @vo = parse_opts('--vo=help', '^  ([^\s\:]*)\s*: (.*)');
+my @ao = parse_opts('--ao=help', '^  ([^\s\:]*)\s*(.*)');
+my @vo = parse_opts('--vo=help', '^  ([^\s\:]*)\s*(.*)');
 
-my @af = parse_opts('--af=help', '^  ([^\s\:]*)\s*: (.*)');
-my @vf = parse_opts('--vf=help', '^  ([^\s\:]*)\s*: (.*)');
+my @af = parse_opts('--af=help', '^  ([^\s\:]*)\s*(.*)');
+my @vf = parse_opts('--vf=help', '^  ([^\s\:]*)\s*(.*)');
 
 my @protos = parse_opts('--list-protocols', '^ ([^\s]*)');
 

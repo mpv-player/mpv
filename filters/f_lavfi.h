@@ -28,3 +28,9 @@ struct mp_lavfi *mp_lavfi_create_filter(struct mp_filter *parent,
                                         enum mp_frame_type type, bool bidir,
                                         char **graph_opts,
                                         const char *filter, char **filter_opts);
+
+// Print libavfilter list for --vf/--af
+void print_lavfi_help_list(struct mp_log *log, int media_type);
+
+// Print libavfilter help for the given filter
+void print_lavfi_help(struct mp_log *log, const char *name, int media_type);
