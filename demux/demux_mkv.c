@@ -704,7 +704,10 @@ static void parse_trackentry(struct demuxer *demuxer,
     }
     track->uid = entry->track_uid;
 
-    track->name = talloc_strdup(track, entry->name);
+    if (entry->name) {
+        track->name = talloc_strdup(track, entry->name);
+        MP_VERBOSE(demuxer, "|  + Name: %s\n", track->name);
+    }
 
     track->type = entry->track_type;
     MP_VERBOSE(demuxer, "|  + Track type: ");
