@@ -1032,7 +1032,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         }
         char *def = NULL;
         if (co->default_data)
-            def = m_option_print(opt, co->default_data);
+            def = m_option_pretty_print(opt, co->default_data);
         if (def) {
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);
