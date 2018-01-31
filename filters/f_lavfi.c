@@ -903,15 +903,58 @@ static bool is_usable(const AVFilter *filter, int media_type)
            is_single_media_only(filter->outputs, media_type);
 }
 
-static void print_help(struct mp_log *log, int mediatype, char *name, char *ex)
+static void dump_list(struct mp_log *log, int media_type)
 {
-    mp_info(log, "List of libavfilter filters:\n");
+    mp_info(log, "Available libavfilter filters:\n");
     for (const AVFilter *filter = avfilter_next(NULL); filter;
          filter = avfilter_next(filter))
     {
-        if (is_usable(filter, mediatype))
-            mp_info(log, " %-16s %s\n", filter->name, filter->description);
+        if (is_usable(filter, media_type))
+            mp_info(log, "  %-16s %s\n", filter->name, filter->description);
     }
+}
+
+void print_lavfi_help(struct mp_log *log, const char *name, int media_type)
+{
+    const AVFilter *f = avfilter_get_by_name(name);
+    if (!f) {
+        mp_err(log, "Filter '%s' not found.\n", name);
+        return;
+    }
+    if (!is_usable(f, media_type)) {
+        mp_err(log, "Filter '%s' is not usable in this context (wrong media \n"
+               "types or wrong number of inputs/outputs).\n", name);
+    }
+    mp_info(log, "Options:\n\n");
+    const AVClass *class = f->priv_class;
+    // av_opt_next() requires this for some retarded incomprehensible reason.
+    const AVClass **c = &class;
+    int offset= -1;
+    int count = 0;
+    for (const AVOption *o = av_opt_next(c, 0); o; o = av_opt_next(c, o)) {
+        // This is how libavfilter (at the time) decided to assign positional
+        // options (called "shorthand" in the libavfilter code). So we
+        // duplicate it exactly.
+        if (o->type == AV_OPT_TYPE_CONST || o->offset == offset)
+            continue;
+        offset = o->offset;
+
+        mp_info(log, " %s\n", o->name);
+        count++;
+    }
+    mp_info(log, "\nTotal: %d options\n", count);
+}
+
+void print_lavfi_help_list(struct mp_log *log, int media_type)
+{
+    dump_list(log, media_type);
+    mp_info(log, "\nIf libavfilter filters clash with builtin mpv filters,\n"
+            "prefix them with lavfi- to select the libavfilter one.\n\n");
+}
+
+static void print_help(struct mp_log *log, int mediatype, char *name, char *ex)
+{
+    dump_list(log, mediatype);
     mp_info(log, "\n"
         "This lists %s->%s filters only. Refer to\n"
         "\n"
