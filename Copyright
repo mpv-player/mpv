@@ -16,7 +16,7 @@ licensed as LGPLv2.1+. Also see the list of files with specific licenses below
 All new contributions must be LGPLv2.1+ licensed. Using a more liberal license
 compatible to LGPLv2.1+ is also ok.
 
-If changes are done on GPL code, must come with the implicit agreement that the
+Changes done to GPL code must come with the implicit/explicit agreement that the
 project can relicense the changes to LGPLv2.1+ at a later point without asking
 the contributor. This is a safeguard for making potential relicensing of
 remaining GPL code to LGPLv2.1+ easier.
