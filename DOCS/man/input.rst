@@ -2104,9 +2104,6 @@ Property list
     List of decoders supported. This lists decoders which can be passed to
     ``--vd`` and ``--ad``.
 
-    ``family``
-        Decoder driver. Usually ``lavc`` for libavcodec.
-
     ``codec``
         Canonical codec name, which identifies the format the decoder can
         handle.
@@ -2127,7 +2124,6 @@ Property list
 
         MPV_FORMAT_NODE_ARRAY
             MPV_FORMAT_NODE_MAP (for each decoder entry)
-                "family"        MPV_FORMAT_STRING
                 "codec"         MPV_FORMAT_STRING
                 "driver"        MPV_FORMAT_STRING
                 "description"   MPV_FORMAT_STRING

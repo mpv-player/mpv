@@ -3538,7 +3538,6 @@ static int get_decoder_entry(int item, int action, void *arg, void *ctx)
     struct mp_decoder_entry *c = &codecs->entries[item];
 
     struct m_sub_property props[] = {
-        {"family",      SUB_PROP_STR(c->family)},
         {"codec",       SUB_PROP_STR(c->codec)},
         {"driver" ,     SUB_PROP_STR(c->decoder)},
         {"description", SUB_PROP_STR(c->desc)},

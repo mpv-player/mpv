@@ -378,7 +378,7 @@ struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref)
     const char *suffix_name = dts_hd_allowed ? "dts_hd" : codec;
     char name[80];
     snprintf(name, sizeof(name), "spdif_%s", suffix_name);
-    mp_add_decoder(list, "spdif", codec, name,
+    mp_add_decoder(list, codec, name,
                    "libavformat/spdifenc audio pass-through decoder");
     return list;
 }

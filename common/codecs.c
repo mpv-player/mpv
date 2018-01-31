@@ -21,11 +21,10 @@
 #include "common/msg.h"
 #include "codecs.h"
 
-void mp_add_decoder(struct mp_decoder_list *list, const char *family,
-                    const char *codec, const char *decoder, const char *desc)
+void mp_add_decoder(struct mp_decoder_list *list, const char *codec,
+                    const char *decoder, const char *desc)
 {
     struct mp_decoder_entry entry = {
-        .family = talloc_strdup(list, family),
         .codec = talloc_strdup(list, codec),
         .decoder = talloc_strdup(list, decoder),
         .desc = talloc_strdup(list, desc),
@@ -40,7 +39,7 @@ static void add_new(struct mp_decoder_list *to, struct mp_decoder_entry *entry,
 {
     if (!entry || (codec && strcmp(entry->codec, codec) != 0))
         return;
-    mp_add_decoder(to, entry->family, entry->codec, entry->decoder, entry->desc);
+    mp_add_decoder(to, entry->codec, entry->decoder, entry->desc);
 }
 
 // Select a decoder from the given list for the given codec. The selection
@@ -70,11 +69,6 @@ struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
         if (bstr_equals0(entry, "-")) {
             mp_warn(log, "Excluding codecs is deprecated.\n");
             stop = true;
-            break;
-        }
-        if (bstr_find0(entry, ":") >= 0) {
-            mp_err(log, "Codec family selection was removed. "
-                        "Pass the codec name directly.\n");
             break;
         }
         for (int n = 0; n < all->num_entries; n++) {
