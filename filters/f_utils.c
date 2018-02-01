@@ -251,8 +251,7 @@ static void fixed_aframe_size_process(struct mp_filter *f)
         p->out = NULL;
         p->out_written = 0;
     } else {
-        if (mp_pin_out_request_data(f->ppins[0]))
-            mp_filter_internal_mark_progress(f);
+        mp_pin_out_request_data_next(f->ppins[0]);
     }
 }
 

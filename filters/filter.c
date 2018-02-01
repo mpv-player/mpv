@@ -256,6 +256,12 @@ bool mp_pin_out_request_data(struct mp_pin *p)
     return mp_pin_out_has_data(p);
 }
 
+void mp_pin_out_request_data_next(struct mp_pin *p)
+{
+    if (mp_pin_out_request_data(p))
+        update_filter(p->owner, p->conn->manual_connection);
+}
+
 struct mp_frame mp_pin_out_read(struct mp_pin *p)
 {
     if (!mp_pin_out_request_data(p))

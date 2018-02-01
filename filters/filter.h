@@ -47,6 +47,11 @@ bool mp_pin_in_write(struct mp_pin *p, struct mp_frame frame);
 // buffered in mp_pins goes against this.
 bool mp_pin_out_request_data(struct mp_pin *p);
 
+// Same as mp_pin_out_request_data(), but call the filter's process() function
+// next time even if there is new data. the intention is that the filter reads
+// the data in the next iteration, without checking for the data now.
+void mp_pin_out_request_data_next(struct mp_pin *p);
+
 // Same as mp_pin_out_request_data(), but does not attempt to procure new frames
 // if the return value is false.
 bool mp_pin_out_has_data(struct mp_pin *p);
