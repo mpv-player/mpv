@@ -11,5 +11,6 @@
 #include <float.h>
 
 #define assert_double_equal(a, b) assert_true(fabs(a - b) <= DBL_EPSILON)
+#define assert_float_equal(a, b) assert_true(fabsf(a - b) <= FLT_EPSILON)
 
 #endif
