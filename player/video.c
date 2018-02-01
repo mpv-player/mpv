@@ -244,7 +244,6 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     vo_c->vo = mpctx->video_out;
     vo_c->filter =
         mp_output_chain_create(mpctx->filter_root, MP_OUTPUT_CHAIN_VIDEO);
-    vo_c->filter->container_fps = vo_c->container_fps;
     mp_output_chain_set_vo(vo_c->filter, vo_c->vo);
     vo_c->filter->update_subtitles = filter_update_subtitles;
     vo_c->filter->update_subtitles_ctx = mpctx;
@@ -256,7 +255,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
             goto err_out;
 
         vo_c->dec_src = track->dec->f->pins[0];
-        vo_c->container_fps = track->dec->fps;
+        vo_c->filter->container_fps = track->dec->fps;
         vo_c->is_coverart = !!track->stream->attached_picture;
 
         track->vo_c = vo_c;
@@ -266,8 +265,10 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     }
 
 #if HAVE_ENCODING
-    if (mpctx->encode_lavc_ctx)
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, vo_c->container_fps);
+    if (mpctx->encode_lavc_ctx) {
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx,
+                                  vo_c->filter->container_fps);
+    }
 #endif
 
     if (!recreate_video_filters(mpctx))
@@ -318,7 +319,7 @@ static void check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
         mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao) &&
         vo_c->track && vo_c->track->dec && (opts->frame_dropping & 2))
     {
-        float fps = vo_c->container_fps;
+        float fps = vo_c->filter->container_fps;
         // it's a crappy heuristic; avoid getting upset by incorrect fps
         if (fps <= 20 || fps >= 500)
             return;
@@ -906,10 +907,11 @@ static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
 // Determine the mpctx->past_frames[0] frame duration.
 static void calculate_frame_duration(struct MPContext *mpctx)
 {
+    struct vo_chain *vo_c = mpctx->vo_chain;
     assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
 
-    double demux_duration = mpctx->vo_chain->container_fps > 0
-                            ? 1.0 / mpctx->vo_chain->container_fps : -1;
+    double demux_duration = vo_c->filter->container_fps > 0
+                            ? 1.0 / vo_c->filter->container_fps : -1;
     double duration = demux_duration;
 
     if (mpctx->num_next_frames >= 2) {

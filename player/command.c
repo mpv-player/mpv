@@ -2500,7 +2500,7 @@ static int get_frame_count(struct MPContext *mpctx)
     if (!mpctx->vo_chain)
         return -1;
     double len = get_time_length(mpctx);
-    double fps = mpctx->vo_chain->container_fps;
+    double fps = mpctx->vo_chain->filter->container_fps;
     if (len < 0 || fps <= 0)
         return 0;
 
@@ -2949,7 +2949,7 @@ static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    float fps = mpctx->vo_chain ? mpctx->vo_chain->container_fps : 0;
+    float fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
     if (fps < 0.1 || !isfinite(fps))
         return M_PROPERTY_UNAVAILABLE;;
     return m_property_float_ro(action, arg, fps);
