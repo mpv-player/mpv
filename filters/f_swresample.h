@@ -23,6 +23,7 @@ struct mp_resample_opts {
     double cutoff;
     int normalize;
     int allow_passthrough;
+    double max_output_frame_size;
     char **avopts;
 };
 
@@ -31,6 +32,7 @@ struct mp_resample_opts {
     .cutoff      = 0.0,         \
     .phase_shift = 10,          \
     .normalize   = 0,           \
+    .max_output_frame_size = 40,\
     }
 
 // Create the filter. If opts==NULL, use the global options as defaults.

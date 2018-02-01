@@ -80,6 +80,7 @@ struct priv {
     struct mp_chmap out_channels;
 
     double current_pts;
+    struct mp_aframe *input;
 
     double cmd_speed;
     double speed;
@@ -96,6 +97,7 @@ const struct m_sub_options resample_conf = {
         OPT_DOUBLE("audio-resample-cutoff", cutoff, M_OPT_RANGE,
                    .min = 0, .max = 1),
         OPT_FLAG("audio-normalize-downmix", normalize, 0),
+        OPT_DOUBLE("audio-resample-max-output-size", max_output_frame_size, 0),
         OPT_KEYVALUELIST("audio-swresample-o", avopts, 0),
         {0}
     },
@@ -357,6 +359,7 @@ static void reset(struct mp_filter *f)
     struct priv *p = f->priv;
 
     p->current_pts = MP_NOPTS_VALUE;
+    TA_FREEP(&p->input);
 
     if (!p->avrctx)
         return;
@@ -426,7 +429,8 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
 }
 
 static int resample_frame(struct AVAudioResampleContext *r,
-                          struct mp_aframe *out, struct mp_aframe *in)
+                          struct mp_aframe *out, struct mp_aframe *in,
+                          int consume_in)
 {
     // Be aware that the channel layout and count can be different for in and
     // out frames. In some situations the caller will fix up the frames before
@@ -439,7 +443,7 @@ static int resample_frame(struct AVAudioResampleContext *r,
         av_o ? av_o->nb_samples : 0,
         av_i ? av_i->extended_data : NULL,
         av_i ? av_i->linesize[0] : 0,
-        av_i ? av_i->nb_samples : 0);
+        av_i ? MPMIN(av_i->nb_samples, consume_in) : 0);
 }
 
 static struct mp_frame filter_resample_output(struct priv *p,
@@ -450,7 +454,15 @@ static struct mp_frame filter_resample_output(struct priv *p,
     if (!p->avrctx)
         goto error;
 
-    int samples = get_out_samples(p, in ? mp_aframe_get_size(in) : 0);
+    // Limit the filtered data size for better latency when changing speed.
+    // Avoid buffering data within the resampler => restrict input size.
+    // p->in_rate already includes the speed factor.
+    double s = p->opts->max_output_frame_size / 1000 * p->in_rate;
+    int max_in = lrint(MPCLAMP(s, 128, INT_MAX));
+    int consume_in = in ? mp_aframe_get_size(in) : 0;
+    consume_in = MPMIN(consume_in, max_in);
+
+    int samples = get_out_samples(p, consume_in);
     out = mp_aframe_create();
     mp_aframe_config_copy(out, p->pool_fmt);
     if (mp_aframe_pool_allocate(p->out_pool, out, samples) < 0)
@@ -458,7 +470,7 @@ static struct mp_frame filter_resample_output(struct priv *p,
 
     int out_samples = 0;
     if (samples) {
-        out_samples = resample_frame(p->avrctx, out, in);
+        out_samples = resample_frame(p->avrctx, out, in, consume_in);
         if (out_samples < 0 || out_samples > samples)
             goto error;
         mp_aframe_set_size(out, out_samples);
@@ -479,7 +491,7 @@ static struct mp_frame filter_resample_output(struct priv *p,
         }
         int got = 0;
         if (out_samples)
-            got = resample_frame(p->avrctx_out, new, out);
+            got = resample_frame(p->avrctx_out, new, out, out_samples);
         talloc_free(out);
         out = new;
         if (got != out_samples)
@@ -491,12 +503,14 @@ static struct mp_frame filter_resample_output(struct priv *p,
     if (in) {
         mp_aframe_copy_attributes(out, in);
         p->current_pts = mp_aframe_end_pts(in);
+        mp_aframe_skip_samples(in, consume_in);
     }
 
     if (out_samples) {
         if (p->current_pts != MP_NOPTS_VALUE) {
             double delay = get_delay(p) * mp_aframe_get_speed(out) +
-                           mp_aframe_duration(out);
+                           mp_aframe_duration(out) +
+                           (p->input ? mp_aframe_duration(p->input) : 0);
             mp_aframe_set_pts(out, p->current_pts - delay);
             mp_aframe_mul_speed(out, p->speed);
         }
@@ -516,30 +530,36 @@ static void process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    if (!mp_pin_can_transfer_data(f->ppins[1], f->ppins[0]))
+    if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
 
     p->speed = p->cmd_speed * p->public.speed;
 
-    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
-
     struct mp_aframe *input = NULL;
-    if (frame.type == MP_FRAME_AUDIO) {
-        input = frame.data;
-    } else if (frame.type != MP_FRAME_EOF) {
-        MP_ERR(p, "Unsupported frame type.\n");
-        mp_frame_unref(&frame);
-        mp_filter_internal_mark_failed(f);
-        return;
-    }
+    if (!p->input) {
+        struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
-    if (!input && !p->avrctx) {
-        // Obviously no draining needed.
-        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
-        return;
+        if (frame.type == MP_FRAME_AUDIO) {
+            input = frame.data;
+        } else if (!frame.type) {
+            return; // no new data
+        } else if (frame.type != MP_FRAME_EOF) {
+            MP_ERR(p, "Unsupported frame type.\n");
+            mp_frame_unref(&frame);
+            mp_filter_internal_mark_failed(f);
+            return;
+        }
+
+        if (!input && !p->avrctx) {
+            // Obviously no draining needed.
+            mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+            return;
+        }
     }
 
     if (input) {
+        assert(!p->input);
+
         struct mp_swresample *s = &p->public;
 
         int in_rate = mp_aframe_get_rate(input);
@@ -549,7 +569,7 @@ static void process(struct mp_filter *f)
 
         if (!in_rate || !in_format || !in_channels.num) {
             MP_ERR(p, "Frame with invalid format unsupported\n");
-            mp_frame_unref(&frame);
+            talloc_free(input);
             mp_filter_internal_mark_failed(f);
             return;
         }
@@ -573,7 +593,8 @@ static void process(struct mp_filter *f)
                 if (out.type) {
                     mp_pin_in_write(f->ppins[1], out);
                     // continue filtering next time.
-                    mp_pin_out_unread(f->ppins[0], frame);
+                    mp_pin_out_unread(f->ppins[0],
+                                      MAKE_FRAME(MP_FRAME_AUDIO, input));
                     input = NULL;
                 }
             }
@@ -598,6 +619,8 @@ static void process(struct mp_filter *f)
                 return;
             }
         }
+
+        p->input = input;
     }
 
     int new_rate = rate_from_speed(p->in_rate_user, p->speed);
@@ -624,32 +647,29 @@ static void process(struct mp_filter *f)
         // in the resampler.
         struct mp_frame out = filter_resample_output(p, NULL);
         bool need_drain = !!out.type;
-        if (need_drain) {
+        if (need_drain)
             mp_pin_in_write(f->ppins[1], out);
-            // Drain; continue filtering next time.
-            mp_pin_out_unread(f->ppins[0], frame);
-        }
         // Reinitialize resampler.
         configure_lavrr(p, false);
-        if (need_drain) {
-            mp_filter_internal_mark_progress(f);
+        // If we've written output, we must continue filtering next time.
+        if (need_drain)
             return;
-        }
     }
 
-    struct mp_frame out = filter_resample_output(p, input);
+    struct mp_frame out = filter_resample_output(p, p->input);
 
-    if (input && out.type) {
+    if (p->input && out.type) {
         mp_pin_in_write(f->ppins[1], out);
         mp_pin_out_request_data(f->ppins[0]);
-    } else if (!input && out.type) {
+    } else if (!p->input && out.type) {
         mp_pin_in_write(f->ppins[1], out);
         mp_pin_out_repeat_eof(f->ppins[0]);
-    } else if (!input) {
+    } else if (!p->input) {
         mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
     }
 
-    talloc_free(input);
+    if (p->input && !mp_aframe_get_size(p->input))
+        TA_FREEP(&p->input);
 }
 
 double mp_swresample_get_delay(struct mp_swresample *s)
@@ -676,6 +696,7 @@ static void destroy(struct mp_filter *f)
     struct priv *p = f->priv;
 
     close_lavrr(p);
+    TA_FREEP(&p->input);
 }
 
 static const struct mp_filter_info swresample_filter = {
