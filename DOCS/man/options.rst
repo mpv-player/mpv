@@ -3496,6 +3496,15 @@ It also sets the defaults for the ``lavrresample`` audio filter.
     (decoder downmixing), or in the audio output (system mixer), this has no
     effect.
 
+``--audio-resample-max-output-size=<length>``
+    Limit maximum size of audio frames filtered at once, in ms (default: 40).
+    The output size size is limited in order to make resample speed changes
+    react faster. This is necessary especially if decoders or filters output
+    very large frame sizes (like some lossless codecs or some DRC filters).
+    This option does not affect the resampling algorithm in any way.
+
+    For testing/debugging only. Can be removed or changed any time.
+
 ``--audio-swresample-o=<string>``
     Set AVOptions on the SwrContext or AVAudioResampleContext. These should
     be documented by FFmpeg or Libav.
