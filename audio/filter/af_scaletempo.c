@@ -60,6 +60,7 @@ struct priv {
     struct mp_aframe *cur_format;
     struct mp_aframe_pool *out_pool;
     double current_pts;
+    struct mp_aframe *in;
 
     // stride
     float scale;
@@ -90,12 +91,13 @@ struct priv {
     int (*best_overlap_offset)(struct priv *s);
 };
 
-static bool reinit(struct mp_filter *f, struct mp_aframe *in);
+static bool reinit(struct mp_filter *f);
 
-static int fill_queue(struct priv *s, struct mp_aframe *in, int offset)
+// Return whether it got enough data for filtering.
+static bool fill_queue(struct priv *s)
 {
-    int bytes_in = in ? mp_aframe_get_size(in) * s->bytes_per_frame - offset : 0;
-    int offset_unchanged = offset;
+    int bytes_in = s->in ? mp_aframe_get_size(s->in) * s->bytes_per_frame : 0;
+    int offset = 0;
 
     if (s->bytes_to_slide > 0) {
         if (s->bytes_to_slide < s->bytes_queued) {
@@ -114,16 +116,22 @@ static int fill_queue(struct priv *s, struct mp_aframe *in, int offset)
         }
     }
 
-    if (bytes_in > 0) {
-        int bytes_copy = MPMIN(s->bytes_queue - s->bytes_queued, bytes_in);
-        assert(bytes_copy >= 0);
-        uint8_t **planes = mp_aframe_get_data_ro(in);
+    int bytes_needed = s->bytes_queue - s->bytes_queued;
+    assert(bytes_needed >= 0);
+
+    int bytes_copy = MPMIN(bytes_needed, bytes_in);
+    if (bytes_copy > 0) {
+        uint8_t **planes = mp_aframe_get_data_ro(s->in);
         memcpy(s->buf_queue + s->bytes_queued, planes[0] + offset, bytes_copy);
         s->bytes_queued += bytes_copy;
         offset += bytes_copy;
+        bytes_needed -= bytes_copy;
     }
 
-    return offset - offset_unchanged;
+    if (s->in)
+        mp_aframe_skip_samples(s->in, offset / s->bytes_per_frame);
+
+    return bytes_needed == 0;
 }
 
 #define UNROLL_PADDING (4 * 4)
@@ -224,62 +232,73 @@ static void process(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
-    if (!mp_pin_can_transfer_data(f->ppins[1], s->in_pin))
+    if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
 
-    struct mp_aframe *in = NULL, *out = NULL;
+    struct mp_aframe *out = NULL;
 
-    struct mp_frame frame = mp_pin_out_read(s->in_pin);
-    if (frame.type != MP_FRAME_AUDIO && frame.type != MP_FRAME_EOF) {
-        MP_ERR(f, "unexpected frame type\n");
-        goto error;
-    }
+    bool drain = false;
+    bool is_eof = false;
+    if (!s->in) {
+        struct mp_frame frame = mp_pin_out_read(s->in_pin);
+        if (!frame.type)
+            return; // no input yet
+        if (frame.type != MP_FRAME_AUDIO && frame.type != MP_FRAME_EOF) {
+            MP_ERR(f, "unexpected frame type\n");
+            goto error;
+        }
 
-    in = frame.type == MP_FRAME_AUDIO ? frame.data : NULL;
-    bool is_eof = !in;
+        s->in = frame.type == MP_FRAME_AUDIO ? frame.data : NULL;
+        is_eof = drain = !s->in;
 
-    // EOF before it was even initialized once.
-    if (is_eof && !mp_aframe_config_is_valid(s->cur_format)) {
-        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
-        return;
-    }
+        // EOF before it was even initialized once.
+        if (is_eof && !mp_aframe_config_is_valid(s->cur_format)) {
+            mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+            return;
+        }
 
-    if (in && !mp_aframe_config_equals(in, s->cur_format)) {
-        if (s->bytes_queued) {
-            // Drain remaining data before executing the format change.
-            MP_VERBOSE(f, "draining\n");
-            mp_pin_out_unread(s->in_pin, frame);
-            in = NULL;
-        } else {
-            if (!reinit(f, in)) {
-                MP_ERR(f, "initialization failed\n");
-                goto error;
+        if (s->in && !mp_aframe_config_equals(s->in, s->cur_format)) {
+            if (s->bytes_queued) {
+                // Drain remaining data before executing the format change.
+                MP_VERBOSE(f, "draining\n");
+                mp_pin_out_unread(s->in_pin, frame);
+                s->in = NULL;
+                drain = true;
+            } else {
+                if (!reinit(f)) {
+                    MP_ERR(f, "initialization failed\n");
+                    goto error;
+                }
             }
         }
+
+        if (s->in)
+            s->current_pts = mp_aframe_end_pts(s->in);
     }
 
-    int in_samples = in ? mp_aframe_get_size(in) : 0;
+    if (!fill_queue(s) && !drain) {
+        TA_FREEP(&s->in);
+        mp_pin_out_request_data_next(s->in_pin);
+        return;
+    }
 
-    int max_out_samples =
-        ((int)(in_samples / s->frames_stride_scaled) + 1) * s->frames_stride;
-    if (!in)
+    int max_out_samples = s->bytes_stride / s->bytes_per_frame;
+    if (drain)
         max_out_samples += s->bytes_queued;
+
     out = mp_aframe_new_ref(s->cur_format);
     if (mp_aframe_pool_allocate(s->out_pool, out, max_out_samples) < 0)
         goto error;
 
-    if (in) {
-        mp_aframe_copy_attributes(out, in);
-        s->current_pts = mp_aframe_end_pts(in);
-    }
+    if (s->in)
+        mp_aframe_copy_attributes(out, s->in);
 
-    int offset_in = fill_queue(s, in, 0);
     uint8_t **out_planes = mp_aframe_get_data_rw(out);
     if (!out_planes)
         goto error;
     int8_t *pout = out_planes[0];
     int out_offset = 0;
-    while (s->bytes_queued >= s->bytes_queue) {
+    if (s->bytes_queued >= s->bytes_queue) {
         int ti;
         float tf;
         int bytes_off = 0;
@@ -303,11 +322,9 @@ static void process(struct mp_filter *f)
         ti = (int)tf;
         s->frames_stride_error = tf - ti;
         s->bytes_to_slide = ti * s->bytes_per_frame;
-
-        offset_in += fill_queue(s, in, offset_in);
     }
     // Drain remaining buffered data.
-    if (!in && s->bytes_queued) {
+    if (drain && s->bytes_queued) {
         memcpy(pout + out_offset, s->buf_queue, s->bytes_queued);
         out_offset += s->bytes_queued;
         s->bytes_queued = 0;
@@ -317,8 +334,9 @@ static void process(struct mp_filter *f)
     // This filter can have a negative delay when scale > 1:
     // output corresponding to some length of input can be decided and written
     // after receiving only a part of that input.
-    double delay = (out_offset * s->speed + s->bytes_queued - s->bytes_to_slide) /
-                    s->bytes_per_frame / mp_aframe_get_effective_rate(out);
+    float delay = (out_offset * s->speed + s->bytes_queued - s->bytes_to_slide) /
+                    s->bytes_per_frame / mp_aframe_get_effective_rate(out)
+                  + (s->in ? mp_aframe_duration(s->in) : 0);
 
     if (s->current_pts != MP_NOPTS_VALUE)
         mp_aframe_set_pts(out, s->current_pts - delay);
@@ -333,17 +351,16 @@ static void process(struct mp_filter *f)
     } else if (is_eof && !out) {
         mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
     } else if (!is_eof && !out) {
-        mp_pin_out_request_data(s->in_pin);
+        mp_pin_out_request_data_next(s->in_pin);
     }
 
     if (out)
         mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_AUDIO, out));
 
-    talloc_free(in);
     return;
 
 error:
-    talloc_free(in);
+    TA_FREEP(&s->in);
     talloc_free(out);
     mp_filter_internal_mark_failed(f);
 }
@@ -359,15 +376,15 @@ static void update_speed(struct priv *s, float speed)
     s->frames_stride_error = MPMIN(s->frames_stride_error, s->frames_stride_scaled);
 }
 
-static bool reinit(struct mp_filter *f, struct mp_aframe *in)
+static bool reinit(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
     mp_aframe_reset(s->cur_format);
 
-    float srate  = mp_aframe_get_rate(in) / 1000.0;
-    int nch = mp_aframe_get_channels(in);
-    int format = mp_aframe_get_format(in);
+    float srate  = mp_aframe_get_rate(s->in) / 1000.0;
+    int nch = mp_aframe_get_channels(s->in);
+    int format = mp_aframe_get_format(s->in);
 
     int use_int = 0;
     if (format == AF_FORMAT_S16) {
@@ -488,7 +505,7 @@ static bool reinit(struct mp_filter *f, struct mp_aframe *in)
            (int)(s->bytes_queue / nch / bps),
            (use_int ? "s16" : "float"));
 
-    mp_aframe_config_copy(s->cur_format, in);
+    mp_aframe_config_copy(s->cur_format, s->in);
 
     return true;
 }
@@ -521,6 +538,7 @@ static void reset(struct mp_filter *f)
     s->bytes_to_slide = 0;
     s->frames_stride_error = 0;
     memset(s->buf_overlap, 0, s->bytes_overlap);
+    TA_FREEP(&s->in);
 }
 
 static void destroy(struct mp_filter *f)
@@ -531,6 +549,7 @@ static void destroy(struct mp_filter *f)
     free(s->buf_pre_corr);
     free(s->table_blend);
     free(s->table_window);
+    TA_FREEP(&s->in);
     mp_filter_free_children(f);
 }
 
