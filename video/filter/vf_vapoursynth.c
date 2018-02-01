@@ -602,7 +602,6 @@ static void destroy_vs(struct priv *p)
     for (int n = 0; n < p->num_buffered; n++)
         talloc_free(p->buffered[n]);
     p->num_buffered = 0;
-    p->out_pts = MP_NOPTS_VALUE;
     p->out_frameno = p->in_frameno = 0;
     p->requested_frameno = 0;
     p->failed = false;
@@ -626,6 +625,7 @@ static int reinit_vs(struct priv *p)
     }
 
     p->initializing = true;
+    p->out_pts = MP_NOPTS_VALUE;
 
     if (p->drv->load_core(p) < 0 || !p->vsapi || !p->vscore) {
         MP_FATAL(p, "Could not get vapoursynth API handle.\n");
