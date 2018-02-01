@@ -53,6 +53,7 @@ static const struct mp_filter_info frame_duration_filter = {
     .priv_size = sizeof(struct frame_duration_priv),
     .process = frame_duration_process,
     .reset = frame_duration_reset,
+    .destroy = frame_duration_reset,
 };
 
 struct mp_filter *mp_compute_frame_duration_create(struct mp_filter *parent)
