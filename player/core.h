@@ -168,8 +168,6 @@ struct track {
 struct vo_chain {
     struct mp_log *log;
 
-    double container_fps;
-
     struct mp_output_chain *filter;
 
     //struct vf_chain *vf;
