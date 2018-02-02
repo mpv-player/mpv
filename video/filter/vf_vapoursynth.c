@@ -379,6 +379,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
             pthread_cond_broadcast(&p->wakeup);
         } else if (frame.type != MP_FRAME_NONE) {
             MP_ERR(p, "discarding unknown frame type\n");
+            mp_frame_unref(&frame);
             goto done;
         }
     }
