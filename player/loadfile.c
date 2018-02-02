@@ -985,7 +985,7 @@ static void cleanup_deassociated_complex_filters(struct MPContext *mpctx)
         if (!(track->sink || track->vo_c || track->ao_c)) {
             if (track->dec && !track->vo_c && !track->ao_c) {
                 talloc_free(track->dec->f);
-                track->dec->f = NULL;
+                track->dec = NULL;
             }
             track->selected = false;
         }
