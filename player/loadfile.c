@@ -1003,6 +1003,16 @@ static void cleanup_deassociated_complex_filters(struct MPContext *mpctx)
     }
 }
 
+static void kill_outputs(struct MPContext *mpctx, struct track *track)
+{
+    if (track->vo_c || track->ao_c) {
+        MP_VERBOSE(mpctx, "deselecting track %d for lavfi-complex option\n",
+                   track->user_tid);
+        mp_switch_track(mpctx, track->type, NULL, 0);
+    }
+    assert(!(track->vo_c || track->ao_c));
+}
+
 // >0: changed, 0: no change, -1: error
 static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
 {
@@ -1042,30 +1052,30 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
 
     struct mp_pin *pad = mp_filter_get_named_pin(mpctx->lavfi, "vo");
     if (pad && mp_pin_get_dir(pad) == MP_PIN_OUT) {
-        if (mpctx->vo_chain) {
-            MP_ERR(mpctx, "Pad vo tries to connect to already used VO.\n");
-            goto done;
-        } else {
+        if (mpctx->vo_chain && mpctx->vo_chain->track)
+            kill_outputs(mpctx, mpctx->vo_chain->track);
+        if (!mpctx->vo_chain) {
             reinit_video_chain_src(mpctx, NULL);
             if (!mpctx->vo_chain)
                 goto done;
         }
         struct vo_chain *vo_c = mpctx->vo_chain;
+        assert(!vo_c->track);
         vo_c->filter_src = pad;
         mp_pin_connect(vo_c->filter->f->pins[0], vo_c->filter_src);
     }
 
     pad = mp_filter_get_named_pin(mpctx->lavfi, "ao");
     if (pad && mp_pin_get_dir(pad) == MP_PIN_OUT) {
-        if (mpctx->ao_chain) {
-            MP_ERR(mpctx, "Pad ao tries to connect to already used AO.\n");
-            goto done;
-        } else {
+        if (mpctx->ao_chain && mpctx->ao_chain->track)
+            kill_outputs(mpctx, mpctx->ao_chain->track);
+        if (!mpctx->ao_chain) {
             reinit_audio_chain_src(mpctx, NULL);
             if (!mpctx->ao_chain)
                 goto done;
         }
         struct ao_chain *ao_c = mpctx->ao_chain;
+        assert(!ao_c->track);
         ao_c->filter_src = pad;
         mp_pin_connect(ao_c->filter->f->pins[0], ao_c->filter_src);
     }
@@ -1090,19 +1100,18 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         assert(!mp_pin_is_connected(pad));
 
         assert(!track->sink);
-        if (track->vo_c || track->ao_c) {
-            MP_ERR(mpctx, "Pad %s tries to connect to already selected track.\n",
-                   label);
-            goto done;
-        }
+
+        kill_outputs(mpctx, track);
+
         track->sink = pad;
         track->selected = true;
-        assert(!track->dec);
 
-        if (track->type == STREAM_VIDEO && !init_video_decoder(mpctx, track))
-            goto done;
-        if (track->type == STREAM_AUDIO && !init_audio_decoder(mpctx, track))
-            goto done;
+        if (!track->dec) {
+            if (track->type == STREAM_VIDEO && !init_video_decoder(mpctx, track))
+                goto done;
+            if (track->type == STREAM_AUDIO && !init_audio_decoder(mpctx, track))
+                goto done;
+        }
 
         mp_pin_connect(track->sink, track->dec->f->pins[0]);
     }
