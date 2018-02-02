@@ -1057,8 +1057,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             continue;
         if (mp_pin_get_dir(pad) != MP_PIN_IN)
             continue;
-        if (mp_pin_is_connected(pad))
-            continue;
+        assert(!mp_pin_is_connected(pad));
 
         assert(!track->sink);
         if (track->vo_c || track->ao_c) {
@@ -1067,7 +1066,6 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             goto done;
         }
         track->sink = pad;
-        mp_pin_set_manual_connection(pad, true);
         track->selected = true;
     }
 
