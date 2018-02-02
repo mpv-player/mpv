@@ -406,8 +406,7 @@ static void process(struct mp_filter *f)
     if (mp_pin_can_transfer_data(p->filters_in, f->ppins[0])) {
         struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
-        p->public.got_input_eof = frame.type == MP_FRAME_EOF;
-        if (p->public.got_input_eof)
+        if (frame.type == MP_FRAME_EOF)
             MP_VERBOSE(p, "filter input EOF\n");
 
         if (frame.type == MP_FRAME_VIDEO && p->public.update_subtitles) {
@@ -441,7 +440,6 @@ static void reset(struct mp_filter *f)
     p->format_change_second_try = false;
     p->public.ao_needs_update = false;
 
-    p->public.got_input_eof = false;
     p->public.got_output_eof = false;
 }
 
