@@ -1040,35 +1040,6 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
     for (int n = 0; n < mpctx->lavfi->num_pins; n++)
         mp_pin_disconnect(mpctx->lavfi->pins[n]);
 
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-
-        char label[32];
-        char prefix;
-        switch (track->type) {
-        case STREAM_VIDEO: prefix = 'v'; break;
-        case STREAM_AUDIO: prefix = 'a'; break;
-        default: continue;
-        }
-        snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
-
-        struct mp_pin *pad = mp_filter_get_named_pin(mpctx->lavfi, label);
-        if (!pad)
-            continue;
-        if (mp_pin_get_dir(pad) != MP_PIN_IN)
-            continue;
-        assert(!mp_pin_is_connected(pad));
-
-        assert(!track->sink);
-        if (track->vo_c || track->ao_c) {
-            MP_ERR(mpctx, "Pad %s tries to connect to already selected track.\n",
-                   label);
-            goto done;
-        }
-        track->sink = pad;
-        track->selected = true;
-    }
-
     struct mp_pin *pad = mp_filter_get_named_pin(mpctx->lavfi, "vo");
     if (pad && mp_pin_get_dir(pad) == MP_PIN_OUT) {
         if (mpctx->vo_chain) {
@@ -1101,16 +1072,39 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
-        if (track->sink && track->type == STREAM_VIDEO) {
-            if (!track->dec && !init_video_decoder(mpctx, track))
-                goto done;
-            mp_pin_connect(track->sink, track->dec->f->pins[0]);
+
+        char label[32];
+        char prefix;
+        switch (track->type) {
+        case STREAM_VIDEO: prefix = 'v'; break;
+        case STREAM_AUDIO: prefix = 'a'; break;
+        default: continue;
         }
-        if (track->sink && track->type == STREAM_AUDIO) {
-            if (!track->dec && !init_audio_decoder(mpctx, track))
-                goto done;
-            mp_pin_connect(track->sink, track->dec->f->pins[0]);
+        snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
+
+        pad = mp_filter_get_named_pin(mpctx->lavfi, label);
+        if (!pad)
+            continue;
+        if (mp_pin_get_dir(pad) != MP_PIN_IN)
+            continue;
+        assert(!mp_pin_is_connected(pad));
+
+        assert(!track->sink);
+        if (track->vo_c || track->ao_c) {
+            MP_ERR(mpctx, "Pad %s tries to connect to already selected track.\n",
+                   label);
+            goto done;
         }
+        track->sink = pad;
+        track->selected = true;
+        assert(!track->dec);
+
+        if (track->type == STREAM_VIDEO && !init_video_decoder(mpctx, track))
+            goto done;
+        if (track->type == STREAM_AUDIO && !init_audio_decoder(mpctx, track))
+            goto done;
+
+        mp_pin_connect(track->sink, track->dec->f->pins[0]);
     }
 
     // Don't allow unconnected pins. Libavfilter would make the data flow a
