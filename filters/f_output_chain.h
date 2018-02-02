@@ -17,7 +17,6 @@ struct mp_output_chain {
     // This filter will have 1 input (from decoder) and 1 output (to VO/AO).
     struct mp_filter *f;
 
-    bool got_input_eof;
     bool got_output_eof;
 
     // The filter chain output could not be converted to any format the output
