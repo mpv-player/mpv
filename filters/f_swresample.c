@@ -666,15 +666,14 @@ static void process(struct mp_filter *f)
 
     struct mp_frame out = filter_resample_output(p, p->input);
 
-    if (p->input && out.type) {
+    if (out.type) {
         mp_pin_in_write(f->ppins[1], out);
-    } else if (!p->input && out.type) {
-        mp_pin_in_write(f->ppins[1], out);
-        mp_pin_out_repeat_eof(f->ppins[0]);
-    } else if (!p->input) {
-        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
-    } else {
+        if (!p->input)
+            mp_pin_out_repeat_eof(f->ppins[0]);
+    } else if (p->input) {
         mp_filter_internal_mark_progress(f); // try to consume more input
+    } else {
+        mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
     }
 
     if (p->input && !mp_aframe_get_size(p->input))
