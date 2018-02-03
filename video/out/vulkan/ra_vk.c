@@ -209,7 +209,7 @@ struct ra *ra_create_vk(struct mpvk_ctx *vk, struct mp_log *log)
     ra->max_pushc_size = vk->limits.maxPushConstantsSize;
 
     if (vk->pool_compute) {
-        ra->caps |= RA_CAP_COMPUTE;
+        ra->caps |= RA_CAP_COMPUTE | RA_CAP_NUM_GROUPS;
         // If we have more compute queues than graphics queues, we probably
         // want to be using them. (This seems mostly relevant for AMD)
         if (vk->pool_compute->num_queues > vk->pool_graphics->num_queues)
