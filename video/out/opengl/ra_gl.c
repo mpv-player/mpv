@@ -101,6 +101,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         {RA_CAP_TEX_1D,             MPGL_CAP_1D_TEX},
         {RA_CAP_TEX_3D,             MPGL_CAP_3D_TEX},
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
+        {RA_CAP_NUM_GROUPS,         MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
     };
 
