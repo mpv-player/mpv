@@ -624,7 +624,14 @@ static void process(struct mp_filter *f)
     }
 
     int new_rate = rate_from_speed(p->in_rate_user, p->speed);
-    if (p->avrctx && !(!p->is_resampling && new_rate == p->in_rate)) {
+    bool exact_rate = new_rate == p->in_rate;
+    bool use_comp = fabs(new_rate / (double)p->in_rate - 1) <= 0.01;
+    // If we've never used compensation, avoid setting it - even if it's in
+    // theory a NOP, libswresample will enable resampling. _If_ we're
+    // resampling, we might have to disable previously enabled compensation.
+    if (exact_rate && !p->is_resampling)
+        use_comp = false;
+    if (p->avrctx && use_comp) {
         AVRational r =
             av_d2q(p->speed * p->in_rate_user / p->in_rate, INT_MAX / 2);
         // Essentially, swr/avresample_set_compensation() does 2 things:
@@ -635,14 +642,15 @@ static void process(struct mp_filter *f)
         // feeding it, until the next filter() call.
         int mult = INT_MAX / 2 / MPMAX(MPMAX(abs(r.num), abs(r.den)), 1);
         r = (AVRational){ r.num * mult, r.den * mult };
+        if (r.den == r.num)
+            r = (AVRational){0}; // fully disable
         if (avresample_set_compensation(p->avrctx, r.den - r.num, r.den) >= 0) {
-            new_rate = p->in_rate;
-            p->is_resampling = true;
+            exact_rate = true;
+            p->is_resampling = true; // libswresample can auto-enable it
         }
     }
 
-    bool need_reinit = fabs(new_rate / (double)p->in_rate - 1) > 0.01;
-    if (need_reinit && new_rate != p->in_rate) {
+    if (!exact_rate) {
         // Before reconfiguring, drain the audio that is still buffered
         // in the resampler.
         struct mp_frame out = filter_resample_output(p, NULL);
