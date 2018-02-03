@@ -327,7 +327,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     }
 
     // Read input and pass it to the input queue VS reads.
-    if (p->num_buffered < MP_TALLOC_AVAIL(p->buffered) && !p->eof) {
+    while (p->num_buffered < MP_TALLOC_AVAIL(p->buffered) && !p->eof) {
         // Note: this requests new input frames even if no output was ever
         // requested. Normally this is not how mp_filter works, but since VS
         // works asynchronously, it's probably ok.
@@ -382,6 +382,8 @@ static void vf_vapoursynth_process(struct mp_filter *f)
             MP_ERR(p, "discarding unknown frame type\n");
             mp_frame_unref(&frame);
             goto done;
+        } else {
+            break; // no new data available
         }
     }
 
