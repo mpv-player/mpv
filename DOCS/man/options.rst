@@ -5063,7 +5063,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         for in-range material as much as possible. Use this when you care about
         color accuracy more than detail preservation. This is somewhere in
         between ``clip`` and ``reinhard``, depending on the value of
-        ``--tone-mapping-param``. (default)
+        ``--tone-mapping-param``.
     reinhard
         Reinhard tone mapping algorithm. Very simple continuous curve.
         Preserves overall image brightness but uses nonlinear contrast, which
@@ -5074,7 +5074,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
         desaturating everything. Developed by John Hable for use in video
         games. Use this when you care about detail preservation more than
         color/brightness accuracy. This is roughly equivalent to
-        ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``.
+        ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
+        you should also enable ``--hdr-compute-peak`` for the best results.
+        (Default)
     gamma
         Fits a logarithmic transfer between the tone curves.
     linear
@@ -5103,13 +5105,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
-``--hdr-compute-peak``
-    Compute the HDR peak per-frame of relying on tagged metadata. These values
-    are averaged over local regions as well as over several frames to prevent
-    the value from jittering around too much. This option basically gives you
-    dynamic, per-scene tone mapping. Requires compute shaders, which is a
-    fairly recent OpenGL feature, and will probably also perform horribly on
-    some drivers, so enable at your own risk.
+``--hdr-compute-peak=<auto|yes|no>``
+    Compute the HDR peak and frame average brightness per-frame instead of
+    relying on tagged metadata. These values are averaged over local regions as
+    well as over several frames to prevent the value from jittering around too
+    much. This option basically gives you dynamic, per-scene tone mapping.
+    Requires compute shaders, which is a fairly recent OpenGL feature, and will
+    probably also perform horribly on some drivers, so enable at your own risk.
+    The special value ``auto`` (default) will enable HDR peak computation
+    automatically if compute shaders and SSBOs are supported.
 
 ``--tone-mapping-desaturate=<value>``
     Apply desaturation for highlights. The parameter essentially controls the
@@ -5119,8 +5123,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     into white instead. This makes images feel more natural, at the cost of
     reducing information about out-of-range colors.
 
-    The default of 1.0 provides a good balance that roughly matches the look
-    and feel of the ACES ODT curves. A setting of 0.0 disables this option.
+    The default of 0.5 provides a good balance. This value is weaker than the
+    ACES ODT curves' recommendation, but works better for most content in
+    practice. A setting of 0.0 disables this option.
 
 ``--gamut-warning``
     If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a

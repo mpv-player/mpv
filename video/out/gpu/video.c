@@ -313,9 +313,9 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .tone_mapping = TONE_MAPPING_MOBIUS,
+    .tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
-    .tone_mapping_desat = 1.0,
+    .tone_mapping_desat = 0.5,
     .early_flush = -1,
     .hwdec_interop = "auto",
 };
@@ -358,7 +358,10 @@ const struct m_sub_options gl_video_conf = {
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
-        OPT_FLAG("hdr-compute-peak", compute_hdr_peak, 0),
+        OPT_CHOICE("hdr-compute-peak", compute_hdr_peak, 0,
+                   ({"auto", 0},
+                    {"yes", 1},
+                    {"no", -1})),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
         OPT_FLAG("gamut-warning", gamut_warning, 0),
@@ -2442,19 +2445,17 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
-    bool detect_peak = p->opts.compute_hdr_peak && mp_trc_is_hdr(src.gamma);
+    bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
-            unsigned int sig_peak_raw;
-            unsigned int index;
+            unsigned int counter;
+            unsigned int frame_idx;
+            unsigned int frame_num;
             unsigned int frame_max[PEAK_DETECT_FRAMES+1];
+            unsigned int frame_sum[PEAK_DETECT_FRAMES+1];
+            unsigned int total_max;
+            unsigned int total_sum;
         } peak_ssbo = {0};
-
-        // Prefill with safe values
-        int safe = MP_REF_WHITE * mp_trc_nom_peak(p->image_params.color.gamma);
-        peak_ssbo.sig_peak_raw = PEAK_DETECT_FRAMES * safe;
-        for (int i = 0; i < PEAK_DETECT_FRAMES+1; i++)
-            peak_ssbo.frame_max[i] = safe;
 
         struct ra_buf_params params = {
             .type = RA_BUF_TYPE_SHADER_STORAGE,
@@ -2465,7 +2466,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         p->hdr_peak_ssbo = ra_buf_create(ra, &params);
         if (!p->hdr_peak_ssbo) {
             MP_WARN(p, "Failed to create HDR peak detection SSBO, disabling.\n");
-            detect_peak = (p->opts.compute_hdr_peak = false);
+            detect_peak = false;
+            p->opts.compute_hdr_peak = -1;
         }
     }
 
@@ -2473,9 +2475,15 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         pass_describe(p, "detect HDR peak");
         pass_is_compute(p, 8, 8); // 8x8 is good for performance
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
-            "uint sig_peak_raw;"
-            "uint index;"
-            "uint frame_max[%d];", PEAK_DETECT_FRAMES + 1
+            "uint counter;"
+            "uint frame_idx;"
+            "uint frame_num;"
+            "uint frame_max[%d];"
+            "uint frame_sum[%d];"
+            "uint total_max;"
+            "uint total_sum;",
+            PEAK_DETECT_FRAMES + 1,
+            PEAK_DETECT_FRAMES + 1
         );
     }
 
@@ -3504,9 +3512,10 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
-    if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak) {
-        p->opts.compute_hdr_peak = 0;
-        MP_WARN(p, "Disabling HDR peak computation (no compute shaders).\n");
+    if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak >= 0) {
+        int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
+        MP_MSG(p, msgl, "Disabling HDR peak computation (no compute shaders).\n");
+        p->opts.compute_hdr_peak = -1;
     }
 }
 
