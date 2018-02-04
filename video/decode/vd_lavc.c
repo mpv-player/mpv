@@ -976,17 +976,23 @@ static bool do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     return true;
 }
 
-static bool send_packet(struct mp_filter *vd, struct demux_packet *pkt)
+static bool send_queued(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    if (ctx->num_requeue_packets) {
-        if (do_send_packet(vd, ctx->requeue_packets[0])) {
-            talloc_free(ctx->requeue_packets[0]);
-            MP_TARRAY_REMOVE_AT(ctx->requeue_packets, ctx->num_requeue_packets, 0);
-        }
-        return false;
+    while (ctx->num_requeue_packets && do_send_packet(vd, ctx->requeue_packets[0]))
+    {
+        talloc_free(ctx->requeue_packets[0]);
+        MP_TARRAY_REMOVE_AT(ctx->requeue_packets, ctx->num_requeue_packets, 0);
     }
+
+    return ctx->num_requeue_packets == 0;
+}
+
+static bool send_packet(struct mp_filter *vd, struct demux_packet *pkt)
+{
+    if (!send_queued(vd))
+        return false;
 
     return do_send_packet(vd, pkt);
 }
@@ -1052,6 +1058,9 @@ static bool receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
 
         ctx->requeue_packets = pkts;
         ctx->num_requeue_packets = num_pkts;
+
+        send_queued(vd);
+        progress = decode_frame(vd);
     }
 
     if (!ctx->num_delay_queue)
