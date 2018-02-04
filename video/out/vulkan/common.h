@@ -72,4 +72,5 @@ struct mpvk_ctx {
 
     // Cached capabilities
     VkPhysicalDeviceLimits limits;
+    VkPhysicalDeviceFeatures features;
 };
