@@ -1765,6 +1765,7 @@ static int vk_desc_namespace(enum ra_vartype type)
 
 struct vk_timer {
     VkQueryPool pool;
+    int index_seen; // keeps track of which indices have been used at least once
     int index;
     uint64_t result;
 };
@@ -1789,6 +1790,7 @@ static ra_timer *vk_timer_create(struct ra *ra)
     struct mpvk_ctx *vk = ra_vk_get(ra);
 
     struct vk_timer *timer = talloc_zero(NULL, struct vk_timer);
+    timer->index_seen = -1;
 
     struct VkQueryPoolCreateInfo qinfo = {
         .sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO,
@@ -1820,12 +1822,15 @@ static void vk_timer_start(struct ra *ra, ra_timer *ratimer)
     struct mpvk_ctx *vk = ra_vk_get(ra);
     struct vk_timer *timer = ratimer;
 
-    timer->index = (timer->index + 2) % VK_QUERY_POOL_SIZE;
-
+    VkResult res = VK_NOT_READY;
     uint64_t out[2];
-    VkResult res = vkGetQueryPoolResults(vk->dev, timer->pool, timer->index, 2,
-                                         sizeof(out), &out[0], sizeof(uint64_t),
-                                         VK_QUERY_RESULT_64_BIT);
+
+    if (timer->index <= timer->index_seen) {
+        res = vkGetQueryPoolResults(vk->dev, timer->pool, timer->index, 2,
+                                    sizeof(out), &out[0], sizeof(uint64_t),
+                                    VK_QUERY_RESULT_64_BIT);
+    }
+
     switch (res) {
     case VK_SUCCESS:
         timer->result = (out[1] - out[0]) * vk->limits.timestampPeriod;
@@ -1847,6 +1852,9 @@ static uint64_t vk_timer_stop(struct ra *ra, ra_timer *ratimer)
     struct vk_timer *timer = ratimer;
     vk_timer_record(ra, timer->pool, timer->index + 1,
                     VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+
+    timer->index_seen = MPMAX(timer->index_seen, timer->index);
+    timer->index = (timer->index + 2) % VK_QUERY_POOL_SIZE;
 
     return timer->result;
 }
