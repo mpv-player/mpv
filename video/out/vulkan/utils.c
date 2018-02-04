@@ -316,6 +316,7 @@ bool mpvk_find_phys_device(struct mpvk_ctx *vk, const char *name, bool sw)
                     (int)VK_VERSION_PATCH(prop.apiVersion));
             vk->physd = devices[i];
             vk->limits = prop.limits;
+            vkGetPhysicalDeviceFeatures(vk->physd, &vk->features);
             talloc_free(devices);
             return true;
         }
@@ -498,12 +499,20 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     if (vk->spirv->required_ext)
         MP_TARRAY_APPEND(tmp, exts, num_exts, vk->spirv->required_ext);
 
+    // Enable all features we optionally use
+#define FEATURE(name) .name = vk->features.name
+    VkPhysicalDeviceFeatures feats = {
+        FEATURE(shaderStorageImageExtendedFormats),
+    };
+#undef FEATURE
+
     VkDeviceCreateInfo dinfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .pQueueCreateInfos = qinfos,
         .queueCreateInfoCount = num_qinfos,
         .ppEnabledExtensionNames = exts,
         .enabledExtensionCount = num_exts,
+        .pEnabledFeatures = &feats,
     };
 
     MP_VERBOSE(vk, "Creating vulkan device with extensions:\n");
