@@ -58,7 +58,7 @@ static void destroy(struct mp_filter *f)
 }
 
 static const struct mp_filter_info demux_filter = {
-    .name = "demux",
+    .name = "demux_in",
     .priv_size = sizeof(struct priv),
     .process = process,
     .reset = reset,
