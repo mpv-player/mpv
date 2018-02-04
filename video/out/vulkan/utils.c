@@ -502,6 +502,7 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     // Enable all features we optionally use
 #define FEATURE(name) .name = vk->features.name
     VkPhysicalDeviceFeatures feats = {
+        FEATURE(shaderImageGatherExtended),
         FEATURE(shaderStorageImageExtendedFormats),
     };
 #undef FEATURE
