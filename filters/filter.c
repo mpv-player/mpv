@@ -165,13 +165,12 @@ void mp_filter_internal_mark_progress(struct mp_filter *f)
 
 // Basically copy the async notifications to the sync ones. Done so that the
 // sync notifications don't need any locking.
-static void flush_async_notifications(struct filter_runner *r, bool queue)
+static void flush_async_notifications(struct filter_runner *r)
 {
     pthread_mutex_lock(&r->async_lock);
     for (int n = 0; n < r->num_async_pending; n++) {
         struct mp_filter *f = r->async_pending[n];
-        if (queue)
-            add_pending(f);
+        add_pending(f);
         f->in->async_pending = false;
     }
     r->num_async_pending = 0;
@@ -185,7 +184,7 @@ bool mp_filter_run(struct mp_filter *filter)
 
     r->filtering = true;
 
-    flush_async_notifications(r, true);
+    flush_async_notifications(r);
 
     while (r->num_pending) {
         struct mp_filter *next = r->pending[r->num_pending - 1];
@@ -653,7 +652,7 @@ static void filter_destructor(void *p)
 
     // Just make sure the filter is not still in the async notifications set.
     // There will be no more new notifications at this point (due to destroy()).
-    flush_async_notifications(r, false);
+    flush_async_notifications(r);
 
     for (int n = 0; n < r->num_pending; n++) {
         if (r->pending[n] == f) {
