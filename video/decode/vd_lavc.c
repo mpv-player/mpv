@@ -1009,8 +1009,11 @@ static bool decode_frame(struct mp_filter *vd)
     int ret = avcodec_receive_frame(avctx, ctx->pic);
     if (ret == AVERROR_EOF) {
         // If flushing was initialized earlier and has ended now, make it start
-        // over in case we get new packets at some point in the future.
-        reset_avctx(vd);
+        // over in case we get new packets at some point in the future. This
+        // must take the delay queue into account, so avctx returns EOF until
+        // the delay queue has been drained.
+        if (!ctx->num_delay_queue)
+            reset_avctx(vd);
         return false;
     } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
         handle_err(vd);
@@ -1084,7 +1087,7 @@ static bool receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
             MP_ERR(vd, "Could not copy back hardware decoded frame.\n");
             ctx->hwdec_fail_count = INT_MAX - 1; // force fallback
             handle_err(vd);
-            return false;
+            return true;
         }
     }
 
