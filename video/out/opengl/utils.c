@@ -105,25 +105,23 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h)
+bool gl_read_fbo_contents(GL *gl, int fbo, int dir, GLenum format, GLenum type,
+                          int w, int h, uint8_t *dst, int dst_stride)
 {
-    if (gl->es)
-        return NULL; // ES can't read from front buffer
-    mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, w, h);
-    if (!image)
-        return NULL;
+    assert(dir == 1 || dir == -1);
+    if (fbo == 0 && gl->es)
+        return false; // ES can't read from front buffer
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     GLenum obj = fbo ? GL_COLOR_ATTACHMENT0 : GL_FRONT;
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->ReadBuffer(obj);
-    //flip image while reading (and also avoid stride-related trouble)
-    for (int y = 0; y < h; y++) {
-        gl->ReadPixels(0, h - y - 1, w, 1, GL_RGB, GL_UNSIGNED_BYTE,
-                       image->planes[0] + y * image->stride[0]);
-    }
+    // reading by line allows flipping, and avoids stride-related trouble
+    int y1 = dir > 0 ? 0 : h;
+    for (int y = 0; y < h; y++)
+        gl->ReadPixels(0, y, w, 1, format, type, dst + (y1 + dir * y) * dst_stride);
     gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    return image;
+    return true;
 }
 
 static void gl_vao_enable_attribs(struct gl_vao *vao)

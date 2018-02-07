@@ -102,7 +102,12 @@ enum mp_voctrl {
     VOCTRL_GET_DISPLAY_NAMES,
 
     // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
+    // Deprecated for VOCTRL_SCREENSHOT with corresponding flags.
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
+
+    // A normal screenshot - VOs can react to this if vo_get_current_frame() is
+    // not sufficient.
+    VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot*
 
     VOCTRL_UPDATE_RENDER_OPTS,
 
@@ -168,6 +173,11 @@ struct mp_frame_perf {
 
 struct voctrl_performance_data {
     struct mp_frame_perf fresh, redraw;
+};
+
+struct voctrl_screenshot {
+    bool scaled, subs, osd, high_bit_depth;
+    struct mp_image *res;
 };
 
 enum {
@@ -447,6 +457,7 @@ double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 double vo_get_delay(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
+struct vo_frame *vo_get_current_vo_frame(struct vo *vo);
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
                               int stride_align);
 

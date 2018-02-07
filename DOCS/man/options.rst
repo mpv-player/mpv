@@ -3309,7 +3309,8 @@ Screenshot
 ``--screenshot-high-bit-depth=<yes|no>``
     If possible, write screenshots with a bit depth similar to the source
     video (default: yes). This is interesting in particular for PNG, as this
-    sometimes triggers writing 16 bit PNGs with huge file sizes.
+    sometimes triggers writing 16 bit PNGs with huge file sizes. This will also
+    include an unused alpha channel in the resulting files if 16 bit is used.
 
 ``--screenshot-template=<template>``
     Specify the filename template used to save screenshots. The template

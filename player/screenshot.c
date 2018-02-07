@@ -389,16 +389,30 @@ static void add_subs(struct MPContext *mpctx, struct mp_image *image)
                       OSD_DRAW_SUB_ONLY, image);
 }
 
-static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
+static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
+                                       bool high_depth)
 {
     struct mp_image *image = NULL;
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
+    bool need_add_subs = mode == MODE_SUBTITLES;
 
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
-        if (mode != MODE_FULL_WINDOW)
+        struct voctrl_screenshot ctrl = {
+            .scaled = mode == MODE_FULL_WINDOW,
+            .subs = mode != 0,
+            .osd = mode == MODE_FULL_WINDOW,
+            .high_bit_depth = high_depth &&
+                              mpctx->opts->screenshot_image_opts->high_bit_depth,
+        };
+        vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
+        image = ctrl.res;
+        if (image)
+            need_add_subs = false;
+
+        if (!image && mode != MODE_FULL_WINDOW)
             image = vo_get_current_frame(mpctx->video_out);
         if (!image) {
             vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
@@ -412,7 +426,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         image = nimage;
     }
 
-    if (image && mode == MODE_SUBTITLES)
+    if (image && need_add_subs)
         add_subs(mpctx, image);
 
     return image;
@@ -420,7 +434,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 
 struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
 {
-    struct mp_image *mpi = screenshot_get(mpctx, mode);
+    struct mp_image *mpi = screenshot_get(mpctx, mode, false);
     if (!mpi)
         return NULL;
     struct mp_image *res = convert_image(mpi, IMGFMT_BGR0, mpctx->log);
@@ -440,7 +454,8 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
     int format = image_writer_format_from_ext(ext);
     if (format)
         opts.format = format;
-    struct mp_image *image = screenshot_get(mpctx, mode);
+    bool high_depth = image_writer_high_depth(&opts);
+    struct mp_image *image = screenshot_get(mpctx, mode, high_depth);
     if (!image) {
         screenshot_msg(ctx, MSGL_ERR, "Taking screenshot failed.");
         goto end;
@@ -471,10 +486,12 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
     ctx->mode = mode;
     ctx->osd = osd;
 
-    struct mp_image *image = screenshot_get(mpctx, mode);
+    struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
+    bool high_depth = image_writer_high_depth(opts);
+
+    struct mp_image *image = screenshot_get(mpctx, mode, high_depth);
 
     if (image) {
-        struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
         char *filename = gen_fname(ctx, image_writer_file_ext(opts));
         if (filename)
             write_screenshot(mpctx, image, filename, NULL, async);

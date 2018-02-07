@@ -188,6 +188,20 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_image **)data = screen;
         return true;
     }
+    case VOCTRL_SCREENSHOT: {
+        struct vo_frame *frame = vo_get_current_vo_frame(vo);
+        if (frame) {
+            // Disable interpolation and such.
+            frame->redraw = true;
+            frame->repeat = false;
+            frame->still = true;
+            frame->pts = 0;
+            frame->duration = -1;
+            gl_video_screenshot(p->renderer, frame, data);
+        }
+        talloc_free(frame);
+        return true;
+    }
     case VOCTRL_LOAD_HWDEC_API:
         request_hwdec_api(vo);
         return true;

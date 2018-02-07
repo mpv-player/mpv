@@ -32,7 +32,8 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
                    const void *dataptr, int stride,
                    int x, int y, int w, int h);
 
-mp_image_t *gl_read_fbo_contents(GL *gl, int fbo, int w, int h);
+bool gl_read_fbo_contents(GL *gl, int fbo, int dir, GLenum format, GLenum type,
+                          int w, int h, uint8_t *dst, int dst_stride);
 
 struct gl_vao {
     GL *gl;
