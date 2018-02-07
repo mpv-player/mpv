@@ -251,16 +251,21 @@ struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
 
-    assert(p->wrapped_fb);
-    struct mp_image *screen = gl_read_fbo_contents(p->gl, p->main_fb,
-                                                   p->wrapped_fb->params.w,
-                                                   p->wrapped_fb->params.h);
+    struct mp_image *screen = mp_image_alloc(IMGFMT_RGB24, p->wrapped_fb->params.w,
+                                             p->wrapped_fb->params.h);
+    if (!screen)
+        return NULL;
 
-    // OpenGL FB is also read in flipped order, so we need to flip when the
-    // rendering is *not* flipped, which in our case is whenever
-    // p->params.flipped is true. I hope that made sense
-    if (screen && p->params.flipped)
-        mp_image_vflip(screen);
+    int dir = p->params.flipped ? 1 : -1;
+
+    assert(p->wrapped_fb);
+    if (!gl_read_fbo_contents(p->gl, p->main_fb, dir, GL_RGB, GL_UNSIGNED_BYTE,
+                              p->wrapped_fb->params.w, p->wrapped_fb->params.h,
+                              screen->planes[0], screen->stride[0]))
+    {
+        talloc_free(screen);
+        return NULL;
+    }
 
     return screen;
 }

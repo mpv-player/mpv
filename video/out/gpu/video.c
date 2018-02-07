@@ -2852,7 +2852,7 @@ static bool update_surface(struct gl_video *p, struct mp_image *mpi,
 // Draws an interpolate frame to fbo, based on the frame timing in t
 // flags: bit set of RENDER_FRAME_* flags
 static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
-                                       struct ra_fbo fbo, flags)
+                                       struct ra_fbo fbo, int flags)
 {
     bool is_new = false;
 
@@ -3154,6 +3154,84 @@ done:
 
     p->frames_rendered++;
     pass_report_performance(p);
+}
+
+void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
+                         struct voctrl_screenshot *args)
+{
+    bool ok = false;
+    struct mp_image *res = NULL;
+
+    if (!p->ra->fns->tex_download)
+        return;
+
+    struct mp_rect old_src = p->src_rect;
+    struct mp_rect old_dst = p->dst_rect;
+    struct mp_osd_res old_osd = p->osd_rect;
+
+    if (!args->scaled) {
+        int w = p->real_image_params.w;
+        int h = p->real_image_params.h;
+        if (w < 1 || h < 1)
+            return;
+
+        struct mp_rect rc = {0, 0, w, h};
+        struct mp_osd_res osd = {.w = w, .h = h, .display_par = 1.0};
+        gl_video_resize(p, &rc, &rc, &osd);
+    }
+
+    gl_video_reset_surfaces(p);
+
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .downloadable = true,
+        .w = p->osd_rect.w,
+        .h = p->osd_rect.h,
+        .render_dst = true,
+    };
+
+    params.format = ra_find_unorm_format(p->ra, 1, 4);
+    int mpfmt = IMGFMT_RGB0;
+    if (args->high_bit_depth && p->ra_format.component_bits > 8) {
+        const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 4);
+        if (fmt && fmt->renderable) {
+            params.format = fmt;
+            mpfmt = IMGFMT_RGBA64;
+        }
+    }
+
+    if (!params.format || !params.format->renderable)
+        goto done;
+    struct ra_tex *target = ra_tex_create(p->ra, &params);
+    if (!target)
+        goto done;
+
+    int flags = 0;
+    if (args->subs)
+        flags |= RENDER_FRAME_SUBS;
+    if (args->osd)
+        flags |= RENDER_FRAME_OSD;
+    gl_video_render_frame(p, frame, (struct ra_fbo){target}, flags);
+
+    res = mp_image_alloc(mpfmt, params.w, params.h);
+    if (!res)
+        goto done;
+
+    struct ra_tex_download_params download_params = {
+        .tex = target,
+        .dst = res->planes[0],
+        .stride = res->stride[0],
+    };
+    if (!p->ra->fns->tex_download(p->ra, &download_params))
+        goto done;
+
+    ok = true;
+done:
+    ra_tex_free(p->ra, &target);
+    gl_video_resize(p, &old_src, &old_dst, &old_osd);
+    if (!ok)
+        TA_FREEP(&res);
+    args->res = res;
 }
 
 // Use this color instead of the global option.

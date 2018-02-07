@@ -182,6 +182,9 @@ enum mp_imgfmt {
     IMGFMT_RGB0_START = IMGFMT_0RGB,
     IMGFMT_RGB0_END = IMGFMT_RGB0,
 
+    // Like IMGFMT_RGBA, but 2 bytes per component.
+    IMGFMT_RGBA64,
+
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
 

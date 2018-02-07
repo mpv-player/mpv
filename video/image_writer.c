@@ -277,6 +277,11 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
     return m_opt_choice_str(mp_image_writer_formats, opts->format);
 }
 
+bool image_writer_high_depth(const struct image_writer_opts *opts)
+{
+    return opts->format == AV_CODEC_ID_PNG;
+}
+
 int image_writer_format_from_ext(const char *ext)
 {
     for (int n = 0; mp_image_writer_formats[n].name; n++) {

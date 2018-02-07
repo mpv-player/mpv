@@ -277,6 +277,13 @@ static struct ra_tex *gl_tex_create_blank(struct ra *ra,
         tex_gl->target = GL_TEXTURE_EXTERNAL_OES;
     }
 
+    if (params->downloadable && !(params->dimensions == 2 &&
+                                  params->format->renderable))
+    {
+        gl_tex_destroy(ra, tex);
+        return NULL;
+    }
+
     return tex;
 }
 
@@ -329,8 +336,11 @@ static struct ra_tex *gl_tex_create(struct ra *ra,
 
     gl_check_error(gl, ra->log, "after creating texture");
 
-    // Even blitting needs an FBO in OpenGL for strange reasons
-    if (tex->params.render_dst || tex->params.blit_src || tex->params.blit_dst) {
+    // Even blitting needs an FBO in OpenGL for strange reasons.
+    // Download is handled by reading from an FBO.
+    if (tex->params.render_dst || tex->params.blit_src ||
+        tex->params.blit_dst || tex->params.downloadable)
+    {
         if (!tex->params.format->renderable) {
             MP_ERR(ra, "Trying to create renderable texture with unsupported "
                    "format.\n");
@@ -510,6 +520,18 @@ static bool gl_tex_upload(struct ra *ra,
     }
 
     return true;
+}
+
+static bool gl_tex_download(struct ra *ra, struct ra_tex_download_params *params)
+{
+    GL *gl = ra_gl_get(ra);
+    struct ra_tex *tex = params->tex;
+    struct ra_tex_gl *tex_gl = tex->priv;
+    if (!tex_gl->fbo)
+        return false;
+    return gl_read_fbo_contents(gl, tex_gl->fbo, 1, tex_gl->format, tex_gl->type,
+                                tex->params.w, tex->params.h, params->dst,
+                                params->stride);
 }
 
 static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
@@ -1134,6 +1156,7 @@ static struct ra_fns ra_fns_gl = {
     .tex_create             = gl_tex_create,
     .tex_destroy            = gl_tex_destroy,
     .tex_upload             = gl_tex_upload,
+    .tex_download           = gl_tex_download,
     .buf_create             = gl_buf_create,
     .buf_destroy            = gl_buf_destroy,
     .buf_update             = gl_buf_update,

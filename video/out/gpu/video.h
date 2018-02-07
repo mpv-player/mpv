@@ -146,6 +146,7 @@ extern const struct m_sub_options gl_video_conf;
 
 struct gl_video;
 struct vo_frame;
+struct voctrl_screenshot;
 
 enum {
     RENDER_FRAME_SUBS = 1 << 0,
@@ -171,6 +172,9 @@ void gl_video_set_clear_color(struct gl_video *p, struct m_color color);
 void gl_video_set_osd_pts(struct gl_video *p, double pts);
 bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *osd,
                                double pts);
+
+void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
+                         struct voctrl_screenshot *args);
 
 float gl_video_scale_ambient_lux(float lmin, float lmax,
                                  float rmin, float rmax, float lux);

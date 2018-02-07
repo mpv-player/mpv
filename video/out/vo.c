@@ -1324,6 +1324,15 @@ struct mp_image *vo_get_current_frame(struct vo *vo)
     return r;
 }
 
+struct vo_frame *vo_get_current_vo_frame(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    struct vo_frame *r = vo_frame_ref(vo->in->current_frame);
+    pthread_mutex_unlock(&in->lock);
+    return r;
+}
+
 static void destroy_frame(void *p)
 {
     struct vo_frame *frame = p;

@@ -110,6 +110,7 @@ struct ra_tex_params {
     bool blit_src;          // must be usable as a blit source
     bool blit_dst;          // must be usable as a blit destination
     bool host_mutable;      // texture may be updated with tex_upload
+    bool downloadable;      // texture can be read with tex_download
     // When used as render source texture.
     bool src_linear;        // if false, use nearest sampling (whether this can
                             // be true depends on ra_format.linear_filter)
@@ -148,6 +149,13 @@ struct ra_tex_upload_params {
     const void *src;    // Address of data
     // For 2D textures only:
     struct mp_rect *rc; // Region to upload. NULL means entire image
+    ptrdiff_t stride;   // The size of a horizontal line in bytes (*not* texels!)
+};
+
+struct ra_tex_download_params {
+    struct ra_tex *tex; // Texture to download from
+    // Downloading directly (set by caller, data written to by callee):
+    void *dst;          // Address of data (packed with no alignment)
     ptrdiff_t stride;   // The size of a horizontal line in bytes (*not* texels!)
 };
 
@@ -378,6 +386,10 @@ struct ra_fns {
     // must not be touched again by the API user until buf_poll returns true.
     // Returns whether successful.
     bool (*tex_upload)(struct ra *ra, const struct ra_tex_upload_params *params);
+
+    // Copy data from the texture to memory. ra_tex_params.downloadable must
+    // have been set to true on texture creation.
+    bool (*tex_download)(struct ra *ra, struct ra_tex_download_params *params);
 
     // Create a buffer. This can be used as a persistently mapped buffer,
     // a uniform buffer, a shader storage buffer or possibly others.
