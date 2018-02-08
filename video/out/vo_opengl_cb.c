@@ -331,7 +331,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     ra_gl_ctx_resize(sw, vp_w, abs(vp_h), fbo);
     ra_gl_ctx_start_frame(sw, &target);
     target.flip = vp_h < 0;
-    gl_video_render_frame(ctx->renderer, frame, target);
+    gl_video_render_frame(ctx->renderer, frame, target, RENDER_FRAME_DEF);
     ra_gl_ctx_submit_frame(sw, frame);
 
     reset_gl_state(ctx->gl);
