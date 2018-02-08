@@ -2616,6 +2616,9 @@ static void pass_dither(struct gl_video *p)
 static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
                           struct mp_osd_res rect, struct ra_fbo fbo, bool cms)
 {
+    if ((draw_flags & OSD_DRAW_SUB_ONLY) && (draw_flags & OSD_DRAW_OSD_ONLY))
+        return;
+
     mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
 
     timer_pool_start(p->osd_timer);
@@ -2685,7 +2688,9 @@ static void pass_render_frame_dumb(struct gl_video *p)
 
 // The main rendering function, takes care of everything up to and including
 // upscaling. p->image is rendered.
-static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t id)
+// flags: bit set of RENDER_FRAME_* flags
+static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
+                              uint64_t id, int flags)
 {
     // initialize the texture parameters and temporary variables
     p->texture_w = p->image_params.w;
@@ -2716,7 +2721,9 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
     if (vpts == MP_NOPTS_VALUE)
         vpts = p->osd_pts;
 
-    if (p->osd && p->opts.blend_subs == BLEND_SUBS_VIDEO) {
+    if (p->osd && p->opts.blend_subs == BLEND_SUBS_VIDEO &&
+        (flags & RENDER_FRAME_SUBS))
+    {
         double scale[2];
         get_scale_factors(p, false, scale);
         struct mp_osd_res rect = {
@@ -2735,7 +2742,9 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi, uint64_t
 
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-    if (p->osd && p->opts.blend_subs == BLEND_SUBS_YES) {
+    if (p->osd && p->opts.blend_subs == BLEND_SUBS_YES &&
+        (flags & RENDER_FRAME_SUBS))
+    {
         // Recreate the real video size from the src/dst rects
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
@@ -2815,14 +2824,15 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
     finish_pass_fbo(p, fbo, false, &p->dst_rect);
 }
 
+// flags: bit set of RENDER_FRAME_* flags
 static bool update_surface(struct gl_video *p, struct mp_image *mpi,
-                           uint64_t id, struct surface *surf)
+                           uint64_t id, struct surface *surf, int flags)
 {
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
 
     pass_info_reset(p, false);
-    if (!pass_render_frame(p, mpi, id))
+    if (!pass_render_frame(p, mpi, id, flags))
         return false;
 
     // Frame blending should always be done in linear light to preserve the
@@ -2840,8 +2850,9 @@ static bool update_surface(struct gl_video *p, struct mp_image *mpi,
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t
+// flags: bit set of RENDER_FRAME_* flags
 static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
-                                       struct ra_fbo fbo)
+                                       struct ra_fbo fbo, flags)
 {
     bool is_new = false;
 
@@ -2855,7 +2866,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].id == 0) {
         struct surface *now = &p->surfaces[p->surface_now];
-        if (!update_surface(p, t->current, t->frame_id, now))
+        if (!update_surface(p, t->current, t->frame_id, now, flags))
             return;
         p->surface_idx = p->surface_now;
         is_new = true;
@@ -2913,7 +2924,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         if (f_id > p->surfaces[p->surface_idx].id) {
             struct surface *dst = &p->surfaces[surface_dst];
-            if (!update_surface(p, f, f_id, dst))
+            if (!update_surface(p, f, f_id, dst, flags))
                 return;
             p->surface_idx = surface_dst;
             surface_dst = surface_wrap(surface_dst + 1);
@@ -3013,7 +3024,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 }
 
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
-                           struct ra_fbo fbo)
+                           struct ra_fbo fbo, int flags)
 {
     gl_video_update_options(p);
 
@@ -3056,7 +3067,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
         }
 
         if (interpolate) {
-            gl_video_interpolate_frame(p, frame, fbo);
+            gl_video_interpolate_frame(p, frame, fbo, flags);
         } else {
             bool is_new = frame->frame_id != p->image.id;
 
@@ -3068,7 +3079,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 p->output_tex_valid = false;
 
                 pass_info_reset(p, !is_new);
-                if (!pass_render_frame(p, frame->current, frame->frame_id))
+                if (!pass_render_frame(p, frame->current, frame->frame_id, flags))
                     goto done;
 
                 // For the non-interpolation case, we draw to a single "cache"
@@ -3117,15 +3128,20 @@ done:
 
     debug_check_gl(p, "after video rendering");
 
-    if (p->osd) {
+    if (p->osd && (flags & (RENDER_FRAME_SUBS | RENDER_FRAME_OSD))) {
         // If we haven't actually drawn anything so far, then we technically
         // need to consider this the start of a new pass. Let's call it a
         // redraw just because, since it's basically a blank frame anyway
         if (!has_frame)
             pass_info_reset(p, true);
 
-        pass_draw_osd(p, p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0,
-                      p->osd_pts, p->osd_rect, fbo, true);
+        int osd_flags = p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0;
+        if (!(flags & RENDER_FRAME_SUBS))
+            osd_flags |= OSD_DRAW_OSD_ONLY;
+        if (!(flags & RENDER_FRAME_OSD))
+            osd_flags |= OSD_DRAW_SUB_ONLY;
+
+        pass_draw_osd(p, osd_flags, p->osd_pts, p->osd_rect, fbo, true);
         debug_check_gl(p, "after OSD rendering");
     }
 
