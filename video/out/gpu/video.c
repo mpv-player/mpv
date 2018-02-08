@@ -3075,7 +3075,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 // texture to speed up subsequent re-draws (if any exist)
                 struct ra_fbo dest_fbo = fbo;
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
-                    !p->dumb_mode && (p->ra->caps & RA_CAP_BLIT))
+                    !p->dumb_mode && (p->ra->caps & RA_CAP_BLIT) &&
+                    fbo.tex->params.blit_dst)
                 {
                     // Attempt to use the same format as the destination FBO
                     // if possible. Some RAs use a wrapped dummy format here,
@@ -3095,7 +3096,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
             }
 
             // "output tex valid" and "output tex needed" are equivalent
-            if (p->output_tex_valid) {
+            if (p->output_tex_valid && fbo.tex->params.blit_dst) {
                 pass_info_reset(p, true);
                 pass_describe(p, "redraw cached frame");
                 struct mp_rect src = p->dst_rect;
