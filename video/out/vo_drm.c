@@ -295,6 +295,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     p->cur_frame_cropped = mp_image_new_dummy_ref(p->cur_frame);
     mp_image_crop_rc(p->cur_frame_cropped, p->dst);
 
+    talloc_free(p->last_input);
+    p->last_input = NULL;
+
     struct framebuffer *buf = p->bufs;
     for (unsigned int i = 0; i < BUF_COUNT; i++)
         memset(buf[i].map, 0, buf[i].size);
