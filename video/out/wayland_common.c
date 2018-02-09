@@ -1198,6 +1198,7 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
     } else {
         MP_VERBOSE(wl, "Disabling the idle inhibitor\n");
         zwp_idle_inhibitor_v1_destroy(wl->idle_inhibitor);
+        wl->idle_inhibitor = NULL;
     }
     return VO_TRUE;
 }
