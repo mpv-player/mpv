@@ -443,6 +443,8 @@ static int preinit(struct vo *vo)
         goto err;
     }
 
+    vo->monitor_par = 1 / vo->opts->monitor_pixel_aspect;
+
     return 0;
 
 err:
