@@ -559,6 +559,10 @@ void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, floa
 // under a typical presentation gamma of about 2.0.
 static const float sdr_avg = 0.25;
 
+// The threshold for which to consider an average luminance difference to be
+// a sign of a scene change.
+static const int scene_threshold = 0.2 * MP_REF_WHITE;
+
 static void hdr_update_peak(struct gl_shader_cache *sc)
 {
     // For performance, we want to do as few atomic operations on global
@@ -578,14 +582,16 @@ static void hdr_update_peak(struct gl_shader_cache *sc)
     GLSL(if (gl_LocalInvocationIndex == 0) {)
     GLSL(    uint wg_avg = wg_sum / (gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
     GLSL(    atomicMax(frame_max[frame_idx], wg_avg);)
-    GLSL(    atomicAdd(frame_sum[frame_idx], wg_avg);)
+    GLSL(    atomicAdd(frame_avg[frame_idx], wg_avg);)
     GLSL(})
+
+    const float refi = 1.0 / MP_REF_WHITE;
 
     // Update the sig_peak/sig_avg from the old SSBO state
     GLSL(uint num_wg = gl_NumWorkGroups.x * gl_NumWorkGroups.y;)
     GLSL(if (frame_num > 0) {)
-    GLSLF("    float peak = float(total_max) / (%f * float(frame_num));\n", MP_REF_WHITE);
-    GLSLF("    float avg = float(total_sum) / (%f * float(frame_num * num_wg));\n", MP_REF_WHITE);
+    GLSLF("    float peak = %f * float(total_max) / float(frame_num);\n", refi);
+    GLSLF("    float avg = %f * float(total_avg) / float(frame_num);\n", refi);
     GLSLF("    sig_peak = max(1.0, peak);\n");
     GLSLF("    sig_avg  = max(%f, avg);\n", sdr_avg);
     GLSL(});
@@ -594,12 +600,31 @@ static void hdr_update_peak(struct gl_shader_cache *sc)
     GLSL(memoryBarrierBuffer();)
     GLSL(barrier();)
     GLSL(if (gl_LocalInvocationIndex == 0 && atomicAdd(counter, 1) == num_wg - 1) {)
+
+    // Since we sum up all the workgroups, we also still need to divide the
+    // average by the number of work groups
     GLSL(    counter = 0;)
+    GLSL(    frame_avg[frame_idx] /= num_wg;)
+    GLSL(    uint cur_max = frame_max[frame_idx];)
+    GLSL(    uint cur_avg = frame_avg[frame_idx];)
+
+    // Scene change detection
+    GLSL(    int diff = int(frame_num * cur_avg) - int(total_avg);)
+    GLSLF("  if (abs(diff) > frame_num * %d) {\n", scene_threshold);
+    GLSL(        frame_num = 0;)
+    GLSL(        total_max = total_avg = 0;)
+    GLSLF("      for (uint i = 0; i < %d; i++)\n", PEAK_DETECT_FRAMES+1);
+    GLSL(            frame_max[i] = frame_avg[i] = 0;)
+    GLSL(        frame_max[frame_idx] = cur_max;)
+    GLSL(        frame_avg[frame_idx] = cur_avg;)
+    GLSL(    })
+
     // Add the current frame, then subtract and reset the next frame
     GLSLF("  uint next = (frame_idx + 1) %% %d;\n", PEAK_DETECT_FRAMES+1);
-    GLSL(    total_max += frame_max[frame_idx] - frame_max[next];)
-    GLSL(    total_sum += frame_sum[frame_idx] - frame_sum[next];)
-    GLSL(    frame_max[next] = frame_sum[next] = 0;)
+    GLSL(    total_max += cur_max - frame_max[next];)
+    GLSL(    total_avg += cur_avg - frame_avg[next];)
+    GLSL(    frame_max[next] = frame_avg[next] = 0;)
+
     // Update the index and count
     GLSL(    frame_idx = next;)
     GLSLF("  frame_num = min(frame_num + 1, %d);\n", PEAK_DETECT_FRAMES);

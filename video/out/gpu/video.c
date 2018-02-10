@@ -2448,13 +2448,13 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
-            unsigned int counter;
-            unsigned int frame_idx;
-            unsigned int frame_num;
-            unsigned int frame_max[PEAK_DETECT_FRAMES+1];
-            unsigned int frame_sum[PEAK_DETECT_FRAMES+1];
-            unsigned int total_max;
-            unsigned int total_sum;
+            uint32_t counter;
+            uint32_t frame_idx;
+            uint32_t frame_num;
+            uint32_t frame_max[PEAK_DETECT_FRAMES+1];
+            uint32_t frame_sum[PEAK_DETECT_FRAMES+1];
+            uint32_t total_max;
+            uint32_t total_sum;
         } peak_ssbo = {0};
 
         struct ra_buf_params params = {
@@ -2479,9 +2479,9 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             "uint frame_idx;"
             "uint frame_num;"
             "uint frame_max[%d];"
-            "uint frame_sum[%d];"
+            "uint frame_avg[%d];"
             "uint total_max;"
-            "uint total_sum;",
+            "uint total_avg;",
             PEAK_DETECT_FRAMES + 1,
             PEAK_DETECT_FRAMES + 1
         );
