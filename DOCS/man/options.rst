@@ -560,6 +560,10 @@ Program Behavior
     which mpv should not use with youtube-dl. The patterns are matched after
     the ``http(s)://`` part of the URL.
 
+    The `use_manifests` script option makes mpv use the master manifest URL for
+    formats like HLS and DASH, if available, allowing for video/audio selection
+    in runtime. It's disabled ("no") by default for performance reasons.
+
     ``^`` matches the beginning of the URL, ``$`` matches its end, and you
     should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
     that character.
