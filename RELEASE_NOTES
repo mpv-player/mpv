@@ -1,3 +1,12 @@
+Release 0.27.1
+==============
+
+This releaes fixes CVE-2018-6360.
+
+Fixes and Minor Enhancements
+----------------------------
+- ytdl_hook:  whitelist protocols from urls retrieved from youtube-dl (#5456)
+
 Release 0.27.0
 ==============
 
