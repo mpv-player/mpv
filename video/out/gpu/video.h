@@ -96,7 +96,7 @@ enum tone_mapping {
 };
 
 // How many frames to average over for HDR peak detection
-#define PEAK_DETECT_FRAMES 20
+#define PEAK_DETECT_FRAMES 63
 
 struct gl_video_opts {
     int dumb_mode;
