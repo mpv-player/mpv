@@ -4,7 +4,8 @@ local options = require 'mp.options'
 
 local o = {
     exclude = "",
-    try_ytdl_first = false
+    try_ytdl_first = false,
+    use_manifests = false
 }
 options.read_options(o)
 
@@ -279,7 +280,7 @@ local function add_single_video(json)
     local reqfmts = json["requested_formats"]
 
     -- prefer manifest_url if present
-    if valid_manifest(json) then
+    if o.use_manifests and valid_manifest(json) then
         local mpd_url = reqfmts and reqfmts[1]["manifest_url"] or
             json["manifest_url"]
         if not mpd_url then
