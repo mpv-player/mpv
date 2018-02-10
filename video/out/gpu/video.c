@@ -3393,6 +3393,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_texrg = rg_tex && !rg_tex->luminance_alpha;
     bool have_compute = ra->caps & RA_CAP_COMPUTE;
     bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
+    bool have_numgroups = ra->caps & RA_CAP_NUM_GROUPS;
 
     const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgba16hf",
                                    "rgb10_a2", "rgba8", 0};
@@ -3512,7 +3513,9 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
-    if ((!have_compute || !have_ssbo) && p->opts.compute_hdr_peak >= 0) {
+
+    bool have_compute_peak = have_compute && have_ssbo && have_numgroups;
+    if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
         int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
         MP_MSG(p, msgl, "Disabling HDR peak computation (no compute shaders).\n");
         p->opts.compute_hdr_peak = -1;
