@@ -626,9 +626,13 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
                     site = entry["webpage_url"]
                 end
 
-                -- links with only youtube id as returned by --flat-playlist
+                -- links without protocol as returned by --flat-playlist
                 if not site:find("://") then
-                    table.insert(playlist, "https://youtu.be/" .. site)
+                    -- youtube extractor provides only IDs,
+                    -- others come prefixed with the extractor name and ":"
+                    local prefix = site:find(":") and "ytdl://" or
+                        "https://youtu.be/"
+                    table.insert(playlist, prefix .. site)
                 elseif url_is_safe(site) then
                     table.insert(playlist, site)
                 end
