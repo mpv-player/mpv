@@ -381,7 +381,6 @@ local function add_single_video(json)
             "rtmp_app", json.app)
     end
 
-    -- ffmpeg ignores proxy if https is used and doesn't support SOCKS
     if json.proxy and json.proxy ~= "" then
         stream_opts = append_libav_opt(stream_opts,
             "http_proxy", json.proxy)
@@ -391,7 +390,7 @@ local function add_single_video(json)
 end
 
 mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
-    local url = mp.get_property("stream-open-filename")
+    local url = mp.get_property("stream-open-filename", "")
     local start_time = os.clock()
     if (url:find("ytdl://") == 1) or
         ((url:find("https?://") == 1) and not is_blacklisted(url)) then
@@ -484,13 +483,12 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
         json["proxy"] = json["proxy"] or proxy
 
         -- what did we get?
-        if not (json["direct"] == nil) and (json["direct"] == true) then
+        if json["direct"] then
             -- direct URL, nothing to do
             msg.verbose("Got direct URL")
             return
-        elseif not (json["_type"] == nil)
-            and ((json["_type"] == "playlist")
-            or (json["_type"] == "multi_video")) then
+        elseif (json["_type"] == "playlist")
+            or (json["_type"] == "multi_video") then
             -- a playlist
 
             if (#json.entries == 0) then
@@ -519,9 +517,7 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
                 end
 
                 -- can't change the http headers for each entry, so use the 1st
-                if json.entries[1] then
-                    set_http_headers(json.entries[1].http_headers)
-                end
+                set_http_headers(json.entries[1].http_headers)
 
                 mp.set_property("stream-open-filename", playlist)
                 if not (json.title == nil) then
