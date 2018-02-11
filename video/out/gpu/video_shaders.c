@@ -628,6 +628,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc)
     // Update the index and count
     GLSL(    frame_idx = next;)
     GLSLF("  frame_num = min(frame_num + 1, %d);\n", PEAK_DETECT_FRAMES);
+    GLSL(    memoryBarrierBuffer();)
     GLSL(})
 }
 
