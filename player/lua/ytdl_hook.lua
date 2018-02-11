@@ -270,7 +270,8 @@ local function add_single_video(json)
 
             if not (sub_info.data == nil) then
                 sub = "memory://"..sub_info.data
-            elseif not (sub_info.url == nil) then
+            elseif not (sub_info.url == nil) and
+                url_is_safe(sub_info.url) then
                 sub = sub_info.url
             end
 
@@ -468,7 +469,8 @@ mp.add_hook("on_load", 10, function ()
                         local subfile = "edl://"
                         for i, entry in pairs(json.entries) do
                             if not (entry.requested_subtitles == nil) and
-                                not (entry.requested_subtitles[j] == nil) then
+                                not (entry.requested_subtitles[j] == nil) and
+                                url_is_safe(entry.requested_subtitles[j].url) then
                                 subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
                             else
                                 subfile = subfile..edl_escape("memory://WEBVTT")
