@@ -215,8 +215,8 @@ local function edl_track_joined(fragments, protocol, is_live, base)
 end
 
 local function has_native_dash_demuxer()
-    local demuxers = mp.get_property_native("demuxer-lavf-list")
-    for _,v in ipairs(demuxers) do
+    local demuxers = mp.get_property_native("demuxer-lavf-list", {})
+    for _, v in ipairs(demuxers) do
         if v == "dash" then
             return true
         end
@@ -230,7 +230,7 @@ local function valid_manifest(json)
         return false
     end
     local proto = reqfmt["protocol"] or json["protocol"] or ""
-    return (has_native_dash_demuxer() and proto == "http_dash_segments") or
+    return (proto == "http_dash_segments" and has_native_dash_demuxer()) or
         proto:find("^m3u8")
 end
 
