@@ -32,6 +32,12 @@ API changes
 
 ::
 
+ --- mpv 0.29.0 ---
+ 1.27   - make opengl-cb the default VO. This causes a subtle behavior change
+          if the API user called mpv_opengl_cb_init_gl(), but does not set
+          the "vo" option. Before, it would still have used another VO (like
+          on the CLI, e.g. vo=gpu). Now it'll behave as if vo=opengl-cb was
+          used.
  --- mpv 0.28.0 ---
  1.26   - remove glMPGetNativeDisplay("drm") support
         - add mpv_opengl_cb_window_pos and mpv_opengl_cb_drm_params and

@@ -554,7 +554,8 @@ static int preinit(struct vo *vo)
     struct vo_priv *p = vo->priv;
     p->ctx = vo->extra.opengl_cb_context;
     if (!p->ctx) {
-        MP_FATAL(vo, "No context set.\n");
+        if (!vo->probing)
+            MP_FATAL(vo, "No context set.\n");
         return -1;
     }
 
