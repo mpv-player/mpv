@@ -44,28 +44,29 @@ def __find_swift_library(ctx):
             ctx.end_msg(swift_library)
             __add_swift_library_linking_flags(ctx, swift_library)
             return
-    ctx.end_msg(None, "RED")
+    ctx.end_msg(False)
 
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
     sdk = __run('xcrun --sdk macosx --show-sdk-path')
-    if sdk != "":
+    if sdk:
         ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
     else:
-        ctx.end_msg(None, "RED")
+        ctx.end_msg(False)
 
 def __find_swift_compiler(ctx):
     ctx.start_msg('Checking for swift (Swift compiler)')
     swift = __run('xcrun -find swift')
-    if swift != "":
+    if swift:
         ctx.end_msg(swift)
         ctx.env.SWIFT = swift
         __add_swift_flags(ctx)
         __find_swift_library(ctx)
     else:
-        ctx.end_msg(None, "RED")
+        ctx.end_msg(False)
 
 def configure(ctx):
-    __find_macos_sdk(ctx)
-    __find_swift_compiler(ctx)
+    if ctx.env.DEST_OS == "darwin":
+        __find_macos_sdk(ctx)
+        __find_swift_compiler(ctx)
