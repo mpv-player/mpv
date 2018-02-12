@@ -111,8 +111,8 @@ const struct m_sub_options demux_conf = {
     },
     .size = sizeof(struct demux_opts),
     .defaults = &(const struct demux_opts){
-        .max_bytes = 400 * 1024 * 1024,
-        .max_bytes_bw = 400 * 1024 * 1024,
+        .max_bytes = 150 * 1024 * 1024,
+        .max_bytes_bw = 50 * 1024 * 1024,
         .min_secs = 1.0,
         .min_secs_cache = 10.0 * 60 * 60,
         .seekable_cache = -1,
