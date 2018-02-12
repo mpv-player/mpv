@@ -72,6 +72,9 @@ Interface changes
       will probably stall.
     - deprecate the OpenGL cocoa backend, option choice --gpu-context=cocoa
       when used with --gpu-api=opengl (use --vo=opengl-cb)
+    - make --deinterlace=yes always deinterlace, instead of trying to check
+      certain unreliable video metadata. Also flip the defaults of all builtin
+      HW deinterlace filters to always deinterlace.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

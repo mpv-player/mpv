@@ -180,7 +180,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_FLOATRANGE("denoise", opts.denoise, 0, 0, 1),
     OPT_FLOATRANGE("sharpen", opts.sharpen, 0, -1, 1),
     OPT_INTRANGE("hqscaling", opts.hqscaling, 0, 0, 9),
-    OPT_FLAG("interlaced-only", interlaced_only, 0, OPTDEF_INT(1)),
+    OPT_FLAG("interlaced-only", interlaced_only, 0),
     {0}
 };
 
