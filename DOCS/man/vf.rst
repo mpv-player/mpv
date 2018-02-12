@@ -478,10 +478,14 @@ Available mpv-only filters are:
 
         no
             Don't perform deinterlacing.
+        auto
+             Select the best quality deinterlacing algorithm (default). This
+             goes by the order of the options as documented, with
+             ``motion-compensated`` being considered best quality.
         first-field
             Show only first field.
         bob
-            bob deinterlacing (default).
+            bob deinterlacing.
         weave, motion-adaptive, motion-compensated
             Advanced deinterlacing algorithms. Whether these actually work
             depends on the GPU hardware, the GPU drivers, driver bugs, and

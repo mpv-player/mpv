@@ -86,6 +86,7 @@ static void add_surfaces(struct priv *p, struct surface_refs *refs, int dir)
 }
 
 // The array items must match with the "deint" suboption values.
+// They're also sorted by quality.
 static const int deint_algorithm[] = {
     [0] = VAProcDeinterlacingNone,
     [1] = VAProcDeinterlacingBob, // first-field, special-cased
@@ -376,12 +377,25 @@ static bool initialize(struct mp_filter *vf)
         buffers[i] = VA_INVALID_ID;
     for (int i = 0; i < num_filters; i++) {
         if (filters[i] == VAProcFilterDeinterlacing) {
-            if (p->opts->deint_type < 1)
-                continue;
             VAProcFilterCapDeinterlacing caps[VAProcDeinterlacingCount];
             int num = va_query_filter_caps(vf, VAProcFilterDeinterlacing, caps,
                                            VAProcDeinterlacingCount);
             if (!num)
+                continue;
+            if (p->opts->deint_type < 0) {
+                for (int n = MP_ARRAY_SIZE(deint_algorithm) - 1; n > 0; n--) {
+                    for (int x = 0; x < num; x++) {
+                        if (caps[x].type == deint_algorithm[n]) {
+                            p->opts->deint_type = n;
+                            MP_VERBOSE(vf, "Selected deinterlacing algorithm: "
+                                       "%d\n", deint_algorithm[n]);
+                            goto found;
+                        }
+                    }
+                }
+                found: ;
+            }
+            if (p->opts->deint_type <= 0)
                 continue;
             VAProcDeinterlacingType algorithm =
                 deint_algorithm[p->opts->deint_type];
@@ -398,6 +412,8 @@ static bool initialize(struct mp_filter *vf)
                 MP_WARN(vf, "Selected deinterlacing algorithm not supported.\n");
         } // check other filters
     }
+    if (p->opts->deint_type < 0)
+        p->opts->deint_type = 0;
     p->num_buffers = 0;
     if (buffers[VAProcFilterDeinterlacing] != VA_INVALID_ID)
         p->buffers[p->num_buffers++] = buffers[VAProcFilterDeinterlacing];
@@ -456,8 +472,9 @@ error:
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE("deint", deint_type, 0,
-               // The values must match with deint_algorithm[].
-               ({"no", 0},
+               // The values >=0 must match with deint_algorithm[].
+               ({"auto", -1},
+                {"no", 0},
                 {"first-field", 1},
                 {"bob", 2},
                 {"weave", 3},
@@ -474,7 +491,7 @@ const struct mp_user_filter_entry vf_vavpp = {
         .name = "vavpp",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
-            .deint_type = 2,
+            .deint_type = -1,
             .interlaced_only = 0,
             .reversal_bug = 1,
         },

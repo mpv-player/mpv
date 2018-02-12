@@ -75,6 +75,7 @@ Interface changes
     - make --deinterlace=yes always deinterlace, instead of trying to check
       certain unreliable video metadata. Also flip the defaults of all builtin
       HW deinterlace filters to always deinterlace.
+    - change vf_vavpp default to use the best deinterlace algorithm by default
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
