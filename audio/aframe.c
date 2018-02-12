@@ -441,11 +441,14 @@ double mp_aframe_duration(struct mp_aframe *f)
 
 // Clip the given frame to the given timestamp range. Adjusts the frame size
 // and timestamp.
+// Refuses to change spdif frames.
 void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
 {
     double f_end = mp_aframe_end_pts(f);
     double rate = mp_aframe_get_effective_rate(f);
     if (f_end == MP_NOPTS_VALUE)
+        return;
+    if (af_fmt_is_spdif(mp_aframe_get_format(f)))
         return;
     if (end != MP_NOPTS_VALUE) {
         if (f_end >= end) {
