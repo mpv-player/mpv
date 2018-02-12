@@ -1036,6 +1036,8 @@ Video
     ``--deinterlace=auto`` was removed, which used to mean that the default
     interlacing option of possibly inserted video filters was used.)
 
+    Note that this will make video look worse if it's not actually interlaced.
+
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
 

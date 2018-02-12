@@ -475,7 +475,7 @@ const struct mp_user_filter_entry vf_vavpp = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .deint_type = 2,
-            .interlaced_only = 1,
+            .interlaced_only = 0,
             .reversal_bug = 1,
         },
         .options = vf_opts_fields,

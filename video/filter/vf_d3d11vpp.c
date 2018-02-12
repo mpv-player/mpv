@@ -532,7 +532,7 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .deint_enabled = 1,
-            .interlaced_only = 1,
+            .interlaced_only = 0,
             .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
         },
         .options = vf_opts_fields,

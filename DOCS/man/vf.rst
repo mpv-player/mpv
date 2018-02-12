@@ -488,8 +488,8 @@ Available mpv-only filters are:
             mpv bugs.
 
     ``<interlaced-only>``
-        :no:  Deinterlace all frames.
-        :yes: Only deinterlace frames marked as interlaced (default).
+        :no:  Deinterlace all frames (default).
+        :yes: Only deinterlace frames marked as interlaced.
 
     ``reversal-bug=<yes|no>``
         :no:  Use the API as it was interpreted by older Mesa drivers. While
@@ -544,7 +544,7 @@ Available mpv-only filters are:
         Try to apply inverse telecine, needs motion adaptive temporal
         deinterlacing.
     ``interlaced-only=<yes|no>``
-        If ``yes`` (default), only deinterlace frames marked as interlaced.
+        If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``hqscaling=<0-9>``
         0
             Use default VDPAU scaling (default).
@@ -558,7 +558,7 @@ Available mpv-only filters are:
     ``deint=<yes|no>``
         Whether deinterlacing is enabled (default: no).
     ``interlaced-only=<yes|no>``
-        If ``yes`` (default), only deinterlace frames marked as interlaced.
+        If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
         Tries to select a video processor with the given processing capability.
         If a video processor supports multiple capabilities, it is not clear
