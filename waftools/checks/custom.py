@@ -92,18 +92,6 @@ def check_wl_protocols(ctx, dependency_identifier):
         return ret
     return fn(ctx, dependency_identifier)
 
-def _run(cmd):
-    from waflib import Utils
-    try:
-        cmd = Utils.subprocess.Popen(cmd,
-                                     stdout=Utils.subprocess.PIPE,
-                                     stderr=Utils.subprocess.PIPE,
-                                     shell=True)
-        output = cmd.stdout.read().strip()
-        return output
-    except Exception:
-        return ""
-
 def check_cocoa(ctx, dependency_identifier):
     fn = check_cc(
         fragment         = load_fragment('cocoa.m'),
@@ -117,7 +105,7 @@ def check_cocoa(ctx, dependency_identifier):
     # linking warnings or errors
     if res:
         ctx.env.append_value('LINKFLAGS', [
-            '-isysroot', '%s' % _run('xcrun --sdk macosx --show-sdk-path')
+            '-isysroot', ctx.env.MACOS_SDK
         ])
 
     return res

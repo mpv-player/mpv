@@ -57,6 +57,10 @@ struct mpv_opengl_cb_context {
     struct mpv_global *global;
     struct mp_client_api *client_api;
 
+    pthread_mutex_t control_lock;
+    mpv_opengl_cb_control_fn control_cb;
+    void *control_cb_ctx;
+
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
 
@@ -78,6 +82,7 @@ struct mpv_opengl_cb_context {
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
     bool update_new_opts;
     struct vo *active;
+    bool icc_was_set;
 
     // --- This is only mutable while initialized=false, during which nothing
     //     except the OpenGL context manager is allowed to access it.
@@ -93,7 +98,7 @@ struct mpv_opengl_cb_context {
     struct mp_vo_opts *vo_opts;
 };
 
-static void update(struct vo_priv *p);
+static void update(struct mpv_opengl_cb_context *ctx);
 
 static void forget_frames(struct mpv_opengl_cb_context *ctx, bool all)
 {
@@ -114,6 +119,7 @@ static void free_ctx(void *ptr)
 
     pthread_cond_destroy(&ctx->wakeup);
     pthread_mutex_destroy(&ctx->lock);
+    pthread_mutex_destroy(&ctx->control_lock);
 }
 
 struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
@@ -121,6 +127,7 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
 {
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
     talloc_set_destructor(ctx, free_ctx);
+    pthread_mutex_init(&ctx->control_lock, NULL);
     pthread_mutex_init(&ctx->lock, NULL);
     pthread_cond_init(&ctx->wakeup, NULL);
 
@@ -142,6 +149,17 @@ void mpv_opengl_cb_set_update_callback(struct mpv_opengl_cb_context *ctx,
     ctx->update_cb = callback;
     ctx->update_cb_ctx = callback_ctx;
     pthread_mutex_unlock(&ctx->lock);
+}
+
+
+void mp_client_set_control_callback(struct mpv_opengl_cb_context *ctx,
+                                    mpv_opengl_cb_control_fn callback,
+                                    void *callback_ctx)
+{
+    pthread_mutex_lock(&ctx->control_lock);
+    ctx->control_cb = callback;
+    ctx->control_cb_ctx = callback_ctx;
+    pthread_mutex_unlock(&ctx->control_lock);
 }
 
 // Reset some GL attributes the user might clobber. For mid-term compatibility
@@ -223,9 +241,11 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     pthread_mutex_lock(&ctx->lock);
     forget_frames(ctx, true);
     ctx->initialized = false;
+    bool was_active = ctx->active ? true : false;
     pthread_mutex_unlock(&ctx->lock);
 
-    kill_video(ctx->client_api);
+    if (was_active)
+        kill_video(ctx->client_api);
 
     pthread_mutex_lock(&ctx->lock);
     assert(!ctx->active);
@@ -291,7 +311,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
                            &debug);
         ctx->gl->debug_context = debug;
         ra_gl_set_debug(ctx->ra_ctx->ra, debug);
-        if (gl_video_icc_auto_enabled(ctx->renderer))
+        if (!ctx->icc_was_set && gl_video_icc_auto_enabled(ctx->renderer))
             MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
     ctx->reconfigured = false;
@@ -360,10 +380,10 @@ int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
 }
 
 // Called locked.
-static void update(struct vo_priv *p)
+static void update(struct mpv_opengl_cb_context *ctx)
 {
-    if (p->ctx->update_cb)
-        p->ctx->update_cb(p->ctx->update_cb_ctx);
+    if (ctx->update_cb)
+        ctx->update_cb(ctx->update_cb_ctx);
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -375,7 +395,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->ctx->next_frame = vo_frame_ref(frame);
     p->ctx->expected_flip_count = p->ctx->flip_count + 1;
     p->ctx->redrawing = frame->redraw || !frame->current;
-    update(p);
+    update(p->ctx);
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
@@ -442,17 +462,20 @@ static int query_format(struct vo *vo, int format)
     return ok;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+// Can only be called from the GL thread
+void mp_client_set_icc_profile(struct mpv_opengl_cb_context *ctx, bstr icc_data)
 {
-    struct vo_priv *p = vo->priv;
+    gl_video_set_icc_profile(ctx->renderer, icc_data);
+    pthread_mutex_lock(&ctx->lock);
+    ctx->icc_was_set = true;
+    if (ctx->active)
+        update(ctx);
+    pthread_mutex_unlock(&ctx->lock);
+}
 
-    pthread_mutex_lock(&p->ctx->lock);
-    forget_frames(p->ctx, true);
-    p->ctx->img_params = *params;
-    p->ctx->reconfigured = true;
-    pthread_mutex_unlock(&p->ctx->lock);
-
-    return 0;
+void mp_client_set_ambient_lux(struct mpv_opengl_cb_context *ctx, int lux)
+{
+    gl_video_set_ambient_lux(ctx->renderer, lux);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -475,30 +498,54 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->force_update = true;
-        update(p);
+        update(p->ctx);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
     case VOCTRL_UPDATE_RENDER_OPTS:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->update_new_opts = true;
-        update(p);
+        update(p->ctx);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
     }
 
-    return VO_NOTIMPL;
+    int r = VO_NOTIMPL;
+    pthread_mutex_lock(&p->ctx->control_lock);
+    if (p->ctx->control_cb) {
+        int events = 0;
+        r = p->ctx->control_cb(p->ctx->control_cb_ctx, &events, request, data);
+        vo_event(vo, events);
+    }
+    pthread_mutex_unlock(&p->ctx->control_lock);
+
+    return r;
+}
+
+static int reconfig(struct vo *vo, struct mp_image_params *params)
+{
+    struct vo_priv *p = vo->priv;
+
+    pthread_mutex_lock(&p->ctx->lock);
+    forget_frames(p->ctx, true);
+    p->ctx->img_params = *params;
+    p->ctx->reconfigured = true;
+    pthread_mutex_unlock(&p->ctx->lock);
+    control(vo, VOCTRL_RECONFIG, NULL);
+
+    return 0;
 }
 
 static void uninit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
 
+    control(vo, VOCTRL_UNINIT, NULL);
     pthread_mutex_lock(&p->ctx->lock);
     forget_frames(p->ctx, true);
     p->ctx->img_params = (struct mp_image_params){0};
     p->ctx->reconfigured = true;
     p->ctx->active = NULL;
-    update(p);
+    update(p->ctx);
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
@@ -523,6 +570,7 @@ static int preinit(struct vo *vo)
     pthread_mutex_unlock(&p->ctx->lock);
 
     vo->hwdec_devs = p->ctx->hwdec_devs;
+    control(vo, VOCTRL_PREINIT, NULL);
 
     return 0;
 }

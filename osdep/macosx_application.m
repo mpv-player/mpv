@@ -33,6 +33,9 @@
 #if HAVE_MACOS_TOUCHBAR
 #import "osdep/macosx_touchbar.h"
 #endif
+#if HAVE_MACOS_COCOA_CB
+#include "osdep/macOS_swift.h"
+#endif
 
 #define MPV_PROTOCOL @"mpv://"
 
@@ -40,7 +43,13 @@
 // running in libmpv mode, and cocoa_main() was never called.
 static bool application_instantiated;
 
+struct playback_thread_ctx {
+    int  *argc;
+    char ***argv;
+};
+
 static pthread_t playback_thread_id;
+static struct playback_thread_ctx thread_ctx = {0};
 
 @interface Application ()
 {
@@ -60,9 +69,22 @@ static void terminate_cocoa_application(void)
     [NSApp terminate:NSApp];
 }
 
+static void *playback_thread(void *ctx_obj)
+{
+    mpthread_set_name("playback core (OSX)");
+    @autoreleasepool {
+        struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
+        int r = mpv_main(*ctx->argc, *ctx->argv);
+        terminate_cocoa_application();
+        // normally never reached - unless the cocoa mainloop hasn't started yet
+        exit(r);
+    }
+}
+
 @implementation Application
 @synthesize menuBar = _menu_bar;
 @synthesize openCount = _open_count;
+@synthesize cocoaCB = _cocoa_cb;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -96,6 +118,24 @@ static void terminate_cocoa_application(void)
     [super dealloc];
 }
 
+- (void)initMPVCore
+{
+    pthread_create(&playback_thread_id, NULL, playback_thread, &thread_ctx);
+    [[EventsResponder sharedInstance] waitForInputContext];
+}
+
+static const char macosx_icon[] =
+#include "osdep/macosx_icon.inc"
+;
+
+- (NSImage *)getMPVIcon
+{
+    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
+                                             length:sizeof(macosx_icon)
+                                       freeWhenDone:NO];
+    return [[NSImage alloc] initWithData:icon_data];
+}
+
 #if HAVE_MACOS_TOUCHBAR
 - (NSTouchBar *)makeTouchBar
 {
@@ -117,6 +157,16 @@ static void terminate_cocoa_application(void)
     if ([self respondsToSelector:@selector(touchBar)])
         [(TouchBar *)self.touchBar processEvent:event];
 #endif
+    if (_cocoa_cb) {
+        [_cocoa_cb processEvent:event];
+    }
+}
+
+- (void)setMpvHandle:(struct mpv_handle *)ctx
+{
+    if (_cocoa_cb) {
+        [_cocoa_cb setMpvHandle:ctx];
+    }
 }
 
 - (void)queueCommand:(char *)cmd
@@ -182,28 +232,11 @@ static void terminate_cocoa_application(void)
 }
 @end
 
-struct playback_thread_ctx {
-    int  *argc;
-    char ***argv;
-};
-
 static void cocoa_run_runloop(void)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [NSApp run];
     [pool drain];
-}
-
-static void *playback_thread(void *ctx_obj)
-{
-    mpthread_set_name("playback core (OSX)");
-    @autoreleasepool {
-        struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
-        int r = mpv_main(*ctx->argc, *ctx->argv);
-        terminate_cocoa_application();
-        // normally never reached - unless the cocoa mainloop hasn't started yet
-        exit(r);
-    }
 }
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
@@ -217,6 +250,10 @@ static void init_cocoa_application(bool regular)
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
     [NSApp setMenuBar:[[MenuBar alloc] init]];
+
+#if HAVE_MACOS_COCOA_CB
+    [NSApp setCocoaCB:[[CocoaCB alloc] init]];
+#endif
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.
@@ -279,9 +316,8 @@ int cocoa_main(int argc, char *argv[])
         application_instantiated = true;
         [[EventsResponder sharedInstance] setIsApplication:YES];
 
-        struct playback_thread_ctx ctx = {0};
-        ctx.argc     = &argc;
-        ctx.argv     = &argv;
+        thread_ctx.argc = &argc;
+        thread_ctx.argv = &argv;
 
         if (bundle_started_from_finder(argv)) {
             setup_bundle(&argc, argv);
@@ -294,8 +330,8 @@ int cocoa_main(int argc, char *argv[])
             init_cocoa_application(false);
         }
 
-        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
-        [[EventsResponder sharedInstance] waitForInputContext];
+        if (![NSApp cocoaCB])
+            [NSApp initMPVCore];
         cocoa_run_runloop();
 
         // This should never be reached: cocoa_run_runloop blocks until the

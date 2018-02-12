@@ -39,6 +39,10 @@
 
 #include "config.h"
 
+#if HAVE_MACOS_COCOA_CB
+#include "osdep/macOS_swift.h"
+#endif
+
 @interface EventsResponder ()
 {
     struct input_ctx *_inputContext;
@@ -304,7 +308,10 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 - (BOOL)setMpvHandle:(struct mpv_handle *)ctx
 {
     if (_is_application) {
-        dispatch_sync(dispatch_get_main_queue(), ^{ _ctx = ctx; });
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            _ctx = ctx;
+            [NSApp setMpvHandle:ctx];
+        });
         return YES;
     } else {
         mpv_detach_destroy(ctx);
@@ -326,16 +333,20 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 -(void)processEvent:(struct mpv_event *)event
 {
+    if(_is_application) {
+        [NSApp processEvent:event];
+    }
+
     switch (event->event_id) {
     case MPV_EVENT_SHUTDOWN: {
+        #if HAVE_MACOS_COCOA_CB
+        if ([(Application *)NSApp cocoaCB].isShuttingDown)
+            return;
+        #endif
         mpv_detach_destroy(_ctx);
         _ctx = nil;
         break;
     }
-    }
-
-    if(_is_application) {
-        [NSApp processEvent:event];
     }
 }
 

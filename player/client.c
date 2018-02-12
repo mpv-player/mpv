@@ -1726,6 +1726,17 @@ int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
 {
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
+void mp_client_set_control_callback(struct mpv_opengl_cb_context *ctx,
+                                           mpv_opengl_cb_control_fn callback,
+                                           void *callback_ctx)
+{
+}
+void mp_client_set_icc_profile(struct mpv_opengl_cb_context *ctx, bstr icc_data)
+{
+}
+void mp_client_set_ambient_lux(struct mpv_opengl_cb_context *ctx, int lux)
+{
+}
 #endif
 
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
@@ -1733,20 +1744,27 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     return mpv_opengl_cb_draw(ctx, fbo, vp[2], vp[3]);
 }
 
-void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
+void *mp_get_sub_api2(mpv_handle *ctx, mpv_sub_api sub_api, bool lock)
 {
     if (!ctx->mpctx->initialized)
         return NULL;
     void *res = NULL;
-    lock_core(ctx);
+    if (lock)
+        lock_core(ctx);
     switch (sub_api) {
     case MPV_SUB_API_OPENGL_CB:
         res = opengl_cb_get_context(ctx);
         break;
     default:;
     }
-    unlock_core(ctx);
+    if (lock)
+        unlock_core(ctx);
     return res;
+}
+
+void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
+{
+    return mp_get_sub_api2(ctx, sub_api, true);
 }
 
 struct mp_custom_protocol {
