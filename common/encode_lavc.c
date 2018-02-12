@@ -204,8 +204,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
         return NULL;
     }
 
-    av_strlcpy(ctx->avc->filename, filename,
-               sizeof(ctx->avc->filename));
+    ctx->avc->url = av_strdup(filename);
 
     ctx->foptions = NULL;
     if (ctx->options->fopts) {
@@ -232,7 +231,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
         }
     } else
         ctx->vc = avcodec_find_encoder(av_guess_codec(ctx->avc->oformat, NULL,
-                                                      ctx->avc->filename, NULL,
+                                                      ctx->avc->url, NULL,
                                                       AVMEDIA_TYPE_VIDEO));
 
     if (ctx->options->acodec) {
@@ -251,7 +250,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
         }
     } else
         ctx->ac = avcodec_find_encoder(av_guess_codec(ctx->avc->oformat, NULL,
-                                                      ctx->avc->filename, NULL,
+                                                      ctx->avc->url, NULL,
                                                       AVMEDIA_TYPE_AUDIO));
 
     if (!ctx->vc && !ctx->ac) {
@@ -338,12 +337,12 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
 
     if (!(ctx->avc->oformat->flags & AVFMT_NOFILE)) {
         MP_INFO(ctx, "Opening output file: %s\n",
-                ctx->avc->filename);
+                ctx->avc->url);
 
-        if (avio_open(&ctx->avc->pb, ctx->avc->filename,
+        if (avio_open(&ctx->avc->pb, ctx->avc->url,
                       AVIO_FLAG_WRITE) < 0) {
             encode_lavc_fail(ctx, "could not open '%s'\n",
-                             ctx->avc->filename);
+                             ctx->avc->url);
             return 0;
         }
     }
@@ -481,12 +480,10 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                                  const char *prefix)
 {
     if (!*bytebuf) {
-        char buf[sizeof(ctx->avc->filename) + 12];
+        char buf[1024];
         AVDictionaryEntry *de = av_dict_get(ctx->voptions, "flags", NULL, 0);
 
-        snprintf(buf, sizeof(buf), "%s-%s-pass1.log", ctx->avc->filename,
-                 prefix);
-        buf[sizeof(buf) - 1] = 0;
+        snprintf(buf, sizeof(buf), "%s-%s-pass1.log", ctx->avc->url, prefix);
 
         if (value_has_flag(de ? de->value : "", "pass2")) {
             if (!(*bytebuf = stream_open(buf, ctx->global))) {
@@ -500,7 +497,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                 if (content.start == NULL) {
                     MP_WARN(ctx, "%s: could not read '%s', "
                            "disabling 2-pass encoding at pass 1\n",
-                           prefix, ctx->avc->filename);
+                           prefix, ctx->avc->url);
                 } else {
                     content.start[content.len] = 0;
                     codec->stats_in = content.start;
@@ -515,7 +512,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                 MP_WARN(ctx,
                     "%s: could not open '%s', disabling "
                     "2-pass encoding at pass 1\n",
-                    prefix, ctx->avc->filename);
+                    prefix, ctx->avc->url);
                 set_to_avdictionary(ctx, dictp, "flags", "-pass1");
             }
         }
@@ -889,7 +886,7 @@ void encode_lavc_discontinuity(struct encode_lavc_context *ctx)
     pthread_mutex_unlock(&ctx->lock);
 }
 
-static void encode_lavc_printoptions(struct mp_log *log, void *obj,
+static void encode_lavc_printoptions(struct mp_log *log, const void *obj,
                                      const char *indent, const char *subindent,
                                      const char *unit, int filter_and,
                                      int filter_eq)
@@ -964,29 +961,28 @@ static void encode_lavc_printoptions(struct mp_log *log, void *obj,
 bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
 {
     bool help_output = false;
-    if (av_codec_next(NULL) == NULL)
-        mp_err(log, "NO CODECS\n");
 #define CHECKS(str) ((str) && \
                      strcmp((str), "help") == 0 ? (help_output |= 1) : 0)
 #define CHECKV(strv) ((strv) && (strv)[0] && \
                       strcmp((strv)[0], "help") == 0 ? (help_output |= 1) : 0)
     if (CHECKS(opts->format)) {
-        AVOutputFormat *c = NULL;
+        const AVOutputFormat *c = NULL;
+        void *iter = NULL;
         mp_info(log, "Available output formats:\n");
-        while ((c = av_oformat_next(c)))
+        while ((c = av_muxer_iterate(&iter)))
             mp_info(log, "  --of=%-13s %s\n", c->name,
                    c->long_name ? c->long_name : "");
-        av_free(c);
     }
     if (CHECKV(opts->fopts)) {
         AVFormatContext *c = avformat_alloc_context();
-        AVOutputFormat *format = NULL;
+        const AVOutputFormat *format = NULL;
         mp_info(log, "Available output format ctx->options:\n");
         encode_lavc_printoptions(log, c, "  --ofopts=", "           ", NULL,
                                  AV_OPT_FLAG_ENCODING_PARAM,
                                  AV_OPT_FLAG_ENCODING_PARAM);
         av_free(c);
-        while ((format = av_oformat_next(format))) {
+        void *iter = NULL;
+        while ((format = av_muxer_iterate(&iter))) {
             if (format->priv_class) {
                 mp_info(log, "Additionally, for --of=%s:\n",
                        format->name);
@@ -999,7 +995,7 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
     }
     if (CHECKV(opts->vopts)) {
         AVCodecContext *c = avcodec_alloc_context3(NULL);
-        AVCodec *codec = NULL;
+        const AVCodec *codec = NULL;
         mp_info(log, "Available output video codec ctx->options:\n");
         encode_lavc_printoptions(log,
             c, "  --ovcopts=", "            ", NULL,
@@ -1008,7 +1004,8 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
             AV_OPT_FLAG_ENCODING_PARAM |
             AV_OPT_FLAG_VIDEO_PARAM);
         av_free(c);
-        while ((codec = av_codec_next(codec))) {
+        void *iter = NULL;
+        while ((codec = av_codec_iterate(&iter))) {
             if (!av_codec_is_encoder(codec))
                 continue;
             if (codec->type != AVMEDIA_TYPE_VIDEO)
@@ -1031,7 +1028,7 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
     }
     if (CHECKV(opts->aopts)) {
         AVCodecContext *c = avcodec_alloc_context3(NULL);
-        AVCodec *codec = NULL;
+        const AVCodec *codec = NULL;
         mp_info(log, "Available output audio codec ctx->options:\n");
         encode_lavc_printoptions(log,
             c, "  --oacopts=", "            ", NULL,
@@ -1040,7 +1037,8 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
             AV_OPT_FLAG_ENCODING_PARAM |
             AV_OPT_FLAG_AUDIO_PARAM);
         av_free(c);
-        while ((codec = av_codec_next(codec))) {
+        void *iter = NULL;
+        while ((codec = av_codec_iterate(&iter))) {
             if (!av_codec_is_encoder(codec))
                 continue;
             if (codec->type != AVMEDIA_TYPE_AUDIO)
@@ -1062,9 +1060,10 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
         }
     }
     if (CHECKS(opts->vcodec)) {
-        AVCodec *c = NULL;
+        const AVCodec *c = NULL;
+        void *iter = NULL;
         mp_info(log, "Available output video codecs:\n");
-        while ((c = av_codec_next(c))) {
+        while ((c = av_codec_iterate(&iter))) {
             if (!av_codec_is_encoder(c))
                 continue;
             if (c->type != AVMEDIA_TYPE_VIDEO)
@@ -1072,12 +1071,12 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
             mp_info(log, "  --ovc=%-12s %s\n", c->name,
                    c->long_name ? c->long_name : "");
         }
-        av_free(c);
     }
     if (CHECKS(opts->acodec)) {
-        AVCodec *c = NULL;
+        const AVCodec *c = NULL;
+        void *iter = NULL;
         mp_info(log, "Available output audio codecs:\n");
-        while ((c = av_codec_next(c))) {
+        while ((c = av_codec_iterate(&iter))) {
             if (!av_codec_is_encoder(c))
                 continue;
             if (c->type != AVMEDIA_TYPE_AUDIO)
@@ -1085,7 +1084,6 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
             mp_info(log, "  --oac=%-12s %s\n", c->name,
                    c->long_name ? c->long_name : "");
         }
-        av_free(c);
     }
     return help_output;
 }
