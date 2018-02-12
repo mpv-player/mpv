@@ -171,6 +171,8 @@ static bool cocoa_init(struct ra_ctx *ctx)
     p->opts = mp_get_config_group(ctx, ctx->global, &cocoa_conf);
     vo_cocoa_init(ctx->vo);
 
+    MP_WARN(ctx->vo, "opengl cocoa backend is deprecated, use opengl-cb instead\n");
+
     if (!create_gl_context(ctx))
         goto fail;
 

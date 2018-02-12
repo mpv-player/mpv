@@ -70,6 +70,8 @@ Interface changes
       pad must be connected either to another filter, or to a video/audio track
       or video/audio output). If they are disconnected at runtime, the stream
       will probably stall.
+    - deprecate the OpenGL cocoa backend, option choice --gpu-context=cocoa
+      when used with --gpu-api=opengl (use --vo=opengl-cb)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

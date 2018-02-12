@@ -1,5 +1,5 @@
 from waflib.Build import BuildContext
-from waflib import TaskGen
+from waflib import TaskGen, Utils
 from io import StringIO
 from TOOLS.matroska import generate_C_header, generate_C_definitions
 from TOOLS.file2string import file2string
@@ -70,6 +70,15 @@ def __wayland_protocol_header__(ctx, **kwargs):
         name   = os.path.basename(kwargs['target']),
         **kwargs
     )
+
+@TaskGen.feature('cprogram')
+@TaskGen.feature('apply_link')
+def handle_add_object(tgen):
+    if getattr(tgen, 'add_object', None):
+        for input in Utils.to_list(tgen.add_object):
+            input_node = tgen.path.find_resource(input)
+            if input_node is not None:
+                tgen.link_task.inputs.append(input_node)
 
 BuildContext.file2string             = __file2string__
 BuildContext.wayland_protocol_code   = __wayland_protocol_code__

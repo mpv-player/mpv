@@ -646,7 +646,7 @@
 {
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
         @"mpv", @"ApplicationName",
-        [self getMPVIcon], @"ApplicationIcon",
+        [(Application *)NSApp getMPVIcon], @"ApplicationIcon",
         [NSString stringWithUTF8String:mpv_copyright], @"Copyright",
         [NSString stringWithUTF8String:mpv_version], @"ApplicationVersion",
         nil];
@@ -709,7 +709,7 @@
     [alert setMessageText:@"Open URL"];
     [alert addButtonWithTitle:@"Ok"];
     [alert addButtonWithTitle:@"Cancel"];
-    [alert setIcon:[self getMPVIcon]];
+    [alert setIcon:[(Application *)NSApp getMPVIcon]];
 
     NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 24)];
     [input setPlaceholderString:@"URL"];
@@ -737,25 +737,13 @@
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
 }
 
-static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
-;
-
-- (NSImage *)getMPVIcon
-{
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon)
-                                       freeWhenDone:NO];
-    return [[NSImage alloc] initWithData:icon_data];
-}
-
 - (void)alertWithTitle:(NSString *)title andText:(NSString *)text
 {
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:title];
     [alert setInformativeText:text];
     [alert addButtonWithTitle:@"Ok"];
-    [alert setIcon:[self getMPVIcon]];
+    [alert setIcon:[(Application *)NSApp getMPVIcon]];
     [alert runModal];
 }
 

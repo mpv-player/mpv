@@ -429,7 +429,9 @@ Available video output drivers are:
         Specify the directory to save the image files to (default: ``./``).
 
 ``opengl-cb``
-    For use with libmpv direct OpenGL embedding; useless in any other contexts.
+    For use with libmpv direct OpenGL embedding. As a special case, on OS X it
+    is used like a normal VO within mpv (cocoa-cb). Otherwise useless in any
+    other contexts.
     (See ``<mpv/opengl_cb.h>``.)
 
     This also supports many of the options the ``gpu`` VO has.

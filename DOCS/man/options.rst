@@ -4876,7 +4876,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     auto
         auto-select (default)
     cocoa
-        Cocoa/OS X
+        Cocoa/OS X (deprecated, use --vo=opengl-cb instead)
     win
         Win32/WGL
     winvk

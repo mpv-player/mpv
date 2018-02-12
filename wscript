@@ -914,7 +914,12 @@ standalone_features = [
             framework_name=['AppKit'],
             compile_filename='test-touchbar.m',
             linkflags='-fobjc-arc')
-     }
+     }, {
+        'name': '--macos-cocoa-cb',
+        'desc': 'macOS opengl-cb backend',
+        'deps': 'cocoa',
+        'func': check_true
+    }
 ]
 
 _INSTALL_DIRS_LIST = [
@@ -965,6 +970,10 @@ def options(opt):
         type    = 'string',
         dest    = 'LUA_VER',
         help    = "select Lua package which should be autodetected. Choices: 51 51deb 51obsd 51fbsd 52 52deb 52arch 52fbsd luajit")
+    group.add_option('--swift-flags',
+        type    = 'string',
+        dest    = 'SWIFT_FLAGS',
+        help    = "Optional Swift compiler flags")
 
 @conf
 def is_optimization(ctx):
@@ -1000,6 +1009,7 @@ def configure(ctx):
     ctx.load('compiler_c')
     ctx.load('waf_customizations')
     ctx.load('dependencies')
+    ctx.load('detections.compiler_swift')
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
 
@@ -1021,6 +1031,9 @@ def configure(ctx):
 
     if ctx.options.LUA_VER:
         ctx.options.enable_lua = True
+
+    if ctx.options.SWIFT_FLAGS:
+        ctx.env.SWIFT_FLAGS += ' ' + ctx.options.SWIFT_FLAGS
 
     ctx.parse_dependencies(standalone_features)
 
