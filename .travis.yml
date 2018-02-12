@@ -32,6 +32,7 @@ matrix:
       compiler: gcc
     - os: linux
       compiler: clang
+    - env: LIBAV=libav-git
 
 before_install: TOOLS/travis-deps libass-stable $LIBAV
 script:

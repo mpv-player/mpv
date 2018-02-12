@@ -219,42 +219,43 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
     avctx->thread_count = threads;
 }
 
-void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
+static void add_codecs(struct mp_decoder_list *list, enum AVMediaType type,
+                       bool decoders)
 {
-    AVCodec *cur = NULL;
+    const AVCodec *cur = NULL;
+    void *iter = NULL;
     for (;;) {
-        cur = av_codec_next(cur);
+        cur = av_codec_iterate(&iter);
         if (!cur)
             break;
-        if (av_codec_is_decoder(cur) && cur->type == type) {
+        if (av_codec_is_decoder(cur) == decoders &&
+            (type == AVMEDIA_TYPE_UNKNOWN || cur->type == type))
+        {
             mp_add_decoder(list, mp_codec_from_av_codec_id(cur->id),
                            cur->name, cur->long_name);
         }
     }
+}
+
+void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
+{
+    add_codecs(list, type, true);
 }
 
 // (Abuses the decoder list data structures.)
 void mp_add_lavc_encoders(struct mp_decoder_list *list)
 {
-    AVCodec *cur = NULL;
-    for (;;) {
-        cur = av_codec_next(cur);
-        if (!cur)
-            break;
-        if (av_codec_is_encoder(cur)) {
-            mp_add_decoder(list, mp_codec_from_av_codec_id(cur->id),
-                           cur->name, cur->long_name);
-        }
-    }
+    add_codecs(list, AVMEDIA_TYPE_UNKNOWN, false);
 }
 
 char **mp_get_lavf_demuxers(void)
 {
     char **list = NULL;
-    AVInputFormat *cur = NULL;
+    const AVInputFormat *cur = NULL;
+    void *iter = NULL;
     int num = 0;
     for (;;) {
-        cur = av_iformat_next(cur);
+        cur = av_demuxer_iterate(&iter);
         if (!cur)
             break;
         MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, cur->name));

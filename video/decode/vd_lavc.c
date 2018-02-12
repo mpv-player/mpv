@@ -258,9 +258,10 @@ static void add_hwdec_item(struct hwdec_info **infos, int *num_infos,
 
 static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
 {
-    AVCodec *codec = NULL;
+    const AVCodec *codec = NULL;
+    void *iter = NULL;
     while (1) {
-        codec = av_codec_next(codec);
+        codec = av_codec_iterate(&iter);
         if (!codec)
             break;
         if (codec->type != AVMEDIA_TYPE_VIDEO || !av_codec_is_decoder(codec))

@@ -314,8 +314,9 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
 static void list_formats(struct demuxer *demuxer)
 {
     MP_INFO(demuxer, "Available lavf input formats:\n");
-    AVInputFormat *fmt = NULL;
-    while ((fmt = av_iformat_next(fmt)))
+    const AVInputFormat *fmt;
+    void *iter = NULL;
+    while ((fmt = av_demuxer_iterate(&iter)))
         MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 

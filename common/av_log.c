@@ -159,8 +159,6 @@ void init_libav(struct mpv_global *global)
     }
     pthread_mutex_unlock(&log_lock);
 
-    avcodec_register_all();
-    av_register_all();
     avformat_network_init();
     avfilter_register_all();
 
