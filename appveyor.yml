@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - appveyor
+    - ci
 
 environment:
   global:
