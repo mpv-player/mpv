@@ -3,7 +3,7 @@
 #include "frame.h"
 
 // A wrapped libavfilter filter or filter graph.
-// (to free this, free the filtert itself, mp_lavfi.f)
+// (to free this, free the filter itself, mp_lavfi.f)
 struct mp_lavfi {
     // This mirrors the libavfilter pads according to the user specification.
     struct mp_filter *f;
