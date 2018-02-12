@@ -3524,6 +3524,13 @@ static void check_gl_features(struct gl_video *p)
         MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
 
+    bool have_compute_peak = have_compute && have_ssbo && have_numgroups;
+    if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
+        int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
+        MP_MSG(p, msgl, "Disabling HDR peak computation (no compute shaders).\n");
+        p->opts.compute_hdr_peak = -1;
+    }
+
     p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
     bool voluntarily_dumb = check_dumb_mode(p);
     if (p->forced_dumb_mode || voluntarily_dumb) {
@@ -3543,6 +3550,7 @@ static void check_gl_features(struct gl_video *p)
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
+            .compute_hdr_peak = p->opts.compute_hdr_peak,
             .dither_algo = p->opts.dither_algo,
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
@@ -3607,13 +3615,6 @@ static void check_gl_features(struct gl_video *p)
     if (!have_mglsl && p->opts.deband) {
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
-    }
-
-    bool have_compute_peak = have_compute && have_ssbo && have_numgroups;
-    if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
-        int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
-        MP_MSG(p, msgl, "Disabling HDR peak computation (no compute shaders).\n");
-        p->opts.compute_hdr_peak = -1;
     }
 }
 
