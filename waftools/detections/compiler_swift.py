@@ -2,12 +2,8 @@ from waflib import Utils
 
 def __run(cmd):
     try:
-        cmd = Utils.subprocess.Popen(cmd,
-                                     stdout=Utils.subprocess.PIPE,
-                                     stderr=Utils.subprocess.PIPE,
-                                     shell=True)
-        output = cmd.stdout.read().decode().strip()
-        return output
+        output = Utils.subprocess.check_output(cmd, universal_newlines=True, shell=True)
+        return output.strip()
     except Exception:
         return ""
 
