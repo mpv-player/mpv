@@ -78,6 +78,9 @@ struct d3d_tex {
     ID3D11Texture3D *tex3d;
     int array_slice;
 
+    // Staging texture for tex_download(), 2D only
+    ID3D11Texture2D *staging;
+
     ID3D11ShaderResourceView *srv;
     ID3D11RenderTargetView *rtv;
     ID3D11UnorderedAccessView *uav;
@@ -359,12 +362,17 @@ static void tex_destroy(struct ra *ra, struct ra_tex *tex)
     SAFE_RELEASE(tex_p->uav);
     SAFE_RELEASE(tex_p->sampler);
     SAFE_RELEASE(tex_p->res);
+    SAFE_RELEASE(tex_p->staging);
     talloc_free(tex);
 }
 
 static struct ra_tex *tex_create(struct ra *ra,
                                  const struct ra_tex_params *params)
 {
+    // Only 2D textures may be downloaded for now
+    if (params->downloadable && params->dimensions != 2)
+        return NULL;
+
     struct ra_d3d11 *p = ra->priv;
     HRESULT hr;
 
@@ -437,6 +445,21 @@ static struct ra_tex *tex_create(struct ra *ra,
             goto error;
         }
         tex_p->res = (ID3D11Resource *)tex_p->tex2d;
+
+        // Create a staging texture with CPU access for tex_download()
+        if (params->downloadable) {
+            desc2d.BindFlags = 0;
+            desc2d.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            desc2d.Usage = D3D11_USAGE_STAGING;
+
+            hr = ID3D11Device_CreateTexture2D(p->dev, &desc2d, NULL,
+                                              &tex_p->staging);
+            if (FAILED(hr)) {
+                MP_ERR(ra, "Failed to staging texture: %s\n",
+                       mp_HRESULT_to_str(hr));
+                goto error;
+            }
+        }
         break;
     case 3:;
         D3D11_TEXTURE3D_DESC desc3d = {
@@ -648,6 +671,39 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
         ID3D11DeviceContext_UpdateSubresource(p->ctx, tex_p->res, subresource,
             rc, src, stride, pitch);
     }
+
+    return true;
+}
+
+static bool tex_download(struct ra *ra, struct ra_tex_download_params *params)
+{
+    struct ra_d3d11 *p = ra->priv;
+    struct ra_tex *tex = params->tex;
+    struct d3d_tex *tex_p = tex->priv;
+    HRESULT hr;
+
+    if (!tex_p->staging)
+        return false;
+
+    ID3D11DeviceContext_CopyResource(p->ctx, (ID3D11Resource*)tex_p->staging,
+        tex_p->res);
+
+    D3D11_MAPPED_SUBRESOURCE lock;
+    hr = ID3D11DeviceContext_Map(p->ctx, (ID3D11Resource*)tex_p->staging, 0,
+                                 D3D11_MAP_READ, 0, &lock);
+    if (FAILED(hr)) {
+        MP_ERR(ra, "Failed to map staging texture: %s\n", mp_HRESULT_to_str(hr));
+        return false;
+    }
+
+    char *cdst = params->dst;
+    char *csrc = lock.pData;
+    for (int y = 0; y < tex->params.h; y++) {
+        memcpy(cdst + y * params->stride, csrc + y * lock.RowPitch,
+               MPMIN(params->stride, lock.RowPitch));
+    }
+
+    ID3D11DeviceContext_Unmap(p->ctx, (ID3D11Resource*)tex_p->staging, 0);
 
     return true;
 }
@@ -2045,6 +2101,7 @@ static struct ra_fns ra_fns_d3d11 = {
     .tex_create         = tex_create,
     .tex_destroy        = tex_destroy,
     .tex_upload         = tex_upload,
+    .tex_download       = tex_download,
     .buf_create         = buf_create,
     .buf_destroy        = buf_destroy,
     .buf_update         = buf_update,

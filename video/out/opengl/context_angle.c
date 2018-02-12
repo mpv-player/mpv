@@ -525,17 +525,6 @@ static int angle_color_depth(struct ra_swapchain *sw)
     return 8;
 }
 
-static struct mp_image *angle_screenshot(struct ra_swapchain *sw)
-{
-    struct priv *p = sw->ctx->priv;
-    if (p->dxgi_swapchain) {
-        struct mp_image *img = mp_d3d11_screenshot(p->dxgi_swapchain);
-        if (img)
-            return img;
-    }
-    return ra_gl_ctx_screenshot(sw);
-}
-
 static bool angle_submit_frame(struct ra_swapchain *sw,
                                const struct vo_frame *frame)
 {
@@ -611,7 +600,6 @@ static bool angle_init(struct ra_ctx *ctx)
     // Custom swapchain impl for the D3D11 swapchain-based surface
     static const struct ra_swapchain_fns dxgi_swapchain_fns = {
         .color_depth = angle_color_depth,
-        .screenshot = angle_screenshot,
         .submit_frame = angle_submit_frame,
     };
     struct ra_gl_ctx_params params = {
