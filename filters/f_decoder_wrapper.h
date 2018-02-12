@@ -51,6 +51,9 @@ struct mp_decoder_wrapper {
 
     // Prefer spdif wrapper over real decoders.
     bool try_spdif;
+
+    // A pts reset was observed (audio only, heuristic).
+    bool pts_reset;
 };
 
 // Create the decoder wrapper for the given stream, plus underlying decoder.
