@@ -6,7 +6,7 @@ def __run(cmd):
                                      stdout=Utils.subprocess.PIPE,
                                      stderr=Utils.subprocess.PIPE,
                                      shell=True)
-        output = cmd.stdout.read().strip()
+        output = cmd.stdout.read().decode().strip()
         return output
     except Exception:
         return ""
