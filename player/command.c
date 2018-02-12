@@ -4321,6 +4321,7 @@ static const struct property_osd_display {
     {"ab-loop-a", "A-B loop start"},
     {"ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"},
     {"audio-device", "Audio device"},
+    {"hwdec", .msg = "Hardware decoding: ${hwdec-current}"},
     // By default, don't display the following properties on OSD
     {"pause", NULL},
     {"fullscreen", NULL},
