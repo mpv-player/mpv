@@ -3488,6 +3488,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_texrg = rg_tex && !rg_tex->luminance_alpha;
     bool have_compute = ra->caps & RA_CAP_COMPUTE;
     bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
+    bool have_fragcoord = ra->caps & RA_CAP_FRAGCOORD;
     bool have_numgroups = ra->caps & RA_CAP_NUM_GROUPS;
 
     const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgba16hf",
@@ -3510,15 +3511,13 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    if (!(ra->caps & RA_CAP_FRAGCOORD) && p->opts.dither_depth >= 0 &&
+    if (!have_fragcoord && p->opts.dither_depth >= 0 &&
         p->opts.dither_algo != DITHER_NONE)
     {
         p->opts.dither_algo = DITHER_NONE;
         MP_WARN(p, "Disabling dithering (no gl_FragCoord).\n");
     }
-    if (!(ra->caps & RA_CAP_FRAGCOORD) &&
-        p->opts.alpha_mode == ALPHA_BLEND_TILES)
-    {
+    if (!have_fragcoord && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
         p->opts.alpha_mode = ALPHA_BLEND;
         // Verbose, since this is the default setting
         MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
