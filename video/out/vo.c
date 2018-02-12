@@ -66,6 +66,9 @@ extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
+#if HAVE_GL
+    &video_out_opengl_cb,
+#endif
 #if HAVE_ANDROID
     &video_out_mediacodec_embed,
 #endif
@@ -103,9 +106,6 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_ENCODING
     &video_out_lavc,
-#endif
-#if HAVE_GL
-    &video_out_opengl_cb,
 #endif
     NULL
 };
