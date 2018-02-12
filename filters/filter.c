@@ -713,9 +713,10 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
     if (f->in->parent) {
         struct mp_filter_internal *parent = f->in->parent->in;
         MP_TARRAY_APPEND(parent, parent->children, parent->num_children, f);
+        f->log = mp_log_new(f, f->global->log, params->info->name);
+    } else {
+        f->log = mp_log_new(f, f->global->log, "!root");
     }
-
-    f->log = mp_log_new(f, f->global->log, params->info->name);
 
     if (f->in->info->init) {
         if (!f->in->info->init(f, params)) {
