@@ -482,12 +482,6 @@ audio_output_features = [
         'func': check_pkg_config('sdl2'),
         'default': 'disable'
     }, {
-        'name': '--sdl1',
-        'desc': 'SDL (1.x)',
-        'deps': '!sdl2',
-        'func': check_pkg_config('sdl'),
-        'default': 'disable'
-    }, {
         'name': '--oss-audio',
         'desc': 'OSS',
         'func': check_cc(header_name='sys/soundcard.h'),
