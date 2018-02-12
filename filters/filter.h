@@ -36,6 +36,7 @@ bool mp_pin_in_needs_data(struct mp_pin *p);
 // (does not normally happen, as long as mp_pin_in_needs_data() returned true).
 // The callee owns the reference to the frame data, even on failure.
 // Writing a MP_FRAME_NONE has no effect (and returns false).
+// If you did not call mp_pin_in_needs_data() before this, it's likely a bug.
 bool mp_pin_in_write(struct mp_pin *p, struct mp_frame frame);
 
 // True if a frame is actually available for reading right now, and
@@ -119,8 +120,8 @@ bool mp_pin_can_transfer_data(struct mp_pin *dst, struct mp_pin *src);
 // mp_pin_can_transfer_data(). Returns whether a transfer happened.
 bool mp_pin_transfer_data(struct mp_pin *dst, struct mp_pin *src);
 
-// Connect src and dst, for automatic data flow. pin a will reflect the request
-// state of pin src, and accept and pass down frames to dst when appropriate.
+// Connect src and dst, for automatic data flow. Pin src will reflect the request
+// state of pin dst, and accept and pass down frames to dst when appropriate.
 // src must be MP_PIN_OUT, dst must be MP_PIN_IN.
 // Previous connections are always removed. If the pins were already connected,
 // no action is taken.
@@ -144,8 +145,7 @@ void mp_pin_set_manual_connection_for(struct mp_pin *p, struct mp_filter *f);
 // Return the manual connection for this pin, or NULL if none.
 struct mp_filter *mp_pin_get_manual_connection(struct mp_pin *p);
 
-// If not connected, this will produce EOF for MP_PIN_IN, and never request
-// data for MP_PIN_OUT.
+// Disconnect the pin, possibly breaking connections.
 void mp_pin_disconnect(struct mp_pin *p);
 
 // Return whether a connection was set on this pin. Note that this is not
@@ -173,9 +173,41 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * things that require readahead). But in general, a filter should not request
  * input before output is needed.
  *
- * The general goal is to reduce the amount of data buffered. If buffering is
+ * The general goal is to reduce the amount of data buffered. This is why
+ * mp_pins buffer at most 1 frame, and the API is designed such that queued
+ * data in pins will be immediately passed to the next filter. If buffering is
  * actually desired, explicit filters for buffering have to be introduced into
  * the filter chain.
+ *
+ * Typically a filter will do something like this:
+ *
+ *  process(struct mp_filter *f) {
+ *      if (!mp_pin_in_needs_data(f->ppins[1]))
+ *          return; // reader needs no output yet, so stop filtering
+ *      if (!have_enough_data_for_output) {
+ *          // Could check mp_pin_out_request_data(), but often just trying to
+ *          // read is enough, as a failed read will request more data.
+ *          struct mp_frame fr = mp_pin_out_read_data(f->ppins[0]);
+ *          if (!fr.type)
+ *              return; // no frame was returned - data was requested, and will
+ *                      // be queued when available, and invoke process() again
+ *           ... do something with fr here ...
+ *      }
+ *      ... produce output frame (i.e. actual filtering) ...
+ *      mp_pin_in_write(f->ppins[1], output_frame);
+ *  }
+ *
+ * Simpler filters can use utility functions like mp_pin_can_transfer_data(),
+ * which reduce the boilerplate. Such filters also may not need to buffer data
+ * as internal state.
+ *
+ * --- Driving filters:
+ *
+ * The filter root (created by mp_filter_create_root()) will internally create
+ * a graph runner, that can be entered with mp_filter_run(). This will check if
+ * any filter/pin has unhandled requests, and call filter process() functions
+ * accordingly. Outside of the filter, this can be triggered implicitly via the
+ * mp_pin_* functions.
  *
  * Multiple filters are driven by letting mp_pin flag filters which need
  * process() to be called. The process starts by requesting output from the
@@ -184,7 +216,12 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * filter's input pin is requested. The API user feeds it a frame, which will
  * call the first filter's process() function, which will filter and output
  * the frame, and the frame is iteratively filtered until it reaches the output.
- * (Depending on implementation, some if this wil be recursive not iterative.)
+ *
+ * (The mp_pin_* calls can recursively start filtering, but this is only the
+ * case if you access a separate graph with a different filter root. Most
+ * importantly, calling them from outside the filter's process() function (e.g.
+ * an outside filter user) will enter filtering. Within the filter, mp_pin_*
+ * will usually only set or query flags.)
  *
  * --- General rules for thread safety:
  *
