@@ -105,6 +105,7 @@ static void reset_decoder(struct priv *p)
     p->last_format = p->fixed_format = (struct mp_image_params){0};
     p->public.dropped_frames = 0;
     p->public.attempt_framedrops = 0;
+    p->public.pts_reset = false;
     p->packets_without_output = 0;
     mp_frame_unref(&p->packet);
     talloc_free(p->new_segment);
@@ -402,9 +403,20 @@ static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
         if (p->pts != MP_NOPTS_VALUE)
             MP_STATS(p, "value %f audio-pts-err", p->pts - frame_pts);
 
+        double diff = fabs(p->pts - frame_pts);
+
+        // Attempt to detect jumps in PTS. Even for the lowest sample rates and
+        // with worst container rounded timestamp, this should be a margin more
+        // than enough.
+        if (p->pts != MP_NOPTS_VALUE && diff > 0.1) {
+            MP_WARN(p, "Invalid audio PTS: %f -> %f\n", p->pts, frame_pts);
+            if (diff >= 5)
+                p->public.pts_reset = true;
+        }
+
         // Keep the interpolated timestamp if it doesn't deviate more
         // than 1 ms from the real one. (MKV rounded timestamps.)
-        if (p->pts == MP_NOPTS_VALUE || fabs(p->pts - frame_pts) > 0.001)
+        if (p->pts == MP_NOPTS_VALUE || diff > 0.001)
             p->pts = frame_pts;
     }
 

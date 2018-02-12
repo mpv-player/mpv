@@ -179,7 +179,6 @@ void update_playback_speed(struct MPContext *mpctx)
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->last_out_pts = MP_NOPTS_VALUE;
-    ao_c->pts_reset = false;
     TA_FREEP(&ao_c->output_frame);
     ao_c->out_eof = false;
 
@@ -658,21 +657,6 @@ static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
             if (frame.type == MP_FRAME_AUDIO) {
                 ao_c->output_frame = frame.data;
                 ao_c->out_eof = false;
-
-                double pts = mp_aframe_get_pts(ao_c->output_frame);
-                if (pts != MP_NOPTS_VALUE) {
-                    // Attempt to detect jumps in PTS. Even for the lowest
-                    // sample rates and with worst container rounded timestamp,
-                    // this should be a margin more than enough.
-                    double desync = pts - ao_c->last_out_pts;
-                    if (ao_c->last_out_pts != MP_NOPTS_VALUE && fabs(desync) > 0.1)
-                    {
-                        MP_WARN(ao_c, "Invalid audio PTS: %f -> %f\n",
-                                ao_c->last_out_pts, pts);
-                        if (desync >= 5)
-                            ao_c->pts_reset = true;
-                    }
-                }
                 ao_c->last_out_pts = mp_aframe_end_pts(ao_c->output_frame);
             } else if (frame.type == MP_FRAME_EOF) {
                 ao_c->out_eof = true;
@@ -786,8 +770,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     // (if AO is set due to gapless from previous file, then we can try to
     // filter normally until the filter tells us to change the AO)
     if (!mpctx->ao) {
-        // Probe the initial audio format. Returns AD_OK (and does nothing) if
-        // the format is already known.
+        // Probe the initial audio format.
         mp_pin_out_request_data(ao_c->filter->f->pins[1]);
         reinit_audio_filters_and_output(mpctx);
         return; // try again next iteration
@@ -799,7 +782,9 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         return;
     }
 
-    if (mpctx->vo_chain && ao_c->pts_reset) {
+    if (mpctx->vo_chain && ao_c->track && ao_c->track->dec &&
+        ao_c->track->dec->pts_reset)
+    {
         MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
         mp_wakeup_core(mpctx);
