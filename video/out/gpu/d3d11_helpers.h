@@ -78,6 +78,4 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
                                struct d3d11_swapchain_opts *opts,
                                IDXGISwapChain **swapchain_out);
 
-struct mp_image *mp_d3d11_screenshot(IDXGISwapChain *swapchain);
-
 #endif
