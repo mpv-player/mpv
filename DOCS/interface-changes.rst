@@ -61,7 +61,7 @@ Interface changes
         - inserting a filter that changes the output channel layout will not
           reconfigure the AO - you need to run an additional "ao-reload"
           command to force this if you want that
-        - using "string" gapless audio (--gapless-audio=yes) can fail if the
+        - using "strong" gapless audio (--gapless-audio=yes) can fail if the
           audio formats are not convertible (such as switching between PCM and
           AC3 passthrough)
     - remove out-format sub-parameter from "format" audio filter (no replacement)
