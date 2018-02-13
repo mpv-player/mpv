@@ -645,6 +645,7 @@ def build(ctx):
                 "target": "mpv",
                 "source":   ctx.filtered_sources(sources),
                 "use":      ctx.dependencies_use(),
+                "add_object": "osdep/macOS_swift.o",
                 "includes": [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                              ctx.dependencies_includes(),
                 "features": features,

@@ -72,6 +72,8 @@ def __wayland_protocol_header__(ctx, **kwargs):
     )
 
 @TaskGen.feature('cprogram')
+@TaskGen.feature('cshlib')
+@TaskGen.feature('cstlib')
 @TaskGen.feature('apply_link')
 def handle_add_object(tgen):
     if getattr(tgen, 'add_object', None):
