@@ -1,7 +1,16 @@
+Release 0.27.2
+==============
+
+This release contains an additional fix for CVE-2018-6360.
+
+Fixes and Minor Enhancements
+----------------------------
+- ytdl_hook: whitelist subtitle URLs as well (#5456)
+
 Release 0.27.1
 ==============
 
-This releaes fixes CVE-2018-6360.
+This release fixes CVE-2018-6360.
 
 Fixes and Minor Enhancements
 ----------------------------
