@@ -914,6 +914,35 @@ static void dump_list(struct mp_log *log, int media_type)
     }
 }
 
+static const char *get_avopt_type_name(enum AVOptionType type)
+{
+    switch (type) {
+    case AV_OPT_TYPE_FLAGS:             return "flags";
+    case AV_OPT_TYPE_INT:               return "int";
+    case AV_OPT_TYPE_INT64:             return "int64";
+    case AV_OPT_TYPE_DOUBLE:            return "double";
+    case AV_OPT_TYPE_FLOAT:             return "float";
+    case AV_OPT_TYPE_STRING:            return "string";
+    case AV_OPT_TYPE_RATIONAL:          return "rational";
+    case AV_OPT_TYPE_BINARY:            return "binary";
+    case AV_OPT_TYPE_DICT:              return "dict";
+    case AV_OPT_TYPE_UINT64:            return "uint64";
+    case AV_OPT_TYPE_IMAGE_SIZE:        return "imagesize";
+    case AV_OPT_TYPE_PIXEL_FMT:         return "pixfmt";
+    case AV_OPT_TYPE_SAMPLE_FMT:        return "samplefmt";
+    case AV_OPT_TYPE_VIDEO_RATE:        return "fps";
+    case AV_OPT_TYPE_DURATION:          return "duration";
+    case AV_OPT_TYPE_COLOR:             return "color";
+    case AV_OPT_TYPE_CHANNEL_LAYOUT:    return "channellayout";
+    case AV_OPT_TYPE_BOOL:              return "bool";
+    case AV_OPT_TYPE_CONST: // fallthrough
+    default:
+        return NULL;
+    }
+}
+
+#define NSTR(s) ((s) ? (s) : "")
+
 void print_lavfi_help(struct mp_log *log, const char *name, int media_type)
 {
     const AVFilter *f = avfilter_get_by_name(name);
@@ -939,7 +968,18 @@ void print_lavfi_help(struct mp_log *log, const char *name, int media_type)
             continue;
         offset = o->offset;
 
-        mp_info(log, " %s\n", o->name);
+        const char *t = get_avopt_type_name(o->type);
+        char *tstr = t ? mp_tprintf(30, "<%s>", t) : "?";
+        mp_info(log, " %-10s %-12s %s\n", o->name, tstr, NSTR(o->help));
+
+        const AVOption *sub = o;
+        while (1) {
+            sub = av_opt_next(c, sub);
+            if (!sub || sub->type != AV_OPT_TYPE_CONST)
+                break;
+            mp_info(log, " %3s%-23s %s\n", "", sub->name, NSTR(sub->help));
+        }
+
         count++;
     }
     mp_info(log, "\nTotal: %d options\n", count);
