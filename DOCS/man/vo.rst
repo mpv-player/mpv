@@ -484,13 +484,26 @@ Available video output drivers are:
         (default: empty)
 
     ``--drm-mode=<number>``
-        Mode ID to use (resolution, bit depth and frame rate).
+        Mode ID to use (resolution and frame rate).
         (default: 0)
 
     ``--drm-overlay=<number>``
         Select the DRM overlay index to use.
         Overlay index is zero based, and related to crtc.
         (default: 0)
+
+    ``--drm-format=<xrgb8888,xrgb2101010>``
+        Select the DRM format to use (default: xrgb8888). This allows you to
+        choose the bit depth of the DRM mode. xrgb8888 is your usual 24 bit per
+        pixel/8 bits per channel packed RGB format with 8 bits of padding.
+        xrgb2101010 is a packed 30 bits per pixel/10 bits per channel packed RGB
+        format with 2 bits of padding.
+
+        Unless you have an intel graphics card, a recent kernel and a recent
+        version of mesa (>=18) xrgb2101010 is unlikely to work for you.
+
+        This currently only has an effect when used together with the ``drm``
+        backend for the ``gpu`` VO. The ``drm`` VO always uses xrgb8888.
 
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.

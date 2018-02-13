@@ -24,6 +24,9 @@
 #include "options/m_option.h"
 #include "drm_atomic.h"
 
+#define DRM_OPTS_FORMAT_XRGB8888    0
+#define DRM_OPTS_FORMAT_XRGB2101010 1
+
 struct kms {
     struct mp_log *log;
     int fd;
@@ -46,6 +49,7 @@ struct drm_opts {
     char *drm_connector_spec;
     int drm_mode_id;
     int drm_overlay_id;
+    int drm_format;
 };
 
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
