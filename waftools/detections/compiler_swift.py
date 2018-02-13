@@ -2,7 +2,7 @@ from waflib import Utils
 
 def __run(cmd):
     try:
-        output = Utils.subprocess.check_output(cmd, universal_newlines=True, shell=True)
+        output = Utils.subprocess.check_output(cmd, universal_newlines=True)
         return output.strip()
     except Exception:
         return ""
@@ -10,7 +10,7 @@ def __run(cmd):
 def __add_swift_flags(ctx):
     ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop -emit-objc-header'
                            ' -emit-module -parse-as-library') % (ctx.env.MACOS_SDK)
-    swift_version = __run(ctx.env.SWIFT +  ' -version').split(' ')[3].split('.')[:2]
+    swift_version = __run([ctx.env.SWIFT, '-version']).split(' ')[3].split('.')[:2]
     major, minor = [int(n) for n in swift_version]
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
@@ -32,6 +32,7 @@ def __find_swift_library(ctx):
         'usr/lib/swift_static/macosx'
     ]
     dev_path = __run('xcode-select -p')[1:]
+    dev_path = __run(['xcode-select', '-p'])[1:]
 
     ctx.start_msg('Checking for Swift Library')
     for path in swift_library_paths:
@@ -44,7 +45,7 @@ def __find_swift_library(ctx):
 
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
-    sdk = __run('xcrun --sdk macosx --show-sdk-path')
+    sdk = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
     if sdk:
         ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
@@ -53,7 +54,7 @@ def __find_macos_sdk(ctx):
 
 def __find_swift_compiler(ctx):
     ctx.start_msg('Checking for swift (Swift compiler)')
-    swift = __run('xcrun -find swift')
+    swift = __run(['xcrun', '-find', 'swift'])
     if swift:
         ctx.end_msg(swift)
         ctx.env.SWIFT = swift
