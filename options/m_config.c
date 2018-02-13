@@ -819,16 +819,16 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
         return co;
 
     // Turn "--no-foo" into "foo" + set *out_negate.
-    if (!co && bstr_eatstart0(name, "no-")) {
-        co = m_config_get_co(config, *name);
+    bstr no_name = *name;
+    if (!co && bstr_eatstart0(&no_name, "no-")) {
+        co = m_config_get_co(config, no_name);
 
         // Not all choice types have this value - if they don't, then parsing
         // them will simply result in an error. Good enough.
-        if (co && co->opt->type != CONF_TYPE_FLAG &&
-                  co->opt->type != CONF_TYPE_CHOICE &&
-                  co->opt->type != &m_option_type_aspect)
+        if (!co || !(co->opt->type->flags & M_OPT_TYPE_CHOICE))
             return NULL;
 
+        *name = no_name;
         *out_negate = true;
         return co;
     }

@@ -183,11 +183,11 @@ const m_option_type_t m_option_type_flag = {
     // need yes or no in config files
     .name  = "Flag",
     .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM | M_OPT_TYPE_CHOICE,
     .parse = parse_flag,
     .print = print_flag,
     .copy  = copy_opt,
-    .add = add_flag,
+    .add   = add_flag,
     .set   = flag_set,
     .get   = flag_get,
 };
@@ -747,6 +747,7 @@ static char *print_choice(const m_option_t *opt, const void *val)
 const struct m_option_type m_option_type_choice = {
     .name  = "Choice",
     .size  = sizeof(int),
+    .flags = M_OPT_TYPE_CHOICE,
     .parse = parse_choice,
     .print = print_choice,
     .copy  = copy_opt,
@@ -1087,6 +1088,7 @@ static int parse_float_aspect(struct mp_log *log, const m_option_t *opt,
 const m_option_type_t m_option_type_aspect = {
     .name  = "Aspect",
     .size  = sizeof(float),
+    .flags = M_OPT_TYPE_CHOICE,
     .parse = parse_float_aspect,
     .print = print_float,
     .pretty_print = print_float_f3,
