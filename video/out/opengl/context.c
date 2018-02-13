@@ -173,8 +173,6 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
     if (ext) {
         if (ext->color_depth)
             p->fns.color_depth = ext->color_depth;
-        if (ext->screenshot)
-            p->fns.screenshot = ext->screenshot;
         if (ext->start_frame)
             p->fns.start_frame = ext->start_frame;
         if (ext->submit_frame)
@@ -245,29 +243,6 @@ int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return depth_g;
-}
-
-struct mp_image *ra_gl_ctx_screenshot(struct ra_swapchain *sw)
-{
-    struct priv *p = sw->priv;
-
-    struct mp_image *screen = mp_image_alloc(IMGFMT_RGB24, p->wrapped_fb->params.w,
-                                             p->wrapped_fb->params.h);
-    if (!screen)
-        return NULL;
-
-    int dir = p->params.flipped ? 1 : -1;
-
-    assert(p->wrapped_fb);
-    if (!gl_read_fbo_contents(p->gl, p->main_fb, dir, GL_RGB, GL_UNSIGNED_BYTE,
-                              p->wrapped_fb->params.w, p->wrapped_fb->params.h,
-                              screen->planes[0], screen->stride[0]))
-    {
-        talloc_free(screen);
-        return NULL;
-    }
-
-    return screen;
 }
 
 bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
@@ -353,7 +328,6 @@ void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
-    .screenshot    = ra_gl_ctx_screenshot,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
     .swap_buffers  = ra_gl_ctx_swap_buffers,

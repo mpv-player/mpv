@@ -565,7 +565,6 @@ static void swap_buffers(struct ra_swapchain *sw)
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {
-    // .screenshot is not currently supported
     .color_depth   = color_depth,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
