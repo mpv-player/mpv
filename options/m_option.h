@@ -443,6 +443,11 @@ char *format_file_size(int64_t size);
 // options can be used without "=" and value.
 #define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 0)
 
+// Behaves fundamentally like a choice or a superset of it (all allowed string
+// values are from a fixed set, although other types of values like numbers
+// might be allowed too). E.g. m_option_type_choice and m_option_type_flag.
+#define M_OPT_TYPE_CHOICE               (1 << 1)
+
 ///////////////////////////// Parser flags /////////////////////////////////
 
 // OptionParserReturn
