@@ -1046,7 +1046,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         if (opt->type == &m_option_type_alias)
             MP_INFO(config, " for %s", (char *)opt->priv);
         if (opt->type == &m_option_type_cli_alias)
-            MP_INFO(config, " for %s (CLI/config files only)", (char *)opt->priv);
+            MP_INFO(config, " for --%s (CLI/config files only)", (char *)opt->priv);
         MP_INFO(config, "\n");
         for (int n = 0; opt->type->actions && opt->type->actions[n].name; n++) {
             const struct m_option_action *action = &opt->type->actions[n];
