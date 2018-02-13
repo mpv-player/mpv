@@ -69,9 +69,6 @@ struct ra_swapchain_fns {
     // Gets the current framebuffer depth in bits (0 if unknown). Optional.
     int (*color_depth)(struct ra_swapchain *sw);
 
-    // Retrieves a screenshot of the framebuffer. Optional.
-    struct mp_image *(*screenshot)(struct ra_swapchain *sw);
-
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function
     // can also fail sporadically, and such errors should be ignored unless
