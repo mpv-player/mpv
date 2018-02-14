@@ -91,15 +91,12 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
 static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h ,struct mp_rect *src, struct mp_rect *dst)
 {
     struct priv *p = hw->priv;
-    double hratio, vratio, ratio;
 
     // drm can allow to have a layer that has a different size from framebuffer
     // we scale here the destination size to video mode
-    hratio = vratio = ratio = 1.0;
-
-    hratio = (double)p->display_w / (double)source_w;
-    vratio = (double)p->display_h / (double)source_h;
-    ratio = hratio <= vratio ? hratio : vratio;
+    double hratio = p->display_w / (double)source_w;
+    double vratio = p->display_h / (double)source_h;
+    double ratio = hratio <= vratio ? hratio : vratio;
 
     dst->x0 = src->x0 * ratio;
     dst->x1 = src->x1 * ratio;
