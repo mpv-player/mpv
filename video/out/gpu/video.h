@@ -106,7 +106,7 @@ struct gl_video_opts {
     int gamma_auto;
     int target_prim;
     int target_trc;
-    int target_brightness;
+    int target_peak;
     int tone_mapping;
     int compute_hdr_peak;
     float tone_mapping_param;
