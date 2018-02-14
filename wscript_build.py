@@ -152,6 +152,13 @@ def build(ctx):
                               bridge, header, tgt, src)
         return task.exec_command(cmd)
 
+    if ctx.dependency_satisfied('cocoa') and ctx.env.MACOS_SDK:
+        # on macOS we explicitly need to set the SDK path, otherwise it can lead to
+        # linking warnings or errors
+        ctx.env.append_value('LINKFLAGS', [
+            '-isysroot', ctx.env.MACOS_SDK
+        ])
+
     if ctx.dependency_satisfied('macos-cocoa-cb'):
         swift_source = [
             ( "video/out/cocoa_cb_common.swift" ),
