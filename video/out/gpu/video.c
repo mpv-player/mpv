@@ -2411,6 +2411,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             dst.primaries = prim_orig;
             dst.gamma = trc_orig;
+            assert(dst.primaries && dst.gamma);
         }
     }
 
@@ -2444,6 +2445,11 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         if (dst.gamma == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(dst.gamma))
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
+
+    // For now, just infer the dst sig peak from the gamma function always.
+    // In theory, we could allow users to configure this or detect it from the
+    // ICC profile, but avoid the complexity for now.
+    dst.sig_peak = mp_trc_nom_peak(dst.gamma);
 
     bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
     if (detect_peak && !p->hdr_peak_ssbo) {
