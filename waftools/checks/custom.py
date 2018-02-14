@@ -100,15 +100,7 @@ def check_cocoa(ctx, dependency_identifier):
         includes         = ctx.srcnode.abspath(),
         linkflags        = '-fobjc-arc')
 
-    res = fn(ctx, dependency_identifier)
-    # on macOS we explicitly need to set the SDK path, otherwise it can lead to
-    # linking warnings or errors
-    if res:
-        ctx.env.append_value('LINKFLAGS', [
-            '-isysroot', ctx.env.MACOS_SDK
-        ])
-
-    return res
+    return fn(ctx, dependency_identifier)
 
 def check_openal(ctx, dependency_identifier):
     checks = [
