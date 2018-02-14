@@ -1428,7 +1428,6 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
         struct mp_tags *metadata = NULL;
-        int res = CONTROL_UNKNOWN;
         struct mp_output_chain *chain = NULL;
         if (strcmp(type, "vf") == 0) {
             chain = mpctx->vo_chain ? mpctx->vo_chain->filter : NULL;
@@ -1444,26 +1443,19 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         };
         mp_output_chain_command(chain, mp_tprintf(80, "%.*s", BSTR_P(key)), &cmd);
 
-        if (metadata)
-            res = CONTROL_OK;
-
-        switch (res) {
-        case CONTROL_UNKNOWN:
-            return M_PROPERTY_UNKNOWN;
-        case CONTROL_NA: // empty
-        case CONTROL_OK:
-            if (strlen(rem)) {
-                struct m_property_action_arg next_ka = *ka;
-                next_ka.key = rem;
-                res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, metadata);
-            } else {
-                res = tag_property(ka->action, ka->arg, metadata);
-            }
-            talloc_free(metadata);
-            return res;
-        default:
+        if (!metadata)
             return M_PROPERTY_ERROR;
+
+        int res;
+        if (strlen(rem)) {
+            struct m_property_action_arg next_ka = *ka;
+            next_ka.key = rem;
+            res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, metadata);
+        } else {
+            res = tag_property(ka->action, ka->arg, metadata);
         }
+        talloc_free(metadata);
+        return res;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
