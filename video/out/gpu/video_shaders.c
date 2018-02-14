@@ -812,8 +812,14 @@ void pass_color_map(struct gl_shader_cache *sc,
     if (need_ootf)
         pass_inverse_ootf(sc, dst.light, dst.sig_peak);
 
-    // Post-scale the outgoing values from absolute scale to normalized
-    GLSLF("color.rgb *= vec3(%f);\n", 1.0 / mp_trc_nom_peak(dst.gamma));
+    // Post-scale the outgoing values from absolute scale to normalized.
+    // For SDR, we normalize to the chosen signal peak. For HDR, we normalize
+    // to the encoding range of the transfer function.
+    float dst_range = dst.sig_peak;
+    if (mp_trc_is_hdr(dst.gamma))
+        dst_range = mp_trc_nom_peak(dst.gamma);
+
+    GLSLF("color.rgb *= vec3(%f);\n", 1.0 / dst_range);
 
     // Warn for remaining out-of-gamut colors is enabled
     if (gamut_warning) {

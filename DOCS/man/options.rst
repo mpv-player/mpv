@@ -5054,6 +5054,39 @@ The following video options are currently all specific to ``--vo=gpu`` and
         The user should independently guarantee this before using these signal
         formats for display.
 
+``--target-peak=<nits>``
+    Specifies the measured peak brightness of the output display, in cd/m^2
+    (AKA nits). The interpretation of this brightness depends on the configured
+    ``--target-trc``. In all cases, it imposes a limit on the signal values
+    that will be sent to the display. If the source exceeds this brightness
+    level, a tone mapping filter will be inserted. For HLG, it has the
+    additional effect of parametrizing the inverse OOTF, in order to get
+    colorimetrically consistent results with the mastering display. For SDR, or
+    when using an ICC (profile (``--icc-profile``), setting this to a value
+    above 100 essentially causes the display to be treated as if it were an HDR
+    display in disguise. (See the note below)
+
+    By default, the chosen peak defaults to an appropriate value based on the
+    TRC in use. For SDR curves, it defaults to 100. For HDR curves, it
+    defaults to 100 * the transfer function's nominal peak.
+
+    .. note::
+
+        When using an SDR transfer function, this is normally not needed, and
+        setting it may lead to very unexpected results. The one time it *is*
+        useful is if you want to calibrate a HDR display using traditional
+        transfer functions and calibration equipment. In such cases, you can
+        set your HDR display to a high brightness such as 800 cd/m^2, and then
+        calibrate it to a standard curve like gamma2.8. Setting this value to
+        800 would then instruct mpv to essentially treat it as an HDR display
+        with the given peak. This may be a good alternative in environments
+        where PQ or HLG input to the display is not possible, and makes it
+        possible to use HDR displays with mpv regardless of operating system
+        support for HDMI HDR metadata.
+
+        In such a configuration, we highly recommend setting ``--tone-mapping``
+        to ``mobius`` or even ``clip``.
+
 ``--tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping images onto the target
     display. This is relevant for both HDR->SDR conversion as well as gamut

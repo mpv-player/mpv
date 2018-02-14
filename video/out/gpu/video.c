@@ -351,6 +351,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
+        OPT_INTRANGE("target-peak", target_peak, 0, 10, 10000),
         OPT_CHOICE("tone-mapping", tone_mapping, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"mobius",   TONE_MAPPING_MOBIUS},
@@ -548,6 +549,7 @@ struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p)
     return (struct mp_colorspace) {
         .primaries = p->opts.target_prim,
         .gamma = p->opts.target_trc,
+        .sig_peak = p->opts.target_peak / MP_REF_WHITE,
     };
 }
 
@@ -2392,6 +2394,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         .gamma = p->opts.target_trc,
         .primaries = p->opts.target_prim,
         .light = MP_CSP_LIGHT_DISPLAY,
+        .sig_peak = p->opts.target_peak / MP_REF_WHITE,
     };
 
     if (p->use_lut_3d) {
@@ -2446,10 +2449,10 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
-    // For now, just infer the dst sig peak from the gamma function always.
-    // In theory, we could allow users to configure this or detect it from the
-    // ICC profile, but avoid the complexity for now.
-    dst.sig_peak = mp_trc_nom_peak(dst.gamma);
+    // If there's no specific signal peak known for the output display, infer
+    // it from the chosen transfer function
+    if (!dst.sig_peak)
+        dst.sig_peak = mp_trc_nom_peak(dst.gamma);
 
     bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
     if (detect_peak && !p->hdr_peak_ssbo) {
