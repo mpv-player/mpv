@@ -39,8 +39,6 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
 
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
-void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak);
-void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light light, float peak);
 
 void pass_color_map(struct gl_shader_cache *sc,
                     struct mp_colorspace src, struct mp_colorspace dst,
