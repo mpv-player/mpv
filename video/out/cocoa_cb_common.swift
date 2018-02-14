@@ -141,13 +141,29 @@ class CocoaCB: NSObject {
         }
     }
 
+    let linkCallback: CVDisplayLinkOutputCallback = {
+                    (displayLink: CVDisplayLink,
+                           inNow: UnsafePointer<CVTimeStamp>,
+                    inOutputTime: UnsafePointer<CVTimeStamp>,
+                         flagsIn: CVOptionFlags,
+                        flagsOut: UnsafeMutablePointer<CVOptionFlags>,
+              displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
+        let ccb: CocoaCB = MPVHelper.bridge(ptr: displayLinkContext!)
+        ccb.layer.reportFlip()
+        return kCVReturnSuccess
+    }
+
     func startDisplayLink() {
         let displayId = UInt32(window.screen!.deviceDescription["NSScreenNumber"] as! Int)
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
         CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
-        CVDisplayLinkSetOutputHandler(link!) { link, now, out, inFlags, outFlags -> CVReturn in
-            self.layer.reportFlip()
-            return kCVReturnSuccess
+        if #available(macOS 10.12, *) {
+            CVDisplayLinkSetOutputHandler(link!) { link, now, out, inFlags, outFlags -> CVReturn in
+                self.layer.reportFlip()
+                return kCVReturnSuccess
+            }
+        } else {
+            CVDisplayLinkSetOutputCallback(link!, linkCallback, MPVHelper.bridge(obj: self))
         }
         CVDisplayLinkStart(link!)
     }
