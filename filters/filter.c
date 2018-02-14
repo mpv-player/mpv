@@ -325,7 +325,7 @@ static void init_connection(struct mp_pin *p)
     // manual connections at the ends is still disconnected (or if this
     // attempted to extend an existing connection, becomes dangling and gets
     // disconnected).
-    if (!in->manual_connection && !out->manual_connection)
+    if (!in->manual_connection || !out->manual_connection)
         return;
 
     assert(in->dir == MP_PIN_IN);
