@@ -443,7 +443,13 @@ static int preinit(struct vo *vo)
         goto err;
     }
 
-    vo->monitor_par = 1 / vo->opts->monitor_pixel_aspect;
+    if (vo->opts->force_monitor_aspect != 0.0) {
+        vo->monitor_par = p->screen_w / (double) p->screen_h /
+                          vo->opts->force_monitor_aspect;
+    } else {
+        vo->monitor_par = 1 / vo->opts->monitor_pixel_aspect;
+    }
+    mp_verbose(vo->log, "Monitor pixel aspect: %g\n", vo->monitor_par);
 
     return 0;
 
