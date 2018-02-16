@@ -891,7 +891,7 @@ bool vo_render_frame_external(struct vo *vo)
         update_vsync_timing_after_swap(vo);
     }
 
-    if (vo->driver->caps & VO_CAP_NOREDRAW) {
+    if (vo->driver->caps & VO_CAP_NORETAIN) {
         talloc_free(in->current_frame);
         in->current_frame = NULL;
     }
@@ -919,7 +919,7 @@ static void do_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    if (!vo->config_ok || (vo->driver->caps & VO_CAP_NOREDRAW))
+    if (!vo->config_ok || (vo->driver->caps & VO_CAP_NORETAIN))
         return;
 
     pthread_mutex_lock(&in->lock);
