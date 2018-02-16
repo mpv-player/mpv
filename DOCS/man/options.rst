@@ -4852,6 +4852,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
+``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
+    Sets the styling of the title bar (default: dark).
+    OS X and cocoa-cb only
+
+    :dark:        Dark title bar with vibrancy, a subtle blurring effect that
+                  dynamically blends the background (Video) into the title bar.
+    :ultradark:   Darker title bar with vibrancy (like QuickTime Player).
+    :light:       Bright title bar with vibrancy.
+    :mediumlight: Less bright title bar with vibrancy.
+    :auto:        Detects the system settings and sets the title bar styling
+                  appropriately, either ultradark or mediumlight.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during

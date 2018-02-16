@@ -99,12 +99,12 @@ class CocoaCB: NSObject {
                               screen: targetScreen, cocoaCB: self)
         win.title = window.title
         win.setOnTop(mpv.getBoolProperty("ontop"))
-        win.setBorder(mpv.getBoolProperty("border"))
         win.keepAspect = mpv.getBoolProperty("keepaspect-window")
         window.close()
         window = win
         window.contentView!.addSubview(view)
         view.frame = window.contentView!.frame
+        window.initTitleBar()
 
         setAppIcon()
         window.isRestorable = false
@@ -486,7 +486,7 @@ class CocoaCB: NSObject {
         switch String(cString: property.name) {
         case "border":
             if let data = MPVHelper.mpvFlagToBool(property.data) {
-                window.setBorder(data)
+                window.border = data
             }
         case "ontop":
             if let data = MPVHelper.mpvFlagToBool(property.data) {
@@ -495,6 +495,10 @@ class CocoaCB: NSObject {
         case "keepaspect-window":
             if let data = MPVHelper.mpvFlagToBool(property.data) {
                 window.keepAspect = data
+            }
+        case "macos-title-bar-style":
+            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+                window.setTitleBarStyle(data)
             }
         default:
             break
