@@ -408,6 +408,9 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
     if (eof)
         return 1;
 
+    if (mpctx->video_out->driver->caps & VO_CAP_NORETAIN)
+        return 1;
+
     // On the first frame, output a new frame as quickly as possible.
     // But display-sync likes to have a correct frame duration always.
     if (mpctx->video_pts == MP_NOPTS_VALUE)
