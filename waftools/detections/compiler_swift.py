@@ -8,8 +8,9 @@ def __run(cmd):
         return ""
 
 def __add_swift_flags(ctx):
-    ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop -emit-objc-header'
-                           ' -emit-module -parse-as-library') % (ctx.env.MACOS_SDK)
+    ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop'
+                           ' -emit-objc-header -parse-as-library'
+                           ' -target x86_64-apple-macosx10.10') % (ctx.env.MACOS_SDK)
     swift_version = __run([ctx.env.SWIFT, '-version']).split(' ')[3].split('.')[:2]
     major, minor = [int(n) for n in swift_version]
 
@@ -31,7 +32,6 @@ def __find_swift_library(ctx):
         'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx',
         'usr/lib/swift_static/macosx'
     ]
-    dev_path = __run('xcode-select -p')[1:]
     dev_path = __run(['xcode-select', '-p'])[1:]
 
     ctx.start_msg('Checking for Swift Library')
