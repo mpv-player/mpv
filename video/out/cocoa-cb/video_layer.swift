@@ -198,6 +198,7 @@ class VideoLayer: CAOpenGLLayer {
             if !cocoaCB.window.occlusionState.contains(.visible) &&
                 neededFlips > 1 && canDrawOffScreen
             {
+                CGLSetCurrentContext(cglContext!)
                 draw(cglContext!)
                 display()
             } else {
