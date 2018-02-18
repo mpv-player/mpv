@@ -108,6 +108,11 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     int chosen = 0;
     if (cb.refine_config)
         chosen = cb.refine_config(cb.user_data, configs, num_configs);
+    if (chosen < 0) {
+        talloc_free(configs);
+        MP_MSG(ctx, msgl, "Could not choose EGLConfig!\n");
+        return false;
+    }
     EGLConfig config = configs[chosen];
 
     talloc_free(configs);
