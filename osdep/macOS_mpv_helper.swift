@@ -26,6 +26,7 @@ class MPVHelper: NSObject {
     var mpvLog: OpaquePointer?
     var inputContext: OpaquePointer?
     var mpctx: UnsafeMutablePointer<MPContext>?
+    var fbo: GLint = 1
 
     init(_ mpv: OpaquePointer) {
         super.init()
@@ -101,8 +102,11 @@ class MPVHelper: NSObject {
         if mpvGLCBContext != nil {
             var i: GLint = 0
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
+            // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
+            // so only utilize a newly received FBO ID if it is nonzero.
+            fbo = i != 0 ? i : fbo
 
-            mpv_opengl_cb_draw(mpvGLCBContext, i, Int32(surface.width), Int32(-surface.height))
+            mpv_opengl_cb_draw(mpvGLCBContext, fbo, Int32(surface.width), Int32(-surface.height))
         } else {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
