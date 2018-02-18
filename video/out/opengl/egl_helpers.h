@@ -15,7 +15,9 @@ bool mpegl_create_context(struct ra_ctx *ctx, EGLDisplay display,
 
 struct mpegl_cb {
     // if set, pick the desired config from the given list and return its index
-    // defaults to 0 (they are sorted by eglChooseConfig)
+    // defaults to 0 (they are sorted by eglChooseConfig). return a negative
+    // number to indicate an error condition or that no suitable configs could
+    // be found.
     int (*refine_config)(void *user_data, EGLConfig *configs, int num_configs);
     void *user_data;
 };
