@@ -11,6 +11,7 @@ Added
 ~~~~~
 
 - vo_gpu: Vulkan API implementation based on libplacebo.
+- vo_drm: Add 30bpp support.
 
 Changed
 ~~~~~~~
