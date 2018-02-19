@@ -107,7 +107,7 @@ static void uninit(struct vo *vo)
 const struct vo_driver video_out_mediacodec_embed = {
     .description = "Android (Embedded MediaCodec Surface)",
     .name = "mediacodec_embed",
-    .caps = VO_CAP_NOREDRAW,
+    .caps = VO_CAP_NORETAIN,
     .preinit = preinit,
     .query_format = query_format,
     .control = control,
