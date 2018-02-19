@@ -35,7 +35,13 @@
 #include "video/sws_utils.h"
 #include "vo.h"
 
-#define IMGFMT IMGFMT_BGR0
+#define IMGFMT_XRGB8888 IMGFMT_BGR0
+#if BYTE_ORDER == BIG_ENDIAN
+#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10BE)
+#else
+#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10LE)
+#endif
+
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
 #define USE_MASTER 0
@@ -70,6 +76,9 @@ struct priv {
     bool active;
     bool pflip_happening;
 
+    uint32_t depth;
+    enum mp_imgfmt imgfmt;
+
     int32_t screen_w;
     int32_t screen_h;
     struct mp_image *last_input;
@@ -99,6 +108,8 @@ static void fb_destroy(int fd, struct framebuffer *buf)
 
 static bool fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
 {
+    struct priv *p = vo->priv;
+
     buf->handle = 0;
 
     // create dumb buffer
@@ -116,7 +127,7 @@ static bool fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
     buf->handle = creq.handle;
 
     // create framebuffer object for the dumb-buffer
-    if (drmModeAddFB(fd, buf->width, buf->height, 24, creq.bpp, buf->stride,
+    if (drmModeAddFB(fd, buf->width, buf->height, p->depth, creq.bpp, buf->stride,
                      buf->handle, &buf->fb)) {
         MP_ERR(vo, "Cannot create framebuffer: %s\n", mp_strerror(errno));
         goto err;
@@ -280,7 +291,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     mp_sws_set_from_cmdline(p->sws, vo->global);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = IMGFMT,
+        .imgfmt = p->imgfmt,
         .w = w,
         .h = h,
         .p_w = 1,
@@ -288,7 +299,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     };
 
     talloc_free(p->cur_frame);
-    p->cur_frame = mp_image_alloc(IMGFMT, p->screen_w, p->screen_h);
+    p->cur_frame = mp_image_alloc(p->imgfmt, p->screen_w, p->screen_h);
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
     p->cur_frame[0].w = p->screen_w;
@@ -337,10 +348,36 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         }
 
         struct framebuffer *front_buf = &p->bufs[p->front_buf];
-        memcpy_pic(front_buf->map, p->cur_frame->planes[0],
-                   p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
-                   front_buf->stride,
-                   p->cur_frame->stride[0]);
+
+        if (p->depth == 30) {
+            // Pack GBRP10 image into XRGB2101010 for DRM
+            const int w = p->cur_frame->w;
+            const int h = p->cur_frame->h;
+
+            const int g_padding = p->cur_frame->stride[0]/sizeof(uint16_t) - w;
+            const int b_padding = p->cur_frame->stride[1]/sizeof(uint16_t) - w;
+            const int r_padding = p->cur_frame->stride[2]/sizeof(uint16_t) - w;
+            const int fbuf_padding = front_buf->stride/sizeof(uint32_t) - w;
+
+            uint16_t *g_ptr = (uint16_t*)p->cur_frame->planes[0];
+            uint16_t *b_ptr = (uint16_t*)p->cur_frame->planes[1];
+            uint16_t *r_ptr = (uint16_t*)p->cur_frame->planes[2];
+            uint32_t *fbuf_ptr = (uint32_t*)front_buf->map;
+            for (unsigned y = 0; y < h; ++y) {
+                for (unsigned x = 0; x < w; ++x) {
+                    *fbuf_ptr++ = (*r_ptr++ << 20) | (*g_ptr++ << 10) | (*b_ptr++);
+                }
+                g_ptr += g_padding;
+                b_ptr += b_padding;
+                r_ptr += r_padding;
+                fbuf_ptr += fbuf_padding;
+            }
+        } else {
+            memcpy_pic(front_buf->map, p->cur_frame->planes[0],
+                       p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
+                       front_buf->stride,
+                       p->cur_frame->stride[0]);
+        }
     }
 
     if (mpi != p->last_input) {
@@ -424,6 +461,14 @@ static int preinit(struct vo *vo)
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
         goto err;
+    }
+
+    if (vo->opts->drm_opts->drm_format == DRM_OPTS_FORMAT_XRGB2101010) {
+        p->depth = 30;
+        p->imgfmt = IMGFMT_XRGB2101010;
+    } else {
+        p->depth = 24;
+        p->imgfmt = IMGFMT_XRGB8888;
     }
 
     if (!fb_setup_double_buffering(vo)) {
