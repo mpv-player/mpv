@@ -52,7 +52,7 @@ extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
 extern const struct vo_driver video_out_gpu;
-extern const struct vo_driver video_out_opengl_cb;
+extern const struct vo_driver video_out_libmpv;
 extern const struct vo_driver video_out_null;
 extern const struct vo_driver video_out_image;
 extern const struct vo_driver video_out_lavc;
@@ -66,9 +66,7 @@ extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
-#if HAVE_GL
-    &video_out_opengl_cb,
-#endif
+    &video_out_libmpv,
 #if HAVE_ANDROID
     &video_out_mediacodec_embed,
 #endif
@@ -185,7 +183,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .options = vo->options,
         .options_prefix = vo->options_prefix,
         .global_opts = vo->global_opts,
-        .hidden = vo->encode || !strcmp(vo->name, "opengl-cb"),
+        .hidden = vo->encode,
         .p = vo,
     };
     return true;
@@ -199,6 +197,7 @@ const struct m_obj_list vo_obj_list = {
         {"gl", "gpu"},
         {"direct3d_shaders", "direct3d"},
         {"opengl", "gpu"},
+        {"opengl-cb", "libmpv"},
         {0}
     },
     .allow_unknown_entries = true,

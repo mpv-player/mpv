@@ -891,7 +891,6 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
-            .opengl_cb_context = mpctx->gl_cb_ctx,
             .wakeup_cb = mp_wakeup_core_cb,
             .wakeup_ctx = mpctx,
         };

@@ -210,7 +210,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 27)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 28)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1691,6 +1691,11 @@ int mpv_get_wakeup_pipe(mpv_handle *ctx);
  */
 void mpv_wait_async_requests(mpv_handle *ctx);
 
+#if MPV_ENABLE_DEPRECATED
+
+/**
+ * @deprecated use render.h
+ */
 typedef enum mpv_sub_api {
     /**
      * For using mpv's OpenGL renderer on an external OpenGL context.
@@ -1698,6 +1703,8 @@ typedef enum mpv_sub_api {
      * This context can be used with mpv_opengl_cb_* functions.
      * Will return NULL if unavailable (if OpenGL support was not compiled in).
      * See opengl_cb.h for details.
+     *
+     * @deprecated use render.h
      */
     MPV_SUB_API_OPENGL_CB = 1
 } mpv_sub_api;
@@ -1705,8 +1712,12 @@ typedef enum mpv_sub_api {
 /**
  * This is used for additional APIs that are not strictly part of the core API.
  * See the individual mpv_sub_api member values.
+ *
+ * @deprecated use render.h
  */
 void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api);
+
+#endif
 
 #ifdef __cplusplus
 }

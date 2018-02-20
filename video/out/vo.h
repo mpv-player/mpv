@@ -205,7 +205,6 @@ struct vo_extra {
     struct input_ctx *input_ctx;
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
-    struct mpv_opengl_cb_context *opengl_cb_context;
     void (*wakeup_cb)(void *ctx);
     void *wakeup_ctx;
 };
