@@ -333,17 +333,19 @@ static void vf_vapoursynth_process(struct mp_filter *f)
         // works asynchronously, it's probably ok.
         struct mp_frame frame = mp_pin_out_read(p->in_pin);
         if (frame.type == MP_FRAME_EOF) {
-            if (p->out_node) {
+            if (p->out_node && !p->eof) {
                 MP_VERBOSE(p, "initiate EOF\n");
                 p->eof = true;
                 pthread_cond_broadcast(&p->wakeup);
-            } else if (mp_pin_in_needs_data(f->ppins[1])) {
+            }
+            if (!p->out_node && mp_pin_in_needs_data(f->ppins[1])) {
                 MP_VERBOSE(p, "return EOF\n");
                 mp_pin_in_write(f->ppins[1], frame);
-                frame = MP_NO_FRAME;
+            } else {
+                // Keep it until we can propagate it.
+                mp_pin_out_unread(p->in_pin, frame);
+                break;
             }
-            // Keep it until we can propagate it.
-            mp_pin_out_unread(p->in_pin, frame);
         } else if (frame.type == MP_FRAME_VIDEO) {
             struct mp_image *mpi = frame.data;
             // Init VS script, or reinit it to change video format. (This
