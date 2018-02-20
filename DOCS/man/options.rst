@@ -5221,6 +5221,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     NOTE: On Windows, the default profile must be an ICC profile. WCS profiles
     are not supported.
 
+    Applications using libmpv with the render API need to provide the ICC
+    profile via ``MPV_RENDER_PARAM_ICC_PROFILE``.
+
 ``--icc-cache-dir=<dirname>``
     Store and load the 3D LUTs created from the ICC profile in this directory.
     This can be used to speed up loading, since LittleCMS 2 can take a while to

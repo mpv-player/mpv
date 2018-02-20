@@ -433,8 +433,6 @@ typedef struct MPContext {
 
     struct mp_ipc_ctx *ipc_ctx;
 
-    struct mpv_opengl_cb_context *gl_cb_ctx;
-
     pthread_mutex_t lock;
 
     // --- The following fields are protected by lock

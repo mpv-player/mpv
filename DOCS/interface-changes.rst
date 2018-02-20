@@ -72,6 +72,8 @@ Interface changes
       will probably stall.
     - deprecate the OpenGL cocoa backend, option choice --gpu-context=cocoa
       when used with --gpu-api=opengl (use --vo=opengl-cb)
+    - rename --vo=opengl-cb to --vo=libmpv (goes in hand with the opengl-cb
+      API deprecation, see client-api-changes.rst)
     - make --deinterlace=yes always deinterlace, instead of trying to check
       certain unreliable video metadata. Also flip the defaults of all builtin
       HW deinterlace filters to always deinterlace.

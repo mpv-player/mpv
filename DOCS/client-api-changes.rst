@@ -33,6 +33,19 @@ API changes
 ::
 
  --- mpv 0.29.0 ---
+ 1.28   - deprecate the render opengl_cb API, and replace it with render.h
+          and render_gl.h. The goal is allowing support for APIs other than
+          OpenGL. The old API is emulated with the new API.
+          Likewise, the "opengl-cb" VO is renamed to "libmpv".
+          mpv_get_sub_api() is deprecated along the opengl_cb API.
+          The new API is relatively similar, but not the same. The rough
+          equivalents are:
+            mpv_opengl_cb_init_gl => mpv_render_context_create
+            mpv_opengl_cb_set_update_callback => mpv_render_context_set_update_callback
+            mpv_opengl_cb_draw => mpv_render_context_render
+            mpv_opengl_cb_report_flip => mpv_render_context_report_swap
+            mpv_opengl_cb_uninit_gl => mpv_render_context_free
+          The VO opengl-cb is also renamed to "libmpv".
  1.27   - make opengl-cb the default VO. This causes a subtle behavior change
           if the API user called mpv_opengl_cb_init_gl(), but does not set
           the "vo" option. Before, it would still have used another VO (like

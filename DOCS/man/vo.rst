@@ -428,13 +428,14 @@ Available video output drivers are:
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
-``opengl-cb``
-    For use with libmpv direct OpenGL embedding. As a special case, on OS X it
+``libmpv``
+    For use with libmpv direct embedding. As a special case, on OS X it
     is used like a normal VO within mpv (cocoa-cb). Otherwise useless in any
     other contexts.
-    (See ``<mpv/opengl_cb.h>``.)
+    (See ``<mpv/render.h>``.)
 
-    This also supports many of the options the ``gpu`` VO has.
+    This also supports many of the options the ``gpu`` VO has, depending on the
+    backend.
 
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.

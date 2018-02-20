@@ -183,9 +183,6 @@ void mp_destroy(struct MPContext *mpctx)
 
     mp_clients_destroy(mpctx);
 
-    talloc_free(mpctx->gl_cb_ctx);
-    mpctx->gl_cb_ctx = NULL;
-
     osd_free(mpctx->osd);
 
 #if HAVE_COCOA
