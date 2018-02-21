@@ -803,6 +803,19 @@ PROTOCOLS
     ``PATH`` itself should start with a third ``/`` to make the path an
     absolute path.
 
+``appending://PATH``
+
+    Play a local file, but assume it's being appended to. This is useful for
+    example for files that are currently being downloaded to disk. This will
+    block playback, and stop playback only if no new data was appended after
+    a timeout of about 2 seconds.
+
+    Using this is still a bit of a bad idea, because there is no way to detect
+    if a file is actually being appended, or if it's still written. If you're
+    trying to play the  output of some program, consider using a pipe
+    (``something | mpv -``). If it really has to be a file on disk, use tail to
+    make it wait forever, e.g. ``tail -f -c +0 file.mkv | mpv -``.
+
 ``fd://123``
 
     Read data from the given file descriptor (for example 123). This is similar
