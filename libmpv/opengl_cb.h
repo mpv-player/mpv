@@ -59,7 +59,7 @@ extern "C" {
  * for OpenGL 2.1 and OpenGL ES 2.0.
  *
  * Note that some hardware decoding interop API (as set with the "hwdec" option)
- * may actually access
+ * may actually access some sort of host API, such as EGL.
  *
  * OpenGL state
  * ------------
@@ -118,7 +118,7 @@ extern "C" {
  * While "normal" mpv loads the OpenGL hardware decoding interop on demand,
  * this can't be done with opengl_cb for internal technical reasons. Instead,
  * it loads them by default, even if hardware decoding is not going to be used.
- * In older mpv relases, this had to be done by setting the
+ * In older mpv releases, this had to be done by setting the
  * "opengl-hwdec-interop" or "hwdec-preload" options before calling
  * mpv_opengl_cb_init_gl(). You can still use the newer "gpu-hwdec-interop"
  * option to prevent loading of interop, or to load only a specific interop.

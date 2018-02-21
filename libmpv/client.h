@@ -16,7 +16,8 @@
 /*
  * Note: the client API is licensed under ISC (see above) to enable
  * other wrappers outside of mpv. But keep in mind that the
- * mpv core is still mostly GPLv2+.
+ * mpv core is by default still GPLv2+ - unless built with
+ * --enable-lgpl, which makes it LGPLv2+.
  */
 
 #ifndef MPV_CLIENT_API_H_
