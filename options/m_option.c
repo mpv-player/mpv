@@ -2623,16 +2623,9 @@ bool m_obj_list_find(struct m_obj_desc *dst, const struct m_obj_list *l,
     for (int i = 0; l->aliases[i][0]; i++) {
         const char *aname = l->aliases[i][0];
         const char *alias = l->aliases[i][1];
-        const char *opts  = l->aliases[i][2];
         if (bstr_equals0(name, aname) && m_obj_list_find(dst, l, bstr0(alias)))
         {
-            if (opts) {
-                dst->init_options = opts;
-            } else {
-                // Assume it's deprecated in this case.
-                // Also, it's used by the VO code only, so whatever.
-                dst->replaced_name = aname;
-            }
+            dst->replaced_name = aname;
             return true;
         }
     }

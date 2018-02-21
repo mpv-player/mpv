@@ -147,7 +147,7 @@ struct m_obj_list {
     bool (*get_desc)(struct m_obj_desc *dst, int index);
     const char *description;
     // Can be set to a NULL terminated array of aliases
-    const char *aliases[4][5];
+    const char *aliases[5][2];
     // Allow a trailing ",", which adds an entry with name=""
     bool allow_trailer;
     // Allow unknown entries, for which a dummy entry is inserted, and whose
