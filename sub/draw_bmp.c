@@ -172,7 +172,7 @@ static void unpremultiply_and_split_BGR32(struct mp_image *img,
 }
 
 // dst_format merely contains the target colorspace/format information
-static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
+static void scale_sb_rgba(struct sub_bitmap *sb, const struct mp_image *dst_format,
                           struct mp_image **out_sbi, struct mp_image **out_sba)
 {
     struct mp_image sbisrc = {0};
@@ -279,9 +279,10 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
             int rgb[3] = {r, g, b};
             mp_map_fixp_color(&rgb2yuv, 8, rgb, cspar.texture_bits, color_yuv);
         } else {
-            color_yuv[0] = g;
-            color_yuv[1] = b;
-            color_yuv[2] = r;
+            const int shift = (bits > 8) ? bits - 8 : 0;
+            color_yuv[0] = g << shift;
+            color_yuv[1] = b << shift;
+            color_yuv[2] = r << shift;
         }
 
         int bytes = (bits + 7) / 8;
@@ -340,12 +341,16 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
     int planes = desc.flags & MP_IMGFLAG_ALPHA ? 4 : 3;
-    int bits = desc.component_bits > 8 ? 16 : 8;
     if (desc.flags & MP_IMGFLAG_RGB) {
+        // For RGB try to match the amount of bits exactly (but no less than 8, or larger than 16)
+        int bits = (desc.component_bits > 8) ? desc.component_bits : 8;
+        if (bits > 16)
+            bits = 16;
         *out_format = mp_imgfmt_find(0, 0, planes, bits, MP_IMGFLAG_RGB_P);
         if (!mp_sws_supported_format(*out_format))
             *out_format = mp_imgfmt_find(0, 0, planes, 8, MP_IMGFLAG_RGB_P);
     } else if (desc.flags & MP_IMGFLAG_YUV_P) {
+        const int bits = (desc.component_bits > 8) ? 16 : 8;
         *out_format = mp_imgfmt_find(0, 0, planes, bits, MP_IMGFLAG_YUV_P);
     } else {
         *out_format = 0;
