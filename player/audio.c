@@ -272,6 +272,11 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     if (!out_fmt)
         abort();
 
+    if (!mp_aframe_config_is_valid(out_fmt)) {
+        talloc_free(out_fmt);
+        goto init_error;
+    }
+
     if (af_fmt_is_pcm(mp_aframe_get_format(out_fmt))) {
         if (opts->force_srate)
             mp_aframe_set_rate(out_fmt, opts->force_srate);
