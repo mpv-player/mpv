@@ -74,6 +74,13 @@ extern pthread_mutex_t mp_atomic_mutex;
 #define atomic_fetch_add(a, b) atomic_fetch_op(a, b, +)
 #define atomic_fetch_and(a, b) atomic_fetch_op(a, b, &)
 #define atomic_fetch_or(a, b)  atomic_fetch_op(a, b, |)
+#define atomic_exchange(p, new)                         \
+    ({ __typeof__(p) p_ = (p);                          \
+       pthread_mutex_lock(&mp_atomic_mutex);            \
+       __typeof__(p_->v) res_ = p_->v;                  \
+       p_->v = (new);                                   \
+       pthread_mutex_unlock(&mp_atomic_mutex);          \
+       res_; })
 #define atomic_compare_exchange_strong(p, old, new)     \
     ({ __typeof__(p) p_ = (p);                          \
        __typeof__(old) old_ = (old);                    \
