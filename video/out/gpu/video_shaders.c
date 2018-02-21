@@ -797,9 +797,6 @@ void pass_color_map(struct gl_shader_cache *sc,
         mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
-        // Since this can reduce the gamut, figure out by how much
-        for (int c = 0; c < 3; c++)
-            src.sig_peak = MPMAX(src.sig_peak, m[c][c]);
     }
 
     // Tone map to prevent clipping when the source signal peak exceeds the
