@@ -351,7 +351,10 @@ static void process_format_change(struct mp_filter *f)
                 p->format_change_phase = 2;
                 mp_pin_out_request_data(p->filters_out);
             } else if (!p->public.failed_output_conversion) {
-                MP_ERR(p, "we didn't get an output frame? (broken filter?)\n");
+                MP_ERR(p, "No output format - empty file or broken filter?\n");
+                p->ao = NULL;
+                p->public.ao_needs_update = true;
+                p->format_change_phase = 5;
             }
             mp_filter_internal_mark_progress(f);
             return;
