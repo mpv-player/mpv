@@ -42,18 +42,14 @@ class VideoLayer: CAOpenGLLayer {
         }
     }
 
-    let surfaceLock = NSLock()
     var surfaceSize: NSSize?
 
     var inLiveResize: Bool = false {
         didSet {
             if inLiveResize == false {
                 isAsynchronous = false
-                display()
+                neededFlips += 1
             } else {
-                surfaceLock.lock()
-                updateSurfaceSize()
-                surfaceLock.unlock()
                 isAsynchronous = true
             }
         }
@@ -101,13 +97,8 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     func draw(_ ctx: CGLContextObj) {
-        surfaceLock.lock()
-        if inLiveResize == false {
-            updateSurfaceSize()
-        }
-
+        updateSurfaceSize()
         mpv.drawGLCB(surfaceSize!)
-        surfaceLock.unlock()
         CGLFlushDrawable(ctx)
 
         if needsICCUpdate {
@@ -117,9 +108,15 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     func updateSurfaceSize() {
-        surfaceSize = bounds.size
-        surfaceSize!.width *= contentsScale
-        surfaceSize!.height *= contentsScale
+        var dims: [GLint] = [0, 0, 0, 0]
+        glGetIntegerv(GLenum(GL_VIEWPORT), &dims)
+        surfaceSize = NSMakeSize(CGFloat(dims[2]), CGFloat(dims[3]))
+
+        if NSEqualSizes(surfaceSize!, NSZeroSize) {
+            surfaceSize = bounds.size
+            surfaceSize!.width *= contentsScale
+            surfaceSize!.height *= contentsScale
+        }
     }
 
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
@@ -179,9 +176,7 @@ class VideoLayer: CAOpenGLLayer {
 
     override func display() {
         super.display()
-        if !isAsynchronous {
-            CATransaction.flush()
-        }
+        CATransaction.flush()
     }
 
     func setVideo(_ state: Bool) {
