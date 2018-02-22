@@ -143,13 +143,12 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func window(_ window: NSWindow, startCustomAnimationToEnterFullScreenWithDuration duration: TimeInterval) {
-        var newFrame = targetScreen!.frame
         let cRect = contentRect(forFrameRect: frame)
-        newFrame.size.height = newFrame.size.height - (frame.size.height - cRect.size.height)
-        let intermediateFrame = aspectFit(rect: cRect, in: newFrame)
+        var intermediateFrame = aspectFit(rect: cRect, in: targetScreen!.frame)
+        intermediateFrame = frameRect(forContentRect: intermediateFrame)
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = duration-0.1
+            context.duration = duration - 0.05
             window.animator().setFrame(intermediateFrame, display: true)
         }, completionHandler: { })
     }
@@ -158,10 +157,9 @@ class Window: NSWindow, NSWindowDelegate {
         let newFrame = calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen)
         let intermediateFrame = aspectFit(rect: newFrame, in: screen!.frame)
         setFrame(intermediateFrame, display: true)
-        cocoaCB.layer.display()
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = duration-0.1
+            context.duration = duration - 0.05
             window.animator().setFrame(newFrame, display: true)
         }, completionHandler: { })
     }
@@ -170,13 +168,13 @@ class Window: NSWindow, NSWindowDelegate {
         isInFullscreen = true
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         cocoaCB.updateCusorVisibility()
-        endAnimation()
+        endAnimation(frame)
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        endAnimation()
+        endAnimation(calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen))
     }
 
     func windowDidFailToEnterFullScreen(_ window: NSWindow) {
@@ -191,7 +189,14 @@ class Window: NSWindow, NSWindowDelegate {
         endAnimation()
     }
 
-    func endAnimation() {
+    func endAnimation(_ newFrame: NSRect = NSZeroRect) {
+        if !NSEqualRects(newFrame, NSZeroRect) {
+            NSAnimationContext.runAnimationGroup({ (context) -> Void in
+                context.duration = 0.01
+                self.animator().setFrame(newFrame, display: true)
+            }, completionHandler: nil )
+        }
+
         isAnimating = false
         cocoaCB.isShuttingDown = false
     }
@@ -275,7 +280,10 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
-        super.setFrame(frameRect, display: flag)
+        let newFrame = !isAnimating && isInFullscreen ? targetScreen!.frame :
+                                                        frameRect
+        super.setFrame(newFrame, display: flag)
+
         if keepAspect {
             contentAspectRatio = unfsContentFrame!.size
         }

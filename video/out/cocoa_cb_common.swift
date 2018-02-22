@@ -114,7 +114,9 @@ class CocoaCB: NSObject {
         layer.setVideo(true)
 
         if self.mpv.getBoolProperty("fullscreen") {
-            window.toggleFullScreen(nil)
+            DispatchQueue.main.async {
+                self.window.toggleFullScreen(nil)
+            }
         } else {
             window.isMovableByWindowBackground = true
         }
