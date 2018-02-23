@@ -689,6 +689,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, bool detect_peak,
         break;
 
     case TONE_MAPPING_MOBIUS:
+        GLSLF("if (sig_peak > (1.0 + 1e-6)) {\n");
         GLSLF("const float j = %f;\n", isnan(param) ? 0.3 : param);
         // solve for M(j) = j; M(sig_peak) = 1.0; M'(j) = 1.0
         // where M(x) = scale * (x+a)/(x+b)
@@ -697,6 +698,7 @@ static void pass_tone_map(struct gl_shader_cache *sc, bool detect_peak,
               "max(1e-6, sig_peak - 1.0);\n");
         GLSLF("float scale = (b*b + 2.0*b*j + j*j) / (b-a);\n");
         GLSL(sig = sig > j ? scale * (sig + a) / (sig + b) : sig;)
+        GLSLF("}\n");
         break;
 
     case TONE_MAPPING_REINHARD: {
