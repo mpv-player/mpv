@@ -22,6 +22,7 @@
 #include <math.h>
 #include <assert.h>
 
+#include "audio/out/ao_cb.h"
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
@@ -1993,4 +1994,9 @@ bool mp_streamcb_lookup(struct mpv_global *g, const char *protocol,
     }
     pthread_mutex_unlock(&clients->lock);
     return found;
+}
+
+int mpv_audio_callback(void *buffer, int len)
+{
+    return audio_callback(buffer, len);
 }

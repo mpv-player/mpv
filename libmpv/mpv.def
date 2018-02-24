@@ -1,3 +1,4 @@
+mpv_audio_callback
 mpv_client_api_version
 mpv_client_name
 mpv_command
@@ -28,8 +29,8 @@ mpv_load_config_file
 mpv_observe_property
 mpv_opengl_cb_draw
 mpv_opengl_cb_init_gl
-mpv_opengl_cb_report_flip
 mpv_opengl_cb_render
+mpv_opengl_cb_report_flip
 mpv_opengl_cb_set_update_callback
 mpv_opengl_cb_uninit_gl
 mpv_render_context_create

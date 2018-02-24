@@ -1780,6 +1780,18 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
  */
 int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
 
+/**
+ * Obtain samples from the audio_callback audio driver.
+ *
+ * The audio_callback driver must have been selected and initialised prior to
+ * calling this function.
+ *
+ * @param buffer Allocated buffer to store audio samples.
+ * @param len Length of allocated buffer.
+ * @return Number of samples stored in buffer, or negative on error.
+ */
+int mpv_audio_callback(void *buffer, int len);
+
 #if MPV_ENABLE_DEPRECATED
 
 /**
