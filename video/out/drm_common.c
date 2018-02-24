@@ -431,7 +431,6 @@ static int install_signal(int signo, void (*handler)(int))
     return sigaction(signo, &act, NULL);
 }
 
-
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 {
     s->log = log;
@@ -482,6 +481,14 @@ bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
         return false;
     }
 
+    // Block the VT switching signals from interrupting the VO thread (they will
+    // still be picked up by other threads, which will fill vt_switcher_pipe for us)
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, RELEASE_SIGNAL);
+    sigaddset(&set, ACQUIRE_SIGNAL);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
+
     return true;
 }
 
@@ -507,6 +514,13 @@ void vt_switcher_interrupt_poll(struct vt_switcher *s)
 
 void vt_switcher_destroy(struct vt_switcher *s)
 {
+    struct vt_mode vt_mode = {0};
+    vt_mode.mode = VT_AUTO;
+    if (ioctl(s->tty_fd, VT_SETMODE, &vt_mode) < 0) {
+        MP_ERR(s, "VT_SETMODE failed: %s\n", mp_strerror(errno));
+        return;
+    }
+
     install_signal(RELEASE_SIGNAL, SIG_DFL);
     install_signal(ACQUIRE_SIGNAL, SIG_DFL);
     close(s->tty_fd);
