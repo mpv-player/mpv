@@ -31,6 +31,7 @@
 #include "libmpv/opengl_cb.h"
 #include "video/out/drm_common.h"
 #include "common/common.h"
+#include "osdep/timer.h"
 
 #include "egl_helpers.h"
 #include "common.h"
@@ -257,7 +258,7 @@ static void crtc_release(struct ra_ctx *ctx)
 static void release_vt(void *data)
 {
     struct ra_ctx *ctx = data;
-    MP_VERBOSE(ctx->vo, "Releasing VT");
+    MP_VERBOSE(ctx->vo, "Releasing VT\n");
     crtc_release(ctx);
     if (USE_MASTER) {
         //this function enables support for switching to x, weston etc.
@@ -274,7 +275,7 @@ static void release_vt(void *data)
 static void acquire_vt(void *data)
 {
     struct ra_ctx *ctx = data;
-    MP_VERBOSE(ctx->vo, "Acquiring VT");
+    MP_VERBOSE(ctx->vo, "Acquiring VT\n");
     if (USE_MASTER) {
         struct priv *p = ctx->priv;
         if (drmSetMaster(p->kms->fd)) {
@@ -306,6 +307,9 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
     int ret;
+
+    if (!p->active)
+        return;
 
     eglSwapBuffers(p->egl.display, p->egl.surface);
     p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
@@ -544,6 +548,25 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
     return VO_NOTIMPL;
 }
 
+static void wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+{
+    struct priv *p = ctx->priv;
+    if (p->vt_switcher_active) {
+        int64_t wait_us = until_time_us - mp_time_us();
+        int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+        vt_switcher_poll(&p->vt_switcher, timeout_ms);
+    } else {
+        vo_wait_default(ctx->vo, until_time_us);
+    }
+}
+
+static void wakeup(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->vt_switcher_active)
+        vt_switcher_interrupt_poll(&p->vt_switcher);
+}
+
 const struct ra_ctx_fns ra_ctx_drm_egl = {
     .type           = "opengl",
     .name           = "drm",
@@ -551,4 +574,6 @@ const struct ra_ctx_fns ra_ctx_drm_egl = {
     .control        = drm_egl_control,
     .init           = drm_egl_init,
     .uninit         = drm_egl_uninit,
+    .wait_events    = wait_events,
+    .wakeup         = wakeup,
 };
