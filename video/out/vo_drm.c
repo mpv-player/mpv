@@ -41,6 +41,9 @@
 #define USE_MASTER 0
 #define BUF_COUNT 2
 
+// Modulo that works correctly for negative numbers
+#define MOD(a,b) ((((a)%(b))+(b))%(b))
+
 struct framebuffer {
     uint32_t width;
     uint32_t height;
@@ -181,7 +184,7 @@ static bool crtc_setup(struct vo *vo)
         return true;
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
     int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
-                             p->bufs[p->front_buf + BUF_COUNT - 1].fb,
+                             p->bufs[MOD(p->front_buf - 1, BUF_COUNT)].fb,
                              0, 0, &p->kms->connector->connector_id, 1,
                              &p->kms->mode);
     p->active = true;
@@ -356,7 +359,7 @@ static void flip_page(struct vo *vo)
                               p->bufs[p->front_buf].fb,
                               DRM_MODE_PAGE_FLIP_EVENT, p);
     if (ret) {
-        MP_WARN(vo, "Cannot flip page for connector\n");
+        MP_WARN(vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
     } else {
         p->front_buf++;
         p->front_buf %= BUF_COUNT;
