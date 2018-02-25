@@ -376,7 +376,22 @@ class Window: NSWindow, NSWindowDelegate {
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
         let newFrame = !isAnimating && isInFullscreen ? targetScreen!.frame :
                                                         frameRect
+        let aspectRatioDiff = fabs( (newFrame.width/newFrame.height) -
+                                    (frame.width/frame.height) )
+
+        let isNotUserLiveResize = isAnimating || !(!isAnimating && inLiveResize)
+        if aspectRatioDiff > 0.005 && isNotUserLiveResize {
+            cocoaCB.layer.drawLock.lock()
+            cocoaCB.layer.atomicDrawingStart()
+        }
+
         super.setFrame(newFrame, display: flag)
+        cocoaCB.layer.neededFlips += 1
+
+        if aspectRatioDiff > 0.005 && isNotUserLiveResize {
+            Swift.print("drawUnLock")
+            cocoaCB.layer.drawLock.unlock()
+        }
 
         if keepAspect {
             contentAspectRatio = unfsContentFrame!.size
