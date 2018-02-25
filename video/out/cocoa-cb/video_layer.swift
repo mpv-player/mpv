@@ -31,6 +31,11 @@ class VideoLayer: CAOpenGLLayer {
     var neededFlips: Int = 0
     var cglContext: CGLContextObj? = nil
 
+    enum Draw: Int { case normal = 1, atomic, atomicEnd }
+    var draw: Draw = .normal
+    let drawLock = NSLock()
+    var surfaceSize: NSSize?
+
     var canDrawOffScreen: Bool = false
     var lastThread: Thread? = nil
 
@@ -41,8 +46,6 @@ class VideoLayer: CAOpenGLLayer {
             }
         }
     }
-
-    var surfaceSize: NSSize?
 
     var inLiveResize: Bool = false {
         didSet {
@@ -97,9 +100,23 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     func draw(_ ctx: CGLContextObj) {
+        drawLock.lock()
         updateSurfaceSize()
+
+        let aspectRatioDiff = fabs( (surfaceSize!.width/surfaceSize!.height) -
+                                    (bounds.size.width/bounds.size.height) )
+
+        if aspectRatioDiff <= 0.005 && draw.rawValue >= Draw.atomic.rawValue {
+             if draw == .atomic {
+                draw = .atomicEnd
+             } else {
+                atomicDrawingEnd()
+             }
+        }
+
         mpv.drawGLCB(surfaceSize!)
         CGLFlushDrawable(ctx)
+        drawLock.unlock()
 
         if needsICCUpdate {
             needsICCUpdate = false
@@ -118,6 +135,20 @@ class VideoLayer: CAOpenGLLayer {
             surfaceSize!.height *= contentsScale
         }
     }
+
+    func atomicDrawingStart() {
+        if draw == .normal && hasVideo {
+            NSDisableScreenUpdates()
+            draw = .atomic
+        }
+    }
+
+    func atomicDrawingEnd() {
+        if draw.rawValue >= Draw.atomic.rawValue {
+            NSEnableScreenUpdates()
+            draw = .normal
+        }
+     }
 
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         let glVersions: [CGLOpenGLProfile] = [
