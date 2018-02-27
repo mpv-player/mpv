@@ -4864,6 +4864,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
     :auto:        Detects the system settings and sets the title bar styling
                   appropriately, either ultradark or mediumlight.
 
+``--macos-fs-animation-duration=<default|0-1000>``
+    Sets the fullscreen resize animation duration in ms (default: default).
+    The default value is slightly less than the system's animation duration
+    (500ms) to prevent some problems when the end of an async animation happens
+    at the same time as the end of the system wide fullscreen animation. Setting
+    anything higher than 500ms will only prematurely cancel the resize animation
+    after the system wide animation ended. The upper limit is still set at
+    1000ms since it's possible that Apple or the user changes the system
+    defaults. Anything higher than 1000ms though seems too long and shouldn't be
+    set anyway.
+    OS X and cocoa-cb only
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
