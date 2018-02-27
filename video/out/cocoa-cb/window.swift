@@ -252,7 +252,7 @@ class Window: NSWindow, NSWindowDelegate {
         hideTitleBar()
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = duration - 0.05
+            context.duration = getFsAnimationDuration(duration - 0.05)
             window.animator().setFrame(intermediateFrame, display: true)
         }, completionHandler: { })
     }
@@ -264,7 +264,7 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(intermediateFrame, display: true)
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = duration - 0.05
+            context.duration = getFsAnimationDuration(duration - 0.05)
             window.animator().setFrame(newFrame, display: true)
         }, completionHandler: { })
     }
@@ -326,6 +326,15 @@ class Window: NSWindow, NSWindowDelegate {
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         cocoaCB.layer.neededFlips += 1
+    }
+
+    func getFsAnimationDuration(_ def: Double) -> Double{
+        let duration = mpv.getStringProperty("macos-fs-animation-duration") ?? "default"
+        if duration == "default" {
+            return def
+        } else {
+            return Double(duration)!/1000
+        }
     }
 
     func setOnTop(_ state: Bool) {
