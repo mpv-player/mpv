@@ -19,6 +19,8 @@ import Cocoa
 import OpenGL.GL
 import OpenGL.GL3
 
+let glDummy: @convention(c) () -> Void = {}
+
 class MPVHelper: NSObject {
 
     var mpvHandle: OpaquePointer?
@@ -72,7 +74,7 @@ class MPVHelper: NSObject {
         let addr = CFBundleGetFunctionPointerForName(indentifier, symbol)
 
         if symbol as String == "glFlush" {
-            return glDummyPtr()
+            return unsafeBitCast(glDummy, to: UnsafeMutableRawPointer.self)
         }
 
         return addr
