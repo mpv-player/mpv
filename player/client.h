@@ -37,7 +37,6 @@ struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct mpv_global *mp_client_get_global(struct mpv_handle *ctx);
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
 struct MPContext *mp_client_api_get_core(struct mp_client_api *api);
-void *mp_get_sub_api2(mpv_handle *ctx, mpv_sub_api sub_api, bool lock);
 
 // m_option.c
 void *node_get_alloc(struct mpv_node *node);
@@ -53,15 +52,5 @@ void kill_video(struct mp_client_api *client_api);
 
 bool mp_streamcb_lookup(struct mpv_global *g, const char *protocol,
                         void **out_user_data, mpv_stream_cb_open_ro_fn *out_fn);
-
-// Legacy.
-typedef int (*mpv_opengl_cb_control_fn)(void *cb_ctx, int *events,
-                                        uint32_t request, void *data);
-struct mpv_opengl_cb_context;
-void mp_client_set_control_callback(struct mpv_opengl_cb_context *ctx,
-                                    mpv_opengl_cb_control_fn callback,
-                                    void *callback_ctx);
-void mp_client_set_icc_profile(struct mpv_opengl_cb_context *ctx, bstr icc_data);
-void mp_client_set_ambient_lux(struct mpv_opengl_cb_context *ctx, int lux);
 
 #endif
