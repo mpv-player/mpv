@@ -398,7 +398,6 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.layer.neededFlips += 1
 
         if aspectRatioDiff > 0.005 && isNotUserLiveResize {
-            Swift.print("drawUnLock")
             cocoaCB.layer.drawLock.unlock()
         }
 
