@@ -47,8 +47,3 @@ static int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
 static int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 static int SWIFT_KEY_STATE_DOWN  = MP_KEY_STATE_DOWN;
 static int SWIFT_KEY_STATE_UP    = MP_KEY_STATE_UP;
-
-// dummy function to override glFlush()
-static void glDummy() {}
-static void *glDummyPtr(void) __attribute__((unused));
-static void *glDummyPtr() { return &glDummy; }
