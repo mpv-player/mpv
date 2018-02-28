@@ -20,7 +20,8 @@
 #import <IOKit/pwr_mgt/IOPMLib.h>
 
 #include "player/client.h"
-#include "libmpv/opengl_cb.h"
+#include "video/out/libmpv.h"
+#include "libmpv/render_gl.h"
 
 #include "player/core.h"
 #include "input/input.h"

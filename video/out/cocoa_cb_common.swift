@@ -61,7 +61,7 @@ class CocoaCB: NSObject {
 
     func setMpvHandle(_ ctx: OpaquePointer) {
         mpv = MPVHelper(ctx)
-        layer.setUpGLCB()
+        layer.setUpRender()
     }
 
     func preinit() {
@@ -113,7 +113,7 @@ class CocoaCB: NSObject {
         NSApp.activate(ignoringOtherApps: true)
         layer.setVideo(true)
 
-        if self.mpv.getBoolProperty("fullscreen") {
+        if mpv.getBoolProperty("fullscreen") {
             DispatchQueue.main.async {
                 self.window.toggleFullScreen(nil)
             }
@@ -239,7 +239,7 @@ class CocoaCB: NSObject {
 
     func updateICCProfile() {
         if mpv.getBoolProperty("icc-profile-auto") {
-            mpv.setGLCBICCProfile(window.screen!.colorSpace!)
+            mpv.setRenderICCProfile(window.screen!.colorSpace!)
         }
         layer.colorspace = window.screen!.colorSpace!.cgColorSpace!
     }
@@ -273,7 +273,7 @@ class CocoaCB: NSObject {
             var mean = (values[0] + values[1]) / 2
             if ccb.lastLmu != mean {
                 ccb.lastLmu = mean
-                ccb.mpv.setGLCBLux(ccb.lmuToLux(ccb.lastLmu))
+                ccb.mpv.setRenderLux(ccb.lmuToLux(ccb.lastLmu))
             }
         }
     }
@@ -383,7 +383,7 @@ class CocoaCB: NSObject {
         return ev
     }
 
-    var controlCallback: mpv_opengl_cb_control_fn = { ( ctx, events, request, data ) -> Int32 in
+    var controlCallback: mp_render_cb_control_fn = { ( ctx, events, request, data ) -> Int32 in
         let ccb: CocoaCB = MPVHelper.bridge(ptr: ctx!)
 
         switch mp_voctrl(request) {
@@ -466,7 +466,7 @@ class CocoaCB: NSObject {
             stopDisplaylink()
             uninitLightSensor()
             removeDisplayReconfigureObserver()
-            mpv.deinitGLCB()
+            mpv.deinitRender()
             mpv.deinitMPV()
         case MPV_EVENT_PROPERTY_CHANGE:
             if backendState == .init {

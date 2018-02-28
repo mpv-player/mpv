@@ -24,7 +24,7 @@ let glDummy: @convention(c) () -> Void = {}
 class MPVHelper: NSObject {
 
     var mpvHandle: OpaquePointer?
-    var mpvGLCBContext: OpaquePointer?
+    var mpvRenderContext: OpaquePointer?
     var mpvLog: OpaquePointer?
     var inputContext: OpaquePointer?
     var mpctx: UnsafeMutablePointer<MPContext>?
@@ -44,30 +44,29 @@ class MPVHelper: NSObject {
         mpv_observe_property(mpvHandle, 0, "macos-title-bar-style", MPV_FORMAT_STRING)
     }
 
-    func setGLCB() {
-        if mpvHandle == nil {
-            sendError("No mpv handle available.")
-            exit(1)
-        }
-        mpvGLCBContext = OpaquePointer(mp_get_sub_api2(mpvHandle, MPV_SUB_API_OPENGL_CB, false))
-        if mpvGLCBContext == nil {
-            sendError("libmpv does not have the opengl-cb sub-API.")
+    func initRender() {
+        let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
+        var pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
+                                              get_proc_address_ctx: nil,
+                                              extra_exts: nil)
+        var params: [mpv_render_param] = [
+            mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
+            mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: &pAddress),
+            mpv_render_param()
+        ]
+
+        if (mpv_render_context_create(&mpvRenderContext, mpvHandle, &params) < 0)
+        {
+            sendError("Render context init has failed.")
             exit(1)
         }
     }
 
-    func initGLCB() {
-        if mpvGLCBContext == nil {
-            setGLCB()
-        }
-        if mpv_opengl_cb_init_gl(mpvGLCBContext, nil, getProcAddress, nil) < 0 {
-            sendError("GL init has failed.")
-            exit(1)
-        }
-    }
-
-    let getProcAddress: mpv_opengl_cb_get_proc_address_fn = {
-            (ctx: UnsafeMutableRawPointer?, name: UnsafePointer<Int8>?) -> UnsafeMutableRawPointer? in
+    let getProcAddress: (@convention(c) (UnsafeMutableRawPointer?, UnsafePointer<Int8>?)
+                        -> UnsafeMutableRawPointer?)! =
+    {
+        (ctx: UnsafeMutableRawPointer?, name: UnsafePointer<Int8>?)
+                        -> UnsafeMutableRawPointer? in
         let symbol: CFString = CFStringCreateWithCString(
                                 kCFAllocatorDefault, name, kCFStringEncodingASCII)
         let indentifier = CFBundleGetBundleWithIdentifier("com.apple.opengl" as CFString)
@@ -80,54 +79,68 @@ class MPVHelper: NSObject {
         return addr
     }
 
-    func setGLCBUpdateCallback(_ callback: @escaping mpv_opengl_cb_update_fn, context object: AnyObject) {
-        if mpvGLCBContext == nil {
-            sendWarning("Init mpv opengl-cb first.")
+    func setRenderUpdateCallback(_ callback: @escaping mpv_render_update_fn, context object: AnyObject) {
+        if mpvRenderContext == nil {
+            sendWarning("Init mpv render context first.")
         } else {
-            mpv_opengl_cb_set_update_callback(mpvGLCBContext, callback, MPVHelper.bridge(obj: object))
+            mpv_render_context_set_update_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
         }
     }
 
-    func setGLCBControlCallback(_ callback: @escaping mpv_opengl_cb_control_fn, context object: AnyObject) {
-        if mpvGLCBContext == nil {
-            sendWarning("Init mpv opengl-cb first.")
+    func setRenderControlCallback(_ callback: @escaping mp_render_cb_control_fn, context object: AnyObject) {
+        if mpvRenderContext == nil {
+            sendWarning("Init mpv render context first.")
         } else {
-            mp_client_set_control_callback(mpvGLCBContext, callback, MPVHelper.bridge(obj: object))
+            mp_render_context_set_control_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
         }
     }
 
-    func reportGLCBFlip() {
-        if mpvGLCBContext == nil { return }
-            mpv_opengl_cb_report_flip(mpvGLCBContext, 0)
+    func reportRenderFlip() {
+        if mpvRenderContext == nil { return }
+            mpv_render_context_report_swap(mpvRenderContext)
     }
 
-    func drawGLCB(_ surface: NSSize) {
-        if mpvGLCBContext != nil {
+    func drawRender(_ surface: NSSize) {
+        if mpvRenderContext != nil {
             var i: GLint = 0
+            var flip: CInt = 1
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
             fbo = i != 0 ? i : fbo
 
-            mpv_opengl_cb_draw(mpvGLCBContext, fbo, Int32(surface.width), Int32(-surface.height))
+            var data = mpv_opengl_fbo(fbo: Int32(i),
+                                         w: Int32(surface.width),
+                                         h: Int32(surface.height),
+                                         internal_format: 0)
+            var params: [mpv_render_param] = [
+                mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
+                mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
+                mpv_render_param()
+            ]
+            mpv_render_context_render(mpvRenderContext, &params);
         } else {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
         }
     }
 
-    func setGLCBICCProfile(_ profile: NSColorSpace) {
-        if mpvGLCBContext == nil { return }
+    func setRenderICCProfile(_ profile: NSColorSpace) {
+        if mpvRenderContext == nil { return }
         var iccData = profile.iccProfileData
         iccData!.withUnsafeMutableBytes { (u8Ptr: UnsafeMutablePointer<UInt8>) in
-            let icc = bstrdup(nil, bstr(start: u8Ptr, len: iccData!.count))
-            mp_client_set_icc_profile(mpvGLCBContext, icc)
+            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: iccData!.count))
+            var icc = mpv_byte_array(data: iccBstr.start, size: iccBstr.len)
+            let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: &icc)
+            mpv_render_context_set_parameter(mpvRenderContext, params)
         }
     }
 
-    func setGLCBLux(_ lux: Int) {
-        if mpvGLCBContext == nil { return }
-        mp_client_set_ambient_lux(mpvGLCBContext, Int32(lux))
+    func setRenderLux(_ lux: Int) {
+        if mpvRenderContext == nil { return }
+        var light = lux
+        let params = mpv_render_param(type: MPV_RENDER_PARAM_AMBIENT_LIGHT, data: &light)
+        mpv_render_context_set_parameter(mpvRenderContext, params)
     }
 
     func command(_ cmd: String) {
@@ -225,11 +238,11 @@ class MPVHelper: NSObject {
         print("\(level)[osx/cocoacb] \(msg)\u{001B}[0;30m")
     }
 
-    func deinitGLCB() {
-        mpv_opengl_cb_set_update_callback(mpvGLCBContext, nil, nil)
-        mp_client_set_control_callback(mpvGLCBContext, nil, nil)
-        mpv_opengl_cb_uninit_gl(mpvGLCBContext)
-        mpvGLCBContext = nil
+    func deinitRender() {
+        mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
+        mp_render_context_set_control_callback(mpvRenderContext, nil, nil)
+        mpv_render_context_free(mpvRenderContext)
+        mpvRenderContext = nil
     }
 
     func deinitMPV() {

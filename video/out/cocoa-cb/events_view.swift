@@ -52,7 +52,7 @@ class EventsView: NSView {
             return
         }
 
-        tracker = NSTrackingArea(rect: self.bounds,
+        tracker = NSTrackingArea(rect: bounds,
             options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved, .enabledDuringMouseDrag],
             owner: self, userInfo: nil)
         addTrackingArea(tracker!)
