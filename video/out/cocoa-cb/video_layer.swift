@@ -76,10 +76,10 @@ class VideoLayer: CAOpenGLLayer {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func setUpGLCB() {
-        self.mpv.initGLCB()
-        self.mpv.setGLCBUpdateCallback(self.updateCallback, context: self)
-        self.mpv.setGLCBControlCallback(self.cocoaCB.controlCallback, context: self.cocoaCB)
+    func setUpRender() {
+        mpv.initRender()
+        mpv.setRenderUpdateCallback(updateCallback, context: self)
+        mpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
     }
 
     override func canDraw(inCGLContext ctx: CGLContextObj,
@@ -114,7 +114,7 @@ class VideoLayer: CAOpenGLLayer {
              }
         }
 
-        mpv.drawGLCB(surfaceSize!)
+        mpv.drawRender(surfaceSize!)
         CGLFlushDrawable(ctx)
         drawLock.unlock()
 
@@ -200,7 +200,7 @@ class VideoLayer: CAOpenGLLayer {
         return ctx
     }
 
-    let updateCallback: mpv_opengl_cb_update_fn = { (ctx) in
+    let updateCallback: mpv_render_update_fn = { (ctx) in
         let layer: VideoLayer = MPVHelper.bridge(ptr: ctx!)
         layer.neededFlips += 1
     }
@@ -218,7 +218,7 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     func reportFlip() {
-        mpv.reportGLCBFlip()
+        mpv.reportRenderFlip()
         videoLock.lock()
         if !isAsynchronous && neededFlips > 0 && hasVideo {
             if !cocoaCB.window.occlusionState.contains(.visible) &&
