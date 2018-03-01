@@ -988,7 +988,8 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
 #if LIBAVUTIL_VERSION_MICRO >= 100
     if (src->icc_profile) {
         AVFrameSideData *sd =
-            ffmpeg_garbage(dst, AV_FRAME_DATA_ICC_PROFILE, new_ref->icc_profile);
+            av_frame_new_side_data_from_buf(dst, AV_FRAME_DATA_ICC_PROFILE,
+                                            new_ref->icc_profile);
         if (!sd)
             abort();
         new_ref->icc_profile = NULL;
@@ -1007,7 +1008,8 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     for (int n = 0; n < new_ref->num_ff_side_data; n++) {
         struct mp_ff_side_data *mpsd = &new_ref->ff_side_data[n];
         if (!av_frame_get_side_data(dst, mpsd->type)) {
-            AVFrameSideData *sd = ffmpeg_garbage(dst, mpsd->type, mpsd->buf);
+            AVFrameSideData *sd = av_frame_new_side_data_from_buf(dst, mpsd->type,
+                                                                  mpsd->buf);
             if (!sd)
                 abort();
             mpsd->buf = NULL;
