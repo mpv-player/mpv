@@ -209,6 +209,9 @@ static void mp_image_destructor(void *ptr)
     av_buffer_unref(&mpi->hwctx);
     av_buffer_unref(&mpi->icc_profile);
     av_buffer_unref(&mpi->a53_cc);
+    for (int n = 0; n < mpi->num_ff_side_data; n++)
+        av_buffer_unref(&mpi->ff_side_data[n].buf);
+    talloc_free(mpi->ff_side_data);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -329,6 +332,10 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     fail |= !ref_buffer(&new->icc_profile);
     fail |= !ref_buffer(&new->a53_cc);
 
+    new->ff_side_data = talloc_memdup(NULL, new->ff_side_data,
+                        new->num_ff_side_data * sizeof(new->ff_side_data[0]));
+    for (int n = 0; n < new->num_ff_side_data; n++)
+        fail |= !ref_buffer(&new->ff_side_data[n].buf);
 
     if (!fail)
         return new;
@@ -897,6 +904,15 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_A53_CC);
     if (sd)
         dst->a53_cc = sd->buf;
+
+    for (int n = 0; n < src->nb_side_data; n++) {
+        sd = src->side_data[n];
+        struct mp_ff_side_data mpsd = {
+            .type = sd->type,
+            .buf = sd->buf,
+        };
+        MP_TARRAY_APPEND(NULL, dst->ff_side_data, dst->num_ff_side_data, mpsd);
+    }
 #endif
 
     if (dst->hwctx) {
@@ -908,7 +924,12 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
             fns->complete_image_params(dst);
     }
 
-    return mp_image_new_ref(dst);
+    struct mp_image *res = mp_image_new_ref(dst);
+
+    // Allocated, but non-refcounted data.
+    talloc_free(dst->ff_side_data);
+
+    return res;
 }
 
 
@@ -980,6 +1001,18 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         if (!clm)
             abort();
         clm->MaxCLL = src->params.color.sig_peak * MP_REF_WHITE;
+    }
+
+    // Add back side data, but only for types which are not specially handled
+    // above. Keep in mind that the types above will be out of sync anyway.
+    for (int n = 0; n < new_ref->num_ff_side_data; n++) {
+        struct mp_ff_side_data *mpsd = &new_ref->ff_side_data[n];
+        if (!av_frame_get_side_data(dst, mpsd->type)) {
+            AVFrameSideData *sd = ffmpeg_garbage(dst, mpsd->type, mpsd->buf);
+            if (!sd)
+                abort();
+            mpsd->buf = NULL;
+        }
     }
 #endif
 

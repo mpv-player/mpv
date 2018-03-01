@@ -121,7 +121,15 @@ typedef struct mp_image {
     struct AVBufferRef *icc_profile;
     // Closed captions packet, if any (only after decoder)
     struct AVBufferRef *a53_cc;
+    // Other side data we don't care about.
+    struct mp_ff_side_data *ff_side_data;
+    int num_ff_side_data;
 } mp_image_t;
+
+struct mp_ff_side_data {
+    int type;
+    struct AVBufferRef *buf;
+};
 
 int mp_chroma_div_up(int size, int shift);
 
