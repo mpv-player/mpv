@@ -138,7 +138,7 @@ static struct tl_parts *parse_edl(bstr str)
             bstr type = param_vals[0]; // value, because no "="
             if (bstr_equals0(type, "mp4_dash")) {
                 tl->dash = true;
-                if (bstr_equals0(param_names[1], "init"))
+                if (nparam > 1 && bstr_equals0(param_names[1], "init"))
                     tl->init_fragment_url = bstrto0(tl, param_vals[1]);
             }
             continue;
