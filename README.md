@@ -132,6 +132,10 @@ FFmpeg dependencies:
 - OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
 - libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
   explicitly enabled when compiling FFmpeg)
+- For native DASH playback, FFmpeg needs to be built with --enable-libxml2
+  (although there are security implications).
+- For good nvidia support on Linux, make sure nv-codec-headers is installed
+  and can be found by configure.
 - Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
