@@ -28,6 +28,7 @@
 
 #include "osdep/io.h"
 #include "osdep/terminal.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 
 #include "common/msg.h"
@@ -828,6 +829,8 @@ static void load_per_file_options(m_config_t *conf,
 static void *open_demux_thread(void *ctx)
 {
     struct MPContext *mpctx = ctx;
+
+    mpthread_set_name("opener");
 
     struct demuxer_params p = {
         .force_format = mpctx->open_format,
