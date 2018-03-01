@@ -257,9 +257,10 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
              whence == SEEK_CUR ? "cur" :
              whence == SEEK_SET ? "set" : "size");
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
-        int64_t end = stream_get_size(stream) + priv->init_fragment.len;
+        int64_t end = stream_get_size(stream);
         if (end < 0)
             return -1;
+        end += priv->init_fragment.len;
         if (whence == AVSEEK_SIZE)
             return end;
         pos += end;
