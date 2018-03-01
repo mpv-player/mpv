@@ -1124,7 +1124,7 @@ static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
         AVCodecContext *avctx = ctx->avctx;
         if (!avctx)
             break;
-        if (ctx->use_hwdec && strcmp(ctx->hwdec.method_name, "mmal"))
+        if (ctx->use_hwdec && strcmp(ctx->hwdec.method_name, "mmal") == 0)
             break; // MMAL has arbitrary buffering, thus unknown
         *(int *)arg = avctx->has_b_frames;
         return CONTROL_TRUE;
