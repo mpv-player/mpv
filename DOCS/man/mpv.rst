@@ -58,6 +58,10 @@ Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
     might not always work; see ``sub-seek`` command.
 
+Ctrl+Shift+Left and Ctrl+Shift+Right
+    Adjust subtitle delay so that the next or previous subtitle is displayed
+    now. This is especially useful to sync subtitles to audio.
+
 [ and ]
     Decrease/increase current playback speed by 10%.
 
@@ -66,6 +70,17 @@ Ctrl+LEFT and Ctrl+RIGHT
 
 BACKSPACE
     Reset playback speed to normal.
+
+Shift+BACKSPACE
+    Undo the last seek. This works only if the playlist entry was not changed.
+    Hitting it a second time will go back to the original position.
+    See ``revert-seek`` command for details.
+
+Shift+Ctrl+BACKSPACE
+    Mark the current position. This will then be used by ``Shift+BACKSPACE``
+    as revert position (once you seek back, the marker will be reset). You can
+    use this to seek around in the file and then return to the exact position
+    where you left off.
 
 < and >
     Go backward/forward in the playlist.
@@ -115,8 +130,9 @@ ESC
 T
     Toggle stay-on-top (see also ``--ontop``).
 
-w and e
-    Decrease/increase pan-and-scan range.
+w and W
+    Decrease/increase pan-and-scan range. The ``e`` key does the same as
+    ``W`` currently, but use is discouraged.
 
 o (also P)
     Show progression bar, elapsed time and total duration on the OSD.
@@ -130,8 +146,9 @@ v
 j and J
     Cycle through the available subtitles.
 
-x and z
-    Adjust subtitle delay by +/- 0.1 seconds.
+z and Z
+    Adjust subtitle delay by +/- 0.1 seconds. The ``x`` key does the same as
+    ``Z`` currently, but use is discouraged.
 
 l
     Set/clear A-B loop points. See ``ab-loop`` command for details.
@@ -151,8 +168,9 @@ V
     Toggle subtitle VSFilter aspect compatibility mode. See
     ``--sub-ass-vsfilter-aspect-compat`` for more info.
 
-r and t
-    Move subtitles up/down.
+r and R
+    Move subtitles up/down. The ``t`` key does the same as ``R`` currently, but
+    use is discouraged.
 
 s
     Take a screenshot.
@@ -182,6 +200,23 @@ A
 
 Ctrl h
     Toggle hardware video decoding on/off.
+
+Alt+LEFT, Alt+RIGHT, Alt+UP, Alt+DOWN
+    Move the video rectangle (panning).
+
+Alt + and Alt -
+    Combining ``Alt`` with the ``+`` or ``-`` keys changes video zoom.
+
+Alt+BACKSPACE
+    Reset the pan/zoom settings.
+
+F9
+    Show the playlist and the current position in it (useful only if a UI window
+    is used, broken on the terminal).
+
+F10
+    Show the list of audio and subtitle streams (useful only if a UI window  is
+    used, broken on the terminal).
 
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment.)
