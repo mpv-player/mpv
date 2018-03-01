@@ -877,7 +877,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 #if LIBAVUTIL_VERSION_MICRO >= 100
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
     if (sd)
-        dst->icc_profile = av_buffer_ref(sd->buf);
+        dst->icc_profile = sd->buf;
 
     // Get the content light metadata if available
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
@@ -896,7 +896,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_A53_CC);
     if (sd)
-        dst->a53_cc = av_buffer_ref(sd->buf);
+        dst->a53_cc = sd->buf;
 #endif
 
     if (dst->hwctx) {
