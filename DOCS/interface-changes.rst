@@ -64,6 +64,8 @@ Interface changes
         - using "strong" gapless audio (--gapless-audio=yes) can fail if the
           audio formats are not convertible (such as switching between PCM and
           AC3 passthrough)
+        - if filters do not pass through PTS values correctly, A/V sync can
+          result over time
     - remove out-format sub-parameter from "format" audio filter (no replacement)
     - --lavfi-complex now requires uniquely named filter pads. In addition,
       unconnected filter pads are not allowed anymore (that means every filter
