@@ -61,7 +61,7 @@ class Window: NSWindow, NSWindowDelegate {
         get { return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height }
     }
     var titleButtons: [NSButton] {
-        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).flatMap { standardWindowButton($0) } }
+        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindowButton]).flatMap { standardWindowButton($0) } }
     }
 
     override var canBecomeKey: Bool { return true }
