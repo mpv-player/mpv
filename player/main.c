@@ -426,6 +426,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (!print_libav_versions(mp_null_log, 0)) {
         // Using mismatched libraries can be legitimate, but even then it's
         // a bad idea. We don't acknowledge its usefulness and stability.
+        // Distro maintainers who patch this out should be aware that mpv
+        // intentionally ignores ABI in some places where it's not possible to
+        // get by without violating it.
         print_libav_versions(mpctx->log, MSGL_FATAL);
         MP_FATAL(mpctx, "\nmpv was compiled against a different version of "
                  "FFmpeg/Libav than the shared\nlibrary it is linked against. "
