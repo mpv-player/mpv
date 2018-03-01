@@ -1279,6 +1279,9 @@ Audio
     ``--af-clr`` exist to modify a previously specified list, but you
     should not need these for typical use.
 
+``--audio-raw=<codecs>``
+    List of codecs for which raw audio passthrough should be used.
+
 ``--audio-spdif=<codecs>``
     List of codecs for which compressed audio passthrough should be used. This
     works for both classic S/PDIF and HDMI.

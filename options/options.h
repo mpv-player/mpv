@@ -179,6 +179,7 @@ typedef struct MPOpts {
     char *audio_decoders;
     char *video_decoders;
     char *audio_spdif;
+    char *audio_raw;
 
     struct mp_subtitle_opts *subs_rend;
     struct mp_osd_render_opts *osd_rend;

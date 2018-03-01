@@ -508,6 +508,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("vd", video_decoders, 0),
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
+    OPT_STRING("audio-raw", audio_raw, 0),
 
     OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
                         hwdec_validate_opt),

@@ -183,13 +183,25 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
         user_list = opts->audio_decoders;
 
         if (p->public.try_spdif && p->codec->codec) {
-            struct mp_decoder_list *spdif =
-                select_spdif_codec(p->codec->codec, opts->audio_spdif);
-            if (spdif->num_entries) {
-                driver = &ad_spdif;
-                list = spdif;
+            bool found = false;
+            struct mp_decoder_list *raw =
+                select_raw_codec(p->codec->codec, opts->audio_raw);
+            if (raw->num_entries) {
+                driver = &ad_raw;
+                list = raw;
+                found = true;
             } else {
-                talloc_free(spdif);
+                talloc_free(raw);
+            }
+            if (!found) {
+                struct mp_decoder_list *spdif =
+                    select_spdif_codec(p->codec->codec, opts->audio_spdif);
+                if (spdif->num_entries) {
+                    driver = &ad_spdif;
+                    list = spdif;
+                } else {
+                    talloc_free(spdif);
+                }
             }
         }
     }

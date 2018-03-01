@@ -262,6 +262,7 @@ int af_format_sample_alignment(int format)
 {
     switch (format) {
     case AF_FORMAT_S_AAC:       return 16384 / 4;
+    case AF_FORMAT_R_AC3:
     case AF_FORMAT_S_AC3:       return 6144 / 4;
     case AF_FORMAT_S_DTSHD:     return 32768 / 16;
     case AF_FORMAT_S_DTS:       return 2048 / 4;

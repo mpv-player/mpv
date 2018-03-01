@@ -107,6 +107,7 @@ struct mp_decoder_fns {
 extern const struct mp_decoder_fns vd_lavc;
 extern const struct mp_decoder_fns ad_lavc;
 extern const struct mp_decoder_fns ad_spdif;
+extern const struct mp_decoder_fns ad_raw;
 
 // Convenience wrapper for lavc based decoders. eof_flag must be set to false
 // on init and resets.
@@ -116,3 +117,6 @@ void lavc_process(struct mp_filter *f, bool *eof_flag,
 
 // ad_spdif.c
 struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);
+
+// ad_raw.c
+struct mp_decoder_list *select_raw_codec(const char *codec, const char *pref);
