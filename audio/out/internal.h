@@ -148,7 +148,7 @@ struct ao_driver {
     void (*uninit)(struct ao *ao);
     // push based: see ao_reset()
     // pull based: stop the audio callback
-    void (*reset)(struct ao*ao);
+    void (*reset)(struct ao *ao);
     // push based: see ao_pause()
     void (*pause)(struct ao *ao);
     // push based: see ao_resume()
