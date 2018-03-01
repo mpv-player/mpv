@@ -1760,7 +1760,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     const char *codec = sh_a->codec;
     if (!strcmp(codec, "mp2") || !strcmp(codec, "mp3") ||
-        !strcmp(codec, "truehd"))
+        !strcmp(codec, "truehd") || !strcmp(codec, "eac3"))
     {
         track->parse = true;
     } else if (!strcmp(codec, "flac")) {
