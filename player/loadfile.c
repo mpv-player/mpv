@@ -575,8 +575,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     return true;
 }
 
-// Add the given file as additional track. Only tracks of type "filter" are
-// included; pass STREAM_TYPE_COUNT to disable filtering.
+// Add the given file as additional track. The filter argument controls how or
+// if tracks are auto-selected at any point.
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter)
 {
@@ -634,7 +634,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->title = talloc_strdup(t, mp_basename(disp_filename));
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
-        t->no_auto_select = filter == STREAM_TYPE_COUNT;
+        t->no_auto_select = t->no_default;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first_num = mpctx->num_tracks - 1;
     }
