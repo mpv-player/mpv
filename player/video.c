@@ -413,13 +413,15 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
     if (mpctx->opts->untimed || mpctx->video_out->driver->untimed)
         return 1;
 
+    int min = mpctx->opts->video_latency_hacks ? 1 : 2;
+
     // On the first frame, output a new frame as quickly as possible.
     // But display-sync likes to have a correct frame duration always.
     if (mpctx->video_pts == MP_NOPTS_VALUE)
-        return mpctx->opts->video_sync == VS_DEFAULT ? 1 : 2;
+        return mpctx->opts->video_sync == VS_DEFAULT ? 1 : min;
 
     int req = vo_get_num_req_frames(mpctx->video_out);
-    return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames) - 1);
+    return MPCLAMP(req, min, MP_ARRAY_SIZE(mpctx->next_frames) - 1);
 }
 
 // Whether it's fine to call add_new_frame() now.
@@ -1149,8 +1151,10 @@ void write_video(struct MPContext *mpctx)
     if (mpctx->video_status < STATUS_PLAYING) {
         mpctx->video_status = STATUS_READY;
         // After a seek, make sure to wait until the first frame is visible.
-        vo_wait_frame(vo);
-        MP_VERBOSE(mpctx, "first video frame after restart shown\n");
+        if (!opts->video_latency_hacks) {
+            vo_wait_frame(vo);
+            MP_VERBOSE(mpctx, "first video frame after restart shown\n");
+        }
     }
     screenshot_flip(mpctx);
 

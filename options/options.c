@@ -608,6 +608,7 @@ const m_option_t mp_opts[] = {
                 {"vo", 1},
                 {"decoder", 2},
                 {"decoder+vo", 3})),
+    OPT_FLAG("video-latency-hacks", video_latency_hacks, 0),
 
     OPT_DOUBLE("display-fps", frame_drop_fps, M_OPT_MIN, .min = 0),
 

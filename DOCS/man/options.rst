@@ -679,6 +679,26 @@ Video
         ``--vo=vdpau`` has its own code for the ``vo`` framedrop mode. Slight
         differences to other VOs are possible.
 
+``--video-latency-hacks=<yes|no>``
+    Enable some things which tend to reduce video latency by 1 or 2 frames
+    (default: no). Note that this option might be removed without notice once
+    the player's timing code does not inherently need to do these things
+    anymore.
+
+    This does:
+
+    - Use the demuxer reported FPS for frame dropping. This avoids that the
+      player needs to decode 1 frame in advance, lowering total latency in
+      effect. This also means that if the demuxer reported FPS is wrong, or
+      the video filter chain changes FPS (e.g. deinterlacing), then it could
+      drop too many or not enough frames.
+    - Disable waiting for the first video frame. Normally the player waits for
+      the first video frame to be fully rendered before starting playback
+      properly. Some VOs will lazily initialize stuff when rendering the first
+      frame, so if this is not done, there is some likeliness that the VO has
+      to drop some frames if rendering the first frame takes longer than needed.
+
+
 ``--display-fps=<fps>``
     Set the display FPS used with the ``--video-sync=display-*`` modes. By
     default, a detected value is used. Keep in mind that setting an incorrect
