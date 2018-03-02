@@ -1234,6 +1234,8 @@ static void play_current_file(struct MPContext *mpctx)
 
 reopen_file:
 
+    reset_playback_state(mpctx);
+
     assert(mpctx->demuxer == NULL);
 
     if (process_open_hooks(mpctx, "on_load") < 0)
