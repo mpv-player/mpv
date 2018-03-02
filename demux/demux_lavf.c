@@ -136,6 +136,8 @@ struct format_hack {
     bool clear_filepos : 1;
     bool ignore_start : 1;
     bool fix_editlists : 1;
+    bool is_network : 1;
+    bool no_seek : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -153,6 +155,7 @@ static const struct format_hack format_hacks[] = {
 
     {"hls", .no_stream = true, .clear_filepos = true},
     {"dash", .no_stream = true, .clear_filepos = true},
+    {"sdp", .clear_filepos = true, .is_network = true, .no_seek = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
 
@@ -934,6 +937,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (avfc->ctx_flags & AVFMTCTX_UNSEEKABLE)
         demuxer->seekable = false;
 #endif
+
+    demuxer->is_network |= priv->format_hack.is_network;
+    demuxer->seekable &= !priv->format_hack.no_seek;
 
     if (priv->avfc->duration > 0) {
         demuxer->duration = (double)priv->avfc->duration / AV_TIME_BASE;
