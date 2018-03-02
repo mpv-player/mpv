@@ -576,6 +576,11 @@ description (shown by ``--profile=help``) can be defined with the
 ``profile-desc`` option. To end the profile, start another one or use the
 profile name ``default`` to continue with normal options.
 
+You can list profiles with ``--profile=help``, and show the contents of a
+profile with ``--show-profile=<name>`` (replace ``<name>`` with the profile
+name). You can apply profiles on start with the ``--profile=<name>`` option,
+or at runtime with the ``apply-profile <name>`` command.
+
 .. admonition:: Example mpv config file with profiles
 
     ::
