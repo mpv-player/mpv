@@ -367,8 +367,8 @@ class Window: NSWindow, NSWindowDelegate {
     func updateFrame(_ rect: NSRect) {
         if rect != frame {
             let cRect = frameRect(forContentRect: rect)
-            setFrame(cRect, display: true)
             unfsContentFrame = rect
+            setFrame(cRect, display: true)
         }
     }
 
