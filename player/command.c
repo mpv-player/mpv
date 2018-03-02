@@ -5294,7 +5294,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
         for (int n = first; n < mpctx->num_tracks; n++) {
             struct track *t = mpctx->tracks[n];
-            if (cmd->args[1].v.i == 1){
+            if (cmd->args[1].v.i == 1) {
                 t->no_default = true;
             } else if (n == first) {
                 if (mpctx->playback_initialized) {
