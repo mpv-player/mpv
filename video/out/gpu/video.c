@@ -3184,6 +3184,9 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         if (w < 1 || h < 1)
             return;
 
+        if (p->image_params.rotate % 180 == 90)
+            MPSWAP(int, w, h);
+
         struct mp_rect rc = {0, 0, w, h};
         struct mp_osd_res osd = {.w = w, .h = h, .display_par = 1.0};
         gl_video_resize(p, &rc, &rc, &osd);
