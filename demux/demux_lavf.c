@@ -82,7 +82,7 @@ const struct m_sub_options demux_lavf_conf = {
     .opts = (const m_option_t[]) {
         OPT_INTRANGE("demuxer-lavf-probesize", probesize, 0, 32, INT_MAX),
         OPT_CHOICE("demuxer-lavf-probe-info", probeinfo, 0,
-                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
+                   ({"no", 0}, {"yes", 1}, {"auto", -1}, {"nostreams", -2})),
         OPT_STRING("demuxer-lavf-format", format, 0),
         OPT_FLOATRANGE("demuxer-lavf-analyzeduration", analyzeduration, 0,
                        0, 3600),
@@ -892,8 +892,11 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     priv->avfc = avfc;
 
-    bool probeinfo = lavfdopts->probeinfo < 0 ?
-                            !priv->format_hack.skipinfo : lavfdopts->probeinfo;
+    bool probeinfo = lavfdopts->probeinfo != 0;
+    switch (lavfdopts->probeinfo) {
+    case -2: probeinfo = priv->avfc->nb_streams == 0; break;
+    case -1: probeinfo = !priv->format_hack.skipinfo; break;
+    }
     if (demuxer->params && demuxer->params->skip_lavf_probing)
         probeinfo = false;
     if (probeinfo) {
