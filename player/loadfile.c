@@ -1420,7 +1420,6 @@ terminate_playback:
     uninit_demuxer(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
-    TA_FREEP(&mpctx->filter_root);
 
     mpctx->playback_initialized = false;
 
@@ -1432,6 +1431,7 @@ terminate_playback:
 
     m_config_restore_backups(mpctx->mconfig);
 
+    TA_FREEP(&mpctx->filter_root);
     talloc_free(mpctx->filtered_tags);
     mpctx->filtered_tags = NULL;
 
