@@ -3154,7 +3154,8 @@ done:
         debug_check_gl(p, "after OSD rendering");
     }
 
-    if (gl_sc_error_state(p->sc) || p->broken_frame) {
+    p->broken_frame |= gl_sc_error_state(p->sc);
+    if (p->broken_frame) {
         // Make the screen solid blue to make it visually clear that an
         // error has occurred
         float color[4] = {0.0, 0.05, 0.5, 1.0};
@@ -3235,6 +3236,9 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         .stride = res->stride[0],
     };
     if (!p->ra->fns->tex_download(p->ra, &download_params))
+        goto done;
+
+    if (p->broken_frame)
         goto done;
 
     ok = true;
