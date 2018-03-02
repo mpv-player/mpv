@@ -1967,10 +1967,23 @@ void demux_update(demuxer_t *demuxer)
             }
         }
 
-        // Often useful audio-only files, which have metadata in the audio track
-        // metadata instead of the main metadata (especially OGG).
-        if (in->num_streams == 1)
-            mp_tags_merge(demuxer->metadata, in->streams[0]->tags);
+        // Often for useful audio-only files, which have metadata in the audio
+        // track metadata instead of the main metadata, but can also have cover
+        // art metadata (which libavformat likes to treat as video streams).
+        int astreams = 0;
+        int astream_id = -1;
+        int vstreams = 0;
+        for (int n = 0; n < in->num_streams; n++) {
+            struct sh_stream *sh = in->streams[n];
+            if (sh->type == STREAM_VIDEO && !sh->attached_picture)
+                vstreams += 1;
+            if (sh->type == STREAM_AUDIO) {
+                astreams += 1;
+                astream_id = n;
+            }
+        }
+        if (vstreams == 0 && astreams == 1)
+            mp_tags_merge(demuxer->metadata, in->streams[astream_id]->tags);
 
         if (in->stream_metadata)
             mp_tags_merge(demuxer->metadata, in->stream_metadata);
