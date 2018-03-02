@@ -1941,6 +1941,45 @@ void demux_changed(demuxer_t *demuxer, int events)
     pthread_mutex_unlock(&in->lock);
 }
 
+// Called locked, with user demuxer.
+static void update_final_metadata(demuxer_t *demuxer)
+{
+    assert(demuxer == demuxer->in->d_user);
+    struct demux_internal *in = demuxer->in;
+
+    int num_streams = MPMIN(in->num_streams, demuxer->num_update_stream_tags);
+    for (int n = 0; n < num_streams; n++) {
+        struct mp_tags *tags = demuxer->update_stream_tags[n];
+        demuxer->update_stream_tags[n] = NULL;
+        if (tags) {
+            struct sh_stream *sh = in->streams[n];
+            talloc_free(sh->tags);
+            sh->tags = talloc_steal(sh, tags);
+        }
+    }
+
+    // Often for useful audio-only files, which have metadata in the audio track
+    // metadata instead of the main metadata, but can also have cover art
+    // metadata (which libavformat likes to treat as video streams).
+    int astreams = 0;
+    int astream_id = -1;
+    int vstreams = 0;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct sh_stream *sh = in->streams[n];
+        if (sh->type == STREAM_VIDEO && !sh->attached_picture)
+            vstreams += 1;
+        if (sh->type == STREAM_AUDIO) {
+            astreams += 1;
+            astream_id = n;
+        }
+    }
+    if (vstreams == 0 && astreams == 1)
+        mp_tags_merge(demuxer->metadata, in->streams[astream_id]->tags);
+
+    if (in->stream_metadata)
+        mp_tags_merge(demuxer->metadata, in->stream_metadata);
+}
+
 // Called by the user thread (i.e. player) to update metadata and other things
 // from the demuxer thread.
 void demux_update(demuxer_t *demuxer)
@@ -1955,39 +1994,8 @@ void demux_update(demuxer_t *demuxer)
     demux_copy(demuxer, in->d_buffer);
     demuxer->events |= in->events;
     in->events = 0;
-    if (demuxer->events & DEMUX_EVENT_METADATA) {
-        int num_streams = MPMIN(in->num_streams, demuxer->num_update_stream_tags);
-        for (int n = 0; n < num_streams; n++) {
-            struct mp_tags *tags = demuxer->update_stream_tags[n];
-            demuxer->update_stream_tags[n] = NULL;
-            if (tags) {
-                struct sh_stream *sh = in->streams[n];
-                talloc_free(sh->tags);
-                sh->tags = talloc_steal(sh, tags);
-            }
-        }
-
-        // Often for useful audio-only files, which have metadata in the audio
-        // track metadata instead of the main metadata, but can also have cover
-        // art metadata (which libavformat likes to treat as video streams).
-        int astreams = 0;
-        int astream_id = -1;
-        int vstreams = 0;
-        for (int n = 0; n < in->num_streams; n++) {
-            struct sh_stream *sh = in->streams[n];
-            if (sh->type == STREAM_VIDEO && !sh->attached_picture)
-                vstreams += 1;
-            if (sh->type == STREAM_AUDIO) {
-                astreams += 1;
-                astream_id = n;
-            }
-        }
-        if (vstreams == 0 && astreams == 1)
-            mp_tags_merge(demuxer->metadata, in->streams[astream_id]->tags);
-
-        if (in->stream_metadata)
-            mp_tags_merge(demuxer->metadata, in->stream_metadata);
-    }
+    if (demuxer->events & DEMUX_EVENT_METADATA)
+        update_final_metadata(demuxer);
     if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
         demux_update_replaygain(demuxer);
     pthread_mutex_unlock(&in->lock);
