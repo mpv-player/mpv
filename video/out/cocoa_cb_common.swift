@@ -72,8 +72,6 @@ class CocoaCB: NSObject {
                 self.updateICCProfile()
             }
             startDisplayLink()
-        } else {
-            layer.setVideo(true)
         }
     }
 
@@ -86,6 +84,7 @@ class CocoaCB: NSObject {
         if backendState == .needsInit {
             initBackend()
         } else {
+            layer.setVideo(true)
             updateWindowSize()
             layer.neededFlips += 1
         }
@@ -128,15 +127,13 @@ class CocoaCB: NSObject {
     }
 
     func updateWindowSize() {
-        if layer.hasVideo {
-            let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main()
-            let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: mpv.mpctx!.pointee.video_out)
-            if !window.isVisible {
-                window.makeKeyAndOrderFront(nil)
-            }
-            layer.atomicDrawingStart()
-            window.updateSize(wr.size)
+        let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main()
+        let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: mpv.mpctx!.pointee.video_out)
+        if !window.isVisible {
+            window.makeKeyAndOrderFront(nil)
         }
+        layer.atomicDrawingStart()
+        window.updateSize(wr.size)
     }
 
     func setAppIcon() {
