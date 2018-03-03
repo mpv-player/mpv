@@ -280,5 +280,6 @@ extern const struct m_sub_options tv_params_conf;
 #define MP_FOURCC_YUY2  MP_FOURCC('Y', 'U', 'Y', '2')
 
 #define MP_FOURCC_MJPEG MP_FOURCC('M', 'J', 'P', 'G')
+#define MP_FOURCC_JPEG  MP_FOURCC('J', 'P', 'E', 'G')
 
 #endif /* MPLAYER_TV_H */

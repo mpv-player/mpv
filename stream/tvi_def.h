@@ -79,6 +79,7 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
         }
         break;
     case MP_FOURCC_MJPEG:
+    case MP_FOURCC_JPEG:
         /*
         This is compressed format. I don't know yet how to fill such frame with blue color.
         Keeping frame unchanged.
