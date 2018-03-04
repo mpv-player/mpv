@@ -101,7 +101,8 @@ static void destroy(struct libmpv_gpu_context *ctx)
 {
     struct priv *p = ctx->priv;
 
-    ra_gl_ctx_uninit(p->ra_ctx);
+    if (p->ra_ctx)
+        ra_gl_ctx_uninit(p->ra_ctx);
 }
 
 const struct libmpv_gpu_context_fns libmpv_gpu_context_gl = {
