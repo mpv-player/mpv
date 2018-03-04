@@ -87,16 +87,36 @@ struct priv {
 static const char *gbm_format_to_string(uint32_t format)
 {
     switch (format) {
-        case GBM_FORMAT_XRGB8888:
-            return "GBM_FORMAT_XRGB8888";
-        case GBM_FORMAT_ARGB8888:
-            return "GBM_FORMAT_ARGB8888";
-        case GBM_FORMAT_XRGB2101010:
-            return "GBM_FORMAT_XRGB2101010";
-        case GBM_FORMAT_ARGB2101010:
-            return "GBM_FORMAT_ARGB2101010";
-        default:
-            return "UNKNOWN";
+    case GBM_FORMAT_XRGB8888:
+        return "GBM_FORMAT_XRGB8888";
+    case GBM_FORMAT_ARGB8888:
+        return "GBM_FORMAT_ARGB8888";
+    case GBM_FORMAT_XRGB2101010:
+        return "GBM_FORMAT_XRGB2101010";
+    case GBM_FORMAT_ARGB2101010:
+        return "GBM_FORMAT_ARGB2101010";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+// Allow falling back to an ARGB EGLConfig when we have an XRGB framebuffer.
+// Also allow falling back to an XRGB EGLConfig for ARGB framebuffers, since
+// this seems neccessary to work with broken Mali drivers that don't report
+// their EGLConfigs as supporting alpha properly.
+static uint32_t fallback_format_for(uint32_t format)
+{
+    switch (format) {
+    case GBM_FORMAT_XRGB8888:
+        return GBM_FORMAT_ARGB8888;
+    case GBM_FORMAT_ARGB8888:
+        return GBM_FORMAT_XRGB8888;
+    case GBM_FORMAT_XRGB2101010:
+        return GBM_FORMAT_ARGB2101010;
+    case GBM_FORMAT_ARGB2101010:
+        return GBM_FORMAT_XRGB2101010;
+    default:
+        return 0;
     }
 }
 
@@ -104,16 +124,28 @@ static int match_config_to_visual(void *user_data, EGLConfig *configs, int num_c
 {
     struct ra_ctx *ctx = (struct ra_ctx*)user_data;
     struct priv *p = ctx->priv;
-    const EGLint visual_id = (EGLint)p->gbm_format;
+    const EGLint visual_id[] = {
+        (EGLint)p->gbm_format,
+        (EGLint)fallback_format_for(p->gbm_format),
+        0
+    };
 
-    for (unsigned int i = 0; i < num_configs; ++i) {
-        EGLint id;
+    for (unsigned int i = 0; visual_id[i] != 0; ++i) {
+        MP_VERBOSE(ctx, "Attempting to find EGLConfig matching %s\n",
+                   gbm_format_to_string(visual_id[i]));
+        for (unsigned int j = 0; j < num_configs; ++j) {
+            EGLint id;
 
-        if (!eglGetConfigAttrib(p->egl.display, configs[i], EGL_NATIVE_VISUAL_ID, &id))
-            continue;
+            if (!eglGetConfigAttrib(p->egl.display, configs[j], EGL_NATIVE_VISUAL_ID, &id))
+                continue;
 
-        if (visual_id == id)
-            return i;
+            if (visual_id[i] == id) {
+                MP_VERBOSE(ctx, "Found matching EGLConfig for %s\n",
+                           gbm_format_to_string(visual_id[i]));
+                return j;
+            }
+        }
+        MP_VERBOSE(ctx, "No matching EGLConfig for %s\n", gbm_format_to_string(visual_id[i]));
     }
 
     MP_ERR(ctx, "Could not find EGLConfig matching the GBM visual (%s).\n",
