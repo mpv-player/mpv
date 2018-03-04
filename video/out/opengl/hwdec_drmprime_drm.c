@@ -83,8 +83,6 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
     } else {
         memset(&p->current_frame.fb, 0, sizeof(p->current_frame.fb));
         mp_image_setrefp(&p->current_frame.image, NULL);
-        mp_image_setrefp(&p->last_frame.image, NULL);
-        mp_image_setrefp(&p->old_frame.image, NULL);
     }
 }
 
@@ -180,6 +178,9 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
                 }
             }
         }
+    } else {
+        while (p->old_frame.fb.fb_id)
+          set_current_frame(hw, NULL);
     }
 
     set_current_frame(hw, &next_frame);
