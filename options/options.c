@@ -970,8 +970,9 @@ const struct MPOpts mp_default_opts = {
     .mf_fps = 1.0,
 
     .display_tags = (char **)(const char*[]){
-        "Artist", "Album", "Album_Artist", "Comment", "Composer", "Genre",
-        "Performer", "Title", "Track", "icy-title", "service_name",
+        "Artist", "Album", "Album_Artist", "Comment", "Composer",
+        "Date", "Description", "Genre", "Performer", "Rating",
+        "Series", "Title", "Track", "icy-title", "service_name",
         NULL
     },
 
