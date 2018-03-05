@@ -28,6 +28,7 @@
 extern const struct ra_hwdec_driver ra_hwdec_vaegl;
 extern const struct ra_hwdec_driver ra_hwdec_vaglx;
 extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
+extern const struct ra_hwdec_driver ra_hwdec_surfacetexture;
 extern const struct ra_hwdec_driver ra_hwdec_vdpau;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11egl;
@@ -77,6 +78,9 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #endif
 #if HAVE_DRMPRIME && HAVE_DRM
     &ra_hwdec_drmprime_drm,
+#endif
+#if HAVE_ANDROID
+    &ra_hwdec_surfacetexture,
 #endif
 
     NULL

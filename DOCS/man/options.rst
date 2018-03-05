@@ -4902,6 +4902,26 @@ The following video options are currently all specific to ``--vo=gpu`` and
     set anyway.
     OS X and cocoa-cb only
 
+``--android-surfacetexture-listener-class=(int64_t)(intptr_t)(jclass)io.mpv.NativeOnFrameAvailableListener``
+    Providers a reference to a SurfaceTexture.OnFrameAvailableListener java
+    subclass to the surfacetexture hwdec for help in mapping hardware
+    mediacodec frames to gpu textures.
+
+    To set this option, import the following code into your Java application::
+
+        package io.mpv
+        import android.graphics.SurfaceTexture
+        class NativeOnFrameAvailableListener: SurfaceTexture.OnFrameAvailableListener {
+            var nativePtr = 0L
+            override fun onFrameAvailable(texture: SurfaceTexture?) {
+                nativeOnFrameAvailable(nativePtr)
+            }
+            private external fun nativeOnFrameAvailable(nativePtr: Long)
+        }
+
+    Android with ``--gpu-context=android`` and
+    ``--gpu-hwdec-interop=surfacetexture`` only.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during

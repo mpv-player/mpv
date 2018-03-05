@@ -472,6 +472,7 @@ def build(ctx):
         ( "video/out/opengl/hwdec_ios.m",        "ios-gl" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
+        ( "video/out/opengl/hwdec_surfacetexture.c","android" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/libmpv_gl.c",        "gl" ),
