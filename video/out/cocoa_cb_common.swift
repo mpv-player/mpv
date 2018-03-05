@@ -57,6 +57,7 @@ class CocoaCB: NSObject {
         layer = VideoLayer(cocoaCB: self)
         view.layer = layer
         view.wantsLayer = true
+        view.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func setMpvHandle(_ ctx: OpaquePointer) {
@@ -133,6 +134,7 @@ class CocoaCB: NSObject {
             if !window.isVisible {
                 window.makeKeyAndOrderFront(nil)
             }
+            layer.atomicDrawingStart()
             window.updateSize(wr.size)
         }
     }

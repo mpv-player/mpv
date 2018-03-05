@@ -30,11 +30,10 @@ class VideoLayer: CAOpenGLLayer {
     var hasVideo: Bool = false
     var neededFlips: Int = 0
     var cglContext: CGLContextObj? = nil
+    var surfaceSize: NSSize?
 
     enum Draw: Int { case normal = 1, atomic, atomicEnd }
     var draw: Draw = .normal
-    let drawLock = NSLock()
-    var surfaceSize: NSSize?
 
     var canDrawOffScreen: Bool = false
     var lastThread: Thread? = nil
@@ -49,10 +48,7 @@ class VideoLayer: CAOpenGLLayer {
 
     var inLiveResize: Bool = false {
         didSet {
-            if inLiveResize == false {
-                isAsynchronous = false
-                neededFlips += 1
-            } else {
+            if inLiveResize {
                 isAsynchronous = true
             }
         }
@@ -86,6 +82,9 @@ class VideoLayer: CAOpenGLLayer {
                           pixelFormat pf: CGLPixelFormatObj,
                           forLayerTime t: CFTimeInterval,
                           displayTime ts: UnsafePointer<CVTimeStamp>?) -> Bool {
+        if inLiveResize == false {
+            isAsynchronous = false
+        }
         return mpv != nil && cocoaCB.backendState == .init
     }
 
@@ -100,13 +99,7 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     func draw(_ ctx: CGLContextObj) {
-        drawLock.lock()
-        updateSurfaceSize()
-
-        let aspectRatioDiff = fabs( (surfaceSize!.width/surfaceSize!.height) -
-                                    (bounds.size.width/bounds.size.height) )
-
-        if aspectRatioDiff <= 0.005 && draw.rawValue >= Draw.atomic.rawValue {
+        if draw.rawValue >= Draw.atomic.rawValue {
              if draw == .atomic {
                 draw = .atomicEnd
              } else {
@@ -114,9 +107,9 @@ class VideoLayer: CAOpenGLLayer {
              }
         }
 
+        updateSurfaceSize()
         mpv.drawRender(surfaceSize!)
         CGLFlushDrawable(ctx)
-        drawLock.unlock()
 
         if needsICCUpdate {
             needsICCUpdate = false
@@ -148,7 +141,7 @@ class VideoLayer: CAOpenGLLayer {
             NSEnableScreenUpdates()
             draw = .normal
         }
-     }
+    }
 
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         let glVersions: [CGLOpenGLProfile] = [

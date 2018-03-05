@@ -246,20 +246,18 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func window(_ window: NSWindow, startCustomAnimationToEnterFullScreenWithDuration duration: TimeInterval) {
-        let cRect = contentRect(forFrameRect: frame)
-        var intermediateFrame = aspectFit(rect: cRect, in: targetScreen!.frame)
-        intermediateFrame = frameRect(forContentRect: intermediateFrame)
+        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
         hideTitleBar()
-
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = getFsAnimationDuration(duration - 0.05)
-            window.animator().setFrame(intermediateFrame, display: true)
+            window.animator().setFrame(targetScreen!.frame, display: true)
         }, completionHandler: { })
     }
 
     func window(_ window: NSWindow, startCustomAnimationToExitFullScreenWithDuration duration: TimeInterval) {
         let newFrame = calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen)
         let intermediateFrame = aspectFit(rect: newFrame, in: screen!.frame)
+        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFill
         hideTitleBar()
         setFrame(intermediateFrame, display: true)
 
@@ -281,6 +279,7 @@ class Window: NSWindow, NSWindowDelegate {
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         endAnimation(calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen))
+        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func windowDidFailToEnterFullScreen(_ window: NSWindow) {
@@ -293,6 +292,7 @@ class Window: NSWindow, NSWindowDelegate {
         let newFrame = targetScreen!.frame
         setFrame(newFrame, display: true)
         endAnimation()
+        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func endAnimation(_ newFrame: NSRect = NSZeroRect) {
@@ -304,6 +304,7 @@ class Window: NSWindow, NSWindowDelegate {
         }
 
         isAnimating = false
+        cocoaCB.layer.neededFlips += 1
         cocoaCB.isShuttingDown = false
     }
 
@@ -385,21 +386,7 @@ class Window: NSWindow, NSWindowDelegate {
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
         let newFrame = !isAnimating && isInFullscreen ? targetScreen!.frame :
                                                         frameRect
-        let aspectRatioDiff = fabs( (newFrame.width/newFrame.height) -
-                                    (frame.width/frame.height) )
-
-        let isNotUserLiveResize = isAnimating || !(!isAnimating && inLiveResize)
-        if aspectRatioDiff > 0.005 && isNotUserLiveResize {
-            cocoaCB.layer.drawLock.lock()
-            cocoaCB.layer.atomicDrawingStart()
-        }
-
         super.setFrame(newFrame, display: flag)
-        cocoaCB.layer.neededFlips += 1
-
-        if aspectRatioDiff > 0.005 && isNotUserLiveResize {
-            cocoaCB.layer.drawLock.unlock()
-        }
 
         if keepAspect {
             contentAspectRatio = unfsContentFrame!.size
