@@ -130,6 +130,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(Uniform1i),
             DEF_FN(UniformMatrix2fv),
             DEF_FN(UniformMatrix3fv),
+            DEF_FN(UniformMatrix4fv),
             DEF_FN(UseProgram),
             DEF_FN(VertexAttribPointer),
             DEF_FN(Viewport),

@@ -939,6 +939,8 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
             gl->UniformMatrix2fv(loc, 1, GL_FALSE, f);
         } else if (input->dim_v == 3 && input->dim_m == 3) {
             gl->UniformMatrix3fv(loc, 1, GL_FALSE, f);
+        } else if (input->dim_v == 4 && input->dim_m == 4) {
+            gl->UniformMatrix4fv(loc, 1, GL_FALSE, f);
         } else {
             abort();
         }
