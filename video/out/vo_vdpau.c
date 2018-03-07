@@ -86,6 +86,7 @@ struct vdpctx {
     int                                current_duration;
 
     int                                output_surface_w, output_surface_h;
+    int                                rotation;
 
     int                                force_yuv;
     struct mp_vdpau_mixer             *video_mixer;
@@ -244,8 +245,7 @@ static void forget_frames(struct vo *vo, bool seek_reset)
 static int s_size(int max, int s, int disp)
 {
     disp = MPMAX(1, disp);
-    s += s / 2;
-    return MPMIN(max, s >= disp ? s : disp);
+    return MPMIN(max, MPMAX(s, disp));
 }
 
 static void resize(struct vo *vo)
@@ -285,7 +285,9 @@ static void resize(struct vo *vo)
                          1000LL * vc->flip_offset_window;
     vo_set_queue_params(vo, vc->flip_offset_us, 1);
 
-    if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight) {
+    if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight ||
+        vc->rotation != vo->params->rotate)
+    {
         vc->output_surface_w = s_size(max_w, vc->output_surface_w, vo->dwidth);
         vc->output_surface_h = s_size(max_h, vc->output_surface_h, vo->dheight);
         // Creation of output_surfaces
@@ -309,6 +311,7 @@ static void resize(struct vo *vo)
             vdp_st = vdp->output_surface_destroy(vc->rotation_surface);
             CHECK_VDP_WARNING(vo, "Error when calling "
                               "vdp_output_surface_destroy");
+            vc->rotation_surface = VDP_INVALID_HANDLE;
         }
         if (vo->params->rotate == 90 || vo->params->rotate == 270) {
             vdp_st = vdp->output_surface_create(vc->vdp_device,
@@ -327,6 +330,7 @@ static void resize(struct vo *vo)
         MP_DBG(vo, "vdpau rotation surface create: %u\n",
                vc->rotation_surface);
     }
+    vc->rotation = vo->params->rotate;
     vo->want_redraw = true;
 }
 
