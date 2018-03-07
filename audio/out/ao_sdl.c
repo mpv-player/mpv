@@ -113,8 +113,7 @@ static int init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-    SDL_AudioSpec desired, obtained;
-
+    SDL_AudioSpec desired = {0};
     desired.format = AUDIO_S16SYS;
     for (int n = 0; fmtmap[n][0]; n++) {
         if (ao->format == fmtmap[n][0]) {
@@ -124,8 +123,10 @@ static int init(struct ao *ao)
     }
     desired.freq = ao->samplerate;
     desired.channels = ao->channels.num;
-    desired.samples = MPMIN(32768, ceil_power_of_two(ao->samplerate *
-                                                     priv->buflen));
+    if (priv->buflen) {
+        desired.samples = MPMIN(32768, ceil_power_of_two(ao->samplerate *
+                                                         priv->buflen));
+    }
     desired.callback = audio_callback;
     desired.userdata = ao;
 
@@ -134,7 +135,7 @@ static int init(struct ao *ao)
                (int) desired.freq, (int) desired.channels,
                (int) desired.format, (int) desired.samples);
 
-    obtained = desired;
+    SDL_AudioSpec obtained = desired;
     if (SDL_OpenAudio(&desired, &obtained)) {
         if (!ao->probing)
             MP_ERR(ao, "could not open audio: %s\n", SDL_GetError());
