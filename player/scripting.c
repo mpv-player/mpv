@@ -107,7 +107,7 @@ static void wait_loaded(struct MPContext *mpctx)
     mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
 }
 
-int mp_load_script(struct MPContext *mpctx, const char *fname)
+static int mp_load_script(struct MPContext *mpctx, const char *fname)
 {
     char *ext = mp_splitext(fname, NULL);
     const struct mp_scripting *backend = NULL;
