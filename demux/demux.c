@@ -2902,7 +2902,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 r->underrun |= !ds->reader_head && !ds->eof;
                 r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
                 r->ts_end = MP_PTS_MAX(r->ts_end, ds->queue->last_ts);
-                any_packets |= !!ds->queue->head;
+                any_packets |= !!ds->reader_head;
             }
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
