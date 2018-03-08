@@ -109,10 +109,10 @@ class MPVHelper: NSObject {
             // so only utilize a newly received FBO ID if it is nonzero.
             fbo = i != 0 ? i : fbo
 
-            var data = mpv_opengl_fbo(fbo: Int32(i),
-                                         w: Int32(surface.width),
-                                         h: Int32(surface.height),
-                                         internal_format: 0)
+            var data = mpv_opengl_fbo(fbo: Int32(fbo),
+                                        w: Int32(surface.width),
+                                        h: Int32(surface.height),
+                          internal_format: 0)
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
                 mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
