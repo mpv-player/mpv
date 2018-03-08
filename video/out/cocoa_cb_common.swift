@@ -237,9 +237,7 @@ class CocoaCB: NSObject {
     }
 
     func updateICCProfile() {
-        if mpv.getBoolProperty("icc-profile-auto") {
-            mpv.setRenderICCProfile(window.screen!.colorSpace!)
-        }
+        mpv.setRenderICCProfile(window.screen!.colorSpace!)
         layer.colorspace = window.screen!.colorSpace!.cgColorSpace!
     }
 
