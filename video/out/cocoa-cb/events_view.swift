@@ -48,10 +48,6 @@ class EventsView: NSView {
             removeTrackingArea(tracker!)
         }
 
-        if mpv != nil && !mpv.getBoolProperty("input-cursor") {
-            return
-        }
-
         tracker = NSTrackingArea(rect: bounds,
             options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved, .enabledDuringMouseDrag],
             owner: self, userInfo: nil)
@@ -88,12 +84,11 @@ class EventsView: NSView {
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
-        return mpv.getBoolProperty("input-cursor")
+        return true
     }
 
     override func becomeFirstResponder() -> Bool {
-        return mpv.getBoolProperty("input-cursor") ||
-               mpv.getBoolProperty("input-vo-keyboard")
+        return true
     }
 
     override func resignFirstResponder() -> Bool {
