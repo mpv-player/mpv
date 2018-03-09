@@ -154,18 +154,9 @@ void mp_print_version(struct mp_log *log, int always)
     }
 }
 
-static void shutdown_clients(struct MPContext *mpctx)
-{
-    mp_client_enter_shutdown(mpctx);
-    while (mp_clients_num(mpctx) || mpctx->outstanding_async) {
-        mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
-        mp_wait_events(mpctx);
-    }
-}
-
 void mp_destroy(struct MPContext *mpctx)
 {
-    shutdown_clients(mpctx);
+    mp_shutdown_clients(mpctx);
 
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
@@ -198,9 +189,6 @@ void mp_destroy(struct MPContext *mpctx)
     mp_input_uninit(mpctx->input);
 
     uninit_libav(mpctx->global);
-
-    if (mpctx->autodetach)
-        pthread_detach(pthread_self());
 
     mp_msg_uninit(mpctx->global);
     pthread_mutex_destroy(&mpctx->lock);
@@ -460,6 +448,8 @@ int mpv_main(int argc, char *argv[])
     struct MPContext *mpctx = mp_create();
     if (!mpctx)
         return 1;
+
+    mpctx->is_cli = true;
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);

@@ -210,7 +210,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 28)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 29)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -449,9 +449,17 @@ int mpv_initialize(mpv_handle *ctx);
 
 /**
  * Disconnect and destroy the mpv_handle. ctx will be deallocated with this
- * API call. This leaves the player running. If you want to be sure that the
- * player is terminated, send a "quit" command, and wait until the
- * MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
+ * API call.
+ *
+ * Since mpv client API version 1.29:
+ *  If the last mpv_handle is detached, the core player is destroyed. Note that
+ *  internal mpv_handles created due to scripts (e.g. the OSC) will keep the
+ *  player running. (To be fixed in the following commit.)
+ *
+ * Before mpv client API version 1.29:
+ *  This left the player running. If you want to be sure that the
+ *  player is terminated, send a "quit" command, and wait until the
+ *  MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
  */
 void mpv_detach_destroy(mpv_handle *ctx);
 
@@ -466,9 +474,19 @@ void mpv_detach_destroy(mpv_handle *ctx);
  * Since mpv_detach_destroy() is called somewhere on the way, it's not safe to
  * call other functions concurrently on the same context.
  *
- * If this is called on a mpv_handle that was not created with mpv_create(),
- * this function will merely send a quit command and then call
- * mpv_detach_destroy(), without waiting for the actual shutdown.
+ * Since mpv client API version 1.29:
+ *  The first call on any mpv_handle will block until the core is destroyed.
+ *  This means it will wait until other mpv_handle have been destroyed. If you
+ *  want asynchronous destruction, just run the "quit" command, and then react
+ *  to the MPV_EVENT_SHUTDOWN event.
+ *  If another mpv_handle already called mpv_terminate_destroy(), this call will
+ *  not actually block. It will destroy the mpv_handle, and exit immediately,
+ *  while other mpv_handles might still be uninitializing.
+ *
+ * Before mpv client API version 1.29:
+ *  If this is called on a mpv_handle that was not created with mpv_create(),
+ *  this function will merely send a quit command and then call
+ *  mpv_detach_destroy(), without waiting for the actual shutdown.
  */
 void mpv_terminate_destroy(mpv_handle *ctx);
 
