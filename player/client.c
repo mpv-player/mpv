@@ -543,7 +543,7 @@ int mpv_initialize(mpv_handle *ctx)
     int res = 0;
     void *args[2] = {ctx->mpctx, &res};
     mp_dispatch_run(ctx->mpctx->dispatch, doinit, args);
-    return res < 0 ? MPV_ERROR_INVALID_PARAMETER : 0;
+    return res == 0 ? 0 : MPV_ERROR_INVALID_PARAMETER;
 }
 
 // set ev->data to a new copy of the original data

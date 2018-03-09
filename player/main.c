@@ -206,48 +206,6 @@ void mp_destroy(struct MPContext *mpctx)
     talloc_free(mpctx);
 }
 
-static int prepare_exit_cplayer(struct MPContext *mpctx, enum exit_reason how)
-{
-    int rc = 0;
-    const char *reason = NULL;
-
-    if (how == EXIT_ERROR) {
-        reason = "Fatal error";
-        rc = 1;
-    } else if (how == EXIT_NORMAL) {
-        if (mpctx->stop_play == PT_QUIT) {
-            reason = "Quit";
-            rc = 0;
-        } else if (mpctx->files_played) {
-            if (mpctx->files_errored || mpctx->files_broken) {
-                reason = "Some errors happened";
-                rc = 3;
-            } else {
-                reason = "End of file";
-                rc = 0;
-            }
-        } else if (mpctx->files_broken && !mpctx->files_errored) {
-            reason = "Errors when loading file";
-            rc = 2;
-        } else if (mpctx->files_errored) {
-            reason = "Interrupted by error";
-            rc = 2;
-        } else {
-            reason = "No files played";
-            rc = 0;
-        }
-    }
-
-    if (reason)
-        MP_INFO(mpctx, "\nExiting... (%s)\n", reason);
-
-    if (mpctx->has_quit_custom_rc)
-        rc = mpctx->quit_custom_rc;
-
-    mp_destroy(mpctx);
-    return rc;
-}
-
 static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -370,7 +328,7 @@ struct MPContext *mp_create(void)
 // Some of the initializations depend on the options, and can't be changed or
 // undone later.
 // If options is not NULL, apply them as command line player arguments.
-// Returns: <0 on error, 0 on success.
+// Returns: 0 on success, -1 on error, 1 if exiting normally (e.g. help).
 int mp_initialize(struct MPContext *mpctx, char **options)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -398,7 +356,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
                                                mpctx->global, options);
         if (r < 0)
-            return r == M_OPT_EXIT ? -2 : -1;
+            return r == M_OPT_EXIT ? 1 : -1;
     }
 
     if (opts->operation_mode == 1) {
@@ -421,7 +379,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK);
 
     if (handle_help_options(mpctx))
-        return -2;
+        return 1; // help
 
     if (!print_libav_versions(mp_null_log, 0)) {
         // Using mismatched libraries can be legitimate, but even then it's
@@ -438,8 +396,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
     }
 
-    if (!mpctx->playlist->first && !opts->player_idle_mode)
-        return -3;
+    if (!mpctx->playlist->first && !opts->player_idle_mode) {
+        // nothing to play
+        mp_print_version(mpctx->log, true);
+        MP_INFO(mpctx, "%s", mp_help_text);
+        return 1;
+    }
 
     MP_STATS(mpctx, "start init");
 
@@ -482,16 +444,40 @@ int mpv_main(int argc, char *argv[])
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);
-    if (r == -2) // help
-        return prepare_exit_cplayer(mpctx, EXIT_NONE);
-    if (r == -3) { // nothing to play
-        mp_print_version(mpctx->log, true);
-        MP_INFO(mpctx, "%s", mp_help_text);
-        return prepare_exit_cplayer(mpctx, EXIT_NONE);
-    }
-    if (r < 0) // another error
-        return prepare_exit_cplayer(mpctx, EXIT_ERROR);
+    if (r == 0)
+        mp_play_files(mpctx);
 
-    mp_play_files(mpctx);
-    return prepare_exit_cplayer(mpctx, EXIT_NORMAL);
+    int rc = 0;
+    const char *reason = NULL;
+    if (r < 0) {
+        reason = "Fatal error";
+        rc = 1;
+    } else if (r > 0) {
+        // nothing
+    } else if (mpctx->stop_play == PT_QUIT) {
+        reason = "Quit";
+    } else if (mpctx->files_played) {
+        if (mpctx->files_errored || mpctx->files_broken) {
+            reason = "Some errors happened";
+            rc = 3;
+        } else {
+            reason = "End of file";
+        }
+    } else if (mpctx->files_broken && !mpctx->files_errored) {
+        reason = "Errors when loading file";
+        rc = 2;
+    } else if (mpctx->files_errored) {
+        reason = "Interrupted by error";
+        rc = 2;
+    } else {
+        reason = "No files played";
+    }
+
+    if (reason)
+        MP_INFO(mpctx, "\nExiting... (%s)\n", reason);
+    if (mpctx->has_quit_custom_rc)
+        rc = mpctx->quit_custom_rc;
+
+    mp_destroy(mpctx);
+    return rc;
 }
