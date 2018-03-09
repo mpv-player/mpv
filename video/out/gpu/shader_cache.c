@@ -20,7 +20,7 @@
 #define SC_MAX_ENTRIES 48
 
 union uniform_val {
-    float f[9];         // RA_VARTYPE_FLOAT
+    float f[16];        // RA_VARTYPE_FLOAT
     int i[4];           // RA_VARTYPE_INT
     struct ra_tex *tex; // RA_VARTYPE_TEX, RA_VARTYPE_IMG_*
     struct ra_buf *buf; // RA_VARTYPE_BUF_*
@@ -443,6 +443,31 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
         u->v.f[n] = v[n];
     if (transpose)
         transpose3x3(&u->v.f[0]);
+}
+
+static void transpose4x4(float r[4 * 4])
+{
+    MPSWAP(float, r[0+4*1], r[1+4*0]);
+    MPSWAP(float, r[0+4*2], r[2+4*0]);
+    MPSWAP(float, r[0+4*3], r[3+4*0]);
+    MPSWAP(float, r[1+4*2], r[2+4*1]);
+    MPSWAP(float, r[1+4*3], r[3+4*1]);
+    MPSWAP(float, r[2+4*3], r[3+4*2]);
+}
+
+void gl_sc_uniform_mat4(struct gl_shader_cache *sc, char *name,
+                        bool transpose, float *v)
+{
+    struct sc_uniform *u = find_uniform(sc, name);
+    u->input.type = RA_VARTYPE_FLOAT;
+    u->input.dim_v = 4;
+    u->input.dim_m = 4;
+    u->glsl_type = "mat4";
+    update_uniform_params(sc, u);
+    for (int n = 0; n < 16; n++)
+        u->v.f[n] = v[n];
+    if (transpose)
+        transpose4x4(&u->v.f[0]);
 }
 
 void gl_sc_blend(struct gl_shader_cache *sc,

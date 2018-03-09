@@ -43,6 +43,8 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
+void gl_sc_uniform_mat4(struct gl_shader_cache *sc, char *name,
+                        bool transpose, float *v);
 void gl_sc_blend(struct gl_shader_cache *sc,
                  enum ra_blend blend_src_rgb,
                  enum ra_blend blend_dst_rgb,
