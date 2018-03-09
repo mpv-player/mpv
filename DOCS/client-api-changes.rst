@@ -37,6 +37,8 @@ API changes
           changes subtly (see documentation in the header file). In particular,
           mpv_detach_destroy() will not leave the player running in all
           situations anymore (it gets closer to refcounting).
+        - rename mpv_detach_destroy() to mpv_destroy() (the old function will
+          remain valid as deprecated alias)
         - add mpv_create_weak_client(), which makes use of above changes
  1.28   - deprecate the render opengl_cb API, and replace it with render.h
           and render_gl.h. The goal is allowing support for APIs other than

@@ -468,9 +468,14 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
     }
 }
 
-void mpv_detach_destroy(mpv_handle *ctx)
+void mpv_destroy(mpv_handle *ctx)
 {
     mp_destroy_client(ctx, false);
+}
+
+void mpv_detach_destroy(mpv_handle *ctx)
+{
+    mpv_destroy(ctx);
 }
 
 void mpv_terminate_destroy(mpv_handle *ctx)
