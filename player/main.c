@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 #include <pthread.h>
+#include <locale.h>
 
 #include "config.h"
 #include "mpv_talloc.h"
@@ -263,8 +264,24 @@ static void abort_playback_cb(void *ctx)
     mp_abort_playback_async(mpctx);
 }
 
+// We mostly care about LC_NUMERIC, and how "." vs. "," is treated,
+// Other locale stuff might break too, but probably isn't too bad.
+static bool check_locale(void)
+{
+    char *name = setlocale(LC_NUMERIC, NULL);
+    return !name || strcmp(name, "C") == 0 || strcmp(name, "C.UTF-8") == 0;
+}
+
 struct MPContext *mp_create(void)
 {
+    if (!check_locale()) {
+        // Normally, we never print anything (except if the "terminal" option
+        // is enabled), so this is an exception.
+        fprintf(stderr, "Non-C locale detected. This is not supported.\n"
+                        "Call 'setlocale(LC_NUMERIC, \"C\");' in your code.\n");
+        return NULL;
+    }
+
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
@@ -441,6 +458,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 int mpv_main(int argc, char *argv[])
 {
     struct MPContext *mpctx = mp_create();
+    if (!mpctx)
+        return 1;
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);

@@ -19,7 +19,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <locale.h>
 #include <math.h>
 #include <assert.h>
 
@@ -462,15 +461,18 @@ static void *core_thread(void *tag)
 {
     mpthread_set_name("mpv core");
 
+    mpv_handle *ctx = NULL;
     struct MPContext *mpctx = mp_create();
-    mpctx->autodetach = true;
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
-    if (ctx) {
-        ctx->owner = true;
-        ctx->fuzzy_initialized = true;
-        m_config_set_profile(mpctx->mconfig, "libmpv", 0);
-    } else {
-        mp_destroy(mpctx);
+    if (mpctx) {
+        mpctx->autodetach = true;
+        ctx = mp_new_client(mpctx->clients, "main");
+        if (ctx) {
+            ctx->owner = true;
+            ctx->fuzzy_initialized = true;
+            m_config_set_profile(mpctx->mconfig, "libmpv", 0);
+        } else {
+            mp_destroy(mpctx);
+        }
     }
 
     // Let mpv_create() return, and pass it the handle.
@@ -491,24 +493,8 @@ static void *core_thread(void *tag)
     return NULL;
 }
 
-// We mostly care about LC_NUMERIC, and how "." vs. "," is treated,
-// Other locale stuff might break too, but probably isn't too bad.
-static bool check_locale(void)
-{
-    char *name = setlocale(LC_NUMERIC, NULL);
-    return !name || strcmp(name, "C") == 0 || strcmp(name, "C.UTF-8") == 0;
-}
-
 mpv_handle *mpv_create(void)
 {
-    if (!check_locale()) {
-        // Normally, we never print anything (except if the "terminal" option
-        // is enabled), so this is an exception.
-        fprintf(stderr, "Non-C locale detected. This is not supported.\n"
-                        "Call 'setlocale(LC_NUMERIC, \"C\");' in your code.\n");
-        return NULL;
-    }
-
     char tag;
     pthread_t thread;
     if (pthread_create(&thread, NULL, core_thread, &tag) != 0)
