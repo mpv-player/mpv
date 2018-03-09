@@ -32,6 +32,7 @@ bool mp_client_event_is_registered(struct MPContext *mpctx, int event);
 void mp_client_property_change(struct MPContext *mpctx, const char *name);
 
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name);
+void mp_client_set_weak(struct mpv_handle *ctx);
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct mpv_global *mp_client_get_global(struct mpv_handle *ctx);
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx);

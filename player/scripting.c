@@ -138,6 +138,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
         talloc_free(arg);
         return -1;
     }
+    mp_client_set_weak(arg->client);
     arg->log = mp_client_get_log(arg->client);
 
     MP_DBG(arg, "Loading %s %s...\n", backend->name, fname);

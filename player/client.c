@@ -136,6 +136,7 @@ struct mpv_handle {
     uint64_t property_event_masks; // or-ed together event masks of all properties
 
     bool fuzzy_initialized; // see scripting.c wait_loaded()
+    bool is_weak;           // can not keep core alive on its own
     struct mp_log_buffer *messages;
 };
 
@@ -267,6 +268,13 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
     mpv_request_event(client, MPV_EVENT_TICK, 0);
 
     return client;
+}
+
+void mp_client_set_weak(struct mpv_handle *ctx)
+{
+    pthread_mutex_lock(&ctx->lock);
+    ctx->is_weak = true;
+    pthread_mutex_unlock(&ctx->lock);
 }
 
 const char *mpv_client_name(mpv_handle *ctx)
@@ -416,8 +424,11 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
     if (mpctx->is_cli) {
         terminate = false;
     } else {
-        // If the last mpv_handle got destroyed, destroy the core.
-        if (clients->num_clients == 0)
+        // If the last strong mpv_handle got destroyed, destroy the core.
+        bool has_strong_ref = false;
+        for (int n = 0; n < clients->num_clients; n++)
+            has_strong_ref |= !clients->clients[n]->is_weak;
+        if (!has_strong_ref)
             terminate = true;
 
         // Reserve the right to destroy mpctx for us.
@@ -547,6 +558,14 @@ mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name)
     mpv_handle *new = mp_new_client(ctx->mpctx->clients, name);
     if (new)
         mpv_wait_event(new, 0); // set fuzzy_initialized
+    return new;
+}
+
+mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name)
+{
+    mpv_handle *new = mpv_create_client(ctx, name);
+    if (new)
+        mp_client_set_weak(new);
     return new;
 }
 

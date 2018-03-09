@@ -452,9 +452,11 @@ int mpv_initialize(mpv_handle *ctx);
  * API call.
  *
  * Since mpv client API version 1.29:
- *  If the last mpv_handle is detached, the core player is destroyed. Note that
- *  internal mpv_handles created due to scripts (e.g. the OSC) will keep the
- *  player running. (To be fixed in the following commit.)
+ *  If the last mpv_handle is detached, the core player is destroyed. In
+ *  addition, if there are only weak mpv_handles (such as created by
+ *  mpv_create_weak_client() or internal scripts), these mpv_handles will
+ *  be sent MPV_EVENT_SHUTDOWN. This function may block until these clients
+ *  have responded to the shutdown event, and the core is finally destroyed.
  *
  * Before mpv client API version 1.29:
  *  This left the player running. If you want to be sure that the
@@ -515,6 +517,20 @@ void mpv_terminate_destroy(mpv_handle *ctx);
  * @return a new handle, or NULL on error
  */
 mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
+
+/**
+ * This is the same as mpv_create_client(), but the created mpv_handle is
+ * treated as a weak reference. If all mpv_handles referencing a core are
+ * weak references, the core is automatically destroyed. (This still goes
+ * through normal uninit of course. Effectively, if the last non-weak mpv_handle
+ * is destroyed, then the weak mpv_handles receive MPV_EVENT_SHUTDOWN and are
+ * asked to terminate as well.)
+ *
+ * Note if you want to use this like refcounting: you have to be aware that
+ * mpv_terminate_destroy() _and_ mpv_detach_destroy() for the last non-weak
+ * mpv_handle will block until all weak mpv_handles are destroyed.
+ */
+mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name);
 
 /**
  * Load a config file. This loads and parses the file, and sets every entry in
