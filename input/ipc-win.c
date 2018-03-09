@@ -304,7 +304,7 @@ done:
         CloseHandle(arg->write_ol.hEvent);
 
     CloseHandle(arg->client_h);
-    mpv_detach_destroy(arg->client);
+    mpv_destroy(arg->client);
     talloc_free(arg);
     return NULL;
 }
@@ -316,7 +316,7 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 
     pthread_t client_thr;
     if (pthread_create(&client_thr, NULL, client_thread, client)) {
-        mpv_detach_destroy(client->client);
+        mpv_destroy(client->client);
         CloseHandle(client->client_h);
         talloc_free(client);
     }

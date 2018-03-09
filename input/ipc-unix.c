@@ -209,7 +209,7 @@ done:
     talloc_free(client_msg.start);
     if (arg->close_client_fd)
         close(arg->client_fd);
-    mpv_detach_destroy(arg->client);
+    mpv_destroy(arg->client);
     talloc_free(arg);
     return NULL;
 }
@@ -230,7 +230,7 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 
 err:
     if (client->client)
-        mpv_detach_destroy(client->client);
+        mpv_destroy(client->client);
 
     if (client->close_client_fd)
         close(client->client_fd);

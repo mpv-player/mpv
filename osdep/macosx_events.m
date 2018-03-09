@@ -314,7 +314,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         });
         return YES;
     } else {
-        mpv_detach_destroy(ctx);
+        mpv_destroy(ctx);
         return NO;
     }
 }
@@ -343,7 +343,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         if ([(Application *)NSApp cocoaCB].isShuttingDown)
             return;
         #endif
-        mpv_detach_destroy(_ctx);
+        mpv_destroy(_ctx);
         _ctx = nil;
         break;
     }

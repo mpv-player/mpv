@@ -95,7 +95,7 @@ static void *script_thread(void *p)
     if (arg->backend->load(arg->client, arg->fname) < 0)
         MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->fname);
 
-    mpv_detach_destroy(arg->client);
+    mpv_destroy(arg->client);
     talloc_free(arg);
     return NULL;
 }
@@ -145,7 +145,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, script_thread, arg)) {
-        mpv_detach_destroy(arg->client);
+        mpv_destroy(arg->client);
         talloc_free(arg);
         return -1;
     }
