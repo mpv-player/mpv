@@ -141,7 +141,7 @@ def build(ctx):
 
     def swift(task):
         src = ' '.join([x.abspath() for x in task.inputs])
-        bridge = ctx.path.find_node("osdep/macOS_swift_bridge.h")
+        bridge = ctx.path.find_node("osdep/macOS_swift_bridge.h").abspath()
         tgt = task.outputs[0].abspath()
         header = task.outputs[1].abspath()
         module = task.outputs[2].abspath()
@@ -179,7 +179,7 @@ def build(ctx):
 
         ctx.env.append_value('LINKFLAGS', [
             '-Xlinker', '-add_ast_path',
-            '-Xlinker', '%s' % ctx.path.find_resource("osdep/macOS_swift.swiftmodule")
+            '-Xlinker', '%s' % ctx.path.find_or_declare("osdep/macOS_swift.swiftmodule").abspath()
         ])
 
     if ctx.dependency_satisfied('cplayer'):

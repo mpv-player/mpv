@@ -38,8 +38,8 @@ def __find_swift_library(ctx):
     for path in swift_library_paths:
         swift_library = ctx.root.find_dir([dev_path, path])
         if swift_library is not None:
-            ctx.end_msg(swift_library)
-            __add_swift_library_linking_flags(ctx, swift_library)
+            ctx.end_msg(swift_library.abspath())
+            __add_swift_library_linking_flags(ctx, swift_library.abspath())
             return
     ctx.end_msg(False)
 
