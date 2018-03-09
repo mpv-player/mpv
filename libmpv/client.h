@@ -451,6 +451,19 @@ int mpv_initialize(mpv_handle *ctx);
  * Disconnect and destroy the mpv_handle. ctx will be deallocated with this
  * API call.
  *
+ * If the last mpv_handle is detached, the core player is destroyed. In
+ * addition, if there are only weak mpv_handles (such as created by
+ * mpv_create_weak_client() or internal scripts), these mpv_handles will
+ * be sent MPV_EVENT_SHUTDOWN. This function may block until these clients
+ * have responded to the shutdown event, and the core is finally destroyed.
+ */
+void mpv_destroy(mpv_handle *ctx);
+
+#if MPV_ENABLE_DEPRECATED
+/**
+ * @deprecated use mpv_destroy(), which has exactly the same semantics (the
+ * deprecation is a mere rename)
+ *
  * Since mpv client API version 1.29:
  *  If the last mpv_handle is detached, the core player is destroyed. In
  *  addition, if there are only weak mpv_handles (such as created by
@@ -464,16 +477,17 @@ int mpv_initialize(mpv_handle *ctx);
  *  MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
  */
 void mpv_detach_destroy(mpv_handle *ctx);
+#endif
 
 /**
- * Similar to mpv_detach_destroy(), but brings the player and all clients down
+ * Similar to mpv_destroy(), but brings the player and all clients down
  * as well, and waits until all of them are destroyed. This function blocks. The
- * advantage over mpv_detach_destroy() is that while mpv_detach_destroy() merely
+ * advantage over mpv_destroy() is that while mpv_destroy() merely
  * detaches the client handle from the player, this function quits the player,
  * waits until all other clients are destroyed (i.e. all mpv_handles are
  * detached), and also waits for the final termination of the player.
  *
- * Since mpv_detach_destroy() is called somewhere on the way, it's not safe to
+ * Since mpv_destroy() is called somewhere on the way, it's not safe to
  * call other functions concurrently on the same context.
  *
  * Since mpv client API version 1.29:
@@ -488,7 +502,7 @@ void mpv_detach_destroy(mpv_handle *ctx);
  * Before mpv client API version 1.29:
  *  If this is called on a mpv_handle that was not created with mpv_create(),
  *  this function will merely send a quit command and then call
- *  mpv_detach_destroy(), without waiting for the actual shutdown.
+ *  mpv_destroy(), without waiting for the actual shutdown.
  */
 void mpv_terminate_destroy(mpv_handle *ctx);
 
@@ -498,7 +512,7 @@ void mpv_terminate_destroy(mpv_handle *ctx);
  * mpv_request_log_messages() state, its own set of observed properties, and
  * its own state for asynchronous operations. Otherwise, everything is shared.
  *
- * This handle should be destroyed with mpv_detach_destroy() if no longer
+ * This handle should be destroyed with mpv_destroy() if no longer
  * needed. The core will live as long as there is at least 1 handle referencing
  * it. Any handle can make the core quit, which will result in every handle
  * receiving MPV_EVENT_SHUTDOWN.
@@ -527,7 +541,7 @@ mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
  * asked to terminate as well.)
  *
  * Note if you want to use this like refcounting: you have to be aware that
- * mpv_terminate_destroy() _and_ mpv_detach_destroy() for the last non-weak
+ * mpv_terminate_destroy() _and_ mpv_destroy() for the last non-weak
  * mpv_handle will block until all weak mpv_handles are destroyed.
  */
 mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name);
@@ -1154,7 +1168,7 @@ typedef enum mpv_event_id {
      * to disconnect all clients. Most requests to the player will fail, and
      * mpv_wait_event() will always return instantly (returning new shutdown
      * events if no other events are queued). The client should react to this
-     * and quit with mpv_detach_destroy() as soon as possible.
+     * and quit with mpv_destroy() as soon as possible.
      */
     MPV_EVENT_SHUTDOWN          = 1,
     /**

@@ -8,6 +8,7 @@ mpv_command_string
 mpv_create
 mpv_create_client
 mpv_create_weak_client
+mpv_destroy
 mpv_detach_destroy
 mpv_error_string
 mpv_event_name
