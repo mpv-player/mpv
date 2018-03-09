@@ -40,6 +40,8 @@ API changes
         - rename mpv_detach_destroy() to mpv_destroy() (the old function will
           remain valid as deprecated alias)
         - add mpv_create_weak_client(), which makes use of above changes
+        - MPV_EVENT_SHUTDOWN is now returned exactly once if a mpv_handle
+          should terminate, instead of spamming the event queue with this event
  1.28   - deprecate the render opengl_cb API, and replace it with render.h
           and render_gl.h. The goal is allowing support for APIs other than
           OpenGL. The old API is emulated with the new API.

@@ -634,6 +634,8 @@ static int append_event(struct mpv_handle *ctx, struct mpv_event event, bool cop
     ctx->events[(ctx->first_event + ctx->num_events) % ctx->max_events] = event;
     ctx->num_events++;
     wakeup_client(ctx);
+    if (event.event_id == MPV_EVENT_SHUTDOWN)
+        ctx->event_mask &= ctx->event_mask & ~(1ULL << MPV_EVENT_SHUTDOWN);
     return 0;
 }
 

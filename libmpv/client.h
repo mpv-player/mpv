@@ -1166,9 +1166,8 @@ typedef enum mpv_event_id {
     /**
      * Happens when the player quits. The player enters a state where it tries
      * to disconnect all clients. Most requests to the player will fail, and
-     * mpv_wait_event() will always return instantly (returning new shutdown
-     * events if no other events are queued). The client should react to this
-     * and quit with mpv_destroy() as soon as possible.
+     * the client should react to this and quit with mpv_destroy() as soon as
+     * possible.
      */
     MPV_EVENT_SHUTDOWN          = 1,
     /**
