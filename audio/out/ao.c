@@ -36,6 +36,7 @@
 #include "common/global.h"
 
 extern const struct ao_driver audio_out_oss;
+extern const struct ao_driver audio_out_audiotrack;
 extern const struct ao_driver audio_out_audiounit;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_coreaudio_exclusive;
@@ -54,6 +55,9 @@ extern const struct ao_driver audio_out_sdl;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
+#if HAVE_ANDROID
+    &audio_out_audiotrack,
+#endif
 #if HAVE_AUDIOUNIT
     &audio_out_audiounit,
 #endif

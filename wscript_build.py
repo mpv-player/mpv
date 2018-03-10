@@ -242,6 +242,7 @@ def build(ctx):
         ( "audio/format.c" ),
         ( "audio/out/ao.c" ),
         ( "audio/out/ao_alsa.c",                 "alsa" ),
+        ( "audio/out/ao_audiotrack.c",           "android" ),
         ( "audio/out/ao_audiounit.m",            "audiounit" ),
         ( "audio/out/ao_coreaudio.c",            "coreaudio" ),
         ( "audio/out/ao_coreaudio_chmap.c",      "coreaudio || audiounit" ),
