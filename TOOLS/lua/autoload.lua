@@ -7,7 +7,9 @@
 -- Add at most 5000 * 2 files when starting a file (before + after).
 MAXENTRIES = 5000
 
+local msg = require 'mp.msg'
 local options = require 'mp.options'
+local utils = require 'mp.utils'
 
 o = {
     disabled = false
@@ -24,8 +26,6 @@ EXTENSIONS = Set {
     'mkv', 'avi', 'mp4', 'ogv', 'webm', 'rmvb', 'flv', 'wmv', 'mpeg', 'mpg', 'm4v', '3gp',
     'mp3', 'wav', 'ogm', 'flac', 'm4a', 'wma', 'ogg', 'opus',
 }
-
-mputils = require 'mp.utils'
 
 function add_files_at(index, files)
     index = index - 1
@@ -84,21 +84,34 @@ function alnumcomp(x, y)
     return #xt < #yt
 end
 
+local autoloaded = nil
+
 function find_and_add_entries()
     local path = mp.get_property("path", "")
-    local dir, filename = mputils.split_path(path)
-    if o.disabled or #dir == 0 then
+    local dir, filename = utils.split_path(path)
+    msg.trace(("dir: %s, filename: %s"):format(dir, filename))
+    if o.disabled then
+        msg.verbose("stopping: autoload disabled")
+    elseif #dir == 0 then
+        msg.verbose("stopping: not a local path")
         return
     end
+
     local pl_count = mp.get_property_number("playlist-count", 1)
-    if (pl_count > 1 and autoload == nil) or
+    -- check if this is a manually made playlist
+    if (pl_count > 1 and autoloaded == nil) or
        (pl_count == 1 and EXTENSIONS[string.lower(get_extension(filename))] == nil) then
         return
     else
-        autoload = true
+        autoloaded = true
     end
 
-    local files = mputils.readdir(dir, "files")
+    local pl = mp.get_property_native("playlist", {})
+    local pl_current = mp.get_property_number("playlist-pos-1", 1)
+    msg.trace(("playlist-pos-1: %s, playlist: %s"):format(pl_current,
+        utils.to_string(pl)))
+
+    local files = utils.readdir(dir, "files")
     if files == nil then
         return
     end
@@ -118,8 +131,6 @@ function find_and_add_entries()
         dir = ""
     end
 
-    local pl = mp.get_property_native("playlist", {})
-    local pl_current = mp.get_property_number("playlist-pos", 0) + 1
     -- Find the current pl entry (dir+"/"+filename) in the sorted dir list
     local current
     for i = 1, #files do
@@ -131,6 +142,7 @@ function find_and_add_entries()
     if current == nil then
         return
     end
+    msg.trace("current file position in files: "..current)
 
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
@@ -144,6 +156,7 @@ function find_and_add_entries()
             local filepath = dir .. file
             if pl_e then
                 -- If there's a playlist entry, and it's the same file, stop.
+                msg.trace(pl_e.filename.." == "..filepath.." ?")
                 if pl_e.filename == filepath then
                     break
                 end
@@ -151,11 +164,11 @@ function find_and_add_entries()
 
             if direction == -1 then
                 if pl_current == 1 then -- never add additional entries in the middle
-                    mp.msg.info("Prepending " .. file)
+                    msg.info("Prepending " .. file)
                     table.insert(append[-1], 1, filepath)
                 end
             else
-                mp.msg.info("Adding " .. file)
+                msg.info("Adding " .. file)
                 table.insert(append[1], filepath)
             end
         end
