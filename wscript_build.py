@@ -326,6 +326,7 @@ def build(ctx):
         ( "misc/bstr.c" ),
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
+        ( "misc/jni.c",                          "android" ),
         ( "misc/json.c" ),
         ( "misc/natural_sort.c" ),
         ( "misc/node.c" ),
