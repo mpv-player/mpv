@@ -70,6 +70,7 @@ struct texplane {
     struct ra_tex *tex;
     int w, h;
     bool flipped;
+    struct gl_transform transform;
 };
 
 struct video_image {
@@ -760,6 +761,10 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
 
         get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
                       &img[n].transform);
+
+        if (!gl_transform_eq(t->transform, identity_trans))
+            gl_transform_trans(t->transform, &img[n].transform);
+
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, img[n].w, img[n].h);
 
@@ -882,6 +887,7 @@ static void init_video(struct gl_video *p)
 
             plane->w = mp_image_plane_w(&layout, n);
             plane->h = mp_image_plane_h(&layout, n);
+            plane->transform = identity_trans;
 
             struct ra_tex_params params = {
                 .dimensions = 2,
@@ -3388,6 +3394,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
                     .w = mp_image_plane_w(&layout, n),
                     .h = mp_image_plane_h(&layout, n),
                     .tex = tex[n],
+                    .transform = p->hwdec_mapper->transform,
                 };
             }
         } else {

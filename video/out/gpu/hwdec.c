@@ -166,6 +166,7 @@ struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
         .priv = talloc_zero_size(mapper, hwdec->driver->mapper->priv_size),
         .src_params = *params,
         .dst_params = *params,
+        .transform = identity_trans,
     };
     if (mapper->driver->init(mapper) < 0)
         ra_hwdec_mapper_free(&mapper);

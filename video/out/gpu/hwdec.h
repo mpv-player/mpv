@@ -4,6 +4,7 @@
 #include "video/mp_image.h"
 #include "ra.h"
 #include "video/hwdec.h"
+#include "video/out/gpu/utils.h"
 
 struct ra_hwdec {
     const struct ra_hwdec_driver *driver;
@@ -44,6 +45,7 @@ struct ra_hwdec_mapper {
     // .init() callback.
     struct ra_tex *tex[4];
     bool vdpau_fields;
+    struct gl_transform transform;
 };
 
 // This can be used to map frames of a specific hw format as GL textures.
