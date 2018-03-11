@@ -38,6 +38,7 @@ struct priv {
     char *curbuf, *buf1, *buf2;
     size_t buffer_size;
     pthread_mutex_t buffer_lock;
+    double audio_latency;
 
     int cfg_frames_per_buffer;
     int cfg_sample_rate;
@@ -89,6 +90,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
 
     data[0] = p->curbuf;
     delay = 2 * p->buffer_size / (double)ao->bps;
+    delay += p->audio_latency;
     ao_read_data(ao, data, p->buffer_size / ao->sstride,
         mp_time_us() + 1000000LL * delay);
 
@@ -188,10 +190,11 @@ static int init(struct ao *ao)
     audio_sink.pLocator = (void*)&locator_output_mix;
     audio_sink.pFormat = NULL;
 
-    SLboolean required[] = { SL_BOOLEAN_TRUE };
-    SLInterfaceID iid_array[] = { SL_IID_BUFFERQUEUE };
+    SLInterfaceID iid_array[] = { SL_IID_BUFFERQUEUE, SL_IID_ANDROIDCONFIGURATION };
+    SLboolean required[] = { SL_BOOLEAN_TRUE, SL_BOOLEAN_FALSE };
     CHK((*p->engine)->CreateAudioPlayer(p->engine, &p->player, &audio_source,
-        &audio_sink, 1, iid_array, required));
+        &audio_sink, 2, iid_array, required));
+
     CHK((*p->player)->Realize(p->player, SL_BOOLEAN_FALSE));
     CHK((*p->player)->GetInterface(p->player, SL_IID_PLAY, (void*)&p->play));
     CHK((*p->player)->GetInterface(p->player, SL_IID_BUFFERQUEUE,
@@ -199,6 +202,20 @@ static int init(struct ao *ao)
     CHK((*p->buffer_queue)->RegisterCallback(p->buffer_queue,
         buffer_callback, ao));
     CHK((*p->play)->SetPlayState(p->play, SL_PLAYSTATE_PLAYING));
+
+    SLAndroidConfigurationItf android_config;
+    SLuint32 audio_latency = 0, value_size = sizeof(SLuint32);
+    SLint32 result = (*p->player)->GetInterface(p->player,
+        SL_IID_ANDROIDCONFIGURATION, &android_config);
+    if (result == SL_RESULT_SUCCESS) {
+        result = (*android_config)->GetConfiguration(android_config,
+            (const SLchar *)"androidGetAudioLatency",
+            &value_size, &audio_latency);
+    }
+    if (result == SL_RESULT_SUCCESS) {
+        p->audio_latency = (double)audio_latency / 1000.0;
+        MP_INFO(ao, "Device latency is %f\n", p->audio_latency);
+    }
 
     return 1;
 error:
