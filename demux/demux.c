@@ -2489,7 +2489,7 @@ static void execute_cache_seek(struct demux_internal *in,
     }
 }
 
-// Create a new blank ache range, and backup the old one. If the seekable
+// Create a new blank cache range, and backup the old one. If the seekable
 // demuxer cache is disabled, merely reset the current range to a blank state.
 static void switch_to_fresh_cache_range(struct demux_internal *in)
 {
