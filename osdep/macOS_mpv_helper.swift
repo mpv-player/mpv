@@ -100,10 +100,11 @@ class MPVHelper: NSObject {
             mpv_render_context_report_swap(mpvRenderContext)
     }
 
-    func drawRender(_ surface: NSSize) {
+    func drawRender(_ surface: NSSize, _ depth: GLint) {
         if mpvRenderContext != nil {
             var i: GLint = 0
             var flip: CInt = 1
+            var ditherDepth = depth
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
@@ -116,6 +117,7 @@ class MPVHelper: NSObject {
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
                 mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
+                mpv_render_param(type: MPV_RENDER_PARAM_DEPTH, data: &ditherDepth),
                 mpv_render_param()
             ]
             mpv_render_context_render(mpvRenderContext, &params);

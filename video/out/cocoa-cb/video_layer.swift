@@ -31,6 +31,7 @@ class VideoLayer: CAOpenGLLayer {
     var neededFlips: Int = 0
     var cglContext: CGLContextObj? = nil
     var surfaceSize: NSSize?
+    var bufferDepth: GLint = 0
 
     enum Draw: Int { case normal = 1, atomic, atomicEnd }
     var draw: Draw = .normal
@@ -60,6 +61,9 @@ class VideoLayer: CAOpenGLLayer {
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
         contentsScale = cocoaCB.window.backingScaleFactor
+        if #available(macOS 10.12, *) {
+            contentsFormat = kCAContentsFormatRGBA16Float
+        }
     }
 
     override init(layer: Any) {
@@ -108,7 +112,7 @@ class VideoLayer: CAOpenGLLayer {
         }
 
         updateSurfaceSize()
-        mpv.drawRender(surfaceSize!)
+        mpv.drawRender(surfaceSize!, bufferDepth)
         CGLFlushDrawable(ctx)
 
         if needsICCUpdate {
@@ -159,6 +163,8 @@ class VideoLayer: CAOpenGLLayer {
                 kCGLPFAAccelerated,
                 kCGLPFADoubleBuffer,
                 kCGLPFABackingStore,
+                kCGLPFAColorSize, _CGLPixelFormatAttribute(rawValue: 64),
+                kCGLPFAColorFloat,
                 kCGLPFAAllowOfflineRenderers,
                 kCGLPFASupportsAutomaticGraphicsSwitching,
                 _CGLPixelFormatAttribute(rawValue: 0)
@@ -186,6 +192,10 @@ class VideoLayer: CAOpenGLLayer {
         CGLSetParameter(ctx, kCGLCPSwapInterval, &i)
         CGLSetCurrentContext(ctx)
         cglContext = ctx
+
+        let obj: GLenum = GLenum(GL_BACK_LEFT)
+        glGetFramebufferAttachmentParameteriv(GLenum(GL_FRAMEBUFFER), obj,
+                        GLenum(GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE), &bufferDepth)
 
         if let app = NSApp as? Application {
             app.initMPVCore()
