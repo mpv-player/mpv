@@ -61,9 +61,6 @@ class VideoLayer: CAOpenGLLayer {
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
         contentsScale = cocoaCB.window.backingScaleFactor
-        if #available(macOS 10.12, *) {
-            contentsFormat = kCAContentsFormatRGBA16Float
-        }
     }
 
     override init(layer: Any) {
@@ -147,6 +144,45 @@ class VideoLayer: CAOpenGLLayer {
         }
     }
 
+    func testDisplaysFor10bit() -> Bool {
+        let task = Process()
+        let pipe = Pipe()
+        task.launchPath = "/usr/sbin/system_profiler"
+        task.arguments = ["-xml", "SPDisplaysDataType"]
+        task.standardOutput = pipe
+        task.launch()
+        task.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output: String = String(data: data, encoding: .utf8)!
+        var is10bit: Bool = false
+
+        let profiles = output.propertyList() as! NSArray
+        for case let profile as [String: Any] in profiles {
+            let gpus = profile["_items"] as! NSArray
+            for case let gpu as [String: Any] in gpus {
+                guard let connectedDevices = gpu["spdisplays_ndrvs"] as? NSArray else {
+                    break
+                }
+
+                for case let device as [String: Any] in connectedDevices {
+                    guard let depthStr = device["spdisplays_depth"] as? String else {
+                        break
+                    }
+                    if depthStr == "CGSThirtyBitColor" {
+                        is10bit = true
+                    }
+                    let depth = depthStr == "CGSThirtytwoBitColor" ? "8" :
+                                depthStr == "CGSThirtyBitColor"    ? "10" : "unknown"
+                    print("Detected Display '\(device["_name"]!)' with \(depth)bit")
+                    //mpv.sendError("Detected Display '\(device["_name"]!)' with \(depth)bit")
+                }
+            }
+        }
+
+        return is10bit
+    }
+
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         let glVersions: [CGLOpenGLProfile] = [
             kCGLOGLPVersion_3_2_Core,
@@ -156,6 +192,7 @@ class VideoLayer: CAOpenGLLayer {
         var pix: CGLPixelFormatObj?
         var err: CGLError = CGLError(rawValue: 0)
         var npix: GLint = 0
+        let is10bit = testDisplaysFor10bit()
 
         verLoop : for ver in glVersions {
             var glAttributes: [CGLPixelFormatAttribute] = [
@@ -169,6 +206,17 @@ class VideoLayer: CAOpenGLLayer {
                 kCGLPFASupportsAutomaticGraphicsSwitching,
                 _CGLPixelFormatAttribute(rawValue: 0)
             ]
+
+
+            if !is10bit {
+                // removes kCGLPFAColorSize, its parameter and kCGLPFAColorFloat
+                glAttributes.removeSubrange(5..<8)
+            } else {
+                cocoaCB.window.depthLimit = .sixtyfourBitRGB
+                if #available(macOS 10.12, *) {
+                    contentsFormat = kCAContentsFormatRGBA16Float
+                }
+            }
 
             for index in stride(from: glAttributes.count-2, through: 4, by: -1) {
                 err = CGLChoosePixelFormat(glAttributes, &pix, &npix)
