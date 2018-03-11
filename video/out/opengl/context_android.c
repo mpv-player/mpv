@@ -26,6 +26,7 @@
 #include "options/m_config.h"
 #include "context.h"
 #include "context_android.h"
+#include "misc/jni.h"
 
 #define OPT_BASE_STRUCT struct android_opts
 const struct m_sub_options android_conf = {
@@ -74,19 +75,18 @@ static void android_uninit(struct ra_ctx *ctx)
 static bool android_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
+    JNIEnv *env = MP_JNI_GET_ENV(ctx);
+    if (!env) {
+        MP_FATAL(ctx, "Could not attach java VM.\n");
+        goto fail;
+    }
 
     jobject surface = (jobject)(intptr_t)ctx->vo->opts->WinID;
-    JavaVM *vm = (JavaVM *)av_jni_get_java_vm(NULL);
-    JNIEnv *env;
-    int ret = (*vm)->GetEnv(vm, (void**)&env, JNI_VERSION_1_6);
-    if (ret == JNI_EDETACHED) {
-        if ((*vm)->AttachCurrentThread(vm, &env, NULL) != 0) {
-            MP_FATAL(ctx, "Could not attach java VM.\n");
-            goto fail;
-        }
-    }
     p->native_window = ANativeWindow_fromSurface(env, surface);
-    (*vm)->DetachCurrentThread(vm);
+    if (!p->native_window) {
+        MP_FATAL(ctx, "Failed to create ANativeWindow\n");
+        goto fail;
+    }
 
     p->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
