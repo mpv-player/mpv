@@ -1590,12 +1590,12 @@ Property list
     redrawing and frame display being somewhat disconnected, and you might
     have to pause and force a redraw.
 
-    Sub-properties:
+    Sub-properties::
 
-    ``video-frame-info/picture-type``
-    ``video-frame-info/interlaced``
-    ``video-frame-info/tff``
-    ``video-frame-info/repeat``
+        video-frame-info/picture-type
+        video-frame-info/interlaced
+        video-frame-info/tff
+        video-frame-info/repeat
 
 ``container-fps``
     Container FPS. This can easily contain bogus values. For videos that use
