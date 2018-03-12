@@ -249,7 +249,7 @@ const struct ao_driver audio_out_opensles = {
 
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
-        OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 10000),
+        OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 96000),
         {0}
     },
     .options_prefix = "opensles",
