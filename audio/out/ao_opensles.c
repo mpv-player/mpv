@@ -41,7 +41,6 @@ struct priv {
     double audio_latency;
 
     int cfg_frames_per_buffer;
-    int cfg_sample_rate;
 };
 
 static const int fmtmap[][2] = {
@@ -153,9 +152,6 @@ static int init(struct ao *ao)
     pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
 
-    if (p->cfg_sample_rate)
-        ao->samplerate = p->cfg_sample_rate;
-
     // samplesPerSec is misnamed, actually it's samples per ms
     pcm.samplesPerSec = ao->samplerate * 1000;
 
@@ -254,7 +250,6 @@ const struct ao_driver audio_out_opensles = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 10000),
-        OPT_INTRANGE("sample-rate", cfg_sample_rate, 0, 1000, 100000),
         {0}
     },
     .options_prefix = "opensles",
