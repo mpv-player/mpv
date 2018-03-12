@@ -98,7 +98,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     pthread_mutex_unlock(&p->buffer_lock);
 }
 
-#define DEFAULT_BUFFER_SIZE_MS 200
+#define DEFAULT_BUFFER_SIZE_MS 250
 
 #define CHK(stmt) \
     { \
