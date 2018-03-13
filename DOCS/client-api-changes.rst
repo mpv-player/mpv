@@ -46,6 +46,12 @@ API changes
             mpv_opengl_cb_report_flip => mpv_render_context_report_swap
             mpv_opengl_cb_uninit_gl => mpv_render_context_free
           The VO opengl-cb is also renamed to "libmpv".
+        - deprecate the qthelper.hpp header file. This provided some C++ helper
+          utility functions for Qt with use of libmpv. There is no reason to
+          keep this in the mpv git repository, nor to make it part of the libmpv
+          API. If you're using this header, you can safely copy it into your
+          project - it uses only libmpv public API. Alternatively, it could be
+          maintained in a separate repository by interested parties.
  1.27   - make opengl-cb the default VO. This causes a subtle behavior change
           if the API user called mpv_opengl_cb_init_gl(), but does not set
           the "vo" option. Before, it would still have used another VO (like
