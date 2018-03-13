@@ -616,6 +616,9 @@ extern const char m_option_path_separator;
 #define OPT_FLOATRANGE(...) \
     OPT_RANGE_(float, __VA_ARGS__, .type = &m_option_type_float)
 
+#define OPT_DOUBLERANGE(...) \
+    OPT_RANGE_(double, __VA_ARGS__, .type = &m_option_type_double)
+
 #define OPT_INTPAIR(...) \
     OPT_GENERAL_NOTYPE(__VA_ARGS__, .type = &m_option_type_intpair)
 
