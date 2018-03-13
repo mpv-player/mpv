@@ -158,7 +158,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func showTitleBar() {
-        if !border && !isInFullscreen { return }
+        if titleBarEffect == nil || (!border && !isInFullscreen) { return }
         let loc = cocoaCB.view.convert(mouseLocationOutsideOfEventStream, from: nil)
 
         titleButtons.forEach { $0.isHidden = false }
@@ -178,6 +178,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func hideTitleBar() {
+        if titleBarEffect == nil { return }
         if isInFullscreen && !isAnimating {
             titleBarEffect!.alphaValue = 0
             return
