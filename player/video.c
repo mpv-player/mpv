@@ -777,7 +777,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
                 mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP;
-    drop &= (opts->frame_dropping & 1);
+    drop &= frame->can_drop;
 
     if (resample && using_spdif_passthrough(mpctx))
         return;
@@ -1109,6 +1109,7 @@ void write_video(struct MPContext *mpctx)
         .pts = pts,
         .duration = -1,
         .still = mpctx->step_frames > 0,
+        .can_drop = opts->frame_dropping & 1,
         .num_frames = MPMIN(mpctx->num_next_frames, req),
         .num_vsyncs = 1,
     };
