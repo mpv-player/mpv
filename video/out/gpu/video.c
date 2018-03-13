@@ -3180,8 +3180,8 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
     struct mp_osd_res old_osd = p->osd_rect;
 
     if (!args->scaled) {
-        int w = p->real_image_params.w;
-        int h = p->real_image_params.h;
+        int w, h;
+        mp_image_params_get_dsize(&p->real_image_params, &w, &h);
         if (w < 1 || h < 1)
             return;
 
