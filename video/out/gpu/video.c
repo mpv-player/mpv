@@ -106,6 +106,7 @@ struct image {
     struct ra_tex *tex;
     int w, h; // logical size (after transformation)
     struct gl_transform transform; // rendering transformation
+    int interlaced; // deinterlacing
 };
 
 // A named image, for user scripting purposes
@@ -347,6 +348,8 @@ const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
         OPT_CHOICE("gpu-dumb-mode", dumb_mode, 0,
                    ({"auto", 0}, {"yes", 1}, {"no", -1})),
+        OPT_CHOICE("gpu-deint-shader", deint_shader, 0,
+            ({"no", 0}, {"yes", 1}, {"auto", -1})),
         OPT_FLOATRANGE("gamma-factor", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
@@ -754,6 +757,11 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
             .w = t->w,
             .h = t->h,
         };
+
+        if (p->opts.deint_shader == -1)
+            img[n].interlaced = !!(vimg->mpi->fields & MP_IMGFIELD_INTERLACED);
+        else if (p->opts.deint_shader == 1)
+            img[n].interlaced = 1;
 
         for (int i = 0; i < 4; i++)
             img[n].components += !!p->ra_format.components[n][i];
@@ -1291,8 +1299,22 @@ static void copy_image(struct gl_video *p, int *offset, struct image img)
         img.multiplier *= 1.0 / (tex_max - 1);
     }
 
-    GLSLF("color.%s = %f * vec4(texture(texture%d, texcoord%d)).%s;\n",
-          dst, img.multiplier, id, id, src);
+    if (img.interlaced) {
+        // Simple "blend" deinterlacer based on vlc's deinterlace/algo_basic.c
+        // The two fields are averaged together to produce one frame.
+        // Each line output is the input line averaged with the previous line.
+        // The very first line is copied exactly (albeit by averaging itself).
+        GLSLF("float yprev%d = texcoord%d.y == 0.0 ? 0.0 : "
+                              "texcoord%d.y - 1.0 / texture_size%d.y;\n",
+              id, id, id, id);
+        GLSLF("vec2 prev%d = vec2(texcoord%d.x, yprev%d);\n", id, id, id);
+        GLSLF("color.%s = %f * mix(texture(texture%d, texcoord%d), "
+                                  "texture(texture%d, prev%d), 0.5).%s;\n",
+              dst, img.multiplier, id, id, id, id, src);
+    } else {
+        GLSLF("color.%s = %f * vec4(texture(texture%d, texcoord%d)).%s;\n",
+              dst, img.multiplier, id, id, src);
+    }
 
     *offset += count;
 }
@@ -2034,7 +2056,8 @@ static void pass_read_video(struct gl_video *p)
     // If any textures are still in integer format by this point, we need
     // to introduce an explicit conversion pass to avoid breaking hooks/scaling
     for (int n = 0; n < 4; n++) {
-        if (img[n].tex && img[n].tex->params.format->ctype == RA_CTYPE_UINT) {
+        if (img[n].tex && (img[n].tex->params.format->ctype == RA_CTYPE_UINT ||
+                           img[n].interlaced)) {
             GLSLF("// use_integer fix for plane %d\n", n);
             copy_image(p, &(int){0}, img[n]);
             pass_describe(p, "use_integer fix");
@@ -3577,6 +3600,7 @@ static void check_gl_features(struct gl_video *p)
             .tone_mapping_param = p->opts.tone_mapping_param,
             .tone_mapping_desat = p->opts.tone_mapping_desat,
             .early_flush = p->opts.early_flush,
+            .deint_shader = p->opts.deint_shader,
             .icc_opts = p->opts.icc_opts,
             .hwdec_interop = p->opts.hwdec_interop,
         };

@@ -4395,6 +4395,17 @@ The following video options are currently all specific to ``--vo=gpu`` and
     ``--temporal-dither`` is in use. 1 (the default) will update on every video
     frame, 2 on every other frame, etc.
 
+``--gpu-deint-shader=<mode>``
+    Enable deinterlacing in the gpu fragment shader (default: no). Requires
+    ``--vo=gpu``.
+
+    no
+        Disable deinterlacing.
+    yes
+        Enable deinterlacing of all frames.
+    auto
+        Enable deinterlacing of only frames marked as interlaced.
+
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,
     it calls ``glGetError()``, and requests a debug context. For Vulkan, it

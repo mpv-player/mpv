@@ -140,6 +140,7 @@ struct gl_video_opts {
     int early_flush;
     char *shader_cache_dir;
     char *hwdec_interop;
+    int deint_shader;
 };
 
 extern const struct m_sub_options gl_video_conf;
