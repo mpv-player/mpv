@@ -222,8 +222,7 @@ static void update_opts(void *p)
             vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
     }
 
-    if (vo->gl_opts_cache && m_config_cache_update(vo->gl_opts_cache))
-    {
+    if (vo->gl_opts_cache && m_config_cache_update(vo->gl_opts_cache)) {
         // "Legacy" update of video GL renderer related options.
         if (vo->driver->control)
             vo->driver->control(vo, VOCTRL_UPDATE_RENDER_OPTS, NULL);
