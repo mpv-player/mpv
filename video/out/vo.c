@@ -163,6 +163,7 @@ struct vo_internal {
     uint64_t current_frame_id;
 
     double display_fps;
+    double reported_display_fps;
     int opt_framedrop;
 };
 
@@ -533,27 +534,30 @@ static void update_display_fps(struct vo *vo)
         mp_read_option_raw(vo->global, "framedrop", &m_option_type_choice,
                            &in->opt_framedrop);
 
-        double display_fps;
-        mp_read_option_raw(vo->global, "display-fps", &m_option_type_double,
-                           &display_fps);
-
-        if (display_fps <= 0)
-            vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
+        double fps = 0;
+        vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &fps);
 
         pthread_mutex_lock(&in->lock);
 
-        if (in->display_fps != display_fps) {
-            in->display_fps = display_fps;
-            MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
-
-            // make sure to update the player
-            in->queued_events |= VO_EVENT_WIN_STATE;
-            wakeup_core(vo);
-        }
-
-        in->nominal_vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
-        in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
+        in->reported_display_fps = fps;
     }
+
+    double display_fps = vo->opts->override_display_fps;
+    if (display_fps <= 0)
+        display_fps = in->reported_display_fps;
+
+    if (in->display_fps != display_fps) {
+        in->nominal_vsync_interval =  display_fps > 0 ? 1e6 / display_fps : 0;
+        in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
+        in->display_fps = display_fps;
+
+        MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
+
+        // make sure to update the player
+        in->queued_events |= VO_EVENT_WIN_STATE;
+        wakeup_core(vo);
+    }
+
     pthread_mutex_unlock(&in->lock);
 }
 
