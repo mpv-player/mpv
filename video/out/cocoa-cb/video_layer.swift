@@ -166,7 +166,7 @@ class VideoLayer: CAOpenGLLayer {
 
             for index in stride(from: glAttributes.count-2, through: 4, by: -1) {
                 err = CGLChoosePixelFormat(glAttributes, &pix, &npix)
-                if err == kCGLBadAttribute {
+                if err == kCGLBadAttribute || err == kCGLBadPixelFormat || pix == nil {
                     glAttributes.remove(at: index)
                 } else {
                     break verLoop
@@ -174,8 +174,10 @@ class VideoLayer: CAOpenGLLayer {
             }
         }
 
-        if err != kCGLNoError {
-            fatalError("Couldn't create CGL pixel format: \(CGLErrorString(err)) (\(err))")
+        if err != kCGLNoError || pix == nil {
+            let errS = String(cString: CGLErrorString(err))
+            print("Couldn't create CGL pixel format: \(errS) (\(err.rawValue))")
+            exit(1)
         }
         return pix!
     }
