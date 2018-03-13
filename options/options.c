@@ -139,6 +139,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
     OPT_FLAG("native-fs", native_fs, 0),
+    OPT_DOUBLE("display-fps", override_display_fps, M_OPT_MIN, .min = 0),
     OPT_DOUBLERANGE("video-timing-offset", timing_offset, 0, 0.0, 1.0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
@@ -611,8 +612,6 @@ const m_option_t mp_opts[] = {
                 {"decoder", 2},
                 {"decoder+vo", 3})),
     OPT_FLAG("video-latency-hacks", video_latency_hacks, 0),
-
-    OPT_DOUBLE("display-fps", frame_drop_fps, M_OPT_MIN, .min = 0),
 
     OPT_FLAG("untimed", untimed, 0),
 

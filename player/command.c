@@ -2724,17 +2724,10 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    double fps = mpctx->opts->frame_drop_fps;
-    struct vo *vo = mpctx->video_out;
-    if (vo)
-        fps = vo_get_display_fps(vo);
-    if (action == M_PROPERTY_SET) {
-        int ret = mp_property_generic_option(mpctx, prop, action, arg);
-        if (vo)
-            vo_event(vo, VO_EVENT_WIN_STATE);
-        return ret;
-    }
-    return m_property_double_ro(action, arg, fps);
+    double fps = mpctx->video_out ? vo_get_display_fps(mpctx->video_out) : 0;
+    if (fps > 0 && action != M_PROPERTY_SET)
+        return m_property_double_ro(action, arg, fps);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_framedrop(void *ctx, struct m_property *prop,
