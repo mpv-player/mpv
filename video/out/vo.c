@@ -164,7 +164,6 @@ struct vo_internal {
 
     double display_fps;
     double reported_display_fps;
-    int opt_framedrop;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -531,9 +530,6 @@ static void update_display_fps(struct vo *vo)
 
         pthread_mutex_unlock(&in->lock);
 
-        mp_read_option_raw(vo->global, "framedrop", &m_option_type_choice,
-                           &in->opt_framedrop);
-
         double fps = 0;
         vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &fps);
 
@@ -851,7 +847,7 @@ bool vo_render_frame_external(struct vo *vo)
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
-    in->dropped_frame &= (in->opt_framedrop & 1);
+    in->dropped_frame &= frame->can_drop;
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= now - in->prev_vsync < 100 * 1000;
