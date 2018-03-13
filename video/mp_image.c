@@ -369,6 +369,10 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
     for (int p = 0; p < MP_MAX_PLANES; p++)
         new->bufs[p] = NULL;
     new->hwctx = NULL;
+    new->icc_profile = NULL;
+    new->a53_cc = NULL;
+    new->num_ff_side_data = 0;
+    new->ff_side_data = NULL;
     return new;
 }
 
