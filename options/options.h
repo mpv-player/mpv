@@ -50,6 +50,8 @@ typedef struct mp_vo_opts {
 
     char *mmcss_profile;
 
+    double timing_offset;
+
     // vo_drm
     struct sws_opts *sws_opts;
     // vo_drm

@@ -5410,6 +5410,26 @@ Miscellaneous
     out. This delay in reaction time to sudden A/V offsets should be the only
     side effect of turning this option on, for all sound drivers.
 
+``--video-timing-offset=<seconds>``
+    Control how long before video display target time the frame should be
+    rendered (default: 0.050). If a video frame should be displayed at a
+    certain time, the VO will start rendering the frame earlier, and then will
+    perform a blocking wait until the display time, and only then "swap" the
+    frame to display. The rendering cannot start before the previous frame is
+    displayed, so this value is implicitly limited by the video framerate. With
+    normal video frame rates, the default value will ensure that rendering is
+    always immediately started after the previous frame was displayed. On the
+    other hand, setting a too high value can reduce responsiveness with low
+    FPS value.
+
+    For client API users using the render API (or the deprecated ``opengl-cb``
+    API), this option is interesting, because you can stop the render API
+    from limiting your FPS (see ``mpv_render_context_render()`` documentation).
+
+    This applies only to audio timing modes (e.g. ``--video-sync=audio``). In
+    other modes (``--video-sync=display-...``), video timing relies on vsync
+    blocking, and this option is not used.
+
 ``--video-sync=<audio|...>``
     How the player synchronizes audio and video.
 

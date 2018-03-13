@@ -270,6 +270,12 @@ void mpv_render_context_set_update_callback(mpv_render_context *ctx,
  * notifies you when a new frame was added. The details potentially depend on
  * the backends and the provided parameters.
  *
+ * Generally, libmpv will invoke your update callback some time before the video
+ * frame should be shown, and then lets this function block until the supposed
+ * display time. This will limit your rendering to video FPS. You can prevent
+ * this by setting the "video-timing-offset" global option to 0. (This applies
+ * only to "audio" video sync mode.)
+ *
  * @param ctx a valid render context
  * @param params an array of parameters, terminated by type==0. Which parameters
  *               are required depends on the backend. It's left unspecified what

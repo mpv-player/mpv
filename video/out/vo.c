@@ -147,6 +147,7 @@ struct vo_internal {
     int64_t num_successive_vsyncs;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
+    int64_t timing_offset;     // same (but from options; not VO configured)
 
     int64_t delayed_count;
     int64_t drop_count;
@@ -212,11 +213,23 @@ static void dispatch_wakeup_cb(void *ptr)
     vo_wakeup(vo);
 }
 
+// Initialize or update options from vo->opts
+static void read_opts(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+    in->timing_offset = (uint64_t)(vo->opts->timing_offset * 1e6);
+    pthread_mutex_unlock(&in->lock);
+}
+
 static void update_opts(void *p)
 {
     struct vo *vo = p;
 
     if (m_config_cache_update(vo->opts_cache)) {
+        read_opts(vo);
+
         // "Legacy" update of video position related options.
         if (vo->driver->control)
             vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
@@ -728,8 +741,9 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
     if (r && next_pts >= 0) {
         // Don't show the frame too early - it would basically freeze the
         // display by disallowing OSD redrawing or VO interaction.
-        // Actually render the frame at earliest 50ms before target time.
-        next_pts -= (uint64_t)(0.050 * 1e6);
+        // Actually render the frame at earliest the given offset before target
+        // time.
+        next_pts -= in->timing_offset;
         next_pts -= in->flip_queue_offset;
         int64_t now = mp_time_us();
         if (next_pts > now)
@@ -1003,6 +1017,7 @@ static void *vo_thread(void *ptr)
     if (r < 0)
         return NULL;
 
+    read_opts(vo);
     update_display_fps(vo);
     vo_event(vo, VO_EVENT_WIN_STATE);
 
