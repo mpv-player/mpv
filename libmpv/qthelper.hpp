@@ -13,6 +13,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef MPV_CLIENT_API_QTHELPER_H_
+#define MPV_CLIENT_API_QTHELPER_H_
+
+#include <mpv/client.h>
+
+#if !MPV_ENABLE_DEPRECATED
+#error "This helper is deprecated. Copy it into your project instead."
+#else
+
 /**
  * Note: these helpers are provided for convenience for C++/Qt applications.
  * This is based on the public API in client.h, and it does not encode any
@@ -20,9 +29,6 @@
  * can even copy and modify this code as you like, or implement similar things
  * for other languages.
  */
-
-#ifndef MPV_CLIENT_API_QTHELPER_H_
-#define MPV_CLIENT_API_QTHELPER_H_
 
 #include <cstring>
 
@@ -32,8 +38,6 @@
 #include <QHash>
 #include <QSharedPointer>
 #include <QMetaType>
-
-#include <mpv/client.h>
 
 namespace mpv {
 namespace qt {
@@ -376,5 +380,7 @@ static inline QVariant command(mpv_handle *ctx, const QVariant &args)
 }
 
 Q_DECLARE_METATYPE(mpv::qt::ErrorReturn)
+
+#endif /* else #if MPV_ENABLE_DEPRECATED */
 
 #endif
