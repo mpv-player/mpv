@@ -1234,7 +1234,9 @@ Audio
     While the option normally takes one of the strings as indicated by the
     methods above, you can also force the device for most AOs by building it
     manually. For example ``name/foobar`` forces the AO ``name`` to use the
-    device ``foobar``.
+    device ``foobar``. However, the ``--ao`` option will strictly force a
+    specific AO. To avoid confusion, don't use ``--ao`` and ``--audio-device``
+    together.
 
     .. admonition:: Example for ALSA
 
