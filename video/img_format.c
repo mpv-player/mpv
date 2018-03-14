@@ -318,6 +318,9 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
     if (pixdesc && strncmp(pixdesc->name, "xyz", 3) == 0)
         return MP_CSP_XYZ;
 
+    if (imgfmt == IMGFMT_ADRENO)
+        return MP_CSP_AUTO;
+
     if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_RGB))
         return MP_CSP_RGB;
 

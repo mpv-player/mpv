@@ -315,6 +315,43 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     p->tex_format = ra_find_unorm_format(mapper->ra, 1, 4);
 
+    const char *renderer = gl->GetString(GL_RENDERER);
+    if (strncmp(renderer, "Adreno (TM) 3", 13) == 0) {
+        // Some Adreno (Qualcomm Snapdragon) GPUs return a texture
+        // which is actually packed VYU instead of RGB:
+        //  - Amazon FireTV gen1 [API22, Adreno (TM) 320]
+        //  - Samsung Galaxy Tab Pro 8.4 (mondrianwifi) [API23, Adreno (TM) 330]
+        MP_INFO(mapper, "Enabling YUV workaround for %s\n", renderer);
+        struct ra *ra = mapper->ra;
+        struct ra_format *fmt = talloc_zero(ra, struct ra_format);
+        *fmt = (struct ra_format) {
+            .name           = "adreno_external_oes",
+            .priv           = p->tex_format->priv,
+            .ctype          = p->tex_format->ctype,
+            .ordered        = p->tex_format->ordered,
+            .num_components = p->tex_format->num_components,
+            .pixel_size     = p->tex_format->pixel_size,
+            .linear_filter  = p->tex_format->linear_filter,
+            .renderable     = p->tex_format->renderable,
+            .special_imgfmt = IMGFMT_ADRENO,
+        };
+
+        struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
+        desc->num_planes = 1;
+        desc->planes[0] = fmt;
+        desc->components[0][0] = 3;
+        desc->components[0][1] = 1;
+        desc->components[0][2] = 2;
+        desc->chroma_w = desc->chroma_h = 1;
+
+        fmt->special_imgfmt_desc = desc;
+        fmt->glsl_format = ra_fmt_glsl_format(fmt);
+        MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
+
+        p->tex_format = fmt;
+        mapper->dst_params.imgfmt = IMGFMT_ADRENO;
+    }
+
     return 0;
 }
 

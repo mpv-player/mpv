@@ -202,6 +202,7 @@ enum mp_imgfmt {
     IMGFMT_MEDIACODEC,      // AVMediaCodecBuffer
     IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
     IMGFMT_CUDA,            // CUDA Buffer
+    IMGFMT_ADRENO,          // Adreno GL_TEXTURE_EXTERNAL_OES
 
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
     // a corresponding IMGFMT_ value.
