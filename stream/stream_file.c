@@ -212,6 +212,7 @@ static bool check_stream_network(int fd)
         0x564C      /*NCP*/,    0x6969      /*NFS*/,    0x6E667364  /*NFSD*/,
         0xAAD7AAEA  /*PANFS*/,  0x50495045  /*PIPEFS*/, 0x517B      /*SMB*/,
         0xBEEFDEAD  /*SNFS*/,   0xBACBACBC  /*VMHGFS*/, 0x7461636f  /*OCFS2*/,
+        0xFE534D42  /*SMB2*/,   0x61636673  /*ACFS*/,   0x013111A8  /*IBRIX*/,
         0
     };
     if (fstatfs(fd, &fs) == 0) {
