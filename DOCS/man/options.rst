@@ -129,8 +129,8 @@ Playback Control
         ``--start='#2' --end='#4'``
             Plays chapters 2 and 3, and exits.
 
-``--end=<time>``
-    Stop at given absolute time. Use ``--length`` if the time should be relative
+``--end=<relative time>``
+    Stop at given time. Use ``--length`` if the time should be relative
     to ``--start``. See ``--start`` for valid option values and examples.
 
 ``--length=<relative time>``
