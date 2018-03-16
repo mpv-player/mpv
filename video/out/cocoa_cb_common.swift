@@ -452,6 +452,21 @@ class CocoaCB: NSObject {
         }
     }
 
+    func shutdown(_ destroy: Bool = false) {
+        setCursorVisiblility(true)
+        stopDisplaylink()
+        uninitLightSensor()
+        removeDisplayReconfigureObserver()
+        mpv.deinitRender()
+        mpv.deinitMPV(destroy)
+    }
+
+    func checkShutdown() {
+        if isShuttingDown {
+            shutdown(true)
+        }
+    }
+
     func processEvent(_ event: UnsafePointer<mpv_event>) {
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
@@ -459,12 +474,7 @@ class CocoaCB: NSObject {
                 isShuttingDown = true
                 return
             }
-            setCursorVisiblility(true)
-            stopDisplaylink()
-            uninitLightSensor()
-            removeDisplayReconfigureObserver()
-            mpv.deinitRender()
-            mpv.deinitMPV()
+            shutdown()
         case MPV_EVENT_PROPERTY_CHANGE:
             if backendState == .init {
                 handlePropertyChange(event)
