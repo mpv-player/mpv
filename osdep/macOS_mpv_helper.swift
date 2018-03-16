@@ -245,7 +245,10 @@ class MPVHelper: NSObject {
         mpvRenderContext = nil
     }
 
-    func deinitMPV() {
+    func deinitMPV(_ destroy: Bool = false) {
+        if destroy {
+            mpv_destroy(mpvHandle)
+        }
         mpvHandle = nil
         mpvLog = nil
         inputContext = nil
