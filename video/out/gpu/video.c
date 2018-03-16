@@ -3181,16 +3181,17 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
 
     if (!args->scaled) {
         int w, h;
-        mp_image_params_get_dsize(&p->real_image_params, &w, &h);
+        mp_image_params_get_dsize(&p->image_params, &w, &h);
         if (w < 1 || h < 1)
             return;
 
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, w, h);
 
-        struct mp_rect rc = {0, 0, w, h};
+        struct mp_rect src = {0, 0, p->image_params.w, p->image_params.h};
+        struct mp_rect dst = {0, 0, w, h};
         struct mp_osd_res osd = {.w = w, .h = h, .display_par = 1.0};
-        gl_video_resize(p, &rc, &rc, &osd);
+        gl_video_resize(p, &src, &dst, &osd);
     }
 
     gl_video_reset_surfaces(p);
