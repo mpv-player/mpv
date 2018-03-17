@@ -177,6 +177,9 @@ struct mpv_opengl_cb_drm_params {
     // currently used crtc id
     int crtc_id;
 
+    // currently used connector id
+    int connector_id;
+
     // pointer to the drmModeAtomicReq that is being used for the renderloop.
     // This atomic request pointer should be usually created at every renderloop.
     struct _drmModeAtomicReq *atomic_request;
