@@ -224,7 +224,7 @@ static int init(struct ra_hwdec *hw)
     drm_params = ra_get_native_resource(hw->ra, "drm_params");
     if (drm_params) {
         p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
-                                           drm_overlay);
+                                           drm_params->connector_id, drm_overlay);
         if (!p->ctx) {
             mp_err(p->log, "Failed to retrieve DRM atomic context.\n");
             goto err;

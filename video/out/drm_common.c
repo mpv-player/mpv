@@ -285,7 +285,8 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
         mp_verbose(log, "No DRM Atomic support found\n");
     } else {
         mp_verbose(log, "DRM Atomic support found\n");
-        kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id, overlay_id);
+        kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id,
+                                                        kms->connector->connector_id, overlay_id);
         if (!kms->atomic_context) {
             mp_err(log, "Failed to create DRM atomic context\n");
             goto err;
