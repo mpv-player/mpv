@@ -323,8 +323,10 @@ static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *o
 {
     struct priv *p = sw->ctx->priv;
     if (p->kms->atomic_context) {
-        p->kms->atomic_context->request = drmModeAtomicAlloc();
-        p->drm_params.atomic_request = p->kms->atomic_context->request;
+        if (!p->kms->atomic_context->request) {
+            p->kms->atomic_context->request = drmModeAtomicAlloc();
+            p->drm_params.atomic_request = p->kms->atomic_context->request;
+        }
         return ra_gl_ctx_start_frame(sw, out_fbo);
     }
     return false;
@@ -381,7 +383,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
-        p->drm_params.atomic_request = atomic_ctx->request = NULL;
+        p->drm_params.atomic_request = atomic_ctx->request = drmModeAtomicAlloc();
     }
 
     gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
@@ -391,6 +393,15 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 static void drm_egl_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
+
+    if (atomic_ctx) {
+        int ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request, 0, NULL);
+        if (ret)
+            MP_ERR(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
+        drmModeAtomicFree(atomic_ctx->request);
+    }
+
     ra_gl_ctx_uninit(ctx);
 
     crtc_release(ctx);
