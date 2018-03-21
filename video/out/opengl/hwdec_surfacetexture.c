@@ -47,6 +47,7 @@ struct priv_owner {
 struct priv {
     struct mp_log *log;
     const struct ra_format *tex_format;
+    bool external_oes_2d;
 
     jfloatArray matrix;
     jfloat transform[16];
@@ -351,6 +352,12 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         p->tex_format = fmt;
         mapper->dst_params.imgfmt = IMGFMT_ADRENO;
     }
+    if (strncmp(renderer, "PowerVR Rogue GX6250", 20) == 0) {
+        // Some Android devices that support GLES3 still only support
+        // texture2D() on external textures.
+        //  - Amazon FireTV gen2 [API22]
+        p->external_oes_2d = true;
+    }
 
     return 0;
 }
@@ -438,6 +445,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         .render_src = true,
         .src_linear = true,
         .external_oes = true,
+        .external_oes_2d = p->external_oes_2d,
     };
     if (!params.format)
         return -1;

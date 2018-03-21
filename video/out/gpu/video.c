@@ -1297,6 +1297,9 @@ static void copy_image(struct gl_video *p, int *offset, struct image img)
         img.multiplier *= 1.0 / (tex_max - 1);
     }
 
+    if (img.tex->params.external_oes_2d)
+        GLSLHF("#define texture texture2D\n");
+
     GLSLF("color.%s = %f * vec4(texture(texture%d, texcoord%d)).%s;\n",
           dst, img.multiplier, id, id, src);
 
