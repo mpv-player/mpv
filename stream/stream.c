@@ -302,7 +302,8 @@ struct stream *stream_create(const char *url, int flags,
             continue;
         }
         if (r != STREAM_OK) {
-            mp_err(log, "Failed to open %s.\n", url);
+            if (!mp_cancel_test(c))
+                mp_err(log, "Failed to open %s.\n", url);
             goto done;
         }
     }

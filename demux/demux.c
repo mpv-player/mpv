@@ -1183,7 +1183,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
-    if (!dp || !dp->len || !ds) {
+    if (!dp || !dp->len || !ds || demux_cancel_test(ds->in->d_thread)) {
         talloc_free(dp);
         return;
     }
@@ -1306,7 +1306,7 @@ static bool read_packet(struct demux_internal *in)
     in->eof = false;
     in->idle = true;
 
-    if (!in->reading || in->blocked)
+    if (!in->reading || in->blocked || demux_cancel_test(in->d_thread))
         return false;
 
     // Check if we need to read a new packet. We do this if all queues are below
