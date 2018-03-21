@@ -710,8 +710,13 @@ void lavc_process(struct mp_filter *f, bool *eof_flag,
             }
             return;
         }
-        if (!send(f, pkt))
-            MP_WARN(f, "could not consume packet\n"); // should never happen
+        if (!send(f, pkt)) {
+            // Should never happen, but can happen with broken decoders.
+            MP_WARN(f, "could not consume packet\n");
+            mp_pin_out_unread(f->ppins[0], frame);
+            mp_filter_wakeup(f);
+            return;
+        }
         talloc_free(pkt);
         mp_filter_internal_mark_progress(f);
     }
