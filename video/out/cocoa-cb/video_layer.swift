@@ -27,21 +27,22 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     let videoLock = NSLock()
+    let displayLock = NSLock()
     var hasVideo: Bool = false
-    var neededFlips: Int = 0
+    var needsFlip: Bool = false
+    var canDrawOffScreen: Bool = false
     var cglContext: CGLContextObj? = nil
     var surfaceSize: NSSize?
 
     enum Draw: Int { case normal = 1, atomic, atomicEnd }
     var draw: Draw = .normal
 
-    var canDrawOffScreen: Bool = false
-    var lastThread: Thread? = nil
+    let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue.draw")
 
     var needsICCUpdate: Bool = false {
         didSet {
             if needsICCUpdate == true {
-                neededFlips += 1
+                update()
             }
         }
     }
@@ -51,6 +52,7 @@ class VideoLayer: CAOpenGLLayer {
             if inLiveResize {
                 isAsynchronous = true
             }
+            update()
         }
     }
 
@@ -92,9 +94,8 @@ class VideoLayer: CAOpenGLLayer {
                        pixelFormat pf: CGLPixelFormatObj,
                        forLayerTime t: CFTimeInterval,
                        displayTime ts: UnsafePointer<CVTimeStamp>?) {
-        neededFlips = 0
-        canDrawOffScreen = Thread.current == lastThread
-        lastThread = Thread.current
+        needsFlip = false
+        canDrawOffScreen = true
         draw(ctx)
     }
 
@@ -197,36 +198,42 @@ class VideoLayer: CAOpenGLLayer {
 
     let updateCallback: mpv_render_update_fn = { (ctx) in
         let layer: VideoLayer = MPVHelper.bridge(ptr: ctx!)
-        layer.neededFlips += 1
+        layer.update()
     }
 
     override func display() {
+        displayLock.lock()
+        let isUpdate = needsFlip
         super.display()
         CATransaction.flush()
+        if isUpdate {
+            if !cocoaCB.window.occlusionState.contains(.visible) &&
+                needsFlip && canDrawOffScreen
+            {
+                CGLSetCurrentContext(cglContext!)
+                draw(cglContext!)
+            } else if needsFlip {
+                update()
+            }
+        }
+        displayLock.unlock()
     }
 
     func setVideo(_ state: Bool) {
         videoLock.lock()
         hasVideo = state
-        neededFlips = 0
         videoLock.unlock()
     }
 
-    func reportFlip() {
-        mpv.reportRenderFlip()
-        videoLock.lock()
-        if !isAsynchronous && neededFlips > 0 && hasVideo {
-            if !cocoaCB.window.occlusionState.contains(.visible) &&
-                neededFlips > 1 && canDrawOffScreen
-            {
-                CGLSetCurrentContext(cglContext!)
-                draw(cglContext!)
-                display()
-            } else {
-                display()
+    func update() {
+        queue.async {
+            self.videoLock.lock()
+            if !self.inLiveResize && self.hasVideo {
+                self.needsFlip = true
+                self.display()
             }
+            self.videoLock.unlock()
         }
-        videoLock.unlock()
     }
 
 }

@@ -86,7 +86,7 @@ class CocoaCB: NSObject {
         } else {
             layer.setVideo(true)
             updateWindowSize()
-            layer.neededFlips += 1
+            layer.update()
         }
     }
 
@@ -150,7 +150,7 @@ class CocoaCB: NSObject {
                         flagsOut: UnsafeMutablePointer<CVOptionFlags>,
               displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
         let ccb: CocoaCB = MPVHelper.bridge(ptr: displayLinkContext!)
-        ccb.layer.reportFlip()
+        ccb.mpv.reportRenderFlip()
         return kCVReturnSuccess
     }
 
@@ -160,7 +160,7 @@ class CocoaCB: NSObject {
         CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
         if #available(macOS 10.12, *) {
             CVDisplayLinkSetOutputHandler(link!) { link, now, out, inFlags, outFlags -> CVReturn in
-                self.layer.reportFlip()
+                self.mpv.reportRenderFlip()
                 return kCVReturnSuccess
             }
         } else {
@@ -454,6 +454,7 @@ class CocoaCB: NSObject {
 
     func shutdown(_ destroy: Bool = false) {
         setCursorVisiblility(true)
+        layer.setVideo(false)
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()

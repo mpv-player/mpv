@@ -305,7 +305,7 @@ class Window: NSWindow, NSWindowDelegate {
         }
 
         isAnimating = false
-        cocoaCB.layer.neededFlips += 1
+        cocoaCB.layer.update()
         cocoaCB.checkShutdown()
     }
 
@@ -316,7 +316,7 @@ class Window: NSWindow, NSWindowDelegate {
         endAnimation()
         isInFullscreen = true
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer.neededFlips += 1
+        cocoaCB.layer.update()
     }
 
     func setToWindow() {
@@ -327,7 +327,7 @@ class Window: NSWindow, NSWindowDelegate {
         endAnimation()
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer.neededFlips += 1
+        cocoaCB.layer.update()
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double{
