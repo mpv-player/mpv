@@ -642,7 +642,8 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     return first_num;
 
 err_out:
-    MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
+    if (!mp_cancel_test(mpctx->playback_abort))
+        MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
     return -1;
 }
 
