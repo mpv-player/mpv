@@ -5646,6 +5646,8 @@ Miscellaneous
           both tracks need to have the same width, or filter initialization
           will fail (you can add ``scale`` filters before the ``vstack`` filter
           to fix the size).
+          To load a video track from another file, you can use
+          ``--external-file=other.mkv``.
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
