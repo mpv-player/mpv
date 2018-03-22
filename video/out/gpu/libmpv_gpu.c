@@ -17,6 +17,11 @@ struct priv {
     struct gl_video *renderer;
 };
 
+static const char *const native_resource_map[] = {
+    [MPV_RENDER_PARAM_X11_DISPLAY] = "x11",
+    [MPV_RENDER_PARAM_WL_DISPLAY] = "wl",
+};
+
 static int init(struct render_backend *ctx, mpv_render_param *params)
 {
     ctx->priv = talloc_zero(NULL, struct priv);
@@ -45,6 +50,16 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
     int err = p->context->fns->init(p->context, params);
     if (err < 0)
         return err;
+
+    for (int n = 0; params && params[n].type; n++) {
+        if (params[n].type > 0 &&
+            params[n].type < MP_ARRAY_SIZE(native_resource_map) &&
+            native_resource_map[params[n].type])
+        {
+            ra_add_native_resource(p->context->ra,
+                        native_resource_map[params[n].type], params[n].data);
+        }
+    }
 
     p->renderer = gl_video_init(p->context->ra, ctx->log, ctx->global);
 

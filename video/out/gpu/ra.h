@@ -39,7 +39,28 @@ struct ra {
     // RA_CAP_DIRECT_UPLOAD is supported. This is basically only relevant for
     // OpenGL. Set by the RA user.
     bool use_pbo;
+
+    // Array of native resources. For the most part an "escape" mechanism, and
+    // usually does not contain parameters required for basic functionality.
+    struct ra_native_resource *native_resources;
+    int num_native_resources;
 };
+
+// For passing through windowing system specific parameters and such. The
+// names are always internal (except for legacy opengl-cb uses; the libmpv
+// render API uses mpv_render_param_type and maps them to names internally).
+// For example, a name="x11" entry has a X11 display as (Display*)data.
+struct ra_native_resource {
+    const char *name;
+    void *data;
+};
+
+// Add a ra_native_resource entry. Both name and data pointers must stay valid
+// until ra termination.
+void ra_add_native_resource(struct ra *ra, const char *name, void *data);
+
+// Search ra->native_resources, returns NULL on failure.
+void *ra_get_native_resource(struct ra *ra, const char *name);
 
 enum {
     RA_CAP_TEX_1D         = 1 << 0, // supports 1D textures (as shader inputs)

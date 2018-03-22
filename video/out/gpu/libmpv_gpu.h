@@ -2,6 +2,8 @@
 
 #include "video/out/libmpv.h"
 
+struct ra_tex;
+
 struct libmpv_gpu_context {
     struct mpv_global *global;
     struct mp_log *log;

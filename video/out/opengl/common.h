@@ -78,9 +78,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 typedef void (GLAPIENTRY *MP_GLDEBUGPROC)(GLenum, GLenum, GLuint, GLenum,
                                           GLsizei, const GLchar *,const void *);
 
-// Return a named host API reference (e.g. "wl" -> wl_display).
-void *mpgl_get_native_display(struct GL *gl, const char *name);
-
 //function pointers loaded from the OpenGL library
 struct GL {
     int version;                // MPGL_VER() mangled (e.g. 210 for 2.1)
@@ -89,11 +86,6 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
-
-    // Use mpgl_get_native_display() instead. Also, this is set to use the
-    // fields in MPGLContext by default (if set).
-    void *get_native_display_ctx;
-    void *(*get_native_display)(void *ctx, const char *name);
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);

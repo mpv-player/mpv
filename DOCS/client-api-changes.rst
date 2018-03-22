@@ -33,6 +33,11 @@ API changes
 ::
 
  --- mpv 0.29.0 ---
+ 1.100  - bump API number to avoid confusion with mpv release versions
+        - actually apply the GL_MP_MPGetNativeDisplay change for the new render
+          API. This also means compatibility for anything but x11 and wayland
+          through the old opengl-cb GL_MP_MPGetNativeDisplay method is now
+          unsupported.
  1.29   - the behavior of mpv_terminate_destroy() and mpv_detach_destroy()
           changes subtly (see documentation in the header file). In particular,
           mpv_detach_destroy() will not leave the player running in all
@@ -55,6 +60,11 @@ API changes
             mpv_opengl_cb_report_flip => mpv_render_context_report_swap
             mpv_opengl_cb_uninit_gl => mpv_render_context_free
           The VO opengl-cb is also renamed to "libmpv".
+          Also, the GL_MP_MPGetNativeDisplay pseudo extension is not used by the
+          render API anymore, and the old opengl-cb API only handles the "x11"
+          and "wl" names anymore. Support for everything else has been removed.
+          The new render API uses proper API parameters, e.g. for X11 you pass
+          MPV_RENDER_PARAM_X11_DISPLAY directly.
         - deprecate the qthelper.hpp header file. This provided some C++ helper
           utility functions for Qt with use of libmpv. There is no reason to
           keep this in the mpv git repository, nor to make it part of the libmpv

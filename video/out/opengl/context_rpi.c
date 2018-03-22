@@ -241,12 +241,12 @@ static bool rpi_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = rpi_swap_buffers,
-        .native_display_type = "MPV_RPI_WINDOW",
-        .native_display = p->win_params,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         goto fail;
+
+    ra_add_native_resource(ctx->ra, "MPV_RPI_WINDOW", p->win_params);
 
     ra_gl_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight, 0);
     return true;

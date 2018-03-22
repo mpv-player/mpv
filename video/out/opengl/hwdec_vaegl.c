@@ -55,9 +55,9 @@ typedef void *EGLImageKHR;
 #if HAVE_VAAPI_X11
 #include <va/va_x11.h>
 
-static VADisplay *create_x11_va_display(GL *gl)
+static VADisplay *create_x11_va_display(struct ra *ra)
 {
-    Display *x11 = mpgl_get_native_display(gl, "x11");
+    Display *x11 = ra_get_native_resource(ra, "x11");
     return x11 ? vaGetDisplay(x11) : NULL;
 }
 #endif
@@ -65,9 +65,9 @@ static VADisplay *create_x11_va_display(GL *gl)
 #if HAVE_VAAPI_WAYLAND
 #include <va/va_wayland.h>
 
-static VADisplay *create_wayland_va_display(GL *gl)
+static VADisplay *create_wayland_va_display(struct ra *ra)
 {
-    struct wl_display *wl = mpgl_get_native_display(gl, "wl");
+    struct wl_display *wl = ra_get_native_resource(ra, "wl");
     return wl ? vaGetDisplayWl(wl) : NULL;
 }
 #endif
@@ -75,9 +75,9 @@ static VADisplay *create_wayland_va_display(GL *gl)
 #if HAVE_VAAPI_DRM
 #include <va/va_drm.h>
 
-static VADisplay *create_drm_va_display(GL *gl)
+static VADisplay *create_drm_va_display(struct ra *ra)
 {
-    int drm_fd = (intptr_t)mpgl_get_native_display(gl, "drm");
+    int drm_fd = (intptr_t)ra_get_native_resource(ra, "drm");
     // Note: yes, drm_fd==0 could be valid - but it's rare and doesn't fit with
     //       our slightly crappy way of passing it through, so consider 0 not
     //       valid.
@@ -87,7 +87,7 @@ static VADisplay *create_drm_va_display(GL *gl)
 
 struct va_create_native {
     const char *name;
-    VADisplay *(*create)(GL *gl);
+    VADisplay *(*create)(struct ra *ra);
 };
 
 static const struct va_create_native create_native_cbs[] = {
@@ -102,12 +102,12 @@ static const struct va_create_native create_native_cbs[] = {
 #endif
 };
 
-static VADisplay *create_native_va_display(GL *gl, struct mp_log *log)
+static VADisplay *create_native_va_display(struct ra *ra, struct mp_log *log)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
         const struct va_create_native *disp = &create_native_cbs[n];
         mp_verbose(log, "Trying to open a %s VA display...\n", disp->name);
-        VADisplay *display = disp->create(gl);
+        VADisplay *display = disp->create(ra);
         if (display)
             return display;
     }
@@ -169,7 +169,7 @@ static int init(struct ra_hwdec *hw)
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
 
-    p->display = create_native_va_display(gl, hw->log);
+    p->display = create_native_va_display(hw->ra, hw->log);
     if (!p->display) {
         MP_VERBOSE(hw, "Could not create a VA display.\n");
         return -1;

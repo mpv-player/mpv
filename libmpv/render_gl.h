@@ -88,8 +88,9 @@ extern "C" {
  * There may be certain requirements on the OpenGL implementation:
  *
  * - Windows: ANGLE is required (although in theory GL/DX interop could be used)
- * - Intel/Linux: EGL is required, and also a glMPGetNativeDisplay() callback
- *                must be provided (see sections below)
+ * - Intel/Linux: EGL is required, and also the native display resource needs
+ *                to be provided (e.g. MPV_RENDER_PARAM_X11_DISPLAY for X11 and
+ *                MPV_RENDER_PARAM_WL_DISPLAY for Wayland)
  * - nVidia/Linux: Both GLX and EGL should work (GLX is required if vdpau is
  *                 used, e.g. due to old drivers.)
  * - OSX: CGL is required (CGLGetCurrentContext() returning non-NULL)
@@ -118,9 +119,7 @@ typedef struct mpv_opengl_init_params {
      */
     void *get_proc_address_ctx;
     /**
-     * This should not be used. The main purpose is signaling support for
-     * "GL_MP_MPGetNativeDisplay", which is needed for compatibility with the
-     * opengl_cb API only. Thus it's deprecated and will be removed or ignored
+     * This should not be used. It is deprecated and will be removed or ignored
      * when the opengl_cb API is removed.
      */
     const char *extra_exts;

@@ -152,6 +152,18 @@ typedef enum mpv_render_param_type {
      * This can be used for automatic gamma correction.
      */
     MPV_RENDER_PARAM_AMBIENT_LIGHT = 7,
+    /**
+     * X11 Display, sometimes used for hwdec. Valid for
+     * mpv_render_context_create().
+     * Type: Display*
+     */
+    MPV_RENDER_PARAM_X11_DISPLAY = 8,
+    /**
+     * Wayland display, sometimes used for hwdec. Valid for
+     * mpv_render_context_create().
+     * Type: struct wl_display*
+     */
+    MPV_RENDER_PARAM_WL_DISPLAY = 9,
 } mpv_render_param_type;
 
 /**

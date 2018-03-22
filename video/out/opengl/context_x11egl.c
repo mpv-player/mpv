@@ -142,12 +142,12 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = mpegl_swap_buffers,
-        .native_display_type = "x11",
-        .native_display = vo->x11->display,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         goto uninit;
+
+    ra_add_native_resource(ctx->ra, "x11", vo->x11->display);
 
     return true;
 

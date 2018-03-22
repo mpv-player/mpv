@@ -34,10 +34,6 @@ struct ra_gl_ctx_params {
     // ra_swapchain_fns structs will entirely replace the equivalent ra_gl_ctx
     // functions in the resulting ra_swapchain.
     const struct ra_swapchain_fns *external_swapchain;
-
-    // For hwdec_vaegl.c:
-    const char *native_display_type;
-    void *native_display;
 };
 
 void ra_gl_ctx_uninit(struct ra_ctx *ctx);

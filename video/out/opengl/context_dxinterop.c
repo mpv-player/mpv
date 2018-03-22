@@ -481,20 +481,6 @@ static int GLAPIENTRY dxgl_swap_interval(int interval)
     return 1;
 }
 
-static void * GLAPIENTRY dxgl_get_native_display(const char *name)
-{
-    if (!current_ctx || !name)
-        return NULL;
-    struct priv *p = current_ctx->priv;
-
-    if (p->device && strcmp("IDirect3DDevice9Ex", name) == 0) {
-        return p->device;
-    } else if (p->device_h && strcmp("dxinterop_device_HANDLE", name) == 0) {
-        return p->device_h;
-    }
-    return NULL;
-}
-
 static void dxgl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -560,7 +546,6 @@ static bool dxgl_init(struct ra_ctx *ctx)
 
     current_ctx = ctx;
     gl->SwapInterval = dxgl_swap_interval;
-    gl->MPGetNativeDisplay = dxgl_get_native_display;
 
     if (d3d_create(ctx) < 0)
         goto fail;
@@ -576,6 +561,9 @@ static bool dxgl_init(struct ra_ctx *ctx)
 
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto fail;
+
+    ra_add_native_resource(ctx->ra, "IDirect3DDevice9Ex", p->device);
+    ra_add_native_resource(ctx->ra, "dxinterop_device_HANDLE", p->device_h);
 
     DwmEnableMMCSS(TRUE);
     return true;

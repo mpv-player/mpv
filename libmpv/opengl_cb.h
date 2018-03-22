@@ -159,20 +159,9 @@ extern "C" {
  * See below what names are defined. Usually, libmpv will use the native handle
  * up until mpv_opengl_cb_uninit_gl() is called. If the name is not anything
  * you know/expected, return NULL from the function.
- *
- * * Windowing system scaling
- * ------------------------------------
- *
- * When using GL, sometimes GL rendering window is upscaled to display buffer.
- * Typically with drm where GL framebuffer can be upscaled at later stage.
- * In That case glMPGetNativeDisplay("opengl-cb-window-pos") should return an
- * mpv_opengl_cb_window_pos struct pointer defined below.
- * Note : The intended use is for hardware overlays that might require
- * upscaling features (typically upscaling GL windows with drm to screen size).
- *
- * This is never used for GL rendering - only to map hardware overlays to
- * GL rendering (for backends which support it).
  */
+
+// Legacy - not supported anymore.
 struct mpv_opengl_cb_window_pos {
     int x;      // left coordinates of window (usually 0)
     int y;      // top coordinates of window (usually 0)
@@ -180,22 +169,7 @@ struct mpv_opengl_cb_window_pos {
     int height; // height of GL window
 };
 
-/**
- * Windowing system interop on Intel/Linux with VAAPI
- * --------------------------------------------------
- *
- * The new VAAPI OpenGL interop requires an EGL context. EGL provides no way
- * to query the X11 Display associated to a specific EGL context, so this API
- * is used to pass it through.
- *
- * glMPGetNativeDisplay("x11") should return a X11 "Display*", which then will
- * be used to create the hardware decoder state.
- *
- * glMPGetNativeDisplay("wl") should return a Wayland "struct wl_display *".
- *
- * glMPGetNativeDisplay("opengl-cb-drm-params") should return an
- * mpv_opengl_cb_drm_params structure pointer :
- */
+// Legacy - not supported anymore.
 struct mpv_opengl_cb_drm_params {
     // DRM fd (int). set this to -1 if invalid.
     int fd;
@@ -218,29 +192,6 @@ struct mpv_opengl_cb_drm_params {
  * You should use ANGLE, and make sure your application and libmpv are linked
  * to the same ANGLE DLLs. libmpv will pick the device context (needed for
  * hardware decoding) from the current ANGLE EGL context.
- *
- * Windowing system interop on RPI
- * -------------------------------
- *
- * The RPI uses no proper interop, but hardware overlays instead. To place the
- * overlay correctly, you can communicate the window parameters as follows to
- * libmpv. glMPGetNativeDisplay("MPV_RPI_WINDOW") returns an array of type int
- * with the following 4 elements:
- *      0: display number (default 0)
- *      1: layer number of the GL layer - video will be placed in the layer
- *         directly below (default: 0)
- *      2: absolute x position of the GL context (default: 0)
- *      3: absolute y position of the GL context (default: 0)
- * The (x,y) position must be the absolute screen pixel position of the
- * top/left pixel of the dispmanx layer used for the GL context. If you render
- * to a FBO, the position must be that of the final position of the FBO
- * contents on screen. You can't transform or scale the video other than what
- * mpv will render to the video overlay. The defaults are suitable for
- * rendering the video at fullscreen.
- * The parameters are checked on every draw by calling MPGetNativeDisplay and
- * checking the values in the returned array for changes. The returned array
- * must remain valid until the libmpv render function returns; then it can be
- * deallocated by the API user.
  */
 
 /**

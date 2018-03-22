@@ -62,6 +62,19 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     ra_gl_set_debug(p->ra_ctx->ra, debug);
 
     ctx->ra = p->ra_ctx->ra;
+
+    // Legacy API user loading for opengl-cb. Explicitly inactive for render API.
+    if (get_mpv_render_param(params, (mpv_render_param_type)-1, NULL) ==
+        ctx->global && p->gl->MPGetNativeDisplay)
+    {
+        void *x11 = p->gl->MPGetNativeDisplay("x11");
+        if (x11)
+            ra_add_native_resource(ctx->ra, "x11", x11);
+        void *wl = p->gl->MPGetNativeDisplay("wl");
+        if (wl)
+            ra_add_native_resource(ctx->ra, "wl", wl);
+    }
+
     return 0;
 }
 

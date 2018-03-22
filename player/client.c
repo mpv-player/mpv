@@ -1829,6 +1829,9 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
             .get_proc_address_ctx = get_proc_address_ctx,
             .extra_exts = exts,
         }},
+        // Hack for explicit legacy hwdec loading. We really want to make it
+        // impossible for proper render API users to trigger this.
+        {(mpv_render_param_type)-1, ctx->client_api->mpctx->global},
         {0}
     };
     int err = mpv_render_context_create(&ctx->client_api->render_context,

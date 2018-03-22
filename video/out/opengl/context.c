@@ -125,17 +125,6 @@ done:
     return ret;
 }
 
-static void *get_native_display(void *priv, const char *name)
-{
-    struct priv *p = priv;
-    if (!p->params.native_display_type || !name)
-        return NULL;
-    if (strcmp(p->params.native_display_type, name) != 0)
-        return NULL;
-
-    return p->params.native_display;
-}
-
 void ra_gl_ctx_uninit(struct ra_ctx *ctx)
 {
     if (ctx->swapchain) {
@@ -191,8 +180,6 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
     }
 
     gl->debug_context = ctx->opts.debug;
-    gl->get_native_display_ctx = p;
-    gl->get_native_display = get_native_display;
 
     if (gl->SwapInterval) {
         gl->SwapInterval(p->opts->swapinterval);

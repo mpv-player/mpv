@@ -453,6 +453,7 @@ static const struct gl_functions gl_functions[] = {
     },
     // These don't exist - they are for the sake of mpv internals, and libmpv
     // interaction (see libmpv/opengl_cb.h).
+    // This is not used by the render API, only the deprecated opengl-cb API.
     {
         .extension = "GL_MP_MPGetNativeDisplay",
         .functions = (const struct gl_function[]) {
@@ -663,14 +664,4 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log)
 {
     mpgl_load_functions2(gl, get_procaddr_wrapper, getProcAddress, ext2, log);
-}
-
-void *mpgl_get_native_display(struct GL *gl, const char *name)
-{
-    void *res = NULL;
-    if (gl->get_native_display)
-        res = gl->get_native_display(gl->get_native_display_ctx, name);
-    if (!res && gl->MPGetNativeDisplay)
-        res = gl->MPGetNativeDisplay(name);
-    return res;
 }

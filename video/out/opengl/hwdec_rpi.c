@@ -36,7 +36,6 @@
 #include "video/out/gpu/hwdec.h"
 
 #include "common.h"
-#include "ra_gl.h"
 
 struct priv {
     struct mp_log *log;
@@ -126,13 +125,12 @@ static void disable_renderer(struct ra_hwdec *hw)
 static void update_overlay(struct ra_hwdec *hw, bool check_window_only)
 {
     struct priv *p = hw->priv;
-    GL *gl = ra_is_gl(hw->ra) ? ra_gl_get(hw->ra) : NULL;
     MMAL_PORT_T *input = p->renderer->input[0];
     struct mp_rect src = p->src;
     struct mp_rect dst = p->dst;
 
     int defs[4] = {0, 0, 0, 0};
-    int *z = gl ? mpgl_get_native_display(gl, "MPV_RPI_WINDOW") : NULL;
+    int *z = ra_get_native_resource(hw->ra, "MPV_RPI_WINDOW");
     if (!z)
         z = defs;
 

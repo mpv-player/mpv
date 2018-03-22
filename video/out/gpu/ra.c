@@ -4,6 +4,26 @@
 
 #include "ra.h"
 
+void ra_add_native_resource(struct ra *ra, const char *name, void *data)
+{
+    struct ra_native_resource r = {
+        .name = name,
+        .data = data,
+    };
+    MP_TARRAY_APPEND(ra, ra->native_resources, ra->num_native_resources, r);
+}
+
+void *ra_get_native_resource(struct ra *ra, const char *name)
+{
+    for (int n = 0; n < ra->num_native_resources; n++) {
+        struct ra_native_resource *r = &ra->native_resources[n];
+        if (strcmp(r->name, name) == 0)
+            return r->data;
+    }
+
+    return NULL;
+}
+
 struct ra_tex *ra_tex_create(struct ra *ra, const struct ra_tex_params *params)
 {
     return ra->fns->tex_create(ra, params);

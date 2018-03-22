@@ -555,13 +555,13 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         p->drm_params.atomic_request = p->kms->atomic_context->request;
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
-        .native_display_type = "opengl-cb-drm-params",
-        .native_display = &p->drm_params,
         .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
                                                        NULL,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
+
+    ra_add_native_resource(ctx->ra, "opengl-cb-drm-params", &p->drm_params);
 
     return true;
 }

@@ -67,12 +67,12 @@ static int init(struct ra_hwdec *hw)
 
     // AMD drivers won't open multiple dxinterop HANDLES on the same D3D device,
     // so we request the one already in use by context_dxinterop
-    p->device_h = mpgl_get_native_display(gl, "dxinterop_device_HANDLE");
+    p->device_h = ra_get_native_resource(hw->ra, "dxinterop_device_HANDLE");
     if (!p->device_h)
         return -1;
 
     // But we also still need the actual D3D device
-    p->device = mpgl_get_native_display(gl, "IDirect3DDevice9Ex");
+    p->device = ra_get_native_resource(hw->ra, "IDirect3DDevice9Ex");
     if (!p->device)
         return -1;
     IDirect3DDevice9Ex_AddRef(p->device);

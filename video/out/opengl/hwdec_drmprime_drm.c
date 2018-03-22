@@ -35,8 +35,6 @@
 #include "video/out/gpu/hwdec.h"
 #include "video/mp_image.h"
 
-#include "ra_gl.h"
-
 extern const struct m_sub_options drm_conf;
 
 struct drm_frame {
@@ -114,7 +112,6 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
                          struct mp_rect *src, struct mp_rect *dst, bool newframe)
 {
     struct priv *p = hw->priv;
-    GL *gl = ra_gl_get(hw->ra);
     AVDRMFrameDescriptor *desc = NULL;
     drmModeAtomicReq *request = NULL;
     struct drm_frame next_frame = {0};
@@ -125,8 +122,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
         // grab opengl-cb windowing info to eventually upscale the overlay
         // as egl windows could be upscaled to primary plane.
         struct mpv_opengl_cb_window_pos *glparams =
-                gl ? (struct mpv_opengl_cb_window_pos *)
-                mpgl_get_native_display(gl, "opengl-cb-window-pos") : NULL;
+            ra_get_native_resource(hw->ra, "opengl-cb-window-pos");
         if (glparams) {
             scale_dst_rect(hw, glparams->width, glparams->height, dst, &p->dst);
         } else {
@@ -136,8 +132,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
         // grab drm interop info
         struct mpv_opengl_cb_drm_params *drmparams =
-                gl ? (struct mpv_opengl_cb_drm_params *)
-                mpgl_get_native_display(gl, "opengl-cb-drm-params") : NULL;
+            ra_get_native_resource(hw->ra, "opengl-cb-drm-params");
         if (drmparams)
             request = (drmModeAtomicReq *)drmparams->atomic_request;
 
@@ -208,9 +203,6 @@ static int init(struct ra_hwdec *hw)
     struct priv *p = hw->priv;
     int drm_overlay;
 
-    if (!ra_is_gl(hw->ra))
-        return -1;
-
     p->log = hw->log;
 
     void *tmp = talloc_new(NULL);
@@ -218,10 +210,8 @@ static int init(struct ra_hwdec *hw)
     drm_overlay = opts->drm_overlay_id;
     talloc_free(tmp);
 
-    GL *gl = ra_gl_get(hw->ra);
     struct mpv_opengl_cb_drm_params *params =
-            gl ? (struct mpv_opengl_cb_drm_params *)
-            mpgl_get_native_display(gl, "opengl-cb-drm-params") : NULL;
+        ra_get_native_resource(hw->ra, "opengl-cb-drm-params");
     if (!params) {
         MP_VERBOSE(hw, "Could not get drm interop info.\n");
         goto err;

@@ -78,12 +78,12 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = wayland_egl_swap_buffers,
-        .native_display_type = "wl",
-        .native_display = wl->display,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
+
+    ra_add_native_resource(ctx->ra, "wl", wl->display);
 
     return true;
 }
