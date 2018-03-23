@@ -753,7 +753,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 static int process_open_hooks(struct MPContext *mpctx, char *name)
 {
 
-    mp_hook_run(mpctx, NULL, name);
+    mp_hook_run(mpctx, name);
 
     while (!mp_hook_test_completion(mpctx, name)) {
         mp_idle(mpctx);
@@ -770,7 +770,7 @@ static int process_open_hooks(struct MPContext *mpctx, char *name)
 
 static int process_preloaded_hooks(struct MPContext *mpctx)
 {
-    mp_hook_run(mpctx, NULL, "on_preloaded");
+    mp_hook_run(mpctx, "on_preloaded");
 
     while (!mp_hook_test_completion(mpctx, "on_preloaded")) {
         mp_idle(mpctx);
@@ -783,7 +783,7 @@ static int process_preloaded_hooks(struct MPContext *mpctx)
 
 static void process_unload_hooks(struct MPContext *mpctx)
 {
-    mp_hook_run(mpctx, NULL, "on_unload");
+    mp_hook_run(mpctx, "on_unload");
 
     while (!mp_hook_test_completion(mpctx, "on_unload"))
         mp_idle(mpctx);

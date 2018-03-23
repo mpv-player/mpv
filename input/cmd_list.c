@@ -209,7 +209,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_WRITE_WATCH_LATER_CONFIG, "write-watch-later-config", },
 
   { MP_CMD_HOOK_ADD, "hook-add", { ARG_STRING, ARG_INT, ARG_INT } },
-  { MP_CMD_HOOK_ACK, "hook-ack", { ARG_STRING } },
+  { MP_CMD_HOOK_ACK, "hook-ack", { ARG_INT } },
 
   { MP_CMD_MOUSE, "mouse", {
       ARG_INT, ARG_INT, // coordinate (x, y)

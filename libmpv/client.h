@@ -1133,6 +1133,9 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * property yourself. Try to avoid endless feedback loops, which could happen
  * if you react to the change notifications triggered by your own change.
  *
+ * Only the mpv_handle on which this was called will receive the property
+ * change events, or can unobserve them.
+ *
  * @param reply_userdata This will be used for the mpv_event.reply_userdata
  *                       field for the received MPV_EVENT_PROPERTY_CHANGE
  *                       events. (Also see section about asynchronous calls,
@@ -1350,7 +1353,14 @@ typedef enum mpv_event_id {
      * Event delivery will continue normally once this event was returned
      * (this forces the client to empty the queue completely).
      */
-    MPV_EVENT_QUEUE_OVERFLOW    = 24
+    MPV_EVENT_QUEUE_OVERFLOW    = 24,
+    /**
+     * Triggered if a hook handler was registered with mpv_hook_add(), and the
+     * hook is invoked. If you receive this, you must handle it, and continue
+     * the hook with mpv_hook_continue().
+     * See also mpv_event and mpv_event_hook.
+     */
+    MPV_EVENT_HOOK              = 25,
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
@@ -1513,6 +1523,17 @@ typedef struct mpv_event_client_message {
     int num_args;
     const char **args;
 } mpv_event_client_message;
+
+typedef struct mpv_event_hook {
+    /**
+     * The hook name as passed to mpv_hook_add().
+     */
+    const char *name;
+    /**
+     * Internal ID that must be passed to mpv_hook_continue().
+     */
+    uint64_t id;
+} mpv_event_hook;
 
 typedef struct mpv_event {
     /**
@@ -1681,6 +1702,62 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  * suspend counter of the given handle.
  */
 void mpv_wait_async_requests(mpv_handle *ctx);
+
+/**
+ * A hook is like a synchronous event that blocks the player. You register
+ * a hook handler with this function. You will get an event, which you need
+ * to handle, and once things are ready, you can let the player continue with
+ * mpv_hook_continue().
+ *
+ * Currently, hooks can't be removed explicitly. But they will be implicitly
+ * removed if the mpv_handle it was registered with is destroyed. This also
+ * continues the hook if it was being handled by the destroyed mpv_handle (but
+ * this should be avoided, as it might mess up order of hook execution).
+ *
+ * Hook handlers are ordered globally by priority and order of registration.
+ * Handlers for the same hook with same priority are invoked in order of
+ * registration (the handler registered first is run first). Handlers with
+ * lower priority are run first (which seems backward).
+ *
+ * See the "Hooks" section in the manpage to see which hooks are currently
+ * defined.
+ *
+ * Some hooks might be reentrant (so you get multiple MPV_EVENT_HOOK for the
+ * same hook). If this can happen for a specific hook type, it will be
+ * explicitly documented in the manpage.
+ *
+ * Only the mpv_handle on which this was called will receive the hook events,
+ * or can "continue" them.
+ *
+ * @param reply_userdata This will be used for the mpv_event.reply_userdata
+ *                       field for the received MPV_EVENT_HOOK events.
+ *                       If you have no use for this, pass 0.
+ * @param name The hook name. This should be one of the documented names. But
+ *             if the name is unknown, the hook event will simply be never
+ *             raised.
+ * @param priority See remarks above. Use 0 as a neutral default.
+ * @return error code (usually fails only on OOM)
+ */
+int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
+                 const char *name, int priority);
+
+/**
+ * Respond to a MPV_EVENT_HOOK event. You must call this after you have handled
+ * the event. There is no way to "cancel" or "stop" the hook.
+ *
+ * Calling this will will typically unblock the player for whatever the hook
+ * is responsible for (e.g. for the "on_load" hook it lets it continue
+ * playback).
+ *
+ * It is explicitly undefined behavior to call this more than once for each
+ * MPV_EVENT_HOOK, to pass an incorrect ID, or to call this on a mpv_handle
+ * different from the one that registered the handler and received the event.
+ *
+ * @param id This must be the value of the mpv_event_hook.id field for the
+ *           corresponding MPV_EVENT_HOOK.
+ * @return error code
+ */
+int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
 
 #if MPV_ENABLE_DEPRECATED
 
