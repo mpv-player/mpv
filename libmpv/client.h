@@ -1669,6 +1669,22 @@ void mpv_wakeup(mpv_handle *ctx);
 void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
 
 /**
+ * Block until all asynchronous requests are done. This affects functions like
+ * mpv_command_async(), which return immediately and return their result as
+ * events.
+ *
+ * This is a helper, and somewhat equivalent to calling mpv_wait_event() in a
+ * loop until all known asynchronous requests have sent their reply as event,
+ * except that the event queue is not emptied.
+ *
+ * In case you called mpv_suspend() before, this will also forcibly reset the
+ * suspend counter of the given handle.
+ */
+void mpv_wait_async_requests(mpv_handle *ctx);
+
+#if MPV_ENABLE_DEPRECATED
+
+/**
  * Return a UNIX file descriptor referring to the read end of a pipe. This
  * pipe can be used to wake up a poll() based processing loop. The purpose of
  * this function is very similar to mpv_set_wakeup_callback(), and provides
@@ -1719,26 +1735,14 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  *      }
  *  }
  *
+ * @deprecated this function will be removed in the future. If you need this
+ *             functionality, use mpv_set_wakeup_callback(), create a pipe
+ *             manually, and call write() on your pipe in the callback.
+ *
  * @return A UNIX FD of the read end of the wakeup pipe, or -1 on error.
  *         On MS Windows/MinGW, this will always return -1.
  */
 int mpv_get_wakeup_pipe(mpv_handle *ctx);
-
-/**
- * Block until all asynchronous requests are done. This affects functions like
- * mpv_command_async(), which return immediately and return their result as
- * events.
- *
- * This is a helper, and somewhat equivalent to calling mpv_wait_event() in a
- * loop until all known asynchronous requests have sent their reply as event,
- * except that the event queue is not emptied.
- *
- * In case you called mpv_suspend() before, this will also forcibly reset the
- * suspend counter of the given handle.
- */
-void mpv_wait_async_requests(mpv_handle *ctx);
-
-#if MPV_ENABLE_DEPRECATED
 
 /**
  * @deprecated use render.h

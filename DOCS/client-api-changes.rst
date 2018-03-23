@@ -38,6 +38,9 @@ API changes
           API. This also means compatibility for anything but x11 and wayland
           through the old opengl-cb GL_MP_MPGetNativeDisplay method is now
           unsupported.
+        - deprecate mpv_get_wakeup_pipe(). It's complex, but easy to replace
+          using normal API (just set a wakeup callback to a function which
+          writes to a pipe).
  1.29   - the behavior of mpv_terminate_destroy() and mpv_detach_destroy()
           changes subtly (see documentation in the header file). In particular,
           mpv_detach_destroy() will not leave the player running in all
