@@ -4729,6 +4729,30 @@ static bool check_property_scalable(char *property, struct MPContext *mpctx)
            prop.type == &m_option_type_aspect;
 }
 
+static int change_property_cmd(struct MPContext *mpctx, struct mp_cmd *cmd,
+                               const char *name, int action, void *arg)
+{
+    struct MPOpts *opts = mpctx->opts;
+    int osd_duration = opts->osd_duration;
+    int on_osd = cmd->flags & MP_ON_OSD_FLAGS;
+    bool auto_osd = on_osd == MP_ON_OSD_AUTO;
+    bool msg_osd = auto_osd || (on_osd & MP_ON_OSD_MSG);
+    int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
+
+    int r = mp_property_do(name, action, arg, mpctx);
+    if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
+        show_property_osd(mpctx, name, on_osd);
+    } else if (r == M_PROPERTY_UNKNOWN) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Unknown property: '%s'", name);
+        return -1;
+    } else if (r <= 0) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Failed to set property '%s'",
+                    name);
+        return -1;
+    }
+    return 0;
+}
+
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
 {
     struct command_ctx *cmdctx = mpctx->command_ctx;
@@ -4836,21 +4860,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_SET: {
-        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SET_STRING,
-                               cmd->args[1].v.s, mpctx);
-        if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, cmd->args[0].v.s, on_osd);
-        } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Unknown property: '%s'", cmd->args[0].v.s);
-            return -1;
-        } else if (r <= 0) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Failed to set property '%s' to '%s'",
-                        cmd->args[0].v.s, cmd->args[1].v.s);
-            return -1;
-        }
-        break;
+        return change_property_cmd(mpctx, cmd, cmd->args[0].v.s,
+                                   M_PROPERTY_SET_STRING, cmd->args[1].v.s);
     }
 
     case MP_CMD_CHANGE_LIST: {
@@ -4905,39 +4916,17 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 .inc = cmd->args[1].v.d * scale,
                 .wrap = cmd->id == MP_CMD_CYCLE,
             };
-            int r = mp_property_do(property, M_PROPERTY_SWITCH, &s, mpctx);
-            if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-                show_property_osd(mpctx, property, on_osd);
-            } else if (r == M_PROPERTY_UNKNOWN) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                            "Unknown property: '%s'", property);
-                return -1;
-            } else if (r <= 0) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                        "Failed to change property '%s'", property);
-                return -1;
-            }
+            int r =
+                change_property_cmd(mpctx, cmd, property, M_PROPERTY_SWITCH, &s);
+            if (r < 0)
+                return r;
         }
         break;
     }
 
     case MP_CMD_MULTIPLY: {
-        char *property = cmd->args[0].v.s;
-        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_MULTIPLY,
-                               &cmd->args[1].v.d, mpctx);
-
-        if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, property, on_osd);
-        } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Unknown property: '%s'", property);
-            return -1;
-        } else if (r <= 0) {
-            set_osd_msg(mpctx, osdl, osd_duration,
-                        "Failed to multiply property '%s'", property);
-            return -1;
-        }
-        break;
+        return change_property_cmd(mpctx, cmd, cmd->args[0].v.s,
+                                   M_PROPERTY_MULTIPLY, &cmd->args[1].v.d);
     }
 
     case MP_CMD_CYCLE_VALUES: {
@@ -4951,6 +4940,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
         int *ptr = get_cmd_cycle_counter(mpctx, &args[first - 1]);
         int count = cmd->nargs - first;
+        int r = 0;
         if (ptr && count > 0) {
             *ptr = *ptr < 0 ? (dir > 0 ? 0 : -1) : *ptr + dir;
             if (*ptr >= count)
@@ -4959,24 +4949,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 *ptr = count - 1;
             char *property = args[first - 1];
             char *value = args[first + *ptr];
-            int r = mp_property_do(property, M_PROPERTY_SET_STRING, value, mpctx);
-            if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-                show_property_osd(mpctx, property, on_osd);
-            } else if (r == M_PROPERTY_UNKNOWN) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                            "Unknown property: '%s'", property);
-                talloc_free(args);
-                return -1;
-            } else if (r <= 0) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                            "Failed to set property '%s' to '%s'",
-                            property, value);
-                talloc_free(args);
-                return -1;
-            }
+            r = change_property_cmd(mpctx, cmd, property, M_PROPERTY_SET_STRING,
+                                    value);
         }
         talloc_free(args);
-        break;
+        return r;
     }
 
     case MP_CMD_FRAME_STEP:
