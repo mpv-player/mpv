@@ -219,7 +219,9 @@ static int run_next_hook_handler(struct MPContext *mpctx, char *type, int index)
     return 0;
 }
 
-void mp_hook_run(struct MPContext *mpctx, char *type)
+// Start processing script/client API hooks. This is asynchronous, and the
+// caller needs to use mp_hook_test_completion() to check whether they're done.
+void mp_hook_start(struct MPContext *mpctx, char *type)
 {
     while (run_next_hook_handler(mpctx, type, 0) < 0) {
         // We can repeat this until all broken clients have been removed, and
