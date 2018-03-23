@@ -4689,29 +4689,6 @@ static int *get_cmd_cycle_counter(struct MPContext *mpctx, char **args)
     return &cmd->cycle_counters[cmd->num_cycle_counters - 1].counter;
 }
 
-static int mp_property_multiply(char *property, double f, struct MPContext *mpctx)
-{
-    union m_option_value val = {0};
-    struct m_option opt = {0};
-    int r;
-
-    r = mp_property_do(property, M_PROPERTY_GET_CONSTRICTED_TYPE, &opt, mpctx);
-    if (r != M_PROPERTY_OK)
-        return r;
-    assert(opt.type);
-
-    if (!opt.type->multiply)
-        return M_PROPERTY_NOT_IMPLEMENTED;
-
-    r = mp_property_do(property, M_PROPERTY_GET, &val, mpctx);
-    if (r != M_PROPERTY_OK)
-        return r;
-    opt.type->multiply(&opt, &val, f);
-    r = mp_property_do(property, M_PROPERTY_SET, &val, mpctx);
-    m_option_free(&opt, &val);
-    return r;
-}
-
 static struct track *find_track_with_url(struct MPContext *mpctx, int type,
                                          const char *url)
 {
@@ -4946,8 +4923,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_MULTIPLY: {
         char *property = cmd->args[0].v.s;
-        double f = cmd->args[1].v.d;
-        int r = mp_property_multiply(property, f, mpctx);
+        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_MULTIPLY,
+                               &cmd->args[1].v.d, mpctx);
 
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, property, on_osd);
@@ -4957,7 +4934,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         } else if (r <= 0) {
             set_osd_msg(mpctx, osdl, osd_duration,
-                        "Failed to multiply property '%s' by %g", property, f);
+                        "Failed to multiply property '%s'", property);
             return -1;
         }
         break;

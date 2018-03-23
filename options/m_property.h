@@ -79,6 +79,10 @@ enum mp_property_action {
     //  arg: mpv_node*
     M_PROPERTY_SET_NODE,
 
+    // Multiply numeric property with a factor.
+    //  arg: double*
+    M_PROPERTY_MULTIPLY,
+
     // Pass down an action to a sub-property.
     //  arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
