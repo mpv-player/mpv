@@ -11,7 +11,8 @@ void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
     // Other formats need to be initialized manually.
     assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
            format == MPV_FORMAT_FLAG || format == MPV_FORMAT_INT64 ||
-           format == MPV_FORMAT_DOUBLE || format == MPV_FORMAT_NONE);
+           format == MPV_FORMAT_DOUBLE || format == MPV_FORMAT_BYTE_ARRAY ||
+           format == MPV_FORMAT_NONE);
 
     void *ta_parent = NULL;
     if (parent) {
@@ -23,6 +24,8 @@ void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
     *dst = (struct mpv_node){ .format = format };
     if (format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY)
         dst->u.list = talloc_zero(ta_parent, struct mpv_node_list);
+    if (format == MPV_FORMAT_BYTE_ARRAY)
+        dst->u.ba = talloc_zero(ta_parent, struct mpv_byte_array);
 }
 
 // Add an entry to a MPV_FORMAT_NODE_ARRAY.
