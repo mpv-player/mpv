@@ -82,6 +82,8 @@ Interface changes
     - change vf_vavpp default to use the best deinterlace algorithm by default
     - remove a compatibility hack that allowed CLI aliases to be set as property
       (such as "sub-file"), deprecated in mpv 0.26.0
+    - deprecate the old command based hook API, and introduce a proper C API
+      (the high level Lua API for this does not change)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

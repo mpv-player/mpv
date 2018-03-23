@@ -762,40 +762,8 @@ and obscure way to handle events that require stricter coordination. There are
 no API stability guarantees made. Not following the protocol exactly can make
 the player freeze randomly. Basically, nobody should use this API.
 
-There are two special commands involved. Also, the client must listen for
-client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
-
-``hook-add <hook-name> <id> <priority>``
-    Subscribe to the hook identified by the first argument (basically, the
-    name of event). The ``id`` argument is an arbitrary integer chosen by the
-    user. ``priority`` is used to sort all hook handlers globally across all
-    clients. Each client can register multiple hook handlers (even for the
-    same hook-name). Once the hook is registered, it cannot be unregistered.
-
-    When a specific event happens, all registered handlers are run serially.
-    This uses a protocol every client has to follow explicitly. When a hook
-    handler is run, a client message (``MPV_EVENT_CLIENT_MESSAGE``) is sent to
-    the client which registered the hook. This message has the following
-    arguments:
-
-    1. the string ``hook_run``
-    2. the ``id`` argument the hook was registered with as string (this can be
-       used to correctly handle multiple hooks registered by the same client,
-       as long as the ``id`` argument is unique in the client)
-    3. something undefined, used by the hook mechanism to track hook execution
-       (currently, it's the hook-name, but this might change without warning)
-
-    Upon receiving this message, the client can handle the event. While doing
-    this, the player core will still react to requests, but playback will
-    typically be stopped.
-
-    When the client is done, it must continue the core's hook execution by
-    running the ``hook-ack`` command.
-
-``hook-ack <string>``
-    Run the next hook in the global chain of hooks. The argument is the 3rd
-    argument of the client message that starts hook execution for the
-    current client.
+The C API is described in the header files. The Lua API is described in the
+Lua section.
 
 The following hooks are currently defined:
 
@@ -829,6 +797,47 @@ The following hooks are currently defined:
 ``on_unload``
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.
+
+Legacy hook API
+~~~~~~~~~~~~~~~
+
+.. warning::
+
+    The legacy API is deprecated and will be removed soon.
+
+There are two special commands involved. Also, the client must listen for
+client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
+
+``hook-add <hook-name> <id> <priority>``
+    Subscribe to the hook identified by the first argument (basically, the
+    name of event). The ``id`` argument is an arbitrary integer chosen by the
+    user. ``priority`` is used to sort all hook handlers globally across all
+    clients. Each client can register multiple hook handlers (even for the
+    same hook-name). Once the hook is registered, it cannot be unregistered.
+
+    When a specific event happens, all registered handlers are run serially.
+    This uses a protocol every client has to follow explicitly. When a hook
+    handler is run, a client message (``MPV_EVENT_CLIENT_MESSAGE``) is sent to
+    the client which registered the hook. This message has the following
+    arguments:
+
+    1. the string ``hook_run``
+    2. the ``id`` argument the hook was registered with as string (this can be
+       used to correctly handle multiple hooks registered by the same client,
+       as long as the ``id`` argument is unique in the client)
+    3. something undefined, used by the hook mechanism to track hook execution
+
+    Upon receiving this message, the client can handle the event. While doing
+    this, the player core will still react to requests, but playback will
+    typically be stopped.
+
+    When the client is done, it must continue the core's hook execution by
+    running the ``hook-ack`` command.
+
+``hook-ack <string>``
+    Run the next hook in the global chain of hooks. The argument is the 3rd
+    argument of the client message that starts hook execution for the
+    current client.
 
 Input Command Prefixes
 ----------------------

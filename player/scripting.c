@@ -207,7 +207,8 @@ static void load_builtin_script(struct MPContext *mpctx, bool enable,
             // terminated, or re-enabling the script could be racy (because it'd
             // recognize a still-terminating script as "loaded").
             while (mp_client_exists(mpctx, name)) {
-                if (mp_client_send_event(mpctx, name, MPV_EVENT_SHUTDOWN, NULL) < 0)
+                if (mp_client_send_event(mpctx, name, 0, MPV_EVENT_SHUTDOWN,
+                                         NULL) < 0)
                     break;
                 mp_idle(mpctx);
             }

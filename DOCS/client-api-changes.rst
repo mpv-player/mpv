@@ -41,6 +41,9 @@ API changes
         - deprecate mpv_get_wakeup_pipe(). It's complex, but easy to replace
           using normal API (just set a wakeup callback to a function which
           writes to a pipe).
+        - add a 1st class hook API, which replaces the hacky mpv_command()
+          based one. The old API is deprecated and will be removed soon. The
+          old API was never meant to be stable, while the new API is.
  1.29   - the behavior of mpv_terminate_destroy() and mpv_detach_destroy()
           changes subtly (see documentation in the header file). In particular,
           mpv_detach_destroy() will not leave the player running in all

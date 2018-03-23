@@ -556,6 +556,12 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "data");
         break;
     }
+    case MPV_EVENT_HOOK: {
+        mpv_event_hook *hook = event->data;
+        lua_pushinteger(L, hook->id);
+        lua_setfield(L, -2, "hook_id");
+        break;
+    }
     default: ;
     }
 
@@ -1046,6 +1052,22 @@ static int script_get_wakeup_pipe(lua_State *L)
     return 1;
 }
 
+static int script_raw_hook_add(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    uint64_t ud = luaL_checkinteger(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+    int pri = luaL_checkinteger(L, 3);
+    return check_error(L, mpv_hook_add(ctx->client, ud, name, pri));
+}
+
+static int script_raw_hook_continue(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    lua_Integer id = luaL_checkinteger(L, 1);
+    return check_error(L, mpv_hook_continue(ctx->client, id));
+}
+
 static int script_readdir(lua_State *L)
 {
     //                    0      1        2       3
@@ -1335,6 +1357,8 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(format_time),
     FN_ENTRY(enable_messages),
     FN_ENTRY(get_wakeup_pipe),
+    FN_ENTRY(raw_hook_add),
+    FN_ENTRY(raw_hook_continue),
     {0}
 };
 

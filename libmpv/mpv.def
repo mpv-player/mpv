@@ -21,6 +21,8 @@ mpv_get_property_string
 mpv_get_sub_api
 mpv_get_time_us
 mpv_get_wakeup_pipe
+mpv_hook_add
+mpv_hook_continue
 mpv_initialize
 mpv_load_config_file
 mpv_observe_property
