@@ -3605,37 +3605,6 @@ done:
     return mp_property_do(real_property, action, arg, ctx);
 }
 
-static int mp_property_shitfuck(void *ctx, struct m_property *prop,
-                                int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int flags = M_SETOPT_RUNTIME;
-    const char *rname = prop->priv;
-
-    MP_WARN(mpctx, "Do not use %s, use %s, bug reports will be ignored.\n",
-            prop->name, rname);
-
-    struct m_config_option *co = m_config_get_co_raw(mpctx->mconfig, bstr0(rname));
-    if (!co)
-        return M_PROPERTY_UNKNOWN;
-
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = *(co->opt);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        if (!co->data)
-            return M_PROPERTY_NOT_IMPLEMENTED;
-        m_option_copy(co->opt, arg, co->data);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        if (m_config_set_option_raw_direct(mpctx->mconfig, co, arg, flags) < 0)
-            return M_PROPERTY_ERROR;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 static int access_options(struct m_property_action_arg *ka, bool local,
                           MPContext *mpctx)
 {
@@ -5600,8 +5569,7 @@ void command_init(struct MPContext *mpctx)
     for (int n = 0; n < num_opts; n++) {
         struct m_config_option *co = m_config_get_co_index(mpctx->mconfig, n);
         assert(co->name[0]);
-        if ((co->opt->flags & M_OPT_NOPROP) &&
-            co->opt->type != &m_option_type_cli_alias)
+        if (co->opt->flags & M_OPT_NOPROP)
             continue;
 
         struct m_property prop = {0};
@@ -5614,21 +5582,6 @@ void command_init(struct MPContext *mpctx)
                 .call = co->opt->deprecation_message ?
                             mp_property_deprecated_alias : mp_property_alias,
                 .priv = (void *)alias,
-                .is_option = true,
-            };
-        } else if (co->opt->type == &m_option_type_cli_alias) {
-            bstr rname = bstr0(co->opt->priv);
-            for (int i = rname.len - 1; i >= 0; i--) {
-                if (rname.start[i] == '-') {
-                    rname.len = i;
-                    break;
-                }
-            }
-
-            prop = (struct m_property){
-                .name = co->name,
-                .call = mp_property_shitfuck,
-                .priv = bstrto0(ctx, rname),
                 .is_option = true,
             };
         } else {

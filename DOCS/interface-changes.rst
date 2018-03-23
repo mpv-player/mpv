@@ -80,6 +80,8 @@ Interface changes
       certain unreliable video metadata. Also flip the defaults of all builtin
       HW deinterlace filters to always deinterlace.
     - change vf_vavpp default to use the best deinterlace algorithm by default
+    - remove a compatibility hack that allowed CLI aliases to be set as property
+      (such as "sub-file"), deprecated in mpv 0.26.0
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
