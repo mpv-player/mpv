@@ -424,7 +424,8 @@ end
 
 
 local function add_file(s)
-    append_property(s, "filename", {prefix="File:", nl="", indent=""})
+    append(s, "", {prefix=o.nl .. o.nl .. "File:", nl="", indent=""})
+    append_property(s, "filename", {prefix_sep="", nl="", indent=""})
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
         append_property(s, "media-title", {prefix="Title:"})
     end
@@ -471,7 +472,8 @@ local function add_video(s)
         return
     end
 
-    if append_property(s, "video-codec", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""}) then
+    append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
+    if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
         append_property(s, "hwdec-current", {prefix="(hwdec:", nl="", indent=" ",
                          no_prefix_markup=true, suffix=")"}, {no=true, [""]=true})
     end
@@ -533,7 +535,8 @@ local function add_audio(s)
         return
     end
 
-    append_property(s, "audio-codec", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
+    append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
+    append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
     append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
     append(s, r["channel-count"], {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
