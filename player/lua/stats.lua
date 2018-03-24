@@ -161,18 +161,6 @@ local function has_vo_window()
 end
 
 
-local function has_video()
-    local r = mp.get_property("video")
-    return r and r ~= "no" and r ~= ""
-end
-
-
-local function has_audio()
-    local r = mp.get_property("audio")
-    return r and r ~= "no" and r ~= ""
-end
-
-
 local function has_ansi()
     local is_windows = type(package) == 'table'
         and type(package.config) == 'string'
@@ -234,6 +222,9 @@ end
 
 
 local function append(s, str, attr)
+    if not str then
+        return false
+    end
     attr.prefix_sep = attr.prefix_sep or o.prefix_sep
     attr.indent = attr.indent or o.indent
     attr.nl = attr.nl or o.nl
@@ -243,6 +234,7 @@ local function append(s, str, attr)
     attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
     s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
                      attr.prefix, attr.prefix_sep, no_ASS(str), attr.suffix)
+    return true
 end
 
 
@@ -267,8 +259,7 @@ local function append_property(s, prop, attr, excluded)
         end
         return false
     end
-    append(s, ret, attr)
-    return true
+    return append(s, ret, attr)
 end
 
 
@@ -471,7 +462,12 @@ end
 
 
 local function add_video(s)
-    if not has_video() then
+    local r = mp.get_property_native("video-params")
+    -- in case of e.g. lavi-complex there can be no input video, only output
+    if not r then
+        r = mp.get_property_native("video-out-params")
+    end
+    if not r then
         return
     end
 
@@ -502,41 +498,44 @@ local function add_video(s)
     append_display_sync(s)
     append_perfdata(s, o.print_perfdata_passes)
 
-    if append_property(s, "video-params/w", {prefix="Native Resolution:"}) then
-        append_property(s, "video-params/h",
-                        {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    if append(s, r["w"], {prefix="Native Resolution:"}) then
+        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
     append_property(s, "window-scale", {prefix="Window Scale:"})
-    append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
-    append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
+    append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
+    append(s, r["pixelformat"], {prefix="Pixel Format:"})
 
     -- Group these together to save vertical space
-    local prim = append_property(s, "video-params/primaries", {prefix="Primaries:"})
-    local cmat = append_property(s, "video-params/colormatrix",
-                                     {prefix="Colormatrix:", nl=prim and "" or o.nl})
-    append_property(s, "video-params/colorlevels", {prefix="Levels:", nl=cmat and "" or o.nl})
+    local prim = append(s, r["primaries"], {prefix="Primaries:"})
+    local cmat = append(s, r["colormatrix"], {prefix="Colormatrix:", nl=prim and "" or o.nl})
+    append(s, r["colorlevels"], {prefix="Levels:", nl=cmat and "" or o.nl})
 
     -- Append HDR metadata conditionally (only when present and interesting)
-    local hdrpeak = mp.get_property_number("video-params/sig-peak", 0)
+    local hdrpeak = r["sig-peak"] or 0
     local hdrinfo = ""
     if hdrpeak > 1 then
-        hdrinfo = " (HDR peak: " .. hdrpeak .. ")"
+        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak) .. ")"
     end
 
-    append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
+    append(s, r["gamma"], {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end
 
 
 local function add_audio(s)
-    if not has_audio() then
+    local r = mp.get_property_native("audio-params")
+    -- in case of e.g. lavi-complex there can be no input audio, only output
+    if not r then
+        r = mp.get_property_native("audio-out-params")
+    end
+    if not r then
         return
     end
 
     append_property(s, "audio-codec", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
-    append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
-    append_property(s, "audio-params/channel-count", {prefix="Channels:"})
+    append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
+    append(s, r["channel-count"], {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
 end
