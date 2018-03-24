@@ -205,16 +205,25 @@ static int init(struct ao *ao)
 
     SLAndroidConfigurationItf android_config;
     SLuint32 audio_latency = 0, value_size = sizeof(SLuint32);
-    SLint32 result = (*p->player)->GetInterface(p->player,
-        SL_IID_ANDROIDCONFIGURATION, &android_config);
-    if (result == SL_RESULT_SUCCESS) {
-        result = (*android_config)->GetConfiguration(android_config,
+
+    SLint32 get_interface_result = (*p->player)->GetInterface(
+        p->player,
+        SL_IID_ANDROIDCONFIGURATION,
+        &android_config
+    );
+
+    if (get_interface_result == SL_RESULT_SUCCESS) {
+        SLint32 get_configuration_result = (*android_config)->GetConfiguration(
+            android_config,
             (const SLchar *)"androidGetAudioLatency",
-            &value_size, &audio_latency);
-    }
-    if (result == SL_RESULT_SUCCESS) {
-        p->audio_latency = (double)audio_latency / 1000.0;
-        MP_INFO(ao, "Device latency is %f\n", p->audio_latency);
+            &value_size,
+            &audio_latency
+        );
+
+        if (get_configuration_result == SL_RESULT_SUCCESS) {
+            p->audio_latency = (double)audio_latency / 1000.0;
+            MP_INFO(ao, "Device latency is %f\n", p->audio_latency);
+        }
     }
 
     return 1;
