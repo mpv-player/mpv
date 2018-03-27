@@ -123,22 +123,19 @@ function dispatch_message(ev) {
 }
 
 //  ----- hooks -----
-var next_hid = 1,
-    hooks = new_cache();  // items of id: fn
+var hooks = [];  // array of callbacks, id is index+1
 
-function hook_run(id, cont) {
-    var cb = hooks[id];
+function run_hook(ev) {
+    var cb = ev.id > 0 && hooks[ev.id - 1];
     if (cb)
         cb();
-    mp.commandv("hook-ack", cont);
+    mp._hook_continue(ev.hook_id);
 }
 
 mp.add_hook = function add_hook(name, pri, fn) {
-    if (next_hid == 1)  // doesn't really matter if we do it once or always
-        mp.register_script_message("hook_run", hook_run);
-    var id = next_hid++;
-    hooks[id] = fn;
-    return mp.commandv("hook-add", name, id, pri);
+    hooks.push(fn);
+    // 50 (scripting docs default priority) maps to 0 (default in C API docs)
+    return mp._hook_add(name, pri - 50, hooks.length);
 }
 
 /**********************************************************************
@@ -559,6 +556,7 @@ mp.keep_running = true;
 g.exit = function() { mp.keep_running = false };  // user-facing too
 mp.register_event("shutdown", g.exit);
 mp.register_event("property-change", notify_observer);
+mp.register_event("hook", run_hook);
 mp.register_event("client-message", dispatch_message);
 mp.register_script_message("key-binding", dispatch_key_binding);
 
