@@ -70,6 +70,7 @@ static struct ao *ao_data;
 struct priv {
     ALenum al_format;
     int chunk_size;
+    int direct_channels;
 };
 
 static void reset(struct ao *ao);
@@ -308,6 +309,10 @@ static int init(struct ao *ao)
     alListenerfv(AL_ORIENTATION, direction);
 
     alGenSources(1, &source);
+    if (p->direct_channels && alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT")) {
+        alSourcei(source, alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT"), AL_TRUE);
+    }
+
     cur_buf = 0;
     unqueue_buf = 0;
     alGenBuffers(NUM_BUF, buffers);
@@ -449,4 +454,9 @@ const struct ao_driver audio_out_openal = {
     .reset     = reset,
     .drain     = drain,
     .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_FLAG("direct-channels", direct_channels, 0),
+        {0}
+    },
+    .options_prefix = "openal",
 };
