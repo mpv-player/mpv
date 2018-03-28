@@ -112,6 +112,12 @@ Available audio output drivers are:
 ``openal``
     Experimental OpenAL audio output driver
 
+    ``--openal-direct-channels=<yes|no>``
+        Enable OpenAL Soft's direct channel extension when available to avoid
+        tinting the sound with ambisonics or HRTF.
+        Channels are dropped when when they are not available as downmixing
+        will be disabled. Default: no.
+
     .. note:: This driver is not very useful. Playing multi-channel audio with
               it is slow.
 
