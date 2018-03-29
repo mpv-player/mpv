@@ -347,6 +347,7 @@ typedef struct MPOpts {
     struct macos_opts *macos_opts;
     struct android_opts *android_opts;
     struct dvd_opts *dvd_opts;
+    struct vaapi_opts *vaapi_opts;
 
     int cuda_device;
 } MPOpts;

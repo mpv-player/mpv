@@ -89,6 +89,7 @@ extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options macos_conf;
 extern const struct m_sub_options android_conf;
+extern const struct m_sub_options vaapi_conf;
 
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
@@ -754,6 +755,10 @@ const m_option_t mp_opts[] = {
 #if HAVE_CUDA_HWACCEL
     OPT_CHOICE_OR_INT("cuda-decode-device", cuda_device, 0,
                       0, INT_MAX, ({"auto", -1})),
+#endif
+
+#if HAVE_VAAPI
+    OPT_SUBSTRUCT("vaapi", vaapi_opts, vaapi_conf, 0),
 #endif
 
 #if HAVE_ENCODING
