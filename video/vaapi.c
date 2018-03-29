@@ -26,9 +26,26 @@
 #include "mp_image.h"
 #include "img_format.h"
 #include "mp_image_pool.h"
+#include "options/m_config.h"
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+
+struct vaapi_opts {
+    char *path;
+};
+
+#define OPT_BASE_STRUCT struct vaapi_opts
+const struct m_sub_options vaapi_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_STRING("device", path, 0),
+        {0},
+    },
+    .defaults = &(const struct vaapi_opts) {
+        .path = "/dev/dri/renderD128",
+    },
+    .size = sizeof(struct vaapi_opts),
+};
 
 int va_get_colorspace_flag(enum mp_csp csp)
 {
@@ -216,7 +233,8 @@ bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 }
 
 struct va_native_display {
-    void (*create)(VADisplay **out_display, void **out_native_ctx);
+    void (*create)(VADisplay **out_display, void **out_native_ctx,
+                   const char *path);
     void (*destroy)(void *native_ctx);
 };
 
@@ -229,7 +247,8 @@ static void x11_destroy(void *native_ctx)
     XCloseDisplay(native_ctx);
 }
 
-static void x11_create(VADisplay **out_display, void **out_native_ctx)
+static void x11_create(VADisplay **out_display, void **out_native_ctx,
+                       const char *path)
 {
     void *native_display = XOpenDisplay(NULL);
     if (!native_display)
@@ -264,30 +283,23 @@ static void drm_destroy(void *native_ctx)
     talloc_free(ctx);
 }
 
-static void drm_create(VADisplay **out_display, void **out_native_ctx)
+static void drm_create(VADisplay **out_display, void **out_native_ctx,
+                       const char *path)
 {
-    static const char *drm_device_paths[] = {
-        "/dev/dri/renderD128",
-        "/dev/dri/card0",
-        NULL
-    };
+    int drm_fd = open(path, O_RDWR);
+    if (drm_fd < 0)
+        return;
 
-    for (int i = 0; drm_device_paths[i]; i++) {
-        int drm_fd = open(drm_device_paths[i], O_RDWR);
-        if (drm_fd < 0)
-            continue;
-
-        struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
-        ctx->drm_fd = drm_fd;
-        *out_display = vaGetDisplayDRM(drm_fd);
-        if (out_display) {
-            *out_native_ctx = ctx;
-            return;
-        }
-
-        close(drm_fd);
-        talloc_free(ctx);
+    struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
+    ctx->drm_fd = drm_fd;
+    *out_display = vaGetDisplayDRM(drm_fd);
+    if (out_display) {
+        *out_native_ctx = ctx;
+        return;
     }
+
+    close(drm_fd);
+    talloc_free(ctx);
 }
 
 static const struct va_native_display disp_drm = {
@@ -309,24 +321,31 @@ static const struct va_native_display *const native_displays[] = {
 static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
         struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
+    struct AVBufferRef *ret = NULL;
+    struct vaapi_opts *opts = mp_get_config_group(NULL, global, &vaapi_conf);
+
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
         void *native_ctx = NULL;
-        native_displays[n]->create(&display, &native_ctx);
+        native_displays[n]->create(&display, &native_ctx, opts->path);
         if (display) {
             struct mp_vaapi_ctx *ctx =
                 va_initialize(display, log, params->probing);
             if (!ctx) {
                 vaTerminate(display);
                 native_displays[n]->destroy(native_ctx);
-                return NULL;
+                goto end;
             }
             ctx->native_ctx = native_ctx;
             ctx->destroy_native_ctx = native_displays[n]->destroy;
-            return ctx->hwctx.av_device_ref;
+            ret = ctx->hwctx.av_device_ref;
+            goto end;
         }
     }
-    return NULL;
+
+end:
+    talloc_free(opts);
+    return ret;
 }
 
 const struct hwcontext_fns hwcontext_fns_vaapi = {
