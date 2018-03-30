@@ -26,6 +26,7 @@
 #include "mp_image.h"
 #include "img_format.h"
 #include "mp_image_pool.h"
+#include "options/m_config.h"
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
@@ -216,7 +217,7 @@ bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 }
 
 struct va_native_display {
-    void (*create)(VADisplay **out_display, void **out_native_ctx);
+    void (*create)(struct mpv_global *global, struct mp_log *log, VADisplay **out_display, void **out_native_ctx);
     void (*destroy)(void *native_ctx);
 };
 
@@ -229,7 +230,8 @@ static void x11_destroy(void *native_ctx)
     XCloseDisplay(native_ctx);
 }
 
-static void x11_create(VADisplay **out_display, void **out_native_ctx)
+static void x11_create(struct mpv_global *global, struct mp_log *log,
+        VADisplay **out_display, void **out_native_ctx)
 {
     void *native_display = XOpenDisplay(NULL);
     if (!native_display)
@@ -264,30 +266,40 @@ static void drm_destroy(void *native_ctx)
     talloc_free(ctx);
 }
 
-static void drm_create(VADisplay **out_display, void **out_native_ctx)
+static void drm_create(struct mpv_global *global, struct mp_log *log,
+        VADisplay **out_display, void **out_native_ctx)
 {
-    static const char *drm_device_paths[] = {
-        "/dev/dri/renderD128",
-        "/dev/dri/card0",
-        NULL
-    };
+    char *device = NULL;
+    mp_read_option_raw(global, "vaapi-device", &m_option_type_string,
+            &device);
 
-    for (int i = 0; drm_device_paths[i]; i++) {
-        int drm_fd = open(drm_device_paths[i], O_RDWR);
-        if (drm_fd < 0)
-            continue;
+    if (!device) {
+        mp_warn(log, "No VAAPI DRM device specified\n");
+        return;
+    }
 
-        struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
-        ctx->drm_fd = drm_fd;
-        *out_display = vaGetDisplayDRM(drm_fd);
-        if (out_display) {
-            *out_native_ctx = ctx;
-            return;
-        }
+    int drm_fd = open(device, O_RDWR);
+    if (drm_fd < 0) {
+        mp_err(log, "Failed to open DRM device %s\n", device);
+        talloc_free(device);
+        return;
+    }
 
+    struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
+    ctx->drm_fd = drm_fd;
+
+    *out_display = vaGetDisplayDRM(drm_fd);
+    if (!out_display) {
+        mp_err(log, "%s was not a valid VAAPI DRM device\n", device);
         close(drm_fd);
         talloc_free(ctx);
+        talloc_free(device);
+        return;
     }
+
+    *out_native_ctx = ctx;
+
+    talloc_free(device);
 }
 
 static const struct va_native_display disp_drm = {
@@ -312,7 +324,7 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
         void *native_ctx = NULL;
-        native_displays[n]->create(&display, &native_ctx);
+        native_displays[n]->create(global, plog, &display, &native_ctx);
         if (display) {
             struct mp_vaapi_ctx *ctx =
                 va_initialize(display, log, params->probing);

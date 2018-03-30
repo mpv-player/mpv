@@ -756,6 +756,10 @@ const m_option_t mp_opts[] = {
                       0, INT_MAX, ({"auto", -1})),
 #endif
 
+#if HAVE_VAAPI_HWACCEL
+    OPT_STRING("vaapi-device", vaapi_device, M_OPT_FILE),
+#endif
+
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
@@ -971,6 +975,8 @@ const struct MPOpts mp_default_opts = {
     },
 
     .cuda_device = -1,
+
+    .vaapi_device = "/dev/dri/renderD128",
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */
