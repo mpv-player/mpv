@@ -112,6 +112,14 @@ Available audio output drivers are:
 ``openal``
     Experimental OpenAL audio output driver
 
+    ``--openal-num-buffer=<2-128>``
+        Specify the number of audio buffers to use. Lower values are better for
+        lower CPU usage. Default: 4.
+
+    ``--openal-num-samples=<256-32768>``
+        Specify the number of complete samples to use for each buffer. Higher
+        values are better for lower CPU usage. Default: 8192.
+
     ``--openal-direct-channels=<yes|no>``
         Enable OpenAL Soft's direct channel extension when available to avoid
         tinting the sound with ambisonics or HRTF.
