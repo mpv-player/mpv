@@ -212,9 +212,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.bytes[p] = desc.bpp[p] / 8;
     }
 
-    // PSEUDOPAL is a complete braindeath nightmare, however it seems various
-    // parts of FFmpeg expect that it has a palette allocated.
-    if (pd->flags & (AV_PIX_FMT_FLAG_PAL | AV_PIX_FMT_FLAG_PSEUDOPAL))
+    if (pd->flags & AV_PIX_FMT_FLAG_PAL)
         desc.flags |= MP_IMGFLAG_PAL;
 
     if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))

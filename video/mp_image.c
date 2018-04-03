@@ -478,8 +478,7 @@ static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
         memcpy_pic_cb(dst->planes[n], src->planes[n], line_bytes, plane_h,
                       dst->stride[n], src->stride[n], cpy);
     }
-    // Watch out for AV_PIX_FMT_FLAG_PSEUDOPAL retardation
-    if ((dst->fmt.flags & MP_IMGFLAG_PAL) && dst->planes[1] && src->planes[1])
+    if (dst->fmt.flags & MP_IMGFLAG_PAL)
         memcpy(dst->planes[1], src->planes[1], AVPALETTE_SIZE);
 }
 
