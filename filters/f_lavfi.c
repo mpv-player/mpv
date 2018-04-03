@@ -906,9 +906,11 @@ static bool is_usable(const AVFilter *filter, int media_type)
 static void dump_list(struct mp_log *log, int media_type)
 {
     mp_info(log, "Available libavfilter filters:\n");
-    for (const AVFilter *filter = avfilter_next(NULL); filter;
-         filter = avfilter_next(filter))
-    {
+    void *iter = NULL;
+    for (;;) {
+        const AVFilter *filter = av_filter_iterate(&iter);
+        if (!filter)
+            break;
         if (is_usable(filter, media_type))
             mp_info(log, "  %-16s %s\n", filter->name, filter->description);
     }

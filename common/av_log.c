@@ -160,7 +160,6 @@ void init_libav(struct mpv_global *global)
     pthread_mutex_unlock(&log_lock);
 
     avformat_network_init();
-    avfilter_register_all();
 
 #if HAVE_LIBAVDEVICE
     avdevice_register_all();
