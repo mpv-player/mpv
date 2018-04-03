@@ -143,6 +143,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
             APPEND(b, " %dch", s->codec->channels.num);
         if (s && s->codec->samplerate)
             APPEND(b, " %dHz", s->codec->samplerate);
+        if (s && s->codec->bitrate)
+            APPEND(b, " %dkbps", s->codec->bitrate/1000);
     }
     APPEND(b, ")");
     if (t->is_external)
