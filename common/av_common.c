@@ -222,10 +222,9 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
 static void add_codecs(struct mp_decoder_list *list, enum AVMediaType type,
                        bool decoders)
 {
-    const AVCodec *cur = NULL;
     void *iter = NULL;
     for (;;) {
-        cur = av_codec_iterate(&iter);
+        const AVCodec *cur = av_codec_iterate(&iter);
         if (!cur)
             break;
         if (av_codec_is_decoder(cur) == decoders &&
@@ -251,11 +250,10 @@ void mp_add_lavc_encoders(struct mp_decoder_list *list)
 char **mp_get_lavf_demuxers(void)
 {
     char **list = NULL;
-    const AVInputFormat *cur = NULL;
     void *iter = NULL;
     int num = 0;
     for (;;) {
-        cur = av_demuxer_iterate(&iter);
+        const AVInputFormat *cur = av_demuxer_iterate(&iter);
         if (!cur)
             break;
         MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, cur->name));
