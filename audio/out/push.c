@@ -464,7 +464,7 @@ static int init(struct ao *ao)
 
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
-                               &ao->channels, ao->samplerate);
+                               &ao->channels, ao->samplerate, ao->bitrate);
     mp_audio_buffer_preallocate_min(p->buffer, ao->buffer);
     if (pthread_create(&p->thread, NULL, playthread, ao))
         goto err;

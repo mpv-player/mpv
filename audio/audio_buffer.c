@@ -34,6 +34,7 @@ struct mp_audio_buffer {
     uint8_t *data[MP_NUM_CHANNELS];
     int allocated;
     int num_samples;
+    int bitrate;
 };
 
 struct mp_audio_buffer *mp_audio_buffer_create(void *talloc_ctx)
@@ -44,7 +45,8 @@ struct mp_audio_buffer *mp_audio_buffer_create(void *talloc_ctx)
 // Reinitialize the buffer, set a new format, drop old data.
 // The audio data in fmt is not used, only the format.
 void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
-                                const struct mp_chmap *channels, int srate)
+                                const struct mp_chmap *channels,
+                                int srate, int bitrate)
 {
     for (int n = 0; n < MP_NUM_CHANNELS; n++)
         TA_FREEP(&ab->data[n]);
@@ -55,6 +57,7 @@ void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
     ab->num_samples = 0;
     ab->sstride = af_fmt_to_bytes(ab->format);
     ab->num_planes = 1;
+    ab->bitrate = bitrate;
     if (af_fmt_is_planar(ab->format)) {
         ab->num_planes = ab->channels.num;
     } else {

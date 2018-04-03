@@ -23,7 +23,8 @@ struct mp_chmap;
 
 struct mp_audio_buffer *mp_audio_buffer_create(void *talloc_ctx);
 void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
-                                const struct mp_chmap *channels, int srate);
+                                const struct mp_chmap *channels,
+                                int srate, int bitrate);
 void mp_audio_buffer_preallocate_min(struct mp_audio_buffer *ab, int samples);
 int mp_audio_buffer_get_write_available(struct mp_audio_buffer *ab);
 void mp_audio_buffer_append(struct mp_audio_buffer *ab, void **ptr, int samples);

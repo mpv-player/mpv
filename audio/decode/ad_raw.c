@@ -46,7 +46,8 @@ struct rawContext {
 };
 
 static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
-                                   int *out_profile, int *out_rate)
+                                   int *out_profile, int *out_rate,
+                                   int64_t *out_bitrate)
 {
     struct rawContext *raw_ctx = da->priv;
     int profile = FF_PROFILE_UNKNOWN;
@@ -69,6 +70,7 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
         av_parser_parse2(parser, ctx, &d, &s, pkt->data, pkt->size, 0, 0, 0);
         *out_profile = profile = ctx->profile;
         *out_rate = ctx->sample_rate;
+        *out_bitrate = ctx->bit_rate;
 
         avcodec_free_context(&ctx);
         av_parser_close(parser);
@@ -138,8 +140,9 @@ static void process(struct mp_filter *da)
         pkt.pts = pkt.dts = 0;
         int profile = FF_PROFILE_UNKNOWN;
         int c_rate = 0;
-        determine_codec_params(da, &pkt, &profile, &c_rate);
-        MP_VERBOSE(da, "In: profile=%d samplerate=%d\n", profile, c_rate);
+        int64_t bitrate = 0;
+        determine_codec_params(da, &pkt, &profile, &c_rate, &bitrate);
+        MP_VERBOSE(da, "In: profile=%d samplerate=%d bitrate=%"PRId64"\n", profile, c_rate, bitrate);
 
         raw_ctx->fmt = mp_aframe_create();
         talloc_steal(raw_ctx, raw_ctx->fmt);
@@ -149,6 +152,7 @@ static void process(struct mp_filter *da)
         mp_aframe_set_chmap(raw_ctx->fmt, &chmap);
         mp_aframe_set_format(raw_ctx->fmt, AF_FORMAT_R_AC3);
         mp_aframe_set_rate(raw_ctx->fmt, c_rate > 0 ? c_rate : 48000);
+        mp_aframe_set_bitrate(raw_ctx->fmt, bitrate);
         raw_ctx->sstride = mp_aframe_get_sstride(raw_ctx->fmt);
     }
 

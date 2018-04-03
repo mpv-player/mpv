@@ -301,6 +301,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     uninit_audio_out(mpctx);
 
     int out_rate = mp_aframe_get_rate(out_fmt);
+    int out_bitrate = mp_aframe_get_bitrate(out_fmt);
     int out_format = mp_aframe_get_format(out_fmt);
     struct mp_chmap out_channels = {0};
     mp_aframe_get_chmap(out_fmt, &out_channels);
@@ -332,14 +333,15 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 
     mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
                              mpctx, mpctx->encode_lavc_ctx, out_rate,
-                             out_format, out_channels);
+                             out_bitrate, out_format, out_channels);
     ao_c->ao = mpctx->ao;
 
     int ao_rate = 0;
+    int ao_bitrate = 0;
     int ao_format = 0;
     struct mp_chmap ao_channels = {0};
     if (mpctx->ao)
-        ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
+        ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
 
     // Verify passthrough format was not changed.
     if (mpctx->ao && af_fmt_is_spdif(out_format)) {
@@ -374,7 +376,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     }
 
     mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, ao_format, &ao_channels,
-                                ao_rate);
+                                ao_rate, ao_bitrate);
 
     char tmp[80];
     MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(mpctx->ao),
@@ -472,9 +474,10 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (mpctx->ao) {
         int rate;
         int format;
+        int bitrate;
         struct mp_chmap channels;
-        ao_get_format(mpctx->ao, &rate, &format, &channels);
-        mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, format, &channels, rate);
+        ao_get_format(mpctx->ao, &rate, &format, &channels, &bitrate);
+        mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, format, &channels, rate, bitrate);
 
         audio_update_volume(mpctx);
     }
@@ -525,9 +528,10 @@ static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
         return 0;
     struct ao *ao = mpctx->ao;
     int samplerate;
+    int bitrate;
     int format;
     struct mp_chmap channels;
-    ao_get_format(ao, &samplerate, &format, &channels);
+    ao_get_format(ao, &samplerate, &format, &channels, &bitrate);
 #if HAVE_ENCODING
     encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
 #endif
@@ -580,9 +584,10 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         return true;
 
     int ao_rate;
+    int ao_bitrate;
     int ao_format;
     struct mp_chmap ao_channels;
-    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
+    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
 
     double play_samplerate = ao_rate / mpctx->audio_speed;
 
@@ -638,9 +643,10 @@ static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
     struct mp_audio_buffer *outbuf = ao_c->ao_buffer;
 
     int ao_rate;
+    int ao_bitrate;
     int ao_format;
     struct mp_chmap ao_channels;
-    ao_get_format(ao_c->ao, &ao_rate, &ao_format, &ao_channels);
+    ao_get_format(ao_c->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
 
     while (mp_audio_buffer_samples(outbuf) < minsamples) {
         int cursamples = mp_audio_buffer_samples(outbuf);
@@ -797,9 +803,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     }
 
     int ao_rate;
+    int ao_bitrate;
     int ao_format;
     struct mp_chmap ao_channels;
-    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
+    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
     double play_samplerate = ao_rate / mpctx->audio_speed;
     int align = af_format_sample_alignment(ao_format);
 

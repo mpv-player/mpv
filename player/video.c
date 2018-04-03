@@ -665,9 +665,10 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
 {
     if (mpctx->ao_chain && mpctx->ao_chain->ao) {
         int samplerate;
+        int bitrate;
         int format;
         struct mp_chmap channels;
-        ao_get_format(mpctx->ao_chain->ao, &samplerate, &format, &channels);
+        ao_get_format(mpctx->ao_chain->ao, &samplerate, &format, &channels, &bitrate);
         return !af_fmt_is_pcm(format);
     }
     return false;

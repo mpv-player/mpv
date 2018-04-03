@@ -33,6 +33,7 @@ struct mp_aframe {
     int format;
     double pts;
     double speed;
+    int bitrate;
 };
 
 struct avframe_opaque {
@@ -67,6 +68,7 @@ struct mp_aframe *mp_aframe_new_ref(struct mp_aframe *frame)
     dst->format = frame->format;
     dst->pts = frame->pts;
     dst->speed = frame->speed;
+    dst->bitrate = frame->bitrate;
 
     if (mp_aframe_is_allocated(frame)) {
         if (av_frame_ref(dst->av_frame, frame->av_frame) < 0)
@@ -188,6 +190,7 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src)
 
     dst->chmap = src->chmap;
     dst->format = src->format;
+    dst->bitrate = src->bitrate;
 
     mp_aframe_copy_attributes(dst, src);
 
@@ -275,6 +278,11 @@ int mp_aframe_get_rate(struct mp_aframe *frame)
     return frame->av_frame->sample_rate;
 }
 
+int mp_aframe_get_bitrate(struct mp_aframe *frame)
+{
+    return frame->bitrate;
+}
+
 int mp_aframe_get_size(struct mp_aframe *frame)
 {
     return frame->av_frame->nb_samples;
@@ -315,6 +323,12 @@ bool mp_aframe_set_chmap(struct mp_aframe *frame, struct mp_chmap *in)
     // FFmpeg being a stupid POS again
     frame->av_frame->channels = frame->chmap.num;
 #endif
+    return true;
+}
+
+bool mp_aframe_set_bitrate(struct mp_aframe *frame, int bitrate)
+{
+    frame->bitrate = bitrate;
     return true;
 }
 

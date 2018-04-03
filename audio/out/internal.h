@@ -27,6 +27,7 @@
 /* global data used by ao.c and ao drivers */
 struct ao {
     int samplerate;
+    int bitrate;
     struct mp_chmap channels;
     int format;                 // one of AF_FORMAT_...
     int bps;                    // bytes per second (per plane)

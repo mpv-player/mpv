@@ -170,13 +170,14 @@ error:
 static struct ao *ao_init(bool probing, struct mpv_global *global,
                           void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                           struct encode_lavc_context *encode_lavc_ctx, int flags,
-                          int samplerate, int format, struct mp_chmap channels,
-                          char *dev, char *name)
+                          int samplerate, int bitrate, int format,
+                          struct mp_chmap channels, char *dev, char *name)
 {
     struct ao *ao = ao_alloc(probing, global, wakeup_cb, wakeup_ctx, name);
     if (!ao)
         return NULL;
     ao->samplerate = samplerate;
+    ao->bitrate = bitrate;
     ao->channels = channels;
     ao->format = format;
     ao->encode_lavc_ctx = encode_lavc_ctx;
@@ -207,8 +208,8 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
             snprintf(rdevice, sizeof(rdevice), "%s", ao->device ? ao->device : "");
             talloc_free(ao);
             return ao_init(probing, global, wakeup_cb, wakeup_ctx,
-                           encode_lavc_ctx, flags, samplerate, format, channels,
-                           rdevice, redirect);
+                           encode_lavc_ctx, flags, samplerate, bitrate, format,
+                           channels, rdevice, redirect);
         }
         goto fail;
     }
@@ -267,7 +268,8 @@ struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
                         void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
-                        int samplerate, int format, struct mp_chmap channels)
+                        int samplerate, int bitrate, int format,
+                        struct mp_chmap channels)
 {
     struct MPOpts *opts = global->opts;
     void *tmp = talloc_new(NULL);
@@ -322,7 +324,7 @@ struct ao *ao_init_best(struct mpv_global *global,
             mp_verbose(log, "Using preferred device '%s'\n", dev);
         }
         ao = ao_init(probing, global, wakeup_cb, wakeup_ctx, encode_lavc_ctx,
-                     init_flags, samplerate, format, channels, dev, entry->name);
+                     init_flags, samplerate, bitrate, format, channels, dev, entry->name);
         if (ao)
             break;
         if (!probing)
@@ -483,11 +485,13 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 // --- The following functions just return immutable information.
 
 void ao_get_format(struct ao *ao,
-                   int *samplerate, int *format, struct mp_chmap *channels)
+                   int *samplerate, int *format, struct mp_chmap *channels,
+                   int *bitrate)
 {
     *samplerate = ao->samplerate;
     *format = ao->format;
     *channels = ao->channels;
+    *bitrate = ao->bitrate;
 }
 
 const char *ao_get_name(struct ao *ao)

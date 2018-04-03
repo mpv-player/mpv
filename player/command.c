@@ -2114,9 +2114,10 @@ static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
     if (mpctx->ao) {
         frame = mp_aframe_create();
         int samplerate;
+        int bitrate;
         int format;
         struct mp_chmap channels;
-        ao_get_format(mpctx->ao, &samplerate, &format, &channels);
+        ao_get_format(mpctx->ao, &samplerate, &format, &channels, &bitrate);
         mp_aframe_set_rate(frame, samplerate);
         mp_aframe_set_format(frame, format);
         mp_aframe_set_chmap(frame, &channels);

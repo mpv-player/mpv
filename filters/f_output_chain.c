@@ -603,8 +603,9 @@ void mp_output_chain_set_ao(struct mp_output_chain *c, struct ao *ao)
 
     int out_format = 0;
     int out_rate = 0;
+    int out_bitrate = 0;
     struct mp_chmap out_channels = {0};
-    ao_get_format(p->ao, &out_rate, &out_format, &out_channels);
+    ao_get_format(p->ao, &out_rate, &out_format, &out_channels, &out_bitrate);
 
     mp_autoconvert_clear(p->convert);
     mp_autoconvert_add_afmt(p->convert, out_format);
