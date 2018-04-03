@@ -395,6 +395,8 @@ int mp_aframe_get_planes(struct mp_aframe *frame)
 size_t mp_aframe_get_sstride(struct mp_aframe *frame)
 {
     int format = mp_aframe_get_format(frame);
+    if (af_fmt_is_raw(format))
+        return 1;
     return af_fmt_to_bytes(format) *
            (af_fmt_is_planar(format) ? 1 : mp_aframe_get_channels(frame));
 }

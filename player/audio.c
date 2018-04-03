@@ -537,6 +537,8 @@ static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
 #endif
     if (samples == 0)
         return 0;
+    if (af_fmt_is_raw(format))
+        samplerate = bitrate / 8;
     double real_samplerate = samplerate / mpctx->audio_speed;
     int played = ao_play(mpctx->ao, (void **)planes, samples, flags);
     assert(played <= samples);
@@ -588,6 +590,8 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     int ao_format;
     struct mp_chmap ao_channels;
     ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
+    if (af_fmt_is_raw(ao_format))
+        ao_rate = ao_bitrate / 8;
 
     double play_samplerate = ao_rate / mpctx->audio_speed;
 
@@ -647,6 +651,8 @@ static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
     int ao_format;
     struct mp_chmap ao_channels;
     ao_get_format(ao_c->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
+    if (af_fmt_is_raw(ao_format))
+        ao_rate = ao_bitrate / 8;
 
     while (mp_audio_buffer_samples(outbuf) < minsamples) {
         int cursamples = mp_audio_buffer_samples(outbuf);
@@ -807,6 +813,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     int ao_format;
     struct mp_chmap ao_channels;
     ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels, &ao_bitrate);
+    if (af_fmt_is_raw(ao_format))
+        ao_rate = ao_bitrate / 8;
     double play_samplerate = ao_rate / mpctx->audio_speed;
     int align = af_format_sample_alignment(ao_format);
 

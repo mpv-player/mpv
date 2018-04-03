@@ -68,6 +68,7 @@ bool af_fmt_is_float(int format);
 bool af_fmt_is_int(int format);
 bool af_fmt_is_planar(int format);
 bool af_fmt_is_spdif(int format);
+bool af_fmt_is_raw(int format);
 bool af_fmt_is_pcm(int format);
 
 int af_fmt_to_planar(int format);

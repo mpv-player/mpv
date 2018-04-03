@@ -60,7 +60,7 @@ void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
     ab->bitrate = bitrate;
     if (af_fmt_is_planar(ab->format)) {
         ab->num_planes = ab->channels.num;
-    } else {
+    } else if (!af_fmt_is_raw(ab->format)) {
         ab->sstride *= ab->channels.num;
     }
 }
@@ -156,5 +156,7 @@ int mp_audio_buffer_samples(struct mp_audio_buffer *ab)
 // Return amount of buffered audio in seconds.
 double mp_audio_buffer_seconds(struct mp_audio_buffer *ab)
 {
+    if (af_fmt_is_raw(ab->format))
+        return ab->num_samples / (double)(ab->bitrate/8);
     return ab->num_samples / (double)ab->srate;
 }

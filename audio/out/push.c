@@ -144,7 +144,8 @@ static void resume(struct ao *ao)
 static void drain(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
-    double maxbuffer = ao->buffer / (double)ao->samplerate + 1;
+    double maxbuffer = 1 + ao->buffer / (double)(
+        af_fmt_is_raw(ao->format) ? ao->bitrate/8 : ao->samplerate);
 
     MP_VERBOSE(ao, "draining...\n");
 

@@ -223,7 +223,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     ao->num_planes = 1;
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;
-    } else {
+    } else if (!af_fmt_is_raw(ao->format)) {
         ao->sstride *= ao->channels.num;
     }
     ao->bps = ao->samplerate * ao->sstride;
@@ -232,7 +232,8 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
         ao->device_buffer = ao->driver->get_space(ao);
     if (ao->device_buffer)
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
-    ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
+    ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer *
+                    af_fmt_is_raw(ao->format) ? ao->bitrate/8 : ao->samplerate);
     ao->buffer = MPMAX(ao->buffer, 1);
 
     int align = af_format_sample_alignment(ao->format);
