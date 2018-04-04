@@ -1862,6 +1862,98 @@ static int mp_property_mixer_active(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, !!mpctx->ao);
 }
 
+static int mp_property_dynamic_volume(void *ctx, struct m_property *prop,
+                              int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        float value = *(float *)arg, clamped;
+
+        // AO can only accepts volumes in range [0%, 100%]
+        clamped = MPMIN(value, 100.0f);
+        int err = mp_property_do("ao-volume", action, &clamped, mpctx);
+        if (err == M_PROPERTY_NOT_IMPLEMENTED || err == M_PROPERTY_UNAVAILABLE)
+            return mp_property_do("volume", action, arg, mpctx); // fallback
+        else if (err != M_PROPERTY_OK)
+            return err;
+
+        // vol <= 100: AO handles volume, set softvol to 100%
+        // vol >  100: AO is at 100%, softvol handles volume
+        clamped = MPMAX(value, 100.0f);
+        return mp_property_do("volume", M_PROPERTY_SET, &clamped, mpctx);
+    }
+    case M_PROPERTY_GET: {
+        float ao_volume, soft_volume;
+        int err = mp_property_do("ao-volume", M_PROPERTY_GET, &ao_volume, mpctx);
+        if (err == M_PROPERTY_NOT_IMPLEMENTED || err == M_PROPERTY_UNAVAILABLE)
+            ao_volume = 100.0f;
+        else if (err != M_PROPERTY_OK)
+            return err;
+
+        err = mp_property_do("volume", M_PROPERTY_GET, &soft_volume, mpctx);
+        if (err != M_PROPERTY_OK)
+            return err;
+
+        *(float *)arg = (ao_volume / 100.0f) * (soft_volume / 100.0f) * 100.0f;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET_CONSTRICTED_TYPE:
+        return mp_property_do("volume", action, arg, mpctx);
+    case M_PROPERTY_PRINT: {
+        float value;
+        int err = mp_property_dynamic_volume(ctx, prop, M_PROPERTY_GET, &value);
+        if (err != M_PROPERTY_OK)
+            return err;
+        *(char **)arg = talloc_asprintf(NULL, "%.f", value);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_dynamic_mute(void *ctx, struct m_property *prop,
+                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        int err = mp_property_do("ao-mute", action, arg, mpctx);
+        if (err == M_PROPERTY_NOT_IMPLEMENTED || err == M_PROPERTY_UNAVAILABLE)
+            return mp_property_do("mute", action, arg, mpctx); // fallback
+        else if (err != M_PROPERTY_OK)
+            return err;
+
+        // muting is done by AO, ensure softvol is unmuted
+        int value = 0;
+        return mp_property_do("mute", M_PROPERTY_SET, &value, mpctx);
+    }
+    case M_PROPERTY_GET: {
+        int ao_muted, soft_muted;
+
+        int err = mp_property_do("ao-mute", M_PROPERTY_GET, &ao_muted, mpctx);
+        if (err == M_PROPERTY_NOT_IMPLEMENTED || err == M_PROPERTY_UNAVAILABLE)
+            ao_muted = false;
+        else if (err != M_PROPERTY_OK)
+            return err;
+
+        err = mp_property_do("mute", M_PROPERTY_GET, &soft_muted, mpctx);
+        if (err != M_PROPERTY_OK)
+            return err;
+
+        *(int *)arg = ao_muted || soft_muted;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Volume (RW)
 static int mp_property_volume(void *ctx, struct m_property *prop,
                               int action, void *arg)
@@ -3908,6 +4000,8 @@ static const struct m_property mp_properties_base[] = {
 
     // Audio
     {"mixer-active", mp_property_mixer_active},
+    {"dynamic-volume", mp_property_dynamic_volume},
+    {"dynamic-mute", mp_property_dynamic_mute},
     {"volume", mp_property_volume},
     {"mute", mp_property_mute},
     {"ao-volume", mp_property_ao_volume},
@@ -4253,12 +4347,16 @@ static const struct property_osd_display {
     {"speed", "Speed"},
     {"clock", "Clock"},
     // audio
+    {"dynamic-volume", "Volume",
+     .msg = "Volume: ${?dynamic-volume:${dynamic-volume}% ${?dynamic-mute==yes:(Muted)}}${!dynamic-volume:${dynamic-volume}}",
+     .osd_progbar = OSD_VOLUME, .marker = 100},
     {"volume", "Volume",
      .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
     {"ao-volume", "AO Volume",
      .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
+    {"dynamic-mute", "Mute"},
     {"mute", "Mute"},
     {"ao-mute", "AO Mute"},
     {"audio-delay", "A-V delay"},
