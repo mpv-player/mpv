@@ -529,6 +529,18 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     used only through the client API or from a script using
     ``mp.command_native``. (see `Property Expansion`_).
 
+``expand-path "<string>"``
+    Expand a path's double-tilde placeholders into a platform-specific path.
+    As ``expand-text``, this can only be used through the client API or from
+    a script using ``mp.command_native``.
+
+    .. admonition:: Example
+
+        ``mp.osd_message(mp.command_native({"expand-path", "~~home/"}))``
+
+        This line of Lua would show the location of the user's mpv
+        configuration directory on the OSD.
+
 ``show-progress``
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.

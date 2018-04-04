@@ -4967,6 +4967,17 @@ static void cmd_expand_text(void *p)
     };
 }
 
+static void cmd_expand_path(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    cmd->result = (mpv_node){
+        .format = MPV_FORMAT_STRING,
+        .u.string = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s)
+    };
+}
+
 static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -5811,6 +5822,7 @@ const struct mp_cmd_def mp_cmds[] = {
                                     OPT_INT("level", v.i, MP_CMD_OPT_ARG), },
         .allow_auto_repeat = true},
     { "expand-text", cmd_expand_text, { OPT_STRING("text", v.s, 0) } },
+    { "expand-path", cmd_expand_path, { OPT_STRING("text", v.s, 0) } },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true},
 
     { "sub-add", cmd_track_add,
