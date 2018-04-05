@@ -41,6 +41,7 @@ struct priv {
     double audio_latency;
 
     int cfg_frames_per_buffer;
+    int cfg_ms_per_buffer;
 };
 
 static const int fmtmap[][2] = {
@@ -155,10 +156,12 @@ static int init(struct ao *ao)
     // samplesPerSec is misnamed, actually it's samples per ms
     pcm.samplesPerSec = ao->samplerate * 1000;
 
+    if (!p->cfg_ms_per_buffer)
+        p->cfg_ms_per_buffer = DEFAULT_BUFFER_SIZE_MS;
     if (p->cfg_frames_per_buffer)
         ao->device_buffer = p->cfg_frames_per_buffer;
     else
-        ao->device_buffer = ao->samplerate * DEFAULT_BUFFER_SIZE_MS / 1000;
+        ao->device_buffer = ao->samplerate * p->cfg_ms_per_buffer / 1000;
     p->buffer_size = ao->device_buffer * ao->channels.num *
         af_fmt_to_bytes(ao->format);
     p->buf = calloc(1, p->buffer_size);
@@ -250,6 +253,7 @@ const struct ao_driver audio_out_opensles = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 96000),
+        OPT_INTRANGE("ms-per-buffer", cfg_ms_per_buffer, 0, 1, 500),
         {0}
     },
     .options_prefix = "opensles",
