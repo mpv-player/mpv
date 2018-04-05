@@ -4147,6 +4147,20 @@ ALSA audio output options
     or it will work only for files which use the layout implicit to your
     ALSA device).
 
+``--alsa-buffer-time=<microseconds>``
+    Set the requested buffer time in microseconds. A value of 0 skips requesting
+    anything from the ALSA API. This and the ``--alsa-periods`` option uses the
+    ALSA ``near`` functions to set the requested parameters. If doing so results
+    in an empty configuration set, setting these parameters is skipped.
+
+    Both options control the buffer size. A low buffer size can lead to higher
+    CPU usage and audio dropouts, while a high buffer size can lead to higher
+    latency in volume changes and other filtering.
+
+``--alsa-periods=<number>``
+    Number of periods requested from the ALSA API. See ``--alsa-buffer-time``
+    for further remarks.
+
 
 GPU renderer options
 -----------------------
