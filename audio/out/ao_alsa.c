@@ -82,8 +82,8 @@ static const struct m_sub_options ao_alsa_conf = {
         .mixer_name = "Master",
         .mixer_index = 0,
         .ni = 0,
-        .buffer_time = 250000,
-        .frags = 16,
+        .buffer_time = 25000,
+        .frags = 4,
     },
     .size = sizeof(struct ao_alsa_opts),
 };
