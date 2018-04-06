@@ -41,6 +41,8 @@ struct priv {
     double audio_latency;
 
     int cfg_frames_per_buffer;
+    int cfg_ms_per_buffer;
+    int cfg_enqueue_factor;
 };
 
 static const int fmtmap[][2] = {
@@ -99,7 +101,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     pthread_mutex_unlock(&p->buffer_lock);
 }
 
-#define DEFAULT_BUFFER_SIZE_MS 250
+#define DEFAULT_BUFFER_SIZE_MS 200
 
 #define CHK(stmt) \
     { \
@@ -129,7 +131,7 @@ static int init(struct ao *ao)
     CHK((*p->output_mix)->Realize(p->output_mix, SL_BOOLEAN_FALSE));
 
     locator_buffer_queue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
-    locator_buffer_queue.numBuffers = 1;
+    locator_buffer_queue.numBuffers = 2;
 
     pcm.formatType = SL_DATAFORMAT_PCM;
     pcm.numChannels = 2;
@@ -155,12 +157,16 @@ static int init(struct ao *ao)
     // samplesPerSec is misnamed, actually it's samples per ms
     pcm.samplesPerSec = ao->samplerate * 1000;
 
+    if (!p->cfg_ms_per_buffer)
+        p->cfg_ms_per_buffer = DEFAULT_BUFFER_SIZE_MS;
     if (p->cfg_frames_per_buffer)
         ao->device_buffer = p->cfg_frames_per_buffer;
     else
-        ao->device_buffer = ao->samplerate * DEFAULT_BUFFER_SIZE_MS / 1000;
+        ao->device_buffer = ao->samplerate * p->cfg_ms_per_buffer / 1000;
+    if (!p->cfg_enqueue_factor || p->cfg_enqueue_factor > ao->device_buffer)
+        p->cfg_enqueue_factor = ao->device_buffer;
     p->buffer_size = ao->device_buffer * ao->channels.num *
-        af_fmt_to_bytes(ao->format);
+        af_fmt_to_bytes(ao->format) / p->cfg_enqueue_factor;
     p->buf = calloc(1, p->buffer_size);
     if (!p->buf) {
         MP_ERR(ao, "Failed to allocate device buffer\n");
@@ -250,6 +256,8 @@ const struct ao_driver audio_out_opensles = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 96000),
+        OPT_INTRANGE("ms-per-buffer", cfg_ms_per_buffer, 0, 1, 500),
+        OPT_INTRANGE("enqueue-factor", cfg_enqueue_factor, 0, 1, 96000),
         {0}
     },
     .options_prefix = "opensles",

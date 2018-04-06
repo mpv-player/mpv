@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.29.0 ---
+    - add --opensles-enqueue-factor, the size per Enqueue() will be the device buffer size devided by its value; the default is to do one frame per Enqueue(); setting this to 1 is to do whole buffer per Enqueue()
+    - add --opensles-ms-per-buffer
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
       --ad-spdif-dtshd, --softvol options
