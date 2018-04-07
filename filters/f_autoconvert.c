@@ -161,14 +161,7 @@ static void handle_video_frame(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    struct mp_frame frame = p->sub.frame;
-    if (frame.type != MP_FRAME_VIDEO) {
-        MP_ERR(p, "video input required!\n");
-        mp_filter_internal_mark_failed(f);
-        return;
-    }
-
-    struct mp_image *img = frame.data;
+    struct mp_image *img = p->sub.frame.data;
 
     if (p->force_update)
         p->in_imgfmt = p->in_subfmt = 0;
@@ -186,6 +179,11 @@ static void handle_video_frame(struct mp_filter *f)
     p->in_imgfmt = img->params.imgfmt;
     p->in_subfmt = img->params.hw_subfmt;
     p->force_update = false;
+
+    if (!p->num_imgfmts) {
+        mp_subfilter_continue(&p->sub);
+        return;
+    }
 
     bool different_subfmt = false;
 
@@ -278,14 +276,7 @@ static void handle_audio_frame(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    struct mp_frame frame = p->sub.frame;
-    if (frame.type != MP_FRAME_AUDIO) {
-        MP_ERR(p, "audio input required!\n");
-        mp_filter_internal_mark_failed(f);
-        return;
-    }
-
-    struct mp_aframe *aframe = frame.data;
+    struct mp_aframe *aframe = p->sub.frame.data;
 
     int afmt = mp_aframe_get_format(aframe);
     int srate = mp_aframe_get_rate(aframe);
@@ -369,19 +360,14 @@ static void process(struct mp_filter *f)
     if (!mp_subfilter_read(&p->sub))
         return;
 
-    struct mp_frame frame = p->sub.frame;
+    if (p->sub.frame.type == MP_FRAME_VIDEO) {
+        handle_video_frame(f);
+        return;
+    }
 
-    if (!mp_frame_is_signaling(frame)) {
-        if (p->num_imgfmts) {
-            handle_video_frame(f);
-            return;
-        }
-        if (p->num_afmts || p->num_srates || p->chmaps.num_chmaps ||
-            p->resampling_forced)
-        {
-            handle_audio_frame(f);
-            return;
-        }
+    if (p->sub.frame.type == MP_FRAME_AUDIO) {
+        handle_audio_frame(f);
+        return;
     }
 
     mp_subfilter_continue(&p->sub);
