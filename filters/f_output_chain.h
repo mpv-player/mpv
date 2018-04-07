@@ -79,7 +79,7 @@ bool mp_output_chain_update_filters(struct mp_output_chain *p,
 void mp_output_chain_set_audio_speed(struct mp_output_chain *p,
                                      double speed, double resample);
 
-// Total delay incured by the filter chain, as measured by the recent filtered
+// Total delay incurred by the filter chain, as measured by the recent filtered
 // frames. The intention is that this sums the measured delays for each filter,
 // so if a filter is removed, the caller can estimate how much audio is missing
 // due to the change.
