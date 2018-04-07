@@ -8,6 +8,13 @@
 struct mp_autoconvert {
     // f->pins[0] is input, f->pins[1] is output
     struct mp_filter *f;
+
+    // If this is set, the callback is invoked (from the process function), and
+    // further data flow is blocked until mp_autoconvert_format_change_continue()
+    // is called. The idea is that you can reselect the output parameters on
+    // format changes and continue filtering when ready.
+    void (*on_audio_format_change)(void *opaque);
+    void *on_audio_format_change_opaque;
 };
 
 // (to free this, free the filter itself, mp_autoconvert.f)
@@ -45,6 +52,9 @@ void mp_autoconvert_add_srate(struct mp_autoconvert *c, int rate);
 // behavior, you need to readd all previously allowed formats, or reset the
 // filter.)
 void mp_autoconvert_clear(struct mp_autoconvert *c);
+
+// See mp_autoconvert.on_audio_format_change.
+void mp_autoconvert_format_change_continue(struct mp_autoconvert *c);
 
 // vf_d3d11vpp.c
 struct mp_filter *vf_d3d11_create_outconv(struct mp_filter *parent);

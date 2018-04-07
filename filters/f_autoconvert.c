@@ -45,6 +45,9 @@ struct priv {
     double audio_speed;
     bool resampling_forced;
 
+    bool format_change_blocked;
+    bool format_change_cont;
+
     struct mp_autoconvert public;
 };
 
@@ -283,16 +286,29 @@ static void handle_audio_frame(struct mp_filter *f)
     struct mp_chmap chmap = {0};
     mp_aframe_get_chmap(aframe, &chmap);
 
-    if (afmt == p->in_afmt && srate == p->in_srate &&
-        mp_chmap_equals(&chmap, &p->in_chmap) &&
-        (!p->resampling_forced || p->sub.filter) &&
-        !p->force_update)
-    {
+    bool format_change = afmt != p->in_afmt ||
+                         srate != p->in_srate ||
+                         !mp_chmap_equals(&chmap, &p->in_chmap) ||
+                         p->force_update;
+
+    if (!format_change && (!p->resampling_forced || p->sub.filter))
         goto cont;
-    }
 
     if (!mp_subfilter_drain_destroy(&p->sub))
         return;
+
+    if (format_change && p->public.on_audio_format_change) {
+        if (p->format_change_blocked)
+            return;
+
+        if (!p->format_change_cont) {
+            p->format_change_blocked = true;
+            p->public.
+                on_audio_format_change(p->public.on_audio_format_change_opaque);
+            return;
+        }
+        p->format_change_cont = false;
+    }
 
     p->in_afmt = afmt;
     p->in_srate = srate;
@@ -373,6 +389,17 @@ static void process(struct mp_filter *f)
     mp_subfilter_continue(&p->sub);
 }
 
+void mp_autoconvert_format_change_continue(struct mp_autoconvert *c)
+{
+    struct priv *p = c->f->priv;
+
+    if (p->format_change_blocked) {
+        p->format_change_cont = true;
+        p->format_change_blocked = false;
+        mp_filter_wakeup(c->f);
+    }
+}
+
 static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *p = f->priv;
@@ -394,6 +421,9 @@ static void reset(struct mp_filter *f)
     struct priv *p = f->priv;
 
     mp_subfilter_reset(&p->sub);
+
+    p->format_change_cont = false;
+    p->format_change_blocked = false;
 }
 
 static void destroy(struct mp_filter *f)
