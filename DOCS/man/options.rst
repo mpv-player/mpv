@@ -912,6 +912,16 @@ Video
     Deprecated. Use ``--hwdec-image-format`` if you really need this. If both
     are specified, ``--hwdec-image-format`` wins.
 
+``--cuda-decode-device=<auto|0..>``
+    Choose the GPU device used for decoding when using the ``cuda`` hwdec.
+
+    By default, the device that is being used to provide OpenGL output will
+    also be used for decoding (and in the vast majority of cases, only one
+    GPU will be present).
+
+    Note that when using the ``cuda-copy`` hwdec, a different option must be
+    passed: ``--vd-lavc-o=gpu=<0..>``.
+
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     video to make it fit a 4:3 display without black bands). The range
@@ -5372,16 +5382,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
-
-``--cuda-decode-device=<auto|0..>``
-    Choose the GPU device used for decoding when using the ``cuda`` hwdec.
-
-    By default, the device that is being used to provide OpenGL output will
-    also be used for decoding (and in the vast majority of cases, only one
-    GPU will be present).
-
-    Note that when using the ``cuda-copy`` hwdec, a different option must be
-    passed: ``--vd-lavc-o=gpu=<0..>``.
 
 Miscellaneous
 -------------
