@@ -922,6 +922,10 @@ Video
     Note that when using the ``cuda-copy`` hwdec, a different option must be
     passed: ``--vd-lavc-o=gpu=<0..>``.
 
+``--vaapi-device=<device file>``
+    Choose the DRM device for ``vaapi-copy``. This should be the path to a
+    DRM device file. (Default: ``/dev/dri/renderD128``)
+
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     video to make it fit a 4:3 display without black bands). The range
