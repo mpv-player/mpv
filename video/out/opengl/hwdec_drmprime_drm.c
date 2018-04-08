@@ -108,6 +108,30 @@ static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h ,stru
     dst->y1 += offset_y;
 }
 
+static void disable_video_plane(struct ra_hwdec *hw)
+{
+    struct priv *p = hw->priv;
+    if (!p->ctx)
+        return;
+
+    // Disabling video plane is needed on some devices when using the
+    // primary plane for video. Primary buffer can't be active with no
+    // framebuffer associated. So we need this function to commit it
+    // right away as mpv will free all framebuffers on playback end.
+    drmModeAtomicReqPtr request = drmModeAtomicAlloc();
+    if (request) {
+        drm_object_set_property(request, p->ctx->video_plane, "FB_ID", 0);
+        drm_object_set_property(request, p->ctx->video_plane, "CRTC_ID", 0);
+
+        int ret = drmModeAtomicCommit(p->ctx->fd, request,
+                                  DRM_MODE_ATOMIC_NONBLOCK, NULL);
+
+        if (ret)
+            MP_ERR(hw, "Failed to commit disable plane request (code %d)", ret);
+        drmModeAtomicFree(request);
+    }
+}
+
 static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
                          struct mp_rect *src, struct mp_rect *dst, bool newframe)
 {
@@ -183,6 +207,8 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
             }
         }
     } else {
+        disable_video_plane(hw);
+
         while (p->old_frame.fb.fb_id)
           set_current_frame(hw, NULL);
     }
@@ -199,6 +225,7 @@ static void uninit(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
 
+    disable_video_plane(hw);
     set_current_frame(hw, NULL);
 
     if (p->ctx) {
@@ -249,6 +276,7 @@ static int init(struct ra_hwdec *hw)
         goto err;
     }
 
+    disable_video_plane(hw);
     return 0;
 
 err:
