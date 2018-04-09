@@ -940,6 +940,14 @@ static HIDRemote *sHIDRemote = nil;
                                 case kHIDUsage_Csmr_Menu:
                                         buttonCode = kHIDRemoteButtonCodeMenuHold;
                                 break;
+
+                                case kHIDUsage_Csmr_VolumeIncrement:
+                                        buttonCode = kHIDRemoteButtonCodeUp;
+                                break;
+
+                                case kHIDUsage_Csmr_VolumeDecrement:
+                                        buttonCode = kHIDRemoteButtonCodeDown;
+                                break;
                         }
                 break;
 
