@@ -127,9 +127,13 @@ class MPVHelper: NSObject {
 
     func setRenderICCProfile(_ profile: NSColorSpace) {
         if mpvRenderContext == nil { return }
-        var iccData = profile.iccProfileData
-        iccData!.withUnsafeMutableBytes { (u8Ptr: UnsafeMutablePointer<UInt8>) in
-            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: iccData!.count))
+        guard var iccData = profile.iccProfileData else {
+            sendWarning("Invalid ICC profile data.")
+            return
+        }
+        let iccSize = iccData.count
+        iccData.withUnsafeMutableBytes { (u8Ptr: UnsafeMutablePointer<UInt8>) in
+            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: iccSize))
             var icc = mpv_byte_array(data: iccBstr.start, size: iccBstr.len)
             let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: &icc)
             mpv_render_context_set_parameter(mpvRenderContext, params)
