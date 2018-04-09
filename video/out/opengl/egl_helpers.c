@@ -101,7 +101,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 
     if (!num_configs) {
         talloc_free(configs);
-        MP_MSG(ctx, msgl, "Could not choose EGLConfig!\n");
+        MP_MSG(ctx, msgl, "Could not choose EGLConfig for %s!\n", name);
         return false;
     }
 
@@ -110,7 +110,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         chosen = cb.refine_config(cb.user_data, configs, num_configs);
     if (chosen < 0) {
         talloc_free(configs);
-        MP_MSG(ctx, msgl, "Could not choose EGLConfig!\n");
+        MP_MSG(ctx, msgl, "Could not refine EGLConfig for %s!\n", name);
         return false;
     }
     EGLConfig config = configs[chosen];
@@ -157,7 +157,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     }
 
     if (!egl_ctx) {
-        MP_MSG(ctx, msgl, "Could not create EGL context!\n");
+        MP_MSG(ctx, msgl, "Could not create EGL context for %s!\n", name);
         return false;
     }
 
