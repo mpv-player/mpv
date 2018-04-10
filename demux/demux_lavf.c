@@ -443,10 +443,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
                        priv->avif->name, score, avpd.buf_size,
                        forced_format ? " (forced)" : "");
 
-            for (int n = 0; format_hacks[n].ff_name; n++) {
+            for (int n = 0; lavfdopts->hacks && format_hacks[n].ff_name; n++) {
                 const struct format_hack *entry = &format_hacks[n];
-                if (!lavfdopts->hacks)
-                    continue;
                 if (!matches_avinputformat_name(priv, entry->ff_name))
                     continue;
                 if (entry->mime_type && strcasecmp(entry->mime_type, mime_type) != 0)
