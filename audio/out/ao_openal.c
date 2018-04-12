@@ -57,19 +57,22 @@
 #include "options/m_option.h"
 
 #define MAX_CHANS MP_NUM_CHANNELS
-#define NUM_BUF 128
-#define CHUNK_SAMPLES 256
-static ALuint buffers[MAX_CHANS][NUM_BUF];
-static ALuint sources[MAX_CHANS];
+#define MAX_BUF 128
+#define MAX_SAMPLES 32768
+static ALuint buffers[MAX_BUF];
+static ALuint buffer_size[MAX_BUF];
+static ALuint source;
 
-static int cur_buf[MAX_CHANS];
-static int unqueue_buf[MAX_CHANS];
+static int cur_buf;
+static int unqueue_buf;
 
 static struct ao *ao_data;
 
 struct priv {
     ALenum al_format;
-    int chunk_size;
+    int num_buffers;
+    int num_samples;
+    int direct_channels;
 };
 
 static void reset(struct ao *ao);
@@ -89,43 +92,80 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         vol->left = vol->right = volume * 100;
         return CONTROL_TRUE;
     }
+    case AOCONTROL_GET_MUTE:
+    case AOCONTROL_SET_MUTE: {
+        bool mute = *(bool *)arg;
+        ALfloat al_mute = (ALfloat)(!mute);
+        if (cmd == AOCONTROL_SET_MUTE) {
+            alSourcef(source, AL_GAIN, al_mute);
+        }
+        alGetSourcef(source, AL_GAIN, &al_mute);
+        *(bool *)arg = !((bool)al_mute);
+        return CONTROL_TRUE;
+    }
+
     case AOCONTROL_HAS_SOFT_VOLUME:
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
 
-struct speaker {
-    int id;
-    float pos[3];
-};
-
-static const struct speaker speaker_pos[] = {
-    {MP_SPEAKER_ID_FL,   {-0.500,  0, -0.866}}, // -30 deg
-    {MP_SPEAKER_ID_FR,   { 0.500,  0, -0.866}}, //  30 deg
-    {MP_SPEAKER_ID_FC,   {     0,  0,     -1}}, //   0 deg
-    {MP_SPEAKER_ID_LFE,  {     0, -1,      0}}, //   below
-    {MP_SPEAKER_ID_BL,   {-0.609,  0,  0.793}}, // -142.5 deg
-    {MP_SPEAKER_ID_BR,   { 0.609,  0,  0.793}}, //  142.5 deg
-    {MP_SPEAKER_ID_BC,   {     0,  0,      1}}, //  180 deg
-    {MP_SPEAKER_ID_SL,   {-0.985,  0,  0.174}}, // -100 deg
-    {MP_SPEAKER_ID_SR,   { 0.985,  0,  0.174}}, //  100 deg
-    {-1},
-};
-
-static ALenum get_al_format(int format)
+static enum af_format get_supported_format(int format)
 {
     switch (format) {
-    case AF_FORMAT_U8P: return AL_FORMAT_MONO8;
-    case AF_FORMAT_S16P: return  AL_FORMAT_MONO16;
-    case AF_FORMAT_FLOATP:
+    case AF_FORMAT_U8:
+        if (alGetEnumValue((ALchar*)"AL_FORMAT_MONO8"))
+            return AF_FORMAT_U8;
+        break;
+
+    case AF_FORMAT_S16:
+        if (alGetEnumValue((ALchar*)"AL_FORMAT_MONO16"))
+            return AF_FORMAT_S16;
+        break;
+
+    case AF_FORMAT_S32:
+        if (strstr(alGetString(AL_RENDERER), "X-Fi") != NULL)
+            return AF_FORMAT_S32;
+        break;
+
+    case AF_FORMAT_FLOAT:
         if (alIsExtensionPresent((ALchar*)"AL_EXT_float32") == AL_TRUE)
-            return AL_FORMAT_MONO_FLOAT32;
+            return AF_FORMAT_FLOAT;
         break;
-    case AF_FORMAT_DOUBLEP:
-        if (alIsExtensionPresent((ALchar*)"AL_EXT_double") == AL_TRUE)
-            return AL_FORMAT_MONO_DOUBLE_EXT;
-        break;
+    }
+    return AL_FALSE;
+}
+
+static ALenum get_supported_layout(int format, int channels)
+{
+    const char *channel_str[] = {
+        [1] = "MONO",
+        [2] = "STEREO",
+        [4] = "QUAD",
+        [6] = "51CHN",
+        [7] = "61CHN",
+        [8] = "71CHN",
+    };
+    const char *format_str[] = {
+        [AF_FORMAT_U8] = "8",
+        [AF_FORMAT_S16] = "16",
+        [AF_FORMAT_S32] = "32",
+        [AF_FORMAT_FLOAT] = "_FLOAT32",
+    };
+    if (channel_str[channels] == NULL || format_str[format] == NULL)
+        return AL_FALSE;
+
+    char enum_name[32];
+    // AF_FORMAT_FLOAT uses same enum name as AF_FORMAT_S32 for multichannel
+    // playback, while it is different for mono and stereo.
+    // OpenAL Soft does not support AF_FORMAT_S32 and seems to reuse the names.
+    if (channels > 2 && format == AF_FORMAT_FLOAT)
+        format = AF_FORMAT_S32;
+    snprintf(enum_name, sizeof(enum_name), "AL_FORMAT_%s%s", channel_str[channels],
+             format_str[format]);
+
+    if (alGetEnumValue((ALchar*)enum_name)) {
+        return alGetEnumValue((ALchar*)enum_name);
     }
     return AL_FALSE;
 }
@@ -133,9 +173,15 @@ static ALenum get_al_format(int format)
 // close audio device
 static void uninit(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+    alSourceStop(source);
+    alSourcei(source, AL_BUFFER, 0);
+
+    alDeleteBuffers(p->num_buffers, buffers);
+    alDeleteSources(1, &source);
+
     ALCcontext *ctx = alcGetCurrentContext();
     ALCdevice *dev = alcGetContextsDevice(ctx);
-    reset(ao);
     alcMakeContextCurrent(NULL);
     alcDestroyContext(ctx);
     alcCloseDevice(dev);
@@ -150,30 +196,12 @@ static int init(struct ao *ao)
     ALCcontext *ctx = NULL;
     ALCint freq = 0;
     ALCint attribs[] = {ALC_FREQUENCY, ao->samplerate, 0, 0};
-    int i;
     struct priv *p = ao->priv;
     if (ao_data) {
         MP_FATAL(ao, "Not reentrant!\n");
         return -1;
     }
     ao_data = ao;
-    struct mp_chmap_sel sel = {0};
-    for (i = 0; speaker_pos[i].id != -1; i++)
-        mp_chmap_sel_add_speaker(&sel, speaker_pos[i].id);
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-        goto err_out;
-    struct speaker speakers[MAX_CHANS];
-    for (i = 0; i < ao->channels.num; i++) {
-        speakers[i].id = -1;
-        for (int n = 0; speaker_pos[n].id >= 0; n++) {
-            if (speaker_pos[n].id == ao->channels.speaker[i])
-                speakers[i] = speaker_pos[n];
-        }
-        if (speakers[i].id < 0) {
-            MP_FATAL(ao, "Unknown channel layout\n");
-            goto err_out;
-        }
-    }
     char *dev_name = ao->device;
     dev = alcOpenDevice(dev_name && dev_name[0] ? dev_name : NULL);
     if (!dev) {
@@ -184,37 +212,74 @@ static int init(struct ao *ao)
     alcMakeContextCurrent(ctx);
     alListenerfv(AL_POSITION, position);
     alListenerfv(AL_ORIENTATION, direction);
-    alGenSources(ao->channels.num, sources);
-    for (i = 0; i < ao->channels.num; i++) {
-        cur_buf[i] = 0;
-        unqueue_buf[i] = 0;
-        alGenBuffers(NUM_BUF, buffers[i]);
-        alSourcefv(sources[i], AL_POSITION, speakers[i].pos);
-        alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
+
+    alGenSources(1, &source);
+    if (p->direct_channels && alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT")) {
+        alSourcei(source, alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT"), AL_TRUE);
     }
+
+    cur_buf = 0;
+    unqueue_buf = 0;
+    for (int i = 0; i < p->num_buffers; ++i) {
+        buffer_size[i] = 0;
+    }
+
+    alGenBuffers(p->num_buffers, buffers);
+
     alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
     if (alcGetError(dev) == ALC_NO_ERROR && freq)
         ao->samplerate = freq;
 
-    p->al_format = AL_FALSE;
+    // Check sample format
     int try_formats[AF_FORMAT_COUNT + 1];
+    enum af_format sample_format = 0;
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
-        p->al_format = get_al_format(try_formats[n]);
-        if (p->al_format != AL_FALSE) {
+        sample_format = get_supported_format(try_formats[n]);
+        if (sample_format != AF_FORMAT_UNKNOWN) {
             ao->format = try_formats[n];
             break;
         }
     }
 
-    if (p->al_format == AL_FALSE) {
+    if (sample_format == AF_FORMAT_UNKNOWN) {
         MP_FATAL(ao, "Can't find appropriate sample format.\n");
         uninit(ao);
         goto err_out;
     }
 
-    p->chunk_size = CHUNK_SAMPLES * af_fmt_to_bytes(ao->format);
-    ao->period_size = CHUNK_SAMPLES;
+    // Check if OpenAL driver supports the desired number of channels.
+    int num_channels = ao->channels.num;
+    do {
+        p->al_format = get_supported_layout(sample_format, num_channels);
+        if (p->al_format == AL_FALSE) {
+            num_channels = num_channels - 1;
+        }
+    } while (p->al_format == AL_FALSE && num_channels > 1);
+
+    // Request number of speakers for output from ao.
+    const struct mp_chmap possible_layouts[] = {
+        {0},                                        // empty
+        MP_CHMAP_INIT_MONO,                         // mono
+        MP_CHMAP_INIT_STEREO,                       // stereo
+        {0},                                        // 2.1
+        MP_CHMAP4(FL, FR, BL, BR),                  // 4.0
+        {0},                                        // 5.0
+        MP_CHMAP6(FL, FR, FC, LFE, BL, BR),         // 5.1
+        MP_CHMAP7(FL, FR, FC, LFE, SL, SR, BC),     // 6.1
+        MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
+    };
+    ao->channels = possible_layouts[num_channels];
+    if (!ao->channels.num)
+        mp_chmap_set_unknown(&ao->channels, num_channels);
+
+    if (p->al_format == AL_FALSE || !mp_chmap_is_valid(&ao->channels)) {
+        MP_FATAL(ao, "Can't find appropriate channel layout.\n");
+        uninit(ao);
+        goto err_out;
+    }
+
+    ao->period_size = p->num_samples;
     return 0;
 
 err_out:
@@ -225,30 +290,27 @@ err_out:
 static void drain(struct ao *ao)
 {
     ALint state;
-    alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
+    alGetSourcei(source, AL_SOURCE_STATE, &state);
     while (state == AL_PLAYING) {
         mp_sleep_us(10000);
-        alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
+        alGetSourcei(source, AL_SOURCE_STATE, &state);
     }
 }
 
-static void unqueue_buffers(void)
+static void unqueue_buffers(struct ao *ao)
 {
+    struct priv *q = ao->priv;
     ALint p;
-    int s;
-    for (s = 0; s < ao_data->channels.num; s++) {
-        int till_wrap = NUM_BUF - unqueue_buf[s];
-        alGetSourcei(sources[s], AL_BUFFERS_PROCESSED, &p);
-        if (p >= till_wrap) {
-            alSourceUnqueueBuffers(sources[s], till_wrap,
-                                   &buffers[s][unqueue_buf[s]]);
-            unqueue_buf[s] = 0;
-            p -= till_wrap;
-        }
-        if (p) {
-            alSourceUnqueueBuffers(sources[s], p, &buffers[s][unqueue_buf[s]]);
-            unqueue_buf[s] += p;
-        }
+    int till_wrap = q->num_buffers - unqueue_buf;
+    alGetSourcei(source, AL_BUFFERS_PROCESSED, &p);
+    if (p >= till_wrap) {
+        alSourceUnqueueBuffers(source, till_wrap, &buffers[unqueue_buf]);
+        unqueue_buf = 0;
+        p -= till_wrap;
+    }
+    if (p) {
+        alSourceUnqueueBuffers(source, p, &buffers[unqueue_buf]);
+        unqueue_buf += p;
     }
 }
 
@@ -257,8 +319,8 @@ static void unqueue_buffers(void)
  */
 static void reset(struct ao *ao)
 {
-    alSourceStopv(ao->channels.num, sources);
-    unqueue_buffers();
+    alSourceStop(source);
+    unqueue_buffers(ao);
 }
 
 /**
@@ -266,7 +328,7 @@ static void reset(struct ao *ao)
  */
 static void audio_pause(struct ao *ao)
 {
-    alSourcePausev(ao->channels.num, sources);
+    alSourcePause(source);
 }
 
 /**
@@ -274,18 +336,19 @@ static void audio_pause(struct ao *ao)
  */
 static void audio_resume(struct ao *ao)
 {
-    alSourcePlayv(ao->channels.num, sources);
+    alSourcePlay(source);
 }
 
 static int get_space(struct ao *ao)
 {
+    struct priv *p = ao->priv;
     ALint queued;
-    unqueue_buffers();
-    alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
-    queued = NUM_BUF - queued - 3;
+    unqueue_buffers(ao);
+    alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+    queued = p->num_buffers - queued;
     if (queued < 0)
         return 0;
-    return queued * CHUNK_SAMPLES;
+    return p->num_samples * queued;
 }
 
 /**
@@ -294,30 +357,66 @@ static int get_space(struct ao *ao)
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
-    ALint state;
-    int num = samples / CHUNK_SAMPLES;
-    for (int i = 0; i < num; i++) {
-        for (int ch = 0; ch < ao->channels.num; ch++) {
-            char *d = data[ch];
-            d += i * p->chunk_size;
-            alBufferData(buffers[ch][cur_buf[ch]], p->al_format, d,
-                         p->chunk_size, ao->samplerate);
-            alSourceQueueBuffers(sources[ch], 1, &buffers[ch][cur_buf[ch]]);
-            cur_buf[ch] = (cur_buf[ch] + 1) % NUM_BUF;
-        }
+
+    int buffered_samples = 0;
+    int num = 0;
+    if (flags & AOPLAY_FINAL_CHUNK) {
+        num = 1;
+        buffered_samples = samples;
+    } else {
+        num = samples / p->num_samples;
+        buffered_samples = num * p->num_samples;
     }
-    alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
+
+    for (int i = 0; i < num; i++) {
+        char *d = *data;
+        if (flags & AOPLAY_FINAL_CHUNK) {
+            buffer_size[cur_buf] = samples;
+        } else {
+            buffer_size[cur_buf] = p->num_samples;
+        }
+        d += i * buffer_size[cur_buf] * ao->sstride;
+        alBufferData(buffers[cur_buf], p->al_format, d,
+            buffer_size[cur_buf] * ao->sstride, ao->samplerate);
+        alSourceQueueBuffers(source, 1, &buffers[cur_buf]);
+        cur_buf = (cur_buf + 1) % p->num_buffers;
+    }
+
+    ALint state;
+    alGetSourcei(source, AL_SOURCE_STATE, &state);
     if (state != AL_PLAYING) // checked here in case of an underrun
-        alSourcePlayv(ao->channels.num, sources);
-    return num * CHUNK_SAMPLES;
+        alSourcePlay(source);
+
+    return buffered_samples;
 }
 
 static double get_delay(struct ao *ao)
 {
+    struct priv *p = ao->priv;
     ALint queued;
-    unqueue_buffers();
-    alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
-    return queued * CHUNK_SAMPLES / (double)ao->samplerate;
+    unqueue_buffers(ao);
+    alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+
+    double soft_source_latency = 0;
+    if(alIsExtensionPresent("AL_SOFT_source_latency")) {
+        ALdouble offsets[2];
+        LPALGETSOURCEDVSOFT alGetSourcedvSOFT = alGetProcAddress("alGetSourcedvSOFT");
+        alGetSourcedvSOFT(source, AL_SEC_OFFSET_LATENCY_SOFT, offsets);
+        // Additional latency to the play buffer, the remaining seconds to be
+        // played minus the offset (seconds already played)
+        soft_source_latency = offsets[1] - offsets[0];
+    } else {
+        float offset = 0;
+        alGetSourcef(source, AL_SEC_OFFSET, &offset);
+        soft_source_latency = -offset;
+    }
+
+    int queued_samples = 0;
+    for (int i = 0, index = cur_buf; i < queued; ++i) {
+        queued_samples += buffer_size[index];
+        index = (index + 1) % p->num_buffers;
+    }
+    return (queued_samples / (double)ao->samplerate) + soft_source_latency;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -336,4 +435,16 @@ const struct ao_driver audio_out_openal = {
     .reset     = reset,
     .drain     = drain,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .num_buffers = 4,
+        .num_samples = 8192,
+        .direct_channels = 0,
+    },
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("num-buffers", num_buffers, 0, 2, MAX_BUF),
+        OPT_INTRANGE("num-samples", num_samples, 0, 256, MAX_SAMPLES),
+        OPT_FLAG("direct-channels", direct_channels, 0),
+        {0}
+    },
+    .options_prefix = "openal",
 };
