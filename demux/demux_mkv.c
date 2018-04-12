@@ -193,7 +193,6 @@ typedef struct mkv_demuxer {
     struct header_elem {
         int32_t id;
         int64_t pos;
-        bool needed;
         bool parsed;
     } *headers;
     int num_headers;
@@ -2079,7 +2078,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             }
             continue;
         }
-        elem->needed = true;
         only_cue = only_cue < 0 && elem->id == MATROSKA_ID_CUES;
     }
 
@@ -2094,7 +2092,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             struct header_elem *lowest = NULL;
             for (int n = 0; n < mkv_d->num_headers; n++) {
                 struct header_elem *elem = &mkv_d->headers[n];
-                if (!elem->needed)
+                if (elem->parsed)
                     continue;
                 if (!lowest || elem->pos < lowest->pos)
                     lowest = elem;
@@ -2103,7 +2101,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             if (!lowest)
                 break;
 
-            lowest->needed = false;
             if (read_deferred_element(demuxer, lowest) < 0)
                 return -1;
         }
