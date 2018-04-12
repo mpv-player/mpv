@@ -1375,11 +1375,30 @@ Property list
     is loadedThis is because the same underlying code is used for seeking and
     resyncing.)
 
+``dynamic-volume`` (RW)
+    Current volume. This property combines ``ao-volume`` and ``volume``
+    (if the former is available), otherwise it's equivalent ``volume``.
+
+    Reading this property returns the effective volume mpv is playing at,
+    taking into account both the system and internal volume.
+
+    When writing this property, adjusting system volume (``ao-volume``)
+    will be preferred. The internal volume will only be adjusted if unavoidable,
+    e.g. when setting volumes greater than 100%.
+
+``dynamic-mute`` (RW)
+    Current mute status. This property combines ``ao-mute`` and ``mute``
+    (if the former is available), otherwise it's equivalent ``mute``.
+
+    When setting this property, changing system mute state (``ao-mute``) will
+    be preferred and ``mute`` only used as fallback.
+
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise.
 
     This option is relatively useless. Before mpv 0.18.1, it could be used to
-    infer behavior of the ``volume`` property.
+    infer behavior of the ``volume`` property. This option **can't** be used
+    to infer the behaviour of ``dynamic-volume`` or ``dynamic-mute`` either.
 
 ``ao-volume`` (RW)
     System volume. This property is available only if mpv audio output is
