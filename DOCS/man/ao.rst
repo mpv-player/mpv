@@ -110,7 +110,7 @@ Available audio output drivers are:
     exclusive mode (bypasses the sound server).
 
 ``openal``
-    Experimental OpenAL audio output driver
+    OpenAL audio output driver
 
     ``--openal-num-buffers=<2-128>``
         Specify the number of audio buffers to use. Lower values are better for
@@ -125,9 +125,6 @@ Available audio output drivers are:
         tinting the sound with ambisonics or HRTF.
         Channels are dropped when when they are not available as downmixing
         will be disabled. Default: no.
-
-    .. note:: This driver is not very useful. Playing multi-channel audio with
-              it is slow.
 
 ``pulse``
     PulseAudio audio output driver
