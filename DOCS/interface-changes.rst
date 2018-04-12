@@ -58,15 +58,17 @@ Interface changes
           between PCM and AC3 output, the audio output won't be reconfigured,
           and audio playback will fail due to libswresample being unable to
           convert between PCM and AC3 (Note: the responsible developer didn't
-          give a shit)
-        - inserting a filter that changes the output channel layout will not
+          give a shit. Later changes might have improved or worsened this.)
+        - inserting a filter that changes the output sample format will not
           reconfigure the AO - you need to run an additional "ao-reload"
           command to force this if you want that
         - using "strong" gapless audio (--gapless-audio=yes) can fail if the
           audio formats are not convertible (such as switching between PCM and
           AC3 passthrough)
         - if filters do not pass through PTS values correctly, A/V sync can
-          result over time
+          result over time. Some libavfilter filters are known to be affected by
+          this, such as af_loudnorm, which can desync over time, depending on
+          how the audio track was muxed.
     - remove out-format sub-parameter from "format" audio filter (no replacement)
     - --lavfi-complex now requires uniquely named filter pads. In addition,
       unconnected filter pads are not allowed anymore (that means every filter
