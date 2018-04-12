@@ -286,6 +286,11 @@ static void handle_audio_frame(struct mp_filter *f)
     struct mp_chmap chmap = {0};
     mp_aframe_get_chmap(aframe, &chmap);
 
+    if (p->resampling_forced && !af_fmt_is_pcm(afmt)) {
+        MP_WARN(p, "ignoring request to resample non-PCM audio for speed change\n");
+        p->resampling_forced = false;
+    }
+
     bool format_change = afmt != p->in_afmt ||
                          srate != p->in_srate ||
                          !mp_chmap_equals(&chmap, &p->in_chmap) ||
