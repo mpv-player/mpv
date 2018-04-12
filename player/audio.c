@@ -255,6 +255,33 @@ static char *audio_config_to_str_buf(char *buf, size_t buf_sz, int rate,
     return buf;
 }
 
+// Decide whether on a format change, we should reinit the AO.
+static bool keep_weak_gapless_format(struct mp_aframe *old, struct mp_aframe* new)
+{
+    bool res = false;
+    struct mp_aframe *new_mod = mp_aframe_new_ref(new);
+    if (!new_mod)
+        abort();
+
+    // If the sample formats are compatible (== libswresample generally can
+    // convert them), keep the AO. On other changes, recreate it.
+
+    int old_fmt = mp_aframe_get_format(old);
+    int new_fmt = mp_aframe_get_format(new);
+
+    if (af_format_conversion_score(old_fmt, new_fmt) == INT_MIN)
+        goto done; // completely incompatible formats
+
+    if (!mp_aframe_set_format(new_mod, old_fmt))
+        goto done;
+
+    res = mp_aframe_config_equals(old, new_mod);
+
+done:
+    talloc_free(new_mod);
+    return res;
+}
+
 static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -290,7 +317,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     // previous one, keep the AO and don't reinit anything.
     // Strong gapless: always keep the AO
     if ((mpctx->ao_filter_fmt && mpctx->ao && opts->gapless_audio < 0 &&
-         mp_aframe_config_equals(mpctx->ao_filter_fmt, out_fmt)) ||
+         keep_weak_gapless_format(mpctx->ao_filter_fmt, out_fmt)) ||
         (mpctx->ao && opts->gapless_audio > 0))
     {
         mp_output_chain_set_ao(ao_c->filter, mpctx->ao);

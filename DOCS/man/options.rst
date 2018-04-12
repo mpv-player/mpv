@@ -1541,9 +1541,10 @@ Audio
             changes, the audio device is closed and reopened. This means that
             you will normally get gapless audio with files that were encoded
             using the same settings, but might not be gapless in other cases.
-            (Unlike with ``yes``, you don't have to worry about corner cases
-            like the first file setting a very low quality output format, and
-            ruining the playback of higher quality files that follow.)
+            The exact conditions under which the audio device is kept open is
+            an implementation detail, and can change from version to version.
+            Currently, the device is kept even if the sample format changes,
+            but the sample formats are convertible.
 
     .. note::
 
