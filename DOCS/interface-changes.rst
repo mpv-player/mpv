@@ -68,7 +68,7 @@ Interface changes
         - if filters do not pass through PTS values correctly, A/V sync can
           result over time. Some libavfilter filters are known to be affected by
           this, such as af_loudnorm, which can desync over time, depending on
-          how the audio track was muxed.
+          how the audio track was muxed (af_lavfi's fix-pts suboption can help).
     - remove out-format sub-parameter from "format" audio filter (no replacement)
     - --lavfi-complex now requires uniquely named filter pads. In addition,
       unconnected filter pads are not allowed anymore (that means every filter

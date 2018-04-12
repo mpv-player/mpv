@@ -245,3 +245,16 @@ Available filters are:
 
     ``o=<string>``
         AVOptions.
+
+    ``fix-pts=<yes|no>``
+        Determine PTS based on sample count (default: no). If this is enabled,
+        the player won't rely on libavfilter passing through PTS accurately.
+        Instead, it pass a sample count as PTS to libavfilter, and compute the
+        PTS used by mpv based on that and the input PTS. This helps with filters
+        which output a recomputed PTS instead of the original PTS (including
+        filters which require the PTS to start at 0). mpv normally expects
+        filters to not touch the PTS (or only to the extent of changing frame
+        boundaries), so this is not the default, but it will be needed to use
+        broken filters. In practice, these broken filters will either cause slow
+        A/V desync over time (with some files), or break playback completely if
+        you seek or start playback from the middle of a file.

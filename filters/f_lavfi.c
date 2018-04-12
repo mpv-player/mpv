@@ -93,6 +93,12 @@ struct lavfi {
 
     AVFrame *tmp_frame;
 
+    // Audio timestamp emulation.
+    bool emulate_audio_pts;
+    double in_pts;      // last input timestamps
+    int64_t in_samples; // samples ever sent to the filter
+    double delay;       // seconds of audio apparently buffered by filter
+
     struct mp_lavfi public;
 };
 
@@ -137,6 +143,9 @@ static void free_graph(struct lavfi *c)
     }
     c->initialized = false;
     c->draining_recover = false;
+    c->in_pts = MP_NOPTS_VALUE;
+    c->in_samples = 0;
+    c->delay = 0;
 }
 
 static void add_pad(struct lavfi *c, int dir, int index, AVFilterContext *filter,
@@ -611,6 +620,13 @@ static bool feed_input_pads(struct lavfi *c)
         AVFrame *frame = mp_frame_to_av(pad->pending, &pad->timebase);
         bool eof = pad->pending.type == MP_FRAME_EOF;
 
+        if (c->emulate_audio_pts && pad->pending.type == MP_FRAME_AUDIO) {
+            struct mp_aframe *aframe = pad->pending.data;
+            c->in_pts = mp_aframe_end_pts(aframe);
+            frame->pts = c->in_samples; // timebase is 1/sample_rate
+            c->in_samples += frame->nb_samples;
+        }
+
         mp_frame_unref(&pad->pending);
 
         if (!frame && !eof) {
@@ -656,6 +672,14 @@ static bool read_output_pads(struct lavfi *c)
 #endif
             struct mp_frame frame =
                 mp_frame_from_av(pad->type, c->tmp_frame, &pad->timebase);
+            if (c->emulate_audio_pts && frame.type == MP_FRAME_AUDIO) {
+                AVFrame *avframe = c->tmp_frame;
+                struct mp_aframe *aframe = frame.data;
+                double in_time = c->in_samples * av_q2d(c->in_pads[0]->timebase);
+                double out_time = avframe->pts * av_q2d(pad->timebase);
+                mp_aframe_set_pts(aframe, c->in_pts +
+                    (c->in_pts != MP_NOPTS_VALUE ? (out_time - in_time) : 0));
+            }
             av_frame_unref(c->tmp_frame);
             if (frame.type) {
                 mp_pin_in_write(pad->pin, frame);
@@ -871,6 +895,8 @@ struct lavfi_user_opts {
 
     char *filter_name;
     char **filter_opts;
+
+    int fix_pts;
 };
 
 static struct mp_filter *lavfi_create(struct mp_filter *parent, void *options)
@@ -883,6 +909,10 @@ static struct mp_filter *lavfi_create(struct mp_filter *parent, void *options)
     } else {
         l = mp_lavfi_create_graph(parent, opts->type, true,
                                   opts->avopts, opts->graph);
+    }
+    if (l) {
+        struct lavfi *c = l->f->priv;
+        c->emulate_audio_pts = opts->fix_pts;
     }
     talloc_free(opts);
     return l ? l->f : NULL;
@@ -1030,6 +1060,7 @@ const struct mp_user_filter_entry af_lavfi = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
             OPT_STRING("graph", graph, M_OPT_MIN, .min = 1),
+            OPT_FLAG("fix-pts", fix_pts, 0),
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}
         },
