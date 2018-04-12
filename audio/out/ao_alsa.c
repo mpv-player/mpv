@@ -856,11 +856,6 @@ static int init_device(struct ao *ao, int mode)
             (p->alsa, alsa_swparams, p->outburst);
     CHECK_ALSA_ERROR("Unable to set start threshold");
 
-    /* disable underrun reporting */
-    err = snd_pcm_sw_params_set_stop_threshold
-            (p->alsa, alsa_swparams, boundary);
-    CHECK_ALSA_ERROR("Unable to set stop threshold");
-
     /* play silence when there is an underrun */
     err = snd_pcm_sw_params_set_silence_size
             (p->alsa, alsa_swparams, boundary);
@@ -1117,6 +1112,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         } else if (res < 0) {
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);
+            } else if (res == -EPIPE) {
+                // For some reason, writing a smaller fragment at the end
+                // immediately underruns.
+                if (!(flags & AOPLAY_FINAL_CHUNK))
+                    MP_WARN(ao, "Device underrun detected.\n");
             } else {
                 MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
             }
