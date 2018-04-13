@@ -76,6 +76,11 @@ static mpv_handle *jclient(js_State *J)
     return jctx(J)->client;
 }
 
+static void pushnode(js_State *J, mpv_node *node);
+static void makenode(void *ta_ctx, mpv_node *dst, js_State *J, int idx);
+static int jsL_checkint(js_State *J, int idx);
+static uint64_t jsL_checkuint64(js_State *J, int idx);
+
 /**********************************************************************
  *  conventions, MuJS notes and vm errors
  *********************************************************************/
@@ -372,7 +377,7 @@ static void push_file_content(js_State *J, const char *fname, int limit)
 // utils.read_file(..). args: fname [,max]. returns [up to max] bytes as string.
 static void script_read_file(js_State *J)
 {
-    int limit = js_isundefined(J, 2) ? -1 : js_tonumber(J, 2);
+    int limit = js_isundefined(J, 2) ? -1 : jsL_checkint(J, 2);
     push_file_content(J, js_tostring(J, 1), limit);
 }
 
@@ -501,11 +506,6 @@ error_out:
 /**********************************************************************
  *  Main mp.* scripting APIs and helpers
  *********************************************************************/
-static void pushnode(js_State *J, mpv_node *node);
-static void makenode(void *ta_ctx, mpv_node *dst, js_State *J, int idx);
-static int jsL_checkint(js_State *J, int idx);
-static int64_t jsL_checkint64(js_State *J, int idx);
-
 // Return the index in opts of stack[idx] (or of def if undefined), else throws.
 static int checkopt(js_State *J, int idx, const char *def, const char *opts[],
                     const char *desc)
@@ -686,7 +686,7 @@ static void script__observe_property(js_State *J)
                              MPV_FORMAT_STRING, MPV_FORMAT_DOUBLE};
 
     mpv_format f = mf[checkopt(J, 3, "none", fmts, "observe type")];
-    int e = mpv_observe_property(jclient(J), js_tonumber(J, 1),
+    int e = mpv_observe_property(jclient(J), jsL_checkuint64(J, 1),
                                              js_tostring(J, 2),
                                              f);
     push_status(J, e);
@@ -695,7 +695,7 @@ static void script__observe_property(js_State *J)
 // args: id
 static void script__unobserve_property(js_State *J)
 {
-    int e = mpv_unobserve_property(jclient(J), js_tonumber(J, 1));
+    int e = mpv_unobserve_property(jclient(J), jsL_checkuint64(J, 1));
     push_status(J, e);
 }
 
@@ -719,8 +719,8 @@ static void script_get_time_ms(js_State *J)
 static void script_set_osd_ass(js_State *J)
 {
     struct script_ctx *ctx = jctx(J);
-    int res_x = js_tonumber(J, 1);
-    int res_y = js_tonumber(J, 2);
+    int res_x = jsL_checkint(J, 1);
+    int res_y = jsL_checkint(J, 2);
     const char *text = js_tostring(J, 3);
     osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
     mp_wakeup_core(ctx->mpctx);
@@ -772,8 +772,8 @@ static void script_input_set_section_mouse_area(js_State *J)
 {
     char *section = (char *)js_tostring(J, 1);
     mp_input_set_section_mouse_area(jctx(J)->mpctx->input, section,
-        js_tonumber(J, 2), js_tonumber(J, 3),   // x0, y0
-        js_tonumber(J, 4), js_tonumber(J, 5));  // x1, y1
+        jsL_checkint(J, 2), jsL_checkint(J, 3),   // x0, y0
+        jsL_checkint(J, 4), jsL_checkint(J, 5));  // x1, y1
     push_success(J);
 }
 
@@ -799,14 +799,14 @@ static void script__hook_add(js_State *J)
 {
     const char *name = js_tostring(J, 1);
     int pri = jsL_checkint(J, 2);
-    uint64_t id = jsL_checkint64(J, 3);
+    uint64_t id = jsL_checkuint64(J, 3);
     push_status(J, mpv_hook_add(jclient(J), id, name, pri));
 }
 
 // args: id (uint)
 static void script__hook_continue(js_State *J)
 {
-    push_status(J, mpv_hook_continue(jclient(J), jsL_checkint64(J, 1)));
+    push_status(J, mpv_hook_continue(jclient(J), jsL_checkuint64(J, 1)));
 }
 
 /**********************************************************************
@@ -1124,15 +1124,15 @@ static int jsL_checkint(js_State *J, int idx)
 {
     double d = js_tonumber(J, idx);
     if (!(d >= INT_MIN && d <= INT_MAX))
-        js_error(J, "integer out of range at index %d", idx);
+        js_error(J, "int out of range at index %d", idx);
     return d;
 }
 
-static int64_t jsL_checkint64(js_State *J, int idx)
+static uint64_t jsL_checkuint64(js_State *J, int idx)
 {
     double d = js_tonumber(J, idx);
-    if (!(d >= INT64_MIN && d <= INT64_MAX))
-        js_error(J, "integer out of range at index %d", idx);
+    if (!(d >= 0 && d <= UINT64_MAX))
+        js_error(J, "uint64 out of range at index %d", idx);
     return d;
 }
 
