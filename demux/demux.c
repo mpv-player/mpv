@@ -2945,6 +2945,8 @@ static void thread_demux_control(void *p)
     struct demux_internal *in = demuxer->in;
     int r = CONTROL_UNKNOWN;
 
+    pthread_mutex_unlock(&in->lock);
+
     if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
         struct demux_ctrl_stream_ctrl *c = arg;
         if (in->threading)
@@ -2959,6 +2961,8 @@ static void thread_demux_control(void *p)
         if (demuxer->desc->control)
             r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
     }
+
+    pthread_mutex_lock(&in->lock);
 
     *args->r = r;
 }
@@ -2990,7 +2994,9 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
             pthread_cond_wait(&in->wakeup, &in->lock);
         pthread_mutex_unlock(&in->lock);
     } else {
+        pthread_mutex_lock(&in->lock);
         thread_demux_control(&args);
+        pthread_mutex_unlock(&in->lock);
     }
 
     return r;
