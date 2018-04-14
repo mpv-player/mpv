@@ -95,6 +95,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_GET_MUTE:
     case AOCONTROL_SET_MUTE: {
         bool mute = *(bool *)arg;
+
+        // openal has no mute control, only gain.
+        // Thus reverse the muted state to get required gain
         ALfloat al_mute = (ALfloat)(!mute);
         if (cmd == AOCONTROL_SET_MUTE) {
             alSourcef(source, AL_GAIN, al_mute);
