@@ -452,16 +452,16 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
         mpctx->stop_play = PT_QUIT;
         mp_dispatch_unlock(mpctx->dispatch);
 
-        // Stop the core thread.
+        pthread_t playthread;
+        mp_dispatch_run(mpctx->dispatch, get_thread, &playthread);
+
+        // Ask the core thread to stop.
         pthread_mutex_lock(&clients->lock);
         clients->terminate_core_thread = true;
         pthread_mutex_unlock(&clients->lock);
         mp_wakeup_core(mpctx);
 
         // Blocking wait for all clients and core thread to terminate.
-        pthread_t playthread;
-        mp_dispatch_run(mpctx->dispatch, get_thread, &playthread);
-
         pthread_join(playthread, NULL);
 
         mp_destroy(mpctx);
