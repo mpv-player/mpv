@@ -129,12 +129,14 @@ def build(ctx):
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
             target    = "video/out/wayland/idle-inhibit-v1.h")
-        ctx.wayland_protocol_code(proto_dir = "../video/out/wayland",
-            protocol = "server-decoration",
-            target   = "video/out/wayland/srv-decor.c")
-        ctx.wayland_protocol_header(proto_dir = "../video/out/wayland",
-            protocol = "server-decoration",
-            target   = "video/out/wayland/srv-decor.h")
+        ctx.wayland_protocol_code(proto_dir = "video/out/wayland",
+            protocol          = "server-decoration",
+            vendored_protocol = True,
+            target            = "video/out/wayland/srv-decor.c")
+        ctx.wayland_protocol_header(proto_dir = "video/out/wayland",
+            protocol          = "server-decoration",
+            vendored_protocol = True,
+            target            = "video/out/wayland/srv-decor.h")
 
     ctx(features = "ebml_header", target = "ebml_types.h")
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
