@@ -17,9 +17,20 @@ struct priv {
     struct gl_video *renderer;
 };
 
-static const char *const native_resource_map[] = {
-    [MPV_RENDER_PARAM_X11_DISPLAY] = "x11",
-    [MPV_RENDER_PARAM_WL_DISPLAY] = "wl",
+struct native_resource_entry {
+    const char *name;   // ra_add_native_resource() internal name argument
+    size_t size;        // size of struct pointed to (0 for no copy)
+};
+
+static const struct native_resource_entry native_resource_map[] = {
+    [MPV_RENDER_PARAM_X11_DISPLAY] = {
+        .name = "x11",
+        .size = 0,
+    },
+    [MPV_RENDER_PARAM_WL_DISPLAY] = {
+        .name = "wl",
+        .size = 0,
+    },
 };
 
 static int init(struct render_backend *ctx, mpv_render_param *params)
@@ -54,10 +65,14 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
     for (int n = 0; params && params[n].type; n++) {
         if (params[n].type > 0 &&
             params[n].type < MP_ARRAY_SIZE(native_resource_map) &&
-            native_resource_map[params[n].type])
+            native_resource_map[params[n].type].name)
         {
-            ra_add_native_resource(p->context->ra,
-                        native_resource_map[params[n].type], params[n].data);
+            const struct native_resource_entry *entry =
+                &native_resource_map[params[n].type];
+            void *data = params[n].data;
+            if (entry->size)
+                data = talloc_memdup(p, data, entry->size);
+            ra_add_native_resource(p->context->ra, entry->name, data);
         }
     }
 
