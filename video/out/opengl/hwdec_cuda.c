@@ -27,8 +27,7 @@
  * when decoding 10bit streams (there is some hardware dithering going on).
  */
 
-#include "cuda_dynamic.h"
-
+#include <ffnvcodec/dynlink_loader.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
@@ -39,6 +38,7 @@
 
 struct priv_owner {
     struct mp_hwdec_ctx hwctx;
+    CudaFunctions *cu;
     CUcontext display_ctx;
     CUcontext decode_ctx;
 };
@@ -56,13 +56,15 @@ static int check_cu(struct ra_hwdec *hw, CUresult err, const char *func)
     const char *err_name;
     const char *err_string;
 
+    struct priv_owner *p = hw->priv;
+
     MP_TRACE(hw, "Calling %s\n", func);
 
     if (err == CUDA_SUCCESS)
         return 0;
 
-    cuGetErrorName(err, &err_name);
-    cuGetErrorString(err, &err_string);
+    p->cu->cuGetErrorName(err, &err_name);
+    p->cu->cuGetErrorString(err, &err_string);
 
     MP_ERR(hw, "%s failed", func);
     if (err_name && err_string)
@@ -82,6 +84,7 @@ static int cuda_init(struct ra_hwdec *hw)
     unsigned int device_count;
     int ret = 0;
     struct priv_owner *p = hw->priv;
+    CudaFunctions *cu;
 
     if (!ra_is_gl(hw->ra))
         return -1;
@@ -92,24 +95,25 @@ static int cuda_init(struct ra_hwdec *hw)
         return -1;
     }
 
-    bool loaded = cuda_load();
-    if (!loaded) {
+    ret = cuda_load_functions(&p->cu, NULL);
+    if (ret != 0) {
         MP_VERBOSE(hw, "Failed to load CUDA symbols\n");
         return -1;
     }
+    cu = p->cu;
 
-    ret = CHECK_CU(cuInit(0));
+    ret = CHECK_CU(cu->cuInit(0));
     if (ret < 0)
         goto error;
 
     // Allocate display context
-    ret = CHECK_CU(cuGLGetDevices(&device_count, &display_dev, 1,
-                                  CU_GL_DEVICE_LIST_ALL));
+    ret = CHECK_CU(cu->cuGLGetDevices(&device_count, &display_dev, 1,
+                                      CU_GL_DEVICE_LIST_ALL));
     if (ret < 0)
         goto error;
 
-    ret = CHECK_CU(cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
-                               display_dev));
+    ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                   display_dev));
     if (ret < 0)
         goto error;
 
@@ -121,7 +125,7 @@ static int cuda_init(struct ra_hwdec *hw)
 
     if (decode_dev_idx > -1) {
         CUdevice decode_dev;
-        ret = CHECK_CU(cuDeviceGet(&decode_dev, decode_dev_idx));
+        ret = CHECK_CU(cu->cuDeviceGet(&decode_dev, decode_dev_idx));
         if (ret < 0)
             goto error;
 
@@ -129,12 +133,12 @@ static int cuda_init(struct ra_hwdec *hw)
             MP_INFO(hw, "Using separate decoder and display devices\n");
 
             // Pop the display context. We won't use it again during init()
-            ret = CHECK_CU(cuCtxPopCurrent(&dummy));
+            ret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
             if (ret < 0)
                 goto error;
 
-            ret = CHECK_CU(cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
-                                       decode_dev));
+            ret = CHECK_CU(cu->cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                           decode_dev));
             if (ret < 0)
                 goto error;
         }
@@ -155,7 +159,7 @@ static int cuda_init(struct ra_hwdec *hw)
         goto error;
     }
 
-    ret = CHECK_CU(cuCtxPopCurrent(&dummy));
+    ret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
     if (ret < 0)
         goto error;
 
@@ -168,7 +172,7 @@ static int cuda_init(struct ra_hwdec *hw)
 
  error:
     av_buffer_unref(&hw_device_ctx);
-    CHECK_CU(cuCtxPopCurrent(&dummy));
+    CHECK_CU(cu->cuCtxPopCurrent(&dummy));
 
     return -1;
 }
@@ -176,15 +180,18 @@ static int cuda_init(struct ra_hwdec *hw)
 static void cuda_uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
+    CudaFunctions *cu = p->cu;
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
     av_buffer_unref(&p->hwctx.av_device_ref);
 
     if (p->decode_ctx && p->decode_ctx != p->display_ctx)
-        CHECK_CU(cuCtxDestroy(p->decode_ctx));
+        CHECK_CU(cu->cuCtxDestroy(p->decode_ctx));
 
     if (p->display_ctx)
-        CHECK_CU(cuCtxDestroy(p->display_ctx));
+        CHECK_CU(cu->cuCtxDestroy(p->display_ctx));
+
+    cuda_free_functions(&p->cu);
 }
 
 #undef CHECK_CU
@@ -195,6 +202,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     struct priv_owner *p_owner = mapper->owner->priv;
     struct priv *p = mapper->priv;
     CUcontext dummy;
+    CudaFunctions *cu = p_owner->cu;
     int ret = 0, eret = 0;
 
     p->display_ctx = p_owner->display_ctx;
@@ -212,7 +220,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         return -1;
     }
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
+    ret = CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
@@ -239,27 +247,27 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         GLenum target;
         ra_gl_get_raw_tex(mapper->ra, mapper->tex[n], &texture, &target);
 
-        ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], texture, target,
-                                                 CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
+        ret = CHECK_CU(cu->cuGraphicsGLRegisterImage(&p->cu_res[n], texture, target,
+                                                     CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
         if (ret < 0)
             goto error;
 
-        ret = CHECK_CU(cuGraphicsMapResources(1, &p->cu_res[n], 0));
+        ret = CHECK_CU(cu->cuGraphicsMapResources(1, &p->cu_res[n], 0));
         if (ret < 0)
             goto error;
 
-        ret = CHECK_CU(cuGraphicsSubResourceGetMappedArray(&p->cu_array[n], p->cu_res[n],
-                                                           0, 0));
+        ret = CHECK_CU(cu->cuGraphicsSubResourceGetMappedArray(&p->cu_array[n], p->cu_res[n],
+                                                               0, 0));
         if (ret < 0)
             goto error;
 
-        ret = CHECK_CU(cuGraphicsUnmapResources(1, &p->cu_res[n], 0));
+        ret = CHECK_CU(cu->cuGraphicsUnmapResources(1, &p->cu_res[n], 0));
         if (ret < 0)
             goto error;
     }
 
  error:
-    eret = CHECK_CU(cuCtxPopCurrent(&dummy));
+    eret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
     if (eret < 0)
         return eret;
 
@@ -269,17 +277,19 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    CudaFunctions *cu = p_owner->cu;
     CUcontext dummy;
 
     // Don't bail if any CUDA calls fail. This is all best effort.
-    CHECK_CU(cuCtxPushCurrent(p->display_ctx));
+    CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
     for (int n = 0; n < 4; n++) {
         if (p->cu_res[n] > 0)
-            CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
+            CHECK_CU(cu->cuGraphicsUnregisterResource(p->cu_res[n]));
         p->cu_res[n] = 0;
         ra_tex_free(mapper->ra, &mapper->tex[n]);
     }
-    CHECK_CU(cuCtxPopCurrent(&dummy));
+    CHECK_CU(cu->cuCtxPopCurrent(&dummy));
 }
 
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
@@ -289,10 +299,12 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
+    struct priv_owner *p_owner = mapper->owner->priv;
+    CudaFunctions *cu = p_owner->cu;
     CUcontext dummy;
     int ret = 0, eret = 0;
 
-    ret = CHECK_CU(cuCtxPushCurrent(p->display_ctx));
+    ret = CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
         return ret;
 
@@ -308,14 +320,14 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                              mapper->tex[n]->params.format->pixel_size,
             .Height        = mp_image_plane_h(&p->layout, n),
         };
-        ret = CHECK_CU(cuMemcpy2D(&cpy));
+        ret = CHECK_CU(cu->cuMemcpy2D(&cpy));
         if (ret < 0)
             goto error;
     }
 
 
  error:
-   eret = CHECK_CU(cuCtxPopCurrent(&dummy));
+   eret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
    if (eret < 0)
        return eret;
 
