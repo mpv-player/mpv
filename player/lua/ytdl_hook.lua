@@ -31,7 +31,7 @@ local safe_protos = Set {
 
 local function exec(args)
     local ret = utils.subprocess({args = args})
-    return ret.status, ret.stdout, ret
+    return ret.status, ret.stdout, ret, ret.killed_by_us
 end
 
 -- return true if it was explicitly set on the command line
@@ -502,7 +502,11 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
     table.insert(command, "--")
     table.insert(command, url)
     msg.debug("Running: " .. table.concat(command,' '))
-    local es, json, result = exec(command)
+    local es, json, result, aborted = exec(command)
+
+    if aborted then
+        return
+    end
 
     if (es < 0) or (json == nil) or (json == "") then
         local err = "youtube-dl failed: "
