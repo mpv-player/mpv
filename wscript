@@ -839,9 +839,13 @@ hwaccel_features = [
         'groups': [ 'gl' ],
         'func': check_true,
     }, {
+        'name': 'ffnvcodec',
+        'desc': 'CUDA Headers and dynamic loader',
+        'func': check_pkg_config('ffnvcodec >= 8.1.24.1'),
+    }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
-        'deps': 'gl',
+        'deps': 'gl && ffnvcodec',
         'func': check_cc(fragment=load_fragment('cuda.c'),
                          use='libavcodec'),
     }

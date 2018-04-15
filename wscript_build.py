@@ -461,7 +461,6 @@ def build(ctx):
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
         ( "video/out/opengl/context_win.c",      "gl-win32" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
-        ( "video/out/opengl/cuda_dynamic.c",     "cuda-hwaccel" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec_cuda.c",       "cuda-hwaccel" ),
