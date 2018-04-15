@@ -505,6 +505,7 @@ static int archive_entry_open(stream_t *stream)
     }
     stream->close = archive_entry_close;
     stream->control = archive_entry_control;
+    stream->streaming = true;
 
     return STREAM_OK;
 }
