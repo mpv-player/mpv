@@ -730,7 +730,9 @@ Input Commands that are Possibly Subject to Change
     merely sets all option values listed within the profile.
 
 ``load-script "<path>"``
-    Load a script, similar to the ``--script`` option.
+    Load a script, similar to the ``--script`` option. Whether this waits for
+    the script to finish initialization or not changed multiple times, and the
+    future behavior is left undefined.
 
 ``change-list "<option>" "<operation>" "<value>"``
     This command changes list options as described in `List Options`_. The

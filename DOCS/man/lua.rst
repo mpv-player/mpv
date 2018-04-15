@@ -63,7 +63,10 @@ the player will more or less hang until the script returns from the main chunk
 (and ``mp_event_loop`` is called), or the script calls ``mp_event_loop`` or
 ``mp.dispatch_events`` directly. This is done to make it possible for a script
 to fully setup event handlers etc. before playback actually starts. In older
-mpv versions, this happened asynchronously.
+mpv versions, this happened asynchronously. With mpv 0.29.0, this changes
+slightly, and it merely waits for scripts to be loaded in this manner before
+starting playback as part of the player initialization phase. Scripts run though
+initialization in parallel. This might change again.
 
 mp functions
 ------------
