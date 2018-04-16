@@ -1148,24 +1148,9 @@ redo:
         return CONTROL_OK;
     }
     case DEMUXER_CTRL_RESYNC:
-        /* NOTE:
-         *
-         * We actually want to call ff_read_frame_flush() here, but it is
-         * internal.
-         *
-         * This function call seems to do the same for now.
-         *
-         * Once ff_read_frame_flush() is exported in some way, change this to
-         * call the new API instead of relying on av_seek_frame() to do this
-         * for us.
-         */
-        // avio_flush() is designed for write-only streams, and does the wrong
-        // thing when reading. Flush it manually instead.
         stream_drop_buffers(priv->stream);
-        priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
-        priv->avfc->pb->pos = stream_tell(priv->stream);
-        av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
-                      AVSEEK_FLAG_BYTE);
+        avio_flush(priv->avfc->pb);
+        avformat_flush(priv->avfc);
         return CONTROL_OK;
     case DEMUXER_CTRL_REPLACE_STREAM:
         if (priv->own_stream)
