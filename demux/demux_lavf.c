@@ -748,13 +748,13 @@ static void add_new_streams(demuxer_t *demuxer)
         handle_new_stream(demuxer, priv->num_streams);
 }
 
-static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
+static void update_metadata(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     if (priv->avfc->event_flags & AVFMT_EVENT_FLAG_METADATA_UPDATED) {
         mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->metadata);
         priv->avfc->event_flags = 0;
-        demux_changed(demuxer, DEMUX_EVENT_METADATA);
+        demux_metadata_changed(demuxer);
     }
 
     for (int n = 0; n < priv->num_streams; n++) {
@@ -923,7 +923,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     add_new_streams(demuxer);
 
     mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
-    update_metadata(demuxer, NULL);
 
     demuxer->ts_resets_possible =
         priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
@@ -994,7 +993,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     }
 
     add_new_streams(demux);
-    update_metadata(demux, pkt);
+    update_metadata(demux);
 
     assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     struct sh_stream *stream = priv->streams[pkt->stream_index];
@@ -1143,9 +1142,9 @@ redo:
         priv->cur_program = prog->progid = program->id;
 
         mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->programs[p]->metadata);
-        update_metadata(demuxer, NULL);
+        update_metadata(demuxer);
         // Enforce metadata update even if no explicit METADATA_UPDATED since we switched program.
-        demux_changed(demuxer, DEMUX_EVENT_METADATA);
+        demux_metadata_changed(demuxer);
 
         return CONTROL_OK;
     }

@@ -25,6 +25,7 @@
 #if HAVE_STDATOMIC
 #include <stdatomic.h>
 typedef _Atomic float mp_atomic_float;
+typedef _Atomic int64_t mp_atomic_int64;
 #else
 
 // Emulate the parts of C11 stdatomic.h needed by mpv.
@@ -38,6 +39,7 @@ typedef struct { uint_least32_t v;     } atomic_uint_least32_t;
 typedef struct { unsigned long long v; } atomic_ullong;
 
 typedef struct { float v;              } mp_atomic_float;
+typedef struct { int64_t v;            } mp_atomic_int64;
 
 #define ATOMIC_VAR_INIT(x) \
     {.v = (x)}

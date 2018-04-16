@@ -27,6 +27,7 @@
 
 #include "common/av_common.h"
 #include "common/common.h"
+#include "demux.h"
 
 #include "packet.h"
 
@@ -34,6 +35,7 @@ static void packet_destroy(void *ptr)
 {
     struct demux_packet *dp = ptr;
     av_packet_unref(dp->avpacket);
+    mp_packet_tags_unref(dp->metadata);
 }
 
 // This actually preserves only data and side data, not PTS/DTS/pos/etc.
@@ -129,6 +131,7 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->codec = src->codec;
     dst->keyframe = src->keyframe;
     dst->stream = src->stream;
+    mp_packet_tags_setref(&dst->metadata, src->metadata);
 }
 
 struct demux_packet *demux_copy_packet(struct demux_packet *dp)

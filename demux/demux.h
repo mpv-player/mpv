@@ -303,7 +303,7 @@ void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
 
 int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 
-void demux_changed(demuxer_t *demuxer, int events);
+void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer);
 
 void demux_disable_cache(demuxer_t *demuxer);
@@ -317,5 +317,8 @@ bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);
 
 const char *stream_type_name(enum stream_type type);
+
+void mp_packet_tags_unref(struct mp_packet_tags *tags);
+void mp_packet_tags_setref(struct mp_packet_tags **dst, struct mp_packet_tags *src);
 
 #endif /* MPLAYER_DEMUXER_H */
