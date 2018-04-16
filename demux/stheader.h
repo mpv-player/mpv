@@ -45,6 +45,7 @@ struct sh_stream {
     char *lang;                 // language code
     bool default_track;         // container default track flag
     bool forced_track;          // container forced track flag
+    bool dependent_track;       // container dependent track flag
     int hls_bitrate;
 
     struct mp_tags *tags;

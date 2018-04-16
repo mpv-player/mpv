@@ -2242,6 +2242,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
         {"default",     SUB_PROP_FLAG(track->default_track)},
         {"forced",      SUB_PROP_FLAG(track->forced_track)},
+        {"dependent",   SUB_PROP_FLAG(track->dependent_track)},
         {"external",    SUB_PROP_FLAG(track->is_external)},
         {"selected",    SUB_PROP_FLAG(track->selected)},
         {"external-filename", SUB_PROP_STR(track->external_filename),
