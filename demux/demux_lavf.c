@@ -190,6 +190,12 @@ static const struct format_hack format_hacks[] = {
     {0}
 };
 
+typedef struct {
+    int num;
+    int pcr_pid;
+    unsigned int nb_stream_indexes;
+} lavf_program_t;
+
 typedef struct lavf_priv {
     struct stream *stream;
     bool own_stream;
@@ -206,6 +212,11 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     double seek_delay;
+
+    lavf_program_t program;
+    struct sh_stream *selected_video_stream;
+    struct sh_stream *selected_audio_stream;
+    struct sh_stream *active_audio_stream;
 
     struct demux_lavf_opts *opts;
     double mf_fps;
@@ -540,6 +551,25 @@ static void select_tracks(struct demuxer *demuxer, int start)
         bool selected = stream && demux_stream_is_selected(stream) &&
                         !stream->attached_picture;
         st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
+
+        if (!stream)
+            continue;
+        if (stream->type == STREAM_VIDEO) {
+            if (selected) {
+                priv->program.num = stream->program_num;
+                priv->selected_video_stream = stream;
+            } else if (priv->program.num &&
+                       priv->program.num == stream->program_num) {
+                // always demux all video streams within the same program
+                st->discard = AVDISCARD_DEFAULT;
+            }
+        }
+        if (stream->type == STREAM_AUDIO) {
+            if (selected)
+                priv->selected_audio_stream = stream;
+            if (stream == priv->active_audio_stream)
+                st->discard = AVDISCARD_DEFAULT;
+        }
     }
 }
 
@@ -702,6 +732,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, sh);
 
     if (sh) {
+        AVProgram *program = av_find_program_from_stream(priv->avfc, NULL, st->index);
+        if (program)
+            sh->program_num = program->program_num;
         sh->ff_index = st->index;
         sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec->codec_tag = codec->codec_tag;
@@ -736,6 +769,72 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     }
 
     select_tracks(demuxer, i);
+}
+
+static void detect_program_changes(demuxer_t *demuxer)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    struct sh_stream *old_stream = NULL, *new_stream = NULL;
+    AVProgram *program;
+    int i, j;
+
+    if (priv->avfc->nb_programs < 1)
+        return;
+    if (priv->program.num == 0)
+        return;
+
+    for (i = 0; i < priv->avfc->nb_programs; i++)
+        if (priv->avfc->programs[i]->id == priv->program.num)
+            break;
+    if (i == priv->avfc->nb_programs)
+        return;
+    program = priv->avfc->programs[i];
+
+    // skip unless program changed
+    if (program->pcr_pid == priv->program.pcr_pid &&
+        program->nb_stream_indexes == priv->program.nb_stream_indexes) {
+        return;
+    }
+
+    MP_VERBOSE(demuxer, "Detected program change for %d: "
+                        "(pcr=%d,nb=%d) -> (pcr=%d,nb=%d) \n",
+               program->program_num,
+               priv->program.pcr_pid, priv->program.nb_stream_indexes,
+               program->pcr_pid, program->nb_stream_indexes);
+
+    priv->program = (lavf_program_t){
+        .num = program->program_num,
+        .pcr_pid = program->pcr_pid,
+        .nb_stream_indexes = program->nb_stream_indexes,
+    };
+
+    for (i = 0; i < priv->num_streams; i++) {
+        struct sh_stream *stream = priv->streams[i];
+        if (!stream || stream->type != STREAM_AUDIO)
+            continue;
+
+        int found = 0;
+        for (j = 0; j < program->nb_stream_indexes; j++) {
+            if (program->stream_index[j] == stream->ff_index) {
+                found = 1;
+                break;
+            }
+        }
+
+        if (found) {
+            if (!new_stream) new_stream = stream;
+        } else if (!found && demux_stream_is_selected(stream)) {
+            // currently selected stream not found in changed program,
+            // so we need to enable the replacement below
+            old_stream = stream;
+        }
+    }
+
+    if (old_stream && new_stream) {
+        MP_DBG(demuxer, "Following audio PID switch from %d to %d\n", old_stream->index, new_stream->index);
+        priv->active_audio_stream = new_stream;
+        select_tracks(demuxer, 0);
+    }
 }
 
 // Add any new streams that might have been added
@@ -992,11 +1091,21 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     }
 
     add_new_streams(demux);
+    detect_program_changes(demux);
     update_metadata(demux, pkt);
 
     assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     struct sh_stream *stream = priv->streams[pkt->stream_index];
     AVStream *st = priv->avfc->streams[pkt->stream_index];
+
+    // for mpegts programs with pid changes, redirect packets
+    // from new streams back into the original selected stream
+    if (stream && priv->program.num) {
+        if (stream->type == STREAM_VIDEO)
+            stream = priv->selected_video_stream;
+        if (stream->type == STREAM_AUDIO)
+            stream = priv->selected_audio_stream;
+    }
 
     if (!demux_stream_is_selected(stream)) {
         av_packet_unref(pkt);
