@@ -30,6 +30,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <math.h>
 #include <string.h>
 
@@ -59,6 +60,8 @@ struct ao_alsa_opts {
     int resample;
     int ni;
     int ignore_chmap;
+    int buffer_time;
+    int frags;
 };
 
 #define OPT_BASE_STRUCT struct ao_alsa_opts
@@ -70,6 +73,8 @@ static const struct m_sub_options ao_alsa_conf = {
         OPT_INTRANGE("alsa-mixer-index", mixer_index, 0, 0, 99),
         OPT_FLAG("alsa-non-interleaved", ni, 0),
         OPT_FLAG("alsa-ignore-chmap", ignore_chmap, 0),
+        OPT_INTRANGE("alsa-buffer-time", buffer_time, 0, 0, INT_MAX),
+        OPT_INTRANGE("alsa-periods", frags, 0, 0, INT_MAX),
         {0}
     },
     .defaults = &(const struct ao_alsa_opts) {
@@ -77,6 +82,8 @@ static const struct m_sub_options ao_alsa_conf = {
         .mixer_name = "Master",
         .mixer_index = 0,
         .ni = 0,
+        .buffer_time = 25000,
+        .frags = 4,
     },
     .size = sizeof(struct ao_alsa_opts),
 };
@@ -98,9 +105,6 @@ struct priv {
 
     struct ao_alsa_opts *opts;
 };
-
-#define BUFFER_TIME 250000  // 250ms
-#define FRAGCOUNT 16
 
 #define CHECK_ALSA_ERROR(message) \
     do { \
@@ -648,6 +652,7 @@ alsa_error: ;
 static int init_device(struct ao *ao, int mode)
 {
     struct priv *p = ao->priv;
+    struct ao_alsa_opts *opts = p->opts;
     int ret = INIT_DEVICE_ERR_GENERIC;
     char *tmp;
     size_t tmp_s;
@@ -790,12 +795,15 @@ static int init_device(struct ao *ao, int mode)
     snd_pcm_hw_params_copy(hwparams_backup, alsa_hwparams);
 
     // Cargo-culted buffer settings; might still be useful for PulseAudio.
-    err = snd_pcm_hw_params_set_buffer_time_near
-            (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
-    CHECK_ALSA_WARN("Unable to set buffer time near");
-    if (err >= 0) {
+    err = 0;
+    if (opts->buffer_time) {
+        err = snd_pcm_hw_params_set_buffer_time_near
+                (p->alsa, alsa_hwparams, &(unsigned int){opts->buffer_time}, NULL);
+        CHECK_ALSA_WARN("Unable to set buffer time near");
+    }
+    if (err >= 0 && opts->frags) {
         err = snd_pcm_hw_params_set_periods_near
-                    (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
+                    (p->alsa, alsa_hwparams, &(unsigned int){opts->frags}, NULL);
         CHECK_ALSA_WARN("Unable to set periods");
     }
     if (err < 0)
