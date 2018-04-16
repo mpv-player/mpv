@@ -578,6 +578,7 @@ int mpv_initialize(mpv_handle *ctx)
 {
     lock_core(ctx);
     int res = mp_initialize(ctx->mpctx, NULL) ? MPV_ERROR_INVALID_PARAMETER : 0;
+    mp_wakeup_core(ctx->mpctx);
     unlock_core(ctx);
     return res;
 }
