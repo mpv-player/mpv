@@ -253,8 +253,10 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     struct priv *p = mapper->priv;
 
     CVPixelBufferRelease(p->pbuf);
-    CFRelease(p->gl_texture_cache);
-    p->gl_texture_cache = NULL;
+    if (p->gl_texture_cache) {
+        CFRelease(p->gl_texture_cache);
+        p->gl_texture_cache = NULL;
+    }
 }
 
 const struct ra_hwdec_driver ra_hwdec_videotoolbox = {
