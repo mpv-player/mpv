@@ -88,6 +88,11 @@ Interface changes
     - deprecate the old command based hook API, and introduce a proper C API
       (the high level Lua API for this does not change)
     - rename the the lua-settings/ config directory to script-opts/
+    - the way the player waits for scripts getting loaded changes slightly. Now
+      scripts are loaded in parallel, and block the player from continuing
+      playback only in the player initialization phase. It could change again in
+      the future. (This kind of waiting was always a feature to prevent that
+      playback is started while scripts are only half-loaded.)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

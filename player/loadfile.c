@@ -31,6 +31,7 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 
+#include "client.h"
 #include "common/msg.h"
 #include "common/global.h"
 #include "options/path.h"
@@ -1519,6 +1520,15 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
+    // Wait for all scripts to load before possibly starting playback.
+    if (!mp_clients_all_initialized(mpctx)) {
+        MP_VERBOSE(mpctx, "Waiting for scripts...\n");
+        while (!mp_clients_all_initialized(mpctx))
+            mp_idle(mpctx);
+        mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
+        MP_VERBOSE(mpctx, "Done loading scripts.\n");
+    }
+
     prepare_playlist(mpctx, mpctx->playlist);
 
     for (;;) {

@@ -57,11 +57,8 @@ void mp_wait_events(struct MPContext *mpctx)
     if (sleeping)
         MP_STATS(mpctx, "start sleep");
 
-    mpctx->in_dispatch = true;
-
     mp_dispatch_queue_process(mpctx->dispatch, mpctx->sleeptime);
 
-    mpctx->in_dispatch = false;
     mpctx->sleeptime = INFINITY;
 
     if (sleeping)
@@ -73,11 +70,11 @@ void mp_wait_events(struct MPContext *mpctx)
 // mp_set_timeout(c, 0) is essentially equivalent to mp_wakeup_core(c).
 void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
 {
-    mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleeptime);
-
-    // Can't adjust timeout if called from mp_dispatch_queue_process().
-    if (mpctx->in_dispatch && isfinite(sleeptime))
-        mp_wakeup_core(mpctx);
+    if (mpctx->sleeptime > sleeptime) {
+        mpctx->sleeptime = sleeptime;
+        int64_t abstime = mp_add_timeout(mp_time_us(), sleeptime);
+        mp_dispatch_adjust_timeout(mpctx->dispatch, abstime);
+    }
 }
 
 // Cause the playloop to run. This can be called from any thread. If called

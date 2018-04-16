@@ -234,7 +234,6 @@ typedef struct MPContext {
     struct mp_client_api *clients;
     struct mp_dispatch_queue *dispatch;
     struct mp_cancel *playback_abort;
-    bool in_dispatch;
     // Number of asynchronous tasks that still need to finish until MPContext
     // destruction is ok. It's implied that the async tasks call
     // mp_wakeup_core() each time this is decremented.
