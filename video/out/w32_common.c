@@ -79,6 +79,7 @@ struct vo_w32_state {
     pthread_t thread;
     bool terminate;
     struct mp_dispatch_queue *dispatch; // used to run stuff on the GUI thread
+    bool in_dispatch;
 
     struct w32_api api; // stores functions from dynamically loaded DLLs
 
@@ -920,7 +921,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
     // The dispatch queue should be processed as soon as possible to prevent
     // playback glitches, since it is likely blocking the VO thread
-    mp_dispatch_queue_process(w32->dispatch, 0);
+    if (!w32->in_dispatch) {
+        w32->in_dispatch = true;
+        mp_dispatch_queue_process(w32->dispatch, 0);
+        w32->in_dispatch = false;
+    }
 
     switch (message) {
     case WM_ERASEBKGND: // no need to erase background separately
