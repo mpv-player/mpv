@@ -31,9 +31,9 @@ class EventsView: NSView {
     override var acceptsFirstResponder: Bool { return true }
 
 
-    init(frame frameRect: NSRect, cocoaCB ccb: CocoaCB) {
+    init(cocoaCB ccb: CocoaCB) {
         cocoaCB = ccb
-        super.init(frame: frameRect)
+        super.init(frame: NSMakeRect(0, 0, 960, 480))
         autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         wantsBestResolutionOpenGLSurface = true
         register(forDraggedTypes: [NSFilenamesPboardType, NSURLPboardType])
@@ -249,6 +249,7 @@ class EventsView: NSView {
     }
 
     func canHideCursor() -> Bool {
+        if cocoaCB.window == nil { return false }
         return !hasMouseDown && containsMouseLocation() && window!.isKeyWindow
     }
 

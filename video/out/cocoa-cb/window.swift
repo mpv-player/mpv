@@ -78,28 +78,23 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
-    convenience init(cocoaCB ccb: CocoaCB) {
-        self.init(contentRect: NSMakeRect(0, 0, 960, 480),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered, defer: false, screen: NSScreen.main())
-        cocoaCB = ccb
-        title = "mpv"
-    }
-
-    convenience init(contentRect: NSRect, styleMask style: NSWindowStyleMask,
-                     screen: NSScreen?, cocoaCB ccb: CocoaCB)
-    {
-        self.init(contentRect: contentRect, styleMask: style,
+    convenience init(contentRect: NSRect, screen: NSScreen?, view: NSView, cocoaCB ccb: CocoaCB) {
+        self.init(contentRect: contentRect,
+                  styleMask: [.titled, .closable, .miniaturizable, .resizable],
                   backing: .buffered, defer: false, screen: screen)
         cocoaCB = ccb
+        title = cocoaCB.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
         delegate = self
+        contentView!.addSubview(view)
+        view.frame = contentView!.frame
 
         unfsContentFrame = convertToScreen(contentView!.frame)
         targetScreen = screen!
         currentScreen = screen!
         unfScreen = screen!
+        initTitleBar()
 
         if let app = NSApp as? Application {
             app.menuBar.register(#selector(setHalfWindowSize), for: MPM_H_SIZE)

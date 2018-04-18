@@ -30,6 +30,10 @@ class CocoaCB: NSObject {
     var cursorVisibilityWanted: Bool = true
     var isShuttingDown: Bool = false
 
+    var title: String = "mpv" {
+        didSet { if window != nil { window.title = title } }
+    }
+
     enum State {
         case uninit
         case needsInit
@@ -47,31 +51,22 @@ class CocoaCB: NSObject {
 
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
-    override init() {
-        super.init()
-        window = Window(cocoaCB: self)
-
-        view = EventsView(frame: window.contentView!.bounds, cocoaCB: self)
-        window.contentView!.addSubview(view)
-
+    convenience init(_ mpvHandle: OpaquePointer) {
+        self.init()
+        mpv = MPVHelper(mpvHandle)
         layer = VideoLayer(cocoaCB: self)
-        view.layer = layer
-        view.wantsLayer = true
-        view.layerContentsPlacement = .scaleProportionallyToFit
-    }
-
-    func setMpvHandle(_ ctx: OpaquePointer) {
-        mpv = MPVHelper(ctx)
-        layer.setUpRender()
     }
 
     func preinit() {
         if backendState == .uninit {
             backendState = .needsInit
-            DispatchQueue.main.async {
-                self.updateICCProfile()
-            }
+            view = EventsView(cocoaCB: self)
+            view.layer = layer
+            view.wantsLayer = true
+            view.layerContentsPlacement = .scaleProportionallyToFit
             startDisplayLink()
+            initLightSensor()
+            addDisplayReconfigureObserver()
         }
     }
 
@@ -92,25 +87,21 @@ class CocoaCB: NSObject {
 
     func initBackend() {
         NSApp.setActivationPolicy(.regular)
+        setAppIcon()
 
         let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main()
         let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: mpv.mpctx!.pointee.video_out)
-        let win = Window(contentRect: wr, styleMask: window.styleMask,
-                              screen: targetScreen, cocoaCB: self)
-        win.title = window.title
-        win.setOnTop(mpv.getBoolProperty("ontop"))
-        win.keepAspect = mpv.getBoolProperty("keepaspect-window")
-        window.close()
-        window = win
-        window.contentView!.addSubview(view)
-        view.frame = window.contentView!.frame
-        window.initTitleBar()
+        window = Window(contentRect: wr, screen: targetScreen, view: view, cocoaCB: self)
+        updateICCProfile()
+        window.setOnTop(mpv.getBoolProperty("ontop"))
+        window.keepAspect = mpv.getBoolProperty("keepaspect-window")
+        window.title = title
 
-        setAppIcon()
         window.isRestorable = false
         window.makeMain()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        updateDisplaylink()
         layer.setVideo(true)
 
         if mpv.getBoolProperty("fullscreen") {
@@ -121,8 +112,6 @@ class CocoaCB: NSObject {
             window.isMovableByWindowBackground = true
         }
 
-        initLightSensor()
-        addDisplayReconfigureObserver()
         backendState = .init
     }
 
@@ -155,7 +144,8 @@ class CocoaCB: NSObject {
     }
 
     func startDisplayLink() {
-        let displayId = UInt32(window.screen!.deviceDescription["NSScreenNumber"] as! Int)
+        let displayId = NSScreen.main()!.deviceDescription["NSScreenNumber"] as! UInt32
+
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
         CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
         if #available(macOS 10.12, *) {
@@ -323,8 +313,8 @@ class CocoaCB: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        let screenID = fs ? mpv.getStringProperty("fs-screen") ?? "current":
-                            mpv.getStringProperty("screen") ?? "current"
+        let screenType = fs ? "fs-screen" : "screen"
+        let screenID = mpv.getStringProperty(screenType) ?? "current"
 
         switch screenID {
         case "current", "default", "all":
@@ -431,21 +421,17 @@ class CocoaCB: NSObject {
             let titleData = data!.assumingMemoryBound(to: Int8.self)
             let title = String(cString: titleData)
             DispatchQueue.main.async {
-                ccb.window.title = String(cString: titleData)
+                ccb.title = String(cString: titleData)
             }
             return VO_TRUE
         case VOCTRL_PREINIT:
-            ccb.preinit()
+            DispatchQueue.main.sync { ccb.preinit() }
             return VO_TRUE
         case VOCTRL_UNINIT:
-            DispatchQueue.main.async {
-                ccb.uninit()
-            }
+            DispatchQueue.main.async { ccb.uninit() }
             return VO_TRUE
         case VOCTRL_RECONFIG:
-            DispatchQueue.main.async {
-                ccb.reconfig()
-            }
+            DispatchQueue.main.async { ccb.reconfig() }
             return VO_TRUE
         default:
             return VO_NOTIMPL
@@ -471,7 +457,7 @@ class CocoaCB: NSObject {
     func processEvent(_ event: UnsafePointer<mpv_event>) {
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
-            if window.isAnimating {
+            if window != nil && window.isAnimating {
                 isShuttingDown = true
                 return
             }

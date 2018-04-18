@@ -61,7 +61,15 @@ class VideoLayer: CAOpenGLLayer {
         super.init()
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
-        contentsScale = cocoaCB.window.backingScaleFactor
+
+        CGLCreateContext(copyCGLPixelFormat(forDisplayMask: 0), nil, &cglContext)
+        var i: GLint = 1
+        CGLSetParameter(cglContext!, kCGLCPSwapInterval, &i)
+        CGLSetCurrentContext(cglContext!)
+
+        mpv.initRender()
+        mpv.setRenderUpdateCallback(updateCallback, context: self)
+        mpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
     }
 
     override init(layer: Any) {
@@ -72,12 +80,6 @@ class VideoLayer: CAOpenGLLayer {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    func setUpRender() {
-        mpv.initRender()
-        mpv.setRenderUpdateCallback(updateCallback, context: self)
-        mpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
     }
 
     override func canDraw(inCGLContext ctx: CGLContextObj,
@@ -184,16 +186,8 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     override func copyCGLContext(forPixelFormat pf: CGLPixelFormatObj) -> CGLContextObj {
-        let ctx = super.copyCGLContext(forPixelFormat: pf)
-        var i: GLint = 1
-        CGLSetParameter(ctx, kCGLCPSwapInterval, &i)
-        CGLSetCurrentContext(ctx)
-        cglContext = ctx
-
-        if let app = NSApp as? Application {
-            app.initMPVCore()
-        }
-        return ctx
+        contentsScale = cocoaCB.window.backingScaleFactor
+        return cglContext!
     }
 
     let updateCallback: mpv_render_update_fn = { (ctx) in
