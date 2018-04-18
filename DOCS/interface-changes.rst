@@ -75,10 +75,10 @@ Interface changes
       pad must be connected either to another filter, or to a video/audio track
       or video/audio output). If they are disconnected at runtime, the stream
       will probably stall.
-    - deprecate the OpenGL cocoa backend, option choice --gpu-context=cocoa
-      when used with --gpu-api=opengl (use --vo=opengl-cb)
     - rename --vo=opengl-cb to --vo=libmpv (goes in hand with the opengl-cb
       API deprecation, see client-api-changes.rst)
+    - deprecate the OpenGL cocoa backend, option choice --gpu-context=cocoa
+      when used with --gpu-api=opengl (use --vo=libmpv)
     - make --deinterlace=yes always deinterlace, instead of trying to check
       certain unreliable video metadata. Also flip the defaults of all builtin
       HW deinterlace filters to always deinterlace.
