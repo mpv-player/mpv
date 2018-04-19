@@ -805,6 +805,13 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         // Probe the initial audio format.
         mp_pin_out_request_data(ao_c->filter->f->pins[1]);
         reinit_audio_filters_and_output(mpctx);
+        if (ao_c->filter->got_output_eof &&
+            mpctx->audio_status != STATUS_EOF)
+        {
+            mpctx->audio_status = STATUS_EOF;
+            MP_VERBOSE(mpctx, "audio EOF without any data\n");
+            mp_filter_reset(ao_c->filter->f);
+        }
         return; // try again next iteration
     }
 
