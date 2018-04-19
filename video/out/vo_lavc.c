@@ -57,6 +57,8 @@ struct priv {
     bool shutdown;
 };
 
+static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi);
+
 static int preinit(struct vo *vo)
 {
     struct priv *vc;
@@ -70,7 +72,6 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi);
 static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
@@ -103,15 +104,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
 
     if (vc->stream) {
-        if (width == vc->codec->width &&
-                height == vc->codec->height) {
+        if (width == vc->codec->width && height == vc->codec->height) {
             if (aspect.num != vc->codec->sample_aspect_ratio.num ||
-                    aspect.den != vc->codec->sample_aspect_ratio.den) {
+                aspect.den != vc->codec->sample_aspect_ratio.den)
+            {
                 /* aspect-only changes are not critical */
                 MP_WARN(vo, "unsupported pixel aspect ratio change from %d:%d to %d:%d\n",
-                       vc->codec->sample_aspect_ratio.num,
-                       vc->codec->sample_aspect_ratio.den,
-                       aspect.num, aspect.den);
+                        vc->codec->sample_aspect_ratio.num,
+                        vc->codec->sample_aspect_ratio.den,
+                        aspect.num, aspect.den);
             }
             goto done;
         }
@@ -143,8 +144,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
                                  AVMEDIA_TYPE_VIDEO,
                                  &vc->stream, &vc->codec) < 0)
         goto error;
-    vc->stream->sample_aspect_ratio = vc->codec->sample_aspect_ratio =
-            aspect;
+    vc->stream->sample_aspect_ratio = vc->codec->sample_aspect_ratio = aspect;
     vc->codec->width = width;
     vc->codec->height = height;
     vc->codec->pix_fmt = pix_fmt;
@@ -208,14 +208,13 @@ static void write_packet(struct vo *vo, AVPacket *packet)
         // HACK: libavformat calculates dts wrong if the initial packet
         // duration is not set, but ONLY if the time base is "high" and if we
         // have b-frames!
-        if (!packet->duration)
-            if (!vc->have_first_packet)
-                if (vc->codec->has_b_frames
-                        || vc->codec->max_b_frames)
-                    if (vc->stream->time_base.num * 1000LL <=
-                            vc->stream->time_base.den)
-                        packet->duration = FFMAX(1, av_rescale_q(1,
-                             vc->codec->time_base, vc->stream->time_base));
+        if (!packet->duration && !vc->have_first_packet &&
+            (vc->codec->has_b_frames || vc->codec->max_b_frames) &&
+            (vc->stream->time_base.num * 1000LL <= vc->stream->time_base.den))
+        {
+            packet->duration = FFMAX(1, av_rescale_q(1,
+                                vc->codec->time_base, vc->stream->time_base));
+        }
     }
 
     if (encode_lavc_write_frame(vo->encode_lavc_ctx,
@@ -247,15 +246,13 @@ static void encode_video_and_write(struct vo *vo, AVFrame *frame)
         av_init_packet(&packet);
         status = avcodec_receive_packet(vc->codec, &packet);
         if (status == AVERROR(EAGAIN)) { // No more packets for now.
-            if (frame == NULL) {
+            if (frame == NULL)
                 MP_ERR(vo, "sent flush frame, got EAGAIN");
-            }
             break;
         }
         if (status == AVERROR_EOF) { // No more packets, ever.
-            if (frame != NULL) {
+            if (frame != NULL)
                 MP_ERR(vo, "sent image frame, got EOF");
-            }
             break;
         }
         if (status < 0) {
@@ -304,7 +301,6 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     avc = vc->codec;
 
     if (vc->worst_time_base.den == 0) {
-        //if (avc->time_base.num / avc->time_base.den >= vc->stream->time_base.num / vc->stream->time_base.den)
         if (avc->time_base.num * (double) vc->stream->time_base.den >=
                 vc->stream->time_base.num * (double) avc->time_base.den) {
             MP_VERBOSE(vo, "NOTE: using codec time base "
@@ -322,11 +318,12 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
             vc->worst_time_base = vc->stream->time_base;
             vc->worst_time_base_is_stream = 1;
         }
-        if (ectx->options->maxfps)
+        if (ectx->options->maxfps) {
             vc->mindeltapts = ceil(vc->worst_time_base.den /
                     (vc->worst_time_base.num * ectx->options->maxfps));
-        else
+        } else {
             vc->mindeltapts = 0;
+        }
 
         // NOTE: we use the following "axiom" of av_rescale_q:
         // if time base A is worse than time base B, then
@@ -355,8 +352,9 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
-        }
-        else if (fabs(nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts) > 30) {
+        } else if (fabs(nextpts + ectx->discontinuity_pts_offset -
+                        ectx->next_in_pts) > 30)
+        {
             MP_WARN(vo, "detected an unexpected discontinuity (pts jumped by "
                     "%f seconds)\n",
                     nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
@@ -364,8 +362,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         }
 
         outpts = pts + ectx->discontinuity_pts_offset;
-    }
-    else {
+    } else {
         // adjust pts by knowledge of audio pts vs audio playback time
         double duration = 0;
         if (ectx->last_video_in_pts != MP_NOPTS_VALUE)
@@ -407,17 +404,14 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     }
 
     if (vc->lastipts != AV_NOPTS_VALUE) {
-
         // we have a valid image in lastimg
         while (vc->lastimg && vc->lastipts < frameipts) {
             int64_t thisduration = vc->harddup ? 1 : (frameipts - vc->lastipts);
 
             // we will ONLY encode this frame if it can be encoded at at least
             // vc->mindeltapts after the last encoded frame!
-            int64_t skipframes =
-                (vc->lastencodedipts == AV_NOPTS_VALUE)
-                    ? 0
-                    : vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
+            int64_t skipframes = (vc->lastencodedipts == AV_NOPTS_VALUE)
+                    ? 0 : vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
             if (skipframes < 0)
                 skipframes = 0;
 
@@ -434,7 +428,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 encode_video_and_write(vo, frame);
                 av_frame_free(&frame);
 
-                ++vc->lastdisplaycount;
+                vc->lastdisplaycount += 1;
                 vc->lastencodedipts = vc->lastipts + skipframes;
             }
 
@@ -456,7 +450,8 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 
             vc->lastframeipts = vc->lastipts = frameipts;
             if (ectx->options->rawts && vc->lastipts < 0) {
-                MP_ERR(vo, "why does this happen? DEBUG THIS! vc->lastipts = %lld\n", (long long) vc->lastipts);
+                MP_ERR(vo, "why does this happen? DEBUG THIS! vc->lastipts = %lld\n",
+                       (long long) vc->lastipts);
                 vc->lastipts = -1;
             }
             vc->lastdisplaycount = 0;

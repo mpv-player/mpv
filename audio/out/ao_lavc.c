@@ -58,11 +58,13 @@ struct priv {
     bool shutdown;
 };
 
+static void encode(struct ao *ao, double apts, void **data);
+
 static bool supports_format(AVCodec *codec, int format)
 {
     for (const enum AVSampleFormat *sampleformat = codec->sample_fmts;
          sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
-         ++sampleformat)
+         sampleformat++)
     {
         if (af_from_avformat(*sampleformat) == format)
             return true;
@@ -100,9 +102,10 @@ static int init(struct ao *ao)
 
     if (encode_lavc_alloc_stream(ao->encode_lavc_ctx,
                                  AVMEDIA_TYPE_AUDIO,
-                                 &ac->stream, &ac->codec) < 0) {
-      MP_ERR(ao, "could not get a new audio stream\n");
-      goto fail;
+                                 &ac->stream, &ac->codec) < 0)
+    {
+        MP_ERR(ao, "could not get a new audio stream\n");
+        goto fail;
     }
 
     codec = ao->encode_lavc_ctx->ac;
@@ -114,7 +117,7 @@ static int init(struct ao *ao)
 
     // TODO: Remove this redundancy with encode_lavc_alloc_stream also
     // setting the time base.
-    // Using codec->time_bvase is deprecated, but needed for older lavf.
+    // Using codec->time_base is deprecated, but needed for older lavf.
     ac->stream->time_base.num = 1;
     ac->stream->time_base.den = ao->samplerate;
     ac->codec->time_base.num = 1;
@@ -145,10 +148,11 @@ static int init(struct ao *ao)
     if (ac->codec->frame_size <= 1)
         ac->pcmhack = av_get_bits_per_sample(ac->codec->codec_id) / 8;
 
-    if (ac->pcmhack)
+    if (ac->pcmhack) {
         ac->aframesize = 16384; // "enough"
-    else
+    } else {
         ac->aframesize = ac->codec->frame_size;
+    }
 
     // enough frames for at least 0.25 seconds
     ac->framecount = ceil(ao->samplerate * 0.25 / ac->aframesize);
@@ -175,7 +179,6 @@ fail:
 }
 
 // close audio device
-static void encode(struct ao *ao, double apts, void **data);
 static void uninit(struct ao *ao)
 {
     struct priv *ac = ao->priv;
@@ -245,8 +248,7 @@ static void write_packet(struct ao *ao, AVPacket *packet)
 
     ac->savepts = AV_NOPTS_VALUE;
 
-    if (encode_lavc_write_frame(ao->encode_lavc_ctx,
-                                ac->stream, packet) < 0) {
+    if (encode_lavc_write_frame(ao->encode_lavc_ctx, ac->stream, packet) < 0) {
         MP_ERR(ao, "error writing at %d %d/%d\n",
                (int) packet->pts,
                ac->stream->time_base.num,
@@ -269,6 +271,7 @@ static void encode_audio_and_write(struct ao *ao, AVFrame *frame)
                ac->codec->time_base.den);
         return;
     }
+
     for (;;) {
         av_init_packet(&packet);
         status = avcodec_receive_packet(ac->codec, &packet);
@@ -328,29 +331,33 @@ static void encode(struct ao *ao, double apts, void **data)
 
         if (ectx->options->rawts || ectx->options->copyts) {
             // real audio pts
-            frame->pts = floor(apts * ac->codec->time_base.den / ac->codec->time_base.num + 0.5);
+            frame->pts = floor(apts * ac->codec->time_base.den /
+                               ac->codec->time_base.num + 0.5);
         } else {
             // audio playback time
-            frame->pts = floor(realapts * ac->codec->time_base.den / ac->codec->time_base.num + 0.5);
+            frame->pts = floor(realapts * ac->codec->time_base.den /
+                               ac->codec->time_base.num + 0.5);
         }
 
-        int64_t frame_pts = av_rescale_q(frame->pts, ac->codec->time_base, ac->worst_time_base);
+        int64_t frame_pts = av_rescale_q(frame->pts, ac->codec->time_base,
+                                         ac->worst_time_base);
         if (ac->lastpts != AV_NOPTS_VALUE && frame_pts <= ac->lastpts) {
             // this indicates broken video
             // (video pts failing to increase fast enough to match audio)
             MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
                     (int)frame->pts, (int)ac->lastpts);
             frame_pts = ac->lastpts + 1;
-            frame->pts = av_rescale_q(frame_pts, ac->worst_time_base, ac->codec->time_base);
+            frame->pts = av_rescale_q(frame_pts, ac->worst_time_base,
+                                      ac->codec->time_base);
         }
         ac->lastpts = frame_pts;
 
         frame->quality = ac->codec->global_quality;
         encode_audio_and_write(ao, frame);
         av_frame_free(&frame);
-    }
-    else
+    } else {
         encode_audio_and_write(ao, NULL);
+    }
 }
 
 // this should round samples down to frame sizes
@@ -400,7 +407,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     }
 
     if (ac->worst_time_base.den == 0) {
-        //if (ac->codec->time_base.num / ac->codec->time_base.den >= ac->stream->time_base.num / ac->stream->time_base.den)
         if (ac->codec->time_base.num * (double) ac->stream->time_base.den >=
                 ac->stream->time_base.num * (double) ac->codec->time_base.den) {
             MP_VERBOSE(ao, "NOTE: using codec time base (%d/%d) for pts "
@@ -445,8 +451,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
-        }
-        else if (fabs(nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts) > 30) {
+        } else if (fabs(nextpts + ectx->discontinuity_pts_offset -
+                        ectx->next_in_pts) > 30)
+        {
             MP_WARN(ao, "detected an unexpected discontinuity (pts jumped by "
                     "%f seconds)\n",
                     nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
@@ -454,8 +461,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         }
 
         outpts = pts + ectx->discontinuity_pts_offset;
-    }
-    else {
+    } else {
         outpts = pts;
     }
 
@@ -488,13 +494,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     pthread_mutex_unlock(&ectx->lock);
 
     if (flags & AOPLAY_FINAL_CHUNK) {
-        if (bufpos < orig_samples) {
+        if (bufpos < orig_samples)
             MP_ERR(ao, "did not write enough data at the end\n");
-        }
     } else {
-        if (bufpos > orig_samples) {
+        if (bufpos > orig_samples)
             MP_ERR(ao, "audio buffer overflow (should never happen)\n");
-        }
     }
 
     return taken;
