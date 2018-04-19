@@ -148,9 +148,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vc->codec->width = width;
     vc->codec->height = height;
     vc->codec->pix_fmt = pix_fmt;
-
-    encode_lavc_set_csp(vo->encode_lavc_ctx, vc->codec, params->color.space);
-    encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->codec, params->color.levels);
+    vc->codec->colorspace = mp_csp_to_avcol_spc(params->color.space);
+    vc->codec->color_range = mp_csp_levels_to_avcol_range(params->color.levels);
 
     if (encode_lavc_open_codec(vo->encode_lavc_ctx, vc->codec) < 0)
         goto error;

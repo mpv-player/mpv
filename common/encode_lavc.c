@@ -1196,34 +1196,4 @@ void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...)
     encode_lavc_finish(ctx);
 }
 
-bool encode_lavc_set_csp(struct encode_lavc_context *ctx,
-                         AVCodecContext *codec, enum mp_csp csp)
-{
-    CHECK_FAIL(ctx, NULL);
-
-    if (ctx->header_written) {
-        if (codec->colorspace != mp_csp_to_avcol_spc(csp))
-            MP_WARN(ctx, "can not change color space during encoding\n");
-        return false;
-    }
-
-    codec->colorspace = mp_csp_to_avcol_spc(csp);
-    return true;
-}
-
-bool encode_lavc_set_csp_levels(struct encode_lavc_context *ctx,
-                                AVCodecContext *codec, enum mp_csp_levels lev)
-{
-    CHECK_FAIL(ctx, NULL);
-
-    if (ctx->header_written) {
-        if (codec->color_range != mp_csp_levels_to_avcol_range(lev))
-            MP_WARN(ctx, "can not change color space during encoding\n");
-        return false;
-    }
-
-    codec->color_range = mp_csp_levels_to_avcol_range(lev);
-    return true;
-}
-
 // vim: ts=4 sw=4 et

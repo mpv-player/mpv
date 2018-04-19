@@ -113,9 +113,4 @@ double encode_lavc_getoffset(struct encode_lavc_context *ctx,
                              AVCodecContext *codec);
 void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...); // report failure of encoding
 
-bool encode_lavc_set_csp(struct encode_lavc_context *ctx,
-                         AVCodecContext *codec, enum mp_csp csp);
-bool encode_lavc_set_csp_levels(struct encode_lavc_context *ctx,
-                                AVCodecContext *codec, enum mp_csp_levels lev);
-
 #endif
