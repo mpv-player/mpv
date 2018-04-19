@@ -65,7 +65,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--oaoffset=<value>``
     Shifts audio data by the given time (in seconds) by adding/removing
-    samples at the start.
+    samples at the start. Deprecated.
 
 ``--oacopts=<options>``
     Specifies the output audio codec options for libavcodec.
@@ -94,7 +94,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--oafirst``
     Force the audio stream to become the first stream in the output.
-    By default, the order is unspecified.
+    By default, the order is unspecified. Deprecated.
 
 ``--ovc=<codec>``
     Specifies the output video codec. This can be a comma separated list of
@@ -103,7 +103,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--ovoffset=<value>``
     Shifts video data by the given time (in seconds) by shifting the pts
-    values.
+    values. Deprecated.
 
 ``--ovcopts <options>``
     Specifies the output video codec options for libavcodec.
@@ -135,7 +135,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--ovfirst``
     Force the video stream to become the first stream in the output.
-    By default, the order is unspecified.
+    By default, the order is unspecified. Deprecated.
 
 ``--ocopyts``
     Copies input pts to the output video (not supported by some output

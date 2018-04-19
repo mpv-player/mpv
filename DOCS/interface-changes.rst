@@ -93,6 +93,7 @@ Interface changes
       playback only in the player initialization phase. It could change again in
       the future. (This kind of waiting was always a feature to prevent that
       playback is started while scripts are only half-loaded.)
+    - deprecate --ovoffset, --oaoffset, --ovfirst, --oafirst
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
