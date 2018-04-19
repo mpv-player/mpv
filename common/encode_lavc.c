@@ -1211,20 +1211,4 @@ bool encode_lavc_set_csp_levels(struct encode_lavc_context *ctx,
     return true;
 }
 
-enum mp_csp encode_lavc_get_csp(struct encode_lavc_context *ctx,
-                                AVCodecContext *codec)
-{
-    CHECK_FAIL(ctx, 0);
-
-    return avcol_spc_to_mp_csp(codec->colorspace);
-}
-
-enum mp_csp_levels encode_lavc_get_csp_levels(struct encode_lavc_context *ctx,
-                                              AVCodecContext *codec)
-{
-    CHECK_FAIL(ctx, 0);
-
-    return avcol_range_to_mp_csp_levels(codec->color_range);
-}
-
 // vim: ts=4 sw=4 et

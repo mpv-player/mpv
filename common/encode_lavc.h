@@ -117,9 +117,5 @@ bool encode_lavc_set_csp(struct encode_lavc_context *ctx,
                          AVCodecContext *codec, enum mp_csp csp);
 bool encode_lavc_set_csp_levels(struct encode_lavc_context *ctx,
                                 AVCodecContext *codec, enum mp_csp_levels lev);
-enum mp_csp encode_lavc_get_csp(struct encode_lavc_context *ctx,
-                                AVCodecContext *codec);
-enum mp_csp_levels encode_lavc_get_csp_levels(struct encode_lavc_context *ctx,
-                                              AVCodecContext *codec);
 
 #endif
