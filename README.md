@@ -136,7 +136,7 @@ FFmpeg dependencies:
   (although there are security implications).
 - For good nvidia support on Linux, make sure nv-codec-headers is installed
   and can be found by configure.
-- Libav also works, but some features will not work. (See section below.)
+- Libav support is broken. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
 Linux distributions. For ease of compiling the latest git master of everything,
@@ -153,8 +153,8 @@ or cross-compile from Linux with MinGW. See
 
 
 Generally, mpv should work with the latest release as well as the git version
-of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
-with FFmpeg only (subtitle formats in particular).
+of FFmpeg. Libav support is currently broken, because they did not add certain
+FFmpeg API changes which mpv relies on.
 
 
 ## FFmpeg ABI compatibility
