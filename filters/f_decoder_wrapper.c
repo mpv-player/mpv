@@ -358,6 +358,7 @@ static void process_video_frame(struct priv *p, struct mp_image *mpi)
         fix_image_params(p, &mpi->params);
 
     mpi->params = p->fixed_format;
+    mpi->nominal_fps = p->public.fps;
 
     mpi->pts = pts;
     p->pts = pts;

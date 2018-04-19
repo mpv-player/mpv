@@ -382,7 +382,6 @@ struct mp_stream_info {
     void *priv; // for use by whoever implements the callbacks
 
     double (*get_display_fps)(struct mp_stream_info *i);
-    double (*get_container_fps)(struct mp_stream_info *i);
 
     struct mp_hwdec_devices *hwdec_devs;
     struct osd_state *osd;

@@ -340,7 +340,8 @@ static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
     return a->imgfmt == b->imgfmt &&
            a->w == b->w && a->h && b->h &&
-           a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h;
+           a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h &&
+           a->nominal_fps == b->nominal_fps;
 }
 static bool is_format_ok(struct mp_frame a, struct mp_frame b)
 {
@@ -483,6 +484,7 @@ static bool init_pads(struct lavfi *c)
             params->sample_aspect_ratio.num = fmt->params.p_w;
             params->sample_aspect_ratio.den = fmt->params.p_h;
             params->hw_frames_ctx = fmt->hwctx;
+            params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
             filter_name = "buffer";
         } else {
             assert(0);
@@ -679,6 +681,11 @@ static bool read_output_pads(struct lavfi *c)
                 double out_time = avframe->pts * av_q2d(pad->timebase);
                 mp_aframe_set_pts(aframe, c->in_pts +
                     (c->in_pts != MP_NOPTS_VALUE ? (out_time - in_time) : 0));
+            }
+            if (frame.type == MP_FRAME_VIDEO) {
+                struct mp_image *vframe = frame.data;
+                vframe->nominal_fps =
+                    av_q2d(av_buffersink_get_frame_rate(pad->buffer));
             }
             av_frame_unref(c->tmp_frame);
             if (frame.type) {

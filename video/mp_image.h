@@ -105,6 +105,8 @@ typedef struct mp_image {
     double pts;
     /* only after decoder */
     double dts, pkt_duration;
+    /* container reported FPS; can be incorrect, or 0 if unknown */
+    double nominal_fps;
     /* for private use */
     void* priv;
 

@@ -103,7 +103,7 @@ static const struct mp_image dummy_img;
 static const struct mp_image dummy_img_eof;
 
 static void destroy_vs(struct priv *p);
-static int reinit_vs(struct priv *p);
+static int reinit_vs(struct priv *p, struct mp_image *input);
 
 struct script_driver {
     int (*init)(struct priv *p);                // first time init
@@ -368,7 +368,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                 if (p->out_node)
                     destroy_vs(p);
                 p->fmt_in = mpi->params;
-                if (reinit_vs(p) < 0) {
+                if (reinit_vs(p, mpi) < 0) {
                     MP_ERR(p, "could not init VS\n");
                     mp_frame_unref(&frame);
                     return;
@@ -617,7 +617,7 @@ static void destroy_vs(struct priv *p)
     MP_DBG(p, "uninitialized.\n");
 }
 
-static int reinit_vs(struct priv *p)
+static int reinit_vs(struct priv *p, struct mp_image *input)
 {
     VSMap *vars = NULL, *in = NULL, *out = NULL;
     int res = -1;
@@ -665,11 +665,9 @@ static int reinit_vs(struct priv *p)
     p->vsapi->propSetInt(vars, "video_in_dh", d_h, 0);
 
     struct mp_stream_info *info = mp_filter_find_stream_info(p->f);
-    double container_fps = 0;
+    double container_fps = input->nominal_fps;
     double display_fps = 0;
     if (info) {
-        if (info->get_container_fps)
-            container_fps = info->get_container_fps(info);
         if (info->get_display_fps)
             display_fps = info->get_display_fps(info);
     }
