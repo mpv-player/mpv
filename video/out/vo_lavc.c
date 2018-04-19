@@ -94,8 +94,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct priv *vc = vo->priv;
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(params->imgfmt);
     AVRational aspect = {params->p_w, params->p_h};
-    uint32_t width = params->w;
-    uint32_t height = params->h;
+    int width = params->w;
+    int height = params->h;
 
     if (!vc || vc->shutdown)
         return -1;
@@ -103,11 +103,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
 
     if (vc->stream) {
-        /* NOTE:
-         * in debug builds we get a "comparison between signed and unsigned"
-         * warning here. We choose to ignore that; just because ffmpeg currently
-         * uses a plain 'int' for these struct fields, it doesn't mean it always
-         * will */
         if (width == vc->codec->width &&
                 height == vc->codec->height) {
             if (aspect.num != vc->codec->sample_aspect_ratio.num ||
