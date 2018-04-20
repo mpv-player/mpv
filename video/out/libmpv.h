@@ -52,6 +52,8 @@ struct render_backend_fns {
     void (*reconfig)(struct render_backend *ctx, struct mp_image_params *params);
     // Like VOCTRL_RESET.
     void (*reset)(struct render_backend *ctx);
+    void (*screenshot)(struct render_backend *ctx, struct vo_frame *frame,
+                       struct voctrl_screenshot *args);
     // Like vo_driver.get_image().
     struct mp_image *(*get_image)(struct render_backend *ctx, int imgfmt,
                                   int w, int h, int stride_align);

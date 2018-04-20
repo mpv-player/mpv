@@ -511,6 +511,29 @@ static int query_format(struct vo *vo, int format)
     return ok;
 }
 
+static void run_control_on_render_thread(void *p)
+{
+    void **args = p;
+    struct mpv_render_context *ctx = args[0];
+    int request = (intptr_t)args[1];
+    void *data = args[2];
+    int ret = VO_NOTIMPL;
+
+    switch (request) {
+    case VOCTRL_SCREENSHOT: {
+        pthread_mutex_lock(&ctx->lock);
+        struct vo_frame *frame = vo_frame_ref(ctx->cur_frame);
+        pthread_mutex_unlock(&ctx->lock);
+        if (frame && ctx->renderer->fns->screenshot)
+            ctx->renderer->fns->screenshot(ctx->renderer, frame, data);
+        talloc_free(frame);
+        break;
+    }
+    }
+
+    *(int *)args[3] = ret;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct vo_priv *p = vo->priv;
@@ -542,6 +565,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_unlock(&ctx->lock);
         vo->want_redraw = true;
         return VO_TRUE;
+    }
+
+    // VOCTRLs to be run on the renderer thread (if possible at all).
+    switch (request) {
+    case VOCTRL_SCREENSHOT:
+        if (ctx->dispatch) {
+            int ret;
+            void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};
+            mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
+            return ret;
+        }
     }
 
     int r = VO_NOTIMPL;

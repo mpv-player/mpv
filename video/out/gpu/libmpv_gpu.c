@@ -190,6 +190,14 @@ static struct mp_image *get_image(struct render_backend *ctx, int imgfmt,
     return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align);
 }
 
+static void screenshot(struct render_backend *ctx, struct vo_frame *frame,
+                       struct voctrl_screenshot *args)
+{
+    struct priv *p = ctx->priv;
+
+    gl_video_screenshot(p->renderer, frame, args);
+}
+
 static void destroy(struct render_backend *ctx)
 {
     struct priv *p = ctx->priv;
@@ -217,5 +225,6 @@ const struct render_backend_fns render_backend_gpu = {
     .get_target_size = get_target_size,
     .render = render,
     .get_image = get_image,
+    .screenshot = screenshot,
     .destroy = destroy,
 };
