@@ -106,12 +106,22 @@ struct mpv_render_context {
     struct mp_vo_opts *vo_opts;
 };
 
-static void update(struct mpv_render_context *ctx);
-
 const struct render_backend_fns *render_backends[] = {
     &render_backend_gpu,
     NULL
 };
+
+static void update(struct mpv_render_context *ctx)
+{
+    pthread_mutex_lock(&ctx->update_lock);
+    if (ctx->update_cb)
+        ctx->update_cb(ctx->update_cb_ctx);
+
+    // For the termination code.
+    ctx->had_kill_update = true;
+    pthread_cond_broadcast(&ctx->update_cond);
+    pthread_mutex_unlock(&ctx->update_lock);
+}
 
 void *get_mpv_render_param(mpv_render_param *params, mpv_render_param_type type,
                            void *def)
@@ -426,18 +436,6 @@ int mpv_render_context_set_parameter(mpv_render_context *ctx,
         pthread_mutex_unlock(&ctx->lock);
     }
     return err;
-}
-
-static void update(struct mpv_render_context *ctx)
-{
-    pthread_mutex_lock(&ctx->update_lock);
-    if (ctx->update_cb)
-        ctx->update_cb(ctx->update_cb_ctx);
-
-    // For the termination code.
-    ctx->had_kill_update = true;
-    pthread_cond_broadcast(&ctx->update_cond);
-    pthread_mutex_unlock(&ctx->update_lock);
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
