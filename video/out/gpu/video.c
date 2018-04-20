@@ -3169,15 +3169,23 @@ done:
 void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
                          struct voctrl_screenshot *args)
 {
-    bool ok = false;
-    struct mp_image *res = NULL;
-
     if (!p->ra->fns->tex_download)
         return;
 
+    bool ok = false;
+    struct mp_image *res = NULL;
+    struct ra_tex *target = NULL;
     struct mp_rect old_src = p->src_rect;
     struct mp_rect old_dst = p->dst_rect;
     struct mp_osd_res old_osd = p->osd_rect;
+    struct vo_frame *nframe = vo_frame_ref(frame);
+
+    // Disable interpolation and such.
+    nframe->redraw = true;
+    nframe->repeat = false;
+    nframe->still = true;
+    nframe->pts = 0;
+    nframe->duration = -1;
 
     if (!args->scaled) {
         int w, h;
@@ -3216,7 +3224,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
 
     if (!params.format || !params.format->renderable)
         goto done;
-    struct ra_tex *target = ra_tex_create(p->ra, &params);
+    target = ra_tex_create(p->ra, &params);
     if (!target)
         goto done;
 
@@ -3225,7 +3233,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         flags |= RENDER_FRAME_SUBS;
     if (args->osd)
         flags |= RENDER_FRAME_OSD;
-    gl_video_render_frame(p, frame, (struct ra_fbo){target}, flags);
+    gl_video_render_frame(p, nframe, (struct ra_fbo){target}, flags);
 
     res = mp_image_alloc(mpfmt, params.w, params.h);
     if (!res)
@@ -3244,6 +3252,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
 
     ok = true;
 done:
+    talloc_free(nframe);
     ra_tex_free(p->ra, &target);
     gl_video_resize(p, &old_src, &old_dst, &old_osd);
     if (!ok)

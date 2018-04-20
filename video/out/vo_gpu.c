@@ -178,15 +178,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct vo_frame *frame = vo_get_current_vo_frame(vo);
-        if (frame) {
-            // Disable interpolation and such.
-            frame->redraw = true;
-            frame->repeat = false;
-            frame->still = true;
-            frame->pts = 0;
-            frame->duration = -1;
+        if (frame)
             gl_video_screenshot(p->renderer, frame, data);
-        }
         talloc_free(frame);
         return true;
     }
