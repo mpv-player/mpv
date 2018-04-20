@@ -230,12 +230,53 @@ typedef enum mpv_render_param_type {
      * Type: int*: 0 for disable (default), 1 for enable
      */
     MPV_RENDER_PARAM_ADVANCED_CONTROL = 10,
+    /**
+     * Return information about the next frame to render. Valid for
+     * mpv_render_context_get_info().
+     *
+     * Type: mpv_render_frame_info*
+     *
+     * It strictly returns information about the _next_ frame. The implication
+     * is that e.g. mpv_render_context_update()'s return value will have
+     * MPV_RENDER_UPDATE_FRAME set, and the user is supposed to call
+     * mpv_render_context_render(). If there is no next frame, then the
+     * return value will have is_valid set to 0.
+     */
+    MPV_RENDER_PARAM_NEXT_FRAME_INFO = 11,
+    /**
+     * Enable or disable video timing. Valid for mpv_render_context_render().
+     *
+     * Type: int*: 0 for disable, 1 for enable (default)
+     *
+     * When video is timed to audio, the player attempts to render video a bit
+     * ahead, and then do a blocking wait until the target display time is
+     * reached. This blocks mpv_render_context_render() for up to the amount
+     * specified with the "video-timing-offset" global option. You can set
+     * this parameter to 0 to disable this kind of waiting. If you do, it's
+     * recommended to use the target time value in mpv_render_frame_info to
+     * wait yourself, or to set the "video-timing-offset" to 0 instead.
+     *
+     * Disabling this without doing anything in addition will result in A/V sync
+     * being slightly off.
+     */
+    MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME = 12,
+    /**
+     * Use to skip rendering in mpv_render_context_render().
+     *
+     * Type: int*: 0 for rendering (default), 1 for skipping
+     *
+     * If this is set, you don't need to pass a target surface to the render
+     * function (and if you do, it's completely ignored). This can still call
+     * into the lower level APIs (i.e. if you use OpenGL, the OpenGL context
+     * must be set).
+     *
+     * Be aware that the render API will consider this frame as having been
+     * rendered. All other normal rules also apply, for example about whether
+     * you have to call mpv_render_context_report_swap(). It also does timing
+     * in the same way.
+     */
+    MPV_RENDER_PARAM_SKIP_RENDERING = 13,
 } mpv_render_param_type;
-
-/**
- * Predefined values for MPV_RENDER_PARAM_API_TYPE.
- */
-#define MPV_RENDER_API_TYPE_OPENGL "opengl"
 
 /**
  * Used to pass arbitrary parameters to some mpv_render_* functions. The
@@ -266,6 +307,84 @@ typedef struct mpv_render_param {
     enum mpv_render_param_type type;
     void *data;
 } mpv_render_param;
+
+
+/**
+ * Predefined values for MPV_RENDER_PARAM_API_TYPE.
+ */
+#define MPV_RENDER_API_TYPE_OPENGL "opengl"
+
+/**
+ * Flags used in mpv_render_frame_info.flags. Each value represents a bit in it.
+ */
+typedef enum mpv_render_frame_info_flag {
+    /**
+     * Set if there is actually a next frame. If unset, there is no next frame
+     * yet, and other flags and fields that require a frame to be queued will
+     * be unset.
+     *
+     * This is set for _any_ kind of frame, even for redraw requests.
+     *
+     * Note that when this is unset, it simply means no new frame was
+     * decoded/queued yet, not necessarily that the end of the video was
+     * reached. A new frame can be queued after some time.
+     *
+     * If the return value of mpv_render_context_render() had the
+     * MPV_RENDER_UPDATE_FRAME flag set, this flag will usually be set as well,
+     * unless the frame is rendered, or discarded by other asynchronous events.
+     */
+    MPV_RENDER_FRAME_INFO_PRESENT         = 1 << 0,
+    /**
+     * If set, the frame is not an actual new video frame, but a redraw request.
+     * For example if the video is paused, and an option that affects video
+     * rendering was changed (or any other reason), an update request can be
+     * issued and this flag will be set.
+     *
+     * Typically, redraw frames will not be subject to video timing.
+     *
+     * Implies MPV_RENDER_FRAME_INFO_PRESENT.
+     */
+    MPV_RENDER_FRAME_INFO_REDRAW          = 1 << 1,
+    /**
+     * If set, this is supposed to reproduce the previous frame perfectly. This
+     * is usually used for certain "video-sync" options ("display-..." modes).
+     * Typically the renderer will blit the video from a FBO. Unset otherwise.
+     *
+     * Implies MPV_RENDER_FRAME_INFO_PRESENT.
+     */
+    MPV_RENDER_FRAME_INFO_REPEAT          = 1 << 2,
+    /**
+     * If set, the player timing code expects that the user thread blocks on
+     * vsync (by either delaying the render call, or by making a call to
+     * mpv_render_context_report_swap() at vsync time).
+     *
+     * Implies MPV_RENDER_FRAME_INFO_PRESENT.
+     */
+    MPV_RENDER_FRAME_INFO_BLOCK_VSYNC     = 1 << 3,
+} mpv_render_frame_info_flag;
+
+/**
+ * Information about the next video frame that will be rendered. Can be
+ * retrieved with MPV_RENDER_PARAM_NEXT_FRAME_INFO.
+ */
+typedef struct mpv_render_frame_info {
+    /**
+     * A bitset of mpv_render_frame_info_flag values (i.e. multiple flags are
+     * combined with bitwise or).
+     */
+    uint64_t flags;
+    /**
+     * Absolute time at which the frame is supposed to be displayed. This is in
+     * the same unit and base as the time returned by mpv_get_time_us(). For
+     * frames that are redrawn, or if vsync locked video timing is used (see
+     * "video-sync" option), then this can be 0. The "video-timing-offset"
+     * option determines how much "headroom" the render thread gets (but a high
+     * enough frame rate can reduce it anyway). mpv_render_context_render() will
+     * normally block until the time is elapsed, unless you pass it
+     * MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME = 0.
+     */
+    int64_t target_time;
+} mpv_render_frame_info;
 
 /**
  * Initialize the renderer state. Depending on the backend used, this will
@@ -309,6 +428,28 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
  */
 int mpv_render_context_set_parameter(mpv_render_context *ctx,
                                      mpv_render_param param);
+
+/**
+ * Retrieve information from the render context. This is NOT a counterpart to
+ * mpv_render_context_set_parameter(), because you generally can't read
+ * parameters set with it, and this function is not meant for this purpose.
+ * Instead, this is for communicating information from the renderer back to the
+ * user. See mpv_render_param_type; entries which support this function
+ * explicitly mention it, and for other entries you can assume it will fail.
+ *
+ * You pass param with param.type set and param.data pointing to a variable
+ * of the required data type. The function will then overwrite that variable
+ * with the returned value (at least on success).
+ *
+ * @param ctx a valid render context
+ * @param param the parameter type and data that should be retrieved
+ * @return error code. If a parameter could actually be retrieved, this returns
+ *         success, otherwise an error code depending on the parameter type
+ *         and situation. MPV_ERROR_NOT_IMPLEMENTED is used for unknown
+ *         param.type, or if retrieving it is not supported.
+ */
+int mpv_render_context_get_info(mpv_render_context *ctx,
+                                mpv_render_param param);
 
 typedef void (*mpv_render_update_fn)(void *cb_ctx);
 
