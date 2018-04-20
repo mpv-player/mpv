@@ -328,6 +328,14 @@ struct vo_driver {
                                   int stride_align);
 
     /*
+     * Thread-safe variant of get_image. Set at most one of these callbacks.
+     * This excludes _all_ synchronization magic. The only guarantee is that
+     * vo_driver.uninit is not called before this function returns.
+     */
+    struct mp_image *(*get_image_ts)(struct vo *vo, int imgfmt, int w, int h,
+                                     int stride_align);
+
+    /*
      * Render the given frame to the VO's backbuffer. This operation will be
      * followed by a draw_osd and a flip_page[_timed] call.
      * mpi belongs to the VO; the VO must free it eventually.
