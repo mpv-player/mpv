@@ -12,6 +12,9 @@
 void *get_mpv_render_param(mpv_render_param *params, mpv_render_param_type type,
                            void *def);
 
+#define GET_MPV_RENDER_PARAM(params, type, ctype, def) \
+    (*(ctype *)get_mpv_render_param(params, type, &(ctype){(def)}))
+
 typedef int (*mp_render_cb_control_fn)(void *cb_ctx, int *events,
                                        uint32_t request, void *data);
 void mp_render_context_set_control_callback(mpv_render_context *ctx,
