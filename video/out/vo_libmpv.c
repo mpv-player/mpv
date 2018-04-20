@@ -427,15 +427,7 @@ uint64_t mpv_render_context_update(mpv_render_context *ctx)
 int mpv_render_context_set_parameter(mpv_render_context *ctx,
                                      mpv_render_param param)
 {
-    int err = ctx->renderer->fns->set_parameter(ctx->renderer, param);
-    if (err >= 0) {
-        // Might need to redraw.
-        pthread_mutex_lock(&ctx->lock);
-        if (ctx->vo)
-            update(ctx);
-        pthread_mutex_unlock(&ctx->lock);
-    }
-    return err;
+    return ctx->renderer->fns->set_parameter(ctx->renderer, param);
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -530,7 +522,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         forget_frames(ctx, false);
         ctx->need_reset = true;
         pthread_mutex_unlock(&ctx->lock);
-        update(ctx);
+        vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
@@ -542,13 +534,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_lock(&ctx->lock);
         ctx->need_resize = true;
         pthread_mutex_unlock(&ctx->lock);
-        update(ctx);
+        vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_UPDATE_RENDER_OPTS:
         pthread_mutex_lock(&ctx->lock);
         ctx->need_update_external = true;
         pthread_mutex_unlock(&ctx->lock);
-        update(ctx);
+        vo->want_redraw = true;
         return VO_TRUE;
     }
 
