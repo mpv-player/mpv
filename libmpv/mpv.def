@@ -38,6 +38,7 @@ mpv_render_context_render
 mpv_render_context_report_swap
 mpv_render_context_set_parameter
 mpv_render_context_set_update_callback
+mpv_render_context_update
 mpv_request_event
 mpv_request_log_messages
 mpv_resume

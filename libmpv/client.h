@@ -210,7 +210,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 100)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 101)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -614,6 +614,8 @@ void mpv_resume(mpv_handle *ctx);
  *
  * Unlike other libmpv APIs, this can be called at absolutely any time (even
  * within wakeup callbacks), as long as the context is valid.
+ *
+ * Safe to be called from mpv render API threads.
  */
 int64_t mpv_get_time_us(mpv_handle *ctx);
 
@@ -959,6 +961,8 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * be unified in the future. For now, calling this API means that the command
  * will be synchronously executed on the core, without blocking the API user.
  *
+ * * Safe to be called from mpv render API threads.
+ *
  * @param reply_userdata the value mpv_event.reply_userdata of the reply will
  *                       be set to (see section about asynchronous calls)
  * @param args NULL-terminated list of strings (see mpv_command())
@@ -974,6 +978,8 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  *
  * See mpv_command_async() for details. Retrieving the result is not
  * supported yet.
+ *
+ * Safe to be called from mpv render API threads.
  *
  * @param reply_userdata the value mpv_event.reply_userdata of the reply will
  *                       be set to (see section about asynchronous calls)
@@ -1029,6 +1035,8 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
  * as MPV_EVENT_SET_PROPERTY_REPLY event. The mpv_event.error field will contain
  * the result status of the operation. Otherwise, this function is similar to
  * mpv_set_property().
+ *
+ * Safe to be called from mpv render API threads.
  *
  * @param reply_userdata see section about asynchronous calls
  * @param name The property name.
@@ -1090,6 +1098,8 @@ char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
  * as well as the property data with the MPV_EVENT_GET_PROPERTY_REPLY event.
  * You should check the mpv_event.error field on the reply event.
  *
+ * Safe to be called from mpv render API threads.
+ *
  * @param reply_userdata see section about asynchronous calls
  * @param name The property name.
  * @param format see enum mpv_format.
@@ -1136,6 +1146,8 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * Only the mpv_handle on which this was called will receive the property
  * change events, or can unobserve them.
  *
+ * Safe to be called from mpv render API threads.
+ *
  * @param reply_userdata This will be used for the mpv_event.reply_userdata
  *                       field for the received MPV_EVENT_PROPERTY_CHANGE
  *                       events. (Also see section about asynchronous calls,
@@ -1154,6 +1166,8 @@ int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
 /**
  * Undo mpv_observe_property(). This will remove all observed properties for
  * which the given number was passed as reply_userdata to mpv_observe_property.
+ *
+ * Safe to be called from mpv render API threads.
  *
  * @param registered_reply_userdata ID that was passed to mpv_observe_property
  * @return negative value is an error code, >=0 is number of removed properties
@@ -1586,6 +1600,8 @@ typedef struct mpv_event {
  * (Informational note: currently, all events are enabled by default, except
  *  MPV_EVENT_TICK.)
  *
+ * Safe to be called from mpv render API threads.
+ *
  * @param event See enum mpv_event_id.
  * @param enable 1 to enable receiving this event, 0 to disable it.
  * @return error code
@@ -1625,6 +1641,9 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  * function internally calls mpv_wait_event(). Additionally, concurrent calls
  * to different mpv_handles are always safe.
  *
+ * As long as the timeout is 0, this is safe to be called from mpv render API
+ * threads.
+ *
  * @param timeout Timeout in seconds, after which the function returns even if
  *                no event was received. A MPV_EVENT_NONE is returned on
  *                timeout. A value of 0 will disable waiting. Negative values
@@ -1648,6 +1667,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
  * this call. But note that this dummy event might be skipped if there are
  * already other events queued. All what counts is that the waiting thread
  * is woken up at all.
+ *
+ * Safe to be called from mpv render API threads.
  */
 void mpv_wakeup(mpv_handle *ctx);
 

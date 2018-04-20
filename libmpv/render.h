@@ -38,7 +38,7 @@ extern "C" {
  * Preferably rendering should be done in a separate thread. If you call
  * normal libmpv API functions on the renderer thread, deadlocks can result
  * (these are made non-fatal with timeouts, but user experience will obviously
- * suffer).
+ * suffer). See "Threading" section below.
  *
  * You can output and embed video without this API by setting the mpv "wid"
  * option to a native window handle (see "Embedding the video window" section
@@ -54,6 +54,9 @@ extern "C" {
  * Threading
  * ---------
  *
+ * You are recommended to do rendering on a separate thread than normal libmpv
+ * use.
+ *
  * The mpv_render_* functions can be called from any thread, under the
  * following conditions:
  *  - only one of the mpv_render_* functions can be called at the same time
@@ -64,6 +67,32 @@ extern "C" {
  *    must be "current" in the calling thread, and it must be the same OpenGL
  *    context as the mpv_render_context was created with. Otherwise, undefined
  *    behavior will occur.
+ *  - the thread does not call libmpv API functions other than the mpv_render_*
+ *    functions, except APIs which are declared as safe (see below). Likewise,
+ *    there must be no lock or wait dependency from the render thread to a
+ *    thread using other libmpv functions. Basically, the situation that your
+ *    render thread waits for a "not safe" libmpv API function to return must
+ *    not happen. If you ignore this requirement, deadlocks can happen, which
+ *    are made non-fatal with timeouts; then playback quality will be degraded,
+ *    and the message
+ *          mpv_render_context_render() not being called or stuck.
+ *    is logged. If you set MPV_RENDER_PARAM_ADVANCED_CONTROL, you promise that
+ *    this won't happen, and must absolutely guarantee it, or a real deadlock
+ *    will freeze the mpv core thread forever.
+ *
+ * libmpv functions which are safe to call from a render thread are:
+ *  - functions marked with "Safe to be called from mpv render API threads."
+ *  - client.h functions which don't have an explicit or implicit mpv_handle
+ *    parameter
+ *  - mpv_render_* functions; but only for the same mpv_render_context pointer.
+ *    If the pointer is different, mpv_render_context_free() is not safe. (The
+ *    reason is that if MPV_RENDER_PARAM_ADVANCED_CONTROL is set, it may have
+ *    to process still queued requests from the core, which it can do only for
+ *    the current context, while requests for other contexts would deadlock.
+ *    Also, it may have to wait and block for the core to terminate the video
+ *    chain to make sure no resources are used after context destruction.)
+ *  - if the mpv_handle parameter refers to a different mpv core than the one
+ *    you're rendering for (very obscure, but allowed)
  *
  * Context and handle lifecycle
  * ----------------------------
@@ -71,6 +100,8 @@ extern "C" {
  * Video initialization will fail if the render context was not initialized yet
  * (with mpv_render_context_create()), or it will revert to a VO that creates
  * its own window.
+ *
+ * Currently, there can be only 1 mpv_render_context at a time per mpv core.
  *
  * Calling mpv_render_context_free() while a VO is using the render context is
  * active will disable video.
@@ -166,6 +197,39 @@ typedef enum mpv_render_param_type {
      * Type: struct wl_display*
      */
     MPV_RENDER_PARAM_WL_DISPLAY = 9,
+    /**
+     * Better control about rendering and enabling some advanced features. Valid
+     * for mpv_render_context_create().
+     *
+     * This conflates multiple requirements the API user promises to abide if
+     * this option is enabled:
+     *
+     *  - The API user's render thread, which is calling the mpv_render_*()
+     *    functions, never waits for the core. Otherwise deadlocks can happen.
+     *    See "Threading" section.
+     *  - The callback set with mpv_render_context_set_update_callback() can now
+     *    be called even if there is no new frame. The API user should call the
+     *    mpv_render_context_update() function, and interpret the return value
+     *    for whether a new frame should be rendered.
+     *  - Correct functionality is impossible if the update callback is not set,
+     *    or not set soon enough after mpv_render_context_create() (the core can
+     *    block while waiting for you to call mpv_render_context_update(), and
+     *    if the update callback is not correctly set, it will deadlock, or
+     *    block for too long).
+     *
+     * In general, setting this option will enable the following features (and
+     * possibly more):
+     *
+     *  - "Direct rendering", which means the player decodes directly to a
+     *    texture, which saves a copy per video frame ("vd-lavc-dr" option
+     *    needs to be enabled, and the rendering backend as well as the
+     *    underlying GPU API/driver needs to have support for it).
+     *  - Rendering screenshots with the GPU API if supported by the backend
+     *    (instead of using a suboptimal software fallback via libswscale).
+     *
+     * Type: int*: 0 for disable (default), 1 for enable
+     */
+    MPV_RENDER_PARAM_ADVANCED_CONTROL = 10,
 } mpv_render_param_type;
 
 /**
@@ -258,6 +322,8 @@ typedef void (*mpv_render_update_fn)(void *cb_ctx);
  * This can be called from any thread, except from an update callback. In case
  * of the OpenGL backend, no OpenGL state or API is accessed.
  *
+ * Calling this will raise an update callback immediately.
+ *
  * @param callback callback(callback_ctx) is called if the frame should be
  *                 redrawn
  * @param callback_ctx opaque argument to the callback
@@ -265,6 +331,43 @@ typedef void (*mpv_render_update_fn)(void *cb_ctx);
 void mpv_render_context_set_update_callback(mpv_render_context *ctx,
                                             mpv_render_update_fn callback,
                                             void *callback_ctx);
+
+/**
+ * The API user is supposed to call this when the update callback was invoked
+ * (like all mpv_render_* functions, this has to happen on the render thread,
+ * and _not_ from the update callback itself).
+ *
+ * This is optional if MPV_RENDER_PARAM_ADVANCED_CONTROL was not set (default).
+ * Otherwise, it's a hard requirement that this is called after each update
+ * callback. If multiple update callback happened, and the function could not
+ * be called sooner, it's OK to call it once after the last callback.
+ *
+ * If an update callback happens during or after this function, the function
+ * must be called again at the soonest possible time.
+ *
+ * If MPV_RENDER_PARAM_ADVANCED_CONTROL was set, this will do additional work
+ * such as allocating textures for the video decoder.
+ *
+ * @return a bitset of mpv_render_update_flag values (i.e. multiple flags are
+ *         combined with bitwise or). Typically, this will tell the API user
+ *         what should happen next. E.g. if the MPV_RENDER_UPDATE_FRAME flag is
+ *         set, mpv_render_context_render() should be called. If flags unknown
+ *         to the API user are set, or if the return value is 0, nothing needs
+ *         to be done.
+ */
+uint64_t mpv_render_context_update(mpv_render_context *ctx);
+
+/**
+ * Flags returned by mpv_render_context_update(). Each value represents a bit
+ * in the function's return value.
+ */
+typedef enum mpv_render_update_flag {
+    /**
+     * A new video frame must be rendered. mpv_render_context_render() must be
+     * called.
+     */
+    MPV_RENDER_UPDATE_FRAME         = 1 << 0,
+} mpv_render_context_flag;
 
 /**
  * Render video.
