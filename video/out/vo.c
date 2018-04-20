@@ -23,8 +23,6 @@
 #include <pthread.h>
 #include <math.h>
 
-#include <libavutil/buffer.h>
-
 #include "mpv_talloc.h"
 
 #include "config.h"
@@ -37,6 +35,7 @@
 #include "misc/bstr.h"
 #include "vo.h"
 #include "aspect.h"
+#include "dr_helper.h"
 #include "input/input.h"
 #include "options/m_config.h"
 #include "common/msg.h"
@@ -111,8 +110,7 @@ const struct vo_driver *const video_out_drivers[] =
 struct vo_internal {
     pthread_t thread;
     struct mp_dispatch_queue *dispatch;
-
-    atomic_ullong dr_in_flight;
+    struct dr_helper *dr_helper;
 
     // --- The following fields are protected by lock
     pthread_mutex_t lock;
@@ -1004,6 +1002,13 @@ void vo_disable_external_renderloop(struct vo *vo)
     in->external_renderloop_drive = false;
 }
 
+static struct mp_image *get_image_vo(void *ctx, int imgfmt, int w, int h,
+                                     int stride_align)
+{
+    struct vo *vo = ctx;
+    return vo->driver->get_image(vo, imgfmt, w, h, stride_align);
+}
+
 static void *vo_thread(void *ptr)
 {
     struct vo *vo = ptr;
@@ -1012,10 +1017,13 @@ static void *vo_thread(void *ptr)
 
     mpthread_set_name("vo");
 
+    if (vo->driver->get_image)
+        in->dr_helper = dr_helper_create(in->dispatch, get_image_vo, vo);
+
     int r = vo->driver->preinit(vo) ? -1 : 0;
     mp_rendezvous(vo, r); // init barrier
     if (r < 0)
-        return NULL;
+        goto done;
 
     read_opts(vo);
     update_display_fps(vo);
@@ -1072,7 +1080,8 @@ static void *vo_thread(void *ptr)
     talloc_free(in->current_frame);
     in->current_frame = NULL;
     vo->driver->uninit(vo);
-    assert(atomic_load(&vo->in->dr_in_flight) == 0);
+done:
+    TA_FREEP(&in->dr_helper);
     return NULL;
 }
 
@@ -1346,6 +1355,16 @@ struct vo_frame *vo_get_current_vo_frame(struct vo *vo)
     return r;
 }
 
+struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
+                              int stride_align)
+{
+    if (vo->driver->get_image_ts)
+        return vo->driver->get_image_ts(vo, imgfmt, w, h, stride_align);
+    if (vo->in->dr_helper)
+        return dr_helper_get_image(vo->in->dr_helper, imgfmt, w, h, stride_align);
+    return NULL;
+}
+
 static void destroy_frame(void *p)
 {
     struct vo_frame *frame = p;
@@ -1384,89 +1403,4 @@ int lookup_keymap_table(const struct mp_keymap *map, int key)
     while (map->from && map->from != key)
         map++;
     return map->to;
-}
-
-struct free_dr_context {
-    struct vo *vo;
-    AVBufferRef *ref;
-};
-
-static void vo_thread_free(void *ptr)
-{
-    struct free_dr_context *ctx = ptr;
-
-    unsigned long long v = atomic_fetch_add(&ctx->vo->in->dr_in_flight, -1);
-    assert(v); // value before sub is 0 - unexpected underflow.
-
-    av_buffer_unref(&ctx->ref);
-    talloc_free(ctx);
-}
-
-static void free_dr_buffer_on_vo_thread(void *opaque, uint8_t *data)
-{
-    struct free_dr_context *ctx = opaque;
-
-    // The image could be unreffed even on the VO thread. In practice, this
-    // matters most on VO destruction.
-    if (pthread_equal(ctx->vo->in->thread, pthread_self())) {
-        vo_thread_free(ctx);
-    } else {
-        mp_dispatch_run(ctx->vo->in->dispatch, vo_thread_free, ctx);
-    }
-}
-
-struct get_image_cmd {
-    struct vo *vo;
-    int imgfmt, w, h, stride_align;
-    struct mp_image *res;
-};
-
-static void sync_get_image(void *ptr)
-{
-    struct get_image_cmd *cmd = ptr;
-    struct vo *vo = cmd->vo;
-
-    cmd->res = vo->driver->get_image(vo, cmd->imgfmt, cmd->w, cmd->h,
-                                     cmd->stride_align);
-    if (!cmd->res)
-        return;
-
-    // We require exactly 1 AVBufferRef.
-    assert(cmd->res->bufs[0]);
-    assert(!cmd->res->bufs[1]);
-
-    // Apply some magic to get it free'd on the VO thread as well. For this to
-    // work, we create a dummy-ref that aliases the original ref, which is why
-    // the original ref must be writable in the first place. (A newly allocated
-    // image should be always writable of course.)
-    assert(mp_image_is_writeable(cmd->res));
-
-    struct free_dr_context *ctx = talloc_zero(NULL, struct free_dr_context);
-    *ctx = (struct free_dr_context){
-        .vo = vo,
-        .ref = cmd->res->bufs[0],
-    };
-
-    AVBufferRef *new_ref = av_buffer_create(ctx->ref->data, ctx->ref->size,
-                                            free_dr_buffer_on_vo_thread, ctx, 0);
-    if (!new_ref)
-        abort(); // tiny malloc OOM
-
-    cmd->res->bufs[0] = new_ref;
-
-    atomic_fetch_add(&vo->in->dr_in_flight, 1);
-}
-
-struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
-                              int stride_align)
-{
-    if (!vo->driver->get_image)
-        return NULL;
-
-    struct get_image_cmd cmd = {
-        .vo = vo,
-        .imgfmt = imgfmt, .w = w, .h = h, .stride_align = stride_align,
-    };
-    mp_dispatch_run(vo->in->dispatch, sync_get_image, &cmd);
-    return cmd.res;
 }
