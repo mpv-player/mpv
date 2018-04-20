@@ -525,8 +525,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_lock(&p->ctx->lock);
         forget_frames(p->ctx, false);
         p->ctx->need_reset = true;
-        update(p->ctx);
         pthread_mutex_unlock(&p->ctx->lock);
+        update(p->ctx);
         return VO_TRUE;
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
@@ -537,14 +537,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->need_resize = true;
-        update(p->ctx);
         pthread_mutex_unlock(&p->ctx->lock);
+        update(p->ctx);
         return VO_TRUE;
     case VOCTRL_UPDATE_RENDER_OPTS:
         pthread_mutex_lock(&p->ctx->lock);
         p->ctx->need_update_external = true;
-        update(p->ctx);
         pthread_mutex_unlock(&p->ctx->lock);
+        update(p->ctx);
         return VO_TRUE;
     }
 
