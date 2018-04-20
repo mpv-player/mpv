@@ -323,38 +323,45 @@ bool mp_render_context_acquire(mpv_render_context *ctx)
 
 int mpv_render_context_render(mpv_render_context *ctx, mpv_render_param *params)
 {
-    int vp_w, vp_h;
-    int err = ctx->renderer->fns->get_target_size(ctx->renderer, params,
-                                                  &vp_w, &vp_h);
-    if (err < 0)
-        return err;
-
     pthread_mutex_lock(&ctx->lock);
 
-    struct vo *vo = ctx->vo;
+    int do_render =
+        !GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_SKIP_RENDERING, int, 0);
 
-    if (vo && (ctx->vp_w != vp_w || ctx->vp_h != vp_h || ctx->need_resize)) {
-        ctx->vp_w = vp_w;
-        ctx->vp_h = vp_h;
+    if (do_render) {
+        int vp_w, vp_h;
+        int err = ctx->renderer->fns->get_target_size(ctx->renderer, params,
+                                                    &vp_w, &vp_h);
+        if (err < 0) {
+            pthread_mutex_unlock(&ctx->lock);
+            return err;
+        }
 
-        m_config_cache_update(ctx->vo_opts_cache);
+        if (ctx->vo && (ctx->vp_w != vp_w || ctx->vp_h != vp_h ||
+                        ctx->need_resize))
+        {
+            ctx->vp_w = vp_w;
+            ctx->vp_h = vp_h;
 
-        struct mp_rect src, dst;
-        struct mp_osd_res osd;
-        mp_get_src_dst_rects(ctx->log, ctx->vo_opts, vo->driver->caps,
-                             &ctx->img_params, vp_w, abs(vp_h),
-                             1.0, &src, &dst, &osd);
+            m_config_cache_update(ctx->vo_opts_cache);
 
-        ctx->renderer->fns->resize(ctx->renderer, &src, &dst, &osd);
+            struct mp_rect src, dst;
+            struct mp_osd_res osd;
+            mp_get_src_dst_rects(ctx->log, ctx->vo_opts, ctx->vo->driver->caps,
+                                &ctx->img_params, vp_w, abs(vp_h),
+                                1.0, &src, &dst, &osd);
+
+            ctx->renderer->fns->resize(ctx->renderer, &src, &dst, &osd);
+        }
+        ctx->need_resize = false;
     }
-    ctx->need_resize = false;
 
     if (ctx->need_reconfig)
         ctx->renderer->fns->reconfig(ctx->renderer, &ctx->img_params);
     ctx->need_reconfig = false;
 
     if (ctx->need_update_external)
-        ctx->renderer->fns->update_external(ctx->renderer, vo);
+        ctx->renderer->fns->update_external(ctx->renderer, ctx->vo);
     ctx->need_update_external = false;
 
     if (ctx->need_reset) {
@@ -387,15 +394,22 @@ int mpv_render_context_render(mpv_render_context *ctx, mpv_render_param *params)
 
     MP_STATS(ctx, "glcb-render");
 
-    err = ctx->renderer->fns->render(ctx->renderer, params, frame);
+    int err = 0;
+
+    if (do_render)
+        err = ctx->renderer->fns->render(ctx->renderer, params, frame);
 
     if (frame != &dummy)
         talloc_free(frame);
 
-    pthread_mutex_lock(&ctx->lock);
-    while (wait_present_count > ctx->present_count)
-        pthread_cond_wait(&ctx->video_wait, &ctx->lock);
-    pthread_mutex_unlock(&ctx->lock);
+    if (GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME,
+                             int, 1))
+    {
+        pthread_mutex_lock(&ctx->lock);
+        while (wait_present_count > ctx->present_count)
+            pthread_cond_wait(&ctx->video_wait, &ctx->lock);
+        pthread_mutex_unlock(&ctx->lock);
+    }
 
     return err;
 }
@@ -428,6 +442,36 @@ int mpv_render_context_set_parameter(mpv_render_context *ctx,
                                      mpv_render_param param)
 {
     return ctx->renderer->fns->set_parameter(ctx->renderer, param);
+}
+
+int mpv_render_context_get_info(mpv_render_context *ctx,
+                                mpv_render_param param)
+{
+    int res = MPV_ERROR_NOT_IMPLEMENTED;
+    pthread_mutex_lock(&ctx->lock);
+
+    switch (param.type) {
+    case MPV_RENDER_PARAM_NEXT_FRAME_INFO: {
+        mpv_render_frame_info *info = param.data;
+        *info = (mpv_render_frame_info){0};
+        struct vo_frame *frame = ctx->next_frame;
+        if (frame) {
+            info->flags =
+                MPV_RENDER_FRAME_INFO_PRESENT |
+                (frame->redraw ? MPV_RENDER_FRAME_INFO_REDRAW : 0) |
+                (frame->repeat ? MPV_RENDER_FRAME_INFO_REPEAT : 0) |
+                (frame->display_synced && !frame->redraw ?
+                    MPV_RENDER_FRAME_INFO_BLOCK_VSYNC : 0);
+            info->target_time = frame->pts;
+        }
+        res = 0;
+        break;
+    }
+    default:;
+    }
+
+    pthread_mutex_unlock(&ctx->lock);
+    return res;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)

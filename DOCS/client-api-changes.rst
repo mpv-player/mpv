@@ -34,6 +34,10 @@ API changes
 
  --- mpv 0.29.0 ---
  1.101  - add MPV_RENDER_PARAM_ADVANCED_CONTROL and related API
+        - add MPV_RENDER_PARAM_NEXT_FRAME_INFO and related symbols
+        - add MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME
+        - add MPV_RENDER_PARAM_SKIP_RENDERING
+        - add mpv_render_context_get_info()
  1.100  - bump API number to avoid confusion with mpv release versions
         - actually apply the GL_MP_MPGetNativeDisplay change for the new render
           API. This also means compatibility for anything but x11 and wayland
