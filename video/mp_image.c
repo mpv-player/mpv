@@ -305,7 +305,7 @@ static void ref_buffer(bool *ok, AVBufferRef **dst)
     if (*dst) {
         *dst = av_buffer_ref(*dst);
         if (!*dst)
-            ok = false;
+            *ok = false;
     }
 }
 
