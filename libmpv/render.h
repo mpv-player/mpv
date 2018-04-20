@@ -195,8 +195,8 @@ typedef enum mpv_render_param_type {
  * will not write to the params array or any data pointed to it.
  *
  * As a convention, parameter arrays are always terminated by type==0. There
- * is no specific order of the parameters required. The order of fields is
- * guaranteed (even after ABI changes).
+ * is no specific order of the parameters required. The order of the 2 fields in
+ * this struct is guaranteed (even after ABI changes).
  */
 typedef struct mpv_render_param {
     enum mpv_render_param_type type;
