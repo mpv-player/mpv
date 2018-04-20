@@ -182,6 +182,14 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     return 0;
 }
 
+static struct mp_image *get_image(struct render_backend *ctx, int imgfmt,
+                                  int w, int h, int stride_align)
+{
+    struct priv *p = ctx->priv;
+
+    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align);
+}
+
 static void destroy(struct render_backend *ctx)
 {
     struct priv *p = ctx->priv;
@@ -208,5 +216,6 @@ const struct render_backend_fns render_backend_gpu = {
     .resize = resize,
     .get_target_size = get_target_size,
     .render = render,
+    .get_image = get_image,
     .destroy = destroy,
 };

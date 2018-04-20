@@ -52,6 +52,9 @@ struct render_backend_fns {
     void (*reconfig)(struct render_backend *ctx, struct mp_image_params *params);
     // Like VOCTRL_RESET.
     void (*reset)(struct render_backend *ctx);
+    // Like vo_driver.get_image().
+    struct mp_image *(*get_image)(struct render_backend *ctx, int imgfmt,
+                                  int w, int h, int stride_align);
     // This has two purposes: 1. set queue attributes on VO, 2. update the
     // renderer's OSD pointer. Keep in mind that as soon as the caller releases
     // the renderer lock, the VO pointer can become invalid. The OSD pointer

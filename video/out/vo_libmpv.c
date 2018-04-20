@@ -17,6 +17,7 @@
 #include "options/m_config.h"
 #include "options/options.h"
 #include "aspect.h"
+#include "dr_helper.h"
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
@@ -60,6 +61,7 @@ struct mpv_render_context {
     // --- Immutable after init
     bool advanced_control;
     struct mp_dispatch_queue *dispatch; // NULL if advanced_control disabled
+    struct dr_helper *dr;           // NULL if advanced_control disabled
 
     pthread_mutex_t control_lock;
     // --- Protected by control_lock
@@ -137,6 +139,14 @@ static void dispatch_wakeup(void *ptr)
     update(ctx);
 }
 
+static struct mp_image *render_get_image(void *ptr, int imgfmt, int w, int h,
+                                         int stride_align)
+{
+    struct mpv_render_context *ctx = ptr;
+
+    return ctx->renderer->fns->get_image(ctx->renderer, imgfmt, w, h, stride_align);
+}
+
 int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
                               mpv_render_param *params)
 {
@@ -189,6 +199,9 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
         ctx->imgfmt_supported[n - IMGFMT_START] =
             ctx->renderer->fns->check_format(ctx->renderer, n);
     }
+
+    if (ctx->renderer->fns->get_image && ctx->dispatch)
+        ctx->dr = dr_helper_create(ctx->dispatch, render_get_image, ctx);
 
     if (!mp_set_main_render_context(ctx->client_api, ctx, true)) {
         MP_ERR(ctx, "There is already a mpv_render_context set.\n");
@@ -277,6 +290,7 @@ void mpv_render_context_free(mpv_render_context *ctx)
     ctx->renderer->fns->destroy(ctx->renderer);
     talloc_free(ctx->renderer->priv);
     talloc_free(ctx->renderer);
+    talloc_free(ctx->dr);
     talloc_free(ctx->dispatch);
 
     pthread_cond_destroy(&ctx->update_cond);
@@ -548,6 +562,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
+static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
+                                  int stride_align)
+{
+    struct vo_priv *p = vo->priv;
+
+    if (p->ctx->dr)
+        return dr_helper_get_image(p->ctx->dr, imgfmt, w, h, stride_align);
+
+    return NULL;
+}
+
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vo_priv *p = vo->priv;
@@ -619,6 +644,7 @@ const struct vo_driver video_out_libmpv = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
+    .get_image_ts = get_image,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
