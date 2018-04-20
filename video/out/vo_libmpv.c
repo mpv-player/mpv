@@ -441,28 +441,30 @@ int mpv_render_context_set_parameter(mpv_render_context *ctx,
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
-    pthread_mutex_lock(&p->ctx->lock);
-    assert(!p->ctx->next_frame);
-    p->ctx->next_frame = vo_frame_ref(frame);
-    p->ctx->expected_flip_count = p->ctx->flip_count + 1;
-    p->ctx->redrawing = frame->redraw || !frame->current;
-    pthread_mutex_unlock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
+    assert(!ctx->next_frame);
+    ctx->next_frame = vo_frame_ref(frame);
+    ctx->expected_flip_count = ctx->flip_count + 1;
+    ctx->redrawing = frame->redraw || !frame->current;
+    pthread_mutex_unlock(&ctx->lock);
 
-    update(p->ctx);
+    update(ctx);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
     struct timespec ts = mp_rel_time_to_timespec(0.2);
 
-    pthread_mutex_lock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
 
     // Wait until frame was rendered
-    while (p->ctx->next_frame) {
-        if (pthread_cond_timedwait(&p->ctx->video_wait, &p->ctx->lock, &ts)) {
-            if (p->ctx->next_frame) {
+    while (ctx->next_frame) {
+        if (pthread_cond_timedwait(&ctx->video_wait, &ctx->lock, &ts)) {
+            if (ctx->next_frame) {
                 MP_VERBOSE(vo, "mpv_render_context_render() not being called "
                            "or stuck.\n");
                 goto done;
@@ -471,19 +473,19 @@ static void flip_page(struct vo *vo)
     }
 
     // Unblock mpv_render_context_render().
-    p->ctx->present_count += 1;
-    pthread_cond_broadcast(&p->ctx->video_wait);
+    ctx->present_count += 1;
+    pthread_cond_broadcast(&ctx->video_wait);
 
-    if (p->ctx->redrawing)
+    if (ctx->redrawing)
         goto done; // do not block for redrawing
 
     // Wait until frame was presented
-    while (p->ctx->expected_flip_count > p->ctx->flip_count) {
+    while (ctx->expected_flip_count > ctx->flip_count) {
         // mpv_render_report_swap() is declared as optional API.
         // Assume the user calls it consistently _if_ it's called at all.
-        if (!p->ctx->flip_count)
+        if (!ctx->flip_count)
             break;
-        if (pthread_cond_timedwait(&p->ctx->video_wait, &p->ctx->lock, &ts)) {
+        if (pthread_cond_timedwait(&ctx->video_wait, &ctx->lock, &ts)) {
             MP_VERBOSE(vo, "mpv_render_report_swap() not being called.\n");
             goto done;
         }
@@ -492,41 +494,43 @@ static void flip_page(struct vo *vo)
 done:
 
     // Cleanup after the API user is not reacting, or is being unusually slow.
-    if (p->ctx->next_frame) {
-        talloc_free(p->ctx->cur_frame);
-        p->ctx->cur_frame = p->ctx->next_frame;
-        p->ctx->next_frame = NULL;
-        p->ctx->present_count += 2;
-        pthread_cond_signal(&p->ctx->video_wait);
+    if (ctx->next_frame) {
+        talloc_free(ctx->cur_frame);
+        ctx->cur_frame = ctx->next_frame;
+        ctx->next_frame = NULL;
+        ctx->present_count += 2;
+        pthread_cond_signal(&ctx->video_wait);
         vo_increment_drop_count(vo, 1);
     }
 
-    pthread_mutex_unlock(&p->ctx->lock);
+    pthread_mutex_unlock(&ctx->lock);
 }
 
 static int query_format(struct vo *vo, int format)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
     bool ok = false;
-    pthread_mutex_lock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
     if (format >= IMGFMT_START && format < IMGFMT_END)
-        ok = p->ctx->imgfmt_supported[format - IMGFMT_START];
-    pthread_mutex_unlock(&p->ctx->lock);
+        ok = ctx->imgfmt_supported[format - IMGFMT_START];
+    pthread_mutex_unlock(&ctx->lock);
     return ok;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
     switch (request) {
     case VOCTRL_RESET:
-        pthread_mutex_lock(&p->ctx->lock);
-        forget_frames(p->ctx, false);
-        p->ctx->need_reset = true;
-        pthread_mutex_unlock(&p->ctx->lock);
-        update(p->ctx);
+        pthread_mutex_lock(&ctx->lock);
+        forget_frames(ctx, false);
+        ctx->need_reset = true;
+        pthread_mutex_unlock(&ctx->lock);
+        update(ctx);
         return VO_TRUE;
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
@@ -535,27 +539,27 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        pthread_mutex_lock(&p->ctx->lock);
-        p->ctx->need_resize = true;
-        pthread_mutex_unlock(&p->ctx->lock);
-        update(p->ctx);
+        pthread_mutex_lock(&ctx->lock);
+        ctx->need_resize = true;
+        pthread_mutex_unlock(&ctx->lock);
+        update(ctx);
         return VO_TRUE;
     case VOCTRL_UPDATE_RENDER_OPTS:
-        pthread_mutex_lock(&p->ctx->lock);
-        p->ctx->need_update_external = true;
-        pthread_mutex_unlock(&p->ctx->lock);
-        update(p->ctx);
+        pthread_mutex_lock(&ctx->lock);
+        ctx->need_update_external = true;
+        pthread_mutex_unlock(&ctx->lock);
+        update(ctx);
         return VO_TRUE;
     }
 
     int r = VO_NOTIMPL;
-    pthread_mutex_lock(&p->ctx->control_lock);
-    if (p->ctx->control_cb) {
+    pthread_mutex_lock(&ctx->control_lock);
+    if (ctx->control_cb) {
         int events = 0;
-        r = p->ctx->control_cb(p->ctx->control_cb_ctx, &events, request, data);
+        r = ctx->control_cb(ctx->control_cb_ctx, &events, request, data);
         vo_event(vo, events);
     }
-    pthread_mutex_unlock(&p->ctx->control_lock);
+    pthread_mutex_unlock(&ctx->control_lock);
 
     return r;
 }
@@ -564,9 +568,10 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
                                   int stride_align)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
-    if (p->ctx->dr)
-        return dr_helper_get_image(p->ctx->dr, imgfmt, w, h, stride_align);
+    if (ctx->dr)
+        return dr_helper_get_image(ctx->dr, imgfmt, w, h, stride_align);
 
     return NULL;
 }
@@ -574,13 +579,14 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
-    pthread_mutex_lock(&p->ctx->lock);
-    forget_frames(p->ctx, true);
-    p->ctx->img_params = *params;
-    p->ctx->need_reconfig = true;
-    p->ctx->need_resize = true;
-    pthread_mutex_unlock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
+    forget_frames(ctx, true);
+    ctx->img_params = *params;
+    ctx->need_reconfig = true;
+    ctx->need_resize = true;
+    pthread_mutex_unlock(&ctx->lock);
 
     control(vo, VOCTRL_RECONFIG, NULL);
 
@@ -590,45 +596,48 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 static void uninit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
+    struct mpv_render_context *ctx = p->ctx;
 
     control(vo, VOCTRL_UNINIT, NULL);
 
-    pthread_mutex_lock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
 
-    forget_frames(p->ctx, true);
-    p->ctx->img_params = (struct mp_image_params){0};
-    p->ctx->need_reconfig = true;
-    p->ctx->need_resize = true;
-    p->ctx->need_update_external = true;
-    p->ctx->need_reset = true;
-    p->ctx->vo = NULL;
-    pthread_mutex_unlock(&p->ctx->lock);
+    forget_frames(ctx, true);
+    ctx->img_params = (struct mp_image_params){0};
+    ctx->need_reconfig = true;
+    ctx->need_resize = true;
+    ctx->need_update_external = true;
+    ctx->need_reset = true;
+    ctx->vo = NULL;
+    pthread_mutex_unlock(&ctx->lock);
 
-    bool state = atomic_exchange(&p->ctx->in_use, false);
+    bool state = atomic_exchange(&ctx->in_use, false);
     assert(state); // obviously must have been set
 
-    update(p->ctx);
+    update(ctx);
 }
 
 static int preinit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
 
-    p->ctx = mp_client_api_acquire_render_context(vo->global->client_api);
+    struct mpv_render_context *ctx =
+        mp_client_api_acquire_render_context(vo->global->client_api);
+    p->ctx = ctx;
 
-    if (!p->ctx) {
+    if (!ctx) {
         if (!vo->probing)
             MP_FATAL(vo, "No render context set.\n");
         return -1;
     }
 
-    pthread_mutex_lock(&p->ctx->lock);
-    p->ctx->vo = vo;
-    p->ctx->need_resize = true;
-    p->ctx->need_update_external = true;
-    pthread_mutex_unlock(&p->ctx->lock);
+    pthread_mutex_lock(&ctx->lock);
+    ctx->vo = vo;
+    ctx->need_resize = true;
+    ctx->need_update_external = true;
+    pthread_mutex_unlock(&ctx->lock);
 
-    vo->hwdec_devs = p->ctx->hwdec_devs;
+    vo->hwdec_devs = ctx->hwdec_devs;
     control(vo, VOCTRL_PREINIT, NULL);
 
     return 0;
