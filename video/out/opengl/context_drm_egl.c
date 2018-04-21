@@ -247,39 +247,50 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
     p->fb = fb;
 }
 
-static bool crtc_setup_atomic(struct ra_ctx *ctx, drmModeModeInfo mode)
+static bool crtc_setup_atomic(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
+
     drmModeAtomicReqPtr request = drmModeAtomicAlloc();
     if (request) {
-        drm_object_set_property(request, atomic_ctx->connector, "CRTC_ID", p->kms->crtc_id);
+        if (drm_object_set_property(request, atomic_ctx->connector, "CRTC_ID", p->kms->crtc_id) < 0) {
+            MP_ERR(ctx->vo, "Could not set CRTC_ID on connector\n");
+            return false;
+        }
 
         uint32_t blob_id;
-        if (drmModeCreatePropertyBlob(p->kms->fd, &mode, sizeof(drmModeModeInfo),
+        if (drmModeCreatePropertyBlob(p->kms->fd, &p->kms->mode, sizeof(drmModeModeInfo),
                                       &blob_id) != 0) {
-            MP_ERR(ctx->vo, "Failed to DRM mode blob\n");
-            return 0;
+            MP_ERR(ctx->vo, "Failed to create DRM mode blob\n");
+            return false;
         }
-        drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", blob_id);
-        drm_object_set_property(request, atomic_ctx->crtc, "ACTIVE", 1);
+        if (drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", blob_id) < 0) {
+            MP_ERR(ctx->vo, "Could not set MODE_ID on crtc\n");
+            return false;
+        }
+        if (drm_object_set_property(request, atomic_ctx->crtc, "ACTIVE", 1) < 0) {
+            MP_ERR(ctx->vo, "Could not set ACTIVE on crtc\n");
+            return false;
+        }
 
+        drm_object_set_property(request, atomic_ctx->osd_plane, "FB_ID", p->fb->id);
+        drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_ID", p->kms->crtc_id);
         drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_X",   0);
         drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_Y",   0);
         drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_W",   p->osd_size.width << 16);
         drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_H",   p->osd_size.height << 16);
         drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_X",  0);
         drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_Y",  0);
-        drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_W",  mode.hdisplay);
-        drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_H",  mode.vdisplay);
+        drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_W",  p->kms->mode.hdisplay);
+        drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_H",  p->kms->mode.vdisplay);
 
-        int ret = drmModeAtomicCommit(p->kms->fd, request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT
-                                  | DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
-
-        if (ret)
-           MP_WARN(ctx->vo, "Failed to commit ModeSetting atomic request (%d)\n", ret);
+        int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
+        if (ret) {
+           MP_ERR(ctx->vo, "Failed to commit ModeSetting atomic request (%d)\n", ret);
+           drmModeAtomicFree(request);
+           return false;
+        }
 
         drmModeAtomicFree(request);
 
@@ -303,16 +314,14 @@ static bool crtc_release_atomic(struct ra_ctx *ctx)
         uint32_t blob_id;
         if (drmModeCreatePropertyBlob(p->kms->fd, &p->old_crtc->mode, sizeof(drmModeModeInfo),
                                       &blob_id) != 0) {
-            MP_ERR(ctx->vo, "Failed to DRM mode blob\n");
-            return 0;
+            MP_ERR(ctx->vo, "Failed to create DRM mode blob\n");
+            return false;
         }
         drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", blob_id);
         drm_object_set_property(request, atomic_ctx->crtc, "ACTIVE", 1);
-        drm_object_set_property(request, atomic_ctx->osd_plane, "FB_ID",   p->old_crtc->buffer_id);
+        drm_object_set_property(request, atomic_ctx->osd_plane, "FB_ID", p->old_crtc->buffer_id);
 
-        int ret = drmModeAtomicCommit(p->kms->fd, request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT
-                                  | DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
+        int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
 
         if (ret)
            MP_WARN(ctx->vo, "Failed to commit ModeSetting atomic request (%d)\n", ret);
@@ -335,10 +344,9 @@ static bool crtc_setup(struct ra_ctx *ctx)
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
 
     if (p->kms->atomic_context) {
-        int ret = crtc_setup_atomic(ctx, p->kms->mode);
+        int ret = crtc_setup_atomic(ctx);
         p->active = true;
         return ret;
-
     } else {
         int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb->id,
                                  0, 0, &p->kms->connector->connector_id, 1,
@@ -376,7 +384,7 @@ static void crtc_release(struct ra_ctx *ctx)
                            &p->kms->connector->connector_id, 1,
                            &p->old_crtc->mode);
         }
-        drmModeFreeCrtc(p->old_crtc);       
+        drmModeFreeCrtc(p->old_crtc);
         p->old_crtc = NULL;
     }
 }
