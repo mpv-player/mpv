@@ -583,9 +583,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("force-media-title", media_title, 0),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
                       ({"no", -1})),
-    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, UPDATE_IMGPAR,
-                 mp_stereo3d_names,
-                 .deprecation_message = "mostly broken"),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),

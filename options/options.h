@@ -174,7 +174,6 @@ typedef struct MPOpts {
     int cursor_autohide_fs;
 
     int video_rotate;
-    int video_stereo_mode;
 
     char *audio_decoders;
     char *video_decoders;
