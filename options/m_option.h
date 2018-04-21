@@ -405,6 +405,9 @@ char *format_file_size(int64_t size);
 // Do not add as property.
 #define M_OPT_NOPROP            (1 << 6)
 
+// Enable special semantics for some options when parsing the string "help".
+#define M_OPT_HAVE_HELP         (1 << 7)
+
 // The following are also part of the M_OPT_* flags, and are used to update
 // certain groups of options.
 #define UPDATE_OPT_FIRST        (1 << 7)

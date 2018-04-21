@@ -24,6 +24,7 @@
 
 #include "config.h"
 #include "encode_lavc.h"
+#include "common/av_common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
@@ -39,13 +40,13 @@ const struct m_sub_options encode_config = {
     .opts = (const m_option_t[]) {
         OPT_STRING("o", file, M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
         OPT_STRING("of", format, M_OPT_FIXED),
-        OPT_STRINGLIST("ofopts", fopts, M_OPT_FIXED),
+        OPT_KEYVALUELIST("ofopts", fopts, M_OPT_FIXED | M_OPT_HAVE_HELP),
         OPT_FLOATRANGE("ofps", fps, M_OPT_FIXED, 0.0, 1000000.0),
         OPT_FLOATRANGE("omaxfps", maxfps, M_OPT_FIXED, 0.0, 1000000.0),
         OPT_STRING("ovc", vcodec, M_OPT_FIXED),
-        OPT_STRINGLIST("ovcopts", vopts, M_OPT_FIXED),
+        OPT_KEYVALUELIST("ovcopts", vopts, M_OPT_FIXED | M_OPT_HAVE_HELP),
         OPT_STRING("oac", acodec, M_OPT_FIXED),
-        OPT_STRINGLIST("oacopts", aopts, M_OPT_FIXED),
+        OPT_KEYVALUELIST("oacopts", aopts, M_OPT_FIXED | M_OPT_HAVE_HELP),
         OPT_FLAG("oharddup", harddup, M_OPT_FIXED),
         OPT_FLOATRANGE("ovoffset", voffset, M_OPT_FIXED, -1000000.0, 1000000.0,
                        .deprecation_message = "--audio-delay (once unbroken)"),
@@ -69,49 +70,6 @@ const struct m_sub_options encode_config = {
         .copy_metadata = 1,
     },
 };
-
-static int set_to_avdictionary(struct encode_lavc_context *ctx,
-                               AVDictionary **dictp,
-                               const char *key,
-                               const char *val)
-{
-    char keybuf[1024];
-    char valuebuf[1024];
-
-    if (key == NULL) {
-        // we need to split at equals sign
-        const char *equals = strchr(val, '=');
-        if (!equals || equals - val >= sizeof(keybuf)) {
-            MP_WARN(ctx, "option '%s' does not contain an equals sign\n",
-                    val);
-            return 0;
-        }
-        memcpy(keybuf, val, equals - val);
-        keybuf[equals - val] = 0;
-        key = keybuf;
-        val = equals + 1;
-    }
-
-    // hack: support "qscale" key as virtual "global_quality" key that multiplies by QP2LAMBDA
-    if (!strcmp(key, "qscale")) {
-        key = "global_quality";
-        snprintf(valuebuf, sizeof(valuebuf),
-                 "%.1s(%s)*QP2LAMBDA",
-                 (val[0] == '+' || val[0] == '-') ? val : "",
-                 (val[0] == '+' || val[0] == '-') ? val + 1 : val);
-        valuebuf[sizeof(valuebuf) - 1] = 0;
-        val = valuebuf;
-    }
-
-    MP_VERBOSE(ctx, "setting value '%s' for key '%s'\n",
-               val, key);
-
-    if (av_dict_set(dictp, key, *val ? val : NULL,
-                    (val[0] == '+' || val[0] == '-') ? AV_DICT_APPEND : 0) >= 0)
-        return 1;
-
-    return 0;
-}
 
 static bool value_has_flag(const char *value, const char *flag)
 {
@@ -205,14 +163,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
 
     ctx->avc->url = av_strdup(filename);
 
-    ctx->foptions = NULL;
-    if (ctx->options->fopts) {
-        char **p;
-        for (p = ctx->options->fopts; *p; ++p) {
-            if (!set_to_avdictionary(ctx, &ctx->foptions, NULL, *p))
-                MP_WARN(ctx, "could not set option %s\n", *p);
-        }
-    }
+    mp_set_avdict(&ctx->foptions, ctx->options->fopts);
 
     if (ctx->options->vcodec) {
         char *tok;
@@ -476,7 +427,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                 MP_WARN(ctx, "%s: could not open '%s', "
                        "disabling 2-pass encoding at pass 2\n", prefix, buf);
                 codec->flags &= ~AV_CODEC_FLAG_PASS2;
-                set_to_avdictionary(ctx, dictp, "flags", "-pass2");
+                av_dict_set(dictp, "flags", "-pass2", AV_DICT_APPEND);
             } else {
                 struct bstr content = stream_read_complete(*bytebuf, NULL,
                                                            1000000000);
@@ -499,7 +450,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                     "%s: could not open '%s', disabling "
                     "2-pass encoding at pass 1\n",
                     prefix, ctx->avc->url);
-                set_to_avdictionary(ctx, dictp, "flags", "-pass1");
+                av_dict_set(dictp, "flags", "-pass1", AV_DICT_APPEND);
             }
         }
     }
@@ -511,7 +462,6 @@ int encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
                              AVCodecContext **codec_out)
 {
     AVDictionaryEntry *de;
-    char **p;
 
     *stream_out = NULL;
     *codec_out = NULL;
@@ -605,19 +555,14 @@ int encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
 
         ctx->voptions = NULL;
 
-        if (ctx->options->vopts) {
-            for (p = ctx->options->vopts; *p; ++p) {
-                if (!set_to_avdictionary(ctx, &ctx->voptions, NULL, *p))
-                    MP_WARN(ctx, "vo-lavc: could not set option %s\n", *p);
-            }
-        }
+        mp_set_avdict(&ctx->voptions, ctx->options->vopts);
 
         de = av_dict_get(ctx->voptions, "global_quality", NULL, 0);
         if (de)
-            set_to_avdictionary(ctx, &ctx->voptions, "flags", "+qscale");
+            av_dict_set(&ctx->voptions, "flags", "+qscale", AV_DICT_APPEND);
 
         if (ctx->avc->oformat->flags & AVFMT_GLOBALHEADER)
-            set_to_avdictionary(ctx, &ctx->voptions, "flags", "+global_header");
+            av_dict_set(&ctx->voptions, "flags", "+global_header", AV_DICT_APPEND);
 
         encode_2pass_prepare(ctx, &ctx->voptions, ctx->vst, ctx->vcc,
                              &ctx->twopass_bytebuffer_v,
@@ -642,19 +587,14 @@ int encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
 
         ctx->aoptions = 0;
 
-        if (ctx->options->aopts) {
-            for (p = ctx->options->aopts; *p; ++p) {
-                if (!set_to_avdictionary(ctx, &ctx->aoptions, NULL, *p))
-                    MP_WARN(ctx, "ao-lavc: could not set option %s\n", *p);
-            }
-        }
+        mp_set_avdict(&ctx->aoptions, ctx->options->aopts);
 
         de = av_dict_get(ctx->aoptions, "global_quality", NULL, 0);
         if (de)
-            set_to_avdictionary(ctx, &ctx->aoptions, "flags", "+qscale");
+            av_dict_set(&ctx->aoptions, "flags", "+qscale", AV_DICT_APPEND);
 
         if (ctx->avc->oformat->flags & AVFMT_GLOBALHEADER)
-            set_to_avdictionary(ctx, &ctx->aoptions, "flags", "+global_header");
+            av_dict_set(&ctx->aoptions, "flags", "+global_header", AV_DICT_APPEND);
 
         encode_2pass_prepare(ctx, &ctx->aoptions, ctx->ast, ctx->acc,
                              &ctx->twopass_bytebuffer_a,

@@ -1552,6 +1552,9 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
     bool append = false;
     bool full_value = false;
 
+    if ((opt->flags & M_OPT_HAVE_HELP) && bstr_equals0(param, "help"))
+        param = bstr0("help=");
+
     if (bstr_endswith0(name, "-add")) {
         append = true;
     } else if (bstr_endswith0(name, "-append")) {
