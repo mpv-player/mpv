@@ -2628,7 +2628,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
     if ((draw_flags & OSD_DRAW_SUB_ONLY) && (draw_flags & OSD_DRAW_OSD_ONLY))
         return;
 
-    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
+    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo3d, draw_flags);
 
     timer_pool_start(p->osd_timer);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
@@ -3294,7 +3294,7 @@ void gl_video_resize(struct gl_video *p,
     gl_video_reset_surfaces(p);
 
     if (p->osd)
-        mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
+        mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo3d);
 }
 
 static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)

@@ -501,8 +501,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->dts = src->dts;
     dst->pkt_duration = src->pkt_duration;
     dst->params.rotate = src->params.rotate;
-    dst->params.stereo_in = src->params.stereo_in;
-    dst->params.stereo_out = src->params.stereo_out;
+    dst->params.stereo3d = src->params.stereo3d;
     dst->params.p_w = src->params.p_w;
     dst->params.p_h = src->params.p_h;
     dst->params.color = src->params.color;
@@ -642,10 +641,9 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
-        if (p->stereo_in > 0 || p->stereo_out > 0) {
-            mp_snprintf_cat(b, bs, " stereo=%s/%s",
-                            MP_STEREO3D_NAME_DEF(p->stereo_in, "?"),
-                            MP_STEREO3D_NAME_DEF(p->stereo_out, "?"));
+        if (p->stereo3d > 0) {
+            mp_snprintf_cat(b, bs, " stereo=%s",
+                            MP_STEREO3D_NAME_DEF(p->stereo3d, "?"));
         }
         if (p->spherical.type != MP_SPHERICAL_NONE) {
             const float *a = p->spherical.ref_angles;
@@ -708,8 +706,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            mp_colorspace_equal(p1->color, p2->color) &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
-           p1->stereo_in == p2->stereo_in &&
-           p1->stereo_out == p2->stereo_out &&
+           p1->stereo3d == p2->stereo3d &&
            mp_spherical_equal(&p1->spherical, &p2->spherical);
 }
 
@@ -877,8 +874,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
         dst->params.rotate = p->rotate;
-        dst->params.stereo_in = p->stereo_in;
-        dst->params.stereo_out = p->stereo_out;
+        dst->params.stereo3d = p->stereo3d;
         dst->params.spherical = p->spherical;
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
