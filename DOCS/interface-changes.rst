@@ -94,6 +94,10 @@ Interface changes
       the future. (This kind of waiting was always a feature to prevent that
       playback is started while scripts are only half-loaded.)
     - deprecate --ovoffset, --oaoffset, --ovfirst, --oafirst
+    - remove --video-stereo-mode. This option was broken out of laziness, and
+      nobody wants to fix it. Automatic 3D down-conversion to 2D is also broken,
+      although you can just insert the stereo3d filter manually. The obscurity
+      of 3D content doesn't justify such an option anyway.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
