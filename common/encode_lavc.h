@@ -91,7 +91,6 @@ struct encode_lavc_context {
 
     // has encoding failed?
     bool failed;
-    bool finished;
 };
 
 // interface for vo/ao drivers
@@ -108,7 +107,6 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx,
 int encode_lavc_available(struct encode_lavc_context *ctx);
 int encode_lavc_timesyncfailed(struct encode_lavc_context *ctx);
 int encode_lavc_start(struct encode_lavc_context *ctx); // returns 1 on success
-int encode_lavc_oformat_flags(struct encode_lavc_context *ctx);
 double encode_lavc_getoffset(struct encode_lavc_context *ctx,
                              AVCodecContext *codec);
 void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...); // report failure of encoding
