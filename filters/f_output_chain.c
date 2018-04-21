@@ -61,7 +61,6 @@ struct mp_user_filter {
     char *label;
     bool generated_label;
     char *name;
-    bool is_output_converter;
 
     struct mp_image_params last_in_vformat;
     struct mp_aframe *last_in_aformat;
@@ -153,7 +152,7 @@ static void process_user(struct mp_filter *f)
     assert(u->name);
 
     if (!u->failed && mp_filter_has_failed(u->f)) {
-        if (u->is_output_converter) {
+        if (u == p->convert_wrapper) {
             // This is a fuckup we can't ignore.
             MP_FATAL(p, "Cannot convert decoder/filter output to any format "
                      "supported by the output.\n");
@@ -167,7 +166,7 @@ static void process_user(struct mp_filter *f)
     }
 
     if (u->failed) {
-        if (u->is_output_converter) {
+        if (u == p->convert_wrapper) {
             if (mp_pin_in_needs_data(f->ppins[1])) {
                 if (!u->error_eof_sent)
                     mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
@@ -717,7 +716,6 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
     if (!p->convert)
         abort();
     p->convert_wrapper->name = "convert";
-    p->convert_wrapper->is_output_converter = true;
     p->convert_wrapper->f = p->convert->f;
     MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, p->convert_wrapper);
 
