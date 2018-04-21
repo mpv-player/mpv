@@ -209,6 +209,9 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
                     mp_err(log, "Unable to retrieve type property from plane %d\n", j);
                     goto fail;
                 } else {
+                    if (value == DRM_PLANE_TYPE_CURSOR) // Skip cursor planes
+                        continue;
+
                     layercount++;
 
                     if ((!primary_id) && (value == DRM_PLANE_TYPE_PRIMARY))
