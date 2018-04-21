@@ -50,7 +50,6 @@ struct vf_format_opts {
     int light;
     int chroma_location;
     int stereo_in;
-    int stereo_out;
     int rotate;
     int dw, dh;
     double dar;
@@ -108,9 +107,7 @@ static void vf_format_process(struct mp_filter *f)
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)
-        out->stereo_in = p->stereo_in;
-    if (p->stereo_out)
-        out->stereo_out = p->stereo_out;
+        out->stereo3d = p->stereo_in;
     if (p->rotate >= 0)
         out->rotate = p->rotate;
 
@@ -183,7 +180,6 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("light", light, 0, mp_csp_light_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     OPT_CHOICE_C("stereo-in", stereo_in, 0, mp_stereo3d_names),
-    OPT_CHOICE_C("stereo-out", stereo_out, 0, mp_stereo3d_names),
     OPT_INTRANGE("rotate", rotate, 0, -1, 359),
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),

@@ -272,14 +272,13 @@ static void fix_image_params(struct priv *p,
         m.p_w = m.p_h = 1;
 
     m.rotate = p->codec->rotate;
-    m.stereo_in = p->codec->stereo_mode;
+    m.stereo3d = p->codec->stereo_mode;
 
     if (opts->video_rotate < 0) {
         m.rotate = 0;
     } else {
         m.rotate = (m.rotate + opts->video_rotate) % 360;
     }
-    m.stereo_out = opts->video_stereo_mode;
 
     mp_colorspace_merge(&m.color, &c->color);
 
