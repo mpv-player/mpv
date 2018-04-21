@@ -526,18 +526,18 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     }
 }
 
-// If primary plane supports ARGB we want to use that, but if it doesn't we fall
+// If the OSD plane supports ARGB we want to use that, but if it doesn't we fall
 // back on XRGB. If the driver does not support atomic there is no particular
 // reason to be using ARGB (drmprime hwdec will not work without atomic,
 // anyway), so we fall back to XRGB (another reason is that we do not have the
-// convenient atomic_ctx and its convenient primary_plane field).
+// convenient atomic_ctx and its convenient plane fields).
 static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t xrgb_format)
 {
     struct priv *p = ctx->priv;
 
     if (!p->kms->atomic_context) {
         p->gbm_format = xrgb_format;
-        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Use %s for primary plane.\n",
+        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Use %s for OSD plane.\n",
                    gbm_format_to_string(xrgb_format));
         return true;
     }
@@ -557,11 +557,11 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
 
     if (have_argb) {
         p->gbm_format = argb_format;
-        MP_VERBOSE(ctx->vo, "%s supported by primary plane.\n", gbm_format_to_string(argb_format));
+        MP_VERBOSE(ctx->vo, "%s supported by OSD plane.\n", gbm_format_to_string(argb_format));
         result = true;
     } else if (have_xrgb) {
         p->gbm_format = xrgb_format;
-        MP_VERBOSE(ctx->vo, "%s not supported by primary plane: Falling back to %s.\n",
+        MP_VERBOSE(ctx->vo, "%s not supported by OSD plane: Falling back to %s.\n",
                    gbm_format_to_string(argb_format), gbm_format_to_string(xrgb_format));
         result = true;
     }
@@ -667,7 +667,6 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     }
 
     p->drm_params.fd = p->kms->fd;
-    p->drm_params.connector_id = p->kms->connector->connector_id;
     p->drm_params.crtc_id = p->kms->crtc_id;
     p->drm_params.connector_id = p->kms->connector->connector_id;
     if (p->kms->atomic_context)
