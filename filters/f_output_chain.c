@@ -66,6 +66,8 @@ struct mp_user_filter {
     struct mp_image_params last_in_vformat;
     struct mp_aframe *last_in_aformat;
 
+    bool last_is_active;
+
     int64_t last_in_pts, last_out_pts;
 
     bool failed;
@@ -198,6 +200,13 @@ static void process_user(struct mp_filter *f)
             u->last_out_pts = pts;
 
         mp_pin_in_write(f->ppins[1], frame);
+
+        struct mp_filter_command cmd = {.type = MP_FILTER_COMMAND_IS_ACTIVE};
+        if (mp_filter_command(u->f, &cmd) && u->last_is_active != cmd.is_active) {
+            u->last_is_active = cmd.is_active;
+            MP_VERBOSE(p, "[%s] (%sabled)\n", u->name,
+                       u->last_is_active ? "en" : "dis");
+        }
     }
 }
 
@@ -236,6 +245,7 @@ static struct mp_user_filter *create_wrapper_filter(struct chain *p)
     wrapper->wrapper = f;
     wrapper->p = p;
     wrapper->last_in_aformat = talloc_steal(wrapper, mp_aframe_create());
+    wrapper->last_is_active = true;
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
     return wrapper;

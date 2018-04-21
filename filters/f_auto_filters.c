@@ -106,9 +106,21 @@ static void deint_destroy(struct mp_filter *f)
     TA_FREEP(&p->sub.filter);
 }
 
+static bool deint_command(struct mp_filter *f, struct mp_filter_command *cmd)
+{
+    struct deint_priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_IS_ACTIVE) {
+        cmd->is_active = !!p->sub.filter;
+        return true;
+    }
+    return false;
+}
+
 static const struct mp_filter_info deint_filter = {
     .name = "deint",
     .priv_size = sizeof(struct deint_priv),
+    .command = deint_command,
     .process = deint_process,
     .reset = deint_reset,
     .destroy = deint_destroy,
@@ -220,9 +232,21 @@ static void rotate_destroy(struct mp_filter *f)
     TA_FREEP(&p->sub.filter);
 }
 
+static bool rotate_command(struct mp_filter *f, struct mp_filter_command *cmd)
+{
+    struct rotate_priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_IS_ACTIVE) {
+        cmd->is_active = !!p->sub.filter;
+        return true;
+    }
+    return false;
+}
+
 static const struct mp_filter_info rotate_filter = {
     .name = "autorotate",
     .priv_size = sizeof(struct rotate_priv),
+    .command = rotate_command,
     .process = rotate_process,
     .reset = rotate_reset,
     .destroy = rotate_destroy,
@@ -288,6 +312,11 @@ static bool aspeed_command(struct mp_filter *f, struct mp_filter_command *cmd)
 
     if (cmd->type == MP_FILTER_COMMAND_SET_SPEED) {
         p->cur_speed = cmd->speed;
+        return true;
+    }
+
+    if (cmd->type == MP_FILTER_COMMAND_IS_ACTIVE) {
+        cmd->is_active = !!p->sub.filter;
         return true;
     }
 
