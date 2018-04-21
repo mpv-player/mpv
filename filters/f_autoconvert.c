@@ -418,6 +418,11 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
         return true;
     }
 
+    if (cmd->type == MP_FILTER_COMMAND_IS_ACTIVE) {
+        cmd->is_active = !!p->sub.filter;
+        return true;
+    }
+
     return false;
 }
 
