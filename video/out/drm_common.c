@@ -173,6 +173,27 @@ static bool setup_connector(struct kms *kms, const drmModeRes *res,
 
 static bool setup_crtc(struct kms *kms, const drmModeRes *res)
 {
+    // First try to find currently connected encoder and its current CRTC
+    for (unsigned int i = 0; i < res->count_encoders; i++) {
+        drmModeEncoder *encoder = drmModeGetEncoder(kms->fd, res->encoders[i]);
+        if (!encoder) {
+            MP_WARN(kms, "Cannot retrieve encoder %u:%u: %s\n",
+                    i, res->encoders[i], mp_strerror(errno));
+            continue;
+        }
+
+        if (encoder->encoder_id == kms->connector->encoder_id && encoder->crtc_id != 0) {
+            MP_VERBOSE(kms, "Connector %u currently connected to encoder %u\n",
+                       kms->connector->connector_id, kms->connector->encoder_id);
+            kms->encoder = encoder;
+            kms->crtc_id = encoder->crtc_id;
+            goto success;
+        }
+
+        drmModeFreeEncoder(encoder);
+    }
+
+    // Otherwise pick first legal encoder and CRTC combo for the connector
     for (unsigned int i = 0; i < kms->connector->count_encoders; ++i) {
         drmModeEncoder *encoder
             = drmModeGetEncoder(kms->fd, kms->connector->encoders[i]);
@@ -190,7 +211,7 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
 
             kms->encoder = encoder;
             kms->crtc_id = res->crtcs[j];
-            return true;
+            goto success;
         }
 
         drmModeFreeEncoder(encoder);
@@ -199,6 +220,11 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
     MP_ERR(kms, "Connector %u has no suitable CRTC\n",
            kms->connector->connector_id);
     return false;
+
+  success:
+    MP_VERBOSE(kms, "Selected Encoder %u with CRTC %u\n",
+               kms->encoder->encoder_id, kms->crtc_id);
+    return true;
 }
 
 static bool setup_mode(struct kms *kms, int mode_id)
