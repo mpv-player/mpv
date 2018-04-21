@@ -165,7 +165,6 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_video_out(mpctx);
 
 #if HAVE_ENCODING
-    encode_lavc_finish(mpctx->encode_lavc_ctx);
     encode_lavc_free(mpctx->encode_lavc_ctx);
 #endif
 

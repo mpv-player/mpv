@@ -133,7 +133,7 @@ static bool value_has_flag(const char *value, const char *flag)
 }
 
 #define CHECK_FAIL(ctx, val) \
-    if (ctx && (ctx->failed || ctx->finished)) { \
+    if (ctx && (ctx->failed)) { \
         MP_ERR(ctx, \
                "Called a function on a %s encoding context. Bailing out.\n", \
                ctx->failed ? "failed" : "finished"); \
@@ -141,7 +141,7 @@ static bool value_has_flag(const char *value, const char *flag)
     }
 
 #define CHECK_FAIL_UNLOCK(ctx, val) \
-    if (ctx && (ctx->failed || ctx->finished)) { \
+    if (ctx && (ctx->failed)) { \
         MP_ERR(ctx, \
                "Called a function on a %s encoding context. Bailing out.\n", \
                ctx->failed ? "failed" : "finished"); \
@@ -153,12 +153,6 @@ int encode_lavc_available(struct encode_lavc_context *ctx)
 {
     CHECK_FAIL(ctx, 0);
     return ctx && ctx->avc;
-}
-
-int encode_lavc_oformat_flags(struct encode_lavc_context *ctx)
-{
-    CHECK_FAIL(ctx, 0);
-    return ctx->avc ? ctx->avc->oformat->flags : 0;
 }
 
 struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
@@ -200,8 +194,9 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
             if (*in)
                 ++in;
         }
-    } else
+    } else {
         ctx->avc->oformat = av_guess_format(NULL, filename, NULL);
+    }
 
     if (!ctx->avc->oformat) {
         encode_lavc_fail(ctx, "format not found\n");
@@ -381,26 +376,9 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
 
 void encode_lavc_free(struct encode_lavc_context *ctx)
 {
-    if (!ctx)
-        return;
-
-    if (!ctx->finished) {
-        encode_lavc_fail(ctx,
-                         "called encode_lavc_free without encode_lavc_finish\n");
-    }
-
-    pthread_mutex_destroy(&ctx->lock);
-    talloc_free(ctx);
-}
-
-void encode_lavc_finish(struct encode_lavc_context *ctx)
-{
     unsigned i;
 
     if (!ctx)
-        return;
-
-    if (ctx->finished)
         return;
 
     if (ctx->avc) {
@@ -459,7 +437,8 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
         ctx->avc = NULL;
     }
 
-    ctx->finished = true;
+    pthread_mutex_destroy(&ctx->lock);
+    talloc_free(ctx);
 }
 
 void encode_lavc_set_video_fps(struct encode_lavc_context *ctx, float fps)
@@ -1193,7 +1172,6 @@ void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...)
     if (ctx->failed)
         return;
     ctx->failed = true;
-    encode_lavc_finish(ctx);
 }
 
 // vim: ts=4 sw=4 et

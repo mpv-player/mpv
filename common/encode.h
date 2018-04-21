@@ -57,7 +57,6 @@ struct encode_opts {
 // interface for mplayer.c
 struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
                                              struct mpv_global *global);
-void encode_lavc_finish(struct encode_lavc_context *ctx);
 void encode_lavc_free(struct encode_lavc_context *ctx);
 void encode_lavc_discontinuity(struct encode_lavc_context *ctx);
 bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *options);
