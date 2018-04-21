@@ -39,7 +39,7 @@ struct chain {
     // First input/last output of all_filters[].
     struct mp_pin *filters_in, *filters_out;
 
-    struct mp_user_filter *input, *output;
+    struct mp_user_filter *input, *output, *convert_wrapper;
     struct mp_autoconvert *convert;
 
     struct vo *vo;
@@ -62,10 +62,9 @@ struct mp_user_filter {
     bool generated_label;
     char *name;
     bool is_output_converter;
-    bool is_input;
 
-    struct mp_image_params last_out_params;
-    struct mp_aframe *last_out_aformat;
+    struct mp_image_params last_in_vformat;
+    struct mp_aframe *last_in_aformat;
 
     int64_t last_in_pts, last_out_pts;
 
@@ -94,21 +93,20 @@ static void update_output_caps(struct chain *p)
     }
 }
 
-static bool check_out_format_change(struct mp_user_filter *u,
-                                    struct mp_frame frame)
+static void check_in_format_change(struct mp_user_filter *u,
+                                   struct mp_frame frame)
 {
     struct chain *p = u->p;
-    bool changed = false;
 
     if (frame.type == MP_FRAME_VIDEO) {
         struct mp_image *img = frame.data;
 
-        if (!mp_image_params_equal(&img->params, &u->last_out_params)) {
+        if (!mp_image_params_equal(&img->params, &u->last_in_vformat)) {
             MP_VERBOSE(p, "[%s] %s\n", u->name,
                        mp_image_params_to_str(&img->params));
-            u->last_out_params = img->params;
+            u->last_in_vformat = img->params;
 
-            if (u->is_input) {
+            if (u == p->input) {
                 p->public.input_params = img->params;
 
                 // Unfortunately there's no good place to update these.
@@ -116,35 +114,31 @@ static bool check_out_format_change(struct mp_user_filter *u,
                 // might init some support of them in the VO, and update
                 // the VO's format list.
                 update_output_caps(p);
-            } else if (u->is_output_converter) {
+            } else if (u == p->output) {
                 p->public.output_params = img->params;
             }
 
             p->public.reconfig_happened = true;
-            changed = true;
         }
     }
 
     if (frame.type == MP_FRAME_AUDIO) {
         struct mp_aframe *aframe = frame.data;
 
-        if (!mp_aframe_config_equals(aframe, u->last_out_aformat)) {
+        if (!mp_aframe_config_equals(aframe, u->last_in_aformat)) {
             MP_VERBOSE(p, "[%s] %s\n", u->name,
                        mp_aframe_format_str(aframe));
-            mp_aframe_config_copy(u->last_out_aformat, aframe);
+            mp_aframe_config_copy(u->last_in_aformat, aframe);
 
-            if (u->is_input) {
+            if (u == p->input) {
                 mp_aframe_config_copy(p->public.input_aformat, aframe);
-            } else if (u->is_output_converter) {
+            } else if (u == p->output) {
                 mp_aframe_config_copy(p->public.output_aformat, aframe);
             }
 
             p->public.reconfig_happened = true;
-            changed = true;
         }
     }
-
-    return changed;
 }
 
 static void process_user(struct mp_filter *f)
@@ -187,6 +181,8 @@ static void process_user(struct mp_filter *f)
     if (mp_pin_can_transfer_data(u->f->pins[0], f->ppins[0])) {
         struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
 
+        check_in_format_change(u, frame);
+
         double pts = mp_frame_get_pts(frame);
         if (pts != MP_NOPTS_VALUE)
             u->last_in_pts = pts;
@@ -196,8 +192,6 @@ static void process_user(struct mp_filter *f)
 
     if (mp_pin_can_transfer_data(f->ppins[1], u->f->pins[1])) {
         struct mp_frame frame = mp_pin_out_read(u->f->pins[1]);
-
-        check_out_format_change(u, frame);
 
         double pts = mp_frame_get_pts(frame);
         if (pts != MP_NOPTS_VALUE)
@@ -241,7 +235,7 @@ static struct mp_user_filter *create_wrapper_filter(struct chain *p)
     struct mp_user_filter *wrapper = f->priv;
     wrapper->wrapper = f;
     wrapper->p = p;
-    wrapper->last_out_aformat = talloc_steal(wrapper, mp_aframe_create());
+    wrapper->last_in_aformat = talloc_steal(wrapper, mp_aframe_create());
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
     return wrapper;
@@ -325,8 +319,8 @@ void mp_output_chain_reset_harder(struct mp_output_chain *c)
         struct mp_user_filter *u = p->all_filters[n];
 
         u->failed = false;
-        u->last_out_params = (struct mp_image_params){0};
-        mp_aframe_reset(u->last_out_aformat);
+        u->last_in_vformat = (struct mp_image_params){0};
+        mp_aframe_reset(u->last_in_aformat);
     }
 
     if (p->type == MP_OUTPUT_CHAIN_AUDIO) {
@@ -400,20 +394,13 @@ static void on_audio_format_change(void *opaque)
 {
     struct chain *p = opaque;
 
-    // Find the filter before p->convert, to get p->convert's input format.
-    struct mp_user_filter *prev = NULL;
-    for (int n = 0; n < p->num_all_filters; n++) {
-        struct mp_user_filter *u = p->all_filters[n];
-        if (u->is_output_converter)
-            break;
-        prev = u;
-    }
-
-    assert(prev); // there must have been one
-
     // Let the f_output_chain user know what format to use. (Not quite proper,
-    // since we overwrite what some other code normally automatically sets.)
-    mp_aframe_config_copy(p->public.output_aformat, prev->last_out_aformat);
+    // since we overwrite what some other code normally automatically sets.
+    // The main issue is that this callback is called before output_aformat can
+    // be set, because we "block" the converter until the AO is reconfigured,
+    // and mp_autoconvert_format_change_continue() is called.)
+    mp_aframe_config_copy(p->public.output_aformat,
+                          p->convert_wrapper->last_in_aformat);
 
     // Ask for calling mp_output_chain_set_ao().
     p->public.ao_needs_update = true;
@@ -708,7 +695,6 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
     if (!p->input->f)
         abort();
     p->input->name = "in";
-    p->input->is_input = true;
     MP_TARRAY_APPEND(p, p->pre_filters, p->num_pre_filters, p->input);
 
     switch (type) {
@@ -716,19 +702,27 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
     case MP_OUTPUT_CHAIN_AUDIO: create_audio_things(p); break;
     }
 
-    p->output = create_wrapper_filter(p);
-    p->convert = mp_autoconvert_create(p->output->wrapper);
+    p->convert_wrapper = create_wrapper_filter(p);
+    p->convert = mp_autoconvert_create(p->convert_wrapper->wrapper);
     if (!p->convert)
         abort();
-    p->output->name = "convert";
-    p->output->is_output_converter = true;
-    p->output->f = p->convert->f;
-    MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, p->output);
+    p->convert_wrapper->name = "convert";
+    p->convert_wrapper->is_output_converter = true;
+    p->convert_wrapper->f = p->convert->f;
+    MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, p->convert_wrapper);
 
     if (type == MP_OUTPUT_CHAIN_AUDIO) {
         p->convert->on_audio_format_change = on_audio_format_change;
         p->convert->on_audio_format_change_opaque = p;
     }
+
+    // Dummy filter for reporting and logging the output format.
+    p->output = create_wrapper_filter(p);
+    p->output->f = mp_bidir_nop_filter_create(p->output->wrapper);
+    if (!p->output->f)
+        abort();
+    p->output->name = "out";
+    MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, p->output);
 
     relink_filter_list(p);
 
