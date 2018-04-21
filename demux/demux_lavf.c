@@ -727,7 +727,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (st->disposition & AV_DISPOSITION_DEPENDENT)
             sh->dependent_track = true;
         AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
-        if (lang && lang->value)
+        if (lang && lang->value && strcmp(lang->value, "und") != 0)
             sh->lang = talloc_strdup(sh, lang->value);
         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
         if (!sh->title && sh->hls_bitrate > 0)
