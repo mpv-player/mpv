@@ -106,4 +106,15 @@ char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
 
 char **mp_dup_str_array(void *tctx, char **s);
 
+// We generally do not handle allocation failure of small malloc()s. This would
+// create a large number of rarely tested code paths, which would probably
+// regress and cause security issues. We prefer to fail fast.
+// This macro generally behaves like an assert(), except it will make sure to
+// kill the process even with NDEBUG.
+#define MP_HANDLE_OOM(x) do {   \
+        assert(x);              \
+        if (!(x))               \
+            abort();            \
+    } while (0)
+
 #endif /* MPLAYER_MPCOMMON_H */

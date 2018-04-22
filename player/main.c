@@ -165,10 +165,10 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_video_out(mpctx);
 
 #if HAVE_ENCODING
+    // If it's still set here, it's an error.
     encode_lavc_free(mpctx->encode_lavc_ctx);
-#endif
-
     mpctx->encode_lavc_ctx = NULL;
+#endif
 
     command_uninit(mpctx);
 
@@ -416,8 +416,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
-        mpctx->encode_lavc_ctx = encode_lavc_init(opts->encode_opts,
-                                                  mpctx->global);
+        mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
             MP_INFO(mpctx, "Encoding initialization failed.\n");
             return -1;
