@@ -571,8 +571,10 @@ static void run_reconfig(void *p)
 {
     void **pp = p;
     struct vo *vo = pp[0];
-    struct mp_image_params *params = pp[1];
+    struct mp_image *img = pp[1];
     int *ret = pp[2];
+
+    struct mp_image_params *params = &img->params;
 
     struct vo_internal *in = vo->in;
 
@@ -585,7 +587,11 @@ static void run_reconfig(void *p)
     talloc_free(vo->params);
     vo->params = talloc_dup(vo, params);
 
-    *ret = vo->driver->reconfig(vo, vo->params);
+    if (vo->driver->reconfig2) {
+        *ret = vo->driver->reconfig2(vo, img);
+    } else {
+        *ret = vo->driver->reconfig(vo, vo->params);
+    }
     vo->config_ok = *ret >= 0;
     if (vo->config_ok) {
         check_vo_caps(vo);
@@ -607,7 +613,17 @@ static void run_reconfig(void *p)
 int vo_reconfig(struct vo *vo, struct mp_image_params *params)
 {
     int ret;
-    void *p[] = {vo, params, &ret};
+    struct mp_image dummy = {0};
+    mp_image_set_params(&dummy, params);
+    void *p[] = {vo, &dummy, &ret};
+    mp_dispatch_run(vo->in->dispatch, run_reconfig, p);
+    return ret;
+}
+
+int vo_reconfig2(struct vo *vo, struct mp_image *img)
+{
+    int ret;
+    void *p[] = {vo, img, &ret};
     mp_dispatch_run(vo->in->dispatch, run_reconfig, p);
     return ret;
 }
