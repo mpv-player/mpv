@@ -263,13 +263,6 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
         mp_pin_connect(vo_c->filter->f->pins[0], vo_c->dec_src);
     }
 
-#if HAVE_ENCODING
-    if (mpctx->encode_lavc_ctx) {
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx,
-                                  vo_c->filter->container_fps);
-    }
-#endif
-
     if (!recreate_video_filters(mpctx))
         goto err_out;
 

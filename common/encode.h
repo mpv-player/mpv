@@ -54,17 +54,16 @@ struct encode_opts {
     char **remove_metadata;
 };
 
-// interface for mplayer.c
-struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
-                                             struct mpv_global *global);
-void encode_lavc_free(struct encode_lavc_context *ctx);
+// interface for player core
+struct encode_lavc_context *encode_lavc_init(struct mpv_global *global);
+bool encode_lavc_free(struct encode_lavc_context *ctx);
 void encode_lavc_discontinuity(struct encode_lavc_context *ctx);
 bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *options);
 int encode_lavc_getstatus(struct encode_lavc_context *ctx, char *buf, int bufsize, float relative_position);
-void encode_lavc_expect_stream(struct encode_lavc_context *ctx, int mt);
+void encode_lavc_expect_stream(struct encode_lavc_context *ctx,
+                               enum stream_type type);
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata);
-void encode_lavc_set_video_fps(struct encode_lavc_context *ctx, float fps);
 void encode_lavc_set_audio_pts(struct encode_lavc_context *ctx, double pts);
 bool encode_lavc_didfail(struct encode_lavc_context *ctx); // check if encoding failed
 

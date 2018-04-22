@@ -1302,9 +1302,9 @@ reopen_file:
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
-        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_VIDEO);
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_AUDIO])
-        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_AUDIO);
     if (mpctx->encode_lavc_ctx) {
         encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
                                  mpctx->demuxer->metadata);
@@ -1556,6 +1556,20 @@ void mp_play_files(struct MPContext *mpctx)
     }
 
     cancel_open(mpctx);
+
+#if HAVE_ENCODING
+    if (mpctx->encode_lavc_ctx) {
+        // Make sure all streams get finished.
+        uninit_audio_out(mpctx);
+        uninit_video_out(mpctx);
+
+        if (!encode_lavc_free(mpctx->encode_lavc_ctx))
+            mpctx->stop_play = PT_ERROR;
+
+        mpctx->encode_lavc_ctx = NULL;
+    }
+#endif
+
 }
 
 // Abort current playback and set the given entry to play next.
