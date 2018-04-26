@@ -384,14 +384,6 @@ static void flip_page(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *vc = vo->priv;
-
-    switch (request) {
-    case VOCTRL_RESET:
-        vc->last_video_in_pts = MP_NOPTS_VALUE;
-        break;
-    }
-
     return VO_NOTIMPL;
 }
 
