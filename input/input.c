@@ -1013,7 +1013,7 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 
     mp_input_disable_section(ictx, name);
 
-    MP_DBG(ictx, "enable section '%s'\n", name);
+    MP_TRACE(ictx, "enable section '%s'\n", name);
 
     if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
         int top = ictx->num_active_sections;
@@ -1030,10 +1030,10 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
         ictx->num_active_sections++;
     }
 
-    MP_DBG(ictx, "active section stack:\n");
+    MP_TRACE(ictx, "active section stack:\n");
     for (int n = 0; n < ictx->num_active_sections; n++) {
-        MP_DBG(ictx, " %s %d\n", ictx->active_sections[n].name,
-               ictx->active_sections[n].flags);
+        MP_TRACE(ictx, " %s %d\n", ictx->active_sections[n].name,
+                 ictx->active_sections[n].flags);
     }
 
     input_unlock(ictx);
@@ -1193,9 +1193,9 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     memcpy(bind->keys, keys, num_keys * sizeof(bind->keys[0]));
     if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
         char *s = mp_input_get_key_combo_name(keys, num_keys);
-        MP_DBG(ictx, "add: section='%s' key='%s'%s cmd='%s' location='%s'\n",
-               bind->owner->section, s, bind->is_builtin ? " builtin" : "",
-               bind->cmd, bind->location);
+        MP_TRACE(ictx, "add: section='%s' key='%s'%s cmd='%s' location='%s'\n",
+                 bind->owner->section, s, bind->is_builtin ? " builtin" : "",
+                 bind->cmd, bind->location);
         talloc_free(s);
     }
 }
