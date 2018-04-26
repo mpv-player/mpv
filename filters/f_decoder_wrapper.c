@@ -335,7 +335,7 @@ static void process_video_frame(struct priv *p, struct mp_image *mpi)
 
         if (opts->correct_pts) {
             if (p->has_broken_decoded_pts <= 1) {
-                MP_WARN(p, "No video PTS! Making something up. using "
+                MP_WARN(p, "No video PTS! Making something up. Using "
                         "%f FPS.\n", fps);
                 if (p->has_broken_decoded_pts == 1)
                     MP_WARN(p, "Ignoring further missing PTS warnings.\n");
