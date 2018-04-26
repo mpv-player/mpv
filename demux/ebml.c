@@ -327,7 +327,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
 {
     assert(type->type == EBML_TYPE_SUBELEMENTS);
     assert(level < 8);
-    MP_DBG(ctx, "%.*sParsing element %s\n", level, "       ", type->name);
+    MP_TRACE(ctx, "%.*sParsing element %s\n", level, "       ", type->name);
 
     char *s = target;
     uint8_t *end = data + size;
@@ -340,7 +340,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
-            MP_DBG(ctx, "Error parsing subelement id\n");
+            MP_ERR(ctx, "Error parsing subelement id\n");
             goto other_error;
         }
         p += len;
@@ -348,7 +348,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
-            MP_DBG(ctx, "Error parsing subelement length\n");
+            MP_ERR(ctx, "Error parsing subelement length\n");
             goto other_error;
         }
         p += len;
@@ -368,7 +368,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (length > end - p) {
             if (field_idx >= 0 && type->fields[field_idx].desc->type
                 != EBML_TYPE_SUBELEMENTS) {
-                MP_DBG(ctx, "Subelement content goes "
+                MP_ERR(ctx, "Subelement content goes "
                        "past end of containing element\n");
                 goto other_error;
             }
@@ -381,7 +381,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         continue;
 
     past_end_error:
-        MP_DBG(ctx, "Subelement headers go past end of containing element\n");
+        MP_ERR(ctx, "Subelement headers go past end of containing element\n");
     other_error:
         ctx->has_errors = true;
         end = startp;
@@ -437,20 +437,20 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         int len;
         uint32_t id = ebml_parse_id(data, end - data, &len);
         if (len < 0 || len > end - data) {
-            MP_DBG(ctx, "Error parsing subelement\n");
+            MP_ERR(ctx, "Error parsing subelement\n");
             break;
         }
         data += len;
         uint64_t length = ebml_parse_length(data, end - data, &len);
         if (len < 0 || len > end - data) {
-            MP_DBG(ctx, "Error parsing subelement length\n");
+            MP_ERR(ctx, "Error parsing subelement length\n");
             break;
         }
         data += len;
         if (length > end - data) {
             // Try to parse what is possible from inside this partial element
             length = end - data;
-            MP_DBG(ctx, "Next subelement content goes "
+            MP_ERR(ctx, "Next subelement content goes "
                    "past end of containing element, will be truncated\n");
         }
         int field_idx = -1;
@@ -460,16 +460,17 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                 break;
             }
         if (field_idx < 0) {
-            if (id == 0xec)
-                MP_DBG(ctx, "%.*sIgnoring Void element "
-                       "size: %"PRIu64"\n", level+1, "        ", length);
-            else if (id == 0xbf)
-                MP_DBG(ctx, "%.*sIgnoring CRC-32 "
-                       "element size: %"PRIu64"\n", level+1, "        ",
-                       length);
-            else
+            if (id == 0xec) {
+                MP_TRACE(ctx, "%.*sIgnoring Void element "
+                         "size: %"PRIu64"\n", level+1, "        ", length);
+            } else if (id == 0xbf) {
+                MP_TRACE(ctx, "%.*sIgnoring CRC-32 "
+                         "element size: %"PRIu64"\n", level+1, "        ",
+                         length);
+            } else {
                 MP_DBG(ctx, "Ignoring unrecognized "
                        "subelement. ID: %x size: %"PRIu64"\n", id, length);
+            }
             data += length;
             continue;
         }
@@ -485,20 +486,20 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             continue;
         }
         if (*countptr > 0 && !multiple) {
-            MP_DBG(ctx, "Another subelement of type "
-                   "%x %s (size: %"PRIu64"). Only one allowed. Ignoring.\n",
-                   id, ed->name, length);
+            MP_WARN(ctx, "Another subelement of type "
+                    "%x %s (size: %"PRIu64"). Only one allowed. Ignoring.\n",
+                    id, ed->name, length);
             ctx->has_errors = true;
             data += length;
             continue;
         }
-        MP_DBG(ctx, "%.*sParsing %x %s size: %"PRIu64
-               " value: ", level+1, "        ", id, ed->name, length);
+        MP_TRACE(ctx, "%.*sParsing %x %s size: %"PRIu64
+                 " value: ", level+1, "        ", id, ed->name, length);
 
         char *fieldptr = s + fd->offset;
         switch (ed->type) {
         case EBML_TYPE_SUBELEMENTS:
-            MP_DBG(ctx, "subelements\n");
+            MP_TRACE(ctx, "subelements\n");
             char *subelptr;
             if (multiple) {
                 char *array_start = (char *) *(generic_struct **) fieldptr;
@@ -517,29 +518,29 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                 subelptr = (fieldtype *) fieldptr
             GETPTR(uintptr, uint64_t);
             if (length < 1 || length > 8) {
-                MP_DBG(ctx, "uint invalid length %"PRIu64"\n", length);
+                MP_ERR(ctx, "uint invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *uintptr = ebml_parse_uint(data, length);
-            MP_DBG(ctx, "uint %"PRIu64"\n", *uintptr);
+            MP_TRACE(ctx, "uint %"PRIu64"\n", *uintptr);
             break;
 
         case EBML_TYPE_SINT:;
             int64_t *sintptr;
             GETPTR(sintptr, int64_t);
             if (length > 8) {
-                MP_DBG(ctx, "sint invalid length %"PRIu64"\n", length);
+                MP_ERR(ctx, "sint invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *sintptr = ebml_parse_sint(data, length);
-            MP_DBG(ctx, "sint %"PRId64"\n", *sintptr);
+            MP_TRACE(ctx, "sint %"PRId64"\n", *sintptr);
             break;
 
         case EBML_TYPE_FLOAT:;
             double *floatptr;
             GETPTR(floatptr, double);
             if (length != 0 && length != 4 && length != 8) {
-                MP_DBG(ctx, "float invalid length %"PRIu64"\n", length);
+                MP_ERR(ctx, "float invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *floatptr = ebml_parse_float(data, length);
@@ -554,7 +555,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             char **strptr;
             GETPTR(strptr, char *);
             *strptr = talloc_strndup(ctx->talloc_ctx, data, length);
-            MP_DBG(ctx, "string \"%s\"\n", *strptr);
+            MP_TRACE(ctx, "string \"%s\"\n", *strptr);
             break;
 
         case EBML_TYPE_BINARY:;
@@ -566,7 +567,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             GETPTR(binptr, struct bstr);
             binptr->start = data;
             binptr->len = length;
-            MP_DBG(ctx, "binary %zd bytes\n", binptr->len);
+            MP_TRACE(ctx, "binary %zd bytes\n", binptr->len);
             break;
 
         case EBML_TYPE_EBML_ID:;
@@ -574,10 +575,10 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             GETPTR(idptr, uint32_t);
             *idptr = ebml_parse_id(data, end - data, &len);
             if (len != length) {
-                MP_DBG(ctx, "ebml_id broken value\n");
+                MP_ERR(ctx, "ebml_id broken value\n");
                 goto error;
             }
-            MP_DBG(ctx, "ebml_id %x\n", (unsigned)*idptr);
+            MP_TRACE(ctx, "ebml_id %x\n", (unsigned)*idptr);
             break;
         default:
             abort();
