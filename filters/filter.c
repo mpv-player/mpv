@@ -406,9 +406,9 @@ static void deinit_connection(struct mp_pin *p)
         assert(!p->other->data.type); // unused for in pins
         p->data_requested = false;
         if (p->data.type)
-            MP_WARN(p->owner, "dropping frame due to pin disconnect\n");
+            MP_VERBOSE(p->owner, "dropping frame due to pin disconnect\n");
         if (p->data_requested)
-            MP_WARN(p->owner, "dropping request due to pin disconnect\n");
+            MP_VERBOSE(p->owner, "dropping request due to pin disconnect\n");
         mp_frame_unref(&p->data);
         p = p->other->user_conn;
     }
