@@ -213,6 +213,7 @@ elements_matroska = (
             'Tag*, 7373, sub', (
                 'Targets, 63c0, sub', (
                     'TargetTypeValue, 68ca, uint',
+                    'TargetType, 63ca, str',
                     'TargetTrackUID, 63c5, uint',
                     'TargetEditionUID, 63c9, uint',
                     'TargetChapterUID, 63c4, uint',
@@ -221,7 +222,8 @@ elements_matroska = (
                 'SimpleTag*, 67c8, sub', (
                     'TagName, 45a3, str',
                     'TagLanguage, 447a, str',
-                    'TagString, 4487, str'
+                    'TagString, 4487, str',
+                    'TagDefault, 4484, uint',
                 ),
             ),
         ),
