@@ -1012,6 +1012,9 @@ void write_video(struct MPContext *mpctx)
             } else {
                 mpctx->time_frame = 0;
             }
+            // Encode mode can't honor this; it'll only delay finishing.
+            if (mpctx->encode_lavc_ctx)
+                mpctx->time_frame = 0;
         }
 
         if (mpctx->video_status == STATUS_DRAINING) {
