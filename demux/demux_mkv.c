@@ -356,7 +356,7 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                     dest = NULL;
                     goto error;
                 }
-                mp_dbg(log, "lzo decompression buffer too small.\n");
+                mp_trace(log, "lzo decompression buffer too small.\n");
                 if (dstlen >= maxlen / 2) {
                     talloc_free(dest);
                     dest = NULL;
@@ -894,11 +894,11 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
             cue_index_add(demuxer, trackpos->cue_track, pos,
                           time, trackpos->cue_duration);
             mkv_d->index_has_durations |= trackpos->n_cue_duration > 0;
-            MP_DBG(demuxer, "|+ found cue point for track %"PRIu64": "
-                   "timecode %"PRIu64", filepos: %"PRIu64""
-                   "offset %"PRIu64", duration %"PRIu64"\n",
-                   trackpos->cue_track, time, pos,
-                   trackpos->cue_relative_position, trackpos->cue_duration);
+            MP_TRACE(demuxer, "|+ found cue point for track %"PRIu64": "
+                     "timecode %"PRIu64", filepos: %"PRIu64""
+                     "offset %"PRIu64", duration %"PRIu64"\n",
+                     trackpos->cue_track, time, pos,
+                     trackpos->cue_relative_position, trackpos->cue_duration);
         }
     }
 
@@ -1232,8 +1232,8 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
             continue;
         }
         uint64_t pos = seek->seek_position + mkv_d->segment_start;
-        MP_DBG(demuxer, "Element 0x%"PRIx32" at %"PRIu64".\n",
-               seek->seek_id, pos);
+        MP_TRACE(demuxer, "Element 0x%"PRIx32" at %"PRIu64".\n",
+                 seek->seek_id, pos);
         get_header_element(demuxer, seek->seek_id, pos);
     }
  out:
@@ -1938,7 +1938,7 @@ static int read_ebml_header(demuxer_t *demuxer)
                    "Assuming \"matroska\".\n");
     } else if (strcmp(ebml_master.doc_type, "matroska") != 0
         && strcmp(ebml_master.doc_type, "webm") != 0) {
-        MP_DBG(demuxer, "no head found\n");
+        MP_TRACE(demuxer, "no head found\n");
         talloc_free(parse_ctx.talloc_ctx);
         return 0;
     }
