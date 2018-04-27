@@ -313,7 +313,7 @@ void mp_avdict_print_unset(struct mp_log *log, int msgl, AVDictionary *dict)
 // to the name of the n-th parameter.
 static void resolve_positional_arg(void *avobj, char **name)
 {
-    if (!*name || (*name)[0] != '@')
+    if (!*name || (*name)[0] != '@' || !avobj)
         return;
 
     char *end = NULL;
@@ -345,11 +345,18 @@ static void resolve_positional_arg(void *avobj, char **name)
 // Returns: >=0 success, <0 failed to set an option
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
 {
+    return mp_set_avopts_pos(log, avobj, avobj, kv);
+}
+
+// Like mp_set_avopts(), but the posargs argument is used to resolve positional
+// arguments. If posargs==NULL, positional args are disabled.
+int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv)
+{
     int success = 0;
     for (int n = 0; kv && kv[n * 2]; n++) {
         char *k = kv[n * 2 + 0];
         char *v = kv[n * 2 + 1];
-        resolve_positional_arg(avobj, &k);
+        resolve_positional_arg(posargs, &k);
         int r = av_opt_set(avobj, k, v, AV_OPT_SEARCH_CHILDREN);
         if (r == AVERROR_OPTION_NOT_FOUND) {
             mp_err(log, "AVOption '%s' not found.\n", k);
