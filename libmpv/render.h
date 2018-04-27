@@ -396,6 +396,13 @@ typedef struct mpv_render_frame_info {
  * Currently, only at most 1 context can exists per mpv core (it represents the
  * main video output).
  *
+ * You should pass the following parameters:
+ *  - MPV_RENDER_PARAM_API_TYPE to select the underlying backend/GPU API.
+ *  - Backend-specific init parameter, like MPV_RENDER_PARAM_OPENGL_INIT_PARAMS.
+ *  - Setting MPV_RENDER_PARAM_ADVANCED_CONTROL and following its rules is
+ *    strongly recommended.
+ *  - If you want to use hwdec, possibly hwdec interop resources.
+ *
  * @param res set to the context (on success) or NULL (on failure). The value
  *            is never read and always overwritten.
  * @param mpv handle used to get the core (the mpv_render_context won't depend
@@ -533,6 +540,10 @@ typedef enum mpv_render_update_flag {
  * display time. This will limit your rendering to video FPS. You can prevent
  * this by setting the "video-timing-offset" global option to 0. (This applies
  * only to "audio" video sync mode.)
+ *
+ * You should pass the following parameters:
+ *  - Backend-specific target object, such as MPV_RENDER_PARAM_OPENGL_FBO.
+ *  - Possibly transformations, such as MPV_RENDER_PARAM_FLIP_Y.
  *
  * @param ctx a valid render context
  * @param params an array of parameters, terminated by type==0. Which parameters
