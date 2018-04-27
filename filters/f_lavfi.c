@@ -271,7 +271,8 @@ static void precreate_graph(struct lavfi *c, bool first_init)
             goto error;
         }
 
-        if (mp_set_avopts(c->log, filter->priv, c->direct_filter_opts) < 0)
+        if (mp_set_avopts_pos(c->log, filter, filter->priv,
+                              c->direct_filter_opts) < 0)
             goto error;
 
         if (avfilter_init_str(filter, NULL) < 0) {

@@ -47,5 +47,6 @@ const char *mp_codec_from_av_codec_id(int codec_id);
 void mp_set_avdict(struct AVDictionary **dict, char **kv);
 void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
+int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv);
 
 #endif
