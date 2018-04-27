@@ -371,6 +371,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                 if (reinit_vs(p, mpi) < 0) {
                     MP_ERR(p, "could not init VS\n");
                     mp_frame_unref(&frame);
+                    mp_filter_internal_mark_failed(f);
                     return;
                 }
                 pthread_mutex_lock(&p->lock);
