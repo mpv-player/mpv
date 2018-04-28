@@ -84,9 +84,6 @@ struct command_ctx {
     char **warned_deprecated;
     int num_warned_deprecated;
 
-    struct cycle_counter *cycle_counters;
-    int num_cycle_counters;
-
     struct overlay *overlays;
     int num_overlays;
     // One of these is in use by the OSD; the other one exists so that the
@@ -4671,47 +4668,6 @@ static void overlay_uninit(struct MPContext *mpctx)
         mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }
 
-struct cycle_counter {
-    char **args;
-    int counter;
-};
-
-static bool stringlist_equals(char **l1, char **l2)
-{
-    assert(l1 && l2);
-    for (int i = 0; ; i++) {
-        if (!l1[i] && !l2[i])
-            return true;
-        if (!l1[i] || !l2[i])
-            return false;
-        if (strcmp(l1[i], l2[i]) != 0)
-            return false;
-    }
-}
-
-static char **stringlist_dup(void *talloc_ctx, char **list)
-{
-    int num = 0;
-    char **res = NULL;
-    for (int i = 0; list && list[i]; i++)
-        MP_TARRAY_APPEND(talloc_ctx, res, num, talloc_strdup(talloc_ctx, list[i]));
-    MP_TARRAY_APPEND(talloc_ctx, res, num, NULL);
-    return res;
-}
-
-static int *get_cmd_cycle_counter(struct MPContext *mpctx, char **args)
-{
-    struct command_ctx *cmd = mpctx->command_ctx;
-    for (int n = 0; n < cmd->num_cycle_counters; n++) {
-        struct cycle_counter *ctr = &cmd->cycle_counters[n];
-        if (stringlist_equals(ctr->args, args))
-            return &ctr->counter;
-    }
-    struct cycle_counter ctr = {stringlist_dup(cmd, args), -1};
-    MP_TARRAY_APPEND(cmd, cmd->cycle_counters, cmd->num_cycle_counters, ctr);
-    return &cmd->cycle_counters[cmd->num_cycle_counters - 1].counter;
-}
-
 static struct track *find_track_with_url(struct MPContext *mpctx, int type,
                                          const char *url)
 {
@@ -4752,8 +4708,8 @@ static bool check_property_scalable(char *property, struct MPContext *mpctx)
            prop.type == &m_option_type_aspect;
 }
 
-static int change_property_cmd(struct MPContext *mpctx, struct mp_cmd *cmd,
-                               const char *name, int action, void *arg)
+static int show_property_status(struct MPContext *mpctx, struct mp_cmd *cmd,
+                                const char *name, int r)
 {
     struct MPOpts *opts = mpctx->opts;
     int osd_duration = opts->osd_duration;
@@ -4762,9 +4718,10 @@ static int change_property_cmd(struct MPContext *mpctx, struct mp_cmd *cmd,
     bool msg_osd = auto_osd || (on_osd & MP_ON_OSD_MSG);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
-    int r = mp_property_do(name, action, arg, mpctx);
     if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
         show_property_osd(mpctx, name, on_osd);
+        if (r == M_PROPERTY_UNAVAILABLE)
+            return -1;
     } else if (r == M_PROPERTY_UNKNOWN) {
         set_osd_msg(mpctx, osdl, osd_duration, "Unknown property: '%s'", name);
         return -1;
@@ -4774,6 +4731,88 @@ static int change_property_cmd(struct MPContext *mpctx, struct mp_cmd *cmd,
         return -1;
     }
     return 0;
+}
+
+static int change_property_cmd(struct MPContext *mpctx, struct mp_cmd *cmd,
+                               const char *name, int action, void *arg)
+{
+    int r = mp_property_do(name, action, arg, mpctx);
+    return show_property_status(mpctx, cmd, name, r);
+}
+
+static bool compare_values(struct m_option *type, void *a, void *b)
+{
+    // Since there is no m_option_equals() or anything similar, we convert all
+    // values to a common, unambiguous representation - strings.
+    char *as = m_option_print(type, a);
+    char *bs = m_option_print(type, b);
+    bool res = bstr_equals(bstr0(as), bstr0(bs)); // treat as "" on failure
+    talloc_free(as);
+    talloc_free(bs);
+    return res;
+}
+
+static int cycle_values_cmd(struct MPContext *mpctx, struct mp_cmd *cmd)
+{
+    int first = 0, dir = 1;
+
+    if (strcmp(cmd->args[first].v.s, "!reverse") == 0) {
+        first += 1;
+        dir = -1;
+    }
+
+    const char *name = cmd->args[first].v.s;
+    first += 1;
+
+    if (first >= cmd->nargs) {
+        MP_ERR(mpctx, "cycle-values command does not have any value arguments.\n");
+        return -1;
+    }
+
+    struct m_option prop = {0};
+    int r = mp_property_do(name, M_PROPERTY_GET_TYPE, &prop, mpctx);
+    if (r <= 0)
+        return show_property_status(mpctx, cmd, name, r);
+
+    union m_option_value curval = {0};
+    r = mp_property_do(name, M_PROPERTY_GET, &curval, mpctx);
+    if (r <= 0)
+        return show_property_status(mpctx, cmd, name, r);
+
+    // Find the current value. Note that we even though compare_values() uses
+    // strings internally, we need to convert the cycle-values arguments to
+    // native anyway to "normalize" the value for comparison.
+    int current = -1;
+    for (int n = first; n < cmd->nargs; n++) {
+        union m_option_value val = {0};
+        if (m_option_parse(mpctx->log, &prop, bstr0(name),
+                           bstr0(cmd->args[n].v.s), &val) <= 0)
+            continue;
+
+        if (compare_values(&prop, &curval, &val))
+            current = n;
+
+        m_option_free(&prop, &val);
+
+        if (current >= 0)
+            break;
+    }
+
+    m_option_free(&prop, &curval);
+
+    if (current >= 0) {
+        current += dir;
+        if (current < first)
+            current = cmd->nargs - 1;
+        if (current >= cmd->nargs)
+            current = first;
+    } else {
+        MP_VERBOSE(mpctx, "Current value not found. Picking default.\n");
+        current = dir > 0 ? first : cmd->nargs - 1;
+    }
+
+    return change_property_cmd(mpctx, cmd, name, M_PROPERTY_SET_STRING,
+                               cmd->args[current].v.s);
 }
 
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
@@ -4952,32 +4991,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                                    M_PROPERTY_MULTIPLY, &cmd->args[1].v.d);
     }
 
-    case MP_CMD_CYCLE_VALUES: {
-        char **args = talloc_zero_array(NULL, char *, cmd->nargs + 1);
-        for (int n = 0; n < cmd->nargs; n++)
-            args[n] = cmd->args[n].v.s;
-        int first = 1, dir = 1;
-        if (strcmp(args[0], "!reverse") == 0) {
-            first += 1;
-            dir = -1;
-        }
-        int *ptr = get_cmd_cycle_counter(mpctx, &args[first - 1]);
-        int count = cmd->nargs - first;
-        int r = 0;
-        if (ptr && count > 0) {
-            *ptr = *ptr < 0 ? (dir > 0 ? 0 : -1) : *ptr + dir;
-            if (*ptr >= count)
-                *ptr = 0;
-            if (*ptr < 0)
-                *ptr = count - 1;
-            char *property = args[first - 1];
-            char *value = args[first + *ptr];
-            r = change_property_cmd(mpctx, cmd, property, M_PROPERTY_SET_STRING,
-                                    value);
-        }
-        talloc_free(args);
-        return r;
-    }
+    case MP_CMD_CYCLE_VALUES:
+        return cycle_values_cmd(mpctx, cmd);
 
     case MP_CMD_FRAME_STEP:
         if (!mpctx->playback_initialized)

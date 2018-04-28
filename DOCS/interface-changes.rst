@@ -98,6 +98,8 @@ Interface changes
       nobody wants to fix it. Automatic 3D down-conversion to 2D is also broken,
       although you can just insert the stereo3d filter manually. The obscurity
       of 3D content doesn't justify such an option anyway.
+    - change cycle-values command to use the current value, instead of an
+      internal counter that remembered the current position.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
