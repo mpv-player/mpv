@@ -2165,19 +2165,20 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if (!track)
-            *(char **) arg = talloc_strdup(NULL, "no");
-        else {
+        if (track) {
             char *lang = track->lang;
             if (!lang)
                 lang = "unknown";
 
-            if (track->title)
+            if (track->title) {
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
                                            track->user_tid, lang, track->title);
-            else
+            } else {
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s",
                                                 track->user_tid, lang);
+            }
+        } else {
+            *(char **) arg = talloc_strdup(NULL, "no");
         }
         return M_PROPERTY_OK;
 
