@@ -514,21 +514,14 @@ Input Commands that are Possibly Subject to Change
 
 ``cycle-values ["!reverse"] <property> "<value1>" "<value2>" ...``
     Cycle through a list of values. Each invocation of the command will set the
-    given property to the next value in the list. The command maintains an
-    internal counter which value to pick next, and which is initially 0. It is
-    reset to 0 once the last value is reached.
-
-    The internal counter is associated using the property name and the value
-    list. If multiple commands (bound to different keys) use the same name
-    and value list, they will share the internal counter.
+    given property to the next value in the list. The command will use the
+    current value of the property/option, and use it to determine the current
+    position in the list of values. Once it has found it, it will set the
+    next value in the list (wrapping around to the first item if needed).
 
     The special argument ``!reverse`` can be used to cycle the value list in
-    reverse. Compared with a command that just lists the value in reverse, this
-    command will actually share the internal counter with the forward-cycling
-    key binding (as long as the rest of the arguments are the same).
-
-    Note that there is a static limit of (as of this writing) 10 arguments
-    (this limit could be raised on demand).
+    reverse. The only advantage is that you don't need to reverse the value
+    list yourself when adding a second key binding for cycling backwards.
 
 ``enable-section "<section>" [flags]``
     Enable all key bindings in the named input section.
