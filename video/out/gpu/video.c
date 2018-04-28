@@ -3552,7 +3552,10 @@ static void check_gl_features(struct gl_video *p)
     bool have_compute_peak = have_compute && have_ssbo && have_numgroups;
     if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
         int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
-        MP_MSG(p, msgl, "Disabling HDR peak computation (no compute shaders).\n");
+        MP_MSG(p, msgl, "Disabling HDR peak computation (one or more of the "
+                        "following is not supported: compute shaders=%d, "
+                        "SSBO=%d, multiple work groups=%d).\n",
+                        have_compute, have_ssbo, have_numgroups);
         p->opts.compute_hdr_peak = -1;
     }
 
