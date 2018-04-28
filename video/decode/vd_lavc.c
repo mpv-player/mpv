@@ -126,6 +126,7 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
+        .dr = 1,
     },
 };
 
