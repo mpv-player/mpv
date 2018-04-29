@@ -1027,6 +1027,7 @@ void write_video(struct MPContext *mpctx)
             if (mpctx->time_frame <= 0) {
                 MP_VERBOSE(mpctx, "video EOF reached\n");
                 mpctx->video_status = STATUS_EOF;
+                encode_lavc_stream_eof(mpctx->encode_lavc_ctx, STREAM_VIDEO);
             }
         }
 

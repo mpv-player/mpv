@@ -56,6 +56,7 @@ struct ao_push_state {
     bool still_playing;
     bool need_wakeup;
     bool paused;
+    bool initial_unblocked;
 
     // Whether the current buffer contains the complete audio.
     bool final_chunk;
@@ -357,7 +358,8 @@ static void *playthread(void *arg)
     mpthread_set_name("ao");
     pthread_mutex_lock(&p->lock);
     while (!p->terminate) {
-        bool playing = !p->paused || ao->stream_silence;
+        bool blocked = ao->driver->initially_blocked && !p->initial_unblocked;
+        bool playing = (!p->paused || ao->stream_silence) && !blocked;
         if (playing)
             ao_play_data(ao);
 
@@ -500,6 +502,19 @@ int ao_play_silence(struct ao *ao, int samples)
         return 0;
 
     return ao->driver->play(ao, (void **)p->silence, samples, 0);
+}
+
+void ao_unblock(struct ao *ao)
+{
+    if (ao->api == &ao_api_push) {
+        struct ao_push_state *p = ao->api_priv;
+        pthread_mutex_lock(&p->lock);
+        p->need_wakeup = true;
+        p->initial_unblocked = true;
+        wakeup_playthread(ao);
+        pthread_cond_signal(&p->wakeup);
+        pthread_mutex_unlock(&p->lock);
+    }
 }
 
 #ifndef __MINGW32__
