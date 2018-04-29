@@ -820,6 +820,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
                                      stream_type_name(p->type));
 
     if (p->encoder->flags & AV_CODEC_FLAG_PASS2) {
+        MP_INFO(p, "Reading 2-pass log: %s\n", filename);
         struct stream *s = stream_open(filename, p->global);
         if (s) {
             struct bstr content = stream_read_complete(s, p, 1000000000);
@@ -838,6 +839,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
     }
 
     if (p->encoder->flags & AV_CODEC_FLAG_PASS1) {
+        MP_INFO(p, "Writing to 2-pass log: %s\n", filename);
         p->twopass_bytebuffer = open_output_stream(filename, p->global);
         if (!p->twopass_bytebuffer) {
             MP_WARN(p, "could not open '%s', "
@@ -927,15 +929,18 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
         av_init_packet(&packet);
 
         status = avcodec_receive_packet(p->encoder, &packet);
-        if (status == AVERROR(EAGAIN) || status == AVERROR_EOF)
+        if (status == AVERROR(EAGAIN))
             break;
-        if (status < 0)
+        if (status < 0 && status != AVERROR_EOF)
             goto fail;
 
         if (p->twopass_bytebuffer && p->encoder->stats_out) {
             stream_write_buffer(p->twopass_bytebuffer, p->encoder->stats_out,
                                 strlen(p->encoder->stats_out));
         }
+
+        if (status == AVERROR_EOF)
+            break;
 
         encode_lavc_add_packet(p->mux_stream, &packet);
         av_packet_unref(&packet);
