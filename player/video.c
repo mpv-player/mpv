@@ -1017,7 +1017,11 @@ void write_video(struct MPContext *mpctx)
                 mpctx->time_frame = 0;
         }
 
-        if (mpctx->video_status == STATUS_DRAINING) {
+        // Wait for the VO to signal actual EOF, then exit if the frame timer
+        // has expired.
+        if (mpctx->video_status == STATUS_DRAINING &&
+            vo_is_ready_for_frame(vo, -1))
+        {
             mpctx->time_frame -= get_relative_time(mpctx);
             mp_set_timeout(mpctx, mpctx->time_frame);
             if (mpctx->time_frame <= 0) {
