@@ -555,9 +555,7 @@ static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
     int format;
     struct mp_chmap channels;
     ao_get_format(ao, &samplerate, &format, &channels);
-#if HAVE_ENCODING
     encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
-#endif
     if (samples == 0)
         return 0;
     double real_samplerate = samplerate / mpctx->audio_speed;

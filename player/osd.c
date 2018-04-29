@@ -198,7 +198,6 @@ static char *get_term_status_msg(struct MPContext *mpctx)
             saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);
     }
 
-#if HAVE_ENCODING
     double position = get_current_pos_ratio(mpctx, true);
     char lavcbuf[80];
     if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),
@@ -206,9 +205,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     {
         // encoding stats
         saddf(&line, " %s", lavcbuf);
-    } else
-#endif
-    {
+    } else {
         // VO stats
         if (mpctx->vo_chain) {
             if (mpctx->display_sync_active) {

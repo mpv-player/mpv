@@ -164,11 +164,9 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_audio_out(mpctx);
     uninit_video_out(mpctx);
 
-#if HAVE_ENCODING
     // If it's still set here, it's an error.
     encode_lavc_free(mpctx->encode_lavc_ctx);
     mpctx->encode_lavc_ctx = NULL;
-#endif
 
     command_uninit(mpctx);
 
@@ -229,10 +227,8 @@ static bool handle_help_options(struct MPContext *mpctx)
         property_print_help(mpctx);
         return true;
     }
-#if HAVE_ENCODING
     if (encode_lavc_showhelp(log, opts->encode_opts))
         return true;
-#endif
     return false;
 }
 
@@ -414,7 +410,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     cocoa_set_mpv_handle(ctx);
 #endif
 
-#if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
@@ -424,7 +419,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         m_config_set_profile(mpctx->mconfig, "encoding", 0);
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
-#endif
 
 #if !HAVE_LIBASS
     MP_WARN(mpctx, "Compiled without libass.\n");
