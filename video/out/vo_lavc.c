@@ -41,8 +41,6 @@ struct priv {
     bool shutdown;
 };
 
-static void draw_image(struct vo *vo, mp_image_t *mpi);
-
 static int preinit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
@@ -158,18 +156,23 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *voframe)
 {
     struct priv *vc = vo->priv;
     struct encoder_context *enc = vc->enc;
     struct encode_lavc_context *ectx = enc->encode_lavc_ctx;
     AVCodecContext *avc = enc->encoder;
 
+    if (voframe->redraw || voframe->repeat || voframe->num_frames < 1)
+        return;
+
+    struct mp_image *mpi = voframe->frames[0];
+
     struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
 
     if (vc->shutdown)
-        goto done;
+        return;
 
     // Lock for shared timestamp fields.
     pthread_mutex_lock(&ectx->lock);
@@ -215,9 +218,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     frame->quality = avc->global_quality;
     encoder_encode(enc, frame);
     av_frame_free(&frame);
-
-done:
-    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)
@@ -240,7 +240,7 @@ const struct vo_driver video_out_lavc = {
     .reconfig2 = reconfig2,
     .control = control,
     .uninit = uninit,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
 };
 
