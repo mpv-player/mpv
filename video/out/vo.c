@@ -101,9 +101,7 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_DRM
     &video_out_drm,
 #endif
-#if HAVE_ENCODING
     &video_out_lavc,
-#endif
     NULL
 };
 

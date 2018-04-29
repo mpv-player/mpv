@@ -241,7 +241,7 @@ def build(ctx):
         ( "audio/out/ao_coreaudio_utils.c",      "audiounit" ),
         ( "audio/out/ao_coreaudio_utils.c",      "coreaudio" ),
         ( "audio/out/ao_jack.c",                 "jack" ),
-        ( "audio/out/ao_lavc.c",                 "encoding" ),
+        ( "audio/out/ao_lavc.c" ),
         ( "audio/out/ao_null.c" ),
         ( "audio/out/ao_openal.c",               "openal" ),
         ( "audio/out/ao_opensles.c",             "opensles" ),
@@ -262,7 +262,7 @@ def build(ctx):
         ( "common/av_log.c" ),
         ( "common/codecs.c" ),
         ( "common/common.c" ),
-        ( "common/encode_lavc.c",                "encoding" ),
+        ( "common/encode_lavc.c" ),
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
         ( "common/recorder.c" ),
@@ -484,7 +484,7 @@ def build(ctx):
         ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_gpu.c" ),
         ( "video/out/vo_image.c" ),
-        ( "video/out/vo_lavc.c",                 "encoding" ),
+        ( "video/out/vo_lavc.c" ),
         ( "video/out/vo_libmpv.c" ),
         ( "video/out/vo_mediacodec_embed.c",     "android" ),
         ( "video/out/vo_null.c" ),
@@ -730,8 +730,7 @@ def build(ctx):
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
 
-        if ctx.dependency_satisfied('encoding'):
-            ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
+        ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64'.split():
             ctx.install_as(

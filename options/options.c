@@ -758,9 +758,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("vaapi", vaapi_opts, vaapi_conf, 0),
 #endif
 
-#if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
-#endif
 
     OPT_REMOVED("a52drc", "use --ad-lavc-ac3drc=level"),
     OPT_REMOVED("afm", "use --ad=..."),

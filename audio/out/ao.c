@@ -93,9 +93,7 @@ static const struct ao_driver * const audio_out_drivers[] = {
     &audio_out_coreaudio_exclusive,
 #endif
     &audio_out_pcm,
-#if HAVE_ENCODING
     &audio_out_lavc,
-#endif
 #if HAVE_RSOUND
     &audio_out_rsound,
 #endif
