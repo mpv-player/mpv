@@ -21,14 +21,7 @@ You can encode files from one format/codec to another using this facility.
     ``--ofopts-add=<options1[,options2,...]>``
         Appends the options given as arguments to the options list.
 
-    ``--ofopts-pre=<options1[,options2,...]>``
-        Prepends the options given as arguments to the options list.
-
-    ``--ofopts-del=<index1[,index2,...]>``
-        Deletes the options at the given indexes. Index numbers start at 0,
-        negative numbers address the end of the list (-1 is the last).
-
-    ``--ofopts-clr``
+    ``--ofopts=""``
         Completely empties the options list.
 
 ``--ofps=<float value>``
@@ -80,14 +73,7 @@ You can encode files from one format/codec to another using this facility.
     ``--oacopts-add=<options1[,options2,...]>``
         Appends the options given as arguments to the options list.
 
-    ``--oacopts-pre=<options1[,options2,...]>``
-        Prepends the options given as arguments to the options list.
-
-    ``--oacopts-del=<index1[,index2,...]>``
-        Deletes the options at the given indexes. Index numbers start at 0,
-        negative numbers address the end of the list (-1 is the last).
-
-    ``--oacopts-clr``
+    ``--oacopts=""``
         Completely empties the options list.
 
 ``--oafirst``
@@ -102,7 +88,7 @@ You can encode files from one format/codec to another using this facility.
     Shifts video data by the given time (in seconds) by shifting the pts
     values. Deprecated.
 
-``--ovcopts <options>``
+``--ovcopts=<options>``
     Specifies the output video codec options for libavcodec.
     See --ovcopts=help for a full list of supported options.
 
@@ -120,14 +106,7 @@ You can encode files from one format/codec to another using this facility.
     ``--ovcopts-add=<options1[,options2,...]>``
         Appends the options given as arguments to the options list.
 
-    ``--ovcopts-pre=<options1[,options2,...]>``
-        Prepends the options given as arguments to the options list.
-
-    ``--ovcopts-del=<index1[,index2,...]>``
-        Deletes the options at the given indexes. Index numbers start at 0,
-        negative numbers address the end of the list (-1 is the last).
-
-    ``--ovcopts-clr``
+    ``--ovcopts=""``
         Completely empties the options list.
 
 ``--ovfirst``
