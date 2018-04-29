@@ -38,21 +38,6 @@
 struct priv {
     struct encoder_context *enc;
 
-    int harddup;
-
-    double lastpts;
-    int64_t lastipts;
-    int64_t lastframeipts;
-    int64_t lastencodedipts;
-    int64_t mindeltapts;
-    double expected_next_pts;
-    mp_image_t *lastimg;
-    int lastdisplaycount;
-
-    double last_video_in_pts;
-
-    AVRational worst_time_base;
-
     bool shutdown;
 };
 
@@ -65,25 +50,21 @@ static int preinit(struct vo *vo)
     if (!vc->enc)
         return -1;
     talloc_steal(vc, vc->enc);
-    vc->harddup = vc->enc->options->harddup;
-    vc->last_video_in_pts = MP_NOPTS_VALUE;
     return 0;
 }
 
 static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
+    struct encoder_context *enc = vc->enc;
 
-    if (vc->lastipts >= 0 && !vc->shutdown)
-        draw_image(vo, NULL);
-
-    mp_image_unrefp(&vc->lastimg);
+    if (!vc->shutdown)
+        encoder_encode(enc, NULL); // finish encoding
 }
 
 static int reconfig2(struct vo *vo, struct mp_image *img)
 {
     struct priv *vc = vo->priv;
-    struct encode_lavc_context *ctx = vo->encode_lavc_ctx;
     AVCodecContext *encoder = vc->enc->encoder;
 
     struct mp_image_params *params = &img->params;
@@ -117,10 +98,6 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     // - Second calls after reconfigure() already succeeded once return early
     //   (due to the avcodec_is_open() check above).
 
-    vc->lastipts = AV_NOPTS_VALUE;
-    vc->lastframeipts = AV_NOPTS_VALUE;
-    vc->lastencodedipts = AV_NOPTS_VALUE;
-
     if (pix_fmt == AV_PIX_FMT_NONE) {
         MP_FATAL(vo, "Format %s not supported by lavc.\n",
                  mp_imgfmt_to_name(params->imgfmt));
@@ -136,27 +113,15 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
 
     AVRational tb;
 
-    if (ctx->options->fps > 0) {
-        tb = av_d2q(ctx->options->fps, ctx->options->fps * 1001 + 2);
-    } else if (ctx->options->autofps && img->nominal_fps > 0) {
-        tb = av_d2q(img->nominal_fps, img->nominal_fps * 1001 + 2);
-        MP_INFO(vo, "option --ofps not specified "
-                "but --oautofps is active, using guess of %u/%u\n",
-                (unsigned)tb.num, (unsigned)tb.den);
-    } else {
-        // we want to handle:
-        //      1/25
-        //   1001/24000
-        //   1001/30000
-        // for this we would need 120000fps...
-        // however, mpeg-4 only allows 16bit values
-        // so let's take 1001/30000 out
-        tb.num = 24000;
-        tb.den = 1;
-        MP_INFO(vo, "option --ofps not specified "
-                "and fps could not be inferred, using guess of %u/%u\n",
-                (unsigned)tb.num, (unsigned)tb.den);
-    }
+    // we want to handle:
+    //      1/25
+    //   1001/24000
+    //   1001/30000
+    // for this we would need 120000fps...
+    // however, mpeg-4 only allows 16bit values
+    // so let's take 1001/30000 out
+    tb.num = 24000;
+    tb.den = 1;
 
     const AVRational *rates = encoder->codec->supported_framerates;
     if (rates && rates[0].den)
@@ -199,180 +164,57 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct encoder_context *enc = vc->enc;
     struct encode_lavc_context *ectx = enc->encode_lavc_ctx;
     AVCodecContext *avc = enc->encoder;
-    int64_t frameipts;
-    double nextpts;
 
-    double pts = mpi ? mpi->pts : MP_NOPTS_VALUE;
-
-    if (mpi) {
-        assert(vo->params);
-
-        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
-
-        osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
-    }
+    struct mp_osd_res dim = osd_res_from_image_params(vo->params);
+    osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
 
     if (vc->shutdown)
         goto done;
 
-    if (pts == MP_NOPTS_VALUE) {
-        if (mpi)
-            MP_WARN(vo, "frame without pts, please report; synthesizing pts instead\n");
-        pts = vc->expected_next_pts;
-    }
-
-    if (vc->worst_time_base.den == 0) {
-        // We don't know the muxer time_base anymore, and can't, because we
-        // might start encoding before the muxer is opened. (The muxer decides
-        // the final AVStream.time_base when opening the muxer.)
-        vc->worst_time_base = avc->time_base;
-
-        if (enc->options->maxfps) {
-            vc->mindeltapts = ceil(vc->worst_time_base.den /
-                    (vc->worst_time_base.num * enc->options->maxfps));
-        } else {
-            vc->mindeltapts = 0;
-        }
-
-        // NOTE: we use the following "axiom" of av_rescale_q:
-        // if time base A is worse than time base B, then
-        //   av_rescale_q(av_rescale_q(x, A, B), B, A) == x
-        // this can be proven as long as av_rescale_q rounds to nearest, which
-        // it currently does
-
-        // av_rescale_q(x, A, B) * B = "round x*A to nearest multiple of B"
-        // and:
-        //    av_rescale_q(av_rescale_q(x, A, B), B, A) * A
-        // == "round av_rescale_q(x, A, B)*B to nearest multiple of A"
-        // == "round 'round x*A to nearest multiple of B' to nearest multiple of A"
-        //
-        // assume this fails. Then there is a value of x*A, for which the
-        // nearest multiple of B is outside the range [(x-0.5)*A, (x+0.5)*A[.
-        // Absurd, as this range MUST contain at least one multiple of B.
-    }
-
-    double timeunit = (double)vc->worst_time_base.num / vc->worst_time_base.den;
-
     // Lock for shared timestamp fields.
     pthread_mutex_lock(&ectx->lock);
 
-    double outpts;
-    if (enc->options->rawts) {
-        outpts = pts;
-    } else if (enc->options->copyts) {
+    double pts = mpi->pts;
+    double outpts = pts;
+    if (!enc->options->rawts) {
         // fix the discontinuity pts offset
-        nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
-            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
-        } else if (fabs(nextpts + ectx->discontinuity_pts_offset -
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - pts;
+        } else if (fabs(pts + ectx->discontinuity_pts_offset -
                         ectx->next_in_pts) > 30)
         {
             MP_WARN(vo, "detected an unexpected discontinuity (pts jumped by "
                     "%f seconds)\n",
-                    nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
-            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
+                    pts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - pts;
         }
 
         outpts = pts + ectx->discontinuity_pts_offset;
-    } else {
-        // adjust pts by knowledge of audio pts vs audio playback time
-        double duration = 0;
-        if (vc->last_video_in_pts != MP_NOPTS_VALUE)
-            duration = pts - vc->last_video_in_pts;
-        if (duration < 0)
-            duration = timeunit;   // XXX warn about discontinuity?
-        outpts = vc->lastpts + duration;
-        if (ectx->audio_pts_offset != MP_NOPTS_VALUE) {
-            double adj = outpts - pts - ectx->audio_pts_offset;
-            adj = FFMIN(adj, duration * 0.1);
-            adj = FFMAX(adj, -duration * 0.1);
-            outpts -= adj;
-        }
     }
-    vc->lastpts = outpts;
-    vc->last_video_in_pts = pts;
-    frameipts = floor((outpts + encoder_get_offset(enc)) / timeunit + 0.5);
 
-    // calculate expected pts of next video frame
-    vc->expected_next_pts = pts + timeunit;
+    outpts += encoder_get_offset(enc);
 
-    if (!enc->options->rawts && enc->options->copyts) {
+    if (!enc->options->rawts) {
+        // calculate expected pts of next video frame
+        double timeunit = av_q2d(avc->time_base);
+        double expected_next_pts = pts + timeunit;
         // set next allowed output pts value
-        nextpts = vc->expected_next_pts + ectx->discontinuity_pts_offset;
+        double nextpts = expected_next_pts + ectx->discontinuity_pts_offset;
         if (nextpts > ectx->next_in_pts)
             ectx->next_in_pts = nextpts;
     }
 
     pthread_mutex_unlock(&ectx->lock);
 
-    // never-drop mode
-    if (enc->options->neverdrop) {
-        int64_t step = vc->mindeltapts ? vc->mindeltapts : 1;
-        if (frameipts < vc->lastipts + step) {
-            MP_INFO(vo, "--oneverdrop increased pts by %d\n",
-                    (int) (vc->lastipts - frameipts + step));
-            frameipts = vc->lastipts + step;
-            vc->lastpts = frameipts * timeunit - encoder_get_offset(enc);
-        }
-    }
+    AVFrame *frame = mp_image_to_av_frame(mpi);
+    if (!frame)
+        abort();
 
-    if (vc->lastipts != AV_NOPTS_VALUE) {
-        // we have a valid image in lastimg
-        while (vc->lastimg && vc->lastipts < frameipts) {
-            int64_t thisduration = vc->harddup ? 1 : (frameipts - vc->lastipts);
-
-            // we will ONLY encode this frame if it can be encoded at at least
-            // vc->mindeltapts after the last encoded frame!
-            int64_t skipframes = (vc->lastencodedipts == AV_NOPTS_VALUE)
-                    ? 0 : vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
-            if (skipframes < 0)
-                skipframes = 0;
-
-            if (thisduration > skipframes) {
-                AVFrame *frame = mp_image_to_av_frame(vc->lastimg);
-                if (!frame)
-                    abort();
-
-                // this is a nop, unless the worst time base is the STREAM time base
-                frame->pts = av_rescale_q(vc->lastipts + skipframes,
-                                          vc->worst_time_base, avc->time_base);
-                frame->pict_type = 0; // keep this at unknown/undefined
-                frame->quality = avc->global_quality;
-                encoder_encode(enc, frame);
-                av_frame_free(&frame);
-
-                vc->lastdisplaycount += 1;
-                vc->lastencodedipts = vc->lastipts + skipframes;
-            }
-
-            vc->lastipts += thisduration;
-        }
-    }
-
-    if (!mpi) {
-        // finish encoding
-        encoder_encode(enc, NULL);
-    } else {
-        if (frameipts >= vc->lastframeipts) {
-            if (vc->lastframeipts != AV_NOPTS_VALUE && vc->lastdisplaycount != 1)
-                MP_INFO(vo, "Frame at pts %d got displayed %d times\n",
-                        (int) vc->lastframeipts, vc->lastdisplaycount);
-            talloc_free(vc->lastimg);
-            vc->lastimg = mpi;
-            mpi = NULL;
-
-            vc->lastframeipts = vc->lastipts = frameipts;
-            if (enc->options->rawts && vc->lastipts < 0) {
-                MP_ERR(vo, "why does this happen? DEBUG THIS! vc->lastipts = %lld\n",
-                       (long long) vc->lastipts);
-                vc->lastipts = -1;
-            }
-            vc->lastdisplaycount = 0;
-        } else {
-            MP_INFO(vo, "Frame at pts %d got dropped "
-                    "entirely because pts went backwards\n", (int) frameipts);
-        }
-    }
+    frame->pts = rint(outpts * av_q2d(av_inv_q(avc->time_base)));
+    frame->pict_type = 0; // keep this at unknown/undefined
+    frame->quality = avc->global_quality;
+    encoder_encode(enc, frame);
+    av_frame_free(&frame);
 
 done:
     talloc_free(mpi);

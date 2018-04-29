@@ -169,7 +169,7 @@ static void uninit(struct ao *ao)
         double outpts = ac->expected_next_pts;
 
         pthread_mutex_lock(&ectx->lock);
-        if (!ac->enc->options->rawts && ac->enc->options->copyts)
+        if (!ac->enc->options->rawts)
             outpts += ectx->discontinuity_pts_offset;
         pthread_mutex_unlock(&ectx->lock);
 
@@ -214,15 +214,7 @@ static void encode(struct ao *ao, double apts, void **data)
 
         frame->linesize[0] = frame->nb_samples * ao->sstride;
 
-        if (ac->enc->options->rawts || ac->enc->options->copyts) {
-            // real audio pts
-            frame->pts = floor(apts * encoder->time_base.den /
-                               encoder->time_base.num + 0.5);
-        } else {
-            // audio playback time
-            frame->pts = floor(realapts * encoder->time_base.den /
-                               encoder->time_base.num + 0.5);
-        }
+        frame->pts = rint(apts * av_q2d(av_inv_q(encoder->time_base)));
 
         int64_t frame_pts = av_rescale_q(frame->pts, encoder->time_base,
                                          ac->worst_time_base);
@@ -254,7 +246,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
     int bufpos = 0;
     double nextpts;
-    double outpts;
     int orig_samples = samples;
 
     // for ectx PTS fields
@@ -281,38 +272,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
        samples = (bytelen + extralen) / ao->sstride;
     }
 
-    if (pts == MP_NOPTS_VALUE) {
-        MP_WARN(ao, "frame without pts, please report; synthesizing pts instead\n");
-        // synthesize pts from previous expected next pts
-        pts = ac->expected_next_pts;
-    }
-
-    if (ac->worst_time_base.den == 0) {
-        // We don't know the muxer time_base anymore, and can't, because we
-        // might start encoding before the muxer is opened. (The muxer decides
-        // the final AVStream.time_base when opening the muxer.)
-        ac->worst_time_base = enc->encoder->time_base;
-
-        // NOTE: we use the following "axiom" of av_rescale_q:
-        // if time base A is worse than time base B, then
-        //   av_rescale_q(av_rescale_q(x, A, B), B, A) == x
-        // this can be proven as long as av_rescale_q rounds to nearest, which
-        // it currently does
-
-        // av_rescale_q(x, A, B) * B = "round x*A to nearest multiple of B"
-        // and:
-        //    av_rescale_q(av_rescale_q(x, A, B), B, A) * A
-        // == "round av_rescale_q(x, A, B)*B to nearest multiple of A"
-        // == "round 'round x*A to nearest multiple of B' to nearest multiple of A"
-        //
-        // assume this fails. Then there is a value of x*A, for which the
-        // nearest multiple of B is outside the range [(x-0.5)*A, (x+0.5)*A[.
-        // Absurd, as this range MUST contain at least one multiple of B.
-    }
-
-    // Fix and apply the discontinuity pts offset.
-    if (!enc->options->rawts && enc->options->copyts) {
-        // fix the discontinuity pts offset
+    double outpts = pts;
+    if (!enc->options->rawts) {
+        // Fix and apply the discontinuity pts offset.
         nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
@@ -326,8 +288,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         }
 
         outpts = pts + ectx->discontinuity_pts_offset;
-    } else {
-        outpts = pts;
     }
 
     pthread_mutex_unlock(&ectx->lock);
@@ -349,7 +309,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     pthread_mutex_lock(&ectx->lock);
 
     // Set next allowed input pts value (input side).
-    if (!enc->options->rawts && enc->options->copyts) {
+    if (!enc->options->rawts) {
         nextpts = ac->expected_next_pts + ectx->discontinuity_pts_offset;
         if (nextpts > ectx->next_in_pts)
             ectx->next_in_pts = nextpts;

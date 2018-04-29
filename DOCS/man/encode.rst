@@ -24,32 +24,6 @@ You can encode files from one format/codec to another using this facility.
     ``--ofopts=""``
         Completely empties the options list.
 
-``--ofps=<float value>``
-    Specifies the output format time base (default: 24000). Low values like 25
-    limit video fps by dropping frames.
-
-``--oautofps``
-    Sets the output format time base to the guessed frame rate of the input
-    video (simulates MEncoder behavior, useful for AVI; may cause frame drops).
-    Note that not all codecs and not all formats support VFR encoding, and some
-    which do have bugs when a target bitrate is specified - use ``--ofps`` or
-    ``--oautofps`` to force CFR encoding in these cases.
-
-``--omaxfps=<float value>``
-    Specifies the minimum distance of adjacent frames (default: 0, which means
-    unset). Content of lower frame rate is not readjusted to this frame rate;
-    content of higher frame rate is decimated to this frame rate.
-
-``--oharddup``
-    If set, the frame rate given by ``--ofps`` is attained not by skipping time
-    codes, but by duplicating frames (constant frame rate mode).
-
-``--oneverdrop``
-    If set, frames are never dropped. Instead, time codes of video are
-    readjusted to always increase. This may cause AV desync, though; to work
-    around this, use a high-fps time base using ``--ofps`` and absolutely
-    avoid ``--oautofps``.
-
 ``--oac=<codec>``
     Specifies the output audio codec. See ``--oac=help`` for a full list of
     supported codecs.
@@ -112,13 +86,6 @@ You can encode files from one format/codec to another using this facility.
 ``--ovfirst``
     Force the video stream to become the first stream in the output.
     By default, the order is unspecified. Deprecated.
-
-``--ocopyts``
-    Copies input pts to the output video (not supported by some output
-    container formats, e.g. AVI). Discontinuities are still fixed.
-    By default, audio pts are set to playback time and video pts are
-    synchronized to match audio pts, as some output formats do not support
-    anything else.
 
 ``--orawts``
     Copies input pts to the output video (not supported by some output
