@@ -94,6 +94,9 @@ Interface changes
       the future. (This kind of waiting was always a feature to prevent that
       playback is started while scripts are only half-loaded.)
     - deprecate --ovoffset, --oaoffset, --ovfirst, --oafirst
+    - remove the following encoding options: --ocopyts (now the default, old
+      timestamp handling is gone), --oneverdrop (now default), --oharddup (you
+      need to use --vf=fps=VALUE), --ofps, --oautofps, --omaxfps
     - remove --video-stereo-mode. This option was broken out of laziness, and
       nobody wants to fix it. Automatic 3D down-conversion to 2D is also broken,
       although you can just insert the stereo3d filter manually. The obscurity
