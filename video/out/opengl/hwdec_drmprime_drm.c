@@ -29,7 +29,7 @@
 #include "video/hwdec.h"
 #include "common/msg.h"
 #include "options/m_config.h"
-#include "libmpv/opengl_cb.h"
+#include "libmpv/render_gl.h"
 #include "video/out/drm_common.h"
 #include "video/out/drm_prime.h"
 #include "video/out/gpu/hwdec.h"
@@ -117,24 +117,33 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
     struct drm_frame next_frame = {0};
     int ret;
 
+    // grab atomic request from native resources
+    if (p->ctx) {
+        struct mpv_opengl_drm_params *drm_params;
+        drm_params = (mpv_opengl_drm_params *)ra_get_native_resource(hw->ra, "drm_params");
+        if (!drm_params) {
+            MP_ERR(hw, "Failed to retrieve drm params from native resources\n");
+            return -1;
+        }
+        if (drm_params->atomic_request_ptr) {
+            request = *drm_params->atomic_request_ptr;
+        } else {
+            MP_ERR(hw, "drm params pointer to atomic request is invalid");
+            return -1;
+        }
+    }
+
     if (hw_image) {
 
-        // grab opengl-cb windowing info to eventually upscale the overlay
-        // as egl windows could be upscaled to primary plane.
-        struct mpv_opengl_cb_window_pos *glparams =
-            ra_get_native_resource(hw->ra, "opengl-cb-window-pos");
-        if (glparams) {
-            scale_dst_rect(hw, glparams->width, glparams->height, dst, &p->dst);
+        // grab osd windowing info to eventually upscale the overlay
+        // as egl windows could be upscaled to osd plane.
+        struct mpv_opengl_drm_osd_size *osd_size = ra_get_native_resource(hw->ra, "drm_osd_size");
+        if (osd_size) {
+            scale_dst_rect(hw, osd_size->width, osd_size->height, dst, &p->dst);
         } else {
             p->dst = *dst;
         }
         p->src = *src;
-
-        // grab drm interop info
-        struct mpv_opengl_cb_drm_params *drmparams =
-            ra_get_native_resource(hw->ra, "opengl-cb-drm-params");
-        if (drmparams)
-            request = (drmModeAtomicReq *)drmparams->atomic_request;
 
         next_frame.image = hw_image;
         desc = (AVDRMFrameDescriptor *)hw_image->planes[0];
@@ -210,15 +219,11 @@ static int init(struct ra_hwdec *hw)
     drm_overlay = opts->drm_overlay_id;
     talloc_free(tmp);
 
-    struct mpv_opengl_cb_drm_params *params =
-        ra_get_native_resource(hw->ra, "opengl-cb-drm-params");
-    if (!params) {
-        MP_VERBOSE(hw, "Could not get drm interop info.\n");
-        goto err;
-    }
+    struct mpv_opengl_drm_params *drm_params;
 
-    if (params->fd) {
-        p->ctx = drm_atomic_create_context(p->log, params->fd, params->crtc_id,
+    drm_params = ra_get_native_resource(hw->ra, "drm_params");
+    if (drm_params) {
+        p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
                                            drm_overlay);
         if (!p->ctx) {
             mp_err(p->log, "Failed to retrieve DRM atomic context.\n");

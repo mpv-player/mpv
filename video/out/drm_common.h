@@ -50,6 +50,7 @@ struct drm_opts {
     int drm_mode_id;
     int drm_overlay_id;
     int drm_format;
+    struct m_geometry drm_osd_size;
 };
 
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);

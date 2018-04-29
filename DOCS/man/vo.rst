@@ -488,11 +488,6 @@ Available video output drivers are:
         Mode ID to use (resolution and frame rate).
         (default: 0)
 
-    ``--drm-overlay=<number>``
-        Select the DRM overlay index to use.
-        Overlay index is zero based, and related to crtc.
-        (default: 0)
-
     ``--drm-format=<xrgb8888,xrgb2101010>``
         Select the DRM format to use (default: xrgb8888). This allows you to
         choose the bit depth of the DRM mode. xrgb8888 is your usual 24 bit per
@@ -505,6 +500,13 @@ Available video output drivers are:
 
         This currently only has an effect when used together with the ``drm``
         backend for the ``gpu`` VO. The ``drm`` VO always uses xrgb8888.
+
+    ``--drm-osd-size=<[WxH]>``
+        Sets the OSD OpenGL size to the specified size. OSD will then be upscaled
+        to the current screen resolution. This option can be useful when using
+        several layers in high resolutions with a GPU which cannot handle it.
+        Note : this option is only available with DRM atomic support.
+        (default: display resolution)
 
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.

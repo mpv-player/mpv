@@ -28,7 +28,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include "libmpv/opengl_cb.h"
+#include "libmpv/render_gl.h"
 #include "video/out/drm_common.h"
 #include "common/common.h"
 #include "osdep/timer.h"
@@ -80,7 +80,8 @@ struct priv {
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
 
-    struct mpv_opengl_cb_drm_params drm_params;
+    struct mpv_opengl_drm_params drm_params;
+    struct mpv_opengl_drm_osd_size osd_size;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -194,11 +195,11 @@ static bool init_gbm(struct ra_ctx *ctx)
     }
 
     MP_VERBOSE(ctx->vo, "Initializing GBM surface (%d x %d)\n",
-        p->kms->mode.hdisplay, p->kms->mode.vdisplay);
+        p->osd_size.width, p->osd_size.height);
     p->gbm.surface = gbm_surface_create(
         p->gbm.device,
-        p->kms->mode.hdisplay,
-        p->kms->mode.vdisplay,
+        p->osd_size.width,
+        p->osd_size.height,
         p->gbm_format,
         GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     if (!p->gbm.surface) {
@@ -325,7 +326,7 @@ static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *o
     if (p->kms->atomic_context) {
         if (!p->kms->atomic_context->request) {
             p->kms->atomic_context->request = drmModeAtomicAlloc();
-            p->drm_params.atomic_request = p->kms->atomic_context->request;
+            p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
         }
         return ra_gl_ctx_start_frame(sw, out_fbo);
     }
@@ -383,7 +384,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
-        p->drm_params.atomic_request = atomic_ctx->request = drmModeAtomicAlloc();
+        atomic_ctx->request = drmModeAtomicAlloc();
     }
 
     gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
@@ -495,6 +496,20 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         return false;
     }
 
+    if (ctx->vo->opts->drm_opts->drm_osd_size.wh_valid) {
+        if (p->kms->atomic_context) {
+            p->osd_size.width = ctx->vo->opts->drm_opts->drm_osd_size.w;
+            p->osd_size.height = ctx->vo->opts->drm_opts->drm_osd_size.h;
+        } else {
+            p->osd_size.width = p->kms->mode.hdisplay;
+            p->osd_size.height = p->kms->mode.vdisplay;
+            MP_WARN(ctx, "Setting OSD size is only available with DRM atomic, defaulting to screen resolution\n");
+        }
+    } else {
+        p->osd_size.width = p->kms->mode.hdisplay;
+        p->osd_size.height = p->kms->mode.vdisplay;
+    }
+
     uint32_t argb_format;
     uint32_t xrgb_format;
     if (DRM_OPTS_FORMAT_XRGB2101010 == ctx->vo->opts->drm_opts->drm_format) {
@@ -550,9 +565,10 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     }
 
     p->drm_params.fd = p->kms->fd;
+    p->drm_params.connector_id = p->kms->connector->connector_id;
     p->drm_params.crtc_id = p->kms->crtc_id;
     if (p->kms->atomic_context)
-        p->drm_params.atomic_request = p->kms->atomic_context->request;
+        p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
         .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
@@ -561,7 +577,8 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
 
-    ra_add_native_resource(ctx->ra, "opengl-cb-drm-params", &p->drm_params);
+    ra_add_native_resource(ctx->ra, "drm_params", &p->drm_params);
+    ra_add_native_resource(ctx->ra, "drm_osd_size", &p->osd_size);
 
     return true;
 }

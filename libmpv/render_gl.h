@@ -147,6 +147,37 @@ typedef struct mpv_opengl_fbo {
     int internal_format;
 } mpv_opengl_fbo;
 
+typedef struct mpv_opengl_drm_params {
+    /**
+     * DRM fd (int). set this to -1 if invalid.
+     */
+    int fd;
+
+    /**
+     * Currently used crtc id
+     */
+    int crtc_id;
+
+    /**
+     * Currently used connector id
+     */
+    int connector_id;
+
+    /**
+     * Pointer to a drmModeAtomicReq pointer that is being used for the renderloop.
+     * This pointer should hold a pointer to the atomic request pointer
+     * The atomic request pointer is usually changed at every renderloop.
+     */
+    struct _drmModeAtomicReq **atomic_request_ptr;
+} mpv_opengl_drm_params;
+
+typedef struct mpv_opengl_drm_osd_size {
+    /**
+     * size of the OSD in pixels.
+     */
+    int width, height;
+} mpv_opengl_drm_osd_size;
+
 #ifdef __cplusplus
 }
 #endif

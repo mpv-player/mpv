@@ -1,6 +1,7 @@
 #include "config.h"
 #include "hwdec.h"
 #include "libmpv_gpu.h"
+#include "libmpv/render_gl.h"
 #include "video.h"
 #include "video/out/libmpv.h"
 
@@ -30,6 +31,14 @@ static const struct native_resource_entry native_resource_map[] = {
     [MPV_RENDER_PARAM_WL_DISPLAY] = {
         .name = "wl",
         .size = 0,
+    },
+    [MPV_RENDER_PARAM_DRM_DISPLAY] = {
+        .name = "drm_params",
+        .size = sizeof (mpv_opengl_drm_params),
+    },
+    [MPV_RENDER_PARAM_DRM_OSD_SIZE] = {
+        .name = "drm_osd_size",
+        .size = sizeof (mpv_opengl_drm_osd_size),
     },
 };
 

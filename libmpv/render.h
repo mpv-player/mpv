@@ -276,6 +276,18 @@ typedef enum mpv_render_param_type {
      * in the same way.
      */
     MPV_RENDER_PARAM_SKIP_RENDERING = 13,
+    /**
+     * DRM display, contains drm display handles.
+     * Valid for mpv_render_context_create().
+     * Type : struct mpv_opengl_drm_params*
+     */
+    MPV_RENDER_PARAM_DRM_DISPLAY = 14,
+    /**
+     * DRM osd size, contains osd dimensions.
+     * Valid for mpv_render_context_create().
+     * Type : struct mpv_opengl_drm_osd_size*
+     */
+    MPV_RENDER_PARAM_DRM_OSD_SIZE = 15,
 } mpv_render_param_type;
 
 /**

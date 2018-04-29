@@ -51,6 +51,7 @@ const struct m_sub_options drm_conf = {
         OPT_CHOICE("drm-format", drm_format, 0,
                    ({"xrgb8888",    DRM_OPTS_FORMAT_XRGB8888},
                     {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010})),
+        OPT_SIZE_BOX("drm-osd-size", drm_osd_size, 0),
         {0},
     },
     .size = sizeof(struct drm_opts),
