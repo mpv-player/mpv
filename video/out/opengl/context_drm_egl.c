@@ -352,9 +352,9 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     update_framebuffer_from_bo(ctx, p->gbm.next_bo);
 
     if (atomic_ctx) {
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "FB_ID", p->fb->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "CRTC_ID", atomic_ctx->crtc->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->primary_plane, "ZPOS", 1);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "FB_ID", p->fb->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "CRTC_ID", atomic_ctx->crtc->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "ZPOS", 1);
 
         ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
                                   DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, NULL);
@@ -442,7 +442,7 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
     }
 
     drmModePlane *drmplane =
-        drmModeGetPlane(p->kms->fd, p->kms->atomic_context->primary_plane->id);
+        drmModeGetPlane(p->kms->fd, p->kms->atomic_context->osd_plane->id);
     bool have_argb = false;
     bool have_xrgb = false;
     bool result = false;
@@ -490,7 +490,8 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     MP_VERBOSE(ctx, "Initializing KMS\n");
     p->kms = kms_create(ctx->log, ctx->vo->opts->drm_opts->drm_connector_spec,
                         ctx->vo->opts->drm_opts->drm_mode_id,
-                        ctx->vo->opts->drm_opts->drm_overlay_id);
+                        ctx->vo->opts->drm_opts->drm_osd_plane_id,
+                        ctx->vo->opts->drm_opts->drm_video_plane_id);
     if (!p->kms) {
         MP_ERR(ctx, "Failed to create KMS.\n");
         return false;

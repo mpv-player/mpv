@@ -420,7 +420,8 @@ static int preinit(struct vo *vo)
     p->kms = kms_create(
         vo->log, vo->opts->drm_opts->drm_connector_spec,
                  vo->opts->drm_opts->drm_mode_id,
-                 vo->opts->drm_opts->drm_overlay_id);
+                 vo->opts->drm_opts->drm_osd_plane_id,
+                 vo->opts->drm_opts->drm_video_plane_id);
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
         goto err;

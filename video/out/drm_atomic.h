@@ -37,8 +37,8 @@ struct drm_atomic_context {
 
     struct drm_object *crtc;
     struct drm_object *connector;
-    struct drm_object *primary_plane;
-    struct drm_object *overlay_plane;
+    struct drm_object *osd_plane;
+    struct drm_object *video_plane;
 
     drmModeAtomicReq *request;
 };
@@ -52,7 +52,8 @@ drmModePropertyBlobPtr drm_object_get_property_blob(struct drm_object *object, c
 struct drm_object * drm_object_create(struct mp_log *log, int fd, uint32_t object_id, uint32_t type);
 void drm_object_free(struct drm_object *object);
 void drm_object_print_info(struct mp_log *log, struct drm_object *object);
-struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id, int connector_id, int overlay_id);
+struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id, int connector_id,
+													 int osd_plane_id, int video_plane_id);
 void drm_atomic_destroy_context(struct drm_atomic_context *ctx);
 
 #endif // MP_DRMATOMIC_H

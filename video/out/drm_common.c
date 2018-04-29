@@ -47,12 +47,17 @@ const struct m_sub_options drm_conf = {
         OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
                             0, drm_validate_connector_opt),
         OPT_INT("drm-mode", drm_mode_id, 0),
-        OPT_INT("drm-overlay", drm_overlay_id, 0),
+        OPT_INT("drm-osd-plane-id", drm_osd_plane_id, 0),
+        OPT_INT("drm-video-plane-id", drm_video_plane_id, 0),
         OPT_CHOICE("drm-format", drm_format, 0,
                    ({"xrgb8888",    DRM_OPTS_FORMAT_XRGB8888},
                     {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010})),
         OPT_SIZE_BOX("drm-osd-size", drm_osd_size, 0),
         {0},
+    },
+    .defaults = &(const struct drm_opts) {
+        .drm_osd_plane_id = -1,
+        .drm_video_plane_id = -1,
     },
     .size = sizeof(struct drm_opts),
 };
@@ -238,7 +243,7 @@ static void parse_connector_spec(struct mp_log *log,
 
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id, int overlay_id)
+                       int mode_id, int osd_plane_id, int video_plane_id)
 {
     int card_no = -1;
     char *connector_name = NULL;
@@ -286,7 +291,7 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
     } else {
         mp_verbose(log, "DRM Atomic support found\n");
         kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id,
-                                                        kms->connector->connector_id, overlay_id);
+                                                        kms->connector->connector_id, osd_plane_id, video_plane_id);
         if (!kms->atomic_context) {
             mp_err(log, "Failed to create DRM atomic context\n");
             goto err;
