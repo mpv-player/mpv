@@ -1153,6 +1153,9 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
     int num_x = info.block_w > 0 ? (w + info.block_w - 1) / info.block_w : 1,
         num_y = info.block_h > 0 ? (h + info.block_h - 1) / info.block_h : 1;
 
+    if (!(p->ra->caps & RA_CAP_NUM_GROUPS))
+        PRELUDE("#define gl_NumWorkGroups uvec3(%d, %d, 1)\n", num_x, num_y);
+
     pass_record(p, gl_sc_dispatch_compute(p->sc, num_x, num_y, 1));
     cleanup_binds(p);
 }
@@ -3515,7 +3518,6 @@ static void check_gl_features(struct gl_video *p)
     bool have_compute = ra->caps & RA_CAP_COMPUTE;
     bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
     bool have_fragcoord = ra->caps & RA_CAP_FRAGCOORD;
-    bool have_numgroups = ra->caps & RA_CAP_NUM_GROUPS;
 
     const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgba16hf",
                                    "rgb10_a2", "rgba8", 0};
@@ -3549,13 +3551,12 @@ static void check_gl_features(struct gl_video *p)
         MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
 
-    bool have_compute_peak = have_compute && have_ssbo && have_numgroups;
+    bool have_compute_peak = have_compute && have_ssbo;
     if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
         int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
         MP_MSG(p, msgl, "Disabling HDR peak computation (one or more of the "
                         "following is not supported: compute shaders=%d, "
-                        "SSBO=%d, multiple work groups=%d).\n",
-                        have_compute, have_ssbo, have_numgroups);
+                        "SSBO=%d).\n", have_compute, have_ssbo);
         p->opts.compute_hdr_peak = -1;
     }
 
