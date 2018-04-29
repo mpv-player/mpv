@@ -354,6 +354,9 @@ struct vo_driver {
 
     /* Render the given frame. Note that this is also called when repeating
      * or redrawing frames.
+     *
+     * frame is freed by the caller, but the callee can still modify the
+     * contained data and references.
      */
     void (*draw_frame)(struct vo *vo, struct vo_frame *frame);
 
