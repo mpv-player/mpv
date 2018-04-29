@@ -422,7 +422,7 @@ int ao_query_and_reset_events(struct ao *ao, int events)
     return atomic_fetch_and(&ao->events_, ~(unsigned)events) & events;
 }
 
-static void ao_add_events(struct ao *ao, int events)
+void ao_add_events(struct ao *ao, int events)
 {
     atomic_fetch_or(&ao->events_, events);
     ao->wakeup_cb(ao->wakeup_ctx);

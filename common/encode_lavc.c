@@ -53,10 +53,6 @@ struct encode_priv {
     struct mux_stream **streams;
     int num_streams;
 
-    // Temporary queue while muxer is not initialized.
-    AVPacket **packets;
-    int num_packets;
-
     // Statistics
     double t0;
 
@@ -69,10 +65,13 @@ struct encode_priv {
 
 struct mux_stream {
     int index;                      // index of this into p->streams[]
+    char name[80];
     struct encode_lavc_context *ctx;
     enum AVMediaType codec_type;
     AVRational encoder_timebase;    // packet timestamps from encoder
     AVStream *st;
+    void (*on_ready)(void *ctx);    // when finishing muxer init
+    void *on_ready_ctx;
 };
 
 #define OPT_BASE_STRUCT struct encode_opts
@@ -111,8 +110,6 @@ const struct m_sub_options encode_config = {
         .copy_metadata = 1,
     },
 };
-
-static void write_remaining_packets(struct encode_lavc_context *ctx);
 
 struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
 {
@@ -219,8 +216,6 @@ bool encode_lavc_free(struct encode_lavc_context *ctx)
         p->failed = true;
     }
 
-    write_remaining_packets(ctx);
-
     if (!p->failed && p->header_written) {
         if (av_write_trailer(p->muxer) < 0)
             MP_ERR(p, "error writing trailer\n");
@@ -258,52 +253,6 @@ void encode_lavc_set_audio_pts(struct encode_lavc_context *ctx, double pts)
 }
 
 // called locked
-static void write_remaining_packets(struct encode_lavc_context *ctx)
-{
-    struct encode_priv *p = ctx->priv;
-
-    if (!p->header_written && !p->failed)
-        return; // wait until muxer initialization
-
-    for (int n = 0; n < p->num_packets; n++) {
-        AVPacket *pkt = p->packets[n];
-        MP_TARRAY_REMOVE_AT(p->packets, p->num_packets, 0);
-
-        if (p->failed) {
-            av_packet_free(&pkt);
-            continue;
-        }
-
-        struct mux_stream *s = p->streams[pkt->stream_index];
-
-        pkt->stream_index = s->st->index;
-        assert(s->st == p->muxer->streams[pkt->stream_index]);
-
-        av_packet_rescale_ts(pkt, s->encoder_timebase, s->st->time_base);
-
-        switch (s->st->codecpar->codec_type) {
-        case AVMEDIA_TYPE_VIDEO:
-            p->vbytes += pkt->size;
-            p->frames += 1;
-            break;
-        case AVMEDIA_TYPE_AUDIO:
-            p->abytes += pkt->size;
-            p->audioseconds += pkt->duration
-                * (double)s->st->time_base.num
-                / (double)s->st->time_base.den;
-            break;
-        }
-
-        if (av_interleaved_write_frame(p->muxer, pkt) < 0) {
-            MP_ERR(p, "Writing packet failed.\n");
-            p->failed = true;
-        }
-    }
-
-    p->num_packets = 0;
-}
-
-// called locked
 static void maybe_init_muxer(struct encode_lavc_context *ctx)
 {
     struct encode_priv *p = ctx->priv;
@@ -315,15 +264,8 @@ static void maybe_init_muxer(struct encode_lavc_context *ctx)
     // AVStream parameters, so we wait for data from _all_ streams before
     // starting.
     for (int n = 0; n < p->num_streams; n++) {
-        if (!p->streams[n]->st) {
-            int max_num = 50;
-            if (p->num_packets > max_num) {
-                MP_FATAL(p, "no data on stream %d, even though other streams "
-                         "produced more than %d packets.\n", n, p->num_packets);
-                goto failed;
-            }
+        if (!p->streams[n]->st)
             return;
-        }
     }
 
     if (!(p->muxer->oformat->flags & AVFMT_NOFILE)) {
@@ -364,7 +306,13 @@ static void maybe_init_muxer(struct encode_lavc_context *ctx)
 
     p->header_written = true;
 
-    write_remaining_packets(ctx);
+    for (int n = 0; n < p->num_streams; n++) {
+        struct mux_stream *s = p->streams[n];
+
+        if (s->on_ready)
+            s->on_ready(s->on_ready_ctx);
+    }
+
     return;
 
 failed:
@@ -411,9 +359,35 @@ void encode_lavc_expect_stream(struct encode_lavc_context *ctx,
         .ctx = ctx,
         .codec_type = mp_to_av_stream_type(type),
     };
+    snprintf(dst->name, sizeof(dst->name), "%s", stream_type_name(type));
     MP_TARRAY_APPEND(p, p->streams, p->num_streams, dst);
 
 done:
+    pthread_mutex_unlock(&ctx->lock);
+}
+
+void encode_lavc_stream_eof(struct encode_lavc_context *ctx,
+                            enum stream_type type)
+{
+    if (!ctx)
+        return;
+
+    struct encode_priv *p = ctx->priv;
+
+    pthread_mutex_lock(&ctx->lock);
+
+    enum AVMediaType codec_type = mp_to_av_stream_type(type);
+    struct mux_stream *dst = find_mux_stream(ctx, codec_type);
+
+    // If we've reached EOF, even though the stream was selected, and we didn't
+    // ever initialize it, we have a problem. We could mux some sort of dummy
+    // stream (and could fail if actual data arrives later), or we bail out
+    // early.
+    if (dst && !dst->st) {
+        MP_ERR(p, "No data on stream %s.\n", dst->name);
+        p->failed = true;
+    }
+
     pthread_mutex_unlock(&ctx->lock);
 }
 
@@ -421,7 +395,9 @@ done:
 // This returns a muxing handle which you can use to add encodec packets.
 // Can be called only once per stream. info is copied by callee as needed.
 static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx,
-                                                 struct encoder_stream_info *info)
+                                                 struct encoder_stream_info *info,
+                                                 void (*on_ready)(void *ctx),
+                                                 void *on_ready_ctx)
 {
     struct encode_priv *p = ctx->priv;
 
@@ -449,6 +425,9 @@ static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx
     if (avcodec_parameters_copy(dst->st->codecpar, info->codecpar) < 0)
         MP_HANDLE_OOM(0);
 
+    dst->on_ready = on_ready;
+    dst->on_ready_ctx = on_ready_ctx;
+
     maybe_init_muxer(ctx);
 
 done:
@@ -470,17 +449,41 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
     if (p->failed)
         goto done;
 
-    AVPacket *new_packet = av_packet_clone(pkt);
-    if (pkt && !new_packet)
-        MP_HANDLE_OOM(0);
+    if (!p->header_written) {
+        MP_ERR(p, "Encoder trying to write packet before muxer was initialized.\n");
+        p->failed = true;
+        goto done;
+    }
 
-    new_packet->stream_index = dst->index; // not the lavf index (yet)
-    MP_TARRAY_APPEND(p, p->packets, p->num_packets, new_packet);
+    pkt->stream_index = dst->st->index;
+    assert(dst->st == p->muxer->streams[pkt->stream_index]);
 
-    write_remaining_packets(ctx);
+    av_packet_rescale_ts(pkt, dst->encoder_timebase, dst->st->time_base);
+
+    switch (dst->st->codecpar->codec_type) {
+    case AVMEDIA_TYPE_VIDEO:
+        p->vbytes += pkt->size;
+        p->frames += 1;
+        break;
+    case AVMEDIA_TYPE_AUDIO:
+        p->abytes += pkt->size;
+        p->audioseconds += pkt->duration
+            * (double)dst->st->time_base.num
+            / (double)dst->st->time_base.den;
+        break;
+    }
+
+    if (av_interleaved_write_frame(p->muxer, pkt) < 0) {
+        MP_ERR(p, "Writing packet failed.\n");
+        p->failed = true;
+        goto done;
+    }
+
+    pkt = NULL;
 
 done:
     pthread_mutex_unlock(&ctx->lock);
+    av_packet_free(&pkt);
 }
 
 void encode_lavc_discontinuity(struct encode_lavc_context *ctx)
@@ -852,7 +855,8 @@ static void encoder_2pass_prepare(struct encoder_context *p)
     talloc_free(filename);
 }
 
-bool encoder_init_codec_and_muxer(struct encoder_context *p)
+bool encoder_init_codec_and_muxer(struct encoder_context *p,
+                                  void (*on_ready)(void *ctx), void *ctx)
 {
     assert(!avcodec_is_open(p->encoder));
 
@@ -905,7 +909,8 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p)
     if (avcodec_parameters_from_context(p->info.codecpar, p->encoder) < 0)
         goto fail;
 
-    p->mux_stream = encode_lavc_add_stream(p->encode_lavc_ctx, &p->info);
+    p->mux_stream = encode_lavc_add_stream(p->encode_lavc_ctx, &p->info,
+                                           on_ready, ctx);
     if (!p->mux_stream)
         goto fail;
 

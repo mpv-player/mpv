@@ -84,6 +84,13 @@ static void select_format(struct ao *ao, const AVCodec *codec)
     }
 }
 
+static void on_ready(void *ptr)
+{
+    struct ao *ao = ptr;
+
+    ao_add_events(ao, AO_EVENT_INITIAL_UNBLOCK);
+}
+
 // open & setup audio device
 static int init(struct ao *ao)
 {
@@ -123,7 +130,7 @@ static int init(struct ao *ao)
     encoder->sample_fmt = af_to_avformat(ao->format);
     encoder->bits_per_raw_sample = ac->sample_size * 8;
 
-    if (!encoder_init_codec_and_muxer(ac->enc))
+    if (!encoder_init_codec_and_muxer(ac->enc, on_ready, ao))
         goto fail;
 
     ac->pcmhack = 0;
@@ -342,6 +349,7 @@ const struct ao_driver audio_out_lavc = {
     .encode = true,
     .description = "audio encoding using libavcodec",
     .name      = "lavc",
+    .initially_blocked = true,
     .priv_size = sizeof(struct priv),
     .init      = init,
     .uninit    = uninit,

@@ -130,6 +130,10 @@ struct ao_driver {
     const char *name;
     // Description shown with --ao=help.
     const char *description;
+    // This requires waiting for a AO_EVENT_INITIAL_UNBLOCK event before the
+    // first play() call is done. Encode mode uses this, and push mode
+    // respects it automatically (don't use with pull mode).
+    bool initially_blocked;
     // Init the device using ao->format/ao->channels/ao->samplerate. If the
     // device doesn't accept these parameters, you can attempt to negotiate
     // fallback parameters, and set the ao format fields accordingly.
