@@ -4830,7 +4830,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     bool async = cmd->flags & MP_ASYNC_CMD;
 
-    mp_cmd_dump(mpctx->log, cmd->id == MP_CMD_IGNORE ? MSGL_TRACE : MSGL_DEBUG,
+    mp_cmd_dump(mpctx->log, cmd->def->is_ignore ? MSGL_TRACE : MSGL_DEBUG,
                 "Run command:", cmd);
 
     if (cmd->flags & MP_EXPAND_PROPERTIES) {
@@ -5645,7 +5645,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 #define OARG_CYCLEDIR(def)      OPT_CYCLEDIR(ARG(d), 0, OPTDEF_DOUBLE(def))
 
 const struct mp_cmd_def mp_cmds[] = {
-    { MP_CMD_IGNORE, "ignore", },
+    { MP_CMD_IGNORE, "ignore", .is_ignore = true },
 
     { MP_CMD_SEEK, "seek", {
         ARG_TIME,
@@ -5666,20 +5666,26 @@ const struct mp_cmd_def mp_cmds[] = {
     { MP_CMD_REVERT_SEEK, "revert-seek", {
         OARG_FLAGS(0, ({"mark", 1})),
     }},
-    { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
-    { MP_CMD_QUIT_WATCH_LATER, "quit-watch-later", { OARG_INT(0) } },
-    { MP_CMD_STOP, "stop", },
+    { MP_CMD_QUIT, "quit", { OARG_INT(0) },
+        .is_abort = true },
+    { MP_CMD_QUIT_WATCH_LATER, "quit-watch-later", { OARG_INT(0) },
+        .is_abort = true },
+    { MP_CMD_STOP, "stop", .is_abort = true },
     { MP_CMD_FRAME_STEP, "frame-step", .allow_auto_repeat = true,
         .on_updown = true },
     { MP_CMD_FRAME_BACK_STEP, "frame-back-step", .allow_auto_repeat = true },
     { MP_CMD_PLAYLIST_NEXT, "playlist-next", {
-        OARG_CHOICE(0, ({"weak", 0},
-                        {"force", 1})),
-    }},
+            OARG_CHOICE(0, ({"weak", 0},
+                            {"force", 1})),
+        },
+        .is_soft_abort = true,
+    },
     { MP_CMD_PLAYLIST_PREV, "playlist-prev", {
-        OARG_CHOICE(0, ({"weak", 0},
-                        {"force", 1})),
-    }},
+            OARG_CHOICE(0, ({"weak", 0},
+                            {"force", 1})),
+        },
+        .is_soft_abort = true,
+    },
     { MP_CMD_PLAYLIST_SHUFFLE, "playlist-shuffle", },
     { MP_CMD_SUB_STEP, "sub-step", { ARG_INT }, .allow_auto_repeat = true },
     { MP_CMD_SUB_SEEK, "sub-seek", { ARG_INT }, .allow_auto_repeat = true },

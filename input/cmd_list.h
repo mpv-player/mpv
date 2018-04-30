@@ -33,6 +33,9 @@ struct mp_cmd_def {
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
     bool scalable;
+    bool is_abort;
+    bool is_soft_abort;
+    bool is_ignore;
 };
 
 extern const struct mp_cmd_def mp_cmds[];

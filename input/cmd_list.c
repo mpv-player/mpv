@@ -30,15 +30,11 @@
 // 0: no, 1: maybe, 2: sure
 static int is_abort_cmd(struct mp_cmd *cmd)
 {
-    switch (cmd->id) {
-    case MP_CMD_QUIT:
-    case MP_CMD_QUIT_WATCH_LATER:
-    case MP_CMD_STOP:
+    if (cmd->def->is_abort)
         return 2;
-    case MP_CMD_PLAYLIST_NEXT:
-    case MP_CMD_PLAYLIST_PREV:
+    if (cmd->def->is_soft_abort)
         return 1;
-    case MP_CMD_COMMAND_LIST:;
+    if (cmd->def == &mp_cmd_list) {
         int r = 0;
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
             int x = is_abort_cmd(sub);
@@ -61,14 +57,13 @@ bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
 {
-    return (cmd->def && cmd->def->allow_auto_repeat) ||
-           cmd->id == MP_CMD_COMMAND_LIST ||
+    return (cmd->def->allow_auto_repeat) || cmd->def == &mp_cmd_list ||
            (cmd->flags & MP_ALLOW_REPEAT);
 }
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
 {
-    return cmd->def && cmd->def->scalable;
+    return cmd->def->scalable;
 }
 
 void mp_print_cmd_list(struct mp_log *out)

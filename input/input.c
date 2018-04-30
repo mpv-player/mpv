@@ -547,7 +547,7 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
     update_mouse_section(ictx);
     struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
     key_buf_add(ictx->key_history, code);
-    if (cmd && cmd->id != MP_CMD_IGNORE && !should_drop_cmd(ictx, cmd))
+    if (cmd && !cmd->def->is_ignore && !should_drop_cmd(ictx, cmd))
         return cmd;
     talloc_free(cmd);
     return NULL;
