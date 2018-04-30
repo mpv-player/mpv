@@ -24,6 +24,8 @@ struct mp_log;
 struct mp_cmd;
 struct mpv_node;
 
+extern const struct mp_cmd_def mp_cmd_list;
+
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.
 struct mp_cmd *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc);

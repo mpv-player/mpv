@@ -28,6 +28,11 @@
 
 #include "libmpv/client.h"
 
+const struct mp_cmd_def mp_cmd_list = {
+    .id = MP_CMD_COMMAND_LIST,
+    .name = "list",
+};
+
 static void destroy_cmd(void *ptr)
 {
     struct mp_cmd *cmd = ptr;
@@ -314,11 +319,6 @@ error:
     return NULL;
 }
 
-static struct mp_cmd_def list_def = {
-    .id = MP_CMD_COMMAND_LIST,
-    .name = "list",
-};
-
 mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
 {
     void *tmp = talloc_new(NULL);
@@ -341,9 +341,9 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
             struct mp_cmd *list = talloc_ptrtype(NULL, list);
             talloc_set_destructor(list, destroy_cmd);
             *list = (struct mp_cmd) {
-                .id = list_def.id,
-                .name = (char *)list_def.name,
-                .def = &list_def,
+                .id = mp_cmd_list.id,
+                .name = (char *)mp_cmd_list.name,
+                .def = &mp_cmd_list,
                 .original = bstrdup(list, original),
             };
             talloc_steal(list, cmd);
@@ -407,7 +407,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     ret->original = bstrdup(ret, cmd->original);
     ret->key_name = talloc_strdup(ret, ret->key_name);
 
-    if (cmd->id == MP_CMD_COMMAND_LIST) {
+    if (cmd->def == &mp_cmd_list) {
         struct mp_cmd *prev = NULL;
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
             sub = mp_cmd_clone(sub);
