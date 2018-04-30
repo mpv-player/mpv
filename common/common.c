@@ -16,6 +16,7 @@
  */
 
 #include <stdarg.h>
+#include <math.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
@@ -48,14 +49,17 @@ char *mp_format_time_fmt(const char *fmt, double time)
     time = time < 0 ? -time : time;
     long long int itime = time;
     long long int h, m, tm, s;
-    int ms;
+    int ms = lrint((time - itime) * 1000);
+    if (ms >= 1000) {
+        ms -= 1000;
+        itime += 1;
+    }
     s = itime;
     tm = s / 60;
     h = s / 3600;
     s -= h * 3600;
     m = s / 60;
     s -= m * 60;
-    ms = (time - itime) * 1000;
     char *res = talloc_strdup(NULL, "");
     while (*fmt) {
         if (fmt[0] == '%') {
