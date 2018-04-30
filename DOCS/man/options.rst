@@ -2961,8 +2961,7 @@ Demuxer
 
     Keep in mind that some events can flush the cache or force a low level
     seek anyway, such as switching tracks, or attempting to seek before the
-    start or after the end of the file. This option is experimental - thus
-    disabled, and bugs are to be expected.
+    start or after the end of the file.
 
     The special value ``auto`` means ``yes`` in the same situation as
     ``--cache-secs`` is used (i.e. when the stream appears to be a network
