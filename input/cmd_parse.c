@@ -251,13 +251,6 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
     };
 
     ctx->str = bstr_lstrip(ctx->str);
-    bstr old = ctx->str;
-    if (mp_replace_legacy_cmd(ctx->tmp, &ctx->str)) {
-        MP_WARN(ctx, "Warning: command '%.*s' is deprecated, "
-                "replaced with '%.*s' at %s.\n",
-                BSTR_P(old), BSTR_P(ctx->str), loc);
-        ctx->start = ctx->str;
-    }
 
     bstr cur_token;
     if (pctx_read_token(ctx, &cur_token) < 0)

@@ -134,9 +134,6 @@ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd);
 
-struct bstr;
-bool mp_replace_legacy_cmd(void *talloc_ctx, struct bstr *s);
-
 struct mp_log;
 void mp_print_cmd_list(struct mp_log *out);
 
