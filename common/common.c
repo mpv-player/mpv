@@ -72,6 +72,7 @@ char *mp_format_time_fmt(const char *fmt, double time)
             case 's': appendf(&res, "%s%lld", sign, itime); break;
             case 'S': appendf(&res, "%02lld", s); break;
             case 'T': appendf(&res, "%03d", ms); break;
+            case 'f': appendf(&res, "%f", time); break;
             case '%': appendf(&res, "%s", "%"); break;
             default: goto error;
             }
