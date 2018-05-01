@@ -1450,7 +1450,7 @@ bool mp_input_use_media_keys(struct input_ctx *ictx)
 struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
                                   const char *location)
 {
-    return mp_input_parse_cmd_(ictx->log, str, location);
+    return mp_input_parse_cmd_str(ictx->log, str, location);
 }
 
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
@@ -1603,7 +1603,7 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
             if (term) {
                 bstr s = {in->cmd_buffer, in->cmd_buffer_size};
                 s = bstr_strip(s);
-                struct mp_cmd *cmd= mp_input_parse_cmd_(src->log, s, "<>");
+                struct mp_cmd *cmd = mp_input_parse_cmd_str(src->log, s, "<>");
                 if (cmd)
                     mp_input_queue_cmd(src->input_ctx, cmd);
                 in->cmd_buffer_size = 0;

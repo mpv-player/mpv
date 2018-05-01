@@ -316,7 +316,7 @@ error:
     return NULL;
 }
 
-mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
+mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
 {
     void *tmp = talloc_new(NULL);
     bstr original = str;

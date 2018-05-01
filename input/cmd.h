@@ -124,7 +124,8 @@ void mp_print_cmd_list(struct mp_log *out);
 
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.
-struct mp_cmd *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc);
+struct mp_cmd *mp_input_parse_cmd_str(struct mp_log *log, bstr str,
+                                      const char *loc);
 
 // Similar to mp_input_parse_cmd(), but takes a list of strings instead.
 // Also, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES are not set by default.
