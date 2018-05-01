@@ -22,7 +22,7 @@
 #include "misc/bstr.h"
 
 #include "cmd_list.h"
-#include "cmd_parse.h"
+#include "cmd.h"
 
 // For mp_input_put_key(): release all keys that are down.
 #define MP_INPUT_RELEASE_ALL -1
