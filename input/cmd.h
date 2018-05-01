@@ -44,6 +44,70 @@ struct mp_cmd_def {
     bool is_ignore;
 };
 
+enum mp_cmd_flags {
+    MP_ON_OSD_NO = 0,           // prefer not using OSD
+    MP_ON_OSD_AUTO = 1,         // use default behavior of the specific command
+    MP_ON_OSD_BAR = 2,          // force a bar, if applicable
+    MP_ON_OSD_MSG = 4,          // force a message, if applicable
+    MP_EXPAND_PROPERTIES = 8,   // expand strings as properties
+    MP_ALLOW_REPEAT = 16,       // if used as keybinding, allow key repeat
+    MP_ASYNC_CMD = 32,
+
+    MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
+                      MP_ON_OSD_BAR | MP_ON_OSD_MSG,
+};
+
+enum mp_input_section_flags {
+    // If a key binding is not defined in the current section, do not search the
+    // other sections for it (like the default section). Instead, an unbound
+    // key warning will be printed.
+    MP_INPUT_EXCLUSIVE = 1,
+    // Prefer it to other sections.
+    MP_INPUT_ON_TOP = 2,
+    // Let mp_input_test_dragging() return true, even if inside the mouse area.
+    MP_INPUT_ALLOW_VO_DRAGGING = 4,
+    // Don't force mouse pointer visible, even if inside the mouse area.
+    MP_INPUT_ALLOW_HIDE_CURSOR = 8,
+};
+
+// Arbitrary upper bound for sanity.
+#define MP_CMD_MAX_ARGS 100
+
+struct mp_cmd_arg {
+    const struct m_option *type;
+    union {
+        int i;
+        float f;
+        double d;
+        char *s;
+        char **str_list;
+        void *p;
+    } v;
+};
+
+typedef struct mp_cmd {
+    int id;
+    char *name;
+    struct mp_cmd_arg *args;
+    int nargs;
+    int flags; // mp_cmd_flags bitfield
+    bstr original;
+    char *input_section;
+    bool is_up_down : 1;
+    bool is_up : 1;
+    bool emit_on_up : 1;
+    bool is_mouse_button : 1;
+    bool repeated : 1;
+    bool mouse_move : 1;
+    int mouse_x, mouse_y;
+    struct mp_cmd *queue_next;
+    double scale;               // for scaling numeric arguments
+    int scale_units;
+    const struct mp_cmd_def *def;
+    char *sender; // name of the client API user which sent this
+    char *key_name; // string representation of the key binding
+} mp_cmd_t;
+
 extern const struct mp_cmd_def mp_cmds[];
 extern const struct mp_cmd_def mp_cmd_list;
 
