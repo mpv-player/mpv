@@ -21,7 +21,6 @@
 #include <stdbool.h>
 #include "misc/bstr.h"
 
-#include "cmd_list.h"
 #include "cmd.h"
 
 // For mp_input_put_key(): release all keys that are down.

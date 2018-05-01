@@ -18,13 +18,45 @@
 #ifndef MP_PARSE_COMMAND_H
 #define MP_PARSE_COMMAND_H
 
+#include <stdbool.h>
+
 #include "misc/bstr.h"
+#include "options/m_option.h"
+
+#define MP_CMD_DEF_MAX_ARGS 9
+#define MP_CMD_OPT_ARG 0x1000
 
 struct mp_log;
 struct mp_cmd;
 struct mpv_node;
 
+struct mp_cmd_def {
+    const char *name;   // user-visible name (as used in input.conf)
+    void (*handler)(void *ctx);
+    const struct m_option args[MP_CMD_DEF_MAX_ARGS];
+    const void *priv;   // for free use by handler()
+    bool allow_auto_repeat; // react to repeated key events
+    bool on_updown;     // always emit it on both up and down key events
+    bool vararg;        // last argument can be given 0 to multiple times
+    bool scalable;
+    bool is_abort;
+    bool is_soft_abort;
+    bool is_ignore;
+};
+
+extern const struct mp_cmd_def mp_cmds[];
 extern const struct mp_cmd_def mp_cmd_list;
+
+// Executing this command will maybe abort playback (play something else, or quit).
+bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd);
+// This command will definitely abort playback.
+bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
+
+bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
+
+bool mp_input_is_scalable_cmd(struct mp_cmd *cmd);
+
+void mp_print_cmd_list(struct mp_log *out);
 
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.

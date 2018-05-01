@@ -28,7 +28,7 @@
 #include "common/msg_control.h"
 #include "common/global.h"
 #include "input/input.h"
-#include "input/cmd_list.h"
+#include "input/cmd.h"
 #include "misc/ctype.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
