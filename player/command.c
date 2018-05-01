@@ -4797,7 +4797,7 @@ static void cmd_cycle_values(void *p)
     for (int n = first; n < cmd->num_args; n++) {
         union m_option_value val = {0};
         if (m_option_parse(mpctx->log, &prop, bstr0(name),
-                           bstr0(cmd->args[n].v.s), &val) <= 0)
+                           bstr0(cmd->args[n].v.s), &val) < 0)
             continue;
 
         if (compare_values(&prop, &curval, &val))
