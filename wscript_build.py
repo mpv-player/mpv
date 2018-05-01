@@ -306,7 +306,6 @@ def build(ctx):
         ( "filters/user_filters.c" ),
 
         ## Input
-        ( "input/cmd_list.c" ),
         ( "input/cmd.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
