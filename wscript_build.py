@@ -307,7 +307,7 @@ def build(ctx):
 
         ## Input
         ( "input/cmd_list.c" ),
-        ( "input/cmd_parse.c" ),
+        ( "input/cmd.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
         ( "input/ipc.c" ),
