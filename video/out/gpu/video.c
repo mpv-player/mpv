@@ -3561,6 +3561,11 @@ static void check_gl_features(struct gl_video *p)
         // Verbose, since this is the default setting
         MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
+    if (!have_fbo && have_compute) {
+        have_compute = false;
+        MP_WARN(p, "Force-disabling compute shaders as an FBO format was not "
+                   "available! See your FBO format configuration!\n");
+    }
 
     bool have_compute_peak = have_compute && have_ssbo;
     if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
