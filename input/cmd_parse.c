@@ -29,7 +29,6 @@
 #include "libmpv/client.h"
 
 const struct mp_cmd_def mp_cmd_list = {
-    .id = MP_CMD_COMMAND_LIST,
     .name = "list",
 };
 
@@ -87,7 +86,6 @@ static bool find_cmd(struct mp_log *log, struct mp_cmd *cmd, bstr name)
         if (strcmp(nname, mp_cmds[n].name) == 0) {
             cmd->def = &mp_cmds[n];
             cmd->name = (char *)cmd->def->name;
-            cmd->id = cmd->def->id;
             return true;
         }
     }
@@ -341,7 +339,6 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
             struct mp_cmd *list = talloc_ptrtype(NULL, list);
             talloc_set_destructor(list, destroy_cmd);
             *list = (struct mp_cmd) {
-                .id = mp_cmd_list.id,
                 .name = (char *)mp_cmd_list.name,
                 .def = &mp_cmd_list,
                 .original = bstrdup(list, original),

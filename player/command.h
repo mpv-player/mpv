@@ -29,6 +29,25 @@ struct m_config_option;
 void command_init(struct MPContext *mpctx);
 void command_uninit(struct MPContext *mpctx);
 
+// Runtime context for a single command.
+struct mp_cmd_ctx {
+    struct MPContext *mpctx;
+    struct mp_cmd *cmd; // original command
+    // Fields from cmd (for convenience)
+    struct mp_cmd_arg *args;
+    int num_args;
+    const void *priv;   // cmd->def->priv
+    // OSD control
+    int on_osd;         // MP_ON_OSD_FLAGS;
+    bool msg_osd;       // OSD message requested
+    bool bar_osd;       // OSD bar requested
+    bool seek_msg_osd;  // same as above, but for seek commands
+    bool seek_bar_osd;
+    // Return values
+    bool success;       // true by default
+    struct mpv_node *result;
+};
+
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str);
