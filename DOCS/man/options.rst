@@ -64,17 +64,6 @@ Track Selection
     streamed with youtube-dl, because it saves bandwidth. This is done by
     setting the ytdl_format to "bestaudio/best" in the ytdl_hook.lua script.
 
-``--ff-aid=<ID|auto|no>``, ``--ff-sid=<ID|auto|no>``, ``--ff-vid=<ID|auto|no>``
-    Select audio/subtitle/video streams by the FFmpeg stream index. The FFmpeg
-    stream index is relatively arbitrary, but useful when interacting with
-    other software using FFmpeg (consider ``ffprobe``).
-
-    Note that with external tracks (added with ``--sub-files`` and similar
-    options), there will be streams with duplicate IDs. In this case, the
-    first stream in order is selected.
-
-    Deprecated.
-
 ``--edition=<ID|auto>``
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set
@@ -898,19 +887,6 @@ Video
     videotoolbox is known to require ``uyvy422`` for good performance on some
     older hardware. d3d11va can always use ``yuv420p``, which uses an opaque
     format, with likely no advantages.
-
-``--videotoolbox-format=<name>``
-    Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The
-    choice of the format can influence performance considerably. On the other
-    hand, there doesn't appear to be a good way to detect the best format for
-    the given hardware. ``nv12``, the default, works better on modern hardware,
-    while ``uyvy422`` appears to be better for old hardware. ``yuv420p`` also
-    works.
-    Since mpv 0.25.0, ``no`` is an accepted value, which lets the decoder pick
-    the format on newer FFmpeg versions (will use ``nv12`` on older versions).
-
-    Deprecated. Use ``--hwdec-image-format`` if you really need this. If both
-    are specified, ``--hwdec-image-format`` wins.
 
 ``--cuda-decode-device=<auto|0..>``
     Choose the GPU device used for decoding when using the ``cuda`` hwdec.
