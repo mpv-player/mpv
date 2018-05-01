@@ -626,7 +626,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     pthread_mutex_lock(&ctx->control_lock);
     if (ctx->control_cb) {
         int events = 0;
-        r = ctx->control_cb(ctx->control_cb_ctx, &events, request, data);
+        r = p->ctx->control_cb(vo, p->ctx->control_cb_ctx,
+                               &events, request, data);
         vo_event(vo, events);
     }
     pthread_mutex_unlock(&ctx->control_lock);
