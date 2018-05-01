@@ -6083,33 +6083,24 @@ void command_init(struct MPContext *mpctx)
         if (co->opt->flags & M_OPT_NOPROP)
             continue;
 
-        struct m_property prop = {0};
+        struct m_property prop = {
+            .name = co->name,
+            .call = mp_property_generic_option,
+            .is_option = true,
+        };
 
         if (co->opt->type == &m_option_type_alias) {
-            const char *alias = (const char *)co->opt->priv;
+            prop.priv = co->opt->priv;
 
-            prop = (struct m_property){
-                .name = co->name,
-                .call = co->opt->deprecation_message ?
-                            mp_property_deprecated_alias : mp_property_alias,
-                .priv = (void *)alias,
-                .is_option = true,
-            };
-        } else {
-            prop = (struct m_property){
-                .name = co->name,
-                .call = mp_property_generic_option,
-                .is_option = true,
-            };
+            prop.call = co->opt->deprecation_message ?
+                            mp_property_deprecated_alias : mp_property_alias;
         }
 
-        if (prop.name) {
-            // The option might be covered by a manual property already.
-            if (m_property_list_find(ctx->properties, prop.name))
-                continue;
+        // The option might be covered by a manual property already.
+        if (m_property_list_find(ctx->properties, prop.name))
+            continue;
 
-            ctx->properties[count++] = prop;
-        }
+        ctx->properties[count++] = prop;
     }
 }
 
