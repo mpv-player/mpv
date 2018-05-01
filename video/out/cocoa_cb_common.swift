@@ -80,21 +80,22 @@ class CocoaCB: NSObject {
         window.orderOut(nil)
     }
 
-    func reconfig() {
+    func reconfig(_ vo: UnsafeMutablePointer<vo>) {
         if backendState == .needsInit {
-            initBackend()
+            initBackend(vo)
         } else {
             layer.setVideo(true)
-            updateWindowSize()
+            updateWindowSize(vo)
             layer.update()
         }
     }
 
-    func initBackend() {
+    func initBackend(_ vo: UnsafeMutablePointer<vo>) {
+        let opts: mp_vo_opts = vo.pointee.opts.pointee
         NSApp.setActivationPolicy(.regular)
 
         let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main()
-        let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: mpv.mpctx!.pointee.video_out)
+        let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: vo)
         let win = Window(contentRect: wr, styleMask: window.styleMask,
                               screen: targetScreen, cocoaCB: self)
         win.title = window.title
@@ -126,9 +127,9 @@ class CocoaCB: NSObject {
         backendState = .init
     }
 
-    func updateWindowSize() {
+    func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
         let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main()
-        let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: mpv.mpctx!.pointee.video_out)
+        let wr = getWindowGeometry(forScreen: targetScreen!, videoOut: vo)
         if !window.isVisible {
             window.makeKeyAndOrderFront(nil)
         }
@@ -380,7 +381,7 @@ class CocoaCB: NSObject {
         return ev
     }
 
-    var controlCallback: mp_render_cb_control_fn = { ( ctx, events, request, data ) -> Int32 in
+    var controlCallback: mp_render_cb_control_fn = { ( vo, ctx, events, request, data ) -> Int32 in
         let ccb: CocoaCB = MPVHelper.bridge(ptr: ctx!)
 
         switch mp_voctrl(request) {
@@ -444,7 +445,7 @@ class CocoaCB: NSObject {
             return VO_TRUE
         case VOCTRL_RECONFIG:
             DispatchQueue.main.async {
-                ccb.reconfig()
+                ccb.reconfig(vo!)
             }
             return VO_TRUE
         default:
