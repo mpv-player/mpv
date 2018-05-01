@@ -3524,18 +3524,29 @@ static void check_gl_features(struct gl_video *p)
     const char *user_fbo_fmts[] = {p->opts.fbo_format, 0};
     const char **fbo_fmts = user_fbo_fmts[0] && strcmp(user_fbo_fmts[0], "auto")
                           ? user_fbo_fmts : auto_fbo_fmts;
+    bool user_specified_fbo_fmt = fbo_fmts == user_fbo_fmts;
+    bool fbo_test_result = false;
     bool have_fbo = false;
     p->fbo_format = NULL;
     for (int n = 0; fbo_fmts[n]; n++) {
         const char *fmt = fbo_fmts[n];
         const struct ra_format *f = ra_find_named_format(p->ra, fmt);
-        if (!f && fbo_fmts == user_fbo_fmts)
+        if (!f && user_specified_fbo_fmt)
             MP_WARN(p, "FBO format '%s' not found!\n", fmt);
-        if (f && f->renderable && f->linear_filter && test_fbo(p, f)) {
+        if (f && f->renderable && f->linear_filter &&
+            (fbo_test_result = test_fbo(p, f))) {
             MP_VERBOSE(p, "Using FBO format %s.\n", f->name);
             have_fbo = true;
             p->fbo_format = f;
             break;
+        }
+
+        if (user_specified_fbo_fmt) {
+            MP_WARN(p, "User-specified FBO format '%s' failed to initialize! "
+                       "(exists=%d, renderable=%d, linear_filter=%d, "
+                       "fbo_test_result=%d)\n",
+                    fmt, !!f, f ? f->renderable : 0,  f ? f->linear_filter : 0,
+                    fbo_test_result);
         }
     }
 
