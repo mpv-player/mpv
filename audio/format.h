@@ -46,6 +46,15 @@ enum af_format {
     AF_FORMAT_S_MP3,
     AF_FORMAT_S_TRUEHD,
 
+    // Raw formats, passed directly to the AO.
+    AF_FORMAT_R_AAC,
+    AF_FORMAT_R_AC3,
+    AF_FORMAT_R_DTS,
+    AF_FORMAT_R_DTSHD,
+    AF_FORMAT_R_EAC3,
+    AF_FORMAT_R_MP3,
+    AF_FORMAT_R_TRUEHD,
+
     AF_FORMAT_COUNT
 };
 
@@ -59,6 +68,7 @@ bool af_fmt_is_float(int format);
 bool af_fmt_is_int(int format);
 bool af_fmt_is_planar(int format);
 bool af_fmt_is_spdif(int format);
+bool af_fmt_is_raw(int format);
 bool af_fmt_is_pcm(int format);
 
 int af_fmt_to_planar(int format);

@@ -144,7 +144,8 @@ static void resume(struct ao *ao)
 static void drain(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
-    double maxbuffer = ao->buffer / (double)ao->samplerate + 1;
+    double maxbuffer = 1 + ao->buffer / (double)(
+        af_fmt_is_raw(ao->format) ? ao->bitrate/8 : ao->samplerate);
 
     MP_VERBOSE(ao, "draining...\n");
 
@@ -464,7 +465,7 @@ static int init(struct ao *ao)
 
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
-                               &ao->channels, ao->samplerate);
+                               &ao->channels, ao->samplerate, ao->bitrate);
     mp_audio_buffer_preallocate_min(p->buffer, ao->buffer);
     if (pthread_create(&p->thread, NULL, playthread, ao))
         goto err;

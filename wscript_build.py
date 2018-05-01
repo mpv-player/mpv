@@ -222,6 +222,7 @@ def build(ctx):
         ( "audio/chmap.c" ),
         ( "audio/chmap_sel.c" ),
         ( "audio/decode/ad_lavc.c" ),
+        ( "audio/decode/ad_raw.c" ),
         ( "audio/decode/ad_spdif.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_lavcac3enc.c" ),

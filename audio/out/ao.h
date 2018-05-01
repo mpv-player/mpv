@@ -86,10 +86,12 @@ struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
                         void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
-                        int samplerate, int format, struct mp_chmap channels);
+                        int samplerate, int bitrate, int format,
+                        struct mp_chmap channels);
 void ao_uninit(struct ao *ao);
 void ao_get_format(struct ao *ao,
-                   int *samplerate, int *format, struct mp_chmap *channels);
+                   int *samplerate, int *format, struct mp_chmap *channels,
+                   int *bitrate);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
 bool ao_untimed(struct ao *ao);
