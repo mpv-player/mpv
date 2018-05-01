@@ -22,7 +22,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 
-#include "cmd_parse.h"
+#include "cmd.h"
 #include "cmd_list.h"
 #include "input.h"
 

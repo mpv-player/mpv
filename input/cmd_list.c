@@ -25,7 +25,7 @@
 
 #include "input.h"
 #include "cmd_list.h"
-#include "cmd_parse.h"
+#include "cmd.h"
 
 // 0: no, 1: maybe, 2: sure
 static int is_abort_cmd(struct mp_cmd *cmd)
