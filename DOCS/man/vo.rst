@@ -489,14 +489,14 @@ Available video output drivers are:
         (default: 0)
 
     ``--drm-osd-plane-id=<number>``
-        Select the DRM planed index to use for OSD (or OSD and video).
+        Select the DRM plane index to use for OSD (or OSD and video).
         Index is zero based, and related to crtc.
-        When using this option with drm_prime renderer, it will only affect
+        When using this option with the drm_prime renderer, it will only affect
         the OSD contents. Otherwise it will set OSD & video plane.
         (default: primary plane)
 
     ``--drm-video-plane-id=<number>``
-        Select the DRM planed index to use for video layer.
+        Select the DRM plane index to use for video layer.
         Index is zero based, and related to crtc.
         This option only has effect when using the drm_prime renderer (which
         supports several layers) together with ``vo=gpu`` and ``gpu-context=drm``.
