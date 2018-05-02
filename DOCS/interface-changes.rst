@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.29.0 ---
+    - add --cache-pause-fill to control when the packet cache is considered
+      full after --cache-pause-wait triggers buffering
     - change --cache-pause-initial from yes/no flag to number of seconds for
       initial buffer
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired

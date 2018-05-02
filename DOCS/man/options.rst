@@ -3935,13 +3935,22 @@ Cache
     pause and unpause once more data is available, aka "buffering".
 
 ``--cache-pause-wait=<seconds>``
+    Minimum number of seconds the packet cache needs to contain to avoid
+    triggering "buffering" (default: 1). If the packet cache gets below this
+    value, the demuxer is considered to be underrun and the player will start
+    rebuffering if ``--cache-pause`` is enabled. This will also control when
+    the player leaves the buffering state, unless ``--cache-pause-fill`` is
+    set. If the given time is higher than the maximum set with ``--cache-secs``
+    or  ``--demuxer-readahead-secs``, or prefetching ends before that for some
+    other reason (like file end), playback resumes earlier.
+
+``--cache-pause-fill=<seconds>``
     Number of seconds the packet cache should have buffered before starting
-    playback again if "buffering" was entered (default: 1). This can be used
-    to control how long the player rebuffers if ``--cache-pause`` is enabled,
-    and the demuxer underruns. If the given time is higher than the maximum
-    set with ``--cache-secs`` or  ``--demuxer-readahead-secs``, or prefetching
-    ends before that for some other reason (like file end), playback resumes
-    earlier.
+    playback again once "buffering" was entered. By default, the value of
+    ``--cache-pause-wait`` is used, so the same threshold is used for both
+    starting and stopping buffering. This can be used to control how long
+    the player rebuffers if ``--cache-pause`` is enabled, and the demuxer
+    underruns.
 
 ``--cache-pause-initial=<seconds>``
     Number of seconds the packet cache should have buffered before starting

@@ -465,6 +465,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("cache-pause", cache_pause, 0),
     OPT_FLOAT("cache-pause-initial", cache_pause_initial, M_OPT_MIN, .min = 0),
     OPT_FLOAT("cache-pause-wait", cache_pause_wait, M_OPT_MIN, .min = 0),
+    OPT_FLOAT("cache-pause-fill", cache_pause_fill, M_OPT_MIN, .min = 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),

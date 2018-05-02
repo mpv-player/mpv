@@ -628,6 +628,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
     float cache_pause_wait = opts->cache_pause_wait;
+    float cache_pause_fill = opts->cache_pause_fill > 0 ? opts->cache_pause_fill
+                                                        : cache_pause_wait;
     int cache_buffer = 100;
     bool use_pause_on_low_cache = (c.size > 0 || mpctx->demuxer->is_network) &&
                                   opts->cache_pause;
@@ -645,10 +647,12 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->paused_for_initial_cache) {
         cache_pause_wait = opts->cache_pause_initial;
+        cache_pause_fill = cache_pause_wait;
     }
 
     bool is_low = use_pause_on_low_cache && !s.idle &&
-                  s.ts_duration < opts->cache_pause_wait;
+                  s.ts_duration < (mpctx->paused_for_cache ? cache_pause_fill
+                                                           : cache_pause_wait);
 
     // Enter buffering state only if there actually was an underrun (or if
     // initial caching before playback restart is used).
@@ -667,7 +671,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->paused_for_cache) {
         cache_buffer =
-            100 * MPCLAMP(s.ts_duration / opts->cache_pause_wait, 0, 0.99);
+            100 * MPCLAMP(s.ts_duration / cache_pause_fill, 0, 0.99);
         mp_set_timeout(mpctx, 0.2);
     }
 
