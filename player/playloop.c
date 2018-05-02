@@ -674,11 +674,16 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (mpctx->cache_buffer != cache_buffer) {
         if ((mpctx->cache_buffer == 100) != (cache_buffer == 100)) {
             if (cache_buffer < 100) {
-                MP_VERBOSE(mpctx, "Enter buffering.\n");
+                MP_VERBOSE(mpctx, "Enter buffering (buffer went from %d%% -> %d%%) [%fs].\n",
+                           mpctx->cache_buffer, cache_buffer, s.ts_duration);
             } else {
                 double t = now - mpctx->cache_stop_time;
-                MP_VERBOSE(mpctx, "End buffering (waited %f secs).\n", t);
+                MP_VERBOSE(mpctx, "End buffering (waited %f secs) [%fs].\n",
+                           t, s.ts_duration);
             }
+        } else {
+            MP_VERBOSE(mpctx, "Still buffering (buffer went from %d%% -> %d%%) [%fs].\n",
+                       mpctx->cache_buffer, cache_buffer, s.ts_duration);
         }
         mpctx->cache_buffer = cache_buffer;
         force_update = true;
