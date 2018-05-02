@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.29.0 ---
+    - change --cache-pause-initial from yes/no flag to number of seconds for
+      initial buffer
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
       --ad-spdif-dtshd, --softvol options

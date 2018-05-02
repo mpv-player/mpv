@@ -415,6 +415,7 @@ typedef struct MPContext {
     bool playing_msg_shown;
 
     bool paused_for_cache;
+    bool paused_for_initial_cache;
     double cache_stop_time;
     int cache_buffer;
 

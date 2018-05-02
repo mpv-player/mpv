@@ -627,6 +627,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
+    float cache_pause_wait = opts->cache_pause_wait;
     int cache_buffer = 100;
     bool use_pause_on_low_cache = (c.size > 0 || mpctx->demuxer->is_network) &&
                                   opts->cache_pause;
@@ -635,9 +636,15 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         // Audio or video is restarting, and initial buffering is enabled. Make
         // sure we actually restart them in paused mode, so no audio gets
         // dropped and video technically doesn't start yet.
-        use_pause_on_low_cache &= opts->cache_pause_initial &&
+        use_pause_on_low_cache &= opts->cache_pause_initial > 0 &&
                                     (mpctx->video_status == STATUS_READY ||
                                      mpctx->audio_status == STATUS_READY);
+        if (use_pause_on_low_cache)
+            mpctx->paused_for_initial_cache = true;
+    }
+
+    if (mpctx->paused_for_initial_cache) {
+        cache_pause_wait = opts->cache_pause_initial;
     }
 
     bool is_low = use_pause_on_low_cache && !s.idle &&
@@ -654,6 +661,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         force_update = true;
         if (is_low)
             mpctx->cache_stop_time = now;
+        if (!is_low)
+            mpctx->paused_for_initial_cache = false;
     }
 
     if (mpctx->paused_for_cache) {
