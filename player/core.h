@@ -180,6 +180,8 @@ struct vo_chain {
     // - video consists of a single picture, which should be shown only once
     // - do not sync audio to video in any way
     bool is_coverart;
+    // - video consists of sparse still images
+    bool is_sparse;
 };
 
 // Like vo_chain, for audio.

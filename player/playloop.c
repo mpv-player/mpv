@@ -950,7 +950,9 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
 // Update current playback time.
 static void handle_playback_time(struct MPContext *mpctx)
 {
-    if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
+    if (mpctx->vo_chain &&
+        !mpctx->vo_chain->is_coverart &&
+        !mpctx->vo_chain->is_sparse &&
         mpctx->video_status >= STATUS_PLAYING &&
         mpctx->video_status < STATUS_EOF)
     {
@@ -986,6 +988,13 @@ static void handle_playback_restart(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
+    // Do not wait for video stream if it only has sparse frames.
+    if (mpctx->vo_chain &&
+        mpctx->vo_chain->is_sparse &&
+        mpctx->video_status < STATUS_READY) {
+        mpctx->video_status = STATUS_READY;
+    }
+
     if (mpctx->audio_status < STATUS_READY ||
         mpctx->video_status < STATUS_READY)
         return;
@@ -1008,7 +1017,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
         }
 
         // Video needed, but not started yet -> wait.
-        if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
+        if (mpctx->vo_chain &&
+            !mpctx->vo_chain->is_coverart &&
+            !mpctx->vo_chain->is_sparse &&
             mpctx->video_status <= STATUS_READY)
             return;
 
