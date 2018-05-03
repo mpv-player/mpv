@@ -53,6 +53,9 @@
 #ifndef AV_DISPOSITION_TIMED_THUMBNAILS
 #define AV_DISPOSITION_TIMED_THUMBNAILS 0
 #endif
+#ifndef AV_DISPOSITION_STILL_IMAGE
+#define AV_DISPOSITION_STILL_IMAGE 0
+#endif
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
@@ -717,6 +720,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->forced_track = true;
         if (st->disposition & AV_DISPOSITION_DEPENDENT)
             sh->dependent_track = true;
+        if (st->disposition & AV_DISPOSITION_STILL_IMAGE)
+            sh->still_image = true;
         if (priv->format_hack.use_stream_ids)
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
