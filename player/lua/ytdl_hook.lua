@@ -311,14 +311,14 @@ local function add_single_video(json)
             if not edl_track and not url_is_safe(track.url) then
                 return
             end
-            if track.acodec and track.acodec ~= "none" then
+            if track.vcodec and track.vcodec ~= "none" then
+                -- video track
+                streamurl = edl_track or track.url
+            elseif track.acodec and track.acodec ~= "none" and track.vcodec == "none" then
                 -- audio track
                 mp.commandv("audio-add",
                     edl_track or track.url, "auto",
                     track.format_note or "")
-            elseif track.vcodec and track.vcodec ~= "none" then
-                -- video track
-                streamurl = edl_track or track.url
             end
         end
 
