@@ -47,6 +47,19 @@ struct mp_input_src {
     void *priv;
 };
 
+enum mp_input_section_flags {
+    // If a key binding is not defined in the current section, do not search the
+    // other sections for it (like the default section). Instead, an unbound
+    // key warning will be printed.
+    MP_INPUT_EXCLUSIVE = 1,
+    // Prefer it to other sections.
+    MP_INPUT_ON_TOP = 2,
+    // Let mp_input_test_dragging() return true, even if inside the mouse area.
+    MP_INPUT_ALLOW_VO_DRAGGING = 4,
+    // Don't force mouse pointer visible, even if inside the mouse area.
+    MP_INPUT_ALLOW_HIDE_CURSOR = 8,
+};
+
 // Add an input source that runs on a thread. The source is automatically
 // removed if the thread loop exits.
 //  ctx: this is passed to loop_fn.
