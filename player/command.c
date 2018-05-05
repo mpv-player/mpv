@@ -4827,6 +4827,16 @@ static void cmd_cycle_values(void *p)
     change_property_cmd(cmd, name, M_PROPERTY_SET_STRING, cmd->args[current].v.s);
 }
 
+static void cmd_list(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+
+    for (struct mp_cmd *sub = cmd->cmd->args[0].v.p; sub; sub = sub->queue_next)
+        run_command(cmd->mpctx, sub, NULL);
+}
+
+const struct mp_cmd_def mp_cmd_list = { "list", cmd_list };
+
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
 {
     struct mpv_node dummy_node = {0};
@@ -4863,13 +4873,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
     }
 
-    if (cmd->def == &mp_cmd_list) {
-        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
-            run_command(mpctx, sub, NULL);
-    } else {
-        assert(cmd->def->handler);
-        cmd->def->handler(ctx);
-    }
+    cmd->def->handler(ctx);
 
     if (!ctx->success)
         mpv_free_node_contents(ctx->result);
