@@ -57,19 +57,6 @@ enum mp_cmd_flags {
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
 };
 
-enum mp_input_section_flags {
-    // If a key binding is not defined in the current section, do not search the
-    // other sections for it (like the default section). Instead, an unbound
-    // key warning will be printed.
-    MP_INPUT_EXCLUSIVE = 1,
-    // Prefer it to other sections.
-    MP_INPUT_ON_TOP = 2,
-    // Let mp_input_test_dragging() return true, even if inside the mouse area.
-    MP_INPUT_ALLOW_VO_DRAGGING = 4,
-    // Don't force mouse pointer visible, even if inside the mouse area.
-    MP_INPUT_ALLOW_HIDE_CURSOR = 8,
-};
-
 // Arbitrary upper bound for sanity.
 #define MP_CMD_MAX_ARGS 100
 
