@@ -274,6 +274,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             // while the dispatch item is processed.
             // At the same time, we must prevent other threads from returning
             // from mp_dispatch_lock(), which is done by locked=true.
+            assert(!queue->locked);
             queue->locked = true;
             pthread_mutex_unlock(&queue->lock);
 
