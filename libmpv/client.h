@@ -195,6 +195,18 @@ extern "C" {
  * or change the underlying datatypes. It might be a good idea to prefer
  * MPV_FORMAT_STRING over other types to decouple your code from potential
  * mpv changes.
+ *
+ * Future changes
+ * --------------
+ *
+ * This are the planned changes that will most likely be done on the next major
+ * bump of the library:
+ *
+ *  - remove all symbols and include files that are marked as deprecated
+ *  - reassign enum numerical values to remove gaps
+ *  - remove the mpv_opengl_init_params.extra_exts field
+ *  - change the type of mpv_event_end_file.reason
+ *  - disabling all events by default
  */
 
 /**
@@ -1575,6 +1587,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_SET_PROPERTY_REPLY
      *  MPV_EVENT_COMMAND_REPLY
      *  MPV_EVENT_PROPERTY_CHANGE
+     *  MPV_EVENT_HOOK
      */
     uint64_t reply_userdata;
     /**
@@ -1584,6 +1597,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  MPV_EVENT_END_FILE:               mpv_event_end_file*
+     *  MPV_EVENT_HOOK:                   mpv_event_hook*
      *  other: NULL
      *
      * Note: future enhancements might add new event structs for existing or new
