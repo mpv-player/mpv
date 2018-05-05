@@ -27,10 +27,6 @@
 
 #include "libmpv/client.h"
 
-const struct mp_cmd_def mp_cmd_list = {
-    .name = "list",
-};
-
 static void destroy_cmd(void *ptr)
 {
     struct mp_cmd *cmd = ptr;
