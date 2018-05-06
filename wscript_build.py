@@ -323,6 +323,7 @@ def build(ctx):
         ( "misc/rendezvous.c" ),
         ( "misc/ring.c" ),
         ( "misc/thread_pool.c" ),
+        ( "misc/thread_tools.c" ),
 
         ## Options
         ( "options/m_config.c" ),
