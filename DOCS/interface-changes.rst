@@ -25,6 +25,8 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
+    - add `--d3d11-output-csp` to enable explicit selection of a D3D11
+      swap chain color space.
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
     - rewrite DVB channel switching to use an integer value

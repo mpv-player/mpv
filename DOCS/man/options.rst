@@ -4746,6 +4746,19 @@ The following video options are currently all specific to ``--vo=gpu`` and
         from Windows 10. Thus on older systems it will only automatically
         utilize the rgba8 output format.
 
+``--d3d11-output-csp=<auto|srgb|linear|pq|bt.2020>``
+    Select a specific D3D11 output color space to utilize for D3D11 rendering.
+    "auto" is the default, which will select the color space of the desktop
+    on which the swap chain is located.
+
+    Values other than "srgb" and "pq" have had issues in testing, so they
+    are mostly available for manual testing.
+
+    .. note::
+
+        Swap chain color space configuration is only available from an API
+        available from Windows 10. Thus on older systems it will not work.
+
 ``--d3d11va-zero-copy=<yes|no>``
     By default, when using hardware decoding with ``--gpu-api=d3d11``, the
     video image will be copied (GPU-to-GPU) from the decoder surface to a

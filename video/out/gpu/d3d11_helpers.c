@@ -227,6 +227,52 @@ static const char *d3d11_get_csp_name(DXGI_COLOR_SPACE_TYPE csp)
     }
 }
 
+static bool d3d11_get_mp_csp(DXGI_COLOR_SPACE_TYPE csp,
+                             struct mp_colorspace *mp_csp)
+{
+    if (!mp_csp)
+        return false;
+
+    // Colorspaces utilizing gamma 2.2 (G22) are set to
+    // AUTO as that keeps the current default flow regarding
+    // SDR transfer function handling.
+    // (no adjustment is done unless the user has a CMS LUT).
+    //
+    // Additionally, only set primary information with colorspaces
+    // utilizing non-709 primaries to keep the current behavior
+    // regarding not doing conversion from BT.601 to BT.709.
+    switch (csp) {
+    case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
+        *mp_csp = (struct mp_colorspace){
+            .gamma     = MP_CSP_TRC_AUTO,
+            .primaries = MP_CSP_PRIM_AUTO,
+        };
+        break;
+    case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
+        *mp_csp = (struct mp_colorspace) {
+            .gamma     = MP_CSP_TRC_LINEAR,
+            .primaries = MP_CSP_PRIM_AUTO,
+        };
+        break;
+    case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
+        *mp_csp = (struct mp_colorspace) {
+            .gamma     = MP_CSP_TRC_PQ,
+            .primaries = MP_CSP_PRIM_BT_2020,
+        };
+        break;
+    case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020:
+        *mp_csp = (struct mp_colorspace) {
+            .gamma     = MP_CSP_TRC_AUTO,
+            .primaries = MP_CSP_PRIM_BT_2020,
+        };
+        break;
+    default:
+        return false;
+    }
+
+    return true;
+}
+
 static bool query_output_format_and_colorspace(struct mp_log *log,
                                                IDXGISwapChain *swapchain,
                                                DXGI_FORMAT *out_fmt,
@@ -658,14 +704,82 @@ static bool update_swapchain_format(struct mp_log *log,
     return true;
 }
 
+static bool update_swapchain_color_space(struct mp_log *log,
+                                         IDXGISwapChain *swapchain,
+                                         DXGI_COLOR_SPACE_TYPE color_space)
+{
+    IDXGISwapChain4 *swapchain4 = NULL;
+    const char *csp_name = d3d11_get_csp_name(color_space);
+    bool success = false;
+    HRESULT hr = E_FAIL;
+    unsigned int csp_support_flags;
+
+    hr = IDXGISwapChain_QueryInterface(swapchain, &IID_IDXGISwapChain4,
+                                       (void *)&(swapchain4));
+    if (FAILED(hr)) {
+        mp_err(log, "Failed to create v4 swapchain for color space "
+                    "configuration (%s)!\n",
+               mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    hr = IDXGISwapChain4_CheckColorSpaceSupport(swapchain4,
+                                                color_space,
+                                                &csp_support_flags);
+    if (FAILED(hr)) {
+        mp_err(log, "Failed to check color space support for color space "
+                    "%s (%d): %s!\n",
+               csp_name, color_space, mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    mp_verbose(log,
+               "Swapchain capabilities for color space %s (%d): "
+               "normal: %s, overlay: %s\n",
+               csp_name, color_space,
+               (csp_support_flags & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT) ?
+               "yes" : "no",
+               (csp_support_flags & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_OVERLAY_PRESENT) ?
+               "yes" : "no");
+
+    if (!(csp_support_flags & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT)) {
+        mp_err(log, "Color space %s (%d) is not supported by this swapchain!\n",
+               csp_name, color_space);
+        goto done;
+    }
+
+    hr = IDXGISwapChain4_SetColorSpace1(swapchain4, color_space);
+    if (FAILED(hr)) {
+        mp_err(log, "Failed to set color space %s (%d) for this swapchain "
+                    "(%s)!\n",
+               csp_name, color_space, mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    mp_verbose(log, "Swapchain successfully configured to color space %s (%d)!\n",
+               csp_name, color_space);
+
+    success = true;
+
+done:
+    SAFE_RELEASE(swapchain4);
+    return success;
+}
+
 static bool configure_created_swapchain(struct mp_log *log,
                                         IDXGISwapChain *swapchain,
-                                        DXGI_FORMAT requested_format)
+                                        DXGI_FORMAT requested_format,
+                                        DXGI_COLOR_SPACE_TYPE requested_csp,
+                                        struct mp_colorspace *configured_csp)
 {
     DXGI_FORMAT probed_format = DXGI_FORMAT_UNKNOWN;
     DXGI_FORMAT selected_format = DXGI_FORMAT_UNKNOWN;
-    DXGI_COLOR_SPACE_TYPE probed_colorspace;
+    DXGI_COLOR_SPACE_TYPE probed_colorspace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+    DXGI_COLOR_SPACE_TYPE selected_colorspace;
     const char *format_name = NULL;
+    const char *csp_name = NULL;
+    struct mp_colorspace mp_csp = { 0 };
+    bool mp_csp_mapped = false;
 
     query_output_format_and_colorspace(log, swapchain,
                                        &probed_format,
@@ -676,13 +790,57 @@ static bool configure_created_swapchain(struct mp_log *log,
                       requested_format :
                       (probed_format != DXGI_FORMAT_UNKNOWN ?
                        probed_format : DXGI_FORMAT_R8G8B8A8_UNORM);
-    format_name = d3d11_get_format_name(selected_format);
+    selected_colorspace = requested_csp != -1 ?
+                          requested_csp : probed_colorspace;
+    format_name   = d3d11_get_format_name(selected_format);
+    csp_name      = d3d11_get_csp_name(selected_colorspace);
+    mp_csp_mapped = d3d11_get_mp_csp(selected_colorspace, &mp_csp);
 
     mp_verbose(log, "Selected swapchain format %s (%d), attempting "
                     "to utilize it.\n",
                format_name, selected_format);
 
-    return update_swapchain_format(log, swapchain, selected_format);
+    if (!update_swapchain_format(log, swapchain, selected_format)) {
+        return false;
+    }
+
+    if (!IsWindows10OrGreater()) {
+        // On older than Windows 10, query_output_format_and_colorspace
+        // will not change probed_colorspace, and even if a user sets
+        // a colorspace it will not get applied. Thus warn user in case a
+        // value was specifically set and finish.
+        if (requested_csp != -1) {
+            mp_warn(log, "User selected a D3D11 color space %s (%d), "
+                         "but configuration of color spaces is only supported"
+                         "from Windows 10! The default configuration has been "
+                         "left as-is.\n",
+                    csp_name, selected_colorspace);
+        }
+
+        return true;
+    }
+
+    if (!mp_csp_mapped) {
+        mp_warn(log, "Color space %s (%d) does not have an mpv color space "
+                     "mapping! Overriding to standard sRGB!\n",
+                csp_name, selected_colorspace);
+        selected_colorspace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+        d3d11_get_mp_csp(selected_colorspace, &mp_csp);
+    }
+
+    mp_verbose(log, "Selected swapchain color space %s (%d), attempting to "
+                    "utilize it.\n",
+               csp_name, selected_colorspace);
+
+    if (!update_swapchain_color_space(log, swapchain, selected_colorspace)) {
+        return false;
+    }
+
+    if (configured_csp) {
+        *configured_csp = mp_csp;
+    }
+
+    return true;
 }
 
 // Create a Direct3D 11 swapchain
@@ -757,7 +915,9 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
         mp_verbose(log, "Using DXGI 1.1\n");
     }
 
-    configure_created_swapchain(log, swapchain, opts->format);
+    configure_created_swapchain(log, swapchain, opts->format,
+                                opts->color_space,
+                                opts->configured_csp);
 
     DXGI_SWAP_CHAIN_DESC scd = {0};
     IDXGISwapChain_GetDesc(swapchain, &scd);

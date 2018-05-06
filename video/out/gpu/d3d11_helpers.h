@@ -78,6 +78,12 @@ struct d3d11_swapchain_opts {
     int width;
     int height;
     DXGI_FORMAT format;
+    DXGI_COLOR_SPACE_TYPE color_space;
+
+    // mp_colorspace mapping of the configured swapchain colorspace
+    // shall be written into this memory location if configuration
+    // succeeds. Will be ignored if NULL.
+    struct mp_colorspace *configured_csp;
 
     // Use DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL if possible
     bool flip;

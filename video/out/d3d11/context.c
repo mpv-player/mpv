@@ -37,6 +37,7 @@ struct d3d11_opts {
     int sync_interval;
     char *adapter_name;
     int output_format;
+    int color_space;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -66,6 +67,12 @@ const struct m_sub_options d3d11_conf = {
                     {"bgra8",    DXGI_FORMAT_B8G8R8A8_UNORM},
                     {"rgb10_a2", DXGI_FORMAT_R10G10B10A2_UNORM},
                     {"rgba16f",  DXGI_FORMAT_R16G16B16A16_FLOAT})),
+        OPT_CHOICE("d3d11-output-csp", color_space, 0,
+                   ({"auto", -1},
+                    {"srgb",    DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709},
+                    {"linear",  DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709},
+                    {"pq",      DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020},
+                    {"bt.2020", DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020})),
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -75,6 +82,7 @@ const struct m_sub_options d3d11_conf = {
         .sync_interval = 1,
         .adapter_name = NULL,
         .output_format = DXGI_FORMAT_UNKNOWN,
+        .color_space = -1,
     },
     .size = sizeof(struct d3d11_opts)
 };
@@ -85,6 +93,7 @@ struct priv {
     struct ra_tex *backbuffer;
     ID3D11Device *device;
     IDXGISwapChain *swapchain;
+    struct mp_colorspace swapchain_csp;
 
     int64_t perf_freq;
     unsigned last_sync_refresh_count;
@@ -188,6 +197,7 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     *out_fbo = (struct ra_fbo) {
         .tex = p->backbuffer,
         .flip = false,
+        .color_space = p->swapchain_csp
     };
     return true;
 }
@@ -382,6 +392,8 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .width = ctx->vo->dwidth,
         .height = ctx->vo->dheight,
         .format = p->opts->output_format,
+        .color_space = p->opts->color_space,
+        .configured_csp = &p->swapchain_csp,
         .flip = p->opts->flip,
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
