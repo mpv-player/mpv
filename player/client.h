@@ -20,6 +20,7 @@ struct mpv_global;
 void mp_clients_init(struct MPContext *mpctx);
 void mp_clients_destroy(struct MPContext *mpctx);
 void mp_shutdown_clients(struct MPContext *mpctx);
+bool mp_is_shutting_down(struct MPContext *mpctx);
 bool mp_clients_all_initialized(struct MPContext *mpctx);
 
 bool mp_client_exists(struct MPContext *mpctx, const char *client_name);

@@ -60,7 +60,9 @@
 #include "video/out/bitmap_packer.h"
 #include "options/path.h"
 #include "screenshot.h"
+#include "misc/dispatch.h"
 #include "misc/node.h"
+#include "misc/thread_pool.h"
 
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
@@ -4827,27 +4829,147 @@ static void cmd_cycle_values(void *p)
     change_property_cmd(cmd, name, M_PROPERTY_SET_STRING, cmd->args[current].v.s);
 }
 
+struct cmd_list_ctx {
+    struct MPContext *mpctx;
+
+    // actual list command
+    struct mp_cmd_ctx *parent;
+
+    bool current_valid;
+    pthread_t current;
+    bool completed_recursive;
+
+    // list of sub commands yet to run
+    struct mp_cmd **sub;
+    int num_sub;
+};
+
+static void continue_cmd_list(struct cmd_list_ctx *list);
+
+static void on_cmd_list_sub_completion(struct mp_cmd_ctx *cmd)
+{
+    struct cmd_list_ctx *list = cmd->on_completion_priv;
+
+    if (list->current_valid && pthread_equal(list->current, pthread_self())) {
+        list->completed_recursive = true;
+    } else {
+        continue_cmd_list(list);
+    }
+}
+
+static void continue_cmd_list(struct cmd_list_ctx *list)
+{
+    while (list->parent->args[0].v.p) {
+        struct mp_cmd *sub = list->parent->args[0].v.p;
+        list->parent->args[0].v.p = sub->queue_next;
+
+        ta_xset_parent(sub, NULL);
+
+        if (sub->flags & MP_ASYNC_CMD) {
+            // We run it "detached" (fire & forget)
+            run_command(list->mpctx, sub, NULL, NULL);
+        } else {
+            // Run the next command once this one completes.
+
+            list->completed_recursive = false;
+            list->current_valid = true;
+            list->current = pthread_self();
+
+            run_command(list->mpctx, sub, on_cmd_list_sub_completion, list);
+
+            list->current_valid = false;
+
+            // run_command() either recursively calls the completion function,
+            // or lets the command continue run in the background. If it was
+            // completed recursively, we can just continue our loop. Otherwise
+            // the completion handler will invoke this loop again elsewhere.
+            // We could unconditionally call continue_cmd_list() in the handler
+            // instead, but then stack depth would grow with list length.
+            if (!list->completed_recursive)
+                return;
+        }
+    }
+
+    mp_cmd_ctx_complete(list->parent);
+    talloc_free(list);
+}
+
 static void cmd_list(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
 
-    for (struct mp_cmd *sub = cmd->cmd->args[0].v.p; sub; sub = sub->queue_next)
-        run_command(cmd->mpctx, sub, NULL);
+    cmd->completed = false;
+
+    struct cmd_list_ctx *list = talloc_zero(NULL, struct cmd_list_ctx);
+    list->mpctx = cmd->mpctx;
+    list->parent = p;
+
+    continue_cmd_list(list);
 }
 
-const struct mp_cmd_def mp_cmd_list = { "list", cmd_list };
+const struct mp_cmd_def mp_cmd_list = { "list", cmd_list, .exec_async = true };
 
-int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
+// Signal that the command is complete now. This also deallocates cmd.
+// You must call this function in a state where the core is locked for the
+// current thread (e.g. from the main thread, or from within mp_dispatch_lock()).
+// Completion means the command is finished, even if it errored or never ran.
+// Keep in mind that calling this can execute further user command that can
+// change arbitrary state (due to cmd_list).
+void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd)
 {
-    struct mpv_node dummy_node = {0};
-    struct mp_cmd_ctx *ctx = &(struct mp_cmd_ctx){
+    cmd->completed = true;
+    if (!cmd->success)
+        mpv_free_node_contents(&cmd->result);
+    if (cmd->on_completion)
+        cmd->on_completion(cmd);
+    mpv_free_node_contents(&cmd->result);
+    talloc_free(cmd->cmd);
+    talloc_free(cmd);
+}
+
+static void run_command_on_worker_thread(void *p)
+{
+    struct mp_cmd_ctx *ctx = p;
+    struct MPContext *mpctx = ctx->mpctx;
+
+    mp_core_lock(mpctx);
+
+    bool exec_async = ctx->cmd->def->exec_async;
+    ctx->cmd->def->handler(ctx);
+    if (!exec_async)
+        mp_cmd_ctx_complete(ctx);
+
+    mpctx->outstanding_async -= 1;
+    if (!mpctx->outstanding_async && mp_is_shutting_down(mpctx))
+        mp_wakeup_core(mpctx);
+
+    mp_core_unlock(mpctx);
+}
+
+// Run the given command. Upon command completion, on_completion is called. This
+// can happen within the function, or for async commands, some time after the
+// function returns (the caller is supposed to be able to handle both cases). In
+// both cases, the callback will be called while the core is locked (i.e. you
+// can access the core freely).
+// on_completion_priv is copied to mp_cmd_ctx.on_completion_priv and can be
+// accessed from the completion callback.
+// The completion callback is invoked exactly once. If it's NULL, it's ignored.
+// Ownership of cmd goes to the caller.
+void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
+                 void (*on_completion)(struct mp_cmd_ctx *cmd),
+                 void *on_completion_priv)
+{
+    struct mp_cmd_ctx *ctx = talloc(NULL, struct mp_cmd_ctx);
+    *ctx = (struct mp_cmd_ctx){
         .mpctx = mpctx,
         .cmd = cmd,
         .args = cmd->args,
         .num_args = cmd->nargs,
         .priv = cmd->def->priv,
         .success = true,
-        .result = res ? res : &dummy_node,
+        .completed = true,
+        .on_completion = on_completion,
+        .on_completion_priv = on_completion_priv,
     };
 
     struct MPOpts *opts = mpctx->opts;
@@ -4865,22 +4987,32 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         for (int n = 0; n < cmd->nargs; n++) {
             if (cmd->args[n].type->type == CONF_TYPE_STRING) {
                 char *s = mp_property_expand_string(mpctx, cmd->args[n].v.s);
-                if (!s)
-                    return -1;
+                if (!s) {
+                    ctx->success = false;
+                    mp_cmd_ctx_complete(ctx);
+                    return;
+                }
                 talloc_free(cmd->args[n].v.s);
                 cmd->args[n].v.s = s;
             }
         }
     }
 
-    cmd->def->handler(ctx);
-
-    if (!ctx->success)
-        mpv_free_node_contents(ctx->result);
-
-    mpv_free_node_contents(&dummy_node);
-
-    return ctx->success ? 0 : -1;
+    if (cmd->def->spawn_thread) {
+        mpctx->outstanding_async += 1; // prevent that core disappears
+        if (!mp_thread_pool_queue(mpctx->thread_pool,
+                                  run_command_on_worker_thread, ctx))
+        {
+            mpctx->outstanding_async -= 1;
+            ctx->success = false;
+            mp_cmd_ctx_complete(ctx);
+        }
+    } else {
+        bool exec_async = cmd->def->exec_async;
+        cmd->def->handler(ctx);
+        if (!exec_async)
+            mp_cmd_ctx_complete(ctx);
+    }
 }
 
 static void cmd_seek(void *p)
@@ -5201,7 +5333,7 @@ static void cmd_expand_text(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    *cmd->result = (mpv_node){
+    cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
         .u.string = mp_property_expand_string(mpctx, cmd->args[0].v.s)
     };
@@ -5515,7 +5647,7 @@ static void cmd_screenshot_raw(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    struct mpv_node *res = cmd->result;
+    struct mpv_node *res = &cmd->result;
 
     struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i);
     if (!img) {

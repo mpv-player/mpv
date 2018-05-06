@@ -48,7 +48,8 @@ static const struct flag cmd_flags[] = {
     {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
     {"repeatable",          0,               MP_ALLOW_REPEAT},
-    {"async",               0,               MP_ASYNC_CMD},
+    {"async",               MP_SYNC_CMD,     MP_ASYNC_CMD},
+    {"sync",                MP_ASYNC_CMD,     MP_SYNC_CMD},
     {0}
 };
 
@@ -127,6 +128,10 @@ static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
             m_option_copy(opt, &arg.v, opt->defval);
         MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
     }
+
+    if (!(cmd->flags & (MP_ASYNC_CMD | MP_SYNC_CMD)))
+        cmd->flags |= cmd->def->default_async ? MP_ASYNC_CMD : MP_SYNC_CMD;
+
     return true;
 }
 
