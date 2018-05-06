@@ -582,7 +582,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 // Add the given file as additional track. The filter argument controls how or
 // if tracks are auto-selected at any point.
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter)
+                         enum stream_type filter, bool unlock)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename)
@@ -603,11 +603,19 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     }
 
+    if (unlock)
+        mp_core_unlock(mpctx);
+
     struct demuxer *demuxer =
         demux_open_url(filename, &params, mpctx->playback_abort, mpctx->global);
+    if (demuxer)
+        enable_demux_thread(mpctx, demuxer);
+
+    if (unlock)
+        mp_core_lock(mpctx);
+
     if (!demuxer)
         goto err_out;
-    enable_demux_thread(mpctx, demuxer);
 
     if (opts->rebase_start_time)
         demux_set_ts_offset(demuxer, -demuxer->start_time);
@@ -622,7 +630,11 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     }
 
     if (!has_any) {
+        if (unlock)
+            mp_core_unlock(mpctx);
         free_demuxer_and_stream(demuxer);
+        if (unlock)
+            mp_core_lock(mpctx);
         char *tname = mp_tprintf(20, "%s ", stream_type_name(filter));
         if (filter == STREAM_TYPE_COUNT)
             tname = "";
@@ -655,7 +667,7 @@ static void open_external_files(struct MPContext *mpctx, char **files,
                                 enum stream_type filter)
 {
     for (int n = 0; files && files[n]; n++)
-        mp_add_external_file(mpctx, files[n], filter);
+        mp_add_external_file(mpctx, files[n], filter, false);
 }
 
 void autoload_external_files(struct MPContext *mpctx)
@@ -694,7 +706,7 @@ void autoload_external_files(struct MPContext *mpctx)
             goto skip;
         if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
-        int first = mp_add_external_file(mpctx, filename, list[i].type);
+        int first = mp_add_external_file(mpctx, filename, list[i].type, false);
         if (first < 0)
             goto skip;
 

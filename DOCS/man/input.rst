@@ -909,6 +909,9 @@ The only exception is the current legacy behavior with screenshot commands,
 which will be fixed later. Using the ``async`` prefix makes them run the file
 saving code in a detached manner.
 
+Currently the following commands have different waiting characteristics with
+sync vs. async: sub-add, audio-add
+
 Input Sections
 --------------
 
