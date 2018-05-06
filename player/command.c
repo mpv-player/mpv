@@ -5522,7 +5522,7 @@ static void cmd_track_add(void *p)
             return;
         }
     }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type);
+    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type, true);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -5586,7 +5586,7 @@ static void cmd_track_reload(void *p)
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
         mp_remove_track(mpctx, t);
-        nt_num = mp_add_external_file(mpctx, filename, type);
+        nt_num = mp_add_external_file(mpctx, filename, type, false);
         talloc_free(filename);
     }
 
@@ -6041,6 +6041,7 @@ const struct mp_cmd_def mp_cmds[] = {
             OARG_STRING(""), OARG_STRING(""),
         },
         .priv = &(const int){STREAM_SUB},
+        .spawn_thread = true,
     },
     { "sub-remove", cmd_track_remove, { OARG_INT(-1) },
         .priv = &(const int){STREAM_SUB}, },
@@ -6171,6 +6172,7 @@ const struct mp_cmd_def mp_cmds[] = {
             OARG_STRING(""), OARG_STRING(""),
         },
         .priv = &(const int){STREAM_AUDIO},
+        .spawn_thread = true,
     },
     { "audio-remove", cmd_track_remove, { OARG_INT(-1) },
         .priv = &(const int){STREAM_AUDIO}, },
