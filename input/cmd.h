@@ -42,6 +42,18 @@ struct mp_cmd_def {
     bool is_abort;
     bool is_soft_abort;
     bool is_ignore;
+    bool default_async; // default to MP_ASYNC flag if none set by user
+    // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
+    // at some point (can be after handler() returns). If you don't set it, the
+    // common code will call mp_cmd_ctx_complete() when handler() returns.
+    // You must make sure that the core cannot disappear while you do work. The
+    // common code keeps the core referenced only until handler() returns.
+    bool exec_async;
+    // If set, handler() is run on a separate worker thread. This means you can
+    // use mp_core_[un]lock() to temporarily unlock and re-lock the core (while
+    // unlocked, you have no synchronized access to mpctx, but you can do long
+    // running operations without blocking playback or input handling).
+    bool spawn_thread;
 };
 
 enum mp_cmd_flags {
@@ -51,7 +63,11 @@ enum mp_cmd_flags {
     MP_ON_OSD_MSG = 4,          // force a message, if applicable
     MP_EXPAND_PROPERTIES = 8,   // expand strings as properties
     MP_ALLOW_REPEAT = 16,       // if used as keybinding, allow key repeat
-    MP_ASYNC_CMD = 32,
+
+    // Exactly one of the following 2 bits is set. Which one is used depends on
+    // the command parser (prefixes and mp_cmd_def.default_async).
+    MP_ASYNC_CMD = 32,          // do not wait for command to complete
+    MP_SYNC_CMD = 64,           // block on command completion
 
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,

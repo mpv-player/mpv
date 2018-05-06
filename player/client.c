@@ -32,6 +32,7 @@
 #include "misc/ctype.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
+#include "misc/thread_tools.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
@@ -506,6 +507,15 @@ void mp_shutdown_clients(struct MPContext *mpctx)
     }
 
     pthread_mutex_unlock(&clients->lock);
+}
+
+bool mp_is_shutting_down(struct MPContext *mpctx)
+{
+    struct mp_client_api *clients = mpctx->clients;
+    pthread_mutex_lock(&clients->lock);
+    bool res = clients->shutting_down;
+    pthread_mutex_unlock(&clients->lock);
+    return res;
 }
 
 static void *core_thread(void *p)
@@ -1014,29 +1024,30 @@ static int run_async(mpv_handle *ctx, void (*fn)(void *fn_data), void *fn_data)
         talloc_free(fn_data);
         return err;
     }
-    mp_dispatch_enqueue_autofree(ctx->mpctx->dispatch, fn, fn_data);
+    mp_dispatch_enqueue(ctx->mpctx->dispatch, fn, fn_data);
     return 0;
 }
 
 struct cmd_request {
     struct MPContext *mpctx;
     struct mp_cmd *cmd;
-    struct mpv_node *res;
     int status;
-    struct mpv_handle *reply_ctx;
-    uint64_t userdata;
+    struct mpv_node *res;
+    struct mp_waiter completion;
 };
 
-static void cmd_fn(void *data)
+static void cmd_complete(struct mp_cmd_ctx *cmd)
 {
-    struct cmd_request *req = data;
-    int r = run_command(req->mpctx, req->cmd, req->res);
-    req->status = r >= 0 ? 0 : MPV_ERROR_COMMAND;
-    talloc_free(req->cmd);
-    if (req->reply_ctx) {
-        status_reply(req->reply_ctx, MPV_EVENT_COMMAND_REPLY,
-                     req->userdata, req->status);
+    struct cmd_request *req = cmd->on_completion_priv;
+
+    req->status = cmd->success ? 0 : MPV_ERROR_COMMAND;
+    if (req->res) {
+        *req->res = cmd->result;
+        cmd->result = (mpv_node){0};
     }
+
+    // Unblock the waiting thread (especially for async commands).
+    mp_waiter_wakeup(&req->completion, 0);
 }
 
 static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res)
@@ -1055,8 +1066,22 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
         .mpctx = ctx->mpctx,
         .cmd = cmd,
         .res = res,
+        .completion = MP_WAITER_INITIALIZER,
     };
-    run_locked(ctx, cmd_fn, &req);
+
+    bool async = cmd->flags & MP_ASYNC_CMD;
+
+    lock_core(ctx);
+    if (async) {
+        run_command(ctx->mpctx, req.cmd, NULL, NULL);
+    } else {
+        run_command(ctx->mpctx, req.cmd, cmd_complete, &req);
+    }
+    unlock_core(ctx);
+
+    if (!async)
+        mp_waiter_wait(&req.completion);
+
     return req.status;
 }
 
@@ -1080,7 +1105,41 @@ int mpv_command_string(mpv_handle *ctx, const char *args)
         mp_input_parse_cmd(ctx->mpctx->input, bstr0((char*)args), ctx->name), NULL);
 }
 
-static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
+struct async_cmd_request {
+    struct MPContext *mpctx;
+    struct mp_cmd *cmd;
+    int status;
+    struct mpv_handle *reply_ctx;
+    uint64_t userdata;
+};
+
+static void async_cmd_complete(struct mp_cmd_ctx *cmd)
+{
+    struct async_cmd_request *req = cmd->on_completion_priv;
+
+    req->status = cmd->success ? 0 : MPV_ERROR_COMMAND;
+
+    // Async command invocation - send a reply message.
+    status_reply(req->reply_ctx, MPV_EVENT_COMMAND_REPLY,
+                 req->userdata, req->status);
+
+    talloc_free(req);
+}
+
+static void async_cmd_fn(void *data)
+{
+    struct async_cmd_request *req = data;
+
+    struct mp_cmd *cmd = req->cmd;
+    ta_xset_parent(cmd, NULL);
+    req->cmd = NULL;
+
+    // This will synchronously or asynchronously call cmd_complete (depending
+    // on the command).
+    run_command(req->mpctx, cmd, async_cmd_complete, req);
+}
+
+static int run_async_cmd(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
@@ -1089,24 +1148,24 @@ static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 
     cmd->sender = ctx->name;
 
-    struct cmd_request *req = talloc_ptrtype(NULL, req);
-    *req = (struct cmd_request){
+    struct async_cmd_request *req = talloc_ptrtype(NULL, req);
+    *req = (struct async_cmd_request){
         .mpctx = ctx->mpctx,
-        .cmd = cmd,
+        .cmd = talloc_steal(req, cmd),
         .reply_ctx = ctx,
         .userdata = ud,
     };
-    return run_async(ctx, cmd_fn, req);
+    return run_async(ctx, async_cmd_fn, req);
 }
 
 int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
 {
-    return run_cmd_async(ctx, ud, mp_input_parse_cmd_strv(ctx->log, args));
+    return run_async_cmd(ctx, ud, mp_input_parse_cmd_strv(ctx->log, args));
 }
 
 int mpv_command_node_async(mpv_handle *ctx, uint64_t ud, mpv_node *args)
 {
-    return run_cmd_async(ctx, ud, mp_input_parse_cmd_node(ctx->log, args));
+    return run_async_cmd(ctx, ud, mp_input_parse_cmd_node(ctx->log, args));
 }
 
 static int translate_property_error(int errc)
@@ -1155,6 +1214,7 @@ static void setproperty_fn(void *arg)
     if (req->reply_ctx) {
         status_reply(req->reply_ctx, MPV_EVENT_SET_PROPERTY_REPLY,
                      req->userdata, req->status);
+        talloc_free(req);
     }
 }
 
@@ -1310,6 +1370,7 @@ static void getproperty_fn(void *arg)
             .error = req->status,
         };
         send_reply(req->reply_ctx, req->userdata, &reply);
+        talloc_free(req);
     }
 }
 
