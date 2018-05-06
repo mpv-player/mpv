@@ -28,6 +28,7 @@
 #include "mpv_talloc.h"
 
 #include "misc/dispatch.h"
+#include "misc/thread_pool.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
@@ -279,6 +280,7 @@ struct MPContext *mp_create(void)
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
+        .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
     };
 
     pthread_mutex_init(&mpctx->lock, NULL);
