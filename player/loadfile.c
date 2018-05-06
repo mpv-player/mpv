@@ -1579,6 +1579,13 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
     mpctx->playlist->current = e;
     mpctx->playlist->current_was_replaced = false;
+    // If something is currently loading, abort it a bit more forcefully. This
+    // will in particular make ytdl_hook kill the script. During normal
+    // playback, we probably don't want this, because it could upset the
+    // demuxer or decoders and spam nonsense errors.
+    if (mpctx->playing && !mpctx->playback_initialized)
+        mp_abort_playback_async(mpctx);
+    // Make it pick up the new entry.
     if (!mpctx->stop_play)
         mpctx->stop_play = PT_CURRENT_ENTRY;
     mp_wakeup_core(mpctx);
