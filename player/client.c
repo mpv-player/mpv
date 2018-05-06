@@ -483,32 +483,29 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     mp_destroy_client(ctx, true);
 }
 
-static bool can_terminate(struct MPContext *mpctx)
-{
-    struct mp_client_api *clients = mpctx->clients;
-
-    pthread_mutex_lock(&clients->lock);
-    bool ok = clients->num_clients == 0 && mpctx->outstanding_async == 0 &&
-              (mpctx->is_cli || clients->terminate_core_thread);
-    pthread_mutex_unlock(&clients->lock);
-
-    return ok;
-}
-
 // Can be called on the core thread only. Idempotent.
 void mp_shutdown_clients(struct MPContext *mpctx)
 {
     struct mp_client_api *clients = mpctx->clients;
 
-    // Prevent that new clients can appear.
     pthread_mutex_lock(&clients->lock);
-    clients->shutting_down = true;
-    pthread_mutex_unlock(&clients->lock);
 
-    while (!can_terminate(mpctx)) {
+    // Prevent that new clients can appear.
+    clients->shutting_down = true;
+
+    // Wait until we can terminate.
+    while (clients->num_clients || mpctx->outstanding_async ||
+           !(mpctx->is_cli || clients->terminate_core_thread))
+    {
+        pthread_mutex_unlock(&clients->lock);
+
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
         mp_wait_events(mpctx);
+
+        pthread_mutex_lock(&clients->lock);
     }
+
+    pthread_mutex_unlock(&clients->lock);
 }
 
 static void *core_thread(void *p)
