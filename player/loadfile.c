@@ -585,7 +585,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter, bool unlock)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (!filename)
+    if (!filename || mp_cancel_test(mpctx->playback_abort))
         return -1;
 
     char *disp_filename = filename;
