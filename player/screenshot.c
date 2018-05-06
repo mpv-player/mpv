@@ -148,7 +148,7 @@ static void write_screenshot(struct MPContext *mpctx, struct mp_image *img,
 
     if (async) {
         if (!ctx->thread_pool)
-            ctx->thread_pool = mp_thread_pool_create(ctx, 1);
+            ctx->thread_pool = mp_thread_pool_create(ctx, 1, 1, 3);
         if (ctx->thread_pool) {
             item->on_thread = true;
             mpctx->outstanding_async += 1;
