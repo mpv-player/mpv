@@ -910,7 +910,8 @@ which will be fixed later. Using the ``async`` prefix makes them run the file
 saving code in a detached manner.
 
 Currently the following commands have different waiting characteristics with
-sync vs. async: sub-add, audio-add
+sync vs. async: sub-add, audio-add, sub-reload, audio-reload,
+rescan-external-files.
 
 Input Sections
 --------------

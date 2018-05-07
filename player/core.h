@@ -296,6 +296,8 @@ typedef struct MPContext {
     struct track **tracks;
     int num_tracks;
 
+    int64_t death_hack; // don't fucking ask, just don't
+
     char *track_layout_hash;
 
     // Selected tracks. NULL if no track selected.
@@ -488,7 +490,7 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
 void mp_abort_playback_async(struct MPContext *mpctx);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter, bool unlock);
+                         enum stream_type filter);
 #define FLAG_MARK_SELECTION 1
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track, int flags);
