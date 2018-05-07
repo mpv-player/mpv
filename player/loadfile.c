@@ -26,6 +26,8 @@
 #include "config.h"
 #include "mpv_talloc.h"
 
+#include "misc/thread_pool.h"
+#include "misc/thread_tools.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 #include "osdep/threads.h"
@@ -581,8 +583,9 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 
 // Add the given file as additional track. The filter argument controls how or
 // if tracks are auto-selected at any point.
+// To be run on a worker thread, locked (temporarily unlocks core).
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter, bool unlock)
+                         enum stream_type filter)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename || mp_cancel_test(mpctx->playback_abort))
@@ -603,16 +606,23 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     }
 
-    if (unlock)
-        mp_core_unlock(mpctx);
+    mp_core_unlock(mpctx);
 
     struct demuxer *demuxer =
         demux_open_url(filename, &params, mpctx->playback_abort, mpctx->global);
     if (demuxer)
         enable_demux_thread(mpctx, demuxer);
 
-    if (unlock)
+    mp_core_lock(mpctx);
+
+    // The command could have overlapped with playback exiting. (We don't care
+    // if playback has started again meanwhile - weird, but not a problem.)
+    if (!mpctx->playing) {
+        mp_core_unlock(mpctx);
+        free_demuxer_and_stream(demuxer);
         mp_core_lock(mpctx);
+        return -1;
+    }
 
     if (!demuxer)
         goto err_out;
@@ -630,11 +640,9 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     }
 
     if (!has_any) {
-        if (unlock)
-            mp_core_unlock(mpctx);
+        mp_core_unlock(mpctx);
         free_demuxer_and_stream(demuxer);
-        if (unlock)
-            mp_core_lock(mpctx);
+        mp_core_lock(mpctx);
         char *tname = mp_tprintf(20, "%s ", stream_type_name(filter));
         if (filter == STREAM_TYPE_COUNT)
             tname = "";
@@ -663,11 +671,18 @@ err_out:
     return -1;
 }
 
+// to be run on a worker thread, locked (temporarily unlocks core)
 static void open_external_files(struct MPContext *mpctx, char **files,
                                 enum stream_type filter)
 {
+    // Need a copy, because the option value could be mutated during iteration.
+    void *tmp = talloc_new(NULL);
+    files = mp_dup_str_array(tmp, files);
+
     for (int n = 0; files && files[n]; n++)
-        mp_add_external_file(mpctx, files[n], filter, false);
+        mp_add_external_file(mpctx, files[n], filter);
+
+    talloc_free(tmp);
 }
 
 void autoload_external_files(struct MPContext *mpctx)
@@ -706,7 +721,7 @@ void autoload_external_files(struct MPContext *mpctx)
             goto skip;
         if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
-        int first = mp_add_external_file(mpctx, filename, list[i].type, false);
+        int first = mp_add_external_file(mpctx, filename, list[i].type);
         if (first < 0)
             goto skip;
 
@@ -774,20 +789,25 @@ static void process_hooks(struct MPContext *mpctx, char *name)
         mp_idle(mpctx);
 }
 
+// to be run on a worker thread, locked (temporarily unlocks core)
 static void load_chapters(struct MPContext *mpctx)
 {
     struct demuxer *src = mpctx->demuxer;
     bool free_src = false;
     char *chapter_file = mpctx->opts->chapter_file;
     if (chapter_file && chapter_file[0]) {
+        chapter_file = talloc_strdup(NULL, chapter_file);
+        mp_core_unlock(mpctx);
         struct demuxer *demux = demux_open_url(chapter_file, NULL,
                                         mpctx->playback_abort, mpctx->global);
+        mp_core_lock(mpctx);
         if (demux) {
             src = demux;
             free_src = true;
         }
         talloc_free(mpctx->chapters);
         mpctx->chapters = NULL;
+        talloc_free(chapter_file);
     }
     if (src && !mpctx->chapters) {
         talloc_free(mpctx->chapters);
@@ -798,8 +818,11 @@ static void load_chapters(struct MPContext *mpctx)
                 mpctx->chapters[n].pts -= src->start_time;
         }
     }
-    if (free_src)
+    if (free_src) {
+        mp_core_unlock(mpctx);
         free_demuxer_and_stream(src);
+        mp_core_lock(mpctx);
+    }
 }
 
 static void load_per_file_options(m_config_t *conf,
@@ -1146,6 +1169,44 @@ void update_lavfi_complex(struct MPContext *mpctx)
     }
 }
 
+
+// Worker thread for loading external files and such. This is needed to avoid
+// freezing the core when waiting for network while loading these.
+static void load_external_opts_thread(void *p)
+{
+    void **a = p;
+    struct MPContext *mpctx = a[0];
+    struct mp_waiter *waiter = a[1];
+
+    mp_core_lock(mpctx);
+
+    load_chapters(mpctx);
+    open_external_files(mpctx, mpctx->opts->audio_files, STREAM_AUDIO);
+    open_external_files(mpctx, mpctx->opts->sub_name, STREAM_SUB);
+    open_external_files(mpctx, mpctx->opts->external_files, STREAM_TYPE_COUNT);
+    autoload_external_files(mpctx);
+
+    mp_waiter_wakeup(waiter, 0);
+    mp_wakeup_core(mpctx);
+    mp_core_unlock(mpctx);
+}
+
+static void load_external_opts(struct MPContext *mpctx)
+{
+    struct mp_waiter wait = MP_WAITER_INITIALIZER;
+
+    void *a[] = {mpctx, &wait};
+    if (!mp_thread_pool_queue(mpctx->thread_pool, load_external_opts_thread, a)) {
+        mpctx->stop_play = PT_ERROR;
+        return;
+    }
+
+    while (!mp_waiter_poll(&wait))
+        mp_idle(mpctx);
+
+    mp_waiter_wait(&wait);
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -1263,13 +1324,11 @@ static void play_current_file(struct MPContext *mpctx)
         demux_set_ts_offset(mpctx->demuxer, -mpctx->demuxer->start_time);
     enable_demux_thread(mpctx, mpctx->demuxer);
 
-    load_chapters(mpctx);
     add_demuxer_tracks(mpctx, mpctx->demuxer);
 
-    open_external_files(mpctx, opts->audio_files, STREAM_AUDIO);
-    open_external_files(mpctx, opts->sub_name, STREAM_SUB);
-    open_external_files(mpctx, opts->external_files, STREAM_TYPE_COUNT);
-    autoload_external_files(mpctx);
+    load_external_opts(mpctx);
+    if (mpctx->stop_play)
+        goto terminate_playback;
 
     check_previous_track_selection(mpctx);
 
@@ -1458,6 +1517,8 @@ terminate_playback:
 
     if (mpctx->playing)
         playlist_entry_unref(mpctx->playing);
+    // Note: a lot of things assume that the core won't be unlocked between
+    // uninitializing various playback-only resources (such as tracks).
     mpctx->playing = NULL;
     talloc_free(mpctx->filename);
     mpctx->filename = NULL;
