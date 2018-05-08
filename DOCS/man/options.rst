@@ -1020,8 +1020,8 @@ Video
     determined using a fixed framerate value (either using the ``--fps``
     option, or using file information). Sometimes, files with very broken
     timestamps can be played somewhat well in this mode. Note that video
-    filters, subtitle rendering and audio synchronization can be completely
-    broken in this mode.
+    filters, subtitle rendering, seeking (including hr-seeks and backstepping),
+    and audio synchronization can be completely broken in this mode.
 
 ``--fps=<float>``
     Override video framerate. Useful if the original value is wrong or missing.
