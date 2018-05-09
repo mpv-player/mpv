@@ -6015,13 +6015,17 @@ const struct mp_cmd_def mp_cmds[] = {
         // backwards compatibility
         OARG_CHOICE(0, ({"unused", 0}, {"single", 0},
                         {"each-frame", 8})),
-    }},
+        },
+        .spawn_thread = true,
+    },
     { "screenshot-to-file", cmd_screenshot_to_file, {
         ARG_STRING,
         OARG_CHOICE(2, ({"video", 0},
                         {"window", 1},
                         {"subtitles", 2})),
-    }},
+        },
+        .spawn_thread = true,
+    },
     { "screenshot-raw", cmd_screenshot_raw, {
         OARG_CHOICE(2, ({"video", 0},
                         {"window", 1},
