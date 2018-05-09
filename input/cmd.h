@@ -89,7 +89,6 @@ struct mp_cmd_arg {
 };
 
 typedef struct mp_cmd {
-    int id;
     char *name;
     struct mp_cmd_arg *args;
     int nargs;
