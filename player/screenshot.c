@@ -27,8 +27,10 @@
 #include "screenshot.h"
 #include "core.h"
 #include "command.h"
+#include "input/cmd.h"
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
+#include "misc/node.h"
 #include "misc/thread_pool.h"
 #include "common/msg.h"
 #include "options/path.h"
@@ -432,7 +434,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     return image;
 }
 
-struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
+// mode is the same as in screenshot_request()
+static struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
 {
     struct mp_image *mpi = screenshot_get(mpctx, mode, false);
     if (!mpi)
@@ -442,8 +445,11 @@ struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
     return res;
 }
 
-void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
-                        bool osd, bool async)
+// filename: where to store the screenshot; doesn't try to find an alternate
+//           name if the file already exists
+// mode, osd: same as in screenshot_request()
+static void screenshot_to_file(struct MPContext *mpctx, const char *filename,
+                               int mode, bool osd, bool async)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
     struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
@@ -467,8 +473,13 @@ end:
     ctx->osd = old_osd;
 }
 
-void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
-                        bool osd, bool async)
+// Request a taking & saving a screenshot of the currently displayed frame.
+// mode: 0: -, 1: save the actual output window contents, 2: with subtitles.
+// each_frame: If set, this toggles per-frame screenshots, exactly like the
+//             screenshot slave command (MP_CMD_SCREENSHOT).
+// osd: show status on OSD
+static void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
+                               bool osd, bool async)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
@@ -501,6 +512,51 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
     }
 
     talloc_free(image);
+}
+
+void cmd_screenshot(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    bool async = cmd->cmd->flags & MP_ASYNC_CMD;
+    int mode = cmd->args[0].v.i & 3;
+    int freq = (cmd->args[0].v.i | cmd->args[1].v.i) >> 3;
+    screenshot_request(mpctx, mode, freq, cmd->msg_osd, async);
+}
+
+void cmd_screenshot_to_file(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    bool async = cmd->cmd->flags & MP_ASYNC_CMD;
+    screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, cmd->msg_osd,
+                       async);
+}
+
+void cmd_screenshot_raw(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct mpv_node *res = &cmd->result;
+
+    struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i);
+    if (!img) {
+        cmd->success = false;
+        return;
+    }
+
+    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+    node_map_add_int64(res, "w", img->w);
+    node_map_add_int64(res, "h", img->h);
+    node_map_add_int64(res, "stride", img->stride[0]);
+    node_map_add_string(res, "format", "bgr0");
+    struct mpv_byte_array *ba =
+        node_map_add(res, "data", MPV_FORMAT_BYTE_ARRAY)->u.ba;
+    *ba = (struct mpv_byte_array){
+        .data = img->planes[0],
+        .size = img->stride[0] * img->h,
+    };
+    talloc_steal(ba, img);
 }
 
 void screenshot_flip(struct MPContext *mpctx)

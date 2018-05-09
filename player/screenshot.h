@@ -25,24 +25,12 @@ struct MPContext;
 // One time initialization at program start.
 void screenshot_init(struct MPContext *mpctx);
 
-// Request a taking & saving a screenshot of the currently displayed frame.
-// mode: 0: -, 1: save the actual output window contents, 2: with subtitles.
-// each_frame: If set, this toggles per-frame screenshots, exactly like the
-//             screenshot slave command (MP_CMD_SCREENSHOT).
-// osd: show status on OSD
-void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
-                        bool osd, bool async);
-
-// filename: where to store the screenshot; doesn't try to find an alternate
-//           name if the file already exists
-// mode, osd: same as in screenshot_request()
-void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
-                        bool osd, bool async);
-
-// mode is the same as in screenshot_request()
-struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode);
-
 // Called by the playback core code when a new frame is displayed.
 void screenshot_flip(struct MPContext *mpctx);
+
+// Handlers for the user-facing commands.
+void cmd_screenshot(void *p);
+void cmd_screenshot_to_file(void *p);
+void cmd_screenshot_raw(void *p);
 
 #endif /* MPLAYER_SCREENSHOT_H */
