@@ -5624,51 +5624,6 @@ static void cmd_rescan_external_files(void *p)
     }
 }
 
-static void cmd_screenshot(void *p)
-{
-    struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
-    bool async = cmd->cmd->flags & MP_ASYNC_CMD;
-    int mode = cmd->args[0].v.i & 3;
-    int freq = (cmd->args[0].v.i | cmd->args[1].v.i) >> 3;
-    screenshot_request(mpctx, mode, freq, cmd->msg_osd, async);
-}
-
-static void cmd_screenshot_to_file(void *p)
-{
-    struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
-    bool async = cmd->cmd->flags & MP_ASYNC_CMD;
-    screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, cmd->msg_osd,
-                       async);
-}
-
-static void cmd_screenshot_raw(void *p)
-{
-    struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
-    struct mpv_node *res = &cmd->result;
-
-    struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i);
-    if (!img) {
-        cmd->success = false;
-        return;
-    }
-
-    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
-    node_map_add_int64(res, "w", img->w);
-    node_map_add_int64(res, "h", img->h);
-    node_map_add_int64(res, "stride", img->stride[0]);
-    node_map_add_string(res, "format", "bgr0");
-    struct mpv_byte_array *ba =
-        node_map_add(res, "data", MPV_FORMAT_BYTE_ARRAY)->u.ba;
-    *ba = (struct mpv_byte_array){
-        .data = img->planes[0],
-        .size = img->stride[0] * img->h,
-    };
-    talloc_steal(ba, img);
-}
-
 static void cmd_run(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
