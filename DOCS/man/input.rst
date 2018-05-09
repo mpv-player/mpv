@@ -186,11 +186,10 @@ List of Input Commands
     second argument (and did not have flags). This syntax is still understood,
     but deprecated and might be removed in the future.
 
-    Setting the ``async`` flag will make encoding and writing the actual image
-    file asynchronous in most cases. (``each-frame`` mode ignores this flag
-    currently.) Requesting async screenshots too early or too often could lead
-    to the same filenames being chosen, and overwriting each others in undefined
-    order.
+    If you combine this command with another one using ``;``, you can use the
+    ``async`` flag to make encoding/writing the image file asynchronous. For
+    normal standalone commands, this is always asynchronous, and the flag has
+    no effect. (This behavior changed with mpv 0.29.0.)
 
 ``screenshot-to-file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will
@@ -203,9 +202,6 @@ List of Input Commands
 
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
-
-    The ``async`` flag has an effect on this command (see ``screenshot``
-    command).
 
 ``playlist-next [weak|force]``
     Go to the next entry on the playlist.
@@ -905,13 +901,13 @@ command behaves by itself. There are the following cases:
   have an  asynchronous implementation. The async libmpv API still never blocks
   the caller in these cases.
 
-The only exception is the current legacy behavior with screenshot commands,
-which will be fixed later. Using the ``async`` prefix makes them run the file
-saving code in a detached manner.
+Before mpv 0.29.0, the ``async`` prefix was only used by screenshot commands,
+and made them run the file saving code in a detached manner. This is the
+default now, and ``async`` changes behavior only in the ways mentioned above.
 
 Currently the following commands have different waiting characteristics with
 sync vs. async: sub-add, audio-add, sub-reload, audio-reload,
-rescan-external-files.
+rescan-external-files, screenshot, screenshot-to-file.
 
 Input Sections
 --------------

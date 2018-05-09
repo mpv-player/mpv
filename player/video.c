@@ -1168,7 +1168,6 @@ void write_video(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "first video frame after restart shown\n");
         }
     }
-    screenshot_flip(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
@@ -1186,6 +1185,8 @@ void write_video(struct MPContext *mpctx)
         if (mpctx->max_frames > 0)
             mpctx->max_frames--;
     }
+
+    screenshot_flip(mpctx);
 
     mp_wakeup_core(mpctx);
     return;
