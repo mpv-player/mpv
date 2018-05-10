@@ -684,16 +684,6 @@ static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
     pthread_mutex_unlock(&ctx->lock);
 }
 
-static void status_reply(struct mpv_handle *ctx, int event,
-                         uint64_t userdata, int status)
-{
-    struct mpv_event reply = {
-        .event_id = event,
-        .error = status,
-    };
-    send_reply(ctx, userdata, &reply);
-}
-
 // Return whether there's any client listening to this event.
 // If false is returned, the core doesn't need to send it.
 bool mp_client_event_is_registered(struct MPContext *mpctx, int event)
@@ -1217,8 +1207,11 @@ static void setproperty_fn(void *arg)
     req->status = translate_property_error(err);
 
     if (req->reply_ctx) {
-        status_reply(req->reply_ctx, MPV_EVENT_SET_PROPERTY_REPLY,
-                     req->userdata, req->status);
+        struct mpv_event reply = {
+            .event_id = MPV_EVENT_SET_PROPERTY_REPLY,
+            .error = req->status,
+        };
+        send_reply(req->reply_ctx, req->userdata, &reply);
         talloc_free(req);
     }
 }
