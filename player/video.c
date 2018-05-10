@@ -955,7 +955,8 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         // Note that even if each timestamp is within rounding tolerance, it
         // could literally not add up (e.g. if demuxer FPS is rounded itself).
         if (fabs(duration - demux_duration) < tolerance &&
-            fabs(total - demux_duration * num_dur) < tolerance && num_dur >= 16)
+            fabs(total - demux_duration * num_dur) < tolerance &&
+            (num_dur >= 16 || num_dur >= mpctx->num_past_frames - 4))
         {
             approx_duration = demux_duration;
         }
