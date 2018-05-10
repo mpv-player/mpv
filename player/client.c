@@ -1108,7 +1108,6 @@ int mpv_command_string(mpv_handle *ctx, const char *args)
 struct async_cmd_request {
     struct MPContext *mpctx;
     struct mp_cmd *cmd;
-    int status;
     struct mpv_handle *reply_ctx;
     uint64_t userdata;
 };
@@ -1117,11 +1116,17 @@ static void async_cmd_complete(struct mp_cmd_ctx *cmd)
 {
     struct async_cmd_request *req = cmd->on_completion_priv;
 
-    req->status = cmd->success ? 0 : MPV_ERROR_COMMAND;
+    struct mpv_event_command *data = talloc_zero(NULL, struct mpv_event_command);
+    data->result = cmd->result;
+    cmd->result = (mpv_node){0};
+    talloc_steal(data, node_get_alloc(&data->result));
 
-    // Async command invocation - send a reply message.
-    status_reply(req->reply_ctx, MPV_EVENT_COMMAND_REPLY,
-                 req->userdata, req->status);
+    struct mpv_event reply = {
+        .event_id = MPV_EVENT_COMMAND_REPLY,
+        .data = data,
+        .error = cmd->success ? 0 : MPV_ERROR_COMMAND,
+    };
+    send_reply(req->reply_ctx, req->userdata, &reply);
 
     talloc_free(req);
 }

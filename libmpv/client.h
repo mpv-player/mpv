@@ -967,10 +967,11 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * Same as mpv_command, but run the command asynchronously.
  *
  * Commands are executed asynchronously. You will receive a
- * MPV_EVENT_COMMAND_REPLY event. (This event will also have an
- * error code set if running the command failed.)
+ * MPV_EVENT_COMMAND_REPLY event. This event will also have an
+ * error code set if running the command failed. For commands that
+ * return data, the data is put into mpv_event_command.result.
  *
- * * Safe to be called from mpv render API threads.
+ * Safe to be called from mpv render API threads.
  *
  * @param reply_userdata the value mpv_event.reply_userdata of the reply will
  *                       be set to (see section about asynchronous calls)
@@ -985,8 +986,7 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * function is to mpv_command_node() what mpv_command_async() is to
  * mpv_command().
  *
- * See mpv_command_async() for details. Retrieving the result is not
- * supported yet.
+ * See mpv_command_async() for details.
  *
  * Safe to be called from mpv render API threads.
  *
@@ -1211,7 +1211,8 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_SET_PROPERTY_REPLY = 4,
     /**
-     * Reply to a mpv_command_async() request.
+     * Reply to a mpv_command_async() or mpv_command_node_async() request.
+     * See also mpv_event and mpv_event_command.
      */
     MPV_EVENT_COMMAND_REPLY     = 5,
     /**
@@ -1558,6 +1559,17 @@ typedef struct mpv_event_hook {
     uint64_t id;
 } mpv_event_hook;
 
+// Since API version 1.102.
+typedef struct mpv_event_command {
+    /**
+     * Result data of the command. Note that success/failure is signaled
+     * separately via mpv_event.error. This field is only for result data
+     * in case of success. Most commands leave it at MPV_FORMAT_NONE. Set
+     * to MPV_FORMAT_NONE on failure.
+     */
+    mpv_node result;
+} mpv_event_command;
+
 typedef struct mpv_event {
     /**
      * One of mpv_event. Keep in mind that later ABI compatible releases might
@@ -1595,6 +1607,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  MPV_EVENT_END_FILE:               mpv_event_end_file*
      *  MPV_EVENT_HOOK:                   mpv_event_hook*
+     *  MPV_EVENT_COMMAND_REPLY*          mpv_event_command*
      *  other: NULL
      *
      * Note: future enhancements might add new event structs for existing or new

@@ -36,6 +36,9 @@ API changes
         - rename MPV_RENDER_PARAM_DRM_OSD_SIZE to MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE
 
  --- mpv 0.29.0 ---
+ 1.102  - redo handling of async commands
+        - add mpv_event_command and make it possible to return values from
+          commands issued with mpv_command_async() or mpv_command_node_async()
  1.101  - add MPV_RENDER_PARAM_ADVANCED_CONTROL and related API
         - add MPV_RENDER_PARAM_NEXT_FRAME_INFO and related symbols
         - add MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME
