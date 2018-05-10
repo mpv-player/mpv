@@ -5848,7 +5848,7 @@ static void cmd_mouse(void *p)
         mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
         return;
     }
-    if (button < 0 || button >= 20) {// invalid button
+    if (button < 0 || button >= MP_KEY_MOUSE_BTN_COUNT) {// invalid button
         MP_ERR(mpctx, "%d is not a valid mouse button number.\n", button);
         cmd->success = false;
         return;
