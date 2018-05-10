@@ -842,8 +842,7 @@ hwaccel_features = [
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
         'deps': 'gl && ffnvcodec',
-        'func': check_cc(fragment=load_fragment('cuda.c'),
-                         use='libavcodec'),
+        'func': check_true,
     }
 ]
 
