@@ -562,6 +562,12 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "hook_id");
         break;
     }
+    case MPV_EVENT_COMMAND_REPLY: {
+        mpv_event_command *cmd = event->data;
+        pushnode(L, &cmd->result);
+        lua_setfield(L, -2, "result");
+        break;
+    }
     default: ;
     }
 
@@ -967,6 +973,18 @@ static int script_command_native(lua_State *L)
     return 2;
 }
 
+static int script_raw_command_native_async(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    uint64_t id = luaL_checknumber(L, 1);
+    struct mpv_node node;
+    void *tmp = mp_lua_PITA(L);
+    makenode(tmp, &node, L, 2);
+    int res = mpv_command_node_async(ctx->client, id, &node);
+    talloc_free_children(tmp);
+    return check_error(L, res);
+}
+
 static int script_set_osd_ass(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1339,6 +1357,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(command),
     FN_ENTRY(commandv),
     FN_ENTRY(command_native),
+    FN_ENTRY(raw_command_native_async),
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
     FN_ENTRY(get_property_native),

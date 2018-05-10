@@ -528,6 +528,27 @@ function mp.add_hook(name, pri, cb)
     mp.raw_hook_add(id, name, pri - 50)
 end
 
+local async_call_table = {}
+local async_next_id = 1
+
+function mp.command_native_async(node, cb)
+    local id = async_next_id
+    async_next_id = async_next_id + 1
+    async_call_table[id] = cb
+    mp.raw_command_native_async(id, node)
+end
+
+mp.register_event("command-reply", function(ev)
+    local id = tonumber(ev.id)
+    cb = async_call_table[id]
+    async_call_table[id] = nil
+    if ev.error then
+        cb(false, nil, ev.error)
+    else
+        cb(true, ev.result, nil)
+    end
+end)
+
 local mp_utils = package.loaded["mp.utils"]
 
 function mp_utils.format_table(t, set)

@@ -115,6 +115,15 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     error. ``def`` is the second parameter provided to the function, and is
     nil if it's missing.
 
+``mp.command_native_async(table [,fn])``
+    Like ``mp.command_native()``, but the command is ran asynchronously (as far
+    as possible), and upon completion, fn is called. fn has two arguments:
+    ``fn(success, result, error)``. ``success`` is always a Boolean and is true
+    if the command was successful, otherwise false. The second parameter is
+    the result value (can be nil) in case of success, nil otherwise (as returned
+    by ``mp.command_native()``). The third parameter is the error string in case
+    of an error, nil otherwise.
+
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
