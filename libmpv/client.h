@@ -107,8 +107,9 @@ extern "C" {
  * careful not accidentally interpret the mpv_event->reply_userdata if an
  * event is not a reply. (For non-replies, this field is set to 0.)
  *
- * Currently, asynchronous calls are always strictly ordered (even with
- * synchronous calls) for each client, although that may change in the future.
+ * Asynchronous calls may be reordered in arbitrarily with other synchronous
+ * and asynchronous calls. If you want a guaranteed order, you need to wait
+ * until asynchronous calls report completion before doing the next call.
  *
  * Multithreading
  * --------------
@@ -968,10 +969,6 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * Commands are executed asynchronously. You will receive a
  * MPV_EVENT_COMMAND_REPLY event. (This event will also have an
  * error code set if running the command failed.)
- *
- * This has nothing to do with the "async" command prefix, although they might
- * be unified in the future. For now, calling this API means that the command
- * will be synchronously executed on the core, without blocking the API user.
  *
  * * Safe to be called from mpv render API threads.
  *
