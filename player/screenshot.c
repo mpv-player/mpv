@@ -93,7 +93,7 @@ static char *stripext(void *talloc_ctx, const char *s)
     return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
 }
 
-static void write_screenshot(struct MPContext *mpctx, struct mp_image *img,
+static bool write_screenshot(struct MPContext *mpctx, struct mp_image *img,
                              const char *filename, struct image_writer_opts *opts)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
@@ -113,6 +113,7 @@ static void write_screenshot(struct MPContext *mpctx, struct mp_image *img,
     } else {
         screenshot_msg(ctx, MSGL_ERR, "Error writing screenshot!");
     }
+    return ok;
 }
 
 #ifdef _WIN32
@@ -418,9 +419,10 @@ void cmd_screenshot_to_file(void *p)
     ctx->osd = old_osd;
     if (!image) {
         screenshot_msg(ctx, MSGL_ERR, "Taking screenshot failed.");
+        cmd->success = false;
         return;
     }
-    write_screenshot(mpctx, image, filename, &opts);
+    cmd->success = write_screenshot(mpctx, image, filename, &opts);
     talloc_free(image);
 }
 
@@ -451,6 +453,8 @@ void cmd_screenshot(void *p)
         }
     }
 
+    cmd->success = false;
+
     ctx->osd = osd;
 
     struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
@@ -461,7 +465,7 @@ void cmd_screenshot(void *p)
     if (image) {
         char *filename = gen_fname(ctx, image_writer_file_ext(opts));
         if (filename)
-            write_screenshot(mpctx, image, filename, NULL);
+            cmd->success = write_screenshot(mpctx, image, filename, NULL);
         talloc_free(filename);
     } else {
         screenshot_msg(ctx, MSGL_ERR, "Taking screenshot failed.");
