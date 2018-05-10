@@ -16,6 +16,7 @@
 #include <pthread.h>
 
 #include "common/common.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 
 #include "thread_pool.h"
@@ -52,6 +53,8 @@ struct mp_thread_pool {
 static void *worker_thread(void *arg)
 {
     struct mp_thread_pool *pool = arg;
+
+    mpthread_set_name("worker");
 
     pthread_mutex_lock(&pool->lock);
 
