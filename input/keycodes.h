@@ -135,6 +135,8 @@
 #define MP_KEY_IS_MOUSE_BTN_DBL(code) \
     ((code) >= MP_MBTN_DBL_BASE && (code) < MP_MBTN_DBL_END)
 
+#define MP_KEY_MOUSE_BTN_COUNT (MP_MBTN_END - MP_MBTN_BASE)
+
 // Apple Remote input module
 #define MP_AR_BASE        (MP_KEY_BASE+0xE0)
 #define MP_AR_PLAY        (MP_AR_BASE + 0)
