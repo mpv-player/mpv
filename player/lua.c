@@ -1187,83 +1187,6 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
-struct subprocess_cb_ctx {
-    struct mp_log *log;
-    void* talloc_ctx;
-    int64_t max_size;
-    bstr output;
-};
-
-static void subprocess_stdout(void *p, char *data, size_t size)
-{
-    struct subprocess_cb_ctx *ctx = p;
-    if (ctx->output.len < ctx->max_size)
-        bstr_xappend(ctx->talloc_ctx, &ctx->output, (bstr){data, size});
-}
-
-static void subprocess_stderr(void *p, char *data, size_t size)
-{
-    struct subprocess_cb_ctx *ctx = p;
-    MP_INFO(ctx, "%.*s", (int)size, data);
-}
-
-static int script_subprocess(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-    luaL_checktype(L, 1, LUA_TTABLE);
-    void *tmp = mp_lua_PITA(L);
-
-    lua_getfield(L, 1, "args"); // args
-    int num_args = mp_lua_len(L, -1);
-    char *args[256];
-    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
-        luaL_error(L, "too many arguments");
-    if (num_args < 1)
-        luaL_error(L, "program name missing");
-    for (int n = 0; n < num_args; n++) {
-        lua_pushinteger(L, n + 1); // args n
-        lua_gettable(L, -2); // args arg
-        args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
-        if (!args[n])
-            luaL_error(L, "program arguments must be strings");
-        lua_pop(L, 1); // args
-    }
-    args[num_args] = NULL;
-    lua_pop(L, 1); // -
-
-    lua_getfield(L, 1, "cancellable"); // c
-    struct mp_cancel *cancel = NULL;
-    if (lua_isnil(L, -1) ? true : lua_toboolean(L, -1))
-        cancel = ctx->mpctx->playback_abort;
-    lua_pop(L, 1); // -
-
-    lua_getfield(L, 1, "max_size"); // m
-    int64_t max_size = lua_isnil(L, -1) ? 64 * 1024 * 1024 : lua_tointeger(L, -1);
-
-    struct subprocess_cb_ctx cb_ctx = {
-        .log = ctx->log,
-        .talloc_ctx = tmp,
-        .max_size = max_size,
-    };
-
-    char *error = NULL;
-    int status = mp_subprocess(args, cancel, &cb_ctx, subprocess_stdout,
-                               subprocess_stderr, &error);
-
-    lua_newtable(L); // res
-    if (error) {
-        lua_pushstring(L, error); // res e
-        lua_setfield(L, -2, "error"); // res
-    }
-    lua_pushinteger(L, status); // res s
-    lua_setfield(L, -2, "status"); // res
-    lua_pushlstring(L, cb_ctx.output.start, cb_ctx.output.len); // res d
-    lua_setfield(L, -2, "stdout"); // res
-    lua_pushboolean(L, status == MP_SUBPROCESS_EKILLED_BY_US); // res b
-    lua_setfield(L, -2, "killed_by_us"); // res
-    return 1;
-}
-
 static int script_subprocess_detached(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1386,7 +1309,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
-    FN_ENTRY(subprocess),
     FN_ENTRY(subprocess_detached),
     FN_ENTRY(getpid),
     FN_ENTRY(parse_json),
