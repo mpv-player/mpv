@@ -189,6 +189,8 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
     mp_msg_uninit(mpctx->global);
+    assert(!mpctx->num_abort_list);
+    talloc_free(mpctx->abort_list);
     pthread_mutex_destroy(&mpctx->abort_lock);
     talloc_free(mpctx);
 }

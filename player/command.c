@@ -4867,7 +4867,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
 
         if (sub->flags & MP_ASYNC_CMD) {
             // We run it "detached" (fire & forget)
-            run_command(list->mpctx, sub, NULL, NULL);
+            run_command(list->mpctx, sub, NULL, NULL, NULL);
         } else {
             // Run the next command once this one completes.
 
@@ -4875,7 +4875,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
             list->current_valid = true;
             list->current = pthread_self();
 
-            run_command(list->mpctx, sub, on_cmd_list_sub_completion, list);
+            run_command(list->mpctx, sub, NULL, on_cmd_list_sub_completion, list);
 
             list->current_valid = false;
 
@@ -4922,8 +4922,9 @@ void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd)
         mpv_free_node_contents(&cmd->result);
     if (cmd->on_completion)
         cmd->on_completion(cmd);
+    if (cmd->abort)
+        mp_abort_remove(cmd->mpctx, cmd->abort);
     mpv_free_node_contents(&cmd->result);
-    talloc_free(cmd->cmd);
     talloc_free(cmd);
 }
 
@@ -4951,26 +4952,39 @@ static void run_command_on_worker_thread(void *p)
 // function returns (the caller is supposed to be able to handle both cases). In
 // both cases, the callback will be called while the core is locked (i.e. you
 // can access the core freely).
+// If abort is non-NULL, then the caller creates the abort object. It must have
+// been allocated with talloc. run_command() will register/unregister/destroy
+// it. Must not be set if cmd->def->can_abort==false.
 // on_completion_priv is copied to mp_cmd_ctx.on_completion_priv and can be
 // accessed from the completion callback.
 // The completion callback is invoked exactly once. If it's NULL, it's ignored.
 // Ownership of cmd goes to the caller.
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
+                 struct mp_abort_entry *abort,
                  void (*on_completion)(struct mp_cmd_ctx *cmd),
                  void *on_completion_priv)
 {
     struct mp_cmd_ctx *ctx = talloc(NULL, struct mp_cmd_ctx);
     *ctx = (struct mp_cmd_ctx){
         .mpctx = mpctx,
-        .cmd = cmd,
+        .cmd = talloc_steal(ctx, cmd),
         .args = cmd->args,
         .num_args = cmd->nargs,
         .priv = cmd->def->priv,
+        .abort = talloc_steal(ctx, abort),
         .success = true,
         .completed = true,
         .on_completion = on_completion,
         .on_completion_priv = on_completion_priv,
     };
+
+    if (!ctx->abort && cmd->def->can_abort)
+        ctx->abort = talloc_zero(ctx, struct mp_abort_entry);
+
+    assert(cmd->def->can_abort == !!ctx->abort);
+
+    if (ctx->abort)
+        mp_abort_add(mpctx, ctx->abort);
 
     struct MPOpts *opts = mpctx->opts;
     ctx->on_osd = cmd->flags & MP_ON_OSD_FLAGS;
