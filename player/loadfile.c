@@ -66,10 +66,10 @@ void mp_abort_playback_async(struct MPContext *mpctx)
 {
     mp_cancel_trigger(mpctx->playback_abort);
 
-    pthread_mutex_lock(&mpctx->lock);
+    pthread_mutex_lock(&mpctx->abort_lock);
     if (mpctx->demuxer_cancel)
         mp_cancel_trigger(mpctx->demuxer_cancel);
-    pthread_mutex_unlock(&mpctx->lock);
+    pthread_mutex_unlock(&mpctx->abort_lock);
 }
 
 static void uninit_demuxer(struct MPContext *mpctx)
@@ -96,10 +96,10 @@ static void uninit_demuxer(struct MPContext *mpctx)
     free_demuxer_and_stream(mpctx->demuxer);
     mpctx->demuxer = NULL;
 
-    pthread_mutex_lock(&mpctx->lock);
+    pthread_mutex_lock(&mpctx->abort_lock);
     talloc_free(mpctx->demuxer_cancel);
     mpctx->demuxer_cancel = NULL;
-    pthread_mutex_unlock(&mpctx->lock);
+    pthread_mutex_unlock(&mpctx->abort_lock);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -939,9 +939,9 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         start_open(mpctx, url, mpctx->playing->stream_flags);
 
     // User abort should cancel the opener now.
-    pthread_mutex_lock(&mpctx->lock);
+    pthread_mutex_lock(&mpctx->abort_lock);
     mpctx->demuxer_cancel = mpctx->open_cancel;
-    pthread_mutex_unlock(&mpctx->lock);
+    pthread_mutex_unlock(&mpctx->abort_lock);
 
     while (!atomic_load(&mpctx->open_done)) {
         mp_idle(mpctx);
@@ -957,9 +957,9 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         mpctx->open_cancel = NULL;
     } else {
         mpctx->error_playing = mpctx->open_res_error;
-        pthread_mutex_lock(&mpctx->lock);
+        pthread_mutex_lock(&mpctx->abort_lock);
         mpctx->demuxer_cancel = NULL;
-        pthread_mutex_unlock(&mpctx->lock);
+        pthread_mutex_unlock(&mpctx->abort_lock);
     }
 
     cancel_open(mpctx); // cleanup
