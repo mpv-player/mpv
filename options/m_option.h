@@ -564,6 +564,7 @@ extern const char m_option_path_separator;
 
 #define OPTDEF_STR(s)     .defval = (void *)&(char * const){s}
 #define OPTDEF_INT(i)     .defval = (void *)&(const int){i}
+#define OPTDEF_INT64(i)   .defval = (void *)&(const int64_t){i}
 #define OPTDEF_FLOAT(f)   .defval = (void *)&(const float){f}
 #define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 

@@ -5635,6 +5635,91 @@ static void cmd_run(void *p)
     talloc_free(args);
 }
 
+struct subprocess_cb_ctx {
+    struct mp_log *log;
+    void* talloc_ctx;
+    int64_t max_size;
+    bool capture[3];
+    bstr output[3];
+};
+
+static void subprocess_output(struct subprocess_cb_ctx *ctx, int fd,
+                              char *data, size_t size)
+{
+    if (ctx->capture[fd]) {
+        if (ctx->output[fd].len < ctx->max_size)
+            bstr_xappend(ctx->talloc_ctx, &ctx->output[fd], (bstr){data, size});
+    } else {
+        int msgl = fd == 2 ? MSGL_ERR : MSGL_INFO;
+        mp_msg(ctx->log, msgl, "%.*s", (int)size, data);
+    }
+}
+
+static void subprocess_stdout(void *p, char *data, size_t size)
+{
+    struct subprocess_cb_ctx *ctx = p;
+    subprocess_output(ctx, 1, data, size);
+}
+
+static void subprocess_stderr(void *p, char *data, size_t size)
+{
+    struct subprocess_cb_ctx *ctx = p;
+    subprocess_output(ctx, 2, data, size);
+}
+
+static void cmd_subprocess(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    char **args = cmd->args[0].v.str_list;
+    bool playback_only = cmd->args[1].v.i;
+
+    if (!args || !args[0]) {
+        MP_ERR(mpctx, "program name missing\n");
+        cmd->success = false;
+        return;
+    }
+
+    void *tmp = talloc_new(NULL);
+    struct subprocess_cb_ctx ctx = {
+        .log = mpctx->log,
+        .talloc_ctx = tmp,
+        .max_size = cmd->args[2].v.i,
+        .capture = {0, cmd->args[3].v.i, cmd->args[4].v.i},
+    };
+
+    struct mp_cancel *cancel = NULL;
+    if (playback_only)
+        cancel = mpctx->playback_abort;
+
+    mp_core_unlock(mpctx);
+
+    char *error = NULL;
+    int status = mp_subprocess(args, cancel, &ctx, subprocess_stdout,
+                               subprocess_stderr, &error);
+
+    mp_core_lock(mpctx);
+
+    struct mpv_node *res = &cmd->result;
+    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+    node_map_add_int64(res, "status", status);
+    node_map_add_flag(res, "killed_by_us", status == MP_SUBPROCESS_EKILLED_BY_US);
+    node_map_add_string(res, "error_string", error ? error : "");
+    const char *sname[] = {NULL, "stdout", "stderr"};
+    for (int n = 1; n < 3; n++) {
+        if (!ctx.capture[n])
+            continue;
+        struct mpv_byte_array *ba =
+            node_map_add(res, sname[n], MPV_FORMAT_BYTE_ARRAY)->u.ba;
+        *ba = (struct mpv_byte_array){
+            .data = talloc_steal(ba, ctx.output[n].start),
+            .size = ctx.output[n].len,
+        };
+    }
+
+    talloc_free(tmp);
+}
+
 static void cmd_enable_input_section(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6049,6 +6134,17 @@ const struct mp_cmd_def mp_cmds[] = {
     }},
     { "playlist-move", cmd_playlist_move, { ARG_INT, ARG_INT } },
     { "run", cmd_run, { ARG_STRING, ARG_STRING }, .vararg = true },
+    { "subprocess", cmd_subprocess,
+        {
+            OPT_STRINGLIST("args", v.str_list, 0),
+            OPT_FLAG("playback_only", v.i, 0, OPTDEF_INT(1)),
+            OPT_BYTE_SIZE("capture_size", v.i64, 0, 0, INT_MAX,
+                          OPTDEF_INT64(64 * 1024 * 1024)),
+            OPT_FLAG("capture_stdout", v.i, 0, OPTDEF_INT(0)),
+            OPT_FLAG("capture_stderr", v.i, 0, OPTDEF_INT(0)),
+        },
+        .spawn_thread = true,
+    },
 
     { "set", cmd_set, { ARG_STRING,  ARG_STRING } },
     { "change-list", cmd_change_list, { ARG_STRING, ARG_STRING, ARG_STRING } },

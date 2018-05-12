@@ -305,6 +305,11 @@ List of Input Commands
         command line arguments following. This is just like the ``run`` command
         argument list.
 
+        The first array entry is either an absolute path to the executable, or
+        a filename with no path components, in which case the ``PATH``
+        environment variable. On Unix, this is equivalent to ``posix_spawnp``
+        and ``execvp`` behavior.
+
     ``playback_only`` (``MPV_FORMAT_FLAG``)
         Boolean indicating whether the process should be killed when playback
         terminates (optional, default: yes). If enabled, stopping playback

@@ -50,4 +50,9 @@ mp.observe_property("vo-configured", "bool", function(_, v)
         function(res, val, err)
             print("done err scr.: " .. join(" ", {res, val, err}))
         end)
+
+    mp.command_native_async({name = "subprocess", args = {"sh", "-c", "echo hi && sleep 10s"}, capture_stdout = true},
+        function(res, val, err)
+            print("done subprocess: " .. join(" ", {res, val, err}))
+        end)
 end)
