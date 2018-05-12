@@ -438,9 +438,9 @@ typedef struct MPContext {
 
     struct mp_ipc_ctx *ipc_ctx;
 
-    pthread_mutex_t lock;
+    pthread_mutex_t abort_lock;
 
-    // --- The following fields are protected by lock
+    // --- The following fields are protected by abort_lock
     struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
 
     // --- Owned by MPContext

@@ -189,7 +189,7 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
     mp_msg_uninit(mpctx->global);
-    pthread_mutex_destroy(&mpctx->lock);
+    pthread_mutex_destroy(&mpctx->abort_lock);
     talloc_free(mpctx);
 }
 
@@ -283,7 +283,7 @@ struct MPContext *mp_create(void)
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
     };
 
-    pthread_mutex_init(&mpctx->lock, NULL);
+    pthread_mutex_init(&mpctx->abort_lock, NULL);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
