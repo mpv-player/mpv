@@ -81,3 +81,16 @@ void node_map_add_flag(struct mpv_node *dst, const char *key, bool v)
 {
     node_map_add(dst, key, MPV_FORMAT_FLAG)->u.flag = v;
 }
+
+mpv_node *node_map_get(mpv_node *src, const char *key)
+{
+    if (src->format != MPV_FORMAT_NODE_MAP)
+        return NULL;
+
+    for (int i = 0; i < src->u.list->num; i++) {
+        if (strcmp(key, src->u.list->keys[i]) == 0)
+            return &src->u.list->values[i];
+    }
+
+    return NULL;
+}
