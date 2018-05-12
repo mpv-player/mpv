@@ -20,22 +20,11 @@
 #include "common/msg.h"
 #include "input/input.h"
 #include "misc/json.h"
+#include "misc/node.h"
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "player/client.h"
-
-static mpv_node *mpv_node_map_get(mpv_node *src, const char *key)
-{
-    if (src->format != MPV_FORMAT_NODE_MAP)
-        return NULL;
-
-    for (int i = 0; i < src->u.list->num; i++)
-        if (!strcmp(key, src->u.list->keys[i]))
-            return &src->u.list->values[i];
-
-    return NULL;
-}
 
 static mpv_node *mpv_node_array_get(mpv_node *src, int index)
 {
@@ -217,9 +206,9 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
         goto error;
     }
 
-    reqid_node = mpv_node_map_get(&msg_node, "request_id");
+    reqid_node = node_map_get(&msg_node, "request_id");
 
-    mpv_node *cmd_node = mpv_node_map_get(&msg_node, "command");
+    mpv_node *cmd_node = node_map_get(&msg_node, "command");
     if (!cmd_node ||
         (cmd_node->format != MPV_FORMAT_NODE_ARRAY) ||
         !cmd_node->u.list->num)
