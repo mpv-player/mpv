@@ -617,4 +617,27 @@ function mp_utils.format_bytes_humanized(b)
     return string.format("%0.2f %s", b, d[i] and d[i] or "*1024^" .. (i-1))
 end
 
+function mp_utils.subprocess(t)
+    local cmd = {}
+    cmd.name = "subprocess"
+    cmd.capture_stdout = true
+    for k, v in pairs(t) do
+        if k == "cancellable" then
+            k = "playback_only"
+        elseif k == "max_size" then
+            k = "capture_size"
+        end
+        cmd[k] = v
+    end
+    local res, err = mp.command_native(cmd)
+    if res == nil then
+        -- an error usually happens only if parsing failed (or no args passed)
+        res = {error_string = err, status = -1}
+    end
+    if res.error_string ~= "" then
+        res.error = res.error_string
+    end
+    return res
+end
+
 return {}
