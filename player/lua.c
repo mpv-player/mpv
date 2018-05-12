@@ -985,6 +985,14 @@ static int script_raw_command_native_async(lua_State *L)
     return check_error(L, res);
 }
 
+static int script_raw_abort_async_command(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    uint64_t id = luaL_checknumber(L, 1);
+    mpv_abort_async_command(ctx->client, id);
+    return 0;
+}
+
 static int script_set_osd_ass(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1252,6 +1260,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(commandv),
     FN_ENTRY(command_native),
     FN_ENTRY(raw_command_native_async),
+    FN_ENTRY(raw_abort_async_command),
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
     FN_ENTRY(get_property_native),

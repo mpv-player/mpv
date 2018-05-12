@@ -134,6 +134,18 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     by ``mp.command_native()``). The third parameter is the error string in case
     of an error, nil otherwise.
 
+    Returns a table with undefined contents, which can be used as argument for
+    ``mp.abort_async_command``.
+
+    If starting the command failed for some reason, ``nil, error`` is returned,
+    and ``fn`` is called indicating failure, using the same error value.
+
+``mp.abort_async_command(t)``
+    Abort a ``mp.command_native_async`` call. The argument is the return value
+    of that command (which starts asynchronous execution of the command).
+    Whether this works and how long it takes depends on the command and the
+    situation. The abort call itself is asynchronous. Does not return anything.
+
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
