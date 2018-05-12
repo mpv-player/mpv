@@ -363,6 +363,8 @@ List of Input Commands
     it was somehow killed or returned an error status has to be queried from
     the result value.
 
+    This command can be asynchronously aborted via API.
+
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
 
