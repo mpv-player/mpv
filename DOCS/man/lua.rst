@@ -682,6 +682,9 @@ strictly part of the guaranteed API.
 
     The function returns ``nil``.
 
+    This is a legacy wrapper around calling the ``run`` command with
+    ``mp.commandv`` and other functions.
+
 ``utils.getpid()``
     Returns the process ID of the running mpv process. This can be used to identify
     the calling mpv when launching (detached) subprocesses.

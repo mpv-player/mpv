@@ -640,4 +640,8 @@ function mp_utils.subprocess(t)
     return res
 end
 
+function mp_utils.subprocess_detached(t)
+    mp.commandv("run", unpack(t.args))
+end
+
 return {}
