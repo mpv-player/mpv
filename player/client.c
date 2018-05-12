@@ -1063,9 +1063,14 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
 
     lock_core(ctx);
     if (async) {
-        run_command(ctx->mpctx, req.cmd, NULL, NULL);
+        run_command(ctx->mpctx, cmd, NULL, NULL, NULL);
     } else {
-        run_command(ctx->mpctx, req.cmd, cmd_complete, &req);
+        struct mp_abort_entry *abort = NULL;
+        if (cmd->def->can_abort) {
+            abort = talloc_zero(NULL, struct mp_abort_entry);
+            abort->client = ctx;
+        }
+        run_command(ctx->mpctx, cmd, abort, cmd_complete, &req);
     }
     unlock_core(ctx);
 
@@ -1129,9 +1134,17 @@ static void async_cmd_fn(void *data)
     ta_xset_parent(cmd, NULL);
     req->cmd = NULL;
 
+    struct mp_abort_entry *abort = NULL;
+    if (cmd->def->can_abort) {
+        abort = talloc_zero(NULL, struct mp_abort_entry);
+        abort->client = req->reply_ctx;
+        abort->client_work_type = MPV_EVENT_COMMAND_REPLY;
+        abort->client_work_id = req->userdata;
+    }
+
     // This will synchronously or asynchronously call cmd_complete (depending
     // on the command).
-    run_command(req->mpctx, cmd, async_cmd_complete, req);
+    run_command(req->mpctx, cmd, abort, async_cmd_complete, req);
 }
 
 static int run_async_cmd(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
@@ -1161,6 +1174,23 @@ int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
 int mpv_command_node_async(mpv_handle *ctx, uint64_t ud, mpv_node *args)
 {
     return run_async_cmd(ctx, ud, mp_input_parse_cmd_node(ctx->log, args));
+}
+
+void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata)
+{
+    struct MPContext *mpctx = ctx->mpctx;
+
+    pthread_mutex_lock(&mpctx->abort_lock);
+    for (int n = 0; n < mpctx->num_abort_list; n++) {
+        struct mp_abort_entry *abort = mpctx->abort_list[n];
+        if (abort->client == ctx &&
+            abort->client_work_type == MPV_EVENT_COMMAND_REPLY &&
+            abort->client_work_id == reply_userdata)
+        {
+            mp_abort_trigger_locked(mpctx, abort);
+        }
+    }
+    pthread_mutex_unlock(&mpctx->abort_lock);
 }
 
 static int translate_property_error(int errc)

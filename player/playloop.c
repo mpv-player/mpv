@@ -110,7 +110,7 @@ void mp_process_input(struct MPContext *mpctx)
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
-        run_command(mpctx, cmd, NULL, NULL);
+        run_command(mpctx, cmd, NULL, NULL, NULL);
     }
     mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
 }

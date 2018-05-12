@@ -67,9 +67,60 @@ void mp_abort_playback_async(struct MPContext *mpctx)
     mp_cancel_trigger(mpctx->playback_abort);
 
     pthread_mutex_lock(&mpctx->abort_lock);
+
     if (mpctx->demuxer_cancel)
         mp_cancel_trigger(mpctx->demuxer_cancel);
+
+    for (int n = 0; n < mpctx->num_abort_list; n++) {
+        struct mp_abort_entry *abort = mpctx->abort_list[n];
+        if (abort->coupled_to_playback)
+            mp_abort_trigger_locked(mpctx, abort);
+    }
+
     pthread_mutex_unlock(&mpctx->abort_lock);
+}
+
+// Add it to the global list, and allocate required data structures.
+void mp_abort_add(struct MPContext *mpctx, struct mp_abort_entry *abort)
+{
+    pthread_mutex_lock(&mpctx->abort_lock);
+    assert(!abort->cancel);
+    abort->cancel = mp_cancel_new(NULL);
+    MP_TARRAY_APPEND(NULL, mpctx->abort_list, mpctx->num_abort_list, abort);
+    mp_abort_recheck_locked(mpctx, abort);
+    pthread_mutex_unlock(&mpctx->abort_lock);
+}
+
+// Remove Add it to the global list, and free/clear required data structures.
+// Does not deallocate the abort value itself.
+void mp_abort_remove(struct MPContext *mpctx, struct mp_abort_entry *abort)
+{
+    pthread_mutex_lock(&mpctx->abort_lock);
+    for (int n = 0; n < mpctx->num_abort_list; n++) {
+        if (mpctx->abort_list[n] == abort) {
+            MP_TARRAY_REMOVE_AT(mpctx->abort_list, mpctx->num_abort_list, n);
+            TA_FREEP(&abort->cancel);
+            abort = NULL; // it's not free'd, just clear for the assert below
+            break;
+        }
+    }
+    assert(!abort); // should have been in the list
+    pthread_mutex_unlock(&mpctx->abort_lock);
+}
+
+// Verify whether the abort needs to be signaled after changing certain fields
+// in abort.
+void mp_abort_recheck_locked(struct MPContext *mpctx,
+                             struct mp_abort_entry *abort)
+{
+    if (abort->coupled_to_playback && mp_cancel_test(mpctx->playback_abort))
+        mp_abort_trigger_locked(mpctx, abort);
+}
+
+void mp_abort_trigger_locked(struct MPContext *mpctx,
+                             struct mp_abort_entry *abort)
+{
+    mp_cancel_trigger(abort->cancel);
 }
 
 static void uninit_demuxer(struct MPContext *mpctx)

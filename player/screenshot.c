@@ -519,7 +519,7 @@ void screenshot_flip(struct MPContext *mpctx)
 
     struct mp_waiter wait = MP_WAITER_INITIALIZER;
     void *a[] = {mpctx, &wait};
-    run_command(mpctx, mp_cmd_clone(ctx->each_frame), screenshot_fin, a);
+    run_command(mpctx, mp_cmd_clone(ctx->each_frame), NULL, screenshot_fin, a);
 
     // Block (in a reentrant way) until he screenshot was written. Otherwise,
     // we could pile up screenshot requests forever.

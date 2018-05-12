@@ -39,6 +39,7 @@ API changes
  1.102  - redo handling of async commands
         - add mpv_event_command and make it possible to return values from
           commands issued with mpv_command_async() or mpv_command_node_async()
+        - add mpv_abort_async_command()
  1.101  - add MPV_RENDER_PARAM_ADVANCED_CONTROL and related API
         - add MPV_RENDER_PARAM_NEXT_FRAME_INFO and related symbols
         - add MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME
