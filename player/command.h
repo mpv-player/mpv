@@ -45,6 +45,8 @@ struct mp_cmd_ctx {
     bool bar_osd;       // OSD bar requested
     bool seek_msg_osd;  // same as above, but for seek commands
     bool seek_bar_osd;
+    // If mp_cmd_def.can_abort is set, this will be set.
+    struct mp_abort_entry *abort;
     // Return values (to be set by command implementation, read by the
     // completion callback).
     bool success;       // true by default
@@ -64,6 +66,7 @@ struct mp_cmd_ctx {
 };
 
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
+                 struct mp_abort_entry *abort,
                  void (*on_completion)(struct mp_cmd_ctx *cmd),
                  void *on_completion_priv);
 void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd);

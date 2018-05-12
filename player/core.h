@@ -442,6 +442,8 @@ typedef struct MPContext {
 
     // --- The following fields are protected by abort_lock
     struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
+    struct mp_abort_entry **abort_list;
+    int num_abort_list;
 
     // --- Owned by MPContext
     pthread_t open_thread;
@@ -458,6 +460,20 @@ typedef struct MPContext {
     struct demuxer *open_res_demuxer;
     int open_res_error;
 } MPContext;
+
+// Contains information about an asynchronous work item, how it can be aborted,
+// and when. All fields are protected by MPContext.abort_lock.
+struct mp_abort_entry {
+    // General conditions.
+    bool coupled_to_playback;   // trigger when playback is terminated
+    // Actual trigger to abort the work.
+    struct mp_cancel *cancel;
+    // For client API.
+    struct mpv_handle *client;  // non-NULL if done by a client API user
+    int client_work_type;       // client API type, e.h. MPV_EVENT_COMMAND_REPLY
+    uint64_t client_work_id;    // client API user reply_userdata value
+                                // (only valid if client_work_type set)
+};
 
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
@@ -488,6 +504,12 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
 
 // loadfile.c
 void mp_abort_playback_async(struct MPContext *mpctx);
+void mp_abort_add(struct MPContext *mpctx, struct mp_abort_entry *abort);
+void mp_abort_remove(struct MPContext *mpctx, struct mp_abort_entry *abort);
+void mp_abort_recheck_locked(struct MPContext *mpctx,
+                             struct mp_abort_entry *abort);
+void mp_abort_trigger_locked(struct MPContext *mpctx,
+                             struct mp_abort_entry *abort);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter);

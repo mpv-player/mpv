@@ -1014,6 +1014,38 @@ int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
                            mpv_node *args);
 
 /**
+ * Signal to all async requests with the matching ID to abort. This affects
+ * the following API calls:
+ *
+ *      mpv_command_async
+ *      mpv_command_node_async
+ *
+ * All of these functions take a reply_userdata parameter. This API function
+ * tells all requests with the matching reply_userdata value to try to return
+ * as soon as possible. If there are multiple requests with matching ID, it
+ * aborts all of them.
+ *
+ * This API function is mostly asynchronous itself. It will not wait until the
+ * command is aborted. Instead, the command will terminate as usual, but with
+ * some work not done. How this is signaled depends on the specific command (for
+ * example, the "subprocess" command will indicate it by "killed_by_us" set to
+ * true in the result). How long it takes also depends on the situation. The
+ * aborting process is completely asynchronous.
+ *
+ * Not all commands may support this functionality. In this case, this function
+ * will have no effect. The same is true if the request using the passed
+ * reply_userdata has already terminated, has not been started yet, or was
+ * never in use at all.
+ *
+ * You have to be careful of race conditions: the time during which the abort
+ * request will be effective is _after_ e.g. mpv_command_async() has returned,
+ * and before the command has signaled completion with MPV_EVENT_COMMAND_REPLY.
+ *
+ * @param reply_userdata ID of the request to be aborted (see above)
+ */
+void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata);
+
+/**
  * Set a property to a given value. Properties are essentially variables which
  * can be queried or set at runtime. For example, writing to the pause property
  * will actually pause or unpause playback.

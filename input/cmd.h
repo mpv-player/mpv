@@ -54,6 +54,10 @@ struct mp_cmd_def {
     // unlocked, you have no synchronized access to mpctx, but you can do long
     // running operations without blocking playback or input handling).
     bool spawn_thread;
+    // If this is set, mp_cmd_ctx.abort is set. Set this if handler() can do
+    // asynchronous abort of the command, and explicitly uses mp_cmd_ctx.abort.
+    // (Not setting it when it's not needed can save resources.)
+    bool can_abort;
 };
 
 enum mp_cmd_flags {
