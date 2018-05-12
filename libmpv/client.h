@@ -941,10 +941,25 @@ int mpv_command(mpv_handle *ctx, const char **args);
  *
  * Does not use OSD and string expansion by default.
  *
- * @param[in] args mpv_node with format set to MPV_FORMAT_NODE_ARRAY; each entry
- *                 is an argument using an arbitrary format (the format must be
- *                 compatible to the used command). Usually, the first item is
- *                 the command name (as MPV_FORMAT_STRING).
+ * The args argument can have one of the following formats:
+ *
+ * MPV_FORMAT_NODE_ARRAY:
+ *      Positional arguments. Each entry is an argument using an arbitrary
+ *      format (the format must be compatible to the used command). Usually,
+ *      the first item is the command name (as MPV_FORMAT_STRING). The order
+ *      of arguments is as documented in each command description.
+ *
+ * MPV_FORMAT_NODE_MAP:
+ *      Named arguments. This requires at least an entry with the key "name"
+ *      to be present, which must be a string, and contains the command name.
+ *      The special entry "_flags" is optional, and if present, must be an
+ *      array of strings, each being a command prefix to apply. All other
+ *      entries are interpreted as arguments. They must use the argument names
+ *      as documented in each command description. Currently, most commands do
+ *      not support named arguments at all.
+ *
+ * @param[in] args mpv_node with format set to one of the values documented
+ *                 above (see there for details)
  * @param[out] result Optional, pass NULL if unused. If not NULL, and if the
  *                    function succeeds, this is set to command-specific return
  *                    data. You must call mpv_free_node_contents() to free it
