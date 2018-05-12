@@ -55,4 +55,13 @@ mp.observe_property("vo-configured", "bool", function(_, v)
         function(res, val, err)
             print("done subprocess: " .. join(" ", {res, val, err}))
         end)
+
+    local x = mp.command_native_async({name = "subprocess", args = {"sleep", "inf"}},
+        function(res, val, err)
+            print("done sleep inf subprocess: " .. join(" ", {res, val, err}))
+        end)
+    mp.add_timeout(15, function()
+        print("aborting sleep inf subprocess after timeout")
+        mp.abort_async_command(x)
+    end)
 end)
