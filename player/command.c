@@ -5702,15 +5702,16 @@ static void cmd_subprocess(void *p)
         .capture = {0, cmd->args[3].v.i, cmd->args[4].v.i},
     };
 
-    struct mp_cancel *cancel = NULL;
-    if (playback_only)
-        cancel = mpctx->playback_abort;
+    pthread_mutex_lock(&mpctx->abort_lock);
+    cmd->abort->coupled_to_playback = playback_only;
+    mp_abort_recheck_locked(mpctx, cmd->abort);
+    pthread_mutex_unlock(&mpctx->abort_lock);
 
     mp_core_unlock(mpctx);
 
     char *error = NULL;
-    int status = mp_subprocess(args, cancel, &ctx, subprocess_stdout,
-                               subprocess_stderr, &error);
+    int status = mp_subprocess(args, cmd->abort->cancel, &ctx,
+                               subprocess_stdout, subprocess_stderr, &error);
 
     mp_core_lock(mpctx);
 
@@ -6158,6 +6159,7 @@ const struct mp_cmd_def mp_cmds[] = {
             OPT_FLAG("capture_stderr", v.i, 0, OPTDEF_INT(0)),
         },
         .spawn_thread = true,
+        .can_abort = true,
     },
 
     { "set", cmd_set, { ARG_STRING,  ARG_STRING } },
