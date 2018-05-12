@@ -78,6 +78,16 @@ that matches, and the multi-key command will never be called. Intermediate keys
 can be remapped to ``ignore`` in order to avoid this issue. The maximum number
 of (non-modifier) keys for combinations is currently 4.
 
+Named arguments
+---------------
+
+Some commands support named arguments (most currently don't). Named arguments
+cannot be used with the "flat" input.conf syntax shown above, but require using
+e.g. ``mp.command_native()`` in Lua scripting, or e.g. ``mpv_command_node()``
+with the libmpv API. Some commands ask you to only use named arguments (because
+the command order is not guaranteed), which means you can't use them as
+key bindings in input.conf at all.
+
 List of Input Commands
 ----------------------
 
@@ -282,6 +292,71 @@ List of Input Commands
         escaping, and a specially prepared file might allow an attacker to
         execute arbitrary shell commands. It is recommended to write a small
         shell script, and call that with ``run``.
+
+``subprocess``
+    Similar to ``run``, but gives more control about process execution to the
+    caller, and does does not detach the process.
+
+    This has the following named arguments. The order of them is not guaranteed,
+    so you should always call them with named arguments, see `Named arguments`_.
+
+    ``args`` (``MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_STRING]``)
+        Array of strings with the command as first argument, and subsequent
+        command line arguments following. This is just like the ``run`` command
+        argument list.
+
+    ``playback_only`` (``MPV_FORMAT_FLAG``)
+        Boolean indicating whether the process should be killed when playback
+        terminates (optional, default: yes). If enabled, stopping playback
+        will automatically kill the process, and you can't start it outside of
+        playback.
+
+    ``capture_size`` (``MPV_FORMAT_INT64``)
+        Integer setting the maximum number of stdout plus stderr bytes that can
+        be captured (optional, default: 64MB). If the number of bytes exceeds
+        this, capturing is stopped. The limit is per captured stream.
+
+    ``capture_stdout`` (``MPV_FORMAT_FLAG``)
+        Capture all data the process outputs to stdout and return it once the
+        process ends (optional, default: no).
+
+    ``capture_stderr`` (``MPV_FORMAT_FLAG``)
+        Same as ``capture_stdout``, but for stderr.
+
+    The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
+
+    ``status`` (``MPV_FORMAT_INT64``)
+        The raw exit status of the process. It will be negative on error. The
+        meaning of negative values is undefined, other than meaning error (and
+        does not necessarily correspond to OS low level exit status values).
+
+        On Windows, it can happen that a negative return value is returned
+        even if the process exits gracefully, because the win32 ``UINT`` exit
+        code is assigned to an ``int`` variable before being set as ``int64_t``
+        field in the result map. This might be fixed later.
+
+    ``stdout`` (``MPV_FORMAT_BYTE_ARRAY``)
+        Captured stdout stream, limited to ``capture_size``.
+
+    ``stderr`` (``MPV_FORMAT_BYTE_ARRAY``)
+        Same as ``stdout``, but for stderr.
+
+    ``error_string`` (``MPV_FORMAT_STRING``)
+        Empty string if the process exited gracefully. The string ``killed`` if
+        the process was terminated in an unusual way. The string ``init`` if the
+        process could not be started.
+
+        On Windows, ``killed`` is only returned when the process has been
+        killed by mpv as a result of ``playback_only`` being set to ``yes``.
+
+    ``killed_by_us`` (``MPV_FORMAT_FLAG``)
+        Set to ``yes`` if the process has been killed by mpv as a result
+        of ``playback_only`` being set to ``yes``.
+
+    Note that the command itself will always return success as long as the
+    parameters are correct. Whether the process could be spawned or whether
+    it was somehow killed or returned an error status has to be queried from
+    the result value.
 
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
