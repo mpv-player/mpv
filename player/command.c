@@ -5682,7 +5682,7 @@ static void cmd_subprocess(void *p)
 
     void *tmp = talloc_new(NULL);
     struct subprocess_cb_ctx ctx = {
-        .log = mpctx->log,
+        .log = mp_log_new(tmp, mpctx->log, cmd->cmd->sender),
         .talloc_ctx = tmp,
         .max_size = cmd->args[2].v.i,
         .capture = {0, cmd->args[3].v.i, cmd->args[4].v.i},

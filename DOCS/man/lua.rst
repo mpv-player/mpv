@@ -653,45 +653,23 @@ strictly part of the guaranteed API.
 
 ``utils.subprocess(t)``
     Runs an external process and waits until it exits. Returns process status
-    and the captured output.
+    and the captured output. This is a legacy wrapper around calling the
+    ``subprocess`` command with ``mp.command_native``. It does the following
+    things:
 
-    The parameter ``t`` is a table. The function reads the following entries:
+    - copy the table ``t``
+    - rename ``cancellable`` field to ``playback_only``
+    - rename ``max_size`` to ``capture_size``
+    - set ``capture_stdout`` field to ``true`` if unset
+    - set ``name`` field to ``subprocess``
+    - call ``mp.command_native(copied_t)``
+    - if the command failed, create a dummy result table
+    - copy ``error_string`` to ``error`` field if the string is non-empty
+    - return the result table
 
-        ``args``
-            Array of strings. The first array entry is the executable. This
-            can be either an absolute path, or a filename with no path
-            components, in which case the ``PATH`` environment variable is
-            used to resolve the executable. The other array elements are
-            passed as command line arguments.
-
-        ``cancellable``
-            Optional. If set to ``true`` (default), then if the user stops
-            playback or goes to the next file while the process is running,
-            the process will be killed.
-
-        ``max_size``
-            Optional. The maximum size in bytes of the data that can be captured
-            from stdout. (Default: 16 MB.)
-
-    The function returns a table as result with the following entries:
-
-        ``status``
-            The raw exit status of the process. It will be negative on error.
-
-        ``stdout``
-            Captured output stream as string, limited to ``max_size``.
-
-        ``error``
-            ``nil`` on success. The string ``killed`` if the process was
-            terminated in an unusual way. The string ``init`` if the process
-            could not be started.
-
-            On Windows, ``killed`` is only returned when the process has been
-            killed by mpv as a result of ``cancellable`` being set to ``true``.
-
-        ``killed_by_us``
-            Set to ``true`` if the process has been killed by mpv as a result
-            of ``cancellable`` being set to ``true``.
+    It is recommended to use ``mp.command_native`` or ``mp.command_native_async``
+    directly, instead of calling this legacy wrapper. It is for compatibility
+    only.
 
 ``utils.subprocess_detached(t)``
     Runs an external process and detaches it from mpv's control.
