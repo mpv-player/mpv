@@ -1187,35 +1187,6 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
-static int script_subprocess_detached(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-    luaL_checktype(L, 1, LUA_TTABLE);
-    void *tmp = mp_lua_PITA(L);
-
-    lua_getfield(L, 1, "args"); // args
-    int num_args = mp_lua_len(L, -1);
-    char *args[256];
-    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
-        luaL_error(L, "too many arguments");
-    if (num_args < 1)
-        luaL_error(L, "program name missing");
-    for (int n = 0; n < num_args; n++) {
-        lua_pushinteger(L, n + 1); // args n
-        lua_gettable(L, -2); // args arg
-        args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
-        if (!args[n])
-            luaL_error(L, "program arguments must be strings");
-        lua_pop(L, 1); // args
-    }
-    args[num_args] = NULL;
-    lua_pop(L, 1); // -
-
-    mp_subprocess_detached(ctx->log, args);
-    lua_pushnil(L);
-    return 1;
-}
-
 static int script_getpid(lua_State *L)
 {
     lua_pushnumber(L, mp_getpid());
@@ -1309,7 +1280,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
-    FN_ENTRY(subprocess_detached),
     FN_ENTRY(getpid),
     FN_ENTRY(parse_json),
     FN_ENTRY(format_json),
