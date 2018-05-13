@@ -103,6 +103,9 @@ Interface changes
       of 3D content doesn't justify such an option anyway.
     - change cycle-values command to use the current value, instead of an
       internal counter that remembered the current position.
+    - ipc: require that "request_id" fields are integers. Other types are still
+      accepted for compatibility, but this will stop in the future. Also, if no
+      request_id is provided, 0 will be assumed.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

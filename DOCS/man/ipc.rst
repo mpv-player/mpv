@@ -108,7 +108,10 @@ Because events can occur at any time, it may be difficult at times to determine
 which response goes with which command. Commands may optionally include a
 ``request_id`` which, if provided in the command request, will be copied
 verbatim into the response. mpv does not intrepret the ``request_id`` in any
-way; it is solely for the use of the requester.
+way; it is solely for the use of the requester. The only requirement is that
+the ``request_id`` field must be an integer (a number without fractional parts
+in the range ``-2^63..2^63-1``). Using other types is deprecated and will
+currently show a warning. In the future, this will raise an error.
 
 For example, this request:
 
@@ -121,6 +124,11 @@ Would generate this response:
 ::
 
     { "error": "success", "data": 1.468135, "request_id": 100 }
+
+If you don't specify a ``request_id``, command replies will set it to 0.
+
+Commands may run asynchronously in the future, instead of blocking the  socket
+until a reply is sent.
 
 All commands, replies, and events are separated from each other with a line
 break character (``\n``).
