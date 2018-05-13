@@ -113,8 +113,11 @@ void mp_abort_remove(struct MPContext *mpctx, struct mp_abort_entry *abort)
 void mp_abort_recheck_locked(struct MPContext *mpctx,
                              struct mp_abort_entry *abort)
 {
-    if (abort->coupled_to_playback && mp_cancel_test(mpctx->playback_abort))
+    if ((abort->coupled_to_playback && mp_cancel_test(mpctx->playback_abort)) ||
+        mpctx->abort_all)
+    {
         mp_abort_trigger_locked(mpctx, abort);
+    }
 }
 
 void mp_abort_trigger_locked(struct MPContext *mpctx,

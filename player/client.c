@@ -371,6 +371,30 @@ void mpv_wait_async_requests(mpv_handle *ctx)
     pthread_mutex_unlock(&ctx->lock);
 }
 
+// Send abort signal to all matching work items.
+// If type==0, destroy all of the matching ctx.
+// If ctx==0, destroy all.
+static void abort_async(struct MPContext *mpctx, mpv_handle *ctx,
+                        int type, uint64_t id)
+{
+    pthread_mutex_lock(&mpctx->abort_lock);
+
+    // Destroy all => ensure any newly appearing work is aborted immediately.
+    if (ctx == NULL)
+        mpctx->abort_all = true;
+
+    for (int n = 0; n < mpctx->num_abort_list; n++) {
+        struct mp_abort_entry *abort = mpctx->abort_list[n];
+        if (!ctx || (abort->client == ctx && (!type ||
+            (abort->client_work_type == type && abort->client_work_id == id))))
+        {
+            mp_abort_trigger_locked(mpctx, abort);
+        }
+    }
+
+    pthread_mutex_unlock(&mpctx->abort_lock);
+}
+
 static void get_thread(void *ptr)
 {
     *(pthread_t *)ptr = pthread_self();
@@ -388,6 +412,8 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
 
     if (terminate)
         mpv_command(ctx, (const char*[]){"quit", NULL});
+
+    abort_async(mpctx, ctx, 0, 0);
 
     // reserved_events equals the number of asynchronous requests that weren't
     // yet replied. In order to avoid that trying to reply to a removed client
@@ -485,9 +511,13 @@ void mpv_terminate_destroy(mpv_handle *ctx)
 }
 
 // Can be called on the core thread only. Idempotent.
+// Also happens to take care of shutting down any async work.
 void mp_shutdown_clients(struct MPContext *mpctx)
 {
     struct mp_client_api *clients = mpctx->clients;
+
+    // Forcefully abort async work after 2 seconds of waiting.
+    double abort_time = mp_time_sec() + 2;
 
     pthread_mutex_lock(&clients->lock);
 
@@ -499,6 +529,16 @@ void mp_shutdown_clients(struct MPContext *mpctx)
            !(mpctx->is_cli || clients->terminate_core_thread))
     {
         pthread_mutex_unlock(&clients->lock);
+
+        double left = abort_time - mp_time_sec();
+        if (left >= 0) {
+            mp_set_timeout(mpctx, left);
+        } else {
+            // Forcefully abort any ongoing async work. This is quite rude and
+            // probably not what everyone wants, so it happens only after a
+            // timeout.
+            abort_async(mpctx, NULL, 0, 0);
+        }
 
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
         mp_wait_events(mpctx);
@@ -1178,19 +1218,7 @@ int mpv_command_node_async(mpv_handle *ctx, uint64_t ud, mpv_node *args)
 
 void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata)
 {
-    struct MPContext *mpctx = ctx->mpctx;
-
-    pthread_mutex_lock(&mpctx->abort_lock);
-    for (int n = 0; n < mpctx->num_abort_list; n++) {
-        struct mp_abort_entry *abort = mpctx->abort_list[n];
-        if (abort->client == ctx &&
-            abort->client_work_type == MPV_EVENT_COMMAND_REPLY &&
-            abort->client_work_id == reply_userdata)
-        {
-            mp_abort_trigger_locked(mpctx, abort);
-        }
-    }
-    pthread_mutex_unlock(&mpctx->abort_lock);
+    abort_async(ctx->mpctx, ctx, MPV_EVENT_COMMAND_REPLY, reply_userdata);
 }
 
 static int translate_property_error(int errc)

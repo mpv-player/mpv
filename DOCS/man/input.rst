@@ -365,6 +365,9 @@ List of Input Commands
 
     This command can be asynchronously aborted via API.
 
+    In all cases, the subprocess will be terminated on player exit. Only the
+    ``run`` command can start processes in a truly detached way.
+
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
 
