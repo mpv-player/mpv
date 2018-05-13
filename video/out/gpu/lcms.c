@@ -83,7 +83,7 @@ const struct m_sub_options mp_icc_conf = {
         OPT_FLAG("icc-profile-auto", profile_auto, 0),
         OPT_STRING("icc-cache-dir", cache_dir, M_OPT_FILE),
         OPT_INT("icc-intent", intent, 0),
-        OPT_INTRANGE("icc-contrast", contrast, 0, 0, 100000),
+        OPT_INTRANGE("icc-contrast", contrast, 0, 0, 1000000),
         OPT_STRING_VALIDATE("icc-3dlut-size", size_str, 0, validate_3dlut_size_opt),
 
         OPT_REPLACED("3dlut-size", "icc-3dlut-size"),
@@ -304,7 +304,8 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
 
         // Built-in contrast failsafe
         double contrast = 3.0 / (src_black[0] + src_black[1] + src_black[2]);
-        if (contrast > 100000) {
+        MP_VERBOSE(p, "Detected ICC profile contrast: %f\n", contrast);
+        if (contrast > 100000 && !p->opts->contrast) {
             MP_WARN(p, "ICC profile detected contrast very high (>100000),"
                     " falling back to contrast 1000 for sanity. Set the"
                     " icc-contrast option to silence this warning.\n");

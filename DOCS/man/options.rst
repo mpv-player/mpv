@@ -5277,7 +5277,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Size of the 3D LUT generated from the ICC profile in each dimension.
     Default is 64x64x64. Sizes may range from 2 to 512.
 
-``--icc-contrast=<0-100000>``
+``--icc-contrast=<0-1000000>``
     Specifies an upper limit on the target device's contrast ratio. This is
     detected automatically from the profile if possible, but for some profiles
     it might be missing, causing the contrast to be assumed as infinite. As a
