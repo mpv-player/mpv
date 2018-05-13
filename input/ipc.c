@@ -207,6 +207,10 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
     }
 
     reqid_node = node_map_get(&msg_node, "request_id");
+    if (reqid_node && reqid_node->format != MPV_FORMAT_INT64) {
+        mp_warn(log, "'request_id' must be an integer. Using other types is "
+                "deprecated and will trigger an error in the future!\n");
+    }
 
     mpv_node *cmd_node = node_map_get(&msg_node, "command");
     if (!cmd_node ||
@@ -404,6 +408,8 @@ error:
      */
     if (reqid_node) {
         mpv_node_map_add(ta_parent, &reply_node, "request_id", reqid_node);
+    } else {
+        mpv_node_map_add_int64(ta_parent, &reply_node, "request_id", 0);
     }
 
     mpv_node_map_add_string(ta_parent, &reply_node, "error", mpv_error_string(rc));
