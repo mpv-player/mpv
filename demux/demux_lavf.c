@@ -186,8 +186,6 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
-    // Probably a security risk.
-    BLACKLIST("ffm"),
     // Image demuxers ("<name>_pipe" is detected explicitly)
     {"image2pipe", .image_format = true},
     {0}
