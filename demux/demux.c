@@ -1236,6 +1236,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
 {
     struct demux_queue *queue = ds->queue;
     bool attempt_range_join = false;
+    bool prev_eof = queue->is_eof;
 
     if (!ds->in->seekable_cache)
         return;
@@ -1253,6 +1254,8 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
             attempt_range_join = queue->range->seek_end > old_end;
             if (queue->keyframe_latest->kf_seek_pts != MP_NOPTS_VALUE)
                 add_index_entry(queue, queue->keyframe_latest);
+        } else {
+            queue->is_eof |= ds->eof;
         }
         queue->keyframe_latest = dp;
         queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
@@ -1268,11 +1271,11 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
         queue->keyframe_pts = MP_PTS_MIN(queue->keyframe_pts, ts);
         queue->keyframe_end_pts = MP_PTS_MAX(queue->keyframe_end_pts, ts);
 
-        if (queue->is_eof) {
-            queue->is_eof = false;
-            update_seek_ranges(queue->range);
-        }
+        queue->is_eof = false;
     }
+
+    if (queue->is_eof != prev_eof)
+        update_seek_ranges(queue->range);
 
     if (attempt_range_join)
         attempt_range_joining(ds->in);
@@ -1443,9 +1446,11 @@ static bool read_packet(struct demux_internal *in)
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             bool eof = !ds->reader_head;
-            if (eof && ds->eof)
+            if (!ds->eof && eof) {
+                ds->eof = true;
+                adjust_seek_range_on_packet(ds, NULL);
                 wakeup_ds(ds);
-            ds->eof |= eof;
+            }
         }
         return false;
     }
@@ -1477,11 +1482,11 @@ static bool read_packet(struct demux_internal *in)
         if (eof) {
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
-                if (!ds->eof)
+                if (!ds->eof) {
+                    ds->eof = true;
                     adjust_seek_range_on_packet(ds, NULL);
-                ds->eof = true;
-                if (!in->last_eof && ds->wakeup_cb)
                     wakeup_ds(ds);
+                }
             }
             // If we had EOF previously, then don't wakeup (avoids wakeup loop)
             if (!in->last_eof) {
