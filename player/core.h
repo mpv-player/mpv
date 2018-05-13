@@ -444,6 +444,7 @@ typedef struct MPContext {
     struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
     struct mp_abort_entry **abort_list;
     int num_abort_list;
+    bool abort_all; // during final termination
 
     // --- Owned by MPContext
     pthread_t open_thread;
