@@ -135,6 +135,9 @@ Interface changes
       consequences for scripts, client API, or when using file-local options)
     - remove deprecated ao/vo auto profiles. Consider using scripts like
       auto-profiles.lua instead.
+    - ipc: require that "request_id" fields are integers. Other types are still
+      accepted for compatibility, but this will stop in the future. Also, if no
+      request_id is provided, 0 will be assumed.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
