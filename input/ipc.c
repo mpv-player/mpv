@@ -280,11 +280,11 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
 
         char *result = mpv_get_property_string(client,
                                         cmd_node->u.list->values[1].u.string);
-        if (!result) {
-            mpv_node_map_add_null(ta_parent, &reply_node, "data");
-        } else {
+        if (result) {
             mpv_node_map_add_string(ta_parent, &reply_node, "data", result);
             mpv_free(result);
+        } else {
+            mpv_node_map_add_null(ta_parent, &reply_node, "data");
         }
     } else if (!strcmp("set_property", cmd) ||
         !strcmp("set_property_string", cmd))
