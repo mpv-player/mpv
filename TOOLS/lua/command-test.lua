@@ -64,4 +64,20 @@ mp.observe_property("vo-configured", "bool", function(_, v)
         print("aborting sleep inf subprocess after timeout")
         mp.abort_async_command(x)
     end)
+
+    -- This should get killed on script exit.
+    mp.command_native_async({name = "subprocess", playback_only = false,
+                             args = {"sleep", "inf"}}, function()end)
+
+    -- Runs detached; should be killed on player exit (forces timeout)
+    mp.command_native({_flags={"async"}, name = "subprocess",
+                       playback_only = false, args = {"sleep", "inf"}})
+end)
+
+mp.register_event("shutdown", function()
+    -- This "freezes" the script, should be killed via timeout.
+    print("freeze!")
+    local x = mp.command_native({name = "subprocess", playback_only = false,
+                                 args = {"sleep", "inf"}})
+    print("done, killed=" .. utils.to_string(x.killed_by_us))
 end)
