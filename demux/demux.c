@@ -513,22 +513,31 @@ static void update_seek_ranges(struct demux_cached_range *range)
     range->is_bof = true;
     range->is_eof = true;
 
+    double max_end_pts = MP_NOPTS_VALUE;
+
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
 
         if (queue->ds->selected && queue->ds->eager) {
             range->seek_start = MP_PTS_MAX(range->seek_start, queue->seek_start);
-            range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
+
+            if (queue->is_eof) {
+                max_end_pts = MP_PTS_MAX(max_end_pts, queue->seek_end);
+            } else {
+                range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
+            }
 
             range->is_eof &= queue->is_eof;
             range->is_bof &= queue->is_bof;
 
-            if (queue->seek_start >= queue->seek_end) {
-                range->seek_start = range->seek_end = MP_NOPTS_VALUE;
-                break;
-            }
+            bool empty = queue->is_eof && !queue->head;
+            if (queue->seek_start >= queue->seek_end && !empty)
+                goto broken;
         }
     }
+
+    if (range->is_eof)
+        range->seek_end = max_end_pts;
 
     // Sparse stream behavior is not very clearly defined, but usually we don't
     // want it to restrict the range of other streams, unless
@@ -557,7 +566,12 @@ static void update_seek_ranges(struct demux_cached_range *range)
     }
 
     if (range->seek_start >= range->seek_end)
-        range->seek_start = range->seek_end = MP_NOPTS_VALUE;
+        goto broken;
+
+    return;
+
+broken:
+    range->seek_start = range->seek_end = MP_NOPTS_VALUE;
 }
 
 // Remove queue->head from the queue. Does not update in->fw_bytes/in->fw_packs.
