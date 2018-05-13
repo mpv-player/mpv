@@ -275,7 +275,9 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
             mpv_node_map_add_string(ta_parent, &reply_node, "data", result);
             mpv_free(result);
         }
-    } else if (!strcmp("set_property", cmd)) {
+    } else if (!strcmp("set_property", cmd) ||
+        !strcmp("set_property_string", cmd))
+    {
         if (cmd_node->u.list->num != 3) {
             rc = MPV_ERROR_INVALID_PARAMETER;
             goto error;
@@ -288,25 +290,6 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
 
         rc = mpv_set_property(client, cmd_node->u.list->values[1].u.string,
                               MPV_FORMAT_NODE, &cmd_node->u.list->values[2]);
-    } else if (!strcmp("set_property_string", cmd)) {
-        if (cmd_node->u.list->num != 3) {
-            rc = MPV_ERROR_INVALID_PARAMETER;
-            goto error;
-        }
-
-        if (cmd_node->u.list->values[1].format != MPV_FORMAT_STRING) {
-            rc = MPV_ERROR_INVALID_PARAMETER;
-            goto error;
-        }
-
-        if (cmd_node->u.list->values[2].format != MPV_FORMAT_STRING) {
-            rc = MPV_ERROR_INVALID_PARAMETER;
-            goto error;
-        }
-
-        rc = mpv_set_property_string(client,
-                                     cmd_node->u.list->values[1].u.string,
-                                     cmd_node->u.list->values[2].u.string);
     } else if (!strcmp("observe_property", cmd)) {
         if (cmd_node->u.list->num != 3) {
             rc = MPV_ERROR_INVALID_PARAMETER;

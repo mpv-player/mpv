@@ -180,14 +180,7 @@ extra commands can also be used as part of the protocol:
         { "error": "success" }
 
 ``set_property_string``
-    Like ``set_property``, but the argument value must be passed as string.
-
-    Example:
-
-    ::
-
-        { "command": ["set_property_string", "pause", "yes"] }
-        { "error": "success" }
+    Alias for ``set_property``. Both commands accept native values and strings.
 
 ``observe_property``
     Watch a property for changes. If the given property is changed, then an
