@@ -537,6 +537,7 @@ local function add_audio(s)
 
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
+    append(s, r["format"], {prefix="Format:"})
     append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
     append(s, r["channel-count"], {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
