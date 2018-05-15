@@ -54,6 +54,7 @@ struct vo_wayland_state {
     struct mp_rect window_size;
     float aspect_ratio;
     bool fullscreen;
+    bool maximized;
     bool configured;
     int wakeup_pipe[2];
     int pending_vo_events;
