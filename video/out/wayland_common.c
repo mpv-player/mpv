@@ -782,9 +782,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     int found = 1;
     struct vo_wayland_state *wl = data;
 
-    if (!strcmp(interface, wl_compositor_interface.name) && found++) {
-        ver = MPMIN(ver, 4); /* Cap the version */
-        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
+    if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 3) && found++) {
+        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, 3);
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
