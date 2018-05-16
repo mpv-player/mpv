@@ -818,13 +818,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
     if (select == AV_PIX_FMT_NONE) {
         ctx->hwdec_failed = true;
-        for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
-            const AVPixFmtDescriptor *d = av_pix_fmt_desc_get(fmt[i]);
-            if (d && !(d->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
-                select = fmt[i];
-                break;
-            }
-        }
+        select = avcodec_default_get_format(avctx, fmt);
     }
 
     const char *name = av_get_pix_fmt_name(select);
