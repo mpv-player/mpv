@@ -5039,7 +5039,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     are:
 
     auto
-        Disable any adaptation (default)
+        Disable any adaptation, except for atypical color spaces. Specifically,
+        wide/unusual gamuts get automatically adapted to BT.709, while standard
+        gamut (i.e. BT.601 and BT.709) content is not touched. (default)
     bt.470m
         ITU-R BT.470 M
     bt.601-525
@@ -5071,7 +5073,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Valid values are:
 
     auto
-        Disable any adaptation (default)
+        Disable any adaptation, except for atypical transfers. Specifically,
+        HDR or linear light source material gets automatically converted to
+        gamma 2.2, while SDR content is not touched. (default)
     bt.1886
         ITU-R BT.1886 curve (assuming infinite contrast)
     srgb
