@@ -4741,7 +4741,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
-    banding, blocking and other quantization artifacts, at the expensive of
+    banding, blocking and other quantization artifacts, at the expense of
     very slightly blurring some of the finest details. In practice, it's
     virtually always an improvement - the only reason to disable it would be
     for performance.
