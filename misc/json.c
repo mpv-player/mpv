@@ -22,7 +22,12 @@
  * doesn't verify what's passed to strtod(), and also prefers parsing numbers
  * as integers with stroll() if possible).
  *
- * Does not support extensions like unquoted string literals.
+ * It has some non-standard extensions which shouldn't conflict with JSON:
+ *  - a list or object item can have a trailing ","
+ *  - object syntax accepts "=" in addition of ":"
+ *  - object keys can be unquoted, if they start with a character in [A-Za-z_]
+ *    and contain only characters in [A-Za-z0-9_]
+ *  - byte escapes with "\xAB" are allowed (with AB being a 2 digit hex number)
  *
  * Also see: http://tools.ietf.org/html/rfc8259
  *
@@ -45,6 +50,7 @@
 
 #include "common/common.h"
 #include "misc/bstr.h"
+#include "misc/ctype.h"
 
 #include "json.h"
 
@@ -70,6 +76,24 @@ static void eat_ws(char **src)
 void json_skip_whitespace(char **src)
 {
     eat_ws(src);
+}
+
+static int read_id(void *ta_parent, struct mpv_node *dst, char **src)
+{
+    char *start = *src;
+    if (!mp_isalpha(**src) && **src != '_')
+        return -1;
+    while (mp_isalnum(**src) || **src == '_')
+        *src += 1;
+    if (**src == ' ') {
+        **src = '\0'; // we're allowed to mutate it => can avoid the strndup
+        *src += 1;
+    } else {
+        start = talloc_strndup(ta_parent, start, *src - start);
+    }
+    dst->format = MPV_FORMAT_STRING;
+    dst->u.string = start;
+    return 0;
 }
 
 static int read_str(void *ta_parent, struct mpv_node *dst, char **src)
@@ -122,12 +146,18 @@ static int read_sub(void *ta_parent, struct mpv_node *dst, char **src,
         if (list->num > 0 && !eat_c(src, ','))
             return -1; // missing ','
         eat_ws(src);
+        // non-standard extension: allow a trailing ","
+        if (eat_c(src, term))
+            break;
         if (is_obj) {
             struct mpv_node keynode;
-            if (read_str(list, &keynode, src) < 0)
+            // non-standard extension: allow unquoted strings as keys
+            if (read_id(list, &keynode, src) < 0 &&
+                read_str(list, &keynode, src) < 0)
                 return -1; // key is not a string
             eat_ws(src);
-            if (!eat_c(src, ':'))
+            // non-standard extension: allow "=" instead of ":"
+            if (!eat_c(src, ':') && !eat_c(src, '='))
                 return -1; // ':' missing
             eat_ws(src);
             MP_TARRAY_GROW(list, list->keys, list->num);

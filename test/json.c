@@ -45,14 +45,24 @@ static const struct entry entries[] = {
     { "[1,2,3]", "[1,2,3]",
         NODE_ARRAY(NODE_INT64(1), NODE_INT64(2), NODE_INT64(3))},
     { "[ ]", "[]", NODE_ARRAY()},
-    { "[1,2,]", .expect_fail = true},
     { "[1,,2]", .expect_fail = true},
+    { "[,]", .expect_fail = true},
     { TEXT({"a":1, "b":2}), TEXT({"a":1,"b":2}),
         NODE_MAP(L("a", "b"), L(NODE_INT64(1), NODE_INT64(2)))},
     { "{ }", "{}", NODE_MAP(L(), L())},
     { TEXT({"a":b}), .expect_fail = true},
-    { TEXT({a:"b"}), .expect_fail = true},
-    { TEXT({"a":1,}), .expect_fail = true},
+    { TEXT({1a:"b"}), .expect_fail = true},
+
+    // non-standard extensions
+    { "[1,2,]", "[1,2]", NODE_ARRAY(NODE_INT64(1), NODE_INT64(2))},
+    { TEXT({a:"b"}), TEXT({"a":"b"}),
+        NODE_MAP(L("a"), L(NODE_STR("b")))},
+    { TEXT({a="b"}), TEXT({"a":"b"}),
+        NODE_MAP(L("a"), L(NODE_STR("b")))},
+    { TEXT({a ="b"}), TEXT({"a":"b"}),
+        NODE_MAP(L("a"), L(NODE_STR("b")))},
+    { TEXT({_a12="b"}), TEXT({"_a12":"b"}),
+        NODE_MAP(L("_a12"), L(NODE_STR("b")))},
 };
 
 #define MAX_DEPTH 10
