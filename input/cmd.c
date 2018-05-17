@@ -597,12 +597,13 @@ void mp_print_cmd_list(struct mp_log *out)
         const struct mp_cmd_def *def = &mp_cmds[i];
         mp_info(out, "%-20.20s", def->name);
         for (int j = 0; j < MP_CMD_DEF_MAX_ARGS && def->args[j].type; j++) {
-            const char *type = def->args[j].type->name;
-            if (def->args[j].defval)
-                mp_info(out, " [%s]", type);
-            else
-                mp_info(out, " %s", type);
+            const struct m_option *arg = &def->args[j];
+            bool is_opt = arg->defval || (arg->flags & MP_CMD_OPT_ARG);
+            mp_info(out, " %s%s=%s%s", is_opt ? "[" : "", arg->name,
+                    arg->type->name, is_opt ? "]" : "");
         }
+        if (def->vararg)
+            mp_info(out, "..."); // essentially append to last argument
         mp_info(out, "\n");
     }
 }
