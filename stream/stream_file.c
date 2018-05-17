@@ -65,6 +65,7 @@ struct priv {
     bool regular_file;
     bool appending;
     int64_t orig_size;
+    struct mp_cancel *cancel;
 };
 
 // Total timeout = RETRY_TIMEOUT * MAX_RETRIES
@@ -85,7 +86,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 
 #ifndef __MINGW32__
     if (p->use_poll) {
-        int c = s->cancel ? mp_cancel_get_fd(s->cancel) : -1;
+        int c = mp_cancel_get_fd(p->cancel);
         struct pollfd fds[2] = {
             {.fd = p->fd, .events = POLLIN},
             {.fd = c, .events = POLLIN},
@@ -112,7 +113,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
         if (!p->appending || p->use_poll)
             break;
 
-        if (mp_cancel_wait(s->cancel, RETRY_TIMEOUT))
+        if (mp_cancel_wait(p->cancel, RETRY_TIMEOUT))
             break;
     }
 
@@ -160,6 +161,7 @@ static void s_close(stream_t *s)
     struct priv *p = s->priv;
     if (p->close)
         close(p->fd);
+    talloc_free(p->cancel);
 }
 
 // If url is a file:// URL, return the local filename, otherwise return NULL.
@@ -360,6 +362,10 @@ static int open_f(stream_t *stream)
         stream->streaming = true;
 
     p->orig_size = get_size(stream);
+
+    p->cancel = mp_cancel_new(p);
+    if (stream->cancel)
+        mp_cancel_add_slave(stream->cancel, p->cancel);
 
     return STREAM_OK;
 }
