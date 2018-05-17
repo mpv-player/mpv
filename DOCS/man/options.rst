@@ -2547,7 +2547,7 @@ Window
 
     This is not supported on all video outputs or platforms. Sometimes it is
     implemented, but does not work (known to happen with GNOME). You might be
-    able to work around this using ``--heartbeat-cmd`` instead.
+    able to work around this using a script instead.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
