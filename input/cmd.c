@@ -239,6 +239,13 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
     if (!find_cmd(log, cmd, bstr0(name->u.string)))
         return false;
 
+    if (cmd->def->vararg) {
+        mp_err(log, "Command %s: this command uses a variable number of "
+               "arguments, which does not work with named arguments.\n",
+               cmd->name);
+        return false;
+    }
+
     for (int n = 0; n < args->num; n++) {
         const char *key = args->keys[n];
         mpv_node *val = &args->values[n];

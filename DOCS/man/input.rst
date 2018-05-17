@@ -41,10 +41,10 @@ commands they're bound to on the OSD, instead of executing the commands::
 (Only closing the window will make **mpv** exit, pressing normal keys will
 merely display the binding, even if mapped to quit.)
 
-General Input Command Syntax
-----------------------------
+input.conf syntax
+-----------------
 
-``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)* [; <command>]``
+``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] <command> ( ; <command> )*``
 
 Note that by default, the right Alt key can be used to create special
 characters, and thus does not register as a modifier. The option
@@ -59,9 +59,9 @@ character), or a symbolic name (as printed by ``--input-keylist``).
 ``<section>`` (braced with ``{`` and ``}``) is the input section for this
 command.
 
-Arguments are separated by whitespace. This applies even to string arguments.
-For this reason, string arguments should be quoted with ``"``. Inside quotes,
-C-style escaping can be used.
+``<command>`` is the command itself. It consists of the command name and
+multiple (or none) commands, all separated by whitespace. String arguments
+need to be quoted with ``"``. Details see ``Flat command syntax``.
 
 You can bind multiple commands to one key. For example:
 
@@ -78,25 +78,89 @@ that matches, and the multi-key command will never be called. Intermediate keys
 can be remapped to ``ignore`` in order to avoid this issue. The maximum number
 of (non-modifier) keys for combinations is currently 4.
 
+Flat command syntax
+-------------------
+
+This is the syntax used in input.conf, and referred to "input.conf syntax" in
+a number of other places.
+
+``<command> ::= [<prefixes>] <command_name> (<argument>)*``
+``<argument> ::= (<string> | " <quoted_string> " )``
+
+``command_name`` is an unquoted string with the command name itself. See
+`List of Input Commands`_ for a list.
+
+Arguments are separated by whitespace. This applies even to string arguments.
+For this reason, string arguments should be quoted with ``"``. If a string
+argument contains spaces or certain special characters, quoting and possibly
+escaping is mandatory, or the command cannot be parsed correctly.
+
+Inside quotes, C-style escaping can be used. JSON escapes according to RFC 8259,
+minus surrogate pair escapes, should be a safe subset that can be used.
+
+Commands specified as arrays
+----------------------------
+
+This applies to certain APIs, such as ``mp.commandv()`` or
+``mp.command_native()`` (with array parameters) in Lua scripting, or
+``mpv_command()`` or ``mpv_command_node()`` (with MPV_FORMAT_NODE_ARRAY) in the
+C libmpv client API.
+
+The command as well as all arguments are passed as a single array. Similar to
+the `Flat command syntax`_, you can first pass prefixes as strings (each as
+separate array item), then the command name as string, and then each argument
+as string or a native value.
+
+Since these APIs pass arguments as separate strings or native values, they do
+not expect quotes, and do support escaping. Technically, there is the input.conf
+parser, which first splits the command string into arguments, and then invokes
+argument parsers for each argument. The input.conf parser normally handles
+quotes and escaping. The array command APIs mentioned above pass strings
+directly to the argument parsers, or can sidestep them by the ability to pass
+non-string values.
+
+Sometimes commands have string arguments, that in turn are actually parsed by
+other components (e.g. filter strings with ``vf add``) - in these cases, you
+you would have to double-escape in input.conf, but not with the array APIs.
+
+For complex commands, consider using `Named arguments`_ instead, which should
+give slightly more compatibility. Some commands do not support named arguments
+and inherently take an array, though.
+
 Named arguments
 ---------------
 
-Some commands support named arguments (most currently don't). Named arguments
-cannot be used with the "flat" input.conf syntax shown above, but require using
-e.g. ``mp.command_native()`` in Lua scripting, or e.g. ``mpv_command_node()``
-with the libmpv API. Some commands ask you to only use named arguments (because
-the command order is not guaranteed), which means you can't use them as
-key bindings in input.conf at all.
+This applies to certain APIs, such as ``mp.command_native()`` (with tables that
+have string keys) in Lua scripting, or ``mpv_command_node()`` (with
+MPV_FORMAT_NODE_MAP) in the C libmpv client API.
+
+Like with array commands, quoting and escaping is inherently not needed in the
+normal case.
+
+The name of each command is defined in each command description in the
+`List of Input Commands`_.
+
+Some commands do not support named arguments (e.g. ``run`` command). You need
+to use APIs that pass arguments as arrays.
+
+Named arguments are not supported in the "flat" input.conf syntax, which means
+you cannot use them for key bindings in input.conf at all.
 
 List of Input Commands
 ----------------------
+
+Commands with parameters have the parameter name enclosed in ``<`` / ``>``.
+Don't add those to the actual command. Optional arguments are enclosed in
+``[`` / ``]``. If you don't pass them, they will be set to a default value.
+
+Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
 ``ignore``
     Use this to "block" keys that should be unbound, and do nothing. Useful for
     disabling default bindings, without disabling all bindings with
     ``--no-input-default-bindings``.
 
-``seek <seconds> [relative|absolute|absolute-percent|relative-percent|exact|keyframes]``
+``seek <target> [<flags>]``
     Change the playback position. By default, seeks by a relative amount of
     seconds.
 
@@ -124,7 +188,7 @@ List of Input Commands
     3rd parameter (essentially using a space instead of ``+``). The 3rd
     parameter is still parsed, but is considered deprecated.
 
-``revert-seek [mode]``
+``revert-seek [<flags>]``
     Undoes the ``seek`` command, and some other commands that seek (but not
     necessarily all of them). Calling this command once will jump to the
     playback position before the seek. Calling it a second time undoes the
@@ -154,22 +218,24 @@ List of Input Commands
 
     This does not work with audio-only playback.
 
-``set <property> "<value>"``
-    Set the given property to the given value.
+``set <name> <value>``
+    Set the given property or option to the given value.
 
-``add <property> [<value>]``
-    Add the given value to the property. On overflow or underflow, clamp the
-    property to the maximum. If ``<value>`` is omitted, assume ``1``.
+``add <name> [<value>]``
+    Add the given value to the property or option. On overflow or underflow,
+    clamp the property to the maximum. If ``<value>`` is omitted, assume ``1``.
 
-``cycle <property> [up|down]``
-    Cycle the given property. ``up`` and ``down`` set the cycle direction. On
-    overflow, set the property back to the minimum, on underflow set it to the
-    maximum. If ``up`` or ``down`` is omitted, assume ``up``.
+``cycle <name> [<value>]``
+    Cycle the given property or option. The second argument can be ``up`` or
+    ``down`` to set the cycle direction. On overflow, set the property back to
+    the minimum, on underflow set it to the maximum. If ``up`` or ``down`` is
+    omitted, assume ``up``.
 
-``multiply <property> <factor>``
-    Multiplies the value of a property with the numeric factor.
+``multiply <name> <value>``
+    Similar to ``add``, but multiplies the property or option with the numeric
+    value.
 
-``screenshot [subtitles|video|window|single|each-frame]``
+``screenshot <flags>``
     Take a screenshot.
 
     Multiple flags are available (some can be combined with ``+``):
@@ -201,36 +267,41 @@ List of Input Commands
     normal standalone commands, this is always asynchronous, and the flag has
     no effect. (This behavior changed with mpv 0.29.0.)
 
-``screenshot-to-file "<filename>" [subtitles|video|window]``
+``screenshot-to-file <filename> <flags>``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
 
-    The second argument is like the first argument to ``screenshot``.
+    The second argument is like the first argument to ``screenshot`` and
+    supports ``subtitles``, ``video``, ``window``.
 
     If the file already exists, it's overwritten.
 
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
-``playlist-next [weak|force]``
+``playlist-next <flags>``
     Go to the next entry on the playlist.
+
+    First argument:
 
     weak (default)
         If the last file on the playlist is currently played, do nothing.
     force
         Terminate playback if there are no more files on the playlist.
 
-``playlist-prev [weak|force]``
+``playlist-prev <flags>``
     Go to the previous entry on the playlist.
+
+    First argument:
 
     weak (default)
         If the first file on the playlist is currently played, do nothing.
     force
         Terminate playback if the first file is being played.
 
-``loadfile "<file>" [replace|append|append-play [options]]``
-    Load the given file and play it.
+``loadfile <url> [<flags> [<options>]]``
+    Load the given file or URL and play it.
 
     Second argument:
 
@@ -248,13 +319,20 @@ List of Input Commands
     Not all options can be changed this way. Some options require a restart
     of the player.
 
-``loadlist "<playlist>" [replace|append]``
-    Load the given playlist file (like ``--playlist``).
+``loadlist <url> [<flags>]``
+    Load the given playlist file or URL (like ``--playlist``).
+
+    Second argument:
+
+    <replace> (default)
+        Stop playback and replace the internal playlist with the new one.
+    <append>
+        Append the new playlist at the end of the current internal playlist.
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
 
-``playlist-remove current|<index>``
+``playlist-remove <index>``
     Remove the playlist entry at the given index. Index values start counting
     with 0. The special value ``current`` removes the current entry. Note that
     removing the current entry also stops playback and starts playing the next
@@ -271,12 +349,14 @@ List of Input Commands
     Shuffle the playlist. This is similar to what is done on start if the
     ``--shuffle`` option is used.
 
-``run "command" "arg1" "arg2" ...``
+``run <command> [<arg1> [<arg2> [...]]]``
     Run the given command. Unlike in MPlayer/mplayer2 and earlier versions of
     mpv (0.2.x and older), this doesn't call the shell. Instead, the command
     is run directly, with each argument passed separately. Each argument is
-    expanded like in `Property Expansion`_. Note that there is a static limit
-    of (as of this writing) 9 arguments (this limit could be raised on demand).
+    expanded like in `Property Expansion`_.
+
+    This command has a variable number of arguments, and cannot be used with
+    named arguments.
 
     The program is run in a detached way. mpv doesn't wait until the command
     is completed, but continues playback right after spawning it.
@@ -376,15 +456,15 @@ List of Input Commands
     will seek to the previous position on start. The (optional) argument is
     exactly as in the ``quit`` command.
 
-``sub-add "<file>" [<flags> [<title> [<lang>]]]``
-    Load the given subtitle file. It is selected as current subtitle after
-    loading.
+``sub-add <url> [<flags> [<title> [<lang>]]]``
+    Load the given subtitle file or stream. By default, it is selected as
+    current subtitle  after loading.
 
-    The ``flags`` args is one of the following values:
+    The ``flags`` argument is one of the following values:
 
     <select>
 
-        Select the subtitle immediately.
+        Select the subtitle immediately (default).
 
     <auto>
 
@@ -427,11 +507,11 @@ List of Input Commands
     events that have already been displayed, or are within a short prefetch
     range.
 
-``print-text "<string>"``
+``print-text <text>``
     Print text to stdout. The string can contain properties (see
-    `Property Expansion`_).
+    `Property Expansion`_). Take care to put the argument in quotes.
 
-``show-text "<string>" [<duration>|-1 [<level>]]``
+``show-text <text> [<duration> [<level>]]``
     Show text on the OSD. The string can contain properties, which are expanded
     as described in `Property Expansion`_. This can be used to show playback
     time, filename, and so on.
@@ -443,7 +523,7 @@ List of Input Commands
     <level>
         The minimum OSD level to show the text at (see ``--osd-level``).
 
-``expand-text "<string>"``
+``expand-text <string>``
     Property-expand the argument and return the expanded string. This can be
     used only through the client API or from a script using
     ``mp.command_native``. (see `Property Expansion`_).
@@ -461,7 +541,7 @@ List of Input Commands
     essentially like ``quit``. Useful for the client API: playback can be
     stopped without terminating the player.
 
-``mouse <x> <y> [<button> [single|double]]``
+``mouse <x> <y> [<button> [<mode>]]``
     Send a mouse event with given coordinate (``<x>``, ``<y>``).
 
     Second argument:
@@ -478,24 +558,24 @@ List of Input Commands
     <double>
         The mouse event represents double-click.
 
-``keypress <key_name>``
+``keypress <name>``
     Send a key event through mpv's input handler, triggering whatever
-    behavior is configured to that key. ``key_name`` uses the ``input.conf``
+    behavior is configured to that key. ``name`` uses the ``input.conf``
     naming scheme for keys and modifiers. Useful for the client API: key events
     can be sent to libmpv to handle internally.
 
-``keydown <key_name>``
+``keydown <name>``
     Similar to ``keypress``, but sets the ``KEYDOWN`` flag so that if the key is
     bound to a repeatable command, it will be run repeatedly with mpv's key
     repeat timing until the ``keyup`` command is called.
 
-``keyup [<key_name>]``
+``keyup [<name>]``
     Set the ``KEYUP`` flag, stopping any repeated behavior that had been
-    triggered. ``key_name`` is optional. If ``key_name`` is not given or is an
+    triggered. ``name`` is optional. If ``name`` is not given or is an
     empty string, ``KEYUP`` will be set on all keys. Otherwise, ``KEYUP`` will
-    only be set on the key specified by ``key_name``.
+    only be set on the key specified by ``name``.
 
-``audio-add "<file>" [<flags> [<title> [<lang>]]]``
+``audio-add <url> [<flags> [<title> [<lang>]]]``
     Load the given audio file. See ``sub-add`` command.
 
 ``audio-remove [<id>]``
@@ -523,21 +603,21 @@ List of Input Commands
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
 
-``af set|add|toggle|del|clr "filter1=params,filter2,..."``
+``af <operation> <value>``
     Change audio filter chain. See ``vf`` command.
 
-``vf set|add|toggle|del|clr "filter1=params,filter2,..."``
+``vf <operation> <value>``
     Change video filter chain.
 
     The first argument decides what happens:
 
-    set
+    <set>
         Overwrite the previous filter chain with the new one.
 
-    add
+    <add>
         Append the new filter chain to the previous one.
 
-    toggle
+    <toggle>
         Check if the given filter (with the exact parameters) is already
         in the video chain. If yes, remove the filter. If no, add the filter.
         (If several filters are passed to the command, this is done for
@@ -547,14 +627,14 @@ Input Commands that are Possibly Subject to Change
         without filter name and parameters as filter entry. This toggles the
         enable/disable flag.
 
-    del
+    <del>
         Remove the given filters from the video chain. Unlike in the other
         cases, the second parameter is a comma separated list of filter names
         or integer indexes. ``0`` would denote the first filter. Negative
         indexes start from the last filter, and ``-1`` denotes the last
         filter.
 
-    clr
+    <clr>
         Remove all filters. Note that like the other sub-commands, this does
         not control automatically inserted filters.
 
@@ -593,18 +673,21 @@ Input Commands that are Possibly Subject to Change
           "disabled" flag for the filter with the label ``deband`` when the
           ``a`` key is hit.
 
-``cycle-values ["!reverse"] <property> "<value1>" "<value2>" ...``
+``cycle-values [<"!reverse">] <property> <value1> [<value2> [...]]``
     Cycle through a list of values. Each invocation of the command will set the
     given property to the next value in the list. The command will use the
     current value of the property/option, and use it to determine the current
     position in the list of values. Once it has found it, it will set the
     next value in the list (wrapping around to the first item if needed).
 
+    This command has a variable number of arguments, and cannot be used with
+    named arguments.
+
     The special argument ``!reverse`` can be used to cycle the value list in
     reverse. The only advantage is that you don't need to reverse the value
     list yourself when adding a second key binding for cycling backwards.
 
-``enable-section "<section>" [flags]``
+``enable-section <name> [<flags>]``
     Enable all key bindings in the named input section.
 
     The enabled input sections form a stack. Bindings in sections on the top of
@@ -626,10 +709,10 @@ Input Commands that are Possibly Subject to Change
     <allow-vo-dragging>
         Same.
 
-``disable-section "<section>"``
+``disable-section <name>``
     Disable the named input section. Undoes ``enable-section``.
 
-``define-section "<section>" "<contents>" [default|force]``
+``define-section <name> <contents> [<flags>]``
     Create a named input section, or replace the contents of an already existing
     input section. The ``contents`` parameter uses the same syntax as the
     ``input.conf`` file (except that using the section syntax in it is not
@@ -657,7 +740,7 @@ Input Commands that are Possibly Subject to Change
     information about the key state. The special key name ``unmapped`` can be
     used to match any unmapped key.
 
-``overlay-add <id> <x> <y> "<file>" <offset> "<fmt>" <w> <h> <stride>``
+``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride>``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -667,6 +750,9 @@ Input Commands that are Possibly Subject to Change
     ``osd-width`` and ``osd-height`` properties. At least with ``--vo-xv`` and
     anamorphic video (such as DVD), ``osd-par`` should be read as well, and the
     overlay should be aspect-compensated.
+
+    This has the following named arguments. The order of them is not guaranteed,
+    so you should always call them with named arguments, see `Named arguments`_.
 
     ``id`` is an integer between 0 and 63 identifying the overlay element. The
     ID can be used to add multiple overlay parts, update a part by using this
@@ -725,18 +811,24 @@ Input Commands that are Possibly Subject to Change
     Remove an overlay added with ``overlay-add`` and the same ID. Does nothing
     if no overlay with this ID exists.
 
-``script-message "<arg1>" "<arg2>" ...``
+``script-message [<arg1> [<arg2> [...]]]``
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments
     mean is fully up to the receiver and the sender. Every client receives the
     message, so be careful about name clashes (or use ``script-message-to``).
 
-``script-message-to "<target>" "<arg1>" "<arg2>" ...``
+    This command has a variable number of arguments, and cannot be used with
+    named arguments.
+
+``script-message-to <target> [<arg1> [<arg2> [...]]]``
     Same as ``script-message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``.
 
-``script-binding "<name>"``
+    This command has a variable number of arguments, and cannot be used with
+    named arguments.
+
+``script-binding <name>``
     Invoke a script-provided key binding. This can be used to remap key
     bindings provided by external Lua scripts.
 
@@ -773,7 +865,7 @@ Input Commands that are Possibly Subject to Change
     unseekable streams that are going out of sync.
     This command might be changed or removed in the future.
 
-``screenshot-raw [subtitles|video|window]``
+``screenshot-raw [<flags>]``
     Return a screenshot in memory. This can be used only through the client
     API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
     ``stride`` fields set to obvious contents. The ``format`` field is set to
@@ -783,7 +875,10 @@ Input Commands that are Possibly Subject to Change
     is freed as soon as the result mpv_node is freed. As usual with client API
     semantics, you are not allowed to write to the image data.
 
-``vf-command "<label>" "<cmd>" "<args>"``
+    The ``flags`` argument is like the first argument to ``screenshot`` and
+    supports ``subtitles``, ``video``, ``window``.
+
+``vf-command <label> <command> <argument>``
     Send a command to the filter with the given ``<label>``. Use ``all`` to send
     it to all filters at once. The command and argument string is filter
     specific. Currently, this only works with the ``lavfi`` filter - see
@@ -792,10 +887,10 @@ Input Commands that are Possibly Subject to Change
     Note that the ``<label>`` is a mpv filter label, not a libavfilter filter
     name.
 
-``af-command "<label>" "<cmd>" "<args>"``
+``af-command <label> <command> <argument>``
     Same as ``vf-command``, but for audio filters.
 
-``apply-profile "<name>"``
+``apply-profile <name>``
     Apply the contents of a named profile. This is like using ``profile=name``
     in a config file, except you can map it to a key binding to change it at
     runtime.
@@ -803,14 +898,14 @@ Input Commands that are Possibly Subject to Change
     There is no such thing as "unapplying" a profile - applying a profile
     merely sets all option values listed within the profile.
 
-``load-script "<path>"``
+``load-script <filename>``
     Load a script, similar to the ``--script`` option. Whether this waits for
     the script to finish initialization or not changed multiple times, and the
     future behavior is left undefined.
 
-``change-list "<option>" "<operation>" "<value>"``
+``change-list <name> <operation> <value>``
     This command changes list options as described in `List Options`_. The
-    ``<option>`` parameter is the normal option name, while ``<operation>`` is
+    ``<name>`` parameter is the normal option name, while ``<operation>`` is
     the suffix or action used on the option.
 
     Some operations take no value, but the command still requires the value
