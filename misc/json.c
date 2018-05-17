@@ -24,7 +24,7 @@
  *
  * Does not support extensions like unquoted string literals.
  *
- * Also see: http://tools.ietf.org/html/rfc4627
+ * Also see: http://tools.ietf.org/html/rfc8259
  *
  * JSON writer:
  *
@@ -34,9 +34,6 @@
  * to deal with somehow: either by using byte-strings for JSON, or by running
  * a "fixup" pass on the input data. The latter could for example change
  * invalid UTF-8 sequences to replacement characters.
- *
- * Currently, will insert \u literals for characters 0-31, '"', '\', and write
- * everything else literally.
  */
 
 #include <stdlib.h>
@@ -218,6 +215,14 @@ int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth)
 
 #define APPEND(b, s) bstr_xappend(NULL, (b), bstr0(s))
 
+static const char special_escape[] = {
+    ['\b'] = 'b',
+    ['\f'] = 'f',
+    ['\n'] = 'n',
+    ['\r'] = 'r',
+    ['\t'] = 't',
+};
+
 static void write_json_str(bstr *b, unsigned char *str)
 {
     APPEND(b, "\"");
@@ -228,7 +233,15 @@ static void write_json_str(bstr *b, unsigned char *str)
         if (!cur[0])
             break;
         bstr_xappend(NULL, b, (bstr){str, cur - str});
-        bstr_xappend_asprintf(NULL, b, "\\u%04x", (unsigned char)cur[0]);
+        if (cur[0] == '\"') {
+            bstr_xappend(NULL, b, (bstr){"\\\"", 2});
+        } else if (cur[0] == '\\') {
+            bstr_xappend(NULL, b, (bstr){"\\\\", 2});
+        } else if (cur[0] < sizeof(special_escape) && special_escape[cur[0]]) {
+            bstr_xappend_asprintf(NULL, b, "\\%c", special_escape[cur[0]]);
+        } else {
+            bstr_xappend_asprintf(NULL, b, "\\u%04x", (unsigned char)cur[0]);
+        }
         str = cur + 1;
     }
     APPEND(b, str);
