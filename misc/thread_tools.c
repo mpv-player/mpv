@@ -110,9 +110,7 @@ void mp_cancel_reset(struct mp_cancel *c)
     // Flush it fully.
     while (1) {
         int r = read(c->wakeup_pipe[0], &(char[256]){0}, 256);
-        if (r < 0 && errno == EINTR)
-            continue;
-        if (r <= 0)
+        if (r <= 0 && !(r < 0 && errno == EINTR))
             break;
     }
 }
