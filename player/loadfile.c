@@ -1288,14 +1288,13 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
     mpctx->display_sync_error = 0.0;
     mpctx->display_sync_active = false;
+    // let get_current_time() show 0 as start time (before playback_pts is set)
+    mpctx->last_seek_pts = 0.0;
     mpctx->seek = (struct seek_params){ 0 };
     mpctx->filter_root = mp_filter_create_root(mpctx->global);
     mp_filter_root_set_wakeup_cb(mpctx->filter_root, mp_wakeup_core_cb, mpctx);
 
     reset_playback_state(mpctx);
-
-    // let get_current_time() show 0 as start time (before playback_pts is set)
-    mpctx->last_seek_pts = 0.0;
 
     mpctx->playing = mpctx->playlist->current;
     if (!mpctx->playing || !mpctx->playing->filename)
