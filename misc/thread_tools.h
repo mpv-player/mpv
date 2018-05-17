@@ -59,6 +59,23 @@ bool mp_cancel_wait(struct mp_cancel *c, double timeout);
 // Restore original state. (Allows reusing a mp_cancel.)
 void mp_cancel_reset(struct mp_cancel *c);
 
+// Add a callback to invoke when mp_cancel gets triggered. If it's already
+// triggered, call it from mp_cancel_add_cb() directly. May be called multiple
+// times even if the trigger state changes; not called if it resets. In all
+// cases, this may be called with internal locks held (either in mp_cancel, or
+// other locks held by whoever calls mp_cancel_trigger()).
+// There is only one callback. Create a slave mp_cancel to get a private one.
+void mp_cancel_set_cb(struct mp_cancel *c, void (*cb)(void *ctx), void *ctx);
+
+// If c gets triggered, automatically trigger slave. Trying to add a slave more
+// than once or to multiple parents is undefined behavior.
+// The parent mp_cancel must remain valid until the slave is manually removed
+// or destroyed. Destroying a mp_cancel that still has slaves is an error.
+void mp_cancel_add_slave(struct mp_cancel *c, struct mp_cancel *slave);
+
+// Undo mp_cancel_add_slave(). Ignores never added slaves for easier cleanup.
+void mp_cancel_remove_slave(struct mp_cancel *c, struct mp_cancel *slave);
+
 // win32 "Event" HANDLE that indicates the current mp_cancel state.
 void *mp_cancel_get_event(struct mp_cancel *c);
 
