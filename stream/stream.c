@@ -17,16 +17,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <limits.h>
-#include <errno.h>
 
 #include <strings.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -36,6 +32,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/bstr.h"
+#include "misc/thread_tools.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -44,12 +41,6 @@
 
 #include "options/m_option.h"
 #include "options/m_config.h"
-
-#ifdef __MINGW32__
-#include <windows.h>
-#else
-#include <poll.h>
-#endif
 
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
@@ -841,131 +832,6 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
     talloc_free(fname);
     return res;
 }
-
-#ifndef __MINGW32__
-struct mp_cancel {
-    atomic_bool triggered;
-    int wakeup_pipe[2];
-};
-
-static void cancel_destroy(void *p)
-{
-    struct mp_cancel *c = p;
-    if (c->wakeup_pipe[0] >= 0) {
-        close(c->wakeup_pipe[0]);
-        close(c->wakeup_pipe[1]);
-    }
-}
-
-struct mp_cancel *mp_cancel_new(void *talloc_ctx)
-{
-    struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
-    talloc_set_destructor(c, cancel_destroy);
-    *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
-    mp_make_wakeup_pipe(c->wakeup_pipe);
-    return c;
-}
-
-// Request abort.
-void mp_cancel_trigger(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, true);
-    (void)write(c->wakeup_pipe[1], &(char){0}, 1);
-}
-
-// Restore original state. (Allows reusing a mp_cancel.)
-void mp_cancel_reset(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, false);
-    // Flush it fully.
-    while (1) {
-        int r = read(c->wakeup_pipe[0], &(char[256]){0}, 256);
-        if (r < 0 && errno == EINTR)
-            continue;
-        if (r <= 0)
-            break;
-    }
-}
-
-// Return whether the caller should abort.
-// For convenience, c==NULL is allowed.
-bool mp_cancel_test(struct mp_cancel *c)
-{
-    return c ? atomic_load_explicit(&c->triggered, memory_order_relaxed) : false;
-}
-
-// Wait until the even is signaled. If the timeout (in seconds) expires, return
-// false. timeout==0 polls, timeout<0 waits forever.
-bool mp_cancel_wait(struct mp_cancel *c, double timeout)
-{
-    struct pollfd fd = { .fd = c->wakeup_pipe[0], .events = POLLIN };
-    poll(&fd, 1, timeout * 1000);
-    return fd.revents & POLLIN;
-}
-
-// The FD becomes readable if mp_cancel_test() would return true.
-// Don't actually read from it, just use it for poll().
-int mp_cancel_get_fd(struct mp_cancel *c)
-{
-    return c->wakeup_pipe[0];
-}
-
-#else
-
-struct mp_cancel {
-    atomic_bool triggered;
-    HANDLE event;
-};
-
-static void cancel_destroy(void *p)
-{
-    struct mp_cancel *c = p;
-    CloseHandle(c->event);
-}
-
-struct mp_cancel *mp_cancel_new(void *talloc_ctx)
-{
-    struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
-    talloc_set_destructor(c, cancel_destroy);
-    *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
-    c->event = CreateEventW(NULL, TRUE, FALSE, NULL);
-    return c;
-}
-
-void mp_cancel_trigger(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, true);
-    SetEvent(c->event);
-}
-
-void mp_cancel_reset(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, false);
-    ResetEvent(c->event);
-}
-
-bool mp_cancel_test(struct mp_cancel *c)
-{
-    return c ? atomic_load_explicit(&c->triggered, memory_order_relaxed) : false;
-}
-
-bool mp_cancel_wait(struct mp_cancel *c, double timeout)
-{
-    return WaitForSingleObject(c->event, timeout < 0 ? INFINITE : timeout * 1000)
-            == WAIT_OBJECT_0;
-}
-
-void *mp_cancel_get_event(struct mp_cancel *c)
-{
-    return c->event;
-}
-
-int mp_cancel_get_fd(struct mp_cancel *c)
-{
-    return -1;
-}
-
-#endif
 
 char **stream_get_proto_list(void)
 {

@@ -26,8 +26,9 @@
 
 #include "osdep/subprocess.h"
 
-#include "osdep/io.h"
 #include "common/common.h"
+#include "misc/thread_tools.h"
+#include "osdep/io.h"
 #include "stream/stream.h"
 
 extern char **environ;

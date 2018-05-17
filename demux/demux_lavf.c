@@ -42,6 +42,7 @@
 #include "common/av_common.h"
 #include "misc/bstr.h"
 #include "misc/charset_conv.h"
+#include "misc/thread_tools.h"
 
 #include "stream/stream.h"
 #include "demux.h"
