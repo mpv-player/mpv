@@ -74,6 +74,12 @@ some wrapper like .NET's NamedPipeClientStream.)
 Protocol
 --------
 
+The protocol uses UTF-8-only JSON as defined by RFC-8259. Unlike standard JSON,
+"\u" escape sequences are not allowed to construct surrogate pairs. To avoid
+getting conflicts, encode all text characters including and above codepoint
+U+0020 as UTF-8. mpv might output broken UTF-8 in corner cases (see "UTF-8"
+section below).
+
 Clients can execute commands on the player by sending JSON messages of the
 following form:
 
@@ -266,4 +272,28 @@ sometimes sends invalid JSON. If that is a problem for the client application's
 parser, it should filter the raw data for invalid UTF-8 sequences and perform
 the desired replacement, before feeding the data to its JSON parser.
 
-mpv will not attempt to construct invalid UTF-8 with broken escape sequences.
+mpv will not attempt to construct invalid UTF-8 with broken "\u" escape
+sequences. This includes surrogate pairs.
+
+JSON extensions
+---------------
+
+The following non-standard extensions are supported:
+
+    - a list or object item can have a trailing ","
+    - object syntax accepts "=" in addition of ":"
+    - object keys can be unquoted, if they start with a character in "A-Za-z\_"
+      and contain only characters in "A-Za-z0-9\_"
+    - byte escapes with "\xAB" are allowed (with AB being a 2 digit hex number)
+
+Example:
+
+::
+
+    { objkey = "value\x0A" }
+
+Is equivalent to:
+
+::
+
+    { "objkey": "value\n" }
