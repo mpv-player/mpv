@@ -5625,7 +5625,7 @@ static void cmd_rescan_external_files(void *p)
     }
 
     autoload_external_files(mpctx);
-    if (cmd->args[0].v.i && mpctx->playback_initialized) {
+    if (!cmd->args[0].v.i && mpctx->playback_initialized) {
         // somewhat fuzzy and not ideal
         struct track *a = select_default_track(mpctx, 0, STREAM_AUDIO);
         if (a && a->is_external)
@@ -5754,7 +5754,7 @@ static void cmd_define_input_section(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     mp_input_define_section(mpctx->input, cmd->args[0].v.s, "<api>",
-                            cmd->args[1].v.s, !!cmd->args[2].v.i,
+                            cmd->args[1].v.s, !cmd->args[2].v.i,
                             cmd->cmd->sender);
 }
 
@@ -6007,263 +6007,318 @@ static void cmd_load_script(void *p)
         cmd->success = false;
 }
 
-// This does not specify the real destination of the command parameter values,
-// it just provides a dummy for the OPT_ macros.
-#define OPT_BASE_STRUCT struct mp_cmd_arg
-#define ARG(t) "", v. t
-
 /* This array defines all known commands.
- * The first field is an id used to recognize the command.
- * The second is the command name used in slave mode and input.conf.
- * Then comes the definition of each argument, first mandatory arguments
- * (ARG_INT, ARG_FLOAT, ARG_STRING) if any, then optional arguments
- * (OARG_INT(default), etc) if any. The command will be given the default
- * argument value if the user didn't give enough arguments to specify it.
- * A command can take a maximum of MP_CMD_DEF_MAX_ARGS arguments, or more
- * if the command uses varargs.
+ * The first field the command name used in libmpv and input.conf.
+ * The second field is the handler function (see mp_cmd_def.handler and
+ * run_command()).
+ * Then comes the definition of each argument. They are defined like options,
+ * except that the result is parsed into mp_cmd.args[] (thus the option variable
+ * is a field in the mp_cmd_arg union field). Arguments are optional if either
+ * defval is set (usually via OPTDEF_ macros), or the MP_CMD_OPT_ARG flag is
+ * set, or if it's the last argument and .vararg is set. If .vararg is set, the
+ * command has an arbitrary number of arguments, all using the type indicated by
+ * the last argument (they are appended to mp_cmd.args[] starting at the last
+ * argument's index).
+ * Arguments have named, which can be used by named argument functions, e.g. in
+ * Lua with mp.command_native().
  */
 
-#define ARG_INT                 OPT_INT(ARG(i), 0)
-#define ARG_FLOAT               OPT_FLOAT(ARG(f), 0)
-#define ARG_DOUBLE              OPT_DOUBLE(ARG(d), 0)
-#define ARG_STRING              OPT_STRING(ARG(s), 0)
-#define ARG_CHOICE(c)           OPT_CHOICE(ARG(i), 0, c)
-#define ARG_CHOICE_OR_INT(...)  OPT_CHOICE_OR_INT(ARG(i), 0, __VA_ARGS__)
-#define ARG_TIME                OPT_TIME(ARG(d), 0)
-#define OARG_DOUBLE(def)        OPT_DOUBLE(ARG(d), 0, OPTDEF_DOUBLE(def))
-#define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
-#define OARG_CHOICE(def, c)     OPT_CHOICE(ARG(i), 0, c, OPTDEF_INT(def))
-#define OARG_FLAGS(def, c)      OPT_FLAGS(ARG(i), 0, c, OPTDEF_INT(def))
-#define OARG_STRING(def)        OPT_STRING(ARG(s), 0, OPTDEF_STR(def))
-
-#define OARG_CYCLEDIR(def)      OPT_CYCLEDIR(ARG(d), 0, OPTDEF_DOUBLE(def))
+// This does not specify the real destination of the command parameter values,
+// it just provides a dummy for the OPT_ macros. The real destination is an
+// array item  in mp_cmd.args[], using the index of the option definition.
+#define OPT_BASE_STRUCT struct mp_cmd_arg
 
 const struct mp_cmd_def mp_cmds[] = {
     { "ignore", cmd_ignore, .is_ignore = true },
 
-    { "seek", cmd_seek, {
-        ARG_TIME,
-        OARG_FLAGS(4|0, ({"relative", 4|0}, {"-", 4|0},
-                         {"absolute-percent", 4|1},
-                         {"absolute", 4|2},
-                         {"relative-percent", 4|3},
-                         {"keyframes", 32|8},
-                         {"exact", 32|16})),
-        // backwards compatibility only
-        OARG_CHOICE(0, ({"unused", 0}, {"default-precise", 0},
+    { "seek", cmd_seek,
+        {
+            OPT_TIME("target", v.d, 0),
+            OPT_FLAGS("flags", v.i, 0,
+                      ({"relative", 4|0}, {"-", 4|0},
+                       {"absolute-percent", 4|1},
+                       {"absolute", 4|2},
+                       {"relative-percent", 4|3},
+                       {"keyframes", 32|8},
+                       {"exact", 32|16}),
+                      OPTDEF_INT(4|0)),
+            // backwards compatibility only
+            OPT_CHOICE("legacy", v.i, MP_CMD_OPT_ARG,
+                       ({"unused", 0}, {"default-precise", 0},
                         {"keyframes", 32|8},
                         {"exact", 32|16})),
         },
         .allow_auto_repeat = true,
         .scalable = true,
     },
-    { "revert-seek", cmd_revert_seek, {
-        OARG_FLAGS(0, ({"mark", 1})),
-    }},
-    { "quit", cmd_quit, { OARG_INT(0) },
+    { "revert-seek", cmd_revert_seek,
+        {OPT_FLAGS("flags", v.i, MP_CMD_OPT_ARG, ({"mark", 1}))},
+    },
+    { "quit", cmd_quit, { OPT_INT("code", v.i, MP_CMD_OPT_ARG) },
         .priv = &(const bool){0}, .is_abort = true },
-    { "quit-watch-later", cmd_quit, { OARG_INT(0) },
+    { "quit-watch-later", cmd_quit, { OPT_INT("code", v.i, MP_CMD_OPT_ARG) },
         .priv = &(const bool){1}, .is_abort = true },
     { "stop", cmd_stop, .is_abort = true },
     { "frame-step", cmd_frame_step, .allow_auto_repeat = true,
         .on_updown = true },
     { "frame-back-step", cmd_frame_back_step, .allow_auto_repeat = true },
-    { "playlist-next", cmd_playlist_next_prev, {
-            OARG_CHOICE(0, ({"weak", 0},
-                            {"force", 1})),
+    { "playlist-next", cmd_playlist_next_prev,
+        {
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG, ({"weak", 0},
+                                                      {"force", 1})),
         },
         .is_soft_abort = true, .priv = &(const int){1},
     },
-    { "playlist-prev", cmd_playlist_next_prev, {
-            OARG_CHOICE(0, ({"weak", 0},
-                            {"force", 1})),
+    { "playlist-prev", cmd_playlist_next_prev,
+        {
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG, ({"weak", 0},
+                                                      {"force", 1})),
         },
         .is_soft_abort = true, .priv = &(const int){-1},
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
-    { "sub-step", cmd_sub_step_seek, { ARG_INT }, .allow_auto_repeat = true,
-        .priv = &(const bool){true} },
-    { "sub-seek", cmd_sub_step_seek, { ARG_INT }, .allow_auto_repeat = true,
-        .priv = &(const bool){false} },
-    { "print-text", cmd_print_text, { ARG_STRING }, .allow_auto_repeat = true },
-    { "show-text", cmd_show_text, { ARG_STRING, OARG_INT(-1), OARG_INT(0) },
+    { "sub-step", cmd_sub_step_seek, { OPT_INT("skip", v.i, 0) },
+        .allow_auto_repeat = true, .priv = &(const bool){true} },
+    { "sub-seek", cmd_sub_step_seek, { OPT_INT("skip", v.i, 0) },
+        .allow_auto_repeat = true, .priv = &(const bool){false} },
+    { "print-text", cmd_print_text, { OPT_STRING("text", v.s, 0) },
+        .allow_auto_repeat = true },
+    { "show-text", cmd_show_text, { OPT_STRING("text", v.s, 0),
+                                    OPT_INT("duration", v.i, 0, OPTDEF_INT(-1)),
+                                    OPT_INT("level", v.i, MP_CMD_OPT_ARG), },
         .allow_auto_repeat = true},
-    { "expand-text", cmd_expand_text, { ARG_STRING } },
+    { "expand-text", cmd_expand_text, { OPT_STRING("text", v.s, 0) } },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true},
-    { "sub-add", cmd_track_add, {
-            ARG_STRING,
-            OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
-            OARG_STRING(""), OARG_STRING(""),
+
+    { "sub-add", cmd_track_add,
+        {
+            OPT_STRING("url", v.s, 0),
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                       ({"select", 0}, {"auto", 1}, {"cached", 2})),
+            OPT_STRING("title", v.s, MP_CMD_OPT_ARG),
+            OPT_STRING("lang", v.s, MP_CMD_OPT_ARG),
         },
         .priv = &(const int){STREAM_SUB},
         .spawn_thread = true,
     },
-    { "sub-remove", cmd_track_remove, { OARG_INT(-1) },
+    { "audio-add", cmd_track_add,
+        {
+            OPT_STRING("url", v.s, 0),
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                       ({"select", 0}, {"auto", 1}, {"cached", 2})),
+            OPT_STRING("title", v.s, MP_CMD_OPT_ARG),
+            OPT_STRING("lang", v.s, MP_CMD_OPT_ARG),
+        },
+        .priv = &(const int){STREAM_AUDIO},
+        .spawn_thread = true,
+    },
+
+    { "sub-remove", cmd_track_remove, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
         .priv = &(const int){STREAM_SUB}, },
-    { "sub-reload", cmd_track_reload, { OARG_INT(-1) },
+    { "audio-remove", cmd_track_remove, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
+        .priv = &(const int){STREAM_AUDIO}, },
+
+    { "sub-reload", cmd_track_reload, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
         .priv = &(const int){STREAM_SUB},
+        .spawn_thread = true,
+    },
+    { "audio-reload", cmd_track_reload, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
+        .priv = &(const int){STREAM_AUDIO},
+        .spawn_thread = true,
+    },
+
+    { "rescan-external-files", cmd_rescan_external_files,
+        {
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                       ({"keep-selection", 1},
+                        {"reselect", 0})),
+        },
         .spawn_thread = true,
     },
 
     { "tv-last-channel", cmd_tv_last_channel, },
 
-    { "screenshot", cmd_screenshot, {
-        OARG_FLAGS(4|2, ({"video", 4|0}, {"-", 4|0},
-                         {"window", 4|1},
-                         {"subtitles", 4|2},
-                         {"each-frame", 8})),
-        // backwards compatibility
-        OARG_CHOICE(0, ({"unused", 0}, {"single", 0},
-                        {"each-frame", 8})),
+    { "screenshot", cmd_screenshot,
+        {
+            OPT_FLAGS("flags", v.i, 0,
+                      ({"video", 4|0}, {"-", 4|0},
+                       {"window", 4|1},
+                       {"subtitles", 4|2},
+                       {"each-frame", 8}),
+                      OPTDEF_INT(4|2)),
+            // backwards compatibility
+            OPT_CHOICE("legacy", v.i, MP_CMD_OPT_ARG,
+                      ({"unused", 0}, {"single", 0},
+                       {"each-frame", 8})),
         },
         .spawn_thread = true,
     },
-    { "screenshot-to-file", cmd_screenshot_to_file, {
-        ARG_STRING,
-        OARG_CHOICE(2, ({"video", 0},
+    { "screenshot-to-file", cmd_screenshot_to_file,
+        {
+            OPT_STRING("filename", v.s, 0),
+            OPT_CHOICE("flags", v.i, 0,
+                       ({"video", 0},
                         {"window", 1},
-                        {"subtitles", 2})),
+                        {"subtitles", 2}),
+                       OPTDEF_INT(2)),
         },
         .spawn_thread = true,
     },
-    { "screenshot-raw", cmd_screenshot_raw, {
-        OARG_CHOICE(2, ({"video", 0},
+    { "screenshot-raw", cmd_screenshot_raw,
+        {
+            OPT_CHOICE("flags", v.i, 0,
+                       ({"video", 0},
                         {"window", 1},
-                        {"subtitles", 2})),
-    }},
-    { "loadfile", cmd_loadfile, {
-        ARG_STRING,
-        OARG_CHOICE(0, ({"replace", 0},
+                        {"subtitles", 2}),
+                       OPTDEF_INT(2)),
+        },
+    },
+    { "loadfile", cmd_loadfile,
+        {
+            OPT_STRING("url", v.s, 0),
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                       ({"replace", 0},
                         {"append", 1},
                         {"append-play", 2})),
-        OPT_KEYVALUELIST(ARG(str_list), MP_CMD_OPT_ARG),
-    }},
-    { "loadlist", cmd_loadlist, {
-        ARG_STRING,
-        OARG_CHOICE(0, ({"replace", 0},
-                        {"append", 1})),
-    }},
+            OPT_KEYVALUELIST("options", v.str_list, MP_CMD_OPT_ARG),
+        },
+    },
+    { "loadlist", cmd_loadlist, { OPT_STRING("url", v.s, 0),
+                                  OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                                             ({"replace", 0}, {"append", 1})), }},
     { "playlist-clear", cmd_playlist_clear },
-    { "playlist-remove", cmd_playlist_remove, {
-        ARG_CHOICE_OR_INT(0, INT_MAX, ({"current", -1})),
-    }},
-    { "playlist-move", cmd_playlist_move, { ARG_INT, ARG_INT } },
-    { "run", cmd_run, { ARG_STRING, ARG_STRING }, .vararg = true },
+    { "playlist-remove", cmd_playlist_remove,
+        {OPT_CHOICE_OR_INT("index", v.i, MP_CMD_OPT_ARG, 0, INT_MAX,
+                           ({"current", -1}))},
+    },
+    { "playlist-move", cmd_playlist_move,  { OPT_INT("index1", v.i, 0),
+                                             OPT_INT("index2", v.i, 0), }},
+    { "run", cmd_run, { OPT_STRING("command", v.s, 0),
+                        OPT_STRING("args", v.s, 0), },
+        .vararg = true,
+    },
     { "subprocess", cmd_subprocess,
         {
             OPT_STRINGLIST("args", v.str_list, 0),
             OPT_FLAG("playback_only", v.i, 0, OPTDEF_INT(1)),
             OPT_BYTE_SIZE("capture_size", v.i64, 0, 0, INT_MAX,
                           OPTDEF_INT64(64 * 1024 * 1024)),
-            OPT_FLAG("capture_stdout", v.i, 0, OPTDEF_INT(0)),
-            OPT_FLAG("capture_stderr", v.i, 0, OPTDEF_INT(0)),
+            OPT_FLAG("capture_stdout", v.i, MP_CMD_OPT_ARG),
+            OPT_FLAG("capture_stderr", v.i, MP_CMD_OPT_ARG),
         },
         .spawn_thread = true,
         .can_abort = true,
     },
 
-    { "set", cmd_set, { ARG_STRING,  ARG_STRING } },
-    { "change-list", cmd_change_list, { ARG_STRING, ARG_STRING, ARG_STRING } },
-    { "add", cmd_add_cycle, { ARG_STRING, OARG_DOUBLE(1) },
+    { "set", cmd_set, {OPT_STRING("name", v.s, 0), OPT_STRING("value", v.s, 0)}},
+    { "change-list", cmd_change_list, { OPT_STRING("name", v.s, 0),
+                                        OPT_STRING("operation", v.s, 0),
+                                        OPT_STRING("value", v.s, 0) }},
+    { "add", cmd_add_cycle, { OPT_STRING("name", v.s, 0),
+                              OPT_DOUBLE("value", v.d, 0, OPTDEF_DOUBLE(1)), },
         .allow_auto_repeat = true,
         .scalable = true,
     },
-    { "cycle", cmd_add_cycle, {
-            ARG_STRING,
-            OARG_CYCLEDIR(1),
-        },
+    { "cycle", cmd_add_cycle, { OPT_STRING("name", v.s, 0),
+                                OPT_CYCLEDIR("value", v.d, 0, OPTDEF_DOUBLE(1)), },
         .allow_auto_repeat = true,
         .scalable = true,
         .priv = "",
     },
-    { "multiply", cmd_multiply, { ARG_STRING, ARG_DOUBLE },
+    { "multiply", cmd_multiply, { OPT_STRING("name", v.s, 0),
+                                  OPT_DOUBLE("value", v.d, 0)},
         .allow_auto_repeat = true},
 
-    { "cycle-values", cmd_cycle_values, { ARG_STRING, ARG_STRING, ARG_STRING },
+    { "cycle-values", cmd_cycle_values, { OPT_STRING("arg0", v.s, 0),
+                                          OPT_STRING("arg1", v.s, 0),
+                                          OPT_STRING("argN", v.s, 0), },
         .vararg = true},
 
-    { "enable-section", cmd_enable_input_section, {
-        ARG_STRING,
-        OARG_FLAGS(0, ({"default", 0},
+    { "enable-section", cmd_enable_input_section,
+        {
+            OPT_STRING("name", v.s, 0),
+            OPT_FLAGS("flags", v.i, MP_CMD_OPT_ARG,
+                      ({"default", 0},
                        {"exclusive", MP_INPUT_EXCLUSIVE},
                        {"allow-hide-cursor", MP_INPUT_ALLOW_HIDE_CURSOR},
                        {"allow-vo-dragging", MP_INPUT_ALLOW_VO_DRAGGING})),
-    }},
-    { "disable-section", cmd_disable_input_section, { ARG_STRING } },
-    { "define-section", cmd_define_input_section, {
-        ARG_STRING,
-        ARG_STRING,
-        OARG_CHOICE(1, ({"default", 1},
-                        {"force", 0})),
-    }},
+        }
+    },
+    { "disable-section", cmd_disable_input_section,
+        {OPT_STRING("name", v.s, 0) }},
+    { "define-section", cmd_define_input_section,
+        {
+            OPT_STRING("name", v.s, 0),
+            OPT_STRING("contents", v.s, 0),
+            OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
+                       ({"default", 0}, {"force", 1})),
+        },
+    },
 
     { "ab-loop", cmd_ab_loop },
 
     { "drop-buffers", cmd_drop_buffers, },
 
-    { "af", cmd_filter, { ARG_STRING, ARG_STRING },
-        .priv = &(const int){STREAM_AUDIO}, },
-    { "af-command", cmd_filter_command, { ARG_STRING, ARG_STRING, ARG_STRING },
-        .priv = &(const int){STREAM_AUDIO}, },
+    { "af", cmd_filter, { OPT_STRING("operation", v.s, 0),
+                          OPT_STRING("value", v.s, 0), },
+        .priv = &(const int){STREAM_AUDIO} },
+    { "vf", cmd_filter, { OPT_STRING("operation", v.s, 0),
+                          OPT_STRING("value", v.s, 0), },
+        .priv = &(const int){STREAM_VIDEO} },
+
+    { "af-command", cmd_filter_command, { OPT_STRING("label", v.s, 0),
+                                          OPT_STRING("command", v.s, 0),
+                                          OPT_STRING("argument", v.s, 0), },
+        .priv = &(const int){STREAM_AUDIO} },
+    { "vf-command", cmd_filter_command, { OPT_STRING("label", v.s, 0),
+                                          OPT_STRING("command", v.s, 0),
+                                          OPT_STRING("argument", v.s, 0), },
+        .priv = &(const int){STREAM_VIDEO} },
+
     { "ao-reload", cmd_ao_reload },
 
-    { "vf", cmd_filter, { ARG_STRING, ARG_STRING },
-        .priv = &(const int){STREAM_VIDEO}, },
-    { "vf-command", cmd_filter_command, { ARG_STRING, ARG_STRING, ARG_STRING },
-        .priv = &(const int){STREAM_VIDEO}, },
-
-    { "script-binding", cmd_script_binding, { ARG_STRING },
+    { "script-binding", cmd_script_binding, { OPT_STRING("name", v.s, 0) },
         .allow_auto_repeat = true, .on_updown = true},
 
-    { "script-message", cmd_script_message, { ARG_STRING }, .vararg = true },
-    { "script-message-to", cmd_script_message_to, { ARG_STRING, ARG_STRING },
+    { "script-message", cmd_script_message, { OPT_STRING("args", v.s, 0) },
+        .vararg = true },
+    { "script-message-to", cmd_script_message_to, { OPT_STRING("target", v.s, 0),
+                                                    OPT_STRING("args", v.s, 0) },
         .vararg = true },
 
-    { "overlay-add", cmd_overlay_add,
-        { ARG_INT, ARG_INT, ARG_INT, ARG_STRING, ARG_INT, ARG_STRING, ARG_INT,
-            ARG_INT, ARG_INT }},
-    { "overlay-remove", cmd_overlay_remove, { ARG_INT } },
+    { "overlay-add", cmd_overlay_add, { OPT_INT("id", v.i, 0),
+                                        OPT_INT("x", v.i, 0),
+                                        OPT_INT("y", v.i, 0),
+                                        OPT_STRING("file", v.s, 0),
+                                        OPT_INT("offset", v.i, 0),
+                                        OPT_STRING("fmt", v.s, 0),
+                                        OPT_INT("w", v.i, 0),
+                                        OPT_INT("h", v.i, 0),
+                                        OPT_INT("stride", v.i, 0), }},
+    { "overlay-remove", cmd_overlay_remove, { OPT_INT("id", v.i, 0) } },
 
     { "write-watch-later-config", cmd_write_watch_later_config },
 
-    { "hook-add", cmd_hook_add, { ARG_STRING, ARG_INT, ARG_INT } },
-    { "hook-ack", cmd_hook_ack, { ARG_INT } },
+    { "hook-add", cmd_hook_add, { OPT_STRING("arg0", v.s, 0),
+                                  OPT_INT("arg1", v.i, 0),
+                                  OPT_INT("arg2", v.i, 0) }},
+    { "hook-ack", cmd_hook_ack, { OPT_INT("arg0", v.i, 0) }},
 
-    { "mouse", cmd_mouse, {
-        ARG_INT, ARG_INT, // coordinate (x, y)
-        OARG_INT(-1),     // button number
-        OARG_CHOICE(0, ({"single", 0},
-                        {"double", 1})),
-    }},
-    { "keypress", cmd_key, { ARG_STRING }, .priv = &(const int){0}},
-    { "keydown", cmd_key, { ARG_STRING }, .priv = &(const int){MP_KEY_STATE_DOWN}},
-    { "keyup", cmd_key, { OARG_STRING("") }, .priv = &(const int){MP_KEY_STATE_UP}},
+    { "mouse", cmd_mouse, { OPT_INT("x", v.i, 0),
+                            OPT_INT("y", v.i, 0),
+                            OPT_INT("button", v.i, 0, OPTDEF_INT(-1)),
+                            OPT_CHOICE("mode", v.i, MP_CMD_OPT_ARG,
+                                       ({"single", 0}, {"double", 1})), }},
+    { "keypress", cmd_key, { OPT_STRING("name", v.s, 0) },
+        .priv = &(const int){0}},
+    { "keydown", cmd_key, { OPT_STRING("name", v.s, 0) },
+        .priv = &(const int){MP_KEY_STATE_DOWN}},
+    { "keyup", cmd_key, { OPT_STRING("name", v.s, MP_CMD_OPT_ARG) },
+        .priv = &(const int){MP_KEY_STATE_UP}},
 
-    { "audio-add", cmd_track_add, {
-            ARG_STRING,
-            OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
-            OARG_STRING(""), OARG_STRING(""),
-        },
-        .priv = &(const int){STREAM_AUDIO},
-        .spawn_thread = true,
-    },
-    { "audio-remove", cmd_track_remove, { OARG_INT(-1) },
-        .priv = &(const int){STREAM_AUDIO}, },
-    { "audio-reload", cmd_track_reload, { OARG_INT(-1) },
-        .priv = &(const int){STREAM_AUDIO},
-        .spawn_thread = true,
-    },
+    { "apply-profile", cmd_apply_profile, {OPT_STRING("name", v.s, 0)} },
 
-    { "rescan-external-files", cmd_rescan_external_files, {
-        OARG_CHOICE(1, ({"keep-selection", 0},
-                        {"reselect", 1})),
-        },
-        .spawn_thread = true,
-    },
-
-    { "apply-profile", cmd_apply_profile, {ARG_STRING } },
-
-    { "load-script", cmd_load_script, {ARG_STRING} },
+    { "load-script", cmd_load_script, {OPT_STRING("filename", v.s, 0)} },
 
     {0}
 };

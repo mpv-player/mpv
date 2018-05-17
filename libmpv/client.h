@@ -955,8 +955,8 @@ int mpv_command(mpv_handle *ctx, const char **args);
  *      The special entry "_flags" is optional, and if present, must be an
  *      array of strings, each being a command prefix to apply. All other
  *      entries are interpreted as arguments. They must use the argument names
- *      as documented in each command description. Currently, most commands do
- *      not support named arguments at all.
+ *      as documented in each command description. Some commands do not
+ *      support named arguments at all, and must use MPV_FORMAT_NODE_ARRAY.
  *
  * @param[in] args mpv_node with format set to one of the values documented
  *                 above (see there for details)

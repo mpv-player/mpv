@@ -138,6 +138,9 @@ Interface changes
     - ipc: require that "request_id" fields are integers. Other types are still
       accepted for compatibility, but this will stop in the future. Also, if no
       request_id is provided, 0 will be assumed.
+    - mpv_command_node() and mp.command_native() now support named arguments
+      (see manpage). If you want to use them, use a new version of the manpage
+      as reference, which lists the definitive names.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
