@@ -31,6 +31,7 @@
 #include "input/cmd.h"
 #include "misc/ctype.h"
 #include "misc/dispatch.h"
+#include "misc/node.h"
 #include "misc/rendezvous.h"
 #include "misc/thread_tools.h"
 #include "options/m_config.h"
@@ -942,54 +943,6 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
     return false;
 }
 
-// Note: for MPV_FORMAT_NODE_MAP, this (incorrectly) takes the order into
-//       account, instead of treating it as set.
-static bool compare_value(void *a, void *b, mpv_format format)
-{
-    switch (format) {
-    case MPV_FORMAT_NONE:
-        return true;
-    case MPV_FORMAT_STRING:
-    case MPV_FORMAT_OSD_STRING:
-        return strcmp(*(char **)a, *(char **)b) == 0;
-    case MPV_FORMAT_FLAG:
-        return *(int *)a == *(int *)b;
-    case MPV_FORMAT_INT64:
-        return *(int64_t *)a == *(int64_t *)b;
-    case MPV_FORMAT_DOUBLE:
-        return *(double *)a == *(double *)b;
-    case MPV_FORMAT_NODE: {
-        struct mpv_node *a_n = a, *b_n = b;
-        if (a_n->format != b_n->format)
-            return false;
-        return compare_value(&a_n->u, &b_n->u, a_n->format);
-    }
-    case MPV_FORMAT_BYTE_ARRAY: {
-        struct mpv_byte_array *a_r = a, *b_r = b;
-        if (a_r->size != b_r->size)
-            return false;
-        return memcmp(a_r->data, b_r->data, a_r->size) == 0;
-    }
-    case MPV_FORMAT_NODE_ARRAY:
-    case MPV_FORMAT_NODE_MAP:
-    {
-        mpv_node_list *l_a = *(mpv_node_list **)a, *l_b = *(mpv_node_list **)b;
-        if (l_a->num != l_b->num)
-            return false;
-        for (int n = 0; n < l_a->num; n++) {
-            if (!compare_value(&l_a->values[n], &l_b->values[n], MPV_FORMAT_NODE))
-                return false;
-            if (format == MPV_FORMAT_NODE_MAP) {
-                if (strcmp(l_a->keys[n], l_b->keys[n]) != 0)
-                    return false;
-            }
-        }
-        return true;
-    }
-    }
-    abort();
-}
-
 void mpv_free_node_contents(mpv_node *node)
 {
     static const struct m_option type = { .type = CONF_TYPE_NODE };
@@ -1622,7 +1575,7 @@ static void update_prop(void *p)
     if (prop->user_value_valid != prop->new_value_valid) {
         prop->changed = true;
     } else if (prop->user_value_valid && prop->new_value_valid) {
-        if (!compare_value(&prop->user_value, &prop->new_value, prop->format))
+        if (!equal_mpv_value(&prop->user_value, &prop->new_value, prop->format))
             prop->changed = true;
     }
     if (prop->dead)
