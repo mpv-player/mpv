@@ -254,14 +254,6 @@ stream_t *open_memory_stream(void *data, int len);
 void mp_url_unescape_inplace(char *buf);
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
 
-struct mp_cancel *mp_cancel_new(void *talloc_ctx);
-void mp_cancel_trigger(struct mp_cancel *c);
-bool mp_cancel_test(struct mp_cancel *c);
-bool mp_cancel_wait(struct mp_cancel *c, double timeout);
-void mp_cancel_reset(struct mp_cancel *c);
-void *mp_cancel_get_event(struct mp_cancel *c); // win32 HANDLE
-int mp_cancel_get_fd(struct mp_cancel *c);
-
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);
 char *mp_file_get_path(void *talloc_ctx, bstr url);

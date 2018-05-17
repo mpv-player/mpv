@@ -37,3 +37,31 @@ void mp_waiter_wakeup(struct mp_waiter *waiter, uintptr_t value);
 // wakeup (in parallel to mp_waiter).
 // You still need to call mp_waiter_wait() to free resources.
 bool mp_waiter_poll(struct mp_waiter *waiter);
+
+// Basically a binary semaphore that supports signaling the semaphore value to
+// a bunch of other complicated mechanisms (such as wakeup pipes). It was made
+// for aborting I/O and thus has according naming.
+struct mp_cancel;
+
+struct mp_cancel *mp_cancel_new(void *talloc_ctx);
+
+// Request abort.
+void mp_cancel_trigger(struct mp_cancel *c);
+
+// Return whether the caller should abort.
+// For convenience, c==NULL is allowed.
+bool mp_cancel_test(struct mp_cancel *c);
+
+// Wait until the even is signaled. If the timeout (in seconds) expires, return
+// false. timeout==0 polls, timeout<0 waits forever.
+bool mp_cancel_wait(struct mp_cancel *c, double timeout);
+
+// Restore original state. (Allows reusing a mp_cancel.)
+void mp_cancel_reset(struct mp_cancel *c);
+
+// win32 "Event" HANDLE that indicates the current mp_cancel state.
+void *mp_cancel_get_event(struct mp_cancel *c);
+
+// The FD becomes readable if mp_cancel_test() would return true.
+// Don't actually read from it, just use it for poll().
+int mp_cancel_get_fd(struct mp_cancel *c);

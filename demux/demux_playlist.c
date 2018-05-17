@@ -25,6 +25,7 @@
 #include "options/options.h"
 #include "common/msg.h"
 #include "common/playlist.h"
+#include "misc/thread_tools.h"
 #include "options/path.h"
 #include "stream/stream.h"
 #include "osdep/io.h"
