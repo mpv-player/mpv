@@ -228,7 +228,6 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_backstep = false;
     mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->step_frames = 0;
     mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
