@@ -20,6 +20,7 @@
 
 #include "misc/bstr.h"
 #include "common/common.h"
+#include "misc/thread_tools.h"
 #include "stream.h"
 
 #include "stream_libarchive.h"

@@ -35,6 +35,7 @@
 #include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "misc/thread_tools.h"
 #include "osdep/atomic.h"
 #include "osdep/threads.h"
 

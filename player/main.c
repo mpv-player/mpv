@@ -54,7 +54,7 @@
 
 #include "audio/out/ao.h"
 #include "demux/demux.h"
-#include "stream/stream.h"
+#include "misc/thread_tools.h"
 #include "sub/osd.h"
 #include "video/out/vo.h"
 

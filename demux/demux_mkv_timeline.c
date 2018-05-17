@@ -39,6 +39,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/thread_tools.h"
 #include "common/common.h"
 #include "common/playlist.h"
 #include "stream/stream.h"
