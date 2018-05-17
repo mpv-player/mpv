@@ -138,7 +138,7 @@ Like with array commands, quoting and escaping is inherently not needed in the
 normal case.
 
 The name of each command is defined in each command description in the
-`List of Input Commands`_.
+`List of Input Commands`_. ``--input-cmdlist`` also lists them.
 
 Some commands do not support named arguments (e.g. ``run`` command). You need
 to use APIs that pass arguments as arrays.
