@@ -4983,8 +4983,10 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
 
     assert(cmd->def->can_abort == !!ctx->abort);
 
-    if (ctx->abort)
+    if (ctx->abort) {
+        ctx->abort->coupled_to_playback |= cmd->def->abort_on_playback_end;
         mp_abort_add(mpctx, ctx->abort);
+    }
 
     struct MPOpts *opts = mpctx->opts;
     ctx->on_osd = cmd->flags & MP_ON_OSD_FLAGS;
@@ -5536,7 +5538,8 @@ static void cmd_track_add(void *p)
             return;
         }
     }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type);
+    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
+                                     cmd->abort->cancel);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -5600,7 +5603,7 @@ static void cmd_track_reload(void *p)
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
         mp_remove_track(mpctx, t);
-        nt_num = mp_add_external_file(mpctx, filename, type);
+        nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel);
         talloc_free(filename);
     }
 
@@ -5624,7 +5627,7 @@ static void cmd_rescan_external_files(void *p)
         return;
     }
 
-    autoload_external_files(mpctx);
+    autoload_external_files(mpctx, cmd->abort->cancel);
     if (!cmd->args[0].v.i && mpctx->playback_initialized) {
         // somewhat fuzzy and not ideal
         struct track *a = select_default_track(mpctx, 0, STREAM_AUDIO);
@@ -6100,6 +6103,8 @@ const struct mp_cmd_def mp_cmds[] = {
         },
         .priv = &(const int){STREAM_SUB},
         .spawn_thread = true,
+        .can_abort = true,
+        .abort_on_playback_end = true,
     },
     { "audio-add", cmd_track_add,
         {
@@ -6111,6 +6116,8 @@ const struct mp_cmd_def mp_cmds[] = {
         },
         .priv = &(const int){STREAM_AUDIO},
         .spawn_thread = true,
+        .can_abort = true,
+        .abort_on_playback_end = true,
     },
 
     { "sub-remove", cmd_track_remove, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
@@ -6121,10 +6128,14 @@ const struct mp_cmd_def mp_cmds[] = {
     { "sub-reload", cmd_track_reload, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
         .priv = &(const int){STREAM_SUB},
         .spawn_thread = true,
+        .can_abort = true,
+        .abort_on_playback_end = true,
     },
     { "audio-reload", cmd_track_reload, { OPT_INT("id", v.i, 0, OPTDEF_INT(-1)) },
         .priv = &(const int){STREAM_AUDIO},
         .spawn_thread = true,
+        .can_abort = true,
+        .abort_on_playback_end = true,
     },
 
     { "rescan-external-files", cmd_rescan_external_files,
@@ -6134,6 +6145,8 @@ const struct mp_cmd_def mp_cmds[] = {
                         {"reselect", 0})),
         },
         .spawn_thread = true,
+        .can_abort = true,
+        .abort_on_playback_end = true,
     },
 
     { "tv-last-channel", cmd_tv_last_channel, },

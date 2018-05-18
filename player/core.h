@@ -441,7 +441,6 @@ typedef struct MPContext {
     pthread_mutex_t abort_lock;
 
     // --- The following fields are protected by abort_lock
-    struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
     struct mp_abort_entry **abort_list;
     int num_abort_list;
     bool abort_all; // during final termination
@@ -513,7 +512,7 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
                              struct mp_abort_entry *abort);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter);
+                         enum stream_type filter, struct mp_cancel *cancel);
 #define FLAG_MARK_SELECTION 1
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track, int flags);
@@ -532,7 +531,7 @@ void update_demuxer_properties(struct MPContext *mpctx);
 void print_track_list(struct MPContext *mpctx, const char *msg);
 void reselect_demux_stream(struct MPContext *mpctx, struct track *track);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
-void autoload_external_files(struct MPContext *mpctx);
+void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel);
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
 void prefetch_next(struct MPContext *mpctx);
