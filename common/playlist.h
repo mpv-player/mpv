@@ -101,8 +101,10 @@ int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e);
 int playlist_entry_count(struct playlist *pl);
 struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index);
 
+struct mp_cancel;
 struct mpv_global;
-struct playlist *playlist_parse_file(const char *file, struct mpv_global *global);
+struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
+                                     struct mpv_global *global);
 
 void playlist_entry_unref(struct playlist_entry *e);
 
