@@ -715,6 +715,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->default_track = true;
         if (st->disposition & AV_DISPOSITION_FORCED)
             sh->forced_track = true;
+        if (st->disposition & AV_DISPOSITION_DEPENDENT)
+            sh->dependent_track = true;
         if (priv->format_hack.use_stream_ids)
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
@@ -724,8 +726,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->title = talloc_asprintf(sh, "visual impaired");
         if (!sh->title && st->disposition & AV_DISPOSITION_HEARING_IMPAIRED)
             sh->title = talloc_asprintf(sh, "hearing impaired");
-        if (st->disposition & AV_DISPOSITION_DEPENDENT)
-            sh->dependent_track = true;
         AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
         if (lang && lang->value && strcmp(lang->value, "und") != 0)
             sh->lang = talloc_strdup(sh, lang->value);
