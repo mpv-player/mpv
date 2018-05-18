@@ -5389,7 +5389,8 @@ static void cmd_loadlist(void *p)
     char *filename = cmd->args[0].v.s;
     bool append = cmd->args[1].v.i;
 
-    struct playlist *pl = playlist_parse_file(filename, mpctx->global);
+    struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
+                                              mpctx->global);
     if (pl) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
@@ -6198,7 +6199,10 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadlist", cmd_loadlist, { OPT_STRING("url", v.s, 0),
                                   OPT_CHOICE("flags", v.i, MP_CMD_OPT_ARG,
-                                             ({"replace", 0}, {"append", 1})), }},
+                                             ({"replace", 0}, {"append", 1})), },
+        .spawn_thread = true,
+        .can_abort = true,
+    },
     { "playlist-clear", cmd_playlist_clear },
     { "playlist-remove", cmd_playlist_remove,
         {OPT_CHOICE_OR_INT("index", v.i, MP_CMD_OPT_ARG, 0, INT_MAX,
