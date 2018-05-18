@@ -139,12 +139,15 @@ static void thread_pool_dtor(void *ctx)
     pthread_mutex_destroy(&pool->lock);
 }
 
-static void add_thread(struct mp_thread_pool *pool)
+static bool add_thread(struct mp_thread_pool *pool)
 {
     pthread_t thread;
 
-    if (pthread_create(&thread, NULL, worker_thread, pool) == 0)
-        MP_TARRAY_APPEND(pool, pool->threads, pool->num_threads, thread);
+    if (pthread_create(&thread, NULL, worker_thread, pool) != 0)
+        return false;
+
+    MP_TARRAY_APPEND(pool, pool->threads, pool->num_threads, thread);
+    return true;
 }
 
 struct mp_thread_pool *mp_thread_pool_create(void *ta_parent, int init_threads,
@@ -175,8 +178,8 @@ struct mp_thread_pool *mp_thread_pool_create(void *ta_parent, int init_threads,
     return pool;
 }
 
-bool mp_thread_pool_queue(struct mp_thread_pool *pool, void (*fn)(void *ctx),
-                          void *fn_ctx)
+static bool thread_pool_add(struct mp_thread_pool *pool, void (*fn)(void *ctx),
+                            void *fn_ctx, bool allow_queue)
 {
     bool ok = true;
 
@@ -192,17 +195,29 @@ bool mp_thread_pool_queue(struct mp_thread_pool *pool, void (*fn)(void *ctx),
     if (pool->busy_threads + pool->num_work + 1 > pool->num_threads &&
         pool->num_threads < pool->max_threads)
     {
-        // We ignore failures, unless there are no threads available (below).
-        add_thread(pool);
+        if (!add_thread(pool)) {
+            // If we can queue it, it'll get done as long as there is 1 thread.
+            ok = allow_queue && pool->num_threads > 0;
+        }
     }
 
-    if (pool->num_threads) {
+    if (ok) {
         MP_TARRAY_INSERT_AT(pool, pool->work, pool->num_work, 0, work);
         pthread_cond_signal(&pool->wakeup);
-    } else {
-        ok = false;
     }
 
     pthread_mutex_unlock(&pool->lock);
     return ok;
+}
+
+bool mp_thread_pool_queue(struct mp_thread_pool *pool, void (*fn)(void *ctx),
+                          void *fn_ctx)
+{
+    return thread_pool_add(pool, fn, fn_ctx, true);
+}
+
+bool mp_thread_pool_run(struct mp_thread_pool *pool, void (*fn)(void *ctx),
+                        void *fn_ctx)
+{
+    return thread_pool_add(pool, fn, fn_ctx, false);
 }
