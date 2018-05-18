@@ -68,9 +68,6 @@ void mp_abort_playback_async(struct MPContext *mpctx)
 
     pthread_mutex_lock(&mpctx->abort_lock);
 
-    if (mpctx->demuxer_cancel)
-        mp_cancel_trigger(mpctx->demuxer_cancel);
-
     for (int n = 0; n < mpctx->num_abort_list; n++) {
         struct mp_abort_entry *abort = mpctx->abort_list[n];
         if (abort->coupled_to_playback)
@@ -126,6 +123,25 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
     mp_cancel_trigger(abort->cancel);
 }
 
+static void cancel_and_free_demuxer(struct MPContext *mpctx,
+                                    struct demuxer **demuxer)
+{
+    if (!*demuxer)
+        return;
+
+    struct mp_cancel *cancel = (*demuxer)->cancel;
+    assert(cancel != mpctx->playback_abort);
+
+    // Explicitly trigger it so freeing the demuxer can't block on I/O.
+    if (cancel)
+        mp_cancel_trigger(cancel);
+
+    free_demuxer_and_stream(*demuxer);
+    *demuxer = NULL;
+
+    talloc_free(cancel);
+}
+
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     for (int r = 0; r < NUM_PTRACKS; r++) {
@@ -147,13 +163,7 @@ static void uninit_demuxer(struct MPContext *mpctx)
     }
     mpctx->num_tracks = 0;
 
-    free_demuxer_and_stream(mpctx->demuxer);
-    mpctx->demuxer = NULL;
-
-    pthread_mutex_lock(&mpctx->abort_lock);
-    talloc_free(mpctx->demuxer_cancel);
-    mpctx->demuxer_cancel = NULL;
-    pthread_mutex_unlock(&mpctx->abort_lock);
+    cancel_and_free_demuxer(mpctx, &mpctx->demuxer);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -628,7 +638,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
         in_use |= mpctx->tracks[n]->demuxer == d;
 
     if (!in_use)
-        free_demuxer_and_stream(d);
+        cancel_and_free_demuxer(mpctx, &d);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -638,11 +648,13 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 // Add the given file as additional track. The filter argument controls how or
 // if tracks are auto-selected at any point.
 // To be run on a worker thread, locked (temporarily unlocks core).
+// cancel will generally be used to abort the loading process, but on success
+// the demuxer is changed to be slaved to mpctx->playback_abort instead.
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter)
+                         enum stream_type filter, struct mp_cancel *cancel)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (!filename || mp_cancel_test(mpctx->playback_abort))
+    if (!filename || mp_cancel_test(cancel))
         return -1;
 
     char *disp_filename = filename;
@@ -660,10 +672,13 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     }
 
+    struct mp_cancel *demux_cancel = mp_cancel_new(NULL);
+    mp_cancel_add_slave(cancel, demux_cancel);
+
     mp_core_unlock(mpctx);
 
     struct demuxer *demuxer =
-        demux_open_url(filename, &params, mpctx->playback_abort, mpctx->global);
+        demux_open_url(filename, &params, demux_cancel, mpctx->global);
     if (demuxer)
         enable_demux_thread(mpctx, demuxer);
 
@@ -671,12 +686,8 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
 
     // The command could have overlapped with playback exiting. (We don't care
     // if playback has started again meanwhile - weird, but not a problem.)
-    if (!mpctx->playing) {
-        mp_core_unlock(mpctx);
-        free_demuxer_and_stream(demuxer);
-        mp_core_lock(mpctx);
-        return -1;
-    }
+    if (!mpctx->playing)
+        goto err_out;
 
     if (!demuxer)
         goto err_out;
@@ -694,14 +705,11 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     }
 
     if (!has_any) {
-        mp_core_unlock(mpctx);
-        free_demuxer_and_stream(demuxer);
-        mp_core_lock(mpctx);
         char *tname = mp_tprintf(20, "%s ", stream_type_name(filter));
         if (filter == STREAM_TYPE_COUNT)
             tname = "";
         MP_ERR(mpctx, "No %sstreams in file %s.\n", tname, disp_filename);
-        return -1;
+        goto err_out;
     }
 
     int first_num = -1;
@@ -717,10 +725,18 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             first_num = mpctx->num_tracks - 1;
     }
 
+    mp_cancel_remove_slave(cancel, demux_cancel);
+    mp_cancel_add_slave(mpctx->playback_abort, demux_cancel);
+
     return first_num;
 
 err_out:
-    if (!mp_cancel_test(mpctx->playback_abort))
+    if (demuxer) {
+        cancel_and_free_demuxer(mpctx, &demuxer);
+    } else {
+        talloc_free(demux_cancel);
+    }
+    if (!mp_cancel_test(cancel))
         MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
     return -1;
 }
@@ -734,12 +750,13 @@ static void open_external_files(struct MPContext *mpctx, char **files,
     files = mp_dup_str_array(tmp, files);
 
     for (int n = 0; files && files[n]; n++)
-        mp_add_external_file(mpctx, files[n], filter);
+        mp_add_external_file(mpctx, files[n], filter, mpctx->playback_abort);
 
     talloc_free(tmp);
 }
 
-void autoload_external_files(struct MPContext *mpctx)
+// See mp_add_external_file() for meaning of cancel parameter.
+void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 {
     if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
         return;
@@ -775,7 +792,7 @@ void autoload_external_files(struct MPContext *mpctx)
             goto skip;
         if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
-        int first = mp_add_external_file(mpctx, filename, list[i].type);
+        int first = mp_add_external_file(mpctx, filename, list[i].type, cancel);
         if (first < 0)
             goto skip;
 
@@ -851,13 +868,17 @@ static void load_chapters(struct MPContext *mpctx)
     char *chapter_file = mpctx->opts->chapter_file;
     if (chapter_file && chapter_file[0]) {
         chapter_file = talloc_strdup(NULL, chapter_file);
+        struct mp_cancel *cancel = mp_cancel_new(NULL);
+        mp_cancel_add_slave(mpctx->playback_abort, cancel);
         mp_core_unlock(mpctx);
-        struct demuxer *demux = demux_open_url(chapter_file, NULL,
-                                        mpctx->playback_abort, mpctx->global);
+        struct demuxer *demux = demux_open_url(chapter_file, NULL, cancel,
+                                               mpctx->global);
         mp_core_lock(mpctx);
         if (demux) {
             src = demux;
             free_src = true;
+        } else {
+            talloc_free(cancel);
         }
         talloc_free(mpctx->chapters);
         mpctx->chapters = NULL;
@@ -872,11 +893,8 @@ static void load_chapters(struct MPContext *mpctx)
                 mpctx->chapters[n].pts -= src->start_time;
         }
     }
-    if (free_src) {
-        mp_core_unlock(mpctx);
-        free_demuxer_and_stream(src);
-        mp_core_lock(mpctx);
-    }
+    if (free_src)
+        cancel_and_free_demuxer(mpctx, &src);
 }
 
 static void load_per_file_options(m_config_t *conf,
@@ -929,13 +947,15 @@ static void cancel_open(struct MPContext *mpctx)
         pthread_join(mpctx->open_thread, NULL);
     mpctx->open_active = false;
 
+    if (mpctx->open_res_demuxer) {
+        assert(mpctx->open_res_demuxer->cancel == mpctx->open_cancel);
+        mpctx->open_cancel = NULL;
+        cancel_and_free_demuxer(mpctx, &mpctx->open_res_demuxer);
+    }
+
     TA_FREEP(&mpctx->open_cancel);
     TA_FREEP(&mpctx->open_url);
     TA_FREEP(&mpctx->open_format);
-
-    if (mpctx->open_res_demuxer)
-        free_demuxer_and_stream(mpctx->open_res_demuxer);
-    mpctx->open_res_demuxer = NULL;
 
     atomic_store(&mpctx->open_done, false);
 }
@@ -993,9 +1013,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         start_open(mpctx, url, mpctx->playing->stream_flags);
 
     // User abort should cancel the opener now.
-    pthread_mutex_lock(&mpctx->abort_lock);
-    mpctx->demuxer_cancel = mpctx->open_cancel;
-    pthread_mutex_unlock(&mpctx->abort_lock);
+    mp_cancel_add_slave(mpctx->playback_abort, mpctx->open_cancel);
 
     while (!atomic_load(&mpctx->open_done)) {
         mp_idle(mpctx);
@@ -1005,15 +1023,12 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     }
 
     if (mpctx->open_res_demuxer) {
-        assert(mpctx->demuxer_cancel == mpctx->open_cancel);
+        assert(mpctx->open_res_demuxer->cancel == mpctx->open_cancel);
         mpctx->demuxer = mpctx->open_res_demuxer;
         mpctx->open_res_demuxer = NULL;
         mpctx->open_cancel = NULL;
     } else {
         mpctx->error_playing = mpctx->open_res_error;
-        pthread_mutex_lock(&mpctx->abort_lock);
-        mpctx->demuxer_cancel = NULL;
-        pthread_mutex_unlock(&mpctx->abort_lock);
     }
 
     cancel_open(mpctx); // cleanup
@@ -1238,7 +1253,7 @@ static void load_external_opts_thread(void *p)
     open_external_files(mpctx, mpctx->opts->audio_files, STREAM_AUDIO);
     open_external_files(mpctx, mpctx->opts->sub_name, STREAM_SUB);
     open_external_files(mpctx, mpctx->opts->external_files, STREAM_TYPE_COUNT);
-    autoload_external_files(mpctx);
+    autoload_external_files(mpctx, mpctx->playback_abort);
 
     mp_waiter_wakeup(waiter, 0);
     mp_wakeup_core(mpctx);
