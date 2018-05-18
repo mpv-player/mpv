@@ -26,4 +26,9 @@ struct mp_thread_pool *mp_thread_pool_create(void *ta_parent, int init_threads,
 bool mp_thread_pool_queue(struct mp_thread_pool *pool, void (*fn)(void *ctx),
                           void *fn_ctx);
 
+// Like mp_thread_pool_queue(), but only queue the item and succeed if a thread
+// can be reserved for the item (i.e. minimal wait time instead of unbounded).
+bool mp_thread_pool_run(struct mp_thread_pool *pool, void (*fn)(void *ctx),
+                        void *fn_ctx);
+
 #endif
