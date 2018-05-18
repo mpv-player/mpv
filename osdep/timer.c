@@ -59,16 +59,6 @@ double mp_time_sec(void)
     return mp_time_us() / (double)(1000 * 1000);
 }
 
-int64_t mp_time_relative_us(int64_t *t)
-{
-    int64_t r = 0;
-    int64_t now = mp_time_us();
-    if (*t)
-        r = now - *t;
-    *t = now;
-    return r;
-}
-
 int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
 {
     assert(time_us > 0); // mp_time_us() returns strictly positive values
