@@ -233,6 +233,9 @@ typedef struct demuxer {
     struct mp_tags **update_stream_tags;
     int num_update_stream_tags;
 
+    // Triggered when ending demuxing forcefully. Usually bound to the stream too.
+    struct mp_cancel *cancel;
+
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
     // You can freely use demux_stream_control() to send STREAM_CTRLs.

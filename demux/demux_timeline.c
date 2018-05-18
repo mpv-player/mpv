@@ -167,7 +167,7 @@ static void reopen_lazy_segments(struct demuxer *demuxer)
         .skip_lavf_probing = true,
     };
     p->current->d = demux_open_url(p->current->url, &params,
-                                   demuxer->stream->cancel, demuxer->global);
+                                   demuxer->cancel, demuxer->global);
     if (!p->current->d && !demux_cancel_test(demuxer))
         MP_ERR(demuxer, "failed to load segment\n");
     if (p->current->d)
