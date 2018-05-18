@@ -2200,6 +2200,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
+        .cancel = stream->cancel,
         .seekable = stream->seekable,
         .filepos = -1,
         .global = global,
@@ -3136,7 +3137,7 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
 
 bool demux_cancel_test(struct demuxer *demuxer)
 {
-    return mp_cancel_test(demuxer->stream->cancel);
+    return mp_cancel_test(demuxer->cancel);
 }
 
 struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
