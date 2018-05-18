@@ -58,6 +58,9 @@ struct mp_cmd_def {
     // asynchronous abort of the command, and explicitly uses mp_cmd_ctx.abort.
     // (Not setting it when it's not needed can save resources.)
     bool can_abort;
+    // If playback ends, and the command is still running, an abort is
+    // automatically triggered.
+    bool abort_on_playback_end;
 };
 
 enum mp_cmd_flags {

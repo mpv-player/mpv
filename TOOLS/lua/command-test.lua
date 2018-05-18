@@ -65,6 +65,18 @@ mp.observe_property("vo-configured", "bool", function(_, v)
         mp.abort_async_command(x)
     end)
 
+    -- (assuming this "freezes")
+    local y = mp.command_native_async({name = "sub-add", url = "-"},
+        function(res, val, err)
+            print("done sub-add stdin: " .. join(" ", {res, val, err}))
+        end)
+    mp.add_timeout(20, function()
+        print("aborting sub-add stdin after timeout")
+        mp.abort_async_command(y)
+    end)
+
+
+
     -- This should get killed on script exit.
     mp.command_native_async({name = "subprocess", playback_only = false,
                              args = {"sleep", "inf"}}, function()end)
