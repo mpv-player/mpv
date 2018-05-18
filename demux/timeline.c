@@ -14,7 +14,7 @@ struct timeline *timeline_load(struct mpv_global *global, struct mp_log *log,
     *tl = (struct timeline){
         .global = global,
         .log = log,
-        .cancel = demuxer->stream->cancel,
+        .cancel = demuxer->cancel,
         .demuxer = demuxer,
         .track_layout = demuxer,
     };

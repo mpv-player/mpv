@@ -782,8 +782,7 @@ static void update_metadata(demuxer_t *demuxer)
 static int interrupt_cb(void *ctx)
 {
     struct demuxer *demuxer = ctx;
-    lavf_priv_t *priv = demuxer->priv;
-    return mp_cancel_test(priv->stream->cancel);
+    return mp_cancel_test(demuxer->cancel);
 }
 
 static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
