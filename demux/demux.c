@@ -147,6 +147,7 @@ struct demux_internal {
 
     bool thread_terminate;
     bool threading;
+    bool shutdown_async;
     void (*wakeup_cb)(void *ctx);
     void *wakeup_cb_ctx;
 
@@ -950,6 +951,32 @@ int demux_get_num_stream(struct demuxer *demuxer)
     return r;
 }
 
+static void demux_shutdown(struct demux_internal *in)
+{
+    struct demuxer *demuxer = in->d_user;
+
+    if (demuxer->desc->close)
+        demuxer->desc->close(in->d_thread);
+    demuxer->priv = NULL;
+    in->d_thread->priv = NULL;
+
+    demux_flush(demuxer);
+    assert(in->total_bytes == 0);
+
+    if (in->owns_stream)
+        free_stream(demuxer->stream);
+    demuxer->stream = NULL;
+}
+
+static void demux_dealloc(struct demux_internal *in)
+{
+    for (int n = 0; n < in->num_streams; n++)
+        talloc_free(in->streams[n]);
+    pthread_mutex_destroy(&in->lock);
+    pthread_cond_destroy(&in->wakeup);
+    talloc_free(in->d_user);
+}
+
 void demux_free(struct demuxer *demuxer)
 {
     if (!demuxer)
@@ -958,21 +985,63 @@ void demux_free(struct demuxer *demuxer)
     assert(demuxer == in->d_user);
 
     demux_stop_thread(demuxer);
+    demux_shutdown(in);
+    demux_dealloc(in);
+}
 
-    if (demuxer->desc->close)
-        demuxer->desc->close(in->d_thread);
+// Start closing the demuxer and eventually freeing the demuxer asynchronously.
+// You must not access the demuxer once this has been started. Once the demuxer
+// is shutdown, the wakeup callback is invoked. Then you need to call
+// demux_free_async_finish() to end the operation (it must not be called from
+// the wakeup callback).
+// This can return NULL. Then the demuxer cannot be free'd asynchronously, and
+// you need to call demux_free() instead.
+struct demux_free_async_state *demux_free_async(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
 
-    demux_flush(demuxer);
-    assert(in->total_bytes == 0);
+    if (!in->threading)
+        return NULL;
 
-    if (in->owns_stream)
-        free_stream(demuxer->stream);
+    pthread_mutex_lock(&in->lock);
+    in->thread_terminate = true;
+    in->shutdown_async = true;
+    pthread_cond_signal(&in->wakeup);
+    pthread_mutex_unlock(&in->lock);
 
-    for (int n = 0; n < in->num_streams; n++)
-        talloc_free(in->streams[n]);
-    pthread_mutex_destroy(&in->lock);
-    pthread_cond_destroy(&in->wakeup);
-    talloc_free(demuxer);
+    return (struct demux_free_async_state *)demuxer->in; // lies
+}
+
+// As long as state is valid, you can call this to request immediate abort.
+// Roughly behaves as demux_cancel_and_free(), except you still need to wait
+// for the result.
+void demux_free_async_force(struct demux_free_async_state *state)
+{
+    struct demux_internal *in = (struct demux_internal *)state; // reverse lies
+
+    mp_cancel_trigger(in->d_user->cancel);
+}
+
+// Check whether the demuxer is shutdown yet. If not, return false, and you
+// need to call this again in the future (preferably after you were notified by
+// the wakeup callback). If yes, deallocate all state, and return true (in
+// particular, the state ptr becomes invalid, and the wakeup callback will never
+// be called again).
+bool demux_free_async_finish(struct demux_free_async_state *state)
+{
+    struct demux_internal *in = (struct demux_internal *)state; // reverse lies
+
+    pthread_mutex_lock(&in->lock);
+    bool busy = in->shutdown_async;
+    pthread_mutex_unlock(&in->lock);
+
+    if (busy)
+        return false;
+
+    demux_stop_thread(in->d_user);
+    demux_dealloc(in);
+    return true;
 }
 
 // Like demux_free(), but trigger an abort, which will force the demuxer to
@@ -1693,12 +1762,23 @@ static void *demux_thread(void *pctx)
     struct demux_internal *in = pctx;
     mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
+
     while (!in->thread_terminate) {
         if (thread_work(in))
             continue;
         pthread_cond_signal(&in->wakeup);
         pthread_cond_wait(&in->wakeup, &in->lock);
     }
+
+    if (in->shutdown_async) {
+        pthread_mutex_unlock(&in->lock);
+        demux_shutdown(in);
+        pthread_mutex_lock(&in->lock);
+        in->shutdown_async = false;
+        if (in->wakeup_cb)
+            in->wakeup_cb(in->wakeup_cb_ctx);
+    }
+
     pthread_mutex_unlock(&in->lock);
     return NULL;
 }
