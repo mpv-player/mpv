@@ -127,8 +127,8 @@ void update_core_idle_state(struct MPContext *mpctx)
 {
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
-    bool active = !mpctx->paused && mpctx->restart_complete && mpctx->playing &&
-                  mpctx->in_playloop && !eof;
+    bool active = !mpctx->paused && mpctx->restart_complete &&
+                  mpctx->stop_play && mpctx->in_playloop && !eof;
 
     if (mpctx->playback_active != active) {
         mpctx->playback_active = active;
@@ -873,7 +873,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // True if we're either in idle mode, or loading of the file has finished.
     // It's also set via force in some stages during file loading.
-    bool act = !mpctx->playing || mpctx->playback_initialized || force;
+    bool act = mpctx->stop_play || mpctx->playback_initialized || force;
 
     // On the other hand, if a video track is selected, but no video is ever
     // decoded on it, then create the window.

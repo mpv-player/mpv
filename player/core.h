@@ -37,12 +37,13 @@
 // definitions used internally by the core player code
 
 enum stop_play_reason {
-    KEEP_PLAYING = 0,   // must be 0, numeric values of others do not matter
+    KEEP_PLAYING = 0,   // playback of a file is actually going on
+                        // must be 0, numeric values of others do not matter
     AT_END_OF_FILE,     // file has ended, prepare to play next
                         // also returned on unrecoverable playback errors
     PT_NEXT_ENTRY,      // prepare to play next entry in playlist
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
-    PT_STOP,            // stop playback, clear playlist
+    PT_STOP,            // stop playback, or transient state when going to next
     PT_QUIT,            // stop playback, quit player
     PT_ERROR,           // play next playlist entry (due to an error)
 };

@@ -283,6 +283,7 @@ struct MPContext *mp_create(void)
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
+        .stop_play = PT_STOP,
     };
 
     pthread_mutex_init(&mpctx->abort_lock, NULL);

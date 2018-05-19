@@ -5522,7 +5522,7 @@ static void cmd_track_add(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     int type = *(int *)cmd->priv;
 
-    if (!mpctx->playing) {
+    if (mpctx->stop_play) {
         cmd->success = false;
         return;
     }
@@ -5623,7 +5623,7 @@ static void cmd_rescan_external_files(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    if (!mpctx->playing) {
+    if (mpctx->stop_play) {
         cmd->success = false;
         return;
     }
