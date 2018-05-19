@@ -147,7 +147,7 @@ static void close_lazy_segments(struct demuxer *demuxer)
     for (int n = 0; n < p->num_segments; n++) {
         struct segment *seg = p->segments[n];
         if (seg != p->current && seg->d && seg->lazy) {
-            free_demuxer_and_stream(seg->d);
+            demux_free(seg->d);
             seg->d = NULL;
         }
     }
@@ -431,7 +431,7 @@ static void d_close(struct demuxer *demuxer)
     p->current = NULL;
     close_lazy_segments(demuxer);
     timeline_destroy(p->tl);
-    free_demuxer(master);
+    demux_free(master);
 }
 
 static int d_control(struct demuxer *demuxer, int cmd, void *arg)
