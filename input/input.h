@@ -193,10 +193,6 @@ double mp_input_get_delay(struct input_ctx *ictx);
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);
 
-// Used to asynchronously abort playback. Needed because the core still can
-// block on network in some situations.
-void mp_input_set_cancel(struct input_ctx *ictx, void (*cb)(void *c), void *c);
-
 // If this returns true, use Right Alt key as Alt Gr to produce special
 // characters. If false, count Right Alt as the modifier Alt key.
 bool mp_input_use_alt_gr(struct input_ctx *ictx);

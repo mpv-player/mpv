@@ -39,8 +39,6 @@ struct mp_cmd_def {
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
     bool scalable;
-    bool is_abort;
-    bool is_soft_abort;
     bool is_ignore;
     bool default_async; // default to MP_ASYNC flag if none set by user
     // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
@@ -120,11 +118,6 @@ typedef struct mp_cmd {
 
 extern const struct mp_cmd_def mp_cmds[];
 extern const struct mp_cmd_def mp_cmd_list;
-
-// Executing this command will maybe abort playback (play something else, or quit).
-bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd);
-// This command will definitely abort playback.
-bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
 

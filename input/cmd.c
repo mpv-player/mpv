@@ -552,34 +552,6 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
     mp_msg(log, msgl, "]\n");
 }
 
-// 0: no, 1: maybe, 2: sure
-static int is_abort_cmd(struct mp_cmd *cmd)
-{
-    if (cmd->def->is_abort)
-        return 2;
-    if (cmd->def->is_soft_abort)
-        return 1;
-    if (cmd->def == &mp_cmd_list) {
-        int r = 0;
-        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
-            int x = is_abort_cmd(sub);
-            r = MPMAX(r, x);
-        }
-        return r;
-    }
-    return 0;
-}
-
-bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd)
-{
-    return is_abort_cmd(cmd) >= 1;
-}
-
-bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
-{
-    return is_abort_cmd(cmd) >= 2;
-}
-
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
 {
     return (cmd->def->allow_auto_repeat) || cmd->def == &mp_cmd_list ||
