@@ -103,6 +103,8 @@ Interface changes
       of 3D content doesn't justify such an option anyway.
     - change cycle-values command to use the current value, instead of an
       internal counter that remembered the current position.
+    - edition and disc title switching will now fully reload playback (may have
+      consequences for scripts, client API, or when using file-local options)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
