@@ -926,7 +926,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
         if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_NOT_IMPLEMENTED;
         if (!mpctx->stop_play)
-            mpctx->stop_play = PT_RELOAD_FILE;
+            mpctx->stop_play = PT_CURRENT_ENTRY;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1143,7 +1143,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         if (edition != demuxer->edition) {
             mpctx->opts->edition_id = edition;
             if (!mpctx->stop_play)
-                mpctx->stop_play = PT_RELOAD_FILE;
+                mpctx->stop_play = PT_CURRENT_ENTRY;
             mp_wakeup_core(mpctx);
             break; // make it accessible to the demuxer via option change notify
         }
