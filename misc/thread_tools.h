@@ -67,14 +67,12 @@ void mp_cancel_reset(struct mp_cancel *c);
 // There is only one callback. Create a slave mp_cancel to get a private one.
 void mp_cancel_set_cb(struct mp_cancel *c, void (*cb)(void *ctx), void *ctx);
 
-// If c gets triggered, automatically trigger slave. Trying to add a slave more
-// than once or to multiple parents is undefined behavior.
-// The parent mp_cancel must remain valid until the slave is manually removed
-// or destroyed. Destroying a mp_cancel that still has slaves is an error.
-void mp_cancel_add_slave(struct mp_cancel *c, struct mp_cancel *slave);
-
-// Undo mp_cancel_add_slave(). Ignores never added slaves for easier cleanup.
-void mp_cancel_remove_slave(struct mp_cancel *c, struct mp_cancel *slave);
+// If parent gets triggered, automatically trigger slave. There is only 1
+// parent; setting NULL clears the parent. Freeing slave also automatically
+// ends the parent link, but the parent mp_cancel must remain valid until the
+// slave is manually removed or destroyed. Destroying a mp_cancel that still
+// has slaves is an error.
+void mp_cancel_set_parent(struct mp_cancel *slave, struct mp_cancel *parent);
 
 // win32 "Event" HANDLE that indicates the current mp_cancel state.
 void *mp_cancel_get_event(struct mp_cancel *c);

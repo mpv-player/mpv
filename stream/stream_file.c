@@ -365,7 +365,7 @@ static int open_f(stream_t *stream)
 
     p->cancel = mp_cancel_new(p);
     if (stream->cancel)
-        mp_cancel_add_slave(stream->cancel, p->cancel);
+        mp_cancel_set_parent(p->cancel, stream->cancel);
 
     return STREAM_OK;
 }
