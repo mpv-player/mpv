@@ -665,7 +665,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
 
     // The command could have overlapped with playback exiting. (We don't care
     // if playback has started again meanwhile - weird, but not a problem.)
-    if (!mpctx->playing)
+    if (mpctx->stop_play)
         goto err_out;
 
     if (!demuxer)
@@ -1251,6 +1251,8 @@ static void play_current_file(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     double playback_start = -1e100;
 
+    assert(mpctx->stop_play);
+
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
 
     mp_cancel_reset(mpctx->playback_abort);
@@ -1476,15 +1478,15 @@ static void play_current_file(struct MPContext *mpctx)
 
 terminate_playback:
 
-    update_core_idle_state(mpctx);
-
-    process_hooks(mpctx, "on_unload");
-
-    if (mpctx->stop_play == KEEP_PLAYING)
-        mpctx->stop_play = AT_END_OF_FILE;
+    if (!mpctx->stop_play)
+        mpctx->stop_play = PT_ERROR;
 
     if (mpctx->stop_play != AT_END_OF_FILE)
         clear_audio_output_buffers(mpctx);
+
+    update_core_idle_state(mpctx);
+
+    process_hooks(mpctx, "on_unload");
 
     if (mpctx->step_frames)
         opts->pause = 1;
@@ -1553,8 +1555,6 @@ terminate_playback:
 
     if (mpctx->playing)
         playlist_entry_unref(mpctx->playing);
-    // Note: a lot of things assume that the core won't be unlocked between
-    // uninitializing various playback-only resources (such as tracks).
     mpctx->playing = NULL;
     talloc_free(mpctx->filename);
     mpctx->filename = NULL;
@@ -1567,6 +1567,8 @@ terminate_playback:
     } else {
         mpctx->files_played++;
     }
+
+    assert(mpctx->stop_play);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
@@ -1632,6 +1634,7 @@ void mp_play_files(struct MPContext *mpctx)
     prepare_playlist(mpctx, mpctx->playlist);
 
     for (;;) {
+        assert(mpctx->stop_play);
         idle_loop(mpctx);
         if (mpctx->stop_play == PT_QUIT)
             break;
@@ -1642,14 +1645,14 @@ void mp_play_files(struct MPContext *mpctx)
 
         struct playlist_entry *new_entry = mpctx->playlist->current;
         if (mpctx->stop_play == PT_NEXT_ENTRY || mpctx->stop_play == PT_ERROR ||
-            mpctx->stop_play == AT_END_OF_FILE || !mpctx->stop_play)
+            mpctx->stop_play == AT_END_OF_FILE || mpctx->stop_play == PT_STOP)
         {
             new_entry = mp_next_file(mpctx, +1, false, true);
         }
 
         mpctx->playlist->current = new_entry;
         mpctx->playlist->current_was_replaced = false;
-        mpctx->stop_play = 0;
+        mpctx->stop_play = PT_STOP;
 
         if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
             break;
