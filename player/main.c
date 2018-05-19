@@ -244,12 +244,6 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
-static void abort_playback_cb(void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    mp_abort_playback_async(mpctx);
-}
-
 // We mostly care about LC_NUMERIC, and how "." vs. "," is treated,
 // Other locale stuff might break too, but probably isn't too bad.
 static bool check_locale(void)
@@ -319,8 +313,6 @@ struct MPContext *mp_create(void)
 #if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);
 #endif
-
-    mp_input_set_cancel(mpctx->input, abort_playback_cb, mpctx);
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)

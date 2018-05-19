@@ -1040,9 +1040,6 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
 
-    if (mp_input_is_abort_cmd(cmd))
-        mp_abort_playback_async(ctx->mpctx);
-
     cmd->sender = ctx->name;
 
     struct cmd_request req = {
