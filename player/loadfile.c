@@ -61,6 +61,13 @@
 #include "command.h"
 #include "libmpv/client.h"
 
+// Called from the demuxer thread if a new packet is available, or other changes.
+static void wakeup_demux(void *pctx)
+{
+    struct MPContext *mpctx = pctx;
+    mp_wakeup_core(mpctx);
+}
+
 // Called by foreign threads when playback should be stopped and such.
 void mp_abort_playback_async(struct MPContext *mpctx)
 {
@@ -280,13 +287,6 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
     demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
     if (track == mpctx->seek_slave)
         mpctx->seek_slave = NULL;
-}
-
-// Called from the demuxer thread if a new packet is available.
-static void wakeup_demux(void *pctx)
-{
-    struct MPContext *mpctx = pctx;
-    mp_wakeup_core(mpctx);
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
