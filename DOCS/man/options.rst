@@ -2944,9 +2944,12 @@ Demuxer
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
-    of packets (default: yes). Having this enabled may lead to smoother
-    playback, but on the other hand can add delays to seeking or track
-    switching.
+    of packets (default: yes). Having this enabled leads to smoother playback,
+    enables features like prefetching, and prevents that stuck network freezes
+    the player. On the other hand, it can add overhead, or the background
+    prefetching can hog CPU resources.
+
+    Disabling this option is not recommended. Use it for debugging only.
 
 ``--demuxer-readahead-secs=<seconds>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
