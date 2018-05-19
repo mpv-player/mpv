@@ -253,6 +253,11 @@ typedef struct {
 void demux_free(struct demuxer *demuxer);
 void demux_cancel_and_free(struct demuxer *demuxer);
 
+struct demux_free_async_state;
+struct demux_free_async_state *demux_free_async(struct demuxer *demuxer);
+void demux_free_async_force(struct demux_free_async_state *state);
+bool demux_free_async_finish(struct demux_free_async_state *state);
+
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp);
 
