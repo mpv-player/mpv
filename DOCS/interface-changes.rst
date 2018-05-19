@@ -141,6 +141,19 @@ Interface changes
     - mpv_command_node() and mp.command_native() now support named arguments
       (see manpage). If you want to use them, use a new version of the manpage
       as reference, which lists the definitive names.
+    - edition and disc title switching will now fully reload playback (may have
+      consequences for scripts, client API, or when using file-local options)
+    - remove async playback abort hack. This breaks aborting playback in the
+      following cases, iff the current stream is a network stream that
+      completely stopped responding:
+        - setting "program" property
+        - setting "cache-size" property
+      In earlier versions of mpv, the player core froze as well in these cases,
+      but could still be aborted with the quit, stop, playlist-prev,
+      playlist-next commands. If these properties are not accessed, frozen
+      network streams should not freeze the player core (only playback in
+      uncached regions), and differing behavior should be reported as a bug.
+      If --demuxer-thread=no is used, there are no guarantees.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs

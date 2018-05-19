@@ -269,7 +269,8 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
 
     if (opts->quiet || !mpctx->playback_initialized || !mpctx->playing_msg_shown)
     {
-        term_osd_set_status_lazy(mpctx, "");
+        if (!mpctx->playing)
+            term_osd_set_status_lazy(mpctx, "");
         return;
     }
 

@@ -130,29 +130,111 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
     mp_cancel_trigger(abort->cancel);
 }
 
+static void kill_demuxers_reentrant(struct MPContext *mpctx,
+                                    struct demuxer **demuxers, int num_demuxers)
+{
+    struct demux_free_async_state **items = NULL;
+    int num_items = 0;
+
+    for (int n = 0; n < num_demuxers; n++) {
+        struct demuxer *d = demuxers[n];
+
+        if (!demux_cancel_test(d)) {
+            // Make sure it is set if it wasn't yet.
+            demux_set_wakeup_cb(d, wakeup_demux, mpctx);
+
+            struct demux_free_async_state *item = demux_free_async(d);
+            if (item) {
+                MP_TARRAY_APPEND(NULL, items, num_items, item);
+                d = NULL;
+            }
+        }
+
+        demux_cancel_and_free(d);
+    }
+
+    if (!num_items)
+        return;
+
+    MP_DBG(mpctx, "Terminating demuxers...\n");
+
+    double end = mp_time_sec() + mpctx->opts->demux_termination_timeout;
+    bool force = false;
+    while (num_items) {
+        double wait = end - mp_time_sec();
+
+        for (int n = 0; n < num_items; n++) {
+            struct demux_free_async_state *item = items[n];
+            if (demux_free_async_finish(item)) {
+                items[n] = items[num_items - 1];
+                num_items -= 1;
+                n--;
+                goto repeat;
+            } else if (wait < 0) {
+                demux_free_async_force(item);
+                if (!force)
+                    MP_VERBOSE(mpctx, "Forcefully terminating demuxers...\n");
+                force = true;
+            }
+        }
+
+        if (wait >= 0)
+            mp_set_timeout(mpctx, wait);
+        mp_idle(mpctx);
+    repeat:;
+    }
+
+    talloc_free(items);
+
+    MP_DBG(mpctx, "Done terminating demuxers.\n");
+}
+
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     for (int r = 0; r < NUM_PTRACKS; r++) {
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
     }
+    mpctx->seek_slave = NULL;
+
     talloc_free(mpctx->chapters);
     mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
 
-    // close demuxers for external tracks
-    for (int n = mpctx->num_tracks - 1; n >= 0; n--) {
-        mpctx->tracks[n]->selected = false;
-        mp_remove_track(mpctx, mpctx->tracks[n]);
-    }
+    struct demuxer **demuxers = NULL;
+    int num_demuxers = 0;
+
+    if (mpctx->demuxer)
+        MP_TARRAY_APPEND(NULL, demuxers, num_demuxers, mpctx->demuxer);
+    mpctx->demuxer = NULL;
+
     for (int i = 0; i < mpctx->num_tracks; i++) {
-        sub_destroy(mpctx->tracks[i]->d_sub);
-        talloc_free(mpctx->tracks[i]);
+        struct track *track = mpctx->tracks[i];
+
+        assert(!track->dec);
+        assert(!track->vo_c && !track->ao_c);
+        assert(!track->sink);
+        assert(!track->remux_sink);
+
+        sub_destroy(track->d_sub);
+
+        // Demuxers can be added in any order (if they appear mid-stream), and
+        // we can't know which tracks uses which, so here's some O(n^2) trash.
+        for (int n = 0; n < num_demuxers; n++) {
+            if (demuxers[n] == track->demuxer) {
+                track->demuxer = NULL;
+                break;
+            }
+        }
+        if (track->demuxer)
+            MP_TARRAY_APPEND(NULL, demuxers, num_demuxers, track->demuxer);
+
+        talloc_free(track);
     }
     mpctx->num_tracks = 0;
 
-    demux_cancel_and_free(mpctx->demuxer);
-    mpctx->demuxer = NULL;
+    kill_demuxers_reentrant(mpctx, demuxers, num_demuxers);
+    talloc_free(demuxers);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -830,8 +912,13 @@ static void process_hooks(struct MPContext *mpctx, char *name)
 {
     mp_hook_start(mpctx, name);
 
-    while (!mp_hook_test_completion(mpctx, name))
+    while (!mp_hook_test_completion(mpctx, name)) {
         mp_idle(mpctx);
+
+        // We have no idea what blocks a hook, so just do a full abort.
+        if (mpctx->stop_play)
+            mp_abort_playback_async(mpctx);
+    }
 }
 
 // to be run on a worker thread, locked (temporarily unlocks core)
@@ -1238,8 +1325,12 @@ static void load_external_opts(struct MPContext *mpctx)
         return;
     }
 
-    while (!mp_waiter_poll(&wait))
+    while (!mp_waiter_poll(&wait)) {
         mp_idle(mpctx);
+
+        if (mpctx->stop_play)
+            mp_abort_playback_async(mpctx);
+    }
 
     mp_waiter_wait(&wait);
 }
@@ -1491,8 +1582,6 @@ terminate_playback:
     if (mpctx->step_frames)
         opts->pause = 1;
 
-    mp_abort_playback_async(mpctx);
-
     close_recorder(mpctx);
 
     // time to uninit all, except global stuff:
@@ -1500,11 +1589,15 @@ terminate_playback:
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
-    uninit_demuxer(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
+
+    uninit_demuxer(mpctx);
+
+    // Possibly stop ongoing async commands.
+    mp_abort_playback_async(mpctx);
 
     m_config_restore_backups(mpctx->mconfig);
 
@@ -1679,12 +1772,6 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
     mpctx->playlist->current = e;
     mpctx->playlist->current_was_replaced = false;
-    // If something is currently loading, abort it a bit more forcefully. This
-    // will in particular make ytdl_hook kill the script. During normal
-    // playback, we probably don't want this, because it could upset the
-    // demuxer or decoders and spam nonsense errors.
-    if (mpctx->playing && !mpctx->playback_initialized)
-        mp_abort_playback_async(mpctx);
     // Make it pick up the new entry.
     if (!mpctx->stop_play)
         mpctx->stop_play = PT_CURRENT_ENTRY;

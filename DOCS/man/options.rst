@@ -2952,6 +2952,19 @@ Demuxer
 
     Disabling this option is not recommended. Use it for debugging only.
 
+``--demuxer-termination-timeout=<seconds>``
+    Number of seconds the player should wait to shutdown the demuxer (default:
+    0.1). The player will wait up to this much time before it closes the
+    stream layer forcefully. Forceful closing usually means the network I/O is
+    given no chance to close its connections gracefully (of course the OS can
+    still close TCP connections properly), and might result in annoying messages
+    being logged, and in some cases, confused remote servers.
+
+    This timeout is usually only applied when loading has finished properly. If
+    loading is aborted by the user, or in some corner cases like removing
+    external tracks sourced from network during playback, forceful closing is
+    always used.
+
 ``--demuxer-readahead-secs=<seconds>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
     should buffer ahead in seconds (default: 1). As long as no packet has
