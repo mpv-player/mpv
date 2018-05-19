@@ -153,9 +153,6 @@ struct input_ctx {
 
     struct cmd_queue cmd_queue;
 
-    void (*cancel)(void *cancel_ctx);
-    void *cancel_ctx;
-
     void (*wakeup_cb)(void *ctx);
     void *wakeup_ctx;
 };
@@ -531,13 +528,11 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 }
 
 // We don't want the append to the command queue indefinitely, because that
-// could lead to situations where recovery would take too long. On the other
-// hand, don't drop commands that will abort playback.
+// could lead to situations where recovery would take too long.
 static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
     struct cmd_queue *queue = &ictx->cmd_queue;
-    return queue_count_cmds(queue) >= ictx->opts->key_fifo_size &&
-           !mp_input_is_abort_cmd(cmd);
+    return queue_count_cmds(queue) >= ictx->opts->key_fifo_size;
 }
 
 static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
@@ -883,26 +878,10 @@ static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
     }
 }
 
-static bool test_abort_cmd(struct input_ctx *ictx, struct mp_cmd *new)
-{
-    if (!mp_input_is_maybe_abort_cmd(new))
-        return false;
-    if (mp_input_is_abort_cmd(new))
-        return true;
-    // Abort only if there are going to be at least 2 commands in the queue.
-    for (struct mp_cmd *cmd = ictx->cmd_queue.first; cmd; cmd = cmd->queue_next) {
-        if (mp_input_is_maybe_abort_cmd(cmd))
-            return true;
-    }
-    return false;
-}
-
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
     input_lock(ictx);
     if (cmd) {
-        if (ictx->cancel && test_abort_cmd(ictx, cmd))
-            ictx->cancel(ictx->cancel_ctx);
         queue_add_tail(&ictx->cmd_queue, cmd);
         mp_input_wakeup(ictx);
     }
@@ -1421,14 +1400,6 @@ void mp_input_uninit(struct input_ctx *ictx)
     talloc_free(ictx->current_down_cmd);
     pthread_mutex_destroy(&ictx->mutex);
     talloc_free(ictx);
-}
-
-void mp_input_set_cancel(struct input_ctx *ictx, void (*cb)(void *c), void *c)
-{
-    input_lock(ictx);
-    ictx->cancel = cb;
-    ictx->cancel_ctx = c;
-    input_unlock(ictx);
 }
 
 bool mp_input_use_alt_gr(struct input_ctx *ictx)
