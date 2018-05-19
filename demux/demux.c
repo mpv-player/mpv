@@ -2216,6 +2216,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .extended_ctrls = stream->extended_ctrls,
     };
     demuxer->seekable = stream->seekable;
     if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)

@@ -184,6 +184,7 @@ typedef struct stream {
     bool is_local_file : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
+    bool extended_ctrls : 1; // supports some of BD/DVD/DVB/TV controls
     struct mp_log *log;
     struct mpv_global *global;
 
