@@ -1120,6 +1120,7 @@ static int dvb_open(stream_t *stream)
     stream->allow_caching = true;
     stream->demuxer = "lavf";
     stream->lavf_type = "mpegts";
+    stream->extended_ctrls = true;
 
     return STREAM_OK;
 
