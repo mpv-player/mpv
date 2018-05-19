@@ -34,9 +34,9 @@ void timeline_destroy(struct timeline *tl)
     for (int n = 0; n < tl->num_sources; n++) {
         struct demuxer *d = tl->sources[n];
         if (d != tl->demuxer && d != tl->track_layout)
-            free_demuxer_and_stream(d);
+            demux_free(d);
     }
     if (tl->track_layout && tl->track_layout != tl->demuxer)
-        free_demuxer_and_stream(tl->track_layout);
+        demux_free(tl->track_layout);
     talloc_free(tl);
 }

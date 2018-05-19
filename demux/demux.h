@@ -177,6 +177,7 @@ struct demuxer_params {
     bool initial_readahead;
     bstr init_fragment;
     bool skip_lavf_probing;
+    bool does_not_own_stream; // if false, stream is free'd on demux_free()
     // -- demux_open_url() only
     int stream_flags;
     bool disable_cache;
@@ -249,8 +250,7 @@ typedef struct {
     int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
 
-void free_demuxer(struct demuxer *demuxer);
-void free_demuxer_and_stream(struct demuxer *demuxer);
+void demux_free(struct demuxer *demuxer);
 
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp);
