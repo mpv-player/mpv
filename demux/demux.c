@@ -135,6 +135,8 @@ struct demux_internal {
     struct demuxer *d_thread;   // accessed by demuxer impl. (producer)
     struct demuxer *d_user;     // accessed by player (consumer)
 
+    bool owns_stream;
+
     // The lock protects the packet queues (struct demux_stream),
     // and the fields below.
     pthread_mutex_t lock;
@@ -948,7 +950,7 @@ int demux_get_num_stream(struct demuxer *demuxer)
     return r;
 }
 
-void free_demuxer(demuxer_t *demuxer)
+void demux_free(struct demuxer *demuxer)
 {
     if (!demuxer)
         return;
@@ -963,20 +965,14 @@ void free_demuxer(demuxer_t *demuxer)
     demux_flush(demuxer);
     assert(in->total_bytes == 0);
 
+    if (in->owns_stream)
+        free_stream(demuxer->stream);
+
     for (int n = 0; n < in->num_streams; n++)
         talloc_free(in->streams[n]);
     pthread_mutex_destroy(&in->lock);
     pthread_cond_destroy(&in->wakeup);
     talloc_free(demuxer);
-}
-
-void free_demuxer_and_stream(struct demuxer *demuxer)
-{
-    if (!demuxer)
-        return;
-    struct stream *s = demuxer->stream;
-    free_demuxer(demuxer);
-    free_stream(s);
 }
 
 // Start the demuxer thread, which reads ahead packets on its own.
@@ -2312,7 +2308,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         return demuxer;
     }
 
-    free_demuxer(demuxer);
+    demux_free(demuxer);
     return NULL;
 }
 
@@ -2321,6 +2317,9 @@ static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
 static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 
 // params can be NULL
+// If params->does_not_own_stream==false, this does _not_ free the stream if
+// opening fails. But if it succeeds, a later demux_free() call will free the
+// stream.
 struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                            struct mpv_global *global)
 {
@@ -2360,6 +2359,8 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                 if (demuxer) {
                     talloc_steal(demuxer, log);
                     log = NULL;
+                    demuxer->in->owns_stream =
+                        params ? !params->does_not_own_stream : false;
                     goto done;
                 }
             }
@@ -2373,16 +2374,16 @@ done:
 
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
-// (use free_demuxer_and_stream() to free the underlying stream too)
 // Also for some reason may close the opened stream if it's not needed.
 struct demuxer *demux_open_url(const char *url,
-                                struct demuxer_params *params,
-                                struct mp_cancel *cancel,
-                                struct mpv_global *global)
+                               struct demuxer_params *params,
+                               struct mp_cancel *cancel,
+                               struct mpv_global *global)
 {
     struct demuxer_params dummy = {0};
     if (!params)
         params = &dummy;
+    assert(!params->does_not_own_stream); // API user error
     struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
                                      cancel, global);
     if (!s)

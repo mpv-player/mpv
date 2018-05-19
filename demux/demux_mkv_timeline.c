@@ -217,7 +217,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
             }
 
             if (stream_wants_cache(d->stream, ctx->opts->stream_cache)) {
-                free_demuxer_and_stream(d);
+                demux_free(d);
                 params.disable_cache = false;
                 params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
                 d = demux_open_url(filename, &params, cancel, ctx->global);
@@ -230,7 +230,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
         }
     }
 
-    free_demuxer_and_stream(d);
+    demux_free(d);
     return was_valid;
 }
 

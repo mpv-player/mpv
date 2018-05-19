@@ -297,7 +297,7 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
                          "pass it to the player\ndirectly. Don't use --playlist.\n");
         }
     }
-    free_demuxer_and_stream(d);
+    demux_free(d);
 
     if (ret) {
         mp_verbose(log, "Playlist successfully parsed\n");

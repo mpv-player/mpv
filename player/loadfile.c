@@ -136,7 +136,7 @@ static void cancel_and_free_demuxer(struct MPContext *mpctx,
     if (cancel)
         mp_cancel_trigger(cancel);
 
-    free_demuxer_and_stream(*demuxer);
+    demux_free(*demuxer);
     *demuxer = NULL;
 
     talloc_free(cancel);
