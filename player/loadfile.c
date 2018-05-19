@@ -123,25 +123,6 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
     mp_cancel_trigger(abort->cancel);
 }
 
-static void cancel_and_free_demuxer(struct MPContext *mpctx,
-                                    struct demuxer **demuxer)
-{
-    if (!*demuxer)
-        return;
-
-    struct mp_cancel *cancel = (*demuxer)->cancel;
-    assert(cancel != mpctx->playback_abort);
-
-    // Explicitly trigger it so freeing the demuxer can't block on I/O.
-    if (cancel)
-        mp_cancel_trigger(cancel);
-
-    demux_free(*demuxer);
-    *demuxer = NULL;
-
-    talloc_free(cancel);
-}
-
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     for (int r = 0; r < NUM_PTRACKS; r++) {
@@ -163,7 +144,8 @@ static void uninit_demuxer(struct MPContext *mpctx)
     }
     mpctx->num_tracks = 0;
 
-    cancel_and_free_demuxer(mpctx, &mpctx->demuxer);
+    demux_cancel_and_free(mpctx->demuxer);
+    mpctx->demuxer = NULL;
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -638,7 +620,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
         in_use |= mpctx->tracks[n]->demuxer == d;
 
     if (!in_use)
-        cancel_and_free_demuxer(mpctx, &d);
+        demux_cancel_and_free(d);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -672,13 +654,10 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     }
 
-    struct mp_cancel *demux_cancel = mp_cancel_new(NULL);
-    mp_cancel_add_slave(cancel, demux_cancel);
-
     mp_core_unlock(mpctx);
 
     struct demuxer *demuxer =
-        demux_open_url(filename, &params, demux_cancel, mpctx->global);
+        demux_open_url(filename, &params, cancel, mpctx->global);
     if (demuxer)
         enable_demux_thread(mpctx, demuxer);
 
@@ -725,17 +704,12 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             first_num = mpctx->num_tracks - 1;
     }
 
-    mp_cancel_remove_slave(cancel, demux_cancel);
-    mp_cancel_add_slave(mpctx->playback_abort, demux_cancel);
+    mp_cancel_set_parent(demuxer->cancel, mpctx->playback_abort);
 
     return first_num;
 
 err_out:
-    if (demuxer) {
-        cancel_and_free_demuxer(mpctx, &demuxer);
-    } else {
-        talloc_free(demux_cancel);
-    }
+    demux_cancel_and_free(demuxer);
     if (!mp_cancel_test(cancel))
         MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
     return -1;
@@ -868,17 +842,14 @@ static void load_chapters(struct MPContext *mpctx)
     char *chapter_file = mpctx->opts->chapter_file;
     if (chapter_file && chapter_file[0]) {
         chapter_file = talloc_strdup(NULL, chapter_file);
-        struct mp_cancel *cancel = mp_cancel_new(NULL);
-        mp_cancel_add_slave(mpctx->playback_abort, cancel);
         mp_core_unlock(mpctx);
-        struct demuxer *demux = demux_open_url(chapter_file, NULL, cancel,
+        struct demuxer *demux = demux_open_url(chapter_file, NULL,
+                                               mpctx->playback_abort,
                                                mpctx->global);
         mp_core_lock(mpctx);
         if (demux) {
             src = demux;
             free_src = true;
-        } else {
-            talloc_free(cancel);
         }
         talloc_free(mpctx->chapters);
         mpctx->chapters = NULL;
@@ -894,7 +865,7 @@ static void load_chapters(struct MPContext *mpctx)
         }
     }
     if (free_src)
-        cancel_and_free_demuxer(mpctx, &src);
+        demux_cancel_and_free(src);
 }
 
 static void load_per_file_options(m_config_t *conf,
@@ -947,11 +918,9 @@ static void cancel_open(struct MPContext *mpctx)
         pthread_join(mpctx->open_thread, NULL);
     mpctx->open_active = false;
 
-    if (mpctx->open_res_demuxer) {
-        assert(mpctx->open_res_demuxer->cancel == mpctx->open_cancel);
-        mpctx->open_cancel = NULL;
-        cancel_and_free_demuxer(mpctx, &mpctx->open_res_demuxer);
-    }
+    if (mpctx->open_res_demuxer)
+        demux_cancel_and_free(mpctx->open_res_demuxer);
+    mpctx->open_res_demuxer = NULL;
 
     TA_FREEP(&mpctx->open_cancel);
     TA_FREEP(&mpctx->open_url);
@@ -1013,7 +982,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         start_open(mpctx, url, mpctx->playing->stream_flags);
 
     // User abort should cancel the opener now.
-    mp_cancel_add_slave(mpctx->playback_abort, mpctx->open_cancel);
+    mp_cancel_set_parent(mpctx->open_cancel, mpctx->playback_abort);
 
     while (!atomic_load(&mpctx->open_done)) {
         mp_idle(mpctx);
@@ -1023,10 +992,9 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     }
 
     if (mpctx->open_res_demuxer) {
-        assert(mpctx->open_res_demuxer->cancel == mpctx->open_cancel);
         mpctx->demuxer = mpctx->open_res_demuxer;
         mpctx->open_res_demuxer = NULL;
-        mpctx->open_cancel = NULL;
+        mp_cancel_set_parent(mpctx->demuxer->cancel, mpctx->playback_abort);
     } else {
         mpctx->error_playing = mpctx->open_res_error;
     }

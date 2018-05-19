@@ -975,6 +975,17 @@ void demux_free(struct demuxer *demuxer)
     talloc_free(demuxer);
 }
 
+// Like demux_free(), but trigger an abort, which will force the demuxer to
+// terminate immediately. If this wasn't opened with demux_open_url(), there is
+// some chance this will accidentally abort other things via demuxer->cancel.
+void demux_cancel_and_free(struct demuxer *demuxer)
+{
+    if (!demuxer)
+        return;
+    mp_cancel_trigger(demuxer->cancel);
+    demux_free(demuxer);
+}
+
 // Start the demuxer thread, which reads ahead packets on its own.
 void demux_start_thread(struct demuxer *demuxer)
 {
@@ -2375,6 +2386,9 @@ done:
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
 // Also for some reason may close the opened stream if it's not needed.
+// demuxer->cancel is not the cancel parameter, but is its own object that will
+// be a slave (mp_cancel_set_parent()) to provided cancel object.
+// demuxer->cancel is automatically freed.
 struct demuxer *demux_open_url(const char *url,
                                struct demuxer_params *params,
                                struct mp_cancel *cancel,
@@ -2384,18 +2398,25 @@ struct demuxer *demux_open_url(const char *url,
     if (!params)
         params = &dummy;
     assert(!params->does_not_own_stream); // API user error
+    struct mp_cancel *priv_cancel = mp_cancel_new(NULL);
+    if (cancel)
+        mp_cancel_set_parent(priv_cancel, cancel);
     struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
-                                     cancel, global);
-    if (!s)
+                                     priv_cancel, global);
+    if (!s) {
+        talloc_free(priv_cancel);
         return NULL;
+    }
     if (!params->disable_cache)
         stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
+        talloc_steal(d->in, priv_cancel);
         demux_maybe_replace_stream(d);
     } else {
         params->demuxer_failed = true;
         free_stream(s);
+        talloc_free(priv_cancel);
     }
     return d;
 }

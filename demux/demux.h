@@ -251,6 +251,7 @@ typedef struct {
 } demux_program_t;
 
 void demux_free(struct demuxer *demuxer);
+void demux_cancel_and_free(struct demuxer *demuxer);
 
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp);

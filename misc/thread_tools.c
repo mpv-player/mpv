@@ -105,12 +105,7 @@ static void cancel_destroy(void *p)
 
     assert(!c->slaves.head); // API user error
 
-    // We can access c->parent without synchronization, because:
-    //  - since c is being destroyed, nobody can explicitly remove it as slave
-    //    at the same time
-    //  - c->parent needs to stay valid as long as the slave exists
-    if (c->parent)
-        mp_cancel_remove_slave(c->parent, c);
+    mp_cancel_set_parent(c, NULL);
 
     if (c->wakeup_pipe[0] >= 0) {
         close(c->wakeup_pipe[0]);
@@ -225,25 +220,25 @@ void mp_cancel_set_cb(struct mp_cancel *c, void (*cb)(void *ctx), void *ctx)
     pthread_mutex_unlock(&c->lock);
 }
 
-void mp_cancel_add_slave(struct mp_cancel *c, struct mp_cancel *slave)
+void mp_cancel_set_parent(struct mp_cancel *slave, struct mp_cancel *parent)
 {
-    pthread_mutex_lock(&c->lock);
-    assert(!slave->parent);
-    slave->parent = c;
-    LL_APPEND(siblings, &c->slaves, slave);
-    retrigger_locked(c);
-    pthread_mutex_unlock(&c->lock);
-}
-
-void mp_cancel_remove_slave(struct mp_cancel *c, struct mp_cancel *slave)
-{
-    pthread_mutex_lock(&c->lock);
+    // We can access c->parent without synchronization, because:
+    //  - concurrent mp_cancel_set_parent() calls to slave are not allowed
+    //  - slave->parent needs to stay valid as long as the slave exists
+    if (slave->parent == parent)
+        return;
     if (slave->parent) {
-        assert(slave->parent == c);
-        slave->parent = NULL;
-        LL_REMOVE(siblings, &c->slaves, slave);
+        pthread_mutex_lock(&slave->parent->lock);
+        LL_REMOVE(siblings, &slave->parent->slaves, slave);
+        pthread_mutex_unlock(&slave->parent->lock);
     }
-    pthread_mutex_unlock(&c->lock);
+    slave->parent = parent;
+    if (slave->parent) {
+        pthread_mutex_lock(&slave->parent->lock);
+        LL_APPEND(siblings, &slave->parent->slaves, slave);
+        retrigger_locked(slave->parent);
+        pthread_mutex_unlock(&slave->parent->lock);
+    }
 }
 
 int mp_cancel_get_fd(struct mp_cancel *c)
