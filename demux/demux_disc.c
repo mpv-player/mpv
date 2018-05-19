@@ -342,6 +342,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
         demuxer->duration = len;
 
+    demuxer->extended_ctrls = true;
+
     return 0;
 }
 
