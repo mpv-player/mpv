@@ -1344,10 +1344,6 @@ static void play_current_file(struct MPContext *mpctx)
 
     MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
-reopen_file:
-
-    reset_playback_state(mpctx);
-
     assert(mpctx->demuxer == NULL);
 
     process_hooks(mpctx, "on_load");
@@ -1536,12 +1532,6 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
-
-    if (mpctx->stop_play == PT_RELOAD_FILE) {
-        mpctx->stop_play = KEEP_PLAYING;
-        mp_cancel_reset(mpctx->playback_abort);
-        goto reopen_file;
-    }
 
     m_config_restore_backups(mpctx->mconfig);
 

@@ -109,6 +109,8 @@ Interface changes
     - mpv_command_node() and mp.command_native() now support named arguments
       (see manpage). If you want to use them, use a new version of the manpage
       as reference, which lists the definitive names.
+    - edition and disc title switching will now fully reload playback (may have
+      consequences for scripts, client API, or when using file-local options)
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
