@@ -203,10 +203,6 @@ void m_config_notify_change_co(struct m_config *config,
 // it means it works only on fields in MPContext.opts.
 void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr);
 
-bool m_config_is_in_group(struct m_config *config,
-                          const struct m_sub_options *group,
-                          struct m_config_option *co);
-
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 

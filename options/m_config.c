@@ -1423,17 +1423,6 @@ void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
     }
 }
 
-bool m_config_is_in_group(struct m_config *config,
-                          const struct m_sub_options *group,
-                          struct m_config_option *co)
-{
-    for (int n = 0; n < config->num_groups; n++) {
-        if (config->groups[n].group == group)
-            return is_group_included(config, co->group, n);
-    }
-    return false;
-}
-
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group)
 {
