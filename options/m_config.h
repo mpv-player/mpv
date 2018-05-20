@@ -43,8 +43,7 @@ struct m_config_option {
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
-    int16_t shadow_offset;          // Offset into m_config_shadow.data
-    int16_t group;                  // Index into m_config.groups
+    int16_t group_index;            // Index into m_config.groups
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
     void *data;                     // Raw value of the option
@@ -94,14 +93,17 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
 
-    int shadow_size;
-
-    // List of m_sub_options instances.
+    // Private. List of m_sub_options instances.
     // Index 0 is the top-level and is always present.
+    // Immutable after init.
+    // Invariant: a parent is always at a lower index than any of its children.
     struct m_config_group *groups;
     int num_groups;
 
-    // Thread-safe shadow memory; only set for the main m_config.
+    // Private. Non-NULL if data was allocated. m_config_option.data uses it.
+    struct m_config_data *data;
+
+    // Private. Thread-safe shadow memory; only set for the main m_config.
     struct m_config_shadow *shadow;
 } m_config_t;
 
@@ -264,14 +266,13 @@ struct mpv_node m_config_get_profiles(struct m_config *config);
 // the cache itself is allowed.
 struct m_config_cache {
     // The struct as indicated by m_config_cache_alloc's group parameter.
+    // (Internally the same as data->gdata[0]->udata.)
     void *opts;
 
     // Internal.
-    struct m_config_shadow *shadow;
-    struct m_config *shadow_config;
-    long long ts;
-    int group;
-    bool in_list;
+    struct m_config_shadow *shadow; // real data
+    struct m_config_data *data;     // copy for the cache user
+    bool in_list;                   // registered as listener with root config
     // --- Implicitly synchronized by setting/unsetting wakeup_cb.
     struct mp_dispatch_queue *wakeup_dispatch_queue;
     void (*wakeup_dispatch_cb)(void *ctx);
@@ -320,6 +321,7 @@ bool m_config_cache_update(struct m_config_cache *cache);
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
 // with a snapshot of the current option values.
+// group==NULL is a special case, and always returns the root group.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
 
