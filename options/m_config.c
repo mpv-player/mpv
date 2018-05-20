@@ -1351,7 +1351,7 @@ void m_config_notify_change_co(struct m_config *config,
 
         for (int n = 0; n < shadow->num_listeners; n++) {
             struct m_config_cache *cache = shadow->listeners[n];
-            if (cache->wakeup_cb)
+            if (cache->wakeup_cb && m_config_gdata(cache->data, co->group_index))
                 cache->wakeup_cb(cache->wakeup_cb_ctx);
         }
 
