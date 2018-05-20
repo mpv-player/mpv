@@ -609,7 +609,7 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
 {
     struct m_config_option *co = m_config_get_co_any(config, name);
     // CLI aliases should not be real options, and are explicitly handled by
-    // m_config_set_option_cli(). So petend it does not exist.
+    // m_config_set_option_cli(). So pretend it does not exist.
     if (co && co->opt->type == &m_option_type_cli_alias)
         co = NULL;
     return co;
@@ -1400,7 +1400,7 @@ void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
                                            struct mp_dispatch_queue *dispatch,
                                            void (*cb)(void *ctx), void *cb_ctx)
 {
-    // Remove the old one is tricky. Firts make sure no new notifications will
+    // Removing the old one is tricky. First make sure no new notifications will
     // come.
     m_config_cache_set_wakeup_cb(cache, NULL, NULL);
     // Remove any pending notifications (assume we're on the same thread as
