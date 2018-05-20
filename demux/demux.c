@@ -2990,15 +2990,51 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .ts_last = in->demux_ts,
         };
         bool any_packets = false;
+        struct tsinfo {
+            double ts_reader;
+            double ts_end;
+            double ts_duration;
+        } tsinfo[STREAM_TYPE_COUNT] = {
+            {MP_NOPTS_VALUE, MP_NOPTS_VALUE, -1},
+            {MP_NOPTS_VALUE, MP_NOPTS_VALUE, -1},
+            {MP_NOPTS_VALUE, MP_NOPTS_VALUE, -1}
+        };
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             if (ds->eager && !(!ds->queue->head && ds->eof) && !ds->ignore_eof)
             {
                 r->underrun |= !ds->reader_head && !ds->eof;
-                r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
-                r->ts_end = MP_PTS_MAX(r->ts_end, ds->queue->last_ts);
                 any_packets |= !!ds->reader_head;
+
+                double ts_reader = ds->base_ts;
+                double ts_end = ds->queue->last_ts;
+                double ts_duration = -1;
+                if (ts_reader != MP_NOPTS_VALUE && ts_reader <= ts_end)
+                    ts_duration = ts_end - ts_reader;
+
+                struct tsinfo *i = &tsinfo[ds->type];
+                i->ts_reader = MP_PTS_MIN(i->ts_reader, ts_reader);
+                i->ts_end = MP_PTS_MIN(i->ts_end, ts_end);
+                i->ts_duration = ts_duration;
             }
+        }
+        // find stream type with lowest duration and use its state
+        for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
+            struct tsinfo *i = &tsinfo[n];
+            if (r->ts_duration != -1) {
+                // skip if timestamps unknown
+                if (i->ts_duration == -1)
+                    continue;
+                // skip if we already know of a smaller cached stream
+                if (i->ts_duration > r->ts_duration)
+                    continue;
+                // skip empty subtitle streams when other streams exist
+                if (n == STREAM_SUB && i->ts_duration == 0.0)
+                    continue;
+            }
+            r->ts_duration = i->ts_duration;
+            r->ts_reader = i->ts_reader;
+            r->ts_end = i->ts_end;
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
         r->underrun &= !r->idle;
