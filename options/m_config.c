@@ -304,8 +304,7 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
 {
     struct m_config *config = talloc(talloc_ctx, struct m_config);
     talloc_set_destructor(config, config_destroy);
-    *config = (struct m_config)
-        {.log = log, .size = size, .defaults = defaults, .options = options};
+    *config = (struct m_config){.log = log,};
 
     struct m_sub_options *subopts = talloc_ptrtype(config, subopts);
     *subopts = (struct m_sub_options){
@@ -1233,7 +1232,7 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
 
 void m_config_create_shadow(struct m_config *config)
 {
-    assert(config->global && config->options && config->size);
+    assert(config->global);
     assert(!config->shadow && !config->global->config);
 
     config->shadow = talloc_zero(NULL, struct m_config_shadow);
