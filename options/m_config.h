@@ -60,11 +60,6 @@ typedef struct m_config {
     struct m_config_option *opts; // all options, even suboptions
     int num_opts;
 
-    // Creation parameters
-    size_t size;
-    const void *defaults;
-    const struct m_option *options;
-
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
