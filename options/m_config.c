@@ -525,7 +525,9 @@ static void m_config_add_option(struct m_config *config,
             // The required alignment is unknown, so go with the maximum C
             // could require. Slightly wasteful, but not that much.
             int align = (size - config->shadow_size % size) % size;
-            co.shadow_offset = config->shadow_size + align;
+            int offset = config->shadow_size + align;
+            assert(offset <= INT16_MAX);
+            co.shadow_offset = offset;
             config->shadow_size = co.shadow_offset + size;
         }
 
