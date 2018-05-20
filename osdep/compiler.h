@@ -17,5 +17,10 @@
 #define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
 #endif
 
+#if __STDC_VERSION__ >= 201112L
+#include <stdalign.h>
+#else
+#define alignof(x) (offsetof(struct {char unalign_; x u;}, u))
+#endif
 
 #endif
