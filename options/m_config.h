@@ -278,15 +278,17 @@ struct m_config_cache {
     void *wakeup_cb_ctx;
 };
 
+#define GLOBAL_CONFIG NULL
+
 // Create a mirror copy from the global options.
 // Keep in mind that a m_config_cache object is not thread-safe; it merely
 // provides thread-safe access to the global options. All API functions for
 // the same m_config_cache object must synchronized, unless otherwise noted.
 //  ta_parent: parent for the returned allocation
 //  global: option data source
-//  group: the option group to return. This can be NULL for the global option
-//         struct (MPOpts), or m_sub_options used in a certain OPT_SUBSTRUCT()
-//         item.
+//  group: the option group to return. This can be GLOBAL_CONFIG for the global
+//         option struct (MPOpts), or m_sub_options used in a certain
+//         OPT_SUBSTRUCT() item.
 struct m_config_cache *m_config_cache_alloc(void *ta_parent,
                                             struct mpv_global *global,
                                             const struct m_sub_options *group);
@@ -317,7 +319,7 @@ bool m_config_cache_update(struct m_config_cache *cache);
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
 // with a snapshot of the current option values.
-// group==NULL is a special case, and always returns the root group.
+// group==GLOBAL_CONFIG is a special case, and always returns the root group.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
 
