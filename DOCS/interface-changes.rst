@@ -105,6 +105,8 @@ Interface changes
       internal counter that remembered the current position.
     - edition and disc title switching will now fully reload playback (may have
       consequences for scripts, client API, or when using file-local options)
+    - remove deprecated ao/vo auto profiles. Consider using scripts like
+      auto-profiles.lua instead.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
