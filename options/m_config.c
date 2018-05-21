@@ -1314,7 +1314,7 @@ static bool update_options(struct m_config_data *dst, struct m_config_data *src)
         struct m_group_data *gdst = m_config_gdata(dst, n);
         assert(gsrc && gdst);
 
-        if (gsrc->ts <= gdst->ts)
+        if (gdst->ts >= gsrc->ts)
             continue;
         gdst->ts = gsrc->ts;
         res = true;
@@ -1337,7 +1337,8 @@ bool m_config_cache_update(struct m_config_cache *cache)
 
     // Using atomics and checking outside of the lock - it's unknown whether
     // this makes it faster or slower. Just cargo culting it.
-    if (atomic_load(&shadow->data->ts) <= cache->data->ts)
+    if (atomic_load_explicit(&cache->data->ts, memory_order_relaxed) >=
+        atomic_load(&shadow->data->ts))
         return false;
 
     pthread_mutex_lock(&shadow->lock);
