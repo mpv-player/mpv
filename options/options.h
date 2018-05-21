@@ -293,10 +293,6 @@ typedef struct MPOpts {
     int audiofile_auto;
     int osd_bar_visible;
 
-    char *hwdec_api;
-    char *hwdec_codecs;
-    int hwdec_image_format;
-
     int w32_priority;
 
     struct tv_params *tv_params;
@@ -368,8 +364,5 @@ extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
-
-int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param);
 
 #endif
