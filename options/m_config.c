@@ -1296,10 +1296,11 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
     return cache;
 }
 
-static void update_options(struct m_config_data *dst, struct m_config_data *src)
+static bool update_options(struct m_config_data *dst, struct m_config_data *src)
 {
     assert(dst->root == src->root);
 
+    bool res = false;
     dst->ts = src->ts;
 
     // Must be from same root, but they can have arbitrary overlap.
@@ -1316,6 +1317,7 @@ static void update_options(struct m_config_data *dst, struct m_config_data *src)
         if (gsrc->ts <= gdst->ts)
             continue;
         gdst->ts = gsrc->ts;
+        res = true;
 
         for (int i = g->co_index; i < g->co_end_index; i++) {
             struct m_config_option *co = &dst->root->opts[i];
@@ -1325,6 +1327,8 @@ static void update_options(struct m_config_data *dst, struct m_config_data *src)
             }
         }
     }
+
+    return res;
 }
 
 bool m_config_cache_update(struct m_config_cache *cache)
@@ -1337,9 +1341,9 @@ bool m_config_cache_update(struct m_config_cache *cache)
         return false;
 
     pthread_mutex_lock(&shadow->lock);
-    update_options(cache->data, shadow->data);
+    bool res = update_options(cache->data, shadow->data);
     pthread_mutex_unlock(&shadow->lock);
-    return true;
+    return res;
 }
 
 void m_config_notify_change_co(struct m_config *config,
