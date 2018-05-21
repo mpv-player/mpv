@@ -178,15 +178,19 @@ static void substruct_write_ptr(void *ptr, void *val)
 }
 
 // Initialize a field with a given value. In case this is dynamic data, it has
-// to be allocated and copied. src can alias dst, also can be NULL.
+// to be allocated and copied. src can alias dst.
 static void init_opt_inplace(const struct m_option *opt, void *dst,
                              const void *src)
 {
-    union m_option_value temp = {0};
-    if (src)
+    // The option will use dynamic memory allocation iff it has a free callback.
+    if (opt->type->free) {
+        union m_option_value temp;
         memcpy(&temp, src, opt->type->size);
-    memset(dst, 0, opt->type->size);
-    m_option_copy(opt, dst, &temp);
+        memset(dst, 0, opt->type->size);
+        m_option_copy(opt, dst, &temp);
+    } else if (src != dst) {
+        memcpy(dst, src, opt->type->size);
+    }
 }
 
 static void alloc_group(struct m_config_data *data, int group_index,
