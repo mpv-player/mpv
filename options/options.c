@@ -511,18 +511,13 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
 
-    OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
-                        hwdec_validate_opt),
-    OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
-    OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
-
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
     OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"bitstream", 1}, {"container", 2})),
 
-    OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
+    OPT_SUBSTRUCT("", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
 
     OPT_SUBSTRUCT("", demux_lavf, demux_lavf_conf, 0),
@@ -946,9 +941,6 @@ const struct MPOpts mp_default_opts = {
     .audiofile_auto = -1,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
-
-    .hwdec_api = HAVE_RPI ? "mmal" : "no",
-    .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
 
     .audio_output_channels = {
         .set = 1,

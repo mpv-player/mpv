@@ -2425,18 +2425,20 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
-    struct MPOpts *opts = mpctx->opts;
 
     if (action == M_PROPERTY_SET) {
         char *new = *(char **)arg;
+        char *old = NULL;
+        if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &old) < 1)
+            old = NULL;
 
-        if (strcmp(opts->hwdec_api, new) == 0)
-            return M_PROPERTY_OK;
+        bool same = bstr_equals(bstr0(old), bstr0(new));
 
-        talloc_free(opts->hwdec_api);
-        opts->hwdec_api = talloc_strdup(NULL, new);
+        mp_property_generic_option(mpctx, prop, M_PROPERTY_SET, &new);
 
-        if (!dec)
+        talloc_free(old);
+
+        if (!dec || same)
             return M_PROPERTY_OK;
 
         mp_decoder_wrapper_control(dec, VDCTRL_REINIT, NULL);
