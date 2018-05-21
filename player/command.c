@@ -2008,14 +2008,21 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
     if (action == M_PROPERTY_PRINT) {
         create_hotplug(mpctx);
 
+        char *name = NULL;
+        if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &name) < 1)
+            name = NULL;
+
         struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
-            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device) == 0) {
+            if (dev->name && name && strcmp(dev->name, name) == 0) {
                 *(char **)arg = talloc_strdup(NULL, dev->desc ? dev->desc : "?");
+                talloc_free(name);
                 return M_PROPERTY_OK;
             }
         }
+
+        talloc_free(name);
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }

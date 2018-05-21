@@ -83,6 +83,13 @@ struct mpv_global;
 struct input_ctx;
 struct encode_lavc_context;
 
+struct ao_opts {
+    struct m_obj_settings *audio_driver_list;
+    char *audio_device;
+    char *audio_client_name;
+    double audio_buffer;
+};
+
 struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
                         void (*wakeup_cb)(void *ctx), void *wakeup_ctx,

@@ -78,7 +78,8 @@ extern const struct m_sub_options demux_conf;
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
-extern const struct m_obj_list ao_obj_list;
+
+extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -549,10 +550,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("osd-bar", osd_bar_visible, UPDATE_OSD),
 
 //---------------------- libao/libvo options ------------------------
-    OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
-    OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
+    OPT_SUBSTRUCT("", ao_opts, ao_conf, 0),
     OPT_FLAG("audio-exclusive", audio_exclusive, UPDATE_AUDIO),
-    OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_FLAG("audio-stream-silence", audio_stream_silence, 0),
     OPT_FLOATRANGE("audio-wait-open", audio_wait_open, 0, 0, 60),
@@ -577,8 +576,6 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1},
                 {"weak", -1})),
-    OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
-               .min = 0, .max = 10),
 
     OPT_STRING("title", wintitle, 0),
     OPT_STRING("force-media-title", media_title, 0),
@@ -879,16 +876,12 @@ const m_option_t mp_opts[] = {
 const struct MPOpts mp_default_opts = {
     .use_terminal = 1,
     .msg_color = 1,
-    .audio_driver_list = NULL,
     .audio_decoders = NULL,
     .video_decoders = NULL,
     .softvol_max = 130,
     .softvol_volume = 100,
     .softvol_mute = 0,
     .gapless_audio = -1,
-    .audio_buffer = 0.2,
-    .audio_device = "auto",
-    .audio_client_name = "mpv",
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,

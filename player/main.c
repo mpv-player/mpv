@@ -222,7 +222,9 @@ static bool handle_help_options(struct MPContext *mpctx)
         MP_INFO(mpctx, "\n");
         return true;
     }
-    if (opts->audio_device && strcmp(opts->audio_device, "help") == 0) {
+    if (opts->ao_opts->audio_device &&
+        strcmp(opts->ao_opts->audio_device, "help") == 0)
+    {
         ao_print_devices(mpctx->global, log);
         return true;
     }
