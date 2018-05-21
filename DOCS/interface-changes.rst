@@ -122,6 +122,8 @@ Interface changes
       network streams should not freeze the player core (only playback in
       uncached regions), and differing behavior should be reported as a bug.
       If --demuxer-thread=no is used, there are no guarantees.
+    - remove deprecated ao/vo auto profiles. Consider using scripts like
+      auto-profiles.lua instead.
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
