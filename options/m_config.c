@@ -220,12 +220,12 @@ static void alloc_group(struct m_config_data *data, int group_index,
         if (co->opt->offset < 0 || co->opt->type->size == 0)
             continue;
 
-        const void *defptr = co->default_data;
+        void *dst = gdata->udata + co->opt->offset;
+        const void *defptr = co->opt->defval ? co->opt->defval : dst;
         if (copy_src)
             defptr = copy_src + co->opt->offset;
 
-        if (defptr)
-            init_opt_inplace(co->opt, gdata->udata + co->opt->offset, defptr);
+        init_opt_inplace(co->opt, dst, defptr);
     }
 
     // If there's a parent, update its pointer to the new struct.
@@ -529,8 +529,6 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
         .co_index = config->num_opts,
     };
 
-    const void *optstruct_def = subopts->defaults;
-
     if (subopts->prefix && subopts->prefix[0])
         name_prefix = subopts->prefix;
     if (!name_prefix)
@@ -546,15 +544,8 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
             .name = concat_name(config, name_prefix, opt->name),
             .opt = opt,
             .group_index = group_index,
-            .default_data = &default_value,
             .is_hidden = !!opt->deprecation_message,
         };
-
-        if (opt->offset >= 0 && optstruct_def)
-            co.default_data = (char *)optstruct_def + opt->offset;
-
-        if (opt->defval)
-            co.default_data = opt->defval;
 
         if (opt->type != &m_option_type_subconfig)
             MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
@@ -571,8 +562,8 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
             const struct m_sub_options *new_subopts = opt->priv;
 
             // Providing default structs in-place is not allowed.
-            if (opt->offset >= 0 && optstruct_def) {
-                void *ptr = (char *)optstruct_def + opt->offset;
+            if (opt->offset >= 0 && subopts->defaults) {
+                void *ptr = (char *)subopts->defaults + opt->offset;
                 assert(!substruct_read_ptr(ptr));
             }
 
@@ -670,6 +661,19 @@ int m_config_get_co_count(struct m_config *config)
 struct m_config_option *m_config_get_co_index(struct m_config *config, int index)
 {
     return &config->opts[index];
+}
+
+const void *m_config_get_co_default(const struct m_config *config,
+                                    struct m_config_option *co)
+{
+    if (co->opt->defval)
+        return co->opt->defval;
+
+    const struct m_sub_options *subopt = config->groups[co->group_index].group;
+    if (co->opt->offset >= 0 && subopt->defaults)
+        return (char *)subopt->defaults + co->opt->offset;
+
+    return NULL;
 }
 
 const char *m_config_get_positional_option(const struct m_config *config, int p)
@@ -1077,8 +1081,11 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " (%s to %s)", min, max);
         }
         char *def = NULL;
-        if (co->default_data)
-            def = m_option_pretty_print(opt, co->default_data);
+        const void *defptr = m_config_get_co_default(config, co);
+        if (!defptr)
+            defptr = &default_value;
+        if (defptr)
+            def = m_option_pretty_print(opt, defptr);
         if (def) {
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);
