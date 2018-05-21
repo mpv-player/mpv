@@ -4,9 +4,10 @@
 #include <stdbool.h>
 
 struct mpv_global;
+struct MPOpts;
 void mp_msg_init(struct mpv_global *global);
 void mp_msg_uninit(struct mpv_global *global);
-void mp_msg_update_msglevels(struct mpv_global *global);
+void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts);
 void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr);
 bool mp_msg_has_status_line(struct mpv_global *global);
 bool mp_msg_has_log_file(struct mpv_global *global);

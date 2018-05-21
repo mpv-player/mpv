@@ -827,7 +827,8 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
                                     &stream_filename) > 0)
             base_filename = talloc_steal(tmp, stream_filename);
     }
-    struct subfn *list = find_external_files(mpctx->global, base_filename);
+    struct subfn *list = find_external_files(mpctx->global, base_filename,
+                                             mpctx->opts);
     talloc_steal(tmp, list);
 
     int sc[STREAM_TYPE_COUNT] = {0};

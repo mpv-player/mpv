@@ -3871,7 +3871,9 @@ static void reinit_from_options(struct gl_video *p)
     gl_video_setup_hooks(p);
     reinit_osd(p);
 
-    if (p->opts.interpolation && !p->global->opts->video_sync && !p->dsi_warned) {
+    int vs;
+    mp_read_option_raw(p->global, "video-sync", &m_option_type_choice, &vs);
+    if (p->opts.interpolation && !vs && !p->dsi_warned) {
         MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
                    "E.g.: --video-sync=display-resample\n");
         p->dsi_warned = true;

@@ -117,7 +117,7 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
     bool had_log_file = mp_msg_has_log_file(mpctx->global);
 
-    mp_msg_update_msglevels(mpctx->global);
+    mp_msg_update_msglevels(mpctx->global, mpctx->opts);
 
     bool enable = mpctx->opts->use_terminal;
     bool enabled = cas_terminal_owner(mpctx, mpctx);
@@ -303,8 +303,6 @@ struct MPContext *mp_create(void)
     m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
     m_config_create_shadow(mpctx->mconfig);
 
-    mpctx->global->opts = mpctx->opts;
-
     mpctx->input = mp_input_init(mpctx->global, mp_wakeup_core_cb, mpctx);
     screenshot_init(mpctx);
     command_init(mpctx);
@@ -335,8 +333,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     assert(!mpctx->initialized);
 
     // Preparse the command line, so we can init the terminal early.
-    if (options)
-        m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
+    if (options) {
+        m_config_preparse_command_line(mpctx->mconfig, mpctx->global,
+                                       &opts->verbose, options);
+    }
 
     mp_init_paths(mpctx->global, opts);
     mp_update_logging(mpctx, true);

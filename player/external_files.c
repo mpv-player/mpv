@@ -104,13 +104,12 @@ static struct bstr guess_lang_from_filename(struct bstr name)
     return (struct bstr){name.start + i + 1, n};
 }
 
-static void append_dir_subtitles(struct mpv_global *global,
+static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
                                  struct subfn **slist, int *nsub,
                                  struct bstr path, const char *fname,
                                  int limit_fuzziness, int limit_type)
 {
     void *tmpmem = talloc_new(NULL);
-    struct MPOpts *opts = global->opts;
     struct mp_log *log = mp_log_new(tmpmem, global->log, "find_files");
 
     struct bstr f_fbname = bstr0(mp_basename(fname));
@@ -253,16 +252,16 @@ static void filter_subidx(struct subfn **slist, int *nsub)
     }
 }
 
-static void load_paths(struct mpv_global *global, struct subfn **slist,
-                       int *nsubs, const char *fname, char **paths,
-                       char *cfg_path, int type)
+static void load_paths(struct mpv_global *global, struct MPOpts *opts,
+                       struct subfn **slist, int *nsubs, const char *fname,
+                       char **paths, char *cfg_path, int type)
 {
     for (int i = 0; paths && paths[i]; i++) {
         char *expanded_path = mp_get_user_path(NULL, global, paths[i]);
         char *path = mp_path_join_bstr(
             *slist, mp_dirname(fname),
             bstr0(expanded_path ? expanded_path : paths[i]));
-        append_dir_subtitles(global, slist, nsubs, bstr0(path),
+        append_dir_subtitles(global, opts, slist, nsubs, bstr0(path),
                              fname, 0, type);
         talloc_free(expanded_path);
     }
@@ -270,32 +269,32 @@ static void load_paths(struct mpv_global *global, struct subfn **slist,
     // Load subtitles in ~/.mpv/sub (or similar) limiting sub fuzziness
     char *mp_subdir = mp_find_config_file(NULL, global, cfg_path);
     if (mp_subdir) {
-        append_dir_subtitles(global, slist, nsubs, bstr0(mp_subdir), fname, 1,
-                             type);
+        append_dir_subtitles(global, opts, slist, nsubs, bstr0(mp_subdir),
+                             fname, 1, type);
     }
     talloc_free(mp_subdir);
 }
 
 // Return a list of subtitles and audio files found, sorted by priority.
 // Last element is terminated with a fname==NULL entry.
-struct subfn *find_external_files(struct mpv_global *global, const char *fname)
+struct subfn *find_external_files(struct mpv_global *global, const char *fname,
+                                  struct MPOpts *opts)
 {
-    struct MPOpts *opts = global->opts;
     struct subfn *slist = talloc_array_ptrtype(NULL, slist, 1);
     int n = 0;
 
     // Load subtitles from current media directory
-    append_dir_subtitles(global, &slist, &n, mp_dirname(fname), fname, 0, -1);
+    append_dir_subtitles(global, opts, &slist, &n, mp_dirname(fname), fname, 0, -1);
 
     // Load subtitles in dirs specified by sub-paths option
     if (opts->sub_auto >= 0) {
-        load_paths(global, &slist, &n, fname, opts->sub_paths, "sub",
+        load_paths(global, opts, &slist, &n, fname, opts->sub_paths, "sub",
                    STREAM_SUB);
     }
 
     if (opts->audiofile_auto >= 0) {
-        load_paths(global, &slist, &n, fname, opts->audiofile_paths, "audio",
-                   STREAM_AUDIO);
+        load_paths(global, opts, &slist, &n, fname, opts->audiofile_paths,
+                   "audio", STREAM_AUDIO);
     }
 
     // Sort by name for filter_subidx()

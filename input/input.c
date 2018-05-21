@@ -1370,8 +1370,11 @@ void mp_input_load_config(struct input_ctx *ictx)
     }
 
 #if HAVE_WIN32_PIPES
-    if (ictx->global->opts->input_file && *ictx->global->opts->input_file)
-        mp_input_pipe_add(ictx, ictx->global->opts->input_file);
+    char *ifile;
+    mp_read_option_raw(ictx->global, "input-file", &m_option_type_string, &ifile);
+    if (ifile && ifile[0])
+        mp_input_pipe_add(ictx, ifile);
+    talloc_free(ifile);
 #endif
 
     input_unlock(ictx);
