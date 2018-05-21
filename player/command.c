@@ -3734,12 +3734,13 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         struct m_config_option *co = m_config_get_co(mpctx->mconfig, key);
         if (!co)
             return M_PROPERTY_UNKNOWN;
+        const struct m_option *opt = co->opt;
 
         union m_option_value def = {0};
-        if (co->default_data)
-            memcpy(&def, co->default_data, co->opt->type->size);
+        const void *def_ptr = m_config_get_co_default(mpctx->mconfig, co);
+        if (def_ptr && opt->type->size > 0)
+            memcpy(&def, def_ptr, opt->type->size);
 
-        const struct m_option *opt = co->opt;
         bool has_minmax =
             opt->type == &m_option_type_int ||
             opt->type == &m_option_type_int64 ||
