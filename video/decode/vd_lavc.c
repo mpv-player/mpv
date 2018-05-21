@@ -28,9 +28,12 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
+#include "config.h"
+
 #include "mpv_talloc.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "options/m_config.h"
 #include "options/options.h"
 #include "misc/bstr.h"
 #include "common/av_common.h"
@@ -59,6 +62,8 @@ static void uninit_avctx(struct mp_filter *vd);
 static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags);
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *pix_fmt);
+static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                              struct bstr name, struct bstr param);
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
 
@@ -84,6 +89,9 @@ struct vd_lavc_params {
     int software_fallback;
     char **avopts;
     int dr;
+    char *hwdec_api;
+    char *hwdec_codecs;
+    int hwdec_image_format;
 };
 
 static const struct m_opt_choice_alternatives discard_names[] = {
@@ -101,20 +109,24 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
-        OPT_FLAG("fast", fast, 0),
-        OPT_FLAG("show-all", show_all, 0),
-        OPT_DISCARD("skiploopfilter", skip_loop_filter, 0),
-        OPT_DISCARD("skipidct", skip_idct, 0),
-        OPT_DISCARD("skipframe", skip_frame, 0),
-        OPT_DISCARD("framedrop", framedrop, 0),
-        OPT_INT("threads", threads, M_OPT_MIN, .min = 0),
-        OPT_FLAG("bitexact", bitexact, 0),
-        OPT_FLAG("assume-old-x264", old_x264, 0),
-        OPT_FLAG("check-hw-profile", check_hw_profile, 0),
-        OPT_CHOICE_OR_INT("software-fallback", software_fallback, 0, 1, INT_MAX,
-                          ({"no", INT_MAX}, {"yes", 1})),
-        OPT_KEYVALUELIST("o", avopts, 0),
-        OPT_FLAG("dr", dr, 0),
+        OPT_FLAG("vd-lavc-fast", fast, 0),
+        OPT_FLAG("vd-lavc-show-all", show_all, 0),
+        OPT_DISCARD("vd-lavc-skiploopfilter", skip_loop_filter, 0),
+        OPT_DISCARD("vd-lavc-skipidct", skip_idct, 0),
+        OPT_DISCARD("vd-lavc-skipframe", skip_frame, 0),
+        OPT_DISCARD("vd-lavc-framedrop", framedrop, 0),
+        OPT_INT("vd-lavc-threads", threads, M_OPT_MIN, .min = 0),
+        OPT_FLAG("vd-lavc-bitexact", bitexact, 0),
+        OPT_FLAG("vd-lavc-assume-old-x264", old_x264, 0),
+        OPT_FLAG("vd-lavc-check-hw-profile", check_hw_profile, 0),
+        OPT_CHOICE_OR_INT("vd-lavc-software-fallback", software_fallback,
+                          0, 1, INT_MAX, ({"no", INT_MAX}, {"yes", 1})),
+        OPT_KEYVALUELIST("vd-lavc-o", avopts, 0),
+        OPT_FLAG("vd-lavc-dr", dr, 0),
+        OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
+                            hwdec_validate_opt),
+        OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
+        OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
         {0}
     },
     .size = sizeof(struct vd_lavc_params),
@@ -127,6 +139,8 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
         .dr = 1,
+        .hwdec_api = HAVE_RPI ? "mmal" : "no",
+        .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
     },
 };
 
@@ -147,7 +161,8 @@ struct hwdec_info {
 
 typedef struct lavc_ctx {
     struct mp_log *log;
-    struct MPOpts *opts;
+    struct m_config_cache *opts_cache;
+    struct vd_lavc_params *opts;
     struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *pic;
@@ -409,6 +424,8 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     const char *codec = ctx->codec->codec;
 
+    m_config_cache_update(ctx->opts_cache);
+
     bstr opt = bstr0(ctx->opts->hwdec_api);
 
     bool hwdec_requested = !bstr_equals0(opt, "no");
@@ -493,8 +510,8 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     }
 }
 
-int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param)
+static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                              struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
         struct hwdec_info *hwdecs = NULL;
@@ -543,8 +560,10 @@ static void reinit(struct mp_filter *vd)
 static void init_avctx(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
+    struct vd_lavc_params *lavc_param = ctx->opts;
     struct mp_codec_params *c = ctx->codec;
+
+    m_config_cache_update(ctx->opts_cache);
 
     assert(!ctx->avctx);
 
@@ -911,7 +930,7 @@ static bool prepare_decoding(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
-    struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
+    struct vd_lavc_params *opts = ctx->opts;
 
     if (!avctx || ctx->hwdec_failed)
         return false;
@@ -937,7 +956,7 @@ static bool prepare_decoding(struct mp_filter *vd)
 static void handle_err(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
+    struct vd_lavc_params *opts = ctx->opts;
 
     MP_WARN(vd, "Error while decoding frame!\n");
 
@@ -1194,7 +1213,8 @@ static struct mp_decoder *create(struct mp_filter *parent,
 
     vd_ffmpeg_ctx *ctx = vd->priv;
     ctx->log = vd->log;
-    ctx->opts = vd->global->opts;
+    ctx->opts_cache = m_config_cache_alloc(ctx, vd->global, &vd_lavc_conf);
+    ctx->opts = ctx->opts_cache->opts;
     ctx->codec = codec;
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_swpool = mp_image_pool_new(ctx);
