@@ -338,6 +338,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (options)
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
 
+    mp_init_paths(mpctx->global, opts);
     mp_update_logging(mpctx, true);
 
     if (options) {
