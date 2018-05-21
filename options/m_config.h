@@ -47,7 +47,6 @@ struct m_config_option {
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
     void *data;                     // Raw value of the option
-    const void *default_data;       // Raw default value
 };
 
 // Config object
@@ -179,6 +178,8 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
 
 int m_config_get_co_count(struct m_config *config);
 struct m_config_option *m_config_get_co_index(struct m_config *config, int index);
+const void *m_config_get_co_default(const struct m_config *config,
+                                    struct m_config_option *co);
 
 // Return the n-th option by position. n==0 is the first option. If there are
 // less than (n + 1) options, return NULL.
