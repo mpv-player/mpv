@@ -28,7 +28,9 @@ struct subfn {
 };
 
 struct mpv_global;
-struct subfn *find_external_files(struct mpv_global *global, const char *fname);
+struct MPOpts;
+struct subfn *find_external_files(struct mpv_global *global, const char *fname,
+                                  struct MPOpts *opts);
 
 bool mp_might_be_subtitle_file(const char *filename);
 

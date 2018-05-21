@@ -36,6 +36,7 @@
 #include "common/msg.h"
 #include "input/input.h"
 #include "libmpv/client.h"
+#include "options/m_config.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "player/client.h"
@@ -386,7 +387,7 @@ done:
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global)
 {
-    struct MPOpts *opts = global->opts;
+    struct MPOpts *opts = mp_get_config_group(NULL, global, GLOBAL_CONFIG);
 
     struct mp_ipc_ctx *arg = talloc_ptrtype(NULL, arg);
     *arg = (struct mp_ipc_ctx){
@@ -397,10 +398,12 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     };
     char *input_file = mp_get_user_path(arg, global, opts->input_file);
 
+    talloc_free(opts);
+
     if (input_file && *input_file)
         ipc_start_client_text(arg, input_file);
 
-    if (!opts->ipc_path || !*opts->ipc_path)
+    if (!arg->path || !arg->path[0])
         goto out;
 
     if (mp_make_wakeup_pipe(arg->death_pipe) < 0)
