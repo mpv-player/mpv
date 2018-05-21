@@ -332,7 +332,9 @@ error:
 
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
 {
-    struct m_obj_settings *vo_list = global->opts->vo->video_driver_list;
+    struct mp_vo_opts *opts = mp_get_config_group(NULL, global, &vo_sub_opts);
+    struct m_obj_settings *vo_list = opts->video_driver_list;
+    struct vo *vo = NULL;
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0].name) {
         for (int n = 0; vo_list[n].name; n++) {
@@ -340,11 +342,11 @@ struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
             if (strlen(vo_list[n].name) == 0)
                 goto autoprobe;
             bool p = !!vo_list[n + 1].name;
-            struct vo *vo = vo_create(p, global, ex, vo_list[n].name);
+            vo = vo_create(p, global, ex, vo_list[n].name);
             if (vo)
-                return vo;
+                goto done;
         }
-        return NULL;
+        goto done;
     }
 autoprobe:
     // now try the rest...
@@ -352,11 +354,13 @@ autoprobe:
         const struct vo_driver *driver = video_out_drivers[i];
         if (driver == &video_out_null)
             break;
-        struct vo *vo = vo_create(true, global, ex, (char *)driver->name);
+        vo = vo_create(true, global, ex, (char *)driver->name);
         if (vo)
-            return vo;
+            goto done;
     }
-    return NULL;
+done:
+    talloc_free(opts);
+    return vo;
 }
 
 static void terminate_vo(void *p)

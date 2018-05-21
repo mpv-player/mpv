@@ -27,7 +27,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "common/msg.h"
-
+#include "options/m_config.h"
 #include "osdep/timer.h"
 
 #include "demux/demux.h"
@@ -50,7 +50,7 @@
 struct priv {
     struct mp_filter *f;
     struct mp_log *log;
-    struct MPOpts *opts;
+    struct m_config_cache *opt_cache;
 
     struct sh_stream *header;
     struct mp_codec_params *codec;
@@ -162,7 +162,8 @@ struct mp_decoder_list *audio_decoder_list(void)
 bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 {
     struct priv *p = d->f->priv;
-    struct MPOpts *opts = p->opts;
+    struct MPOpts *opts = p->opt_cache->opts;
+    m_config_cache_update(p->opt_cache);
 
     if (p->decoder)
         talloc_free(p->decoder->f);
@@ -236,9 +237,10 @@ static bool is_valid_peak(float sig_peak)
 static void fix_image_params(struct priv *p,
                              struct mp_image_params *params)
 {
-    struct MPOpts *opts = p->opts;
     struct mp_image_params m = *params;
     struct mp_codec_params *c = p->codec;
+    struct MPOpts *opts = p->opt_cache->opts;
+    m_config_cache_update(p->opt_cache);
 
     MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
     p->dec_format = *params;
@@ -302,7 +304,8 @@ static void fix_image_params(struct priv *p,
 
 static void process_video_frame(struct priv *p, struct mp_image *mpi)
 {
-    struct MPOpts *opts = p->opts;
+    struct MPOpts *opts = p->opt_cache->opts;
+    m_config_cache_update(p->opt_cache);
 
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = mpi->pts;
@@ -645,12 +648,14 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
     struct priv *p = f->priv;
     struct mp_decoder_wrapper *w = &p->public;
-    p->opts = f->global->opts;
+    p->opt_cache = m_config_cache_alloc(p, f->global, GLOBAL_CONFIG);
     p->log = f->log;
     p->f = f;
     p->header = src;
     p->codec = p->header->codec;
     w->f = f;
+
+    struct MPOpts *opts = p->opt_cache->opts;
 
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 
@@ -661,8 +666,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
         MP_VERBOSE(p, "Container reported FPS: %f\n", p->public.fps);
 
-        if (p->opts->force_fps) {
-            p->public.fps = p->opts->force_fps;
+        if (opts->force_fps) {
+            p->public.fps = opts->force_fps;
             MP_INFO(p, "FPS forced to %5.3f.\n", p->public.fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
