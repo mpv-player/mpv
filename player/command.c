@@ -453,10 +453,10 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     double speed = mpctx->opts->playback_speed;
     switch (action) {
     case M_PROPERTY_SET: {
-        mpctx->opts->playback_speed = *(double *)arg;
+        int r = mp_property_generic_option(mpctx, prop, action, arg);
         update_playback_speed(mpctx);
         mp_wakeup_core(mpctx);
-        return M_PROPERTY_OK;
+        return r;
     }
     case M_PROPERTY_PRINT:
         *(char **)arg = talloc_asprintf(NULL, "%.2f", speed);
@@ -1143,11 +1143,10 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
     case M_PROPERTY_SET: {
         edition = *(int *)arg;
         if (edition != demuxer->edition) {
-            mpctx->opts->edition_id = edition;
             if (!mpctx->stop_play)
                 mpctx->stop_play = PT_CURRENT_ENTRY;
             mp_wakeup_core(mpctx);
-            break; // make it accessible to the demuxer via option change notify
+            break; // write value, trigger option change notify
         }
         return M_PROPERTY_OK;
     }
@@ -2056,12 +2055,13 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
     case M_PROPERTY_PRINT:
         *(char **)arg = format_delay(delay);
         return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        mpctx->opts->audio_delay = *(float *)arg;
+    case M_PROPERTY_SET: {
+        int r = mp_property_generic_option(mpctx, prop, action, arg);
         if (mpctx->ao_chain && mpctx->vo_chain)
             mpctx->delay += mpctx->opts->audio_delay - delay;
         mp_wakeup_core(mpctx);
-        return M_PROPERTY_OK;
+        return r;
+    }
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
