@@ -395,8 +395,10 @@ static void *terminal_thread(void *ptr)
         polldev(fds, stdin_ok ? 2 : 1, -1);
         if (fds[0].revents)
             break;
-        if (fds[1].revents)
-            getch2(input_ctx);
+        if (fds[1].revents) {
+            if (!getch2(input_ctx))
+                break;
+        }
     }
     char c;
     bool quit = read(death_pipe[0], &c, 1) == 1 && c == 1;
