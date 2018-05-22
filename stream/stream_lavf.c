@@ -47,6 +47,7 @@ struct stream_lavf_params {
     char *tls_cert_file;
     char *tls_key_file;
     double timeout;
+    char *http_proxy;
 };
 
 const struct m_sub_options stream_lavf_conf = {
@@ -62,6 +63,7 @@ const struct m_sub_options stream_lavf_conf = {
         OPT_STRING("tls-cert-file", tls_cert_file, M_OPT_FILE),
         OPT_STRING("tls-key-file", tls_key_file, M_OPT_FILE),
         OPT_DOUBLE("network-timeout", timeout, M_OPT_MIN, .min = 0),
+        OPT_STRING("http-proxy", http_proxy, 0),
         {0}
     },
     .size = sizeof(struct stream_lavf_params),
@@ -225,6 +227,8 @@ void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
         snprintf(buf, sizeof(buf), "%lld", (long long)(opts->timeout * 1e6));
         av_dict_set(dict, "timeout", buf, 0);
     }
+    if (opts->http_proxy && opts->http_proxy[0])
+        av_dict_set(dict, "http_proxy", opts->http_proxy, 0);
 
     mp_set_avdict(dict, opts->avopts);
 
