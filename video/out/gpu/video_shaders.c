@@ -655,18 +655,6 @@ static void pass_tone_map(struct gl_shader_cache *sc, bool detect_peak,
     GLSLF("float sig_peak = %f;\n", src_peak);
     GLSLF("float sig_avg = %f;\n", sdr_avg);
 
-    // Desaturate the color using a coefficient dependent on the signal
-    // Do this before peak detection in order to try and reclaim as much
-    // dynamic range as possible.
-    if (desat > 0) {
-        float base = 0.18 * dst_peak;
-        GLSL(float luma = dot(dst_luma, color.rgb);)
-        GLSLF("float coeff = max(sig - %f, 1e-6) / max(sig, 1e-6);\n", base);
-        GLSLF("coeff = pow(coeff, %f);\n", 10.0 / desat);
-        GLSL(color.rgb = mix(color.rgb, vec3(luma), coeff);)
-        GLSL(sig = mix(sig, luma, coeff);) // also make sure to update `sig`
-    }
-
     if (detect_peak)
         hdr_update_peak(sc);
 
@@ -682,6 +670,18 @@ static void pass_tone_map(struct gl_shader_cache *sc, bool detect_peak,
     GLSLF("float slope = min(1.0, %f / sig_avg);\n", sdr_avg);
     GLSL(sig *= slope;)
     GLSL(sig_peak *= slope;)
+
+    // Desaturate the color using a coefficient dependent on the signal.
+    // Do this after peak detection in order to prevent over-desaturating
+    // overly bright souces
+    if (desat > 0) {
+        float base = 0.18 * dst_peak;
+        GLSL(float luma = dot(dst_luma, color.rgb);)
+        GLSLF("float coeff = max(sig - %f, 1e-6) / max(sig, 1e-6);\n", base);
+        GLSLF("coeff = pow(coeff, %f);\n", 10.0 / desat);
+        GLSL(color.rgb = mix(color.rgb, vec3(luma), coeff);)
+        GLSL(sig = mix(sig, luma * slope, coeff);) // also make sure to update `sig`
+    }
 
     switch (algo) {
     case TONE_MAPPING_CLIP:
