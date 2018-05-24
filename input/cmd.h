@@ -24,7 +24,7 @@
 #include "options/m_option.h"
 
 #define MP_CMD_DEF_MAX_ARGS 9
-#define MP_CMD_OPT_ARG 0x1000
+#define MP_CMD_OPT_ARG M_OPT_OPTIONAL_PARAM
 
 struct mp_log;
 struct mp_cmd;
@@ -39,9 +39,26 @@ struct mp_cmd_def {
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
     bool scalable;
-    bool is_abort;
-    bool is_soft_abort;
     bool is_ignore;
+    bool default_async; // default to MP_ASYNC flag if none set by user
+    // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
+    // at some point (can be after handler() returns). If you don't set it, the
+    // common code will call mp_cmd_ctx_complete() when handler() returns.
+    // You must make sure that the core cannot disappear while you do work. The
+    // common code keeps the core referenced only until handler() returns.
+    bool exec_async;
+    // If set, handler() is run on a separate worker thread. This means you can
+    // use mp_core_[un]lock() to temporarily unlock and re-lock the core (while
+    // unlocked, you have no synchronized access to mpctx, but you can do long
+    // running operations without blocking playback or input handling).
+    bool spawn_thread;
+    // If this is set, mp_cmd_ctx.abort is set. Set this if handler() can do
+    // asynchronous abort of the command, and explicitly uses mp_cmd_ctx.abort.
+    // (Not setting it when it's not needed can save resources.)
+    bool can_abort;
+    // If playback ends, and the command is still running, an abort is
+    // automatically triggered.
+    bool abort_on_playback_end;
 };
 
 enum mp_cmd_flags {
@@ -51,23 +68,14 @@ enum mp_cmd_flags {
     MP_ON_OSD_MSG = 4,          // force a message, if applicable
     MP_EXPAND_PROPERTIES = 8,   // expand strings as properties
     MP_ALLOW_REPEAT = 16,       // if used as keybinding, allow key repeat
-    MP_ASYNC_CMD = 32,
+
+    // Exactly one of the following 2 bits is set. Which one is used depends on
+    // the command parser (prefixes and mp_cmd_def.default_async).
+    MP_ASYNC_CMD = 32,          // do not wait for command to complete
+    MP_SYNC_CMD = 64,           // block on command completion
 
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
-};
-
-enum mp_input_section_flags {
-    // If a key binding is not defined in the current section, do not search the
-    // other sections for it (like the default section). Instead, an unbound
-    // key warning will be printed.
-    MP_INPUT_EXCLUSIVE = 1,
-    // Prefer it to other sections.
-    MP_INPUT_ON_TOP = 2,
-    // Let mp_input_test_dragging() return true, even if inside the mouse area.
-    MP_INPUT_ALLOW_VO_DRAGGING = 4,
-    // Don't force mouse pointer visible, even if inside the mouse area.
-    MP_INPUT_ALLOW_HIDE_CURSOR = 8,
 };
 
 // Arbitrary upper bound for sanity.
@@ -77,6 +85,7 @@ struct mp_cmd_arg {
     const struct m_option *type;
     union {
         int i;
+        int64_t i64;
         float f;
         double d;
         char *s;
@@ -86,7 +95,6 @@ struct mp_cmd_arg {
 };
 
 typedef struct mp_cmd {
-    int id;
     char *name;
     struct mp_cmd_arg *args;
     int nargs;
@@ -110,11 +118,6 @@ typedef struct mp_cmd {
 
 extern const struct mp_cmd_def mp_cmds[];
 extern const struct mp_cmd_def mp_cmd_list;
-
-// Executing this command will maybe abort playback (play something else, or quit).
-bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd);
-// This command will definitely abort playback.
-bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
 

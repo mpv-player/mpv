@@ -144,10 +144,7 @@ typedef struct MPOpts {
 
     int auto_load_scripts;
 
-    struct m_obj_settings *audio_driver_list;
-    char *audio_device;
     int audio_exclusive;
-    char *audio_client_name;
     int ao_null_fallback;
     int audio_stream_silence;
     float audio_wait_open;
@@ -160,9 +157,9 @@ typedef struct MPOpts {
     int softvol_mute;
     float softvol_max;
     int gapless_audio;
-    double audio_buffer;
 
     mp_vo_opts *vo;
+    struct ao_opts *ao_opts;
 
     char *wintitle;
     char *media_title;
@@ -261,6 +258,7 @@ typedef struct MPOpts {
     char **audio_files;
     char *demuxer_name;
     int demuxer_thread;
+    double demux_termination_timeout;
     int prefetch_open;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
@@ -294,10 +292,6 @@ typedef struct MPOpts {
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;
-
-    char *hwdec_api;
-    char *hwdec_codecs;
-    int hwdec_image_format;
 
     int w32_priority;
 
@@ -370,8 +364,5 @@ extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
-
-int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param);
 
 #endif

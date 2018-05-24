@@ -24,6 +24,9 @@
 #include "misc/bstr.h"
 
 struct mpv_global;
+struct MPOpts;
+
+void mp_init_paths(struct mpv_global *global, struct MPOpts *opts);
 
 // Search for the input filename in several paths. These include user and global
 // config locations by default. Some platforms may implement additional platform

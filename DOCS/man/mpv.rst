@@ -899,6 +899,8 @@ PROTOCOLS
 
     Read data from the given file descriptor (for example 123). This is similar
     to piping data to stdin via ``-``, but can use an arbitrary file descriptor.
+    mpv may modify some file descriptor properties when the stream layer "opens"
+    it.
 
 ``fdclose://123``
 

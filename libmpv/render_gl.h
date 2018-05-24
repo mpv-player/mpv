@@ -107,11 +107,13 @@ typedef struct mpv_opengl_init_params {
     /**
      * This retrieves OpenGL function pointers, and will use them in subsequent
      * operation.
-     * Usually, GL context APIs do this for you (e.g. with glXGetProcAddressARB
-     * or wglGetProcAddress), but some APIs do not always return pointers for
-     * all standard functions (even if present); in this case you have to
-     * compensate by looking up these functions yourself and returning them
-     * from this callback.
+     * Usually, you can simply call the GL context APIs from this callback (e.g.
+     * glXGetProcAddressARB or wglGetProcAddress), but some APIs do not always
+     * return pointers for all standard functions (even if present); in this
+     * case you have to compensate by looking up these functions yourself when
+     * libmpv wants to resolve them through this callback.
+     * libmpv will not normally attempt to resolve GL functions on its own, nor
+     * does it link to GL libraries directly.
      */
     void *(*get_proc_address)(void *ctx, const char *name);
     /**
@@ -147,6 +149,9 @@ typedef struct mpv_opengl_fbo {
     int internal_format;
 } mpv_opengl_fbo;
 
+/**
+ * For MPV_RENDER_PARAM_DRM_DISPLAY.
+ */
 typedef struct mpv_opengl_drm_params {
     /**
      * DRM fd (int). set this to -1 if invalid.
@@ -171,6 +176,9 @@ typedef struct mpv_opengl_drm_params {
     struct _drmModeAtomicReq **atomic_request_ptr;
 } mpv_opengl_drm_params;
 
+/**
+ * For MPV_RENDER_PARAM_DRM_OSD_SIZE.
+ */
 typedef struct mpv_opengl_drm_osd_size {
     /**
      * size of the OSD in pixels.

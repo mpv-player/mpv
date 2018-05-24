@@ -528,6 +528,41 @@ function mp.add_hook(name, pri, cb)
     mp.raw_hook_add(id, name, pri - 50)
 end
 
+local async_call_table = {}
+local async_next_id = 1
+
+function mp.command_native_async(node, cb)
+    local id = async_next_id
+    async_next_id = async_next_id + 1
+    local res, err = mp.raw_command_native_async(id, node)
+    if not res then
+        cb(false, nil, err)
+        return res, err
+    end
+    local t = {cb = cb, id = id}
+    async_call_table[id] = t
+    return t
+end
+
+mp.register_event("command-reply", function(ev)
+    local id = tonumber(ev.id)
+    local t = async_call_table[id]
+    local cb = t.cb
+    t.id = nil
+    async_call_table[id] = nil
+    if ev.error then
+        cb(false, nil, ev.error)
+    else
+        cb(true, ev.result, nil)
+    end
+end)
+
+function mp.abort_async_command(t)
+    if t.id ~= nil then
+        mp.raw_abort_async_command(t.id)
+    end
+end
+
 local mp_utils = package.loaded["mp.utils"]
 
 function mp_utils.format_table(t, set)
@@ -594,6 +629,33 @@ function mp_utils.format_bytes_humanized(b)
         i = i + 1
     end
     return string.format("%0.2f %s", b, d[i] and d[i] or "*1024^" .. (i-1))
+end
+
+function mp_utils.subprocess(t)
+    local cmd = {}
+    cmd.name = "subprocess"
+    cmd.capture_stdout = true
+    for k, v in pairs(t) do
+        if k == "cancellable" then
+            k = "playback_only"
+        elseif k == "max_size" then
+            k = "capture_size"
+        end
+        cmd[k] = v
+    end
+    local res, err = mp.command_native(cmd)
+    if res == nil then
+        -- an error usually happens only if parsing failed (or no args passed)
+        res = {error_string = err, status = -1}
+    end
+    if res.error_string ~= "" then
+        res.error = res.error_string
+    end
+    return res
+end
+
+function mp_utils.subprocess_detached(t)
+    mp.commandv("run", unpack(t.args))
 end
 
 return {}

@@ -27,6 +27,7 @@
 #include "common/common.h"
 #include "stream/stream.h"
 #include "misc/bstr.h"
+#include "misc/thread_tools.h"
 
 static void write_arg(bstr *cmdline, char *arg)
 {

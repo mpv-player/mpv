@@ -1020,8 +1020,8 @@ Video
     determined using a fixed framerate value (either using the ``--fps``
     option, or using file information). Sometimes, files with very broken
     timestamps can be played somewhat well in this mode. Note that video
-    filters, subtitle rendering and audio synchronization can be completely
-    broken in this mode.
+    filters, subtitle rendering, seeking (including hr-seeks and backstepping),
+    and audio synchronization can be completely broken in this mode.
 
 ``--fps=<float>``
     Override video framerate. Useful if the original value is wrong or missing.
@@ -2546,8 +2546,7 @@ Window
     always re-enabled when the player is paused.
 
     This is not supported on all video outputs or platforms. Sometimes it is
-    implemented, but does not work (known to happen with GNOME). You might be
-    able to work around this using ``--heartbeat-cmd`` instead.
+    implemented, but does not work (especially with Linux "desktops").
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
@@ -2764,12 +2763,6 @@ Demuxer
     imperfect behavior from libavformat demuxers. Passing ``no`` disables
     these. For debugging and testing only.
 
-``--demuxer-lavf-genpts-mode=<no|lavf>``
-    Mode for deriving missing packet PTS values from packet DTS. ``lavf``
-    enables libavformat's ``genpts`` option. ``no`` disables it. This used
-    to be enabled by default, but then it was deemed as not needed anymore.
-    Enabling this might help with timestamp problems, or make them worse.
-
 ``--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]``
     Pass AVOptions to libavformat demuxer.
 
@@ -2945,9 +2938,25 @@ Demuxer
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
-    of packets (default: yes). Having this enabled may lead to smoother
-    playback, but on the other hand can add delays to seeking or track
-    switching.
+    of packets (default: yes). Having this enabled leads to smoother playback,
+    enables features like prefetching, and prevents that stuck network freezes
+    the player. On the other hand, it can add overhead, or the background
+    prefetching can hog CPU resources.
+
+    Disabling this option is not recommended. Use it for debugging only.
+
+``--demuxer-termination-timeout=<seconds>``
+    Number of seconds the player should wait to shutdown the demuxer (default:
+    0.1). The player will wait up to this much time before it closes the
+    stream layer forcefully. Forceful closing usually means the network I/O is
+    given no chance to close its connections gracefully (of course the OS can
+    still close TCP connections properly), and might result in annoying messages
+    being logged, and in some cases, confused remote servers.
+
+    This timeout is usually only applied when loading has finished properly. If
+    loading is aborted by the user, or in some corner cases like removing
+    external tracks sourced from network during playback, forceful closing is
+    always used.
 
 ``--demuxer-readahead-secs=<seconds>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
@@ -3990,6 +3999,13 @@ Network
             Field1: value1
             Field2: value2
             Connection: close
+
+``--http-proxy=<proxy>``
+    URL of the HTTP/HTTPS proxy. If this is set, the ``http_proxy`` environment
+    is ignored. The ``no_proxy`` environment variable is still respected. This
+    option is silently ignored if it does not start with ``http://``. Proxies
+    are not used for https URLs. Setting this option does not try to make the
+    ytdl script use the proxy.
 
 ``--tls-ca-file=<filename>``
     Certificate authority database file for use with TLS. (Silently fails with

@@ -20,7 +20,12 @@ def __add_generic_flags__(ctx):
     ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
                        "-D_LARGEFILE_SOURCE", "-D_FILE_OFFSET_BITS=64",
                        "-D_LARGEFILE64_SOURCE",
-                       "-std=c99", "-Wall"]
+                       "-Wall"]
+
+    if ctx.check_cc(cflags="-std=c11", mandatory=False):
+        ctx.env.CFLAGS += ["-std=c11"]
+    else:
+        ctx.env.CFLAGS += ["-std=c99"]
 
     if ctx.is_optimization():
         ctx.env.CFLAGS += ['-O2']

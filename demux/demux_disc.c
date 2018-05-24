@@ -285,7 +285,10 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (check != DEMUX_CHECK_FORCE)
         return -1;
 
-    struct demuxer_params params = {.force_format = "+lavf"};
+    struct demuxer_params params = {
+        .force_format = "+lavf",
+        .does_not_own_stream = true,
+    };
 
     struct stream *cur = demuxer->stream;
     const char *sname = "";
@@ -342,13 +345,15 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
         demuxer->duration = len;
 
+    demuxer->extended_ctrls = true;
+
     return 0;
 }
 
 static void d_close(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
-    free_demuxer(p->slave);
+    demux_free(p->slave);
 }
 
 static int d_control(demuxer_t *demuxer, int cmd, void *arg)

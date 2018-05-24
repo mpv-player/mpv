@@ -42,6 +42,7 @@
 #include "common/av_common.h"
 #include "misc/bstr.h"
 #include "misc/charset_conv.h"
+#include "misc/thread_tools.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -76,7 +77,6 @@ struct demux_lavf_opts {
     char *format;
     char **avopts;
     int hacks;
-    int genptsmode;
     char *sub_cp;
     int rtsp_transport;
 };
@@ -95,8 +95,6 @@ const struct m_sub_options demux_lavf_conf = {
         OPT_INTRANGE("demuxer-lavf-probescore", probescore, 0,
                      1, AVPROBE_SCORE_MAX),
         OPT_FLAG("demuxer-lavf-hacks", hacks, 0),
-        OPT_CHOICE("demuxer-lavf-genpts-mode", genptsmode, 0,
-                   ({"lavf", 1}, {"no", 0})),
         OPT_KEYVALUELIST("demuxer-lavf-o", avopts, 0),
         OPT_STRING("sub-codepage", sub_cp, 0),
         OPT_CHOICE("rtsp-transport", rtsp_transport, 0,
@@ -186,8 +184,6 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
-    // Probably a security risk.
-    BLACKLIST("ffm"),
     // Image demuxers ("<name>_pipe" is detected explicitly)
     {"image2pipe", .image_format = true},
     {0}
@@ -776,8 +772,7 @@ static void update_metadata(demuxer_t *demuxer)
 static int interrupt_cb(void *ctx)
 {
     struct demuxer *demuxer = ctx;
-    lavf_priv_t *priv = demuxer->priv;
-    return mp_cancel_test(priv->stream->cancel);
+    return mp_cancel_test(demuxer->cancel);
 }
 
 static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
@@ -816,8 +811,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!avfc)
         return -1;
 
-    if (lavfdopts->genptsmode)
-        avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 

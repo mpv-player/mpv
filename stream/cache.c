@@ -54,6 +54,7 @@
 
 #include "common/msg.h"
 #include "common/tags.h"
+#include "misc/thread_tools.h"
 #include "options/options.h"
 
 #include "stream.h"

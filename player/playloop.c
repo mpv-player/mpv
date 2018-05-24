@@ -92,6 +92,16 @@ void mp_wakeup_core_cb(void *ctx)
     mp_wakeup_core(mpctx);
 }
 
+void mp_core_lock(struct MPContext *mpctx)
+{
+    mp_dispatch_lock(mpctx->dispatch);
+}
+
+void mp_core_unlock(struct MPContext *mpctx)
+{
+    mp_dispatch_unlock(mpctx->dispatch);
+}
+
 // Process any queued input, whether it's user input, or requests from client
 // API threads. This also resets the "wakeup" flag used with mp_wait_events().
 void mp_process_input(struct MPContext *mpctx)
@@ -100,8 +110,7 @@ void mp_process_input(struct MPContext *mpctx)
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
-        run_command(mpctx, cmd, NULL);
-        mp_cmd_free(cmd);
+        run_command(mpctx, cmd, NULL, NULL, NULL);
     }
     mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
 }
@@ -118,8 +127,8 @@ void update_core_idle_state(struct MPContext *mpctx)
 {
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
-    bool active = !mpctx->paused && mpctx->restart_complete && mpctx->playing &&
-                  mpctx->in_playloop && !eof;
+    bool active = !mpctx->paused && mpctx->restart_complete &&
+                  mpctx->stop_play && mpctx->in_playloop && !eof;
 
     if (mpctx->playback_active != active) {
         mpctx->playback_active = active;
@@ -219,7 +228,6 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_backstep = false;
     mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->step_frames = 0;
     mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
@@ -865,7 +873,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // True if we're either in idle mode, or loading of the file has finished.
     // It's also set via force in some stages during file loading.
-    bool act = !mpctx->playing || mpctx->playback_initialized || force;
+    bool act = mpctx->stop_play || mpctx->playback_initialized || force;
 
     // On the other hand, if a video track is selected, but no video is ever
     // decoded on it, then create the window.
@@ -989,9 +997,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     // Do not wait for video stream if it only has sparse frames.
-    if (mpctx->vo_chain &&
-        mpctx->vo_chain->is_sparse &&
-        mpctx->video_status < STATUS_READY) {
+    if (mpctx->vo_chain && mpctx->vo_chain->is_sparse &&
+        mpctx->video_status < STATUS_READY)
+    {
         mpctx->video_status = STATUS_READY;
     }
 

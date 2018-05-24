@@ -39,6 +39,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/thread_tools.h"
 #include "common/common.h"
 #include "common/playlist.h"
 #include "stream/stream.h"
@@ -216,7 +217,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
             }
 
             if (stream_wants_cache(d->stream, ctx->opts->stream_cache)) {
-                free_demuxer_and_stream(d);
+                demux_free(d);
                 params.disable_cache = false;
                 params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
                 d = demux_open_url(filename, &params, cancel, ctx->global);
@@ -229,7 +230,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
         }
     }
 
-    free_demuxer_and_stream(d);
+    demux_free(d);
     return was_valid;
 }
 
@@ -263,7 +264,8 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
             MP_INFO(ctx, "Loading references from '%s'.\n",
                     opts->ordered_chapters_files);
             struct playlist *pl =
-                playlist_parse_file(opts->ordered_chapters_files, ctx->global);
+                playlist_parse_file(opts->ordered_chapters_files,
+                                    ctx->tl->cancel, ctx->global);
             talloc_steal(tmp, pl);
             for (struct playlist_entry *e = pl ? pl->first : NULL; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
@@ -515,7 +517,7 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         .global = tl->global,
         .tl = tl,
         .demuxer = demuxer,
-        .opts = mp_get_config_group(ctx, tl->global, NULL),
+        .opts = mp_get_config_group(ctx, tl->global, GLOBAL_CONFIG),
     };
 
     if (!ctx->opts->ordered_chapters || !demuxer->access_references) {

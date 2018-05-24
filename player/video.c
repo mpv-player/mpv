@@ -955,7 +955,8 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         // Note that even if each timestamp is within rounding tolerance, it
         // could literally not add up (e.g. if demuxer FPS is rounded itself).
         if (fabs(duration - demux_duration) < tolerance &&
-            fabs(total - demux_duration * num_dur) < tolerance && num_dur >= 16)
+            fabs(total - demux_duration * num_dur) < tolerance &&
+            (num_dur >= 16 || num_dur >= mpctx->num_past_frames - 4))
         {
             approx_duration = demux_duration;
         }
@@ -1168,7 +1169,6 @@ void write_video(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "first video frame after restart shown\n");
         }
     }
-    screenshot_flip(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
@@ -1186,6 +1186,8 @@ void write_video(struct MPContext *mpctx)
         if (mpctx->max_frames > 0)
             mpctx->max_frames--;
     }
+
+    screenshot_flip(mpctx);
 
     mp_wakeup_core(mpctx);
     return;

@@ -112,7 +112,7 @@ typedef int64_t (*mpv_stream_cb_read_fn)(void *cookie, char *buf, uint64_t nbyte
  * is used to test whether the stream is seekable (since seekability might
  * depend on the URI contents, not just the protocol). Return
  * MPV_ERROR_UNSUPPORTED if seeking is not implemented for this stream. This
- * seek also servies to establish the fact that streams start at position 0.
+ * seek also serves to establish the fact that streams start at position 0.
  *
  * This callback can be NULL, in which it behaves as if always returning
  * MPV_ERROR_UNSUPPORTED.

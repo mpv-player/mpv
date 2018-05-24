@@ -34,6 +34,7 @@
 #include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "misc/thread_tools.h"
 #include "osdep/atomic.h"
 #include "osdep/threads.h"
 
@@ -129,6 +130,8 @@ struct demux_internal {
     struct demuxer *d_thread;   // accessed by demuxer impl. (producer)
     struct demuxer *d_user;     // accessed by player (consumer)
 
+    bool owns_stream;
+
     // The lock protects the packet queues (struct demux_stream),
     // and the fields below.
     pthread_mutex_t lock;
@@ -139,6 +142,7 @@ struct demux_internal {
 
     bool thread_terminate;
     bool threading;
+    bool shutdown_async;
     void (*wakeup_cb)(void *ctx);
     void *wakeup_cb_ctx;
 
@@ -508,22 +512,39 @@ static void update_seek_ranges(struct demux_cached_range *range)
     range->is_bof = true;
     range->is_eof = true;
 
+    double min_start_pts = MP_NOPTS_VALUE;
+    double max_end_pts = MP_NOPTS_VALUE;
+
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
 
         if (queue->ds->selected && queue->ds->eager) {
-            range->seek_start = MP_PTS_MAX(range->seek_start, queue->seek_start);
-            range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
+            if (queue->is_bof) {
+                min_start_pts = MP_PTS_MIN(min_start_pts, queue->seek_start);
+            } else {
+                range->seek_start =
+                    MP_PTS_MAX(range->seek_start, queue->seek_start);
+            }
+
+            if (queue->is_eof) {
+                max_end_pts = MP_PTS_MAX(max_end_pts, queue->seek_end);
+            } else {
+                range->seek_end = MP_PTS_MIN(range->seek_end, queue->seek_end);
+            }
 
             range->is_eof &= queue->is_eof;
             range->is_bof &= queue->is_bof;
 
-            if (queue->seek_start >= queue->seek_end) {
-                range->seek_start = range->seek_end = MP_NOPTS_VALUE;
-                break;
-            }
+            bool empty = queue->is_eof && !queue->head;
+            if (queue->seek_start >= queue->seek_end && !empty)
+                goto broken;
         }
     }
+
+    if (range->is_eof)
+        range->seek_end = max_end_pts;
+    if (range->is_bof)
+        range->seek_start = min_start_pts;
 
     // Sparse stream behavior is not very clearly defined, but usually we don't
     // want it to restrict the range of other streams, unless
@@ -552,7 +573,12 @@ static void update_seek_ranges(struct demux_cached_range *range)
     }
 
     if (range->seek_start >= range->seek_end)
-        range->seek_start = range->seek_end = MP_NOPTS_VALUE;
+        goto broken;
+
+    return;
+
+broken:
+    range->seek_start = range->seek_end = MP_NOPTS_VALUE;
 }
 
 // Remove queue->head from the queue. Does not update in->fw_bytes/in->fw_packs.
@@ -920,7 +946,33 @@ int demux_get_num_stream(struct demuxer *demuxer)
     return r;
 }
 
-void free_demuxer(demuxer_t *demuxer)
+static void demux_shutdown(struct demux_internal *in)
+{
+    struct demuxer *demuxer = in->d_user;
+
+    if (demuxer->desc->close)
+        demuxer->desc->close(in->d_thread);
+    demuxer->priv = NULL;
+    in->d_thread->priv = NULL;
+
+    demux_flush(demuxer);
+    assert(in->total_bytes == 0);
+
+    if (in->owns_stream)
+        free_stream(demuxer->stream);
+    demuxer->stream = NULL;
+}
+
+static void demux_dealloc(struct demux_internal *in)
+{
+    for (int n = 0; n < in->num_streams; n++)
+        talloc_free(in->streams[n]);
+    pthread_mutex_destroy(&in->lock);
+    pthread_cond_destroy(&in->wakeup);
+    talloc_free(in->d_user);
+}
+
+void demux_free(struct demuxer *demuxer)
 {
     if (!demuxer)
         return;
@@ -928,27 +980,74 @@ void free_demuxer(demuxer_t *demuxer)
     assert(demuxer == in->d_user);
 
     demux_stop_thread(demuxer);
-
-    if (demuxer->desc->close)
-        demuxer->desc->close(in->d_thread);
-
-    demux_flush(demuxer);
-    assert(in->total_bytes == 0);
-
-    for (int n = 0; n < in->num_streams; n++)
-        talloc_free(in->streams[n]);
-    pthread_mutex_destroy(&in->lock);
-    pthread_cond_destroy(&in->wakeup);
-    talloc_free(demuxer);
+    demux_shutdown(in);
+    demux_dealloc(in);
 }
 
-void free_demuxer_and_stream(struct demuxer *demuxer)
+// Start closing the demuxer and eventually freeing the demuxer asynchronously.
+// You must not access the demuxer once this has been started. Once the demuxer
+// is shutdown, the wakeup callback is invoked. Then you need to call
+// demux_free_async_finish() to end the operation (it must not be called from
+// the wakeup callback).
+// This can return NULL. Then the demuxer cannot be free'd asynchronously, and
+// you need to call demux_free() instead.
+struct demux_free_async_state *demux_free_async(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    if (!in->threading)
+        return NULL;
+
+    pthread_mutex_lock(&in->lock);
+    in->thread_terminate = true;
+    in->shutdown_async = true;
+    pthread_cond_signal(&in->wakeup);
+    pthread_mutex_unlock(&in->lock);
+
+    return (struct demux_free_async_state *)demuxer->in; // lies
+}
+
+// As long as state is valid, you can call this to request immediate abort.
+// Roughly behaves as demux_cancel_and_free(), except you still need to wait
+// for the result.
+void demux_free_async_force(struct demux_free_async_state *state)
+{
+    struct demux_internal *in = (struct demux_internal *)state; // reverse lies
+
+    mp_cancel_trigger(in->d_user->cancel);
+}
+
+// Check whether the demuxer is shutdown yet. If not, return false, and you
+// need to call this again in the future (preferably after you were notified by
+// the wakeup callback). If yes, deallocate all state, and return true (in
+// particular, the state ptr becomes invalid, and the wakeup callback will never
+// be called again).
+bool demux_free_async_finish(struct demux_free_async_state *state)
+{
+    struct demux_internal *in = (struct demux_internal *)state; // reverse lies
+
+    pthread_mutex_lock(&in->lock);
+    bool busy = in->shutdown_async;
+    pthread_mutex_unlock(&in->lock);
+
+    if (busy)
+        return false;
+
+    demux_stop_thread(in->d_user);
+    demux_dealloc(in);
+    return true;
+}
+
+// Like demux_free(), but trigger an abort, which will force the demuxer to
+// terminate immediately. If this wasn't opened with demux_open_url(), there is
+// some chance this will accidentally abort other things via demuxer->cancel.
+void demux_cancel_and_free(struct demuxer *demuxer)
 {
     if (!demuxer)
         return;
-    struct stream *s = demuxer->stream;
-    free_demuxer(demuxer);
-    free_stream(s);
+    mp_cancel_trigger(demuxer->cancel);
+    demux_free(demuxer);
 }
 
 // Start the demuxer thread, which reads ahead packets on its own.
@@ -1236,6 +1335,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
 {
     struct demux_queue *queue = ds->queue;
     bool attempt_range_join = false;
+    bool prev_eof = queue->is_eof;
 
     if (!ds->in->seekable_cache)
         return;
@@ -1253,6 +1353,8 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
             attempt_range_join = queue->range->seek_end > old_end;
             if (queue->keyframe_latest->kf_seek_pts != MP_NOPTS_VALUE)
                 add_index_entry(queue, queue->keyframe_latest);
+        } else {
+            queue->is_eof |= ds->eof;
         }
         queue->keyframe_latest = dp;
         queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
@@ -1268,11 +1370,11 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
         queue->keyframe_pts = MP_PTS_MIN(queue->keyframe_pts, ts);
         queue->keyframe_end_pts = MP_PTS_MAX(queue->keyframe_end_pts, ts);
 
-        if (queue->is_eof) {
-            queue->is_eof = false;
-            update_seek_ranges(queue->range);
-        }
+        queue->is_eof = false;
     }
+
+    if (queue->is_eof != prev_eof)
+        update_seek_ranges(queue->range);
 
     if (attempt_range_join)
         attempt_range_joining(ds->in);
@@ -1443,9 +1545,11 @@ static bool read_packet(struct demux_internal *in)
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             bool eof = !ds->reader_head;
-            if (eof && ds->eof)
+            if (!ds->eof && eof) {
+                ds->eof = true;
+                adjust_seek_range_on_packet(ds, NULL);
                 wakeup_ds(ds);
-            ds->eof |= eof;
+            }
         }
         return false;
     }
@@ -1477,11 +1581,11 @@ static bool read_packet(struct demux_internal *in)
         if (eof) {
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
-                if (!ds->eof)
+                if (!ds->eof) {
+                    ds->eof = true;
                     adjust_seek_range_on_packet(ds, NULL);
-                ds->eof = true;
-                if (!in->last_eof && ds->wakeup_cb)
                     wakeup_ds(ds);
+                }
             }
             // If we had EOF previously, then don't wakeup (avoids wakeup loop)
             if (!in->last_eof) {
@@ -1653,12 +1757,23 @@ static void *demux_thread(void *pctx)
     struct demux_internal *in = pctx;
     mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
+
     while (!in->thread_terminate) {
         if (thread_work(in))
             continue;
         pthread_cond_signal(&in->wakeup);
         pthread_cond_wait(&in->wakeup, &in->lock);
     }
+
+    if (in->shutdown_async) {
+        pthread_mutex_unlock(&in->lock);
+        demux_shutdown(in);
+        pthread_mutex_lock(&in->lock);
+        in->shutdown_async = false;
+        if (in->wakeup_cb)
+            in->wakeup_cb(in->wakeup_cb_ctx);
+    }
+
     pthread_mutex_unlock(&in->lock);
     return NULL;
 }
@@ -2172,6 +2287,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
+        .cancel = stream->cancel,
         .seekable = stream->seekable,
         .filepos = -1,
         .global = global,
@@ -2182,6 +2298,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .extended_ctrls = stream->extended_ctrls,
     };
     demuxer->seekable = stream->seekable;
     if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)
@@ -2277,7 +2394,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         return demuxer;
     }
 
-    free_demuxer(demuxer);
+    demux_free(demuxer);
     return NULL;
 }
 
@@ -2286,6 +2403,9 @@ static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
 static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 
 // params can be NULL
+// If params->does_not_own_stream==false, this does _not_ free the stream if
+// opening fails. But if it succeeds, a later demux_free() call will free the
+// stream.
 struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                            struct mpv_global *global)
 {
@@ -2325,6 +2445,8 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                 if (demuxer) {
                     talloc_steal(demuxer, log);
                     log = NULL;
+                    demuxer->in->owns_stream =
+                        params ? !params->does_not_own_stream : false;
                     goto done;
                 }
             }
@@ -2338,28 +2460,38 @@ done:
 
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
-// (use free_demuxer_and_stream() to free the underlying stream too)
 // Also for some reason may close the opened stream if it's not needed.
+// demuxer->cancel is not the cancel parameter, but is its own object that will
+// be a slave (mp_cancel_set_parent()) to provided cancel object.
+// demuxer->cancel is automatically freed.
 struct demuxer *demux_open_url(const char *url,
-                                struct demuxer_params *params,
-                                struct mp_cancel *cancel,
-                                struct mpv_global *global)
+                               struct demuxer_params *params,
+                               struct mp_cancel *cancel,
+                               struct mpv_global *global)
 {
     struct demuxer_params dummy = {0};
     if (!params)
         params = &dummy;
+    assert(!params->does_not_own_stream); // API user error
+    struct mp_cancel *priv_cancel = mp_cancel_new(NULL);
+    if (cancel)
+        mp_cancel_set_parent(priv_cancel, cancel);
     struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
-                                     cancel, global);
-    if (!s)
+                                     priv_cancel, global);
+    if (!s) {
+        talloc_free(priv_cancel);
         return NULL;
+    }
     if (!params->disable_cache)
         stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
+        talloc_steal(d->in, priv_cancel);
         demux_maybe_replace_stream(d);
     } else {
         params->demuxer_failed = true;
         free_stream(s);
+        talloc_free(priv_cancel);
     }
     return d;
 }
@@ -3108,7 +3240,7 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
 
 bool demux_cancel_test(struct demuxer *demuxer)
 {
-    return mp_cancel_test(demuxer->stream->cancel);
+    return mp_cancel_test(demuxer->cancel);
 }
 
 struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)

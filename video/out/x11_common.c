@@ -1133,6 +1133,8 @@ void vo_x11_check_events(struct vo *vo)
             mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_ENTER);
             break;
         case ButtonPress:
+            if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
+                break;
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = true;
             mp_input_put_key(x11->input_ctx,
@@ -1142,6 +1144,8 @@ void vo_x11_check_events(struct vo *vo)
             vo_x11_xembed_send_message(x11, msg);
             break;
         case ButtonRelease:
+            if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
+                break;
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = false;
             mp_input_put_key(x11->input_ctx,
