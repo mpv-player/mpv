@@ -300,11 +300,9 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     m_config_cache_set_dispatch_change_cb(vo->opts_cache, vo->in->dispatch,
                                           update_opts, vo);
 
-#if HAVE_GL
     vo->gl_opts_cache = m_config_cache_alloc(NULL, global, &gl_video_conf);
     m_config_cache_set_dispatch_change_cb(vo->gl_opts_cache, vo->in->dispatch,
                                           update_opts, vo);
-#endif
 
     vo->eq_opts_cache = m_config_cache_alloc(NULL, global, &mp_csp_equalizer_conf);
     m_config_cache_set_dispatch_change_cb(vo->eq_opts_cache, vo->in->dispatch,
