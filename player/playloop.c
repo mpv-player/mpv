@@ -989,9 +989,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     // Do not wait for video stream if it only has sparse frames.
-    if (mpctx->vo_chain &&
-        mpctx->vo_chain->is_sparse &&
-        mpctx->video_status < STATUS_READY) {
+    if (mpctx->vo_chain && mpctx->vo_chain->is_sparse &&
+        mpctx->video_status < STATUS_READY)
+    {
         mpctx->video_status = STATUS_READY;
     }
 
