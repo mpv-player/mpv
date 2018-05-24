@@ -2763,12 +2763,6 @@ Demuxer
     imperfect behavior from libavformat demuxers. Passing ``no`` disables
     these. For debugging and testing only.
 
-``--demuxer-lavf-genpts-mode=<no|lavf>``
-    Mode for deriving missing packet PTS values from packet DTS. ``lavf``
-    enables libavformat's ``genpts`` option. ``no`` disables it. This used
-    to be enabled by default, but then it was deemed as not needed anymore.
-    Enabling this might help with timestamp problems, or make them worse.
-
 ``--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]``
     Pass AVOptions to libavformat demuxer.
 
