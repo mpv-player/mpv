@@ -550,9 +550,7 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
             .group_index = group_index,
             .is_hidden = !!opt->deprecation_message,
         };
-
-        if (opt->type != &m_option_type_subconfig)
-            MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
+        MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
     }
 
     config->groups[group_index].co_end_index = config->num_opts;
