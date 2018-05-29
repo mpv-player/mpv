@@ -32,7 +32,7 @@ static bool shaderc_init(struct ra_ctx *ctx)
         goto error;
 
     shaderc_compile_options_set_optimization_level(p->opts,
-                                            shaderc_optimization_level_size);
+                                    shaderc_optimization_level_performance);
     if (ctx->opts.debug)
         shaderc_compile_options_set_generate_debug_info(p->opts);
 
