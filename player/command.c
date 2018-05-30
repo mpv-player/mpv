@@ -905,7 +905,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct demuxer *d = mpctx->demuxer;
-    if (!d)
+    if (!d || !d->extended_ctrls)
         return M_PROPERTY_UNAVAILABLE;
     unsigned int title = -1;
     switch (action) {
@@ -1222,8 +1222,9 @@ static int mp_property_disc_titles(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
     unsigned int num_titles;
-    if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
-                                         &num_titles) < 1)
+    if (!demuxer || !demuxer->extended_ctrls ||
+        demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
+                             &num_titles) < 1)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(action, arg, num_titles);
 }
@@ -1253,8 +1254,9 @@ static int mp_property_list_disc_titles(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
     unsigned int num_titles;
-    if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
-                                         &num_titles) < 1)
+    if (!demuxer || !demuxer->extended_ctrls ||
+        demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
+                             &num_titles) < 1)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_read_list(action, arg, num_titles,
                                 get_disc_title_entry, mpctx);
@@ -1289,7 +1291,7 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
+    if (!demuxer || !demuxer->extended_ctrls)
         return M_PROPERTY_UNAVAILABLE;
 
     int ris, angles = -1, angle = 1;
@@ -3115,7 +3117,7 @@ static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
 
 static int prop_stream_ctrl(struct MPContext *mpctx, int ctrl, void *arg)
 {
-    if (!mpctx->demuxer)
+    if (!mpctx->demuxer || !mpctx->demuxer->extended_ctrls)
         return M_PROPERTY_UNAVAILABLE;
     int r = demux_stream_control(mpctx->demuxer, ctrl, arg);
     switch (r) {
@@ -5353,7 +5355,7 @@ static void cmd_tv_last_channel(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    if (!mpctx->demuxer) {
+    if (!mpctx->demuxer || !mpctx->demuxer->extended_ctrls) {
         cmd->success = false;
         return;
     }
