@@ -3519,7 +3519,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_ssbo = ra->caps & RA_CAP_BUF_RW;
     bool have_fragcoord = ra->caps & RA_CAP_FRAGCOORD;
 
-    const char *auto_fbo_fmts[] = {"rgba16", "rgba16f", "rgba16hf",
+    const char *auto_fbo_fmts[] = {"rgba16f", "rgba16hf", "rgba16",
                                    "rgb10_a2", "rgba8", 0};
     const char *user_fbo_fmts[] = {p->opts.fbo_format, 0};
     const char **fbo_fmts = user_fbo_fmts[0] && strcmp(user_fbo_fmts[0], "auto")
