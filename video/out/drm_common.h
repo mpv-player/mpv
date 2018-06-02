@@ -72,17 +72,4 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
 
-void kms_show_available_connectors(struct mp_log *log, int card_no);
-void kms_show_available_modes(struct mp_log *log,
-                              const drmModeConnector *connector);
-void kms_show_available_connectors_and_modes(struct mp_log *log, int card_no);
-void kms_show_available_cards_and_connectors(struct mp_log *log);
-void kms_show_available_cards_connectors_and_modes(struct mp_log *log);
-
-int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
-                               struct bstr name, struct bstr param);
-
-int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
-                          struct bstr name, struct bstr param);
-
 #endif
