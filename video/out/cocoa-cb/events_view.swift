@@ -36,7 +36,9 @@ class EventsView: NSView {
         super.init(frame: NSMakeRect(0, 0, 960, 480))
         autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         wantsBestResolutionOpenGLSurface = true
-        register(forDraggedTypes: [NSFilenamesPboardType, NSURLPboardType])
+        register(forDraggedTypes: [ NSFilenamesPboardType,
+                                    NSURLPboardType,
+                                    NSPasteboardTypeString ])
     }
 
     required init?(coder: NSCoder) {
@@ -60,10 +62,22 @@ class EventsView: NSView {
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard let types = sender.draggingPasteboard().types else { return [] }
-        if types.contains(NSFilenamesPboardType) || types.contains(NSURLPboardType) {
+        if types.contains(NSFilenamesPboardType) ||
+           types.contains(NSURLPboardType) ||
+           types.contains(NSPasteboardTypeString)
+        {
             return .copy
         }
         return []
+    }
+
+    func isURL(_ str: String) -> Bool {
+        let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
+                                             options: .caseInsensitive)
+        let isURL = regex.numberOfMatches(in: str,
+                                     options: [],
+                                       range: NSRange(location: 0, length: str.count))
+        return isURL > 0
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -80,6 +94,21 @@ class EventsView: NSView {
                 EventsResponder.sharedInstance().handleFilesArray(url)
                 return true
             }
+        } else if types.contains(NSPasteboardTypeString) {
+            guard let str = pb.string(forType: NSPasteboardTypeString) else { return false }
+            var filesArray: [String] = []
+
+            for val in str.components(separatedBy: "\n") {
+                let url = val.trimmingCharacters(in: .whitespacesAndNewlines)
+                let path = (url as NSString).expandingTildeInPath
+                if isURL(url) {
+                    filesArray.append(url)
+                } else if path.starts(with: "/") {
+                    filesArray.append(path)
+                }
+            }
+            EventsResponder.sharedInstance().handleFilesArray(filesArray)
+            return true
         }
         return false
     }
