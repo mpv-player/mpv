@@ -252,6 +252,10 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
 
+    if (!drm_atomic_save_old_state(atomic_ctx)) {
+        MP_WARN(ctx->vo, "Failed to save old DRM atomic state\n");
+    }
+
     drmModeAtomicReqPtr request = drmModeAtomicAlloc();
     if (!request) {
         MP_ERR(ctx->vo, "Failed to allocate drm atomic request\n");
@@ -263,14 +267,11 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
         return false;
     }
 
-    uint32_t blob_id = 0;
-    if (drmModeCreatePropertyBlob(p->kms->fd, &p->kms->mode, sizeof(drmModeModeInfo),
-                                  &blob_id) != 0) {
+    if (!drm_mode_ensure_blob(p->kms->fd, &p->kms->mode)) {
         MP_ERR(ctx->vo, "Failed to create DRM mode blob\n");
-        blob_id = 0;
         goto err;
     }
-    if (drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", blob_id) < 0) {
+    if (drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", p->kms->mode.blob_id) < 0) {
         MP_ERR(ctx->vo, "Could not set MODE_ID on crtc\n");
         goto err;
     }
@@ -287,8 +288,8 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
     drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_H",   p->osd_size.height << 16);
     drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_X",  0);
     drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_Y",  0);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_W",  p->kms->mode.hdisplay);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_H",  p->kms->mode.vdisplay);
+    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_W",  p->kms->mode.mode.hdisplay);
+    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_H",  p->kms->mode.mode.vdisplay);
 
     int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
     if (ret)
@@ -298,8 +299,6 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
     return ret == 0;
 
   err:
-    if (blob_id)
-        drmModeDestroyPropertyBlob(p->kms->fd, blob_id);
     drmModeAtomicFree(request);
     return false;
 }
@@ -314,17 +313,10 @@ static bool crtc_release_atomic(struct ra_ctx *ctx)
         MP_ERR(ctx->vo, "Failed to allocate drm atomic request\n");
         return false;
     }
-    drm_object_set_property(request, atomic_ctx->connector, "CRTC_ID", p->old_crtc->crtc_id);
 
-    uint32_t blob_id;
-    if (drmModeCreatePropertyBlob(p->kms->fd, &p->old_crtc->mode, sizeof(drmModeModeInfo),
-                                  &blob_id) != 0) {
-        MP_ERR(ctx->vo, "Failed to create DRM mode blob\n");
-        goto err;
+    if (!drm_atomic_restore_old_state(request, atomic_ctx)) {
+        MP_WARN(ctx->vo, "Got error while restoring old state\n");
     }
-    drm_object_set_property(request, atomic_ctx->crtc, "MODE_ID", blob_id);
-    drm_object_set_property(request, atomic_ctx->crtc, "ACTIVE", 1);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "FB_ID", p->old_crtc->buffer_id);
 
     int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
 
@@ -333,10 +325,6 @@ static bool crtc_release_atomic(struct ra_ctx *ctx)
 
     drmModeAtomicFree(request);
     return ret == 0;
-
-  err:
-    drmModeAtomicFree(request);
-    return false;
 }
 
 static bool crtc_setup(struct ra_ctx *ctx)
@@ -344,16 +332,16 @@ static bool crtc_setup(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     if (p->active)
         return true;
-    p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
 
     if (p->kms->atomic_context) {
         int ret = crtc_setup_atomic(ctx);
         p->active = true;
         return ret;
     } else {
+        p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
         int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb->id,
                                  0, 0, &p->kms->connector->connector_id, 1,
-                                 &p->kms->mode);
+                                 &p->kms->mode.mode);
         p->active = true;
         return ret == 0;
     }
@@ -376,19 +364,21 @@ static void crtc_release(struct ra_ctx *ctx)
         }
     }
 
-    if (p->old_crtc) {
-        if (p->kms->atomic_context) {
+    if (p->kms->atomic_context) {
+        if (p->kms->atomic_context->old_state.saved) {
             if (!crtc_release_atomic(ctx))
                 MP_ERR(ctx->vo, "Failed to restore previous mode\n");
-        } else {
+        }
+    } else {
+        if (p->old_crtc) {
             drmModeSetCrtc(p->kms->fd,
                            p->old_crtc->crtc_id, p->old_crtc->buffer_id,
                            p->old_crtc->x, p->old_crtc->y,
                            &p->kms->connector->connector_id, 1,
                            &p->old_crtc->mode);
+            drmModeFreeCrtc(p->old_crtc);
+            p->old_crtc = NULL;
         }
-        drmModeFreeCrtc(p->old_crtc);
-        p->old_crtc = NULL;
     }
 }
 
@@ -606,13 +596,13 @@ static bool drm_egl_init(struct ra_ctx *ctx)
             p->osd_size.width = ctx->vo->opts->drm_opts->drm_osd_size.w;
             p->osd_size.height = ctx->vo->opts->drm_opts->drm_osd_size.h;
         } else {
-            p->osd_size.width = p->kms->mode.hdisplay;
-            p->osd_size.height = p->kms->mode.vdisplay;
+            p->osd_size.width = p->kms->mode.mode.hdisplay;
+            p->osd_size.height = p->kms->mode.mode.vdisplay;
             MP_WARN(ctx, "Setting OSD size is only available with DRM atomic, defaulting to screen resolution\n");
         }
     } else {
-        p->osd_size.width = p->kms->mode.hdisplay;
-        p->osd_size.height = p->kms->mode.vdisplay;
+        p->osd_size.width = p->kms->mode.mode.hdisplay;
+        p->osd_size.height = p->kms->mode.mode.vdisplay;
     }
 
     uint32_t argb_format;

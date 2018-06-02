@@ -237,7 +237,7 @@ static bool setup_mode(struct kms *kms, int mode_id)
         return false;
     }
 
-    kms->mode = kms->connector->modes[mode_id];
+    kms->mode.mode = kms->connector->modes[mode_id];
     return true;
 }
 
@@ -281,7 +281,7 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
         .fd = open_card(card_no),
         .connector = NULL,
         .encoder = NULL,
-        .mode = { 0 },
+        .mode = {{0}},
         .crtc_id = -1,
         .card_no = card_no,
     };
@@ -324,7 +324,6 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
         }
     }
 
-
     drmModeFreeResources(res);
     return kms;
 
@@ -341,6 +340,7 @@ void kms_destroy(struct kms *kms)
 {
     if (!kms)
         return;
+    drm_mode_destroy_blob(kms->fd, &kms->mode);
     if (kms->connector) {
         drmModeFreeConnector(kms->connector);
         kms->connector = NULL;
@@ -425,7 +425,7 @@ void kms_show_available_cards_and_connectors(struct mp_log *log)
 
 double kms_get_display_fps(const struct kms *kms)
 {
-    return mode_get_Hz(&kms->mode);
+    return mode_get_Hz(&kms->mode.mode);
 }
 
 int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
