@@ -939,17 +939,16 @@ static void drain(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    snd_pcm_status_t *status;
     int err;
 
-    snd_pcm_status_alloca(&status);
+    unsigned space = err = snd_pcm_avail(p->alsa);
+    if (err == -EPIPE) // EOF
+        return p->buffersize;
 
-    err = snd_pcm_status(p->alsa, status);
     if (!check_device_present(ao, err))
         goto alsa_error;
-    CHECK_ALSA_ERROR("cannot get pcm status");
+    CHECK_ALSA_ERROR("cannot get pcm avail");
 
-    unsigned space = snd_pcm_status_get_avail(status);
     if (space > p->buffersize) // Buffer underrun?
         space = p->buffersize;
     return space / p->outburst * p->outburst;
