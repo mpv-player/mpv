@@ -30,6 +30,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "osdep/io.h"
+#include "misc/ctype.h"
 
 #define EVT_RELEASE 1
 #define EVT_ACQUIRE 2
@@ -47,7 +48,8 @@ const struct m_sub_options drm_conf = {
     .opts = (const struct m_option[]) {
         OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
                             0, drm_validate_connector_opt),
-        OPT_INT("drm-mode", drm_mode_id, 0),
+        OPT_STRING_VALIDATE("drm-mode", drm_mode_spec,
+                            0, drm_validate_mode_opt),
         OPT_CHOICE("drm-atomic", drm_atomic, 0,
                    ({"no", 0},
                     {"auto", 1})),
@@ -98,8 +100,8 @@ static const char *connector_names[] = {
 
 // KMS ------------------------------------------------------------------------
 
-static void get_connector_name(
-    drmModeConnector *connector, char ret[MAX_CONNECTOR_NAME_LEN])
+static void get_connector_name(const drmModeConnector *connector,
+                               char ret[MAX_CONNECTOR_NAME_LEN])
 {
     snprintf(ret, MAX_CONNECTOR_NAME_LEN, "%s-%d",
              connector_names[connector->connector_type],
@@ -240,12 +242,15 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
     return true;
 }
 
-static bool setup_mode(struct kms *kms, int mode_id)
+static bool setup_mode(struct kms *kms, const char *mode_spec)
 {
+    const int mode_id = (mode_spec != NULL) ? atoi(mode_spec) : 0;
+
     if (mode_id < 0 || mode_id >= kms->connector->count_modes) {
         MP_ERR(kms, "Bad mode ID (max = %d).\n",
                kms->connector->count_modes - 1);
 
+        MP_INFO(kms, "Available modes:\n");
         kms_show_available_modes(kms->log, kms->connector);
         return false;
     }
@@ -281,7 +286,8 @@ static void parse_connector_spec(struct mp_log *log,
 }
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id, int draw_plane, int drmprime_video_plane,
+                       const char* mode_spec,
+                       int draw_plane, int drmprime_video_plane,
                        bool use_atomic)
 {
     int card_no = -1;
@@ -317,7 +323,7 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
         goto err;
     if (!setup_crtc(kms, res))
         goto err;
-    if (!setup_mode(kms, mode_id))
+    if (!setup_mode(kms, mode_spec))
         goto err;
 
     // Universal planes allows accessing all the planes (including primary)
@@ -381,9 +387,8 @@ static double mode_get_Hz(const drmModeModeInfo *mode)
 void kms_show_available_modes(
     struct mp_log *log, const drmModeConnector *connector)
 {
-    mp_info(log, "Available modes:\n");
     for (unsigned int i = 0; i < connector->count_modes; i++) {
-        mp_info(log, "Mode %d: %s (%dx%d@%.2fHz)\n", i,
+        mp_info(log, "  Mode %d: %s (%dx%d@%.2fHz)\n", i,
                 connector->modes[i].name,
                 connector->modes[i].hdisplay,
                 connector->modes[i].vdisplay,
@@ -391,10 +396,10 @@ void kms_show_available_modes(
     }
 }
 
-void kms_show_available_connectors(struct mp_log *log, int card_no)
+static void kms_show_foreach_connector(struct mp_log *log, int card_no,
+                                       void (*show_fn)(struct mp_log*, int,
+                                                       const drmModeConnector*))
 {
-    mp_info(log, "Available connectors for card %d:\n", card_no);
-
     int fd = open_card(card_no);
     if (fd < 0) {
         mp_err(log, "Failed to open card %d\n", card_no);
@@ -412,12 +417,7 @@ void kms_show_available_connectors(struct mp_log *log, int card_no)
             = drmModeGetConnector(fd, res->connectors[i]);
         if (!connector)
             continue;
-        char other_connector_name[MAX_CONNECTOR_NAME_LEN];
-        get_connector_name(connector, other_connector_name);
-        mp_info(log, "%s (%s)\n", other_connector_name,
-                connector->connection == DRM_MODE_CONNECTED
-                    ? "connected"
-                    : "disconnected");
+        show_fn(log, card_no, connector);
         drmModeFreeConnector(connector);
     }
 
@@ -428,15 +428,63 @@ err:
         drmModeFreeResources(res);
 }
 
-void kms_show_available_cards_and_connectors(struct mp_log *log)
+static void kms_show_connector_name_and_state_callback(
+    struct mp_log *log, int card_no, const drmModeConnector *connector)
+{
+    char other_connector_name[MAX_CONNECTOR_NAME_LEN];
+    get_connector_name(connector, other_connector_name);
+    const char *connection_str =
+        (connector->connection == DRM_MODE_CONNECTED) ? "connected" : "disconnected";
+    mp_info(log, "  %s (%s)\n", other_connector_name, connection_str);
+}
+
+void kms_show_available_connectors(struct mp_log *log, int card_no)
+{
+    mp_info(log, "Available connectors for card %d:\n", card_no);
+    kms_show_foreach_connector(
+        log, card_no, kms_show_connector_name_and_state_callback);
+    mp_info(log, "\n");
+}
+
+static void kms_show_connector_modes_callback(struct mp_log *log, int card_no,
+                                              const drmModeConnector *connector)
+{
+    if (connector->connection != DRM_MODE_CONNECTED)
+        return;
+
+    char other_connector_name[MAX_CONNECTOR_NAME_LEN];
+    get_connector_name(connector, other_connector_name);
+    mp_info(log, "Available modes for drm-connector=%d.%s\n",
+            card_no, other_connector_name);
+    kms_show_available_modes(log, connector);
+    mp_info(log, "\n");
+}
+
+void kms_show_available_connectors_and_modes(struct mp_log *log, int card_no)
+{
+    kms_show_foreach_connector(log, card_no, kms_show_connector_modes_callback);
+}
+
+static void kms_show_foreach_card(
+    struct mp_log *log, void (*show_fn)(struct mp_log*,int))
 {
     for (int card_no = 0; card_no < DRM_MAX_MINOR; card_no++) {
         int fd = open_card(card_no);
         if (fd < 0)
             break;
         close(fd);
-        kms_show_available_connectors(log, card_no);
+        show_fn(log, card_no);
     }
+}
+
+void kms_show_available_cards_and_connectors(struct mp_log *log)
+{
+    kms_show_foreach_card(log, kms_show_available_connectors);
+}
+
+void kms_show_available_cards_connectors_and_modes(struct mp_log *log)
+{
+    kms_show_foreach_card(log, kms_show_available_connectors_and_modes);
 }
 
 double kms_get_display_fps(const struct kms *kms)
@@ -454,7 +502,21 @@ int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
     return 1;
 }
 
-
+int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
+                          struct bstr name, struct bstr param)
+{
+    if (bstr_equals0(param, "help")) {
+        kms_show_available_cards_connectors_and_modes(log);
+        return M_OPT_EXIT;
+    }
+    for (unsigned i = 0; i < param.len; ++i) {
+        if (!mp_isdigit(param.start[i])) {
+            mp_fatal(log, "Invalid value for option drm-mode. Must be a positive number or 'help'\n");
+            return M_OPT_INVALID;
+        }
+    }
+    return 1;
+}
 
 // VT switcher ----------------------------------------------------------------
 

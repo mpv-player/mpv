@@ -764,7 +764,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     MP_VERBOSE(ctx, "Initializing KMS\n");
     p->kms = kms_create(ctx->log, ctx->vo->opts->drm_opts->drm_connector_spec,
-                        ctx->vo->opts->drm_opts->drm_mode_id,
+                        ctx->vo->opts->drm_opts->drm_mode_spec,
                         ctx->vo->opts->drm_opts->drm_draw_plane,
                         ctx->vo->opts->drm_opts->drm_drmprime_video_plane,
                         ctx->vo->opts->drm_opts->drm_atomic);

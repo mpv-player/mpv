@@ -479,13 +479,14 @@ Available video output drivers are:
     ``--drm-connector=[<gpu_number>.]<name>``
         Select the connector to use (usually this is a monitor.) If ``<name>``
         is empty or ``auto``, mpv renders the output on the first available
-        connector. Use ``--drm-connector=help`` to get list of available
+        connector. Use ``--drm-connector=help`` to get a list of available
         connectors. When using multiple graphic cards, use the ``<gpu_number>``
         argument to disambiguate.
         (default: empty)
 
     ``--drm-mode=<number>``
-        Mode ID to use (resolution and frame rate).
+        Mode ID to use (resolution and frame rate). Use ``--drm-mode=help`` to
+        get a list of available modes for all active connectors.
         (default: 0)
 
     ``--drm-atomic=<no|auto>``
