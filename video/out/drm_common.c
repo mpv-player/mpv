@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <sys/vt.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "drm_common.h"
 
@@ -47,8 +48,12 @@ const struct m_sub_options drm_conf = {
         OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
                             0, drm_validate_connector_opt),
         OPT_INT("drm-mode", drm_mode_id, 0),
-        OPT_INT("drm-osd-plane-id", drm_osd_plane_id, 0),
-        OPT_INT("drm-video-plane-id", drm_video_plane_id, 0),
+        OPT_CHOICE_OR_INT("drm-osd-plane-id", drm_osd_plane_id, 0, 0, INT_MAX,
+                          ({"primary", DRM_OPTS_PRIMARY_PLANE},
+                           {"overlay", DRM_OPTS_OVERLAY_PLANE})),
+        OPT_CHOICE_OR_INT("drm-video-plane-id", drm_video_plane_id, 0, 0, INT_MAX,
+                          ({"primary", DRM_OPTS_PRIMARY_PLANE},
+                           {"overlay", DRM_OPTS_OVERLAY_PLANE})),
         OPT_CHOICE("drm-format", drm_format, 0,
                    ({"xrgb8888",    DRM_OPTS_FORMAT_XRGB8888},
                     {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010})),
@@ -56,8 +61,8 @@ const struct m_sub_options drm_conf = {
         {0},
     },
     .defaults = &(const struct drm_opts) {
-        .drm_osd_plane_id = -1,
-        .drm_video_plane_id = -1,
+        .drm_osd_plane_id = DRM_OPTS_PRIMARY_PLANE,
+        .drm_video_plane_id = DRM_OPTS_OVERLAY_PLANE,
     },
     .size = sizeof(struct drm_opts),
 };

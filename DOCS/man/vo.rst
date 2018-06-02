@@ -488,19 +488,21 @@ Available video output drivers are:
         Mode ID to use (resolution and frame rate).
         (default: 0)
 
-    ``--drm-osd-plane-id=<number>``
-        Select the DRM plane index to use for OSD (or OSD and video).
-        Index is zero based, and related to crtc.
-        When using this option with the drm_prime renderer, it will only affect
-        the OSD contents. Otherwise it will set OSD & video plane.
-        (default: primary plane)
+    ``--drm-osd-plane-id=<primary|overlay|N>``
+        Select the DRM plane to use for OSD (or OSD and video). The plane can be
+        specified as ``primary``, which will pick the first applicable primary
+        plane; ``overlay``, which will pick the first applicable overlay plane;
+        or by index. The index is zero based, and related to the CRTC. When using
+        this option with the drm_prime renderer, it will only affect the OSD
+        contents. Otherwise it will set OSD & video plane.
+        (default: primary)
 
-    ``--drm-video-plane-id=<number>``
-        Select the DRM plane index to use for video layer.
-        Index is zero based, and related to crtc.
-        This option only has effect when using the drm_prime renderer (which
-        supports several layers) together with ``vo=gpu`` and ``gpu-context=drm``.
-        (default: first overlay plane)
+    ``--drm-video-plane-id=<primary|overlay|N>``
+        Select the DRM plane index to use for video layer. This option accepts
+        the same values as ``--drm-osd-plane-id``. This option has an effect
+        only when using the drm_prime renderer (which supports several layers)
+        together with ``vo=gpu`` and ``gpu-context=drm``.
+        (default: overlay)
 
     ``--drm-format=<xrgb8888|xrgb2101010>``
         Select the DRM format to use (default: xrgb8888). This allows you to

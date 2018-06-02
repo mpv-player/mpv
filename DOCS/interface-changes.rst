@@ -20,6 +20,11 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
+    - the `--drm-osd-plane-id` and `--drm-video-plane-id`
+      options now accept either an integer index, or the values primary or overlay.
+      `--drm-osd-plane-id` now defaults to primary and `--drm-video-plane-id`
+      defaults to overlay. This should be similar to previous behavior on most drivers
+      due to how planes are usually sorted.
     - rename --opensles-frames-per-buffer to --opensles-frames-per-enqueue to
       better reflect its purpose. In the past it overrides the buffer size the AO
       requests (but not the default/value of the generic --audio-buffer option).

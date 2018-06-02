@@ -138,7 +138,8 @@ void drm_object_print_info(struct mp_log *log, struct drm_object *object)
 }
 
 struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id,
-                                                     int connector_id, int osd_plane_id, int video_plane_id)
+                                                     int connector_id,
+                                                     int osd_plane_idx, int video_plane_idx)
 {
     drmModePlaneRes *plane_res = NULL;
     drmModeRes *res = NULL;
@@ -228,12 +229,12 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
                 if ((!overlay_id) && (value == DRM_PLANE_TYPE_OVERLAY))
                     overlay_id = plane_id;
 
-                if (layercount == osd_plane_id) {
+                if (layercount == osd_plane_idx) {
                     ctx->osd_plane = plane;
                     continue;
                 }
 
-                if (layercount == video_plane_id) {
+                if (layercount == video_plane_idx) {
                     ctx->video_plane = plane;
                     continue;
                 }
@@ -244,26 +245,31 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
         }
     }
 
-    // default OSD plane to primary if unspecified
+    // OSD plane was specified as either of the special options: any primary plane or any overlay plane
     if (!ctx->osd_plane) {
-        if (primary_id) {
-            mp_verbose(log, "Using default plane %d for OSD\n", primary_id);
-            ctx->osd_plane = drm_object_create(log, ctx->fd, primary_id, DRM_MODE_OBJECT_PLANE);
+        const int osd_plane_id = (osd_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? overlay_id : primary_id;
+        const char *plane_type = (osd_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? "overlay" : "primary";
+        if (osd_plane_id) {
+            mp_verbose(log, "Using %s plane %d for OSD\n", plane_type, osd_plane_id);
+            ctx->osd_plane = drm_object_create(log, ctx->fd, osd_plane_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_err(log, "Failed to find OSD plane with id=%d\n", osd_plane_id);
+            mp_err(log, "Failed to find OSD plane with idx=%d\n", osd_plane_idx);
             goto fail;
         }
     } else {
         mp_verbose(log, "Found OSD plane with ID %d\n", ctx->osd_plane->id);
     }
 
-    // default video plane to overlay if unspecified
+    // video plane was specified as either of the special options: any primary plane or any overlay plane
     if (!ctx->video_plane) {
-        if (overlay_id) {
-            mp_verbose(log, "Using default plane %d for video\n", overlay_id);
-            ctx->video_plane = drm_object_create(log, ctx->fd, overlay_id, DRM_MODE_OBJECT_PLANE);
+        const int video_plane_id = (video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? primary_id : overlay_id;
+        const char *plane_type = (video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? "primary" : "overlay";
+
+        if (video_plane_id) {
+            mp_verbose(log, "Using %s plane %d for video\n", plane_type, video_plane_id);
+            ctx->video_plane = drm_object_create(log, ctx->fd, video_plane_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_verbose(log, "Failed to find video plane with id=%d. drmprime-drm hwdec interop will not work\n", video_plane_id);
+            mp_verbose(log, "Failed to find video plane with idx=%d. drmprime-drm hwdec interop will not work\n", video_plane_idx);
         }
     } else {
         mp_verbose(log, "Found video plane with ID %d\n", ctx->video_plane->id);
