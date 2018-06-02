@@ -258,7 +258,7 @@ static int init(struct ra_hwdec *hw)
             goto err;
         }
     } else {
-        mp_err(p->log, "Failed to retrieve DRM fd from native display.\n");
+        mp_verbose(p->log, "Failed to retrieve DRM fd from native display.\n");
         goto err;
     }
 
