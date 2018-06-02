@@ -153,8 +153,8 @@ static bool fb_setup_double_buffering(struct vo *vo)
 
     p->front_buf = 0;
     for (unsigned int i = 0; i < 2; i++) {
-        p->bufs[i].width = p->kms->mode.hdisplay;
-        p->bufs[i].height = p->kms->mode.vdisplay;
+        p->bufs[i].width = p->kms->mode.mode.hdisplay;
+        p->bufs[i].height = p->kms->mode.mode.vdisplay;
     }
 
     for (unsigned int i = 0; i < BUF_COUNT; i++) {
@@ -186,7 +186,7 @@ static bool crtc_setup(struct vo *vo)
     int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
                              p->bufs[MOD(p->front_buf - 1, BUF_COUNT)].fb,
                              0, 0, &p->kms->connector->connector_id, 1,
-                             &p->kms->mode);
+                             &p->kms->mode.mode);
     p->active = true;
     return ret == 0;
 }
