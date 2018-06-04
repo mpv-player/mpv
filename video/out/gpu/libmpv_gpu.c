@@ -207,6 +207,14 @@ static void screenshot(struct render_backend *ctx, struct vo_frame *frame,
     gl_video_screenshot(p->renderer, frame, args);
 }
 
+static void perfdata(struct render_backend *ctx,
+                     struct voctrl_performance_data *out)
+{
+    struct priv *p = ctx->priv;
+
+    gl_video_perfdata(p->renderer, out);
+}
+
 static void destroy(struct render_backend *ctx)
 {
     struct priv *p = ctx->priv;
@@ -235,5 +243,6 @@ const struct render_backend_fns render_backend_gpu = {
     .render = render,
     .get_image = get_image,
     .screenshot = screenshot,
+    .perfdata = perfdata,
     .destroy = destroy,
 };

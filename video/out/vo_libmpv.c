@@ -573,6 +573,13 @@ static void run_control_on_render_thread(void *p)
         talloc_free(frame);
         break;
     }
+    case VOCTRL_PERFORMANCE_DATA: {
+        if (ctx->renderer->fns->perfdata) {
+            ctx->renderer->fns->perfdata(ctx->renderer, data);
+            ret = VO_TRUE;
+        }
+        break;
+    }
     }
 
     *(int *)args[3] = ret;
@@ -614,6 +621,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
     // VOCTRLs to be run on the renderer thread (if possible at all).
     switch (request) {
     case VOCTRL_SCREENSHOT:
+        if (ctx->dispatch) {
+            int ret;
+            void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};
+            mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
+            return ret;
+        }
+    case VOCTRL_PERFORMANCE_DATA:
         if (ctx->dispatch) {
             int ret;
             void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};

@@ -54,6 +54,8 @@ struct render_backend_fns {
     void (*reset)(struct render_backend *ctx);
     void (*screenshot)(struct render_backend *ctx, struct vo_frame *frame,
                        struct voctrl_screenshot *args);
+    void (*perfdata)(struct render_backend *ctx,
+                     struct voctrl_performance_data *out);
     // Like vo_driver.get_image().
     struct mp_image *(*get_image)(struct render_backend *ctx, int imgfmt,
                                   int w, int h, int stride_align);
