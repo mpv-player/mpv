@@ -144,6 +144,12 @@
                         @"key"        : @"O",
                         @"target"     : self
                     }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Open Playlist…",
+                        @"action"     : @"openPlaylist",
+                        @"key"        : @"",
+                        @"target"     : self
+                    }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Close",
@@ -700,6 +706,17 @@
         for (id url in [panel URLs])
             [fileArray addObject:[url path]];
         [(Application *)NSApp openFiles:fileArray];
+    }
+}
+
+- (void)openPlaylist
+{
+    NSOpenPanel *panel = [[NSOpenPanel alloc] init];
+
+    if ([panel runModal] == NSModalResponseOK){
+        NSString *pl = [NSString stringWithFormat:@"loadlist \"%@\"",
+                                                  [panel URLs][0].path];
+        [(Application *)NSApp queueCommand:(char *)[pl UTF8String]];
     }
 }
 
