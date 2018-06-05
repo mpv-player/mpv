@@ -484,10 +484,21 @@ Available video output drivers are:
         argument to disambiguate.
         (default: empty)
 
-    ``--drm-mode=<number>``
-        Mode ID to use (resolution and frame rate). Use ``--drm-mode=help`` to
-        get a list of available modes for all active connectors.
-        (default: 0)
+    ``--drm-mode=<preferred|highest|N|WxH[@R]>``
+        Mode to use (resolution and frame rate).
+        Possible values:
+
+        :preferred: Use the preferred mode for the screen on the selected
+                    connector. (default)
+        :highest:   Use the mode with the highest resolution available on the
+                    selected connector.
+        :N:         Select mode by index.
+        :WxH[@R]:   Specify mode by width, height, and optionally refresh rate.
+                    In case several modes match, selects the mode that comes
+                    first in the EDID list of modes.
+
+        Use ``--drm-mode=help`` to get a list of available modes for all active
+        connectors.
 
     ``--drm-atomic=<no|auto>``
         Toggle use of atomic modesetting. Mostly useful for debugging.
