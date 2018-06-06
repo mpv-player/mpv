@@ -78,28 +78,23 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
-    convenience init(cocoaCB ccb: CocoaCB) {
-        self.init(contentRect: NSMakeRect(0, 0, 960, 480),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered, defer: false, screen: NSScreen.main())
-        cocoaCB = ccb
-        title = "mpv"
-    }
-
-    convenience init(contentRect: NSRect, styleMask style: NSWindowStyleMask,
-                     screen: NSScreen?, cocoaCB ccb: CocoaCB)
-    {
-        self.init(contentRect: contentRect, styleMask: style,
+    convenience init(contentRect: NSRect, screen: NSScreen?, view: NSView, cocoaCB ccb: CocoaCB) {
+        self.init(contentRect: contentRect,
+                  styleMask: [.titled, .closable, .miniaturizable, .resizable],
                   backing: .buffered, defer: false, screen: screen)
         cocoaCB = ccb
+        title = cocoaCB.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
         delegate = self
+        contentView!.addSubview(view)
+        view.frame = contentView!.frame
 
         unfsContentFrame = convertToScreen(contentView!.frame)
         targetScreen = screen!
         currentScreen = screen!
         unfScreen = screen!
+        initTitleBar()
 
         if let app = NSApp as? Application {
             app.menuBar.register(#selector(setHalfWindowSize), for: MPM_H_SIZE)
@@ -123,14 +118,31 @@ class Window: NSWindow, NSWindowDelegate {
         titleBarEffect!.blendingMode = .withinWindow
         titleBarEffect!.autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
 
-        setTitleBarStyle(mpv.getStringProperty("macos-title-bar-style") ?? "dark")
+        setTitleBarStyle(Int(mpv.macOpts!.macos_title_bar_style))
         contentView!.addSubview(titleBarEffect!, positioned: .above, relativeTo: nil)
-
-        border = mpv.getBoolProperty("border")
     }
 
-    func setTitleBarStyle(_ style: String) {
-        var effect = style
+    func setTitleBarStyle(_ style: Any) {
+        var effect: String
+
+        if style is Int {
+            switch style as! Int {
+            case 4:
+                effect = "auto"
+            case 3:
+                effect = "mediumlight"
+            case 2:
+                effect = "light"
+            case 1:
+                effect = "ultradark"
+            case 0: fallthrough
+            default:
+                effect = "dark"
+            }
+        } else {
+            effect = style as! String
+        }
+
         if effect == "auto" {
             let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
             effect = systemStyle == nil ? "mediumlight" : "ultradark"
@@ -339,16 +351,26 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
-    func setOnTop(_ state: Bool) {
+    func setOnTop(_ state: Bool, _ ontopLevel: Any) {
         if state {
-            let ontopLevel = mpv.getStringProperty("ontop-level") ?? "window"
-            switch ontopLevel {
-            case "window":
-                level = Int(CGWindowLevelForKey(.floatingWindow))
-            case "system":
-                level = Int(CGWindowLevelForKey(.statusWindow))+1
-            default:
-                level = Int(ontopLevel)!
+            if ontopLevel is Int {
+                switch ontopLevel as! Int {
+                case -1:
+                    level = Int(CGWindowLevelForKey(.floatingWindow))
+                case -2:
+                    level = Int(CGWindowLevelForKey(.statusWindow))+1
+                default:
+                    level = ontopLevel as! Int
+                }
+            } else {
+                switch ontopLevel as! String {
+                case "window":
+                    level = Int(CGWindowLevelForKey(.floatingWindow))
+                case "system":
+                    level = Int(CGWindowLevelForKey(.statusWindow))+1
+                default:
+                    level = Int(ontopLevel as! String)!
+                }
             }
             collectionBehavior.remove(.transient)
             collectionBehavior.insert(.managed)

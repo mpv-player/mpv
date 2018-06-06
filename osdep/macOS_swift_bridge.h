@@ -23,6 +23,7 @@
 #include "video/out/libmpv.h"
 #include "libmpv/render_gl.h"
 
+#include "options/m_config.h"
 #include "player/core.h"
 #include "input/input.h"
 #include "video/out/win_state.h"

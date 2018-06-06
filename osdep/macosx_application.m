@@ -40,11 +40,6 @@
 
 #define MPV_PROTOCOL @"mpv://"
 
-struct macos_opts {
-    int macos_title_bar_style;
-    int macos_fs_animation_duration;
-};
-
 #define OPT_BASE_STRUCT struct macos_opts
 const struct m_sub_options macos_conf = {
     .opts = (const struct m_option[]) {
@@ -66,13 +61,7 @@ const struct m_sub_options macos_conf = {
 // running in libmpv mode, and cocoa_main() was never called.
 static bool application_instantiated;
 
-struct playback_thread_ctx {
-    int  *argc;
-    char ***argv;
-};
-
 static pthread_t playback_thread_id;
-static struct playback_thread_ctx thread_ctx = {0};
 
 @interface Application ()
 {
@@ -90,18 +79,6 @@ static void terminate_cocoa_application(void)
 {
     [NSApp hide:NSApp];
     [NSApp terminate:NSApp];
-}
-
-static void *playback_thread(void *ctx_obj)
-{
-    mpthread_set_name("playback core (OSX)");
-    @autoreleasepool {
-        struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
-        int r = mpv_main(*ctx->argc, *ctx->argv);
-        terminate_cocoa_application();
-        // normally never reached - unless the cocoa mainloop hasn't started yet
-        exit(r);
-    }
 }
 
 @implementation Application
@@ -139,12 +116,6 @@ static void *playback_thread(void *ctx_obj)
     [em removeEventHandlerForEventClass:kCoreEventClass
                              andEventID:kAEQuitApplication];
     [super dealloc];
-}
-
-- (void)initMPVCore
-{
-    pthread_create(&playback_thread_id, NULL, playback_thread, &thread_ctx);
-    [[EventsResponder sharedInstance] waitForInputContext];
 }
 
 static const char macosx_icon[] =
@@ -187,9 +158,14 @@ static const char macosx_icon[] =
 
 - (void)setMpvHandle:(struct mpv_handle *)ctx
 {
-    if (_cocoa_cb) {
-        [_cocoa_cb setMpvHandle:ctx];
-    }
+#if HAVE_MACOS_COCOA_CB
+    [NSApp setCocoaCB:[[CocoaCB alloc] init:ctx]];
+#endif
+}
+
+- (const struct m_sub_options *)getMacOSConf
+{
+    return &macos_conf;
 }
 
 - (void)queueCommand:(char *)cmd
@@ -255,11 +231,28 @@ static const char macosx_icon[] =
 }
 @end
 
+struct playback_thread_ctx {
+    int  *argc;
+    char ***argv;
+};
+
 static void cocoa_run_runloop(void)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [NSApp run];
     [pool drain];
+}
+
+static void *playback_thread(void *ctx_obj)
+{
+    mpthread_set_name("playback core (OSX)");
+    @autoreleasepool {
+        struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
+        int r = mpv_main(*ctx->argc, *ctx->argv);
+        terminate_cocoa_application();
+        // normally never reached - unless the cocoa mainloop hasn't started yet
+        exit(r);
+    }
 }
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
@@ -273,10 +266,6 @@ static void init_cocoa_application(bool regular)
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
     [NSApp setMenuBar:[[MenuBar alloc] init]];
-
-#if HAVE_MACOS_COCOA_CB
-    [NSApp setCocoaCB:[[CocoaCB alloc] init]];
-#endif
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.
@@ -339,8 +328,9 @@ int cocoa_main(int argc, char *argv[])
         application_instantiated = true;
         [[EventsResponder sharedInstance] setIsApplication:YES];
 
-        thread_ctx.argc = &argc;
-        thread_ctx.argv = &argv;
+        struct playback_thread_ctx ctx = {0};
+        ctx.argc     = &argc;
+        ctx.argv     = &argv;
 
         if (bundle_started_from_finder(argv)) {
             setup_bundle(&argc, argv);
@@ -353,8 +343,8 @@ int cocoa_main(int argc, char *argv[])
             init_cocoa_application(false);
         }
 
-        if (![NSApp cocoaCB])
-            [NSApp initMPVCore];
+        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+        [[EventsResponder sharedInstance] waitForInputContext];
         cocoa_run_runloop();
 
         // This should never be reached: cocoa_run_runloop blocks until the
