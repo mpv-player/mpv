@@ -33,23 +33,29 @@
 #include "options/m_option.h"
 #include "osdep/timer.h"
 
-static struct ao *ao_cb = NULL;
+struct priv {
+    bool init;
+};
 
-int audio_callback(void *buffer, int len)
+int audio_callback(struct ao *ao, void *buffer, int len)
 {
-    struct ao *ao = ao_cb;
+    struct priv *priv;
 
-    // Audio callback not initialised.
-    if (ao == NULL)
+    if (ao == NULL || ao->priv == NULL)
         return -1;
 
-    if (buffer == NULL) {
-        MP_ERR(ao, "stream must not be NULL");
-        return -2;
-    }
+    priv = ao->priv;
+
+    /* Audio callback not initialised or selected. The ao_cb audio output driver
+     * must be selected prior to the calling of audio_configure and
+     * audio_callback.
+     */
+    if (priv->init == false)
+        return -1;
 
     if (len % ao->sstride)
-        MP_ERR(ao, "audio callback not sample aligned");
+        MP_ERR(ao, "audio callback not sample aligned. Len: %d, Sample Size: %d\n",
+                len, ao->sstride);
 
     // Time this buffer will take, plus assume 1 period (1 callback invocation)
     // fixed latency.
@@ -59,24 +65,32 @@ int audio_callback(void *buffer, int len)
             mp_time_us() + 1000000LL * delay);
 }
 
+static void uninit(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    priv->init = false;
+    return;
+}
+
 static int init(struct ao *ao)
 {
+    struct priv *priv = ao->priv;
+    priv->init = true;
+
+    //ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
+    //ao->samplerate = 48000;
+    //ao->format = af_fmt_from_planar(ao->format);
+    //ao->format = AF_FORMAT_S16;
+
+#if 0
     ao->format = AF_FORMAT_S16;
     mp_chmap_from_channels(&ao->channels, 2);
 
     MP_VERBOSE(ao, "Samplerate: %d Hz Channels: %d Format: %s\n",
             ao->samplerate, ao->channels.num, af_fmt_to_str(ao->format));
 
-    /* Setup for audio callback */
-    ao_cb = ao;
-
-    return 0;
-}
-
-static void uninit(struct ao *ao)
-{
-    ao_cb = NULL;
-    return;
+#endif
+    return 1;
 }
 
 static void resume (struct ao *ao)
@@ -92,8 +106,10 @@ const struct ao_driver audio_out_audio_cb = {
     .init      = init,
     .uninit    = uninit,
     .resume    = resume,
-    .priv_size = 0,
-    .priv_defaults = NULL,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .init = false,
+    },
     .options = NULL,
     .options_prefix = NULL,
 };

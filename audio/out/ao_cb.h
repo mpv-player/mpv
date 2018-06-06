@@ -18,6 +18,8 @@
 #ifndef MP_AO_CALLBACK_H_
 #define MP_AO_CALLBACK_H_
 
-int audio_callback(void *buffer, int len);
+#include "ao.h"
+
+int audio_callback(struct ao *ao, void *buffer, int len);
 
 #endif
