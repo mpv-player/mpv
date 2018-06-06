@@ -20,6 +20,11 @@
 
 #include "osdep/macosx_menubar.h"
 
+struct macos_opts {
+    int macos_title_bar_style;
+    int macos_fs_animation_duration;
+};
+
 // multithreaded wrapper for mpv_main
 int cocoa_main(int argc, char *argv[]);
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);

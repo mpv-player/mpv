@@ -31,7 +31,7 @@ struct mpv_handle;
 - (void)stopMPV:(char *)cmd;
 - (void)openFiles:(NSArray *)filenames;
 - (void)setMpvHandle:(struct mpv_handle *)ctx;
-- (void)initMPVCore;
+- (const struct m_sub_options *)getMacOSConf;
 
 @property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, assign) size_t openCount;
