@@ -424,7 +424,7 @@ end
 
 
 local function add_file(s)
-    append(s, "", {prefix=o.nl .. o.nl .. "File:", nl="", indent=""})
+    append(s, "", {prefix="File:", nl="", indent=""})
     append_property(s, "filename", {prefix_sep="", nl="", indent=""})
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
         append_property(s, "media-title", {prefix="Title:"})
