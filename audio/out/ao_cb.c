@@ -42,7 +42,7 @@ int audio_callback(struct ao *ao, void *buffer, int len)
     struct priv *priv;
 
     if (ao == NULL || ao->priv == NULL)
-        return -1;
+        return -4;
 
     priv = ao->priv;
 
@@ -51,11 +51,21 @@ int audio_callback(struct ao *ao, void *buffer, int len)
      * audio_callback.
      */
     if (priv->init == false)
-        return -1;
+    {
+        MP_ERR(ao, "ao_cb not initialized\n");
+        return -4;
+    }
 
-    if (len % ao->sstride)
+    if (ao->format == AF_FORMAT_UNKNOWN)
+    {
+        MP_ERR(ao, "format not selected for audio buffer\n");
+        return -10;
+    }
+
+    if (len % ao->sstride) {
         MP_ERR(ao, "audio callback not sample aligned. Len: %d, Sample Size: %d\n",
                 len, ao->sstride);
+    }
 
     // Time this buffer will take, plus assume 1 period (1 callback invocation)
     // fixed latency.
@@ -77,19 +87,15 @@ static int init(struct ao *ao)
     struct priv *priv = ao->priv;
     priv->init = true;
 
-    //ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
-    //ao->samplerate = 48000;
-    //ao->format = af_fmt_from_planar(ao->format);
-    //ao->format = AF_FORMAT_S16;
+    /* Required as planar audio causes arithmetic exceptions in pull API. */
+    ao->format = af_fmt_from_planar(ao->format);
 
-#if 0
-    ao->format = AF_FORMAT_S16;
-    mp_chmap_from_channels(&ao->channels, 2);
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
 
-    MP_VERBOSE(ao, "Samplerate: %d Hz Channels: %d Format: %s\n",
-            ao->samplerate, ao->channels.num, af_fmt_to_str(ao->format));
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        mp_chmap_from_channels(&ao->channels, 2);
 
-#endif
     return 1;
 }
 
