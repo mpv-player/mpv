@@ -26,7 +26,7 @@
 #include "mpv_talloc.h"
 
 #include "ao.h"
-#include "ao_cb.h"
+#include "ao_libmpv.h"
 #include "audio/format.h"
 #include "common/msg.h"
 #include "internal.h"
@@ -46,13 +46,13 @@ int audio_callback(struct ao *ao, void *buffer, int len)
 
     priv = ao->priv;
 
-    /* Audio callback not initialised or selected. The ao_cb audio output driver
-     * must be selected prior to the calling of audio_configure and
+    /* Audio callback not initialised or selected. The libmpv audio output
+     * driver must be selected prior to the calling of audio_configure and
      * audio_callback.
      */
     if (priv->init == false)
     {
-        MP_ERR(ao, "ao_cb not initialized\n");
+        MP_ERR(ao, "libmpv audio output not initialized\n");
         return -4;
     }
 
@@ -108,7 +108,7 @@ static void resume (struct ao *ao)
 
 const struct ao_driver audio_out_audio_cb = {
     .description = "Audio callback for libmpv",
-    .name      = "audio-cb",
+    .name      = "libmpv",
     .init      = init,
     .uninit    = uninit,
     .resume    = resume,

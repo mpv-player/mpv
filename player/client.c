@@ -22,7 +22,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "audio/out/ao_cb.h"
+#include "audio/out/ao_libmpv.h"
 #include "audio/format.h"
 #include "common/common.h"
 #include "common/global.h"
