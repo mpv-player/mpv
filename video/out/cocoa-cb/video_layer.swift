@@ -89,7 +89,7 @@ class VideoLayer: CAOpenGLLayer {
         if inLiveResize == false {
             isAsynchronous = false
         }
-        return mpv != nil && cocoaCB.backendState == .init
+        return mpv != nil && cocoaCB.backendState == .initialized
     }
 
     override func draw(inCGLContext ctx: CGLContextObj,
