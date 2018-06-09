@@ -35,11 +35,11 @@ class CocoaCB: NSObject {
     }
 
     enum State {
-        case uninit
+        case uninitialized
         case needsInit
-        case `init`
+        case initialized
     }
-    var backendState: State = .uninit
+    var backendState: State = .uninitialized
 
     let eventsLock = NSLock()
     var events: Int = 0
@@ -58,7 +58,7 @@ class CocoaCB: NSObject {
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        if backendState == .uninit {
+        if backendState == .uninitialized {
             backendState = .needsInit
 
             if let app = NSApp as? Application {
@@ -122,7 +122,7 @@ class CocoaCB: NSObject {
             window.isMovableByWindowBackground = true
         }
 
-        backendState = .init
+        backendState = .initialized
     }
 
     func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
@@ -476,7 +476,7 @@ class CocoaCB: NSObject {
             }
             shutdown()
         case MPV_EVENT_PROPERTY_CHANGE:
-            if backendState == .init {
+            if backendState == .initialized {
                 handlePropertyChange(event)
             }
         default:
