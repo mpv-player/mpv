@@ -43,26 +43,16 @@ struct priv {
 int libmpv_audio_callback(struct ao *ao, void *buffer, int len)
 {
     struct priv *priv;
-
-    if (ao == NULL || ao->priv == NULL)
-        return -4;
-
     priv = ao->priv;
 
-    /* Audio callback not initialised or selected. The libmpv audio output
-     * driver must be selected prior to the calling of audio_configure and
-     * audio_callback.
-     */
     if (priv->init == false)
     {
         MP_ERR(ao, "libmpv audio output not initialized\n");
         return -4;
     }
 
-    if (len % ao->sstride) {
-        MP_ERR(ao, "audio callback not sample aligned. Len: %d, Sample Size: %d\n",
-                len, ao->sstride);
-    }
+    if (len % ao->sstride)
+        MP_ERR(ao, "libmpv audio callback not sample aligned.\n");
 
     // Time this buffer will take, plus assume 1 period (1 callback invocation)
     // fixed latency.

@@ -1780,6 +1780,22 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
  */
 int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
 
+/**
+ * Fill a given buffer of length len with audio samples.
+ *
+ * This must be used in conjunction with the libmpv audio driver.
+ *
+ * The ao-libmpv-samplerate, ao-libmpv-format and ao-libmpv-channel-layouts
+ * options may be used to change the output audio filled in the buffer as
+ * required.
+ *
+ * These options by default will not modify the input audio, unless the input
+ * audio is in planar format.
+ *
+ * @param buffer Pointer to an allocated buffer.
+ * @param len Length of the buffer.
+ * @return Number of samples in the buffer, or negative on error.
+ */
 int mpv_audio_callback(mpv_handle *ctx, void *buffer, int len);
 
 #if MPV_ENABLE_DEPRECATED
