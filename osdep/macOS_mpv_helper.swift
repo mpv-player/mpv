@@ -36,6 +36,7 @@ class MPVHelper: NSObject {
     var mpctx: UnsafeMutablePointer<MPContext>?
     var macOpts: macos_opts?
     var fbo: GLint = 1
+    let deinitLock = NSLock()
 
     init(_ mpv: OpaquePointer) {
         super.init()
@@ -58,6 +59,7 @@ class MPVHelper: NSObject {
     }
 
     func initRender() {
+        var advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
         var pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil,
@@ -65,6 +67,7 @@ class MPVHelper: NSObject {
         var params: [mpv_render_param] = [
             mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
             mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: &pAddress),
+            mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: &advanced),
             mpv_render_param()
         ]
 
@@ -110,13 +113,25 @@ class MPVHelper: NSObject {
 
     func reportRenderFlip() {
         if mpvRenderContext == nil { return }
-            mpv_render_context_report_swap(mpvRenderContext)
+        mpv_render_context_report_swap(mpvRenderContext)
     }
 
-    func drawRender(_ surface: NSSize) {
+    func isRenderUpdateFrame() -> Bool {
+        deinitLock.lock()
+        if mpvRenderContext == nil {
+            deinitLock.unlock()
+            return false
+        }
+        let flags: UInt64 = mpv_render_context_update(mpvRenderContext)
+        deinitLock.unlock()
+        return flags & UInt64(MPV_RENDER_UPDATE_FRAME.rawValue) > 0
+    }
+
+    func drawRender(_ surface: NSSize, skip: Bool = false) {
         if mpvRenderContext != nil {
             var i: GLint = 0
             var flip: CInt = 1
+            var skip: CInt = skip ? 1 : 0
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
@@ -129,6 +144,7 @@ class MPVHelper: NSObject {
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
                 mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
+                mpv_render_param(type: MPV_RENDER_PARAM_SKIP_RENDERING, data: &skip),
                 mpv_render_param()
             ]
             mpv_render_context_render(mpvRenderContext, &params);
@@ -258,8 +274,10 @@ class MPVHelper: NSObject {
     func deinitRender() {
         mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
         mp_render_context_set_control_callback(mpvRenderContext, nil, nil)
+        deinitLock.lock()
         mpv_render_context_free(mpvRenderContext)
         mpvRenderContext = nil
+        deinitLock.unlock()
     }
 
     func deinitMPV(_ destroy: Bool = false) {

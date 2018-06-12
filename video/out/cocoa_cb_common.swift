@@ -72,7 +72,6 @@ class CocoaCB: NSObject {
     }
 
     func uninit() {
-        layer.setVideo(false)
         window.orderOut(nil)
     }
 
@@ -81,7 +80,6 @@ class CocoaCB: NSObject {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else {
             DispatchQueue.main.async {
-                self.layer.setVideo(true)
                 self.updateWindowSize(vo)
                 self.layer.update()
             }
@@ -106,7 +104,6 @@ class CocoaCB: NSObject {
         window.makeMain()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        layer.setVideo(true)
 
         if Bool(opts.fullscreen) {
             DispatchQueue.main.async {
@@ -449,7 +446,6 @@ class CocoaCB: NSObject {
 
     func shutdown(_ destroy: Bool = false) {
         setCursorVisiblility(true)
-        layer.setVideo(false)
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()

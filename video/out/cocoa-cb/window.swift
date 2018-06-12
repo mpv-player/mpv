@@ -613,6 +613,12 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.updateCusorVisibility()
     }
 
+    func windowDidChangeOcclusionState(_ notification: Notification) {
+        if occlusionState.contains(.visible) {
+            cocoaCB.layer.update(force: true)
+        }
+    }
+
     func windowWillMove(_ notification: Notification) {
         isMoving = true
     }
