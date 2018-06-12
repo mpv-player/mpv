@@ -21,7 +21,7 @@
 * [Contact](#contact)
 
 
-## External links
+## 외부링크
 
 
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
@@ -29,80 +29,69 @@
 * [Manual](http://mpv.io/manual/master/)
 
 
-## Overview
+## 오버뷰
 
 
-**mpv** is a media player based on MPlayer and mplayer2. It supports a wide
-variety of video file formats, audio and video codecs, and subtitle types.
 
-Releases can be found on the [release list][releases].
+**mpv**는 MPlayer와 mPlayer2에 기반을 둔 미디어 플레이어입니다. 이것은 방대한 비디오, 오디오 포맷과 코덱을 지원하며
+자막도 다양하게 지원합니다.
 
-## System requirements
+출시에 대한 정보는 [release list][releases]에서 볼 수 있습니다.
 
-- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
-- A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
-  decode video in realtime, but must be explicitly enabled with the `--hwdec`
-  option.
-- A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
-  many caveats with drivers or system compositors causing tearing, stutter,
-  etc. On Windows, you might want to make sure the graphics drivers are
-  current. In some cases, ancient fallback video output methods can help
-  (such as `--vo=xv` on Linux), but this use is not recommended or supported.
+## 시스템 요구사양
 
 
-## Downloads
+- 너무 구리지만 않으면 됩니다. 리눅스, 윈도우7이나 그 이상, 또는 OSX 10.8이후 버전이면 가능합니다.
+- 적당한 CPU나 하드웨어가 필요합니다. 실시간 비디오를 디코딩하여 재생하기 위해서는 말이죠,
+  다만 '--hwdec'옵션이 가능해야만 합니다.
+- 그래픽카드 역시 어느정도 사양을 갖추어줘야합니다. 윈도우 등에서 항상 그래픽드라이버는 최신의 것인지
+확인해줘야합니다. 몇몇 경우에서 오래된 비디오(리눅스의 '--vo=xv' 같은)는 권장되거나 지원되지 않을 수 있습니다.
 
 
-For semi-official builds and third-party packages please see
+## 다운로드
+
+
+다운로드는 여기서 가능합니다.(다만 정식버전이 아닙니다)
 [mpv.io/installation](http://mpv.io/installation/).
 
-## Changelog
+## 변경기록
 
 
-There is no complete changelog; however, changes to the player core interface
-are listed in the [interface changelog][interface-changes].
+ 아직 완성된 변경기록은 없습니다. 다만, [interface changelog][interface-changes]에서 인터페이스에
+ 수정에 대한 정보는 확인하실 수 있습니다.
+ C API의 변경은  [client API changelog][api-changes]에 기록되어 있습니다.
 
-Changes to the C API are documented in the [client API changelog][api-changes].
+ [release list][releases] 에 모든 중요한 수정기록들이 보관되어 있습니다.
 
-The [release list][releases] has a summary of most of the important changes
-on every release.
-
-Changes to the default key bindings are indicated in
+기본키 변경에 대한 정보는 아래에서 확인 가능합니다.
 [restore-old-bindings.conf][restore-old-bindings].
 
-## Compilation
+## 컴파일
 
 
-Compiling with full features requires development files for several
-external libraries. Below is a list of some important requirements.
+완벽한 형태의 컴파일은 개발 파일이나 다수의 외부 라이브러리들이 필요합니다.
+mpv 시스템은 [waf](https://waf.io/)를 사용하지만, 우리는 레파지토리에 해당하는 것을 따로
+저장해놓지 않았습니다. `./bootstrap.py` 스크립트는 최신버전의 waf를 포함하고 있으며 이것이 빌드에 이용되고 있습니다.
 
-The mpv build system uses [waf](https://waf.io/), but we don't store it in the
-repository. The `./bootstrap.py` script will download the latest version
-of waf that was tested with the build system.
+`./waf configure --help`를 통하여 사용가능한 빌드옵션의 리스트를 확인하세요.
+만약 몇몇 지원하는 것들이 설치되었으나, 찾는데(detect하지 못했음은 아마 사용하는데 실패한다) 어려움이 있다면
+`build/config.log`파일이 그 실패이유에 대한 정보를 가지고 있을겁니다.(아마 buffer 등의 정보가 따로 저장된다는 것 같음)
 
-For a list of the available build options use `./waf configure --help`. If
-you think you have support for some feature installed but configure fails to
-detect it, the file `build/config.log` may contain information about the
-reasons for the failure.
-
-NOTE: To avoid cluttering the output with unreadable spam, `--help` only shows
-one of the two switches for each option. If the option is autodetected by
-default, the `--disable-***` switch is printed; if the option is disabled by
-default, the `--enable-***` switch is printed. Either way, you can use
-`--enable-***` or `--disable-**` regardless of what is printed by `--help`.
-
-To build the software you can use `./waf build`: the result of the compilation
-will be located in `build/mpv`. You can use `./waf install` to install mpv
-to the *prefix* after it is compiled.
-
-Example:
+###참고###
+결과물이 너무 지저분해지는 것을 방지하기 위해서는(쓰잘데기 없는 것들), `--help`를 사용하면
+각 옵션에 대한 한가지 옵션만을 보여줄 것입니다. 만약 옵션이 기본값으로 자동감지되어진다면, 
+`--disable-***`스위치가 출력될 것이고, 옵션이 자동으로 기본값에 의해 비활성화된다면 
+`--enable-***`스위치가 출력될 것입니다. 어쨌든 당신은 `--help`를 통해 두 출력문을 보게 되겠지요.
+`./waf build`를 통해 당신은 소프트웨어를 빌드하게 될것인데, 그 결과물은 `build/mpv`에 저장될 것입니다.
+또한 설치는 `./waf install`에 미리 저장되어지겠죠.
+예시:
 
     ./bootstrap.py
     ./waf configure
     ./waf
     ./waf install
 
-Essential dependencies (incomplete list):
+필수  (추가될 수 있음):
 
 - gcc or clang
 - X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
@@ -111,129 +100,117 @@ Essential dependencies (incomplete list):
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
   and either libswresample or libavresample)
 - zlib
-- iconv (normally provided by the system libc)
-- libass (OSD, OSC, text subtitles)
-- Lua (optional, required for the OSC pseudo-GUI and youtube-dl integration)
-- libjpeg (optional, used for screenshots only)
-- uchardet (optional, for subtitle charset detection)
-- vdpau and vaapi libraries for hardware decoding on Linux (optional)
+- iconv (기본적으로 system libc에 포함되어 있음)
+- libass (OSD, OSC, 문자 자막형태)
+- Lua (선택 : OSC pseudo-GUI와 youtube-dl integration)
+- libjpeg (선택 : 스크린샷에만 이용됨)
+- uchardet (선택 :  자막 charset 감지)
+- vdpau and vaapi libraries for hardware decoding on Linux (선택)
 
-Libass dependencies:
+Libass 요구사항:
 
 - gcc or clang, yasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
-- harfbuzz (optional, required for correct rendering of combining characters,
-  particularly for correct rendering of non-English text on OSX, and
-  Arabic/Indic scripts on any platform)
+- harfbuzz (선택 : 알맞은 렌더링과 문자들의 조합을 위해 필요함.
+  특히, OSX에서 영어가 아닌 이외 문자나 모든 운영체제 상의 아라비아/인도 언어 스크립트를 위해서)
 
-FFmpeg dependencies:
+FFmpeg 요구사항:
 
 - gcc or clang, yasm on x86 and x86_64
-- OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
-- libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
-  explicitly enabled when compiling FFmpeg)
-- For native DASH playback, FFmpeg needs to be built with --enable-libxml2
-  (although there are security implications).
-- For good nvidia support on Linux, make sure nv-codec-headers is installed
-  and can be found by configure.
-- Libav support is broken. (See section below.)
+- OpenSSL or GnuTLS (FFmpeg를 보다 정확하게 컴파일링하기 위해)
+- libx264/libmp3lame/libfdk-aac  (인코딩을 하기위해 : 이유는 위와 같음)
+- 원본과 같은 DASH playback을 위해 FFmpeg는 --enable-libxml2로 빌드되어야합니다.(보호/보안 관련 이유)
+- 리눅스 상의 완벽한 NVIDIA의 지원을 바란다면, nv-codec-headers가 반드시 설치되어있고 설정되어있게 하세요.
+- Libav support는 더이상 지원하지 않습니다. (아래에 설명되어 있습니다.)
 
-Most of the above libraries are available in suitable versions on normal
-Linux distributions. For ease of compiling the latest git master of everything,
-you may wish to use the separately available build wrapper ([mpv-build][mpv-build])
-which first compiles FFmpeg libraries and libass, and then compiles the player
-statically linked against those.
 
-If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
-or cross-compile from Linux with MinGW. See
-[Windows compilation][windows_compilation].
+위 대부분의 라이브러리들은 일반적인 리눅스 배포버전에 잘 맞습니다. 모든 최신버전의 git master에서의 컴파일링을
+돕기위해, ([mpv-build][mpv-build])를 이용하여 각각 알맞은 build wrapper를 사용하길 권장합니다.
+이는 첫번째로 FFmpeg 라이브러리들과 libass를 컴파일링하며, 그 후에 이에 해당하는 플레이어들에 고정되어 컴파일링될 것입니다.
+
+
+Windows binary를 빌드하고 싶다면, MSYS2와 MinGW 둘중 아무것이나 사용해도 무관하며,
+혹은 Linux에서 MinGW를 사용하여 2중 컴파일하여도 상관 없습니다.
+[Windows compilation][windows_compilation]에서 자세한 컴파일링 정보를 참고!
 
 
 ## FFmpeg vs. Libav
 
 
-Generally, mpv should work with the latest release as well as the git version
-of FFmpeg. Libav support is currently broken, because they did not add certain
-FFmpeg API changes which mpv relies on.
+일반적으로 mpv는 FFmpeg의 git version과 함께 최신버전이어야 합니다. 현재 최신 FFmpeg API 변경을
+진행하지 않아 mpv가 기반인 Libav 지원은 현재 불가능하게 되었습니다.
 
 
-## FFmpeg ABI compatibility
-
-mpv does not support linking against FFmpeg versions it was not built with, even
-if the linked version is supposedly ABI-compatible with the version it was
-compiled against. Expect malfunctions, crashes, and security issues if you
-do it anyway.
-
-The reason for not supporting this is because it creates far too much complexity
-with little to no benefit, coupled with absurd and unusable FFmpeg API
-artifacts.
-
-Newer mpv versions will refuse to start if runtime and compile time FFmpeg
-library versions mismatch.
-
-## Release cycle
-
-Every other month, an arbitrary git snapshot is made, and is assigned
-a 0.X.0 version number. No further maintenance is done.
-
-The goal of releases is to make Linux distributions happy. Linux distributions
-are also expected to apply their own patches in case of bugs and security
-issues.
-
-Releases other than the latest release are unsupported and unmaintained.
-
-See the [release policy document][release-policy] for more information.
-
-## Bug reports
+## FFmpeg ABI 호환성
 
 
-Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
-reports or feature requests. Follow the template's instructions or the issue
-will likely be ignored or closed as invalid.
+mpv는 FFmpeg 버전들 사이에 링크를 지원하지 않습니다. 버전이 바뀌면 새로 빌드하셔야합니다.(ABI호환이 되는 버전일지라도)
+만약 그대로 버전을 바꾸어 링크 후 진행할 경우 오작동,에러나 보안문제가 발생할 수 있습니다.
 
-Using the bug tracker as place for simple questions is fine but IRC is
-recommended (see [Contact](#Contact) below).
+이에 해당하는 이유는 이 mpv는 변경점에 비해 너무 복잡하며 불이익한 변경을 진행하였으며 필요없는 FFMpeg API들이 존재합니다.
 
-## Contributing
+새로운 mpv 버전은 런타임과 컴파일타임이 FFmpeg라이브러리 버전과 다르면 실행자체를 멈추도록 했습니다.(위의 에러 방지)
 
 
-Please read [contribute.md][contribute.md].
+## 새 버전 배포 방식
 
-For small changes you can just send us pull requests through GitHub. For bigger
-changes come and talk to us on IRC before you start working on them. It will
-make code review easier for both parties later on.
 
-You can check [the wiki](https://github.com/mpv-player/mpv/wiki/Stuff-to-do)
-or the [issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22)
-for ideas on what you could contribute with.
+매달 새로운 git 스냅샷이 생성되며 0.X.0의 형태의 버전 넘버로 생성될 것입니다.
+더이상의 수정은 없습니다.
 
-## Relation to MPlayer and mplayer2
+목표는 리눅스 개발자들의 만족입니다. 리눅스 개발자들 역시 그들의 패치로서 버그와 보안문제를 해결하길 바랍니다.
 
-mpv is a fork of MPlayer. Much has changed, and in general, mpv should be
-considered a completely new program, rather than a MPlayer drop-in replacement.
+최신 버전에 대한 지원과 수정만 진행합니다.
 
-For details see [FAQ entry](https://github.com/mpv-player/mpv/wiki/FAQ#How_is_mpv_related_to_MPlayer).
+[release policy document][release-policy] 에서 더 정확한 정보를 찾아보세요.
 
-If you are wondering what's different from mplayer2 and MPlayer, an incomplete
-and largely unmaintained list of changes is located [here][mplayer-changes].
+## 버그 리포트
 
-## License
+Github에서 지원하는 [issue tracker][issue-tracker]를 통해 우리에게 버그리포트와 현상 request를 주세요.
+해당하는 템플릿의 사용법에 따르지 않으면 이슈는 무시되거나 삭제될 수 있습니다.
+
+
+버그 트래커나 간단한 질문은 받을 수 있습니다. (see [Contact](#Contact) below).
+
+## 컨트리뷰션
+
+
+ [contribute.md][contribute.md]을 읽으세요.
+간단한 수정은 pull request를 통하여 보내주세요. 큰 변경사항의 경우 IRC를 통해 우리에게 말해주세요.
+이것이 공동작업에 훨씬 편하며 코드를 분석하는데 도움이 됩니다.
+
+
+[the wiki](https://github.com/mpv-player/mpv/wiki/Stuff-to-do)
+[issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22)
+에서 아이디어의 제출이 가능합니다.
+
+## MPlayer 와 mplayer2
+
+
+mpv는 MPlayer의 분기점입니다. 대부분은 수정되었고, mpv는 완전 새로운 프로그램으로서 받아들어져야하며
+MPlayer의 대체물이라고 더이상 보기 힘듭니다.
+
+더 정확한 정보를 보기 위해서 여기를 확인해주세요.[FAQ entry](https://github.com/mpv-player/mpv/wiki/FAQ#How_is_mpv_related_to_MPlayer).
+
+그래도 무슨 차이인지 궁금하다면, 아직 완성되지 않은 수많은 변경사항들을 이곳에서 확인할 수 있습니다.
+[여기][mplayer-changes].
+
+## 라이센스
 
 GPLv2 "or later" by default, LGPLv2.1 "or later" with `--enable-lgpl`.
 See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
 
-## Contact
+## 연락처
 
 
-Most activity happens on the IRC channel and the github issue tracker.
+IRC나 Github에서 대부분의 컨택트를 받습니다.
 
  - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
  - **User IRC Channel**: `#mpv` on `irc.freenode.net`
  - **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
 
-To contact the `mpv` team in private write to `mpv-team@googlegroups.com`. Use
-only if discretion is required.
+`mpv`팀을 개인적으로 문의하고 싶으시다면 `mpv-team@googlegroups.com`으로 메일해주세요. 신중하게 부탁드리겠습니다.
 
 [releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
