@@ -2005,5 +2005,5 @@ int mpv_audio_callback(mpv_handle *ctx, void *buffer, int len)
     if (!buffer || !len)
         return MPV_ERROR_INVALID_PARAMETER;
 
-    return audio_callback(ctx->mpctx->ao, buffer, len);
+    return libmpv_audio_callback(ctx->mpctx->ao, buffer, len);
 }

@@ -35,9 +35,12 @@
 
 struct priv {
     bool init;
+    struct m_channels channel_layouts;
+    int samplerate;
+    int format;
 };
 
-int audio_callback(struct ao *ao, void *buffer, int len)
+int libmpv_audio_callback(struct ao *ao, void *buffer, int len)
 {
     struct priv *priv;
 
@@ -54,12 +57,6 @@ int audio_callback(struct ao *ao, void *buffer, int len)
     {
         MP_ERR(ao, "libmpv audio output not initialized\n");
         return -4;
-    }
-
-    if (ao->format == AF_FORMAT_UNKNOWN)
-    {
-        MP_ERR(ao, "format not selected for audio buffer\n");
-        return -10;
     }
 
     if (len % ao->sstride) {
@@ -87,14 +84,30 @@ static int init(struct ao *ao)
     struct priv *priv = ao->priv;
     priv->init = true;
 
-    /* Required as planar audio causes arithmetic exceptions in pull API. */
-    ao->format = af_fmt_from_planar(ao->format);
+    /* Only error if user explicitly asks for planar output audio. */
+    if (af_fmt_is_planar(priv->format))
+        MP_ERR(ao, "planar format not supported\n");
 
-    struct mp_chmap_sel sel = {0};
-    mp_chmap_sel_add_waveext_def(&sel);
+    if (priv->format)
+        ao->format = priv->format;
+    else {
+        /* Required as planar audio causes arithmetic exceptions in pull API. */
+        ao->format = af_fmt_from_planar(ao->format);
+    }
+
+    if (priv->samplerate)
+        ao->samplerate = priv->samplerate;
+
+    struct mp_chmap_sel sel = {.tmp = ao};
+    if (priv->channel_layouts.num_chmaps) {
+        for (int n = 0; n < priv->channel_layouts.num_chmaps; n++)
+            mp_chmap_sel_add_map(&sel, &priv->channel_layouts.chmaps[n]);
+    } else {
+        mp_chmap_sel_add_any(&sel);
+    }
 
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-        mp_chmap_from_channels(&ao->channels, 2);
+        MP_ERR(ao, "unable to set channel map\n");
 
     return 1;
 }
@@ -116,6 +129,11 @@ const struct ao_driver audio_out_audio_cb = {
     .priv_defaults = &(const struct priv) {
         .init = false,
     },
-    .options = NULL,
-    .options_prefix = NULL,
+    .options = (const struct m_option[]) {
+        OPT_CHANNELS("channel-layouts", channel_layouts, 0, .min = 1),
+        OPT_INTRANGE("samplerate", samplerate, 0, 1000, 8*48000),
+		OPT_AUDIOFORMAT("format", format, 0),
+        {0}
+    },
+    .options_prefix = "ao-libmpv",
 };

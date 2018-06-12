@@ -20,6 +20,6 @@
 
 #include "ao.h"
 
-int audio_callback(struct ao *ao, void *buffer, int len);
+int libmpv_audio_callback(struct ao *ao, void *buffer, int len);
 
 #endif
