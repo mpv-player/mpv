@@ -49,7 +49,7 @@ extern const struct ao_driver audio_out_null;
 extern const struct ao_driver audio_out_alsa;
 extern const struct ao_driver audio_out_wasapi;
 extern const struct ao_driver audio_out_pcm;
-extern const struct ao_driver audio_out_audio_cb;
+extern const struct ao_driver audio_out_libmpv;
 extern const struct ao_driver audio_out_lavc;
 extern const struct ao_driver audio_out_sdl;
 
@@ -93,7 +93,7 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_COREAUDIO
     &audio_out_coreaudio_exclusive,
 #endif
-    &audio_out_audio_cb,
+    &audio_out_libmpv,
     &audio_out_pcm,
     &audio_out_lavc,
 #if HAVE_RSOUND

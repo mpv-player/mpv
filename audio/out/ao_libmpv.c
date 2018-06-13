@@ -109,7 +109,7 @@ static void resume (struct ao *ao)
 
 #define OPT_BASE_STRUCT struct priv
 
-const struct ao_driver audio_out_audio_cb = {
+const struct ao_driver audio_out_libmpv = {
     .description = "Audio callback for libmpv",
     .name      = "libmpv",
     .init      = init,
@@ -122,7 +122,7 @@ const struct ao_driver audio_out_audio_cb = {
     .options = (const struct m_option[]) {
         OPT_CHANNELS("channel-layouts", channel_layouts, 0, .min = 1),
         OPT_INTRANGE("samplerate", samplerate, 0, 1000, 8*48000),
-		OPT_AUDIOFORMAT("format", format, 0),
+        OPT_AUDIOFORMAT("format", format, 0),
         {0}
     },
     .options_prefix = "ao-libmpv",
