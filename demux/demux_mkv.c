@@ -1588,6 +1588,7 @@ static const char *const mkv_audio_tags[][2] = {
     { "A_FLAC",                 "flac" },
     { "A_ALAC",                 "alac" },
     { "A_TTA1",                 "tta" },
+    { "A_MLP",                  "mlp" },
     { NULL },
 };
 
