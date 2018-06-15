@@ -309,7 +309,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func endAnimation(_ newFrame: NSRect = NSZeroRect) {
-        if !NSEqualRects(newFrame, NSZeroRect) {
+        if !NSEqualRects(newFrame, NSZeroRect) && isAnimating {
             NSAnimationContext.runAnimationGroup({ (context) -> Void in
                 context.duration = 0.01
                 self.animator().setFrame(newFrame, display: true)
