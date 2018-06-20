@@ -677,11 +677,15 @@ def build(ctx):
             _build_libmpv(False)
 
         def get_deps():
-            res = ""
+            res = []
             for k in ctx.env.keys():
-                if k.startswith("LIB_") and k != "LIB_ST":
-                    res += " ".join(["-l" + x for x in ctx.env[k]]) + " "
-            return res
+                if (k.startswith("LIB_") and k != "LIB_ST") \
+                or (k.startswith("STLIB_") and k != "STLIB_ST" and k != "STLIB_MARKER"):
+                    for l in ctx.env[k]:
+                        if l in res:
+                            res.remove(l)
+                        res.append(l)
+            return " ".join(["-l" + l for l in res])
 
         ctx(
             target       = 'libmpv/mpv.pc',
