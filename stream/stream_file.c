@@ -121,16 +121,16 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 static int write_buffer(stream_t *s, char *buffer, int len)
 {
     struct priv *p = s->priv;
-    int r;
-    int wr = 0;
-    while (wr < len) {
-        r = write(p->fd, buffer, len);
-        if (r <= 0)
+    int r = len;
+    int wr;
+    while (r > 0) {
+        wr = write(p->fd, buffer, r);
+        if (wr <= 0)
             return -1;
-        wr += r;
-        buffer += r;
+        r -= wr;
+        buffer += wr;
     }
-    return len;
+    return len - r;
 }
 
 static int seek(stream_t *s, int64_t newpos)
