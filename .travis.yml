@@ -1,4 +1,4 @@
-language: c
+language: generic
 
 os:
   - linux
