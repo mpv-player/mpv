@@ -149,7 +149,7 @@ typedef struct mpv_opengl_fbo {
 
 typedef struct mpv_opengl_drm_params {
     /**
-     * DRM fd (int). set this to -1 if invalid.
+     * DRM fd (int). Set to a negative number if invalid.
      */
     int fd;
 
@@ -169,6 +169,12 @@ typedef struct mpv_opengl_drm_params {
      * The atomic request pointer is usually changed at every renderloop.
      */
     struct _drmModeAtomicReq **atomic_request_ptr;
+
+    /**
+     * DRM render node. Used for VAAPI interop.
+     * Set to a negative number if invalid.
+     */
+    int render_fd;
 } mpv_opengl_drm_params;
 
 typedef struct mpv_opengl_drm_osd_size {
