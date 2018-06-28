@@ -513,6 +513,8 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     p->egl.context = EGL_NO_CONTEXT;
     eglDestroyContext(p->egl.display, p->egl.context);
 
+    close(p->drm_params.render_fd);
+
     if (p->kms) {
         kms_destroy(p->kms);
         p->kms = 0;
@@ -664,6 +666,20 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     p->drm_params.connector_id = p->kms->connector->connector_id;
     if (p->kms->atomic_context)
         p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
+    char *rendernode_path = drmGetRenderDeviceNameFromFd(p->kms->fd);
+    MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);
+    if (rendernode_path) {
+        p->drm_params.render_fd = open(rendernode_path, O_RDWR | O_CLOEXEC);
+        if (p->drm_params.render_fd < 0) {
+            MP_WARN(ctx, "Cannot open render node \"%s\": %s. VAAPI hwdec will be disabled\n",
+                    rendernode_path, mp_strerror(errno));
+        }
+        free(rendernode_path);
+    } else {
+        p->drm_params.render_fd = -1;
+        MP_VERBOSE(ctx, "Could not find path to render node. VAAPI hwdec will be disabled\n");
+    }
+
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
         .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
