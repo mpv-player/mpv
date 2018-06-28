@@ -488,6 +488,16 @@ Available video output drivers are:
         Mode ID to use (resolution and frame rate).
         (default: 0)
 
+    ``--drm-atomic=<no|auto>``
+        Toggle use of atomic modesetting. Mostly useful for debugging.
+
+        :no:    Use legacy modesetting.
+        :auto:  Use atomic modesetting, falling back to legacy modesetting if
+                not available. (default)
+
+        Note: Only affects ``gpu-context=drm``. ``vo=drm`` supports legacy
+        modesetting only.
+
     ``--drm-draw-plane=<primary|overlay|N>``
         Select the DRM plane to which video and OSD is drawn to, under normal
         circumstances. The plane can be specified as ``primary``, which will
