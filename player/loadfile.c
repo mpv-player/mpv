@@ -362,8 +362,11 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
     if (!track->stream)
         return;
     double pts = get_current_time(mpctx);
-    if (pts != MP_NOPTS_VALUE)
+    if (pts != MP_NOPTS_VALUE) {
         pts += get_track_seek_offset(mpctx, track);
+        if (track->type == STREAM_SUB)
+            pts -= 10.0;
+    }
     demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
     if (track == mpctx->seek_slave)
         mpctx->seek_slave = NULL;
