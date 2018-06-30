@@ -211,12 +211,10 @@ static void uninit_demuxer(struct MPContext *mpctx)
     for (int i = 0; i < mpctx->num_tracks; i++) {
         struct track *track = mpctx->tracks[i];
 
-        assert(!track->dec);
+        assert(!track->dec && !track->d_sub);
         assert(!track->vo_c && !track->ao_c);
         assert(!track->sink);
         assert(!track->remux_sink);
-
-        sub_destroy(track->d_sub);
 
         // Demuxers can be added in any order (if they appear mid-stream), and
         // we can't know which tracks uses which, so here's some O(n^2) trash.
@@ -683,8 +681,6 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
         return false;
 
     struct demuxer *d = track->demuxer;
-
-    sub_destroy(track->d_sub);
 
     if (mpctx->seek_slave == track)
         mpctx->seek_slave = NULL;
