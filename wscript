@@ -935,8 +935,10 @@ def options(opt):
     opt.load('compiler_c')
     opt.load('waf_customizations')
     opt.load('features')
+    opt.load('gnu_dirs')
 
     group = opt.get_option_group("build and install options")
+    """
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
             type    = 'string',
@@ -944,6 +946,7 @@ def options(opt):
             default = default,
             help    = 'directory for installing {0} [{1}]' \
                       .format(desc, default))
+    """
 
     group.add_option('--variant',
         default = '',
