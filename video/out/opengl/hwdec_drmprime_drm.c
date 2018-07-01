@@ -257,6 +257,10 @@ static int init(struct ra_hwdec *hw)
             mp_err(p->log, "Failed to retrieve DRM atomic context.\n");
             goto err;
         }
+        if (!p->ctx->video_plane) {
+            mp_warn(p->log, "No video plane. You might need to specify it manually using --drm-video-plane-id\n");
+            goto err;
+        }
     } else {
         mp_verbose(p->log, "Failed to retrieve DRM fd from native display.\n");
         goto err;

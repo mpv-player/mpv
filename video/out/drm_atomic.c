@@ -263,20 +263,15 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
             mp_verbose(log, "Using default plane %d for video\n", overlay_id);
             ctx->video_plane = drm_object_create(log, ctx->fd, overlay_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_err(log, "Failed to find video plane with id=%d\n", video_plane_id);
-            goto fail;
+            mp_verbose(log, "Failed to find video plane with id=%d. drmprime-drm hwdec interop will not work\n", video_plane_id);
         }
     } else {
         mp_verbose(log, "Found video plane with ID %d\n", ctx->video_plane->id);
     }
 
-    mp_verbose(log, "Found Video plane with ID %d, OSD with ID %d\n",
-               ctx->video_plane->id, ctx->osd_plane->id);
-
     drmModeFreePlaneResources(plane_res);
     drmModeFreeResources(res);
     return ctx;
-
 
 fail:
     if (res)
@@ -301,6 +296,9 @@ void drm_atomic_destroy_context(struct drm_atomic_context *ctx)
 static bool drm_atomic_save_plane_state(struct drm_object *plane,
                                         struct drm_atomic_plane_state *plane_state)
 {
+    if (!plane)
+        return true;
+
     bool ret = true;
 
     if (0 > drm_object_get_property(plane, "FB_ID", &plane_state->fb_id))
@@ -333,6 +331,9 @@ static bool drm_atomic_restore_plane_state(drmModeAtomicReq *request,
                                            struct drm_object *plane,
                                            const struct drm_atomic_plane_state *plane_state)
 {
+    if (!plane)
+        return true;
+
     bool ret = true;
 
     if (0 > drm_object_set_property(request, plane, "FB_ID", plane_state->fb_id))
