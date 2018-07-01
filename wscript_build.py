@@ -722,7 +722,7 @@ def build(ctx):
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
 
-        ctx.install_files(os.path.join(ctx.env.SYSCONFDIR, "mpv"), ['etc/encoding-profiles.conf'] )
+        ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64'.split():
             ctx.install_as(
