@@ -689,7 +689,7 @@ def build(ctx):
             features     = 'subst',
             PREFIX       = ctx.env.PREFIX,
             LIBDIR       = ctx.env.LIBDIR,
-            INCDIR       = ctx.env.INCDIR,
+            INCDIR       = ctx.env.INCLUDEDIR,
             VERSION      = libversion,
             PRIV_LIBS    = get_deps(),
         )
@@ -697,7 +697,7 @@ def build(ctx):
         headers = ["client.h", "qthelper.hpp", "opengl_cb.h", "render.h",
                    "render_gl.h", "stream_cb.h"]
         for f in headers:
-            ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
+            ctx.install_as(ctx.env.INCLUDEDIR + '/mpv/' + f, 'libmpv/' + f)
 
         ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
 
@@ -722,7 +722,7 @@ def build(ctx):
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
 
-        ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
+        ctx.install_files(os.path.join(ctx.env.SYSCONFDIR, "mpv"), ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64'.split():
             ctx.install_as(

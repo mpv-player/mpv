@@ -1006,6 +1006,8 @@ def configure(ctx):
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
 
+    ctx.load('gnu_dirs')
+    """
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
         ctx.env[varname] = getattr(ctx.options, ident)
@@ -1013,6 +1015,7 @@ def configure(ctx):
         # keep substituting vars, until the paths are fully expanded
         while re.match('\$\{([^}]+)\}', ctx.env[varname]):
             ctx.env[varname] = Utils.subst_vars(ctx.env[varname], ctx.env)
+    """
 
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
