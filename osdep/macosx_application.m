@@ -127,8 +127,9 @@ static const char macosx_icon[] =
 
 - (NSImage *)getMPVIcon
 {
+    // The C string contains a trailing null, so we strip it away
     NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon)
+                                             length:sizeof(macosx_icon) - 1
                                        freeWhenDone:NO];
     return [[NSImage alloc] initWithData:icon_data];
 }
