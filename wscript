@@ -927,6 +927,18 @@ def options(opt):
     opt.load('features')
     opt.load('gnu_dirs')
 
+    #remove unused options from gnu_dirs
+    opt.parser.remove_option("--sbindir")
+    opt.parser.remove_option("--libexecdir")
+    opt.parser.remove_option("--sharedstatedir")
+    opt.parser.remove_option("--localstatedir")
+    opt.parser.remove_option("--oldincludedir")
+    opt.parser.remove_option("--infodir")
+    opt.parser.remove_option("--localedir")
+    opt.parser.remove_option("--dvidir")
+    opt.parser.remove_option("--pdfdir")
+    opt.parser.remove_option("--psdir")
+
     group = opt.get_option_group("Installation directories")
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
