@@ -10,10 +10,10 @@ sudo: required
 
 env:
   matrix:
-    - CONTAINER=registry.opensuse.org/home/lachs0r/images/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
-    - CONTAINER=registry.opensuse.org/home/lachs0r/images/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
-    - CONTAINER=registry.opensuse.org/home/lachs0r/images/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
-    - CONTAINER=registry.opensuse.org/home/lachs0r/images/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
   global:
     # Coverity token
     - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
