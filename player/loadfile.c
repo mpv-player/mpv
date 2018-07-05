@@ -1296,20 +1296,20 @@ static void play_current_file(struct MPContext *mpctx)
 
     update_demuxer_properties(mpctx);
 
-    if (mpctx->encode_lavc_ctx) {
-        if (mpctx->current_track[0][STREAM_VIDEO])
-            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_VIDEO);
-        if (mpctx->current_track[0][STREAM_AUDIO])
-            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_AUDIO);
-        encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
-                                 mpctx->demuxer->metadata);
-    }
-
     update_playback_speed(mpctx);
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
+
+    if (mpctx->encode_lavc_ctx) {
+        if (mpctx->vo_chain)
+            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_VIDEO);
+        if (mpctx->ao_chain)
+            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_AUDIO);
+        encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
+                                 mpctx->demuxer->metadata);
+    }
 
     if (!mpctx->vo_chain && !mpctx->ao_chain && opts->stream_auto_sel) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
