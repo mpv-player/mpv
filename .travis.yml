@@ -14,6 +14,8 @@ env:
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
+    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   global:
     # Coverity token
     - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
@@ -29,7 +31,7 @@ branches:
 before_install:
   - docker pull $CONTAINER
 script:
-  - docker run --env CC -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"
+  - docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
 
