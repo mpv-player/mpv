@@ -32,7 +32,7 @@ struct kms {
     int fd;
     drmModeConnector *connector;
     drmModeEncoder *encoder;
-    drmModeModeInfo mode;
+    struct drm_mode mode;
     uint32_t crtc_id;
     int card_no;
     struct drm_atomic_context *atomic_context;

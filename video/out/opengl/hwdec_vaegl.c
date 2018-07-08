@@ -36,6 +36,7 @@
 #include "video/vaapi.h"
 #include "common.h"
 #include "ra_gl.h"
+#include "libmpv/render_gl.h"
 
 #ifndef GL_OES_EGL_image
 typedef void* GLeglImageOES;
@@ -77,11 +78,11 @@ static VADisplay *create_wayland_va_display(struct ra *ra)
 
 static VADisplay *create_drm_va_display(struct ra *ra)
 {
-    int drm_fd = (intptr_t)ra_get_native_resource(ra, "drm");
-    // Note: yes, drm_fd==0 could be valid - but it's rare and doesn't fit with
-    //       our slightly crappy way of passing it through, so consider 0 not
-    //       valid.
-    return drm_fd ? vaGetDisplayDRM(drm_fd) : NULL;
+    mpv_opengl_drm_params *params = (mpv_opengl_drm_params*)ra_get_native_resource(ra, "drm_params");
+    if (!params || params->render_fd < 0)
+        return NULL;
+
+    return vaGetDisplayDRM(params->render_fd);
 }
 #endif
 
