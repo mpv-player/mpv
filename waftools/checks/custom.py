@@ -115,6 +115,8 @@ def check_cocoa(ctx, dependency_identifier):
 def check_swift(ctx, dependency_identifier):
     if ctx.env.SWIFT_VERSION:
         major = int(ctx.env.SWIFT_VERSION.split('.')[0])
+        ctx.add_optional_message(dependency_identifier,
+                                 'version found: ' + ctx.env.SWIFT_VERSION)
         if major >= 3:
             return True
     return False
