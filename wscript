@@ -913,7 +913,7 @@ standalone_features = [
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
         'deps': 'cocoa',
-        'func': check_true
+        'func': check_swift
     }
 ]
 
