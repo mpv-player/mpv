@@ -171,6 +171,11 @@ main_dependencies = [
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
     }, {
+        'name': '--swift',
+        'desc': 'macOS Swift build tools',
+        'deps': 'os-darwin',
+        'func': check_swift,
+    }, {
         'name': '--uwp',
         'desc': 'Universal Windows Platform',
         'default': 'disable',
@@ -914,8 +919,8 @@ standalone_features = [
      }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
-        'deps': 'cocoa',
-        'func': check_swift
+        'deps': 'cocoa  && swift',
+        'func': check_true
     }
 ]
 
