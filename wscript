@@ -12,6 +12,8 @@ from waftools.checks.custom import *
 c_preproc.go_absolute=True # enable system folders
 c_preproc.standard_includes.append('/usr/local/include')
 
+APPNAME = 'mpv'
+
 """
 Dependency identifiers (for win32 vs. Unix):
     wscript / C source                  meaning
@@ -916,18 +918,8 @@ standalone_features = [
 ]
 
 _INSTALL_DIRS_LIST = [
-    ('bindir',  '${PREFIX}/bin',      'binary files'),
-    ('libdir',  '${PREFIX}/lib',      'library files'),
-    ('confdir', '${PREFIX}/etc/mpv',  'configuration files'),
-
-    ('incdir',  '${PREFIX}/include',  'include files'),
-
-    ('datadir', '${PREFIX}/share',    'data files'),
-    ('mandir',  '${DATADIR}/man',     'man pages '),
-    ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
-    ('htmldir', '${DOCDIR}',          'html documentation files'),
+    ('confdir', '${SYSCONFDIR}/mpv',  'configuration files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
-
     ('confloaddir', '${CONFDIR}', 'configuration files load directory'),
 ]
 
@@ -935,16 +927,30 @@ def options(opt):
     opt.load('compiler_c')
     opt.load('waf_customizations')
     opt.load('features')
+    opt.load('gnu_dirs')
 
-    group = opt.get_option_group("build and install options")
+    #remove unused options from gnu_dirs
+    opt.parser.remove_option("--sbindir")
+    opt.parser.remove_option("--libexecdir")
+    opt.parser.remove_option("--sharedstatedir")
+    opt.parser.remove_option("--localstatedir")
+    opt.parser.remove_option("--oldincludedir")
+    opt.parser.remove_option("--infodir")
+    opt.parser.remove_option("--localedir")
+    opt.parser.remove_option("--dvidir")
+    opt.parser.remove_option("--pdfdir")
+    opt.parser.remove_option("--psdir")
+
+    group = opt.get_option_group("Installation directories")
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
             type    = 'string',
             dest    = ident,
             default = default,
             help    = 'directory for installing {0} [{1}]' \
-                      .format(desc, default))
+                      .format(desc, default.replace('${','').replace('}','')))
 
+    group = opt.get_option_group("build and install options")
     group.add_option('--variant',
         default = '',
         help    = 'variant name for saving configuration and build results')
@@ -1005,6 +1011,7 @@ def configure(ctx):
     ctx.load('detections.compiler_swift')
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
+    ctx.load('gnu_dirs')
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()

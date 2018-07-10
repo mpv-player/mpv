@@ -5,10 +5,10 @@
 from __future__ import print_function
 import os, sys, stat, hashlib, subprocess
 
-WAFRELEASE = "waf-1.9.8"
+WAFRELEASE = "waf-2.0.9"
 WAFURLS    = ["https://waf.io/" + WAFRELEASE,
               "http://www.freehackers.org/~tnagy/release/" + WAFRELEASE]
-SHA256HASH = "167dc42bab6d5bd823b798af195420319cb5c9b571e00db7d83df2a0fe1f4dbf"
+SHA256HASH = "2a8e0816f023995e557f79ea8940d322bec18f286917c8f9a6fa2dc3875dfa48"
 
 if os.path.exists("waf"):
     wafver = subprocess.check_output([sys.executable, './waf', '--version']).decode()
