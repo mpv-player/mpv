@@ -12,6 +12,8 @@ from waftools.checks.custom import *
 c_preproc.go_absolute=True # enable system folders
 c_preproc.standard_includes.append('/usr/local/include')
 
+APPNAME = 'mpv'
+
 """
 Dependency identifiers (for win32 vs. Unix):
     wscript / C source                  meaning
