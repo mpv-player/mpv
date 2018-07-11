@@ -16,6 +16,10 @@ if os.path.exists("waf"):
         print("Found 'waf', skipping download.")
         sys.exit(0)
 
+if "--no-download" in sys.argv[1:]:
+    print("Did not find {} and no download was requested.".format(WAFRELEASE))
+    sys.exit(1)
+
 try:
     from urllib.request import urlopen, URLError
 except:
