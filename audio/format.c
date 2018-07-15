@@ -95,14 +95,16 @@ int af_fmt_to_planar(int format)
 
 // Return the interleaved format corresponding to the given format.
 // If the format is already interleaved, return it.
-// Always succeeds if format is actually planar; otherwise return 0.
+// Return 0 if there's no equivalent.
 int af_fmt_from_planar(int format)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(planar_formats); n++) {
         if (planar_formats[n][0] == format)
             return planar_formats[n][1];
+        if (planar_formats[n][1] == format)
+            return format;
     }
-    return format;
+    return 0;
 }
 
 bool af_fmt_is_valid(int format)
