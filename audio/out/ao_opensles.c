@@ -43,12 +43,6 @@ struct priv {
     int cfg_frames_per_buffer;
 };
 
-static const int fmtmap[][2] = {
-    { AF_FORMAT_U8, SL_PCMSAMPLEFORMAT_FIXED_8 },
-    { AF_FORMAT_S16, SL_PCMSAMPLEFORMAT_FIXED_16 },
-    { 0 }
-};
-
 #define DESTROY(thing) \
     if (p->thing) { \
         (*p->thing)->Destroy(p->thing); \
@@ -115,7 +109,7 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
     SLDataLocator_BufferQueue locator_buffer_queue;
     SLDataLocator_OutputMix locator_output_mix;
-    SLDataFormat_PCM pcm;
+    SLAndroidDataFormat_PCM_EX pcm;
     SLDataSource audio_source;
     SLDataSink audio_sink;
 
@@ -131,29 +125,23 @@ static int init(struct ao *ao)
     locator_buffer_queue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
     locator_buffer_queue.numBuffers = 1;
 
-    pcm.formatType = SL_DATAFORMAT_PCM;
-    pcm.numChannels = 2;
-
-    int compatible_formats[AF_FORMAT_COUNT + 1];
-    af_get_best_sample_formats(ao->format, compatible_formats);
-    pcm.bitsPerSample = 0;
-    for (int i = 0; compatible_formats[i] && !pcm.bitsPerSample; ++i)
-        for (int j = 0; fmtmap[j][0]; ++j)
-            if (compatible_formats[i] == fmtmap[j][0]) {
-                ao->format = fmtmap[j][0];
-                pcm.bitsPerSample = fmtmap[j][1];
-                break;
-            }
-    if (!pcm.bitsPerSample) {
-        MP_ERR(ao, "Cannot find compatible audio format\n");
-        goto error;
+    if (af_fmt_is_int(ao->format)) {
+        // Be future-proof
+        if (af_fmt_to_bytes(ao->format) > 2)
+            ao->format = AF_FORMAT_S32;
+        else
+            ao->format = af_fmt_from_planar(ao->format);
+        pcm.formatType = SL_DATAFORMAT_PCM;
+    } else {
+        ao->format = AF_FORMAT_FLOAT;
+        pcm.formatType = SL_ANDROID_DATAFORMAT_PCM_EX;
+        pcm.representation = SL_ANDROID_PCM_REPRESENTATION_FLOAT;
     }
-    pcm.containerSize = 8 * af_fmt_to_bytes(ao->format);
+    pcm.numChannels = ao->channels.num;
+    pcm.containerSize = pcm.bitsPerSample = 8 * af_fmt_to_bytes(ao->format);
     pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
-
-    // samplesPerSec is misnamed, actually it's samples per ms
-    pcm.samplesPerSec = ao->samplerate * 1000;
+    pcm.sampleRate = ao->samplerate * 1000;
 
     if (p->cfg_frames_per_buffer)
         ao->device_buffer = p->cfg_frames_per_buffer;
