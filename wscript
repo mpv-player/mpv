@@ -941,6 +941,12 @@ def options(opt):
     opt.parser.remove_option("--pdfdir")
     opt.parser.remove_option("--psdir")
 
+    libdir = opt.parser.get_option('--libdir')
+    if libdir:
+        # Replace any mention of lib64 as we keep the default
+        # for libdir the same as before the waf update.
+        libdir.help = libdir.help.replace('lib64', 'lib')
+
     group = opt.get_option_group("Installation directories")
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
@@ -983,6 +989,7 @@ def is_debug_build(ctx):
     return getattr(ctx.options, 'enable_debug-build')
 
 def configure(ctx):
+    from waflib import Options
     ctx.resetenv(ctx.options.variant)
     ctx.check_waf_version(mini='1.8.4')
     target = os.environ.get('TARGET')
@@ -1012,6 +1019,12 @@ def configure(ctx):
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
     ctx.load('gnu_dirs')
+
+    # if libdir is not set in command line options,
+    # override the gnu_dirs default in order to
+    # always have `lib/` as the library directory.
+    if not getattr(Options.options, 'LIBDIR', None):
+        ctx.env['LIBDIR'] = Utils.subst_vars(os.path.join('${EXEC_PREFIX}', 'lib'), ctx.env)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
