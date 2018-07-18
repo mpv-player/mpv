@@ -144,8 +144,12 @@ class Window: NSWindow, NSWindowDelegate {
         }
 
         if effect == "auto" {
-            let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
-            effect = systemStyle == nil ? "mediumlight" : "ultradark"
+            if #available(OSX 10.14, *) {
+                // Forward effect name "auto" as-is
+            } else {
+                let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+                effect = systemStyle == nil ? "mediumlight" : "ultradark"
+            }
         }
 
         switch effect {
@@ -161,6 +165,13 @@ class Window: NSWindow, NSWindowDelegate {
             appearance = NSAppearance(named: NSAppearanceNameVibrantDark)
             titleBarEffect!.material = .titlebar
             titleBarEffect!.state = .followsWindowActiveState
+        case "auto":
+            // Apply NSApplications' appearance to this window
+            if #available(OSX 10.14, *) {
+                appearance = NSApp.effectiveAppearance
+                titleBarEffect!.material = .titlebar
+                titleBarEffect!.state = .followsWindowActiveState
+            }
         case "dark": fallthrough
         default:
             appearance = NSAppearance(named: NSAppearanceNameVibrantDark)
