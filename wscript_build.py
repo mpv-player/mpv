@@ -611,8 +611,8 @@ def build(ctx):
 
             wrapctx.env.cprogram_PATTERN = "%s.com"
             wrapflags = ['-municode', '-mconsole']
-            wrapctx.env.CFLAGS = wrapflags
-            wrapctx.env.LAST_LINKFLAGS = wrapflags
+            wrapctx.env.CFLAGS = ctx.env.CFLAGS + wrapflags
+            wrapctx.env.LAST_LINKFLAGS = ctx.env.LAST_LINKFLAGS + wrapflags
 
     if ctx.dependency_satisfied('test'):
         for test in ctx.path.ant_glob("test/*.c"):
