@@ -120,6 +120,13 @@ class Window: NSWindow, NSWindowDelegate {
 
         setTitleBarStyle(Int(mpv.macOpts!.macos_title_bar_style))
         contentView!.addSubview(titleBarEffect!, positioned: .above, relativeTo: nil)
+
+        if #available(OSX 10.14, *) {
+            // Handle run-time changes of the system theme (Dark Mode / Light Mode)
+            DistributedNotificationCenter.default().addObserver( forName: NSNotification.Name("AppleInterfaceThemeChangedNotification"), object: nil, queue: nil) { notification in
+                    self.setTitleBarStyle(Int(self.mpv.macOpts!.macos_title_bar_style))
+            }
+        }
     }
 
     func setTitleBarStyle(_ style: Any) {
