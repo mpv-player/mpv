@@ -35,12 +35,13 @@ struct priv {
     SLBufferQueueItf buffer_queue;
     SLEngineItf engine;
     SLPlayItf play;
-    char *buf;
-    size_t buffer_size;
+    void *buf;
+    int bytes_per_enqueue;
     pthread_mutex_t buffer_lock;
     double audio_latency;
 
-    int cfg_frames_per_buffer;
+    int frames_per_enqueue;
+    int buffer_size_in_ms;
 };
 
 static const int fmtmap[][2] = {
@@ -71,7 +72,6 @@ static void uninit(struct ao *ao)
 
     free(p->buf);
     p->buf = NULL;
-    p->buffer_size = 0;
 }
 
 #undef DESTROY
@@ -81,25 +81,21 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     struct ao *ao = context;
     struct priv *p = ao->priv;
     SLresult res;
-    void *data[1];
     double delay;
 
     pthread_mutex_lock(&p->buffer_lock);
 
-    data[0] = p->buf;
-    delay = 2 * p->buffer_size / (double)ao->bps;
+    delay = 2 * p->frames_per_enqueue / (double)ao->samplerate;
     delay += p->audio_latency;
-    ao_read_data(ao, data, p->buffer_size / ao->sstride,
+    ao_read_data(ao, &p->buf, p->frames_per_enqueue,
         mp_time_us() + 1000000LL * delay);
 
-    res = (*buffer_queue)->Enqueue(buffer_queue, p->buf, p->buffer_size);
+    res = (*buffer_queue)->Enqueue(buffer_queue, p->buf, p->bytes_per_enqueue);
     if (res != SL_RESULT_SUCCESS)
         MP_ERR(ao, "Failed to Enqueue: %d\n", res);
 
     pthread_mutex_unlock(&p->buffer_lock);
 }
-
-#define DEFAULT_BUFFER_SIZE_MS 250
 
 #define CHK(stmt) \
     { \
@@ -155,17 +151,35 @@ static int init(struct ao *ao)
     // samplesPerSec is misnamed, actually it's samples per ms
     pcm.samplesPerSec = ao->samplerate * 1000;
 
-    if (p->cfg_frames_per_buffer)
-        ao->device_buffer = p->cfg_frames_per_buffer;
-    else
-        ao->device_buffer = ao->samplerate * DEFAULT_BUFFER_SIZE_MS / 1000;
-    p->buffer_size = ao->device_buffer * ao->channels.num *
+    if (p->buffer_size_in_ms) {
+        ao->device_buffer = ao->samplerate * p->buffer_size_in_ms / 1000;
+        // As the purpose of buffer_size_in_ms is to request a specific
+        // soft buffer size:
+        ao->def_buffer = 0;
+    }
+
+    // But it does not make sense if it is smaller than the enqueue size:
+    if (p->frames_per_enqueue) {
+        ao->device_buffer = MPMAX(ao->device_buffer, p->frames_per_enqueue);
+    } else {
+        if (ao->device_buffer) {
+            p->frames_per_enqueue = ao->device_buffer;
+        } else if (ao->def_buffer) {
+            p->frames_per_enqueue = ao->def_buffer * ao->samplerate;
+        } else {
+            MP_ERR(ao, "Enqueue size is not set and can neither be derived\n");
+            goto error;
+        }
+    }
+
+    p->bytes_per_enqueue = p->frames_per_enqueue * ao->channels.num *
         af_fmt_to_bytes(ao->format);
-    p->buf = calloc(1, p->buffer_size);
+    p->buf = calloc(1, p->bytes_per_enqueue);
     if (!p->buf) {
         MP_ERR(ao, "Failed to allocate device buffer\n");
         goto error;
     }
+
     int r = pthread_mutex_init(&p->buffer_lock, NULL);
     if (r) {
         MP_ERR(ao, "Failed to initialize the mutex: %d\n", r);
@@ -248,8 +262,12 @@ const struct ao_driver audio_out_opensles = {
     .resume    = resume,
 
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .buffer_size_in_ms = 250,
+    },
     .options = (const struct m_option[]) {
-        OPT_INTRANGE("frames-per-buffer", cfg_frames_per_buffer, 0, 1, 96000),
+        OPT_INTRANGE("frames-per-enqueue", frames_per_enqueue, 0, 1, 96000),
+        OPT_INTRANGE("buffer-size-in-ms", buffer_size_in_ms, 0, 0, 500),
         {0}
     },
     .options_prefix = "opensles",
