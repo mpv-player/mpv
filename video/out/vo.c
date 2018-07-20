@@ -66,7 +66,7 @@ extern const struct vo_driver video_out_tct;
 const struct vo_driver *const video_out_drivers[] =
 {
     &video_out_libmpv,
-#if HAVE_ANDROID
+#if HAVE_ANDROID_JNI
     &video_out_mediacodec_embed,
 #endif
 #if HAVE_RPI
