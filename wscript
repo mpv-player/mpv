@@ -803,8 +803,8 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
-                'egl-angle-win32 || android',
+        'deps': 'gl && (egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
+                'egl-angle-win32 || android)',
         'func': check_true
     }
 ]
