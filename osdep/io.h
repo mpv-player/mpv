@@ -33,7 +33,7 @@
 #include <glob.h>
 #endif
 
-#ifdef __ANDROID__
+#if HAVE_ANDROID
 #  include <unistd.h>
 #  include <stdio.h>
 
@@ -58,7 +58,7 @@ static inline int mp_fseeko(FILE* fp, off64_t offset, int whence) {
 }
 #define fseeko(f,p,w) mp_fseeko((f), (p), (w))
 
-#endif // __ANDROID__
+#endif // HAVE_ANDROID
 
 #ifndef O_BINARY
 #define O_BINARY 0
