@@ -62,7 +62,7 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 
 // OpenGL contexts:
-#if HAVE_ANDROID
+#if HAVE_ANDROID_JNI
     &ra_ctx_android,
 #endif
 #if HAVE_RPI
