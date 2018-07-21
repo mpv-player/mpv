@@ -442,7 +442,7 @@ def build(ctx):
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
         ( "video/out/opengl/common.c",           "gl" ),
         ( "video/out/opengl/context.c",          "gl" ),
-        ( "video/out/opengl/context_android.c",  "android" ),
+        ( "video/out/opengl/context_android.c",  "android && egl-helpers" ),
         ( "video/out/opengl/context_angle.c",    "egl-angle-win32" ),
         ( "video/out/opengl/context_cocoa.c",    "gl-cocoa" ),
         ( "video/out/opengl/context_drm_egl.c",  "egl-drm" ),
