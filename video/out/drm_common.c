@@ -450,14 +450,14 @@ static void vt_switcher_sighandler(int sig)
 
 static bool has_signal_installed(int signo)
 {
-    struct sigaction act = { 0 };
+    struct sigaction act = {{0}};
     sigaction(signo, 0, &act);
     return act.sa_handler != 0;
 }
 
 static int install_signal(int signo, void (*handler)(int))
 {
-    struct sigaction act = { 0 };
+    struct sigaction act = {{0}};
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = SA_RESTART;

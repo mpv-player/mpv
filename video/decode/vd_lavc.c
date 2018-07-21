@@ -711,7 +711,7 @@ static void uninit_avctx(struct mp_filter *vd)
     ctx->hwdec_fail_count = 0;
     ctx->max_delay_queue = 0;
     ctx->hw_probing = false;
-    ctx->hwdec = (struct hwdec_info){0};
+    ctx->hwdec = (struct hwdec_info){{0}};
     ctx->use_hwdec = false;
 }
 

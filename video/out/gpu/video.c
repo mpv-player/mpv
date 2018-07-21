@@ -994,7 +994,7 @@ static void uninit_video(struct gl_video *p)
         struct texplane *plane = &vimg->planes[n];
         ra_tex_free(p->ra, &plane->tex);
     }
-    *vimg = (struct video_image){0};
+    *vimg = (struct video_image){{{0}}};
 
     // Invalidate image_params to ensure that gl_video_config() will call
     // init_video() on uninitialized gl_video.
@@ -3313,7 +3313,7 @@ static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)
 
 void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out)
 {
-    *out = (struct voctrl_performance_data){0};
+    *out = (struct voctrl_performance_data){{0}};
     frame_perf_data(p->pass_fresh,  &out->fresh);
     frame_perf_data(p->pass_redraw, &out->redraw);
 }

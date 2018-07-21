@@ -4827,7 +4827,7 @@ static void cmd_cycle_values(void *p)
 
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
 {
-    struct mpv_node dummy_node = {0};
+    struct mpv_node dummy_node = {{0}};
     struct mp_cmd_ctx *ctx = &(struct mp_cmd_ctx){
         .mpctx = mpctx,
         .cmd = cmd,

@@ -45,7 +45,7 @@ void ra_buf_pool_uninit(struct ra *ra, struct ra_buf_pool *pool)
         ra_buf_free(ra, &pool->buffers[i]);
 
     talloc_free(pool->buffers);
-    *pool = (struct ra_buf_pool){0};
+    *pool = (struct ra_buf_pool){{0}};
 }
 
 static bool ra_buf_params_compatible(const struct ra_buf_params *new,

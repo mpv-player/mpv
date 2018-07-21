@@ -921,7 +921,7 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
         }
 
         for (int n = 0; n < sc->num_uniforms; n++) {
-            struct sc_cached_uniform u = {0};
+            struct sc_cached_uniform u = {{{0}}};
             if (sc->uniforms[n].type == SC_UNIFORM_TYPE_GLOBAL) {
                 // global uniforms need to be made visible to the ra_renderpass
                 u.index = sc->params.num_inputs;
