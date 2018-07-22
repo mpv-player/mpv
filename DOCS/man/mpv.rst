@@ -210,11 +210,11 @@ Alt + and Alt -
 Alt+BACKSPACE
     Reset the pan/zoom settings.
 
-F9
+F8
     Show the playlist and the current position in it (useful only if a UI window
     is used, broken on the terminal).
 
-F10
+F9
     Show the list of audio and subtitle streams (useful only if a UI window  is
     used, broken on the terminal).
 
