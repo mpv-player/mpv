@@ -23,6 +23,7 @@
 struct macos_opts {
     int macos_title_bar_style;
     int macos_fs_animation_duration;
+    int cocoa_cb_sw_renderer;
 };
 
 // multithreaded wrapper for mpv_main
