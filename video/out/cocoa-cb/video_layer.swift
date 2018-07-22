@@ -32,6 +32,7 @@ class VideoLayer: CAOpenGLLayer {
     var needsFlip: Bool = false
     var canDrawOffScreen: Bool = false
     var cglContext: CGLContextObj? = nil
+    var cglPixelFormat: CGLPixelFormatObj? = nil
     var surfaceSize: NSSize?
 
     enum Draw: Int { case normal = 1, atomic, atomicEnd }
@@ -62,7 +63,8 @@ class VideoLayer: CAOpenGLLayer {
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
 
-        CGLCreateContext(copyCGLPixelFormat(forDisplayMask: 0), nil, &cglContext)
+        cglPixelFormat = copyCGLPixelFormat(forDisplayMask: 0)
+        CGLCreateContext(cglPixelFormat!, nil, &cglContext)
         var i: GLint = 1
         CGLSetParameter(cglContext!, kCGLCPSwapInterval, &i)
         CGLSetCurrentContext(cglContext!)
@@ -147,6 +149,8 @@ class VideoLayer: CAOpenGLLayer {
     }
 
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
+        if cglPixelFormat != nil { return cglPixelFormat! }
+
         let glVersions: [CGLOpenGLProfile] = [
             kCGLOGLPVersion_3_2_Core,
             kCGLOGLPVersion_Legacy
@@ -157,6 +161,8 @@ class VideoLayer: CAOpenGLLayer {
         var npix: GLint = 0
 
         verLoop : for ver in glVersions {
+            if mpv.macOpts!.cocoa_cb_sw_renderer == 1 { break }
+
             var glAttributes: [CGLPixelFormatAttribute] = [
                 kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(ver.rawValue),
                 kCGLPFAAccelerated,
@@ -177,9 +183,28 @@ class VideoLayer: CAOpenGLLayer {
             }
         }
 
+        if (err != kCGLNoError || pix == nil) && mpv.macOpts!.cocoa_cb_sw_renderer != 0 {
+            if mpv.macOpts!.cocoa_cb_sw_renderer == -1 {
+                let errS = String(cString: CGLErrorString(err))
+                mpv.sendWarning("Couldn't create hardware accelerated CGL " +
+                                "pixel format, falling back to software " +
+                                "renderer: \(errS) (\(err.rawValue))")
+            }
+
+            let glAttributes: [CGLPixelFormatAttribute] = [
+                kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(kCGLOGLPVersion_3_2_Core.rawValue),
+                kCGLPFARendererID, CGLPixelFormatAttribute(UInt32(kCGLRendererGenericFloatID)),
+                kCGLPFADoubleBuffer,
+                kCGLPFABackingStore,
+                _CGLPixelFormatAttribute(rawValue: 0)
+            ]
+
+            err = CGLChoosePixelFormat(glAttributes, &pix, &npix)
+        }
+
         if err != kCGLNoError || pix == nil {
             let errS = String(cString: CGLErrorString(err))
-            mpv.sendError("Couldn't create CGL pixel format: \(errS) (\(err.rawValue))")
+            mpv.sendError("Couldn't create any CGL pixel format: \(errS) (\(err.rawValue))")
             exit(1)
         }
         return pix!

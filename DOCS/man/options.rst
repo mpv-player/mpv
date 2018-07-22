@@ -4881,6 +4881,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
+``--cocoa-cb-sw-renderer=<yes|no|auto>``
+    Use the Apple Software Renderer when using cocoa-cb (default: auto). If set
+    to ``no`` the software renderer is never used and instead fails when a the
+    usual pixel format could not be created, ``yes`` will always only use the
+    software renderer, and ``auto`` only falls back to the software renderer
+    when the usual pixel format couldn't be created.
+
+    OS X only.
+
 ``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
     Sets the styling of the title bar (default: dark).
     OS X and cocoa-cb only
