@@ -45,6 +45,12 @@ class MPVHelper: NSObject {
         mpctx = UnsafeMutablePointer<MPContext>(mp_client_get_core(mpvHandle))
         inputContext = mpctx!.pointee.input
 
+        if let app = NSApp as? Application {
+            let ptr = mp_get_config_group(mpctx!, mp_client_get_global(mpvHandle),
+                                          app.getMacOSConf())
+            macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr))!.pointee
+        }
+
         mpv_observe_property(mpvHandle, 0, "ontop", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "border", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "keepaspect-window", MPV_FORMAT_FLAG)
