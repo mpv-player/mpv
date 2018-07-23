@@ -16,7 +16,7 @@ The exact syntax is:
     name is an arbitrary user-given name, which identifies the filter. This
     is only needed if you want to toggle the filter at runtime.
 
-    A ``!`` before the filter name means the filter is enabled by default. It
+    A ``!`` before the filter name means the filter is disabled by default. It
     will be skipped on filter creation. This is also useful for runtime filter
     toggling.
 
