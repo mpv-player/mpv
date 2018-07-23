@@ -61,12 +61,6 @@ class CocoaCB: NSObject {
         if backendState == .uninitialized {
             backendState = .needsInit
 
-            if let app = NSApp as? Application {
-                let ptr = mp_get_config_group(mpv.mpctx!, vo.pointee.global,
-                                              app.getMacOSConf())
-                mpv.macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr))!.pointee
-            }
-
             view = EventsView(cocoaCB: self)
             view.layer = layer
             view.wantsLayer = true
