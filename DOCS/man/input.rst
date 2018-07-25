@@ -350,7 +350,7 @@ List of Input Commands
     Print text to stdout. The string can contain properties (see
     `Property Expansion`_).
 
-``show-text "<string>" [<duration>|- [<level>]]``
+``show-text "<string>" [<duration>|-1 [<level>]]``
     Show text on the OSD. The string can contain properties, which are expanded
     as described in `Property Expansion`_. This can be used to show playback
     time, filename, and so on.
