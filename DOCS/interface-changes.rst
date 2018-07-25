@@ -19,6 +19,15 @@ Interface changes
 
 ::
 
+ --- mpv 0.30.0 ---
+    - rename --opensles-frames-per-buffer to --opensles-frames-per-enqueue to
+      better reflect its purpose. In the past it overrides the buffer size the AO
+      requests (but not the default/value of the generic --audio-buffer option).
+      Now it only guarantees that the soft buffer size will not be smaller than
+      itself while setting the size per Enqueue.
+    - add --opensles-buffer-size-in-ms, allowing user to tune the soft buffer size.
+      It overrides the --audio-buffer option unless it's set to 0 (with the default
+      being 250).
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
