@@ -2250,6 +2250,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"default",     SUB_PROP_FLAG(track->default_track)},
         {"forced",      SUB_PROP_FLAG(track->forced_track)},
         {"dependent",   SUB_PROP_FLAG(track->dependent_track)},
+        {"visual-impaired",  SUB_PROP_FLAG(track->visual_impaired_track)},
+        {"hearing-impaired", SUB_PROP_FLAG(track->hearing_impaired_track)},
         {"external",    SUB_PROP_FLAG(track->is_external)},
         {"selected",    SUB_PROP_FLAG(track->selected)},
         {"external-filename", SUB_PROP_STR(track->external_filename),

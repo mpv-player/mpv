@@ -715,6 +715,10 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->forced_track = true;
         if (st->disposition & AV_DISPOSITION_DEPENDENT)
             sh->dependent_track = true;
+        if (st->disposition & AV_DISPOSITION_VISUAL_IMPAIRED)
+            sh->visual_impaired_track = true;
+        if (st->disposition & AV_DISPOSITION_HEARING_IMPAIRED)
+            sh->hearing_impaired_track = true;
         if (st->disposition & AV_DISPOSITION_STILL_IMAGE)
             sh->still_image = true;
         if (priv->format_hack.use_stream_ids)
