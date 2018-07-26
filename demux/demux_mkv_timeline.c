@@ -297,6 +297,16 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
         ctx->num_sources = j;
     }
 
+    // Copy attachments from referenced sources so fonts are loaded for sub
+    // rendering.
+    for (int i = 1; i < ctx->num_sources; i++) {
+        for (int j = 0; j < ctx->sources[i]->num_attachments; j++) {
+            struct demux_attachment *att = &ctx->sources[i]->attachments[j];
+            demuxer_add_attachment(ctx->demuxer, att->name, att->type,
+                                   att->data, att->data_size);
+        }
+    }
+
     talloc_free(tmp);
 }
 
