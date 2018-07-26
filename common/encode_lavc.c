@@ -436,7 +436,7 @@ done:
     return dst;
 }
 
-// Write a packet. Callee will create new pkt refs as needed.
+// Write a packet. This will take over ownership of `pkt`
 static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
 {
     struct encode_lavc_context *ctx = dst->ctx;
@@ -476,6 +476,7 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
     if (av_interleaved_write_frame(p->muxer, pkt) < 0) {
         MP_ERR(p, "Writing packet failed.\n");
         p->failed = true;
+        pkt = NULL;
         goto done;
     }
 
@@ -483,7 +484,8 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
 
 done:
     pthread_mutex_unlock(&ctx->lock);
-    av_packet_free(&pkt);
+    if (pkt)
+        av_packet_unref(pkt);
 }
 
 void encode_lavc_discontinuity(struct encode_lavc_context *ctx)
@@ -949,7 +951,6 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
             break;
 
         encode_lavc_add_packet(p->mux_stream, &packet);
-        av_packet_unref(&packet);
     }
 
     return true;
