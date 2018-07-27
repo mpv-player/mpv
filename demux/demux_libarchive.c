@@ -21,13 +21,14 @@
 #include "common/common.h"
 #include "common/playlist.h"
 #include "stream/stream.h"
+#include "misc/natural_sort.h"
 #include "demux.h"
 
 #include "stream/stream_libarchive.h"
 
 static int cmp_filename(const void *a, const void *b)
 {
-    return strcmp(*(char **)a, *(char **)b);
+    return mp_natural_sort_cmp(*(char **)a, *(char **)b);
 }
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)

@@ -29,6 +29,7 @@
 #include "options/path.h"
 #include "stream/stream.h"
 #include "osdep/io.h"
+#include "misc/natural_sort.h"
 #include "demux.h"
 
 #define PROBE_SIZE (8 * 1024)
@@ -284,7 +285,7 @@ static bool scan_dir(struct pl_parser *p, char *path,
 
 static int cmp_filename(const void *a, const void *b)
 {
-    return strcmp(*(char **)a, *(char **)b);
+    return mp_natural_sort_cmp(*(char **)a, *(char **)b);
 }
 
 static int parse_dir(struct pl_parser *p)
