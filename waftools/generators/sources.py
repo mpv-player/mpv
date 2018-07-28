@@ -94,7 +94,7 @@ def __wayland_protocol_header__(ctx, **kwargs):
 @TaskGen.feature('cshlib')
 @TaskGen.feature('cstlib')
 @TaskGen.feature('apply_link')
-@TaskGen.after_method('do_the_symbol_stuff')
+@TaskGen.after_method('process_source', 'process_use', 'apply_link', 'process_uselib_local', 'propagate_uselib_vars', 'do_the_symbol_stuff')
 def handle_add_object(tgen):
     if getattr(tgen, 'add_object', None):
         for input in Utils.to_list(tgen.add_object):
