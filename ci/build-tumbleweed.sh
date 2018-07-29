@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-./bootstrap.py
 ./waf configure \
   --enable-cdda          \
   --enable-dvbin         \

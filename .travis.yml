@@ -31,6 +31,7 @@ branches:
 before_install:
   - docker pull $CONTAINER
 script:
+  - ./bootstrap.py
   - docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website

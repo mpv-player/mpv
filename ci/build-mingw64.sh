@@ -16,7 +16,6 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -mtune=intel -g -ggdb -pipe -Wall --param=ssp-buffer-size=4 -mms-bitfields -fmessage-length=0 -D_FORTIFY_SOURCE=2 -fexceptions -fasynchronous-unwind-tables -fstack-protector-strong -fno-ident"
 export LDFLAGS="-Wl,--no-keep-memory -fstack-protector-strong"
 
-./bootstrap.py
 ./waf configure \
     --enable-static-build \
     --enable-libmpv-shared \
