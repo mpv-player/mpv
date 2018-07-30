@@ -241,7 +241,9 @@ class CocoaCB: NSObject {
 
     func updateICCProfile() {
         mpv.setRenderICCProfile(window.screen!.colorSpace!)
-        layer.colorspace = window.screen!.colorSpace!.cgColorSpace!
+        if #available(macOS 10.11, *) {
+            layer.colorspace = window.screen!.colorSpace!.cgColorSpace!
+        }
     }
 
     func lmuToLux(_ v: UInt64) -> Int {
