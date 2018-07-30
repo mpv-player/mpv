@@ -602,7 +602,7 @@
 - (NSMenu *)mainMenu
 {
     NSMenu *mainMenu = [[NSMenu alloc] initWithTitle:@"MainMenu"];
-    NSApp.servicesMenu = [NSMenu alloc];
+    [NSApp setServicesMenu:[[NSMenu alloc] init]];
 
     for(id mMenu in menuTree) {
         NSMenu *menu = [[NSMenu alloc] initWithTitle:mMenu[@"name"]];
@@ -633,7 +633,7 @@
                 }
 
                 if ([subMenu[@"name"] isEqual:@"Services"]) {
-                    iItem.submenu = NSApp.servicesMenu;
+                    iItem.submenu = [NSApp servicesMenu];
                 }
             }
         }
