@@ -71,6 +71,16 @@ build_options = [
         'default': 'enable',
         'func': check_true
     }, {
+        'name': '--rfc-date',
+        'desc': 'use RFC 3339 format for build/commit dates',
+        'default': 'disable',
+        'func': check_true
+    }, {
+        'name': '--utc-date',
+        'desc': 'use UTC without timezone offset for build/commit dates',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--optimize',
         'desc': 'whether to optimize',
         'default': 'enable',
@@ -1105,6 +1115,12 @@ def configure(ctx):
     if ctx.dependency_satisfied('clang-database'):
         ctx.load('clang_compilation_database')
 
+    if ctx.dependency_satisfied('rfc-date'):
+        ctx.env.RFCDATE = '--rfc=yes'
+
+    if ctx.dependency_satisfied('utc-date'):
+        ctx.env.UTCDATE = '--utc=yes'
+
     if ctx.dependency_satisfied('cplugins'):
         # We need to export the libmpv symbols, since the mpv binary itself is
         # not linked against libmpv. The C plugin needs to be able to pick
@@ -1122,7 +1138,7 @@ def __write_version__(ctx):
     ctx(
         source = 'version.sh',
         target = 'version.h',
-        rule   = 'sh ${SRC} ${CWD_ST:VERSIONSH_CWD} ${VERSIONH_ST:TGT}',
+        rule   = 'sh ${SRC} ${RFCDATE} ${UTCDATE} ${CWD_ST:VERSIONSH_CWD} ${VERSIONH_ST:TGT}',
         always = True,
         update_outputs = True)
 
