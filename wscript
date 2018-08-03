@@ -71,6 +71,11 @@ build_options = [
         'default': 'enable',
         'func': check_true
     }, {
+        'name': '--commit-date',
+        'desc': 'whether to include most recent commit timestamp',
+        'default': 'enable',
+        'func': check_true
+    }, {
         'name': '--rfc-date',
         'desc': 'use RFC 3339 format for build/commit dates',
         'default': 'disable',
@@ -1111,6 +1116,9 @@ def configure(ctx):
 
     if not ctx.dependency_satisfied('build-date'):
         ctx.env.CFLAGS += ['-DNO_BUILD_TIMESTAMPS']
+
+    if not ctx.dependency_satisfied('commit-date'):
+        ctx.env.CFLAGS += ['-DNO_BUILD_GITTIMESTAMPS']
 
     if ctx.dependency_satisfied('clang-database'):
         ctx.load('clang_compilation_database')

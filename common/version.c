@@ -23,8 +23,14 @@
 #else
 #define BUILDDATE_FULL "\n binary built on " BUILDDATE
 #endif
+#ifdef NO_BUILD_GITTIMESTAMPS
+#undef GITDATE
+#define GITDATE_FULL ""
+#else
+#define GITDATE_FULL "\n last updated on " GITDATE
+#endif
 
 const char mpv_version[]  = "mpv " VERSION;
 const char mpv_builddate[] = BUILDDATE_FULL;
-const char mpv_gitdate[] = GITDATE;
+const char mpv_gitdate[] = GITDATE_FULL;
 const char mpv_copyright[] = MPVCOPYRIGHT;
