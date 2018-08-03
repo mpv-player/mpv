@@ -3,6 +3,7 @@
 *.d
 *.exe
 *.pyc
+*.orig
 .depend
 
 /config.h
