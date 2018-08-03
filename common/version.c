@@ -21,7 +21,7 @@
 #undef BUILDDATE
 #define BUILDDATE_FULL ""
 #else
-#define BUILDDATE_FULL "\n built on " BUILDDATE
+#define BUILDDATE_FULL "\n binary built on " BUILDDATE
 #endif
 
 const char mpv_version[]  = "mpv " VERSION;

@@ -53,7 +53,7 @@ fi
 
 NEW_REVISION="#define VERSION \"${VERSION}\""
 OLD_REVISION=$(head -n 1 "$version_h" 2> /dev/null)
-BUILDDATE="#define BUILDDATE \"$(date)\""
+BUILDDATE="#define BUILDDATE \"$(date +"%a %b %-e %T %Y %z")\""
 GITDATE="#define GITDATE \"$(git show -s --format=%cd)\""
 MPVCOPYRIGHT="#define MPVCOPYRIGHT \"Copyright © 2000-2019 mpv/MPlayer/mplayer2 projects\""
 
