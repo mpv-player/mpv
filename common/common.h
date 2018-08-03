@@ -60,6 +60,7 @@ enum stream_type {
 
 extern const char mpv_version[];
 extern const char mpv_builddate[];
+extern const char mpv_gitdate[];
 extern const char mpv_copyright[];
 
 char *mp_format_time(double time, bool fractions);

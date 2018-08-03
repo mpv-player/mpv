@@ -54,6 +54,7 @@ fi
 NEW_REVISION="#define VERSION \"${VERSION}\""
 OLD_REVISION=$(head -n 1 "$version_h" 2> /dev/null)
 BUILDDATE="#define BUILDDATE \"$(date)\""
+GITDATE="#define GITDATE \"$(git show -s --format=%cd)\""
 MPVCOPYRIGHT="#define MPVCOPYRIGHT \"Copyright © 2000-2019 mpv/MPlayer/mplayer2 projects\""
 
 # Update version.h only on revision changes to avoid spurious rebuilds
@@ -61,6 +62,7 @@ if test "$NEW_REVISION" != "$OLD_REVISION"; then
     cat <<EOF > "$version_h"
 $NEW_REVISION
 $BUILDDATE
+$GITDATE
 $MPVCOPYRIGHT
 EOF
 fi
