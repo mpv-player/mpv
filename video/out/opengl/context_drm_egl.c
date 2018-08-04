@@ -158,7 +158,19 @@ static bool init_egl(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     MP_VERBOSE(ctx, "Initializing EGL\n");
-    p->egl.display = eglGetDisplay(p->gbm.device);
+    const char *ext = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (ext) {
+        PFNEGLGETPLATFORMDISPLAYEXTPROC get_platform_display = NULL;
+        get_platform_display = (void *) eglGetProcAddress("eglGetPlatformDisplayEXT");
+        if (get_platform_display && strstr(ext, "EGL_MESA_platform_gbm"))
+            p->egl.display = get_platform_display(EGL_PLATFORM_GBM_MESA, p->gbm.device, NULL);
+        else if (get_platform_display && strstr(ext, "EGL_KHR_platform_gbm"))
+            p->egl.display = get_platform_display(EGL_PLATFORM_GBM_KHR, p->gbm.device, NULL);
+        else
+            p->egl.display = eglGetDisplay(p->gbm.device);
+    } else {
+        p->egl.display = eglGetDisplay(p->gbm.device);
+    }
     if (p->egl.display == EGL_NO_DISPLAY) {
         MP_ERR(ctx, "Failed to get EGL display.\n");
         return false;
