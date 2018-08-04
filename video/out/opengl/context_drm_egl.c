@@ -180,11 +180,30 @@ static int match_config_to_visual(void *user_data, EGLConfig *configs, int num_c
     return -1;
 }
 
+static EGLDisplay egl_get_display(struct gbm_device *gbm_device)
+{
+    const char *ext = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+
+    if (ext) {
+        PFNEGLGETPLATFORMDISPLAYEXTPROC get_platform_display = NULL;
+        get_platform_display = (void *) eglGetProcAddress("eglGetPlatformDisplayEXT");
+
+        if (get_platform_display && strstr(ext, "EGL_MESA_platform_gbm"))
+            return get_platform_display(EGL_PLATFORM_GBM_MESA, gbm_device, NULL);
+
+        if (get_platform_display && strstr(ext, "EGL_KHR_platform_gbm"))
+            return get_platform_display(EGL_PLATFORM_GBM_KHR, gbm_device, NULL);
+    }
+
+    return eglGetDisplay(gbm_device);
+}
+
 static bool init_egl(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     MP_VERBOSE(ctx, "Initializing EGL\n");
-    p->egl.display = eglGetDisplay(p->gbm.device);
+    p->egl.display = egl_get_display(p->gbm.device);
+
     if (p->egl.display == EGL_NO_DISPLAY) {
         MP_ERR(ctx, "Failed to get EGL display.\n");
         return false;
