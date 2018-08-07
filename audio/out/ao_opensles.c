@@ -119,7 +119,7 @@ static int init(struct ao *ao)
     CHK((*p->output_mix)->Realize(p->output_mix, SL_BOOLEAN_FALSE));
 
     locator_buffer_queue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
-    locator_buffer_queue.numBuffers = 1;
+    locator_buffer_queue.numBuffers = 8;
 
     if (af_fmt_is_int(ao->format)) {
         // Be future-proof
