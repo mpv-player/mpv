@@ -127,7 +127,8 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     sio_initpar(&p->par);
     for (i = 0, ap = af_to_par;; i++, ap++) {

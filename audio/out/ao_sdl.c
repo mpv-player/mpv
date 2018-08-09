@@ -111,7 +111,8 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     SDL_AudioSpec desired = {0};
     desired.format = AUDIO_S16SYS;

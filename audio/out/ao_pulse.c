@@ -378,7 +378,8 @@ fail:
 
 static bool set_format(struct ao *ao, pa_format_info *format)
 {
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     format->encoding = map_digital_format(ao->format);
     if (format->encoding == PA_ENCODING_PCM) {

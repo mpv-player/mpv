@@ -374,7 +374,9 @@ static void reset(struct mp_filter *f)
 
 static void extra_output_conversion(struct mp_aframe *mpa)
 {
-    int format = af_fmt_from_planar(mp_aframe_get_format(mpa));
+    int format = mp_aframe_get_format(mpa);
+    if (af_fmt_is_planar(format))
+        format = af_fmt_from_planar(format);
     int num_planes = mp_aframe_get_planes(mpa);
     uint8_t **planes = mp_aframe_get_data_rw(mpa);
     if (!planes)

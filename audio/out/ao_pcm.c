@@ -115,7 +115,8 @@ static int init(struct ao *ao)
         priv->outputfilename =
             talloc_strdup(priv, priv->waveheader ? "audiodump.wav" : "audiodump.pcm");
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     if (priv->waveheader) {
         // WAV files must have one of the following formats
