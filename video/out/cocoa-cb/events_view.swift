@@ -233,7 +233,7 @@ class EventsView: NSView {
             topMargin = cocoaCB.window.titleBarHeight + 1 + menuBarHeight
         }
 
-        var vF = window!.screen!.frame
+        guard var vF = window?.screen?.frame else { return false }
         vF.size.height -= topMargin
 
         let vFW = window!.convertFromScreen(vF)
