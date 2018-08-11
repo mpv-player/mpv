@@ -78,7 +78,8 @@ static int init(struct ao *ao)
     rsd_set_param(priv->rd, RSD_SAMPLERATE, (int[]) { ao->samplerate });
     rsd_set_param(priv->rd, RSD_CHANNELS, (int[]) { ao->channels.num });
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     int rsd_format = set_format(ao);
     rsd_set_param(priv->rd, RSD_FORMAT, &rsd_format);

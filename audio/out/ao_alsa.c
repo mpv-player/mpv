@@ -715,9 +715,11 @@ static int init_device(struct ao *ao, int mode)
         int mp_format = try_formats[n];
         if (af_fmt_is_planar(ao->format) != af_fmt_is_planar(mp_format))
             continue; // implied SND_PCM_ACCESS mismatches
-        int mp_pformat = af_fmt_from_planar(mp_format);
+        int mp_pformat;
         if (af_fmt_is_spdif(mp_pformat))
             mp_pformat = AF_FORMAT_S16;
+        else
+            mp_pformat = af_fmt_from_planar(mp_format);
         const struct alsa_fmt *fmt = find_alsa_format(mp_pformat);
         if (!fmt)
             continue;
@@ -885,7 +887,7 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
     p->opts = mp_get_config_group(ao, ao->global, &ao_alsa_conf);
 
-    if (!p->opts->ni)
+    if (!p->opts->ni && af_fmt_is_planar(ao->format))
         ao->format = af_fmt_from_planar(ao->format);
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());

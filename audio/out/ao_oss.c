@@ -450,7 +450,8 @@ static int init(struct ao *ao)
     MP_VERBOSE(ao, "using '%s' mixer device\n", p->oss_mixer_device);
     MP_VERBOSE(ao, "using '%s' mixer channel\n", mixer_channels[p->oss_mixer_channel]);
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     if (reopen_device(ao, true) < 0)
         goto fail;

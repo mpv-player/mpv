@@ -907,7 +907,8 @@ bool wasapi_thread_init(struct ao *ao)
     bool align_hack = false;
     HRESULT hr;
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
 retry:
     if (state->deviceID) {

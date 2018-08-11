@@ -286,7 +286,8 @@ static int init(struct ao *ao)
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
     CHECK_CA_ERROR_L(coreaudio_error_nounlock, "failed to select device");
 
-    ao->format = af_fmt_from_planar(ao->format);
+    if (af_fmt_is_planar(ao->format))
+        ao->format = af_fmt_from_planar(ao->format);
 
     if (!af_fmt_is_pcm(ao->format) && !af_fmt_is_spdif(ao->format)) {
         MP_ERR(ao, "Unsupported format.\n");
