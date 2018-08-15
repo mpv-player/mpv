@@ -4,7 +4,7 @@ from waflib import Utils
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
-           "check_cocoa", "check_openal", "check_wl_protocols"]
+           "check_cocoa", "check_openal", "check_wl_protocols", "check_swift"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -111,6 +111,15 @@ def check_cocoa(ctx, dependency_identifier):
         ])
 
     return res
+
+def check_swift(ctx, dependency_identifier):
+    if ctx.env.SWIFT_VERSION:
+        major = int(ctx.env.SWIFT_VERSION.split('.')[0])
+        ctx.add_optional_message(dependency_identifier,
+                                 'version found: ' + ctx.env.SWIFT_VERSION)
+        if major >= 3:
+            return True
+    return False
 
 def check_openal(ctx, dependency_identifier):
     checks = [

@@ -11,8 +11,8 @@ def __add_swift_flags(ctx):
     ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop'
                            ' -emit-objc-header -parse-as-library'
                            ' -target x86_64-apple-macosx10.10') % (ctx.env.MACOS_SDK)
-    swift_version = __run([ctx.env.SWIFT, '-version']).split(' ')[3].split('.')[:2]
-    major, minor = [int(n) for n in swift_version]
+    ctx.env.SWIFT_VERSION = __run([ctx.env.SWIFT, '-version']).split(' ')[3]
+    major, minor = [int(n) for n in ctx.env.SWIFT_VERSION.split('.')[:2]]
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
     if major >= 3 and minor >= 1 or major >= 4:
