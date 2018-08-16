@@ -5175,7 +5175,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         desaturating everything. Developed by John Hable for use in video
         games. Use this when you care about detail preservation more than
         color/brightness accuracy. This is roughly equivalent to
-        ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
+        ``--tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
         you should also enable ``--hdr-compute-peak`` for the best results.
         (Default)
     gamma
