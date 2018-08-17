@@ -314,8 +314,8 @@ local function add_single_video(json)
             if track.vcodec and track.vcodec ~= "none" then
                 -- video track
                 streamurl = edl_track or track.url
-            elseif track.acodec and track.acodec ~= "none" and track.vcodec == "none" then
-                -- audio track
+            elseif track.vcodec == "none" then
+                -- according to ytdl, if vcodec is None, it's audio
                 mp.commandv("audio-add",
                     edl_track or track.url, "auto",
                     track.format_note or "")
