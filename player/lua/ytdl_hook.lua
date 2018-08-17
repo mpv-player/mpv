@@ -429,12 +429,7 @@ local function add_single_video(json)
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
 end
 
-mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
-    local url = mp.get_property("stream-open-filename", "")
-    if not (url:find("ytdl://") == 1) and
-        not ((url:find("https?://") == 1) and not is_blacklisted(url)) then
-        return
-    end
+function run_ytdl_hook(url)
     local start_time = os.clock()
 
     -- check for youtube-dl in mpv's config dir
@@ -655,8 +650,29 @@ mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function ()
         add_single_video(json)
     end
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
-end)
+end
 
+if (not o.try_ytdl_first) then
+    mp.add_hook("on_load", 10, function ()
+        msg.verbose('ytdl:// hook')
+        local url = mp.get_property("stream-open-filename", "")
+        if not (url:find("ytdl://") == 1) then
+            msg.verbose('not a ytdl:// url')
+            return
+        end
+        run_ytdl_hook(url)
+    end)
+end
+
+mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function()
+    msg.verbose('full hook')
+    local url = mp.get_property("stream-open-filename", "")
+    if not (url:find("ytdl://") == 1) and
+        not ((url:find("https?://") == 1) and not is_blacklisted(url)) then
+        return
+    end
+    run_ytdl_hook(url)
+end)
 
 mp.add_hook("on_preloaded", 10, function ()
     if next(chapter_list) ~= nil then
