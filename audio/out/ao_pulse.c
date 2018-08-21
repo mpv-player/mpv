@@ -454,11 +454,11 @@ static int init(struct ao *ao)
     pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
     pa_stream_set_latency_update_callback(priv->stream,
                                           stream_latency_update_cb, ao);
-    int buf_size = af_fmt_seconds_to_bytes(ao->format, priv->cfg_buffer / 1000.0,
-                                           ao->channels.num, ao->samplerate);
+    uint32_t buf_size = ao->samplerate * (priv->cfg_buffer / 1000.0) *
+        af_fmt_to_bytes(ao->format) * ao->channels.num;
     pa_buffer_attr bufattr = {
         .maxlength = -1,
-        .tlength = buf_size > 0 ? buf_size : (uint32_t)-1,
+        .tlength = buf_size > 0 ? buf_size : -1,
         .prebuf = -1,
         .minreq = -1,
         .fragsize = -1,
