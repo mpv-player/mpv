@@ -253,7 +253,10 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
     switch (trc) {
     case MP_CSP_TRC_LINEAR:  tonecurve[0] = cmsBuildGamma(cms, 1.0); break;
     case MP_CSP_TRC_GAMMA18: tonecurve[0] = cmsBuildGamma(cms, 1.8); break;
+    case MP_CSP_TRC_GAMMA20: tonecurve[0] = cmsBuildGamma(cms, 2.0); break;
     case MP_CSP_TRC_GAMMA22: tonecurve[0] = cmsBuildGamma(cms, 2.2); break;
+    case MP_CSP_TRC_GAMMA24: tonecurve[0] = cmsBuildGamma(cms, 2.4); break;
+    case MP_CSP_TRC_GAMMA26: tonecurve[0] = cmsBuildGamma(cms, 2.6); break;
     case MP_CSP_TRC_GAMMA28: tonecurve[0] = cmsBuildGamma(cms, 2.8); break;
 
     case MP_CSP_TRC_SRGB:
