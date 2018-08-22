@@ -216,7 +216,10 @@ Available mpv-only filters are:
        :srgb:         IEC 61966-2-4 (sRGB)
        :linear:       Linear light
        :gamma1.8:     Pure power curve (gamma 1.8)
+       :gamma2.0:     Pure power curve (gamma 2.0)
        :gamma2.2:     Pure power curve (gamma 2.2)
+       :gamma2.4:     Pure power curve (gamma 2.4)
+       :gamma2.6:     Pure power curve (gamma 2.6)
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
        :pq:           ITU-R BT.2100 PQ (Perceptual quantizer) curve

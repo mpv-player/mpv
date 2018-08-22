@@ -5090,8 +5090,14 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Linear light output
     gamma1.8
         Pure power curve (gamma 1.8), also used for Apple RGB
+    gamma2.0
+        Pure power curve (gamma 2.0)
     gamma2.2
         Pure power curve (gamma 2.2)
+    gamma2.4
+        Pure power curve (gamma 2.4)
+    gamma2.6
+        Pure power curve (gamma 2.6)
     gamma2.8
         Pure power curve (gamma 2.8), also used for BT.470-BG
     prophoto
