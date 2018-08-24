@@ -163,6 +163,8 @@ static const struct format_hack format_hacks[] = {
     {"mp4", .skipinfo = true, .fix_editlists = true},
     {"matroska", .skipinfo = true},
 
+    {"v4l2", .no_seek = true},
+
     // In theory, such streams might contain timestamps, but virtually none do.
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
     {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
