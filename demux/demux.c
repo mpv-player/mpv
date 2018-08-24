@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include <math.h>
 
@@ -97,11 +98,15 @@ struct demux_opts {
 
 #define OPT_BASE_STRUCT struct demux_opts
 
+#define MAX_BYTES MPMIN(INT64_MAX, SIZE_MAX / 2)
+
 const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
-        OPT_BYTE_SIZE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
-        OPT_BYTE_SIZE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, INT_MAX),
+        // (The MAX_BYTES sizes may not be accurate because the max field is
+        // of double type.)
+        OPT_BYTE_SIZE("demuxer-max-bytes", max_bytes, 0, 0, MAX_BYTES),
+        OPT_BYTE_SIZE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, MAX_BYTES),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
@@ -160,8 +165,8 @@ struct demux_internal {
     bool idle;
     bool autoselect;
     double min_secs;
-    int max_bytes;
-    int max_bytes_bw;
+    size_t max_bytes;
+    size_t max_bytes_bw;
     bool seekable_cache;
 
     // At least one decoder actually requested data since init or the last seek.
