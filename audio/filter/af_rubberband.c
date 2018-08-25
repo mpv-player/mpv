@@ -167,6 +167,7 @@ static void process(struct mp_filter *f)
             if (eof) {
                 mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
                 rubberband_reset(p->rubber);
+                p->rubber_delay = 0;
                 TA_FREEP(&p->pending);
                 p->sent_final = false;
                 return;
@@ -263,6 +264,7 @@ static void reset(struct mp_filter *f)
 
     if (p->rubber)
         rubberband_reset(p->rubber);
+    p->rubber_delay = 0;
     p->sent_final = false;
     TA_FREEP(&p->pending);
 }
