@@ -1103,8 +1103,14 @@ static void cleanup_binds(struct gl_video *p)
 
 // Sets the appropriate compute shader metadata for an implicit compute pass
 // bw/bh: block size
-static void pass_is_compute(struct gl_video *p, int bw, int bh)
+static void pass_is_compute(struct gl_video *p, int bw, int bh, bool flexible)
 {
+    if (p->pass_compute.active && flexible) {
+        // Avoid overwriting existing block sizes when using a flexible pass
+        bw = p->pass_compute.block_w;
+        bh = p->pass_compute.block_h;
+    }
+
     p->pass_compute = (struct compute_info){
         .active = true,
         .block_w = bw,
@@ -1248,7 +1254,7 @@ static void finish_pass_tex(struct gl_video *p, struct ra_tex **dst_tex,
     // If RA_CAP_PARALLEL_COMPUTE is set, try to prefer compute shaders
     // over fragment shaders wherever possible.
     if (!p->pass_compute.active && (p->ra->caps & RA_CAP_PARALLEL_COMPUTE))
-        pass_is_compute(p, 16, 16);
+        pass_is_compute(p, 16, 16, true);
 
     if (p->pass_compute.active) {
         gl_sc_uniform_image2D_wo(p->sc, "out_image", *dst_tex);
@@ -1744,7 +1750,7 @@ static void pass_dispatch_sample_polar(struct gl_video *p, struct scaler *scaler
     if (shmem_req > p->ra->max_shmem)
         goto fallback;
 
-    pass_is_compute(p, bw, bh);
+    pass_is_compute(p, bw, bh, false);
     pass_compute_polar(p->sc, scaler, img.components, bw, bh, iw, ih);
     return;
 
@@ -2485,7 +2491,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
 
     if (detect_peak) {
         pass_describe(p, "detect HDR peak");
-        pass_is_compute(p, 8, 8); // 8x8 is good for performance
+        pass_is_compute(p, 8, 8, true); // 8x8 is good for performance
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
             "uint counter;"
             "uint frame_idx;"
