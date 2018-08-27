@@ -578,3 +578,9 @@ Available video output drivers are:
 
     To use hardware decoding with ``--vo=gpu`` instead, use
     ``--hwdec=mediacodec-copy`` along with ``--gpu-context=android``.
+
+``wlshm`` (Wayland only)
+    Shared memory video output driver without hardware acceleration that works
+    whenever Wayland is present.
+
+    .. note:: This is a fallback only, and should not be normally used.
