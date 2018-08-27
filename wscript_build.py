@@ -488,6 +488,7 @@ def build(ctx):
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
+        ( "video/out/vo_wlshm.c",                "wayland" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
         ( "video/out/vulkan/context.c",          "vulkan" ),

@@ -1,0 +1,312 @@
+/*
+ * This file is part of mpv video player.
+ *
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * mpv is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <libswscale/swscale.h>
+
+#include "sub/osd.h"
+#include "video/fmt-conversion.h"
+#include "video/mp_image.h"
+#include "video/sws_utils.h"
+#include "vo.h"
+#include "wayland_common.h"
+
+struct buffer {
+    struct vo *vo;
+    size_t size;
+    struct wl_shm_pool *pool;
+    struct wl_buffer *buffer;
+    struct mp_image mpi;
+    struct buffer *next;
+};
+
+struct priv {
+    struct mp_sws_context *sws;
+    struct buffer *free_buffers;
+    struct mp_rect src;
+    struct mp_rect dst;
+    struct mp_osd_res osd;
+};
+
+static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+{
+    struct buffer *buf = data;
+    struct vo *vo = buf->vo;
+    struct priv *p = vo->priv;
+
+    if (buf->mpi.w == vo->dwidth && buf->mpi.h == vo->dheight) {
+        buf->next = p->free_buffers;
+        p->free_buffers = buf;
+    } else {
+        talloc_free(buf);
+    }
+}
+
+static const struct wl_buffer_listener buffer_listener = {
+    buffer_handle_release,
+};
+
+static void buffer_destroy(void *p)
+{
+    struct buffer *buf = p;
+    wl_buffer_destroy(buf->buffer);
+    wl_shm_pool_destroy(buf->pool);
+    munmap(buf->mpi.planes[0], buf->size);
+}
+
+/* modeled after randname and mkostemps from musl */
+static int alloc_shm(size_t size)
+{
+    struct timespec ts;
+    unsigned long r;
+    int i, fd, retries = 100;
+    char template[] = "/mpv-XXXXXX";
+
+    do {
+        clock_gettime(CLOCK_REALTIME, &ts);
+        r = ts.tv_nsec * 65537 ^ ((uintptr_t)&ts / 16 + (uintptr_t)template);
+        for (i = 5; i < sizeof(template) - 1; i++, r >>= 5)
+            template[i] = 'A' + (r & 15) + (r & 16) * 2;
+
+        fd = shm_open(template, O_RDWR | O_CREAT | O_EXCL, 0600);
+        if (fd >= 0) {
+            shm_unlink(template);
+            if (posix_fallocate(fd, 0, size) == 0)
+                return fd;
+            close(fd);
+            break;
+        }
+    } while (--retries && errno == EEXIST);
+
+    return -1;
+}
+
+static struct buffer *buffer_create(struct vo *vo, int width, int height)
+{
+    struct priv *p = vo->priv;
+    struct vo_wayland_state *wl = vo->wl;
+    int fd;
+    int stride;
+    size_t size;
+    uint8_t *data;
+    struct buffer *buf;
+
+    stride = MP_ALIGN_UP(width * 4, 16);
+    size = height * stride;
+    fd = alloc_shm(size);
+    if (fd < 0)
+        goto error0;
+    data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED)
+        goto error1;
+    buf = talloc_zero(NULL, struct buffer);
+    if (!buf)
+        goto error2;
+    buf->vo = vo;
+    buf->size = size;
+    mp_image_set_params(&buf->mpi, &p->sws->dst);
+    buf->mpi.w = width;
+    buf->mpi.h = height;
+    buf->mpi.planes[0] = data;
+    buf->mpi.stride[0] = stride;
+    buf->pool = wl_shm_create_pool(wl->shm, fd, size);
+    if (!buf->pool)
+        goto error3;
+    buf->buffer = wl_shm_pool_create_buffer(buf->pool, 0, width, height,
+                                            stride, WL_SHM_FORMAT_XRGB8888);
+    if (!buf->buffer)
+        goto error4;
+    wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
+    close(fd);
+    talloc_set_destructor(buf, buffer_destroy);
+
+    return buf;
+
+error4:
+    wl_shm_pool_destroy(buf->pool);
+error3:
+    talloc_free(buf);
+error2:
+    munmap(data, size);
+error1:
+    close(fd);
+error0:
+    return NULL;
+}
+
+static int preinit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    if (!vo_wayland_init(vo))
+        return -1;
+    p->sws = mp_sws_alloc(vo);
+
+    return 0;
+}
+
+static int query_format(struct vo *vo, int format)
+{
+    return sws_isSupportedInput(imgfmt2pixfmt(format));
+}
+
+static int reconfig(struct vo *vo, struct mp_image_params *params)
+{
+    struct priv *p = vo->priv;
+
+    if (!vo_wayland_reconfig(vo))
+        return -1;
+    mp_sws_set_from_cmdline(p->sws, vo->global);
+    p->sws->src = *params;
+
+    return 0;
+}
+
+static int resize(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct vo_wayland_state *wl = vo->wl;
+    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
+    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    struct buffer *buf;
+
+    vo->want_redraw = true;
+    vo->dwidth = width;
+    vo->dheight = height;
+    vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+    p->sws->dst = (struct mp_image_params) {
+        .imgfmt = IMGFMT_BGR0,
+        .w = width,
+        .h = height,
+        .p_w = 1,
+        .p_h = 1,
+    };
+    mp_image_params_guess_csp(&p->sws->dst);
+    while (p->free_buffers) {
+        buf = p->free_buffers;
+        p->free_buffers = buf->next;
+        talloc_free(buf);
+    }
+    return mp_sws_reinit(p->sws);
+}
+
+static int control(struct vo *vo, uint32_t request, void *data)
+{
+    int events = 0;
+    int ret = vo_wayland_control(vo, &events, request, data);
+
+    if (events & VO_EVENT_RESIZE)
+        ret = resize(vo);
+    vo_event(vo, events);
+    return ret;
+}
+
+static void draw_image(struct vo *vo, struct mp_image *src)
+{
+    struct priv *p = vo->priv;
+    struct vo_wayland_state *wl = vo->wl;
+    struct buffer *buf;
+
+    buf = p->free_buffers;
+    if (buf) {
+        p->free_buffers = buf->next;
+    } else {
+        buf = buffer_create(vo, vo->dwidth, vo->dheight);
+        if (!buf) {
+            wl_surface_attach(wl->surface, NULL, 0, 0);
+            return;
+        }
+    }
+    if (src) {
+        struct mp_image dst = buf->mpi;
+        struct mp_rect src_rc;
+        struct mp_rect dst_rc;
+        src_rc.x0 = MP_ALIGN_DOWN(p->src.x0, MPMAX(src->fmt.align_x, 4));
+        src_rc.y0 = MP_ALIGN_DOWN(p->src.y0, MPMAX(src->fmt.align_y, 4));
+        src_rc.x1 = p->src.x1 - (p->src.x0 - src_rc.x0);
+        src_rc.y1 = p->src.y1 - (p->src.y0 - src_rc.y0);
+        dst_rc.x0 = MP_ALIGN_DOWN(p->dst.x0, MPMAX(dst.fmt.align_x, 4));
+        dst_rc.y0 = MP_ALIGN_DOWN(p->dst.y0, MPMAX(dst.fmt.align_y, 4));
+        dst_rc.x1 = p->dst.x1 - (p->dst.x0 - dst_rc.x0);
+        dst_rc.y1 = p->dst.y1 - (p->dst.y0 - dst_rc.y0);
+        mp_image_crop_rc(src, src_rc);
+        mp_image_crop_rc(&dst, dst_rc);
+        mp_sws_scale(p->sws, &dst, src);
+        if (dst_rc.y0 > 0)
+            mp_image_clear(&buf->mpi, 0, 0, buf->mpi.w, dst_rc.y0);
+        if (buf->mpi.h > dst_rc.y1)
+            mp_image_clear(&buf->mpi, 0, dst_rc.y1, buf->mpi.w, buf->mpi.h);
+        if (dst_rc.x0 > 0)
+            mp_image_clear(&buf->mpi, 0, dst_rc.y0, dst_rc.x0, dst_rc.y1);
+        if (buf->mpi.w > dst_rc.x1)
+            mp_image_clear(&buf->mpi, dst_rc.x1, dst_rc.y0, buf->mpi.w, dst_rc.y1);
+        osd_draw_on_image(vo->osd, p->osd, src->pts, 0, &buf->mpi);
+    } else {
+        mp_image_clear(&buf->mpi, 0, 0, buf->mpi.w, buf->mpi.h);
+        osd_draw_on_image(vo->osd, p->osd, 0, 0, &buf->mpi);
+    }
+    talloc_free(src);
+    wl_surface_attach(wl->surface, buf->buffer, 0, 0);
+}
+
+static void flip_page(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+
+    wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
+                      mp_rect_h(wl->geometry));
+    wl_surface_commit(wl->surface);
+}
+
+static void uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct buffer *buf;
+
+    while (p->free_buffers) {
+        buf = p->free_buffers;
+        p->free_buffers = buf->next;
+        talloc_free(buf);
+    }
+    vo_wayland_uninit(vo);
+}
+
+#define OPT_BASE_STRUCT struct priv
+static const m_option_t options[] = {
+    {0}
+};
+
+const struct vo_driver video_out_wlshm = {
+    .description = "Wayland SHM video output",
+    .name = "wlshm",
+    .preinit = preinit,
+    .query_format = query_format,
+    .reconfig = reconfig,
+    .control = control,
+    .draw_image = draw_image,
+    .flip_page = flip_page,
+    .wakeup = vo_wayland_wakeup,
+    .wait_events = vo_wayland_wait_events,
+    .uninit = uninit,
+    .priv_size = sizeof(struct priv),
+    .options = options,
+};
