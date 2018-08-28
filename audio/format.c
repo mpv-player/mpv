@@ -138,12 +138,7 @@ const char *af_fmt_to_str(int format)
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
     assert(!af_fmt_is_planar(format));
-    int bps      = af_fmt_to_bytes(format);
-    int framelen = channels * bps;
-    int bytes    = seconds  * bps * samplerate;
-    if (bytes % framelen)
-        bytes += framelen - (bytes % framelen);
-    return bytes;
+    return samplerate * seconds * af_fmt_to_bytes(format) * channels;
 }
 
 void af_fill_silence(void *dst, size_t bytes, int format)
