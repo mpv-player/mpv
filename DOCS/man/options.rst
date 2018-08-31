@@ -12,8 +12,8 @@ Track Selection
 
     .. admonition:: Examples
 
-        - ``mpv dvd://1 --alang=hu,en`` chooses the Hungarian language track
-          on a DVD and falls back on English if Hungarian is not available.
+        - ``mpv file.mkv --alang=hu,en`` chooses the Hungarian language track
+          in a file and falls back on English if Hungarian is not available.
         - ``mpv --alang=jpn example.mkv`` plays a Matroska file with Japanese
           audio.
 
@@ -25,8 +25,8 @@ Track Selection
 
     .. admonition:: Examples
 
-        - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
-          a DVD and falls back on English if Hungarian is not available.
+        - ``mpv file.mkv --slang=hu,en`` chooses the Hungarian subtitle track on
+          in a file and falls back on English if Hungarian is not available.
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
 
@@ -281,10 +281,8 @@ Playback Control
     This option does not prevent opening of paired subtitle files and such. Use
     ``--autoload-files=no`` to prevent this.
 
-    This option does not always work if you open non-files (for example using
-    ``dvd://directory`` would open a whole bunch of files in the given
-    directory). Prefixing the filename with ``./`` if it doesn't start with
-    a ``/`` will avoid this.
+    This option does not always work if you open non-files. Prefixing the
+    filename with ``./`` if it doesn't start with a ``/`` will avoid this.
 
 ``--loop-playlist=<N|inf|force|no>``, ``--loop-playlist``
     Loops playback ``N`` times. A value of ``1`` plays it one time (default),
@@ -2620,85 +2618,6 @@ Window
 
     ``never`` asks the window manager to never disable the compositor.
 
-
-Disc Devices
-------------
-
-``--cdrom-device=<path>``
-    Specify the CD-ROM device (default: ``/dev/cdrom``).
-
-``--dvd-device=<path>``
-    Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
-    also specify a directory that contains files previously copied directly
-    from a DVD (with e.g. vobcopy).
-
-    .. admonition:: Example
-
-        ``mpv dvd:// --dvd-device=/path/to/dvd/``
-
-``--bluray-device=<path>``
-    (Blu-ray only)
-    Specify the Blu-ray disc location. Must be a directory with Blu-ray
-    structure.
-
-    .. admonition:: Example
-
-        ``mpv bd:// --bluray-device=/path/to/bd/``
-
-``--cdda-...``
-    These options can be used to tune the CD Audio reading feature of mpv.
-
-``--cdda-speed=<value>``
-    Set CD spin speed.
-
-``--cdda-paranoia=<0-2>``
-    Set paranoia level. Values other than 0 seem to break playback of
-    anything but the first track.
-
-    :0: disable checking (default)
-    :1: overlap checking only
-    :2: full data correction and verification
-
-``--cdda-sector-size=<value>``
-    Set atomic read size.
-
-``--cdda-overlap=<value>``
-    Force minimum overlap search during verification to <value> sectors.
-
-``--cdda-toc-bias``
-    Assume that the beginning offset of track 1 as reported in the TOC
-    will be addressed as LBA 0. Some discs need this for getting track
-    boundaries correctly.
-
-``--cdda-toc-offset=<value>``
-    Add ``<value>`` sectors to the values reported when addressing tracks.
-    May be negative.
-
-``--cdda-skip=<yes|no>``
-    (Never) accept imperfect data reconstruction.
-
-``--cdda-cdtext=<yes|no>``
-    Print CD text. This is disabled by default, because it ruins performance
-    with CD-ROM drives for unknown reasons.
-
-``--dvd-speed=<speed>``
-    Try to limit DVD speed (default: 0, no change). DVD base speed is 1385
-    kB/s, so an 8x drive can read at speeds up to 11080 kB/s. Slower speeds
-    make the drive more quiet. For watching DVDs, 2700 kB/s should be quiet and
-    fast enough. mpv resets the speed to the drive default value on close.
-    Values of at least 100 mean speed in kB/s. Values less than 100 mean
-    multiples of 1385 kB/s, i.e. ``--dvd-speed=8`` selects 11080 kB/s.
-
-    .. note::
-
-        You need write access to the DVD device to change the speed.
-
-``--dvd-angle=<ID>``
-    Some DVDs contain scenes that can be viewed from multiple angles.
-    This option tells mpv which angle to use (default: 1).
-
-
-
 Equalizer
 ---------
 
@@ -3092,8 +3011,7 @@ Input
 
 ``--input-cursor``, ``--no-input-cursor``
     Permit mpv to receive pointer events reported by the video output
-    driver. Necessary to use the OSC, or to select the buttons in DVD menus.
-    Support depends on the VO in use.
+    driver. Necessary to use the OSC. Support depends on the VO in use.
 
 ``--input-media-keys=<yes|no>``
     (OS X and Windows only)
@@ -3655,191 +3573,6 @@ Terminal
 ``--msg-time``
     Prepend timing information to each console message.
 
-
-TV
---
-
-``--tv-...``
-    These options tune various properties of the TV capture module. For
-    watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or
-    even ``tv://<channel_name>`` (see option ``tv-channels`` for ``channel_name``
-    below) as a media URL. You can also use ``tv:///<input_id>`` to start
-    watching a video from a composite or S-Video input (see option ``input`` for
-    details).
-
-``--tv-device=<value>``
-    Specify TV device (default: ``/dev/video0``).
-
-``--tv-channel=<value>``
-    Set tuner to <value> channel.
-
-``--no-tv-audio``
-    no sound
-
-``--tv-automute=<0-255> (v4l and v4l2 only)``
-    If signal strength reported by device is less than this value, audio
-    and video will be muted. In most cases automute=100 will be enough.
-    Default is 0 (automute disabled).
-
-``--tv-driver=<value>``
-    See ``--tv=driver=help`` for a list of compiled-in TV input drivers.
-    available: dummy, v4l2 (default: autodetect)
-
-``--tv-input=<value>``
-    Specify input (default: 0 (TV), see console output for available
-    inputs).
-
-``--tv-freq=<value>``
-    Specify the frequency to set the tuner to (e.g. 511.250). Not
-    compatible with the channels parameter.
-
-``--tv-outfmt=<value>``
-    Specify the output format of the tuner with a preset value supported
-    by the V4L driver (YV12, UYVY, YUY2, I420) or an arbitrary format given
-    as hex value.
-
-``--tv-width=<value>``
-    output window width
-
-``--tv-height=<value>``
-    output window height
-
-``--tv-fps=<value>``
-    framerate at which to capture video (frames per second)
-
-``--tv-buffersize=<value>``
-    maximum size of the capture buffer in megabytes (default: dynamical)
-
-``--tv-norm=<value>``
-    See the console output for a list of all available norms.
-
-    See also: ``--tv-normid``.
-
-``--tv-normid=<value> (v4l2 only)``
-    Sets the TV norm to the given numeric ID. The TV norm depends on the
-    capture card. See the console output for a list of available TV norms.
-
-``--tv-chanlist=<value>``
-    available: argentina, australia, china-bcast, europe-east,
-    europe-west, france, ireland, italy, japan-bcast, japan-cable,
-    newzealand, russia, southafrica, us-bcast, us-cable, us-cable-hrc
-
-``--tv-channels=<chan>-<name>[=<norm>],<chan>-<name>[=<norm>],...``
-    Set names for channels.
-
-    .. note::
-
-        If <chan> is an integer greater than 1000, it will be treated as
-        frequency (in kHz) rather than channel name from frequency table.
-        Use _ for spaces in names (or play with quoting ;-) ). The channel
-        names will then be written using OSD, and the input commands
-        ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
-        will be usable for a remote control. Not compatible with
-        the ``frequency`` parameter.
-
-    .. note::
-
-        The channel number will then be the position in the 'channels'
-        list, beginning with 1.
-
-    .. admonition:: Examples
-
-        ``tv://1``, ``tv://TV1``, ``tv_set_channel 1``,
-        ``tv_set_channel TV1``
-
-``--tv-[brightness|contrast|hue|saturation]=<-100-100>``
-    Set the image equalizer on the card.
-
-``--tv-audiorate=<value>``
-    Set input audio sample rate.
-
-``--tv-forceaudio``
-    Capture audio even if there are no audio sources reported by v4l.
-
-``--tv-alsa``
-    Capture from ALSA.
-
-``--tv-amode=<0-3>``
-    Choose an audio mode:
-
-    :0: mono
-    :1: stereo
-    :2: language 1
-    :3: language 2
-
-``--tv-forcechan=<1-2>``
-    By default, the count of recorded audio channels is determined
-    automatically by querying the audio mode from the TV card. This option
-    allows forcing stereo/mono recording regardless of the amode option
-    and the values returned by v4l. This can be used for troubleshooting
-    when the TV card is unable to report the current audio mode.
-
-``--tv-adevice=<value>``
-    Set an audio device. <value> should be ``/dev/xxx`` for OSS and a
-    hardware ID for ALSA. You must replace any ':' by a '.' in the
-    hardware ID for ALSA.
-
-``--tv-audioid=<value>``
-    Choose an audio output of the capture card, if it has more than one.
-
-``--tv-[volume|bass|treble|balance]=<0-100>``
-    These options set parameters of the mixer on the video capture card.
-    They will have no effect, if your card does not have one. For v4l2 50
-    maps to the default value of the control, as reported by the driver.
-
-``--tv-gain=<0-100>``
-    Set gain control for video devices (usually webcams) to the desired
-    value and switch off automatic control. A value of 0 enables automatic
-    control. If this option is omitted, gain control will not be modified.
-
-``--tv-immediatemode=<bool>``
-    A value of 0 means capture and buffer audio and video together. A
-    value of 1 (default) means to do video capture only and let the audio
-    go through a loopback cable from the TV card to the sound card.
-
-``--tv-mjpeg``
-    Use hardware MJPEG compression (if the card supports it). When using
-    this option, you do not need to specify the width and height of the
-    output window, because mpv will determine it automatically from
-    the decimation value (see below).
-
-``--tv-decimation=<1|2|4>``
-    choose the size of the picture that will be compressed by hardware
-    MJPEG compression:
-
-    :1: full size
-
-        - 704x576 PAL
-        - 704x480 NTSC
-
-    :2: medium size
-
-        - 352x288 PAL
-        - 352x240 NTSC
-
-    :4: small size
-
-        - 176x144 PAL
-        - 176x120 NTSC
-
-``--tv-quality=<0-100>``
-    Choose the quality of the JPEG compression (< 60 recommended for full
-    size).
-
-``--tv-scan-autostart``
-    Begin channel scanning immediately after startup (default: disabled).
-
-``--tv-scan-period=<0.1-2.0>``
-    Specify delay in seconds before switching to next channel (default:
-    0.5). Lower values will cause faster scanning, but can detect inactive
-    TV channels as active.
-
-``--tv-scan-threshold=<1-100>``
-    Threshold value for the signal strength (in percent), as reported by
-    the device (default: 50). A signal strength higher than this value will
-    indicate that the currently scanning channel is active.
-
-
 Cache
 -----
 
@@ -3984,45 +3717,6 @@ Network
 
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
-
-DVB
----
-
-``--dvbin-card=<1-4>``
-    Specifies using card number 1-4 (default: 1).
-
-``--dvbin-file=<filename>``
-    Instructs mpv to read the channels list from ``<filename>``. The default is
-    in the mpv configuration directory (usually ``~/.config/mpv``) with the
-    filename ``channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
-    ``channels.conf`` as a last resort.
-    For DVB-S/2 cards, a VDR 1.7.x format channel list is recommended
-    as it allows tuning to DVB-S2 channels, enabling subtitles and
-    decoding the PMT (which largely improves the demuxing).
-    Classic mplayer format channel lists are still supported (without
-    these improvements), and for other card types, only limited VDR
-    format channel list support is implemented (patches welcome).
-    For channels with dynamic PID switching or incomplete
-    ``channels.conf``, ``--dvbin-full-transponder`` or the magic PID
-    ``8192`` are recommended.
-
-``--dvbin-timeout=<1-30>``
-    Maximum number of seconds to wait when trying to tune a frequency before
-    giving up (default: 30).
-
-``--dvbin-full-transponder=<yes|no>``
-    Apply no filters on program PIDs, only tune to frequency and pass full
-    transponder to demuxer.
-    The player frontend selects the streams from the full TS in this case,
-    so the program which is shown initially may not match the chosen channel.
-    Switching between the programs is possible by cycling the ``program``
-    property.
-    This is useful to record multiple programs on a single transponder,
-    or to work around issues in the ``channels.conf``.
-    It is also recommended to use this for channels which switch PIDs
-    on-the-fly, e.g. for regional news.
-
-    Default: ``no``
 
 ALSA audio output options
 -------------------------
