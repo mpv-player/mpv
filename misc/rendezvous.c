@@ -16,7 +16,7 @@ struct waiter {
 /* A barrier for 2 threads, which can exchange a value when they meet.
  * The first thread to call this function will block. As soon as two threads
  * are calling this function with the same tag value, they will unblock, and
- * on each thread the call return the value parameter of the _other_ thread.
+ * on each thread the call returns the value parameter of the _other_ thread.
  *
  * tag is an arbitrary value, but it must be an unique pointer. If there are
  * more than 2 threads using the same tag, things won't work. Typically, it
