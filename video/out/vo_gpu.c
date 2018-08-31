@@ -98,6 +98,13 @@ static void flip_page(struct vo *vo)
     sw->fns->swap_buffers(sw);
 }
 
+static double get_latency(struct vo *vo)
+{
+    struct gpu_priv *p = vo->priv;
+    struct ra_swapchain *sw = p->ctx->swapchain;
+    return sw->fns->get_latency ? sw->fns->get_latency(sw) : -1;
+}
+
 static int query_format(struct vo *vo, int format)
 {
     struct gpu_priv *p = vo->priv;
@@ -326,6 +333,7 @@ const struct vo_driver video_out_gpu = {
     .get_image = get_image,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
+    .get_latency = get_latency,
     .wait_events = wait_events,
     .wakeup = wakeup,
     .uninit = uninit,
