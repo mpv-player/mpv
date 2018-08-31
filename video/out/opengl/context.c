@@ -313,9 +313,16 @@ void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
     }
 }
 
+static double ra_gl_ctx_get_latency(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    return p->params.get_latency ? p->params.get_latency(sw->ctx) : -1;
+}
+
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
     .swap_buffers  = ra_gl_ctx_swap_buffers,
+    .get_latency   = ra_gl_ctx_get_latency,
 };

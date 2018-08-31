@@ -41,11 +41,20 @@
 #include "context.h"
 #include "utils.h"
 
+// Must be >= max. assumed and supported display latency in frames.
+#define SYNC_SAMPLES 16
+
 struct priv {
     GL gl;
     XVisualInfo *vinfo;
     GLXContext context;
     GLXFBConfig fbc;
+
+    Bool (*XGetSyncValues)(Display*, GLXDrawable, int64_t*, int64_t*, int64_t*);
+    uint64_t ust[SYNC_SAMPLES];
+    uint64_t last_sbc;
+    uint64_t last_msc;
+    double latency;
 };
 
 static void glx_uninit(struct ra_ctx *ctx)
@@ -161,6 +170,13 @@ static bool create_context_x11_gl3(struct ra_ctx *ctx, GL *gl, int gl_version,
 
     mpgl_load_functions(gl, (void *)glXGetProcAddressARB, glxstr, vo->log);
 
+    if (gl_check_extension(glxstr, "GLX_OML_sync_control")) {
+        p->XGetSyncValues =
+            (void *)glXGetProcAddressARB((const GLubyte *)"glXGetSyncValuesOML");
+    }
+    if (p->XGetSyncValues)
+        MP_VERBOSE(vo, "Using GLX_OML_sync_control.\n");
+
     return true;
 }
 
@@ -208,9 +224,91 @@ static void set_glx_attrib(int *attribs, int name, int value)
     }
 }
 
+static double update_latency_oml(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    assert(p->XGetSyncValues);
+
+    p->last_sbc += 1;
+
+    memmove(&p->ust[1], &p->ust[0], (SYNC_SAMPLES - 1) * sizeof(p->ust[0]));
+    p->ust[0] = 0;
+
+    int64_t ust, msc, sbc;
+    if (!p->XGetSyncValues(ctx->vo->x11->display, ctx->vo->x11->window,
+                           &ust, &msc, &sbc))
+        return -1;
+
+    p->ust[0] = ust;
+
+    uint64_t last_msc = p->last_msc;
+    p->last_msc = msc;
+
+    // There was a driver-level discontinuity.
+    if (msc != last_msc + 1)
+        return -1;
+
+    // No frame displayed yet.
+    if (!ust || !sbc || !msc)
+        return -1;
+
+    // We really need to know the time since the vsync happened. There is no way
+    // to get the UST at the time which the frame was queued. So we have to make
+    // assumptions about the UST. The extension spec doesn't define what the UST
+    // is (not even its unit).
+    // Simply assume UST is a simple CLOCK_MONOTONIC usec value. The swap buffer
+    // call happened "some" but very small time ago, so we can get away with
+    // querying the current time. There is also the implicit assumption that
+    // mpv's timer and the UST use the same clock (which it does on POSIX).
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+        return -1;
+    uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+
+    // Actually we need two consecutive displays before we can accurately
+    // measure the latency (because we need to compute vsync_duration).
+    if (!p->ust[1])
+        return -1;
+
+    // Display frame duration.
+    int64_t vsync_duration = p->ust[0] - p->ust[1];
+
+    // Display latency in frames.
+    int64_t n_frames = p->last_sbc - sbc;
+
+    // Too high latency, or other nonsense.
+    if (n_frames < 0 || n_frames >= SYNC_SAMPLES)
+        return -1;
+
+    // Values were not recorded? (Temporary failures etc.)
+    if (!p->ust[n_frames])
+        return -1;
+
+    // Time since last frame display event.
+    int64_t latency_us = now_monotonic - p->ust[n_frames];
+
+    // The frame display event probably happened very recently (about within one
+    // vsync), but the corresponding video frame can be much older.
+    latency_us = (n_frames + 1) * vsync_duration - latency_us;
+
+    return latency_us / (1000.0 * 1000.0);
+}
+
 static void glx_swap_buffers(struct ra_ctx *ctx)
 {
+    struct priv *p = ctx->priv;
+
     glXSwapBuffers(ctx->vo->x11->display, ctx->vo->x11->window);
+
+    if (p->XGetSyncValues)
+        p->latency = update_latency_oml(ctx);
+}
+
+static double glx_get_latency(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    return p->latency;
 }
 
 static bool glx_init(struct ra_ctx *ctx)
@@ -296,10 +394,13 @@ static bool glx_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = glx_swap_buffers,
+        .get_latency  = glx_get_latency,
     };
 
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto uninit;
+
+    p->latency = -1;
 
     return true;
 
