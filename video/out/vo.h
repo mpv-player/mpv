@@ -374,6 +374,11 @@ struct vo_driver {
      */
     void (*flip_page)(struct vo *vo);
 
+    /*
+     * See struct ra_swapchain. Optional.
+     */
+    double (*get_latency)(struct vo *vo);
+
     /* These optional callbacks can be provided if the GUI framework used by
      * the VO requires entering a message loop for receiving events and does
      * not call vo_wakeup() from a separate thread when there are new events.
