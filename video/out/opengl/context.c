@@ -313,10 +313,12 @@ void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
     }
 }
 
-static double ra_gl_ctx_get_latency(struct ra_swapchain *sw)
+static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
+                                struct vo_vsync_info *info)
 {
     struct priv *p = sw->priv;
-    return p->params.get_latency ? p->params.get_latency(sw->ctx) : -1;
+    if (p->params.get_vsync)
+        p->params.get_vsync(sw->ctx, info);
 }
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
@@ -324,5 +326,5 @@ static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
     .swap_buffers  = ra_gl_ctx_swap_buffers,
-    .get_latency   = ra_gl_ctx_get_latency,
+    .get_vsync     = ra_gl_ctx_get_vsync,
 };
