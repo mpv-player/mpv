@@ -292,11 +292,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     struct stream *cur = demuxer->stream;
     const char *sname = "";
-    while (cur) {
-        if (cur->info)
-            sname = cur->info->name;
-        cur = cur->underlying; // down the caching chain
-    }
+    if (cur->info)
+        sname = cur->info->name;
 
     p->is_cdda = strcmp(sname, "cdda") == 0;
     p->is_dvd = strcmp(sname, "dvd") == 0 ||

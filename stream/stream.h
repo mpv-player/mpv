@@ -52,11 +52,6 @@
 enum stream_ctrl {
     STREAM_CTRL_GET_SIZE = 1,
 
-    // Cache
-    STREAM_CTRL_GET_CACHE_INFO,
-    STREAM_CTRL_SET_CACHE_SIZE,
-    STREAM_CTRL_SET_READAHEAD,
-
     // stream_memory.c
     STREAM_CTRL_SET_CONTENTS,
 
@@ -102,14 +97,6 @@ enum stream_ctrl {
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
-};
-
-// for STREAM_CTRL_GET_CACHE_INFO
-struct stream_cache_info {
-    int64_t size;
-    int64_t fill;
-    bool idle;
-    int64_t speed;
 };
 
 struct stream_lang_req {
@@ -179,8 +166,6 @@ typedef struct stream {
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool is_network : 1; // original stream_info_t.is_network flag
-    bool allow_caching : 1; // stream cache makes sense
-    bool caching : 1; // is a cache, or accesses a cache
     bool is_local_file : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
@@ -190,23 +175,11 @@ typedef struct stream {
 
     struct mp_cancel *cancel;   // cancellation notification
 
-    struct stream *underlying;  // e.g. cache wrapper
-
     // Includes additional padding in case sizes get rounded up by sector size.
     unsigned char buffer[];
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
-
-struct mp_cache_opts;
-bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts);
-int stream_enable_cache_defaults(stream_t **stream);
-
-// Internal
-int stream_cache_init(stream_t *cache, stream_t *stream,
-                      struct mp_cache_opts *opts);
-int stream_file_cache_init(stream_t *cache, stream_t *stream,
-                           struct mp_cache_opts *opts);
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
 

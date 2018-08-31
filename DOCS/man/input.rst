@@ -1455,38 +1455,6 @@ Property list
     playing at all. In other words, it's only ``no`` if there's actually
     video playing. (Behavior since mpv 0.7.0.)
 
-``cache``
-    Network cache fill state (0-100.0).
-
-``cache-size`` (RW)
-    Network cache size in KB. This is similar to ``--cache``. This allows
-    setting the cache size at runtime. Currently, it's not possible to enable
-    or disable the cache at runtime using this property, just to resize an
-    existing cache.
-
-    This does not include the backbuffer size (changed after mpv 0.10.0).
-
-    Note that this tries to keep the cache contents as far as possible. To make
-    this easier, the cache resizing code will allocate the new cache while the
-    old cache is still allocated.
-
-    Don't use this when playing DVD or Blu-ray.
-
-``cache-free`` (R)
-    Total free cache size in KB.
-
-``cache-used`` (R)
-    Total used cache size in KB.
-
-``cache-speed`` (R)
-    Current I/O read speed between the cache and the lower layer (like network).
-    This gives the number bytes per seconds over a 1 second window (using
-    the type ``MPV_FORMAT_INT64`` for the client API).
-
-``cache-idle`` (R)
-    Returns ``yes`` if the cache is idle, which means the cache is filled as
-    much as possible, and is currently not reading more data.
-
 ``demuxer-cache-duration``
     Approximate duration of video buffered in the demuxer, in seconds. The
     guess is very unreliable, and often the property will not be available
