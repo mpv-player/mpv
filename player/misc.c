@@ -203,24 +203,6 @@ void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec)
     queue_seek(mpctx, MPSEEK_ABSOLUTE, get_current_time(mpctx), min_prec, 0);
 }
 
-float mp_get_cache_percent(struct MPContext *mpctx)
-{
-    struct stream_cache_info info = {0};
-    if (mpctx->demuxer)
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
-    if (info.size > 0 && info.fill >= 0)
-        return info.fill / (info.size / 100.0);
-    return -1;
-}
-
-bool mp_get_cache_idle(struct MPContext *mpctx)
-{
-    struct stream_cache_info info = {0};
-    if (mpctx->demuxer)
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
-    return info.idle;
-}
-
 void update_vo_playback_state(struct MPContext *mpctx)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {

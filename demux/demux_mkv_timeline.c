@@ -172,7 +172,6 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
         .disable_timeline = true,
-        .disable_cache = true,
     };
     struct mp_cancel *cancel = ctx->tl->cancel;
     if (mp_cancel_test(cancel))
@@ -214,15 +213,6 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
                     /* Add a new source slot. */
                     MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
                 }
-            }
-
-            if (stream_wants_cache(d->stream, ctx->opts->stream_cache)) {
-                demux_free(d);
-                params.disable_cache = false;
-                params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
-                d = demux_open_url(filename, &params, cancel, ctx->global);
-                if (!d)
-                    return false;
             }
 
             ctx->sources[i] = d;

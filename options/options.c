@@ -59,7 +59,6 @@ extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
-extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options drm_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
@@ -386,8 +385,6 @@ const m_option_t mp_opts[] = {
 #endif
 
 // ------------------------- stream options --------------------
-
-    OPT_SUBSTRUCT("", stream_cache, stream_cache_conf, 0),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),

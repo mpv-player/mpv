@@ -357,8 +357,6 @@ def build(ctx):
         ( "stream/ai_oss.c",                     "oss-audio && audio-input" ),
         ( "stream/ai_sndio.c",                   "sndio && audio-input" ),
         ( "stream/audio_in.c",                   "audio-input" ),
-        ( "stream/cache.c" ),
-        ( "stream/cache_file.c" ),
         ( "stream/cookies.c" ),
         ( "stream/dvb_tune.c",                   "dvbin" ),
         ( "stream/frequencies.c",                "tv" ),

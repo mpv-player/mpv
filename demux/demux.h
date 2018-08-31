@@ -174,13 +174,11 @@ struct demuxer_params {
     bool *matroska_was_valid;
     struct timeline *timeline;
     bool disable_timeline;
-    bool initial_readahead;
     bstr init_fragment;
     bool skip_lavf_probing;
     bool does_not_own_stream; // if false, stream is free'd on demux_free()
     // -- demux_open_url() only
     int stream_flags;
-    bool disable_cache;
     // result
     bool demuxer_failed;
 };
@@ -317,6 +315,7 @@ void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer);
 
 void demux_disable_cache(demuxer_t *demuxer);
+bool demux_is_network_cached(demuxer_t *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
