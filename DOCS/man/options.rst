@@ -3843,97 +3843,15 @@ TV
 Cache
 -----
 
-``--cache=<kBytes|yes|no|auto>``
-    Set the size of the cache in kilobytes, disable it with ``no``, or
-    automatically enable it if needed with ``auto`` (default: ``auto``).
-    With ``auto``, the cache will usually be enabled for network streams,
-    using the size set by ``--cache-default``. With ``yes``, the cache will
-    always be enabled with the size set by ``--cache-default`` (unless the
-    stream cannot be cached, or ``--cache-default`` disables caching).
+``--cache=<yes|no|auto>``
+    Decide whether to use network cache settings (default: auto).
 
-    May be useful when playing files from slow media, but can also have
-    negative effects, especially with file formats that require a lot of
-    seeking, such as MP4.
+    If enabled, use the maximum of ``--cache-secs`` and ``--demuxer-max-bytes``
+    for the cache size. If disabled, ``--cache-pause`` and related are
+    implicitly disabled.
 
-    Note that half the cache size will be used to allow fast seeking back. This
-    is also the reason why a full cache is usually not reported as 100% full.
-    The cache fill display does not include the part of the cache reserved for
-    seeking back. The actual maximum percentage will usually be the ratio
-    between readahead and backbuffer sizes.
-
-``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 10000 KB). Using ``no``
-    will not automatically enable the cache e.g. when playing from a network
-    stream. Note that using ``--cache`` will always override this option.
-
-``--cache-initial=<kBytes>``
-    Playback will start when the cache has been filled up with this many
-    kilobytes of data (default: 0).
-
-``--cache-seek-min=<kBytes>``
-    If a seek is to be made to a position within ``<kBytes>`` of the cache
-    size from the current position, mpv will wait for the cache to be
-    filled to this position rather than performing a stream seek (default:
-    500).
-
-    This matters for small forward seeks. With slow streams (especially HTTP
-    streams) there is a tradeoff between skipping the data between current
-    position and seek destination, or performing an actual seek. Depending
-    on the situation, either of these might be slower than the other method.
-    This option allows control over this.
-
-``--cache-backbuffer=<kBytes>``
-    Size of the cache back buffer (default: 10000 KB). This will add to the total
-    cache size, and reserved the amount for seeking back. The reserved amount
-    will not be used for readahead, and instead preserves already read data to
-    enable fast seeking back.
-
-``--cache-file=<TMP|path>``
-    Create a cache file on the filesystem.
-
-    There are two ways of using this:
-
-    1. Passing a path (a filename). The file will always be overwritten. When
-       the general cache is enabled, this file cache will be used to store
-       whatever is read from the source stream.
-
-       This will always overwrite the cache file, and you can't use an existing
-       cache file to resume playback of a stream. (Technically, mpv wouldn't
-       even know which blocks in the file are valid and which not.)
-
-       The resulting file will not necessarily contain all data of the source
-       stream. For example, if you seek, the parts that were skipped over are
-       never read and consequently are not written to the cache. The skipped over
-       parts are filled with zeros. This means that the cache file doesn't
-       necessarily correspond to a full download of the source stream.
-
-       Both of these issues could be improved if there is any user interest.
-
-       .. warning:: Causes random corruption when used with ordered chapters or
-                    with ``--audio-file``.
-
-    2. Passing the string ``TMP``. This will not be interpreted as filename.
-       Instead, an invisible temporary file is created. It depends on your
-       C library where this file is created (usually ``/tmp/``), and whether
-       filename is visible (the ``tmpfile()`` function is used). On some
-       systems, automatic deletion of the cache file might not be guaranteed.
-
-       If you want to use a file cache, this mode is recommended, because it
-       doesn't break ordered chapters or ``--audio-file``. These modes open
-       multiple cache streams, and using the same file for them obviously
-       clashes.
-
-    See also: ``--cache-file-size``.
-
-``--cache-file-size=<kBytes>``
-    Maximum size of the file created with ``--cache-file``. For read accesses
-    above this size, the cache is simply not used.
-
-    Keep in mind that some use-cases, like playing ordered chapters with cache
-    enabled, will actually create multiple cache files, each of which will
-    use up to this much disk space.
-
-    (Default: 1048576, 1 GB.)
+    The ``auto`` choice sets this depending on whether the stream is thought to
+    involve network accesses (this is an imperfect heuristic).
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.

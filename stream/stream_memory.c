@@ -62,7 +62,6 @@ static int open_f(stream_t *stream)
     stream->seekable = true;
     stream->control = control;
     stream->read_chunk = 1024 * 1024;
-    stream->allow_caching = false;
 
     struct priv *p = talloc_zero(stream, struct priv);
     stream->priv = p;

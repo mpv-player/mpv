@@ -229,7 +229,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     s->global = global;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
-    s->allow_caching = true;
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
@@ -255,9 +254,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
 
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
-
-    if (!s->fill_buffer)
-        s->allow_caching = false;
 
     assert(s->seekable == !!s->seek);
 
@@ -581,7 +577,6 @@ void free_stream(stream_t *s)
 
     if (s->close)
         s->close(s);
-    free_stream(s->underlying);
     talloc_free(s);
 }
 
@@ -595,98 +590,6 @@ stream_t *open_memory_stream(void *data, int len)
     talloc_steal(s, dummy);
     stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;
-}
-
-static stream_t *open_cache(stream_t *orig, const char *name)
-{
-    stream_t *cache = new_stream();
-    cache->underlying = orig;
-    cache->caching = true;
-    cache->seekable = true;
-    cache->mode = STREAM_READ;
-    cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
-
-    cache->url = talloc_strdup(cache, orig->url);
-    cache->mime_type = talloc_strdup(cache, orig->mime_type);
-    cache->demuxer = talloc_strdup(cache, orig->demuxer);
-    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
-    cache->streaming = orig->streaming,
-    cache->is_network = orig->is_network;
-    cache->is_local_file = orig->is_local_file;
-    cache->is_directory = orig->is_directory;
-    cache->cancel = orig->cancel;
-    cache->global = orig->global;
-
-    cache->log = mp_log_new(cache, cache->global->log, name);
-
-    return cache;
-}
-
-static struct mp_cache_opts check_cache_opts(stream_t *stream,
-                                             struct mp_cache_opts *opts)
-{
-    struct mp_cache_opts use_opts = *opts;
-    if (use_opts.size == -1)
-        use_opts.size = stream->streaming ? use_opts.def_size : 0;
-    if (use_opts.size == -2)
-        use_opts.size = use_opts.def_size;
-
-    if (stream->mode != STREAM_READ || !stream->allow_caching || use_opts.size < 1)
-        use_opts.size = 0;
-    return use_opts;
-}
-
-bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
-{
-    struct mp_cache_opts use_opts = check_cache_opts(stream, opts);
-    return use_opts.size > 0;
-}
-
-// return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
-// or if the cache is disabled
-static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
-{
-    stream_t *orig = *stream;
-    struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
-
-    if (use_opts.size < 1)
-        return 0;
-
-    stream_t *fcache = open_cache(orig, "file-cache");
-    if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
-        fcache->underlying = NULL; // don't free original stream
-        free_stream(fcache);
-        fcache = orig;
-    }
-
-    stream_t *cache = open_cache(fcache, "cache");
-
-    int res = stream_cache_init(cache, fcache, &use_opts);
-    if (res <= 0) {
-        cache->underlying = NULL; // don't free original stream
-        free_stream(cache);
-        if (fcache != orig) {
-            fcache->underlying = NULL;
-            free_stream(fcache);
-        }
-    } else {
-        *stream = cache;
-    }
-    return res;
-}
-
-// Do some crazy stuff to call stream_enable_cache() with the global options.
-int stream_enable_cache_defaults(stream_t **stream)
-{
-    struct mpv_global *global = (*stream)->global;
-    if (!global)
-        return 0;
-    void *tmp = talloc_new(NULL);
-    struct mp_cache_opts *opts =
-        mp_get_config_group(tmp, global, &stream_cache_conf);
-    int r = stream_enable_cache(stream, opts);
-    talloc_free(tmp);
-    return r;
 }
 
 static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)

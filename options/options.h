@@ -59,16 +59,6 @@ typedef struct mp_vo_opts {
     struct drm_opts *drm_opts;
 } mp_vo_opts;
 
-struct mp_cache_opts {
-    int size;
-    int def_size;
-    int initial;
-    int seek_min;
-    int back_buffer;
-    char *file;
-    int file_max;
-};
-
 // Subtitle options needed by the subtitle decoders/renderers.
 struct mp_subtitle_opts {
     int sub_visibility;
@@ -204,7 +194,6 @@ typedef struct MPOpts {
     char *force_configdir;
     int use_filedir_conf;
     int hls_bitrate;
-    struct mp_cache_opts *stream_cache;
     int chapterrange[2];
     int edition_id;
     int correct_pts;
@@ -358,7 +347,6 @@ struct filter_opts {
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
-extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
