@@ -305,10 +305,10 @@ static void glx_swap_buffers(struct ra_ctx *ctx)
         p->latency = update_latency_oml(ctx);
 }
 
-static double glx_get_latency(struct ra_ctx *ctx)
+static void glx_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct priv *p = ctx->priv;
-    return p->latency;
+    info->latency = p->latency;
 }
 
 static bool glx_init(struct ra_ctx *ctx)
@@ -394,7 +394,7 @@ static bool glx_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = glx_swap_buffers,
-        .get_latency  = glx_get_latency,
+        .get_vsync    = glx_get_vsync,
     };
 
     if (!ra_gl_ctx_init(ctx, gl, params))

@@ -263,6 +263,21 @@ struct vo_frame {
     uint64_t frame_id;
 };
 
+// Presentation feedback.
+struct vo_vsync_info {
+    // Last mp_time_us() timestamp at which a frame was queued.
+    int64_t last_queue_time;
+
+    // The latency at which swap_buffers() is performed. This is in seconds, and
+    // valid values are always >= 0. Essentially, it's the predicted time the
+    // last shown frame will take until it is actually displayed on the physical
+    // screen. (A reasonable implementation is returning the actual measured
+    // value for the last frame which was actually displayed. The assumption is
+    // that the latency usually doesn't change.)
+    // -1 if unset or unsupported.
+    double latency;
+};
+
 struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
@@ -375,9 +390,11 @@ struct vo_driver {
     void (*flip_page)(struct vo *vo);
 
     /*
-     * See struct ra_swapchain. Optional.
+     * Return presentation feedback. The implementation should not touch fields
+     * it doesn't support; the info fields are preinitialized to neutral values.
+     * Usually called once after flip_page(), but can be called any time.
      */
-    double (*get_latency)(struct vo *vo);
+    void (*get_vsync)(struct vo *vo, struct vo_vsync_info *info);
 
     /* These optional callbacks can be provided if the GUI framework used by
      * the VO requires entering a message loop for receiving events and does
