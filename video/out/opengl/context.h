@@ -23,8 +23,8 @@ struct ra_gl_ctx_params {
     // function or if you override it yourself.
     void (*swap_buffers)(struct ra_ctx *ctx);
 
-    // See ra_swapchain_fns.get_latency.
-    double (*get_latency)(struct ra_ctx *ctx);
+    // See ra_swapchain_fns.get_vsync.
+    void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
     // Set to false if the implementation follows normal GL semantics, which is
     // upside down. Set to true if it does *not*, i.e. if rendering is right
