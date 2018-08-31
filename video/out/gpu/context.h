@@ -84,14 +84,8 @@ struct ra_swapchain_fns {
     // params.swapchain_depth, or until the next vblank (for vsynced contexts)
     void (*swap_buffers)(struct ra_swapchain *sw);
 
-    // Return the latency at which swap_buffers() is performed. This is in
-    // seconds and always >= 0. Essentially, it's the predicted time the last
-    // shown frame will take until it is actually displayed on the physical
-    // screen. (A reasonable implementation is returning the duration the
-    // last actually displayed frame took after its swap_buffers() was called.)
-    // Should return -1 on error (e.g. discontinuities).
-    // Can be NULL 0 or always return -1 if unsupported.
-    double (*get_latency)(struct ra_swapchain *sw);
+    // See vo. Usually called after swap_buffers().
+    void (*get_vsync)(struct ra_swapchain *sw, struct vo_vsync_info *info);
 };
 
 // Create and destroy a ra_ctx. This also takes care of creating and destroying
