@@ -220,41 +220,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             void *tmp = talloc_new(NULL);
             bstr file = p.arg;
             char *file0 = bstrdup0(tmp, p.arg);
-#if HAVE_GPL
-            // expand DVD filename entries like dvd://1-3 into component titles
-            if (bstr_startswith0(file, "dvd://")) {
-                int offset = 6;
-                char *splitpos = strstr(file0 + offset, "-");
-                if (splitpos != NULL) {
-                    char *endpos;
-                    int start_title = strtol(file0 + offset, &endpos, 10);
-                    int end_title;
-                    //entries like dvd://-2 imply start at title 1
-                    if (start_title < 0) {
-                        end_title = abs(start_title);
-                        start_title = 1;
-                    } else
-                        end_title = strtol(splitpos + 1, &endpos, 10);
-
-                    #define dvd_range(a)  (a >= 0 && a < 255)
-                    if (dvd_range(start_title) && dvd_range(end_title)
-                            && (start_title < end_title)) {
-                        for (int j = start_title; j <= end_title; j++) {
-                            char *f = talloc_asprintf(tmp, "dvd://%d%s", j,
-                                                      endpos);
-                            playlist_add_file(files, f);
-                        }
-                    } else
-                        MP_ERR(config, "Invalid play entry %s\n", file0);
-
-                } else // dvd:// or dvd://x entry
-                    playlist_add_file(files, file0);
-            } else {
-                process_non_option(files, file0);
-            }
-#else
             process_non_option(files, file0);
-#endif
             talloc_free(tmp);
         }
     }

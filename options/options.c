@@ -55,9 +55,6 @@ static void print_version(struct mp_log *log)
     mp_print_version(log, true);
 }
 
-extern const struct m_sub_options tv_params_conf;
-extern const struct m_sub_options stream_cdda_conf;
-extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options drm_conf;
@@ -279,22 +276,6 @@ const struct m_sub_options mp_osd_render_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
-#define OPT_BASE_STRUCT struct dvd_opts
-
-const struct m_sub_options dvd_conf = {
-    .opts = (const struct m_option[]){
-        OPT_STRING("dvd-device", device, M_OPT_FILE),
-        OPT_INT("dvd-speed", speed, 0),
-        OPT_INTRANGE("dvd-angle", angle, 0, 1, 99),
-        {0}
-    },
-    .size = sizeof(struct dvd_opts),
-    .defaults = &(const struct dvd_opts){
-        .angle = 1,
-    },
-};
-
-#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct filter_opts
 
 const struct m_sub_options filter_conf = {
@@ -386,16 +367,10 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
-#if HAVE_DVDREAD || HAVE_DVDNAV
-    OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),
-#endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0, .deprecation_message = "instead of "
         "--chapter=A-B use --start=#A --end=#B+1"),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
-#if HAVE_LIBBLURAY
-    OPT_STRING("bluray-device", bluray_device, M_OPT_FILE),
-#endif /* HAVE_LIBBLURAY */
 
 // ------------------------- demuxer options --------------------
 
@@ -447,11 +422,6 @@ const m_option_t mp_opts[] = {
 
     OPT_STRINGLIST("display-tags", display_tags, 0),
 
-#if HAVE_CDDA
-    OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
-    OPT_STRING("cdrom-device", cdrom_device, M_OPT_FILE),
-#endif
-
     // demuxer.c - select audio/sub file/demuxer
     OPT_PATHLIST("audio-files", audio_files, 0),
     OPT_CLI_ALIAS("audio-file", "audio-files-append"),
@@ -467,12 +437,6 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
-#if HAVE_TV
-    OPT_SUBSTRUCT("tv", tv_params, tv_params_conf, 0),
-#endif /* HAVE_TV */
-#if HAVE_DVBIN
-    OPT_SUBSTRUCT("dvbin", stream_dvb_opts, stream_dvb_conf, 0),
-#endif
     OPT_SUBSTRUCT("", stream_lavf_opts, stream_lavf_conf, 0),
 
 // ------------------------- a-v sync options --------------------
@@ -763,7 +727,6 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("cursor-autohide-delay", "cursor-autohide"),
     OPT_REPLACED("delay", "audio-delay"),
     OPT_REMOVED("dumpstream", "use --stream-dump=<filename>"),
-    OPT_REPLACED("dvdangle", "dvd-angle"),
     OPT_REPLACED("endpos", "length"),
     OPT_REPLACED("font", "osd-font"),
     OPT_REPLACED("forcedsubsonly", "sub-forced-only"),

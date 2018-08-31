@@ -32,8 +32,6 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_RESYNC,
-    DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
     DEMUXER_CTRL_GET_READER_STATE,
     DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
@@ -201,7 +199,6 @@ typedef struct demuxer {
     bool fully_read;
     bool is_network; // opened directly from a network stream
     bool access_references; // allow opening other files/URLs
-    bool extended_ctrls; // supports some of BD/DVD/DVB/TV controls
 
     // Bitmask of DEMUX_EVENT_*
     int events;
@@ -242,11 +239,6 @@ typedef struct demuxer {
     // Also note that the stream can get replaced if fully_read is set.
     struct stream *stream;
 } demuxer_t;
-
-typedef struct {
-    int progid;      //program id
-    int aid, vid, sid; //audio, video and subtitle id
-} demux_program_t;
 
 void demux_free(struct demuxer *demuxer);
 void demux_cancel_and_free(struct demuxer *demuxer);
