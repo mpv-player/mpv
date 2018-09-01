@@ -29,7 +29,6 @@
 #include "misc/bstr.h"
 
 #define STREAM_BUFFER_SIZE 2048
-#define STREAM_MAX_SECTOR_SIZE (8 * 1024)
 
 // Max buffer for initial probe.
 #define STREAM_MAX_BUFFER_SIZE (2 * 1024 * 1024)
@@ -96,7 +95,6 @@ typedef struct stream {
     // Close
     void (*close)(struct stream *s);
 
-    int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
     int64_t pos;
