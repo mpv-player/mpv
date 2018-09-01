@@ -335,8 +335,7 @@ void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
 // mp_recorder_create().
 struct mp_recorder_sink *mp_recorder_get_sink(struct mp_recorder *r, int stream)
 {
-    assert(stream >= 0 && stream < r->num_streams);
-    return r->streams[stream];
+    return stream >= 0 && stream < r->num_streams ? r->streams[stream] : NULL;
 }
 
 // Pass a packet to the given stream. The function does not own the packet, but
