@@ -974,6 +974,7 @@ static void *open_demux_thread(void *ctx)
     struct demuxer_params p = {
         .force_format = mpctx->open_format,
         .stream_flags = mpctx->open_url_flags,
+        .stream_record = true,
     };
     mpctx->open_res_demuxer =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);
@@ -1848,8 +1849,10 @@ void open_recorder(struct MPContext *mpctx, bool on_init)
             break;
         // (We expect track->stream not to be reused on other tracks.)
         if (track->stream == streams[n_stream]) {
-            set_track_recorder_sink(track,
-                            mp_recorder_get_sink(mpctx->recorder, n_stream));
+            struct mp_recorder_sink * sink =
+                mp_recorder_get_sink(mpctx->recorder, n_stream);
+            assert(sink);
+            set_track_recorder_sink(track, sink);
             n_stream++;
         }
     }
