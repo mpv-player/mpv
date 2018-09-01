@@ -42,8 +42,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 
-// Includes additional padding in case sizes get rounded up by sector size.
-#define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
+#define TOTAL_BUFFER_SIZE STREAM_MAX_BUFFER_SIZE
 
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
@@ -214,7 +213,7 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     }
 
     if (!s->read_chunk)
-        s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
+        s->read_chunk = 4 * STREAM_BUFFER_SIZE;
 
     assert(s->seekable == !!s->seek);
 
@@ -310,8 +309,6 @@ static int stream_fill_buffer_by(stream_t *s, int64_t len)
 {
     len = MPMIN(len, s->read_chunk);
     len = MPMAX(len, STREAM_BUFFER_SIZE);
-    if (s->sector_size)
-        len = s->sector_size;
     len = stream_read_unbuffered(s, s->buffer, len);
     s->buf_pos = 0;
     s->buf_len = len;
@@ -331,9 +328,9 @@ int stream_read_partial(stream_t *s, char *buf, int buf_size)
     assert(buf_size >= 0);
     if (s->buf_pos == s->buf_len && buf_size > 0) {
         s->buf_pos = s->buf_len = 0;
-        // Do a direct read, but only if there's no sector alignment requirement
+        // Do a direct read
         // Also, small reads will be more efficient with buffering & copying
-        if (!s->sector_size && buf_size >= STREAM_BUFFER_SIZE)
+        if (buf_size >= STREAM_BUFFER_SIZE)
             return stream_read_unbuffered(s, buf, buf_size);
         if (!stream_fill_buffer(s))
             return 0;
@@ -378,8 +375,6 @@ struct bstr stream_peek(stream_t *s, int len)
         // Fill rest of the buffer.
         while (buf_valid < len) {
             int chunk = MPMAX(len - buf_valid, STREAM_BUFFER_SIZE);
-            if (s->sector_size)
-                chunk = s->sector_size;
             assert(buf_valid + chunk <= TOTAL_BUFFER_SIZE);
             int read = stream_read_unbuffered(s, &s->buffer[buf_valid], chunk);
             if (read == 0)
@@ -485,8 +480,6 @@ bool stream_seek(stream_t *s, int64_t pos)
         return s->seekable && s->seek(s, pos);
 
     int64_t newpos = pos;
-    if (s->sector_size)
-        newpos = (pos / s->sector_size) * s->sector_size;
 
     MP_TRACE(s, "Seek from %" PRId64 " to %" PRId64
              " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
