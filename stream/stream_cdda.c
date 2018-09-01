@@ -346,7 +346,6 @@ static int open_cdda(stream_t *st)
     priv->sector = priv->start_sector;
 
     st->priv = priv;
-    st->sector_size = CDIO_CD_FRAMESIZE_RAW;
 
     st->fill_buffer = fill_buffer;
     st->seek = seek;

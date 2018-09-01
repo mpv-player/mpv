@@ -417,7 +417,6 @@ static int open_s_internal(stream_t *stream)
     if (p->opts->angle > 1)
         dvdnav_angle_change(priv->dvdnav, p->opts->angle);
 
-    stream->sector_size = 2048;
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvdnav_close;

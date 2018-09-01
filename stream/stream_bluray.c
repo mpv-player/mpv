@@ -354,7 +354,6 @@ static int bluray_stream_open_internal(stream_t *s)
     s->fill_buffer = bluray_stream_fill_buffer;
     s->close       = bluray_stream_close;
     s->control     = bluray_stream_control;
-    s->sector_size = BLURAY_SECTOR_SIZE;
     s->priv        = b;
 
     MP_VERBOSE(s, "Blu-ray successfully opened.\n");
