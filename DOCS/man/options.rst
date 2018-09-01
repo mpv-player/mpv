@@ -5259,6 +5259,12 @@ Miscellaneous
     it to a template (similar to ``--screenshot-template``), being renamed,
     removed, or anything else, until it is declared semi-stable.
 
+``--stream-record=<file>``
+    Similar to ``--record-file``, but write packets as they are received. The
+    implementation of this does not tolerate seeks (outside of demuxer cache),
+    or streams being selected/deselected during recording. Can not be set at
+    runtime. Use with care.
+
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
     take input from multiple source audio and video tracks. The graph can result

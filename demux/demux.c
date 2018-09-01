@@ -35,6 +35,7 @@
 #include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "common/recorder.h"
 #include "misc/thread_tools.h"
 #include "osdep/atomic.h"
 #include "osdep/timer.h"
@@ -90,6 +91,7 @@ struct demux_opts {
     int access_references;
     int seekable_cache;
     int create_ccs;
+    char *record_file;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -111,6 +113,7 @@ const struct m_sub_options demux_conf = {
         OPT_CHOICE("demuxer-seekable-cache", seekable_cache, 0,
                    ({"auto", -1}, {"no", 0}, {"yes", 1})),
         OPT_FLAG("sub-create-cc-track", create_ccs, 0),
+        OPT_STRING("stream-record", record_file, 0),
         {0}
     },
     .size = sizeof(struct demux_opts),
@@ -222,6 +225,10 @@ struct demux_internal {
     int64_t next_cache_update;
     // Updated during init only.
     char *stream_base_filename;
+
+    // -- Access from demuxer thread only
+    bool enable_recording;
+    struct mp_recorder *recorder;
 };
 
 // A continuous range of cached packets for all enabled streams.
@@ -956,6 +963,11 @@ static void demux_shutdown(struct demux_internal *in)
 {
     struct demuxer *demuxer = in->d_user;
 
+    if (in->recorder) {
+        mp_recorder_destroy(in->recorder);
+        in->recorder = NULL;
+    }
+
     if (demuxer->desc->close)
         demuxer->desc->close(in->d_thread);
     demuxer->priv = NULL;
@@ -1499,6 +1511,33 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
                 in->events |= DEMUX_EVENT_DURATION;
                 in->duration = duration;
             }
+        }
+    }
+
+    // (should preferable be outside of the lock)
+    if (in->enable_recording && !in->recorder &&
+        in->opts->record_file && in->opts->record_file[0])
+    {
+        // Later failures shouldn't make it retry and overwrite the previously
+        // recorded file.
+        in->enable_recording = false;
+
+        in->recorder =
+            mp_recorder_create(in->d_thread->global, in->opts->record_file,
+                               in->streams, in->num_streams);
+        if (!in->recorder)
+            MP_ERR(in, "Disabling recording.\n");
+    }
+
+    if (in->recorder) {
+        struct mp_recorder_sink *sink =
+            mp_recorder_get_sink(in->recorder, dp->stream);
+        if (sink) {
+            mp_recorder_feed_packet(sink, dp);
+        } else {
+            MP_ERR(in, "New stream appeared; stopping recording.\n");
+            mp_recorder_destroy(in->recorder);
+            in->recorder = NULL;
         }
     }
 
@@ -2330,6 +2369,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .highest_av_pts = MP_NOPTS_VALUE,
         .seeking_in_progress = MP_NOPTS_VALUE,
         .demux_ts = MP_NOPTS_VALUE,
+        .enable_recording = params && params->stream_record,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
