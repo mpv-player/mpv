@@ -64,17 +64,6 @@ enum stream_ctrl {
     STREAM_CTRL_GET_METADATA,
 };
 
-struct stream_lang_req {
-    int type;     // STREAM_AUDIO, STREAM_SUB
-    int id;
-    char name[50];
-};
-
-struct stream_dvd_info_req {
-    unsigned int palette[16];
-    int num_subs;
-};
-
 // for STREAM_CTRL_AVSEEK
 struct stream_avseek {
     int stream_index;
@@ -103,8 +92,6 @@ typedef struct stream {
     // Seek
     int (*seek)(struct stream *s, int64_t pos);
     // Control
-    // Will be later used to let streams like dvd and cdda report
-    // their structure (ie tracks, chapters, etc)
     int (*control)(struct stream *s, int cmd, void *arg);
     // Close
     void (*close)(struct stream *s);
@@ -128,7 +115,6 @@ typedef struct stream {
     bool is_local_file : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
-    bool extended_ctrls : 1; // supports some of BD/DVD/DVB/TV controls
     struct mp_log *log;
     struct mpv_global *global;
 
