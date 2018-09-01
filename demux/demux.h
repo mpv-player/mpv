@@ -176,6 +176,7 @@ struct demuxer_params {
     bstr init_fragment;
     bool skip_lavf_probing;
     bool does_not_own_stream; // if false, stream is free'd on demux_free()
+    bool stream_record; // if true, enable stream recording if option is set
     // -- demux_open_url() only
     int stream_flags;
     // result
