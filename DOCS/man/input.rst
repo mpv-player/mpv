@@ -1415,6 +1415,11 @@ Property list
     playing at all. In other words, it's only ``no`` if there's actually
     video playing. (Behavior since mpv 0.7.0.)
 
+``cache-speed`` (R)
+    Current I/O read speed between the cache and the lower layer (like network).
+    This gives the number bytes per seconds over a 1 second window (using
+    the type ``MPV_FORMAT_INT64`` for the client API).
+
 ``demuxer-cache-duration``
     Approximate duration of video buffered in the demuxer, in seconds. The
     guess is very unreliable, and often the property will not be available

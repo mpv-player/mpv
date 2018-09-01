@@ -37,6 +37,7 @@
 #include "common/global.h"
 #include "misc/thread_tools.h"
 #include "osdep/atomic.h"
+#include "osdep/timer.h"
 #include "osdep/threads.h"
 
 #include "stream/stream.h"
@@ -216,6 +217,9 @@ struct demux_internal {
     double duration;
     // Cached state.
     int64_t stream_size;
+    int64_t last_speed_query;
+    uint64_t bytes_per_second;
+    int64_t next_cache_update;
     // Updated during init only.
     char *stream_base_filename;
 };
@@ -1741,6 +1745,12 @@ static bool thread_work(struct demux_internal *in)
         if (read_packet(in))
             return true; // read_packet unlocked, so recheck conditions
     }
+    if (mp_time_us() >= in->next_cache_update) {
+        pthread_mutex_unlock(&in->lock);
+        update_cache(in);
+        pthread_mutex_lock(&in->lock);
+        return true;
+    }
     return false;
 }
 
@@ -1754,7 +1764,8 @@ static void *demux_thread(void *pctx)
         if (thread_work(in))
             continue;
         pthread_cond_signal(&in->wakeup);
-        pthread_cond_wait(&in->wakeup, &in->lock);
+        struct timespec until = mp_time_us_to_timespec(in->next_cache_update);
+        pthread_cond_timedwait(&in->wakeup, &in->lock, &until);
     }
 
     if (in->shutdown_async) {
@@ -3041,7 +3052,11 @@ static void update_cache(struct demux_internal *in)
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
 
+    demuxer->total_unbuffered_read_bytes += stream->total_unbuffered_read_bytes;
+    stream->total_unbuffered_read_bytes = 0;
+
     pthread_mutex_lock(&in->lock);
+
     in->stream_size = stream_size;
     if (stream_metadata) {
         for (int n = 0; n < in->num_streams; n++) {
@@ -3051,6 +3066,21 @@ static void update_cache(struct demux_internal *in)
         }
         talloc_free(stream_metadata);
     }
+
+    in->next_cache_update = INT64_MAX;
+
+    int64_t now = mp_time_us();
+    int64_t diff = now - in->last_speed_query;
+    if (diff >= MP_SECOND_US) {
+        uint64_t bytes = demuxer->total_unbuffered_read_bytes;
+        demuxer->total_unbuffered_read_bytes = 0;
+        in->last_speed_query = now;
+        in->bytes_per_second = bytes / (diff / (double)MP_SECOND_US);
+    }
+    // The idea is to update as long as there is "activity".
+    if (in->bytes_per_second)
+        in->next_cache_update = now + MP_SECOND_US + 1;
+
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -3107,6 +3137,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .seeking = in->seeking_in_progress,
             .low_level_seeks = in->low_level_seeks,
             .ts_last = in->demux_ts,
+            .bytes_per_second = in->bytes_per_second,
         };
         bool any_packets = false;
         for (int n = 0; n < in->num_streams; n++) {

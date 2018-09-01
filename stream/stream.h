@@ -118,6 +118,10 @@ typedef struct stream {
 
     struct mp_cancel *cancel;   // cancellation notification
 
+    // Read statistic for fill_buffer calls. All bytes read by fill_buffer() are
+    // added to this. The user can reset this as needed.
+    uint64_t total_unbuffered_read_bytes;
+
     // Includes additional padding in case sizes get rounded up by sector size.
     unsigned char buffer[];
 } stream_t;

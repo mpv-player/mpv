@@ -39,6 +39,9 @@ void mp_sleep_us(int64_t us);
 
 #define MP_START_TIME 10000000
 
+// Duration of a second in mpv time.
+#define MP_SECOND_US (1000 * 1000)
+
 // Add a time in seconds to the given time in microseconds, and return it.
 // Takes care of possible overflows. Never returns a negative or 0 time.
 int64_t mp_add_timeout(int64_t time_us, double timeout_sec);

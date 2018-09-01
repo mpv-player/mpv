@@ -54,6 +54,7 @@ struct demux_ctrl_reader_state {
     double seeking; // current low level seek target, or NOPTS
     int low_level_seeks; // number of started low level seeks
     double ts_last; // approx. timestamp of demuxer position
+    uint64_t bytes_per_second; // low level statistics
     // Positions that can be seeked to without incurring the latency of a low
     // level seek.
     int num_seek_ranges;
@@ -232,6 +233,9 @@ typedef struct demuxer {
 
     // Triggered when ending demuxing forcefully. Usually bound to the stream too.
     struct mp_cancel *cancel;
+
+    // Demuxer thread only.
+    uint64_t total_unbuffered_read_bytes;
 
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.

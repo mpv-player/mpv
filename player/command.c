@@ -1418,6 +1418,26 @@ static int mp_property_playback_abort(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, !mpctx->playing || mpctx->stop_play);
 }
 
+static int mp_property_cache_speed(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct demux_ctrl_reader_state s;
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    uint64_t val = s.bytes_per_second;
+
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_strdup_append(format_file_size(val), "/s");
+        return M_PROPERTY_OK;
+    }
+    return m_property_int64_ro(action, arg, val);
+}
+
 static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop,
                                               int action, void *arg)
 {
@@ -3413,6 +3433,7 @@ static const struct m_property mp_properties_base[] = {
     {"eof-reached", mp_property_eof_reached},
     {"seeking", mp_property_seeking},
     {"playback-abort", mp_property_playback_abort},
+    {"cache-speed", mp_property_cache_speed},
     {"demuxer-cache-duration", mp_property_demuxer_cache_duration},
     {"demuxer-cache-time", mp_property_demuxer_cache_time},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
