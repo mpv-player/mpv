@@ -302,6 +302,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
     s->pos += res;
+    s->total_unbuffered_read_bytes += res;
     return res;
 }
 
