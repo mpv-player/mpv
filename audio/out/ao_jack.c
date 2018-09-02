@@ -143,7 +143,8 @@ connect_to_outports(struct ao *ao)
     if (!port_name)
         port_flags |= JackPortIsPhysical;
 
-    matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
+    const char *port_type = JACK_DEFAULT_AUDIO_TYPE; // exclude MIDI ports
+    matching_ports = jack_get_ports(p->client, port_name, port_type, port_flags);
 
     if (!matching_ports || !matching_ports[0]) {
         MP_FATAL(ao, "no ports to connect to\n");
