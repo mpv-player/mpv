@@ -812,6 +812,12 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         }
     }
 
+    if (!mp_trc_is_hdr(params->color.gamma)) {
+        // Some clips have leftover HDR metadata after conversion to SDR, so to
+        // avoid blowing up the tone mapping code, strip/sanitize it
+        params->color.sig_peak = 1.0;
+    }
+
     if (params->chroma_location == MP_CHROMA_AUTO) {
         if (params->color.levels == MP_CSP_LEVELS_TV)
             params->chroma_location = MP_CHROMA_LEFT;
