@@ -502,7 +502,7 @@ Available video output drivers are:
         supports several layers) together with ``vo=gpu`` and ``gpu-context=drm``.
         (default: first overlay plane)
 
-    ``--drm-format=<xrgb8888,xrgb2101010>``
+    ``--drm-format=<xrgb8888|xrgb2101010>``
         Select the DRM format to use (default: xrgb8888). This allows you to
         choose the bit depth of the DRM mode. xrgb8888 is your usual 24 bit per
         pixel/8 bits per channel packed RGB format with 8 bits of padding.
