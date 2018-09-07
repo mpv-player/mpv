@@ -237,10 +237,12 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
             MP_ERR(tl, "Could not read init fragment.\n");
             goto error;
         }
-        s = open_memory_stream(tl->init_fragment.start, tl->init_fragment.len);
-        tl->track_layout = demux_open(s, NULL, tl->global);
+        struct demuxer_params params = {
+            .init_fragment = tl->init_fragment,
+        };
+        tl->track_layout = demux_open_url("memory://", &params, tl->cancel,
+                                          tl->global);
         if (!tl->track_layout) {
-            free_stream(s);
             MP_ERR(tl, "Could not demux init fragment.\n");
             goto error;
         }
