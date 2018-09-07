@@ -34,7 +34,6 @@
 #include "fmt-conversion.h"
 #include "csputils.h"
 #include "common/msg.h"
-#include "osdep/endian.h"
 
 //global sws_flags from the command line
 struct sws_opts {
@@ -294,13 +293,11 @@ int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
 }
 
 static const int endian_swaps[][2] = {
-#if BYTE_ORDER == LITTLE_ENDIAN
 #if defined(AV_PIX_FMT_YA16) && defined(AV_PIX_FMT_RGBA64)
     {AV_PIX_FMT_YA16BE,     AV_PIX_FMT_YA16LE},
     {AV_PIX_FMT_RGBA64BE,   AV_PIX_FMT_RGBA64LE},
     {AV_PIX_FMT_GRAY16BE,   AV_PIX_FMT_GRAY16LE},
     {AV_PIX_FMT_RGB48BE,    AV_PIX_FMT_RGB48LE},
-#endif
 #endif
     {AV_PIX_FMT_NONE,       AV_PIX_FMT_NONE}
 };

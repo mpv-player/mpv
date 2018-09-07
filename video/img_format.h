@@ -20,15 +20,8 @@
 
 #include <inttypes.h>
 
-#include "osdep/endian.h"
 #include "misc/bstr.h"
 #include "video/csputils.h"
-
-#if BYTE_ORDER == BIG_ENDIAN
-#define MP_SELECT_LE_BE(LE, BE) BE
-#else
-#define MP_SELECT_LE_BE(LE, BE) LE
-#endif
 
 #define MP_MAX_PLANES 4
 
@@ -56,7 +49,7 @@
 // set if in big endian, or endian independent
 #define MP_IMGFLAG_BE 0x4000
 // set if in native (host) endian, or endian independent
-#define MP_IMGFLAG_NE MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
+#define MP_IMGFLAG_NE MP_IMGFLAG_LE
 // Carries a palette in plane[1] (see IMGFMT_PAL8 for format of the palette).
 // Note that some non-paletted formats have this flag set, because FFmpeg
 // mysteriously expects some formats to carry a palette plane for no apparent
@@ -216,8 +209,8 @@ enum mp_imgfmt {
     // normally byte-accessed formats:
     // IMGFMT_RGB32 = r | (g << 8) | (b << 16) | (a << 24)
     // IMGFMT_BGR32 = b | (g << 8) | (r << 16) | (a << 24)
-    IMGFMT_RGB32   = MP_SELECT_LE_BE(IMGFMT_RGBA, IMGFMT_ABGR),
-    IMGFMT_BGR32   = MP_SELECT_LE_BE(IMGFMT_BGRA, IMGFMT_ARGB),
+    IMGFMT_RGB32   = IMGFMT_RGBA,
+    IMGFMT_BGR32   = IMGFMT_BGRA,
 };
 
 static inline bool IMGFMT_IS_RGB(int fmt)

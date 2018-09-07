@@ -39,7 +39,6 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "common/msg.h"
-#include "osdep/endian.h"
 
 #include <alsa/asoundlib.h>
 
@@ -262,9 +261,7 @@ static const struct alsa_fmt mp_alsa_formats[] = {
     {AF_FORMAT_S16,         SND_PCM_FORMAT_S16},
     {AF_FORMAT_S32,         SND_PCM_FORMAT_S32},
     {AF_FORMAT_S32,         SND_PCM_FORMAT_S24, .bits = 32, .pad_msb = 8},
-    {AF_FORMAT_S32,
-            MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE),
-            .bits = 24, .pad_msb = 0},
+    {AF_FORMAT_S32,         SND_PCM_FORMAT_S24_3LE, .bits = 24, .pad_msb = 0},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
     {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
     {0},

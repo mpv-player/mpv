@@ -217,11 +217,9 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             }
         } else {
             // filename
-            void *tmp = talloc_new(NULL);
-            bstr file = p.arg;
-            char *file0 = bstrdup0(tmp, p.arg);
+            char *file0 = bstrdup0(NULL, p.arg);
             process_non_option(files, file0);
-            talloc_free(tmp);
+            talloc_free(file0);
         }
     }
 

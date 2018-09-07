@@ -38,8 +38,6 @@
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 
-#include "osdep/endian.h"
-
 struct demux_rawaudio_opts {
     struct m_channels channels;
     int samplerate;
@@ -49,7 +47,7 @@ struct demux_rawaudio_opts {
 // Ad-hoc schema to systematically encode the format as int
 #define PCM(sign, is_float, bits, is_be) \
     ((sign) | ((is_float) << 1) | ((is_be) << 2) | ((bits) << 3))
-#define NE (BYTE_ORDER == BIG_ENDIAN)
+#define NE 0
 
 #define OPT_BASE_STRUCT struct demux_rawaudio_opts
 const struct m_sub_options demux_rawaudio_conf = {

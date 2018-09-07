@@ -92,7 +92,7 @@ char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt)
         name = "unknown";
     snprintf(buf, buf_size, "%s", name);
     int len = strlen(buf);
-    if (len > 2 && buf[len - 2] == MP_SELECT_LE_BE('l', 'b') && buf[len - 1] == 'e')
+    if (len > 2 && buf[len - 2] == 'l' && buf[len - 1] == 'e')
         buf[len - 2] = '\0';
     return buf;
 }
