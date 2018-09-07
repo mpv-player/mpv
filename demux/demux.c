@@ -198,9 +198,6 @@ struct demux_internal {
 
     double ts_offset;           // timestamp offset to apply to everything
 
-    void (*run_fn)(void *);     // if non-NULL, function queued to be run on
-    void *run_fn_arg;           // the thread as run_fn(run_fn_arg)
-
     // (sorted by least recent use: index 0 is least recently used)
     struct demux_cached_range **ranges;
     int num_ranges;
@@ -1769,12 +1766,6 @@ static void execute_seek(struct demux_internal *in)
 // Make demuxing progress. Return whether progress was made.
 static bool thread_work(struct demux_internal *in)
 {
-    if (in->run_fn) {
-        in->run_fn(in->run_fn_arg);
-        in->run_fn = NULL;
-        pthread_cond_signal(&in->wakeup);
-        return true;
-    }
     if (in->tracks_switched) {
         execute_trackswitch(in);
         return true;
@@ -3117,133 +3108,73 @@ static void update_cache(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 }
 
-// must be called locked
-static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
-{
-    switch (cmd) {
-    case DEMUXER_CTRL_GET_BITRATE_STATS: {
-        double *rates = arg;
-        for (int n = 0; n < STREAM_TYPE_COUNT; n++)
-            rates[n] = -1;
-        for (int n = 0; n < in->num_streams; n++) {
-            struct demux_stream *ds = in->streams[n]->ds;
-            if (ds->selected && ds->bitrate >= 0)
-                rates[ds->type] = MPMAX(0, rates[ds->type]) + ds->bitrate;
-        }
-        return CONTROL_OK;
-    }
-    case DEMUXER_CTRL_GET_READER_STATE: {
-        struct demux_ctrl_reader_state *r = arg;
-        *r = (struct demux_ctrl_reader_state){
-            .eof = in->last_eof,
-            .ts_reader = MP_NOPTS_VALUE,
-            .ts_end = MP_NOPTS_VALUE,
-            .ts_duration = -1,
-            .total_bytes = in->total_bytes,
-            .fw_bytes = in->fw_bytes,
-            .seeking = in->seeking_in_progress,
-            .low_level_seeks = in->low_level_seeks,
-            .ts_last = in->demux_ts,
-            .bytes_per_second = in->bytes_per_second,
-        };
-        bool any_packets = false;
-        for (int n = 0; n < in->num_streams; n++) {
-            struct demux_stream *ds = in->streams[n]->ds;
-            if (ds->eager && !(!ds->queue->head && ds->eof) && !ds->ignore_eof)
-            {
-                r->underrun |= !ds->reader_head && !ds->eof && !ds->still_image;
-                r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
-                r->ts_end = MP_PTS_MAX(r->ts_end, ds->queue->last_ts);
-                any_packets |= !!ds->reader_head;
-            }
-        }
-        r->idle = (in->idle && !r->underrun) || r->eof;
-        r->underrun &= !r->idle;
-        r->ts_reader = MP_ADD_PTS(r->ts_reader, in->ts_offset);
-        r->ts_end = MP_ADD_PTS(r->ts_end, in->ts_offset);
-        if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_end)
-            r->ts_duration = r->ts_end - r->ts_reader;
-        if (in->seeking || !any_packets)
-            r->ts_duration = 0;
-        for (int n = 0; n < MPMIN(in->num_ranges, MAX_SEEK_RANGES); n++) {
-            struct demux_cached_range *range = in->ranges[n];
-            if (range->seek_start != MP_NOPTS_VALUE) {
-                r->seek_ranges[r->num_seek_ranges++] =
-                    (struct demux_seek_range){
-                        .start = MP_ADD_PTS(range->seek_start, in->ts_offset),
-                        .end = MP_ADD_PTS(range->seek_end, in->ts_offset),
-                    };
-            }
-        }
-        return CONTROL_OK;
-    }
-    }
-    return CONTROL_UNKNOWN;
-}
-
-struct demux_control_args {
-    struct demuxer *demuxer;
-    int cmd;
-    void *arg;
-    int *r;
-};
-
-static void thread_demux_control(void *p)
-{
-    struct demux_control_args *args = p;
-    struct demuxer *demuxer = args->demuxer;
-    int cmd = args->cmd;
-    void *arg = args->arg;
-    struct demux_internal *in = demuxer->in;
-    int r = CONTROL_UNKNOWN;
-
-    pthread_mutex_unlock(&in->lock);
-
-    if (r != CONTROL_OK) {
-        if (in->threading)
-            MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
-        if (demuxer->desc->control)
-            r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
-    }
-
-    pthread_mutex_lock(&in->lock);
-
-    *args->r = r;
-}
-
-int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+void demux_get_bitrate_stats(struct demuxer *demuxer, double *rates)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
 
-    if (in->threading) {
-        pthread_mutex_lock(&in->lock);
-        int cr = cached_demux_control(in, cmd, arg);
-        pthread_mutex_unlock(&in->lock);
-        if (cr != CONTROL_UNKNOWN)
-            return cr;
+    pthread_mutex_lock(&in->lock);
+
+    for (int n = 0; n < STREAM_TYPE_COUNT; n++)
+        rates[n] = -1;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        if (ds->selected && ds->bitrate >= 0)
+            rates[ds->type] = MPMAX(0, rates[ds->type]) + ds->bitrate;
     }
 
-    int r = 0;
-    struct demux_control_args args = {demuxer, cmd, arg, &r};
-    if (in->threading) {
-        MP_VERBOSE(in, "blocking on demuxer thread\n");
-        pthread_mutex_lock(&in->lock);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        in->run_fn = thread_demux_control;
-        in->run_fn_arg = &args;
-        pthread_cond_signal(&in->wakeup);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        pthread_mutex_unlock(&in->lock);
-    } else {
-        pthread_mutex_lock(&in->lock);
-        thread_demux_control(&args);
-        pthread_mutex_unlock(&in->lock);
+    pthread_mutex_unlock(&in->lock);
+}
+
+void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *r)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    pthread_mutex_lock(&in->lock);
+
+    *r = (struct demux_reader_state){
+        .eof = in->last_eof,
+        .ts_reader = MP_NOPTS_VALUE,
+        .ts_end = MP_NOPTS_VALUE,
+        .ts_duration = -1,
+        .total_bytes = in->total_bytes,
+        .fw_bytes = in->fw_bytes,
+        .seeking = in->seeking_in_progress,
+        .low_level_seeks = in->low_level_seeks,
+        .ts_last = in->demux_ts,
+        .bytes_per_second = in->bytes_per_second,
+    };
+    bool any_packets = false;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        if (ds->eager && !(!ds->queue->head && ds->eof) && !ds->ignore_eof) {
+            r->underrun |= !ds->reader_head && !ds->eof && !ds->still_image;
+            r->ts_reader = MP_PTS_MAX(r->ts_reader, ds->base_ts);
+            r->ts_end = MP_PTS_MAX(r->ts_end, ds->queue->last_ts);
+            any_packets |= !!ds->reader_head;
+        }
+    }
+    r->idle = (in->idle && !r->underrun) || r->eof;
+    r->underrun &= !r->idle;
+    r->ts_reader = MP_ADD_PTS(r->ts_reader, in->ts_offset);
+    r->ts_end = MP_ADD_PTS(r->ts_end, in->ts_offset);
+    if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_end)
+        r->ts_duration = r->ts_end - r->ts_reader;
+    if (in->seeking || !any_packets)
+        r->ts_duration = 0;
+    for (int n = 0; n < MPMIN(in->num_ranges, MAX_SEEK_RANGES); n++) {
+        struct demux_cached_range *range = in->ranges[n];
+        if (range->seek_start != MP_NOPTS_VALUE) {
+            r->seek_ranges[r->num_seek_ranges++] =
+                (struct demux_seek_range){
+                    .start = MP_ADD_PTS(range->seek_start, in->ts_offset),
+                    .end = MP_ADD_PTS(range->seek_end, in->ts_offset),
+                };
+        }
     }
 
-    return r;
+    pthread_mutex_unlock(&in->lock);
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)

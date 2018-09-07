@@ -1423,9 +1423,8 @@ static int mp_property_cache_speed(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct demux_ctrl_reader_state s;
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    struct demux_reader_state s;
+    demux_get_reader_state(mpctx->demuxer, &s);
 
     uint64_t val = s.bytes_per_second;
 
@@ -1443,9 +1442,8 @@ static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct demux_ctrl_reader_state s;
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    struct demux_reader_state s;
+    demux_get_reader_state(mpctx->demuxer, &s);
 
     if (s.ts_duration < 0)
         return M_PROPERTY_UNAVAILABLE;
@@ -1460,9 +1458,8 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct demux_ctrl_reader_state s;
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    struct demux_reader_state s;
+    demux_get_reader_state(mpctx->demuxer, &s);
 
     if (s.ts_end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -1477,9 +1474,8 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct demux_ctrl_reader_state s;
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    struct demux_reader_state s;
+    demux_get_reader_state(mpctx->demuxer, &s);
 
     return m_property_flag_ro(action, arg, s.idle);
 }
@@ -1498,9 +1494,8 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     if (action != M_PROPERTY_GET)
         return M_PROPERTY_NOT_IMPLEMENTED;
 
-    struct demux_ctrl_reader_state s;
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    struct demux_reader_state s;
+    demux_get_reader_state(mpctx->demuxer, &s);
 
     struct mpv_node *r = (struct mpv_node *)arg;
     node_init(r, MPV_FORMAT_NODE_MAP, NULL);
@@ -3032,8 +3027,7 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     double r[STREAM_TYPE_COUNT];
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    demux_get_bitrate_stats(demuxer, r);
     if (r[type] < 0)
         return M_PROPERTY_UNAVAILABLE;
 
