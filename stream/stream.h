@@ -54,9 +54,6 @@ enum stream_ctrl {
     // stream_memory.c
     STREAM_CTRL_SET_CONTENTS,
 
-    // stream_libarchive.c
-    STREAM_CTRL_GET_BASE_FILENAME,
-
     // Certain network protocols
     STREAM_CTRL_AVSEEK,
     STREAM_CTRL_HAS_AVSEEK,
