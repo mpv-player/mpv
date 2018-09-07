@@ -2442,8 +2442,9 @@ static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 // If params->does_not_own_stream==false, this does _not_ free the stream if
 // opening fails. But if it succeeds, a later demux_free() call will free the
 // stream.
-struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
-                           struct mpv_global *global)
+static struct demuxer *demux_open(struct stream *stream,
+                                  struct demuxer_params *params,
+                                  struct mpv_global *global)
 {
     const int *check_levels = d_normal;
     const struct demuxer_desc *check_desc = NULL;
