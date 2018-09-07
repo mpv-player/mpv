@@ -1044,6 +1044,14 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 "broken as well.\n");
     }
 
+    if (demuxer->fully_read) {
+        demux_close_stream(demuxer);
+        if (priv->own_stream)
+            free_stream(priv->stream);
+        priv->own_stream = false;
+        priv->stream = demuxer->stream;
+    }
+
     return 0;
 }
 
@@ -1153,17 +1161,9 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
 
 static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 {
-    lavf_priv_t *priv = demuxer->priv;
-
     switch (cmd) {
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         select_tracks(demuxer, 0);
-        return CONTROL_OK;
-    case DEMUXER_CTRL_REPLACE_STREAM:
-        if (priv->own_stream)
-            free_stream(priv->stream);
-        priv->own_stream = false;
-        priv->stream = demuxer->stream;
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;

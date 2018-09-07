@@ -2256,20 +2256,22 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     }
 }
 
-static void demux_maybe_replace_stream(struct demuxer *demuxer)
+// A demuxer can use this during opening if all data was read from the stream.
+// Calling this after opening was completed is not allowed. Also, if opening
+// failed, this must not be called (or trying another demuxer would fail).
+// Useful so that e.g. subtitles don't keep the file or socket open.
+// Replaces it with a dummy stream for dumb reasons.
+// If there's ever the situation where we can't allow the demuxer to close
+// the stream, this function could ignore the request.
+void demux_close_stream(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
-    assert(!in->threading && demuxer == in->d_user);
+    assert(!in->threading && demuxer == in->d_thread);
 
-    if (demuxer->fully_read) {
-        MP_VERBOSE(demuxer, "assuming demuxer read all data; closing stream\n");
-        free_stream(demuxer->stream);
-        demuxer->stream = open_memory_stream(NULL, 0); // dummy
-        in->d_thread->stream = demuxer->stream;
-
-        if (demuxer->desc->control)
-            demuxer->desc->control(in->d_thread, DEMUXER_CTRL_REPLACE_STREAM, NULL);
-    }
+    MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
+    free_stream(demuxer->stream);
+    demuxer->stream = open_memory_stream(NULL, 0); // dummy
+    in->d_user->stream = demuxer->stream;
 }
 
 static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
@@ -2522,7 +2524,6 @@ struct demuxer *demux_open_url(const char *url,
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
         talloc_steal(d->in, priv_cancel);
-        demux_maybe_replace_stream(d);
     } else {
         params->demuxer_failed = true;
         free_stream(s);
