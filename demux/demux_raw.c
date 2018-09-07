@@ -267,17 +267,17 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     return generic_open(demuxer);
 }
 
-static int raw_fill_buffer(demuxer_t *demuxer)
+static bool raw_read_packet(struct demuxer *demuxer, struct demux_packet **pkt)
 {
     struct priv *p = demuxer->priv;
 
     if (demuxer->stream->eof)
-        return 0;
+        return false;
 
     struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
     if (!dp) {
         MP_ERR(demuxer, "Can't read packet.\n");
-        return 1;
+        return true;
     }
 
     dp->pos = stream_tell(demuxer->stream);
@@ -285,9 +285,11 @@ static int raw_fill_buffer(demuxer_t *demuxer)
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
     demux_packet_shorten(dp, len);
-    demux_add_packet(p->sh, dp);
 
-    return 1;
+    dp->stream = p->sh->index;
+    *pkt = dp;
+
+    return true;
 }
 
 static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
@@ -310,7 +312,7 @@ const demuxer_desc_t demuxer_desc_rawaudio = {
     .name = "rawaudio",
     .desc = "Uncompressed audio",
     .open = demux_rawaudio_open,
-    .fill_buffer = raw_fill_buffer,
+    .read_packet = raw_read_packet,
     .seek = raw_seek,
 };
 
@@ -318,6 +320,6 @@ const demuxer_desc_t demuxer_desc_rawvideo = {
     .name = "rawvideo",
     .desc = "Uncompressed video",
     .open = demux_rawvideo_open,
-    .fill_buffer = raw_fill_buffer,
+    .read_packet = raw_read_packet,
     .seek = raw_seek,
 };

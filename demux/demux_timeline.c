@@ -222,7 +222,7 @@ static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
     switch_segment(demuxer, new, pts, flags, false);
 }
 
-static int d_fill_buffer(struct demuxer *demuxer)
+static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt)
 {
     struct priv *p = demuxer->priv;
 
@@ -231,7 +231,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
 
     struct segment *seg = p->current;
     if (!seg || !seg->d)
-        return 0;
+        return false;
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
     if (!pkt || pkt->pts >= seg->end)
@@ -267,9 +267,9 @@ static int d_fill_buffer(struct demuxer *demuxer)
             }
         }
         if (!next)
-            return 0;
+            return false;
         switch_segment(demuxer, next, next->start, 0, true);
-        return 1; // reader will retry
+        return true; // reader will retry
     }
 
     if (pkt->stream < 0 || pkt->stream > seg->num_stream_map)
@@ -308,12 +308,13 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
     }
 
-    demux_add_packet(vs->sh, pkt);
-    return 1;
+    pkt->stream = vs->sh->index;
+    *out_pkt = pkt;
+    return true;
 
 drop:
     talloc_free(pkt);
-    return 1;
+    return true;
 }
 
 static void print_timeline(struct demuxer *demuxer)
@@ -447,7 +448,7 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 const demuxer_desc_t demuxer_desc_timeline = {
     .name = "timeline",
     .desc = "timeline segments",
-    .fill_buffer = d_fill_buffer,
+    .read_packet = d_read_packet,
     .open = d_open,
     .close = d_close,
     .seek = d_seek,

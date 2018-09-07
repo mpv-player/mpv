@@ -33,7 +33,7 @@ typedef struct demux_packet {
     bool keyframe;
 
     int64_t pos;        // position in source file byte stream
-    int stream;         // source stream index
+    int stream;         // source stream index (typically sh_stream.index)
 
     // segmentation (ordered chapters, EDL)
     bool segmented;
