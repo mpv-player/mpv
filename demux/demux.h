@@ -30,10 +30,6 @@
 #include "packet.h"
 #include "stheader.h"
 
-enum demux_ctrl {
-    DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-};
-
 #define MAX_SEEK_RANGES 10
 
 struct demux_seek_range {
@@ -107,7 +103,7 @@ typedef struct demuxer_desc {
     bool (*read_packet)(struct demuxer *demuxer, struct demux_packet **pkt);
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
-    int (*control)(struct demuxer *demuxer, int cmd, void *arg);
+    void (*switched_tracks)(struct demuxer *demuxer);
     // See timeline.c
     void (*load_timeline)(struct timeline *tl);
 } demuxer_desc_t;

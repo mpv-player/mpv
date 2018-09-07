@@ -435,14 +435,9 @@ static void d_close(struct demuxer *demuxer)
     demux_free(master);
 }
 
-static int d_control(struct demuxer *demuxer, int cmd, void *arg)
+static void d_switched_tracks(struct demuxer *demuxer)
 {
-    if (cmd == DEMUXER_CTRL_SWITCHED_TRACKS) {
-        reselect_streams(demuxer);
-        return CONTROL_OK;
-    }
-
-    return CONTROL_UNKNOWN;
+    reselect_streams(demuxer);
 }
 
 const demuxer_desc_t demuxer_desc_timeline = {
@@ -452,5 +447,5 @@ const demuxer_desc_t demuxer_desc_timeline = {
     .open = d_open,
     .close = d_close,
     .seek = d_seek,
-    .control = d_control,
+    .switched_tracks = d_switched_tracks,
 };
