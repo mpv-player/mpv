@@ -34,7 +34,6 @@
 #include "ao.h"
 #include "internal.h"
 #include "common/msg.h"
-#include "osdep/endian.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes
@@ -119,14 +118,6 @@ static int init(struct ao *ao)
 
     if (priv->waveheader) {
         // WAV files must have one of the following formats
-
-        // And they don't work in big endian; fixing it would be simple, but
-        // nobody cares.
-        if (BYTE_ORDER == BIG_ENDIAN) {
-            MP_FATAL(ao, "Not supported on big endian.\n");
-            return -1;
-        }
-
         switch (ao->format) {
         case AF_FORMAT_U8:
         case AF_FORMAT_S16:

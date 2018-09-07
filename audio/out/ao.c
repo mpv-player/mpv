@@ -30,7 +30,6 @@
 
 #include "options/options.h"
 #include "options/m_config.h"
-#include "osdep/endian.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "common/global.h"
@@ -734,11 +733,7 @@ bool ao_need_conversion(struct ao_convert_fmt *fmt)
 }
 
 // The LSB is always ignored.
-#if BYTE_ORDER == BIG_ENDIAN
-#define SHIFT24(x) ((3-(x))*8)
-#else
 #define SHIFT24(x) (((x)+1)*8)
-#endif
 
 static void convert_plane(int type, void *data, int num_samples)
 {

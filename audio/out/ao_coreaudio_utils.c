@@ -24,7 +24,6 @@
 
 #include "audio/out/ao_coreaudio_utils.h"
 #include "osdep/timer.h"
-#include "osdep/endian.h"
 #include "osdep/semaphore.h"
 #include "audio/format.h"
 
@@ -179,9 +178,6 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
     } else if (!af_fmt_is_unsigned(mp_format)) {
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
     }
-
-    if (BYTE_ORDER == BIG_ENDIAN)
-        asbd->mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     asbd->mFramesPerPacket = 1;
     asbd->mBytesPerPacket = asbd->mBytesPerFrame =

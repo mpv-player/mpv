@@ -40,7 +40,6 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "osdep/timer.h"
-#include "osdep/endian.h"
 
 #include <sys/soundcard.h>
 
@@ -95,11 +94,11 @@ static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
 };
 
 #if !defined(AFMT_S16_NE) && defined(AFMT_S16_LE) && defined(AFMT_S16_BE)
-#define AFMT_S16_NE MP_SELECT_LE_BE(AFMT_S16_LE, AFMT_S16_BE)
+#define AFMT_S16_NE AFMT_S16_LE
 #endif
 
 #if !defined(AFMT_S32_NE) && defined(AFMT_S32_LE) && defined(AFMT_S32_BE)
-#define AFMT_S32_NE AFMT_S32MP_SELECT_LE_BE(AFMT_S32_LE, AFMT_S32_BE)
+#define AFMT_S32_NE AFMT_S32_LE
 #endif
 
 static const int format_table[][2] = {
