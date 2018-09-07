@@ -32,8 +32,6 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_GET_READER_STATE,
-    DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
     DEMUXER_CTRL_REPLACE_STREAM,
 };
 
@@ -43,7 +41,7 @@ struct demux_seek_range {
     double start, end;
 };
 
-struct demux_ctrl_reader_state {
+struct demux_reader_state {
     bool eof, underrun, idle;
     double ts_duration;
     double ts_reader; // approx. timerstamp of decoder position
@@ -58,12 +56,6 @@ struct demux_ctrl_reader_state {
     // level seek.
     int num_seek_ranges;
     struct demux_seek_range seek_ranges[MAX_SEEK_RANGES];
-};
-
-struct demux_ctrl_stream_ctrl {
-    int ctrl;
-    void *arg;
-    int res;
 };
 
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
@@ -289,7 +281,8 @@ void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
 void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
-int demux_control(struct demuxer *demuxer, int cmd, void *arg);
+void demux_get_bitrate_stats(struct demuxer *demuxer, double *rates);
+void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *r);
 
 void demux_block_reading(struct demuxer *demuxer, bool block);
 

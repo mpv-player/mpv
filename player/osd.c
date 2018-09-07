@@ -232,8 +232,8 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     if (mpctx->demuxer && demux_is_network_cached(mpctx->demuxer)) {
         saddf(&line, " Cache: ");
 
-        struct demux_ctrl_reader_state s = {.ts_duration = -1};
-        demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+        struct demux_reader_state s;
+        demux_get_reader_state(mpctx->demuxer, &s);
 
         if (s.ts_duration < 0) {
             saddf(&line, "???");
