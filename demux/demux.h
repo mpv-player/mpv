@@ -32,7 +32,6 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_REPLACE_STREAM,
 };
 
 #define MAX_SEEK_RANGES 10
@@ -295,6 +294,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
 void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
                            struct mp_tags *tags);
+void demux_close_stream(struct demuxer *demuxer);
 
 void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer);

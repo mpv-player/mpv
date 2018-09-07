@@ -264,6 +264,8 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
         return -1;
     }
 
+    demux_close_stream(demuxer);
+
     mp_tags_merge(demuxer->metadata, p->f->tags);
     return 0;
 }

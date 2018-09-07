@@ -388,6 +388,7 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     if (p->data.start == NULL)
         return -1;
     bstr_eatstart0(&p->data, HEADER);
+    demux_close_stream(demuxer);
     return 0;
 }
 
