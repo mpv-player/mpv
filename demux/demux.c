@@ -1733,8 +1733,8 @@ static void execute_trackswitch(struct demux_internal *in)
 
     pthread_mutex_unlock(&in->lock);
 
-    if (in->d_thread->desc->control)
-        in->d_thread->desc->control(in->d_thread, DEMUXER_CTRL_SWITCHED_TRACKS, 0);
+    if (in->d_thread->desc->switched_tracks)
+        in->d_thread->desc->switched_tracks(in->d_thread);
 
     pthread_mutex_lock(&in->lock);
 }

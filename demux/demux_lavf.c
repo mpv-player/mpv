@@ -1159,15 +1159,9 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     update_read_stats(demuxer);
 }
 
-static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
+static void demux_lavf_switched_tracks(struct demuxer *demuxer)
 {
-    switch (cmd) {
-    case DEMUXER_CTRL_SWITCHED_TRACKS:
-        select_tracks(demuxer, 0);
-        return CONTROL_OK;
-    default:
-        return CONTROL_UNKNOWN;
-    }
+    select_tracks(demuxer, 0);
 }
 
 static void demux_close_lavf(demuxer_t *demuxer)
@@ -1209,5 +1203,5 @@ const demuxer_desc_t demuxer_desc_lavf = {
     .open = demux_open_lavf,
     .close = demux_close_lavf,
     .seek = demux_seek_lavf,
-    .control = demux_lavf_control,
+    .switched_tracks = demux_lavf_switched_tracks,
 };
