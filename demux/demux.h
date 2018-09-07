@@ -264,9 +264,6 @@ int demux_get_num_stream(struct demuxer *demuxer);
 struct sh_stream *demux_alloc_sh_stream(enum stream_type type);
 void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh);
 
-struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
-                           struct mpv_global *global);
-
 struct mp_cancel;
 struct demuxer *demux_open_url(const char *url,
                                struct demuxer_params *params,
