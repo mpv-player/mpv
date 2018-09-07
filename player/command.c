@@ -557,9 +557,7 @@ static int mp_property_file_size(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size;
-    if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_SIZE, &size) < 1)
-        return M_PROPERTY_UNAVAILABLE;
+    int64_t size = mpctx->demuxer->filesize;
 
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = format_file_size(size);
