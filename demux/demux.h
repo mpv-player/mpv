@@ -32,7 +32,6 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
-    DEMUXER_CTRL_STREAM_CTRL,
     DEMUXER_CTRL_GET_READER_STATE,
     DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
     DEMUXER_CTRL_REPLACE_STREAM,
@@ -191,6 +190,7 @@ typedef struct demuxer {
     const demuxer_desc_t *desc; ///< Demuxer description structure
     const char *filetype; // format name when not identified by demuxer (libavformat)
     int64_t filepos;  // input stream current pos.
+    int64_t filesize;
     char *filename;  // same as stream->url
     bool seekable;
     bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
@@ -244,7 +244,6 @@ typedef struct demuxer {
 
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
-    // You can freely use demux_stream_control() to send STREAM_CTRLs.
     // Also note that the stream can get replaced if fully_read is set.
     struct stream *stream;
 } demuxer_t;
@@ -308,8 +307,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
 void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
                            struct mp_tags *tags);
-
-int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 
 void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer);

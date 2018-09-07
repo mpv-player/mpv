@@ -1879,6 +1879,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     // This implies this function is actually called from "the" user thread.
     if (pkt->pos >= ds->in->d_user->filepos)
         ds->in->d_user->filepos = pkt->pos;
+    ds->in->d_user->filesize = ds->in->stream_size;
 
     pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
     pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
@@ -3117,30 +3118,9 @@ static void update_cache(struct demux_internal *in)
 }
 
 // must be called locked
-static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
-{
-    switch (cmd) {
-    case STREAM_CTRL_GET_SIZE:
-        if (in->stream_size < 0)
-            return STREAM_UNSUPPORTED;
-        *(int64_t *)arg = in->stream_size;
-        return STREAM_OK;
-    }
-    return STREAM_ERROR;
-}
-
-// must be called locked
 static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
 {
     switch (cmd) {
-    case DEMUXER_CTRL_STREAM_CTRL: {
-        struct demux_ctrl_stream_ctrl *c = arg;
-        int r = cached_stream_control(in, c->ctrl, c->arg);
-        if (r == STREAM_ERROR)
-            break;
-        c->res = r;
-        return CONTROL_OK;
-    }
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
         for (int n = 0; n < STREAM_TYPE_COUNT; n++)
@@ -3219,14 +3199,6 @@ static void thread_demux_control(void *p)
 
     pthread_mutex_unlock(&in->lock);
 
-    if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
-        struct demux_ctrl_stream_ctrl *c = arg;
-        if (in->threading)
-            MP_VERBOSE(demuxer, "blocking for STREAM_CTRL %d\n", c->ctrl);
-        c->res = stream_control(demuxer->stream, c->ctrl, c->arg);
-        if (c->res != STREAM_UNSUPPORTED)
-            r = CONTROL_OK;
-    }
     if (r != CONTROL_OK) {
         if (in->threading)
             MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
@@ -3272,13 +3244,6 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
     }
 
     return r;
-}
-
-int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
-{
-    struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
-    demux_control(demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
-    return c.res;
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)
