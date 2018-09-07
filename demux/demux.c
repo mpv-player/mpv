@@ -355,6 +355,7 @@ struct mp_packet_tags {
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
 static void update_cache(struct demux_internal *in);
+static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp);
 
 #if 0
 // very expensive check for redundant cached queue state
@@ -1150,9 +1151,9 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
     dp->keyframe = true;
     dp->pts = MP_ADD_PTS(dp->pts, -in->ts_offset);
     dp->dts = MP_ADD_PTS(dp->dts, -in->ts_offset);
+    add_packet_locked(sh, dp);
     pthread_mutex_unlock(&in->lock);
 
-    demux_add_packet(sh, dp);
 }
 
 // Add the keyframe to the end of the index. Not all packets are actually added.
@@ -1398,15 +1399,14 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
         attempt_range_joining(ds->in);
 }
 
-void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
+static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
-    if (!dp || !dp->len || !ds || demux_cancel_test(ds->in->d_thread)) {
+    if (!dp->len || demux_cancel_test(ds->in->d_thread)) {
         talloc_free(dp);
         return;
     }
     struct demux_internal *in = ds->in;
-    pthread_mutex_lock(&in->lock);
 
     in->initial_state = false;
 
@@ -1542,7 +1542,6 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     wakeup_ds(ds);
-    pthread_mutex_unlock(&in->lock);
 }
 
 // Returns true if there was "progress" (lock was released temporarily).
@@ -1614,13 +1613,19 @@ static bool read_packet(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 
     struct demuxer *demux = in->d_thread;
+    struct demux_packet *pkt = NULL;
 
     bool eof = true;
-    if (demux->desc->fill_buffer && !demux_cancel_test(demux))
-        eof = demux->desc->fill_buffer(demux) <= 0;
+    if (demux->desc->read_packet && !demux_cancel_test(demux))
+        eof = !demux->desc->read_packet(demux, &pkt);
     update_cache(in);
 
     pthread_mutex_lock(&in->lock);
+
+    if (pkt) {
+        assert(pkt->stream >= 0 && pkt->stream < in->num_streams);
+        add_packet_locked(in->streams[pkt->stream], pkt);
+    }
 
     if (!in->seeking) {
         if (eof) {

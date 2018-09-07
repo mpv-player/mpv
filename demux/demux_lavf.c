@@ -1047,7 +1047,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
-static int demux_lavf_fill_buffer(demuxer_t *demux)
+static bool demux_lavf_read_packet(struct demuxer *demux,
+                                   struct demux_packet **mp_pkt)
 {
     lavf_priv_t *priv = demux->priv;
 
@@ -1057,11 +1058,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     if (r < 0) {
         av_packet_unref(pkt);
         if (r == AVERROR(EAGAIN))
-            return 1;
+            return true;
         if (r == AVERROR_EOF)
-            return 0;
+            return false;
         MP_WARN(demux, "error reading packet.\n");
-        return -1;
+        return false;
     }
 
     add_new_streams(demux);
@@ -1073,13 +1074,13 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
 
     if (!demux_stream_is_selected(stream)) {
         av_packet_unref(pkt);
-        return 1; // don't signal EOF if skipping a packet
+        return true; // don't signal EOF if skipping a packet
     }
 
     struct demux_packet *dp = new_demux_packet_from_avpacket(pkt);
     if (!dp) {
         av_packet_unref(pkt);
-        return 1;
+        return true;
     }
 
     if (pkt->pts != AV_NOPTS_VALUE)
@@ -1098,8 +1099,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     if (priv->format_hack.clear_filepos)
         dp->pos = -1;
 
-    demux_add_packet(stream, dp);
-    return 1;
+    dp->stream = stream->index;
+
+    *mp_pkt = dp;
+    return true;
 }
 
 static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
@@ -1202,7 +1205,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
 const demuxer_desc_t demuxer_desc_lavf = {
     .name = "lavf",
     .desc = "libavformat",
-    .fill_buffer = demux_lavf_fill_buffer,
+    .read_packet = demux_lavf_read_packet,
     .open = demux_open_lavf,
     .close = demux_close_lavf,
     .seek = demux_seek_lavf,

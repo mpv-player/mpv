@@ -110,7 +110,11 @@ typedef struct demuxer_desc {
     // Return 0 on success, otherwise -1
     int (*open)(struct demuxer *demuxer, enum demux_check check);
     // The following functions are all optional
-    int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
+    // Try to read a packet. Return false on EOF. If true is returned, the
+    // demuxer may set *pkt to a new packet (the reference goes to the caller).
+    // If *pkt is NULL (the value when this function is called), the call
+    // will be repeated.
+    bool (*read_packet)(struct demuxer *demuxer, struct demux_packet **pkt);
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
@@ -253,7 +257,6 @@ struct demux_free_async_state *demux_free_async(struct demuxer *demuxer);
 void demux_free_async_force(struct demux_free_async_state *state);
 bool demux_free_async_finish(struct demux_free_async_state *state);
 
-void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp);
 
 struct demux_packet *demux_read_packet(struct sh_stream *sh);
