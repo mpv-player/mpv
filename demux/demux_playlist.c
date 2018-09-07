@@ -391,6 +391,8 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     demuxer->filetype = p->format ? p->format : fmt->name;
     demuxer->fully_read = true;
     talloc_free(p);
+    if (ok)
+        demux_close_stream(demuxer);
     return ok ? 0 : -1;
 }
 

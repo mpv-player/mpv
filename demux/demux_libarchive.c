@@ -85,6 +85,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     demuxer->fully_read = true;
 
     mp_archive_free(mpa);
+    demux_close_stream(demuxer);
 
     return 0;
 }
