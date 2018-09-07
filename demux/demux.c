@@ -223,8 +223,6 @@ struct demux_internal {
     int64_t last_speed_query;
     uint64_t bytes_per_second;
     int64_t next_cache_update;
-    // Updated during init only.
-    char *stream_base_filename;
 
     // -- Access from demuxer thread only
     bool enable_recording;
@@ -2245,16 +2243,6 @@ void demux_update(demuxer_t *demuxer)
     pthread_mutex_unlock(&in->lock);
 }
 
-static void demux_init_cache(struct demuxer *demuxer)
-{
-    struct demux_internal *in = demuxer->in;
-    struct stream *stream = demuxer->stream;
-
-    char *base = NULL;
-    stream_control(stream, STREAM_CTRL_GET_BASE_FILENAME, &base);
-    in->stream_base_filename = talloc_steal(demuxer, base);
-}
-
 static void demux_init_cuesheet(struct demuxer *demuxer)
 {
     char *cue = mp_tags_get_str(demuxer->metadata, "cuesheet");
@@ -2418,7 +2406,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
             in->d_thread->partially_seekable = true;
         }
         demux_init_cuesheet(in->d_thread);
-        demux_init_cache(demuxer);
         demux_init_ccs(demuxer, opts);
         demux_copy(in->d_user, in->d_thread);
         in->duration = in->d_thread->duration;
@@ -3137,11 +3124,6 @@ static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
         if (in->stream_size < 0)
             return STREAM_UNSUPPORTED;
         *(int64_t *)arg = in->stream_size;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_BASE_FILENAME:
-        if (!in->stream_base_filename)
-            return STREAM_UNSUPPORTED;
-        *(char **)arg = talloc_strdup(NULL, in->stream_base_filename);
         return STREAM_OK;
     }
     return STREAM_ERROR;

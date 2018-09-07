@@ -467,9 +467,6 @@ static int archive_entry_control(stream_t *s, int cmd, void *arg)
 {
     struct priv *p = s->priv;
     switch (cmd) {
-    case STREAM_CTRL_GET_BASE_FILENAME:
-        *(char **)arg = talloc_strdup(NULL, p->src->url);
-        return STREAM_OK;
     case STREAM_CTRL_GET_SIZE:
         if (p->entry_size < 0)
             break;

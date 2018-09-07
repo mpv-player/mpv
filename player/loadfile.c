@@ -819,14 +819,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
         return;
 
     void *tmp = talloc_new(NULL);
-    char *base_filename = mpctx->filename;
-    char *stream_filename = NULL;
-    if (mpctx->demuxer) {
-        if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_BASE_FILENAME,
-                                    &stream_filename) > 0)
-            base_filename = talloc_steal(tmp, stream_filename);
-    }
-    struct subfn *list = find_external_files(mpctx->global, base_filename,
+    struct subfn *list = find_external_files(mpctx->global, mpctx->filename,
                                              mpctx->opts);
     talloc_steal(tmp, list);
 
