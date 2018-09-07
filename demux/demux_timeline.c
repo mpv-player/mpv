@@ -272,7 +272,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
         return true; // reader will retry
     }
 
-    if (pkt->stream < 0 || pkt->stream > seg->num_stream_map)
+    if (pkt->stream < 0 || pkt->stream >= seg->num_stream_map)
         goto drop;
 
     if (!p->dash) {
@@ -285,8 +285,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             pkt->end = seg->end;
     }
 
-    pkt->stream = seg->stream_map[pkt->stream];
-    if (pkt->stream < 0)
+    int vs_index = seg->stream_map[pkt->stream];
+    if (vs_index < 0)
         goto drop;
 
     // for refresh seeks, demux.c prefers monotonically increasing packet pos
@@ -294,7 +294,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (pkt->pos >= 0)
         pkt->pos |= (seg->index & 0x7FFFULL) << 48;
 
-    struct virtual_stream *vs = p->streams[pkt->stream];
+    struct virtual_stream *vs = p->streams[vs_index];
 
     if (pkt->pts != MP_NOPTS_VALUE && pkt->pts >= seg->end) {
         // Trust the keyframe flag. Might not always be a good idea, but will
