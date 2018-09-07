@@ -210,6 +210,10 @@ typedef struct mkv_demuxer {
     // temporary data, and not normally larger than 0 or 1 elements.
     struct block_info *blocks;
     int num_blocks;
+
+    // Packets to return.
+    struct demux_packet **packets;
+    int num_packets;
 } mkv_demuxer_t;
 
 #define OPT_BASE_STRUCT struct demux_mkv_opts
@@ -255,6 +259,17 @@ static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos);
 static void probe_first_timestamp(struct demuxer *demuxer);
 static int read_next_block_into_queue(demuxer_t *demuxer);
 static void free_block(struct block_info *block);
+
+static void add_packet(struct demuxer *demuxer, struct sh_stream *stream,
+                       struct demux_packet *pkt)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    if (!pkt)
+        return;
+
+    pkt->stream = stream->index;
+    MP_TARRAY_APPEND(mkv_d, mkv_d->packets, mkv_d->num_packets, pkt);
+}
 
 #define AAC_SYNC_EXTENSION_TYPE 0x02b7
 static int aac_get_sample_rate_index(uint32_t sample_rate)
@@ -2312,7 +2327,7 @@ static bool handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                 track->audio_timestamp[x * apk_usize / w];
             dp->pos = orig->pos + x;
             dp->keyframe = !x;   // Mark first packet as keyframe
-            demux_add_packet(track->stream, dp);
+            add_packet(demuxer, track->stream, dp);
         }
     }
 
@@ -2336,6 +2351,10 @@ static void mkv_seek_reset(demuxer_t *demuxer)
     for (int n = 0; n < mkv_d->num_blocks; n++)
         free_block(&mkv_d->blocks[n]);
     mkv_d->num_blocks = 0;
+
+    for (int n = 0; n < mkv_d->num_packets; n++)
+        talloc_free(mkv_d->packets[n]);
+    mkv_d->num_packets = 0;
 
     mkv_d->skip_to_timecode = INT64_MIN;
 }
@@ -2440,7 +2459,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
             if (new) {
                 demux_packet_copy_attribs(new, dp);
                 talloc_free(dp);
-                demux_add_packet(stream, new);
+                add_packet(demuxer, stream, new);
                 return;
             }
         }
@@ -2455,7 +2474,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
             memcpy(new->buffer + 8, dp->buffer, dp->len);
             demux_packet_copy_attribs(new, dp);
             talloc_free(dp);
-            demux_add_packet(stream, new);
+            add_packet(demuxer, stream, new);
             return;
         }
     }
@@ -2469,7 +2488,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     if (!track->parse || !track->av_parser || !track->av_parser_codec) {
-        demux_add_packet(stream, dp);
+        add_packet(demuxer, stream, dp);
         return;
     }
 
@@ -2503,13 +2522,13 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
                 new->dts = track->av_parser->dts == AV_NOPTS_VALUE
                          ? MP_NOPTS_VALUE : track->av_parser->dts / tb;
             }
-            demux_add_packet(stream, new);
+            add_packet(demuxer, stream, new);
         }
         pts = dts = AV_NOPTS_VALUE;
     }
 
     if (dp->len) {
-        demux_add_packet(stream, dp);
+        add_packet(demuxer, stream, dp);
     } else {
         talloc_free(dp);
     }
@@ -2897,19 +2916,26 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     return 1;
 }
 
-static int demux_mkv_fill_buffer(demuxer_t *demuxer)
+static bool demux_mkv_read_packet(struct demuxer *demuxer,
+                                  struct demux_packet **pkt)
 {
+    struct mkv_demuxer *mkv_d = demuxer->priv;
+
     for (;;) {
+        if (mkv_d->num_packets) {
+            *pkt = mkv_d->packets[0];
+            MP_TARRAY_REMOVE_AT(mkv_d->packets, mkv_d->num_packets, 0);
+            return true;
+        }
+
         int res;
         struct block_info block;
         res = read_next_block(demuxer, &block);
         if (res < 0)
-            return 0;
+            return false;
         if (res > 0) {
-            res = handle_block(demuxer, &block);
+            handle_block(demuxer, &block);
             free_block(&block);
-            if (res > 0)
-                return 1;
         }
     }
 }
@@ -3130,8 +3156,6 @@ static void demux_mkv_seek(demuxer_t *demuxer, double seek_pts, int flags)
     mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
     mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
     mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
-
-    demux_mkv_fill_buffer(demuxer);
 }
 
 static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos)
@@ -3238,7 +3262,7 @@ const demuxer_desc_t demuxer_desc_matroska = {
     .name = "mkv",
     .desc = "Matroska",
     .open = demux_mkv_open,
-    .fill_buffer = demux_mkv_fill_buffer,
+    .read_packet = demux_mkv_read_packet,
     .close = mkv_free,
     .seek = demux_mkv_seek,
     .load_timeline = build_ordered_chapter_timeline,

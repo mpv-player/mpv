@@ -173,14 +173,12 @@ static void demux_seek_mf(demuxer_t *demuxer, double seek_pts, int flags)
     mf->curr_frame = newpos;
 }
 
-// return value:
-//     0 = EOF or no stream found
-//     1 = successfully read a packet
-static int demux_mf_fill_buffer(demuxer_t *demuxer)
+static bool demux_mf_read_packet(struct demuxer *demuxer,
+                                 struct demux_packet **pkt)
 {
     mf_t *mf = demuxer->priv;
     if (mf->curr_frame >= mf->nr_of_files)
-        return 0;
+        return false;
 
     struct stream *entry_stream = NULL;
     if (mf->streams)
@@ -201,7 +199,8 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
                 memcpy(dp->buffer, data.start, data.len);
                 dp->pts = mf->curr_frame / mf->sh->codec->fps;
                 dp->keyframe = true;
-                demux_add_packet(mf->sh, dp);
+                dp->stream = mf->sh->index;
+                *pkt = dp;
             }
         }
         talloc_free(data.start);
@@ -211,7 +210,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
         free_stream(stream);
 
     mf->curr_frame++;
-    return 1;
+    return true;
 }
 
 // map file extension/type to a codec name
@@ -350,7 +349,7 @@ static void demux_close_mf(demuxer_t *demuxer)
 const demuxer_desc_t demuxer_desc_mf = {
     .name = "mf",
     .desc = "image files (mf)",
-    .fill_buffer = demux_mf_fill_buffer,
+    .read_packet = demux_mf_read_packet,
     .open = demux_open_mf,
     .close = demux_close_mf,
     .seek = demux_seek_mf,
