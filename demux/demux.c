@@ -2421,6 +2421,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 }
             }
         }
+        // Let this demuxer free demuxer->stream. Timeline sub-demuxers can
+        // share a stream, and in these cases the demux_timeline instance
+        // should own the stream, as it frees the sub demuxers first.
+        demuxer->in->owns_stream = true;
         return demuxer;
     }
 
@@ -2433,9 +2437,6 @@ static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
 static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 
 // params can be NULL
-// If params->does_not_own_stream==false, this does _not_ free the stream if
-// opening fails. But if it succeeds, a later demux_free() call will free the
-// stream.
 // This may free the stream parameter on success.
 static struct demuxer *demux_open(struct stream *stream,
                                   struct demuxer_params *params,
@@ -2477,8 +2478,6 @@ static struct demuxer *demux_open(struct stream *stream,
                 if (demuxer) {
                     talloc_steal(demuxer, log);
                     log = NULL;
-                    demuxer->in->owns_stream =
-                        params ? !params->does_not_own_stream : true;
                     goto done;
                 }
             }
@@ -2504,7 +2503,6 @@ struct demuxer *demux_open_url(const char *url,
     struct demuxer_params dummy = {0};
     if (!params)
         params = &dummy;
-    assert(!params->does_not_own_stream); // API user error
     struct mp_cancel *priv_cancel = mp_cancel_new(NULL);
     if (cancel)
         mp_cancel_set_parent(priv_cancel, cancel);
