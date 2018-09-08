@@ -432,8 +432,15 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
             int size = MPMIN(newpos - s->pos, sizeof(buffer));
             locale_t oldlocale = uselocale(p->mpa->locale);
             int r = archive_read_data(p->mpa->arch, buffer, size);
-            if (r < 0) {
-                MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
+            if (r <= 0) {
+                if (r == 0 && newpos > p->entry_size) {
+                    MP_ERR(s, "demuxer trying to seek beyond end of archive "
+                           "entry\n");
+                } else if (r == 0) {
+                    MP_ERR(s, "end of archive entry reached while seeking\n");
+                } else {
+                    MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
+                }
                 uselocale(oldlocale);
                 if (mp_archive_check_fatal(p->mpa, r)) {
                     mp_archive_free(p->mpa);
