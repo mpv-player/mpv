@@ -2263,6 +2263,7 @@ void demux_close_stream(struct demuxer *demuxer)
     MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
     free_stream(demuxer->stream);
     demuxer->stream = open_memory_stream(NULL, 0); // dummy
+    demuxer->stream->cancel = demuxer->cancel;
     in->d_user->stream = demuxer->stream;
 }
 
@@ -2333,7 +2334,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
     };
-    demuxer->seekable = stream->seekable;
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){
@@ -2368,12 +2368,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
            desc->name, d_level(check));
 
     // not for DVD/BD/DVB in particular
-    if (stream->seekable && (!params || !params->timeline))
-        stream_seek(stream, 0);
-
-    // Peek this much data to avoid that stream_read() run by some demuxers
-    // will flush previous peeked data.
-    stream_peek(stream, STREAM_BUFFER_SIZE);
+    if (demuxer->stream->seekable && (!params || !params->timeline))
+        stream_seek(demuxer->stream, 0);
 
     in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
@@ -2412,8 +2408,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 struct demuxer_params params2 = {0};
                 params2.timeline = tl;
                 struct demuxer *sub =
-                    open_given_type(global, log, &demuxer_desc_timeline, stream,
-                                    &params2, DEMUX_CHECK_FORCE);
+                    open_given_type(global, log, &demuxer_desc_timeline,
+                                    demuxer->stream, &params2, DEMUX_CHECK_FORCE);
                 if (sub) {
                     demuxer = sub;
                 } else {
@@ -2436,6 +2432,7 @@ static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 // If params->does_not_own_stream==false, this does _not_ free the stream if
 // opening fails. But if it succeeds, a later demux_free() call will free the
 // stream.
+// This may free the stream parameter on success.
 static struct demuxer *demux_open(struct stream *stream,
                                   struct demuxer_params *params,
                                   struct mpv_global *global)
@@ -2516,6 +2513,7 @@ struct demuxer *demux_open_url(const char *url,
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
         talloc_steal(d->in, priv_cancel);
+        assert(d->cancel);
     } else {
         params->demuxer_failed = true;
         free_stream(s);
