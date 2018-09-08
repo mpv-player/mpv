@@ -278,7 +278,6 @@ void demux_block_reading(struct demuxer *demuxer, bool block);
 
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           double ref_pts, bool selected);
-void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect);
 
 void demuxer_help(struct mp_log *log);
 

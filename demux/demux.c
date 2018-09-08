@@ -170,7 +170,6 @@ struct demux_internal {
     bool last_eof;              // last actual global EOF status
     bool eof;                   // whether we're in EOF state (reset for retry)
     bool idle;
-    bool autoselect;
     double min_secs;
     size_t max_bytes;
     size_t max_bytes_bw;
@@ -853,7 +852,6 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         .sh = sh,
         .type = sh->type,
         .index = sh->index,
-        .selected = in->autoselect,
         .global_correct_dts = true,
         .global_correct_pos = true,
     };
@@ -2937,12 +2935,6 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
         }
     }
     pthread_mutex_unlock(&in->lock);
-}
-
-void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect)
-{
-    assert(!demuxer->in->threading); // laziness
-    demuxer->in->autoselect = autoselect;
 }
 
 // This is for demuxer implementations only. demuxer_select_track() sets the
