@@ -220,8 +220,6 @@ typedef struct demuxer {
 
     // internal to demux.c
     struct demux_internal *in;
-    struct mp_tags **update_stream_tags;
-    int num_update_stream_tags;
 
     // Triggered when ending demuxing forcefully. Usually bound to the stream too.
     struct mp_cancel *cancel;

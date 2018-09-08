@@ -2177,14 +2177,6 @@ static void update_final_metadata(demuxer_t *demuxer)
     assert(demuxer == demuxer->in->d_user);
     struct demux_internal *in = demuxer->in;
 
-    int num_streams = MPMIN(in->num_streams, demuxer->num_update_stream_tags);
-    for (int n = 0; n < num_streams; n++) {
-        struct sh_stream *sh = in->streams[n];
-        // (replace them even if unnecessary, simpler and doesn't hurt)
-        if (sh->ds->tags_reader)
-            mp_tags_replace(sh->tags, sh->ds->tags_reader->sh);
-    }
-
     struct mp_packet_tags *tags =
         in->master_stream ? in->master_stream->tags_reader : NULL;
 
