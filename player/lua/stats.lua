@@ -39,8 +39,8 @@ local o = {
     plot_color = "FFFFFF",
 
     -- Text style
-    font = "Source Sans Pro",
-    font_mono = "Source Sans Pro",   -- monospaced digits are sufficient
+    font = "sans",
+    font_mono = "monospace",   -- monospaced digits are sufficient
     font_size = 8,
     font_color = "FFFFFF",
     border_size = 0.8,
