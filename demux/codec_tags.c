@@ -50,14 +50,8 @@ static const char *lookup_tag(int type, uint32_t tag)
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
-static const unsigned char guid_pcm[16] =
-    {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
-     0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
-static const unsigned char guid_float[16] =
-    {0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
-     0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
-// Corresponds to FF_MEDIASUBTYPE_BASE_GUID (plus 4 bytes of padding).
-static const unsigned char guid_ffext[16] =
+// Corresponds to WMMEDIASUBTYPE_Base.
+static const unsigned char guid_ext_base[16] =
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
      0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
 
@@ -74,14 +68,10 @@ static void map_audio_pcm_tag(struct mp_codec_params *c)
 
         // WAVEFORMATEXTENSIBLE.SubFormat
         unsigned char *subformat = c->extradata + 6;
-        if (memcmp(subformat + 4, guid_ffext + 4, 12) == 0) {
+        if (memcmp(subformat + 4, guid_ext_base + 4, 12) == 0) {
             c->codec_tag = AV_RL32(subformat);
             c->codec = lookup_tag(c->type, c->codec_tag);
         }
-        if (memcmp(subformat, guid_pcm, 16) == 0)
-            c->codec_tag = 0x0;
-        if (memcmp(subformat, guid_float, 16) == 0)
-            c->codec_tag = 0x3;
 
         // Compressed formats might use this.
         c->extradata += 22;
