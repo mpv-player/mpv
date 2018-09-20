@@ -940,6 +940,11 @@ static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
+    // in case of pausing or the device still being configured,
+    // just return our buffer size.
+    if (p->paused || snd_pcm_state(p->alsa) == SND_PCM_STATE_SETUP)
+        return p->buffersize;
+
     snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
     if (space < 0) {
         MP_ERR(ao, "Error received from snd_pcm_avail (%ld, %s)!\n",
