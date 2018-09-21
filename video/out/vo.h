@@ -263,19 +263,33 @@ struct vo_frame {
     uint64_t frame_id;
 };
 
-// Presentation feedback.
+// Presentation feedback. See get_vsync() for how backends should fill this
+// struct.
 struct vo_vsync_info {
-    // Last mp_time_us() timestamp at which a frame was queued.
-    int64_t last_queue_time;
-
-    // The latency at which swap_buffers() is performed. This is in seconds, and
-    // valid values are always >= 0. Essentially, it's the predicted time the
-    // last shown frame will take until it is actually displayed on the physical
-    // screen. (A reasonable implementation is returning the actual measured
-    // value for the last frame which was actually displayed. The assumption is
-    // that the latency usually doesn't change.)
+    // mp_time_us() timestamp at which the last queued frame will likely be
+    // displayed (this is in the future, unless the frame is instantly output).
     // -1 if unset or unsupported.
-    double latency;
+    // This implies the latency of the output.
+    int64_t last_queue_display_time;
+
+    // Time between 2 vsync events in microseconds. The difference should be the
+    // from 2 times sampled from the same reference point (it should not be the
+    // difference between e.g. the end of scanout and the start of the next one;
+    // it must be continuous).
+    // -1 if unsupported.
+    //  0 if supported, but no value available yet. It is assumed that the value
+    //    becomes available after enough swap_buffers() calls were done.
+    // >0 values are taken for granted. Very bad things will happen if it's
+    //    inaccurate.
+    int64_t vsync_duration;
+
+    // Number of skipped physical vsyncs at some point in time. Typically, this
+    // value is some time in the past by an offset that equals to the latency.
+    // This value is reset and newly sampled at every swap_buffers() call.
+    // This can be used to detect delayed frames iff you try to call
+    // swap_buffers() for every physical vsync.
+    // -1 if unset or unsupported.
+    int64_t skipped_vsyncs;
 };
 
 struct vo_driver {
@@ -393,6 +407,8 @@ struct vo_driver {
      * Return presentation feedback. The implementation should not touch fields
      * it doesn't support; the info fields are preinitialized to neutral values.
      * Usually called once after flip_page(), but can be called any time.
+     * The values returned by this are always relative to the last flip_page()
+     * call.
      */
     void (*get_vsync)(struct vo *vo, struct vo_vsync_info *info);
 
