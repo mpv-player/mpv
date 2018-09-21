@@ -37,12 +37,10 @@
 #define GLX_CONTEXT_ES2_PROFILE_BIT_EXT         0x00000004
 #endif
 
+#include "osdep/timer.h"
 #include "video/out/x11_common.h"
 #include "context.h"
 #include "utils.h"
-
-// Must be >= max. assumed and supported display latency in frames.
-#define SYNC_SAMPLES 16
 
 struct priv {
     GL gl;
@@ -51,10 +49,14 @@ struct priv {
     GLXFBConfig fbc;
 
     Bool (*XGetSyncValues)(Display*, GLXDrawable, int64_t*, int64_t*, int64_t*);
-    uint64_t ust[SYNC_SAMPLES];
-    uint64_t last_sbc;
-    uint64_t last_msc;
-    double latency;
+    int64_t last_ust;
+    int64_t last_msc;
+    int64_t last_sbc;
+    int64_t last_sbc_mp_time;
+    int64_t user_sbc;
+    int64_t vsync_duration;
+    int64_t last_skipped_vsyncs;
+    int64_t last_queue_display_time;
 };
 
 static void glx_uninit(struct ra_ctx *ctx)
@@ -224,75 +226,97 @@ static void set_glx_attrib(int *attribs, int name, int value)
     }
 }
 
-static double update_latency_oml(struct ra_ctx *ctx)
+static void update_vsync_oml(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
     assert(p->XGetSyncValues);
 
-    p->last_sbc += 1;
+    p->last_skipped_vsyncs = 0;
+    p->user_sbc += 1;
 
-    memmove(&p->ust[1], &p->ust[0], (SYNC_SAMPLES - 1) * sizeof(p->ust[0]));
-    p->ust[0] = 0;
-
+    // This extension returns two unrelated values:
+    //  (ust, msc): clock time and incrementing counter of last vsync (this is
+    //              reported continuously, even if we don't swap)
+    //  sbc:        swap counter of frame that was last displayed (every swap
+    //              increments the user_sbc, and the reported sbc is the sbc
+    //              of the frame that was just displayed)
+    // Invariants:
+    //  - ust and msc change in lockstep (no value can change with the other)
+    //  - msc is incremented; if you query it in a loop, and your thread isn't
+    //    frozen or starved by the scheduler, it will usually not change or
+    //    be incremented by 1 (while the ust will be incremented by vsync
+    //    duration)
+    //  - sbc is never higher than the user_sbc
+    //  - (ust, msc) are equal to or higher by vsync increments than the display
+    //    time of the frame referenced by the sbc
+    // Note that (ust, msc) and sbc are not locked to each other. The following
+    // can easily happen if vsync skips occur:
+    //  - you draw a frame, in the meantime hardware swaps sbc_1
+    //  - another display vsync happens during drawing
+    //  - you call swap()
+    //  - query (ust, msc) and sbc
+    //  - sbc contains sbc_1, but (ust, msc) contains the vsync after it
+    // As a consequence, it's hard to detect the latency or vsync skips.
     int64_t ust, msc, sbc;
     if (!p->XGetSyncValues(ctx->vo->x11->display, ctx->vo->x11->window,
                            &ust, &msc, &sbc))
-        return -1;
+    {
+        // Assume the extension is effectively unsupported.
+        p->vsync_duration = -1;
+        p->last_skipped_vsyncs = -1;
+        p->last_queue_display_time = -1;
+        return;
+    }
 
-    p->ust[0] = ust;
+    int64_t ust_passed = p->last_ust ? ust - p->last_ust : 0;
+    p->last_ust = ust;
 
-    uint64_t last_msc = p->last_msc;
+    int64_t msc_passed = p->last_msc ? msc - p->last_msc : 0;
     p->last_msc = msc;
 
-    // There was a driver-level discontinuity.
-    if (msc != last_msc + 1)
-        return -1;
+    int64_t sbc_passed = sbc - p->last_sbc;
+    p->last_sbc = sbc;
 
-    // No frame displayed yet.
-    if (!ust || !sbc || !msc)
-        return -1;
+    // Display frame duration. This makes assumptions about UST (see below).
+    if (msc_passed && ust_passed)
+        p->vsync_duration = ust_passed / msc_passed;
 
-    // We really need to know the time since the vsync happened. There is no way
-    // to get the UST at the time which the frame was queued. So we have to make
-    // assumptions about the UST. The extension spec doesn't define what the UST
-    // is (not even its unit).
-    // Simply assume UST is a simple CLOCK_MONOTONIC usec value. The swap buffer
-    // call happened "some" but very small time ago, so we can get away with
-    // querying the current time. There is also the implicit assumption that
-    // mpv's timer and the UST use the same clock (which it does on POSIX).
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts))
-        return -1;
-    uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+    // Only if a new frame was displayed (sbc increased) we have sort-of a
+    // chance that the current (ust, msc) is for the sbc. But this is racy,
+    // because skipped frames drops could have increased the msc right after the
+    // display event and before we queried the values. This code hopes for the
+    // best and ignores this.
+    if (sbc_passed) {
+        // The extension spec doesn't define what the UST is (not even its unit).
+        // Simply assume UST is a simple CLOCK_MONOTONIC usec value. The swap
+        // buffer call happened "some" but very small time ago, so we can get
+        // away with querying the current time. There is also the implicit
+        // assumption that mpv's timer and the UST use the same clock (which it
+        // does on POSIX).
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts))
+            return;
+        uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+        uint64_t ust_mp_time = mp_time_us() - (now_monotonic - ust);
 
-    // Actually we need two consecutive displays before we can accurately
-    // measure the latency (because we need to compute vsync_duration).
-    if (!p->ust[1])
-        return -1;
+        // Assume this is exactly when the actual display event for this sbc
+        // happened. This is subject to the race mentioned above.
+        p->last_sbc_mp_time = ust_mp_time;
+    }
 
-    // Display frame duration.
-    int64_t vsync_duration = p->ust[0] - p->ust[1];
+    // At least one frame needs to be actually displayed before
+    // p->last_sbc_mp_time is set.
+    if (!sbc)
+        return;
 
-    // Display latency in frames.
-    int64_t n_frames = p->last_sbc - sbc;
-
-    // Too high latency, or other nonsense.
-    if (n_frames < 0 || n_frames >= SYNC_SAMPLES)
-        return -1;
-
-    // Values were not recorded? (Temporary failures etc.)
-    if (!p->ust[n_frames])
-        return -1;
-
-    // Time since last frame display event.
-    int64_t latency_us = now_monotonic - p->ust[n_frames];
-
-    // The frame display event probably happened very recently (about within one
-    // vsync), but the corresponding video frame can be much older.
-    latency_us = (n_frames + 1) * vsync_duration - latency_us;
-
-    return latency_us / (1000.0 * 1000.0);
+    // Extrapolate from the last sbc time (when a frame was actually displayed),
+    // and by adding the number of frames that were queued since to it.
+    // For every unit the sbc is smaller than user_sbc, the actual display
+    // is one frame ahead (assumes glx_swap_buffers() is called for every
+    // vsync).
+    p->last_queue_display_time =
+        p->last_sbc_mp_time + (p->user_sbc - sbc) * p->vsync_duration;
 }
 
 static void glx_swap_buffers(struct ra_ctx *ctx)
@@ -302,13 +326,15 @@ static void glx_swap_buffers(struct ra_ctx *ctx)
     glXSwapBuffers(ctx->vo->x11->display, ctx->vo->x11->window);
 
     if (p->XGetSyncValues)
-        p->latency = update_latency_oml(ctx);
+        update_vsync_oml(ctx);
 }
 
 static void glx_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct priv *p = ctx->priv;
-    info->latency = p->latency;
+    info->vsync_duration = p->vsync_duration;
+    info->skipped_vsyncs = p->last_skipped_vsyncs;
+    info->last_queue_display_time = p->last_queue_display_time;
 }
 
 static bool glx_init(struct ra_ctx *ctx)
@@ -400,7 +426,9 @@ static bool glx_init(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto uninit;
 
-    p->latency = -1;
+    p->vsync_duration = -1;
+    p->last_skipped_vsyncs = -1;
+    p->last_queue_display_time = -1;
 
     return true;
 

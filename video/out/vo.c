@@ -477,7 +477,7 @@ static void update_vsync_timing_after_swap(struct vo *vo,
 {
     struct vo_internal *in = vo->in;
 
-    int64_t vsync_time = vsync->last_queue_time;
+    int64_t vsync_time = vsync->last_queue_display_time;
     int64_t prev_vsync = in->prev_vsync;
     in->prev_vsync = vsync_time;
 
@@ -909,15 +909,15 @@ bool vo_render_frame_external(struct vo *vo)
         vo->driver->flip_page(vo);
 
         struct vo_vsync_info vsync = {
-            .last_queue_time = mp_time_us(),
-            .latency = -1,
+            .last_queue_display_time = -1,
+            .skipped_vsyncs = -1,
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
 
-        // If we can, use a "made up" expected display time.
-        if (vsync.latency >= 0)
-            vsync.last_queue_time += vsync.latency * (1000.0 * 1000.0);
+        // Make up some crap if presentation feedback is missing.
+        if (vsync.last_queue_display_time < 0)
+            vsync.last_queue_display_time = mp_time_us();
 
         MP_STATS(vo, "end video-flip");
 
