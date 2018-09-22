@@ -430,6 +430,8 @@ local function add_file(s)
         append_property(s, "media-title", {prefix="Title:"})
     end
 
+    append_property(s, "file-format", {prefix="Format/protocol:"})
+
     local ch_index = mp.get_property_number("chapter")
     if ch_index and ch_index >= 0 then
         append_property(s, "chapter-list/" .. tostring(ch_index) .. "/title", {prefix="Chapter:"})
