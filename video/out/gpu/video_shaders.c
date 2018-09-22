@@ -833,10 +833,14 @@ void pass_color_map(struct gl_shader_cache *sc,
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.
 // Obtain random numbers by calling rand(h), followed by h = permute(h) to
 // update the state. Assumes the texture was hooked.
+// permute() was modified from the original to avoid "large" numbers in
+// calculations, since low-end mobile GPUs choke on them (overflow).
 static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 {
     GLSLH(float mod289(float x)  { return x - floor(x * 1.0/289.0) * 289.0; })
-    GLSLH(float permute(float x) { return mod289((34.0*x + 1.0) * x); })
+    GLSLHF("float permute(float x) {\n");
+        GLSLH(return mod289( mod289(34.0*x + 1.0) * (fract(x) + 1.0) );)
+    GLSLHF("}\n");
     GLSLH(float rand(float x)    { return fract(x * 1.0/41.0); })
 
     // Initialize the PRNG by hashing the position + a random uniform
