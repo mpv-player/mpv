@@ -164,6 +164,7 @@ def build(ctx):
     if ctx.dependency_satisfied('macos-cocoa-cb'):
         swift_source = [
             ( "osdep/macOS_mpv_helper.swift" ),
+            ( "osdep/macOS_swift_extensions.swift" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),

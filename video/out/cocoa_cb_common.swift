@@ -420,6 +420,20 @@ class CocoaCB: NSObject {
             let minimized = data!.assumingMemoryBound(to: Int32.self)
             minimized.pointee = ccb.window.isMiniaturized ? VO_WIN_STATE_MINIMIZED : Int32(0)
             return VO_TRUE
+        case VOCTRL_GET_DISPLAY_NAMES:
+            let opts: mp_vo_opts = vo!.pointee.opts!.pointee
+            let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
+            var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
+            var count: Int32 = 0
+            let screen = ccb.window != nil ? ccb.window.screen :
+                                             ccb.getScreenBy(id: Int(opts.screen_id)) ??
+                                             NSScreen.main()
+            let displayName = screen?.displayName ?? "Unknown"
+
+            SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
+            SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
+            dnames.pointee = array
+            return VO_TRUE
         case VOCTRL_UPDATE_WINDOW_TITLE:
             let titleData = data!.assumingMemoryBound(to: Int8.self)
             let title = String(cString: titleData)
