@@ -940,12 +940,13 @@ static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
+    snd_pcm_sframes_t space = snd_pcm_avail_update(p->alsa);
     if (space < 0) {
-        MP_ERR(ao, "Error received from snd_pcm_avail (%ld, %s)!\n",
-               space, snd_strerror(space));
         if (space == -EPIPE) // EOF
             return p->buffersize;
+
+        MP_ERR(ao, "Error received from snd_pcm_avail_update (%ld, %s)!\n",
+               space, snd_strerror(space));
 
         // request a reload of the AO if device is not present,
         // then error out.
