@@ -947,10 +947,15 @@ static int get_space(struct ao *ao)
 
     snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
     if (space < 0) {
+        if (space == -EPIPE) {
+            MP_WARN(ao, "ALSA XRUN hit, attempting to recover...\n");
+            int err = snd_pcm_prepare(p->alsa);
+            CHECK_ALSA_ERROR("Unable to recover from under/overrun!");
+            return p->buffersize;
+        }
+
         MP_ERR(ao, "Error received from snd_pcm_avail (%ld, %s)!\n",
                space, snd_strerror(space));
-        if (space == -EPIPE) // EOF
-            return p->buffersize;
 
         // request a reload of the AO if device is not present,
         // then error out.
