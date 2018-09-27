@@ -954,8 +954,10 @@ static int get_space(struct ao *ao)
             return p->buffersize;
         }
 
-        MP_ERR(ao, "Error received from snd_pcm_avail (%ld, %s)!\n",
-               space, snd_strerror(space));
+        MP_ERR(ao, "Error received from snd_pcm_avail "
+                   "(%ld, %s with ALSA state %s)!\n",
+               space, snd_strerror(space),
+               snd_pcm_state_name(snd_pcm_state(p->alsa)));
 
         // request a reload of the AO if device is not present,
         // then error out.
