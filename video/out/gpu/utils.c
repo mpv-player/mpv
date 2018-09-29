@@ -141,16 +141,17 @@ struct ra_layout std140_layout(struct ra_renderpass_input *inp)
     // the nearest multiple of vec4
     // 4. Matrices are treated like arrays of vectors
     // 5. Arrays/matrices are laid out with a stride equal to the alignment
-    size_t size = el_size * inp->dim_v;
+    size_t stride = el_size * inp->dim_v;
+    size_t align = stride;
     if (inp->dim_v == 3)
-        size += el_size;
+        align += el_size;
     if (inp->dim_m > 1)
-        size = MP_ALIGN_UP(size, sizeof(float[4]));
+        stride = align = MP_ALIGN_UP(stride, sizeof(float[4]));
 
     return (struct ra_layout) {
-        .align  = size,
-        .stride = size,
-        .size   = size * inp->dim_m,
+        .align  = align,
+        .stride = stride,
+        .size   = stride * inp->dim_m,
     };
 }
 
@@ -160,14 +161,15 @@ struct ra_layout std430_layout(struct ra_renderpass_input *inp)
 
     // std430 packing rules: like std140, except arrays/matrices are always
     // "tightly" packed, even arrays/matrices of vec3s
-    size_t size = el_size * inp->dim_v;
+    size_t stride = el_size * inp->dim_v;
+    size_t align = stride;
     if (inp->dim_v == 3 && inp->dim_m == 1)
-        size += el_size;
+        align += el_size;
 
     return (struct ra_layout) {
-        .align  = size,
-        .stride = size,
-        .size   = size * inp->dim_m,
+        .align  = align,
+        .stride = stride,
+        .size   = stride * inp->dim_m,
     };
 }
 
