@@ -27,6 +27,7 @@ branches:
     - master
     - ci
     - coverity_scan
+    - /release\/.*$/
 
 before_install:
   - docker pull $CONTAINER
