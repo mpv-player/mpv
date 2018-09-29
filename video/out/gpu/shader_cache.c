@@ -666,8 +666,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             struct sc_uniform *u = &sc->uniforms[n];
             if (u->type != SC_UNIFORM_TYPE_PUSHC)
                 continue;
-            // push constants don't support explicit offsets
-            ADD(dst, "/*offset=%zu*/ %s %s;\n", u->offset, u->glsl_type,
+            ADD(dst, "layout(offset=%zu) %s %s;\n", u->offset, u->glsl_type,
                 u->input.name);
         }
         ADD(dst, "};\n");
