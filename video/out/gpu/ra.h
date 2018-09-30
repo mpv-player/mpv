@@ -188,6 +188,7 @@ enum ra_buf_type {
     RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
     RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
     RA_BUF_TYPE_VERTEX,         // not publicly usable (RA-internal usage)
+    RA_BUF_TYPE_SHARED_MEMORY,  // device memory for sharing with external API
 };
 
 struct ra_buf_params {
