@@ -148,10 +148,9 @@ class CocoaCB: NSObject {
     func startDisplayLink(_ vo: UnsafeMutablePointer<vo>) {
         let opts: mp_vo_opts = vo.pointee.opts.pointee
         let screen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main()
-        let displayId = screen!.deviceDescription["NSScreenNumber"] as! UInt32
 
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
-        CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
+        CVDisplayLinkSetCurrentCGDisplay(link!, screen!.displayID)
         if #available(macOS 10.12, *) {
             CVDisplayLinkSetOutputHandler(link!) { link, now, out, inFlags, outFlags -> CVReturn in
                 self.mpv.reportRenderFlip()
@@ -170,8 +169,7 @@ class CocoaCB: NSObject {
     }
 
     func updateDisplaylink() {
-        let displayId = UInt32(window.screen!.deviceDescription["NSScreenNumber"] as! Int)
-        CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
+        CVDisplayLinkSetCurrentCGDisplay(link!, window.screen!.displayID)
 
         queue.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             self.flagEvents(VO_EVENT_WIN_STATE)
@@ -302,9 +300,8 @@ class CocoaCB: NSObject {
     var reconfigureCallback: CGDisplayReconfigurationCallBack = { (display, flags, userInfo) in
         if flags.contains(.setModeFlag) {
             let ccb: CocoaCB = MPVHelper.bridge(ptr: userInfo!)
-            let displayID = (ccb.window.screen!.deviceDescription["NSScreenNumber"] as! NSNumber).intValue
-            if UInt32(displayID) == display {
-                ccb.mpv.sendVerbose("Detected display mode change, updating screen refresh rate\n");
+            if ccb.window.screen!.displayID == display {
+                ccb.mpv.sendVerbose("Detected display mode change, updating screen refresh rate");
                 ccb.flagEvents(VO_EVENT_WIN_STATE)
             }
         }
