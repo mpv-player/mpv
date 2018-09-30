@@ -11,6 +11,7 @@ struct vk_memslice {
     VkDeviceMemory vkmem;
     size_t offset;
     size_t size;
+    size_t slab_size;
     void *priv;
 };
 
@@ -32,4 +33,5 @@ struct vk_bufslice {
 // creating/destroying lots of (little) VkBuffers.
 bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlags bufFlags,
                       VkMemoryPropertyFlags memFlags, VkDeviceSize size,
-                      VkDeviceSize alignment, struct vk_bufslice *out);
+                      VkDeviceSize alignment, bool exportable,
+                      struct vk_bufslice *out);

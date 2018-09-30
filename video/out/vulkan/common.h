@@ -73,4 +73,8 @@ struct mpvk_ctx {
     // Cached capabilities
     VkPhysicalDeviceLimits limits;
     VkPhysicalDeviceFeatures features;
+
+    // Extension availability
+    bool has_ext_external_memory;
+    bool has_ext_external_memory_export;
 };

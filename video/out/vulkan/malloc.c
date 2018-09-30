@@ -2,6 +2,10 @@
 #include "utils.h"
 #include "osdep/timer.h"
 
+#if HAVE_WIN32_DESKTOP
+#include <versionhelpers.h>
+#endif
+
 // Controls the multiplication factor for new slab allocations. The new slab
 // will always be allocated such that the size of the slab is this factor times
 // the previous slab. Higher values make it grow faster.
@@ -57,6 +61,7 @@ struct vk_heap {
     VkBufferUsageFlags usage;    // the buffer usage type (or 0)
     VkMemoryPropertyFlags flags; // the memory type flags (or 0)
     uint32_t typeBits;           // the memory type index requirements (or 0)
+    bool exportable;             // whether memory is exportable to other APIs
     struct vk_slab **slabs;      // array of slabs sorted by size
     int num_slabs;
 };
@@ -126,8 +131,20 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
         .end   = slab->size,
     });
 
+    VkExportMemoryAllocateInfoKHR eminfo = {
+        .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
+#if HAVE_WIN32_DESKTOP
+        .handleTypes = IsWindows8OrGreater()
+		? VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
+		: VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT,
+#else
+        .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT,
+#endif
+    };
+
     VkMemoryAllocateInfo minfo = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .pNext = heap->exportable ? &eminfo : NULL,
         .allocationSize = slab->size,
     };
 
@@ -141,8 +158,14 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
         for (int i = 0; i < vk->num_pools; i++)
             qfs[i] = vk->pools[i]->qf;
 
+        VkExternalMemoryBufferCreateInfo ebinfo = {
+            .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO,
+            .handleTypes = eminfo.handleTypes,
+        };
+
         VkBufferCreateInfo binfo = {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .pNext = heap->exportable ? &ebinfo : NULL,
             .size  = slab->size,
             .usage = heap->usage,
             .sharingMode = vk->num_pools > 1 ? VK_SHARING_MODE_CONCURRENT
@@ -292,7 +315,8 @@ void vk_free_memslice(struct mpvk_ctx *vk, struct vk_memslice slice)
 // reqs: can be NULL
 static struct vk_heap *find_heap(struct mpvk_ctx *vk, VkBufferUsageFlags usage,
                                  VkMemoryPropertyFlags flags,
-                                 VkMemoryRequirements *reqs)
+                                 VkMemoryRequirements *reqs,
+                                 bool exportable)
 {
     struct vk_malloc *ma = vk->alloc;
     int typeBits = reqs ? reqs->memoryTypeBits : 0;
@@ -304,6 +328,8 @@ static struct vk_heap *find_heap(struct mpvk_ctx *vk, VkBufferUsageFlags usage,
             continue;
         if (ma->heaps[i].typeBits != typeBits)
             continue;
+        if (ma->heaps[i].exportable != exportable)
+            continue;
         return &ma->heaps[i];
     }
 
@@ -314,6 +340,7 @@ static struct vk_heap *find_heap(struct mpvk_ctx *vk, VkBufferUsageFlags usage,
         .usage    = usage,
         .flags    = flags,
         .typeBits = typeBits,
+        .exportable = exportable,
     };
     return heap;
 }
@@ -396,6 +423,7 @@ static bool slice_heap(struct mpvk_ctx *vk, struct vk_heap *heap, size_t size,
         .vkmem = slab->mem,
         .offset = MP_ALIGN_UP(reg.start, alignment),
         .size = size,
+        .slab_size = slab->size,
         .priv = slab,
     };
 
@@ -413,15 +441,24 @@ static bool slice_heap(struct mpvk_ctx *vk, struct vk_heap *heap, size_t size,
 bool vk_malloc_generic(struct mpvk_ctx *vk, VkMemoryRequirements reqs,
                        VkMemoryPropertyFlags flags, struct vk_memslice *out)
 {
-    struct vk_heap *heap = find_heap(vk, 0, flags, &reqs);
+    struct vk_heap *heap = find_heap(vk, 0, flags, &reqs, false);
     return slice_heap(vk, heap, reqs.size, reqs.alignment, out);
 }
 
 bool vk_malloc_buffer(struct mpvk_ctx *vk, VkBufferUsageFlags bufFlags,
                       VkMemoryPropertyFlags memFlags, VkDeviceSize size,
-                      VkDeviceSize alignment, struct vk_bufslice *out)
+                      VkDeviceSize alignment, bool exportable,
+                      struct vk_bufslice *out)
 {
-    struct vk_heap *heap = find_heap(vk, bufFlags, memFlags, NULL);
+    if (exportable) {
+        if (!vk->has_ext_external_memory_export) {
+            MP_ERR(vk, "Exportable memory requires the %s extension\n",
+                   MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME);
+            return false;
+        }
+    }
+
+    struct vk_heap *heap = find_heap(vk, bufFlags, memFlags, NULL, exportable);
     if (!slice_heap(vk, heap, size, alignment, &out->mem))
         return false;
 

@@ -10,6 +10,12 @@
 #define VK_LOAD_PFN(name) PFN_##name pfn_##name = (PFN_##name) \
                             vkGetInstanceProcAddr(vk->inst, #name);
 
+#if HAVE_WIN32_DESKTOP
+    #define MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME
+#else
+    #define MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
+#endif
+
 // Return a human-readable name for various struct mpvk_ctx enums
 const char* vk_err(VkResult res);
 

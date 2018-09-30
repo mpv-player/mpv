@@ -29,3 +29,17 @@ struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex);
 // May be called on a struct ra of any type. Returns NULL if the ra is not
 // a vulkan ra.
 struct mpvk_ctx *ra_vk_get(struct ra *ra);
+
+struct vk_external_mem {
+#if HAVE_WIN32_DESKTOP
+    HANDLE mem_handle;
+#else
+    int mem_fd;
+#endif
+    size_t mem_size;
+    size_t size;
+    size_t offset;
+};
+
+// Export an ra_buf for importing by another api.
+bool ra_vk_buf_get_external_info(struct ra *ra, struct ra_buf *buf, struct vk_external_mem *ret);
