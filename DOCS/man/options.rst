@@ -750,7 +750,7 @@ Video
     likely works with Intel GPUs only. It also requires the opengl EGL backend.
 
     The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
-    which is useful as there is no other deinterlacing mechanism in the opengl
+    which is useful as there is no other deinterlacing mechanism in the gpu
     output path. To use this deinterlacing you must pass the option:
     ``vd-lavc-o=deint=[weave|bob|adaptive]``.
     Pass ``weave`` (or leave the option unset) to not attempt any
@@ -778,6 +778,11 @@ Video
         When using this switch, hardware decoding is still only done for some
         codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
         codecs.
+
+    .. note::
+
+       Most non-copy methods only work with the OpenGL GPU backend. Currently,
+       only the ``nvdec`` and ``cuda`` methods work with Vulkan.
 
     .. admonition:: Quality reduction with hardware decoding
 
@@ -888,14 +893,18 @@ Video
     format, with likely no advantages.
 
 ``--cuda-decode-device=<auto|0..>``
-    Choose the GPU device used for decoding when using the ``cuda`` hwdec.
+    Choose the GPU device used for decoding when using the ``cuda`` or
+    ``nvdec`` hwdecs with the OpenGL GPU backend.
 
-    By default, the device that is being used to provide OpenGL output will
+    By default, the device that is being used to provide ``gpu`` output will
     also be used for decoding (and in the vast majority of cases, only one
     GPU will be present).
 
-    Note that when using the ``cuda-copy`` hwdec, a different option must be
-    passed: ``--vd-lavc-o=gpu=<0..>``.
+    Note that when using the ``cuda-copy`` or ``nvdec-copy`` hwdec, a
+    different option must be passed: ``--vd-lavc-o=gpu=<0..>``.
+
+    Note that this option is not available with the Vulkan GPU backend. With
+    Vulkan, decoding must always happen on the display device.
 
 ``--vaapi-device=<device file>``
     Choose the DRM device for ``vaapi-copy``. This should be the path to a
