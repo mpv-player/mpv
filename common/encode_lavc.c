@@ -476,8 +476,6 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
     if (av_interleaved_write_frame(p->muxer, pkt) < 0) {
         MP_ERR(p, "Writing packet failed.\n");
         p->failed = true;
-        pkt = NULL;
-        goto done;
     }
 
     pkt = NULL;
