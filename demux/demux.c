@@ -1973,18 +1973,6 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
     return r;
 }
 
-// Return whether a packet is queued. Never blocks, never forces any reads.
-bool demux_has_packet(struct sh_stream *sh)
-{
-    bool has_packet = false;
-    if (sh) {
-        pthread_mutex_lock(&sh->ds->in->lock);
-        has_packet = sh->ds->reader_head;
-        pthread_mutex_unlock(&sh->ds->in->lock);
-    }
-    return has_packet;
-}
-
 // Read and return any packet we find. NULL means EOF.
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
