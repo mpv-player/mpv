@@ -30,10 +30,6 @@
 
 #define STREAM_BUFFER_SIZE 2048
 
-// Max buffer for initial probe.
-#define STREAM_MAX_BUFFER_SIZE (2 * 1024 * 1024)
-
-
 // stream->mode
 #define STREAM_READ  0
 #define STREAM_WRITE 1
@@ -119,8 +115,10 @@ typedef struct stream {
     // added to this. The user can reset this as needed.
     uint64_t total_unbuffered_read_bytes;
 
-    // Includes additional padding in case sizes get rounded up by sector size.
-    unsigned char buffer[];
+    uint8_t *buffer;
+
+    int buffer_alloc;
+    uint8_t buffer_inline[STREAM_BUFFER_SIZE];
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
