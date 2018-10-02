@@ -301,7 +301,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
             MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
                    (long long int)pos, (long long int)size);
         }
-        bstr data = stream_peek(stream, STREAM_MAX_BUFFER_SIZE);
+        bstr data = stream_peek(stream, 4096);
         if (data.len == 0) {
             ok &= stream->eof;
             break;
