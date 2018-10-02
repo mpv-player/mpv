@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.29.1 ---
+    - add --cocoa-cb-sw-renderer to control the usage of Apple Software Renderer
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

@@ -1,3 +1,44 @@
+Release 0.29.1
+==============
+
+A bug fix release for the 0.29 release branch.
+
+Fixes and Minor Enhancements
+----------------------------
+
+- af_rubberband: Fix for A-V drift on seeking.
+- ao_alsa: Fixes to remove spam during pausing and end-of-file.
+- ao_jack: Fix for mpv attempting to connect to non-standard devices such as MIDI.
+- ao_openal: Drop support for Apple's bundled OpenAL due to lack of features to successfully build.
+- ao_pulse: Fix for audio buffer length calculation.
+- demux_lavf: Fix EDL playback of certain DASH streams.
+- demux_lavf: Mark v4l streams as not seekable.
+- demux_raw: Fix for gapless playback from raw audio input.
+- drm_atomic: Fix to enable video output with devices without a video overlay plane.
+- encode: Fix for crashes in case of failure to write to output.
+- encode: Fix for encoding when utilizing lavfi-complex.
+- Fix to strip HDR peak metadata if attached to SDR video (#6111)
+- macOS: Capability to fall back on SW rendering for testing purposes.
+- macOS: Fix for issues with the main menu.
+- macOS: Fix for side by side split view.
+- macOS: Fixes for crashes, most notably those happening on 10.14 (#5908, #6097, #6041, #6062).
+- macOS: No longer let older, unsupported versions of the Swift build tools through configure.
+- manpage: Misc fixups.
+- stream_{smb,file}: Fix for partial writes to buffers.
+- stream_libarchive: Fix hang when an out-of-bound seek happens.
+- stream_smb: Fix for crashes due to libsmbclient and threading (#5936).
+- vo_gpu: Fix for corruption when multiple compute shaders override each others' block sizes (#6083).
+- ytdl_hook: Always load "ytdl://" URLs with ytdl_hook first.
+- ytdl_hook: Fix audio streams not being picked up for some sites.
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- `--cocoa-cb-sw-renderer` to control whether or not to fall back on software rendering on macOS.
+
 Release 0.29.0
 ==============
 
