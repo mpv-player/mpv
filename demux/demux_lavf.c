@@ -60,7 +60,7 @@
 #endif
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
-#define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
+#define PROBE_BUF_SIZE (2 * 1024 * 1024)
 
 
 // Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
