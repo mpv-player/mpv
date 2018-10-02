@@ -511,13 +511,14 @@ bool stream_seek(stream_t *s, int64_t pos)
 
     s->eof = 0; // eof should be set only on read; seeking always clears it
 
-    if (pos == stream_tell(s))
-        return true;
-
     if (pos < 0) {
         MP_ERR(s, "Invalid seek to negative position %lld!\n", (long long)pos);
         pos = 0;
     }
+
+    if (pos == stream_tell(s))
+        return true;
+
     if (pos < s->pos) {
         int64_t x = pos - (s->pos - (int)s->buf_len);
         if (x >= 0) {
