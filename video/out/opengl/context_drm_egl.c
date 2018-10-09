@@ -355,15 +355,6 @@ static void crtc_release(struct ra_ctx *ctx)
         return;
     p->active = false;
 
-    // wait for current page flip
-    while (p->waiting_for_flip) {
-        int ret = drmHandleEvent(p->kms->fd, &p->ev);
-        if (ret) {
-            MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
-            break;
-        }
-    }
-
     if (p->kms->atomic_context) {
         if (p->kms->atomic_context->old_state.saved) {
             if (!crtc_release_atomic(ctx))
@@ -417,14 +408,16 @@ static void acquire_vt(void *data)
 static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->ctx->priv;
-    if (p->kms->atomic_context) {
-        if (!p->kms->atomic_context->request) {
-            p->kms->atomic_context->request = drmModeAtomicAlloc();
-            p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
-        }
-        return ra_gl_ctx_start_frame(sw, out_fbo);
+
+    if (!p->kms->atomic_context)
+        return false;
+
+    if (!p->kms->atomic_context->request) {
+        p->kms->atomic_context->request = drmModeAtomicAlloc();
+        p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
     }
-    return false;
+
+    return ra_gl_ctx_start_frame(sw, out_fbo);
 }
 
 static const struct ra_swapchain_fns drm_atomic_swapchain = {
@@ -440,11 +433,28 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     if (!p->active)
         return;
 
+    if (p->waiting_for_flip) {
+        // poll page flip finish event
+        const int timeout_ms = 3000;
+        struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
+        poll(fds, 1, timeout_ms);
+        if (fds[0].revents & POLLIN) {
+            ret = drmHandleEvent(p->kms->fd, &p->ev);
+            if (ret != 0)
+                MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+        }
+        p->waiting_for_flip = false;
+
+        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
+        p->gbm.bo = p->gbm.next_bo;
+    }
+
     eglSwapBuffers(p->egl.display, p->egl.surface);
+
     p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
-    p->waiting_for_flip = true;
     update_framebuffer_from_bo(ctx, p->gbm.next_bo);
 
+    p->waiting_for_flip = true;
     if (atomic_ctx) {
         drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "FB_ID", p->fb->id);
         drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "CRTC_ID", atomic_ctx->crtc->id);
@@ -462,27 +472,10 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         }
     }
 
-    // poll page flip finish event
-    const int timeout_ms = 3000;
-    struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
-    poll(fds, 1, timeout_ms);
-    if (fds[0].revents & POLLIN) {
-        ret = drmHandleEvent(p->kms->fd, &p->ev);
-        if (ret != 0) {
-            MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
-            p->waiting_for_flip = false;
-            return;
-        }
-    }
-    p->waiting_for_flip = false;
-
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
         atomic_ctx->request = drmModeAtomicAlloc();
     }
-
-    gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
-    p->gbm.bo = p->gbm.next_bo;
 }
 
 static void drm_egl_uninit(struct ra_ctx *ctx)
