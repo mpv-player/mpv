@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <limits.h>
 #include <poll.h>
 #include <unistd.h>
 #include <linux/input.h>
@@ -51,7 +53,17 @@ static int spawn_cursor(struct vo_wayland_state *wl)
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
-    wl->cursor_theme = wl_cursor_theme_load(NULL, 32*wl->scaling, wl->shm);
+    const char *size_str = getenv("XCURSOR_SIZE");
+    int size = 32;
+    if (size_str != NULL) {
+        errno = 0;
+        char *end;
+        long size_long = strtol(size_str, &end, 10);
+        if (!*end && !errno && size_long > 0 && size_long <= INT_MAX)
+            size = (int)size_long;
+    }
+
+    wl->cursor_theme = wl_cursor_theme_load(NULL, size*wl->scaling, wl->shm);
     if (!wl->cursor_theme) {
         MP_ERR(wl, "Unable to load cursor theme!\n");
         return 1;
