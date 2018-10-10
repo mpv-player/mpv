@@ -5507,6 +5507,13 @@ static void cmd_screenshot_to_file(void *p)
                        async);
 }
 
+static void cmd_screenshot_template(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+
+    set_screenshot_template(cmd->mpctx, cmd->args[0].v.s);
+}
+
 static void cmd_screenshot_raw(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -5932,6 +5939,9 @@ const struct mp_cmd_def mp_cmds[] = {
         OARG_CHOICE(2, ({"video", 0},
                         {"window", 1},
                         {"subtitles", 2})),
+    }},
+    { "screenshot-template", cmd_screenshot_template, {
+        ARG_STRING,
     }},
     { "loadfile", cmd_loadfile, {
         ARG_STRING,

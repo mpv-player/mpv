@@ -207,6 +207,10 @@ List of Input Commands
     The ``async`` flag has an effect on this command (see ``screenshot``
     command).
 
+``screenshot-template "<template>"``
+    Set a new screenshot file template (see ``--screenshot-template``
+    for valid values).
+
 ``playlist-next [weak|force]``
     Go to the next entry on the playlist.
 
