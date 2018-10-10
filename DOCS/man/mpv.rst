@@ -218,6 +218,11 @@ F9
     Show the list of audio and subtitle streams (useful only if a UI window  is
     used, broken on the terminal).
 
+i and I
+    Show/toggle an overlay displaying statistics about the currently playing
+    file such as codec, framerate, number of dropped frames and so on. See
+    `STATS`_ for more information.
+
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment.)
 
