@@ -45,4 +45,7 @@ struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode);
 // Called by the playback core code when a new frame is displayed.
 void screenshot_flip(struct MPContext *mpctx);
 
+// Change the screenshot template.
+void set_screenshot_template(struct MPContext *mpctx, const char *template);
+
 #endif /* MPLAYER_SCREENSHOT_H */

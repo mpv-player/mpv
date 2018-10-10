@@ -467,6 +467,13 @@ end:
     ctx->osd = old_osd;
 }
 
+void set_screenshot_template(struct MPContext *mpctx, const char *template) {
+  screenshot_ctx *ctx = mpctx->screenshot_ctx;
+    
+  ctx->mpctx->opts->screenshot_template =
+    talloc_strdup(ctx->mpctx->opts, template);
+}
+
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
                         bool osd, bool async)
 {
