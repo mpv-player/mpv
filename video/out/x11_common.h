@@ -88,7 +88,9 @@ struct vo_x11_state {
     bool pseudo_mapped; // not necessarily mapped, but known window size
     int fs;     // whether we assume the window is in fullscreen mode
 
-    bool mouse_cursor_hidden;
+    bool mouse_cursor_visible;
+    bool mouse_cursor_set;
+    bool has_focus;
     long orig_layer;
 
     // Current actual window position (updated on window move/resize events).
