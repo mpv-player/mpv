@@ -209,7 +209,7 @@ static int init_filter(struct mp_filter *da, AVPacket *pkt)
     case AV_CODEC_ID_DTS: {
         bool is_hd_ma = profile == FF_PROFILE_DTS_HD_MA ||
                         profile == FF_PROFILE_UNKNOWN;
-	bool is_hd_hr = profile == FF_PROFILE_DTS_HD_HRA;
+	  bool is_hd_hr = profile == FF_PROFILE_DTS_HD_HRA;
         if (spdif_ctx->use_dts_hd && (is_hd_ma || is_hd_hr)) { // 4*192000 = MA 1*192000 = HRA       
             av_dict_set(&format_opts, "dtshd_rate", is_hd_hr ? "192000" : "768000", 0);
             sample_format               = AF_FORMAT_S_DTSHD;
