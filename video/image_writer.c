@@ -23,6 +23,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
 #include <libavutil/opt.h>
+#include <libswscale/swscale.h>
 
 #include "config.h"
 
@@ -85,6 +86,67 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
     case AV_PIX_FMT_YUV444P: return AV_PIX_FMT_YUVJ444P;
     }
     return fmt;
+}
+
+typedef struct image_s {
+	int width, height, stride;
+	unsigned char *buffer;      // RGB24
+} image_t;
+
+static void flip(image_t * frame)
+{
+	//unsigned short bpp = Data->Info.bmiHeader.biBitCount;
+	unsigned int width = abs(frame->width);
+	unsigned int height = abs(frame->height);
+	unsigned int stride = abs(frame->stride);
+
+	unsigned char* buffer = (unsigned char*)malloc(stride);
+
+	unsigned char *cur = frame->buffer;
+
+	for (int i = 0; i <= height / 2; i++)
+	{
+		memcpy(buffer, cur + i * stride, stride);
+		memcpy(cur + i * stride, cur + (height - 1 - i)*stride, stride);
+		memcpy(cur + (height - 1 - i)*stride, buffer, stride);
+	}
+	free(buffer);
+}
+
+void write_bmp(const char* filename, image_t *img)
+{
+	flip(img);
+	int w = img->width;
+	int h = img->height;
+	int l = (w * 3 + 3) / 4 * 4;
+	int bmi[] = { l*h + 54,0,54,40,w,h,1 | 3 * 8 << 16,0,l*h,0,0,100,0 };
+	FILE *fp = fopen(filename, "wb");
+	fprintf(fp, "BM");
+	fwrite(&bmi, 52, 1, fp);
+	fwrite(img->buffer, 1, l*h, fp);
+	fclose(fp);
+}
+
+void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
+	FILE *pFile;
+	char szFilename[32];
+	int  y;
+
+	// Open file
+	sprintf(szFilename, "frame%d.ppm", iFrame);
+	pFile = fopen(szFilename, "wb");
+	if (pFile == NULL)
+		return;
+
+	// Write header
+	fprintf(pFile, "P6\n%d %d\n255\n", width, height);
+
+	// Write pixel data
+	for (y = 0; y < height; y++)
+		fwrite(pFrame->data[0] + y * pFrame->linesize[0], 1, width * 3, pFile);
+
+	// Close file
+	fclose(pFile);
 }
 
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
@@ -155,9 +217,48 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     if (ret < 0)
         goto error_exit;
     got_output = 1;
+	//
+	struct SwsContext *sws_ctx = NULL;
+	//
+	sws_ctx = sws_getContext(avctx->width,
+		avctx->height,
+		avctx->pix_fmt,
+		avctx->width,
+		avctx->height,
+		AV_PIX_FMT_RGB24,
+		SWS_BILINEAR,
+		NULL,
+		NULL,
+		NULL
+	);
+	//
+	AVFrame *pFrameRGB = av_frame_alloc();
+	//
+	int numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, avctx->width,
+		avctx->height);
+	uint8_t * buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+	//fwrite(pkt.data, pkt.size, 1, fp);
+	avpicture_fill((AVPicture *)pFrameRGB, buffer, AV_PIX_FMT_RGB24,
+		avctx->width, avctx->height);
+	//
+	sws_scale(sws_ctx, (uint8_t const * const *)pic->data,
+		pic->linesize, 0, avctx->height,
+		pFrameRGB->data, pFrameRGB->linesize);
 
-    fwrite(pkt.data, pkt.size, 1, fp);
-
+	//
+	image_t img;
+	img.width = avctx->width;
+	img.height = avctx->height;
+	img.stride = img.width * 3;
+	img.buffer = buffer;
+	////
+	write_bmp("test_mpv.bmp", &img);
+	//SaveFrame(pFrameRGB, avctx->width, avctx->height,0);
+	//
+	av_free(buffer);
+	//
+	av_frame_free(&pFrameRGB);
+	//
     success = !!got_output;
 error_exit:
     avcodec_free_context(&avctx);
@@ -362,16 +463,20 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!dst)
         return false;
 
-    FILE *fp = fopen(filename, "wb");
-    bool success = false;
-    if (fp == NULL) {
-        mp_err(log, "Error opening '%s' for writing!\n", filename);
-    } else {
-        success = write(&ctx, dst, fp);
-        success = !fclose(fp) && success;
-        if (!success)
-            mp_err(log, "Error writing file '%s'!\n", filename);
-    }
+	bool success = false;
+#if 1
+    //FILE *fp = fopen(filename, "wb");
+    //if (fp == NULL) {
+    //    mp_err(log, "Error opening '%s' for writing!\n", filename);
+    //} else {  
+        success = write(&ctx, dst, 0);
+        //success = !fclose(fp) && success;
+    //    if (!success)
+    //        mp_err(log, "Error writing file '%s'!\n", filename);
+    //}
+#else
+	write_bmp(filename, dst);
+#endif
 
     talloc_free(dst);
     return success;
