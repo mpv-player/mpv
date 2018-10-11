@@ -24,6 +24,7 @@
 #include <poll.h>
 #include <string.h>
 #include <assert.h>
+#include <colord.h>
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -1751,6 +1752,52 @@ static void vo_x11_fullscreen(struct vo *vo)
     vo_x11_update_composition_hint(vo);
 }
 
+static bool vo_x11_get_icc_profile_colord(struct vo *vo, int screen,
+                                          bstr *out_icc)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    bool ret_loaded = false;
+    CdDevice *dev = NULL;
+    CdProfile *prof = NULL;
+    CdIcc *icc = NULL;
+    GBytes *icc_bytes = NULL;
+    CdClient *cli = cd_client_new();
+    if (!cli || !cd_client_connect_sync(cli, NULL, NULL))
+        goto out;
+    dev = cd_client_find_device_by_property_sync(cli,
+                                                 CD_DEVICE_METADATA_XRANDR_NAME,
+                                                 x11->displays[screen].name,
+                                                 NULL, NULL);
+    if (!dev || !cd_device_connect_sync(dev, NULL, NULL))
+        goto out;
+    prof = cd_device_get_default_profile(dev);
+    if (!prof || !cd_profile_connect_sync(prof, NULL, NULL))
+        goto out;
+    icc = cd_profile_load_icc(prof, CD_ICC_LOAD_FLAGS_NONE, NULL, NULL);
+    if (!icc)
+        goto out;
+    MP_VERBOSE(x11, "Using profile %s\n", g_strdup(cd_icc_get_filename(icc)));
+    icc_bytes = cd_icc_save_data(icc, CD_ICC_SAVE_FLAGS_NONE, NULL);
+    if (!icc_bytes)
+        goto out;
+    int len = g_bytes_get_size(icc_bytes);
+    char *data = (char *)g_bytes_get_data(icc_bytes, NULL);
+    *out_icc = bstrdup(NULL, (bstr){data, len});
+    ret_loaded = true;
+out:
+    if (icc_bytes)
+        g_bytes_unref(icc_bytes);
+    if (icc)
+        g_object_unref(icc);
+    if (prof)
+        g_object_unref(prof);
+    if (dev)
+        g_object_unref(dev);
+    if (cli)
+        g_object_unref(cli);
+    return ret_loaded;
+}
+
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct mp_vo_opts *opts = vo->opts;
@@ -1844,14 +1891,18 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         if (screen > 0)
             mp_snprintf_cat(prop, sizeof(prop), "_%d", screen);
         x11->icc_profile_property = XAs(x11, prop);
-        int len;
         MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", screen);
-        void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
-                                     XA_CARDINAL, 8, &len);
-        if (!icc)
-            return VO_FALSE;
-        *(bstr *)arg = bstrdup(NULL, (bstr){icc, len});
-        XFree(icc);
+        bstr icc_data;
+        if (!vo_x11_get_icc_profile_colord(vo, screen, &icc_data)) {
+            int len;
+            void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
+                                         XA_CARDINAL, 8, &len);
+            if (!icc)
+                return VO_FALSE;
+            icc_data = bstrdup(NULL, (bstr){icc, len});
+            XFree(icc);
+        }
+        *(bstr *)arg = icc_data;
         // Watch x11->icc_profile_property
         XSelectInput(x11->display, x11->rootwin, PropertyChangeMask);
         return VO_TRUE;
