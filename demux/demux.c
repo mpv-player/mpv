@@ -61,11 +61,7 @@ extern const demuxer_desc_t demuxer_desc_libarchive;
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
-/* Please do not add any new demuxers here. If you want to implement a new
- * demuxer, add it to libavformat, except for wrappers around external
- * libraries and demuxers requiring binary support. */
-
-const demuxer_desc_t *const demuxer_list[] = {
+static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_edl,
     &demuxer_desc_cue,
     &demuxer_desc_rawaudio,
