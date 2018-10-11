@@ -207,14 +207,14 @@ static int init_filter(struct mp_filter *da, AVPacket *pkt)
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_DTS: {
-        bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
-                     profile == FF_PROFILE_DTS_HD_MA ||
-                     profile == FF_PROFILE_UNKNOWN;
-        if (spdif_ctx->use_dts_hd && is_hd) {
-            av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
+        bool is_hd_ma = profile == FF_PROFILE_DTS_HD_MA ||
+                        profile == FF_PROFILE_UNKNOWN;
+		bool is_hd_hr = profile == FF_PROFILE_DTS_HD_HRA;				
+        if (spdif_ctx->use_dts_hd && (is_hd_ma || is_hd_hr)) { // 4*192000 = MA 1*192000 = HRA       
+            av_dict_set(&format_opts, "dtshd_rate", is_hd_hr ? "192000" : "768000", 0); 
             sample_format               = AF_FORMAT_S_DTSHD;
             samplerate                  = 192000;
-            num_channels                = 2*4;
+            num_channels                = is_hd_hr ? 2 : 2*4;
         } else {
             sample_format               = AF_FORMAT_S_DTS;
             samplerate                  = 48000;
