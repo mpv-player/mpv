@@ -21,6 +21,12 @@
 
 #include "ao_wasapi.h"
 
+#ifdef _MSC_VER
+//MSVC has different IsEqualPropertyKey to mingw
+#undef IsEqualPropertyKey
+#define IsEqualPropertyKey(a, b)   (((a).pid == (b).pid) && IsEqualIID(&(a).fmtid, &(b).fmtid) )
+#endif
+
 static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
 {

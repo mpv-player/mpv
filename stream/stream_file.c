@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 #include <poll.h>
 #endif
 
@@ -81,8 +81,7 @@ static int64_t get_size(stream_t *s)
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     struct priv *p = s->priv;
-
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
     if (p->use_poll) {
         int c = s->cancel ? mp_cancel_get_fd(s->cancel) : -1;
         struct pollfd fds[2] = {
@@ -226,6 +225,27 @@ static bool check_stream_network(int fd)
 
 }
 #elif defined(_WIN32)
+#ifdef _MSC_VER
+typedef enum
+{
+    FileFsVolumeInformation = 1,
+    FileFsLabelInformation = 2,
+    FileFsSizeInformation = 3,
+    FileFsDeviceInformation = 4,
+    FileFsAttributeInformation = 5,
+    FileFsControlInformation = 6,
+    FileFsFullSizeInformation = 7,
+    FileFsObjectIdInformation = 8,
+    FileFsDriverPathInformation = 9,
+    FileFsVolumeFlagsInformation = 10,
+    FileFsSectorSizeInformation = 11
+} FS_INFORMATION_CLASS;
+typedef struct _FILE_FS_DEVICE_INFORMATION
+{
+    DEVICE_TYPE DeviceType;
+    ULONG       Characteristics;
+} FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
+#endif
 static bool check_stream_network(int fd)
 {
     NTSTATUS (NTAPI *pNtQueryVolumeInformationFile)(HANDLE,
@@ -305,7 +325,7 @@ static int open_f(stream_t *stream)
             p->appending = true;
 
         mode_t openmode = S_IRUSR | S_IWUSR;
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
         openmode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
         if (!write)
             m |= O_NONBLOCK;
@@ -327,7 +347,7 @@ static int open_f(stream_t *stream)
             MP_INFO(stream, "This is a directory - adding to playlist.\n");
         } else if (S_ISREG(st.st_mode)) {
             p->regular_file = true;
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
             // O_NONBLOCK has weird semantics on file locks; remove it.
             int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
             fcntl(p->fd, F_SETFL, val);
@@ -337,7 +357,7 @@ static int open_f(stream_t *stream)
         }
     }
 
-#ifdef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
     setmode(p->fd, O_BINARY);
 #endif
 

@@ -20,6 +20,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include "osdep/compiler.h"
+
 #ifdef __GNUC__
 #define TA_PRF(a1, a2) __attribute__ ((format(printf, a1, a2)))
 #define TA_TYPEOF(t) __typeof__(t)
@@ -96,7 +98,7 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 
 #define ta_steal(ta_parent, ptr) (TA_TYPEOF(ptr))ta_steal_(ta_parent, ptr)
 
-#define ta_dup(ta_parent, ptr) \
+#define ta_dup_ptrtype(ta_parent, ptr) \
     (TA_TYPEOF(ptr))ta_memdup(ta_parent, ptr, sizeof(*(ptr)))
 
 // Ugly macros that crash on OOM.
@@ -104,29 +106,29 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 // prefix), and the only difference is that they will call abort() on allocation
 // failures (such as out of memory conditions), instead of returning an error
 // code.
-#define ta_xalloc_size(...)             ta_oom_p(ta_alloc_size(__VA_ARGS__))
-#define ta_xzalloc_size(...)            ta_oom_p(ta_zalloc_size(__VA_ARGS__))
-#define ta_xset_destructor(...)         ta_oom_b(ta_set_destructor(__VA_ARGS__))
-#define ta_xset_parent(...)             ta_oom_b(ta_set_parent(__VA_ARGS__))
-#define ta_xnew_context(...)            ta_oom_p(ta_new_context(__VA_ARGS__))
-#define ta_xstrdup_append(...)          ta_oom_b(ta_strdup_append(__VA_ARGS__))
-#define ta_xstrdup_append_buffer(...)   ta_oom_b(ta_strdup_append_buffer(__VA_ARGS__))
-#define ta_xstrndup_append(...)         ta_oom_b(ta_strndup_append(__VA_ARGS__))
-#define ta_xstrndup_append_buffer(...)  ta_oom_b(ta_strndup_append_buffer(__VA_ARGS__))
-#define ta_xasprintf(...)               ta_oom_s(ta_asprintf(__VA_ARGS__))
-#define ta_xvasprintf(...)              ta_oom_s(ta_vasprintf(__VA_ARGS__))
-#define ta_xasprintf_append(...)        ta_oom_b(ta_asprintf_append(__VA_ARGS__))
-#define ta_xvasprintf_append(...)       ta_oom_b(ta_vasprintf_append(__VA_ARGS__))
-#define ta_xasprintf_append_buffer(...) ta_oom_b(ta_asprintf_append_buffer(__VA_ARGS__))
-#define ta_xvasprintf_append_buffer(...) ta_oom_b(ta_vasprintf_append_buffer(__VA_ARGS__))
-#define ta_xnew(...)                    ta_oom_g(ta_new(__VA_ARGS__))
-#define ta_xznew(...)                   ta_oom_g(ta_znew(__VA_ARGS__))
-#define ta_xnew_array(...)              ta_oom_g(ta_new_array(__VA_ARGS__))
-#define ta_xznew_array(...)             ta_oom_g(ta_znew_array(__VA_ARGS__))
-#define ta_xnew_array_size(...)         ta_oom_p(ta_new_array_size(__VA_ARGS__))
-#define ta_xnew_ptrtype(...)            ta_oom_g(ta_new_ptrtype(__VA_ARGS__))
-#define ta_xnew_array_ptrtype(...)      ta_oom_g(ta_new_array_ptrtype(__VA_ARGS__))
-#define ta_xdup(...)                    ta_oom_g(ta_dup(__VA_ARGS__))
+#define ta_xalloc_size(...)             ta_oom_p(MP_EXPAND_ARGS(ta_alloc_size(__VA_ARGS__)))
+#define ta_xzalloc_size(...)            ta_oom_p(MP_EXPAND_ARGS(ta_zalloc_size(__VA_ARGS__)))
+#define ta_xset_destructor(...)         ta_oom_b(MP_EXPAND_ARGS(ta_set_destructor(__VA_ARGS__)))
+#define ta_xset_parent(...)             ta_oom_b(MP_EXPAND_ARGS(ta_set_parent(__VA_ARGS__)))
+#define ta_xnew_context(...)            ta_oom_p(MP_EXPAND_ARGS(ta_new_context(__VA_ARGS__)))
+#define ta_xstrdup_append(...)          ta_oom_b(MP_EXPAND_ARGS(ta_strdup_append(__VA_ARGS__)))
+#define ta_xstrdup_append_buffer(...)   ta_oom_b(MP_EXPAND_ARGS(ta_strdup_append_buffer(__VA_ARGS__)))
+#define ta_xstrndup_append(...)         ta_oom_b(MP_EXPAND_ARGS(ta_strndup_append(__VA_ARGS__)))
+#define ta_xstrndup_append_buffer(...)  ta_oom_b(MP_EXPAND_ARGS(ta_strndup_append_buffer(__VA_ARGS__)))
+#define ta_xasprintf(...)               ta_oom_s(MP_EXPAND_ARGS(ta_asprintf(__VA_ARGS__)))
+#define ta_xvasprintf(...)              ta_oom_s(MP_EXPAND_ARGS(ta_vasprintf(__VA_ARGS__)))
+#define ta_xasprintf_append(...)        ta_oom_b(MP_EXPAND_ARGS(ta_asprintf_append(__VA_ARGS__)))
+#define ta_xvasprintf_append(...)       ta_oom_b(MP_EXPAND_ARGS(ta_vasprintf_append(__VA_ARGS__)))
+#define ta_xasprintf_append_buffer(...) ta_oom_b(MP_EXPAND_ARGS(ta_asprintf_append_buffer(__VA_ARGS__)))
+#define ta_xvasprintf_append_buffer(...) ta_oom_b(MP_EXPAND_ARGS(ta_vasprintf_append_buffer(__VA_ARGS__)))
+#define ta_xnew(...)                    ta_oom_g(MP_EXPAND_ARGS(ta_new(__VA_ARGS__)))
+#define ta_xznew(...)                   ta_oom_g(MP_EXPAND_ARGS(ta_znew(__VA_ARGS__)))
+#define ta_xnew_array(...)              ta_oom_g(MP_EXPAND_ARGS(ta_new_array(__VA_ARGS__)))
+#define ta_xznew_array(...)             ta_oom_g(MP_EXPAND_ARGS(ta_znew_array(__VA_ARGS__)))
+#define ta_xnew_array_size(...)         ta_oom_p(MP_EXPAND_ARGS(ta_new_array_size(__VA_ARGS__)))
+#define ta_xnew_ptrtype(...)            ta_oom_g(MP_EXPAND_ARGS(ta_new_ptrtype(__VA_ARGS__)))
+#define ta_xnew_array_ptrtype(...)      ta_oom_g(MP_EXPAND_ARGS(ta_new_array_ptrtype(__VA_ARGS__)))
+#define ta_xdup_ptrtype(...)            ta_oom_g(MP_EXPAND_ARGS(ta_dup_ptrtype(__VA_ARGS__)))
 
 #define ta_xsteal(ta_parent, ptr) (TA_TYPEOF(ptr))ta_xsteal_(ta_parent, ptr)
 #define ta_xrealloc(ta_parent, ptr, type, count) \

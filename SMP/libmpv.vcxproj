@@ -1,0 +1,1324 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDLLStaticDeps|Win32">
+      <Configuration>DebugDLLStaticDeps</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLLStaticDeps|x64">
+      <Configuration>DebugDLLStaticDeps</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLL|Win32">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLL|x64">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLLStaticDeps|Win32">
+      <Configuration>ReleaseDLLStaticDeps</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLLStaticDeps|x64">
+      <Configuration>ReleaseDLLStaticDeps</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|Win32">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|x64">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\audio\aframe.h" />
+    <ClInclude Include="..\audio\audio_buffer.h" />
+    <ClInclude Include="..\audio\chmap.h" />
+    <ClInclude Include="..\audio\chmap_sel.h" />
+    <ClInclude Include="..\audio\filter\equalizer.h" />
+    <ClInclude Include="..\audio\fmt-conversion.h" />
+    <ClInclude Include="..\audio\format.h" />
+    <ClInclude Include="..\audio\out\ao.h" />
+    <ClInclude Include="..\audio\out\ao_wasapi.h" />
+    <ClInclude Include="..\audio\out\internal.h" />
+    <ClInclude Include="..\common\av_common.h" />
+    <ClInclude Include="..\common\av_log.h" />
+    <ClInclude Include="..\common\codecs.h" />
+    <ClInclude Include="..\common\common.h" />
+    <ClInclude Include="..\common\encode.h" />
+    <ClInclude Include="..\common\encode_lavc.h" />
+    <ClInclude Include="..\common\global.h" />
+    <ClInclude Include="..\common\msg.h" />
+    <ClInclude Include="..\common\msg_control.h" />
+    <ClInclude Include="..\common\playlist.h" />
+    <ClInclude Include="..\common\recorder.h" />
+    <ClInclude Include="..\common\tags.h" />
+    <ClInclude Include="..\demux\codec_tags.h" />
+    <ClInclude Include="..\demux\cue.h" />
+    <ClInclude Include="..\demux\demux.h" />
+    <ClInclude Include="..\demux\ebml.h" />
+    <ClInclude Include="..\demux\matroska.h" />
+    <ClInclude Include="..\demux\packet.h" />
+    <ClInclude Include="..\demux\stheader.h" />
+    <ClInclude Include="..\demux\timeline.h" />
+    <ClInclude Include="..\filters\filter.h" />
+    <ClInclude Include="..\filters\filter_internal.h" />
+    <ClInclude Include="..\filters\frame.h" />
+    <ClInclude Include="..\filters\f_autoconvert.h" />
+    <ClInclude Include="..\filters\f_auto_filters.h" />
+    <ClInclude Include="..\filters\f_decoder_wrapper.h" />
+    <ClInclude Include="..\filters\f_demux_in.h" />
+    <ClInclude Include="..\filters\f_hwtransfer.h" />
+    <ClInclude Include="..\filters\f_lavfi.h" />
+    <ClInclude Include="..\filters\f_output_chain.h" />
+    <ClInclude Include="..\filters\f_swresample.h" />
+    <ClInclude Include="..\filters\f_swscale.h" />
+    <ClInclude Include="..\filters\f_utils.h" />
+    <ClInclude Include="..\filters\user_filters.h" />
+    <ClInclude Include="..\input\event.h" />
+    <ClInclude Include="..\input\input.h" />
+    <ClInclude Include="..\input\keycodes.h" />
+    <ClInclude Include="..\misc\bstr.h" />
+    <ClInclude Include="..\misc\charset_conv.h" />
+    <ClInclude Include="..\misc\ctype.h" />
+    <ClInclude Include="..\misc\dispatch.h" />
+    <ClInclude Include="..\misc\json.h" />
+    <ClInclude Include="..\misc\node.h" />
+    <ClInclude Include="..\misc\rendezvous.h" />
+    <ClInclude Include="..\misc\ring.h" />
+    <ClInclude Include="..\misc\thread_pool.h" />
+    <ClInclude Include="..\options\m_config.h" />
+    <ClInclude Include="..\options\m_option.h" />
+    <ClInclude Include="..\options\m_property.h" />
+    <ClInclude Include="..\options\options.h" />
+    <ClInclude Include="..\options\parse_commandline.h" />
+    <ClInclude Include="..\options\parse_configfile.h" />
+    <ClInclude Include="..\options\path.h" />
+    <ClInclude Include="..\osdep\atomic.h" />
+    <ClInclude Include="..\osdep\compiler.h" />
+    <ClInclude Include="..\osdep\endian.h" />
+    <ClInclude Include="..\osdep\io.h" />
+    <ClInclude Include="..\osdep\path.h" />
+    <ClInclude Include="..\osdep\polldev.h" />
+    <ClInclude Include="..\osdep\semaphore.h" />
+    <ClInclude Include="..\osdep\strnlen.h" />
+    <ClInclude Include="..\osdep\subprocess.h" />
+    <ClInclude Include="..\osdep\terminal.h" />
+    <ClInclude Include="..\osdep\threads.h" />
+    <ClInclude Include="..\osdep\timer.h" />
+    <ClInclude Include="..\osdep\w32_keyboard.h" />
+    <ClInclude Include="..\osdep\windows_utils.h" />
+    <ClInclude Include="..\player\client.h" />
+    <ClInclude Include="..\player\command.h" />
+    <ClInclude Include="..\player\core.h" />
+    <ClInclude Include="..\player\external_files.h" />
+    <ClInclude Include="..\player\screenshot.h" />
+    <ClInclude Include="..\stream\cookies.h" />
+    <ClInclude Include="..\stream\frequencies.h" />
+    <ClInclude Include="..\stream\rar.h" />
+    <ClInclude Include="..\stream\stream.h" />
+    <ClInclude Include="..\stream\stream_dvd_common.h" />
+    <ClInclude Include="..\stream\stream_libarchive.h" />
+    <ClInclude Include="..\sub\ass_mp.h" />
+    <ClInclude Include="..\sub\dec_sub.h" />
+    <ClInclude Include="..\sub\draw_bmp.h" />
+    <ClInclude Include="..\sub\img_convert.h" />
+    <ClInclude Include="..\sub\osd.h" />
+    <ClInclude Include="..\sub\osd_state.h" />
+    <ClInclude Include="..\sub\sd.h" />
+    <ClInclude Include="..\ta\ta.h" />
+    <ClInclude Include="..\ta\ta_talloc.h" />
+    <ClInclude Include="..\video\csputils.h" />
+    <ClInclude Include="..\video\d3d.h" />
+    <ClInclude Include="..\video\filter\refqueue.h" />
+    <ClInclude Include="..\video\fmt-conversion.h" />
+    <ClInclude Include="..\video\hwdec.h" />
+    <ClInclude Include="..\video\image_loader.h" />
+    <ClInclude Include="..\video\image_writer.h" />
+    <ClInclude Include="..\video\img_format.h" />
+    <ClInclude Include="..\video\mp_image.h" />
+    <ClInclude Include="..\video\mp_image_pool.h" />
+    <ClInclude Include="..\video\out\aspect.h" />
+    <ClInclude Include="..\video\out\bitmap_packer.h" />
+    <ClInclude Include="..\video\out\dither.h" />
+    <ClInclude Include="..\video\out\dr_helper.h" />
+    <ClInclude Include="..\video\out\filter_kernels.h" />
+    <ClInclude Include="..\video\out\gpu\context.h" />
+    <ClInclude Include="..\video\out\gpu\d3d11_helpers.h" />
+    <ClInclude Include="..\video\out\gpu\hwdec.h" />
+    <ClInclude Include="..\video\out\gpu\lcms.h" />
+    <ClInclude Include="..\video\out\gpu\libmpv_gpu.h" />
+    <ClInclude Include="..\video\out\gpu\osd.h" />
+    <ClInclude Include="..\video\out\gpu\ra.h" />
+    <ClInclude Include="..\video\out\gpu\shader_cache.h" />
+    <ClInclude Include="..\video\out\gpu\spirv.h" />
+    <ClInclude Include="..\video\out\gpu\user_shaders.h" />
+    <ClInclude Include="..\video\out\gpu\utils.h" />
+    <ClInclude Include="..\video\out\gpu\video.h" />
+    <ClInclude Include="..\video\out\gpu\video_shaders.h" />
+    <ClInclude Include="..\video\out\opengl\common.h" />
+    <ClInclude Include="..\video\out\opengl\context.h" />
+    <ClInclude Include="..\video\out\opengl\cuda_dynamic.h" />
+    <ClInclude Include="..\video\out\opengl\egl_helpers.h" />
+    <ClInclude Include="..\video\out\opengl\formats.h" />
+    <ClInclude Include="..\video\out\opengl\gl_headers.h" />
+    <ClInclude Include="..\video\out\opengl\ra_gl.h" />
+    <ClInclude Include="..\video\out\opengl\utils.h" />
+    <ClInclude Include="..\video\out\vo.h" />
+    <ClInclude Include="..\video\out\w32_common.h" />
+    <ClInclude Include="..\video\out\win32\displayconfig.h" />
+    <ClInclude Include="..\video\out\win32\droptarget.h" />
+    <ClInclude Include="..\video\out\win_state.h" />
+    <ClInclude Include="..\video\sws_utils.h" />
+    <ClInclude Include="config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\audio\aframe.c" />
+    <ClCompile Include="..\audio\audio_buffer.c" />
+    <ClCompile Include="..\audio\chmap.c" />
+    <ClCompile Include="..\audio\chmap_sel.c" />
+    <ClCompile Include="..\audio\decode\ad_lavc.c" />
+    <ClCompile Include="..\audio\decode\ad_spdif.c" />
+    <ClCompile Include="..\audio\filter\af_format.c" />
+    <ClCompile Include="..\audio\filter\af_lavcac3enc.c" />
+    <ClCompile Include="..\audio\filter\af_lavrresample.c" />
+    <ClCompile Include="..\audio\filter\af_scaletempo.c" />
+    <ClCompile Include="..\audio\fmt-conversion.c" />
+    <ClCompile Include="..\audio\format.c" />
+    <ClCompile Include="..\audio\out\ao.c" />
+    <ClCompile Include="..\audio\out\ao_lavc.c" />
+    <ClCompile Include="..\audio\out\ao_null.c" />
+    <ClCompile Include="..\audio\out\ao_pcm.c" />
+    <ClCompile Include="..\audio\out\ao_wasapi.c" />
+    <ClCompile Include="..\audio\out\ao_wasapi_changenotify.c" />
+    <ClCompile Include="..\audio\out\ao_wasapi_utils.c" />
+    <ClCompile Include="..\audio\out\pull.c" />
+    <ClCompile Include="..\audio\out\push.c" />
+    <ClCompile Include="..\common\av_common.c" />
+    <ClCompile Include="..\common\av_log.c" />
+    <ClCompile Include="..\common\codecs.c" />
+    <ClCompile Include="..\common\common.c" />
+    <ClCompile Include="..\common\encode_lavc.c" />
+    <ClCompile Include="..\common\msg.c" />
+    <ClCompile Include="..\common\playlist.c" />
+    <ClCompile Include="..\common\recorder.c" />
+    <ClCompile Include="..\common\tags.c" />
+    <ClCompile Include="..\common\version.c" />
+    <ClCompile Include="..\demux\codec_tags.c" />
+    <ClCompile Include="..\demux\cue.c" />
+    <ClCompile Include="..\demux\demux.c" />
+    <ClCompile Include="..\demux\demux_cue.c" />
+    <ClCompile Include="..\demux\demux_disc.c" />
+    <ClCompile Include="..\demux\demux_edl.c" />
+    <ClCompile Include="..\demux\demux_lavf.c" />
+    <ClCompile Include="..\demux\demux_mf.c" />
+    <ClCompile Include="..\demux\demux_mkv.c" />
+    <ClCompile Include="..\demux\demux_mkv_timeline.c" />
+    <ClCompile Include="..\demux\demux_null.c" />
+    <ClCompile Include="..\demux\demux_playlist.c" />
+    <ClCompile Include="..\demux\demux_rar.c" />
+    <ClCompile Include="..\demux\demux_raw.c" />
+    <ClCompile Include="..\demux\demux_timeline.c" />
+    <ClCompile Include="..\demux\ebml.c" />
+    <ClCompile Include="..\demux\packet.c" />
+    <ClCompile Include="..\demux\timeline.c" />
+    <ClCompile Include="..\filters\filter.c" />
+    <ClCompile Include="..\filters\frame.c" />
+    <ClCompile Include="..\filters\f_autoconvert.c" />
+    <ClCompile Include="..\filters\f_auto_filters.c" />
+    <ClCompile Include="..\filters\f_decoder_wrapper.c" />
+    <ClCompile Include="..\filters\f_demux_in.c" />
+    <ClCompile Include="..\filters\f_hwtransfer.c" />
+    <ClCompile Include="..\filters\f_lavfi.c" />
+    <ClCompile Include="..\filters\f_output_chain.c" />
+    <ClCompile Include="..\filters\f_swresample.c" />
+    <ClCompile Include="..\filters\f_swscale.c" />
+    <ClCompile Include="..\filters\f_utils.c" />
+    <ClCompile Include="..\filters\user_filters.c" />
+    <ClCompile Include="..\input\cmd.c" />
+    <ClCompile Include="..\input\event.c" />
+    <ClCompile Include="..\input\input.c" />
+    <ClCompile Include="..\input\ipc-win.c" />
+    <ClCompile Include="..\input\ipc.c" />
+    <ClCompile Include="..\input\keycodes.c" />
+    <ClCompile Include="..\input\pipe-win32.c" />
+    <ClCompile Include="..\misc\bstr.c" />
+    <ClCompile Include="..\misc\charset_conv.c" />
+    <ClCompile Include="..\misc\dispatch.c" />
+    <ClCompile Include="..\misc\json.c" />
+    <ClCompile Include="..\misc\node.c" />
+    <ClCompile Include="..\misc\rendezvous.c" />
+    <ClCompile Include="..\misc\ring.c" />
+    <ClCompile Include="..\misc\thread_pool.c" />
+    <ClCompile Include="..\options\m_config.c" />
+    <ClCompile Include="..\options\m_option.c" />
+    <ClCompile Include="..\options\m_property.c" />
+    <ClCompile Include="..\options\options.c" />
+    <ClCompile Include="..\options\parse_commandline.c" />
+    <ClCompile Include="..\options\parse_configfile.c" />
+    <ClCompile Include="..\options\path.c" />
+    <ClCompile Include="..\osdep\glob-win.c" />
+    <ClCompile Include="..\osdep\io.c">
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32_WINNT=0x0602;</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="..\osdep\main-fn-win.c" />
+    <ClCompile Include="..\osdep\path-win.c" />
+    <ClCompile Include="..\osdep\semaphore_osx.c" />
+    <ClCompile Include="..\osdep\subprocess-win.c" />
+    <ClCompile Include="..\osdep\subprocess.c" />
+    <ClCompile Include="..\osdep\terminal-win.c" />
+    <ClCompile Include="..\osdep\threads.c" />
+    <ClCompile Include="..\osdep\timer-win2.c" />
+    <ClCompile Include="..\osdep\timer.c" />
+    <ClCompile Include="..\osdep\w32_keyboard.c" />
+    <ClCompile Include="..\osdep\win32-console-wrapper.c" />
+    <ClCompile Include="..\osdep\win32\pthread.c" />
+    <ClCompile Include="..\osdep\windows_utils.c" />
+    <ClCompile Include="..\player\audio.c">
+      <ObjectFileName>$(IntDir)player_audio.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\player\client.c" />
+    <ClCompile Include="..\player\command.c" />
+    <ClCompile Include="..\player\configfiles.c" />
+    <ClCompile Include="..\player\external_files.c" />
+    <ClCompile Include="..\player\loadfile.c" />
+    <ClCompile Include="..\player\main.c" />
+    <ClCompile Include="..\player\misc.c" />
+    <ClCompile Include="..\player\osd.c" />
+    <ClCompile Include="..\player\playloop.c" />
+    <ClCompile Include="..\player\screenshot.c" />
+    <ClCompile Include="..\player\scripting.c" />
+    <ClCompile Include="..\player\sub.c" />
+    <ClCompile Include="..\player\video.c" />
+    <ClCompile Include="..\stream\cache.c" />
+    <ClCompile Include="..\stream\cache_file.c" />
+    <ClCompile Include="..\stream\cookies.c" />
+    <ClCompile Include="..\stream\frequencies.c" />
+    <ClCompile Include="..\stream\rar.c" />
+    <ClCompile Include="..\stream\stream.c" />
+    <ClCompile Include="..\stream\stream_avdevice.c" />
+    <ClCompile Include="..\stream\stream_cb.c" />
+    <ClCompile Include="..\stream\stream_edl.c" />
+    <ClCompile Include="..\stream\stream_file.c" />
+    <ClCompile Include="..\stream\stream_lavf.c" />
+    <ClCompile Include="..\stream\stream_memory.c" />
+    <ClCompile Include="..\stream\stream_mf.c" />
+    <ClCompile Include="..\stream\stream_null.c" />
+    <ClCompile Include="..\stream\stream_rar.c" />
+    <ClCompile Include="..\sub\dec_sub.c" />
+    <ClCompile Include="..\sub\draw_bmp.c" />
+    <ClCompile Include="..\sub\filter_sdh.c" />
+    <ClCompile Include="..\sub\img_convert.c" />
+    <ClCompile Include="..\sub\lavc_conv.c" />
+    <ClCompile Include="..\sub\osd.c">
+      <ObjectFileName>$(IntDir)sub_osd.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\sub\osd_dummy.c" />
+    <ClCompile Include="..\sub\sd_lavc.c" />
+    <ClCompile Include="..\ta\ta.c" />
+    <ClCompile Include="..\ta\ta_talloc.c" />
+    <ClCompile Include="..\ta\ta_utils.c" />
+    <ClCompile Include="..\video\csputils.c" />
+    <ClCompile Include="..\video\d3d.c" />
+    <ClCompile Include="..\video\decode\vd_lavc.c" />
+    <ClCompile Include="..\video\filter\refqueue.c" />
+    <ClCompile Include="..\video\filter\vf_format.c" />
+    <ClCompile Include="..\video\filter\vf_sub.c" />
+    <ClCompile Include="..\video\fmt-conversion.c">
+      <ObjectFileName>$(IntDir)video_fmt-conversion.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\hwdec.c" />
+    <ClCompile Include="..\video\image_loader.c" />
+    <ClCompile Include="..\video\image_writer.c" />
+    <ClCompile Include="..\video\img_format.c" />
+    <ClCompile Include="..\video\mp_image.c" />
+    <ClCompile Include="..\video\mp_image_pool.c" />
+    <ClCompile Include="..\video\out\aspect.c" />
+    <ClCompile Include="..\video\out\bitmap_packer.c" />
+    <ClCompile Include="..\video\out\dither.c" />
+    <ClCompile Include="..\video\out\dr_helper.c" />
+    <ClCompile Include="..\video\out\filter_kernels.c" />
+    <ClCompile Include="..\video\out\gpu\context.c" />
+    <ClCompile Include="..\video\out\gpu\hwdec.c">
+      <ObjectFileName>$(IntDir)video_gpu_hwdec.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\lcms.c" />
+    <ClCompile Include="..\video\out\gpu\libmpv_gpu.c" />
+    <ClCompile Include="..\video\out\gpu\osd.c">
+      <ObjectFileName>$(IntDir)video_gpu_osd.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\ra.c" />
+    <ClCompile Include="..\video\out\gpu\shader_cache.c" />
+    <ClCompile Include="..\video\out\gpu\spirv.c" />
+    <ClCompile Include="..\video\out\gpu\user_shaders.c" />
+    <ClCompile Include="..\video\out\gpu\utils.c" />
+    <ClCompile Include="..\video\out\gpu\video.c">
+      <ObjectFileName>$(IntDir)video_gpu_video.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\video_shaders.c" />
+    <ClCompile Include="..\video\out\opengl\common.c">
+      <ObjectFileName>$(IntDir)video_opengl_common.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\context.c">
+      <ObjectFileName>$(IntDir)video_opengl_context.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\context_dxinterop.c" />
+    <ClCompile Include="..\video\out\opengl\context_win.c" />
+    <ClCompile Include="..\video\out\opengl\cuda_dynamic.c" />
+    <ClCompile Include="..\video\out\opengl\formats.c" />
+    <ClCompile Include="..\video\out\opengl\hwdec_cuda.c" />
+    <ClCompile Include="..\video\out\opengl\libmpv_gl.c" />
+    <ClCompile Include="..\video\out\opengl\ra_gl.c" />
+    <ClCompile Include="..\video\out\opengl\utils.c">
+      <ObjectFileName>$(IntDir)video_opengl_utils.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo.c" />
+    <ClCompile Include="..\video\out\vo_direct3d.c" />
+    <ClCompile Include="..\video\out\vo_gpu.c" />
+    <ClCompile Include="..\video\out\vo_image.c" />
+    <ClCompile Include="..\video\out\vo_lavc.c" />
+    <ClCompile Include="..\video\out\vo_libmpv.c" />
+    <ClCompile Include="..\video\out\vo_null.c" />
+    <ClCompile Include="..\video\out\vo_tct.c" />
+    <ClCompile Include="..\video\out\w32_common.c" />
+    <ClCompile Include="..\video\out\win32\displayconfig.c" />
+    <ClCompile Include="..\video\out\win32\droptarget.c" />
+    <ClCompile Include="..\video\out\win_state.c" />
+    <ClCompile Include="..\video\sws_utils.c" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6550743E-D1D9-4849-AF42-893B981E5462}</ProjectGuid>
+    <RootNamespace>libmpv</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+    <TargetName>mpvd</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|Win32'">
+    <TargetName>mpvd</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <TargetName>mpvd</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|x64'">
+    <TargetName>mpvd</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+    <TargetName>mpv</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|Win32'">
+    <TargetName>mpv</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
+    <TargetName>mpv</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|x64'">
+    <TargetName>mpv</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>libmpvd</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>libmpvd</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>libmpv</TargetName>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>libmpv</TargetName>
+    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_LIB;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Lib>
+      <TargetMachine>MachineX86</TargetMachine>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\lib\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;.\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006,4221,4049,4217,4197,4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>avutil.lib;avcodec.lib;avformat.lib;avfilter.lib;avdevice.lib;swscale.lib;postproc.lib;swresample.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+    <Link>
+      <AdditionalDependencies>avutil.lib;avcodec.lib;avformat.lib;avfilter.lib;avdevice.lib;swscale.lib;postproc.lib;swresample.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_LIB;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\lib\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006,4221,4049,4217,4197,4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>libavutild.lib;libavcodecd.lib;libavformatd.lib;libavfilterd.lib;libavdeviced.lib;libswscaled.lib;libpostprocd.lib;libswresampled.lib;libarchived.lib;libblurayd.lib;libdvdnavd.lib;libdvdreadd.lib;libcdiod.lib;libcdio_paranoiad.lib;libassd.lib;libiconvd.lib;libzlibd.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x86\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <LargeAddressAware>true</LargeAddressAware>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <AdditionalDependencies>avutild.lib;avcodecd.lib;avformatd.lib;avfilterd.lib;avdeviced.lib;swscaled.lib;postprocd.lib;swresampled.lib;archived.lib;blurayd.lib;dvdnavd.lib;dvdreadd.lib;cdiod.lib;cdio_paranoiad.lib;assd.lib;iconvd.lib;zlibd.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x86\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <LargeAddressAware>true</LargeAddressAware>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <AdditionalDependencies>libavutild.lib;libavcodecd.lib;libavformatd.lib;libavfilterd.lib;libavdeviced.lib;libswscaled.lib;libpostprocd.lib;libswresampled.lib;libarchived.lib;libblurayd.lib;libdvdnavd.lib;libdvdreadd.lib;libcdiod.lib;libcdio_paranoiad.lib;libassd.lib;libiconvd.lib;libzlibd.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x64\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>6.0</MinimumRequiredVersion>
+      <AdditionalDependencies>avutild.lib;avcodecd.lib;avformatd.lib;avfilterd.lib;avdeviced.lib;swscaled.lib;postprocd.lib;swresampled.lib;archived.lib;blurayd.lib;dvdnavd.lib;dvdreadd.lib;cdiod.lib;cdio_paranoiad.lib;assd.lib;iconvd.lib;zlibd.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x64\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>6.0</MinimumRequiredVersion>
+      <AdditionalDependencies>libavutild.lib;libavcodecd.lib;libavformatd.lib;libavfilterd.lib;libavdeviced.lib;libswscaled.lib;libpostprocd.lib;libswresampled.lib;libarchived.lib;libblurayd.lib;libdvdnavd.lib;libdvdreadd.lib;libcdiod.lib;libcdio_paranoiad.lib;libassd.lib;libiconvd.lib;libzlibd.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <InterproceduralOptimization>SingleFile</InterproceduralOptimization>
+      <ProgramDataBaseFileName>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Lib>
+      <TargetMachine>MachineX86</TargetMachine>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\lib\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libavutil.lib;libavcodec.lib;libavformat.lib;libavfilter.lib;libavdevice.lib;libswscale.lib;libpostproc.lib;libswresample.lib;libarchive.lib;libbluray.lib;libdvdnav.lib;libdvdread.lib;libcdio.lib;libcdio_paranoia.lib;libass.lib;libiconv.lib;libzlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006,4221,4049,4217,4197,4099 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <InterproceduralOptimization>SingleFile</InterproceduralOptimization>
+      <ProgramDataBaseFileName>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\lib\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libavutil.lib;libavcodec.lib;libavformat.lib;libavfilter.lib;libavdevice.lib;libswscale.lib;libpostproc.lib;libswresample.lib;libarchive.lib;libbluray.lib;libdvdnav.lib;libdvdread.lib;libcdio.lib;libcdio_paranoia.lib;libass.lib;libiconv.lib;libzlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006,4221,4049,4217,4197,4099 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x86\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <LargeAddressAware>true</LargeAddressAware>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <AdditionalDependencies>avutil.lib;avcodec.lib;avformat.lib;avfilter.lib;avdevice.lib;swscale.lib;postproc.lib;swresample.lib;archive.lib;bluray.lib;dvdnav.lib;dvdread.lib;cdio.lib;cdio_paranoia.lib;ass.lib;iconv.lib;zlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x86\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <LargeAddressAware>true</LargeAddressAware>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <AdditionalDependencies>libavutil.lib;libavcodec.lib;libavformat.lib;libavfilter.lib;libavdevice.lib;libswscale.lib;libpostproc.lib;libswresample.lib;libarchive.lib;libbluray.lib;libdvdnav.lib;libdvdread.lib;libcdio.lib;libcdio_paranoia.lib;libass.lib;libiconv.lib;libzlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x86\;$(ProjectDir)\..\..\prebuilt\lib\x86\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x64\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>6.0</MinimumRequiredVersion>
+      <AdditionalDependencies>avutil.lib;avcodec.lib;avformat.lib;avfilter.lib;avdevice.lib;swscale.lib;postproc.lib;swresample.lib;archive.lib;bluray.lib;dvdnav.lib;dvdread.lib;cdio.lib;cdio_paranoia.lib;ass.lib;iconv.lib;zlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;restrict=__restrict;__thread=__declspec(thread);COBJMACROS;_WIN32_WINNT=0x0601;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\bin\x64\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(OutDir)\lib\x64\$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)\lib\x64\$(TargetName).pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\mpv.def</ModuleDefinitionFile>
+      <ProfileGuidedDatabase>$(IntDir)\$(TargetName).pgd</ProfileGuidedDatabase>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>6.0</MinimumRequiredVersion>
+      <AdditionalDependencies>libavutil.lib;libavcodec.lib;libavformat.lib;libavfilter.lib;libavdevice.lib;libswscale.lib;libpostproc.lib;libswresample.lib;libarchive.lib;libbluray.lib;libdvdnav.lib;libdvdread.lib;libcdio.lib;libcdio_paranoia.lib;libass.lib;libiconv.lib;libzlib.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\lib\x64\;$(ProjectDir)\..\..\prebuilt\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)"\include
+mkdir "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.h "$(OutDir)"\include\libmpv
+copy ..\libmpv\*.hpp "$(OutDir)"\include\libmpv
+mkdir $(OutDir)\licenses
+copy ..\LICENSE.GPL $(OutDir)\licenses\mpv.txt</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if exist ..\config.h (
+del ..\config.h
+)
+if exist "$(OutDir)"\include\libmpv (
+rd /s /q "$(OutDir)"\include\libmpv
+cd ../
+cd $(ProjectDir)
+)</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Custom Clean Step</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>force_clean</Outputs>
+      <Command>if exist "$(OutDir)"\include\libmpv (
+rmdir /s /q "$(OutDir)"\include\libmpv
+)
+if exist $(OutDir)\licenses\mpv.txt (
+del /f /q $(OutDir)\licenses\mpv.txt
+)</Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

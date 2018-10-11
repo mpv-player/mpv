@@ -24,6 +24,7 @@
 
 #include "mpv_talloc.h"
 
+#ifdef __MINGW32__
 // Some DisplayConfig definitions are broken in mingw-w64 (as of 2015-3-13.) To
 // get the correct struct alignment, it's necessary to define them properly.
 #include <pshpack1.h>
@@ -83,6 +84,7 @@ typedef struct MP_DISPLAYCONFIG_TARGET_DEVICE_NAME {
 #define DISPLAYCONFIG_TARGET_DEVICE_NAME MP_DISPLAYCONFIG_TARGET_DEVICE_NAME
 
 #include <poppack.h>
+#endif
 
 static pthread_once_t displayconfig_load_ran = PTHREAD_ONCE_INIT;
 static bool displayconfig_loaded = false;

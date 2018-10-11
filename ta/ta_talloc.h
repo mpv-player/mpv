@@ -33,6 +33,7 @@
 #define talloc_realloc                  ta_xrealloc
 #define talloc_ptrtype                  ta_xnew_ptrtype
 #define talloc_array_ptrtype            ta_xnew_array_ptrtype
+#define talloc_dup                      ta_xdup_ptrtype
 
 #define talloc_steal                    ta_xsteal
 #define talloc_realloc_size             ta_xrealloc_size
@@ -45,7 +46,6 @@
 #define talloc_get_size                 ta_get_size
 #define talloc_free_children            ta_free_children
 #define talloc_free                     ta_free
-#define talloc_dup                      ta_xdup
 #define talloc_memdup                   ta_xmemdup
 #define talloc_strdup                   ta_xstrdup
 #define talloc_strndup                  ta_xstrndup

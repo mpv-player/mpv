@@ -31,6 +31,7 @@ static bool has_redirected_stdio(void)
 
 static void microsoft_nonsense(void)
 {
+#if 0
     // stop Windows from showing all kinds of annoying error dialogs
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 
@@ -46,6 +47,7 @@ static void microsoft_nonsense(void)
     SetDllDirectoryW(L"");
     if (pSetSearchPathMode)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
+#endif
 }
 
 int wmain(int argc, wchar_t *argv[])

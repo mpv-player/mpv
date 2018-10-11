@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 12.0.30501.0
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmpv", "libmpv.vcxproj", "{6550743E-D1D9-4849-AF42-893B981E5462}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		DebugDLL|x86 = DebugDLL|x86
+		DebugDLLStaticDeps|x86 = DebugDLLStaticDeps|x86
+		Release|x86 = Release|x86
+		ReleaseDLL|x86 = ReleaseDLL|x86
+		ReleaseDLLStaticDeps|x86 = ReleaseDLLStaticDeps|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6550743E-D1D9-4849-AF42-893B981E5462}.Debug|x86.ActiveCfg = Debug|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.Debug|x86.Build.0 = Debug|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.DebugDLL|x86.ActiveCfg = DebugDLL|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.DebugDLL|x86.Build.0 = DebugDLL|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.DebugDLLStaticDeps|x86.ActiveCfg = DebugDLLStaticDeps|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.DebugDLLStaticDeps|x86.Build.0 = DebugDLLStaticDeps|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.Release|x86.ActiveCfg = Release|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.Release|x86.Build.0 = Release|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.ReleaseDLL|x86.ActiveCfg = ReleaseDLL|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.ReleaseDLL|x86.Build.0 = ReleaseDLL|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.ReleaseDLLStaticDeps|x86.ActiveCfg = ReleaseDLLStaticDeps|Win32
+		{6550743E-D1D9-4849-AF42-893B981E5462}.ReleaseDLLStaticDeps|x86.Build.0 = ReleaseDLLStaticDeps|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C9F4B5F-9F74-4030-8BCF-45A2CD3B8E6A}
+	EndGlobalSection
+EndGlobal

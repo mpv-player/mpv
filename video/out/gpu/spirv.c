@@ -21,6 +21,7 @@ static const struct spirv_compiler_fns *compilers[] = {
 #if HAVE_VULKAN
     [SPIRV_NVIDIA]  = &spirv_nvidia_builtin,
 #endif
+    {0}
 };
 
 static const struct m_opt_choice_alternatives compiler_choices[] = {

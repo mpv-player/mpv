@@ -45,7 +45,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 #include <windows.h>
 #else
 #include <poll.h>
@@ -842,7 +842,7 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
     return res;
 }
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 struct mp_cancel {
     atomic_bool triggered;
     int wakeup_pipe[2];

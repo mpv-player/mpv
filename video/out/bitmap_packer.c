@@ -93,7 +93,7 @@ static int pack_rectangles(struct pos *in, struct pos *out, int num_rects,
         bins[i] = bins[i << HEIGHT_SORT_BITS] - sizes[i << HEIGHT_SORT_BITS];
     struct {
         int size, x, bottom;
-    } stack[16] = {{15, 0, h}}, s = {};
+    } stack[16] = {{15, 0, h}}, s = {0};
     int stackpos = 1;
     int y;
     while (stackpos) {

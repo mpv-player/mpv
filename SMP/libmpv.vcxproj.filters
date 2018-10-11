@@ -1,0 +1,1146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0ac907ae-8594-4bb0-8d0e-9be7a8d97f51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7e8a524d-0db6-4085-8683-f67626568e10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\audio">
+      <UniqueIdentifier>{da7ea675-a8b7-497a-87ec-0930f46d774e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio">
+      <UniqueIdentifier>{b34fe482-5fa7-41a8-9b45-c018ebd41e27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\audio\decode">
+      <UniqueIdentifier>{2ea13cae-8c07-4321-987b-6de3132b17a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio\decode">
+      <UniqueIdentifier>{da218556-acec-4d13-8a21-9520d8d7443d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\audio\filter">
+      <UniqueIdentifier>{dae4441b-996c-4798-8fe7-883c18be36b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio\filter">
+      <UniqueIdentifier>{9d4b27a5-b073-431c-a889-31530eaf7116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\audio\out">
+      <UniqueIdentifier>{162c3f1d-ca32-46fc-a70c-ef28880fa569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio\out">
+      <UniqueIdentifier>{48e88199-6951-418a-84c6-79c15ff9ac17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{b2910520-9d03-4ad6-9033-c4bc47ab3f50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{0d034ce7-05aa-4cbc-978c-0814bc55acd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\demux">
+      <UniqueIdentifier>{feb6c802-f0cf-48f2-a39d-b29177a65c67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\demux">
+      <UniqueIdentifier>{448fbc54-f83d-4c98-b1a2-2761eef3dc1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{0f0cf5d1-093e-4891-bc08-f5151a82e1eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\input">
+      <UniqueIdentifier>{8e278af3-11fb-44f8-9146-01a2528532c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\misc">
+      <UniqueIdentifier>{34a359eb-eeab-43e0-82b7-d64e5d0b48d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\misc">
+      <UniqueIdentifier>{d0f74901-7f66-438a-80bf-b4f029d8763c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\player">
+      <UniqueIdentifier>{f7c43884-9896-4be1-b32f-7123534142f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\player">
+      <UniqueIdentifier>{658e0e7c-2d14-4ee8-8122-2b413be47809}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\stream">
+      <UniqueIdentifier>{97cc1305-8020-4337-8cee-e624ec4e1abd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\stream">
+      <UniqueIdentifier>{69371ede-d8c7-47a3-9c57-9550843f0694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sub">
+      <UniqueIdentifier>{5c779a06-1bc9-4bbb-b229-1ab25ec59219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sub">
+      <UniqueIdentifier>{1d6e7cc2-987e-48c6-9635-eea3e98aebfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video">
+      <UniqueIdentifier>{68807716-f4c2-4ccd-8e8e-6b727d7dbddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video">
+      <UniqueIdentifier>{6a018e9d-dec0-44d9-88ca-1c35797ababc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\decode">
+      <UniqueIdentifier>{b4232ae3-b87f-49bc-a9ba-5c49f73ff837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\decode">
+      <UniqueIdentifier>{60a58c5f-7888-4dc2-9335-aba7bc9c0850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\filter">
+      <UniqueIdentifier>{eb154f89-ffbe-44dc-9d0d-bfee465a3b51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\filter">
+      <UniqueIdentifier>{93c0d6a7-294b-4df7-b075-9b4d21dc99ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\out">
+      <UniqueIdentifier>{61eb1830-cc4f-4cb0-b617-539555ee2b6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\out">
+      <UniqueIdentifier>{9bedc259-c86f-4596-b61d-3322ed6a1f52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\out\gpu">
+      <UniqueIdentifier>{7eaaddb3-c5cb-4768-bb07-d9a673c055b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\out\gpu">
+      <UniqueIdentifier>{632a8e08-4f7c-40e7-a3de-2d8d3ab01afd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\out\opengl">
+      <UniqueIdentifier>{96968d52-8b5b-4bf3-a928-fbf5b07c2389}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\out\opengl">
+      <UniqueIdentifier>{f12c3327-5e03-47d5-a221-83a9261fe954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video\out\win32">
+      <UniqueIdentifier>{dd18e668-956b-4085-8256-2ee3e10bf600}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video\out\win32">
+      <UniqueIdentifier>{b7cfe56f-a13c-449e-82e1-16079782136d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\osdep">
+      <UniqueIdentifier>{970aa984-1bda-47c3-bdce-bb25f77086a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\osdep">
+      <UniqueIdentifier>{2765d3f5-51db-4b21-ba54-8e609827a55d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ta">
+      <UniqueIdentifier>{d0099359-5652-4e2f-a818-04d685b910ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ta">
+      <UniqueIdentifier>{81eba51d-bad1-452a-89c3-fc723545af5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{588d5552-0621-4b94-9e02-5c881af6d951}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\options">
+      <UniqueIdentifier>{e2bfb51e-a81a-4a65-8c19-c5e81e969a00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\options">
+      <UniqueIdentifier>{14c65286-2e9c-45f9-bb23-0a6b7df685cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\osdep\win32">
+      <UniqueIdentifier>{d7033ddb-c51c-4208-af82-0ba673989d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\filters">
+      <UniqueIdentifier>{e2d53438-f0d7-45fb-9687-730a3fcbe356}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\aframe.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\audio_buffer.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\chmap.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\chmap_sel.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\fmt-conversion.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\format.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\filter\equalizer.h">
+      <Filter>Header Files\audio\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\out\ao.h">
+      <Filter>Header Files\audio\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\out\ao_wasapi.h">
+      <Filter>Header Files\audio\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\out\internal.h">
+      <Filter>Header Files\audio\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\av_common.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\av_log.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\codecs.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\common.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\encode.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\encode_lavc.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\global.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\msg.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\msg_control.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\playlist.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\recorder.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\tags.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\codec_tags.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\cue.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\demux.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\ebml.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\matroska.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\packet.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\stheader.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\demux\timeline.h">
+      <Filter>Header Files\demux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\input\event.h">
+      <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\input\input.h">
+      <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\input\keycodes.h">
+      <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\bstr.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\charset_conv.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\ctype.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\dispatch.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\json.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\node.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\rendezvous.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\ring.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\misc\thread_pool.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\player\client.h">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\player\command.h">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\player\core.h">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\player\external_files.h">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\player\screenshot.h">
+      <Filter>Header Files\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\cookies.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\frequencies.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\rar.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\stream.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\stream_dvd_common.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\ass_mp.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\dec_sub.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\draw_bmp.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\img_convert.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\osd.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\osd_state.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sub\sd.h">
+      <Filter>Header Files\sub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\csputils.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\d3d.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\fmt-conversion.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\hwdec.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\image_loader.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\image_writer.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\img_format.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\mp_image.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\mp_image_pool.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\sws_utils.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\filter\refqueue.h">
+      <Filter>Header Files\video\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\aspect.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\bitmap_packer.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\dither.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\filter_kernels.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\vo.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\w32_common.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\win_state.h">
+      <Filter>Header Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\context.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\d3d11_helpers.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\hwdec.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\lcms.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\osd.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\ra.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\shader_cache.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\spirv.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\user_shaders.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\utils.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\video.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\video_shaders.h">
+      <Filter>Header Files\video\out\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\common.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\context.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\cuda_dynamic.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\egl_helpers.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\formats.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\gl_headers.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\ra_gl.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\opengl\utils.h">
+      <Filter>Header Files\video\out\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\win32\displayconfig.h">
+      <Filter>Header Files\video\out\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\win32\droptarget.h">
+      <Filter>Header Files\video\out\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\atomic.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\compiler.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\endian.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\io.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\path.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\polldev.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\semaphore.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\strnlen.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\subprocess.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\terminal.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\threads.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\timer.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\w32_keyboard.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\osdep\windows_utils.h">
+      <Filter>Header Files\osdep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ta\ta.h">
+      <Filter>Header Files\ta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ta\ta_talloc.h">
+      <Filter>Header Files\ta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\m_config.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\m_option.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\m_property.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\options.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\parse_commandline.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\parse_configfile.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options\path.h">
+      <Filter>Header Files\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stream\stream_libarchive.h">
+      <Filter>Header Files\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_swresample.h">
+      <Filter>Source Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_auto_filters.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_autoconvert.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_decoder_wrapper.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_demux_in.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_hwtransfer.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_lavfi.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_output_chain.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_swscale.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\f_utils.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\filter.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\filter_internal.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\frame.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filters\user_filters.h">
+      <Filter>Source Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\dr_helper.h">
+      <Filter>Source Files\video\out</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video\out\gpu\libmpv_gpu.h">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\audio\aframe.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\audio_buffer.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\chmap.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\chmap_sel.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\fmt-conversion.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\format.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\decode\ad_lavc.c">
+      <Filter>Source Files\audio\decode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\decode\ad_spdif.c">
+      <Filter>Source Files\audio\decode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\filter\af_format.c">
+      <Filter>Source Files\audio\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\filter\af_lavcac3enc.c">
+      <Filter>Source Files\audio\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\filter\af_lavrresample.c">
+      <Filter>Source Files\audio\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\filter\af_scaletempo.c">
+      <Filter>Source Files\audio\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_null.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_pcm.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_wasapi.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_wasapi_changenotify.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_wasapi_utils.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\pull.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\push.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\av_common.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\av_log.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\codecs.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\common.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\encode_lavc.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\msg.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\playlist.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\recorder.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\tags.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\version.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\codec_tags.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\cue.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_cue.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_disc.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_edl.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_lavf.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_mf.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_mkv.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_mkv_timeline.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_null.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_playlist.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_rar.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_raw.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\demux_timeline.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\ebml.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\packet.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\demux\timeline.c">
+      <Filter>Source Files\demux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\event.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\input.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\ipc.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\ipc-win.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\keycodes.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\pipe-win32.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\bstr.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\charset_conv.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\dispatch.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\json.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\node.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\rendezvous.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\ring.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\misc\thread_pool.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\audio.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\client.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\command.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\configfiles.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\external_files.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\loadfile.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\main.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\misc.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\osd.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\playloop.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\screenshot.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\scripting.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\sub.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\player\video.c">
+      <Filter>Source Files\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\cache.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\cache_file.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\cookies.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\frequencies.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\rar.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_avdevice.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_cb.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_edl.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_file.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_lavf.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_memory.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_mf.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_null.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stream\stream_rar.c">
+      <Filter>Source Files\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\dec_sub.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\draw_bmp.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\filter_sdh.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\img_convert.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\lavc_conv.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\osd.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\sd_lavc.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\csputils.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\fmt-conversion.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\hwdec.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\image_loader.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\image_writer.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\img_format.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\mp_image.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\mp_image_pool.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\sws_utils.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\d3d.c">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\filter\refqueue.c">
+      <Filter>Source Files\video\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\filter\vf_format.c">
+      <Filter>Source Files\video\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\filter\vf_sub.c">
+      <Filter>Source Files\video\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\aspect.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\bitmap_packer.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\dither.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\filter_kernels.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_direct3d.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_gpu.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_image.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_lavc.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_null.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_tct.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\w32_common.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\win_state.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\context.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\hwdec.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\lcms.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\osd.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\ra.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\shader_cache.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\user_shaders.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\utils.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\video.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\video_shaders.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\common.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\context.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\context_win.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\formats.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\hwdec_cuda.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\ra_gl.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\utils.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\win32\displayconfig.c">
+      <Filter>Source Files\video\out\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\win32\droptarget.c">
+      <Filter>Source Files\video\out\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\glob-win.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\io.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\path-win.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\semaphore_osx.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\subprocess.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\subprocess-win.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\terminal-win.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\threads.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\timer.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\timer-win2.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\w32_keyboard.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\win32-console-wrapper.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\windows_utils.c">
+      <Filter>Source Files\osdep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ta\ta.c">
+      <Filter>Source Files\ta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ta\ta_talloc.c">
+      <Filter>Source Files\ta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ta\ta_utils.c">
+      <Filter>Source Files\ta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\m_config.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\m_option.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\m_property.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\options.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\parse_commandline.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\parse_configfile.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options\path.c">
+      <Filter>Source Files\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\win32\pthread.c">
+      <Filter>Source Files\osdep\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio\out\ao_lavc.c">
+      <Filter>Source Files\audio\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\context_dxinterop.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\spirv.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\osdep\main-fn-win.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sub\osd_dummy.c">
+      <Filter>Source Files\sub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_swresample.c">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_auto_filters.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_autoconvert.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_decoder_wrapper.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_demux_in.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_hwtransfer.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_lavfi.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_output_chain.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_swscale.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\f_utils.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\filter.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\frame.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filters\user_filters.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input\cmd.c">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\dr_helper.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\gpu\libmpv_gpu.c">
+      <Filter>Source Files\video\out\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\libmpv_gl.c">
+      <Filter>Source Files\video\out\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\vo_libmpv.c">
+      <Filter>Source Files\video\out</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\out\opengl\cuda_dynamic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video\decode\vd_lavc.c">
+      <Filter>Source Files\video\decode</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

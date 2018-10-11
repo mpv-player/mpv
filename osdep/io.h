@@ -83,11 +83,11 @@ wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #endif
 
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
 #include <io.h>
 #endif
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 
 #include <stdio.h>
 #include <dirent.h>
@@ -110,7 +110,7 @@ off_t mp_lseek(int fd, off_t offset, int whence);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
 typedef uint64_t mp_dev_t_;
-#ifdef _WIN64
+#if defined(_WIN64) && !defined(_MSC_VER)
 typedef unsigned __int128 mp_ino_t_;
 #else
 // 32-bit Windows doesn't have a __int128-type, which means ReFS file IDs will

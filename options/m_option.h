@@ -567,15 +567,19 @@ extern const char m_option_path_separator;
 #define OPTDEF_FLOAT(f)   .defval = (void *)&(const float){f}
 #define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 
-#define OPT_GENERAL(ctype, optname, varname, flagv, ...)                \
+#define OPT_GENERAL2(ctype, optname, varname, flagv, ...)               \
     {.name = optname, .flags = flagv,                                   \
     .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, varname, ctype),     \
     __VA_ARGS__}
 
-#define OPT_GENERAL_NOTYPE(optname, varname, flagv, ...)                \
+#define OPT_GENERAL(...) MP_EXPAND_ARGS(OPT_GENERAL2(__VA_ARGS__))
+
+#define OPT_GENERAL_NOTYPE2(optname, varname, flagv, ...)               \
     {.name = optname, .flags = flagv,                                   \
     .offset = offsetof(OPT_BASE_STRUCT, varname),                       \
     __VA_ARGS__}
+
+#define OPT_GENERAL_NOTYPE(...) MP_EXPAND_ARGS(OPT_GENERAL_NOTYPE2(__VA_ARGS__))
 
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
 
@@ -610,10 +614,10 @@ extern const char m_option_path_separator;
                 .min = minval, .max = maxval, __VA_ARGS__)
 
 #define OPT_INTRANGE(...) \
-    OPT_RANGE_(int, __VA_ARGS__, .type = &m_option_type_int)
+    MP_EXPAND_ARGS(OPT_RANGE_(int, __VA_ARGS__, .type = &m_option_type_int))
 
 #define OPT_FLOATRANGE(...) \
-    OPT_RANGE_(float, __VA_ARGS__, .type = &m_option_type_float)
+    MP_EXPAND_ARGS(OPT_RANGE_(float, __VA_ARGS__, .type = &m_option_type_float))
 
 #define OPT_DOUBLERANGE(...) \
     OPT_RANGE_(double, __VA_ARGS__, .type = &m_option_type_double)
@@ -652,7 +656,7 @@ extern const char m_option_path_separator;
                       OPT_HELPER_REMOVEPAREN choices, {NULL}}
 
 #define OPT_CHOICE(...) \
-    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
+    MP_EXPAND_ARGS(OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice))
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
 // Variant which takes a pointer to struct m_opt_choice_alternatives directly
@@ -662,7 +666,7 @@ extern const char m_option_path_separator;
                 .type = &m_option_type_choice, __VA_ARGS__)
 
 #define OPT_FLAGS(...) \
-    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)
+    MP_EXPAND_ARGS(OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags))
 
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.
@@ -671,7 +675,7 @@ extern const char m_option_path_separator;
                 .min = minval, .max = maxval,                                     \
                 M_CHOICES(choices), __VA_ARGS__)
 #define OPT_CHOICE_OR_INT(...) \
-    OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
+    MP_EXPAND_ARGS(OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice))
 
 #define OPT_TIME(...) \
     OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_time)
@@ -692,8 +696,7 @@ extern const char m_option_path_separator;
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
 
 #define OPT_TRACKCHOICE(name, var, ...) \
-    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}), \
-    ## __VA_ARGS__)
+    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 
 #define OPT_ASPECT(...) \
     OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_aspect)
@@ -702,7 +705,7 @@ extern const char m_option_path_separator;
     OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \
                 .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
 #define OPT_STRING_VALIDATE(...) \
-    OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
+    MP_EXPAND_ARGS(OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string))
 
 #define OPT_PRINT(optname, fn)                                              \
     {.name = optname,                                                       \

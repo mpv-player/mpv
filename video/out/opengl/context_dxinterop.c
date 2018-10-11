@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define INITGUID
 #include <windows.h>
 #include <versionhelpers.h>
 #include <d3d9.h>
