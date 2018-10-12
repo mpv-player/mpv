@@ -69,7 +69,7 @@ int cr_runproc(wchar_t *name, wchar_t *cmdline)
 
     return (int)retval;
 }
-#if 0
+#if 1
 int wmain(int argc, wchar_t **argv, wchar_t **envp)
 {
     wchar_t *cmd;

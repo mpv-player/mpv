@@ -31,6 +31,7 @@ mpv_opengl_cb_init_gl
 mpv_opengl_cb_report_flip
 mpv_opengl_cb_render
 mpv_opengl_cb_set_update_callback
+mpv_image_set_update_callback
 mpv_opengl_cb_uninit_gl
 mpv_render_context_create
 mpv_render_context_free

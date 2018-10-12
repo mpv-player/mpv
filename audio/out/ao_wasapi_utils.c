@@ -21,8 +21,12 @@
 #include <wchar.h>
 #include <windows.h>
 #include <errors.h>
+
+#ifdef _MSC_VER
 #include <ks.h>
 #include <mmreg.h>
+#endif
+
 #include <ksguid.h>
 #include <ksmedia.h>
 #include <avrt.h>

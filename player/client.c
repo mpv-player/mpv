@@ -1872,12 +1872,6 @@ static mpv_image_cb_context *image_cb_get_context(mpv_handle *ctx)
 void mpv_image_set_update_callback(mpv_image_cb_context *ctx,mpv_image_cb_update_fn callback,
 	void *callback_ctx)
 {
-	// This was probably supposed to be thread-safe, but we don't care. It's
-// compatibility code, and if you have problems, use the new API.
-	if (ctx->client_api->render_context) {
-		mpv_render_context_set_update_callback(ctx->client_api->render_context,
-			callback, callback_ctx);
-	}
 	// Nasty thing: could set this even while not initialized, so we need to
 	// preserve it.
 	ctx->callback = callback;

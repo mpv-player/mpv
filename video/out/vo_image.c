@@ -42,7 +42,7 @@
 #include "options/m_option.h"
 
 #include "libmpv/image.h"
-#include "libmpv/client.h"
+#include "player/client.h"
 #include "common/global.h"
 
 static const struct m_sub_options image_writer_conf = {
