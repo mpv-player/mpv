@@ -542,7 +542,9 @@ static void gl_buf_destroy(struct ra *ra, struct ra_buf *buf)
     GL *gl = ra_gl_get(ra);
     struct ra_buf_gl *buf_gl = buf->priv;
 
-    gl->DeleteSync(buf_gl->fence);
+    if (buf_gl->fence)
+        gl->DeleteSync(buf_gl->fence);
+
     if (buf->data) {
         gl->BindBuffer(buf_gl->target, buf_gl->buffer);
         gl->UnmapBuffer(buf_gl->target);
