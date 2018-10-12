@@ -1028,9 +1028,6 @@
     <ClCompile Include="..\osdep\w32_keyboard.c">
       <Filter>Source Files\osdep</Filter>
     </ClCompile>
-    <ClCompile Include="..\osdep\win32-console-wrapper.c">
-      <Filter>Source Files\osdep</Filter>
-    </ClCompile>
     <ClCompile Include="..\osdep\windows_utils.c">
       <Filter>Source Files\osdep</Filter>
     </ClCompile>

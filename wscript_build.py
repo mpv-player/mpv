@@ -699,7 +699,7 @@ def build(ctx):
         )
 
         headers = ["client.h", "qthelper.hpp", "opengl_cb.h", "render.h",
-                   "render_gl.h", "stream_cb.h"]
+                   "render_gl.h", "stream_cb.h", "image.h"]
         for f in headers:
             ctx.install_as(ctx.env.INCLUDEDIR + '/mpv/' + f, 'libmpv/' + f)
 

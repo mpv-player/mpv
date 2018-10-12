@@ -45,6 +45,13 @@
 #include "player/client.h"
 #include "common/global.h"
 
+struct mpv_image_cb_context {
+	struct mp_client_api *client_api;
+	mpv_image_cb_update_fn callback;
+	void *callback_ctx;
+	image_t *image_ctx;
+};
+
 static const struct m_sub_options image_writer_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
@@ -107,21 +114,25 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, p->current);
-}
+	//
+	struct mpv_image_cb_context *ctx = p->ctx;
+	//
+	image_t img = get_image(p->current, p->opts->opts, vo->log);
 
-struct mpv_image_cb_context {
-	struct mp_client_api *client_api;
-	mpv_image_cb_update_fn callback;
-	void *callback_ctx;
-};
+	if (ctx)
+	{
+		ctx->callback(ctx->callback_ctx, &img);
+	}
+
+	av_free(img.buffer);
+	//
+}
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (!p->current)
         return;
-
-	struct mpv_image_cb_context *ctx = p->ctx;
 
     (p->frame)++;
 
@@ -134,15 +145,7 @@ static void flip_page(struct vo *vo)
 
     MP_INFO(vo, "Saving %s\n", filename);
 
-	//write_image(p->current, p->opts->opts, filename, vo->log);
-    image_t img = get_image(p->current, p->opts->opts, filename, vo->log);
-
-	if (ctx)
-	{
-		ctx->callback(&img);
-	}
-
-	av_free(img.buffer);
+	write_image(p->current, p->opts->opts, filename, vo->log);
 
     talloc_free(t);
     mp_image_unrefp(&p->current);

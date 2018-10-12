@@ -291,7 +291,6 @@
     <ClCompile Include="..\osdep\timer-win2.c" />
     <ClCompile Include="..\osdep\timer.c" />
     <ClCompile Include="..\osdep\w32_keyboard.c" />
-    <ClCompile Include="..\osdep\win32-console-wrapper.c" />
     <ClCompile Include="..\osdep\win32\pthread.c" />
     <ClCompile Include="..\osdep\windows_utils.c" />
     <ClCompile Include="..\player\audio.c">

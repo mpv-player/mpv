@@ -1841,6 +1841,7 @@ struct mpv_image_cb_context {
 	struct mp_client_api *client_api;
 	mpv_image_cb_update_fn callback;
 	void *callback_ctx;
+	image_t *image_ctx;
 };
 
 static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)

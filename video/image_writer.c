@@ -391,8 +391,7 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
     return dst;
 }
 
-image_t get_image(struct mp_image *image, const struct image_writer_opts *opts,
-	const char *filename, struct mp_log *log)
+image_t get_image(struct mp_image *image, const struct image_writer_opts *opts, struct mp_log *log)
 {
 	image_t img = { 0,0,0,0 };
 	struct image_writer_opts defs = image_writer_opts_defaults;
