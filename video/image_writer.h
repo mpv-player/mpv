@@ -16,6 +16,7 @@
  */
 
 #include "options/m_option.h"
+#include "libmpv/image.h"
 
 struct mp_image;
 struct mp_log;
@@ -60,6 +61,9 @@ int image_writer_format_from_ext(const char *ext);
  */
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
                  const char *filename, struct mp_log *log);
+
+image_t get_image(struct mp_image *image, const struct image_writer_opts *opts,
+	const char *filename, struct mp_log *log);
 
 /* Return the image converted to the given format. If the pixel aspect ratio is
  * not 1:1, the image is scaled as well. Returns NULL on failure.

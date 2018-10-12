@@ -88,45 +88,6 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
     return fmt;
 }
 
-typedef struct image_s {
-	int width, height, stride;
-	unsigned char *buffer;      // RGB24
-} image_t;
-
-static void flip(image_t * frame)
-{
-	//unsigned short bpp = Data->Info.bmiHeader.biBitCount;
-	unsigned int width = abs(frame->width);
-	unsigned int height = abs(frame->height);
-	unsigned int stride = abs(frame->stride);
-
-	unsigned char* buffer = (unsigned char*)malloc(stride);
-
-	unsigned char *cur = frame->buffer;
-
-	for (int i = 0; i <= height / 2; i++)
-	{
-		memcpy(buffer, cur + i * stride, stride);
-		memcpy(cur + i * stride, cur + (height - 1 - i)*stride, stride);
-		memcpy(cur + (height - 1 - i)*stride, buffer, stride);
-	}
-	free(buffer);
-}
-
-void write_bmp(const char* filename, image_t *img)
-{
-	flip(img);
-	int w = img->width;
-	int h = img->height;
-	int l = (w * 3 + 3) / 4 * 4;
-	int bmi[] = { l*h + 54,0,54,40,w,h,1 | 3 * 8 << 16,0,l*h,0,0,100,0 };
-	FILE *fp = fopen(filename, "wb");
-	fprintf(fp, "BM");
-	fwrite(&bmi, 52, 1, fp);
-	fwrite(img->buffer, 1, l*h, fp);
-	fclose(fp);
-}
-
 void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 	FILE *pFile;
 	char szFilename[32];
@@ -149,7 +110,7 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 	fclose(pFile);
 }
 
-static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
+static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image)
 {
     bool success = 0;
     AVFrame *pic = NULL;
@@ -245,14 +206,6 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 		pic->linesize, 0, avctx->height,
 		pFrameRGB->data, pFrameRGB->linesize);
 
-	//
-	image_t img;
-	img.width = avctx->width;
-	img.height = avctx->height;
-	img.stride = img.width * 3;
-	img.buffer = buffer;
-	////
-	write_bmp("test_mpv.bmp", &img);
 	//SaveFrame(pFrameRGB, avctx->width, avctx->height,0);
 	//
 	av_free(buffer);
@@ -438,6 +391,136 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
     return dst;
 }
 
+image_t get_image(struct mp_image *image, const struct image_writer_opts *opts,
+	const char *filename, struct mp_log *log)
+{
+	image_t img = { 0,0,0,0 };
+	struct image_writer_opts defs = image_writer_opts_defaults;
+	if (!opts)
+		opts = &defs;
+
+	struct image_writer_ctx ctx = { log, opts, image->fmt };
+	int destfmt = 0;
+	if (!destfmt)
+		destfmt = get_target_format(&ctx);
+
+	struct mp_image *dst_image = convert_image(image, destfmt, log);
+	if (!dst_image)
+		return img;
+
+	bool success = 0;
+	AVFrame *pic = NULL;
+	AVPacket pkt = { 0 };
+	int got_output = 0;
+
+	av_init_packet(&pkt);
+
+	struct AVCodec *codec = avcodec_find_encoder(ctx.opts->format);
+	AVCodecContext *avctx = NULL;
+	if (!codec)
+		goto print_open_fail;
+	avctx = avcodec_alloc_context3(codec);
+	if (!avctx)
+		goto print_open_fail;
+
+	avctx->time_base = AV_TIME_BASE_Q;
+	avctx->width = dst_image->w;
+	avctx->height = dst_image->h;
+	avctx->color_range = mp_csp_levels_to_avcol_range(dst_image->params.color.levels);
+	avctx->pix_fmt = imgfmt2pixfmt(dst_image->imgfmt);
+	// Annoying deprecated garbage for the jpg encoder.
+	if (dst_image->params.color.levels == MP_CSP_LEVELS_PC)
+		avctx->pix_fmt = replace_j_format(avctx->pix_fmt);
+	if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
+		MP_ERR(&ctx, "Image format %s not supported by lavc.\n",
+			mp_imgfmt_to_name(dst_image->imgfmt));
+		goto error_exit;
+	}
+	if (codec->id == AV_CODEC_ID_PNG) {
+		avctx->compression_level = ctx.opts->png_compression;
+		av_opt_set_int(avctx, "pred", ctx.opts->png_filter,
+			AV_OPT_SEARCH_CHILDREN);
+	}
+
+	if (avcodec_open2(avctx, codec, NULL) < 0) {
+	print_open_fail:
+		MP_ERR(&ctx, "Could not open libavcodec encoder for saving images\n");
+		goto error_exit;
+	}
+
+	pic = av_frame_alloc();
+	if (!pic)
+		goto error_exit;
+	for (int n = 0; n < 4; n++) {
+		pic->data[n] = dst_image->planes[n];
+		pic->linesize[n] = dst_image->stride[n];
+	}
+	pic->format = avctx->pix_fmt;
+	pic->width = avctx->width;
+	pic->height = avctx->height;
+	pic->color_range = avctx->color_range;
+	if (ctx.opts->tag_csp) {
+		pic->color_primaries = mp_csp_prim_to_avcol_pri(dst_image->params.color.primaries);
+		pic->color_trc = mp_csp_trc_to_avcol_trc(dst_image->params.color.gamma);
+	}
+
+	int ret = avcodec_send_frame(avctx, pic);
+	if (ret < 0)
+		goto error_exit;
+	ret = avcodec_send_frame(avctx, NULL); // send EOF
+	if (ret < 0)
+		goto error_exit;
+	ret = avcodec_receive_packet(avctx, &pkt);
+	if (ret < 0)
+		goto error_exit;
+	got_output = 1;
+	//
+	struct SwsContext *sws_ctx = NULL;
+	//
+	sws_ctx = sws_getContext(avctx->width,
+		avctx->height,
+		avctx->pix_fmt,
+		avctx->width,
+		avctx->height,
+		AV_PIX_FMT_RGB24,
+		SWS_BILINEAR,
+		NULL,
+		NULL,
+		NULL
+	);
+	//
+	AVFrame *pFrameRGB = av_frame_alloc();
+	//
+	int numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, avctx->width,
+		avctx->height);
+	uint8_t * buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+	//fwrite(pkt.data, pkt.size, 1, fp);
+	avpicture_fill((AVPicture *)pFrameRGB, buffer, AV_PIX_FMT_RGB24,
+		avctx->width, avctx->height);
+	//
+	sws_scale(sws_ctx, (uint8_t const * const *)pic->data,
+		pic->linesize, 0, avctx->height,
+		pFrameRGB->data, pFrameRGB->linesize);
+
+	img.width = avctx->width;
+	img.height = avctx->height;
+	img.stride = avctx->width * 3;
+	img.buffer = buffer;
+	//
+	//av_free(buffer);
+	//
+	av_frame_free(&pFrameRGB);
+	//
+	success = !!got_output;
+error_exit:
+	avcodec_free_context(&avctx);
+	av_frame_free(&pic);
+	av_packet_unref(&pkt);
+
+	talloc_free(dst_image);
+	return img;
+}
+
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
                 const char *filename, struct mp_log *log)
 {
@@ -446,7 +529,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         opts = &defs;
 
     struct image_writer_ctx ctx = { log, opts, image->fmt };
-    bool (*write)(struct image_writer_ctx *, mp_image_t *, FILE *) = write_lavc;
+    bool (*write)(struct image_writer_ctx *, mp_image_t *) = write_lavc;
     int destfmt = 0;
 
 #if HAVE_JPEG
@@ -465,15 +548,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
 
 	bool success = false;
 #if 1
-    //FILE *fp = fopen(filename, "wb");
-    //if (fp == NULL) {
-    //    mp_err(log, "Error opening '%s' for writing!\n", filename);
-    //} else {  
-        success = write(&ctx, dst, 0);
-        //success = !fclose(fp) && success;
-    //    if (!success)
-    //        mp_err(log, "Error writing file '%s'!\n", filename);
-    //}
+    success = write(&ctx, dst);
 #else
 	write_bmp(filename, dst);
 #endif

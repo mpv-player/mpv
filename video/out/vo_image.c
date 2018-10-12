@@ -41,6 +41,10 @@
 #include "sub/osd.h"
 #include "options/m_option.h"
 
+#include "libmpv/image.h"
+#include "libmpv/client.h"
+#include "common/global.h"
+
 static const struct m_sub_options image_writer_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
@@ -67,6 +71,7 @@ struct priv {
     struct vo_image_opts *opts;
 
     struct mp_image *current;
+	struct mpv_image_cb_context *ctx; // immutable after init
     int frame;
 };
 
@@ -104,11 +109,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, p->current);
 }
 
+struct mpv_image_cb_context {
+	struct mp_client_api *client_api;
+	mpv_image_cb_update_fn callback;
+	void *callback_ctx;
+};
+
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (!p->current)
         return;
+
+	struct mpv_image_cb_context *ctx = p->ctx;
 
     (p->frame)++;
 
@@ -120,7 +133,16 @@ static void flip_page(struct vo *vo)
         filename = mp_path_join(t, p->opts->outdir, filename);
 
     MP_INFO(vo, "Saving %s\n", filename);
-    write_image(p->current, p->opts->opts, filename, vo->log);
+
+	//write_image(p->current, p->opts->opts, filename, vo->log);
+    image_t img = get_image(p->current, p->opts->opts, filename, vo->log);
+
+	if (ctx)
+	{
+		ctx->callback(&img);
+	}
+
+	av_free(img.buffer);
 
     talloc_free(t);
     mp_image_unrefp(&p->current);
@@ -143,6 +165,10 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+	struct mpv_image_cb_context *ctx = mp_client_api_acquire_image_context(vo->global->client_api);
+	p->ctx = ctx;
+
     p->opts = mp_get_config_group(vo, vo->global, &vo_image_conf);
     if (p->opts->outdir && !checked_mkdir(vo, p->opts->outdir))
         return -1;

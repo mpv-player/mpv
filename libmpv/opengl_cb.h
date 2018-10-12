@@ -224,15 +224,6 @@ typedef void *(*mpv_opengl_cb_get_proc_address_fn)(void *fn_ctx, const char *nam
 void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
                                        mpv_opengl_cb_update_fn callback,
                                        void *callback_ctx);
-typedef struct image_s {
-	int width, height, stride;
-	unsigned char *buffer;      // RGB24
-} image_t;
-
-typedef void(*mpv_image_cb_update_fn)(image_t *cb_ctx);
-
-void mpv_image_set_update_callback(mpv_image_cb_update_fn callback,
-	void *callback_ctx);
 
 /**
  * Initialize the mpv OpenGL state. This retrieves OpenGL function pointers via

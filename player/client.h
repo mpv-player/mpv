@@ -48,6 +48,10 @@ bool mp_set_main_render_context(struct mp_client_api *client_api,
                                 struct mpv_render_context *ctx, bool active);
 struct mpv_render_context *
 mp_client_api_acquire_render_context(struct mp_client_api *ca);
+
+struct mpv_image_cb_context *
+	mp_client_api_acquire_image_context(struct mp_client_api *ca);
+
 void kill_video_async(struct mp_client_api *client_api, void (*fin)(void *ctx),
                       void *fin_ctx);
 

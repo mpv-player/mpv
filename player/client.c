@@ -45,6 +45,7 @@
 #include "command.h"
 #include "core.h"
 #include "client.h"
+#include "libmpv/image.h"
 
 /*
  * Locking hierarchy:
@@ -77,6 +78,7 @@ struct mp_client_api {
 
     struct mpv_render_context *render_context;
     struct mpv_opengl_cb_context *gl_cb_ctx;
+	struct mpv_image_cb_context *image_cb_ctx;
 };
 
 struct observe_property {
@@ -1813,6 +1815,17 @@ mp_client_api_acquire_render_context(struct mp_client_api *ca)
     return res;
 }
 
+struct mpv_image_cb_context *
+	mp_client_api_acquire_image_context(struct mp_client_api *ca)
+{
+	struct mpv_image_cb_context *res = NULL;
+	pthread_mutex_lock(&ca->lock);
+	if (ca->image_cb_ctx)
+		res = ca->image_cb_ctx;
+	pthread_mutex_unlock(&ca->lock);
+	return res;
+}
+
 // Emulation of old opengl_cb API.
 
 #include "libmpv/opengl_cb.h"
@@ -1822,6 +1835,12 @@ struct mpv_opengl_cb_context {
     struct mp_client_api *client_api;
     mpv_opengl_cb_update_fn callback;
     void *callback_ctx;
+};
+
+struct mpv_image_cb_context {
+	struct mp_client_api *client_api;
+	mpv_image_cb_update_fn callback;
+	void *callback_ctx;
 };
 
 static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
@@ -1836,6 +1855,35 @@ static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
     pthread_mutex_unlock(&ctx->clients->lock);
     return cb;
 }
+
+static mpv_image_cb_context *image_cb_get_context(mpv_handle *ctx)
+{
+	pthread_mutex_lock(&ctx->clients->lock);
+	mpv_image_cb_context *cb = ctx->clients->image_cb_ctx;
+	if (!cb) {
+		cb = talloc_zero(NULL, struct mpv_image_cb_context);
+		cb->client_api = ctx->clients;
+		cb->client_api->image_cb_ctx = cb;
+	}
+	pthread_mutex_unlock(&ctx->clients->lock);
+	return cb;
+}
+
+void mpv_image_set_update_callback(mpv_image_cb_context *ctx,mpv_image_cb_update_fn callback,
+	void *callback_ctx)
+{
+	// This was probably supposed to be thread-safe, but we don't care. It's
+// compatibility code, and if you have problems, use the new API.
+	if (ctx->client_api->render_context) {
+		mpv_render_context_set_update_callback(ctx->client_api->render_context,
+			callback, callback_ctx);
+	}
+	// Nasty thing: could set this even while not initialized, so we need to
+	// preserve it.
+	ctx->callback = callback;
+	ctx->callback_ctx = callback_ctx;
+}
+
 
 void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
                                        mpv_opengl_cb_update_fn callback,
@@ -1932,6 +1980,9 @@ void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
     case MPV_SUB_API_OPENGL_CB:
         res = opengl_cb_get_context(ctx);
         break;
+	case MPV_SUB_API_IMAGE_CB:
+		res = image_cb_get_context(ctx);
+		break;
     default:;
     }
     return res;

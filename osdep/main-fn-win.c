@@ -11,6 +11,8 @@
 #include "osdep/terminal.h"
 #include "osdep/main-fn.h"
 
+#include "libmpv/client.h"
+
 int wmain(int argc, wchar_t *argv[]);
 
 // mpv does its own wildcard expansion in the option parser
@@ -50,6 +52,7 @@ static void microsoft_nonsense(void)
 #endif
 }
 
+#if 0
 int wmain(int argc, wchar_t *argv[])
 {
     microsoft_nonsense();
@@ -82,3 +85,104 @@ int wmain(int argc, wchar_t *argv[])
     talloc_free(argv_u8);
     return ret;
 }
+#else
+// Build with: gcc -o simple simple.c `pkg-config --libs --cflags mpv`
+
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <libmpv/client.h>
+#include <libmpv/image.h>
+
+static inline void check_error(int status)
+{
+	if (status < 0) {
+		printf("mpv API error: %s\n", mpv_error_string(status));
+		//exit(1);
+	}
+}
+
+
+static void flip(image_t * frame)
+{
+	//unsigned short bpp = Data->Info.bmiHeader.biBitCount;
+	unsigned int width = abs(frame->width);
+	unsigned int height = abs(frame->height);
+	unsigned int stride = abs(frame->stride);
+
+	unsigned char* buffer = (unsigned char*)malloc(stride);
+
+	unsigned char *cur = frame->buffer;
+
+	for (int i = 0; i <= height / 2; i++)
+	{
+		memcpy(buffer, cur + i * stride, stride);
+		memcpy(cur + i * stride, cur + (height - 1 - i)*stride, stride);
+		memcpy(cur + (height - 1 - i)*stride, buffer, stride);
+	}
+	free(buffer);
+}
+
+void write_bmp(const char* filename, image_t *img)
+{
+	flip(img);
+	int w = img->width;
+	int h = img->height;
+	int l = (w * 3 + 3) / 4 * 4;
+	int bmi[] = { l*h + 54,0,54,40,w,h,1 | 3 * 8 << 16,0,l*h,0,0,100,0 };
+	FILE *fp = fopen(filename, "wb");
+	fprintf(fp, "BM");
+	fwrite(&bmi, 52, 1, fp);
+	fwrite(img->buffer, 1, l*h, fp);
+	fclose(fp);
+}
+
+void image_cb_update_fn(image_t *cb_ctx)
+{
+	write_bmp("test_mpv.bmp", cb_ctx);
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc != 2) {
+		printf("pass a single media file as argument\n");
+		return 1;
+	}
+
+	mpv_handle *ctx = mpv_create();
+	if (!ctx) {
+		printf("failed creating context\n");
+		return 1;
+	}
+
+	// Enable default key bindings, so the user can actually interact with
+	// the player (and e.g. close the window).
+	check_error(mpv_set_option_string(ctx, "input-default-bindings", "yes"));
+	mpv_set_option_string(ctx, "input-vo-keyboard", "yes");
+	mpv_set_option_string(ctx, "vo", "image");
+	int val = 1;
+	//check_error(mpv_set_option(ctx, "osc", MPV_FORMAT_FLAG, &val));
+
+	// Done setting up options.
+	check_error(mpv_initialize(ctx));
+	//
+	mpv_image_cb_context * image_ctx = (mpv_image_cb_context *)mpv_get_sub_api(ctx, MPV_SUB_API_IMAGE_CB);
+	mpv_image_set_update_callback(image_ctx, image_cb_update_fn, 0);
+	// Play this file.
+	const char *cmd[] = { "loadfile", argv[1], NULL };
+	check_error(mpv_command(ctx, cmd));
+
+	// Let it play, and wait until the user quits.
+	while (1) {
+		mpv_event *event = mpv_wait_event(ctx, 10000);
+		printf("event: %s\n", mpv_event_name(event->event_id));
+		if (event->event_id == MPV_EVENT_SHUTDOWN)
+			break;
+	}
+
+	mpv_terminate_destroy(ctx);
+	return 0;
+}
+
+#endif

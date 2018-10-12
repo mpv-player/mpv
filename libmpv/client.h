@@ -1855,7 +1855,8 @@ typedef enum mpv_sub_api {
      *
      * @deprecated use render.h
      */
-    MPV_SUB_API_OPENGL_CB = 1
+    MPV_SUB_API_OPENGL_CB = 1,
+	MPV_SUB_API_IMAGE_CB = 2,
 } mpv_sub_api;
 
 /**
