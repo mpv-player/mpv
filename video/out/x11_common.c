@@ -15,6 +15,7 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -24,7 +25,9 @@
 #include <poll.h>
 #include <string.h>
 #include <assert.h>
+#if HAVE_COLORD
 #include <colord.h>
+#endif
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -39,7 +42,6 @@
 #include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
 
-#include "config.h"
 #include "misc/bstr.h"
 #include "options/options.h"
 #include "options/m_config.h"
@@ -1752,11 +1754,11 @@ static void vo_x11_fullscreen(struct vo *vo)
     vo_x11_update_composition_hint(vo);
 }
 
-static bool vo_x11_get_icc_profile_colord(struct vo *vo, int screen,
-                                          bstr *out_icc)
+#if HAVE_COLORD
+static void vo_x11_get_icc_profile_colord(struct vo *vo, int screen,
+                                          struct bstr *out_icc)
 {
     struct vo_x11_state *x11 = vo->x11;
-    bool ret_loaded = false;
     CdDevice *dev = NULL;
     CdProfile *prof = NULL;
     CdIcc *icc = NULL;
@@ -1783,7 +1785,6 @@ static bool vo_x11_get_icc_profile_colord(struct vo *vo, int screen,
     int len = g_bytes_get_size(icc_bytes);
     char *data = (char *)g_bytes_get_data(icc_bytes, NULL);
     *out_icc = bstrdup(NULL, (bstr){data, len});
-    ret_loaded = true;
 out:
     if (icc_bytes)
         g_bytes_unref(icc_bytes);
@@ -1795,8 +1796,8 @@ out:
         g_object_unref(dev);
     if (cli)
         g_object_unref(cli);
-    return ret_loaded;
 }
+#endif
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
@@ -1892,8 +1893,11 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
             mp_snprintf_cat(prop, sizeof(prop), "_%d", screen);
         x11->icc_profile_property = XAs(x11, prop);
         MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", screen);
-        bstr icc_data;
-        if (!vo_x11_get_icc_profile_colord(vo, screen, &icc_data)) {
+        bstr icc_data = {0};
+#if HAVE_COLORD
+        vo_x11_get_icc_profile_colord(vo, screen, &icc_data);
+#endif
+        if (!icc_data.len) {
             int len;
             void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
                                          XA_CARDINAL, 8, &len);

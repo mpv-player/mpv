@@ -587,8 +587,12 @@ video_output_features = [
                                  'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
                                  'xinerama',    '>= 1.0.0',
-                                 'xrandr',      '>= 1.2.0',
-                                 'colord',      '>= 1.0.2'),
+                                 'xrandr',      '>= 1.2.0'),
+    } , {
+        'name': '--colord',
+        'desc': 'colord',
+        'deps': 'x11',
+        'func': check_pkg_config('colord', '>= 1.0.2'),
     } , {
         'name': '--xv',
         'desc': 'Xv video output',
