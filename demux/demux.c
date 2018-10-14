@@ -2977,8 +2977,10 @@ static int chapter_compare(const void *p1, const void *p2)
 
 static void demuxer_sort_chapters(demuxer_t *demuxer)
 {
-    qsort(demuxer->chapters, demuxer->num_chapters,
-          sizeof(struct demux_chapter), chapter_compare);
+    if (demuxer->num_chapters) {
+        qsort(demuxer->chapters, demuxer->num_chapters,
+            sizeof(struct demux_chapter), chapter_compare);
+    }
 }
 
 int demuxer_add_chapter(demuxer_t *demuxer, char *name,
