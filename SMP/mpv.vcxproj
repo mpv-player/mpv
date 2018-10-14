@@ -409,6 +409,7 @@
     <ProjectGuid>{6550743E-D1D9-4849-AF42-893B981E5462}</ProjectGuid>
     <RootNamespace>libmpv</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>mpv</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -460,7 +461,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
@@ -550,72 +551,70 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
     <TargetName>mpvd</TargetName>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|Win32'">
     <TargetName>mpvd</TargetName>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
     <TargetName>mpvd</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLLStaticDeps|x64'">
     <TargetName>mpvd</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
     <TargetName>mpv</TargetName>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|Win32'">
     <TargetName>mpv</TargetName>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
     <TargetName>mpv</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLLStaticDeps|x64'">
     <TargetName>mpv</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>libmpvd</TargetName>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <TargetName>mpv_d</TargetName>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)build\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>libmpvd</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>libmpv</TargetName>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <TargetName>mpv</TargetName>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)build\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>libmpv</TargetName>
-    <OutDir>$(ProjectDir)..\..\..\msvc\</OutDir>
+    <OutDir>$(ProjectDir)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
     <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
@@ -960,7 +959,7 @@ del /f /q $(OutDir)\licenses\mpv.txt
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\osdep\win32\include\;$(OutDir)\include;$(ProjectDir)\..\..\prebuilt\include;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InterproceduralOptimization>SingleFile</InterproceduralOptimization>
       <ProgramDataBaseFileName>$(OutDir)\lib\x86\$(TargetName).pdb</ProgramDataBaseFileName>
       <DisableSpecificWarnings>4244;4090;4018;4305;4047;4146;4996;4133;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -1004,6 +1003,10 @@ if exist $(OutDir)\licenses\mpv.txt (
 del /f /q $(OutDir)\licenses\mpv.txt
 )</Command>
     </CustomBuildStep>
+    <Link>
+      <AdditionalLibraryDirectories>.\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avutil.lib;avcodec.lib;avformat.lib;avfilter.lib;avdevice.lib;swscale.lib;postproc.lib;swresample.lib;OpenGL32.lib;winmm.lib;ole32.lib;uuid.lib;oleaut32.lib;ksuser.lib;avrt.lib;version.lib;dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

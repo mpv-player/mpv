@@ -52,7 +52,7 @@ static void microsoft_nonsense(void)
 #endif
 }
 
-#if 1
+#if 0
 int wmain(int argc, wchar_t *argv[])
 {
     microsoft_nonsense();
@@ -138,7 +138,7 @@ void write_bmp(const char* filename, image_t *img)
 	fclose(fp);
 }
 
-void image_cb_update_fn(image_t *cb_ctx)
+void image_cb_update_fn(void* callback_ctx, image_t *cb_ctx)
 {
 	write_bmp("test_mpv.bmp", cb_ctx);
 }
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	// the player (and e.g. close the window).
 	check_error(mpv_set_option_string(ctx, "input-default-bindings", "yes"));
 	mpv_set_option_string(ctx, "input-vo-keyboard", "yes");
-	mpv_set_option_string(ctx, "vo", "image");
+	mpv_set_option_string(ctx, "vo", "tct");
 	int val = 1;
 	//check_error(mpv_set_option(ctx, "osc", MPV_FORMAT_FLAG, &val));
 

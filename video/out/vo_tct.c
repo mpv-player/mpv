@@ -48,6 +48,17 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
+#include "libmpv/image.h"
+#include "player/client.h"
+#include "common/global.h"
+
+struct mpv_image_cb_context {
+	struct mp_client_api *client_api;
+	mpv_image_cb_update_fn callback;
+	void *callback_ctx;
+	image_t *image_ctx;
+};
+
 struct vo_tct_opts {
     int algo;
     int width;   // 0 -> default
@@ -82,6 +93,8 @@ struct priv {
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_sws_context *sws;
+	//
+	struct mpv_image_cb_context *ctx; // immutable after init
 };
 
 // Convert RGB24 to xterm-256 8-bit value
@@ -236,13 +249,27 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
     struct mp_image src = *mpi;
     // XXX: pan, crop etc.
-    mp_sws_scale(p->sws, p->frame, &src);
+	//
+	image_t img;
+	img.width = mpi->w;
+	img.height = mpi->h;
+	img.stride = mpi->stride[0];
+	img.buffer = mpi->planes[0];
+	//
+	struct mpv_image_cb_context *ctx = p->ctx;
+	//
+	if (ctx)
+	{
+		ctx->callback(ctx->callback_ctx, &img);
+	}
+    //mp_sws_scale(p->sws, p->frame, &src);
     talloc_free(mpi);
-}
+  }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
+	return;
     if (p->opts->algo == ALGO_PLAIN) {
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
@@ -276,6 +303,10 @@ static int preinit(struct vo *vo)
     vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
 
     struct priv *p = vo->priv;
+
+	struct mpv_image_cb_context *ctx = mp_client_api_acquire_image_context(vo->global->client_api);
+	p->ctx = ctx;
+
     p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
     return 0;

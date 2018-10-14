@@ -393,7 +393,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
                  "This is most likely a broken build and could\nresult in "
                  "misbehavior and crashes.\n\nmpv does not support this "
                  "configuration and will not run - rebuild mpv instead.\n");
-        return -1;
+        //return -1;
     }
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
