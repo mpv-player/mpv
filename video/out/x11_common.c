@@ -1641,7 +1641,7 @@ static int get_icc_screen(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
     cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
-    int screen = 0; // xinerama screen number
+    int screen = x11->current_icc_screen; // xinerama screen number
     for (int n = 0; n < x11->num_displays; n++) {
         struct xrandr_display *disp = &x11->displays[n];
         if (mp_rect_contains(&disp->rc, cx, cy)) {
