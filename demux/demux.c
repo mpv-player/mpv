@@ -1425,7 +1425,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     if (drop) {
-        pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
         return;
     }
