@@ -693,7 +693,19 @@ struct ra_buf_vk {
     // "current" metadata, can change during course of execution
     VkPipelineStageFlags current_stage;
     VkAccessFlags current_access;
+    // Arbitrary user data for the creator of a buffer
+    void *user_data;
 };
+
+void ra_vk_buf_set_user_data(struct ra_buf *buf, void *user_data) {
+    struct ra_buf_vk *vk_priv = buf->priv;
+    vk_priv->user_data = user_data;
+}
+
+void *ra_vk_buf_get_user_data(struct ra_buf *buf) {
+    struct ra_buf_vk *vk_priv = buf->priv;
+    return vk_priv->user_data;
+}
 
 static void vk_buf_deref(struct ra *ra, struct ra_buf *buf)
 {

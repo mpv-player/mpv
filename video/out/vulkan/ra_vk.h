@@ -43,3 +43,9 @@ struct vk_external_mem {
 
 // Export an ra_buf for importing by another api.
 bool ra_vk_buf_get_external_info(struct ra *ra, struct ra_buf *buf, struct vk_external_mem *ret);
+
+// Set the buffer user data
+void ra_vk_buf_set_user_data(struct ra_buf *buf, void *priv);
+
+// Get the buffer user data
+void *ra_vk_buf_get_user_data(struct ra_buf *buf);
