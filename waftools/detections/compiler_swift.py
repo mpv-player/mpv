@@ -1,3 +1,4 @@
+import re
 from waflib import Utils
 
 def __run(cmd):
@@ -11,7 +12,9 @@ def __add_swift_flags(ctx):
     ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop'
                            ' -emit-objc-header -parse-as-library'
                            ' -target x86_64-apple-macosx10.10') % (ctx.env.MACOS_SDK)
-    ctx.env.SWIFT_VERSION = __run([ctx.env.SWIFT, '-version']).split(' ')[3]
+
+    ver = re.compile("(?i)version\s?([\d.]+)")
+    ctx.env.SWIFT_VERSION = ver.search(__run([ctx.env.SWIFT, '-version'])).group(1)
     major, minor = [int(n) for n in ctx.env.SWIFT_VERSION.split('.')[:2]]
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
