@@ -250,25 +250,26 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct mp_image src = *mpi;
     // XXX: pan, crop etc.
 	//
-	image_t img;
-	img.width = mpi->w;
-	img.height = mpi->h;
-	img.stride = mpi->stride[0];
-	img.buffer = mpi->planes[0];
-	//
-	struct mpv_image_cb_context *ctx = p->ctx;
-	//
-	if (ctx)
-	{
-		ctx->callback(ctx->callback_ctx, &img);
-	}
     //mp_sws_scale(p->sws, p->frame, &src);
-    talloc_free(mpi);
-  }
+	p->frame = mpi;
+}
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
+	image_t img;
+	img.width = p->frame->w;
+	img.height = p->frame->h;
+	img.stride = p->frame->stride[0];
+	img.buffer = p->frame->planes[0];
+	//
+	struct mpv_image_cb_context *ctx = p->ctx;
+	//
+	if (ctx && ctx->callback_ctx)
+	{
+		ctx->callback(ctx->callback_ctx, &img);
+	}
+	talloc_free(p->frame);
 	return;
     if (p->opts->algo == ALGO_PLAIN) {
         write_plain(

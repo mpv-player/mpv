@@ -115,6 +115,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, p->current);
 	//
+#if 1
 	struct mpv_image_cb_context *ctx = p->ctx;
 	//
 	image_t img = get_image(p->current, p->opts->opts, vo->log);
@@ -126,6 +127,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 	av_free(img.buffer);
 	//
+#endif
 }
 
 static void flip_page(struct vo *vo)
