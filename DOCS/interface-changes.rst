@@ -28,6 +28,10 @@ Interface changes
     - add --opensles-buffer-size-in-ms, allowing user to tune the soft buffer size.
       It overrides the --audio-buffer option unless it's set to 0 (with the default
       being 250).
+    - remove `--linear-scaling`, replaced by `--linear-upscaling` and
+      `--linear-downscaling`. This means that `--sigmoid-upscaling` no longer
+      implies linear light downscaling as well, which was confusing.
+    - the built-in `gpu-hq` profile now includes` --linear-downscaling`.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

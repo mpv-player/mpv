@@ -373,8 +373,9 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("tscale", SCALER_TSCALE),
         OPT_INTRANGE("scaler-lut-size", scaler_lut_size, 0, 4, 10),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
-        OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("correct-downscaling", correct_downscaling, 0),
+        OPT_FLAG("linear-downscaling", linear_downscaling, 0),
+        OPT_FLAG("linear-upscaling", linear_upscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
@@ -423,6 +424,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("opengl-fbo-format", "fbo-format"),
         OPT_REPLACED("opengl-dumb-mode", "gpu-dumb-mode"),
         OPT_REPLACED("opengl-gamma", "gamma-factor"),
+        OPT_REMOVED("linear-scaling", "Split into --linear-upscaling and "
+                    "--linear-downscaling"),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2332,13 +2335,18 @@ static void pass_scale_main(struct gl_video *p)
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
-    bool use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
+    bool use_linear = false;
+    if (downscaling) {
+        use_linear = p->opts.linear_downscaling;
 
-    // Linear light downscaling results in nasty artifacts for HDR curves due
-    // to the potentially extreme brightness differences severely compounding
-    // any ringing. So just scale in gamma light instead.
-    if (mp_trc_is_hdr(p->image_params.color.gamma) && downscaling)
-        use_linear = false;
+        // Linear light downscaling results in nasty artifacts for HDR curves
+        // due to the potentially extreme brightness differences severely
+        // compounding any ringing. So just scale in gamma light instead.
+        if (mp_trc_is_hdr(p->image_params.color.gamma))
+            use_linear = false;
+    } else if (upscaling) {
+        use_linear = p->opts.linear_upscaling || p->opts.sigmoid_upscaling;
+    }
 
     if (use_linear) {
         p->use_linear = true;
@@ -3494,9 +3502,9 @@ static bool check_dumb_mode(struct gl_video *p)
         return false;
 
     // otherwise, use auto-detection
-    if (o->target_prim || o->target_trc || o->linear_scaling ||
-        o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
-        o->blend_subs || o->deband || o->unsharp)
+    if (o->target_prim || o->target_trc || o->correct_downscaling ||
+        o->linear_downscaling || o->linear_upscaling || o->sigmoid_upscaling ||
+        o->interpolation || o->blend_subs || o->deband || o->unsharp)
         return false;
     // check remaining scalers (tscale is already implicitly excluded above)
     for (int i = 0; i < SCALER_COUNT; i++) {
@@ -3652,8 +3660,11 @@ static void check_gl_features(struct gl_video *p)
                   p->opts.target_trc != MP_CSP_TRC_AUTO || p->use_lut_3d;
 
     // mix() is needed for some gamma functions
-    if (!have_mglsl && (p->opts.linear_scaling || p->opts.sigmoid_upscaling)) {
-        p->opts.linear_scaling = false;
+    if (!have_mglsl && (p->opts.linear_downscaling ||
+                        p->opts.linear_upscaling || p->opts.sigmoid_upscaling))
+    {
+        p->opts.linear_downscaling = false;
+        p->opts.linear_upscaling = false;
         p->opts.sigmoid_upscaling = false;
         MP_WARN(p, "Disabling linear/sigmoid scaling (GLSL version too old).\n");
     }
