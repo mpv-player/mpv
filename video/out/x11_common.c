@@ -588,7 +588,8 @@ int vo_x11_init(struct vo *vo)
         dispName += 4;
     else if (strncmp(dispName, "localhost:", 10) == 0)
         dispName += 9;
-    x11->display_is_local = dispName[0] == ':' && atoi(dispName + 1) < 10;
+    x11->display_is_local = dispName[0] == ':' &&
+                            strtoul(dispName + 1, NULL, 10) < 10;
     MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
                x11->ws_width, x11->ws_height, dispName,
                x11->display_is_local ? "local" : "remote");
