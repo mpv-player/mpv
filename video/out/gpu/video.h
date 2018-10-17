@@ -112,8 +112,9 @@ struct gl_video_opts {
     float tone_mapping_param;
     float tone_mapping_desat;
     int gamut_warning;
-    int linear_scaling;
     int correct_downscaling;
+    int linear_downscaling;
+    int linear_upscaling;
     int sigmoid_upscaling;
     float sigmoid_center;
     float sigmoid_slope;

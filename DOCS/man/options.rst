@@ -4314,11 +4314,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     will reproduce the source image perfectly if no scaling is performed.
     Enabled by default. Note that this option never affects ``--cscale``.
 
-``--linear-scaling``
-    Scale in linear light. It should only be used with a
-    ``--fbo-format`` that has at least 16 bit precision. This option
-    has no effect on HDR content.
-
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
     downscaling. Increases quality, but reduces performance while downscaling.
@@ -4326,6 +4321,32 @@ The following video options are currently all specific to ``--vo=gpu`` and
     This will perform slightly sub-optimally for anamorphic video (but still
     better than without it) since it will extend the size to match only the
     milder of the scale factors between the axes.
+
+``--linear-downscaling``
+    Scale in linear light when downscaling. It should only be used with a
+    ``--fbo-format`` that has at least 16 bit precision. This option
+    has no effect on HDR content.
+
+``--linear-upscaling``
+    Scale in linear light when upscaling. Like ``--linear-downscaling``, it
+    should only be used with a ``--fbo-format`` that has at least 16 bits
+    precisions. This is not usually recommended except for testing/specific
+    purposes. Users are advised to either enable ``--sigmoid-upscaling`` or
+    keep both options disabled (i.e. scaling in gamma light).
+
+``--sigmoid-upscaling``
+    When upscaling, use a sigmoidal color transform to avoid emphasizing
+    ringing artifacts. This is incompatible with and replaces
+    ``--linear-upscaling``. (Note that sigmoidization also requires
+    linearization, so the ``LINEAR`` rendering step fires in both cases)
+
+``--sigmoid-center``
+    The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
+    float between 0.0 and 1.0. Defaults to 0.75 if not specified.
+
+``--sigmoid-slope``
+    The slope of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
+    float between 1.0 and 20.0. Defaults to 6.5 if not specified.
 
 ``--interpolation``
     Reduce stuttering caused by mismatches in the video fps and display refresh
@@ -4715,7 +4736,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     LINEAR (fixed)
         Linear light image, before scaling. This only fires when
-        ``--linear-scaling`` is in effect.
+        ``--linear-upscaling``, ``--linear-downscaling`` or
+        ``--sigmoid-upscaling`` is in effect.
 
     SIGMOID (fixed)
         Sigmoidized light, before scaling. This only fires when
@@ -4771,18 +4793,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Add some extra noise to the image. This significantly helps cover up
     remaining quantization artifacts. Higher numbers add more noise. (Default
     48)
-
-``--sigmoid-upscaling``
-    When upscaling, use a sigmoidal color transform to avoid emphasizing
-    ringing artifacts. This also implies ``--linear-scaling``.
-
-``--sigmoid-center``
-    The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
-    float between 0.0 and 1.0. Defaults to 0.75 if not specified.
-
-``--sigmoid-slope``
-    The slope of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
-    float between 1.0 and 20.0. Defaults to 6.5 if not specified.
 
 ``--sharpen=<value>``
     If set to a value other than 0, enable an unsharp masking filter. Positive
