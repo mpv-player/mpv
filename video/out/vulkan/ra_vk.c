@@ -886,6 +886,7 @@ static bool vk_tex_upload(struct ra *ra,
             struct mp_rect *rc = params->rc;
             region.imageOffset = (VkOffset3D){rc->x0, rc->y0, 0};
             region.imageExtent = (VkExtent3D){mp_rect_w(*rc), mp_rect_h(*rc), 1};
+            region.bufferImageHeight = region.imageExtent.height;
         }
     }
 
