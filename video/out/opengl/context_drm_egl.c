@@ -82,6 +82,13 @@ struct priv {
 
     struct mpv_opengl_drm_params drm_params;
     struct mpv_opengl_drm_osd_size osd_size;
+
+    unsigned int msc, prev_msc;
+    uint64_t ust, prev_ust;
+
+    int64_t vsync_duration;
+    int64_t last_skipped_vsyncs;
+    int64_t last_queue_display_time;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -405,6 +412,35 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
+static void update_latency(struct priv *p)
+{
+    const unsigned int msc_passed = p->msc - p->prev_msc;
+    const uint64_t ust_passed = p->ust - p->prev_ust;
+
+    const bool first_time = (p->prev_msc == 0) || (p->prev_ust == 0);
+    p->prev_msc = p->msc;
+    p->prev_ust = p->ust;
+
+    if (first_time)
+        return;
+
+    p->vsync_duration = ust_passed / msc_passed;
+
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+        return;
+
+    const uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+    const int64_t ust_mp_time = mp_time_us() - (now_monotonic - p->ust);
+
+    // Assumes we are being called every vsync. The fact that this context will
+    // only ever queue one swap before waiting for the next one, means that sbc
+    // can be implicitly known to always be one before, and we can use msc for
+    // skip detection.
+    p->last_queue_display_time = ust_mp_time + p->vsync_duration;
+    p->last_skipped_vsyncs = msc_passed - 1;
+}
+
 static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -416,15 +452,16 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 
     if (p->waiting_for_flip) {
         // poll page flip finish event
-        const int timeout_ms = 3000;
-        struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
-        poll(fds, 1, timeout_ms);
-        if (fds[0].revents & POLLIN) {
-            ret = drmHandleEvent(p->kms->fd, &p->ev);
-            if (ret != 0)
-                MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+        while (p->waiting_for_flip) {
+            const int timeout_ms = 3000;
+            struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
+            poll(fds, 1, timeout_ms);
+            if (fds[0].revents & POLLIN) {
+                ret = drmHandleEvent(p->kms->fd, &p->ev);
+                if (ret != 0)
+                    MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+            }
         }
-        p->waiting_for_flip = false;
 
         gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
         p->gbm.bo = p->gbm.next_bo;
@@ -442,7 +479,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "ZPOS", 1);
 
         ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, NULL);
+                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, p);
         if (ret)
             MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
     } else {
@@ -457,6 +494,8 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         drmModeAtomicFree(atomic_ctx->request);
         atomic_ctx->request = drmModeAtomicAlloc();
     }
+
+    update_latency(p);
 }
 
 static void drm_egl_uninit(struct ra_ctx *ctx)
@@ -539,6 +578,24 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
     return result;
 }
 
+static void page_flipped(int fd, unsigned int msc, unsigned int sec,
+                         unsigned int usec, void *data)
+{
+    struct priv *p = data;
+    p->waiting_for_flip = false;
+
+    p->ust = (sec * 1000000LL) + usec;
+    p->msc = msc;
+}
+
+static void drm_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
+{
+    struct priv *p = ctx->priv;
+    info->vsync_duration = p->vsync_duration;
+    info->skipped_vsyncs = p->last_skipped_vsyncs;
+    info->last_queue_display_time = p->last_queue_display_time;
+}
+
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
     if (ctx->opts.probing) {
@@ -548,6 +605,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
+    p->ev.page_flip_handler = page_flipped;
 
     p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log);
     if (p->vt_switcher_active) {
@@ -659,12 +717,17 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
+        .get_vsync = drm_get_vsync,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
 
     ra_add_native_resource(ctx->ra, "drm_params", &p->drm_params);
     ra_add_native_resource(ctx->ra, "drm_osd_size", &p->osd_size);
+
+    p->vsync_duration = -1;
+    p->last_skipped_vsyncs = -1;
+    p->last_queue_display_time = -1;
 
     return true;
 }
