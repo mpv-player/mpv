@@ -192,6 +192,7 @@ bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log,
 
     // Enable whatever extensions were compiled in.
     const char *extensions[] = {
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
         VK_KHR_SURFACE_EXTENSION_NAME,
         surf_ext_name,
 
@@ -326,6 +327,27 @@ error:
     MP_VERBOSE(vk, "Found no suitable device, giving up.\n");
     talloc_free(devices);
     return false;
+}
+
+bool mpvk_get_phys_device_uuid(struct mpvk_ctx *vk, uint8_t uuid_out[VK_UUID_SIZE])
+{
+    assert(vk->physd);
+
+    VkPhysicalDeviceIDProperties idprops = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES,
+    };
+
+    VkPhysicalDeviceProperties2 props = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+        .pNext = &idprops,
+    };
+
+    VK_LOAD_PFN(vkGetPhysicalDeviceProperties2KHR);
+    pfn_vkGetPhysicalDeviceProperties2KHR(vk->physd, &props);
+
+    memcpy(uuid_out, idprops.deviceUUID, VK_UUID_SIZE);
+
+    return true;
 }
 
 bool mpvk_pick_surface_format(struct mpvk_ctx *vk)
