@@ -17,6 +17,31 @@
 
 import Cocoa
 
+class CustomTtitleBar: NSVisualEffectView {
+
+    // catch these events so they are not propagated to the underlying view
+    override func mouseDown(with event: NSEvent) { }
+
+    override func mouseUp(with event: NSEvent) {
+        if event.clickCount > 1 {
+            let def = UserDefaults.standard
+            var action = def.string(forKey: "AppleActionOnDoubleClick")
+
+            // macOS 10.10 and earlier
+            if action == nil {
+                action = def.bool(forKey: "AppleMiniaturizeOnDoubleClick") == true ?
+                    "Minimize" : "Maximize"
+            }
+
+            if action == "Minimize" {
+                window!.miniaturize(self)
+            } else if action == "Maximize" {
+                window!.zoom(self)
+            }
+        }
+    }
+}
+
 class Window: NSWindow, NSWindowDelegate {
 
     weak var cocoaCB: CocoaCB! = nil
@@ -113,7 +138,7 @@ class Window: NSWindow, NSWindowDelegate {
         styleMask.insert(.fullSizeContentView)
         titleBar.alphaValue = 0
         titlebarAppearsTransparent = true
-        titleBarEffect = NSVisualEffectView(frame: f)
+        titleBarEffect = CustomTtitleBar(frame: f)
         titleBarEffect!.alphaValue = 0
         titleBarEffect!.blendingMode = .withinWindow
         titleBarEffect!.autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
@@ -179,6 +204,7 @@ class Window: NSWindow, NSWindowDelegate {
             titleBar.animator().alphaValue = 1
             if !isInFullscreen && !isAnimating {
                 titleBarEffect!.animator().alphaValue = 1
+                titleBarEffect!.isHidden = false
             }
         }, completionHandler: nil )
 
@@ -193,6 +219,7 @@ class Window: NSWindow, NSWindowDelegate {
         if titleBarEffect == nil { return }
         if isInFullscreen && !isAnimating {
             titleBarEffect!.alphaValue = 0
+            titleBarEffect!.isHidden = true
             return
         }
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
@@ -201,6 +228,7 @@ class Window: NSWindow, NSWindowDelegate {
             titleBarEffect!.animator().alphaValue = 0
         }, completionHandler: {
             self.titleButtons.forEach { $0.isHidden = true }
+            self.titleBarEffect!.isHidden = true
         })
     }
 
