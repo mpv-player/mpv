@@ -54,16 +54,16 @@ static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
 
     res = vkCreateInstance(&info, MPVK_ALLOCATOR, &inst);
     if (res != VK_SUCCESS)
-        goto error;
+        goto done;
 
     res = vkEnumeratePhysicalDevices(inst, &num, NULL);
     if (res != VK_SUCCESS)
-        goto error;
+        goto done;
 
     devices = talloc_array(NULL, VkPhysicalDevice, num);
     vkEnumeratePhysicalDevices(inst, &num, devices);
     if (res != VK_SUCCESS)
-        goto error;
+        goto done;
 
     bool help = bstr_equals0(param, "help");
     if (help) {
@@ -80,14 +80,14 @@ static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
                     (unsigned)prop.vendorID, (unsigned)prop.deviceID);
         } else if (bstr_equals0(param, prop.deviceName)) {
             ret = 0;
-            break;
+            goto done;
         }
     }
 
     if (!help)
         mp_err(log, "No device with name '%.*s'!\n", BSTR_P(param));
 
-error:
+done:
     talloc_free(devices);
     return ret;
 }
