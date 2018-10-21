@@ -635,7 +635,11 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         struct sh_stream *sh = demux_get_stream(demuxer, n);
         struct track *t = add_stream_track(mpctx, demuxer, sh);
         t->is_external = true;
-        t->title = talloc_strdup(t, mp_basename(disp_filename));
+        if (sh->title && sh->title[0]) {
+            t->title = talloc_strdup(t, sh->title);
+        } else {
+            t->title = talloc_strdup(t, mp_basename(disp_filename));
+        }
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
