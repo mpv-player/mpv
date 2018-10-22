@@ -43,6 +43,7 @@ static void smb_auth_fn(const char *server, const char *share,
              char *password, int pwmaxlen)
 {
   strncpy(workgroup, "LAN", wgmaxlen - 1);
+  workgroup[wgmaxlen - 1] = '\0';
 }
 
 static int control(stream_t *s, int cmd, void *arg) {
