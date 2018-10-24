@@ -405,25 +405,6 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
-static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
-{
-    struct priv *p = sw->ctx->priv;
-
-    if (!p->kms->atomic_context)
-        return false;
-
-    if (!p->kms->atomic_context->request) {
-        p->kms->atomic_context->request = drmModeAtomicAlloc();
-        p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
-    }
-
-    return ra_gl_ctx_start_frame(sw, out_fbo);
-}
-
-static const struct ra_swapchain_fns drm_atomic_swapchain = {
-    .start_frame   = drm_atomic_egl_start_frame,
-};
-
 static void drm_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -657,8 +638,11 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     p->drm_params.fd = p->kms->fd;
     p->drm_params.crtc_id = p->kms->crtc_id;
     p->drm_params.connector_id = p->kms->connector->connector_id;
-    if (p->kms->atomic_context)
+    // We need to create an atomic request ahead of time for the first frame
+    if (p->kms->atomic_context) {
+        p->kms->atomic_context->request = drmModeAtomicAlloc();
         p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
+    }
     char *rendernode_path = drmGetRenderDeviceNameFromFd(p->kms->fd);
     if (rendernode_path) {
         MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);
@@ -675,8 +659,6 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
-        .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
-                                                       NULL,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
