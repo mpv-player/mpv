@@ -114,6 +114,9 @@ static void disable_video_plane(struct ra_hwdec *hw)
     if (!p->ctx)
         return;
 
+    if (!p->ctx->video_plane)
+        return;
+
     // Disabling video plane is needed on some devices when using the
     // primary plane for video. Primary buffer can't be active with no
     // framebuffer associated. So we need this function to commit it
