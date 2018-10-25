@@ -75,7 +75,8 @@ class EventsView: NSView {
                 return true
             }
         } else if types.contains(NSURLPboardType) {
-            if let url = pb.propertyList(forType: NSURLPboardType) as? [Any] {
+            if var url = pb.propertyList(forType: NSURLPboardType) as? [String] {
+                url = url.filter{ !$0.isEmpty }
                 EventsResponder.sharedInstance().handleFilesArray(url)
                 return true
             }
