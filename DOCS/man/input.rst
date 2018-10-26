@@ -1903,9 +1903,9 @@ Property list
     Last known OSD display pixel aspect (can be 0).
 
 ``sub-text``
-    Return the current subtitle text. Formatting is stripped. If a subtitle
-    is selected, but no text is currently visible, or the subtitle is not
-    text-based (i.e. DVD/BD subtitles), an empty string is returned.
+    Return the current subtitle text regardless of sub visibility.
+    Formatting is stripped. If the subtitle is not text-based
+    (i.e. DVD/BD subtitles), an empty string is returned.
 
     This property is experimental and might be removed in the future.
 

@@ -367,7 +367,7 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     sub->last_vo_pts = pts;
     update_segment(sub);
 
-    if (opts->sub_visibility && sub->sd->driver->get_text)
+    if (sub->sd->driver->get_text)
         text = sub->sd->driver->get_text(sub->sd, pts);
     pthread_mutex_unlock(&sub->lock);
     return text;
