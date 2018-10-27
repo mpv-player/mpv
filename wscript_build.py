@@ -147,11 +147,12 @@ def build(ctx):
         tgt = task.outputs[0].abspath()
         header = task.outputs[1].abspath()
         module = task.outputs[2].abspath()
+        module_name = os.path.basename(module).rsplit(".", 1)[0]
 
         cmd = [ ctx.env.SWIFT ]
         cmd.extend(ctx.env.SWIFT_FLAGS)
         cmd.extend([
-            "-module-name", "macOS_swift",
+            "-module-name", module_name,
             "-emit-module-path", module,
             "-import-objc-header", bridge,
             "-emit-objc-header-path", header,
