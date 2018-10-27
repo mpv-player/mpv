@@ -142,16 +142,24 @@ def build(ctx):
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
     def swift(task):
-        src = ' '.join([x.abspath() for x in task.inputs])
+        src = [x.abspath() for x in task.inputs]
         bridge = ctx.path.find_node("osdep/macOS_swift_bridge.h").abspath()
         tgt = task.outputs[0].abspath()
         header = task.outputs[1].abspath()
         module = task.outputs[2].abspath()
 
-        cmd = ('%s %s -module-name macOS_swift -emit-module-path %s '
-               '-import-objc-header %s -emit-objc-header-path %s -o %s %s '
-               '-I. -I%s') % (ctx.env.SWIFT, ctx.env.SWIFT_FLAGS, module,
-                              bridge, header, tgt, src, ctx.srcnode.abspath())
+        cmd = [ ctx.env.SWIFT ]
+        cmd.extend(ctx.env.SWIFT_FLAGS)
+        cmd.extend([
+            "-module-name", "macOS_swift",
+            "-emit-module-path", module,
+            "-import-objc-header", bridge,
+            "-emit-objc-header-path", header,
+            "-o", tgt,
+        ])
+        cmd.extend(src)
+        cmd.extend([ "-I.", "-I%s" % ctx.srcnode.abspath() ])
+
         return task.exec_command(cmd)
 
     if ctx.dependency_satisfied('macos-cocoa-cb'):
@@ -166,15 +174,15 @@ def build(ctx):
         ctx(
             rule   = swift,
             source = ctx.filtered_sources(swift_source),
-            target = ('osdep/macOS_swift.o '
-                      'osdep/macOS_swift.h '
-                      'osdep/macOS_swift.swiftmodule'),
+            target = [ "osdep/macOS_swift.o",
+                       "osdep/macOS_swift.h",
+                       "osdep/macOS_swift.swiftmodule" ],
             before = 'c',
         )
 
         ctx.env.append_value('LINKFLAGS', [
             '-Xlinker', '-add_ast_path',
-            '-Xlinker', '%s' % ctx.path.find_or_declare("osdep/macOS_swift.swiftmodule").abspath()
+            '-Xlinker', ctx.path.find_or_declare("osdep/macOS_swift.swiftmodule").abspath()
         ])
 
     if ctx.dependency_satisfied('cplayer'):
