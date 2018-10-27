@@ -3,6 +3,7 @@
 import sys, os, re
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
 sys.path.insert(0, os.getcwd())
+from shlex import split
 from waflib.Configure import conf
 from waflib.Tools import c_preproc
 from waflib import Utils
@@ -1053,7 +1054,7 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     if ctx.options.SWIFT_FLAGS:
-        ctx.env.SWIFT_FLAGS += ' ' + ctx.options.SWIFT_FLAGS
+        ctx.env.SWIFT_FLAGS.extend(split(ctx.options.SWIFT_FLAGS))
 
     ctx.parse_dependencies(standalone_features)
 
