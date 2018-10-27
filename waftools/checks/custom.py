@@ -97,7 +97,7 @@ def check_cocoa(ctx, dependency_identifier):
         fragment         = load_fragment('cocoa.m'),
         compile_filename = 'test.m',
         framework_name   = ['Cocoa', 'IOKit', 'OpenGL', 'QuartzCore'],
-        includes         = ctx.srcnode.abspath(),
+        includes         = [ctx.srcnode.abspath()],
         linkflags        = '-fobjc-arc')
 
     res = fn(ctx, dependency_identifier)
