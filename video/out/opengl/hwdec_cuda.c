@@ -123,12 +123,17 @@ static int cuda_init(struct ra_hwdec *hw)
     p->is_vk = ra_vk_get(hw->ra) != NULL;
     if (p->is_vk) {
         if (!ra_vk_get(hw->ra)->has_ext_external_memory_export) {
-            MP_ERR(hw, "CUDA hwdec with Vulkan requires the %s extension\n",
-                   MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME);
+            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires the %s extension\n",
+                       MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME);
             return -1;
         }
     }
 #endif
+
+    if (!p->is_gl && !p->is_vk) {
+        MP_VERBOSE(hw, "CUDA hwdec only works with OpenGL or Vulkan backends.\n");
+        return -1;
+    }
 
     ret = cuda_load_functions(&p->cu, NULL);
     if (ret != 0) {
@@ -144,7 +149,7 @@ static int cuda_init(struct ra_hwdec *hw)
 
     ret = CHECK_CU(cu->cuInit(0));
     if (ret < 0)
-        goto error;
+        return -1;
 
     // Allocate display context
     if (p->is_gl) {
@@ -152,12 +157,12 @@ static int cuda_init(struct ra_hwdec *hw)
         ret = CHECK_CU(cu->cuGLGetDevices(&device_count, &display_dev, 1,
                                           CU_GL_DEVICE_LIST_ALL));
         if (ret < 0)
-            goto error;
+            return -1;
 
         ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
                                        display_dev));
         if (ret < 0)
-            goto error;
+            return -1;
 
         p->decode_ctx = p->display_ctx;
 
@@ -177,12 +182,12 @@ static int cuda_init(struct ra_hwdec *hw)
                 // Pop the display context. We won't use it again during init()
                 ret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
                 if (ret < 0)
-                    goto error;
+                    return -1;
 
                 ret = CHECK_CU(cu->cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
                                                decode_dev));
                 if (ret < 0)
-                    goto error;
+                    return -1;
             }
         }
     } else if (p->is_vk) {
@@ -195,7 +200,7 @@ static int cuda_init(struct ra_hwdec *hw)
         int count;
         ret = CHECK_CU(cu->cuDeviceGetCount(&count));
         if (ret < 0)
-            goto error;
+            return -1;
 
         display_dev = -1;
         for (int i = 0; i < count; i++) {
@@ -217,13 +222,13 @@ static int cuda_init(struct ra_hwdec *hw)
 
         if (display_dev == -1) {
             MP_ERR(hw, "Could not match Vulkan display device in CUDA.\n");
-            goto error;
+            return -1;
         }
 
         ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
                                        display_dev));
         if (ret < 0)
-            goto error;
+            return -1;
 
         p->decode_ctx = p->display_ctx;
 #endif
