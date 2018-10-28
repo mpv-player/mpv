@@ -50,8 +50,7 @@ struct gbm
 {
     struct gbm_surface *surface;
     struct gbm_device *device;
-    struct gbm_bo *bo;
-    struct gbm_bo *next_bo;
+    struct gbm_bo *bo[3];
 };
 
 struct egl
@@ -444,15 +443,23 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
                 MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
         }
         p->waiting_for_flip = false;
+    }
 
-        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
-        p->gbm.bo = p->gbm.next_bo;
+    if (p->gbm.bo[2]) {
+        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo[0]);
+        p->gbm.bo[0] = p->gbm.bo[1];
+        p->gbm.bo[1] = p->gbm.bo[2];
+        p->gbm.bo[2] = NULL;
     }
 
     eglSwapBuffers(p->egl.display, p->egl.surface);
 
-    p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
-    update_framebuffer_from_bo(ctx, p->gbm.next_bo);
+    p->gbm.bo[2] = gbm_surface_lock_front_buffer(p->gbm.surface);
+
+    if (!p->gbm.bo[1])
+        return;
+
+    update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
 
     p->waiting_for_flip = true;
     if (atomic_ctx) {
@@ -637,12 +644,12 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     eglSwapBuffers(p->egl.display, p->egl.surface);
 
     MP_VERBOSE(ctx, "Preparing framebuffer\n");
-    p->gbm.bo = gbm_surface_lock_front_buffer(p->gbm.surface);
-    if (!p->gbm.bo) {
+    p->gbm.bo[0] = gbm_surface_lock_front_buffer(p->gbm.surface);
+    if (!p->gbm.bo[0]) {
         MP_ERR(ctx, "Failed to lock GBM surface.\n");
         return false;
     }
-    update_framebuffer_from_bo(ctx, p->gbm.bo);
+    update_framebuffer_from_bo(ctx, p->gbm.bo[0]);
     if (!p->fb || !p->fb->id) {
         MP_ERR(ctx, "Failed to create framebuffer.\n");
         return false;
