@@ -210,11 +210,19 @@ static int init_filter(struct mp_filter *da, AVPacket *pkt)
         bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
                      profile == FF_PROFILE_DTS_HD_MA ||
                      profile == FF_PROFILE_UNKNOWN;
+
+        // Apparently, DTS-HD over SPDIF is specified to be 7.1 (8 channels)
+        // for DTS-HD MA, and stereo (2 channels) for DTS-HD HRA. The bit
+        // streaming rate as well as the signaled channel count are defined
+        // based on this value.
+        int dts_hd_spdif_channel_count = profile == FF_PROFILE_DTS_HD_HRA ?
+                                         2 : 8;
         if (spdif_ctx->use_dts_hd && is_hd) {
-            av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
+            av_dict_set_int(&format_opts, "dtshd_rate",
+                            dts_hd_spdif_channel_count * 96000, 0);
             sample_format               = AF_FORMAT_S_DTSHD;
             samplerate                  = 192000;
-            num_channels                = 2*4;
+            num_channels                = dts_hd_spdif_channel_count;
         } else {
             sample_format               = AF_FORMAT_S_DTS;
             samplerate                  = 48000;
