@@ -272,14 +272,6 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
 {
     struct priv *p = userData;
 
-    pthread_mutex_lock(&p->lock);
-
-    // If these assertions fail, n is an unrequested frame (or filtered twice).
-    assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
-    int index = n - p->out_frameno;
-    MP_TRACE(p, "filtered frame %d (%d)\n", n, index);
-    assert(p->requested[index] == &dummy_img);
-
     struct mp_image *res = NULL;
     if (f) {
         struct mp_image img = map_vs_frame(p, f, false);
@@ -299,6 +291,15 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         res = mp_image_new_copy(&img);
         p->vsapi->freeFrame(f);
     }
+
+    pthread_mutex_lock(&p->lock);
+
+    // If these assertions fail, n is an unrequested frame (or filtered twice).
+    assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
+    int index = n - p->out_frameno;
+    MP_TRACE(p, "filtered frame %d (%d)\n", n, index);
+    assert(p->requested[index] == &dummy_img);
+
     if (!res && !p->shutdown) {
         if (p->eof) {
             res = (struct mp_image *)&dummy_img_eof;
