@@ -79,6 +79,9 @@ struct priv {
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
 
+    bool still;
+    bool paused;
+
     struct mpv_opengl_drm_params drm_params;
     struct mpv_opengl_drm_osd_size osd_size;
 };
@@ -404,14 +407,11 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
-static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
+static bool drm_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->ctx->priv;
 
-    if (!p->kms->atomic_context)
-        return false;
-
-    if (!p->kms->atomic_context->request) {
+    if (p->kms->atomic_context && !p->kms->atomic_context->request) {
         p->kms->atomic_context->request = drmModeAtomicAlloc();
         p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
     }
@@ -419,47 +419,25 @@ static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *o
     return ra_gl_ctx_start_frame(sw, out_fbo);
 }
 
-static const struct ra_swapchain_fns drm_atomic_swapchain = {
-    .start_frame   = drm_atomic_egl_start_frame,
+static bool drm_egl_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
+{
+    struct priv *p = sw->ctx->priv;
+
+    p->still = frame->still;
+
+    return ra_gl_ctx_submit_frame(sw, frame);
+}
+
+static const struct ra_swapchain_fns drm_egl_swapchain = {
+    .start_frame   = drm_egl_start_frame,
+    .submit_frame  = drm_egl_submit_frame,
 };
 
-static void drm_egl_swap_buffers(struct ra_ctx *ctx)
+static void queue_flip(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
     int ret;
-
-    if (!p->active)
-        return;
-
-    if (p->waiting_for_flip) {
-        // poll page flip finish event
-        const int timeout_ms = 3000;
-        struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
-        poll(fds, 1, timeout_ms);
-        if (fds[0].revents & POLLIN) {
-            ret = drmHandleEvent(p->kms->fd, &p->ev);
-            if (ret != 0)
-                MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
-        }
-        p->waiting_for_flip = false;
-    }
-
-    if (p->gbm.bo[2]) {
-        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo[0]);
-        p->gbm.bo[0] = p->gbm.bo[1];
-        p->gbm.bo[1] = p->gbm.bo[2];
-        p->gbm.bo[2] = NULL;
-    }
-
-    eglSwapBuffers(p->egl.display, p->egl.surface);
-
-    p->gbm.bo[2] = gbm_surface_lock_front_buffer(p->gbm.surface);
-
-    if (!p->gbm.bo[1])
-        return;
-
-    update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
 
     p->waiting_for_flip = true;
     if (atomic_ctx) {
@@ -473,7 +451,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
             MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
     } else {
         ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
-                                  DRM_MODE_PAGE_FLIP_EVENT, p);
+                              DRM_MODE_PAGE_FLIP_EVENT, p);
         if (ret) {
             MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
         }
@@ -482,6 +460,69 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
         atomic_ctx->request = drmModeAtomicAlloc();
+    }
+}
+
+static void wait_on_flip(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    // poll page flip finish event
+    if (p->waiting_for_flip) {
+        const int timeout_ms = 3000;
+        struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
+        poll(fds, 1, timeout_ms);
+        if (fds[0].revents & POLLIN) {
+            const int ret = drmHandleEvent(p->kms->fd, &p->ev);
+            if (ret != 0)
+                MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+        }
+        p->waiting_for_flip = false;
+    }
+}
+
+static void swapchain_step(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo[0]);
+    p->gbm.bo[0] = p->gbm.bo[1];
+    p->gbm.bo[1] = p->gbm.bo[2];
+    p->gbm.bo[2] = NULL;
+}
+
+static void drm_egl_swap_buffers(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    if (!p->active)
+        return;
+
+    wait_on_flip(ctx);
+
+    if (p->gbm.bo[2]) {
+        swapchain_step(ctx);
+    }
+
+    eglSwapBuffers(p->egl.display, p->egl.surface);
+
+    p->gbm.bo[2] = gbm_surface_lock_front_buffer(p->gbm.surface);
+
+    if (!p->gbm.bo[1])
+        return;
+
+    update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
+    queue_flip(ctx);
+
+    // We need to drain the swapchain when paused/showing still images so that
+    // output does not lag behind user input.
+    if (p->paused || p->still) {
+        wait_on_flip(ctx);
+        swapchain_step(ctx);
+        if (!p->gbm.bo[1])
+            return;
+        update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
+        queue_flip(ctx);
     }
 }
 
@@ -682,8 +723,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = drm_egl_swap_buffers,
-        .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
-                                                       NULL,
+        .external_swapchain = &drm_egl_swapchain,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
@@ -715,6 +755,13 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
         *(double*)arg = fps;
         return VO_TRUE;
     }
+    case VOCTRL_PAUSE:
+        ctx->vo->want_redraw = true;
+        p->paused = true;
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        p->paused = false;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
