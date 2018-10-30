@@ -536,11 +536,14 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
                 break;
             }
+
+            pthread_mutex_unlock(&p->lock);
             struct mp_image vsframe = map_vs_frame(p, ret, true);
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
             set_vs_frame_props(p, ret, img, dur, res);
+            pthread_mutex_lock(&p->lock);
             break;
         }
         pthread_cond_wait(&p->wakeup, &p->lock);
