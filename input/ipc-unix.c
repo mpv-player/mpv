@@ -73,7 +73,7 @@ static int ipc_write_str(struct client_arg *client, const char *buf)
             if (rc == 0)
                 return -1;
 
-            if (errno == EBADF) {
+            if (errno == EBADF || errno == ENOTSOCK) {
                 client->writable = false;
                 return 0;
             }
