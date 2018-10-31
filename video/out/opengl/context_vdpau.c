@@ -323,6 +323,7 @@ static bool vdpau_init(struct ra_ctx *ctx)
     struct ra_gl_ctx_params params = {
         .swap_buffers = vdpau_swap_buffers,
         .external_swapchain = &vdpau_swapchain,
+        .disable_vsync_fences = true,
         .flipped = true,
     };
 

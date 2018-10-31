@@ -28,9 +28,13 @@ struct ra_gl_ctx_params {
     // side up
     bool flipped;
 
+    // Set to true to disable the software simulation of --swapchain-depth. Only
+    // relevant if both ra_gl_ctx_submit_frame and ra_gl_ctx_submit_frame are
+    // called (directly or indirectly) as part of the swapchain.
+    bool disable_vsync_fences;
+
     // If this is set to non-NULL, then the ra_gl_ctx will consider the GL
-    // implementation to be using an external swapchain, which disables the
-    // software simulation of --swapchain-depth. Any functions defined by this
+    // implementation to be using an external swapchain. Any functions defined by this
     // ra_swapchain_fns structs will entirely replace the equivalent ra_gl_ctx
     // functions in the resulting ra_swapchain.
     const struct ra_swapchain_fns *external_swapchain;

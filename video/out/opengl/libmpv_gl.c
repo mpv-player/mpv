@@ -40,15 +40,13 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
         .allow_sw = true,
     };
 
-    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
     struct ra_gl_ctx_params gl_params = {
         // vo_opengl_cb is essentially like a gigantic external swapchain where
         // the user is in charge of presentation / swapping etc. But we don't
         // actually need to provide any of these functions, since we can just
-        // not call them to begin with - so just set it to an empty object to
-        // signal to ra_gl_p that we don't care about its latency emulation
-        // functionality
-        .external_swapchain = &empty_swapchain_fns
+        // not call them to begin with - so set disable_vsync_fences to signal
+        // to ra_gl_p that we don't care about its latency emulation functionality
+        .disable_vsync_fences = true,
     };
 
     p->gl->SwapInterval = NULL; // we shouldn't randomly change this, so lock it

@@ -606,6 +606,7 @@ static bool angle_init(struct ra_ctx *ctx)
         .swap_buffers = angle_swap_buffers,
         .flipped = p->flipped,
         .external_swapchain = p->dxgi_swapchain ? &dxgi_swapchain_fns : NULL,
+        .disable_vsync_fences = true,
     };
 
     if (!ra_gl_ctx_init(ctx, gl, params))

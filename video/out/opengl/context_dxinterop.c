@@ -552,11 +552,10 @@ static bool dxgl_init(struct ra_ctx *ctx)
     if (d3d_size_dependent_create(ctx) < 0)
         goto fail;
 
-    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
     struct ra_gl_ctx_params params = {
         .swap_buffers = dxgl_swap_buffers,
         .flipped = true,
-        .external_swapchain = &empty_swapchain_fns,
+        .disable_vsync_fences = true,
     };
 
     if (!ra_gl_ctx_init(ctx, gl, params))
