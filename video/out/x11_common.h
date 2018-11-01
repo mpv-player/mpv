@@ -44,6 +44,7 @@ struct xrandr_display {
     double fps;
     char *name;
     bool overlaps;
+    int atom_id;
 };
 
 struct vo_x11_state {

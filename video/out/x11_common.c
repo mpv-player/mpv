@@ -394,6 +394,8 @@ static void xrandr_read(struct vo_x11_state *x11)
         return;
     }
 
+    int primary_id = -1;
+    RROutput primary = XRRGetOutputPrimary(x11->display, x11->rootwin);
     for (int o = 0; o < r->noutput; o++) {
         RROutput output = r->outputs[o];
         XRRCrtcInfo *crtc = NULL;
@@ -426,6 +428,8 @@ static void xrandr_read(struct vo_x11_state *x11)
                 MP_VERBOSE(x11, "Display %d (%s): [%d, %d, %d, %d] @ %f FPS\n",
                            num, d.name, d.rc.x0, d.rc.y0, d.rc.x1, d.rc.y1, d.fps);
                 x11->displays[num] = d;
+                if (output == primary)
+                    primary_id = num;
             }
         }
     next:
@@ -433,6 +437,20 @@ static void xrandr_read(struct vo_x11_state *x11)
             XRRFreeCrtcInfo(crtc);
         if (out)
             XRRFreeOutputInfo(out);
+    }
+
+    for (int i = 0; i < x11->num_displays; i++) {
+        struct xrandr_display *d = &(x11->displays[i]);
+
+        if (i == primary_id) {
+            d->atom_id = 0;
+            continue;
+        }
+        if (primary_id > 0 && i < primary_id) {
+            d->atom_id = i+1;
+            continue;
+        }
+        d->atom_id = i;
     }
 
     XRRFreeScreenResources(r);
@@ -1840,10 +1858,11 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         if (!x11->pseudo_mapped)
             return VO_NOTAVAIL;
         int screen = get_icc_screen(vo);
+        int atom_id = x11->displays[screen].atom_id;
         char prop[80];
         snprintf(prop, sizeof(prop), "_ICC_PROFILE");
-        if (screen > 0)
-            mp_snprintf_cat(prop, sizeof(prop), "_%d", screen);
+        if (atom_id > 0)
+            mp_snprintf_cat(prop, sizeof(prop), "_%d", atom_id);
         x11->icc_profile_property = XAs(x11, prop);
         int len;
         MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", screen);
