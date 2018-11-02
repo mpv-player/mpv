@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <locale.h>
 
 #include "mpv_talloc.h"
 #include "osdep/compiler.h"
@@ -137,8 +138,12 @@ struct bstr bstr_strip_linebreaks(struct bstr str);
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
 void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     PRINTF_ATTRIBUTE(3, 4);
+void bstr_xappend_asprintf_l(void *talloc_ctx, bstr *s, locale_t loc, const char *fmt, ...)
+    PRINTF_ATTRIBUTE(4, 5);
 void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
     PRINTF_ATTRIBUTE(3, 0);
+void bstr_xappend_vasprintf_l(void *talloc_ctx, bstr *s, locale_t loc, const char *fmt, va_list va)
+    PRINTF_ATTRIBUTE(4, 0);
 
 // If s starts/ends with prefix, return true and return the rest of the string
 // in s.

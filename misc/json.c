@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <locale.h>
 
 #include "common/common.h"
 #include "misc/bstr.h"
@@ -256,9 +257,12 @@ static int json_append(bstr *b, const struct mpv_node *src, int indent)
     case MPV_FORMAT_INT64:
         bstr_xappend_asprintf(NULL, b, "%"PRId64, src->u.int64);
         return 0;
-    case MPV_FORMAT_DOUBLE:
-        bstr_xappend_asprintf(NULL, b, "%f", src->u.double_);
+    case MPV_FORMAT_DOUBLE: {
+        locale_t loc = newlocale(LC_NUMERIC, "C", (locale_t)0);
+        bstr_xappend_asprintf_l(NULL, b, loc, "%f", src->u.double_);
+        freelocale(loc);
         return 0;
+    }
     case MPV_FORMAT_STRING:
         write_json_str(b, src->u.string);
         return 0;

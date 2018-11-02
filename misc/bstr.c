@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <locale.h>
 
 #include <libavutil/common.h>
 
@@ -402,6 +403,14 @@ void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     va_end(ap);
 }
 
+void bstr_xappend_asprintf_l(void *talloc_ctx, bstr *s, locale_t loc, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    bstr_xappend_vasprintf_l(talloc_ctx, s, loc, fmt, ap);
+    va_end(ap);
+}
+
 // Exactly as bstr_xappend(), but with a formatted string.
 void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
                             va_list ap)
@@ -423,6 +432,32 @@ void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
     if (avail < 1 || size + 1 > avail) {
         resize_append(talloc_ctx, s, size + 1);
         vsnprintf(s->start + s->len, size + 1, fmt, ap);
+    }
+    s->len += size;
+}
+
+void bstr_xappend_vasprintf_l(void *talloc_ctx, bstr *s, locale_t loc, const char *fmt,
+                            va_list ap)
+{
+    int size;
+    va_list copy;
+    va_copy(copy, ap);
+    size_t avail = talloc_get_size(s->start) - s->len;
+    char *dest = s->start ? s->start + s->len : NULL;
+    char c;
+    if (avail < 1)
+        dest = &c;
+    size = vsnprintf(dest, MPMAX(avail, 1), fmt, copy);
+    va_end(copy);
+
+    if (size < 0)
+        abort();
+
+    if (avail < 1 || size + 1 > avail) {
+        resize_append(talloc_ctx, s, size + 1);
+        locale_t cur_loc = uselocale(loc);
+        vsnprintf(s->start + s->len, size + 1, fmt, ap); // vsnprintf_l() ?
+        uselocale(cur_loc);
     }
     s->len += size;
 }
