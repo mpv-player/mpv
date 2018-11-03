@@ -544,6 +544,14 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     if (p->vt_switcher_active)
         vt_switcher_destroy(&p->vt_switcher);
 
+    // According to GBM documentation all BO:s must be released before
+    // gbm_surface_destroy can be called on the surface.
+    for (unsigned int i = MP_ARRAY_SIZE(p->gbm.bo); i != 0; --i) {
+        struct gbm_bo *bo = p->gbm.bo[i-1];
+        if (bo)
+            gbm_surface_release_buffer(p->gbm.surface, bo);
+    }
+
     eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                    EGL_NO_CONTEXT);
     eglDestroyContext(p->egl.display, p->egl.context);
