@@ -333,12 +333,12 @@ bool mpvk_get_phys_device_uuid(struct mpvk_ctx *vk, uint8_t uuid_out[VK_UUID_SIZ
 {
     assert(vk->physd);
 
-    VkPhysicalDeviceIDProperties idprops = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES,
+    VkPhysicalDeviceIDPropertiesKHR idprops = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR,
     };
 
-    VkPhysicalDeviceProperties2 props = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+    VkPhysicalDeviceProperties2KHR props = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
         .pNext = &idprops,
     };
 
