@@ -136,9 +136,9 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
 #if HAVE_WIN32_DESKTOP
         .handleTypes = IsWindows8OrGreater()
 		? VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
-		: VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT,
+		: VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_KHR,
 #else
-        .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT,
+        .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
 #endif
     };
 
@@ -158,8 +158,8 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
         for (int i = 0; i < vk->num_pools; i++)
             qfs[i] = vk->pools[i]->qf;
 
-        VkExternalMemoryBufferCreateInfo ebinfo = {
-            .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO,
+        VkExternalMemoryBufferCreateInfoKHR ebinfo = {
+            .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
             .handleTypes = eminfo.handleTypes,
         };
 

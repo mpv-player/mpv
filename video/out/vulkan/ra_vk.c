@@ -951,7 +951,7 @@ static bool ra_vk_mem_get_external_info(struct ra *ra, struct vk_memslice *mem, 
         .memory = mem->vkmem,
         .handleType = IsWindows8OrGreater()
             ? VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
-            : VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT,
+            : VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_KHR,
     };
 
     VK_LOAD_PFN(vkGetMemoryWin32HandleKHR);
