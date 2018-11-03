@@ -93,12 +93,17 @@ class TitleBar: NSVisualEffectView {
             effect = style as! String
         }
 
-        if effect == "auto" {
-            let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
-            effect = systemStyle == nil ? "mediumlight" : "ultradark"
-        }
-
         switch effect {
+        case "auto":
+             if #available(macOS 10.14, *) {
+                 cocoaCB.window.appearance = nil
+                 material = .titlebar
+                 state = .followsWindowActiveState
+             } else {
+                 let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+                 effect = systemStyle == nil ? "mediumlight" : "ultradark"
+                 setStyle(effect)
+             }
         case "mediumlight":
             cocoaCB.window.appearance = NSAppearance(named: NSAppearanceNameVibrantLight)
             material = .titlebar
