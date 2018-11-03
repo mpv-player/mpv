@@ -807,7 +807,8 @@ video_output_features = [
     }, {
         'name': '--vulkan',
         'desc':  'Vulkan context support',
-        'func': check_pkg_config('vulkan'),
+        # Lowest version tested, Ubuntu 16.04's
+        'func': check_pkg_config('vulkan >= 1.0.61'),
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
