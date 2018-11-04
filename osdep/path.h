@@ -8,6 +8,7 @@
 //  "home"          the native mpv-specific user config dir
 //  "old_home"      same as "home", but lesser priority (compatibility)
 //  "osxbundle"     macOS bundle resource path
+//  "macosbundle"   macOS bundle resource path
 //  "global"        the least priority, global config file location
 //  "desktop"       path to desktop contents
 //

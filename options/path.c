@@ -58,6 +58,7 @@ static const char *const config_dirs[] = {
     "home",
     "old_home",
     "osxbundle",
+    "macosbundle",
     "global",
 };
 
