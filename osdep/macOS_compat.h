@@ -18,8 +18,8 @@
  */
 
 
-#ifndef MPV_MACOSX_COMPAT
-#define MPV_MACOSX_COMPAT
+#ifndef MPV_MACOS_COMPAT
+#define MPV_MACOS_COMPAT
 
 #import <Cocoa/Cocoa.h>
 #include "osdep/macOS_versions.h"
@@ -60,4 +60,4 @@ static const NSModalResponse NSModalResponseOK = NSFileHandlingPanelOKButton
 
 #endif
 
-#endif /* MPV_MACOSX_COMPAT */
+#endif /* MPV_MACOS_COMPAT */

@@ -15,8 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_MENU
-#define MPV_MACOSX_MENU
+#ifndef MPV_MACOS_MENU
+#define MPV_MACOS_MENU
 
 // Menu Keys identifing menu items
 typedef enum {
@@ -27,4 +27,4 @@ typedef enum {
     MPM_ZOOM,
 } MPMenuKey;
 
-#endif /* MPV_MACOSX_MENU */
+#endif /* MPV_MACOS_MENU */

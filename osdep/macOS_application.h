@@ -15,8 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_APPLICATION
-#define MPV_MACOSX_APPLICATION
+#ifndef MPV_MACOS_APPLICATION
+#define MPV_MACOS_APPLICATION
 
 #include "osdep/macOS_menubar.h"
 
@@ -30,4 +30,4 @@ struct macos_opts {
 int cocoa_main(int argc, char *argv[]);
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
-#endif /* MPV_MACOSX_APPLICATION */
+#endif /* MPV_MACOS_APPLICATION */

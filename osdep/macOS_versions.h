@@ -15,8 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_VERSIONS
-#define MPV_MACOSX_VERSIONS
+#ifndef MPV_MACOS_VERSIONS
+#define MPV_MACOS_VERSIONS
 
 #if !defined(MAC_OS_X_VERSION_10_9)
 #    define MAC_OS_X_VERSION_10_9 1090
@@ -30,4 +30,4 @@
 #    define MAC_OS_X_VERSION_10_12 101200
 #endif
 
-#endif /* MPV_MACOSX_VERSIONS */
+#endif /* MPV_MACOS_VERSIONS */
