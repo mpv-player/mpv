@@ -27,7 +27,7 @@ struct mpv_global;
 
 // Search for the input filename in several paths. These include user and global
 // config locations by default. Some platforms may implement additional platform
-// related lookups (i.e.: OSX inside an application bundle).
+// related lookups (i.e.: macOS inside an application bundle).
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 

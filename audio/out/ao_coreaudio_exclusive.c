@@ -1,5 +1,5 @@
 /*
- * CoreAudio audio output driver for Mac OS X
+ * CoreAudio audio output driver for macOS
  *
  * original copyright (C) Timothy J. Wood - Aug 2000
  * ported to MPlayer libao2 by Dan Christiansen
@@ -28,7 +28,7 @@
  */
 
 /*
- * The MacOS X CoreAudio framework doesn't mesh as simply as some
+ * The macOS CoreAudio framework doesn't mesh as simply as some
  * simpler frameworks do.  This is due to the fact that CoreAudio pulls
  * audio samples rather than having them pushed at it (which is nice
  * when you are wanting to do good buffering of audio).

@@ -94,7 +94,7 @@ const struct gl_format gl_formats[] = {
     // Special formats.
     {"rgb565",  GL_RGB8,     GL_RGB,
      GL_UNSIGNED_SHORT_5_6_5,                           F_TF | F_GL2 | F_GL3},
-    // Worthless, but needed by OSX videotoolbox interop on old Apple hardware.
+    // Worthless, but needed by macOS videotoolbox interop on old Apple hardware.
     {"appleyp", GL_RGB,      GL_RGB_422_APPLE,
      GL_UNSIGNED_SHORT_8_8_APPLE,                       F_TF | F_APPL},
 

@@ -406,7 +406,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_STATS(mpctx, "start init");
 
 #if HAVE_COCOA
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "osx");
+    mpv_handle *ctx = mp_new_client(mpctx->clients, "macOS");
     cocoa_set_mpv_handle(ctx);
 #endif
 

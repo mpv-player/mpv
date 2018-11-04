@@ -77,7 +77,7 @@ int mp_sem_timedwait(mp_sem_t *sem, const struct timespec *abs_timeout)
         if (abs_timeout) {
             timeout_ms = 0;
 
-            // OSX does not provide clock_gettime() either.
+            // macOS does not provide clock_gettime() either.
             struct timeval tv;
             gettimeofday(&tv, NULL);
 

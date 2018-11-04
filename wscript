@@ -18,7 +18,7 @@ APPNAME = 'mpv'
 Dependency identifiers (for win32 vs. Unix):
     wscript / C source                  meaning
     --------------------------------------------------------------------------
-    posix / HAVE_POSIX:                 defined on Linux, OSX, Cygwin
+    posix / HAVE_POSIX:                 defined on Linux, macOS, Cygwin
                                         (Cygwin emulates POSIX APIs on Windows)
     mingw / __MINGW32__:                defined if posix is not defined
                                         (Windows without Cygwin)
@@ -289,7 +289,7 @@ iconv support use --disable-iconv.",
                                 use=['pthreads']),
     }, {
         'name': 'osx-thread-name',
-        'desc': 'OSX API for setting thread name',
+        'desc': 'macOS API for setting thread name',
         'deps': '!glibc-thread-name',
         'func': check_statement('pthread.h',
                                 'pthread_setname_np("ducks")', use=['pthreads']),

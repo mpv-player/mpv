@@ -252,7 +252,7 @@ class MPVHelper: NSObject {
             level += "[0;30m"
         }
 
-        print("\(level)[osx/cocoacb] \(msg)\u{001B}[0;30m")
+        print("\(level)[macOS/cocoacb] \(msg)\u{001B}[0;30m")
     }
 
     func deinitRender() {

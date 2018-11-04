@@ -86,7 +86,7 @@ static void get_realtime(struct timespec *out_ts)
 #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, out_ts);
 #else
-    // OSX
+    // macOS
     struct timeval tv;
     gettimeofday(&tv, NULL);
     out_ts->tv_sec = tv.tv_sec;
@@ -112,7 +112,7 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
         diff_secs += 1;
         diff_nsecs -= 1000000000UL;
     }
-    // OSX can't deal with large timeouts. Also handles tv_sec/time_t overflows.
+    // macOS can't deal with large timeouts. Also handles tv_sec/time_t overflows.
     diff_secs = MPMIN(diff_secs, 10000000);
     ts.tv_sec += diff_secs;
     ts.tv_nsec += diff_nsecs;

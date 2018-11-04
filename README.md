@@ -37,7 +37,7 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
+- A not too ancient Linux, Windows 7 or later, or macOS 10.8 or later.
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
@@ -121,7 +121,7 @@ Libass dependencies:
 - gcc or clang, yasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
 - harfbuzz (optional, required for correct rendering of combining characters,
-  particularly for correct rendering of non-English text on OSX, and
+  particularly for correct rendering of non-English text on macOS, and
   Arabic/Indic scripts on any platform)
 
 FFmpeg dependencies:

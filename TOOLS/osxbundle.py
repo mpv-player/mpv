@@ -68,7 +68,7 @@ def main():
     else:
         binary_name = args[0]
 
-    print("Creating Mac OS X application bundle (version: %s)..." % version)
+    print("Creating macOS application bundle (version: %s)..." % version)
     print("> copying bundle skeleton")
     copy_bundle(binary_name)
     print("> copying binary")

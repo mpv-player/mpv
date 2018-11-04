@@ -238,16 +238,16 @@ corresponding adjustment.)
 7 and 8
     Adjust saturation.
 
-Alt+0 (and command+0 on OSX)
+Alt+0 (and command+0 on macOS)
     Resize video window to half its original size.
 
-Alt+1 (and command+1 on OSX)
+Alt+1 (and command+1 on macOS)
     Resize video window to its original size.
 
-Alt+2 (and command+2 on OSX)
+Alt+2 (and command+2 on macOS)
     Resize video window to double its original size.
 
-command + f (OSX only)
+command + f (macOS only)
     Toggle fullscreen (see also ``--fs``).
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
@@ -413,8 +413,8 @@ Name             Meaning
 ================ ===============================================================
 ``~~home/``      same as ``~~/``
 ``~~global/``    the global config path, if available (not on win32)
-``~~osxbundle/`` the OSX bundle resource path (OSX only)
-``~~desktop/``   the path to the desktop (win32, OSX)
+``~~osxbundle/`` the macOS bundle resource path (macOS only)
+``~~desktop/``   the path to the desktop (win32, macOS)
 ================ ===============================================================
 
 
@@ -528,7 +528,7 @@ tree and play the longest title.
     stream. Specify ``dvdread://...`` to fix such problems.
 
 .. note:: DVD subtitles
-    
+
     DVDs use image-based subtitles. Image subtitles are implemented as
     a bitmap video stream which can be superimposed over the main
     movie. mpv's subtitle styling and positioning options and keyboard
@@ -944,7 +944,7 @@ Currently this happens only in the following cases:
   or file associations provided by desktop environments)
 - if started from explorer.exe on Windows (technically, if it was started on
   Windows, and all of the stdout/stderr/stdin handles are unset)
-- started out of the bundle on OSX
+- started out of the bundle on macOS
 - if you manually use ``--player-operation-mode=pseudo-gui`` on the command line
 
 This mode applies options from the builtin profile ``builtin-pseudo-gui``, but

@@ -249,7 +249,7 @@ static void cocoa_run_runloop(void)
 
 static void *playback_thread(void *ctx_obj)
 {
-    mpthread_set_name("playback core (OSX)");
+    mpthread_set_name("playback core (macOS)");
     @autoreleasepool {
         struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
         int r = mpv_main(*ctx->argc, *ctx->argv);

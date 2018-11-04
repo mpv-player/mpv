@@ -712,9 +712,9 @@ Video
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
-    :videotoolbox: requires ``--vo=gpu`` (OS X 10.8 and up),
+    :videotoolbox: requires ``--vo=gpu`` (macOS 10.8 and up),
                    or ``--vo=opengl-cb`` (iOS 9.0 and up)
-    :videotoolbox-copy: copies video back into system RAM (OS X 10.8 or iOS 9.0 and up)
+    :videotoolbox-copy: copies video back into system RAM (macOS 10.8 or iOS 9.0 and up)
     :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=d3d11``,
                 ``--gpu-context=angle`` or ``--gpu-context=dxinterop``
                 (Windows only)
@@ -2236,9 +2236,9 @@ Window
         This option works properly only with window managers which
         understand the EWMH ``_NET_WM_FULLSCREEN_MONITORS`` hint.
 
-    .. admonition:: Note (OS X)
+    .. admonition:: Note (macOS)
 
-        ``all`` does not work on OS X and will behave like ``current``.
+        ``all`` does not work on macOS and will behave like ``current``.
 
     See also ``--screen``.
 
@@ -2339,7 +2339,7 @@ Window
     Manager.
 
 ``--ontop-level=<window|system|level>``
-    (OS X only)
+    (macOS only)
     Sets the level of an ontop window (default: window).
 
     :window:  On top of all other windows.
@@ -2381,9 +2381,9 @@ Window
 
         Generally only supported by GUI VOs. Ignored for encoding.
 
-    .. admonition: Note (OS X)
+    .. admonition: Note (macOS)
 
-        On Mac OS X the origin of the screen coordinate system is located on the
+        On macOS the origin of the screen coordinate system is located on the
         bottom-left corner. For instance, ``0:0`` will place the window at the
         bottom-left of the screen.
 
@@ -2533,14 +2533,14 @@ Window
         - ``--monitoraspect=16:9`` or ``--monitoraspect=1.7777``
 
 ``--hidpi-window-scale``, ``--no-hidpi-window-scale``
-    (OS X and X11 only)
+    (macOS and X11 only)
     Scale the window size according to the backing scale factor (default: yes).
     On regular HiDPI resolutions the window opens with double the size but appears
-    as having the same size as on none-HiDPI resolutions. This is the default OS X
+    as having the same size as on none-HiDPI resolutions. This is the default macOS
     behavior.
 
 ``--native-fs``, ``--no-native-fs``
-    (OS X only)
+    (macOS only)
     Uses the native fullscreen mechanism of the OS (default: yes).
 
 ``--monitorpixelaspect=<ratio>``
@@ -2572,8 +2572,8 @@ Window
     ``intptr_t``. mpv will create its own window, and set the wid window as
     parent, like with X11.
 
-    On OSX/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
-    to ``intptr_t``. mpv will create its own sub-view. Because OSX does not
+    On macOS/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
+    to ``intptr_t``. mpv will create its own sub-view. Because macOS does not
     support window embedding of foreign processes, this works only with libmpv,
     and will crash when used from the command line.
 
@@ -3075,7 +3075,7 @@ Input
     See `JSON IPC`_ for details.
 
 ``--input-appleremote=<yes|no>``
-    (OS X only)
+    (macOS only)
     Enable/disable Apple Remote support. Enabled by default (except for libmpv).
 
 ``--input-cursor``, ``--no-input-cursor``
@@ -3084,7 +3084,7 @@ Input
     Support depends on the VO in use.
 
 ``--input-media-keys=<yes|no>``
-    (OS X and Windows only)
+    (macOS and Windows only)
     Enable/disable media keys support. Enabled by default (except for libmpv).
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
@@ -4898,7 +4898,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Deactivates the automatic graphics switching and forces the dedicated GPU.
     (default: no)
 
-    OS X only.
+    macOS only.
 
 ``--cocoa-cb-sw-renderer=<yes|no|auto>``
     Use the Apple Software Renderer when using cocoa-cb (default: auto). If set
@@ -4907,11 +4907,11 @@ The following video options are currently all specific to ``--vo=gpu`` and
     software renderer, and ``auto`` only falls back to the software renderer
     when the usual pixel format couldn't be created.
 
-    OS X only.
+    macOS only.
 
 ``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
     Sets the styling of the title bar (default: dark).
-    OS X and cocoa-cb only
+    macOS and cocoa-cb only
 
     :dark:        Dark title bar with vibrancy, a subtle blurring effect that
                   dynamically blends the background (Video) into the title bar.
@@ -4931,7 +4931,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     1000ms since it's possible that Apple or the user changes the system
     defaults. Anything higher than 1000ms though seems too long and shouldn't be
     set anyway.
-    OS X and cocoa-cb only
+    macOS and cocoa-cb only
 
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
@@ -4959,7 +4959,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     auto
         auto-select (default)
     cocoa
-        Cocoa/OS X (deprecated, use --vo=opengl-cb instead)
+        Cocoa/macOS (deprecated, use --vo=opengl-cb instead)
     win
         Win32/WGL
     winvk
@@ -5064,7 +5064,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     With ambient illuminance of 16 lux, mpv will pick the 1.0 gamma value (no
     boost), and slightly increase the boost up until 1.2 for 256 lux.
 
-    NOTE: Only implemented on OS X.
+    NOTE: Only implemented on macOS.
 
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
@@ -5384,7 +5384,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     flipping GL front and backbuffers immediately (i.e. it doesn't call it
     in display-sync mode).
 
-    On OSX this is always deactivated because it only causes performance
+    On macOS this is always deactivated because it only causes performance
     problems and other regressions.
 
 ``--gpu-dumb-mode=<yes|no|auto>``
