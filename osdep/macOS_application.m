@@ -285,7 +285,7 @@ static void init_cocoa_application(bool regular)
     });
 }
 
-static void macosx_redirect_output_to_logfile(const char *filename)
+static void macos_redirect_output_to_logfile(const char *filename)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *log_path = [NSHomeDirectory() stringByAppendingPathComponent:
@@ -338,7 +338,7 @@ int cocoa_main(int argc, char *argv[])
 
         if (bundle_started_from_finder(argv)) {
             setup_bundle(&argc, argv);
-            macosx_redirect_output_to_logfile("mpv");
+            macos_redirect_output_to_logfile("mpv");
             init_cocoa_application(true);
         } else {
             for (int i = 1; i < argc; i++)
