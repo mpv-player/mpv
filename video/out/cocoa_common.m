@@ -162,8 +162,8 @@ static void disable_power_management(struct vo_cocoa_state *s)
             &s->power_mgmt_assertion);
 }
 
-static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
+static const char macos_icon[] =
+#include "osdep/macos_icon.inc"
 ;
 
 static void set_application_icon(NSApplication *app)
@@ -174,8 +174,8 @@ static void set_application_icon(NSApplication *app)
         return;
 
     // The C string contains a trailing null, so we strip it away
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon) - 1
+    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macos_icon
+                                             length:sizeof(macos_icon) - 1
                                        freeWhenDone:NO];
     NSImage *icon = [[NSImage alloc] initWithData:icon_data];
     [app setApplicationIconImage:icon];

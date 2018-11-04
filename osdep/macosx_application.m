@@ -121,15 +121,15 @@ static void terminate_cocoa_application(void)
     [super dealloc];
 }
 
-static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
+static const char macos_icon[] =
+#include "osdep/macos_icon.inc"
 ;
 
 - (NSImage *)getMPVIcon
 {
     // The C string contains a trailing null, so we strip it away
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon) - 1
+    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macos_icon
+                                             length:sizeof(macos_icon) - 1
                                        freeWhenDone:NO];
     return [[NSImage alloc] initWithData:icon_data];
 }

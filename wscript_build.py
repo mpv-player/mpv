@@ -54,7 +54,7 @@ def build(ctx):
     ctx(
         features = "file2string",
         source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
-        target = "osdep/macosx_icon.inc",
+        target = "osdep/macos_icon.inc",
     )
 
     ctx(
