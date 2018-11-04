@@ -45,7 +45,7 @@ void mpthread_set_name(const char *name)
     }
 #elif HAVE_WIN32_INTERNAL_PTHREADS || HAVE_BSD_THREAD_NAME
     pthread_set_name_np(pthread_self(), tname);
-#elif HAVE_OSX_THREAD_NAME
+#elif HAVE_MACOS_THREAD_NAME
     pthread_setname_np(tname);
 #endif
 }
