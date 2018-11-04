@@ -33,9 +33,9 @@
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
-#include "osdep/macosx_compat.h"
-#import "osdep/macosx_events_objc.h"
-#import "osdep/macosx_application_objc.h"
+#include "osdep/macOS_compat.h"
+#import "osdep/macOS_events_objc.h"
+#import "osdep/macOS_application_objc.h"
 
 #include "config.h"
 

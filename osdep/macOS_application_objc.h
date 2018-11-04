@@ -1,6 +1,4 @@
 /*
- * Cocoa Application Event Handling
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -18,25 +16,24 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "ar/HIDRemote.h"
-#include "osdep/macosx_events.h"
+#include "osdep/macOS_application.h"
+#import "osdep/macOS_menubar_objc.h"
 
-struct input_ctx;
+@class CocoaCB;
+struct mpv_event;
+struct mpv_handle;
 
-@interface EventsResponder : NSObject <HIDRemoteDelegate>
+@interface Application : NSApplication
 
-+ (EventsResponder *)sharedInstance;
-- (void)setInputContext:(struct input_ctx *)ctx;
-- (void)setIsApplication:(BOOL)isApplication;
+- (NSImage *)getMPVIcon;
+- (void)processEvent:(struct mpv_event *)event;
+- (void)queueCommand:(char *)cmd;
+- (void)stopMPV:(char *)cmd;
+- (void)openFiles:(NSArray *)filenames;
+- (void)setMpvHandle:(struct mpv_handle *)ctx;
+- (const struct m_sub_options *)getMacOSConf;
 
-/// Blocks until inputContext is present.
-- (void)waitForInputContext;
-- (void)wakeup;
-- (void)putKey:(int)keycode;
-- (void)setHighestPriotityMediaKeysTap;
-- (void)handleFilesArray:(NSArray *)files;
-
-- (bool)queueCommand:(char *)cmd;
-- (bool)processKeyEvent:(NSEvent *)event;
-
+@property(nonatomic, retain) MenuBar *menuBar;
+@property(nonatomic, assign) size_t openCount;
+@property(nonatomic, retain) CocoaCB *cocoaCB;
 @end

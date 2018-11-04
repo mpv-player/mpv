@@ -1,4 +1,6 @@
 /*
+ * Cocoa Application Event Handling
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,19 +17,26 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_APPLICATION
-#define MPV_MACOSX_APPLICATION
+#import <Cocoa/Cocoa.h>
+#import "ar/HIDRemote.h"
+#include "osdep/macOS_events.h"
 
-#include "osdep/macosx_menubar.h"
+struct input_ctx;
 
-struct macos_opts {
-    int macos_title_bar_style;
-    int macos_fs_animation_duration;
-    int cocoa_cb_sw_renderer;
-};
+@interface EventsResponder : NSObject <HIDRemoteDelegate>
 
-// multithreaded wrapper for mpv_main
-int cocoa_main(int argc, char *argv[]);
-void cocoa_register_menu_item_action(MPMenuKey key, void* action);
++ (EventsResponder *)sharedInstance;
+- (void)setInputContext:(struct input_ctx *)ctx;
+- (void)setIsApplication:(BOOL)isApplication;
 
-#endif /* MPV_MACOSX_APPLICATION */
+/// Blocks until inputContext is present.
+- (void)waitForInputContext;
+- (void)wakeup;
+- (void)putKey:(int)keycode;
+- (void)setHighestPriotityMediaKeysTap;
+- (void)handleFilesArray:(NSArray *)files;
+
+- (bool)queueCommand:(char *)cmd;
+- (bool)processKeyEvent:(NSEvent *)event;
+
+@end

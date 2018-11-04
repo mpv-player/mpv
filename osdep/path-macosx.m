@@ -19,7 +19,7 @@
 #include "options/path.h"
 #include "osdep/path.h"
 
-const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type)
+const char *mp_get_platform_path_macos(void *talloc_ctx, const char *type)
 {
     if (strcmp(type, "osxbundle") == 0 && getenv("MPVBUNDLE")) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

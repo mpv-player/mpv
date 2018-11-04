@@ -25,14 +25,14 @@
 #include "player/client.h"
 #include "options/m_config.h"
 
-#import "osdep/macosx_application_objc.h"
-#include "osdep/macosx_compat.h"
-#import "osdep/macosx_events_objc.h"
+#import "osdep/macOS_application_objc.h"
+#include "osdep/macOS_compat.h"
+#import "osdep/macOS_events_objc.h"
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
 
 #if HAVE_MACOS_TOUCHBAR
-#import "osdep/macosx_touchbar.h"
+#import "osdep/macOS_touchbar.h"
 #endif
 #if HAVE_MACOS_COCOA_CB
 #include "osdep/macOS_swift.h"

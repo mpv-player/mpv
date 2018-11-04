@@ -15,25 +15,19 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_application.h"
-#import "osdep/macosx_menubar_objc.h"
+#ifndef MPV_MACOSX_APPLICATION
+#define MPV_MACOSX_APPLICATION
 
-@class CocoaCB;
-struct mpv_event;
-struct mpv_handle;
+#include "osdep/macOS_menubar.h"
 
-@interface Application : NSApplication
+struct macos_opts {
+    int macos_title_bar_style;
+    int macos_fs_animation_duration;
+    int cocoa_cb_sw_renderer;
+};
 
-- (NSImage *)getMPVIcon;
-- (void)processEvent:(struct mpv_event *)event;
-- (void)queueCommand:(char *)cmd;
-- (void)stopMPV:(char *)cmd;
-- (void)openFiles:(NSArray *)filenames;
-- (void)setMpvHandle:(struct mpv_handle *)ctx;
-- (const struct m_sub_options *)getMacOSConf;
+// multithreaded wrapper for mpv_main
+int cocoa_main(int argc, char *argv[]);
+void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
-@property(nonatomic, retain) MenuBar *menuBar;
-@property(nonatomic, assign) size_t openCount;
-@property(nonatomic, retain) CocoaCB *cocoaCB;
-@end
+#endif /* MPV_MACOSX_APPLICATION */

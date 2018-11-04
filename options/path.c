@@ -41,7 +41,7 @@
 // In order of decreasing priority: the first has highest priority.
 static const mp_get_platform_path_cb path_resolvers[] = {
 #if HAVE_COCOA
-    mp_get_platform_path_osx,
+    mp_get_platform_path_macos,
 #endif
 #if !defined(_WIN32) || defined(__CYGWIN__)
     mp_get_platform_path_unix,

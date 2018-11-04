@@ -1,4 +1,4 @@
-#include "osdep/macosx_application.h"
+#include "osdep/macOS_application.h"
 
 // This is needed because Cocoa absolutely requires creating the NSApplication
 // singleton and running it in the "main" thread. It is apparently not
