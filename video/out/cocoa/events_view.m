@@ -46,6 +46,12 @@
     return self;
 }
 
+- (void)drawRect:(NSRect)rect
+{
+    [[NSColor blackColor] setFill];
+    NSRectFill(rect);
+}
+
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
 // as well without having to do any coordinate conversion of mouse positions.
 - (BOOL)isFlipped { return YES; }
