@@ -17,8 +17,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MACOSX_EVENTS_H
-#define MACOSX_EVENTS_H
+#ifndef MPV_MACOS_EVENTS
+#define MPV_MACOS_EVENTS
 #include "input/keycodes.h"
 
 struct input_ctx;
@@ -36,4 +36,4 @@ void cocoa_uninit_media_keys(void);
 void cocoa_set_input_context(struct input_ctx *input_context);
 void cocoa_set_mpv_handle(struct mpv_handle *ctx);
 
-#endif
+#endif /* MPV_MACOS_EVENTS */
