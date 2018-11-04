@@ -16,8 +16,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#include "osdep/macOS_application.h"
-#import "osdep/macOS_menubar_objc.h"
+#include "osdep/macos_application.h"
+#import "osdep/macos_menubar_objc.h"
 
 @class CocoaCB;
 struct mpv_event;

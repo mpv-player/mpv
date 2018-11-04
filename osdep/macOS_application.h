@@ -18,7 +18,7 @@
 #ifndef MPV_MACOS_APPLICATION
 #define MPV_MACOS_APPLICATION
 
-#include "osdep/macOS_menubar.h"
+#include "osdep/macos_menubar.h"
 
 struct macos_opts {
     int macos_title_bar_style;

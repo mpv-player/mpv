@@ -2,7 +2,7 @@
 #import <OpenGL/OpenGL.h>
 #import <Cocoa/Cocoa.h>
 
-#include "osdep/macOS_compat.h"
+#include "osdep/macos_compat.h"
 
 int main(int argc, char **argv)
 {

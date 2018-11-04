@@ -67,7 +67,7 @@ static const char def_config[] =
 ;
 
 #if HAVE_COCOA
-#include "osdep/macOS_events.h"
+#include "osdep/macos_events.h"
 #endif
 
 #ifndef FULLCONFIG

@@ -29,7 +29,7 @@ def copy_bundle(binary_name):
     if os.path.isdir(bundle_path(binary_name)):
         shutil.rmtree(bundle_path(binary_name))
     shutil.copytree(
-        os.path.join('TOOLS', 'macOSbundle', bundle_name(binary_name)),
+        os.path.join('TOOLS', 'macosbundle', bundle_name(binary_name)),
         bundle_path(binary_name))
 
 def copy_binary(binary_name):

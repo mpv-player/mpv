@@ -18,9 +18,9 @@
 #include "config.h"
 #include "common/common.h"
 
-#import "macOS_menubar_objc.h"
-#import "osdep/macOS_application_objc.h"
-#include "osdep/macOS_compat.h"
+#import "macos_menubar_objc.h"
+#import "osdep/macos_application_objc.h"
+#include "osdep/macos_compat.h"
 
 @implementation MenuBar
 {

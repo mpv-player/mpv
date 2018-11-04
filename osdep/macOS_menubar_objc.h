@@ -16,7 +16,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#include "osdep/macOS_menubar.h"
+#include "osdep/macos_menubar.h"
 
 @interface MenuBar : NSObject
 

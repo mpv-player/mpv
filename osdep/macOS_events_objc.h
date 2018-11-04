@@ -19,7 +19,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "ar/HIDRemote.h"
-#include "osdep/macOS_events.h"
+#include "osdep/macos_events.h"
 
 struct input_ctx;
 

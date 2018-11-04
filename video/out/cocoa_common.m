@@ -31,14 +31,14 @@
 
 #include "osdep/threads.h"
 #include "osdep/atomic.h"
-#include "osdep/macOS_compat.h"
-#include "osdep/macOS_events_objc.h"
+#include "osdep/macos_compat.h"
+#include "osdep/macos_events_objc.h"
 
 #include "config.h"
 
 #include "osdep/timer.h"
-#include "osdep/macOS_application.h"
-#include "osdep/macOS_application_objc.h"
+#include "osdep/macos_application.h"
+#include "osdep/macos_application_objc.h"
 
 #include "options/options.h"
 #include "video/out/vo.h"

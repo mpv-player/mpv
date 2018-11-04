@@ -53,7 +53,7 @@ def build(ctx):
 
     ctx(
         features = "file2string",
-        source = "TOOLS/macOSbundle/mpv.app/Contents/Resources/icon.icns",
+        source = "TOOLS/macosbundle/mpv.app/Contents/Resources/icon.icns",
         target = "osdep/macos_icon.inc",
     )
 
@@ -143,12 +143,12 @@ def build(ctx):
 
     def swift(task):
         src = ' '.join([x.abspath() for x in task.inputs])
-        bridge = ctx.path.find_node("osdep/macOS_swift_bridge.h").abspath()
+        bridge = ctx.path.find_node("osdep/macos_swift_bridge.h").abspath()
         tgt = task.outputs[0].abspath()
         header = task.outputs[1].abspath()
         module = task.outputs[2].abspath()
 
-        cmd = ('%s %s -module-name macOS_swift -emit-module-path %s '
+        cmd = ('%s %s -module-name macos_swift -emit-module-path %s '
                '-import-objc-header %s -emit-objc-header-path %s -o %s %s '
                '-I. -I%s') % (ctx.env.SWIFT, ctx.env.SWIFT_FLAGS, module,
                               bridge, header, tgt, src, ctx.srcnode.abspath())
@@ -156,7 +156,7 @@ def build(ctx):
 
     if ctx.dependency_satisfied('macos-cocoa-cb'):
         swift_source = [
-            ( "osdep/macOS_mpv_helper.swift" ),
+            ( "osdep/macos_mpv_helper.swift" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
@@ -166,15 +166,15 @@ def build(ctx):
         ctx(
             rule   = swift,
             source = ctx.filtered_sources(swift_source),
-            target = ('osdep/macOS_swift.o '
-                      'osdep/macOS_swift.h '
-                      'osdep/macOS_swift.swiftmodule'),
+            target = ('osdep/macos_swift.o '
+                      'osdep/macos_swift.h '
+                      'osdep/macos_swift.swiftmodule'),
             before = 'c',
         )
 
         ctx.env.append_value('LINKFLAGS', [
             '-Xlinker', '-add_ast_path',
-            '-Xlinker', '%s' % ctx.path.find_or_declare("osdep/macOS_swift.swiftmodule").abspath()
+            '-Xlinker', '%s' % ctx.path.find_or_declare("osdep/macos_swift.swiftmodule").abspath()
         ])
 
     if ctx.dependency_satisfied('cplayer'):
@@ -463,7 +463,7 @@ def build(ctx):
         ( "video/out/opengl/hwdec_dxva2egl.c",   "d3d9-hwaccel && egl-angle" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop-d3d9" ),
         ( "video/out/opengl/hwdec_ios.m",        "ios-gl" ),
-        ( "video/out/opengl/hwdec_macOS.c",      "videotoolbox-gl" ),
+        ( "video/out/opengl/hwdec_macos.c",      "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
@@ -522,16 +522,16 @@ def build(ctx):
         ( "osdep/android/strnlen.c",             "android"),
         ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
         ( "osdep/glob-win.c",                    "glob-win32" ),
-        ( "osdep/macOS_application.m",           "cocoa" ),
-        ( "osdep/macOS_events.m",                "cocoa" ),
-        ( "osdep/macOS_menubar.m",               "cocoa" ),
-        ( "osdep/macOS_touchbar.m",              "macos-touchbar" ),
+        ( "osdep/macos_application.m",           "cocoa" ),
+        ( "osdep/macos_events.m",                "cocoa" ),
+        ( "osdep/macos_menubar.m",               "cocoa" ),
+        ( "osdep/macos_touchbar.m",              "macos-touchbar" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
-        ( "osdep/path-macOS.m",                  "cocoa" ),
+        ( "osdep/path-macos.m",                  "cocoa" ),
         ( "osdep/path-unix.c"),
         ( "osdep/path-uwp.c",                    "uwp" ),
         ( "osdep/path-win.c",                    "win32-desktop" ),
-        ( "osdep/semaphore_macOS.c" ),
+        ( "osdep/semaphore_macos.c" ),
         ( "osdep/subprocess.c" ),
         ( subprocess_c ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
@@ -590,7 +590,7 @@ def build(ctx):
             target       = "mpv",
             source       = main_fn_c,
             use          = ctx.dependencies_use() + ['objects'],
-            add_object   = "osdep/macOS_swift.o",
+            add_object   = "osdep/macos_swift.o",
             includes     = _all_includes(ctx),
             features     = "c cprogram" + (" syms" if syms else ""),
             export_symbols_def = "libmpv/mpv.def", # for syms=True
@@ -647,7 +647,7 @@ def build(ctx):
                 "target": "mpv",
                 "source":   ctx.filtered_sources(sources),
                 "use":      ctx.dependencies_use(),
-                "add_object": "osdep/macOS_swift.o",
+                "add_object": "osdep/macos_swift.o",
                 "includes": [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                              ctx.dependencies_includes(),
                 "features": features,
