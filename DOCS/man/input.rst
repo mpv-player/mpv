@@ -1647,12 +1647,6 @@ Property list
 ``vsync-jitter``
     Estimated deviation factor of the vsync duration.
 
-``video-aspect`` (RW)
-    Video aspect, see ``--video-aspect``.
-
-    If video is active, this reports the effective aspect value, instead of
-    the value of the ``--video-aspect`` option.
-
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
     ``overlay-add`` command. It gives you the actual OSD size, which can be

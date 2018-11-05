@@ -47,6 +47,11 @@ Interface changes
     - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
       as the only option. The `--spirv-compiler` option itself has been marked
       as deprecated, and may be removed in the future.
+    - remove the special-case for the option "video-aspect". When video-aspect
+      is set to "0" or "-1", it will actually return those values, rather than
+      turning this into the effective video aspect with those settings. If
+      you need access to the effective video aspect, you can e.g. divide
+      `video-out-params/dw` by `video-out-params/dh`.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

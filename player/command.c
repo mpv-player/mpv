@@ -2995,44 +2995,6 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, 1.0 / avg);
 }
 
-/// Video aspect (RO)
-static int mp_property_aspect(void *ctx, struct m_property *prop,
-                              int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-
-    float aspect = mpctx->opts->movie_aspect;
-    if (mpctx->vo_chain && aspect <= 0) {
-        struct mp_image_params *params = &mpctx->vo_chain->filter->input_params;
-        if (params && params->p_w > 0 && params->p_h > 0) {
-            int d_w, d_h;
-            mp_image_params_get_dsize(params, &d_w, &d_h);
-            aspect = (float)d_w / d_h;
-        }
-    }
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (track && track->stream && aspect <= 0) {
-        struct mp_codec_params *c = track->stream->codec;
-        if (c->disp_w && c->disp_h)
-            aspect = (float)c->disp_w / c->disp_h;
-    }
-
-    switch (action) {
-    case M_PROPERTY_PRINT: {
-        if (mpctx->opts->movie_aspect < 0) {
-            *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
-            return M_PROPERTY_OK;
-        }
-        break;
-    }
-    case M_PROPERTY_GET: {
-        *(float *)arg = aspect;
-        return M_PROPERTY_OK;
-    }
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 /// Selected subtitles (RW)
 static int mp_property_sub(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -3952,7 +3914,6 @@ static const struct m_property mp_properties_base[] = {
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
-    {"video-aspect", mp_property_aspect},
     {"vid", mp_property_video},
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
