@@ -2335,6 +2335,9 @@ mp.set_key_bindings({
                             function(e) process_event("shift+mbtn_left", "down")  end},
     {"mbtn_right",          function(e) process_event("mbtn_right", "up") end,
                             function(e) process_event("mbtn_right", "down")  end},
+    -- alias to shift_mbtn_left for single-handed mouse use
+    {"mbtn_mid",            function(e) process_event("shift+mbtn_left", "up") end,
+                            function(e) process_event("shift+mbtn_left", "down")  end},
     {"wheel_up",            function(e) process_event("wheel_up", "press") end},
     {"wheel_down",          function(e) process_event("wheel_down", "press") end},
     {"mbtn_left_dbl",       "ignore"},
