@@ -158,14 +158,8 @@ static struct vk_slab *slab_alloc(struct mpvk_ctx *vk, struct vk_heap *heap,
         for (int i = 0; i < vk->num_pools; i++)
             qfs[i] = vk->pools[i]->qf;
 
-        VkExternalMemoryBufferCreateInfoKHR ebinfo = {
-            .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
-            .handleTypes = eminfo.handleTypes,
-        };
-
         VkBufferCreateInfo binfo = {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-            .pNext = heap->exportable ? &ebinfo : NULL,
             .size  = slab->size,
             .usage = heap->usage,
             .sharingMode = vk->num_pools > 1 ? VK_SHARING_MODE_CONCURRENT
