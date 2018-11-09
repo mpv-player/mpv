@@ -80,6 +80,9 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_GL_DXINTEROP
     &ra_ctx_dxgl,
 #endif
+#if HAVE_GL_WAYLAND
+    &ra_ctx_wayland_egl,
+#endif
 #if HAVE_GL_X11
     &ra_ctx_glx_probe,
 #endif
@@ -88,9 +91,6 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_GL_X11
     &ra_ctx_glx,
-#endif
-#if HAVE_GL_WAYLAND
-    &ra_ctx_wayland_egl,
 #endif
 #if HAVE_EGL_DRM
     &ra_ctx_drm_egl,
