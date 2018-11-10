@@ -1241,7 +1241,7 @@ static void blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     }
 }
 
-static int desc_namespace(enum ra_vartype type)
+static int desc_namespace(struct ra *ra, enum ra_vartype type)
 {
     // Images and SSBOs both use UAV bindings
     if (type == RA_VARTYPE_IMG_W)
