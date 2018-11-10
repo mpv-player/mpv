@@ -41,8 +41,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
     struct mpvk_ctx *vk = &p->vk;
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
 
-    if (!mpvk_instance_init(vk, ctx->log, VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
-                            ctx->opts.debug))
+    if (!mpvk_init(vk, ctx, VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME))
         goto error;
 
     if (!vo_wayland_init(ctx->vo))
@@ -54,10 +53,10 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
          .surface = ctx->vo->wl->surface,
     };
 
-    VkResult res = vkCreateWaylandSurfaceKHR(vk->inst, &wlinfo, MPVK_ALLOCATOR,
-                                             &vk->surf);
+    VkInstance inst = vk->vkinst->instance;
+    VkResult res = vkCreateWaylandSurfaceKHR(inst, &wlinfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
-        MP_MSG(ctx, msgl, "Failed creating Wayland surface: %s\n", vk_err(res));
+        MP_MSG(ctx, msgl, "Failed creating Wayland surface\n");
         goto error;
     }
 
@@ -77,7 +76,7 @@ error:
     return false;
 }
 
-static void resize(struct ra_ctx *ctx)
+static bool resize(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
 
@@ -87,9 +86,7 @@ static void resize(struct ra_ctx *ctx)
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
 
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-
-    wl->vo->dwidth  = width;
-    wl->vo->dheight = height;
+    return ra_vk_ctx_resize(ctx, width, height);
 }
 
 static bool wayland_vk_reconfig(struct ra_ctx *ctx)
@@ -104,8 +101,7 @@ static int wayland_vk_control(struct ra_ctx *ctx, int *events, int request, void
 {
     int ret = vo_wayland_control(ctx->vo, events, request, arg);
     if (*events & VO_EVENT_RESIZE) {
-        resize(ctx);
-        if (ra_vk_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight))
+        if (!resize(ctx))
             return VO_ERROR;
     }
     return ret;

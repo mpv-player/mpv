@@ -52,7 +52,12 @@ void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va);
 
-bool mp_msg_test(struct mp_log *log, int lev);
+int mp_msg_level(struct mp_log *log);
+
+static inline bool mp_msg_test(struct mp_log *log, int lev)
+{
+    return lev <= mp_msg_level(log);
+}
 
 // Convenience macros.
 #define mp_fatal(log, ...)      mp_msg(log, MSGL_FATAL, __VA_ARGS__)
