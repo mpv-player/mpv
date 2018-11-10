@@ -17,7 +17,8 @@ struct vk_memslice {
 
 void vk_free_memslice(struct mpvk_ctx *vk, struct vk_memslice slice);
 bool vk_malloc_generic(struct mpvk_ctx *vk, VkMemoryRequirements reqs,
-                       VkMemoryPropertyFlags flags, struct vk_memslice *out);
+                       VkMemoryPropertyFlags flags, bool exportable,
+                       struct vk_memslice *out);
 
 // Represents a single "slice" of a larger buffer
 struct vk_bufslice {

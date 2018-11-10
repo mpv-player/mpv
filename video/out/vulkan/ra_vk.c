@@ -608,7 +608,7 @@ static struct ra_tex *vk_tex_create(struct ra *ra,
     vkGetImageMemoryRequirements(vk->dev, tex_vk->img, &reqs);
 
     struct vk_memslice *mem = &tex_vk->mem;
-    if (!vk_malloc_generic(vk, reqs, memFlags, mem))
+    if (!vk_malloc_generic(vk, reqs, memFlags, params->exportable, mem))
         goto error;
 
     VK(vkBindImageMemory(vk->dev, tex_vk->img, mem->vkmem, mem->offset));
@@ -992,6 +992,19 @@ bool ra_vk_buf_get_external_info(struct ra *ra, struct ra_buf *buf, struct vk_ex
 
     struct ra_buf_vk *buf_vk = buf->priv;
     struct vk_memslice *mem = &buf_vk->slice.mem;
+
+    return ra_vk_mem_get_external_info(ra, mem, ret);
+}
+
+bool ra_vk_tex_get_external_info(struct ra *ra, struct ra_tex *tex, struct vk_external_mem *ret)
+{
+    if (!tex->params.exportable) {
+        MP_ERR(ra, "Image must be created as exportable to be able to export it...");
+        return false;
+    }
+
+    struct ra_tex_vk *tex_vk = tex->priv;
+    struct vk_memslice *mem = &tex_vk->mem;
 
     return ra_vk_mem_get_external_info(ra, mem, ret);
 }

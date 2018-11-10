@@ -140,6 +140,7 @@ struct ra_tex_params {
     bool non_normalized;    // hack for GL_TEXTURE_RECTANGLE OSX idiocy
                             // always set to false, except in OSX code
     bool external_oes;      // hack for GL_TEXTURE_EXTERNAL_OES idiocy
+    bool exportable;        // can be exported for use with an external API
     // If non-NULL, the texture will be created with these contents. Using
     // this does *not* require setting host_mutable. Otherwise, the initial
     // data is undefined.
