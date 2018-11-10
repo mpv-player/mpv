@@ -326,6 +326,7 @@ struct ra_tex_vk {
     struct vk_signal *sig;
     VkPipelineStageFlags sig_stage;
     VkSemaphore ext_dep; // external semaphore, not owned by the ra_tex
+    bool held; // is the texture currently held
 };
 
 void ra_tex_vk_external_dep(struct ra *ra, struct ra_tex *tex, VkSemaphore dep)
@@ -336,10 +337,12 @@ void ra_tex_vk_external_dep(struct ra *ra, struct ra_tex *tex, VkSemaphore dep)
 }
 
 // Small helper to ease image barrier creation. if `discard` is set, the contents
-// of the image will be undefined after the barrier
+// of the image will be undefined after the barrier. If `hold` is set, the image
+// will be transitioned to the external queue family. If `hold` is not set, the
+// image will be transitioned back from the external queue family.
 static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
                         VkPipelineStageFlags stage, VkAccessFlags newAccess,
-                        VkImageLayout newLayout, bool discard)
+                        VkImageLayout newLayout, bool discard, bool hold)
 {
     struct mpvk_ctx *vk = ra_vk_get(ra);
     struct ra_tex_vk *tex_vk = tex->priv;
@@ -349,12 +352,17 @@ static void tex_barrier(struct ra *ra, struct vk_cmd *cmd, struct ra_tex *tex,
         tex_vk->ext_dep = NULL;
     }
 
+    bool exportable = tex->params.exportable;
     VkImageMemoryBarrier imgBarrier = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .oldLayout = tex_vk->current_layout,
         .newLayout = newLayout,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .srcQueueFamilyIndex = tex_vk->held && exportable ?
+                               VK_QUEUE_FAMILY_EXTERNAL_KHR :
+                               VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = hold && exportable ?
+                               VK_QUEUE_FAMILY_EXTERNAL_KHR :
+                               VK_QUEUE_FAMILY_IGNORED,
         .srcAccessMask = tex_vk->current_access,
         .dstAccessMask = newAccess,
         .image = tex_vk->img,
@@ -925,7 +933,7 @@ static bool vk_tex_upload(struct ra *ra,
     tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_WRITE_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                params->invalidate);
+                params->invalidate, false);
 
     vkCmdCopyBufferToImage(cmd->buf, buf_vk->slice.buf, tex_vk->img,
                            tex_vk->current_layout, 1, &region);
@@ -1549,7 +1557,7 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         assert(tex->params.render_src);
         tex_barrier(ra, cmd, tex, passStages[pass->params.type],
                     VK_ACCESS_SHADER_READ_BIT,
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false, false);
 
         VkDescriptorImageInfo *iinfo = &pass_vk->dsiinfo[idx];
         *iinfo = (VkDescriptorImageInfo) {
@@ -1568,7 +1576,7 @@ static void vk_update_descriptor(struct ra *ra, struct vk_cmd *cmd,
         assert(tex->params.storage_dst);
         tex_barrier(ra, cmd, tex, passStages[pass->params.type],
                     VK_ACCESS_SHADER_WRITE_BIT,
-                    VK_IMAGE_LAYOUT_GENERAL, false);
+                    VK_IMAGE_LAYOUT_GENERAL, false, false);
 
         VkDescriptorImageInfo *iinfo = &pass_vk->dsiinfo[idx];
         *iinfo = (VkDescriptorImageInfo) {
@@ -1699,7 +1707,7 @@ static void vk_renderpass_run(struct ra *ra,
 
         tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, pass_vk->initialLayout,
-                    pass->params.invalidate_target);
+                    pass->params.invalidate_target, false);
 
         VkViewport viewport = {
             .x = params->viewport.x0,
@@ -1763,7 +1771,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     tex_barrier(ra, cmd, src, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_READ_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                false);
+                false, false);
 
     bool discard = dst_rc->x0 == 0 &&
                    dst_rc->y0 == 0 &&
@@ -1773,7 +1781,7 @@ static void vk_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     tex_barrier(ra, cmd, dst, VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_ACCESS_TRANSFER_WRITE_BIT,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                discard);
+                discard, false);
 
     // Under certain conditions we can use vkCmdCopyImage instead of
     // vkCmdBlitImage, namely when the blit operation does not require
@@ -1828,7 +1836,7 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
         // To clear the entire image, we can use the efficient clear command
         tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_ACCESS_TRANSFER_WRITE_BIT,
-                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, true);
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, true, false);
 
         VkClearColorValue clearColor = {0};
         for (int c = 0; c < 4; c++)
@@ -1987,9 +1995,105 @@ struct vk_cmd *ra_vk_submit(struct ra *ra, struct ra_tex *tex)
     assert(tex_vk->external_img);
     tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
                 VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                false);
+                false, false);
 
     // Return this directly instead of going through vk_submit
     p->cmd = NULL;
     return cmd;
+}
+
+bool ra_vk_create_external_semaphore(struct ra *ra,
+                                     struct vk_external_semaphore *ret)
+{
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+
+    const VkExportSemaphoreCreateInfoKHR einfo = {
+        .sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR,
+        .handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+    };
+
+    const VkSemaphoreCreateInfo sinfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = &einfo,
+    };
+
+    VkSemaphore s = NULL;
+    VK(vkCreateSemaphore(vk->dev, &sinfo, MPVK_ALLOCATOR, &s));
+    ret->s = s;
+
+#if HAVE_WIN32_DESKTOP
+    HANDLE handle;
+
+    VkSemaphoreGetWin32HandleInfoKHR hinfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
+        .pNext = NULL,
+        .semaphore = s,
+        .handleType = IsWindows8OrGreater()
+            ? VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
+            : VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_KHR,
+    };
+
+    VK_LOAD_PFN(vkGetSemaphoreWin32HandleKHR);
+    VK(pfn_vkGetSemaphoreWin32HandleKHR(vk->dev, &hinfo, &handle));
+
+    ret->handle = handle;
+#else
+    int fd;
+
+    VkSemaphoreGetFdInfoKHR finfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
+        .semaphore = s,
+        .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+    };
+
+    VK_LOAD_PFN(vkGetSemaphoreFdKHR);
+    VK(pfn_vkGetSemaphoreFdKHR(vk->dev, &finfo, &fd));
+
+    ret->fd = fd;
+#endif
+
+    return true;
+
+error:
+    if (s) {
+        vkDestroySemaphore(vk->dev, s, NULL);
+    }
+    return false;
+}
+
+bool ra_vk_hold(struct ra *ra, struct ra_tex *tex,
+                VkImageLayout layout, VkAccessFlags access,
+                VkSemaphore sem_out)
+{
+    struct mpvk_ctx *vk = ra_vk_get(ra);
+    struct ra_tex_vk *tex_vk = tex->priv;
+    assert(!tex_vk->held);
+    assert(sem_out);
+
+    struct vk_cmd *cmd = vk_require_cmd(ra, GRAPHICS);
+    if (!cmd) {
+        MP_ERR(ra, "Failed holding external image!");
+        return false;
+    }
+
+    tex_barrier(ra, cmd, tex, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                access, layout, false, true);
+    vk_cmd_sig(cmd, sem_out);
+    vk_submit(ra);
+    tex_vk->held = mpvk_flush_commands(vk);
+
+    return tex_vk->held;
+}
+
+void ra_vk_release(struct ra *ra, struct ra_tex *tex,
+                   VkImageLayout layout, VkAccessFlags access,
+                   VkSemaphore sem_in)
+{
+    struct ra_tex_vk *tex_vk = tex->priv;
+    assert(tex_vk->held);
+    ra_tex_vk_external_dep(ra, tex, sem_in);
+
+    tex_vk->current_layout = layout;
+    tex_vk->current_access = access;
+    tex_vk->held = false;
 }

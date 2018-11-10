@@ -44,8 +44,50 @@ struct vk_external_mem {
 // Export an ra_buf for importing by another api.
 bool ra_vk_buf_get_external_info(struct ra *ra, struct ra_buf *buf, struct vk_external_mem *ret);
 
+// Export an ra_tex for importing by another api.
+bool ra_vk_tex_get_external_info(struct ra *ra, struct ra_tex *tex, struct vk_external_mem *ret);
+
 // Set the buffer user data
 void ra_vk_buf_set_user_data(struct ra_buf *buf, void *priv);
 
 // Get the buffer user data
 void *ra_vk_buf_get_user_data(struct ra_buf *buf);
+
+struct vk_external_semaphore {
+    VkSemaphore s;
+#if HAVE_WIN32_DESKTOP
+    HANDLE handle;
+#else
+    int fd;
+#endif
+};
+
+// Create and export a semaphore for external use. Both the semaphore and
+// exported object are returned. The caller is responsible for destroying
+// the semaphore and for closing the fd or handle if it is not imported by
+// another API.
+//
+// Returns whether successful.
+bool ra_vk_create_external_semaphore(struct ra *ra,
+                                     struct vk_external_semaphore *ret);
+
+// "Hold" a shared image. This will transition the image into the layout and
+// access mode specified by the user, and fire the given semaphore (required!)
+// when this is done. This marks the image as held. Attempting to perform any
+// ra_tex_* operation (except ra_tex_destroy) on a held image is an error.
+//
+// Returns whether successful.
+bool ra_vk_hold(struct ra *ra, struct ra_tex *tex,
+                VkImageLayout layout, VkAccessFlags access,
+                VkSemaphore sem_out);
+
+// "Release" a shared image, meaning it is no longer held. `layout` and
+// `access` describe the current state of the image at the point in time when
+// the user is releasing it. Performing any operation on the VkImage underlying
+// this `ra_tex` while it is not being held by the user is undefined behavior.
+//
+// If `sem_in` is specified, it must fire before ra_vk will actually use
+// or modify the image. (Optional)
+void ra_vk_release(struct ra *ra, struct ra_tex *tex,
+                   VkImageLayout layout, VkAccessFlags access,
+                   VkSemaphore sem_in);

@@ -193,6 +193,7 @@ bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log,
     // Enable whatever extensions were compiled in.
     const char *extensions[] = {
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
         VK_KHR_SURFACE_EXTENSION_NAME,
         surf_ext_name,
@@ -485,6 +486,16 @@ static bool detect_device_extensions(struct mpvk_ctx *vk)
             vk->has_ext_external_memory_export = true;
             continue;
         }
+        if (!strcmp(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+                    props[i].extensionName)) {
+            vk->has_ext_external_semaphore = true;
+            continue;
+        }
+        if (!strcmp(MP_VK_EXTERNAL_SEMAPHORE_EXPORT_EXTENSION_NAME,
+                    props[i].extensionName)) {
+            vk->has_ext_external_semaphore_export = true;
+            continue;
+        }
     }
 
     ret = true;
@@ -556,10 +567,18 @@ bool mpvk_device_init(struct mpvk_ctx *vk, struct mpvk_device_opts opts)
     const char **exts = NULL;
     int num_exts = 0;
     MP_TARRAY_APPEND(tmp, exts, num_exts, VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-    if (vk->has_ext_external_memory)
+    if (vk->has_ext_external_memory) {
         MP_TARRAY_APPEND(tmp, exts, num_exts, VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
-    if (vk->has_ext_external_memory_export)
+    }
+    if (vk->has_ext_external_memory_export) {
         MP_TARRAY_APPEND(tmp, exts, num_exts, MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME);
+    }
+    if (vk->has_ext_external_semaphore) {
+        MP_TARRAY_APPEND(tmp, exts, num_exts, VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+    }
+    if (vk->has_ext_external_semaphore_export) {
+        MP_TARRAY_APPEND(tmp, exts, num_exts, MP_VK_EXTERNAL_SEMAPHORE_EXPORT_EXTENSION_NAME);
+    }
     if (vk->spirv->required_ext)
         MP_TARRAY_APPEND(tmp, exts, num_exts, vk->spirv->required_ext);
 

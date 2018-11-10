@@ -77,4 +77,6 @@ struct mpvk_ctx {
     // Extension availability
     bool has_ext_external_memory;
     bool has_ext_external_memory_export;
+    bool has_ext_external_semaphore;
+    bool has_ext_external_semaphore_export;
 };
