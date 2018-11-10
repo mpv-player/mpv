@@ -796,12 +796,6 @@ error:
 
     vk->num_cmds_queued = 0;
 
-    // Rotate the queues to ensure good parallelism across frames
-    for (int i = 0; i < vk->num_pools; i++) {
-        struct vk_cmdpool *pool = vk->pools[i];
-        pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
-    }
-
     return ret;
 }
 
