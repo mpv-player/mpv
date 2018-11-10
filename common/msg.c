@@ -127,19 +127,19 @@ static void update_loglevel(struct mp_log *log)
     pthread_mutex_unlock(&mp_msg_lock);
 }
 
-// Return whether the message at this verbosity level would be actually printed.
+// Get the current effective msg level.
 // Thread-safety: see mp_msg().
-bool mp_msg_test(struct mp_log *log, int lev)
+int mp_msg_level(struct mp_log *log)
 {
     struct mp_log_root *root = log->root;
     if (!root)
-        return false;
+        return -1;
     if (atomic_load_explicit(&log->reload_counter, memory_order_relaxed) !=
         atomic_load_explicit(&root->reload_counter, memory_order_relaxed))
     {
         update_loglevel(log);
     }
-    return lev <= log->level;
+    return log->level;
 }
 
 // Reposition cursor and clear lines for outputting the status line. In certain

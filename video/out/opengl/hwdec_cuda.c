@@ -39,9 +39,11 @@
 #include "ra_gl.h"
 #endif
 #if HAVE_VULKAN
+/*
 #include "video/out/vulkan/formats.h"
 #include "video/out/vulkan/ra_vk.h"
 #include "video/out/vulkan/utils.h"
+*/
 #endif
 
 #if HAVE_WIN32_DESKTOP
@@ -125,6 +127,8 @@ static int cuda_init(struct ra_hwdec *hw)
 #endif
 
 #if HAVE_VULKAN
+    return -1; // TODO: reimplement
+    /*
     p->is_vk = ra_vk_get(hw->ra) != NULL;
     if (p->is_vk) {
         if (!ra_vk_get(hw->ra)->has_ext_external_memory_export) {
@@ -133,6 +137,7 @@ static int cuda_init(struct ra_hwdec *hw)
             return -1;
         }
     }
+    */
 #endif
 
     if (!p->is_gl && !p->is_vk) {
@@ -197,6 +202,7 @@ static int cuda_init(struct ra_hwdec *hw)
         }
     } else if (p->is_vk) {
 #if HAVE_VULKAN
+        /*
         uint8_t vk_uuid[VK_UUID_SIZE];
         struct mpvk_ctx *vk = ra_vk_get(hw->ra);
 
@@ -236,6 +242,7 @@ static int cuda_init(struct ra_hwdec *hw)
             return -1;
 
         p->decode_ctx = p->display_ctx;
+        */
 #endif
     }
 
@@ -293,6 +300,7 @@ static void cuda_uninit(struct ra_hwdec *hw)
 #define CHECK_CU(x) check_cu((mapper)->owner, (x), #x)
 
 #if HAVE_VULKAN
+/*
 static struct ra_buf *cuda_buf_pool_get(struct ra_hwdec_mapper *mapper, int n)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
@@ -390,6 +398,7 @@ static void cuda_buf_pool_uninit(struct ra_hwdec_mapper *mapper, int n)
     }
     ra_buf_pool_uninit(mapper->ra, pool);
 }
+*/
 #endif // HAVE_VULKAN
 
 static int mapper_init(struct ra_hwdec_mapper *mapper)
@@ -497,7 +506,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 
 #if HAVE_VULKAN
-        cuda_buf_pool_uninit(mapper, n);
+        //cuda_buf_pool_uninit(mapper, n);
 #endif
     }
     CHECK_CU(cu->cuCtxPopCurrent(&dummy));
