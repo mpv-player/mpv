@@ -521,12 +521,15 @@ static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
     if (!mpvk_flush_commands(vk))
         return false;
 
-    // Older nvidia drivers can spontaneously combust when submitting to the
-    // same queue as we're rendering from, in a multi-queue scenario. Safest
-    // option is to flush the commands first and then submit to the next queue.
-    // We can drop this hack in the future, I suppose.
-    struct vk_cmdpool *pool = vk->pool_graphics;
-    VkQueue queue = pool->queues[pool->idx_queues];
+    // Submit to the same queue that we were currently rendering to
+    struct vk_cmdpool *pool_gfx = vk->pool_graphics;
+    VkQueue queue = pool_gfx->queues[pool_gfx->idx_queues];
+
+    // Rotate the queues to ensure good parallelism across frames
+    for (int i = 0; i < vk->num_pools; i++) {
+        struct vk_cmdpool *pool = vk->pools[i];
+        pool->idx_queues = (pool->idx_queues + 1) % pool->num_queues;
+    }
 
     VkPresentInfoKHR pinfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
