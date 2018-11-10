@@ -1837,7 +1837,7 @@ static void vk_clear(struct ra *ra, struct ra_tex *tex, float color[4],
     }
 }
 
-static int vk_desc_namespace(enum ra_vartype type)
+static int vk_desc_namespace(struct ra *ra, enum ra_vartype type)
 {
     return 0;
 }

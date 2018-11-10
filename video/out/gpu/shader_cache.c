@@ -254,7 +254,7 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
 
 static int gl_sc_next_binding(struct gl_shader_cache *sc, enum ra_vartype type)
 {
-    return sc->next_binding[sc->ra->fns->desc_namespace(type)]++;
+    return sc->next_binding[sc->ra->fns->desc_namespace(sc->ra, type)]++;
 }
 
 void gl_sc_uniform_dynamic(struct gl_shader_cache *sc)
