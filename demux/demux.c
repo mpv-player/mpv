@@ -2498,7 +2498,7 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                     talloc_steal(demuxer, log);
                     log = NULL;
                     demuxer->in->owns_stream =
-                        params ? !params->does_not_own_stream : false;
+                        params ? !params->does_not_own_stream : true;
                     goto done;
                 }
             }
