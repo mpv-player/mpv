@@ -128,6 +128,7 @@ class MPVHelper: NSObject {
     }
 
     func drawRender(_ surface: NSSize, skip: Bool = false) {
+        deinitLock.lock()
         if mpvRenderContext != nil {
             var i: GLint = 0
             var flip: CInt = 1
@@ -152,6 +153,7 @@ class MPVHelper: NSObject {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
         }
+        deinitLock.unlock()
     }
 
     func setRenderICCProfile(_ profile: NSColorSpace) {
