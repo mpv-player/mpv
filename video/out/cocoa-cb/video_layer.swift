@@ -148,6 +148,18 @@ class VideoLayer: CAOpenGLLayer {
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         if cglPixelFormat != nil { return cglPixelFormat! }
 
+        let attributeLookUp: [UInt32:String] = [
+            kCGLOGLPVersion_3_2_Core.rawValue:     "kCGLOGLPVersion_3_2_Core",
+            kCGLOGLPVersion_Legacy.rawValue:       "kCGLOGLPVersion_Legacy",
+            kCGLPFAOpenGLProfile.rawValue:         "kCGLPFAOpenGLProfile",
+            kCGLPFAAccelerated.rawValue:           "kCGLPFAAccelerated",
+            kCGLPFADoubleBuffer.rawValue:          "kCGLPFADoubleBuffer",
+            kCGLPFABackingStore.rawValue:          "kCGLPFABackingStore",
+            kCGLPFAAllowOfflineRenderers.rawValue: "kCGLPFAAllowOfflineRenderers",
+            kCGLPFASupportsAutomaticGraphicsSwitching.rawValue: "kCGLPFASupportsAutomaticGraphicsSwitching",
+            0: ""
+        ]
+
         let glVersions: [CGLOpenGLProfile] = [
             kCGLOGLPVersion_3_2_Core,
             kCGLOGLPVersion_Legacy
@@ -175,6 +187,13 @@ class VideoLayer: CAOpenGLLayer {
                 if err == kCGLBadAttribute || err == kCGLBadPixelFormat || pix == nil {
                     glAttributes.remove(at: index)
                 } else {
+                    var attArray = glAttributes.map({ (value: _CGLPixelFormatAttribute) -> String in
+                        return attributeLookUp[value.rawValue]!
+                    })
+                    attArray.removeLast()
+
+                    mpv.sendVerbose("Created CGL pixel format with attributes: " +
+                                    "\(attArray.joined(separator: ", "))")
                     break verLoop
                 }
             }
