@@ -124,6 +124,12 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     if (gl->BlitFramebuffer)
         ra->caps |= RA_CAP_BLIT;
 
+    // Disable compute shaders for GLSL < 420. This work-around is needed since
+    // some buggy OpenGL drivers expose compute shaders for lower GLSL versions,
+    // despite the spec requiring 420+.
+    if (ra->glsl_version < 420)
+        ra->caps &= ~RA_CAP_COMPUTE;
+
     int gl_fmt_features = gl_format_feature_flags(gl);
 
     for (int n = 0; gl_formats[n].internal_format; n++) {
