@@ -39,6 +39,43 @@ class VideoLayer: CAOpenGLLayer {
 
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue.draw")
 
+    let glVersions: [CGLOpenGLProfile] = [
+        kCGLOGLPVersion_3_2_Core,
+        kCGLOGLPVersion_Legacy
+    ]
+
+    let glFormatBase: [CGLPixelFormatAttribute] = [
+        kCGLPFAOpenGLProfile,
+        kCGLPFAAccelerated,
+        kCGLPFADoubleBuffer
+    ]
+
+    let glFormatSoftwareBase: [CGLPixelFormatAttribute] = [
+        kCGLPFAOpenGLProfile,
+        kCGLPFARendererID,
+        CGLPixelFormatAttribute(UInt32(kCGLRendererGenericFloatID)),
+        kCGLPFADoubleBuffer
+    ]
+
+    let glFormatOptional: [CGLPixelFormatAttribute] = [
+        kCGLPFABackingStore,
+        kCGLPFAAllowOfflineRenderers,
+        kCGLPFASupportsAutomaticGraphicsSwitching
+    ]
+
+    let attributeLookUp: [UInt32:String] = [
+        kCGLOGLPVersion_3_2_Core.rawValue:     "kCGLOGLPVersion_3_2_Core",
+        kCGLOGLPVersion_Legacy.rawValue:       "kCGLOGLPVersion_Legacy",
+        kCGLPFAOpenGLProfile.rawValue:         "kCGLPFAOpenGLProfile",
+        UInt32(kCGLRendererGenericFloatID):    "kCGLRendererGenericFloatID",
+        kCGLPFARendererID.rawValue:            "kCGLPFARendererID",
+        kCGLPFAAccelerated.rawValue:           "kCGLPFAAccelerated",
+        kCGLPFADoubleBuffer.rawValue:          "kCGLPFADoubleBuffer",
+        kCGLPFABackingStore.rawValue:          "kCGLPFABackingStore",
+        kCGLPFAAllowOfflineRenderers.rawValue: "kCGLPFAAllowOfflineRenderers",
+        kCGLPFASupportsAutomaticGraphicsSwitching.rawValue: "kCGLPFASupportsAutomaticGraphicsSwitching",
+    ]
+
     var needsICCUpdate: Bool = false {
         didSet {
             if needsICCUpdate == true {
@@ -148,82 +185,63 @@ class VideoLayer: CAOpenGLLayer {
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         if cglPixelFormat != nil { return cglPixelFormat! }
 
-        let attributeLookUp: [UInt32:String] = [
-            kCGLOGLPVersion_3_2_Core.rawValue:     "kCGLOGLPVersion_3_2_Core",
-            kCGLOGLPVersion_Legacy.rawValue:       "kCGLOGLPVersion_Legacy",
-            kCGLPFAOpenGLProfile.rawValue:         "kCGLPFAOpenGLProfile",
-            kCGLPFAAccelerated.rawValue:           "kCGLPFAAccelerated",
-            kCGLPFADoubleBuffer.rawValue:          "kCGLPFADoubleBuffer",
-            kCGLPFABackingStore.rawValue:          "kCGLPFABackingStore",
-            kCGLPFAAllowOfflineRenderers.rawValue: "kCGLPFAAllowOfflineRenderers",
-            kCGLPFASupportsAutomaticGraphicsSwitching.rawValue: "kCGLPFASupportsAutomaticGraphicsSwitching",
-            0: ""
-        ]
+        var pix: CGLPixelFormatObj?
+        var err: CGLError = CGLError(rawValue: 0)
 
-        let glVersions: [CGLOpenGLProfile] = [
-            kCGLOGLPVersion_3_2_Core,
-            kCGLOGLPVersion_Legacy
-        ]
+        if mpv.macOpts!.cocoa_cb_sw_renderer != 1 {
+            (pix, err) = createPixelFormat()
+        }
 
+        if (err != kCGLNoError || pix == nil) && mpv.macOpts!.cocoa_cb_sw_renderer != 0 {
+            (pix, err) = createPixelFormat(software: true)
+        }
+
+        if err != kCGLNoError || pix == nil {
+            mpv.sendError("Couldn't create any CGL pixel format")
+            exit(1)
+        }
+
+        return pix!
+    }
+
+    func createPixelFormat(software: Bool = false) -> (CGLPixelFormatObj?, CGLError) {
         var pix: CGLPixelFormatObj?
         var err: CGLError = CGLError(rawValue: 0)
         var npix: GLint = 0
 
-        verLoop : for ver in glVersions {
-            if mpv.macOpts!.cocoa_cb_sw_renderer == 1 { break }
+        for ver in glVersions {
+            var glBase = software ? glFormatSoftwareBase : glFormatBase
+            glBase.insert(CGLPixelFormatAttribute(ver.rawValue), at: 1)
+            var glFormat = glBase + glFormatOptional
 
-            var glAttributes: [CGLPixelFormatAttribute] = [
-                kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(ver.rawValue),
-                kCGLPFAAccelerated,
-                kCGLPFADoubleBuffer,
-                kCGLPFABackingStore,
-                kCGLPFAAllowOfflineRenderers,
-                kCGLPFASupportsAutomaticGraphicsSwitching,
-                _CGLPixelFormatAttribute(rawValue: 0)
-            ]
+            for index in stride(from: glFormat.count-1, through: glBase.count-1, by: -1) {
+                let format = glFormat + [_CGLPixelFormatAttribute(rawValue: 0)]
+                err = CGLChoosePixelFormat(format, &pix, &npix)
 
-            for index in stride(from: glAttributes.count-2, through: 4, by: -1) {
-                err = CGLChoosePixelFormat(glAttributes, &pix, &npix)
                 if err == kCGLBadAttribute || err == kCGLBadPixelFormat || pix == nil {
-                    glAttributes.remove(at: index)
+                    glFormat.remove(at: index)
                 } else {
-                    var attArray = glAttributes.map({ (value: _CGLPixelFormatAttribute) -> String in
+                    let attArray = glFormat.map({ (value: _CGLPixelFormatAttribute) -> String in
                         return attributeLookUp[value.rawValue]!
                     })
-                    attArray.removeLast()
 
                     mpv.sendVerbose("Created CGL pixel format with attributes: " +
                                     "\(attArray.joined(separator: ", "))")
-                    break verLoop
+                    return (pix, err)
                 }
             }
         }
 
-        if (err != kCGLNoError || pix == nil) && mpv.macOpts!.cocoa_cb_sw_renderer != 0 {
-            if mpv.macOpts!.cocoa_cb_sw_renderer == -1 {
-                let errS = String(cString: CGLErrorString(err))
-                mpv.sendWarning("Couldn't create hardware accelerated CGL " +
-                                "pixel format, falling back to software " +
-                                "renderer: \(errS) (\(err.rawValue))")
-            }
+        let errS = String(cString: CGLErrorString(err))
+        mpv.sendWarning("Couldn't create a " +
+                        "\(software ? "software" : "hardware accelerated") " +
+                        "CGL pixel format: \(errS) (\(err.rawValue))")
 
-            let glAttributes: [CGLPixelFormatAttribute] = [
-                kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(kCGLOGLPVersion_3_2_Core.rawValue),
-                kCGLPFARendererID, CGLPixelFormatAttribute(UInt32(kCGLRendererGenericFloatID)),
-                kCGLPFADoubleBuffer,
-                kCGLPFABackingStore,
-                _CGLPixelFormatAttribute(rawValue: 0)
-            ]
-
-            err = CGLChoosePixelFormat(glAttributes, &pix, &npix)
+        if software == false && mpv.macOpts!.cocoa_cb_sw_renderer == -1 {
+            mpv.sendWarning("Falling back to software renderer")
         }
 
-        if err != kCGLNoError || pix == nil {
-            let errS = String(cString: CGLErrorString(err))
-            mpv.sendError("Couldn't create any CGL pixel format: \(errS) (\(err.rawValue))")
-            exit(1)
-        }
-        return pix!
+        return (pix, err)
     }
 
     override func copyCGLContext(forPixelFormat pf: CGLPixelFormatObj) -> CGLContextObj {
