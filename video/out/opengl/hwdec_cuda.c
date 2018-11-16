@@ -424,6 +424,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
             .d = 1,
             .format = format,
             .render_src = true,
+            .host_mutable = p_owner->is_vk,
             .src_linear = format->linear_filter,
         };
 
