@@ -226,7 +226,7 @@ static bool resize(struct vo *vo)
 
     for (int i = 0; i < 2; i++) {
         if (!getMyXImage(p, i))
-            return -1;
+            return false;
     }
 
     const struct fmt_entry *fmte = mp_to_x_fmt;
@@ -241,7 +241,7 @@ static bool resize(struct vo *vo)
     }
     if (!fmte->mpfmt) {
         MP_ERR(vo, "X server image format not supported, use another VO.\n");
-        return -1;
+        return false;
     }
 
     mp_sws_set_from_cmdline(p->sws, vo->global);
