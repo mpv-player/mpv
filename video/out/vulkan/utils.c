@@ -192,6 +192,7 @@ bool mpvk_instance_init(struct mpvk_ctx *vk, struct mp_log *log,
 
     // Enable whatever extensions were compiled in.
     const char *extensions[] = {
+        VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
         VK_KHR_SURFACE_EXTENSION_NAME,
         surf_ext_name,
