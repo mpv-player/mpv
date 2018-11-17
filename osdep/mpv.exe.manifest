@@ -8,8 +8,9 @@
     />
     <description>mpv - The Movie Player</description>
     <application xmlns="urn:schemas-microsoft-com:asm.v3">
-        <windowsSettings xmlns:ws="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
-            <ws:dpiAware>True/PM</ws:dpiAware>
+        <windowsSettings>
+            <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">True/PM</dpiAware>
+            <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2,PerMonitor</dpiAwareness>
         </windowsSettings>
     </application>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">

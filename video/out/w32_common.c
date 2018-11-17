@@ -69,6 +69,7 @@ typedef enum MONITOR_DPI_TYPE {
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
     BOOL (WINAPI *pImmDisableIME)(DWORD);
+    BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
 };
 
 struct vo_w32_state {
@@ -110,6 +111,7 @@ struct vo_w32_state {
     uint32_t o_dheight;
 
     int dpi;
+    double dpi_scale;
 
     bool disable_screensaver;
     bool cursor_visible;
@@ -148,16 +150,22 @@ struct vo_w32_state {
     HANDLE avrt_handle;
 };
 
-static void add_window_borders(HWND hwnd, RECT *rc)
+static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
-    AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
+    if (w32->api.pAdjustWindowRectExForDpi) {
+        w32->api.pAdjustWindowRectExForDpi(rc,
+            GetWindowLongPtrW(hwnd, GWL_STYLE), 0,
+            GetWindowLongPtrW(hwnd, GWL_EXSTYLE), w32->dpi);
+    } else {
+        AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
+    }
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
-static void subtract_window_borders(HWND hwnd, RECT *rc)
+static void subtract_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
     RECT b = { 0, 0, 0, 0 };
-    add_window_borders(hwnd, &b);
+    add_window_borders(w32, hwnd, &b);
     rc->left -= b.left;
     rc->top -= b.top;
     rc->right -= b.right;
@@ -523,16 +531,19 @@ static void update_dpi(struct vo_w32_state *w32)
     if (w32->api.pGetDpiForMonitor && w32->api.pGetDpiForMonitor(w32->monitor,
                                      MDT_EFFECTIVE_DPI, &dpiX, &dpiY) == S_OK) {
         w32->dpi = (int)dpiX;
+        w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
         MP_VERBOSE(w32, "DPI detected from the new API: %d\n", w32->dpi);
         return;
     }
     HDC hdc = GetDC(NULL);
     if (hdc) {
         w32->dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+        w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
         ReleaseDC(NULL, hdc);
         MP_VERBOSE(w32, "DPI detected from the old API: %d\n", w32->dpi);
     } else {
         w32->dpi = 96;
+        w32->dpi_scale = 1.0;
         MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", w32->dpi);
     }
 }
@@ -818,7 +829,7 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
 
     RECT screen = get_working_area(w32);
     if (w32->opts->border && w32->opts->fit_border)
-        subtract_window_borders(w32->window, &screen);
+        subtract_window_borders(w32, w32->window, &screen);
 
     if (fit_rect(&w32->windowrc, &screen)) {
         MP_VERBOSE(w32, "adjusted window bounds: %d:%d:%d:%d\n",
@@ -924,7 +935,7 @@ static void update_window_state(struct vo_w32_state *w32)
         return;
 
     RECT wr = w32->windowrc;
-    add_window_borders(w32->window, &wr);
+    add_window_borders(w32, w32->window, &wr);
 
     SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
                  wr.left, wr.top, rect_w(wr), rect_h(wr),
@@ -1088,7 +1099,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             // get client area of the windows if it had the rect rc
             // (subtracting the window borders)
             RECT r = *rc;
-            subtract_window_borders(w32->window, &r);
+            subtract_window_borders(w32, w32->window, &r);
             int c_w = rect_w(r), c_h = rect_h(r);
             float aspect = w32->o_dwidth / (float) MPMAX(w32->o_dheight, 1);
             int d_w = c_h * aspect - c_w;
@@ -1384,7 +1395,7 @@ static void gui_thread_reconfig(void *ptr)
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
 
-    vo_calc_window_geometry(vo, &screen, &geo);
+    vo_calc_window_geometry2(vo, &screen, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = w32->o_dwidth != vo->dwidth ||
@@ -1439,6 +1450,11 @@ static void w32_api_load(struct vo_w32_state *w32)
     // Available since Win8.1
     w32->api.pGetDpiForMonitor = !shcore_dll ? NULL :
                 (void *)GetProcAddress(shcore_dll, "GetDpiForMonitor");
+
+    HMODULE user32_dll = LoadLibraryW(L"user32.dll");
+    // Available since Win10
+    w32->api.pAdjustWindowRectExForDpi = !user32_dll ? NULL :
+                (void *)GetProcAddress(user32_dll, "AdjustWindowRectExForDpi");
 
     // imm32.dll must be loaded dynamically
     // to account for machines without East Asian language support
