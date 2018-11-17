@@ -110,8 +110,7 @@ class VideoLayer: CAOpenGLLayer {
         }
 
         updateSurfaceSize()
-        mpv.drawRender(surfaceSize!)
-        CGLFlushDrawable(ctx)
+        mpv.drawRender(surfaceSize!, ctx)
 
         if needsICCUpdate {
             needsICCUpdate = false
@@ -244,7 +243,7 @@ class VideoLayer: CAOpenGLLayer {
         if isUpdate && needsFlip {
             CGLSetCurrentContext(cglContext!)
             if mpv.isRenderUpdateFrame() {
-                mpv.drawRender(NSZeroSize, skip: true)
+                mpv.drawRender(NSZeroSize, cglContext!, skip: true)
             }
         }
         displayLock.unlock()
