@@ -128,7 +128,7 @@ class MPVHelper: NSObject {
         return flags & UInt64(MPV_RENDER_UPDATE_FRAME.rawValue) > 0
     }
 
-    func drawRender(_ surface: NSSize, skip: Bool = false) {
+    func drawRender(_ surface: NSSize, _ ctx: CGLContextObj, skip: Bool = false) {
         deinitLock.lock()
         if mpvRenderContext != nil {
             var i: GLint = 0
@@ -154,6 +154,9 @@ class MPVHelper: NSObject {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
         }
+
+        if !skip { CGLFlushDrawable(ctx) }
+
         deinitLock.unlock()
     }
 
