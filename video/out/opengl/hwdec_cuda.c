@@ -32,12 +32,17 @@
 #include <libavutil/hwcontext_cuda.h>
 
 #include "video/out/gpu/hwdec.h"
+#include "video/out/gpu/utils.h"
 #include "formats.h"
 #include "options/m_config.h"
+#if HAVE_GL
 #include "ra_gl.h"
+#endif
+#if HAVE_VULKAN
 #include "video/out/vulkan/formats.h"
 #include "video/out/vulkan/ra_vk.h"
 #include "video/out/vulkan/utils.h"
+#endif
 
 #if HAVE_WIN32_DESKTOP
 #include <versionhelpers.h>
