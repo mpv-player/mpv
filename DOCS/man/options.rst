@@ -4522,18 +4522,19 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
-    (currently) only relevant for ``--gpu-api=vulkan``. The possible choices
-    are:
+    (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
+    The possible choices are currently only:
 
     auto
         Use the first available compiler. (Default)
     shaderc
         Use libshaderc, which is an API wrapper around glslang. This is
         generally the most preferred, if available.
-    nvidia
-        Use nvidia's built-in compiler. Only works for nvidia GPUs. Can be
-        buggy, but also supports some features glslang does not. Only works
-        with vulkan.
+
+    .. note::
+
+        This option is deprecated, since there is only one reasonable value.
+        It may be removed in the future.
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,

@@ -44,6 +44,9 @@ Interface changes
       `--linear-downscaling`. This means that `--sigmoid-upscaling` no longer
       implies linear light downscaling as well, which was confusing.
     - the built-in `gpu-hq` profile now includes` --linear-downscaling`.
+    - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
+      as the only option. The `--spirv-compiler` option itself has been marked
+      as deprecated, and may be removed in the future.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

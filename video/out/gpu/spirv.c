@@ -5,21 +5,16 @@
 #include "config.h"
 
 extern const struct spirv_compiler_fns spirv_shaderc;
-extern const struct spirv_compiler_fns spirv_nvidia_builtin;
 
 // in probe-order
 enum {
     SPIRV_AUTO = 0,
     SPIRV_SHADERC, // generally preferred, but not packaged everywhere
-    SPIRV_NVIDIA,  // can be useful for testing, only available on nvidia
 };
 
 static const struct spirv_compiler_fns *compilers[] = {
 #if HAVE_SHADERC
     [SPIRV_SHADERC] = &spirv_shaderc,
-#endif
-#if HAVE_VULKAN
-    [SPIRV_NVIDIA]  = &spirv_nvidia_builtin,
 #endif
 };
 
@@ -27,9 +22,6 @@ static const struct m_opt_choice_alternatives compiler_choices[] = {
     {"auto",        SPIRV_AUTO},
 #if HAVE_SHADERC
     {"shaderc",     SPIRV_SHADERC},
-#endif
-#if HAVE_VULKAN
-    {"nvidia",      SPIRV_NVIDIA},
 #endif
     {0}
 };
