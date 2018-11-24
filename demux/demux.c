@@ -2475,7 +2475,7 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
     if (!force_format)
         force_format = stream->demuxer;
 
-    if (force_format && force_format[0]) {
+    if (force_format && force_format[0] && !stream->is_directory) {
         check_levels = d_request;
         if (force_format[0] == '+') {
             force_format += 1;
