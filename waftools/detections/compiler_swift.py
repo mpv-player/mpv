@@ -1,5 +1,6 @@
 import re
 from waflib import Utils
+from distutils.version import StrictVersion
 
 def __run(cmd):
     try:
@@ -15,12 +16,11 @@ def __add_swift_flags(ctx):
         "-target", "x86_64-apple-macosx10.10"
     ]
 
-    ver = re.compile("(?i)version\s?([\d.]+)")
-    ctx.env.SWIFT_VERSION = ver.search(__run([ctx.env.SWIFT, '-version'])).group(1)
-    major, minor = [int(n) for n in ctx.env.SWIFT_VERSION.split('.')[:2]]
+    verRe = re.compile("(?i)version\s?([\d.]+)")
+    ctx.env.SWIFT_VERSION = verRe.search(__run([ctx.env.SWIFT, '-version'])).group(1)
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
-    if major >= 3 and minor >= 1 or major >= 4:
+    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("3.1"):
         ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "3" ])
 
     if ctx.is_debug_build():
