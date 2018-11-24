@@ -427,7 +427,6 @@ Program Behavior
     the player with Shift+Q.
 
 ``--watch-later-directory=<path>``
-
     The directory in which to store the "watch later" temporary files.
 
     The default is a subdirectory named "watch_later" underneath the
