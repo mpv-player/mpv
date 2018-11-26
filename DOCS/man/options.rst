@@ -4531,10 +4531,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     shaderc
         Use libshaderc, which is an API wrapper around glslang. This is
         generally the most preferred, if available.
-    nvidia
-        Use nvidia's built-in compiler. Only works for nvidia GPUs. Can be
-        buggy, but also supports some features glslang does not. Only works
-        with vulkan.
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,

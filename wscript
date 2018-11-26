@@ -806,7 +806,8 @@ video_output_features = [
                 "video outputs use --disable-gl.",
     }, {
         'name': '--vulkan',
-        'desc':  'Vulkan context support',
+        'desc': 'Vulkan context support',
+        'deps': 'shaderc',
         # Lowest version tested, Ubuntu 16.04's
         'func': check_pkg_config('vulkan >= 1.0.61'),
     }, {

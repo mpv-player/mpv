@@ -501,7 +501,6 @@ def build(ctx):
         ( "video/out/vulkan/formats.c",          "vulkan" ),
         ( "video/out/vulkan/malloc.c",           "vulkan" ),
         ( "video/out/vulkan/ra_vk.c",            "vulkan" ),
-        ( "video/out/vulkan/spirv_nvidia.c",     "vulkan" ),
         ( "video/out/vulkan/utils.c",            "vulkan" ),
         ( "video/out/w32_common.c",              "win32-desktop" ),
         ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
