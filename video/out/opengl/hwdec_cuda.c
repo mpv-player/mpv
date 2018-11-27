@@ -39,11 +39,7 @@
 #include "ra_gl.h"
 #endif
 #if HAVE_VULKAN
-/*
-#include "video/out/vulkan/formats.h"
-#include "video/out/vulkan/ra_vk.h"
-#include "video/out/vulkan/utils.h"
-*/
+#include "video/out/placebo/ra_pl.h"
 #endif
 
 #if HAVE_WIN32_DESKTOP
@@ -58,16 +54,20 @@ struct priv_owner {
 
     bool is_gl;
     bool is_vk;
+
+    enum pl_handle_type handle_type;
 };
 
-struct ext_buf {
-#if HAVE_WIN32_DESKTOP
-    HANDLE handle;
-#else
-    int fd;
-#endif
+struct ext_vk {
     CUexternalMemory mem;
-    CUdeviceptr buf;
+    CUmipmappedArray mma;
+
+    const struct pl_tex *pltex;
+
+    const struct pl_sync *sync;
+
+    CUexternalSemaphore ss;
+    CUexternalSemaphore ws;
 };
 
 struct priv {
@@ -77,8 +77,7 @@ struct priv {
 
     CUcontext display_ctx;
 
-    struct ra_buf_params buf_params[4];
-    struct ra_buf_pool buf_pool[4];
+    struct ext_vk evk[4];
 };
 
 static int check_cu(struct ra_hwdec *hw, CUresult err, const char *func)
@@ -127,17 +126,26 @@ static int cuda_init(struct ra_hwdec *hw)
 #endif
 
 #if HAVE_VULKAN
-    return -1; // TODO: reimplement
-    /*
-    p->is_vk = ra_vk_get(hw->ra) != NULL;
+    p->handle_type =
+#if HAVE_WIN32_DESKTOP
+        IsWindows8OrGreater() ? PL_HANDLE_WIN32 : PL_HANDLE_WIN32_KMT;
+#else
+        PL_HANDLE_FD;
+#endif
+
+    const struct pl_gpu *gpu = ra_pl_get(hw->ra);
+    p->is_vk = gpu != NULL;
     if (p->is_vk) {
-        if (!ra_vk_get(hw->ra)->has_ext_external_memory_export) {
-            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires the %s extension\n",
-                       MP_VK_EXTERNAL_MEMORY_EXPORT_EXTENSION_NAME);
+        if (!(gpu->export_caps.tex & p->handle_type)) {
+            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",
+                       p->handle_type);
+            return -1;
+        } else if (!(gpu->export_caps.sync & p->handle_type)) {
+            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable semaphores of type 0x%X.\n",
+                       p->handle_type);
             return -1;
         }
     }
-    */
 #endif
 
     if (!p->is_gl && !p->is_vk) {
@@ -202,12 +210,6 @@ static int cuda_init(struct ra_hwdec *hw)
         }
     } else if (p->is_vk) {
 #if HAVE_VULKAN
-        /*
-        uint8_t vk_uuid[VK_UUID_SIZE];
-        struct mpvk_ctx *vk = ra_vk_get(hw->ra);
-
-        mpvk_get_phys_device_uuid(vk, vk_uuid);
-
         int count;
         ret = CHECK_CU(cu->cuDeviceGetCount(&count));
         if (ret < 0)
@@ -225,7 +227,7 @@ static int cuda_init(struct ra_hwdec *hw)
             if (ret < 0)
                 continue;
 
-            if (memcmp(vk_uuid, uuid.bytes, VK_UUID_SIZE) == 0) {
+            if (memcmp(gpu->uuid, uuid.bytes, sizeof (gpu->uuid)) == 0) {
                 display_dev = dev;
                 break;
             }
@@ -242,7 +244,6 @@ static int cuda_init(struct ra_hwdec *hw)
             return -1;
 
         p->decode_ctx = p->display_ctx;
-        */
 #endif
     }
 
@@ -300,105 +301,188 @@ static void cuda_uninit(struct ra_hwdec *hw)
 #define CHECK_CU(x) check_cu((mapper)->owner, (x), #x)
 
 #if HAVE_VULKAN
-/*
-static struct ra_buf *cuda_buf_pool_get(struct ra_hwdec_mapper *mapper, int n)
+static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
+                             const struct ra_format *format, int n)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
     struct priv *p = mapper->priv;
     CudaFunctions *cu = p_owner->cu;
+    int mem_fd = -1, wait_fd = -1, signal_fd = -1;
     int ret = 0;
 
-    struct ra_buf_pool *pool = &p->buf_pool[n];
-    struct ra_buf *buf = ra_buf_pool_get(mapper->ra, pool, &p->buf_params[n]);
-    if (!buf) {
+    struct ext_vk *evk = &p->evk[n];
+
+    const struct pl_gpu *gpu = ra_pl_get(mapper->ra);
+
+    struct pl_tex_params tex_params = {
+        .w = mp_image_plane_w(&p->layout, n),
+        .h = mp_image_plane_h(&p->layout, n),
+        .d = 0,
+        .format = ra_pl_fmt_get(format),
+        .sampleable = true,
+        .sample_mode = format->linear_filter ? PL_TEX_SAMPLE_LINEAR
+                                             : PL_TEX_SAMPLE_NEAREST,
+        .export_handle = p_owner->handle_type,
+    };
+
+    evk->pltex = pl_tex_create(gpu, &tex_params);
+    if (!evk->pltex) {
         goto error;
     }
 
-    if (!ra_vk_buf_get_user_data(buf)) {
-        struct ext_buf *ebuf = talloc_zero(NULL, struct ext_buf);
-        struct vk_external_mem mem_info;
+    struct ra_tex *ratex = talloc_ptrtype(NULL, ratex);
+    ret = mppl_wrap_tex(mapper->ra, evk->pltex, ratex);
+    if (!ret) {
+        pl_tex_destroy(gpu, &evk->pltex);
+        talloc_free(ratex);
+        goto error;
+    }
+    mapper->tex[n] = ratex;
 
-        bool success = ra_vk_buf_get_external_info(mapper->ra, buf, &mem_info);
-        if (!success) {
-            ret = -1;
+#if !HAVE_WIN32_DESKTOP
+    if (evk->pltex->params.export_handle == PL_HANDLE_FD) {
+        mem_fd = dup(evk->pltex->shared_mem.handle.fd);
+        if (mem_fd < 0) {
             goto error;
         }
-
-#if HAVE_WIN32_DESKTOP
-        ebuf->handle = mem_info.mem_handle;
-        MP_DBG(mapper, "vk_external_info[%d][%d]: %p %zu %zu\n", n, pool->index, ebuf->handle, mem_info.size, mem_info.offset);
-#else
-        ebuf->fd = mem_info.mem_fd;
-        MP_DBG(mapper, "vk_external_info[%d][%d]: %d %zu %zu\n", n, pool->index, ebuf->fd, mem_info.size, mem_info.offset);
-#endif
-
-        CUDA_EXTERNAL_MEMORY_HANDLE_DESC ext_desc = {
-#if HAVE_WIN32_DESKTOP
-            .type = IsWindows8OrGreater()
-                ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
-                : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
-            .handle.win32.handle = ebuf->handle,
-#else
-            .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
-            .handle.fd = ebuf->fd,
-#endif
-            .size = mem_info.mem_size,
-            .flags = 0,
-        };
-        ret = CHECK_CU(cu->cuImportExternalMemory(&ebuf->mem, &ext_desc));
-        if (ret < 0)
-            goto error;
-
-        CUDA_EXTERNAL_MEMORY_BUFFER_DESC buf_desc = {
-            .offset = mem_info.offset,
-            .size = mem_info.size,
-            .flags = 0,
-        };
-        ret = CHECK_CU(cu->cuExternalMemoryGetMappedBuffer(&ebuf->buf, ebuf->mem, &buf_desc));
-        if (ret < 0)
-            goto error;
-
-        ra_vk_buf_set_user_data(buf, ebuf);
     }
-    return buf;
+#endif
+
+    CUDA_EXTERNAL_MEMORY_HANDLE_DESC ext_desc = {
+#if HAVE_WIN32_DESKTOP
+        .type = IsWindows8OrGreater()
+            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
+            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .handle.win32.handle = evk->pltex->shared_mem.handle.handle,
+#else
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
+        .handle.fd = mem_fd,
+#endif
+        .size = evk->pltex->shared_mem.size,
+        .flags = 0,
+    };
+    ret = CHECK_CU(cu->cuImportExternalMemory(&evk->mem, &ext_desc));
+    if (ret < 0)
+        goto error;
+    // CUDA takes ownership of imported memory
+    mem_fd = -1;
+
+    CUarray_format cufmt;
+    switch (format->pixel_size / format->num_components) {
+    case 1:
+        cufmt = CU_AD_FORMAT_UNSIGNED_INT8;
+        break;
+    case 2:
+        cufmt = CU_AD_FORMAT_UNSIGNED_INT16;
+        break;
+    default:
+        ret = -1;
+        goto error;
+    }
+
+    CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC tex_desc = {
+        .offset = evk->pltex->shared_mem.offset,
+        .arrayDesc = {
+            .Width = mp_image_plane_w(&p->layout, n),
+            .Height = mp_image_plane_h(&p->layout, n),
+            .Depth = 0,
+            .Format = cufmt,
+            .NumChannels = format->num_components,
+            .Flags = 0,
+        },
+        .numLevels = 1,
+    };
+
+    ret = CHECK_CU(cu->cuExternalMemoryGetMappedMipmappedArray(&evk->mma, evk->mem, &tex_desc));
+    if (ret < 0)
+        goto error;
+
+    ret = CHECK_CU(cu->cuMipmappedArrayGetLevel(&p->cu_array[n], evk->mma, 0));
+    if (ret < 0)
+        goto error;
+
+    evk->sync = pl_sync_create(gpu, p_owner->handle_type);
+    if (!evk->sync) {
+        ret = -1;
+        goto error;
+    }
+
+#if !HAVE_WIN32_DESKTOP
+    if (evk->sync->handle_type == PL_HANDLE_FD) {
+        wait_fd = dup(evk->sync->wait_handle.fd);
+        signal_fd = dup(evk->sync->signal_handle.fd);
+    }
+#endif
+
+    CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC w_desc = {
+#if HAVE_WIN32_DESKTOP
+        .type = IsWindows8OrGreater()
+            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
+            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .handle.win32.handle = evk->sync->wait_handle.handle,
+#else
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
+        .handle.fd = wait_fd,
+#endif
+    };
+    ret = CHECK_CU(cu->cuImportExternalSemaphore(&evk->ws, &w_desc));
+    if (ret < 0)
+        goto error;
+    wait_fd = -1;
+
+    CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC s_desc = {
+#if HAVE_WIN32_DESKTOP
+        .type = IsWindows8OrGreater()
+            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
+            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .handle.win32.handle = evk->sync->signal_handle.handle,
+#else
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
+        .handle.fd = signal_fd,
+#endif
+    };
+
+    ret = CHECK_CU(cu->cuImportExternalSemaphore(&evk->ss, &s_desc));
+    if (ret < 0)
+        goto error;
+    signal_fd = -1;
+
+    return true;
 
 error:
-    MP_ERR(mapper, "cuda_buf_pool_get failed\n");
-    return NULL;
+    MP_ERR(mapper, "cuda_ext_vk_init failed\n");
+    if (mem_fd > -1)
+        close(mem_fd);
+    if (wait_fd > -1)
+        close(wait_fd);
+    if (signal_fd > -1)
+        close(signal_fd);
+    return false;
 }
 
-static void cuda_buf_pool_uninit(struct ra_hwdec_mapper *mapper, int n)
+static void cuda_ext_vk_uninit(struct ra_hwdec_mapper *mapper, int n)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
     struct priv *p = mapper->priv;
     CudaFunctions *cu = p_owner->cu;
 
-    struct ra_buf_pool *pool = &p->buf_pool[n];
-    for (int i = 0; i < pool->num_buffers; i++) {
-        struct ra_buf *buf = pool->buffers[i];
-        struct ext_buf *ebuf = ra_vk_buf_get_user_data(buf);
-        if (ebuf) {
-            if (ebuf->mem > 0) {
-                CHECK_CU(cu->cuDestroyExternalMemory(ebuf->mem));
-#if HAVE_WIN32_DESKTOP
-            }
-            if (ebuf->handle) {
-                // Handle must always be closed by us.
-                CloseHandle(ebuf->handle);
-            }
-#else
-            } else if (ebuf->fd > -1) {
-                // fd should only be closed if external memory was not imported
-                close(ebuf->fd);
-            }
-#endif
+    struct ext_vk *evk = &p->evk[n];
+    if (evk) {
+        if (evk->mma) {
+            CHECK_CU(cu->cuMipmappedArrayDestroy(evk->mma));
         }
-        talloc_free(ebuf);
-        ra_vk_buf_set_user_data(buf, NULL);
+        if (evk->mem) {
+            CHECK_CU(cu->cuDestroyExternalMemory(evk->mem));
+        }
+        if (evk->ss) {
+            CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ss));
+        }
+        if (evk->ws) {
+            CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ws));
+        }
+        pl_sync_destroy(ra_pl_get(mapper->ra), &evk->sync);
     }
-    ra_buf_pool_uninit(mapper->ra, pool);
 }
-*/
 #endif // HAVE_VULKAN
 
 static int mapper_init(struct ra_hwdec_mapper *mapper)
@@ -431,24 +515,24 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     for (int n = 0; n < desc.num_planes; n++) {
         const struct ra_format *format = desc.planes[n];
 
-        struct ra_tex_params params = {
-            .dimensions = 2,
-            .w = mp_image_plane_w(&p->layout, n),
-            .h = mp_image_plane_h(&p->layout, n),
-            .d = 1,
-            .format = format,
-            .render_src = true,
-            .src_linear = format->linear_filter,
-        };
-
-        mapper->tex[n] = ra_tex_create(mapper->ra, &params);
-        if (!mapper->tex[n]) {
-            ret = -1;
-            goto error;
-        }
-
         if (p_owner->is_gl) {
 #if HAVE_GL
+            struct ra_tex_params params = {
+                .dimensions = 2,
+                .w = mp_image_plane_w(&p->layout, n),
+                .h = mp_image_plane_h(&p->layout, n),
+                .d = 1,
+                .format = format,
+                .render_src = true,
+                .src_linear = format->linear_filter,
+            };
+
+            mapper->tex[n] = ra_tex_create(mapper->ra, &params);
+            if (!mapper->tex[n]) {
+                ret = -1;
+                goto error;
+            }
+
             GLuint texture;
             GLenum target;
             ra_gl_get_raw_tex(mapper->ra, mapper->tex[n], &texture, &target);
@@ -472,13 +556,11 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
                 goto error;
 #endif
         } else if (p_owner->is_vk) {
-            struct ra_buf_params buf_params = {
-                .type = RA_BUF_TYPE_SHARED_MEMORY,
-                .size = mp_image_plane_h(&p->layout, n) *
-                        mp_image_plane_w(&p->layout, n) *
-                        mapper->tex[n]->params.format->pixel_size,
-            };
-            p->buf_params[n] = buf_params;
+#if HAVE_VULKAN
+            ret = cuda_ext_vk_init(mapper, format, n);
+            if (ret < 0)
+                goto error;
+#endif
         }
     }
 
@@ -503,11 +585,10 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
         if (p->cu_res[n] > 0)
             CHECK_CU(cu->cuGraphicsUnregisterResource(p->cu_res[n]));
         p->cu_res[n] = 0;
-        ra_tex_free(mapper->ra, &mapper->tex[n]);
-
 #if HAVE_VULKAN
-        //cuda_buf_pool_uninit(mapper, n);
+        cuda_ext_vk_uninit(mapper, n);
 #endif
+        ra_tex_free(mapper->ra, &mapper->tex[n]);
     }
     CHECK_CU(cu->cuCtxPopCurrent(&dummy));
 }
@@ -523,7 +604,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CudaFunctions *cu = p_owner->cu;
     CUcontext dummy;
     int ret = 0, eret = 0;
-    bool is_gl = p_owner->is_gl;
     bool is_vk = p_owner->is_vk;
 
     ret = CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
@@ -531,45 +611,44 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         return ret;
 
     for (int n = 0; n < p->layout.num_planes; n++) {
-        struct ra_buf *buf = NULL;
+#if HAVE_VULKAN
+        if (is_vk) {
+            ret = pl_tex_export(ra_pl_get(mapper->ra),
+                                p->evk[n].pltex, p->evk[n].sync);
+            if (!ret)
+                goto error;
 
+            CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS wp = { 0, };
+            ret = CHECK_CU(cu->cuWaitExternalSemaphoresAsync(&p->evk[n].ws,
+                                                             &wp, 1, 0));
+            if (ret < 0)
+                goto error;
+        }
+#endif
         CUDA_MEMCPY2D cpy = {
             .srcMemoryType = CU_MEMORYTYPE_DEVICE,
             .srcDevice     = (CUdeviceptr)mapper->src->planes[n],
             .srcPitch      = mapper->src->stride[n],
             .srcY          = 0,
+            .dstMemoryType = CU_MEMORYTYPE_ARRAY,
+            .dstArray      = p->cu_array[n],
             .WidthInBytes  = mp_image_plane_w(&p->layout, n) *
                              mapper->tex[n]->params.format->pixel_size,
             .Height        = mp_image_plane_h(&p->layout, n),
         };
 
-        if (is_gl) {
-            cpy.dstMemoryType = CU_MEMORYTYPE_ARRAY;
-            cpy.dstArray = p->cu_array[n];
-        } else if (is_vk) {
-#if HAVE_VULKAN
-            buf = cuda_buf_pool_get(mapper, n);
-            struct ext_buf *ebuf = ra_vk_buf_get_user_data(buf);
-
-            cpy.dstMemoryType = CU_MEMORYTYPE_DEVICE;
-            cpy.dstDevice = ebuf->buf;
-            cpy.dstPitch  = mp_image_plane_w(&p->layout, n) *
-                            mapper->tex[n]->params.format->pixel_size;
-#endif
-        }
-
-        ret = CHECK_CU(cu->cuMemcpy2D(&cpy));
+        ret = CHECK_CU(cu->cuMemcpy2DAsync(&cpy, 0));
         if (ret < 0)
             goto error;
-
+#if HAVE_VULKAN
         if (is_vk) {
-            struct ra_tex_upload_params params = {
-                .tex = mapper->tex[n],
-                .invalidate = true,
-                .buf = buf,
-            };
-            mapper->ra->fns->tex_upload(mapper->ra, &params);
+            CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS sp = { 0, };
+            ret = CHECK_CU(cu->cuSignalExternalSemaphoresAsync(&p->evk[n].ss,
+                                                               &sp, 1, 0));
+            if (ret < 0)
+                goto error;
         }
+#endif
     }
 
  error:
