@@ -8,13 +8,18 @@ struct ra_pl {
     const struct pl_gpu *gpu;
 };
 
-static inline const struct pl_gpu *get_gpu(struct ra *ra)
+static inline const struct pl_gpu *get_gpu(const struct ra *ra)
 {
     struct ra_pl *p = ra->priv;
     return p->gpu;
 }
 
 static struct ra_fns ra_fns_pl;
+
+const struct pl_gpu *ra_pl_get(const struct ra *ra)
+{
+    return ra->fns == &ra_fns_pl ? get_gpu(ra) : NULL;
+}
 
 struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
 {
