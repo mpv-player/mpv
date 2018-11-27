@@ -852,7 +852,7 @@ hwaccel_features = [
     }, {
         'name': 'ffnvcodec',
         'desc': 'CUDA Headers and dynamic loader',
-        'func': check_pkg_config('ffnvcodec >= 8.2.15.3'),
+        'func': check_pkg_config('ffnvcodec >= 8.2.15.7'),
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
