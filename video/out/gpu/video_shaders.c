@@ -387,11 +387,13 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               gl_sc_bvec(sc, 3));
         break;
     case MP_CSP_TRC_PQ:
-        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", PQ_M2);
-        GLSLF("color.rgb = max(color.rgb - vec3(%f), vec3(0.0)) \n"
-              "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
+        gl_sc_paddf(sc, "highp vec3 pq_rgb;");
+        GLSLF("pq_rgb = color.rgb;\n");
+        GLSLF("pq_rgb = pow(pq_rgb, vec3(%f));\n", 1.0/PQ_M2);
+        GLSLF("pq_rgb = max(pq_rgb - vec3(%f), vec3(0.0)) \n"
+              "             / (vec3(%f) - vec3(%f) * pq_rgb);\n",
               PQ_C1, PQ_C2, PQ_C3);
-        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", 1.0 / PQ_M1);
+        GLSLF("color.rgb = pow(pq_rgb, vec3(%f));\n", 1.0/PQ_M1);
         // PQ's output range is 0-10000, but we need it to be relative to
         // MP_REF_WHITE instead, so rescale
         GLSLF("color.rgb *= vec3(%f);\n", 10000 / MP_REF_WHITE);
