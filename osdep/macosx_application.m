@@ -51,12 +51,14 @@ const struct m_sub_options macos_conf = {
                           ({"default", -1})),
         OPT_CHOICE("cocoa-cb-sw-renderer", cocoa_cb_sw_renderer, 0,
                    ({"auto", -1}, {"no", 0}, {"yes", 1})),
+        OPT_FLAG("cocoa-cb-precise-timer", cocoa_cb_precise_timer, 0),
         {0}
     },
     .size = sizeof(struct macos_opts),
     .defaults = &(const struct macos_opts){
         .macos_fs_animation_duration = -1,
         .cocoa_cb_sw_renderer = -1,
+        .cocoa_cb_precise_timer = 1,
     },
 };
 

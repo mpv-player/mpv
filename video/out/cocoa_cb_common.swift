@@ -50,6 +50,7 @@ class CocoaCB: NSObject {
     var displaySleepAssertion: IOPMAssertionID = IOPMAssertionID(0)
 
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
+    var timer: PreciseTimer?
 
     convenience init(_ mpvHandle: OpaquePointer) {
         self.init()
@@ -61,6 +62,9 @@ class CocoaCB: NSObject {
         if backendState == .uninitialized {
             backendState = .needsInit
 
+            if mpv.macOpts!.cocoa_cb_precise_timer == 1 {
+                timer =  PreciseTimer(cocoaCB: self)
+            }
             view = EventsView(cocoaCB: self)
             view.layer = layer
             view.wantsLayer = true
@@ -141,7 +145,13 @@ class CocoaCB: NSObject {
                         flagsOut: UnsafeMutablePointer<CVOptionFlags>,
               displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
         let ccb: CocoaCB = MPVHelper.bridge(ptr: displayLinkContext!)
-        ccb.mpv.reportRenderFlip()
+        if ccb.timer?.isHighPrecision ?? false {
+            ccb.timer?.scheduleAt(time: inOutputTime.pointee.hostTime) {
+                ccb.mpv.reportRenderFlip()
+            }
+        } else {
+            ccb.mpv.reportRenderFlip()
+        }
         return kCVReturnSuccess
     }
 
@@ -154,13 +164,14 @@ class CocoaCB: NSObject {
         CVDisplayLinkSetCurrentCGDisplay(link!, displayId)
         if #available(macOS 10.12, *) {
             CVDisplayLinkSetOutputHandler(link!) { link, now, out, inFlags, outFlags -> CVReturn in
-                self.mpv.reportRenderFlip()
-                return kCVReturnSuccess
+                return self.linkCallback(link, now, out, inFlags, outFlags, MPVHelper.bridge(obj: self))
             }
         } else {
             CVDisplayLinkSetOutputCallback(link!, linkCallback, MPVHelper.bridge(obj: self))
         }
         CVDisplayLinkStart(link!)
+
+        timer?.updatePolicy(refreshRate: currentFps())
     }
 
     func stopDisplaylink() {
@@ -175,6 +186,7 @@ class CocoaCB: NSObject {
 
         queue.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             self.flagEvents(VO_EVENT_WIN_STATE)
+            self.timer?.updatePolicy(refreshRate: self.currentFps())
         }
     }
 
@@ -446,6 +458,7 @@ class CocoaCB: NSObject {
 
     func shutdown(_ destroy: Bool = false) {
         setCursorVisiblility(true)
+        timer?.terminate()
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()

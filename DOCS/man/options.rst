@@ -4909,6 +4909,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
+``--cocoa-cb-precise-timer=<yes|no>``
+    Use a high precision timer to report vsyncs (default: yes). This will reduce
+    vsync jitter but slightly increases CPU usage.
+
+    OS X only.
+
 ``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
     Sets the styling of the title bar (default: dark).
     OS X and cocoa-cb only
