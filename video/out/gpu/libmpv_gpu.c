@@ -36,9 +36,9 @@ static const struct native_resource_entry native_resource_map[] = {
         .name = "drm_params",
         .size = sizeof (mpv_opengl_drm_params),
     },
-    [MPV_RENDER_PARAM_DRM_OSD_SIZE] = {
-        .name = "drm_osd_size",
-        .size = sizeof (mpv_opengl_drm_osd_size),
+    [MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE] = {
+        .name = "drm_draw_surface_size",
+        .size = sizeof (mpv_opengl_drm_draw_surface_size),
     },
 };
 

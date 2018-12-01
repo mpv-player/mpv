@@ -81,7 +81,7 @@ struct priv {
     struct vt_switcher vt_switcher;
 
     struct mpv_opengl_drm_params drm_params;
-    struct mpv_opengl_drm_osd_size osd_size;
+    struct mpv_opengl_drm_draw_surface_size draw_surface_size;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -195,11 +195,11 @@ static bool init_gbm(struct ra_ctx *ctx)
     }
 
     MP_VERBOSE(ctx->vo, "Initializing GBM surface (%d x %d)\n",
-        p->osd_size.width, p->osd_size.height);
+        p->draw_surface_size.width, p->draw_surface_size.height);
     p->gbm.surface = gbm_surface_create(
         p->gbm.device,
-        p->osd_size.width,
-        p->osd_size.height,
+        p->draw_surface_size.width,
+        p->draw_surface_size.height,
         p->gbm_format,
         GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     if (!p->gbm.surface) {
@@ -280,16 +280,16 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
         goto err;
     }
 
-    drm_object_set_property(request, atomic_ctx->osd_plane, "FB_ID", p->fb->id);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_ID", p->kms->crtc_id);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_X",   0);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_Y",   0);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_W",   p->osd_size.width << 16);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "SRC_H",   p->osd_size.height << 16);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_X",  0);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_Y",  0);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_W",  p->kms->mode.mode.hdisplay);
-    drm_object_set_property(request, atomic_ctx->osd_plane, "CRTC_H",  p->kms->mode.mode.vdisplay);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_ID", p->kms->crtc_id);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_X",   0);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_Y",   0);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_W",   p->draw_surface_size.width << 16);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_H",   p->draw_surface_size.height << 16);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_X",  0);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_Y",  0);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_W",  p->kms->mode.mode.hdisplay);
+    drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_H",  p->kms->mode.mode.vdisplay);
 
     int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
     if (ret)
@@ -446,9 +446,9 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     update_framebuffer_from_bo(ctx, p->gbm.next_bo);
 
     if (atomic_ctx) {
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "FB_ID", p->fb->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "CRTC_ID", atomic_ctx->crtc->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->osd_plane, "ZPOS", 1);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
+        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
         ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
                                   DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, NULL);
@@ -521,24 +521,24 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     }
 }
 
-// If the OSD plane supports ARGB we want to use that, but if it doesn't we fall
-// back on XRGB. If the driver does not support atomic there is no particular
-// reason to be using ARGB (drmprime hwdec will not work without atomic,
-// anyway), so we fall back to XRGB (another reason is that we do not have the
-// convenient atomic_ctx and its convenient plane fields).
+// If the draw plane supports ARGB we want to use that, but if it doesn't we
+// fall back on XRGB. If we do not have atomic there is no particular reason to
+// be using ARGB (drmprime hwdec will not work without atomic, anyway), so we
+// fall back to XRGB (another reason is that we do not have the convenient
+// atomic_ctx and its convenient plane fields).
 static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t xrgb_format)
 {
     struct priv *p = ctx->priv;
 
     if (!p->kms->atomic_context) {
         p->gbm_format = xrgb_format;
-        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Use %s for OSD plane.\n",
+        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Use %s for draw plane.\n",
                    gbm_format_to_string(xrgb_format));
         return true;
     }
 
     drmModePlane *drmplane =
-        drmModeGetPlane(p->kms->fd, p->kms->atomic_context->osd_plane->id);
+        drmModeGetPlane(p->kms->fd, p->kms->atomic_context->draw_plane->id);
     bool have_argb = false;
     bool have_xrgb = false;
     bool result = false;
@@ -552,11 +552,11 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
 
     if (have_argb) {
         p->gbm_format = argb_format;
-        MP_VERBOSE(ctx->vo, "%s supported by OSD plane.\n", gbm_format_to_string(argb_format));
+        MP_VERBOSE(ctx->vo, "%s supported by draw plane.\n", gbm_format_to_string(argb_format));
         result = true;
     } else if (have_xrgb) {
         p->gbm_format = xrgb_format;
-        MP_VERBOSE(ctx->vo, "%s not supported by OSD plane: Falling back to %s.\n",
+        MP_VERBOSE(ctx->vo, "%s not supported by draw plane: Falling back to %s.\n",
                    gbm_format_to_string(argb_format), gbm_format_to_string(xrgb_format));
         result = true;
     }
@@ -586,25 +586,25 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     MP_VERBOSE(ctx, "Initializing KMS\n");
     p->kms = kms_create(ctx->log, ctx->vo->opts->drm_opts->drm_connector_spec,
                         ctx->vo->opts->drm_opts->drm_mode_id,
-                        ctx->vo->opts->drm_opts->drm_osd_plane_id,
-                        ctx->vo->opts->drm_opts->drm_video_plane_id);
+                        ctx->vo->opts->drm_opts->drm_draw_plane,
+                        ctx->vo->opts->drm_opts->drm_drmprime_video_plane);
     if (!p->kms) {
         MP_ERR(ctx, "Failed to create KMS.\n");
         return false;
     }
 
-    if (ctx->vo->opts->drm_opts->drm_osd_size.wh_valid) {
+    if (ctx->vo->opts->drm_opts->drm_draw_surface_size.wh_valid) {
         if (p->kms->atomic_context) {
-            p->osd_size.width = ctx->vo->opts->drm_opts->drm_osd_size.w;
-            p->osd_size.height = ctx->vo->opts->drm_opts->drm_osd_size.h;
+            p->draw_surface_size.width = ctx->vo->opts->drm_opts->drm_draw_surface_size.w;
+            p->draw_surface_size.height = ctx->vo->opts->drm_opts->drm_draw_surface_size.h;
         } else {
-            p->osd_size.width = p->kms->mode.mode.hdisplay;
-            p->osd_size.height = p->kms->mode.mode.vdisplay;
-            MP_WARN(ctx, "Setting OSD size is only available with DRM atomic, defaulting to screen resolution\n");
+            p->draw_surface_size.width = p->kms->mode.mode.hdisplay;
+            p->draw_surface_size.height = p->kms->mode.mode.vdisplay;
+            MP_WARN(ctx, "Setting draw plane size is only available with DRM atomic, defaulting to screen resolution\n");
         }
     } else {
-        p->osd_size.width = p->kms->mode.mode.hdisplay;
-        p->osd_size.height = p->kms->mode.mode.vdisplay;
+        p->draw_surface_size.width = p->kms->mode.mode.hdisplay;
+        p->draw_surface_size.height = p->kms->mode.mode.vdisplay;
     }
 
     uint32_t argb_format;
@@ -618,7 +618,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     }
 
     if (!probe_gbm_format(ctx, argb_format, xrgb_format)) {
-        MP_ERR(ctx->vo, "No suitable format found on DRM primary plane (tried: %s and %s).\n",
+        MP_ERR(ctx->vo, "No suitable format found on draw plane (tried: %s and %s).\n",
                gbm_format_to_string(argb_format), gbm_format_to_string(xrgb_format));
         return false;
     }
@@ -689,7 +689,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         return false;
 
     ra_add_native_resource(ctx->ra, "drm_params", &p->drm_params);
-    ra_add_native_resource(ctx->ra, "drm_osd_size", &p->osd_size);
+    ra_add_native_resource(ctx->ra, "drm_draw_surface_size", &p->draw_surface_size);
 
     return true;
 }

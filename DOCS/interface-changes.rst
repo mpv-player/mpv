@@ -20,9 +20,16 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
-    - the `--drm-osd-plane-id` and `--drm-video-plane-id`
+    - rename `--drm-osd-plane-id` to `--drm-draw-plane`, `--drm-video-plane-id` to
+      `--drm-drmprime-video-plane` and `--drm-osd-size` to `--drm-draw-surface-size`
+      to better reflect what the options actually control, that the values they
+      accept aren't actually internal DRM ID's (like with similar options in
+      ffmpeg's KMS support), and that the video plane is only used when the drmprime
+      overlay hwdec interop is active, with the video being drawn to the draw plane
+      otherwise.
+    - in addition to the above, the `--drm-draw-plane` and `--drm-drmprime-video-plane`
       options now accept either an integer index, or the values primary or overlay.
-      `--drm-osd-plane-id` now defaults to primary and `--drm-video-plane-id`
+      `--drm-draw-plane` now defaults to primary and `--drm-drmprime-video-plane`
       defaults to overlay. This should be similar to previous behavior on most drivers
       due to how planes are usually sorted.
     - rename --opensles-frames-per-buffer to --opensles-frames-per-enqueue to

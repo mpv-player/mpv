@@ -177,12 +177,17 @@ typedef struct mpv_opengl_drm_params {
     int render_fd;
 } mpv_opengl_drm_params;
 
-typedef struct mpv_opengl_drm_osd_size {
+typedef struct mpv_opengl_drm_draw_surface_size {
     /**
-     * size of the OSD in pixels.
+     * size of the draw plane surface in pixels.
      */
     int width, height;
-} mpv_opengl_drm_osd_size;
+} mpv_opengl_drm_draw_surface_size;
+
+/**
+ * For backwards compatibility with the old naming of mpv_opengl_drm_draw_surface_size
+ */
+#define mpv_opengl_drm_osd_size mpv_opengl_drm_draw_surface_size
 
 #ifdef __cplusplus
 }

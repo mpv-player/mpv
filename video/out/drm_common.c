@@ -48,21 +48,25 @@ const struct m_sub_options drm_conf = {
         OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
                             0, drm_validate_connector_opt),
         OPT_INT("drm-mode", drm_mode_id, 0),
-        OPT_CHOICE_OR_INT("drm-osd-plane-id", drm_osd_plane_id, 0, 0, INT_MAX,
+        OPT_CHOICE_OR_INT("drm-draw-plane", drm_draw_plane, 0, 0, INT_MAX,
                           ({"primary", DRM_OPTS_PRIMARY_PLANE},
                            {"overlay", DRM_OPTS_OVERLAY_PLANE})),
-        OPT_CHOICE_OR_INT("drm-video-plane-id", drm_video_plane_id, 0, 0, INT_MAX,
+        OPT_CHOICE_OR_INT("drm-drmprime-video-plane", drm_drmprime_video_plane, 0, 0, INT_MAX,
                           ({"primary", DRM_OPTS_PRIMARY_PLANE},
                            {"overlay", DRM_OPTS_OVERLAY_PLANE})),
         OPT_CHOICE("drm-format", drm_format, 0,
                    ({"xrgb8888",    DRM_OPTS_FORMAT_XRGB8888},
                     {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010})),
-        OPT_SIZE_BOX("drm-osd-size", drm_osd_size, 0),
+        OPT_SIZE_BOX("drm-draw-surface-size", drm_draw_surface_size, 0),
+
+        OPT_REPLACED("drm-osd-plane-id", "drm-draw-plane"),
+        OPT_REPLACED("drm-video-plane-id", "drm-drmprime-video-plane"),
+        OPT_REPLACED("drm-osd-size", "drm-draw-surface-size"),
         {0},
     },
     .defaults = &(const struct drm_opts) {
-        .drm_osd_plane_id = DRM_OPTS_PRIMARY_PLANE,
-        .drm_video_plane_id = DRM_OPTS_OVERLAY_PLANE,
+        .drm_draw_plane = DRM_OPTS_PRIMARY_PLANE,
+        .drm_drmprime_video_plane = DRM_OPTS_OVERLAY_PLANE,
     },
     .size = sizeof(struct drm_opts),
 };
@@ -274,7 +278,7 @@ static void parse_connector_spec(struct mp_log *log,
 
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id, int osd_plane_id, int video_plane_id)
+                       int mode_id, int draw_plane, int drmprime_video_plane)
 {
     int card_no = -1;
     char *connector_name = NULL;
@@ -322,7 +326,8 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
     } else {
         mp_verbose(log, "DRM Atomic support found\n");
         kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id,
-                                                        kms->connector->connector_id, osd_plane_id, video_plane_id);
+                                                        kms->connector->connector_id,
+                                                        draw_plane, drmprime_video_plane);
         if (!kms->atomic_context) {
             mp_err(log, "Failed to create DRM atomic context\n");
             goto err;
