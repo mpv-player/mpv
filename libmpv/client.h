@@ -210,7 +210,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 101)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 102)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before

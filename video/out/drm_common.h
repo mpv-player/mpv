@@ -48,10 +48,10 @@ struct vt_switcher {
 struct drm_opts {
     char *drm_connector_spec;
     int drm_mode_id;
-    int drm_osd_plane_id;
-    int drm_video_plane_id;
+    int drm_draw_plane;
+    int drm_drmprime_video_plane;
     int drm_format;
-    struct m_geometry drm_osd_size;
+    struct m_geometry drm_draw_surface_size;
 };
 
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
@@ -65,7 +65,7 @@ void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
                          void *user_data);
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id, int osd_plane_id, int video_plane_id);
+                       int mode_id, int draw_plane, int drmprime_video_plane);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
 

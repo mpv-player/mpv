@@ -139,7 +139,7 @@ void drm_object_print_info(struct mp_log *log, struct drm_object *object)
 
 struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id,
                                                      int connector_id,
-                                                     int osd_plane_idx, int video_plane_idx)
+                                                     int draw_plane_idx, int drmprime_video_plane_idx)
 {
     drmModePlaneRes *plane_res = NULL;
     drmModeRes *res = NULL;
@@ -229,13 +229,13 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
                 if ((!overlay_id) && (value == DRM_PLANE_TYPE_OVERLAY))
                     overlay_id = plane_id;
 
-                if (layercount == osd_plane_idx) {
-                    ctx->osd_plane = plane;
+                if (layercount == draw_plane_idx) {
+                    ctx->draw_plane = plane;
                     continue;
                 }
 
-                if (layercount == video_plane_idx) {
-                    ctx->video_plane = plane;
+                if (layercount == drmprime_video_plane_idx) {
+                    ctx->drmprime_video_plane = plane;
                     continue;
                 }
             }
@@ -245,34 +245,34 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
         }
     }
 
-    // OSD plane was specified as either of the special options: any primary plane or any overlay plane
-    if (!ctx->osd_plane) {
-        const int osd_plane_id = (osd_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? overlay_id : primary_id;
-        const char *plane_type = (osd_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? "overlay" : "primary";
-        if (osd_plane_id) {
-            mp_verbose(log, "Using %s plane %d for OSD\n", plane_type, osd_plane_id);
-            ctx->osd_plane = drm_object_create(log, ctx->fd, osd_plane_id, DRM_MODE_OBJECT_PLANE);
+    // draw plane was specified as either of the special options: any primary plane or any overlay plane
+    if (!ctx->draw_plane) {
+        const int draw_plane_id = (draw_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? overlay_id : primary_id;
+        const char *plane_type = (draw_plane_idx == DRM_OPTS_OVERLAY_PLANE) ? "overlay" : "primary";
+        if (draw_plane_id) {
+            mp_verbose(log, "Using %s plane %d as draw plane\n", plane_type, draw_plane_id);
+            ctx->draw_plane = drm_object_create(log, ctx->fd, draw_plane_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_err(log, "Failed to find OSD plane with idx=%d\n", osd_plane_idx);
+            mp_err(log, "Failed to find draw plane with idx=%d\n", draw_plane_idx);
             goto fail;
         }
     } else {
-        mp_verbose(log, "Found OSD plane with ID %d\n", ctx->osd_plane->id);
+        mp_verbose(log, "Found draw plane with ID %d\n", ctx->draw_plane->id);
     }
 
-    // video plane was specified as either of the special options: any primary plane or any overlay plane
-    if (!ctx->video_plane) {
-        const int video_plane_id = (video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? primary_id : overlay_id;
-        const char *plane_type = (video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? "primary" : "overlay";
+    // drmprime plane was specified as either of the special options: any primary plane or any overlay plane
+    if (!ctx->drmprime_video_plane) {
+        const int drmprime_video_plane_id = (drmprime_video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? primary_id : overlay_id;
+        const char *plane_type = (drmprime_video_plane_idx == DRM_OPTS_PRIMARY_PLANE) ? "primary" : "overlay";
 
-        if (video_plane_id) {
-            mp_verbose(log, "Using %s plane %d for video\n", plane_type, video_plane_id);
-            ctx->video_plane = drm_object_create(log, ctx->fd, video_plane_id, DRM_MODE_OBJECT_PLANE);
+        if (drmprime_video_plane_id) {
+            mp_verbose(log, "Using %s plane %d as drmprime plane\n", plane_type, drmprime_video_plane_id);
+            ctx->drmprime_video_plane = drm_object_create(log, ctx->fd, drmprime_video_plane_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_verbose(log, "Failed to find video plane with idx=%d. drmprime-drm hwdec interop will not work\n", video_plane_idx);
+            mp_verbose(log, "Failed to find drmprime plane with idx=%d. drmprime-drm hwdec interop will not work\n", drmprime_video_plane_idx);
         }
     } else {
-        mp_verbose(log, "Found video plane with ID %d\n", ctx->video_plane->id);
+        mp_verbose(log, "Found drmprime plane with ID %d\n", ctx->drmprime_video_plane->id);
     }
 
     drmModeFreePlaneResources(plane_res);
@@ -294,8 +294,8 @@ void drm_atomic_destroy_context(struct drm_atomic_context *ctx)
     drm_mode_destroy_blob(ctx->fd, &ctx->old_state.crtc.mode);
     drm_object_free(ctx->crtc);
     drm_object_free(ctx->connector);
-    drm_object_free(ctx->osd_plane);
-    drm_object_free(ctx->video_plane);
+    drm_object_free(ctx->draw_plane);
+    drm_object_free(ctx->drmprime_video_plane);
     talloc_free(ctx);
 }
 
@@ -387,9 +387,9 @@ bool drm_atomic_save_old_state(struct drm_atomic_context *ctx)
     if (0 > drm_object_get_property(ctx->connector, "CRTC_ID", &ctx->old_state.connector.crtc_id))
         ret = false;
 
-    if (!drm_atomic_save_plane_state(ctx->osd_plane, &ctx->old_state.osd_plane))
+    if (!drm_atomic_save_plane_state(ctx->draw_plane, &ctx->old_state.draw_plane))
         ret = false;
-    if (!drm_atomic_save_plane_state(ctx->video_plane, &ctx->old_state.video_plane))
+    if (!drm_atomic_save_plane_state(ctx->drmprime_video_plane, &ctx->old_state.drmprime_video_plane))
         ret = false;
 
     ctx->old_state.saved = true;
@@ -414,9 +414,9 @@ bool drm_atomic_restore_old_state(drmModeAtomicReqPtr request, struct drm_atomic
     if (0 > drm_object_set_property(request, ctx->crtc, "ACTIVE", ctx->old_state.crtc.active))
         ret = false;
 
-    if (!drm_atomic_restore_plane_state(request, ctx->osd_plane, &ctx->old_state.osd_plane))
+    if (!drm_atomic_restore_plane_state(request, ctx->draw_plane, &ctx->old_state.draw_plane))
         ret = false;
-    if (!drm_atomic_restore_plane_state(request, ctx->video_plane, &ctx->old_state.video_plane))
+    if (!drm_atomic_restore_plane_state(request, ctx->drmprime_video_plane, &ctx->old_state.drmprime_video_plane))
         ret = false;
 
     ctx->old_state.saved = false;

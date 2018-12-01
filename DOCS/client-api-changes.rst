@@ -31,6 +31,9 @@ API changes
 ===========
 
 ::
+ --- mpv 0.30.0 ---
+ 1.102  - rename struct mpv_opengl_drm_osd_size to mpv_opengl_drm_draw_surface_size
+        - rename MPV_RENDER_PARAM_DRM_OSD_SIZE to MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE
 
  --- mpv 0.29.0 ---
  1.101  - add MPV_RENDER_PARAM_ADVANCED_CONTROL and related API
