@@ -181,6 +181,8 @@ no_audio:
         if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
             MP_WARN(tvh, "Unable to set gain control!\n");
 
+    demuxer->extended_ctrls = true;
+
     return 0;
 }
 

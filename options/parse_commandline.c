@@ -199,7 +199,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             if (bstrcmp0(p.arg, "playlist") == 0) {
                 // append the playlist to the local args
                 char *param0 = bstrdup0(NULL, p.param);
-                struct playlist *pl = playlist_parse_file(param0, global);
+                struct playlist *pl = playlist_parse_file(param0, NULL, global);
                 talloc_free(param0);
                 if (!pl) {
                     MP_FATAL(config, "Error reading playlist '%.*s'\n",
@@ -281,10 +281,8 @@ err_out:
  * during normal options parsing.
  */
 void m_config_preparse_command_line(m_config_t *config, struct mpv_global *global,
-                                    char **argv)
+                                    int *verbose, char **argv)
 {
-    struct MPOpts *opts = global->opts;
-
     struct parse_state p = {config, argv};
     while (split_opt_silent(&p) == 0) {
         if (p.is_opt) {
@@ -293,7 +291,7 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
             int flags = M_SETOPT_FROM_CMDLINE | M_SETOPT_PRE_PARSE_ONLY;
             m_config_set_option_cli(config, p.arg, p.param, flags);
             if (bstrcmp0(p.arg, "v") == 0)
-                opts->verbose++;
+                (*verbose)++;
         }
     }
 

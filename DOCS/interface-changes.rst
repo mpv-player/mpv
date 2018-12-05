@@ -47,6 +47,25 @@ Interface changes
     - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
       as the only option. The `--spirv-compiler` option itself has been marked
       as deprecated, and may be removed in the future.
+    - ipc: require that "request_id" fields are integers. Other types are still
+      accepted for compatibility, but this will stop in the future. Also, if no
+      request_id is provided, 0 will be assumed.
+    - mpv_command_node() and mp.command_native() now support named arguments
+      (see manpage). If you want to use them, use a new version of the manpage
+      as reference, which lists the definitive names.
+    - edition and disc title switching will now fully reload playback (may have
+      consequences for scripts, client API, or when using file-local options)
+    - remove async playback abort hack. This breaks aborting playback in the
+      following cases, iff the current stream is a network stream that
+      completely stopped responding:
+        - setting "program" property
+        - setting "cache-size" property
+      In earlier versions of mpv, the player core froze as well in these cases,
+      but could still be aborted with the quit, stop, playlist-prev,
+      playlist-next commands. If these properties are not accessed, frozen
+      network streams should not freeze the player core (only playback in
+      uncached regions), and differing behavior should be reported as a bug.
+      If --demuxer-thread=no is used, there are no guarantees.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
@@ -131,8 +150,6 @@ Interface changes
       of 3D content doesn't justify such an option anyway.
     - change cycle-values command to use the current value, instead of an
       internal counter that remembered the current position.
-    - edition and disc title switching will now fully reload playback (may have
-      consequences for scripts, client API, or when using file-local options)
     - remove deprecated ao/vo auto profiles. Consider using scripts like
       auto-profiles.lua instead.
  --- mpv 0.28.0 ---

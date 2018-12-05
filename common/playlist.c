@@ -275,13 +275,14 @@ struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index)
     }
 }
 
-struct playlist *playlist_parse_file(const char *file, struct mpv_global *global)
+struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
+                                     struct mpv_global *global)
 {
     struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
     mp_verbose(log, "Parsing playlist file %s...\n", file);
 
     struct demuxer_params p = {.force_format = "playlist"};
-    struct demuxer *d = demux_open_url(file, &p, NULL, global);
+    struct demuxer *d = demux_open_url(file, &p, cancel, global);
     if (!d) {
         talloc_free(log);
         return NULL;
@@ -296,7 +297,7 @@ struct playlist *playlist_parse_file(const char *file, struct mpv_global *global
                          "pass it to the player\ndirectly. Don't use --playlist.\n");
         }
     }
-    free_demuxer_and_stream(d);
+    demux_free(d);
 
     if (ret) {
         mp_verbose(log, "Playlist successfully parsed\n");

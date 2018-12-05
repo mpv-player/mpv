@@ -109,11 +109,42 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 ``mp.command_native(table [,def])``
     Similar to ``mp.commandv``, but pass the argument list as table. This has
     the advantage that in at least some cases, arguments can be passed as
-    native types.
+    native types. It also allows you to use named argument.
+
+    If the table is an array, each array item is like an argument in
+    ``mp.commandv()`` (but can be a native type instead of a string).
+
+    If the table contains string keys, it's interpreted as command with named
+    arguments. This requires at least an entry with the key ``name`` to be
+    present, which must be a string, and contains the command name. The special
+    entry ``_flags`` is optional, and if present, must be an array of
+    `Input Command Prefixes`_ to apply. All other entries are interpreted as
+    arguments.
 
     Returns a result table on success (usually empty), or ``def, error`` on
     error. ``def`` is the second parameter provided to the function, and is
     nil if it's missing.
+
+``mp.command_native_async(table [,fn])``
+    Like ``mp.command_native()``, but the command is ran asynchronously (as far
+    as possible), and upon completion, fn is called. fn has two arguments:
+    ``fn(success, result, error)``. ``success`` is always a Boolean and is true
+    if the command was successful, otherwise false. The second parameter is
+    the result value (can be nil) in case of success, nil otherwise (as returned
+    by ``mp.command_native()``). The third parameter is the error string in case
+    of an error, nil otherwise.
+
+    Returns a table with undefined contents, which can be used as argument for
+    ``mp.abort_async_command``.
+
+    If starting the command failed for some reason, ``nil, error`` is returned,
+    and ``fn`` is called indicating failure, using the same error value.
+
+``mp.abort_async_command(t)``
+    Abort a ``mp.command_native_async`` call. The argument is the return value
+    of that command (which starts asynchronous execution of the command).
+    Whether this works and how long it takes depends on the command and the
+    situation. The abort call itself is asynchronous. Does not return anything.
 
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
@@ -634,45 +665,23 @@ strictly part of the guaranteed API.
 
 ``utils.subprocess(t)``
     Runs an external process and waits until it exits. Returns process status
-    and the captured output.
+    and the captured output. This is a legacy wrapper around calling the
+    ``subprocess`` command with ``mp.command_native``. It does the following
+    things:
 
-    The parameter ``t`` is a table. The function reads the following entries:
+    - copy the table ``t``
+    - rename ``cancellable`` field to ``playback_only``
+    - rename ``max_size`` to ``capture_size``
+    - set ``capture_stdout`` field to ``true`` if unset
+    - set ``name`` field to ``subprocess``
+    - call ``mp.command_native(copied_t)``
+    - if the command failed, create a dummy result table
+    - copy ``error_string`` to ``error`` field if the string is non-empty
+    - return the result table
 
-        ``args``
-            Array of strings. The first array entry is the executable. This
-            can be either an absolute path, or a filename with no path
-            components, in which case the ``PATH`` environment variable is
-            used to resolve the executable. The other array elements are
-            passed as command line arguments.
-
-        ``cancellable``
-            Optional. If set to ``true`` (default), then if the user stops
-            playback or goes to the next file while the process is running,
-            the process will be killed.
-
-        ``max_size``
-            Optional. The maximum size in bytes of the data that can be captured
-            from stdout. (Default: 16 MB.)
-
-    The function returns a table as result with the following entries:
-
-        ``status``
-            The raw exit status of the process. It will be negative on error.
-
-        ``stdout``
-            Captured output stream as string, limited to ``max_size``.
-
-        ``error``
-            ``nil`` on success. The string ``killed`` if the process was
-            terminated in an unusual way. The string ``init`` if the process
-            could not be started.
-
-            On Windows, ``killed`` is only returned when the process has been
-            killed by mpv as a result of ``cancellable`` being set to ``true``.
-
-        ``killed_by_us``
-            Set to ``true`` if the process has been killed by mpv as a result
-            of ``cancellable`` being set to ``true``.
+    It is recommended to use ``mp.command_native`` or ``mp.command_native_async``
+    directly, instead of calling this legacy wrapper. It is for compatibility
+    only.
 
 ``utils.subprocess_detached(t)``
     Runs an external process and detaches it from mpv's control.
@@ -684,6 +693,9 @@ strictly part of the guaranteed API.
             ``subprocess`` function.
 
     The function returns ``nil``.
+
+    This is a legacy wrapper around calling the ``run`` command with
+    ``mp.commandv`` and other functions.
 
 ``utils.getpid()``
     Returns the process ID of the running mpv process. This can be used to identify

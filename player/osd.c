@@ -229,27 +229,23 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         }
     }
 
-    if (mpctx->demuxer) {
-        struct stream_cache_info info = {0};
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
-        if (info.size > 0 || mpctx->demuxer->is_network) {
-            saddf(&line, " Cache: ");
+    if (mpctx->demuxer && demux_is_network_cached(mpctx->demuxer)) {
+        saddf(&line, " Cache: ");
 
-            struct demux_ctrl_reader_state s = {.ts_duration = -1};
-            demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+        struct demux_ctrl_reader_state s = {.ts_duration = -1};
+        demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
-            if (s.ts_duration < 0) {
-                saddf(&line, "???");
+        if (s.ts_duration < 0) {
+            saddf(&line, "???");
+        } else {
+            saddf(&line, "%2ds", (int)s.ts_duration);
+        }
+        int64_t cache_size = s.fw_bytes;
+        if (cache_size > 0) {
+            if (cache_size >= 1024 * 1024) {
+                saddf(&line, "+%lldMB", (long long)(cache_size / 1024 / 1024));
             } else {
-                saddf(&line, "%2ds", (int)s.ts_duration);
-            }
-            int64_t cache_size = s.fw_bytes + info.fill;
-            if (cache_size > 0) {
-                if (cache_size >= 1024 * 1024) {
-                    saddf(&line, "+%lldMB", (long long)(cache_size / 1024 / 1024));
-                } else {
-                    saddf(&line, "+%lldKB", (long long)(cache_size / 1024));
-                }
+                saddf(&line, "+%lldKB", (long long)(cache_size / 1024));
             }
         }
     }
@@ -267,9 +263,13 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
     if (!opts->use_terminal)
         return;
 
-    if (opts->quiet || !mpctx->playback_initialized || !mpctx->playing_msg_shown)
+    if (opts->quiet || !mpctx->playback_initialized ||
+        !mpctx->playing_msg_shown || mpctx->stop_play)
     {
-        term_osd_set_status_lazy(mpctx, "");
+        if (!mpctx->playing || mpctx->stop_play) {
+            mp_msg_flush_status_line(mpctx->log);
+            term_osd_set_status_lazy(mpctx, "");
+        }
         return;
     }
 

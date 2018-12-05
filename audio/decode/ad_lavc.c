@@ -37,6 +37,7 @@
 #include "demux/stheader.h"
 #include "filters/f_decoder_wrapper.h"
 #include "filters/filter_internal.h"
+#include "options/m_config.h"
 #include "options/options.h"
 
 struct priv {
@@ -80,8 +81,9 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
                  const char *decoder)
 {
     struct priv *ctx = da->priv;
-    struct MPOpts *mpopts = da->global->opts;
-    struct ad_lavc_params *opts = mpopts->ad_lavc_params;
+    struct MPOpts *mpopts = mp_get_config_group(ctx, da->global, GLOBAL_CONFIG);
+    struct ad_lavc_params *opts =
+        mp_get_config_group(ctx, da->global, &ad_lavc_conf);
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
 

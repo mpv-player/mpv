@@ -17,16 +17,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <limits.h>
-#include <errno.h>
 
 #include <strings.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -36,6 +32,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/bstr.h"
+#include "misc/thread_tools.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -44,12 +41,6 @@
 
 #include "options/m_option.h"
 #include "options/m_config.h"
-
-#ifdef __MINGW32__
-#include <windows.h>
-#else
-#include <poll.h>
-#endif
 
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
@@ -238,7 +229,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     s->global = global;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
-    s->allow_caching = true;
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
@@ -264,9 +254,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
 
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
-
-    if (!s->fill_buffer)
-        s->allow_caching = false;
 
     assert(s->seekable == !!s->seek);
 
@@ -590,7 +577,6 @@ void free_stream(stream_t *s)
 
     if (s->close)
         s->close(s);
-    free_stream(s->underlying);
     talloc_free(s);
 }
 
@@ -604,98 +590,6 @@ stream_t *open_memory_stream(void *data, int len)
     talloc_steal(s, dummy);
     stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;
-}
-
-static stream_t *open_cache(stream_t *orig, const char *name)
-{
-    stream_t *cache = new_stream();
-    cache->underlying = orig;
-    cache->caching = true;
-    cache->seekable = true;
-    cache->mode = STREAM_READ;
-    cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
-
-    cache->url = talloc_strdup(cache, orig->url);
-    cache->mime_type = talloc_strdup(cache, orig->mime_type);
-    cache->demuxer = talloc_strdup(cache, orig->demuxer);
-    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
-    cache->streaming = orig->streaming,
-    cache->is_network = orig->is_network;
-    cache->is_local_file = orig->is_local_file;
-    cache->is_directory = orig->is_directory;
-    cache->cancel = orig->cancel;
-    cache->global = orig->global;
-
-    cache->log = mp_log_new(cache, cache->global->log, name);
-
-    return cache;
-}
-
-static struct mp_cache_opts check_cache_opts(stream_t *stream,
-                                             struct mp_cache_opts *opts)
-{
-    struct mp_cache_opts use_opts = *opts;
-    if (use_opts.size == -1)
-        use_opts.size = stream->streaming ? use_opts.def_size : 0;
-    if (use_opts.size == -2)
-        use_opts.size = use_opts.def_size;
-
-    if (stream->mode != STREAM_READ || !stream->allow_caching || use_opts.size < 1)
-        use_opts.size = 0;
-    return use_opts;
-}
-
-bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
-{
-    struct mp_cache_opts use_opts = check_cache_opts(stream, opts);
-    return use_opts.size > 0;
-}
-
-// return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
-// or if the cache is disabled
-static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
-{
-    stream_t *orig = *stream;
-    struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
-
-    if (use_opts.size < 1)
-        return 0;
-
-    stream_t *fcache = open_cache(orig, "file-cache");
-    if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
-        fcache->underlying = NULL; // don't free original stream
-        free_stream(fcache);
-        fcache = orig;
-    }
-
-    stream_t *cache = open_cache(fcache, "cache");
-
-    int res = stream_cache_init(cache, fcache, &use_opts);
-    if (res <= 0) {
-        cache->underlying = NULL; // don't free original stream
-        free_stream(cache);
-        if (fcache != orig) {
-            fcache->underlying = NULL;
-            free_stream(fcache);
-        }
-    } else {
-        *stream = cache;
-    }
-    return res;
-}
-
-// Do some crazy stuff to call stream_enable_cache() with the global options.
-int stream_enable_cache_defaults(stream_t **stream)
-{
-    struct mpv_global *global = (*stream)->global;
-    if (!global)
-        return 0;
-    void *tmp = talloc_new(NULL);
-    struct mp_cache_opts *opts =
-        mp_get_config_group(tmp, global, &stream_cache_conf);
-    int r = stream_enable_cache(stream, opts);
-    talloc_free(tmp);
-    return r;
 }
 
 static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)
@@ -841,131 +735,6 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
     talloc_free(fname);
     return res;
 }
-
-#ifndef __MINGW32__
-struct mp_cancel {
-    atomic_bool triggered;
-    int wakeup_pipe[2];
-};
-
-static void cancel_destroy(void *p)
-{
-    struct mp_cancel *c = p;
-    if (c->wakeup_pipe[0] >= 0) {
-        close(c->wakeup_pipe[0]);
-        close(c->wakeup_pipe[1]);
-    }
-}
-
-struct mp_cancel *mp_cancel_new(void *talloc_ctx)
-{
-    struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
-    talloc_set_destructor(c, cancel_destroy);
-    *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
-    mp_make_wakeup_pipe(c->wakeup_pipe);
-    return c;
-}
-
-// Request abort.
-void mp_cancel_trigger(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, true);
-    (void)write(c->wakeup_pipe[1], &(char){0}, 1);
-}
-
-// Restore original state. (Allows reusing a mp_cancel.)
-void mp_cancel_reset(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, false);
-    // Flush it fully.
-    while (1) {
-        int r = read(c->wakeup_pipe[0], &(char[256]){0}, 256);
-        if (r < 0 && errno == EINTR)
-            continue;
-        if (r <= 0)
-            break;
-    }
-}
-
-// Return whether the caller should abort.
-// For convenience, c==NULL is allowed.
-bool mp_cancel_test(struct mp_cancel *c)
-{
-    return c ? atomic_load_explicit(&c->triggered, memory_order_relaxed) : false;
-}
-
-// Wait until the even is signaled. If the timeout (in seconds) expires, return
-// false. timeout==0 polls, timeout<0 waits forever.
-bool mp_cancel_wait(struct mp_cancel *c, double timeout)
-{
-    struct pollfd fd = { .fd = c->wakeup_pipe[0], .events = POLLIN };
-    poll(&fd, 1, timeout * 1000);
-    return fd.revents & POLLIN;
-}
-
-// The FD becomes readable if mp_cancel_test() would return true.
-// Don't actually read from it, just use it for poll().
-int mp_cancel_get_fd(struct mp_cancel *c)
-{
-    return c->wakeup_pipe[0];
-}
-
-#else
-
-struct mp_cancel {
-    atomic_bool triggered;
-    HANDLE event;
-};
-
-static void cancel_destroy(void *p)
-{
-    struct mp_cancel *c = p;
-    CloseHandle(c->event);
-}
-
-struct mp_cancel *mp_cancel_new(void *talloc_ctx)
-{
-    struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
-    talloc_set_destructor(c, cancel_destroy);
-    *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
-    c->event = CreateEventW(NULL, TRUE, FALSE, NULL);
-    return c;
-}
-
-void mp_cancel_trigger(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, true);
-    SetEvent(c->event);
-}
-
-void mp_cancel_reset(struct mp_cancel *c)
-{
-    atomic_store(&c->triggered, false);
-    ResetEvent(c->event);
-}
-
-bool mp_cancel_test(struct mp_cancel *c)
-{
-    return c ? atomic_load_explicit(&c->triggered, memory_order_relaxed) : false;
-}
-
-bool mp_cancel_wait(struct mp_cancel *c, double timeout)
-{
-    return WaitForSingleObject(c->event, timeout < 0 ? INFINITE : timeout * 1000)
-            == WAIT_OBJECT_0;
-}
-
-void *mp_cancel_get_event(struct mp_cancel *c)
-{
-    return c->event;
-}
-
-int mp_cancel_get_fd(struct mp_cancel *c)
-{
-    return -1;
-}
-
-#endif
 
 char **stream_get_proto_list(void)
 {

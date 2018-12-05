@@ -41,7 +41,6 @@ tv_stream_open (stream_t *stream)
 
   stream->close=tv_stream_close;
   stream->demuxer = "tv";
-  stream->allow_caching = false;
 
   return STREAM_OK;
 }

@@ -59,7 +59,6 @@ extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
-extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options drm_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
@@ -78,7 +77,8 @@ extern const struct m_sub_options demux_conf;
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
-extern const struct m_obj_list ao_obj_list;
+
+extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -386,8 +386,6 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
-    OPT_SUBSTRUCT("", stream_cache, stream_cache_conf, 0),
-
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),
 #endif /* HAVE_DVDREAD */
@@ -461,6 +459,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
+    OPT_DOUBLE("demuxer-termination-timeout", demux_termination_timeout, 0),
     OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pause, 0),
     OPT_FLAG("cache-pause-initial", cache_pause_initial, 0),
@@ -509,18 +508,13 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
 
-    OPT_STRING_VALIDATE("hwdec", hwdec_api, M_OPT_OPTIONAL_PARAM,
-                        hwdec_validate_opt),
-    OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
-    OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
-
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
     OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"bitstream", 1}, {"container", 2})),
 
-    OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
+    OPT_SUBSTRUCT("", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
 
     OPT_SUBSTRUCT("", demux_lavf, demux_lavf_conf, 0),
@@ -548,10 +542,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("osd-bar", osd_bar_visible, UPDATE_OSD),
 
 //---------------------- libao/libvo options ------------------------
-    OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
-    OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
+    OPT_SUBSTRUCT("", ao_opts, ao_conf, 0),
     OPT_FLAG("audio-exclusive", audio_exclusive, UPDATE_AUDIO),
-    OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_FLAG("audio-stream-silence", audio_stream_silence, 0),
     OPT_FLOATRANGE("audio-wait-open", audio_wait_open, 0, 0, 60),
@@ -576,8 +568,6 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1},
                 {"weak", -1})),
-    OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
-               .min = 0, .max = 10),
 
     OPT_STRING("title", wintitle, 0),
     OPT_STRING("force-media-title", media_title, 0),
@@ -878,16 +868,12 @@ const m_option_t mp_opts[] = {
 const struct MPOpts mp_default_opts = {
     .use_terminal = 1,
     .msg_color = 1,
-    .audio_driver_list = NULL,
     .audio_decoders = NULL,
     .video_decoders = NULL,
     .softvol_max = 130,
     .softvol_volume = 100,
     .softvol_mute = 0,
     .gapless_audio = -1,
-    .audio_buffer = 0.2,
-    .audio_device = "auto",
-    .audio_client_name = "mpv",
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
@@ -915,6 +901,7 @@ const struct MPOpts mp_default_opts = {
     .position_resume = 1,
     .autoload_files = 1,
     .demuxer_thread = 1,
+    .demux_termination_timeout = 0.1,
     .hls_bitrate = INT_MAX,
     .cache_pause = 1,
     .cache_pause_wait = 1.0,
@@ -951,9 +938,6 @@ const struct MPOpts mp_default_opts = {
     .audiofile_auto = -1,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
-
-    .hwdec_api = HAVE_RPI ? "mmal" : "no",
-    .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
 
     .audio_output_channels = {
         .set = 1,

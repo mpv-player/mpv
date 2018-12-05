@@ -32,6 +32,10 @@ API changes
 
 ::
  --- mpv 0.30.0 ---
+ 1.103  - redo handling of async commands
+        - add mpv_event_command and make it possible to return values from
+          commands issued with mpv_command_async() or mpv_command_node_async()
+        - add mpv_abort_async_command()
  1.102  - rename struct mpv_opengl_drm_osd_size to mpv_opengl_drm_draw_surface_size
         - rename MPV_RENDER_PARAM_DRM_OSD_SIZE to MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE
 

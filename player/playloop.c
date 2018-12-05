@@ -92,6 +92,16 @@ void mp_wakeup_core_cb(void *ctx)
     mp_wakeup_core(mpctx);
 }
 
+void mp_core_lock(struct MPContext *mpctx)
+{
+    mp_dispatch_lock(mpctx->dispatch);
+}
+
+void mp_core_unlock(struct MPContext *mpctx)
+{
+    mp_dispatch_unlock(mpctx->dispatch);
+}
+
 // Process any queued input, whether it's user input, or requests from client
 // API threads. This also resets the "wakeup" flag used with mp_wait_events().
 void mp_process_input(struct MPContext *mpctx)
@@ -100,8 +110,7 @@ void mp_process_input(struct MPContext *mpctx)
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
-        run_command(mpctx, cmd, NULL);
-        mp_cmd_free(cmd);
+        run_command(mpctx, cmd, NULL, NULL, NULL);
     }
     mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
 }
@@ -118,8 +127,8 @@ void update_core_idle_state(struct MPContext *mpctx)
 {
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
-    bool active = !mpctx->paused && mpctx->restart_complete && mpctx->playing &&
-                  mpctx->in_playloop && !eof;
+    bool active = !mpctx->paused && mpctx->restart_complete &&
+                  mpctx->stop_play && mpctx->in_playloop && !eof;
 
     if (mpctx->playback_active != active) {
         mpctx->playback_active = active;
@@ -219,7 +228,6 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_backstep = false;
     mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->step_frames = 0;
     mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
@@ -619,14 +627,11 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     double now = mp_time_sec();
 
-    struct stream_cache_info c = {.idle = true};
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &c);
-
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
     int cache_buffer = 100;
-    bool use_pause_on_low_cache = (c.size > 0 || mpctx->demuxer->is_network) &&
+    bool use_pause_on_low_cache = demux_is_network_cached(mpctx->demuxer) &&
                                   opts->cache_pause;
 
     if (!mpctx->restart_complete) {
@@ -661,7 +666,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     }
 
     // Also update cache properties.
-    bool busy = !s.idle || !c.idle;
+    bool busy = !s.idle;
     if (busy || mpctx->next_cache_update > 0) {
         if (mpctx->next_cache_update <= now) {
             mpctx->next_cache_update = busy ? now + 0.25 : 0;
@@ -865,7 +870,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // True if we're either in idle mode, or loading of the file has finished.
     // It's also set via force in some stages during file loading.
-    bool act = !mpctx->playing || mpctx->playback_initialized || force;
+    bool act = mpctx->stop_play || mpctx->playback_initialized || force;
 
     // On the other hand, if a video track is selected, but no video is ever
     // decoded on it, then create the window.

@@ -59,16 +59,6 @@ typedef struct mp_vo_opts {
     struct drm_opts *drm_opts;
 } mp_vo_opts;
 
-struct mp_cache_opts {
-    int size;
-    int def_size;
-    int initial;
-    int seek_min;
-    int back_buffer;
-    char *file;
-    int file_max;
-};
-
 // Subtitle options needed by the subtitle decoders/renderers.
 struct mp_subtitle_opts {
     int sub_visibility;
@@ -144,10 +134,7 @@ typedef struct MPOpts {
 
     int auto_load_scripts;
 
-    struct m_obj_settings *audio_driver_list;
-    char *audio_device;
     int audio_exclusive;
-    char *audio_client_name;
     int ao_null_fallback;
     int audio_stream_silence;
     float audio_wait_open;
@@ -160,9 +147,9 @@ typedef struct MPOpts {
     int softvol_mute;
     float softvol_max;
     int gapless_audio;
-    double audio_buffer;
 
     mp_vo_opts *vo;
+    struct ao_opts *ao_opts;
 
     char *wintitle;
     char *media_title;
@@ -207,7 +194,6 @@ typedef struct MPOpts {
     char *force_configdir;
     int use_filedir_conf;
     int hls_bitrate;
-    struct mp_cache_opts *stream_cache;
     int chapterrange[2];
     int edition_id;
     int correct_pts;
@@ -261,6 +247,7 @@ typedef struct MPOpts {
     char **audio_files;
     char *demuxer_name;
     int demuxer_thread;
+    double demux_termination_timeout;
     int prefetch_open;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
@@ -294,10 +281,6 @@ typedef struct MPOpts {
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;
-
-    char *hwdec_api;
-    char *hwdec_codecs;
-    int hwdec_image_format;
 
     int w32_priority;
 
@@ -364,14 +347,10 @@ struct filter_opts {
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
-extern const struct m_sub_options stream_cache_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
-
-int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param);
 
 #endif

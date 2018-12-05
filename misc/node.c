@@ -81,3 +81,68 @@ void node_map_add_flag(struct mpv_node *dst, const char *key, bool v)
 {
     node_map_add(dst, key, MPV_FORMAT_FLAG)->u.flag = v;
 }
+
+mpv_node *node_map_get(mpv_node *src, const char *key)
+{
+    if (src->format != MPV_FORMAT_NODE_MAP)
+        return NULL;
+
+    for (int i = 0; i < src->u.list->num; i++) {
+        if (strcmp(key, src->u.list->keys[i]) == 0)
+            return &src->u.list->values[i];
+    }
+
+    return NULL;
+}
+
+// Note: for MPV_FORMAT_NODE_MAP, this (incorrectly) takes the order into
+//       account, instead of treating it as set.
+bool equal_mpv_value(const void *a, const void *b, mpv_format format)
+{
+    switch (format) {
+    case MPV_FORMAT_NONE:
+        return true;
+    case MPV_FORMAT_STRING:
+    case MPV_FORMAT_OSD_STRING:
+        return strcmp(*(char **)a, *(char **)b) == 0;
+    case MPV_FORMAT_FLAG:
+        return *(int *)a == *(int *)b;
+    case MPV_FORMAT_INT64:
+        return *(int64_t *)a == *(int64_t *)b;
+    case MPV_FORMAT_DOUBLE:
+        return *(double *)a == *(double *)b;
+    case MPV_FORMAT_NODE:
+        return equal_mpv_node(a, b);
+    case MPV_FORMAT_BYTE_ARRAY: {
+        const struct mpv_byte_array *a_r = a, *b_r = b;
+        if (a_r->size != b_r->size)
+            return false;
+        return memcmp(a_r->data, b_r->data, a_r->size) == 0;
+    }
+    case MPV_FORMAT_NODE_ARRAY:
+    case MPV_FORMAT_NODE_MAP:
+    {
+        mpv_node_list *l_a = *(mpv_node_list **)a, *l_b = *(mpv_node_list **)b;
+        if (l_a->num != l_b->num)
+            return false;
+        for (int n = 0; n < l_a->num; n++) {
+            if (format == MPV_FORMAT_NODE_MAP) {
+                if (strcmp(l_a->keys[n], l_b->keys[n]) != 0)
+                    return false;
+            }
+            if (!equal_mpv_node(&l_a->values[n], &l_b->values[n]))
+                return false;
+        }
+        return true;
+    }
+    }
+    abort(); // supposed to be able to handle all defined types
+}
+
+// Remarks see equal_mpv_value().
+bool equal_mpv_node(const struct mpv_node *a, const struct mpv_node *b)
+{
+    if (a->format != b->format)
+        return false;
+    return equal_mpv_value(&a->u, &b->u, a->format);
+}
