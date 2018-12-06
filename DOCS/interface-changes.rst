@@ -55,6 +55,10 @@ Interface changes
       as reference, which lists the definitive names.
     - edition and disc title switching will now fully reload playback (may have
       consequences for scripts, client API, or when using file-local options)
+    - with the removal of the stream cache, the following properties and options were
+      dropped: `cache`, `cache-size`, `cache-free`, `cache-used`, `--cache-default`,
+      `--cache-initial`, `--cache-seek-min`, `--cache-backbuffer`, `--cache-file`,
+      `--cache-file-size`
     - remove async playback abort hack. This breaks aborting playback in the
       following cases, iff the current stream is a network stream that
       completely stopped responding:
