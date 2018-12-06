@@ -447,13 +447,10 @@ local function add_file(s)
         demuxer_cache = 0
     end
     local demuxer_secs = mp.get_property_number("demuxer-cache-duration", 0)
-    local stream_cache = mp.get_property_number("cache-used", 0) * 1024 -- returns KiB
-    if stream_cache + demuxer_cache + demuxer_secs > 0 then
-        append(s, utils.format_bytes_humanized(stream_cache + demuxer_cache), {prefix="Total Cache:"})
-        append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="(Demuxer:",
-               suffix=",", nl="", no_prefix_markup=true, indent=o.prefix_sep})
-        append(s, format("%.1f", demuxer_secs), {suffix=" sec)", nl="", indent="",
-               no_prefix_markup=true})
+    if demuxer_cache + demuxer_secs > 0 then
+        append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="Total Cache:"})
+        append(s, format("%.1f", demuxer_secs), {prefix="(", suffix=" sec)", nl="",
+               no_prefix_markup=true, prefix_sep="", indent=o.prefix_sep})
         local speed = mp.get_property_number("cache-speed", 0)
         if speed > 0 then
             append(s, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
