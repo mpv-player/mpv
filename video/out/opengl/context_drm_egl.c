@@ -46,11 +46,23 @@ struct framebuffer
     uint32_t id;
 };
 
+struct vsync_tuple
+{
+    uint64_t ust;
+    unsigned int msc;
+    unsigned int sbc;
+};
+
+struct gbm_frame {
+    struct gbm_bo *bo;
+    struct vsync_tuple vsync;
+};
+
 struct gbm
 {
     struct gbm_surface *surface;
     struct gbm_device *device;
-    struct gbm_bo **bo;
+    struct gbm_frame **bo_queue;
     unsigned int num_bos;
 };
 
@@ -86,8 +98,16 @@ struct priv {
     bool still;
     bool paused;
 
+    struct vsync_tuple vsync;
+    struct vo_vsync_info vsync_info;
+
     struct mpv_opengl_drm_params drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
+};
+
+struct pflip_cb_closure {
+    struct priv *priv;
+    struct gbm_frame *frame;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -411,11 +431,18 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
-static void queue_flip(struct ra_ctx *ctx)
+static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 {
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
     int ret;
+
+    update_framebuffer_from_bo(ctx, frame->bo);
+
+    // Alloc and fill the data struct for the page flip callback
+    struct pflip_cb_closure *data = talloc(ctx, struct pflip_cb_closure);
+    data->priv = p;
+    data->frame = frame;
 
     if (atomic_ctx) {
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
@@ -423,14 +450,17 @@ static void queue_flip(struct ra_ctx *ctx)
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
         ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, p);
-        if (ret)
+                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, data);
+        if (ret) {
             MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
+            talloc_free(data);
+        }
     } else {
         ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
-                                  DRM_MODE_PAGE_FLIP_EVENT, p);
+                              DRM_MODE_PAGE_FLIP_EVENT, data);
         if (ret) {
             MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
+            talloc_free(data);
         }
     }
     p->waiting_for_flip = true;
@@ -458,13 +488,35 @@ static void wait_on_flip(struct ra_ctx *ctx)
     }
 }
 
+static void enqueue_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
+{
+    struct priv *p = ctx->priv;
+
+    p->vsync.sbc++;
+    struct gbm_frame *new_frame = talloc(p, struct gbm_frame);
+    new_frame->bo = bo;
+    new_frame->vsync = p->vsync;
+    MP_TARRAY_APPEND(p, p->gbm.bo_queue, p->gbm.num_bos, new_frame);
+}
+
+static void dequeue_bo(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    talloc_free(p->gbm.bo_queue[0]);
+    MP_TARRAY_REMOVE_AT(p->gbm.bo_queue, p->gbm.num_bos, 0);
+}
+
 static void swapchain_step(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
-    if (p->gbm.num_bos > 0 && p->gbm.bo[0])
-        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo[0]);
-    MP_TARRAY_REMOVE_AT(p->gbm.bo, p->gbm.num_bos, 0);
+    if (!(p->gbm.num_bos > 0))
+        return;
+
+    if (p->gbm.bo_queue[0]->bo)
+        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo_queue[0]->bo);
+    dequeue_bo(ctx);
 }
 
 static void new_fence(struct ra_ctx *ctx)
@@ -530,7 +582,7 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
         MP_ERR(ctx->vo, "Couldn't lock front buffer\n");
         return;
     }
-    MP_TARRAY_APPEND(p, p->gbm.bo, p->gbm.num_bos, new_bo);
+    enqueue_bo(ctx, new_bo);
     new_fence(ctx);
 
     while (drain || p->gbm.num_bos > ctx->opts.swapchain_depth || !gbm_surface_has_free_buffers(p->gbm.surface)) {
@@ -540,13 +592,12 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
         }
         if (p->gbm.num_bos <= 1)
             break;
-        if (!p->gbm.bo[1]) {
+        if (!p->gbm.bo_queue[1] || !p->gbm.bo_queue[1]->bo) {
             MP_ERR(ctx->vo, "Hole in swapchain?\n");
             swapchain_step(ctx);
             continue;
         }
-        update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
-        queue_flip(ctx);
+        queue_flip(ctx, p->gbm.bo_queue[1]);
     }
 }
 
@@ -642,11 +693,54 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
     return result;
 }
 
-static void page_flipped(int fd, unsigned int frame, unsigned int sec,
+static void page_flipped(int fd, unsigned int msc, unsigned int sec,
                          unsigned int usec, void *data)
 {
-    struct priv *p = data;
+    struct pflip_cb_closure *closure = data;
+    struct priv *p = closure->priv;
+
+    // frame->vsync.ust is the timestamp of the pageflip that happened just before this flip was queued
+    // frame->vsync.msc is the sequence number of the pageflip that happened just before this flip was queued
+    // frame->vsync.sbc is the sequence number for the frame that was just flipped to screen
+    struct gbm_frame *frame = closure->frame;
+
+    const bool ready =
+        (p->vsync.msc != 0) &&
+        (frame->vsync.ust != 0) && (frame->vsync.msc != 0);
+
+    const uint64_t ust = (sec * 1000000LL) + usec;
+
+    const unsigned int msc_since_last_flip = msc - p->vsync.msc;
+
+    p->vsync.ust = ust;
+    p->vsync.msc = msc;
+
+    if (ready) {
+        // Convert to mp_time
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts))
+            goto fail;
+        const uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+        const uint64_t ust_mp_time = mp_time_us() - (now_monotonic - p->vsync.ust);
+
+        const uint64_t     ust_since_enqueue = p->vsync.ust - frame->vsync.ust;
+        const unsigned int msc_since_enqueue = p->vsync.msc - frame->vsync.msc;
+        const unsigned int sbc_since_enqueue = p->vsync.sbc - frame->vsync.sbc;
+
+        p->vsync_info.vsync_duration = ust_since_enqueue / msc_since_enqueue;
+        p->vsync_info.skipped_vsyncs = msc_since_last_flip - 1; // Valid iff swap_buffers is called every vsync
+        p->vsync_info.last_queue_display_time = ust_mp_time + (sbc_since_enqueue * p->vsync_info.vsync_duration);
+    }
+
+fail:
     p->waiting_for_flip = false;
+    talloc_free(closure);
+}
+
+static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
+{
+    struct priv *p = ctx->priv;
+    *info = p->vsync_info;
 }
 
 static bool drm_egl_init(struct ra_ctx *ctx)
@@ -734,7 +828,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         MP_ERR(ctx, "Failed to lock GBM surface.\n");
         return false;
     }
-    MP_TARRAY_APPEND(p, p->gbm.bo, p->gbm.num_bos, new_bo);
+    enqueue_bo(ctx, new_bo);
     update_framebuffer_from_bo(ctx, new_bo);
     if (!p->fb || !p->fb->id) {
         MP_ERR(ctx, "Failed to create framebuffer.\n");
@@ -768,12 +862,17 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .external_swapchain = &drm_egl_swapchain,
+        .get_vsync          = &drm_egl_get_vsync,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
 
     ra_add_native_resource(ctx->ra, "drm_params", &p->drm_params);
     ra_add_native_resource(ctx->ra, "drm_draw_surface_size", &p->draw_surface_size);
+
+    p->vsync_info.vsync_duration = 0;
+    p->vsync_info.skipped_vsyncs = -1;
+    p->vsync_info.last_queue_display_time = -1;
 
     return true;
 }
@@ -805,6 +904,10 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
         return VO_TRUE;
     case VOCTRL_RESUME:
         p->paused = false;
+        p->vsync_info.last_queue_display_time = -1;
+        p->vsync_info.skipped_vsyncs = 0;
+        p->vsync.ust = 0;
+        p->vsync.msc = 0;
         return VO_TRUE;
     }
     return VO_NOTIMPL;
