@@ -50,7 +50,7 @@ extern const struct ra_ctx_fns ra_ctx_vdpauglx;
 
 /* Vulkan */
 extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
-//extern const struct ra_ctx_fns ra_ctx_vulkan_win;
+extern const struct ra_ctx_fns ra_ctx_vulkan_win;
 extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
 
 /* Direct3D 11 */
@@ -105,11 +105,9 @@ static const struct ra_ctx_fns *contexts[] = {
 // Vulkan contexts:
 #if HAVE_VULKAN
 
-/*
 #if HAVE_WIN32_DESKTOP
     &ra_ctx_vulkan_win,
 #endif
-*/
 #if HAVE_WAYLAND
     &ra_ctx_vulkan_wayland,
 #endif
