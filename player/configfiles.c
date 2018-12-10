@@ -253,14 +253,25 @@ void mp_get_resume_defaults(struct MPContext *mpctx)
 {
     char **list =
         talloc_zero_array(mpctx, char*, MP_ARRAY_SIZE(backup_properties));
+    bool *blacklist =
+        talloc_zero_array(mpctx, bool, MP_ARRAY_SIZE(backup_properties));
+
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
         char *val = NULL;
         int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK)
             list[i] = talloc_steal(list, val);
+        for (int n = 0; mpctx->opts->watch_later_blacklist_properties
+                        && mpctx->opts->watch_later_blacklist_properties[n]; n++) {
+            if (!strcmp(mpctx->opts->watch_later_blacklist_properties[n], pname)) {
+                blacklist[i] = true;
+                break;
+            }
+        }
     }
     mpctx->resume_defaults = list;
+    mpctx->resume_blacklist = blacklist;
 }
 
 // Should follow what parser-cfg.c does/needs
@@ -337,9 +348,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         if (r == M_PROPERTY_OK) {
             if (strncmp(pname, "options/", 8) == 0)
                 pname += 8;
-            // Only store it if it's different from the initial value.
+            // Only store it if it's different from the initial value, and if
+            // it's not blacklisted.
             char *prev = mpctx->resume_defaults[i];
-            if (!prev || strcmp(prev, val) != 0) {
+            bool bl = mpctx->resume_blacklist[i];
+            if (!bl && (!prev || strcmp(prev, val) != 0)) {
                 if (needs_config_quoting(val)) {
                     // e.g. '%6%STRING'
                     fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);

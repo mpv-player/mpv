@@ -276,6 +276,7 @@ typedef struct MPContext {
     int quit_custom_rc;
     bool has_quit_custom_rc;
     char **resume_defaults;
+    bool *resume_blacklist;
 
     // Global file statistics
     int files_played;       // played without issues (even if stopped by user)
