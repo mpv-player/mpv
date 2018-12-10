@@ -4057,8 +4057,8 @@ Network
 DVB
 ---
 
-``--dvbin-card=<1-4>``
-    Specifies using card number 1-4 (default: 1).
+``--dvbin-card=<0-15>``
+    Specifies using card number 0-15 (default: 0).
 
 ``--dvbin-file=<filename>``
     Instructs mpv to read the channels list from ``<filename>``. The default is
