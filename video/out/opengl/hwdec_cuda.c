@@ -33,10 +33,10 @@
 
 #include "video/out/gpu/hwdec.h"
 #include "video/out/gpu/utils.h"
-#include "formats.h"
 #include "options/m_config.h"
 #if HAVE_GL
-#include "ra_gl.h"
+#include "video/out/opengl/formats.h"
+#include "video/out/opengl/ra_gl.h"
 #endif
 #if HAVE_VULKAN
 #include "video/out/placebo/ra_pl.h"
@@ -55,10 +55,21 @@ struct priv_owner {
     bool is_gl;
     bool is_vk;
 
+    bool (*ext_init)(struct ra_hwdec_mapper *mapper,
+                     const struct ra_format *format, int n);
+    void (*ext_uninit)(struct ra_hwdec_mapper *mapper, int n);
+
     enum pl_handle_type handle_type;
 };
 
+struct ext_gl {
+#if HAVE_GL
+    CUgraphicsResource cu_res;
+#endif
+};
+
 struct ext_vk {
+#if HAVE_VULKAN
     CUexternalMemory mem;
     CUmipmappedArray mma;
 
@@ -68,15 +79,16 @@ struct ext_vk {
 
     CUexternalSemaphore ss;
     CUexternalSemaphore ws;
+#endif
 };
 
 struct priv {
     struct mp_image layout;
-    CUgraphicsResource cu_res[4];
     CUarray cu_array[4];
 
     CUcontext display_ctx;
 
+    struct ext_gl egl[4];
     struct ext_vk evk[4];
 };
 
@@ -105,9 +117,123 @@ static int check_cu(struct ra_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
+static bool cuda_ext_gl_init(struct ra_hwdec_mapper *mapper,
+                             const struct ra_format *format, int n);
+static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
+                             const struct ra_format *format, int n);
+static void cuda_ext_gl_uninit(struct ra_hwdec_mapper *mapper, int n);
+static void cuda_ext_vk_uninit(struct ra_hwdec_mapper *mapper, int n);
+
+static bool gl_init(struct ra_hwdec *hw) {
+#if HAVE_GL
+    int ret = 0;
+    struct priv_owner *p = hw->priv;
+    CudaFunctions *cu = p->cu;
+
+    CUdevice display_dev;
+    unsigned int device_count;
+    ret = CHECK_CU(cu->cuGLGetDevices(&device_count, &display_dev, 1,
+                                      CU_GL_DEVICE_LIST_ALL));
+    if (ret < 0)
+        return false;
+
+    ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                   display_dev));
+    if (ret < 0)
+        return false;
+
+    p->decode_ctx = p->display_ctx;
+
+    int decode_dev_idx = -1;
+    mp_read_option_raw(hw->global, "cuda-decode-device", &m_option_type_choice,
+                       &decode_dev_idx);
+
+    if (decode_dev_idx > -1) {
+        CUcontext dummy;
+        CUdevice decode_dev;
+        ret = CHECK_CU(cu->cuDeviceGet(&decode_dev, decode_dev_idx));
+        if (ret < 0) {
+            CHECK_CU(cu->cuCtxPopCurrent(&dummy));
+            return false;
+        }
+
+        if (decode_dev != display_dev) {
+            MP_INFO(hw, "Using separate decoder and display devices\n");
+
+            // Pop the display context. We won't use it again during init()
+            ret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
+            if (ret < 0)
+                return false;
+
+            ret = CHECK_CU(cu->cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                           decode_dev));
+            if (ret < 0)
+                return false;
+        }
+    }
+
+    p->ext_init = cuda_ext_gl_init;
+    p->ext_uninit = cuda_ext_gl_uninit;
+
+    return true;
+#else
+    return false;
+#endif
+}
+
+static bool vk_init(struct ra_hwdec *hw) {
+#if HAVE_VULKAN
+    int ret = 0;
+    struct priv_owner *p = hw->priv;
+    CudaFunctions *cu = p->cu;
+
+    int device_count;
+    ret = CHECK_CU(cu->cuDeviceGetCount(&device_count));
+    if (ret < 0)
+        return false;
+
+    CUdevice display_dev = -1;
+    for (int i = 0; i < device_count; i++) {
+        CUdevice dev;
+        ret = CHECK_CU(cu->cuDeviceGet(&dev, i));
+        if (ret < 0)
+            continue;
+
+        CUuuid uuid;
+        ret = CHECK_CU(cu->cuDeviceGetUuid(&uuid, dev));
+        if (ret < 0)
+            continue;
+
+        const struct pl_gpu *gpu = ra_pl_get(hw->ra);
+        if (memcmp(gpu->uuid, uuid.bytes, sizeof (gpu->uuid)) == 0) {
+            display_dev = dev;
+            break;
+        }
+    }
+
+    if (display_dev == -1) {
+        MP_ERR(hw, "Could not match Vulkan display device in CUDA.\n");
+        return false;
+    }
+
+    ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
+                                   display_dev));
+    if (ret < 0)
+        return false;
+
+    p->decode_ctx = p->display_ctx;
+
+    p->ext_init = cuda_ext_vk_init;
+    p->ext_uninit = cuda_ext_vk_uninit;
+
+    return true;
+#else
+    return false;
+#endif
+}
+
 static int cuda_init(struct ra_hwdec *hw)
 {
-    CUdevice display_dev;
     AVBufferRef *hw_device_ctx = NULL;
     CUcontext dummy;
     int ret = 0;
@@ -170,81 +296,10 @@ static int cuda_init(struct ra_hwdec *hw)
         return -1;
 
     // Allocate display context
-    if (p->is_gl) {
-        unsigned int device_count;
-        ret = CHECK_CU(cu->cuGLGetDevices(&device_count, &display_dev, 1,
-                                          CU_GL_DEVICE_LIST_ALL));
-        if (ret < 0)
-            return -1;
-
-        ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
-                                       display_dev));
-        if (ret < 0)
-            return -1;
-
-        p->decode_ctx = p->display_ctx;
-
-        int decode_dev_idx = -1;
-        mp_read_option_raw(hw->global, "cuda-decode-device", &m_option_type_choice,
-                           &decode_dev_idx);
-
-        if (decode_dev_idx > -1) {
-            CUdevice decode_dev;
-            ret = CHECK_CU(cu->cuDeviceGet(&decode_dev, decode_dev_idx));
-            if (ret < 0)
-                goto error;
-
-            if (decode_dev != display_dev) {
-                MP_INFO(hw, "Using separate decoder and display devices\n");
-
-                // Pop the display context. We won't use it again during init()
-                ret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
-                if (ret < 0)
-                    return -1;
-
-                ret = CHECK_CU(cu->cuCtxCreate(&p->decode_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
-                                               decode_dev));
-                if (ret < 0)
-                    return -1;
-            }
-        }
-    } else if (p->is_vk) {
-#if HAVE_VULKAN
-        int count;
-        ret = CHECK_CU(cu->cuDeviceGetCount(&count));
-        if (ret < 0)
-            return -1;
-
-        display_dev = -1;
-        for (int i = 0; i < count; i++) {
-            CUdevice dev;
-            ret = CHECK_CU(cu->cuDeviceGet(&dev, i));
-            if (ret < 0)
-                continue;
-
-            CUuuid uuid;
-            ret = CHECK_CU(cu->cuDeviceGetUuid(&uuid, dev));
-            if (ret < 0)
-                continue;
-
-            if (memcmp(gpu->uuid, uuid.bytes, sizeof (gpu->uuid)) == 0) {
-                display_dev = dev;
-                break;
-            }
-        }
-
-        if (display_dev == -1) {
-            MP_ERR(hw, "Could not match Vulkan display device in CUDA.\n");
-            return -1;
-        }
-
-        ret = CHECK_CU(cu->cuCtxCreate(&p->display_ctx, CU_CTX_SCHED_BLOCKING_SYNC,
-                                       display_dev));
-        if (ret < 0)
-            return -1;
-
-        p->decode_ctx = p->display_ctx;
-#endif
+    if (p->is_gl && !gl_init(hw)) {
+        return -1;
+    } else if (p->is_vk && !vk_init(hw)) {
+        return -1;
     }
 
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA);
@@ -467,23 +522,93 @@ static void cuda_ext_vk_uninit(struct ra_hwdec_mapper *mapper, int n)
     CudaFunctions *cu = p_owner->cu;
 
     struct ext_vk *evk = &p->evk[n];
-    if (evk) {
-        if (evk->mma) {
-            CHECK_CU(cu->cuMipmappedArrayDestroy(evk->mma));
-        }
-        if (evk->mem) {
-            CHECK_CU(cu->cuDestroyExternalMemory(evk->mem));
-        }
-        if (evk->ss) {
-            CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ss));
-        }
-        if (evk->ws) {
-            CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ws));
-        }
-        pl_sync_destroy(ra_pl_get(mapper->ra), &evk->sync);
+    if (evk->mma) {
+        CHECK_CU(cu->cuMipmappedArrayDestroy(evk->mma));
+        evk->mma = 0;
     }
+    if (evk->mem) {
+        CHECK_CU(cu->cuDestroyExternalMemory(evk->mem));
+        evk->mem = 0;
+    }
+    if (evk->ss) {
+        CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ss));
+        evk->ss = 0;
+    }
+    if (evk->ws) {
+        CHECK_CU(cu->cuDestroyExternalSemaphore(evk->ws));
+        evk->ws = 0;
+    }
+    pl_sync_destroy(ra_pl_get(mapper->ra), &evk->sync);
 }
 #endif // HAVE_VULKAN
+
+#if HAVE_GL
+static bool cuda_ext_gl_init(struct ra_hwdec_mapper *mapper,
+                             const struct ra_format *format, int n)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    CudaFunctions *cu = p_owner->cu;
+    int ret = 0;
+    CUcontext dummy;
+
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = mp_image_plane_w(&p->layout, n),
+        .h = mp_image_plane_h(&p->layout, n),
+        .d = 1,
+        .format = format,
+        .render_src = true,
+        .src_linear = format->linear_filter,
+    };
+
+    mapper->tex[n] = ra_tex_create(mapper->ra, &params);
+    if (!mapper->tex[n]) {
+        goto error;
+    }
+
+    GLuint texture;
+    GLenum target;
+    ra_gl_get_raw_tex(mapper->ra, mapper->tex[n], &texture, &target);
+
+    ret = CHECK_CU(cu->cuGraphicsGLRegisterImage(&p->egl[n].cu_res, texture, target,
+                                                 CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
+    if (ret < 0)
+        goto error;
+
+    ret = CHECK_CU(cu->cuGraphicsMapResources(1, &p->egl[n].cu_res, 0));
+    if (ret < 0)
+        goto error;
+
+    ret = CHECK_CU(cu->cuGraphicsSubResourceGetMappedArray(&p->cu_array[n], p->egl[n].cu_res,
+                                                           0, 0));
+    if (ret < 0)
+        goto error;
+
+    ret = CHECK_CU(cu->cuGraphicsUnmapResources(1, &p->egl[n].cu_res, 0));
+    if (ret < 0)
+        goto error;
+
+    return true;
+
+error:
+    CHECK_CU(cu->cuCtxPopCurrent(&dummy));
+    return false;
+}
+
+static void cuda_ext_gl_uninit(struct ra_hwdec_mapper *mapper, int n)
+{
+    struct priv_owner *p_owner = mapper->owner->priv;
+    struct priv *p = mapper->priv;
+    CudaFunctions *cu = p_owner->cu;
+
+    struct ext_gl *egl = &p->egl[n];
+    if (egl->cu_res) {
+        CHECK_CU(cu->cuGraphicsUnregisterResource(p->egl[n].cu_res));
+        egl->cu_res = 0;
+    }
+}
+#endif // HAVE_GL
 
 static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
@@ -513,55 +638,8 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         return ret;
 
     for (int n = 0; n < desc.num_planes; n++) {
-        const struct ra_format *format = desc.planes[n];
-
-        if (p_owner->is_gl) {
-#if HAVE_GL
-            struct ra_tex_params params = {
-                .dimensions = 2,
-                .w = mp_image_plane_w(&p->layout, n),
-                .h = mp_image_plane_h(&p->layout, n),
-                .d = 1,
-                .format = format,
-                .render_src = true,
-                .src_linear = format->linear_filter,
-            };
-
-            mapper->tex[n] = ra_tex_create(mapper->ra, &params);
-            if (!mapper->tex[n]) {
-                ret = -1;
-                goto error;
-            }
-
-            GLuint texture;
-            GLenum target;
-            ra_gl_get_raw_tex(mapper->ra, mapper->tex[n], &texture, &target);
-
-            ret = CHECK_CU(cu->cuGraphicsGLRegisterImage(&p->cu_res[n], texture, target,
-                                                         CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
-            if (ret < 0)
-                goto error;
-
-            ret = CHECK_CU(cu->cuGraphicsMapResources(1, &p->cu_res[n], 0));
-            if (ret < 0)
-                goto error;
-
-            ret = CHECK_CU(cu->cuGraphicsSubResourceGetMappedArray(&p->cu_array[n], p->cu_res[n],
-                                                                   0, 0));
-            if (ret < 0)
-                goto error;
-
-            ret = CHECK_CU(cu->cuGraphicsUnmapResources(1, &p->cu_res[n], 0));
-            if (ret < 0)
-                goto error;
-#endif
-        } else if (p_owner->is_vk) {
-#if HAVE_VULKAN
-            ret = cuda_ext_vk_init(mapper, format, n);
-            if (ret < 0)
-                goto error;
-#endif
-        }
+        if (!p_owner->ext_init(mapper, desc.planes[n], n))
+            goto error;
     }
 
  error:
@@ -582,12 +660,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     // Don't bail if any CUDA calls fail. This is all best effort.
     CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
     for (int n = 0; n < 4; n++) {
-        if (p->cu_res[n] > 0)
-            CHECK_CU(cu->cuGraphicsUnregisterResource(p->cu_res[n]));
-        p->cu_res[n] = 0;
-#if HAVE_VULKAN
-        cuda_ext_vk_uninit(mapper, n);
-#endif
+        p_owner->ext_uninit(mapper, n);
         ra_tex_free(mapper->ra, &mapper->tex[n]);
     }
     CHECK_CU(cu->cuCtxPopCurrent(&dummy));
@@ -604,7 +677,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CudaFunctions *cu = p_owner->cu;
     CUcontext dummy;
     int ret = 0, eret = 0;
-    bool is_vk = p_owner->is_vk;
 
     ret = CHECK_CU(cu->cuCtxPushCurrent(p->display_ctx));
     if (ret < 0)
@@ -612,7 +684,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 
     for (int n = 0; n < p->layout.num_planes; n++) {
 #if HAVE_VULKAN
-        if (is_vk) {
+        if (p_owner->is_vk) {
             ret = pl_tex_export(ra_pl_get(mapper->ra),
                                 p->evk[n].pltex, p->evk[n].sync);
             if (!ret)
@@ -641,7 +713,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         if (ret < 0)
             goto error;
 #if HAVE_VULKAN
-        if (is_vk) {
+        if (p_owner->is_vk) {
             CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS sp = { 0, };
             ret = CHECK_CU(cu->cuSignalExternalSemaphoresAsync(&p->evk[n].ss,
                                                                &sp, 1, 0));
