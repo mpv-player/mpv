@@ -47,6 +47,10 @@ Interface changes
     - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
       as the only option. The `--spirv-compiler` option itself has been marked
       as deprecated, and may be removed in the future.
+    - split up `--tone-mapping-desaturate`` into strength + exponent, instead of
+      only using a single value (which previously just controlled the exponent).
+      The strength now linearly blends between the linear and nonlinear tone
+      mapped versions of a color.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
