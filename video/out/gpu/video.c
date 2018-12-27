@@ -313,9 +313,12 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .tone_mapping = TONE_MAPPING_HABLE,
-    .tone_mapping_param = NAN,
-    .tone_mapping_desat = 0.5,
+    .tone_map = {
+        .curve = TONE_MAPPING_HABLE,
+        .curve_param = NAN,
+        .desat = 0.7,
+        .desat_exp = 20.0,
+    },
     .early_flush = -1,
     .hwdec_interop = "auto",
 };
@@ -352,20 +355,23 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
         OPT_INTRANGE("target-peak", target_peak, 0, 10, 10000),
-        OPT_CHOICE("tone-mapping", tone_mapping, 0,
+        OPT_CHOICE("tone-mapping", tone_map.curve, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"mobius",   TONE_MAPPING_MOBIUS},
                     {"reinhard", TONE_MAPPING_REINHARD},
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
-        OPT_CHOICE("hdr-compute-peak", compute_hdr_peak, 0,
+        OPT_CHOICE("hdr-compute-peak", tone_map.compute_peak, 0,
                    ({"auto", 0},
                     {"yes", 1},
                     {"no", -1})),
-        OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
-        OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
-        OPT_FLAG("gamut-warning", gamut_warning, 0),
+        OPT_FLOAT("tone-mapping-param", tone_map.curve_param, 0),
+        OPT_FLOAT("tone-mapping-desaturate", tone_map.desat, 0),
+        OPT_FLOATRANGE("tone-mapping-desaturate-exponent",
+                       tone_map.desat_exp, 0, 0.0, 1.0),
+        OPT_FLAG("tone-mapping-per-channel", tone_map.per_channel, 0),
+        OPT_FLAG("gamut-warning", tone_map.gamut_warning, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2471,7 +2477,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     if (!dst.sig_peak)
         dst.sig_peak = mp_trc_nom_peak(dst.gamma);
 
-    bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
+    struct gl_tone_map_opts tone_map = p->opts.tone_map;
+    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma);
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
             uint32_t counter;
@@ -2492,8 +2499,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         p->hdr_peak_ssbo = ra_buf_create(ra, &params);
         if (!p->hdr_peak_ssbo) {
             MP_WARN(p, "Failed to create HDR peak detection SSBO, disabling.\n");
+            tone_map.compute_peak = p->opts.tone_map.compute_peak = -1;
             detect_peak = false;
-            p->opts.compute_hdr_peak = -1;
         }
     }
 
@@ -2514,9 +2521,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     }
 
     // Adapt from src to dst as necessary
-    pass_color_map(p->sc, src, dst, p->opts.tone_mapping,
-                   p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
-                   detect_peak, p->opts.gamut_warning, p->use_linear && !osd);
+    pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
@@ -3582,12 +3587,12 @@ static void check_gl_features(struct gl_video *p)
     }
 
     bool have_compute_peak = have_compute && have_ssbo;
-    if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
-        int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
+    if (!have_compute_peak && p->opts.tone_map.compute_peak >= 0) {
+        int msgl = p->opts.tone_map.compute_peak == 1 ? MSGL_WARN : MSGL_V;
         MP_MSG(p, msgl, "Disabling HDR peak computation (one or more of the "
                         "following is not supported: compute shaders=%d, "
                         "SSBO=%d).\n", have_compute, have_ssbo);
-        p->opts.compute_hdr_peak = -1;
+        p->opts.tone_map.compute_peak = -1;
     }
 
     p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
@@ -3609,7 +3614,6 @@ static void check_gl_features(struct gl_video *p)
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
-            .compute_hdr_peak = p->opts.compute_hdr_peak,
             .dither_algo = p->opts.dither_algo,
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
@@ -3617,9 +3621,7 @@ static void check_gl_features(struct gl_video *p)
             .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
             .tex_pad_y = p->opts.tex_pad_y,
-            .tone_mapping = p->opts.tone_mapping,
-            .tone_mapping_param = p->opts.tone_mapping_param,
-            .tone_mapping_desat = p->opts.tone_mapping_desat,
+            .tone_map = p->opts.tone_map,
             .early_flush = p->opts.early_flush,
             .icc_opts = p->opts.icc_opts,
             .hwdec_interop = p->opts.hwdec_interop,

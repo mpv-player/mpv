@@ -5233,6 +5233,16 @@ The following video options are currently all specific to ``--vo=gpu`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
+``--tone-mapping-per-channel``
+    Enabling this option (default: no) does tone-mapping per channel instead
+    of linearly. Per-channel tone mapping tends to distort overly bright
+    colors towards white, unless they're sufficiently close to the primaries.
+    If you prefer the "Hollywood" look, enabling this option might improve the
+    aesthetic result of tone mapping at the cost of colorimetric accuracy.
+
+    When enabling this option, it's strongly recommended to also disable
+    ``--tone-mapping-desaturate``.
+
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of
     relying on tagged metadata. These values are averaged over local regions as
@@ -5243,17 +5253,23 @@ The following video options are currently all specific to ``--vo=gpu`` and
     The special value ``auto`` (default) will enable HDR peak computation
     automatically if compute shaders and SSBOs are supported.
 
-``--tone-mapping-desaturate=<value>``
-    Apply desaturation for highlights. The parameter essentially controls the
-    steepness of the desaturation curve. The higher the parameter, the more
-    aggressively colors will be desaturated. This setting helps prevent
-    unnaturally blown-out colors for super-highlights, by (smoothly) turning
-    into white instead. This makes images feel more natural, at the cost of
-    reducing information about out-of-range colors.
+``--tone-mapping-desaturate=<0.0..1.0>``
+    Apply desaturation for highlights. The parameter controls the strength of
+    the desaturation curve. A value of 0.0 completely disables it, while a
+    value of 1.0 means that overly bright colors will be completely white.
+    Values in between apply progressively more/less aggressive desaturation.
+    This setting helps prevent unnaturally blown-out colors for
+    super-highlights, by (smoothly) turning them into white instead. This makes
+    images feel more natural, at the cost of reducing information about
+    out-of-range colors. The default value of 0.5 provides a good balance.
 
-    The default of 0.5 provides a good balance. This value is weaker than the
-    ACES ODT curves' recommendation, but works better for most content in
-    practice. A setting of 0.0 disables this option.
+``--tone-mapping-desaturate-exponent=<value>``
+    This setting controls the exponent of the desaturation curve, which
+    controls how bright a color needs to be in order to start being
+    desaturated. The default of 20.0 provides a reasonable balance. This value
+    is weaker than the ACES ODT curves' recommendation, but works better for
+    most content in practice. Decreasing this exponent makes the curve more
+    aggressive.
 
 ``--gamut-warning``
     If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a
