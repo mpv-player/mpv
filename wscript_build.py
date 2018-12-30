@@ -449,7 +449,7 @@ def build(ctx):
         ( "video/out/hwdec/hwdec_cuda.c",        "cuda-hwaccel" ),
         ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-hwaccel && gl" ),
         ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-hwaccel && vulkan" ),
-        ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl" ),
+        ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-vulkan" ),
         ( "video/out/placebo/ra_pl.c",           "libplacebo" ),
         ( "video/out/placebo/utils.c",           "libplacebo" ),
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),

@@ -827,6 +827,11 @@ video_output_features = [
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
     }, {
+        'name': 'vaapi-vulkan',
+        'desc': 'VAAPI Vulkan',
+        'deps': 'vaapi && vulkan',
+        'func': check_true,
+    }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
