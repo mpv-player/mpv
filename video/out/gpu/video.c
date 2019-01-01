@@ -316,6 +316,9 @@ static const struct gl_video_opts gl_video_opts_def = {
     .tone_map = {
         .curve = TONE_MAPPING_HABLE,
         .curve_param = NAN,
+        .decay_rate = 100.0,
+        .scene_threshold_low = 50,
+        .scene_threshold_high = 200,
         .desat = 0.75,
         .desat_exp = 1.5,
     },
@@ -367,6 +370,11 @@ const struct m_sub_options gl_video_conf = {
                    ({"auto", 0},
                     {"yes", 1},
                     {"no", -1})),
+        OPT_FLOATRANGE("hdr-peak-decay-rate", tone_map.decay_rate, 0, 1.0, 1000.0),
+        OPT_INTRANGE("hdr-scene-threshold-low",
+                     tone_map.scene_threshold_low, 0, 0, 10000),
+        OPT_INTRANGE("hdr-scene-threshold-high",
+                     tone_map.scene_threshold_high, 0, 0, 10000),
         OPT_FLOAT("tone-mapping-param", tone_map.curve_param, 0),
         OPT_FLOAT("tone-mapping-desaturate", tone_map.desat, 0),
         OPT_FLOATRANGE("tone-mapping-desaturate-exponent",
@@ -2478,17 +2486,18 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         dst.sig_peak = mp_trc_nom_peak(dst.gamma);
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
-    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma);
+    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)
+                       && src.sig_peak > dst.sig_peak;
+
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
+            float average[2];
+            uint32_t frame_sum;
+            uint32_t frame_max;
             uint32_t counter;
-            uint32_t frame_idx;
-            uint32_t frame_num;
-            uint32_t frame_max[PEAK_DETECT_FRAMES+1];
-            uint32_t frame_sum[PEAK_DETECT_FRAMES+1];
-            uint32_t total_max;
-            uint32_t total_sum;
-        } peak_ssbo = {0};
+        } peak_ssbo = {
+            .average = { 0.25, src.sig_peak },
+        };
 
         struct ra_buf_params params = {
             .type = RA_BUF_TYPE_SHADER_STORAGE,
@@ -2508,15 +2517,10 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         pass_describe(p, "detect HDR peak");
         pass_is_compute(p, 8, 8, true); // 8x8 is good for performance
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
+            "vec2 average;"
+            "uint frame_sum;"
+            "uint frame_max;"
             "uint counter;"
-            "uint frame_idx;"
-            "uint frame_num;"
-            "uint frame_max[%d];"
-            "uint frame_avg[%d];"
-            "uint total_max;"
-            "uint total_avg;",
-            PEAK_DETECT_FRAMES + 1,
-            PEAK_DETECT_FRAMES + 1
         );
     }
 

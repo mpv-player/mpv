@@ -5245,6 +5245,30 @@ The following video options are currently all specific to ``--vo=gpu`` and
     The special value ``auto`` (default) will enable HDR peak computation
     automatically if compute shaders and SSBOs are supported.
 
+``--hdr-peak-decay-rate=<1.0..1000.0>``
+    The decay rate used for the HDR peak detection algorithm (default: 100.0).
+    This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values
+    make the peak decay more slowly, leading to more stable values at the cost
+    of more "eye adaptation"-like effects (although this is mitigated somewhat
+    by ``--hdr-scene-threshold``). A value of 1.0 (the lowest possible) disables
+    all averaging, meaning each frame's value is used directly as measured,
+    but doing this is not recommended for "noisy" sources since it may lead
+    to excessive flicker. (In signal theory terms, this controls the time
+    constant "tau" of an IIR low pass filter)
+
+``--hdr-scene-threshold-low=<0..10000>``, ``--hdr-scene-threshold-high=<0..10000>``
+    The lower and upper thresholds (in cd/m^2) for a brightness difference to
+    be considered a scene change (default: 50 low, 200 high). This is only
+    relevant when ``--hdr-compute-peak`` is enabled. Normally, small
+    fluctuations in the frame brightness are compensated for by the peak
+    averaging mechanism, but for large jumps in the brightness this can result
+    in the frame remaining too bright or too dark for up to several seconds,
+    depending on the value of ``--hdr-peak-decay-rate``. To counteract this,
+    when the brightness between the running average and the current frame
+    exceeds the low threshold, mpv will make the averaging filter more
+    aggressive, up to the limit of the high threshold (at which point the
+    filter becomes instant).
+
 ``--tone-mapping-desaturate=<0.0..1.0>``
     Apply desaturation for highlights (default: 0.75). The parameter controls
     the strength of the desaturation curve. A value of 0.0 completely disables
