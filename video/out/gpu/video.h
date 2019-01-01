@@ -95,13 +95,13 @@ enum tone_mapping {
     TONE_MAPPING_LINEAR,
 };
 
-// How many frames to average over for HDR peak detection
-#define PEAK_DETECT_FRAMES 63
-
 struct gl_tone_map_opts {
     int curve;
     float curve_param;
     int compute_peak;
+    float decay_rate;
+    int scene_threshold_low;
+    int scene_threshold_high;
     float desat;
     float desat_exp;
     int gamut_warning; // bool

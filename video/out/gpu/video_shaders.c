@@ -567,75 +567,55 @@ static void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light ligh
 // under a typical presentation gamma of about 2.0.
 static const float sdr_avg = 0.25;
 
-// The threshold for which to consider an average luminance difference to be
-// a sign of a scene change.
-static const int scene_threshold = 0.2 * MP_REF_WHITE;
-
-static void hdr_update_peak(struct gl_shader_cache *sc)
+static void hdr_update_peak(struct gl_shader_cache *sc,
+                            const struct gl_tone_map_opts *opts)
 {
-    // For performance, we want to do as few atomic operations on global
-    // memory as possible, so use an atomic in shmem for the work group.
-    GLSLH(shared uint wg_sum;);
-    GLSL(wg_sum = 0;)
+    // Update the sig_peak/sig_avg from the old SSBO state
+    GLSL(sig_avg  = max(1e-3, average.x);)
+    GLSL(sig_peak = max(1.00, average.y);)
 
-    // Have each thread update the work group sum with the local value
+    // For performance, and to avoid overflows, we tally up the sub-results per
+    // pixel using shared memory first
+    GLSLH(shared uint wg_sum;)
+    GLSLH(shared uint wg_max;)
+    GLSL(wg_sum = wg_max = 0;)
     GLSL(barrier();)
-    GLSLF("atomicAdd(wg_sum, uint(sig_max * %f));\n", MP_REF_WHITE);
+    GLSLF("uint sig_uint = uint(sig_max * %f);\n", MP_REF_WHITE);
+    GLSL(atomicAdd(wg_sum, sig_uint);)
+    GLSL(atomicMax(wg_max, sig_uint);)
 
-    // Have one thread per work group update the global atomics. We use the
-    // work group average even for the global sum, to make the values slightly
-    // more stable and smooth out tiny super-highlights.
+    // Have one thread per work group update the global atomics
     GLSL(memoryBarrierShared();)
     GLSL(barrier();)
     GLSL(if (gl_LocalInvocationIndex == 0) {)
     GLSL(    uint wg_avg = wg_sum / (gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
-    GLSL(    atomicMax(frame_max[frame_idx], wg_avg);)
-    GLSL(    atomicAdd(frame_avg[frame_idx], wg_avg);)
+    GLSL(    atomicAdd(frame_sum, wg_avg);)
+    GLSL(    atomicMax(frame_max, wg_max);)
+    GLSL(    memoryBarrierBuffer();)
     GLSL(})
-
-    const float refi = 1.0 / MP_REF_WHITE;
-
-    // Update the sig_peak/sig_avg from the old SSBO state
-    GLSL(uint num_wg = gl_NumWorkGroups.x * gl_NumWorkGroups.y;)
-    GLSL(if (frame_num > 0) {)
-    GLSLF("    float peak = %f * float(total_max) / float(frame_num);\n", refi);
-    GLSLF("    float avg = %f * float(total_avg) / float(frame_num);\n", refi);
-    GLSLF("    sig_peak = max(1.0, peak);\n");
-    GLSLF("    sig_avg  = max(%f, avg);\n", sdr_avg);
-    GLSL(});
+    GLSL(barrier();)
 
     // Finally, to update the global state, we increment a counter per dispatch
-    GLSL(memoryBarrierBuffer();)
-    GLSL(barrier();)
+    GLSL(uint num_wg = gl_NumWorkGroups.x * gl_NumWorkGroups.y;)
     GLSL(if (gl_LocalInvocationIndex == 0 && atomicAdd(counter, 1) == num_wg - 1) {)
-
-    // Since we sum up all the workgroups, we also still need to divide the
-    // average by the number of work groups
     GLSL(    counter = 0;)
-    GLSL(    frame_avg[frame_idx] /= num_wg;)
-    GLSL(    uint cur_max = frame_max[frame_idx];)
-    GLSL(    uint cur_avg = frame_avg[frame_idx];)
+    GLSL(    vec2 cur = vec2(float(frame_sum) / float(num_wg), frame_max);)
+    GLSLF("  cur *= 1.0/%f;\n", MP_REF_WHITE);
 
-    // Scene change detection
-    GLSL(    int diff = int(frame_num * cur_avg) - int(total_avg);)
-    GLSLF("  if (abs(diff) > frame_num * %d) {\n", scene_threshold);
-    GLSL(        frame_num = 0;)
-    GLSL(        total_max = total_avg = 0;)
-    GLSLF("      for (uint i = 0; i < %d; i++)\n", PEAK_DETECT_FRAMES+1);
-    GLSL(            frame_max[i] = frame_avg[i] = 0;)
-    GLSL(        frame_max[frame_idx] = cur_max;)
-    GLSL(        frame_avg[frame_idx] = cur_avg;)
-    GLSL(    })
+    // Use an IIR low-pass filter to smooth out the detected values, with a
+    // configurable decay rate based on the desired time constant (tau)
+    float a = 1.0 - cos(1.0 / opts->decay_rate);
+    float decay = sqrt(a*a + 2*a) - a;
+    GLSLF("  average += %f * (cur - average);\n", decay);
 
-    // Add the current frame, then subtract and reset the next frame
-    GLSLF("  uint next = (frame_idx + 1) %% %d;\n", PEAK_DETECT_FRAMES+1);
-    GLSL(    total_max += cur_max - frame_max[next];)
-    GLSL(    total_avg += cur_avg - frame_avg[next];)
-    GLSL(    frame_max[next] = frame_avg[next] = 0;)
+    // Scene change hysteresis
+    GLSLF("  float weight = smoothstep(%f, %f, abs(cur.x - average.x));\n",
+          (float) opts->scene_threshold_low / MP_REF_WHITE,
+          (float) opts->scene_threshold_high / MP_REF_WHITE);
+    GLSL(    average = mix(average, cur, weight);)
 
-    // Update the index and count
-    GLSL(    frame_idx = next;)
-    GLSLF("  frame_num = min(frame_num + 1, %d);\n", PEAK_DETECT_FRAMES);
+    // Reset SSBO state for the next frame
+    GLSL(    frame_max = frame_sum = 0;)
     GLSL(    memoryBarrierBuffer();)
     GLSL(})
 }
@@ -659,7 +639,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     GLSLF("float sig_avg = %f;\n", sdr_avg);
 
     if (opts->compute_peak >= 0)
-        hdr_update_peak(sc);
+        hdr_update_peak(sc, opts);
 
     GLSLF("vec3 sig = color.rgb;\n");
 
