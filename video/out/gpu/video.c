@@ -3513,9 +3513,9 @@ static bool check_dumb_mode(struct gl_video *p)
         return false;
 
     // otherwise, use auto-detection
-    if (o->target_prim || o->target_trc || o->correct_downscaling ||
-        o->linear_downscaling || o->linear_upscaling || o->sigmoid_upscaling ||
-        o->interpolation || o->blend_subs || o->deband || o->unsharp)
+    if (o->correct_downscaling || o->linear_downscaling ||
+        o->linear_upscaling || o->sigmoid_upscaling || o->interpolation ||
+        o->blend_subs || o->deband || o->unsharp)
         return false;
     // check remaining scalers (tscale is already implicitly excluded above)
     for (int i = 0; i < SCALER_COUNT; i++) {
@@ -3526,8 +3526,6 @@ static bool check_dumb_mode(struct gl_video *p)
         }
     }
     if (o->user_shaders && o->user_shaders[0])
-        return false;
-    if (p->use_lut_3d)
         return false;
     return true;
 }
@@ -3631,6 +3629,9 @@ static void check_gl_features(struct gl_video *p)
             .early_flush = p->opts.early_flush,
             .icc_opts = p->opts.icc_opts,
             .hwdec_interop = p->opts.hwdec_interop,
+            .target_trc = p->opts.target_trc,
+            .target_prim = p->opts.target_prim,
+            .target_peak = p->opts.target_peak,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             p->opts.scaler[n] = gl_video_opts_def.scaler[n];
