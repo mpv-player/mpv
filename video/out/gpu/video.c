@@ -316,6 +316,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .tone_map = {
         .curve = TONE_MAPPING_HABLE,
         .curve_param = NAN,
+        .max_boost = 1.0,
         .decay_rate = 100.0,
         .scene_threshold_low = 50,
         .scene_threshold_high = 200,
@@ -376,6 +377,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_INTRANGE("hdr-scene-threshold-high",
                      tone_map.scene_threshold_high, 0, 0, 10000),
         OPT_FLOAT("tone-mapping-param", tone_map.curve_param, 0),
+        OPT_FLOATRANGE("tone-mapping-max-boost", tone_map.max_boost, 0, 1.0, 10.0),
         OPT_FLOAT("tone-mapping-desaturate", tone_map.desat, 0),
         OPT_FLOATRANGE("tone-mapping-desaturate-exponent",
                        tone_map.desat_exp, 0, 0.0, 20.0),
