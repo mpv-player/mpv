@@ -98,6 +98,7 @@ enum tone_mapping {
 struct gl_tone_map_opts {
     int curve;
     float curve_param;
+    float max_boost;
     int compute_peak;
     float decay_rate;
     int scene_threshold_low;

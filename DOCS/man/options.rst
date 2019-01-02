@@ -5235,6 +5235,14 @@ The following video options are currently all specific to ``--vo=gpu`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
+``--tone-mapping-max-boost=<1.0..10.0>``
+    Upper limit for how much the tone mapping algorithm is allowed to boost
+    the average brightness by over-exposing the image. The default value of 1.0
+    allows no additional brightness boost. A value of 2.0 would allow
+    over-exposing by a factor of 2, and so on. Raising this setting can help
+    reveal details that would otherwise be hidden in dark scenes, but raising
+    it too high will make dark scenes appear unnaturally bright.
+
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of
     relying on tagged metadata. These values are averaged over local regions as

@@ -652,7 +652,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     }
 
     GLSL(float sig_orig = sig[sig_idx];)
-    GLSLF("float slope = min(1.0, %f / sig_avg);\n", sdr_avg);
+    GLSLF("float slope = min(%f, %f / sig_avg);\n", opts->max_boost, sdr_avg);
     GLSL(sig *= slope;)
     GLSL(sig_peak *= slope;)
 
