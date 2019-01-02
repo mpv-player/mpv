@@ -574,21 +574,24 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(sig_avg  = max(1e-3, average.x);)
     GLSL(sig_peak = max(1.00, average.y);)
 
+    // Chosen to avoid overflowing on an 8K buffer
+    const float log_min = 1e-3, log_scale = 400.0, sig_scale = 10000.0;
+
     // For performance, and to avoid overflows, we tally up the sub-results per
     // pixel using shared memory first
-    GLSLH(shared uint wg_sum;)
+    GLSLH(shared int wg_sum;)
     GLSLH(shared uint wg_max;)
-    GLSL(wg_sum = wg_max = 0;)
+    GLSL(wg_sum = 0; wg_max = 0;)
     GLSL(barrier();)
-    GLSLF("uint sig_uint = uint(sig_max * %f);\n", MP_REF_WHITE);
-    GLSL(atomicAdd(wg_sum, sig_uint);)
-    GLSL(atomicMax(wg_max, sig_uint);)
+    GLSLF("float sig_log = log(max(sig_max, %f));\n", log_min);
+    GLSLF("atomicAdd(wg_sum, int(sig_log * %f));\n", log_scale);
+    GLSLF("atomicMax(wg_max, uint(sig_max * %f));\n", sig_scale);
 
     // Have one thread per work group update the global atomics
     GLSL(memoryBarrierShared();)
     GLSL(barrier();)
     GLSL(if (gl_LocalInvocationIndex == 0) {)
-    GLSL(    uint wg_avg = wg_sum / (gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
+    GLSL(    int wg_avg = wg_sum / int(gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
     GLSL(    atomicAdd(frame_sum, wg_avg);)
     GLSL(    atomicMax(frame_max, wg_max);)
     GLSL(    memoryBarrierBuffer();)
@@ -600,7 +603,8 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(if (gl_LocalInvocationIndex == 0 && atomicAdd(counter, 1) == num_wg - 1) {)
     GLSL(    counter = 0;)
     GLSL(    vec2 cur = vec2(float(frame_sum) / float(num_wg), frame_max);)
-    GLSLF("  cur *= 1.0/%f;\n", MP_REF_WHITE);
+    GLSLF("  cur *= vec2(1.0/%f, 1.0/%f);\n", log_scale, sig_scale);
+    GLSL(    cur.x = exp(cur.x);)
 
     // Use an IIR low-pass filter to smooth out the detected values, with a
     // configurable decay rate based on the desired time constant (tau)
@@ -615,7 +619,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(    average = mix(average, cur, weight);)
 
     // Reset SSBO state for the next frame
-    GLSL(    frame_max = frame_sum = 0;)
+    GLSL(    frame_sum = 0; frame_max = 0;)
     GLSL(    memoryBarrierBuffer();)
     GLSL(})
 }

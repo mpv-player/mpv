@@ -2494,7 +2494,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
             float average[2];
-            uint32_t frame_sum;
+            int32_t frame_sum;
             uint32_t frame_max;
             uint32_t counter;
         } peak_ssbo = {
@@ -2520,7 +2520,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         pass_is_compute(p, 8, 8, true); // 8x8 is good for performance
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
             "vec2 average;"
-            "uint frame_sum;"
+            "int frame_sum;"
             "uint frame_max;"
             "uint counter;"
         );
