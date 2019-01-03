@@ -2381,6 +2381,7 @@ static void pass_scale_main(struct gl_video *p)
         // values at 1 and 0, and then scale/shift them, respectively.
         sig_offset = 1.0/(1+expf(sig_slope * sig_center));
         sig_scale  = 1.0/(1+expf(sig_slope * (sig_center-1))) - sig_offset;
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSLF("color.rgb = %f - log(1.0/(color.rgb * %f + %f) - 1.0) * 1.0/%f;\n",
                 sig_center, sig_scale, sig_offset, sig_slope);
         pass_opt_hook_point(p, "SIGMOID", NULL);
@@ -2408,6 +2409,7 @@ static void pass_scale_main(struct gl_video *p)
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
         // Inverse of the transformation above
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) * 1.0/%f;\n",
                 sig_slope, sig_center, sig_offset, sig_scale);
     }
