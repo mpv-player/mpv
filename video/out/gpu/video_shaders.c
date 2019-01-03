@@ -784,6 +784,10 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     if (need_ootf)
         pass_ootf(sc, src.light, src.sig_peak);
 
+    // Tone map to prevent clipping due to excessive brightness
+    if (src.sig_peak > dst.sig_peak)
+        pass_tone_map(sc, src.sig_peak, dst.sig_peak, opts);
+
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
         struct mp_csp_primaries csp_src = mp_get_csp_primaries(src.primaries),
@@ -793,11 +797,6 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
     }
-
-    // Tone map to prevent clipping when the source signal peak exceeds the
-    // encodable range or we've reduced the gamut
-    if (src.sig_peak > dst.sig_peak)
-        pass_tone_map(sc, src.sig_peak, dst.sig_peak, opts);
 
     if (need_ootf)
         pass_inverse_ootf(sc, dst.light, dst.sig_peak);
