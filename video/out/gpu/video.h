@@ -101,8 +101,8 @@ struct gl_tone_map_opts {
     float max_boost;
     int compute_peak;
     float decay_rate;
-    int scene_threshold_low;
-    int scene_threshold_high;
+    float scene_threshold_low;
+    float scene_threshold_high;
     float desat;
     float desat_exp;
     int gamut_warning; // bool

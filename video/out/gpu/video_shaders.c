@@ -613,9 +613,10 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSLF("  average += %f * (cur - average);\n", decay);
 
     // Scene change hysteresis
-    GLSLF("  float weight = smoothstep(%f, %f, abs(cur.x - average.x));\n",
-          (float) opts->scene_threshold_low / MP_REF_WHITE,
-          (float) opts->scene_threshold_high / MP_REF_WHITE);
+    float log_db = 10.0 / log(10.0);
+    GLSLF("  float weight = smoothstep(%f, %f, abs(log(cur.x / average.x)));\n",
+          opts->scene_threshold_low / log_db,
+          opts->scene_threshold_high / log_db);
     GLSL(    average = mix(average, cur, weight);)
 
     // Reset SSBO state for the next frame
