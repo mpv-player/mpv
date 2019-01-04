@@ -263,6 +263,11 @@ Playback Control
     includes special protocols and anything that doesn't refer to normal files.
     Local files and HTTP links on the other hand are always considered safe.
 
+    In addition, if a playlist is loaded while this is set, the added playlist
+    entries are not marked as originating from network or potentially unsafe
+    location. (Instead, the behavior is as if the playlist entries were provided
+    directly to mpv command line or ``loadfile`` command.)
+
     Note that ``--playlist`` always loads all entries, so you use that instead
     if you really have the need for this functionality.
 
