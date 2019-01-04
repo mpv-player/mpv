@@ -361,6 +361,7 @@ static int reopen_archive(stream_t *s)
 {
     struct priv *p = s->priv;
     mp_archive_free(p->mpa);
+    s->pos = 0;
     p->mpa = mp_archive_new(s->log, p->src, MP_ARCHIVE_FLAG_UNSAFE);
     if (!p->mpa)
         return STREAM_ERROR;
@@ -423,9 +424,10 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
         MP_VERBOSE(s, "trying to reopen archive for performing seek\n");
         if (reopen_archive(s) < STREAM_OK)
             return -1;
-        s->pos = 0;
     }
     if (newpos > s->pos) {
+        if (!p->mpa && reopen_archive(s) < STREAM_OK)
+            return -1;
         // For seeking forwards, just keep reading data (there's no libarchive
         // skip function either).
         char buffer[4096];
