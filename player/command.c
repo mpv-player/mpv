@@ -2915,11 +2915,14 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 
         for (struct playlist_entry *e = pl->first; e; e = e->next)
         {
-            char *p = e->filename;
-            if (!mp_is_url(bstr0(p))) {
-                char *s = mp_basename(e->filename);
-                if (s[0])
-                    p = s;
+            char *p = e->title;
+            if (!p) {
+                p = e->filename;
+                if (!mp_is_url(bstr0(p))) {
+                    char *s = mp_basename(e->filename);
+                    if (s[0])
+                        p = s;
+                }
             }
             const char *m = pl->current == e ? list_current : list_normal;
             res = talloc_asprintf_append(res, "%s%s\n", m, p);
