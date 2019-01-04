@@ -131,6 +131,33 @@ The current implementation will
 - not add segment boundaries as chapter points
 - require full compatibility between all segments (same codec etc.)
 
+Separate files for tracks
+=========================
+
+The special ``new_stream`` header lets you specify separate parts and time
+offsets for separate tracks. This can for example be used to source audio and
+video track from separate files.
+
+Example::
+
+    # mpv EDL v0
+    video.mkv
+    !new_stream
+    audio.mkv
+
+This adds all tracks from both files to the virtual track list. Upon playback,
+the tracks will be played at the same time, instead of appending them. The files
+can contain more than 1 stream; the apparent effect is the same as if the second
+part after the ``!new_stream`` part were in a separate ``.edl`` file and added
+with ``--external-file``.
+
+Note that all metadata between the stream sets created by ``new_stream`` is
+disjoint. Global metadata is taken from the first part only.
+
+In context of mpv, this is redundant to the ``--audio-file`` and
+``--external-file`` options, but (as of this writing) has the advantage that
+this will use a unified cache for all streams.
+
 Timestamp format
 ================
 

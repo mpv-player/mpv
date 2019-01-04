@@ -48,6 +48,7 @@ struct tl_parts {
     char *init_fragment_url;
     struct tl_part *parts;
     int num_parts;
+    struct tl_parts *next;
 };
 
 struct priv {
@@ -78,6 +79,7 @@ static bool parse_time(bstr str, double *out_time)
 static struct tl_parts *parse_edl(bstr str)
 {
     struct tl_parts *tl = talloc_zero(NULL, struct tl_parts);
+    struct tl_parts *root = tl;
     while (str.len) {
         if (bstr_eatstart0(&str, "#"))
             bstr_split_tok(str, "\n", &(bstr){0}, &str);
@@ -133,13 +135,15 @@ static struct tl_parts *parse_edl(bstr str)
                 break;
         }
         if (is_header) {
-            if (tl->num_parts)
-                goto error; // can't have header once an entry was defined
             bstr type = param_vals[0]; // value, because no "="
             if (bstr_equals0(type, "mp4_dash")) {
                 tl->dash = true;
                 if (nparam > 1 && bstr_equals0(param_names[1], "init"))
                     tl->init_fragment_url = bstrto0(tl, param_vals[1]);
+            } else if (bstr_equals0(type, "new_stream")) {
+                struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
+                tl->next = ntl;
+                tl = ntl;
             }
             continue;
         }
@@ -147,11 +151,11 @@ static struct tl_parts *parse_edl(bstr str)
             goto error;
         MP_TARRAY_APPEND(tl, tl->parts, tl->num_parts, p);
     }
-    if (!tl->num_parts)
+    if (!root->num_parts)
         goto error;
-    return tl;
+    return root;
 error:
-    talloc_free(tl);
+    talloc_free(root);
     return NULL;
 }
 
@@ -258,8 +262,8 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
             tl->demuxer->is_network = true;
 
             if (!tl->track_layout) {
-                source = open_source(tl, part->filename);
-                if (!source)
+                tl->track_layout = open_source(tl, part->filename);
+                if (!tl->track_layout)
                     goto error;
             }
         } else {
@@ -315,12 +319,8 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
 
         starttime += part->length;
 
-        if (source) {
-            tl->demuxer->is_network |= source->is_network;
-
-            if (!tl->track_layout)
-                tl->track_layout = source;
-        }
+        if (source && !tl->track_layout)
+            tl->track_layout = source;
     }
     tl->parts[parts->num_parts] = (struct timeline_part) {.start = starttime};
     tl->num_parts = parts->num_parts;
@@ -347,16 +347,32 @@ static void build_mpv_edl_timeline(struct timeline *tl)
 {
     struct priv *p = tl->demuxer->priv;
 
-    struct tl_parts *parts = parse_edl(p->data);
-    if (!parts) {
+    struct timeline *root_tl = tl;
+    struct tl_parts *root = parse_edl(p->data);
+    if (!root) {
         MP_ERR(tl, "Error in EDL.\n");
         return;
     }
-    MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, tl->demuxer);
-    if (!p->allow_any)
-        fix_filenames(parts, tl->demuxer->filename);
-    build_timeline(tl, parts);
-    talloc_free(parts);
+
+    for (struct tl_parts *parts = root; parts; parts = parts->next) {
+        if (tl->demuxer)
+            MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, tl->demuxer);
+        if (!p->allow_any)
+            fix_filenames(parts, root_tl->demuxer->filename);
+        build_timeline(tl, parts);
+
+        if (parts->next) {
+            struct timeline *ntl = talloc_zero(tl, struct timeline);
+            *ntl = (struct timeline) {
+                .global = tl->global,
+                .log = tl->log,
+                .cancel = tl->cancel,
+            };
+            tl->next = ntl;
+            tl = ntl;
+        }
+    }
+    talloc_free(root);
 }
 
 static int try_open_file(struct demuxer *demuxer, enum demux_check check)

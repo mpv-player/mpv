@@ -19,7 +19,7 @@ struct timeline {
     bstr init_fragment;
     bool dash;
 
-    // All referenced files. The source file must be at sources[0].
+    // All referenced files.
     struct demuxer **sources;
     int num_sources;
 
@@ -33,6 +33,12 @@ struct timeline {
 
     // Which source defines the overall track list (over the full timeline).
     struct demuxer *track_layout;
+
+    // For tracks which require a separate opened demuxer, such as separate
+    // audio tracks. (For example, for ordered chapters this would be NULL,
+    // because all streams demux from the same file at a given time, while
+    // for DASH-style video+audio, each track would have its own timeline.)
+    struct timeline *next;
 };
 
 struct timeline *timeline_load(struct mpv_global *global, struct mp_log *log,

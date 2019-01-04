@@ -31,6 +31,8 @@ void timeline_destroy(struct timeline *tl)
 {
     if (!tl)
         return;
+    // (Sub timeline elements may depend on allocations in the parent one.)
+    timeline_destroy(tl->next);
     for (int n = 0; n < tl->num_sources; n++) {
         struct demuxer *d = tl->sources[n];
         if (d != tl->demuxer && d != tl->track_layout)
