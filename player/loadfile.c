@@ -1429,7 +1429,7 @@ static void play_current_file(struct MPContext *mpctx)
     if (mpctx->demuxer->playlist) {
         struct playlist *pl = mpctx->demuxer->playlist;
         int entry_stream_flags = 0;
-        if (!pl->disable_safety) {
+        if (!pl->disable_safety && !mpctx->opts->load_unsafe_playlists) {
             entry_stream_flags = STREAM_SAFE_ONLY;
             if (mpctx->demuxer->is_network)
                 entry_stream_flags |= STREAM_NETWORK_ONLY;

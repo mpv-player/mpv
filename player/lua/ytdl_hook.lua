@@ -644,6 +644,12 @@ function run_ytdl_hook(url)
             end
 
             mp.set_property("stream-open-filename", "memory://" .. table.concat(playlist, "\n"))
+
+            -- This disables mpv's mushy playlist security code, which will
+            -- break links that will be resolved to EDL later (because EDL is
+            -- not considered "safe", and the playlist entries got tagged as
+            -- network originating due to the playlist redirection).
+            mp.set_property_native("file-local-options/load-unsafe-playlists", true)
         end
 
     else -- probably a video
