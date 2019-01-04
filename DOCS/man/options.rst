@@ -5264,9 +5264,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     to excessive flicker. (In signal theory terms, this controls the time
     constant "tau" of an IIR low pass filter)
 
-``--hdr-scene-threshold-low=<0..10000>``, ``--hdr-scene-threshold-high=<0..10000>``
-    The lower and upper thresholds (in cd/m^2) for a brightness difference to
-    be considered a scene change (default: 50 low, 200 high). This is only
+``--hdr-scene-threshold-low=<0.0..100.0>``, ``--hdr-scene-threshold-high=<0.0..100.0>``
+    The lower and upper thresholds (in dB) for a brightness difference
+    to be considered a scene change (default: 5.5 low, 10.0 high). This is only
     relevant when ``--hdr-compute-peak`` is enabled. Normally, small
     fluctuations in the frame brightness are compensated for by the peak
     averaging mechanism, but for large jumps in the brightness this can result
