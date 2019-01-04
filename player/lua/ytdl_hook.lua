@@ -303,6 +303,8 @@ local function add_single_video(json)
 
     -- DASH/split tracks
     elseif reqfmts then
+        local streams = {}
+
         for _, track in pairs(reqfmts) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
@@ -313,13 +315,21 @@ local function add_single_video(json)
             end
             if track.vcodec and track.vcodec ~= "none" then
                 -- video track
-                streamurl = edl_track or track.url
+                streams[#streams + 1] = edl_track or track.url
             elseif track.vcodec == "none" then
-                -- according to ytdl, if vcodec is None, it's audio
-                mp.commandv("audio-add",
-                    edl_track or track.url, "auto",
-                    track.format_note or "")
+                -- audio track
+                streams[#streams + 1] = track.url
             end
+        end
+
+        if #streams > 1 then
+            -- merge them via EDL
+            for i = 1, #streams do
+                streams[i] = edl_escape(streams[i])
+            end
+            streamurl = "edl://" .. table.concat(streams, ";!new_stream;") .. ";"
+        else
+            streamurl = streams[1]
         end
 
     elseif not (json.url == nil) then
