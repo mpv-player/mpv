@@ -44,6 +44,7 @@ struct tl_part {
 };
 
 struct tl_parts {
+    bool disable_chapters;
     bool dash;
     char *init_fragment_url;
     struct tl_part *parts;
@@ -148,6 +149,8 @@ static struct tl_parts *parse_edl(bstr str)
                 struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
                 tl->next = ntl;
                 tl = ntl;
+            } else if (bstr_equals0(f_type, "no_chapters")) {
+                tl->disable_chapters = true;
             } else {
                 goto error;
             }
@@ -303,17 +306,19 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
                 }
             }
 
-            // Add a chapter between each file.
-            struct demux_chapter ch = {
-                .pts = starttime,
-                .metadata = talloc_zero(tl, struct mp_tags),
-            };
-            mp_tags_set_str(ch.metadata, "title", part->filename);
-            MP_TARRAY_APPEND(tl, tl->chapters, tl->num_chapters, ch);
+            if (!parts->disable_chapters) {
+                // Add a chapter between each file.
+                struct demux_chapter ch = {
+                    .pts = starttime,
+                    .metadata = talloc_zero(tl, struct mp_tags),
+                };
+                mp_tags_set_str(ch.metadata, "title", part->filename);
+                MP_TARRAY_APPEND(tl, tl->chapters, tl->num_chapters, ch);
 
-            // Also copy the source file's chapters for the relevant parts
-            copy_chapters(&tl->chapters, &tl->num_chapters, source, part->offset,
-                          part->length, starttime);
+                // Also copy the source file's chapters for the relevant parts
+                copy_chapters(&tl->chapters, &tl->num_chapters, source,
+                              part->offset, part->length, starttime);
+            }
         }
 
         tl->parts[n] = (struct timeline_part) {
