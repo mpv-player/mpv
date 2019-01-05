@@ -149,9 +149,6 @@ static void reselect_streams(struct demuxer *demuxer)
     for (int x = 0; x < p->num_sources; x++) {
         struct virtual_source *src = p->sources[x];
 
-        bool was_selected = src->any_selected;
-        src->any_selected = false;
-
         for (int n = 0; n < src->num_segments; n++) {
             struct segment *seg = src->segments[n];
 
@@ -159,20 +156,24 @@ static void reselect_streams(struct demuxer *demuxer)
                 continue;
 
             for (int i = 0; i < seg->num_stream_map; i++) {
-                struct sh_stream *sh = demux_get_stream(seg->d, i);
                 bool selected =
                     seg->stream_map[i] && seg->stream_map[i]->selected;
-
-                src->any_selected |= selected;
 
                 // This stops demuxer readahead for inactive segments.
                 if (!src->current || seg->d != src->current->d)
                     selected = false;
+                struct sh_stream *sh = demux_get_stream(seg->d, i);
                 demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected);
 
                 update_slave_stats(demuxer, seg->d);
             }
         }
+
+        bool was_selected = src->any_selected;
+        src->any_selected = false;
+
+        for (int n = 0; n < src->num_streams; n++)
+            src->any_selected |= src->streams[n]->selected;
 
         if (!was_selected && src->any_selected) {
             src->eof_reached = false;
