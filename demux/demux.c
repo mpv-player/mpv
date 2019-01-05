@@ -218,6 +218,8 @@ struct demux_internal {
     // -- Access from demuxer thread only
     bool enable_recording;
     struct mp_recorder *recorder;
+    int64_t slave_unbuffered_read_bytes; // value repoted from demuxer impl.
+    int64_t cache_unbuffered_read_bytes; // for demux_reader_state.bytes_per_second
 };
 
 // A continuous range of cached packets for all enabled streams.
@@ -3030,6 +3032,19 @@ void demux_block_reading(struct demuxer *demuxer, bool block)
     pthread_mutex_unlock(&in->lock);
 }
 
+static void update_bytes_read(struct demux_internal *in)
+{
+    struct demuxer *demuxer = in->d_thread;
+    struct stream *stream = demuxer->stream;
+
+    int64_t new = stream->total_unbuffered_read_bytes +
+                  in->slave_unbuffered_read_bytes;
+    stream->total_unbuffered_read_bytes = 0;
+    in->slave_unbuffered_read_bytes = 0;
+
+    in->cache_unbuffered_read_bytes += new;
+}
+
 // must be called not locked
 static void update_cache(struct demux_internal *in)
 {
@@ -3042,8 +3057,7 @@ static void update_cache(struct demux_internal *in)
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
 
-    demuxer->total_unbuffered_read_bytes += stream->total_unbuffered_read_bytes;
-    stream->total_unbuffered_read_bytes = 0;
+    update_bytes_read(in);
 
     pthread_mutex_lock(&in->lock);
 
@@ -3062,8 +3076,8 @@ static void update_cache(struct demux_internal *in)
     int64_t now = mp_time_us();
     int64_t diff = now - in->last_speed_query;
     if (diff >= MP_SECOND_US) {
-        uint64_t bytes = demuxer->total_unbuffered_read_bytes;
-        demuxer->total_unbuffered_read_bytes = 0;
+        uint64_t bytes = in->cache_unbuffered_read_bytes;
+        in->cache_unbuffered_read_bytes = 0;
         in->last_speed_query = now;
         in->bytes_per_second = bytes / (diff / (double)MP_SECOND_US);
     }
@@ -3072,6 +3086,17 @@ static void update_cache(struct demux_internal *in)
         in->next_cache_update = now + MP_SECOND_US + 1;
 
     pthread_mutex_unlock(&in->lock);
+}
+
+// Used by demuxers to report the amount of transferred bytes. This is for
+// streams which circumvent demuxer->stream (stream statistics are handled by
+// demux.c itself).
+void demux_report_unbuffered_read_bytes(struct demuxer *demuxer, int64_t new)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_thread);
+
+    in->slave_unbuffered_read_bytes += new;
 }
 
 void demux_get_bitrate_stats(struct demuxer *demuxer, double *rates)

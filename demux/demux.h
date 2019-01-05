@@ -222,9 +222,6 @@ typedef struct demuxer {
     // Triggered when ending demuxing forcefully. Usually bound to the stream too.
     struct mp_cancel *cancel;
 
-    // Demuxer thread only.
-    uint64_t total_unbuffered_read_bytes;
-
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
     // Also note that the stream can get replaced if fully_read is set.
@@ -293,6 +290,8 @@ void demux_update(demuxer_t *demuxer);
 
 void demux_disable_cache(demuxer_t *demuxer);
 bool demux_is_network_cached(demuxer_t *demuxer);
+
+void demux_report_unbuffered_read_bytes(struct demuxer *demuxer, int64_t new);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
