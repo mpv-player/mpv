@@ -2608,6 +2608,22 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
             break;
     }
 
+    // Usually, the last seen keyframe (keyframe_latest) has kf_seek_pts unset
+    // (because it needs to see all packets until the next keyframe or EOF in
+    // order to determine the minimum PTS the range provides). If the pts is
+    // within seek range, but the second-last keyframe is before the seek
+    // target, above search will return NULL, even though we should return
+    // keyframe_latest.
+    // This is only correct in the case when the target PTS is still within the
+    // seek range; the timestamps past it are unknown.
+    if (!target && (flags & SEEK_FORWARD) && queue->keyframe_latest &&
+        queue->keyframe_latest->kf_seek_pts == MP_NOPTS_VALUE &&
+        pts <= queue->seek_end)
+    {
+        target = queue->keyframe_latest;
+    }
+
+
     return target;
 }
 
