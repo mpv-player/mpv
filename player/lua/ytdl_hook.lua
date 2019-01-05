@@ -327,7 +327,8 @@ local function add_single_video(json)
             for i = 1, #streams do
                 streams[i] = edl_escape(streams[i])
             end
-            streamurl = "edl://" .. table.concat(streams, ";!new_stream;") .. ";"
+            streamurl = "edl://!no_chapters;" ..
+                        table.concat(streams, ";!new_stream;") .. ";"
         else
             streamurl = streams[1]
         end
