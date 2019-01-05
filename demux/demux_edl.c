@@ -69,8 +69,6 @@ static bool parse_time(bstr str, double *out_time)
     return true;
 }
 
-#define MAX_PARAMS 10
-
 /* Returns a list of parts, or NULL on parse error.
  * Syntax (without file header or URI prefix):
  *    url      ::= <entry> ( (';' | '\n') <entry> )*
@@ -89,9 +87,9 @@ static struct tl_parts *parse_edl(bstr str)
         if (bstr_eatstart0(&str, "\n") || bstr_eatstart0(&str, ";"))
             continue;
         bool is_header = bstr_eatstart0(&str, "!");
+        bstr f_type = {0};
+        bstr f_init = {0};
         struct tl_part p = { .length = -1 };
-        bstr param_names[MAX_PARAMS];
-        bstr param_vals[MAX_PARAMS];
         int nparam = 0;
         while (1) {
             bstr name, val;
@@ -100,6 +98,9 @@ static struct tl_parts *parse_edl(bstr str)
             if (next > 0 && next < str.len && str.start[next] == '=') {
                 name = bstr_splice(str, 0, next);
                 str = bstr_cut(str, next + 1);
+            } else if (is_header) {
+                const char *names[] = {"type"}; // implied name
+                name = bstr0(nparam < 1 ? names[nparam] : "-");
             } else {
                 const char *names[] = {"file", "start", "length"}; // implied name
                 name = bstr0(nparam < 3 ? names[nparam] : "-");
@@ -116,45 +117,48 @@ static struct tl_parts *parse_edl(bstr str)
                 str = bstr_cut(str, next);
             }
             // Interpret parameters. Explicitly ignore unknown ones.
-            if (bstr_equals0(name, "file")) {
-                p.filename = bstrto0(tl, val);
-            } else if (bstr_equals0(name, "start")) {
-                if (!parse_time(val, &p.offset))
-                    goto error;
-                p.offset_set = true;
-            } else if (bstr_equals0(name, "length")) {
-                if (!parse_time(val, &p.length))
-                    goto error;
-            } else if (bstr_equals0(name, "timestamps")) {
-                if (bstr_equals0(val, "chapters"))
-                    p.chapter_ts = true;
-            } else if (bstr_equals0(name, "title")) {
-                p.title = bstrto0(tl, val);
+            if (is_header) {
+                if (bstr_equals0(name, "type")) {
+                    f_type = val;
+                } else if (bstr_equals0(name, "init")) {
+                    f_init = val;
+                }
+            } else {
+                if (bstr_equals0(name, "file")) {
+                    p.filename = bstrto0(tl, val);
+                } else if (bstr_equals0(name, "start")) {
+                    if (!parse_time(val, &p.offset))
+                        goto error;
+                    p.offset_set = true;
+                } else if (bstr_equals0(name, "length")) {
+                    if (!parse_time(val, &p.length))
+                        goto error;
+                } else if (bstr_equals0(name, "timestamps")) {
+                    if (bstr_equals0(val, "chapters"))
+                        p.chapter_ts = true;
+                } else if (bstr_equals0(name, "title")) {
+                    p.title = bstrto0(tl, val);
+                }
             }
-            if (nparam >= MAX_PARAMS)
-                goto error;
-            param_names[nparam] = name;
-            param_vals[nparam] = val;
             nparam++;
             if (!bstr_eatstart0(&str, ","))
                 break;
         }
         if (is_header) {
-            bstr type = param_vals[0]; // value, because no "="
-            if (bstr_equals0(type, "mp4_dash")) {
+            if (bstr_equals0(f_type, "mp4_dash")) {
                 tl->dash = true;
-                if (nparam > 1 && bstr_equals0(param_names[1], "init"))
-                    tl->init_fragment_url = bstrto0(tl, param_vals[1]);
-            } else if (bstr_equals0(type, "new_stream")) {
+                if (f_init.len)
+                    tl->init_fragment_url = bstrto0(tl, f_init);
+            } else if (bstr_equals0(f_type, "new_stream")) {
                 struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
                 tl->next = ntl;
                 tl = ntl;
             }
-            continue;
+        } else {
+            if (!p.filename)
+                goto error;
+            MP_TARRAY_APPEND(tl, tl->parts, tl->num_parts, p);
         }
-        if (!p.filename)
-            goto error;
-        MP_TARRAY_APPEND(tl, tl->parts, tl->num_parts, p);
     }
     if (!root->num_parts)
         goto error;
