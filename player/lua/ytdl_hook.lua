@@ -222,12 +222,18 @@ local function edl_track_joined(fragments, protocol, is_live, base)
     local offset = 1
     local parts = {}
 
-    if (protocol == "http_dash_segments") and
-        not fragments[1].duration and not is_live then
+    if (protocol == "http_dash_segments") and not is_live then
+        msg.debug("Using dash")
+        local args = ""
+
         -- assume MP4 DASH initialization segment
-        table.insert(parts,
-            "!mp4_dash,init=" .. edl_escape(join_url(base, fragments[1])))
-        offset = 2
+        if not fragments[1].duration then
+            msg.debug("Using init segment")
+            args = args .. "init=" .. edl_escape(join_url(base, fragments[1]))
+            offset = 2
+        end
+
+        table.insert(parts, "!mp4_dash" .. args)
 
         -- Check remaining fragments for duration;
         -- if not available in all, give up.
