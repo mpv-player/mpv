@@ -153,6 +153,8 @@ static struct tl_parts *parse_edl(bstr str)
                 struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
                 tl->next = ntl;
                 tl = ntl;
+            } else {
+                goto error;
             }
         } else {
             if (!p.filename)
