@@ -100,6 +100,18 @@ entries affect all other file entries in the EDL file. Their format is highly
 implementation specific. They should generally follow the file header, and come
 before any file entries.
 
+Disabling chapter generation and copying
+========================================
+
+By default, chapters from the source ranges are copied to the virtual file's
+chapters. Also, a chapter is inserted after each range. This can be disabled
+with the ``no_chapters`` header.
+
+Example::
+
+    !no_chapters
+
+
 MP4 DASH
 ========
 
