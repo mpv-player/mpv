@@ -2687,8 +2687,8 @@ static void execute_cache_seek(struct demux_internal *in,
                     if (target_pts != MP_NOPTS_VALUE) {
                         MP_VERBOSE(in, "adjust seek target %f -> %f\n",
                                    pts, target_pts);
-                        // (We assume the find_seek_target() will return the
-                        // same target for the video stream.)
+                        // (We assume the find_seek_target() call will return
+                        // the same target for the video stream.)
                         pts = target_pts;
                         flags &= ~SEEK_FORWARD;
                     }
