@@ -304,7 +304,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     assert(seg && seg->d);
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
-    if (!pkt || pkt->pts >= seg->end)
+    if (!pkt || (!src->dash && pkt->pts >= seg->end))
         src->eos_packets += 1;
 
     update_slave_stats(demuxer, seg->d);
@@ -370,7 +370,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (pkt->pos >= 0)
         pkt->pos |= (seg->index & 0x7FFFULL) << 48;
 
-    if (pkt->pts != MP_NOPTS_VALUE && pkt->pts >= seg->end) {
+    if (pkt->pts != MP_NOPTS_VALUE && !src->dash && pkt->pts >= seg->end) {
         // Trust the keyframe flag. Might not always be a good idea, but will
         // be sufficient at least with mkv. The problem is that this flag is
         // not well-defined in libavformat and is container-dependent.
