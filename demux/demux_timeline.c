@@ -211,9 +211,10 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
                                      demuxer->cancel, demuxer->global);
     if (!src->current->d && !demux_cancel_test(demuxer))
         MP_ERR(demuxer, "failed to load segment\n");
-    if (src->current->d)
+    if (src->current->d) {
         demux_disable_cache(src->current->d);
-    update_slave_stats(demuxer, src->current->d);
+        update_slave_stats(demuxer, src->current->d);
+    }
     associate_streams(demuxer, src, src->current);
 }
 
