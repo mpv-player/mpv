@@ -497,7 +497,8 @@ static bool stream_seek_unbuffered(stream_t *s, int64_t newpos)
         }
         if (s->seek(s, newpos) <= 0) {
             int level = mp_cancel_test(s->cancel) ? MSGL_V : MSGL_ERR;
-            MP_MSG(s, level, "Seek failed\n");
+            MP_MSG(s, level, "Seek failed (to %lld, size %lld)\n",
+                   (long long)newpos, (long long)stream_get_size(s));
             return false;
         }
         stream_drop_buffers(s);
