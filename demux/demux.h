@@ -292,6 +292,7 @@ void demux_disable_cache(demuxer_t *demuxer);
 bool demux_is_network_cached(demuxer_t *demuxer);
 
 void demux_report_unbuffered_read_bytes(struct demuxer *demuxer, int64_t new);
+int64_t demux_get_bytes_read_hack(struct demuxer *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
