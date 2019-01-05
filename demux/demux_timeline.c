@@ -89,6 +89,11 @@ struct priv {
 
 static void add_tl(struct demuxer *demuxer, struct timeline *tl);
 
+static void update_slave_stats(struct demuxer *demuxer, struct demuxer *slave)
+{
+    demux_report_unbuffered_read_bytes(demuxer, demux_get_bytes_read_hack(slave));
+}
+
 static bool target_stream_used(struct segment *seg, struct virtual_stream *vs)
 {
     for (int n = 0; n < seg->num_stream_map; n++) {
@@ -164,6 +169,8 @@ static void reselect_streams(struct demuxer *demuxer)
                 if (!src->current || seg->d != src->current->d)
                     selected = false;
                 demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected);
+
+                update_slave_stats(demuxer, seg->d);
             }
         }
 
@@ -205,6 +212,7 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
         MP_ERR(demuxer, "failed to load segment\n");
     if (src->current->d)
         demux_disable_cache(src->current->d);
+    update_slave_stats(demuxer, src->current->d);
     associate_streams(demuxer, src, src->current);
 }
 
@@ -216,6 +224,9 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
         flags |= SEEK_HR;
 
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
+
+    if (src->current && src->current->d)
+        update_slave_stats(demuxer, src->current->d);
 
     src->current = new;
     reopen_lazy_segments(demuxer, src);
@@ -293,6 +304,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
     if (!pkt || pkt->pts >= seg->end)
         src->eos_packets += 1;
+
+    update_slave_stats(demuxer, seg->d);
 
     // Test for EOF. Do this here to properly run into EOF even if other
     // streams are disabled etc. If it somehow doesn't manage to reach the end

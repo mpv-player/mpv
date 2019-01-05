@@ -219,6 +219,7 @@ struct demux_internal {
     bool enable_recording;
     struct mp_recorder *recorder;
     int64_t slave_unbuffered_read_bytes; // value repoted from demuxer impl.
+    int64_t hack_unbuffered_read_bytes;  // for demux_get_bytes_read_hack()
     int64_t cache_unbuffered_read_bytes; // for demux_reader_state.bytes_per_second
 };
 
@@ -3043,6 +3044,7 @@ static void update_bytes_read(struct demux_internal *in)
     in->slave_unbuffered_read_bytes = 0;
 
     in->cache_unbuffered_read_bytes += new;
+    in->hack_unbuffered_read_bytes += new;
 }
 
 // must be called not locked
@@ -3097,6 +3099,23 @@ void demux_report_unbuffered_read_bytes(struct demuxer *demuxer, int64_t new)
     assert(demuxer == in->d_thread);
 
     in->slave_unbuffered_read_bytes += new;
+}
+
+// Return bytes read since last query. It's a hack because it works only if
+// the demuxer thread is disabled.
+int64_t demux_get_bytes_read_hack(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+
+    // Required because demuxer==in->d_user, and we access in->d_thread.
+    // Locking won't solve this, because we also need to access struct stream.
+    assert(!in->threading);
+
+    update_bytes_read(in);
+
+    int64_t res = in->hack_unbuffered_read_bytes;
+    in->hack_unbuffered_read_bytes = 0;
+    return res;
 }
 
 void demux_get_bitrate_stats(struct demuxer *demuxer, double *rates)
