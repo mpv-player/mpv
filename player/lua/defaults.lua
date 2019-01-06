@@ -476,12 +476,9 @@ function mp.dispatch_events(allow_wait)
     while mp.keep_running do
         local wait = 0
         if not more_events then
-            wait = process_timers()
-            if wait == nil then
-                for _, handler in ipairs(idle_handlers) do
-                    handler()
-                end
-                wait = 1e20 -- infinity for all practical purposes
+            wait = process_timers() or 1e20 -- infinity for all practical purposes
+            for _, handler in ipairs(idle_handlers) do
+                handler()
             end
             -- Resume playloop - important especially if an error happened while
             -- suspended, and the error was handled, but no resume was done.
