@@ -2499,9 +2499,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             int32_t frame_sum;
             uint32_t frame_max;
             uint32_t counter;
-        } peak_ssbo = {
-            .average = { 0.25, src.sig_peak },
-        };
+        } peak_ssbo = {0};
 
         struct ra_buf_params params = {
             .type = RA_BUF_TYPE_SHADER_STORAGE,
