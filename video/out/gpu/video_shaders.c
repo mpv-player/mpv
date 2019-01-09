@@ -571,8 +571,10 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
                             const struct gl_tone_map_opts *opts)
 {
     // Update the sig_peak/sig_avg from the old SSBO state
-    GLSL(sig_avg  = max(1e-3, average.x);)
-    GLSL(sig_peak = max(1.00, average.y);)
+    GLSL(if (average.y > 0.0) {)
+    GLSL(    sig_avg  = max(1e-3, average.x);)
+    GLSL(    sig_peak = max(1.00, average.y);)
+    GLSL(})
 
     // Chosen to avoid overflowing on an 8K buffer
     const float log_min = 1e-3, log_scale = 400.0, sig_scale = 10000.0;
@@ -605,6 +607,8 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(    vec2 cur = vec2(float(frame_sum) / float(num_wg), frame_max);)
     GLSLF("  cur *= vec2(1.0/%f, 1.0/%f);\n", log_scale, sig_scale);
     GLSL(    cur.x = exp(cur.x);)
+    GLSL(    if (average.y == 0.0))
+    GLSL(        average = cur;)
 
     // Use an IIR low-pass filter to smooth out the detected values, with a
     // configurable decay rate based on the desired time constant (tau)
