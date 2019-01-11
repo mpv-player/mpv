@@ -143,6 +143,11 @@ The current implementation will
 - not add segment boundaries as chapter points
 - require full compatibility between all segments (same codec etc.)
 
+Another header part of this mechanism is ``no_clip``. This header is similar
+to ``mp4_dash``, but does not include on-demand opening/closing of segments,
+and does not support init segments. It also exists solely to support internal
+ytdl requirements.
+
 Separate files for tracks
 =========================
 

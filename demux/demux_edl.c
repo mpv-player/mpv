@@ -46,7 +46,7 @@ struct tl_part {
 
 struct tl_parts {
     bool disable_chapters;
-    bool dash;
+    bool dash, no_clip;
     char *init_fragment_url;
     struct tl_part *parts;
     int num_parts;
@@ -150,6 +150,8 @@ static struct tl_parts *parse_edl(bstr str)
                 tl->dash = true;
                 if (f_init.len)
                     tl->init_fragment_url = bstrto0(tl, f_init);
+            } else if (bstr_equals0(f_type, "no_clip")) {
+                tl->no_clip = true;
             } else if (bstr_equals0(f_type, "new_stream")) {
                 struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
                 tl->next = ntl;
@@ -238,6 +240,7 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
 {
     tl->track_layout = NULL;
     tl->dash = parts->dash;
+    tl->no_clip = parts->no_clip;
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
         MP_VERBOSE(tl, "Opening init fragment...\n");

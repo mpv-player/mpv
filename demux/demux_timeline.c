@@ -56,7 +56,7 @@ struct virtual_stream {
 struct virtual_source {
     struct timeline *tl;
 
-    bool dash;
+    bool dash, no_clip;
 
     struct segment **segments;
     int num_segments;
@@ -235,9 +235,9 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     if (!new->d)
         return;
     reselect_streams(demuxer);
-    if (!src->dash)
+    if (!src->no_clip)
         demux_set_ts_offset(new->d, new->start - new->d_start);
-    if (!src->dash || !init)
+    if (!src->no_clip || !init)
         demux_seek(new->d, start_pts, flags);
 
     for (int n = 0; n < src->num_streams; n++) {
@@ -304,7 +304,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     assert(seg && seg->d);
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
-    if (!pkt || (!src->dash && pkt->pts >= seg->end))
+    if (!pkt || (!src->no_clip && pkt->pts >= seg->end))
         src->eos_packets += 1;
 
     update_slave_stats(demuxer, seg->d);
@@ -351,7 +351,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (pkt->stream < 0 || pkt->stream >= seg->num_stream_map)
         goto drop;
 
-    if (!src->dash) {
+    if (!src->no_clip) {
         pkt->segmented = true;
         if (!pkt->codec)
             pkt->codec = demux_get_stream(seg->d, pkt->stream)->codec;
@@ -370,7 +370,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (pkt->pos >= 0)
         pkt->pos |= (seg->index & 0x7FFFULL) << 48;
 
-    if (pkt->pts != MP_NOPTS_VALUE && !src->dash && pkt->pts >= seg->end) {
+    if (pkt->pts != MP_NOPTS_VALUE && !src->no_clip && pkt->pts >= seg->end) {
         // Trust the keyframe flag. Might not always be a good idea, but will
         // be sufficient at least with mkv. The problem is that this flag is
         // not well-defined in libavformat and is container-dependent.
@@ -475,6 +475,7 @@ static void add_tl(struct demuxer *demuxer, struct timeline *tl)
     *src = (struct virtual_source){
         .tl = tl,
         .dash = tl->dash,
+        .no_clip = tl->no_clip || tl->dash,
         .dts = MP_NOPTS_VALUE,
     };
 
