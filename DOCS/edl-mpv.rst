@@ -148,6 +148,10 @@ to ``mp4_dash``, but does not include on-demand opening/closing of segments,
 and does not support init segments. It also exists solely to support internal
 ytdl requirements.
 
+The ``mp4_dash`` and ``no_clip`` headers are not part of the core EDL format.
+They may be changed or removed at any time, depending on mpv's internal
+requirements.
+
 Separate files for tracks
 =========================
 
@@ -174,6 +178,9 @@ disjoint. Global metadata is taken from the first part only.
 In context of mpv, this is redundant to the ``--audio-file`` and
 ``--external-file`` options, but (as of this writing) has the advantage that
 this will use a unified cache for all streams.
+
+The ``new_stream`` header is not part of the core EDL format. It may be changed
+or removed at any time, depending on mpv's internal requirements.
 
 Timestamp format
 ================
