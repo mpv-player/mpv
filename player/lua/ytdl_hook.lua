@@ -331,7 +331,7 @@ local function add_single_video(json)
         if #streams > 1 then
             -- merge them via EDL
             for i = 1, #streams do
-                streams[i] = edl_escape(streams[i])
+                streams[i] = "!no_clip;" .. edl_escape(streams[i])
             end
             streamurl = "edl://!no_chapters;" ..
                         table.concat(streams, ";!new_stream;") .. ";"
