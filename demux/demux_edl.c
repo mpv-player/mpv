@@ -271,7 +271,8 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
                 MP_WARN(tl, "Segment %d has unknown duration.\n", n);
             if (part->offset_set)
                 MP_WARN(tl, "Offsets are ignored.\n");
-            tl->demuxer->is_network = true;
+            if (tl->demuxer)
+                tl->demuxer->is_network = true;
 
             if (!tl->track_layout) {
                 tl->track_layout = open_source(tl, part->filename);
