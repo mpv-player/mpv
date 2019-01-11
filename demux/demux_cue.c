@@ -210,6 +210,7 @@ static void build_timeline(struct timeline *tl)
         }
         timeline[i] = (struct timeline_part) {
             .start = starttime,
+            .end = starttime + duration,
             .source_start = tracks[i].start,
             .source = source,
         };
@@ -217,23 +218,20 @@ static void build_timeline(struct timeline *tl)
             .pts = timeline[i].start,
             .metadata = mp_tags_dup(tl, tracks[i].tags),
         };
-        starttime += duration;
+        starttime = timeline[i].end;
     }
 
-    // apparently we need this to give the last part a non-zero length
-    timeline[track_count] = (struct timeline_part) {
-        .start = starttime,
-        // perhaps unused by the timeline code
-        .source_start = 0,
-        .source = timeline[0].source,
+    struct timeline_par *par = talloc_ptrtype(tl, par);
+    *par = (struct timeline_par){
+        .parts = timeline,
+        .num_parts = track_count,
+        .track_layout = timeline[0].source,
     };
 
-    tl->parts = timeline;
-    // the last part is not included it in the count
-    tl->num_parts = track_count + 1 - 1;
     tl->chapters = chapters;
     tl->num_chapters = track_count;
-    tl->track_layout = tl->parts[0].source;
+    MP_TARRAY_APPEND(tl, tl->pars, tl->num_pars, par);
+    tl->meta = par->track_layout;
 
 out:
     talloc_free(ctx);

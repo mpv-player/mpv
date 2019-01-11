@@ -54,7 +54,7 @@ struct virtual_stream {
 // This represents a single timeline source. (See timeline.next. For each
 // timeline struct there is a virtual_source.)
 struct virtual_source {
-    struct timeline *tl;
+    struct timeline_par *tl;
 
     bool dash, no_clip;
 
@@ -87,7 +87,7 @@ struct priv {
     int num_sources;
 };
 
-static void add_tl(struct demuxer *demuxer, struct timeline *tl);
+static bool add_tl(struct demuxer *demuxer, struct timeline_par *par);
 
 static void update_slave_stats(struct demuxer *demuxer, struct demuxer *slave)
 {
@@ -415,13 +415,14 @@ static void print_timeline(struct demuxer *demuxer)
                     break;
                 }
             }
-            MP_VERBOSE(demuxer, " %2d: %12f [%12f] (", n, seg->start, seg->d_start);
+            MP_VERBOSE(demuxer, " %2d: %12f - %12f [%12f] (",
+                       n, seg->start, seg->end, seg->d_start);
             for (int i = 0; i < seg->num_stream_map; i++) {
                 struct virtual_stream *vs = seg->stream_map[i];
                 MP_VERBOSE(demuxer, "%s%d", i ? " " : "",
                            vs ? vs->sh->index : -1);
             }
-            MP_VERBOSE(demuxer, ") %d:'%s'\n", src_num, seg->url);
+            MP_VERBOSE(demuxer, ")\n  source %d:'%s'\n", src_num, seg->url);
         }
 
         if (src->dash)
@@ -434,13 +435,15 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
 {
     struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
     p->tl = demuxer->params ? demuxer->params->timeline : NULL;
-    if (!p->tl || p->tl->num_parts < 1)
+    if (!p->tl || p->tl->num_pars < 1)
         return -1;
 
     demuxer->chapters = p->tl->chapters;
     demuxer->num_chapters = p->tl->num_chapters;
 
-    struct demuxer *meta = p->tl->track_layout;
+    struct demuxer *meta = p->tl->meta;
+    if (!meta)
+        return -1;
     demuxer->metadata = meta->metadata;
     demuxer->attachments = meta->attachments;
     demuxer->num_attachments = meta->num_attachments;
@@ -448,8 +451,13 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->num_editions = meta->num_editions;
     demuxer->edition = meta->edition;
 
-    for (struct timeline *tl = p->tl; tl; tl = tl->next)
-        add_tl(demuxer, tl);
+    for (int n = 0; n < p->tl->num_pars; n++) {
+        if (!add_tl(demuxer, p->tl->pars[n]))
+            return -1;
+    }
+
+    if (!p->num_sources)
+        return -1;
 
     demuxer->duration = p->duration;
 
@@ -459,7 +467,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->partially_seekable = false;
 
     demuxer->filetype = talloc_asprintf(p, "edl/%s%s",
-                        p->num_sources && p->sources[0]->dash ? "dash/" : "",
+                        p->sources[0]->dash ? "dash/" : "",
                         meta->filetype ? meta->filetype : meta->desc->name);
 
     reselect_streams(demuxer);
@@ -467,7 +475,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     return 0;
 }
 
-static void add_tl(struct demuxer *demuxer, struct timeline *tl)
+static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 {
     struct priv *p = demuxer->priv;
 
@@ -479,9 +487,12 @@ static void add_tl(struct demuxer *demuxer, struct timeline *tl)
         .dts = MP_NOPTS_VALUE,
     };
 
+    if (!tl->num_parts || !tl->track_layout)
+        return false;
+
     MP_TARRAY_APPEND(p, p->sources, p->num_sources, src);
 
-    p->duration = MPMAX(p->duration, tl->parts[tl->num_parts].start);
+    p->duration = MPMAX(p->duration, tl->parts[tl->num_parts - 1].end);
 
     struct demuxer *meta = tl->track_layout;
 
@@ -511,7 +522,6 @@ static void add_tl(struct demuxer *demuxer, struct timeline *tl)
 
     for (int n = 0; n < tl->num_parts; n++) {
         struct timeline_part *part = &tl->parts[n];
-        struct timeline_part *next = &tl->parts[n + 1];
 
         // demux_timeline already does caching, doing it for the sub-demuxers
         // would be pointless and wasteful.
@@ -527,7 +537,7 @@ static void add_tl(struct demuxer *demuxer, struct timeline *tl)
             .lazy = !part->source,
             .d_start = part->source_start,
             .start = part->start,
-            .end = next->start,
+            .end = part->end,
         };
 
         associate_streams(demuxer, src, seg);
@@ -537,6 +547,7 @@ static void add_tl(struct demuxer *demuxer, struct timeline *tl)
     }
 
     demuxer->is_network |= tl->track_layout->is_network;
+    return true;
 }
 
 static void d_close(struct demuxer *demuxer)

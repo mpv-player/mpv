@@ -52,6 +52,11 @@ struct tl_parts {
     struct tl_parts *next;
 };
 
+struct tl_root {
+    struct tl_parts **pars;
+    int num_pars;
+};
+
 struct priv {
     bstr data;
     bool allow_any;
@@ -69,16 +74,23 @@ static bool parse_time(bstr str, double *out_time)
     return true;
 }
 
+static struct tl_parts *add_part(struct tl_root *root)
+{
+    struct tl_parts *tl = talloc_zero(root, struct tl_parts);
+    MP_TARRAY_APPEND(root, root->pars, root->num_pars, tl);
+    return tl;
+}
+
 /* Returns a list of parts, or NULL on parse error.
  * Syntax (without file header or URI prefix):
  *    url      ::= <entry> ( (';' | '\n') <entry> )*
  *    entry    ::= <param> ( <param> ',' )*
  *    param    ::= [<string> '='] (<string> | '%' <number> '%' <bytes>)
  */
-static struct tl_parts *parse_edl(bstr str)
+static struct tl_root *parse_edl(bstr str)
 {
-    struct tl_parts *tl = talloc_zero(NULL, struct tl_parts);
-    struct tl_parts *root = tl;
+    struct tl_root *root = talloc_zero(NULL, struct tl_root);
+    struct tl_parts *tl = add_part(root);
     while (str.len) {
         if (bstr_eatstart0(&str, "#"))
             bstr_split_tok(str, "\n", &(bstr){0}, &str);
@@ -148,9 +160,7 @@ static struct tl_parts *parse_edl(bstr str)
             } else if (bstr_equals0(f_type, "no_clip")) {
                 tl->no_clip = true;
             } else if (bstr_equals0(f_type, "new_stream")) {
-                struct tl_parts *ntl = talloc_zero(tl, struct tl_parts);
-                tl->next = ntl;
-                tl = ntl;
+                tl = add_part(root);
             } else if (bstr_equals0(f_type, "no_chapters")) {
                 tl->disable_chapters = true;
             } else {
@@ -162,29 +172,35 @@ static struct tl_parts *parse_edl(bstr str)
             MP_TARRAY_APPEND(tl, tl->parts, tl->num_parts, p);
         }
     }
-    if (!root->num_parts)
+    if (!root->num_pars)
         goto error;
+    for (int n = 0; n < root->num_pars; n++) {
+        if (root->pars[n]->num_parts < 1)
+            goto error;
+    }
     return root;
 error:
     talloc_free(root);
     return NULL;
 }
 
-static struct demuxer *open_source(struct timeline *tl, char *filename)
+static struct demuxer *open_source(struct timeline *root,
+                                   struct timeline_par *tl, char *filename)
 {
-    for (int n = 0; n < tl->num_sources; n++) {
-        struct demuxer *d = tl->sources[n];
-        if (strcmp(d->stream->url, filename) == 0)
+    for (int n = 0; n < tl->num_parts; n++) {
+        struct demuxer *d = tl->parts[n].source;
+        if (d && strcmp(d->stream->url, filename) == 0)
             return d;
     }
     struct demuxer_params params = {
         .init_fragment = tl->init_fragment,
     };
-    struct demuxer *d = demux_open_url(filename, &params, tl->cancel, tl->global);
+    struct demuxer *d = demux_open_url(filename, &params, root->cancel,
+                                       root->global);
     if (d) {
-        MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, d);
+        MP_TARRAY_APPEND(root, root->sources, root->num_sources, d);
     } else {
-        MP_ERR(tl, "EDL: Could not open source file '%s'.\n", filename);
+        MP_ERR(root, "EDL: Could not open source file '%s'.\n", filename);
     }
     return d;
 }
@@ -231,35 +247,38 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
         part->offset = demuxer->start_time;
 }
 
-static void build_timeline(struct timeline *tl, struct tl_parts *parts)
+static bool build_timeline(struct timeline *root, struct tl_parts *parts)
 {
+    struct timeline_par *tl = talloc_zero(root, struct timeline_par);
+    MP_TARRAY_APPEND(root, root->pars, root->num_pars, tl);
+
     tl->track_layout = NULL;
     tl->dash = parts->dash;
     tl->no_clip = parts->no_clip;
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
-        MP_VERBOSE(tl, "Opening init fragment...\n");
+        MP_VERBOSE(root, "Opening init fragment...\n");
         stream_t *s = stream_create(parts->init_fragment_url, STREAM_READ,
-                                    tl->cancel, tl->global);
+                                    root->cancel, root->global);
         if (s)
             tl->init_fragment = stream_read_complete(s, tl, 1000000);
         free_stream(s);
         if (!tl->init_fragment.len) {
-            MP_ERR(tl, "Could not read init fragment.\n");
+            MP_ERR(root, "Could not read init fragment.\n");
             goto error;
         }
         struct demuxer_params params = {
             .init_fragment = tl->init_fragment,
         };
-        tl->track_layout = demux_open_url("memory://", &params, tl->cancel,
-                                          tl->global);
+        tl->track_layout = demux_open_url("memory://", &params, root->cancel,
+                                          root->global);
         if (!tl->track_layout) {
-            MP_ERR(tl, "Could not demux init fragment.\n");
+            MP_ERR(root, "Could not demux init fragment.\n");
             goto error;
         }
     }
 
-    tl->parts = talloc_array_ptrtype(tl, tl->parts, parts->num_parts + 1);
+    tl->parts = talloc_array_ptrtype(tl, tl->parts, parts->num_parts);
     double starttime = 0;
     for (int n = 0; n < parts->num_parts; n++) {
         struct tl_part *part = &parts->parts[n];
@@ -268,21 +287,16 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
         if (tl->dash) {
             part->offset = starttime;
             if (part->length <= 0)
-                MP_WARN(tl, "Segment %d has unknown duration.\n", n);
+                MP_WARN(root, "Segment %d has unknown duration.\n", n);
             if (part->offset_set)
-                MP_WARN(tl, "Offsets are ignored.\n");
-            if (tl->demuxer)
-                tl->demuxer->is_network = true;
+                MP_WARN(root, "Offsets are ignored.\n");
 
-            if (!tl->track_layout) {
-                tl->track_layout = open_source(tl, part->filename);
-                if (!tl->track_layout)
-                    goto error;
-            }
+            if (!tl->track_layout)
+                tl->track_layout = open_source(root, tl, part->filename);
         } else {
-            MP_VERBOSE(tl, "Opening segment %d...\n", n);
+            MP_VERBOSE(root, "Opening segment %d...\n", n);
 
-            source = open_source(tl, part->filename);
+            source = open_source(root, tl, part->filename);
             if (!source)
                 goto error;
 
@@ -296,7 +310,7 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
             // something up.
             if (part->length < 0) {
                 if (end_time < 0) {
-                    MP_WARN(tl, "EDL: source file '%s' has unknown duration.\n",
+                    MP_WARN(root, "EDL: source file '%s' has unknown duration.\n",
                             part->filename);
                     end_time = 1;
                 }
@@ -304,7 +318,7 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
             } else if (end_time >= 0) {
                 double end_part = part->offset + part->length;
                 if (end_part > end_time) {
-                    MP_WARN(tl, "EDL: entry %d uses %f "
+                    MP_WARN(root, "EDL: entry %d uses %f "
                             "seconds, but file has only %f seconds.\n",
                             n, end_part, end_time);
                 }
@@ -317,33 +331,39 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
                     .metadata = talloc_zero(tl, struct mp_tags),
                 };
                 mp_tags_set_str(ch.metadata, "title", part->filename);
-                MP_TARRAY_APPEND(tl, tl->chapters, tl->num_chapters, ch);
+                MP_TARRAY_APPEND(root, root->chapters, root->num_chapters, ch);
 
                 // Also copy the source file's chapters for the relevant parts
-                copy_chapters(&tl->chapters, &tl->num_chapters, source,
+                copy_chapters(&root->chapters, &root->num_chapters, source,
                               part->offset, part->length, starttime);
             }
         }
 
         tl->parts[n] = (struct timeline_part) {
             .start = starttime,
+            .end = starttime + part->length,
             .source_start = part->offset,
             .source = source,
             .url = talloc_strdup(tl, part->filename),
         };
 
-        starttime += part->length;
+        starttime = tl->parts[n].end;
 
         if (source && !tl->track_layout)
             tl->track_layout = source;
     }
-    tl->parts[parts->num_parts] = (struct timeline_part) {.start = starttime};
+
+    if (!tl->track_layout)
+        goto error;
+    if (!root->meta)
+        root->meta = tl->track_layout;
+
     tl->num_parts = parts->num_parts;
-    return;
+    return true;
 
 error:
-    tl->num_parts = 0;
-    tl->num_chapters = 0;
+    root->num_pars = 0;
+    return false;
 }
 
 // For security, don't allow relative or absolute paths, only plain filenames.
@@ -362,30 +382,18 @@ static void build_mpv_edl_timeline(struct timeline *tl)
 {
     struct priv *p = tl->demuxer->priv;
 
-    struct timeline *root_tl = tl;
-    struct tl_parts *root = parse_edl(p->data);
+    struct tl_root *root = parse_edl(p->data);
     if (!root) {
         MP_ERR(tl, "Error in EDL.\n");
         return;
     }
 
-    for (struct tl_parts *parts = root; parts; parts = parts->next) {
-        if (tl->demuxer)
-            MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, tl->demuxer);
+    for (int n = 0; n < root->num_pars; n++) {
+        struct tl_parts *parts = root->pars[n];
         if (!p->allow_any)
-            fix_filenames(parts, root_tl->demuxer->filename);
-        build_timeline(tl, parts);
-
-        if (parts->next) {
-            struct timeline *ntl = talloc_zero(tl, struct timeline);
-            *ntl = (struct timeline) {
-                .global = tl->global,
-                .log = tl->log,
-                .cancel = tl->cancel,
-            };
-            tl->next = ntl;
-            tl = ntl;
-        }
+            fix_filenames(parts, tl->demuxer->filename);
+        if (!build_timeline(tl, parts))
+            break;
     }
     talloc_free(root);
 }

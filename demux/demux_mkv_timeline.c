@@ -445,12 +445,10 @@ static void build_timeline_loop(struct tl_ctx *ctx,
         ctx->missing_time += info->limit - local_starttime;
 }
 
-static void check_track_compatibility(struct timeline *tl)
+static void check_track_compatibility(struct tl_ctx *tl, struct demuxer *mainsrc)
 {
-    struct demuxer *mainsrc = tl->track_layout;
-
     for (int n = 0; n < tl->num_parts; n++) {
-        struct timeline_part *p = &tl->parts[n];
+        struct timeline_part *p = &tl->timeline[n];
         if (p->source == mainsrc)
             continue;
 
@@ -583,10 +581,11 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         MP_TARRAY_APPEND(NULL, ctx->timeline, ctx->num_parts, new);
     }
 
-    struct timeline_part new = {
-        .start = ctx->start_time / 1e9,
+    for (int n = 0; n < ctx->num_parts; n++) {
+        ctx->timeline[n].end = n == ctx->num_parts - 1
+            ? ctx->start_time / 1e9
+            : ctx->timeline[n + 1].start;
     };
-    MP_TARRAY_APPEND(NULL, ctx->timeline, ctx->num_parts, new);
 
     /* Ignore anything less than a millisecond when reporting missing time. If
      * users really notice less than a millisecond missing, maybe this can be
@@ -596,22 +595,29 @@ void build_ordered_chapter_timeline(struct timeline *tl)
                ctx->missing_time / 1e9);
     }
 
-    tl->sources = ctx->sources;
-    tl->num_sources = ctx->num_sources;
-    tl->parts = ctx->timeline;
-    tl->num_parts = ctx->num_parts - 1; // minus termination
-    tl->chapters = chapters;
-    tl->num_chapters = m->num_ordered_chapters;
-
     // With Matroska, the "master" file usually dictates track layout etc.,
     // except maybe with playlist-like files.
-    tl->track_layout = tl->parts[0].source;
-    for (int n = 0; n < tl->num_parts; n++) {
-        if (tl->parts[n].source == ctx->demuxer) {
-            tl->track_layout = ctx->demuxer;
+    struct demuxer *track_layout = ctx->timeline[0].source;
+    for (int n = 0; n < ctx->num_parts; n++) {
+        if (ctx->timeline[n].source == ctx->demuxer) {
+            track_layout = ctx->demuxer;
             break;
         }
     }
 
-    check_track_compatibility(tl);
+    check_track_compatibility(ctx, track_layout);
+
+    tl->sources = ctx->sources;
+    tl->num_sources = ctx->num_sources;
+
+    struct timeline_par *par = talloc_ptrtype(tl, par);
+    *par = (struct timeline_par){
+        .parts = ctx->timeline,
+        .num_parts = ctx->num_parts,
+        .track_layout = track_layout,
+    };
+    MP_TARRAY_APPEND(tl, tl->pars, tl->num_pars, par);
+    tl->chapters = chapters;
+    tl->num_chapters = m->num_ordered_chapters;
+    tl->meta = track_layout;
 }
