@@ -466,8 +466,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->seekable = true;
     demuxer->partially_seekable = false;
 
-    demuxer->filetype = talloc_asprintf(p, "edl/%s%s",
-                        p->sources[0]->dash ? "dash/" : "",
+    demuxer->filetype = talloc_asprintf(p, "%s/%s",
+                        p->tl->format,
                         meta->filetype ? meta->filetype : meta->desc->name);
 
     reselect_streams(demuxer);

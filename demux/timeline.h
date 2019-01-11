@@ -35,6 +35,8 @@ struct timeline {
     struct mp_log *log;
     struct mp_cancel *cancel;
 
+    const char *format;
+
     // main source, and all other sources (this usually only has special meaning
     // for memory management; mostly compensates for the lack of refcounting)
     struct demuxer *demuxer;
