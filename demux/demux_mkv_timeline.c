@@ -630,4 +630,5 @@ void build_ordered_chapter_timeline(struct timeline *tl)
     tl->chapters = chapters;
     tl->num_chapters = m->num_ordered_chapters;
     tl->meta = track_layout;
+    tl->format = "mkv_oc";
 }

@@ -252,7 +252,8 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
         part->offset = demuxer->start_time;
 }
 
-static bool build_timeline(struct timeline *root, struct tl_parts *parts)
+static struct timeline_par *build_timeline(struct timeline *root,
+                                           struct tl_parts *parts)
 {
     struct timeline_par *tl = talloc_zero(root, struct timeline_par);
     MP_TARRAY_APPEND(root, root->pars, root->num_pars, tl);
@@ -365,11 +366,11 @@ static bool build_timeline(struct timeline *root, struct tl_parts *parts)
         root->meta = tl->track_layout;
 
     tl->num_parts = parts->num_parts;
-    return true;
+    return tl;
 
 error:
     root->num_pars = 0;
-    return false;
+    return NULL;
 }
 
 // For security, don't allow relative or absolute paths, only plain filenames.
@@ -394,13 +395,30 @@ static void build_mpv_edl_timeline(struct timeline *tl)
         return;
     }
 
+    bool all_dash = true;
+    bool all_no_clip = true;
+    bool all_single = true;
+
     for (int n = 0; n < root->num_pars; n++) {
         struct tl_parts *parts = root->pars[n];
         if (!p->allow_any)
             fix_filenames(parts, tl->demuxer->filename);
-        if (!build_timeline(tl, parts))
+        struct timeline_par *par = build_timeline(tl, parts);
+        if (!par)
             break;
+        all_dash &= par->dash;
+        all_no_clip &= par->no_clip;
+        all_single &= par->num_parts == 1;
     }
+
+    if (all_dash) {
+        tl->format = "dash";
+    } else if (all_no_clip && all_single) {
+        tl->format = "multi";
+    } else {
+        tl->format = "edl";
+    }
+
     talloc_free(root);
 }
 

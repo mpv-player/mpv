@@ -232,6 +232,7 @@ static void build_timeline(struct timeline *tl)
     tl->num_chapters = track_count;
     MP_TARRAY_APPEND(tl, tl->pars, tl->num_pars, par);
     tl->meta = par->track_layout;
+    tl->format = "cue";
 
 out:
     talloc_free(ctx);

@@ -16,6 +16,7 @@ struct timeline *timeline_load(struct mpv_global *global, struct mp_log *log,
         .log = log,
         .cancel = demuxer->cancel,
         .demuxer = demuxer,
+        .format = "unknown",
     };
 
     demuxer->desc->load_timeline(tl);
