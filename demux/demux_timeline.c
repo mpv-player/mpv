@@ -72,6 +72,8 @@ struct virtual_source {
     bool eof_reached;
     double dts;                 // highest read DTS (or PTS if no DTS available)
     bool any_selected;          // at least one stream is actually selected
+
+    struct demux_packet *next;
 };
 
 struct priv {
@@ -88,6 +90,8 @@ struct priv {
 };
 
 static bool add_tl(struct demuxer *demuxer, struct timeline_par *par);
+static bool do_read_next_packet(struct demuxer *demuxer,
+                                struct virtual_source *src);
 
 static void update_slave_stats(struct demuxer *demuxer, struct demuxer *slave)
 {
@@ -178,6 +182,7 @@ static void reselect_streams(struct demuxer *demuxer)
         if (!was_selected && src->any_selected) {
             src->eof_reached = false;
             src->dts = MP_NOPTS_VALUE;
+            TA_FREEP(&src->next);
         }
     }
 }
@@ -189,6 +194,7 @@ static void close_lazy_segments(struct demuxer *demuxer,
     for (int n = 0; n < src->num_segments; n++) {
         struct segment *seg = src->segments[n];
         if (seg != src->current && seg->d && seg->lazy) {
+            TA_FREEP(&src->next); // might depend on one of the sub-demuxers
             demux_free(seg->d);
             seg->d = NULL;
         }
@@ -249,28 +255,76 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     src->eos_packets = 0;
 }
 
+static void seek_source(struct demuxer *demuxer, struct virtual_source *src,
+                        double pts, int flags)
+{
+    struct segment *new = src->segments[src->num_segments - 1];
+    for (int n = 0; n < src->num_segments; n++) {
+        if (pts < src->segments[n]->end) {
+            new = src->segments[n];
+            break;
+        }
+    }
+
+    switch_segment(demuxer, src, new, pts, flags, false);
+
+    src->dts = MP_NOPTS_VALUE;
+    TA_FREEP(&src->next);
+}
+
 static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
 
-    double pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
-
+    seek_pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
     flags &= SEEK_FORWARD | SEEK_HR;
 
+    // The intention is to seek audio streams to the same target as video
+    // streams if they are separate streams. Video streams usually have more
+    // coarse keyframe snapping, which could leave video without audio.
+    struct virtual_source *master = NULL;
+    bool has_slaves = false;
     for (int x = 0; x < p->num_sources; x++) {
         struct virtual_source *src = p->sources[x];
 
-        struct segment *new = src->segments[src->num_segments - 1];
-        for (int n = 0; n < src->num_segments; n++) {
-            if (pts < src->segments[n]->end) {
-                new = src->segments[n];
-                break;
+        bool any_audio = false, any_video = false;
+        for (int i = 0; i < src->num_streams; i++) {
+            struct virtual_stream *str = src->streams[i];
+            if (str->selected) {
+                if (str->sh->type == STREAM_VIDEO)
+                    any_video = true;
+                if (str->sh->type == STREAM_AUDIO)
+                    any_audio = true;
             }
         }
 
-        switch_segment(demuxer, src, new, pts, flags, false);
+        if (any_video)
+            master = src;
+        // A true slave stream is audio-only; this also prevents that the master
+        // stream is considered a slave stream.
+        if (any_audio && !any_video)
+            has_slaves = true;
+    }
 
-        src->dts = MP_NOPTS_VALUE;
+    if (!has_slaves)
+        master = NULL;
+
+    if (master) {
+        seek_source(demuxer, master, seek_pts, flags);
+        do_read_next_packet(demuxer, master);
+        if (master->next && master->next->pts != MP_NOPTS_VALUE) {
+            // Assume we got a seek target. Actually apply the heuristic.
+            MP_VERBOSE(demuxer, "adjust seek target from %f to %f\n", seek_pts,
+                       master->next->pts);
+            seek_pts = master->next->pts;
+            flags &= ~(unsigned)SEEK_FORWARD;
+        }
+    }
+
+    for (int x = 0; x < p->num_sources; x++) {
+        struct virtual_source *src = p->sources[x];
+        if (src != master)
+            seek_source(demuxer, src, seek_pts, flags);
     }
 }
 
@@ -300,8 +354,22 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (!src)
         return false;
 
+    if (!do_read_next_packet(demuxer, src))
+        return false;
+    *out_pkt = src->next;
+    src->next = NULL;
+    return true;
+}
+
+static bool do_read_next_packet(struct demuxer *demuxer,
+                                struct virtual_source *src)
+{
+    if (src->next)
+        return 1;
+
     struct segment *seg = src->current;
-    assert(seg && seg->d);
+    if (!seg || !seg->d)
+        return 0;
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
     if (!pkt || (!src->no_clip && pkt->pts >= seg->end))
@@ -387,7 +455,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
         src->dts = dts;
 
     pkt->stream = vs->sh->index;
-    *out_pkt = pkt;
+    src->next = pkt;
     return true;
 
 drop:
@@ -558,6 +626,7 @@ static void d_close(struct demuxer *demuxer)
         struct virtual_source *src = p->sources[x];
 
         src->current = NULL;
+        TA_FREEP(&src->next);
         close_lazy_segments(demuxer, src);
     }
 
