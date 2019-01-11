@@ -17,7 +17,7 @@ struct timeline {
     struct demuxer *demuxer;
 
     bstr init_fragment;
-    bool dash;
+    bool dash, no_clip;
 
     // All referenced files.
     struct demuxer **sources;
