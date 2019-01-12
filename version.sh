@@ -44,6 +44,10 @@ git_revision=$(cat snapshot_version 2> /dev/null)
 test "$git_revision" || test ! -e .git || git_revision="$(git describe \
     --match "v[0-9]*" --always --tags --dirty | sed 's/^v//')"
 version="$git_revision\n"
+git_revision_master="$(git rev-parse --short master)"
+git_revision_head="$(git rev-parse --short HEAD)"
+git_hashes="master-$git_revision_master HEAD-$git_revision_head"
+version="$git_revision ($git_hashes)\n"
 
 # other tarballs extract the version number from the VERSION file
 if test ! "$version"; then
