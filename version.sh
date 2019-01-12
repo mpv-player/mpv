@@ -43,7 +43,7 @@ fi
 git_revision=$(cat snapshot_version 2> /dev/null)
 test "$git_revision" || test ! -e .git || git_revision="$(git describe \
     --match "v[0-9]*" --always --tags --dirty | sed 's/^v//')"
-version="$git_revision"
+version="$git_revision\n"
 
 # other tarballs extract the version number from the VERSION file
 if test ! "$version"; then
