@@ -47,7 +47,8 @@ version="$git_revision\n"
 git_revision_master="$(git rev-parse --short master)"
 git_revision_head="$(git rev-parse --short HEAD)"
 git_hashes="master-$git_revision_master HEAD-$git_revision_head"
-version="$git_revision ($git_hashes)\n"
+branches_included="contains: $(git branch --merged | grep -v master | sed 's/^..//g' | tr '\n' ' ')"
+version="$git_revision ($git_hashes)\n$branches_included\n"
 
 # other tarballs extract the version number from the VERSION file
 if test ! "$version"; then
