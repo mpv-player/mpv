@@ -242,7 +242,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
 {
     struct mp_archive *mpa = talloc_zero(NULL, struct mp_archive);
     mpa->log = log;
-    mpa->locale = newlocale(LC_ALL_MASK, "C.UTF-8", (locale_t)0);
+    mpa->locale = newlocale(LC_CTYPE_MASK, "", (locale_t)0);
     if (!mpa->locale)
         goto err;
     mpa->arch = archive_read_new();
