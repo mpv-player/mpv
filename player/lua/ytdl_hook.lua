@@ -229,7 +229,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         -- assume MP4 DASH initialization segment
         if not fragments[1].duration then
             msg.debug("Using init segment")
-            args = args .. "init=" .. edl_escape(join_url(base, fragments[1]))
+            args = args .. ",init=" .. edl_escape(join_url(base, fragments[1]))
             offset = 2
         end
 
