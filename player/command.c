@@ -3494,7 +3494,7 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
 
     // Same story, but used kilobits for some reason.
     if (old)
-        return m_property_int64_ro(action, arg, rate / 1000.0 + 0.5);
+        return m_property_int64_ro(action, arg, llrint(rate / 1000.0));
 
     if (action == M_PROPERTY_PRINT) {
         rate /= 1000;
@@ -3505,7 +3505,7 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
-    return m_property_int64_ro(action, arg, rate);
+    return m_property_int64_ro(action, arg, llrint(rate));
 }
 
 static int mp_property_cwd(void *ctx, struct m_property *prop,
