@@ -282,6 +282,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
             MP_ERR(root, "Could not demux init fragment.\n");
             goto error;
         }
+        MP_TARRAY_APPEND(root, root->sources, root->num_sources, tl->track_layout);
     }
 
     tl->parts = talloc_array_ptrtype(tl, tl->parts, parts->num_parts);
