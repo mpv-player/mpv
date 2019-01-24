@@ -554,7 +554,7 @@ video_output_features = [
         'name': '--drm',
         'desc': 'DRM',
         'deps': 'vt.h',
-        'func': check_pkg_config('libdrm'),
+        'func': check_pkg_config('libdrm', '>= 2.4.74'),
     }, {
         'name': '--drmprime',
         'desc': 'DRM Prime ffmpeg support',
