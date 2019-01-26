@@ -107,6 +107,19 @@ class Window: NSWindow, NSWindowDelegate {
         self.init(contentRect: contentRect,
                   styleMask: [.titled, .closable, .miniaturizable, .resizable],
                   backing: .buffered, defer: false, screen: screen)
+
+        // workaround for an AppKit bug where the NSWindow can't be placed on a
+        // none Main screen NSScreen outside the Main screen's frame bounds
+        if screen != NSScreen.main() {
+            var absoluteWantedOrigin = contentRect.origin
+            absoluteWantedOrigin.x += screen!.frame.origin.x
+            absoluteWantedOrigin.y += screen!.frame.origin.y
+
+            if !NSEqualPoints(absoluteWantedOrigin, self.frame.origin) {
+                self.setFrameOrigin(absoluteWantedOrigin)
+            }
+        }
+
         cocoaCB = ccb
         title = cocoaCB.title
         minSize = NSMakeSize(160, 90)
