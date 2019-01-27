@@ -34,6 +34,7 @@ class MPVHelper: NSObject {
     var mpvLog: OpaquePointer?
     var inputContext: OpaquePointer?
     var mpctx: UnsafeMutablePointer<MPContext>?
+    var vo: UnsafeMutablePointer<vo>?
     var macOpts: macos_opts?
     var fbo: GLint = 1
     let deinitLock = NSLock()
