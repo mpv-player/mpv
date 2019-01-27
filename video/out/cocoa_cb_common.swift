@@ -88,6 +88,7 @@ class CocoaCB: NSObject {
 
     func initBackend(_ vo: UnsafeMutablePointer<vo>) {
         let opts: mp_vo_opts = vo.pointee.opts.pointee
+        mpv.vo = vo
         NSApp.setActivationPolicy(.regular)
         setAppIcon()
 
@@ -363,6 +364,7 @@ class CocoaCB: NSObject {
         eventsLock.lock()
         events |= ev
         eventsLock.unlock()
+        vo_wakeup(mpv.vo)
     }
 
     func checkEvents() -> Int {
