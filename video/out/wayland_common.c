@@ -72,6 +72,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 {
     if (!wl->pointer)
         return VO_NOTAVAIL;
+    wl->cursor_visible = on;
     if (on) {
         if (spawn_cursor(wl))
             return VO_FALSE;
@@ -100,7 +101,7 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     wl->pointer    = pointer;
     wl->pointer_id = serial;
 
-    set_cursor_visibility(wl, true);
+    set_cursor_visibility(wl, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
 
@@ -997,6 +998,7 @@ int vo_wayland_init(struct vo *vo)
         .scaling = 1,
         .wakeup_pipe = {-1, -1},
         .dnd_fd = -1,
+        .cursor_visible = true,
     };
 
     wl_list_init(&wl->output_list);

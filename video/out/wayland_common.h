@@ -101,6 +101,7 @@ struct vo_wayland_state {
     struct wl_cursor       *default_cursor;
     struct wl_surface      *cursor_surface;
     int                     allocated_cursor_scale;
+    bool                    cursor_visible;
 };
 
 int vo_wayland_init(struct vo *vo);
