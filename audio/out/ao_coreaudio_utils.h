@@ -65,9 +65,7 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
                        AudioStreamBasicDescription *new);
 
 int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
-#if HAVE_COREAUDIO
 int64_t ca_get_latency(const AudioTimeStamp *ts);
-#endif
 
 #if HAVE_COREAUDIO
 bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream);
