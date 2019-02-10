@@ -456,6 +456,12 @@ class CocoaCB: NSObject {
     }
 
     func shutdown(_ destroy: Bool = false) {
+        isShuttingDown = window?.isAnimating ?? false || window?.isInFullscreen ?? false
+        if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
+            window.close()
+        }
+        if isShuttingDown { return }
+
         setCursorVisiblility(true)
         stopDisplaylink()
         uninitLightSensor()
@@ -473,10 +479,6 @@ class CocoaCB: NSObject {
     func processEvent(_ event: UnsafePointer<mpv_event>) {
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
-            if window != nil && window.isAnimating {
-                isShuttingDown = true
-                return
-            }
             shutdown()
         case MPV_EVENT_PROPERTY_CHANGE:
             if backendState == .initialized {
