@@ -420,7 +420,8 @@ class CocoaCB: NSObject {
             return VO_TRUE
         case VOCTRL_GET_WIN_STATE:
             let minimized = data!.assumingMemoryBound(to: Int32.self)
-            minimized.pointee = ccb.window.isMiniaturized ? VO_WIN_STATE_MINIMIZED : Int32(0)
+            minimized.pointee = ccb.window?.isMiniaturized ?? false ?
+                VO_WIN_STATE_MINIMIZED : Int32(0)
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_NAMES:
             let opts: mp_vo_opts = vo!.pointee.opts!.pointee
