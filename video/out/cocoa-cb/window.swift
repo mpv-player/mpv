@@ -604,6 +604,14 @@ class Window: NSWindow, NSWindowDelegate {
         return false
     }
 
+    func windowDidMiniaturize(_ notification: Notification) {
+        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+    }
+
+    func windowDidDeminiaturize(_ notification: Notification) {
+        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+    }
+
     func windowDidResignKey(_ notification: Notification) {
         cocoaCB.setCursorVisiblility(true)
     }
