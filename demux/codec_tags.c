@@ -24,8 +24,6 @@
 #include "stheader.h"
 #include "common/av_common.h"
 
-#define HAVE_QT_TAGS (LIBAVFORMAT_VERSION_MICRO >= 100)
-
 static const char *lookup_tag(int type, uint32_t tag)
 {
     const struct AVCodecTag *av_tags[3] = {0};

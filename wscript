@@ -483,6 +483,12 @@ FFmpeg/Libav libraries. Git master is recommended."
         'desc': 'LZO support in libavutil',
         'func': check_statement('libavutil/lzo.h',
                                 'int i = AV_LZO_OUTPUT_PADDING')
+    }, {
+        'name': 'qt-tags',
+        'desc': 'MOV atom support in libavformat',
+        'func': check_statement('libavformat/avformat.h',
+                                'avformat_get_mov_video_tags()',
+                                lib='avformat')
     }
 ]
 
