@@ -478,6 +478,11 @@ FFmpeg/Libav libraries. Git master is recommended."
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
+    }, {
+        'name': 'libavutil-lzo',
+        'desc': 'LZO support in libavutil',
+        'func': check_statement('libavutil/lzo.h',
+                                'int i = AV_LZO_OUTPUT_PADDING')
     }
 ]
 

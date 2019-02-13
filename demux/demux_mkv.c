@@ -28,7 +28,6 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include <libavutil/lzo.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/avstring.h>
 
@@ -39,6 +38,10 @@
 
 #if HAVE_ZLIB
 #include <zlib.h>
+#endif
+
+#if HAVE_LIBAVUTIL_LZO
+#include <libavutil/lzo.h>
 #endif
 
 #include "mpv_talloc.h"
@@ -334,6 +337,7 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             inflateEnd(&zstream);
 #endif
         } else if (enc->comp_algo == 2) {
+#if HAVE_LIBAVUTIL_LZO
             /* lzo encoded track */
             int out_avail;
             int maxlen = INT_MAX - AV_LZO_OUTPUT_PADDING;
@@ -365,6 +369,7 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                 dstlen = MPMAX(1, 2 * dstlen);
             }
             size = dstlen - out_avail;
+#endif
         } else if (enc->comp_algo == 3) {
             dest = talloc_size(track->parser_tmp, size + enc->comp_settings_len);
             memcpy(dest, enc->comp_settings, enc->comp_settings_len);
@@ -745,7 +750,11 @@ static void parse_trackentry(struct demuxer *demuxer,
 
     if (entry->n_codec_private && entry->codec_private.len <= 0x10000000) {
         int len = entry->codec_private.len;
+#if HAVE_LIBAVUTIL_LZO
         track->private_data = talloc_size(track, len + AV_LZO_INPUT_PADDING);
+#else
+        track->private_data = talloc_size(track, len);
+#endif
         memcpy(track->private_data, entry->codec_private.start, len);
         track->private_size = len;
         MP_VERBOSE(demuxer, "|  + CodecPrivate, length %u\n", track->private_size);
@@ -2197,7 +2206,11 @@ static int demux_mkv_read_block_lacing(struct block_info *block, int type,
         uint32_t size = lace_size[i];
         if (stream_tell(s) + size > endpos || size > (1 << 30))
             goto error;
+#if HAVE_LIBAVUTIL_LZO
         int pad = MPMAX(AV_INPUT_BUFFER_PADDING_SIZE, AV_LZO_INPUT_PADDING);
+#else
+        int pad = AV_INPUT_BUFFER_PADDING_SIZE;
+#endif
         AVBufferRef *buf = av_buffer_alloc(size + pad);
         if (!buf)
             goto error;
