@@ -70,7 +70,7 @@ struct vo_wayland_state {
 
     /* Shell */
     struct wl_surface       *surface;
-    struct xdg_wm_base      *shell;
+    struct xdg_wm_base      *wm_base;
     struct xdg_toplevel     *xdg_toplevel;
     struct xdg_surface      *xdg_surface;
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
