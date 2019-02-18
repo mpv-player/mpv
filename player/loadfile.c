@@ -609,7 +609,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         goto err_out;
     enable_demux_thread(mpctx, demuxer);
 
-    if (opts->rebase_start_time)
+    if (filter != STREAM_SUB && opts->rebase_start_time)
         demux_set_ts_offset(demuxer, -demuxer->start_time);
 
     bool has_any = false;
