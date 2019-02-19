@@ -225,6 +225,12 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
             }
 
             ctx->sources[i] = d;
+            for (int n = 0; n < d->num_attachments; n++) {
+                demuxer_add_attachment(ctx->sources[0], d->attachments[n].name,
+                                       d->attachments[n].type,
+                                       d->attachments[n].data,
+                                       d->attachments[n].data_size);
+            }
             return true;
         }
     }
