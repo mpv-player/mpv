@@ -399,7 +399,7 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
     if (!mp_aframe_set_chmap(mpa, newmap))
         return false;
 
-    int num_planes = newmap->num;
+    int num_planes = mp_aframe_get_planes(mpa);
     uint8_t **planes = mp_aframe_get_data_rw(mpa);
     uint8_t *old_planes[MP_NUM_CHANNELS];
     assert(num_planes <= MP_NUM_CHANNELS);
