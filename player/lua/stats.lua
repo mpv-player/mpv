@@ -754,3 +754,7 @@ mp.register_event("video-reconfig",
             print_page(curr_page)
         end
     end)
+
+if mp.get_property_bool("osd-stats") then
+    process_key_binding(false)
+end

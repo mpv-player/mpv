@@ -592,6 +592,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", video_equalizer, mp_csp_equalizer_conf, 0),
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
+    OPT_FLAG("osd-stats", osd_stats, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_CHOICE("osd-on-seek", osd_on_seek, 0,
@@ -892,6 +893,7 @@ const struct MPOpts mp_default_opts = {
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
     .video_osd = 1,
+    .osd_stats = 0,
     .osd_level = 1,
     .osd_on_seek = 1,
     .osd_duration = 1000,

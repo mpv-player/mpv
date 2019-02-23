@@ -182,6 +182,7 @@ typedef struct MPOpts {
     struct mp_subtitle_opts *subs_rend;
     struct mp_osd_render_opts *osd_rend;
 
+    int osd_stats;
     int osd_level;
     int osd_duration;
     int osd_fractions;

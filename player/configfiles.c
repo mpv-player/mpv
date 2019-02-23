@@ -208,6 +208,7 @@ exit:
 
 static const char *const backup_properties[] = {
     "osd-level",
+    "osd-stats",
     //"loop",
     "speed",
     "options/edition",
