@@ -116,7 +116,12 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
                                   uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
     struct vo_wayland_state *wl = data;
+    if (!wl->prev_fullscreen && wl->fullscreen) {
+        wl->prev_fullscreen = wl->fullscreen;
+        return;
+    }
 
+    wl->prev_fullscreen = wl->fullscreen;
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
 
@@ -1019,6 +1024,7 @@ int vo_wayland_init(struct vo *vo)
         .wakeup_pipe = {-1, -1},
         .dnd_fd = -1,
         .cursor_visible = true,
+        .prev_fullscreen = vo->opts->fullscreen,
     };
 
     wl_list_init(&wl->output_list);
