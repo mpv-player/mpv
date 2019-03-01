@@ -953,7 +953,7 @@ const struct MPOpts mp_default_opts = {
     .screenshot_template = "mpv-shot%n",
 
     .hwdec_api = HAVE_RPI ? "mmal" : "no",
-    .hwdec_codecs = "h264,vc1,wmv3,hevc,vp9",
+    .hwdec_codecs = "h264,vc1,hevc,vp9",
 
     .audio_output_channels = {
         .set = 1,
