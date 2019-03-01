@@ -364,12 +364,23 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     }
     return t1->user_tid <= t2->user_tid;
 }
+
+static bool duplicate_track(struct MPContext *mpctx, int order,
+                            enum stream_type type, struct track *track)
+{
+    for (int i = 0; i < order; i++) {
+        if (mpctx->current_track[i][type] == track)
+            return true;
+    }
+    return false;
+}
+
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type)
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
-    char **langs = order == 0 ? opts->stream_lang[type] : NULL;
+    char **langs = opts->stream_lang[type];
     if (tid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
@@ -381,6 +392,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         if (track->user_tid == tid)
             return track;
         if (track->no_auto_select)
+            continue;
+        if (duplicate_track(mpctx, order, type, track))
             continue;
         if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;
