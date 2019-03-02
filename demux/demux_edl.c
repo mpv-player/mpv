@@ -80,8 +80,10 @@ static struct tl_parts *parse_edl(bstr str)
 {
     struct tl_parts *tl = talloc_zero(NULL, struct tl_parts);
     while (str.len) {
-        if (bstr_eatstart0(&str, "#"))
+        if (bstr_eatstart0(&str, "#")) {
             bstr_split_tok(str, "\n", &(bstr){0}, &str);
+            continue;
+        }
         if (bstr_eatstart0(&str, "\n") || bstr_eatstart0(&str, ";"))
             continue;
         bool is_header = bstr_eatstart0(&str, "!");
