@@ -64,6 +64,18 @@ Track Selection
     streamed with youtube-dl, because it saves bandwidth. This is done by
     setting the ytdl_format to "bestaudio/best" in the ytdl_hook.lua script.
 
+``--aselect=<stream_specifier[,stream_specifier,...]>``
+    Specify a list of stream specifiers which will be passed to the demuxer for
+    automatic stream selection. If the first specifier does not match any
+    streams then the second will be tried and so on. For now this only makes
+    sense when using the ``lavf`` demuxer.
+
+``--sselect=<...>``
+    Equivalent to ``--aselect`` and ``--vselect``, for subtitle tracks.
+
+``--vselect=<...>``
+    Equivalent to ``--aselect`` and ``--sselect``, for video tracks.
+
 ``--edition=<ID|auto>``
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set

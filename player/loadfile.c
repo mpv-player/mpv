@@ -443,6 +443,23 @@ static int match_lang(char **langs, char *lang)
     return 0;
 }
 
+static int select_track_by_stream_specifier(struct demuxer *demuxer,
+                                            char **specifiers,
+                                            enum stream_type type)
+{
+    int ret = -1;
+    for (int idx = 0; specifiers && specifiers[idx] && ret < 0; idx++) {
+        demux_find_stream_t p = {
+            .specifier = specifiers[idx],
+            .type = type,
+            .id = -2
+        };
+        if (demux_control(demuxer, DEMUXER_CTRL_FIND_STREAM, &p) == CONTROL_OK)
+            ret = p.id;
+    }
+    return ret;
+}
+
 /* Get the track wanted by the user.
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
@@ -500,8 +517,12 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
+    int ffid = order == 0 ? select_track_by_stream_specifier(mpctx->demuxer,
+                    opts->stream_specifier[type], type) : -1;
     char **langs = order == 0 ? opts->stream_lang[type] : NULL;
-    if (tid == -2)
+    if (ffid != -1)
+        tid = -1; // prefer selecting ffid
+    if (tid == -2 || ffid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
     struct track *pick = NULL;
@@ -510,6 +531,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         if (track->type != type)
             continue;
         if (track->user_tid == tid)
+            return track;
+        if (track->ff_index == ffid)
             return track;
         if (track->no_auto_select)
             continue;

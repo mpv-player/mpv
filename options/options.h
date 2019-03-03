@@ -239,6 +239,7 @@ typedef struct MPOpts {
     double image_display_duration;
     char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];
+    char **stream_specifier[STREAM_TYPE_COUNT];
     char **stream_lang[STREAM_TYPE_COUNT];
     int stream_auto_sel;
     int audio_display;

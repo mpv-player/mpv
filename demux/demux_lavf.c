@@ -1170,6 +1170,28 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
         select_tracks(demuxer, 0);
         return CONTROL_OK;
     }
+    case DEMUXER_CTRL_FIND_STREAM:
+    {
+        demux_find_stream_t *params = arg;
+        AVFormatContext *ic = priv->avfc;
+
+        add_new_streams(demuxer);
+
+        for (int i = 0; i < ic->nb_streams; i++) {
+            AVStream *st = ic->streams[i];
+            enum AVMediaType type = st->codecpar->codec_type;
+            if ((type == AVMEDIA_TYPE_VIDEO    && params->type == STREAM_VIDEO) ||
+                (type == AVMEDIA_TYPE_AUDIO    && params->type == STREAM_AUDIO) ||
+                (type == AVMEDIA_TYPE_SUBTITLE && params->type == STREAM_SUB  ))
+            {
+                if (avformat_match_stream_specifier(ic, st, params->specifier) > 0) {
+                    params->id = i;
+                    break;
+                }
+            }
+        }
+        return CONTROL_OK;
+    }
     case DEMUXER_CTRL_IDENTIFY_PROGRAM:
     {
         demux_program_t *prog = arg;

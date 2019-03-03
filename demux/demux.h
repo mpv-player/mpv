@@ -38,6 +38,7 @@ enum demux_ctrl {
     DEMUXER_CTRL_GET_READER_STATE,
     DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
     DEMUXER_CTRL_REPLACE_STREAM,
+    DEMUXER_CTRL_FIND_STREAM,
 };
 
 #define MAX_SEEK_RANGES 10
@@ -250,6 +251,12 @@ typedef struct {
     int progid;      //program id
     int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
+
+typedef struct {
+    const char *specifier;  //demuxer specific stream specifier
+    enum stream_type type;  //stream_type to search for
+    int id;                 //demuxer specific found id (ff index)
+} demux_find_stream_t;
 
 void demux_free(struct demuxer *demuxer);
 void demux_cancel_and_free(struct demuxer *demuxer);

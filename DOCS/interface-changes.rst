@@ -76,6 +76,8 @@ Interface changes
       network streams should not freeze the player core (only playback in
       uncached regions), and differing behavior should be reported as a bug.
       If --demuxer-thread=no is used, there are no guarantees.
+    - add --aselect, --vselect, --sselect to enable using libavformat stream
+      specifiers
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
