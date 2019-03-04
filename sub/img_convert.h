@@ -8,7 +8,8 @@ struct sub_bitmap;
 struct mp_rect;
 
 // Sub postprocessing
-void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur);
+void mp_blur_scale_rgba_sub_bitmap(struct sub_bitmap *d, double gblur,
+                                   double scale);
 
 bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
 

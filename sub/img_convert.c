@@ -30,7 +30,8 @@
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 
-void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
+void mp_blur_scale_rgba_sub_bitmap(struct sub_bitmap *d, double gblur,
+                                   double scale)
 {
     struct mp_image *tmp1 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
     if (tmp1) { // on OOM, skip region
@@ -41,6 +42,12 @@ void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
         s.planes[0] = d->bitmap;
 
         mp_image_copy(tmp1, &s);
+
+        if (scale != 1.0) {
+            d->w *= scale;
+            d->h *= scale;
+            mp_image_set_size(&s, d->w, d->h);
+        }
 
         mp_image_sw_blur_scale(&s, tmp1, gblur);
     }

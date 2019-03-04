@@ -1670,12 +1670,17 @@ Subtitles
         styling in the main subtitle stream.
 
 ``--sub-scale=<0-100>``
-    Factor for the text subtitle font size (default: 1).
+    Factor for the subtitle size (default: 1).
 
     .. note::
 
-        This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-font-size`` instead.
+        For text subtitles, this changes the font size. Affects ASS subtitles
+        as well, and may lead to incorrect subtitle rendering. Use with care,
+        or use ``--sub-font-size`` instead.
+
+        May position DVD/Vobsubs incorrectly if the subtitles are not at the
+        bottom center of the screen. A value other than 1 also switches to
+        software subtitle scaling for DVD/Vobsubs. Might be slow.
 
 ``--sub-scale-by-window=<yes|no>``
     Whether to scale subtitles with the window size (default: yes). If this is

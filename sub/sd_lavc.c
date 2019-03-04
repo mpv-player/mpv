@@ -179,6 +179,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
     // Assume consumers may use bilinear scaling on it (2x2 filter)
     int padding = 1 + extend;
 
+    bool apply_scale = opts->sub_scale != 1.0f;
+
     priv->packer->padding = padding;
 
     // For the sake of libswscale, which in some cases takes sub-rects as
@@ -217,12 +219,16 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
     struct pos bb[2];
     packer_get_bb(priv->packer, bb);
 
-    sub->bound_w = bb[1].x;
-    sub->bound_h = bb[1].y;
+    // Do not shrink the bounding box, as it may cause artifacts.
+    float scale = opts->sub_scale > 1.0f ? opts->sub_scale : 1.0f;
+    sub->bound_w = bb[1].x * scale;
+    sub->bound_h = bb[1].y * scale;
 
     if (!sub->data || sub->data->w < sub->bound_w || sub->data->h < sub->bound_h) {
         talloc_free(sub->data);
-        sub->data = mp_image_alloc(IMGFMT_BGRA, priv->packer->w, priv->packer->h);
+        // The data size should be at least as large as the unscaled one.
+        sub->data = mp_image_alloc(IMGFMT_BGRA, priv->packer->w * scale,
+                                   priv->packer->h * scale);
         if (!sub->data) {
             sub->count = 0;
             return;
@@ -238,8 +244,9 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         int *linesize = r->linesize;
         b->w = r->w;
         b->h = r->h;
-        b->x = r->x;
-        b->y = r->y;
+        // Fix the coordinate of the bottom-center point.
+        b->x = r->x - (opts->sub_scale - 1.0f) * r->w / 2.0f;
+        b->y = r->y - (opts->sub_scale - 1.0f) * r->h;
 
         // Choose such that the extended start position is aligned.
         pos.x = MP_ALIGN_UP(pos.x - extend, align) + extend;
@@ -281,8 +288,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         b->w += extend * 2;
         b->h += extend * 2;
 
-        if (apply_blur)
-            mp_blur_rgba_sub_bitmap(b, opts->sub_gauss);
+        if (apply_blur || apply_scale)
+            mp_blur_scale_rgba_sub_bitmap(b, opts->sub_gauss, opts->sub_scale);
     }
 }
 
