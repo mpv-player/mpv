@@ -286,8 +286,10 @@ int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
 {
     struct mp_sws_context *ctx = mp_sws_alloc(NULL);
     ctx->flags = mp_sws_hq_flags;
-    ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
-    ctx->force_reload = true;
+    if (gblur != 0.0) {
+        ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
+        ctx->force_reload = true;
+    }
     int res = mp_sws_scale(ctx, dst, src);
     talloc_free(ctx);
     return res;
