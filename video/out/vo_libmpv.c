@@ -74,7 +74,8 @@ struct mpv_render_context {
     // --- Protected by update_lock
     mpv_render_update_fn update_cb;
     void *update_cb_ctx;
-    bool had_kill_update;           // update during termination
+    bool had_kill;                  // kill_cb finished
+    bool had_update;                // update during termination
 
     pthread_mutex_t lock;
     pthread_cond_t video_wait;      // paired with lock
@@ -118,7 +119,7 @@ static void update(struct mpv_render_context *ctx)
         ctx->update_cb(ctx->update_cb_ctx);
 
     // For the termination code.
-    ctx->had_kill_update = true;
+    ctx->had_update = true;
     pthread_cond_broadcast(&ctx->update_cond);
     pthread_mutex_unlock(&ctx->update_lock);
 }
@@ -250,7 +251,7 @@ static void kill_cb(void *ptr)
     struct mpv_render_context *ctx = ptr;
 
     pthread_mutex_lock(&ctx->update_lock);
-    ctx->had_kill_update = true;
+    ctx->had_kill = true;
     pthread_cond_broadcast(&ctx->update_cond);
     pthread_mutex_unlock(&ctx->update_lock);
 }
@@ -269,9 +270,11 @@ void mpv_render_context_free(mpv_render_context *ctx)
     // context. The above removal guarantees it can't come back (so ctx->vo
     // can't change to non-NULL).
     if (atomic_load(&ctx->in_use)) {
+        bool had_kill = false;
+
         kill_video_async(ctx->client_api, kill_cb, ctx);
 
-        while (atomic_load(&ctx->in_use)) {
+        while (!had_kill) {
             // As long as the video decoders are not destroyed, they can still
             // try to allocate new DR images and so on. This is a grotesque
             // corner case, but possible. Also, more likely, DR images need to
@@ -281,9 +284,10 @@ void mpv_render_context_free(mpv_render_context *ctx)
 
             // Wait for kill_cb() or update() calls.
             pthread_mutex_lock(&ctx->update_lock);
-            if (!ctx->had_kill_update)
+            if (!ctx->had_kill || !ctx->had_update)
                 pthread_cond_wait(&ctx->update_cond, &ctx->update_lock);
-            ctx->had_kill_update = false;
+            had_kill = ctx->had_kill;
+            ctx->had_update = false;
             pthread_mutex_unlock(&ctx->update_lock);
         }
     }
