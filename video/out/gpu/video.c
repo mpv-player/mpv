@@ -2072,6 +2072,23 @@ static void pass_read_video(struct gl_video *p)
         }
     }
 
+    // The basic idea is we assume the rgb/luma texture is the "reference" and
+    // scale everything else to match, after all planes are finalized.
+    // We find the reference texture first, in order to maintain texture offset
+    // between hooks on different type of planes.
+    int reference_tex_num = 0;
+    for (int n = 0; n < 4; n++) {
+        switch (img[n].type) {
+        case PLANE_RGB:
+        case PLANE_XYZ:
+        case PLANE_LUMA: break;
+        default: continue;
+        }
+
+        reference_tex_num = n;
+        break;
+    }
+
     // Dispatch the hooks for all of these textures, saving and perhaps
     // modifying them in the process
     for (int n = 0; n < 4; n++) {
@@ -2086,26 +2103,18 @@ static void pass_read_video(struct gl_video *p)
         }
 
         img[n] = pass_hook(p, name, img[n], &offsets[n]);
+
+        if (reference_tex_num == n) {
+            // The reference texture is finalized now.
+            p->texture_w = img[n].w;
+            p->texture_h = img[n].h;
+            p->texture_offset = offsets[n];
+        }
     }
 
     // At this point all planes are finalized but they may not be at the
     // required size yet. Furthermore, they may have texture offsets that
-    // require realignment. For lack of something better to do, we assume
-    // the rgb/luma texture is the "reference" and scale everything else
-    // to match.
-    for (int n = 0; n < 4; n++) {
-        switch (img[n].type) {
-        case PLANE_RGB:
-        case PLANE_XYZ:
-        case PLANE_LUMA: break;
-        default: continue;
-        }
-
-        p->texture_w = img[n].w;
-        p->texture_h = img[n].h;
-        p->texture_offset = offsets[n];
-        break;
-    }
+    // require realignment.
 
     // Compute the reference rect
     struct mp_rect_f src = {0.0, 0.0, p->image_params.w, p->image_params.h};
