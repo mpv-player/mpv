@@ -30,9 +30,11 @@ enum szexp_op {
     SZEXP_OP_SUB,
     SZEXP_OP_MUL,
     SZEXP_OP_DIV,
+    SZEXP_OP_MOD,
     SZEXP_OP_NOT,
     SZEXP_OP_GT,
     SZEXP_OP_LT,
+    SZEXP_OP_EQ,
 };
 
 enum szexp_tag {
