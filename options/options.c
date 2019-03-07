@@ -632,6 +632,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("write-filename-in-watch-later-config", write_filename_in_watch_later_config, 0),
     OPT_FLAG("ignore-path-in-watch-later-config", ignore_path_in_watch_later_config, 0),
     OPT_STRING("watch-later-directory", watch_later_directory, M_OPT_FILE),
+    OPT_STRINGLIST("watch-later-blacklist", watch_later_blacklist, 0),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_STRING("ordered-chapters-files", ordered_chapters_files, M_OPT_FILE),

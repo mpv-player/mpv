@@ -361,6 +361,16 @@ static char *format_delay(double time)
     return talloc_asprintf(NULL, "%d ms", (int)lrint(time * 1000));
 }
 
+static bool blacklist_contains(char **blacklist, const char *name)
+{
+    while (blacklist && *blacklist) {
+        if (strcmp(*blacklist, name) == 0)
+            return true;
+        blacklist++;
+    }
+    return false;
+}
+
 // Option-property bridge. This is used so that setting options via various
 // mechanisms (including command line parsing, config files, per-file options)
 // updates state associated with them. For that, they have to go through the
@@ -373,6 +383,13 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
     const char *name = co->name;
+
+    if ((flags & M_SETOPT_WATCH_LATER) &&
+        blacklist_contains(mpctx->opts->watch_later_blacklist, name))
+    {
+        MP_VERBOSE(mpctx, "Option %s in watch later blacklist is ignored.\n", name);
+        return 0;
+    }
 
     // Skip going through mp_property_generic_option (typically), because the
     // property implementation is trivial, and can break some obscure features

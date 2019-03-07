@@ -154,6 +154,7 @@ enum {
     M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
     M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
     M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
+    M_SETOPT_WATCH_LATER = 512,     // Ignore options in watch later blacklist
 };
 
 // Flags for safe option setting during runtime.
