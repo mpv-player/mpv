@@ -297,9 +297,11 @@ void mpv_render_context_free(mpv_render_context *ctx)
 
     forget_frames(ctx, true);
 
-    ctx->renderer->fns->destroy(ctx->renderer);
-    talloc_free(ctx->renderer->priv);
-    talloc_free(ctx->renderer);
+    if (ctx->renderer) {
+        ctx->renderer->fns->destroy(ctx->renderer);
+        talloc_free(ctx->renderer->priv);
+        talloc_free(ctx->renderer);
+    }
     talloc_free(ctx->dr);
     talloc_free(ctx->dispatch);
 
