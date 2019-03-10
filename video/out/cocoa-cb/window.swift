@@ -300,6 +300,7 @@ class Window: NSWindow, NSWindowDelegate {
         let intermediateFrame = aspectFit(rect: newFrame, in: screen!.frame)
         cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFill
         hideTitleBar()
+        styleMask.remove(.fullScreen)
         setFrame(intermediateFrame, display: true)
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
@@ -435,9 +436,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
-        let newFrame = !isAnimating && isInFullscreen ? targetScreen!.frame :
-                                                        frameRect
-        super.setFrame(newFrame, display: flag)
+        super.setFrame(frameRect, display: flag)
 
         if keepAspect {
             contentAspectRatio = unfsContentFrame!.size

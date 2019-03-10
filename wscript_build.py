@@ -164,6 +164,7 @@ def build(ctx):
     if ctx.dependency_satisfied('macos-cocoa-cb'):
         swift_source = [
             ( "osdep/macOS_mpv_helper.swift" ),
+            ( "osdep/macOS_swift_extensions.swift" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
@@ -234,12 +235,10 @@ def build(ctx):
         ( "audio/out/ao_alsa.c",                 "alsa" ),
         ( "audio/out/ao_audiounit.m",            "audiounit" ),
         ( "audio/out/ao_coreaudio.c",            "coreaudio" ),
-        ( "audio/out/ao_coreaudio_chmap.c",      "audiounit" ),
-        ( "audio/out/ao_coreaudio_chmap.c",      "coreaudio" ),
+        ( "audio/out/ao_coreaudio_chmap.c",      "coreaudio || audiounit" ),
         ( "audio/out/ao_coreaudio_exclusive.c",  "coreaudio" ),
         ( "audio/out/ao_coreaudio_properties.c", "coreaudio" ),
-        ( "audio/out/ao_coreaudio_utils.c",      "audiounit" ),
-        ( "audio/out/ao_coreaudio_utils.c",      "coreaudio" ),
+        ( "audio/out/ao_coreaudio_utils.c",      "coreaudio || audiounit" ),
         ( "audio/out/ao_jack.c",                 "jack" ),
         ( "audio/out/ao_lavc.c" ),
         ( "audio/out/ao_null.c" ),

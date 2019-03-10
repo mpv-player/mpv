@@ -4052,6 +4052,7 @@ static bool is_property_set(int action, void *val)
     case M_PROPERTY_SWITCH:
     case M_PROPERTY_SET_STRING:
     case M_PROPERTY_SET_NODE:
+    case M_PROPERTY_MULTIPLY:
         return true;
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *key = val;

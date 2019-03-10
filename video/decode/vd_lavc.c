@@ -140,13 +140,13 @@ const struct m_sub_options vd_lavc_conf = {
         .framedrop = AVDISCARD_NONREF,
         .dr = 1,
         .hwdec_api = HAVE_RPI ? "mmal" : "no",
-        .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
+        .hwdec_codecs = "h264,vc1,hevc,vp9",
     },
 };
 
 struct hwdec_info {
     char name[64];
-    char method_name[16]; // non-unique name describing the hwdec method
+    char method_name[24]; // non-unique name describing the hwdec method
     const AVCodec *codec; // implemented by this codec
     enum AVHWDeviceType lavc_device; // if not NONE, get a hwdevice
     bool copying; // if true, outputs sw frames, or copy to sw ourselves

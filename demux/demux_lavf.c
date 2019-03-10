@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 Michael Niedermayer <michaelni@gmx.at>
+ * Copyright (C) 2018 Google LLC
  *
  * This file is part of mpv.
  *
@@ -588,17 +589,27 @@ static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
         av_rgain = (AVReplayGain*)src_sd->data;
         rgain    = talloc_ptrtype(demuxer, rgain);
 
-        rgain->track_gain = (av_rgain->track_gain != INT32_MIN) ?
-            av_rgain->track_gain / 100000.0f : 0.0;
+        // Set values in *rgain, using track gain as a fallback for album gain
+        // if the latter is not present. This behavior matches that in
+        // demux/demux.c's decode_rgain; if you change this, please make
+        // equivalent changes there too.
+        if (av_rgain->track_gain != INT32_MIN && av_rgain->track_peak != 0.0) {
+            // Track gain is defined.
+            rgain->track_gain = av_rgain->track_gain / 100000.0f;
+            rgain->track_peak = av_rgain->track_peak / 100000.0f;
 
-        rgain->track_peak = (av_rgain->track_peak != 0.0) ?
-            av_rgain->track_peak / 100000.0f : 1.0;
-
-        rgain->album_gain = (av_rgain->album_gain != INT32_MIN) ?
-            av_rgain->album_gain / 100000.0f : 0.0;
-
-        rgain->album_peak = (av_rgain->album_peak != 0.0) ?
-            av_rgain->album_peak / 100000.0f : 1.0;
+            if (av_rgain->album_gain != INT32_MIN &&
+                av_rgain->album_peak != 0.0)
+            {
+                // Album gain is also defined.
+                rgain->album_gain = av_rgain->album_gain / 100000.0f;
+                rgain->album_peak = av_rgain->album_peak / 100000.0f;
+            } else {
+                // Album gain is undefined; fall back to track gain.
+                rgain->album_gain = rgain->track_gain;
+                rgain->album_peak = rgain->track_peak;
+            }
+        }
 
         // This must be run only before the stream was added, otherwise there
         // will be race conditions with accesses from the user thread.

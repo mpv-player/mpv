@@ -262,6 +262,7 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 320,
+        .ver_es_core = 300,
         .extension = "GL_ARB_sync",
         .functions = (const struct gl_function[]) {
             DEF_FN(FenceSync),

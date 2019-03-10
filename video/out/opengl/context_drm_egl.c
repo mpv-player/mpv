@@ -50,8 +50,8 @@ struct gbm
 {
     struct gbm_surface *surface;
     struct gbm_device *device;
-    struct gbm_bo *bo;
-    struct gbm_bo *next_bo;
+    struct gbm_bo **bo;
+    unsigned int num_bos;
 };
 
 struct egl
@@ -72,6 +72,9 @@ struct priv {
     struct gbm gbm;
     struct framebuffer *fb;
 
+    GLsync *vsync_fences;
+    unsigned int num_vsync_fences;
+
     uint32_t gbm_format;
 
     bool active;
@@ -79,6 +82,9 @@ struct priv {
 
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
+
+    bool still;
+    bool paused;
 
     struct mpv_opengl_drm_params drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
@@ -355,15 +361,6 @@ static void crtc_release(struct ra_ctx *ctx)
         return;
     p->active = false;
 
-    // wait for current page flip
-    while (p->waiting_for_flip) {
-        int ret = drmHandleEvent(p->kms->fd, &p->ev);
-        if (ret) {
-            MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
-            break;
-        }
-    }
-
     if (p->kms->atomic_context) {
         if (p->kms->atomic_context->old_state.saved) {
             if (!crtc_release_atomic(ctx))
@@ -414,36 +411,11 @@ static void acquire_vt(void *data)
     crtc_setup(ctx);
 }
 
-static bool drm_atomic_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
-{
-    struct priv *p = sw->ctx->priv;
-    if (p->kms->atomic_context) {
-        if (!p->kms->atomic_context->request) {
-            p->kms->atomic_context->request = drmModeAtomicAlloc();
-            p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
-        }
-        return ra_gl_ctx_start_frame(sw, out_fbo);
-    }
-    return false;
-}
-
-static const struct ra_swapchain_fns drm_atomic_swapchain = {
-    .start_frame   = drm_atomic_egl_start_frame,
-};
-
-static void drm_egl_swap_buffers(struct ra_ctx *ctx)
+static void queue_flip(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
     int ret;
-
-    if (!p->active)
-        return;
-
-    eglSwapBuffers(p->egl.display, p->egl.surface);
-    p->gbm.next_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
-    p->waiting_for_flip = true;
-    update_framebuffer_from_bo(ctx, p->gbm.next_bo);
 
     if (atomic_ctx) {
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
@@ -451,7 +423,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
         ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, NULL);
+                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, p);
         if (ret)
             MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
     } else {
@@ -461,29 +433,128 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
             MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
         }
     }
-
-    // poll page flip finish event
-    const int timeout_ms = 3000;
-    struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
-    poll(fds, 1, timeout_ms);
-    if (fds[0].revents & POLLIN) {
-        ret = drmHandleEvent(p->kms->fd, &p->ev);
-        if (ret != 0) {
-            MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
-            p->waiting_for_flip = false;
-            return;
-        }
-    }
-    p->waiting_for_flip = false;
+    p->waiting_for_flip = true;
 
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
         atomic_ctx->request = drmModeAtomicAlloc();
     }
-
-    gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo);
-    p->gbm.bo = p->gbm.next_bo;
 }
+
+static void wait_on_flip(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    // poll page flip finish event
+    while (p->waiting_for_flip) {
+        const int timeout_ms = 3000;
+        struct pollfd fds[1] = { { .events = POLLIN, .fd = p->kms->fd } };
+        poll(fds, 1, timeout_ms);
+        if (fds[0].revents & POLLIN) {
+            const int ret = drmHandleEvent(p->kms->fd, &p->ev);
+            if (ret != 0)
+                MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+        }
+    }
+}
+
+static void swapchain_step(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    if (p->gbm.num_bos > 0 && p->gbm.bo[0])
+        gbm_surface_release_buffer(p->gbm.surface, p->gbm.bo[0]);
+    MP_TARRAY_REMOVE_AT(p->gbm.bo, p->gbm.num_bos, 0);
+}
+
+static void new_fence(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    if (p->gl.FenceSync) {
+        GLsync fence = p->gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (fence)
+            MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
+    }
+}
+
+static void wait_fence(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+
+    while (p->num_vsync_fences && (p->num_vsync_fences >= p->gbm.num_bos)) {
+        p->gl.ClientWaitSync(p->vsync_fences[0], GL_SYNC_FLUSH_COMMANDS_BIT, 1e9);
+        p->gl.DeleteSync(p->vsync_fences[0]);
+        MP_TARRAY_REMOVE_AT(p->vsync_fences, p->num_vsync_fences, 0);
+    }
+}
+
+static bool drm_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
+{
+    struct ra_ctx *ctx = sw->ctx;
+    struct priv *p = ctx->priv;
+
+    if (p->kms->atomic_context && !p->kms->atomic_context->request) {
+        p->kms->atomic_context->request = drmModeAtomicAlloc();
+        p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
+    }
+
+    return ra_gl_ctx_start_frame(sw, out_fbo);
+}
+
+static bool drm_egl_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
+{
+    struct ra_ctx *ctx = sw->ctx;
+    struct priv *p = ctx->priv;
+
+    p->still = frame->still;
+
+    return ra_gl_ctx_submit_frame(sw, frame);
+}
+
+static void drm_egl_swap_buffers(struct ra_swapchain *sw)
+{
+    struct ra_ctx *ctx = sw->ctx;
+    struct priv *p = ctx->priv;
+    const bool drain = p->paused || p->still;  // True when we need to drain the swapchain
+
+    if (!p->active)
+        return;
+
+    wait_fence(ctx);
+
+    eglSwapBuffers(p->egl.display, p->egl.surface);
+
+    struct gbm_bo *new_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
+    if (!new_bo) {
+        MP_ERR(ctx->vo, "Couldn't lock front buffer\n");
+        return;
+    }
+    MP_TARRAY_APPEND(p, p->gbm.bo, p->gbm.num_bos, new_bo);
+    new_fence(ctx);
+
+    while (drain || p->gbm.num_bos > ctx->opts.swapchain_depth || !gbm_surface_has_free_buffers(p->gbm.surface)) {
+        if (p->waiting_for_flip) {
+            wait_on_flip(ctx);
+            swapchain_step(ctx);
+        }
+        if (p->gbm.num_bos <= 1)
+            break;
+        if (!p->gbm.bo[1]) {
+            MP_ERR(ctx->vo, "Hole in swapchain?\n");
+            swapchain_step(ctx);
+            continue;
+        }
+        update_framebuffer_from_bo(ctx, p->gbm.bo[1]);
+        queue_flip(ctx);
+    }
+}
+
+static const struct ra_swapchain_fns drm_egl_swapchain = {
+    .start_frame   = drm_egl_start_frame,
+    .submit_frame  = drm_egl_submit_frame,
+    .swap_buffers  = drm_egl_swap_buffers,
+};
 
 static void drm_egl_uninit(struct ra_ctx *ctx)
 {
@@ -502,6 +573,12 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     crtc_release(ctx);
     if (p->vt_switcher_active)
         vt_switcher_destroy(&p->vt_switcher);
+
+    // According to GBM documentation all BO:s must be released before
+    // gbm_surface_destroy can be called on the surface.
+    while (p->gbm.num_bos) {
+        swapchain_step(ctx);
+    }
 
     eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                    EGL_NO_CONTEXT);
@@ -565,6 +642,13 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
     return result;
 }
 
+static void page_flipped(int fd, unsigned int frame, unsigned int sec,
+                         unsigned int usec, void *data)
+{
+    struct priv *p = data;
+    p->waiting_for_flip = false;
+}
+
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
     if (ctx->opts.probing) {
@@ -574,6 +658,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
+    p->ev.page_flip_handler = page_flipped;
 
     p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log);
     if (p->vt_switcher_active) {
@@ -644,12 +729,13 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     eglSwapBuffers(p->egl.display, p->egl.surface);
 
     MP_VERBOSE(ctx, "Preparing framebuffer\n");
-    p->gbm.bo = gbm_surface_lock_front_buffer(p->gbm.surface);
-    if (!p->gbm.bo) {
+    struct gbm_bo *new_bo = gbm_surface_lock_front_buffer(p->gbm.surface);
+    if (!new_bo) {
         MP_ERR(ctx, "Failed to lock GBM surface.\n");
         return false;
     }
-    update_framebuffer_from_bo(ctx, p->gbm.bo);
+    MP_TARRAY_APPEND(p, p->gbm.bo, p->gbm.num_bos, new_bo);
+    update_framebuffer_from_bo(ctx, new_bo);
     if (!p->fb || !p->fb->id) {
         MP_ERR(ctx, "Failed to create framebuffer.\n");
         return false;
@@ -681,9 +767,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     }
 
     struct ra_gl_ctx_params params = {
-        .swap_buffers = drm_egl_swap_buffers,
-        .external_swapchain = p->kms->atomic_context ? &drm_atomic_swapchain :
-                                                       NULL,
+        .external_swapchain = &drm_egl_swapchain,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
@@ -715,6 +799,13 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
         *(double*)arg = fps;
         return VO_TRUE;
     }
+    case VOCTRL_PAUSE:
+        ctx->vo->want_redraw = true;
+        p->paused = true;
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        p->paused = false;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }

@@ -47,6 +47,12 @@ Interface changes
     - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
       as the only option. The `--spirv-compiler` option itself has been marked
       as deprecated, and may be removed in the future.
+    - split up `--tone-mapping-desaturate`` into strength + exponent, instead of
+      only using a single value (which previously just controlled the exponent).
+      The strength now linearly blends between the linear and nonlinear tone
+      mapped versions of a color.
+    - add --hdr-peak-decay-rate and --hdr-scene-threshold-low/high
+    - add --tone-mapping-max-boost
     - ipc: require that "request_id" fields are integers. Other types are still
       accepted for compatibility, but this will stop in the future. Also, if no
       request_id is provided, 0 will be assumed.

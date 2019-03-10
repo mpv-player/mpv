@@ -1817,7 +1817,9 @@ Property list
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
     are the GDI names (\\.\DISPLAY1, \\.\DISPLAY2, etc.) and the first display
     in the list will be the one that Windows considers associated with the
-    window (as determined by the MonitorFromWindow API.)
+    window (as determined by the MonitorFromWindow API.) On macOS these are the
+    Display Product Names as used in the System Information and only one display
+    name is returned since a window can only be on one screen.
 
 ``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS

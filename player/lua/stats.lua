@@ -430,7 +430,8 @@ local function add_file(s)
         append_property(s, "media-title", {prefix="Title:"})
     end
 
-    append_property(s, "file-format", {prefix="Format/Protocol:"})
+    local fs = append_property(s, "file-size", {prefix="Size:"})
+    append_property(s, "file-format", {prefix="Format/Protocol:", nl=fs and "" or o.nl})
 
     local ch_index = mp.get_property_number("chapter")
     if ch_index and ch_index >= 0 then
@@ -457,7 +458,6 @@ local function add_file(s)
                    indent=o.prefix_sep, no_prefix_markup=true})
         end
     end
-    append_property(s, "file-size", {prefix="Size:"})
 end
 
 
@@ -536,9 +536,9 @@ local function add_audio(s)
 
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
-    append(s, r["format"], {prefix="Format:"})
+    local cc = append(s, r["channel-count"], {prefix="Channels:"})
+    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl})
     append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
-    append(s, r["channel-count"], {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
 end

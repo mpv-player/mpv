@@ -313,9 +313,16 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .tone_mapping = TONE_MAPPING_HABLE,
-    .tone_mapping_param = NAN,
-    .tone_mapping_desat = 0.5,
+    .tone_map = {
+        .curve = TONE_MAPPING_HABLE,
+        .curve_param = NAN,
+        .max_boost = 1.0,
+        .decay_rate = 100.0,
+        .scene_threshold_low = 5.5,
+        .scene_threshold_high = 10.0,
+        .desat = 0.75,
+        .desat_exp = 1.5,
+    },
     .early_flush = -1,
     .hwdec_interop = "auto",
 };
@@ -351,21 +358,30 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
-        OPT_INTRANGE("target-peak", target_peak, 0, 10, 10000),
-        OPT_CHOICE("tone-mapping", tone_mapping, 0,
+        OPT_CHOICE_OR_INT("target-peak", target_peak, 0, 10, 10000,
+                          ({"auto", 0})),
+        OPT_CHOICE("tone-mapping", tone_map.curve, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"mobius",   TONE_MAPPING_MOBIUS},
                     {"reinhard", TONE_MAPPING_REINHARD},
                     {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
-        OPT_CHOICE("hdr-compute-peak", compute_hdr_peak, 0,
+        OPT_CHOICE("hdr-compute-peak", tone_map.compute_peak, 0,
                    ({"auto", 0},
                     {"yes", 1},
                     {"no", -1})),
-        OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
-        OPT_FLOAT("tone-mapping-desaturate", tone_mapping_desat, 0),
-        OPT_FLAG("gamut-warning", gamut_warning, 0),
+        OPT_FLOATRANGE("hdr-peak-decay-rate", tone_map.decay_rate, 0, 1.0, 1000.0),
+        OPT_FLOATRANGE("hdr-scene-threshold-low",
+                       tone_map.scene_threshold_low, 0, 0, 20.0),
+        OPT_FLOATRANGE("hdr-scene-threshold-high",
+                       tone_map.scene_threshold_high, 0, 0, 20.0),
+        OPT_FLOAT("tone-mapping-param", tone_map.curve_param, 0),
+        OPT_FLOATRANGE("tone-mapping-max-boost", tone_map.max_boost, 0, 1.0, 10.0),
+        OPT_FLOAT("tone-mapping-desaturate", tone_map.desat, 0),
+        OPT_FLOATRANGE("tone-mapping-desaturate-exponent",
+                       tone_map.desat_exp, 0, 0.0, 20.0),
+        OPT_FLAG("gamut-warning", tone_map.gamut_warning, 0),
         OPT_FLAG("opengl-pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2056,6 +2072,23 @@ static void pass_read_video(struct gl_video *p)
         }
     }
 
+    // The basic idea is we assume the rgb/luma texture is the "reference" and
+    // scale everything else to match, after all planes are finalized.
+    // We find the reference texture first, in order to maintain texture offset
+    // between hooks on different type of planes.
+    int reference_tex_num = 0;
+    for (int n = 0; n < 4; n++) {
+        switch (img[n].type) {
+        case PLANE_RGB:
+        case PLANE_XYZ:
+        case PLANE_LUMA: break;
+        default: continue;
+        }
+
+        reference_tex_num = n;
+        break;
+    }
+
     // Dispatch the hooks for all of these textures, saving and perhaps
     // modifying them in the process
     for (int n = 0; n < 4; n++) {
@@ -2070,26 +2103,18 @@ static void pass_read_video(struct gl_video *p)
         }
 
         img[n] = pass_hook(p, name, img[n], &offsets[n]);
+
+        if (reference_tex_num == n) {
+            // The reference texture is finalized now.
+            p->texture_w = img[n].w;
+            p->texture_h = img[n].h;
+            p->texture_offset = offsets[n];
+        }
     }
 
     // At this point all planes are finalized but they may not be at the
     // required size yet. Furthermore, they may have texture offsets that
-    // require realignment. For lack of something better to do, we assume
-    // the rgb/luma texture is the "reference" and scale everything else
-    // to match.
-    for (int n = 0; n < 4; n++) {
-        switch (img[n].type) {
-        case PLANE_RGB:
-        case PLANE_XYZ:
-        case PLANE_LUMA: break;
-        default: continue;
-        }
-
-        p->texture_w = img[n].w;
-        p->texture_h = img[n].h;
-        p->texture_offset = offsets[n];
-        break;
-    }
+    // require realignment.
 
     // Compute the reference rect
     struct mp_rect_f src = {0.0, 0.0, p->image_params.w, p->image_params.h};
@@ -2365,6 +2390,7 @@ static void pass_scale_main(struct gl_video *p)
         // values at 1 and 0, and then scale/shift them, respectively.
         sig_offset = 1.0/(1+expf(sig_slope * sig_center));
         sig_scale  = 1.0/(1+expf(sig_slope * (sig_center-1))) - sig_offset;
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSLF("color.rgb = %f - log(1.0/(color.rgb * %f + %f) - 1.0) * 1.0/%f;\n",
                 sig_center, sig_scale, sig_offset, sig_slope);
         pass_opt_hook_point(p, "SIGMOID", NULL);
@@ -2392,6 +2418,7 @@ static void pass_scale_main(struct gl_video *p)
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
         // Inverse of the transformation above
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) * 1.0/%f;\n",
                 sig_slope, sig_center, sig_offset, sig_scale);
     }
@@ -2471,16 +2498,16 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     if (!dst.sig_peak)
         dst.sig_peak = mp_trc_nom_peak(dst.gamma);
 
-    bool detect_peak = p->opts.compute_hdr_peak >= 0 && mp_trc_is_hdr(src.gamma);
+    struct gl_tone_map_opts tone_map = p->opts.tone_map;
+    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)
+                       && src.sig_peak > dst.sig_peak;
+
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {
+            float average[2];
+            int32_t frame_sum;
+            uint32_t frame_max;
             uint32_t counter;
-            uint32_t frame_idx;
-            uint32_t frame_num;
-            uint32_t frame_max[PEAK_DETECT_FRAMES+1];
-            uint32_t frame_sum[PEAK_DETECT_FRAMES+1];
-            uint32_t total_max;
-            uint32_t total_sum;
         } peak_ssbo = {0};
 
         struct ra_buf_params params = {
@@ -2492,8 +2519,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         p->hdr_peak_ssbo = ra_buf_create(ra, &params);
         if (!p->hdr_peak_ssbo) {
             MP_WARN(p, "Failed to create HDR peak detection SSBO, disabling.\n");
+            tone_map.compute_peak = p->opts.tone_map.compute_peak = -1;
             detect_peak = false;
-            p->opts.compute_hdr_peak = -1;
         }
     }
 
@@ -2501,22 +2528,15 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
         pass_describe(p, "detect HDR peak");
         pass_is_compute(p, 8, 8, true); // 8x8 is good for performance
         gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
+            "vec2 average;"
+            "int frame_sum;"
+            "uint frame_max;"
             "uint counter;"
-            "uint frame_idx;"
-            "uint frame_num;"
-            "uint frame_max[%d];"
-            "uint frame_avg[%d];"
-            "uint total_max;"
-            "uint total_avg;",
-            PEAK_DETECT_FRAMES + 1,
-            PEAK_DETECT_FRAMES + 1
         );
     }
 
     // Adapt from src to dst as necessary
-    pass_color_map(p->sc, src, dst, p->opts.tone_mapping,
-                   p->opts.tone_mapping_param, p->opts.tone_mapping_desat,
-                   detect_peak, p->opts.gamut_warning, p->use_linear && !osd);
+    pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
@@ -3502,9 +3522,9 @@ static bool check_dumb_mode(struct gl_video *p)
         return false;
 
     // otherwise, use auto-detection
-    if (o->target_prim || o->target_trc || o->correct_downscaling ||
-        o->linear_downscaling || o->linear_upscaling || o->sigmoid_upscaling ||
-        o->interpolation || o->blend_subs || o->deband || o->unsharp)
+    if (o->correct_downscaling || o->linear_downscaling ||
+        o->linear_upscaling || o->sigmoid_upscaling || o->interpolation ||
+        o->blend_subs || o->deband || o->unsharp)
         return false;
     // check remaining scalers (tscale is already implicitly excluded above)
     for (int i = 0; i < SCALER_COUNT; i++) {
@@ -3515,8 +3535,6 @@ static bool check_dumb_mode(struct gl_video *p)
         }
     }
     if (o->user_shaders && o->user_shaders[0])
-        return false;
-    if (p->use_lut_3d)
         return false;
     return true;
 }
@@ -3582,12 +3600,12 @@ static void check_gl_features(struct gl_video *p)
     }
 
     bool have_compute_peak = have_compute && have_ssbo;
-    if (!have_compute_peak && p->opts.compute_hdr_peak >= 0) {
-        int msgl = p->opts.compute_hdr_peak == 1 ? MSGL_WARN : MSGL_V;
+    if (!have_compute_peak && p->opts.tone_map.compute_peak >= 0) {
+        int msgl = p->opts.tone_map.compute_peak == 1 ? MSGL_WARN : MSGL_V;
         MP_MSG(p, msgl, "Disabling HDR peak computation (one or more of the "
                         "following is not supported: compute shaders=%d, "
                         "SSBO=%d).\n", have_compute, have_ssbo);
-        p->opts.compute_hdr_peak = -1;
+        p->opts.tone_map.compute_peak = -1;
     }
 
     p->forced_dumb_mode = p->opts.dumb_mode > 0 || !have_fbo || !have_texrg;
@@ -3609,7 +3627,6 @@ static void check_gl_features(struct gl_video *p)
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
-            .compute_hdr_peak = p->opts.compute_hdr_peak,
             .dither_algo = p->opts.dither_algo,
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
@@ -3617,12 +3634,13 @@ static void check_gl_features(struct gl_video *p)
             .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
             .tex_pad_y = p->opts.tex_pad_y,
-            .tone_mapping = p->opts.tone_mapping,
-            .tone_mapping_param = p->opts.tone_mapping_param,
-            .tone_mapping_desat = p->opts.tone_mapping_desat,
+            .tone_map = p->opts.tone_map,
             .early_flush = p->opts.early_flush,
             .icc_opts = p->opts.icc_opts,
             .hwdec_interop = p->opts.hwdec_interop,
+            .target_trc = p->opts.target_trc,
+            .target_prim = p->opts.target_prim,
+            .target_peak = p->opts.target_peak,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             p->opts.scaler[n] = gl_video_opts_def.scaler[n];

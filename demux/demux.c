@@ -1715,8 +1715,6 @@ static void prune_old_packets(struct demux_internal *in)
                 }
                 prev = prev->next;
             }
-
-            update_seek_ranges(range);
         }
 
         bool done = false;
@@ -1724,6 +1722,8 @@ static void prune_old_packets(struct demux_internal *in)
             done = queue->next_prune_target == queue->head;
             remove_head_packet(queue);
         }
+
+        update_seek_ranges(range);
 
         if (range != in->current_range && range->seek_start == MP_NOPTS_VALUE)
             free_empty_cached_ranges(in);
@@ -2100,12 +2100,17 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
 {
     struct replaygain_data rg = {0};
 
+    // Set values in *rg, using track gain as a fallback for album gain if the
+    // latter is not present. This behavior matches that in demux/demux_lavf.c's
+    // export_replaygain; if you change this, please make equivalent changes
+    // there too.
     if (decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) >= 0 &&
         decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) >= 0)
     {
         if (decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) < 0 ||
             decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak) < 0)
         {
+            // Album gain is undefined; fall back to track gain.
             rg.album_gain = rg.track_gain;
             rg.album_peak = rg.track_peak;
         }

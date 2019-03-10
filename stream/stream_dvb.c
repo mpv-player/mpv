@@ -73,7 +73,7 @@ static pthread_mutex_t global_dvb_state_lock = PTHREAD_MUTEX_INITIALIZER;
 const struct m_sub_options stream_dvb_conf = {
     .opts = (const m_option_t[]) {
         OPT_STRING("prog", cfg_prog, 0),
-        OPT_INTRANGE("card", cfg_devno, 0, 1, 4),
+        OPT_INTRANGE("card", cfg_devno, 0, 0, MAX_ADAPTERS-1),
         OPT_INTRANGE("timeout", cfg_timeout, 0, 1, 30),
         OPT_STRING("file", cfg_file, M_OPT_FILE),
         OPT_FLAG("full-transponder", cfg_full_transponder, 0),
@@ -1157,7 +1157,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     if (devno.len) {
         bstr r;
         priv->cfg_devno = bstrtoll(devno, &r, 0);
-        if (r.len || priv->cfg_devno < 0 || priv->cfg_devno > MAX_ADAPTERS) {
+        if (r.len || priv->cfg_devno < 0 || priv->cfg_devno >= MAX_ADAPTERS) {
             MP_ERR(stream, "invalid devno: '%.*s'\n", BSTR_P(devno));
             return NULL;
         }
