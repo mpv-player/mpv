@@ -37,7 +37,6 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
-#include "osdep/subprocess.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "osdep/getpid.h"
@@ -920,36 +919,6 @@ static void script_get_user_path(js_State *J, void *af)
     js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
 }
 
-// args: client invocation args object
-static void script_subprocess_detached(js_State *J, void *af)
-{
-    struct script_ctx *ctx = jctx(J);
-    if (!js_isobject(J, 1))
-        js_error(J, "argument must be an object");
-
-    js_getproperty(J, 1, "args"); // args
-    int num_args = js_getlength(J, -1);
-    if (!num_args) // not using js_isarray to also accept array-like objects
-        js_error(J, "args must be an non-empty array");
-    char *args[256];
-    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
-        js_error(J, "too many arguments");
-    if (num_args < 1)
-        js_error(J, "program name missing");
-
-    for (int n = 0; n < num_args; n++) {
-        js_getindex(J, -1, n);
-        if (js_isundefined(J, -1))
-            js_error(J, "program arguments must be strings");
-        args[n] = talloc_strdup(af, js_tostring(J, -1));
-        js_pop(J, 1); // args
-    }
-    args[num_args] = NULL;
-
-    mp_subprocess_detached(ctx->log, args);
-    push_success(J);
-}
-
 // args: none
 static void script_getpid(js_State *J)
 {
@@ -1296,7 +1265,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
-    AF_ENTRY(subprocess_detached, 1),
     FN_ENTRY(getpid, 0),
 
     FN_ENTRY(read_file, 2),
