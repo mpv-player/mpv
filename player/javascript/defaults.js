@@ -17,7 +17,7 @@ function new_cache() {
 }
 
 /**********************************************************************
- *  event handlers, property observers, idle, client messages, hooks
+ *  event handlers, property observers, idle, client messages, hooks, async
  *********************************************************************/
 var ehandlers = new_cache() // items of event-name: array of {maybe cb: fn}
 
@@ -136,6 +136,25 @@ mp.add_hook = function add_hook(name, pri, fn) {
     hooks.push(fn);
     // 50 (scripting docs default priority) maps to 0 (default in C API docs)
     return mp._hook_add(name, pri - 50, hooks.length);
+}
+
+// ----- async commands -----
+var async_callbacks = new_cache();  // items of id: fn
+var async_next_id = 1;
+
+mp.command_native_async = function command_native_async(node, cb) {
+    var id = async_next_id++;
+    async_callbacks[id] = cb;
+    return mp._command_native_async(id, node);
+}
+
+function async_command_handler(ev) {
+    var cb = async_callbacks[ev.id];
+    delete async_callbacks[ev.id];
+    if (ev.error)
+        cb(false, undefined, ev.error);
+    else
+        cb(true, ev.result, "");
 }
 
 /**********************************************************************
@@ -557,6 +576,7 @@ g.exit = function() { mp.keep_running = false };  // user-facing too
 mp.register_event("shutdown", g.exit);
 mp.register_event("property-change", notify_observer);
 mp.register_event("hook", run_hook);
+mp.register_event("command-reply", async_command_handler);
 mp.register_event("client-message", dispatch_message);
 mp.register_script_message("key-binding", dispatch_key_binding);
 

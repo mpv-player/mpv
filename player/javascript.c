@@ -710,6 +710,15 @@ static void script_command_native(js_State *J, void *af)
         pushnode(J, presult_node);
 }
 
+// args: async-command-id, native-command
+static void script__command_native_async(js_State *J, void *af)
+{
+    uint64_t id = jsL_checkuint64(J, 1);
+    struct mpv_node node;
+    makenode(af, &node, J, 2);
+    push_status(J, mpv_command_node_async(jclient(J), id, &node));
+}
+
 // args: none, result in millisec
 static void script_get_time_ms(js_State *J)
 {
@@ -1283,6 +1292,13 @@ static void script_wait_event(js_State *J)
         js_setproperty(J, -2, "hook_id");  // reply.hook_id (is a number)
         break;
     }
+
+    case MPV_EVENT_COMMAND_REPLY: {
+        mpv_event_command *cmd = event->data;
+        pushnode(J, &cmd->result);
+        js_setproperty(J, -2, "result");  // reply.result (mpv node)
+        break;
+    }
     }  // switch (event->event_id)
 
     assert(top == js_gettop(J) - 1);
@@ -1310,6 +1326,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(command, 1),
     FN_ENTRY(commandv, 0),
     AF_ENTRY(command_native, 2),
+    AF_ENTRY(_command_native_async, 2),
     FN_ENTRY(get_property_bool, 2),
     FN_ENTRY(get_property_number, 2),
     AF_ENTRY(get_property_native, 2),
