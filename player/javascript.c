@@ -920,31 +920,8 @@ static void script_get_user_path(js_State *J, void *af)
     js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
 }
 
-struct subprocess_cb_ctx {
-    struct mp_log *log;
-    void *talloc_ctx;
-    int64_t max_size;
-    bstr output;
-    bstr err;
-};
-
-static void subprocess_stdout(void *p, char *data, size_t size)
-{
-    struct subprocess_cb_ctx *ctx = p;
-    if (ctx->output.len < ctx->max_size)
-        bstr_xappend(ctx->talloc_ctx, &ctx->output, (bstr){data, size});
-}
-
-static void subprocess_stderr(void *p, char *data, size_t size)
-{
-    struct subprocess_cb_ctx *ctx = p;
-    if (ctx->err.len < ctx->max_size)
-        bstr_xappend(ctx->talloc_ctx, &ctx->err, (bstr){data, size});
-    MP_INFO(ctx, "%.*s", (int)size, data);
-}
-
-// args: client invocation args object. TODO: use common backend for js/lua
-static void af_subprocess_common(js_State *J, int detach, void *af)
+// args: client invocation args object
+static void script_subprocess_detached(js_State *J, void *af)
 {
     struct script_ctx *ctx = jctx(J);
     if (!js_isobject(J, 1))
@@ -969,52 +946,8 @@ static void af_subprocess_common(js_State *J, int detach, void *af)
     }
     args[num_args] = NULL;
 
-    if (detach) {
-        mp_subprocess_detached(ctx->log, args);
-        push_success(J);
-        return;
-    }
-
-    struct mp_cancel *cancel = NULL;
-    if (js_hasproperty(J, 1, "cancellable") ? js_toboolean(J, -1) : true)
-        cancel = ctx->mpctx->playback_abort;
-
-    int64_t max_size = js_hasproperty(J, 1, "max_size") ? js_tointeger(J, -1)
-                                                        : 16 * 1024 * 1024;
-    struct subprocess_cb_ctx cb_ctx = {
-        .log = ctx->log,
-        .talloc_ctx = af,
-        .max_size = max_size,
-    };
-
-    char *error = NULL;
-    int status = mp_subprocess(args, cancel, &cb_ctx, subprocess_stdout,
-                               subprocess_stderr, &error);
-
-    js_newobject(J); // res
-    if (error) {
-        js_pushstring(J, error); // res e
-        js_setproperty(J, -2, "error"); // res
-    }
-    js_pushnumber(J, status); // res s
-    js_setproperty(J, -2, "status"); // res
-    js_pushlstring(J, cb_ctx.output.start, cb_ctx.output.len); // res d
-    js_setproperty(J, -2, "stdout"); // res
-    js_pushlstring(J, cb_ctx.err.start, cb_ctx.err.len);
-    js_setproperty(J, -2, "stderr");
-    js_pushboolean(J, status == MP_SUBPROCESS_EKILLED_BY_US); // res b
-    js_setproperty(J, -2, "killed_by_us"); // res
-}
-
-// args: client invocation args object (same also for _detached)
-static void script_subprocess(js_State *J, void *af)
-{
-    af_subprocess_common(J, 0, af);
-}
-
-static void script_subprocess_detached(js_State *J, void *af)
-{
-    af_subprocess_common(J, 1, af);
+    mp_subprocess_detached(ctx->log, args);
+    push_success(J);
 }
 
 // args: none
@@ -1084,6 +1017,9 @@ static void pushnode(js_State *J, mpv_node *node)
     case MPV_FORMAT_INT64:  js_pushnumber(J, node->u.int64); break;
     case MPV_FORMAT_DOUBLE: js_pushnumber(J, node->u.double_); break;
     case MPV_FORMAT_FLAG:   js_pushboolean(J, node->u.flag); break;
+    case MPV_FORMAT_BYTE_ARRAY:
+        js_pushlstring(J, node->u.ba->data, node->u.ba->size);
+        break;
     case MPV_FORMAT_NODE_ARRAY:
         js_newarray(J);
         len = node->u.list->num;
@@ -1360,7 +1296,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
-    AF_ENTRY(subprocess, 1),
     AF_ENTRY(subprocess_detached, 1),
     FN_ENTRY(getpid, 0),
 
