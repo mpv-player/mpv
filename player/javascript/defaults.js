@@ -538,6 +538,20 @@ mp.osd_message = function osd_message(text, duration) {
     mp.commandv("show_text", text, Math.round(1000 * (duration || -1)));
 }
 
+mp.utils.subprocess = function subprocess(t) {
+    var cmd = { name: "subprocess", capture_stdout: true };
+    var new_names = { cancellable: "playback_only", max_size: "capture_size" };
+    for (var k in t)
+        cmd[new_names[k] || k] = t[k];
+
+    var rv = mp.command_native(cmd);
+    if (mp.last_error())  /* typically on missing/incorrect args */
+        rv = { error_string: mp.last_error(), status: -1 };
+    if (rv.error_string)
+        rv.error = rv.error_string;
+    return rv;
+}
+
 // ----- dump: like print, but expands objects/arrays recursively -----
 function replacer(k, v) {
     var t = typeof v;
