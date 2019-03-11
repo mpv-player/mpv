@@ -552,6 +552,11 @@ mp.utils.subprocess = function subprocess(t) {
     return rv;
 }
 
+mp.utils.subprocess_detached = function subprocess_detached(t) {
+    return mp.commandv.apply(null, ["run"].concat(t.args));
+}
+
+
 // ----- dump: like print, but expands objects/arrays recursively -----
 function replacer(k, v) {
     var t = typeof v;
