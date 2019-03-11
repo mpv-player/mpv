@@ -1425,6 +1425,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     XSetWMProtocols(x11->display, x11->window, protos, 1);
 
     x11->mouse_cursor_set = false;
+    x11->mouse_cursor_visible = true;
     vo_update_cursor(vo);
 
     if (x11->xim) {
