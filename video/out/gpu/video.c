@@ -121,6 +121,7 @@ struct tex_hook {
     const char *hook_tex[SHADER_MAX_HOOKS];
     const char *bind_tex[SHADER_MAX_BINDS];
     int components; // how many components are relevant (0 = same as input)
+    bool align_offset; // whether to align hooked tex with reference.
     void *priv; // this gets talloc_freed when the tex_hook is removed
     void (*hook)(struct gl_video *p, struct image img, // generates GLSL
                  struct gl_transform *trans, void *priv);
@@ -1482,6 +1483,25 @@ found:
             continue;
         }
 
+        const char *store_name = hook->save_tex ? hook->save_tex : name;
+        bool is_overwrite = strcmp(store_name, name) == 0;
+
+        // If user shader is set to align HOOKED with reference and fix its
+        // offset, it requires HOOKED to be resizable and overwrited.
+        if (is_overwrite && hook->align_offset) {
+            if (!trans) {
+                MP_ERR(p, "Hook tried to align unresizable texture %s!\n",
+                       name);
+                return img;
+            }
+
+            struct gl_transform align_off = identity_trans;
+            align_off.t[0] = trans->t[0];
+            align_off.t[1] = trans->t[1];
+
+            gl_transform_trans(align_off, &img.transform);
+        }
+
         if (!pass_hook_setup_binds(p, name, img, hook))
             continue;
 
@@ -1501,13 +1521,12 @@ found:
 
         struct ra_tex **tex = next_hook_tex(p);
         finish_pass_tex(p, tex, w, h);
-        const char *store_name = hook->save_tex ? hook->save_tex : name;
         struct image saved_img = image_wrap(*tex, img.type, comps);
 
         // If the texture we're saving overwrites the "current" texture, also
         // update the tex parameter so that the future loop cycles will use the
         // updated values, and export the offset
-        if (strcmp(store_name, name) == 0) {
+        if (is_overwrite) {
             if (!trans && !gl_transform_eq(hook_off, identity_trans)) {
                 MP_ERR(p, "Hook tried changing size of unscalable texture %s!\n",
                        name);
@@ -1515,8 +1534,17 @@ found:
             }
 
             img = saved_img;
-            if (trans)
+            if (trans) {
                 gl_transform_trans(hook_off, trans);
+
+                // If user shader is set to align HOOKED, the offset it produces
+                // is dynamic (with static resizing factor though).
+                // Align it with reference manually to get offset fixed.
+                if (hook->align_offset) {
+                    trans->t[0] = 0.0;
+                    trans->t[1] = 0.0;
+                }
+            }
         }
 
         saved_img_store(p, store_name, saved_img);
@@ -1955,6 +1983,7 @@ static bool add_user_hook(void *priv, struct gl_user_shader_hook hook)
     struct tex_hook texhook = {
         .save_tex = bstrdup0(copy, hook.save_tex),
         .components = hook.components,
+        .align_offset = hook.align_offset,
         .hook = user_hook,
         .cond = user_hook_cond,
         .priv = copy,

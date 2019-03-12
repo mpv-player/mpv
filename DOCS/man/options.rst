@@ -4572,12 +4572,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
         hook point can still cause that hook point to be saved, which has some
         minor overhead)
 
-    OFFSET <ox> <oy>
+    OFFSET <ox oy | ALIGN>
         Indicates a pixel shift (offset) introduced by this pass. These pixel
         offsets will be accumulated and corrected during the next scaling pass
         (``cscale`` or ``scale``). The default values are 0 0 which correspond
         to no shift. Note that offsets are ignored when not overwriting the
         hooked texture.
+
+        A special value of ``ALIGN`` will attempt to fix existing offset of
+        HOOKED by align it with reference. It requires HOOKED to be resizable
+        (see below). It works transparently with fragment shader. For compute
+        shader, the predefined ``texmap`` macro is required to handle coordinate
+        mapping.
 
     COMPONENTS <n>
         Specifies how many components of this pass's output are relevant and

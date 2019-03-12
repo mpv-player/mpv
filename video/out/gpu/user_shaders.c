@@ -170,6 +170,7 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
     *out = (struct gl_user_shader_hook){
         .pass_desc = bstr0("(unknown)"),
         .offset = identity_trans,
+        .align_offset = false,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
         .height = {{ SZEXP_VAR_H, { .varname = bstr0("HOOKED") }}},
         .cond = {{ SZEXP_CONST, { .cval = 1.0 }}},
@@ -221,13 +222,18 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
         }
 
         if (bstr_eatstart0(&line, "OFFSET")) {
-            float ox, oy;
-            if (bstr_sscanf(line, "%f %f", &ox, &oy) != 2) {
-                mp_err(log, "Error while parsing OFFSET!\n");
-                return false;
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "ALIGN")) {
+                out->align_offset = true;
+            } else {
+                float ox, oy;
+                if (bstr_sscanf(line, "%f %f", &ox, &oy) != 2) {
+                    mp_err(log, "Error while parsing OFFSET!\n");
+                    return false;
+                }
+                out->offset.t[0] = ox;
+                out->offset.t[1] = oy;
             }
-            out->offset.t[0] = ox;
-            out->offset.t[1] = oy;
             continue;
         }
 
