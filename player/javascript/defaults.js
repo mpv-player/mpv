@@ -144,8 +144,15 @@ var async_next_id = 1;
 
 mp.command_native_async = function command_native_async(node, cb) {
     var id = async_next_id++;
+    cb = cb || function dummy() {};
+    if (!mp._command_native_async(id, node)) {
+        var le = mp.last_error();
+        setTimeout(cb, 0, false, undefined, le);  /* callback async */
+        mp._set_last_error(le);
+        return undefined;
+    }
     async_callbacks[id] = cb;
-    return mp._command_native_async(id, node);
+    return id;
 }
 
 function async_command_handler(ev) {
@@ -155,6 +162,12 @@ function async_command_handler(ev) {
         cb(false, undefined, ev.error);
     else
         cb(true, ev.result, "");
+}
+
+mp.abort_async_command = function abort_async_command(id) {
+    // cb will be invoked regardless, possibly with the abort result
+    if (async_callbacks[id])
+        mp._abort_async_command(id);
 }
 
 /**********************************************************************
