@@ -1347,6 +1347,7 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_pos texcoord%d\n", name, id);
     GLSLHF("#define %s_size texture_size%d\n", name, id);
     GLSLHF("#define %s_rot texture_rot%d\n", name, id);
+    GLSLHF("#define %s_off texture_off%d\n", name, id);
     GLSLHF("#define %s_pt pixel_size%d\n", name, id);
     GLSLHF("#define %s_map texmap%d\n", name, id);
     GLSLHF("#define %s_mul %f\n", name, img.multiplier);
