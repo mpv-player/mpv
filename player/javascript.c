@@ -718,6 +718,13 @@ static void script__command_native_async(js_State *J, void *af)
     push_status(J, mpv_command_node_async(jclient(J), id, &node));
 }
 
+// args: async-command-id
+static void script__abort_async_command(js_State *J)
+{
+    mpv_abort_async_command(jclient(J), jsL_checkuint64(J, 1));
+    push_success(J);
+}
+
 // args: none, result in millisec
 static void script_get_time_ms(js_State *J)
 {
@@ -1232,6 +1239,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(commandv, 0),
     AF_ENTRY(command_native, 2),
     AF_ENTRY(_command_native_async, 2),
+    FN_ENTRY(_abort_async_command, 1),
     FN_ENTRY(get_property_bool, 2),
     FN_ENTRY(get_property_number, 2),
     AF_ENTRY(get_property_native, 2),
