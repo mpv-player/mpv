@@ -340,8 +340,10 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     switch (event->event_id) {
     case MPV_EVENT_SHUTDOWN: {
         #if HAVE_MACOS_COCOA_CB
-        if ([(Application *)NSApp cocoaCB].isShuttingDown)
+        if ([(Application *)NSApp cocoaCB].isShuttingDown) {
+            _ctx = nil;
             return;
+        }
         #endif
         mpv_destroy(_ctx);
         _ctx = nil;
