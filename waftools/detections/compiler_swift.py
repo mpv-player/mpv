@@ -23,6 +23,9 @@ def __add_swift_flags(ctx):
     if major >= 3 and minor >= 1 or major >= 4:
         ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "3" ])
 
+    if ctx.is_debug_build():
+        ctx.env.SWIFT_FLAGS.append("-g")
+
     if ctx.is_optimization():
         ctx.env.SWIFT_FLAGS.append("-O")
 
