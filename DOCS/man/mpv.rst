@@ -555,7 +555,9 @@ command line override either. The syntax of the configuration files is
 that work without values can be enabled by setting them to *yes* and disabled by
 setting them to *no*. Even suboptions can be specified in this way.
 
-.. admonition:: Example configuration file
+Run ``mpv --list-options`` for a list of all mpv.conf/CLI options.
+
+.. admonition:: Example configuration file:
 
     ::
 
