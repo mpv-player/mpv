@@ -71,6 +71,7 @@ enum dither_algo {
     DITHER_NONE = 0,
     DITHER_FRUIT,
     DITHER_ORDERED,
+    DITHER_ERROR_DIFFUSION,
 };
 
 enum alpha_mode {
@@ -131,6 +132,7 @@ struct gl_video_opts {
     int dither_size;
     int temporal_dither;
     int temporal_dither_period;
+    char *error_diffusion;
     char *fbo_format;
     int alpha_mode;
     int use_rectangle;

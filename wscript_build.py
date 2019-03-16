@@ -433,6 +433,7 @@ def build(ctx):
         ( "video/out/filter_kernels.c" ),
         ( "video/out/gpu/context.c" ),
         ( "video/out/gpu/d3d11_helpers.c",       "d3d11 || egl-angle-win32" ),
+        ( "video/out/gpu/error_diffusion.c" ),
         ( "video/out/gpu/hwdec.c" ),
         ( "video/out/gpu/lcms.c" ),
         ( "video/out/gpu/libmpv_gpu.c" ),
