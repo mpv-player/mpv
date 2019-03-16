@@ -4346,9 +4346,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Used in ``--dither=fruit`` mode only.
 
-``--dither=<fruit|ordered|no>``
+``--dither=<fruit|ordered|error-diffusion|no>``
     Select dithering algorithm (default: fruit). (Normally, the
     ``--dither-depth`` option controls whether dithering is enabled.)
+
+    The ``error-diffusion`` option requires compute shader support. It also
+    requires large amount of shared memory to run, the size of which depends on
+    both the kernel (see ``--error-diffusion`` option below) and the height of
+    video window. It will fallback to ``fruit`` dithering if there is no enough
+    shared memory to run the shader.
 
 ``--temporal-dither``
     Enable temporal dithering. (Only active if dithering is enabled in
@@ -4361,6 +4367,29 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Determines how often the dithering pattern is updated when
     ``--temporal-dither`` is in use. 1 (the default) will update on every video
     frame, 2 on every other frame, etc.
+
+``--error-diffusion=<kernel>``
+    The error diffusion kernel to use when ``--dither=error-diffusion`` is set.
+
+    ``simple``
+        Propagate error to only two adjacent pixels. Fastest but low quality.
+
+    ``sierra-lite``
+        Fast with reasonable quality. This is the default.
+
+    ``floyd-steinberg``
+        Most notable error diffusion kernel.
+
+    ``atkinson``
+        Looks different from other kernels because only fraction of errors will
+        be propagated during dithering. A typical use case of this kernel is
+        saving dithered screenshot (in window mode). This kernel produces
+        slightly smaller file, with still reasonable dithering quality.
+
+    There are other kernels (use ``--error-diffusion=help`` to list) but most of
+    them are much slower and demanding even larger amount of shared memory.
+    Among these kernels, ``burkes`` achieves a good balance between performance
+    and quality, and probably is the one you want to try first.
 
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,

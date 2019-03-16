@@ -38,6 +38,7 @@
 #include "stream/stream.h"
 #include "video_shaders.h"
 #include "user_shaders.h"
+#include "error_diffusion.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
 #include "video/out/dither.h"
@@ -211,6 +212,7 @@ struct gl_video {
     struct ra_tex *integer_tex[4];
     struct ra_tex *indirect_tex;
     struct ra_tex *blend_subs_tex;
+    struct ra_tex *error_diffusion_tex;
     struct ra_tex *screen_tex;
     struct ra_tex *output_tex;
     struct ra_tex *vdpau_deinterleave_tex[2];
@@ -295,6 +297,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
+    .error_diffusion = "sierra-lite",
     .fbo_format = "auto",
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
@@ -333,6 +336,9 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 
 static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param);
+
+static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
+                                        struct bstr name, struct bstr param);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 
@@ -402,10 +408,13 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE("dither", dither_algo, 0,
                    ({"fruit", DITHER_FRUIT},
                     {"ordered", DITHER_ORDERED},
+                    {"error-diffusion", DITHER_ERROR_DIFFUSION},
                     {"no", DITHER_NONE})),
         OPT_INTRANGE("dither-size-fruit", dither_size, 0, 2, 8),
         OPT_FLAG("temporal-dither", temporal_dither, 0),
         OPT_INTRANGE("temporal-dither-period", temporal_dither_period, 0, 1, 128),
+        OPT_STRING_VALIDATE("error-diffusion", error_diffusion, 0,
+                            validate_error_diffusion_opt),
         OPT_CHOICE("alpha", alpha_mode, 0,
                    ({"no", ALPHA_NO},
                     {"yes", ALPHA_YES},
@@ -544,6 +553,7 @@ static void uninit_rendering(struct gl_video *p)
 
     ra_tex_free(p->ra, &p->indirect_tex);
     ra_tex_free(p->ra, &p->blend_subs_tex);
+    ra_tex_free(p->ra, &p->error_diffusion_tex);
     ra_tex_free(p->ra, &p->screen_tex);
     ra_tex_free(p->ra, &p->output_tex);
 
@@ -2595,6 +2605,51 @@ static void pass_dither(struct gl_video *p)
     if (p->opts.dither_depth < 0 || p->opts.dither_algo == DITHER_NONE)
         return;
 
+    if (p->opts.dither_algo == DITHER_ERROR_DIFFUSION) {
+        const struct error_diffusion_kernel *kernel =
+            mp_find_error_diffusion_kernel(p->opts.error_diffusion);
+        int o_w = p->dst_rect.x1 - p->dst_rect.x0,
+            o_h = p->dst_rect.y1 - p->dst_rect.y0;
+
+        int shmem_req = mp_ef_compute_shared_memory_size(kernel, o_h);
+        if (shmem_req > p->ra->max_shmem) {
+            MP_WARN(p, "Fallback to dither=fruit because there is no enough "
+                       "shared memory (%d/%d).\n",
+                       shmem_req, (int)p->ra->max_shmem);
+            p->opts.dither_algo = DITHER_FRUIT;
+        } else {
+            finish_pass_tex(p, &p->screen_tex, o_w, o_h);
+
+            struct image img = image_wrap(p->screen_tex, PLANE_RGB, p->components);
+
+            // 1024 is minimal required number of invocation allowed in single
+            // work group in OpenGL. Use it for maximal performance.
+            int block_size = MPMIN(1024, o_h);
+
+            pass_describe(p, "dither=error-diffusion (kernel=%s, depth=%d)",
+                             kernel->name, dst_depth);
+
+            p->pass_compute = (struct compute_info) {
+                .active = true,
+                .threads_w = block_size,
+                .threads_h = 1,
+                .directly_writes = true
+            };
+
+            int tex_id = pass_bind(p, img);
+
+            pass_error_diffusion(p->sc, kernel, tex_id, o_w, o_h,
+                                 dst_depth, block_size);
+
+            finish_pass_tex(p, &p->error_diffusion_tex, o_w, o_h);
+
+            img = image_wrap(p->error_diffusion_tex, PLANE_RGB, p->components);
+            copy_image(p, &(int){0}, img);
+
+            return;
+        }
+    }
+
     if (!p->dither_texture) {
         MP_VERBOSE(p, "Dither to %d.\n", dst_depth);
 
@@ -3632,6 +3687,12 @@ static void check_gl_features(struct gl_video *p)
                    "available! See your FBO format configuration!\n");
     }
 
+    if (!have_compute && p->opts.dither_algo == DITHER_ERROR_DIFFUSION) {
+        MP_WARN(p, "Disabling error diffusion dithering because compute shader "
+                   "was not supported. Fallback to dither=fruit instead.\n");
+        p->opts.dither_algo = DITHER_FRUIT;
+    }
+
     bool have_compute_peak = have_compute && have_ssbo;
     if (!have_compute_peak && p->opts.tone_map.compute_peak >= 0) {
         int msgl = p->opts.tone_map.compute_peak == 1 ? MSGL_WARN : MSGL_V;
@@ -3663,6 +3724,7 @@ static void check_gl_features(struct gl_video *p)
             .dither_algo = p->opts.dither_algo,
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
+            .error_diffusion = p->opts.error_diffusion,
             .temporal_dither = p->opts.temporal_dither,
             .temporal_dither_period = p->opts.temporal_dither_period,
             .tex_pad_x = p->opts.tex_pad_x,
@@ -4007,6 +4069,29 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
             mp_info(log, "    %s\n", mp_filter_windows[n].name);
         if (s[0])
             mp_fatal(log, "No window named '%s' found!\n", s);
+    }
+    return r;
+}
+
+static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
+                                        struct bstr name, struct bstr param)
+{
+    char s[20] = {0};
+    int r = 1;
+    if (bstr_equals0(param, "help")) {
+        r = M_OPT_EXIT;
+    } else {
+        snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
+        const struct error_diffusion_kernel *k = mp_find_error_diffusion_kernel(s);
+        if (!k)
+            r = M_OPT_INVALID;
+    }
+    if (r < 1) {
+        mp_info(log, "Available error diffusion kernels:\n");
+        for (int n = 0; mp_error_diffusion_kernels[n].name; n++)
+            mp_info(log, "    %s\n", mp_error_diffusion_kernels[n].name);
+        if (s[0])
+            mp_fatal(log, "No error diffusion kernel named '%s' found!\n", s);
     }
     return r;
 }
