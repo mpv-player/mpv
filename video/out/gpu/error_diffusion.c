@@ -67,8 +67,8 @@ int mp_ef_compute_shared_memory_size(const struct error_diffusion_kernel *k,
     int shifted_columns = compute_rightmost_shifted_column(k) + 1;
 
     // The shared memory is an array of size rows*shifted_columns. Each element
-    // is three int, for each RGB component.
-    return rows * shifted_columns * 3 * 4;
+    // is a single uint for three RGB component.
+    return rows * shifted_columns * 4;
 }
 
 void pass_error_diffusion(struct gl_shader_cache *sc,
@@ -104,18 +104,13 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
     int ring_buffer_columns = compute_rightmost_shifted_column(k) + 1;
     int ring_buffer_size = ring_buffer_rows * ring_buffer_columns;
 
-    const char *rgb = "rgb";
-
     // Defines the ring buffer in shared memory.
-    for (int comp = 0; comp < 3; comp++)
-        GLSLH("shared int err_%c[%d];\n", rgb[comp], ring_buffer_size);
+    GLSLH("shared uint err_rgb8[%d];\n", ring_buffer_size);
 
     // Initialize the ring buffer.
-    GLSL("for (int i = int(gl_LocalInvocationIndex); i < %d; i += %d) {\n",
+    GLSL("for (int i = int(gl_LocalInvocationIndex); i < %d; i += %d) ",
          ring_buffer_size, block_size);
-    for (int comp = 0; comp < 3; comp++)
-        GLSL("err_%c[i] = 0;\n", rgb[comp]);
-    GLSL("}\n");
+    GLSL("err_rgb8[i] = 0;\n");
 
     GLSL("for (int block_id = 0; block_id < %d; ++block_id) {\n", blocks);
 
@@ -141,54 +136,87 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
 
     // The dithering will quantize pixel value into multiples of 1/dither_quant.
     int dither_quant = (1 << depth) - 1;
-    // The absolute value of the errors to propagate is less than 1/dither_quant,
-    // multiply by dither_quant24 to have them processed with int in 24 bit
-    // precision.
-    double dither_quant24 = (double)(1 << 24) * dither_quant;
+
+    // We encode errors in RGB components into a single 32-bit unsigned integer.
+    // The error we propagate from the current pixel is in range of
+    // [-0.5 / dither_quant, 0.5 / dither_quant]. While not quite obvious, the
+    // sum of all errors been propagated into a pixel is also in the same range.
+    // It's possible to map errors in this range into [-127, 127], and use an
+    // unsigned 8-bit integer to store it (using standard two's complement).
+    // The three 8-bit unsigned integers can then be encoded into a single
+    // 32-bit unsigned integer, with two 4-bit padding to prevent addition
+    // operation overflows affecting other component. There are at most 12
+    // addition operations on each pixel, so 4-bit padding should be enough.
+    // The overflow from R component will be discarded.
+    //
+    // The following figure is how the encoding looks like.
+    //
+    //     +------------------------------------+
+    //     |RRRRRRRR|0000|GGGGGGGG|0000|BBBBBBBB|
+    //     +------------------------------------+
+    //
+
+    // The bitshift position for R and G component.
+    int bitshift_r = 24, bitshift_g = 12;
+    // The multiplier we use to map [-0.5, 0.5] to [-127, 127].
+    int uint8_mul = 127 * 2;
 
     // Adding the error previously propagated into current pixel, and clear it
     // in the buffer.
-    GLSL("pix += vec3(err_r[idx], err_g[idx], err_b[idx]) / %f;\n", dither_quant24);
-    for (int comp = 0; comp < 3; comp++)
-        GLSL("err_%c[idx] = 0;\n", rgb[comp]);
-
-    // Dithering to depth.
-    GLSL("vec3 dithered = floor(pix * %d.0 + 0.5) / %d.0;\n", dither_quant, dither_quant);
-    GLSL("ivec3 err = ivec3((pix - dithered) * %f + 0.5);\n", dither_quant24);
+    GLSL("uint err_u32 = err_rgb8[idx] + %uu;\n",
+         (128u << bitshift_r) | (128u << bitshift_g) | 128u);
+    GLSL("pix = pix * %d.0 + vec3("
+         "int((err_u32 >> %d) & 255u) - 128,"
+         "int((err_u32 >> %d) & 255u) - 128,"
+         "int( err_u32        & 255u) - 128"
+         ") / %d.0;\n", dither_quant, bitshift_r, bitshift_g, uint8_mul);
+    GLSL("err_rgb8[idx] = 0;\n");
 
     // Write the dithered pixel.
-    GLSL("imageStore(out_image, ivec2(x, y), vec4(dithered, 0.0));\n");
+    GLSL("vec3 dithered = round(pix);\n");
+    GLSL("imageStore(out_image, ivec2(x, y), vec4(dithered / %d.0, 0.0));\n",
+         dither_quant);
 
-    GLSL("int nidx;\n");
-    for (int y = 0; y <= EF_MAX_DELTA_Y; y++) {
-        for (int x = EF_MIN_DELTA_X; x <= EF_MAX_DELTA_X; x++) {
-            if (k->pattern[y][x - EF_MIN_DELTA_X] != 0) {
+    GLSL("vec3 err_divided = (pix - dithered) * %d.0 / %d.0;\n",
+         uint8_mul, k->divisor);
+    GLSL("ivec3 tmp;\n");
+
+    // Group error propagation with same weight factor together, in order to
+    // reduce the number of annoying error encoding.
+    for (int dividend = 1; dividend <= k->divisor; dividend++) {
+        bool err_assigned = false;
+
+        for (int y = 0; y <= EF_MAX_DELTA_Y; y++) {
+            for (int x = EF_MIN_DELTA_X; x <= EF_MAX_DELTA_X; x++) {
+                if (k->pattern[y][x - EF_MIN_DELTA_X] != dividend)
+                    continue;
+
+                if (!err_assigned) {
+                    err_assigned = true;
+
+                    GLSL("tmp = ivec3(round(err_divided * %d.0));\n", dividend);
+
+                    GLSL("err_u32 = "
+                         "(uint(tmp.r & 255) << %d)|"
+                         "(uint(tmp.g & 255) << %d)|"
+                         " uint(tmp.b & 255);\n",
+                         bitshift_r, bitshift_g);
+                }
+
                 int shifted_x = x + y * k->shift;
 
                 // Unlike the right border, errors propagated out from left
                 // border will remain in the ring buffer. This will produce
                 // visible artifacts near the left border, especially for
                 // shift=3 kernels.
-                bool left_border_check = x < 0;
-
-                if (left_border_check)
-                    GLSL("if (x >= %d) {\n", -x);
+                if (x < 0)
+                    GLSL("if (x >= %d) ", -x);
 
                 // Calculate the new position in the ring buffer to propagate
                 // the error into.
                 int ring_buffer_delta = shifted_x * ring_buffer_rows + y;
-                GLSL("nidx = (idx + %d) %% %d;\n", ring_buffer_delta, ring_buffer_size);
-
-                // Propagate the error with atomic operation.
-                for (int comp = 0; comp < 3; comp++) {
-                    GLSL("atomicAdd(err_%c[nidx], err.%c * %d / %d);\n",
-                         rgb[comp], rgb[comp],
-                         k->pattern[y][x - EF_MIN_DELTA_X],
-                         k->divisor);
-                }
-
-                if (left_border_check)
-                    GLSL("}\n");
+                GLSL("atomicAdd(err_rgb8[(idx + %d) %% %d], err_u32);\n",
+                     ring_buffer_delta, ring_buffer_size);
             }
         }
     }
