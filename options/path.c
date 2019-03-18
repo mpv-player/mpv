@@ -279,8 +279,20 @@ char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
     have_separator = endchar1 == '/';
 #endif
 
-    return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
-                           have_separator ? "" : "/", BSTR_P(p2));
+    char *path = talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
+                                 have_separator ? "" : "/", BSTR_P(p2));
+#if HAVE_DOS_PATHS
+    struct bstr p = bstr0(path);
+    test = (p.len >= 2 && p.start[1] == ':') || p.start[0] == '\\';
+    if (test) {
+        char *pos = strchr(path, '/');
+        while (pos) {
+            *pos = '\\';
+            pos = strchr(path, '/');
+        }
+    }
+#endif
+    return path;
 }
 
 char *mp_path_join(void *talloc_ctx, const char *p1, const char *p2)
