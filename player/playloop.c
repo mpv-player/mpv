@@ -1060,7 +1060,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->playing_msg_shown = true;
         mp_wakeup_core(mpctx);
         mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
-        MP_VERBOSE(mpctx, "playback restart complete\n");
+        MP_VERBOSE(mpctx, "playback restart complete @ %f\n", mpctx->playback_pts);
     }
 }
 
