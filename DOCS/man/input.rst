@@ -181,8 +181,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     Multiple flags can be combined, e.g.: ``absolute+keyframes``.
 
-    By default, ``keyframes`` is used for relative seeks, and ``exact`` is used
-    for absolute seeks.
+    By default, ``keyframes`` is used for ``relative``, ``relative-percent``,
+    and ``absolute-percent`` seeks, while ``exact`` is used for ``absolute``
+    seeks.
 
     Before mpv 0.9, the ``keyframes`` and ``exact`` flags had to be passed as
     3rd parameter (essentially using a space instead of ``+``). The 3rd
