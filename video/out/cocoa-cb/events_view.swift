@@ -135,14 +135,14 @@ class EventsView: NSView {
         if mpv.getBoolProperty("input-cursor") {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
-        cocoaCB.window.hideTitleBar()
+        cocoaCB.titleBar.hide()
     }
 
     override func mouseMoved(with event: NSEvent) {
         if mpv != nil && mpv.getBoolProperty("input-cursor") {
             signalMouseMovement(event)
         }
-        cocoaCB.window.showTitleBar()
+        cocoaCB.titleBar.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -260,7 +260,7 @@ class EventsView: NSView {
         let menuBarHeight = NSApp.mainMenu!.menuBarHeight
 
         if cocoaCB.window.isInFullscreen && (menuBarHeight > 0) {
-            topMargin = cocoaCB.window.titleBarHeight + 1 + menuBarHeight
+            topMargin = TitleBar.height + 1 + menuBarHeight
         }
 
         guard var vF = window?.screen?.frame else { return false }
@@ -272,8 +272,8 @@ class EventsView: NSView {
 
         var clippedBounds = bounds.intersection(vFV)
         if !cocoaCB.window.isInFullscreen {
-            clippedBounds.origin.y += cocoaCB.window.titleBarHeight
-            clippedBounds.size.height -= cocoaCB.window.titleBarHeight
+            clippedBounds.origin.y += TitleBar.height
+            clippedBounds.size.height -= TitleBar.height
         }
         return clippedBounds.contains(pt)
     }

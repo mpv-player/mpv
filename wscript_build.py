@@ -168,6 +168,7 @@ def build(ctx):
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
+            ( "video/out/cocoa-cb/title_bar.swift" ),
             ( "video/out/cocoa_cb_common.swift" ),
         ]
 

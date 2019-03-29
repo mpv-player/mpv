@@ -22,6 +22,7 @@ class CocoaCB: NSObject {
 
     var mpv: MPVHelper!
     var window: Window!
+    var titleBar: TitleBar!
     var view: EventsView!
     var layer: VideoLayer!
     var link: CVDisplayLink?
@@ -100,6 +101,8 @@ class CocoaCB: NSObject {
         window.keepAspect = Bool(opts.keepaspect_window)
         window.title = title
         window.border = Bool(opts.border)
+
+        titleBar = TitleBar(frame: wr, window: window, cocoaCB: self)
 
         window.isRestorable = false
         window.makeMain()
@@ -512,7 +515,7 @@ class CocoaCB: NSObject {
             }
         case "macos-title-bar-style":
             if let data = MPVHelper.mpvStringArrayToString(property.data) {
-                window.setTitleBarStyle(data)
+                titleBar.setStyle(data)
             }
         default:
             break
