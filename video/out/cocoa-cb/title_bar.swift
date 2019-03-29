@@ -62,12 +62,14 @@ class TitleBar: NSVisualEffectView {
         autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
         systemBar.alphaValue = 0
         state = .followsWindowActiveState
+        wantsLayer = true
 
         window.contentView!.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
         set(appearance: Int(mpv.macOpts!.macos_title_bar_appearance))
         set(material: Int(mpv.macOpts!.macos_title_bar_material))
+        set(color: mpv.macOpts!.macos_title_bar_color)
     }
 
     // catch these events so they are not propagated to the underlying view
@@ -105,6 +107,20 @@ class TitleBar: NSVisualEffectView {
             self.material = materialFrom(string: String(material as! Int))
         } else {
             self.material = materialFrom(string: material as! String)
+        }
+    }
+
+    func set(color: Any) {
+        if color is String {
+            layer?.backgroundColor = NSColor(hex: color as! String).cgColor
+        } else {
+            let col = color as! m_color
+            let red   = CGFloat(col.r)/255
+            let green = CGFloat(col.g)/255
+            let blue  = CGFloat(col.b)/255
+            let alpha = CGFloat(col.a)/255
+            layer?.backgroundColor = NSColor(calibratedRed: red, green: green,
+                                             blue: blue, alpha: alpha).cgColor
         }
     }
 

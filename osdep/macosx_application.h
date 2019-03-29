@@ -19,11 +19,13 @@
 #define MPV_MACOSX_APPLICATION
 
 #include "osdep/macosx_menubar.h"
+#include "options/m_option.h"
 
 struct macos_opts {
     int macos_title_bar_style;
     int macos_title_bar_appearance;
     int macos_title_bar_material;
+    struct m_color macos_title_bar_color;
     int macos_fs_animation_duration;
     int cocoa_cb_sw_renderer;
 };
