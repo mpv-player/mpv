@@ -4842,17 +4842,68 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
-``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
-    Sets the styling of the title bar (default: dark).
-    OS X and cocoa-cb only
+``--macos-title-bar-appearance=<appearance>``
+    Sets the appearance of the title bar (default: auto). Not all combinations
+    of appearances and ``--macos-title-bar-material`` materials make sense or
+    are unique. Appearances that are not supported by you current macOS version
+    fall back to the default value.
+    macOS and cocoa-cb only
 
-    :dark:        Dark title bar with vibrancy, a subtle blurring effect that
-                  dynamically blends the background (Video) into the title bar.
-    :ultradark:   Darker title bar with vibrancy (like QuickTime Player).
-    :light:       Bright title bar with vibrancy.
-    :mediumlight: Less bright title bar with vibrancy.
-    :auto:        Detects the system settings and sets the title bar styling
-                  appropriately, either ultradark or mediumlight.
+    ``<appearance>`` can be one of the following:
+
+    :auto:                     Detects the system settings and sets the title
+                               bar appearance appropriately. On macOS 10.14 it
+                               also detects run time changes.
+    :aqua:                     The standard macOS Light appearance.
+    :darkAqua:                 The standard macOS Dark appearance. (macOS 10.14+)
+    :vibrantLight:             Light vibrancy appearance with.
+    :vibrantDark:              Dark vibrancy appearance with.
+    :aquaHighContrast:         Light Accessibility appearance. (macOS 10.14+)
+    :darkAquaHighContrast:     Dark Accessibility appearance. (macOS 10.14+)
+    :vibrantLightHighContrast: Light vibrancy Accessibility appearance.
+                               (macOS 10.14+)
+    :vibrantDarkHighContrast:  Dark vibrancy Accessibility appearance.
+                               (macOS 10.14+)
+
+``--macos-title-bar-material=<material>``
+    Sets the material of the title bar (default: titlebar). All deprecated
+    materials should not be used on macOS 10.14+ because their functionality
+    is not guaranteed. Not all combinations of materials and
+    ``--macos-title-bar-appearance`` appearances make sense or are unique.
+    Materials that are not supported by you current macOS version fall back to
+    the default value.
+    macOS and cocoa-cb only
+
+    ``<material>`` can be one of the following:
+
+    :titlebar:              The standard macOS titel bar material.
+    :selection:             The standard macOS selection material.
+    :menu:                  The standard macOS menu material. (macOS 10.11+)
+    :popover:               The standard macOS popover material. (macOS 10.11+)
+    :sidebar:               The standard macOS sidebar material. (macOS 10.11+)
+    :headerView:            The standard macOS header view material.
+                            (macOS 10.14+)
+    :sheet:                 The standard macOS sheet material. (macOS 10.14+)
+    :windowBackground:      The standard macOS window background material.
+                            (macOS 10.14+)
+    :hudWindow:             The standard macOS hudWindow material. (macOS 10.14+)
+    :fullScreen:            The standard macOS full screen material.
+                            (macOS 10.14+)
+    :toolTip:               The standard macOS tool tip material. (macOS 10.14+)
+    :contentBackground:     The standard macOS content background material.
+                            (macOS 10.14+)
+    :underWindowBackground: The standard macOS under window background material.
+                            (macOS 10.14+)
+    :underPageBackground:   The standard macOS under page background material.
+                            (deprecated in macOS 10.14+)
+    :dark:                  The standard macOS dark material.
+                            (deprecated in macOS 10.14+)
+    :light:                 The standard macOS light material.
+                            (macOS 10.14+)
+    :mediumLight:           The standard macOS mediumLight material.
+                            (macOS 10.11+, deprecated in macOS 10.14+)
+    :ultraDark:             The standard macOS ultraDark material.
+                            (macOS 10.11+ deprecated in macOS 10.14+)
 
 ``--macos-fs-animation-duration=<default|0-1000>``
     Sets the fullscreen resize animation duration in ms (default: default).

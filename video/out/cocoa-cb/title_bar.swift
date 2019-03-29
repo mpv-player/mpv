@@ -34,6 +34,24 @@ class TitleBar: NSVisualEffectView {
         get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindowButton]).flatMap { cocoaCB.window.standardWindowButton($0) } }
     }
 
+    override var material: NSVisualEffectView.Material {
+        get { return super.material }
+        set {
+            super.material = newValue
+            // fix for broken deprecated materials
+            if material == .light || material == .dark {
+                state = .active
+            } else if #available(macOS 10.11, *),
+                      material == .mediumLight || material == .ultraDark
+            {
+                state = .active
+            } else {
+                state = .followsWindowActiveState
+            }
+
+        }
+    }
+
     convenience init(frame: NSRect, window: NSWindow, cocoaCB ccb: CocoaCB) {
         let f = NSMakeRect(0, frame.size.height - TitleBar.height,
                            frame.size.width, TitleBar.height)
@@ -43,11 +61,13 @@ class TitleBar: NSVisualEffectView {
         blendingMode = .withinWindow
         autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
         systemBar.alphaValue = 0
+        state = .followsWindowActiveState
 
         window.contentView!.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        setStyle(Int(mpv.macOpts!.macos_title_bar_style))
+        set(appearance: Int(mpv.macOpts!.macos_title_bar_appearance))
+        set(material: Int(mpv.macOpts!.macos_title_bar_material))
     }
 
     // catch these events so they are not propagated to the underlying view
@@ -72,55 +92,19 @@ class TitleBar: NSVisualEffectView {
         }
     }
 
-    func setStyle(_ style: Any) {
-        var effect: String
-
-        if style is Int {
-            switch style as! Int {
-            case 4:
-                effect = "auto"
-            case 3:
-                effect = "mediumlight"
-            case 2:
-                effect = "light"
-            case 1:
-                effect = "ultradark"
-            case 0: fallthrough
-            default:
-                effect = "dark"
-            }
+    func set(appearance: Any) {
+        if appearance is Int {
+            window!.appearance = appearanceFrom(string: String(appearance as! Int))
         } else {
-            effect = style as! String
+            window!.appearance = appearanceFrom(string: appearance as! String)
         }
+    }
 
-        switch effect {
-        case "auto":
-             if #available(macOS 10.14, *) {
-                 cocoaCB.window.appearance = nil
-                 material = .titlebar
-                 state = .followsWindowActiveState
-             } else {
-                 let systemStyle = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
-                 effect = systemStyle == nil ? "mediumlight" : "ultradark"
-                 setStyle(effect)
-             }
-        case "mediumlight":
-            cocoaCB.window.appearance = NSAppearance(named: NSAppearanceNameVibrantLight)
-            material = .titlebar
-            state = .followsWindowActiveState
-        case "light":
-            cocoaCB.window.appearance = NSAppearance(named: NSAppearanceNameVibrantLight)
-            material = .light
-            state = .active
-        case "ultradark":
-            cocoaCB.window.appearance = NSAppearance(named: NSAppearanceNameVibrantDark)
-            material = .titlebar
-            state = .followsWindowActiveState
-        case "dark": fallthrough
-        default:
-            cocoaCB.window.appearance = NSAppearance(named: NSAppearanceNameVibrantDark)
-            material = .dark
-            state = .active
+    func set(material: Any) {
+        if material is Int {
+            self.material = materialFrom(string: String(material as! Int))
+        } else {
+            self.material = materialFrom(string: material as! String)
         }
     }
 
@@ -166,5 +150,76 @@ class TitleBar: NSVisualEffectView {
                                                  selector: #selector(hide),
                                                    object: nil)
         perform(#selector(hide), with: nil, afterDelay: 0.5)
+    }
+
+    func appearanceFrom(string: String) -> NSAppearance? {
+        switch string {
+        case "1", "aqua":
+            return NSAppearance(named: NSAppearanceNameAqua)
+        case "3", "vibrantLight":
+            return NSAppearance(named: NSAppearanceNameVibrantLight)
+        case "4", "vibrantDark":
+            return NSAppearance(named: NSAppearanceNameVibrantDark)
+        default: break
+        }
+
+        if #available(macOS 10.14, *) {
+            switch string {
+            case "2", "darkAqua":
+                return NSAppearance(named: NSAppearanceNameDarkAqua)
+            case "5", "aquaHighContrast":
+                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastAqua)
+            case "6", "darkAquaHighContrast":
+                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastDarkAqua)
+            case "7", "vibrantLightHighContrast":
+                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastVibrantLight)
+            case "8", "vibrantDarkHighContrast":
+                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastVibrantDark)
+            case "0", "auto": fallthrough
+            default:
+                return nil
+            }
+        }
+
+        let style = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+        return appearanceFrom(string: style == nil ? "aqua" : "vibrantDark")
+    }
+
+    func materialFrom(string: String) -> NSVisualEffectView.Material {
+        switch string {
+        case "1",  "selection": return .selection
+        case "0",  "titlebar":  return .titlebar
+        case "14", "dark":      return .dark
+        case "15", "light":     return .light
+        default:                break
+        }
+
+        if #available(macOS 10.11, *) {
+            switch string {
+            case "2,", "menu":          return .menu
+            case "3",  "popover":       return .popover
+            case "4",  "sidebar":       return .sidebar
+            case "16", "mediumLight":   return .mediumLight
+            case "17", "ultraDark":     return .ultraDark
+            default:                    break
+            }
+        }
+
+        if #available(macOS 10.14, *) {
+            switch string {
+            case "5,", "headerView":            return .headerView
+            case "6",  "sheet":                 return .sheet
+            case "7",  "windowBackground":      return .windowBackground
+            case "8",  "hudWindow":             return .hudWindow
+            case "9",  "fullScreen":            return .fullScreenUI
+            case "10", "toolTip":               return .toolTip
+            case "11", "contentBackground":     return .contentBackground
+            case "12", "underWindowBackground": return .underWindowBackground
+            case "13", "underPageBackground":   return .underPageBackground
+            default:                            break
+            }
+        }
+
+        return .titlebar
     }
 }
