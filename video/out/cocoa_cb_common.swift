@@ -516,6 +516,10 @@ class CocoaCB: NSObject {
             if let data = MPVHelper.mpvStringArrayToString(property.data) {
                 titleBar.set(material: data)
             }
+        case "macos-title-bar-color":
+            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+                titleBar.set(color: data)
+            }
         default:
             break
         }

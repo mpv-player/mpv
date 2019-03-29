@@ -4905,6 +4905,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     :ultraDark:             The standard macOS ultraDark material.
                             (macOS 10.11+ deprecated in macOS 10.14+)
 
+``--macos-title-bar-color=<color>``
+    Sets the color of the title bar (default: completely transparent). Is
+    influenced by ``--macos-title-bar-appearance`` and
+    ``--macos-title-bar-material``.
+    See ``--sub-color`` for color syntax.
+
 ``--macos-fs-animation-duration=<default|0-1000>``
     Sets the fullscreen resize animation duration in ms (default: default).
     The default value is slightly less than the system's animation duration

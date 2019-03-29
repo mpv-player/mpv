@@ -57,6 +57,7 @@ const struct m_sub_options macos_conf = {
                     {"underWindowBackground", 12}, {"underPageBackground", 13},
                     {"dark", 14}, {"light", 15}, {"mediumLight", 16},
                     {"ultraDark", 17})),
+        OPT_COLOR("macos-title-bar-color", macos_title_bar_color, 0),
         OPT_CHOICE_OR_INT("macos-fs-animation-duration",
                           macos_fs_animation_duration, 0, 0, 1000,
                           ({"default", -1})),
@@ -68,6 +69,7 @@ const struct m_sub_options macos_conf = {
     },
     .size = sizeof(struct macos_opts),
     .defaults = &(const struct macos_opts){
+        .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
         .cocoa_cb_sw_renderer = -1,
     },
