@@ -508,9 +508,13 @@ class CocoaCB: NSObject {
             if let data = MPVHelper.mpvFlagToBool(property.data) {
                 window.keepAspect = data
             }
-        case "macos-title-bar-style":
+        case "macos-title-bar-appearance":
             if let data = MPVHelper.mpvStringArrayToString(property.data) {
-                titleBar.setStyle(data)
+                titleBar.set(appearance: data)
+            }
+        case "macos-title-bar-material":
+            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+                titleBar.set(material: data)
             }
         default:
             break

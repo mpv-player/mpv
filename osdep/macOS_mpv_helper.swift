@@ -56,6 +56,8 @@ class MPVHelper: NSObject {
         mpv_observe_property(mpvHandle, 0, "border", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "keepaspect-window", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "macos-title-bar-style", MPV_FORMAT_STRING)
+        mpv_observe_property(mpvHandle, 0, "macos-title-bar-appearance", MPV_FORMAT_STRING)
+        mpv_observe_property(mpvHandle, 0, "macos-title-bar-material", MPV_FORMAT_STRING)
     }
 
     func initRender() {

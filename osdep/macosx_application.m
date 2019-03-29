@@ -43,14 +43,27 @@
 #define OPT_BASE_STRUCT struct macos_opts
 const struct m_sub_options macos_conf = {
     .opts = (const struct m_option[]) {
-        OPT_CHOICE("macos-title-bar-style", macos_title_bar_style, 0,
-                   ({"dark", 0}, {"ultradark", 1}, {"light", 2},
-                    {"mediumlight", 3}, {"auto", 4})),
+        OPT_CHOICE("macos-title-bar-appearance", macos_title_bar_appearance, 0,
+                   ({"auto", 0}, {"aqua", 1}, {"darkAqua", 2},
+                    {"vibrantLight", 3}, {"vibrantDark", 4},
+                    {"aquaHighContrast", 5}, {"darkAquaHighContrast", 6},
+                    {"vibrantLightHighContrast", 7},
+                    {"vibrantDarkHighContrast", 8})),
+        OPT_CHOICE("macos-title-bar-material", macos_title_bar_material, 0,
+                   ({"titlebar", 0}, {"selection", 1}, {"menu", 2},
+                    {"popover", 3}, {"sidebar", 4}, {"headerView", 5},
+                    {"sheet", 6}, {"windowBackground", 7}, {"hudWindow", 8},
+                    {"fullScreen", 9}, {"toolTip", 10}, {"contentBackground", 11},
+                    {"underWindowBackground", 12}, {"underPageBackground", 13},
+                    {"dark", 14}, {"light", 15}, {"mediumLight", 16},
+                    {"ultraDark", 17})),
         OPT_CHOICE_OR_INT("macos-fs-animation-duration",
                           macos_fs_animation_duration, 0, 0, 1000,
                           ({"default", -1})),
         OPT_CHOICE("cocoa-cb-sw-renderer", cocoa_cb_sw_renderer, 0,
                    ({"auto", -1}, {"no", 0}, {"yes", 1})),
+        OPT_REMOVED("macos-title-bar-style", "Split into --macos-title-bar-appearance "
+                     "and --macos-title-bar-material"),
         {0}
     },
     .size = sizeof(struct macos_opts),
