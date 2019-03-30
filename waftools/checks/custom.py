@@ -114,9 +114,13 @@ def check_cocoa(ctx, dependency_identifier):
     return res
 
 def check_swift(ctx, dependency_identifier):
+    minVer = StrictVersion("3.0")
     if ctx.env.SWIFT_VERSION:
-        ctx.add_optional_message(dependency_identifier,
-                                 'version found: ' + str(ctx.env.SWIFT_VERSION))
-        if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("3.0"):
+        if StrictVersion(ctx.env.SWIFT_VERSION) >= minVer:
+            ctx.add_optional_message(dependency_identifier,
+                                     'version found: ' + str(ctx.env.SWIFT_VERSION))
             return True
+    ctx.add_optional_message(dependency_identifier,
+                             "'swift >= " + str(minVer) + "' not found, found " +
+                             str(ctx.env.SWIFT_VERSION or None))
     return False
