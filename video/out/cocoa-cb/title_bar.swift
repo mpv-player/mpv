@@ -19,19 +19,17 @@ import Cocoa
 
 class TitleBar: NSVisualEffectView {
 
-    weak var cocoaCB: CocoaCB! = nil
-    var mpv: MPVHelper! {
-        get { return cocoaCB == nil ? nil : cocoaCB.mpv }
-    }
+    weak var cocoaCB: CocoaCB!
+    var mpv: MPVHelper { get { return cocoaCB.mpv } }
 
-    var systemBar: NSView {
-        get { return (cocoaCB.window.standardWindowButton(.closeButton)?.superview)! }
+    var systemBar: NSView? {
+        get { return cocoaCB.window?.standardWindowButton(.closeButton)?.superview }
     }
     static var height: CGFloat {
         get { return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height }
     }
     var buttons: [NSButton] {
-        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindowButton]).flatMap { cocoaCB.window.standardWindowButton($0) } }
+        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindowButton]).flatMap { cocoaCB.window?.standardWindowButton($0) } }
     }
 
     override var material: NSVisualEffectView.Material {
@@ -52,24 +50,28 @@ class TitleBar: NSVisualEffectView {
         }
     }
 
-    convenience init(frame: NSRect, window: NSWindow, cocoaCB ccb: CocoaCB) {
+    init(frame: NSRect, window: NSWindow, cocoaCB ccb: CocoaCB) {
         let f = NSMakeRect(0, frame.size.height - TitleBar.height,
                            frame.size.width, TitleBar.height)
-        self.init(frame: f)
         cocoaCB = ccb
+        super.init(frame: f)
         alphaValue = 0
         blendingMode = .withinWindow
         autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
-        systemBar.alphaValue = 0
+        systemBar?.alphaValue = 0
         state = .followsWindowActiveState
         wantsLayer = true
 
-        window.contentView!.addSubview(self, positioned: .above, relativeTo: nil)
+        window.contentView?.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        set(appearance: Int(mpv.macOpts!.macos_title_bar_appearance))
-        set(material: Int(mpv.macOpts!.macos_title_bar_material))
-        set(color: mpv.macOpts!.macos_title_bar_color)
+        set(appearance: Int(mpv.macOpts?.macos_title_bar_appearance ?? 0))
+        set(material: Int(mpv.macOpts?.macos_title_bar_material ?? 0))
+        set(color: mpv.macOpts?.macos_title_bar_color ?? "#00000000")
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     // catch these events so they are not propagated to the underlying view
@@ -87,34 +89,34 @@ class TitleBar: NSVisualEffectView {
             }
 
             if action == "Minimize" {
-                cocoaCB.window.miniaturize(self)
+                window?.miniaturize(self)
             } else if action == "Maximize" {
-                cocoaCB.window.zoom(self)
+                window?.zoom(self)
             }
         }
     }
 
     func set(appearance: Any) {
         if appearance is Int {
-            window!.appearance = appearanceFrom(string: String(appearance as! Int))
+            window?.appearance = appearanceFrom(string: String(appearance as? Int ?? 0))
         } else {
-            window!.appearance = appearanceFrom(string: appearance as! String)
+            window?.appearance = appearanceFrom(string: appearance as? String ?? "auto")
         }
     }
 
     func set(material: Any) {
         if material is Int {
-            self.material = materialFrom(string: String(material as! Int))
+            self.material = materialFrom(string: String(material as? Int ?? 0))
         } else {
-            self.material = materialFrom(string: material as! String)
+            self.material = materialFrom(string: material as? String ?? "titlebar")
         }
     }
 
     func set(color: Any) {
         if color is String {
-            layer?.backgroundColor = NSColor(hex: color as! String).cgColor
+            layer?.backgroundColor = NSColor(hex: color as? String ?? "#00000000").cgColor
         } else {
-            let col = color as! m_color
+            let col = color as? m_color ?? m_color(r: 0, g: 0, b: 0, a: 0)
             let red   = CGFloat(col.r)/255
             let green = CGFloat(col.g)/255
             let blue  = CGFloat(col.b)/255
@@ -125,20 +127,21 @@ class TitleBar: NSVisualEffectView {
     }
 
     func show() {
-        if (!cocoaCB.window.border && !cocoaCB.window.isInFullscreen) { return }
-        let loc = cocoaCB.view.convert(cocoaCB.window.mouseLocationOutsideOfEventStream, from: nil)
+        guard let window = cocoaCB.window else { return }
+        if !window.border && !window.isInFullscreen { return }
+        let loc = cocoaCB.view?.convert(window.mouseLocationOutsideOfEventStream, from: nil)
 
         buttons.forEach { $0.isHidden = false }
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = 0.20
-            systemBar.animator().alphaValue = 1
-            if !cocoaCB.window.isInFullscreen && !cocoaCB.window.isAnimating {
+            systemBar?.animator().alphaValue = 1
+            if !window.isInFullscreen && !window.isAnimating {
                 animator().alphaValue = 1
                 isHidden = false
             }
         }, completionHandler: nil )
 
-        if loc.y > TitleBar.height {
+        if loc?.y ?? 0 > TitleBar.height {
             hideDelayed()
         } else {
             NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(hide), object: nil)
@@ -146,14 +149,15 @@ class TitleBar: NSVisualEffectView {
     }
 
     func hide() {
-        if cocoaCB.window.isInFullscreen && !cocoaCB.window.isAnimating {
+        guard let window = cocoaCB.window else { return }
+        if window.isInFullscreen && !window.isAnimating {
             alphaValue = 0
             isHidden = true
             return
         }
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = 0.20
-            systemBar.animator().alphaValue = 0
+            systemBar?.animator().alphaValue = 0
             animator().alphaValue = 0
         }, completionHandler: {
             self.buttons.forEach { $0.isHidden = true }

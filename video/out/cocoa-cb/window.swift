@@ -20,9 +20,7 @@ import Cocoa
 class Window: NSWindow, NSWindowDelegate {
 
     weak var cocoaCB: CocoaCB! = nil
-    var mpv: MPVHelper! {
-        get { return cocoaCB == nil ? nil : cocoaCB.mpv }
-    }
+    var mpv: MPVHelper { get { return cocoaCB.mpv } }
 
     var targetScreen: NSScreen?
     var previousScreen: NSScreen?
@@ -37,12 +35,12 @@ class Window: NSWindow, NSWindowDelegate {
 
     var keepAspect: Bool = true {
         didSet {
-            if !isInFullscreen {
-                unfsContentFrame = convertToScreen(contentView!.frame)
+            if let contentViewFrame = contentView?.frame, !isInFullscreen {
+                unfsContentFrame = convertToScreen(contentViewFrame)
             }
 
             if keepAspect {
-                contentAspectRatio = unfsContentFrame!.size
+                contentAspectRatio = unfsContentFrame?.size ?? contentAspectRatio
             } else {
                 resizeIncrements = NSSize(width: 1.0, height: 1.0)
             }
@@ -50,7 +48,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     var border: Bool = true {
-        didSet { if !border { cocoaCB.titleBar.hide() } }
+        didSet { if !border { cocoaCB.titleBar?.hide() } }
     }
 
     override var canBecomeKey: Bool { return true }
@@ -74,10 +72,10 @@ class Window: NSWindow, NSWindowDelegate {
 
         // workaround for an AppKit bug where the NSWindow can't be placed on a
         // none Main screen NSScreen outside the Main screen's frame bounds
-        if screen != NSScreen.main() {
+        if let wantedScreen = screen, screen != NSScreen.main() {
             var absoluteWantedOrigin = contentRect.origin
-            absoluteWantedOrigin.x += screen!.frame.origin.x
-            absoluteWantedOrigin.y += screen!.frame.origin.y
+            absoluteWantedOrigin.x += wantedScreen.frame.origin.x
+            absoluteWantedOrigin.y += wantedScreen.frame.origin.y
 
             if !NSEqualPoints(absoluteWantedOrigin, self.frame.origin) {
                 self.setFrameOrigin(absoluteWantedOrigin)
@@ -89,13 +87,16 @@ class Window: NSWindow, NSWindowDelegate {
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
         delegate = self
-        contentView!.addSubview(view)
-        view.frame = contentView!.frame
 
-        unfsContentFrame = convertToScreen(contentView!.frame)
-        targetScreen = screen!
-        currentScreen = screen!
-        unfScreen = screen!
+        if let cView = contentView {
+            cView.addSubview(view)
+            view.frame = cView.frame
+            unfsContentFrame = convertToScreen(cView.frame)
+        }
+
+        targetScreen = screen
+        currentScreen = screen
+        unfScreen = screen
 
         if let app = NSApp as? Application {
             app.menuBar.register(#selector(setHalfWindowSize), for: MPM_H_SIZE)
@@ -123,13 +124,13 @@ class Window: NSWindow, NSWindowDelegate {
             previousScreen = screen
         }
 
-        if !isInFullscreen {
-            unfsContentFrame = convertToScreen(contentView!.frame)
+        if let contentViewFrame = contentView?.frame, !isInFullscreen {
+            unfsContentFrame = convertToScreen(contentViewFrame)
             unfScreen = screen
         }
         // move window to target screen when going to fullscreen
-        if !isInFullscreen && (targetScreen != screen) {
-            let frame = calculateWindowPosition(for: targetScreen!, withoutBounds: false)
+        if let tScreen = targetScreen, !isInFullscreen && (tScreen != screen) {
+            let frame = calculateWindowPosition(for: tScreen, withoutBounds: false)
             setFrame(frame, display: true)
         }
 
@@ -154,19 +155,21 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func window(_ window: NSWindow, startCustomAnimationToEnterFullScreenWithDuration duration: TimeInterval) {
-        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
-        cocoaCB.titleBar.hide()
+        guard let tScreen = targetScreen else { return }
+        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
+        cocoaCB.titleBar?.hide()
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = getFsAnimationDuration(duration - 0.05)
-            window.animator().setFrame(targetScreen!.frame, display: true)
+            window.animator().setFrame(tScreen.frame, display: true)
         }, completionHandler: { })
     }
 
     func window(_ window: NSWindow, startCustomAnimationToExitFullScreenWithDuration duration: TimeInterval) {
-        let newFrame = calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen)
-        let intermediateFrame = aspectFit(rect: newFrame, in: screen!.frame)
-        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFill
-        cocoaCB.titleBar.hide()
+        guard let tScreen = targetScreen, let currentScreen = screen else { return }
+        let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: tScreen == screen)
+        let intermediateFrame = aspectFit(rect: newFrame, in: currentScreen.frame)
+        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFill
+        cocoaCB.titleBar?.hide()
         styleMask.remove(.fullScreen)
         setFrame(intermediateFrame, display: true)
 
@@ -181,27 +184,29 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         cocoaCB.updateCusorVisibility()
         endAnimation(frame)
-        cocoaCB.titleBar.show()
+        cocoaCB.titleBar?.show()
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {
+        guard let tScreen = targetScreen else { return }
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        endAnimation(calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen))
-        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
+        endAnimation(calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen))
+        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func windowDidFailToEnterFullScreen(_ window: NSWindow) {
-        let newFrame = calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen)
+        guard let tScreen = targetScreen else { return }
+        let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen)
         setFrame(newFrame, display: true)
         endAnimation()
     }
 
     func windowDidFailToExitFullScreen(_ window: NSWindow) {
-        let newFrame = targetScreen!.frame
-        setFrame(newFrame, display: true)
+        guard let targetFrame = targetScreen?.frame else { return }
+        setFrame(targetFrame, display: true)
         endAnimation()
-        cocoaCB.view.layerContentsPlacement = .scaleProportionallyToFit
+        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func endAnimation(_ newFrame: NSRect = NSZeroRect) {
@@ -213,29 +218,31 @@ class Window: NSWindow, NSWindowDelegate {
         }
 
         isAnimating = false
-        cocoaCB.layer.update()
+        cocoaCB.layer?.update()
         cocoaCB.checkShutdown()
     }
 
     func setToFullScreen() {
+        guard let targetFrame = targetScreen?.frame else { return }
         styleMask.insert(.fullScreen)
         NSApp.presentationOptions = [.autoHideMenuBar, .autoHideDock]
-        setFrame(targetScreen!.frame, display: true)
+        setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer.update()
+        cocoaCB.layer?.update()
     }
 
     func setToWindow() {
-        let newFrame = calculateWindowPosition(for: targetScreen!, withoutBounds: targetScreen == screen)
+        guard let tScreen = targetScreen else { return }
+        let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen)
         NSApp.presentationOptions = []
         setFrame(newFrame, display: true)
         styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
         cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer.update()
+        cocoaCB.layer?.update()
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double{
@@ -243,35 +250,37 @@ class Window: NSWindow, NSWindowDelegate {
         if duration == "default" {
             return def
         } else {
-            return Double(duration)!/1000
+            return (Double(duration) ?? 0.2)/1000
         }
     }
 
     func setOnTop(_ state: Bool, _ ontopLevel: Any) {
+        let stdLevel = Int(CGWindowLevelForKey(.normalWindow))
+
         if state {
             if ontopLevel is Int {
-                switch ontopLevel as! Int {
+                switch ontopLevel as? Int {
                 case -1:
                     level = Int(CGWindowLevelForKey(.floatingWindow))
                 case -2:
                     level = Int(CGWindowLevelForKey(.statusWindow))+1
                 default:
-                    level = ontopLevel as! Int
+                    level = ontopLevel as? Int ?? stdLevel
                 }
             } else {
-                switch ontopLevel as! String {
+                switch ontopLevel as? String {
                 case "window":
                     level = Int(CGWindowLevelForKey(.floatingWindow))
                 case "system":
                     level = Int(CGWindowLevelForKey(.statusWindow))+1
                 default:
-                    level = Int(ontopLevel as! String)!
+                    level = Int(ontopLevel as? String ?? "") ?? stdLevel
                 }
             }
             collectionBehavior.remove(.transient)
             collectionBehavior.insert(.managed)
         } else {
-            level = Int(CGWindowLevelForKey(.normalWindow))
+            level = stdLevel
         }
     }
 
@@ -292,7 +301,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func updateSize(_ size: NSSize) {
-        if size != contentView!.frame.size {
+        if let currentSize = contentView?.frame.size, size != currentSize {
             let newContentFrame = centeredContentSize(for: frame, size: size)
             if !isInFullscreen {
                 updateFrame(newContentFrame)
@@ -305,8 +314,8 @@ class Window: NSWindow, NSWindowDelegate {
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
         super.setFrame(frameRect, display: flag)
 
-        if keepAspect {
-            contentAspectRatio = unfsContentFrame!.size
+        if let size = unfsContentFrame?.size, keepAspect {
+            contentAspectRatio = size
         }
     }
 
@@ -328,10 +337,13 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func calculateWindowPosition(for tScreen: NSScreen, withoutBounds: Bool) -> NSRect {
-        var newFrame = frameRect(forContentRect: unfsContentFrame!)
+        guard let contentFrame = unfsContentFrame, let screen = unfScreen else {
+            return frame
+        }
+        var newFrame = frameRect(forContentRect: contentFrame)
         let targetFrame = tScreen.frame
         let targetVisibleFrame = tScreen.visibleFrame
-        let unfsScreenFrame = unfScreen!.frame
+        let unfsScreenFrame = screen.frame
         let visibleWindow = NSIntersectionRect(unfsScreenFrame, newFrame)
 
         // calculate visible area of every side
@@ -398,10 +410,12 @@ class Window: NSWindow, NSWindowDelegate {
             return frameRect
         }
 
+        guard let ts: NSScreen = tScreen ?? screen ?? NSScreen.main() else {
+            return frameRect
+        }
         var nf: NSRect = frameRect
-        let ts: NSScreen = tScreen ?? screen ?? NSScreen.main()!
         let of: NSRect = frame
-        let vf: NSRect = (isAnimating ? targetScreen! : ts).visibleFrame
+        let vf: NSRect = (isAnimating ? (targetScreen ?? ts) : ts).visibleFrame
         let ncf: NSRect = contentRect(forFrameRect: nf)
 
         // screen bounds top and bottom
@@ -451,19 +465,19 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidChangeScreenProfile(_ notification: Notification) {
-        cocoaCB.layer.needsICCUpdate = true
+        cocoaCB.layer?.needsICCUpdate = true
     }
 
     func windowDidChangeBackingProperties(_ notification: Notification) {
-        cocoaCB.layer.contentsScale = backingScaleFactor
+        cocoaCB.layer?.contentsScale = backingScaleFactor
     }
 
     func windowWillStartLiveResize(_ notification: Notification) {
-        cocoaCB.layer.inLiveResize = true
+        cocoaCB.layer?.inLiveResize = true
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
-        cocoaCB.layer.inLiveResize = false
+        cocoaCB.layer?.inLiveResize = false
     }
 
     func windowShouldClose(_ sender: Any) -> Bool {
@@ -489,7 +503,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidChangeOcclusionState(_ notification: Notification) {
         if occlusionState.contains(.visible) {
-            cocoaCB.layer.update(force: true)
+            cocoaCB.layer?.update(force: true)
         }
     }
 
