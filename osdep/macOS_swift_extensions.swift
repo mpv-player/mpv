@@ -21,7 +21,7 @@ extension NSScreen {
 
     public var displayID: CGDirectDisplayID {
         get {
-            return deviceDescription["NSScreenNumber"] as! CGDirectDisplayID
+            return deviceDescription["NSScreenNumber"] as? CGDirectDisplayID ?? 0
         }
     }
 
@@ -37,8 +37,8 @@ extension NSScreen {
 
             repeat {
                 object = IOIteratorNext(iter)
-                let info = IODisplayCreateInfoDictionary(object, IOOptionBits(kIODisplayOnlyPreferredName)).takeRetainedValue() as! [String:AnyObject]
-                if (info[kDisplayVendorID] as? UInt32 == CGDisplayVendorNumber(displayID) &&
+                if let info = IODisplayCreateInfoDictionary(object, IOOptionBits(kIODisplayOnlyPreferredName)).takeRetainedValue() as? [String:AnyObject],
+                    (info[kDisplayVendorID] as? UInt32 == CGDisplayVendorNumber(displayID) &&
                     info[kDisplayProductID] as? UInt32 == CGDisplayModelNumber(displayID) &&
                     info[kDisplaySerialNumber] as? UInt32 ?? 0 == CGDisplaySerialNumber(displayID))
                 {
@@ -60,11 +60,11 @@ extension NSScreen {
 extension NSColor {
 
     convenience init(hex: String) {
-        let int = Int(hex.dropFirst(), radix: 16)
-        let alpha = CGFloat((int! >> 24) & 0x000000FF)/255
-        let red   = CGFloat((int! >> 16) & 0x000000FF)/255
-        let green = CGFloat((int! >> 8)  & 0x000000FF)/255
-        let blue  = CGFloat((int!)       & 0x000000FF)/255
+        let int = Int(hex.dropFirst(), radix: 16) ?? 0
+        let alpha = CGFloat((int >> 24) & 0x000000FF)/255
+        let red   = CGFloat((int >> 16) & 0x000000FF)/255
+        let green = CGFloat((int >> 8)  & 0x000000FF)/255
+        let blue  = CGFloat((int)       & 0x000000FF)/255
 
         self.init(calibratedRed: red, green: green, blue: blue, alpha: alpha)
     }

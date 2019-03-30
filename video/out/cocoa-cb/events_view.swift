@@ -20,9 +20,7 @@ import Cocoa
 class EventsView: NSView {
 
     weak var cocoaCB: CocoaCB!
-    var mpv: MPVHelper! {
-        get { return cocoaCB == nil ? nil : cocoaCB.mpv }
-    }
+    var mpv: MPVHelper { get { return cocoaCB.mpv } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -46,13 +44,14 @@ class EventsView: NSView {
     }
 
     override func updateTrackingAreas() {
-        if tracker != nil {
-            removeTrackingArea(tracker!)
+        if let tracker = self.tracker {
+            removeTrackingArea(tracker)
         }
 
         tracker = NSTrackingArea(rect: bounds,
             options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved, .enabledDuringMouseDrag],
             owner: self, userInfo: nil)
+        // here tracker is guaranteed to be none-nil
         addTrackingArea(tracker!)
 
         if containsMouseLocation() {
@@ -72,6 +71,7 @@ class EventsView: NSView {
     }
 
     func isURL(_ str: String) -> Bool {
+        // force unwrapping is fine here, regex is guarnteed to be valid
         let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
                                              options: .caseInsensitive)
         let isURL = regex.numberOfMatches(in: str,
@@ -135,14 +135,14 @@ class EventsView: NSView {
         if mpv.getBoolProperty("input-cursor") {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
-        cocoaCB.titleBar.hide()
+        cocoaCB.titleBar?.hide()
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mpv != nil && mpv.getBoolProperty("input-cursor") {
+        if mpv.getBoolProperty("input-cursor") {
             signalMouseMovement(event)
         }
-        cocoaCB.titleBar.show()
+        cocoaCB.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -161,7 +161,7 @@ class EventsView: NSView {
         if mpv.getBoolProperty("input-cursor") {
             signalMouseUp(event)
         }
-        cocoaCB.window.isMoving = false
+        cocoaCB.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
@@ -210,8 +210,8 @@ class EventsView: NSView {
         point = convertToBacking(point)
         point.y = -point.y
 
-        cocoaCB.window.updateMovableBackground(point)
-        if !cocoaCB.window.isMoving {
+        cocoaCB.window?.updateMovableBackground(point)
+        if !(cocoaCB.window?.isMoving ?? false) {
             mpv.setMousePosition(point)
         }
     }
@@ -257,21 +257,23 @@ class EventsView: NSView {
     func containsMouseLocation() -> Bool {
         if cocoaCB == nil { return false }
         var topMargin: CGFloat = 0.0
-        let menuBarHeight = NSApp.mainMenu!.menuBarHeight
+        let menuBarHeight = NSApp.mainMenu?.menuBarHeight ?? 23.0
 
-        if cocoaCB.window.isInFullscreen && (menuBarHeight > 0) {
+        guard let window = cocoaCB.window else { return false }
+        guard var vF = window.screen?.frame else { return false }
+
+        if window.isInFullscreen && (menuBarHeight > 0) {
             topMargin = TitleBar.height + 1 + menuBarHeight
         }
 
-        guard var vF = window?.screen?.frame else { return false }
         vF.size.height -= topMargin
 
-        let vFW = window!.convertFromScreen(vF)
+        let vFW = window.convertFromScreen(vF)
         let vFV = convert(vFW, from: nil)
-        let pt = convert(window!.mouseLocationOutsideOfEventStream, from: nil)
+        let pt = convert(window.mouseLocationOutsideOfEventStream, from: nil)
 
         var clippedBounds = bounds.intersection(vFV)
-        if !cocoaCB.window.isInFullscreen {
+        if !window.isInFullscreen {
             clippedBounds.origin.y += TitleBar.height
             clippedBounds.size.height -= TitleBar.height
         }
@@ -279,8 +281,8 @@ class EventsView: NSView {
     }
 
     func canHideCursor() -> Bool {
-        if cocoaCB.window == nil { return false }
-        return !hasMouseDown && containsMouseLocation() && window!.isKeyWindow
+        guard let window = cocoaCB.window else { return false }
+        return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
     }
 
     func getMpvButton(_ event: NSEvent) -> Int32 {
