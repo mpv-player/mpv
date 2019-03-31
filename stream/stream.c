@@ -49,6 +49,7 @@ extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_tv;
 extern const stream_info_t stream_info_smb;
+extern const stream_info_t stream_info_dsm;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
 extern const stream_info_t stream_info_mf;
@@ -83,6 +84,9 @@ static const stream_info_t *const stream_list[] = {
 #endif
 #if HAVE_LIBSMBCLIENT
     &stream_info_smb,
+#endif
+#if HAVE_LIBDSM
+    &stream_info_dsm,
 #endif
 #if HAVE_DVDREAD || HAVE_DVDNAV
     &stream_info_ifo,
