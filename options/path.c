@@ -327,7 +327,7 @@ bool mp_is_url(bstr path)
     for (int i = 0; i < proto; i++) {
         unsigned char c = path.start[i];
         if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') &&
-            !(c >= '0' && c <= '9') && c != '_')
+            !(c >= '0' && c <= '9') && c != '_' && c != '+' && c != '-' && c != '.')
             return false;
     }
     return true;
