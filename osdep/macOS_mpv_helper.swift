@@ -178,8 +178,8 @@ class MPVHelper: NSObject {
             return
         }
         let iccSize = iccData.count
-        iccData.withUnsafeMutableBytes { (u8Ptr: UnsafeMutablePointer<UInt8>) in
-            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: iccSize))
+        iccData.withUnsafeMutableBytes { (u8Ptr: UnsafeMutableRawBufferPointer) in
+            let iccBstr = bstrdup(nil, bstr(start: u8Ptr.baseAddress!.bindMemory(to: UInt8.self, capacity: iccSize), len: iccSize))
             var icc = mpv_byte_array(data: iccBstr.start, size: iccBstr.len)
             let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: &icc)
             mpv_render_context_set_parameter(mpvRenderContext, params)

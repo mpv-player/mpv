@@ -75,7 +75,11 @@ class EventsView: NSView {
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+#if swift(>=5.0)
+        guard let types = sender.draggingPasteboard.types else { return [] }
+#else
         guard let types = sender.draggingPasteboard().types else { return [] }
+#endif
         if types.contains(EventsView.fileURLType) ||
            types.contains(EventsView.URLType) ||
            types.contains(NSPasteboard.PasteboardType.string)
@@ -96,8 +100,12 @@ class EventsView: NSView {
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+#if swift(>=5.0)
+        let pb = sender.draggingPasteboard
+#else
         let pb = sender.draggingPasteboard()
-        guard let types = sender.draggingPasteboard().types else { return false }
+#endif
+        guard let types = pb.types else { return false }
         if types.contains(EventsView.fileURLType) {
             if let files = pb.propertyList(forType: EventsView.fileURLType) as? [Any] {
                 EventsResponder.sharedInstance().handleFilesArray(files)
@@ -235,7 +243,7 @@ class EventsView: NSView {
         var delta: Double
         var cmd: Int32
 
-        if fabs(event.deltaY) >= fabs(event.deltaX) {
+        if abs(event.deltaY) >= abs(event.deltaX) {
             delta = Double(event.deltaY) * 0.1;
             cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN;
         } else {
@@ -243,7 +251,7 @@ class EventsView: NSView {
             cmd = delta > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT;
         }
 
-        mpv.putAxis(cmd, delta: fabs(delta))
+        mpv.putAxis(cmd, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
@@ -259,7 +267,7 @@ class EventsView: NSView {
             let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
             var mpkey: Int32
 
-            if fabs(deltaY) >= fabs(deltaX) {
+            if abs(deltaY) >= abs(deltaX) {
                 mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN;
             } else {
                 mpkey = deltaX > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT;
