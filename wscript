@@ -607,7 +607,8 @@ video_output_features = [
         'groups': [ 'gl' ],
         'func': check_statement('IOSurface/IOSurface.h',
                                 'IOSurfaceRef surface;',
-                                framework='IOSurface')
+                                framework='IOSurface',
+                                cflags=['-DGL_SILENCE_DEPRECATION'])
     } , {
         'name': '--gl-x11',
         'desc': 'OpenGL X11 Backend',
