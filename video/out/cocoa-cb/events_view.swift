@@ -28,15 +28,30 @@ class EventsView: NSView {
     override var isFlipped: Bool { return true }
     override var acceptsFirstResponder: Bool { return true }
 
+    static let fileURLType: NSPasteboard.PasteboardType = {
+        if #available(OSX 10.13, *) {
+            return NSPasteboard.PasteboardType.fileURL
+        } else {
+            return NSPasteboard.PasteboardType(kUTTypeFileURL as String)
+        }
+    } ()
+
+    static let URLType: NSPasteboard.PasteboardType = {
+        if #available(OSX 10.13, *) {
+            return NSPasteboard.PasteboardType.URL
+        } else {
+            return NSPasteboard.PasteboardType(kUTTypeURL as String)
+        }
+    } ()
 
     init(cocoaCB ccb: CocoaCB) {
         cocoaCB = ccb
         super.init(frame: NSMakeRect(0, 0, 960, 480))
-        autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
-        register(forDraggedTypes: [ NSFilenamesPboardType,
-                                    NSURLPboardType,
-                                    NSPasteboardTypeString ])
+        registerForDraggedTypes([ EventsView.fileURLType,
+                                  EventsView.URLType,
+                                  NSPasteboard.PasteboardType.string ])
     }
 
     required init?(coder: NSCoder) {
@@ -61,9 +76,9 @@ class EventsView: NSView {
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard let types = sender.draggingPasteboard().types else { return [] }
-        if types.contains(NSFilenamesPboardType) ||
-           types.contains(NSURLPboardType) ||
-           types.contains(NSPasteboardTypeString)
+        if types.contains(EventsView.fileURLType) ||
+           types.contains(EventsView.URLType) ||
+           types.contains(NSPasteboard.PasteboardType.string)
         {
             return .copy
         }
@@ -83,19 +98,19 @@ class EventsView: NSView {
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pb = sender.draggingPasteboard()
         guard let types = sender.draggingPasteboard().types else { return false }
-        if types.contains(NSFilenamesPboardType) {
-            if let files = pb.propertyList(forType: NSFilenamesPboardType) as? [Any] {
+        if types.contains(EventsView.fileURLType) {
+            if let files = pb.propertyList(forType: EventsView.fileURLType) as? [Any] {
                 EventsResponder.sharedInstance().handleFilesArray(files)
                 return true
             }
-        } else if types.contains(NSURLPboardType) {
-            if var url = pb.propertyList(forType: NSURLPboardType) as? [String] {
+        } else if types.contains(EventsView.URLType) {
+            if var url = pb.propertyList(forType: EventsView.URLType) as? [String] {
                 url = url.filter{ !$0.isEmpty }
                 EventsResponder.sharedInstance().handleFilesArray(url)
                 return true
             }
-        } else if types.contains(NSPasteboardTypeString) {
-            guard let str = pb.string(forType: NSPasteboardTypeString) else { return false }
+        } else if types.contains(NSPasteboard.PasteboardType.string) {
+            guard let str = pb.string(forType: NSPasteboard.PasteboardType.string) else { return false }
             var filesArray: [String] = []
 
             for val in str.components(separatedBy: "\n") {

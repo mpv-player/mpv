@@ -21,7 +21,7 @@ extension NSScreen {
 
     public var displayID: CGDirectDisplayID {
         get {
-            return deviceDescription["NSScreenNumber"] as? CGDirectDisplayID ?? 0
+            return deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID ?? 0
         }
     }
 

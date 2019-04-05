@@ -20,8 +20,8 @@ def __add_swift_flags(ctx):
     ctx.env.SWIFT_VERSION = verRe.search(__run([ctx.env.SWIFT, '-version'])).group(1)
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
-    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("3.1"):
-        ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "3" ])
+    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("4.0"):
+        ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "4" ])
 
     if ctx.is_debug_build():
         ctx.env.SWIFT_FLAGS.append("-g")
@@ -33,11 +33,14 @@ def __add_swift_library_linking_flags(ctx, swift_library):
     ctx.env.append_value('LINKFLAGS', [
         '-L%s' % swift_library,
         '-Xlinker', '-force_load_swift_libs', '-lc++',
+        '-Wl,-rpath,/usr/lib/swift'
     ])
 
 def __find_swift_library(ctx):
     swift_library_paths = [
+        'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx',
         'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx',
+        'usr/lib/swift/macosx'
         'usr/lib/swift_static/macosx'
     ]
     dev_path = __run(['xcode-select', '-p'])[1:]
