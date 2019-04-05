@@ -39,8 +39,8 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        [self registerForDraggedTypes:@[NSFilenamesPboardType,
-                                        NSURLPboardType]];
+        [self registerForDraggedTypes:@[NSPasteboardTypeFileURL,
+                                        NSPasteboardTypeURL]];
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     }
     return self;
@@ -305,8 +305,8 @@
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
     NSArray *types = [pboard types];
-    if ([types containsObject:NSFilenamesPboardType] ||
-        [types containsObject:NSURLPboardType]) {
+    if ([types containsObject:NSPasteboardTypeFileURL] ||
+        [types containsObject:NSPasteboardTypeURL]) {
         return NSDragOperationCopy;
     } else {
         return NSDragOperationNone;
@@ -316,11 +316,11 @@
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    if ([[pboard types] containsObject:NSFilenamesPboardType]) {
-        NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
+    if ([[pboard types] containsObject:NSPasteboardTypeFileURL]) {
+        NSArray *pbitems = [pboard propertyListForType:NSPasteboardTypeFileURL];
         [self.adapter handleFilesArray:pbitems];
         return YES;
-    } else if ([[pboard types] containsObject:NSURLPboardType]) {
+    } else if ([[pboard types] containsObject:NSPasteboardTypeURL]) {
         NSURL *url = [NSURL URLFromPasteboard:pboard];
         [self.adapter handleFilesArray:@[[url absoluteString]]];
         return YES;
