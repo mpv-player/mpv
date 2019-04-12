@@ -163,7 +163,7 @@ static bool fb_setup_double_buffering(struct vo *vo)
     struct priv *p = vo->priv;
 
     p->front_buf = 0;
-    for (unsigned int i = 0; i < 2; i++) {
+    for (unsigned int i = 0; i < BUF_COUNT; i++) {
         p->bufs[i].width = p->kms->mode.mode.hdisplay;
         p->bufs[i].height = p->kms->mode.mode.vdisplay;
     }
