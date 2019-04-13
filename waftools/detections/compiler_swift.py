@@ -74,4 +74,5 @@ def __find_swift_compiler(ctx):
 def configure(ctx):
     if ctx.env.DEST_OS == "darwin":
         __find_macos_sdk(ctx)
-        __find_swift_compiler(ctx)
+        if ctx.options.enable_swift is not False:
+            __find_swift_compiler(ctx)
