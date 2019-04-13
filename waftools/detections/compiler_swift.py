@@ -1,4 +1,5 @@
 import re
+import os.path
 from waflib import Utils
 from distutils.version import StrictVersion
 
@@ -36,20 +37,55 @@ def __add_swift_library_linking_flags(ctx, swift_library):
     ])
 
 def __find_swift_library(ctx):
-    swift_library_paths = [
-        'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx',
-        'usr/lib/swift_static/macosx'
-    ]
+    swift_libraries = {}
+    #first search for swift libs relative to the swift compiler executable
+    swift_library_relative_paths = {
+        'SWIFT_LIB_DYNAMIC': '../../lib/swift/macosx',
+        'SWIFT_LIB_STATIC': '../../lib/swift_static/macosx'
+    }
+
+    for lib_type, path in swift_library_relative_paths.items():
+        lib_path = os.path.join(ctx.env.SWIFT, path)
+        swift_library = ctx.root.find_dir(lib_path)
+        if swift_library is not None:
+            swift_libraries[lib_type] = swift_library.abspath()
+
+    #fall back to xcode-select path
+    swift_library_paths = {
+        'SWIFT_LIB_DYNAMIC': [
+            'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx',
+            'usr/lib/swift/macosx'
+        ],
+        'SWIFT_LIB_STATIC': [
+            'Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx',
+            'usr/lib/swift_static/macosx'
+        ]
+    }
     dev_path = __run(['xcode-select', '-p'])[1:]
 
-    ctx.start_msg('Checking for Swift Library')
-    for path in swift_library_paths:
-        swift_library = ctx.root.find_dir([dev_path, path])
-        if swift_library is not None:
-            ctx.end_msg(swift_library.abspath())
-            __add_swift_library_linking_flags(ctx, swift_library.abspath())
-            return
-    ctx.end_msg(False)
+    for lib_type, paths in swift_library_paths.items():
+        for path in paths:
+            if lib_type not in swift_libraries:
+                swift_library = ctx.root.find_dir([dev_path, path])
+                if swift_library is not None:
+                    swift_libraries[lib_type] = swift_library.abspath()
+                    break
+            else:
+                break
+
+    #check if library paths were found
+    ctx.start_msg('Checking for dynamic Swift Library')
+    if 'SWIFT_LIB_DYNAMIC' in swift_libraries:
+        ctx.end_msg(swift_libraries['SWIFT_LIB_DYNAMIC'])
+    else:
+        ctx.end_msg(False)
+
+    ctx.start_msg('Checking for static Swift Library')
+    if 'SWIFT_LIB_STATIC' in swift_libraries:
+        ctx.end_msg(swift_libraries['SWIFT_LIB_STATIC'])
+        __add_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_STATIC'])
+    else:
+        ctx.end_msg(False)
 
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
