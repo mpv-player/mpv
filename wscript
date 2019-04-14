@@ -945,7 +945,17 @@ standalone_features = [
             framework_name=['AppKit'],
             compile_filename='test-touchbar.m',
             linkflags='-fobjc-arc')
-     }, {
+    }, {
+        'name': '--macos-10-11-features',
+        'desc': 'macOS 10.11 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.11')
+    }, {
+        'name': '--macos-10-14-features',
+        'desc': 'macOS 10.14 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.14')
+    }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
         'deps': 'cocoa  && swift',

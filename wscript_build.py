@@ -165,6 +165,7 @@ def build(ctx):
         swift_source = [
             ( "osdep/macOS_mpv_helper.swift" ),
             ( "osdep/macOS_swift_extensions.swift" ),
+            ( "osdep/macOS_swift_compat.swift" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
