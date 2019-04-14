@@ -55,6 +55,12 @@ struct drm_opts {
     struct m_geometry drm_draw_surface_size;
 };
 
+struct drm_vsync_tuple {
+    uint64_t ust;
+    unsigned int msc;
+    unsigned int sbc;
+};
+
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
 void vt_switcher_destroy(struct vt_switcher *s);
 void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);
