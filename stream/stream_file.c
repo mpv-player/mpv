@@ -161,7 +161,6 @@ static void s_close(stream_t *s)
     struct priv *p = s->priv;
     if (p->close)
         close(p->fd);
-    talloc_free(p->cancel);
 }
 
 // If url is a file:// URL, return the local filename, otherwise return NULL.
