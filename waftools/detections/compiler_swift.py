@@ -38,17 +38,24 @@ def __add_swift_library_linking_flags(ctx, swift_library):
 
 def __find_swift_library(ctx):
     swift_libraries = {}
-    #first search for swift libs relative to the swift compiler executable
+    #look for set lib paths in passed environment variables
+    if 'SWIFT_LIB_DYNAMIC' in ctx.environ:
+        swift_libraries['SWIFT_LIB_DYNAMIC'] = ctx.environ['SWIFT_LIB_DYNAMIC']
+    if 'SWIFT_LIB_STATIC' in ctx.environ:
+        swift_libraries['SWIFT_LIB_STATIC'] = ctx.environ['SWIFT_LIB_STATIC']
+
+    #search for swift libs relative to the swift compiler executable
     swift_library_relative_paths = {
         'SWIFT_LIB_DYNAMIC': '../../lib/swift/macosx',
         'SWIFT_LIB_STATIC': '../../lib/swift_static/macosx'
     }
 
     for lib_type, path in swift_library_relative_paths.items():
-        lib_path = os.path.join(ctx.env.SWIFT, path)
-        swift_library = ctx.root.find_dir(lib_path)
-        if swift_library is not None:
-            swift_libraries[lib_type] = swift_library.abspath()
+        if lib_type not in swift_libraries:
+            lib_path = os.path.join(ctx.env.SWIFT, path)
+            swift_library = ctx.root.find_dir(lib_path)
+            if swift_library is not None:
+                swift_libraries[lib_type] = swift_library.abspath()
 
     #fall back to xcode-select path
     swift_library_paths = {
@@ -98,7 +105,16 @@ def __find_macos_sdk(ctx):
 
 def __find_swift_compiler(ctx):
     ctx.start_msg('Checking for swift (Swift compiler)')
-    swift = __run(['xcrun', '-find', 'swift'])
+    swift = ''
+
+    #look for set swift paths in passed environment variables
+    if 'SWIFT' in ctx.environ:
+        swift = ctx.environ['SWIFT']
+
+    #find swift executable
+    if not swift:
+        swift = __run(['xcrun', '-find', 'swift'])
+
     if swift:
         ctx.end_msg(swift)
         ctx.env.SWIFT = swift
