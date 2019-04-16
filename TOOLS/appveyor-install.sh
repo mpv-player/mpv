@@ -62,10 +62,11 @@ pacman -Sc --noconfirm
     ninja install
 )
 
-# Compile crossc
+# Compile SPIRV-Cross
 (
-    git clone --depth=1 https://github.com/rossy/crossc && cd crossc
-    git submodule update --init
+    git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Cross && cd SPIRV-Cross
 
-    make -j4 install prefix=$MINGW_PREFIX
+    mkdir build && cd build
+    cmake -GNinja -DSPIRV_CROSS_SHARED=ON -DCMAKE_INSTALL_PREFIX=$MINGW_PREFIX ..
+    ninja install
 )

@@ -747,13 +747,13 @@ video_output_features = [
         'deps': 'shaderc-shared || shaderc-static',
         'func': check_true,
     }, {
-        'name': '--crossc',
-        'desc': 'libcrossc SPIR-V translator',
-        'func': check_pkg_config('crossc'),
+        'name': '--spirv-cross',
+        'desc': 'SPIRV-Cross SPIR-V shader converter',
+        'func': check_pkg_config('spirv-cross-c-shared'),
     }, {
         'name': '--d3d11',
         'desc': 'Direct3D 11 video output',
-        'deps': 'win32-desktop && shaderc && crossc',
+        'deps': 'win32-desktop && shaderc && spirv-cross',
         'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_2.h']),
     }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
