@@ -90,6 +90,7 @@ struct observe_property {
     bool changed;           // property change should be signaled to user
     bool need_new_value;    // a new value should be retrieved
     bool updating;          // a new value is being retrieved
+    bool updated;           // a new value was successfully retrieved
     bool dead;              // property unobserved while retrieving value
     bool new_value_valid, user_value_valid;
     union m_option_value new_value, user_value;
@@ -1467,7 +1468,8 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
         .reply_id = userdata,
         .format = format,
         .changed = true,
-        .need_new_value = true,
+        .updating = false,
+        .updated = false,
     };
     MP_TARRAY_APPEND(ctx, ctx->properties, ctx->num_properties, prop);
     ctx->property_event_masks |= prop->event_mask;
@@ -1510,7 +1512,6 @@ static void mark_property_changed(struct mpv_handle *client, int index)
 {
     struct observe_property *prop = client->properties[index];
     prop->changed = true;
-    prop->need_new_value = prop->format != 0;
     client->lowest_changed = MPMIN(client->lowest_changed, index);
 }
 
@@ -1574,10 +1575,10 @@ static void update_prop(void *p)
     if (prop->new_value_valid)
         memcpy(&prop->new_value, &val, type->type->size);
     if (prop->user_value_valid != prop->new_value_valid) {
-        prop->changed = true;
+        prop->updated = true;
     } else if (prop->user_value_valid && prop->new_value_valid) {
         if (!equal_mpv_value(&prop->user_value, &prop->new_value, prop->format))
-            prop->changed = true;
+            prop->updated = true;
     }
     if (prop->dead)
         talloc_steal(ctx->cur_event, prop);
@@ -1595,34 +1596,37 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
     ctx->lowest_changed = ctx->num_properties;
     for (int n = start; n < ctx->num_properties; n++) {
         struct observe_property *prop = ctx->properties[n];
-        if ((prop->changed || prop->updating) && n < ctx->lowest_changed)
+        if ((prop->changed || prop->updating || prop->updated) && n < ctx->lowest_changed)
             ctx->lowest_changed = n;
         if (prop->changed) {
-            bool get_value = prop->need_new_value;
-            prop->need_new_value = false;
             prop->changed = false;
-            if (prop->format && get_value) {
+            if (prop->format != MPV_FORMAT_NONE) {
                 ctx->properties_updating++;
                 prop->updating = true;
                 mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop, prop);
             } else {
-                const struct m_option *type = get_mp_type_get(prop->format);
-                prop->user_value_valid = prop->new_value_valid;
-                if (prop->new_value_valid)
-                    m_option_copy(type, &prop->user_value, &prop->new_value);
-                ctx->cur_property_event = (struct mpv_event_property){
-                    .name = prop->name,
-                    .format = prop->user_value_valid ? prop->format : 0,
-                };
-                if (prop->user_value_valid)
-                    ctx->cur_property_event.data = &prop->user_value;
-                *ctx->cur_event = (struct mpv_event){
-                    .event_id = MPV_EVENT_PROPERTY_CHANGE,
-                    .reply_userdata = prop->reply_id,
-                    .data = &ctx->cur_property_event,
-                };
-                return true;
+                prop->updated = true;
             }
+        }
+        bool updated = prop->updated;
+        prop->updated = false;
+        if (updated) {
+            const struct m_option *type = get_mp_type_get(prop->format);
+            prop->user_value_valid = prop->new_value_valid;
+            if (prop->new_value_valid)
+                m_option_copy(type, &prop->user_value, &prop->new_value);
+            ctx->cur_property_event = (struct mpv_event_property){
+                .name = prop->name,
+                .format = prop->user_value_valid ? prop->format : 0,
+            };
+            if (prop->user_value_valid)
+                ctx->cur_property_event.data = &prop->user_value;
+            *ctx->cur_event = (struct mpv_event){
+                .event_id = MPV_EVENT_PROPERTY_CHANGE,
+                .reply_userdata = prop->reply_id,
+                .data = &ctx->cur_property_event,
+            };
+            return true;
         }
     }
     return false;
