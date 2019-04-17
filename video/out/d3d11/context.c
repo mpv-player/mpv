@@ -17,6 +17,7 @@
 
 #include "common/msg.h"
 #include "options/m_config.h"
+#include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 
 #include "video/out/gpu/context.h"
@@ -68,6 +69,12 @@ struct priv {
     struct ra_tex *backbuffer;
     ID3D11Device *device;
     IDXGISwapChain *swapchain;
+
+    int64_t perf_freq;
+    unsigned last_sync_refresh_count;
+    int64_t last_sync_qpc_time;
+    int64_t vsync_duration_qpc;
+    int64_t last_submit_qpc;
 };
 
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
@@ -141,15 +148,127 @@ static bool d3d11_submit_frame(struct ra_swapchain *sw,
     return true;
 }
 
+static int64_t qpc_to_us(struct ra_swapchain *sw, int64_t qpc)
+{
+    struct priv *p = sw->priv;
+
+    // Convert QPC units (1/perf_freq seconds) to microseconds. This will work
+    // without overflow because the QPC value is guaranteed not to roll-over
+    // within 100 years, so perf_freq must be less than 2.9*10^9.
+    return qpc / p->perf_freq * 1000000 +
+        qpc % p->perf_freq * 1000000 / p->perf_freq;
+}
+
+static int64_t qpc_us_now(struct ra_swapchain *sw)
+{
+    LARGE_INTEGER perf_count;
+    QueryPerformanceCounter(&perf_count);
+    return qpc_to_us(sw, perf_count.QuadPart);
+}
+
 static void d3d11_swap_buffers(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
+
+    LARGE_INTEGER perf_count;
+    QueryPerformanceCounter(&perf_count);
+    p->last_submit_qpc = perf_count.QuadPart;
+
     IDXGISwapChain_Present(p->swapchain, p->opts->sync_interval, 0);
+}
+
+static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
+{
+    struct priv *p = sw->priv;
+    HRESULT hr;
+
+    // The calculations below are only valid if mpv presents on every vsync
+    if (p->opts->sync_interval != 1)
+        return;
+
+    // GetLastPresentCount returns a sequential ID for the frame submitted by
+    // the last call to IDXGISwapChain::Present()
+    UINT submit_count;
+    hr = IDXGISwapChain_GetLastPresentCount(p->swapchain, &submit_count);
+    if (FAILED(hr))
+        return;
+
+    // GetFrameStatistics returns two pairs. The first is (PresentCount,
+    // PresentRefreshCount) which relates a present ID (on the same timeline as
+    // GetLastPresentCount) to the physical vsync it was displayed on. The
+    // second is (SyncRefreshCount, SyncQPCTime), which relates a physical vsync
+    // to a timestamp on the same clock as QueryPerformanceCounter.
+    DXGI_FRAME_STATISTICS stats;
+    hr = IDXGISwapChain_GetFrameStatistics(p->swapchain, &stats);
+    if (hr == DXGI_ERROR_FRAME_STATISTICS_DISJOINT) {
+        p->last_sync_refresh_count = 0;
+        p->last_sync_qpc_time = 0;
+        p->vsync_duration_qpc = 0;
+    }
+    if (FAILED(hr))
+        return;
+
+    // Detecting skipped vsyncs is possible but not supported yet
+    info->skipped_vsyncs = 0;
+
+    // Get the number of physical vsyncs that have passed since the last call.
+    // Check for 0 here, since sometimes GetFrameStatistics returns S_OK but
+    // with 0s in some (all?) members of DXGI_FRAME_STATISTICS.
+    unsigned src_passed = 0;
+    if (stats.SyncRefreshCount && p->last_sync_refresh_count)
+        src_passed = stats.SyncRefreshCount - p->last_sync_refresh_count;
+    p->last_sync_refresh_count = stats.SyncRefreshCount;
+
+    // Get the elapsed time passed between the above vsyncs
+    unsigned sqt_passed = 0;
+    if (stats.SyncQPCTime.QuadPart && p->last_sync_qpc_time)
+        sqt_passed = stats.SyncQPCTime.QuadPart - p->last_sync_qpc_time;
+    p->last_sync_qpc_time = stats.SyncQPCTime.QuadPart;
+
+    // If any vsyncs have passed, estimate the physical frame rate
+    if (src_passed && sqt_passed)
+        p->vsync_duration_qpc = sqt_passed / src_passed;
+    if (p->vsync_duration_qpc)
+        info->vsync_duration = qpc_to_us(sw, p->vsync_duration_qpc);
+
+    // If the physical frame rate is known and the other members of
+    // DXGI_FRAME_STATISTICS are non-0, estimate the timing of the next frame
+    if (p->vsync_duration_qpc && stats.PresentCount &&
+        stats.PresentRefreshCount && stats.SyncRefreshCount &&
+        stats.SyncQPCTime.QuadPart)
+    {
+        // PresentRefreshCount and SyncRefreshCount might refer to different
+        // frames (this can definitely occur in bitblt-mode.) Assuming mpv
+        // presents on every frame, guess the present count that relates to
+        // SyncRefreshCount.
+        unsigned expected_sync_pc = stats.PresentCount +
+            (stats.SyncRefreshCount - stats.PresentRefreshCount);
+
+        // Now guess the timestamp of the last submitted frame based on the
+        // timestamp of the frame at SyncRefreshCount and the frame rate
+        int64_t last_queue_display_time_qpc = stats.SyncQPCTime.QuadPart +
+            (submit_count - expected_sync_pc) * p->vsync_duration_qpc;
+
+        // Only set the estimated display time if it's after the last submission
+        // time. It could be before if mpv skips a lot of frames.
+        if (last_queue_display_time_qpc >= p->last_submit_qpc) {
+            info->last_queue_display_time = mp_time_us() +
+                (qpc_to_us(sw, last_queue_display_time_qpc) - qpc_us_now(sw));
+        }
+    }
 }
 
 static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
+    struct priv *p = ctx->priv;
+
     int ret = vo_w32_control(ctx->vo, events, request, arg);
+    if (request == VOCTRL_RESUME) {
+        // Reset frame statistics after pause
+        p->last_sync_refresh_count = 0;
+        p->last_sync_qpc_time = 0;
+        p->vsync_duration_qpc = 0;
+    }
     if (*events & VO_EVENT_RESIZE) {
         if (!resize(ctx))
             return VO_ERROR;
@@ -178,12 +297,17 @@ static const struct ra_swapchain_fns d3d11_swapchain = {
     .start_frame  = d3d11_start_frame,
     .submit_frame = d3d11_submit_frame,
     .swap_buffers = d3d11_swap_buffers,
+    .get_vsync    = d3d11_get_vsync,
 };
 
 static bool d3d11_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->opts = mp_get_config_group(ctx, ctx->global, &d3d11_conf);
+
+    LARGE_INTEGER perf_freq;
+    QueryPerformanceFrequency(&perf_freq);
+    p->perf_freq = perf_freq.QuadPart;
 
     struct ra_swapchain *sw = ctx->swapchain = talloc_zero(ctx, struct ra_swapchain);
     sw->priv = p;
