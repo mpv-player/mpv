@@ -501,8 +501,10 @@ static void wait_on_flip(struct ra_ctx *ctx)
         poll(fds, 1, timeout_ms);
         if (fds[0].revents & POLLIN) {
             const int ret = drmHandleEvent(p->kms->fd, &p->ev);
-            if (ret != 0)
+            if (ret != 0) {
                 MP_ERR(ctx->vo, "drmHandleEvent failed: %i\n", ret);
+                return;
+            }
         }
     }
 }
