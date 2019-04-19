@@ -78,8 +78,65 @@ static int get_feature_levels(int max_fl, int min_fl,
     return len;
 }
 
-static HRESULT create_device(struct mp_log *log, bool warp, bool debug,
-                             int max_fl, int min_fl, ID3D11Device **dev)
+static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log, char *requested_adapter_name)
+{
+    HRESULT hr = S_OK;
+    IDXGIFactory1 *factory;
+    IDXGIAdapter1 *picked_adapter = NULL;
+
+    hr = pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&factory);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Failed to create a DXGI factory: %s\n",
+                 mp_HRESULT_to_str(hr));
+        return NULL;
+    }
+
+    for (unsigned int adapter_num = 0; hr != DXGI_ERROR_NOT_FOUND; adapter_num++)
+    {
+        IDXGIAdapter1 *adapter = NULL;
+        DXGI_ADAPTER_DESC1 desc = { 0 };
+        char *adapter_description = NULL;
+
+        hr = IDXGIFactory1_EnumAdapters1(factory, adapter_num, &adapter);
+        if (FAILED(hr)) {
+            if (hr != DXGI_ERROR_NOT_FOUND) {
+                mp_fatal(log, "Failed to enumerate at adapter %u\n",
+                         adapter_num);
+            }
+            continue;
+        }
+
+        if (FAILED(IDXGIAdapter1_GetDesc1(adapter, &desc))) {
+            mp_fatal(log, "Failed to get adapter description when listing at adapter %u\n",
+                     adapter_num);
+            continue;
+        }
+
+        adapter_description = mp_to_utf8(NULL, desc.Description);
+
+        mp_verbose(log, "Adapter %u: vendor: %u, description: %s\n",
+                adapter_num, desc.VendorId,
+                adapter_description ? adapter_description : "<No Description>");
+
+        if (requested_adapter_name && adapter_description &&
+            !strcmp(requested_adapter_name, adapter_description))
+        {
+            picked_adapter = adapter;
+            break;
+        }
+
+        talloc_free(adapter_description);
+        SAFE_RELEASE(adapter);
+    }
+
+    SAFE_RELEASE(factory);
+
+    return picked_adapter;
+}
+
+static HRESULT create_device(struct mp_log *log, IDXGIAdapter1 *adapter,
+                             bool warp, bool debug, int max_fl, int min_fl,
+                             ID3D11Device **dev)
 {
     const D3D_FEATURE_LEVEL *levels;
     int levels_len = get_feature_levels(max_fl, min_fl, &levels);
@@ -91,8 +148,8 @@ static HRESULT create_device(struct mp_log *log, bool warp, bool debug,
     D3D_DRIVER_TYPE type = warp ? D3D_DRIVER_TYPE_WARP
                                 : D3D_DRIVER_TYPE_HARDWARE;
     UINT flags = debug ? D3D11_CREATE_DEVICE_DEBUG : 0;
-    return pD3D11CreateDevice(NULL, type, NULL, flags, levels, levels_len,
-        D3D11_SDK_VERSION, dev, NULL, NULL);
+    return pD3D11CreateDevice((IDXGIAdapter *)adapter, adapter ? D3D_DRIVER_TYPE_UNKNOWN : type,
+                              NULL, flags, levels, levels_len, D3D11_SDK_VERSION, dev, NULL, NULL);
 }
 
 // Create a Direct3D 11 device for rendering and presentation. This is meant to
@@ -105,6 +162,9 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
     bool warp = opts->force_warp;
     int max_fl = opts->max_feature_level;
     int min_fl = opts->min_feature_level;
+    // Normalize nullptr and an empty string to nullptr to simplify handling.
+    char *adapter_name = (opts->adapter_name && *(opts->adapter_name)) ?
+                         opts->adapter_name : NULL;
     ID3D11Device *dev = NULL;
     IDXGIDevice1 *dxgi_dev = NULL;
     IDXGIAdapter1 *adapter = NULL;
@@ -120,13 +180,21 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         goto done;
     }
 
+    adapter = get_d3d11_adapter(log, adapter_name);
+
+    if (adapter_name && !adapter) {
+        mp_warn(log, "Adapter '%s' was not found in the system! "
+                     "Will fall back to the default adapter.\n",
+                 adapter_name);
+    }
+
     // Return here to retry creating the device
     do {
         // Use these default feature levels if they are not set
         max_fl = max_fl ? max_fl : D3D_FEATURE_LEVEL_11_0;
         min_fl = min_fl ? min_fl : D3D_FEATURE_LEVEL_9_1;
 
-        hr = create_device(log, warp, opts->debug, max_fl, min_fl, &dev);
+        hr = create_device(log, adapter, warp, opts->debug, max_fl, min_fl, &dev);
         if (SUCCEEDED(hr))
             break;
 
@@ -163,6 +231,10 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
                  mp_HRESULT_to_str(hr));
         goto done;
     } while (true);
+
+    // if we picked an adapter, release it here - we're taking another
+    // from the device.
+    SAFE_RELEASE(adapter);
 
     hr = ID3D11Device_QueryInterface(dev, &IID_IDXGIDevice1, (void**)&dxgi_dev);
     if (FAILED(hr)) {
