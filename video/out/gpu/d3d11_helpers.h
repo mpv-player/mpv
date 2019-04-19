@@ -52,6 +52,11 @@ struct d3d11_device_opts {
     // not supported, device creation will fail.
     // If unset, defaults to D3D_FEATURE_LEVEL_9_1
     int min_feature_level;
+
+    // The adapter name to utilize if a specific adapter is required
+    // If unset, the default adapter will be utilized when creating
+    // a device.
+    char *adapter_name;
 };
 
 bool mp_d3d11_create_present_device(struct mp_log *log,
