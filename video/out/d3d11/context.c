@@ -31,6 +31,7 @@ struct d3d11_opts {
     int warp;
     int flip;
     int sync_interval;
+    char *adapter_name;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -52,6 +53,7 @@ const struct m_sub_options d3d11_conf = {
                     {"9_1", D3D_FEATURE_LEVEL_9_1})),
         OPT_FLAG("d3d11-flip", flip, 0),
         OPT_INTRANGE("d3d11-sync-interval", sync_interval, 0, 0, 4),
+        OPT_STRING("d3d11-adapter", adapter_name, 0),
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -59,6 +61,7 @@ const struct m_sub_options d3d11_conf = {
         .warp = -1,
         .flip = 1,
         .sync_interval = 1,
+        .adapter_name = NULL,
     },
     .size = sizeof(struct d3d11_opts)
 };
