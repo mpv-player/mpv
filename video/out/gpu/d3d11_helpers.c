@@ -29,16 +29,22 @@
 
 // Windows 8 enum value, not present in mingw-w64 headers
 #define DXGI_ADAPTER_FLAG_SOFTWARE (2)
+typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
 
 static pthread_once_t d3d11_once = PTHREAD_ONCE_INIT;
 static PFN_D3D11_CREATE_DEVICE pD3D11CreateDevice = NULL;
+static PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = NULL;
 static void d3d11_load(void)
 {
-    HMODULE d3d11 = LoadLibraryW(L"d3d11.dll");
-    if (!d3d11)
+    HMODULE d3d11   = LoadLibraryW(L"d3d11.dll");
+    HMODULE dxgilib = LoadLibraryW(L"dxgi.dll");
+    if (!d3d11 || !dxgilib)
         return;
+
     pD3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)
         GetProcAddress(d3d11, "D3D11CreateDevice");
+    pCreateDXGIFactory1 = (PFN_CREATE_DXGI_FACTORY)
+        GetProcAddress(dxgilib, "CreateDXGIFactory1");
 }
 
 // Get a const array of D3D_FEATURE_LEVELs from max_fl to min_fl (inclusive)
@@ -106,8 +112,11 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
     HRESULT hr;
 
     pthread_once(&d3d11_once, d3d11_load);
-    if (!pD3D11CreateDevice) {
-        mp_fatal(log, "Failed to load d3d11.dll\n");
+    if (!pD3D11CreateDevice || !pCreateDXGIFactory1) {
+        mp_fatal(log, "Failed to load base d3d11 functionality: "
+                      "CreateDevice: %s, CreateDXGIFactory1: %s\n",
+                 pD3D11CreateDevice ? "success" : "failure",
+                 pCreateDXGIFactory1 ? "success": "failure");
         goto done;
     }
 
