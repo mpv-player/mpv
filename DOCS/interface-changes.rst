@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
+    - add `--d3d11-adapter` to enable explicit selection of a D3D11 rendering
+      adapter by name.
     - rename `--drm-osd-plane-id` to `--drm-draw-plane`, `--drm-video-plane-id` to
       `--drm-drmprime-video-plane` and `--drm-osd-size` to `--drm-draw-surface-size`
       to better reflect what the options actually control, that the values they
