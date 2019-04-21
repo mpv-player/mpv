@@ -125,6 +125,11 @@ build_options = [
         'desc': 'generate a clang compilation database',
         'func': check_true,
         'default': 'disable',
+    } , {
+        'name': '--swift-static',
+        'desc': 'static Swift linking',
+        'deps': 'os-darwin',
+        'func': check_ctx_vars('SWIFT_LIB_STATIC')
     }
 ]
 

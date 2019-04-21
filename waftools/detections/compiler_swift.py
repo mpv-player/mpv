@@ -30,10 +30,23 @@ def __add_swift_flags(ctx):
     if ctx.is_optimization():
         ctx.env.SWIFT_FLAGS.append("-O")
 
-def __add_swift_library_linking_flags(ctx, swift_library):
+def __add_static_swift_library_linking_flags(ctx, swift_library):
     ctx.env.append_value('LINKFLAGS', [
         '-L%s' % swift_library,
         '-Xlinker', '-force_load_swift_libs', '-lc++',
+    ])
+
+def __add_dynamic_swift_library_linking_flags(ctx, swift_library):
+    ctx.env.append_value('LINKFLAGS', [ '-L%s' % swift_library ])
+
+    #ABI compatibility
+    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("5.0"):
+        ctx.env.append_value('LINKFLAGS', [
+            '-Xlinker', '-rpath', '-Xlinker', '/usr/lib/swift',
+        ])
+
+    ctx.env.append_value('LINKFLAGS', [
+        '-Xlinker', '-rpath', '-Xlinker', swift_library,
     ])
 
 def __find_swift_library(ctx):
@@ -90,9 +103,15 @@ def __find_swift_library(ctx):
     ctx.start_msg('Checking for static Swift Library')
     if 'SWIFT_LIB_STATIC' in swift_libraries:
         ctx.end_msg(swift_libraries['SWIFT_LIB_STATIC'])
-        __add_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_STATIC'])
+        ctx.env['SWIFT_LIB_STATIC'] = swift_libraries['SWIFT_LIB_STATIC']
     else:
         ctx.end_msg(False)
+
+    enableStatic = getattr(ctx.options, 'enable_swift-static')
+    if (enableStatic or enableStatic == None) and 'SWIFT_LIB_STATIC' in swift_libraries:
+        __add_static_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_STATIC'])
+    else:
+        __add_dynamic_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_DYNAMIC'])
 
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
