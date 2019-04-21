@@ -55,6 +55,8 @@ class TitleBar: NSVisualEffectView {
                            frame.size.width, TitleBar.height)
         cocoaCB = ccb
         super.init(frame: f)
+        buttons.forEach { $0.isHidden = true }
+        isHidden = true
         alphaValue = 0
         blendingMode = .withinWindow
         autoresizingMask = [.width, .minYMargin]
