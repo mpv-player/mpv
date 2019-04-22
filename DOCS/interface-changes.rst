@@ -78,6 +78,8 @@ Interface changes
       If --demuxer-thread=no is used, there are no guarantees.
     - remove `--macos-title-bar-style`, replaced by `--macos-title-bar-material`
       and `--macos-title-bar-appearance`.
+    - The default for `--vulkan-async-compute` has changed to `yes` from `no`
+      with the move to libplacebo as the back-end for vulkan rendering.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

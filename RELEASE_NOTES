@@ -1,3 +1,55 @@
+Release 0.30.0
+==============
+
+This release has replaced the internal Vulkan rendering abstraction
+with libplacebo's more up-to-date implementation.
+
+Features
+--------
+
+Added
+~~~~~
+
+- vo_gpu: Vulkan API implementation based on libplacebo.
+
+Changed
+~~~~~~~
+
+
+Deprecated
+~~~~~~~~~~
+
+
+Removed
+~~~~~~~
+
+- vo_gpu: Internal Vulkan API implementation.
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+
+Changed
+~~~~~~~
+
+
+Deprecated
+~~~~~~~~~~
+
+
+Removed
+~~~~~~~
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+
+
 Release 0.29.0
 ==============
 
