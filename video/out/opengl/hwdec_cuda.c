@@ -59,7 +59,9 @@ struct priv_owner {
                      const struct ra_format *format, int n);
     void (*ext_uninit)(struct ra_hwdec_mapper *mapper, int n);
 
+#if HAVE_VULKAN
     enum pl_handle_type handle_type;
+#endif
 };
 
 struct ext_gl {
