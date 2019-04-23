@@ -233,9 +233,7 @@ static void update_read_stats(struct demuxer *demuxer)
         struct nested_stream *nest = &priv->nested[n];
 
         int64_t cur = nest->id->bytes_read;
-        int64_t new = cur - nest->last_bytes;
         nest->last_bytes = cur;
-        demuxer->total_unbuffered_read_bytes += new;
     }
 }
 
