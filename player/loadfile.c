@@ -974,6 +974,7 @@ static void *open_demux_thread(void *ctx)
     struct demuxer_params p = {
         .force_format = mpctx->open_format,
         .stream_flags = mpctx->open_url_flags,
+        .initial_readahead = true,
         .stream_record = true,
     };
     mpctx->open_res_demuxer =

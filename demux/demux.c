@@ -88,7 +88,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 };
 
 struct demux_opts {
-    int enable_cache;
     int64_t max_bytes;
     int64_t max_bytes_bw;
     double min_secs;
@@ -106,8 +105,6 @@ struct demux_opts {
 
 const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
-        OPT_CHOICE("cache", enable_cache, 0,
-                   ({"no", 0}, {"auto", -1}, {"yes", 1})),
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
         // (The MAX_BYTES sizes may not be accurate because the max field is
         // of double type.)
@@ -124,7 +121,6 @@ const struct m_sub_options demux_conf = {
     },
     .size = sizeof(struct demux_opts),
     .defaults = &(const struct demux_opts){
-        .enable_cache = -1, // auto
         .max_bytes = 150 * 1024 * 1024,
         .max_bytes_bw = 50 * 1024 * 1024,
         .min_secs = 1.0,
@@ -225,6 +221,8 @@ struct demux_internal {
     // Transient state.
     double duration;
     // Cached state.
+    bool force_cache_update;
+    struct stream_cache_info stream_cache_info;
     int64_t stream_size;
     // Updated during init only.
     char *stream_base_filename;
@@ -1739,6 +1737,9 @@ static void execute_trackswitch(struct demux_internal *in)
     if (in->d_thread->desc->control)
         in->d_thread->desc->control(in->d_thread, DEMUXER_CTRL_SWITCHED_TRACKS, 0);
 
+    stream_control(in->d_thread->stream, STREAM_CTRL_SET_READAHEAD,
+                   &(int){any_selected});
+
     pthread_mutex_lock(&in->lock);
 }
 
@@ -1786,6 +1787,13 @@ static bool thread_work(struct demux_internal *in)
     if (!in->eof) {
         if (read_packet(in))
             return true; // read_packet unlocked, so recheck conditions
+    }
+    if (in->force_cache_update) {
+        pthread_mutex_unlock(&in->lock);
+        update_cache(in);
+        pthread_mutex_lock(&in->lock);
+        in->force_cache_update = false;
+        return true;
     }
     return false;
 }
@@ -2307,19 +2315,6 @@ static void fixup_metadata(struct demux_internal *in)
     }
 }
 
-// Return whether "heavy" caching on this stream is enabled. By default, this
-// corresponds to whether the source stream is considered in the network. The
-// only effect should be adjusting display behavior (of cache stats etc.), and
-// possibly switching between which set of options influence cache settings.
-bool demux_is_network_cached(demuxer_t *demuxer)
-{
-    struct demux_internal *in = demuxer->in;
-    bool use_cache = demuxer->is_network;
-    if (in->opts->enable_cache >= 0)
-        use_cache = in->opts->enable_cache == 1;
-    return use_cache;
-}
-
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -2349,6 +2344,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .extended_ctrls = stream->extended_ctrls,
     };
     demuxer->seekable = stream->seekable;
+    if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)
+        demuxer->seekable = false;
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){
@@ -2415,8 +2412,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         fixup_metadata(in);
         in->events = DEMUX_EVENT_ALL;
         demux_update(demuxer);
+        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD,
+                       &(int){params ? params->initial_readahead : false});
         int seekable = opts->seekable_cache;
-        if (demux_is_network_cached(demuxer)) {
+        if (demuxer->is_network || stream->caching) {
             in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
             if (seekable < 0)
                 seekable = 1;
@@ -2528,6 +2527,8 @@ struct demuxer *demux_open_url(const char *url,
         talloc_free(priv_cancel);
         return NULL;
     }
+    if (!params->disable_cache)
+        stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
         talloc_steal(d->in, priv_cancel);
@@ -3084,12 +3085,15 @@ static void update_cache(struct demux_internal *in)
 
     // Don't lock while querying the stream.
     struct mp_tags *stream_metadata = NULL;
+    struct stream_cache_info stream_cache_info = {.size = -1};
 
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_INFO, &stream_cache_info);
 
     pthread_mutex_lock(&in->lock);
     in->stream_size = stream_size;
+    in->stream_cache_info = stream_cache_info;
     if (stream_metadata) {
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
@@ -3104,7 +3108,18 @@ static void update_cache(struct demux_internal *in)
 // must be called locked
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
+    // If the cache is active, wake up the thread to possibly update cache state.
+    if (in->stream_cache_info.size >= 0) {
+        in->force_cache_update = true;
+        pthread_cond_signal(&in->wakeup);
+    }
+
     switch (cmd) {
+    case STREAM_CTRL_GET_CACHE_INFO:
+        if (in->stream_cache_info.size < 0)
+            return STREAM_UNSUPPORTED;
+        *(struct stream_cache_info *)arg = in->stream_cache_info;
+        return STREAM_OK;
     case STREAM_CTRL_GET_SIZE:
         if (in->stream_size < 0)
             return STREAM_UNSUPPORTED;

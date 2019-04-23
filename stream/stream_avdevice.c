@@ -22,6 +22,7 @@
 static int open_f(stream_t *stream)
 {
     stream->demuxer = "lavf";
+    stream->allow_caching = false;
 
     return STREAM_OK;
 }

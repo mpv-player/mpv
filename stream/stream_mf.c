@@ -31,6 +31,7 @@ static int
 mf_stream_open (stream_t *stream)
 {
   stream->demuxer = "mf";
+  stream->allow_caching = false;
 
   return STREAM_OK;
 }

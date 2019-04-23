@@ -520,6 +520,7 @@ static int open_s_internal(stream_t *stream)
     stream->close = stream_dvdnav_close;
     stream->demuxer = "+disc";
     stream->lavf_type = "mpeg";
+    stream->allow_caching = false;
 
     return STREAM_OK;
 }

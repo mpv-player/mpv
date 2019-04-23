@@ -6,6 +6,7 @@
 static int s_open (struct stream *stream)
 {
     stream->demuxer = "edl";
+    stream->allow_caching = false;
 
     return STREAM_OK;
 }
