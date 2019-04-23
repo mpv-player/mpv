@@ -630,8 +630,7 @@ or at runtime with the ``apply-profile <name>`` command.
 
         # a profile that can be enabled with --profile=big-cache
         [big-cache]
-        cache=yes
-        demuxer-max-bytes=123400KiB
+        cache=123400
         demuxer-readahead-secs=20
 
         [slow]
