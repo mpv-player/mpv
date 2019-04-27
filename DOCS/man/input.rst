@@ -585,6 +585,15 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``audio-reload [<id>]``
     Reload the given audio tracks. See ``sub-reload`` command.
 
+``video-add <url> [<flags> [<title> [<lang>]]]``
+    Load the given video file. See ``sub-add`` command.
+
+``video-remove [<id>]``
+    Remove the given video track. See ``sub-remove`` command.
+
+``video-reload [<id>]``
+    Reload the given video tracks. See ``sub-reload`` command.
+
 ``rescan-external-files [<mode>]``
     Rescan external files according to the current ``--sub-auto`` and
     ``--audio-file-auto`` settings. This can be used to auto-load external
