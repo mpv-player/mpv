@@ -196,6 +196,7 @@ int msync(void *addr, size_t length, int flags);
 // These are stubs since there is not anything that helps with this on Windows.
 #define locale_t int
 #define LC_ALL_MASK 0
+#define LC_CTYPE_MASK 0
 locale_t newlocale(int, const char *, locale_t);
 locale_t uselocale(locale_t);
 void freelocale(locale_t);
