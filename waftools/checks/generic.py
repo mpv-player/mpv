@@ -1,5 +1,6 @@
 import os
 import inflector
+from distutils.version import StrictVersion
 from waflib.ConfigSet import ConfigSet
 from waflib import Utils
 
@@ -8,7 +9,7 @@ __all__ = [
     "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "check_true", "any_version",
     "load_fragment", "check_stub", "check_ctx_vars", "check_program",
-    "check_pkg_config_datadir"]
+    "check_pkg_config_datadir", "check_macos_sdk"]
 
 any_version = None
 
@@ -186,3 +187,13 @@ def load_fragment(fragment):
     fragment_code = fp.read()
     fp.close()
     return fragment_code
+
+def check_macos_sdk(version):
+    def fn(ctx, dependency_identifier):
+        if ctx.env.MACOS_SDK_VERSION:
+            if StrictVersion(ctx.env.MACOS_SDK_VERSION) >= StrictVersion(version):
+                ctx.define(inflector.define_key(dependency_identifier), 1)
+                return True
+        return False
+
+    return fn
