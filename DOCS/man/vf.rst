@@ -468,8 +468,9 @@ Available mpv-only filters are:
     other userdata type will result in hard crashes.
 
 ``vavpp``
-    VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=gpu``
-    only. Currently deinterlaces. This filter is automatically inserted if
+    VA-API video post processing. Requires the system to support VA-API,
+    i.e. Linux/BSD only. Works with ``--vo=vaapi`` and ``--vo=gpu`` only.
+    Currently deinterlaces. This filter is automatically inserted if
     deinterlacing is requested (either using the ``d`` key, by default mapped to
     the command ``cycle deinterlace``, or the ``--deinterlace`` option).
 
