@@ -1,4 +1,5 @@
 import re
+import string
 import os.path
 from waflib import Utils
 from distutils.version import StrictVersion
@@ -116,9 +117,18 @@ def __find_swift_library(ctx):
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
     sdk = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
+    sdk_build_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-build-version' ])
+
     if sdk:
         ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
+
+        if sdk_build_version:
+            verRe = re.compile("(\d+)(\D+)(\d+)")
+            version_parts = verRe.search(sdk_build_version)
+            major = int(version_parts.group(1))-4
+            minor = string.ascii_lowercase.index(version_parts.group(2).lower())
+            ctx.env.MACOS_SDK_VERSION = '10.' + str(major) + '.' + str(minor)
     else:
         ctx.end_msg(False)
 
