@@ -61,6 +61,7 @@ struct priv {
     char *cfg_host;
     int cfg_buffer;
     int cfg_latency_hacks;
+    int cfg_allow_suspended;
 };
 
 #define GENERIC_ERR_MSG(str) \
@@ -482,7 +483,7 @@ static int init(struct ao *ao)
         pa_threaded_mainloop_wait(priv->mainloop);
     }
 
-    if (pa_stream_is_suspended(priv->stream)) {
+    if (pa_stream_is_suspended(priv->stream) && !priv->cfg_allow_suspended) {
         MP_ERR(ao, "The stream is suspended. Bailing out.\n");
         goto unlock_and_fail;
     }
@@ -837,6 +838,7 @@ const struct ao_driver audio_out_pulse = {
         OPT_STRING("host", cfg_host, 0),
         OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", 0})),
         OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
+        OPT_FLAG("allow-suspended", cfg_allow_suspended, 0),
         {0}
     },
     .options_prefix = "pulse",

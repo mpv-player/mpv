@@ -152,6 +152,10 @@ Available audio output drivers are:
         If you have stuttering video when using pulse, try to enable this
         option. (Or try to update PulseAudio.)
 
+    ``--pulse-allow-suspended=<yes|no>``
+        Allow mpv to use PulseAudio even if the sink is suspended (default: no).
+        Can be useful if PulseAudio is running as a bridge to jack and mpv has its sink-input set to the one jack is using.
+
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
     1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
