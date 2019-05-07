@@ -116,14 +116,26 @@ def __find_swift_library(ctx):
 
 def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
-    sdk = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
-    sdk_build_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-build-version' ])
+    sdk = None
+    sdk_build_version = None
+
+    #look for set macOS SDK paths and version in passed environment variables
+    if 'MACOS_SDK' in ctx.environ:
+        sdk = ctx.environ['MACOS_SDK']
+    if 'MACOS_SDK_VERSION' in ctx.environ:
+        ctx.env.MACOS_SDK_VERSION = ctx.environ['MACOS_SDK_VERSION']
+
+    #find macOS SDK paths and version
+    if not sdk:
+        sdk = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
+    if not ctx.env.MACOS_SDK_VERSION:
+        sdk_build_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-build-version' ])
 
     if sdk:
         ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
 
-        if sdk_build_version:
+        if sdk_build_version and not ctx.env.MACOS_SDK_VERSION:
             verRe = re.compile("(\d+)(\D+)(\d+)")
             version_parts = verRe.search(sdk_build_version)
             major = int(version_parts.group(1))-4
