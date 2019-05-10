@@ -842,19 +842,16 @@ static bool update_fullscreen_state(struct vo_w32_state *w32)
     w32->current_fs = new_fs;
 
     if (toggle_fs) {
-        RECT rc;
-        char msg[50];
         if (w32->current_fs) {
             // Save window rect when switching to fullscreen.
-            rc = w32->prev_windowrc = w32->windowrc;
-            sprintf(msg, "save window bounds");
+            w32->prev_windowrc = w32->windowrc;
+            MP_VERBOSE(w32, "save window bounds: %d:%d:%d:%d\n",
+                       (int)w32->windowrc.left, (int)w32->windowrc.top,
+                       (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
         } else {
             // Restore window rect when switching from fullscreen.
-            rc = w32->windowrc = w32->prev_windowrc;
-            sprintf(msg, "restore window bounds");
+            w32->windowrc = w32->prev_windowrc;
         }
-        MP_VERBOSE(w32, "%s: %d:%d:%d:%d\n", msg,
-                   (int)rc.left, (int)rc.top, (int)rect_w(rc), (int)rect_h(rc));
     }
 
     if (w32->current_fs)
