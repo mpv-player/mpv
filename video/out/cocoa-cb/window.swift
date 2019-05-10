@@ -260,18 +260,18 @@ class Window: NSWindow, NSWindowDelegate {
         if state {
             if ontopLevel is Int {
                 switch ontopLevel as? Int {
-                case -1:
+                case .some(-1):
                     level = Int(CGWindowLevelForKey(.floatingWindow))
-                case -2:
+                case .some(-2):
                     level = Int(CGWindowLevelForKey(.statusWindow))+1
                 default:
                     level = ontopLevel as? Int ?? stdLevel
                 }
             } else {
                 switch ontopLevel as? String {
-                case "window":
+                case .some("window"):
                     level = Int(CGWindowLevelForKey(.floatingWindow))
-                case "system":
+                case .some("system"):
                     level = Int(CGWindowLevelForKey(.statusWindow))+1
                 default:
                     level = Int(ontopLevel as? String ?? "") ?? stdLevel
