@@ -19,7 +19,9 @@
 #include <stdio.h>
 #include <windows.h>
 
-void cr_perror(const wchar_t *prefix)
+int wmain(int argc, wchar_t **argv, wchar_t **envp);
+
+static void cr_perror(const wchar_t *prefix)
 {
     wchar_t *error;
 
@@ -34,7 +36,7 @@ void cr_perror(const wchar_t *prefix)
     LocalFree(error);
 }
 
-int cr_runproc(wchar_t *name, wchar_t *cmdline)
+static int cr_runproc(wchar_t *name, wchar_t *cmdline)
 {
     STARTUPINFOW si;
     STARTUPINFOW our_si;
