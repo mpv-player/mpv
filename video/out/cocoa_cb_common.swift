@@ -524,7 +524,8 @@ class CocoaCB: NSObject {
     }
 
     func shutdown(_ destroy: Bool = false) {
-        isShuttingDown = window?.isAnimating ?? false || window?.isInFullscreen ?? false
+        isShuttingDown = window?.isAnimating ?? false ||
+                         window?.isInFullscreen ?? false && mpv.getBoolProperty("native-fs")
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }
