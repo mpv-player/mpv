@@ -1063,6 +1063,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
+    if (wl->current_output->output)
+        wl_output_destroy(wl->current_output->output);
+
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
@@ -1071,6 +1074,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->xkb_context)
         xkb_context_unref(wl->xkb_context);
+
+    if (wl->xkb_state)
+        xkb_state_unref(wl->xkb_state);
+
+    if (wl->xkb_keymap)
+        xkb_keymap_unref(wl->xkb_keymap);
 
     if (wl->idle_inhibitor)
         zwp_idle_inhibitor_v1_destroy(wl->idle_inhibitor);
@@ -1084,6 +1093,9 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->shm)
         wl_shm_destroy(wl->shm);
 
+    if (wl->dnd_ddev)
+        wl_data_device_destroy(wl->dnd_ddev);
+
     if (wl->dnd_devman)
         wl_data_device_manager_destroy(wl->dnd_devman);
 
@@ -1093,11 +1105,32 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->xdg_decoration_manager)
         zxdg_decoration_manager_v1_destroy(wl->xdg_decoration_manager);
 
+    if (wl->xdg_toplevel)
+        xdg_toplevel_destroy(wl->xdg_toplevel);
+
+    if (wl->xdg_surface)
+        xdg_surface_destroy(wl->xdg_surface);
+
+    if (wl->compositor)
+        wl_compositor_destroy(wl->compositor);
+
     if (wl->surface)
         wl_surface_destroy(wl->surface);
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
+
+    if (wl->pointer)
+        wl_pointer_destroy(wl->pointer);
+
+    if (wl->keyboard)
+        wl_keyboard_destroy(wl->keyboard);
+
+    if (wl->seat)
+        wl_seat_destroy(wl->seat);
+
+    if (wl->registry)
+        wl_registry_destroy(wl->registry);
 
     if (wl->display) {
         close(wl_display_get_fd(wl->display));
