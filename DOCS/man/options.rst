@@ -2921,6 +2921,14 @@ Demuxer
     requests), seeking will be disabled. This option can forcibly enable it.
     For seeks within the cache, there's a good chance of success.
 
+``--demuxer-cache-wait=<yes|no>``
+    Before starting playback, read data until either the end of the file was
+    reached, or the demuxer cache has reached maximum capacity. Only once this
+    is done, playback starts. This intentionally happens before the initial
+    seek triggered with ``--start``. This does not change any runtime behavior
+    after the initial caching. This option is useless if the file cannot be
+    cached completely.
+
 Input
 -----
 

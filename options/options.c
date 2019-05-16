@@ -430,6 +430,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
     OPT_DOUBLE("demuxer-termination-timeout", demux_termination_timeout, 0),
+    OPT_FLAG("demuxer-cache-wait", demuxer_cache_wait, 0),
     OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pause, 0),
     OPT_FLAG("cache-pause-initial", cache_pause_initial, 0),
