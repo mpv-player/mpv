@@ -1399,7 +1399,10 @@ static void play_current_file(struct MPContext *mpctx)
 
     handle_force_window(mpctx, false);
 
-    MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
+    if (mpctx->playlist->first != mpctx->playing ||
+        mpctx->playlist->last != mpctx->playing ||
+        mpctx->playing->num_redirects)
+        MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
     assert(mpctx->demuxer == NULL);
 
