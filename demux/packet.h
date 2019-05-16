@@ -24,16 +24,17 @@
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
-    int len;
-    unsigned char *buffer;
-
     double pts;
     double dts;
     double duration;
-    bool keyframe;
-
     int64_t pos;        // position in source file byte stream
+
+    unsigned char *buffer;
+    int len;
+
     int stream;         // source stream index (typically sh_stream.index)
+
+    bool keyframe;
 
     // segmentation (ordered chapters, EDL)
     bool segmented;
