@@ -1500,7 +1500,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     adjust_seek_range_on_packet(ds, dp);
 
-    // Possible update duration based on highest TS demuxed (but ignore subs).
+    // Possibly update duration based on highest TS demuxed (but ignore subs).
     if (stream->type != STREAM_SUB) {
         if (dp->segmented)
             ts = MP_PTS_MIN(ts, dp->end);
@@ -1516,7 +1516,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         }
     }
 
-    // (should preferable be outside of the lock)
+    // (should preferably be outside of the lock)
     if (in->enable_recording && !in->recorder &&
         in->opts->record_file && in->opts->record_file[0])
     {
