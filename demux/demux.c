@@ -1297,6 +1297,10 @@ static void attempt_range_joining(struct demux_internal *in)
         struct demux_queue *q2 = next->streams[n];
 
         struct demux_stream *ds = in->streams[n]->ds;
+        assert(ds->queue == q1);
+
+        // First new packet that is appended to the current range.
+        struct demux_packet *join_point = q2->head;
 
         if (q2->head) {
             if (q1->head) {
@@ -1325,6 +1329,10 @@ static void attempt_range_joining(struct demux_internal *in)
         for (int i = 0; i < q2->num_index; i++)
             add_index_entry(q1, q2->index[i]);
         q2->num_index = 0;
+
+        if (ds->selected && !ds->reader_head)
+            ds->reader_head = join_point;
+        ds->skip_to_keyframe = false;
 
         recompute_buffers(ds);
         in->fw_bytes += ds->fw_bytes;
