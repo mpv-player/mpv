@@ -1516,6 +1516,11 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         }
     }
 
+    // Don't process the packet further if it's skipped by the previous seek
+    // (see reader_head check/assignment above).
+    if (!ds->reader_head)
+        return;
+
     // (should preferably be outside of the lock)
     if (in->enable_recording && !in->recorder &&
         in->opts->record_file && in->opts->record_file[0])
