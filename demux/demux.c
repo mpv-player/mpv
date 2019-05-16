@@ -1100,6 +1100,17 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
     pthread_mutex_unlock(&in->lock);
 }
 
+void demux_start_prefetch(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    pthread_mutex_lock(&in->lock);
+    in->reading = true;
+    pthread_cond_signal(&in->wakeup);
+    pthread_mutex_unlock(&in->lock);
+}
+
 const char *stream_type_name(enum stream_type type)
 {
     switch (type) {

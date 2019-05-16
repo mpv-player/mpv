@@ -1534,6 +1534,19 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     }
 
+    demux_start_prefetch(mpctx->demuxer);
+
+    if (opts->demuxer_cache_wait) {
+        while (!mpctx->stop_play) {
+            struct demux_reader_state s;
+            demux_get_reader_state(mpctx->demuxer, &s);
+            if (s.idle)
+                break;
+
+            mp_idle(mpctx);
+        }
+    }
+
     double play_start_pts = get_play_start_pts(mpctx);
     if (play_start_pts != MP_NOPTS_VALUE) {
         /*
