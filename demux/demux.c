@@ -1821,6 +1821,27 @@ static void *demux_thread(void *pctx)
     return NULL;
 }
 
+// Low-level part of dequeueing a packet.
+static struct demux_packet *advance_reader_head(struct demux_stream *ds)
+{
+    struct demux_packet *pkt = ds->reader_head;
+    if (!pkt)
+        return NULL;
+
+    ds->reader_head = pkt->next;
+
+    // Update cached packet queue state.
+    ds->fw_packs--;
+    size_t bytes = demux_packet_estimate_total_size(pkt);
+    ds->fw_bytes -= bytes;
+    ds->in->fw_bytes -= bytes;
+
+    ds->last_ret_pos = pkt->pos;
+    ds->last_ret_dts = pkt->dts;
+
+    return pkt;
+}
+
 static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 {
     if (ds->sh->attached_picture) {
@@ -1836,17 +1857,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     }
     if (!ds->reader_head || ds->in->blocked)
         return NULL;
-    struct demux_packet *pkt = ds->reader_head;
-    ds->reader_head = pkt->next;
-
-    // Update cached packet queue state.
-    ds->fw_packs--;
-    size_t bytes = demux_packet_estimate_total_size(pkt);
-    ds->fw_bytes -= bytes;
-    ds->in->fw_bytes -= bytes;
-
-    ds->last_ret_pos = pkt->pos;
-    ds->last_ret_dts = pkt->dts;
+    struct demux_packet *pkt = advance_reader_head(ds);
 
     // The returned packet is mutated etc. and will be owned by the user.
     pkt = demux_copy_packet(pkt);
