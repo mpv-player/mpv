@@ -616,7 +616,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     vo_redraw(mpctx->video_out);
 }
 
-static void handle_pause_on_low_cache(struct MPContext *mpctx)
+static void handle_update_cache(struct MPContext *mpctx)
 {
     bool force_update = false;
     struct MPOpts *opts = mpctx->opts;
@@ -1005,7 +1005,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->video_status < STATUS_READY)
         return;
 
-    handle_pause_on_low_cache(mpctx);
+    handle_update_cache(mpctx);
 
     if (mpctx->video_status == STATUS_READY) {
         mpctx->video_status = STATUS_PLAYING;
@@ -1135,7 +1135,7 @@ void run_playloop(struct MPContext *mpctx)
         mp_wakeup_core(mpctx);
     mp_wait_events(mpctx);
 
-    handle_pause_on_low_cache(mpctx);
+    handle_update_cache(mpctx);
 
     mp_process_input(mpctx);
 
@@ -1152,6 +1152,7 @@ void mp_idle(struct MPContext *mpctx)
     mp_wait_events(mpctx);
     mp_process_input(mpctx);
     handle_command_updates(mpctx);
+    handle_update_cache(mpctx);
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);
     update_osd_msg(mpctx);
