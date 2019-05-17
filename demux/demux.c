@@ -175,10 +175,13 @@ struct demux_internal {
     // Do this to allow the decoder thread to select streams before starting.
     bool reading;
 
-    // Set if we know that we are at the start of the file. This is used to
+    // Set if we just performed a seek, without reading packets yet. Used to
     // avoid a redundant initial seek after enabling streams. We could just
     // allow it, but to avoid buggy seeking affecting normal playback, we don't.
-    bool initial_state;
+    bool after_seek;
+    // Set in addition to after_seek if we think we seeked to the start of the
+    // file (or if the demuxer was just opened).
+    bool after_seek_to_start;
 
     bool tracks_switched;       // thread needs to inform demuxer of this
 
@@ -1419,7 +1422,8 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
     struct demux_internal *in = ds->in;
 
-    in->initial_state = false;
+    in->after_seek = false;
+    in->after_seek_to_start = false;
 
     double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
     if (dp->segmented)
@@ -1616,7 +1620,7 @@ static bool read_packet(struct demux_internal *in)
     if (!read_more && !prefetch_more && !refresh_more)
         return false;
 
-    if (in->initial_state) {
+    if (in->after_seek_to_start) {
         for (int n = 0; n < in->num_streams; n++)
             in->current_range->streams[n]->is_bof = in->streams[n]->ds->selected;
     }
@@ -1624,7 +1628,8 @@ static bool read_packet(struct demux_internal *in)
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
     in->idle = false;
-    in->initial_state = false;
+    in->after_seek = false;
+    in->after_seek_to_start = false;
     pthread_mutex_unlock(&in->lock);
 
     struct demuxer *demux = in->d_thread;
@@ -1767,7 +1772,10 @@ static void execute_seek(struct demux_internal *in)
     in->seeking_in_progress = pts;
     in->demux_ts = MP_NOPTS_VALUE;
     in->low_level_seeks += 1;
-    in->initial_state = false;
+    in->after_seek = true;
+    in->after_seek_to_start =
+        !(flags & (SEEK_FORWARD | SEEK_FACTOR)) &&
+        pts <= in->d_thread->start_time;
 
     pthread_mutex_unlock(&in->lock);
 
@@ -2357,7 +2365,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .min_secs = opts->min_secs,
         .max_bytes = opts->max_bytes,
         .max_bytes_bw = opts->max_bytes_bw,
-        .initial_state = true,
+        .after_seek = true, // (assumed identical to initial demuxer state)
+        .after_seek_to_start = true,
         .highest_av_pts = MP_NOPTS_VALUE,
         .seeking_in_progress = MP_NOPTS_VALUE,
         .demux_ts = MP_NOPTS_VALUE,
@@ -2957,7 +2966,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
         ds->selected = selected;
         update_stream_selection_state(in, ds);
         in->tracks_switched = true;
-        if (ds->selected && !in->initial_state)
+        if (ds->selected && !in->after_seek)
             initiate_refresh_seek(in, ds, MP_ADD_PTS(ref_pts, -in->ts_offset));
         if (in->threading) {
             pthread_cond_signal(&in->wakeup);
