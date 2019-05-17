@@ -3221,6 +3221,8 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
                     .start = MP_ADD_PTS(range->seek_start, in->ts_offset),
                     .end = MP_ADD_PTS(range->seek_end, in->ts_offset),
                 };
+            r->bof_cached |= range->is_bof;
+            r->eof_cached |= range->is_eof;
         }
     }
 

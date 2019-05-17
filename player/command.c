@@ -1502,6 +1502,9 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     struct mpv_node *r = (struct mpv_node *)arg;
     node_init(r, MPV_FORMAT_NODE_MAP, NULL);
 
+    node_map_add_flag(r, "bof-cached", s.bof_cached);
+    node_map_add_flag(r, "eof-cached", s.eof_cached);
+
     struct mpv_node *ranges =
         node_map_add(r, "seekable-ranges", MPV_FORMAT_NODE_ARRAY);
     for (int n = 0; n < s.num_seek_ranges; n++) {

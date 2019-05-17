@@ -38,6 +38,7 @@ struct demux_seek_range {
 
 struct demux_reader_state {
     bool eof, underrun, idle;
+    bool bof_cached, eof_cached;
     double ts_duration;
     double ts_reader; // approx. timerstamp of decoder position
     double ts_end; // approx. timestamp of end of buffered range
