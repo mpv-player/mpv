@@ -1450,6 +1450,13 @@ Property list
     buffering amount, while the seek ranges represent the buffered data that
     can actually be used for cached seeking.
 
+    ``bof-cached`` indicates whether the seek range with the lowest timestamp
+    points to the beginning of the stream (BOF). This implies you cannot seek
+    before this position at all. ``eof-cached`` indicates whether the seek range
+    with the highest timestamp points to the end of the stream (EOF). If both
+    ``bof-cached`` and ``eof-cached`` are set to ``yes``, the entire stream is
+    cached.
+
     ``fw-bytes`` is the number of bytes of packets buffered in the range
     starting from the current decoding position.
 
@@ -1464,6 +1471,8 @@ Property list
                 MPV_FORMAT_NODE_MAP
                     "start"             MPV_FORMAT_DOUBLE
                     "end"               MPV_FORMAT_DOUBLE
+            "bof-cached"        MPV_FORMAT_FLAG
+            "eof-cached"        MPV_FORMAT_FLAG
             "fw-bytes"          MPV_FORMAT_INT64
 
     Other fields (might be changed or removed in the future):
