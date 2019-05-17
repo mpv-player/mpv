@@ -1930,7 +1930,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 // Read a packet from the given stream. The returned packet belongs to the
 // caller, who has to free it with talloc_free(). Might block. Returns NULL
 // on EOF.
-struct demux_packet *demux_read_packet(struct sh_stream *sh)
+static struct demux_packet *demux_read_packet(struct sh_stream *sh)
 {
     struct demux_stream *ds = sh ? sh->ds : NULL;
     if (!ds)

@@ -31,6 +31,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/recorder.h"
+#include "misc/dispatch.h"
 #include "osdep/threads.h"
 
 extern const struct sd_functions sd_ass;
@@ -69,6 +70,8 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
+
+    struct mp_dispatch_queue *demux_waiter;
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -119,12 +122,21 @@ void sub_unlock(struct dec_sub *sub)
     pthread_mutex_unlock(&sub->lock);
 }
 
+static void wakeup_demux(void *ctx)
+{
+    struct mp_dispatch_queue *q = ctx;
+    mp_dispatch_interrupt(q);
+}
+
 void sub_destroy(struct dec_sub *sub)
 {
     if (!sub)
         return;
-    sub_reset(sub);
-    sub->sd->driver->uninit(sub->sd);
+    demux_set_stream_wakeup_cb(sub->sh, NULL, NULL);
+    if (sub->sd) {
+        sub_reset(sub);
+        sub->sd->driver->uninit(sub->sd);
+    }
     talloc_free(sub->sd);
     pthread_mutex_destroy(&sub->lock);
     talloc_free(sub);
@@ -178,9 +190,12 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,
         .end = MP_NOPTS_VALUE,
+        .demux_waiter = mp_dispatch_create(sub),
     };
     sub->opts = sub->opts_cache->opts;
     mpthread_mutex_init_recursive(&sub->lock);
+
+    demux_set_stream_wakeup_cb(sub->sh, wakeup_demux, sub->demux_waiter);
 
     sub->sd = init_decoder(sub);
     if (sub->sd) {
@@ -188,7 +203,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
         return sub;
     }
 
-    talloc_free(sub);
+    sub_destroy(sub);
     return NULL;
 }
 
@@ -237,7 +252,12 @@ void sub_preload(struct dec_sub *sub)
     sub->preload_attempted = true;
 
     for (;;) {
-        struct demux_packet *pkt = demux_read_packet(sub->sh);
+        struct demux_packet *pkt = NULL;
+        int r = demux_read_packet_async(sub->sh, &pkt);
+        if (r == 0) {
+            mp_dispatch_queue_process(sub->demux_waiter, INFINITY);
+            continue;
+        }
         if (!pkt)
             break;
         sub->sd->driver->decode(sub->sd, pkt);
