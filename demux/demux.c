@@ -3217,7 +3217,7 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
         }
     }
     r->idle = (in->idle && !r->underrun) || r->eof;
-    r->underrun &= !r->idle;
+    r->underrun &= !r->idle && in->threading;
     r->ts_reader = MP_ADD_PTS(r->ts_reader, in->ts_offset);
     r->ts_end = MP_ADD_PTS(r->ts_end, in->ts_offset);
     if (r->ts_reader != MP_NOPTS_VALUE && r->ts_reader <= r->ts_end)
