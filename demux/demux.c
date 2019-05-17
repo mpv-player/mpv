@@ -2002,26 +2002,26 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
+    pthread_mutex_lock(&in->lock);
     assert(!in->threading); // doesn't work with threading
+    struct demux_packet *out_pkt = NULL;
     bool read_more = true;
     while (read_more && !in->blocked) {
         bool all_eof = true;
         for (int n = 0; n < in->num_streams; n++) {
             in->reading = true; // force read_packet() to read
-            struct demux_packet *out_pkt = NULL;
             int r = dequeue_packet(in->streams[n]->ds, &out_pkt);
             if (r > 0)
-                return out_pkt;
+                break;
             if (r == 0)
                 all_eof = false;
         }
         // retry after calling this
-        pthread_mutex_lock(&in->lock); // lock only because thread_work unlocks
         read_more = thread_work(in);
         read_more &= !all_eof;
-        pthread_mutex_unlock(&in->lock);
     }
-    return NULL;
+    pthread_mutex_unlock(&in->lock);
+    return out_pkt;
 }
 
 void demuxer_help(struct mp_log *log)
