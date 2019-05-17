@@ -942,7 +942,10 @@ err:
 // Potentially needed by some Lua scripts, which assume TICK always comes.
 static void handle_dummy_ticks(struct MPContext *mpctx)
 {
-    if (mpctx->video_status == STATUS_EOF || mpctx->paused) {
+    if ((mpctx->video_status != STATUS_PLAYING &&
+         mpctx->video_status != STATUS_DRAINING) ||
+         mpctx->paused)
+    {
         if (mp_time_sec() - mpctx->last_idle_tick > 0.050) {
             mpctx->last_idle_tick = mp_time_sec();
             mp_notify(mpctx, MPV_EVENT_TICK, NULL);
