@@ -1458,7 +1458,9 @@ Property list
     cached.
 
     ``fw-bytes`` is the number of bytes of packets buffered in the range
-    starting from the current decoding position.
+    starting from the current decoding position. This is a rough estimate
+    (may not account correctly for various overhead), and stops at the
+    demuxer position (it ignores seek ranges after it).
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -1490,11 +1492,6 @@ Property list
     ``total-bytes``
         Sum of packet bytes (plus some overhead estimation) of the entire packet
         queue, including cached seekable ranges.
-
-    ``fw-bytes``
-        Sum of packet bytes (plus some overhead estimation) of the readahead
-        packet queue (packets between current decoder reader positions and
-        demuxer position).
 
 ``demuxer-via-network``
     Returns ``yes`` if the stream demuxed via the main demuxer is most likely
