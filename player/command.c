@@ -1502,18 +1502,6 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     struct mpv_node *r = (struct mpv_node *)arg;
     node_init(r, MPV_FORMAT_NODE_MAP, NULL);
 
-    node_map_add_flag(r, "bof-cached", s.bof_cached);
-    node_map_add_flag(r, "eof-cached", s.eof_cached);
-
-    struct mpv_node *ranges =
-        node_map_add(r, "seekable-ranges", MPV_FORMAT_NODE_ARRAY);
-    for (int n = 0; n < s.num_seek_ranges; n++) {
-        struct demux_seek_range *range = &s.seek_ranges[n];
-        struct mpv_node *sub = node_array_add(ranges, MPV_FORMAT_NODE_MAP);
-        node_map_add_double(sub, "start", range->start);
-        node_map_add_double(sub, "end", range->end);
-    }
-
     if (s.ts_end != MP_NOPTS_VALUE)
         node_map_add_double(r, "cache-end", s.ts_end);
 
@@ -1530,6 +1518,18 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     node_map_add_int64(r, "debug-low-level-seeks", s.low_level_seeks);
     if (s.ts_last != MP_NOPTS_VALUE)
         node_map_add_double(r, "debug-ts-last", s.ts_last);
+
+    node_map_add_flag(r, "bof-cached", s.bof_cached);
+    node_map_add_flag(r, "eof-cached", s.eof_cached);
+
+    struct mpv_node *ranges =
+        node_map_add(r, "seekable-ranges", MPV_FORMAT_NODE_ARRAY);
+    for (int n = s.num_seek_ranges - 1; n >= 0; n--) {
+        struct demux_seek_range *range = &s.seek_ranges[n];
+        struct mpv_node *sub = node_array_add(ranges, MPV_FORMAT_NODE_MAP);
+        node_map_add_double(sub, "start", range->start);
+        node_map_add_double(sub, "end", range->end);
+    }
 
     return M_PROPERTY_OK;
 }
