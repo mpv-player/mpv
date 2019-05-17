@@ -580,6 +580,11 @@ static void read_frame(struct priv *p)
     if (!frame.type)
         return;
 
+    if (p->header->attached_picture && frame.type == MP_FRAME_VIDEO) {
+        p->decoded_coverart = mp_frame_ref(frame);
+        p->coverart_returned = 1;
+    }
+
     if (p->public.attempt_framedrops) {
         int dropped = MPMAX(0, p->packets_without_output - 1);
         p->public.attempt_framedrops =
@@ -613,11 +618,6 @@ static void read_frame(struct priv *p)
     if (!frame.type) {
         mp_filter_internal_mark_progress(p->f); // make it retry
         return;
-    }
-
-    if (p->header->attached_picture && frame.type == MP_FRAME_VIDEO) {
-        p->decoded_coverart = mp_frame_ref(frame);
-        p->coverart_returned = 1;
     }
 
     mp_pin_in_write(pin, frame);
