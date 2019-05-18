@@ -520,6 +520,56 @@ bool mp_aframe_set_silence(struct mp_aframe *f, int offset, int samples)
     return true;
 }
 
+bool mp_aframe_reverse(struct mp_aframe *f)
+{
+    int format = mp_aframe_get_format(f);
+    size_t bps = af_fmt_to_bytes(format);
+    if (!af_fmt_is_pcm(format) || bps > 16)
+        return false;
+
+    uint8_t **d = mp_aframe_get_data_rw(f);
+    if (!d)
+        return false;
+
+    int planes = mp_aframe_get_planes(f);
+    int samples = mp_aframe_get_size(f);
+    int channels = mp_aframe_get_channels(f);
+    size_t sstride = mp_aframe_get_sstride(f);
+
+    int plane_samples = channels;
+    if (af_fmt_is_planar(format))
+        plane_samples = 1;
+
+    for (int p = 0; p < planes; p++) {
+        for (int n = 0; n < samples / 2; n++) {
+            int s1_offset = n * sstride;
+            int s2_offset = (samples - 1 - n) * sstride;
+            for (int c = 0; c < plane_samples; c++) {
+                // Nobody said it'd be fast.
+                char tmp[16];
+                uint8_t *s1 = d[p] + s1_offset + c * bps;
+                uint8_t *s2 = d[p] + s2_offset + c * bps;
+                memcpy(tmp, s2, bps);
+                memcpy(s2, s1, bps);
+                memcpy(s1, tmp, bps);
+            }
+        }
+    }
+
+    return true;
+}
+
+int mp_aframe_approx_byte_size(struct mp_aframe *frame)
+{
+    // God damn, AVFrame is too fucking annoying. Just go with the size that
+    // allocating a new frame would use.
+    int planes = mp_aframe_get_planes(frame);
+    size_t sstride = mp_aframe_get_sstride(frame);
+    int samples = frame->av_frame->nb_samples;
+    int plane_size = MP_ALIGN_UP(sstride * MPMAX(samples, 1), 32);
+    return plane_size * planes + sizeof(*frame);
+}
+
 struct mp_aframe_pool {
     AVBufferPool *avpool;
     int element_size;

@@ -224,6 +224,7 @@ typedef struct MPOpts {
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;
+    int play_dir;
     int rebase_start_time;
     int play_frames;
     double ab_loop[2];
@@ -252,6 +253,8 @@ typedef struct MPOpts {
     int prefetch_open;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
+    int64_t video_reverse_size;
+    int64_t audio_reverse_size;
 
     int cache_pause;
     int cache_pause_initial;

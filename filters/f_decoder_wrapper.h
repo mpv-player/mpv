@@ -37,6 +37,7 @@ struct mp_decoder_wrapper {
 
     // Can be set by user.
     struct mp_recorder_sink *recorder_sink;
+    int play_dir;
 
     // --- for STREAM_VIDEO
 

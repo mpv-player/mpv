@@ -326,6 +326,7 @@ typedef struct MPContext {
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
+    int play_dir;
     // Factors to multiply with opts->playback_speed to get the total audio or
     // video speed (usually 1.0, but can be set to by the sync code).
     double speed_factor_v, speed_factor_a;

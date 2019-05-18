@@ -465,6 +465,19 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_play_direction(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (action == M_PROPERTY_SET) {
+        if (mpctx->play_dir != *(int *)arg) {
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, get_current_time(mpctx),
+                       MPSEEK_EXACT, 0);
+        }
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
@@ -3560,6 +3573,8 @@ static const struct m_property mp_properties_base[] = {
     {"option-info", mp_property_option_info},
     {"property-list", mp_property_list},
     {"profile-list", mp_profile_list},
+
+    {"play-direction", mp_property_play_direction},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),

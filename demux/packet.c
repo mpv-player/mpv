@@ -129,6 +129,8 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->start = src->start;
     dst->end = src->end;
     dst->codec = src->codec;
+    dst->back_restart = src->back_restart;
+    dst->back_preroll = src->back_preroll;
     dst->keyframe = src->keyframe;
     dst->stream = src->stream;
     mp_packet_tags_setref(&dst->metadata, src->metadata);

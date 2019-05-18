@@ -58,6 +58,7 @@ struct dec_sub {
     struct attachment_list *attachments;
 
     struct sh_stream *sh;
+    int play_dir;
     double last_pkt_pts;
     bool preload_attempted;
     double video_fps;
@@ -97,7 +98,7 @@ static double pts_to_subtitle(struct dec_sub *sub, double pts)
     struct mp_subtitle_opts *opts = sub->opts;
 
     if (pts != MP_NOPTS_VALUE)
-        pts = (pts - opts->sub_delay) / sub->sub_speed;
+        pts = (pts * sub->play_dir - opts->sub_delay) / sub->sub_speed;
 
     return pts;
 }
@@ -107,7 +108,7 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     struct mp_subtitle_opts *opts = sub->opts;
 
     if (pts != MP_NOPTS_VALUE)
-        pts = pts * sub->sub_speed + opts->sub_delay;
+        pts = (pts * sub->sub_speed + opts->sub_delay) * sub->play_dir;
 
     return pts;
 }
@@ -186,6 +187,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
         .sh = sh,
         .codec = sh->codec,
         .attachments = talloc_steal(sub, attachments),
+        .play_dir = 1,
         .last_pkt_pts = MP_NOPTS_VALUE,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,
@@ -433,3 +435,9 @@ void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink)
     pthread_mutex_unlock(&sub->lock);
 }
 
+void sub_set_play_dir(struct dec_sub *sub, int dir)
+{
+    pthread_mutex_lock(&sub->lock);
+    sub->play_dir = dir;
+    pthread_mutex_unlock(&sub->lock);
+}

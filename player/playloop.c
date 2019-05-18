@@ -42,6 +42,7 @@
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
+#include "sub/dec_sub.h"
 #include "sub/osd.h"
 #include "video/out/vo.h"
 
@@ -223,6 +224,14 @@ void reset_playback_state(struct MPContext *mpctx)
     reset_audio_state(mpctx);
     reset_subtitle_state(mpctx);
 
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (t->dec)
+            t->dec->play_dir = mpctx->play_dir;
+        if (t->d_sub)
+            sub_set_play_dir(t->d_sub, mpctx->play_dir);
+    }
+
     mpctx->hrseek_active = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
@@ -317,6 +326,10 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!mpctx->demuxer->seekable)
         demux_flags |= SEEK_CACHED;
 
+    int play_dir = opts->play_dir;
+    if (play_dir < 0)
+        demux_flags |= SEEK_SATAN;
+
     if (!demux_seek(mpctx->demuxer, demux_pts, demux_flags)) {
         if (!mpctx->demuxer->seekable) {
             MP_ERR(mpctx, "Cannot seek in this stream.\n");
@@ -324,6 +337,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         }
         return;
     }
+
+    mpctx->play_dir = play_dir;
 
     // Seek external, extra files too:
     bool has_video = false;
@@ -336,7 +351,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
                 main_new_pos += get_track_seek_offset(mpctx, track);
             if (demux_flags & SEEK_FACTOR)
                 main_new_pos = seek_pts;
-            demux_seek(track->demuxer, main_new_pos, 0);
+            demux_seek(track->demuxer, main_new_pos, demux_flags & SEEK_SATAN);
             if (track->type == STREAM_AUDIO && !external_audio)
                 external_audio = track;
         }
@@ -357,7 +372,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     // granularity is coarser than audio). The result would be playing video with
     // silence until the audio seek target is reached. Work around by blocking
     // the demuxer (decoders can't read) and seeking to video position later.
-    if (has_video && external_audio && !hr_seek && !(demux_flags & SEEK_FORWARD)) {
+    if (has_video && external_audio && !hr_seek && mpctx->play_dir > 0 &&
+        !(demux_flags & SEEK_FORWARD))
+    {
         MP_VERBOSE(mpctx, "delayed seek for aid=%d\n", external_audio->user_tid);
         demux_block_reading(external_audio->demuxer, true);
         mpctx->seek_slave = external_audio;
@@ -370,7 +387,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (hr_seek) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_backstep = seek.type == MPSEEK_BACKSTEP;
-        mpctx->hrseek_pts = seek_pts;
+        mpctx->hrseek_pts = seek_pts * mpctx->play_dir;
 
         // allow decoder to drop frames before hrseek_pts
         bool hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
@@ -472,7 +489,7 @@ double get_current_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (demuxer) {
         if (mpctx->playback_pts != MP_NOPTS_VALUE)
-            return mpctx->playback_pts;
+            return mpctx->playback_pts * mpctx->play_dir;
         if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
             return mpctx->last_seek_pts;
     }
@@ -630,7 +647,7 @@ static void handle_update_cache(struct MPContext *mpctx)
 
     int cache_buffer = 100;
     bool use_pause_on_low_cache = demux_is_network_cached(mpctx->demuxer) &&
-                                  opts->cache_pause;
+                                  opts->cache_pause && mpctx->play_dir > 0;
 
     if (!mpctx->restart_complete) {
         // Audio or video is restarting, and initial buffering is enabled. Make

@@ -51,6 +51,10 @@ int mp_aframe_get_planes(struct mp_aframe *frame);
 int mp_aframe_get_total_plane_samples(struct mp_aframe *frame);
 size_t mp_aframe_get_sstride(struct mp_aframe *frame);
 
+bool mp_aframe_reverse(struct mp_aframe *frame);
+
+int mp_aframe_approx_byte_size(struct mp_aframe *frame);
+
 char *mp_aframe_format_str_buf(char *buf, size_t buf_size, struct mp_aframe *fmt);
 #define mp_aframe_format_str(fmt) mp_aframe_format_str_buf((char[32]){0}, 32, (fmt))
 

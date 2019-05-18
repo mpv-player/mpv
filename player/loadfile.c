@@ -1551,6 +1551,11 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     double play_start_pts = get_play_start_pts(mpctx);
+
+    // Backward playback -> start from end by default.
+    if (play_start_pts == MP_NOPTS_VALUE && opts->play_dir < 0)
+        play_start_pts = MPMAX(mpctx->demuxer->duration, 0);
+
     if (play_start_pts != MP_NOPTS_VALUE) {
         /*
          * get_play_start_pts returns rebased values, but
