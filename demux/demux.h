@@ -58,6 +58,7 @@ struct demux_reader_state {
 #define SEEK_FORWARD  (1 << 2)      // prefer later time if not exact
                                     // (if unset, prefer earlier time)
 #define SEEK_CACHED   (1 << 3)      // allow packet cache seeks only
+#define SEEK_SATAN    (1 << 4)      // enable backward demuxing
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
 
 // Strictness of the demuxer open format check.

@@ -87,6 +87,13 @@ struct priv {
     double start, end;
     struct demux_packet *new_segment;
     struct mp_frame packet;
+    bool packet_fed;
+    int preroll_discard;
+
+    size_t reverse_queue_byte_size;
+    struct mp_frame *reverse_queue;
+    int num_reverse_queue;
+    bool reverse_queue_complete;
 
     struct mp_frame decoded_coverart;
     int coverart_returned; // 0: no, 1: coverart frame itself, 2: EOF returned
@@ -108,10 +115,18 @@ static void reset_decoder(struct priv *p)
     p->public.pts_reset = false;
     p->packets_without_output = 0;
     mp_frame_unref(&p->packet);
+    p->packet_fed = false;
+    p->preroll_discard = 0;
     talloc_free(p->new_segment);
     p->new_segment = NULL;
     p->start = p->end = MP_NOPTS_VALUE;
     p->coverart_returned = 0;
+
+    for (int n = 0; n < p->num_reverse_queue; n++)
+        mp_frame_unref(&p->reverse_queue[n]);
+    p->num_reverse_queue = 0;
+    p->reverse_queue_byte_size = 0;
+    p->reverse_queue_complete = false;
 
     if (p->decoder)
         mp_filter_reset(p->decoder->f);
@@ -307,18 +322,22 @@ static void process_video_frame(struct priv *p, struct mp_image *mpi)
     struct MPOpts *opts = p->opt_cache->opts;
     m_config_cache_update(p->opt_cache);
 
+    int dir = p->public.play_dir;
+
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = mpi->pts;
     double dts = mpi->dts;
 
     if (pts != MP_NOPTS_VALUE) {
-        if (pts < p->codec_pts)
+        pts *= dir;
+        if (pts < p->codec_pts && dir > 0)
             p->num_codec_pts_problems++;
         p->codec_pts = mpi->pts;
     }
 
     if (dts != MP_NOPTS_VALUE) {
-        if (dts <= p->codec_dts)
+        dts *= dir;
+        if (dts <= p->codec_dts && dir > 0)
             p->num_codec_dts_problems++;
         p->codec_dts = mpi->dts;
     }
@@ -401,8 +420,12 @@ void mp_decoder_wrapper_get_video_dec_params(struct mp_decoder_wrapper *d,
 
 static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
 {
+    double dir = p->public.play_dir;
+
     double frame_pts = mp_aframe_get_pts(aframe);
     if (frame_pts != MP_NOPTS_VALUE) {
+        frame_pts *= dir;
+
         if (p->pts != MP_NOPTS_VALUE)
             MP_STATS(p, "value %f audio-pts-err", p->pts - frame_pts);
 
@@ -429,7 +452,10 @@ static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
     mp_aframe_set_pts(aframe, p->pts);
 
     if (p->pts != MP_NOPTS_VALUE)
-        p->pts += mp_aframe_duration(aframe);
+        p->pts += mp_aframe_duration(aframe) * dir;
+
+    if (dir < 0)
+        mp_aframe_set_pts(aframe, p->pts);
 }
 
 
@@ -445,8 +471,9 @@ static bool is_new_segment(struct priv *p, struct mp_frame frame)
     if (frame.type != MP_FRAME_PACKET)
         return false;
     struct demux_packet *pkt = frame.data;
-    return pkt->segmented && (pkt->start != p->start || pkt->end != p->end ||
-                              pkt->codec != p->codec);
+    return (pkt->segmented && (pkt->start != p->start || pkt->end != p->end ||
+                               pkt->codec != p->codec)) ||
+           (p->public.play_dir < 0 && pkt->back_restart && p->packet_fed);
 }
 
 static void feed_packet(struct priv *p)
@@ -466,6 +493,9 @@ static void feed_packet(struct priv *p)
         }
     }
 
+    if (!p->packet.type)
+        return;
+
     // Flush current data if the packet is a new segment.
     if (is_new_segment(p, p->packet)) {
         assert(!p->new_segment);
@@ -474,7 +504,8 @@ static void feed_packet(struct priv *p)
     }
 
     assert(p->packet.type == MP_FRAME_PACKET || p->packet.type == MP_FRAME_EOF);
-    struct demux_packet *packet = p->packet.data;
+    struct demux_packet *packet =
+        p->packet.type == MP_FRAME_PACKET ? p->packet.data : NULL;
 
     // For video framedropping, including parts of the hr-seek logic.
     if (p->decoder->control) {
@@ -488,7 +519,7 @@ static void feed_packet(struct priv *p)
         if (p->public.attempt_framedrops)
             framedrop_type = 1;
 
-        if (start_pts != MP_NOPTS_VALUE && packet &&
+        if (start_pts != MP_NOPTS_VALUE && packet && p->public.play_dir > 0 &&
             packet->pts < start_pts - .005 && !p->has_broken_packet_pts)
             framedrop_type = 2;
 
@@ -511,8 +542,12 @@ static void feed_packet(struct priv *p)
     if (p->first_packet_pdts == MP_NOPTS_VALUE)
         p->first_packet_pdts = pkt_pdts;
 
+    if (packet && packet->back_preroll)
+        p->preroll_discard += 1;
+
     mp_pin_in_write(p->decoder->f->pins[0], p->packet);
     p->packet = MP_NO_FRAME;
+    p->packet_fed = true;
 
     p->packets_without_output += 1;
 }
@@ -549,6 +584,10 @@ static bool process_decoded_frame(struct priv *p, struct mp_frame *frame)
         double pts = mp_aframe_get_pts(aframe);
         if (pts != MP_NOPTS_VALUE && p->start != MP_NOPTS_VALUE)
             segment_ended = pts >= p->end;
+
+        if (p->public.play_dir < 0 && !mp_aframe_reverse(aframe))
+            MP_ERR(p, "Couldn't reverse audio frame.\n");
+
         if (mp_aframe_get_size(aframe) == 0)
             mp_frame_unref(frame);
     } else {
@@ -556,6 +595,35 @@ static bool process_decoded_frame(struct priv *p, struct mp_frame *frame)
     }
 
     return segment_ended;
+}
+
+static void enqueue_backward_frame(struct priv *p, struct mp_frame frame)
+{
+    bool eof = frame.type == MP_FRAME_EOF;
+
+    if (!eof) {
+        struct MPOpts *opts = p->opt_cache->opts;
+
+        uint64_t queue_size = 0;
+        switch (p->header->type) {
+        case STREAM_VIDEO: queue_size = opts->video_reverse_size; break;
+        case STREAM_AUDIO: queue_size = opts->audio_reverse_size; break;
+        }
+
+        if (p->reverse_queue_byte_size >= queue_size) {
+            MP_ERR(p, "Reversal queue overflow, discarding frame.\n");
+            mp_frame_unref(&frame);
+            return;
+        }
+
+        p->reverse_queue_byte_size += mp_frame_approx_size(frame);
+    }
+
+    // Note: EOF (really BOF) is propagated, but not reversed.
+    MP_TARRAY_INSERT_AT(p, p->reverse_queue, p->num_reverse_queue,
+                        eof ? 0 : p->num_reverse_queue, frame);
+
+    p->reverse_queue_complete = eof;
 }
 
 static void read_frame(struct priv *p)
@@ -576,6 +644,15 @@ static void read_frame(struct priv *p)
         return;
     }
 
+    if (p->reverse_queue_complete && p->num_reverse_queue) {
+        struct mp_frame frame = p->reverse_queue[p->num_reverse_queue - 1];
+        p->num_reverse_queue -= 1;
+        //MP_WARN(p, "getq %f\n", mp_frame_get_pts(frame));
+        mp_pin_in_write(pin, frame);
+        return;
+    }
+    p->reverse_queue_complete = false;
+
     struct mp_frame frame = mp_pin_out_read(p->decoder->f->pins[1]);
     if (!frame.type)
         return;
@@ -593,23 +670,48 @@ static void read_frame(struct priv *p)
     }
     p->packets_without_output = 0;
 
+    if (p->preroll_discard > 0 && frame.type != MP_FRAME_EOF) {
+        p->preroll_discard -= 1;
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_progress(p->f);
+        return;
+    }
+
     bool segment_ended = process_decoded_frame(p, &frame);
+
+    if (p->public.play_dir < 0 && frame.type) {
+        enqueue_backward_frame(p, frame);
+        frame = MP_NO_FRAME;
+    }
 
     // If there's a new segment, start it as soon as we're drained/finished.
     if (segment_ended && p->new_segment) {
         struct demux_packet *new_segment = p->new_segment;
         p->new_segment = NULL;
 
+        struct mp_frame *reverse_queue = p->reverse_queue;
+        int num_reverse_queue = p->num_reverse_queue;
+        p->reverse_queue = NULL;
+        p->num_reverse_queue = 0;
+
+        //MP_WARN(p, "reset\n");
         reset_decoder(p);
 
-        if (p->codec != new_segment->codec) {
-            p->codec = new_segment->codec;
-            if (!mp_decoder_wrapper_reinit(&p->public))
-                mp_filter_internal_mark_failed(p->f);
+        if (new_segment->segmented) {
+            if (p->codec != new_segment->codec) {
+                p->codec = new_segment->codec;
+                if (!mp_decoder_wrapper_reinit(&p->public))
+                    mp_filter_internal_mark_failed(p->f);
+            }
+
+            p->start = new_segment->start;
+            p->end = new_segment->end;
         }
 
-        p->start = new_segment->start;
-        p->end = new_segment->end;
+        assert(!p->reverse_queue);
+        p->reverse_queue = reverse_queue;
+        p->num_reverse_queue = num_reverse_queue;
+        p->reverse_queue_complete = p->num_reverse_queue > 0;
 
         p->packet = MAKE_FRAME(MP_FRAME_PACKET, new_segment);
         mp_filter_internal_mark_progress(p->f);
@@ -654,6 +756,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->header = src;
     p->codec = p->header->codec;
     w->f = f;
+
+    w->play_dir = 1;
 
     struct MPOpts *opts = p->opt_cache->opts;
 

@@ -280,6 +280,7 @@ struct MPContext *mp_create(void)
         .playback_abort = mp_cancel_new(mpctx),
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
         .stop_play = PT_STOP,
+        .play_dir = 1,
     };
 
     pthread_mutex_init(&mpctx->abort_lock, NULL);

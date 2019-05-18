@@ -380,6 +380,11 @@ const m_option_t mp_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
+    OPT_CHOICE("play-direction", play_dir, 0,
+               ({"forward", 1}, {"backward", -1})),
+    OPT_BYTE_SIZE("video-reversal-buffer", video_reverse_size, 0, 0, (size_t)-1),
+    OPT_BYTE_SIZE("audio-reversal-buffer", audio_reverse_size, 0, 0, (size_t)-1),
+
     OPT_FLAG("rebase-start-time", rebase_start_time, 0),
 
     OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
@@ -902,6 +907,9 @@ const struct MPOpts mp_default_opts = {
     .audiofile_auto = -1,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
+    .play_dir = 1,
+    .video_reverse_size = 1 * 1024 * 1024 * 1024,
+    .audio_reverse_size = 64 * 1024 * 1024,
 
     .audio_output_channels = {
         .set = 1,

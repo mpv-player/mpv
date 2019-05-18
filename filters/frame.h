@@ -45,6 +45,9 @@ struct mp_frame mp_frame_ref(struct mp_frame frame);
 double mp_frame_get_pts(struct mp_frame frame);
 void mp_frame_set_pts(struct mp_frame frame, double pts);
 
+// Estimation of total size in bytes. This is for buffering purposes.
+int mp_frame_approx_size(struct mp_frame frame);
+
 struct AVFrame;
 struct AVRational;
 struct AVFrame *mp_frame_to_av(struct mp_frame frame, struct AVRational *tb);

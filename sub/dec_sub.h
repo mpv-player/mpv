@@ -42,6 +42,7 @@ void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);
 void sub_update_opts(struct dec_sub *sub);
 void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink);
+void sub_set_play_dir(struct dec_sub *sub, int dir);
 
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);
 

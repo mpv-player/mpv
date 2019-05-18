@@ -36,6 +36,10 @@ typedef struct demux_packet {
 
     bool keyframe;
 
+    // backward playback
+    bool back_restart;  // restart point (reverse and return previous frames)
+    bool back_preroll;  // initial discarded frame for smooth decoder reinit
+
     // segmentation (ordered chapters, EDL)
     bool segmented;
     struct mp_codec_params *codec;  // set to non-NULL iff segmented is set

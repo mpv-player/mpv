@@ -364,6 +364,197 @@ Playback Control
     of them fails. This doesn't affect playback of audio-only or video-only
     files.
 
+``--play-direction=<forward|backward>``
+    Control the playback direction (default: forward). Setting ``backward``
+    will attempt to play the file in reverse direction, with decreasing
+    playback time. If this is set on playback starts, playback will start from
+    the end of the file. If this is changed at during playback, a hr-seek will
+    be issued to change the direction.
+
+    The rest of this option description pertains to the ``backward`` mode.
+
+    .. note::
+
+        Backward playback is extremely fragile. It may not always work, is much
+        slower than forward playback, and breaks certain other features. How
+        well it works depends mainly on the file being played. Generally, it
+        will show good results (or results at all) only if the stars align.
+
+    mpv, as well as most media formats, were designed for forward playback
+    only. Backward playback is bolted on top of mpv, and tries to make a medium
+    effort to make backward playback work. Depending on your use-case, another
+    tool may work much better.
+
+    Backward playback is not exactly a 1st class feature. Implementation
+    tradeoffs were made, that are bad for backward playback, but in turn do not
+    cause disadvantages for normal playback. Various possible optimizations are
+    not implemented in order to keep the complexity down. Normally, a media
+    player is highly pipelined (future data is prepared in separate threads, so
+    it is available in realtime when the next stage needs it), but backward
+    playback will essentially stall the pipeline at various random points.
+
+    For example, for intra-only codecs are trivially backward playable, and
+    tools built around them may make efficient use of them (consider video
+    editors or camera viewers). mpv won't be efficient in this case, because it
+    uses its generic backward playback algorithm, that on top of it is not very
+    optimized.
+
+    If you just want to quickly go backward through the video and just show
+    "keyframes", just use forward playback, and hold down the left cursor key
+    (which on CLI with default config sends many small relative seek commands).
+
+    The implementation consists of mostly 3 parts:
+
+    - Backward demuxing. This relies on the demuxer cache, so the demuxer cache
+      should (or must, didn't test it) be enabled, and its size will affect
+      performance. If the cache is too small or too large, quadratic runtime
+      behavior may result.
+
+    - Backward decoding. The decoder library used (libavcodec) does not support
+      this. It is emulated by feeding bits of data in forward, putting the
+      result in a queue, returning the queue data to the VO in reverse, and
+      then starting over at an earlier position. This can require buffering an
+      extreme amount of decoded data, and also completely breaks pipelining.
+
+    - Backward output. This is relatively simple, because the decoder returns
+      the frames in the needed order. However, this may cause various problems
+      because very basic assumptions are broken (such as time going forward).
+      Also, some filtering becomes impossible. Deinterlacing filters will not
+      work.
+
+    Known problems:
+
+    - It's fragile. If anything doesn't work, random non-useful behavior may
+      occur. In simple cases, the player will just play nonsense and artifacts.
+      In other cases, it may get stuck or heat the CPU. (Exceeding memory usage
+      significantly beyond the user-set limits would be a bug, though.)
+
+    - Performance and resource usage isn't good. In part this is inherent to
+      backward playback of normal media formats, and in parts due to
+      implementation choices and tradeoffs.
+
+    - This is extremely reliant on good demuxer behavior. Although backward
+      demuxing requires no special demuxer support, it is required that the
+      demuxer performs seeks reliably, fulfills some specific requirements
+      about packet metadata, and has deterministic behavior.
+
+    - Starting playback exactly from the end may or may not work, depending on
+      seeking behavior and file duration detection.
+
+    - Some container formats, audio, and video codecs are not supported due to
+      their behavior. There is no list, and the player usually does not detect
+      them. Certain live streams (including TV captures) may exhibit problems
+      in particular, as well as some lossy audio codecs. h264 intra-refresh is
+      known not to work due to problems with libavcodec.
+
+    - Function with EDL/mkv ordered chapters is obviously broken.
+
+    - Backward demuxing of subtitles is not supported. Subtitle display still
+      works for some external text subtitle formats. (These are fully read into
+      memory, and only backward display is needed.) Text subtitles that are
+      cached in the subtitle renderer also have a chance to be displayed
+      correctly.
+
+    - Some features dealing with playback of broken or hard to deal with files
+      will be disabled (such as timestamp correction).
+
+    - If demuxer low level seeks (i.e. seeking the actual demuxer instead of
+      just within the demuxer cache) are performed by backward playback, the
+      created seek ranges may not join, because not enough overlap is achieved.
+
+    - Trying to use this with hardware video decoding will probably exhaust all
+      your GPU memory and then crash a thing or two.
+
+    - Stream recording and encoding are broken.
+
+    - Relative seeks may behave weird. Small seeks backward (towards smaller
+      time, i.e. ``seek -1``) may not really seek properly, and audio will
+      remain muted for a while. Using hr-seek is recommended, which should have
+      none of these problems.
+
+    - Some things are just weird. For example, while seek commands manipulate
+      playback time in the expected way (provided they work correctly), the
+      framestep commands are transposed. Backstepping will perform very
+      expensive work to step forward by 1 frame.
+
+    Tuning:
+
+    - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
+      Disable idiotic nonsense like SPDIF passthrough.
+
+    - Increasing ``--video-reversal-buffer`` might help if reversal queue
+      overflow is reported, which may happen in high bitrate video, or video
+      with large GOP.
+
+    - The demuxer cache is essential for backward demuxing. If it's too small,
+      a queue overflow will be logged, and backward playback cannot continue,
+      or it performs too many low level seeks. If it's too large, implementation
+      tradeoffs may cause general performance issues. Use ``--demuxer-max-bytes``
+      to potentially increase the amount of packets the demuxer layer can queue
+      for reverse demuxing (basically it's the ``--video-reversal-buffer``
+      equivalent for the demuxer layer).
+
+    - ``--demuxer-backward-playback-step`` also factors into how many seeks may
+      be performed, and whether backward demuxing could break due to queue
+      overflow.
+
+    - Setting ``--demuxer-cache-wait`` may be useful to cache the entire file
+      into the demuxer cache. Set ``--demuxer-max-bytes`` to a large size to
+      make sure it can read the entire cache; ``--demuxer-max-back-bytes``
+      should also be set to a large size to prevent that tries to trim the
+      cache.
+
+    - If audio artifacts are audible, even though the AO does not underrun,
+      increasing ``--audio-reversal-buffer`` might help in some cases.
+
+``--video-reversal-buffer=<bytesize>``, ``--audio-reversal-buffer=<bytesize>``
+    For backward decoding. Backward decoding decodes forward in steps, and then
+    reverses the decoder output. These options control the approximate maximum
+    amount of bytes that can be buffered. The main use of this is to avoid
+    unbounded resource usage; during normal backward playback, it's not supposed
+    to hit the limit, and if it does, it will drop frames and complain about it.
+
+    This does not work correctly if video hardware decoding is used. The video
+    frame size will not include the referenced GPU and driver memory.
+
+    How large the queue size needs to be depends entirely on the way the media
+    was encoded. Audio typically requires a very small buffer, while video can
+    require excessively large buffers.
+
+    (Technically, this allows the last frame to exceed the limit. Also, this
+    does not account for other buffered frames, such as inside the decoder or
+    the video output.)
+
+    This does not affect demuxer cache behavior at all.
+
+    See ``--list-options`` for defaults and value range. ``<bytesize>`` options
+    accept suffixes such as ``KiB`` and ``MiB``.
+
+``--video-backward-overlap=<auto|number>``, ``--audio-backward-overlap=<auto|number>``
+    Number of overlapping packets to use for backward decoding (default: auto).
+    Backward decoding works by forward decoding in small steps. Some codecs
+    cannot restart decoding from any packet (even if it's marked as seek point),
+    which becomes noticeable with backward decoding (in theory this is a problem
+    with seeking too, but ``--hr-seek-demuxer-offset`` can fix it for seeking).
+    In particular, MDCT based audio codecs are affected.
+
+    The solution is to feed a previous packet to the decoder each time, and then
+    discard the output. This option controls how many packets to feed. The
+    ``auto`` choice is currently hardcoded to 1 for audio, and 0 for video.
+
+    ``--video-backward-overlap`` was intended to handle intra-refresh video, but
+    which does not work since libavcodec silently drops frames even with
+    ``--vd-lavc-show-all``, and it's too messy to accurately guess which frames
+    have been dropped.
+
+``--demuxer-backward-playback-step=<seconds>``
+    Number of seconds the demuxer should seek back to get new packets during
+    backward playback (default: 60). This is useful for tuning backward
+    playback, see ``--play-direction`` for details.
+
+    Setting this to a very low value or 0 may make the player think seeking is
+    broken, or may make it perform multiple seeks.
+
 Program Behavior
 ----------------
 
