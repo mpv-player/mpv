@@ -647,7 +647,6 @@ static void read_frame(struct priv *p)
     if (p->reverse_queue_complete && p->num_reverse_queue) {
         struct mp_frame frame = p->reverse_queue[p->num_reverse_queue - 1];
         p->num_reverse_queue -= 1;
-        //MP_WARN(p, "getq %f\n", mp_frame_get_pts(frame));
         mp_pin_in_write(pin, frame);
         return;
     }
@@ -694,7 +693,6 @@ static void read_frame(struct priv *p)
         p->reverse_queue = NULL;
         p->num_reverse_queue = 0;
 
-        //MP_WARN(p, "reset\n");
         reset_decoder(p);
 
         if (new_segment->segmented) {
