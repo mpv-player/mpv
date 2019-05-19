@@ -110,7 +110,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         term_osd_set_subs(mpctx, sub_get_text(dec_sub, video_pts));
 
     // Handle displaying subtitles on VO with no video being played. This is
-    // quite differently, because normally subtitles are redrawn on new video
+    // quite different, because normally subtitles are redrawn on new video
     // frames, using the video frames' timestamps.
     if (mpctx->video_out && mpctx->video_status == STATUS_EOF) {
         if (osd_get_force_video_pts(mpctx->osd) != video_pts) {
