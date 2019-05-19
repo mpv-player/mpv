@@ -2377,7 +2377,7 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
             in->reading = true; // force read_packet() to read
             int r = dequeue_packet(in->streams[n]->ds, &out_pkt);
             if (r > 0)
-                break;
+                goto done;
             if (r == 0)
                 all_eof = false;
         }
@@ -2385,6 +2385,7 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
         read_more = thread_work(in);
         read_more &= !all_eof;
     }
+done:
     pthread_mutex_unlock(&in->lock);
     return out_pkt;
 }
