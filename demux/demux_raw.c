@@ -299,7 +299,9 @@ static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
     stream_t *s = demuxer->stream;
     int64_t end = 0;
     stream_control(s, STREAM_CTRL_GET_SIZE, &end);
-    int64_t pos = seek_pts * p->frame_rate * p->frame_size;
+    int64_t frame_nr = seek_pts * p->frame_rate;
+    frame_nr = frame_nr - (frame_nr % p->read_frames);
+    int64_t pos = frame_nr * p->frame_size;
     if (flags & SEEK_FACTOR)
         pos = end * seek_pts;
     if (pos < 0)

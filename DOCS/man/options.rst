@@ -477,6 +477,16 @@ Playback Control
       framestep commands are transposed. Backstepping will perform very
       expensive work to step forward by 1 frame.
 
+    - Backward playback in wav files does not work properly (and possibly
+      similar formats, typically raw audio formats used through libavformat).
+      This is because libavformat does not align seeks on the packet sizes it
+      uses. (The packet sizes are arbitrary and chosen by libavformat
+      internally. Seeks on the other hand are sample-exact, which leads to
+      overlapping packets if the backward playback state machine seeks back.
+      This is very complex to work around, so it doesn't attempt to.)
+      A workaround is to remux to a format like mkv, which enforces packet
+      boundaries. Making mpv cache the entire file in memory also works.
+
     Tuning:
 
     - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
