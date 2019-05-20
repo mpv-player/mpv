@@ -280,6 +280,7 @@ static bool raw_read_packet(struct demuxer *demuxer, struct demux_packet **pkt)
         return true;
     }
 
+    dp->keyframe = true;
     dp->pos = stream_tell(demuxer->stream);
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 
