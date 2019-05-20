@@ -3171,7 +3171,12 @@ int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
     assert(demuxer == in->d_user);
 
     pthread_mutex_lock(&in->lock);
+
+    if (!(flags & SEEK_FACTOR))
+        seek_pts = MP_ADD_PTS(seek_pts, -in->ts_offset);
+
     int res = queue_seek(in, seek_pts, flags, true);
+
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
 
@@ -3186,9 +3191,6 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
 
     MP_VERBOSE(in, "queuing seek to %f%s\n", seek_pts,
                in->seeking ? " (cascade)" : "");
-
-    if (!(flags & SEEK_FACTOR))
-        seek_pts = MP_ADD_PTS(seek_pts, -in->ts_offset);
 
     bool require_cache = flags & SEEK_CACHED;
     flags &= ~(unsigned)SEEK_CACHED;
