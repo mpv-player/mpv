@@ -487,6 +487,14 @@ Playback Control
       A workaround is to remux to a format like mkv, which enforces packet
       boundaries. Making mpv cache the entire file in memory also works.
 
+    - Starting from the very end of the file often does not work. This includes
+      starting playback of a file while backward playback mode is enabled, and
+      no initial seek is set with ``--start``. You need to use something like
+      ``--start=99%`` to try to get the end.
+
+    - Starting backward playback at a specific time position without pre-caching
+      the entire file usually misses the seek target due to a race condition.
+
     Tuning:
 
     - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
