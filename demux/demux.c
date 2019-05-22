@@ -1686,8 +1686,11 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
         if (queue->keyframe_latest) {
             queue->keyframe_latest->kf_seek_pts = queue->keyframe_pts;
             double old_end = queue->range->seek_end;
-            if (queue->seek_start == MP_NOPTS_VALUE)
+            if (queue->seek_start == MP_NOPTS_VALUE) {
                 queue->seek_start = queue->keyframe_pts;
+                if (queue->seek_start != MP_NOPTS_VALUE)
+                    queue->seek_start += ds->sh->seek_preroll;
+            }
             if (queue->keyframe_end_pts != MP_NOPTS_VALUE)
                 queue->seek_end = queue->keyframe_end_pts;
             queue->is_eof = !dp;
@@ -2976,6 +2979,8 @@ static void switch_current_range(struct demux_internal *in,
 static struct demux_packet *find_seek_target(struct demux_queue *queue,
                                              double pts, int flags)
 {
+    pts -= queue->ds->sh->seek_preroll;
+
     struct demux_packet *start = queue->head;
     for (int n = 0; n < queue->num_index; n++) {
         if (queue->index[n]->kf_seek_pts > pts)
