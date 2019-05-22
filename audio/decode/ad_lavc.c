@@ -254,7 +254,8 @@ static bool receive_frame(struct mp_filter *da, struct mp_frame *out)
         priv->trim_samples -= trim;
     }
 
-    *out = MAKE_FRAME(MP_FRAME_AUDIO, mpframe);
+    if (mp_aframe_get_size(mpframe) > 0)
+        *out = MAKE_FRAME(MP_FRAME_AUDIO, mpframe);
 
     av_frame_unref(priv->avframe);
 
