@@ -646,6 +646,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         export_replaygain(demuxer, sh, st);
 
+        sh->seek_preroll = delay;
+
         break;
     }
     case AVMEDIA_TYPE_VIDEO: {
