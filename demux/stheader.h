@@ -55,6 +55,8 @@ struct sh_stream {
 
     bool missing_timestamps;
 
+    double seek_preroll;
+
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
 
