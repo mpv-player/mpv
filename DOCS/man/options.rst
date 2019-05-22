@@ -1990,6 +1990,9 @@ Subtitles
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
+    This also controls some bitmap subtitle overrides, as well as HTML tags in
+    formats like SRT, despite the name of the option.
+
 ``--sub-ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in the ASS format.
