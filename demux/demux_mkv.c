@@ -2705,8 +2705,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {
                 unsigned int srate = stream->codec->samplerate;
-                demux_packet_set_padding(dp,
-                    mkv_d->a_skip_preroll ? track->codec_delay * srate : 0,
+                demux_packet_set_padding(dp, 0,
                     block_info->discardpadding / 1e9 * srate);
                 mkv_d->a_skip_preroll = 0;
             }
