@@ -77,10 +77,10 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_tv,
 #endif
     &demuxer_desc_matroska,
+    &demuxer_desc_rar,
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,
 #endif
-    &demuxer_desc_rar,
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
