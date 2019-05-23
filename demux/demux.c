@@ -347,6 +347,7 @@ struct demux_stream {
     // back_range_started or back_restarting are set.
     int64_t back_restart_pos;
     double back_restart_dts;
+    bool back_restart_eof; // restart position is at EOF; overrides pos/dts
     bool back_restarting;   // searching keyframe before restart pos
     // Current PTS lower bound for back demuxing.
     double back_seek_pos;
@@ -753,6 +754,7 @@ static void ds_clear_reader_state(struct demux_stream *ds,
     if (clear_back_state) {
         ds->back_restart_pos = -1;
         ds->back_restart_dts = MP_NOPTS_VALUE;
+        ds->back_restart_eof = false;
         ds->back_restarting = false;
         ds->back_seek_pos = MP_NOPTS_VALUE;
         ds->back_resume_pos = -1;
@@ -1256,75 +1258,78 @@ static void perform_backward_seek(struct demux_internal *in)
     target -= in->opts->back_seek_size;
 
     MP_VERBOSE(in, "triggering backward seek to get more packets\n");
+
+    // Note: we don't want it to use SEEK_FORWARD, while the player frontend
+    // wants it. As a fragile hack, SEEK_HR controls this.
     queue_seek(in, target, SEEK_SATAN, false);
+
     in->reading = true;
 }
 
 // Search for a packet to resume demuxing from.
-//  from_cache: if true, this was called trying to go backwards in the cache;
-//              if false, this is from a hard seek before the back_restart_pos
 // The implementation of this function is quite awkward, because the packet
 // queue is a singly linked list without back links, while it needs to search
 // backwards.
 // This is the core of backward demuxing.
-static void find_backward_restart_pos(struct demux_stream *ds, bool from_cache)
+static void find_backward_restart_pos(struct demux_stream *ds)
 {
     struct demux_internal *in = ds->in;
 
     assert(ds->back_restarting);
 
-    if (!ds->reader_head)
-        return; // no packets yet
-
     struct demux_packet *first = ds->reader_head;
     struct demux_packet *last = ds->queue->tail;
-    assert(last);
 
-    if ((ds->global_correct_dts && last->dts < ds->back_restart_dts) ||
-        (ds->global_correct_pos && last->pos < ds->back_restart_pos))
-        return; // restart pos not reached yet
-
-    // The target we're searching for is apparently before the start of the queue.
-    if ((ds->global_correct_dts && first->dts > ds->back_restart_dts) ||
-        (ds->global_correct_pos && first->pos > ds->back_restart_pos))
-    {
-        // If this function was called for trying to backstep within the packet
-        // cache, the cache probably got pruned past the target (reader_head is
-        // being moved backwards, so nothing stops it from pruning packets
-        // before that). Just make the caller seek.
-        if (from_cache) {
-            in->need_back_seek = true;
-            return;
-        }
-
-        // The demuxer probably seeked to the wrong position, or broke dts/pos
-        // determinism assumptions?
-        MP_ERR(in, "Demuxer did not seek correctly.\n");
-        return;
-    }
+    if (first && !first->keyframe)
+        MP_WARN(in, "Queue not starting on keyframe.\n");
 
     // Packet at back_restart_pos. (Note: we don't actually need it, only the
     // packet immediately before it. But same effort.)
+    // If this is NULL, look for EOF (resume from very last keyframe).
     struct demux_packet *back_restart = NULL;
 
-    for (struct demux_packet *cur = first; cur; cur = cur->next) {
-        if ((ds->global_correct_dts && cur->dts == ds->back_restart_dts) ||
-            (ds->global_correct_pos && cur->pos == ds->back_restart_pos))
-        {
-            back_restart = cur;
-            break;
+    if (ds->back_restart_eof) {
+        // We're trying to find EOF (without discarding packets). Only continue
+        // if we really reach EOF.
+        if (!ds->eof)
+            return;
+    } else if (!first && ds->eof) {
+        // Reached EOF during normal backward demuxing. We probably returned the
+        // last keyframe range to user. Need to resume at an earlier position.
+        // Fall through, hit the no-keyframe case (and possible the BOF check
+        // if there are no packets at all), and then resume_earlier.
+    } else if (!first) {
+        return; // no packets yet
+    } else {
+        assert(last);
+
+        if ((ds->global_correct_dts && last->dts < ds->back_restart_dts) ||
+            (ds->global_correct_pos && last->pos < ds->back_restart_pos))
+            return; // restart pos not reached yet
+
+        // The target we're searching for is apparently before the start of the
+        // queue.
+        if ((ds->global_correct_dts && first->dts > ds->back_restart_dts) ||
+            (ds->global_correct_pos && first->pos > ds->back_restart_pos))
+            goto resume_earlier; // current position is too late; seek back
+
+
+        for (struct demux_packet *cur = first; cur; cur = cur->next) {
+            if ((ds->global_correct_dts && cur->dts == ds->back_restart_dts) ||
+                (ds->global_correct_pos && cur->pos == ds->back_restart_pos))
+            {
+                back_restart = cur;
+                break;
+            }
+        }
+
+        if (!back_restart) {
+            // The packet should have been in the searched range; maybe dts/pos
+            // determinism assumptions were broken.
+            MP_ERR(in, "Demuxer not cooperating.\n");
+            return;
         }
     }
-
-    if (!back_restart) {
-        // The packet should have been in the searched range; maybe dts/pos
-        // determinism assumptions were broken.
-        MP_ERR(in, "Demuxer not cooperating.\n");
-        return;
-    }
-
-    if (!ds->reader_head->keyframe)
-        MP_WARN(in, "Queue not starting on keyframe.\n");
 
     // Find where to restart demuxing. It's usually the last keyframe packet
     // before restart_pos, but might be up to back_preroll packets earlier.
@@ -1396,13 +1401,25 @@ static void find_backward_restart_pos(struct demux_stream *ds, bool from_cache)
     return;
 
 resume_earlier:
-    // If an earlier seek didn't land at an early enough position, we need to
-    // try to seek even earlier. Usually this will happen with large
-    // back_preroll values, because the initial back seek does not take them
-    // into account. We don't really know how much we need to seek, so add some
-    // random value to the previous seek value. Not ideal.
-    if (!from_cache && ds->back_seek_pos != MP_NOPTS_VALUE)
-        ds->back_seek_pos -= 1.0;
+    // We want to seek back to get earlier packets. But before we do this, we
+    // must be sure that other streams have initialized their state. The only
+    // time when this state is not initialized is right after the seek that
+    // started backward demuxing (not any subsequent backstep seek). If this
+    // initialization is omitted, the stream would try to start demuxing from
+    // the "current" position. If another stream backstepped before that, the
+    // other stream will miss the original seek target, and start playback from
+    // a position that is too early.
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds2 = in->streams[n]->ds;
+        if (ds2 == ds || !ds2->eager)
+            continue;
+
+        if (!ds2->reader_head && !ds2->back_resuming && !ds2->back_restarting) {
+            MP_VERBOSE(in, "delaying stream %d for %d\n", ds->index, ds2->index);
+            return;
+        }
+    }
+
     in->need_back_seek = true;
 }
 
@@ -1435,7 +1452,7 @@ static void back_demux_see_packets(struct demux_stream *ds)
     }
 
     if (ds->back_restarting)
-        find_backward_restart_pos(ds, false);
+        find_backward_restart_pos(ds);
 }
 
 // Resume demuxing from an earlier position for backward playback. May trigger
@@ -1448,6 +1465,14 @@ static void step_backwards(struct demux_stream *ds)
 
     assert(!ds->back_restarting);
     ds->back_restarting = true;
+
+    // No valid restart pos, but EOF reached -> find last restart pos before EOF.
+    ds->back_restart_eof = ds->back_restart_dts == MP_NOPTS_VALUE &&
+                           ds->back_restart_pos < 0 &&
+                           ds->eof;
+
+    if (ds->back_restart_eof)
+        MP_VERBOSE(in, "backward eof on stream %d\n", ds->index);
 
     // Move to start of queue. This is inefficient, because we need to iterate
     // the entire fucking packet queue just to update the fw_* stats. But as
@@ -1465,7 +1490,7 @@ static void step_backwards(struct demux_stream *ds)
     while (ds->reader_head && !ds->reader_head->keyframe)
         advance_reader_head(ds);
 
-    find_backward_restart_pos(ds, true);
+    find_backward_restart_pos(ds);
 }
 
 // Add the keyframe to the end of the index. Not all packets are actually added.
@@ -1933,6 +1958,7 @@ static bool read_packet(struct demux_internal *in)
             if (!ds->eof && eof) {
                 ds->eof = true;
                 adjust_seek_range_on_packet(ds, NULL);
+                back_demux_see_packets(ds);
                 wakeup_ds(ds);
             }
         }
@@ -1976,6 +2002,7 @@ static bool read_packet(struct demux_internal *in)
                 if (!ds->eof) {
                     ds->eof = true;
                     adjust_seek_range_on_packet(ds, NULL);
+                    back_demux_see_packets(ds);
                     wakeup_ds(ds);
                 }
             }
@@ -2234,8 +2261,10 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
             return -1;
 
         // Next keyframe (or EOF) was reached => step back.
-        if (ds->back_range_started && !ds->back_range_min &&
-            ((ds->reader_head && ds->reader_head->keyframe) || eof))
+        if ((ds->back_range_started && !ds->back_range_min &&
+             ((ds->reader_head && ds->reader_head->keyframe) || eof)) ||
+            (!ds->back_range_started && !ds->back_range_min &&
+             !ds->reader_head && eof))
         {
             step_backwards(ds);
             if (ds->back_restarting)
@@ -2275,6 +2304,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
             // For next backward adjust action.
             ds->back_restart_dts = pkt->dts;
             ds->back_restart_pos = pkt->pos;
+            ds->back_restart_eof = false;
         }
         if (!ds->back_range_started) {
             pkt->back_restart = true;
@@ -3197,8 +3227,8 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     bool set_backwards = flags & SEEK_SATAN;
     flags &= ~(unsigned)SEEK_SATAN;
 
-    // For HR seeks, the correct seek rounding direction is forward instead of
-    // backward.
+    // For HR seeks in backward playback mode, the correct seek rounding
+    // direction is forward instead of backward.
     if (set_backwards && (flags & SEEK_HR))
         flags |= SEEK_FORWARD;
 
@@ -3234,8 +3264,14 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
         in->seek_pts = seek_pts;
     }
 
-    for (int n = 0; n < in->num_streams; n++)
-        wakeup_ds(in->streams[n]->ds);
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+
+        if (in->back_demuxing && clear_back_state)
+            ds->back_seek_pos = seek_pts;
+
+        wakeup_ds(ds);
+    }
 
     if (!in->threading && in->seeking)
         execute_seek(in);
