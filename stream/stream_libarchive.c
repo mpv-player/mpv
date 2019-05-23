@@ -17,6 +17,7 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <libavformat/avio.h>
 
 #include "misc/bstr.h"
 #include "common/common.h"
@@ -207,6 +208,11 @@ static char **find_volumes(struct stream *primary_stream)
     struct bstr base = bstr_splice(primary_url, 0, -strlen(pattern->match));
     for (int i = pattern->start; i <= pattern->stop; i++) {
         char* url = pattern->volume_url(res, pattern->format, base, i);
+        int not_found = avio_check(url, 0);
+        if (not_found == -2) {
+            talloc_free(url);
+            goto done;
+        }
         struct stream *s = stream_create(url, STREAM_READ | STREAM_SAFE_ONLY,
                                          primary_stream->cancel,
                                          primary_stream->global);
@@ -254,7 +260,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     if (!mpa->arch)
         goto err;
 
-    // first volume is the primary streame
+    // first volume is the primary stream
     if (!add_volume(log ,mpa, src, src->url))
         goto err;
 
