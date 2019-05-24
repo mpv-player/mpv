@@ -1259,11 +1259,7 @@ static void perform_backward_seek(struct demux_internal *in)
     target -= in->opts->back_seek_size;
 
     MP_VERBOSE(in, "triggering backward seek to get more packets\n");
-
-    // Note: we don't want it to use SEEK_FORWARD, while the player frontend
-    // wants it. As a fragile hack, SEEK_HR controls this.
-    queue_seek(in, target, SEEK_SATAN, false);
-
+    queue_seek(in, target, SEEK_SATAN | SEEK_HR, false);
     in->reading = true;
 }
 
@@ -3230,11 +3226,6 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
 
     bool set_backwards = flags & SEEK_SATAN;
     flags &= ~(unsigned)SEEK_SATAN;
-
-    // For HR seeks in backward playback mode, the correct seek rounding
-    // direction is forward instead of backward.
-    if (set_backwards && (flags & SEEK_HR))
-        flags |= SEEK_FORWARD;
 
     struct demux_cached_range *cache_target =
         find_cache_seek_target(in, seek_pts, flags);

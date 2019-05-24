@@ -305,6 +305,10 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         demux_flags |= SEEK_FACTOR;
     }
 
+    int play_dir = opts->play_dir;
+    if (play_dir < 0)
+        demux_flags |= SEEK_SATAN;
+
     if (hr_seek) {
         double hr_seek_offset = opts->hr_seek_demuxer_offset;
         // Always try to compensate for possibly bad demuxers in "special"
@@ -321,14 +325,14 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         }
         demux_pts -= hr_seek_offset;
         demux_flags = (demux_flags | SEEK_HR) & ~SEEK_FORWARD;
+        // For HR seeks in backward playback mode, the correct seek rounding
+        // direction is forward instead of backward.
+        if (play_dir < 0)
+            demux_flags |= SEEK_FORWARD;
     }
 
     if (!mpctx->demuxer->seekable)
         demux_flags |= SEEK_CACHED;
-
-    int play_dir = opts->play_dir;
-    if (play_dir < 0)
-        demux_flags |= SEEK_SATAN;
 
     if (!demux_seek(mpctx->demuxer, demux_pts, demux_flags)) {
         if (!mpctx->demuxer->seekable) {
