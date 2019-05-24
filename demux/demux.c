@@ -1903,6 +1903,16 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     wakeup_ds(ds);
 }
 
+static void mark_stream_eof(struct demux_stream *ds)
+{
+    if (!ds->eof) {
+        ds->eof = true;
+        adjust_seek_range_on_packet(ds, NULL);
+        back_demux_see_packets(ds);
+        wakeup_ds(ds);
+    }
+}
+
 // Returns true if there was "progress" (lock was released temporarily).
 static bool read_packet(struct demux_internal *in)
 {
@@ -1955,13 +1965,8 @@ static bool read_packet(struct demux_internal *in)
         }
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            bool eof = !ds->reader_head;
-            if (!ds->eof && eof) {
-                ds->eof = true;
-                adjust_seek_range_on_packet(ds, NULL);
-                back_demux_see_packets(ds);
-                wakeup_ds(ds);
-            }
+            if (!ds->reader_head)
+                mark_stream_eof(ds);
         }
         return false;
     }
@@ -1998,15 +2003,8 @@ static bool read_packet(struct demux_internal *in)
 
     if (!in->seeking) {
         if (eof) {
-            for (int n = 0; n < in->num_streams; n++) {
-                struct demux_stream *ds = in->streams[n]->ds;
-                if (!ds->eof) {
-                    ds->eof = true;
-                    adjust_seek_range_on_packet(ds, NULL);
-                    back_demux_see_packets(ds);
-                    wakeup_ds(ds);
-                }
-            }
+            for (int n = 0; n < in->num_streams; n++)
+                mark_stream_eof(in->streams[n]->ds);
             // If we had EOF previously, then don't wakeup (avoids wakeup loop)
             if (!in->last_eof) {
                 if (in->wakeup_cb)
