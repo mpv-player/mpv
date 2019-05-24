@@ -487,6 +487,13 @@ Playback Control
       A workaround is to remux to a format like mkv, which enforces packet
       boundaries. Making mpv cache the entire file in memory also works.
 
+    - Backward playback with Vorbis does not work. libavcodec's decoder
+      discards the first Vorbis packet (after each decoder reset), and the
+      mechanism behind ``--audio-reversal-buffer`` assumes that it strictly
+      outputs a frame for each packet fed to it (the mechanism discards output
+      based on frame count, not timestamps). Since this tries to decode each
+      frame on its own, the player never gets a usable audio frame.
+
     Tuning:
 
     - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
