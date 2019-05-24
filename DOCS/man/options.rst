@@ -559,7 +559,8 @@ Playback Control
     The solution is to feed a previous packet to the decoder each time, and then
     discard the output. This option controls how many packets to feed. The
     ``auto`` choice is currently hardcoded to 0 for video, and uses 1 for lossy
-    audio, 0 for lossless audio.
+    audio, 0 for lossless audio. As a hack, it sets it to 2 for Opus, which
+    requires this for unknown reasons.
 
     ``--video-backward-overlap`` can potentially handle intra-refresh video,
     depending on the exact conditions. You may have to use the
