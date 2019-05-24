@@ -541,7 +541,8 @@ Playback Control
     accept suffixes such as ``KiB`` and ``MiB``.
 
 ``--video-backward-overlap=<auto|number>``, ``--audio-backward-overlap=<auto|number>``
-    Number of overlapping packets to use for backward decoding (default: auto).
+    Number of overlapping keyframe ranges to use for backward decoding (default:
+    auto) ("keyframe" to be understood as in the mpv/ffmpeg specific meaning).
     Backward decoding works by forward decoding in small steps. Some codecs
     cannot restart decoding from any packet (even if it's marked as seek point),
     which becomes noticeable with backward decoding (in theory this is a problem
@@ -552,10 +553,9 @@ Playback Control
     discard the output. This option controls how many packets to feed. The
     ``auto`` choice is currently hardcoded to 1 for audio, and 0 for video.
 
-    ``--video-backward-overlap`` was intended to handle intra-refresh video, but
-    which does not work since libavcodec silently drops frames even with
-    ``--vd-lavc-show-all``, and it's too messy to accurately guess which frames
-    have been dropped.
+    ``--video-backward-overlap`` can potentially handle intra-refresh video,
+    depending on the exact conditions. You may have to use the
+    ``--vd-lavc-show-all`` option as well.
 
 ``--demuxer-backward-playback-step=<seconds>``
     Number of seconds the demuxer should seek back to get new packets during
