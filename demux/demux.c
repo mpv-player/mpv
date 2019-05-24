@@ -1256,8 +1256,6 @@ static void perform_backward_seek(struct demux_internal *in)
 
     target = PTS_OR_DEF(target, in->d_thread->start_time);
 
-    target -= in->opts->back_seek_size;
-
     MP_VERBOSE(in, "triggering backward seek to get more packets\n");
     queue_seek(in, target, SEEK_SATAN | SEEK_HR, false);
     in->reading = true;
@@ -1390,6 +1388,15 @@ static void find_backward_restart_pos(struct demux_stream *ds)
             assert(0); // target must be in list
     }
 
+    double seek_pts = MP_NOPTS_VALUE;
+    for (struct demux_packet *cur = target; cur; cur = cur->next) {
+        seek_pts = MP_PTS_MIN(seek_pts, cur->pts);
+        if (cur->next && cur->next->keyframe)
+            break;
+    }
+    if (seek_pts != MP_NOPTS_VALUE)
+        ds->back_seek_pos = seek_pts;
+
     ds->back_restarting = false;
     ds->back_range_started = false;
     ds->back_range_min = got_preroll + 1;
@@ -1417,6 +1424,7 @@ resume_earlier:
         }
     }
 
+    ds->back_seek_pos -= in->opts->back_seek_size;
     in->need_back_seek = true;
 }
 
