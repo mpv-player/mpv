@@ -1818,7 +1818,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     size_t bytes = demux_packet_estimate_total_size(dp);
-    ds->in->total_bytes += bytes;
+    in->total_bytes += bytes;
     if (ds->reader_head) {
         ds->fw_packs++;
         ds->fw_bytes += bytes;
@@ -2300,7 +2300,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         abort();
     pkt->next = NULL;
 
-    if (ds->in->back_demuxing) {
+    if (in->back_demuxing) {
         if (ds->back_range_min && pkt->keyframe)
             ds->back_range_min -= 1;
         if (ds->back_range_min) {
@@ -2339,16 +2339,16 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
     ds->last_br_bytes += pkt->len;
 
     // This implies this function is actually called from "the" user thread.
-    if (pkt->pos >= ds->in->d_user->filepos)
-        ds->in->d_user->filepos = pkt->pos;
-    ds->in->d_user->filesize = ds->in->stream_size;
+    if (pkt->pos >= in->d_user->filepos)
+        in->d_user->filepos = pkt->pos;
+    in->d_user->filesize = in->stream_size;
 
-    pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
-    pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
+    pkt->pts = MP_ADD_PTS(pkt->pts, in->ts_offset);
+    pkt->dts = MP_ADD_PTS(pkt->dts, in->ts_offset);
 
     if (pkt->segmented) {
-        pkt->start = MP_ADD_PTS(pkt->start, ds->in->ts_offset);
-        pkt->end = MP_ADD_PTS(pkt->end, ds->in->ts_offset);
+        pkt->start = MP_ADD_PTS(pkt->start, in->ts_offset);
+        pkt->end = MP_ADD_PTS(pkt->end, in->ts_offset);
     }
 
     // Apply timed metadata when packet is returned to user.
@@ -2358,12 +2358,12 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         metadata = ds->tags_init;
     if (metadata != ds->tags_reader) {
         mp_packet_tags_setref(&ds->tags_reader, metadata);
-        ds->in->events |= DEMUX_EVENT_METADATA;
-        if (ds->in->wakeup_cb)
-            ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
+        in->events |= DEMUX_EVENT_METADATA;
+        if (in->wakeup_cb)
+            in->wakeup_cb(in->wakeup_cb_ctx);
     }
 
-    prune_old_packets(ds->in);
+    prune_old_packets(in);
     *res = pkt;
     return 1;
 }
