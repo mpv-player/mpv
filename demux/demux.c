@@ -1336,7 +1336,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     // before restart_pos, but might be up to back_preroll packets earlier.
 
     struct demux_packet *last_keyframe = NULL;
-    struct demux_packet *last_preroll = NULL;
+    struct demux_packet *target = NULL;
 
     // Keep this packet at back_preroll packets before last_keyframe.
     struct demux_packet *pre_packet = ds->reader_head;
@@ -1349,7 +1349,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     {
         if (cur->keyframe) {
             last_keyframe = cur;
-            last_preroll = pre_packet;
+            target = pre_packet;
         }
 
         if (pre_packet_offset) {
@@ -1375,7 +1375,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     }
 
     int got_preroll = 0;
-    for (struct demux_packet *cur = last_preroll;
+    for (struct demux_packet *cur = target;
          cur != last_keyframe;
          cur = cur->next)
          got_preroll++;
@@ -1383,15 +1383,15 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     if (got_preroll < ds->back_preroll && !ds->queue->is_bof)
         goto resume_earlier;
 
-    // (Round preroll down to last_keyframe in the worst case.)
-    while (!last_preroll->keyframe)
-        last_preroll = last_preroll->next;
+    // (Round preroll down to 0 in the worst case.)
+    while (!target->keyframe)
+        target = target->next;
 
     // Skip reader_head from previous keyframe to current one.
     // Or if preroll is involved, the first preroll packet.
-    while (ds->reader_head != last_preroll) {
+    while (ds->reader_head != target) {
         if (!advance_reader_head(ds))
-            assert(0); // last_preroll must be in list
+            assert(0); // target must be in list
     }
 
     ds->back_restarting = false;
