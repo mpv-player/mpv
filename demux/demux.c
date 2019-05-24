@@ -1291,7 +1291,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     } else if (!first && ds->eof) {
         // Reached EOF during normal backward demuxing. We probably returned the
         // last keyframe range to user. Need to resume at an earlier position.
-        // Fall through, hit the no-keyframe case (and possible the BOF check
+        // Fall through, hit the no-keyframe case (and possibly the BOF check
         // if there are no packets at all), and then resume_earlier.
     } else if (!first) {
         return; // no packets yet
@@ -1621,7 +1621,7 @@ static void attempt_range_joining(struct demux_internal *in)
 
         // For enabled non-sparse streams, always require an overlap packet.
         if (ds->eager && !join_point_found) {
-            MP_WARN(in, "stream %d: no joint point found\n", n);
+            MP_WARN(in, "stream %d: no join point found\n", n);
             goto failed;
         }
     }
