@@ -558,7 +558,8 @@ Playback Control
 
     The solution is to feed a previous packet to the decoder each time, and then
     discard the output. This option controls how many packets to feed. The
-    ``auto`` choice is currently hardcoded to 1 for audio, and 0 for video.
+    ``auto`` choice is currently hardcoded to 0 for video, and uses 1 for lossy
+    audio, 0 for lossless audio.
 
     ``--video-backward-overlap`` can potentially handle intra-refresh video,
     depending on the exact conditions. You may have to use the

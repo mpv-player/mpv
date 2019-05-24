@@ -19,6 +19,7 @@
 #define MP_AVCOMMON_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #include <libavutil/avutil.h>
 #include <libavutil/rational.h>
@@ -44,6 +45,7 @@ void mp_add_lavc_encoders(struct mp_decoder_list *list);
 char **mp_get_lavf_demuxers(void);
 int mp_codec_to_av_codec_id(const char *codec);
 const char *mp_codec_from_av_codec_id(int codec_id);
+bool mp_codec_is_lossless(const char *codec);
 void mp_set_avdict(struct AVDictionary **dict, char **kv);
 void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
