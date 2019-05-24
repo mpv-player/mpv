@@ -292,6 +292,13 @@ const char *mp_codec_from_av_codec_id(int codec_id)
     return name;
 }
 
+bool mp_codec_is_lossless(const char *codec)
+{
+    const AVCodecDescriptor *desc =
+        avcodec_descriptor_get(mp_codec_to_av_codec_id(codec));
+    return desc && (desc->props & AV_CODEC_PROP_LOSSLESS);
+}
+
 // kv is in the format as by OPT_KEYVALUELIST(): kv[0]=key0, kv[1]=val0, ...
 // Copy them to the dict.
 void mp_set_avdict(AVDictionary **dict, char **kv)

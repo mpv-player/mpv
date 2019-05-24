@@ -33,6 +33,7 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "mpv_talloc.h"
+#include "common/av_common.h"
 #include "common/msg.h"
 #include "common/global.h"
 #include "common/recorder.h"
@@ -952,8 +953,8 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
     switch (ds->type) {
     case STREAM_AUDIO:
         ds->back_preroll = in->opts->audio_back_preroll;
-        if (ds->back_preroll < 0)
-            ds->back_preroll = 1; // auto
+        if (ds->back_preroll < 0) // auto
+            ds->back_preroll = mp_codec_is_lossless(sh->codec->codec) ? 0 : 1;
         break;
     case STREAM_VIDEO:
         ds->back_preroll = in->opts->video_back_preroll;
