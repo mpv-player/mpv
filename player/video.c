@@ -483,6 +483,8 @@ static int video_output_image(struct MPContext *mpctx)
         }
         if (img) {
             double endpts = get_play_end_pts(mpctx);
+            if (endpts != MP_NOPTS_VALUE)
+                endpts *= mpctx->play_dir;
             if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
                 mpctx->max_frames == 0)
             {
