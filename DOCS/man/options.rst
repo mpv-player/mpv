@@ -443,7 +443,9 @@ Playback Control
       their behavior. There is no list, and the player usually does not detect
       them. Certain live streams (including TV captures) may exhibit problems
       in particular, as well as some lossy audio codecs. h264 intra-refresh is
-      known not to work due to problems with libavcodec.
+      known not to work due to problems with libavcodec. WAV and some other raw
+      audio formats tend to have problems - there are hacks for dealing with
+      them, which may or may not work.
 
     - Function with EDL/mkv ordered chapters is obviously broken.
 
@@ -475,16 +477,6 @@ Playback Control
       playback time in the expected way (provided they work correctly), the
       framestep commands are transposed. Backstepping will perform very
       expensive work to step forward by 1 frame.
-
-    - Backward playback in wav files does not work properly (and possibly
-      similar formats, typically raw audio formats used through libavformat).
-      This is because libavformat does not align seeks on the packet sizes it
-      uses. (The packet sizes are arbitrary and chosen by libavformat
-      internally. Seeks on the other hand are sample-exact, which leads to
-      overlapping packets if the backward playback state machine seeks back.
-      This is very complex to work around, so it doesn't attempt to.)
-      A workaround is to remux to a format like mkv, which enforces packet
-      boundaries. Making mpv cache the entire file in memory also works.
 
     - Backward playback with Vorbis does not work. libavcodec's decoder
       discards the first Vorbis packet (after each decoder reset), and the

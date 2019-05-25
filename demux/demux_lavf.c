@@ -139,6 +139,7 @@ struct format_hack {
     bool fix_editlists : 1;
     bool is_network : 1;
     bool no_seek : 1;
+    bool no_pcm_seek : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -160,8 +161,8 @@ static const struct format_hack format_hacks[] = {
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
 
-    {"mp4", .skipinfo = true, .fix_editlists = true},
-    {"matroska", .skipinfo = true},
+    {"mp4", .skipinfo = true, .fix_editlists = true, .no_pcm_seek = true},
+    {"matroska", .skipinfo = true, .no_pcm_seek = true},
 
     {"v4l2", .no_seek = true},
 
@@ -214,6 +215,10 @@ typedef struct lavf_priv {
 
     struct demux_lavf_opts *opts;
     double mf_fps;
+
+    bool pcm_seek_hack_disabled;
+    AVStream *pcm_seek_hack;
+    int pcm_seek_hack_packet_size;
 
     // Proxying nested streams.
     struct nested_stream *nested;
@@ -665,6 +670,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             }
         }
 
+        if (!sh->attached_picture) {
+            // A real video stream probably means it's a packet based format.
+            priv->pcm_seek_hack_disabled = true;
+            priv->pcm_seek_hack = NULL;
+        }
+
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
         if (st->avg_frame_rate.num)
@@ -769,6 +780,25 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
         mp_tags_copy_from_av_dictionary(sh->tags, st->metadata);
         demux_add_sh_stream(demuxer, sh);
+
+        // Unfortunately, there is no better way to detect PCM codecs, other
+        // than listing them all manually. (Or other "frameless" codecs. Or
+        // rather, codecs with frames so small libavformat will put multiple of
+        // them into a single packet, but not preserve these artificial packet
+        // boundaries on seeking.)
+        if (sh->codec->codec && strncmp(sh->codec->codec, "pcm_", 4) == 0 &&
+            codec->block_align && !priv->pcm_seek_hack_disabled &&
+            priv->opts->hacks && !priv->format_hack.no_pcm_seek &&
+            st->time_base.num == 1 && st->time_base.den == codec->sample_rate)
+        {
+            if (priv->pcm_seek_hack) {
+                // More than 1 audio stream => usually doesn't apply.
+                priv->pcm_seek_hack_disabled = true;
+                priv->pcm_seek_hack = NULL;
+            } else {
+                priv->pcm_seek_hack = st;
+            }
+        }
     }
 
     select_tracks(demuxer, i);
@@ -1089,6 +1119,9 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
         return true;
     }
 
+    if (priv->pcm_seek_hack == st && !priv->pcm_seek_hack_packet_size)
+        priv->pcm_seek_hack_packet_size = pkt->size;
+
     if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
     if (pkt->dts != AV_NOPTS_VALUE)
@@ -1116,6 +1149,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
     int64_t seek_pts_av = 0;
+    int seek_stream = -1;
 
     if (!(flags & SEEK_FORWARD))
         avsflags = AVSEEK_FLAG_BACKWARD;
@@ -1139,13 +1173,39 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
         seek_pts_av = seek_pts * AV_TIME_BASE;
     }
 
-    int r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
+    // Hack to make wav seeking "deterministic". Without this, features like
+    // backward playback won't work.
+    if (priv->pcm_seek_hack && !priv->pcm_seek_hack_packet_size) {
+        // This might for example be the initial seek. Fuck it up like the
+        // bullshit it is.
+        AVPacket pkt = {0};
+        if (av_read_frame(priv->avfc, &pkt) >= 0)
+            priv->pcm_seek_hack_packet_size = pkt.size;
+        av_packet_unref(&pkt);
+        add_new_streams(demuxer);
+    }
+    if (priv->pcm_seek_hack && priv->pcm_seek_hack_packet_size &&
+        !(avsflags & AVSEEK_FLAG_BYTE))
+    {
+        int samples = priv->pcm_seek_hack_packet_size /
+                      priv->pcm_seek_hack->codecpar->block_align;
+        if (samples > 0) {
+            MP_VERBOSE(demuxer, "using bullshit libavformat PCM seek hack\n");
+            double pts = seek_pts_av / (double)AV_TIME_BASE;
+            seek_pts_av = pts / av_q2d(priv->pcm_seek_hack->time_base);
+            int64_t align = seek_pts_av % samples;
+            seek_pts_av -= align;
+            seek_stream = priv->pcm_seek_hack->index;
+        }
+    }
+
+    int r = av_seek_frame(priv->avfc, seek_stream, seek_pts_av, avsflags);
     if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
         // When seeking before the beginning of the file, and seeking fails,
         // try again without the backwards flag to make it seek to the
         // beginning.
         avsflags &= ~AVSEEK_FLAG_BACKWARD;
-        r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
+        r = av_seek_frame(priv->avfc, seek_stream, seek_pts_av, avsflags);
     }
 
     if (r < 0) {
