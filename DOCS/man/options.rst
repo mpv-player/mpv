@@ -5075,6 +5075,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
+``--cocoa-cb-10bit-context=<yes|no>``
+    Creates a 10bit capable pixel format for the context creation (default: yes).
+    Instead of 8bit integer framebuffer a 16bit half-float framebuffer is
+    requested.
+
+    OS X only.
+
 ``--macos-title-bar-appearance=<appearance>``
     Sets the appearance of the title bar (default: auto). Not all combinations
     of appearances and ``--macos-title-bar-material`` materials make sense or

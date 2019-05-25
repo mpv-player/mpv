@@ -63,6 +63,7 @@ const struct m_sub_options macos_conf = {
                           ({"default", -1})),
         OPT_CHOICE("cocoa-cb-sw-renderer", cocoa_cb_sw_renderer, 0,
                    ({"auto", -1}, {"no", 0}, {"yes", 1})),
+        OPT_FLAG("cocoa-cb-10bit-context", cocoa_cb_10bit_context, 0),
         OPT_REMOVED("macos-title-bar-style", "Split into --macos-title-bar-appearance "
                      "and --macos-title-bar-material"),
         {0}
@@ -72,6 +73,7 @@ const struct m_sub_options macos_conf = {
         .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
         .cocoa_cb_sw_renderer = -1,
+        .cocoa_cb_10bit_context = 1
     },
 };
 

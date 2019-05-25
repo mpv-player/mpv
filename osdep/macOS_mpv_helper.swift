@@ -139,12 +139,13 @@ class MPVHelper: NSObject {
         return flags & UInt64(MPV_RENDER_UPDATE_FRAME.rawValue) > 0
     }
 
-    func drawRender(_ surface: NSSize, _ ctx: CGLContextObj, skip: Bool = false) {
+    func drawRender(_ surface: NSSize, _ depth: GLint, _ ctx: CGLContextObj, skip: Bool = false) {
         deinitLock.lock()
         if mpvRenderContext != nil {
             var i: GLint = 0
             var flip: CInt = 1
             var skip: CInt = skip ? 1 : 0
+            var ditherDepth = depth
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
@@ -157,6 +158,7 @@ class MPVHelper: NSObject {
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
                 mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
+                mpv_render_param(type: MPV_RENDER_PARAM_DEPTH, data: &ditherDepth),
                 mpv_render_param(type: MPV_RENDER_PARAM_SKIP_RENDERING, data: &skip),
                 mpv_render_param()
             ]
