@@ -150,12 +150,6 @@ Playback Control
 ``--shuffle``
     Play files in random order.
 
-``--chapter=<start[-end]>``
-    Specify which chapter to start playing at. Optionally specify which
-    chapter to end playing at.
-
-    See also: ``--start``.
-
 ``--playlist-start=<auto|index>``
     Set which file on the internal playlist to start playback with. The index
     is an integer, with 0 meaning the first file. The value ``auto`` means that

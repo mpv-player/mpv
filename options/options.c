@@ -365,10 +365,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("load-stats-overlay", lua_load_stats, UPDATE_BUILTIN_SCRIPTS),
 #endif
 
-// ------------------------- stream options --------------------
-
-    OPT_INTPAIR("chapter", chapterrange, 0, .deprecation_message = "instead of "
-        "--chapter=A-B use --start=#A --end=#B+1"),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
 
@@ -830,6 +826,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("sub-paths", "sub-file-paths"),
     OPT_REMOVED("heartbeat-cmd", "use Lua scripting instead"),
     OPT_REMOVED("no-ometadata", "use --no-ocopy-metadata"),
+    OPT_REMOVED("chapter", "use '--start=#123' '--end=#124' (for chapter 123)"),
 
     {0}
 };
@@ -874,7 +871,6 @@ const struct MPOpts mp_default_opts = {
     .hls_bitrate = INT_MAX,
     .cache_pause = 1,
     .cache_pause_wait = 1.0,
-    .chapterrange = {-1, -1},
     .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
     .edition_id = -1,
     .default_max_pts_correction = -1,
