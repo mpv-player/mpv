@@ -23,6 +23,13 @@ extension NSAppearance.Name {
     static let accessibilityHighContrastVibrantLight: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantLight")
     static let accessibilityHighContrastVibrantDark: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantDark")
 }
+
+@available(OSX 10.12, *)
+extension String {
+    static let RGBA16Float: String = kCAContentsFormatRGBA16Float
+    static let RGBA8Uint: String = kCAContentsFormatRGBA8Uint
+    static let gray8Uint: String = kCAContentsFormatGray8Uint
+}
 #endif
 
 extension NSPasteboard.PasteboardType {
@@ -70,6 +77,13 @@ extension Array {
 
     func compactMap<ElementOfResult>(_ transform: (Element) throws -> ElementOfResult?) rethrows -> [ElementOfResult] {
         return try self.flatMap(transform)
+    }
+}
+
+extension Array where Element == [CGLPixelFormatAttribute] {
+
+    func contains(_ obj: [CGLPixelFormatAttribute]) -> Bool {
+        return self.contains(where:{ $0 == obj })
     }
 }
 
