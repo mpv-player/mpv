@@ -2265,17 +2265,6 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
     if (in->blocked)
         return 0;
 
-    if (ds->eager) {
-        in->reading = true; // enable readahead
-        in->eof = false; // force retry
-        pthread_cond_signal(&in->wakeup); // possibly read more
-    }
-
-    if (ds->back_resuming || ds->back_restarting) {
-        assert(in->back_demuxing);
-        return 0;
-    }
-
     if (ds->sh->attached_picture) {
         ds->eof = true;
         if (ds->attached_picture_added)
@@ -2287,6 +2276,17 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         pkt->stream = ds->sh->index;
         *res = pkt;
         return 1;
+    }
+
+    if (ds->eager) {
+        in->reading = true; // enable readahead
+        in->eof = false; // force retry
+        pthread_cond_signal(&in->wakeup); // possibly read more
+    }
+
+    if (ds->back_resuming || ds->back_restarting) {
+        assert(in->back_demuxing);
+        return 0;
     }
 
     bool eof = !ds->reader_head && ds->eof;
