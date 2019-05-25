@@ -481,6 +481,9 @@ static void feed_packet(struct priv *p)
     if (!p->decoder || !mp_pin_in_needs_data(p->decoder->f->pins[0]))
         return;
 
+    if (p->decoded_coverart.type)
+        return;
+
     if (!p->packet.type && !p->new_segment) {
         p->packet = mp_pin_out_read(p->demux);
         if (!p->packet.type)
@@ -657,8 +660,9 @@ static void read_frame(struct priv *p)
         return;
 
     if (p->header->attached_picture && frame.type == MP_FRAME_VIDEO) {
-        p->decoded_coverart = mp_frame_ref(frame);
-        p->coverart_returned = 1;
+        p->decoded_coverart = frame;
+        mp_filter_internal_mark_progress(p->f);
+        return;
     }
 
     if (p->public.attempt_framedrops) {
