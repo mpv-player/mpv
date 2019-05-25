@@ -48,40 +48,30 @@
 static double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
-    // declaration up here because of C grammar quirk
-    double chapter_start_pts;
+    // Relative times are an offset to the start of the file.
+    double start = 0;
+    if (mpctx->demuxer && !mpctx->opts->rebase_start_time)
+        start = mpctx->demuxer->start_time;
+
     switch (t.type) {
     case REL_TIME_ABSOLUTE:
         return t.pos;
     case REL_TIME_RELATIVE:
         if (t.pos >= 0) {
-            return t.pos;
+            return start + t.pos;
         } else {
             if (length >= 0)
-                return MPMAX(length + t.pos, 0.0);
+                return start + MPMAX(length + t.pos, 0.0);
         }
         break;
     case REL_TIME_PERCENT:
         if (length >= 0)
-            return length * (t.pos / 100.0);
+            return start + length * (t.pos / 100.0);
         break;
     case REL_TIME_CHAPTER:
-        chapter_start_pts = chapter_start_time(mpctx, t.pos);
-        if (chapter_start_pts != MP_NOPTS_VALUE){
-            /*
-             * rel_time_to_abs always returns rebased timetamps,
-             * even with --rebase-start-time=no. (See the above two
-             * cases.) chapter_start_time values are not rebased without
-             * --rebase-start-time=yes, so we need to rebase them
-             * here to be consistent with the rest of rel_time_to_abs.
-             */
-            if (mpctx->demuxer && !mpctx->opts->rebase_start_time){
-                chapter_start_pts -= mpctx->demuxer->start_time;
-            }
-            return chapter_start_pts;
-        }
-        break;
+        return chapter_start_time(mpctx, t.pos); // already absolute time
     }
+
     return MP_NOPTS_VALUE;
 }
 
