@@ -359,19 +359,20 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type)
     mpctx->osd_progbar.num_stops = 0;
     double len = get_time_length(mpctx);
     if (len > 0) {
-        double ab_loop_start_time = get_ab_loop_start_time(mpctx);
         if (opts->ab_loop[0] != MP_NOPTS_VALUE ||
-            (ab_loop_start_time != MP_NOPTS_VALUE &&
-               opts->ab_loop[1] != MP_NOPTS_VALUE))
+            opts->ab_loop[1] != MP_NOPTS_VALUE)
         {
+            double ab_loop_start_time = get_ab_loop_start_time(mpctx);
+            if (ab_loop_start_time == MP_NOPTS_VALUE)
+                ab_loop_start_time = 0;
             MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
                         mpctx->osd_progbar.num_stops, ab_loop_start_time / len);
-        }
-        if (opts->ab_loop[1] != MP_NOPTS_VALUE) {
-            MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
-                        mpctx->osd_progbar.num_stops, opts->ab_loop[1] / len);
-        }
-        if (mpctx->osd_progbar.num_stops == 0) {
+            if (opts->ab_loop[1] != MP_NOPTS_VALUE) {
+                MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
+                                 mpctx->osd_progbar.num_stops,
+                                 opts->ab_loop[1] / len);
+            }
+        } else {
             int num = get_chapter_count(mpctx);
             for (int n = 0; n < num; n++) {
                 double time = chapter_start_time(mpctx, n);
