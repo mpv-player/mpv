@@ -88,10 +88,7 @@ static double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 double get_play_end_pts(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    double end = MP_NOPTS_VALUE;
-    if (opts->play_end.type) {
-        end = rel_time_to_abs(mpctx, opts->play_end);
-    }
+    double end = rel_time_to_abs(mpctx, opts->play_end);
     if (opts->play_length.type) {
         double start = get_play_start_pts(mpctx);
         if (start == MP_NOPTS_VALUE)
