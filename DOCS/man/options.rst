@@ -418,9 +418,7 @@ Playback Control
 
     - Backward output. This is relatively simple, because the decoder returns
       the frames in the needed order. However, this may cause various problems
-      because very basic assumptions are broken (such as time going forward).
-      Also, some filtering becomes impossible. Deinterlacing filters will not
-      work.
+      because filters see audio and video going backward.
 
     Known problems:
 
