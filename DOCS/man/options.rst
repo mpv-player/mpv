@@ -465,7 +465,8 @@ Playback Control
     - Trying to use this with hardware video decoding will probably exhaust all
       your GPU memory and then crash a thing or two.
 
-    - Stream recording and encoding are broken.
+    - Stream recording is broken. ``--stream-record`` may keep working if you
+      backward play within a cached region only.
 
     - Relative seeks may behave weird. Small seeks backward (towards smaller
       time, i.e. ``seek -1``) may not really seek properly, and audio will
