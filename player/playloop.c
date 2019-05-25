@@ -323,7 +323,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
                 offset += get_track_seek_offset(mpctx, mpctx->tracks[n]);
             hr_seek_offset = MPMAX(hr_seek_offset, -offset);
         }
-        demux_pts -= hr_seek_offset;
+        demux_pts -= hr_seek_offset * play_dir;
         demux_flags = (demux_flags | SEEK_HR) & ~SEEK_FORWARD;
         // For HR seeks in backward playback mode, the correct seek rounding
         // direction is forward instead of backward.
