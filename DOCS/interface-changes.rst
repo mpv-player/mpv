@@ -88,6 +88,7 @@ Interface changes
     - always prefer EGL over GLX, which helps with AMD/vaapi, but will break
       vdpau with --vo=gpu - use --gpu-context=x11 to be able to use vdpau. This
       does not affect --vo=vdpau or --hwdec=vdpau-copy.
+    - remove deprecated --chapter option
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

@@ -194,7 +194,6 @@ typedef struct MPOpts {
     char *force_configdir;
     int use_filedir_conf;
     int hls_bitrate;
-    int chapterrange[2];
     int edition_id;
     int correct_pts;
     int initial_audio_sync;
