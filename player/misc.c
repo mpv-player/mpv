@@ -45,7 +45,7 @@
 #include "core.h"
 #include "command.h"
 
-double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
+static double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
     // declaration up here because of C grammar quirk
