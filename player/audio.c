@@ -736,6 +736,8 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
     struct ao_chain *ao_c = mpctx->ao_chain;
 
     double endpts = get_play_end_pts(mpctx);
+    if (endpts != MP_NOPTS_VALUE)
+        endpts *= mpctx->play_dir;
 
     bool eof = false;
     if (!copy_output(mpctx, ao_c, minsamples, endpts, &eof))
