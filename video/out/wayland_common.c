@@ -1063,7 +1063,7 @@ void vo_wayland_uninit(struct vo *vo)
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
-    if (wl->current_output->output)
+    if (wl->current_output && wl->current_output->output)
         wl_output_destroy(wl->current_output->output);
 
     if (wl->cursor_theme)
