@@ -814,25 +814,30 @@ static void handle_loop_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    double ab[2];
-    if (mpctx->stop_play == AT_END_OF_FILE && get_ab_loop_times(mpctx, ab) &&
-        mpctx->ab_loop_clip)
-    {
-        // Assumes execute_queued_seek() happens before next audio/video is
-        // attempted to be decoded or filtered.
-        mpctx->stop_play = KEEP_PLAYING;
-        mark_seek(mpctx);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, ab[0], MPSEEK_EXACT,
-                   MPSEEK_FLAG_NOFLUSH);
-    }
+    if (mpctx->stop_play != AT_END_OF_FILE)
+        return;
 
-    // Do not attempt to loop-file if --ab-loop is active.
-    else if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
-        mpctx->stop_play = KEEP_PLAYING;
-        set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, MPSEEK_FLAG_NOFLUSH);
+    double target = MP_NOPTS_VALUE;
+    enum seek_precision prec = MPSEEK_DEFAULT;
+
+    double ab[2];
+    if (get_ab_loop_times(mpctx, ab) && mpctx->ab_loop_clip) {
+        target = ab[0];
+        prec = MPSEEK_EXACT;
+    } else if (opts->loop_file) {
         if (opts->loop_file > 0)
             opts->loop_file--;
+        target = 0;
+    }
+
+    if (target != MP_NOPTS_VALUE) {
+        mpctx->stop_play = KEEP_PLAYING;
+        set_osd_function(mpctx, OSD_FFW);
+        mark_seek(mpctx);
+
+        // Assumes execute_queued_seek() happens before next audio/video is
+        // attempted to be decoded or filtered.
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, target, prec, MPSEEK_FLAG_NOFLUSH);
     }
 }
 
