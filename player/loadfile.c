@@ -1550,7 +1550,8 @@ static void play_current_file(struct MPContext *mpctx)
         }
     }
 
-    double play_start_pts = get_play_start_pts(mpctx);
+    // (Not get_play_start_pts(), which would always trigger a seek.)
+    double play_start_pts = rel_time_to_abs(mpctx, opts->play_start);
 
     // Backward playback -> start from end by default.
     if (play_start_pts == MP_NOPTS_VALUE && opts->play_dir < 0)

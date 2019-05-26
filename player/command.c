@@ -3009,7 +3009,6 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     struct MPContext *mpctx = ctx;
-    struct MPOpts *opts = mpctx->opts;
     if (action == M_PROPERTY_KEY_ACTION) {
         double val;
         if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &val) < 1)
@@ -3019,12 +3018,7 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
     }
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (r > 0 && action == M_PROPERTY_SET) {
-        mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
-        if (strcmp(prop->name, "ab-loop-b") == 0) {
-            if (opts->ab_loop[1] != MP_NOPTS_VALUE &&
-                mpctx->playback_pts <= opts->ab_loop[1])
-                mpctx->ab_loop_clip = true;
-        }
+        update_ab_loop_clip(mpctx);
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
         mp_wakeup_core(mpctx);

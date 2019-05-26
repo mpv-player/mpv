@@ -352,27 +352,22 @@ static void update_osd_bar(struct MPContext *mpctx, int type,
 
 void set_osd_bar_chapters(struct MPContext *mpctx, int type)
 {
-    struct MPOpts *opts = mpctx->opts;
     if (mpctx->osd_progbar.type != type)
         return;
 
     mpctx->osd_progbar.num_stops = 0;
     double len = get_time_length(mpctx);
     if (len > 0) {
-        if (opts->ab_loop[0] != MP_NOPTS_VALUE ||
-            opts->ab_loop[1] != MP_NOPTS_VALUE)
-        {
-            double ab_loop_start_time = get_ab_loop_start_time(mpctx);
-            if (ab_loop_start_time == MP_NOPTS_VALUE)
-                ab_loop_start_time = 0;
-            MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
-                        mpctx->osd_progbar.num_stops, ab_loop_start_time / len);
-            if (opts->ab_loop[1] != MP_NOPTS_VALUE) {
+        // Always render the loop points, even if they're incomplete.
+        double ab[2];
+        bool valid = get_ab_loop_times(mpctx, ab);
+        for (int n = 0; n < 2; n++) {
+            if (ab[n] != MP_NOPTS_VALUE) {
                 MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
-                                 mpctx->osd_progbar.num_stops,
-                                 opts->ab_loop[1] / len);
+                                 mpctx->osd_progbar.num_stops, ab[n] / len);
             }
-        } else {
+        }
+        if (!valid) {
             int num = get_chapter_count(mpctx);
             for (int n = 0; n < num; n++) {
                 double time = chapter_start_time(mpctx, n);

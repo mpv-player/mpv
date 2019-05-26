@@ -551,9 +551,10 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit);
 void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec);
 
 // misc.c
+double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_play_start_pts(struct MPContext *mpctx);
-double get_ab_loop_start_time(struct MPContext *mpctx);
+bool get_ab_loop_times(struct MPContext *mpctx, double t[2]);
 void merge_playlist_files(struct playlist *pl);
 void update_vo_playback_state(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
@@ -605,6 +606,7 @@ void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);
 void seek_to_last_frame(struct MPContext *mpctx);
 void update_screensaver_state(struct MPContext *mpctx);
+void update_ab_loop_clip(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
