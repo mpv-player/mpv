@@ -245,16 +245,6 @@ void mp_render_context_set_control_callback(mpv_render_context *ctx,
     pthread_mutex_unlock(&ctx->control_lock);
 }
 
-static void kill_cb(void *ptr)
-{
-    struct mpv_render_context *ctx = ptr;
-
-    pthread_mutex_lock(&ctx->update_lock);
-    ctx->had_kill_update = true;
-    pthread_cond_broadcast(&ctx->update_cond);
-    pthread_mutex_unlock(&ctx->update_lock);
-}
-
 void mpv_render_context_free(mpv_render_context *ctx)
 {
     if (!ctx)
@@ -269,7 +259,7 @@ void mpv_render_context_free(mpv_render_context *ctx)
     // context. The above removal guarantees it can't come back (so ctx->vo
     // can't change to non-NULL).
     if (atomic_load(&ctx->in_use)) {
-        kill_video_async(ctx->client_api, kill_cb, ctx);
+        kill_video_async(ctx->client_api);
 
         while (atomic_load(&ctx->in_use)) {
             // As long as the video decoders are not destroyed, they can still
@@ -279,7 +269,7 @@ void mpv_render_context_free(mpv_render_context *ctx)
             if (ctx->dispatch)
                 mp_dispatch_queue_process(ctx->dispatch, 0);
 
-            // Wait for kill_cb() or update() calls.
+            // Wait for update() calls.
             pthread_mutex_lock(&ctx->update_lock);
             if (!ctx->had_kill_update)
                 pthread_cond_wait(&ctx->update_cond, &ctx->update_lock);
