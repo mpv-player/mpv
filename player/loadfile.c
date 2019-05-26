@@ -1555,7 +1555,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     // Backward playback -> start from end by default.
     if (play_start_pts == MP_NOPTS_VALUE && opts->play_dir < 0)
-        play_start_pts = MPMAX(mpctx->demuxer->duration, 0);
+        play_start_pts = get_start_time(mpctx, -1);
 
     if (play_start_pts != MP_NOPTS_VALUE) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, play_start_pts, MPSEEK_DEFAULT, 0);

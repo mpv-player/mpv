@@ -107,14 +107,8 @@ double get_play_start_pts(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     double res = rel_time_to_abs(mpctx, opts->play_start);
-    if (res == MP_NOPTS_VALUE) {
-        res = 0;
-        if (!opts->rebase_start_time && mpctx->demuxer)
-            res = mpctx->demuxer->start_time;
-        // Backward playback -> start from end by default.
-        if (mpctx->play_dir < 0 && mpctx->demuxer)
-            res = MPMAX(mpctx->demuxer->duration, 0);
-    }
+    if (res == MP_NOPTS_VALUE)
+        res = get_start_time(mpctx, mpctx->play_dir);
     return res;
 }
 
