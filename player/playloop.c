@@ -488,6 +488,20 @@ double get_time_length(struct MPContext *mpctx)
     return demuxer && demuxer->duration >= 0 ? demuxer->duration : MP_NOPTS_VALUE;
 }
 
+// Return approximate PTS of first frame played. This can be completely wrong
+// for a number of reasons in a number of situations.
+double get_start_time(struct MPContext *mpctx, int dir)
+{
+    double res = 0;
+    if (mpctx->demuxer) {
+        if (!mpctx->opts->rebase_start_time)
+            res += mpctx->demuxer->start_time;
+        if (dir < 0)
+            res += MPMAX(mpctx->demuxer->duration, 0);
+    }
+    return res;
+}
+
 double get_current_time(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
@@ -827,7 +841,7 @@ static void handle_loop_file(struct MPContext *mpctx)
     } else if (opts->loop_file) {
         if (opts->loop_file > 0)
             opts->loop_file--;
-        target = 0;
+        target = get_start_time(mpctx, mpctx->play_dir);
     }
 
     if (target != MP_NOPTS_VALUE) {
