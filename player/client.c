@@ -1813,16 +1813,9 @@ int64_t mpv_get_time_us(mpv_handle *ctx)
 
 #include "video/out/libmpv.h"
 
-struct kill_ctx {
-    struct MPContext *mpctx;
-    void (*fin)(void *ctx);
-    void *fin_ctx;
-};
-
 static void do_kill(void *ptr)
 {
-    struct kill_ctx *k = ptr;
-    struct MPContext *mpctx = k->mpctx;
+    struct MPContext *mpctx = ptr;
 
     struct track *track = mpctx->vo_chain ? mpctx->vo_chain->track : NULL;
     uninit_video_out(mpctx);
@@ -1830,22 +1823,13 @@ static void do_kill(void *ptr)
         mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
         error_on_track(mpctx, track);
     }
-
-    k->fin(k->fin_ctx);
 }
 
 // Used by vo_libmpv to (a)synchronously uninitialize video.
-void kill_video_async(struct mp_client_api *client_api, void (*fin)(void *ctx),
-                      void *fin_ctx)
+void kill_video_async(struct mp_client_api *client_api)
 {
     struct MPContext *mpctx = client_api->mpctx;
-    struct kill_ctx *k = talloc_ptrtype(NULL, k);
-    *k = (struct kill_ctx){
-        .mpctx = mpctx,
-        .fin = fin,
-        .fin_ctx = fin_ctx,
-    };
-    mp_dispatch_enqueue_autofree(mpctx->dispatch, do_kill, k);
+    mp_dispatch_enqueue(mpctx->dispatch, do_kill, mpctx);
 }
 
 // Used by vo_libmpv to set the current render context.
