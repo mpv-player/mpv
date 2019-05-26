@@ -847,7 +847,7 @@ void seek_to_last_frame(struct MPContext *mpctx)
                    });
     // Make it exact: stop seek only if last frame was reached.
     if (mpctx->hrseek_active) {
-        mpctx->hrseek_pts = 1e99; // "infinite"
+        mpctx->hrseek_pts = INFINITY;
         mpctx->hrseek_lastframe = true;
     }
 }
