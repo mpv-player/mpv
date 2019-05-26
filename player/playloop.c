@@ -417,7 +417,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
-    mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
+    update_ab_loop_clip(mpctx);
 
     mpctx->current_seek = seek;
 }
@@ -527,10 +527,8 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (use_range) {
         double startpos = get_play_start_pts(mpctx);
         double endpos = get_play_end_pts(mpctx);
-        if (endpos == MP_NOPTS_VALUE || endpos > MPMAX(0, len))
+        if (endpos > MPMAX(0, len))
             endpos = MPMAX(0, len);
-        if (startpos == MP_NOPTS_VALUE || startpos < 0)
-            startpos = 0;
         if (endpos < startpos)
             endpos = startpos;
         start = startpos;
@@ -612,6 +610,18 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
 int get_chapter_count(struct MPContext *mpctx)
 {
     return mpctx->num_chapters;
+}
+
+// If the current playback position (or seek target) falls before the B
+// position, actually make playback loop when reaching the B point. The
+// intention is that you can seek out of the ab-loop range.
+void update_ab_loop_clip(struct MPContext *mpctx)
+{
+    double pts = get_current_time(mpctx);
+    double ab[2];
+    mpctx->ab_loop_clip = pts != MP_NOPTS_VALUE &&
+                          get_ab_loop_times(mpctx, ab) &&
+                          pts * mpctx->play_dir <= ab[1] * mpctx->play_dir;
 }
 
 static void handle_osd_redraw(struct MPContext *mpctx)
@@ -804,17 +814,15 @@ static void handle_loop_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (mpctx->stop_play == AT_END_OF_FILE &&
-        (opts->ab_loop[0] != MP_NOPTS_VALUE || opts->ab_loop[1] != MP_NOPTS_VALUE))
+    double ab[2];
+    if (mpctx->stop_play == AT_END_OF_FILE && get_ab_loop_times(mpctx, ab) &&
+        mpctx->ab_loop_clip)
     {
         // Assumes execute_queued_seek() happens before next audio/video is
         // attempted to be decoded or filtered.
         mpctx->stop_play = KEEP_PLAYING;
-        double start = get_ab_loop_start_time(mpctx);
-        if (start == MP_NOPTS_VALUE)
-            start = 0;
         mark_seek(mpctx);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, start, MPSEEK_EXACT,
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, ab[0], MPSEEK_EXACT,
                    MPSEEK_FLAG_NOFLUSH);
     }
 
@@ -1081,7 +1089,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         }
         mpctx->playing_msg_shown = true;
         mp_wakeup_core(mpctx);
-        mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
+        update_ab_loop_clip(mpctx);
         MP_VERBOSE(mpctx, "playback restart complete\n");
     }
 }

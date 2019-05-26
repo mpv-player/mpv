@@ -312,9 +312,14 @@ Playback Control
     the ``a`` timestamp. Seeking past the ``b`` point doesn't loop (this is
     intentional).
 
-    If both options are set to ``no`` or unset, looping is disabled.
-    Otherwise, the start/end of playback is used if one of the options
-    is set to ``no`` or unset.
+    If ``a`` is after ``b``, the behavior is as if the points were given in
+    the right order, and the player will seek to ``b`` after crossing through
+    ``a``. This is different from old behavior, where looping was disabled (and
+    as a bug, looped back to ``a`` on the end of the file).
+
+    If either options are set to ``no`` (or unset), looping is disabled. This
+    is different from old behavior, where an unset ``a`` implied the start of
+    the file, and an unset ``b`` the end of the file.
 
     The loop-points can be adjusted at runtime with the corresponding
     properties. See also ``ab-loop`` command.
