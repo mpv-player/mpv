@@ -864,9 +864,14 @@ void seek_to_last_frame(struct MPContext *mpctx)
     MP_VERBOSE(mpctx, "seeking to last frame...\n");
     // Approximately seek close to the end of the file.
     // Usually, it will seek some seconds before end.
-    double end = get_play_end_pts(mpctx);
-    if (end == MP_NOPTS_VALUE)
-        end = get_time_length(mpctx);
+    double end = MP_NOPTS_VALUE;
+    if (mpctx->play_dir > 0) {
+        end = get_play_end_pts(mpctx);
+        if (end == MP_NOPTS_VALUE)
+            end = get_time_length(mpctx);
+    } else {
+        end = get_start_time(mpctx, 1);
+    }
     mp_seek(mpctx, (struct seek_params){
                    .type = MPSEEK_ABSOLUTE,
                    .amount = end,
@@ -874,7 +879,7 @@ void seek_to_last_frame(struct MPContext *mpctx)
                    });
     // Make it exact: stop seek only if last frame was reached.
     if (mpctx->hrseek_active) {
-        mpctx->hrseek_pts = INFINITY;
+        mpctx->hrseek_pts = INFINITY * mpctx->play_dir;
         mpctx->hrseek_lastframe = true;
     }
 }
