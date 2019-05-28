@@ -89,10 +89,12 @@ Playback Control
 ``--start=<relative time>``
     Seek to given time position.
 
-    The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
-    is given with a prefix of ``+`` or ``-``, the seek is relative from the start
-    or end of the file. (Since mpv 0.14, the start of the file is always
-    considered 0.)
+    The general format for times is ``[+|-][[hh:]mm:]ss[.ms]``. If the time is
+    prefixed with ``-``, the time is considered relative from the end of the
+    file (as signaled by the demuxer/the file). A ``+`` is usually ignored (but
+    see below).
+
+    The following alternative time specifications are recognized:
 
     ``pp%`` seeks to percent position pp (0-100).
 
@@ -100,9 +102,17 @@ Playback Control
 
     ``none`` resets any previously set option (useful for libmpv).
 
+    If ``--rebase-start-time=no`` is given, then prefixing times with ``+``
+    makes the time relative to the start of the file. A timestamp without
+    prefix is considered an absolute time, i.e. should seek to a frame with a
+    timestamp as the file contains it. As a bug, but also a hidden feature,
+    putting 1 or more spaces before the ``+`` or ``-`` always interprets the
+    time as absolute, which can be used to seek to negative timestamps (useful
+    for debugging at most).
+
     .. admonition:: Examples
 
-        ``--start=+56``, ``--start=+00:56``
+        ``--start=+56``, ``--start=00:56``
             Seeks to the start time + 56 seconds.
         ``--start=-56``, ``--start=-00:56``
             Seeks to the end time - 56 seconds.
@@ -128,6 +138,10 @@ Playback Control
 
     If both ``--end`` and ``--length`` are provided, playback will stop when it
     reaches either of the two endpoints.
+
+    Obscurity note: this does not work correctly if ``--rebase-start-time=no``,
+    and the specified time is not an "absolute" time, as defined in the
+    ``--start`` option description.
 
 ``--rebase-start-time=<yes|no>``
     Whether to move the file start time to ``00:00:00`` (default: yes). This
