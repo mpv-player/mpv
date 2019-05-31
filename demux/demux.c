@@ -1495,16 +1495,8 @@ static void step_backwards(struct demux_stream *ds)
 
     assert(!ds->back_restarting);
     ds->back_restarting = true;
-
+    ds->back_restart_eof = false;
     ds->back_restart_next = false;
-
-    // No valid restart pos, but EOF reached -> find last restart pos before EOF.
-    ds->back_restart_eof = ds->back_restart_dts == MP_NOPTS_VALUE &&
-                           ds->back_restart_pos < 0 &&
-                           ds->eof;
-
-    if (ds->back_restart_eof)
-        MP_VERBOSE(in, "backward eof on stream %d\n", ds->index);
 
     // Move to start of queue. This is inefficient, because we need to iterate
     // the entire fucking packet queue just to update the fw_* stats. But as
@@ -2291,10 +2283,8 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
             return -1;
 
         // Next keyframe (or EOF) was reached => step back.
-        if ((ds->back_range_started && !ds->back_range_min &&
-             ((ds->reader_head && ds->reader_head->keyframe) || eof)) ||
-            (!ds->back_range_started && !ds->back_range_min &&
-             !ds->reader_head && eof))
+        if (ds->back_range_started && !ds->back_range_min &&
+            ((ds->reader_head && ds->reader_head->keyframe) || eof))
         {
             step_backwards(ds);
             if (ds->back_restarting)
