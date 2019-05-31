@@ -102,6 +102,10 @@ struct priv {
     struct mp_decoder_wrapper public;
 };
 
+// This resets only the decoder. Unlike a full reset(), this doesn't imply a
+// seek reset. This distinction exists only when using timeline stuff (EDL and
+// ordered chapters). timeline stuff needs to reset the decoder state, but keep
+// some of the user-relevant state.
 static void reset_decoder(struct priv *p)
 {
     p->first_packet_pdts = MP_NOPTS_VALUE;
@@ -112,10 +116,6 @@ static void reset_decoder(struct priv *p)
     p->num_codec_pts_problems = 0;
     p->num_codec_dts_problems = 0;
     p->has_broken_decoded_pts = 0;
-    p->last_format = p->fixed_format = (struct mp_image_params){0};
-    p->public.dropped_frames = 0;
-    p->public.attempt_framedrops = 0;
-    p->public.pts_reset = false;
     p->packets_without_output = 0;
     mp_frame_unref(&p->packet);
     p->packet_fed = false;
@@ -123,13 +123,6 @@ static void reset_decoder(struct priv *p)
     talloc_free(p->new_segment);
     p->new_segment = NULL;
     p->start = p->end = MP_NOPTS_VALUE;
-    p->coverart_returned = 0;
-
-    for (int n = 0; n < p->num_reverse_queue; n++)
-        mp_frame_unref(&p->reverse_queue[n]);
-    p->num_reverse_queue = 0;
-    p->reverse_queue_byte_size = 0;
-    p->reverse_queue_complete = false;
 
     if (p->decoder)
         mp_filter_reset(p->decoder->f);
@@ -138,6 +131,19 @@ static void reset_decoder(struct priv *p)
 static void reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
+
+    p->last_format = p->fixed_format = (struct mp_image_params){0};
+    p->public.dropped_frames = 0;
+    p->public.attempt_framedrops = 0;
+    p->public.pts_reset = false;
+
+    p->coverart_returned = 0;
+
+    for (int n = 0; n < p->num_reverse_queue; n++)
+        mp_frame_unref(&p->reverse_queue[n]);
+    p->num_reverse_queue = 0;
+    p->reverse_queue_byte_size = 0;
+    p->reverse_queue_complete = false;
 
     reset_decoder(p);
 }
@@ -159,7 +165,7 @@ static void destroy(struct mp_filter *f)
         talloc_free(p->decoder->f);
         p->decoder = NULL;
     }
-    reset_decoder(p);
+    reset(f);
     mp_frame_unref(&p->decoded_coverart);
 }
 
@@ -695,11 +701,6 @@ static void read_frame(struct priv *p)
         struct demux_packet *new_segment = p->new_segment;
         p->new_segment = NULL;
 
-        struct mp_frame *reverse_queue = p->reverse_queue;
-        int num_reverse_queue = p->num_reverse_queue;
-        p->reverse_queue = NULL;
-        p->num_reverse_queue = 0;
-
         reset_decoder(p);
 
         if (new_segment->segmented) {
@@ -713,9 +714,7 @@ static void read_frame(struct priv *p)
             p->end = new_segment->end;
         }
 
-        assert(!p->reverse_queue);
-        p->reverse_queue = reverse_queue;
-        p->num_reverse_queue = num_reverse_queue;
+        p->reverse_queue_byte_size = 0;
         p->reverse_queue_complete = p->num_reverse_queue > 0;
 
         p->packet = MAKE_FRAME(MP_FRAME_PACKET, new_segment);
