@@ -67,12 +67,6 @@ static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
 
-// Maximum number of surfaces the player wants to buffer.
-// This number might require adjustment depending on whatever the player does;
-// for example, if vo_gpu increases the number of reference surfaces for
-// interpolation, this value has to be increased too.
-#define HWDEC_EXTRA_SURFACES 6
-
 #define OPT_BASE_STRUCT struct vd_lavc_params
 
 struct vd_lavc_params {
@@ -92,6 +86,7 @@ struct vd_lavc_params {
     char *hwdec_api;
     char *hwdec_codecs;
     int hwdec_image_format;
+    int hwdec_extra_frames;
 };
 
 static const struct m_opt_choice_alternatives discard_names[] = {
@@ -127,6 +122,7 @@ const struct m_sub_options vd_lavc_conf = {
                             hwdec_validate_opt),
         OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
         OPT_IMAGEFORMAT("hwdec-image-format", hwdec_image_format, 0, .min = -1),
+        OPT_INTRANGE("hwdec-extra-frames", hwdec_extra_frames, 0, 0, 256),
         {0}
     },
     .size = sizeof(struct vd_lavc_params),
@@ -141,6 +137,11 @@ const struct m_sub_options vd_lavc_conf = {
         .dr = 1,
         .hwdec_api = HAVE_RPI ? "mmal" : "no",
         .hwdec_codecs = "h264,vc1,hevc,vp9",
+        // Maximum number of surfaces the player wants to buffer. This number
+        // might require adjustment depending on whatever the player does;
+        // for example, if vo_gpu increases the number of reference surfaces for
+        // interpolation, this value has to be increased too.
+        .hwdec_extra_frames = 6,
     },
 };
 
@@ -762,7 +763,7 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
     // 1 surface is already included by libavcodec. The field is 0 if the
     // hwaccel supports dynamic surface allocation.
     if (new_fctx->initial_pool_size)
-        new_fctx->initial_pool_size += HWDEC_EXTRA_SURFACES - 1;
+        new_fctx->initial_pool_size += ctx->opts->hwdec_extra_frames - 1;
 
     const struct hwcontext_fns *fns =
         hwdec_get_hwcontext_fns(new_fctx->device_ctx->type);

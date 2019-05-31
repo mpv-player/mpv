@@ -1092,6 +1092,21 @@ Video
     barely related to this anymore, but will be somewhat compatible in some
     cases.
 
+``--hwdec-extra-frames=<N>``
+    Number of GPU frames hardware decoding should preallocate (default: see
+    ``--list-options`` output). If this is too low, frame allocation may fail
+    during decoding, and video frames might get dropped and/or corrupted.
+    Setting it too high simply wastes GPU memory and has no advantages.
+
+    This value is used only for hardware decoding APIs which require
+    preallocating surfaces (known examples include ``d3d11va`` and ``vaapi``).
+    For other APIs, frames are allocated as needed. The details depend on the
+    libavcodec implementations of the hardware decoders.
+
+    The required number of surfaces depends on dynamic runtime situations. The
+    default is a fixed value that is thought to be sufficient for most uses. But
+    in certain situations, it may not be enough.
+
 ``--hwdec-image-format=<name>``
     Set the internal pixel format used by hardware decoding via ``--hwdec``
     (default ``no``). The special value ``no`` selects an implementation
