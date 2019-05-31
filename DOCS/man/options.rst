@@ -462,8 +462,6 @@ Playback Control
       audio formats tend to have problems - there are hacks for dealing with
       them, which may or may not work.
 
-    - Function with EDL/mkv ordered chapters is obviously broken.
-
     - Backward demuxing of subtitles is not supported. Subtitle display still
       works for some external text subtitle formats. (These are fully read into
       memory, and only backward display is needed.) Text subtitles that are
@@ -471,7 +469,7 @@ Playback Control
       correctly.
 
     - Some features dealing with playback of broken or hard to deal with files
-      will be disabled (such as timestamp correction).
+      will not work fully (such as timestamp correction).
 
     - If demuxer low level seeks (i.e. seeking the actual demuxer instead of
       just within the demuxer cache) are performed by backward playback, the
