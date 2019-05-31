@@ -1484,38 +1484,6 @@ static void back_demux_see_packets(struct demux_stream *ds)
         find_backward_restart_pos(ds);
 }
 
-// Resume demuxing from an earlier position for backward playback. May trigger
-// a seek.
-static void step_backwards(struct demux_stream *ds)
-{
-    struct demux_internal *in = ds->in;
-
-    assert(in->back_demuxing);
-
-    assert(!ds->back_restarting);
-    ds->back_restarting = true;
-    ds->back_restart_eof = false;
-    ds->back_restart_next = false;
-
-    // Move to start of queue. This is inefficient, because we need to iterate
-    // the entire fucking packet queue just to update the fw_* stats. But as
-    // long as we don't have demux_packet.prev links or a complete index, it's
-    // the thing to do.
-    // Note: if the buffer forward is much larger than the one backward, it
-    // would be worth looping until the previous reader_head and decrementing
-    // fw_packs/fw_bytes - you could skip the full recompute_buffers().
-    ds->reader_head = ds->queue->head;
-    in->fw_bytes -= ds->fw_bytes;
-    recompute_buffers(ds);
-    in->fw_bytes += ds->fw_bytes;
-
-    // Exclude weird special-cases (incomplete pruning? broken seeks?)
-    while (ds->reader_head && !ds->reader_head->keyframe)
-        advance_reader_head(ds);
-
-    find_backward_restart_pos(ds);
-}
-
 // Add the keyframe to the end of the index. Not all packets are actually added.
 static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
 {
@@ -2285,7 +2253,12 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         if (ds->back_range_started && !ds->back_range_min &&
             ((ds->reader_head && ds->reader_head->keyframe) || eof))
         {
-            step_backwards(ds);
+            ds->back_restarting = true;
+            ds->back_restart_eof = false;
+            ds->back_restart_next = false;
+
+            find_backward_restart_pos(ds);
+
             if (ds->back_restarting)
                 return 0;
         }
