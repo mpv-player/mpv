@@ -72,6 +72,8 @@ struct priv {
     double first_packet_pdts;
 
     // There was at least one packet with nonsense timestamps.
+    // Intentionally not reset on seeks; its whole purpose is to enable faster
+    // future seeks.
     int has_broken_packet_pts; // <0: uninitialized, 0: no problems, 1: broken
 
     int has_broken_decoded_pts;
@@ -107,6 +109,8 @@ static void reset_decoder(struct priv *p)
     p->pts = MP_NOPTS_VALUE;
     p->codec_pts = MP_NOPTS_VALUE;
     p->codec_dts = MP_NOPTS_VALUE;
+    p->num_codec_pts_problems = 0;
+    p->num_codec_dts_problems = 0;
     p->has_broken_decoded_pts = 0;
     p->last_format = p->fixed_format = (struct mp_image_params){0};
     p->public.dropped_frames = 0;
