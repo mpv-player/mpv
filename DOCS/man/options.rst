@@ -476,7 +476,8 @@ Playback Control
       created seek ranges may not join, because not enough overlap is achieved.
 
     - Trying to use this with hardware video decoding will probably exhaust all
-      your GPU memory and then crash a thing or two.
+      your GPU memory and then crash a thing or two. Or it will fail because
+      ``--hwdec-extra-frames`` will certainly be set too low.
 
     - Stream recording is broken. ``--stream-record`` may keep working if you
       backward play within a cached region only.
@@ -498,7 +499,9 @@ Playback Control
 
     - Increasing ``--video-reversal-buffer`` might help if reversal queue
       overflow is reported, which may happen in high bitrate video, or video
-      with large GOP.
+      with large GOP. Hardware decoding mostly ignores this, and you need to
+      increase ``--hwdec-extra-frames`` instead (until you get playback without
+      logged errors).
 
     - The demuxer cache is essential for backward demuxing. If it's too small,
       a queue overflow will be logged, and backward playback cannot continue,
