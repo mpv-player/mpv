@@ -87,8 +87,7 @@ struct priv {
     double start, end;
     struct demux_packet *new_segment;
     struct mp_frame packet;
-    bool packet_fed;
-    int preroll_discard;
+    bool packet_fed, preroll_discard;
 
     size_t reverse_queue_byte_size;
     struct mp_frame *reverse_queue;
@@ -116,7 +115,7 @@ static void reset_decoder(struct priv *p)
     p->packets_without_output = 0;
     mp_frame_unref(&p->packet);
     p->packet_fed = false;
-    p->preroll_discard = 0;
+    p->preroll_discard = false;
     talloc_free(p->new_segment);
     p->new_segment = NULL;
     p->start = p->end = MP_NOPTS_VALUE;
@@ -543,12 +542,14 @@ static void feed_packet(struct priv *p)
     if (p->first_packet_pdts == MP_NOPTS_VALUE)
         p->first_packet_pdts = pkt_pdts;
 
-    if (packet && packet->back_preroll)
-        p->preroll_discard += 1;
+    if (packet && packet->back_preroll) {
+        p->preroll_discard = true;
+        packet->pts = packet->dts = MP_NOPTS_VALUE;
+    }
 
     mp_pin_in_write(p->decoder->f->pins[0], p->packet);
-    p->packet = MP_NO_FRAME;
     p->packet_fed = true;
+    p->packet = MP_NO_FRAME;
 
     p->packets_without_output += 1;
 }
@@ -671,11 +672,14 @@ static void read_frame(struct priv *p)
     }
     p->packets_without_output = 0;
 
-    if (p->preroll_discard > 0 && frame.type != MP_FRAME_EOF) {
-        p->preroll_discard -= 1;
-        mp_frame_unref(&frame);
-        mp_filter_internal_mark_progress(p->f);
-        return;
+    if (p->preroll_discard && frame.type != MP_FRAME_EOF) {
+        double ts = mp_frame_get_pts(frame);
+        if (ts == MP_NOPTS_VALUE) {
+            mp_frame_unref(&frame);
+            mp_filter_internal_mark_progress(p->f);
+            return;
+        }
+        p->preroll_discard = false;
     }
 
     bool segment_ended = process_decoded_frame(p, &frame);
