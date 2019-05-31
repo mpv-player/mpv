@@ -949,7 +949,9 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         ds->back_preroll = in->opts->audio_back_preroll;
         if (ds->back_preroll < 0) { // auto
             ds->back_preroll = mp_codec_is_lossless(sh->codec->codec) ? 0 : 1;
-            if (sh->codec->codec && strcmp(sh->codec->codec, "opus") == 0)
+            if (sh->codec->codec && (strcmp(sh->codec->codec, "opus") == 0 ||
+                                     strcmp(sh->codec->codec, "vorbis") == 0 ||
+                                     strcmp(sh->codec->codec, "mp3") == 0))
                 ds->back_preroll = 2;
         }
         break;
