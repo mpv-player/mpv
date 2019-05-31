@@ -1393,9 +1393,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     }
 
     if (!target) {
-        // Note: assume this holds true. You could think of various reasons why
-        // this might break.
-        if (ds->queue->is_bof) {
+        if (ds->queue->is_bof && first == ds->queue->head) {
             MP_VERBOSE(in, "BOF for stream %d\n", ds->index);
             ds->back_restarting = false;
             ds->back_range_started = false;
