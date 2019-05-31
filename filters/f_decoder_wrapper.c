@@ -458,8 +458,6 @@ static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
         mp_aframe_set_pts(aframe, p->pts);
 }
 
-
-// Frames before the start timestamp can be dropped. (Used for hr-seek.)
 void mp_decoder_wrapper_set_start_pts(struct mp_decoder_wrapper *d, double pts)
 {
     struct priv *p = d->f->priv;
