@@ -491,13 +491,6 @@ Playback Control
       framestep commands are transposed. Backstepping will perform very
       expensive work to step forward by 1 frame.
 
-    - Backward playback with Vorbis does not work. libavcodec's decoder
-      discards the first Vorbis packet (after each decoder reset), and the
-      mechanism behind ``--audio-reversal-buffer`` assumes that it strictly
-      outputs a frame for each packet fed to it (the mechanism discards output
-      based on frame count, not timestamps). Since this tries to decode each
-      frame on its own, the player never gets a usable audio frame.
-
     Tuning:
 
     - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
@@ -563,8 +556,8 @@ Playback Control
     The solution is to feed a previous packet to the decoder each time, and then
     discard the output. This option controls how many packets to feed. The
     ``auto`` choice is currently hardcoded to 0 for video, and uses 1 for lossy
-    audio, 0 for lossless audio. As a hack, it sets it to 2 for Opus, which
-    requires this for unknown reasons.
+    audio, 0 for lossless audio. For some specific lossy audio codecs, this is
+    set to 2.
 
     ``--video-backward-overlap`` can potentially handle intra-refresh video,
     depending on the exact conditions. You may have to use the
