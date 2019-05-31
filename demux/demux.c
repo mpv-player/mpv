@@ -1259,6 +1259,10 @@ static void perform_backward_seek(struct demux_internal *in)
     MP_VERBOSE(in, "triggering backward seek to get more packets\n");
     queue_seek(in, target, SEEK_SATAN | SEEK_HR, false);
     in->reading = true;
+
+    // Don't starve other threads.
+    pthread_mutex_unlock(&in->lock);
+    pthread_mutex_lock(&in->lock);
 }
 
 // Search for a packet to resume demuxing from.
@@ -1393,7 +1397,10 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     }
 
     if (!target) {
-        if (ds->queue->is_bof && first == ds->queue->head) {
+        if (ds->queue->is_bof &&
+                (first == ds->queue->head ||
+                 ds->back_seek_pos < ds->queue->seek_start))
+        {
             MP_VERBOSE(in, "BOF for stream %d\n", ds->index);
             ds->back_restarting = false;
             ds->back_range_started = false;
