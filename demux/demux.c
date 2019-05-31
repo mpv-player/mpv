@@ -385,14 +385,6 @@ struct mp_packet_tags {
     struct mp_tags *sh;         // per sh_stream tags (e.g. OGG)
 };
 
-// Return "a", or if that is NOPTS, return "def".
-#define PTS_OR_DEF(a, def) ((a) == MP_NOPTS_VALUE ? (def) : (a))
-// If one of the values is NOPTS, always pick the other one.
-#define MP_PTS_MIN(a, b) MPMIN(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
-#define MP_PTS_MAX(a, b) MPMAX(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
-
-#define MP_ADD_PTS(a, b) ((a) == MP_NOPTS_VALUE ? (a) : ((a) + (b)))
-
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
 static void update_cache(struct demux_internal *in);
@@ -1260,7 +1252,7 @@ static void perform_backward_seek(struct demux_internal *in)
         target = MP_PTS_MIN(target, ds->back_seek_pos);
     }
 
-    target = PTS_OR_DEF(target, in->d_thread->start_time);
+    target = MP_PTS_OR_DEF(target, in->d_thread->start_time);
 
     MP_VERBOSE(in, "triggering backward seek to get more packets\n");
     queue_seek(in, target, SEEK_SATAN | SEEK_HR, false);
@@ -1764,7 +1756,7 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
     if (dp) {
         dp->kf_seek_pts = MP_NOPTS_VALUE;
 
-        double ts = PTS_OR_DEF(dp->pts, dp->dts);
+        double ts = MP_PTS_OR_DEF(dp->pts, dp->dts);
         if (dp->segmented && (ts < dp->start || ts > dp->end))
             ts = MP_NOPTS_VALUE;
 
@@ -2340,7 +2332,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         ds->back_seek_pos = MP_PTS_MIN(ds->back_seek_pos, pkt->pts);
     }
 
-    double ts = PTS_OR_DEF(pkt->dts, pkt->pts);
+    double ts = MP_PTS_OR_DEF(pkt->dts, pkt->pts);
     if (ts != MP_NOPTS_VALUE)
         ds->base_ts = ts;
 
@@ -3168,7 +3160,7 @@ static void execute_cache_seek(struct demux_internal *in,
         ds->reader_head = target;
         ds->skip_to_keyframe = !target;
         if (ds->reader_head)
-            ds->base_ts = PTS_OR_DEF(ds->reader_head->pts, ds->reader_head->dts);
+            ds->base_ts = MP_PTS_OR_DEF(ds->reader_head->pts, ds->reader_head->dts);
 
         recompute_buffers(ds);
         in->fw_bytes += ds->fw_bytes;
