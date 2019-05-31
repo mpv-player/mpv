@@ -110,7 +110,6 @@ static void reset_decoder(struct priv *p)
 {
     p->first_packet_pdts = MP_NOPTS_VALUE;
     p->start_pts = MP_NOPTS_VALUE;
-    p->pts = MP_NOPTS_VALUE;
     p->codec_pts = MP_NOPTS_VALUE;
     p->codec_dts = MP_NOPTS_VALUE;
     p->num_codec_pts_problems = 0;
@@ -132,6 +131,7 @@ static void reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
+    p->pts = MP_NOPTS_VALUE;
     p->last_format = p->fixed_format = (struct mp_image_params){0};
     p->public.dropped_frames = 0;
     p->public.attempt_framedrops = 0;
@@ -324,26 +324,34 @@ static void fix_image_params(struct priv *p,
     p->fixed_format = m;
 }
 
-static void process_video_frame(struct priv *p, struct mp_image *mpi)
+void mp_decoder_wrapper_reset_params(struct mp_decoder_wrapper *d)
 {
-    struct MPOpts *opts = p->opt_cache->opts;
+    struct priv *p = d->f->priv;
+    p->last_format = (struct mp_image_params){0};
+}
 
-    int dir = p->public.play_dir;
+void mp_decoder_wrapper_get_video_dec_params(struct mp_decoder_wrapper *d,
+                                             struct mp_image_params *m)
+{
+    struct priv *p = d->f->priv;
+    *m = p->dec_format;
+}
 
-    // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
-    double pts = mpi->pts;
-    double dts = mpi->dts;
+// This code exists only because multimedia is so god damn crazy. In a sane
+// world, the video decoder would always output a video frame with a valid PTS;
+// this deals with cases where it doesn't.
+static void crazy_video_pts_stuff(struct priv *p, struct mp_image *mpi)
+{
+    // Note: the PTS is reordered, but the DTS is not. Both must be monotonic.
 
-    if (pts != MP_NOPTS_VALUE) {
-        pts *= dir;
-        if (pts < p->codec_pts && dir > 0)
+    if (mpi->pts != MP_NOPTS_VALUE) {
+        if (mpi->pts < p->codec_pts)
             p->num_codec_pts_problems++;
         p->codec_pts = mpi->pts;
     }
 
-    if (dts != MP_NOPTS_VALUE) {
-        dts *= dir;
-        if (dts <= p->codec_dts && dir > 0)
+    if (mpi->dts != MP_NOPTS_VALUE) {
+        if (mpi->dts <= p->codec_dts)
             p->num_codec_dts_problems++;
         p->codec_dts = mpi->dts;
     }
@@ -355,10 +363,84 @@ static void process_video_frame(struct priv *p, struct mp_image *mpi)
 
     // If PTS is unset, or non-monotonic, fall back to DTS.
     if ((p->num_codec_pts_problems > p->num_codec_dts_problems ||
-         pts == MP_NOPTS_VALUE) && dts != MP_NOPTS_VALUE)
-        pts = dts;
+        mpi->pts == MP_NOPTS_VALUE) && mpi->dts != MP_NOPTS_VALUE)
+        mpi->pts = mpi->dts;
 
-    if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
+    // Compensate for incorrectly using mpeg-style DTS for avi timestamps.
+    if (p->decoder && p->decoder->control && p->codec->avi_dts &&
+        mpi->pts != MP_NOPTS_VALUE && p->public.fps > 0)
+    {
+        int delay = -1;
+        p->decoder->control(p->decoder->f, VDCTRL_GET_BFRAMES, &delay);
+        mpi->pts -= MPMAX(delay, 0) / p->public.fps;
+    }
+}
+
+// Return true if the current frame is outside segment range.
+static bool process_decoded_frame(struct priv *p, struct mp_frame *frame)
+{
+    if (frame->type == MP_FRAME_EOF) {
+        // if we were just draining current segment, don't propagate EOF
+        if (p->new_segment)
+            mp_frame_unref(frame);
+        return true;
+    }
+
+    bool segment_ended = false;
+
+    if (frame->type == MP_FRAME_VIDEO) {
+        struct mp_image *mpi = frame->data;
+
+        crazy_video_pts_stuff(p, mpi);
+
+        struct demux_packet *ccpkt = new_demux_packet_from_buf(mpi->a53_cc);
+        if (ccpkt) {
+            av_buffer_unref(&mpi->a53_cc);
+            ccpkt->pts = mpi->pts;
+            ccpkt->dts = mpi->dts;
+            demuxer_feed_caption(p->header, ccpkt);
+        }
+
+        // Stop hr-seek logic.
+        if (mpi->pts == MP_NOPTS_VALUE || mpi->pts >= p->start_pts)
+            p->start_pts = MP_NOPTS_VALUE;
+
+        if (mpi->pts != MP_NOPTS_VALUE) {
+            segment_ended = p->end != MP_NOPTS_VALUE && mpi->pts >= p->end;
+            if ((p->start != MP_NOPTS_VALUE && mpi->pts < p->start) ||
+                segment_ended)
+            {
+                mp_frame_unref(frame);
+                goto done;
+            }
+        }
+    } else if (frame->type == MP_FRAME_AUDIO) {
+        struct mp_aframe *aframe = frame->data;
+
+        mp_aframe_clip_timestamps(aframe, p->start, p->end);
+        double pts = mp_aframe_get_pts(aframe);
+        if (pts != MP_NOPTS_VALUE && p->start != MP_NOPTS_VALUE)
+            segment_ended = pts >= p->end;
+
+        if (mp_aframe_get_size(aframe) == 0) {
+            mp_frame_unref(frame);
+            goto done;
+        }
+    } else {
+        MP_ERR(p, "unknown frame type from decoder\n");
+    }
+
+done:
+    return segment_ended;
+}
+
+static void correct_video_pts(struct priv *p, struct mp_image *mpi)
+{
+    struct MPOpts *opts = p->opt_cache->opts;
+
+    mpi->pts *= p->public.play_dir;
+
+    if (!opts->correct_pts || mpi->pts == MP_NOPTS_VALUE) {
         double fps = p->public.fps > 0 ? p->public.fps : 25;
 
         if (opts->correct_pts) {
@@ -373,64 +455,27 @@ static void process_video_frame(struct priv *p, struct mp_image *mpi)
 
         double frame_time = 1.0f / fps;
         double base = p->first_packet_pdts;
-        pts = p->pts;
-        if (pts == MP_NOPTS_VALUE) {
-            pts = base == MP_NOPTS_VALUE ? 0 : base;
+        mpi->pts = p->pts;
+        if (mpi->pts == MP_NOPTS_VALUE) {
+            mpi->pts = base == MP_NOPTS_VALUE ? 0 : base;
         } else {
-            pts += frame_time;
+            mpi->pts += frame_time;
         }
     }
 
-    if (!mp_image_params_equal(&p->last_format, &mpi->params))
-        fix_image_params(p, &mpi->params);
-
-    mpi->params = p->fixed_format;
-    mpi->nominal_fps = p->public.fps;
-
-    mpi->pts = pts;
-    p->pts = pts;
-
-    // Compensate for incorrectly using mpeg-style DTS for avi timestamps.
-    if (p->decoder && p->decoder->control && p->codec->avi_dts &&
-        opts->correct_pts && mpi->pts != MP_NOPTS_VALUE && p->public.fps > 0)
-    {
-        int delay = -1;
-        p->decoder->control(p->decoder->f, VDCTRL_GET_BFRAMES, &delay);
-        mpi->pts -= MPMAX(delay, 0) / p->public.fps;
-    }
-
-    struct demux_packet *ccpkt = new_demux_packet_from_buf(mpi->a53_cc);
-    if (ccpkt) {
-        av_buffer_unref(&mpi->a53_cc);
-        ccpkt->pts = mpi->pts;
-        ccpkt->dts = mpi->dts;
-        demuxer_feed_caption(p->header, ccpkt);
-    }
-
-    if (mpi->pts == MP_NOPTS_VALUE || mpi->pts >= p->start_pts)
-        p->start_pts = MP_NOPTS_VALUE;
+    p->pts = mpi->pts;
 }
 
-void mp_decoder_wrapper_reset_params(struct mp_decoder_wrapper *d)
-{
-    struct priv *p = d->f->priv;
-    p->last_format = (struct mp_image_params){0};
-}
-
-void mp_decoder_wrapper_get_video_dec_params(struct mp_decoder_wrapper *d,
-                                             struct mp_image_params *m)
-{
-    struct priv *p = d->f->priv;
-    *m = p->dec_format;
-}
-
-static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
+static void correct_audio_pts(struct priv *p, struct mp_aframe *aframe)
 {
     double dir = p->public.play_dir;
 
     double frame_pts = mp_aframe_get_pts(aframe);
+    double frame_len = mp_aframe_duration(aframe);
+
     if (frame_pts != MP_NOPTS_VALUE) {
-        frame_pts *= dir;
+        if (dir < 0)
+            frame_pts = -(frame_pts + frame_len);
 
         if (p->pts != MP_NOPTS_VALUE)
             MP_STATS(p, "value %f audio-pts-err", p->pts - frame_pts);
@@ -458,10 +503,29 @@ static void process_audio_frame(struct priv *p, struct mp_aframe *aframe)
     mp_aframe_set_pts(aframe, p->pts);
 
     if (p->pts != MP_NOPTS_VALUE)
-        p->pts += mp_aframe_duration(aframe) * dir;
+        p->pts += frame_len;
+}
 
-    if (dir < 0)
-        mp_aframe_set_pts(aframe, p->pts);
+static void process_output_frame(struct priv *p, struct mp_frame frame)
+{
+    if (frame.type == MP_FRAME_VIDEO) {
+        struct mp_image *mpi = frame.data;
+
+        correct_video_pts(p, mpi);
+
+        if (!mp_image_params_equal(&p->last_format, &mpi->params))
+            fix_image_params(p, &mpi->params);
+
+        mpi->params = p->fixed_format;
+        mpi->nominal_fps = p->public.fps;
+    } else if (frame.type == MP_FRAME_AUDIO) {
+        struct mp_aframe *aframe = frame.data;
+
+        if (p->public.play_dir < 0 && !mp_aframe_reverse(aframe))
+            MP_ERR(p, "Couldn't reverse audio frame.\n");
+
+        correct_audio_pts(p, aframe);
+    }
 }
 
 void mp_decoder_wrapper_set_start_pts(struct mp_decoder_wrapper *d, double pts)
@@ -561,51 +625,6 @@ static void feed_packet(struct priv *p)
     p->packets_without_output += 1;
 }
 
-// Return true if the current frame is outside segment range.
-static bool process_decoded_frame(struct priv *p, struct mp_frame *frame)
-{
-    if (frame->type == MP_FRAME_EOF) {
-        // if we were just draining current segment, don't propagate EOF
-        if (p->new_segment)
-            mp_frame_unref(frame);
-        return true;
-    }
-
-    bool segment_ended = false;
-
-    if (frame->type == MP_FRAME_VIDEO) {
-        struct mp_image *mpi = frame->data;
-
-        process_video_frame(p, mpi);
-
-        if (mpi->pts != MP_NOPTS_VALUE) {
-            double vpts = mpi->pts;
-            segment_ended = p->end != MP_NOPTS_VALUE && vpts >= p->end;
-            if ((p->start != MP_NOPTS_VALUE && vpts < p->start) || segment_ended)
-                mp_frame_unref(frame);
-        }
-    } else if (frame->type == MP_FRAME_AUDIO) {
-        struct mp_aframe *aframe = frame->data;
-
-        process_audio_frame(p, aframe);
-
-        mp_aframe_clip_timestamps(aframe, p->start, p->end);
-        double pts = mp_aframe_get_pts(aframe);
-        if (pts != MP_NOPTS_VALUE && p->start != MP_NOPTS_VALUE)
-            segment_ended = pts >= p->end;
-
-        if (p->public.play_dir < 0 && !mp_aframe_reverse(aframe))
-            MP_ERR(p, "Couldn't reverse audio frame.\n");
-
-        if (mp_aframe_get_size(aframe) == 0)
-            mp_frame_unref(frame);
-    } else {
-        MP_ERR(p, "unknown frame type from decoder\n");
-    }
-
-    return segment_ended;
-}
-
 static void enqueue_backward_frame(struct priv *p, struct mp_frame frame)
 {
     bool eof = frame.type == MP_FRAME_EOF;
@@ -638,6 +657,7 @@ static void enqueue_backward_frame(struct priv *p, struct mp_frame frame)
 static void read_frame(struct priv *p)
 {
     struct mp_pin *pin = p->f->ppins[0];
+    struct mp_frame frame = {0};
 
     if (!p->decoder || !mp_pin_in_needs_data(pin))
         return;
@@ -654,14 +674,13 @@ static void read_frame(struct priv *p)
     }
 
     if (p->reverse_queue_complete && p->num_reverse_queue) {
-        struct mp_frame frame = p->reverse_queue[p->num_reverse_queue - 1];
+        frame = p->reverse_queue[p->num_reverse_queue - 1];
         p->num_reverse_queue -= 1;
-        mp_pin_in_write(pin, frame);
-        return;
+        goto output_frame;
     }
     p->reverse_queue_complete = false;
 
-    struct mp_frame frame = mp_pin_out_read(p->decoder->f->pins[1]);
+    frame = mp_pin_out_read(p->decoder->f->pins[1]);
     if (!frame.type)
         return;
 
@@ -726,6 +745,8 @@ static void read_frame(struct priv *p)
         return;
     }
 
+output_frame:
+    process_output_frame(p, frame);
     mp_pin_in_write(pin, frame);
 }
 
