@@ -3568,7 +3568,7 @@ static const struct m_property mp_properties_base[] = {
     {"property-list", mp_property_list},
     {"profile-list", mp_profile_list},
 
-    {"play-direction", mp_property_play_direction},
+    {"play-dir", mp_property_play_direction},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
