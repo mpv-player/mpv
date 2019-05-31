@@ -177,7 +177,6 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 {
     struct priv *p = d->f->priv;
     struct MPOpts *opts = p->opt_cache->opts;
-    m_config_cache_update(p->opt_cache);
 
     if (p->decoder)
         talloc_free(p->decoder->f);
@@ -254,7 +253,6 @@ static void fix_image_params(struct priv *p,
     struct mp_image_params m = *params;
     struct mp_codec_params *c = p->codec;
     struct MPOpts *opts = p->opt_cache->opts;
-    m_config_cache_update(p->opt_cache);
 
     MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
     p->dec_format = *params;
@@ -319,7 +317,6 @@ static void fix_image_params(struct priv *p,
 static void process_video_frame(struct priv *p, struct mp_image *mpi)
 {
     struct MPOpts *opts = p->opt_cache->opts;
-    m_config_cache_update(p->opt_cache);
 
     int dir = p->public.play_dir;
 
@@ -732,6 +729,7 @@ static void read_frame(struct priv *p)
 static void process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
+    m_config_cache_update(p->opt_cache);
 
     feed_packet(p);
     read_frame(p);
