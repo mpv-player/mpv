@@ -2693,14 +2693,15 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             if (!dp)
                 break;
 
-            dp->keyframe = keyframe;
             dp->pos = filepos;
             /* If default_duration is 0, assume no pts value is known
              * for packets after the first one (rather than all pts
              * values being the same). Also, don't use it for extra
              * packets resulting from parsing. */
-            if (i == 0 || track->default_duration)
+            if (i == 0 || track->default_duration) {
                 dp->pts = current_pts + i * track->default_duration;
+                dp->keyframe = keyframe;
+            }
             if (stream->codec->avi_dts)
                 MPSWAP(double, dp->pts, dp->dts);
             if (i == 0 && block_info->duration_known)
