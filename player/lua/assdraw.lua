@@ -1,5 +1,6 @@
 local ass_mt = {}
 ass_mt.__index = ass_mt
+local c = 0.551915024494 -- circle approximation
 
 local function ass_new()
     return setmetatable({ scale = 4, text = "" }, ass_mt)
@@ -75,24 +76,84 @@ function ass_mt.rect_cw(ass, x0, y0, x1, y1)
     ass:line_to(x0, y1)
 end
 
-function ass_mt.round_rect_cw(ass, x0, y0, x1, y1, r)
-    local c = 0.551915024494 * r -- circle approximation
-    ass:move_to(x0 + r, y0)
-    ass:line_to(x1 - r, y0) -- top line
-    if r > 0 then
-        ass:bezier_curve(x1 - r + c, y0, x1, y0 + r - c, x1, y0 + r) -- top right corner
+function ass_mt.hexagon_cw(ass, x0, y0, x1, y1, r1, r2)
+    if r2 == nil then
+        r2 = r1
     end
-    ass:line_to(x1, y1 - r) -- right line
-    if r > 0 then
-        ass:bezier_curve(x1, y1 - r + c, x1 - r + c, y1, x1 - r, y1) -- bottom right corner
+    ass:move_to(x0 + r1, y0)
+    if x0 ~= x1 then
+        ass:line_to(x1 - r2, y0)
     end
-    ass:line_to(x0 + r, y1) -- bottom line
-    if r > 0 then
-        ass:bezier_curve(x0 + r - c, y1, x0, y1 - r + c, x0, y1 - r) -- bottom left corner
+    ass:line_to(x1, y0 + r2)
+    if x0 ~= x1 then
+        ass:line_to(x1 - r2, y1)
     end
-    ass:line_to(x0, y0 + r) -- left line
-    if r > 0 then
-        ass:bezier_curve(x0, y0 + r - c, x0 + r - c, y0, x0 + r, y0) -- top left corner
+    ass:line_to(x0 + r1, y1)
+    ass:line_to(x0, y0 + r1)
+end
+
+function ass_mt.hexagon_ccw(ass, x0, y0, x1, y1, r1, r2)
+    if r2 == nil then
+        r2 = r1
+    end
+    ass:move_to(x0 + r1, y0)
+    ass:line_to(x0, y0 + r1)
+    ass:line_to(x0 + r1, y1)
+    if x0 ~= x1 then
+        ass:line_to(x1 - r2, y1)
+    end
+    ass:line_to(x1, y0 + r2)
+    if x0 ~= x1 then
+        ass:line_to(x1 - r2, y0)
+    end
+end
+
+function ass_mt.round_rect_cw(ass, x0, y0, x1, y1, r1, r2)
+    if r2 == nil then
+        r2 = r1
+    end
+    local c1 = c * r1 -- circle approximation
+    local c2 = c * r2 -- circle approximation
+    ass:move_to(x0 + r1, y0)
+    ass:line_to(x1 - r2, y0) -- top line
+    if r2 > 0 then
+        ass:bezier_curve(x1 - r2 + c2, y0, x1, y0 + r2 - c2, x1, y0 + r2) -- top right corner
+    end
+    ass:line_to(x1, y1 - r2) -- right line
+    if r2 > 0 then
+        ass:bezier_curve(x1, y1 - r2 + c2, x1 - r2 + c2, y1, x1 - r2, y1) -- bottom right corner
+    end
+    ass:line_to(x0 + r1, y1) -- bottom line
+    if r1 > 0 then
+        ass:bezier_curve(x0 + r1 - c1, y1, x0, y1 - r1 + c1, x0, y1 - r1) -- bottom left corner
+    end
+    ass:line_to(x0, y0 + r1) -- left line
+    if r1 > 0 then
+        ass:bezier_curve(x0, y0 + r1 - c1, x0 + r1 - c1, y0, x0 + r1, y0) -- top left corner
+    end
+end
+
+function ass_mt.round_rect_ccw(ass, x0, y0, x1, y1, r1, r2)
+    if r2 == nil then
+        r2 = r1
+    end
+    local c1 = c * r1 -- circle approximation
+    local c2 = c * r2 -- circle approximation
+    ass:move_to(x0 + r1, y0)
+    if r1 > 0 then
+        ass:bezier_curve(x0 + r1 - c1, y0, x0, y0 + r1 - c1, x0, y0 + r1) -- top left corner
+    end
+    ass:line_to(x0, y1 - r1) -- left line
+    if r1 > 0 then
+        ass:bezier_curve(x0, y1 - r1 + c1, x0 + r1 - c1, y1, x0 + r1, y1) -- bottom left corner
+    end
+    ass:line_to(x1 - r2, y1) -- bottom line
+    if r2 > 0 then
+        ass:bezier_curve(x1 - r2 + c2, y1, x1, y1 - r2 + c2, x1, y1 - r2) -- bottom right corner
+    end
+    ass:line_to(x1, y0 + r2) -- right line
+    if r2 > 0 then
+        ass:bezier_curve(x1, y0 + r2 - c2, x1 - r2 + c2, y0, x1 - r2, y0) -- top right corner
     end
 end
 
