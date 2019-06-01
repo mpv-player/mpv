@@ -333,7 +333,6 @@ struct demux_stream {
     double last_br_ts;      // timestamp of last packet bitrate was calculated
     size_t last_br_bytes;   // summed packet sizes since last bitrate calculation
     double bitrate;
-    size_t fw_packs;        // number of packets in buffer (forward)
     size_t fw_bytes;        // total bytes of packets in buffer (forward)
     struct demux_packet *reader_head;   // points at current decoder position
     bool skip_to_keyframe;
@@ -415,7 +414,6 @@ static void check_queue_consistency(struct demux_internal *in)
             assert(queue->range == range);
 
             size_t fw_bytes = 0;
-            size_t fw_packs = 0;
             bool is_forward = false;
             bool kf_found = false;
             bool npt_found = false;
@@ -429,7 +427,6 @@ static void check_queue_consistency(struct demux_internal *in)
                 total_bytes += bytes;
                 if (is_forward) {
                     fw_bytes += bytes;
-                    fw_packs += 1;
                     assert(range == in->current_range);
                     assert(queue->ds->queue == queue);
                 }
@@ -458,9 +455,8 @@ static void check_queue_consistency(struct demux_internal *in)
 
             if (range == in->current_range) {
                 assert(queue->ds->fw_bytes == fw_bytes);
-                assert(queue->ds->fw_packs == fw_packs);
             } else {
-                assert(fw_bytes == 0 && fw_packs == 0);
+                assert(fw_bytes == 0);
             }
 
             if (queue->keyframe_latest)
@@ -530,12 +526,10 @@ static void mp_packet_tags_make_writable(struct mp_packet_tags **tags)
 
 static void recompute_buffers(struct demux_stream *ds)
 {
-    ds->fw_packs = 0;
     ds->fw_bytes = 0;
 
     for (struct demux_packet *dp = ds->reader_head; dp; dp = dp->next) {
         ds->fw_bytes += demux_packet_estimate_total_size(dp);
-        ds->fw_packs++;
     }
 }
 
@@ -631,7 +625,7 @@ broken:
     range->seek_start = range->seek_end = MP_NOPTS_VALUE;
 }
 
-// Remove queue->head from the queue. Does not update in->fw_bytes/in->fw_packs.
+// Remove queue->head from the queue. Does not update in->fw_bytes.
 static void remove_head_packet(struct demux_queue *queue)
 {
     struct demux_packet *dp = queue->head;
@@ -728,7 +722,6 @@ static void ds_clear_reader_queue_state(struct demux_stream *ds)
     ds->in->fw_bytes -= ds->fw_bytes;
     ds->reader_head = NULL;
     ds->fw_bytes = 0;
-    ds->fw_packs = 0;
     ds->eof = false;
     ds->need_wakeup = true;
 }
@@ -1811,7 +1804,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     size_t bytes = demux_packet_estimate_total_size(dp);
     in->total_bytes += bytes;
     if (ds->reader_head) {
-        ds->fw_packs++;
         ds->fw_bytes += bytes;
         in->fw_bytes += bytes;
     }
@@ -1841,9 +1833,10 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     if (ds->base_ts == MP_NOPTS_VALUE)
         ds->base_ts = queue->last_ts;
 
+    const char *num_pkts = queue->head == queue->tail ? "1" : ">1";
     MP_TRACE(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
-             "[num=%zd size=%zd]\n", stream_type_name(stream->type),
-             dp->len, dp->pts, dp->dts, dp->pos, ds->fw_packs, ds->fw_bytes);
+             "[num=%s size=%zd]\n", stream_type_name(stream->type),
+             dp->len, dp->pts, dp->dts, dp->pos, num_pkts, ds->fw_bytes);
 
     adjust_seek_range_on_packet(ds, dp);
 
@@ -1950,9 +1943,13 @@ static bool read_packet(struct demux_internal *in)
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
                 if (ds->selected) {
+                    size_t num_pkts = 0;
+                    for (struct demux_packet *dp = ds->reader_head;
+                         dp; dp = dp->next)
+                        num_pkts++;
                     MP_WARN(in, "  %s/%d: %zd packets, %zd bytes%s%s\n",
                             stream_type_name(ds->type), n,
-                            ds->fw_packs, ds->fw_bytes,
+                            num_pkts, ds->fw_bytes,
                             ds->eager ? "" : " (lazy)",
                             ds->refreshing ? " (refreshing)" : "");
                 }
@@ -2201,7 +2198,6 @@ static struct demux_packet *advance_reader_head(struct demux_stream *ds)
     ds->reader_head = pkt->next;
 
     // Update cached packet queue state.
-    ds->fw_packs--;
     size_t bytes = demux_packet_estimate_total_size(pkt);
     ds->fw_bytes -= bytes;
     ds->in->fw_bytes -= bytes;
