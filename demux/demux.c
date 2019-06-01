@@ -638,7 +638,8 @@ static void remove_head_packet(struct demux_queue *queue)
         queue->keyframe_latest = NULL;
     queue->is_bof = false;
 
-    queue->ds->in->total_bytes -= demux_packet_estimate_total_size(dp);
+    uint64_t end_pos = dp->next ? dp->next->cum_pos : queue->tail_cum_pos;
+    queue->ds->in->total_bytes -= end_pos - dp->cum_pos;
 
     if (queue->num_index && queue->index[0] == dp)
         MP_TARRAY_REMOVE_AT(queue->index, queue->num_index, 0);
@@ -655,10 +656,12 @@ static void clear_queue(struct demux_queue *queue)
     struct demux_stream *ds = queue->ds;
     struct demux_internal *in = ds->in;
 
+    if (queue->head)
+        in->total_bytes -= queue->tail_cum_pos - queue->head->cum_pos;
+
     struct demux_packet *dp = queue->head;
     while (dp) {
         struct demux_packet *dn = dp->next;
-        in->total_bytes -= demux_packet_estimate_total_size(dp);
         assert(ds->reader_head != dp);
         talloc_free(dp);
         dp = dn;
