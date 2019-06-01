@@ -167,9 +167,14 @@ Configurable Options
 ``seekbarstyle``
     Default: bar
 
-    Sets the style of the seekbar, slider (diamond marker), knob (circle
-    marker with guide), or bar (fill).
-    Default pre-0.21.0 was 'slider'.
+    Sets the style of the playback position marker and overall shape
+    of the seekbar: ``bar``, ``diamond`` or ``knob``.
+
+``seekbarhandlesize``
+    Default: 0.6
+
+    Size ratio of the seek handle if ``seekbarstyle`` is set to ``dimaond``
+    or ``knob``. This is relative to the full height of the seekbar.
 
 ``seekbarkeyframes``
     Default: yes
@@ -179,6 +184,28 @@ Configurable Options
     will be used instead. Keyframes are preferred, but exact seeks may be
     useful in cases where keyframes cannot be found. Note that using exact
     seeks can potentially make mouse dragging much slower.
+
+``seekrangestyle``
+    Default: inverted
+
+    Display seekable ranges on the seekbar. ``bar`` shows them on the full
+    height of the bar, ``line`` as a thick line and ``inverted`` as a thin
+    line that is inverted over playback position markers. ``none`` will hide
+    them. Additionally, ``slider`` will show a permanent handle inside the seekbar
+    with cached ranges marked inside. Note that these will look differently
+    based on the seekbarstyle option. Also, ``slider`` does not work with
+    ``seekbarstyle`` set to ``bar``.
+
+``seekrangeseparate``
+    Default: yes
+
+    Controls whether to show line-style seekable ranges on top of the
+    seekbar or separately if ``seekbarstyle`` is set to ``bar``.
+
+``seekrangealpha``
+    Default: 200
+
+    Alpha of the seekable ranges, 0 (opaque) to 255 (fully transparent).
 
 ``deadzonesize``
     Default: 0.5
@@ -280,11 +307,6 @@ Configurable Options
     Default: no
 
     Display timecodes with milliseconds
-
-``seekranges``
-    Default: yes
-
-    Display seekable ranges on the seekbar
 
 ``visibility``
     Default: auto (auto hide/show on mouse move)

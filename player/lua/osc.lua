@@ -6,7 +6,6 @@ local utils = require 'mp.utils'
 --
 -- Parameters
 --
-
 -- default user option values
 -- do not touch, change them in osc.conf
 local user_opts = {
@@ -32,15 +31,17 @@ local user_opts = {
                                 -- internal track list management (and some
                                 -- functions that depend on it)
     layout = "bottombar",
-    seekbarstyle = "bar",       -- slider (diamond marker), knob (circle
-                                -- marker with guide), or bar (fill)
+    seekbarstyle = "bar",       -- bar, diamond or knob
+    seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
+    seekrangestyle = "inverted",-- bar, line, slider, inverted or none
+    seekrangeseparate = true,   -- wether the seekranges overlay on the bar-style seekbar
+    seekrangealpha = 200,       -- transparency of seekranges
     seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     title = "${media-title}",   -- string compatible with property-expansion
                                 -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
-    seekranges = true,          -- display seek ranges?
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
 }
@@ -251,6 +252,37 @@ function add_area(name, x1, y1, x2, y2)
     table.insert(osc_param.areas[name], {x1=x1, y1=y1, x2=x2, y2=y2})
 end
 
+function ass_append_alpha(ass, alpha, modifier)
+    local ar = {}
+
+    for ai, av in pairs(alpha) do
+        av = mult_alpha(av, modifier)
+        if state.animation then
+            av = mult_alpha(av, state.animation)
+        end
+        ar[ai] = av
+    end
+
+    ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
+               ar[1], ar[2], ar[3], ar[4]))
+end
+
+function ass_draw_rr_h_cw(ass, x0, y0, x1, y1, r1, hexagon, r2)
+    if hexagon then
+        ass:hexagon_cw(x0, y0, x1, y1, r1, r2)
+    else
+        ass:round_rect_cw(x0, y0, x1, y1, r1, r2)
+    end
+end
+
+function ass_draw_rr_h_ccw(ass, x0, y0, x1, y1, r1, hexagon, r2)
+    if hexagon then
+        ass:hexagon_ccw(x0, y0, x1, y1, r1, r2)
+    else
+        ass:round_rect_ccw(x0, y0, x1, y1, r1, r2)
+    end
+end
+
 
 --
 -- Tracklist Management
@@ -395,25 +427,30 @@ function prepare_elements()
         if (element.type == "box") then
             --draw box
             static_ass:draw_start()
-            static_ass:round_rect_cw(0, 0, elem_geo.w, elem_geo.h,
-                element.layout.box.radius)
+            ass_draw_rr_h_cw(static_ass, 0, 0, elem_geo.w, elem_geo.h,
+                             element.layout.box.radius, element.layout.box.hexagon)
             static_ass:draw_stop()
-
 
         elseif (element.type == "slider") then
             --draw static slider parts
 
+            local r1 = 0
+            local r2 = 0
             local slider_lo = element.layout.slider
             -- offset between element outline and drag-area
             local foV = slider_lo.border + slider_lo.gap
 
             -- calculate positions of min and max points
-            if (slider_lo.stype == "slider") or
-                (slider_lo.stype == "knob") then
+            if (slider_lo.stype ~= "bar") then
+                r1 = elem_geo.h / 2
                 element.slider.min.ele_pos = elem_geo.h / 2
                 element.slider.max.ele_pos = elem_geo.w - (elem_geo.h / 2)
-
-            elseif (slider_lo.stype == "bar") then
+                if (slider_lo.stype == "diamond") then
+                    r2 = (elem_geo.h - 2 * slider_lo.border) / 2
+                elseif (slider_lo.stype == "knob") then
+                    r2 = r1
+                end
+            else
                 element.slider.min.ele_pos =
                     slider_lo.border + slider_lo.gap
                 element.slider.max.ele_pos =
@@ -430,11 +467,12 @@ function prepare_elements()
             static_ass:draw_start()
 
             -- the box
-            static_ass:rect_cw(0, 0, elem_geo.w, elem_geo.h);
+            ass_draw_rr_h_cw(static_ass, 0, 0, elem_geo.w, elem_geo.h, r1, slider_lo.stype == "diamond")
 
             -- the "hole"
-            static_ass:rect_ccw(slider_lo.border, slider_lo.border,
-                elem_geo.w - slider_lo.border, elem_geo.h - slider_lo.border)
+            ass_draw_rr_h_ccw(static_ass, slider_lo.border, slider_lo.border,
+                              elem_geo.w - slider_lo.border, elem_geo.h - slider_lo.border,
+                              r2, slider_lo.stype == "diamond")
 
             -- marker nibbles
             if not (element.slider.markerF == nil) and (slider_lo.gap > 0) then
@@ -510,18 +548,7 @@ function render_elements(master_ass)
 
         local style_ass = assdraw.ass_new()
         style_ass:merge(element.style_ass)
-
-        --alpha
-        local ar = element.layout.alpha
-        if not (state.animation == nil) then
-            ar = {}
-            for ai, av in pairs(element.layout.alpha) do
-                ar[ai] = mult_alpha(av, state.animation)
-            end
-        end
-
-        style_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
-            ar[1], ar[2], ar[3], ar[4]))
+        ass_append_alpha(style_ass, element.layout.alpha, 0)
 
         if element.eventresponder and (state.active_element == n) then
 
@@ -562,48 +589,110 @@ function render_elements(master_ass)
             local s_max = element.slider.max.value
 
             -- draw pos marker
+            local foH, xp
             local pos = element.slider.posF()
+            local foV = slider_lo.border + slider_lo.gap
+            local innerH = elem_geo.h - (2 * foV)
+            local seekRanges = element.slider.seekRangesF()
+            local seekRangeLineHeight = innerH / 5
 
-            if not (pos == nil) then
+            if slider_lo.stype ~= "bar" then
+                foH = elem_geo.h / 2
+            else
+                foH = slider_lo.border + slider_lo.gap
+            end
 
-                local foV = slider_lo.border + slider_lo.gap
-                local foH = 0
-                if (slider_lo.stype == "slider") or
-                    (slider_lo.stype == "knob") then
-                    foH = elem_geo.h / 2
-                elseif (slider_lo.stype == "bar") then
-                    foH = slider_lo.border + slider_lo.gap
+            if pos then
+                xp = get_slider_ele_pos_for(element, pos)
+
+                if slider_lo.stype ~= "bar" then
+                    local r = (user_opts.seekbarhandlesize * innerH) / 2
+                    ass_draw_rr_h_cw(elem_ass, xp - r, foH - r,
+                                     xp + r, foH + r,
+                                     r, slider_lo.stype == "diamond")
+                else
+                    local h = 0
+                    if seekRanges and user_opts.seekrangeseparate and slider_lo.rtype ~= "inverted" then
+                        h = seekRangeLineHeight
+                    end
+                    elem_ass:rect_cw(foH, foV, xp, elem_geo.h - foV - h)
+
+                    if seekRanges and not user_opts.seekrangeseparate and slider_lo.rtype ~= "inverted" then
+                        -- Punch holes for the seekRanges to be drawn later
+                        for _,range in pairs(seekRanges) do
+                            if range["start"] < pos then
+                                local pstart = get_slider_ele_pos_for(element, range["start"])
+                                local pend = xp
+
+                                if pos > range["end"] then
+                                    pend = get_slider_ele_pos_for(element, range["end"])
+                                end
+                                elem_ass:rect_ccw(pstart, elem_geo.h - foV - seekRangeLineHeight, pend, elem_geo.h - foV)
+                            end
+                        end
+                    end
                 end
 
-                local xp = get_slider_ele_pos_for(element, pos)
-
-                -- the filling
-                local innerH = elem_geo.h - (2*foV)
-
-                if (slider_lo.stype == "bar") then
-                    elem_ass:rect_cw(foH, foV, xp, elem_geo.h - foV)
-                elseif (slider_lo.stype == "slider") then
-                    elem_ass:move_to(xp, foV)
-                    elem_ass:line_to(xp+(innerH/2), (innerH/2)+foV)
-                    elem_ass:line_to(xp, (innerH)+foV)
-                    elem_ass:line_to(xp-(innerH/2), (innerH/2)+foV)
-                elseif (slider_lo.stype == "knob") then
-                    elem_ass:rect_cw(xp, (9*innerH/20) + foV,
-                        elem_geo.w - foH, (11*innerH/20) + foV)
-                    elem_ass:rect_cw(foH, (3*innerH/8) + foV,
-                        xp, (5*innerH/8) + foV)
-                    elem_ass:round_rect_cw(xp - innerH/2, foV,
-                        xp + innerH/2, foV + innerH, innerH/2.0)
+                if slider_lo.rtype == "slider" then
+                    ass_draw_rr_h_cw(elem_ass, foH - innerH / 6, foH - innerH / 6,
+                                     xp, foH + innerH / 6,
+                                     innerH / 6, slider_lo.stype == "diamond", 0)
+                    ass_draw_rr_h_cw(elem_ass, xp, foH - innerH / 15,
+                                     elem_geo.w - foH + innerH / 15, foH + innerH / 15,
+                                     0, slider_lo.stype == "diamond", innerH / 15)
+                    for _,range in pairs(seekRanges or {}) do
+                        local pstart = get_slider_ele_pos_for(element, range["start"])
+                        local pend = get_slider_ele_pos_for(element, range["end"])
+                        ass_draw_rr_h_ccw(elem_ass, pstart, foH - innerH / 21,
+                                          pend, foH + innerH / 21,
+                                          innerH / 21, slider_lo.stype == "diamond")
+                    end
                 end
             end
 
-            -- seek ranges
-            local seekRanges = element.slider.seekRangesF()
-            if not (seekRanges == nil) then
+            if seekRanges then
+                if slider_lo.rtype ~= "inverted" then
+                    elem_ass:draw_stop()
+                    elem_ass:merge(element.style_ass)
+                    ass_append_alpha(elem_ass, element.layout.alpha, user_opts.seekrangealpha)
+                    elem_ass:merge(element.static_ass)
+                end
+
                 for _,range in pairs(seekRanges) do
                     local pstart = get_slider_ele_pos_for(element, range["start"])
                     local pend = get_slider_ele_pos_for(element, range["end"])
-                    elem_ass:rect_ccw(pstart, (elem_geo.h/2)-1, pend, (elem_geo.h/2) + 1)
+
+                    if slider_lo.rtype == "slider" then
+                        ass_draw_rr_h_cw(elem_ass, pstart, foH - innerH / 21,
+                                         pend, foH + innerH / 21,
+                                         innerH / 21, slider_lo.stype == "diamond")
+                    elseif slider_lo.rtype == "line" then
+                        if slider_lo.stype == "bar" then
+                            elem_ass:rect_cw(pstart, elem_geo.h - foV - seekRangeLineHeight, pend, elem_geo.h - foV)
+                        else
+                            ass_draw_rr_h_cw(elem_ass, pstart - innerH / 8, foH - innerH / 8,
+                                             pend + innerH / 8, foH + innerH / 8,
+                                             innerH / 8, slider_lo.stype == "diamond")
+                        end
+                    elseif slider_lo.rtype == "bar" then
+                        if slider_lo.stype ~= "bar" then
+                            ass_draw_rr_h_cw(elem_ass, pstart - innerH / 2, foV,
+                                             pend + innerH / 2, foV + innerH,
+                                             innerH / 2, slider_lo.stype == "diamond")
+                        elseif range["end"] >= (pos or 0) then
+                            elem_ass:rect_cw(pstart, foV, pend, elem_geo.h - foV)
+                        else
+                            elem_ass:rect_cw(pstart, elem_geo.h - foV - seekRangeLineHeight, pend, elem_geo.h - foV)
+                        end
+                    elseif slider_lo.rtype == "inverted" then
+                        if slider_lo.stype ~= "bar" then
+                            ass_draw_rr_h_ccw(elem_ass, pstart, (elem_geo.h / 2) - 1, pend,
+                                              (elem_geo.h / 2) + 1,
+                                              1, slider_lo.stype == "diamond")
+                        else
+                            elem_ass:rect_ccw(pstart, (elem_geo.h / 2) - 1, pend, (elem_geo.h / 2) + 1)
+                        end
+                    end
                 end
             end
 
@@ -648,18 +737,7 @@ function render_elements(master_ass)
                     elem_ass:pos(tx, ty)
                     elem_ass:an(an)
                     elem_ass:append(slider_lo.tooltip_style)
-
-                    --alpha
-                    local ar = slider_lo.alpha
-                    if not (state.animation == nil) then
-                        ar = {}
-                        for ai, av in pairs(slider_lo.alpha) do
-                            ar[ai] = mult_alpha(av, state.animation)
-                        end
-                    end
-                    elem_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
-                        ar[1], ar[2], ar[3], ar[4]))
-
+                    ass_append_alpha(elem_ass, slider_lo.alpha, 0)
                     elem_ass:append(tooltiplabel)
 
                 end
@@ -862,7 +940,7 @@ function add_layout(name)
                 alpha = {[1] = 0, [2] = 255, [3] = 88, [4] = 255},
             }
         elseif (elements[name].type == "box") then
-            elements[name].layout.box = {radius = 0}
+            elements[name].layout.box = {radius = 0, hexagon = false}
         end
 
         return elements[name].layout
@@ -1028,9 +1106,7 @@ layouts["box"] = function ()
     lo.style = osc_styles.timecodes
     lo.slider.tooltip_style = osc_styles.vidtitle
     lo.slider.stype = user_opts["seekbarstyle"]
-    if lo.slider.stype == "knob" then
-        lo.slider.border = 0
-    end
+    lo.slider.rtype = user_opts["seekrangestyle"]
 
     --
     -- Timecodes + Cache
@@ -1119,6 +1195,7 @@ layouts["slimbox"] = function ()
     lo.alpha[3] = 0
     if not (user_opts["seekbarstyle"] == "bar") then
         lo.box.radius = osc_geo.r
+        lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
     end
 
 
@@ -1130,6 +1207,7 @@ layouts["slimbox"] = function ()
     lo.slider.gap = 1.5
     lo.slider.tooltip_style = styles.tooltip
     lo.slider.stype = user_opts["seekbarstyle"]
+    lo.slider.rtype = user_opts["seekrangestyle"]
     lo.slider.adjust_tooltip = false
 
     --
@@ -1316,6 +1394,10 @@ layouts["bottombar"] = function()
     lo.style = osc_styles.timecodesBar
     lo.alpha[1] =
         math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+    if not (user_opts["seekbarstyle"] == "bar") then
+        lo.box.radius = geo.h / 2
+        lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
+    end
 
     lo = add_layout("seekbar")
     lo.geometry = geo
@@ -1325,6 +1407,7 @@ layouts["bottombar"] = function()
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
+    lo.slider.rtype = user_opts["seekrangestyle"]
 end
 
 layouts["topbar"] = function()
@@ -1450,6 +1533,10 @@ layouts["topbar"] = function()
     lo.style = osc_styles.timecodesBar
     lo.alpha[1] =
         math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+    if not (user_opts["seekbarstyle"] == "bar") then
+        lo.box.radius = geo.h / 2
+        lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
+    end
 
     lo = add_layout("seekbar")
     lo.geometry = geo
@@ -1458,6 +1545,7 @@ layouts["topbar"] = function()
     lo.slider.gap = 2
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
+    lo.slider.rtype = user_opts["seekrangestyle"]
     lo.slider.tooltip_an = 5
 
 
@@ -1497,15 +1585,31 @@ end
 function validate_user_opts()
     if layouts[user_opts.layout] == nil then
         msg.warn("Invalid setting \""..user_opts.layout.."\" for layout")
-        user_opts.layout = "box"
+        user_opts.layout = "bottombar"
     end
 
-    if user_opts.seekbarstyle ~= "slider" and
-       user_opts.seekbarstyle ~= "bar" and
+    if user_opts.seekbarstyle ~= "bar" and
+       user_opts.seekbarstyle ~= "diamond" and
        user_opts.seekbarstyle ~= "knob" then
         msg.warn("Invalid setting \"" .. user_opts.seekbarstyle
             .. "\" for seekbarstyle")
-        user_opts.seekbarstyle = "slider"
+        user_opts.seekbarstyle = "bar"
+    end
+
+    if user_opts.seekrangestyle ~= "bar" and
+       user_opts.seekrangestyle ~= "line" and
+       user_opts.seekrangestyle ~= "slider" and
+       user_opts.seekrangestyle ~= "inverted" and
+       user_opts.seekrangestyle ~= "none" then
+        msg.warn("Invalid setting \"" .. user_opts.seekrangestyle
+            .. "\" for seekrangestyle")
+        user_opts.seekrangestyle = "inverted"
+    end
+
+    if user_opts.seekrangestyle == "slider" and
+       user_opts.seekbarstyle == "bar" then
+        msg.warn("Using \"slider\" seekrangestyle together with \"bar\" seekbarstyle is not supported")
+        user_opts.seekrangestyle = "inverted"
     end
 end
 
@@ -1762,7 +1866,7 @@ function osc_init()
         end
     end
     ne.slider.seekRangesF = function()
-        if not (user_opts.seekranges) then
+        if user_opts.seekrangestyle == "none" then
             return nil
         end
         local cache_state = mp.get_property_native("demuxer-cache-state", nil)
@@ -1777,6 +1881,9 @@ function osc_init()
         for _, range in pairs(ranges) do
             range["start"] = 100 * range["start"] / duration
             range["end"] = 100 * range["end"] / duration
+        end
+        if #ranges == 0 then
+            return nil
         end
         return ranges
     end
