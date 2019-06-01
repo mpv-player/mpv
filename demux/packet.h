@@ -48,6 +48,7 @@ typedef struct demux_packet {
     // private
     struct demux_packet *next;
     struct AVPacket *avpacket;   // keep the buffer allocation and sidedata
+    uint64_t cum_pos; // demux.c internal: cumulative size until _start_ of pkt
     double kf_seek_pts; // demux.c internal: seek pts for keyframe range
     struct mp_packet_tags *metadata; // timed metadata (demux.c internal)
 } demux_packet_t;
