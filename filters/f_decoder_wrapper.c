@@ -810,6 +810,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
         goto error;
     p->demux = demux->pins[0];
 
+    reset(f);
+
     return w;
 error:
     talloc_free(f);
