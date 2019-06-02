@@ -3060,29 +3060,25 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
     }
 
     struct demux_packet *target = NULL;
-    double target_diff = MP_NOPTS_VALUE;
     for (struct demux_packet *dp = start; dp; dp = dp->next) {
         double range_pts = dp->kf_seek_pts;
         if (!dp->keyframe || range_pts == MP_NOPTS_VALUE)
             continue;
 
-        double diff = range_pts - pts;
         if (flags & SEEK_FORWARD) {
-            diff = -diff;
-            if (diff > 0)
+            // Stop on the first packet that is >= pts.
+            if (target)
+                break;
+            if (range_pts < pts)
                 continue;
+        } else {
+            // Stop before the first packet that is > pts.
+            // This still returns a packet with > pts if there's no better one.
+            if (target && range_pts > pts)
+                break;
         }
-        if (target) {
-            if (diff <= 0) {
-                if (target_diff <= 0 && diff <= target_diff)
-                    continue;
-            } else if (diff >= target_diff)
-                continue;
-        }
-        target_diff = diff;
+
         target = dp;
-        if (range_pts > pts)
-            break;
     }
 
     // Usually, the last seen keyframe (keyframe_latest) has kf_seek_pts unset
@@ -3099,7 +3095,6 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
     {
         target = queue->keyframe_latest;
     }
-
 
     return target;
 }
