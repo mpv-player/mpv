@@ -269,7 +269,25 @@ struct demux_cached_range {
     bool is_eof;            // set if the file ends with this range
 };
 
-#define MAX_INDEX_ENTRIES 16
+#define QUEUE_INDEX_SIZE_MASK(queue) ((queue)->index_size - 1)
+
+// Access the idx-th entry in the given demux_queue.
+// Requirement: idx >= 0 && idx < queue->num_index
+#define QUEUE_INDEX_ENTRY(queue, idx) \
+    ((queue)->index[((queue)->index0 + (idx)) & QUEUE_INDEX_SIZE_MASK(queue)])
+
+// Don't index packets whose timestamps that are within the last index entry by
+// this amount of time (it's better to seek them manually).
+#define INDEX_STEP_SIZE 1.0
+
+// Approximate worst case number of bytes a keyframe packet uses for the index.
+// (Worst case: every KF packet is indexed; index buffer is overallocated.)
+#define KF_SEEK_ENTRY_WORST_CASE (sizeof(struct index_entry) * 2)
+
+struct index_entry {
+    double pts;
+    struct demux_packet *pkt;
+};
 
 // A continuous list of cached packets for a single stream/range. There is one
 // for each stream and range. Also contains some state for use during demuxing
@@ -302,11 +320,11 @@ struct demux_queue {
     bool is_bof;            // started demuxing at beginning of file
     bool is_eof;            // received true EOF here
 
-    // incomplete index to somewhat speed up seek operations
-    // the entries in index[] must be in packet queue append/removal order
-    int num_index;          // valid index[] entries
-    double index_distance;  // minimum keyframe distance to add index element
-    struct demux_packet *index[MAX_INDEX_ENTRIES];
+    // Complete index, though it may skip some entries to reduce density.
+    struct index_entry *index;  // ring buffer
+    size_t index_size;          // size of index[] (0 or a power of 2)
+    size_t index0;              // first index entry
+    size_t num_index;           // number of index entries (wraps on index_size)
 };
 
 struct demux_stream {
@@ -431,7 +449,7 @@ static void check_queue_consistency(struct demux_internal *in)
             bool is_forward = false;
             bool kf_found = false;
             bool npt_found = false;
-            int next_index = 0;
+            size_t next_index = 0;
             uint64_t queue_total_bytes = 0;
             for (struct demux_packet *dp = queue->head; dp; dp = dp->next) {
                 is_forward |= dp == queue->ds->reader_head;
@@ -439,6 +457,8 @@ static void check_queue_consistency(struct demux_internal *in)
                 npt_found |= dp == queue->next_prune_target;
 
                 size_t bytes = demux_packet_estimate_total_size(dp);
+                if (dp->keyframe)
+                    bytes += KF_SEEK_ENTRY_WORST_CASE;
                 total_bytes += bytes;
                 queue_total_bytes += bytes;
                 if (is_forward) {
@@ -451,7 +471,8 @@ static void check_queue_consistency(struct demux_internal *in)
                 if (!dp->next)
                     assert(queue->tail == dp);
 
-                if (next_index < queue->num_index && queue->index[next_index] == dp)
+                if (next_index < queue->num_index &&
+                    QUEUE_INDEX_ENTRY(queue, next_index).pkt == dp)
                     next_index += 1;
             }
             if (!queue->head)
@@ -661,8 +682,10 @@ static void remove_head_packet(struct demux_queue *queue)
     uint64_t end_pos = dp->next ? dp->next->cum_pos : queue->tail_cum_pos;
     queue->ds->in->total_bytes -= end_pos - dp->cum_pos;
 
-    if (queue->num_index && queue->index[0] == dp)
-        MP_TARRAY_REMOVE_AT(queue->index, queue->num_index, 0);
+    if (queue->num_index && queue->index[queue->index0].pkt == dp) {
+        queue->index0 = (queue->index0 + 1) & QUEUE_INDEX_SIZE_MASK(queue);
+        queue->num_index -= 1;
+    }
 
     queue->head = dp->next;
     if (!queue->head)
@@ -692,7 +715,6 @@ static void clear_queue(struct demux_queue *queue)
     queue->seek_start = queue->seek_end = queue->last_pruned = MP_NOPTS_VALUE;
 
     queue->num_index = 0;
-    queue->index_distance = 1.0;
 
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
@@ -1528,22 +1550,39 @@ static void back_demux_see_packets(struct demux_stream *ds)
 // Add the keyframe to the end of the index. Not all packets are actually added.
 static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
 {
+    struct demux_internal *in = queue->ds->in;
+
     assert(dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE);
 
-    if (queue->num_index) {
-        double prev = queue->index[queue->num_index - 1]->kf_seek_pts;
-        if (dp->kf_seek_pts < prev + queue->index_distance)
+    if (queue->num_index > 0) {
+        struct index_entry *last = &QUEUE_INDEX_ENTRY(queue, queue->num_index - 1);
+        if (dp->kf_seek_pts - last->pts < INDEX_STEP_SIZE)
             return;
     }
 
-    if (queue->num_index == MAX_INDEX_ENTRIES) {
-        for (int n = 0; n < MAX_INDEX_ENTRIES / 2; n++)
-            queue->index[n] = queue->index[n * 2];
-        queue->num_index = MAX_INDEX_ENTRIES / 2;
-        queue->index_distance *= 2;
+    if (queue->num_index == queue->index_size) {
+        // Needs to honor power-of-2 requirement.
+        size_t new_size = MPMAX(128, queue->index_size * 2);
+        assert(!(new_size & (new_size - 1)));
+        MP_VERBOSE(in, "stream %d: resize index to %zu\n", queue->ds->index,
+                   new_size);
+        // Note: we could tolerate allocation failure, and just discard the
+        // entire index (and prevent the index from being recreated).
+        MP_RESIZE_ARRAY(queue, queue->index, new_size);
+        size_t highest_index = queue->index0 + queue->num_index;
+        for (size_t n = queue->index_size; n < highest_index; n++)
+            queue->index[n] = queue->index[n - queue->index_size];
+        queue->index_size = new_size;
     }
 
-    queue->index[queue->num_index++] = dp;
+    assert(queue->num_index < queue->index_size);
+
+    queue->num_index += 1;
+
+    QUEUE_INDEX_ENTRY(queue, queue->num_index - 1) = (struct index_entry){
+        .pts = dp->kf_seek_pts,
+        .pkt = dp,
+    };
 }
 
 // Check whether the next range in the list is, and if it appears to overlap,
@@ -1689,10 +1728,10 @@ static void attempt_range_joining(struct demux_internal *in)
         q2->head = q2->tail = NULL;
         q2->next_prune_target = NULL;
         q2->keyframe_latest = NULL;
-
-        for (int i = 0; i < q2->num_index; i++)
-            add_index_entry(q1, q2->index[i]);
         q2->num_index = 0;
+        q2->index_size = 0;
+        q2->index0 = 0;
+        TA_FREEP(&q2->index);
 
         if (ds->selected && !ds->reader_head)
             ds->reader_head = join_point;
@@ -1704,6 +1743,10 @@ static void attempt_range_joining(struct demux_internal *in)
             uint64_t size = next_pos - dp->cum_pos;
             dp->cum_pos = q1->tail_cum_pos;
             q1->tail_cum_pos += size;
+
+            // And update the index with packets from q2.
+            if (dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE)
+                add_index_entry(q1, dp);
         }
 
         // For moving demuxer position.
@@ -1846,6 +1889,8 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     size_t bytes = demux_packet_estimate_total_size(dp);
+    if (dp->keyframe)
+        bytes += KF_SEEK_ENTRY_WORST_CASE;
     in->total_bytes += bytes;
     dp->cum_pos = queue->tail_cum_pos;
     queue->tail_cum_pos += bytes;
@@ -3059,10 +3104,11 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
     pts -= queue->ds->sh->seek_preroll;
 
     struct demux_packet *start = queue->head;
-    for (int n = 0; n < queue->num_index; n++) {
-        if (queue->index[n]->kf_seek_pts > pts)
+    for (size_t n = 0; n < queue->num_index; n++) {
+        struct index_entry *e = &QUEUE_INDEX_ENTRY(queue, n);
+        if (e->pts > pts)
             break;
-        start = queue->index[n];
+        start = e->pkt;
     }
 
     struct demux_packet *target = NULL;
