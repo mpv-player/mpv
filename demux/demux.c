@@ -600,19 +600,30 @@ static void update_seek_ranges(struct demux_cached_range *range)
     if (range->is_bof)
         range->seek_start = min_start_pts;
 
-    // Sparse stream behavior is not very clearly defined, but usually we don't
-    // want it to restrict the range of other streams, unless
+    // Sparse (subtitle) stream behavior is not very clearly defined, but
+    // usually we don't want it to restrict the range of other streams. For
+    // example, if there are subtitle packets at position 5 and 10 seconds, and
+    // the demuxer demuxed the other streams until position 7 seconds, the seek
+    // range end position is 7.
+    // Assume that reading a non-sparse (audio/video) packet gets all sparse
+    // packets that are needed before that non-sparse packet.
     // This is incorrect in any of these cases:
     //  - sparse streams only (it's unknown how to determine an accurate range)
     //  - if sparse streams have non-keyframe packets (we set queue->last_pruned
     //    to the start of the pruned keyframe range - we'd need the end or so)
-    // We also assume that ds->eager equals to a stream being sparse (usually
-    // true, except if only sparse streams are selected).
+    // We also assume that ds->eager equals to a stream not being sparse
+    // (usually true, except if only sparse streams are selected).
     // We also rely on the fact that the demuxer position will always be ahead
     // of the seek_end for audio/video, because they need to prefetch at least
-    // 1 packet to detect the end of a keyframe range. This means that we're
-    // relatively guaranteed to have all sparse (subtitle) packets within the
-    // seekable range.
+    // 1 packet to detect the end of a keyframe range. This means that there's
+    // a relatively high guarantee to have all sparse (subtitle) packets within
+    // the seekable range.
+    // As a consequence, the code _never_ checks queue->seek_end for a sparse
+    // queue, as the end of it is implied by the highest PTS of a non-sparse
+    // stream (i.e. the latest demuxer position).
+    // On the other hand, if a sparse packet was pruned, and that packet has
+    // a higher PTS than seek_start for non-sparse queues, that packet is
+    // missing. So the range's seek_start needs to be adjusted accordingly.
     for (int n = 0; n < range->num_streams; n++) {
         struct demux_queue *queue = range->streams[n];
         if (queue->ds->selected && !queue->ds->eager &&
@@ -2094,12 +2105,13 @@ static void prune_old_packets(struct demux_internal *in)
         struct demux_queue *queue = range->streams[ds->index];
 
         // Prune all packets until the next keyframe or reader_head. Keeping
-        // those packets would not help with seeking at all, so we strictly
-        // drop them.
+        // leading non-keyframe packets would not help with seeking at all (as
+        // seeking requires keyframe packets as target), so we strictly drop
+        // them. But obviously, you can't prune reader_head.
         // In addition, we need to find the new possibly min. seek target,
         // which in the worst case could be inside the forward buffer. The fact
-        // that many keyframe ranges without keyframes exist (audio packets)
-        // makes this much harder.
+        // that there's not necessarily a keyframe packet anywhere in the
+        // current queue makes this harder.
         if (in->seekable_cache && !queue->next_prune_target) {
             // (Has to be _after_ queue->head to drop at least 1 packet.)
             struct demux_packet *prev = queue->head;
@@ -2109,8 +2121,9 @@ static void prune_old_packets(struct demux_internal *in)
             queue->next_prune_target = queue->tail; // (prune all if none found)
             while (prev->next) {
                 struct demux_packet *dp = prev->next;
-                // Note that the next back_pts might be above the lowest buffered
-                // packet, but it will still be only viable lowest seek target.
+                // Prune until the next keyframe-marked packet (which is the
+                // lowest viable seek target and thus the first packet useful to
+                // keep). Can be after reader_head, or not exist (=> prune_all).
                 if (dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE) {
                     queue->seek_start = dp->kf_seek_pts;
                     queue->next_prune_target = prev;
@@ -2398,8 +2411,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
 // Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
 // make the demuxer thread read packets for this stream, and if there's at
 // least one packet, call the wakeup callback.
-// Unlike demux_read_packet(), this always enables readahead (except for
-// interleaved subtitles).
+// This enables readahead if it wasn't yet (except for interleaved subtitles).
 // Returns:
 //   < 0: EOF was reached, *out_pkt=NULL
 //  == 0: no new packet yet, but maybe later, *out_pkt=NULL
@@ -2429,6 +2441,7 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 }
 
 // Read and return any packet we find. NULL means EOF.
+// Does not work with threading (don't call demux_start_thread()).
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
