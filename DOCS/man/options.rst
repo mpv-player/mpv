@@ -494,8 +494,8 @@ Playback Control
 
     Tuning:
 
-    - Remove all ``--vf``/``--af`` filters you have set. Disable deinterlacing.
-      Disable idiotic nonsense like SPDIF passthrough.
+    - Remove all ``--vf``/``--af`` filters you have set. Disable hardware
+      decoding. Disable idiotic nonsense like SPDIF passthrough.
 
     - Increasing ``--video-reversal-buffer`` might help if reversal queue
       overflow is reported, which may happen in high bitrate video, or video
@@ -503,17 +503,20 @@ Playback Control
       increase ``--hwdec-extra-frames`` instead (until you get playback without
       logged errors).
 
-    - The demuxer cache is essential for backward demuxing. If it's too small,
-      a queue overflow will be logged, and backward playback cannot continue,
-      or it performs too many low level seeks. If it's too large, implementation
-      tradeoffs may cause general performance issues. Use ``--demuxer-max-bytes``
-      to potentially increase the amount of packets the demuxer layer can queue
-      for reverse demuxing (basically it's the ``--video-reversal-buffer``
-      equivalent for the demuxer layer).
+    - The demuxer cache is essential for backward demuxing. Make sure to set
+      ``--demuxer-seekable-cache`` (or just use ``--cache``). The cache size
+      might matter. If it's too small, a queue overflow will be logged, and
+      backward playback cannot continue, or it performs too many low level
+      seeks. If it's too large, implementation tradeoffs may cause general
+      performance issues. Use ``--demuxer-max-bytes`` to potentially increase
+      the amount of packets the demuxer layer can queue for reverse demuxing
+      (basically it's the ``--video-reversal-buffer`` equivalent for the
+      demuxer layer).
 
     - ``--demuxer-backward-playback-step`` also factors into how many seeks may
       be performed, and whether backward demuxing could break due to queue
-      overflow.
+      overflow. If it's set too high, the backstep operation needs to search
+      through more packets all the time, even if the cache is large enough.
 
     - Setting ``--demuxer-cache-wait`` may be useful to cache the entire file
       into the demuxer cache. Set ``--demuxer-max-bytes`` to a large size to
@@ -522,7 +525,7 @@ Playback Control
       cache.
 
     - If audio artifacts are audible, even though the AO does not underrun,
-      increasing ``--audio-reversal-buffer`` might help in some cases.
+      increasing ``--audio-backward-overlap`` might help in some cases.
 
 ``--video-reversal-buffer=<bytesize>``, ``--audio-reversal-buffer=<bytesize>``
     For backward decoding. Backward decoding decodes forward in steps, and then
@@ -531,8 +534,13 @@ Playback Control
     unbounded resource usage; during normal backward playback, it's not supposed
     to hit the limit, and if it does, it will drop frames and complain about it.
 
+    Use this option if you get reversal queue overflow errors during backward
+    playback. Increase the size until the warning disappears. Usually, the video
+    buffer will overflow first, especially if it's high resolution video.
+
     This does not work correctly if video hardware decoding is used. The video
-    frame size will not include the referenced GPU and driver memory.
+    frame size will not include the referenced GPU and driver memory. Some
+    hardware decoders may also be limited by ``--hwdec-extra-frames``.
 
     How large the queue size needs to be depends entirely on the way the media
     was encoded. Audio typically requires a very small buffer, while video can
@@ -588,6 +596,8 @@ Playback Control
 
     Setting this to a very low value or 0 may make the player think seeking is
     broken, or may make it perform multiple seeks.
+
+    Setting this to a high value may lead to quadratic runtime behavior.
 
 Program Behavior
 ----------------
