@@ -91,6 +91,7 @@ struct demux_opts {
     char *record_file;
     int video_back_preroll;
     int audio_back_preroll;
+    int back_batch[STREAM_TYPE_COUNT];
     double back_seek_size;
 };
 
@@ -118,6 +119,8 @@ const struct m_sub_options demux_conf = {
                           1024, ({"auto", -1})),
         OPT_CHOICE_OR_INT("audio-backward-overlap", audio_back_preroll, 0, 0,
                           1024, ({"auto", -1})),
+        OPT_INTRANGE("video-backward-batch", back_batch[STREAM_VIDEO], 0, 0, 1024),
+        OPT_INTRANGE("audio-backward-batch", back_batch[STREAM_AUDIO], 0, 0, 1024),
         OPT_DOUBLE("demuxer-backward-playback-step", back_seek_size, M_OPT_MIN,
                    .min = 0),
         {0}
@@ -134,6 +137,10 @@ const struct m_sub_options demux_conf = {
         .video_back_preroll = -1,
         .audio_back_preroll = -1,
         .back_seek_size = 60,
+        .back_batch = {
+            [STREAM_VIDEO] = 1,
+            [STREAM_AUDIO] = 10,
+        },
     },
 };
 
@@ -343,8 +350,8 @@ struct demux_stream {
     double last_ret_dts;
 
     // Backwards demuxing.
-    // pos/dts of the previous keyframe packet returned; valid if
-    // back_range_started or back_restarting are set.
+    // pos/dts of the previous keyframe packet returned; always valid if back-
+    // demuxing is enabled, and back_restart_eof/back_restart_next are false.
     int64_t back_restart_pos;
     double back_restart_dts;
     bool back_restart_eof; // restart position is at EOF; overrides pos/dts
@@ -360,8 +367,10 @@ struct demux_stream {
     bool back_resuming;     // resuming mode (above fields are valid/used)
     // Set to true if the first packet (keyframe) of a range was returned.
     bool back_range_started;
-    // Number of packets at start of range yet to return. -1 is used for BOF.
-    int back_range_min;
+    // Number of KF packets at start of range yet to return. -1 is used for BOF.
+    int back_range_count;
+    // Number of KF packets yet to return that are marked as preroll.
+    int back_range_preroll;
     // Static packet preroll count.
     int back_preroll;
 
@@ -752,7 +761,8 @@ static void ds_clear_reader_state(struct demux_stream *ds,
         ds->back_resume_dts = MP_NOPTS_VALUE;
         ds->back_resuming = false;
         ds->back_range_started = false;
-        ds->back_range_min = 0;
+        ds->back_range_count = 0;
+        ds->back_range_preroll = 0;
     }
 }
 
@@ -1350,43 +1360,43 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     }
 
     // Find where to restart demuxing. It's usually the last keyframe packet
-    // before restart_pos, but might be up to back_preroll packets earlier.
-
-    struct demux_packet *last_keyframe = NULL; // keyframe before back_restart
+    // before restart_pos, but might be up to back_preroll + batch keyframe
+    // packets earlier.
 
     // (Normally, we'd just iterate backwards, but no back links.)
     int num_kf = 0;
-    struct demux_packet *pre_1 = NULL; // idiotic "optimization" for preroll=1
+    struct demux_packet *pre_1 = NULL; // idiotic "optimization" for total=1
     for (struct demux_packet *dp = first; dp != back_restart; dp = dp->next) {
         if (dp->keyframe) {
             num_kf++;
-            pre_1 = last_keyframe; // 1 keyframe before final last_keyframe
-            last_keyframe = dp;
+            pre_1 = dp;
         }
     }
 
-    struct demux_packet *target = NULL; // resume pos
-    int got_preroll = 0; // nr. of keyframes, incl. target, excl. last_keyframe
+    // Number of renderable keyframes to return to user.
+    // (Excludes preroll, which is decoded by user, but then discarded.)
+    int batch = MPMAX(in->opts->back_batch[ds->type], 1);
+    // Number of keyframes to return to the user in total.
+    int total = batch + ds->back_preroll;
 
-    if (ds->back_preroll == 0) {
-        target = last_keyframe;
-    } else if (ds->back_preroll == 1) {
+    assert(total >= 1);
+
+    struct demux_packet *target = NULL; // resume pos
+    // nr. of keyframes, incl. target, excl. restart_pos
+    int got_total = num_kf < total && ds->queue->is_bof ? num_kf : total;
+    int got_preroll = MPMAX(got_total - batch, 0);
+
+    if (got_total == 1) {
         target = pre_1;
-        if (!target && ds->queue->is_bof)
-            target = last_keyframe;
-        got_preroll = target == pre_1 ? 1 : 0;
-    } else if (num_kf > ds->back_preroll || ds->queue->is_bof) {
-        got_preroll = ds->back_preroll;
-        if (num_kf <= ds->back_preroll && ds->queue->is_bof)
-            got_preroll = MPMAX(0, num_kf - 1);
+    } else if (got_total <= num_kf) {
         int cur_kf = 0;
         for (struct demux_packet *dp = first; dp != back_restart; dp = dp->next) {
             if (dp->keyframe) {
-                cur_kf++;
-                if (num_kf - cur_kf == got_preroll) {
+                if (num_kf - cur_kf == got_total) {
                     target = dp;
                     break;
                 }
+                cur_kf++;
             }
         }
     }
@@ -1399,7 +1409,8 @@ static void find_backward_restart_pos(struct demux_stream *ds)
             MP_VERBOSE(in, "BOF for stream %d\n", ds->index);
             ds->back_restarting = false;
             ds->back_range_started = false;
-            ds->back_range_min = -1;
+            ds->back_range_count = -1;
+            ds->back_range_preroll = 0;
             ds->need_wakeup = true;
             wakeup_ds(ds);
             return;
@@ -1423,9 +1434,26 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     if (seek_pts != MP_NOPTS_VALUE)
         ds->back_seek_pos = seek_pts;
 
+    // For next backward adjust action.
+    struct demux_packet *restart_pkt = NULL;
+    int kf_pos = 0;
+    for (struct demux_packet *dp = target; dp; dp = dp->next) {
+        if (dp->keyframe) {
+            if (kf_pos == got_preroll) {
+                restart_pkt = dp;
+                break;
+            }
+            kf_pos++;
+        }
+    }
+    assert(restart_pkt);
+    ds->back_restart_dts = restart_pkt->dts;
+    ds->back_restart_pos = restart_pkt->pos;
+
     ds->back_restarting = false;
     ds->back_range_started = false;
-    ds->back_range_min = got_preroll + 1;
+    ds->back_range_count = got_total;
+    ds->back_range_preroll = got_preroll;
     ds->need_wakeup = true;
     wakeup_ds(ds);
     return;
@@ -2263,7 +2291,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
             return -1;
 
         // Next keyframe (or EOF) was reached => step back.
-        if (ds->back_range_started && !ds->back_range_min &&
+        if (ds->back_range_started && !ds->back_range_count &&
             ((ds->reader_head && ds->reader_head->keyframe) || eof))
         {
             ds->back_restarting = true;
@@ -2276,7 +2304,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
                 return 0;
         }
 
-        eof = ds->back_range_min < 0;
+        eof = ds->back_range_count < 0;
     }
 
     ds->need_wakeup = !ds->reader_head;
@@ -2301,21 +2329,20 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
     pkt->next = NULL;
 
     if (in->back_demuxing) {
-        if (ds->back_range_min && pkt->keyframe)
-            ds->back_range_min -= 1;
-        if (ds->back_range_min) {
-            pkt->back_preroll = true;
-        } else if (pkt->keyframe) {
-            // For next backward adjust action.
-            ds->back_restart_dts = pkt->dts;
-            ds->back_restart_pos = pkt->pos;
-            ds->back_restart_eof = false;
+        if (pkt->keyframe) {
+            assert(ds->back_range_count > 0);
+            ds->back_range_count -= 1;
+            if (ds->back_range_preroll >= 0)
+                ds->back_range_preroll -= 1;
         }
+
+        if (ds->back_range_preroll >= 0)
+            pkt->back_preroll = true;
+
         if (!ds->back_range_started) {
             pkt->back_restart = true;
             ds->back_range_started = true;
         }
-        ds->back_seek_pos = MP_PTS_MIN(ds->back_seek_pos, pkt->pts);
     }
 
     double ts = MP_PTS_OR_DEF(pkt->dts, pkt->pts);
