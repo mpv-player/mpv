@@ -330,17 +330,20 @@ static char *cut_osd_list(struct MPContext *mpctx, char *text, int pos)
 
     char *new = talloc_strdup(NULL, "");
 
-    int start = pos - max_lines / 2;
+    int start = MPMAX(pos - max_lines / 2, 0);
     if (start == 1)
         start = 0; // avoid weird transition when pad_h becomes visible
     int pad_h = start > 0;
-    if (pad_h)
-        new = talloc_strdup_append_buffer(new, "\342\206\221 (hidden items)\n");
 
     int space = max_lines - pad_h - 1;
     int pad_t = count - start > space;
     if (!pad_t)
         start = count - space;
+
+    if (pad_h) {
+        new = talloc_asprintf_append_buffer(new, "\342\206\221 (%d hidden items)\n",
+                                            start);
+    }
 
     char *head = skip_n_lines(text, start);
     if (!head) {
@@ -348,11 +351,14 @@ static char *cut_osd_list(struct MPContext *mpctx, char *text, int pos)
         return text;
     }
 
-    char *tail = skip_n_lines(head, max_lines - pad_h - pad_t);
+    int lines_shown = max_lines - pad_h - pad_t;
+    char *tail = skip_n_lines(head, lines_shown);
     new = talloc_asprintf_append_buffer(new, "%.*s",
                             (int)(tail ? tail - head : strlen(head)), head);
-    if (pad_t)
-        new = talloc_strdup_append_buffer(new, "\342\206\223 (hidden items)\n");
+    if (pad_t) {
+        new = talloc_asprintf_append_buffer(new, "\342\206\223 (%d hidden items)\n",
+                                            count - start - lines_shown + 1);
+    }
 
     talloc_free(text);
     return new;
