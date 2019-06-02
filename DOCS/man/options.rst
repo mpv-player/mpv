@@ -566,6 +566,21 @@ Playback Control
     depending on the exact conditions. You may have to use the
     ``--vd-lavc-show-all`` option as well.
 
+``--video-backward-batch=<number>``, ``--audio-backward-batch=<number>``
+    Number of keyframe ranges to decode at once when backward decoding (default:
+    1 for video, 10 for audio). Another pointless tuning parameter nobody should
+    use. This should affect performance only. In theory, setting a number higher
+    than 1 for audio will reduce overhead due to less frequent backstep
+    operations and less redundant decoding work due to fewer decoded overlap
+    frames (see ``--audio-backward-overlap``). On the other hand, it requires
+    a larger reversal buffer, and could make playback less smooth due to
+    breaking pipelining (e.g. by decoding a lot, and then doing nothing for a
+    while).
+
+    It probably never makes sense to set ``--video-backward-batch``. But in
+    theory, it could help with intra-only video codecs by reducing backstep
+    operations.
+
 ``--demuxer-backward-playback-step=<seconds>``
     Number of seconds the demuxer should seek back to get new packets during
     backward playback (default: 60). This is useful for tuning backward
