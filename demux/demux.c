@@ -3015,9 +3015,7 @@ static void switch_current_range(struct demux_internal *in,
         struct demux_stream *ds = in->streams[n]->ds;
         // This is needed to resume or join the range at all.
         if (ds->selected && !(ds->global_correct_dts || ds->global_correct_pos)) {
-            MP_VERBOSE(in, "discarding old range, due to stream %d: "
-                       "correct_dts=%d correct_pos=%d\n", n,
-                       ds->global_correct_dts, ds->global_correct_pos);
+            MP_VERBOSE(in, "discarding unseekable range due to stream %d\n", n);
             clear_cached_range(in, old);
             break;
         }
