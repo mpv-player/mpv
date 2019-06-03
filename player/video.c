@@ -95,8 +95,12 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 
 void reset_video_state(struct MPContext *mpctx)
 {
-    if (mpctx->vo_chain)
+    if (mpctx->vo_chain) {
         vo_chain_reset_state(mpctx->vo_chain);
+        struct track *t = mpctx->vo_chain->track;
+        if (t && t->dec)
+            t->dec->play_dir = mpctx->play_dir;
+    }
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);

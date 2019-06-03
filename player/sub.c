@@ -48,8 +48,10 @@ static int get_order(struct MPContext *mpctx, struct track *track)
 
 static void reset_subtitles(struct MPContext *mpctx, struct track *track)
 {
-    if (track->d_sub)
+    if (track->d_sub) {
         sub_reset(track->d_sub);
+        sub_set_play_dir(track->d_sub, mpctx->play_dir);
+    }
     term_osd_set_subs(mpctx, NULL);
 }
 
