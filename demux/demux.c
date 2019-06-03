@@ -268,12 +268,12 @@ struct demux_cached_range {
     bool is_eof;            // set if the file ends with this range
 };
 
-#define MAX_INDEX_ENTRIES 16
+#define QUEUE_INDEX_SIZE_MASK(queue) ((queue)->index_size - 1)
 
 // Access the idx-th entry in the given demux_queue.
 // Requirement: idx >= 0 && idx < queue->num_index
 #define QUEUE_INDEX_ENTRY(queue, idx) \
-    ((queue)->index[((queue)->index0 + idx) & ((queue)->index_size - 1)])
+    ((queue)->index[((queue)->index0 + (idx)) & QUEUE_INDEX_SIZE_MASK(queue)])
 
 // Don't index packets whose timestamps that are within the last index entry by
 // this amount of time (it's better to seek them manually).
@@ -682,7 +682,7 @@ static void remove_head_packet(struct demux_queue *queue)
     queue->ds->in->total_bytes -= end_pos - dp->cum_pos;
 
     if (queue->num_index && queue->index[queue->index0].pkt == dp) {
-        queue->index0 += 1;
+        queue->index0 = (queue->index0 + 1) & QUEUE_INDEX_SIZE_MASK(queue);
         queue->num_index -= 1;
     }
 
@@ -1563,13 +1563,17 @@ static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
 
     if (queue->num_index == queue->index_size) {
         // Needs to honor power-of-2 requirement.
-        queue->index_size = MPMAX(128, queue->index_size * 2);
-        assert(!(queue->index_size & (queue->index_size - 1)));
-        MP_VERBOSE(in, "stream %d: resize index to %zd\n", queue->ds->index,
-                   queue->index_size);
+        size_t new_size = MPMAX(128, queue->index_size * 2);
+        assert(!(new_size & (new_size - 1)));
+        MP_VERBOSE(in, "stream %d: resize index to %zu\n", queue->ds->index,
+                   new_size);
         // Note: we could tolerate allocation failure, and just discard the
         // entire index (and prevent the index from being recreated).
-        MP_RESIZE_ARRAY(queue, queue->index, queue->index_size);
+        MP_RESIZE_ARRAY(queue, queue->index, new_size);
+        size_t highest_index = queue->index0 + queue->num_index;
+        for (size_t n = queue->index_size; n < highest_index; n++)
+            queue->index[n] = queue->index[n - queue->index_size];
+        queue->index_size = new_size;
     }
 
     assert(queue->num_index < queue->index_size);
