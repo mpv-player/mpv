@@ -787,8 +787,8 @@ static void ds_clear_reader_state(struct demux_stream *ds,
         ds->back_restart_pos = -1;
         ds->back_restart_dts = MP_NOPTS_VALUE;
         ds->back_restart_eof = false;
-        ds->back_restart_next = false;
-        ds->back_restarting = false;
+        ds->back_restart_next = ds->in->back_demuxing;
+        ds->back_restarting = ds->in->back_demuxing && ds->eager;
         ds->back_seek_pos = MP_NOPTS_VALUE;
         ds->back_resume_pos = -1;
         ds->back_resume_dts = MP_NOPTS_VALUE;
@@ -820,8 +820,6 @@ static void update_stream_selection_state(struct demux_internal *in,
 {
     ds->eof = false;
     ds->refreshing = false;
-
-    ds_clear_reader_state(ds, true);
 
     // We still have to go over the whole stream list to update ds->eager for
     // other streams too, because they depend on other stream's selections.
@@ -861,6 +859,8 @@ static void update_stream_selection_state(struct demux_internal *in,
 
     if (!any_streams)
         in->blocked = false;
+
+    ds_clear_reader_state(ds, true);
 
     // Make sure any stream reselection or addition is reflected in the seek
     // ranges, and also get rid of data that is not needed anymore (or
@@ -1511,8 +1511,10 @@ resume_earlier:
         }
     }
 
-    ds->back_seek_pos -= in->opts->back_seek_size;
-    in->need_back_seek = true;
+    if (ds->back_seek_pos != MP_NOPTS_VALUE) {
+        ds->back_seek_pos -= in->opts->back_seek_size;
+        in->need_back_seek = true;
+    }
 }
 
 // Process that one or multiple packets were added.
@@ -3347,13 +3349,13 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
         }
     }
 
-    clear_reader_state(in, clear_back_state);
-
     in->eof = false;
     in->last_eof = false;
     in->idle = true;
     in->reading = false;
     in->back_demuxing = set_backwards;
+
+    clear_reader_state(in, clear_back_state);
 
     if (cache_target) {
         execute_cache_seek(in, cache_target, seek_pts, flags);
@@ -3368,20 +3370,13 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
 
-        if (in->back_demuxing && clear_back_state) {
+        // Process possibly cached packets.
+        if (in->back_demuxing) {
             ds->back_seek_pos = seek_pts;
-            ds->back_restarting = ds->eager;
-            ds->back_restart_next = true;
+            back_demux_see_packets(in->streams[n]->ds);
         }
 
         wakeup_ds(ds);
-    }
-
-    if (in->back_demuxing) {
-        // Process possibly cached packets. Separate from the loop above, since
-        // all flags must be set on all streams before this function is called.
-        for (int n = 0; n < in->num_streams; n++)
-            back_demux_see_packets(in->streams[n]->ds);
     }
 
     if (!in->threading && in->seeking)
@@ -3488,14 +3483,19 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     struct demux_internal *in = demuxer->in;
     struct demux_stream *ds = stream->ds;
     pthread_mutex_lock(&in->lock);
+    ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
     // don't flush buffers if stream is already selected / unselected
     if (ds->selected != selected) {
         MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
         ds->selected = selected;
         update_stream_selection_state(in, ds);
         in->tracks_switched = true;
-        if (ds->selected && !in->after_seek)
-            initiate_refresh_seek(in, ds, MP_ADD_PTS(ref_pts, -in->ts_offset));
+        if (ds->selected) {
+            if (in->back_demuxing)
+                ds->back_seek_pos = ref_pts;
+            if (!in->after_seek)
+                initiate_refresh_seek(in, ds, ref_pts);
+        }
         if (in->threading) {
             pthread_cond_signal(&in->wakeup);
         } else {
