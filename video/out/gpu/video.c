@@ -16,11 +16,11 @@
  */
 
 #include <assert.h>
+#include <float.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
-#include <assert.h>
 
 #include <libavutil/common.h>
 #include <libavutil/lfg.h>
@@ -2358,8 +2358,11 @@ static void pass_scale_main(struct gl_video *p)
     xy[0] /= p->texture_offset.m[0][0];
     xy[1] /= p->texture_offset.m[1][1];
 
-    bool downscaling = xy[0] < 1.0 || xy[1] < 1.0;
-    bool upscaling = !downscaling && (xy[0] > 1.0 || xy[1] > 1.0);
+    // The calculation of scale factor involves 32-bit float(from gl_transform),
+    // use non-strict equality test to tolerate precision loss.
+    bool downscaling = xy[0] < 1.0 - FLT_EPSILON || xy[1] < 1.0 - FLT_EPSILON;
+    bool upscaling = !downscaling && (xy[0] > 1.0 + FLT_EPSILON ||
+                                      xy[1] > 1.0 + FLT_EPSILON);
     double scale_factor = 1.0;
 
     struct scaler *scaler = &p->scaler[SCALER_SCALE];
