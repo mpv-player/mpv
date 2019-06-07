@@ -43,6 +43,7 @@
 // align must be a power of two (align >= 1), x >= 0
 #define MP_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define MP_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+#define MP_IS_ALIGNED(x, align) (!((x) & ((align) - 1)))
 
 // Return "a", or if that is NOPTS, return "def".
 #define MP_PTS_OR_DEF(a, def) ((a) == MP_NOPTS_VALUE ? (def) : (a))
