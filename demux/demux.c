@@ -280,10 +280,6 @@ struct demux_cached_range {
 // this amount of time (it's better to seek them manually).
 #define INDEX_STEP_SIZE 1.0
 
-// Approximate worst case number of bytes a keyframe packet uses for the index.
-// (Worst case: every KF packet is indexed; index buffer is overallocated.)
-#define KF_SEEK_ENTRY_WORST_CASE (sizeof(struct index_entry) * 2)
-
 struct index_entry {
     double pts;
     struct demux_packet *pkt;
@@ -457,8 +453,6 @@ static void check_queue_consistency(struct demux_internal *in)
                 npt_found |= dp == queue->next_prune_target;
 
                 size_t bytes = demux_packet_estimate_total_size(dp);
-                if (dp->keyframe)
-                    bytes += KF_SEEK_ENTRY_WORST_CASE;
                 total_bytes += bytes;
                 queue_total_bytes += bytes;
                 if (is_forward) {
@@ -502,6 +496,8 @@ static void check_queue_consistency(struct demux_internal *in)
 
             if (queue->keyframe_latest)
                 assert(queue->keyframe_latest->keyframe);
+
+            total_bytes += queue->index_size * sizeof(struct index_entry);
         }
 
         // Invariant needed by pruning; violation has worse effects than just
@@ -694,6 +690,18 @@ static void remove_head_packet(struct demux_queue *queue)
     talloc_free(dp);
 }
 
+static void free_index(struct demux_queue *queue)
+{
+    struct demux_stream *ds = queue->ds;
+    struct demux_internal *in = ds->in;
+
+    in->total_bytes -= queue->index_size * sizeof(queue->index[0]);
+    queue->index_size = 0;
+    queue->index0 = 0;
+    queue->num_index = 0;
+    TA_FREEP(&queue->index);
+}
+
 static void clear_queue(struct demux_queue *queue)
 {
     struct demux_stream *ds = queue->ds;
@@ -701,6 +709,8 @@ static void clear_queue(struct demux_queue *queue)
 
     if (queue->head)
         in->total_bytes -= queue->tail_cum_pos - queue->head->cum_pos;
+
+    free_index(queue);
 
     struct demux_packet *dp = queue->head;
     while (dp) {
@@ -713,8 +723,6 @@ static void clear_queue(struct demux_queue *queue)
     queue->next_prune_target = NULL;
     queue->keyframe_latest = NULL;
     queue->seek_start = queue->seek_end = queue->last_pruned = MP_NOPTS_VALUE;
-
-    queue->num_index = 0;
 
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
@@ -1570,10 +1578,12 @@ static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
                    new_size);
         // Note: we could tolerate allocation failure, and just discard the
         // entire index (and prevent the index from being recreated).
-        MP_RESIZE_ARRAY(queue, queue->index, new_size);
+        MP_RESIZE_ARRAY(NULL, queue->index, new_size);
         size_t highest_index = queue->index0 + queue->num_index;
         for (size_t n = queue->index_size; n < highest_index; n++)
             queue->index[n] = queue->index[n - queue->index_size];
+        in->total_bytes +=
+            (new_size - queue->index_size) * sizeof(queue->index[0]);
         queue->index_size = new_size;
     }
 
@@ -1730,10 +1740,7 @@ static void attempt_range_joining(struct demux_internal *in)
         q2->head = q2->tail = NULL;
         q2->next_prune_target = NULL;
         q2->keyframe_latest = NULL;
-        q2->num_index = 0;
-        q2->index_size = 0;
-        q2->index0 = 0;
-        TA_FREEP(&q2->index);
+        free_index(q2);
 
         if (ds->selected && !ds->reader_head)
             ds->reader_head = join_point;
@@ -1891,8 +1898,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     size_t bytes = demux_packet_estimate_total_size(dp);
-    if (dp->keyframe)
-        bytes += KF_SEEK_ENTRY_WORST_CASE;
     in->total_bytes += bytes;
     dp->cum_pos = queue->tail_cum_pos;
     queue->tail_cum_pos += bytes;
@@ -2147,7 +2152,11 @@ static void prune_old_packets(struct demux_internal *in)
             }
         }
 
-        assert(earliest_stream); // incorrect accounting of buffered sizes?
+        // In some cases (like when the seek index became huge), there aren't
+        // any backwards packets, even if the total cache size is exceeded.
+        if (!earliest_stream)
+            break;
+
         struct demux_stream *ds = earliest_stream;
         struct demux_queue *queue = range->streams[ds->index];
 
