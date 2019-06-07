@@ -158,6 +158,7 @@ typedef struct demux_attachment
 } demux_attachment_t;
 
 struct demuxer_params {
+    bool is_top_level; // if true, it's not a sub-demuxer (enables cache etc.)
     char *force_format;
     int matroska_num_wanted_uids;
     struct matroska_segment_uid *matroska_wanted_uids;
