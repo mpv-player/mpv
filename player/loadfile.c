@@ -724,7 +724,9 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
 
-    struct demuxer_params params = {0};
+    struct demuxer_params params = {
+        .is_top_level = true,
+    };
 
     switch (filter) {
     case STREAM_SUB:
@@ -968,6 +970,7 @@ static void *open_demux_thread(void *ctx)
         .force_format = mpctx->open_format,
         .stream_flags = mpctx->open_url_flags,
         .stream_record = true,
+        .is_top_level = true,
     };
     mpctx->open_res_demuxer =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);

@@ -2923,21 +2923,26 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 seekable = 1;
         }
         in->seekable_cache = seekable == 1;
+        struct demuxer *sub = NULL;
         if (!(params && params->disable_timeline)) {
             struct timeline *tl = timeline_load(global, log, demuxer);
             if (tl) {
                 struct demuxer_params params2 = {0};
                 params2.timeline = tl;
-                struct demuxer *sub =
+                params2.is_top_level = params && params->is_top_level;
+                sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
                                     demuxer->stream, &params2, DEMUX_CHECK_FORCE);
-                if (sub) {
-                    demuxer = sub;
-                } else {
+                if (!sub)
                     timeline_destroy(tl);
-                }
             }
         }
+        if (!(params && params->is_top_level) || sub) {
+            in->seekable_cache = false;
+            in->min_secs = 0;
+            in->max_bytes = 1;
+        }
+        demuxer = sub ? sub : demuxer;
         // Let this demuxer free demuxer->stream. Timeline sub-demuxers can
         // share a stream, and in these cases the demux_timeline instance
         // should own the stream, as it frees the sub demuxers first.
