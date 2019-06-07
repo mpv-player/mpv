@@ -403,7 +403,9 @@ static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
     long long tmp_int = bstrtoll(param, &r, 0);
     int64_t unit = 1;
     if (r.len) {
-        if (bstrcasecmp0(r, "kib") == 0 || bstrcasecmp0(r, "k") == 0) {
+        if (bstrcasecmp0(r, "b") == 0) {
+            unit = 1;
+        } else if (bstrcasecmp0(r, "kib") == 0 || bstrcasecmp0(r, "k") == 0) {
             unit = 1024;
         } else if (bstrcasecmp0(r, "mib") == 0 || bstrcasecmp0(r, "m") == 0) {
             unit = 1024 * 1024;
@@ -415,7 +417,7 @@ static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
             mp_err(log, "The %.*s option must be an integer: %.*s\n",
                    BSTR_P(name), BSTR_P(param));
             mp_err(log, "The following suffixes are also allowed: "
-                   "KiB, MiB, GiB, TiB, K, M, G, T.\n");
+                   "KiB, MiB, GiB, TiB, B, K, M, G, T.\n");
             return M_OPT_INVALID;
         }
     }
@@ -456,7 +458,7 @@ char *format_file_size(int64_t size)
 {
     double s = size;
     if (size < 1024)
-        return talloc_asprintf(NULL, "%.0f", s);
+        return talloc_asprintf(NULL, "%.0f B", s);
 
     if (size < (1024 * 1024))
         return talloc_asprintf(NULL, "%.3f KiB", s / (1024.0));
