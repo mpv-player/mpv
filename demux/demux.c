@@ -1924,7 +1924,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     const char *num_pkts = queue->head == queue->tail ? "1" : ">1";
     uint64_t fw_bytes = get_foward_buffered_bytes(ds);
-    MP_TRACE(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
+    MP_TRACE(in, "append packet to %s: size=%zu pts=%f dts=%f pos=%"PRIi64" "
              "[num=%s size=%zd]\n", stream_type_name(stream->type),
              dp->len, dp->pts, dp->dts, dp->pos, num_pkts, (size_t)fw_bytes);
 

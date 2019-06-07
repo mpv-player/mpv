@@ -30,7 +30,7 @@ typedef struct demux_packet {
     int64_t pos;        // position in source file byte stream
 
     unsigned char *buffer;
-    int len;
+    size_t len;
 
     int stream;         // source stream index (typically sh_stream.index)
 
