@@ -291,7 +291,6 @@ void demux_close_stream(struct demuxer *demuxer);
 void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer);
 
-void demux_disable_cache(demuxer_t *demuxer);
 bool demux_is_network_cached(demuxer_t *demuxer);
 
 void demux_report_unbuffered_read_bytes(struct demuxer *demuxer, int64_t new);

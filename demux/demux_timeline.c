@@ -217,10 +217,8 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
                                      demuxer->cancel, demuxer->global);
     if (!src->current->d && !demux_cancel_test(demuxer))
         MP_ERR(demuxer, "failed to load segment\n");
-    if (src->current->d) {
-        demux_disable_cache(src->current->d);
+    if (src->current->d)
         update_slave_stats(demuxer, src->current->d);
-    }
     associate_streams(demuxer, src, src->current);
 }
 
@@ -593,10 +591,8 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 
         // demux_timeline already does caching, doing it for the sub-demuxers
         // would be pointless and wasteful.
-        if (part->source) {
-            demux_disable_cache(part->source);
+        if (part->source)
             demuxer->is_network |= part->source->is_network;
-        }
 
         struct segment *seg = talloc_ptrtype(src, seg);
         *seg = (struct segment){
