@@ -79,6 +79,7 @@ struct demux_lavf_opts {
     int hacks;
     char *sub_cp;
     int rtsp_transport;
+    int linearize_ts;
 };
 
 const struct m_sub_options demux_lavf_conf = {
@@ -102,6 +103,8 @@ const struct m_sub_options demux_lavf_conf = {
                 {"udp", 1},
                 {"tcp", 2},
                 {"http", 3})),
+        OPT_CHOICE("demuxer-lavf-linearize-timestamps", linearize_ts, 0,
+                   ({"no", 0}, {"auto", -1}, {"yes", 1})),
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -115,6 +118,7 @@ const struct m_sub_options demux_lavf_conf = {
         .probescore = AVPROBE_SCORE_MAX/4 + 1,
         .sub_cp = "auto",
         .rtsp_transport = 2,
+        .linearize_ts = -1,
     },
 };
 
@@ -135,7 +139,7 @@ struct format_hack {
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
-    bool ignore_start : 1;
+    bool linearize_audio_ts : 1;// compensate timestamp resets (audio only)
     bool fix_editlists : 1;
     bool is_network : 1;
     bool no_seek : 1;
@@ -170,8 +174,9 @@ static const struct format_hack format_hacks[] = {
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
     {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
 
-    // Rebasing start time to 0 is very weird with ogg shoutcast streams.
-    {"ogg", .ignore_start = true},
+    // Some Ogg shoutcast streams are essentially concatenated OGG files. They
+    // reset timestamps, which causes all sorts of problems.
+    {"ogg", .linearize_audio_ts = true},
 
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
@@ -199,6 +204,9 @@ struct nested_stream {
 
 struct stream_info {
     struct sh_stream *sh;
+    double last_key_pts;
+    double highest_pts;
+    double ts_offset;
 };
 
 typedef struct lavf_priv {
@@ -223,6 +231,9 @@ typedef struct lavf_priv {
     bool pcm_seek_hack_disabled;
     AVStream *pcm_seek_hack;
     int pcm_seek_hack_packet_size;
+
+    int linearize_ts;
+    bool any_ts_fixed;
 
     // Proxying nested streams.
     struct nested_stream *nested;
@@ -525,6 +536,10 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     if (lavfdopts->hacks)
         priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
 
+    priv->linearize_ts = lavfdopts->linearize_ts;
+    if (priv->linearize_ts < 0 && !priv->format_hack.linearize_audio_ts)
+        priv->linearize_ts = 0;
+
     demuxer->filetype = priv->avif->name;
 
     if (priv->format_hack.detect_charset)
@@ -678,6 +693,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             // A real video stream probably means it's a packet based format.
             priv->pcm_seek_hack_disabled = true;
             priv->pcm_seek_hack = NULL;
+            // Also, we don't want to do this shit for ogv videos.
+            if (priv->linearize_ts < 0)
+                priv->linearize_ts = 0;
         }
 
         sh->codec->disp_w = codec->width;
@@ -748,6 +766,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     struct stream_info *info = talloc_zero(priv, struct stream_info);
     *info = (struct stream_info){
         .sh = sh,
+        .last_key_pts = MP_NOPTS_VALUE,
+        .highest_pts = MP_NOPTS_VALUE,
     };
     assert(priv->num_streams == i); // directly mapped
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, info);
@@ -1034,7 +1054,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->ts_resets_possible =
         priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
 
-    if (avfc->start_time != AV_NOPTS_VALUE && !priv->format_hack.ignore_start)
+    if (avfc->start_time != AV_NOPTS_VALUE)
         demuxer->start_time = avfc->start_time / (double)AV_TIME_BASE;
 
     demuxer->fully_read = priv->format_hack.fully_read;
@@ -1113,7 +1133,8 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     update_metadata(demux);
 
     assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
-    struct sh_stream *stream = priv->streams[pkt->stream_index]->sh;
+    struct stream_info *info = priv->streams[pkt->stream_index];
+    struct sh_stream *stream = info->sh;
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
     if (!demux_stream_is_selected(stream)) {
@@ -1146,6 +1167,30 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
 
     dp->stream = stream->index;
 
+    if (priv->linearize_ts) {
+        dp->pts = MP_ADD_PTS(dp->pts, info->ts_offset);
+        dp->dts = MP_ADD_PTS(dp->dts, info->ts_offset);
+
+        double pts = MP_PTS_OR_DEF(dp->pts, dp->dts);
+        if (pts != MP_NOPTS_VALUE) {
+            if (dp->keyframe) {
+                if (pts < info->highest_pts) {
+                    MP_WARN(demux, "Linearizing discontinuity: %f -> %f\n",
+                            pts, info->highest_pts);
+                    // Note: introduces a small discontinuity by a frame size.
+                    double diff = info->highest_pts - pts;
+                    dp->pts = MP_ADD_PTS(dp->pts, diff);
+                    dp->dts = MP_ADD_PTS(dp->dts, diff);
+                    pts += diff;
+                    info->ts_offset += diff;
+                    priv->any_ts_fixed = true;
+                }
+                info->last_key_pts = pts;
+            }
+            info->highest_pts = MP_PTS_MAX(info->highest_pts, pts);
+        }
+    }
+
     *mp_pkt = dp;
     return true;
 }
@@ -1156,6 +1201,14 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     int avsflags = 0;
     int64_t seek_pts_av = 0;
     int seek_stream = -1;
+
+    if (priv->any_ts_fixed)  {
+        // helpful message to piss of users
+        MP_WARN(demuxer, "Some timestamps returned by the demuxer were linearized. "
+                         "A low level seek was requested; this won't work due to "
+                         "restrictions in libavformat's API. You may have more "
+                         "luck by enabling or enlarging the mpv cache.\n");
+    }
 
     if (!(flags & SEEK_FORWARD))
         avsflags = AVSEEK_FLAG_BACKWARD;
