@@ -87,6 +87,9 @@ static void copy_planes(struct mp_audio_buffer *ab,
                         uint8_t **dst, int dst_offset,
                         uint8_t **src, int src_offset, int length)
 {
+    if (!length)
+        return;
+
     for (int n = 0; n < ab->num_planes; n++) {
         memmove((char *)dst[n] + dst_offset * ab->sstride,
                 (char *)src[n] + src_offset * ab->sstride,
