@@ -1122,10 +1122,8 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     if (priv->pcm_seek_hack == st && !priv->pcm_seek_hack_packet_size)
         priv->pcm_seek_hack_packet_size = pkt->size;
 
-    if (pkt->pts != AV_NOPTS_VALUE)
-        dp->pts = pkt->pts * av_q2d(st->time_base);
-    if (pkt->dts != AV_NOPTS_VALUE)
-        dp->dts = pkt->dts * av_q2d(st->time_base);
+    dp->pts = mp_pts_from_av(pkt->pts, &st->time_base);
+    dp->dts = mp_pts_from_av(pkt->dts, &st->time_base);
     dp->duration = pkt->duration * av_q2d(st->time_base);
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
