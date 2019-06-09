@@ -197,6 +197,10 @@ struct nested_stream {
     int64_t last_bytes;
 };
 
+struct stream_info {
+    struct sh_stream *sh;
+};
+
 typedef struct lavf_priv {
     struct stream *stream;
     bool own_stream;
@@ -208,7 +212,7 @@ typedef struct lavf_priv {
     bstr init_fragment;
     int64_t stream_pos;
     AVIOContext *pb;
-    struct sh_stream **streams; // NULL for unknown streams
+    struct stream_info **streams; // NULL for unknown streams
     int num_streams;
     char *mime_type;
     double seek_delay;
@@ -570,7 +574,7 @@ static void select_tracks(struct demuxer *demuxer, int start)
 {
     lavf_priv_t *priv = demuxer->priv;
     for (int n = start; n < priv->num_streams; n++) {
-        struct sh_stream *stream = priv->streams[n];
+        struct sh_stream *stream = priv->streams[n]->sh;
         AVStream *st = priv->avfc->streams[n];
         bool selected = stream && demux_stream_is_selected(stream) &&
                         !stream->attached_picture;
@@ -741,8 +745,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     default: ;
     }
 
+    struct stream_info *info = talloc_zero(priv, struct stream_info);
+    *info = (struct stream_info){
+        .sh = sh,
+    };
     assert(priv->num_streams == i); // directly mapped
-    MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, sh);
+    MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, info);
 
     if (sh) {
         sh->ff_index = st->index;
@@ -822,12 +830,12 @@ static void update_metadata(demuxer_t *demuxer)
     }
 
     for (int n = 0; n < priv->num_streams; n++) {
-        AVStream *st = priv->streams[n] ? priv->avfc->streams[n] : NULL;
+        AVStream *st = priv->streams[n]->sh ? priv->avfc->streams[n] : NULL;
         if (st && st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
             st->event_flags = 0;
             struct mp_tags *tags = talloc_zero(NULL, struct mp_tags);
             mp_tags_copy_from_av_dictionary(tags, st->metadata);
-            demux_set_stream_tags(demuxer, priv->streams[n], tags);
+            demux_set_stream_tags(demuxer, priv->streams[n]->sh, tags);
         }
     }
 }
@@ -1105,7 +1113,7 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     update_metadata(demux);
 
     assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
-    struct sh_stream *stream = priv->streams[pkt->stream_index];
+    struct sh_stream *stream = priv->streams[pkt->stream_index]->sh;
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
     if (!demux_stream_is_selected(stream)) {
@@ -1241,8 +1249,9 @@ static void demux_close_lavf(demuxer_t *demuxer)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
-            if (priv->streams[n])
-                avcodec_parameters_free(&priv->streams[n]->codec->lav_codecpar);
+            struct stream_info *info = priv->streams[n];
+            if (info->sh)
+                avcodec_parameters_free(&info->sh->codec->lav_codecpar);
         }
         if (priv->own_stream)
             free_stream(priv->stream);
