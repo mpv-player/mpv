@@ -3037,6 +3037,22 @@ Demuxer
     libavformat might reallocate the buffer internally, or not fully use all
     of it.
 
+``--demuxer-lavf-linearize-timestamps=<yes|no|auto>``
+    Attempt to linearize timestamp resets in demuxed streams (default: auto).
+    This was tested only for single audio streams. It's unknown whether it
+    works correctly for video (but likely won't). Note that the implementation
+    is slightly incorrect either way, and will introduce a discontinuity by
+    about 1 codec frame size.
+
+    The ``auto`` mode enables this for OGG audio stream. This covers the common
+    and annoying case of OGG web radio streams. Some of these will reset
+    timestamps to 0 every time a new song begins. This breaks the mpv seekable
+    cache, which can't deal with timestamp resets. Note that FFmpeg/libavformat's
+    seeking API can't deal with this either; it's likely that if this option
+    breaks this even more, while if it's disabled, you can at least seek within
+    the first song in the stream. Well, you won't get anything useful either
+    way if the seek is outside of mpv's cache.
+
 ``--demuxer-mkv-subtitle-preroll=<yes|index|no>``, ``--mkv-subtitle-preroll``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how
