@@ -2185,6 +2185,8 @@ static void prune_old_packets(struct demux_internal *in)
             queue->seek_start = kf_min;
 
             if (queue->seek_start != MP_NOPTS_VALUE) {
+                queue->seek_start += ds->sh->seek_preroll;
+
                 // Don't need to update if the new start is still before the
                 // range's start (or if the range was undefined anyway).
                 if (range->seek_start == MP_NOPTS_VALUE ||
