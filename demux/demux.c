@@ -3449,7 +3449,8 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
 
         // Process possibly cached packets.
         if (in->back_demuxing) {
-            ds->back_seek_pos = seek_pts;
+            if (ds->back_seek_pos == MP_NOPTS_VALUE)
+                ds->back_seek_pos = seek_pts;
             back_demux_see_packets(in->streams[n]->ds);
         }
 
