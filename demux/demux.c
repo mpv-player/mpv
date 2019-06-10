@@ -2690,7 +2690,7 @@ static void update_final_metadata(demuxer_t *demuxer, struct timed_metadata *tm)
 
     struct mp_tags *dyn_tags = NULL;
 
-    // Often for useful audio-only files, which have metadata in the audio track
+    // Often useful for audio-only files, which have metadata in the audio track
     // metadata instead of the main metadata, but can also have cover art
     // metadata (which libavformat likes to treat as video streams).
     int astreams = 0;
