@@ -1551,18 +1551,19 @@ static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
 // try joining it into a single range.
 static void attempt_range_joining(struct demux_internal *in)
 {
+    struct demux_cached_range *current = in->current_range;
     struct demux_cached_range *next = NULL;
     double next_dist = INFINITY;
 
-    assert(in->current_range && in->num_ranges > 0);
-    assert(in->current_range == in->ranges[in->num_ranges - 1]);
+    assert(current && in->num_ranges > 0);
+    assert(current == in->ranges[in->num_ranges - 1]);
 
     for (int n = 0; n < in->num_ranges - 1; n++) {
         struct demux_cached_range *range = in->ranges[n];
 
-        if (in->current_range->seek_start <= range->seek_start) {
+        if (current->seek_start <= range->seek_start) {
             // This uses ">" to get some non-0 overlap.
-            double dist = in->current_range->seek_end - range->seek_start;
+            double dist = current->seek_end - range->seek_start;
             if (dist > 0 && dist < next_dist) {
                 next = range;
                 next_dist = dist;
@@ -1574,7 +1575,7 @@ static void attempt_range_joining(struct demux_internal *in)
         return;
 
     MP_VERBOSE(in, "going to join ranges %f-%f + %f-%f\n",
-               in->current_range->seek_start, in->current_range->seek_end,
+               current->seek_start, current->seek_end,
                next->seek_start, next->seek_end);
 
     // Try to find a join point, where packets obviously overlap. (It would be
@@ -1586,7 +1587,7 @@ static void attempt_range_joining(struct demux_internal *in)
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
 
-        struct demux_queue *q1 = in->current_range->streams[n];
+        struct demux_queue *q1 = current->streams[n];
         struct demux_queue *q2 = next->streams[n];
 
         if (!ds->global_correct_pos && !ds->global_correct_dts) {
@@ -1658,7 +1659,7 @@ static void attempt_range_joining(struct demux_internal *in)
     // data associated with the current range.
 
     for (int n = 0; n < in->num_streams; n++) {
-        struct demux_queue *q1 = in->current_range->streams[n];
+        struct demux_queue *q1 = current->streams[n];
         struct demux_queue *q2 = next->streams[n];
 
         struct demux_stream *ds = in->streams[n]->ds;
@@ -1712,15 +1713,13 @@ static void attempt_range_joining(struct demux_internal *in)
         ds->refreshing = ds->selected;
     }
 
-    struct demux_cached_range *current = in->current_range;
-
     for (int n = 0; n < next->num_metadata; n++) {
         MP_TARRAY_APPEND(current, current->metadata, current->num_metadata,
                          next->metadata[n]);
     }
     next->num_metadata = 0;
 
-    update_seek_ranges(in->current_range);
+    update_seek_ranges(current);
 
     // Move demuxing position to after the current range.
     in->seeking = true;
