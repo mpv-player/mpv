@@ -55,7 +55,6 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         .end = MP_NOPTS_VALUE,
         .stream = -1,
         .avpacket = talloc_zero(dp, AVPacket),
-        .kf_seek_pts = MP_NOPTS_VALUE,
     };
     av_init_packet(dp->avpacket);
     int r = -1;
