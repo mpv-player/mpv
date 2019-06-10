@@ -307,8 +307,6 @@ struct demux_queue {
     struct demux_packet *head;
     struct demux_packet *tail;
 
-    struct demux_packet *next_prune_target; // cached value for faster pruning
-
     uint64_t tail_cum_pos;  // cumulative size including tail packet
 
     bool correct_dts;       // packet DTS is strictly monotonically increasing
@@ -318,8 +316,8 @@ struct demux_queue {
     double last_ts;         // timestamp of the last packet added to queue
 
     // for incrementally determining seek PTS range
-    double keyframe_pts, keyframe_end_pts;
     struct demux_packet *keyframe_latest;
+    struct demux_packet *keyframe_first; // cached value of first KF packet
 
     // incrementally maintained seek range, possibly invalid
     double seek_start, seek_end;
@@ -444,13 +442,13 @@ static void check_queue_consistency(struct demux_internal *in)
             size_t fw_bytes = 0;
             bool is_forward = false;
             bool kf_found = false;
-            bool npt_found = false;
+            bool kf1_found = false;
             size_t next_index = 0;
             uint64_t queue_total_bytes = 0;
             for (struct demux_packet *dp = queue->head; dp; dp = dp->next) {
                 is_forward |= dp == queue->ds->reader_head;
                 kf_found |= dp == queue->keyframe_latest;
-                npt_found |= dp == queue->next_prune_target;
+                kf1_found |= dp == queue->keyframe_first;
 
                 size_t bytes = demux_packet_estimate_total_size(dp);
                 total_bytes += bytes;
@@ -488,7 +486,7 @@ static void check_queue_consistency(struct demux_internal *in)
                 assert(fw_bytes == fw_bytes2);
             }
 
-            assert(npt_found == !!queue->next_prune_target);
+            assert(kf1_found == !!queue->keyframe_first);
 
             if (range != in->current_range) {
                 assert(fw_bytes == 0);
@@ -551,7 +549,7 @@ static void prune_metadata(struct demux_cached_range *range)
     }
 }
 
-// Refresh range->seek_start/end.
+// Refresh range->seek_start/end. Idempotent.
 static void update_seek_ranges(struct demux_cached_range *range)
 {
     range->seek_start = range->seek_end = MP_NOPTS_VALUE;
@@ -646,8 +644,8 @@ static void remove_head_packet(struct demux_queue *queue)
     struct demux_packet *dp = queue->head;
 
     assert(queue->ds->reader_head != dp);
-    if (queue->next_prune_target == dp)
-        queue->next_prune_target = NULL;
+    if (queue->keyframe_first == dp)
+        queue->keyframe_first = NULL;
     if (queue->keyframe_latest == dp)
         queue->keyframe_latest = NULL;
     queue->is_bof = false;
@@ -697,15 +695,13 @@ static void clear_queue(struct demux_queue *queue)
         dp = dn;
     }
     queue->head = queue->tail = NULL;
-    queue->next_prune_target = NULL;
+    queue->keyframe_first = NULL;
     queue->keyframe_latest = NULL;
     queue->seek_start = queue->seek_end = queue->last_pruned = MP_NOPTS_VALUE;
 
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
     queue->last_ts = queue->last_dts = MP_NOPTS_VALUE;
-    queue->keyframe_latest = NULL;
-    queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
 
     queue->is_eof = false;
     queue->is_bof = false;
@@ -1508,15 +1504,16 @@ static void back_demux_see_packets(struct demux_stream *ds)
 }
 
 // Add the keyframe to the end of the index. Not all packets are actually added.
-static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
+static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp,
+                            double pts)
 {
     struct demux_internal *in = queue->ds->in;
 
-    assert(dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE);
+    assert(dp->keyframe && pts != MP_NOPTS_VALUE);
 
     if (queue->num_index > 0) {
         struct index_entry *last = &QUEUE_INDEX_ENTRY(queue, queue->num_index - 1);
-        if (dp->kf_seek_pts - last->pts < INDEX_STEP_SIZE)
+        if (pts - last->pts < INDEX_STEP_SIZE)
             return;
     }
 
@@ -1542,7 +1539,7 @@ static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp)
     queue->num_index += 1;
 
     QUEUE_INDEX_ENTRY(queue, queue->num_index - 1) = (struct index_entry){
-        .pts = dp->kf_seek_pts,
+        .pts = pts,
         .pkt = dp,
     };
 }
@@ -1621,14 +1618,6 @@ static void attempt_range_joining(struct demux_internal *in)
                         goto failed;
                     }
 
-                    // q1 usually meets q2 at a keyframe. q1 will end on a key-
-                    // frame (because it tries joining when reading a keyframe).
-                    // Obviously, q1 can not know the kf_seek_pts yet; it would
-                    // have to read packets after it to compute it. Ideally,
-                    // we'd remove it and use q2's packet, but the linked list
-                    // makes this hard, so copy this missing metadata instead.
-                    end->kf_seek_pts = dp->kf_seek_pts;
-
                     remove_head_packet(q2);
                     join_point_found = true;
                     break;
@@ -1683,15 +1672,12 @@ static void attempt_range_joining(struct demux_internal *in)
         q1->last_pos = q2->last_pos;
         q1->last_dts = q2->last_dts;
         q1->last_ts = q2->last_ts;
-        q1->keyframe_pts = q2->keyframe_pts;
-        q1->keyframe_end_pts = q2->keyframe_end_pts;
         q1->keyframe_latest = q2->keyframe_latest;
         q1->is_eof = q2->is_eof;
 
         q2->head = q2->tail = NULL;
-        q2->next_prune_target = NULL;
+        q2->keyframe_first = NULL;
         q2->keyframe_latest = NULL;
-        free_index(q2);
 
         if (ds->selected && !ds->reader_head)
             ds->reader_head = join_point;
@@ -1703,11 +1689,14 @@ static void attempt_range_joining(struct demux_internal *in)
             uint64_t size = next_pos - dp->cum_pos;
             dp->cum_pos = q1->tail_cum_pos;
             q1->tail_cum_pos += size;
-
-            // And update the index with packets from q2.
-            if (dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE)
-                add_index_entry(q1, dp);
         }
+
+        // And update the index with packets from q2.
+        for (size_t i = 0; i < q2->num_index; i++) {
+            struct index_entry *e = &QUEUE_INDEX_ENTRY(q2, i);
+            add_index_entry(q1, e->pkt, e->pts);
+        }
+        free_index(q2);
 
         // For moving demuxer position.
         ds->refreshing = ds->selected;
@@ -1736,6 +1725,44 @@ failed:
     free_empty_cached_ranges(in);
 }
 
+// Compute the assumed first and last frame timestamp for keyframe range
+// starting at pkt. To get valid results, pkt->keyframe must be true, otherwise
+// nonsense will be returned.
+// Always sets *out_kf_min and *out_kf_max without reading them. Both are set
+// to NOPTS if there are no timestamps at all in the stream. *kf_max will not
+// be set to the actual end time of the decoded output, just the last frame
+// (audio will typically end up with kf_min==kf_max).
+// Either of out_kf_min and out_kf_max can be NULL, which discards the result.
+// Return the next keyframe packet after pkt, or NULL if there's none.
+static struct demux_packet *compute_keyframe_times(struct demux_packet *pkt,
+                                                   double *out_kf_min,
+                                                   double *out_kf_max)
+{
+    struct demux_packet *start = pkt;
+    double min = MP_NOPTS_VALUE;
+    double max = MP_NOPTS_VALUE;
+
+    while (pkt) {
+        if (pkt->keyframe && pkt != start)
+            break;
+
+        double ts = MP_PTS_OR_DEF(pkt->pts, pkt->dts);
+        if (pkt->segmented && (ts < pkt->start || ts > pkt->end))
+            ts = MP_NOPTS_VALUE;
+
+        min = MP_PTS_MIN(min, ts);
+        max = MP_PTS_MAX(max, ts);
+
+        pkt = pkt->next;
+    }
+
+    if (out_kf_min)
+        *out_kf_min = min;
+    if (out_kf_max)
+        *out_kf_max = max;
+    return pkt;
+}
+
 // Determine seekable range when a packet is added. If dp==NULL, treat it as
 // EOF (i.e. closes the current block).
 // This has to deal with a number of corner cases, such as demuxers potentially
@@ -1745,53 +1772,54 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
                                         struct demux_packet *dp)
 {
     struct demux_queue *queue = ds->queue;
-    bool attempt_range_join = false;
-    bool prev_eof = queue->is_eof;
 
     if (!ds->in->seekable_cache)
         return;
 
+    bool new_eof = !dp;
+    bool update_ranges = queue->is_eof != new_eof;
+    queue->is_eof = new_eof;
+
     if (!dp || dp->keyframe) {
         if (queue->keyframe_latest) {
-            queue->keyframe_latest->kf_seek_pts = queue->keyframe_pts;
-            double old_end = queue->range->seek_end;
-            if (queue->seek_start == MP_NOPTS_VALUE) {
-                queue->seek_start = queue->keyframe_pts;
-                if (queue->seek_start != MP_NOPTS_VALUE)
-                    queue->seek_start += ds->sh->seek_preroll;
+            double kf_min, kf_max;
+            compute_keyframe_times(queue->keyframe_latest, &kf_min, &kf_max);
+
+            if (kf_min != MP_NOPTS_VALUE) {
+                add_index_entry(queue, queue->keyframe_latest, kf_min);
+
+                // Initialize the queue's start if it's unset.
+                if (queue->seek_start == MP_NOPTS_VALUE) {
+                    update_ranges = true;
+                    queue->seek_start = kf_min + ds->sh->seek_preroll;
+                }
             }
-            if (queue->keyframe_end_pts != MP_NOPTS_VALUE)
-                queue->seek_end = queue->keyframe_end_pts;
-            queue->is_eof = !dp;
-            update_seek_ranges(queue->range);
-            attempt_range_join = queue->range->seek_end > old_end;
-            if (queue->keyframe_latest->kf_seek_pts != MP_NOPTS_VALUE)
-                add_index_entry(queue, queue->keyframe_latest);
-        } else {
-            queue->is_eof |= ds->eof;
+
+            if (kf_max != MP_NOPTS_VALUE &&
+                (queue->seek_end == MP_NOPTS_VALUE || kf_max > queue->seek_end))
+            {
+                // If the queue was past the current range's end even before
+                // this update, it means _other_ streams are not there yet,
+                // and the seek range doesn't need to be updated. This means
+                // if the _old_ queue->seek_end was already after the range end,
+                // then the new seek_end won't extend the range either.
+                if (queue->range->seek_end == MP_NOPTS_VALUE ||
+                    queue->seek_end <= queue->range->seek_end)
+                {
+                    update_ranges = true;
+                }
+
+                queue->seek_end = kf_max;
+            }
         }
+
         queue->keyframe_latest = dp;
-        queue->keyframe_pts = queue->keyframe_end_pts = MP_NOPTS_VALUE;
     }
 
-    if (dp) {
-        dp->kf_seek_pts = MP_NOPTS_VALUE;
-
-        double ts = MP_PTS_OR_DEF(dp->pts, dp->dts);
-        if (dp->segmented && (ts < dp->start || ts > dp->end))
-            ts = MP_NOPTS_VALUE;
-
-        queue->keyframe_pts = MP_PTS_MIN(queue->keyframe_pts, ts);
-        queue->keyframe_end_pts = MP_PTS_MAX(queue->keyframe_end_pts, ts);
-
-        queue->is_eof = false;
-    }
-
-    if (queue->is_eof != prev_eof)
+    if (update_ranges) {
         update_seek_ranges(queue->range);
-
-    if (attempt_range_join)
         attempt_range_joining(ds->in);
+    }
 }
 
 static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
@@ -2094,9 +2122,10 @@ static void prune_old_packets(struct demux_internal *in)
 
             if (queue->head && queue->head != ds->reader_head) {
                 struct demux_packet *dp = queue->head;
-                double ts = dp->kf_seek_pts;
-                // Note: in obscure cases, packets might have no timestamps set,
-                // in which case we still need to prune _something_.
+                double ts = queue->seek_start;
+                // If the ts is NOPTS, the queue has no retainable packets, so
+                // delete them all. This code is not run when there's enough
+                // free space, so normally the queue gets the chance to build up.
                 bool prune_always =
                     !in->seekable_cache || ts == MP_NOPTS_VALUE || !dp->keyframe;
                 if (prune_always || !earliest_stream || ts < earliest_ts) {
@@ -2116,39 +2145,57 @@ static void prune_old_packets(struct demux_internal *in)
         struct demux_stream *ds = earliest_stream;
         struct demux_queue *queue = range->streams[ds->index];
 
-        // Prune all packets until the next keyframe or reader_head. Keeping
-        // leading non-keyframe packets would not help with seeking at all (as
-        // seeking requires keyframe packets as target), so we strictly drop
-        // them. But obviously, you can't prune reader_head.
-        // In addition, we need to find the new possibly min. seek target,
-        // which in the worst case could be inside the forward buffer. The fact
-        // that there's not necessarily a keyframe packet anywhere in the
-        // current queue makes this harder.
-        if (in->seekable_cache && !queue->next_prune_target) {
-            // (Has to be _after_ queue->head to drop at least 1 packet.)
-            struct demux_packet *prev = queue->head;
-            if (queue->seek_start != MP_NOPTS_VALUE)
-                queue->last_pruned = queue->seek_start;
-            queue->seek_start = MP_NOPTS_VALUE;
-            queue->next_prune_target = queue->tail; // (prune all if none found)
-            while (prev->next) {
-                struct demux_packet *dp = prev->next;
-                // Prune until the next keyframe-marked packet (which is the
-                // lowest viable seek target and thus the first packet useful to
-                // keep). Can be after reader_head, or not exist (=> prune_all).
-                if (dp->keyframe && dp->kf_seek_pts != MP_NOPTS_VALUE) {
-                    queue->seek_start = dp->kf_seek_pts;
-                    queue->next_prune_target = prev;
+        bool non_kf_prune = queue->head && !queue->head->keyframe;
+        bool kf_was_pruned = false;
+
+        while (queue->head && queue->head != ds->reader_head) {
+            if (queue->head->keyframe) {
+                // If the cache is seekable, only delete until up the next
+                // keyframe. This is not always efficient, but ensures we
+                // prune all streams fairly.
+                // Also, if the first packet was _not_ a keyframe, we want it
+                // to remove all preceding non-keyframe packets first, before
+                // re-evaluating what to prune next.
+                if ((kf_was_pruned || non_kf_prune) && in->seekable_cache)
                     break;
-                }
-                prev = prev->next;
+                kf_was_pruned = true;
             }
+
+            remove_head_packet(queue);
         }
 
-        bool done = false;
-        while (!done && queue->head && queue->head != ds->reader_head) {
-            done = queue->next_prune_target == queue->head;
-            remove_head_packet(queue);
+        // Need to update the seekable time range.
+        if (kf_was_pruned) {
+            assert(!queue->keyframe_first); // it was just deleted, supposedly
+
+            queue->keyframe_first = queue->head;
+            // (May happen if reader_head stopped pruning the range, and there's
+            // no next range.)
+            while (queue->keyframe_first && !queue->keyframe_first->keyframe)
+                queue->keyframe_first = queue->keyframe_first->next;
+
+            if (queue->seek_start != MP_NOPTS_VALUE)
+                queue->last_pruned = queue->seek_start;
+
+            double kf_min;
+            compute_keyframe_times(queue->keyframe_first, &kf_min, NULL);
+
+            bool update_range = true;
+
+            queue->seek_start = kf_min;
+
+            if (queue->seek_start != MP_NOPTS_VALUE) {
+                // Don't need to update if the new start is still before the
+                // range's start (or if the range was undefined anyway).
+                if (range->seek_start == MP_NOPTS_VALUE ||
+                    queue->seek_start <= range->seek_start)
+                {
+                    update_range = false;
+                }
+            }
+
+            if (update_range)
+                update_seek_ranges(range);
         }
 
         update_seek_ranges(range);
@@ -3111,8 +3158,8 @@ static void switch_current_range(struct demux_internal *in,
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_queue *queue = old->streams[n];
 
-            // Remove all packets from head up until including next_prune_target.
-            while (queue->next_prune_target)
+            // Remove all packets which cannot be involved in seeking.
+            while (queue->head && !queue->head->keyframe)
                 remove_head_packet(queue);
         }
 
@@ -3181,9 +3228,16 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
         start = queue->head;
 
     struct demux_packet *target = NULL;
-    for (struct demux_packet *dp = start; dp; dp = dp->next) {
-        double range_pts = dp->kf_seek_pts;
-        if (!dp->keyframe || range_pts == MP_NOPTS_VALUE)
+    struct demux_packet *next = NULL;
+    for (struct demux_packet *dp = start; dp; dp = next) {
+        next = dp->next;
+        if (!dp->keyframe)
+            continue;
+
+        double range_pts;
+        next = compute_keyframe_times(dp, &range_pts, NULL);
+
+        if (range_pts == MP_NOPTS_VALUE)
             continue;
 
         if (flags & SEEK_FORWARD) {
@@ -3200,21 +3254,6 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
         }
 
         target = dp;
-    }
-
-    // Usually, the last seen keyframe (keyframe_latest) has kf_seek_pts unset
-    // (because it needs to see all packets until the next keyframe or EOF in
-    // order to determine the minimum PTS the range provides). If the pts is
-    // within seek range, but the second-last keyframe is before the seek
-    // target, above search will return NULL, even though we should return
-    // keyframe_latest.
-    // This is only correct in the case when the target PTS is still within the
-    // seek range; the timestamps past it are unknown.
-    if (!target && (flags & SEEK_FORWARD) && queue->keyframe_latest &&
-        queue->keyframe_latest->kf_seek_pts == MP_NOPTS_VALUE &&
-        pts <= queue->seek_end)
-    {
-        target = queue->keyframe_latest;
     }
 
     return target;
@@ -3270,7 +3309,8 @@ static void execute_cache_seek(struct demux_internal *in,
             if (ds->selected && ds->type == STREAM_VIDEO) {
                 struct demux_packet *target = find_seek_target(queue, pts, flags);
                 if (target) {
-                    double target_pts = target->kf_seek_pts;
+                    double target_pts;
+                    compute_keyframe_times(target, &target_pts, NULL);
                     if (target_pts != MP_NOPTS_VALUE) {
                         MP_VERBOSE(in, "adjust seek target %f -> %f\n",
                                    pts, target_pts);
