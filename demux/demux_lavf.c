@@ -864,16 +864,6 @@ static void update_metadata(demuxer_t *demuxer)
         priv->avfc->event_flags = 0;
         demux_metadata_changed(demuxer);
     }
-
-    for (int n = 0; n < priv->num_streams; n++) {
-        AVStream *st = priv->streams[n]->sh ? priv->avfc->streams[n] : NULL;
-        if (st && st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
-            st->event_flags = 0;
-            struct mp_tags *tags = talloc_zero(NULL, struct mp_tags);
-            mp_tags_copy_from_av_dictionary(tags, st->metadata);
-            demux_set_stream_tags(demuxer, priv->streams[n]->sh, tags);
-        }
-    }
 }
 
 static int interrupt_cb(void *ctx)
@@ -1212,6 +1202,14 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
             }
             info->highest_pts = MP_PTS_MAX(info->highest_pts, pts);
         }
+    }
+
+    if (st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
+        st->event_flags = 0;
+        struct mp_tags *tags = talloc_zero(NULL, struct mp_tags);
+        mp_tags_copy_from_av_dictionary(tags, st->metadata);
+        double pts = MP_PTS_OR_DEF(dp->pts, dp->dts);
+        demux_stream_tags_changed(demux, stream, tags, pts);
     }
 
     *mp_pkt = dp;

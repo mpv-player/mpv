@@ -173,12 +173,9 @@ struct demux_internal {
     struct sh_stream **streams;
     int num_streams;
 
-    // If non-NULL, a _selected_ stream which is used for global (timed)
-    // metadata. It will be an arbitrary stream that is hopefully not sparse
-    // (i.e. not a subtitle stream). This is needed because due to variable
-    // interleaving multiple streams won't agree whether timed metadata is in
-    // effect yet at the same time position.
-    struct demux_stream *master_stream;
+    // If non-NULL, a stream which is used for global (timed) metadata. It will
+    // be an arbitrary stream, which hopefully will happen to work.
+    struct sh_stream *metadata_stream;
 
     int events;
 
@@ -247,12 +244,23 @@ struct demux_internal {
     uint64_t bytes_per_second;
     int64_t next_cache_update;
 
+    // demux user state (user thread, somewhat similar to reader/decoder state)
+    double last_playback_pts;   // last playback_pts from demux_update()
+    bool force_metadata_update;
+    int cached_metadata_index;  // speed up repeated lookups
+
     // -- Access from demuxer thread only
     bool enable_recording;
     struct mp_recorder *recorder;
     int64_t slave_unbuffered_read_bytes; // value repoted from demuxer impl.
     int64_t hack_unbuffered_read_bytes;  // for demux_get_bytes_read_hack()
     int64_t cache_unbuffered_read_bytes; // for demux_reader_state.bytes_per_second
+};
+
+struct timed_metadata {
+    double pts;
+    struct mp_tags *tags;
+    bool from_stream;
 };
 
 // A continuous range of cached packets for all enabled streams.
@@ -268,6 +276,9 @@ struct demux_cached_range {
 
     bool is_bof;            // set if the file begins with this range
     bool is_eof;            // set if the file ends with this range
+
+    struct timed_metadata **metadata;
+    int num_metadata;
 };
 
 #define QUEUE_INDEX_SIZE_MASK(queue) ((queue)->index_size - 1)
@@ -392,19 +403,6 @@ struct demux_stream {
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
     bool ignore_eof;        // ignore stream in underrun detection
-
-    // timed metadata
-    struct mp_packet_tags *tags_demux;  // demuxer state (last updated metadata)
-    struct mp_packet_tags *tags_reader; // reader state (last returned packet)
-    struct mp_packet_tags *tags_init;   // global state at start of demuxing
-};
-
-// "Snapshot" of the tag state. Refcounted to avoid a copy per packet.
-struct mp_packet_tags {
-    mp_atomic_int64 refcount;
-    struct mp_tags *demux;      // demuxer global tags (normal thing)
-    struct mp_tags *stream;     // byte stream tags (ICY crap)
-    struct mp_tags *sh;         // per sh_stream tags (e.g. OGG)
 };
 
 static void switch_to_fresh_cache_range(struct demux_internal *in);
@@ -512,56 +510,6 @@ static void check_queue_consistency(struct demux_internal *in)
 }
 #endif
 
-void mp_packet_tags_unref(struct mp_packet_tags *tags)
-{
-    if (tags) {
-        if (atomic_fetch_add(&tags->refcount, -1) == 1) {
-            talloc_free(tags->sh);
-            talloc_free(tags->demux);
-            talloc_free(tags->stream);
-            talloc_free(tags);
-        }
-    }
-}
-
-void mp_packet_tags_setref(struct mp_packet_tags **dst, struct mp_packet_tags *src)
-{
-    if (src)
-        atomic_fetch_add(&src->refcount, 1);
-    mp_packet_tags_unref(*dst);
-    *dst = src;
-}
-
-static struct mp_tags *tags_dup_or_null(struct mp_tags *t)
-{
-    return t ? mp_tags_dup(NULL, t) : talloc_zero(NULL, struct mp_tags);
-}
-
-// Return a "deep" copy. If tags==NULL, allocate a new one.
-static struct mp_packet_tags *mp_packet_tags_copy(struct mp_packet_tags *tags)
-{
-    struct mp_packet_tags *new = talloc_ptrtype(NULL, new);
-    *new = (struct mp_packet_tags){
-        .refcount = ATOMIC_VAR_INIT(1),
-        .demux = tags_dup_or_null(tags ? tags->demux : NULL),
-        .stream = tags_dup_or_null(tags ? tags->stream : NULL),
-        .sh = tags_dup_or_null(tags ? tags->sh : NULL),
-    };
-    return new;
-}
-
-// Force a copy if refcount != 1.
-// (refcount==1 means we're the unambiguous owner.)
-// If *tags==NULL, allocate a blank one.
-static void mp_packet_tags_make_writable(struct mp_packet_tags **tags)
-{
-    if (*tags && atomic_load(&(*tags)->refcount) == 1)
-        return;
-    struct mp_packet_tags *new = mp_packet_tags_copy(*tags);
-    mp_packet_tags_unref(*tags);
-    *tags = new;
-}
-
 // (this doesn't do most required things for a switch, like updating ds->queue)
 static void set_current_range(struct demux_internal *in,
                               struct demux_cached_range *range)
@@ -576,6 +524,31 @@ static void set_current_range(struct demux_internal *in,
         }
     }
     MP_TARRAY_APPEND(in, in->ranges, in->num_ranges, range);
+}
+
+static void prune_metadata(struct demux_cached_range *range)
+{
+    int first_needed = 0;
+
+    if (range->seek_start == MP_NOPTS_VALUE) {
+        first_needed = range->num_metadata;
+    } else {
+        for (int n = 0; n < range->num_metadata ; n++) {
+            if (range->metadata[n]->pts > range->seek_start)
+                break;
+            first_needed = n;
+        }
+    }
+
+    // Always preserve the last entry.
+    first_needed = MPMIN(first_needed, range->num_metadata - 1);
+
+    // (Could make this significantly more efficient for large first_needed,
+    // however that might be very rare and even then it might not matter.)
+    for (int n = 0; n < first_needed; n++) {
+        talloc_free(range->metadata[0]);
+        MP_TARRAY_REMOVE_AT(range->metadata, range->num_metadata, 0);
+    }
 }
 
 // Refresh range->seek_start/end.
@@ -659,10 +632,12 @@ static void update_seek_ranges(struct demux_cached_range *range)
     if (range->seek_start >= range->seek_end)
         goto broken;
 
+    prune_metadata(range);
     return;
 
 broken:
     range->seek_start = range->seek_end = MP_NOPTS_VALUE;
+    prune_metadata(range);
 }
 
 // Remove queue->head from the queue.
@@ -741,6 +716,11 @@ static void clear_cached_range(struct demux_internal *in,
 {
     for (int n = 0; n < range->num_streams; n++)
         clear_queue(range->streams[n]);
+
+    for (int n = 0; n < range->num_metadata; n++)
+        talloc_free(range->metadata[n]);
+    range->num_metadata = 0;
+
     update_seek_ranges(range);
 }
 
@@ -845,25 +825,16 @@ static void update_stream_selection_state(struct demux_internal *in,
 
     bool any_av_streams = false;
     bool any_streams = false;
-    struct demux_stream *master = NULL;
 
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *s = in->streams[n]->ds;
 
         s->still_image = s->sh->still_image;
         s->eager = s->selected && !s->sh->attached_picture;
-        if (s->eager && !s->still_image) {
+        if (s->eager && !s->still_image)
             any_av_streams |= s->type != STREAM_SUB;
-            if (!master ||
-                (master->type == STREAM_VIDEO && s->type == STREAM_AUDIO))
-            {
-                master = s;
-            }
-        }
         any_streams |= s->selected;
     }
-
-    in->master_stream = master;
 
     // Subtitles are only eagerly read if there are no other eagerly read
     // streams.
@@ -942,14 +913,6 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
     return sh;
 }
 
-static void ds_destroy(void *ptr)
-{
-    struct demux_stream *ds = ptr;
-    mp_packet_tags_unref(ds->tags_init);
-    mp_packet_tags_unref(ds->tags_reader);
-    mp_packet_tags_unref(ds->tags_demux);
-}
-
 // Add a new sh_stream to the demuxer. Note that as soon as the stream has been
 // added, it must be immutable, and must not be released (this will happen when
 // the demuxer is destroyed).
@@ -969,7 +932,6 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         .global_correct_dts = true,
         .global_correct_pos = true,
     };
-    talloc_set_destructor(sh->ds, ds_destroy);
 
     struct demux_stream *ds = sh->ds;
 
@@ -998,11 +960,6 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
 
     update_stream_selection_state(in, sh->ds);
 
-    mp_packet_tags_make_writable(&sh->ds->tags_init);
-    mp_tags_replace(sh->ds->tags_init->demux, in->d_thread->metadata);
-    mp_tags_replace(sh->ds->tags_init->sh, sh->tags);
-    mp_packet_tags_setref(&sh->ds->tags_reader, sh->ds->tags_init);
-
     switch (ds->type) {
     case STREAM_AUDIO:
         ds->back_preroll = in->opts->audio_back_preroll;
@@ -1021,6 +978,12 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         break;
     }
 
+    if (!ds->sh->attached_picture) {
+        // Typically this is used for webradio, so any stream will do.
+        if (!in->metadata_stream)
+            in->metadata_stream = sh;
+    }
+
     in->events |= DEMUX_EVENT_STREAMS;
     if (in->wakeup_cb)
         in->wakeup_cb(in->wakeup_cb_ctx);
@@ -1033,35 +996,6 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
     assert(demuxer == in->d_thread);
     pthread_mutex_lock(&in->lock);
     demux_add_sh_stream_locked(in, sh);
-    pthread_mutex_unlock(&in->lock);
-}
-
-static void ds_modify_demux_tags(struct demux_stream *ds)
-{
-    if (!ds->tags_demux)
-        mp_packet_tags_setref(&ds->tags_demux, ds->tags_init);
-    mp_packet_tags_make_writable(&ds->tags_demux);
-}
-
-// Update sh->tags (lazily). This must be called by demuxers which update
-// stream tags after init. (sh->tags can be accessed by the playback thread,
-// which means the demuxer thread cannot write or read it directly.)
-// Before init is finished, sh->tags can still be accessed freely.
-// Ownership of tags goes to the function.
-void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
-                           struct mp_tags *tags)
-{
-    struct demux_internal *in = demuxer->in;
-    assert(demuxer == in->d_thread);
-    struct demux_stream *ds = sh->ds;
-    assert(ds); // stream must have been added
-
-    pthread_mutex_lock(&in->lock);
-
-    ds_modify_demux_tags(ds);
-    mp_tags_replace(ds->tags_demux->sh, tags);
-    talloc_free(tags);
-
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -1778,6 +1712,14 @@ static void attempt_range_joining(struct demux_internal *in)
         ds->refreshing = ds->selected;
     }
 
+    struct demux_cached_range *current = in->current_range;
+
+    for (int n = 0; n < next->num_metadata; n++) {
+        MP_TARRAY_APPEND(current, current->metadata, current->num_metadata,
+                         next->metadata[n]);
+    }
+    next->num_metadata = 0;
+
     update_seek_ranges(in->current_range);
 
     // Move demuxing position to after the current range.
@@ -1904,7 +1846,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     dp->stream = stream->index;
     dp->next = NULL;
-    mp_packet_tags_setref(&dp->metadata, ds->tags_demux);
 
     // (keep in mind that even if the reader went out of data, the queue is not
     // necessarily empty due to the backbuffer)
@@ -2463,18 +2404,6 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
         pkt->end = MP_ADD_PTS(pkt->end, in->ts_offset);
     }
 
-    // Apply timed metadata when packet is returned to user.
-    // (The tags_init thing is a microopt. to not do refcounting for sane files.)
-    struct mp_packet_tags *metadata = pkt->metadata;
-    if (!metadata)
-        metadata = ds->tags_init;
-    if (metadata != ds->tags_reader) {
-        mp_packet_tags_setref(&ds->tags_reader, metadata);
-        in->events |= DEMUX_EVENT_METADATA;
-        if (in->wakeup_cb)
-            in->wakeup_cb(in->wakeup_cb_ctx);
-    }
-
     prune_old_packets(in);
     *res = pkt;
     return 1;
@@ -2689,6 +2618,65 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
     dst->metadata = mp_tags_dup(dst, src->metadata);
 }
 
+// Update metadata after initialization. If sh==NULL, it's global metadata,
+// otherwise it's bound to the stream. If pts==NOPTS, use the highest known pts
+// in the stream. Caller retains ownership of tags ptr. Called locked.
+static void add_timed_metadata(struct demux_internal *in, struct mp_tags *tags,
+                               struct sh_stream *sh, double pts)
+{
+    struct demux_cached_range *r = in->current_range;
+    if (!r)
+        return;
+
+    // We don't expect this, nor do we find it useful.
+    if (sh && sh != in->metadata_stream)
+        return;
+
+    if (pts == MP_NOPTS_VALUE) {
+        for (int n = 0; n < r->num_streams; n++)
+            pts = MP_PTS_MAX(pts, r->streams[n]->last_ts);
+
+        // Tends to happen when doing the initial icy update.
+        if (pts == MP_NOPTS_VALUE)
+            pts = in->d_thread->start_time;
+    }
+
+    struct timed_metadata *tm = talloc_zero(NULL, struct timed_metadata);
+    *tm = (struct timed_metadata){
+        .pts = pts,
+        .tags = mp_tags_dup(tm, tags),
+        .from_stream = !!sh,
+    };
+    MP_TARRAY_APPEND(r, r->metadata, r->num_metadata, tm);
+}
+
+// This is called by demuxer implementations if sh->tags changed. Note that
+// sh->tags itself is never actually changed (it's immutable, because sh->tags
+// can be accessed by the playback thread, and there is no synchronization).
+// pts is the time at/after which the metadata becomes effective. You're
+// supposed to call this ordered by time, and only while a packet is being
+// read.
+// Ownership of tags goes to the function.
+void demux_stream_tags_changed(struct demuxer *demuxer, struct sh_stream *sh,
+                               struct mp_tags *tags, double pts)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_thread);
+    struct demux_stream *ds = sh ? sh->ds : NULL;
+    assert(!sh || ds); // stream must have been added
+
+    pthread_mutex_lock(&in->lock);
+
+    if (pts == MP_NOPTS_VALUE) {
+        MP_WARN(in, "Discarding timed metadata without timestamp.\n");
+    } else {
+        add_timed_metadata(in, tags, sh, pts);
+    }
+    talloc_free(tags);
+
+    pthread_mutex_unlock(&in->lock);
+}
+
 // This is called by demuxer implementations if demuxer->metadata changed.
 // (It will be propagated to the user as timed metadata.)
 void demux_metadata_changed(demuxer_t *demuxer)
@@ -2697,27 +2685,17 @@ void demux_metadata_changed(demuxer_t *demuxer)
     struct demux_internal *in = demuxer->in;
 
     pthread_mutex_lock(&in->lock);
-
-    for (int n = 0; n < in->num_streams; n++) {
-        struct demux_stream *ds = in->streams[n]->ds;
-        ds_modify_demux_tags(ds);
-        mp_tags_replace(ds->tags_demux->demux, demuxer->metadata);
-    }
-
+    add_timed_metadata(in, demuxer->metadata, NULL, MP_NOPTS_VALUE);
     pthread_mutex_unlock(&in->lock);
 }
 
 // Called locked, with user demuxer.
-static void update_final_metadata(demuxer_t *demuxer)
+static void update_final_metadata(demuxer_t *demuxer, struct timed_metadata *tm)
 {
     assert(demuxer == demuxer->in->d_user);
     struct demux_internal *in = demuxer->in;
 
-    struct mp_packet_tags *tags =
-        in->master_stream ? in->master_stream->tags_reader : NULL;
-
-    if (tags)
-        mp_tags_replace(demuxer->metadata, tags->demux);
+    struct mp_tags *dyn_tags = NULL;
 
     // Often for useful audio-only files, which have metadata in the audio track
     // metadata instead of the main metadata, but can also have cover art
@@ -2734,16 +2712,54 @@ static void update_final_metadata(demuxer_t *demuxer)
             astream_id = n;
         }
     }
-    if (vstreams == 0 && astreams == 1)
-        mp_tags_merge(demuxer->metadata, in->streams[astream_id]->tags);
 
-    if (tags)
-        mp_tags_merge(demuxer->metadata, tags->stream);
+    // Use the metadata_stream tags only if this really seems to be an audio-
+    // only stream. Otherwise it will happen too often that "uninteresting"
+    // stream metadata will trash the actual file tags.
+    if (vstreams == 0 && astreams == 1 &&
+        in->streams[astream_id] == in->metadata_stream)
+    {
+        dyn_tags = in->metadata_stream->tags;
+        if (tm && tm->from_stream)
+            dyn_tags = tm->tags;
+    }
+
+    // Global metadata updates.
+    if (tm && !tm->from_stream)
+        dyn_tags = tm->tags;
+
+    if (dyn_tags)
+        mp_tags_merge(demuxer->metadata, dyn_tags);
+}
+
+static struct timed_metadata *lookup_timed_metadata(struct demux_internal *in,
+                                                    double pts)
+{
+    struct demux_cached_range *r = in->current_range;
+
+    if (!r || !r->num_metadata || pts == MP_NOPTS_VALUE)
+        return NULL;
+
+    int start = 1;
+    int i = in->cached_metadata_index;
+    if (i >= 0 &&  i < r->num_metadata && r->metadata[i]->pts <= pts)
+        start = i + 1;
+
+    in->cached_metadata_index = r->num_metadata - 1;
+    for (int n = start; n < r->num_metadata; n++) {
+        if (r->metadata[n]->pts >= pts) {
+            in->cached_metadata_index = n - 1;
+            break;
+        }
+    }
+
+    return r->metadata[in->cached_metadata_index];
 }
 
 // Called by the user thread (i.e. player) to update metadata and other things
 // from the demuxer thread.
-void demux_update(demuxer_t *demuxer)
+// The pts parameter is the current playback position.
+void demux_update(demuxer_t *demuxer, double pts)
 {
     assert(demuxer == demuxer->in->d_user);
     struct demux_internal *in = demuxer->in;
@@ -2752,14 +2768,26 @@ void demux_update(demuxer_t *demuxer)
         update_cache(in);
 
     pthread_mutex_lock(&in->lock);
+
+    pts = MP_ADD_PTS(pts, -in->ts_offset);
+
+    struct timed_metadata *prev = lookup_timed_metadata(in, in->last_playback_pts);
+    struct timed_metadata *cur = lookup_timed_metadata(in, pts);
+    if (prev != cur || in->force_metadata_update) {
+        in->force_metadata_update = false;
+        update_final_metadata(demuxer, cur);
+        demuxer->events |= DEMUX_EVENT_METADATA;
+    }
+
+    in->last_playback_pts = pts;
+
     demuxer->events |= in->events;
     in->events = 0;
-    if (demuxer->events & DEMUX_EVENT_METADATA)
-        update_final_metadata(demuxer);
     if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
         demux_update_replaygain(demuxer);
     if (demuxer->events & DEMUX_EVENT_DURATION)
         demuxer->duration = in->duration;
+
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -2815,19 +2843,6 @@ static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
             demuxer_get_cc_track_locked(sh);
     }
     pthread_mutex_unlock(&in->lock);
-}
-
-// Each stream contains a copy of the global demuxer metadata, but this might
-// be outdated if a stream gets added and then metadata does get set during
-// early init.
-static void fixup_metadata(struct demux_internal *in)
-{
-    for (int n = 0; n < in->num_streams; n++) {
-        struct demux_stream *ds = in->streams[n]->ds;
-        mp_packet_tags_make_writable(&ds->tags_init);
-        mp_tags_replace(ds->tags_init->demux, in->d_thread->metadata);
-        mp_packet_tags_setref(&ds->tags_reader, ds->tags_init);
-    }
 }
 
 // Return whether "heavy" caching on this stream is enabled. By default, this
@@ -2922,9 +2937,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_copy(in->d_user, in->d_thread);
         in->duration = in->d_thread->duration;
         demuxer_sort_chapters(demuxer);
-        fixup_metadata(in);
         in->events = DEMUX_EVENT_ALL;
-        demux_update(demuxer);
         int seekable = opts->seekable_cache;
         if (demux_is_network_cached(demuxer)) {
             in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
@@ -2952,6 +2965,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
             in->max_bytes = 1;
         }
         switch_to_fresh_cache_range(in);
+
+        demux_update(demuxer, MP_NOPTS_VALUE);
 
         demuxer = sub ? sub : demuxer;
         // Let this demuxer free demuxer->stream. Timeline sub-demuxers can
@@ -3127,6 +3142,9 @@ static void switch_current_range(struct demux_internal *in,
 
     // No point in keeping any junk (especially if old current_range is empty).
     free_empty_cached_ranges(in);
+
+    // The change detection doesn't work across ranges.
+    in->force_metadata_update = true;
 }
 
 // Search for the entry with the highest index with entry.pts <= pts true.
@@ -3659,11 +3677,7 @@ static void update_cache(struct demux_internal *in)
 
     in->stream_size = stream_size;
     if (stream_metadata) {
-        for (int n = 0; n < in->num_streams; n++) {
-            struct demux_stream *ds = in->streams[n]->ds;
-            ds_modify_demux_tags(ds);
-            mp_tags_replace(ds->tags_demux->stream, stream_metadata);
-        }
+        add_timed_metadata(in, stream_metadata, NULL, MP_NOPTS_VALUE);
         talloc_free(stream_metadata);
     }
 
