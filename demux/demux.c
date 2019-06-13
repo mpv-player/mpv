@@ -1853,6 +1853,36 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
     }
 }
 
+static void record_packet(struct demux_internal *in, struct demux_packet *dp)
+{
+    // (should preferably be outside of the lock)
+    if (in->enable_recording && !in->recorder &&
+        in->opts->record_file && in->opts->record_file[0])
+    {
+        // Later failures shouldn't make it retry and overwrite the previously
+        // recorded file.
+        in->enable_recording = false;
+
+        in->recorder =
+            mp_recorder_create(in->d_thread->global, in->opts->record_file,
+                               in->streams, in->num_streams);
+        if (!in->recorder)
+            MP_ERR(in, "Disabling recording.\n");
+    }
+
+    if (in->recorder) {
+        struct mp_recorder_sink *sink =
+            mp_recorder_get_sink(in->recorder, dp->stream);
+        if (sink) {
+            mp_recorder_feed_packet(sink, dp);
+        } else {
+            MP_ERR(in, "New stream appeared; stopping recording.\n");
+            mp_recorder_destroy(in->recorder);
+            in->recorder = NULL;
+        }
+    }
+}
+
 static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
@@ -1894,6 +1924,8 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         talloc_free(dp);
         return;
     }
+
+    record_packet(in, dp);
 
     if (in->cache) {
         int64_t pos = demux_cache_write(in->cache, dp);
@@ -1979,33 +2011,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     // (see reader_head check/assignment above).
     if (!ds->reader_head)
         return;
-
-    // (should preferably be outside of the lock)
-    if (in->enable_recording && !in->recorder &&
-        in->opts->record_file && in->opts->record_file[0])
-    {
-        // Later failures shouldn't make it retry and overwrite the previously
-        // recorded file.
-        in->enable_recording = false;
-
-        in->recorder =
-            mp_recorder_create(in->d_thread->global, in->opts->record_file,
-                               in->streams, in->num_streams);
-        if (!in->recorder)
-            MP_ERR(in, "Disabling recording.\n");
-    }
-
-    if (in->recorder) {
-        struct mp_recorder_sink *sink =
-            mp_recorder_get_sink(in->recorder, dp->stream);
-        if (sink) {
-            mp_recorder_feed_packet(sink, dp);
-        } else {
-            MP_ERR(in, "New stream appeared; stopping recording.\n");
-            mp_recorder_destroy(in->recorder);
-            in->recorder = NULL;
-        }
-    }
 
     back_demux_see_packets(ds);
 
