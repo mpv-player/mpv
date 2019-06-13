@@ -207,4 +207,6 @@ void freelocale(locale_t);
 
 #endif /* __MINGW32__ */
 
+int mp_mkostemps(char *template, int suffixlen, int flags);
+
 #endif
