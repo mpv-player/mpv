@@ -19,9 +19,15 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include "mpv_talloc.h"
 
@@ -814,3 +820,29 @@ void freelocale(locale_t locobj)
 }
 
 #endif // __MINGW32__
+
+int mp_mkostemps(char *template, int suffixlen, int flags)
+{
+    size_t len = strlen(template);
+    char *t = len >= 6 + suffixlen ? &template[len - (6 + suffixlen)] : NULL;
+    if (!t || strncmp(t, "XXXXXX", 6) != 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    for (size_t fuckshit = 0; fuckshit < UINT32_MAX; fuckshit++) {
+        // Using a random value may make it require fewer iterations (even if
+        // not truly random; just a counter would be sufficient).
+        size_t fuckmess = rand();
+        char crap[7] = "";
+        snprintf(crap, sizeof(crap), "%06zx", fuckmess);
+        memcpy(t, crap, 6);
+
+        int res = open(template, O_RDWR | O_CREAT | O_EXCL | flags, 0600);
+        if (res >= 0 || errno != EEXIST)
+            return res;
+    }
+
+    errno = EEXIST;
+    return -1;
+}
