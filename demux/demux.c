@@ -1890,6 +1890,10 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         talloc_free(dp);
         return;
     }
+
+    assert(dp->stream == stream->index);
+    assert(!dp->next);
+
     struct demux_internal *in = ds->in;
 
     in->after_seek = false;
@@ -1942,9 +1946,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     queue->last_dts = dp->dts;
     ds->global_correct_pos &= queue->correct_pos;
     ds->global_correct_dts &= queue->correct_dts;
-
-    dp->stream = stream->index;
-    dp->next = NULL;
 
     // (keep in mind that even if the reader went out of data, the queue is not
     // necessarily empty due to the backbuffer)
