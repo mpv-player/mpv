@@ -416,6 +416,8 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp);
 static struct demux_packet *advance_reader_head(struct demux_stream *ds);
 static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
                        bool clear_back_state);
+static void clear_reader_state(struct demux_internal *in,
+                               bool clear_back_state);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -1237,6 +1239,15 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
     pthread_mutex_unlock(&in->lock);
 }
 
+static void error_on_backward_demuxing(struct demux_internal *in)
+{
+    if (!in->back_demuxing)
+        return;
+    MP_ERR(in, "Disabling backward demuxing.\n");
+    in->back_demuxing = false;
+    clear_reader_state(in, true);
+}
+
 static void perform_backward_seek(struct demux_internal *in)
 {
     double target = MP_NOPTS_VALUE;
@@ -1351,6 +1362,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
             // The packet should have been in the searched range; maybe dts/pos
             // determinism assumptions were broken.
             MP_ERR(in, "Demuxer not cooperating.\n");
+            error_on_backward_demuxing(in);
             return;
         }
     }
@@ -1492,6 +1504,7 @@ static void back_demux_see_packets(struct demux_stream *ds)
 
     if (!ds->global_correct_dts && !ds->global_correct_pos) {
         MP_ERR(in, "Can't demux backward due to demuxer problems.\n");
+        error_on_backward_demuxing(in);
         return;
     }
 
