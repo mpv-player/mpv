@@ -88,6 +88,7 @@ struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
             .pixel_size = plfmt->texel_size,
             .linear_filter = plfmt->caps & PL_FMT_CAP_LINEAR,
             .renderable = plfmt->caps & PL_FMT_CAP_RENDERABLE,
+            .storable = plfmt->caps & PL_FMT_CAP_STORABLE,
             .glsl_format = plfmt->glsl_format,
         };
 

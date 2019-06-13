@@ -107,6 +107,7 @@ struct ra_format {
                             // only applies to 2-component textures
     bool linear_filter;     // linear filtering available from shader
     bool renderable;        // can be used for render targets
+    bool storable;          // can be used for storage images
     bool dummy_format;      // is not a real ra_format but a fake one (e.g. FBO).
                             // dummy formats cannot be used to create textures
 

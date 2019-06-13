@@ -233,6 +233,9 @@ static void setup_formats(struct ra *ra)
             .pixel_size     = d3dfmt->bytes,
             .linear_filter  = (support & sup_filter) == sup_filter,
             .renderable     = (support & sup_render) == sup_render,
+            // TODO: Check whether it's a storage format
+            // https://docs.microsoft.com/en-us/windows/desktop/direct3d12/typed-unordered-access-view-loads
+            .storable       = true,
         };
 
         if (support & D3D11_FORMAT_SUPPORT_TEXTURE1D)
