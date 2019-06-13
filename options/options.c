@@ -73,6 +73,7 @@ extern const struct m_sub_options gl_video_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
 extern const struct m_sub_options demux_conf;
+extern const struct m_sub_options demux_cache_conf;
 
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
@@ -700,6 +701,7 @@ const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
+    OPT_SUBSTRUCT("", demux_cache_opts, demux_cache_conf, 0),
 
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
     OPT_SUBSTRUCT("", spirv_opts, spirv_conf, 0),

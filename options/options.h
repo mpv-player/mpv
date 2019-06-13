@@ -303,6 +303,7 @@ typedef struct MPOpts {
     struct demux_mkv_opts *demux_mkv;
 
     struct demux_opts *demux_opts;
+    struct demux_cache_opts *demux_cache_opts;
 
     struct vd_lavc_params *vd_lavc_params;
     struct ad_lavc_params *ad_lavc_params;
