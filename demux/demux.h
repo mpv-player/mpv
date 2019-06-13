@@ -44,6 +44,7 @@ struct demux_reader_state {
     double ts_end; // approx. timestamp of end of buffered range
     int64_t total_bytes;
     int64_t fw_bytes;
+    int64_t file_cache_bytes;
     double seeking; // current low level seek target, or NOPTS
     int low_level_seeks; // number of started low level seeks
     double ts_last; // approx. timestamp of demuxer position

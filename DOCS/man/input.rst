@@ -1461,6 +1461,10 @@ Property list
     (may not account correctly for various overhead), and stops at the
     demuxer position (it ignores seek ranges after it).
 
+    ``file-cache-bytes`` is the number of bytes stored in the file cache. This
+    includes all overhead, and possibly unused data (like pruned data). This
+    member is missing if the file cache is not active.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1475,6 +1479,7 @@ Property list
             "bof-cached"        MPV_FORMAT_FLAG
             "eof-cached"        MPV_FORMAT_FLAG
             "fw-bytes"          MPV_FORMAT_INT64
+            "file-cache-bytes"  MPV_FORMAT_INT64
 
     Other fields (might be changed or removed in the future):
 

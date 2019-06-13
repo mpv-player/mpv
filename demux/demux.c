@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "cache.h"
 #include "config.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -79,6 +80,7 @@ static const demuxer_desc_t *const demuxer_list[] = {
 
 struct demux_opts {
     int enable_cache;
+    int disk_cache;
     int64_t max_bytes;
     int64_t max_bytes_bw;
     double min_secs;
@@ -102,6 +104,7 @@ const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
         OPT_CHOICE("cache", enable_cache, 0,
                    ({"no", 0}, {"auto", -1}, {"yes", 1})),
+        OPT_FLAG("cache-on-disk", disk_cache, 0),
         OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
         // (The MAX_BYTES sizes may not be accurate because the max field is
         // of double type.)
@@ -177,6 +180,8 @@ struct demux_internal {
     struct sh_stream *metadata_stream;
 
     int events;
+
+    struct demux_cache *cache;
 
     bool warned_queue_overflow;
     bool last_eof;              // last actual global EOF status
@@ -1038,6 +1043,10 @@ static void demux_shutdown(struct demux_internal *in)
 
     in->current_range = NULL;
     free_empty_cached_ranges(in);
+
+    talloc_free(in->cache);
+    in->cache = NULL;
+
     if (in->owns_stream)
         free_stream(demuxer->stream);
     demuxer->stream = NULL;
@@ -1863,6 +1872,15 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         return;
     }
 
+    if (in->cache) {
+        int64_t pos = demux_cache_write(in->cache, dp);
+        if (pos >= 0) {
+            demux_packet_unref_contents(dp);
+            dp->is_cached = true;
+            dp->cached_data.pos = pos;
+        }
+    }
+
     queue->correct_pos &= dp->pos >= 0 && dp->pos > queue->last_pos;
     queue->correct_dts &= dp->dts != MP_NOPTS_VALUE && dp->dts > queue->last_dts;
     queue->last_pos = dp->pos;
@@ -2393,11 +2411,21 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
     struct demux_packet *pkt = advance_reader_head(ds);
     assert(pkt);
 
-    // The returned packet is mutated etc. and will be owned by the user.
-    pkt = demux_copy_packet(pkt);
+    if (pkt->is_cached) {
+        assert(in->cache);
+        struct demux_packet *meta = pkt;
+        pkt = demux_cache_read(in->cache, pkt->cached_data.pos);
+        if (pkt) {
+            demux_packet_copy_attribs(pkt, meta);
+        } else {
+            MP_ERR(in, "Failed to retrieve packet from cache.\n");
+        }
+    } else {
+        // The returned packet is mutated etc. and will be owned by the user.
+        pkt = demux_copy_packet(pkt);
+    }
     if (!pkt)
-        abort();
-    pkt->next = NULL;
+        return 0;
 
     if (in->back_demuxing) {
         if (pkt->keyframe) {
@@ -2999,11 +3027,19 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                     timeline_destroy(tl);
             }
         }
+
         if (!(params && params->is_top_level) || sub) {
             in->seekable_cache = false;
             in->min_secs = 0;
             in->max_bytes = 1;
         }
+
+        if (in->seekable_cache && opts->disk_cache) {
+            in->cache = demux_cache_create(global, log);
+            if (!in->cache)
+                MP_ERR(in, "Failed to create file cache.\n");
+        }
+
         switch_to_fresh_cache_range(in);
 
         demux_update(demuxer, MP_NOPTS_VALUE);
@@ -3792,6 +3828,7 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
         .low_level_seeks = in->low_level_seeks,
         .ts_last = in->demux_ts,
         .bytes_per_second = in->bytes_per_second,
+        .file_cache_bytes = in->cache ? demux_cache_get_size(in->cache) : -1,
     };
     bool any_packets = false;
     for (int n = 0; n < in->num_streams; n++) {

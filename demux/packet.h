@@ -29,16 +29,29 @@ typedef struct demux_packet {
     double duration;
     int64_t pos;        // position in source file byte stream
 
-    unsigned char *buffer;
-    size_t len;
+    union {
+        // Normally valid for packets.
+        struct {
+            unsigned char *buffer;
+            size_t len;
+        };
+
+        // Used if is_cached==true, special uses only.
+        struct {
+            uint64_t pos;
+        } cached_data;
+    };
 
     int stream;         // source stream index (typically sh_stream.index)
 
     bool keyframe;
 
     // backward playback
-    bool back_restart;  // restart point (reverse and return previous frames)
-    bool back_preroll;  // initial discarded frame for smooth decoder reinit
+    bool back_restart : 1;  // restart point (reverse and return previous frames)
+    bool back_preroll : 1;  // initial discarded frame for smooth decoder reinit
+
+    // If true, cached_data is valid, while buffer/len are not.
+    bool is_cached : 1;
 
     // segmentation (ordered chapters, EDL)
     bool segmented;
@@ -67,5 +80,7 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end);
 int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
                                      void *data, size_t size);
+
+void demux_packet_unref_contents(struct demux_packet *dp);
 
 #endif /* MPLAYER_DEMUX_PACKET_H */

@@ -272,6 +272,7 @@ def build(ctx):
         ## Demuxers
         ( "demux/codec_tags.c" ),
         ( "demux/cue.c" ),
+        ( "demux/cache.c" ),
         ( "demux/demux.c" ),
         ( "demux/demux_cue.c" ),
         ( "demux/demux_edl.c" ),

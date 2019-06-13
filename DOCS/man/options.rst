@@ -3871,6 +3871,33 @@ Cache
     very high, so the actually achieved readahead will usually be limited by
     the value of the ``--demuxer-max-bytes`` option.
 
+``--cache-on-disk=<yes|no>``
+    Write packet data to a temporary file, instead of keeping them in memory.
+    This makes sense only with ``--cache``. If the normal cache is disabled,
+    this option is ignored.
+
+    You need to set ``--cache-dir`` to use this.
+
+    The cache file is append-only. Even if the player appears to prune data, the
+    file space freed by it is not reused. The cache file is deleted when
+    playback is closed.
+
+    Note that packet metadata is still kept in memory. ``--demuxer-max-bytes``
+    and related options are applied to metadata *only*. The size of this
+    metadata  varies, but 50 MB per hour of media is typical. The cache
+    statistics will report this metadats size, instead of the size of the cache
+    file. If the metadata hits the size limits, the metadata is pruned (but not
+    the cache file).
+
+    When the media is closed, the cache file is deleted. A cache file is
+    generally worthless after the media is closed, and it's hard to retrieve
+    any media data from it (it's not supported by design).
+
+``--cache-dir=<path>``
+    Directory where to create temporary files (default: none).
+
+    Currently, this is used for ``--cache-on-disk`` only.
+
 ``--cache-pause=<yes|no>``
     Whether the player should automatically pause when the cache runs out of
     data and stalls decoding/playback (default: yes). If enabled, it will
@@ -3899,6 +3926,25 @@ Cache
 
     This option also triggers when playback is restarted after seeking.
 
+``--cache-unlink-files=<immediate|whendone|no>``
+    Whether or when to unlink cache files (default: immediate). This affects
+    cache files which are inherently temporary, and which make no sense to
+    remain on disk after the player terminates. This is a debugging option.
+
+    ``immediate``
+        Unlink cache file after they were created. The cache files won't be
+        visible anymore, even though they're in use. This ensures they are
+        guaranteed to be removed from disk when the player terminates, even if
+        it crashes.
+
+    ``whendone``
+        Delete cache files after they are closed.
+
+    ``no``
+        Don't delete cache files. They will consume disk space without having a
+        use.
+
+    Currently, this is used for ``--cache-on-disk`` only.
 
 Network
 -------

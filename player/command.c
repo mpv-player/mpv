@@ -1532,6 +1532,8 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     node_map_add_flag(r, "idle", s.idle);
     node_map_add_int64(r, "total-bytes", s.total_bytes);
     node_map_add_int64(r, "fw-bytes", s.fw_bytes);
+    if (s.file_cache_bytes >= 0)
+        node_map_add_int64(r, "file-cache-bytes", s.file_cache_bytes);
     if (s.seeking != MP_NOPTS_VALUE)
         node_map_add_double(r, "debug-seeking", s.seeking);
     node_map_add_int64(r, "debug-low-level-seeks", s.low_level_seeks);
