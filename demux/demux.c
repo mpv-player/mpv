@@ -416,8 +416,6 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp);
 static struct demux_packet *advance_reader_head(struct demux_stream *ds);
 static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
                        bool clear_back_state);
-static void clear_reader_state(struct demux_internal *in,
-                               bool clear_back_state);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -799,6 +797,18 @@ static void ds_clear_reader_state(struct demux_stream *ds,
         ds->back_range_count = 0;
         ds->back_range_preroll = 0;
     }
+}
+
+// called locked, from user thread only
+static void clear_reader_state(struct demux_internal *in,
+                               bool clear_back_state)
+{
+    for (int n = 0; n < in->num_streams; n++)
+        ds_clear_reader_state(in->streams[n]->ds, clear_back_state);
+    in->warned_queue_overflow = false;
+    in->d_user->filepos = -1; // implicitly synchronized
+    in->blocked = false;
+    in->need_back_seek = false;
 }
 
 // Call if the observed reader state on this stream somehow changes. The wakeup
@@ -3173,18 +3183,6 @@ struct demuxer *demux_open_url(const char *url,
         talloc_free(priv_cancel);
     }
     return d;
-}
-
-// called locked, from user thread only
-static void clear_reader_state(struct demux_internal *in,
-                               bool clear_back_state)
-{
-    for (int n = 0; n < in->num_streams; n++)
-        ds_clear_reader_state(in->streams[n]->ds, clear_back_state);
-    in->warned_queue_overflow = false;
-    in->d_user->filepos = -1; // implicitly synchronized
-    in->blocked = false;
-    in->need_back_seek = false;
 }
 
 // clear the packet queues
