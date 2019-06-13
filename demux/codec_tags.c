@@ -75,7 +75,7 @@ static void map_audio_pcm_tag(struct mp_codec_params *c)
 
         // Compressed formats might use this.
         c->extradata += 22;
-        c->extradata_size += 22;
+        c->extradata_size -= 22;
     }
 
     int bits = c->bits_per_coded_sample;
