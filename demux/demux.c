@@ -3284,6 +3284,9 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
         double range_pts;
         next = compute_keyframe_times(dp, &range_pts, NULL);
 
+        if (range_pts == MP_NOPTS_VALUE)
+            continue;
+
         if (flags & SEEK_FORWARD) {
             // Stop on the first packet that is >= pts.
             if (target)
