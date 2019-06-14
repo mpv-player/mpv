@@ -152,7 +152,6 @@ const struct keymap_entry keys[] = {
 };
 
 struct priv {
-    bool reinit_renderer;
     SDL_Window *window;
     SDL_Renderer *renderer;
     int renderer_index;
@@ -176,9 +175,6 @@ struct priv {
         int targets_size;
     } osd_surfaces[MAX_OSD_PARTS];
     double osd_pts;
-    int mouse_hidden;
-    int brightness, contrast;
-    char *window_title;
     Uint32 wakeup_event;
     bool screensaver_enabled;
 
@@ -283,15 +279,9 @@ static void destroy_renderer(struct vo *vo)
         SDL_DestroyRenderer(vc->renderer);
         vc->renderer = NULL;
     }
-
-    if (vc->window) {
-        SDL_DestroyWindow(vc->window);
-        vc->window = NULL;
-    }
 }
 
-static bool try_create_renderer(struct vo *vo, int i, const char *driver,
-                                struct mp_rect *rc, int flags)
+static bool try_create_renderer(struct vo *vo, int i, const char *driver)
 {
     struct priv *vc = vo->priv;
 
@@ -302,24 +292,9 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
     if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
         return false;
 
-    bool xy_valid = flags & VO_WIN_FORCE_POS;
-
-    // then actually try
-    vc->window = SDL_CreateWindow("MPV",
-                                  xy_valid ? rc->x0 : SDL_WINDOWPOS_UNDEFINED,
-                                  xy_valid ? rc->y0 : SDL_WINDOWPOS_UNDEFINED,
-                                  rc->x1 - rc->x0, rc->y1 - rc->y0,
-                                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
-    if (!vc->window) {
-        MP_ERR(vo, "SDL_CreateWindow failed\n");
-        destroy_renderer(vo);
-        return false;
-    }
-
     vc->renderer = SDL_CreateRenderer(vc->window, i, 0);
     if (!vc->renderer) {
         MP_ERR(vo, "SDL_CreateRenderer failed\n");
-        destroy_renderer(vo);
         return false;
     }
 
@@ -343,14 +318,10 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
         vc->renderer_index = i;
     }
 
-    if (vc->window_title)
-        SDL_SetWindowTitle(vc->window, vc->window_title);
-
     return true;
 }
 
-// flags: VO_WIN_* bits
-static int init_renderer(struct vo *vo, struct mp_rect *rc, int flags)
+static int init_renderer(struct vo *vo)
 {
     struct priv *vc = vo->priv;
 
@@ -358,16 +329,15 @@ static int init_renderer(struct vo *vo, struct mp_rect *rc, int flags)
     int i;
 
     if (vc->renderer_index >= 0)
-        if (try_create_renderer(vo, vc->renderer_index, NULL, rc, flags))
+        if (try_create_renderer(vo, vc->renderer_index, NULL))
             return 0;
 
     for (i = 0; i < n; ++i)
-        if (try_create_renderer(vo, i, SDL_GetHint(SDL_HINT_RENDER_DRIVER),
-                                rc, flags))
+        if (try_create_renderer(vo, i, SDL_GetHint(SDL_HINT_RENDER_DRIVER)))
             return 0;
 
     for (i = 0; i < n; ++i)
-        if (try_create_renderer(vo, i, NULL, rc, flags))
+        if (try_create_renderer(vo, i, NULL))
             return 0;
 
     MP_ERR(vo, "No supported renderer\n");
@@ -472,17 +442,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     int win_w = vo->dwidth;
     int win_h = vo->dheight;
 
-    if (vc->reinit_renderer) {
-        destroy_renderer(vo);
-        vc->reinit_renderer = false;
-    }
-
-    if (vc->window)
-        SDL_SetWindowSize(vc->window, win_w, win_h);
-    else {
-        if (init_renderer(vo, &geo.win, geo.flags) != 0)
-            return -1;
-    }
+    SDL_SetWindowSize(vc->window, win_w, win_h);
+    if (geo.flags & VO_WIN_FORCE_POS)
+        SDL_SetWindowPosition(vc->window, geo.win.x0, geo.win.y0);
 
     if (vc->tex)
         SDL_DestroyTexture(vc->tex);
@@ -636,6 +598,8 @@ static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     destroy_renderer(vo);
+    SDL_DestroyWindow(vc->window);
+    vc->window = NULL;
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     talloc_free(vc);
 }
@@ -825,13 +789,21 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
+    // then actually try
+    vc->window = SDL_CreateWindow("MPV", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                  640, 480, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+    if (!vc->window) {
+        MP_ERR(vo, "SDL_CreateWindow failed\n");
+        return -1;
+    }
+
     // try creating a renderer (this also gets the renderer_info data
     // for query_format to use!)
-    if (init_renderer(vo, &(struct mp_rect){.x1 = 640, .y1 = 480}, 0) != 0)
+    if (init_renderer(vo) != 0) {
+        SDL_DestroyWindow(vc->window);
+        vc->window = NULL;
         return -1;
-
-    // please reinitialize the renderer to proper size on config()
-    vc->reinit_renderer = true;
+    }
 
     vc->wakeup_event = SDL_RegisterEvents(1);
     if (vc->wakeup_event == (Uint32)-1)
@@ -938,10 +910,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         set_screensaver(vc->screensaver_enabled);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        talloc_free(vc->window_title);
-        vc->window_title = talloc_strdup(vc, (char *)data);
-        if (vc->window && vc->window_title)
-            SDL_SetWindowTitle(vc->window, vc->window_title);
+        SDL_SetWindowTitle(vc->window, (char *)data);
         return true;
     }
     return VO_NOTIMPL;
