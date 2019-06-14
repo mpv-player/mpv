@@ -12,8 +12,6 @@ env:
   matrix:
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:snapshot-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
     - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   global:
