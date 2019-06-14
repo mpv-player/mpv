@@ -747,9 +747,22 @@ video_output_features = [
         'deps': 'shaderc-shared || shaderc-static',
         'func': check_true,
     }, {
+        'name': 'spirv-cross-shared',
+        'desc': 'SPIRV-Cross SPIR-V shader converter (shared library)',
+        'deps': '!static-build',
+        'groups': ['spirv-cross'],
+        'func': check_pkg_config('spirv-cross-c-shared'),
+    }, {
+        'name': 'spirv-cross-static',
+        'desc': 'SPIRV-Cross SPIR-V shader converter (static library)',
+        'deps': '!spirv-cross-shared',
+        'groups': ['spirv-cross'],
+        'func': check_pkg_config('spirv-cross'),
+    }, {
         'name': '--spirv-cross',
         'desc': 'SPIRV-Cross SPIR-V shader converter',
-        'func': check_pkg_config('spirv-cross-c-shared'),
+        'deps': 'spirv-cross-shared || spirv-cross-static',
+        'func': check_true,
     }, {
         'name': '--d3d11',
         'desc': 'Direct3D 11 video output',
