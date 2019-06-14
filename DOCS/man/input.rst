@@ -1453,8 +1453,8 @@ Property list
     points to the beginning of the stream (BOF). This implies you cannot seek
     before this position at all. ``eof-cached`` indicates whether the seek range
     with the highest timestamp points to the end of the stream (EOF). If both
-    ``bof-cached`` and ``eof-cached`` are set to ``yes``, the entire stream is
-    cached.
+    ``bof-cached`` and ``eof-cached`` are set to ``yes``, and there's only 1
+    cache range, the entire stream is cached.
 
     ``fw-bytes`` is the number of bytes of packets buffered in the range
     starting from the current decoding position. This is a rough estimate
