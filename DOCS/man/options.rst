@@ -1261,6 +1261,30 @@ Video
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
+``--video-margin-ratio-left=<val>``, ``--video-margin-ratio-right=<val>``, ``--video-margin-ratio-top=<val>``, ``--video-margin-ratio-bottom=<val>``
+    Set extra video margins on each border (default: 0). Each value is a ratio
+    of the window size, using a range 0.0-1.0. For example, setting the option
+    ``--video-margin-ratio-right=0.2`` at a window size of 1000 pixels will add
+    a 200 pixels border on the right side of the window.
+
+    The video is "boxed" by these margins. The window size is not changed. In
+    particular it does not enlarge the window, and the margins will cause the
+    video to be downscaled by default. This may or may not change in the future.
+
+    The margins are applied after 90° video rotation, but before any other video
+    transformations.
+
+    This option is disabled if the ``--no-keepaspect`` option is used.
+
+    Subtitles still may use the margins, depending on ``--sub-use-margins`` and
+    similar options.
+
+    These options were created for the OSC. Some odd decisions, such as making
+    the margin values a ratio (instead of pixels), were made for the sake of
+    the OSC. It's possible that these options may be replaced by ones that are
+    more generally useful. The behavior of these options may change to fit
+    OSC requirements better, too.
+
 ``--correct-pts``, ``--no-correct-pts``
     ``--no-correct-pts`` switches mpv to a mode where video timing is
     determined using a fixed framerate value (either using the ``--fps``

@@ -113,6 +113,18 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     *osd_margin_b = dst_size - *dst_end;
 }
 
+static void calc_margin(float opts[2], int out[2], int size)
+{
+    out[0] = MPCLAMP((int)(opts[0] * size), 0, size);
+    out[1] = MPCLAMP((int)(opts[1] * size), 0, size);
+
+    if (out[0] + out[1] >= size) {
+        // This case is not really supported. Show an error by 1 pixel.
+        out[0] = 0;
+        out[1] = MPMAX(0, size - 1);
+    }
+}
+
 void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
                           int vo_caps, struct mp_image_params *video,
                           int window_w, int window_h, double monitor_par,
@@ -123,6 +135,7 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     int src_w = video->w;
     int src_h = video->h;
     int src_dw, src_dh;
+
     mp_image_params_get_dsize(video, &src_dw, &src_dh);
     if (video->rotate % 180 == 90 && (vo_caps & VO_CAP_ROTATE90)) {
         MPSWAP(int, src_w, src_h);
@@ -130,6 +143,17 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     }
     window_w = MPMAX(1, window_w);
     window_h = MPMAX(1, window_h);
+
+    int margin_x[2] = {0};
+    int margin_y[2] = {0};
+    if (opts->keepaspect) {
+        calc_margin(opts->margin_x, margin_x, window_w);
+        calc_margin(opts->margin_y, margin_y, window_h);
+    }
+
+    int vid_window_w = window_w - margin_x[0] - margin_x[1];
+    int vid_window_h = window_h - margin_y[0] - margin_y[1];
+
     struct mp_rect dst = {0, 0, window_w, window_h};
     struct mp_rect src = {0, 0, src_w,    src_h};
     struct mp_osd_res osd = {
@@ -137,20 +161,33 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
         .h = window_h,
         .display_par = monitor_par,
     };
+
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
         aspect_calc_panscan(opts, src_w, src_h, src_dw, src_dh, opts->unscaled,
-                            window_w, window_h, monitor_par,
+                            vid_window_w, vid_window_h, monitor_par,
                             &scaled_width, &scaled_height);
-        src_dst_split_scaling(src_w, window_w, scaled_width,
+        src_dst_split_scaling(src_w, vid_window_w, scaled_width,
                               opts->zoom, opts->align_x, opts->pan_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
-        src_dst_split_scaling(src_h, window_h, scaled_height,
+        src_dst_split_scaling(src_h, vid_window_h, scaled_height,
                               opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);
     }
+
+    dst.x0 += margin_x[0];
+    dst.y0 += margin_y[0];
+    dst.x1 += margin_x[0];
+    dst.y1 += margin_y[0];
+
+    // OSD really uses the full window, but was computed on the margin-cut
+    // video sub-window. Correct it to the full window.
+    osd.ml += margin_x[0];
+    osd.mr += margin_x[1];
+    osd.mt += margin_y[0];
+    osd.mb += margin_y[1];
 
     *out_src = src;
     *out_dst = dst;
@@ -159,8 +196,9 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     int sw = src.x1 - src.x0, sh = src.y1 - src.y0;
     int dw = dst.x1 - dst.x0, dh = dst.y1 - dst.y0;
 
-    mp_verbose(log, "Window size: %dx%d\n",
-               window_w, window_h);
+    mp_verbose(log, "Window size: %dx%d (Borders: l=%d t=%d r=%d b=%d)\n",
+               window_w, window_h,
+               margin_x[0], margin_y[0], margin_x[1], margin_y[1]);
     mp_verbose(log, "Video source: %dx%d (%d:%d)\n",
                video->w, video->h, video->p_w, video->p_h);
     mp_verbose(log, "Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
