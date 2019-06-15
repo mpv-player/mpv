@@ -299,6 +299,26 @@ Configurable Options
     default is conservative to allow wide fonts to be used without overflow.
     However, with many common fonts a bigger number can be used. YMMV.
 
+``boxvideo``
+    Default: no
+
+    Whether to overlay the osc over the video (``no``), or to box the video
+    within the areas not covered by the osc (``yes``). If this option is set,
+    the osc may overwrite the ``--video-margin-ratio-*`` options, even if the
+    user has set them. (It will not overwrite them if all of them are set to
+    default values.)
+
+    Currently, this is supported for the ``bottombar`` layout only. The other
+    layouts do not change if this option is set.
+
+    The border is static and appears even if the OSC is configured to appear
+    only on mouse interaction. If the OSC is invisible, the border is simply
+    filled with the background color (black by default).
+
+    This currently still makes the OSC overlap with subtitles (if the
+    ``--sub-use-margins`` option is set to ``yes``, the default). This may be
+    fixed later.
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
