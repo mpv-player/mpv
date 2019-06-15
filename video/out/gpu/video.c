@@ -212,7 +212,7 @@ struct gl_video {
     struct ra_tex *integer_tex[4];
     struct ra_tex *indirect_tex;
     struct ra_tex *blend_subs_tex;
-    struct ra_tex *error_diffusion_tex;
+    struct ra_tex *error_diffusion_tex[2];
     struct ra_tex *screen_tex;
     struct ra_tex *output_tex;
     struct ra_tex *vdpau_deinterleave_tex[2];
@@ -553,9 +553,11 @@ static void uninit_rendering(struct gl_video *p)
 
     ra_tex_free(p->ra, &p->indirect_tex);
     ra_tex_free(p->ra, &p->blend_subs_tex);
-    ra_tex_free(p->ra, &p->error_diffusion_tex);
     ra_tex_free(p->ra, &p->screen_tex);
     ra_tex_free(p->ra, &p->output_tex);
+
+    for (int n = 0; n < 2; n++)
+        ra_tex_free(p->ra, &p->error_diffusion_tex[n]);
 
     for (int n = 0; n < SURFACES_MAX; n++)
         ra_tex_free(p->ra, &p->surfaces[n].tex);
@@ -2618,9 +2620,9 @@ static void pass_dither(struct gl_video *p)
                        shmem_req, (int)p->ra->max_shmem);
             p->opts.dither_algo = DITHER_FRUIT;
         } else {
-            finish_pass_tex(p, &p->screen_tex, o_w, o_h);
+            finish_pass_tex(p, &p->error_diffusion_tex[0], o_w, o_h);
 
-            struct image img = image_wrap(p->screen_tex, PLANE_RGB, p->components);
+            struct image img = image_wrap(p->error_diffusion_tex[0], PLANE_RGB, p->components);
 
             // 1024 is minimal required number of invocation allowed in single
             // work group in OpenGL. Use it for maximal performance.
@@ -2641,9 +2643,9 @@ static void pass_dither(struct gl_video *p)
             pass_error_diffusion(p->sc, kernel, tex_id, o_w, o_h,
                                  dst_depth, block_size);
 
-            finish_pass_tex(p, &p->error_diffusion_tex, o_w, o_h);
+            finish_pass_tex(p, &p->error_diffusion_tex[1], o_w, o_h);
 
-            img = image_wrap(p->error_diffusion_tex, PLANE_RGB, p->components);
+            img = image_wrap(p->error_diffusion_tex[1], PLANE_RGB, p->components);
             copy_image(p, &(int){0}, img);
 
             return;
