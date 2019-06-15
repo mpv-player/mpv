@@ -44,6 +44,7 @@ local user_opts = {
     timems = false,             -- display timecodes with milliseconds?
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
+    boxvideo = false,           -- apply osc_param.video_margins to video
 }
 
 -- read_options may modify hidetimeout, so save the original default value in
@@ -62,6 +63,9 @@ local osc_param = { -- calculated by osc_init()
     display_aspect = 1,
     unscaled_y = 0,
     areas = {},
+    video_margins = {
+        l = 0, r = 0, t = 0, b = 0,         -- left/right/top/bottom
+    },
 }
 
 local osc_styles = {
@@ -108,6 +112,7 @@ local state = {
     input_enabled = true,
     showhide_enabled = false,
     dmx_cache = 0,
+    using_video_margins = false,
 }
 
 
@@ -116,6 +121,13 @@ local state = {
 --
 -- Helperfunctions
 --
+
+local margins_opts = {
+    {"l", "video-margin-ratio-left"},
+    {"r", "video-margin-ratio-right"},
+    {"t", "video-margin-ratio-top"},
+    {"b", "video-margin-ratio-bottom"},
+}
 
 -- scale factor for translating between real and virtual ASS coordinates
 function get_virt_scale_factor()
@@ -1408,6 +1420,8 @@ layouts["bottombar"] = function()
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.rtype = user_opts["seekrangestyle"]
+
+    osc_param.video_margins.b = osc_geo.h / osc_param.playresy
 end
 
 layouts["topbar"] = function()
@@ -1998,9 +2012,40 @@ function osc_init()
     --do something with the elements
     prepare_elements()
 
+    if user_opts.boxvideo then
+        -- check whether any margin option has a non-default value
+        local margins_used = false
+
+        for _, opt in ipairs(margins_opts) do
+            if mp.get_property_number(opt[2], 0.0) ~= 0.0 then
+                margins_used = true
+            end
+        end
+
+        if not margins_used then
+            local margins = osc_param.video_margins
+            for _, opt in ipairs(margins_opts) do
+                local v = margins[opt[1]]
+                if v ~= 0 then
+                    mp.set_property_number(opt[2], v)
+                    state.using_video_margins = true
+                end
+            end
+        end
+    else
+        reset_margins()
+    end
+
 end
 
-
+function reset_margins()
+    if state.using_video_margins then
+        for _, opt in ipairs(margins_opts) do
+            mp.set_property_number(opt[2], 0.0)
+        end
+        state.using_video_margins = false
+    end
+end
 
 --
 -- Other important stuff
@@ -2386,6 +2431,7 @@ end
 
 validate_user_opts()
 
+mp.register_event("shutdown", reset_margins)
 mp.register_event("start-file", request_init)
 mp.register_event("tracks-changed", request_init)
 mp.observe_property("playlist", nil, request_init)
