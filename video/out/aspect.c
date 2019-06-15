@@ -44,12 +44,12 @@ static void aspect_calc_panscan(struct mp_vo_opts *opts,
     }
 
     int vo_panscan_area = window_h - fheight;
-    double f_w = fwidth / (double)fheight;
+    double f_w = fwidth / (double)MPMAX(fheight, 1);
     double f_h = 1;
     if (vo_panscan_area == 0) {
         vo_panscan_area = window_w - fwidth;
         f_w = 1;
-        f_h = fheight / (double)fwidth;
+        f_h = fheight / (double)MPMAX(fwidth, 1);
     }
 
     if (unscaled) {
@@ -90,10 +90,6 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     *dst_start = (dst_size - scaled_src_size) * align + pan * scaled_src_size;
     *dst_end = *dst_start + scaled_src_size;
 
-    // Distance of screen frame to video
-    *osd_margin_a = *dst_start;
-    *osd_margin_b = dst_size - *dst_end;
-
     // Clip to screen
     int s_src = *src_end - *src_start;
     int s_dst = *dst_end - *dst_start;
@@ -111,6 +107,10 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     // For sanity: avoid bothering VOs with corner cases
     clamp_size(src_size, src_start, src_end);
     clamp_size(dst_size, dst_start, dst_end);
+
+    // Distance of screen frame to video
+    *osd_margin_a = *dst_start;
+    *osd_margin_b = dst_size - *dst_end;
 }
 
 void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
