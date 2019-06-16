@@ -44,6 +44,7 @@
 #define MP_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define MP_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
 #define MP_IS_ALIGNED(x, align) (!((x) & ((align) - 1)))
+#define MP_IS_POWER_OF_2(x) ((x) > 0 && !((x) & ((x) - 1)))
 
 // Return "a", or if that is NOPTS, return "def".
 #define MP_PTS_OR_DEF(a, def) ((a) == MP_NOPTS_VALUE ? (def) : (a))
