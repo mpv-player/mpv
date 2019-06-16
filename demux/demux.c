@@ -416,6 +416,9 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp);
 static struct demux_packet *advance_reader_head(struct demux_stream *ds);
 static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
                        bool clear_back_state);
+static struct demux_packet *compute_keyframe_times(struct demux_packet *pkt,
+                                                   double *out_kf_min,
+                                                   double *out_kf_max);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -1444,12 +1447,8 @@ static void find_backward_restart_pos(struct demux_stream *ds)
             assert(0); // target must be in list
     }
 
-    double seek_pts = MP_NOPTS_VALUE;
-    for (struct demux_packet *cur = target; cur; cur = cur->next) {
-        seek_pts = MP_PTS_MIN(seek_pts, cur->pts);
-        if (cur->next && cur->next->keyframe)
-            break;
-    }
+    double seek_pts;
+    compute_keyframe_times(target, &seek_pts, NULL);
     if (seek_pts != MP_NOPTS_VALUE)
         ds->back_seek_pos = seek_pts;
 
