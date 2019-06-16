@@ -1421,9 +1421,12 @@ static void find_backward_restart_pos(struct demux_stream *ds)
 
     assert(total >= 1);
 
+    bool is_bof = ds->queue->is_bof &&
+        (first == ds->queue->head || ds->back_seek_pos < ds->queue->seek_start);
+
     struct demux_packet *target = NULL; // resume pos
     // nr. of keyframes, incl. target, excl. restart_pos
-    int got_total = num_kf < total && ds->queue->is_bof ? num_kf : total;
+    int got_total = num_kf < total && is_bof ? num_kf : total;
     int got_preroll = MPMAX(got_total - batch, 0);
 
     if (got_total == 1) {
@@ -1442,10 +1445,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     }
 
     if (!target) {
-        if (ds->queue->is_bof &&
-                (first == ds->queue->head ||
-                 ds->back_seek_pos < ds->queue->seek_start))
-        {
+        if (is_bof) {
             MP_VERBOSE(in, "BOF for stream %d\n", ds->index);
             ds->back_restarting = false;
             ds->back_range_started = false;
