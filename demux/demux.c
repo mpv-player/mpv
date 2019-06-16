@@ -211,8 +211,9 @@ struct demux_internal {
     // stuff otherwise), which adds complexity on top of it.
     bool back_demuxing;
 
-    // For backward demuxing: back-step seek needs to be triggered.
-    bool need_back_seek;
+    // For backward demuxing:
+    bool need_back_seek;        // back-step seek needs to be triggered
+    bool back_any_need_recheck; // at least 1 ds->back_need_recheck set
 
     bool tracks_switched;       // thread needs to inform demuxer of this
 
@@ -379,6 +380,7 @@ struct demux_stream {
     double last_ret_dts;
 
     // Backwards demuxing.
+    bool back_need_recheck; // flag for incremental find_backward_restart_pos work
     // pos/dts of the previous keyframe packet returned; always valid if back-
     // demuxing is enabled, and back_restart_eof/back_restart_next are false.
     int64_t back_restart_pos;
@@ -419,6 +421,9 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
 static struct demux_packet *compute_keyframe_times(struct demux_packet *pkt,
                                                    double *out_kf_min,
                                                    double *out_kf_max);
+static void find_backward_restart_pos(struct demux_stream *ds);
+static struct demux_packet *find_seek_target(struct demux_queue *queue,
+                                             double pts, int flags);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -1291,6 +1296,19 @@ static void perform_backward_seek(struct demux_internal *in)
     pthread_mutex_lock(&in->lock);
 }
 
+// For incremental backward demuxing search work.
+static void check_backward_seek(struct demux_internal *in)
+{
+    in->back_any_need_recheck = false;
+
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+
+        if (ds->back_need_recheck)
+            find_backward_restart_pos(ds);
+    }
+}
+
 // Search for a packet to resume demuxing from.
 // The implementation of this function is quite awkward, because the packet
 // queue is a singly linked list without back links, while it needs to search
@@ -1300,7 +1318,9 @@ static void find_backward_restart_pos(struct demux_stream *ds)
 {
     struct demux_internal *in = ds->in;
 
-    assert(ds->back_restarting);
+    ds->back_need_recheck = false;
+    if (!ds->back_restarting)
+        return;
 
     struct demux_packet *first = ds->reader_head;
     struct demux_packet *last = ds->queue->tail;
@@ -1497,8 +1517,20 @@ resume_earlier:
     }
 
     if (ds->back_seek_pos != MP_NOPTS_VALUE) {
-        ds->back_seek_pos -= in->opts->back_seek_size;
-        in->need_back_seek = true;
+        struct demux_packet *t =
+            find_seek_target(ds->queue, ds->back_seek_pos - 0.001, 0);
+        if (t && t != ds->reader_head) {
+            double pts;
+            compute_keyframe_times(t, &pts, NULL);
+            ds->back_seek_pos = MP_PTS_MIN(ds->back_seek_pos, pts);
+            ds_clear_reader_state(ds, false);
+            ds->reader_head = t;
+            ds->back_need_recheck = true;
+            in->back_any_need_recheck = true;
+        } else {
+            ds->back_seek_pos -= in->opts->back_seek_size;
+            in->need_back_seek = true;
+        }
     }
 }
 
@@ -2307,6 +2339,10 @@ static bool thread_work(struct demux_internal *in)
     }
     if (in->need_back_seek) {
         perform_backward_seek(in);
+        return true;
+    }
+    if (in->back_any_need_recheck) {
+        check_backward_seek(in);
         return true;
     }
     if (in->seeking) {
