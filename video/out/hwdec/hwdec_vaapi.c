@@ -417,7 +417,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                                    VA_EXPORT_SURFACE_READ_ONLY |
                                    VA_EXPORT_SURFACE_SEPARATE_LAYERS,
                                    &p->desc);
-    if (!CHECK_VA_STATUS(mapper, "vaExportSurfaceHandle()")) {
+    if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
+                               p_owner->probing_formats ? MSGL_V : MSGL_ERR)) {
         if (status == VA_STATUS_ERROR_UNIMPLEMENTED)
             p->esh_not_implemented = true;
         goto esh_failed;
