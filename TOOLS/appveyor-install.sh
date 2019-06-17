@@ -14,12 +14,12 @@ EOF
 # Install build dependencies for mpv
 pacman -S --noconfirm --needed \
     $MINGW_PACKAGE_PREFIX-toolchain \
-    $MINGW_PACKAGE_PREFIX-angleproject-git \
     $MINGW_PACKAGE_PREFIX-cmake \
     $MINGW_PACKAGE_PREFIX-lcms2 \
     $MINGW_PACKAGE_PREFIX-libarchive \
     $MINGW_PACKAGE_PREFIX-libass \
     $MINGW_PACKAGE_PREFIX-libjpeg-turbo \
+    $MINGW_PACKAGE_PREFIX-libplacebo \
     $MINGW_PACKAGE_PREFIX-lua51 \
     $MINGW_PACKAGE_PREFIX-ninja \
     $MINGW_PACKAGE_PREFIX-rubberband \
