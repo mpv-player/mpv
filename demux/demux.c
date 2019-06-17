@@ -1715,6 +1715,8 @@ static void prune_old_packets(struct demux_internal *in)
                 }
                 prev = prev->next;
             }
+
+            update_seek_ranges(range);
         }
 
         bool done = false;
@@ -1722,8 +1724,6 @@ static void prune_old_packets(struct demux_internal *in)
             done = queue->next_prune_target == queue->head;
             remove_head_packet(queue);
         }
-
-        update_seek_ranges(range);
 
         if (range != in->current_range && range->seek_start == MP_NOPTS_VALUE)
             free_empty_cached_ranges(in);
