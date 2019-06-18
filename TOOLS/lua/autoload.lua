@@ -89,7 +89,7 @@ local autoloaded = nil
 function find_and_add_entries()
     local path = mp.get_property("path", "")
     local dir, filename = utils.split_path(path)
-    msg.trace(("dir: %s, filename: %s"):format(dir, filename))
+    msg.log("trace", ("dir: %s, filename: %s"):format(dir, filename))
     if o.disabled then
         msg.verbose("stopping: autoload disabled")
         return
@@ -109,7 +109,7 @@ function find_and_add_entries()
 
     local pl = mp.get_property_native("playlist", {})
     local pl_current = mp.get_property_number("playlist-pos-1", 1)
-    msg.trace(("playlist-pos-1: %s, playlist: %s"):format(pl_current,
+    msg.log("trace", ("playlist-pos-1: %s, playlist: %s"):format(pl_current,
         utils.to_string(pl)))
 
     local files = utils.readdir(dir, "files")
@@ -143,7 +143,7 @@ function find_and_add_entries()
     if current == nil then
         return
     end
-    msg.trace("current file position in files: "..current)
+    msg.log("trace", "current file position in files: "..current)
 
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
@@ -157,7 +157,7 @@ function find_and_add_entries()
             local filepath = dir .. file
             if pl_e then
                 -- If there's a playlist entry, and it's the same file, stop.
-                msg.trace(pl_e.filename.." == "..filepath.." ?")
+                msg.log("trace", pl_e.filename.." == "..filepath.." ?")
                 if pl_e.filename == filepath then
                     break
                 end
