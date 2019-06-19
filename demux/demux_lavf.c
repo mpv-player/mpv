@@ -396,7 +396,7 @@ static void convert_charset(struct demuxer *demuxer)
             data = conv;
     }
     if (data.start) {
-        priv->stream = open_memory_stream(data.start, data.len);
+        priv->stream = stream_memory_open(demuxer->global, data.start, data.len);
         priv->own_stream = true;
     }
     talloc_free(alloc);

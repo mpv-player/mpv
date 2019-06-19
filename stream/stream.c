@@ -213,10 +213,12 @@ static void stream_resize_buffer(struct stream *s, int new)
     }
 }
 
-static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
-                         struct mp_cancel *c, struct mpv_global *global,
-                         struct stream **ret)
+int stream_create_instance(const stream_info_t *sinfo, const char *url, int flags,
+                           struct mp_cancel *c, struct mpv_global *global,
+                           void *arg, struct stream **ret)
 {
+    *ret = NULL;
+
     if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
         return STREAM_UNSAFE;
     if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
@@ -233,7 +235,11 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
         return STREAM_NO_MATCH;
 
     stream_t *s = talloc_zero(NULL, stream_t);
-    s->log = mp_log_new(s, global->log, sinfo->name);
+    if (flags & STREAM_SILENT) {
+        s->log = mp_null_log;
+    } else {
+        s->log = mp_log_new(s, global->log, sinfo->name);
+    }
     s->info = sinfo;
     s->cancel = c;
     s->global = global;
@@ -242,13 +248,17 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
-    if (global->config) {
-        int opt;
-        mp_read_option_raw(global, "access-references", &m_option_type_flag, &opt);
-        s->access_references = opt;
-    }
+    int opt;
+    mp_read_option_raw(global, "access-references", &m_option_type_flag, &opt);
+    s->access_references = opt;
 
     MP_VERBOSE(s, "Opening %s\n", url);
+
+    if (strlen(url) > INT_MAX / 8) {
+        MP_ERR(s, "URL too large.\n");
+        talloc_free(s);
+        return STREAM_ERROR;
+    }
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
         MP_DBG(s, "No write access implemented.\n");
@@ -256,7 +266,12 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
         return STREAM_NO_MATCH;
     }
 
-    int r = (sinfo->open)(s);
+    int r = STREAM_UNSUPPORTED;
+    if (sinfo->open2) {
+        r = sinfo->open2(s, arg);
+    } else if (!arg) {
+        r = (sinfo->open)(s);
+    }
     if (r != STREAM_OK) {
         talloc_free(s);
         return r;
@@ -286,13 +301,11 @@ struct stream *stream_create(const char *url, int flags,
     struct stream *s = NULL;
     assert(url);
 
-    if (strlen(url) > INT_MAX / 8)
-        goto done;
-
     // Open stream proper
     bool unsafe = false;
     for (int i = 0; stream_list[i]; i++) {
-        int r = open_internal(stream_list[i], url, flags, c, global, &s);
+        int r = stream_create_instance(stream_list[i], url, flags, c, global,
+                                       NULL, &s);
         if (r == STREAM_OK)
             break;
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
@@ -615,18 +628,6 @@ void free_stream(stream_t *s)
     if (s->close)
         s->close(s);
     talloc_free(s);
-}
-
-stream_t *open_memory_stream(void *data, int len)
-{
-    assert(len >= 0);
-    struct mpv_global *dummy = talloc_zero(NULL, struct mpv_global);
-    dummy->log = mp_null_log;
-    stream_t *s = stream_open("memory://", dummy);
-    MP_HANDLE_OOM(s);
-    talloc_steal(s, dummy);
-    stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
-    return s;
 }
 
 static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)

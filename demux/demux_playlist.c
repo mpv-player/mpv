@@ -366,7 +366,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->add_base = true;
 
     bstr probe_buf = stream_peek(demuxer->stream, PROBE_SIZE);
-    p->s = open_memory_stream(probe_buf.start, probe_buf.len);
+    p->s = stream_memory_open(demuxer->global, probe_buf.start, probe_buf.len);
     p->s->mime_type = demuxer->stream->mime_type;
     p->utf16 = stream_skip_bom(p->s);
     p->force = force;
