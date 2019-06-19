@@ -2958,7 +2958,7 @@ void demux_close_stream(struct demuxer *demuxer)
 
     MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
     free_stream(demuxer->stream);
-    demuxer->stream = open_memory_stream(NULL, 0); // dummy
+    demuxer->stream = stream_memory_open(demuxer->global, NULL, 0); // dummy
     demuxer->stream->cancel = demuxer->cancel;
     in->d_user->stream = demuxer->stream;
 }
