@@ -209,7 +209,11 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
         return STREAM_NO_MATCH;
 
     stream_t *s = talloc_zero(NULL, stream_t);
-    s->log = mp_log_new(s, global->log, sinfo->name);
+    if (flags & STREAM_SILENT) {
+        s->log = mp_null_log;
+    } else {
+        s->log = mp_log_new(s, global->log, sinfo->name);
+    }
     s->info = sinfo;
     s->cancel = c;
     s->global = global;
@@ -222,8 +226,7 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
     mp_read_option_raw(global, "access-references", &m_option_type_flag, &opt);
     s->access_references = opt;
 
-    if (!(flags & STREAM_SILENT))
-        MP_VERBOSE(s, "Opening %s\n", url);
+    MP_VERBOSE(s, "Opening %s\n", url);
 
     if (strlen(url) > INT_MAX / 8) {
         MP_ERR(s, "URL too large.\n");
@@ -256,12 +259,10 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
 
     assert(s->seekable == !!s->seek);
 
-    if (!(flags & STREAM_SILENT)) {
-        if (s->mime_type)
-            MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
+    if (s->mime_type)
+        MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
 
-        MP_DBG(s, "Stream opened successfully.\n");
-    }
+    MP_DBG(s, "Stream opened successfully.\n");
 
     *ret = s;
     return STREAM_OK;
