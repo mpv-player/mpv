@@ -355,6 +355,7 @@ def build(ctx):
         ( "stream/stream.c" ),
         ( "stream/stream_avdevice.c" ),
         ( "stream/stream_cb.c" ),
+        ( "stream/stream_concat.c" ),
         ( "stream/stream_edl.c" ),
         ( "stream/stream_file.c" ),
         ( "stream/stream_lavf.c" ),
