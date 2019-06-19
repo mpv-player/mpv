@@ -157,8 +157,6 @@ struct demux_internal {
     struct demuxer *d_thread;   // accessed by demuxer impl. (producer)
     struct demuxer *d_user;     // accessed by player (consumer)
 
-    bool owns_stream;
-
     // The lock protects the packet queues (struct demux_stream),
     // and the fields below.
     pthread_mutex_t lock;
@@ -1068,8 +1066,7 @@ static void demux_shutdown(struct demux_internal *in)
     talloc_free(in->cache);
     in->cache = NULL;
 
-    if (in->owns_stream)
-        free_stream(demuxer->stream);
+    free_stream(demuxer->stream);
     demuxer->stream = NULL;
 }
 
@@ -2966,6 +2963,9 @@ void demux_close_stream(struct demuxer *demuxer)
     struct demux_internal *in = demuxer->in;
     assert(!in->threading && demuxer == in->d_thread);
 
+    if (!demuxer->stream)
+        return;
+
     MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
     free_stream(demuxer->stream);
     demuxer->stream = stream_memory_open(demuxer->global, NULL, 0); // dummy
@@ -2994,20 +2994,29 @@ static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
 bool demux_is_network_cached(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
-    bool use_cache = demuxer->stream->streaming;
+    bool use_cache = demuxer->is_network ||
+        (demuxer->stream && demuxer->stream->streaming);
     if (in->opts->enable_cache >= 0)
         use_cache = in->opts->enable_cache == 1;
     return use_cache;
 }
 
+struct parent_stream_info {
+    bool seekable;
+    bool is_network;
+    struct mp_cancel *cancel;
+    char *filename;
+};
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
                                        struct stream *stream,
+                                       struct parent_stream_info *sinfo,
                                        struct demuxer_params *params,
                                        enum demux_check check)
 {
-    if (mp_cancel_test(stream->cancel))
+    if (mp_cancel_test(sinfo->cancel))
         return NULL;
 
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
@@ -3015,14 +3024,14 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
-        .cancel = stream->cancel,
-        .seekable = stream->seekable,
+        .cancel = sinfo->cancel,
+        .seekable = sinfo->seekable,
         .filepos = -1,
         .global = global,
         .log = mp_log_new(demuxer, log, desc->name),
         .glog = log,
-        .filename = talloc_strdup(demuxer, stream->url),
-        .is_network = stream->is_network,
+        .filename = talloc_strdup(demuxer, sinfo->filename),
+        .is_network = sinfo->is_network,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
@@ -3053,10 +3062,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
 
     mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
-
-    // not for DVD/BD/DVB in particular
-    if (demuxer->stream->seekable && (!params || !params->timeline))
-        stream_seek(demuxer->stream, 0);
 
     in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
@@ -3096,7 +3101,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 params2.is_top_level = params && params->is_top_level;
                 sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
-                                    demuxer->stream, &params2, DEMUX_CHECK_FORCE);
+                                    NULL, sinfo, &params2, DEMUX_CHECK_FORCE);
                 if (!sub)
                     timeline_destroy(tl);
             }
@@ -3119,13 +3124,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_update(demuxer, MP_NOPTS_VALUE);
 
         demuxer = sub ? sub : demuxer;
-        // Let this demuxer free demuxer->stream. Timeline sub-demuxers can
-        // share a stream, and in these cases the demux_timeline instance
-        // should own the stream, as it frees the sub demuxers first.
-        demuxer->in->owns_stream = true;
         return demuxer;
     }
 
+    demuxer->stream = NULL;
     demux_free(demuxer);
     return NULL;
 }
@@ -3137,6 +3139,7 @@ static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 // params can be NULL
 // This may free the stream parameter on success.
 static struct demuxer *demux_open(struct stream *stream,
+                                  struct mp_cancel *cancel,
                                   struct demuxer_params *params,
                                   struct mpv_global *global)
 {
@@ -3165,6 +3168,13 @@ static struct demuxer *demux_open(struct stream *stream,
         }
     }
 
+    struct parent_stream_info sinfo = {
+        .seekable = stream->seekable,
+        .is_network = stream->is_network,
+        .cancel = cancel,
+        .filename = talloc_strdup(NULL, stream->url),
+    };
+
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
         enum demux_check level = check_levels[pass];
@@ -3172,7 +3182,10 @@ static struct demuxer *demux_open(struct stream *stream,
         for (int n = 0; demuxer_list[n]; n++) {
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
-                demuxer = open_given_type(global, log, desc, stream, params, level);
+                if (stream->seekable && (!params || !params->timeline))
+                    stream_seek(stream, 0);
+                demuxer = open_given_type(global, log, desc, stream, &sinfo,
+                                          params, level);
                 if (demuxer) {
                     talloc_steal(demuxer, log);
                     log = NULL;
@@ -3183,6 +3196,7 @@ static struct demuxer *demux_open(struct stream *stream,
     }
 
 done:
+    talloc_free(sinfo.filename);
     talloc_free(log);
     return demuxer;
 }
@@ -3210,7 +3224,7 @@ struct demuxer *demux_open_url(const char *url,
         talloc_free(priv_cancel);
         return NULL;
     }
-    struct demuxer *d = demux_open(s, params, global);
+    struct demuxer *d = demux_open(s, priv_cancel, params, global);
     if (d) {
         talloc_steal(d->in, priv_cancel);
         assert(d->cancel);
@@ -3780,12 +3794,15 @@ void demux_block_reading(struct demuxer *demuxer, bool block)
 static void update_bytes_read(struct demux_internal *in)
 {
     struct demuxer *demuxer = in->d_thread;
-    struct stream *stream = demuxer->stream;
 
-    int64_t new = stream->total_unbuffered_read_bytes +
-                  in->slave_unbuffered_read_bytes;
-    stream->total_unbuffered_read_bytes = 0;
+    int64_t new = in->slave_unbuffered_read_bytes;
     in->slave_unbuffered_read_bytes = 0;
+
+    struct stream *stream = demuxer->stream;
+    if (stream) {
+        new += stream->total_unbuffered_read_bytes;
+        stream->total_unbuffered_read_bytes = 0;
+    }
 
     in->cache_unbuffered_read_bytes += new;
     in->hack_unbuffered_read_bytes += new;
@@ -3800,8 +3817,11 @@ static void update_cache(struct demux_internal *in)
     // Don't lock while querying the stream.
     struct mp_tags *stream_metadata = NULL;
 
-    int64_t stream_size = stream_get_size(stream);
-    stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
+    int64_t stream_size = -1;
+    if (stream) {
+        stream_size = stream_get_size(stream);
+        stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
+    }
 
     update_bytes_read(in);
 
