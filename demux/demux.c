@@ -3201,6 +3201,22 @@ done:
     return demuxer;
 }
 
+static struct stream *create_webshit_concat_stream(struct mpv_global *global,
+                                                   struct mp_cancel *c,
+                                                   bstr init, struct stream *real)
+{
+    struct stream *mem = stream_memory_open(global, init.start, init.len);
+    assert(mem);
+
+    struct stream *streams[2] = {mem, real};
+    struct stream *concat = stream_concat_open(global, c, streams, 2);
+    if (!concat) {
+        free_stream(mem);
+        free_stream(real);
+    }
+    return concat;
+}
+
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
 // Also for some reason may close the opened stream if it's not needed.
@@ -3220,6 +3236,10 @@ struct demuxer *demux_open_url(const char *url,
         mp_cancel_set_parent(priv_cancel, cancel);
     struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
                                      priv_cancel, global);
+    if (s && params->init_fragment.len) {
+        s = create_webshit_concat_stream(global, priv_cancel,
+                                         params->init_fragment, s);
+    }
     if (!s) {
         talloc_free(priv_cancel);
         return NULL;
