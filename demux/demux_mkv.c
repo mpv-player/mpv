@@ -214,6 +214,8 @@ typedef struct mkv_demuxer {
     // Packets to return.
     struct demux_packet **packets;
     int num_packets;
+
+    bool probably_webm_dash_init;
 } mkv_demuxer_t;
 
 #define OPT_BASE_STRUCT struct demux_mkv_opts
@@ -1945,6 +1947,7 @@ static void probe_x264_garbage(demuxer_t *demuxer)
 
 static int read_ebml_header(demuxer_t *demuxer)
 {
+    mkv_demuxer_t *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
 
     if (ebml_read_id(s) != EBML_ID_EBML)
@@ -1953,15 +1956,22 @@ static int read_ebml_header(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = { demuxer->log, .no_error_messages = true };
     if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
         return 0;
+    bool is_matroska = false, is_webm = false;
     if (!ebml_master.doc_type) {
         MP_VERBOSE(demuxer, "File has EBML header but no doctype. "
                    "Assuming \"matroska\".\n");
-    } else if (strcmp(ebml_master.doc_type, "matroska") != 0
-        && strcmp(ebml_master.doc_type, "webm") != 0) {
+        is_matroska = true;
+    } else if (strcmp(ebml_master.doc_type, "matroska") == 0) {
+        is_matroska = true;
+    } else if (strcmp(ebml_master.doc_type, "webm") == 0) {
+        is_webm = true;
+    }
+    if (!is_matroska && !is_webm) {
         MP_TRACE(demuxer, "no head found\n");
         talloc_free(parse_ctx.talloc_ctx);
         return 0;
     }
+    mkv_d->probably_webm_dash_init &= is_webm;
     if (ebml_master.doc_type_read_version > 2) {
         MP_WARN(demuxer, "This looks like a Matroska file, "
                 "but we don't support format version %"PRIu64"\n",
@@ -2029,6 +2039,15 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     int64_t start_pos;
     int64_t end_pos;
 
+    mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
+    demuxer->priv = mkv_d;
+    mkv_d->tc_scale = 1000000;
+    mkv_d->a_skip_preroll = 1;
+    mkv_d->skip_to_timecode = INT64_MIN;
+
+    if (demuxer->params)
+        mkv_d->probably_webm_dash_init = demuxer->params->init_fragment.len > 0;
+
     bstr start = stream_peek(s, 4);
     uint32_t start_id = 0;
     for (int n = 0; n < start.len; n++)
@@ -2043,13 +2062,8 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     if (!read_mkv_segment_header(demuxer, &end_pos))
         return -1;
 
-    mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
-    demuxer->priv = mkv_d;
-    mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
     mkv_d->segment_end = end_pos;
-    mkv_d->a_skip_preroll = 1;
-    mkv_d->skip_to_timecode = INT64_MIN;
 
     mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
                        &mkv_d->index_mode);
@@ -2065,7 +2079,8 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         stream_peek(s, 4); // make sure we can always seek back
         uint32_t id = ebml_read_id(s);
         if (s->eof) {
-            MP_WARN(demuxer, "Unexpected end of file (no clusters found)\n");
+            if (!mkv_d->probably_webm_dash_init)
+                MP_WARN(demuxer, "Unexpected end of file (no clusters found)\n");
             break;
         }
         if (id == MATROSKA_ID_CLUSTER) {
@@ -2091,7 +2106,9 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         // Warn against incomplete files and skip headers outside of range.
         if (elem->pos >= end) {
             elem->parsed = true; // don't bother if file is incomplete
-            if (!mkv_d->eof_warning) {
+            if (!mkv_d->eof_warning && !(mkv_d->probably_webm_dash_init &&
+                                         elem->pos == end))
+            {
                 MP_WARN(demuxer, "SeekHead position beyond "
                         "end of file - incomplete file?\n");
                 mkv_d->eof_warning = true;
