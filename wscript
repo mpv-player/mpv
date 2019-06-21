@@ -988,7 +988,7 @@ def __write_version__(ctx):
 
     ctx(
         source = 'version.sh',
-        target = 'version.h',
+        target = 'generated/version.h',
         rule   = 'sh ${SRC} ${CWD_ST:VERSIONSH_CWD} ${VERSIONH_ST:TGT}',
         always = True,
         update_outputs = True)

@@ -16,7 +16,7 @@
  */
 
 #include "common.h"
-#include "version.h"
+#include "generated/version.h"
 #ifdef NO_BUILD_TIMESTAMPS
 #undef BUILDDATE
 #define BUILDDATE "UNKNOWN"

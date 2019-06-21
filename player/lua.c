@@ -57,22 +57,22 @@
 // All these are generated from player/lua/*.lua
 static const char * const builtin_lua_scripts[][2] = {
     {"mp.defaults",
-#   include "player/lua/defaults.inc"
+#   include "generated/player/lua/defaults.lua.inc"
     },
     {"mp.assdraw",
-#   include "player/lua/assdraw.inc"
+#   include "generated/player/lua/assdraw.lua.inc"
     },
     {"mp.options",
-#   include "player/lua/options.inc"
+#   include "generated/player/lua/options.lua.inc"
     },
     {"@osc.lua",
-#   include "player/lua/osc.inc"
+#   include "generated/player/lua/osc.lua.inc"
     },
     {"@ytdl_hook.lua",
-#   include "player/lua/ytdl_hook.inc"
+#   include "generated/player/lua/ytdl_hook.lua.inc"
     },
     {"@stats.lua",
-#   include "player/lua/stats.inc"
+#   include "generated/player/lua/stats.lua.inc"
     },
     {"@console.lua",
 #   include "player/lua/console.inc"

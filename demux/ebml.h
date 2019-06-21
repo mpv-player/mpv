@@ -63,7 +63,7 @@ struct ebml_parse_ctx {
     bool no_error_messages;
 };
 
-#include "ebml_types.h"
+#include "generated/ebml_types.h"
 
 #define EBML_ID_INVALID 0xffffffff
 

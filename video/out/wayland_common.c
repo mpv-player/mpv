@@ -31,16 +31,16 @@
 #include "wayland_common.h"
 
 // Generated from xdg-shell.xml
-#include "video/out/wayland/xdg-shell.h"
+#include "generated/wayland/xdg-shell.h"
 
 // Generated from idle-inhibit-unstable-v1.xml
-#include "video/out/wayland/idle-inhibit-v1.h"
+#include "generated/wayland/idle-inhibit-v1.h"
 
 // Generated from xdg-decoration-unstable-v1.xml
-#include "video/out/wayland/xdg-decoration-v1.h"
+#include "generated/wayland/xdg-decoration-v1.h"
 
 // Generated from presentation-time.xml
-#include "video/out/wayland/presentation-time.h"
+#include "generated/wayland/presentation-time.h"
 
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {

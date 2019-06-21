@@ -163,7 +163,7 @@ static void disable_power_management(struct vo_cocoa_state *s)
 }
 
 static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
+#include "generated/TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns.inc"
 ;
 
 static void set_application_icon(NSApplication *app)

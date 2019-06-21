@@ -54,49 +54,34 @@ def build(ctx):
     ctx(
         features = "file2string",
         source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
-        target = "osdep/macosx_icon.inc",
+        target = "generated/TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns.inc",
     )
 
-    ctx(
-        features = "file2string",
-        source = "etc/mpv-icon-8bit-16x16.png",
-        target = "video/out/x11_icon_16.inc",
-    )
-
-    ctx(
-        features = "file2string",
-        source = "etc/mpv-icon-8bit-32x32.png",
-        target = "video/out/x11_icon_32.inc",
-    )
-
-    ctx(
-        features = "file2string",
-        source = "etc/mpv-icon-8bit-64x64.png",
-        target = "video/out/x11_icon_64.inc",
-    )
-
-    ctx(
-        features = "file2string",
-        source = "etc/mpv-icon-8bit-128x128.png",
-        target = "video/out/x11_icon_128.inc",
-    )
+    icons = [16, 32, 64, 128]
+    for size in icons:
+        name = "etc/mpv-icon-8bit-%dx%d.png" % (size, size)
+        ctx(
+            features = "file2string",
+            source = name,
+            target = "generated/%s.inc" % name,
+        )
 
     ctx(
         features = "file2string",
         source = "etc/input.conf",
-        target = "input/input_conf.h",
+        target = "generated/etc/input.conf.inc",
     )
 
     ctx(
         features = "file2string",
         source = "etc/builtin.conf",
-        target = "player/builtin_conf.inc",
+        target = "generated/etc/builtin.conf.inc",
     )
 
     ctx(
         features = "file2string",
         source = "sub/osd_font.otf",
-        target = "sub/osd_font.h",
+        target = "generated/sub/osd_font.otf.inc",
     )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
@@ -107,43 +92,43 @@ def build(ctx):
         ctx(
             features = "file2string",
             source = fn,
-            target = os.path.splitext(fn)[0] + ".inc",
+            target = "generated/%s.inc" % fn,
         )
 
     ctx(
         features = "file2string",
         source = "player/javascript/defaults.js",
-        target = "player/javascript/defaults.js.inc",
+        target = "generated/player/javascript/defaults.js.inc",
     )
 
     if ctx.dependency_satisfied('wayland'):
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "stable/xdg-shell/xdg-shell",
-            target    = "video/out/wayland/xdg-shell.c")
+            target    = "generated/wayland/xdg-shell.c")
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "stable/xdg-shell/xdg-shell",
-            target    = "video/out/wayland/xdg-shell.h")
+            target    = "generated/wayland/xdg-shell.h")
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
-            target    = "video/out/wayland/idle-inhibit-v1.c")
+            target    = "generated/wayland/idle-inhibit-unstable-v1.c")
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
-            target    = "video/out/wayland/idle-inhibit-v1.h")
+            target    = "generated/wayland/idle-inhibit-unstable-v1.h")
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "stable/presentation-time/presentation-time",
-            target    = "video/out/wayland/presentation-time.c")
+            target    = "generated/wayland/presentation-time.c")
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "stable/presentation-time/presentation-time",
-            target    = "video/out/wayland/presentation-time.h")
+            target    = "generated/wayland/presentation-time.h")
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/xdg-decoration/xdg-decoration-unstable-v1",
-            target    = "video/out/wayland/xdg-decoration-v1.c")
+            target    = "generated/wayland/xdg-decoration-unstable-v1.c")
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/xdg-decoration/xdg-decoration-unstable-v1",
-            target    = "video/out/wayland/xdg-decoration-v1.h")
+            target    = "generated/wayland/xdg-decoration-unstable-v1.h")
 
-    ctx(features = "ebml_header", target = "ebml_types.h")
-    ctx(features = "ebml_definitions", target = "ebml_defs.c")
+    ctx(features = "ebml_header", target = "generated/ebml_types.h")
+    ctx(features = "ebml_definitions", target = "generated/ebml_defs.c")
 
     def swift(task):
         src = [x.abspath() for x in task.inputs]
@@ -521,10 +506,10 @@ def build(ctx):
         ( "video/out/vulkan/context_xlib.c",     "vulkan && x11" ),
         ( "video/out/vulkan/utils.c",            "vulkan" ),
         ( "video/out/w32_common.c",              "win32-desktop" ),
-        ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
-        ( "video/out/wayland/presentation-time.c", "wayland" ),
-        ( "video/out/wayland/xdg-decoration-v1.c", "wayland" ),
-        ( "video/out/wayland/xdg-shell.c",       "wayland" ),
+        ( "generated/wayland/idle-inhibit-unstable-v1.c", "wayland" ),
+        ( "generated/wayland/presentation-time.c", "wayland" ),
+        ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),
+        ( "generated/wayland/xdg-shell.c",       "wayland" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/win32/displayconfig.c",     "win32-desktop" ),
         ( "video/out/win32/droptarget.c",        "win32-desktop" ),
@@ -590,7 +575,7 @@ def build(ctx):
                 ctx.path.find_node('osdep/mpv.rc'),
                 ctx.path.find_node(node))
 
-        version = ctx.bldnode.find_node('version.h')
+        version = ctx.bldnode.find_node('generated/version.h')
         if version:
             ctx.add_manual_dependency(
                 ctx.path.find_node('osdep/mpv.rc'),

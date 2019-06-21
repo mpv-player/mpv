@@ -66,7 +66,7 @@
 #include "screenshot.h"
 
 static const char def_config[] =
-#include "player/builtin_conf.inc"
+#include "generated/etc/builtin.conf.inc"
 ;
 
 #if HAVE_COCOA

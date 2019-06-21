@@ -224,7 +224,7 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 #define E_S(str, count) EVALARGS(E_SN, str, count, N)
 #define FN(id, name, multiple, N) { id, multiple, offsetof(struct ebml_ ## N, name), offsetof(struct ebml_ ## N, n_ ## name), &ebml_##name##_desc},
 #define F(id, name, multiple) EVALARGS(FN, id, name, multiple, N)
-#include "ebml_defs.c"
+#include "generated/ebml_defs.c"
 #undef EVALARGS
 #undef SN
 #undef S

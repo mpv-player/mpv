@@ -224,7 +224,7 @@ const struct m_sub_options input_config = {
 };
 
 static const char builtin_input_conf[] =
-#include "input/input_conf.h"
+#include "generated/etc/input.conf.inc"
 ;
 
 static bool test_rect(struct mp_rect *rc, int x, int y)

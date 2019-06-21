@@ -16,7 +16,7 @@
  */
 
 #include <winver.h>
-#include "version.h"
+#include "generated/version.h"
 
 VS_VERSION_INFO VERSIONINFO
     FILEVERSION 2, 0, 0, 0

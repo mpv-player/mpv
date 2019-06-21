@@ -143,7 +143,7 @@ static void terminate_cocoa_application(void)
 }
 
 static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
+#include "generated/TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns.inc"
 ;
 
 - (NSImage *)getMPVIcon
