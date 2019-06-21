@@ -1,0 +1,1019 @@
+#!/usr/bin/env python3
+
+#missing:
+#- actually support out of tree builds
+#- libmpv
+#- doc generation
+#- windows console wrapper thing (?)
+#- osx testing
+#- swift stuff (impossible, crapple wants you to stick a dagger up your ass?)
+#- vaapi interops (?)
+#- RPI stuff
+#- newer BSD changes
+#- it's weird how the wayland trash is compiled to BUILDDIR/BUILDDIR/
+
+import os
+from TOOLS.configure_common import *
+
+begin()
+
+# (workaround for insufficient Python lambda syntax)
+def chain(*a):
+    return a[-1]
+
+check("-lgpl",
+      desc      = "LGPL (version 2.1 or later) build",
+      default   = False)
+check("gpl*",
+      desc      = "GPL (version 2 or later) build",
+      deps_neg  = "lgpl")
+check("-build-date*",
+      desc      = "whether to include binary compile time",
+      fn        = lambda: chain(add_cflags("-DNO_BUILD_TIMESTAMPS"), True))
+check(desc      = "whether compiler works",
+      required  = "C compiler missing or broken",
+      fn        = lambda: check_program("CC") and check_cc(link = []))
+check(desc      = "pkg-config",
+      required  = "pkg-config missing or broken",
+      fn        = lambda: check_program("PKG_CONFIG"))
+
+check("-cplayer",
+      desc      = "mpv CLI player binary")
+check("-libmpv-shared",
+      desc      = "libmpv shared library",
+      fn        = lambda: check_cc(flags = "-fPIC"),
+        #'-Wl,-version-script', '-Wl,mpv.def
+      default   = False)
+check("-libmpv-static",
+      desc      = "libmpv static library",
+      default   = False,
+      deps_neg  = "libmpv-shared")
+
+add_cflags("-MD", "-MP", "-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
+           "-D_LARGEFILE_SOURCE", "-D_FILE_OFFSET_BITS=64",
+           "-D_LARGEFILE64_SOURCE",
+           "-Wall")
+check(desc      = "C11/C99",
+      fn        = lambda: check_cc(flags = "-std=c11") or
+                          check_cc(flags = "-std=c99"),
+      required  = "No C11 or C99 support.")
+check("-optimize",
+      fn        = lambda: chain(add_cflags("-O2"), True),
+      desc      = "whether to optimize")
+check("-debug-build",
+      desc      = "whether to compile-in debugging information",
+      fn        = lambda: chain(add_cflags("-g"),
+                                check_cc(flags = ["-g3", "-ggdb"]),
+                                True))
+check(desc      = "warning cflags",
+      fn        = lambda: check_cc(flags = [
+                        "-Werror=implicit-function-declaration",
+                        "-Wno-error=deprecated-declarations",
+                        "-Wno-error=unused-function",
+                        "-Wempty-body",
+                        "-Wdisabled-optimization",
+                        "-Wstrict-prototypes",
+                        "-Wno-format-zero-length",
+                        "-Werror=format-security",
+                        "-Wno-redundant-decls",
+                        "-Wvla",
+                        "-Wno-format-truncation"]))
+check(desc      = "-fno-math-errno",
+      fn        = lambda: check_cc(flags = "-fno-math-errno"))
+
+check("gnuc",
+      desc      = "GNU C",
+      fn        = lambda: check_cc(defined = "__GNUC__"))
+check("clang",
+      fn        = lambda: check_cc(defined = "__clang__"))
+
+# Note that an important reason to try different set of warning flags is the
+# fact that both compilers may have different bogus behavior wrt. certain
+# warning options. What is needed on one compiler may be annoying or dangerous
+# on the other.
+check(desc      = "extra gcc warnings",
+      deps      = "gnuc",
+      deps_neg  = "clang",
+      fn        = lambda: check_cc(flags = [
+                        "-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
+                        "-Wno-switch", "-Wparentheses", "-Wpointer-arith",
+                        "-Wno-pointer-sign",
+                        # GCC bug 66425
+                        "-Wno-unused-result"]))
+check(desc      = "extra clang warnings",
+      deps      = "clang",
+      fn        = lambda: check_cc(flags = [
+                        "-Wno-logical-op-parentheses", "-fcolor-diagnostics",
+                        "-Wno-tautological-compare",
+                        "-Wno-tautological-constant-out-of-range-compare"]))
+
+check("-usan",
+      desc      = "undefined sanitizer",
+      fn        = lambda: check_cc(flags = "-fsanitize=undefined", link = []))
+
+# Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
+# Building it can be disabled only by defining NDEBUG through CFLAGS.
+check("-ta-leak-report*",
+      desc      = "enable ta leak report by default (development only)",
+      default   = False)
+
+check("libdl*",
+      fn        = lambda: check_cc(link = "-ldl", include = "dlfcn.h",
+                                   expr = 'dlopen("", 0);'))
+check("libm",
+      fn        = lambda: check_cc(link = "-lm"))
+check("win32",
+      fn        = lambda: check_cc(defined = "_WIN32",
+                        flags = ["-D_WIN32_WINNT=0x0602", "-DUNICODE", "-DCOBJMACROS",
+                                 "-DINITGUID", "-U__STRICT_ANSI__",
+                                 "-D__USE_MINGW_ANSI_STDIO=1"],
+                        include = "windows.h",
+                        link = ["-Wl,--major-os-version=6,--minor-os-version=0",
+                                "-Wl,--major-subsystem-version=6,--minor-subsystem-version=0",
+                                "-mwindows"]) and
+                    check_program("WINDRES") and
+                    chain(set_exe_format("pe"), True),
+      sources   = ["osdep/mpv.rc",
+                   "osdep/w32_keyboard.c",
+                   "osdep/windows_utils.c"])
+
+check("osx",
+      fn        = lambda: check_cc(defined = "__APPLE__") and
+                          chain(set_exe_format("macho"), True))
+
+check("mingw",
+      fn        = lambda: check_cc(include = "stdlib.h",
+                                   defined = ["__MINGW32__", "__MINGW64_VERSION_MAJOR"]))
+check("posix*",
+      fn        = lambda: check_cc(include = "unistd.h",
+                                   defined = "_POSIX_VERSION"),
+      sources   = ["osdep/polldev.c",
+                   "sub/filter_regex.c"])
+check("development environment",
+      deps_any  = ["posix", "mingw"],
+      required  = "Unable to find either POSIX or MinGW-w64 environment.")
+
+check("-cplugins*",
+      desc      = "C plugins",
+      deps      = "libdl",
+      deps_neg  = "win32",
+      fn        = lambda: check_cc(link = "-rdynamic"))
+
+check("noexecstack",
+      fn        = lambda: check_cc(link = "-Wl,-z,noexecstack"))
+
+check("win-dep",
+      deps      = "win32",
+      fn        = lambda: check_cc(link = ["-Wl,--nxcompat", "-Wl,--no-seh", "-Wl,--dynamicbase"]))
+
+check("-android*",
+      fn        = lambda: check_cc(include = "android/api-level.h",
+                                   expr = "(void)__ANDROID__;",
+                                   link = ["-landroid", "-lEGL"]),
+      sources   = ["osdep/android/strnlen.c",
+                   "video/out/opengl/context_android.c",
+                   "video/out/vo_mediacodec_embed.c"])
+
+check("-uwp*",
+      desc      = "Universal Windows Platform",
+      deps      = "mingw",
+      default   = False,
+      fn        = lambda: check_cc(link = "-lwindowsapp"),
+      sources   = "osdep/path-uwp.c")
+check("win32-desktop*",
+      desc      = "win32 desktop APIs",
+      deps      = "win32",
+      deps_neg  = "uwp",
+      fn        = lambda: check_cc(link = ["-lwinmm", "-lgdi32", "-lole32",
+                                           "-luuid", "-lavrt", "-ldwmapi",
+                                           "-lversion"]),
+      sources   = ["osdep/path-win.c",
+                   "video/out/w32_common.c",
+                   "video/out/win32/displayconfig.c",
+                   "video/out/win32/droptarget.c"])
+def check_vista_pthreads():
+    path = os.path.abspath(os.path.join(get_root_dir(), "osdep/win32/include"))
+    add_cflags("-I%s" % path)
+    add_cflags("-isystem%s" % path)
+    # define IN_WINPTHREAD to workaround mingw stupidity (we never want it
+    # to define features specific to its own pthread stuff)
+    add_cflags("-DIN_WINPTHREAD")
+    return True
+check("-win32-internal-pthreads*",
+      deps      = "win32",
+      deps_neg  = "posix",
+      fn        = lambda: check_vista_pthreads(),
+      sources   = "osdep/win32/pthread.c")
+check("pthreads",
+      deps_neg  = "win32-internal-pthreads",
+      fn        = lambda: check_cc(link = "-pthread", flags = "-pthread",
+                                   include = "pthread.h",
+                                   expr = "pthread_self();"))
+check(desc      = "any pthread support",
+      deps_any  = ["pthreads", "win32-internal-pthreads"],
+      required  = "Unable to find pthreads support.")
+check("stdatomic*",
+      fn        = lambda: check_cc(include = "stdatomic.h",
+                                   expr =
+                        "atomic_int_least64_t test = ATOMIC_VAR_INIT(123);"
+                        "atomic_fetch_add(&test, 1);"))
+check("atomics",
+      desc      = "stdatomic.h support or slow emulation",
+      deps_any  = ["stdatomic", "gnuc"],
+      required  = "Required.")
+check("librt",
+      fn        = lambda: check_cc(link = "-lrt"))
+check("iconv*",
+      fn        = lambda: check_cc(include = "iconv.h", link = [],
+                                   expr = "iconv_open(0, 0);") or
+                          check_cc(include = "iconv.h", link = "-liconv",
+                                   expr = "iconv_open(0, 0);"),
+      required  = "Unable to find iconv which should be part of a standard \
+compilation environment. Aborting. If you really mean to compile without \
+iconv support use --disable-iconv.")
+check("dos-paths*",
+      deps      = "win32")
+check("glob-posix*",
+      desc      = "glob() POSIX support",
+      deps      = "posix",
+      deps_neg  = "win32",
+      fn        = lambda: check_cc(include = "glob.h",
+                                   expr = 'glob("filename", 0, 0, 0);'))
+check("glob-win32",
+      desc      = "glob() win32 replacement",
+      deps_neg  = "glob-posix",
+      deps      = "win32",
+      sources   = "osdep/glob-win.c"),
+check("glob*",
+      desc      = "any glob() support",
+      deps_any  = ["glob-posix", "glob-win32"])
+check("fchmod*",
+      fn        = lambda: check_cc(include = "sys/stat.h", expr = "fchmod(0, 0);"))
+check("glibc-thread-name*",
+      deps      = "pthreads",
+      fn        = lambda: check_cc(include = "pthread.h",
+                    expr = 'pthread_setname_np(pthread_self(), "ducks");'))
+check("osx-thread-name*",
+      deps      = "pthreads",
+      fn        = lambda: check_cc(include = "pthread.h",
+                    expr = 'pthread_setname_np("ducks");'))
+check("bsd-thread-name*",
+      deps      = "pthreads",
+      fn        = lambda: check_cc(include = ["pthread.h", "pthread_np.h"],
+                    expr = 'pthread_set_name_np(pthread_self(), "ducks");'))
+check("bsd-fstatfs*",
+      fn        = lambda: check_cc(include = ["sys/param.h", "sys/mount.h"],
+                    expr = "struct statfs fs; fstatfs(0, &fs); fs.f_fstypename;"))
+check("linux-fstatfs*",
+      fn        = lambda: check_cc(include = "sys/vfs.h",
+                    expr = "struct statfs fs; fstatfs(0, &fs); fs.f_namelen;"))
+
+check("-lua*",
+      fn        = lambda:
+            check_pkg_config("lua >= 5.1.0 lua < 5.2.0") or
+            check_pkg_config("lua51 >= 5.1.0") or               # OpenBSD
+            check_pkg_config("lua5.1 >= 5.1.0") or              # debian
+            check_pkg_config("lua-5.1 >= 5.1.0") or             # FreeBSD
+            check_pkg_config("lua >= 5.2.0 lua < 5.3.0" ) or
+            check_pkg_config("lua52 >= 5.2.0") or               # Arch
+            check_pkg_config("lua5.2 >= 5.2.0") or              # debian
+            check_pkg_config("lua-5.2 >= 5.2.0") or             # FreeBSD
+            check_pkg_config("luajit >= 2.0.0"),
+      sources  = "player/lua.c")
+check("-javascript*",
+      fn        = lambda: check_pkg_config("mujs", ">= 1.0.0"),
+      sources   = "player/javascript.c")
+check("-libass*",
+      desc      = "libass subtitle/OSD renderer",
+      fn        = lambda: check_pkg_config("libass >= 0.12.1"),
+      required  = "Unable to find development files for libass, or the version " +
+                   "found is too old. Aborting. You can use --disable-libass " +
+                   "to ignore this warning.",
+      sources   = ["sub/ass_mp.c",
+                   "sub/osd_libass.c",
+                   "sub/sd_ass.c"])
+check(deps_neg  = "libass",
+      sources   = "sub/osd_dummy.c")
+check("-zlib*",
+      fn        = lambda: check_cc(link = "-lz", include = "zlib.h",
+                                   expr = "inflate(0, Z_NO_FLUSH);"),
+      required  = "Unable to find development files for zlib.")
+check("-uchardet*",
+      fn        = lambda: check_pkg_config("uchardet"))
+check("-cocoa*",
+      deps      = "osx",
+      fn        = lambda: check_cc(decl = "#import <Cocoa/Cocoa.h>",
+                                   language = "m"),
+      sources   = ["osdep/macosx_application.m",
+                   "osdep/macosx_events.m",
+                   "osdep/macosx_menubar.m",
+                   "osdep/path-macosx.m",
+                   "video/out/cocoa_common.m",
+                   "video/out/cocoa/events_view.m",
+                   "video/out/cocoa/video_view.m",
+                   "video/out/cocoa/window.m"])
+check("-rubberband*",
+      fn        = lambda: check_pkg_config("rubberband >= 1.8.0"),
+      sources   = "audio/filter/af_rubberband.c")
+check("-lcms2*",
+      fn        = lambda: check_pkg_config("lcms2 >= 2.6"))
+check("-vapoursynth*",
+      fn        = lambda: check_pkg_config("vapoursynth >= 24") and
+                          check_pkg_config("vapoursynth-script >= 23"))
+check("-vapoursynth-lazy*",
+      desc      = "VapourSynth filter bridge (Lazy Lua)",
+      deps      = "lua",
+      fn        = lambda: check_pkg_config("vapoursynth >= 24"))
+check("vapoursynth-core*",
+      deps      = ["vapoursynth", "vapoursynth-lazy"],
+      sources   = "video/filter/vf_vapoursynth.c")
+check("-libarchive*",
+      desc      = "libarchive wrapper for reading zip files and more",
+      fn        = lambda: check_pkg_config("libarchive >= 3.0.0"),
+      sources   = ["demux/demux_libarchive.c",
+                   "stream/stream_libarchive.c"])
+
+check(desc      = "FFmpeg",
+      fn        = lambda: check_pkg_config(
+                    "libavutil      >= 56.12.100",
+                    "libavcodec     >= 58.16.100",
+                    "libavformat    >= 58.9.100",
+                    "libswscale     >= 5.0.101",
+                    "libavfilter    >= 7.14.100",
+                    "libswresample  >= 3.0.100"),
+      required  = "Unable to find development files for some of the required \
+FFmpeg libraries.")
+check("-ffmpeg-strict-abi*",
+      desc      = "Disable all known FFmpeg ABI violations'",
+      default   = False)
+
+check("-zimg*",
+      desc      = "libzimg support (high quality software scaler)",
+      fn        = lambda: check_pkg_config("zimg >= 2.9"),
+      sources   = ["video/filter/vf_fingerprint.c",
+                   "video/zimg.c"]),
+
+check("-libavdevice*",
+      fn        = lambda: check_pkg_config("libavdevice >= 57.0.0"))
+
+check("-sdl2",
+      default   = False,
+      fn        = lambda: check_pkg_config('sdl2'))
+check("-sdl2-audio*",
+      deps      = "sdl2",
+      sources   = "audio/out/ao_sdl.c")
+check("-sdl2-video*",
+      deps      = "sdl2",
+      sources   = "video/out/vo_sdl.c")
+check("-sdl2-gamepad*",
+      desc      = "SDL2 gamepad input",
+      deps      = "sdl2",
+      default   = False,
+      sources   = "input/sdl_gamepad.c")
+
+check("-pulse*",
+      fn        = lambda: check_pkg_config("libpulse >= 1.0"),
+      sources   = "audio/out/ao_pulse.c")
+check("-jack*",
+      deps      = "gpl",
+      fn        = lambda: check_pkg_config("jack"),
+      sources   = "audio/out/ao_jack.c")
+check("-openal*",
+      default   = False,
+      fn        = lambda: check_pkg_config("openal >= 1.13"),
+      sources   = "audio/out/ao_openal.c")
+check("-opensles*",
+      fn        = lambda: check_cc(include = "SLES/OpenSLES.h",
+                                   link = "-lOpenSLES",
+                                   expr = "slCreateEngine;"),
+      sources   = "audio/out/ao_opensles.c")
+check("-alsa*",
+      fn        = lambda: check_pkg_config("alsa >= 1.0.18"),
+      sources   = "audio/out/ao_alsa.c")
+check("-coreaudio*",
+      # TODO: missing frameworks: "CoreFoundation", "CoreAudio", "AudioUnit", "AudioToolbox"
+      deps      = "osx",
+      sources   = ["audio/out/ao_coreaudio.c",
+                   "audio/out/ao_coreaudio_chmap.c",
+                   "audio/out/ao_coreaudio_exclusive.c",
+                   "audio/out/ao_coreaudio_properties.c",
+                   "audio/out/ao_coreaudio_utils.c"])
+check("-audiounit*",
+      desc      = "AudioUnit output for iOS",
+      # TODO: missing frameworks: "Foundation", "AudioToolbox"
+      deps      = "osx",
+      sources   = ["audio/out/ao_audiounit.m",
+                   "audio/out/ao_coreaudio_chmap.c",
+                   "audio/out/ao_coreaudio_utils.c"])
+check("-wasapi*",
+      deps      = "win32",
+      sources   = ["audio/out/ao_wasapi.c",
+                   "audio/out/ao_wasapi_changenotify.c",
+                   "audio/out/ao_wasapi_utils.c"])
+
+check("vt_h*",
+      fn        = lambda: check_cc(include = ["sys/vt.h", "sys/ioctl.h"],
+                                   expr = "int m; ioctl(0, VT_GETMODE, &m);"))
+check("consio_h*",
+      deps_neg  = "vt_h",
+      fn        = lambda: check_cc(include = ["sys/consio.h", "sys/ioctl.h"],
+                                   expr = "int m; ioctl(0, VT_GETMODE, &m);"))
+check("-drm*",
+      deps_any  = ["vt_h", "consio_h"],
+      fn        = lambda: check_pkg_config("libdrm"),
+      sources   = ["video/out/drm_atomic.c",
+                   "video/out/drm_common.c",
+                   "video/out/vo_drm.c"])
+check("-drmprime*",
+      fn        = lambda: check_cc(include = "libavutil/pixfmt.h",
+                                   expr = "int i = AV_PIX_FMT_DRM_PRIME;"))
+check(deps      = ["drm", "drmprime"],
+      sources   = ["video/out/drm_prime.c",
+                   "video/out/opengl/hwdec_drmprime_drm.c"])
+
+check("gbm",
+      fn        = lambda: check_pkg_config("gbm"))
+
+def check_wayland_protos():
+    data = get_pkg_config_variable("wayland-protocols", "pkgdatadir")
+    if data is None:
+        return False
+    add_config_mak_var("WL_PROTO_DIR", data)
+    return True
+
+check("-wayland*",
+      # TODO: where does this check whether the protocol files are available?
+      fn        = lambda: check_wayland_protos() and
+                          check_program("WAYSCAN") and
+                          check_pkg_config("wayland-client  >= 1.6.0",
+                                           "wayland-cursor  >= 1.6.0",
+                                           "xkbcommon       >= 0.3.0"),
+      sources   = ["video/out/wayland_common.c",
+                   "$(BUILD)/generated/wayland/idle-inhibit-unstable-v1.c",
+                   "$(BUILD)/generated/wayland/presentation-time.c",
+                   "$(BUILD)/generated/wayland/xdg-shell.c",
+                   "$(BUILD)/generated/wayland/xdg-decoration-unstable-v1.c"])
+check("memfd_create*",
+      desc      = "Linux's memfd_create()",
+      deps      = "wayland",
+      fn        = lambda: check_cc(include = "sys/mman.h", link = [],
+                                   expr = "memfd_create(0, MFD_CLOEXEC | MFD_ALLOW_SEALING);"),
+      sources   = "video/out/vo_wlshm.c")
+
+check("-x11*",
+      deps      = "gpl",
+      fn        = lambda: check_pkg_config("x11         >= 1.0.0",
+                                           "xscrnsaver  >= 1.0.0",
+                                           "xext        >= 1.0.0",
+                                           "xinerama    >= 1.0.0",
+                                           "xrandr      >= 1.2.0"),
+      sources   = ["video/out/vo_x11.c",
+                   "video/out/x11_common.c"])
+check("-xv*",
+      deps      = "x11",
+      fn        = lambda: check_pkg_config("xv"),
+      sources   = "video/out/vo_xv.c")
+
+check("-libplacebo*",
+      desc      = "libplacebo support",
+      fn        = lambda: check_pkg_config("libplacebo >= 1.18.0"),
+      sources   = ["video/out/placebo/ra_pl.c",
+                   "video/out/placebo/utils.c"])
+
+check("-vulkan*",
+      desc      = "Vulkan context support",
+      deps      = "libplacebo",
+      fn        = lambda: check_pkg_config("vulkan"),
+      sources   = ["video/out/vulkan/context.c",
+                   "video/out/vulkan/utils.c"])
+check(deps      = ["vulkan", "x11"],
+      sources   = "video/out/vulkan/context_xlib.c")
+check(deps      = ["vulkan", "android"],
+      sources   = "video/out/vulkan/context_android.c")
+check(deps      = ["vulkan", "wayland"],
+      sources   = "video/out/vulkan/context_wayland.c")
+check(deps      = ["vulkan", "win32-desktop"],
+      sources   = "video/out/vulkan/context_win.c")
+
+# TODO: the waf check is much more complicated
+check("-egl*",
+      desc      = "EGL 1.4",
+      fn        = lambda: check_pkg_config("egl"))
+
+check("-gl-cocoa*",
+      # TODO
+      fn        = lambda: False,
+      sources   = "video/out/opengl/context_cocoa.c")
+
+check("-gl-x11*",
+      desc      = "OpenGL X11 Backend",
+      deps      = "x11",
+      fn        = lambda: check_cc(link = "-lGL",
+                                   include = "GL/glx.h",
+                                   expr = "glXGetCurrentDisplay();"),
+      sources   = "video/out/opengl/context_glx.c")
+check("-egl-x11*",
+      desc      = "OpenGL X11 EGL Backend",
+      deps      = ["x11", "egl"],
+      sources   = "video/out/opengl/context_x11egl.c")
+check("-egl-drm*",
+      desc      = "OpenGL DRM EGL Backend",
+      deps      = ["drm", "gbm", "egl"],
+      sources   = "video/out/opengl/context_drm_egl.c")
+check("-gl-wayland*",
+      desc      = "OpenGL Wayland Backend",
+      deps      =  ["wayland", "egl"],
+      fn        = lambda: check_pkg_config("wayland-egl >= 9.0.0"),
+      sources   = "video/out/opengl/context_wayland.c")
+check("-gl-win32*",
+      desc      = "OpenGL Win32 Backend",
+      deps      = "win32-desktop",
+      fn        = lambda: check_cc(link = "-lopengl32",
+                                   include = "windows.h",
+                                   expr = "wglCreateContext(0);"),
+      sources   = "video/out/opengl/context_win.c")
+check("-gl-dxinterop*",
+      desc      = "OpenGL/DirectX Interop Backend",
+      deps      = "gl-win32",
+      fn        = lambda: check_cc(include = ["GL/gl.h", "GL/wglext.h", "d3d9.h"],
+                                   expr = "int i = WGL_ACCESS_WRITE_DISCARD_NV;"
+                                          "IDirect3D9Ex *d;"),
+      sources   = "video/out/opengl/context_dxinterop.c")
+check("-egl-angle*",
+      desc      = "OpenGL ANGLE headers",
+      deps      = "win32",
+      fn        = lambda: check_cc(include = ["EGL/egl.h", "EGL/eglext.h"],
+                        expr = "int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE;"),
+      sources   = "video/out/opengl/angle_dynamic.c")
+check("-egl-angle-lib*",
+      desc      = "OpenGL Win32 ANGLE Library",
+      deps      = "egl-angle",
+      fn        = lambda: check_cc(include = ["EGL/egl.h"],
+                            expr = "eglCreateWindowSurface(0, 0, 0, 0);",
+                            flags = ["-DGL_APICALL=", "-DEGLAPI=",
+                                     "-DANGLE_NO_ALIASES", "-DANGLE_EXPORT="],
+                            link = ["-lEGL", "-lGLESv2", "-ldxguid", "-ld3d9",
+                                    "-lgdi32", "-lstdc++"]))
+check("-egl-angle-win32*",
+      desc      = "OpenGL Win32 ANGLE Backend",
+      deps      = ["egl-angle", "win32-desktop"],
+      sources   = ["video/out/gpu/d3d11_helpers.c",
+                   "video/out/opengl/context_angle.c"])
+
+check("-vdpau*",
+      deps      = "x11",
+      fn        = lambda: check_pkg_config("vdpau >= 0.2"),
+      sources   = ["video/filter/vf_vdpaupp.c",
+                   "video/out/vo_vdpau.c",
+                   "video/vdpau.c",
+                   "video/vdpau_mixer.c"])
+check("-vdpau-gl-x11*",
+      desc      = "VDPAU with OpenGL/X11",
+      deps      = ["vdpau", "gl-x11"],
+      sources   = "video/out/opengl/hwdec_vdpau.c")
+check("-vaapi*",
+      desc      = "VAAPI acceleration",
+      fn        = lambda: check_pkg_config("libva >= 0.36.0"),
+      sources   = ["video/vaapi.c",
+                   "video/filter/vf_vavpp.c"])
+check("-vaapi-x11*",
+      desc      = "VAAPI (X11 support)",
+      deps      = ["vaapi", "x11"],
+      fn        = lambda: check_pkg_config("libva-x11 >= 0.36.0"))
+check(deps      = ["vaapi-x11", "gpl"],
+      sources   = "video/out/vo_vaapi.c")
+check("-vaapi-wayland*",
+      desc      = "VAAPI (Wayland support)",
+      deps      = ["vaapi", "gl-wayland"],
+      fn        = lambda: check_pkg_config("libva-wayland >= 0.36.0"))
+check("-vaapi-drm*",
+      desc      = "VAAPI (DRM/EGL support)",
+      deps      = ["vaapi", "egl-drm"],
+      fn        = lambda: check_pkg_config("libva-drm >= 0.36.0"))
+check("-vaapi-glx*",
+      desc      = "VAAPI GLX",
+      deps      = ["gpl", "vaapi-x11", "gl-x11"])
+check("-vaapi-x-egl*",
+      desc      = "VAAPI EGL on X11",
+      deps      = ["vaapi-x11", "egl-x11"])
+
+check("-vaapi-vulkan*",
+      desc      = "VAAPI Vulkan",
+      deps      = ["vaapi", "vulkan"],
+      sources   = ["video/out/hwdec/hwdec_vaapi.c",
+                   "video/out/hwdec/hwdec_vaapi_vk.c"])
+
+check("-vaapi-egl*",
+      desc      = "VAAPI EGL",
+      deps_any  = ["vaapi-x-egl", "vaapi-wayland"],
+      sources   = ["video/out/hwdec/hwdec_vaapi.c",
+                   "video/out/hwdec/hwdec_vaapi_gl.c"])
+
+check("-caca*",
+      deps      = "gpl",
+      fn        = lambda: check_pkg_config("caca >= 0.99.beta18"),
+      sources   = "video/out/vo_caca.c")
+check("-jpeg*",
+      desc      = "JPEG support",
+      fn        = lambda: check_cc(include = ["stdio.h", "jpeglib.h"],
+                                   link = "-ljpeg"))
+check("-direct3d*",
+      desc      = "Ancient D3D9 VO",
+      deps      = ["win32-desktop", "gpl"],
+      sources   = "video/out/vo_direct3d.c")
+check("-shaderc-shared",
+      desc      = "libshaderc SPIR-V compiler (shared library)",
+      fn        = lambda: check_cc(include = "shaderc/shaderc.h",
+                                   link = "-lshaderc_shared"))
+check("-shaderc-static",
+      desc      = "libshaderc SPIR-V compiler (static library)",
+      deps_neg  = "shaderc-shared",
+      fn        = lambda: check_cc(include = "shaderc/shaderc.h",
+                                   link = ["-lshaderc_combined", "-lstdc++"]))
+check("shaderc*",
+      desc      = "libshaderc SPIR-V compiler",
+      deps_any  = ["shaderc-shared", "shaderc-static"],
+      sources   = "video/out/gpu/spirv_shaderc.c")
+check("-spirv-cross-shared",
+      desc      = "SPIRV-Cross SPIR-V shader converter (shared library)",
+      fn        = lambda: check_pkg_config("spirv-cross-c-shared"))
+check("-spirv-cross-static",
+      desc      = "SPIRV-Cross SPIR-V shader converter (static library)",
+      deps_neg  = "spirv-cross-shared",
+      fn        = lambda: check_pkg_config("spirv-cross"))
+check("spirv-cross*",
+      desc      = "SPIRV-Cross SPIR-V shader converter",
+      deps_any  = ["spirv-cross-shared", "spirv-cross-static"])
+check("-d3d11*",
+      desc      = "Direct3D 11 video output",
+      deps      = ["win32-desktop", "shaderc", "spirv-cross",],
+      fn        = lambda: check_cc(include = ["d3d11_1.h", "dxgi1_2.h"]),
+      sources   = ["video/out/d3d11/context.c",
+                   "video/out/d3d11/ra_d3d11.c",
+                   "video/out/gpu/d3d11_helpers.c"])
+
+check("-rpi*",
+      # TODO: or tell them to fuck off
+      fn        = lambda: False,
+      sources   = ["video/out/opengl/context_rpi.c",
+                   "video/out/opengl/hwdec_rpi.c",
+                   "video/out/vo_rpi.c"])
+check("-ios-gl*",
+      desc      = "iOS OpenGL ES hardware decoding interop support",
+      fn        = lambda: check_cc(include = "OpenGLES/ES3/glext.h",
+                                   expr = "(void)GL_RGB32F;"),  # arbitrary OpenGL ES 3.0 symbol
+      sources   = "video/out/opengl/hwdec_ios.m")
+check("-egl-android*",
+      desc      = "Android EGL support",
+      deps      = "android",
+      fn        = lambda: check_cc(link = ["-landroid", "-lEGL"]),
+      sources   = "video/out/opengl/context_android.c")
+
+check("-plain-gl*",
+      desc      = "OpenGL without platform-specific code (e.g. for libmpv)",
+      deps      = ["libmpv-shared", "libmpv-static"])
+
+check("-gl*",
+      desc      = "OpenGL context support",
+      deps_any  = ["gl-cocoa", "gl-x11", "egl-x11", "egl-drm", "egl-android",
+                   "gl-win32", "gl-wayland", "rpi", "plain-gl"],
+      required  = "No OpenGL video output found or enabled. " +
+                  "Aborting. If you really mean to compile without OpenGL " +
+                  "video outputs use --disable-gl.",
+      sources   = ["video/out/opengl/common.c",
+                   "video/out/opengl/context.c",
+                   "video/out/opengl/formats.c",
+                   "video/out/opengl/libmpv_gl.c",
+                   "video/out/opengl/ra_gl.c",
+                   "video/out/opengl/utils.c"])
+
+check("egl-helpers*",
+      desc      = "EGL helper functions",
+      deps_any  = ["egl-x11", "rpi", "gl-wayland", "egl-drm",
+                   "egl-angle-win32", "egl-android"],
+      sources   = ["video/filter/vf_gpu.c", # doesn't really belong here
+                   "video/out/opengl/egl_helpers.c"]),
+
+check("videotoolbox-hwaccel*",
+      desc      = "libavcodec videotoolbox hwaccel",
+      deps_any  = ["gl-cocoa", "ios-gl"])
+check("-videotoolbox-gl*",
+      desc      = "Videotoolbox with OpenGL",
+      deps      = ["gl-cocoa", "videotoolbox-hwaccel"],
+      sources   = "video/out/opengl/hwdec_osx.c")
+check("-d3d-hwaccel*",
+      desc      = "D3D11VA hwaccel",
+      deps      = "win32",
+      sources   = ["video/d3d.c",
+                   "video/filter/vf_d3d11vpp.c"])
+check("-d3d9-hwaccel*",
+      desc      = "DXVA2 hwaccel",
+      deps      = "d3d-hwaccel")
+check("-gl-dxinterop-d3d9*",
+      desc      = "OpenGL/DirectX Interop Backend DXVA2 interop",
+      deps      = ["gl-dxinterop", "d3d9-hwaccel"],
+      sources   = "video/out/opengl/hwdec_dxva2gldx.c")
+
+check("-cuda-hwaccel*",
+      desc      = "CUDA acceleration base dependencies",
+      fn        = lambda: check_pkg_config("ffnvcodec >= 8.2.15.7"),
+      sources   = "video/cuda.c")
+check("-cuda-interop*",
+      deps      = "cuda-hwaccel",
+      desc      = "CUDA with graphics base interop",
+      sources   = "video/out/hwdec/hwdec_cuda.c")
+check("-cuda-interop-gl",
+      desc      = "CUDA GL interop",
+      deps      = ["cuda-interop", "gl"],
+      sources   = "video/out/hwdec/hwdec_cuda_gl.c")
+check("-cuda-interop-vulkan",
+      desc      = "CUDA Vulkan interop",
+      deps      = ["cuda-interop", "vulkan"],
+      sources   = "video/out/hwdec/hwdec_cuda_vk.c")
+
+check("-rpi-mmal*",
+      desc      = "Raspberry Pi MMAL hwaccel",
+      deps      = "rpi",
+      fn        = lambda: check_pkg_config("mmal") or
+                          check_pkg_config("/opt/vc/lib/pkgconfig/mmal.pc"),
+      sources   = ["video/out/opengl/hwdec_rpi.c",
+                   "video/out/vo_rpi.c"])
+
+check(deps_any  = ["gl-x11", "egl-x11"],
+      sources   = ["video/out/opengl/oml_sync.c"])
+
+check(deps      = ["d3d-hwaccel", "egl-angle"],
+      sources   = ["video/out/opengl/hwdec_d3d11egl.c"])
+
+check(deps      = ["d3d-hwaccel", "d3d11"],
+      sources   = "video/out/d3d11/hwdec_d3d11va.c")
+
+check(deps      = ["d3d9-hwaccel", "d3d11"],
+      sources   = "video/out/d3d11/hwdec_dxva2dxgi.c")
+
+check(deps      = ["d3d9-hwaccel", "egl-angle"],
+      sources   = "video/out/opengl/hwdec_dxva2egl.c")
+
+check(deps      = ["vulkan", "wayland"],
+      sources   = "video/out/vulkan/context_wayland.c")
+check(deps      = ["vulkan", "win32-desktop"],
+      sources   = "video/out/vulkan/context_win.c")
+check(deps      = ["vulkan", "x11"],
+      sources   = "video/out/vulkan/context_xlib.c")
+
+check("-libbluray*",
+      desc      = "Bluray support",
+      default   = False,
+      fn        = lambda: check_pkg_config("libbluray >= 0.3.0"),
+      sources   = "stream/stream_bluray.c")
+check("-dvdnav*",
+      desc      = "dvdnav support",
+      default   = False,
+      deps      = "gpl",
+      fn        = lambda: check_pkg_config("dvdnav >= 4.2.0") and
+                          check_pkg_config("dvdread >= 4.1.0"),
+      sources   = "stream/stream_dvdnav.c"),
+check("-cdda*",
+      desc      = "cdda support (libcdio)",
+      deps      = "gpl",
+      default   = False,
+      fn        = lambda: check_pkg_config("libcdio_paranoia"),
+      sources   = "stream/stream_cdda.c")
+check("-dvbin*",
+      desc      = "DVB input module",
+      deps      = "gpl",
+      default   = False,
+      sources   = ["stream/dvb_tune.c", "stream/stream_dvb.c"])
+
+check("-apple-remote*",
+      desc      = "Apple Remote support",
+      deps      = "cocoa",
+      sources   = "osdep/ar/HIDRemote.m")
+check("-macos-touchbar*",
+      desc      = "macOS Touch Bar support",
+      deps      = "cocoa",
+      # TODO: all that framework stuff
+      fn        = lambda: False,
+      sources   = "osdep/macosx_touchbar.m")
+check("-macos-cocoa-cb*",
+      desc      = "macOS opengl-cb backend",
+      deps      = "cocoa")
+
+check("-tests*",
+      desc      = "unit tests (development only)",
+      default   = False,
+      sources   = ["test/chmap.c",
+                   "test/gl_video.c",
+                   "test/img_format.c",
+                   "test/json.c",
+                   "test/linked_list.c",
+                   "test/paths.c",
+                   "test/scale_sws.c",
+                   "test/scale_test.c",
+                   "test/tests.c"])
+check("tests-zimg",
+      deps      = ["tests", "zimg"],
+      sources   = ["test/repack.c",
+                   "test/scale_zimg.c"])
+
+add_sources(
+    "audio/aframe.c",
+    "audio/audio_buffer.c",
+    "audio/chmap.c",
+    "audio/chmap_sel.c",
+    "audio/decode/ad_lavc.c",
+    "audio/decode/ad_spdif.c",
+    "audio/filter/af_drop.c",
+    "audio/filter/af_format.c",
+    "audio/filter/af_lavcac3enc.c",
+    "audio/filter/af_scaletempo.c",
+    "audio/fmt-conversion.c",
+    "audio/format.c",
+    "audio/out/ao.c",
+    "audio/out/ao_lavc.c",
+    "audio/out/ao_null.c",
+    "audio/out/ao_pcm.c",
+    "audio/out/buffer.c",
+    "common/av_common.c",
+    "common/av_log.c",
+    "common/codecs.c",
+    "common/common.c",
+    "common/encode_lavc.c",
+    "common/msg.c",
+    "common/playlist.c",
+    "common/recorder.c",
+    "common/stats.c",
+    "common/tags.c",
+    "common/version.c",
+    "demux/cache.c",
+    "demux/codec_tags.c",
+    "demux/cue.c",
+    "demux/demux.c",
+    "demux/demux_cue.c",
+    "demux/demux_disc.c",
+    "demux/demux_edl.c",
+    "demux/demux_lavf.c",
+    "demux/demux_mf.c",
+    "demux/demux_mkv.c",
+    "demux/demux_mkv_timeline.c",
+    "demux/demux_null.c",
+    "demux/demux_playlist.c",
+    "demux/demux_raw.c",
+    "demux/demux_timeline.c",
+    "demux/ebml.c",
+    "demux/packet.c",
+    "demux/timeline.c",
+    "filters/filter.c",
+    "filters/f_async_queue.c",
+    "filters/f_auto_filters.c",
+    "filters/f_autoconvert.c",
+    "filters/f_decoder_wrapper.c",
+    "filters/f_demux_in.c",
+    "filters/f_hwtransfer.c",
+    "filters/f_lavfi.c",
+    "filters/f_output_chain.c",
+    "filters/f_swresample.c",
+    "filters/f_swscale.c",
+    "filters/f_utils.c",
+    "filters/frame.c",
+    "filters/user_filters.c",
+    "input/cmd.c",
+    "input/event.c",
+    "input/input.c",
+    "input/ipc.c",
+    "input/keycodes.c",
+    "misc/bstr.c",
+    "misc/charset_conv.c",
+    "misc/dispatch.c",
+    "misc/json.c",
+    "misc/natural_sort.c",
+    "misc/node.c",
+    "misc/rendezvous.c",
+    "misc/ring.c",
+    "misc/thread_pool.c",
+    "misc/thread_tools.c",
+    "options/m_config_core.c",
+    "options/m_config_frontend.c",
+    "options/m_option.c",
+    "options/m_property.c",
+    "options/options.c",
+    "options/parse_commandline.c",
+    "options/parse_configfile.c",
+    "options/path.c",
+    "osdep/io.c",
+    "osdep/path-unix.c",
+    "osdep/semaphore_osx.c",
+    "osdep/subprocess.c",
+    "osdep/threads.c",
+    "osdep/timer.c",
+    "player/audio.c",
+    "player/client.c",
+    "player/command.c",
+    "player/configfiles.c",
+    "player/external_files.c",
+    "player/loadfile.c",
+    "player/main.c",
+    "player/misc.c",
+    "player/osd.c",
+    "player/playloop.c",
+    "player/screenshot.c",
+    "player/scripting.c",
+    "player/sub.c",
+    "player/video.c",
+    "stream/cookies.c",
+    "stream/stream.c",
+    "stream/stream_avdevice.c",
+    "stream/stream_cb.c",
+    "stream/stream_concat.c",
+    "stream/stream_edl.c",
+    "stream/stream_file.c",
+    "stream/stream_lavf.c",
+    "stream/stream_memory.c",
+    "stream/stream_mf.c",
+    "stream/stream_null.c",
+    "sub/dec_sub.c",
+    "sub/draw_bmp.c",
+    "sub/filter_sdh.c",
+    "sub/img_convert.c",
+    "sub/lavc_conv.c",
+    "sub/osd.c",
+    "sub/sd_lavc.c",
+    "ta/ta.c",
+    "ta/ta_talloc.c",
+    "ta/ta_utils.c",
+    "video/csputils.c",
+    "video/decode/vd_lavc.c",
+    "video/filter/refqueue.c",
+    "video/filter/vf_format.c",
+    "video/filter/vf_sub.c",
+    "video/fmt-conversion.c",
+    "video/hwdec.c",
+    "video/image_loader.c",
+    "video/image_writer.c",
+    "video/img_format.c",
+    "video/mp_image.c",
+    "video/mp_image_pool.c",
+    "video/out/aspect.c",
+    "video/out/bitmap_packer.c",
+    "video/out/dither.c",
+    "video/out/dr_helper.c",
+    "video/out/filter_kernels.c",
+    "video/out/gpu/context.c",
+    "video/out/gpu/error_diffusion.c",
+    "video/out/gpu/hwdec.c",
+    "video/out/gpu/lcms.c",
+    "video/out/gpu/libmpv_gpu.c",
+    "video/out/gpu/osd.c",
+    "video/out/gpu/ra.c",
+    "video/out/gpu/shader_cache.c",
+    "video/out/gpu/spirv.c",
+    "video/out/gpu/user_shaders.c",
+    "video/out/gpu/utils.c",
+    "video/out/gpu/video.c",
+    "video/out/gpu/video_shaders.c",
+    "video/out/vo.c",
+    "video/out/vo_gpu.c",
+    "video/out/vo_image.c",
+    "video/out/vo_lavc.c",
+    "video/out/vo_libmpv.c",
+    "video/out/vo_null.c",
+    "video/out/vo_tct.c",
+    "video/out/win_state.c",
+    "video/repack.c",
+    "video/sws_utils.c",
+)
+
+if is_running():
+
+    if dep_enabled("cplayer"):
+        pick_first_matching_dep(
+            ("cocoa",           "osdep/main-fn-cocoa.c"),
+            ("posix",           "osdep/main-fn-unix.c"),
+            ("win32-desktop",   "osdep/main-fn-win.c"),
+        )
+
+    pick_first_matching_dep(
+        ("posix",               "osdep/terminal-unix.c"),
+        ("win32-desktop",       "osdep/terminal-win.c"),
+        ("_",                   "osdep/terminal-dummy.c"),
+    )
+
+    pick_first_matching_dep(
+        ("win32",               "osdep/timer-win2.c"),
+        ("osx",                 "osdep/timer-darwin.c"),
+        ("_",                   "osdep/timer-linux.c"),
+    )
+
+    pick_first_matching_dep(
+        ("posix",               "input/ipc-unix.c"),
+        ("win32-desktop",       "input/ipc-win.c"),
+        ("_",                   "input/ipc-dummy.c"),
+    )
+
+    pick_first_matching_dep(
+        ("posix",               "osdep/subprocess-posix.c"),
+        ("win32-desktop",       "osdep/subprocess-win.c"),
+        ("_",                   "osdep/subprocess-dummy.c"),
+    )
+
+finish()
