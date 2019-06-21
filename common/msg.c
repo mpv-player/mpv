@@ -569,10 +569,6 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
 {
     struct mp_log_root *root = global->log->root;
 
-#if !HAVE_ATOMICS
-    return NULL;
-#endif
-
     pthread_mutex_lock(&mp_msg_lock);
 
     struct mp_log_buffer *buffer = talloc_ptrtype(NULL, buffer);
