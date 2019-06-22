@@ -472,7 +472,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
             goto esh_failed;
 
-        for (int n = 0; n < p->desc.num_layers; n++) {
+        for (int n = 0; n < p->num_planes; n++) {
             if (p->desc.layers[n].num_planes > 1) {
                 // Should never happen because we request separate layers
                 MP_ERR(mapper, "Multi-plane VA surfaces are not supported\n");
