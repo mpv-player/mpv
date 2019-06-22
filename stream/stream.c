@@ -244,7 +244,7 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
     if (sinfo->open2) {
         r = sinfo->open2(s, arg);
     } else if (!arg) {
-        r = sinfo->open(s);
+        r = (sinfo->open)(s);
     }
     if (r != STREAM_OK) {
         talloc_free(s);
