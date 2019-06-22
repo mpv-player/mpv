@@ -404,7 +404,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             (``true``). This value is used when the timer expires (but before
             the timer callback function fn is run).
 
-    Note that these are method, and you have to call them using ``:`` instead
+    Note that these are methods, and you have to call them using ``:`` instead
     of ``.`` (Refer to http://www.lua.org/manual/5.2/manual.html#3.4.9 .)
 
     Example:
