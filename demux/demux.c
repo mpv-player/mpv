@@ -1249,6 +1249,7 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
     dp->keyframe = true;
     dp->pts = MP_ADD_PTS(dp->pts, -in->ts_offset);
     dp->dts = MP_ADD_PTS(dp->dts, -in->ts_offset);
+    dp->stream = sh->index;
     add_packet_locked(sh, dp);
     pthread_mutex_unlock(&in->lock);
 }
