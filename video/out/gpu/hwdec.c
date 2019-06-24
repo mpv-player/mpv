@@ -28,6 +28,7 @@
 extern const struct ra_hwdec_driver ra_hwdec_vaegl;
 extern const struct ra_hwdec_driver ra_hwdec_vaglx;
 extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
+extern const struct ra_hwdec_driver ra_hwdec_surfacetexture;
 extern const struct ra_hwdec_driver ra_hwdec_vdpau;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11egl;
@@ -77,6 +78,9 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #endif
 #if HAVE_DRMPRIME && HAVE_DRM
     &ra_hwdec_drmprime_drm,
+#endif
+#if HAVE_ANDROID
+    &ra_hwdec_surfacetexture,
 #endif
 
     NULL
@@ -166,6 +170,7 @@ struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
         .priv = talloc_zero_size(mapper, hwdec->driver->mapper->priv_size),
         .src_params = *params,
         .dst_params = *params,
+        .transform = identity_trans,
     };
     if (mapper->driver->init(mapper) < 0)
         ra_hwdec_mapper_free(&mapper);
