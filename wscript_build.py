@@ -435,7 +435,6 @@ def build(ctx):
         ( "video/out/opengl/context_dxinterop.c","gl-dxinterop" ),
         ( "video/out/opengl/context_glx.c",      "gl-x11" ),
         ( "video/out/opengl/context_rpi.c",      "rpi" ),
-        ( "video/out/opengl/context_vdpau.c",    "vdpau-gl-x11" ),
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
         ( "video/out/opengl/context_win.c",      "gl-win32" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
