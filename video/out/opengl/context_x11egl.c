@@ -30,12 +30,18 @@
 #include "video/out/x11_common.h"
 #include "context.h"
 #include "egl_helpers.h"
+#include "oml_sync.h"
+#include "utils.h"
 
 struct priv {
     GL gl;
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
+
+    EGLBoolean (*GetSyncValues)(EGLDisplay, EGLSurface,
+                                int64_t*, int64_t*, int64_t*);
+    struct oml_sync sync;
 };
 
 static void mpegl_uninit(struct ra_ctx *ctx)
@@ -79,6 +85,19 @@ static void mpegl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     eglSwapBuffers(p->egl_display, p->egl_surface);
+
+    int64_t ust, msc, sbc;
+    if (!p->GetSyncValues || !p->GetSyncValues(p->egl_display, p->egl_surface,
+                                               &ust, &msc, &sbc))
+        ust = msc = sbc = -1;
+
+    oml_sync_swap(&p->sync, ust, msc, sbc);
+}
+
+static void mpegl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
+{
+    struct priv *p = ctx->priv;
+    oml_sync_get_info(&p->sync, info);
 }
 
 static bool mpegl_init(struct ra_ctx *ctx)
@@ -142,10 +161,15 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     struct ra_gl_ctx_params params = {
         .swap_buffers = mpegl_swap_buffers,
+        .get_vsync    = mpegl_get_vsync,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         goto uninit;
+
+    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    if (gl_check_extension(exts, "EGL_CHROMIUM_sync_control"))
+        p->GetSyncValues = (void *)eglGetProcAddress("eglGetSyncValuesCHROMIUM");
 
     ra_add_native_resource(ctx->ra, "x11", vo->x11->display);
 
