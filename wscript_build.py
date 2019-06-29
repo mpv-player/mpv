@@ -480,6 +480,7 @@ def build(ctx):
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/libmpv_gl.c",        "gl" ),
+        ( "video/out/opengl/oml_sync.c",         "gl-x11" ),
         ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/vo.c" ),
