@@ -2325,7 +2325,7 @@ static void fixup_metadata(struct demux_internal *in)
 bool demux_is_network_cached(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
-    bool use_cache = demuxer->stream->streaming;
+    bool use_cache = demuxer->is_network;
     if (in->opts->enable_cache >= 0)
         use_cache = in->opts->enable_cache == 1;
     return use_cache;
