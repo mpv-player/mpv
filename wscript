@@ -746,19 +746,10 @@ video_output_features = [
         'deps': 'libmpv-shared || libmpv-static',
         'func': check_true,
     }, {
-        'name': '--mali-fbdev',
-        'desc': 'MALI via Linux fbdev',
-        'deps': 'libdl',
-        'func': compose_checks(
-            check_cc(lib="EGL"),
-            check_statement('EGL/fbdev_window.h', 'struct fbdev_window test'),
-            check_statement('linux/fb.h', 'struct fb_var_screeninfo test'),
-        ),
-    }, {
         'name': '--gl',
         'desc': 'OpenGL context support',
         'deps': 'gl-cocoa || gl-x11 || egl-x11 || egl-drm || '
-                 + 'gl-win32 || gl-wayland || rpi || mali-fbdev || '
+                 + 'gl-win32 || gl-wayland || rpi || '
                  + 'plain-gl',
         'func': check_true,
         'req': True,
@@ -772,7 +763,7 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
+        'deps': 'egl-x11 || rpi || gl-wayland || egl-drm || ' +
                 'egl-angle-win32 || android',
         'func': check_true
     }

@@ -4938,8 +4938,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
         X11/EGL
     android
         Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
-    mali-fbdev
-        Direct fbdev/EGL support on some ARM/MALI devices.
     vdpauglx
         Use vdpau presentation with GLX as backing. Experimental use only.
         Using this will have no advantage (other than additional bugs or
