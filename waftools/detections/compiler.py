@@ -18,9 +18,7 @@ def __test_and_add_flags__(ctx, flags):
 
 def __add_generic_flags__(ctx):
     ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
-                       "-D_LARGEFILE_SOURCE", "-D_FILE_OFFSET_BITS=64",
-                       "-D_LARGEFILE64_SOURCE",
-                       "-Wall"]
+                       "-D_FILE_OFFSET_BITS=64", "-Wall"]
 
     if ctx.check_cc(cflags="-std=c11", mandatory=False):
         ctx.env.CFLAGS += ["-std=c11"]
