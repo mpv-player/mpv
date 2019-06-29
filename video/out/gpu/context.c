@@ -44,7 +44,6 @@ extern const struct ra_ctx_fns ra_ctx_angle;
 extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
 extern const struct ra_ctx_fns ra_ctx_android;
-extern const struct ra_ctx_fns ra_ctx_mali_fbdev;
 extern const struct ra_ctx_fns ra_ctx_vdpauglx;
 
 /* Vulkan */
@@ -90,9 +89,6 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_EGL_DRM
     &ra_ctx_drm_egl,
-#endif
-#if HAVE_MALI_FBDEV
-    &ra_ctx_mali_fbdev,
 #endif
 #if HAVE_VDPAU_GL_X11
     &ra_ctx_vdpauglx,
