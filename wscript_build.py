@@ -228,7 +228,6 @@ def build(ctx):
         ( "audio/decode/ad_spdif.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_lavcac3enc.c" ),
-        ( "audio/filter/af_lavrresample.c" ),
         ( "audio/filter/af_rubberband.c",        "rubberband" ),
         ( "audio/filter/af_scaletempo.c" ),
         ( "audio/fmt-conversion.c" ),

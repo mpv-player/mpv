@@ -24,44 +24,6 @@ See ``--vf`` group of options for info on how ``--af-defaults``, ``--af-add``,
 
 Available filters are:
 
-``lavrresample[=option1:option2:...]``
-    This filter uses libavresample (or libswresample, depending on the build)
-    to change sample rate, sample format, or channel layout of the audio stream.
-    This filter is automatically enabled if the audio output does not support
-    the audio configuration of the file being played.
-
-    .. warning::
-
-        Deprecated. Either use the ``--audio-resample-...`` options to customize
-        resampling, or the libavfilter ``--af=aresample`` filter, which has its
-        own options.
-
-    It supports only the following sample formats: u8, s16, s32, float.
-
-    ``filter-size=<length>``
-        Length of the filter with respect to the lower sampling rate. (default:
-        16)
-    ``phase-shift=<count>``
-        Log2 of the number of polyphase entries. (..., 10->1024, 11->2048,
-        12->4096, ...) (default: 10->1024)
-    ``cutoff=<cutoff>``
-        Cutoff frequency (0.0-1.0), default set depending upon filter length.
-    ``linear``
-        If set then filters will be linearly interpolated between polyphase
-        entries. (default: no)
-    ``no-detach``
-        Do not detach if input and output audio format/rate/channels match.
-        (If you just want to set defaults for this filter that will be used
-        even by automatically inserted lavrresample instances, you should
-        prefer setting them with the ``--audio-resample-...`` options.) This
-        does not do anything anymore and the filter will never detach.
-    ``normalize=<yes|no|auto>``
-        Whether to normalize when remixing channel layouts (default: auto).
-        ``auto`` uses the value set by ``--audio-normalize-downmix``.
-    ``o=<string>``
-        Set AVOptions on the SwrContext or AVAudioResampleContext. These should
-        be documented by FFmpeg or Libav.
-
 ``lavcac3enc[=options]``
     Encode multi-channel audio to AC-3 at runtime using libavcodec. Supports
     16-bit native-endian input format, maximum 6 channels. The output is
