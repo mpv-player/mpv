@@ -442,31 +442,6 @@ Available mpv-only filters are:
     ``display_fps``
         Refresh rate of the current display. Note that this value can be 0.
 
-``vapoursynth-lazy``
-    The same as ``vapoursynth``, but doesn't load Python scripts. Instead, a
-    custom backend using Lua and the raw VapourSynth API is used. The syntax
-    is completely different, and absolutely no convenience features are
-    provided. There's no type checking either, and you can trigger crashes.
-
-    .. admonition:: Example:
-
-        ::
-
-            video_out = invoke("morpho", "Open", {clip = video_in})
-
-    The special variable ``video_in`` is the mpv video source, while the
-    special variable ``video_out`` is used to read video from. The 1st argument
-    is the plugin (queried with ``getPluginByNs``), the 2nd is the filter name,
-    and the 3rd argument is a table with the arguments. Positional arguments
-    are not supported. The types must match exactly. Since Lua is terrible and
-    can't distinguish integers and floats, integer arguments must be prefixed
-    with ``i_``, in which case the prefix is removed and the argument is cast
-    to an integer. Should the argument's name start with ``i_``, you're out of
-    luck.
-
-    Clips (VSNodeRef) are passed as light userdata, so trying to pass any
-    other userdata type will result in hard crashes.
-
 ``vavpp``
     VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=gpu``
     only. Currently deinterlaces. This filter is automatically inserted if

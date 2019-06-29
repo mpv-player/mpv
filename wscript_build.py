@@ -384,7 +384,7 @@ def build(ctx):
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
         ( "video/filter/vf_format.c" ),
         ( "video/filter/vf_sub.c" ),
-        ( "video/filter/vf_vapoursynth.c",       "vapoursynth-core" ),
+        ( "video/filter/vf_vapoursynth.c",       "vapoursynth" ),
         ( "video/filter/vf_vavpp.c",             "vaapi" ),
         ( "video/filter/vf_vdpaupp.c",           "vdpau" ),
         ( "video/fmt-conversion.c" ),

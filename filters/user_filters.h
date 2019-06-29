@@ -29,7 +29,6 @@ extern const struct mp_user_filter_entry vf_lavfi;
 extern const struct mp_user_filter_entry vf_lavfi_bridge;
 extern const struct mp_user_filter_entry vf_sub;
 extern const struct mp_user_filter_entry vf_vapoursynth;
-extern const struct mp_user_filter_entry vf_vapoursynth_lazy;
 extern const struct mp_user_filter_entry vf_format;
 extern const struct mp_user_filter_entry vf_vdpaupp;
 extern const struct mp_user_filter_entry vf_vavpp;
