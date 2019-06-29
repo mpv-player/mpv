@@ -11,11 +11,6 @@
 #include "osdep/terminal.h"
 #include "osdep/main-fn.h"
 
-int wmain(int argc, wchar_t *argv[]);
-
-// mpv does its own wildcard expansion in the option parser
-int _dowildcard = 0;
-
 static bool is_valid_handle(HANDLE h)
 {
     return h != INVALID_HANDLE_VALUE && h != NULL &&
@@ -48,7 +43,7 @@ static void microsoft_nonsense(void)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
 }
 
-int wmain(int argc, wchar_t *argv[])
+int main(int argc_, char **argv_)
 {
     microsoft_nonsense();
 
@@ -61,11 +56,14 @@ int wmain(int argc, wchar_t *argv[])
     // is expecting mpv to show some UI, so enable the pseudo-GUI profile.
     bool gui = !has_console && !has_redirected_stdio();
 
+    int argc = 0;
+    wchar_t **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+
     int argv_len = 0;
     char **argv_u8 = NULL;
 
     // Build mpv's UTF-8 argv, and add the pseudo-GUI profile if necessary
-    if (argv[0])
+    if (argc > 0 && argv[0])
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len, mp_to_utf8(argv_u8, argv[0]));
     if (gui) {
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len,
