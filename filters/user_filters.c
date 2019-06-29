@@ -64,11 +64,8 @@ const struct mp_user_filter_entry *vf_list[] = {
     &vf_lavfi,
     &vf_lavfi_bridge,
     &vf_sub,
-#if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH
+#if HAVE_VAPOURSYNTH
     &vf_vapoursynth,
-#endif
-#if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH_LAZY
-    &vf_vapoursynth_lazy,
 #endif
 #if HAVE_VDPAU
     &vf_vdpaupp,

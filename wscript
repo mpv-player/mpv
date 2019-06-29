@@ -392,19 +392,9 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('lcms2', '>= 2.6'),
     }, {
         'name': '--vapoursynth',
-        'desc': 'VapourSynth filter bridge (Python)',
+        'desc': 'VapourSynth filter bridge',
         'func': check_pkg_config('vapoursynth',        '>= 24',
                                  'vapoursynth-script', '>= 23'),
-    }, {
-        'name': '--vapoursynth-lazy',
-        'desc': 'VapourSynth filter bridge (Lazy Lua)',
-        'deps': 'lua',
-        'func': check_pkg_config('vapoursynth',        '>= 24'),
-    }, {
-        'name': 'vapoursynth-core',
-        'desc': 'VapourSynth filter bridge (core)',
-        'deps': 'vapoursynth || vapoursynth-lazy',
-        'func': check_true,
     }, {
         'name': '--libarchive',
         'desc': 'libarchive wrapper for reading zip files and more',
