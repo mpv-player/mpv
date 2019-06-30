@@ -3917,6 +3917,12 @@ Cache
     generally worthless after the media is closed, and it's hard to retrieve
     any media data from it (it's not supported by design).
 
+    If the option is enabled at runtime, the cache file is created, but old data
+    will remain in the memory cache. If the option is disabled at runtime, old
+    data remains in the disk cache, and the cache file is not closed until the
+    media is closed. If the option is disabled and enabled again, it will
+    continue to use the cache file that was opened first.
+
 ``--cache-dir=<path>``
     Directory where to create temporary files (default: none).
 
@@ -5579,8 +5585,14 @@ Miscellaneous
 ``--stream-record=<file>``
     Similar to ``--record-file``, but write packets as they are received. The
     implementation of this does not tolerate seeks (outside of demuxer cache),
-    or streams being selected/deselected during recording. Can not be set at
-    runtime. Use with care.
+    or streams being selected/deselected during recording. Use with care.
+
+    If this is set at runtime, the old file is closed, and the new file is
+    opened. Note that this will write only data that is appended at the end of
+    the cache, and the already cached data cannot be written. (A fix for that
+    would be a command that dumps the cache using a given time range, possibly
+    with the option to be open-ended, which would continue to write data
+    appended to the cache. Such a command doesn't exist yet.)
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
