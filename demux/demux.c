@@ -149,8 +149,10 @@ const struct m_sub_options demux_conf = {
 
 struct demux_internal {
     struct mp_log *log;
+    struct mpv_global *global;
 
-    struct demux_opts *opts;
+    bool can_cache;             // not a slave demuxer; caching makes sense
+    bool can_record;            // stream recording is allowed
 
     // The demuxer runs potentially in another thread, so we keep two demuxer
     // structs; the real demuxer can access the shadow struct only.
@@ -164,6 +166,9 @@ struct demux_internal {
     pthread_t thread;
 
     // -- All the following fields are protected by lock.
+
+    struct demux_opts *opts;
+    struct m_config_cache *opts_cache;
 
     bool thread_terminate;
     bool threading;
@@ -190,6 +195,8 @@ struct demux_internal {
     size_t max_bytes;
     size_t max_bytes_bw;
     bool seekable_cache;
+    bool using_network_cache_opts;
+    char *record_filename;
 
     // At least one decoder actually requested data since init or the last seek.
     // Do this to allow the decoder thread to select streams before starting.
@@ -1962,7 +1969,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     record_packet(in, dp);
 
-    if (in->cache) {
+    if (in->cache && in->opts->disk_cache) {
         int64_t pos = demux_cache_write(in->cache, dp);
         if (pos >= 0) {
             demux_packet_unref_contents(dp);
@@ -2327,9 +2334,73 @@ static void execute_seek(struct demux_internal *in)
     in->seeking_in_progress = MP_NOPTS_VALUE;
 }
 
+static void update_opts(struct demux_internal *in)
+{
+    struct demux_opts *opts = in->opts;
+
+    in->min_secs = opts->min_secs;
+    in->max_bytes = opts->max_bytes;
+    in->max_bytes_bw = opts->max_bytes_bw;
+
+    int seekable = opts->seekable_cache;
+    bool is_streaming = in->d_thread->is_network ||
+        (in->d_thread->stream && in->d_thread->stream->streaming);
+    bool use_cache = is_streaming;
+    if (opts->enable_cache >= 0)
+        use_cache = opts->enable_cache == 1;
+
+    if (use_cache) {
+        in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
+        if (seekable < 0)
+            seekable = 1;
+    }
+    in->seekable_cache = seekable == 1;
+    in->using_network_cache_opts = is_streaming && use_cache;
+
+    if (!in->can_cache) {
+        in->seekable_cache = false;
+        in->min_secs = 0;
+        in->max_bytes = 1;
+        in->max_bytes_bw = 0;
+        in->using_network_cache_opts = false;
+    }
+
+    if (in->seekable_cache && opts->disk_cache && !in->cache) {
+        in->cache = demux_cache_create(in->global, in->log);
+        if (!in->cache)
+            MP_ERR(in, "Failed to create file cache.\n");
+    }
+
+    // The filename option really decides whether recording should be active.
+    // So if the filename changes, act upon it.
+    char *old = in->record_filename ? in->record_filename : "";
+    char *new = opts->record_file ? opts->record_file : "";
+    if (strcmp(old, new) != 0) {
+        if (in->recorder) {
+            MP_WARN(in, "Stopping recording.\n");
+            mp_recorder_destroy(in->recorder);
+            in->recorder = NULL;
+        }
+        in->record_filename = talloc_strdup(in, opts->record_file);
+        talloc_free(in->record_filename);
+        // Note: actual recording only starts once packets are read. It may be
+        // important to delay creating in->recorder to that point, because the
+        // demuxer might detect more streams until finding the first packet.
+        in->enable_recording = in->can_record;
+    }
+
+    // In case the cache was reduced in size.
+    prune_old_packets(in);
+
+    // In case the seekable cache was disabled.
+    free_empty_cached_ranges(in);
+}
+
 // Make demuxing progress. Return whether progress was made.
 static bool thread_work(struct demux_internal *in)
 {
+    if (m_config_cache_update(in->opts_cache))
+        update_opts(in);
     if (in->tracks_switched) {
         execute_trackswitch(in);
         return true;
@@ -2994,11 +3065,10 @@ static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
 bool demux_is_network_cached(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
-    bool use_cache = demuxer->is_network ||
-        (demuxer->stream && demuxer->stream->streaming);
-    if (in->opts->enable_cache >= 0)
-        use_cache = in->opts->enable_cache == 1;
-    return use_cache;
+    pthread_mutex_lock(&in->lock);
+    bool r = in->using_network_cache_opts;
+    pthread_mutex_unlock(&in->lock);
+    return r;
 }
 
 struct parent_stream_info {
@@ -3020,7 +3090,9 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         return NULL;
 
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
-    struct demux_opts *opts = mp_get_config_group(demuxer, global, &demux_conf);
+    struct m_config_cache *opts_cache =
+        m_config_cache_alloc(demuxer, global, &demux_conf);
+    struct demux_opts *opts = opts_cache->opts;
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
@@ -3039,19 +3111,19 @@ static struct demuxer *open_given_type(struct mpv_global *global,
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){
+        .global = global,
         .log = demuxer->log,
+        .can_cache = params && params->is_top_level,
+        .can_record = params && params->stream_record,
         .opts = opts,
+        .opts_cache = opts_cache,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
-        .min_secs = opts->min_secs,
-        .max_bytes = opts->max_bytes,
-        .max_bytes_bw = opts->max_bytes_bw,
         .after_seek = true, // (assumed identical to initial demuxer state)
         .after_seek_to_start = true,
         .highest_av_pts = MP_NOPTS_VALUE,
         .seeking_in_progress = MP_NOPTS_VALUE,
         .demux_ts = MP_NOPTS_VALUE,
-        .enable_recording = params && params->stream_record,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
@@ -3085,13 +3157,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         in->duration = in->d_thread->duration;
         demuxer_sort_chapters(demuxer);
         in->events = DEMUX_EVENT_ALL;
-        int seekable = opts->seekable_cache;
-        if (demux_is_network_cached(demuxer)) {
-            in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
-            if (seekable < 0)
-                seekable = 1;
-        }
-        in->seekable_cache = seekable == 1;
+
         struct demuxer *sub = NULL;
         if (!(params && params->disable_timeline)) {
             struct timeline *tl = timeline_load(global, log, demuxer);
@@ -3103,25 +3169,18 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
                                     NULL, sinfo, &params2, DEMUX_CHECK_FORCE);
-                if (!sub)
+                if (sub) {
+                    in->can_cache = false;
+                    in->can_record = false;
+                } else {
                     timeline_destroy(tl);
+                }
             }
         }
 
-        if (!(params && params->is_top_level) || sub) {
-            in->seekable_cache = false;
-            in->min_secs = 0;
-            in->max_bytes = 1;
-            in->enable_recording = false;
-        }
-
-        if (in->seekable_cache && opts->disk_cache) {
-            in->cache = demux_cache_create(global, log);
-            if (!in->cache)
-                MP_ERR(in, "Failed to create file cache.\n");
-        }
-
         switch_to_fresh_cache_range(in);
+
+        update_opts(in);
 
         demux_update(demuxer, MP_NOPTS_VALUE);
 
