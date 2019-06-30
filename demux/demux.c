@@ -3089,6 +3089,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 struct demuxer_params params2 = {0};
                 params2.timeline = tl;
                 params2.is_top_level = params && params->is_top_level;
+                params2.stream_record = params && params->stream_record;
                 sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
                                     NULL, sinfo, &params2, DEMUX_CHECK_FORCE);
@@ -3101,6 +3102,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
             in->seekable_cache = false;
             in->min_secs = 0;
             in->max_bytes = 1;
+            in->enable_recording = false;
         }
 
         if (in->seekable_cache && opts->disk_cache) {
