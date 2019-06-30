@@ -2316,6 +2316,9 @@ static void execute_seek(struct demux_internal *in)
         !(flags & (SEEK_FORWARD | SEEK_FACTOR)) &&
         pts <= in->d_thread->start_time;
 
+    if (in->recorder)
+        mp_recorder_mark_discontinuity(in->recorder);
+
     pthread_mutex_unlock(&in->lock);
 
     MP_VERBOSE(in, "execute seek (to %f flags %d)\n", pts, flags);
