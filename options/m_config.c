@@ -1407,9 +1407,14 @@ void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
     pthread_mutex_lock(&shadow->lock);
     if (cache->in_list) {
         for (int n = 0; n < shadow->num_listeners; n++) {
-            if (shadow->listeners[n] == cache)
+            if (shadow->listeners[n] == cache) {
                 MP_TARRAY_REMOVE_AT(shadow->listeners, shadow->num_listeners, n);
+                break;
+            }
         }
+        for (int n = 0; n < shadow->num_listeners; n++)
+            assert(shadow->listeners[n] != cache); // only 1 wakeup_cb per cache
+        // (The deinitialization path relies on this to free all memory.)
         if (!shadow->num_listeners) {
             talloc_free(shadow->listeners);
             shadow->listeners = NULL;
