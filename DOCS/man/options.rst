@@ -4085,6 +4085,45 @@ Network
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
 
+DVB
+---
+
+``--dvbin-card=<0-15>``
+    Specifies using card number 0-15 (default: 0).
+
+``--dvbin-file=<filename>``
+    Instructs mpv to read the channels list from ``<filename>``. The default is
+    in the mpv configuration directory (usually ``~/.config/mpv``) with the
+    filename ``channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
+    ``channels.conf`` as a last resort.
+    For DVB-S/2 cards, a VDR 1.7.x format channel list is recommended
+    as it allows tuning to DVB-S2 channels, enabling subtitles and
+    decoding the PMT (which largely improves the demuxing).
+    Classic mplayer format channel lists are still supported (without
+    these improvements), and for other card types, only limited VDR
+    format channel list support is implemented (patches welcome).
+    For channels with dynamic PID switching or incomplete
+    ``channels.conf``, ``--dvbin-full-transponder`` or the magic PID
+    ``8192`` are recommended.
+
+``--dvbin-timeout=<1-30>``
+    Maximum number of seconds to wait when trying to tune a frequency before
+    giving up (default: 30).
+
+``--dvbin-full-transponder=<yes|no>``
+    Apply no filters on program PIDs, only tune to frequency and pass full
+    transponder to demuxer.
+    The player frontend selects the streams from the full TS in this case,
+    so the program which is shown initially may not match the chosen channel.
+    Switching between the programs is possible by cycling the ``program``
+    property.
+    This is useful to record multiple programs on a single transponder,
+    or to work around issues in the ``channels.conf``.
+    It is also recommended to use this for channels which switch PIDs
+    on-the-fly, e.g. for regional news.
+
+    Default: ``no``
+
 ALSA audio output options
 -------------------------
 

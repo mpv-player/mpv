@@ -353,6 +353,8 @@ def build(ctx):
         ( "stream/cookies.c" ),
         ( "stream/stream.c" ),
         ( "stream/stream_avdevice.c" ),
+        ( "stream/dvb_tune.c",                   "dvbin" ),
+        ( "stream/stream_dvb.c",                 "dvbin" ),
         ( "stream/stream_cb.c" ),
         ( "stream/stream_concat.c" ),
         ( "stream/stream_edl.c" ),

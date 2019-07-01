@@ -829,6 +829,16 @@ hwaccel_features = [
     }
 ]
 
+radio_and_tv_features = [
+    {
+        'name': '--dvbin',
+        'desc': 'DVB input module',
+        'deps': 'gpl',
+        'func': check_true,
+        'default': 'disable',
+    }
+]
+
 standalone_features = [
     {
         'name': 'win32-executable',
@@ -907,6 +917,7 @@ def options(opt):
     opt.parse_features('audio outputs',     audio_output_features)
     opt.parse_features('video outputs',     video_output_features)
     opt.parse_features('hwaccels',          hwaccel_features)
+    opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('standalone app',    standalone_features)
 
     group = opt.get_option_group("optional features")
@@ -979,6 +990,7 @@ def configure(ctx):
     ctx.parse_dependencies(video_output_features)
     ctx.parse_dependencies(libav_dependencies)
     ctx.parse_dependencies(hwaccel_features)
+    ctx.parse_dependencies(radio_and_tv_features)
 
     if ctx.options.LUA_VER:
         ctx.options.enable_lua = True

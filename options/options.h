@@ -290,6 +290,7 @@ typedef struct MPOpts {
     int w32_priority;
 
     struct stream_lavf_params *stream_lavf_opts;
+    struct dvb_params *stream_dvb_opts;
 
     double mf_fps;
     char *mf_type;

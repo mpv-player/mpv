@@ -55,6 +55,7 @@ static void print_version(struct mp_log *log)
     mp_print_version(log, true);
 }
 
+extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options drm_conf;
@@ -444,6 +445,9 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
+#if HAVE_DVBIN
+    OPT_SUBSTRUCT("dvbin", stream_dvb_opts, stream_dvb_conf, 0),
+#endif
     OPT_SUBSTRUCT("", stream_lavf_opts, stream_lavf_conf, 0),
 
 // ------------------------- a-v sync options --------------------
