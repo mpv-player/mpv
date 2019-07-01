@@ -32,6 +32,10 @@
 
 #define MAX_SEEK_RANGES 10
 
+enum demux_ctrl {
+    DEMUXER_CTRL_STREAM_CTRL = 1,
+};
+
 struct demux_seek_range {
     double start, end;
 };
@@ -53,6 +57,12 @@ struct demux_reader_state {
     // level seek.
     int num_seek_ranges;
     struct demux_seek_range seek_ranges[MAX_SEEK_RANGES];
+};
+
+struct demux_ctrl_stream_ctrl {
+    int ctrl;
+    void *arg;
+    int res;
 };
 
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
@@ -106,6 +116,7 @@ typedef struct demuxer_desc {
     bool (*read_packet)(struct demuxer *demuxer, struct demux_packet **pkt);
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
+    int (*control)(struct demuxer *demuxer, int cmd, void *arg);
     void (*switched_tracks)(struct demuxer *demuxer);
     // See timeline.c
     void (*load_timeline)(struct timeline *tl);
@@ -194,6 +205,7 @@ typedef struct demuxer {
     bool fully_read;
     bool is_network; // opened directly from a network stream
     bool access_references; // allow opening other files/URLs
+    bool extended_ctrls; // supports some of BD/DVD/DVB/TV controls
 
     // Bitmask of DEMUX_EVENT_*
     int events;
@@ -271,6 +283,8 @@ void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
 void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
+int demux_control(struct demuxer *demuxer, int cmd, void *arg);
+
 void demux_get_bitrate_stats(struct demuxer *demuxer, double *rates);
 void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *r);
 
@@ -288,6 +302,8 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
 void demux_stream_tags_changed(struct demuxer *demuxer, struct sh_stream *sh,
                                struct mp_tags *tags, double pts);
 void demux_close_stream(struct demuxer *demuxer);
+
+int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 
 void demux_metadata_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer, double playback_pts);

@@ -2844,6 +2844,73 @@ static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
     return r;
 }
 
+static int prop_stream_ctrl(struct MPContext *mpctx, int ctrl, void *arg)
+{
+    if (!mpctx->demuxer || !mpctx->demuxer->extended_ctrls)
+        return M_PROPERTY_UNAVAILABLE;
+    int r = demux_stream_control(mpctx->demuxer, ctrl, arg);
+    switch (r) {
+    case STREAM_OK: return M_PROPERTY_OK;
+    case STREAM_UNSUPPORTED: return M_PROPERTY_UNAVAILABLE;
+    default: return M_PROPERTY_ERROR;
+    }
+}
+
+static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int r;
+    switch (action) {
+    case M_PROPERTY_SET:
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL, arg);
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+        return r;
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sa = arg;
+        int dir = sa->inc >= 0 ? 1 : -1;
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+        return r;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = &m_option_type_intpair};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_dvb_channel_name(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int r;
+    switch (action) {
+    case M_PROPERTY_SET:
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL_NAME, arg);
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+        return r;
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sa = arg;
+        int dir = sa->inc >= 0 ? 1 : -1;
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+        return r;
+    }
+    case M_PROPERTY_GET: {
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_GET_CHANNEL_NAME, arg);
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
                                       int action, void *arg, int base)
 {
@@ -3551,6 +3618,9 @@ static const struct m_property mp_properties_base[] = {
     PROPERTY_BITRATE("video-bitrate", false, STREAM_VIDEO),
     PROPERTY_BITRATE("audio-bitrate", false, STREAM_AUDIO),
     PROPERTY_BITRATE("sub-bitrate", false, STREAM_SUB),
+
+    {"dvb-channel", mp_property_dvb_channel},
+    {"dvb-channel-name", mp_property_dvb_channel_name},
 
     {"cursor-autohide", mp_property_cursor_autohide},
 

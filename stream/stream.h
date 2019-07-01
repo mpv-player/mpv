@@ -48,6 +48,12 @@
 enum stream_ctrl {
     STREAM_CTRL_GET_SIZE = 1,
 
+    // DVB
+    STREAM_CTRL_DVB_SET_CHANNEL,
+    STREAM_CTRL_DVB_SET_CHANNEL_NAME,
+    STREAM_CTRL_DVB_GET_CHANNEL_NAME,
+    STREAM_CTRL_DVB_STEP_CHANNEL,
+
     // Certain network protocols
     STREAM_CTRL_AVSEEK,
     STREAM_CTRL_HAS_AVSEEK,
@@ -106,6 +112,7 @@ typedef struct stream {
     bool is_local_file : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
+    bool extended_ctrls : 1; // supports some of BD/DVD/DVB/TV controls
     struct mp_log *log;
     struct mpv_global *global;
 

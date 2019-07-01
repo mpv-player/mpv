@@ -887,7 +887,7 @@ int dvb_step_channel(stream_t *stream, int dir)
 
     return dvb_set_channel(stream, state->cur_adapter, new_current);
 }
-/*
+
 static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
 {
     int r;
@@ -928,9 +928,9 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
     list = state->adapters[state->cur_adapter].list;
 
     switch (cmd) {
-    case STREAM_CTRL_GET_TV_FREQ:
+    /*case STREAM_CTRL_GET_TV_FREQ:
         (*(unsigned int*)arg) = list->channels[list->current].freq;
-        return STREAM_ERROR;
+        return STREAM_ERROR;*/
     case STREAM_CTRL_DVB_SET_CHANNEL_NAME: {
         char *progname = *((char**)arg);
         unsigned int new_channel = (~(unsigned int)0);
@@ -971,7 +971,7 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
     }
     return STREAM_UNSUPPORTED;
 }
-*/
+
 void dvbin_close(stream_t *stream)
 {
     dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
@@ -1115,11 +1115,11 @@ static int dvb_open(stream_t *stream)
 
     stream->fill_buffer = dvb_streaming_read;
     stream->close = dvbin_close;
-    //stream->control = dvbin_stream_control;
+    stream->control = dvbin_stream_control;
     stream->streaming = true;
     stream->demuxer = "lavf";
     stream->lavf_type = "mpegts";
-    //stream->extended_ctrls = true;
+    stream->extended_ctrls = true;
 
     return STREAM_OK;
 

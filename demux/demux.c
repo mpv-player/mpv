@@ -233,6 +233,9 @@ struct demux_internal {
 
     double ts_offset;           // timestamp offset to apply to everything
 
+    void (*run_fn)(void *);     // if non-NULL, function queued to be run on
+    void *run_fn_arg;           // the thread as run_fn(run_fn_arg)
+
     // (sorted by least recent use: index 0 is least recently used)
     struct demux_cached_range **ranges;
     int num_ranges;
@@ -2438,6 +2441,12 @@ static void update_opts(struct demux_internal *in)
 // Make demuxing progress. Return whether progress was made.
 static bool thread_work(struct demux_internal *in)
 {
+    if (in->run_fn) {
+        in->run_fn(in->run_fn_arg);
+        in->run_fn = NULL;
+        pthread_cond_signal(&in->wakeup);
+        return true;
+    }
     if (m_config_cache_update(in->opts_cache))
         update_opts(in);
     if (in->tracks_switched) {
@@ -3159,6 +3168,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .extended_ctrls = stream->extended_ctrls,
     };
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
@@ -4269,6 +4279,78 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
     }
 
     pthread_mutex_unlock(&in->lock);
+}
+
+struct demux_control_args {
+    struct demuxer *demuxer;
+    int cmd;
+    void *arg;
+    int *r;
+};
+
+static void thread_demux_control(void *p)
+{
+    struct demux_control_args *args = p;
+    struct demuxer *demuxer = args->demuxer;
+    int cmd = args->cmd;
+    void *arg = args->arg;
+    struct demux_internal *in = demuxer->in;
+    int r = CONTROL_UNKNOWN;
+
+    pthread_mutex_unlock(&in->lock);
+
+    if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
+        struct demux_ctrl_stream_ctrl *c = arg;
+        if (in->threading)
+            MP_VERBOSE(demuxer, "blocking for STREAM_CTRL %d\n", c->ctrl);
+        c->res = stream_control(demuxer->stream, c->ctrl, c->arg);
+        if (c->res != STREAM_UNSUPPORTED)
+            r = CONTROL_OK;
+    }
+    if (r != CONTROL_OK) {
+        if (in->threading)
+            MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
+        if (demuxer->desc->control)
+            r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
+    }
+
+    pthread_mutex_lock(&in->lock);
+
+    *args->r = r;
+}
+
+int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    int r = 0;
+    struct demux_control_args args = {demuxer, cmd, arg, &r};
+    if (in->threading) {
+        MP_VERBOSE(in, "blocking on demuxer thread\n");
+        pthread_mutex_lock(&in->lock);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        in->run_fn = thread_demux_control;
+        in->run_fn_arg = &args;
+        pthread_cond_signal(&in->wakeup);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        pthread_mutex_unlock(&in->lock);
+    } else {
+        pthread_mutex_lock(&in->lock);
+        thread_demux_control(&args);
+        pthread_mutex_unlock(&in->lock);
+    }
+
+    return r;
+}
+
+int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
+{
+    struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
+    demux_control(demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
+    return c.res;
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)

@@ -1879,6 +1879,15 @@ Property list
 ``osd-par``
     Last known OSD display pixel aspect (can be 0).
 
+``dvb-channel`` (W)
+    Pair of integers: card,channel of current DVB stream.
+    Can be switched to switch to another channel on the same card.
+
+``dvb-channel-name`` (RW)
+    Name of current DVB program.
+    On write, a channel-switch to the named channel on the same
+    card is performed. Can also be used for channel switching.
+
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle
     is selected, but no text is currently visible, or the subtitle is not
