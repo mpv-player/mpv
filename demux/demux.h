@@ -34,6 +34,7 @@
 
 enum demux_ctrl {
     DEMUXER_CTRL_STREAM_CTRL = 1,
+    DEMUXER_CTRL_IDENTIFY_PROGRAM,
 };
 
 struct demux_seek_range {
@@ -243,6 +244,11 @@ typedef struct demuxer {
     // Also note that the stream can get replaced if fully_read is set.
     struct stream *stream;
 } demuxer_t;
+
+typedef struct {
+    int progid;      //program id
+    int aid, vid, sid; //audio, video and subtitle id
+} demux_program_t;
 
 void demux_free(struct demuxer *demuxer);
 void demux_cancel_and_free(struct demuxer *demuxer);

@@ -221,6 +221,7 @@ typedef struct lavf_priv {
     AVIOContext *pb;
     struct stream_info **streams; // NULL for unknown streams
     int num_streams;
+    int cur_program;
     char *mime_type;
     double seek_delay;
 
@@ -1260,6 +1261,80 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     update_read_stats(demuxer);
 }
 
+static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    lavf_priv_t *priv = demuxer->priv;
+
+    switch (cmd) {
+    case DEMUXER_CTRL_IDENTIFY_PROGRAM:
+    {
+        demux_program_t *prog = arg;
+        AVProgram *program;
+        int p, i;
+        int start;
+
+        add_new_streams(demuxer);
+
+        prog->vid = prog->aid = prog->sid = -2;
+        if (priv->avfc->nb_programs < 1)
+            return CONTROL_FALSE;
+
+        if (prog->progid == -1) {
+            p = 0;
+            while (p < priv->avfc->nb_programs && priv->avfc->programs[p]->id != priv->cur_program)
+                p++;
+            p = (p + 1) % priv->avfc->nb_programs;
+        } else {
+            for (i = 0; i < priv->avfc->nb_programs; i++)
+                if (priv->avfc->programs[i]->id == prog->progid)
+                    break;
+            if (i == priv->avfc->nb_programs)
+                return CONTROL_FALSE;
+            p = i;
+        }
+        start = p;
+redo:
+        prog->vid = prog->aid = prog->sid = -2;
+        program = priv->avfc->programs[p];
+        for (i = 0; i < program->nb_stream_indexes; i++) {
+            struct sh_stream *stream = priv->streams[program->stream_index[i]]->sh;
+            if (stream) {
+                switch (stream->type) {
+                case STREAM_VIDEO:
+                    if (prog->vid == -2)
+                        prog->vid = stream->demuxer_id;
+                    break;
+                case STREAM_AUDIO:
+                    if (prog->aid == -2)
+                        prog->aid = stream->demuxer_id;
+                    break;
+                case STREAM_SUB:
+                    if (prog->sid == -2)
+                        prog->sid = stream->demuxer_id;
+                    break;
+                }
+            }
+        }
+        if (prog->progid == -1 && prog->vid == -2 && prog->aid == -2) {
+            p = (p + 1) % priv->avfc->nb_programs;
+            if (p == start)
+                return CONTROL_FALSE;
+            goto redo;
+        }
+        priv->cur_program = prog->progid = program->id;
+
+        mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->programs[p]->metadata);
+        update_metadata(demuxer);
+        // Enforce metadata update even if no explicit METADATA_UPDATED since we switched program.
+        demux_metadata_changed(demuxer);
+
+        return CONTROL_OK;
+    }
+    default:
+        return CONTROL_UNKNOWN;
+    }
+}
+
 static void demux_lavf_switched_tracks(struct demuxer *demuxer)
 {
     select_tracks(demuxer, 0);
@@ -1306,4 +1381,5 @@ const demuxer_desc_t demuxer_desc_lavf = {
     .close = demux_close_lavf,
     .seek = demux_seek_lavf,
     .switched_tracks = demux_lavf_switched_tracks,
+    .control = demux_lavf_control,
 };

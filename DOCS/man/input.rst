@@ -1879,6 +1879,9 @@ Property list
 ``osd-par``
     Last known OSD display pixel aspect (can be 0).
 
+``program`` (W)
+    Switch TS program (write-only).
+
 ``dvb-channel`` (W)
     Pair of integers: card,channel of current DVB stream.
     Can be switched to switch to another channel on the same card.
