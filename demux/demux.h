@@ -206,7 +206,7 @@ typedef struct demuxer {
     bool fully_read;
     bool is_network; // opened directly from a network stream
     bool access_references; // allow opening other files/URLs
-    bool extended_ctrls; // supports some of BD/DVD/DVB/TV controls
+    bool extended_ctrls; // supports some of DVB controls
 
     // Bitmask of DEMUX_EVENT_*
     int events;
