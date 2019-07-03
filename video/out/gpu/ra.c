@@ -104,7 +104,7 @@ struct ra_renderpass_params *ra_renderpass_params_copy(void *ta_parent,
     res->frag_shader = talloc_strdup(res, res->frag_shader);
     res->compute_shader = talloc_strdup(res, res->compute_shader);
     return res;
-};
+}
 
 struct glsl_fmt {
     enum ra_ctype ctype;
