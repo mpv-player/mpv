@@ -4193,7 +4193,7 @@ static void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
     p->dr_buffers[p->num_dr_buffers++] = (struct dr_buffer){ .buf = buf };
 
     return buf->data;
-};
+}
 
 static void gl_video_dr_free_buffer(void *opaque, uint8_t *data)
 {
