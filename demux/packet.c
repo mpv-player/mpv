@@ -164,7 +164,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     return new;
 }
 
-#define ROUND_ALLOC(s) MP_ALIGN_UP(s, 64)
+#define ROUND_ALLOC(s) MP_ALIGN_UP((s), 16)
 
 // Attempt to estimate the total memory consumption of the given packet.
 // This is important if we store thousands of packets and not to exceed
@@ -177,12 +177,15 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 size_t demux_packet_estimate_total_size(struct demux_packet *dp)
 {
     size_t size = ROUND_ALLOC(sizeof(struct demux_packet));
+    size += 8 * sizeof(void *); // ta  overhead
+    size += 10 * sizeof(void *); // additional estimate for ta_ext_header
     if (dp->avpacket) {
         assert(!dp->is_cached);
         size += ROUND_ALLOC(dp->len);
         size += ROUND_ALLOC(sizeof(AVPacket));
+        size += 8 * sizeof(void *); // ta  overhead
         size += ROUND_ALLOC(sizeof(AVBufferRef));
-        size += 64; // upper bound estimate on sizeof(AVBuffer)
+        size += ROUND_ALLOC(64); // upper bound estimate on sizeof(AVBuffer)
         size += ROUND_ALLOC(dp->avpacket->side_data_elems *
                             sizeof(dp->avpacket->side_data[0]));
         for (int n = 0; n < dp->avpacket->side_data_elems; n++)
