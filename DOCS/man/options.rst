@@ -3204,6 +3204,13 @@ Demuxer
     the situation that the forward seek range starts after the current playback
     position (as it removes past packets that are seek points).
 
+    If the end of the file is reached, the remaining unused forward buffer space
+    is "donated" to the backbuffer (unless the backbuffer size is set to 0).
+    This still limits the total cache usage to the sum of the forward and
+    backward cache, and effectively makes better use of the total allowed memory
+    budget. (The opposite does not happen: free backward buffer is never
+    "donated" to the forward buffer.)
+
     Keep in mind that other buffers in the player (like decoders) will cause the
     demuxer to cache "future" frames in the back buffer, which can skew the
     impression about how much data the backbuffer contains.
