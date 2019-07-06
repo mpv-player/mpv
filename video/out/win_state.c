@@ -42,7 +42,7 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
     if (!geo->wh_valid)
         return;
 
-    int dummy;
+    int dummy = 0;
     int n_w = *w, n_h = *h;
     m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, geo);
 
