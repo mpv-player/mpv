@@ -736,7 +736,7 @@ void m_config_mark_co_flags(struct m_config_option *co, int flags)
         co->is_set_from_config = true;
 }
 
-// Special options that don't really fit into the option handling mode. They
+// Special options that don't really fit into the option handling model. They
 // usually store no data, but trigger actions. Caller is assumed to have called
 // handle_set_opt_flags() to make sure the option can be set.
 // Returns M_OPT_UNKNOWN if the option is not a special option.
