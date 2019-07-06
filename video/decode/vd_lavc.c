@@ -223,10 +223,10 @@ static const char *const hwdec_autoprobe_order[] = {
     "d3d11va-copy",
     "nvdec",
     "nvdec-copy",
-    "vdpau",
-    "vdpau-copy",
     "vaapi",
     "vaapi-copy",
+    "vdpau",
+    "vdpau-copy",
     0
 };
 
