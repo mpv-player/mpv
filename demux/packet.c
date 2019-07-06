@@ -38,8 +38,9 @@
 void demux_packet_unref_contents(struct demux_packet *dp)
 {
     if (dp->avpacket) {
-        av_packet_unref(dp->avpacket);
         assert(!dp->is_cached);
+        av_packet_unref(dp->avpacket);
+        talloc_free(dp->avpacket);
         dp->avpacket = NULL;
         dp->buffer = NULL;
         dp->len = 0;
