@@ -394,7 +394,8 @@ static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
         MP_WARN(hw, "failed to retrieve libavutil frame constraints\n");
         return;
     }
-    for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
+    for (int n = 0; fc->valid_sw_formats &&
+                    fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
         try_format_pixfmt(hw, fc->valid_sw_formats[n]);
     av_hwframe_constraints_free(&fc);
 }
@@ -402,10 +403,54 @@ static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
 static void determine_working_formats(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
+    VAStatus status;
+    VAProfile *profiles = NULL;
+    VAEntrypoint *entrypoints = NULL;
 
     p->probing_formats = true;
 
-    try_format_config(hw, NULL);
+    AVVAAPIHWConfig *hwconfig = av_hwdevice_hwconfig_alloc(p->ctx->av_device_ref);
+    if (!hwconfig) {
+        MP_WARN(hw, "Could not allocate FFmpeg AVVAAPIHWConfig\n");
+        goto done;
+    }
+
+    profiles = talloc_zero_array(NULL, VAProfile, vaMaxNumProfiles(p->display));
+    entrypoints = talloc_zero_array(NULL, VAEntrypoint,
+                                    vaMaxNumEntrypoints(p->display));
+    int num_profiles = 0;
+    status = vaQueryConfigProfiles(p->display, profiles, &num_profiles);
+    if (!CHECK_VA_STATUS(hw, "vaQueryConfigProfiles()"))
+        num_profiles = 0;
+
+    for (int n = 0; n < num_profiles; n++) {
+        VAProfile profile = profiles[n];
+        int num_ep = 0;
+        status = vaQueryConfigEntrypoints(p->display, profile, entrypoints,
+                                          &num_ep);
+        if (!CHECK_VA_STATUS(hw, "vaQueryConfigEntrypoints()"))
+            continue;
+        for (int ep = 0; ep < num_ep; ep++) {
+            VAConfigID config = VA_INVALID_ID;
+            status = vaCreateConfig(p->display, profile, entrypoints[ep],
+                                    NULL, 0, &config);
+            if (status != VA_STATUS_SUCCESS) {
+                MP_VERBOSE(hw, "vaCreateConfig(): '%s' for profile %d",
+                        vaErrorStr(status), (int)profile);
+                continue;
+            }
+
+            hwconfig->config_id = config;
+            try_format_config(hw, hwconfig);
+
+            vaDestroyConfig(p->display, config);
+        }
+    }
+
+done:
+    av_free(hwconfig);
+    talloc_free(profiles);
+    talloc_free(entrypoints);
 
     p->probing_formats = false;
 
