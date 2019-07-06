@@ -428,6 +428,7 @@ static struct demux_packet *compute_keyframe_times(struct demux_packet *pkt,
 static void find_backward_restart_pos(struct demux_stream *ds);
 static struct demux_packet *find_seek_target(struct demux_queue *queue,
                                              double pts, int flags);
+static void prune_old_packets(struct demux_internal *in);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -2028,6 +2029,9 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     adjust_seek_range_on_packet(ds, dp);
 
+    // May need to reduce backward cache.
+    prune_old_packets(in);
+
     // Possibly update duration based on highest TS demuxed (but ignore subs).
     if (stream->type != STREAM_SUB) {
         if (dp->segmented)
@@ -2190,7 +2194,12 @@ static void prune_old_packets(struct demux_internal *in)
             struct demux_stream *ds = in->streams[n]->ds;
             fw_bytes += get_foward_buffered_bytes(ds);
         }
-        if (in->total_bytes - fw_bytes <= max_bytes)
+        uint64_t max_avail = max_bytes;
+        // Backward cache (if enabled at all) can use unused forward cache.
+        // Still leave 1 byte free, so the read_packet logic doesn't get stuck.
+        if (max_avail && in->max_bytes > (fw_bytes + 1))
+            max_avail += in->max_bytes - (fw_bytes + 1);
+        if (in->total_bytes - fw_bytes <= max_avail)
             break;
 
         // (Start from least recently used range.)
