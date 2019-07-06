@@ -588,8 +588,18 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
             mp_input_put_key(vo->input_ctx,
                 (MP_MBTN_BASE + ev.button.button - 1) | MP_KEY_STATE_UP);
             break;
-        case SDL_MOUSEWHEEL:
+        case SDL_MOUSEWHEEL: {
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -0.1 : 0.1;
+#else
+            double multiplier = 0.1;
+#endif
+            int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
+            mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
+            int x_code = ev.wheel.x > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
+            mp_input_put_wheel(vo->input_ctx, x_code, abs(ev.wheel.x) * multiplier);
             break;
+        }
         }
     }
 }
