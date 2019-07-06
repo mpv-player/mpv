@@ -2307,6 +2307,7 @@ static void execute_seek(struct demux_internal *in)
 {
     int flags = in->seek_flags;
     double pts = in->seek_pts;
+    in->last_eof = false;
     in->seeking = false;
     in->seeking_in_progress = pts;
     in->demux_ts = MP_NOPTS_VALUE;
@@ -3616,7 +3617,6 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     }
 
     in->eof = false;
-    in->last_eof = false;
     in->idle = true;
     in->reading = false;
     in->back_demuxing = set_backwards;
