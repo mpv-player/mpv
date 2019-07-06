@@ -151,6 +151,18 @@ const struct keymap_entry keys[] = {
     {SDLK_F24, MP_KEY_F + 24}
 };
 
+struct mousemap_entry {
+    Uint8 sdl;
+    int mpv;
+};
+const struct mousemap_entry mousebtns[] = {
+    {SDL_BUTTON_LEFT, MP_MBTN_LEFT},
+    {SDL_BUTTON_MIDDLE, MP_MBTN_MID},
+    {SDL_BUTTON_RIGHT, MP_MBTN_RIGHT},
+    {SDL_BUTTON_X1, MP_MBTN_BACK},
+    {SDL_BUTTON_X2, MP_MBTN_FORWARD},
+};
+
 struct priv {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -580,14 +592,24 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
         case SDL_MOUSEMOTION:
             mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
             break;
-        case SDL_MOUSEBUTTONDOWN:
-            mp_input_put_key(vo->input_ctx,
-                (MP_MBTN_BASE + ev.button.button - 1) | MP_KEY_STATE_DOWN);
+        case SDL_MOUSEBUTTONDOWN: {
+            int i;
+            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
+                if (mousebtns[i].sdl == ev.button.button) {
+                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_DOWN);
+                    break;
+                }
             break;
-        case SDL_MOUSEBUTTONUP:
-            mp_input_put_key(vo->input_ctx,
-                (MP_MBTN_BASE + ev.button.button - 1) | MP_KEY_STATE_UP);
+        }
+        case SDL_MOUSEBUTTONUP: {
+            int i;
+            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
+                if (mousebtns[i].sdl == ev.button.button) {
+                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_UP);
+                    break;
+                }
             break;
+        }
         case SDL_MOUSEWHEEL: {
 #if SDL_VERSION_ATLEAST(2, 0, 4)
             double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -0.1 : 0.1;
