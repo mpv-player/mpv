@@ -3461,9 +3461,10 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
     return target;
 }
 
+// Return a cache range for the given pts/flags, or NULL if none available.
 // must be called locked
-static struct demux_cached_range *find_cache_seek_target(struct demux_internal *in,
-                                                         double pts, int flags)
+static struct demux_cached_range *find_cache_seek_range(struct demux_internal *in,
+                                                        double pts, int flags)
 {
     // Note about queued low level seeks: in->seeking can be true here, and it
     // might come from a previous resume seek to the current range. If we end
@@ -3471,6 +3472,8 @@ static struct demux_cached_range *find_cache_seek_target(struct demux_internal *
     // seek needs to continue. Otherwise, we override the queued seek anyway.
     if ((flags & SEEK_FACTOR) || !in->seekable_cache)
         return NULL;
+
+    struct demux_cached_range *res = NULL;
 
     for (int n = 0; n < in->num_ranges; n++) {
         struct demux_cached_range *r = in->ranges[n];
@@ -3482,50 +3485,59 @@ static struct demux_cached_range *find_cache_seek_target(struct demux_internal *
                 (pts <= r->seek_end || r->is_eof))
             {
                 MP_VERBOSE(in, "...using this range for in-cache seek.\n");
-                return r;
+                res = r;
+                break;
             }
         }
     }
 
-    return NULL;
+    return res;
+}
+
+// Adjust the seek target to the found video key frames. Otherwise the
+// video will undershoot the seek target, while audio will be closer to it.
+// The player frontend will play the additional video without audio, so
+// you get silent audio for the amount of "undershoot". Adjusting the seek
+// target will make the audio seek to the video target or before.
+// (If hr-seeks are used, it's better to skip this, as it would only mean
+// that more audio data than necessary would have to be decoded.)
+static void adjust_cache_seek_target(struct demux_internal *in,
+                                     struct demux_cached_range *range,
+                                     double *pts, int *flags)
+{
+    if (*flags & SEEK_HR)
+        return;
+
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        struct demux_queue *queue = range->streams[n];
+        if (ds->selected && ds->type == STREAM_VIDEO) {
+            struct demux_packet *target = find_seek_target(queue, *pts, *flags);
+            if (target) {
+                double target_pts;
+                compute_keyframe_times(target, &target_pts, NULL);
+                if (target_pts != MP_NOPTS_VALUE) {
+                    MP_VERBOSE(in, "adjust seek target %f -> %f\n",
+                               *pts, target_pts);
+                    // (We assume the find_seek_target() call will return
+                    // the same target for the video stream.)
+                    *pts = target_pts;
+                    *flags &= ~SEEK_FORWARD;
+                }
+            }
+            break;
+        }
+    }
 }
 
 // must be called locked
-// range must be non-NULL and from find_cache_seek_target() using the same pts
+// range must be non-NULL and from find_cache_seek_range() using the same pts
 // and flags, before any other changes to the cached state
 static void execute_cache_seek(struct demux_internal *in,
                                struct demux_cached_range *range,
                                double pts, int flags)
 {
-    // Adjust the seek target to the found video key frames. Otherwise the
-    // video will undershoot the seek target, while audio will be closer to it.
-    // The player frontend will play the additional video without audio, so
-    // you get silent audio for the amount of "undershoot". Adjusting the seek
-    // target will make the audio seek to the video target or before.
-    // (If hr-seeks are used, it's better to skip this, as it would only mean
-    // that more audio data than necessary would have to be decoded.)
-    if (!(flags & SEEK_HR)) {
-        for (int n = 0; n < in->num_streams; n++) {
-            struct demux_stream *ds = in->streams[n]->ds;
-            struct demux_queue *queue = range->streams[n];
-            if (ds->selected && ds->type == STREAM_VIDEO) {
-                struct demux_packet *target = find_seek_target(queue, pts, flags);
-                if (target) {
-                    double target_pts;
-                    compute_keyframe_times(target, &target_pts, NULL);
-                    if (target_pts != MP_NOPTS_VALUE) {
-                        MP_VERBOSE(in, "adjust seek target %f -> %f\n",
-                                   pts, target_pts);
-                        // (We assume the find_seek_target() call will return
-                        // the same target for the video stream.)
-                        pts = target_pts;
-                        flags &= ~SEEK_FORWARD;
-                    }
-                }
-                break;
-            }
-        }
-    }
+    adjust_cache_seek_target(in, range, &pts, &flags);
 
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
@@ -3624,7 +3636,7 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     flags &= ~(unsigned)SEEK_SATAN;
 
     struct demux_cached_range *cache_target =
-        find_cache_seek_target(in, seek_pts, flags);
+        find_cache_seek_range(in, seek_pts, flags);
 
     if (!cache_target) {
         if (require_cache) {
