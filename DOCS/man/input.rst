@@ -1129,6 +1129,8 @@ command behaves by itself. There are the following cases:
 - Async libmpv command API (e.g. ``mpv_command_async()``) never blocks the
   caller, and always notify their completion with a message. The ``sync`` and
   ``async`` prefixes make no difference.
+- Lua also provides APIs for running async commands, which behave similar to the
+  C counterparts.
 - In all cases, async mode can still run commands in a synchronous manner, even
   in detached mode. This can for example happen in cases when a command does not
   have an  asynchronous implementation. The async libmpv API still never blocks
