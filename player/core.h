@@ -468,7 +468,8 @@ typedef struct MPContext {
 struct mp_abort_entry {
     // General conditions.
     bool coupled_to_playback;   // trigger when playback is terminated
-    // Actual trigger to abort the work.
+    // Actual trigger to abort the work. Pointer immutable, owner may access
+    // without holding the abort_lock.
     struct mp_cancel *cancel;
     // For client API.
     struct mpv_handle *client;  // non-NULL if done by a client API user

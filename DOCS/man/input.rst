@@ -920,6 +920,60 @@ Input Commands that are Possibly Subject to Change
         equivalent is ``--glsl-shaders-append=file.glsl`` or alternatively
         ``--glsl-shader=file.glsl``.
 
+``dump-cache <start> <end> <filename>``
+    Dump the current cache to the given filename. The ``<filename>`` file is
+    overwritten if it already exists. ``<start>`` and ``<end>`` give the
+    time range of what to dump. If no data is cached at the given time range,
+    nothing may be dumped (creating a file with no packets).
+
+    Dumping a larger part of the cache will freeze the player. No effort was
+    made to fix this, as this feature was meant mostly for creating small
+    excerpts.
+
+    If ``<filename>`` is an empty string, an ongoing ``dump-cache`` is stopped.
+
+    If ``<end>`` is ``no``, then continuous dumping is enabled. Then, after
+    dumping the existing parts of the cache, anything read from network is
+    appended to the cache as well. This behaves similar to ``--stream-record``
+    (although it does not conflict with that option, and they can be both active
+    at the same time).
+
+    If the ``<end>`` time is after the cache, the command will _not_ wait and
+    write newly received data to it.
+
+    The end of the resulting file may be slightly damaged or incomplete at the
+    end. (Not enough effort was made to ensure that the end lines up properly.)
+
+    Note that this command will finish only once dumping ends. That means it
+    works similar to the ``screenshot`` command, just that it can block much
+    longer. If continuous dumping is used, the command will not finish until
+    playback is stopped, an error happens, another ``dump-cache`` command is
+    run, or an API like ``mp.abort_async_command`` was called to explicitly stop
+    the command. See `Synchronous vs. Asynchronous`_.
+
+    .. note::
+
+        This was mostly created for network streams. For local files, there may
+        be much better methods to create excerpts and such. There are tons of
+        much more user-friendly Lua scripts, that will reencode parts of a file
+        by spawning a separate instance of ``ffmpeg``. With network streams,
+        this is not that easily possible, as the stream would have to be
+        downloaded again. Even if ``--stream-record`` is used to record the
+        stream to the local filesystem, there may be problems, because the
+        recorded file is still written to.
+
+    This command is experimental, and all details about it may change in the
+    future.
+
+``ab-loop-dump-cache <filename>``
+    Essentially calls ``dump-cache`` with the current AB-loop points as
+    arguments. Like ``dump-cache``, this will overwrite the file at
+    ``<filename>``. Likewise, if the B point is set to ``no``, it will enter
+    continuous dumping after the existing cache was dumped.
+
+    The author reserves the right to remove this command if enough motivation
+    is found to move this functionality to a trivial Lua script.
+
 
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
@@ -1087,7 +1141,8 @@ default now, and ``async`` changes behavior only in the ways mentioned above.
 
 Currently the following commands have different waiting characteristics with
 sync vs. async: sub-add, audio-add, sub-reload, audio-reload,
-rescan-external-files, screenshot, screenshot-to-file.
+rescan-external-files, screenshot, screenshot-to-file, dump-cache,
+ab-loop-dump-cache.
 
 Input Sections
 --------------

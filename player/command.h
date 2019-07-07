@@ -110,4 +110,6 @@ void mp_hook_add(struct MPContext *mpctx, const char *client, const char *name,
 
 void mark_seek(struct MPContext *mpctx);
 
+void mp_abort_cache_dumping(struct MPContext *mpctx);
+
 #endif /* MPLAYER_COMMAND_H */

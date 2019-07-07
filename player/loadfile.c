@@ -201,6 +201,8 @@ static void uninit_demuxer(struct MPContext *mpctx)
     mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
 
+    mp_abort_cache_dumping(mpctx);
+
     struct demuxer **demuxers = NULL;
     int num_demuxers = 0;
 
