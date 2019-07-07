@@ -536,6 +536,12 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
                 check_resize(vo);
                 vo_event(vo, VO_EVENT_RESIZE);
                 break;
+            case SDL_WINDOWEVENT_ENTER:
+                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
+                break;
+            case SDL_WINDOWEVENT_LEAVE:
+                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+                break;
             }
             break;
         case SDL_QUIT:
