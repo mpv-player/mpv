@@ -63,6 +63,7 @@
 #include "misc/dispatch.h"
 #include "misc/node.h"
 #include "misc/thread_pool.h"
+#include "misc/thread_tools.h"
 
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
@@ -104,6 +105,8 @@ struct command_ctx {
     char *cur_ipc_input;
 
     int silence_option_deprecations;
+
+    struct mp_cmd_ctx *cache_dump_cmd; // in progress cache dumping
 };
 
 struct overlay {
@@ -5557,6 +5560,91 @@ static void cmd_load_script(void *p)
         cmd->success = false;
 }
 
+static void cache_dump_poll(struct MPContext *mpctx)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+    struct mp_cmd_ctx *cmd = ctx->cache_dump_cmd;
+
+    if (!cmd)
+        return;
+
+    // Can't close demuxer without stopping dumping.
+    assert(mpctx->demuxer);
+
+    if (mp_cancel_test(cmd->abort->cancel)) {
+        // Synchronous abort. In particular, the dump command shall not report
+        // completion to the user before the dump target file was closed.
+        demux_cache_dump_set(mpctx->demuxer, 0, 0, NULL);
+        assert(demux_cache_dump_get_status(mpctx->demuxer) <= 0);
+    }
+
+    int status = demux_cache_dump_get_status(mpctx->demuxer);
+    if (status <= 0) {
+        if (status < 0) {
+            mp_cmd_msg(cmd, MSGL_ERR, "Cache dumping stopped due to error.");
+            cmd->success = false;
+        } else {
+            mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping successfully ended.");
+            cmd->success = true;
+        }
+        ctx->cache_dump_cmd = NULL;
+        mp_cmd_ctx_complete(cmd);
+    }
+}
+
+void mp_abort_cache_dumping(struct MPContext *mpctx)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+
+    if (ctx->cache_dump_cmd)
+        mp_cancel_trigger(ctx->cache_dump_cmd->abort->cancel);
+    cache_dump_poll(mpctx);
+    assert(!ctx->cache_dump_cmd); // synchronous abort, must have worked
+}
+
+static void run_dump_cmd(struct mp_cmd_ctx *cmd, double start, double end,
+                         char *filename)
+{
+    struct MPContext *mpctx = cmd->mpctx;
+    struct command_ctx *ctx = mpctx->command_ctx;
+
+    mp_abort_cache_dumping(mpctx);
+
+    if (!mpctx->demuxer) {
+        mp_cmd_msg(cmd, MSGL_ERR, "No demuxer open.");
+        cmd->success = false;
+        mp_cmd_ctx_complete(cmd);
+        return;
+    }
+
+    if (!demux_cache_dump_set(mpctx->demuxer, start, end, filename)) {
+        mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping stopped.");
+        mp_cmd_ctx_complete(cmd);
+        return;
+    }
+
+    mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping started.");
+
+    ctx->cache_dump_cmd = cmd;
+    cache_dump_poll(mpctx);
+}
+
+static void cmd_dump_cache(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+
+    run_dump_cmd(cmd, cmd->args[0].v.d, cmd->args[1].v.d, cmd->args[2].v.s);
+}
+
+static void cmd_dump_cache_ab(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    run_dump_cmd(cmd, mpctx->opts->ab_loop[0], mpctx->opts->ab_loop[1],
+                 cmd->args[0].v.s);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -5881,6 +5969,20 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "load-script", cmd_load_script, {OPT_STRING("filename", v.s, 0)} },
 
+    { "dump-cache", cmd_dump_cache, { OPT_TIME("start", v.d, 0,
+                                               .min = MP_NOPTS_VALUE),
+                                      OPT_TIME("end", v.d, 0,
+                                               .min = MP_NOPTS_VALUE),
+                                      OPT_STRING("filename", v.s, 0) },
+        .exec_async = true,
+        .can_abort = true,
+    },
+
+    { "ab-loop-dump-cache", cmd_dump_cache_ab, { OPT_STRING("filename", v.s, 0) },
+        .exec_async = true,
+        .can_abort = true,
+    },
+
     {0}
 };
 
@@ -5889,8 +5991,13 @@ const struct mp_cmd_def mp_cmds[] = {
 
 void command_uninit(struct MPContext *mpctx)
 {
+    struct command_ctx *ctx = mpctx->command_ctx;
+
+    assert(!ctx->cache_dump_cmd); // closing the demuxer must have aborted it
+
     overlay_uninit(mpctx);
-    ao_hotplug_destroy(mpctx->command_ctx->hotplug);
+    ao_hotplug_destroy(ctx->hotplug);
+
     talloc_free(mpctx->command_ctx);
     mpctx->command_ctx = NULL;
 }
@@ -5964,6 +6071,9 @@ void handle_command_updates(struct MPContext *mpctx)
     // to recheck the state. Then the client(s) will read the property.
     if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
         mp_notify_property(mpctx, "audio-device-list");
+
+    // Depends on polling demuxer wakeup callback notifications.
+    cache_dump_poll(mpctx);
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)

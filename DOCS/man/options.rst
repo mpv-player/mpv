@@ -5596,10 +5596,8 @@ Miscellaneous
 
     If this is set at runtime, the old file is closed, and the new file is
     opened. Note that this will write only data that is appended at the end of
-    the cache, and the already cached data cannot be written. (A fix for that
-    would be a command that dumps the cache using a given time range, possibly
-    with the option to be open-ended, which would continue to write data
-    appended to the cache. Such a command doesn't exist yet.)
+    the cache, and the already cached data cannot be written. You can try the
+    ``dump-cache`` command as an alternative.
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
