@@ -4572,6 +4572,24 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     }
 }
 
+// When a command shows a message. status is the level (e.g. MSGL_INFO), and
+// msg+vararg is as in printf (don't include a trailing "\n").
+void mp_cmd_msg(struct mp_cmd_ctx *cmd, int status, const char *msg, ...)
+{
+    va_list ap;
+    char *s;
+
+    va_start(ap, msg);
+    s = talloc_vasprintf(NULL, msg, ap);
+    va_end(ap);
+
+    MP_MSG(cmd->mpctx, status, "%s\n", s);
+    if (cmd->msg_osd && status <= MSGL_INFO)
+        set_osd_msg(cmd->mpctx, 1, cmd->mpctx->opts->osd_duration, "%s", s);
+
+    talloc_free(s);
+}
+
 static void cmd_seek(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
