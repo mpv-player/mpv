@@ -2189,14 +2189,13 @@ static void prune_old_packets(struct demux_internal *in)
     // It's not clear what the ideal way to prune old packets is. For now, we
     // prune the oldest packet runs, as long as the total cache amount is too
     // big.
-    size_t max_bytes = in->seekable_cache ? in->max_bytes_bw : 0;
     while (1) {
         uint64_t fw_bytes = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
             fw_bytes += get_foward_buffered_bytes(ds);
         }
-        uint64_t max_avail = max_bytes;
+        uint64_t max_avail = in->max_bytes_bw;
         // Backward cache (if enabled at all) can use unused forward cache.
         // Still leave 1 byte free, so the read_packet logic doesn't get stuck.
         if (max_avail && in->max_bytes > (fw_bytes + 1))
@@ -2369,6 +2368,9 @@ static void update_opts(struct demux_internal *in)
     }
     in->seekable_cache = seekable == 1;
     in->using_network_cache_opts = is_streaming && use_cache;
+
+    if (!in->seekable_cache)
+        in->max_bytes_bw = 0;
 
     if (!in->can_cache) {
         in->seekable_cache = false;
