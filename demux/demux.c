@@ -2487,6 +2487,32 @@ static struct demux_packet *advance_reader_head(struct demux_stream *ds)
     return pkt;
 }
 
+// Return a newly allocated new packet. The pkt parameter may be either a
+// in-memory packet (then a new reference is made), or a reference to
+// packet in the disk cache (then the packet is read from disk).
+static struct demux_packet *read_packet_from_cache(struct demux_internal *in,
+                                                   struct demux_packet *pkt)
+{
+    if (!pkt)
+        return NULL;
+
+    if (pkt->is_cached) {
+        assert(in->cache);
+        struct demux_packet *meta = pkt;
+        pkt = demux_cache_read(in->cache, pkt->cached_data.pos);
+        if (pkt) {
+            demux_packet_copy_attribs(pkt, meta);
+        } else {
+            MP_ERR(in, "Failed to retrieve packet from cache.\n");
+        }
+    } else {
+        // The returned packet is mutated etc. and will be owned by the user.
+        pkt = demux_copy_packet(pkt);
+    }
+
+    return pkt;
+}
+
 // Returns:
 //   < 0: EOF was reached, *res is not set
 //  == 0: no new packet yet, wait, *res is not set
@@ -2562,20 +2588,7 @@ static int dequeue_packet(struct demux_stream *ds, struct demux_packet **res)
 
     struct demux_packet *pkt = advance_reader_head(ds);
     assert(pkt);
-
-    if (pkt->is_cached) {
-        assert(in->cache);
-        struct demux_packet *meta = pkt;
-        pkt = demux_cache_read(in->cache, pkt->cached_data.pos);
-        if (pkt) {
-            demux_packet_copy_attribs(pkt, meta);
-        } else {
-            MP_ERR(in, "Failed to retrieve packet from cache.\n");
-        }
-    } else {
-        // The returned packet is mutated etc. and will be owned by the user.
-        pkt = demux_copy_packet(pkt);
-    }
+    pkt = read_packet_from_cache(in, pkt);
     if (!pkt)
         return 0;
 
