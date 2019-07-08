@@ -114,7 +114,7 @@ Available audio output drivers are:
         sending DAC native format (e.g. 16, 24 or 32 Bit integer) directly to the lowest
         level in CoreAudio and bypassing the format converter. Not all devices
         support Integer Mode. Turn off Integer Mode results in coverting audio
-        stream to 32 Bit float format. This option has no affect on SPDIF format.
+        stream to 32 Bit float format. This option has no effect on SPDIF format.
 
     ``--coreaudio-buffer-size=<0-24576>``
         Specify the number of CoreAudio Frame Buffer Size, which represents the amount
@@ -122,11 +122,11 @@ Available audio output drivers are:
         and thus save power. However, higer value might cause clicks during playpack,
         especially in Integer Mode. The actual Frame Buffer Size (shown in
         "Latency property fsiz") in use can vary with different MacOS version, device
-        and audio format. This option has no affect on SPDIF format. Default: 1024.
+        and audio format. This option has no effect on SPDIF format. Default: 1024.
 
     ``--coreaudio-power-saving=<yes|no>``
         Setting CoreAudio Frame Buffer Size to 4096, or device's maximum avaliable value
-        (default: yes). This option has no affect on SPDIF format or when Integer Mode
+        (default: no). This option has no effect on SPDIF format or when Integer Mode
         is on.
 
     ``--coreaudio-iocycle-usage=<0-1>``
@@ -135,7 +135,7 @@ Available audio output drivers are:
         sound quality, but can also cause corruption and leave "skipping cycle
         due to overload" message in Console. It is intended for playing music only,
         as any value that is lower than 1 will lead to A/V sync issues. This option
-        has no affect on SPDIF format. Default: 1.
+        has no effect on SPDIF format. Default: 1.
 
 
 ``openal``
