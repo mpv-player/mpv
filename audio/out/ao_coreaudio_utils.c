@@ -438,6 +438,16 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
               (spdif || a->mBytesPerPacket == b->mBytesPerPacket) &&
               (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
               a->mSampleRate == b->mSampleRate;
+    }else if(integer_mode_hack == 2){
+        int flags = kAudioFormatFlagIsNonMixable | kAudioFormatFlagIsFloat |
+        kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+        return (a->mFormatFlags & flags) == (b->mFormatFlags & flags) &&
+              a->mBitsPerChannel == b->mBitsPerChannel &&
+              ca_normalize_formatid(a->mFormatID) ==
+              ca_normalize_formatid(b->mFormatID) &&
+              (spdif || a->mBytesPerPacket == b->mBytesPerPacket) &&
+              (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
+              a->mSampleRate == b->mSampleRate;
     }else{
         int flags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat |
         kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
@@ -770,7 +780,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
         if (!CHECK_CA_WARN("could not retrieve physical format"))
             break;
 
-        format_set = ca_asbd_equals(&change_format, &actual_format, 0);
+        format_set = ca_asbd_equals(&change_format, &actual_format, 2);
         if (format_set)
             break;
 

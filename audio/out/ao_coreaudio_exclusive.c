@@ -500,7 +500,7 @@ static int init(struct ao *ao)
     err = CA_GET(p->stream, kAudioStreamPropertyVirtualFormat, &p->stream_asbd);
     CHECK_CA_ERROR("could not get stream's virtual format");
 
-    ca_print_asbd(ao, "Virtual format: ", &p->stream_asbd);
+    ca_print_asbd(ao, "Virtual format:", &p->stream_asbd);
 
     if (!ca_init_chmap(ao, p->device))
         goto coreaudio_error;
