@@ -96,6 +96,9 @@ char *mp_strerror_buf(char *buf, size_t buf_size, int errnum);
 char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag);
 #define mp_tag_str(t) mp_tag_str_buf((char[22]){0}, 22, t)
 
+char *mp_tag_str_buf_hex(char *buf, size_t buf_size, uint32_t tag);
+#define mp_tag_str_hex(t) mp_tag_str_buf_hex((char[22]){0}, 22, t)
+
 // Return a printf(format, ...) formatted string of the given SIZE. SIZE must
 // be a compile time constant. The result is allocated on the stack and valid
 // only within the current block scope.

@@ -158,7 +158,9 @@ static int init(struct ao *ao)
         goto coreaudio_error;
 
     AudioStreamBasicDescription asbd;
-    ca_fill_asbd(ao, &asbd);
+    ca_fill_asbd(ao, &asbd, 0);
+
+    SetAudioPowerHintToFavorSavingPower();
 
     if (!init_audiounit(ao, asbd))
         goto coreaudio_error;
@@ -177,7 +179,7 @@ static void init_physical_format(struct ao *ao)
     void *tmp = talloc_new(NULL);
 
     AudioStreamBasicDescription asbd;
-    ca_fill_asbd(ao, &asbd);
+    ca_fill_asbd(ao, &asbd, 0);
 
     AudioStreamID *streams;
     size_t n_streams;
@@ -220,7 +222,7 @@ static void init_physical_format(struct ao *ao)
             ca_print_asbd(ao, "- ", stream_asbd);
 
             if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
-                                                          stream_asbd))
+                                                          stream_asbd, 1, 0))
                 best_asbd = *stream_asbd;
         }
 
@@ -231,7 +233,7 @@ static void init_physical_format(struct ao *ao)
                          &p->original_asbd);
             CHECK_CA_WARN("could not get current physical stream format");
 
-            if (ca_asbd_equals(&p->original_asbd, &best_asbd)) {
+            if (ca_asbd_equals(&p->original_asbd, &best_asbd, 0)) {
                 MP_VERBOSE(ao, "Requested format already set, not changing.\n");
                 p->original_asbd.mFormatID = 0;
                 break;
