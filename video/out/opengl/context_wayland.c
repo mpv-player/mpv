@@ -45,7 +45,9 @@ static void resize(struct ra_ctx *ctx)
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
 
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-    wl_egl_window_resize(p->egl_window, width, height, 0, 0);
+
+    if (p->egl_window)
+        wl_egl_window_resize(p->egl_window, width, height, 0, 0);
 
     wl->vo->dwidth  = width;
     wl->vo->dheight = height;

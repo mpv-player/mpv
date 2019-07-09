@@ -19,7 +19,9 @@
 
 #pragma once
 
-#ifdef __ANDROID__
+#include "config.h"
+
+#if HAVE_ANDROID
 // posix_spawn(p) does not exist at all on Android
 #include "osdep/android/posix-spawn.h"
 #else

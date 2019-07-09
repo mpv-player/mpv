@@ -70,11 +70,11 @@ struct vo_wayland_state {
 
     /* Shell */
     struct wl_surface       *surface;
-    struct xdg_wm_base      *shell;
+    struct xdg_wm_base      *wm_base;
     struct xdg_toplevel     *xdg_toplevel;
     struct xdg_surface      *xdg_surface;
-    struct org_kde_kwin_server_decoration_manager *server_decoration_manager;
-    struct org_kde_kwin_server_decoration *server_decoration;
+    struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
+    struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 

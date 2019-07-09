@@ -1,10 +1,11 @@
 from waftools import inflector
 from waftools.checks.generic import *
 from waflib import Utils
+from distutils.version import StrictVersion
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
-           "check_cocoa", "check_openal", "check_wl_protocols"]
+           "check_cocoa", "check_wl_protocols", "check_swift"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -85,7 +86,7 @@ def check_lua(ctx, dependency_identifier):
 
 def check_wl_protocols(ctx, dependency_identifier):
     def fn(ctx, dependency_identifier):
-        ret = check_pkg_config_datadir("wayland-protocols", ">= 1.14")
+        ret = check_pkg_config_datadir("wayland-protocols", ">= 1.15")
         ret = ret(ctx, dependency_identifier)
         if ret != None:
             ctx.env.WL_PROTO_DIR = ret.split()[0]
@@ -97,18 +98,29 @@ def check_cocoa(ctx, dependency_identifier):
         fragment         = load_fragment('cocoa.m'),
         compile_filename = 'test.m',
         framework_name   = ['Cocoa', 'IOKit', 'OpenGL', 'QuartzCore'],
-        includes         = ctx.srcnode.abspath(),
+        includes         = [ctx.srcnode.abspath()],
         linkflags        = '-fobjc-arc')
 
-    return fn(ctx, dependency_identifier)
+    res = fn(ctx, dependency_identifier)
+    if res and ctx.env.MACOS_SDK:
+        # on macOS we explicitly need to set the SDK path, otherwise it can lead
+        # to linking warnings or errors
+        ctx.env.append_value('LAST_LINKFLAGS', [
+            '-isysroot', ctx.env.MACOS_SDK,
+            '-L/usr/lib',
+            '-L/usr/local/lib'
+        ])
 
-def check_openal(ctx, dependency_identifier):
-    checks = [
-        check_pkg_config('openal', '>= 1.13'),
-        check_statement(['OpenAL/AL.h'], 'int i = AL_VERSION', framework='OpenAL')
-        ]
+    return res
 
-    for fn in checks:
-        if fn(ctx, dependency_identifier):
+def check_swift(ctx, dependency_identifier):
+    minVer = StrictVersion("3.0.2")
+    if ctx.env.SWIFT_VERSION:
+        if StrictVersion(ctx.env.SWIFT_VERSION) >= minVer:
+            ctx.add_optional_message(dependency_identifier,
+                                     'version found: ' + str(ctx.env.SWIFT_VERSION))
             return True
+    ctx.add_optional_message(dependency_identifier,
+                             "'swift >= " + str(minVer) + "' not found, found " +
+                             str(ctx.env.SWIFT_VERSION or None))
     return False

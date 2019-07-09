@@ -428,13 +428,14 @@ end
 
 
 local function add_file(s)
-    append(s, "", {prefix=o.nl .. o.nl .. "File:", nl="", indent=""})
+    append(s, "", {prefix="File:", nl="", indent=""})
     append_property(s, "filename", {prefix_sep="", nl="", indent=""})
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
         append_property(s, "media-title", {prefix="Title:"})
     end
 
-    append_property(s, "file-format", {prefix="Format/protocol:"})
+    local fs = append_property(s, "file-size", {prefix="Size:"})
+    append_property(s, "file-format", {prefix="Format/Protocol:", nl=fs and "" or o.nl})
 
     local ch_index = mp.get_property_number("chapter")
     if ch_index and ch_index >= 0 then
@@ -451,20 +452,16 @@ local function add_file(s)
         demuxer_cache = 0
     end
     local demuxer_secs = mp.get_property_number("demuxer-cache-duration", 0)
-    local stream_cache = mp.get_property_number("cache-used", 0) * 1024 -- returns KiB
-    if stream_cache + demuxer_cache + demuxer_secs > 0 then
-        append(s, utils.format_bytes_humanized(stream_cache + demuxer_cache), {prefix="Total Cache:"})
-        append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="(Demuxer:",
-               suffix=",", nl="", no_prefix_markup=true, indent=o.prefix_sep})
-        append(s, format("%.1f", demuxer_secs), {suffix=" sec)", nl="", indent="",
-               no_prefix_markup=true})
+    if demuxer_cache + demuxer_secs > 0 then
+        append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="Total Cache:"})
+        append(s, format("%.1f", demuxer_secs), {prefix="(", suffix=" sec)", nl="",
+               no_prefix_markup=true, prefix_sep="", indent=o.prefix_sep})
         local speed = mp.get_property_number("cache-speed", 0)
         if speed > 0 then
             append(s, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
                    indent=o.prefix_sep, no_prefix_markup=true})
         end
     end
-    append_property(s, "file-size", {prefix="Size:"})
 end
 
 
@@ -543,9 +540,9 @@ local function add_audio(s)
 
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
-    append(s, r["format"], {prefix="Format:"})
+    local cc = append(s, r["channel-count"], {prefix="Channels:"})
+    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl})
     append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
-    append(s, r["channel-count"], {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
 end

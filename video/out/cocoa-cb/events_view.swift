@@ -20,9 +20,7 @@ import Cocoa
 class EventsView: NSView {
 
     weak var cocoaCB: CocoaCB!
-    var mpv: MPVHelper! {
-        get { return cocoaCB == nil ? nil : cocoaCB.mpv }
-    }
+    var mpv: MPVHelper { get { return cocoaCB.mpv } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -31,12 +29,14 @@ class EventsView: NSView {
     override var acceptsFirstResponder: Bool { return true }
 
 
-    init(frame frameRect: NSRect, cocoaCB ccb: CocoaCB) {
+    init(cocoaCB ccb: CocoaCB) {
         cocoaCB = ccb
-        super.init(frame: frameRect)
+        super.init(frame: NSMakeRect(0, 0, 960, 480))
         autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         wantsBestResolutionOpenGLSurface = true
-        register(forDraggedTypes: [NSFilenamesPboardType, NSURLPboardType])
+        register(forDraggedTypes: [ NSFilenamesPboardType,
+                                    NSURLPboardType,
+                                    NSPasteboardTypeString ])
     }
 
     required init?(coder: NSCoder) {
@@ -44,13 +44,14 @@ class EventsView: NSView {
     }
 
     override func updateTrackingAreas() {
-        if tracker != nil {
-            removeTrackingArea(tracker!)
+        if let tracker = self.tracker {
+            removeTrackingArea(tracker)
         }
 
         tracker = NSTrackingArea(rect: bounds,
             options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved, .enabledDuringMouseDrag],
             owner: self, userInfo: nil)
+        // here tracker is guaranteed to be none-nil
         addTrackingArea(tracker!)
 
         if containsMouseLocation() {
@@ -60,10 +61,23 @@ class EventsView: NSView {
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard let types = sender.draggingPasteboard().types else { return [] }
-        if types.contains(NSFilenamesPboardType) || types.contains(NSURLPboardType) {
+        if types.contains(NSFilenamesPboardType) ||
+           types.contains(NSURLPboardType) ||
+           types.contains(NSPasteboardTypeString)
+        {
             return .copy
         }
         return []
+    }
+
+    func isURL(_ str: String) -> Bool {
+        // force unwrapping is fine here, regex is guarnteed to be valid
+        let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
+                                             options: .caseInsensitive)
+        let isURL = regex.numberOfMatches(in: str,
+                                     options: [],
+                                       range: NSRange(location: 0, length: str.count))
+        return isURL > 0
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -75,10 +89,26 @@ class EventsView: NSView {
                 return true
             }
         } else if types.contains(NSURLPboardType) {
-            if let url = pb.propertyList(forType: NSURLPboardType) as? [Any] {
+            if var url = pb.propertyList(forType: NSURLPboardType) as? [String] {
+                url = url.filter{ !$0.isEmpty }
                 EventsResponder.sharedInstance().handleFilesArray(url)
                 return true
             }
+        } else if types.contains(NSPasteboardTypeString) {
+            guard let str = pb.string(forType: NSPasteboardTypeString) else { return false }
+            var filesArray: [String] = []
+
+            for val in str.components(separatedBy: "\n") {
+                let url = val.trimmingCharacters(in: .whitespacesAndNewlines)
+                let path = (url as NSString).expandingTildeInPath
+                if isURL(url) {
+                    filesArray.append(url)
+                } else if path.starts(with: "/") {
+                    filesArray.append(path)
+                }
+            }
+            EventsResponder.sharedInstance().handleFilesArray(filesArray)
+            return true
         }
         return false
     }
@@ -105,14 +135,14 @@ class EventsView: NSView {
         if mpv.getBoolProperty("input-cursor") {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
-        cocoaCB.window.hideTitleBar()
+        cocoaCB.titleBar?.hide()
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mpv != nil && mpv.getBoolProperty("input-cursor") {
+        if mpv.getBoolProperty("input-cursor") {
             signalMouseMovement(event)
         }
-        cocoaCB.window.showTitleBar()
+        cocoaCB.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -131,7 +161,7 @@ class EventsView: NSView {
         if mpv.getBoolProperty("input-cursor") {
             signalMouseUp(event)
         }
-        cocoaCB.window.isMoving = false
+        cocoaCB.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
@@ -180,8 +210,8 @@ class EventsView: NSView {
         point = convertToBacking(point)
         point.y = -point.y
 
-        cocoaCB.window.updateMovableBackground(point)
-        if !cocoaCB.window.isMoving {
+        cocoaCB.window?.updateMovableBackground(point)
+        if !(cocoaCB.window?.isMoving ?? false) {
             mpv.setMousePosition(point)
         }
     }
@@ -227,29 +257,32 @@ class EventsView: NSView {
     func containsMouseLocation() -> Bool {
         if cocoaCB == nil { return false }
         var topMargin: CGFloat = 0.0
-        let menuBarHeight = NSApp.mainMenu!.menuBarHeight
+        let menuBarHeight = NSApp.mainMenu?.menuBarHeight ?? 23.0
 
-        if cocoaCB.window.isInFullscreen && (menuBarHeight > 0) {
-            topMargin = cocoaCB.window.titleBarHeight + 1 + menuBarHeight
+        guard let window = cocoaCB.window else { return false }
+        guard var vF = window.screen?.frame else { return false }
+
+        if window.isInFullscreen && (menuBarHeight > 0) {
+            topMargin = TitleBar.height + 1 + menuBarHeight
         }
 
-        var vF = window!.screen!.frame
         vF.size.height -= topMargin
 
-        let vFW = window!.convertFromScreen(vF)
+        let vFW = window.convertFromScreen(vF)
         let vFV = convert(vFW, from: nil)
-        let pt = convert(window!.mouseLocationOutsideOfEventStream, from: nil)
+        let pt = convert(window.mouseLocationOutsideOfEventStream, from: nil)
 
         var clippedBounds = bounds.intersection(vFV)
-        if !cocoaCB.window.isInFullscreen {
-            clippedBounds.origin.y += cocoaCB.window.titleBarHeight
-            clippedBounds.size.height -= cocoaCB.window.titleBarHeight
+        if !window.isInFullscreen {
+            clippedBounds.origin.y += TitleBar.height
+            clippedBounds.size.height -= TitleBar.height
         }
         return clippedBounds.contains(pt)
     }
 
     func canHideCursor() -> Bool {
-        return !hasMouseDown && containsMouseLocation() && window!.isKeyWindow
+        guard let window = cocoaCB.window else { return false }
+        return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
     }
 
     func getMpvButton(_ event: NSEvent) -> Int32 {

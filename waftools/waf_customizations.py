@@ -28,18 +28,25 @@ def m_hook(self, node):
     """
     return self.create_compiled_task('c', node)
 
+def try_last_linkflags(cls):
+    try:
+        return cls.orig_run_str + ' ${LAST_LINKFLAGS}'
+    except AttributeError:
+        try:
+            return cls.hcode + ' ${LAST_LINKFLAGS}'
+        except TypeError:
+            return cls.hcode.decode('iso8859-1') + ' ${LAST_LINKFLAGS}'
+
 def build(ctx):
     from waflib import Task
 
     cls = Task.classes['cprogram']
     class cprogram(cls):
-        try:
-            run_str = cls.orig_run_str + ' ${LAST_LINKFLAGS}'
-        except AttributeError:
-            try:
-                run_str = cls.hcode + ' ${LAST_LINKFLAGS}'
-            except TypeError:
-                run_str = cls.hcode.decode('iso8859-1') + ' ${LAST_LINKFLAGS}'
+        run_str = try_last_linkflags(cls)
+
+    cls = Task.classes['cshlib']
+    class cshlib(cls):
+        run_str = try_last_linkflags(cls)
 
     cls = Task.classes['macplist']
     class macplist(cls):

@@ -210,13 +210,18 @@ Alt + and Alt -
 Alt+BACKSPACE
     Reset the pan/zoom settings.
 
-F9
+F8
     Show the playlist and the current position in it (useful only if a UI window
     is used, broken on the terminal).
 
-F10
+F9
     Show the list of audio and subtitle streams (useful only if a UI window  is
     used, broken on the terminal).
+
+i and I
+    Show/toggle an overlay displaying statistics about the currently playing
+    file such as codec, framerate, number of dropped frames and so on. See
+    `STATS`_ for more information.
 
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment.)
@@ -625,7 +630,8 @@ or at runtime with the ``apply-profile <name>`` command.
 
         # a profile that can be enabled with --profile=big-cache
         [big-cache]
-        cache=123400
+        cache=yes
+        demuxer-max-bytes=123400KiB
         demuxer-readahead-secs=20
 
         [slow]

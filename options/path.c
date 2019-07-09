@@ -37,6 +37,7 @@
 #include "mpv_talloc.h"
 #include "osdep/io.h"
 #include "osdep/path.h"
+#include "misc/ctype.h"
 
 // In order of decreasing priority: the first has highest priority.
 static const mp_get_platform_path_cb path_resolvers[] = {
@@ -323,12 +324,15 @@ bool mp_is_url(bstr path)
     int proto = bstr_find0(path, "://");
     if (proto < 1)
         return false;
-    // The protocol part must be alphanumeric, otherwise it's not an URL.
+    // Per RFC3986, the first character of the protocol must be alphabetic.
+    // The rest must be alphanumeric plus -, + and .
     for (int i = 0; i < proto; i++) {
         unsigned char c = path.start[i];
-        if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') &&
-            !(c >= '0' && c <= '9') && c != '_')
+        if ((i == 0 && !mp_isalpha(c)) ||
+            (!mp_isalnum(c) && c != '.' && c != '-' && c != '+'))
+        {
             return false;
+        }
     }
     return true;
 }

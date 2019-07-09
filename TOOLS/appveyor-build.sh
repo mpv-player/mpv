@@ -10,11 +10,9 @@ export PYTHON=/usr/bin/python3
 "$PYTHON" bootstrap.py
 "$PYTHON" waf configure \
     --check-c-compiler=gcc \
-    --disable-egl-angle-lib \
-    --enable-crossc \
+    --enable-spirv-cross \
     --enable-d3d-hwaccel \
     --enable-d3d11 \
-    --enable-egl-angle \
     --enable-jpeg \
     --enable-lcms2 \
     --enable-libarchive \

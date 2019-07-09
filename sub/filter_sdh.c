@@ -406,8 +406,11 @@ char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int len
                     line_with_text =  true;
                 }
             } else if (*rp && rp[0] != '\\') {
-                if (rp[0] > 32 && rp[0] < 127 && rp[0] != '-')
+                if ((rp[0] > 32 && rp[0] < 127 && rp[0] != '-') ||
+                    (unsigned char)rp[0] >= 0xC0)
+                {
                     line_with_text =  true;
+                }
                 append(sd, buf, rp[0]);
                 rp++;
             } else if (rp[0] == '\\' && rp[1] != 'N') {

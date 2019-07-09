@@ -153,8 +153,8 @@ static bool fb_setup_double_buffering(struct vo *vo)
 
     p->front_buf = 0;
     for (unsigned int i = 0; i < 2; i++) {
-        p->bufs[i].width = p->kms->mode.hdisplay;
-        p->bufs[i].height = p->kms->mode.vdisplay;
+        p->bufs[i].width = p->kms->mode.mode.hdisplay;
+        p->bufs[i].height = p->kms->mode.mode.vdisplay;
     }
 
     for (unsigned int i = 0; i < BUF_COUNT; i++) {
@@ -186,7 +186,7 @@ static bool crtc_setup(struct vo *vo)
     int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
                              p->bufs[MOD(p->front_buf - 1, BUF_COUNT)].fb,
                              0, 0, &p->kms->connector->connector_id, 1,
-                             &p->kms->mode);
+                             &p->kms->mode.mode);
     p->active = true;
     return ret == 0;
 }
@@ -417,11 +417,10 @@ static int preinit(struct vo *vo)
         MP_WARN(vo, "Failed to set up VT switcher. Terminal switching will be unavailable.\n");
     }
 
-    p->kms = kms_create(
-        vo->log, vo->opts->drm_opts->drm_connector_spec,
-                 vo->opts->drm_opts->drm_mode_id,
-                 vo->opts->drm_opts->drm_osd_plane_id,
-                 vo->opts->drm_opts->drm_video_plane_id);
+    p->kms = kms_create(vo->log,
+                        vo->opts->drm_opts->drm_connector_spec,
+                        vo->opts->drm_opts->drm_mode_spec,
+                        0, 0, false);
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
         goto err;

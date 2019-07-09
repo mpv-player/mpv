@@ -172,8 +172,10 @@ static void set_application_icon(NSApplication *app)
     NSBundle *bundle = [NSBundle mainBundle];
     if ([bundle pathForResource:@"icon" ofType:@"icns"])
         return;
+
+    // The C string contains a trailing null, so we strip it away
     NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon)
+                                             length:sizeof(macosx_icon) - 1
                                        freeWhenDone:NO];
     NSImage *icon = [[NSImage alloc] initWithData:icon_data];
     [app setApplicationIconImage:icon];

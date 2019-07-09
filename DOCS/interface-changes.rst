@@ -19,6 +19,67 @@ Interface changes
 
 ::
 
+ --- mpv 0.30.0 ---
+    - rename `--drm-osd-plane-id` to `--drm-draw-plane`, `--drm-video-plane-id` to
+      `--drm-drmprime-video-plane` and `--drm-osd-size` to `--drm-draw-surface-size`
+      to better reflect what the options actually control, that the values they
+      accept aren't actually internal DRM ID's (like with similar options in
+      ffmpeg's KMS support), and that the video plane is only used when the drmprime
+      overlay hwdec interop is active, with the video being drawn to the draw plane
+      otherwise.
+    - in addition to the above, the `--drm-draw-plane` and `--drm-drmprime-video-plane`
+      options now accept either an integer index, or the values primary or overlay.
+      `--drm-draw-plane` now defaults to primary and `--drm-drmprime-video-plane`
+      defaults to overlay. This should be similar to previous behavior on most drivers
+      due to how planes are usually sorted.
+    - rename --opensles-frames-per-buffer to --opensles-frames-per-enqueue to
+      better reflect its purpose. In the past it overrides the buffer size the AO
+      requests (but not the default/value of the generic --audio-buffer option).
+      Now it only guarantees that the soft buffer size will not be smaller than
+      itself while setting the size per Enqueue.
+    - add --opensles-buffer-size-in-ms, allowing user to tune the soft buffer size.
+      It overrides the --audio-buffer option unless it's set to 0 (with the default
+      being 250).
+    - remove `--linear-scaling`, replaced by `--linear-upscaling` and
+      `--linear-downscaling`. This means that `--sigmoid-upscaling` no longer
+      implies linear light downscaling as well, which was confusing.
+    - the built-in `gpu-hq` profile now includes` --linear-downscaling`.
+    - support for `--spirv-compiler=nvidia` has been removed, leaving `shaderc`
+      as the only option. The `--spirv-compiler` option itself has been marked
+      as deprecated, and may be removed in the future.
+    - split up `--tone-mapping-desaturate`` into strength + exponent, instead of
+      only using a single value (which previously just controlled the exponent).
+      The strength now linearly blends between the linear and nonlinear tone
+      mapped versions of a color.
+    - add --hdr-peak-decay-rate and --hdr-scene-threshold-low/high
+    - add --tone-mapping-max-boost
+    - ipc: require that "request_id" fields are integers. Other types are still
+      accepted for compatibility, but this will stop in the future. Also, if no
+      request_id is provided, 0 will be assumed.
+    - mpv_command_node() and mp.command_native() now support named arguments
+      (see manpage). If you want to use them, use a new version of the manpage
+      as reference, which lists the definitive names.
+    - edition and disc title switching will now fully reload playback (may have
+      consequences for scripts, client API, or when using file-local options)
+    - with the removal of the stream cache, the following properties and options were
+      dropped: `cache`, `cache-size`, `cache-free`, `cache-used`, `--cache-default`,
+      `--cache-initial`, `--cache-seek-min`, `--cache-backbuffer`, `--cache-file`,
+      `--cache-file-size`
+    - remove async playback abort hack. This breaks aborting playback in the
+      following cases, iff the current stream is a network stream that
+      completely stopped responding:
+        - setting "program" property
+        - setting "cache-size" property
+      In earlier versions of mpv, the player core froze as well in these cases,
+      but could still be aborted with the quit, stop, playlist-prev,
+      playlist-next commands. If these properties are not accessed, frozen
+      network streams should not freeze the player core (only playback in
+      uncached regions), and differing behavior should be reported as a bug.
+      If --demuxer-thread=no is used, there are no guarantees.
+    - remove `--macos-title-bar-style`, replaced by `--macos-title-bar-material`
+      and `--macos-title-bar-appearance`.
+    - The default for `--vulkan-async-compute` has changed to `yes` from `no`
+      with the move to libplacebo as the back-end for vulkan rendering.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
@@ -103,25 +164,6 @@ Interface changes
       of 3D content doesn't justify such an option anyway.
     - change cycle-values command to use the current value, instead of an
       internal counter that remembered the current position.
-    - ipc: require that "request_id" fields are integers. Other types are still
-      accepted for compatibility, but this will stop in the future. Also, if no
-      request_id is provided, 0 will be assumed.
-    - mpv_command_node() and mp.command_native() now support named arguments
-      (see manpage). If you want to use them, use a new version of the manpage
-      as reference, which lists the definitive names.
-    - edition and disc title switching will now fully reload playback (may have
-      consequences for scripts, client API, or when using file-local options)
-    - remove async playback abort hack. This breaks aborting playback in the
-      following cases, iff the current stream is a network stream that
-      completely stopped responding:
-        - setting "program" property
-        - setting "cache-size" property
-      In earlier versions of mpv, the player core froze as well in these cases,
-      but could still be aborted with the quit, stop, playlist-prev,
-      playlist-next commands. If these properties are not accessed, frozen
-      network streams should not freeze the player core (only playback in
-      uncached regions), and differing behavior should be reported as a bug.
-      If --demuxer-thread=no is used, there are no guarantees.
     - remove deprecated ao/vo auto profiles. Consider using scripts like
       auto-profiles.lua instead.
  --- mpv 0.28.0 ---

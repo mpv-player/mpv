@@ -1,8 +1,6 @@
-![http://mpv.io/](https://raw.githubusercontent.com/mpv-player/mpv.io/master/source/images/mpv-logo-128.png)
+![mpv logo](https://raw.githubusercontent.com/mpv-player/mpv.io/master/source/images/mpv-logo-128.png)
 
-## mpv
-
---------------
+# mpv
 
 
 * [External links](#external-links)
@@ -228,9 +226,9 @@ See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
 Most activity happens on the IRC channel and the github issue tracker.
 
- - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
- - **User IRC Channel**: `#mpv` on `irc.freenode.net`
- - **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
+- **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
+- **User IRC Channel**: `#mpv` on `irc.freenode.net`
+- **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
 
 To contact the `mpv` team in private write to `mpv-team@googlegroups.com`. Use
 only if discretion is required.

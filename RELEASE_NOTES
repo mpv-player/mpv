@@ -1,18 +1,8 @@
-Release 0.28.0
+Release 0.30.0
 ==============
 
-This release needs recent FFmpeg (newer than 3.4) due to major refactoring.
-Required library versions:
-
-  * libavutil >= 56.6.100
-  * libavcodec >= 58.7.100
-  * libavformat >= 58.0.102
-  * libswscale >= 5.0.101
-  * libavfilter >= 7.0.101
-  * libswresample >= 3.0.100
-
-The LGPL 2.1+ relicensing process is now mostly complete. The remaining GPL-only
-code (see Copyright file) can be disabled at build time by using --enable-lgpl.
+This release has replaced the internal Vulkan rendering abstraction
+with libplacebo's more up-to-date implementation.
 
 Features
 --------
@@ -20,33 +10,20 @@ Features
 Added
 ~~~~~
 
-- Add DRM_PRIME Format Handling and Display for RockChip MPP decoders
-- csputils: Add support for Display P3 primaries
-- demux: support multiple seekable cached ranges, display cache ranges on OSC
-- demux_playlist: support .url files (#5107)
-- dvb: Add multiple frontends support (up to 8)
-- dvb: implement parsing of modulation for VDR-style channels config
-- hwdec: add mediacodec hardware decoder for IMGFMT_MEDIACODEC frames,
-  rename mediacodec to mediacodec-copy
-- lua: integrate stats.lua script (bound to i/I by default)
-- vd_lavc: add support for nvdec hwaccel
-- vo_gpu: add android opengl backend
-- vo_gpu: initial d3d11 support
-- vo_gpu: vulkan support
+- vo_gpu: Vulkan API implementation based on libplacebo.
+
+Changed
+~~~~~~~
+
+
+Deprecated
+~~~~~~~~~~
 
 
 Removed
 ~~~~~~~
 
-- af: remove deprecated audio filters (channels, equalizer, pan, volume;
-  replacements in lavfi)
-- vf: remove most GPL video filters (crop, dsize, expand, flip, gradfun, mirror,
-  noformat, pullup, rotate, scale, stereo3d, yadif; replacements in lavfi)
-- vf_buffer: remove this filter
-- video: remove automatic stereo3d filter insertion
-- vo_gpu: remove hwdec_vaglx interop
-- vo_opengl: refactor into vo_gpu
-- vo_wayland: remove
+- vo_gpu: Internal Vulkan API implementation.
 
 
 Options and Commands
@@ -55,106 +32,160 @@ Options and Commands
 Added
 ~~~~~
 
-- demux: add option to create CC tracks eagerly (--sub-create-cc-track)
-- options: add --start=none to reset previously set start time
-- options: add --vlang switch
-
 
 Changed
 ~~~~~~~
 
-- cache: lower default size to 2*10MB
-- demux: bump the demuxer cache readahead duration to 10 hours
-- demux: use seekable cache for network by default, bump prefetch limit
-- msg: make --msg-level affect --log-file too
-- player/misc.c: allow both --length and --end to control play endpoint
-- player: match subtitles with language tags with --sub-auto=exact
-- rename --opengl-hwdec-interop to --gpu-hwdec-interop (now mostly useless)
-- vd_lavc: prefer nvdec over vdpau with --hwdec=auto (better codec and surface
-  format support)
-- vd_lavc: rename --hwdec=rpi to --hwdec=mmal
+
+Deprecated
+~~~~~~~~~~
 
 
 Removed
 ~~~~~~~
 
-- options: remove --heartbeat-cmd and --heartbeat-interval
-  (incidentally fixes #4888)
+
+Fixes and Minor Enhancements
+----------------------------
+
+
+
+Release 0.29.0
+==============
+
+This release requires FFmpeg 4.0 or newer.
+
+
+Features
+--------
+
+Added
+~~~~~
+
+- ao/openal: Add better sample format and channel layout selection
+- ao/openal: Add support for direct channels output
+- cocoa-cb: initial implementation via opengl-cb API
+- context_drm_egl: Introduce 30bpp support (requires Mesa 18.0.0_rc4 or later)
+- osx: add some more menu bar items as suggested by Apples's HIG
+- vo_gpu: make screenshots use the GL renderer (#5498, #5240)
+- x11: support Shift+TAB as an input key bind (#5849)
+- ytdl_hook: support native dash demuxer, if present
+
+
+Changed
+~~~~~~~
+
+- ao_alsa, ao_pulse: reduce requested buffer size
+- audio: change format negotiation, remove channel remix fudging
+- client API: deprecate opengl-cb API and introduce a replacement API
+- demux: lower demuxer cache default sizes from 400MB/400MB to 50MB/150MB
+- osx: always deactivate the early opengl flush on macOS
+- scripting: change when/how player waits for scripts being loaded
+- vo_gpu: various improvements to HDR peak detection
+- vo_gpu: various improvements to HDR tone mapping
+- wayland_common: update to stable xdg-shell
+- ytdl_hook: parse youtube playlist urls to set start index if `--ytdl-raw-option=yes-playlist=` is specified
+
+Deprecated
+~~~~~~~~~~
+
+- af_lavrresample: deprecate this filter
+
+
+Removed
+~~~~~~~
+
+- build: drop support for SDL1 (only applied to ao_sdl)
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- add a number of --audio-resample-* options, which should from now on be used instead of --af-defaults=lavrresample:
+- ao/openal: --openal-direct-channels
+- command: add --osd-on-seek option defaulting to bar
+- command: add a change-list command (#5435)
+- options: add --http-proxy
+- options: add a builtin low-latency profile
+- vaapi: add option to select a non-default device path with --vaapi-device (#4320)
+- video: add option to reduce latency by 1 or 2 frames
+- vo_gpu: introduce --target-peak (#5521)
+
+
+Changed
+~~~~~~~
+
+- command: change cycle-value command behavior (#5772)
+- config: replace config dir lua-settings/ with dir script-opts/
+- options: --lavfi-complex now requires uniquely named filter pads.
+- options: --ytdl is now always enabled, even for libmpv
+- options: make --deinterlace=yes always deinterlace (#5219)
+- options: slightly improve filter help output for lavfi bridge
+- vo: rename --vo=opengl-cb to --vo=libmpv
+
+
+Deprecated
+~~~~~~~~~~
+
+- encoding: deprecate a bunch of obscure options (--ovoffset, --oaoffset, --ovfirst, --oafirst)
+- options: deprecate --vf-defaults and --af-defaults
+- osx: --gpu-context=cocoa with --gpu-api=opengl is now deprecated in favour of --vo=libmpv
+
+
+Removed
+~~~~~~~
+
+- command: remove an old compatibility hack that allowed CLI aliases to be set as property, deprecated in 0.26.0
+- input: remove legacy command handling for MPlayer commands that were deprecated in 2013
+- options: drop --opensles-sample-rate, as --audio-samplerate should be used if desired
+- options: drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid, --ad-spdif-dtshd, --softvol options
+- options: remove --video-stereo-mode
+- options: remove deprecated ao/vo auto profiles
+- options: remove the following encoding options: --ocopyts (now the default, old timestamp handling is gone), --oneverdrop (now default), --oharddup (you need to use --vf=fps=VALUE), --ofps, --oautofps, --omaxfps
 
 
 Fixes and Minor Enhancements
 ----------------------------
 
-- TOOLS/autoload.lua: add ogm, ogg and opus extensions
-- Use /dev/tty instead of stdin for terminal input (#4190)
-- audio: add audio softvol processing to AO (replaces previously GPL’d code)
-- audio: fix channel conversion with NA channels (e.g. with ALSA)
-- audio: fix missing volume update on init and reinit
-- csputils: Fix DCI P3 primaries white point
-- demux: don't allow subtitles to mess up buffered time display
-- demux: fix .cue files with audio files that contain attached pictures
-- demux: fix accounting for seekable ranges on track switches (fixes missing
-  audio when cycling through audio tracks with e.g. EDL, --merge-files, ordered
-  chapters and youtube-dl pseudo DASH)
-- demux: fix crash with cue/ordered chapter files (#5027)
-- demux: speed up cache seeking with a coarse index
-- demux_lavf: always give libavformat the filename when probing
-  (helps with mp3 files)
-- demux_mkv: add V_SNOW tag to mkv_video_tags
-- dvb: Fix long channel switching: next/prev channel
-- dvb: fixes for ATSC tuning
-- lavc_conv: clamp timestamps to positive (#5047)
-- macOS: fix bundle on macOS High Sierra (10.13) (#4926, #4866)
-- mp_image: always copy color attributes on hw download (#4804)
-- mp_image: select an explicit fallback for chroma location (#4804)
-- msg: bump log level of --log-file to -v -v
-- msg: reinterpret a bunch of message levels
-- osc: fix rare stack overflow when changing visibility mode
-- osdep/io: add android-related bullshit to fix files >2 GiB
-- player/playloop.c: respect playback start time when using --loop-file
-- player: allow seeking in cached parts of unseekable streams
-- player: make track language matching case insensitive (#5272)
-- player: use start timestamp for ab-looping if --ab-loop-a is absent
-- player: when loading external file, always add all track types (#5132)
-- restore-old-bindings.conf: add old macOS/Wayland AXIS bindings
-- screenshot: create directories from template
-- scripting: report dlerror() output
-- sd_ass: accept RFC8081 font media types
-- sd_ass: accept otc as fallback OpenType collection file extension
-- stream_libarchive: work around various types of locale braindeath
-  (https://git.io/vbiFJ)
-- subprocess-win: don't change the mouse cursor when creating processes
-- video: add a hack to avoid missing subtitles with vf_sub (#5194)
-- video: fix alpha handling (#4983)
-- video: fix memory leaks (roughly 1 KB per decoded frame) with hwdec copy modes
-- video: fix rotation and deinterlace auto filters
-- video: properly pass through ICC data
-- vo: add support for externally driven renderloop and make wayland use it
-  (partially fixes display-sync under wayland; disables rendering when window
-  is invisible)
-- vo_gpu: change --tone-mapping-desaturate algorithm
-- vo_gpu: enable 3DLUTs in dumb mode
-- vo_gpu: fix gamma scale
-- vo_gpu: fix mobius tone mapping compatibility to GLSL 120 (#5069)
-- vo_gpu: fix video sometimes not being rerendered on equalizer change
-- vo_gpu: kill off FBOTEX_FUZZY (#1814)
-- vo_gpu: opengl: fix possible screenshot window crash (#4905)
-- vo_gpu: opengl: use GLX_MESA_swap_control where available
-- vo_gpu: reduce the --alpha=blend-tiles checkerboard intensity
-- vo_gpu: win: remove exclusive-fullscreen detection hack
-- vo_lavc: remove messy delayed subtitle rendering logic (#4689)
-- wayland_common: implement output tracking, many cleanups and bugfixes
-- Windows: skip window snapping if Windows handled it
-- Windows: add more-POSIXy versions of open() and fstat() (#4711)
-- ytdl_hook: don't prepend ytdl:// to non-youtube links in playlists (#5003)
+- HIDRemote: fix volume buttons on macOS 10.13 (#5721)
+- TOOLS/autoload: Fix broken "disabled" option
+- TOOLS/autoload: be more robust with slow directory listings (#5618)
+- ao_sdl: fix default buffer size
+- build: add static libraries to libmpv.pc
+- build: bump waf to 2.0.9 (fixes Python 3.7 compatibility)
+- build: manually add standard library search paths for linking (#5791)
+- common: round all integer times to milliseconds
+- demux, player: fix playback of sparse video streams (w/ still images)
+- demux: support for some kinds of timed metadata (e.g. ICY)
+- demux_mkv: add V_AV1 identifier for AV1
+- demux_mkv: support Meridian Lossless Packing in Matroska (#5923)
+- display additional metadata tags during video playback
+- drm_atomic: Fix memory leaks in drm_atomic_create
+- enable cache for FUSE filesystems on OpenBSD and FreeBSD
+- gpu: prefer 16bit floating point FBO formats to 16bit integer ones
+- hwdec_vaegl: Fix VAAPI EGL interop used with gpu-context=drm
+- input.conf: use exact value for [ binding, which does the inverse of ]
+- input: add a keybinding to toggle hardware decoding
+- input: minor additions to default key bindings (#973)
+- osc: fix accidentally skipping files when seeking with slider
+- player: fix strange behavior on edition switching
+- player: fix track autoselection of external files yet again
+- terminal-unix: stop trying to read when terminal disappears (#5842)
+- video: actually wait for last frame being rendered on EOF
+- video: fix --video-rotate in some cases
+- video: fix crash with vdpau when reinitializing rendering (#5447)
+- vo_gpu: fix anamorphic screenshots (#5619)
+- vo_vdpau: fix resizing and rotation problems
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.27.0..v0.28.0`
+A complete changelog can be seen by running `git log v0.28.2..v0.29.0`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.27.0...v0.28.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.27.0..v0.28.0
-
+https://github.com/mpv-player/mpv/compare/v0.28.2...v0.29.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.28.2..v0.29.0

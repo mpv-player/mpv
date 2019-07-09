@@ -1,4 +1,6 @@
+import re
 from waflib import Utils
+from distutils.version import StrictVersion
 
 def __run(cmd):
     try:
@@ -8,18 +10,24 @@ def __run(cmd):
         return ""
 
 def __add_swift_flags(ctx):
-    ctx.env.SWIFT_FLAGS = ('-frontend -c -sdk %s -enable-objc-interop'
-                           ' -emit-objc-header -parse-as-library'
-                           ' -target x86_64-apple-macosx10.10') % (ctx.env.MACOS_SDK)
-    swift_version = __run([ctx.env.SWIFT, '-version']).split(' ')[3].split('.')[:2]
-    major, minor = [int(n) for n in swift_version]
+    ctx.env.SWIFT_FLAGS = [
+        "-frontend", "-c", "-sdk", ctx.env.MACOS_SDK,
+        "-enable-objc-interop", "-emit-objc-header", "-parse-as-library",
+        "-target", "x86_64-apple-macosx10.10"
+    ]
+
+    verRe = re.compile("(?i)version\s?([\d.]+)")
+    ctx.env.SWIFT_VERSION = verRe.search(__run([ctx.env.SWIFT, '-version'])).group(1)
 
     # the -swift-version parameter is only supported on swift 3.1 and newer
-    if major >= 3 and minor >= 1 or major >= 4:
-        ctx.env.SWIFT_FLAGS += ' -swift-version 3'
+    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("3.1"):
+        ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "3" ])
+
+    if ctx.is_debug_build():
+        ctx.env.SWIFT_FLAGS.append("-g")
 
     if ctx.is_optimization():
-        ctx.env.SWIFT_FLAGS += ' -O'
+        ctx.env.SWIFT_FLAGS.append("-O")
 
 def __add_swift_library_linking_flags(ctx, swift_library):
     ctx.env.append_value('LINKFLAGS', [

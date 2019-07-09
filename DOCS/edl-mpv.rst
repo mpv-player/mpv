@@ -198,6 +198,24 @@ Example::
 
 Plays chapter 3 and ends with the start of chapter 7 (4 chapters later).
 
+Implicit chapters
+=================
+
+mpv will add one chapter per segment entry to the virtual timeline.
+
+By default, the chapter's titles will match the entries' filenames.
+You can override set the ``title`` option to override the chapter title for
+that segment.
+
+Example::
+
+    # mpv EDL v0
+    cap.ts,5,240
+    OP.mkv,0,90,title=Show Opening
+
+The virtual timeline will have two chapters, one called "cap.ts" from 0-240s
+and a second one called "Show Opening" from 240-330s.
+
 Syntax of EDL URIs
 ==================
 

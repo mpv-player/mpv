@@ -32,7 +32,7 @@ struct kms {
     int fd;
     drmModeConnector *connector;
     drmModeEncoder *encoder;
-    drmModeModeInfo mode;
+    struct drm_mode mode;
     uint32_t crtc_id;
     int card_no;
     struct drm_atomic_context *atomic_context;
@@ -47,11 +47,12 @@ struct vt_switcher {
 
 struct drm_opts {
     char *drm_connector_spec;
-    int drm_mode_id;
-    int drm_osd_plane_id;
-    int drm_video_plane_id;
+    char *drm_mode_spec;
+    int drm_atomic;
+    int drm_draw_plane;
+    int drm_drmprime_video_plane;
     int drm_format;
-    struct m_geometry drm_osd_size;
+    struct m_geometry drm_draw_surface_size;
 };
 
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
@@ -65,16 +66,10 @@ void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
                          void *user_data);
 
 struct kms *kms_create(struct mp_log *log, const char *connector_spec,
-                       int mode_id, int osd_plane_id, int video_plane_id);
+                       const char *mode_spec,
+                       int draw_plane, int drmprime_video_plane,
+                       bool use_atomic);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
-
-void kms_show_available_connectors(struct mp_log *log, int card_no);
-void kms_show_available_modes(struct mp_log *log,
-                              const drmModeConnector *connector);
-void kms_show_available_cards_and_connectors(struct mp_log *log);
-
-int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
-                               struct bstr name, struct bstr param);
 
 #endif

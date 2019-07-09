@@ -41,6 +41,7 @@ struct tl_part {
     bool offset_set;
     bool chapter_ts;
     double length;              // length of the part (-1 if rest of the file)
+    char *title;
 };
 
 struct tl_parts {
@@ -92,8 +93,10 @@ static struct tl_root *parse_edl(bstr str)
     struct tl_root *root = talloc_zero(NULL, struct tl_root);
     struct tl_parts *tl = add_part(root);
     while (str.len) {
-        if (bstr_eatstart0(&str, "#"))
+        if (bstr_eatstart0(&str, "#")) {
             bstr_split_tok(str, "\n", &(bstr){0}, &str);
+            continue;
+        }
         if (bstr_eatstart0(&str, "\n") || bstr_eatstart0(&str, ";"))
             continue;
         bool is_header = bstr_eatstart0(&str, "!");
@@ -146,6 +149,8 @@ static struct tl_root *parse_edl(bstr str)
                 } else if (bstr_equals0(name, "timestamps")) {
                     if (bstr_equals0(val, "chapters"))
                         p.chapter_ts = true;
+                } else if (bstr_equals0(name, "title")) {
+                    p.title = bstrto0(tl, val);
                 }
             }
             nparam++;
@@ -332,7 +337,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
                     .pts = starttime,
                     .metadata = talloc_zero(tl, struct mp_tags),
                 };
-                mp_tags_set_str(ch.metadata, "title", part->filename);
+                mp_tags_set_str(ch.metadata, "title", part->title ? part->title : part->filename);
                 MP_TARRAY_APPEND(root, root->chapters, root->num_chapters, ch);
 
                 // Also copy the source file's chapters for the relevant parts

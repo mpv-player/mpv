@@ -42,7 +42,8 @@ static bool is_software_gl(GL *gl)
            strcmp(renderer, "Software Rasterizer") == 0 ||
            strstr(renderer, "llvmpipe") ||
            strcmp(vendor, "Microsoft Corporation") == 0 ||
-           strcmp(renderer, "Mesa X11") == 0;
+           strcmp(renderer, "Mesa X11") == 0 ||
+           strcmp(renderer, "Apple Software Renderer") == 0;
 }
 
 static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
@@ -261,6 +262,7 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 320,
+        .ver_es_core = 300,
         .extension = "GL_ARB_sync",
         .functions = (const struct gl_function[]) {
             DEF_FN(FenceSync),

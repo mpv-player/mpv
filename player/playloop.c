@@ -129,7 +129,7 @@ void update_core_idle_state(struct MPContext *mpctx)
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
     bool active = !mpctx->paused && mpctx->restart_complete &&
-                  mpctx->stop_play && mpctx->in_playloop && !eof;
+                  !mpctx->stop_play && mpctx->in_playloop && !eof;
 
     if (mpctx->playback_active != active) {
         mpctx->playback_active = active;
@@ -1113,7 +1113,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->playing_msg_shown = true;
         mp_wakeup_core(mpctx);
         update_ab_loop_clip(mpctx);
-        MP_VERBOSE(mpctx, "playback restart complete\n");
+        MP_VERBOSE(mpctx, "playback restart complete @ %f\n", mpctx->playback_pts);
     }
 }
 

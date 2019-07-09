@@ -55,7 +55,7 @@ static const NSEventModifierFlags NSEventModifierFlagOption = NSAlternateKeyMask
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_9)
 typedef NSUInteger NSModalResponse;
-static const NSModalResponse NSModalResponseOK = NSFileHandlingPanelOKButton
+static const NSModalResponse NSModalResponseOK = NSFileHandlingPanelOKButton;
 #endif
 
 #endif

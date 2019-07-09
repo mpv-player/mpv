@@ -936,17 +936,32 @@ static void drain(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    snd_pcm_status_t *status;
-    int err;
 
-    snd_pcm_status_alloca(&status);
+    // in case of pausing or the device still being configured,
+    // just return our buffer size.
+    if (p->paused || snd_pcm_state(p->alsa) == SND_PCM_STATE_SETUP)
+        return p->buffersize;
 
-    err = snd_pcm_status(p->alsa, status);
-    if (!check_device_present(ao, err))
+    snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
+    if (space < 0) {
+        if (space == -EPIPE) {
+            MP_WARN(ao, "ALSA XRUN hit, attempting to recover...\n");
+            int err = snd_pcm_prepare(p->alsa);
+            CHECK_ALSA_ERROR("Unable to recover from under/overrun!");
+            return p->buffersize;
+        }
+
+        MP_ERR(ao, "Error received from snd_pcm_avail "
+                   "(%ld, %s with ALSA state %s)!\n",
+               space, snd_strerror(space),
+               snd_pcm_state_name(snd_pcm_state(p->alsa)));
+
+        // request a reload of the AO if device is not present,
+        // then error out.
+        check_device_present(ao, space);
         goto alsa_error;
-    CHECK_ALSA_ERROR("cannot get pcm status");
+    }
 
-    unsigned space = snd_pcm_status_get_avail(status);
     if (space > p->buffersize) // Buffer underrun?
         space = p->buffersize;
     return space / p->outburst * p->outburst;

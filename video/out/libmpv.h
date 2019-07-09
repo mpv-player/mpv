@@ -15,7 +15,7 @@ void *get_mpv_render_param(mpv_render_param *params, mpv_render_param_type type,
 #define GET_MPV_RENDER_PARAM(params, type, ctype, def) \
     (*(ctype *)get_mpv_render_param(params, type, &(ctype){(def)}))
 
-typedef int (*mp_render_cb_control_fn)(void *cb_ctx, int *events,
+typedef int (*mp_render_cb_control_fn)(struct vo *vo, void *cb_ctx, int *events,
                                        uint32_t request, void *data);
 void mp_render_context_set_control_callback(mpv_render_context *ctx,
                                             mp_render_cb_control_fn callback,
@@ -54,6 +54,8 @@ struct render_backend_fns {
     void (*reset)(struct render_backend *ctx);
     void (*screenshot)(struct render_backend *ctx, struct vo_frame *frame,
                        struct voctrl_screenshot *args);
+    void (*perfdata)(struct render_backend *ctx,
+                     struct voctrl_performance_data *out);
     // Like vo_driver.get_image().
     struct mp_image *(*get_image)(struct render_backend *ctx, int imgfmt,
                                   int w, int h, int stride_align);

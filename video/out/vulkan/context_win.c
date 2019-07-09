@@ -44,8 +44,7 @@ static bool win_init(struct ra_ctx *ctx)
     struct mpvk_ctx *vk = &p->vk;
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
 
-    if (!mpvk_instance_init(vk, ctx->log, VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-                            ctx->opts.debug))
+    if (!mpvk_init(vk, ctx, VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
         goto error;
 
     if (!vo_w32_init(ctx->vo))
@@ -57,10 +56,10 @@ static bool win_init(struct ra_ctx *ctx)
          .hwnd = vo_w32_hwnd(ctx->vo),
     };
 
-    VkResult res = vkCreateWin32SurfaceKHR(vk->inst, &wininfo, MPVK_ALLOCATOR,
-                                           &vk->surf);
+    VkInstance inst = vk->vkinst->instance;
+    VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
-        MP_MSG(ctx, msgl, "Failed creating Windows surface: %s\n", vk_err(res));
+        MP_MSG(ctx, msgl, "Failed creating Windows surface\n");
         goto error;
     }
 
@@ -76,7 +75,7 @@ error:
 
 static bool resize(struct ra_ctx *ctx)
 {
-    return ra_vk_ctx_resize(ctx->swapchain, ctx->vo->dwidth, ctx->vo->dheight);
+    return ra_vk_ctx_resize(ctx, ctx->vo->dwidth, ctx->vo->dheight);
 }
 
 static bool win_reconfig(struct ra_ctx *ctx)

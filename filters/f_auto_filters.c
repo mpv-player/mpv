@@ -75,6 +75,10 @@ static void deint_process(struct mp_filter *f)
     } else if (img->imgfmt == IMGFMT_D3D11) {
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "d3d11vpp", NULL);
+    } else if (img->imgfmt == IMGFMT_CUDA) {
+        char *args[] = {"mode", "send_field", NULL};
+        p->sub.filter =
+            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
     } else if (mp_sws_supports_input(img->imgfmt)) {
         char *args[] = {"mode", "send_field", NULL};
         p->sub.filter =

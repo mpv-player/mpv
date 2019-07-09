@@ -21,6 +21,12 @@ import OpenGL.GL3
 
 let glDummy: @convention(c) () -> Void = {}
 
+extension Bool {
+    init(_ num: Int32) {
+        self.init(num > 0)
+    }
+}
+
 class MPVHelper: NSObject {
 
     var mpvHandle: OpaquePointer?
@@ -28,23 +34,44 @@ class MPVHelper: NSObject {
     var mpvLog: OpaquePointer?
     var inputContext: OpaquePointer?
     var mpctx: UnsafeMutablePointer<MPContext>?
+    var vo: UnsafeMutablePointer<vo>?
+    var macOpts: macos_opts?
     var fbo: GLint = 1
+    let deinitLock = NSLock()
 
     init(_ mpv: OpaquePointer) {
         super.init()
         mpvHandle = mpv
         mpvLog = mp_log_new(UnsafeMutablePointer<MPContext>(mpvHandle),
                             mp_client_get_log(mpvHandle), "cocoacb")
-        mpctx = UnsafeMutablePointer<MPContext>(mp_client_get_core(mpvHandle))
-        inputContext = mpctx!.pointee.input
+        guard let mpctx = UnsafeMutablePointer<MPContext>(mp_client_get_core(mpvHandle)) else {
+            sendError("No MPContext available")
+            exit(1)
+        }
+
+        self.mpctx = mpctx
+        inputContext = mpctx.pointee.input
+        guard let app = NSApp as? Application,
+              let ptr = mp_get_config_group(mpctx,
+                                            mp_client_get_global(mpvHandle),
+                                            app.getMacOSConf()) else
+        {
+            sendError("macOS config group couldn't be retrieved'")
+            exit(1)
+        }
+        macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr)).pointee
 
         mpv_observe_property(mpvHandle, 0, "ontop", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "border", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "keepaspect-window", MPV_FORMAT_FLAG)
         mpv_observe_property(mpvHandle, 0, "macos-title-bar-style", MPV_FORMAT_STRING)
+        mpv_observe_property(mpvHandle, 0, "macos-title-bar-appearance", MPV_FORMAT_STRING)
+        mpv_observe_property(mpvHandle, 0, "macos-title-bar-material", MPV_FORMAT_STRING)
+        mpv_observe_property(mpvHandle, 0, "macos-title-bar-color", MPV_FORMAT_STRING)
     }
 
     func initRender() {
+        var advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
         var pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil,
@@ -52,6 +79,7 @@ class MPVHelper: NSObject {
         var params: [mpv_render_param] = [
             mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
             mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: &pAddress),
+            mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: &advanced),
             mpv_render_param()
         ]
 
@@ -63,7 +91,7 @@ class MPVHelper: NSObject {
     }
 
     let getProcAddress: (@convention(c) (UnsafeMutableRawPointer?, UnsafePointer<Int8>?)
-                        -> UnsafeMutableRawPointer?)! =
+                        -> UnsafeMutableRawPointer?) =
     {
         (ctx: UnsafeMutableRawPointer?, name: UnsafePointer<Int8>?)
                         -> UnsafeMutableRawPointer? in
@@ -97,13 +125,26 @@ class MPVHelper: NSObject {
 
     func reportRenderFlip() {
         if mpvRenderContext == nil { return }
-            mpv_render_context_report_swap(mpvRenderContext)
+        mpv_render_context_report_swap(mpvRenderContext)
     }
 
-    func drawRender(_ surface: NSSize) {
+    func isRenderUpdateFrame() -> Bool {
+        deinitLock.lock()
+        if mpvRenderContext == nil {
+            deinitLock.unlock()
+            return false
+        }
+        let flags: UInt64 = mpv_render_context_update(mpvRenderContext)
+        deinitLock.unlock()
+        return flags & UInt64(MPV_RENDER_UPDATE_FRAME.rawValue) > 0
+    }
+
+    func drawRender(_ surface: NSSize, _ ctx: CGLContextObj, skip: Bool = false) {
+        deinitLock.lock()
         if mpvRenderContext != nil {
             var i: GLint = 0
             var flip: CInt = 1
+            var skip: CInt = skip ? 1 : 0
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
@@ -116,6 +157,7 @@ class MPVHelper: NSObject {
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
                 mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
+                mpv_render_param(type: MPV_RENDER_PARAM_SKIP_RENDERING, data: &skip),
                 mpv_render_param()
             ]
             mpv_render_context_render(mpvRenderContext, &params);
@@ -123,6 +165,10 @@ class MPVHelper: NSObject {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
         }
+
+        if !skip { CGLFlushDrawable(ctx) }
+
+        deinitLock.unlock()
     }
 
     func setRenderICCProfile(_ profile: NSColorSpace) {
@@ -176,27 +222,31 @@ class MPVHelper: NSObject {
     }
 
     func getStringProperty(_ name: String) -> String? {
-        if mpvHandle == nil { return nil }
-        let value = mpv_get_property_string(mpvHandle, name)
-        let str = value == nil ? nil : String(cString: value!)
+        guard let mpv = mpvHandle,
+              let value = mpv_get_property_string(mpv, name) else
+        {
+            return nil
+        }
+
+        let str = String(cString: value)
         mpv_free(value)
         return str
     }
 
     func canBeDraggedAt(_ pos: NSPoint) -> Bool {
-        if inputContext == nil { return false }
-        let canDrag = !mp_input_test_dragging(inputContext!, Int32(pos.x), Int32(pos.y))
+        guard let input = inputContext else { return false }
+        let canDrag = !mp_input_test_dragging(input, Int32(pos.x), Int32(pos.y))
         return canDrag
     }
 
     func setMousePosition(_ pos: NSPoint) {
-        if inputContext == nil { return }
-        mp_input_set_mouse_pos(inputContext!, Int32(pos.x), Int32(pos.y))
+        guard let input = inputContext else { return }
+        mp_input_set_mouse_pos(input, Int32(pos.x), Int32(pos.y))
     }
 
     func putAxis(_ mpkey: Int32, delta: Double) {
-        if inputContext == nil { return }
-        mp_input_put_wheel(inputContext!, mpkey, delta)
+        guard let input = inputContext else { return }
+        mp_input_put_wheel(input, mpkey, delta)
     }
 
     func sendVerbose(_ msg: String) {
@@ -219,7 +269,7 @@ class MPVHelper: NSObject {
         if mpvLog == nil {
             sendFallback(message: msg, type: t)
         } else {
-            let args: [CVarArg] = [ (msg as NSString).utf8String! ]
+            let args: [CVarArg] = [ (msg as NSString).utf8String ?? "NO MESSAGE"]
             mp_msg_va(mpvLog, Int32(t), "%s\n", getVaList(args))
         }
     }
@@ -245,8 +295,10 @@ class MPVHelper: NSObject {
     func deinitRender() {
         mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
         mp_render_context_set_control_callback(mpvRenderContext, nil, nil)
+        deinitLock.lock()
         mpv_render_context_free(mpvRenderContext)
         mpvRenderContext = nil
+        deinitLock.unlock()
     }
 
     func deinitMPV(_ destroy: Bool = false) {

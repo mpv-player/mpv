@@ -49,8 +49,8 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
         planes[n] = buffer_list->mBuffers[n].mData;
 
     int64_t end = mp_time_us();
-    end += ca_frames_to_us(ao, frames);
     end += p->device_latency * 1e6;
+    end += ca_get_latency(ts) + ca_frames_to_us(ao, frames);
     ao_read_data(ao, planes, frames, end);
     return noErr;
 }
@@ -155,7 +155,7 @@ static void start(struct ao *ao)
     struct priv *p = ao->priv;
     AVAudioSession *instance = AVAudioSession.sharedInstance;
 
-    p->device_latency = [instance outputLatency];
+    p->device_latency = [instance outputLatency] + [instance IOBufferDuration];
 
     OSStatus err = AudioOutputUnitStart(p->audio_unit);
     CHECK_CA_WARN("can't start audio unit");
@@ -192,7 +192,7 @@ const struct ao_driver audio_out_audiounit = {
     .name           = "audiounit",
     .uninit         = uninit,
     .init           = init,
-    .pause          = stop,
+    .reset          = stop,
     .resume         = start,
     .priv_size      = sizeof(struct priv),
 };

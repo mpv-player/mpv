@@ -23,6 +23,7 @@
 #include "video/out/libmpv.h"
 #include "libmpv/render_gl.h"
 
+#include "options/m_config.h"
 #include "player/core.h"
 #include "input/input.h"
 #include "video/out/win_state.h"
@@ -48,3 +49,11 @@ static int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
 static int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 static int SWIFT_KEY_STATE_DOWN  = MP_KEY_STATE_DOWN;
 static int SWIFT_KEY_STATE_UP    = MP_KEY_STATE_UP;
+
+// only used from Swift files and therefore seen as unused by the c compiler
+static void SWIFT_TARRAY_STRING_APPEND(void *t, char ***a, int *i, char *s) __attribute__ ((unused));
+
+static void SWIFT_TARRAY_STRING_APPEND(void *t, char ***a, int *i, char *s)
+{
+    MP_TARRAY_APPEND(t, *a, *i, s);
+}

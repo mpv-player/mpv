@@ -124,8 +124,8 @@ struct demux_packet *new_demux_packet(size_t len)
 void demux_packet_shorten(struct demux_packet *dp, size_t len)
 {
     assert(len <= dp->len);
-    dp->len = len;
-    memset(dp->buffer + dp->len, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+    av_shrink_packet(dp->avpacket, len);
+    dp->len = dp->avpacket->size;
 }
 
 void free_demux_packet(struct demux_packet *dp)

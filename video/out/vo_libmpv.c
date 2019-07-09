@@ -297,9 +297,11 @@ void mpv_render_context_free(mpv_render_context *ctx)
 
     forget_frames(ctx, true);
 
-    ctx->renderer->fns->destroy(ctx->renderer);
-    talloc_free(ctx->renderer->priv);
-    talloc_free(ctx->renderer);
+    if (ctx->renderer) {
+        ctx->renderer->fns->destroy(ctx->renderer);
+        talloc_free(ctx->renderer->priv);
+        talloc_free(ctx->renderer);
+    }
     talloc_free(ctx->dr);
     talloc_free(ctx->dispatch);
 
@@ -573,6 +575,13 @@ static void run_control_on_render_thread(void *p)
         talloc_free(frame);
         break;
     }
+    case VOCTRL_PERFORMANCE_DATA: {
+        if (ctx->renderer->fns->perfdata) {
+            ctx->renderer->fns->perfdata(ctx->renderer, data);
+            ret = VO_TRUE;
+        }
+        break;
+    }
     }
 
     *(int *)args[3] = ret;
@@ -620,13 +629,21 @@ static int control(struct vo *vo, uint32_t request, void *data)
             mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
             return ret;
         }
+    case VOCTRL_PERFORMANCE_DATA:
+        if (ctx->dispatch) {
+            int ret;
+            void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};
+            mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
+            return ret;
+        }
     }
 
     int r = VO_NOTIMPL;
     pthread_mutex_lock(&ctx->control_lock);
     if (ctx->control_cb) {
         int events = 0;
-        r = ctx->control_cb(ctx->control_cb_ctx, &events, request, data);
+        r = p->ctx->control_cb(vo, p->ctx->control_cb_ctx,
+                               &events, request, data);
         vo_event(vo, events);
     }
     pthread_mutex_unlock(&ctx->control_lock);

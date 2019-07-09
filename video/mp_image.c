@@ -72,6 +72,9 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
         int alloc_h = MP_ALIGN_UP(h, 32) >> desc.ys[n];
         int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
         out_stride[n] = MP_ALIGN_UP(line_bytes, stride_align);
+        // also align to a multiple of desc.bytes[n]
+        while (desc.bytes[n] && out_stride[n] % desc.bytes[n])
+            out_stride[n] += stride_align;
         out_plane_size[n] = out_stride[n] * alloc_h;
     }
     if (desc.flags & MP_IMGFLAG_PAL)
@@ -823,6 +826,12 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             // nominal range as the signal peak to prevent clipping
             params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
         }
+    }
+
+    if (!mp_trc_is_hdr(params->color.gamma)) {
+        // Some clips have leftover HDR metadata after conversion to SDR, so to
+        // avoid blowing up the tone mapping code, strip/sanitize it
+        params->color.sig_peak = 1.0;
     }
 
     if (params->chroma_location == MP_CHROMA_AUTO) {

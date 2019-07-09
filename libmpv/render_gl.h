@@ -154,7 +154,7 @@ typedef struct mpv_opengl_fbo {
  */
 typedef struct mpv_opengl_drm_params {
     /**
-     * DRM fd (int). set this to -1 if invalid.
+     * DRM fd (int). Set to a negative number if invalid.
      */
     int fd;
 
@@ -174,17 +174,28 @@ typedef struct mpv_opengl_drm_params {
      * The atomic request pointer is usually changed at every renderloop.
      */
     struct _drmModeAtomicReq **atomic_request_ptr;
+
+    /**
+     * DRM render node. Used for VAAPI interop.
+     * Set to a negative number if invalid.
+     */
+    int render_fd;
 } mpv_opengl_drm_params;
 
 /**
- * For MPV_RENDER_PARAM_DRM_OSD_SIZE.
+ * For MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE.
  */
-typedef struct mpv_opengl_drm_osd_size {
+typedef struct mpv_opengl_drm_draw_surface_size {
     /**
-     * size of the OSD in pixels.
+     * size of the draw plane surface in pixels.
      */
     int width, height;
-} mpv_opengl_drm_osd_size;
+} mpv_opengl_drm_draw_surface_size;
+
+/**
+ * For backwards compatibility with the old naming of mpv_opengl_drm_draw_surface_size
+ */
+#define mpv_opengl_drm_osd_size mpv_opengl_drm_draw_surface_size
 
 #ifdef __cplusplus
 }

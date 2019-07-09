@@ -19,10 +19,47 @@
 #define MP_DRMATOMIC_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
 #include "common/msg.h"
+
+#define DRM_OPTS_PRIMARY_PLANE -1
+#define DRM_OPTS_OVERLAY_PLANE -2
+
+struct drm_mode {
+    drmModeModeInfo mode;
+    uint32_t blob_id;
+};
+
+struct drm_atomic_plane_state {
+    uint64_t fb_id;
+    uint64_t crtc_id;
+    uint64_t src_x;
+    uint64_t src_y;
+    uint64_t src_w;
+    uint64_t src_h;
+    uint64_t crtc_x;
+    uint64_t crtc_y;
+    uint64_t crtc_w;
+    uint64_t crtc_h;
+    uint64_t zpos;
+};
+
+// Used to store the restore state for VT switching and uninit
+struct drm_atomic_state {
+    bool saved;
+    struct {
+        uint64_t crtc_id;
+    } connector;
+    struct {
+        struct drm_mode mode;
+        uint64_t active;
+    } crtc;
+    struct drm_atomic_plane_state draw_plane;
+    struct drm_atomic_plane_state drmprime_video_plane;
+};
 
 struct drm_object {
     int fd;
@@ -37,10 +74,12 @@ struct drm_atomic_context {
 
     struct drm_object *crtc;
     struct drm_object *connector;
-    struct drm_object *osd_plane;
-    struct drm_object *video_plane;
+    struct drm_object *draw_plane;
+    struct drm_object *drmprime_video_plane;
 
     drmModeAtomicReq *request;
+
+    struct drm_atomic_state old_state;
 };
 
 
@@ -53,7 +92,13 @@ struct drm_object * drm_object_create(struct mp_log *log, int fd, uint32_t objec
 void drm_object_free(struct drm_object *object);
 void drm_object_print_info(struct mp_log *log, struct drm_object *object);
 struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id, int connector_id,
-													 int osd_plane_id, int video_plane_id);
+                                                     int draw_plane_idx, int drmprime_video_plane_idx);
 void drm_atomic_destroy_context(struct drm_atomic_context *ctx);
+
+bool drm_atomic_save_old_state(struct drm_atomic_context *ctx);
+bool drm_atomic_restore_old_state(drmModeAtomicReq *request, struct drm_atomic_context *ctx);
+
+bool drm_mode_ensure_blob(int fd, struct drm_mode *mode);
+bool drm_mode_destroy_blob(int fd, struct drm_mode *mode);
 
 #endif // MP_DRMATOMIC_H

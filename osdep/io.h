@@ -33,7 +33,7 @@
 #include <glob.h>
 #endif
 
-#ifdef __ANDROID__
+#if HAVE_ANDROID
 #  include <unistd.h>
 #  include <stdio.h>
 
@@ -58,7 +58,7 @@ static inline int mp_fseeko(FILE* fp, off64_t offset, int whence) {
 }
 #define fseeko(f,p,w) mp_fseeko((f), (p), (w))
 
-#endif // __ANDROID__
+#endif // HAVE_ANDROID
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -196,6 +196,7 @@ int msync(void *addr, size_t length, int flags);
 // These are stubs since there is not anything that helps with this on Windows.
 #define locale_t int
 #define LC_ALL_MASK 0
+#define LC_CTYPE_MASK 0
 locale_t newlocale(int, const char *, locale_t);
 locale_t uselocale(locale_t);
 void freelocale(locale_t);

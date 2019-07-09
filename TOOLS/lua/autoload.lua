@@ -92,6 +92,7 @@ function find_and_add_entries()
     msg.trace(("dir: %s, filename: %s"):format(dir, filename))
     if o.disabled then
         msg.verbose("stopping: autoload disabled")
+        return
     elseif #dir == 0 then
         msg.verbose("stopping: not a local path")
         return

@@ -407,7 +407,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, ao_format, &ao_channels,
                                 ao_rate);
 
-    char tmp[80];
+    char tmp[192];
     MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(mpctx->ao),
             audio_config_to_str_buf(tmp, sizeof(tmp), ao_rate, ao_format,
                                     ao_channels));

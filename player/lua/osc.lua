@@ -1552,6 +1552,8 @@ function osc_init()
     end
     osc_param.playresx = osc_param.playresy * osc_param.display_aspect
 
+    -- stop seeking with the slider to prevent skipping files
+    state.active_element = nil
 
 
 

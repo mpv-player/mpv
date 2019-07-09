@@ -412,6 +412,9 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .title = stream->title,
         .default_track = stream->default_track,
         .forced_track = stream->forced_track,
+        .dependent_track = stream->dependent_track,
+        .visual_impaired_track = stream->visual_impaired_track,
+        .hearing_impaired_track = stream->hearing_impaired_track,
         .attached_picture = stream->attached_picture != NULL,
         .lang = stream->lang,
         .demuxer = demuxer,
@@ -753,7 +756,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (!demuxer)
         goto err_out;
 
-    if (opts->rebase_start_time)
+    if (filter != STREAM_SUB && opts->rebase_start_time)
         demux_set_ts_offset(demuxer, -demuxer->start_time);
 
     bool has_any = false;
@@ -1497,20 +1500,20 @@ static void play_current_file(struct MPContext *mpctx)
 
     update_demuxer_properties(mpctx);
 
-    if (mpctx->encode_lavc_ctx) {
-        if (mpctx->current_track[0][STREAM_VIDEO])
-            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_VIDEO);
-        if (mpctx->current_track[0][STREAM_AUDIO])
-            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_AUDIO);
-        encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
-                                 mpctx->demuxer->metadata);
-    }
-
     update_playback_speed(mpctx);
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
+
+    if (mpctx->encode_lavc_ctx) {
+        if (mpctx->vo_chain)
+            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_VIDEO);
+        if (mpctx->ao_chain)
+            encode_lavc_expect_stream(mpctx->encode_lavc_ctx, STREAM_AUDIO);
+        encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
+                                 mpctx->demuxer->metadata);
+    }
 
     if (!mpctx->vo_chain && !mpctx->ao_chain && opts->stream_auto_sel) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
@@ -1869,4 +1872,3 @@ void open_recorder(struct MPContext *mpctx, bool on_init)
 
     talloc_free(streams);
 }
-

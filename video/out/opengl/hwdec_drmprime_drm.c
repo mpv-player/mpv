@@ -114,14 +114,17 @@ static void disable_video_plane(struct ra_hwdec *hw)
     if (!p->ctx)
         return;
 
-    // Disabling video plane is needed on some devices when using the
-    // primary plane for video. Primary buffer can't be active with no
-    // framebuffer associated. So we need this function to commit it
-    // right away as mpv will free all framebuffers on playback end.
+    if (!p->ctx->drmprime_video_plane)
+        return;
+
+    // Disabling the drmprime video plane is needed on some devices when using
+    // the primary plane for video. Primary buffer can't be active with no
+    // framebuffer associated. So we need this function to commit it right away
+    // as mpv will free all framebuffers on playback end.
     drmModeAtomicReqPtr request = drmModeAtomicAlloc();
     if (request) {
-        drm_object_set_property(request, p->ctx->video_plane, "FB_ID", 0);
-        drm_object_set_property(request, p->ctx->video_plane, "CRTC_ID", 0);
+        drm_object_set_property(request, p->ctx->drmprime_video_plane, "FB_ID", 0);
+        drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_ID", 0);
 
         int ret = drmModeAtomicCommit(p->ctx->fd, request,
                                   DRM_MODE_ATOMIC_NONBLOCK, NULL);
@@ -159,11 +162,11 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
     if (hw_image) {
 
-        // grab osd windowing info to eventually upscale the overlay
-        // as egl windows could be upscaled to osd plane.
-        struct mpv_opengl_drm_osd_size *osd_size = ra_get_native_resource(hw->ra, "drm_osd_size");
-        if (osd_size) {
-            scale_dst_rect(hw, osd_size->width, osd_size->height, dst, &p->dst);
+        // grab draw plane windowing info to eventually upscale the overlay
+        // as egl windows could be upscaled to draw plane.
+        struct mpv_opengl_drm_draw_surface_size *draw_surface_size = ra_get_native_resource(hw->ra, "drm_draw_surface_size");
+        if (draw_surface_size) {
+            scale_dst_rect(hw, draw_surface_size->width, draw_surface_size->height, dst, &p->dst);
         } else {
             p->dst = *dst;
         }
@@ -184,24 +187,24 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
             }
 
             if (request) {
-                drm_object_set_property(request, p->ctx->video_plane, "FB_ID", next_frame.fb.fb_id);
-                drm_object_set_property(request,  p->ctx->video_plane, "CRTC_ID", p->ctx->crtc->id);
-                drm_object_set_property(request,  p->ctx->video_plane, "SRC_X",   p->src.x0 << 16);
-                drm_object_set_property(request,  p->ctx->video_plane, "SRC_Y",   p->src.y0 << 16);
-                drm_object_set_property(request,  p->ctx->video_plane, "SRC_W",   srcw << 16);
-                drm_object_set_property(request,  p->ctx->video_plane, "SRC_H",   srch << 16);
-                drm_object_set_property(request,  p->ctx->video_plane, "CRTC_X",  MP_ALIGN_DOWN(p->dst.x0, 2));
-                drm_object_set_property(request,  p->ctx->video_plane, "CRTC_Y",  MP_ALIGN_DOWN(p->dst.y0, 2));
-                drm_object_set_property(request,  p->ctx->video_plane, "CRTC_W",  dstw);
-                drm_object_set_property(request,  p->ctx->video_plane, "CRTC_H",  dsth);
-                drm_object_set_property(request,  p->ctx->video_plane, "ZPOS",    0);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "FB_ID", next_frame.fb.fb_id);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_ID", p->ctx->crtc->id);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "SRC_X",   p->src.x0 << 16);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "SRC_Y",   p->src.y0 << 16);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "SRC_W",   srcw << 16);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "SRC_H",   srch << 16);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_X",  MP_ALIGN_DOWN(p->dst.x0, 2));
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_Y",  MP_ALIGN_DOWN(p->dst.y0, 2));
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_W",  dstw);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_H",  dsth);
+                drm_object_set_property(request, p->ctx->drmprime_video_plane, "ZPOS",    0);
             } else {
-                ret = drmModeSetPlane(p->ctx->fd, p->ctx->video_plane->id, p->ctx->crtc->id, next_frame.fb.fb_id, 0,
+                ret = drmModeSetPlane(p->ctx->fd, p->ctx->drmprime_video_plane->id, p->ctx->crtc->id, next_frame.fb.fb_id, 0,
                                       MP_ALIGN_DOWN(p->dst.x0, 2), MP_ALIGN_DOWN(p->dst.y0, 2), dstw, dsth,
                                       p->src.x0 << 16, p->src.y0 << 16 , srcw << 16, srch << 16);
                 if (ret < 0) {
-                    MP_ERR(hw, "Failed to set the plane %d (buffer %d).\n", p->ctx->video_plane->id,
-                                next_frame.fb.fb_id);
+                    MP_ERR(hw, "Failed to set the drmprime video plane %d (buffer %d).\n",
+                           p->ctx->drmprime_video_plane->id, next_frame.fb.fb_id);
                     goto fail;
                 }
             }
@@ -237,14 +240,14 @@ static void uninit(struct ra_hwdec *hw)
 static int init(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    int osd_plane_id, video_plane_id;
+    int draw_plane, drmprime_video_plane;
 
     p->log = hw->log;
 
     void *tmp = talloc_new(NULL);
     struct drm_opts *opts = mp_get_config_group(tmp, hw->global, &drm_conf);
-    osd_plane_id = opts->drm_osd_plane_id;
-    video_plane_id = opts->drm_video_plane_id;
+    draw_plane = opts->drm_draw_plane;
+    drmprime_video_plane = opts->drm_drmprime_video_plane;
     talloc_free(tmp);
 
     struct mpv_opengl_drm_params *drm_params;
@@ -252,13 +255,17 @@ static int init(struct ra_hwdec *hw)
     drm_params = ra_get_native_resource(hw->ra, "drm_params");
     if (drm_params) {
         p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
-                                           drm_params->connector_id, osd_plane_id, video_plane_id);
+                                           drm_params->connector_id, draw_plane, drmprime_video_plane);
         if (!p->ctx) {
             mp_err(p->log, "Failed to retrieve DRM atomic context.\n");
             goto err;
         }
+        if (!p->ctx->drmprime_video_plane) {
+            mp_warn(p->log, "No drmprime video plane. You might need to specify it manually using --drm-drmprime-video-plane\n");
+            goto err;
+        }
     } else {
-        mp_err(p->log, "Failed to retrieve DRM fd from native display.\n");
+        mp_verbose(p->log, "Failed to retrieve DRM fd from native display.\n");
         goto err;
     }
 

@@ -665,7 +665,6 @@ Program Behavior
     the player with Shift+Q.
 
 ``--watch-later-directory=<path>``
-
     The directory in which to store the "watch later" temporary files.
 
     The default is a subdirectory named "watch_later" underneath the
@@ -778,18 +777,14 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
-    The `try_ytdl_first` script option accepts a boolean 'yes' or 'no', and if
+    The ``try_ytdl_first`` script option accepts a boolean 'yes' or 'no', and if
     'yes' will try parsing the URL with youtube-dl first, instead of the default
     where it's only after mpv failed to open it. This mostly depends on whether
     most of your URLs need youtube-dl parsing.
 
-    The `exclude` script option accepts a ``|``-separated list of URL patterns
+    The ``exclude`` script option accepts a ``|``-separated list of URL patterns
     which mpv should not use with youtube-dl. The patterns are matched after
     the ``http(s)://`` part of the URL.
-
-    The `use_manifests` script option makes mpv use the master manifest URL for
-    formats like HLS and DASH, if available, allowing for video/audio selection
-    in runtime. It's disabled ("no") by default for performance reasons.
 
     ``^`` matches the beginning of the URL, ``$`` matches its end, and you
     should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
@@ -805,6 +800,9 @@ Program Behavior
 
     See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
 
+    The ``use_manifests`` script option makes mpv use the master manifest URL for
+    formats like HLS and DASH, if available, allowing for video/audio selection
+    in runtime. It's disabled ("no") by default for performance reasons.
 
 ``--ytdl-format=<best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
@@ -989,7 +987,7 @@ Video
     likely works with Intel GPUs only. It also requires the opengl EGL backend.
 
     The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
-    which is useful as there is no other deinterlacing mechanism in the opengl
+    which is useful as there is no other deinterlacing mechanism in the gpu
     output path. To use this deinterlacing you must pass the option:
     ``vd-lavc-o=deint=[weave|bob|adaptive]``.
     Pass ``weave`` (or leave the option unset) to not attempt any
@@ -1017,6 +1015,11 @@ Video
         When using this switch, hardware decoding is still only done for some
         codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
         codecs.
+
+    .. note::
+
+       Most non-copy methods only work with the OpenGL GPU backend. Currently,
+       only the ``nvdec`` and ``cuda`` methods work with Vulkan.
 
     .. admonition:: Quality reduction with hardware decoding
 
@@ -1142,14 +1145,18 @@ Video
     format, with likely no advantages.
 
 ``--cuda-decode-device=<auto|0..>``
-    Choose the GPU device used for decoding when using the ``cuda`` hwdec.
+    Choose the GPU device used for decoding when using the ``cuda`` or
+    ``nvdec`` hwdecs with the OpenGL GPU backend.
 
-    By default, the device that is being used to provide OpenGL output will
+    By default, the device that is being used to provide ``gpu`` output will
     also be used for decoding (and in the vast majority of cases, only one
     GPU will be present).
 
-    Note that when using the ``cuda-copy`` hwdec, a different option must be
-    passed: ``--vd-lavc-o=gpu=<0..>``.
+    Note that when using the ``cuda-copy`` or ``nvdec-copy`` hwdec, a
+    different option must be passed: ``--vd-lavc-o=gpu=<0..>``.
+
+    Note that this option is not available with the Vulkan GPU backend. With
+    Vulkan, decoding must always happen on the display device.
 
 ``--vaapi-device=<device file>``
     Choose the DRM device for ``vaapi-copy``. This should be the path to a
@@ -1362,7 +1369,7 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default, this is set to ``h264,vc1,wmv3,hevc,mpeg2video,vp9``. Note that
+    By default, this is set to ``h264,vc1,hevc,vp9``. Note that
     the hardware acceleration special codecs like ``h264_vdpau`` are not
     relevant anymore, and in fact have been removed from Libav in this form.
 
@@ -1596,8 +1603,10 @@ Audio
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
 ``--replaygain=<no|track|album>``
-    Adjust volume gain according to the track-gain or album-gain replaygain
-    value stored in the file metadata (default: no replaygain).
+    Adjust volume gain according to replaygain values stored in the file
+    metadata. With ``--replaygain=no`` (the default), perform no adjustment.
+    With ``--replaygain=track``, apply track gain. With ``--replaygain=album``,
+    apply album gain if present and fall back to track gain otherwise.
 
 ``--replaygain-preamp=<db>``
     Pre-amplification gain in dB to apply to the selected replaygain gain
@@ -4305,11 +4314,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     will reproduce the source image perfectly if no scaling is performed.
     Enabled by default. Note that this option never affects ``--cscale``.
 
-``--linear-scaling``
-    Scale in linear light. It should only be used with a
-    ``--fbo-format`` that has at least 16 bit precision. This option
-    has no effect on HDR content.
-
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
     downscaling. Increases quality, but reduces performance while downscaling.
@@ -4317,6 +4321,32 @@ The following video options are currently all specific to ``--vo=gpu`` and
     This will perform slightly sub-optimally for anamorphic video (but still
     better than without it) since it will extend the size to match only the
     milder of the scale factors between the axes.
+
+``--linear-downscaling``
+    Scale in linear light when downscaling. It should only be used with a
+    ``--fbo-format`` that has at least 16 bit precision. This option
+    has no effect on HDR content.
+
+``--linear-upscaling``
+    Scale in linear light when upscaling. Like ``--linear-downscaling``, it
+    should only be used with a ``--fbo-format`` that has at least 16 bits
+    precisions. This is not usually recommended except for testing/specific
+    purposes. Users are advised to either enable ``--sigmoid-upscaling`` or
+    keep both options disabled (i.e. scaling in gamma light).
+
+``--sigmoid-upscaling``
+    When upscaling, use a sigmoidal color transform to avoid emphasizing
+    ringing artifacts. This is incompatible with and replaces
+    ``--linear-upscaling``. (Note that sigmoidization also requires
+    linearization, so the ``LINEAR`` rendering step fires in both cases)
+
+``--sigmoid-center``
+    The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
+    float between 0.0 and 1.0. Defaults to 0.75 if not specified.
+
+``--sigmoid-slope``
+    The slope of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
+    float between 1.0 and 20.0. Defaults to 6.5 if not specified.
 
 ``--interpolation``
     Reduce stuttering caused by mismatches in the video fps and display refresh
@@ -4375,9 +4405,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Used in ``--dither=fruit`` mode only.
 
-``--dither=<fruit|ordered|no>``
+``--dither=<fruit|ordered|error-diffusion|no>``
     Select dithering algorithm (default: fruit). (Normally, the
     ``--dither-depth`` option controls whether dithering is enabled.)
+
+    The ``error-diffusion`` option requires compute shader support. It also
+    requires large amount of shared memory to run, the size of which depends on
+    both the kernel (see ``--error-diffusion`` option below) and the height of
+    video window. It will fallback to ``fruit`` dithering if there is no enough
+    shared memory to run the shader.
 
 ``--temporal-dither``
     Enable temporal dithering. (Only active if dithering is enabled in
@@ -4390,6 +4426,29 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Determines how often the dithering pattern is updated when
     ``--temporal-dither`` is in use. 1 (the default) will update on every video
     frame, 2 on every other frame, etc.
+
+``--error-diffusion=<kernel>``
+    The error diffusion kernel to use when ``--dither=error-diffusion`` is set.
+
+    ``simple``
+        Propagate error to only two adjacent pixels. Fastest but low quality.
+
+    ``sierra-lite``
+        Fast with reasonable quality. This is the default.
+
+    ``floyd-steinberg``
+        Most notable error diffusion kernel.
+
+    ``atkinson``
+        Looks different from other kernels because only fraction of errors will
+        be propagated during dithering. A typical use case of this kernel is
+        saving dithered screenshot (in window mode). This kernel produces
+        slightly smaller file, with still reasonable dithering quality.
+
+    There are other kernels (use ``--error-diffusion=help`` to list) but most of
+    them are much slower and demanding even larger amount of shared memory.
+    Among these kernels, ``burkes`` achieves a good balance between performance
+    and quality, and probably is the one you want to try first.
 
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,
@@ -4484,18 +4543,19 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
-    (currently) only relevant for ``--gpu-api=vulkan``. The possible choices
-    are:
+    (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
+    The possible choices are currently only:
 
     auto
         Use the first available compiler. (Default)
     shaderc
         Use libshaderc, which is an API wrapper around glslang. This is
         generally the most preferred, if available.
-    nvidia
-        Use nvidia's built-in compiler. Only works for nvidia GPUs. Can be
-        buggy, but also supports some features glslang does not. Only works
-        with vulkan.
+
+    .. note::
+
+        This option is deprecated, since there is only one reasonable value.
+        It may be removed in the future.
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
@@ -4600,12 +4660,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
         hook point can still cause that hook point to be saved, which has some
         minor overhead)
 
-    OFFSET <ox> <oy>
+    OFFSET <ox oy | ALIGN>
         Indicates a pixel shift (offset) introduced by this pass. These pixel
         offsets will be accumulated and corrected during the next scaling pass
         (``cscale`` or ``scale``). The default values are 0 0 which correspond
         to no shift. Note that offsets are ignored when not overwriting the
         hooked texture.
+
+        A special value of ``ALIGN`` will attempt to fix existing offset of
+        HOOKED by align it with reference. It requires HOOKED to be resizable
+        (see below). It works transparently with fragment shader. For compute
+        shader, the predefined ``texmap`` macro is required to handle coordinate
+        mapping.
 
     COMPONENTS <n>
         Specifies how many components of this pass's output are relevant and
@@ -4706,7 +4772,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     LINEAR (fixed)
         Linear light image, before scaling. This only fires when
-        ``--linear-scaling`` is in effect.
+        ``--linear-upscaling``, ``--linear-downscaling`` or
+        ``--sigmoid-upscaling`` is in effect.
 
     SIGMOID (fixed)
         Sigmoidized light, before scaling. This only fires when
@@ -4762,18 +4829,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Add some extra noise to the image. This significantly helps cover up
     remaining quantization artifacts. Higher numbers add more noise. (Default
     48)
-
-``--sigmoid-upscaling``
-    When upscaling, use a sigmoidal color transform to avoid emphasizing
-    ringing artifacts. This also implies ``--linear-scaling``.
-
-``--sigmoid-center``
-    The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
-    float between 0.0 and 1.0. Defaults to 0.75 if not specified.
-
-``--sigmoid-slope``
-    The slope of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
-    float between 1.0 and 20.0. Defaults to 6.5 if not specified.
 
 ``--sharpen=<value>``
     If set to a value other than 0, enable an unsharp masking filter. Positive
@@ -4872,17 +4927,83 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
-``--macos-title-bar-style=<dark|ultradark|light|mediumlight|auto>``
-    Sets the styling of the title bar (default: dark).
-    OS X and cocoa-cb only
+``--cocoa-cb-sw-renderer=<yes|no|auto>``
+    Use the Apple Software Renderer when using cocoa-cb (default: auto). If set
+    to ``no`` the software renderer is never used and instead fails when a the
+    usual pixel format could not be created, ``yes`` will always only use the
+    software renderer, and ``auto`` only falls back to the software renderer
+    when the usual pixel format couldn't be created.
 
-    :dark:        Dark title bar with vibrancy, a subtle blurring effect that
-                  dynamically blends the background (Video) into the title bar.
-    :ultradark:   Darker title bar with vibrancy (like QuickTime Player).
-    :light:       Bright title bar with vibrancy.
-    :mediumlight: Less bright title bar with vibrancy.
-    :auto:        Detects the system settings and sets the title bar styling
-                  appropriately, either ultradark or mediumlight.
+    OS X only.
+
+``--macos-title-bar-appearance=<appearance>``
+    Sets the appearance of the title bar (default: auto). Not all combinations
+    of appearances and ``--macos-title-bar-material`` materials make sense or
+    are unique. Appearances that are not supported by you current macOS version
+    fall back to the default value.
+    macOS and cocoa-cb only
+
+    ``<appearance>`` can be one of the following:
+
+    :auto:                     Detects the system settings and sets the title
+                               bar appearance appropriately. On macOS 10.14 it
+                               also detects run time changes.
+    :aqua:                     The standard macOS Light appearance.
+    :darkAqua:                 The standard macOS Dark appearance. (macOS 10.14+)
+    :vibrantLight:             Light vibrancy appearance with.
+    :vibrantDark:              Dark vibrancy appearance with.
+    :aquaHighContrast:         Light Accessibility appearance. (macOS 10.14+)
+    :darkAquaHighContrast:     Dark Accessibility appearance. (macOS 10.14+)
+    :vibrantLightHighContrast: Light vibrancy Accessibility appearance.
+                               (macOS 10.14+)
+    :vibrantDarkHighContrast:  Dark vibrancy Accessibility appearance.
+                               (macOS 10.14+)
+
+``--macos-title-bar-material=<material>``
+    Sets the material of the title bar (default: titlebar). All deprecated
+    materials should not be used on macOS 10.14+ because their functionality
+    is not guaranteed. Not all combinations of materials and
+    ``--macos-title-bar-appearance`` appearances make sense or are unique.
+    Materials that are not supported by you current macOS version fall back to
+    the default value.
+    macOS and cocoa-cb only
+
+    ``<material>`` can be one of the following:
+
+    :titlebar:              The standard macOS titel bar material.
+    :selection:             The standard macOS selection material.
+    :menu:                  The standard macOS menu material. (macOS 10.11+)
+    :popover:               The standard macOS popover material. (macOS 10.11+)
+    :sidebar:               The standard macOS sidebar material. (macOS 10.11+)
+    :headerView:            The standard macOS header view material.
+                            (macOS 10.14+)
+    :sheet:                 The standard macOS sheet material. (macOS 10.14+)
+    :windowBackground:      The standard macOS window background material.
+                            (macOS 10.14+)
+    :hudWindow:             The standard macOS hudWindow material. (macOS 10.14+)
+    :fullScreen:            The standard macOS full screen material.
+                            (macOS 10.14+)
+    :toolTip:               The standard macOS tool tip material. (macOS 10.14+)
+    :contentBackground:     The standard macOS content background material.
+                            (macOS 10.14+)
+    :underWindowBackground: The standard macOS under window background material.
+                            (macOS 10.14+)
+    :underPageBackground:   The standard macOS under page background material.
+                            (deprecated in macOS 10.14+)
+    :dark:                  The standard macOS dark material.
+                            (deprecated in macOS 10.14+)
+    :light:                 The standard macOS light material.
+                            (macOS 10.14+)
+    :mediumLight:           The standard macOS mediumLight material.
+                            (macOS 10.11+, deprecated in macOS 10.14+)
+    :ultraDark:             The standard macOS ultraDark material.
+                            (macOS 10.11+ deprecated in macOS 10.14+)
+
+``--macos-title-bar-color=<color>``
+    Sets the color of the title bar (default: completely transparent). Is
+    influenced by ``--macos-title-bar-appearance`` and
+    ``--macos-title-bar-material``.
+    See ``--sub-color`` for color syntax.
 
 ``--macos-fs-animation-duration=<default|0-1000>``
     Sets the fullscreen resize animation duration in ms (default: default).
@@ -4990,9 +5111,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Selects the internal format of textures used for FBOs. The format can
     influence performance and quality of the video output. ``fmt`` can be one
     of: rgb8, rgb10, rgb10_a2, rgb16, rgb16f, rgb32f, rgba12, rgba16, rgba16f,
-    rgba16hf, rgba32f. Default: ``auto``, which maps to rgba16 on desktop GL,
-    and rgba16f or rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16
-    is available.
+    rgba16hf, rgba32f.
+
+    Default: ``auto``, which first attempts to utilize 16bit float
+    (rgba16f, rgba16hf), and falls back to rgba16 if those are not available.
+    Finally, attempts to utilize rgb10_a2 or rgba8 if all of the previous formats
+    are not available.
 
 ``--gamma-factor=<0.1..2.0>``
     Set an additional raw gamma factor (default: 1.0). If gamma is adjusted in
@@ -5097,7 +5221,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         The user should independently guarantee this before using these signal
         formats for display.
 
-``--target-peak=<nits>``
+``--target-peak=<auto|nits>``
     Specifies the measured peak brightness of the output display, in cd/m^2
     (AKA nits). The interpretation of this brightness depends on the configured
     ``--target-trc``. In all cases, it imposes a limit on the signal values
@@ -5109,9 +5233,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
     above 100 essentially causes the display to be treated as if it were an HDR
     display in disguise. (See the note below)
 
-    By default, the chosen peak defaults to an appropriate value based on the
-    TRC in use. For SDR curves, it defaults to 100. For HDR curves, it
-    defaults to 100 * the transfer function's nominal peak.
+    In ``auto`` mode (the default), the chosen peak is an appropriate value
+    based on the TRC in use. For SDR curves, it uses 100. For HDR curves, it
+    uses 100 * the transfer function's nominal peak.
 
     .. note::
 
@@ -5157,7 +5281,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         desaturating everything. Developed by John Hable for use in video
         games. Use this when you care about detail preservation more than
         color/brightness accuracy. This is roughly equivalent to
-        ``--hdr-tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
+        ``--tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
         you should also enable ``--hdr-compute-peak`` for the best results.
         (Default)
     gamma
@@ -5188,6 +5312,14 @@ The following video options are currently all specific to ``--vo=gpu`` and
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
 
+``--tone-mapping-max-boost=<1.0..10.0>``
+    Upper limit for how much the tone mapping algorithm is allowed to boost
+    the average brightness by over-exposing the image. The default value of 1.0
+    allows no additional brightness boost. A value of 2.0 would allow
+    over-exposing by a factor of 2, and so on. Raising this setting can help
+    reveal details that would otherwise be hidden in dark scenes, but raising
+    it too high will make dark scenes appear unnaturally bright.
+
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of
     relying on tagged metadata. These values are averaged over local regions as
@@ -5198,17 +5330,50 @@ The following video options are currently all specific to ``--vo=gpu`` and
     The special value ``auto`` (default) will enable HDR peak computation
     automatically if compute shaders and SSBOs are supported.
 
-``--tone-mapping-desaturate=<value>``
-    Apply desaturation for highlights. The parameter essentially controls the
-    steepness of the desaturation curve. The higher the parameter, the more
-    aggressively colors will be desaturated. This setting helps prevent
-    unnaturally blown-out colors for super-highlights, by (smoothly) turning
-    into white instead. This makes images feel more natural, at the cost of
-    reducing information about out-of-range colors.
+``--hdr-peak-decay-rate=<1.0..1000.0>``
+    The decay rate used for the HDR peak detection algorithm (default: 100.0).
+    This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values
+    make the peak decay more slowly, leading to more stable values at the cost
+    of more "eye adaptation"-like effects (although this is mitigated somewhat
+    by ``--hdr-scene-threshold``). A value of 1.0 (the lowest possible) disables
+    all averaging, meaning each frame's value is used directly as measured,
+    but doing this is not recommended for "noisy" sources since it may lead
+    to excessive flicker. (In signal theory terms, this controls the time
+    constant "tau" of an IIR low pass filter)
 
-    The default of 0.5 provides a good balance. This value is weaker than the
-    ACES ODT curves' recommendation, but works better for most content in
-    practice. A setting of 0.0 disables this option.
+``--hdr-scene-threshold-low=<0.0..100.0>``, ``--hdr-scene-threshold-high=<0.0..100.0>``
+    The lower and upper thresholds (in dB) for a brightness difference
+    to be considered a scene change (default: 5.5 low, 10.0 high). This is only
+    relevant when ``--hdr-compute-peak`` is enabled. Normally, small
+    fluctuations in the frame brightness are compensated for by the peak
+    averaging mechanism, but for large jumps in the brightness this can result
+    in the frame remaining too bright or too dark for up to several seconds,
+    depending on the value of ``--hdr-peak-decay-rate``. To counteract this,
+    when the brightness between the running average and the current frame
+    exceeds the low threshold, mpv will make the averaging filter more
+    aggressive, up to the limit of the high threshold (at which point the
+    filter becomes instant).
+
+``--tone-mapping-desaturate=<0.0..1.0>``
+    Apply desaturation for highlights (default: 0.75). The parameter controls
+    the strength of the desaturation curve. A value of 0.0 completely disables
+    it, while a value of 1.0 means that overly bright colors will tend towards
+    white. (This is not always the case, especially not for highlights that are
+    near primary colors)
+
+    Values in between apply progressively more/less aggressive desaturation.
+    This setting helps prevent unnaturally oversaturated colors for
+    super-highlights, by (smoothly) turning them into less saturated (per
+    channel tone mapped) colors instead. This makes images feel more natural,
+    at the cost of chromatic distortions for out-of-range colors. The default
+    value of 0.75 provides a good balance. Setting this to 0.0 preserves the
+    chromatic accuracy of the tone mapping process.
+
+``--tone-mapping-desaturate-exponent=<0.0..20.0>``
+    This setting controls the exponent of the desaturation curve, which
+    controls how bright a color needs to be in order to start being
+    desaturated. The default of 1.5 provides a reasonable balance.  Decreasing
+    this exponent makes the curve more aggressive.
 
 ``--gamut-warning``
     If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a
@@ -5269,12 +5434,14 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Size of the 3D LUT generated from the ICC profile in each dimension.
     Default is 64x64x64. Sizes may range from 2 to 512.
 
-``--icc-contrast=<0-1000000>``
+``--icc-contrast=<0-1000000|inf>``
     Specifies an upper limit on the target device's contrast ratio. This is
     detected automatically from the profile if possible, but for some profiles
     it might be missing, causing the contrast to be assumed as infinite. As a
     result, video may appear darker than intended. This only affects BT.1886
-    content. The default of 0 means no limit.
+    content. The default of 0 means no limit if the detected contrast is less
+    than 100000, and limits to 1000 otherwise. Use ``--icc-contrast=inf`` to
+    preserve the infinite contrast (most likely when using OLED displays).
 
 ``--blend-subtitles=<yes|video|no>``
     Blend subtitles directly onto upscaled video frames, before interpolation

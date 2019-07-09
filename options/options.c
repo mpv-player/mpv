@@ -702,7 +702,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", macos_opts, macos_conf, 0),
 #endif
 
-#if HAVE_ANDROID
+#if HAVE_EGL_ANDROID
     OPT_SUBSTRUCT("", android_opts, android_conf, 0),
 #endif
 
@@ -923,8 +923,9 @@ const struct MPOpts mp_default_opts = {
     .mf_fps = 1.0,
 
     .display_tags = (char **)(const char*[]){
-        "Artist", "Album", "Album_Artist", "Comment", "Composer", "Genre",
-        "Performer", "Title", "Track", "icy-title", "service_name",
+        "Artist", "Album", "Album_Artist", "Comment", "Composer",
+        "Date", "Description", "Genre", "Performer", "Rating",
+        "Series", "Title", "Track", "icy-title", "service_name",
         NULL
     },
 

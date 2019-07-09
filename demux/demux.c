@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include <math.h>
 
@@ -98,7 +99,7 @@ struct demux_opts {
 
 #define OPT_BASE_STRUCT struct demux_opts
 
-#define MAX_BYTES MPMIN(INT64_MAX, (size_t)-1 / 2)
+#define MAX_BYTES MPMIN(INT64_MAX, SIZE_MAX / 2)
 
 const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
@@ -2808,12 +2809,17 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
 {
     struct replaygain_data rg = {0};
 
+    // Set values in *rg, using track gain as a fallback for album gain if the
+    // latter is not present. This behavior matches that in demux/demux_lavf.c's
+    // export_replaygain; if you change this, please make equivalent changes
+    // there too.
     if (decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) >= 0 &&
         decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) >= 0)
     {
         if (decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) < 0 ||
             decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak) < 0)
         {
+            // Album gain is undefined; fall back to track gain.
             rg.album_gain = rg.track_gain;
             rg.album_peak = rg.track_peak;
         }

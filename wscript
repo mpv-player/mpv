@@ -3,6 +3,7 @@
 import sys, os, re
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
 sys.path.insert(0, os.getcwd())
+from shlex import split
 from waflib.Configure import conf
 from waflib.Tools import c_preproc
 from waflib import Utils
@@ -11,6 +12,8 @@ from waftools.checks.custom import *
 
 c_preproc.go_absolute=True # enable system folders
 c_preproc.standard_includes.append('/usr/local/include')
+
+APPNAME = 'mpv'
 
 """
 Dependency identifiers (for win32 vs. Unix):
@@ -151,11 +154,13 @@ main_dependencies = [
     }, {
         'name': '--android',
         'desc': 'Android environment',
-        'func': compose_checks(
-            check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
-            check_cc(lib="android"),
-            check_cc(lib="EGL"),
-        )
+        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
+    }, {
+        'name': '--egl-android',
+        'desc': 'Android EGL support',
+        'deps': 'android',
+        'groups': [ 'gl' ],
+        'func': check_cc(lib=['android', 'EGL']),
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
@@ -164,6 +169,11 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
+    }, {
+        'name': '--swift',
+        'desc': 'macOS Swift build tools',
+        'deps': 'os-darwin',
+        'func': check_swift,
     }, {
         'name': '--uwp',
         'desc': 'Universal Windows Platform',
@@ -367,7 +377,7 @@ iconv support use --disable-iconv.",
 ]
 
 ffmpeg_pkg_config_checks = [
-    'libavutil',     '>= 56.12.100',
+    'libavutil',     '>= 56.27.100',
     'libavcodec',    '>= 58.16.100',
     'libavformat',   '>= 58.9.100',
     'libswscale',    '>= 5.0.101',
@@ -463,7 +473,7 @@ audio_output_features = [
     }, {
         'name': '--openal',
         'desc': 'OpenAL audio output',
-        'func': check_openal,
+        'func': check_pkg_config('openal', '>= 1.13'),
         'default': 'disable'
     }, {
         'name': '--opensles',
@@ -696,13 +706,26 @@ video_output_features = [
         'deps': 'shaderc-shared || shaderc-static',
         'func': check_true,
     }, {
-        'name': '--crossc',
-        'desc': 'libcrossc SPIR-V translator',
-        'func': check_pkg_config('crossc'),
+        'name': 'spirv-cross-shared',
+        'desc': 'SPIRV-Cross SPIR-V shader converter (shared library)',
+        'deps': '!static-build',
+        'groups': ['spirv-cross'],
+        'func': check_pkg_config('spirv-cross-c-shared'),
+    }, {
+        'name': 'spirv-cross-static',
+        'desc': 'SPIRV-Cross SPIR-V shader converter (static library)',
+        'deps': '!spirv-cross-shared',
+        'groups': ['spirv-cross'],
+        'func': check_pkg_config('spirv-cross'),
+    }, {
+        'name': '--spirv-cross',
+        'desc': 'SPIRV-Cross SPIR-V shader converter',
+        'deps': 'spirv-cross-shared || spirv-cross-static',
+        'func': check_true,
     }, {
         'name': '--d3d11',
         'desc': 'Direct3D 11 video output',
-        'deps': 'win32-desktop && shaderc && crossc',
+        'deps': 'win32-desktop && shaderc && spirv-cross',
         'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_2.h']),
     }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
@@ -745,14 +768,24 @@ video_output_features = [
                 "Aborting. If you really mean to compile without OpenGL " +
                 "video outputs use --disable-gl.",
     }, {
+        'name': '--libplacebo',
+        'desc': 'libplacebo support',
+        'func': check_pkg_config('libplacebo >= 1.18.0'),
+    }, {
         'name': '--vulkan',
         'desc':  'Vulkan context support',
+        'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
+    }, {
+        'name': 'vaapi-vulkan',
+        'desc': 'VAAPI Vulkan',
+        'deps': 'vaapi && vulkan',
+        'func': check_true,
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || rpi || gl-wayland || egl-drm || ' +
-                'egl-angle-win32 || android',
+                'egl-angle-win32 || egl-android',
         'func': check_true
     }
 ]
@@ -787,11 +820,11 @@ hwaccel_features = [
     }, {
         'name': 'ffnvcodec',
         'desc': 'CUDA Headers and dynamic loader',
-        'func': check_pkg_config('ffnvcodec >= 8.1.24.1'),
+        'func': check_pkg_config('ffnvcodec >= 8.2.15.7'),
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
-        'deps': 'gl && ffnvcodec',
+        'deps': '(gl || vulkan) && ffnvcodec',
         'func': check_true,
     }
 ]
@@ -819,24 +852,14 @@ standalone_features = [
      }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
-        'deps': 'cocoa',
+        'deps': 'cocoa  && swift',
         'func': check_true
     }
 ]
 
 _INSTALL_DIRS_LIST = [
-    ('bindir',  '${PREFIX}/bin',      'binary files'),
-    ('libdir',  '${PREFIX}/lib',      'library files'),
-    ('confdir', '${PREFIX}/etc/mpv',  'configuration files'),
-
-    ('incdir',  '${PREFIX}/include',  'include files'),
-
-    ('datadir', '${PREFIX}/share',    'data files'),
-    ('mandir',  '${DATADIR}/man',     'man pages '),
-    ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
-    ('htmldir', '${DOCDIR}',          'html documentation files'),
+    ('confdir', '${SYSCONFDIR}/mpv',  'configuration files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
-
     ('confloaddir', '${CONFDIR}', 'configuration files load directory'),
 ]
 
@@ -844,16 +867,36 @@ def options(opt):
     opt.load('compiler_c')
     opt.load('waf_customizations')
     opt.load('features')
+    opt.load('gnu_dirs')
 
-    group = opt.get_option_group("build and install options")
+    #remove unused options from gnu_dirs
+    opt.parser.remove_option("--sbindir")
+    opt.parser.remove_option("--libexecdir")
+    opt.parser.remove_option("--sharedstatedir")
+    opt.parser.remove_option("--localstatedir")
+    opt.parser.remove_option("--oldincludedir")
+    opt.parser.remove_option("--infodir")
+    opt.parser.remove_option("--localedir")
+    opt.parser.remove_option("--dvidir")
+    opt.parser.remove_option("--pdfdir")
+    opt.parser.remove_option("--psdir")
+
+    libdir = opt.parser.get_option('--libdir')
+    if libdir:
+        # Replace any mention of lib64 as we keep the default
+        # for libdir the same as before the waf update.
+        libdir.help = libdir.help.replace('lib64', 'lib')
+
+    group = opt.get_option_group("Installation directories")
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
             type    = 'string',
             dest    = ident,
             default = default,
             help    = 'directory for installing {0} [{1}]' \
-                      .format(desc, default))
+                      .format(desc, default.replace('${','').replace('}','')))
 
+    group = opt.get_option_group("build and install options")
     group.add_option('--variant',
         default = '',
         help    = 'variant name for saving configuration and build results')
@@ -885,6 +928,7 @@ def is_debug_build(ctx):
     return getattr(ctx.options, 'enable_debug-build')
 
 def configure(ctx):
+    from waflib import Options
     ctx.resetenv(ctx.options.variant)
     ctx.check_waf_version(mini='1.8.4')
     target = os.environ.get('TARGET')
@@ -913,6 +957,13 @@ def configure(ctx):
     ctx.load('detections.compiler_swift')
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
+    ctx.load('gnu_dirs')
+
+    # if libdir is not set in command line options,
+    # override the gnu_dirs default in order to
+    # always have `lib/` as the library directory.
+    if not getattr(Options.options, 'LIBDIR', None):
+        ctx.env['LIBDIR'] = Utils.subst_vars(os.path.join('${EXEC_PREFIX}', 'lib'), ctx.env)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
@@ -933,7 +984,7 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     if ctx.options.SWIFT_FLAGS:
-        ctx.env.SWIFT_FLAGS += ' ' + ctx.options.SWIFT_FLAGS
+        ctx.env.SWIFT_FLAGS.extend(split(ctx.options.SWIFT_FLAGS))
 
     ctx.parse_dependencies(standalone_features)
 

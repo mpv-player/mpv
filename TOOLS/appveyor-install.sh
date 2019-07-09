@@ -1,6 +1,8 @@
 #!/usr/bin/bash
 set -e
 
+export PYTHON=/usr/bin/python3
+
 # Write an empty fonts.conf to speed up fc-cache
 export FONTCONFIG_FILE=/dummy-fonts.conf
 cat >"$FONTCONFIG_FILE" <<EOF
@@ -12,12 +14,12 @@ EOF
 # Install build dependencies for mpv
 pacman -S --noconfirm --needed \
     $MINGW_PACKAGE_PREFIX-toolchain \
-    $MINGW_PACKAGE_PREFIX-angleproject-git \
     $MINGW_PACKAGE_PREFIX-cmake \
     $MINGW_PACKAGE_PREFIX-lcms2 \
     $MINGW_PACKAGE_PREFIX-libarchive \
     $MINGW_PACKAGE_PREFIX-libass \
     $MINGW_PACKAGE_PREFIX-libjpeg-turbo \
+    $MINGW_PACKAGE_PREFIX-libplacebo \
     $MINGW_PACKAGE_PREFIX-lua51 \
     $MINGW_PACKAGE_PREFIX-ninja \
     $MINGW_PACKAGE_PREFIX-rubberband \
@@ -52,21 +54,19 @@ pacman -Sc --noconfirm
 # Compile shaderc
 (
     git clone --depth=1 https://github.com/google/shaderc && cd shaderc
-    git clone --depth=1 https://github.com/google/glslang.git third_party/glslang
-    git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Tools.git third_party/spirv-tools
-    git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Headers.git third_party/spirv-headers
+    "$PYTHON" utils/git-sync-deps
 
     mkdir build && cd build
     cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DSHADERC_SKIP_TESTS=ON \
           -DCMAKE_INSTALL_PREFIX=$MINGW_PREFIX ..
     ninja install
-    cp -f libshaderc/libshaderc_shared.dll $MINGW_PREFIX/bin/
 )
 
-# Compile crossc
+# Compile SPIRV-Cross
 (
-    git clone --depth=1 https://github.com/rossy/crossc && cd crossc
-    git submodule update --init
+    git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Cross && cd SPIRV-Cross
 
-    make -j4 install prefix=$MINGW_PREFIX
+    mkdir build && cd build
+    cmake -GNinja -DSPIRV_CROSS_SHARED=ON -DCMAKE_INSTALL_PREFIX=$MINGW_PREFIX ..
+    ninja install
 )

@@ -40,11 +40,9 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 
-void pass_color_map(struct gl_shader_cache *sc,
+void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
                     struct mp_colorspace src, struct mp_colorspace dst,
-                    enum tone_mapping algo, float tone_mapping_param,
-                    float tone_mapping_desat, bool use_detected_peak,
-                    bool gamut_warning, bool is_linear);
+                    const struct gl_tone_map_opts *opts);
 
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
                         AVLFG *lfg, enum mp_csp_trc trc);

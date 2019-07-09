@@ -107,6 +107,7 @@ struct ra_format {
                             // only applies to 2-component textures
     bool linear_filter;     // linear filtering available from shader
     bool renderable;        // can be used for render targets
+    bool storable;          // can be used for storage images
     bool dummy_format;      // is not a real ra_format but a fake one (e.g. FBO).
                             // dummy formats cannot be used to create textures
 
@@ -188,6 +189,7 @@ enum ra_buf_type {
     RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
     RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
     RA_BUF_TYPE_VERTEX,         // not publicly usable (RA-internal usage)
+    RA_BUF_TYPE_SHARED_MEMORY,  // device memory for sharing with external API
 };
 
 struct ra_buf_params {
@@ -444,7 +446,7 @@ struct ra_fns {
     // Returns an abstract namespace index for a given renderpass input type.
     // This will always be a value >= 0 and < RA_VARTYPE_COUNT. This is used to
     // figure out which inputs may share the same value of `binding`.
-    int (*desc_namespace)(enum ra_vartype type);
+    int (*desc_namespace)(struct ra *ra, enum ra_vartype type);
 
     // Clear the dst with the given color (rgba) and within the given scissor.
     // dst must have dst->params.render_dst==true. Content outside of the

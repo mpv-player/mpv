@@ -169,6 +169,7 @@ struct priv {
     int brightness, contrast;
     char *window_title;
     Uint32 wakeup_event;
+    bool screensaver_enabled;
 
     // options
     int allow_sw;
@@ -391,10 +392,22 @@ static void check_resize(struct vo *vo)
         resize(vo, w, h);
 }
 
+static inline void set_screensaver(bool enabled)
+{
+    if (!!enabled == !!SDL_IsScreenSaverEnabled())
+        return;
+
+    if (enabled)
+        SDL_EnableScreenSaver();
+    else
+        SDL_DisableScreenSaver();
+}
+
 static void set_fullscreen(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     int fs = vo->opts->fullscreen;
+    SDL_bool prev_screensaver_state = SDL_IsScreenSaverEnabled();
 
     Uint32 fs_flag;
     if (vc->switch_mode)
@@ -417,7 +430,7 @@ static void set_fullscreen(struct vo *vo)
     }
 
     // toggling fullscreen might recreate the window, so better guard for this
-    SDL_DisableScreenSaver();
+    set_screensaver(prev_screensaver_state);
 
     force_resize(vo);
 }
@@ -496,8 +509,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     resize(vo, win_w, win_h);
 
-    SDL_DisableScreenSaver();
-
+    set_screensaver(vc->screensaver_enabled);
     set_fullscreen(vo);
 
     SDL_ShowWindow(vc->window);
@@ -906,6 +918,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_CURSOR_VISIBILITY:
         SDL_ShowCursor(*(bool *)data);
         return true;
+    case VOCTRL_KILL_SCREENSAVER:
+        vc->screensaver_enabled = false;
+        set_screensaver(vc->screensaver_enabled);
+        return VO_TRUE;
+    case VOCTRL_RESTORE_SCREENSAVER:
+        vc->screensaver_enabled = true;
+        set_screensaver(vc->screensaver_enabled);
+        return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
         talloc_free(vc->window_title);
         vc->window_title = talloc_strdup(vc, (char *)data);
@@ -925,6 +945,7 @@ const struct vo_driver video_out_sdl = {
     .priv_defaults = &(const struct priv) {
         .renderer_index = -1,
         .vsync = 1,
+        .screensaver_enabled = false,
     },
     .options = (const struct m_option []){
         OPT_FLAG("sw", allow_sw, 0),

@@ -181,8 +181,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     Multiple flags can be combined, e.g.: ``absolute+keyframes``.
 
-    By default, ``keyframes`` is used for relative seeks, and ``exact`` is used
-    for absolute seeks.
+    By default, ``keyframes`` is used for ``relative``, ``relative-percent``,
+    and ``absolute-percent`` seeks, while ``exact`` is used for ``absolute``
+    seeks.
 
     Before mpv 0.9, the ``keyframes`` and ``exact`` flags had to be passed as
     3rd parameter (essentially using a space instead of ``+``). The 3rd
@@ -511,7 +512,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Print text to stdout. The string can contain properties (see
     `Property Expansion`_). Take care to put the argument in quotes.
 
-``show-text <text> [<duration> [<level>]]``
+``show-text <text> [<duration>|-1 [<level>]]``
     Show text on the OSD. The string can contain properties, which are expanded
     as described in `Property Expansion`_. This can be used to show playback
     time, filename, and so on.
@@ -1845,7 +1846,9 @@ Property list
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
     are the GDI names (\\.\DISPLAY1, \\.\DISPLAY2, etc.) and the first display
     in the list will be the one that Windows considers associated with the
-    window (as determined by the MonitorFromWindow API.)
+    window (as determined by the MonitorFromWindow API.) On macOS these are the
+    Display Product Names as used in the System Information and only one display
+    name is returned since a window can only be on one screen.
 
 ``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS

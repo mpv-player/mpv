@@ -254,7 +254,7 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
 
 static int gl_sc_next_binding(struct gl_shader_cache *sc, enum ra_vartype type)
 {
-    return sc->next_binding[sc->ra->fns->desc_namespace(type)]++;
+    return sc->next_binding[sc->ra->fns->desc_namespace(sc->ra, type)]++;
 }
 
 void gl_sc_uniform_dynamic(struct gl_shader_cache *sc)
@@ -666,8 +666,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             struct sc_uniform *u = &sc->uniforms[n];
             if (u->type != SC_UNIFORM_TYPE_PUSHC)
                 continue;
-            // push constants don't support explicit offsets
-            ADD(dst, "/*offset=%zu*/ %s %s;\n", u->offset, u->glsl_type,
+            ADD(dst, "layout(offset=%zu) %s %s;\n", u->offset, u->glsl_type,
                 u->input.name);
         }
         ADD(dst, "};\n");
