@@ -3168,7 +3168,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
-        .extended_ctrls = stream->extended_ctrls,
+        .extended_ctrls = stream ? stream->extended_ctrls : 0,
     };
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
