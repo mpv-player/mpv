@@ -2380,7 +2380,8 @@ static void update_opts(struct demux_internal *in)
 
     int seekable = opts->seekable_cache;
     bool is_network = in->d_thread->is_network;
-    bool use_cache = is_network;
+    bool streaming = (in->d_thread->stream && in->d_thread->stream->streaming);
+    bool use_cache = is_network || streaming;
     if (opts->enable_cache >= 0)
         use_cache = opts->enable_cache == 1;
 
@@ -2390,7 +2391,7 @@ static void update_opts(struct demux_internal *in)
             seekable = 1;
     }
     in->seekable_cache = seekable == 1;
-    in->using_network_cache_opts = is_network && use_cache;
+    in->using_network_cache_opts = (is_network || streaming) && use_cache;
 
     if (!in->seekable_cache)
         in->max_bytes_bw = 0;
