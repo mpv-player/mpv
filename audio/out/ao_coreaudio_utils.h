@@ -54,7 +54,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device);
 #endif
 
 bool ca_formatid_is_compressed(uint32_t formatid);
-void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd, int packed_24_hack);
+void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 bool ca_asbd_equals(const AudioStreamBasicDescription *a,

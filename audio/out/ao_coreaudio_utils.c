@@ -354,7 +354,7 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 }
 
 static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
-                             int samplerate, int num_channels, int packed_24_hack)
+                             int samplerate, int num_channels)
 {
     asbd->mSampleRate       = samplerate;
     // Set "AC3" for other spdif formats too - unknown if that works.
@@ -382,25 +382,14 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
         asbd->mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     asbd->mFramesPerPacket = 1;
-
-    if (packed_24_hack == 1){
-        if ((asbd->mBitsPerChannel == 32) && (asbd->mFormatFlags & kAudioFormatFlagIsSignedInteger)){
-            asbd->mBytesPerPacket = asbd->mBytesPerFrame = 6;
-        }
-    }else{
-        asbd->mBytesPerPacket = asbd->mBytesPerFrame =
+    asbd->mBytesPerPacket = asbd->mBytesPerFrame =
         asbd->mFramesPerPacket * channels_per_buffer *
         (asbd->mBitsPerChannel / 8);
-    }
 }
 
-void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd, int packed_24_hack)
+void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
 {
-    if (packed_24_hack == 1){
-        ca_fill_asbd_raw(asbd, ao->format, ao->samplerate, ao->channels.num, 1);
-    }else{
-        ca_fill_asbd_raw(asbd, ao->format, ao->samplerate, ao->channels.num, 0);
-    }
+    ca_fill_asbd_raw(asbd, ao->format, ao->samplerate, ao->channels.num);
 }
 
 bool ca_formatid_is_compressed(uint32_t formatid)
@@ -438,9 +427,11 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
               (spdif || a->mBytesPerPacket == b->mBytesPerPacket) &&
               (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
               a->mSampleRate == b->mSampleRate;
+
     }else if(integer_mode_hack == 2){
         int flags = kAudioFormatFlagIsNonMixable | kAudioFormatFlagIsFloat |
         kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+
         return (a->mFormatFlags & flags) == (b->mFormatFlags & flags) &&
               a->mBitsPerChannel == b->mBitsPerChannel &&
               ca_normalize_formatid(a->mFormatID) ==
@@ -448,6 +439,19 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
               (spdif || a->mBytesPerPacket == b->mBytesPerPacket) &&
               (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
               a->mSampleRate == b->mSampleRate;
+
+    }else if(integer_mode_hack == 3){ // for packed 24 bit device
+        int flags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat |
+        kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+
+        return (a->mFormatFlags & flags) == (b->mFormatFlags & flags) &&
+              a->mBitsPerChannel >= b->mBitsPerChannel &&
+              ca_normalize_formatid(a->mFormatID) ==
+              ca_normalize_formatid(b->mFormatID) &&
+              (spdif || a->mBytesPerPacket >= b->mBytesPerPacket) && // mpv's is 4, device's is 3.
+              (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
+              a->mSampleRate == b->mSampleRate;
+
     }else{
         int flags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat |
         kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
@@ -471,15 +475,16 @@ int ca_asbd_to_mp_format(const AudioStreamBasicDescription *asbd,
     for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
         AudioStreamBasicDescription mp_asbd = {0};
 
-        if (packed_24_hack == 1){
-            ca_fill_asbd_raw(&mp_asbd, fmt, asbd->mSampleRate, asbd->mChannelsPerFrame, 1);
-        }else{
-            ca_fill_asbd_raw(&mp_asbd, fmt, asbd->mSampleRate, asbd->mChannelsPerFrame, 0);
-        }
+        ca_fill_asbd_raw(&mp_asbd, fmt, asbd->mSampleRate, asbd->mChannelsPerFrame);
 
         if (integer_mode_hack == 1){
-            if (ca_asbd_equals(&mp_asbd, asbd, 1))
-            return af_fmt_is_spdif(fmt) ? AF_FORMAT_S_AC3 : fmt;
+            if (packed_24_hack == 1){
+                if (ca_asbd_equals(&mp_asbd, asbd, 3))
+                return af_fmt_is_spdif(fmt) ? AF_FORMAT_S_AC3 : fmt;
+            }else{
+                if (ca_asbd_equals(&mp_asbd, asbd, 1))
+                return af_fmt_is_spdif(fmt) ? AF_FORMAT_S_AC3 : fmt;
+            }
         }else{
             if (ca_asbd_equals(&mp_asbd, asbd, 0))
             return af_fmt_is_spdif(fmt) ? AF_FORMAT_S_AC3 : fmt;

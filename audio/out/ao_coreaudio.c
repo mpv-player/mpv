@@ -158,7 +158,7 @@ static int init(struct ao *ao)
         goto coreaudio_error;
 
     AudioStreamBasicDescription asbd;
-    ca_fill_asbd(ao, &asbd, 0);
+    ca_fill_asbd(ao, &asbd);
 
     SetAudioPowerHintToFavorSavingPower();
 
@@ -179,7 +179,7 @@ static void init_physical_format(struct ao *ao)
     void *tmp = talloc_new(NULL);
 
     AudioStreamBasicDescription asbd;
-    ca_fill_asbd(ao, &asbd, 0);
+    ca_fill_asbd(ao, &asbd);
 
     AudioStreamID *streams;
     size_t n_streams;

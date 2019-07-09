@@ -353,7 +353,7 @@ static int find_best_format(struct ao *ao, AudioStreamBasicDescription *out_fmt)
 
     int device_type = device_property(ao);
 
-    ca_fill_asbd(ao, &asbd, 0);
+    ca_fill_asbd(ao, &asbd);
     ca_print_asbd(ao, "Our format:", &asbd);
 
     *out_fmt = (AudioStreamBasicDescription){0};
@@ -546,13 +546,7 @@ static int init(struct ao *ao)
     int new_format;
     AudioStreamBasicDescription asbd;
 
-    if ((device_type == 3) || (device_type == 9)){
-        ca_fill_asbd(ao, &asbd, 1);
-        MP_DBG(ao,"ca_fill_asbd_packed_24_bit_device_hack (%d).\n", device_type);
-    }else{
-        ca_fill_asbd(ao, &asbd, 0);
-    }
-
+    ca_fill_asbd(ao, &asbd);
 
     if (((device_type == 3) || (device_type == 9)) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)
         && (asbd.mBitsPerChannel == 32)){
