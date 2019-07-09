@@ -414,17 +414,17 @@ static int init(struct ao *ao)
     }else if (device_type == 4){
         MP_DBG(ao, "This device (%d) is 32 Bit, doesn't support Integer Mode.\n", device_type);
     }else if (device_type == 5){
-        MP_VERBOSE(ao, "This device (%d) is 32 Bit, doesn't offer 16 Bit format.\n", device_type);
+        MP_DBG(ao, "This device (%d) is 32 Bit, doesn't offer 16 Bit format.\n", device_type);
     }else if (device_type == 6){
-        MP_VERBOSE(ao, "This device (%d) is 16 Bit, doesn't offer 32 Bit format.\n", device_type);
+        MP_DBG(ao, "This device (%d) is 16 Bit, doesn't offer 32 Bit format.\n", device_type);
     }else if (device_type == 7){
-        MP_VERBOSE(ao, "This device (%d) is unpacked 24 Bit aligned low, doesn't offer 16 Bit format.\n",
+        MP_DBG(ao, "This device (%d) is unpacked 24 Bit aligned low, doesn't offer 16 Bit format.\n",
             device_type);
     }else if (device_type == 8){
-        MP_VERBOSE(ao, "This device (%d) is unpacked 24 Bit aligned high, doesn't offer 16 Bit format.\n",
+        MP_DBG(ao, "This device (%d) is unpacked 24 Bit aligned high, doesn't offer 16 Bit format.\n",
             device_type);
     }else if (device_type == 9){
-        MP_VERBOSE(ao, "This device (%d) is packed 24 Bit, doesn't offer 16 Bit format.\n", device_type);
+        MP_DBG(ao, "This device (%d) is packed 24 Bit, doesn't offer 16 Bit format.\n", device_type);
     }else if (device_type == 10){
         MP_DBG(ao, "This device (%d) is 24 Bit, doesn't support Integer Mode.\n", device_type);
     }else if (device_type == 11){
@@ -432,22 +432,11 @@ static int init(struct ao *ao)
     }else if (device_type == 12){
         MP_DBG(ao, "This device (%d) is 20 Bit aligned low.\n", device_type);
     }else if (device_type == 13){
-        MP_VERBOSE(ao, "This device (%d) is unpacked 20 Bit aligned low, doesn't offer 16 Bit format.\n",
+        MP_DBG(ao, "This device (%d) is unpacked 20 Bit aligned low, doesn't offer 16 Bit format.\n",
             device_type);
     }
 
-    // In Integer Mode, our format must match one of deivce's avaliable physical format.
-    if (((device_type == 5) || (device_type == 7) || (device_type == 8)
-        || (device_type == 9) || (device_type == 13)) && (af_fmt_is_pcm(ao->format))){
-        ao->format = AF_FORMAT_S32;
-        MP_VERBOSE(ao, "Request s32 format for device %d.\n", device_type);
-    // Float mode will convert everything to float.
-    }else if ((device_type == 6) && p->integer_mode && af_fmt_is_pcm(ao->format)){
-        ao->format = AF_FORMAT_S16;
-        MP_VERBOSE(ao, "Request s16 format for device %d.\n", device_type);
-    }else{
-        ao->format = af_fmt_from_planar(ao->format);
-    }
+    ao->format = af_fmt_from_planar(ao->format);
 
     if (!af_fmt_is_pcm(ao->format) && !af_fmt_is_spdif(ao->format)) {
         MP_ERR(ao, "Unsupported format.\n");
@@ -541,6 +530,22 @@ static int init(struct ao *ao)
         MP_ERR(ao, "unsupported number of channels: %d > %d.\n",
                p->stream_asbd.mChannelsPerFrame, MP_NUM_CHANNELS);
         goto coreaudio_error;
+    }
+
+    // In Integer Mode, our format must match one of deivce's avaliable physical format.
+    if ((af_fmt_is_pcm(ao->format) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable))){
+        int OurBitsPerChannel = af_fmt_to_bytes(ao->format) * 8;
+        if ((p->stream_asbd.mBitsPerChannel > OurBitsPerChannel)
+            && (p->stream_asbd.mBitsPerChannel > 16)){ // Devices that don't offer 16 bit.
+            ao->format = AF_FORMAT_S32;
+            MP_VERBOSE(ao, "Device is %u bit, greater than our %u bit, request s32.\n",
+                p->stream_asbd.mBitsPerChannel, OurBitsPerChannel);
+        }else if ((p->stream_asbd.mBitsPerChannel < OurBitsPerChannel)
+            && (p->stream_asbd.mBitsPerChannel < 20)){ // 16 bit only device needs to request s16.
+            ao->format = AF_FORMAT_S16;
+            MP_VERBOSE(ao, "Device is %u bit, less than our %u bit, request s16.\n",
+                p->stream_asbd.mBitsPerChannel, OurBitsPerChannel);
+        }
     }
 
     int new_format;
