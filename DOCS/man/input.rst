@@ -974,6 +974,15 @@ Input Commands that are Possibly Subject to Change
     The author reserves the right to remove this command if enough motivation
     is found to move this functionality to a trivial Lua script.
 
+``ab-loop-align-cache``
+    Re-adjust the A/B loop points to the start and end within the cache the
+    ``ab-loop-dump-cache`` command will (probably) dump. Basically, it aligns
+    the times on keyframes. The guess might be off especially at the end (due to
+    granularity issues due to remuxing). If the cache shrinks in the meantime,
+    the points set by the command will not be the effective parameters either.
+
+    This command has an even more uncertain future than ``ab-loop-dump-cache``
+    and might disappear without replacement if the author decides it's useless.
 
 Undocumented commands: ``ao-reload`` (experimental/internal).
 

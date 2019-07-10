@@ -4174,6 +4174,83 @@ int demux_cache_dump_get_status(struct demuxer *demuxer)
     return status;
 }
 
+// Return what range demux_cache_dump_set() would (probably) yield. This is a
+// conservative amount (in addition to internal consistency of this code, it
+// depends on what a player will do with the resulting file).
+// Use for_end==true to get the end of dumping, other the start.
+// Returns NOPTS if nothing was found.
+double demux_probe_cache_dump_target(struct demuxer *demuxer, double pts,
+                                     bool for_end)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
+    double res = MP_NOPTS_VALUE;
+    if (pts == MP_NOPTS_VALUE)
+        return pts;
+
+    pthread_mutex_lock(&in->lock);
+
+    pts = MP_ADD_PTS(pts, -in->ts_offset);
+
+    // (When determining the end, look before the keyframe at pts, so subtract
+    // an arbitrary amount to round down.)
+    double seek_pts = for_end ? pts - 0.001 : pts;
+    int flags = 0;
+    struct demux_cached_range *r = find_cache_seek_range(in, seek_pts, flags);
+    if (r) {
+        if (!for_end)
+            adjust_cache_seek_target(in, r, &pts, &flags);
+
+        double t[STREAM_TYPE_COUNT];
+        for (int n = 0; n < STREAM_TYPE_COUNT; n++)
+            t[n] = MP_NOPTS_VALUE;
+
+        for (int n = 0; n < in->num_streams; n++) {
+            struct demux_stream *ds = in->streams[n]->ds;
+            struct demux_queue *q = r->streams[n];
+
+            struct demux_packet *dp = find_seek_target(q, pts, flags);
+            if (dp) {
+                if (for_end) {
+                    while (dp) {
+                        double pdts = MP_PTS_OR_DEF(dp->dts, dp->pts);
+
+                        if (pdts != MP_NOPTS_VALUE && pdts >= pts && dp->keyframe)
+                            break;
+
+                        t[ds->type] = MP_PTS_MAX(t[ds->type], pdts);
+
+                        dp = dp->next;
+                    }
+                } else {
+                    double start;
+                    compute_keyframe_times(dp, &start, NULL);
+                    start = MP_PTS_MAX(start, r->seek_start);
+                    t[ds->type] = MP_PTS_MAX(t[ds->type], start);
+                }
+            }
+        }
+
+        res = t[STREAM_VIDEO];
+        if (res == MP_NOPTS_VALUE)
+            res = t[STREAM_AUDIO];
+        if (res == MP_NOPTS_VALUE) {
+            for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
+                res = t[n];
+                if (res != MP_NOPTS_VALUE)
+                    break;
+            }
+        }
+    }
+
+    res = MP_ADD_PTS(res, in->ts_offset);
+
+    pthread_mutex_unlock(&in->lock);
+
+    return res;
+}
+
 // Used by demuxers to report the amount of transferred bytes. This is for
 // streams which circumvent demuxer->stream (stream statistics are handled by
 // demux.c itself).
