@@ -115,12 +115,17 @@ OSStatus ca_get_Device_Transport_Type(struct ao *ao, AudioDeviceID device)
     if (err == noErr){
         // "kAudioDevicePropertyDataSource" only works for limited Transport Type,
         // e.g. not work for USB or Bluetooth connection.
-        if (err1 == noErr){
-            MP_VERBOSE(ao, "Device transport type: %s, data source: %s\n",
-                mp_tag_str(CFSwapInt32HostToBig(Transport_Type)),
-                mp_tag_str(CFSwapInt32HostToBig(Source)));
+        if (Transport_Type == kAudioDeviceTransportTypeUnknown){
+                MP_VERBOSE(ao, "Device transport type: unknown\n");
         }else{
-            MP_VERBOSE(ao, "Device transport type: %s\n", mp_tag_str(CFSwapInt32HostToBig(Transport_Type)));
+            if (err1 == noErr){
+                //Transport_Type = kAudioDeviceTransportTypeUnknown ? "unknow": Transport_Type;
+                MP_VERBOSE(ao, "Device transport type: %s, data source: %s\n",
+                    mp_tag_str(CFSwapInt32HostToBig(Transport_Type)),
+                    mp_tag_str(CFSwapInt32HostToBig(Source)));
+            }else{
+                MP_VERBOSE(ao, "Device transport type: %s\n", mp_tag_str(CFSwapInt32HostToBig(Transport_Type)));
+            }
         }
     }
     return err;
@@ -167,10 +172,14 @@ OSStatus ca_get_Terminal_Type(struct ao *ao, AudioDeviceID device)
   	propertyAddress.mElement  = kAudioObjectPropertyElementMaster;
   	propertyAddress.mSelector = kAudioStreamPropertyTerminalType;
 
-  	OSStatus ret = AudioObjectGetPropertyData(device, &propertyAddress, 0, NULL, &size, &val);
-  	if (ret == noErr) {
-    	MP_VERBOSE(ao, "Stream Terminal Type: %s\n",  mp_tag_str_hex(CFSwapInt32HostToBig(val)));
-  	}
+    OSStatus ret = AudioObjectGetPropertyData(device, &propertyAddress, 0, NULL, &size, &val);
+    if (ret == noErr) {
+        if (val == kAudioStreamTerminalTypeUnknown){
+            MP_VERBOSE(ao, "Stream Terminal Type: unknown\n");
+        }else{
+            MP_VERBOSE(ao, "Stream Terminal Type: %s\n", mp_tag_str_hex(CFSwapInt32HostToBig(val)));
+        }
+    }
   	return ret;
 }
 
