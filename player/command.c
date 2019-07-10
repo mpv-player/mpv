@@ -5620,13 +5620,13 @@ static void run_dump_cmd(struct mp_cmd_ctx *cmd, double start, double end,
         return;
     }
 
+    mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping started.");
+
     if (!demux_cache_dump_set(mpctx->demuxer, start, end, filename)) {
         mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping stopped.");
         mp_cmd_ctx_complete(cmd);
         return;
     }
-
-    mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping started.");
 
     ctx->cache_dump_cmd = cmd;
     cache_dump_poll(mpctx);
