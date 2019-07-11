@@ -137,10 +137,30 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
-    button = button == BTN_LEFT   ? MP_MBTN_LEFT :
-             button == BTN_MIDDLE ? MP_MBTN_MID  : MP_MBTN_RIGHT;
+    switch (button) {
+    case BTN_LEFT:
+        button = MP_MBTN_LEFT;
+        break;
+    case BTN_MIDDLE:
+        button = MP_MBTN_MID;
+        break;
+    case BTN_RIGHT:
+        button = MP_MBTN_RIGHT;
+        break;
+    case BTN_SIDE:
+        button = MP_MBTN_BACK;
+        break;
+    case BTN_EXTRA:
+        button = MP_MBTN_FORWARD;
+        break;
+    default:
+        button = 0;
+        break;
+    }
 
-    mp_input_put_key(wl->vo->input_ctx, button | state);
+    if (button) {
+        mp_input_put_key(wl->vo->input_ctx, button | state);
+    }
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
@@ -151,7 +171,7 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
                                 uint32_t time, uint32_t axis, wl_fixed_t value)
 {
     struct vo_wayland_state *wl = data;
-    double val = wl_fixed_to_double(value)*0.1;
+    double val = wl_fixed_to_double(value)/abs(wl_fixed_to_double(value));
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
         if (value > 0)
