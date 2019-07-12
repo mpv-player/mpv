@@ -1491,8 +1491,3 @@ void mp_read_option_raw(struct mpv_global *global, const char *name,
     memset(dst, 0, co->opt->type->size);
     m_option_copy(co->opt, dst, gdata->udata + co->opt->offset);
 }
-
-struct m_config *mp_get_root_config(struct mpv_global *global)
-{
-    return global->config->root;
-}

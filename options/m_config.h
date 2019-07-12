@@ -329,6 +329,4 @@ void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
 void mp_read_option_raw(struct mpv_global *global, const char *name,
                         const struct m_option_type *type, void *dst);
 
-struct m_config *mp_get_root_config(struct mpv_global *global);
-
 #endif /* MPLAYER_M_CONFIG_H */
