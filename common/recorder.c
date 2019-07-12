@@ -293,8 +293,6 @@ void mp_recorder_destroy(struct mp_recorder *priv)
     if (priv->opened) {
         for (int n = 0; n < priv->num_streams; n++) {
             struct mp_recorder_sink *rst = priv->streams[n];
-            if (!rst->proper_eof)
-                continue;
             mux_packets(rst, true);
         }
 
@@ -320,6 +318,7 @@ void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
 
     for (int n = 0; n < priv->num_streams; n++) {
         struct mp_recorder_sink *rst = priv->streams[n];
+        mux_packets(rst, true);
         rst->discont = true;
         rst->proper_eof = false;
     }

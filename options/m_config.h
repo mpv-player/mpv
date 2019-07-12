@@ -118,14 +118,28 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
 // mpv_global. Expected to be called at early init on the main m_config.
 void m_config_create_shadow(struct m_config *config);
 
-struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
-                                                struct mp_log *log,
-                                                struct m_obj_desc *desc);
-
+// Create a m_config for the given desc. This is for --af/--vf, which have
+// different sub-options for every filter (represented by separate desc
+// structs).
+// args is an array of key/value pairs (args=[k0, v0, k1, v1, ..., NULL]).
+// name/defaults is only needed for the legacy af-defaults/vf-defaults options.
 struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
     const char *name, struct m_obj_settings *defaults, char **args);
 
+// Like m_config_from_obj_desc_and_args(), but don't allocate option the
+// struct, i.e. m_config.optstruct==NULL. This is used by the sub-option
+// parser (--af/--vf, to a lesser degree --ao/--vo) to check sub-option names
+// and types.
+struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
+                                                struct mp_log *log,
+                                                struct m_obj_desc *desc);
+
+// Allocate a priv struct that is backed by global options (like AOs and VOs,
+// anything that uses m_obj_list.use_global_options == true).
+// The result contains a snapshot of the current option values of desc->options.
+// For convenience, desc->options can be NULL; then priv struct is allocated
+// with just zero (or priv_defaults if set).
 void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
         struct mpv_global *global, struct m_obj_desc *desc, const char *name);
 
@@ -155,27 +169,40 @@ enum {
 // Flags for safe option setting during runtime.
 #define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
 
+// Set the named option to the given string. This is for command line and config
+// file use only.
+// flags: combination of M_SETOPT_* flags (0 for normal operation)
+// Returns >= 0 on success, otherwise see OptionParserReturn.
 int m_config_set_option_cli(struct m_config *config, struct bstr name,
                             struct bstr param, int flags);
 
+// Similar to m_config_set_option_cli(), but set as data in its native format.
+// This takes care of some details like sending change notifications.
+// The type data points to is as in: co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
 
 void m_config_mark_co_flags(struct m_config_option *co, int flags);
 
+// Unlike m_config_set_option_raw() this does not go through the property layer
+// via config.option_set_callback.
 int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,
                                    void *data, int flags);
 
+// Convert the mpv_node to raw option data, then call m_config_set_option_raw().
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags);
 
-struct m_config_option *m_config_get_co_raw(const struct m_config *config,
-                                            struct bstr name);
+// Return option descriptor. You shouldn't use this.
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
+// Same as above, but does not resolve aliases or trigger warning messages.
+struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                            struct bstr name);
 
+// Special uses only. Look away.
 int m_config_get_co_count(struct m_config *config);
 struct m_config_option *m_config_get_co_index(struct m_config *config, int index);
 const void *m_config_get_co_default(const struct m_config *config,
@@ -328,7 +355,5 @@ void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
 // type is used as a sanity check only). Performs semi-expensive lookup.
 void mp_read_option_raw(struct mpv_global *global, const char *name,
                         const struct m_option_type *type, void *dst);
-
-struct m_config *mp_get_root_config(struct mpv_global *global);
 
 #endif /* MPLAYER_M_CONFIG_H */

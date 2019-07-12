@@ -348,7 +348,6 @@ static struct m_config *m_config_from_obj_desc(void *talloc_ctx,
     return c;
 }
 
-// Like m_config_from_obj_desc(), but don't allocate option struct.
 struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct mp_log *log,
                                                 struct m_obj_desc *desc)
@@ -370,11 +369,6 @@ static const struct m_config_group *find_group(struct mpv_global *global,
     return NULL;
 }
 
-// Allocate a priv struct that is backed by global options (like AOs and VOs,
-// anything that uses m_obj_list.use_global_options == true).
-// The result contains a snapshot of the current option values of desc->options.
-// For convenience, desc->options can be NULL; then priv struct is allocated
-// with just zero (or priv_defaults if set).
 void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
         struct mpv_global *global, struct m_obj_desc *desc, const char *name)
 {
@@ -804,8 +798,6 @@ static int m_config_handle_special_options(struct m_config *config,
     return M_OPT_UNKNOWN;
 }
 
-// Unlike m_config_set_option_raw() this does not go through the property layer
-// via config.option_set_callback.
 int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,
                                    void *data, int flags)
@@ -834,9 +826,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
     return 0;
 }
 
-// Similar to m_config_set_option_cli(), but set as data in its native format.
-// This takes care of some details like sending change notifications.
-// The type data points to is as in: co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags)
 {
@@ -923,10 +912,6 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
     return NULL;
 }
 
-// Set the named option to the given string. This is for command line and config
-// file use only.
-// flags: combination of M_SETOPT_* flags (0 for normal operation)
-// Returns >= 0 on success, otherwise see OptionParserReturn.
 int m_config_set_option_cli(struct m_config *config, struct bstr name,
                             struct bstr param, int flags)
 {
@@ -1490,9 +1475,4 @@ void mp_read_option_raw(struct mpv_global *global, const char *name,
 
     memset(dst, 0, co->opt->type->size);
     m_option_copy(co->opt, dst, gdata->udata + co->opt->offset);
-}
-
-struct m_config *mp_get_root_config(struct mpv_global *global)
-{
-    return global->config->root;
 }

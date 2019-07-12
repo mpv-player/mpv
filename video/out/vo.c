@@ -580,7 +580,7 @@ static void run_reconfig(void *p)
 
     MP_VERBOSE(vo, "reconfig to %s\n", mp_image_params_to_str(params));
 
-    m_config_cache_update(vo->opts_cache);
+    update_opts(vo);
 
     mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
 
@@ -634,7 +634,7 @@ static void run_control(void *p)
     struct vo *vo = pp[0];
     int request = (intptr_t)pp[1];
     void *data = pp[2];
-    m_config_cache_update(vo->opts_cache);
+    update_opts(vo);
     int ret = vo->driver->control(vo, request, data);
     if (pp[3])
         *(int *)pp[3] = ret;

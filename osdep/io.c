@@ -632,41 +632,6 @@ char *mp_win32_getcwd(char *buf, size_t size)
     return buf;
 }
 
-FILE *mp_tmpfile(void)
-{
-    // Reserve a file name in the format %TMP%\mpvXXXX.TMP
-    wchar_t tmp_path[MAX_PATH + 1];
-    if (!GetTempPathW(MAX_PATH + 1, tmp_path))
-        return NULL;
-    wchar_t tmp_name[MAX_PATH + 1];
-    if (!GetTempFileNameW(tmp_path, L"mpv", 0, tmp_name))
-        return NULL;
-
-    // Create the file. FILE_ATTRIBUTE_TEMPORARY indicates the file will be
-    // short-lived. Windows should avoid flushing it to disk while there is
-    // sufficient cache.
-    HANDLE file = CreateFileW(tmp_name, GENERIC_READ | GENERIC_WRITE | DELETE,
-        FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, CREATE_ALWAYS,
-        FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, NULL);
-    if (file == INVALID_HANDLE_VALUE) {
-        DeleteFileW(tmp_name);
-        return NULL;
-    }
-
-    int fd = _open_osfhandle((intptr_t)file, 0);
-    if (fd < 0) {
-        CloseHandle(file);
-        return NULL;
-    }
-    FILE *fp = fdopen(fd, "w+b");
-    if (!fp) {
-        close(fd);
-        return NULL;
-    }
-
-    return fp;
-}
-
 static char **utf8_environ;
 static void *utf8_environ_ctx;
 
