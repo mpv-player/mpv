@@ -3931,15 +3931,15 @@ void demux_block_reading(struct demuxer *demuxer, bool block)
 static void update_bytes_read(struct demux_internal *in)
 {
     struct demuxer *demuxer = in->d_thread;
-    struct stream *stream = demuxer->stream;
 
-    if (!stream)
-        return;
-
-    int64_t new = stream->total_unbuffered_read_bytes +
-                  in->slave_unbuffered_read_bytes;
-    stream->total_unbuffered_read_bytes = 0;
+    int64_t new = in->slave_unbuffered_read_bytes;
     in->slave_unbuffered_read_bytes = 0;
+
+    struct stream *stream = demuxer->stream;
+    if (stream) {
+        new += stream->total_unbuffered_read_bytes;
+        stream->total_unbuffered_read_bytes = 0;
+    }
 
     in->cache_unbuffered_read_bytes += new;
     in->hack_unbuffered_read_bytes += new;
