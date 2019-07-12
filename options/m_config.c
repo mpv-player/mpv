@@ -1233,14 +1233,6 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
     return root;
 }
 
-void m_config_create_shadow(struct m_config *config)
-{
-    assert(config->global);
-    assert(!config->global->config);
-
-    config->global->config = config->shadow;
-}
-
 static void cache_destroy(void *p)
 {
     struct m_config_cache *cache = p;
