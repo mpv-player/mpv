@@ -87,13 +87,6 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
 
-    // Private. List of m_sub_options instances.
-    // Index 0 is the top-level and is always present.
-    // Immutable after init.
-    // Invariant: a parent is always at a lower index than any of its children.
-    struct m_config_group *groups;
-    int num_groups;
-
     // Private. Non-NULL if data was allocated. m_config_option.data uses it.
     struct m_config_data *data;
 
