@@ -4234,6 +4234,8 @@ double demux_probe_cache_dump_target(struct demuxer *demuxer, double pts,
         }
     }
 
+    res = MP_ADD_PTS(res, in->ts_offset);
+
     pthread_mutex_unlock(&in->lock);
 
     return res;
