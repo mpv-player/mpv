@@ -80,8 +80,6 @@ struct m_config_group {
                         // -1 for group 0
     int parent_ptr;     // ptr offset in the parent group's data, or -1 if
                         // none
-    int co_index;       // index of the first group opt into m_config.opts[]
-    int co_end_index;   // index of the last group opt + 1 (i.e. exclusive)
 };
 
 // A copy of option data. Used for the main option struct, the shadow data,
@@ -225,19 +223,18 @@ static void alloc_group(struct m_config_data *data, int group_index,
 
     char *copy_src = copy_gdata ? copy_gdata->udata : NULL;
 
-    for (int n = group->co_index; n < group->co_end_index; n++) {
-        assert(n >= 0 && n < data->root->num_opts);
-        struct m_config_option *co = &data->root->opts[n];
+    for (int n = 0; opts->opts && opts->opts[n].name; n++) {
+        const struct m_option *opt = &opts->opts[n];
 
-        if (co->opt->offset < 0 || co->opt->type->size == 0)
+        if (opt->offset < 0 || opt->type->size == 0)
             continue;
 
-        void *dst = gdata->udata + co->opt->offset;
-        const void *defptr = co->opt->defval ? co->opt->defval : dst;
+        void *dst = gdata->udata + opt->offset;
+        const void *defptr = opt->defval ? opt->defval : dst;
         if (copy_src)
-            defptr = copy_src + co->opt->offset;
+            defptr = copy_src + opt->offset;
 
-        init_opt_inplace(co->opt, dst, defptr);
+        init_opt_inplace(opt, dst, defptr);
     }
 
     // If there's a parent, update its pointer to the new struct.
@@ -258,12 +255,13 @@ static void free_option_data(void *p)
         struct m_group_data *gdata = &data->gdata[i];
         struct m_config_group *group =
             &data->shadow->groups[data->group_index + i];
+        const struct m_option *opts = group->group->opts;
 
-        for (int n = group->co_index; n < group->co_end_index; n++) {
-            struct m_config_option *co = &data->root->opts[n];
+        for (int n = 0; opts && opts[n].name; n++) {
+            const struct m_option *opt = &opts[n];
 
-            if (co->opt->offset >= 0 && co->opt->type->size > 0)
-                m_option_free(co->opt, gdata->udata + co->opt->offset);
+            if (opt->offset >= 0 && opt->type->size > 0)
+                m_option_free(opt, gdata->udata + opt->offset);
         }
     }
 }
@@ -545,7 +543,6 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
         .group = subopts,
         .parent_group = parent_group_index,
         .parent_ptr = parent_ptr,
-        .co_index = config->num_opts,
     };
 
     if (subopts->prefix && subopts->prefix[0])
@@ -568,10 +565,7 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
     }
 
-    shadow->groups[group_index].co_end_index = config->num_opts;
-
-    // Initialize sub-structs. These have to come after, because co_index and
-    // co_end_index must strictly be for a single struct only.
+    // Initialize sub-structs.
     for (int i = 0; subopts->opts && subopts->opts[i].name; i++) {
         const struct m_option *opt = &subopts->opts[i];
 
@@ -1311,6 +1305,7 @@ static bool update_options(struct m_config_data *dst, struct m_config_data *src)
     assert(group_s >= 0 && group_e <= dst->shadow->num_groups);
     for (int n = group_s; n < group_e; n++) {
         struct m_config_group *g = &dst->shadow->groups[n];
+        const struct m_option *opts = g->group->opts;
         struct m_group_data *gsrc = m_config_gdata(src, n);
         struct m_group_data *gdst = m_config_gdata(dst, n);
         assert(gsrc && gdst);
@@ -1320,11 +1315,12 @@ static bool update_options(struct m_config_data *dst, struct m_config_data *src)
         gdst->ts = gsrc->ts;
         res = true;
 
-        for (int i = g->co_index; i < g->co_end_index; i++) {
-            struct m_config_option *co = &dst->root->opts[i];
-            if (co->opt->offset >= 0 && co->opt->type->size) {
-                m_option_copy(co->opt, gdst->udata + co->opt->offset,
-                                       gsrc->udata + co->opt->offset);
+        for (int i = 0; opts && opts[i].name; i++) {
+            const struct m_option *opt = &opts[i];
+
+            if (opt->offset >= 0 && opt->type->size) {
+                m_option_copy(opt, gdst->udata + opt->offset,
+                                   gsrc->udata + opt->offset);
             }
         }
     }
