@@ -542,10 +542,12 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
         .parent_ptr = parent_ptr,
     };
 
-    if (subopts->prefix && subopts->prefix[0])
-        name_prefix = subopts->prefix;
     if (!name_prefix)
         name_prefix = "";
+    if (subopts->prefix && subopts->prefix[0]) {
+        assert(!name_prefix[0]);
+        name_prefix = subopts->prefix;
+    }
 
     for (int i = 0; subopts->opts && subopts->opts[i].name; i++) {
         const struct m_option *opt = &subopts->opts[i];
