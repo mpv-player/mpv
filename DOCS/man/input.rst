@@ -930,6 +930,10 @@ Input Commands that are Possibly Subject to Change
     made to fix this, as this feature was meant mostly for creating small
     excerpts.
 
+    See ``--stream-record`` for various caveats that mostly apply to this
+    command too, as both use the same underlying code for writing the output
+    file.
+
     If ``<filename>`` is an empty string, an ongoing ``dump-cache`` is stopped.
 
     If ``<end>`` is ``no``, then continuous dumping is enabled. Then, after
