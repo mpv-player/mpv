@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- git master ---
+    - deprecate --record-file
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
