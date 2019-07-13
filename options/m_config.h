@@ -87,13 +87,6 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
 
-    // Private. List of m_sub_options instances.
-    // Index 0 is the top-level and is always present.
-    // Immutable after init.
-    // Invariant: a parent is always at a lower index than any of its children.
-    struct m_config_group *groups;
-    int num_groups;
-
     // Private. Non-NULL if data was allocated. m_config_option.data uses it.
     struct m_config_data *data;
 
@@ -113,10 +106,6 @@ typedef struct m_config {
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
                               size_t size, const void *defaults,
                               const struct m_option *options);
-
-// Creates "backup" shadow memory for use with m_config_cache. Sets it on
-// mpv_global. Expected to be called at early init on the main m_config.
-void m_config_create_shadow(struct m_config *config);
 
 // Create a m_config for the given desc. This is for --af/--vf, which have
 // different sub-options for every filter (represented by separate desc
