@@ -517,7 +517,7 @@ static int init(struct ao *ao)
                     err = ca_get_frame_buffer_size(ao, p->device);
                     CHECK_CA_WARN("failed to get buffersize range");
                     err = SetAudioPowerHintToFavorSavingPower();
-                    MP_VERBOSE(ao, "Set audio I/O buffer size to 4096 or device's max.\n");
+                    MP_VERBOSE(ao, "Set audio I/O buffer size to maximum value.\n");
                     CHECK_CA_WARN("failed to set Power Saving Mode");
             }
         }else{
@@ -690,8 +690,7 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     },
     .options = (const struct m_option[]){
         OPT_FLAG("spdif-hack", spdif_hack, 0),
-        OPT_INTRANGE("buffer-size", buffersize, 0, 1, 24576), // Is it possible to set min and max values which are
-        // retrieved from "OSStatus err = CA_GET_O(device, kAudioDevicePropertyBufferFrameSizeRange, &value_range);"
+        OPT_INTRANGE("buffer-size", buffersize, 0, 1, 4096),
         OPT_FLAG("integer-mode", integer_mode, 0),
         OPT_FLOATRANGE("iocycle-usage", IOCycleUsage, 0, 0, 1),
         OPT_FLAG("power-saving", power_saving, 0),
