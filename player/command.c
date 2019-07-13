@@ -6059,6 +6059,18 @@ void command_init(struct MPContext *mpctx)
 
             prop.call = co->opt->deprecation_message ?
                             mp_property_deprecated_alias : mp_property_alias;
+
+            // Check whether this eventually arrives at a real option. If not,
+            // it's some CLI special handling thing. For example, "nosound" is
+            // mapped to "no-audio", which has CLI special-handling, and cannot
+            // be set as property.
+            struct m_config_option *co2 = co;
+            while (co2 && co2->opt->type == &m_option_type_alias) {
+                const char *alias = (const char *)co2->opt->priv;
+                co2 = m_config_get_co_raw(mpctx->mconfig, bstr0(alias));
+            }
+            if (!co2)
+                continue;
         }
 
         // The option might be covered by a manual property already.
