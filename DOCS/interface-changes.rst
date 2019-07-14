@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- git master ---
+    - deprecate --record-file
  --- mpv 0.30.0 ---
     - rename `--drm-osd-plane-id` to `--drm-draw-plane`, `--drm-video-plane-id` to
       `--drm-drmprime-video-plane` and `--drm-osd-size` to `--drm-draw-surface-size`

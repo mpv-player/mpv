@@ -5773,37 +5773,48 @@ Miscellaneous
     referenced files like with ordered chapters.
 
 ``--record-file=<file>``
+    Deprecated, use ``--stream-record``, or the ``dump-cache`` command.
+
     Record the current stream to the given target file. The target file will
     always be overwritten without asking.
 
-    This remuxes the source stream without reencoding, which makes this a
-    highly fragile and experimental feature. It's entirely possible that this
-    writes files which are broken, not standards compliant, not playable with
-    all players (including mpv), or incomplete.
-
-    The target file format is determined by the file extension of the target
-    filename. It is recommended to use the same target container as the source
-    container if possible, and preferring Matroska as fallback.
-
-    Seeking during stream recording, or enabling/disabling stream recording
-    during playback, can cut off data, or produce "holes" in the output file.
-    These are technical restrictions. In particular, video data or subtitles
-    which were read ahead can produce such holes, which might cause playback
-    problems with various players (including mpv).
-
-    The behavior of this option might changed in the future, such as changing
-    it to a template (similar to ``--screenshot-template``), being renamed,
-    removed, or anything else, until it is declared semi-stable.
+    This was deprecated because it isn't very nice to use. For one, seeking
+    while this is enabled will be directly reflected in the output, which was
+    not useful and annoying.
 
 ``--stream-record=<file>``
-    Similar to ``--record-file``, but write packets as they are received. The
-    implementation of this does not tolerate seeks (outside of demuxer cache),
-    or streams being selected/deselected during recording. Use with care.
+    Write received/read data from the demuxer to the given output file. The
+    output file will always be overwritten without asking. The output format
+    is determined by the extension of the output file.
+
+    Switching streams or seeking during recording might result in recording
+    being stopped and/or broken files. Use with care.
+
+    Seeking outside of the demuxer cache will result in "skips" in the output
+    file, but seeking within  the demuxer cache should not affect recording. One
+    exception is when you seek back far enough to exceed the forward buffering
+    size, in which case the cache stops actively reading. This will return in
+    dropped data if it's a live stream.
 
     If this is set at runtime, the old file is closed, and the new file is
     opened. Note that this will write only data that is appended at the end of
     the cache, and the already cached data cannot be written. You can try the
     ``dump-cache`` command as an alternative.
+
+    External files (``--audio-file`` etc.) are ignored by this, it works on the
+    "main" file only. Using this with files using ordered chapters or EDL files
+    will also not work correctly in general.
+
+    There are some glitches with this because it uses FFmpeg's libavformat for
+    writing the output file. For example, it's typical that it will only work if
+    the output format is the same as the input format. This is the case even if
+    it works with the ``ffmpeg`` tool. One reason for this is that ``ffmpeg``
+    and its libraries contain certain hacks and workarounds for these issues,
+    that are unavailable to outside users.
+
+    This replaces ``--record-file``. It is similar to the ancient/removed
+    ``--stream-capture``/``-capture`` options, and provides better behavior in
+    most cases (i.e. actually works).
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can

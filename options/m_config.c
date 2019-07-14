@@ -299,14 +299,15 @@ static void config_destroy(void *p)
     struct m_config *config = p;
     m_config_restore_backups(config);
 
+    talloc_free(config->data);
+
     if (config->shadow) {
         // must all have been unregistered
         assert(config->shadow->num_listeners == 0);
+        talloc_free(config->shadow->data);
         pthread_mutex_destroy(&config->shadow->lock);
         talloc_free(config->shadow);
     }
-
-    talloc_free(config->data);
 }
 
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
@@ -541,10 +542,12 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
         .parent_ptr = parent_ptr,
     };
 
-    if (subopts->prefix && subopts->prefix[0])
-        name_prefix = subopts->prefix;
     if (!name_prefix)
         name_prefix = "";
+    if (subopts->prefix && subopts->prefix[0]) {
+        assert(!name_prefix[0]);
+        name_prefix = subopts->prefix;
+    }
 
     for (int i = 0; subopts->opts && subopts->opts[i].name; i++) {
         const struct m_option *opt = &subopts->opts[i];
