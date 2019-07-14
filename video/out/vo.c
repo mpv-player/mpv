@@ -69,9 +69,6 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_ANDROID
     &video_out_mediacodec_embed,
 #endif
-#if HAVE_RPI
-    &video_out_rpi,
-#endif
     &video_out_gpu,
 #if HAVE_VDPAU
     &video_out_vdpau,
@@ -100,6 +97,9 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_DRM
     &video_out_drm,
+#endif
+#if HAVE_RPI_MMAL
+    &video_out_rpi,
 #endif
     &video_out_lavc,
     NULL
