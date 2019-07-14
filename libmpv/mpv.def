@@ -5,6 +5,7 @@ mpv_command
 mpv_command_async
 mpv_command_node
 mpv_command_node_async
+mpv_command_ret
 mpv_command_string
 mpv_create
 mpv_create_client

@@ -1086,6 +1086,15 @@ int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
     return r;
 }
 
+int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result)
+{
+    struct mpv_node rn = {.format = MPV_FORMAT_NONE};
+    int r = run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args), &rn);
+    if (result && r >= 0)
+        *result = rn;
+    return r;
+}
+
 int mpv_command_string(mpv_handle *ctx, const char *args)
 {
     return run_client_command(ctx,

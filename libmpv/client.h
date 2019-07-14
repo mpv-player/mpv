@@ -223,7 +223,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 103)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 104)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -968,6 +968,22 @@ int mpv_command(mpv_handle *ctx, const char **args);
  * @return error code (the result parameter is not set on error)
  */
 int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
+
+/**
+ * This is essentially identical to mpv_command() but it also returns a result.
+ *
+ * Does not use OSD and string expansion by default.
+ *
+ * @param[in] args NULL-terminated list of strings. Usually, the first item
+ *                 is the command, and the following items are arguments.
+ * @param[out] result Optional, pass NULL if unused. If not NULL, and if the
+ *                    function succeeds, this is set to command-specific return
+ *                    data. You must call mpv_free_node_contents() to free it
+ *                    (again, only if the command actually succeeds).
+ *                    Not many commands actually use this at all.
+ * @return error code (the result parameter is not set on error)
+ */
+int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result);
 
 /**
  * Same as mpv_command, but use input.conf parsing for splitting arguments.
