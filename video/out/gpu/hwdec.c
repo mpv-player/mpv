@@ -72,7 +72,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_VDPAU_GL_X11
     &ra_hwdec_vdpau,
 #endif
-#if HAVE_RPI
+#if HAVE_RPI_MMAL
     &ra_hwdec_rpi_overlay,
 #endif
 #if HAVE_DRMPRIME && HAVE_DRM

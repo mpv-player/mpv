@@ -139,7 +139,7 @@ static bool recreate_dispmanx(struct ra_ctx *ctx)
     VC_RECT_T dst = {.x = p->x, .y = p->y, .width = p->w, .height = p->h};
     VC_RECT_T src = {.width = p->w << 16, .height = p->h << 16};
     VC_DISPMANX_ALPHA_T alpha = {
-        .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
+        .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
         .opacity = 0xFF,
     };
     p->window = vc_dispmanx_element_add(p->update, p->display, layer, &dst, 0,
@@ -234,7 +234,7 @@ static bool rpi_init(struct ra_ctx *ctx)
     if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &p->egl_config))
         goto fail;
 
-    if (recreate_dispmanx(ctx) < 0)
+    if (!recreate_dispmanx(ctx))
         goto fail;
 
     mpegl_load_functions(&p->gl, ctx->log);

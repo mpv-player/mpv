@@ -769,25 +769,9 @@ video_output_features = [
         'deps': 'win32-desktop && shaderc && spirv-cross',
         'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_2.h']),
     }, {
-        # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
-        # every project to hardcode the paths to the include directories. Also,
-        # these headers are so broken that they spam tons of warnings by merely
-        # including them (compensate with -isystem and -fgnu89-inline).
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
-        'func': compose_checks(
-            check_cc(cflags=["-isystem/opt/vc/include",
-                             "-isystem/opt/vc/include/interface/vcos/pthreads",
-                             "-isystem/opt/vc/include/interface/vmcs_host/linux",
-                             "-fgnu89-inline"],
-                     linkflags="-L/opt/vc/lib",
-                     header_name="bcm_host.h",
-                     lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
-            # We still need all OpenGL symbols, because the vo_gpu code is
-            # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
-            check_cc(lib="EGL", linkflags="-lGLESv2"),
-            check_cc(lib="GLESv2"),
-        ),
+        'func': check_pkg_config('brcmegl'),
     } , {
         'name': '--ios-gl',
         'desc': 'iOS OpenGL ES hardware decoding interop support',
@@ -876,6 +860,11 @@ hwaccel_features = [
         'desc': 'CUDA hwaccel',
         'deps': '(gl || vulkan) && ffnvcodec',
         'func': check_true,
+    }, {
+        'name': '--rpi-mmal',
+        'desc': 'Raspberry Pi MMAL hwaccel',
+        'deps': 'rpi',
+        'func': check_pkg_config('mmal'),
     }
 ]
 
