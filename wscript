@@ -385,6 +385,10 @@ iconv support use --disable-iconv.",
         'deps': 'libaf',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
+        'name': '--zimg',
+        'desc': 'libzimg support (for vf_fingerprint)',
+        'func': check_pkg_config('zimg', '>= 2.9'),
+    }, {
         'name': '--lcms2',
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2', '>= 2.6'),
