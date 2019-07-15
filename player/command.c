@@ -1241,9 +1241,12 @@ static int get_tag_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
+// tags can be NULL for M_PROPERTY_GET_TYPE. (In all other cases, tags must be
+// provided, even for M_PROPERTY_KEY_ACTION GET_TYPE sub-actions.)
 static int tag_property(int action, void *arg, struct mp_tags *tags)
 {
     switch (action) {
+    case M_PROPERTY_GET_NODE: // same as GET, because type==mpv_node
     case M_PROPERTY_GET: {
         mpv_node_list *list = talloc_zero(NULL, mpv_node_list);
         mpv_node node = {
@@ -1363,14 +1366,17 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         if (!chain)
             return M_PROPERTY_UNAVAILABLE;
 
-        struct mp_filter_command cmd = {
-            .type = MP_FILTER_COMMAND_GET_META,
-            .res = &metadata,
-        };
-        mp_output_chain_command(chain, mp_tprintf(80, "%.*s", BSTR_P(key)), &cmd);
+        if (ka->action != M_PROPERTY_GET_TYPE) {
+            struct mp_filter_command cmd = {
+                .type = MP_FILTER_COMMAND_GET_META,
+                .res = &metadata,
+            };
+            mp_output_chain_command(chain, mp_tprintf(80, "%.*s", BSTR_P(key)),
+                                    &cmd);
 
-        if (!metadata)
-            return M_PROPERTY_ERROR;
+            if (!metadata)
+                return M_PROPERTY_ERROR;
+        }
 
         int res;
         if (strlen(rem)) {
