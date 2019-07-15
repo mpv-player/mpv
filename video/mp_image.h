@@ -28,6 +28,12 @@
 #include "csputils.h"
 #include "video/img_format.h"
 
+// Assumed minimum align needed for image allocation. It's notable that FFmpeg's
+// libraries except libavcodec don't really know what alignment they want.
+// Things will randomly crash or get slower if the alignment is not satisfied.
+// Whatever. This value should be pretty safe with current CPU architectures.
+#define MP_IMAGE_BYTE_ALIGN 64
+
 #define MP_IMGFIELD_TOP_FIRST 0x02
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_INTERLACED 0x20

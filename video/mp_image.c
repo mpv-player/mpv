@@ -174,7 +174,7 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
     assert(!mpi->planes[0]);
     assert(!mpi->bufs[0]);
 
-    int align = SWS_MIN_BYTE_ALIGN;
+    int align = MP_IMAGE_BYTE_ALIGN;
 
     int size = mp_image_get_alloc_size(mpi->imgfmt, mpi->w, mpi->h, align);
     if (size < 0)

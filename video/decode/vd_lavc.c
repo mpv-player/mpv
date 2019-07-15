@@ -860,7 +860,7 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
 
     // We assume that different alignments are just different power-of-2s.
     // Thus, a higher alignment always satisfies a lower alignment.
-    int stride_align = 0;
+    int stride_align = MP_IMAGE_BYTE_ALIGN;
     for (int n = 0; n < AV_NUM_DATA_POINTERS; n++)
         stride_align = MPMAX(stride_align, linesize_align[n]);
 

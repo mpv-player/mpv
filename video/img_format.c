@@ -539,7 +539,7 @@ int main(int argc, char **argv)
             fr->format = fmt;
             fr->width = 128;
             fr->height = 128;
-            int err = av_frame_get_buffer(fr, SWS_MIN_BYTE_ALIGN);
+            int err = av_frame_get_buffer(fr, MP_IMAGE_BYTE_ALIGN);
             assert(err >= 0);
             struct mp_image *mpi = mp_image_alloc(mpfmt, fr->width, fr->height);
             assert(mpi);

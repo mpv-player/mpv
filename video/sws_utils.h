@@ -11,7 +11,7 @@ struct mpv_global;
 // libswscale currently requires 16 bytes alignment for row pointers and
 // strides. Otherwise, it will print warnings and use slow codepaths.
 // Guaranteed to be a power of 2 and > 1.
-#define SWS_MIN_BYTE_ALIGN 16
+#define SWS_MIN_BYTE_ALIGN MP_IMAGE_BYTE_ALIGN
 
 extern const int mp_sws_hq_flags;
 extern const int mp_sws_fast_flags;
