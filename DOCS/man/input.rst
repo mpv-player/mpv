@@ -1596,7 +1596,7 @@ Property list
 ``seeking``
     Returns ``yes`` if the player is currently seeking, or otherwise trying
     to restart playback. (It's possible that it returns ``yes`` while a file
-    is loadedThis is because the same underlying code is used for seeking and
+    is loaded. This is because the same underlying code is used for seeking and
     resyncing.)
 
 ``mixer-active``
