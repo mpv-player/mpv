@@ -532,18 +532,13 @@ static int init(struct ao *ao)
         goto coreaudio_error;
     }
 
-    // In Integer Mode, our format must match one of deivce's avaliable physical format.
-    if ((af_fmt_is_pcm(ao->format) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable))){
+    // As there is no equivalent 20/24 Bit in mpv's audio format, we need to manually insert "autoconvert".
+    if (af_fmt_is_pcm(ao->format) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)
+        && ((p->stream_asbd.mBitsPerChannel == 24) || (p->stream_asbd.mBitsPerChannel == 20))){
         int OurBitsPerChannel = af_fmt_to_bytes(ao->format) * 8;
-        if ((p->stream_asbd.mBitsPerChannel > OurBitsPerChannel)
-            && (p->stream_asbd.mBitsPerChannel > 16)){ // Devices that don't offer 16 bit.
+        if (p->stream_asbd.mBitsPerChannel > OurBitsPerChannel){
             ao->format = AF_FORMAT_S32;
             MP_VERBOSE(ao, "Device is %u bit, greater than our %u bit, request s32.\n",
-                p->stream_asbd.mBitsPerChannel, OurBitsPerChannel);
-        }else if ((p->stream_asbd.mBitsPerChannel < OurBitsPerChannel)
-            && (p->stream_asbd.mBitsPerChannel < 20)){ // 16 bit only device needs to request s16.
-            ao->format = AF_FORMAT_S16;
-            MP_VERBOSE(ao, "Device is %u bit, less than our %u bit, request s16.\n",
                 p->stream_asbd.mBitsPerChannel, OurBitsPerChannel);
         }
     }
