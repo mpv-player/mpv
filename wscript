@@ -129,7 +129,8 @@ build_options = [
         'name': '--swift-static',
         'desc': 'static Swift linking',
         'deps': 'os-darwin',
-        'func': check_ctx_vars('SWIFT_LIB_STATIC')
+        'func': check_ctx_vars('SWIFT_LIB_STATIC'),
+        'default': 'disable'
     }
 ]
 
@@ -958,7 +959,7 @@ standalone_features = [
     }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
-        'deps': 'cocoa  && swift',
+        'deps': 'cocoa && swift',
         'func': check_true
     }
 ]

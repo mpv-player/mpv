@@ -32,11 +32,9 @@ class EventsView: NSView {
     init(cocoaCB ccb: CocoaCB) {
         cocoaCB = ccb
         super.init(frame: NSMakeRect(0, 0, 960, 480))
-        autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
-        register(forDraggedTypes: [ NSFilenamesPboardType,
-                                    NSURLPboardType,
-                                    NSPasteboardTypeString ])
+        registerForDraggedTypes([ .fileURLCompat, .URLCompat, .string ])
     }
 
     required init?(coder: NSCoder) {
@@ -60,11 +58,8 @@ class EventsView: NSView {
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        guard let types = sender.draggingPasteboard().types else { return [] }
-        if types.contains(NSFilenamesPboardType) ||
-           types.contains(NSURLPboardType) ||
-           types.contains(NSPasteboardTypeString)
-        {
+        guard let types = sender.draggingPasteboard.types else { return [] }
+        if types.contains(.fileURLCompat) || types.contains(.URLCompat) || types.contains(.string) {
             return .copy
         }
         return []
@@ -81,21 +76,17 @@ class EventsView: NSView {
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pb = sender.draggingPasteboard()
-        guard let types = sender.draggingPasteboard().types else { return false }
-        if types.contains(NSFilenamesPboardType) {
-            if let files = pb.propertyList(forType: NSFilenamesPboardType) as? [Any] {
+        let pb = sender.draggingPasteboard
+        guard let types = pb.types else { return false }
+
+        if types.contains(.fileURLCompat) || types.contains(.URLCompat) {
+            if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
+                let files = urls.map { $0.absoluteString }
                 EventsResponder.sharedInstance().handleFilesArray(files)
                 return true
             }
-        } else if types.contains(NSURLPboardType) {
-            if var url = pb.propertyList(forType: NSURLPboardType) as? [String] {
-                url = url.filter{ !$0.isEmpty }
-                EventsResponder.sharedInstance().handleFilesArray(url)
-                return true
-            }
-        } else if types.contains(NSPasteboardTypeString) {
-            guard let str = pb.string(forType: NSPasteboardTypeString) else { return false }
+        } else if types.contains(.string) {
+            guard let str = pb.string(forType: .string) else { return false }
             var filesArray: [String] = []
 
             for val in str.components(separatedBy: "\n") {
@@ -220,7 +211,7 @@ class EventsView: NSView {
         var delta: Double
         var cmd: Int32
 
-        if fabs(event.deltaY) >= fabs(event.deltaX) {
+        if abs(event.deltaY) >= abs(event.deltaX) {
             delta = Double(event.deltaY) * 0.1;
             cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN;
         } else {
@@ -228,7 +219,7 @@ class EventsView: NSView {
             cmd = delta > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT;
         }
 
-        mpv.putAxis(cmd, delta: fabs(delta))
+        mpv.putAxis(cmd, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
@@ -244,7 +235,7 @@ class EventsView: NSView {
             let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
             var mpkey: Int32
 
-            if fabs(deltaY) >= fabs(deltaX) {
+            if abs(deltaY) >= abs(deltaX) {
                 mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN;
             } else {
                 mpkey = deltaX > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT;
