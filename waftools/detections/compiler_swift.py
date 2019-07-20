@@ -21,9 +21,9 @@ def __add_swift_flags(ctx):
     verRe = re.compile("(?i)version\s?([\d.]+)")
     ctx.env.SWIFT_VERSION = verRe.search(__run([ctx.env.SWIFT, '-version'])).group(1)
 
-    # the -swift-version parameter is only supported on swift 3.1 and newer
-    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("3.1"):
-        ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "3" ])
+    # prevent possible breakages with future swift versions
+    if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("6.0"):
+        ctx.env.SWIFT_FLAGS.extend([ "-swift-version", "5" ])
 
     if ctx.is_debug_build():
         ctx.env.SWIFT_FLAGS.append("-g")
@@ -109,7 +109,7 @@ def __find_swift_library(ctx):
         ctx.end_msg(False)
 
     enableStatic = getattr(ctx.options, 'enable_swift-static')
-    if (enableStatic or enableStatic == None) and 'SWIFT_LIB_STATIC' in swift_libraries:
+    if (enableStatic) and 'SWIFT_LIB_STATIC' in swift_libraries:
         __add_static_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_STATIC'])
     else:
         __add_dynamic_swift_library_linking_flags(ctx, swift_libraries['SWIFT_LIB_DYNAMIC'])
@@ -136,7 +136,6 @@ def __find_macos_sdk(ctx):
         sdk_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-version' ])
 
     if sdk:
-        ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
         build_version = '10.10.0'
 
@@ -161,6 +160,8 @@ def __find_macos_sdk(ctx):
                 ctx.env.MACOS_SDK_VERSION = build_version
             else:
                 ctx.env.MACOS_SDK_VERSION = sdk_version
+
+        ctx.end_msg(sdk + ' (version found: ' + ctx.env.MACOS_SDK_VERSION + ')')
     else:
         ctx.end_msg(False)
 

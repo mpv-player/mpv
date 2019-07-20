@@ -177,9 +177,11 @@ class MPVHelper: NSObject {
             sendWarning("Invalid ICC profile data.")
             return
         }
-        let iccSize = iccData.count
-        iccData.withUnsafeMutableBytes { (u8Ptr: UnsafeMutablePointer<UInt8>) in
-            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: iccSize))
+        iccData.withUnsafeMutableBytes { (ptr: UnsafeMutableRawBufferPointer) in
+            guard let baseAddress = ptr.baseAddress, ptr.count > 0 else { return }
+
+            let u8Ptr = baseAddress.assumingMemoryBound(to: UInt8.self)
+            let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: ptr.count))
             var icc = mpv_byte_array(data: iccBstr.start, size: iccBstr.len)
             let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: &icc)
             mpv_render_context_set_parameter(mpvRenderContext, params)

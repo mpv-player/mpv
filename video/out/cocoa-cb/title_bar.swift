@@ -29,7 +29,7 @@ class TitleBar: NSVisualEffectView {
         get { return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height }
     }
     var buttons: [NSButton] {
-        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindowButton]).flatMap { cocoaCB.window?.standardWindowButton($0) } }
+        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).compactMap { cocoaCB.window?.standardWindowButton($0) } }
     }
 
     override var material: NSVisualEffectView.Material {
@@ -57,7 +57,7 @@ class TitleBar: NSVisualEffectView {
         super.init(frame: f)
         alphaValue = 0
         blendingMode = .withinWindow
-        autoresizingMask = [.viewWidthSizable, .viewMinYMargin]
+        autoresizingMask = [.width, .minYMargin]
         systemBar?.alphaValue = 0
         state = .followsWindowActiveState
         wantsLayer = true
@@ -148,7 +148,7 @@ class TitleBar: NSVisualEffectView {
         }
     }
 
-    func hide() {
+    @objc func hide() {
         guard let window = cocoaCB.window else { return }
         if window.isInFullscreen && !window.isAnimating {
             alphaValue = 0
@@ -175,26 +175,26 @@ class TitleBar: NSVisualEffectView {
     func appearanceFrom(string: String) -> NSAppearance? {
         switch string {
         case "1", "aqua":
-            return NSAppearance(named: NSAppearanceNameAqua)
+            return NSAppearance(named: .aqua)
         case "3", "vibrantLight":
-            return NSAppearance(named: NSAppearanceNameVibrantLight)
+            return NSAppearance(named: .vibrantLight)
         case "4", "vibrantDark":
-            return NSAppearance(named: NSAppearanceNameVibrantDark)
+            return NSAppearance(named: .vibrantDark)
         default: break
         }
 
         if #available(macOS 10.14, *) {
             switch string {
             case "2", "darkAqua":
-                return NSAppearance(named: NSAppearanceNameDarkAqua)
+                return NSAppearance(named: .darkAqua)
             case "5", "aquaHighContrast":
-                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastAqua)
+                return NSAppearance(named: .accessibilityHighContrastAqua)
             case "6", "darkAquaHighContrast":
-                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastDarkAqua)
+                return NSAppearance(named: .accessibilityHighContrastDarkAqua)
             case "7", "vibrantLightHighContrast":
-                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastVibrantLight)
+                return NSAppearance(named: .accessibilityHighContrastVibrantLight)
             case "8", "vibrantDarkHighContrast":
-                return NSAppearance(named: NSAppearanceNameAccessibilityHighContrastVibrantDark)
+                return NSAppearance(named: .accessibilityHighContrastVibrantDark)
             case "0", "auto": fallthrough
             default:
                 return nil

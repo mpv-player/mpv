@@ -54,7 +54,7 @@ class Window: NSWindow, NSWindowDelegate {
     override var canBecomeKey: Bool { return true }
     override var canBecomeMain: Bool { return true }
 
-    override var styleMask: NSWindowStyleMask {
+    override var styleMask: NSWindow.StyleMask {
         get { return super.styleMask }
         set {
             let responder = firstResponder
@@ -72,7 +72,7 @@ class Window: NSWindow, NSWindowDelegate {
 
         // workaround for an AppKit bug where the NSWindow can't be placed on a
         // none Main screen NSScreen outside the Main screen's frame bounds
-        if let wantedScreen = screen, screen != NSScreen.main() {
+        if let wantedScreen = screen, screen != NSScreen.main {
             var absoluteWantedOrigin = contentRect.origin
             absoluteWantedOrigin.x += wantedScreen.frame.origin.x
             absoluteWantedOrigin.y += wantedScreen.frame.origin.y
@@ -255,26 +255,26 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func setOnTop(_ state: Bool, _ ontopLevel: Any) {
-        let stdLevel = Int(CGWindowLevelForKey(.normalWindow))
+        let stdLevel: NSWindow.Level = .normal
 
         if state {
             if ontopLevel is Int {
                 switch ontopLevel as? Int {
                 case .some(-1):
-                    level = Int(CGWindowLevelForKey(.floatingWindow))
+                    level = .floating
                 case .some(-2):
-                    level = Int(CGWindowLevelForKey(.statusWindow))+1
+                    level = .statusBar + 1
                 default:
-                    level = ontopLevel as? Int ?? stdLevel
+                    level = NSWindow.Level(ontopLevel as? Int ?? stdLevel.rawValue)
                 }
             } else {
                 switch ontopLevel as? String {
                 case .some("window"):
-                    level = Int(CGWindowLevelForKey(.floatingWindow))
+                    level = .floating
                 case .some("system"):
-                    level = Int(CGWindowLevelForKey(.statusWindow))+1
+                    level = .statusBar + 1
                 default:
-                    level = Int(ontopLevel as? String ?? "") ?? stdLevel
+                    level = NSWindow.Level(Int(ontopLevel as? String ?? "") ?? stdLevel.rawValue)
                 }
             }
             collectionBehavior.remove(.transient)
@@ -410,7 +410,7 @@ class Window: NSWindow, NSWindowDelegate {
             return frameRect
         }
 
-        guard let ts: NSScreen = tScreen ?? screen ?? NSScreen.main() else {
+        guard let ts: NSScreen = tScreen ?? screen ?? NSScreen.main else {
             return frameRect
         }
         var nf: NSRect = frameRect
@@ -443,9 +443,9 @@ class Window: NSWindow, NSWindowDelegate {
         return nf
     }
 
-    func setNormalWindowSize() { setWindowScale(1.0) }
-    func setHalfWindowSize()   { setWindowScale(0.5) }
-    func setDoubleWindowSize() { setWindowScale(2.0) }
+    @objc func setNormalWindowSize() { setWindowScale(1.0) }
+    @objc func setHalfWindowSize()   { setWindowScale(0.5) }
+    @objc func setDoubleWindowSize() { setWindowScale(2.0) }
 
     func setWindowScale(_ scale: Double) {
         mpv.commandAsync(["osd-auto", "set", "window-scale", "\(scale)"])
@@ -480,7 +480,7 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.layer?.inLiveResize = false
     }
 
-    func windowShouldClose(_ sender: Any) -> Bool {
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
         cocoa_put_key(SWIFT_KEY_CLOSE_WIN)
         return false
     }

@@ -17,11 +17,15 @@
 
 import Cocoa
 
+extension NSDeviceDescriptionKey {
+    static let screenNumber = NSDeviceDescriptionKey("NSScreenNumber")
+}
+
 extension NSScreen {
 
     public var displayID: CGDirectDisplayID {
         get {
-            return deviceDescription["NSScreenNumber"] as? CGDirectDisplayID ?? 0
+            return deviceDescription[.screenNumber] as? CGDirectDisplayID ?? 0
         }
     }
 

@@ -16,9 +16,68 @@
  */
 
 #if !HAVE_MACOS_10_14_FEATURES
-let NSAppearanceNameDarkAqua = "NSAppearanceNameDarkAqua"
-let NSAppearanceNameAccessibilityHighContrastAqua = "NSAppearanceNameAccessibilityAqua"
-let NSAppearanceNameAccessibilityHighContrastDarkAqua = "NSAppearanceNameAccessibilityDarkAqua"
-let NSAppearanceNameAccessibilityHighContrastVibrantLight = "NSAppearanceNameAccessibilityVibrantLight"
-let NSAppearanceNameAccessibilityHighContrastVibrantDark = "NSAppearanceNameAccessibilityVibrantDark"
+extension NSAppearance.Name {
+    static let darkAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameDarkAqua")
+    static let accessibilityHighContrastAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityAqua")
+    static let accessibilityHighContrastDarkAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityDarkAqua")
+    static let accessibilityHighContrastVibrantLight: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantLight")
+    static let accessibilityHighContrastVibrantDark: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantDark")
+}
 #endif
+
+extension NSPasteboard.PasteboardType {
+
+    static let fileURLCompat: NSPasteboard.PasteboardType = {
+        if #available(OSX 10.13, *) {
+            return .fileURL
+        } else {
+            return NSPasteboard.PasteboardType(kUTTypeURL as String)
+        }
+    } ()
+
+    static let URLCompat: NSPasteboard.PasteboardType = {
+        if #available(OSX 10.13, *) {
+            return .URL
+        } else {
+            return NSPasteboard.PasteboardType(kUTTypeFileURL as String)
+        }
+    } ()
+}
+
+#if !swift(>=5.0)
+extension Data {
+
+    mutating func withUnsafeMutableBytes<Type>(_ body: (UnsafeMutableRawBufferPointer) throws -> Type) rethrows -> Type {
+        let dataCount = count
+        return try withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) throws -> Type in
+            try body(UnsafeMutableRawBufferPointer(start: ptr, count: dataCount))
+        }
+    }
+}
+#endif
+
+#if !swift(>=4.2)
+extension NSDraggingInfo {
+
+    var draggingPasteboard: NSPasteboard {
+        get { return draggingPasteboard() }
+    }
+}
+#endif
+
+#if !swift(>=4.1)
+extension Array {
+
+    func compactMap<ElementOfResult>(_ transform: (Element) throws -> ElementOfResult?) rethrows -> [ElementOfResult] {
+        return try self.flatMap(transform)
+    }
+}
+
+extension NSWindow.Level {
+
+    static func +(left: NSWindow.Level, right: Int) -> NSWindow.Level {
+        return NSWindow.Level(left.rawValue + right)
+    }
+}
+#endif
+
