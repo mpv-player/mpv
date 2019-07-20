@@ -6,7 +6,7 @@ from distutils.version import StrictVersion
 
 def __run(cmd):
     try:
-        output = Utils.subprocess.check_output(cmd, universal_newlines=True)
+        output = Utils.subprocess.check_output(cmd, stderr=Utils.subprocess.STDOUT, universal_newlines=True)
         return output.strip()
     except Exception:
         return ""
@@ -118,6 +118,7 @@ def __find_macos_sdk(ctx):
     ctx.start_msg('Checking for macOS SDK')
     sdk = None
     sdk_build_version = None
+    sdk_version = None
 
     #look for set macOS SDK paths and version in passed environment variables
     if 'MACOS_SDK' in ctx.environ:
@@ -129,18 +130,37 @@ def __find_macos_sdk(ctx):
     if not sdk:
         sdk = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
     if not ctx.env.MACOS_SDK_VERSION:
+        #show-sdk-build-version: is not available on older command line tools, but return a build version (eg 17A360)
+        #show-sdk-version: is always available, but on older dev tools it's only the major version
         sdk_build_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-build-version' ])
+        sdk_version = __run(['xcrun', '--sdk', 'macosx', '--show-sdk-version' ])
 
     if sdk:
         ctx.end_msg(sdk)
         ctx.env.MACOS_SDK = sdk
+        build_version = '10.10.0'
 
-        if sdk_build_version and not ctx.env.MACOS_SDK_VERSION:
-            verRe = re.compile("(\d+)(\D+)(\d+)")
-            version_parts = verRe.search(sdk_build_version)
-            major = int(version_parts.group(1))-4
-            minor = string.ascii_lowercase.index(version_parts.group(2).lower())
-            ctx.env.MACOS_SDK_VERSION = '10.' + str(major) + '.' + str(minor)
+        if not ctx.env.MACOS_SDK_VERSION:
+            #convert build version to a version string
+            #first 2 two digits are the major version, starting with 15 which is 10.11 (offset of 4)
+            #1 char is the minor version, A => 0, B => 1 and ongoing
+            #las digits are bugfix version, which are nor relevant for us
+            #eg 16E185 => 10.12.4, 17A360 => 10.13, 18B71 => 10.14.1
+            if sdk_build_version and isinstance(sdk_build_version, str):
+                verRe = re.compile("(\d+)(\D+)(\d+)")
+                version_parts = verRe.search(sdk_build_version)
+                major = int(version_parts.group(1))-4
+                minor = string.ascii_lowercase.index(version_parts.group(2).lower())
+                build_version = '10.' + str(major) + '.' + str(minor)
+
+            if not isinstance(sdk_version, str):
+                sdk_version = '10.10.0'
+
+            #pick the higher version, always pick sdk over build if newer
+            if StrictVersion(build_version) > StrictVersion(sdk_version):
+                ctx.env.MACOS_SDK_VERSION = build_version
+            else:
+                ctx.env.MACOS_SDK_VERSION = sdk_version
     else:
         ctx.end_msg(False)
 
