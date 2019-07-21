@@ -1,19 +1,34 @@
-language: generic
+language: c
 
-os:
-  - linux
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode10.2
+      compiler: clang
+    - os: osx
+      osx_image: xcode10.1
+      compiler: clang
+    - os: osx
+      osx_image: xcode9.2
+      compiler: clang
+    - os: linux
+      compiler: gcc
+      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
+    - os: linux
+      compiler: clang
+      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
+    - os: linux
+      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
+    - os: linux
+      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
 
+dist: bionic
 services:
   - docker
 
 sudo: required
 
 env:
-  matrix:
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=gcc
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh CC=clang
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
-    - CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   global:
     # Coverity token
     - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
@@ -28,10 +43,14 @@ branches:
     - /release\/.*$/
 
 before_install:
-  - docker pull $CONTAINER
+  - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
+  - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then "$TRAVIS_BUILD_DIR/ci/get_ffmpeg.sh"; fi
 script:
   - ./bootstrap.py
-  - docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./ci/build-macos.sh; fi
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
 
@@ -52,3 +71,16 @@ addons:
     build_command_prepend: "./bootstrap.py && ./waf configure"
     build_command:   "./waf build"
     branch_pattern: coverity_scan
+  homebrew:
+    packages:
+      - autoconf
+      - automake
+      - freetype
+      - fribidi
+      - libass
+      - libtool
+      - little-cms2
+      - luajit
+      - nasm
+      - pkg-config
+    update: true
