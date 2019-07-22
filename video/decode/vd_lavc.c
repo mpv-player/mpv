@@ -140,7 +140,7 @@ const struct m_sub_options vd_lavc_conf = {
         .framedrop = AVDISCARD_NONREF,
         .dr = 1,
         .hwdec_api = HAVE_RPI ? "mmal" : "no",
-        .hwdec_codecs = "h264,vc1,hevc,vp9",
+        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9",
     },
 };
 
