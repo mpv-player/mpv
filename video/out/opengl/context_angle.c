@@ -339,8 +339,14 @@ static bool d3d9_device_create(struct ra_ctx *ctx)
             EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
         EGL_NONE,
     };
+    HWND hwnd = vo->w32 ? vo_w32_hwnd(vo) : NULL;
+    HDC hdc = hwnd ? GetWindowDC(hwnd) : NULL;
     p->egl_display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE,
-        EGL_DEFAULT_DISPLAY, display_attributes);
+        (void*)hdc, display_attributes);
+    if (hdc) {
+       ReleaseDC(hwnd, hdc);
+       hdc = NULL;
+    }
     if (p->egl_display == EGL_NO_DISPLAY) {
         MP_FATAL(vo, "Couldn't get display\n");
         return false;
@@ -408,7 +414,7 @@ static void context_destroy(struct ra_ctx *ctx)
     p->egl_context = EGL_NO_CONTEXT;
 }
 
-static bool context_init(struct ra_ctx *ctx)
+static bool context_init(struct ra_ctx *ctx, int renderer)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -419,6 +425,15 @@ static bool context_init(struct ra_ctx *ctx)
     }
 
     const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+
+    if (RENDERER_D3D11 == renderer) {
+      if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||
+        !strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") ||
+        !strstr(exts, "EGL_EXT_device_query")) {
+        MP_FATAL(vo, "Couldn't support EGL display for d3d11\n");
+        return false;
+      }
+    }
     if (exts)
         MP_DBG(vo, "EGL extensions: %s\n", exts);
 
@@ -553,12 +568,15 @@ static bool angle_init(struct ra_ctx *ctx)
         goto fail;
     }
 
+    if (!vo_w32_init(vo))
+        goto fail;
+
     // Create the underlying EGL device implementation
     bool context_ok = false;
     if ((!context_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
         context_ok = d3d11_device_create(ctx);
         if (context_ok) {
-            context_ok = context_init(ctx);
+            context_ok = context_init(ctx, RENDERER_D3D11);
             if (!context_ok)
                 d3d11_device_destroy(ctx);
         }
@@ -568,15 +586,12 @@ static bool angle_init(struct ra_ctx *ctx)
         if (context_ok) {
             MP_VERBOSE(vo, "Using Direct3D 9\n");
 
-            context_ok = context_init(ctx);
+            context_ok = context_init(ctx, RENDERER_D3D9);
             if (!context_ok)
                 d3d9_device_destroy(ctx);
         }
     }
     if (!context_ok)
-        goto fail;
-
-    if (!vo_w32_init(vo))
         goto fail;
 
     // Create the underlying EGL surface implementation
