@@ -7,7 +7,7 @@ import fileinput
 from optparse import OptionParser
 
 def sh(command):
-    return os.popen(command).read()
+    return os.popen(command).read().strip()
 
 def bundle_path(binary_name):
     return "%s.app" % binary_name
@@ -80,7 +80,7 @@ def main():
 
     if options.deps:
         print("> bundling dependencies")
-        sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)]))
+        print(sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)])))
 
     print("done.")
 

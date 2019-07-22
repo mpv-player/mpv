@@ -15,6 +15,12 @@ shallow_clone: true
 test: off
 
 install:
+  # Support for Ada and Objective-C was removed from MSYS2. GCC won't update if
+  # these packages are installed.
+  - >-
+    C:\msys64\usr\bin\pacman -R --noconfirm --noprogressbar
+    mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada
+    mingw-w64-x86_64-gcc-objc
   # Update core packages
   - C:\msys64\usr\bin\pacman -Syyuu --noconfirm --noprogressbar --ask=20
   # Update non-core packages

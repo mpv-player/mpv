@@ -20,7 +20,8 @@ def is_user_lib(objfile, libname):
            not "libc." in libname and \
            not "libgcc." in libname and \
            not os.path.basename(libname) == 'Python' and \
-           not os.path.basename(objfile) in libname
+           not os.path.basename(objfile) in libname and \
+           not "libswift" in libname
 
 def otool(objfile):
     command = "otool -L %s | grep -e '\t' | awk '{ print $1 }'" % objfile
@@ -32,6 +33,9 @@ def install_name_tool_change(old, new, objfile):
 
 def install_name_tool_id(name, objfile):
     subprocess.call(["install_name_tool", "-id", name, objfile])
+
+def install_name_tool_add_rpath(rpath, binary):
+    subprocess.call(["install_name_tool", "-add_rpath", rpath, binary])
 
 def libraries(objfile, result = dict()):
     libs_list       = otool(objfile)
@@ -82,15 +86,30 @@ def process_libraries(libs_dict, binary, processed = []):
 
     return ls
 
+def process_swift_libraries(binary):
+    command = ['xcrun', '--find', 'swift-stdlib-tool']
+    swiftStdlibTool = subprocess.check_output(command, universal_newlines=True).strip()
+
+    command = [swiftStdlibTool, '--copy', '--platform', 'macosx', '--scan-executable', binary, '--destination', lib_path(binary)]
+    subprocess.check_output(command, universal_newlines=True)
+
+    print(">> setting additional rpath for swift libraries")
+    install_name_tool_add_rpath("@executable_path/lib", binary)
+
 def main():
     binary = os.path.abspath(sys.argv[1])
     if not os.path.exists(lib_path(binary)):
         os.makedirs(lib_path(binary))
+    print(">> gathering all linked libraries")
     libs = libraries(binary)
 
+    print(">> copying and processing all linked libraries")
     libs_processed = process_libraries(libs, binary)
     while libs_processed is not None:
         libs_processed = process_libraries(libs, binary, libs_processed)
+
+    print(">> copying and processing swift libraries")
+    process_swift_libraries(binary)
 
 if __name__ == "__main__":
     main()

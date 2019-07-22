@@ -36,9 +36,12 @@ struct mp_vaapi_ctx {
     void (*destroy_native_ctx)(void *native_ctx);
 };
 
-#define CHECK_VA_STATUS(ctx, msg) \
+#define CHECK_VA_STATUS_LEVEL(ctx, msg, level) \
     (status == VA_STATUS_SUCCESS ? true \
-        : (MP_ERR(ctx, "%s failed (%s)\n", msg, vaErrorStr(status)), false))
+        : (MP_MSG(ctx, level, "%s failed (%s)\n", msg, vaErrorStr(status)), false))
+
+#define CHECK_VA_STATUS(ctx, msg) \
+    CHECK_VA_STATUS_LEVEL(ctx, msg, MSGL_ERR)
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 

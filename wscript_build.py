@@ -165,6 +165,7 @@ def build(ctx):
         swift_source = [
             ( "osdep/macOS_mpv_helper.swift" ),
             ( "osdep/macOS_swift_extensions.swift" ),
+            ( "osdep/macOS_swift_compat.swift" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
@@ -449,6 +450,7 @@ def build(ctx):
         ( "video/out/hwdec/hwdec_cuda.c",        "cuda-hwaccel" ),
         ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-hwaccel && gl" ),
         ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-hwaccel && vulkan" ),
+        ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-vulkan" ),
         ( "video/out/placebo/ra_pl.c",           "libplacebo" ),
         ( "video/out/placebo/utils.c",           "libplacebo" ),
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
@@ -476,7 +478,6 @@ def build(ctx):
         ( "video/out/opengl/hwdec_ios.m",        "ios-gl" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
-        ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/libmpv_gl.c",        "gl" ),
         ( "video/out/opengl/ra_gl.c",            "gl" ),

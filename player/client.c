@@ -1035,10 +1035,12 @@ static void cmd_complete(struct mp_cmd_ctx *cmd)
 
 static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res)
 {
-    if (!ctx->mpctx->initialized)
-        return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
+    if (!ctx->mpctx->initialized) {
+        talloc_free(cmd);
+        return MPV_ERROR_UNINITIALIZED;
+    }
 
     cmd->sender = ctx->name;
 
@@ -1139,10 +1141,12 @@ static void async_cmd_fn(void *data)
 
 static int run_async_cmd(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 {
-    if (!ctx->mpctx->initialized)
-        return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
+    if (!ctx->mpctx->initialized) {
+        talloc_free(cmd);
+        return MPV_ERROR_UNINITIALIZED;
+    }
 
     cmd->sender = ctx->name;
 

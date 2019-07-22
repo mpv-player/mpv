@@ -125,6 +125,12 @@ build_options = [
         'desc': 'generate a clang compilation database',
         'func': check_true,
         'default': 'disable',
+    } , {
+        'name': '--swift-static',
+        'desc': 'static Swift linking',
+        'deps': 'os-darwin',
+        'func': check_ctx_vars('SWIFT_LIB_STATIC'),
+        'default': 'disable'
     }
 ]
 
@@ -418,7 +424,7 @@ iconv support use --disable-iconv.",
 ]
 
 ffmpeg_pkg_config_checks = [
-    'libavutil',     '>= 56.12.100',
+    'libavutil',     '>= 56.27.100',
     'libavcodec',    '>= 58.16.100',
     'libavformat',   '>= 58.9.100',
     'libswscale',    '>= 5.0.101',
@@ -827,6 +833,11 @@ video_output_features = [
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
     }, {
+        'name': 'vaapi-vulkan',
+        'desc': 'VAAPI Vulkan',
+        'deps': 'vaapi && vulkan',
+        'func': check_true,
+    }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
@@ -935,10 +946,20 @@ standalone_features = [
             framework_name=['AppKit'],
             compile_filename='test-touchbar.m',
             linkflags='-fobjc-arc')
-     }, {
+    }, {
+        'name': '--macos-10-11-features',
+        'desc': 'macOS 10.11 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.11')
+    }, {
+        'name': '--macos-10-14-features',
+        'desc': 'macOS 10.14 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.14')
+    }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS opengl-cb backend',
-        'deps': 'cocoa  && swift',
+        'deps': 'cocoa && swift',
         'func': check_true
     }
 ]

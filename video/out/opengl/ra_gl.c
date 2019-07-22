@@ -150,6 +150,9 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             .linear_filter  = gl_fmt->flags & F_TF,
             .renderable     = (gl_fmt->flags & F_CR) &&
                               (gl->mpgl_caps & MPGL_CAP_FB),
+            // TODO: Check whether it's a storable format
+            // https://www.khronos.org/opengl/wiki/Image_Load_Store
+            .storable       = true,
         };
 
         int csize = gl_component_size(gl_fmt->type) * 8;

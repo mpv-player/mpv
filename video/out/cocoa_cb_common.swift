@@ -29,7 +29,7 @@ class CocoaCB: NSObject {
 
     var cursorHidden: Bool = false
     var cursorVisibilityWanted: Bool = true
-    var isShuttingDown: Bool = false
+    @objc var isShuttingDown: Bool = false
 
     var title: String = "mpv" {
         didSet { if let window = window { window.title = title } }
@@ -52,7 +52,7 @@ class CocoaCB: NSObject {
 
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
-    init(_ mpvHandle: OpaquePointer) {
+    @objc init(_ mpvHandle: OpaquePointer) {
         mpv = MPVHelper(mpvHandle)
         super.init()
         layer = VideoLayer(cocoaCB: self)
@@ -97,7 +97,7 @@ class CocoaCB: NSObject {
             mpv.sendError("Something went wrong, no View was initialized")
             exit(1)
         }
-        guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main() else {
+        guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main else {
             mpv.sendError("Something went wrong, no Screen was found")
             exit(1)
         }
@@ -135,7 +135,7 @@ class CocoaCB: NSObject {
 
     func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
         let opts: mp_vo_opts = vo.pointee.opts.pointee
-        guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main() else {
+        guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main else {
             mpv.sendWarning("Couldn't update Window size, no Screen available")
             return
         }
@@ -170,7 +170,7 @@ class CocoaCB: NSObject {
         let opts: mp_vo_opts = vo.pointee.opts.pointee
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
 
-        guard let screen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main(),
+        guard let screen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main,
               let link = self.link else
         {
             mpv.sendWarning("Couldn't start DisplayLink, no Screen or DisplayLink available")
@@ -279,18 +279,19 @@ class CocoaCB: NSObject {
         // the polinomial approximation for apple lmu value -> lux was empirically
         // derived by firefox developers (Apple provides no documentation).
         // https://bugzilla.mozilla.org/show_bug.cgi?id=793728
-        let power_c4 = 1 / pow(10, 27)
-        let power_c3 = 1 / pow(10, 19)
-        let power_c2 = 1 / pow(10, 12)
-        let power_c1 = 1 / pow(10, 5)
+        let power_c4: Double = 1 / pow(10, 27)
+        let power_c3: Double = 1 / pow(10, 19)
+        let power_c2: Double = 1 / pow(10, 12)
+        let power_c1: Double = 1 / pow(10, 5)
 
-        let term4 = -3.0 * power_c4 * pow(Decimal(v), 4)
-        let term3 = 2.6 * power_c3 * pow(Decimal(v), 3)
-        let term2 = -3.4 * power_c2 * pow(Decimal(v), 2)
-        let term1 = 3.9 * power_c1 * Decimal(v)
+        let lum = Double(v)
+        let term4: Double = -3.0 * power_c4 * pow(lum, 4.0)
+        let term3: Double = 2.6 * power_c3 * pow(lum, 3.0)
+        let term2: Double = -3.4 * power_c2 * pow(lum, 2.0)
+        let term1: Double = 3.9 * power_c1 * lum
 
-        let lux = Int(ceil( Double((term4 + term3 + term2 + term1 - 0.19) as NSNumber)))
-        return Int(lux > 0 ? lux : 0)
+        let lux = Int(ceil(term4 + term3 + term2 + term1 - 0.19))
+        return lux > 0 ? lux : 0
     }
 
     var lightSensorCallback: IOServiceInterestCallback = { (ctx, service, messageType, messageArgument) -> Void in
@@ -370,14 +371,13 @@ class CocoaCB: NSObject {
     }
 
     func getScreenBy(id screenID: Int) -> NSScreen? {
-        guard let screens = NSScreen.screens() else { return nil}
-        if screenID >= screens.count {
+        if screenID >= NSScreen.screens.count {
             mpv.sendInfo("Screen ID \(screenID) does not exist, falling back to current device")
             return nil
         } else if screenID < 0 {
             return nil
         }
-        return screens[screenID]
+        return NSScreen.screens[screenID]
     }
 
     func getWindowGeometry(forScreen targetScreen: NSScreen,
@@ -486,7 +486,7 @@ class CocoaCB: NSObject {
                 var count: Int32 = 0
                 let screen = ccb.window != nil ? ccb.window?.screen :
                                                  ccb.getScreenBy(id: Int(opts.screen_id)) ??
-                                                 NSScreen.main()
+                                                 NSScreen.main
                 let displayName = screen?.displayName ?? "Unknown"
 
                 SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
@@ -545,7 +545,7 @@ class CocoaCB: NSObject {
         }
     }
 
-    func processEvent(_ event: UnsafePointer<mpv_event>) {
+    @objc func processEvent(_ event: UnsafePointer<mpv_event>) {
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
             shutdown()
