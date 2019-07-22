@@ -87,7 +87,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <io.h>
 #endif
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 
 #include <stdio.h>
 #include <dirent.h>

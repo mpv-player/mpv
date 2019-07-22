@@ -216,13 +216,22 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 }
 
 
-
+#ifdef _MSC_VER
+#define EVALARGS(F, str, count, suffix) F(str, count, suffix)
+#define EVALARGS2(F, id, name, multiple, suffix) F(id, name, multiple, suffix)
+#define E(str, suffix, type) const struct ebml_elem_desc ebml_##suffix##_desc = { str, type };
+#define E_SN(str, count, suffix) const struct ebml_elem_desc ebml_##suffix##_desc = { str, EBML_TYPE_SUBELEMENTS, sizeof(struct ebml_##suffix), count, (const struct ebml_field_desc[]){
+#define E_S(str, count) EVALARGS(E_SN, str, count, N)
+#define FN(id, name, multiple, suffix) { id, multiple, offsetof(struct ebml_##suffix, name), offsetof(struct ebml_##suffix, n_ ## name), &ebml_##name##_desc},
+#define F(id, name, multiple) EVALARGS2(FN, id, name, multiple, N)
+#else
 #define EVALARGS(F, ...) F(__VA_ARGS__)
 #define E(str, N, type) const struct ebml_elem_desc ebml_ ## N ## _desc = { str, type };
 #define E_SN(str, count, N) const struct ebml_elem_desc ebml_ ## N ## _desc = { str, EBML_TYPE_SUBELEMENTS, sizeof(struct ebml_ ## N), count, (const struct ebml_field_desc[]){
 #define E_S(str, count) EVALARGS(E_SN, str, count, N)
 #define FN(id, name, multiple, N) { id, multiple, offsetof(struct ebml_ ## N, name), offsetof(struct ebml_ ## N, n_ ## name), &ebml_##name##_desc},
 #define F(id, name, multiple) EVALARGS(FN, id, name, multiple, N)
+#endif
 #include "ebml_defs.c"
 #undef EVALARGS
 #undef SN

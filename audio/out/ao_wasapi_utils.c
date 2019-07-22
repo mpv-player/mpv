@@ -145,7 +145,7 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 
     wformat->SubFormat                   = *format_to_subtype(format->mp_format);
     wformat->Samples.wValidBitsPerSample = format->used_msb;
-    wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask               = (DWORD)mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
 }
 
@@ -162,7 +162,7 @@ static void change_waveformat_channels(WAVEFORMATEXTENSIBLE *wformat,
                                        struct mp_chmap *channels)
 {
     wformat->Format.nChannels = channels->num;
-    wformat->dwChannelMask    = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask    = (DWORD)mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
 }
 
@@ -426,7 +426,7 @@ static bool find_formats_shared(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
     struct wasapi_state *state = ao->priv;
 
-    WAVEFORMATEX *closestMatch;
+    WAVEFORMATEX *closestMatch = NULL;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_SHARED,
                                                 &wformat->Format,
@@ -592,7 +592,7 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     REFERENCE_TIME bufferDuration = devicePeriod;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
         // for shared mode, use integer multiple of device period close to 50ms
-        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
+        bufferDuration = (REFERENCE_TIME)(devicePeriod * ceil(50.0 * 10000.0 / devicePeriod));
     }
 
     // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
@@ -859,7 +859,7 @@ LPWSTR wasapi_find_deviceID(struct ao *ao)
     long long devno = bstrtoll(device, &rest, 10);
     if (!rest.len && 0 <= devno && devno < (long long)enumerator->count) {
         MP_VERBOSE(ao, "Selecting device by number: #%lld\n", devno);
-        d = device_desc_for_num(enumerator, devno);
+        d = device_desc_for_num(enumerator, (UINT)devno);
         deviceID = select_device(ao->log, d);
         goto exit_label;
     }

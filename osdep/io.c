@@ -55,7 +55,7 @@ bool mp_set_cloexec(int fd)
     return true;
 }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 int mp_make_cloexec_pipe(int pipes[2])
 {
     pipes[0] = pipes[1] = -1;
@@ -75,7 +75,7 @@ int mp_make_cloexec_pipe(int pipes[2])
 }
 #endif
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 int mp_make_wakeup_pipe(int pipes[2])
 {
     return mp_make_cloexec_pipe(pipes);
@@ -97,7 +97,7 @@ int mp_make_wakeup_pipe(int pipes[2])
 
 void mp_flush_wakeup_pipe(int pipe_end)
 {
-#ifndef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
     char buf[100];
     (void)read(pipe_end, buf, sizeof(buf));
 #endif
@@ -135,7 +135,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 
 #endif // _WIN32
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 
 #include <io.h>
 #include <fcntl.h>
@@ -174,7 +174,8 @@ static time_t filetime_to_unix_time(int64_t wintime)
 
 static bool get_file_ids_win8(HANDLE h, dev_t *dev, ino_t *ino)
 {
-    FILE_ID_INFO ii;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+  FILE_ID_INFO ii;
     if (!GetFileInformationByHandleEx(h, FileIdInfo, &ii, sizeof(ii)))
         return false;
     *dev = ii.VolumeSerialNumber;
@@ -185,6 +186,9 @@ static bool get_file_ids_win8(HANDLE h, dev_t *dev, ino_t *ino)
     assert(sizeof(*ino) <= sizeof(ii.FileId));
     memcpy(ino, &ii.FileId, sizeof(*ino));
     return true;
+#else
+    return false;
+#endif
 }
 
 #if HAVE_UWP

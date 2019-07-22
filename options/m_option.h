@@ -586,7 +586,33 @@ extern const char m_option_path_separator;
  * 0). Thus the first OPT_SOMETHING is a wrapper which just adds one
  * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
  */
+#ifdef _MSC_VER
+#define OPT_FLAG(optname, varname, flagv, ...) \
+    OPT_GENERAL(int, optname, varname, flagv, \
+               .type = &m_option_type_flag,  ##__VA_ARGS__)
 
+#define OPT_STRINGLIST(optname, varname, flagv, ...) \
+    OPT_GENERAL(char**, optname, varname, flagv, \
+                .type = &m_option_type_string_list, ##__VA_ARGS__)
+
+#define OPT_KEYVALUELIST(optname, varname, flagv, ...) \
+    OPT_GENERAL(char**, optname, varname, flagv, \
+                .type = &m_option_type_keyvalue_list, ##__VA_ARGS__)
+
+#define OPT_PATHLIST(optname, varname, flagv, ...)                                               \
+    OPT_GENERAL(char**, optname, varname, flagv, \
+                .type = &m_option_type_string_list,\
+                .priv = (void *)&m_option_path_separator,\
+                ##__VA_ARGS__)
+
+#define OPT_INT(optname, varname, flagv, ...) \
+    OPT_GENERAL(int, optname, varname, flagv, \
+                .type = &m_option_type_int, ##__VA_ARGS__)
+
+#define OPT_INT64(optname, varname, flagv, ...) \
+    OPT_GENERAL(int64_t, optname, varname, flagv, \
+                .type = &m_option_type_int64, ##__VA_ARGS__)
+#else
 #define OPT_FLAG(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
 
@@ -605,11 +631,41 @@ extern const char m_option_path_separator;
 
 #define OPT_INT64(...) \
     OPT_GENERAL(int64_t, __VA_ARGS__, .type = &m_option_type_int64)
+#endif
 
 #define OPT_RANGE_(ctype, optname, varname, flags, minval, maxval, ...) \
     OPT_GENERAL(ctype, optname, varname, (flags) | CONF_RANGE,          \
                 .min = minval, .max = maxval, __VA_ARGS__)
 
+#ifdef _MSC_VER
+#define OPT_INTRANGE(optname, varname, flags, minval, maxval, ...) \
+    OPT_RANGE_(int, optname, varname, flags, minval, maxval, \
+               .type = &m_option_type_int, ##__VA_ARGS__)
+
+#define OPT_FLOATRANGE(optname, varname, flags, minval, maxval, ...) \
+    OPT_RANGE_(float, optname, varname, flags, minval, maxval, \
+               .type = &m_option_type_float, ##__VA_ARGS__)
+
+#define OPT_DOUBLERANGE(optname, varname, flags, minval, maxval, ...) \
+    OPT_RANGE_(double, optname, varname, flags, minval, maxval, \
+               .type = &m_option_type_double, ##__VA_ARGS__)
+
+#define OPT_INTPAIR(optname, varname, flagv, ...) \
+    OPT_GENERAL_NOTYPE(optname, varname, flagv, \
+                       .type = &m_option_type_intpair, ##__VA_ARGS__)
+
+#define OPT_FLOAT(optname, varname, flagv, ...) \
+    OPT_GENERAL(float, optname, varname, flagv, \
+               .type = &m_option_type_float, ##__VA_ARGS__)
+
+#define OPT_DOUBLE(optname, varname, flagv, ...) \
+    OPT_GENERAL(double, optname, varname, flagv, \
+                .type = &m_option_type_double, ##__VA_ARGS__)
+
+#define OPT_STRING(optname, varname, flagv, ...) \
+    OPT_GENERAL(char*, optname, varname, flagv, \
+                .type = &m_option_type_string, ##__VA_ARGS__)
+#else
 #define OPT_INTRANGE(...) \
     OPT_RANGE_(int, __VA_ARGS__, .type = &m_option_type_int)
 
@@ -630,13 +686,28 @@ extern const char m_option_path_separator;
 
 #define OPT_STRING(...) \
     OPT_GENERAL(char*, __VA_ARGS__, .type = &m_option_type_string)
-
+#endif
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist, ...) \
     OPT_GENERAL(m_obj_settings_t*, optname, varname, flags,     \
                 .type = &m_option_type_obj_settings_list,       \
                 .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist), \
                 __VA_ARGS__)
 
+#ifdef _MSC_VER
+#define OPT_IMAGEFORMAT(optname, varname, flagv, ...) \
+    OPT_GENERAL(int, optname, varname, flagv,\
+                .type = &m_option_type_imgfmt, ##__VA_ARGS__)
+
+#define OPT_AUDIOFORMAT(optname, varname, flagv, ...) \
+    OPT_GENERAL(int, optname, varname, flagv,\
+                .type = &m_option_type_afmt, ##__VA_ARGS__)
+
+// If .min==1, then passing auto is disallowed, but "" is still accepted, and
+// limit channel list to 1 item.
+#define OPT_CHANNELS(optname, varname, flagv, ...) \
+    OPT_GENERAL(struct m_channels, optname, varname, flagv,\
+               .type = &m_option_type_channels, ##__VA_ARGS__)
+#else
 #define OPT_IMAGEFORMAT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_imgfmt)
 
@@ -647,13 +718,12 @@ extern const char m_option_path_separator;
 // limit channel list to 1 item.
 #define OPT_CHANNELS(...) \
     OPT_GENERAL(struct m_channels, __VA_ARGS__, .type = &m_option_type_channels)
+#endif
 
 #define M_CHOICES(choices)                                              \
     .priv = (void *)&(const struct m_opt_choice_alternatives[]){        \
                       OPT_HELPER_REMOVEPAREN choices, {NULL}}
 
-#define OPT_CHOICE(...) \
-    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
 // Variant which takes a pointer to struct m_opt_choice_alternatives directly
@@ -662,15 +732,55 @@ extern const char m_option_path_separator;
                 MP_EXPECT_TYPE(const struct m_opt_choice_alternatives*, choices), \
                 .type = &m_option_type_choice, __VA_ARGS__)
 
+#ifdef _MSC_VER
+#define OPT_CHOICE(optname, varname, flags, choices, ...) \
+    OPT_CHOICE_(optname, varname, flags, choices, \
+                .type = &m_option_type_choice, ##__VA_ARGS__)
+#define OPT_FLAGS(optname, varname, flags, choices, ...) \
+    OPT_CHOICE_(optname, varname, flags, choices, \
+                .type = &m_option_type_flags, ##__VA_ARGS__)
+#else
+#define OPT_CHOICE(...) \
+    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_FLAGS(...) \
     OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)
-
+#endif
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.
 #define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) \
     OPT_GENERAL(int, optname, varname, (flags) | CONF_RANGE,                      \
                 .min = minval, .max = maxval,                                     \
                 M_CHOICES(choices), __VA_ARGS__)
+
+#ifdef _MSC_VER
+#define OPT_CHOICE_OR_INT(optname, varname, flags, minval, maxval, choices, ...) \
+    OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, \
+                       .type = &m_option_type_choice, ##__VA_ARGS__ )
+
+#define OPT_TIME(optname, varname, flagv, ...) \
+    OPT_GENERAL(double, optname, varname, flagv,\
+                .type = &m_option_type_time, ##__VA_ARGS__)
+
+#define OPT_REL_TIME(optname, varname, flagv, ...) \
+    OPT_GENERAL(struct m_rel_time, optname, varname, flagv,\
+                .type = &m_option_type_rel_time, ##__VA_ARGS__)
+
+#define OPT_COLOR(optname, varname, flagv, ...) \
+    OPT_GENERAL(struct m_color, optname, varname, flagv,\
+                .type = &m_option_type_color, ##__VA_ARGS__)
+
+#define OPT_BYTE_SIZE(optname, varname, flags, minval, maxval, ...) \
+    OPT_RANGE_(int64_t, optname, varname, flags, minval, maxval, \
+               .type = &m_option_type_byte_size, ##__VA_ARGS__)
+
+#define OPT_GEOMETRY(optname, varname, flagv, ...) \
+    OPT_GENERAL(struct m_geometry, optname, varname, flagv,\
+                .type = &m_option_type_geometry, ##__VA_ARGS__)
+
+#define OPT_SIZE_BOX(optname, varname, flagv, ...) \
+    OPT_GENERAL(struct m_geometry, optname, varname, flagv,\
+                .type = &m_option_type_size_box, ##__VA_ARGS__)
+#else
 #define OPT_CHOICE_OR_INT(...) \
     OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
 
@@ -691,19 +801,32 @@ extern const char m_option_path_separator;
 
 #define OPT_SIZE_BOX(...) \
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
-
+#endif
 #define OPT_TRACKCHOICE(name, var, ...) \
     OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}), \
     ## __VA_ARGS__)
 
+#ifdef _MSC_VER
+#define OPT_ASPECT(optname, varname, flagv, ...) \
+    OPT_GENERAL(float, optname, varname, flagv,\
+                .type = &m_option_type_aspect, ##__VA_ARGS__)
+#else
 #define OPT_ASPECT(...) \
     OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_aspect)
+#endif
 
 #define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
     OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \
                 .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
+
+#ifdef _MSC_VER
+#define OPT_STRING_VALIDATE(optname, varname, flags, validate_fn, ...) \
+    OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, \
+                         .type = &m_option_type_string, ##__VA_ARGS__)
+#else
 #define OPT_STRING_VALIDATE(...) \
     OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
+#endif
 
 #define OPT_PRINT(optname, fn)                                              \
     {.name = optname,                                                       \

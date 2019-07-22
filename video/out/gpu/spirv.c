@@ -13,9 +13,11 @@ enum {
 };
 
 static const struct spirv_compiler_fns *compilers[] = {
+    [SPIRV_AUTO] = { 0 },
 #if HAVE_SHADERC
     [SPIRV_SHADERC] = &spirv_shaderc,
 #endif
+
 };
 
 static const struct m_opt_choice_alternatives compiler_choices[] = {

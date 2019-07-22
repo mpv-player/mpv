@@ -116,7 +116,7 @@ int mp_ring_size(struct mp_ring *buffer)
 
 int mp_ring_buffered(struct mp_ring *buffer)
 {
-    return (mp_ring_get_wpos(buffer) - mp_ring_get_rpos(buffer));
+    return (int)(mp_ring_get_wpos(buffer) - mp_ring_get_rpos(buffer));
 }
 
 char *mp_ring_repr(struct mp_ring *buffer, void *talloc_ctx)

@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 #include <windows.h>
 #else
 #include <poll.h>
@@ -112,7 +112,7 @@ static void cancel_destroy(void *p)
         close(c->wakeup_pipe[1]);
     }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
     if (c->win32_event)
         CloseHandle(c->win32_event);
 #endif
@@ -149,7 +149,7 @@ static void trigger_locked(struct mp_cancel *c)
     if (c->wakeup_pipe[1] >= 0)
         (void)write(c->wakeup_pipe[1], &(char){0}, 1);
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
     if (c->win32_event)
         SetEvent(c->win32_event);
 #endif
@@ -177,7 +177,7 @@ void mp_cancel_reset(struct mp_cancel *c)
         }
     }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
     if (c->win32_event)
         ResetEvent(c->win32_event);
 #endif
@@ -254,7 +254,7 @@ int mp_cancel_get_fd(struct mp_cancel *c)
     return c->wakeup_pipe[0];
 }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 void *mp_cancel_get_event(struct mp_cancel *c)
 {
     pthread_mutex_lock(&c->lock);

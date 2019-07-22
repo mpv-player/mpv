@@ -149,7 +149,14 @@ struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
 extern const struct m_option_type m_option_type_cycle_dir;
 
+#ifdef _MSC_VER
+#define OPT_CYCLEDIR(optname, varname, flagv, ...) \
+    OPT_GENERAL(double, optname, varname, flagv,\
+                .type = &m_option_type_cycle_dir,\
+                ## __VA_ARGS__)
+#else
 #define OPT_CYCLEDIR(...) \
     OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_cycle_dir)
+#endif
 
 #endif

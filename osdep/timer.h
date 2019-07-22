@@ -19,6 +19,7 @@
 #define MPLAYER_TIMER_H
 
 #include <inttypes.h>
+#include <time.h>
 
 // Initialize timer, must be called at least once at start.
 void mp_time_init(void);

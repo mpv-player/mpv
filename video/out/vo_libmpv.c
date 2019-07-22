@@ -320,7 +320,7 @@ void mpv_render_context_free(mpv_render_context *ctx)
 bool mp_render_context_acquire(mpv_render_context *ctx)
 {
     bool prev = false;
-    return atomic_compare_exchange_strong(&ctx->in_use, &prev, true);
+    return atomic_compare_exchange_strong(&ctx->in_use, (intptr_t*)&prev, true);
 }
 
 int mpv_render_context_render(mpv_render_context *ctx, mpv_render_param *params)

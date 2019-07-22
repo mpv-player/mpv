@@ -807,7 +807,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         // Probe the initial audio format.
         mp_pin_out_request_data(ao_c->filter->f->pins[1]);
         reinit_audio_filters_and_output(mpctx);
-        if (ao_c->filter->got_output_eof &&
+        ao_c = mpctx->ao_chain;
+        if (ao_c && ao_c->filter->got_output_eof &&
             mpctx->audio_status != STATUS_EOF)
         {
             mpctx->audio_status = STATUS_EOF;

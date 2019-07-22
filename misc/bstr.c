@@ -331,7 +331,7 @@ int bstr_validate_utf8(struct bstr s)
                 for (int n = 1; n < bytes; n++) {
                     if (n >= s.len) {
                         // Everything valid until now - just cut off.
-                        return -(bytes - s.len);
+                        return -(int)(bytes - s.len);
                     }
                     int tmp = (unsigned char)s.start[n];
                     if ((tmp & 0xC0) != 0x80)
@@ -435,7 +435,7 @@ bool bstr_case_startswith(struct bstr s, struct bstr prefix)
 
 bool bstr_case_endswith(struct bstr s, struct bstr suffix)
 {
-    struct bstr end = bstr_cut(s, -suffix.len);
+    struct bstr end = bstr_cut(s, -(int)suffix.len);
     return end.len == suffix.len && bstrcasecmp(end, suffix) == 0;
 }
 

@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 #include <poll.h>
 #endif
 
@@ -56,6 +56,38 @@
 #ifndef FILE_REMOTE_DEVICE
 #define FILE_REMOTE_DEVICE (0x10)
 #endif
+
+#ifndef FILE_DEVICE_NETWORK_FILE_SYSTEM
+#define FILE_DEVICE_NETWORK_FILE_SYSTEM 0x00000014
+#endif
+
+#ifndef DEVICE_TYPE
+#define DEVICE_TYPE DWORD
+#endif
+
+typedef enum _FSINFOCLASS {
+  FileFsVolumeInformation,
+  FileFsLabelInformation,
+  FileFsSizeInformation,
+  FileFsDeviceInformation,
+  FileFsAttributeInformation,
+  FileFsControlInformation,
+  FileFsFullSizeInformation,
+  FileFsObjectIdInformation,
+  FileFsDriverPathInformation,
+  FileFsVolumeFlagsInformation,
+  FileFsSectorSizeInformation,
+  FileFsDataCopyInformation,
+  FileFsMetadataSizeInformation,
+  FileFsFullSizeInformationEx,
+  FileFsMaximumInformation
+} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
+
+typedef struct _FILE_FS_DEVICE_INFORMATION {
+  DEVICE_TYPE DeviceType;
+  ULONG       Characteristics;
+} FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
+
 #endif
 
 struct priv {
@@ -84,7 +116,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     struct priv *p = s->priv;
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
     if (p->use_poll) {
         int c = mp_cancel_get_fd(p->cancel);
         struct pollfd fds[2] = {
@@ -308,7 +340,7 @@ static int open_f(stream_t *stream)
             p->appending = true;
 
         mode_t openmode = S_IRUSR | S_IWUSR;
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
         openmode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
         if (!write)
             m |= O_NONBLOCK;
@@ -329,7 +361,7 @@ static int open_f(stream_t *stream)
             MP_INFO(stream, "This is a directory - adding to playlist.\n");
         } else if (S_ISREG(st.st_mode)) {
             p->regular_file = true;
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
             // O_NONBLOCK has weird semantics on file locks; remove it.
             int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
             fcntl(p->fd, F_SETFL, val);
@@ -339,7 +371,7 @@ static int open_f(stream_t *stream)
         }
     }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
     setmode(p->fd, O_BINARY);
 #endif
 

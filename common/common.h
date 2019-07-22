@@ -28,7 +28,13 @@
 #include "mpv_talloc.h"
 
 // double should be able to represent this exactly
-#define MP_NOPTS_VALUE (-0x1p+63)
+#if (_MSC_VER >= 1910)
+#define MP_NOPTS_VALUE_MAX (0x1p+63)
+#else
+#define MP_NOPTS_VALUE_MAX ((double)((2^63)))
+#endif
+#define MP_NOPTS_VALUE_MIN (-MP_NOPTS_VALUE_MAX)
+#define MP_NOPTS_VALUE MP_NOPTS_VALUE_MIN
 
 #define MP_CONCAT_(a, b) a ## b
 #define MP_CONCAT(a, b) MP_CONCAT_(a, b)

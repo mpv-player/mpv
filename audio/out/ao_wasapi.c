@@ -482,7 +482,7 @@ static int hotplug_init(struct ao *ao)
     EXIT_ON_ERROR(hr);
 
     return 0;
-    exit_label:
+exit_label:
     MP_FATAL(state, "Error setting up audio hotplug: %s\n", mp_HRESULT_to_str(hr));
     hotplug_uninit(ao);
     return -1;

@@ -451,7 +451,7 @@ static void check_queue_consistency(struct demux_internal *in)
 void mp_packet_tags_unref(struct mp_packet_tags *tags)
 {
     if (tags) {
-        if (atomic_fetch_add(&tags->refcount, -1) == 1) {
+        if (atomic_fetch_add64(&tags->refcount, -1) == 1) {
             talloc_free(tags->sh);
             talloc_free(tags->demux);
             talloc_free(tags->stream);
@@ -463,7 +463,7 @@ void mp_packet_tags_unref(struct mp_packet_tags *tags)
 void mp_packet_tags_setref(struct mp_packet_tags **dst, struct mp_packet_tags *src)
 {
     if (src)
-        atomic_fetch_add(&src->refcount, 1);
+        atomic_fetch_add64(&src->refcount, 1);
     mp_packet_tags_unref(*dst);
     *dst = src;
 }

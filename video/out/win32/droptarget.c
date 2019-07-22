@@ -18,7 +18,7 @@
 #include <windows.h>
 #include <ole2.h>
 #include <shobjidl.h>
-
+#include <shellapi.h>
 #include "common/msg.h"
 #include "common/common.h"
 #include "input/input.h"

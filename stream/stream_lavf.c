@@ -72,10 +72,25 @@ const struct m_sub_options stream_lavf_conf = {
     },
 };
 
-static const char *const http_like[];
-
 static int open_f(stream_t *stream);
 static struct mp_tags *read_icy(stream_t *stream);
+
+static const char *const http_like[] =
+{ "http", "https", "mmsh", "mmshttp", "httproxy", NULL };
+
+const stream_info_t stream_info_ffmpeg = {
+  .name = "ffmpeg",
+  .open = open_f,
+  .protocols = (const char *const[]) {
+  "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
+    "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
+    "data",
+    NULL
+  },
+  .can_write = true,
+  .is_safe = true,
+  .is_network = true,
+};
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
@@ -400,22 +415,6 @@ done:
     av_free(icy_packet);
     return res;
 }
-
-static const char *const http_like[] =
-    {"http", "https", "mmsh", "mmshttp", "httproxy", NULL};
-
-const stream_info_t stream_info_ffmpeg = {
-  .name = "ffmpeg",
-  .open = open_f,
-  .protocols = (const char *const[]){
-     "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
-     "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
-     "data",
-     NULL },
-  .can_write = true,
-  .is_safe = true,
-  .is_network = true,
-};
 
 // Unlike above, this is not marked as safe, and can contain protocols which
 // may do insecure things. (Such as "ffmpeg", which can access the "lavfi"

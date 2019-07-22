@@ -104,6 +104,40 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 // prefix), and the only difference is that they will call abort() on allocation
 // failures (such as out of memory conditions), instead of returning an error
 // code.
+#ifdef _MSC_VER
+//#define ta_xalloc_size(ta_parent, size)           ta_oom_p(ta_alloc_size(ta_parent, size))
+//#define ta_xzalloc_size(ta_parent, size)          ta_oom_p(ta_zalloc_size(ta_parent, size))
+//#define ta_xset_destructor(ptr, destructor)       ta_oom_b(ta_set_destructor(ptr, destructor)
+//#define ta_xset_parent(ptr, ta_parent)            ta_oom_b(ta_set_parent(ptr, ta_parent))
+//#define ta_xnew_context(ta_parent)                ta_oom_p(ta_new_context(ta_parent))
+//#define ta_xstrdup_append(str, txt)               ta_oom_b(ta_strdup_append(str, txt))
+//#define ta_xstrdup_append_buffer(str, txt)        ta_oom_b(ta_strdup_append_buffer(str, txt))
+//#define ta_xstrndup_append(str, txt, len)         ta_oom_b(ta_strndup_append(str, txt, len))
+//#define ta_xstrndup_append_buffer(str, txt, len)  ta_oom_b(ta_strndup_append_buffer(str, txt, len))
+#define ta_xalloc_size(...)              ta_oom_p(ta_alloc_size(__VA_ARGS__))
+#define ta_xzalloc_size(...)             ta_oom_p(ta_zalloc_size(__VA_ARGS__))
+#define ta_xset_destructor(...)          ta_oom_b(ta_set_destructor(__VA_ARGS__))
+#define ta_xset_parent(...)              ta_oom_b(ta_set_parent(__VA_ARGS__))
+#define ta_xnew_context(...)             ta_oom_p(ta_new_context(__VA_ARGS__))
+#define ta_xstrdup_append(...)           ta_oom_b(ta_strdup_append(__VA_ARGS__))
+#define ta_xstrdup_append_buffer(...)    ta_oom_b(ta_strdup_append_buffer(__VA_ARGS__))
+#define ta_xstrndup_append(...)          ta_oom_b(ta_strndup_append(__VA_ARGS__))
+#define ta_xstrndup_append_buffer(...)   ta_oom_b(ta_strndup_append_buffer(__VA_ARGS__))
+#define ta_xasprintf(...)                ta_oom_s(ta_asprintf(__VA_ARGS__))
+#define ta_xvasprintf(...)               ta_oom_s(ta_vasprintf(__VA_ARGS__))
+#define ta_xasprintf_append(...)         ta_oom_b(ta_asprintf_append(__VA_ARGS__))
+#define ta_xvasprintf_append(...)        ta_oom_b(ta_vasprintf_append(__VA_ARGS__))
+#define ta_xasprintf_append_buffer(...)  ta_oom_b(ta_asprintf_append_buffer(__VA_ARGS__))
+#define ta_xvasprintf_append_buffer(...) ta_oom_b(ta_vasprintf_append_buffer(__VA_ARGS__))
+#define ta_xnew(ta_parent, type)                           ta_oom_g(ta_new(ta_parent, type))
+#define ta_xznew(ta_parent, type)                          ta_oom_g(ta_znew(ta_parent, type))
+#define ta_xnew_array(ta_parent, type, count)              ta_oom_g(ta_new_array(ta_parent, type, count))
+#define ta_xznew_array(ta_parent, type, count)             ta_oom_g(ta_znew_array(ta_parent, type, count))
+#define ta_xnew_array_size(ta_parent, element_size, count) ta_oom_p(ta_new_array_size(ta_parent, element_size, count))
+#define ta_xnew_ptrtype(ta_parent, ptr)                    ta_oom_g(ta_new_ptrtype(ta_parent, ptr))
+#define ta_xnew_array_ptrtype(ta_parent, ptr, count)       ta_oom_g(ta_new_array_ptrtype(ta_parent, ptr, count))
+#define ta_xdup(ta_parent, ptr)                            ta_oom_g(ta_dup(ta_parent, ptr))
+#else
 #define ta_xalloc_size(...)             ta_oom_p(ta_alloc_size(__VA_ARGS__))
 #define ta_xzalloc_size(...)            ta_oom_p(ta_zalloc_size(__VA_ARGS__))
 #define ta_xset_destructor(...)         ta_oom_b(ta_set_destructor(__VA_ARGS__))
@@ -127,6 +161,7 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_xnew_ptrtype(...)            ta_oom_g(ta_new_ptrtype(__VA_ARGS__))
 #define ta_xnew_array_ptrtype(...)      ta_oom_g(ta_new_array_ptrtype(__VA_ARGS__))
 #define ta_xdup(...)                    ta_oom_g(ta_dup(__VA_ARGS__))
+#endif
 
 #define ta_xsteal(ta_parent, ptr) (TA_TYPEOF(ptr))ta_xsteal_(ta_parent, ptr)
 #define ta_xrealloc(ta_parent, ptr, type, count) \

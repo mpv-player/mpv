@@ -24,13 +24,12 @@
 
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 {
-    BOOL pending;
+    BOOL pending = FALSE;
     if (!InitOnceBeginInitialize(once_control, 0, &pending, NULL))
         abort();
-    if (pending) {
+    if (pending)
         init_routine();
-        InitOnceComplete(once_control, 0, NULL);
-    }
+    InitOnceComplete(once_control, 0, NULL);
     return 0;
 }
 
@@ -102,7 +101,7 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
         if (msec > INT_MAX) {
             timeout_ms = INFINITE;
         } else if (msec > 0) {
-            timeout_ms = msec;
+            timeout_ms = (DWORD)msec;
         }
     }
     return cond_wait(cond, mutex, timeout_ms);
@@ -128,7 +127,7 @@ struct m_thread_info {
 
 static struct m_thread_info *find_thread_info(DWORD id)
 {
-    for (int n = 0; n < pthread_table_num; n++) {
+    for (size_t n = 0; n < pthread_table_num; n++) {
         if (id == pthread_table[n].id)
             return &pthread_table[n];
     }

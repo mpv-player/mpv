@@ -155,6 +155,12 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
     return S_OK;
 }
 
+
+#ifdef IsEqualPropertyKey
+#undef IsEqualPropertyKey
+#endif
+#define IsEqualPropertyKey(a, b)   (((a).pid == (b).pid) && IsEqualIID(&(a).fmtid, &(b).fmtid) )
+
 static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     IMMNotificationClient *This,
     LPCWSTR pwstrDeviceId,
