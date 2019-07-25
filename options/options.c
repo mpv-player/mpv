@@ -103,6 +103,7 @@ static const struct m_sub_options screenshot_conf = {
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
+    OPT_FLAG("support-dragdrop", support_dragdrop, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
     OPT_FLAG("snap-window", snap_window, 0),
     OPT_FLAG("ontop", ontop, 0),
@@ -170,6 +171,7 @@ const struct m_sub_options vo_sub_opts = {
         .keepaspect_window = 1,
         .hidpi_window_scale = 1,
         .native_fs = 1,
+        .support_dragdrop = 1,
         .taskbar_progress = 1,
         .snap_window = 0,
         .border = 1,

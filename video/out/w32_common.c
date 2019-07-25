@@ -1029,7 +1029,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // can also happen in --wid mode when the parent window is destroyed.
         if (!w32->terminate)
             mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-        RevokeDragDrop(w32->window);
+        if (w32->opts->support_dragdrop)
+            RevokeDragDrop(w32->window);
         w32->destroyed = true;
         w32->window = NULL;
         PostQuitMessage(0);
@@ -1168,7 +1169,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
 
-    if (message == w32->tbtnCreatedMsg) {
+    if (message && message == w32->tbtnCreatedMsg) {
         w32->tbtnCreated = true;
         update_playback_state(w32);
         return 0;
@@ -1399,16 +1400,18 @@ static void *gui_thread(void *ptr)
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
-
-        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->input_ctx);
-        RegisterDragDrop(w32->window, dt);
-
+        
+        if (w32->opts->support_dragdrop) {
+            IDropTarget* dt = mp_w32_droptarget_create(w32->log, w32->input_ctx);
+            RegisterDragDrop(w32->window, dt);
+        }
+        
         // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
         // make sure the taskbar is hidden when mpv goes fullscreen
-        if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
+        if (!w32->parent &&
+            SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
                                        CLSCTX_INPROC_SERVER, &IID_ITaskbarList2,
-                                       (void**)&w32->taskbar_list)))
-        {
+                                       (void**)&w32->taskbar_list))) {
             if (FAILED(ITaskbarList2_HrInit(w32->taskbar_list))) {
                 ITaskbarList2_Release(w32->taskbar_list);
                 w32->taskbar_list = NULL;
@@ -1417,10 +1420,10 @@ static void *gui_thread(void *ptr)
 
         // ITaskbarList3 has methods for status indication on taskbar buttons,
         // however that interface is only available on Win7/2008 R2 or newer
-        if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
+        if (w32->opts->taskbar_progress &&
+            SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
                                        CLSCTX_INPROC_SERVER, &IID_ITaskbarList3,
-                                       (void**)&w32->taskbar_list3)))
-        {
+                                       (void**)&w32->taskbar_list3))) {
             if (FAILED(ITaskbarList3_HrInit(w32->taskbar_list3))) {
                 ITaskbarList3_Release(w32->taskbar_list3);
                 w32->taskbar_list3 = NULL;
@@ -1433,7 +1436,7 @@ static void *gui_thread(void *ptr)
     }
 
     w32->tracking   = FALSE;
-    w32->trackEvent = (TRACKMOUSEEVENT){
+    w32->trackEvent = (TRACKMOUSEEVENT) {
         .cbSize    = sizeof(TRACKMOUSEEVENT),
         .dwFlags   = TME_LEAVE,
         .hwndTrack = w32->window,

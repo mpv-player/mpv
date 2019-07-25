@@ -9,6 +9,7 @@
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list;
 
+    int support_dragdrop;
     int taskbar_progress;
     int snap_window;
     int ontop;

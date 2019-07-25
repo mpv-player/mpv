@@ -2401,6 +2401,22 @@ static int mp_property_fullscreen(void *ctx, struct m_property *prop,
     return r;
 }
 
+
+/// Show playback progress in Windows 7+ taskbar (RW)
+static int mp_property_support_dragdrop(void* ctx, struct m_property* prop,
+                                        int action, void* arg)
+{
+    MPContext* mpctx = ctx;
+    if (action == M_PROPERTY_SET) {
+        int desired = !!*(int*)arg;
+        if (mpctx->opts->vo->support_dragdrop == desired)
+            return M_PROPERTY_OK;
+        mpctx->opts->vo->support_dragdrop = desired;
+        return M_PROPERTY_OK;
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 /// Show playback progress in Windows 7+ taskbar (RW)
 static int mp_property_taskbar_progress(void *ctx, struct m_property *prop,
                              int action, void *arg)
@@ -3833,6 +3849,7 @@ static const struct m_property mp_properties_base[] = {
 
     // Video
     {"fullscreen", mp_property_fullscreen},
+    {"support-dragdrop", mp_property_support_dragdrop},
     {"taskbar-progress", mp_property_taskbar_progress},
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
