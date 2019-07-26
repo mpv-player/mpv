@@ -161,14 +161,16 @@ static void d3d11_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
-    ra_tex_free(ctx->ra, &p->backbuffer);
+    if (ctx->ra)
+        ra_tex_free(ctx->ra, &p->backbuffer);
     SAFE_RELEASE(p->swapchain);
     vo_w32_uninit(ctx->vo);
     SAFE_RELEASE(p->device);
 
     // Destory the RA last to prevent objects we hold from showing up in D3D's
     // leak checker
-    ctx->ra->fns->destroy(ctx->ra);
+    if (ctx->ra)
+        ctx->ra->fns->destroy(ctx->ra);
 }
 
 static const struct ra_swapchain_fns d3d11_swapchain = {
