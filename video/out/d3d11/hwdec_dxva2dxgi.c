@@ -148,7 +148,9 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     struct priv_owner *o = mapper->owner->priv;
     struct priv *p = mapper->priv;
 
+    ID3D11Device_AddRef(o->dev11);
     p->dev11 = o->dev11;
+    IDirect3DDevice9Ex_AddRef(o->dev9);
     p->dev9 = o->dev9;
     ID3D11Device_GetImmediateContext(o->dev11, &p->ctx11);
 
@@ -409,6 +411,10 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 
     for (int i = 0; i < p->queue_len; i++)
         surf_destroy(mapper, p->queue[i]);
+
+    SAFE_RELEASE(p->ctx11);
+    SAFE_RELEASE(p->dev9);
+    SAFE_RELEASE(p->dev11);
 }
 
 static int mapper_map(struct ra_hwdec_mapper *mapper)
