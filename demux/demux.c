@@ -2166,8 +2166,11 @@ static bool read_packet(struct demux_internal *in)
         return false;
 
     if (in->after_seek_to_start) {
-        for (int n = 0; n < in->num_streams; n++)
-            in->current_range->streams[n]->is_bof = in->streams[n]->ds->selected;
+        for (int n = 0; n < in->num_streams; n++) {
+            struct demux_stream *ds = in->streams[n]->ds;
+            in->current_range->streams[n]->is_bof =
+                ds->selected && !ds->refreshing;
+        }
     }
 
     // Actually read a packet. Drop the lock while doing so, because waiting
