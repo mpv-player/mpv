@@ -465,6 +465,22 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
     }
 
     osd_rescale_bitmaps(res, w, h, d, video_par);
+
+    if (opts->sub_scale != 1.0 && opts->ass_style_override) {
+        for (int n = 0; n < res->num_parts; n++) {
+            struct sub_bitmap *sub = &res->parts[n];
+
+            float shit = (opts->sub_scale - 1.0f) / 2;
+
+            // Fortunately VO isn't supposed to give a FUCKING FUCK about
+            // whether the sub might e.g. go outside of the screen.
+            sub->x -= sub->dw * shit;
+            sub->y -= sub->dh * shit;
+            sub->dw += sub->dw * shit * 2;
+            sub->dh += sub->dh * shit * 2;
+        }
+    }
+
 }
 
 static bool accepts_packet(struct sd *sd, double min_pts)
