@@ -21,7 +21,6 @@
 #include <signal.h>
 #include <string.h>
 #include <poll.h>
-#include <time.h>
 #include <unistd.h>
 
 #include <gbm.h>
@@ -104,11 +103,6 @@ struct priv {
 
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
-};
-
-struct pflip_cb_closure {
-    struct priv *priv;
-    struct gbm_frame *frame;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -460,9 +454,11 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     update_framebuffer_from_bo(ctx, frame->bo);
 
     // Alloc and fill the data struct for the page flip callback
-    struct pflip_cb_closure *data = talloc(ctx, struct pflip_cb_closure);
-    data->priv = p;
-    data->frame = frame;
+    struct drm_pflip_cb_closure *data = talloc(ctx, struct drm_pflip_cb_closure);
+    data->frame_vsync = &frame->vsync;
+    data->vsync = &p->vsync;
+    data->vsync_info = &p->vsync_info;
+    data->waiting_for_flip = &p->waiting_for_flip;
 
     if (atomic_ctx) {
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
@@ -715,50 +711,6 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
     return result;
 }
 
-static void page_flipped(int fd, unsigned int msc, unsigned int sec,
-                         unsigned int usec, void *data)
-{
-    struct pflip_cb_closure *closure = data;
-    struct priv *p = closure->priv;
-
-    // frame->vsync.ust is the timestamp of the pageflip that happened just before this flip was queued
-    // frame->vsync.msc is the sequence number of the pageflip that happened just before this flip was queued
-    // frame->vsync.sbc is the sequence number for the frame that was just flipped to screen
-    struct gbm_frame *frame = closure->frame;
-
-    const bool ready =
-        (p->vsync.msc != 0) &&
-        (frame->vsync.ust != 0) && (frame->vsync.msc != 0);
-
-    const uint64_t ust = (sec * 1000000LL) + usec;
-
-    const unsigned int msc_since_last_flip = msc - p->vsync.msc;
-
-    p->vsync.ust = ust;
-    p->vsync.msc = msc;
-
-    if (ready) {
-        // Convert to mp_time
-        struct timespec ts;
-        if (clock_gettime(CLOCK_MONOTONIC, &ts))
-            goto fail;
-        const uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
-        const uint64_t ust_mp_time = mp_time_us() - (now_monotonic - p->vsync.ust);
-
-        const uint64_t     ust_since_enqueue = p->vsync.ust - frame->vsync.ust;
-        const unsigned int msc_since_enqueue = p->vsync.msc - frame->vsync.msc;
-        const unsigned int sbc_since_enqueue = p->vsync.sbc - frame->vsync.sbc;
-
-        p->vsync_info.vsync_duration = ust_since_enqueue / msc_since_enqueue;
-        p->vsync_info.skipped_vsyncs = msc_since_last_flip - 1; // Valid iff swap_buffers is called every vsync
-        p->vsync_info.last_queue_display_time = ust_mp_time + (sbc_since_enqueue * p->vsync_info.vsync_duration);
-    }
-
-fail:
-    p->waiting_for_flip = false;
-    talloc_free(closure);
-}
-
 static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct priv *p = ctx->priv;
@@ -774,7 +726,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
-    p->ev.page_flip_handler = page_flipped;
+    p->ev.page_flip_handler = &drm_pflip_cb;
 
     p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log);
     if (p->vt_switcher_active) {

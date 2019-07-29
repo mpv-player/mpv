@@ -61,6 +61,13 @@ struct drm_vsync_tuple {
     unsigned int sbc;
 };
 
+struct drm_pflip_cb_closure {
+    struct drm_vsync_tuple *frame_vsync; // vsync tuple when the frame that just flipped was queued
+    struct drm_vsync_tuple *vsync; // vsync tuple of the latest page flip. drm_pflip_cb updates this
+    struct vo_vsync_info *vsync_info; // where the drm_pflip_cb routine writes its output
+    bool *waiting_for_flip; // drm_pflip_cb writes false here before returning
+};
+
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
 void vt_switcher_destroy(struct vt_switcher *s);
 void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);
@@ -77,5 +84,9 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
                        bool use_atomic);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
+
+// DRM Page Flip callback
+void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
+                  unsigned int usec, void *data);
 
 #endif
