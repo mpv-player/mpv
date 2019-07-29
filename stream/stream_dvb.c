@@ -356,9 +356,14 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             mod[0] = '\0';
             // It's a VDR-style config line.
             parse_vdr_par_string(vdr_par_str, ptr);
-            // Units in VDR-style config files are divided by 1000.
-            ptr->freq *=  1000UL;
-            ptr->srate *=  1000UL;
+            // Frequency in VDR-style config files is in MHz for DVB-S,
+            // and may be in MHz, kHz or Hz for DVB-C and DVB-T.
+            // General rule to get useful units is to multiply by 1000 until value is larger than 1000000.
+            while (ptr->freq < 1000000UL) {
+                ptr->freq *= 1000UL;
+            }
+            // Symbol rate in VDR-style config files is divided by 1000.
+            ptr->srate *= 1000UL;
             switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
