@@ -106,14 +106,11 @@ static int device_property(struct ao *ao)
     int integer_mode_avaliable = 0;
     int max_mBytesPerPacket = 0;
     int aligned_high = 0;
-    int minbitdepth_physical = 256;
     for (int j = 0; j < n_formats; j++) {
         AudioStreamBasicDescription *stream_asbd = &formats[j].mFormat;
         if (stream_asbd->mFormatID == kAudioFormatLinearPCM){ // Exclude spdif format
             if (stream_asbd->mBitsPerChannel > maxbitdepth_physical)
                 maxbitdepth_physical = stream_asbd->mBitsPerChannel;
-            if (stream_asbd->mBitsPerChannel < minbitdepth_physical)
-                minbitdepth_physical = stream_asbd->mBitsPerChannel;
             if (stream_asbd->mFormatFlags & kAudioFormatFlagIsNonMixable)
                 integer_mode_avaliable = 1;
             if (stream_asbd->mBytesPerPacket > max_mBytesPerPacket)
@@ -128,23 +125,13 @@ static int device_property(struct ao *ao)
     if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 24)
         && (max_mBytesPerPacket == 8) && (aligned_high == 0)){
         device_type = 1; // unpacked 24 bit aligned low devce.
-        if (minbitdepth_physical == 24)
-            device_type = 7; // unpacked 24 bit aligned low devce which doesn't offer 16 bit format.
     }else if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 24)
         && (max_mBytesPerPacket == 8) && (aligned_high == 1)){
         device_type = 2; // unpacked 24 bit aligned high devce.
-        if (minbitdepth_physical == 24)
-            device_type = 8; // unpacked 24 bit aligned high devce which doesn't offer 16 bit format.
     }else if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 24) && (max_mBytesPerPacket == 6)){
         device_type = 3; // packed 24 Bit device.
-        if (minbitdepth_physical == 24)
-            device_type = 9; // packed 24 Bit device which doesn't offer 16 bit format.
     }else if ((integer_mode_avaliable == 0) && (maxbitdepth_physical == 32)){
         device_type = 4; // 32 Bit device w/o Integer Mode.
-    }else if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 32) && (minbitdepth_physical == 24)){
-        device_type = 5; // 32 Bit device which doesn't offer 16 bit format.
-    }else if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 16)){
-        device_type = 6; // 16 Bit device which doesn't offer 32 bit format.
     }else if ((integer_mode_avaliable == 0) && (maxbitdepth_physical == 24)){
         device_type = 10; // 24 Bit device w/o Integer Mode.
     }else if ((integer_mode_avaliable == 0) && (maxbitdepth_physical == 20)){
@@ -152,8 +139,6 @@ static int device_property(struct ao *ao)
     }else if ((integer_mode_avaliable == 1) && (maxbitdepth_physical == 20)
         && (max_mBytesPerPacket == 8) && (aligned_high == 0)){
         device_type = 12; // 20 bit aligned low devce (shown in optical output).
-        if (minbitdepth_physical == 20)
-            device_type = 13; // 20 bit aligned low devce which doesn't offer 16 bit format.
     }
 
     talloc_free(formats);
@@ -249,7 +234,7 @@ static OSStatus render_cb_compressed(
     int sstride;
 
     int device_type = device_property(ao);
-    if (((device_type == 3) ||(device_type == 9))
+    if ((device_type == 3)
         && ((ao->format == (AF_FORMAT_S32) || ao->format == AF_FORMAT_S32P))){
         // Otherwise coreaudio doesn't get all the frames it expects, and plays at 0.75x normal speed/buzzes.
         sstride = p->spdif_hack ? 4 * ao->channels.num : 6;
@@ -273,7 +258,7 @@ static OSStatus render_cb_compressed(
     // Change feeding format. Only needed for packed 24 Bit and (maybe) unpacked 24 bit aligned high device
     // in 24/32 Bit Integer Mode.
     if ((ao->format == AF_FORMAT_S32) || (ao->format == AF_FORMAT_S32P)){
-        if ((device_type == 3) || (device_type == 9)){
+        if (device_type == 3){
             p->convert = (struct ao_convert_fmt){
             .src_fmt = ao->format,
             .dst_bits = 24,
@@ -413,27 +398,12 @@ static int init(struct ao *ao)
         MP_DBG(ao, "This device (%d) is packed 24 Bit.\n", device_type);
     }else if (device_type == 4){
         MP_DBG(ao, "This device (%d) is 32 Bit, doesn't support Integer Mode.\n", device_type);
-    }else if (device_type == 5){
-        MP_DBG(ao, "This device (%d) is 32 Bit, doesn't offer 16 Bit format.\n", device_type);
-    }else if (device_type == 6){
-        MP_DBG(ao, "This device (%d) is 16 Bit, doesn't offer 32 Bit format.\n", device_type);
-    }else if (device_type == 7){
-        MP_DBG(ao, "This device (%d) is unpacked 24 Bit aligned low, doesn't offer 16 Bit format.\n",
-            device_type);
-    }else if (device_type == 8){
-        MP_DBG(ao, "This device (%d) is unpacked 24 Bit aligned high, doesn't offer 16 Bit format.\n",
-            device_type);
-    }else if (device_type == 9){
-        MP_DBG(ao, "This device (%d) is packed 24 Bit, doesn't offer 16 Bit format.\n", device_type);
     }else if (device_type == 10){
         MP_DBG(ao, "This device (%d) is 24 Bit, doesn't support Integer Mode.\n", device_type);
     }else if (device_type == 11){
         MP_DBG(ao, "This device (%d) is 20 Bit, doesn't support Integer Mode.\n", device_type);
     }else if (device_type == 12){
         MP_DBG(ao, "This device (%d) is 20 Bit aligned low.\n", device_type);
-    }else if (device_type == 13){
-        MP_DBG(ao, "This device (%d) is unpacked 20 Bit aligned low, doesn't offer 16 Bit format.\n",
-            device_type);
     }
 
     ao->format = af_fmt_from_planar(ao->format);
@@ -532,31 +502,17 @@ static int init(struct ao *ao)
         goto coreaudio_error;
     }
 
-    // As there is no equivalent 20/24 Bit in mpv's audio format, we need to manually insert "autoconvert".
-    if (af_fmt_is_pcm(ao->format) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)
-        && ((p->stream_asbd.mBitsPerChannel == 24) || (p->stream_asbd.mBitsPerChannel == 20))){
-        int OurBitsPerChannel = af_fmt_to_bytes(ao->format) * 8;
-        if (p->stream_asbd.mBitsPerChannel > OurBitsPerChannel){
-            ao->format = AF_FORMAT_S32;
-            MP_VERBOSE(ao, "Device is %u bit, greater than our %u bit, request s32.\n",
-                p->stream_asbd.mBitsPerChannel, OurBitsPerChannel);
-        }
-    }
-
     int new_format;
     AudioStreamBasicDescription asbd;
 
     ca_fill_asbd(ao, &asbd);
 
-    if (((device_type == 3) || (device_type == 9)) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)
-        && (asbd.mBitsPerChannel == 32)){
+    if ((device_type == 3) && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)){
         new_format = ca_asbd_to_mp_format(&p->stream_asbd, 1, 1);
         MP_DBG(ao, "Hacking %u Bit stream on packed 24 Bit device (%d) in Integer Mode.\n",
             asbd.mBitsPerChannel, device_type);
-    }else if (((device_type == 1) || (device_type == 2) || (device_type == 7)
-        || (device_type == 8) || (device_type == 12) || (device_type == 13))
-        && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)
-        && (asbd.mBitsPerChannel == 32)) {
+    }else if (((device_type == 1) || (device_type == 2) || (device_type == 12))
+        && (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsNonMixable)){
         new_format = ca_asbd_to_mp_format(&p->stream_asbd, 1, 0);
         MP_DBG(ao, "Hacking %u Bit stream on unpacked 20/24 Bit device (%d) in Integer Mode.\n",
             asbd.mBitsPerChannel, device_type);
