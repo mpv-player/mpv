@@ -747,7 +747,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
             tries --;
             pfds[0].fd = fd;
             pfds[0].events = POLLIN | POLLPRI;
-            if (poll(pfds, 1, 500) <= 0) {
+            if (poll(pfds, 1, 2000) <= 0) {
                 MP_ERR(stream, "dvb_streaming_read, failed with "
                         "errno %d when reading %d bytes\n", errno, size - pos);
                 errno = 0;
