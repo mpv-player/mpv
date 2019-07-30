@@ -136,7 +136,7 @@ pacman -S git python $MINGW_PACKAGE_PREFIX-{pkg-config,gcc}
 
 # Install the most important MinGW-w64 dependencies. libass and lcms2 are also
 # pulled in as dependencies of ffmpeg.
-pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51,angleproject-git}
+pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51}
 ```
 
 Building mpv
