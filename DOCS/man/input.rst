@@ -2038,6 +2038,15 @@ Property list
     ``track-list/N/demux-fps``
         Video FPS as indicated by the container. (Not always accurate.)
 
+    ``track-list/N/demux-bitrate``
+        Audio average bitrate, in bits per second. (Not always accurate.)
+
+    ``track-list/N/demux-rotation``
+        Video clockwise rotation metadata, in degrees.
+
+    ``track-list/N/demux-par``
+        Pixel aspect ratio.
+
     ``track-list/N/audio-channels`` (deprecated)
         Deprecated alias for ``track-list/N/demux-channel-count``.
 
@@ -2079,6 +2088,9 @@ Property list
                 "demux-channels"    MPV_FORMAT_STRING
                 "demux-samplerate"  MPV_FORMAT_INT64
                 "demux-fps"         MPV_FORMAT_DOUBLE
+                "demux-bitrate"     MPV_FORMAT_INT64
+                "demux-rotation"    MPV_FORMAT_INT64
+                "demux-par"         MPV_FORMAT_DOUBLE
                 "audio-channels"    MPV_FORMAT_INT64
                 "replaygain-track-peak" MPV_FORMAT_DOUBLE
                 "replaygain-track-gain" MPV_FORMAT_DOUBLE

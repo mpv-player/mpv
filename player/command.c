@@ -2024,6 +2024,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
                                        : (struct replaygain_data){0};
 
+    double par = 0.0;
+    if (p.par_h)
+        par = p.par_w / (double) p.par_h;
+
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
         {"type",        SUB_PROP_STR(stream_type_name(track->type)),
@@ -2060,6 +2064,9 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"demux-samplerate", SUB_PROP_INT(p.samplerate),
                         .unavailable = !p.samplerate},
         {"demux-fps",   SUB_PROP_DOUBLE(p.fps), .unavailable = p.fps <= 0},
+        {"demux-bitrate",  SUB_PROP_INT(p.bitrate), .unavailable = p.bitrate <= 0},
+        {"demux-rotation", SUB_PROP_INT(p.rotate),  .unavailable = p.rotate <= 0},
+        {"demux-par",      SUB_PROP_DOUBLE(par),    .unavailable = par <= 0},
         {"replaygain-track-peak", SUB_PROP_FLOAT(rg.track_peak),
                         .unavailable = !has_rg},
         {"replaygain-track-gain", SUB_PROP_FLOAT(rg.track_gain),
