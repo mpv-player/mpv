@@ -3320,10 +3320,14 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         if (w < 1 || h < 1)
             return;
 
-        if (p->image_params.rotate % 180 == 90)
+        int src_w = p->image_params.w;
+        int src_h = p->image_params.h;
+        if (p->image_params.rotate % 180 == 90) {
             MPSWAP(int, w, h);
+            MPSWAP(int, src_w, src_h);
+        }
 
-        struct mp_rect src = {0, 0, p->image_params.w, p->image_params.h};
+        struct mp_rect src = {0, 0, src_w, src_h};
         struct mp_rect dst = {0, 0, w, h};
         struct mp_osd_res osd = {.w = w, .h = h, .display_par = 1.0};
         gl_video_resize(p, &src, &dst, &osd);
