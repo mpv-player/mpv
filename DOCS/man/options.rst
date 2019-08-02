@@ -3460,6 +3460,10 @@ Screenshot
 ``--screenshot-webp-quality=<0-100>``
     Set the WebP quality level. Higher means better quality. The default is 75.
 
+``--screenshot-webp-compression=<0-6>``
+    Set the WebP compression level. Higher means better compression, but takes
+    more CPU time. Note that this also affects the screenshot quality when used
+    with lossy WebP files. The default is 4.
 
 Software Scaler
 ---------------

@@ -50,6 +50,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_source_chroma = 1,
     .webp_lossless = 0,
     .webp_quality = 75,
+    .webp_compression = 4,
     .tag_csp = 0,
 };
 
@@ -71,6 +72,7 @@ const struct m_option image_writer_opts[] = {
     OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
     OPT_FLAG("webp-lossless", webp_lossless, 0),
     OPT_INTRANGE("webp-quality", webp_quality, 0, 0, 100),
+    OPT_INTRANGE("webp-compression", webp_compression, 0, 0, 6),
     OPT_FLAG("high-bit-depth", high_bit_depth, 0),
     OPT_FLAG("tag-colorspace", tag_csp, 0),
     {0},
@@ -135,6 +137,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
         av_opt_set_int(avctx, "pred", ctx->opts->png_filter,
                        AV_OPT_SEARCH_CHILDREN);
     } else if (codec->id == AV_CODEC_ID_WEBP) {
+        avctx->compression_level = ctx->opts->webp_compression;
         av_opt_set_int(avctx, "lossless", ctx->opts->webp_lossless,
                        AV_OPT_SEARCH_CHILDREN);
         av_opt_set_int(avctx, "quality", ctx->opts->webp_quality,
