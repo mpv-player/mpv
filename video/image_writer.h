@@ -34,6 +34,7 @@ struct image_writer_opts {
     int jpeg_source_chroma;
     int webp_lossless;
     int webp_quality;
+    int webp_compression;
     int tag_csp;
 };
 

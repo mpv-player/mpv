@@ -431,6 +431,8 @@ Available video output drivers are:
         Enable writing lossless WebP files (default: no)
     ``--vo-image-webp-quality=<0-100>``
         WebP quality (default: 75)
+    ``--vo-image-webp-compression=<0-6>``
+        WebP compression factor (default: 4)
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
