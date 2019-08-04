@@ -423,6 +423,9 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
             p->esh_not_implemented = true;
         goto esh_failed;
     }
+    vaSyncSurface(display, va_surface_id(mapper->src));
+    // No need to error out if sync fails, but good to know if it did.
+    CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
 #if HAVE_GL
