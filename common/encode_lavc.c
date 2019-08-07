@@ -422,6 +422,11 @@ static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx
 
     dst->encoder_timebase = info->timebase;
     dst->st->time_base = info->timebase; // lavf will change this on muxer init
+    // Some muxers (e.g. Matroska one) expect the sample_aspect_ratio to be
+    // set on the AVStream.
+    if (info->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+        dst->st->sample_aspect_ratio = info->codecpar->sample_aspect_ratio;
+    
     if (avcodec_parameters_copy(dst->st->codecpar, info->codecpar) < 0)
         MP_HANDLE_OOM(0);
 
