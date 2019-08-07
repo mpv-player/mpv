@@ -1099,6 +1099,9 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->dnd_devman)
         wl_data_device_manager_destroy(wl->dnd_devman);
 
+    if (wl->dnd_offer)
+        wl_data_offer_destroy(wl->dnd_offer);
+
     if (wl->xdg_toplevel_decoration)
         zxdg_toplevel_decoration_v1_destroy(wl->xdg_toplevel_decoration);
 
