@@ -171,8 +171,8 @@ library versions mismatch.
 
 ## Release cycle
 
-Every other month, an arbitrary git snapshot is made, and is assigned
-a 0.X.0 version number. No further maintenance is done.
+An arbitrary git snapshot is made and is assigned
+a 0.X.0 version number. The Release cycle, along with git snapshot date, will vary. No further maintenance is done.
 
 The goal of releases is to make Linux distributions happy. Linux distributions
 are also expected to apply their own patches in case of bugs and security
