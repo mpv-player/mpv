@@ -1,7 +1,7 @@
 Release Policy
 ==============
 
-Once or twice a month, a new release is cut off of the master branch and is
+A new release is cut off of the master branch and is
 assigned a 0.X.Y version number, where X is incremented each time a release
 contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
@@ -9,7 +9,7 @@ changes.
 
 Releases are tagged on the master branch and will not be maintained separately.
 
-The goal of releases is to provide Linux distributions with something to
+The goal of releases are to provide Linux distributions with something to
 package. If you want the newest features, just use the master branch.
 We try our best to keep it deployable at all times.
 
