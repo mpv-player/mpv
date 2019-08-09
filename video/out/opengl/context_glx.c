@@ -443,8 +443,8 @@ static bool glx_init_probe(struct ra_ctx *ctx)
         return false;
 
     struct priv *p = ctx->priv;
-    if (!(p->gl.mpgl_caps & MPGL_CAP_VDPAU)) {
-        MP_VERBOSE(ctx, "No vdpau support found - probing more things.\n");
+    if (!strcmp(p->gl.GetString(GL_VENDOR), "NVIDIA Corporation") == 0) {
+        MP_VERBOSE(ctx, "Not using Nvidia proprietary driver - switching to EGL.\n");
         glx_uninit(ctx);
         return false;
     }
