@@ -79,7 +79,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
 
     pthread_mutex_lock(&p->buffer_lock);
 
-    delay = 2 * p->frames_per_enqueue / (double)ao->samplerate;
+    delay = p->frames_per_enqueue / (double)ao->samplerate;
     delay += p->audio_latency;
     ao_read_data(ao, &p->buf, p->frames_per_enqueue,
         mp_time_us() + 1000000LL * delay);
