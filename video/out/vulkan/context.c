@@ -165,6 +165,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .async_transfer = p->opts->async_transfer,
         .async_compute = p->opts->async_compute,
         .queue_count = p->opts->queue_count,
+        .device_name = p->opts->device,
     });
     if (!vk->vulkan)
         goto error;
