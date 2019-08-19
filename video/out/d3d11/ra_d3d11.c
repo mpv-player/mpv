@@ -386,14 +386,16 @@ static struct ra_tex *tex_create(struct ra *ra,
     struct d3d_tex *tex_p = tex->priv = talloc_zero(tex, struct d3d_tex);
     DXGI_FORMAT fmt = fmt_to_dxgi(params->format);
 
+    D3D11_SUBRESOURCE_DATA data;
     D3D11_SUBRESOURCE_DATA *pdata = NULL;
     if (params->initial_data) {
-        pdata = &(D3D11_SUBRESOURCE_DATA) {
+        data = (D3D11_SUBRESOURCE_DATA) {
             .pSysMem = params->initial_data,
             .SysMemPitch = params->w * params->format->pixel_size,
         };
         if (params->dimensions >= 3)
-            pdata->SysMemSlicePitch = pdata->SysMemPitch * params->h;
+            data.SysMemSlicePitch = data.SysMemPitch * params->h;
+        pdata = &data;
     }
 
     D3D11_USAGE usage = D3D11_USAGE_DEFAULT;
@@ -645,7 +647,8 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
     ptrdiff_t stride = tex->params.dimensions >= 2 ? tex->params.w : 0;
     ptrdiff_t pitch = tex->params.dimensions >= 3 ? stride * tex->params.h : 0;
     bool invalidate = true;
-    D3D11_BOX *rc = NULL;
+    D3D11_BOX rc;
+    D3D11_BOX *prc = NULL;
 
     if (tex->params.dimensions == 2) {
         stride = params->stride;
@@ -653,7 +656,7 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
         if (params->rc && (params->rc->x0 != 0 || params->rc->y0 != 0 ||
             params->rc->x1 != tex->params.w || params->rc->y1 != tex->params.h))
         {
-            rc = &(D3D11_BOX) {
+            rc = (D3D11_BOX) {
                 .left = params->rc->x0,
                 .top = params->rc->y0,
                 .front = 0,
@@ -661,6 +664,7 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
                 .bottom = params->rc->y1,
                 .back = 1,
             };
+            prc = &rc;
             invalidate = params->invalidate;
         }
     }
@@ -668,11 +672,11 @@ static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
     int subresource = tex_p->array_slice >= 0 ? tex_p->array_slice : 0;
     if (p->ctx1) {
         ID3D11DeviceContext1_UpdateSubresource1(p->ctx1, tex_p->res,
-            subresource, rc, src, stride, pitch,
+            subresource, prc, src, stride, pitch,
             invalidate ? D3D11_COPY_DISCARD : 0);
     } else {
         ID3D11DeviceContext_UpdateSubresource(p->ctx, tex_p->res, subresource,
-            rc, src, stride, pitch);
+            prc, src, stride, pitch);
     }
 
     return true;
@@ -737,9 +741,12 @@ static struct ra_buf *buf_create(struct ra *ra,
 
     struct d3d_buf *buf_p = buf->priv = talloc_zero(buf, struct d3d_buf);
 
+    D3D11_SUBRESOURCE_DATA data;
     D3D11_SUBRESOURCE_DATA *pdata = NULL;
-    if (params->initial_data)
-        pdata = &(D3D11_SUBRESOURCE_DATA) { .pSysMem = params->initial_data };
+    if (params->initial_data) {
+        data = (D3D11_SUBRESOURCE_DATA) { .pSysMem = params->initial_data };
+        pdata = &data;
+    }
 
     D3D11_BUFFER_DESC desc = { .ByteWidth = params->size };
     switch (params->type) {
