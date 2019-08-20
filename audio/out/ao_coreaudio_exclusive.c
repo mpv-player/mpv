@@ -356,7 +356,7 @@ static int find_best_format(struct ao *ao, AudioStreamBasicDescription *out_fmt)
         ca_print_asbd(ao, "-", stream_asbd);
 
         if (((device_type == 4) || (device_type == 10) || (device_type == 11))
-            && (asbd.mBitsPerChannel == 16) && (af_fmt_is_pcm(ao->format))){
+            && (asbd.mBitsPerChannel == 16) && (af_fmt_is_pcm(ao->format)) && (p->spdif_hack == 0)){
             if (!out_fmt->mFormatID || ca_asbd_is_better(&asbd, out_fmt, stream_asbd, 0, 1))
             *out_fmt = *stream_asbd;
         }else if ((p->integer_mode == false) && (af_fmt_is_pcm(ao->format))){
