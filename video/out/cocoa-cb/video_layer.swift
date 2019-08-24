@@ -61,7 +61,6 @@ class VideoLayer: CAOpenGLLayer {
     weak var cocoaCB: CocoaCB!
     var mpv: MPVHelper { get { return cocoaCB.mpv } }
 
-    let videoLock = NSLock()
     let displayLock = NSLock()
     let cglContext: CGLContextObj
     let cglPixelFormat: CGLPixelFormatObj
