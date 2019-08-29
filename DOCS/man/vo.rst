@@ -308,7 +308,7 @@ Available video output drivers are:
     For tuning, refer to your copy of the file ``SDL_hints.h``.
 
     .. note:: This driver is for compatibility with systems that don't provide
-              proper graphics drivers, or which support GLES only.
+              proper graphics drivers.
 
     The following global options are supported by this video output:
 
@@ -540,7 +540,7 @@ Available video output drivers are:
         xrgb2101010 is a packed 30 bits per pixel/10 bits per channel packed RGB
         format with 2 bits of padding.
 
-        Unless you have an intel graphics card, a recent kernel and a recent
+        Unless you have an Intel graphics card, a recent kernel and a recent
         version of mesa (>=18) xrgb2101010 is unlikely to work for you.
 
         This currently only has an effect when used together with the ``drm``
@@ -569,5 +569,5 @@ Available video output drivers are:
     many of mpv's features (subtitle rendering, OSD/OSC, video filters, etc)
     are not available with this driver.
 
-    To use hardware decoding with ``--vo-gpu`` instead, use
+    To use hardware decoding with ``--vo=gpu`` instead, use
     ``--hwdec=mediacodec-copy`` along with ``--gpu-context=android``.
