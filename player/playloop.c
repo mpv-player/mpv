@@ -846,8 +846,11 @@ static void handle_keep_open(struct MPContext *mpctx)
                 seek_to_last_frame(mpctx);
             mpctx->playback_pts = mpctx->last_vo_pts;
         }
-        if (opts->keep_open_pause)
+        if (opts->keep_open_pause) {
+            if (mpctx->ao)
+                ao_drain(mpctx->ao);
             set_pause_state(mpctx, true);
+        }
     }
 }
 
