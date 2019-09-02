@@ -1432,6 +1432,44 @@ void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
     mp_input_queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
 }
 
+void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
+{
+    struct cmd_bind_section *bs = ictx->cmd_bind_sections;
+    struct cmd_bind *bind = NULL;
+
+    for (int n = 0; n < bs->num_binds; n++) {
+        struct cmd_bind *b = &bs->binds[n];
+        if (bind_matches_key(b, 1, &key) && b->is_builtin == false) {
+            bind = b;
+            break;
+        }
+    }
+
+    if (!bind) {
+        struct cmd_bind empty = {{0}};
+        MP_TARRAY_APPEND(bs, bs->binds, bs->num_binds, empty);
+        bind = &bs->binds[bs->num_binds - 1];
+    }
+
+    bind_dealloc(bind);
+
+    *bind = (struct cmd_bind) {
+        .cmd = bstrdup0(bs->binds, command),
+        .location = talloc_strdup(bs->binds, "keybind-command"),
+        .owner = bs,
+        .is_builtin = false,
+        .num_keys = 1,
+    };
+    memcpy(bind->keys, &key, 1 * sizeof(bind->keys[0]));
+    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
+        char *s = mp_input_get_key_combo_name(&key, 1);
+        MP_TRACE(ictx, "add:section='%s' key='%s'%s cmd='%s' location='%s'\n",
+                 bind->owner->section, s, bind->is_builtin ? " builtin" : "",
+                 bind->cmd, bind->location);
+        talloc_free(s);
+    }
+}
+
 struct mp_input_src_internal {
     pthread_t thread;
     bool thread_running;

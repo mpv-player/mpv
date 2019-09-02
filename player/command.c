@@ -5576,6 +5576,21 @@ static void cmd_key(void *p)
     }
 }
 
+static void cmd_key_bind(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    int code = mp_input_get_key_from_name(cmd->args[0].v.s);
+    if (code < 0) {
+        MP_ERR(mpctx, "%s is not a valid input name.\n", cmd->args[0].v.s);
+        cmd->success = false;
+        return;
+    }
+    const char *target_cmd = cmd->args[1].v.s;
+    mp_input_bind_key(mpctx->input, code, bstr0(target_cmd));
+}
+
 static void cmd_apply_profile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6015,6 +6030,8 @@ const struct mp_cmd_def mp_cmds[] = {
                             OPT_INT("button", v.i, 0, OPTDEF_INT(-1)),
                             OPT_CHOICE("mode", v.i, MP_CMD_OPT_ARG,
                                        ({"single", 0}, {"double", 1})), }},
+    { "keybind", cmd_key_bind, { OPT_STRING("name", v.s, 0),
+                                 OPT_STRING("cmd", v.s, 0) }},
     { "keypress", cmd_key, { OPT_STRING("name", v.s, 0) },
         .priv = &(const int){0}},
     { "keydown", cmd_key, { OPT_STRING("name", v.s, 0) },
