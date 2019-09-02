@@ -203,6 +203,9 @@ bool mp_input_use_media_keys(struct input_ctx *ictx);
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 
+// Binds a command to a key.
+void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command);
+
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
 
 void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
