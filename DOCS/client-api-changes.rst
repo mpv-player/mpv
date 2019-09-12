@@ -32,6 +32,8 @@ API changes
 
 ::
  --- mpv 0.30.0 ---
+ 1.104  - Deprecate struct mpv_opengl_drm_params. Replaced by mpv_opengl_drm_params_v2
+        - Deprecate MPV_RENDER_PARAM_DRM_DISPLAY. Replaced by MPV_RENDER_PARAM_DRM_DISPLAY_V2.
  1.103  - redo handling of async commands
         - add mpv_event_command and make it possible to return values from
           commands issued with mpv_command_async() or mpv_command_node_async()
