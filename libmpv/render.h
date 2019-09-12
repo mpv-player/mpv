@@ -277,8 +277,7 @@ typedef enum mpv_render_param_type {
      */
     MPV_RENDER_PARAM_SKIP_RENDERING = 13,
     /**
-     * DRM display, contains drm display handles.
-     * Valid for mpv_render_context_create().
+     * Deprecated. Not supported. Use MPV_RENDER_PARAM_DRM_DISPLAY_V2 instead.
      * Type : struct mpv_opengl_drm_params*
      */
     MPV_RENDER_PARAM_DRM_DISPLAY = 14,
@@ -288,6 +287,12 @@ typedef enum mpv_render_param_type {
      * Type : struct mpv_opengl_drm_draw_surface_size*
      */
     MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE = 15,
+    /**
+     * DRM display, contains drm display handles.
+     * Valid for mpv_render_context_create().
+     * Type : struct mpv_opengl_drm_params_v2*
+    */
+    MPV_RENDER_PARAM_DRM_DISPLAY_V2 = 16,
 } mpv_render_param_type;
 
 /**

@@ -150,11 +150,32 @@ typedef struct mpv_opengl_fbo {
 } mpv_opengl_fbo;
 
 /**
- * For MPV_RENDER_PARAM_DRM_DISPLAY.
+ * Deprecated. For MPV_RENDER_PARAM_DRM_DISPLAY.
  */
 typedef struct mpv_opengl_drm_params {
+    int fd;
+    int crtc_id;
+    int connector_id;
+    struct _drmModeAtomicReq **atomic_request_ptr;
+    int render_fd;
+} mpv_opengl_drm_params;
+
+/**
+ * For MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE.
+ */
+typedef struct mpv_opengl_drm_draw_surface_size {
     /**
-     * DRM fd (int). Set to a negative number if invalid.
+     * size of the draw plane surface in pixels.
+     */
+    int width, height;
+} mpv_opengl_drm_draw_surface_size;
+
+/**
+ * For MPV_RENDER_PARAM_DRM_DISPLAY_V2.
+ */
+typedef struct mpv_opengl_drm_params_v2 {
+    /**
+     * DRM fd (int). Set to -1 if invalid.
      */
     int fd;
 
@@ -177,20 +198,11 @@ typedef struct mpv_opengl_drm_params {
 
     /**
      * DRM render node. Used for VAAPI interop.
-     * Set to a negative number if invalid.
+     * Set to -1 if invalid.
      */
     int render_fd;
-} mpv_opengl_drm_params;
+} mpv_opengl_drm_params_v2;
 
-/**
- * For MPV_RENDER_PARAM_DRM_DRAW_SURFACE_SIZE.
- */
-typedef struct mpv_opengl_drm_draw_surface_size {
-    /**
-     * size of the draw plane surface in pixels.
-     */
-    int width, height;
-} mpv_opengl_drm_draw_surface_size;
 
 /**
  * For backwards compatibility with the old naming of mpv_opengl_drm_draw_surface_size

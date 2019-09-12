@@ -146,8 +146,8 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
     // grab atomic request from native resources
     if (p->ctx) {
-        struct mpv_opengl_drm_params *drm_params;
-        drm_params = (mpv_opengl_drm_params *)ra_get_native_resource(hw->ra, "drm_params");
+        struct mpv_opengl_drm_params_v2 *drm_params;
+        drm_params = (mpv_opengl_drm_params_v2 *)ra_get_native_resource(hw->ra, "drm_params_v2");
         if (!drm_params) {
             MP_ERR(hw, "Failed to retrieve drm params from native resources\n");
             return -1;
@@ -250,9 +250,9 @@ static int init(struct ra_hwdec *hw)
     drmprime_video_plane = opts->drm_drmprime_video_plane;
     talloc_free(tmp);
 
-    struct mpv_opengl_drm_params *drm_params;
+    struct mpv_opengl_drm_params_v2 *drm_params;
 
-    drm_params = ra_get_native_resource(hw->ra, "drm_params");
+    drm_params = ra_get_native_resource(hw->ra, "drm_params_v2");
     if (drm_params) {
         p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
                                            drm_params->connector_id, draw_plane, drmprime_video_plane);

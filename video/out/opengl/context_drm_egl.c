@@ -101,7 +101,7 @@ struct priv {
     struct vsync_tuple vsync;
     struct vo_vsync_info vsync_info;
 
-    struct mpv_opengl_drm_params drm_params;
+    struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
 };
 
@@ -851,7 +851,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     if (rendernode_path) {
         MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);
         p->drm_params.render_fd = open(rendernode_path, O_RDWR | O_CLOEXEC);
-        if (p->drm_params.render_fd < 0) {
+        if (p->drm_params.render_fd == -1) {
             MP_WARN(ctx, "Cannot open render node \"%s\": %s. VAAPI hwdec will be disabled\n",
                     rendernode_path, mp_strerror(errno));
         }
@@ -868,7 +868,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         return false;
 
-    ra_add_native_resource(ctx->ra, "drm_params", &p->drm_params);
+    ra_add_native_resource(ctx->ra, "drm_params_v2", &p->drm_params);
     ra_add_native_resource(ctx->ra, "drm_draw_surface_size", &p->draw_surface_size);
 
     p->vsync_info.vsync_duration = 0;
