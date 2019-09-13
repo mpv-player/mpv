@@ -283,7 +283,6 @@ def build(ctx):
         ( "demux/demux_mkv_timeline.c" ),
         ( "demux/demux_null.c" ),
         ( "demux/demux_playlist.c" ),
-        ( "demux/demux_rar.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_timeline.c" ),
         ( "demux/ebml.c" ),
@@ -354,7 +353,6 @@ def build(ctx):
         ## Streams
         ( "stream/cookies.c" ),
         ( "stream/dvb_tune.c",                   "dvbin" ),
-        ( "stream/rar.c" ),
         ( "stream/stream.c" ),
         ( "stream/stream_avdevice.c" ),
         ( "stream/stream_bluray.c",              "libbluray" ),
@@ -369,7 +367,6 @@ def build(ctx):
         ( "stream/stream_memory.c" ),
         ( "stream/stream_mf.c" ),
         ( "stream/stream_null.c" ),
-        ( "stream/stream_rar.c" ),
         ( "stream/stream_smb.c",                 "libsmbclient" ),
 
         ## Subtitles

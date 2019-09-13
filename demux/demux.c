@@ -74,7 +74,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,
 #endif
-    &demuxer_desc_rar,
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
