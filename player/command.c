@@ -2113,63 +2113,6 @@ static int mp_property_video(void *ctx, struct m_property *prop,
     return property_switch_track(prop, action, arg, ctx, 0, STREAM_VIDEO);
 }
 
-static struct track *find_track_by_demuxer_id(MPContext *mpctx,
-                                              enum stream_type type,
-                                              int demuxer_id)
-{
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-        if (track->type == type && track->demuxer_id == demuxer_id)
-            return track;
-    }
-    return NULL;
-}
-
-static int mp_property_program(void *ctx, struct m_property *prop,
-                               int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    demux_program_t prog = {0};
-
-    struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer || !mpctx->playback_initialized)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SWITCH:
-    case M_PROPERTY_SET:
-        if (action == M_PROPERTY_SET && arg)
-            prog.progid = *((int *) arg);
-        else
-            prog.progid = -1;
-        if (demux_control(demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM, &prog) ==
-            CONTROL_UNKNOWN)
-            return M_PROPERTY_ERROR;
-
-        if (prog.aid < 0 && prog.vid < 0) {
-            MP_ERR(mpctx, "Selected program contains no audio or video streams!\n");
-            return M_PROPERTY_ERROR;
-        }
-        mp_switch_track(mpctx, STREAM_VIDEO,
-                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.vid), 0);
-        mp_switch_track(mpctx, STREAM_AUDIO,
-                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid), 0);
-        mp_switch_track(mpctx, STREAM_SUB,
-                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.sid), 0);
-        print_track_list(mpctx, "Program switched:");
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_INT,
-            .flags = CONF_RANGE,
-            .min = -1,
-            .max = (1 << 16) - 1,
-        };
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 static int mp_property_hwdec(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3553,7 +3496,6 @@ static const struct m_property mp_properties_base[] = {
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
     {"vid", mp_property_video},
-    {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
     {"hwdec-current", mp_property_hwdec_current},
     {"hwdec-interop", mp_property_hwdec_interop},

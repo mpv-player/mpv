@@ -244,11 +244,6 @@ typedef struct demuxer {
     struct stream *stream;
 } demuxer_t;
 
-typedef struct {
-    int progid;      //program id
-    int aid, vid, sid; //audio, video and subtitle id
-} demux_program_t;
-
 void demux_free(struct demuxer *demuxer);
 void demux_cancel_and_free(struct demuxer *demuxer);
 

@@ -1811,9 +1811,6 @@ Property list
 ``osd-par``
     Last known OSD display pixel aspect (can be 0).
 
-``program`` (W)
-    Switch TS program (write-only).
-
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle
     is selected, but no text is currently visible, or the subtitle is not
