@@ -24,7 +24,6 @@ python3 ./waf configure \
     --enable-libarchive \
     --enable-libass \
     --enable-libbluray \
-    --enable-dvdread \
     --enable-dvdnav \
     --enable-uchardet \
     --enable-vulkan \

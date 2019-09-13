@@ -5,7 +5,6 @@ python3 ./waf configure \
   --enable-cdda          \
   --enable-dvbin         \
   --enable-dvdnav        \
-  --enable-dvdread       \
   --enable-libarchive    \
   --enable-libmpv-shared \
   --enable-libsmbclient  \
