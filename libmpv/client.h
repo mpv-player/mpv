@@ -165,14 +165,14 @@ extern "C" {
  * Embedding the video window
  * --------------------------
  *
- * Using the opengl-cb API (in opengl_cb.h) is recommended. This API requires
+ * Using the render API (in render_cb.h) is recommended. This API requires
  * you to create and maintain an OpenGL context, to which you can render
  * video using a specific API call. This API does not include keyboard or mouse
  * input directly.
  *
  * There is an older way to embed the native mpv window into your own. You have
  * to get the raw window handle, and set it as "wid" option. This works on X11,
- * win32, and OSX only. It's much easier to use than the opengl-cb API, but
+ * win32, and OSX only. It's much easier to use than the render API, but
  * also has various problems.
  *
  * Also see client API examples and the mpv manpage. There is an extensive
@@ -440,12 +440,12 @@ mpv_handle *mpv_create(void);
 
 /**
  * Initialize an uninitialized mpv instance. If the mpv instance is already
- * running, an error is retuned.
+ * running, an error is returned.
  *
  * This function needs to be called to make full use of the client API if the
  * client API handle was created with mpv_create().
  *
- * Only the following options require to be set _before_ mpv_initialize():
+ * Only the following options are required to be set _before_ mpv_initialize():
  *      - options which are only read at initialization time:
  *        - config
  *        - config-dir
