@@ -368,7 +368,6 @@ def build(ctx):
         ( "stream/stream_cb.c" ),
         ( "stream/stream_cdda.c",                "cdda" ),
         ( "stream/stream_dvb.c",                 "dvbin" ),
-        ( "stream/stream_dvd_common.c",          "dvdnav" ),
         ( "stream/stream_dvdnav.c",              "dvdnav" ),
         ( "stream/stream_edl.c" ),
         ( "stream/stream_file.c" ),
