@@ -213,6 +213,7 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     double seek_delay;
+    bool optical_crap_hack;
 
     struct demux_lavf_opts *opts;
     double mf_fps;
@@ -1056,6 +1057,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 "broken as well.\n");
     }
 
+    double len = -1;
+    if (stream_control(priv->stream, STREAM_CTRL_OPTICAL_CRAP_HACK1, &len) > 0) {
+        priv->optical_crap_hack = true;
+        demuxer->duration = len;
+        demuxer->seekable = true;
+    }
+
     return 0;
 }
 
@@ -1119,6 +1127,13 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
     int64_t seek_pts_av = 0;
+
+    if (priv->optical_crap_hack) {
+        if (flags & SEEK_FACTOR)
+            seek_pts = seek_pts * demuxer->duration;
+        stream_control(priv->stream, STREAM_CTRL_OPTICAL_CRAP_HACK2, &seek_pts);
+        return;
+    }
 
     if (!(flags & SEEK_FORWARD))
         avsflags = AVSEEK_FLAG_BACKWARD;
@@ -1234,11 +1249,6 @@ redo:
 
         return CONTROL_OK;
     }
-    case DEMUXER_CTRL_RESYNC:
-        stream_drop_buffers(priv->stream);
-        avio_flush(priv->avfc->pb);
-        avformat_flush(priv->avfc);
-        return CONTROL_OK;
     case DEMUXER_CTRL_REPLACE_STREAM:
         if (priv->own_stream)
             free_stream(priv->stream);

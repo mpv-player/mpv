@@ -901,39 +901,6 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
     return property_time(action, arg, get_playback_time(mpctx));
 }
 
-/// Current BD/DVD title (RW)
-static int mp_property_disc_title(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct demuxer *d = mpctx->demuxer;
-    if (!d || !d->extended_ctrls)
-        return M_PROPERTY_UNAVAILABLE;
-    unsigned int title = -1;
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (demux_stream_control(d, STREAM_CTRL_GET_CURRENT_TITLE, &title) < 0)
-            return M_PROPERTY_UNAVAILABLE;
-        *(int*)arg = title;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_INT,
-            .flags = M_OPT_MIN,
-            .min = -1,
-        };
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        title = *(int*)arg;
-        if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
-            return M_PROPERTY_NOT_IMPLEMENTED;
-        if (!mpctx->stop_play)
-            mpctx->stop_play = PT_CURRENT_ENTRY;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 /// Current chapter (RW)
 static int mp_property_chapter(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -1216,53 +1183,6 @@ static int property_list_editions(void *ctx, struct m_property *prop,
                                 get_edition_entry, mpctx);
 }
 
-/// Number of titles in BD/DVD
-static int mp_property_disc_titles(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->demuxer;
-    unsigned int num_titles;
-    if (!demuxer || !demuxer->extended_ctrls ||
-        demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
-                             &num_titles) < 1)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(action, arg, num_titles);
-}
-
-static int get_disc_title_entry(int item, int action, void *arg, void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->demuxer;
-
-    double len = item;
-    if (demux_stream_control(demuxer, STREAM_CTRL_GET_TITLE_LENGTH, &len) < 1)
-        len = -1;
-
-    struct m_sub_property props[] = {
-        {"id",          SUB_PROP_INT(item)},
-        {"length",      {.type = CONF_TYPE_TIME}, {.time = len},
-                        .unavailable = len < 0},
-        {0}
-    };
-
-    return m_property_read_sub(props, action, arg);
-}
-
-static int mp_property_list_disc_titles(void *ctx, struct m_property *prop,
-                                        int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->demuxer;
-    unsigned int num_titles;
-    if (!demuxer || !demuxer->extended_ctrls ||
-        demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
-                             &num_titles) < 1)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_read_list(action, arg, num_titles,
-                                get_disc_title_entry, mpctx);
-}
-
 /// Number of chapters in file
 static int mp_property_chapters(void *ctx, struct m_property *prop,
                                 int action, void *arg)
@@ -1284,67 +1204,6 @@ static int mp_property_editions(void *ctx, struct m_property *prop,
     if (demuxer->num_editions <= 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(action, arg, demuxer->num_editions);
-}
-
-/// Current dvd angle (RW)
-static int mp_property_angle(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer || !demuxer->extended_ctrls)
-        return M_PROPERTY_UNAVAILABLE;
-
-    int ris, angles = -1, angle = 1;
-
-    ris = demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_ANGLES, &angles);
-    if (ris == STREAM_UNSUPPORTED)
-        return M_PROPERTY_UNAVAILABLE;
-
-    ris = demux_stream_control(demuxer, STREAM_CTRL_GET_ANGLE, &angle);
-    if (ris == STREAM_UNSUPPORTED)
-        return -1;
-
-    if (angle < 0 || angles <= 1)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int *) arg = angle;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
-        *(char **) arg = talloc_asprintf(NULL, "%d/%d", angle, angles);
-        return M_PROPERTY_OK;
-    }
-    case M_PROPERTY_SET:
-        angle = *(int *)arg;
-        if (angle < 0 || angle > angles)
-            return M_PROPERTY_ERROR;
-
-        demux_flush(demuxer);
-        ris = demux_stream_control(demuxer, STREAM_CTRL_SET_ANGLE, &angle);
-        if (ris == STREAM_OK) {
-            demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
-            demux_flush(demuxer);
-        }
-
-        reset_audio_state(mpctx);
-        reset_video_state(mpctx);
-        mp_wakeup_core(mpctx);
-
-        return ris == STREAM_OK ? M_PROPERTY_OK : M_PROPERTY_ERROR;
-    case M_PROPERTY_GET_TYPE: {
-        struct m_option opt = {
-            .type = CONF_TYPE_INT,
-            .flags = CONF_RANGE,
-            .min = 1,
-            .max = angles,
-        };
-        *(struct m_option *)arg = opt;
-        return M_PROPERTY_OK;
-    }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int get_tag_entry(int item, int action, void *arg, void *ctx)
@@ -3774,13 +3633,10 @@ static const struct m_property mp_properties_base[] = {
     {"audio-pts", mp_property_audio_pts},
     {"playtime-remaining", mp_property_playtime_remaining},
     {"playback-time", mp_property_playback_time},
-    {"disc-title", mp_property_disc_title},
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
-    {"disc-titles", mp_property_disc_titles},
     {"chapters", mp_property_chapters},
     {"editions", mp_property_editions},
-    {"angle", mp_property_angle},
     {"metadata", mp_property_metadata},
     {"filtered-metadata", mp_property_filtered_metadata},
     {"chapter-metadata", mp_property_chapter_metadata},
@@ -3808,7 +3664,6 @@ static const struct m_property mp_properties_base[] = {
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
     {"edition-list", property_list_editions},
-    {"disc-title-list", mp_property_list_disc_titles},
 
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},

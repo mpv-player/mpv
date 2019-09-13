@@ -1182,8 +1182,6 @@ Property list
 ``media-title``
     If the currently played file has a ``title`` tag, use that.
 
-    Otherwise, if the media type is DVD, return the volume ID of DVD.
-
     Otherwise, return the ``filename`` property.
 
 ``file-format``
@@ -1296,40 +1294,6 @@ Property list
     Current MKV edition number. Setting this property to a different value will
     restart playback. The number of the first edition is 0.
 
-``disc-titles``
-    Number of BD/DVD titles.
-
-    This has a number of sub-properties. Replace ``N`` with the 0-based edition
-    index.
-
-    ``disc-titles/count``
-        Number of titles.
-
-    ``disc-titles/id``
-        Title ID as integer. Currently, this is the same as the title index.
-
-    ``disc-titles/length``
-        Length in seconds. Can be unavailable in a number of cases (currently
-        it works for libdvdnav only).
-
-    When querying the property with the client API using ``MPV_FORMAT_NODE``,
-    or with Lua ``mp.get_property_native``, this will return a mpv_node with
-    the following contents:
-
-    ::
-
-        MPV_FORMAT_NODE_ARRAY
-            MPV_FORMAT_NODE_MAP (for each edition)
-                "id"                MPV_FORMAT_INT64
-                "length"            MPV_FORMAT_DOUBLE
-
-``disc-title-list``
-    List of BD/DVD titles.
-
-``disc-title`` (RW)
-    Current BD/DVD title number. Writing works only for ``dvdnav://`` and
-    ``bd://`` (and aliases for these).
-
 ``chapters``
     Number of chapters.
 
@@ -1368,9 +1332,6 @@ Property list
                 "id"                MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "default"           MPV_FORMAT_FLAG
-
-``angle`` (RW)
-    Current DVD angle.
 
 ``metadata``
     Metadata key/value pairs.
