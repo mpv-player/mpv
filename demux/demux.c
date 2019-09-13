@@ -52,7 +52,6 @@ extern const struct demuxer_desc demuxer_desc_edl;
 extern const struct demuxer_desc demuxer_desc_cue;
 extern const demuxer_desc_t demuxer_desc_rawaudio;
 extern const demuxer_desc_t demuxer_desc_rawvideo;
-extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
@@ -71,9 +70,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_cue,
     &demuxer_desc_rawaudio,
     &demuxer_desc_rawvideo,
-#if HAVE_TV
-    &demuxer_desc_tv,
-#endif
     &demuxer_desc_matroska,
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,

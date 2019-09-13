@@ -82,6 +82,8 @@ Interface changes
       with the move to libplacebo as the back-end for vulkan rendering.
     - Remove "disc-titles", "disc-title", "disc-title-list", and "angle"
       properties. dvd:// does not support title ranges anymore.
+    - Remove all "tv-..." options and properties, along with the classic Linux
+      analog TV support.
  --- mpv 0.29.0 ---
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,

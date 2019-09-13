@@ -467,9 +467,6 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
-#if HAVE_TV
-    OPT_SUBSTRUCT("tv", tv_params, tv_params_conf, 0),
-#endif /* HAVE_TV */
 #if HAVE_DVBIN
     OPT_SUBSTRUCT("dvbin", stream_dvb_opts, stream_dvb_conf, 0),
 #endif

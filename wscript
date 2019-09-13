@@ -409,6 +409,12 @@ iconv support use --disable-iconv.",
         'name': '--libarchive',
         'desc': 'libarchive wrapper for reading zip files and more',
         'func': check_pkg_config('libarchive >= 3.0.0'),
+    }, {
+        'name': '--dvbin',
+        'desc': 'DVB input module',
+        'deps': 'gpl',
+        'func': check_true,
+        'default': 'disable',
     }
 ]
 
@@ -874,47 +880,6 @@ hwaccel_features = [
     }
 ]
 
-radio_and_tv_features = [
-    {
-        'name': '--tv',
-        'desc': 'TV interface',
-        'deps': 'gpl',
-        'func': check_true,
-        'default': 'disable',
-    }, {
-        'name': 'sys_videoio_h',
-        'desc': 'videoio.h',
-        'func': check_cc(header_name=['sys/time.h', 'sys/videoio.h']),
-        'deps': 'tv',
-    }, {
-        'name': 'videodev',
-        'desc': 'videodev2.h',
-        'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h']),
-        'deps': 'tv && !sys_videoio_h',
-    }, {
-        'name': '--tv-v4l2',
-        'desc': 'Video4Linux2 TV interface',
-        'deps': 'tv && (sys_videoio_h || videodev)',
-        'func': check_true,
-    }, {
-        'name': '--libv4l2',
-        'desc': 'libv4l2 support',
-        'func': check_pkg_config('libv4l2'),
-        'deps': 'tv-v4l2',
-    }, {
-        'name': '--audio-input',
-        'desc': 'audio input support',
-        'deps': 'tv-v4l2',
-        'func': check_true
-    } , {
-        'name': '--dvbin',
-        'desc': 'DVB input module',
-        'deps': 'gpl',
-        'func': check_true,
-        'default': 'disable',
-    }
-]
-
 standalone_features = [
     {
         'name': 'win32-executable',
@@ -1003,7 +968,6 @@ def options(opt):
     opt.parse_features('audio outputs',     audio_output_features)
     opt.parse_features('video outputs',     video_output_features)
     opt.parse_features('hwaccels',          hwaccel_features)
-    opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('standalone app',    standalone_features)
 
     group = opt.get_option_group("optional features")
@@ -1076,7 +1040,6 @@ def configure(ctx):
     ctx.parse_dependencies(video_output_features)
     ctx.parse_dependencies(libav_dependencies)
     ctx.parse_dependencies(hwaccel_features)
-    ctx.parse_dependencies(radio_and_tv_features)
 
     if ctx.options.LUA_VER:
         ctx.options.enable_lua = True

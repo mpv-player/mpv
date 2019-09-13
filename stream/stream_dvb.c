@@ -901,6 +901,7 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
     dvb_channels_list_t *list = NULL;
 
 
+#if 0
     switch (cmd) {
     case STREAM_CTRL_DVB_SET_CHANNEL: {
         unsigned int *iarg = arg;
@@ -926,13 +927,14 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         return STREAM_ERROR;
     }
     }
-
+#endif
 
     if (state->cur_adapter >= state->adapters_count)
         return STREAM_ERROR;
     list = state->adapters[state->cur_adapter].list;
 
     switch (cmd) {
+#if 0
     case STREAM_CTRL_GET_TV_FREQ:
         (*(unsigned int*)arg) = list->channels[list->current].freq;
         return STREAM_ERROR;
@@ -966,6 +968,7 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         *(char **)arg = talloc_strdup(NULL, progname);
         return STREAM_OK;
     }
+#endif
     case STREAM_CTRL_GET_METADATA: {
         struct mp_tags *metadata = talloc_zero(NULL, struct mp_tags);
         char *progname = list->channels[list->current].name;

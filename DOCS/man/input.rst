@@ -921,8 +921,7 @@ Input Commands that are Possibly Subject to Change
         ``--glsl-shader=file.glsl``.
 
 
-Undocumented commands: ``tv-last-channel`` (TV/DVB only),
-``ao-reload`` (experimental/internal).
+Undocumented commands: ``ao-reload`` (experimental/internal).
 
 Hooks
 ~~~~~
@@ -1815,24 +1814,12 @@ Property list
 ``program`` (W)
     Switch TS program (write-only).
 
-``dvb-channel`` (W)
-    Pair of integers: card,channel of current DVB stream.
-    Can be switched to switch to another channel on the same card.
-
-``dvb-channel-name`` (RW)
-    Name of current DVB program.
-    On write, a channel-switch to the named channel on the same
-    card is performed. Can also be used for channel switching.
-
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle
     is selected, but no text is currently visible, or the subtitle is not
     text-based (i.e. DVD/BD subtitles), an empty string is returned.
 
     This property is experimental and might be removed in the future.
-
-``tv-brightness``, ``tv-contrast``, ``tv-saturation``, ``tv-hue`` (RW)
-    TV stuff.
 
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing

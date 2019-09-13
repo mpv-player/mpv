@@ -65,24 +65,6 @@ enum stream_ctrl {
     // Garbage compatibility for obnoxious users
     STREAM_CTRL_OPTICAL_CRAP_HACK1,
     STREAM_CTRL_OPTICAL_CRAP_HACK2,
-
-    // TV
-    STREAM_CTRL_TV_SET_SCAN,
-    STREAM_CTRL_SET_TV_FREQ,
-    STREAM_CTRL_GET_TV_FREQ,
-    STREAM_CTRL_SET_TV_COLORS,
-    STREAM_CTRL_GET_TV_COLORS,
-    STREAM_CTRL_TV_SET_NORM,
-    STREAM_CTRL_TV_STEP_NORM,
-    STREAM_CTRL_TV_SET_CHAN,
-    STREAM_CTRL_TV_GET_CHAN,
-    STREAM_CTRL_TV_STEP_CHAN,
-    STREAM_CTRL_TV_LAST_CHAN,
-    STREAM_CTRL_DVB_SET_CHANNEL,
-    STREAM_CTRL_DVB_SET_CHANNEL_NAME,
-    STREAM_CTRL_DVB_GET_CHANNEL_NAME,
-    STREAM_CTRL_DVB_STEP_CHANNEL,
-
 };
 
 struct stream_lang_req {
@@ -95,12 +77,6 @@ struct stream_dvd_info_req {
     unsigned int palette[16];
     int num_subs;
 };
-
-// for STREAM_CTRL_SET_TV_COLORS
-#define TV_COLOR_BRIGHTNESS     1
-#define TV_COLOR_HUE            2
-#define TV_COLOR_SATURATION     3
-#define TV_COLOR_CONTRAST       4
 
 // for STREAM_CTRL_AVSEEK
 struct stream_avseek {

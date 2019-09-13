@@ -286,7 +286,6 @@ def build(ctx):
         ( "demux/demux_rar.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_timeline.c" ),
-        ( "demux/demux_tv.c",                    "tv" ),
         ( "demux/ebml.c" ),
         ( "demux/packet.c" ),
         ( "demux/timeline.c" ),
@@ -353,13 +352,8 @@ def build(ctx):
         ( "player/video.c" ),
 
         ## Streams
-        ( "stream/ai_alsa1x.c",                  "alsa && audio-input" ),
-        ( "stream/ai_oss.c",                     "oss-audio && audio-input" ),
-        ( "stream/ai_sndio.c",                   "sndio && audio-input" ),
-        ( "stream/audio_in.c",                   "audio-input" ),
         ( "stream/cookies.c" ),
         ( "stream/dvb_tune.c",                   "dvbin" ),
-        ( "stream/frequencies.c",                "tv" ),
         ( "stream/rar.c" ),
         ( "stream/stream.c" ),
         ( "stream/stream_avdevice.c" ),
@@ -377,10 +371,6 @@ def build(ctx):
         ( "stream/stream_null.c" ),
         ( "stream/stream_rar.c" ),
         ( "stream/stream_smb.c",                 "libsmbclient" ),
-        ( "stream/stream_tv.c",                  "tv" ),
-        ( "stream/tv.c",                         "tv" ),
-        ( "stream/tvi_dummy.c",                  "tv" ),
-        ( "stream/tvi_v4l2.c",                   "tv-v4l2"),
 
         ## Subtitles
         ( "sub/ass_mp.c",                        "libass"),
