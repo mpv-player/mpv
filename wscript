@@ -364,23 +364,12 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('libbluray', '>= 0.3.0'),
         #'default': 'disable',
     }, {
-        'name': '--dvdread',
-        'desc': 'dvdread support',
-        'deps': 'gpl',
-        'func': check_pkg_config('dvdread', '>= 4.1.0'),
-        'default': 'disable',
-    }, {
         'name': '--dvdnav',
         'desc': 'dvdnav support',
         'deps': 'gpl',
         'func': check_pkg_config('dvdnav',  '>= 4.2.0',
                                  'dvdread', '>= 4.1.0'),
         'default': 'disable',
-    }, {
-        'name': 'dvdread-common',
-        'desc': 'DVD/IFO support',
-        'deps': 'gpl && (dvdread || dvdnav)',
-        'func': check_true,
     }, {
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',

@@ -510,23 +510,6 @@ specifying the path to the local copy: ``--dvd-device=PATH``.
 Alternatively, running ``mpv PATH`` should auto-detect a DVD directory
 tree and play the longest title.
 
-.. note:: DVD library choices
-
-    mpv uses a different default DVD library than MPlayer. MPlayer
-    uses libdvdread by default, and mpv uses libdvdnav by default.
-    Both libraries are developed in parallel, but libdvdnav is
-    intended to support more sophisticated DVD features such as menus
-    and multi-angle playback. mpv uses libdvdnav for files specified
-    as either ``dvd://...`` or ``dvdnav://...``. To use libdvdread,
-    which will produce behavior more like MPlayer, specify
-    ``dvdread://...`` instead. Some users have experienced problems
-    when using libdvdnav, in which playback gets stuck in a DVD menu
-    stream. These problems are reported to go away when auto-selecting
-    the title (``dvd://`` rather than ``dvd://1``) or when using
-    libdvdread (e.g. ``dvdread://0``). There are also outstanding bugs
-    in libdvdnav with seeking backwards and forwards in a video
-    stream. Specify ``dvdread://...`` to fix such problems.
-
 .. note:: DVD subtitles
     
     DVDs use image-based subtitles. Image subtitles are implemented as

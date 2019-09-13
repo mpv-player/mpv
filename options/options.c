@@ -386,9 +386,9 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
-#if HAVE_DVDREAD || HAVE_DVDNAV
+#if HAVE_DVDNAV
     OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),
-#endif /* HAVE_DVDREAD */
+#endif
     OPT_INTPAIR("chapter", chapterrange, 0, .deprecation_message = "instead of "
         "--chapter=A-B use --start=#A --end=#B+1"),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
