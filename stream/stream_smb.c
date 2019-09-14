@@ -85,18 +85,11 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 
 static int write_buffer(stream_t *s, char* buffer, int len) {
   struct priv *p = s->priv;
-  int r = len;
   int wr;
-  while (r > 0) {
-    pthread_mutex_lock(&smb_lock);
-    wr = smbc_write(p->fd,buffer,r);
-    pthread_mutex_unlock(&smb_lock);
-    if (wr <= 0)
-      return -1;
-    r -= wr;
-    buffer += wr;
-  }
-  return len - r;
+  pthread_mutex_lock(&smb_lock);
+  wr = smbc_write(p->fd,buffer,len);
+  pthread_mutex_unlock(&smb_lock);
+  return wr;
 }
 
 static void close_f(stream_t *s){
