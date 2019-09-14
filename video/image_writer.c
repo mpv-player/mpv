@@ -48,6 +48,8 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .png_filter = 5,
     .jpeg_quality = 90,
     .jpeg_source_chroma = 1,
+    .webp_lossless = 0,
+    .webp_quality = 75,
     .tag_csp = 0,
 };
 
@@ -55,6 +57,7 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
     {"jpg",  AV_CODEC_ID_MJPEG},
     {"jpeg", AV_CODEC_ID_MJPEG},
     {"png",  AV_CODEC_ID_PNG},
+    {"webp", AV_CODEC_ID_WEBP},
     {0}
 };
 
@@ -66,6 +69,8 @@ const struct m_option image_writer_opts[] = {
     OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
     OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
     OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
+    OPT_FLAG("webp-lossless", webp_lossless, 0),
+    OPT_INTRANGE("webp-quality", webp_quality, 0, 0, 100),
     OPT_FLAG("high-bit-depth", high_bit_depth, 0),
     OPT_FLAG("tag-colorspace", tag_csp, 0),
     {0},
@@ -96,7 +101,13 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     av_init_packet(&pkt);
 
-    struct AVCodec *codec = avcodec_find_encoder(ctx->opts->format);
+    struct AVCodec *codec;
+    if (ctx->opts->format == AV_CODEC_ID_WEBP) {
+        codec = avcodec_find_encoder_by_name("libwebp"); // non-animated encoder
+    } else {
+        codec = avcodec_find_encoder(ctx->opts->format);
+    }
+
     AVCodecContext *avctx = NULL;
     if (!codec)
         goto print_open_fail;
@@ -109,9 +120,11 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     avctx->height = image->h;
     avctx->color_range = mp_csp_levels_to_avcol_range(image->params.color.levels);
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
-    // Annoying deprecated garbage for the jpg encoder.
-    if (image->params.color.levels == MP_CSP_LEVELS_PC)
-        avctx->pix_fmt = replace_j_format(avctx->pix_fmt);
+    if (codec->id == AV_CODEC_ID_MJPEG) {
+        // Annoying deprecated garbage for the jpg encoder.
+        if (image->params.color.levels == MP_CSP_LEVELS_PC)
+            avctx->pix_fmt = replace_j_format(avctx->pix_fmt);
+    }
     if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
         MP_ERR(ctx, "Image format %s not supported by lavc.\n",
                mp_imgfmt_to_name(image->imgfmt));
@@ -120,6 +133,11 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     if (codec->id == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
         av_opt_set_int(avctx, "pred", ctx->opts->png_filter,
+                       AV_OPT_SEARCH_CHILDREN);
+    } else if (codec->id == AV_CODEC_ID_WEBP) {
+        av_opt_set_int(avctx, "lossless", ctx->opts->webp_lossless,
+                       AV_OPT_SEARCH_CHILDREN);
+        av_opt_set_int(avctx, "quality", ctx->opts->webp_quality,
                        AV_OPT_SEARCH_CHILDREN);
     }
 
@@ -292,6 +310,7 @@ int image_writer_format_from_ext(const char *ext)
 }
 
 static struct mp_image *convert_image(struct mp_image *image, int destfmt,
+                                      enum mp_csp_levels yuv_levels,
                                       struct mp_log *log)
 {
     int d_w, d_h;
@@ -308,9 +327,9 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     // If RGB, just assume everything is correct.
     if (p.color.space != MP_CSP_RGB) {
-        // Currently, assume what FFmpeg's jpg encoder needs.
+        // Currently, assume what FFmpeg's jpg encoder or libwebp needs.
         // Of course this works only for non-HDR (no HDR support in libswscale).
-        p.color.levels = MP_CSP_LEVELS_PC;
+        p.color.levels = yuv_levels;
         p.color.space = MP_CSP_BT_601;
         p.chroma_location = MP_CHROMA_CENTER;
         mp_image_params_guess_csp(&p);
@@ -354,11 +373,24 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         destfmt = IMGFMT_RGB24;
     }
 #endif
+    if (opts->format == AV_CODEC_ID_WEBP && !opts->webp_lossless) {
+        // For lossy images, libwebp has its own RGB->YUV conversion.
+        // We don't want that, so force YUV/YUVA here.
+        int alpha = image->fmt.flags & MP_IMGFLAG_ALPHA;
+        destfmt = alpha ? pixfmt2imgfmt(AV_PIX_FMT_YUVA420P) : IMGFMT_420P;
+    }
 
     if (!destfmt)
         destfmt = get_target_format(&ctx);
 
-    struct mp_image *dst = convert_image(image, destfmt, log);
+    enum mp_csp_levels levels; // Ignored if destfmt is a RGB format
+    if (opts->format == AV_CODEC_ID_WEBP) {
+        levels = MP_CSP_LEVELS_TV;
+    } else {
+        levels = MP_CSP_LEVELS_PC;
+    }
+
+    struct mp_image *dst = convert_image(image, destfmt, levels, log);
     if (!dst)
         return false;
 
