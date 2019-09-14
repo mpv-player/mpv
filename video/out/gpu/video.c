@@ -2539,9 +2539,12 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
     }
 
     // If there's no specific signal peak known for the output display, infer
-    // it from the chosen transfer function
+    // it from the chosen transfer function. Also normalize the src peak, in
+    // case it was unknown
     if (!dst.sig_peak)
         dst.sig_peak = mp_trc_nom_peak(dst.gamma);
+    if (!src.sig_peak)
+        src.sig_peak = mp_trc_nom_peak(src.gamma);
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
     bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)
