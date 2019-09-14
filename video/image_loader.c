@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 #include "mp_image.h"
-#include "image_writer.h"
+#include "player/screenshot.h"
 
 #include "image_loader.h"
 

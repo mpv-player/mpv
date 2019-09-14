@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <setjmp.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
@@ -27,6 +26,7 @@
 #include "config.h"
 
 #if HAVE_JPEG
+#include <setjmp.h>
 #include <jpeglib.h>
 #endif
 
@@ -291,8 +291,8 @@ int image_writer_format_from_ext(const char *ext)
     return 0;
 }
 
-struct mp_image *convert_image(struct mp_image *image, int destfmt,
-                               struct mp_log *log)
+static struct mp_image *convert_image(struct mp_image *image, int destfmt,
+                                      struct mp_log *log)
 {
     int d_w, d_h;
     mp_image_params_get_dsize(&image->params, &d_w, &d_h);

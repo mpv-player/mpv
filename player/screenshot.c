@@ -38,6 +38,7 @@
 #include "video/mp_image_pool.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
+#include "video/sws_utils.h"
 #include "sub/osd.h"
 
 #include "video/csputils.h"
@@ -385,6 +386,42 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         add_subs(mpctx, image);
 
     return image;
+}
+
+struct mp_image *convert_image(struct mp_image *image, int destfmt,
+                               struct mp_log *log)
+{
+    int d_w, d_h;
+    mp_image_params_get_dsize(&image->params, &d_w, &d_h);
+
+    struct mp_image_params p = {
+        .imgfmt = destfmt,
+        .w = d_w,
+        .h = d_h,
+        .p_w = 1,
+        .p_h = 1,
+    };
+    mp_image_params_guess_csp(&p);
+
+    if (mp_image_params_equal(&p, &image->params))
+        return mp_image_new_ref(image);
+
+    struct mp_image *dst = mp_image_alloc(p.imgfmt, p.w, p.h);
+    if (!dst) {
+        mp_err(log, "Out of memory.\n");
+        return NULL;
+    }
+    mp_image_copy_attributes(dst, image);
+
+    dst->params = p;
+
+    if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
+        mp_err(log, "Error when converting image.\n");
+        talloc_free(dst);
+        return NULL;
+    }
+
+    return dst;
 }
 
 // mode is the same as in screenshot_get()
