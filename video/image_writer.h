@@ -32,6 +32,8 @@ struct image_writer_opts {
     int jpeg_progressive;
     int jpeg_baseline;
     int jpeg_source_chroma;
+    int webp_lossless;
+    int webp_quality;
     int tag_csp;
 };
 

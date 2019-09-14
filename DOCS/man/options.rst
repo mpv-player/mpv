@@ -3319,6 +3319,7 @@ Screenshot
     :png:       PNG
     :jpg:       JPEG (default)
     :jpeg:      JPEG (alias for jpg)
+    :webp:      WebP
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace.
@@ -3451,6 +3452,13 @@ Screenshot
     "up", 3 is "average", 4 is "Paeth", and 5 is "mixed". This affects the level
     of compression that can be achieved. For most images, "mixed" achieves the
     best compression ratio, hence it is the default.
+
+``--screenshot-webp-lossless=<yes|no>``
+    Write lossless WebP files. ``--screenshot-webp-quality`` is ignored if this
+    is set. The default is no.
+
+``--screenshot-webp-quality=<0-100>``
+    Set the WebP quality level. Higher means better quality. The default is 75.
 
 
 Software Scaler

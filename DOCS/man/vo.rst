@@ -415,6 +415,8 @@ Available video output drivers are:
             JPEG files, extension .jpeg.
         png
             PNG files.
+        webp
+            WebP files.
 
     ``--vo-image-png-compression=<0-9>``
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
@@ -425,6 +427,10 @@ Available video output drivers are:
         JPEG quality factor (default: 90)
     ``--vo-image-jpeg-optimize=<0-100>``
         JPEG optimization factor (default: 100)
+    ``--vo-image-webp-lossless=<yes|no>``
+        Enable writing lossless WebP files (default: no)
+    ``--vo-image-webp-quality=<0-100>``
+        WebP quality (default: 75)
     ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
