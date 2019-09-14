@@ -419,15 +419,18 @@ struct bstr stream_peek(stream_t *s, int len)
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 {
-    int rd;
     if (!s->write_buffer)
         return -1;
-    rd = s->write_buffer(s, buf, len);
-    if (rd < 0)
-        return -1;
-    s->pos += rd;
-    assert(rd == len && "stream_write_buffer(): unexpected short write");
-    return rd;
+    int orig_len = len;
+    while (len) {
+        int w = s->write_buffer(s, buf, len);
+        if (w <= 0)
+            return -1;
+        s->pos += w;
+        buf += w;
+        len -= w;
+    }
+    return orig_len;
 }
 
 // Drop len bytes form input, possibly reading more until all is skipped. If
