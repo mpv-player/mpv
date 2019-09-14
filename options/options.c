@@ -858,6 +858,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("sub-paths", "sub-file-paths"),
     OPT_REMOVED("heartbeat-cmd", "use Lua scripting instead"),
     OPT_REMOVED("no-ometadata", "use --no-ocopy-metadata"),
+    OPT_REMOVED("video-stereo-mode", "removed, try --vf=stereo3d"),
 
     {0}
 };
