@@ -230,9 +230,6 @@ Most activity happens on the IRC channel and the github issue tracker.
 - **User IRC Channel**: `#mpv` on `irc.freenode.net`
 - **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
 
-To contact the `mpv` team in private write to `mpv-team@googlegroups.com`. Use
-only if discretion is required.
-
 [releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [homebrew-mpv]: https://github.com/mpv-player/homebrew-mpv
