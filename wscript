@@ -700,11 +700,6 @@ video_output_features = [
         'deps': 'vaapi && egl-drm',
         'func': check_pkg_config('libva-drm', '>= 0.36.0'),
     }, {
-        'name': '--vaapi-glx',
-        'desc': 'VAAPI GLX',
-        'deps': 'gpl && vaapi-x11 && gl-x11',
-        'func': check_true,
-    }, {
         'name': '--vaapi-x-egl',
         'desc': 'VAAPI EGL on X11',
         'deps': 'vaapi-x11 && egl-x11',
@@ -712,7 +707,7 @@ video_output_features = [
     }, {
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
-        'deps': 'vaapi-x-egl || vaapi-wayland',
+        'deps': 'vaapi-x-egl || vaapi-wayland || vaapi-drm',
         'func': check_true,
     }, {
         'name': '--caca',
