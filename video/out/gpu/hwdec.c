@@ -42,7 +42,7 @@ extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_drm;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
-#if HAVE_VAAPI_EGL
+#if HAVE_VAAPI_EGL || HAVE_VAAPI_VULKAN
     &ra_hwdec_vaegl,
 #endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
