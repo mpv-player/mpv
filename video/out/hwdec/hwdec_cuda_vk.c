@@ -292,8 +292,8 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
             return false;
         }
     } else {
-        // This is not an error.
-        return true;
+        // This is not a Vulkan RA.
+        return false;
     }
 
     if (!cu->cuImportExternalMemory) {

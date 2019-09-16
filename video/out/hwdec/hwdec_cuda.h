@@ -50,6 +50,8 @@ struct cuda_mapper_priv {
     void *ext[4];
 };
 
+typedef bool (*cuda_interop_init)(const struct ra_hwdec *hw);
+
 bool cuda_gl_init(const struct ra_hwdec *hw);
 
 bool cuda_vk_init(const struct ra_hwdec *hw);

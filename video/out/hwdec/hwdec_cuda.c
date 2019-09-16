@@ -56,6 +56,16 @@ int check_cu(const struct ra_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
+const static cuda_interop_init interop_inits[] = {
+#if HAVE_GL
+    cuda_gl_init,
+#endif
+#if HAVE_VULKAN
+    cuda_vk_init,
+#endif
+    NULL
+};
+
 static int cuda_init(struct ra_hwdec *hw)
 {
     AVBufferRef *hw_device_ctx = NULL;
@@ -76,18 +86,11 @@ static int cuda_init(struct ra_hwdec *hw)
         return -1;
 
     // Initialise CUDA context from backend.
-    // We call all possible inits because these will do nothing if the ra context
-    // doesn't match.
-#if HAVE_GL
-    if (!cuda_gl_init(hw)) {
-        return -1;
+    for (int i = 0; interop_inits[i]; i++) {
+        if (interop_inits[i](hw)) {
+            break;
+        }
     }
-#endif
-#if HAVE_VULKAN
-    if (!cuda_vk_init(hw)) {
-        return -1;
-    }
-#endif
 
     if (!p->ext_init || !p->ext_uninit) {
         MP_VERBOSE(hw, "CUDA hwdec only works with OpenGL or Vulkan backends.\n");
