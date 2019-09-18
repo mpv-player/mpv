@@ -177,8 +177,7 @@ static int init(struct sd *sd)
         ass_set_style_overrides(ctx->ass_library, opts->ass_force_style_list);
 
     ctx->ass_track = ass_new_track(ctx->ass_library);
-    if (!ctx->is_converted)
-        ctx->ass_track->track_type = TRACK_TYPE_ASS;
+    ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
     ctx->shadow_track = ass_new_track(ctx->ass_library);
     ctx->shadow_track->PlayResX = 384;
