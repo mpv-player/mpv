@@ -260,9 +260,11 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
     } else if (got_sub) {
         *sub_pts = packet->pts + mp_pts_from_av(priv->cur.start_display_time,
                                                &avctx->time_base);
-        *sub_duration = mp_pts_from_av(priv->cur.end_display_time -
-                                      priv->cur.start_display_time,
-                                      &avctx->time_base);
+        *sub_duration = priv->cur.end_display_time == UINT32_MAX ?
+                        UINT32_MAX :
+                        mp_pts_from_av(priv->cur.end_display_time -
+                                       priv->cur.start_display_time,
+                                       &avctx->time_base);
 
         for (int i = 0; i < priv->cur.num_rects; i++) {
             if (priv->cur.rects[i]->w > 0 && priv->cur.rects[i]->h > 0)

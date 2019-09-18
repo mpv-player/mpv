@@ -234,17 +234,18 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
             check_packet_seen(sd, packet->pos))
             return;
-        if (packet->duration < 0) {
-            if (!ctx->duration_unknown) {
-                MP_WARN(sd, "Subtitle with unknown duration.\n");
-                ctx->duration_unknown = true;
-            }
-            packet->duration = UNKNOWN_DURATION;
-        }
+
         double sub_pts = 0;
         double sub_duration = 0;
         char **r = lavc_conv_decode(ctx->converter, packet, &sub_pts,
                                     &sub_duration);
+        if (packet->duration < 0 || sub_duration == UINT32_MAX) {
+            if (!ctx->duration_unknown) {
+                MP_WARN(sd, "Subtitle with unknown duration.\n");
+                ctx->duration_unknown = true;
+            }
+            sub_duration = UNKNOWN_DURATION;
+        }
 
         for (int n = 0; r && r[n]; n++) {
             char *ass_line = r[n];
