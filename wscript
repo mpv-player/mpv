@@ -636,7 +636,7 @@ video_output_features = [
         'deps': 'wayland',
         'groups': [ 'gl' ],
         'func': check_pkg_config('wayland-egl', '>= 9.0.0',
-                                 'egl',         '>= 9.0.0')
+                                 'egl',         '>= 1.5')
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
