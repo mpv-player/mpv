@@ -241,13 +241,19 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             }
             packet->duration = UNKNOWN_DURATION;
         }
-        char **r = lavc_conv_decode(ctx->converter, packet);
+        double sub_pts = 0;
+        double sub_duration = 0;
+        char **r = lavc_conv_decode(ctx->converter, packet, &sub_pts,
+                                    &sub_duration);
+
         for (int n = 0; r && r[n]; n++) {
             char *ass_line = r[n];
             if (sd->opts->sub_filter_SDH)
                 ass_line = filter_SDH(sd, track->event_format, 0, ass_line, 0);
             if (ass_line)
-                ass_process_data(track, ass_line, strlen(ass_line));
+                ass_process_chunk(track, ass_line, strlen(ass_line),
+                                  llrint(sub_pts * 1000),
+                                  llrint(sub_duration * 1000));
             if (sd->opts->sub_filter_SDH)
                 talloc_free(ass_line);
         }

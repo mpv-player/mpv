@@ -85,6 +85,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
         goto error;
     if (mp_lavc_set_extradata(avctx, extradata, extradata_len) < 0)
         goto error;
+    av_dict_set(&opts, "sub_text_format", "ass", 0);
     if (strcmp(codec_name, "eia_608") == 0)
         av_dict_set(&opts, "real_time", "1", 0);
     if (avcodec_open2(avctx, codec, &opts) < 0)
@@ -227,8 +228,11 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
 
 #endif
 
-// Return a NULL-terminated list of ASS event lines.
-char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
+// Return a NULL-terminated list of ASS event lines and have
+// the AVSubtitle display PTS and duration set to input
+// double variables.
+char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
+                        double *sub_pts, double *sub_duration)
 {
     AVCodecContext *avctx = priv->avctx;
     AVPacket pkt;
@@ -254,6 +258,12 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
     if (ret < 0) {
         MP_ERR(priv, "Error decoding subtitle\n");
     } else if (got_sub) {
+        *sub_pts = packet->pts + mp_pts_from_av(priv->cur.start_display_time,
+                                               &avctx->time_base);
+        *sub_duration = mp_pts_from_av(priv->cur.end_display_time -
+                                      priv->cur.start_display_time,
+                                      &avctx->time_base);
+
         for (int i = 0; i < priv->cur.num_rects; i++) {
             if (priv->cur.rects[i]->w > 0 && priv->cur.rects[i]->h > 0)
                 MP_WARN(priv, "Ignoring bitmap subtitle.\n");
