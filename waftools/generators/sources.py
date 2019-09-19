@@ -66,7 +66,7 @@ def __wayland_protocol_code__(ctx, **kwargs):
         kwargs['source'] = '{}/{}'.format(kwargs['proto_dir'], file_name)
 
     ctx(
-        rule   = __wayland_scanner_cmd__(ctx, 'code', kwargs['proto_dir'],
+        rule   = __wayland_scanner_cmd__(ctx, 'private-code', kwargs['proto_dir'],
                                          file_name,
                                          protocol_is_vendored),
         name   = os.path.basename(kwargs['target']),
