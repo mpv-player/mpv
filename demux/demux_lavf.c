@@ -250,6 +250,10 @@ static void update_read_stats(struct demuxer *demuxer)
     for (int n = 0; n < priv->num_nested; n++) {
         struct nested_stream *nest = &priv->nested[n];
 
+        // Note: accessing the bytes_read field is not allowed by FFmpeg's API.
+        // This is fully intentional - there is no other way to get this
+        // information (not even by custom I/O, because the connection reuse
+        // mechanism by the HLS demuxer would get disabled).
         int64_t cur = nest->id->bytes_read;
         int64_t new = cur - nest->last_bytes;
         nest->last_bytes = cur;
