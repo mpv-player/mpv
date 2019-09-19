@@ -214,6 +214,11 @@ main_dependencies = [
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
                 'atomic_fetch_add(&test, 1)'))
     }, {
+        # C11; technically we still support C99
+        'name': 'aligned_alloc',
+        'desc': 'C11 aligned_alloc()',
+        'func': check_statement('stdlib.h', 'aligned_alloc(1, 1)'),
+    }, {
         'name': 'atomics',
         'desc': 'stdatomic.h support or slow emulation',
         'func': check_true,
@@ -386,6 +391,7 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
         'name': '--zimg',
+        'deps': 'aligned_alloc',
         'desc': 'libzimg support (for vf_fingerprint)',
         'func': check_pkg_config('zimg', '>= 2.9'),
     }, {

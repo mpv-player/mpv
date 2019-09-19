@@ -136,8 +136,8 @@ static void reinit_fmt(struct mp_filter *f, struct mp_image *mpi)
 
     size_t tmp_size;
     if (!zimg_filter_graph_get_tmp_size(p->zimg_graph, &tmp_size)) {
-        if (posix_memalign(&p->zimg_tmp, ZIMG_ALIGN, tmp_size))
-            p->zimg_tmp = NULL;
+        tmp_size = MP_ALIGN_UP(tmp_size, ZIMG_ALIGN);
+        p->zimg_tmp = aligned_alloc(ZIMG_ALIGN, tmp_size);
     }
 
     if (!p->zimg_tmp) {
