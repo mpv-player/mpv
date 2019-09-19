@@ -570,8 +570,8 @@ video_output_features = [
         'name': '--wayland',
         'desc': 'Wayland',
         'deps': 'wayland-protocols && wayland-scanner',
-        'func': check_pkg_config('wayland-client', '>= 1.6.0',
-                                 'wayland-cursor', '>= 1.6.0',
+        'func': check_pkg_config('wayland-client', '>= 1.15.0',
+                                 'wayland-cursor', '>= 1.15.0',
                                  'xkbcommon',      '>= 0.3.0'),
     } , {
         'name': '--x11',
