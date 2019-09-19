@@ -65,8 +65,7 @@ enum mp_voctrl {
     VOCTRL_RESUME,
 
     VOCTRL_SET_PANSCAN,
-    VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
-    VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
+    VOCTRL_SET_EQUALIZER,
 
     /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
@@ -127,18 +126,6 @@ enum mp_voctrl {
 
     /* private to vo_gpu */
     VOCTRL_EXTERNAL_RESIZE,
-};
-
-// VOCTRL_SET_EQUALIZER
-struct voctrl_set_equalizer_args {
-    const char *name;
-    int value;
-};
-
-// VOCTRL_GET_EQUALIZER
-struct voctrl_get_equalizer_args {
-    const char *name;
-    int *valueptr;
 };
 
 // VOCTRL_GET_WIN_STATE
