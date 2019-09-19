@@ -13,9 +13,9 @@
 //              increments the user_sbc, and the reported sbc is the sbc
 //              of the frame that was just displayed)
 // Invariants:
-//  - ust and msc change in lockstep (no value can change with the other)
+//  - ust and msc change in lockstep (no value can change without the other)
 //  - msc is incremented; if you query it in a loop, and your thread isn't
-//    frozen or starved by the scheduler, it will usually not change or
+//    frozen or starved by the scheduler, it will usually either not change, or
 //    be incremented by 1 (while the ust will be incremented by vsync
 //    duration)
 //  - sbc is never higher than the user_sbc
