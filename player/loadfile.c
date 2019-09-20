@@ -422,8 +422,6 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    demuxer_select_track(track->demuxer, stream, MP_NOPTS_VALUE, false);
-
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
     return track;
@@ -974,11 +972,20 @@ static void *open_demux_thread(void *ctx)
         .stream_record = true,
         .is_top_level = true,
     };
-    mpctx->open_res_demuxer =
+    struct demuxer *demux =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);
+    mpctx->open_res_demuxer = demux;
 
-    if (mpctx->open_res_demuxer) {
+    if (demux) {
         MP_VERBOSE(mpctx, "Opening done: %s\n", mpctx->open_url);
+
+        int num_streams = demux_get_num_stream(demux);
+        for (int n = 0; n < num_streams; n++) {
+            struct sh_stream *sh = demux_get_stream(demux, n);
+            demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true);
+        }
+
+        demux_start_prefetch(demux);
     } else {
         MP_VERBOSE(mpctx, "Opening failed or was aborted: %s\n", mpctx->open_url);
 
