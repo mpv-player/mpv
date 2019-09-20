@@ -74,7 +74,6 @@ struct mpv_render_context {
     // --- Protected by update_lock
     mpv_render_update_fn update_cb;
     void *update_cb_ctx;
-    bool had_kill_update;           // update during termination
 
     pthread_mutex_t lock;
     pthread_cond_t video_wait;      // paired with lock
@@ -117,8 +116,6 @@ static void update(struct mpv_render_context *ctx)
     if (ctx->update_cb)
         ctx->update_cb(ctx->update_cb_ctx);
 
-    // For the termination code.
-    ctx->had_kill_update = true;
     pthread_cond_broadcast(&ctx->update_cond);
     pthread_mutex_unlock(&ctx->update_lock);
 }
@@ -254,29 +251,41 @@ void mpv_render_context_free(mpv_render_context *ctx)
     // a VO could still hold a reference.
     mp_set_main_render_context(ctx->client_api, ctx, false);
 
-    // If it's still in use, a VO using it must be active. Destroy the VO, and
-    // also bring down the decoder etc., which still might be using the hwdec
-    // context. The above removal guarantees it can't come back (so ctx->vo
-    // can't change to non-NULL).
     if (atomic_load(&ctx->in_use)) {
+        // Start destroy the VO, and also bring down the decoder etc., which
+        // still might be using the hwdec context or use DR images. The above
+        // mp_set_main_render_context() call guarantees it can't come back (so
+        // ctx->vo can't change to non-NULL).
+        // In theory, this races with vo_libmpv exiting and another VO being
+        // used, which is a harmless grotesque corner case.
         kill_video_async(ctx->client_api);
 
         while (atomic_load(&ctx->in_use)) {
-            // As long as the video decoders are not destroyed, they can still
-            // try to allocate new DR images and so on. This is a grotesque
-            // corner case, but possible. Also, more likely, DR images need to
-            // be released while the video chain is destroyed.
-            if (ctx->dispatch)
-                mp_dispatch_queue_process(ctx->dispatch, 0);
-
-            // Wait for update() calls.
-            pthread_mutex_lock(&ctx->update_lock);
-            if (!ctx->had_kill_update)
-                pthread_cond_wait(&ctx->update_cond, &ctx->update_lock);
-            ctx->had_kill_update = false;
-            pthread_mutex_unlock(&ctx->update_lock);
+            // As a nasty detail, we need to wait until the VO is released, but
+            // also need to react to update() calls during it (the update calls
+            // are supposed to trigger processing ctx->dispatch). We solve this
+            // by making the VO uninit function call mp_dispatch_interrupt().
+            //
+            // Other than that, processing ctx->dispatch is needed to serve the
+            // video decoder, which might still not be fully destroyed, and e.g.
+            // performs calls to release DR images (or, as a grotesque corner
+            // case may even try to allocate new ones).
+            //
+            // Once the VO is released, ctx->dispatch becomes truly inactive.
+            // (The libmpv API user could call mpv_render_context_update() while
+            // mpv_render_context_free() is being called, but of course this is
+            // invalid.)
+            mp_dispatch_queue_process(ctx->dispatch, INFINITY);
         }
     }
+
+    pthread_mutex_lock(&ctx->lock);
+    // Barrier - guarantee uninit() has left the lock region. It will access ctx
+    // until the lock has been released, so we must not proceed with destruction
+    // before we can acquire the lock. (The opposite, uninit() acquiring the
+    // lock, can not happen anymore at this point - we've waited for VO uninit,
+    // and prevented that new VOs can be created.)
+    pthread_mutex_unlock(&ctx->lock);
 
     assert(!atomic_load(&ctx->in_use));
     assert(!ctx->vo);
@@ -679,12 +688,14 @@ static void uninit(struct vo *vo)
     ctx->need_update_external = true;
     ctx->need_reset = true;
     ctx->vo = NULL;
+
+    // The following do not normally need ctx->lock, however, ctx itself may
+    // become invalid once we release ctx->lock.
+    bool prev_in_use = atomic_exchange(&ctx->in_use, false);
+    assert(prev_in_use); // obviously must have been set
+    mp_dispatch_interrupt(ctx->dispatch);
+
     pthread_mutex_unlock(&ctx->lock);
-
-    bool state = atomic_exchange(&ctx->in_use, false);
-    assert(state); // obviously must have been set
-
-    update(ctx);
 }
 
 static int preinit(struct vo *vo)
