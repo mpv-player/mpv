@@ -85,6 +85,10 @@ extern "C" {
  *    requirement always existed. Not honoring it will lead to UB (deadlocks,
  *    use of invalid pthread_t handles). This requirement might be removed in
  *    the future, but will require some considerable work internal to libmpv.
+ *    You can avoid this issue by setting "vd-lavc-dr" to "no".
+ *  - MPV_RENDER_PARAM_ADVANCED_CONTROL has some other libmpv-internal problems,
+ *    which may result in random deadlocks (see top of vo_libmpv.c).
+ *    You can probably avoid this issue by setting "vd-lavc-dr" to "no".
  *
  * libmpv functions which are safe to call from a render thread are:
  *  - functions marked with "Safe to be called from mpv render API threads."
