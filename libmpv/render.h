@@ -79,6 +79,12 @@ extern "C" {
  *    is logged. If you set MPV_RENDER_PARAM_ADVANCED_CONTROL, you promise that
  *    this won't happen, and must absolutely guarantee it, or a real deadlock
  *    will freeze the mpv core thread forever.
+ *  - if MPV_RENDER_PARAM_ADVANCED_CONTROL is used, you currently must call all
+ *    mpv_render*() API functions from the same thread on which the
+ *    mpv_render_context was returned by mpv_render_context_create(). This
+ *    requirement always existed. Not honoring it will lead to UB (deadlocks,
+ *    use of invalid pthread_t handles). This requirement might be removed in
+ *    the future, but will require some considerable work internal to libmpv.
  *
  * libmpv functions which are safe to call from a render thread are:
  *  - functions marked with "Safe to be called from mpv render API threads."
