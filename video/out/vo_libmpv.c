@@ -59,8 +59,8 @@ struct mpv_render_context {
     atomic_bool in_use;
 
     // --- Immutable after init
+    struct mp_dispatch_queue *dispatch;
     bool advanced_control;
-    struct mp_dispatch_queue *dispatch; // NULL if advanced_control disabled
     struct dr_helper *dr;           // NULL if advanced_control disabled
 
     pthread_mutex_t control_lock;
@@ -174,11 +174,11 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
     ctx->vo_opts_cache = m_config_cache_alloc(ctx, ctx->global, &vo_sub_opts);
     ctx->vo_opts = ctx->vo_opts_cache->opts;
 
-    if (GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_ADVANCED_CONTROL, int, 0)) {
+    ctx->dispatch = mp_dispatch_create(ctx);
+    mp_dispatch_set_wakeup_fn(ctx->dispatch, dispatch_wakeup, ctx);
+
+    if (GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_ADVANCED_CONTROL, int, 0))
         ctx->advanced_control = true;
-        ctx->dispatch = mp_dispatch_create(ctx);
-        mp_dispatch_set_wakeup_fn(ctx->dispatch, dispatch_wakeup, ctx);
-    }
 
     int err = MPV_ERROR_NOT_IMPLEMENTED;
     for (int n = 0; render_backends[n]; n++) {
@@ -210,7 +210,7 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
             ctx->renderer->fns->check_format(ctx->renderer, n);
     }
 
-    if (ctx->renderer->fns->get_image && ctx->dispatch)
+    if (ctx->renderer->fns->get_image && ctx->advanced_control)
         ctx->dr = dr_helper_create(ctx->dispatch, render_get_image, ctx);
 
     if (!mp_set_main_render_context(ctx->client_api, ctx, true)) {
@@ -282,8 +282,7 @@ void mpv_render_context_free(mpv_render_context *ctx)
     assert(!ctx->vo);
 
     // Possibly remaining outstanding work.
-    if (ctx->dispatch)
-        mp_dispatch_queue_process(ctx->dispatch, 0);
+    mp_dispatch_queue_process(ctx->dispatch, 0);
 
     forget_frames(ctx, true);
 
@@ -420,8 +419,7 @@ uint64_t mpv_render_context_update(mpv_render_context *ctx)
 {
     uint64_t res = 0;
 
-    if (ctx->dispatch)
-        mp_dispatch_queue_process(ctx->dispatch, 0);
+    mp_dispatch_queue_process(ctx->dispatch, 0);
 
     pthread_mutex_lock(&ctx->lock);
     if (ctx->next_frame)
@@ -611,20 +609,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     // VOCTRLs to be run on the renderer thread (if possible at all).
-    switch (request) {
-    case VOCTRL_SCREENSHOT:
-        if (ctx->dispatch) {
+    if (ctx->advanced_control) {
+        switch (request) {
+        case VOCTRL_SCREENSHOT:
+        case VOCTRL_PERFORMANCE_DATA: {
             int ret;
             void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};
             mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
             return ret;
         }
-    case VOCTRL_PERFORMANCE_DATA:
-        if (ctx->dispatch) {
-            int ret;
-            void *args[] = {ctx, (void *)(intptr_t)request, data, &ret};
-            mp_dispatch_run(ctx->dispatch, run_control_on_render_thread, args);
-            return ret;
         }
     }
 
