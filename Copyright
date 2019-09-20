@@ -47,19 +47,11 @@ The following files are still GPL only (--enable-lgpl disables them):
 
     audio/out/ao_jack.c             will stay GPL
     audio/out/ao_oss.c              will stay GPL
-    demux/demux_tv.c                will stay GPL
-    stream/ai_*                     will stay GPL (TV code)
-    stream/audio_in.*               will stay GPL (TV code)
     stream/dvb*                     must stay GPL
-    stream/frequencies.*            must stay GPL
     stream/stream_cdda.c            unknown
     stream/stream_dvb.*             must stay GPL
-    stream/stream_dvd.c             unknown
-    stream/stream_dvd_common.*      unknown
     stream/stream_dvdnav.c          unknown
     stream/stream_smb.c             will stay GPLv3
-    stream/stream_tv.c              will stay GPL
-    stream/tv*                      will stay GPL
     video/out/vo_caca.c             unknown
     video/out/vo_direct3d.c         unknown
     video/out/vo_vaapi.c            probably impossible (some company's code)
@@ -76,10 +68,6 @@ The following files are still GPL only (--enable-lgpl disables them):
     mpv.desktop                     unknown license, probably GPLv2+
     etc/restore-old-bindings.conf   unknown license, probably GPLv2+
 
-The following files contain some optional GPL code (--enable-lgpl disables it):
-
-    options/parse_commandline.c     dvd:// expansion
-
-None of the exceptions listed above affect the final binary if it's built as
+None of the cases listed above affect the final binary if it's built as
 LGPL. Linked libraries still can affect the final license (for example if
 FFmpeg was built as GPL).
