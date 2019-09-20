@@ -44,6 +44,7 @@ def __add_dynamic_swift_library_linking_flags(ctx, swift_library):
     if StrictVersion(ctx.env.SWIFT_VERSION) >= StrictVersion("5.0"):
         ctx.env.append_value('LINKFLAGS', [
             '-Xlinker', '-rpath', '-Xlinker', '/usr/lib/swift',
+            '-L/usr/lib/swift',
         ])
 
     ctx.env.append_value('LINKFLAGS', [
