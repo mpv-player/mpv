@@ -719,12 +719,10 @@ listed.
   to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
   decoder frame dropping is enabled with the ``--framedrop`` options.
   (``drop-frame-count`` property.)
-- Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
+- Cache state, e.g. ``Cache:  2s/134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
-  the second value shows the sum of the demuxer forward cache size and the
-  *additional* data buffered in the stream cache in kilobytes.
-  (``demuxer-cache-duration``, ``demuxer-cache-state``, ``cache-used``
-  properties.)
+  the second value shows the estimated size of the buffered amount in kilobytes.
+  (``demuxer-cache-duration`` and ``demuxer-cache-state`` properties.)
 
 
 LOW LATENCY PLAYBACK

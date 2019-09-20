@@ -243,9 +243,9 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         int64_t cache_size = s.fw_bytes;
         if (cache_size > 0) {
             if (cache_size >= 1024 * 1024) {
-                saddf(&line, "+%lldMB", (long long)(cache_size / 1024 / 1024));
+                saddf(&line, "/%lldMB", (long long)(cache_size / 1024 / 1024));
             } else {
-                saddf(&line, "+%lldKB", (long long)(cache_size / 1024));
+                saddf(&line, "/%lldKB", (long long)(cache_size / 1024));
             }
         }
     }
