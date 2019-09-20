@@ -591,8 +591,10 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 
         // demux_timeline already does caching, doing it for the sub-demuxers
         // would be pointless and wasteful.
-        if (part->source)
+        if (part->source) {
             demuxer->is_network |= part->source->is_network;
+            demuxer->is_streaming |= part->source->is_streaming;
+        }
 
         struct segment *seg = talloc_ptrtype(src, seg);
         *seg = (struct segment){
@@ -611,6 +613,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     }
 
     demuxer->is_network |= tl->track_layout->is_network;
+    demuxer->is_streaming |= tl->track_layout->is_streaming;
     return true;
 }
 

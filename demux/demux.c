@@ -2385,8 +2385,7 @@ static void update_opts(struct demux_internal *in)
     in->max_bytes_bw = opts->max_bytes_bw;
 
     int seekable = opts->seekable_cache;
-    bool is_streaming = in->d_thread->is_network ||
-        (in->d_thread->stream && in->d_thread->stream->streaming);
+    bool is_streaming = in->d_thread->is_streaming;
     bool use_cache = is_streaming;
     if (opts->enable_cache >= 0)
         use_cache = opts->enable_cache == 1;
@@ -2882,6 +2881,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
     dst->start_time = src->start_time;
     dst->duration = src->duration;
     dst->is_network = src->is_network;
+    dst->is_streaming = src->is_streaming;
     dst->priv = src->priv;
     dst->metadata = mp_tags_dup(dst, src->metadata);
 }
@@ -3132,6 +3132,7 @@ bool demux_is_network_cached(demuxer_t *demuxer)
 struct parent_stream_info {
     bool seekable;
     bool is_network;
+    bool is_streaming;
     struct mp_cancel *cancel;
     char *filename;
 };
@@ -3162,6 +3163,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .glog = log,
         .filename = talloc_strdup(demuxer, sinfo->filename),
         .is_network = sinfo->is_network,
+        .is_streaming = sinfo->is_streaming,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
@@ -3290,6 +3292,7 @@ static struct demuxer *demux_open(struct stream *stream,
     struct parent_stream_info sinfo = {
         .seekable = stream->seekable,
         .is_network = stream->is_network,
+        .is_streaming = stream->streaming,
         .cancel = cancel,
         .filename = talloc_strdup(NULL, stream->url),
     };

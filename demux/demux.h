@@ -193,6 +193,7 @@ typedef struct demuxer {
     // Typical examples: text subtitles, playlists
     bool fully_read;
     bool is_network; // opened directly from a network stream
+    bool is_streaming; // implies a "slow" input, such as network or FUSE
     bool access_references; // allow opening other files/URLs
 
     // Bitmask of DEMUX_EVENT_*
