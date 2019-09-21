@@ -21,6 +21,8 @@ project can relicense the changes to LGPLv2.1+ at a later point without asking
 the contributor. This is a safeguard for making potential relicensing of
 remaining GPL code to LGPLv2.1+ easier.
 
+See DOCS/contribute.md for binding rules wrt. licensing for contributions.
+
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
 

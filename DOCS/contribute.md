@@ -17,10 +17,14 @@ Sending patches
 - All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
   that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
   repository root directory).
+  Changes in files with more liberal licenses (such as BSD, MIT, or ISC) are
+  assumed to be dual-licensed under LGPLv2.1+ and the license indicated in the
+  file header.
 - You must be either the exclusive author of the patch, or acknowledge all
   authors involved in the commit message. If you take 3rd party code, authorship
   and copyright must be properly acknowledged. If the license of the code is not
   LGPLv2.1+, this must be mentioned.
+- These license statements are legally binding.
 - Don't use fake names (something that looks like an actual names, and may be
   someone else's name, but is not your legal name). Using a pseudonyms is
   allowed if it can be used to identify or contact you, even if whatever
