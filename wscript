@@ -308,7 +308,7 @@ iconv support use --disable-iconv.",
         'name': 'bsd-thread-name',
         'desc': 'BSD API for setting thread name',
         'deps': '!(glibc-thread-name || osx-thread-name)',
-        'func': check_statement('pthread.h',
+        'func': check_statement(['pthread.h', 'pthread_np.h'],
                                 'pthread_set_name_np(pthread_self(), "ducks")',
                                 use=['pthreads']),
     }, {

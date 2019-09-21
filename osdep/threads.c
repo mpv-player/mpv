@@ -24,6 +24,10 @@
 #include "threads.h"
 #include "timer.h"
 
+#if HAVE_BSD_THREAD_NAME
+#include <pthread_np.h>
+#endif
+
 int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
 {
     pthread_mutexattr_t attr;
