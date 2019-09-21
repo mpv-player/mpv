@@ -24,9 +24,20 @@ def is_user_lib(objfile, libname):
            not "libswift" in libname
 
 def otool(objfile):
-    command = "otool -L %s | grep -e '\t' | awk '{ print $1 }'" % objfile
+    command = "otool -L '%s' | grep -e '\t' | awk '{ print $1 }'" % objfile
     output  = subprocess.check_output(command, shell = True, universal_newlines=True)
     return set(filter(partial(is_user_lib, objfile), output.split()))
+
+def get_rpaths_dev_tools(binary):
+    command = "otool -l '%s' | grep -A2 LC_RPATH | grep path | grep \"Xcode\|CommandLineTools\"" % binary
+    result  = subprocess.check_output(command, shell = True, universal_newlines=True)
+    pathRe = re.compile("^\s*path (.*) \(offset \d*\)$")
+    output = []
+
+    for line in result.splitlines():
+        output.append(pathRe.search(line).group(1).strip())
+
+    return output
 
 def install_name_tool_change(old, new, objfile):
     subprocess.call(["install_name_tool", "-change", old, new, objfile])
@@ -36,6 +47,9 @@ def install_name_tool_id(name, objfile):
 
 def install_name_tool_add_rpath(rpath, binary):
     subprocess.call(["install_name_tool", "-add_rpath", rpath, binary])
+
+def install_name_tool_delete_rpath(rpath, binary):
+    subprocess.call(["install_name_tool", "-delete_rpath", rpath, binary])
 
 def libraries(objfile, result = dict()):
     libs_list       = otool(objfile)
@@ -104,6 +118,10 @@ def process_swift_libraries(binary):
     print(">> setting additional rpath for swift libraries")
     install_name_tool_add_rpath("@executable_path/lib", binary)
 
+def remove_dev_tools_rapths(binary):
+    for path in get_rpaths_dev_tools(binary):
+        install_name_tool_delete_rpath(path, binary)
+
 def main():
     binary = os.path.abspath(sys.argv[1])
     if not os.path.exists(lib_path(binary)):
@@ -115,6 +133,9 @@ def main():
     libs_processed = process_libraries(libs, binary)
     while libs_processed is not None:
         libs_processed = process_libraries(libs, binary, libs_processed)
+
+    print(">> removing rpath definitions towards dev tools")
+    remove_dev_tools_rapths(binary)
 
     print(">> copying and processing swift libraries")
     process_swift_libraries(binary)
