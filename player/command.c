@@ -2838,6 +2838,38 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, text);
 }
 
+static struct sd_times get_times(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
+    MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    double pts = mpctx->playback_pts;
+    if (!sub || pts == MP_NOPTS_VALUE)
+        return res;
+    return sub_get_times(sub, pts);
+}
+
+static int mp_property_sub_start(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    double start = get_times(ctx, prop, action, arg).start;
+    if (start == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, start);
+}
+
+
+static int mp_property_sub_end(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    double end = get_times(ctx, prop, action, arg).end;
+    if (end == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, end);
+}
+
 static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
                                        int action, void *arg)
 {
@@ -3541,6 +3573,8 @@ static const struct m_property mp_properties_base[] = {
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
     {"sub-text", mp_property_sub_text},
+    {"sub-start", mp_property_sub_start},
+    {"sub-end", mp_property_sub_end},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},

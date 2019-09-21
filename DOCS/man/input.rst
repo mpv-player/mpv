@@ -1909,6 +1909,17 @@ Property list
 
     This property is experimental and might be removed in the future.
 
+``sub-start``
+    Return the current subtitle start time (in seconds). If there's multiple
+    current subtitles, returns the first start time. If no current subtitle is
+    present null is returned instead.
+
+``sub-end``
+    Return the current subtitle start time (in seconds). If there's multiple
+    current subtitles, return the last end time. If no current subtitle is
+    present, or if it's present but has unknown or incorrect duration, null
+    is returned instead.
+
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing
     to the property will restart playback at the written entry.

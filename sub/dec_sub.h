@@ -21,6 +21,11 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_DEF_FPS,
 };
 
+struct sd_times {
+    double start;
+    double end;
+};
+
 struct attachment_list {
     struct demux_attachment *entries;
     int num_entries;
@@ -38,6 +43,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts);
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
                      double pts, struct sub_bitmaps *res);
 char *sub_get_text(struct dec_sub *sub, double pts);
+struct sd_times sub_get_times(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);
 void sub_update_opts(struct dec_sub *sub);
