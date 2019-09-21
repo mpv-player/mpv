@@ -4,22 +4,22 @@
 static void test_scale_ambient_lux_limits(void **state) {
     float x;
     x = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, 16.0);
-    assert_float_equal(x, 2.40f);
+    assert_float_equal(x, 2.40f, FLT_EPSILON);
 
     x = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, 64.0);
-    assert_float_equal(x, 1.961f);
+    assert_float_equal(x, 1.961f, FLT_EPSILON);
 }
 
 static void test_scale_ambient_lux_sign(void **state) {
     float x;
     x = gl_video_scale_ambient_lux(16.0, 64.0, 1.961, 2.40, 64.0);
-    assert_float_equal(x, 2.40f);
+    assert_float_equal(x, 2.40f, FLT_EPSILON);
 }
 
 static void test_scale_ambient_lux_clamping(void **state) {
     float x;
     x = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, 0.0);
-    assert_float_equal(x, 2.40f);
+    assert_float_equal(x, 2.40f, FLT_EPSILON);
 }
 
 static void test_scale_ambient_lux_log10_midpoint(void **state) {
@@ -27,7 +27,7 @@ static void test_scale_ambient_lux_log10_midpoint(void **state) {
     // 32 corresponds to the the midpoint after converting lux to the log10 scale
     x = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, 32.0);
     float mid_gamma = (2.40 - 1.961) / 2 + 1.961;
-    assert_float_equal(x, mid_gamma);
+    assert_float_equal(x, mid_gamma, FLT_EPSILON);
 }
 
 int main(void) {
