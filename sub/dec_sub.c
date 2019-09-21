@@ -359,7 +359,6 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
 char *sub_get_text(struct dec_sub *sub, double pts)
 {
     pthread_mutex_lock(&sub->lock);
-    struct mp_subtitle_opts *opts = sub->opts;
     char *text = NULL;
 
     pts = pts_to_subtitle(sub, pts);
