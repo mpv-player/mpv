@@ -21,6 +21,10 @@
 
 #include "config.h"
 
+#if HAVE_BSD_THREAD_NAME
+#include <pthread_np.h>
+#endif
+
 #include "threads.h"
 #include "timer.h"
 
