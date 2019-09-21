@@ -13,8 +13,8 @@ def __get_cc_env_vars__(cc):
 
 def __test_and_add_flags__(ctx, flags):
     for flag in flags:
-        ctx.check_cc(cflags=flag, uselib_store="compiler", mandatory=False)
-    ctx.env.CFLAGS += ctx.env.CFLAGS_compiler
+        if ctx.check_cc(cflags='-Werror ' + flag, mandatory=False):
+            ctx.env.CFLAGS += [flag]
 
 def __add_generic_flags__(ctx):
     ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
