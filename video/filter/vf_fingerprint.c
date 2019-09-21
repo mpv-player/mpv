@@ -283,7 +283,7 @@ static struct mp_filter *f_create(struct mp_filter *parent, void *options)
 
 const struct mp_user_filter_entry vf_fingerprint = {
     .desc = {
-        .description = "'Compute video frame fingerprints",
+        .description = "Compute video frame fingerprints",
         .name = "fingerprint",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &f_opts_def,
