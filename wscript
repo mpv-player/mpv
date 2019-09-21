@@ -449,6 +449,12 @@ libav_dependencies = [
         'req': True,
         'fmsg': "FFmpeg/Libav development files not found.",
     }, {
+        'name': 'libavutil',
+        'desc': 'FFmpeg/Libav libavutil present',
+        'func': check_pkg_config('libavutil'),
+        'req': True,
+        'fmsg': "FFmpeg/Libav libavutil not found.",
+    }, {
         'name': 'ffmpeg',
         'desc': 'libav* is FFmpeg',
         # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
@@ -558,7 +564,8 @@ video_output_features = [
         'name': '--drmprime',
         'desc': 'DRM Prime ffmpeg support',
         'func': check_statement('libavutil/pixfmt.h',
-                                'int i = AV_PIX_FMT_DRM_PRIME')
+                                'int i = AV_PIX_FMT_DRM_PRIME',
+                                use='libavutil')
     }, {
         'name': '--gbm',
         'desc': 'GBM',
@@ -1009,9 +1016,9 @@ def configure(ctx):
 
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
+    ctx.parse_dependencies(libav_dependencies)
     ctx.parse_dependencies(audio_output_features)
     ctx.parse_dependencies(video_output_features)
-    ctx.parse_dependencies(libav_dependencies)
     ctx.parse_dependencies(hwaccel_features)
 
     if ctx.options.LUA_VER:
