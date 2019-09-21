@@ -21,10 +21,17 @@
 #include <sys/ioctl.h>
 #include <poll.h>
 #include <sys/stat.h>
-#include <sys/vt.h>
 #include <unistd.h>
 #include <limits.h>
 #include <math.h>
+
+#include "config.h"
+
+#if HAVE_CONSIO_H
+#include <sys/consio.h>
+#else
+#include <sys/vt.h>
+#endif
 
 #include "drm_common.h"
 
