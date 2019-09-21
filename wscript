@@ -283,6 +283,12 @@ iconv support use --disable-iconv.",
         'func': check_statement(['sys/vt.h', 'sys/ioctl.h'],
                                 'int m; ioctl(0, VT_GETMODE, &m)'),
     }, {
+        'name': 'consio.h',
+        'desc': 'consio.h',
+        'deps': '!vt.h',
+        'func': check_statement(['sys/consio.h', 'sys/ioctl.h'],
+                                'int m; ioctl(0, VT_GETMODE, &m)'),
+    }, {
         'name': 'gbm.h',
         'desc': 'gbm.h',
         'func': check_cc(header_name=['stdio.h', 'gbm.h']),
@@ -495,7 +501,7 @@ video_output_features = [
     }, {
         'name': '--drm',
         'desc': 'DRM',
-        'deps': 'vt.h',
+        'deps': 'vt.h || consio.h',
         'func': check_pkg_config('libdrm', '>= 2.4.74'),
     }, {
         'name': '--gbm',
