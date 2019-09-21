@@ -372,6 +372,23 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     return text;
 }
 
+struct sd_times sub_get_times(struct dec_sub *sub, double pts)
+{
+    pthread_mutex_lock(&sub->lock);
+    struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
+
+    pts = pts_to_subtitle(sub, pts);
+
+    sub->last_vo_pts = pts;
+    update_segment(sub);
+
+    if (sub->sd->driver->get_times)
+        res = sub->sd->driver->get_times(sub->sd, pts);
+
+    pthread_mutex_unlock(&sub->lock);
+    return res;
+}
+
 void sub_reset(struct dec_sub *sub)
 {
     pthread_mutex_lock(&sub->lock);

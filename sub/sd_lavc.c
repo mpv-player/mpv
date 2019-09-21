@@ -383,14 +383,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
 }
 
-static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
-                        double pts, struct sub_bitmaps *res)
+static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
 {
-    struct sd_lavc_priv *priv = sd->priv;
-    struct mp_subtitle_opts *opts = sd->opts;
-
-    priv->current_pts = pts;
-
     struct sub *current = NULL;
     for (int n = 0; n < MAX_QUEUE; n++) {
         struct sub *sub = &priv->subs[n];
@@ -407,6 +401,19 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
             break;
         }
     }
+    return current;
+}
+
+static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
+                        double pts, struct sub_bitmaps *res)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    struct mp_subtitle_opts *opts = sd->opts;
+
+    priv->current_pts = pts;
+
+    struct sub *current = get_current(priv, pts);
+
     if (!current)
         return;
 
@@ -481,6 +488,25 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
         }
     }
 
+}
+
+static struct sd_times get_times(struct sd *sd, double pts)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
+
+    if (pts == MP_NOPTS_VALUE)
+        return res;
+
+    struct sub *current = get_current(priv, pts);
+
+    if (!current)
+        return res;
+
+    res.start = current->pts;
+    res.end = current->endpts;
+
+    return res;
 }
 
 static bool accepts_packet(struct sd *sd, double min_pts)
@@ -622,6 +648,7 @@ const struct sd_functions sd_lavc = {
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+    .get_times = get_times,
     .accepts_packet = accepts_packet,
     .control = control,
     .reset = reset,
