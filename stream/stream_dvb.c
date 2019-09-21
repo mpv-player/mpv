@@ -895,7 +895,6 @@ int dvb_step_channel(stream_t *stream, int dir)
 
 static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
 {
-    int r;
     dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
     dvb_state_t *state = priv->state;
     dvb_channels_list_t *list = NULL;
