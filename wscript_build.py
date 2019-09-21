@@ -580,16 +580,16 @@ def build(ctx):
         syms = True
         ctx.load("syms")
 
-    additonal_objects = ""
+    additional_objects = []
     if ctx.dependency_satisfied('swift'):
-        additonal_objects = "osdep/macOS_swift.o"
+        additional_objects.append("osdep/macOS_swift.o")
 
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
             source       = main_fn_c,
             use          = ctx.dependencies_use() + ['objects'],
-            add_object   = additonal_objects,
+            add_objects  = additional_objects,
             includes     = _all_includes(ctx),
             features     = "c cprogram" + (" syms" if syms else ""),
             export_symbols_def = "libmpv/mpv.def", # for syms=True
@@ -646,7 +646,7 @@ def build(ctx):
                 "target": "mpv",
                 "source":   ctx.filtered_sources(sources),
                 "use":      ctx.dependencies_use(),
-                "add_object": additonal_objects,
+                "add_objects": additional_objects,
                 "includes": [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                              ctx.dependencies_includes(),
                 "features": features,
