@@ -1213,6 +1213,9 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
                          "luck by enabling or enlarging the mpv cache.\n");
     }
 
+    if (priv->linearize_ts < 0)
+        priv->linearize_ts = 0;
+
     if (!(flags & SEEK_FORWARD))
         avsflags = AVSEEK_FLAG_BACKWARD;
 
