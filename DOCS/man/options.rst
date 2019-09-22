@@ -947,7 +947,8 @@ Video
     :auto:      enable best hw decoder (see below)
     :yes:       exactly the same as ``auto``
     :auto-copy: enable best hw decoder with copy-back (see below)
-    :vdpau:     requires ``--vo=gpu`` or ``--vo=vdpau`` (Linux only)
+    :vdpau:     requires ``--vo=gpu`` with ``--gpu-context=x11``,
+                or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
