@@ -1213,11 +1213,12 @@ int vo_wayland_reconfig(struct vo *vo)
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
-    /* Surface enter events happen later but we already know the outputs and we'd
-     * like to know the output the surface would be on (for scaling or fullscreen),
-     * so if fsscreen_id is set or there's only one possible output, use it. */
-    if (((!wl->current_output) && (wl_list_length(&wl->output_list) == 1)) ||
-        (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))) {
+    /* Surface enter events happen later but certain config options require the
+     * current_output to be created in order for the video to actually render.
+     * Only skip this if --fs is specified without a fsscreen_id so the video
+     * renders on the same screen and not the one with idx 0. */
+    if ((!wl->current_output) &&
+        !(vo->opts->fullscreen && (vo->opts->fsscreen_id < 0))) {
         int idx = 0;
         if (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))
             idx = vo->opts->fsscreen_id;
