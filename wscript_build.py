@@ -402,6 +402,7 @@ def build(ctx):
         ( "video/img_format.c" ),
         ( "video/mp_image.c" ),
         ( "video/mp_image_pool.c" ),
+        ( "video/out/android_common.c",          "android" ),
         ( "video/out/aspect.c" ),
         ( "video/out/bitmap_packer.c" ),
         ( "video/out/cocoa/events_view.m",       "cocoa" ),
