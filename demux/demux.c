@@ -2347,7 +2347,7 @@ static void execute_seek(struct demux_internal *in)
 {
     int flags = in->seek_flags;
     double pts = in->seek_pts;
-    in->last_eof = false;
+    in->last_eof = in->eof = false;
     in->seeking = false;
     in->seeking_in_progress = pts;
     in->demux_ts = MP_NOPTS_VALUE;
