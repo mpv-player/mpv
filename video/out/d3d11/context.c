@@ -203,7 +203,6 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     if (hr == DXGI_ERROR_FRAME_STATISTICS_DISJOINT) {
         p->last_sync_refresh_count = 0;
         p->last_sync_qpc_time = 0;
-        p->vsync_duration_qpc = 0;
     }
     if (FAILED(hr))
         return;
@@ -260,15 +259,7 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
 
 static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
-    struct priv *p = ctx->priv;
-
     int ret = vo_w32_control(ctx->vo, events, request, arg);
-    if (request == VOCTRL_RESUME) {
-        // Reset frame statistics after pause
-        p->last_sync_refresh_count = 0;
-        p->last_sync_qpc_time = 0;
-        p->vsync_duration_qpc = 0;
-    }
     if (*events & VO_EVENT_RESIZE) {
         if (!resize(ctx))
             return VO_ERROR;
