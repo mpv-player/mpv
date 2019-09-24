@@ -805,7 +805,7 @@ bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
         return false;
     }
 
-    struct vt_mode vt_mode;
+    struct vt_mode vt_mode = { 0 };
     if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
         MP_ERR(s, "VT_GETMODE failed: %s\n", mp_strerror(errno));
         return false;
