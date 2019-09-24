@@ -2322,8 +2322,6 @@ static void prune_old_packets(struct demux_internal *in)
                 update_seek_ranges(range);
         }
 
-        update_seek_ranges(range);
-
         if (range != in->current_range && range->seek_start == MP_NOPTS_VALUE)
             free_empty_cached_ranges(in);
     }
