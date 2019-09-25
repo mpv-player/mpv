@@ -10,6 +10,5 @@ python3 ./waf configure \
   --enable-libsmbclient  \
   --enable-manpage-build \
   --enable-shaderc       \
-  --enable-vulkan        \
-  --enable-zsh-comp
+  --enable-vulkan
 python3 ./waf build --verbose
