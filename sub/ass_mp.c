@@ -96,8 +96,14 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
     if (default_font && !mp_path_exists(default_font))
         default_font = NULL;
 
+    int font_provider = ASS_FONTPROVIDER_AUTODETECT;
+    if (opts->font_provider == 1)
+        font_provider = ASS_FONTPROVIDER_NONE;
+    if (opts->font_provider == 2)
+        font_provider = ASS_FONTPROVIDER_FONTCONFIG;
+
     mp_verbose(log, "Setting up fonts...\n");
-    ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
+    ass_set_fonts(priv, default_font, opts->font, font_provider, config, 1);
     mp_verbose(log, "Done.\n");
 
     talloc_free(tmp);

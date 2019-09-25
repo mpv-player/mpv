@@ -64,6 +64,8 @@ static const m_option_t style_opts[] = {
     OPT_FLAG("italic", italic, 0),
     OPT_CHOICE("justify", justify, 0,
                ({"auto", 0}, {"left", 1}, {"center", 2}, {"right", 3})),
+    OPT_CHOICE("font-provider", font_provider, 0,
+               ({"auto", 0}, {"none", 1}, {"fontconfig", 2})),
     {0}
 };
 

@@ -1969,9 +1969,9 @@ Subtitles
 
     Default: no.
 
-``--embeddedfonts``, ``--no-embeddedfonts``
+``--embeddedfonts=<yes|no>``
     Use fonts embedded in Matroska container files and ASS scripts (default:
-    enabled). These fonts can be used for SSA/ASS subtitle rendering.
+    yes). These fonts can be used for SSA/ASS subtitle rendering.
 
 ``--sub-pos=<0-100>``
     Specify the position of subtitles on the screen. The value is the vertical
@@ -2460,6 +2460,20 @@ Subtitles
 
     If the video stream contains no closed captions, or if no video is being
     decoded, the CC track will remain empty and will not show any text.
+
+``--sub-font-provider=<auto|none|fontconfig>``
+    Which libass font provider backend to use (default: auto). ``auto`` will
+    attempt to use the native font provider: fontconfig on Linux, CoreText on
+    OSX, DirectWrite on Windows. ``fontconfig`` forces fontconfig, if libass
+    was built with support (if not, it behaves like ``none``).
+
+    The ``none`` font provider effectively disables system fonts. It will still
+    attempt to use embedded fonts (unless ``--embeddedfonts=no`` is set; this is
+    the same behavior as with all other font providers), ``subfont.ttf`` if
+    provided, and fonts in  the ``fonts`` sub-directory if provided. (The
+    fallback is more strict than that of other font providers, and if a font
+    name does not match, it may prefer not to render any text that uses the
+    missing font.)
 
 Window
 ------
@@ -3624,6 +3638,10 @@ OSD
 
     This option is somewhat experimental and could be replaced by another
     mechanism in the future.
+
+``--osd-font-provider=<...>``
+    See ``--sub-font-provider`` for details and accepted values. Note that
+    unlike subtitles, OSD never uses embedded fonts from media files.
 
 Screenshot
 ----------
