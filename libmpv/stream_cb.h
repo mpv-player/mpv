@@ -148,6 +148,22 @@ typedef int64_t (*mpv_stream_cb_size_fn)(void *cookie);
 typedef void (*mpv_stream_cb_close_fn)(void *cookie);
 
 /**
+ * Cancel callback used to implement a custom stream.
+ *
+ * This callback is used to interrupt any current or future read and seek
+ * operations. It will be called from a separate thread than the demux
+ * thread, and should not block.
+ *
+ * This callback can be NULL.
+ *
+ * Available since API 1.106.
+ *
+ * @param cookie opaque cookie identifying the stream,
+ *               returned from mpv_stream_cb_open_fn
+ */
+typedef void (*mpv_stream_cb_cancel_fn)(void *cookie);
+
+/**
  * See mpv_stream_cb_open_ro_fn callback.
  */
 typedef struct mpv_stream_cb_info {
@@ -170,6 +186,7 @@ typedef struct mpv_stream_cb_info {
     mpv_stream_cb_seek_fn seek_fn;
     mpv_stream_cb_size_fn size_fn;
     mpv_stream_cb_close_fn close_fn;
+    mpv_stream_cb_cancel_fn cancel_fn; /* since API 1.106 */
 } mpv_stream_cb_info;
 
 /**
