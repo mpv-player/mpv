@@ -37,6 +37,14 @@
 #include "common.h"
 #include "context.h"
 
+#ifndef EGL_PLATFORM_GBM_MESA
+#define EGL_PLATFORM_GBM_MESA 0x31D7
+#endif
+
+#ifndef EGL_PLATFORM_GBM_KHR
+#define EGL_PLATFORM_GBM_KHR 0x31D7
+#endif
+
 #define USE_MASTER 0
 
 struct framebuffer
