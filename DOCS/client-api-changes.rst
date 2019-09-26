@@ -32,6 +32,7 @@ API changes
 
 ::
  --- mpv 0.30.0 ---
+ 1.106  - Add cancel_fn to mpv_stream_cb_info
  1.105  - Fix deadlock problems with MPV_RENDER_PARAM_ADVANCED_CONTROL and if
           the "vd-lavc-dr" option is enabled (which it is by default).
           There were no actual API changes.

@@ -17,9 +17,11 @@
 #include "options/path.h"
 #include "player/client.h"
 #include "libmpv/stream_cb.h"
+#include "misc/thread_tools.h"
 
 struct priv {
     mpv_stream_cb_info info;
+    struct mp_cancel *cancel;
 };
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
@@ -97,6 +99,12 @@ static int open_cb(stream_t *stream)
     stream->control = control;
     stream->read_chunk = 64 * 1024;
     stream->close = s_close;
+
+    if (p->info.cancel_fn && stream->cancel) {
+        p->cancel = mp_cancel_new(p);
+        mp_cancel_set_parent(p->cancel, stream->cancel);
+        mp_cancel_set_cb(p->cancel, p->info.cancel_fn, p->info.cookie);
+    }
 
     return STREAM_OK;
 }
