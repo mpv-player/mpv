@@ -46,21 +46,9 @@
  *  And: render thread > VO (wait for present)
  *       VO > render thread (wait for present done, via timeout)
  *
- *  Inherent locking bugs with advanced_control:
- *
- *      In theory, it can deadlock on ctx->lock. Consider if the VO thread calls
- *      forget_frames(), which it does under ctx->lock (e.g. VOCTRL_RESET).
- *      If a frame was a DR image, dr_helper.c will call mp_dispatch_run().
- *      This in turn will call the wakeup callback set with
- *      mpv_render_context_set_update_callback(). The API user will eventually
- *      call mpv_render_context_update(), which performs the dispatch queue work
- *      queued by dr_helper.c.
- *      And then the function tries to acquire ctx->lock. This can deadlock
- *      under specific circumstances. It will _not_ deadlock if the queued work
- *      made the caller release the lock. However, if the caller made queue
- *      some more work (like freeing a second frame), and will keep the lock
- *      until it gets a reply. Both threads will wait on each other, and no
- *      progress can be made.
+ *  Locking gets more complex with advanced_control enabled. Use
+ *  mpv_render_context.dispatch with care; synchronous calls can add lock
+ *  dependencies.
  */
 
 struct vo_priv {
@@ -305,6 +293,11 @@ void mpv_render_context_free(mpv_render_context *ctx)
 
     assert(!atomic_load(&ctx->in_use));
     assert(!ctx->vo);
+
+    // With the dispatch queue not being served anymore, allow frame free
+    // requests from this thread to be served directly.
+    if (ctx->dr)
+        dr_helper_acquire_thread(ctx->dr);
 
     // Possibly remaining outstanding work.
     mp_dispatch_queue_process(ctx->dispatch, 0);

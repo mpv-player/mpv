@@ -79,16 +79,6 @@ extern "C" {
  *    is logged. If you set MPV_RENDER_PARAM_ADVANCED_CONTROL, you promise that
  *    this won't happen, and must absolutely guarantee it, or a real deadlock
  *    will freeze the mpv core thread forever.
- *  - if MPV_RENDER_PARAM_ADVANCED_CONTROL is used, you currently must call all
- *    mpv_render*() API functions from the same thread on which the
- *    mpv_render_context was returned by mpv_render_context_create(). This
- *    requirement always existed. Not honoring it will lead to UB (deadlocks,
- *    use of invalid pthread_t handles). This requirement might be removed in
- *    the future, but will require some considerable work internal to libmpv.
- *    You can avoid this issue by setting "vd-lavc-dr" to "no".
- *  - MPV_RENDER_PARAM_ADVANCED_CONTROL has some other libmpv-internal problems,
- *    which may result in random deadlocks (see top of vo_libmpv.c).
- *    You can probably avoid this issue by setting "vd-lavc-dr" to "no".
  *
  * libmpv functions which are safe to call from a render thread are:
  *  - functions marked with "Safe to be called from mpv render API threads."
@@ -103,6 +93,18 @@ extern "C" {
  *    chain to make sure no resources are used after context destruction.)
  *  - if the mpv_handle parameter refers to a different mpv core than the one
  *    you're rendering for (very obscure, but allowed)
+ *
+ * Note about old libmpv version:
+ *
+ *      Before API version 1.105 (basically in mpv 0.29.x), simply enabling
+ *      MPV_RENDER_PARAM_ADVANCED_CONTROL could cause deadlock issues. This can
+ *      be worked around by setting the "vd-lavc-dr" option to "no".
+ *      In addition, you were required to call all mpv_render*() API functions
+ *      from the same thread on which mpv_render_context_create() was originally
+ *      run (for the same the mpv_render_context). Not honoring it led to UB
+ *      (deadlocks, use of invalid pthread_t handles), even if you moved your GL
+ *      context to a different thread correctly.
+ *      These problems were addressed in API version 1.105 (mpv 0.30.0).
  *
  * Context and handle lifecycle
  * ----------------------------

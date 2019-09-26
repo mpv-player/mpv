@@ -1046,8 +1046,10 @@ static void *vo_thread(void *ptr)
 
     mpthread_set_name("vo");
 
-    if (vo->driver->get_image)
+    if (vo->driver->get_image) {
         in->dr_helper = dr_helper_create(in->dispatch, get_image_vo, vo);
+        dr_helper_acquire_thread(in->dr_helper);
+    }
 
     int r = vo->driver->preinit(vo) ? -1 : 0;
     mp_rendezvous(vo, r); // init barrier

@@ -32,6 +32,11 @@ API changes
 
 ::
  --- mpv 0.30.0 ---
+ 1.105  - Fix deadlock problems with MPV_RENDER_PARAM_ADVANCED_CONTROL and if
+          the "vd-lavc-dr" option is enabled (which it is by default).
+          There were no actual API changes.
+          API users on older API versions and mpv releases should set
+          "vd-lavc-dr" to "no" to avoid these issues.
  1.104  - Deprecate struct mpv_opengl_drm_params. Replaced by mpv_opengl_drm_params_v2
         - Deprecate MPV_RENDER_PARAM_DRM_DISPLAY. Replaced by MPV_RENDER_PARAM_DRM_DISPLAY_V2.
  1.103  - redo handling of async commands
