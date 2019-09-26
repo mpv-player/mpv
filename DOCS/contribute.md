@@ -153,12 +153,13 @@ General coding
 
 - Use C99. Also freely make use of C99 features if it's appropriate, such as
   stdbool.h. (Except VLA and complex number types.)
-- Don't use GNU-only features. In some cases they may be warranted, if they
-  are optional (such as attributes enabling printf-like format string checks).
+- Don't use non-standard language (such as GNU C-only features). In some cases
+  they may be warranted, if they are optional (such as attributes enabling
+  printf-like format string checks). "#pragma once" is allowed as an exception.
   But in general, standard C99 should be used.
 - The same applies to libc functions. We have to be Windows-compatible too. Use
   functions guaranteed by C99 or POSIX only, unless your use is guarded by a
-  configure check.
+  configure check. There is some restricted use of C11 (ask on IRC for details).
 - Prefer fusing declaration and initialization, rather than putting declarations
   on the top of a block. Obvious data flow is more important than avoiding
   mixing declarations and statements, which is just a C90 artifact.
