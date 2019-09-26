@@ -162,6 +162,10 @@ main_dependencies = [
         'desc': 'Android environment',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
+        'name': '--tvos',
+        'desc': 'tvOS environment',
+        'func': check_statement('TargetConditionals.h', 'int x = TARGET_OS_TV;'),
+    }, {
         'name': '--egl-android',
         'desc': 'Android EGL support',
         'deps': 'android',
@@ -247,7 +251,7 @@ iconv support use --disable-iconv.",
         'desc': 'spawnp()/kill() POSIX support',
         'func': check_statement(['spawn.h', 'signal.h'],
             'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
-        'deps': '!mingw',
+        'deps': '!mingw && !tvos',
     }, {
         'name': 'posix-spawn-android',
         'desc': 'spawnp()/kill() Android replacement',
