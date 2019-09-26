@@ -388,6 +388,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         // Distro maintainers who patch this out should be aware that mpv
         // intentionally ignores ABI in some places where it's not possible to
         // get by without violating it.
+        // Known API/ABI violations:
+        //  - AVIOContext.bytes_read (demux_lavf.c)
         print_libav_versions(mpctx->log, MSGL_FATAL);
         MP_FATAL(mpctx, "\nmpv was compiled against a different version of "
                  "FFmpeg/Libav than the shared\nlibrary it is linked against. "
