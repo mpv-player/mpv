@@ -592,8 +592,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Binds a key to an input command. ``command`` must be a complete command
     containing all the desired arguments and flags. Both ``name`` and
     ``command`` use the ``input.conf`` naming scheme. This is primarily
-    useful for the client API. Note that ``keybind`` cannot be bound to
-    another ``keybind`` command.
+    useful for the client API.
 
 ``audio-add <url> [<flags> [<title> [<lang>]]]``
     Load the given audio file. See ``sub-add`` command.
