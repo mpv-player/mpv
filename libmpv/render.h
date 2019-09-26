@@ -239,6 +239,13 @@ typedef enum mpv_render_param_type {
      *  - Rendering screenshots with the GPU API if supported by the backend
      *    (instead of using a suboptimal software fallback via libswscale).
      *
+     * Warning: do not just add this without reading the "Threading" section
+     *          above, and then wondering that deadlocks happen. The
+     *          requirements are tricky. But also note that even if advanced
+     *          control is disabled, not adhering to the rules will lead to
+     *          playback problems. Enabling advanced controls simply makes
+     *          violating these rules fatal.
+     *
      * Type: int*: 0 for disable (default), 1 for enable
      */
     MPV_RENDER_PARAM_ADVANCED_CONTROL = 10,
