@@ -29,7 +29,7 @@ int af_fmt_to_bytes(int format)
     case AF_FORMAT_U8:      return 1;
     case AF_FORMAT_S16:     return 2;
     case AF_FORMAT_S32:     return 4;
-    case AF_FORMAT_S64:     return 4;
+    case AF_FORMAT_S64:     return 8;
     case AF_FORMAT_FLOAT:   return 4;
     case AF_FORMAT_DOUBLE:  return 8;
     }
