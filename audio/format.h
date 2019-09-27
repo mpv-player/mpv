@@ -27,6 +27,7 @@ enum af_format {
     AF_FORMAT_U8,
     AF_FORMAT_S16,
     AF_FORMAT_S32,
+    AF_FORMAT_S64,
     AF_FORMAT_FLOAT,
     AF_FORMAT_DOUBLE,
 
@@ -34,6 +35,7 @@ enum af_format {
     AF_FORMAT_U8P,
     AF_FORMAT_S16P,
     AF_FORMAT_S32P,
+    AF_FORMAT_S64P,
     AF_FORMAT_FLOATP,
     AF_FORMAT_DOUBLEP,
 

@@ -29,6 +29,7 @@ int af_fmt_to_bytes(int format)
     case AF_FORMAT_U8:      return 1;
     case AF_FORMAT_S16:     return 2;
     case AF_FORMAT_S32:     return 4;
+    case AF_FORMAT_S64:     return 4;
     case AF_FORMAT_FLOAT:   return 4;
     case AF_FORMAT_DOUBLE:  return 8;
     }
@@ -69,6 +70,7 @@ static const int planar_formats[][2] = {
     {AF_FORMAT_U8P,     AF_FORMAT_U8},
     {AF_FORMAT_S16P,    AF_FORMAT_S16},
     {AF_FORMAT_S32P,    AF_FORMAT_S32},
+    {AF_FORMAT_S64P,    AF_FORMAT_S64},
     {AF_FORMAT_FLOATP,  AF_FORMAT_FLOAT},
     {AF_FORMAT_DOUBLEP, AF_FORMAT_DOUBLE},
 };
@@ -117,11 +119,13 @@ const char *af_fmt_to_str(int format)
     case AF_FORMAT_U8:          return "u8";
     case AF_FORMAT_S16:         return "s16";
     case AF_FORMAT_S32:         return "s32";
+    case AF_FORMAT_S64:         return "s64";
     case AF_FORMAT_FLOAT:       return "float";
     case AF_FORMAT_DOUBLE:      return "double";
     case AF_FORMAT_U8P:         return "u8p";
     case AF_FORMAT_S16P:        return "s16p";
     case AF_FORMAT_S32P:        return "s32p";
+    case AF_FORMAT_S64P:        return "s64p";
     case AF_FORMAT_FLOATP:      return "floatp";
     case AF_FORMAT_DOUBLEP:     return "doublep";
     case AF_FORMAT_S_AAC:       return "spdif-aac";
