@@ -214,8 +214,10 @@ static bool receive_frame(struct mp_filter *da, struct mp_frame *out)
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
     struct mp_aframe *mpframe = mp_aframe_from_avframe(priv->avframe);
-    if (!mpframe)
+    if (!mpframe) {
+        MP_ERR(da, "Converting libavcodec frame to mpv frame failed.\n");
         return true;
+    }
 
     if (priv->force_channel_map.num)
         mp_aframe_set_chmap(mpframe, &priv->force_channel_map);
