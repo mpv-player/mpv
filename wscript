@@ -158,7 +158,10 @@ main_dependencies = [
     }, {
         'name': '--tvos',
         'desc': 'tvOS environment',
-        'func': check_statement('TargetConditionals.h', 'int x = TARGET_OS_TV;'),
+        'func': check_statement(
+            ['TargetConditionals.h', 'assert.h'],
+            'static_assert(TARGET_OS_TV, "TARGET_OS_TV defined to zero!")'
+        ),
     }, {
         'name': '--egl-android',
         'desc': 'Android EGL support',
