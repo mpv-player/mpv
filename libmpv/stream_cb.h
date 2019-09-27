@@ -91,7 +91,7 @@ extern "C" {
  * Read callback used to implement a custom stream. The semantics of the
  * callback match read(2) in blocking mode. Short reads are allowed (you can
  * return less bytes than requested, and libmpv will retry reading the rest
- * with a nother call). If no data can be immediately read, the callback must
+ * with another call). If no data can be immediately read, the callback must
  * block until there is new data. A return of 0 will be interpreted as final
  * EOF, although libmpv might retry the read, or seek to a different position.
  *
