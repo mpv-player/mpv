@@ -46,9 +46,6 @@
 #define BITS_PER_PIXEL 32
 #define USE_MASTER 0
 
-#define BUF_COUNT 4
-#define SWAPCHAIN_DEPTH 3
-
 struct framebuffer {
     uint32_t width;
     uint32_t height;
@@ -75,7 +72,9 @@ struct priv {
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
 
-    struct framebuffer bufs[BUF_COUNT];
+    int swapchain_depth;
+    unsigned int buf_count;
+    struct framebuffer *bufs;
     int front_buf;
     bool active;
     bool waiting_for_flip;
@@ -175,13 +174,15 @@ static bool fb_setup_buffers(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    p->bufs = talloc_zero_array(p, struct framebuffer, p->buf_count);
+
     p->front_buf = 0;
-    for (unsigned int i = 0; i < BUF_COUNT; i++) {
+    for (unsigned int i = 0; i < p->buf_count; i++) {
         p->bufs[i].width = p->kms->mode.mode.hdisplay;
         p->bufs[i].height = p->kms->mode.mode.vdisplay;
     }
 
-    for (unsigned int i = 0; i < BUF_COUNT; i++) {
+    for (unsigned int i = 0; i < p->buf_count; i++) {
         if (!fb_setup_single(vo, p->kms->fd, &p->bufs[i])) {
             MP_ERR(vo, "Cannot create framebuffer\n");
             for (unsigned int j = 0; j < i; j++) {
@@ -327,7 +328,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     p->last_input = NULL;
 
     struct framebuffer *buf = p->bufs;
-    for (unsigned int i = 0; i < BUF_COUNT; i++)
+    for (unsigned int i = 0; i < p->buf_count; i++)
         memset(buf[i].map, 0, buf[i].size);
 
     if (mp_sws_reinit(p->sws) < 0)
@@ -365,7 +366,7 @@ static struct framebuffer *get_new_fb(struct vo *vo)
     struct priv *p = vo->priv;
 
     p->front_buf++;
-    p->front_buf %= BUF_COUNT;
+    p->front_buf %= p->buf_count;
 
     return &p->bufs[p->front_buf];
 }
@@ -512,7 +513,7 @@ static void flip_page(struct vo *vo)
     if (!p->active)
         return;
 
-    while (drain || p->fb_queue_len > SWAPCHAIN_DEPTH) {
+    while (drain || p->fb_queue_len > p->swapchain_depth) {
         if (p->waiting_for_flip) {
             wait_on_flip(vo);
             swapchain_step(vo);
@@ -539,7 +540,7 @@ static void uninit(struct vo *vo)
     }
 
     if (p->kms) {
-        for (unsigned int i = 0; i < BUF_COUNT; i++)
+        for (unsigned int i = 0; i < p->buf_count; i++)
             fb_destroy(p->kms->fd, &p->bufs[i]);
         kms_destroy(p->kms);
         p->kms = NULL;
@@ -585,6 +586,8 @@ static int preinit(struct vo *vo)
         p->imgfmt = IMGFMT_XRGB8888;
     }
 
+    p->swapchain_depth = vo->opts->swapchain_depth;
+    p->buf_count = p->swapchain_depth + 1;
     if (!fb_setup_buffers(vo)) {
         MP_ERR(vo, "Failed to set up buffers.\n");
         goto err;
