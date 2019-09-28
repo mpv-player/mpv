@@ -1874,7 +1874,7 @@ void open_recorder(struct MPContext *mpctx, bool on_init)
         // (We expect track->stream not to be reused on other tracks.)
         if (track->stream == streams[n_stream]) {
             struct mp_recorder_sink * sink =
-                mp_recorder_get_sink(mpctx->recorder, n_stream);
+                mp_recorder_get_sink(mpctx->recorder, streams[n_stream]);
             assert(sink);
             set_track_recorder_sink(track, sink);
             n_stream++;

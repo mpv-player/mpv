@@ -328,11 +328,17 @@ void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
 }
 
 // Get a stream for writing. The pointer is valid until mp_recorder is
-// destroyed. The stream is the index referencing the stream passed to
-// mp_recorder_create().
-struct mp_recorder_sink *mp_recorder_get_sink(struct mp_recorder *r, int stream)
+// destroyed. The stream ptr. is the same as one passed to
+// mp_recorder_create() (returns NULL if it wasn't).
+struct mp_recorder_sink *mp_recorder_get_sink(struct mp_recorder *r,
+                                              struct sh_stream *stream)
 {
-    return stream >= 0 && stream < r->num_streams ? r->streams[stream] : NULL;
+    for (int n = 0; n < r->num_streams; n++) {
+        struct mp_recorder_sink *rst = r->streams[n];
+        if (rst->sh == stream)
+            return rst;
+    }
+    return NULL;
 }
 
 // Pass a packet to the given stream. The function does not own the packet, but

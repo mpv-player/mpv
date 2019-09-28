@@ -1907,7 +1907,8 @@ static void write_dump_packet(struct demux_internal *in, struct demux_packet *dp
     assert(in->dumper);
     assert(in->dumper_status == CONTROL_TRUE);
 
-    struct mp_recorder_sink *sink = mp_recorder_get_sink(in->dumper, dp->stream);
+    struct mp_recorder_sink *sink =
+        mp_recorder_get_sink(in->dumper, in->streams[dp->stream]);
     if (sink) {
         mp_recorder_feed_packet(sink, dp);
     } else {
@@ -1935,7 +1936,7 @@ static void record_packet(struct demux_internal *in, struct demux_packet *dp)
 
     if (in->recorder) {
         struct mp_recorder_sink *sink =
-            mp_recorder_get_sink(in->recorder, dp->stream);
+            mp_recorder_get_sink(in->recorder, in->streams[dp->stream]);
         if (sink) {
             mp_recorder_feed_packet(sink, dp);
         } else {
