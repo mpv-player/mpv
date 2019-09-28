@@ -66,12 +66,13 @@ struct stream_avseek {
 };
 
 struct stream;
+struct stream_open_args;
 typedef struct stream_info_st {
     const char *name;
     // opts is set from ->opts
     int (*open)(struct stream *st);
     // Alternative to open(). Only either open() or open2() can be set.
-    int (*open2)(struct stream *st, void *arg);
+    int (*open2)(struct stream *st, struct stream_open_args *args);
     const char *const *protocols;
     bool can_write;     // correctly checks for READ/WRITE modes
     bool is_safe;       // opening is no security issue, even with remote provided URLs
@@ -165,9 +166,17 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
 void free_stream(stream_t *s);
-int stream_create_instance(const stream_info_t *sinfo, const char *url, int flags,
-                           struct mp_cancel *c, struct mpv_global *global,
-                           void *arg, struct stream **ret);
+
+struct stream_open_args {
+    struct mpv_global *global;
+    struct mp_cancel *cancel;   // aborting stream access (used directly)
+    const char *url;
+    int flags;                  // STREAM_READ etc.
+    const stream_info_t *sinfo; // NULL = autoprobe, otherwise force stream impl.
+    void *special_arg;          // specific to impl., use only with sinfo
+};
+
+int stream_create_with_args(struct stream_open_args *args, struct stream **ret);
 struct stream *stream_create(const char *url, int flags,
                              struct mp_cancel *c, struct mpv_global *global);
 struct stream *stream_open(const char *filename, struct mpv_global *global);

@@ -91,7 +91,7 @@ static void s_close(struct stream *s)
         free_stream(p->streams[n]);
 }
 
-static int open2(struct stream *stream, void *arg)
+static int open2(struct stream *stream, struct stream_open_args *args)
 {
     struct priv *p = talloc_zero(stream, struct priv);
     stream->priv = p;
@@ -102,7 +102,7 @@ static int open2(struct stream *stream, void *arg)
 
     stream->seekable = true;
 
-    struct priv *list = arg;
+    struct priv *list = args->special_arg;
     if (!list || !list->num_streams) {
         MP_FATAL(stream, "No sub-streams.\n");
         return STREAM_ERROR;
@@ -153,8 +153,16 @@ struct stream *stream_concat_open(struct mpv_global *global, struct mp_cancel *c
         .num_streams = num_streams,
     };
 
+    struct stream_open_args sargs = {
+        .global = global,
+        .cancel = c,
+        .url = "concat://",
+        .flags = STREAM_READ | STREAM_SILENT,
+        .sinfo = &stream_info_concat,
+        .special_arg = &arg,
+    };
+
     struct stream *s = NULL;
-    stream_create_instance(&stream_info_concat, "concat://",
-                           STREAM_READ | STREAM_SILENT, c, global, &arg, &s);
+    stream_create_with_args(&sargs, &s);
     return s;
 }

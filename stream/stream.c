@@ -213,10 +213,13 @@ static void stream_resize_buffer(struct stream *s, int new)
     }
 }
 
-int stream_create_instance(const stream_info_t *sinfo, const char *url, int flags,
-                           struct mp_cancel *c, struct mpv_global *global,
-                           void *arg, struct stream **ret)
+static int stream_create_instance(const stream_info_t *sinfo,
+                                  struct stream_open_args *args,
+                                  struct stream **ret)
 {
+    const char *url = args->url;
+    int flags = args->flags;
+
     *ret = NULL;
 
     if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
@@ -235,21 +238,21 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
         return STREAM_NO_MATCH;
 
     stream_t *s = talloc_zero(NULL, stream_t);
+    s->global = args->global;
     if (flags & STREAM_SILENT) {
         s->log = mp_null_log;
     } else {
-        s->log = mp_log_new(s, global->log, sinfo->name);
+        s->log = mp_log_new(s, s->global->log, sinfo->name);
     }
     s->info = sinfo;
-    s->cancel = c;
-    s->global = global;
+    s->cancel = args->cancel;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
     int opt;
-    mp_read_option_raw(global, "access-references", &m_option_type_flag, &opt);
+    mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
     s->access_references = opt;
 
     MP_VERBOSE(s, "Opening %s\n", url);
@@ -268,8 +271,8 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
 
     int r = STREAM_UNSUPPORTED;
     if (sinfo->open2) {
-        r = sinfo->open2(s, arg);
-    } else if (!arg) {
+        r = sinfo->open2(s, args);
+    } else if (!args->special_arg) {
         r = (sinfo->open)(s);
     }
     if (r != STREAM_OK) {
@@ -294,49 +297,63 @@ int stream_create_instance(const stream_info_t *sinfo, const char *url, int flag
     return STREAM_OK;
 }
 
+int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
+
+{
+    assert(args->url);
+
+    int r = STREAM_NO_MATCH;
+    *ret = NULL;
+
+    // Open stream proper
+    if (args->sinfo) {
+        r = stream_create_instance(args->sinfo, args, ret);
+    } else {
+        for (int i = 0; stream_list[i]; i++) {
+            r = stream_create_instance(stream_list[i], args, ret);
+            if (r == STREAM_OK)
+                break;
+            if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
+                continue;
+            if (r == STREAM_UNSAFE)
+                continue;
+            break;
+        }
+    }
+
+    if (!*ret && !(args->flags & STREAM_SILENT) && !mp_cancel_test(args->cancel))
+    {
+        struct mp_log *log = mp_log_new(NULL, args->global->log, "!stream");
+
+        if (r == STREAM_UNSAFE) {
+            mp_err(log, "\nRefusing to load potentially unsafe URL from a playlist.\n"
+                   "Use --playlist=file or the --load-unsafe-playlists option to "
+                   "load it anyway.\n\n");
+        } else if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED) {
+            mp_err(log, "No protocol handler found to open URL %s\n", args->url);
+            mp_err(log, "The protocol is either unsupported, or was disabled "
+                        "at compile-time.\n");
+        } else {
+            mp_err(log, "Failed to open %s.\n", args->url);
+        }
+
+        talloc_free(log);
+    }
+
+    return r;
+}
+
 struct stream *stream_create(const char *url, int flags,
                              struct mp_cancel *c, struct mpv_global *global)
 {
-    struct mp_log *log = mp_log_new(NULL, global->log, "!stream");
-    struct stream *s = NULL;
-    assert(url);
-
-    // Open stream proper
-    bool unsafe = false;
-    for (int i = 0; stream_list[i]; i++) {
-        int r = stream_create_instance(stream_list[i], url, flags, c, global,
-                                       NULL, &s);
-        if (r == STREAM_OK)
-            break;
-        if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
-            continue;
-        if (r == STREAM_UNSAFE) {
-            unsafe = true;
-            continue;
-        }
-        if (r != STREAM_OK) {
-            if (!mp_cancel_test(c))
-                mp_err(log, "Failed to open %s.\n", url);
-            goto done;
-        }
-    }
-
-    if (!s && unsafe) {
-        mp_err(log, "\nRefusing to load potentially unsafe URL from a playlist.\n"
-               "Use --playlist=file or the --load-unsafe-playlists option to "
-               "load it anyway.\n\n");
-        goto done;
-    }
-
-    if (!s) {
-        mp_err(log, "No protocol handler found to open URL %s\n", url);
-        mp_err(log, "The protocol is either unsupported, or was disabled "
-                    "at compile-time.\n");
-        goto done;
-    }
-
-done:
-    talloc_free(log);
+    struct stream_open_args args = {
+        .global = global,
+        .cancel = c,
+        .flags = flags,
+        .url = url,
+    };
+    struct stream *s;
+    stream_create_with_args(&args, &s);
     return s;
 }
 

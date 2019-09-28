@@ -50,7 +50,7 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open2(stream_t *stream, void *arg)
+static int open2(stream_t *stream, struct stream_open_args *args)
 {
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
@@ -67,8 +67,8 @@ static int open2(stream_t *stream, void *arg)
     if (!use_hex)
         bstr_eatstart0(&data, "memory://");
 
-    if (arg)
-        data = *(bstr *)arg;
+    if (args->special_arg)
+        data = *(bstr *)args->special_arg;
 
     p->data = bstrdup(stream, data);
 
@@ -90,10 +90,16 @@ struct stream *stream_memory_open(struct mpv_global *global, void *data, int len
 {
     assert(len >= 0);
 
+    struct stream_open_args sargs = {
+        .global = global,
+        .url = "memory://",
+        .flags = STREAM_READ | STREAM_SILENT,
+        .sinfo = &stream_info_memory,
+        .special_arg = &(bstr){data, len},
+    };
+
     struct stream *s = NULL;
-    stream_create_instance(&stream_info_memory, "memory://",
-                           STREAM_READ | STREAM_SILENT, NULL, global,
-                           &(bstr){data, len}, &s);
+    stream_create_with_args(&sargs, &s);
     MP_HANDLE_OOM(s);
     return s;
 }
