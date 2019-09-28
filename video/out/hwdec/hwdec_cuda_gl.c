@@ -164,6 +164,9 @@ bool cuda_gl_init(const struct ra_hwdec *hw) {
         }
     }
 
+    // We don't have a way to do a GPU sync after copying
+    p->do_full_sync = true;
+
     p->ext_init = cuda_ext_gl_init;
     p->ext_uninit = cuda_ext_gl_uninit;
 
