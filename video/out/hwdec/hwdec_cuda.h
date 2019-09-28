@@ -32,6 +32,9 @@ struct cuda_hw_priv {
     // Stored as int to avoid depending on libplacebo enum
     int handle_type;
 
+    // Do we need to do a full CPU sync after copying
+    bool do_full_sync;
+
     bool (*ext_init)(struct ra_hwdec_mapper *mapper,
                      const struct ra_format *format, int n);
     void (*ext_uninit)(const struct ra_hwdec_mapper *mapper, int n);

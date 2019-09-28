@@ -249,6 +249,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                 goto error;
         }
     }
+    if (p_owner->do_full_sync)
+        CHECK_CU(cu->cuStreamSynchronize(0));
 
  error:
    eret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
