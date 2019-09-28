@@ -226,7 +226,7 @@ static bool d3d11_device_create(struct ra_ctx *ctx)
         .force_warp = o->d3d11_warp == 1,
         .max_feature_level = o->d3d11_feature_level,
         .min_feature_level = D3D_FEATURE_LEVEL_9_3,
-        .max_frame_latency = ctx->opts.swapchain_depth,
+        .max_frame_latency = ctx->vo->opts->swapchain_depth,
     };
     if (!mp_d3d11_create_present_device(vo->log, &device_opts, &p->d3d11_device))
         return false;
@@ -294,7 +294,7 @@ static bool d3d11_swapchain_surface_create(struct ra_ctx *ctx)
         .flip = o->flip,
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
-        .length = ctx->opts.swapchain_depth + 2,
+        .length = ctx->vo->opts->swapchain_depth + 2,
         .usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT,
     };
     if (!mp_d3d11_create_swapchain(p->d3d11_device, vo->log, &swapchain_opts,

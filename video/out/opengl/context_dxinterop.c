@@ -346,7 +346,7 @@ static void fill_presentparams(struct ra_ctx *ctx,
         .BackBufferHeight = ctx->vo->dheight ? ctx->vo->dheight : 1,
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
-        .BackBufferCount = ctx->opts.swapchain_depth + 2,
+        .BackBufferCount = ctx->vo->opts->swapchain_depth + 2,
         .SwapEffect = IsWindows7OrGreater() ? D3DSWAPEFFECT_FLIPEX : D3DSWAPEFFECT_FLIP,
         // Automatically get the backbuffer format from the display format
         .BackBufferFormat = D3DFMT_UNKNOWN,
@@ -398,7 +398,7 @@ static int d3d_create(struct ra_ctx *ctx)
         return -1;
     }
 
-    IDirect3DDevice9Ex_SetMaximumFrameLatency(p->device, ctx->opts.swapchain_depth);
+    IDirect3DDevice9Ex_SetMaximumFrameLatency(p->device, ctx->vo->opts->swapchain_depth);
 
     // Register the Direct3D device with WGL_NV_dx_interop
     p->device_h = gl->DXOpenDeviceNV(p->device);

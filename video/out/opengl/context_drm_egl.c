@@ -603,7 +603,8 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
     enqueue_bo(ctx, new_bo);
     new_fence(ctx);
 
-    while (drain || p->gbm.num_bos > ctx->opts.swapchain_depth || !gbm_surface_has_free_buffers(p->gbm.surface)) {
+    while (drain || p->gbm.num_bos > ctx->vo->opts->swapchain_depth ||
+           !gbm_surface_has_free_buffers(p->gbm.surface)) {
         if (p->waiting_for_flip) {
             wait_on_flip(ctx);
             swapchain_step(ctx);

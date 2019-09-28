@@ -59,6 +59,8 @@ typedef struct mp_vo_opts {
     struct sws_opts *sws_opts;
     // vo_drm
     struct drm_opts *drm_opts;
+
+    int swapchain_depth;  // max number of images to render ahead
 } mp_vo_opts;
 
 // Subtitle options needed by the subtitle decoders/renderers.

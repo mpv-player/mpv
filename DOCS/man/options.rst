@@ -1469,6 +1469,13 @@ Video
     this can break on streams not encoded by x264, or if a stream encoded by a
     newer x264 version contains no version info.
 
+``--swapchain-depth=<N>``
+    Allow up to N in-flight frames. This essentially controls the frame
+    latency. Increasing the swapchain depth can improve pipelining and prevent
+    missed vsyncs, but increases visible latency. This option only mandates an
+    upper limit, the implementation can use a lower latency than requested
+    internally. A setting of 1 means that the VO will wait for every frame to
+    become visible before starting to render the next frame. (Default: 3)
 
 Audio
 -----
@@ -5169,14 +5176,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     runtime (i.e. if the device is rotated), via the surfaceChanged callback.
 
     Android with ``--gpu-context=android`` only.
-
-``--swapchain-depth=<N>``
-    Allow up to N in-flight frames. This essentially controls the frame
-    latency. Increasing the swapchain depth can improve pipelining and prevent
-    missed vsyncs, but increases visible latency. This option only mandates an
-    upper limit, the implementation can use a lower latency than requested
-    internally. A setting of 1 means that the VO will wait for every frame to
-    become visible before starting to render the next frame. (Default: 3)
 
 ``--gpu-sw``
     Continue even if a software renderer is detected.
