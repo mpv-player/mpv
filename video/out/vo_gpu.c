@@ -315,13 +315,8 @@ static const m_option_t options[] = {
     OPT_STRING_VALIDATE("gpu-api", context_type, 0, ra_ctx_validate_api),
     OPT_FLAG("gpu-debug", opts.debug, 0),
     OPT_FLAG("gpu-sw", opts.allow_sw, 0),
-    OPT_INTRANGE("swapchain-depth", opts.swapchain_depth, 0, 1, 8),
     {0}
 };
-
-static const struct gpu_priv defaults = { .opts = {
-    .swapchain_depth = 3,
-}};
 
 const struct vo_driver video_out_gpu = {
     .description = "Shader-based GPU Renderer",
@@ -339,6 +334,5 @@ const struct vo_driver video_out_gpu = {
     .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct gpu_priv),
-    .priv_defaults = &defaults,
     .options = options,
 };

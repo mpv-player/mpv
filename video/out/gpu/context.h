@@ -10,7 +10,6 @@ struct ra_ctx_opts {
     int want_alpha;      // create an alpha framebuffer if possible
     int debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
-    int swapchain_depth; // max number of images to render ahead
 };
 
 struct ra_ctx {
