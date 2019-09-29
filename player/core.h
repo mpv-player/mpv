@@ -457,6 +457,7 @@ typedef struct MPContext {
     char *open_url;
     char *open_format;
     int open_url_flags;
+    bool open_for_prefetch;
     // --- All fields below are owned by open_thread, unless open_done was set
     //     to true.
     struct demuxer *open_res_demuxer;

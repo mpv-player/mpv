@@ -983,13 +983,15 @@ static void *open_demux_thread(void *ctx)
     if (demux) {
         MP_VERBOSE(mpctx, "Opening done: %s\n", mpctx->open_url);
 
-        int num_streams = demux_get_num_stream(demux);
-        for (int n = 0; n < num_streams; n++) {
-            struct sh_stream *sh = demux_get_stream(demux, n);
-            demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true);
-        }
+        if (mpctx->open_for_prefetch && !demux->fully_read) {
+            int num_streams = demux_get_num_stream(demux);
+            for (int n = 0; n < num_streams; n++) {
+                struct sh_stream *sh = demux_get_stream(demux, n);
+                demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true);
+            }
 
-        demux_start_prefetch(demux);
+            demux_start_prefetch(demux);
+        }
     } else {
         MP_VERBOSE(mpctx, "Opening failed or was aborted: %s\n", mpctx->open_url);
 
@@ -1026,7 +1028,8 @@ static void cancel_open(struct MPContext *mpctx)
 }
 
 // Setup all the field to open this url, and make sure a thread is running.
-static void start_open(struct MPContext *mpctx, char *url, int url_flags)
+static void start_open(struct MPContext *mpctx, char *url, int url_flags,
+                       bool for_prefetch)
 {
     cancel_open(mpctx);
 
@@ -1039,6 +1042,7 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags)
     mpctx->open_url = talloc_strdup(NULL, url);
     mpctx->open_format = talloc_strdup(NULL, mpctx->opts->demuxer_name);
     mpctx->open_url_flags = url_flags;
+    mpctx->open_for_prefetch = for_prefetch;
     if (mpctx->opts->load_unsafe_playlists)
         mpctx->open_url_flags = 0;
 
@@ -1075,7 +1079,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     }
 
     if (!mpctx->open_active)
-        start_open(mpctx, url, mpctx->playing->stream_flags);
+        start_open(mpctx, url, mpctx->playing->stream_flags, false);
 
     // User abort should cancel the opener now.
     mp_cancel_set_parent(mpctx->open_cancel, mpctx->playback_abort);
@@ -1106,7 +1110,7 @@ void prefetch_next(struct MPContext *mpctx)
     struct playlist_entry *new_entry = mp_next_file(mpctx, +1, false, false);
     if (new_entry && !mpctx->open_active && new_entry->filename) {
         MP_VERBOSE(mpctx, "Prefetching: %s\n", new_entry->filename);
-        start_open(mpctx, new_entry->filename, new_entry->stream_flags);
+        start_open(mpctx, new_entry->filename, new_entry->stream_flags, true);
     }
 }
 
@@ -1553,9 +1557,9 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     }
 
-    demux_start_prefetch(mpctx->demuxer);
-
     if (opts->demuxer_cache_wait) {
+        demux_start_prefetch(mpctx->demuxer);
+
         while (!mpctx->stop_play) {
             struct demux_reader_state s;
             demux_get_reader_state(mpctx->demuxer, &s);
