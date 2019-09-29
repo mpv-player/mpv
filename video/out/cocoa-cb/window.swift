@@ -20,7 +20,8 @@ import Cocoa
 class Window: NSWindow, NSWindowDelegate {
 
     weak var cocoaCB: CocoaCB! = nil
-    var mpv: MPVHelper { get { return cocoaCB.mpv } }
+    var mpv: MPVHelper? { get { return cocoaCB.mpv } }
+    var libmpv: LibmpvHelper { get { return cocoaCB.libmpv } }
 
     var targetScreen: NSScreen?
     var previousScreen: NSScreen?
@@ -134,7 +135,7 @@ class Window: NSWindow, NSWindowDelegate {
             setFrame(frame, display: true)
         }
 
-        if mpv.getBoolProperty("native-fs") {
+        if Bool(mpv?.opts.native_fs ?? 1) {
             super.toggleFullScreen(sender)
         } else {
             if !isInFullscreen {
@@ -245,48 +246,35 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.layer?.update()
     }
 
-    func getFsAnimationDuration(_ def: Double) -> Double{
-        let duration = mpv.getStringProperty("macos-fs-animation-duration") ?? "default"
-        if duration == "default" {
+    func getFsAnimationDuration(_ def: Double) -> Double {
+        let duration = libmpv.macOpts.macos_fs_animation_duration
+        if duration < 0 {
             return def
         } else {
-            return (Double(duration) ?? 0.2)/1000
+            return Double(duration)/1000
         }
     }
 
-    func setOnTop(_ state: Bool, _ ontopLevel: Any) {
-        let stdLevel: NSWindow.Level = .normal
-
+    func setOnTop(_ state: Bool, _ ontopLevel: Int) {
         if state {
-            if ontopLevel is Int {
-                switch ontopLevel as? Int {
-                case .some(-1):
-                    level = .floating
-                case .some(-2):
-                    level = .statusBar + 1
-                default:
-                    level = NSWindow.Level(ontopLevel as? Int ?? stdLevel.rawValue)
-                }
-            } else {
-                switch ontopLevel as? String {
-                case .some("window"):
-                    level = .floating
-                case .some("system"):
-                    level = .statusBar + 1
-                default:
-                    level = NSWindow.Level(Int(ontopLevel as? String ?? "") ?? stdLevel.rawValue)
-                }
+            switch ontopLevel {
+            case -1:
+                level = .floating
+            case -2:
+                level = .statusBar + 1
+            default:
+                level = NSWindow.Level(ontopLevel)
             }
             collectionBehavior.remove(.transient)
             collectionBehavior.insert(.managed)
         } else {
-            level = stdLevel
+            level = .normal
         }
     }
 
     func updateMovableBackground(_ pos: NSPoint) {
         if !isInFullscreen {
-            isMovableByWindowBackground = mpv.canBeDraggedAt(pos)
+            isMovableByWindowBackground = mpv?.canBeDraggedAt(pos) ?? true
         } else {
             isMovableByWindowBackground = false
         }
@@ -448,7 +436,7 @@ class Window: NSWindow, NSWindowDelegate {
     @objc func setDoubleWindowSize() { setWindowScale(2.0) }
 
     func setWindowScale(_ scale: Double) {
-        mpv.commandAsync(["osd-auto", "set", "window-scale", "\(scale)"])
+        mpv?.command("set window-scale \(scale)")
     }
 
     func windowDidChangeScreen(_ notification: Notification) {

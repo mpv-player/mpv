@@ -894,7 +894,7 @@ standalone_features = [
         'func': check_macos_sdk('10.14')
     }, {
         'name': '--macos-cocoa-cb',
-        'desc': 'macOS opengl-cb backend',
+        'desc': 'macOS libmpv backend',
         'deps': 'cocoa && swift',
         'func': check_true
     }

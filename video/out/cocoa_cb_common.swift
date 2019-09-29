@@ -20,7 +20,8 @@ import IOKit.pwr_mgt
 
 class CocoaCB: NSObject {
 
-    var mpv: MPVHelper
+    var mpv: MPVHelper?
+    var libmpv: LibmpvHelper
     var window: Window?
     var titleBar: TitleBar?
     var view: EventsView?
@@ -53,15 +54,24 @@ class CocoaCB: NSObject {
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
     @objc init(_ mpvHandle: OpaquePointer) {
-        mpv = MPVHelper(mpvHandle)
+        libmpv = LibmpvHelper(mpvHandle, "cocoacb")
         super.init()
         layer = VideoLayer(cocoaCB: self)
+
+        libmpv.observeFlag("ontop")
+        libmpv.observeFlag("border")
+        libmpv.observeFlag("keepaspect-window")
+        libmpv.observeString("macos-title-bar-style")
+        libmpv.observeString("macos-title-bar-appearance")
+        libmpv.observeString("macos-title-bar-material")
+        libmpv.observeString("macos-title-bar-color")
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
         if backendState == .uninitialized {
             backendState = .needsInit
 
+            mpv = MPVHelper(vo, "cocoacb")
             view = EventsView(cocoaCB: self)
             view?.layer = layer
             view?.wantsLayer = true
@@ -77,7 +87,7 @@ class CocoaCB: NSObject {
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
-        mpv.vo = vo
+        mpv?.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else {
@@ -94,18 +104,18 @@ class CocoaCB: NSObject {
         setAppIcon()
 
         guard let view = self.view else {
-            mpv.sendError("Something went wrong, no View was initialized")
+            libmpv.sendError("Something went wrong, no View was initialized")
             exit(1)
         }
         guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main else {
-            mpv.sendError("Something went wrong, no Screen was found")
+            libmpv.sendError("Something went wrong, no Screen was found")
             exit(1)
         }
 
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
         window = Window(contentRect: wr, screen: targetScreen, view: view, cocoaCB: self)
         guard let window = self.window else {
-            mpv.sendError("Something went wrong, no Window was initialized")
+            libmpv.sendError("Something went wrong, no Window was initialized")
             exit(1)
         }
 
@@ -136,7 +146,7 @@ class CocoaCB: NSObject {
     func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
         let opts: mp_vo_opts = vo.pointee.opts.pointee
         guard let targetScreen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main else {
-            mpv.sendWarning("Couldn't update Window size, no Screen available")
+            libmpv.sendWarning("Couldn't update Window size, no Screen available")
             return
         }
 
@@ -162,7 +172,7 @@ class CocoaCB: NSObject {
                         flagsOut: UnsafeMutablePointer<CVOptionFlags>,
               displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
         let ccb = unsafeBitCast(displayLinkContext, to: CocoaCB.self)
-        ccb.mpv.reportRenderFlip()
+        ccb.libmpv.reportRenderFlip()
         return kCVReturnSuccess
     }
 
@@ -173,14 +183,14 @@ class CocoaCB: NSObject {
         guard let screen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main,
               let link = self.link else
         {
-            mpv.sendWarning("Couldn't start DisplayLink, no Screen or DisplayLink available")
+            libmpv.sendWarning("Couldn't start DisplayLink, no Screen or DisplayLink available")
             return
         }
 
         CVDisplayLinkSetCurrentCGDisplay(link, screen.displayID)
         if #available(macOS 10.12, *) {
             CVDisplayLinkSetOutputHandler(link) { link, now, out, inFlags, outFlags -> CVReturn in
-                self.mpv.reportRenderFlip()
+                self.libmpv.reportRenderFlip()
                 return kCVReturnSuccess
             }
         } else {
@@ -197,7 +207,7 @@ class CocoaCB: NSObject {
 
     func updateDisplaylink() {
         guard let screen = window?.screen, let link = self.link else {
-            mpv.sendWarning("Couldn't update DisplayLink, no Screen or DisplayLink available")
+            libmpv.sendWarning("Couldn't update DisplayLink, no Screen or DisplayLink available")
             return
         }
 
@@ -220,17 +230,17 @@ class CocoaCB: NSObject {
                 }
 
                 if fabs(actualFps - nominalFps) > 0.1 {
-                    mpv.sendVerbose("Falling back to nominal display refresh rate: \(nominalFps)")
+                    libmpv.sendVerbose("Falling back to nominal display refresh rate: \(nominalFps)")
                     return nominalFps
                 } else {
                     return actualFps
                 }
             }
         } else {
-            mpv.sendWarning("No DisplayLink available")
+            libmpv.sendWarning("No DisplayLink available")
         }
 
-        mpv.sendWarning("Falling back to standard display refresh rate: 60Hz")
+        libmpv.sendWarning("Falling back to standard display refresh rate: 60Hz")
         return 60.0
     }
 
@@ -265,11 +275,11 @@ class CocoaCB: NSObject {
 
     func updateICCProfile() {
         guard let colorSpace = window?.screen?.colorSpace else {
-            mpv.sendWarning("Couldn't update ICC Profile, no color space available")
+            libmpv.sendWarning("Couldn't update ICC Profile, no color space available")
             return
         }
 
-        mpv.setRenderICCProfile(colorSpace)
+        libmpv.setRenderICCProfile(colorSpace)
         if #available(macOS 10.11, *) {
             layer?.colorspace = colorSpace.cgColorSpace
         }
@@ -305,7 +315,7 @@ class CocoaCB: NSObject {
             var mean = (values[0] + values[1]) / 2
             if ccb.lastLmu != mean {
                 ccb.lastLmu = mean
-                ccb.mpv.setRenderLux(ccb.lmuToLux(ccb.lastLmu))
+                ccb.libmpv.setRenderLux(ccb.lmuToLux(ccb.lastLmu))
             }
         }
     }
@@ -313,7 +323,7 @@ class CocoaCB: NSObject {
     func initLightSensor() {
         let srv = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("AppleLMUController"))
         if srv == IO_OBJECT_NULL {
-            mpv.sendVerbose("Can't find an ambient light sensor")
+            libmpv.sendVerbose("Can't find an ambient light sensor")
             return
         }
 
@@ -325,7 +335,7 @@ class CocoaCB: NSObject {
         IOObjectRelease(srv)
 
         if kr != KERN_SUCCESS {
-            mpv.sendVerbose("Can't start ambient light sensor connection")
+            libmpv.sendVerbose("Can't start ambient light sensor connection")
             return
         }
         lightSensorCallback(MPVHelper.bridge(obj: self), 0, 0, nil)
@@ -344,7 +354,7 @@ class CocoaCB: NSObject {
             let displayID = ccb.window?.screen?.displayID ?? display
 
             if displayID == display {
-                ccb.mpv.sendVerbose("Detected display mode change, updating screen refresh rate");
+                ccb.libmpv.sendVerbose("Detected display mode change, updating screen refresh rate");
                 ccb.flagEvents(VO_EVENT_WIN_STATE)
             }
         }
@@ -359,20 +369,13 @@ class CocoaCB: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        let screenType = fs ? "fs-screen" : "screen"
-        let screenID = mpv.getStringProperty(screenType) ?? "current"
-
-        switch screenID {
-        case "current", "default", "all":
-            return getScreenBy(id: -1)
-        default:
-            return getScreenBy(id: Int(screenID) ?? 0)
-        }
+        let screenID = fs ? (mpv?.opts.fsscreen_id ?? 100) : (mpv?.opts.screen_id ?? 100)
+        return getScreenBy(id: Int(screenID))
     }
 
     func getScreenBy(id screenID: Int) -> NSScreen? {
         if screenID >= NSScreen.screens.count {
-            mpv.sendInfo("Screen ID \(screenID) does not exist, falling back to current device")
+            libmpv.sendInfo("Screen ID \(screenID) does not exist, falling back to current device")
             return nil
         } else if screenID < 0 {
             return nil
@@ -405,7 +408,12 @@ class CocoaCB: NSObject {
         eventsLock.lock()
         events |= ev
         eventsLock.unlock()
-        vo_wakeup(mpv.vo)
+
+        guard let vout = mpv?.vo else {
+            libmpv.sendWarning("vo nil in flagEvents")
+            return
+        }
+        vo_wakeup(vout)
     }
 
     func checkEvents() -> Int {
@@ -418,6 +426,10 @@ class CocoaCB: NSObject {
 
     var controlCallback: mp_render_cb_control_fn = { ( vo, ctx, events, request, data ) -> Int32 in
         let ccb = unsafeBitCast(ctx, to: CocoaCB.self)
+        guard let vout = vo, let opts: mp_vo_opts = vout.pointee.opts?.pointee else {
+            ccb.libmpv.sendWarning("Nil vo or opts in Control Callback")
+            return VO_FALSE
+        }
 
         switch mp_voctrl(request) {
         case VOCTRL_CHECK_EVENTS:
@@ -463,7 +475,7 @@ class CocoaCB: NSObject {
                 let size = UnsafeBufferPointer(start: sizeData, count: 2)
                 var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
                 DispatchQueue.main.async {
-                    if let screen = ccb.window?.currentScreen, !ccb.mpv.getBoolProperty("hidpi-window-scale") {
+                    if let screen = ccb.window?.currentScreen, !Bool(opts.hidpi_window_scale) {
                         rect = screen.convertRectFromBacking(rect)
                     }
                     ccb.window?.updateSize(rect.size)
@@ -479,9 +491,7 @@ class CocoaCB: NSObject {
             }
             return VO_FALSE
         case VOCTRL_GET_DISPLAY_NAMES:
-            if let opts: mp_vo_opts = vo?.pointee.opts?.pointee,
-               let dnames = data?.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
-            {
+            if let dnames = data?.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self) {
                 var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
                 var count: Int32 = 0
                 let screen = ccb.window != nil ? ccb.window?.screen :
@@ -504,20 +514,14 @@ class CocoaCB: NSObject {
             }
             return VO_FALSE
         case VOCTRL_PREINIT:
-            if let vout = vo {
-                DispatchQueue.main.sync { ccb.preinit(vout) }
-                return VO_TRUE
-            }
-            return VO_FALSE
+            DispatchQueue.main.sync { ccb.preinit(vout) }
+            return VO_TRUE
         case VOCTRL_UNINIT:
             DispatchQueue.main.async { ccb.uninit() }
             return VO_TRUE
         case VOCTRL_RECONFIG:
-            if let vout = vo {
-                ccb.reconfig(vout)
-                return VO_TRUE
-            }
-            return VO_FALSE
+            ccb.reconfig(vout)
+            return VO_TRUE
         default:
             return VO_NOTIMPL
         }
@@ -525,7 +529,7 @@ class CocoaCB: NSObject {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && mpv.getBoolProperty("native-fs")
+                         window?.isInFullscreen ?? false && Bool(mpv?.opts.native_fs ?? 1)
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }
@@ -535,8 +539,8 @@ class CocoaCB: NSObject {
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()
-        mpv.deinitRender()
-        mpv.deinitMPV(destroy)
+        libmpv.deinitRender()
+        libmpv.deinitMPV(destroy)
     }
 
     func checkShutdown() {
@@ -566,27 +570,27 @@ class CocoaCB: NSObject {
 
         switch String(cString: property.name) {
         case "border":
-            if let data = MPVHelper.mpvFlagToBool(property.data) {
+            if let data = LibmpvHelper.mpvFlagToBool(property.data) {
                 window?.border = data
             }
         case "ontop":
-            if let data = MPVHelper.mpvFlagToBool(property.data) {
-                window?.setOnTop(data, mpv.getStringProperty("ontop-level") ?? "window")
+            if let data = LibmpvHelper.mpvFlagToBool(property.data) {
+                window?.setOnTop(data, Int(mpv?.opts.ontop_level ?? -1))
             }
         case "keepaspect-window":
-            if let data = MPVHelper.mpvFlagToBool(property.data) {
+            if let data = LibmpvHelper.mpvFlagToBool(property.data) {
                 window?.keepAspect = data
             }
         case "macos-title-bar-appearance":
-            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
                 titleBar?.set(appearance: data)
             }
         case "macos-title-bar-material":
-            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
                 titleBar?.set(material: data)
             }
         case "macos-title-bar-color":
-            if let data = MPVHelper.mpvStringArrayToString(property.data) {
+            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
                 titleBar?.set(color: data)
             }
         default:
