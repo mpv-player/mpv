@@ -19,8 +19,8 @@ import Cocoa
 
 class EventsView: NSView {
 
-    weak var cocoaCB: CocoaCB!
-    var mpv: MPVHelper { get { return cocoaCB.mpv } }
+    unowned var cocoaCB: CocoaCB
+    var mpv: MPVHelper? { get { return cocoaCB.mpv } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -117,64 +117,64 @@ class EventsView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
     }
 
     override func mouseExited(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         cocoaCB.titleBar?.hide()
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseMovement(event)
         }
         cocoaCB.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseMovement(event)
         }
     }
 
     override func mouseDown(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func mouseUp(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
         cocoaCB.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func rightMouseUp(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func otherMouseUp(with event: NSEvent) {
-        if mpv.getBoolProperty("input-cursor") {
+        if mpv?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
     }
@@ -203,7 +203,7 @@ class EventsView: NSView {
 
         cocoaCB.window?.updateMovableBackground(point)
         if !(cocoaCB.window?.isMoving ?? false) {
-            mpv.setMousePosition(point)
+            mpv?.setMousePosition(point)
         }
     }
 
@@ -219,11 +219,11 @@ class EventsView: NSView {
             cmd = delta > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT;
         }
 
-        mpv.putAxis(cmd, delta: abs(delta))
+        mpv?.putAxis(cmd, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
-        if !mpv.getBoolProperty("input-cursor") {
+        if !(mpv?.mouseEnabled() ?? true) {
             return
         }
 
@@ -246,7 +246,6 @@ class EventsView: NSView {
     }
 
     func containsMouseLocation() -> Bool {
-        if cocoaCB == nil { return false }
         var topMargin: CGFloat = 0.0
         let menuBarHeight = NSApp.mainMenu?.menuBarHeight ?? 23.0
 

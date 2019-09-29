@@ -66,8 +66,8 @@ let attributeLookUp: [UInt32:String] = [
 
 class VideoLayer: CAOpenGLLayer {
 
-    weak var cocoaCB: CocoaCB!
-    var mpv: MPVHelper { get { return cocoaCB.mpv } }
+    unowned var cocoaCB: CocoaCB
+    var libmpv: LibmpvHelper { get { return cocoaCB.libmpv } }
 
     let displayLock = NSLock()
     let cglContext: CGLContextObj
@@ -101,8 +101,8 @@ class VideoLayer: CAOpenGLLayer {
 
     init(cocoaCB ccb: CocoaCB) {
         cocoaCB = ccb
-        (cglPixelFormat, bufferDepth) = VideoLayer.createPixelFormat(ccb.mpv)
-        cglContext = VideoLayer.createContext(ccb.mpv, cglPixelFormat)
+        (cglPixelFormat, bufferDepth) = VideoLayer.createPixelFormat(ccb.libmpv)
+        cglContext = VideoLayer.createContext(ccb.libmpv, cglPixelFormat)
         super.init()
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
@@ -115,9 +115,9 @@ class VideoLayer: CAOpenGLLayer {
         CGLSetParameter(cglContext, kCGLCPSwapInterval, &i)
         CGLSetCurrentContext(cglContext)
 
-        mpv.initRender()
-        mpv.setRenderUpdateCallback(updateCallback, context: self)
-        mpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
+        libmpv.initRender()
+        libmpv.setRenderUpdateCallback(updateCallback, context: self)
+        libmpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
     }
 
     //necessary for when the layer containing window changes the screen
@@ -144,7 +144,7 @@ class VideoLayer: CAOpenGLLayer {
             isAsynchronous = false
         }
         return cocoaCB.backendState == .initialized &&
-               (forceDraw || mpv.isRenderUpdateFrame())
+               (forceDraw || libmpv.isRenderUpdateFrame())
     }
 
     override func draw(inCGLContext ctx: CGLContextObj,
@@ -163,7 +163,7 @@ class VideoLayer: CAOpenGLLayer {
         }
 
         updateSurfaceSize()
-        mpv.drawRender(surfaceSize, bufferDepth, ctx)
+        libmpv.drawRender(surfaceSize, bufferDepth, ctx)
 
         if needsICCUpdate {
             needsICCUpdate = false
@@ -218,8 +218,8 @@ class VideoLayer: CAOpenGLLayer {
         CATransaction.flush()
         if isUpdate && needsFlip {
             CGLSetCurrentContext(cglContext)
-            if mpv.isRenderUpdateFrame() {
-                mpv.drawRender(NSZeroSize, bufferDepth, cglContext, skip: true)
+            if libmpv.isRenderUpdateFrame() {
+                libmpv.drawRender(NSZeroSize, bufferDepth, cglContext, skip: true)
             }
         }
         displayLock.unlock()
@@ -235,29 +235,29 @@ class VideoLayer: CAOpenGLLayer {
         }
     }
 
-    class func createPixelFormat(_ mpv: MPVHelper) -> (CGLPixelFormatObj, GLint) {
+    class func createPixelFormat(_ libmpv: LibmpvHelper) -> (CGLPixelFormatObj, GLint) {
         var pix: CGLPixelFormatObj?
         var depth: GLint = 8
         var err: CGLError = CGLError(rawValue: 0)
-        let swRender = mpv.macOpts?.cocoa_cb_sw_renderer ?? -1
+        let swRender = libmpv.macOpts.cocoa_cb_sw_renderer
 
         if swRender != 1 {
-            (pix, depth, err) = VideoLayer.findPixelFormat(mpv)
+            (pix, depth, err) = VideoLayer.findPixelFormat(libmpv)
         }
 
         if (err != kCGLNoError || pix == nil) && swRender != 0 {
-            (pix, depth, err) = VideoLayer.findPixelFormat(mpv, software: true)
+            (pix, depth, err) = VideoLayer.findPixelFormat(libmpv, software: true)
         }
 
         guard let pixelFormat = pix, err == kCGLNoError else {
-            mpv.sendError("Couldn't create any CGL pixel format")
+            libmpv.sendError("Couldn't create any CGL pixel format")
             exit(1)
         }
 
         return (pixelFormat, depth)
     }
 
-    class func findPixelFormat(_ mpv: MPVHelper, software: Bool = false) -> (CGLPixelFormatObj?, GLint, CGLError) {
+    class func findPixelFormat(_ libmpv: LibmpvHelper, software: Bool = false) -> (CGLPixelFormatObj?, GLint, CGLError) {
         var pix: CGLPixelFormatObj?
         var err: CGLError = CGLError(rawValue: 0)
         var npix: GLint = 0
@@ -267,7 +267,7 @@ class VideoLayer: CAOpenGLLayer {
             glBase.insert(CGLPixelFormatAttribute(ver.rawValue), at: 1)
 
             var glFormat = [glBase]
-            if (mpv.macOpts?.cocoa_cb_10bit_context == 1) {
+            if (libmpv.macOpts.cocoa_cb_10bit_context == 1) {
                 glFormat += [glFormat10Bit]
             }
             glFormat += glFormatOptional
@@ -283,7 +283,7 @@ class VideoLayer: CAOpenGLLayer {
                         return attributeLookUp[value.rawValue] ?? String(value.rawValue)
                     })
 
-                    mpv.sendVerbose("Created CGL pixel format with attributes: " +
+                    libmpv.sendVerbose("Created CGL pixel format with attributes: " +
                                     "\(attArray.joined(separator: ", "))")
                     return (pix, glFormat.contains(glFormat10Bit) ? 16 : 8, err)
                 }
@@ -291,24 +291,23 @@ class VideoLayer: CAOpenGLLayer {
         }
 
         let errS = String(cString: CGLErrorString(err))
-        mpv.sendWarning("Couldn't create a " +
-                        "\(software ? "software" : "hardware accelerated") " +
-                        "CGL pixel format: \(errS) (\(err.rawValue))")
-
-        if software == false && (mpv.macOpts?.cocoa_cb_sw_renderer ?? -1) == -1 {
-            mpv.sendWarning("Falling back to software renderer")
+        libmpv.sendWarning("Couldn't create a " +
+                           "\(software ? "software" : "hardware accelerated") " +
+                           "CGL pixel format: \(errS) (\(err.rawValue))")
+        if software == false && libmpv.macOpts.cocoa_cb_sw_renderer == -1 {
+            libmpv.sendWarning("Falling back to software renderer")
         }
 
         return (pix, 8, err)
     }
 
-    class func createContext(_ mpv: MPVHelper, _ pixelFormat: CGLPixelFormatObj) -> CGLContextObj {
+    class func createContext(_ libmpv: LibmpvHelper, _ pixelFormat: CGLPixelFormatObj) -> CGLContextObj {
         var context: CGLContextObj?
         let error = CGLCreateContext(pixelFormat, nil, &context)
 
         guard let cglContext = context, error == kCGLNoError else {
             let errS = String(cString: CGLErrorString(error))
-            mpv.sendError("Couldn't create a CGLContext: " + errS)
+            libmpv.sendError("Couldn't create a CGLContext: " + errS)
             exit(1)
         }
 

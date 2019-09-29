@@ -73,3 +73,10 @@ extension NSColor {
         self.init(calibratedRed: red, green: green, blue: blue, alpha: alpha)
     }
 }
+
+extension Bool {
+
+    init(_ int32: Int32) {
+        self.init(int32 != 0)
+    }
+}
