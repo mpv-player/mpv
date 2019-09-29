@@ -160,6 +160,8 @@ static int init(struct ao *ao)
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
 
+    SetAudioPowerHintToFavorSavingPower();
+
     if (!init_audiounit(ao, asbd))
         goto coreaudio_error;
 
@@ -219,9 +221,19 @@ static void init_physical_format(struct ao *ao)
 
             ca_print_asbd(ao, "- ", stream_asbd);
 
-            if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
-                                                          stream_asbd))
+            UInt32 Transport_Type;
+            CA_GET_O(p->device, kAudioDevicePropertyTransportType, &Transport_Type);
+            CHECK_CA_WARN("failed to get device transport type");
+
+            if (Transport_Type == (kAudioDeviceTransportTypeBluetooth | kAudioDeviceTransportTypeBluetoothLE)){
+                if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
+                    stream_asbd, 0, 1))
                 best_asbd = *stream_asbd;
+            }else{
+                if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
+                    stream_asbd, 1, 0))
+                    best_asbd = *stream_asbd;
+            }
         }
 
         if (best_asbd.mFormatID) {
@@ -231,7 +243,7 @@ static void init_physical_format(struct ao *ao)
                          &p->original_asbd);
             CHECK_CA_WARN("could not get current physical stream format");
 
-            if (ca_asbd_equals(&p->original_asbd, &best_asbd)) {
+            if (ca_asbd_equals(&p->original_asbd, &best_asbd, 0)) {
                 MP_VERBOSE(ao, "Requested format already set, not changing.\n");
                 p->original_asbd.mFormatID = 0;
                 break;
