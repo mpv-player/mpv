@@ -410,7 +410,7 @@ const stream_info_t stream_info_ffmpeg = {
   .protocols = (const char *const[]){
      "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
      "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
-     "data",
+     "gopher", "data",
      NULL },
   .can_write = true,
   .is_safe = true,
