@@ -1902,6 +1902,22 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
     }
 }
 
+static struct mp_recorder *recorder_create(struct demux_internal *in,
+                                           const char *dst)
+{
+    struct sh_stream **streams = NULL;
+    int num_streams = 0;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct sh_stream *stream = in->streams[n];
+        if (stream->ds->selected)
+            MP_TARRAY_APPEND(NULL, streams, num_streams, stream);
+    }
+    struct mp_recorder *res = mp_recorder_create(in->d_thread->global, dst,
+                                                 streams, num_streams);
+    talloc_free(streams);
+    return res;
+}
+
 static void write_dump_packet(struct demux_internal *in, struct demux_packet *dp)
 {
     assert(in->dumper);
@@ -1927,9 +1943,7 @@ static void record_packet(struct demux_internal *in, struct demux_packet *dp)
         // recorded file.
         in->enable_recording = false;
 
-        in->recorder =
-            mp_recorder_create(in->d_thread->global, in->opts->record_file,
-                               in->streams, in->num_streams);
+        in->recorder = recorder_create(in, in->opts->record_file);
         if (!in->recorder)
             MP_ERR(in, "Disabling recording.\n");
     }
@@ -4152,8 +4166,7 @@ bool demux_cache_dump_set(struct demuxer *demuxer, double start, double end,
     if (file && file[0] && start != MP_NOPTS_VALUE) {
         res = true;
 
-        in->dumper = mp_recorder_create(in->d_thread->global, file,
-                                        in->streams, in->num_streams);
+        in->dumper = recorder_create(in, file);
 
         // This is not asynchronous and will freeze the shit for a while if the
         // user is unlucky. It could be moved to a thread with some effort.
