@@ -4675,11 +4675,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Schedule each frame to be presented for this number of VBlank intervals.
     (default: 1) Setting to 1 will enable VSync, setting to 0 will disable it.
 
-``--d3d11-adapter=<adapter name>``
+``--d3d11-adapter=<adapter name|help>``
     Select a specific D3D11 adapter to utilize for D3D11 rendering.
     Will pick the default adapter if unset. Alternatives are listed
-    when the d3d11 back-end is initialized with verbosity level verbose
-    or higher.
+    when the name "help" is given.
 
     Hardware decoders utilizing the D3D11 rendering abstraction's helper
     functionality to receive a device, such as D3D11VA or DXVA2's DXGI

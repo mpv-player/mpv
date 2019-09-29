@@ -26,6 +26,10 @@
 #include "video/out/w32_common.h"
 #include "ra_d3d11.h"
 
+static int d3d11_validate_adapter(struct mp_log *log,
+                                  const struct m_option *opt,
+                                  struct bstr name, struct bstr param);
+
 struct d3d11_opts {
     int feature_level;
     int warp;
@@ -53,7 +57,8 @@ const struct m_sub_options d3d11_conf = {
                     {"9_1", D3D_FEATURE_LEVEL_9_1})),
         OPT_FLAG("d3d11-flip", flip, 0),
         OPT_INTRANGE("d3d11-sync-interval", sync_interval, 0, 0, 4),
-        OPT_STRING("d3d11-adapter", adapter_name, 0),
+        OPT_STRING_VALIDATE("d3d11-adapter", adapter_name, 0,
+                            d3d11_validate_adapter),
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -79,6 +84,36 @@ struct priv {
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
 };
+
+static int d3d11_validate_adapter(struct mp_log *log,
+                                  const struct m_option *opt,
+                                  struct bstr name, struct bstr param)
+{
+    bool help = bstr_equals0(param, "help");
+    bool adapter_matched = false;
+    struct bstr listing = { 0 };
+
+    if (bstr_equals0(param, "")) {
+        return 0;
+    }
+
+    adapter_matched = mp_d3d11_list_or_verify_adapters(log,
+                                                       help ? NULL : &param,
+                                                       help ? &listing : NULL);
+
+    if (help) {
+        mp_info(log, "Available D3D11 adapters:\n%.*s",
+                BSTR_P(listing));
+        talloc_free(listing.start);
+        return M_OPT_EXIT;
+    }
+
+    if (!adapter_matched) {
+        mp_err(log, "No adapter with name '%.*s'!\n", BSTR_P(param));
+    }
+
+    return adapter_matched ? 0 : M_OPT_INVALID;
+}
 
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
 {

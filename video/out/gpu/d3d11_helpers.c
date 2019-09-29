@@ -22,6 +22,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "misc/bstr.h"
 #include "osdep/io.h"
 #include "osdep/windows_utils.h"
 
@@ -92,7 +93,9 @@ static int get_feature_levels(int max_fl, int min_fl,
     return len;
 }
 
-static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log, char *requested_adapter_name)
+static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log,
+                                        char *requested_adapter_name,
+                                        struct bstr *listing)
 {
     HRESULT hr = S_OK;
     IDXGIFactory1 *factory;
@@ -128,9 +131,12 @@ static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log, char *requested_adap
 
         adapter_description = mp_to_utf8(NULL, desc.Description);
 
-        mp_verbose(log, "Adapter %u: vendor: %u, description: %s\n",
-                adapter_num, desc.VendorId,
-                adapter_description ? adapter_description : "<No Description>");
+        if (listing) {
+            bstr_xappend_asprintf(NULL, listing,
+                                  "Adapter %u: vendor: %u, description: %s\n",
+                                  adapter_num, desc.VendorId,
+                                  adapter_description ? adapter_description : "<No Description>");
+        }
 
         if (requested_adapter_name && adapter_description &&
             !strcmp(requested_adapter_name, adapter_description))
@@ -166,6 +172,28 @@ static HRESULT create_device(struct mp_log *log, IDXGIAdapter1 *adapter,
                               NULL, flags, levels, levels_len, D3D11_SDK_VERSION, dev, NULL, NULL);
 }
 
+bool mp_d3d11_list_or_verify_adapters(struct mp_log *log,
+                                      bstr *adapter_name,
+                                      bstr *listing)
+{
+    IDXGIAdapter1 *picked_adapter = NULL;
+
+    if (!load_d3d11_functions(log)) {
+        return false;
+    }
+
+    if ((picked_adapter = get_d3d11_adapter(log,
+                                            adapter_name ?
+                                            (char *)adapter_name->start : NULL,
+                                            listing)))
+    {
+        SAFE_RELEASE(picked_adapter);
+        return true;
+    }
+
+    return false;
+}
+
 // Create a Direct3D 11 device for rendering and presentation. This is meant to
 // reduce boilerplate in backends that D3D11, while also making sure they share
 // the same device creation logic and log the same information.
@@ -189,7 +217,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         goto done;
     }
 
-    adapter = get_d3d11_adapter(log, adapter_name);
+    adapter = get_d3d11_adapter(log, adapter_name, NULL);
 
     if (adapter_name && !adapter) {
         mp_warn(log, "Adapter '%s' was not found in the system! "
