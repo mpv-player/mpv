@@ -327,10 +327,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     talloc_free(p->last_input);
     p->last_input = NULL;
 
-    struct framebuffer *buf = p->bufs;
-    for (unsigned int i = 0; i < p->buf_count; i++)
-        memset(buf[i].map, 0, buf[i].size);
-
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
