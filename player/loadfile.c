@@ -990,6 +990,8 @@ static void *open_demux_thread(void *ctx)
                 demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true);
             }
 
+            demux_set_wakeup_cb(demux, wakeup_demux, mpctx);
+            demux_start_thread(demux);
             demux_start_prefetch(demux);
         }
     } else {
@@ -1042,7 +1044,7 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
     mpctx->open_url = talloc_strdup(NULL, url);
     mpctx->open_format = talloc_strdup(NULL, mpctx->opts->demuxer_name);
     mpctx->open_url_flags = url_flags;
-    mpctx->open_for_prefetch = for_prefetch;
+    mpctx->open_for_prefetch = for_prefetch && mpctx->opts->demuxer_thread;
     if (mpctx->opts->load_unsafe_playlists)
         mpctx->open_url_flags = 0;
 
