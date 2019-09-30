@@ -117,16 +117,20 @@ typedef struct {
 } dvb_state_t;
 
 typedef struct {
-    struct mp_log *log;
-
-    dvb_state_t *state;
-
     char *cfg_prog;
     int cfg_devno;
     int cfg_timeout;
     char *cfg_file;
-
     int cfg_full_transponder;
+} dvb_opts_t;
+
+typedef struct {
+    struct mp_log *log;
+
+    dvb_state_t *state;
+
+    dvb_opts_t *opts;
+    struct m_config_cache *opts_cache;
 } dvb_priv_t;
 
 
@@ -176,7 +180,6 @@ typedef struct {
         DELSYS_BIT(SYS_DVBC_ANNEX_C)                                    \
     )
 #endif
-
 
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);
