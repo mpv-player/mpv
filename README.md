@@ -232,7 +232,6 @@ Most activity happens on the IRC channel and the github issue tracker.
 
 [releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
-[homebrew-mpv]: https://github.com/mpv-player/homebrew-mpv
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
 [ffmpeg_vs_libav]: https://github.com/mpv-player/mpv/wiki/FFmpeg-versus-Libav
 [release-policy]: https://github.com/mpv-player/mpv/blob/master/DOCS/release-policy.md
