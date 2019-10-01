@@ -20,6 +20,15 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
+    - rewrite DVB channel switching to use an integer value
+      `--dvbin-channel-switch-offset` for switching instead of the old
+      stream controls which are now gone. Cycling this property up or down will
+      change the offset to the channel which was initially tuned to.
+      Example for `input.conf`: `H cycle dvbin-channel-switch-offset up`,
+      `K cycle dvbin-channel-switch-offset down`.
+    - adapt `stream_dvb` to support writing to `dvbin-prog` at runtime
+      and also to consistently use dvbin-configuration over URI parameters
+      when provided
     - add `--d3d11-adapter` to enable explicit selection of a D3D11 rendering
       adapter by name.
     - rename `--drm-osd-plane-id` to `--drm-draw-plane`, `--drm-video-plane-id` to
