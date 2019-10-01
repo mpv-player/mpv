@@ -121,6 +121,7 @@ typedef struct {
     int cfg_timeout;
     char *cfg_file;
     int cfg_full_transponder;
+    int cfg_channel_switch_offset;
 } dvb_opts_t;
 
 typedef struct {

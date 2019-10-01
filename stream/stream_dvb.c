@@ -78,6 +78,7 @@ const struct m_sub_options stream_dvb_conf = {
         OPT_INTRANGE("timeout", cfg_timeout, 0, 1, 30),
         OPT_STRING("file", cfg_file, M_OPT_FILE),
         OPT_FLAG("full-transponder", cfg_full_transponder, 0),
+        OPT_INT("channel-switch-offset", cfg_channel_switch_offset, 0),
         {0}
     },
     .size = sizeof(dvb_opts_t),
@@ -1044,6 +1045,12 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     }
 
     list->current = i;
+
+    // When switching channels, cfg_channel_switch_offset
+    // keeps the offset to the initially chosen channel.
+    list->current = (list->NUM_CHANNELS + list->current + priv->opts->cfg_channel_switch_offset) % list->NUM_CHANNELS;
+    channel = &(list->channels[list->current]);
+    MP_INFO(stream, "Tuning to channel \"%s\"...\n", channel->name);
     MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i,
                channel->name, channel->freq);
 
