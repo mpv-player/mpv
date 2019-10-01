@@ -183,6 +183,7 @@ typedef struct {
     )
 #endif
 
+void dvb_update_config(stream_t *);
 int dvb_parse_path(stream_t *);
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);

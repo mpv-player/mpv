@@ -47,6 +47,7 @@
 
 #include "osdep/io.h"
 #include "misc/ctype.h"
+#include "osdep/timer.h"
 
 #include "stream.h"
 #include "common/tags.h"
@@ -762,6 +763,9 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
     if (!pos)
         MP_ERR(stream, "dvb_streaming_read, return 0 bytes\n");
 
+    // Check if config parameters have been updated.
+    dvb_update_config(stream);
+
     return pos;
 }
 
@@ -1054,6 +1058,34 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     return 1;
 }
 
+void dvb_update_config(stream_t *stream)
+{
+    static int last_check = 0;
+    int now = (int)(mp_time_sec()*10);
+
+    // Throttle the check to at maximum once every 0.1 s.
+    if (now != last_check) {
+        last_check = now;
+        dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
+        if (m_config_cache_update(priv->opts_cache)) {
+            dvb_state_t *state = priv->state;
+
+            // Re-parse stream path, if we have cfg parameters now,
+            // these should be preferred.
+            if (!dvb_parse_path(stream)) {
+                MP_ERR(stream, "error parsing DVB config, not tuning.");
+                return;
+            }
+
+            int r = dvb_streaming_start(stream, priv->prog);
+            if (r) {
+                // Stream will be pulled down after channel switch,
+                // persist state.
+                state->switching_channel = true;
+            }
+        }
+    }
+}
 
 static int dvb_open(stream_t *stream)
 {
