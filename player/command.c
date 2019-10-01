@@ -3530,6 +3530,7 @@ static const struct m_property mp_properties_base[] = {
     {"edition-list", property_list_editions},
 
     {"dvbin-prog", mp_property_dvb_channel},
+    {"dvbin-channel-switch-offset", mp_property_dvb_channel},
 
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},
