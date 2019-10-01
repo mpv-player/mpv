@@ -878,101 +878,17 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
     return 1;
 }
 
-int dvb_step_channel(stream_t *stream, int dir)
-{
-    unsigned int new_current;
-    dvb_priv_t *priv = stream->priv;
-    dvb_state_t *state = priv->state;
-    dvb_channels_list_t *list = state->adapters[state->cur_adapter].list;
-
-    MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
-
-    if (list == NULL) {
-        MP_ERR(stream, "dvb_step_channel: NULL list_ptr, quit\n");
-        return 0;
-    }
-
-    new_current = (list->NUM_CHANNELS + list->current +
-                  (dir >= 0 ? 1 : -1)) % list->NUM_CHANNELS;
-
-    return dvb_set_channel(stream, state->cur_adapter, new_current);
-}
-
 static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
 {
     dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
     dvb_state_t *state = priv->state;
     dvb_channels_list_t *list = NULL;
 
-
-#if 0
-    switch (cmd) {
-    case STREAM_CTRL_DVB_SET_CHANNEL: {
-        unsigned int *iarg = arg;
-        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_SET_CHANNEL: %i, %i\n", iarg[1], iarg[0]);
-        r = dvb_set_channel(s, iarg[1], iarg[0]);
-        if (r) {
-          // Stream will be pulled down after channel switch,
-          // persist state.
-          state->switching_channel = true;
-          return STREAM_OK;
-        }
-        return STREAM_ERROR;
-    }
-    case STREAM_CTRL_DVB_STEP_CHANNEL: {
-        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_STEP_CHANNEL: %i\n", (*(int *)arg));
-        r = dvb_step_channel(s, (*(int *)arg));
-        if (r) {
-          // Stream will be pulled down after channel switch,
-          // persist state.
-          state->switching_channel = true;
-          return STREAM_OK;
-        }
-        return STREAM_ERROR;
-    }
-    }
-#endif
-
     if (state->cur_adapter >= state->adapters_count)
         return STREAM_ERROR;
     list = state->adapters[state->cur_adapter].list;
 
     switch (cmd) {
-#if 0
-    case STREAM_CTRL_GET_TV_FREQ:
-        (*(unsigned int*)arg) = list->channels[list->current].freq;
-        return STREAM_ERROR;
-    case STREAM_CTRL_DVB_SET_CHANNEL_NAME: {
-        char *progname = *((char**)arg);
-        unsigned int new_channel = (~(unsigned int)0);
-        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_SET_CHANNEL_NAME: %s\n", progname);
-        for (unsigned int i=0; i < list->NUM_CHANNELS; ++i) {
-           if (!strcmp(list->channels[i].name, progname)) {
-               new_channel = i;
-               break;
-            }
-        }
-        if (new_channel == -1) {
-              MP_ERR(s, "Program '%s' not found for adapter %d!\n",
-                     progname, state->adapters[state->cur_adapter].devno);
-              return STREAM_ERROR;
-        }
-        r = dvb_set_channel(s, state->cur_adapter, new_channel);
-        if (r) {
-          // Stream will be pulled down after channel switch,
-          // persist state.
-          state->switching_channel = true;
-          return STREAM_OK;
-        }
-        return STREAM_ERROR;
-    }
-    case STREAM_CTRL_DVB_GET_CHANNEL_NAME: {
-        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_GET_CHANNEL_NAME\n");
-        char *progname = list->channels[list->current].name;
-        *(char **)arg = talloc_strdup(NULL, progname);
-        return STREAM_OK;
-    }
-#endif
     case STREAM_CTRL_GET_METADATA: {
         struct mp_tags *metadata = talloc_zero(NULL, struct mp_tags);
         char *progname = list->channels[list->current].name;

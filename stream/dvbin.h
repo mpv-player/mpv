@@ -186,7 +186,6 @@ typedef struct {
 
 void dvb_update_config(stream_t *);
 int dvb_parse_path(stream_t *);
-int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
 void dvb_free_state(dvb_state_t *);
