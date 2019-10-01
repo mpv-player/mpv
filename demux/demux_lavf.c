@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004 Michael Niedermayer <michaelni@gmx.at>
- * Copyright (C) 2018 Google LLC
  *
  * This file is part of mpv.
  *
