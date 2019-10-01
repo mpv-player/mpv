@@ -137,6 +137,8 @@ static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
 
+static bool is_property_set(int action, void *val);
+
 static int mp_property_do_silent(const char *name, int action, void *val,
                                  struct MPContext *ctx);
 
@@ -2889,6 +2891,19 @@ static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
     return r;
 }
 
+static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (r == M_PROPERTY_OK && is_property_set(action, arg)) {
+        if (!mpctx->stop_play) {
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+        }
+    }
+    return r;
+}
+
 static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
                                       int action, void *arg, int base)
 {
@@ -3513,6 +3528,8 @@ static const struct m_property mp_properties_base[] = {
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
     {"edition-list", property_list_editions},
+
+    {"dvbin-prog", mp_property_dvb_channel},
 
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},
