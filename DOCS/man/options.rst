@@ -4195,6 +4195,13 @@ Network
 DVB
 ---
 
+``--dvbin-prog=<string>``
+    This defines the program to tune to. Usually, you may specify this
+    by using a stream URI like ``"dvb://ZDF HD"``, but you can tune to a
+    different channel by writing to this property at runtime.
+    Also see ``dvbin-channel-switch-offset`` for more useful channel
+    switching functionality.
+
 ``--dvbin-card=<0-15>``
     Specifies using card number 0-15 (default: 0).
 
@@ -4230,6 +4237,15 @@ DVB
     on-the-fly, e.g. for regional news.
 
     Default: ``no``
+
+``--dvbin-channel-switch-offset=<integer>``
+    This value is not meant for setting via configuration, but used in channel
+    switching. An ``input.conf`` can ``cycle`` this value ``up`` and ``down``
+    to perform channel switching. This number effectively gives the offset
+    to the initially tuned to channel in the channel list.
+
+    An example ``input.conf`` could contain:
+    ``H cycle dvbin-channel-switch-offset up``, ``K cycle dvbin-channel-switch-offset down``
 
 ALSA audio output options
 -------------------------
