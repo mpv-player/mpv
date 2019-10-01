@@ -110,7 +110,6 @@ typedef struct {
 
     int is_on;
     int retry;
-    int timeout;
     unsigned int last_freq;
     bool switching_channel;
     bool stream_used;

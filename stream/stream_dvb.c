@@ -1026,7 +1026,6 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, ADAPTER: %d)\n",
                progname, priv->devno);
 
-    state->is_on = 0;
     list = state->adapters[state->cur_adapter].list;
     for (i = 0; i < list->NUM_CHANNELS; i ++) {
         if (!strcmp(list->channels[i].name, progname)) {
@@ -1204,6 +1203,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         return NULL;
     memset(state, 0x00, sizeof(dvb_state_t));
     state->switching_channel = false;
+    state->is_on = 0;
     state->stream_used = true;
     state->fe_fd = state->dvr_fd = -1;
     for (unsigned int i = 0; i < MAX_ADAPTERS; i++) {
