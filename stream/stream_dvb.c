@@ -1024,7 +1024,7 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     if (progname == NULL)
         return 0;
     MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, ADAPTER: %d)\n",
-               progname, priv->opts->cfg_devno);
+               progname, priv->devno);
 
     state->is_on = 0;
     list = state->adapters[state->cur_adapter].list;
@@ -1061,8 +1061,6 @@ static int dvb_open(stream_t *stream)
     // I don't force  the file format because, although it's almost always TS,
     // there are some providers that stream an IP multicast with M$ Mpeg4 inside
     dvb_priv_t *priv = NULL;
-    char *progname;
-    int i;
 
     pthread_mutex_lock(&global_dvb_state_lock);
     if (global_dvb_state && global_dvb_state->stream_used) {
@@ -1086,6 +1084,11 @@ static int dvb_open(stream_t *stream)
         pthread_mutex_unlock(&global_dvb_state_lock);
         goto err_out;
     }
+
+    if (!dvb_parse_path(stream)) {
+        goto err_out;
+    }
+
     state->stream_used = true;
     pthread_mutex_unlock(&global_dvb_state_lock);
 
@@ -1093,33 +1096,12 @@ static int dvb_open(stream_t *stream)
       // State could be already initialized, for example, we just did a channel switch.
       // The following setup only has to be done once.
 
-      state->cur_adapter = -1;
       state->cur_frontend = -1;
-      for (i = 0; i < state->adapters_count; i++) {
-          if (state->adapters[i].devno == priv->opts->cfg_devno) {
-              state->cur_adapter = i;
-              break;
-          }
-      }
-
-      if (state->cur_adapter == -1) {
-          MP_ERR(stream, "NO CONFIGURATION FOUND FOR ADAPTER N. %d, exit\n",
-                 priv->opts->cfg_devno);
-          goto err_out;
-      }
-      state->timeout = priv->opts->cfg_timeout;
 
       MP_VERBOSE(stream, "OPEN_DVB: prog=%s, devno=%d\n",
-                 priv->opts->cfg_prog, state->adapters[state->cur_adapter].devno);
+                 priv->prog, state->adapters[state->cur_adapter].devno);
 
-      if ((priv->opts->cfg_prog == NULL || priv->opts->cfg_prog[0] == 0) &&
-          state->adapters[state->cur_adapter].list != NULL) {
-          progname = state->adapters[state->cur_adapter].list->channels[0].name;
-      } else {
-          progname = priv->opts->cfg_prog;
-      }
-
-      if (!dvb_streaming_start(stream, progname))
+      if (!dvb_streaming_start(stream, priv->prog))
           goto err_out;
     }
 
@@ -1138,6 +1120,69 @@ err_out:
     return STREAM_ERROR;
 }
 
+int dvb_parse_path(stream_t *stream)
+{
+    dvb_priv_t *priv = stream->priv;
+    dvb_state_t *state = priv->state;
+
+    // Parse stream path. Common rule: cfg wins over stream path,
+    // since cfg may be changed at runtime.
+    bstr prog, devno;
+    if (!bstr_split_tok(bstr0(stream->path), "@", &devno, &prog)) {
+        prog = devno;
+        devno.len = 0;
+    }
+
+    if (priv->opts->cfg_devno != 0) {
+        priv->devno = priv->opts->cfg_devno;
+    } else if (devno.len) {
+        bstr r;
+        priv->devno = bstrtoll(devno, &r, 0);
+        if (r.len || priv->devno < 0 || priv->devno >= MAX_ADAPTERS) {
+            MP_ERR(stream, "invalid devno: '%.*s'\n", BSTR_P(devno));
+            return 0;
+        }
+    } else {
+        // Default to the default of cfg_devno.
+        priv->devno = priv->opts->cfg_devno;
+    }
+
+    // Current adapter is derived from devno.
+    state->cur_adapter = -1;
+    for (int i = 0; i < state->adapters_count; i++) {
+        if (state->adapters[i].devno == priv->devno) {
+            state->cur_adapter = i;
+            break;
+        }
+    }
+
+    if (state->cur_adapter == -1) {
+        MP_ERR(stream, "NO CONFIGURATION FOUND FOR ADAPTER N. %d!\n",
+               priv->devno);
+        return 0;
+    }
+
+    if (priv->opts->cfg_prog != NULL && strlen(priv->opts->cfg_prog) > 0) {
+        talloc_free(priv->prog);
+        priv->prog = talloc_strdup(priv, priv->opts->cfg_prog);
+    } else if (prog.len) {
+        talloc_free(priv->prog);
+        priv->prog = bstrto0(priv, prog);
+    } else {
+        // We use the first program from the channel list.
+        if (state->adapters[state->cur_adapter].list == NULL) {
+            MP_ERR(stream, "No channel list available for adapter %d!\n", priv->devno);
+            return 0;
+        }
+        talloc_free(priv->prog);
+        priv->prog = talloc_strdup(priv, state->adapters[state->cur_adapter].list->channels[0].name);
+    }
+
+    MP_VERBOSE(stream, "DVB_CONFIG: prog=%s, devno=%d\n",
+               priv->prog, priv->devno);
+    return 1;
+}
+
 dvb_state_t *dvb_get_state(stream_t *stream)
 {
     if (global_dvb_state != NULL) {
@@ -1153,27 +1198,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     dvb_channels_list_t *list;
     dvb_adapter_config_t *adapters = NULL, *tmp;
     dvb_state_t *state = NULL;
-    bstr prog, devno;
-
-    if (!bstr_split_tok(bstr0(stream->path), "@", &devno, &prog)) {
-        prog = devno;
-        devno.len = 0;
-    }
-    if (prog.len) {
-        talloc_free(priv->opts->cfg_prog);
-        priv->opts->cfg_prog = bstrto0(NULL, prog);
-    }
-    if (devno.len) {
-        bstr r;
-        priv->opts->cfg_devno = bstrtoll(devno, &r, 0);
-        if (r.len || priv->opts->cfg_devno < 0 || priv->opts->cfg_devno >= MAX_ADAPTERS) {
-            MP_ERR(stream, "invalid devno: '%.*s'\n", BSTR_P(devno));
-            return NULL;
-        }
-    }
-
-    MP_VERBOSE(stream, "DVB_CONFIG: prog=%s, devno=%d\n",
-               priv->opts->cfg_prog, priv->opts->cfg_devno);
 
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)

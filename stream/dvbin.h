@@ -129,6 +129,9 @@ typedef struct {
 
     dvb_state_t *state;
 
+    char *prog;
+    int devno;
+
     dvb_opts_t *opts;
     struct m_config_cache *opts_cache;
 } dvb_priv_t;
@@ -181,6 +184,7 @@ typedef struct {
     )
 #endif
 
+int dvb_parse_path(stream_t *);
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
