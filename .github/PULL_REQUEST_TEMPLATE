@@ -1,6 +1,5 @@
-Ideally, you shouldn't need enter any text here, and your commit messages should
-explain your changes sufficiently (especially why they are needed). Read
-https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md for coding
-style and development conventions.
+Read this before you submit this pull request:
+https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
 
-Remove this text block.
+Reading this link and following the rules will get your pull request reviewed
+and merged faster. Nobody wants lazy pull requests.
