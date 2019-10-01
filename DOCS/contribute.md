@@ -5,32 +5,53 @@ General
 -------
 
 The main contact for mpv development is IRC, specifically #mpv
-and #mpv-devel on Freenode.
+and #mpv-devel on Freenode. Github is used for code review and
+long term discussions.
 
 Sending patches
 ---------------
 
 - Make a github pull request, or send a link to a plaintext patch created with
-  ``git format-patch``. diffs posted as pastebins (especially if the http link
-  returns HTML) just cause extra work for everyone, because they lack commit
-  message and authorship information.
+  ``git format-patch``.
+- Plain diffs posted as pastebins are not acceptable! (Especially if the http
+  link returns HTML.) They only cause extra work for everyone, because they lack
+  commit message and authorship information.
+- Never send patches to any of the developers email addresses.
+- If your changes are not supposed to be merged immediately, mark them as
+  "[RFC]" in the commit message or the pull request title.
+- Be sure to test your changes. If you didn't, please say so in the commit
+  message and the pull request text.
+
+Copyright of contributions
+--------------------------
+
+- The copyright belongs to contributors. The project is a collaborative work. By
+  sending your changes, you agree to license your contributions according to the
+  requirements of this project.
 - All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
   that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
   repository root directory).
-  Changes in files with more liberal licenses (such as BSD, MIT, or ISC) are
+- 100% compatible licenses are allowed too.
+- Changes in files with more liberal licenses (such as BSD, MIT, or ISC) are
   assumed to be dual-licensed under LGPLv2.1+ and the license indicated in the
   file header.
 - You must be either the exclusive author of the patch, or acknowledge all
   authors involved in the commit message. If you take 3rd party code, authorship
-  and copyright must be properly acknowledged. If the license of the code is not
-  LGPLv2.1+, this must be mentioned.
+  and copyright must be properly acknowledged. If you're making changes on
+  behalf of your employer, and the employer owns the copyright, you must mention
+  this. If the license of the code is not LGPLv2.1+, you must mention this.
 - These license statements are legally binding.
 - Don't use fake names (something that looks like an actual names, and may be
   someone else's name, but is not your legal name). Using a pseudonyms is
   allowed if it can be used to identify or contact you, even if whatever
   account you used to submit the patch dies.
-- When creating pull requests, be sure to test your changes. If you didn't,
-  please say so in the pull request message.
+- Do not add your name to the license header. This convention is not used by
+  this project, and neither copyright law nor any of the used licenses require
+  it.
+
+Write good commit messages
+--------------------------
+
 - Write informative commit messages. Use present tense to describe the
   situation with the patch applied, and past tense for the situation before
   the change.
@@ -63,18 +84,33 @@ Sending patches
 
   Important: put an empty line between the subject line and the commit message.
   If this is missing, it will break display in common git tools.
+- Another summary of good conventions: https://chris.beams.io/posts/git-commit/
+
+Split changes into multiple commits
+-----------------------------------
+
+- Follow git good practices, and split independent changes into several commits.
+  It's usually OK to put them into a single pull request.
 - Try to separate cosmetic and functional changes. It's ok to make a few
   additional cosmetic changes in the same file you're working on. But don't do
   something like reformatting a whole file, and hiding an actual functional
   change in the same commit.
+
+Touching user-visible parts may require updating the mpv docs
+-------------------------------------------------------------
+
+- Most user-visible things are normally documented in DOCS/man/. If your commit
+  touches documented behavior, list of sub-options, etc., you need to adjust the
+  documentation.
+- These changes usually go into the same commit that changes the code.
 - Changes to command line options (addition/modification/removal) must be
-  documented in options.rst. Changes to input properties or input commands must
-  be documented in input.rst. All changes to the user interface (options,
-  properties, commands) must be documented with a small note in
-  interface-changes.rst (although documenting additions is optional, and
-  obscure corner cases can potentially be skipped too). Changes to the libmpv
-  API must be reflected in the libmpv's headers doxygen, and should be
-  documented in client-api-changes.rst.
+  documented in options.rst.
+- Changes to input properties or input commands must be documented in input.rst.
+- All incompatible changes to the user interface (options, properties, commands)
+  must be documented with a small note in interface-changes.rst. (Additions may
+  be documented there as well, but this isn't required.)
+- Changes to the libmpv API must be reflected in the libmpv's headers doxygen,
+  and in client-api-changes.rst.
 
 Code formatting
 ---------------
@@ -147,6 +183,7 @@ mpv uses C99 with K&R formatting, with some exceptions.
 
   (If the if body is simple enough, this rule can be skipped.)
 - Remove any trailing whitespace.
+- Do not make stray whitespaces changes.
 
 General coding
 --------------
@@ -167,6 +204,11 @@ General coding
   channel first. There might be a better way to add a feature and it can avoid
   wasted work.
 
+Code of Conduct
+---------------
+
+We have one, but the document describing it got lost accidentally.
+
 Rules for git push access
 -------------------------
 
@@ -185,7 +227,9 @@ you got access, the following rules must be followed:
   major bug fixes, or you're the original author of the code). If there is more
   than one maintainer, you may need to come to an agreement with the others how
   to handle this to avoid conflict.
-- As a maintainer, you can approve pushes by others to "your" code.
+- If you make a pull requests (especially if it's to code you maintain), and you
+  want reviews, explicitly ping the people from which you expect reviews.
+- As a maintainer, you can approve pull requests by others to "your" code.
 - If you approve or merge 3rd party changes, make sure they follow the general
   development rules.
 - Changes to user interface and public API must always be approved by the
