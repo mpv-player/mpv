@@ -2104,13 +2104,16 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         if (elem->parsed)
             continue;
         // Warn against incomplete files and skip headers outside of range.
-        if (elem->pos >= end) {
+        if (elem->pos >= end || !s->seekable) {
             elem->parsed = true; // don't bother if file is incomplete
-            if (!mkv_d->eof_warning && !(mkv_d->probably_webm_dash_init &&
-                                         elem->pos == end))
+            if (end < 0 || !s->seekable) {
+                MP_WARN(demuxer, "Stream is not seekable or unknown size, "
+                        "not reading mkv metadata at end of file.\n");
+            } else if (!mkv_d->eof_warning &&
+                       !(mkv_d->probably_webm_dash_init &&  elem->pos == end))
             {
-                MP_WARN(demuxer, "SeekHead position beyond "
-                        "end of file - incomplete file?\n");
+                MP_WARN(demuxer, "mkv metadata beyond end of file - incomplete "
+                        "file?\n");
                 mkv_d->eof_warning = true;
             }
             continue;
