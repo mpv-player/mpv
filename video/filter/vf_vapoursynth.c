@@ -62,6 +62,7 @@ struct priv {
 
     const struct script_driver *drv;
     // drv_vss
+    bool vs_initialized;
     struct VSScript *se;
 
     struct mp_filter *f;
@@ -814,12 +815,15 @@ static int drv_vss_init(struct priv *p)
         MP_FATAL(p, "Could not initialize VapourSynth scripting.\n");
         return -1;
     }
+    p->vs_initialized = true;
     return 0;
 }
 
 static void drv_vss_uninit(struct priv *p)
 {
-    vsscript_finalize();
+    if (p->vs_initialized)
+        vsscript_finalize();
+    p->vs_initialized = false;
 }
 
 static int drv_vss_load_core(struct priv *p)
