@@ -53,9 +53,34 @@ enum stream_ctrl {
     STREAM_CTRL_HAS_AVSEEK,
     STREAM_CTRL_GET_METADATA,
 
-    // Garbage compatibility for obnoxious users
-    STREAM_CTRL_OPTICAL_CRAP_HACK1,
-    STREAM_CTRL_OPTICAL_CRAP_HACK2,
+    // Optical discs (internal interface between streams and demux_disc)
+    STREAM_CTRL_GET_TIME_LENGTH,
+    STREAM_CTRL_GET_DVD_INFO,
+    STREAM_CTRL_GET_DISC_NAME,
+    STREAM_CTRL_GET_NUM_CHAPTERS,
+    STREAM_CTRL_GET_CURRENT_TIME,
+    STREAM_CTRL_GET_CHAPTER_TIME,
+    STREAM_CTRL_SEEK_TO_TIME,
+    STREAM_CTRL_GET_ASPECT_RATIO,
+    STREAM_CTRL_GET_NUM_ANGLES,
+    STREAM_CTRL_GET_ANGLE,
+    STREAM_CTRL_SET_ANGLE,
+    STREAM_CTRL_GET_NUM_TITLES,
+    STREAM_CTRL_GET_TITLE_LENGTH,       // double* (in: title number, out: len)
+    STREAM_CTRL_GET_LANG,
+    STREAM_CTRL_GET_CURRENT_TITLE,
+    STREAM_CTRL_SET_CURRENT_TITLE,
+};
+
+struct stream_lang_req {
+    int type;     // STREAM_AUDIO, STREAM_SUB
+    int id;
+    char name[50];
+};
+
+struct stream_dvd_info_req {
+    unsigned int palette[16];
+    int num_subs;
 };
 
 // for STREAM_CTRL_AVSEEK

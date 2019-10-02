@@ -61,6 +61,7 @@ struct demux_reader_state {
 #define SEEK_CACHED   (1 << 3)      // allow packet cache seeks only
 #define SEEK_SATAN    (1 << 4)      // enable backward demuxing
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
+#define SEEK_FORCE    (1 << 6)      // ignore unseekable flag
 
 // Strictness of the demuxer open format check.
 // demux.c will try by default: NORMAL, UNSAFE (in this order)
@@ -171,6 +172,7 @@ struct demuxer_params {
     bool skip_lavf_probing;
     bool stream_record; // if true, enable stream recording if option is set
     int stream_flags;
+    struct stream *external_stream; // if set, use this, don't open or close streams
     // result
     bool demuxer_failed;
 };

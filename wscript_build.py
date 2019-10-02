@@ -275,6 +275,7 @@ def build(ctx):
         ( "demux/cache.c" ),
         ( "demux/demux.c" ),
         ( "demux/demux_cue.c" ),
+        ( "demux/demux_disc.c" ),
         ( "demux/demux_edl.c" ),
         ( "demux/demux_lavf.c" ),
         ( "demux/demux_libarchive.c",            "libarchive" ),

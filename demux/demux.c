@@ -58,12 +58,14 @@ extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_playlist;
+extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
 static const demuxer_desc_t *const demuxer_list[] = {
+    &demuxer_desc_disc,
     &demuxer_desc_edl,
     &demuxer_desc_cue,
     &demuxer_desc_rawaudio,
@@ -262,6 +264,8 @@ struct demux_internal {
 
     struct mp_recorder *dumper;
     int dumper_status;
+
+    bool owns_stream;
 
     // -- Access from demuxer thread only
     bool enable_recording;
@@ -1084,7 +1088,8 @@ static void demux_shutdown(struct demux_internal *in)
     talloc_free(in->cache);
     in->cache = NULL;
 
-    free_stream(demuxer->stream);
+    if (in->owns_stream)
+        free_stream(demuxer->stream);
     demuxer->stream = NULL;
 }
 
@@ -3105,7 +3110,7 @@ void demux_close_stream(struct demuxer *demuxer)
     struct demux_internal *in = demuxer->in;
     assert(!in->threading && demuxer == in->d_thread);
 
-    if (!demuxer->stream)
+    if (!demuxer->stream || !in->owns_stream)
         return;
 
     MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
@@ -3197,6 +3202,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .highest_av_pts = MP_NOPTS_VALUE,
         .seeking_in_progress = MP_NOPTS_VALUE,
         .demux_ts = MP_NOPTS_VALUE,
+        .owns_stream = !params->external_stream,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
@@ -3369,11 +3375,14 @@ struct demuxer *demux_open_url(const char *url,
     struct mp_cancel *priv_cancel = mp_cancel_new(NULL);
     if (cancel)
         mp_cancel_set_parent(priv_cancel, cancel);
-    struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
-                                     priv_cancel, global);
-    if (s && params->init_fragment.len) {
-        s = create_webshit_concat_stream(global, priv_cancel,
-                                         params->init_fragment, s);
+    struct stream *s = params->external_stream;
+    if (!s) {
+        s = stream_create(url, STREAM_READ | params->stream_flags,
+                          priv_cancel, global);
+        if (s && params->init_fragment.len) {
+            s = create_webshit_concat_stream(global, priv_cancel,
+                                             params->init_fragment, s);
+        }
     }
     if (!s) {
         talloc_free(priv_cancel);
@@ -3385,7 +3394,8 @@ struct demuxer *demux_open_url(const char *url,
         assert(d->cancel);
     } else {
         params->demuxer_failed = true;
-        free_stream(s);
+        if (!params->external_stream)
+            free_stream(s);
         talloc_free(priv_cancel);
     }
     return d;
@@ -3694,6 +3704,9 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     bool set_backwards = flags & SEEK_SATAN;
     flags &= ~(unsigned)SEEK_SATAN;
 
+    bool force_seek = flags & SEEK_FORCE;
+    flags &= ~(unsigned)SEEK_FORCE;
+
     struct demux_cached_range *cache_target =
         find_cache_seek_range(in, seek_pts, flags);
 
@@ -3702,7 +3715,7 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
             MP_VERBOSE(in, "Cached seek not possible.\n");
             return false;
         }
-        if (!in->d_thread->seekable) {
+        if (!in->d_thread->seekable && !force_seek) {
             MP_WARN(in, "Cannot seek in this file.\n");
             return false;
         }

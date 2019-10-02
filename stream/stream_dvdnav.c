@@ -190,6 +190,73 @@ static int dvd_probe(const char *path, const char *ext, const char *sig)
     return r;
 }
 
+/**
+ * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
+ * \param stream: - stream pointer
+ * \param sid: physical subtitle id
+ * \return 0 on error, otherwise language id
+ */
+static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
+{
+    uint8_t lg;
+    uint16_t lang;
+    struct priv *priv = stream->priv;
+
+    if (aid < 0)
+        return 0;
+    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
+    if (lg == 0xff)
+        return 0;
+    lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
+    if (lang == 0xffff)
+        return 0;
+    return lang;
+}
+
+/**
+ * \brief mp_dvdnav_lang_from_sid() returns the language corresponding to subtitle id 'sid'
+ * \param stream: - stream pointer
+ * \param sid: physical subtitle id
+ * \return 0 on error, otherwise language id
+ */
+static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid)
+{
+    uint8_t k;
+    uint16_t lang;
+    struct priv *priv = stream->priv;
+    if (sid < 0)
+        return 0;
+    for (k = 0; k < 32; k++)
+        if (dvdnav_get_spu_logical_stream(priv->dvdnav, k) == sid)
+            break;
+    if (k == 32)
+        return 0;
+    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
+    if (lang == 0xffff)
+        return 0;
+    return lang;
+}
+
+/**
+ * \brief mp_dvdnav_number_of_subs() returns the count of available subtitles
+ * \param stream: - stream pointer
+ * \return 0 on error, something meaningful otherwise
+ */
+static int mp_dvdnav_number_of_subs(stream_t *stream)
+{
+    struct priv *priv = stream->priv;
+    uint8_t lg, k, n = 0;
+
+    for (k = 0; k < 32; k++) {
+        lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
+        if (lg == 0xff)
+            continue;
+        if (lg >= n)
+            n = lg + 1;
+    }
+    return n;
+}
+
 static int fill_buffer(stream_t *s, char *buf, int max_len)
 {
     struct priv *priv = s->priv;
@@ -209,7 +276,7 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
         }
         if (event != DVDNAV_BLOCK_OK) {
             const char *name = LOOKUP_NAME(mp_dvdnav_events, event);
-            MP_VERBOSE(s, "DVDNAV: event %s (%d).\n", name, event);
+            MP_TRACE(s, "DVDNAV: event %s (%d).\n", name, event);
         }
         switch (event) {
         case DVDNAV_BLOCK_OK:
@@ -273,16 +340,92 @@ static int control(stream_t *stream, int cmd, void *arg)
 {
     struct priv *priv = stream->priv;
     dvdnav_t *dvdnav = priv->dvdnav;
+    int tit, part;
 
     switch (cmd) {
-    case STREAM_CTRL_OPTICAL_CRAP_HACK1: {
+    case STREAM_CTRL_GET_NUM_CHAPTERS: {
+        if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+            break;
+        if (dvdnav_get_number_of_parts(dvdnav, tit, &part) != DVDNAV_STATUS_OK)
+            break;
+        if (!part)
+            break;
+        *(unsigned int *)arg = part;
+        return 1;
+    }
+    case STREAM_CTRL_GET_CHAPTER_TIME: {
+        double *ch = arg;
+        int chapter = *ch;
+        if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+            break;
+        uint64_t *parts = NULL, duration = 0;
+        int n = dvdnav_describe_title_chapters(dvdnav, tit, &parts, &duration);
+        if (!parts)
+            break;
+        if (chapter < 0 || chapter + 1 > n)
+            break;
+        *ch = chapter > 0 ? parts[chapter - 1] / 90000.0 : 0;
+        free(parts);
+        return 1;
+    }
+    case STREAM_CTRL_GET_TIME_LENGTH: {
         if (priv->duration) {
             *(double *)arg = (double)priv->duration / 1000.0;
             return 1;
         }
         break;
     }
-    case STREAM_CTRL_OPTICAL_CRAP_HACK2: {
+    case STREAM_CTRL_GET_ASPECT_RATIO: {
+        uint8_t ar = dvdnav_get_video_aspect(dvdnav);
+        *(double *)arg = !ar ? 4.0 / 3.0 : 16.0 / 9.0;
+        return 1;
+    }
+    case STREAM_CTRL_GET_CURRENT_TIME: {
+        double tm;
+        tm = dvdnav_get_current_time(dvdnav) / 90000.0f;
+        if (tm != -1) {
+            *(double *)arg = tm;
+            return 1;
+        }
+        break;
+    }
+    case STREAM_CTRL_GET_NUM_TITLES: {
+        int32_t num_titles = 0;
+        if (dvdnav_get_number_of_titles(dvdnav, &num_titles) != DVDNAV_STATUS_OK)
+            break;
+        *((unsigned int*)arg)= num_titles;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_TITLE_LENGTH: {
+        int t = *(double *)arg;
+        int32_t num_titles = 0;
+        if (dvdnav_get_number_of_titles(dvdnav, &num_titles) != DVDNAV_STATUS_OK)
+            break;
+        if (t < 0 || t >= num_titles)
+            break;
+        uint64_t duration = 0;
+        uint64_t *parts = NULL;
+        dvdnav_describe_title_chapters(dvdnav, t + 1, &parts, &duration);
+        if (!parts)
+            break;
+        free(parts);
+        *(double *)arg = duration / 90000.0;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_CURRENT_TITLE: {
+        if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+            break;
+        *((unsigned int *) arg) = tit - 1;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_SET_CURRENT_TITLE: {
+        int title = *((unsigned int *) arg);
+        if (dvdnav_title_play(priv->dvdnav, title + 1) != DVDNAV_STATUS_OK)
+            break;
+        stream_drop_buffers(stream);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_SEEK_TO_TIME: {
         double *args = arg;
         double d = args[0]; // absolute target timestamp
         int flags = args[1]; // from SEEK_* flags (demux.h)
@@ -304,6 +447,63 @@ static int control(stream_t *stream, int cmd, void *arg)
         MP_VERBOSE(stream, "landed at: %f\n", d);
         if (dvdnav_get_position(dvdnav, &pos, &len) == DVDNAV_STATUS_OK)
             MP_VERBOSE(stream, "block: %lu\n", (unsigned long)pos);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_NUM_ANGLES: {
+        uint32_t curr, angles;
+        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+            break;
+        *(int *)arg = angles;
+        return 1;
+    }
+    case STREAM_CTRL_GET_ANGLE: {
+        uint32_t curr, angles;
+        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+            break;
+        *(int *)arg = curr;
+        return 1;
+    }
+    case STREAM_CTRL_SET_ANGLE: {
+        uint32_t curr, angles;
+        int new_angle = *(int *)arg;
+        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+            break;
+        if (new_angle > angles || new_angle < 1)
+            break;
+        if (dvdnav_angle_change(dvdnav, new_angle) != DVDNAV_STATUS_OK)
+            return 1;
+    }
+    case STREAM_CTRL_GET_LANG: {
+        struct stream_lang_req *req = arg;
+        int lang = 0;
+        switch (req->type) {
+        case STREAM_AUDIO:
+            lang = mp_dvdnav_lang_from_aid(stream, req->id);
+            break;
+        case STREAM_SUB:
+            lang = mp_dvdnav_lang_from_sid(stream, req->id);
+            break;
+        }
+        if (!lang)
+            break;
+        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_DVD_INFO: {
+        struct stream_dvd_info_req *req = arg;
+        memset(req, 0, sizeof(*req));
+        req->num_subs = mp_dvdnav_number_of_subs(stream);
+        assert(sizeof(uint32_t) == sizeof(unsigned int));
+        memcpy(req->palette, priv->spu_clut, sizeof(req->palette));
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_DISC_NAME: {
+        const char *volume = NULL;
+        if (dvdnav_get_title_string(dvdnav, &volume) != DVDNAV_STATUS_OK)
+            break;
+        if (!volume || !volume[0])
+            break;
+        *(char**)arg = talloc_strdup(NULL, volume);
         return STREAM_OK;
     }
     }
@@ -420,6 +620,7 @@ static int open_s_internal(stream_t *stream)
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvdnav_close;
+    stream->demuxer = "+disc";
     stream->lavf_type = "mpeg";
 
     return STREAM_OK;

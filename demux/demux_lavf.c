@@ -222,7 +222,6 @@ typedef struct lavf_priv {
     int num_streams;
     char *mime_type;
     double seek_delay;
-    bool optical_crap_hack;
 
     struct demux_lavf_opts *opts;
     double mf_fps;
@@ -1080,13 +1079,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 "broken as well.\n");
     }
 
-    double len = -1;
-    if (stream_control(priv->stream, STREAM_CTRL_OPTICAL_CRAP_HACK1, &len) > 0) {
-        priv->optical_crap_hack = true;
-        demuxer->duration = len;
-        demuxer->seekable = true;
-    }
-
     if (demuxer->fully_read) {
         demux_close_stream(demuxer);
         if (priv->own_stream)
@@ -1196,13 +1188,6 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     int avsflags = 0;
     int64_t seek_pts_av = 0;
     int seek_stream = -1;
-
-    if (priv->optical_crap_hack) {
-        if (flags & SEEK_FACTOR)
-            seek_pts = seek_pts * demuxer->duration;
-        stream_control(priv->stream, STREAM_CTRL_OPTICAL_CRAP_HACK2, &seek_pts);
-        return;
-    }
 
     if (priv->any_ts_fixed)  {
         // helpful message to piss of users

@@ -226,10 +226,42 @@ static void close_cdda(stream_t *s)
     cdda_close(p->cd);
 }
 
+static int get_track_by_sector(cdda_priv *p, unsigned int sector)
+{
+    int i;
+    for (i = p->cd->tracks; i >= 0; --i)
+        if (p->cd->disc_toc[i].dwStartSector <= sector)
+            break;
+    return i;
+}
+
 static int control(stream_t *stream, int cmd, void *arg)
 {
     cdda_priv *p = stream->priv;
     switch (cmd) {
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    {
+        int start_track = get_track_by_sector(p, p->start_sector);
+        int end_track = get_track_by_sector(p, p->end_sector);
+        if (start_track == -1 || end_track == -1)
+            return STREAM_ERROR;
+        *(unsigned int *)arg = end_track + 1 - start_track;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_CHAPTER_TIME:
+    {
+        int track = *(double *)arg;
+        int start_track = get_track_by_sector(p, p->start_sector);
+        int end_track = get_track_by_sector(p, p->end_sector);
+        track += start_track;
+        if (track > end_track)
+            return STREAM_ERROR;
+        int64_t sector = p->cd->disc_toc[track].dwStartSector;
+        int64_t pos = sector * CDIO_CD_FRAMESIZE_RAW;
+        // Assume standard audio CD: 44.1khz, 2 channels, s16 samples
+        *(double *)arg = pos / (44100.0 * 2 * 2);
+        return STREAM_OK;
+    }
     case STREAM_CTRL_GET_SIZE:
         *(int64_t *)arg =
             (p->end_sector + 1 - p->start_sector) * CDIO_CD_FRAMESIZE_RAW;
