@@ -54,7 +54,6 @@ struct opts {
     int deint_type;
     int interlaced_only;
     int reversal_bug;
-    int force;
 };
 
 struct priv {
@@ -449,13 +448,6 @@ static struct mp_filter *vf_vavpp_create(struct mp_filter *parent, void *options
 
     p->queue = mp_refqueue_alloc(f);
 
-    if (!p->opts->force) {
-        MP_ERR(f, "This filter is disabled because it is known to cause GPU "
-                  "lockups. This is a driver bug. You can override this by "
-                  "passing force=yes as filter argument.\n");
-        goto error;
-    }
-
     p->av_device_ref = mp_filter_load_hwdec_device(f, AV_HWDEVICE_TYPE_VAAPI);
     if (!p->av_device_ref)
         goto error;
@@ -490,7 +482,6 @@ static const m_option_t vf_opts_fields[] = {
                 {"motion-compensated", 5})),
     OPT_FLAG("interlaced-only", interlaced_only, 0),
     OPT_FLAG("reversal-bug", reversal_bug, 0),
-    OPT_FLAG("force", force, 0),
     {0}
 };
 
