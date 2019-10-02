@@ -63,12 +63,6 @@ struct priv {
     const struct script_driver *drv;
     // drv_vss
     struct VSScript *se;
-    // drv_lazy
-    struct lua_State *ls;
-    VSNodeRef **gc_noderef;
-    int num_gc_noderef;
-    VSMap **gc_map;
-    int num_gc_map;
 
     struct mp_filter *f;
     struct mp_pin *in_pin;
