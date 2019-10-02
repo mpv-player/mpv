@@ -27,6 +27,13 @@ struct mp_autoconvert *mp_autoconvert_create(struct mp_filter *parent);
 // otherwise must be 0.
 void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt);
 
+// Add all sw image formats. The effect is that hardware video image formats are
+// disallowed. The semantics are the same as calling mp_autoconvert_add_imgfmt()
+// for each sw format that exists.
+// No need to do this if you add sw formats with mp_autoconvert_add_imgfmt(),
+// as the normal semantics will exclude other formats (including hw ones).
+void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c);
+
 // Add the formats supported by the hwdec interops (or essentially refine them),
 // and trigger conversion if hw_subfmts mismatch. This is mostly a hack for
 // D3D11/ANGLE (which supports NV12 only).
