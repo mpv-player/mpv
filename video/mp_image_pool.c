@@ -253,25 +253,19 @@ void mp_image_pool_set_lru(struct mp_image_pool *pool)
     pool->use_lru = true;
 }
 
-
-// Copies the contents of the HW surface img to system memory and retuns it.
-// If swpool is not NULL, it's used to allocate the target image.
-// img must be a hw surface with a AVHWFramesContext attached.
-// The returned image is cropped as needed.
-// Returns NULL on failure.
-struct mp_image *mp_image_hw_download(struct mp_image *src,
-                                      struct mp_image_pool *swpool)
+// Return the sw image format mp_image_hw_download() would use. This can be
+// different from src->params.hw_subfmt in obscure cases.
+int mp_image_hw_download_get_sw_format(struct mp_image *src)
 {
     if (!src->hwctx)
-        return NULL;
-    AVHWFramesContext *fctx = (void *)src->hwctx->data;
+        return 0;
 
     // Try to find the first format which we can apparently use.
     int imgfmt = 0;
     enum AVPixelFormat *fmts;
     if (av_hwframe_transfer_get_formats(src->hwctx,
             AV_HWFRAME_TRANSFER_DIRECTION_FROM, &fmts, 0) < 0)
-        return NULL;
+        return 0;
     for (int n = 0; fmts[n] != AV_PIX_FMT_NONE; n++) {
         imgfmt = pixfmt2imgfmt(fmts[n]);
         if (imgfmt)
@@ -279,8 +273,23 @@ struct mp_image *mp_image_hw_download(struct mp_image *src,
     }
     av_free(fmts);
 
+    return imgfmt;
+}
+
+// Copies the contents of the HW surface src to system memory and retuns it.
+// If swpool is not NULL, it's used to allocate the target image.
+// src must be a hw surface with a AVHWFramesContext attached.
+// The returned image is cropped as needed.
+// Returns NULL on failure.
+struct mp_image *mp_image_hw_download(struct mp_image *src,
+                                      struct mp_image_pool *swpool)
+{
+    int imgfmt = mp_image_hw_download_get_sw_format(src);
     if (!imgfmt)
         return NULL;
+
+    assert(src->hwctx);
+    AVHWFramesContext *fctx = (void *)src->hwctx->data;
 
     struct mp_image *dst =
         mp_image_pool_get(swpool, imgfmt, fctx->width, fctx->height);
