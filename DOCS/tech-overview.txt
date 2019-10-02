@@ -139,9 +139,6 @@ stream/*:
     Some stream inputs are just there to invoke special demuxers, like
     stream_mf.c. (Basically to make the prefix "mf://" do something special.)
 
-    cache.c is a caching wrapper around streams implementations, needed for
-    smooth network playback.
-
 demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
     are split in packets. Packets (see demux_packet.h) are mostly byte chunks
@@ -154,6 +151,10 @@ demux/:
     The main interface is in demux.h. The stream headers are in stheader.h.
     There is a stream header for each audio/video/sub stream, and each of them
     holds codec information about the stream and other information.
+
+    demux.c is a bit big, the main reason being that it contains the demuxer
+    cache, which is implemented as a list of packets. The cache is complex
+    because it support seeking, multiple ranges, prefetching, and so on.
 
 video/:
     This contains several things related to audio/video decoding, as well as
