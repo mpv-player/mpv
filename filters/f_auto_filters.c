@@ -8,6 +8,7 @@
 #include "video/mp_image_pool.h"
 
 #include "f_auto_filters.h"
+#include "f_autoconvert.h"
 #include "f_hwtransfer.h"
 #include "f_swscale.h"
 #include "f_utils.h"
@@ -79,32 +80,30 @@ static void deint_process(struct mp_filter *f)
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
     } else {
-        int sw_format = img->imgfmt;
+        struct mp_filter *subf = mp_bidir_dummy_filter_create(f);
+        struct mp_filter *filters[2] = {0};
 
-        if (img->hwctx)
-            sw_format = mp_image_hw_download_get_sw_format(img);
+        struct mp_autoconvert *ac = mp_autoconvert_create(subf);
+        if (ac) {
+            filters[0] = ac->f;
+            // We know vf_yadif does not support hw inputs.
+            mp_autoconvert_add_all_sw_imgfmts(ac);
 
-        if (mp_sws_supports_input(sw_format)) {
-            struct mp_filter *subf = mp_bidir_dummy_filter_create(f);
-            struct mp_filter *filters[2] = {0};
-
-            if (sw_format != img->imgfmt) {
-                struct mp_hwdownload *hwd = mp_hwdownload_create(subf);
-                filters[0] = hwd->f;
+            if (!mp_autoconvert_probe_input_video(ac, img)) {
+                MP_ERR(f, "no deinterlace filter available for format %s\n",
+                       mp_imgfmt_to_name(img->imgfmt));
+                talloc_free(subf);
+                mp_subfilter_continue(&p->sub);
+                return;
             }
-
-            char *args[] = {"mode", "send_field", NULL};
-            filters[1] =
-                mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "yadif", args);
-
-            mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
-            p->sub.filter = subf;
-        } else {
-            MP_ERR(f, "no deinterlace filter available for format %s\n",
-                   mp_imgfmt_to_name(img->imgfmt));
-            mp_subfilter_continue(&p->sub);
-            return;
         }
+
+        char *args[] = {"mode", "send_field", NULL};
+        filters[1] =
+            mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "yadif", args);
+
+        mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
+        p->sub.filter = subf;
     }
 
     if (!p->sub.filter)
