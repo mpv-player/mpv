@@ -1213,12 +1213,7 @@ int vo_wayland_reconfig(struct vo *vo)
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
-    /* Surface enter events happen later but certain config options require the
-     * current_output to be created in order for the video to actually render.
-     * Only skip this if --fs is specified without a fsscreen_id so the video
-     * renders on the same screen and not the one with idx 0. */
-    if ((!wl->current_output) &&
-        !(vo->opts->fullscreen && (vo->opts->fsscreen_id < 0))) {
+    if (!wl->current_output) {
         int idx = 0;
         if (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))
             idx = vo->opts->fsscreen_id;
@@ -1255,7 +1250,11 @@ int vo_wayland_reconfig(struct vo *vo)
             wl->geometry.x1  = mp_rect_w(wl->current_output->geometry)/wl->scaling;
             wl->geometry.y1  = mp_rect_h(wl->current_output->geometry)/wl->scaling;
         } else {
-            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl_out);
+            if (vo->opts->fsscreen_id < 0) {
+                xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
+            } else {
+                xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl_out);
+            }
         }
     }
 
