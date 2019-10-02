@@ -71,6 +71,12 @@ bool mp_subfilter_drain_destroy(struct mp_subfilter *sub);
 // A bidrectional filter which passes through all data.
 struct mp_filter *mp_bidir_nop_filter_create(struct mp_filter *parent);
 
+// A bidrectional filter which does not connect its pins. Instead, the user is,
+// by convention, allowed to access the filter's private pins, and use them
+// freely. (This is sometimes convenient, such as when you need to pass a single
+// filter instance to other code, and you don't need a full "proper" filter.)
+struct mp_filter *mp_bidir_dummy_filter_create(struct mp_filter *parent);
+
 // A filter which repacks audio frame to fixed frame sizes with the given
 // number of samples. On hard format changes (sample format/channels/srate),
 // the frame can be shorter, unless pad_silence is true. Fails on non-aframes.
