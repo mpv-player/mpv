@@ -169,6 +169,147 @@ void mp_autoconvert_add_srate(struct mp_autoconvert *c, int rate)
     p->force_update = true;
 }
 
+// If this returns true, and *out==NULL, no conversion is necessary.
+static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
+                                  struct mp_image *img, struct mp_filter **f_out)
+{
+    struct mp_filter *f = c->f;
+    struct priv *p = f->priv;
+
+    *f_out = NULL;
+
+    if (!p->num_imgfmts)
+        return true;
+
+    bool different_subfmt = false;
+
+    for (int n = 0; n < p->num_imgfmts; n++) {
+        bool samefmt = img->params.imgfmt == p->imgfmts[n];
+        bool samesubffmt = img->params.hw_subfmt == p->subfmts[n];
+        if (samefmt && !samesubffmt)
+            different_subfmt = true;
+        if (samefmt && (samesubffmt || !p->subfmts[n]))
+            return true;
+    }
+
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+
+    struct mp_filter *conv = mp_filter_create(f, &convert_filter);
+    mp_filter_add_pin(conv, MP_PIN_IN, "in");
+    mp_filter_add_pin(conv, MP_PIN_OUT, "out");
+
+    // 0: hw->sw download
+    // 1: swscale
+    // 2: sw->hw upload
+    struct mp_filter *filters[3] = {0};
+    bool need_sws = true;
+
+    int *fmts = p->imgfmts;
+    int num_fmts = p->num_imgfmts;
+
+    bool imgfmt_is_sw = !IMGFMT_IS_HWACCEL(img->imgfmt);
+
+    // This should not happen. But not enough guarantee to make it an assert().
+    if (imgfmt_is_sw != !img->hwctx)
+        mp_warn(log, "Unexpected AVFrame/imgfmt hardware context mismatch.\n");
+
+    bool dst_all_hw = true;
+    bool dst_have_sw = false;
+    for (int n = 0; n < num_fmts; n++) {
+        bool is_hw = IMGFMT_IS_HWACCEL(fmts[n]);
+        dst_all_hw &= is_hw;
+        dst_have_sw |= !is_hw;
+    }
+
+    // Source is sw, all targets are hw -> try to upload.
+    bool sw_to_hw = imgfmt_is_sw && dst_all_hw;
+    // Source is hw, some targets are sw -> try to download.
+    bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
+
+    if (sw_to_hw && num_fmts > 0) {
+        // We can probably use this! Very lazy and very approximate.
+        struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[0]);
+        if (upload) {
+            mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[0]));
+            filters[2] = upload->f;
+            fmts = upload->upload_fmts;
+            num_fmts = upload->num_upload_fmts;
+            hw_to_sw = false;
+        }
+    } else if (p->vo_convert && different_subfmt && info && info->hwdec_devs) {
+        for (int n = 0; subfmt_converters[n].hw_imgfmt; n++) {
+            if (subfmt_converters[n].hw_imgfmt == img->imgfmt) {
+                mp_info(log, "Using HW sub-conversion.\n");
+                filters[2] = subfmt_converters[n].create(conv);
+                if (filters[2]) {
+                    need_sws = false;
+                    hw_to_sw = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    int src_fmt = img->imgfmt;
+    if (hw_to_sw) {
+        mp_info(log, "HW-downloading from %s\n", mp_imgfmt_to_name(img->imgfmt));
+        int res_fmt = mp_image_hw_download_get_sw_format(img);
+        if (!res_fmt) {
+            mp_err(log, "cannot copy surface of this format to CPU memory\n");
+            goto fail;
+        }
+        struct mp_hwdownload *hwd = mp_hwdownload_create(conv);
+        if (hwd) {
+            filters[0] = hwd->f;
+            src_fmt = res_fmt;
+        }
+    }
+
+    if (need_sws) {
+        // Create a new conversion filter.
+        struct mp_sws_filter *sws = mp_sws_filter_create(conv);
+        if (!sws) {
+            mp_err(log, "error creating conversion filter\n");
+            goto fail;
+        }
+
+        int out = mp_sws_find_best_out_format(src_fmt,  fmts, num_fmts);
+        if (!out) {
+            mp_err(log, "can't find video conversion for %s\n",
+                   mp_imgfmt_to_name(src_fmt));
+            goto fail;
+        }
+
+        if (out == src_fmt) {
+            // Can happen if hwupload goes to same format.
+            talloc_free(sws->f);
+        } else {
+            sws->out_format = out;
+            mp_info(log, "Converting %s -> %s\n", mp_imgfmt_to_name(src_fmt),
+                    mp_imgfmt_to_name(sws->out_format));
+            filters[1] = sws->f;
+        }
+    }
+
+    mp_chain_filters(conv->ppins[0], conv->ppins[1], filters, 3);
+
+    *f_out = conv;
+    return true;
+
+fail:
+    talloc_free(conv);
+    return false;
+}
+
+bool mp_autoconvert_probe_input_video(struct mp_autoconvert *c,
+                                      struct mp_image *img)
+{
+    struct mp_filter *conv = NULL;
+    bool res = build_image_converter(c, mp_null_log, img, &conv);
+    talloc_free(conv);
+    return res;
+}
+
 static void handle_video_frame(struct mp_filter *f)
 {
     struct priv *p = f->priv;
@@ -192,133 +333,13 @@ static void handle_video_frame(struct mp_filter *f)
     p->in_subfmt = img->params.hw_subfmt;
     p->force_update = false;
 
-    if (!p->num_imgfmts) {
+    struct mp_filter *conv = NULL;
+    if (build_image_converter(&p->public, p->log, img, &conv)) {
+        p->sub.filter = conv;
         mp_subfilter_continue(&p->sub);
-        return;
+    } else {
+        mp_filter_internal_mark_failed(f);
     }
-
-    bool different_subfmt = false;
-
-    for (int n = 0; n < p->num_imgfmts; n++) {
-        bool samefmt = img->params.imgfmt == p->imgfmts[n];
-        bool samesubffmt = img->params.hw_subfmt == p->subfmts[n];
-        if (samefmt && !samesubffmt)
-            different_subfmt = true;
-        if (samefmt && (samesubffmt || !p->subfmts[n])) {
-            mp_subfilter_continue(&p->sub);
-            return;
-        }
-    }
-
-    struct mp_stream_info *info = mp_filter_find_stream_info(f);
-
-    struct mp_filter *conv = mp_filter_create(f, &convert_filter);
-    mp_filter_add_pin(conv, MP_PIN_IN, "in");
-    mp_filter_add_pin(conv, MP_PIN_OUT, "out");
-
-    // 0: hw->sw download
-    // 1: swscale
-    // 2: sw->hw upload
-    struct mp_filter *filters[3] = {0};
-    bool need_sws = true;
-
-    int *fmts = p->imgfmts;
-    int num_fmts = p->num_imgfmts;
-
-    bool imgfmt_is_sw = !IMGFMT_IS_HWACCEL(img->imgfmt);
-
-    // This should not happen. But not enough guarantee to make it an assert().
-    if (imgfmt_is_sw != !img->hwctx)
-        MP_WARN(p, "Unexpected AVFrame/imgfmt hardware context mismatch.\n");
-
-    bool dst_all_hw = true;
-    bool dst_have_sw = false;
-    for (int n = 0; n < num_fmts; n++) {
-        bool is_hw = IMGFMT_IS_HWACCEL(fmts[n]);
-        dst_all_hw &= is_hw;
-        dst_have_sw |= !is_hw;
-    }
-
-    // Source is sw, all targets are hw -> try to upload.
-    bool sw_to_hw = imgfmt_is_sw && dst_all_hw;
-    // Source is hw, some targets are sw -> try to download.
-    bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
-
-    if (sw_to_hw && num_fmts > 0) {
-        // We can probably use this! Very lazy and very approximate.
-        struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[0]);
-        if (upload) {
-            MP_INFO(p, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[0]));
-            filters[2] = upload->f;
-            fmts = upload->upload_fmts;
-            num_fmts = upload->num_upload_fmts;
-            hw_to_sw = false;
-        }
-    } else if (p->vo_convert && different_subfmt && info && info->hwdec_devs) {
-        for (int n = 0; subfmt_converters[n].hw_imgfmt; n++) {
-            if (subfmt_converters[n].hw_imgfmt == img->imgfmt) {
-                MP_INFO(p, "Using HW sub-conversion.\n");
-                filters[2] = subfmt_converters[n].create(conv);
-                if (filters[2]) {
-                    need_sws = false;
-                    hw_to_sw = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    int src_fmt = img->imgfmt;
-    if (hw_to_sw) {
-        MP_INFO(p, "HW-downloading from %s\n", mp_imgfmt_to_name(img->imgfmt));
-        int res_fmt = mp_image_hw_download_get_sw_format(img);
-        if (!res_fmt) {
-            MP_ERR(p, "cannot copy surface of this format to CPU memory\n");
-            goto fail;
-        }
-        struct mp_hwdownload *hwd = mp_hwdownload_create(conv);
-        if (hwd) {
-            filters[0] = hwd->f;
-            src_fmt = res_fmt;
-        }
-    }
-
-    if (need_sws) {
-        // Create a new conversion filter.
-        struct mp_sws_filter *sws = mp_sws_filter_create(conv);
-        if (!sws) {
-            MP_ERR(p, "error creating conversion filter\n");
-            return;
-        }
-
-        int out = mp_sws_find_best_out_format(src_fmt,  fmts, num_fmts);
-        if (!out) {
-            MP_ERR(p, "can't find video conversion for %s\n",
-                   mp_imgfmt_to_name(src_fmt));
-            goto fail;
-        }
-
-        if (out == src_fmt) {
-            // Can happen if hwupload goes to same format.
-            talloc_free(sws->f);
-        } else {
-            sws->out_format = out;
-            MP_INFO(p, "Converting %s -> %s\n", mp_imgfmt_to_name(src_fmt),
-                    mp_imgfmt_to_name(sws->out_format));
-            filters[1] = sws->f;
-        }
-    }
-
-    mp_chain_filters(conv->ppins[0], conv->ppins[1], filters, 3);
-
-    p->sub.filter = conv;
-    mp_subfilter_continue(&p->sub);
-    return;
-
-fail:
-    talloc_free(conv);
-    mp_filter_internal_mark_failed(f);
-    return;
 }
 
 static void handle_audio_frame(struct mp_filter *f)

@@ -2,6 +2,8 @@
 
 #include "filter.h"
 
+struct mp_image;
+
 // A filter which automatically creates and uses a conversion filter based on
 // the filter settings, or passes through data unchanged if no conversion is
 // required.
@@ -33,6 +35,17 @@ void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt)
 // No need to do this if you add sw formats with mp_autoconvert_add_imgfmt(),
 // as the normal semantics will exclude other formats (including hw ones).
 void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c);
+
+// Approximate test for whether the input would be accepted for conversion
+// according to the current settings. If false is returned, conversion will
+// definitely fail; if true is returned, it might succeed, but with no hard
+// guarantee. This is mainly intended for better error reporting to the user.
+// The result is "approximate" because it could still fail at runtime.
+// The mp_image is not mutated.
+// This function is relatively slow.
+// Accepting mp_image instead of any mp_frame is the result of laziness.
+bool mp_autoconvert_probe_input_video(struct mp_autoconvert *c,
+                                      struct mp_image *img);
 
 // Add the formats supported by the hwdec interops (or essentially refine them),
 // and trigger conversion if hw_subfmts mismatch. This is mostly a hack for
