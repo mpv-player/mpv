@@ -30,3 +30,12 @@ struct mp_hwupload *mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt);
 // and otherwise a format that likely results in the least loss.
 // Returns 0 if completely unsupported.
 int mp_hwupload_find_upload_format(struct mp_hwupload *u, int imgfmt);
+
+// A filter which downloads sw frames from hw. Ignores sw frames.
+struct mp_hwdownload {
+    struct mp_filter *f;
+
+    struct mp_image_pool *pool;
+};
+
+struct mp_hwdownload *mp_hwdownload_create(struct mp_filter *parent);

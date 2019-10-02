@@ -298,3 +298,56 @@ error:
     talloc_free(f);
     return NULL;
 }
+
+static void hwdownload_process(struct mp_filter *f)
+{
+    struct mp_hwdownload *d = f->priv;
+
+    if (!mp_pin_can_transfer_data(f->ppins[1], f->ppins[0]))
+        return;
+
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+    if (frame.type != MP_FRAME_VIDEO)
+        goto passthrough;
+
+    struct mp_image *src = frame.data;
+    if (!src->hwctx)
+        goto passthrough;
+
+    struct mp_image *dst = mp_image_hw_download(src, d->pool);
+    if (!dst) {
+        MP_ERR(f, "Could not copy hardware frame to CPU memory.\n");
+        goto passthrough;
+    }
+
+    mp_frame_unref(&frame);
+    mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_VIDEO, dst));
+    return;
+
+passthrough:
+    mp_pin_in_write(f->ppins[1], frame);
+    return;
+}
+
+static const struct mp_filter_info hwdownload_filter = {
+    .name = "hwdownload",
+    .priv_size = sizeof(struct mp_hwdownload),
+    .process = hwdownload_process,
+};
+
+struct mp_hwdownload *mp_hwdownload_create(struct mp_filter *parent)
+{
+    struct mp_filter *f = mp_filter_create(parent, &hwdownload_filter);
+    if (!f)
+        return NULL;
+
+    struct mp_hwdownload *d = f->priv;
+
+    d->f = f;
+    d->pool = mp_image_pool_new(d);
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    return d;
+}
