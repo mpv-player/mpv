@@ -5,8 +5,10 @@
 #include "options/m_config.h"
 #include "options/options.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 
 #include "f_auto_filters.h"
+#include "f_hwtransfer.h"
 #include "f_swscale.h"
 #include "f_utils.h"
 #include "filter.h"
@@ -76,14 +78,33 @@ static void deint_process(struct mp_filter *f)
         char *args[] = {"mode", "send_field", NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
-    } else if (mp_sws_supports_input(img->imgfmt)) {
-        char *args[] = {"mode", "send_field", NULL};
-        p->sub.filter =
-            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif", args);
     } else {
-        MP_ERR(f, "no deinterlace filter available for this format\n");
-        mp_subfilter_continue(&p->sub);
-        return;
+        int sw_format = img->imgfmt;
+
+        if (img->hwctx)
+            sw_format = mp_image_hw_download_get_sw_format(img);
+
+        if (mp_sws_supports_input(sw_format)) {
+            struct mp_filter *subf = mp_bidir_dummy_filter_create(f);
+            struct mp_filter *filters[2] = {0};
+
+            if (sw_format != img->imgfmt) {
+                struct mp_hwdownload *hwd = mp_hwdownload_create(subf);
+                filters[0] = hwd->f;
+            }
+
+            char *args[] = {"mode", "send_field", NULL};
+            filters[1] =
+                mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "yadif", args);
+
+            mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
+            p->sub.filter = subf;
+        } else {
+            MP_ERR(f, "no deinterlace filter available for format %s\n",
+                   mp_imgfmt_to_name(img->imgfmt));
+            mp_subfilter_continue(&p->sub);
+            return;
+        }
     }
 
     if (!p->sub.filter)
