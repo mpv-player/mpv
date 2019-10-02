@@ -74,6 +74,16 @@ struct priv {
     void *zimg_tmp;
 };
 
+static void destroy_zimg(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    free(p->zimg_tmp);
+    p->zimg_tmp = NULL;
+    zimg_filter_graph_free(p->zimg_graph);
+    p->zimg_graph = NULL;
+}
+
 // (Other code internal to this filter also calls this to reset the frame list.)
 static void f_reset(struct mp_filter *f)
 {
@@ -97,10 +107,7 @@ static void reinit_fmt(struct mp_filter *f, struct mp_image *mpi)
     p->last_w = mpi->w;
     p->last_h = mpi->h;
 
-    free(p->zimg_tmp);
-    p->zimg_tmp = NULL;
-    zimg_filter_graph_free(p->zimg_graph);
-    p->zimg_graph = NULL;
+    destroy_zimg(f);
 
     if (!(mpi->fmt.flags & (MP_IMGFLAG_YUV_NV | MP_IMGFLAG_YUV_P)))
         return;
@@ -255,6 +262,7 @@ static const struct mp_filter_info filter = {
     .process = f_process,
     .command = f_command,
     .reset = f_reset,
+    .destroy = destroy_zimg,
     .priv_size = sizeof(struct priv),
 };
 
