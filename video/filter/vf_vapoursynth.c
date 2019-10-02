@@ -54,6 +54,7 @@ struct vapoursynth_opts {
 struct priv {
     struct mp_log *log;
     struct vapoursynth_opts *opts;
+    char *script_path;
 
     VSCore *vscore;
     const VSAPI *vsapi;
@@ -758,8 +759,7 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
         MP_FATAL(p, "'file' parameter must be set.\n");
         goto error;
     }
-    talloc_steal(p, p->opts->file);
-    p->opts->file = mp_get_user_path(p, f->global, p->opts->file);
+    p->script_path = mp_get_user_path(p, f->global, p->opts->file);
 
     p->max_requests = p->opts->maxrequests;
     if (p->max_requests < 0)
@@ -841,7 +841,7 @@ static int drv_vss_load(struct priv *p, VSMap *vars)
 {
     vsscript_setVariable(p->se, vars);
 
-    if (vsscript_evaluateFile(&p->se, p->opts->file, 0)) {
+    if (vsscript_evaluateFile(&p->se, p->script_path, 0)) {
         MP_FATAL(p, "Script evaluation failed:\n%s\n", vsscript_getError(p->se));
         return -1;
     }
