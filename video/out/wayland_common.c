@@ -1043,15 +1043,11 @@ int vo_wayland_init(struct vo *vo)
 
     wl_list_init(&wl->output_list);
 
-    if (!wl->display) {
-        talloc_free(wl);
+    if (!wl->display)
         return false;
-    }
 
-    if (create_input(wl)) {
-        talloc_free(wl);
+    if (create_input(wl))
         return false;
-    }
 
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
@@ -1062,22 +1058,18 @@ int vo_wayland_init(struct vo *vo)
     if (!wl->wm_base) {
         MP_FATAL(wl, "Compositor doesn't support the required %s protocol!\n",
                  xdg_wm_base_interface.name);
-        talloc_free(wl);
         return false;
     }
 
     if (!wl_list_length(&wl->output_list)) {
         MP_FATAL(wl, "No outputs found or compositor doesn't support %s (ver. 2)\n",
                  wl_output_interface.name);
-        talloc_free(wl);
         return false;
     }
 
     /* Can't be initialized during registry due to multi-protocol dependence */
-    if (create_xdg_surface(wl)) {
-        talloc_free(wl);
+    if (create_xdg_surface(wl))
         return false;
-    }
 
     if (wl->dnd_devman) {
         wl->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, wl->seat);
