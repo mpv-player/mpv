@@ -165,8 +165,10 @@ static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 
 static bool wayland_egl_init(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_init(ctx->vo))
+    if (!vo_wayland_init(ctx->vo)) {
+        vo_wayland_uninit(ctx->vo);
         return false;
+    }
 
     return egl_create_context(ctx);
 }
