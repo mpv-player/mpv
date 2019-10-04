@@ -416,8 +416,8 @@ local function add_single_video(json)
 
     -- set aspect ratio for anamorphic video
     if not (json.stretched_ratio == nil) and
-        not option_was_set("video-aspect") then
-        mp.set_property('file-local-options/video-aspect', json.stretched_ratio)
+        not option_was_set("video-aspect-override") then
+        mp.set_property('file-local-options/video-aspect-override', json.stretched_ratio)
     end
 
     local stream_opts = mp.get_property_native("file-local-options/stream-lavf-o", {})
