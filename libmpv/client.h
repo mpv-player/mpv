@@ -111,6 +111,8 @@ extern "C" {
  * and asynchronous calls. If you want a guaranteed order, you need to wait
  * until asynchronous calls report completion before doing the next call.
  *
+ * See also the section "Asynchronous command details" in the manpage.
+ *
  * Multithreading
  * --------------
  *

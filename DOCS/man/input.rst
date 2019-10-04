@@ -378,6 +378,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Similar to ``run``, but gives more control about process execution to the
     caller, and does does not detach the process.
 
+    You can avoid blocking until the process terminates by running this command
+    asynchronously. (For example ``mp.command_native_async()`` in Lua scripting.)
+
     This has the following named arguments. The order of them is not guaranteed,
     so you should always call them with named arguments, see `Named arguments`_.
 
@@ -436,8 +439,10 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         killed by mpv as a result of ``playback_only`` being set to ``yes``.
 
     ``killed_by_us`` (``MPV_FORMAT_FLAG``)
-        Set to ``yes`` if the process has been killed by mpv as a result
-        of ``playback_only`` being set to ``yes``.
+        Set to ``yes`` if the process has been killed by mpv, for example as a
+        result of ``playback_only`` being set to ``yes``, aborting the command
+        (e.g. by ``mp.abort_async_command()``), or if the player is about to
+        exit.
 
     Note that the command itself will always return success as long as the
     parameters are correct. Whether the process could be spawned or whether
@@ -446,8 +451,15 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     This command can be asynchronously aborted via API.
 
-    In all cases, the subprocess will be terminated on player exit. Only the
-    ``run`` command can start processes in a truly detached way.
+    In all cases, the subprocess will be terminated on player exit. Also see
+    `Asynchronous command details`_. Only the ``run`` command can start
+    processes in a truly detached way.
+
+    .. admonition:: Warning
+
+        Don't forget to set the ``playback_only`` field if you want the command
+        run while the player is in idle mode, or if you don't want that end of
+        playback kills the command.
 
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
@@ -1185,6 +1197,24 @@ Currently the following commands have different waiting characteristics with
 sync vs. async: sub-add, audio-add, sub-reload, audio-reload,
 rescan-external-files, screenshot, screenshot-to-file, dump-cache,
 ab-loop-dump-cache.
+
+Asynchronous command details
+----------------------------
+
+On the API level, every asynchronous command is bound to the context which
+started it. For example, an asynchronous command started by ``mpv_command_async``
+is bound to the ``mpv_handle`` passed to the function. Only this ``mpv_handle``
+receives the completion notification (``MPV_EVENT_COMMAND_REPLY``), and only
+this handle can abort a still running command directly. If the ``mpv_handle`` is
+destroyed, any still running async. commands started by it are terminated.
+
+The scripting APIs and JSON IPC give each script/connection its own implicit
+``mpv_handle``.
+
+If the player is closed, the core may abort all pending async. commands on its
+own (like a forced ``mpv_abort_async_command()`` call for each pending command
+on behalf of the API user). This happens at the same time ``MPV_EVENT_SHUTDOWN``
+is sent, and there is no way to prevent this.
 
 Input Sections
 --------------

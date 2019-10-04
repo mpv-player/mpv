@@ -683,6 +683,8 @@ strictly part of the guaranteed API.
     directly, instead of calling this legacy wrapper. It is for compatibility
     only.
 
+    See the ``subprocess`` documentation for semantics and further parameters.
+
 ``utils.subprocess_detached(t)``
     Runs an external process and detaches it from mpv's control.
 
