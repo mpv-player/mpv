@@ -86,10 +86,20 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                        playback_only = false, args = {"sleep", "inf"}})
 end)
 
-mp.register_event("shutdown", function()
+function freeze_test(playback_only)
     -- This "freezes" the script, should be killed via timeout.
-    print("freeze!")
-    local x = mp.command_native({name = "subprocess", playback_only = false,
+    counter = counter and counter + 1 or 0
+    print("freeze! " .. counter)
+    local x = mp.command_native({name = "subprocess",
+                                 playback_only = playback_only,
                                  args = {"sleep", "inf"}})
     print("done, killed=" .. utils.to_string(x.killed_by_us))
+end
+
+mp.register_event("shutdown", function()
+    freeze_test(false)
+end)
+
+mp.register_event("idle", function()
+    freeze_test(true)
 end)

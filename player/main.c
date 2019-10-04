@@ -319,6 +319,8 @@ struct MPContext *mp_create(void)
     if (verbose_env)
         mpctx->opts->verbose = atoi(verbose_env);
 
+    mp_cancel_trigger(mpctx->playback_abort);
+
     return mpctx;
 }
 
