@@ -1937,10 +1937,11 @@ Property list
     Estimated deviation factor of the vsync duration.
 
 ``video-aspect`` (RW)
-    Video aspect, see ``--video-aspect``.
+    Deprecated. This is tied to ``--video-aspect-override``, but always
+    reports the current video aspect if video is active.
 
-    If video is active, this reports the effective aspect value, instead of
-    the value of the ``--video-aspect`` option.
+    The read and write components of this option can be split up into
+    ``video-params/aspect`` and ``video-aspect-override`` respectively.
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
@@ -2536,12 +2537,6 @@ caveats with some properties (due to historical reasons):
     loading time.)
 
     Option changes at runtime are affected by this as well.
-
-``video-aspect``
-    While video is active, always returns the effective aspect ratio. Setting
-    a special value (like ``no``, values ``<= 0``) will make the property
-    set this as option, and return whatever actual aspect was derived from the
-    option setting.
 
 ``display-fps``
     If a VO is created, this will return either the actual display FPS, or

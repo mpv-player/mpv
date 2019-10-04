@@ -2739,11 +2739,27 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, 1.0 / avg);
 }
 
-/// Video aspect (RO)
+/// Video aspect (RW) (deprecated)
+// FIXME: please delete this mess as soon as the deprecation period is over
 static int mp_property_aspect(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct m_config_option *opt;
+    opt = m_config_get_co_raw(mpctx->mconfig, bstr0("video-aspect-override"));
+
+    struct command_ctx *cmd = mpctx->command_ctx;
+    for (int n = 0; n < cmd->num_warned_deprecated; n++) {
+        if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
+            goto skip_warn;
+    }
+
+    MP_WARN(mpctx, "Warning: property 'video-aspect' is deprecated, refer to "
+            "'video-params/aspect' and 'video-aspect-override'.\n");
+    MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
+                     (char *)prop->name);
+
+skip_warn: ;
 
     float aspect = mpctx->opts->movie_aspect;
     if (mpctx->vo_chain && aspect <= 0) {
@@ -2762,6 +2778,9 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
 
     switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = *(opt->opt);
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         if (mpctx->opts->movie_aspect < 0) {
             *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
@@ -2773,8 +2792,14 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_SET: {
+        int flags = M_SETOPT_RUNTIME;
+        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, flags) < 0)
+            return M_PROPERTY_ERROR;
+        return M_PROPERTY_OK;
     }
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 /// Selected subtitles (RW)
