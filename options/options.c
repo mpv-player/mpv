@@ -519,7 +519,7 @@ const m_option_t mp_opts[] = {
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
+    OPT_ASPECT("video-aspect-override", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"bitstream", 1}, {"container", 2})),
 
@@ -764,7 +764,7 @@ const m_option_t mp_opts[] = {
 
     OPT_REMOVED("a52drc", "use --ad-lavc-ac3drc=level"),
     OPT_REMOVED("afm", "use --ad=..."),
-    OPT_REPLACED("aspect", "video-aspect"),
+    OPT_REPLACED("aspect", "video-aspect-override"),
     OPT_REMOVED("ass-bottom-margin", "use --vf=sub=bottom:top"),
     OPT_REPLACED("ass", "sub-ass"),
     OPT_REPLACED("audiofile", "audio-file"),
@@ -875,6 +875,7 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("no-ometadata", "use --no-ocopy-metadata"),
     OPT_REMOVED("video-stereo-mode", "removed, try --vf=stereo3d"),
     OPT_REMOVED("chapter", "use '--start=#123' '--end=#124' (for chapter 123)"),
+    OPT_REPLACED("video-aspect", "video-aspect-override"),
 
     {0}
 };

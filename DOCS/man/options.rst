@@ -1173,9 +1173,9 @@ Video
 
     This option has no effect if ``--video-unscaled`` option is used.
 
-``--video-aspect=<ratio|no>``
+``--video-aspect-override=<ratio|no>``
     Override video aspect ratio, in case aspect information is incorrect or
-    missing in the file being played. See also ``--no-video-aspect``.
+    missing in the file being played.
 
     These values have special meaning:
 
@@ -1187,13 +1187,13 @@ Video
 
     .. admonition:: Examples
 
-        - ``--video-aspect=4:3``  or ``--video-aspect=1.3333``
-        - ``--video-aspect=16:9`` or ``--video-aspect=1.7777``
-        - ``--no-video-aspect`` or ``--video-aspect=no``
+        - ``--video-aspect-override=4:3``  or ``--video-aspect-override=1.3333``
+        - ``--video-aspect-override=16:9`` or ``--video-aspect-override=1.7777``
+        - ``--no-video-aspect-override`` or ``--video-aspect-override=no``
 
 ``--video-aspect-method=<bitstream|container>``
     This sets the default video aspect determination method (if the aspect is
-    _not_ overridden by the user with ``--video-aspect`` or others).
+    _not_ overridden by the user with ``--video-aspect-override`` or others).
 
     :container: Strictly prefer the container aspect ratio. This is apparently
                 the default behavior with VLC, at least with Matroska. Note that
@@ -2814,7 +2814,7 @@ Window
     previous setting (e.g. in the config file). Overrides the
     ``--monitorpixelaspect`` setting if enabled.
 
-    See also ``--monitorpixelaspect`` and ``--video-aspect``.
+    See also ``--monitorpixelaspect`` and ``--video-aspect-override``.
 
     .. admonition:: Examples
 
@@ -2835,7 +2835,7 @@ Window
 ``--monitorpixelaspect=<ratio>``
     Set the aspect of a single pixel of your monitor or TV screen (default:
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
-    also ``--monitoraspect`` and ``--video-aspect``.
+    also ``--monitoraspect`` and ``--video-aspect-override``.
 
 ``--stop-screensaver``, ``--no-stop-screensaver``
     Turns off the screensaver (or screen blanker and similar mechanisms) at
