@@ -7,10 +7,15 @@ mpv provides access to its internals via the following means:
 - commands
 - properties
 - events
+- hooks
+
+The sum of these mechanisms is sometimes called command interface.
 
 All of these are important for interfacing both with end users and API users
 (which include Lua scripts, libmpv, and the JSON IPC). As such, they constitute
 a large part of the user interface and APIs.
+
+Also see compatibility.rst.
 
 This document lists changes to them. New changes are added to the top.
 

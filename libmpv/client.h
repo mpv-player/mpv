@@ -199,6 +199,8 @@ extern "C" {
  * MPV_FORMAT_STRING over other types to decouple your code from potential
  * mpv changes.
  *
+ * Also see: DOCS/compatibility.rst
+ *
  * Future changes
  * --------------
  *

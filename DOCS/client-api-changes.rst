@@ -16,7 +16,7 @@ The version number is the same as used for MPV_CLIENT_API_VERSION (see
 ``client.h`` how to convert between major/minor version numbers and the flat
 32 bit integer).
 
-Also, read the section ``Compatibility`` in ``client.h``.
+Also, read the section ``Compatibility`` in ``client.h``, and compatibility.rst.
 
 Options, commands, properties
 =============================
