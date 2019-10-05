@@ -821,7 +821,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 {
     if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
         return;
-    if (!mpctx->opts->autoload_files)
+    if (!mpctx->opts->autoload_files || strcmp(mpctx->filename, "-") == 0)
         return;
 
     void *tmp = talloc_new(NULL);
