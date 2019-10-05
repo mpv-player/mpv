@@ -76,17 +76,8 @@ Interface changes
       dropped: `cache`, `cache-size`, `cache-free`, `cache-used`, `--cache-default`,
       `--cache-initial`, `--cache-seek-min`, `--cache-backbuffer`, `--cache-file`,
       `--cache-file-size`
-    - remove async playback abort hack. This breaks aborting playback in the
-      following cases, iff the current stream is a network stream that
-      completely stopped responding:
-        - setting "program" property
-        - setting "cache-size" property
-      In earlier versions of mpv, the player core froze as well in these cases,
-      but could still be aborted with the quit, stop, playlist-prev,
-      playlist-next commands. If these properties are not accessed, frozen
-      network streams should not freeze the player core (only playback in
-      uncached regions), and differing behavior should be reported as a bug.
-      If --demuxer-thread=no is used, there are no guarantees.
+    - remove async playback abort hack. This may make it impossible to abort
+      playback if --demuxer-thread=no is forced.
     - remove `--macos-title-bar-style`, replaced by `--macos-title-bar-material`
       and `--macos-title-bar-appearance`.
     - The default for `--vulkan-async-compute` has changed to `yes` from `no`
