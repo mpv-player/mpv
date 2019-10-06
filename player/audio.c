@@ -835,7 +835,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (mpctx->vo_chain && ao_c->track && ao_c->track->dec &&
         ao_c->track->dec->pts_reset)
     {
-        MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
+        MP_WARN(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
         mp_wakeup_core(mpctx);
         return;
