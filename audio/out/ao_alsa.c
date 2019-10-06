@@ -1121,10 +1121,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);
             } else if (res == -EPIPE) {
-                // For some reason, writing a smaller fragment at the end
-                // immediately underruns.
-                if (!(flags & AOPLAY_FINAL_CHUNK))
-                    MP_WARN(ao, "Device underrun detected.\n");
+                MP_WARN(ao, "Device underrun detected.\n");
             } else {
                 MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
             }
