@@ -980,7 +980,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
 
     // With gapless audio, delay this to ao_uninit. There must be only
     // 1 final chunk, and that is handled when calling ao_uninit().
-    if (audio_eof && !opts->gapless_audio)
+    // If video is still on-going, trying to do gapless is pointless, as video
+    // will have to continue for a while with audio stopped (but still try to
+    // do it if gapless is forced, mostly for testing).
+    if (audio_eof && (!opts->gapless_audio ||
+        (opts->gapless_audio <= 0 && mpctx->video_status != STATUS_EOF)))
         playflags |= AOPLAY_FINAL_CHUNK;
 
     uint8_t **planes;

@@ -1798,6 +1798,8 @@ Audio
             an implementation detail, and can change from version to version.
             Currently, the device is kept even if the sample format changes,
             but the sample formats are convertible.
+            If video is still going on when there is still audio, trying to use
+            gapless is also explicitly given up.
 
     .. note::
 
