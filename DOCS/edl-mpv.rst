@@ -216,6 +216,36 @@ Example::
 The virtual timeline will have two chapters, one called "cap.ts" from 0-240s
 and a second one called "Show Opening" from 240-330s.
 
+Entry which defines the track layout
+====================================
+
+Normally, you're supposed to put only files with compatible layouts into an EDL
+file. However, at least the mpv implementation accepts entries that use
+different codecs, or even have a different number of audio/video/subtitle
+tracks. In this case, it's not obvious, which virtual tracks the EDL show should
+expose when being played.
+
+Currently, mpv will apply an arbitrary heuristic which tracks the EDL file
+should expose. (Before mpv 0.30.0, it always used the first source file in the
+segment list.)
+
+You can set the ``layout`` option to ``this`` to make a specific entry define
+the track layout.
+
+Example::
+
+    # mpv EDL v0
+    file_with_2_streams.ts,5,240
+    file_with_5_streams.mkv,0,90,layout=this
+
+The way the different virtual EDL tracks are associated with the per-segment
+ones is highly implementation-defined, and uses a heuristic. If a segment is
+missing a track, there will be a "hole", and bad behavior may result. Improving
+this is subject to further development (due to being fringe cases, they don't
+have a high priority).
+
+If future versions of mpv change this again, this option may be ignored.
+
 Syntax of EDL URIs
 ==================
 

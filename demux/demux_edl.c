@@ -40,6 +40,7 @@ struct tl_part {
     double offset;              // offset into the source file
     bool offset_set;
     bool chapter_ts;
+    bool is_layout;
     double length;              // length of the part (-1 if rest of the file)
     char *title;
 };
@@ -151,6 +152,9 @@ static struct tl_root *parse_edl(bstr str)
                         p.chapter_ts = true;
                 } else if (bstr_equals0(name, "title")) {
                     p.title = bstrto0(tl, val);
+                } else if (bstr_equals0(name, "layout")) {
+                    if (bstr_equals0(val, "this"))
+                        p.is_layout = true;
                 }
             }
             nparam++;
@@ -357,8 +361,20 @@ static struct timeline_par *build_timeline(struct timeline *root,
 
         starttime = tl->parts[n].end;
 
-        if (source && !tl->track_layout)
+        if (source && !tl->track_layout && part->is_layout)
             tl->track_layout = source;
+    }
+
+    if (!tl->track_layout) {
+        // Use a heuristic to select the "broadest" part as layout.
+        for (int n = 0; n < parts->num_parts; n++) {
+            struct demuxer *s = tl->parts[n].source;
+            if (!s)
+                continue;
+            if (!tl->track_layout ||
+                demux_get_num_stream(s) > demux_get_num_stream(tl->track_layout))
+                tl->track_layout = s;
+        }
     }
 
     if (!tl->track_layout)
