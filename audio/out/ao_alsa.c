@@ -946,14 +946,7 @@ static int get_space(struct ao *ao)
         return p->buffersize;
 
     snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
-    if (space < 0) {
-        if (space == -EPIPE) {
-            MP_WARN(ao, "ALSA XRUN hit, attempting to recover...\n");
-            int err = snd_pcm_prepare(p->alsa);
-            CHECK_ALSA_ERROR("Unable to recover from under/overrun!");
-            return p->buffersize;
-        }
-
+    if (space < 0 && space != -EPIPE) {
         MP_ERR(ao, "Error received from snd_pcm_avail "
                    "(%ld, %s with ALSA state %s)!\n",
                space, snd_strerror(space),
@@ -965,7 +958,7 @@ static int get_space(struct ao *ao)
         goto alsa_error;
     }
 
-    if (space > p->buffersize) // Buffer underrun?
+    if (space > p->buffersize || space < 0) // Buffer underrun?
         space = p->buffersize;
     return space / p->outburst * p->outburst;
 
