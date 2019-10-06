@@ -417,12 +417,12 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
     if (mpctx->opts->untimed || mpctx->video_out->driver->untimed)
         return 1;
 
+    // Normally require at least 2 frames, so we can compute a frame duration.
     int min = mpctx->opts->video_latency_hacks ? 1 : 2;
 
     // On the first frame, output a new frame as quickly as possible.
-    // But display-sync likes to have a correct frame duration always.
     if (mpctx->video_pts == MP_NOPTS_VALUE)
-        return mpctx->opts->video_sync == VS_DEFAULT ? 1 : min;
+        return min;
 
     int req = vo_get_num_req_frames(mpctx->video_out);
     return MPCLAMP(req, min, MP_ARRAY_SIZE(mpctx->next_frames) - 1);
