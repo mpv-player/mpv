@@ -34,6 +34,25 @@ struct priv {
     struct wl_egl_window *egl_window;
 };
 
+static const struct wl_callback_listener frame_listener;
+
+static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    struct vo_wayland_state *wl = data;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+    wl->callback_wait = false;
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_callback,
+};
+
+
 static void resize(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -56,7 +75,11 @@ static void resize(struct ra_ctx *ctx)
 static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    struct vo_wayland_state *wl = ctx->vo->wl;
+
     eglSwapBuffers(p->egl_display, p->egl_surface);
+    vo_wayland_wait_frame(wl);
+    wl->callback_wait = true;
 }
 
 static bool egl_create_context(struct ra_ctx *ctx)
@@ -86,6 +109,9 @@ static bool egl_create_context(struct ra_ctx *ctx)
         return false;
 
     ra_add_native_resource(ctx->ra, "wl", wl->display);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     return true;
 }

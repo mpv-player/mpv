@@ -56,6 +56,8 @@ static bool win_init(struct ra_ctx *ctx)
          .hwnd = vo_w32_hwnd(ctx->vo),
     };
 
+    struct ra_vk_ctx_params params = {0};
+
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
@@ -63,7 +65,7 @@ static bool win_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto error;
 
     return true;

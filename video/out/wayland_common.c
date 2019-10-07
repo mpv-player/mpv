@@ -796,23 +796,6 @@ static const struct wl_surface_listener surface_listener = {
     surface_handle_leave,
 };
 
-static const struct wl_callback_listener frame_listener;
-
-static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
-{
-    struct vo_wayland_state *wl = data;
-
-    if (callback)
-        wl_callback_destroy(callback);
-
-    wl->frame_callback = wl_surface_frame(wl->surface);
-    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-}
-
-static const struct wl_callback_listener frame_listener = {
-    frame_callback,
-};
-
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -824,8 +807,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
-        wl->frame_callback = wl_surface_frame(wl->surface);
-        wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     }
 
     if (!strcmp(interface, wl_output_interface.name) && (ver >= 2) && found++) {
@@ -1426,6 +1407,33 @@ void vo_wayland_wakeup(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
+}
+
+void vo_wayland_wait_frame(struct vo_wayland_state *wl)
+{
+    struct pollfd fds[1] = {
+        {.fd = wl->display_fd,     .events = POLLIN },
+    };
+
+    double vblank_time = 1e6 / wl->current_output->refresh_rate;
+    int64_t finish_time = mp_time_us() + vblank_time;
+
+    while (wl->callback_wait && finish_time > mp_time_us()) {
+
+        while (wl_display_prepare_read(wl->display) != 0)
+            wl_display_dispatch_pending(wl->display);
+        wl_display_flush(wl->display);
+
+        int poll_time = (finish_time - mp_time_us()) / 1000;
+        if (poll_time < 0) {
+            poll_time = 0;
+        }
+
+        poll(fds, 1, poll_time);
+
+        wl_display_read_events(wl->display);
+        wl_display_dispatch_pending(wl->display);
+    }
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)

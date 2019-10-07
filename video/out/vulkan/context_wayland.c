@@ -26,6 +26,32 @@ struct priv {
     struct mpvk_ctx vk;
 };
 
+static const struct wl_callback_listener frame_listener;
+
+static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    struct vo_wayland_state *wl = data;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+    wl->callback_wait = false;
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_callback,
+};
+
+static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wl;
+
+    vo_wayland_wait_frame(wl);
+    wl->callback_wait = true;
+}
+
 static void wayland_vk_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -53,6 +79,10 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
          .surface = ctx->vo->wl->surface,
     };
 
+    struct ra_vk_ctx_params params = {
+        .swap_buffers = wayland_vk_swap_buffers,
+    };
+
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateWaylandSurfaceKHR(inst, &wlinfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
@@ -66,10 +96,13 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
      * mean the entire player would block on acquiring swapchain images. Hence,
      * use MAILBOX to guarantee that there'll always be a swapchain image and
      * the player won't block waiting on those */
-    if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_MAILBOX_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_MAILBOX_KHR))
         goto error;
 
     ra_add_native_resource(ctx->ra, "wl", ctx->vo->wl->display);
+
+    ctx->vo->wl->frame_callback = wl_surface_frame(ctx->vo->wl->surface);
+    wl_callback_add_listener(ctx->vo->wl->frame_callback, &frame_listener, ctx->vo->wl);
 
     return true;
 
