@@ -53,6 +53,8 @@ static bool android_init(struct ra_ctx *ctx)
          .window = vo_android_native_window(ctx->vo)
     };
 
+    struct ra_vk_ctx_params params = {0};
+
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateAndroidSurfaceKHR(inst, &info, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
@@ -60,7 +62,7 @@ static bool android_init(struct ra_ctx *ctx)
         goto fail;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto fail;
 
     return true;

@@ -56,6 +56,8 @@ static bool xlib_init(struct ra_ctx *ctx)
          .window = ctx->vo->x11->window,
     };
 
+    struct ra_vk_ctx_params params = {0};
+
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateXlibSurfaceKHR(inst, &xinfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
@@ -63,7 +65,7 @@ static bool xlib_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto error;
 
     ra_add_native_resource(ctx->ra, "x11", ctx->vo->x11->display);

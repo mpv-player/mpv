@@ -56,6 +56,7 @@ struct vo_wayland_state {
     bool fullscreen;
     bool maximized;
     bool configured;
+    bool callback_wait;
     int wakeup_pipe[2];
     int pending_vo_events;
     int mouse_x;
@@ -112,5 +113,6 @@ void vo_wayland_check_events(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
+void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */

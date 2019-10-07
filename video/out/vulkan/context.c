@@ -111,6 +111,7 @@ const struct m_sub_options vulkan_conf = {
 struct priv {
     struct mpvk_ctx *vk;
     struct vulkan_opts *opts;
+    struct ra_vk_ctx_params params;
     const struct pl_swapchain *swapchain;
     struct ra_tex proxy_tex;
 };
@@ -147,6 +148,7 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
 }
 
 bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
+                    struct ra_vk_ctx_params params,
                     VkPresentModeKHR preferred_mode)
 {
     struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
@@ -155,6 +157,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
 
     struct priv *p = sw->priv = talloc_zero(sw, struct priv);
     p->vk = vk;
+    p->params = params;
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
 
     assert(vk->ctx);
@@ -176,16 +179,16 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         goto error;
 
     // Create the swapchain
-    struct pl_vulkan_swapchain_params params = {
+    struct pl_vulkan_swapchain_params pl_params = {
         .surface = vk->surface,
         .present_mode = preferred_mode,
         .swapchain_depth = ctx->vo->opts->swapchain_depth,
     };
 
     if (p->opts->swap_mode >= 0) // user override
-        params.present_mode = p->opts->swap_mode;
+        pl_params.present_mode = p->opts->swap_mode;
 
-    p->swapchain = pl_vulkan_create_swapchain(vk->vulkan, &params);
+    p->swapchain = pl_vulkan_create_swapchain(vk->vulkan, &pl_params);
     if (!p->swapchain)
         goto error;
 
@@ -239,6 +242,8 @@ static void swap_buffers(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
     pl_swapchain_swap_buffers(p->swapchain);
+    if (p->params.swap_buffers)
+        p->params.swap_buffers(sw->ctx);
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {
