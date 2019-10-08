@@ -79,6 +79,8 @@ local meta_property = string.format("vf-metadata/%s", label)
 local config = {}
 local cases = {}
 local cur_bmp
+local seeking = false
+local playback_start_pts = nil
 
 -- Convert a  hex string to an array. Convert each byte to a [0,1] float by
 -- interpreting it as normalized uint8_t.
@@ -194,21 +196,9 @@ local function check_fingerprint(hex, pts)
     return false
 end
 
-mp.observe_property(meta_property, "none", function()
+local function read_frames()
     local result = mp.get_property_native(meta_property)
     if result == nil then
-        return
-    end
-
-    -- Disable matching while seeking. This is not always ideal. For example,
-    -- the filter chain may filter frames ahead of where it will resume
-    -- playback (if something prefetches frames). On the other hand, the
-    -- skipping logic shouldn't activate when the user is trying to seek past
-    -- the skip frame anyway. You could be more fancy and here, and store all
-    -- seen frames, then apply the skipping when it's actually displayed (by
-    -- observing the playback time). But for now, the naive and not-always-
-    -- correct way seems to suffice.
-    if mp.get_property_bool("seeking", false) then
         return
     end
 
@@ -223,9 +213,40 @@ mp.observe_property(meta_property, "none", function()
             break
         end
 
-        if check_fingerprint(hex, pts) then
-            break
+        local skip = false -- blame Lua for not having "continue" or "goto", not me
+
+        -- If seeking just stopped, there will be frames before the seek target,
+        -- ignore them by checking the timestamps.
+        if playback_start_pts ~= nil then
+            if pts >= playback_start_pts then
+                playback_start_pts = nil -- just for robustness
+            else
+                skip = true
+            end
         end
+
+        if not skip then
+            if check_fingerprint(hex, pts) then
+                break
+            end
+        end
+    end
+end
+
+mp.observe_property(meta_property, "none", function()
+    -- Ignore frames that are decoded/filtered during seeking.
+    if seeking then
+        return
+    end
+
+    read_frames()
+end)
+
+mp.observe_property("seeking", "bool", function(name, val)
+    seeking = val
+    if seeking == false then
+        playback_start_pts = mp.get_property_number("playback-time")
+        read_frames()
     end
 end)
 
