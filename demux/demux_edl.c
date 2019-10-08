@@ -270,8 +270,11 @@ static struct timeline_par *build_timeline(struct timeline *root,
         MP_VERBOSE(root, "Opening init fragment...\n");
         stream_t *s = stream_create(parts->init_fragment_url, STREAM_READ,
                                     root->cancel, root->global);
-        if (s)
+        if (s) {
+            root->is_network |= s->is_network;
+            root->is_streaming |= s->streaming;
             tl->init_fragment = stream_read_complete(s, tl, 1000000);
+        }
         free_stream(s);
         if (!tl->init_fragment.len) {
             MP_ERR(root, "Could not read init fragment.\n");

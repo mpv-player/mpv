@@ -525,6 +525,9 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     if (!p->num_sources)
         return -1;
 
+    demuxer->is_network |= p->tl->is_network;
+    demuxer->is_streaming |= p->tl->is_streaming;
+
     demuxer->duration = p->duration;
 
     print_timeline(demuxer);
