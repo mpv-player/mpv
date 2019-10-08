@@ -4004,11 +4004,17 @@ Cache
     Decide whether to use network cache settings (default: auto).
 
     If enabled, use the maximum of ``--cache-secs`` and ``--demuxer-max-bytes``
-    for the cache size. If disabled, ``--cache-pause`` and related are
+    for the cache size, and ``--demuxer-seekable-cache=auto`` behaves as if it
+    was set to ``yes``. If disabled, ``--cache-pause`` and related are
     implicitly disabled.
 
-    The ``auto`` choice sets this depending on whether the stream is thought to
-    involve network accesses (this is an imperfect heuristic).
+    The ``auto`` choice enables this depending on whether the stream is thought
+    to involve network accesses or other slow media (this is an imperfect
+    heuristic).
+
+    Before mpv 0.30.0, this used to accept a number, which specified the size
+    of the cache in kilobytes. Use e.g. ``--cache --demuxer-max-bytes=123k``
+    instead.
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.

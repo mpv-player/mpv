@@ -81,6 +81,7 @@ Interface changes
       dropped: `cache`, `cache-size`, `cache-free`, `cache-used`, `--cache-default`,
       `--cache-initial`, `--cache-seek-min`, `--cache-backbuffer`, `--cache-file`,
       `--cache-file-size`
+    - the --cache option does not take a number value anymore
     - remove async playback abort hack. This may make it impossible to abort
       playback if --demuxer-thread=no is forced.
     - remove `--macos-title-bar-style`, replaced by `--macos-title-bar-material`
