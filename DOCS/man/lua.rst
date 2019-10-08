@@ -344,11 +344,15 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     exact behavior depends on timing and other things.)
 
     In some cases the function is not called even if the property changes.
-    Whether this can happen depends on the property.
+    This depends on the property, and it's a valid feature request to ask for
+    better update handling of a specific property.
 
     If the ``type`` is ``none`` or ``nil``, sporadic property change events are
     possible. This means the change function ``fn`` can be called even if the
     property doesn't actually change.
+
+    You always get an initial change notification. This is meant to initialize
+    the user's state to the current value of the property.
 
 ``mp.unobserve_property(fn)``
     Undo ``mp.observe_property(..., fn)``. This removes all property handlers

@@ -1197,6 +1197,9 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * event queue becomes empty (e.g. mpv_wait_event() would block or return
  * MPV_EVENT_NONE), and then only one event per changed property is returned.
  *
+ * You always get an initial change notification. This is meant to initialize
+ * the user's state to the current value of the property.
+ *
  * Normally, change events are sent only if the property value changes according
  * to the requested format. mpv_event_property will contain the property value
  * as data member.
@@ -1209,7 +1212,7 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * If the property is observed with the format parameter set to MPV_FORMAT_NONE,
  * you get low-level notifications whether the property _may_ have changed, and
  * the data member in mpv_event_property will be unset. With this mode, you
- * will have to determine yourself whether the property really changd. On the
+ * will have to determine yourself whether the property really changed. On the
  * other hand, this mechanism can be faster and uses less resources.
  *
  * Observing a property that doesn't exist is allowed. (Although it may still
