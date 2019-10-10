@@ -323,6 +323,8 @@ typedef struct MPOpts {
 
     int wingl_dwm_flush;
 
+    int wayland_disable_vsync;
+
     struct mp_resample_opts *resample_opts;
 
     struct gl_video_opts *gl_video_opts;

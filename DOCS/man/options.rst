@@ -4720,6 +4720,14 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Currently only relevant for ``--gpu-api=d3d11``.
 
+``--wayland-disable-vsync=<yes|no>``
+    Disable vsync for the wayland contexts. Useful for benchmarking the wayland
+    context when combined with ``video-sync=display-desync``, ``--no-audio``,
+    and ``--untimed=yes``. Only works with ``--gpu-context=wayland`` and
+    ``--gpu-context=waylandvk``.
+
+    Default: no.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.

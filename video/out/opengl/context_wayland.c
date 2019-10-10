@@ -20,6 +20,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "options/m_config.h"
 #include "video/out/wayland_common.h"
 #include "context.h"
 #include "egl_helpers.h"
@@ -77,8 +78,13 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
+    int disable_vsync;
+    mp_read_option_raw(ctx->global, "wayland-disable-vsync", &m_option_type_flag,
+                       &disable_vsync);
+
     eglSwapBuffers(p->egl_display, p->egl_surface);
-    vo_wayland_wait_frame(wl);
+    if (!disable_vsync)
+    	vo_wayland_wait_frame(wl);
     wl->callback_wait = true;
 }
 

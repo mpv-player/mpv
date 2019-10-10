@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "options/m_config.h"
 #include "video/out/gpu/context.h"
 #include "video/out/wayland_common.h"
 
@@ -48,7 +49,12 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    vo_wayland_wait_frame(wl);
+    int disable_vsync;
+    mp_read_option_raw(ctx->global, "wayland-disable-vsync", &m_option_type_flag,
+                       &disable_vsync);
+
+    if (!disable_vsync)
+        vo_wayland_wait_frame(wl);
     wl->callback_wait = true;
 }
 
