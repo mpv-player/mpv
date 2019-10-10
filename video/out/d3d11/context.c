@@ -162,7 +162,12 @@ static bool d3d11_reconfig(struct ra_ctx *ctx)
 
 static int d3d11_color_depth(struct ra_swapchain *sw)
 {
-    return 8;
+    struct priv *p = sw->priv;
+
+    if (!p->backbuffer)
+        return 0;
+
+    return p->backbuffer->params.format->component_depth[0];
 }
 
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
