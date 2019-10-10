@@ -566,8 +566,10 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res)
         goto error;
     }
 
-    if (bind_flags & D3D11_BIND_SHADER_RESOURCE)
+    if (bind_flags & D3D11_BIND_SHADER_RESOURCE) {
         params->render_src = params->blit_src = true;
+        params->src_linear = params->format->linear_filter;
+    }
     if (bind_flags & D3D11_BIND_RENDER_TARGET)
         params->render_dst = params->blit_dst = true;
     if (bind_flags & D3D11_BIND_UNORDERED_ACCESS)
