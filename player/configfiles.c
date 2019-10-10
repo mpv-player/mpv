@@ -129,8 +129,7 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
     }
 }
 
-static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
-                                 bstr item)
+void mp_load_auto_profile(struct MPContext *mpctx, char *category, bstr item)
 {
     if (!item.len)
         return;
@@ -146,9 +145,9 @@ static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
 
 void mp_load_auto_profiles(struct MPContext *mpctx)
 {
-    mp_auto_load_profile(mpctx, "protocol",
+    mp_load_auto_profile(mpctx, "protocol",
                          mp_split_proto(bstr0(mpctx->filename), NULL));
-    mp_auto_load_profile(mpctx, "extension",
+    mp_load_auto_profile(mpctx, "extension",
                          bstr0(mp_splitext(mpctx->filename, NULL)));
 
     mp_load_per_file_config(mpctx);

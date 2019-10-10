@@ -27,6 +27,8 @@
 
 #include "video.h"
 
+#include "player/client.h"
+#include "player/core.h"
 #include "misc/bstr.h"
 #include "options/m_config.h"
 #include "common/global.h"
@@ -855,6 +857,9 @@ static void init_video(struct gl_video *p)
     }
 
     if (hwdec) {
+        mp_load_auto_profile(mp_client_api_get_core(p->global->client_api),
+                             "hwdec", bstr0(hwdec->driver->name));
+
         if (hwdec->driver->overlay_frame) {
             MP_WARN(p, "Using HW-overlay mode. No GL filtering is performed "
                        "on the video!\n");
