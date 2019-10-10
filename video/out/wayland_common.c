@@ -20,6 +20,7 @@
 #include <poll.h>
 #include <unistd.h>
 #include <linux/input.h>
+#include <time.h>
 #include "common/msg.h"
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -36,6 +37,9 @@
 
 // Generated from xdg-decoration-unstable-v1.xml
 #include "video/out/wayland/xdg-decoration-v1.h"
+
+// Generated from presentation-time.xml
+#include "video/out/wayland/presentation-time.h"
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
@@ -796,6 +800,19 @@ static const struct wl_surface_listener surface_listener = {
     surface_handle_leave,
 };
 
+static void pres_set_clockid(void *data, struct wp_presentation *pres,
+                           uint32_t clockid)
+{
+    struct vo_wayland_state *wl = data;
+    
+    wl->presentation = pres;
+    clockid = CLOCK_MONOTONIC;
+}
+
+static const struct wp_presentation_listener pres_listener = {
+    pres_set_clockid,
+};
+
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -842,6 +859,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++) {
         wl->xdg_decoration_manager = wl_registry_bind(reg, id, &zxdg_decoration_manager_v1_interface, 1);
+    }
+
+    if (!strcmp(interface, wp_presentation_interface.name) && found++) {
+        wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, 1);
+        wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
     }
 
     if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++) {
@@ -1056,6 +1078,16 @@ int vo_wayland_init(struct vo *vo)
                    wl_data_device_manager_interface.name);
     }
 
+    if (wl->presentation) {
+        wl->sync = talloc_zero_array(wl, struct vo_wayland_sync, 1);
+        struct vo_wayland_sync sync = {0, 0, 0, 0};
+        wl->sync[0] = sync;
+        wl->sync_size += 1;
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_presentation_interface.name);
+    }
+
     if (wl->xdg_decoration_manager) {
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
         set_border_decorations(wl, vo->opts->border);
@@ -1141,6 +1173,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
+
+    if (wl->presentation)
+        wp_presentation_destroy(wl->presentation);
 
     if (wl->pointer)
         wl_pointer_destroy(wl->pointer);
@@ -1403,6 +1438,73 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+void vo_wayland_sync_shift(struct vo_wayland_state *wl)
+{
+    for (int i = wl->sync_size - 1; i > 0; --i) {
+        wl->sync[i] = wl->sync[i-1];
+    }
+    struct vo_wayland_sync sync = {0, 0, 0, 0};
+    wl->sync[0] = sync;
+}
+
+int last_available_sync(struct vo_wayland_state *wl)
+{
+    for (int i = wl->sync_size - 1; i > -1; --i) {
+        if (!wl->sync[i].filled)
+            return i;
+    }
+    return -1;
+}
+
+void queue_new_sync(struct vo_wayland_state *wl)
+{
+    wl->sync_size += 1;
+    wl->sync = talloc_realloc(wl, wl->sync, struct vo_wayland_sync, wl->sync_size);
+    vo_wayland_sync_shift(wl);
+    wl->sync[0].sbc = wl->user_sbc;
+}
+
+void wayland_sync_swap(struct vo_wayland_state *wl)
+{
+    int index = wl->sync_size - 1;
+
+    wl->last_skipped_vsyncs = 0;
+
+    // If these are the same (can happen if a frame takes too long), update
+    // the ust/msc/sbc based on when the next frame is expected to arrive.
+    if (wl->sync[index].ust == wl->last_ust && wl->last_ust) {
+        wl->sync[index].ust += wl->sync[index].refresh_usec;
+        wl->sync[index].msc += 1;
+        wl->sync[index].sbc += 1;
+    }
+
+    int64_t ust_passed = wl->sync[index].ust ? wl->sync[index].ust - wl->last_ust: 0;
+    wl->last_ust = wl->sync[index].ust;
+    int64_t msc_passed = wl->sync[index].msc ? wl->sync[index].msc - wl->last_msc: 0;
+    wl->last_msc = wl->sync[index].msc;
+    int64_t sbc_passed = wl->sync[index].sbc ? wl->sync[index].sbc - wl->last_sbc: 0;
+    wl->last_sbc = wl->sync[index].sbc;
+
+    if (msc_passed && ust_passed)
+        wl->vsync_duration = ust_passed / msc_passed;
+
+    if (sbc_passed) {
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
+            return;
+        }
+
+        uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+        uint64_t ust_mp_time = mp_time_us() - (now_monotonic - wl->sync[index].ust);
+        wl->last_sbc_mp_time = ust_mp_time;
+    }
+
+    if (!wl->sync[index].sbc)
+        return;
+
+    wl->last_queue_display_time = wl->last_sbc_mp_time + sbc_passed*wl->vsync_duration;
+}
+
 void vo_wayland_wakeup(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -1416,9 +1518,9 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     };
 
     double vblank_time = 1e6 / wl->current_output->refresh_rate;
-    int64_t finish_time = mp_time_us() + vblank_time;
+    int64_t finish_time = mp_time_us() + vblank_time + 1000;
 
-    while (wl->callback_wait && finish_time > mp_time_us()) {
+    while (wl->frame_wait && finish_time > mp_time_us()) {
 
         while (wl_display_prepare_read(wl->display) != 0)
             wl_display_dispatch_pending(wl->display);
