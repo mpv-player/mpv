@@ -210,7 +210,8 @@ bool print_libav_versions(struct mp_log *log, int v)
         mp_msg(log, v, "   %-15s %d.%d.%d", l->name, V(l->buildv));
         if (l->buildv != l->runv) {
             mp_msg(log, v, " (runtime %d.%d.%d)", V(l->runv));
-            mismatch = true;
+            mismatch = l->buildv > l->runv ||
+                AV_VERSION_MAJOR(l->buildv) != AV_VERSION_MAJOR(l->runv);
         }
         mp_msg(log, v, "\n");
     }
