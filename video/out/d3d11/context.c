@@ -36,6 +36,7 @@ struct d3d11_opts {
     int flip;
     int sync_interval;
     char *adapter_name;
+    int output_format;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -59,6 +60,12 @@ const struct m_sub_options d3d11_conf = {
         OPT_INTRANGE("d3d11-sync-interval", sync_interval, 0, 0, 4),
         OPT_STRING_VALIDATE("d3d11-adapter", adapter_name, 0,
                             d3d11_validate_adapter),
+        OPT_CHOICE("d3d11-output-format", output_format, 0,
+                   ({"auto",     DXGI_FORMAT_UNKNOWN},
+                    {"rgba8",    DXGI_FORMAT_R8G8B8A8_UNORM},
+                    {"bgra8",    DXGI_FORMAT_B8G8R8A8_UNORM},
+                    {"rgb10_a2", DXGI_FORMAT_R10G10B10A2_UNORM},
+                    {"rgba16f",  DXGI_FORMAT_R16G16B16A16_FLOAT})),
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -67,6 +74,7 @@ const struct m_sub_options d3d11_conf = {
         .flip = 1,
         .sync_interval = 1,
         .adapter_name = NULL,
+        .output_format = DXGI_FORMAT_UNKNOWN,
     },
     .size = sizeof(struct d3d11_opts)
 };
@@ -372,6 +380,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .window = vo_w32_hwnd(ctx->vo),
         .width = ctx->vo->dwidth,
         .height = ctx->vo->dheight,
+        .format = p->opts->output_format,
         .flip = p->opts->flip,
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
