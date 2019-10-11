@@ -402,6 +402,7 @@ void ao_reset(struct ao *ao)
 {
     if (ao->api->reset)
         ao->api->reset(ao);
+    atomic_fetch_and(&ao->events_, ~(unsigned int)AO_EVENT_UNDERRUN);
 }
 
 // Pause playback. Keep the current buffer. ao_get_delay() must return the
@@ -455,6 +456,14 @@ void ao_request_reload(struct ao *ao)
 void ao_hotplug_event(struct ao *ao)
 {
     ao_add_events(ao, AO_EVENT_HOTPLUG);
+}
+
+void ao_underrun_event(struct ao *ao)
+{
+    // Racy check, but it's just for the message.
+    if (!(atomic_load(&ao->events_) & AO_EVENT_UNDERRUN))
+        MP_WARN(ao, "Device underrun detected.\n");
+    ao_add_events(ao, AO_EVENT_UNDERRUN);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
@@ -515,6 +524,11 @@ const char *ao_get_name(struct ao *ao)
 const char *ao_get_description(struct ao *ao)
 {
     return ao->driver->description;
+}
+
+bool ao_get_reports_underruns(struct ao *ao)
+{
+    return ao->driver->reports_underruns;
 }
 
 bool ao_untimed(struct ao *ao)

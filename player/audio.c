@@ -855,6 +855,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
 
     int playsize = ao_get_space(mpctx->ao);
 
+    ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN);
+
     int skip = 0;
     bool sync_known = get_sync_samples(mpctx, &skip);
     if (skip > 0) {

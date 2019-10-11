@@ -49,6 +49,7 @@ enum {
     AO_EVENT_RELOAD = 1,
     AO_EVENT_HOTPLUG = 2,
     AO_EVENT_INITIAL_UNBLOCK = 4,
+    AO_EVENT_UNDERRUN = 8,
 };
 
 enum {
@@ -100,6 +101,7 @@ void ao_get_format(struct ao *ao,
                    int *samplerate, int *format, struct mp_chmap *channels);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
+bool ao_get_reports_underruns(struct ao *ao);
 bool ao_untimed(struct ao *ao);
 int ao_play(struct ao *ao, void **data, int samples, int flags);
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);

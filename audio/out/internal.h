@@ -68,7 +68,7 @@ struct ao {
     char *redirect;
 
     // Internal events (use ao_request_reload(), ao_hotplug_event())
-    atomic_int events_;
+    atomic_uint events_;
 
     // Float gain multiplicator
     mp_atomic_float gain;
@@ -134,6 +134,11 @@ struct ao_driver {
     // first play() call is done. Encode mode uses this, and push mode
     // respects it automatically (don't use with pull mode).
     bool initially_blocked;
+    // Whether underruns are strictly _always_ reported via ao_underrun_event().
+    // Do not set this to true if underruns may be missed in some way. If the
+    // AO can't guarantee to play silence after underruns, it may be better not
+    // to set this.
+    bool reports_underruns;
     // Init the device using ao->format/ao->channels/ao->samplerate. If the
     // device doesn't accept these parameters, you can attempt to negotiate
     // fallback parameters, and set the ao format fields accordingly.
@@ -206,6 +211,7 @@ struct pollfd;
 int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
                  pthread_mutex_t *lock);
 void ao_wakeup_poll(struct ao *ao);
+void ao_underrun_event(struct ao *ao);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
