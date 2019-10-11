@@ -61,8 +61,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             return CONTROL_FALSE;
         sio_setvol(p->hdl, vol->left * SIO_MAXVOL / 100);
         break;
-    case AOCONTROL_HAS_SOFT_VOLUME:
-        return CONTROL_TRUE;
     default:
         return CONTROL_UNKNOWN;
     }

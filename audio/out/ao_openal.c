@@ -93,8 +93,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_TRUE;
     }
 
-    case AOCONTROL_HAS_SOFT_VOLUME:
-        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
