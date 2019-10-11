@@ -260,8 +260,9 @@ typedef struct MPOpts {
     int64_t audio_reverse_size;
 
     int cache_pause;
-    int cache_pause_initial;
+    float cache_pause_initial;
     float cache_pause_wait;
+    float cache_pause_fill;
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;

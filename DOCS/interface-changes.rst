@@ -104,6 +104,10 @@ Interface changes
     - Deprecate ``--video-aspect`` and add ``--video-aspect-override`` to
       replace it. (The `video-aspect` option remains unchanged.)
  --- mpv 0.29.0 ---
+    - add --cache-pause-fill to control when the packet cache is considered
+      full after --cache-pause-wait triggers buffering
+    - change --cache-pause-initial from yes/no flag to number of seconds for
+      initial buffer
     - drop --opensles-sample-rate, as --audio-samplerate should be used if desired
     - drop deprecated --videotoolbox-format, --ff-aid, --ff-vid, --ff-sid,
       --ad-spdif-dtshd, --softvol options
