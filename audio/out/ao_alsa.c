@@ -94,6 +94,7 @@ struct priv {
     snd_pcm_format_t alsa_fmt;
     bool can_pause;
     bool paused;
+    bool final_chunk_written;
     snd_pcm_sframes_t prepause_frames;
     double delay_before_pause;
     snd_pcm_uframes_t buffersize;
@@ -133,6 +134,18 @@ static bool check_device_present(struct ao *ao, int alsa_err)
         p->device_lost = true;
     }
     return false;
+}
+
+static void handle_underrun(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    if (!p->final_chunk_written) {
+        MP_WARN(ao, "Device underrun detected.\n");
+        int err = snd_pcm_prepare(p->alsa);
+        CHECK_ALSA_ERROR("pcm prepare error");
+    alsa_error: ;
+    }
 }
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -975,8 +988,12 @@ static double get_delay(struct ao *ao)
     if (p->paused)
         return p->delay_before_pause;
 
-    if (snd_pcm_delay(p->alsa, &delay) < 0)
+    int err = snd_pcm_delay(p->alsa, &delay);
+    if (err < 0) {
+        if (err == -EPIPE)
+            handle_underrun(ao);
         return 0;
+    }
 
     if (delay < 0) {
         /* underrun - move the application pointer forward to catch up */
@@ -1082,6 +1099,7 @@ static void reset(struct ao *ao)
     p->paused = false;
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
+    p->final_chunk_written = false;
 
     if (ao->stream_silence) {
         soft_reset(ao);
@@ -1099,11 +1117,13 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
     snd_pcm_sframes_t res = 0;
-    if (!(flags & AOPLAY_FINAL_CHUNK))
+    bool final_chunk = flags & AOPLAY_FINAL_CHUNK;
+
+    if (!final_chunk)
         samples = samples / p->outburst * p->outburst;
 
     if (samples == 0)
-        return 0;
+        goto done;
     ao_convert_inplace(&p->convert, data, samples);
 
     do {
@@ -1121,12 +1141,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);
             } else if (res == -EPIPE) {
-                MP_WARN(ao, "Device underrun detected.\n");
+                handle_underrun(ao);
             } else {
                 MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
             }
-            res = snd_pcm_prepare(p->alsa);
-            int err = res;
+            int err = snd_pcm_prepare(p->alsa);
             CHECK_ALSA_ERROR("pcm prepare error");
             res = 0;
         }
@@ -1134,6 +1153,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     p->paused = false;
 
+done:
+    p->final_chunk_written = res == samples && final_chunk;
     return res < 0 ? -1 : res;
 
 alsa_error:
