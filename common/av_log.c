@@ -177,7 +177,9 @@ void uninit_libav(struct mpv_global *global)
     pthread_mutex_unlock(&log_lock);
 }
 
-#define V(x) (x)>>16, (x)>>8 & 255, (x) & 255
+#define V(x) AV_VERSION_MAJOR(x), \
+             AV_VERSION_MINOR(x), \
+             AV_VERSION_MICRO(x)
 
 struct lib {
     const char *name;
