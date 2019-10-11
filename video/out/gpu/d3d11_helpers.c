@@ -17,7 +17,8 @@
 
 #include <windows.h>
 #include <d3d11.h>
-#include <dxgi1_2.h>
+#include <dxgi1_6.h>
+#include <versionhelpers.h>
 #include <pthread.h>
 
 #include "common/common.h"
@@ -60,6 +61,71 @@ static bool load_d3d11_functions(struct mp_log *log)
     }
 
     return true;
+}
+
+static bool query_output_format_and_colorspace(struct mp_log *log,
+                                               IDXGISwapChain *swapchain,
+                                               DXGI_FORMAT *out_fmt,
+                                               DXGI_COLOR_SPACE_TYPE *out_cspace)
+{
+    IDXGIOutput *output = NULL;
+    IDXGIOutput6 *output6 = NULL;
+    DXGI_OUTPUT_DESC1 desc = { 0 };
+    char *monitor_name = NULL;
+    bool success = false;
+
+    if (!out_fmt || !out_cspace)
+        return false;
+
+    HRESULT hr = IDXGISwapChain_GetContainingOutput(swapchain, &output);
+    if (FAILED(hr)) {
+        mp_err(log, "Failed to get swap chain's containing output: %s!\n",
+               mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    hr = IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6,
+                                    (void**)&output6);
+    if (FAILED(hr)) {
+        // point where systems older than Windows 10 would fail,
+        // thus utilizing error log level only with windows 10+
+        mp_msg(log, IsWindows10OrGreater() ? MSGL_ERR : MSGL_V,
+               "Failed to create a DXGI 1.6 output interface: %s\n",
+               mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    hr = IDXGIOutput6_GetDesc1(output6, &desc);
+    if (FAILED(hr)) {
+        mp_err(log, "Failed to query swap chain's output information: %s\n",
+               mp_HRESULT_to_str(hr));
+        goto done;
+    }
+
+    monitor_name = mp_to_utf8(NULL, desc.DeviceName);
+
+    mp_verbose(log, "Queried output: %s, %ldx%ld @ %d bits, colorspace: %d\n",
+               monitor_name,
+               desc.DesktopCoordinates.right - desc.DesktopCoordinates.left,
+               desc.DesktopCoordinates.bottom - desc.DesktopCoordinates.top,
+               desc.BitsPerColor, desc.ColorSpace);
+
+    *out_cspace = desc.ColorSpace;
+
+    // limit ourselves to the 8bit and 10bit formats for now.
+    // while the 16bit float format would be preferable as something
+    // to default to, it seems to be hard-coded to linear transfer
+    // in windowed mode, and follows configured colorspace in full screen.
+    *out_fmt = desc.BitsPerColor > 8 ?
+               DXGI_FORMAT_R10G10B10A2_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+
+    success = true;
+
+done:
+    talloc_free(monitor_name);
+    SAFE_RELEASE(output6);
+    SAFE_RELEASE(output);
+    return success;
 }
 
 // Get a const array of D3D_FEATURE_LEVELs from max_fl to min_fl (inclusive)
@@ -400,6 +466,56 @@ static HRESULT create_swapchain_1_1(ID3D11Device *dev, IDXGIFactory1 *factory,
                                          swapchain_out);
 }
 
+static bool update_swapchain_format(struct mp_log *log,
+                                    IDXGISwapChain *swapchain,
+                                    DXGI_FORMAT format)
+{
+    DXGI_SWAP_CHAIN_DESC desc;
+
+    HRESULT hr = IDXGISwapChain_GetDesc(swapchain, &desc);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Failed to query swap chain's current state: %s\n",
+                 mp_HRESULT_to_str(hr));
+        return false;
+    }
+
+    hr = IDXGISwapChain_ResizeBuffers(swapchain, 0, desc.BufferDesc.Width,
+                                      desc.BufferDesc.Height,
+                                      format, 0);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Couldn't update swapchain format: %s\n",
+                 mp_HRESULT_to_str(hr));
+        return false;
+    }
+
+    return true;
+}
+
+static bool configure_created_swapchain(struct mp_log *log,
+                                        IDXGISwapChain *swapchain,
+                                        DXGI_FORMAT requested_format)
+{
+    DXGI_FORMAT probed_format = DXGI_FORMAT_UNKNOWN;
+    DXGI_FORMAT selected_format = DXGI_FORMAT_UNKNOWN;
+    DXGI_COLOR_SPACE_TYPE probed_colorspace;
+
+    query_output_format_and_colorspace(log, swapchain,
+                                       &probed_format,
+                                       &probed_colorspace);
+
+
+    selected_format = requested_format != DXGI_FORMAT_UNKNOWN ?
+                      requested_format :
+                      (probed_format != DXGI_FORMAT_UNKNOWN ?
+                       probed_format : DXGI_FORMAT_R8G8B8A8_UNORM);
+
+    mp_verbose(log, "Selected swapchain format %d, attempting "
+                    "to utilize it.\n",
+               selected_format);
+
+    return update_swapchain_format(log, swapchain, selected_format);
+}
+
 // Create a Direct3D 11 swapchain
 bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
                                struct d3d11_swapchain_opts *opts,
@@ -471,6 +587,8 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
     } else {
         mp_verbose(log, "Using DXGI 1.1\n");
     }
+
+    configure_created_swapchain(log, swapchain, opts->format);
 
     DXGI_SWAP_CHAIN_DESC scd = {0};
     IDXGISwapChain_GetDesc(swapchain, &scd);

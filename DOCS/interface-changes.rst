@@ -25,6 +25,8 @@ Interface changes
 ::
 
  --- mpv 0.30.0 ---
+    - add `--d3d11-output-format` to enable explicit selection of a D3D11
+      swap chain format.
     - rewrite DVB channel switching to use an integer value
       `--dvbin-channel-switch-offset` for switching instead of the old
       stream controls which are now gone. Cycling this property up or down will

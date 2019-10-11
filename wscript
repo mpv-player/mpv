@@ -770,7 +770,7 @@ video_output_features = [
         'name': '--d3d11',
         'desc': 'Direct3D 11 video output',
         'deps': 'win32-desktop && shaderc && spirv-cross',
-        'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_2.h']),
+        'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_6.h']),
     }, {
         'name': '--rpi',
         'desc': 'Raspberry Pi support',

@@ -4708,6 +4708,18 @@ The following video options are currently all specific to ``--vo=gpu`` and
     functionality to receive a device, such as D3D11VA or DXVA2's DXGI
     mode, will be affected by this choice.
 
+``--d3d11-output-format=<auto|rgba8|bgra8|rgb10_a2|rgba16f>``
+    Select a specific D3D11 output format to utilize for D3D11 rendering.
+    "auto" is the default, which will pick either rgba8 or rgb10_a2 depending
+    on the configured desktop bit depth. rgba16f and bgra8 are left out of
+    the autodetection logic, and are available for manual testing.
+
+    .. note::
+
+        Desktop bit depth querying is only available from an API available
+        from Windows 10. Thus on older systems it will only automatically
+        utilize the rgba8 output format.
+
 ``--d3d11va-zero-copy=<yes|no>``
     By default, when using hardware decoding with ``--gpu-api=d3d11``, the
     video image will be copied (GPU-to-GPU) from the decoder surface to a
