@@ -91,6 +91,7 @@ int reinit_video_filters(struct MPContext *mpctx)
 static void vo_chain_reset_state(struct vo_chain *vo_c)
 {
     vo_seek_reset(vo_c->vo);
+    vo_c->underrun = false;
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -1003,8 +1004,13 @@ void write_video(struct MPContext *mpctx)
     if (r < 0)
         goto error;
 
-    if (r == VD_WAIT) // Demuxer will wake us up for more packets to decode.
+    if (r == VD_WAIT) {
+        // Heuristic to detect underruns.
+        if (mpctx->video_status == STATUS_PLAYING && !vo_still_displaying(vo))
+            vo_c->underrun = true;
+        // Demuxer will wake us up for more packets to decode.
         return;
+    }
 
     if (r == VD_EOF) {
         if (check_for_hwdec_fallback(mpctx))

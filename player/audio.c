@@ -181,6 +181,7 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
     ao_c->last_out_pts = MP_NOPTS_VALUE;
     TA_FREEP(&ao_c->output_frame);
     ao_c->out_eof = false;
+    ao_c->underrun = false;
 
     mp_audio_buffer_clear(ao_c->ao_buffer);
 }
@@ -855,7 +856,14 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
 
     int playsize = ao_get_space(mpctx->ao);
 
-    ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN);
+    if (ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN))
+        ao_c->underrun = true;
+
+    // Stop feeding data if an underrun happened. Something else needs to
+    // "unblock" audio after underrun. handle_update_cache() does this and can
+    // take the network state into account.
+    if (ao_c->underrun)
+        return;
 
     int skip = 0;
     bool sync_known = get_sync_samples(mpctx, &skip);

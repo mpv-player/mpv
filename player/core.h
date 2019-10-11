@@ -183,6 +183,8 @@ struct vo_chain {
     bool is_coverart;
     // - video consists of sparse still images
     bool is_sparse;
+
+    bool underrun;
 };
 
 // Like vo_chain, for audio.
@@ -206,6 +208,8 @@ struct ao_chain {
     struct track *track;
     struct mp_pin *filter_src;
     struct mp_pin *dec_src;
+
+    bool underrun;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -423,6 +427,7 @@ typedef struct MPContext {
     bool playing_msg_shown;
 
     bool paused_for_cache;
+    bool demux_underrun;
     double cache_stop_time;
     int cache_buffer;
 

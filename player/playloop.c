@@ -660,17 +660,35 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     vo_redraw(mpctx->video_out);
 }
 
+static void clear_underruns(struct MPContext *mpctx)
+{
+    if (mpctx->ao_chain && mpctx->ao_chain->underrun) {
+        mpctx->ao_chain->underrun = false;
+        mp_wakeup_core(mpctx);
+    }
+
+    if (mpctx->vo_chain && mpctx->vo_chain->underrun) {
+        mpctx->vo_chain->underrun = false;
+        mp_wakeup_core(mpctx);
+    }
+}
+
 static void handle_update_cache(struct MPContext *mpctx)
 {
     bool force_update = false;
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->demuxer)
+
+    if (!mpctx->demuxer) {
+        clear_underruns(mpctx);
         return;
+    }
 
     double now = mp_time_sec();
 
     struct demux_reader_state s;
     demux_get_reader_state(mpctx->demuxer, &s);
+
+    mpctx->demux_underrun |= s.underrun;
 
     int cache_buffer = 100;
     bool use_pause_on_low_cache = demux_is_network_cached(mpctx->demuxer) &&
@@ -690,16 +708,42 @@ static void handle_update_cache(struct MPContext *mpctx)
 
     // Enter buffering state only if there actually was an underrun (or if
     // initial caching before playback restart is used).
-    if (is_low && !mpctx->paused_for_cache && mpctx->restart_complete)
-        is_low = s.underrun;
+    bool need_wait = is_low;
+    if (is_low && !mpctx->paused_for_cache && mpctx->restart_complete) {
+        // Wait only if an output underrun was registered. (Or if there is no
+        // underrun detection.)
+        bool output_underrun = false;
 
-    if (mpctx->paused_for_cache != is_low) {
-        mpctx->paused_for_cache = is_low;
+        if (mpctx->ao_chain) {
+            output_underrun |=
+                !(mpctx->ao && ao_get_reports_underruns(mpctx->ao)) ||
+                mpctx->ao_chain->underrun;
+        }
+        if (mpctx->vo_chain)
+            output_underrun |= mpctx->vo_chain->underrun;
+
+        // Output underruns could be sporadic (unrelated to demuxer buffer state
+        // and for example caused by slow decoding), so use a past demuxer
+        // underrun as indication that the underrun was possibly due to a
+        // demuxer underrun.
+        need_wait = mpctx->demux_underrun && output_underrun;
+    }
+
+    // Let the underrun flag "stick" around until the cache has fully recovered.
+    // See logic where demux_underrun is used.
+    if (!is_low)
+        mpctx->demux_underrun = false;
+
+    if (mpctx->paused_for_cache != need_wait) {
+        mpctx->paused_for_cache = need_wait;
         update_internal_pause_state(mpctx);
         force_update = true;
-        if (is_low)
+        if (mpctx->paused_for_cache)
             mpctx->cache_stop_time = now;
     }
+
+    if (!mpctx->paused_for_cache)
+        clear_underruns(mpctx);
 
     if (mpctx->paused_for_cache) {
         cache_buffer =
