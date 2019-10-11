@@ -141,7 +141,8 @@ static void handle_underrun(struct ao *ao)
     struct priv *p = ao->priv;
 
     if (!p->final_chunk_written) {
-        MP_WARN(ao, "Device underrun detected.\n");
+        ao_underrun_event(ao);
+
         int err = snd_pcm_prepare(p->alsa);
         CHECK_ALSA_ERROR("pcm prepare error");
     alsa_error: ;
@@ -1263,6 +1264,7 @@ const struct ao_driver audio_out_alsa = {
     .wait      = audio_wait,
     .wakeup    = ao_wakeup_poll,
     .list_devs = list_devs,
+    .reports_underruns = true,
     .priv_size = sizeof(struct priv),
     .global_opts = &ao_alsa_conf,
 };
