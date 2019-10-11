@@ -970,6 +970,8 @@ static int get_space(struct ao *ao)
         check_device_present(ao, space);
         goto alsa_error;
     }
+    if (space == -EPIPE)
+        handle_underrun(ao);
 
     if (space > p->buffersize || space < 0) // Buffer underrun?
         space = p->buffersize;
