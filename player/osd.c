@@ -237,6 +237,8 @@ static char *get_term_status_msg(struct MPContext *mpctx)
 
         if (s.ts_duration < 0) {
             saddf(&line, "???");
+        } else if (s.ts_duration < 10) {
+            saddf(&line, "%2.1fs", s.ts_duration);
         } else {
             saddf(&line, "%2ds", (int)s.ts_duration);
         }
