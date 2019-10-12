@@ -30,7 +30,10 @@ local safe_protos = Set {
 }
 
 local function exec(args)
-    local ret = utils.subprocess({args = args})
+    local ret = mp.command_native({name = "subprocess",
+                                   args = args,
+                                   capture_stdout = true,
+                                   capture_stderr = true})
     return ret.status, ret.stdout, ret, ret.killed_by_us
 end
 
@@ -446,6 +449,26 @@ local function add_single_video(json)
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
 end
 
+local function check_version(ytdl_path)
+    local command = {
+        name = "subprocess",
+        capture_stdout = true,
+        args = {ytdl_path, "--version"}
+    }
+    local version_string = mp.command_native(command).stdout
+    local year, month, day = string.match(version_string, "(%d+).(%d+).(%d+)")
+
+    -- sanity check
+    if (tonumber(year) < 2000) or (tonumber(month) > 12) or
+        (tonumber(day) > 31) then
+        return
+    end
+    local version_ts = os.time{year=year, month=month, day=day}
+    if (os.difftime(os.time(), version_ts) > 60*60*24*90) then
+        msg.warn("It appears that your youtube-dl version is severely out of date.")
+    end
+end
+
 function run_ytdl_hook(url)
     local start_time = os.clock()
 
@@ -521,8 +544,11 @@ function run_ytdl_hook(url)
     end
 
     if (es < 0) or (json == nil) or (json == "") then
+        -- trim our stderr to avoid spurious newlines
+        ytdl_err = result.stderr:gsub("^%s*(.-)%s*$", "%1")
+        msg.error(ytdl_err)
         local err = "youtube-dl failed: "
-        if result.error and result.error == "init" then
+        if result.error_string and result.error_string == "init" then
             err = err .. "not found or not enough permissions"
         elseif not result.killed_by_us then
             err = err .. "unexpected error ocurred"
@@ -530,6 +556,9 @@ function run_ytdl_hook(url)
             err = string.format("%s returned '%d'", err, es)
         end
         msg.error(err)
+        if string.find(ytdl_err, "yt%-dl%.org/bug") then
+            check_version(ytdl.path)
+        end
         return
     end
 
@@ -537,6 +566,7 @@ function run_ytdl_hook(url)
 
     if (json == nil) then
         msg.error("failed to parse JSON data: " .. err)
+        check_version(ytdl.path)
         return
     end
 
