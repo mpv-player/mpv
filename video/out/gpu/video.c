@@ -291,6 +291,8 @@ struct gl_video {
 
     bool dsi_warned;
     bool broken_frame; // temporary error state
+
+    bool colorspace_override_warned;
 };
 
 static const struct gl_video_opts gl_video_opts_def = {
@@ -2496,18 +2498,43 @@ static void pass_scale_main(struct gl_video *p)
 // rendering)
 // If OSD is true, ignore any changes that may have been made to the video
 // by previous passes (i.e. linear scaling)
-static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
+static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
+                             struct mp_colorspace fbo_csp, bool osd)
 {
     struct ra *ra = p->ra;
 
-    // Figure out the target color space from the options, or auto-guess if
-    // none were set
+    // Configure the destination according to the FBO color space,
+    // unless specific transfer function, primaries or target peak
+    // is set. If values are set to _AUTO, the most likely intended
+    // values are guesstimated later in this function.
     struct mp_colorspace dst = {
-        .gamma = p->opts.target_trc,
-        .primaries = p->opts.target_prim,
+        .gamma = p->opts.target_trc == MP_CSP_TRC_AUTO ?
+                 fbo_csp.gamma : p->opts.target_trc,
+        .primaries = p->opts.target_prim == MP_CSP_PRIM_AUTO ?
+                     fbo_csp.primaries : p->opts.target_prim,
         .light = MP_CSP_LIGHT_DISPLAY,
-        .sig_peak = p->opts.target_peak / MP_REF_WHITE,
+        .sig_peak = !p->opts.target_peak ?
+                    fbo_csp.sig_peak : p->opts.target_peak / MP_REF_WHITE,
     };
+
+    if (!p->colorspace_override_warned &&
+        ((fbo_csp.gamma && dst.gamma != fbo_csp.gamma) ||
+         (fbo_csp.primaries && dst.primaries != fbo_csp.primaries)))
+    {
+        MP_WARN(p, "One or more colorspace value is being overridden "
+                   "by user while the FBO provides colorspace information: "
+                   "transfer function: (dst: %s, fbo: %s), "
+                   "primaries: (dst: %s, fbo: %s). "
+                   "Rendering can lead to incorrect results!\n",
+                m_opt_choice_str(mp_csp_trc_names,  dst.gamma),
+                m_opt_choice_str(mp_csp_trc_names,  fbo_csp.gamma),
+                m_opt_choice_str(mp_csp_prim_names, dst.primaries),
+                m_opt_choice_str(mp_csp_prim_names, fbo_csp.primaries));
+        p->colorspace_override_warned = true;
+    }
+
+    if (dst.gamma == MP_CSP_TRC_HLG)
+        dst.light = MP_CSP_LIGHT_SCENE_HLG;
 
     if (p->use_lut_3d) {
         // The 3DLUT is always generated against the video's original source
@@ -2797,7 +2824,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
                 .light = MP_CSP_LIGHT_DISPLAY,
             };
 
-            pass_colormanage(p, csp_srgb, true);
+            pass_colormanage(p, csp_srgb, fbo.color_space, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }
@@ -2948,7 +2975,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color, false);
+    pass_colormanage(p, p->image_params.color, fbo.color_space, false);
 
     // Since finish_pass_fbo doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
