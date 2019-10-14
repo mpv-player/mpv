@@ -4705,6 +4705,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Will pick the default adapter if unset. Alternatives are listed
     when the name "help" is given.
 
+    Checks for matches based on the start of the string, case
+    insensitive. Thus, if the description of the adapter starts with
+    the vendor name, that can be utilized as the selection parameter.
+
     Hardware decoders utilizing the D3D11 rendering abstraction's helper
     functionality to receive a device, such as D3D11VA or DXVA2's DXGI
     mode, will be affected by this choice.
