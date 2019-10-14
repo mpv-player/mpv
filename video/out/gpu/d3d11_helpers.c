@@ -201,10 +201,10 @@ static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log,
             bstr_xappend_asprintf(NULL, listing,
                                   "Adapter %u: vendor: %u, description: %s\n",
                                   adapter_num, desc.VendorId,
-                                  adapter_description ? adapter_description : "<No Description>");
+                                  adapter_description);
         }
 
-        if (adapter_description && requested_adapter_name.len &&
+        if (requested_adapter_name.len &&
             bstr_case_startswith(bstr0(adapter_description),
                                  requested_adapter_name))
         {
