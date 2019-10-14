@@ -22,6 +22,7 @@
 #include <linux/input.h>
 #include <time.h>
 #include "common/msg.h"
+#include "options/m_config.h"
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "osdep/io.h"
@@ -40,6 +41,20 @@
 
 // Generated from presentation-time.xml
 #include "video/out/wayland/presentation-time.h"
+
+#define OPT_BASE_STRUCT struct wayland_opts
+const struct m_sub_options wayland_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_INTRANGE("wayland-frame-wait-offset", frame_offset, 0, -500, 3000),
+        OPT_FLAG("wayland-disable-vsync", disable_vsync, 0),
+        {0},
+    },
+    .size = sizeof(struct wayland_opts),
+    .defaults = &(struct wayland_opts) {
+        .frame_offset = 1000,
+        .disable_vsync = false,
+    },
+};
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
@@ -1100,6 +1115,7 @@ int vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
 
+    wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
@@ -1511,14 +1527,14 @@ void vo_wayland_wakeup(struct vo *vo)
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
 
-void vo_wayland_wait_frame(struct vo_wayland_state *wl)
+void vo_wayland_wait_frame(struct vo_wayland_state *wl, int frame_offset)
 {
     struct pollfd fds[1] = {
         {.fd = wl->display_fd,     .events = POLLIN },
     };
 
     double vblank_time = 1e6 / wl->current_output->refresh_rate;
-    int64_t finish_time = mp_time_us() + vblank_time + 1000;
+    int64_t finish_time = mp_time_us() + vblank_time + (int64_t)frame_offset;
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
 

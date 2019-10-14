@@ -25,6 +25,11 @@
 #include "vo.h"
 #include "input/event.h"
 
+struct wayland_opts {
+    int frame_offset;
+    int disable_vsync;
+};
+
 struct vo_wayland_sync {
     int64_t ust;
     int64_t msc;
@@ -56,6 +61,7 @@ struct vo_wayland_state {
     struct wl_shm        *shm;
     struct wl_compositor *compositor;
     struct wl_registry   *registry;
+    struct wayland_opts  *opts;
 
     /* State */
     struct mp_rect geometry;
@@ -136,7 +142,7 @@ void vo_wayland_check_events(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
-void vo_wayland_wait_frame(struct vo_wayland_state *wl);
+void vo_wayland_wait_frame(struct vo_wayland_state *wl, int frame_offset);
 void wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_sync_shift(struct vo_wayland_state *wl);
 void queue_new_sync(struct vo_wayland_state *wl);

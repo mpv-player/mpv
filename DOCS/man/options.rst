@@ -4728,6 +4728,21 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Currently only relevant for ``--gpu-api=d3d11``.
 
+``--wayland-frame-wait-offset=<-100..3000>``
+    Control the amount of offset (in microseconds) to add to wayland's frame wait
+    (default 1000). The wayland context assumes that if frame callback or presentation
+    feedback isn't received within a certain amount of time then the video is being
+    rendered offscreen. The time it waits is equal to how long it takes your monitor
+    to display a frame (i.e. 1/refresh rate) plus the offset. In general, staying
+    close to your monitor's refresh rate is preferred, but with a small offset in
+    case a frame takes a little long to display.
+
+``--wayland-disable-vsync=<yes|no>``
+    Disable vsync for the wayland contexts (default: no). Useful for benchmarking
+    the wayland context when combined with ``video-sync=display-desync``,
+    ``--no-audio``, and ``--untimed=yes``. Only works with ``--gpu-context=wayland``
+    and ``--gpu-context=waylandvk``.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
