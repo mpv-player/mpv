@@ -106,7 +106,7 @@ static int d3d11_validate_adapter(struct mp_log *log,
     }
 
     adapter_matched = mp_d3d11_list_or_verify_adapters(log,
-                                                       help ? NULL : &param,
+                                                       help ? bstr0(NULL) : param,
                                                        help ? &listing : NULL);
 
     if (help) {
