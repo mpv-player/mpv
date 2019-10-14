@@ -92,6 +92,7 @@ extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options macos_conf;
 extern const struct m_sub_options android_conf;
+extern const struct m_sub_options wayland_conf;
 extern const struct m_sub_options vaapi_conf;
 
 static const struct m_sub_options screenshot_conf = {
@@ -748,6 +749,10 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_EGL_ANDROID
     OPT_SUBSTRUCT("", android_opts, android_conf, 0),
+#endif
+
+#if HAVE_WAYLAND
+    OPT_SUBSTRUCT("", wayland_opts, wayland_conf, 0),
 #endif
 
 #if HAVE_GL_WIN32

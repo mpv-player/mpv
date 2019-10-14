@@ -139,7 +139,8 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
     }
 
     eglSwapBuffers(p->egl_display, p->egl_surface);
-    vo_wayland_wait_frame(wl);
+    if (!wl->opts->disable_vsync)
+        vo_wayland_wait_frame(wl, wl->opts->frame_offset);
 
     if (wl->presentation)
         wayland_sync_swap(wl);
