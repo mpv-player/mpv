@@ -204,8 +204,9 @@ static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log,
                                   adapter_description ? adapter_description : "<No Description>");
         }
 
-        if (adapter_description &&
-            bstr_equals0(requested_adapter_name, adapter_description))
+        if (adapter_description && requested_adapter_name.len &&
+            bstr_case_startswith(bstr0(adapter_description),
+                                 requested_adapter_name))
         {
             picked_adapter = adapter;
             break;
@@ -282,7 +283,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
     adapter = get_d3d11_adapter(log, bstr0(adapter_name), NULL);
 
     if (adapter_name && !adapter) {
-        mp_warn(log, "Adapter '%s' was not found in the system! "
+        mp_warn(log, "Adapter matching '%s' was not found in the system! "
                      "Will fall back to the default adapter.\n",
                  adapter_name);
     }

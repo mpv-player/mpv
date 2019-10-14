@@ -117,7 +117,7 @@ static int d3d11_validate_adapter(struct mp_log *log,
     }
 
     if (!adapter_matched) {
-        mp_err(log, "No adapter with name '%.*s'!\n", BSTR_P(param));
+        mp_err(log, "No adapter matching '%.*s'!\n", BSTR_P(param));
     }
 
     return adapter_matched ? 0 : M_OPT_INVALID;
