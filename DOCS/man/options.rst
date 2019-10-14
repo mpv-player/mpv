@@ -4003,9 +4003,9 @@ Cache
 ``--cache=<yes|no|auto>``
     Decide whether to use network cache settings (default: auto).
 
-    If enabled, use the maximum of ``--cache-secs`` and ``--demuxer-max-bytes``
-    for the cache size, and ``--demuxer-seekable-cache=auto`` behaves as if it
-    was set to ``yes``. If disabled, ``--cache-pause`` and related are
+    If enabled, use up to ``--cache-secs`` for the cache size (but still limited
+    to ``--demuxer-max-bytes``). ``--demuxer-seekable-cache=auto`` behaves as if
+    it was set to ``yes``. If disabled, ``--cache-pause`` and related are
     implicitly disabled.
 
     The ``auto`` choice enables this depending on whether the stream is thought
@@ -4024,7 +4024,8 @@ Cache
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
     is enabled and the value is larger. The default value is set to something
     very high, so the actually achieved readahead will usually be limited by
-    the value of the ``--demuxer-max-bytes`` option.
+    the value of the ``--demuxer-max-bytes`` option. Setting this option is
+    usually only useful for limiting readahead.
 
 ``--cache-on-disk=<yes|no>``
     Write packet data to a temporary file, instead of keeping them in memory.
@@ -4070,8 +4071,8 @@ Cache
     to control how long the player rebuffers if ``--cache-pause`` is enabled,
     and the demuxer underruns. If the given time is higher than the maximum
     set with ``--cache-secs`` or  ``--demuxer-readahead-secs``, or prefetching
-    ends before that for some other reason (like file end), playback resumes
-    earlier.
+    ends before that for some other reason (like file end or maximum configured
+    cache size reached), playback resumes earlier.
 
 ``--cache-pause-initial=<yes|no>``
     Enter "buffering" mode before starting playback (default: no). This can be
