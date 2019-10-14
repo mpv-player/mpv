@@ -209,10 +209,14 @@ static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log,
                                  requested_adapter_name))
         {
             picked_adapter = adapter;
-            break;
         }
 
         talloc_free(adapter_description);
+
+        if (picked_adapter) {
+            break;
+        }
+
         SAFE_RELEASE(adapter);
     }
 
