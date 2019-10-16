@@ -58,10 +58,10 @@ struct priv_owner {
     EGLBoolean (EGLAPIENTRY *StreamConsumerGLTextureExternalAttribsNV)
                 (EGLDisplay dpy, EGLStreamKHR stream, EGLAttrib *attrib_list);
 
-    // EGL_ANGLE_stream_producer_d3d_texture_nv12
-    EGLBoolean (EGLAPIENTRY *CreateStreamProducerD3DTextureNV12ANGLE)
+    // EGL_ANGLE_stream_producer_d3d_texture
+    EGLBoolean (EGLAPIENTRY *CreateStreamProducerD3DTextureANGLE)
             (EGLDisplay dpy, EGLStreamKHR stream, const EGLAttrib *attrib_list);
-    EGLBoolean (EGLAPIENTRY *StreamPostD3DTextureNV12ANGLE)
+    EGLBoolean (EGLAPIENTRY *StreamPostD3DTextureANGLE)
             (EGLDisplay dpy, EGLStreamKHR stream, void *texture,
              const EGLAttrib *attrib_list);
 };
@@ -102,7 +102,7 @@ static int init(struct ra_hwdec *hw)
 
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
     if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||
-        !strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") ||
+        !gl_check_extension(exts, "EGL_ANGLE_stream_producer_d3d_texture") ||
         !(strstr(gl->extensions, "GL_OES_EGL_image_external_essl3") ||
           gl->es == 200) ||
         !strstr(exts, "EGL_EXT_device_query") ||
@@ -119,16 +119,16 @@ static int init(struct ra_hwdec *hw)
         (void *)eglGetProcAddress("eglStreamConsumerReleaseKHR");
     p->StreamConsumerGLTextureExternalAttribsNV =
         (void *)eglGetProcAddress("eglStreamConsumerGLTextureExternalAttribsNV");
-    p->CreateStreamProducerD3DTextureNV12ANGLE =
-        (void *)eglGetProcAddress("eglCreateStreamProducerD3DTextureNV12ANGLE");
-    p->StreamPostD3DTextureNV12ANGLE =
-        (void *)eglGetProcAddress("eglStreamPostD3DTextureNV12ANGLE");
+    p->CreateStreamProducerD3DTextureANGLE =
+        (void *)eglGetProcAddress("eglCreateStreamProducerD3DTextureANGLE");
+    p->StreamPostD3DTextureANGLE =
+        (void *)eglGetProcAddress("eglStreamPostD3DTextureANGLE");
 
     if (!p->CreateStreamKHR || !p->DestroyStreamKHR ||
         !p->StreamConsumerAcquireKHR || !p->StreamConsumerReleaseKHR ||
         !p->StreamConsumerGLTextureExternalAttribsNV ||
-        !p->CreateStreamProducerD3DTextureNV12ANGLE ||
-        !p->StreamPostD3DTextureNV12ANGLE)
+        !p->CreateStreamProducerD3DTextureANGLE ||
+        !p->StreamPostD3DTextureANGLE)
     {
         MP_ERR(hw, "Failed to load some EGLStream functions.\n");
         goto fail;
@@ -211,7 +211,15 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     struct priv *p = mapper->priv;
     GL *gl = ra_gl_get(mapper->ra);
 
-    if (mapper->src_params.hw_subfmt != IMGFMT_NV12) {
+    struct ra_imgfmt_desc desc = {0};
+
+    ra_get_imgfmt_desc(mapper->ra, mapper->src_params.hw_subfmt, &desc);
+
+    // ANGLE hardcodes the list of accepted formats. This is a subset.
+    if ((mapper->src_params.hw_subfmt != IMGFMT_NV12 &&
+         mapper->src_params.hw_subfmt != IMGFMT_P010) ||
+        desc.num_planes < 1 || desc.num_planes > 2)
+    {
         MP_FATAL(mapper, "Format not supported.\n");
         return -1;
     }
@@ -223,12 +231,17 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     // The texture units need to be bound during init only, and are free for
     // use again after the initialization here is done.
     int texunits = 0; // [texunits, texunits + num_planes)
-    int num_planes = 2;
+    int num_planes = desc.num_planes;
     int gl_target = GL_TEXTURE_EXTERNAL_OES;
 
     p->egl_stream = o->CreateStreamKHR(o->egl_display, (EGLint[]){EGL_NONE});
     if (!p->egl_stream)
         goto fail;
+
+    EGLAttrib attrs[(2 + 2 + 1) * 2] = {
+        EGL_COLOR_BUFFER_TYPE,          EGL_YUV_BUFFER_EXT,
+        EGL_YUV_NUMBER_OF_PLANES_EXT,   num_planes,
+    };
 
     for (int n = 0; n < num_planes; n++) {
         gl->ActiveTexture(GL_TEXTURE0 + texunits + n);
@@ -238,22 +251,18 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         gl->TexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        attrs[(2 + n) * 2 + 0] = EGL_YUV_PLANE0_TEXTURE_UNIT_NV + n;
+        attrs[(2 + n) * 2 + 1] = texunits + n;
     }
 
-    EGLAttrib attrs[] = {
-        EGL_COLOR_BUFFER_TYPE,          EGL_YUV_BUFFER_EXT,
-        EGL_YUV_NUMBER_OF_PLANES_EXT,   num_planes,
-        EGL_YUV_PLANE0_TEXTURE_UNIT_NV, texunits + 0,
-        EGL_YUV_PLANE1_TEXTURE_UNIT_NV, texunits + 1,
-        EGL_NONE,
-    };
+    attrs[(2 + num_planes) * 2 + 0] = EGL_NONE;
 
     if (!o->StreamConsumerGLTextureExternalAttribsNV(o->egl_display, p->egl_stream,
                                                      attrs))
         goto fail;
 
-    if (!o->CreateStreamProducerD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
-                                                    (EGLAttrib[]){EGL_NONE}))
+    if (!o->CreateStreamProducerD3DTextureANGLE(o->egl_display, p->egl_stream,
+                                                (EGLAttrib[]){EGL_NONE}))
         goto fail;
 
     for (int n = 0; n < num_planes; n++) {
@@ -282,12 +291,12 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE, d3d_subindex,
         EGL_NONE,
     };
-    if (!o->StreamPostD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
-                                          (void *)d3d_tex, attrs))
+    if (!o->StreamPostD3DTextureANGLE(o->egl_display, p->egl_stream,
+                                      (void *)d3d_tex, attrs))
     {
         // ANGLE changed the enum ID of this without warning at one point.
         attrs[0] = attrs[0] == 0x33AB ? 0x3AAB : 0x33AB;
-        if (!o->StreamPostD3DTextureNV12ANGLE(o->egl_display, p->egl_stream,
+        if (!o->StreamPostD3DTextureANGLE(o->egl_display, p->egl_stream,
                                               (void *)d3d_tex, attrs))
             return -1;
     }
