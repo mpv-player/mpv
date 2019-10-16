@@ -31,7 +31,6 @@ extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
 extern const struct ra_hwdec_driver ra_hwdec_vdpau;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11egl;
-extern const struct ra_hwdec_driver ra_hwdec_d3d11eglrgb;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11va;
@@ -51,7 +50,6 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_D3D_HWACCEL
  #if HAVE_EGL_ANGLE
     &ra_hwdec_d3d11egl,
-    &ra_hwdec_d3d11eglrgb,
   #if HAVE_D3D9_HWACCEL
     &ra_hwdec_dxva2egl,
   #endif

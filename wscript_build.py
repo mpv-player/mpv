@@ -462,7 +462,6 @@ def build(ctx):
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec_d3d11egl.c",   "d3d-hwaccel && egl-angle" ),
-        ( "video/out/opengl/hwdec_d3d11eglrgb.c","d3d-hwaccel && egl-angle" ),
         ( "video/out/opengl/hwdec_drmprime_drm.c","drmprime && drm" ),
         ( "video/out/opengl/hwdec_dxva2egl.c",   "d3d9-hwaccel && egl-angle" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop-d3d9" ),
