@@ -65,9 +65,6 @@ struct subfmt_conv {
 };
 
 static const struct subfmt_conv subfmt_converters[] = {
-#if HAVE_D3D_HWACCEL
-    {IMGFMT_D3D11, vf_d3d11_create_outconv},
-#endif
     {0}
 };
 

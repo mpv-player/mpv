@@ -52,7 +52,6 @@ struct priv {
     struct opts *opts;
 
     ID3D11Device *vo_dev;
-    const int *vo_formats;
 
     ID3D11DeviceContext *device_ctx;
     ID3D11VideoDevice *video_dev;
@@ -63,8 +62,6 @@ struct priv {
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
 
     DXGI_FORMAT out_format;
-    bool out_shared;
-    bool out_rgb;
 
     bool require_filtering;
 
@@ -99,7 +96,6 @@ static struct mp_image *alloc_pool(void *pctx, int fmt, int w, int h)
         .SampleDesc = { .Count = 1 },
         .Usage = D3D11_USAGE_DEFAULT,
         .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-        .MiscFlags = p->out_shared ? D3D11_RESOURCE_MISC_SHARED : 0,
     };
     hr = ID3D11Device_CreateTexture2D(p->vo_dev, &texdesc, NULL, &texture);
     if (FAILED(hr))
@@ -221,21 +217,9 @@ static int recreate_video_proc(struct mp_filter *vf)
     ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
                                                          p->video_proc,
                                                          0, &csp);
-    if (p->out_rgb) {
-        if (p->params.color.space != MP_CSP_BT_601 &&
-            p->params.color.space != MP_CSP_BT_709)
-        {
-            MP_WARN(vf, "Unsupported video colorspace (%s/%s). Consider "
-                    "disabling hardware decoding, or using "
-                    "--hwdec=d3d11va-copy to get correct output.\n",
-                    m_opt_choice_str(mp_csp_names, p->params.color.space),
-                    m_opt_choice_str(mp_csp_levels_names, p->params.color.levels));
-        }
-    } else {
-        ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
-                                                             p->video_proc,
-                                                             &csp);
-    }
+    ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
+                                                         p->video_proc,
+                                                         &csp);
 
     return 0;
 fail:
@@ -350,15 +334,6 @@ cleanup:
     return out;
 }
 
-static bool vo_supports(struct priv *p, int subfmt)
-{
-    for (int n = 0; p->vo_formats && p->vo_formats[n]; n++) {
-        if (p->vo_formats[n] == subfmt)
-            return true;
-    }
-    return false;
-}
-
 static void vf_d3d11vpp_process(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -372,17 +347,8 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         p->params = in_fmt->params;
         p->out_params = p->params;
 
-        if (vo_supports(p, IMGFMT_NV12)) {
-            p->out_params.hw_subfmt = IMGFMT_NV12;
-            p->out_format = DXGI_FORMAT_NV12;
-            p->out_shared = false;
-            p->out_rgb = false;
-        } else {
-            p->out_params.hw_subfmt = IMGFMT_RGB0;
-            p->out_format = DXGI_FORMAT_B8G8R8A8_UNORM;
-            p->out_shared = true;
-            p->out_rgb = true;
-        }
+        p->out_params.hw_subfmt = IMGFMT_NV12;
+        p->out_format = DXGI_FORMAT_NV12;
         p->out_params.hw_flags = 0;
 
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt;
@@ -475,8 +441,6 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     p->vo_dev = d3dctx->device;
     ID3D11Device_AddRef(p->vo_dev);
 
-    p->vo_formats = hwctx->supported_formats;
-
     HRESULT hr;
 
     hr = ID3D11Device_QueryInterface(p->vo_dev, &IID_ID3D11VideoDevice,
@@ -539,11 +503,3 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
     },
     .create = vf_d3d11vpp_create,
 };
-
-// Create a filter for the purpose of converting the sub-format for hwdec
-// interops which are incapable of handling some formats (ANGLE).
-struct mp_filter *vf_d3d11_create_outconv(struct mp_filter *parent)
-{
-    // options==NULL is normally not allowed, and specially handled.
-    return vf_d3d11vpp_create(parent, NULL);
-}

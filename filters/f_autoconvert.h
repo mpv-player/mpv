@@ -47,11 +47,7 @@ void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c);
 bool mp_autoconvert_probe_input_video(struct mp_autoconvert *c,
                                       struct mp_image *img);
 
-// Add the formats supported by the hwdec interops (or essentially refine them),
-// and trigger conversion if hw_subfmts mismatch. This is mostly a hack for
-// D3D11/ANGLE (which supports NV12 only).
-// Must be called mp_autoconvert_add_imgfmt(), and overrides them where formats
-// collide.
+// This is pointless.
 struct mp_hwdec_devices;
 void mp_autoconvert_add_vo_hwdec_subfmts(struct mp_autoconvert *c,
                                          struct mp_hwdec_devices *devs);
@@ -75,6 +71,3 @@ void mp_autoconvert_clear(struct mp_autoconvert *c);
 
 // See mp_autoconvert.on_audio_format_change.
 void mp_autoconvert_format_change_continue(struct mp_autoconvert *c);
-
-// vf_d3d11vpp.c
-struct mp_filter *vf_d3d11_create_outconv(struct mp_filter *parent);
