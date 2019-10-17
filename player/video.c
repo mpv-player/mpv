@@ -118,7 +118,6 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
     mpctx->display_sync_drift_dir = 0;
-    mpctx->display_sync_broken = false;
 
     mpctx->video_status = mpctx->vo_chain ? STATUS_SYNCING : STATUS_EOF;
 }
@@ -781,7 +780,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     mpctx->display_sync_active = false;
 
-    if (!VS_IS_DISP(mode) || mpctx->display_sync_broken)
+    if (!VS_IS_DISP(mode))
         return;
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
@@ -809,12 +808,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
             mpctx->speed_factor_v = best;
     }
 
-    double av_diff = mpctx->last_av_difference;
-    if (fabs(av_diff) > 0.5) {
-        mpctx->display_sync_broken = true;
-        return;
-    }
-
     // Determine for how many vsyncs a frame should be displayed. This can be
     // e.g. 2 for 30hz on a 60hz display. It can also be 0 if the video
     // framerate is higher than the display framerate.
@@ -830,6 +823,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
             mpctx->display_sync_error, mpctx->display_sync_error / vsync,
             mpctx->display_sync_error / frame_duration);
 
+    double av_diff = mpctx->last_av_difference;
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
     // Intended number of additional display frames to drop (<0) or repeat (>0)

@@ -5789,10 +5789,24 @@ Miscellaneous
     making a some idealized assumptions, which may not always apply in reality.
     Behavior can depend on the VO and the system's video and audio drivers.
     Media files must use constant framerate. Section-wise VFR might work as well
-    with some container formats (but not e.g. mkv). If the sync code detects
-    severe A/V desync, or the framerate cannot be detected, the player
-    automatically reverts to ``audio`` mode for some time or permanently. These
-    modes also require a vsync blocked presentation mode. For OpenGL, this
+    with some container formats (but not e.g. mkv).
+
+    Under some circumstances, the player automatically reverts to ``audio`` mode
+    for some time or permanently. This can happen on very low framerate video,
+    or if the framerate cannot be detected.
+
+    Also in display-sync modes it can happen that interruptions to video
+    playback (such as toggling fullscreen mode, or simply resizing the window)
+    will skip the video frames that should have been displayed, while ``audio``
+    mode will display them after the renderer has resumed (typically resulting
+    in a short A/V desync and the video "catching up").
+
+    Before mpv 0.30.0, there was a fallback to ``audio`` mode on severe A/V
+    desync. This was changed for the sake of not sporadically stopping. Now,
+    ``display-desync`` does what it promises and may desync with audio by an
+    arbitrary amount, until it is manually fixed with a seek.
+
+    These modes also require a vsync blocked presentation mode. For OpenGL, this
     translates to ``--opengl-swapinterval=1``. For Vulkan, it translates to
     ``--vulkan-swap-mode=fifo`` (or ``fifo-relaxed``).
 
