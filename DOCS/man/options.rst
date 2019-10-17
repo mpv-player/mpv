@@ -1040,23 +1040,14 @@ Video
         cases, hardware decoding can also reduce the bit depth of the decoded
         image, which can introduce banding or precision loss for 10-bit files.
 
-        ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
-        video filter is active in general), it forces RGB conversion. The latter
-        currently does not treat certain colorspaces like BT.2020 correctly
-        (which is mostly a mpv-specific restriction). The ``vdpauprb`` video
-        filter retrieves image data without RGB conversion and is safe (but
-        precludes use of vdpau postprocessing).
+        ``vdpau`` is usually safe, exycept for 10 bit video. If deinterlacing
+        enabled (or the ``vdpaupp`` video filter is active in general), it
+        forces RGB conversion. The latter currently does not treat certain
+        colorspaces like BT.2020 correctly.
 
-        ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the
-        logs. If ``vaapi-glx`` is indicated, and the video colorspace is either
-        BT.601 or BT.709, a forced, low-quality but correct RGB conversion is
-        performed. Otherwise, the result will be totally incorrect.
-
-        ``d3d11va`` is safe when used with the ``d3d11`` backend. If used with
-        ``angle`` is it usually safe, except that 10 bit input (HEVC main 10
-        profiles) will be rounded down to 8 bits, which will result in reduced
-        quality. Also note that with very old ANGLE builds (without
-        ``EGL_KHR_stream path``,) all input will be converted to RGB.
+        ``vaapi`` and ``d3d11va`` are safe. Enabling deinterlacing (or simply
+        their respective post-processing filters) will possibly at least reduce
+        color quality by converting the output to a 8 bit format.
 
         ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
         conversion, but actual behavior depends on the GPU drivers. Some drivers
