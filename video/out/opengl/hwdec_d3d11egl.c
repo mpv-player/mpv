@@ -178,7 +178,7 @@ static int init(struct ra_hwdec *hw)
     ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
     ID3D10Multithread_Release(multithread);
 
-    static const int subfmts[] = {IMGFMT_NV12, 0};
+    static const int subfmts[] = {IMGFMT_NV12, IMGFMT_P010, 0};
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
         .av_device_ref = d3d11_wrap_device_ref(p->d3d11_device),
