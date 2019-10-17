@@ -323,6 +323,12 @@ iconv support use --disable-iconv.",
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
+        'name': 'memfd_create',
+        'desc': "Linux's memfd_create()",
+        'deps': 'os-linux',
+        'func': check_statement('sys/mman.h',
+                                'memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING)')
+    }, {
         'name': '--libsmbclient',
         'desc': 'Samba support (makes mpv GPLv3)',
         'deps': 'libdl && gpl',

@@ -77,7 +77,7 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_DIRECT3D
     &video_out_direct3d,
 #endif
-#if HAVE_WAYLAND
+#if HAVE_WAYLAND && HAVE_MEMFD_CREATE
     &video_out_wlshm,
 #endif
 #if HAVE_XV
