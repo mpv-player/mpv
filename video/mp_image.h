@@ -38,20 +38,6 @@
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_INTERLACED 0x20
 
-enum mp_spherical_type {
-    MP_SPHERICAL_AUTO = 0,
-    MP_SPHERICAL_NONE,              // normal video
-    MP_SPHERICAL_UNKNOWN,           // unknown projection
-    MP_SPHERICAL_EQUIRECTANGULAR,   // (untiled)
-};
-
-extern const struct m_opt_choice_alternatives mp_spherical_names[];
-
-struct mp_spherical_params {
-    enum mp_spherical_type type;
-    float ref_angles[3]; // yaw/pitch/roll, refer to AVSphericalMapping
-};
-
 // Describes image parameters that usually stay constant.
 // New fields can be added in the future. Code changing the parameters should
 // usually copy the whole struct, so that fields added later will be preserved.
@@ -65,7 +51,6 @@ struct mp_image_params {
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
-    struct mp_spherical_params spherical;
 };
 
 /* Memory management:

@@ -107,7 +107,6 @@ typedef struct mkv_track {
     uint32_t colorspace;
     int stereo_mode;
     struct mp_colorspace color;
-    struct mp_spherical_params spherical;
 
     uint32_t a_channels, a_bps;
     float a_sfreq;
@@ -603,49 +602,6 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
     }
 }
 
-static void parse_trackprojection(struct demuxer *demuxer, struct mkv_track *track,
-                                  struct ebml_projection *projection)
-{
-    if (projection->n_projection_type) {
-        const char *name;
-        switch (projection->projection_type) {
-        case 0:
-            name = "rectangular";
-            track->spherical.type = MP_SPHERICAL_NONE;
-            break;
-        case 1:
-            name = "equirectangular";
-            track->spherical.type = MP_SPHERICAL_EQUIRECTANGULAR;
-            break;
-        default:
-            name = "unknown";
-            track->spherical.type = MP_SPHERICAL_UNKNOWN;
-        }
-        MP_VERBOSE(demuxer, "|    + ProjectionType: %s (%"PRIu64")\n", name,
-                   projection->projection_type);
-    }
-    if (projection->n_projection_private) {
-        MP_VERBOSE(demuxer, "|    + ProjectionPrivate: %zd bytes\n",
-                   projection->projection_private.len);
-        MP_WARN(demuxer, "Unknown ProjectionPrivate element.\n");
-    }
-    if (projection->n_projection_pose_yaw) {
-        track->spherical.ref_angles[0] = projection->projection_pose_yaw;
-        MP_VERBOSE(demuxer, "|    + ProjectionPoseYaw: %f\n",
-                   projection->projection_pose_yaw);
-    }
-    if (projection->n_projection_pose_pitch) {
-        track->spherical.ref_angles[1] = projection->projection_pose_pitch;
-        MP_VERBOSE(demuxer, "|    + ProjectionPosePitch: %f\n",
-                   projection->projection_pose_pitch);
-    }
-    if (projection->n_projection_pose_roll) {
-        track->spherical.ref_angles[2] = projection->projection_pose_roll;
-        MP_VERBOSE(demuxer, "|    + ProjectionPoseRoll: %f\n",
-                   projection->projection_pose_roll);
-    }
-}
-
 static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_video *video)
 {
@@ -690,8 +646,6 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
     }
     if (video->n_colour)
         parse_trackcolour(demuxer, track, &video->colour);
-    if (video->n_projection)
-        parse_trackprojection(demuxer, track, &video->projection);
 }
 
 /**
@@ -1516,7 +1470,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
     sh_v->stereo_mode = track->stereo_mode;
     sh_v->color = track->color;
-    sh_v->spherical = track->spherical;
 
 done:
     demux_add_sh_stream(demuxer, sh);

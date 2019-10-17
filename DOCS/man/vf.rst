@@ -274,17 +274,6 @@ Available mpv-only filters are:
         but values such as ``[16:9]`` can be passed too (``[...]`` for quoting
         to prevent the option parser from interpreting the ``:`` character).
 
-    ``<spherical-type>``
-        Type of the spherical projection:
-
-        :auto:      As indicated by the file (default)
-        :none:      Normal video
-        :equirect:  Equirectangular
-        :unknown:   Unknown projection
-
-    ``<spherical-yaw>``, ``<spherical-pitch>``, ``<spherical-roll>``
-        Reference angle in degree, if spherical video is used.
-
 ``lavfi=graph[:sws-flags[:o=opts]]``
     Filter video using FFmpeg's libavfilter.
 

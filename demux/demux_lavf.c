@@ -33,7 +33,6 @@
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/replaygain.h>
-#include <libavutil/spherical.h>
 #include <libavutil/display.h>
 #include <libavutil/opt.h>
 
@@ -700,17 +699,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             double r = av_display_rotation_get((uint32_t *)sd);
             if (!isnan(r))
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
-        }
-
-        sd = av_stream_get_side_data(st, AV_PKT_DATA_SPHERICAL, NULL);
-        if (sd) {
-            AVSphericalMapping *sp = (void *)sd;
-            struct mp_spherical_params *mpsp = &sh->codec->spherical;
-            mpsp->type = sp->projection == AV_SPHERICAL_EQUIRECTANGULAR ?
-                            MP_SPHERICAL_EQUIRECTANGULAR : MP_SPHERICAL_UNKNOWN;
-            mpsp->ref_angles[0] = sp->yaw / (float)(1 << 16);
-            mpsp->ref_angles[1] = sp->pitch / (float)(1 << 16);
-            mpsp->ref_angles[2] = sp->roll / (float)(1 << 16);
         }
 
         // This also applies to vfw-muxed mkv, but we can't detect these easily.

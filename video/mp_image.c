@@ -40,14 +40,6 @@
 #include "sws_utils.h"
 #include "fmt-conversion.h"
 
-const struct m_opt_choice_alternatives mp_spherical_names[] = {
-    {"auto",        MP_SPHERICAL_AUTO},
-    {"none",        MP_SPHERICAL_NONE},
-    {"unknown",     MP_SPHERICAL_UNKNOWN},
-    {"equirect",    MP_SPHERICAL_EQUIRECTANGULAR},
-    {0}
-};
-
 // Determine strides, plane sizes, and total required size for an image
 // allocation. Returns total size on success, <0 on error. Unused planes
 // have out_stride/out_plane_size to 0, and out_plane_offset set to -1 up
@@ -522,7 +514,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.p_h = src->params.p_h;
     dst->params.color = src->params.color;
     dst->params.chroma_location = src->params.chroma_location;
-    dst->params.spherical = src->params.spherical;
     dst->nominal_fps = src->nominal_fps;
     // ensure colorspace consistency
     if (mp_image_params_get_forced_csp(&dst->params) !=
@@ -659,12 +650,6 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, " stereo=%s",
                             MP_STEREO3D_NAME_DEF(p->stereo3d, "?"));
         }
-        if (p->spherical.type != MP_SPHERICAL_NONE) {
-            const float *a = p->spherical.ref_angles;
-            mp_snprintf_cat(b, bs, " (%s %f/%f/%f)",
-                            m_opt_choice_str(mp_spherical_names, p->spherical.type),
-                            a[0], a[1], a[2]);
-        }
     } else {
         snprintf(b, bs, "???");
     }
@@ -699,16 +684,6 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     return true;
 }
 
-static bool mp_spherical_equal(const struct mp_spherical_params *p1,
-                               const struct mp_spherical_params *p2)
-{
-    for (int n = 0; n < 3; n++) {
-        if (p1->ref_angles[n] != p2->ref_angles[n])
-            return false;
-    }
-    return p1->type == p2->type;
-}
-
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2)
 {
@@ -719,8 +694,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            mp_colorspace_equal(p1->color, p2->color) &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
-           p1->stereo3d == p2->stereo3d &&
-           mp_spherical_equal(&p1->spherical, &p2->spherical);
+           p1->stereo3d == p2->stereo3d;
 }
 
 // Set most image parameters, but not image format or size.
@@ -894,7 +868,6 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         struct mp_image_params *p = (void *)src->opaque_ref->data;
         dst->params.rotate = p->rotate;
         dst->params.stereo3d = p->stereo3d;
-        dst->params.spherical = p->spherical;
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
     }
