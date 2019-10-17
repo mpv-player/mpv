@@ -73,30 +73,18 @@ static void buffer_destroy(void *p)
     munmap(buf->mpi.planes[0], buf->size);
 }
 
-/* modeled after randname and mkostemps from musl */
-static int alloc_shm(size_t size)
+static int allocate_memfd(size_t size)
 {
-    struct timespec ts;
-    unsigned long r;
-    int i, fd, retries = 100;
-    char template[] = "/mpv-XXXXXX";
+    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    if (fd < 0)
+        return -1;
 
-    do {
-        clock_gettime(CLOCK_REALTIME, &ts);
-        r = ts.tv_nsec * 65537 ^ ((uintptr_t)&ts / 16 + (uintptr_t)template);
-        for (i = 5; i < sizeof(template) - 1; i++, r >>= 5)
-            template[i] = 'A' + (r & 15) + (r & 16) * 2;
+    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
 
-        fd = shm_open(template, O_RDWR | O_CREAT | O_EXCL, 0600);
-        if (fd >= 0) {
-            shm_unlink(template);
-            if (posix_fallocate(fd, 0, size) == 0)
-                return fd;
-            close(fd);
-            break;
-        }
-    } while (--retries && errno == EEXIST);
+    if (posix_fallocate(fd, 0, size) == 0)
+        return fd;
 
+    close(fd);
     return -1;
 }
 
@@ -112,7 +100,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
 
     stride = MP_ALIGN_UP(width * 4, 16);
     size = height * stride;
-    fd = alloc_shm(size);
+    fd = allocate_memfd(size);
     if (fd < 0)
         goto error0;
     data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
