@@ -349,7 +349,6 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
 
         p->out_params.hw_subfmt = IMGFMT_NV12;
         p->out_format = DXGI_FORMAT_NV12;
-        p->out_params.hw_flags = 0;
 
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt;
     }

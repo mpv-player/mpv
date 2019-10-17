@@ -75,12 +75,6 @@ struct hwcontext_create_dev_params {
 // All entries are strictly optional.
 struct hwcontext_fns {
     int av_hwdevice_type;
-    // Set any mp_image fields that require hwcontext specific code, such as
-    // fields or flags not present in AVFrame or AVHWFramesContext in a
-    // portable way. This is called directly after img is converted from an
-    // AVFrame, with all other fields already set. img.hwctx will be set, and
-    // use the correct AV_HWDEVICE_TYPE_.
-    void (*complete_image_params)(struct mp_image *img);
     // Fill in special format-specific requirements.
     void (*refine_hwframes)(struct AVBufferRef *hw_frames_ctx);
     // Returns a AVHWDeviceContext*. Used for copy hwdecs.

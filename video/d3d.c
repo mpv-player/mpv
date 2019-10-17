@@ -112,15 +112,6 @@ AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device)
     return device_ref;
 }
 
-static void d3d11_complete_image_params(struct mp_image *img)
-{
-    AVHWFramesContext *hw_frames = (void *)img->hwctx->data;
-
-    // According to hwcontex_d3d11va.h, this means DXGI_FORMAT_420_OPAQUE.
-    img->params.hw_flags = hw_frames->sw_format == AV_PIX_FMT_YUV420P
-                         ? MP_IMAGE_HW_FLAG_OPAQUE : 0;
-}
-
 static struct AVBufferRef *d3d11_create_standalone(struct mpv_global *global,
         struct mp_log *plog, struct hwcontext_create_dev_params *params)
 {
@@ -152,7 +143,6 @@ static struct AVBufferRef *d3d11_create_standalone(struct mpv_global *global,
 
 const struct hwcontext_fns hwcontext_fns_d3d11 = {
     .av_hwdevice_type       = AV_HWDEVICE_TYPE_D3D11VA,
-    .complete_image_params  = d3d11_complete_image_params,
     .refine_hwframes        = d3d11_refine_hwframes,
     .create_dev             = d3d11_create_standalone,
 };
