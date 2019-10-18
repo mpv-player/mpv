@@ -296,8 +296,9 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
 
         // Now guess the timestamp of the last submitted frame based on the
         // timestamp of the frame at SyncRefreshCount and the frame rate
+        int queued_frames = submit_count - expected_sync_pc;
         int64_t last_queue_display_time_qpc = stats.SyncQPCTime.QuadPart +
-            (submit_count - expected_sync_pc) * p->vsync_duration_qpc;
+            queued_frames * p->vsync_duration_qpc;
 
         // Only set the estimated display time if it's after the last submission
         // time. It could be before if mpv skips a lot of frames.
