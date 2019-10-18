@@ -57,7 +57,6 @@ int va_get_colorspace_flag(enum mp_csp csp)
     return 0;
 }
 
-#if VA_CHECK_VERSION(1, 0, 0)
 static void va_message_callback(void *context, const char *msg, int mp_level)
 {
     struct mp_vaapi_ctx *res = context;
@@ -73,46 +72,6 @@ static void va_info_callback(void *context, const char *msg)
 {
     va_message_callback(context, msg, MSGL_V);
 }
-#else
-// Pre-libva2 VA message callbacks are global and do not have a context
-// parameter, so it's impossible to know from which VADisplay they
-// originate.  Try to route them to existing mpv/libmpv instances within
-// this process.
-static pthread_mutex_t va_log_mutex = PTHREAD_MUTEX_INITIALIZER;
-static struct mp_vaapi_ctx **va_mpv_clients;
-static int num_va_mpv_clients;
-
-static void va_message_callback(const char *msg, int mp_level)
-{
-    pthread_mutex_lock(&va_log_mutex);
-
-    if (num_va_mpv_clients) {
-        struct mp_log *dst = va_mpv_clients[num_va_mpv_clients - 1]->log;
-        mp_msg(dst, mp_level, "libva: %s", msg);
-    } else {
-        // We can't get or call the original libva handler (vaSet... return
-        // them, but it might be from some other lib etc.). So just do what
-        // libva happened to do at the time of this writing.
-        if (mp_level <= MSGL_ERR) {
-            fprintf(stderr, "libva error: %s", msg);
-        } else {
-            fprintf(stderr, "libva info: %s", msg);
-        }
-    }
-
-    pthread_mutex_unlock(&va_log_mutex);
-}
-
-static void va_error_callback(const char *msg)
-{
-    va_message_callback(msg, MSGL_ERR);
-}
-
-static void va_info_callback(const char *msg)
-{
-    va_message_callback(msg, MSGL_V);
-}
-#endif
 
 static void free_device_ref(struct AVHWDeviceContext *hwctx)
 {
@@ -123,19 +82,6 @@ static void free_device_ref(struct AVHWDeviceContext *hwctx)
 
     if (ctx->destroy_native_ctx)
         ctx->destroy_native_ctx(ctx->native_ctx);
-
-#if !VA_CHECK_VERSION(1, 0, 0)
-    pthread_mutex_lock(&va_log_mutex);
-    for (int n = 0; n < num_va_mpv_clients; n++) {
-        if (va_mpv_clients[n] == ctx) {
-            MP_TARRAY_REMOVE_AT(va_mpv_clients, num_va_mpv_clients, n);
-            break;
-        }
-    }
-    if (num_va_mpv_clients == 0)
-        TA_FREEP(&va_mpv_clients); // avoid triggering leak detectors
-    pthread_mutex_unlock(&va_log_mutex);
-#endif
 
     talloc_free(ctx);
 }
@@ -166,17 +112,6 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
 #if VA_CHECK_VERSION(1, 0, 0)
     vaSetErrorCallback(display, va_error_callback, res);
     vaSetInfoCallback(display,  va_info_callback,  res);
-#else
-    pthread_mutex_lock(&va_log_mutex);
-    MP_TARRAY_APPEND(NULL, va_mpv_clients, num_va_mpv_clients, res);
-    pthread_mutex_unlock(&va_log_mutex);
-
-    // Check some random symbol added after message callbacks.
-    // VA_MICRO_VERSION wasn't bumped at the time.
-#ifdef VA_FOURCC_I010
-    vaSetErrorCallback(va_error_callback);
-    vaSetInfoCallback(va_info_callback);
-#endif
 #endif
 
     int major, minor;
