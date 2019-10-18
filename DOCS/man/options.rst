@@ -1040,7 +1040,7 @@ Video
         cases, hardware decoding can also reduce the bit depth of the decoded
         image, which can introduce banding or precision loss for 10-bit files.
 
-        ``vdpau`` is usually safe, exycept for 10 bit video. If deinterlacing
+        ``vdpau`` is usually safe, except for 10 bit video. If deinterlacing
         enabled (or the ``vdpaupp`` video filter is active in general), it
         forces RGB conversion. The latter currently does not treat certain
         colorspaces like BT.2020 correctly.
