@@ -36,6 +36,10 @@
 #include "common/msg.h"
 #include "osdep/endian.h"
 
+#if HAVE_ZIMG
+#include "zimg.h"
+#endif
+
 //global sws_flags from the command line
 struct sws_opts {
     int scaler;
@@ -45,6 +49,7 @@ struct sws_opts {
     int chr_hshift;
     float chr_sharpen;
     float lum_sharpen;
+    int zimg;
 };
 
 #define OPT_BASE_STRUCT struct sws_opts
@@ -68,6 +73,7 @@ const struct m_sub_options sws_conf = {
         OPT_INT("chs", chr_hshift, 0),
         OPT_FLOATRANGE("ls", lum_sharpen, 0, -100.0, 100.0),
         OPT_FLOATRANGE("cs", chr_sharpen, 0, -100.0, 100.0),
+        OPT_FLAG("allow-zimg", zimg, 0),
         {0}
     },
     .size = sizeof(struct sws_opts),
@@ -98,7 +104,13 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g)
     ctx->flags = SWS_PRINT_INFO;
     ctx->flags |= opts->scaler;
 
+    ctx->opts_allow_zimg = opts->zimg;
+
     talloc_free(opts);
+
+#if HAVE_ZIMG
+    mp_zimg_set_from_cmdline(ctx->zimg, g);
+#endif
 }
 
 bool mp_sws_supported_format(int imgfmt)
@@ -126,7 +138,8 @@ static bool cache_valid(struct mp_sws_context *ctx)
            ctx->flags == old->flags &&
            ctx->brightness == old->brightness &&
            ctx->contrast == old->contrast &&
-           ctx->saturation == old->saturation;
+           ctx->saturation == old->saturation &&
+           ctx->allow_zimg == old->allow_zimg;
 }
 
 static void free_mp_sws(void *p)
@@ -150,8 +163,15 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
         .force_reload = true,
         .params = {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
         .cached = talloc_zero(ctx, struct mp_sws_context),
+        .opts_allow_zimg = true,
     };
     talloc_set_destructor(ctx, free_mp_sws);
+
+#if HAVE_ZIMG
+    ctx->zimg = mp_zimg_alloc();
+    talloc_steal(ctx, ctx->zimg);
+#endif
+
     return ctx;
 }
 
@@ -170,6 +190,23 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         return 0;
 
     sws_freeContext(ctx->sws);
+    ctx->sws = NULL;
+    ctx->zimg_ok = false;
+
+#if HAVE_ZIMG
+    if (ctx->allow_zimg && ctx->opts_allow_zimg) {
+        ctx->zimg->log = ctx->log;
+        ctx->zimg->src = *src;
+        ctx->zimg->dst = *dst;
+        if (mp_zimg_config(ctx->zimg)) {
+            ctx->zimg_ok = true;
+            MP_VERBOSE(ctx, "using zimg\n");
+            goto success;
+        }
+        MP_VERBOSE(ctx, "falling back to swscale\n");
+    }
+#endif
+
     ctx->sws = sws_alloc_context();
     if (!ctx->sws)
         return -1;
@@ -246,6 +283,7 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
         return -1;
 
+success:
     ctx->force_reload = false;
     *ctx->cached = *ctx;
     return 1;
@@ -265,6 +303,11 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         MP_ERR(ctx, "libswscale initialization failed.\n");
         return r;
     }
+
+#if HAVE_ZIMG
+    if (ctx->zimg_ok)
+        return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
+#endif
 
     sws_scale(ctx->sws, (const uint8_t *const *) src->planes, src->stride,
               0, src->h, dst->planes, dst->stride);

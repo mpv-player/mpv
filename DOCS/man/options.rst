@@ -3830,6 +3830,21 @@ Software Scaler
 ``--sws-cvs=<v>``
     Software scaler chroma vertical shifting. See ``--sws-scaler``.
 
+``--sws-allow-zimg=<yes|no>``
+    Allow using zimg (if the component using the internal swscale wrapper
+    explicitly allows so). In this case, zimg *may* be used, if the internal
+    zimg wrapper supports the input and output formats. It will silently
+    fall back to libswscale if one of these conditions does not apply.
+
+    If zimg is used, the other ``--sws-`` options are ignored, and the
+    ``--zimg-`` options are used instead.
+
+    If the internal component using the swscale wrapper hooks up logging
+    correctly, a verbose priority log message will indicate whether zimg is
+    being used.
+
+    Currently, barely anything uses this.
+
 ``--zimg--scaler=<point|bilinear|bicubic|spline16|lanczos>``
     Zimg luma scaler to use (default: bilinear).
 

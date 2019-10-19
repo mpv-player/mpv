@@ -31,6 +31,7 @@ struct mp_sws_context {
     // mp_sws_scale() will handle the changes transparently.
     int flags;
     int brightness, contrast, saturation;
+    bool allow_zimg; // use zimg if available (ignores filters and all)
     bool force_reload;
     // These are also implicitly set by mp_sws_scale(), and thus optional.
     // Setting them before that call makes sense when using mp_sws_reinit().
@@ -46,8 +47,10 @@ struct mp_sws_context {
     struct SwsContext *sws;
     bool supports_csp;
 
-    // Contains parameters for which sws is valid
-    struct mp_sws_context *cached;
+    // Private.
+    struct mp_sws_context *cached; // contains parameters for which sws is valid
+    struct mp_zimg_context *zimg;
+    bool opts_allow_zimg, zimg_ok;
 };
 
 struct mp_sws_context *mp_sws_alloc(void *talloc_ctx);
