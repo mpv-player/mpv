@@ -452,10 +452,8 @@ void mp_image_unrefp(struct mp_image **p_img)
     *p_img = NULL;
 }
 
-typedef void *(*memcpy_fn)(void *d, const void *s, size_t size);
-
-static void memcpy_pic_cb(void *dst, const void *src, int bytesPerLine, int height,
-                          int dstStride, int srcStride, memcpy_fn cpy)
+void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
+                int dstStride, int srcStride)
 {
     if (bytesPerLine == dstStride && dstStride == srcStride && height) {
         if (srcStride < 0) {
@@ -464,18 +462,17 @@ static void memcpy_pic_cb(void *dst, const void *src, int bytesPerLine, int heig
             srcStride = -srcStride;
         }
 
-        cpy(dst, src, srcStride * (height - 1) + bytesPerLine);
+        memcpy(dst, src, srcStride * (height - 1) + bytesPerLine);
     } else {
         for (int i = 0; i < height; i++) {
-            cpy(dst, src, bytesPerLine);
+            memcpy(dst, src, bytesPerLine);
             src = (uint8_t*)src + srcStride;
             dst = (uint8_t*)dst + dstStride;
         }
     }
 }
 
-static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
-                             memcpy_fn cpy)
+void mp_image_copy(struct mp_image *dst, struct mp_image *src)
 {
     assert(dst->imgfmt == src->imgfmt);
     assert(dst->w == src->w && dst->h == src->h);
@@ -483,16 +480,11 @@ static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
     for (int n = 0; n < dst->num_planes; n++) {
         int line_bytes = (mp_image_plane_w(dst, n) * dst->fmt.bpp[n] + 7) / 8;
         int plane_h = mp_image_plane_h(dst, n);
-        memcpy_pic_cb(dst->planes[n], src->planes[n], line_bytes, plane_h,
-                      dst->stride[n], src->stride[n], cpy);
+        memcpy_pic(dst->planes[n], src->planes[n], line_bytes, plane_h,
+                   dst->stride[n], src->stride[n]);
     }
     if (dst->fmt.flags & MP_IMGFLAG_PAL)
         memcpy(dst->planes[1], src->planes[1], AVPALETTE_SIZE);
-}
-
-void mp_image_copy(struct mp_image *dst, struct mp_image *src)
-{
-    mp_image_copy_cb(dst, src, memcpy);
 }
 
 static enum mp_csp mp_image_params_get_forced_csp(struct mp_image_params *params)
@@ -1018,12 +1010,6 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
     AVFrame *frame = mp_image_to_av_frame(img);
     talloc_free(img);
     return frame;
-}
-
-void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
-                int dstStride, int srcStride)
-{
-    memcpy_pic_cb(dst, src, bytesPerLine, height, dstStride, srcStride, memcpy);
 }
 
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride)
