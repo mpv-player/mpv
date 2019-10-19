@@ -507,6 +507,7 @@ def build(ctx):
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
         ( "video/sws_utils.c" ),
+        ( "video/zimg.c",                        "zimg" ),
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),

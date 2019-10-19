@@ -55,8 +55,9 @@ typedef struct mp_vo_opts {
     double override_display_fps;
     double timing_offset;
 
-    // vo_drm
     struct sws_opts *sws_opts;
+    struct zimg_opts *zimg_opts;
+
     // vo_drm
     struct drm_opts *drm_opts;
 

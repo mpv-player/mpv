@@ -60,6 +60,7 @@ extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
 extern const struct m_sub_options sws_conf;
+extern const struct m_sub_options zimg_conf;
 extern const struct m_sub_options drm_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
@@ -105,6 +106,9 @@ static const struct m_sub_options screenshot_conf = {
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
+#if HAVE_ZIMG
+    OPT_SUBSTRUCT("zimg", zimg_opts, zimg_conf, 0),
+#endif
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
     OPT_FLAG("snap-window", snap_window, 0),
     OPT_FLAG("ontop", ontop, 0),

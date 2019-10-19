@@ -3830,6 +3830,14 @@ Software Scaler
 ``--sws-cvs=<v>``
     Software scaler chroma vertical shifting. See ``--sws-scaler``.
 
+``--zimg--scaler=<point|bilinear|bicubic|spline16|lanczos>``
+    Zimg luma scaler to use (default: bilinear).
+
+``--zimg-fast=<yes|no>``
+    Allow optimizations that help with performance, but reduce quality (default:
+    yes). Currently, this may simplify gamma conversion operations.
+
+
 Audio Resampler
 ---------------
 
