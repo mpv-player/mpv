@@ -245,6 +245,7 @@ static bool resize(struct vo *vo)
     }
 
     mp_sws_set_from_cmdline(p->sws, vo->global);
+    p->sws->allow_zimg = true;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = fmte->mpfmt,
         .w = p->dst_w,
@@ -376,6 +377,7 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
     p->vo = vo;
     p->sws = mp_sws_alloc(vo);
+    p->sws->log = vo->log;
 
     if (!vo_x11_init(vo))
         goto error;
