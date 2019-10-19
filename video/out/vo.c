@@ -71,9 +71,6 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_mediacodec_embed,
 #endif
     &video_out_gpu,
-#if HAVE_VDPAU
-    &video_out_vdpau,
-#endif
 #if HAVE_DIRECT3D
     &video_out_direct3d,
 #endif
@@ -88,6 +85,9 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_VAAPI_X11 && HAVE_GPL
     &video_out_vaapi,
+#endif
+#if HAVE_VDPAU
+    &video_out_vdpau,
 #endif
 #if HAVE_X11
     &video_out_x11,
