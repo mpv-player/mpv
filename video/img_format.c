@@ -526,9 +526,6 @@ int main(int argc, char **argv)
         printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
                d.plane_bits, d.component_bits);
-        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
-               d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
-               d.plane_bits, d.component_bits);
         printf("  {");
         for (int n = 0; n < MP_MAX_PLANES; n++)
             printf("%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n], d.xs[n], d.ys[n]);
@@ -545,18 +542,29 @@ int main(int argc, char **argv)
             assert(mpi);
             // A rather fuzzy test, which might fail even if there's no bug.
             for (int n = 0; n < 4; n++) {
-                assert(!!mpi->planes[n] == !!fr->data[n]);
-                assert(mpi->stride[n] == fr->linesize[n]);
+                if (!!mpi->planes[n] != !!fr->data[n]) {
+                    printf("   Warning: p%d: %p %p\n", n,
+                           mpi->planes[n], fr->data[n]);
+                }
+                if (mpi->stride[n] != fr->linesize[n]) {
+                    printf("   Warning: p%d: %d %d\n", n,
+                           mpi->stride[n], fr->linesize[n]);
+                }
             }
             talloc_free(mpi);
             av_frame_free(&fr);
         }
         struct mp_regular_imgfmt reg;
         if (mp_get_regular_imgfmt(&reg, mpfmt)) {
-            printf("  Regular: %d planes, %d bytes per comp., %d bit-pad "
-                   "%dx%d chroma\n",
+            const char *type = "unknown";
+            switch (reg.component_type) {
+            case MP_COMPONENT_TYPE_UINT:  type = "uint"; break;
+            case MP_COMPONENT_TYPE_FLOAT: type = "float"; break;
+            }
+            printf("  Regular: %d planes, %d bytes per comp., %d bit-pad, "
+                   "%dx%d chroma, type=%s\n",
                    reg.num_planes, reg.component_size, reg.component_pad,
-                   reg.chroma_w, reg.chroma_h);
+                   reg.chroma_w, reg.chroma_h, type);
             for (int n = 0; n < reg.num_planes; n++) {
                 struct mp_regular_imgfmt_plane *plane = &reg.planes[n];
                 printf("     %d: {", n);
