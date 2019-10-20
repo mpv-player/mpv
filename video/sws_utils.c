@@ -121,6 +121,21 @@ bool mp_sws_supported_format(int imgfmt)
         && sws_isSupportedOutput(av_format);
 }
 
+bool mp_sws_supports_formats(struct mp_sws_context *ctx,
+                             int imgfmt_out, int imgfmt_in)
+{
+#if HAVE_ZIMG
+    if (ctx->allow_zimg && ctx->opts_allow_zimg) {
+        if (mp_zimg_supports_in_format(imgfmt_in) &&
+            mp_zimg_supports_out_format(imgfmt_out))
+            return true;
+    }
+#endif
+
+    return sws_isSupportedInput(imgfmt2pixfmt(imgfmt_in)) &&
+           sws_isSupportedOutput(imgfmt2pixfmt(imgfmt_out));
+}
+
 static int mp_csp_to_sws_colorspace(enum mp_csp csp)
 {
     // The SWS_CS_* macros are just convenience redefinitions of the

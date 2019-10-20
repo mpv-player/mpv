@@ -59,6 +59,9 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g);
 int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
                  struct mp_image *src);
 
+bool mp_sws_supports_formats(struct mp_sws_context *ctx,
+                             int imgfmt_out, int imgfmt_in);
+
 struct mp_image *mp_img_swap_to_native(struct mp_image *img);
 
 #endif /* MP_SWS_UTILS_H */
