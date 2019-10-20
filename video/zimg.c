@@ -236,7 +236,7 @@ static int align_unpack(void *user, unsigned i, unsigned x0, unsigned x1)
 }
 
 // 3 8 bit color components sourced from 3 planes, plus 8 MSB padding bits.
-static void cccx8_pack(void *dst, void *src[], int x0, int x1)
+static void x8ccc8_pack(void *dst, void *src[], int x0, int x1)
 {
     for (int x = x0; x < x1; x++) {
         ((uint32_t *)dst)[x] =
@@ -247,7 +247,7 @@ static void cccx8_pack(void *dst, void *src[], int x0, int x1)
 }
 
 // 3 8 bit color components sourced from 3 planes, plus 8 LSB padding bits.
-static void xccc8_pack(void *dst, void *src[], int x0, int x1)
+static void ccc8x8_pack(void *dst, void *src[], int x0, int x1)
 {
     for (int x = x0; x < x1; x++) {
         ((uint32_t *)dst)[x] =
@@ -390,7 +390,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         // word access, while the metadata here uses byte access).
         int first = p->components[0] ? 0 : 1;
         r->repack = packed_repack;
-        r->packed_repack_scanline = p->components[0] ? cccx8_pack : xccc8_pack;
+        r->packed_repack_scanline = p->components[0] ? x8ccc8_pack : ccc8x8_pack;
         r->zimgfmt = planar_fmt;
         for (int n = 0; n < 3; n++)
             r->components[n] = corder[p->components[first + n]];
