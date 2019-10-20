@@ -761,16 +761,15 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.space = MP_CSP_XYZ;
         params->color.levels = MP_CSP_LEVELS_PC;
 
-        // The default XYZ matrix converts it to BT.709 color space
-        // since that's the most likely scenario. Proper VOs should ignore
-        // this field as well as the matrix and treat XYZ input as absolute,
-        // but for VOs which use the matrix (and hence, consult this field)
-        // this is the correct parameter. This doubles as a reasonable output
-        // gamut for VOs which *do* use the specialized XYZ matrix but don't
-        // know any better output gamut other than whatever the source is
-        // tagged with.
+        // In theory, XYZ data does not really need a concept of 'primaries' to
+        // function, but this field can still be relevant for guiding gamut
+        // mapping optimizations, and it's also used by `mp_get_csp_matrix`
+        // when deciding what RGB space to map XYZ to for VOs that don't want
+        // to directly ingest XYZ into their color pipeline. BT.709 would be a
+        // sane default here, but it runs the risk of clipping any wide gamut
+        // content, so we pick BT.2020 instead to be on the safer side.
         if (params->color.primaries == MP_CSP_PRIM_AUTO)
-            params->color.primaries = MP_CSP_PRIM_BT_709;
+            params->color.primaries = MP_CSP_PRIM_BT_2020;
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_LINEAR;
     } else {
