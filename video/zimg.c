@@ -268,6 +268,17 @@ static void ccc16_unpack(void *src, void *dst[], int x0, int x1)
     }
 }
 
+// 3 10 bit color components source from 3 planes, plus 2 MSB padding bits.
+static void x2ccc10_pack(void *dst, void *src[], int x0, int x1)
+{
+    for (int x = x0; x < x1; x++) {
+        ((uint32_t *)dst)[x] =
+            ((uint16_t *)src[0])[x] |
+            ((uint32_t)((uint16_t *)src[1])[x] << 10) |
+            ((uint32_t)((uint16_t *)src[2])[x] << 20);
+    }
+}
+
 static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -318,6 +329,21 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     }
 
     r->mpi = mpi;
+}
+
+static void setup_misc_packer(struct mp_zimg_repack *r)
+{
+    if (r->zimgfmt == IMGFMT_RGB30) {
+        int planar_fmt = mp_imgfmt_find(0, 0, 3, 10, MP_IMGFLAG_RGB_P);
+        if (!planar_fmt || !r->pack)
+            return;
+        r->zimgfmt = planar_fmt;
+        r->repack = packed_repack;
+        r->packed_repack_scanline = x2ccc10_pack;
+        static int c_order[] = {3, 2, 1};
+        for (int n = 0; n < 3; n++)
+            r->components[n] = corder_gbrp[c_order[n]];
+    }
 }
 
 // Tries to set a packer/unpacker for component-wise byte aligned RGB formats.
@@ -394,7 +420,10 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     r->zimgfmt = fmt.imgfmt;
 
-    setup_regular_rgb_packer(r);
+    if (!r->repack)
+        setup_misc_packer(r);
+    if (!r->repack)
+        setup_regular_rgb_packer(r);
 
     struct mp_regular_imgfmt desc;
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
