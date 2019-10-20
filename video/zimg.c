@@ -253,6 +253,17 @@ static void xccc8_pack(void *dst, void *src[], int x0, int x1)
     }
 }
 
+// 3 16 bit color components written to 3 planes.
+static void ccc16_unpack(void *src, void *dst[], int x0, int x1)
+{
+    uint16_t *r = src;
+    for (int x = x0; x < x1; x++) {
+        ((uint16_t *)dst[0])[x] = *r++;
+        ((uint16_t *)dst[1])[x] = *r++;
+        ((uint16_t *)dst[2])[x] = *r++;
+    }
+}
+
 static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -355,6 +366,17 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         r->zimgfmt = planar_fmt;
         for (int n = 0; n < 3; n++)
             r->components[n] = corder[p->components[first + n]];
+        return;
+    }
+
+    if (desc.component_size == 2 && p->num_components == 3) {
+        if (r->pack) // no packer yet
+            return;
+        r->repack = packed_repack;
+        r->packed_repack_scanline = ccc16_unpack;
+        r->zimgfmt = planar_fmt;
+        for (int n = 0; n < 3; n++)
+            r->components[n] = corder[p->components[n]];
         return;
     }
 }
