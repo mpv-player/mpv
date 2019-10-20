@@ -1552,6 +1552,16 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl, int frame_offset)
         wl_display_read_events(wl->display);
         wl_display_dispatch_pending(wl->display);
     }
+
+    if (wl->frame_wait) {
+        wl->timeout_count += 1;
+    } else {
+        wl->timeout_count = 0;
+        wl->hidden = false;
+    }
+    
+    if (wl->timeout_count > wl->current_output->refresh_rate)
+        wl->hidden = true;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
