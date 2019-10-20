@@ -142,6 +142,7 @@ struct mp_sws_filter *mp_sws_filter_create(struct mp_filter *parent)
     s->sws->log = f->log;
     s->pool = mp_image_pool_new(s);
 
+    s->sws->allow_zimg = true;
     mp_sws_set_from_cmdline(s->sws, f->global);
 
     return s;
