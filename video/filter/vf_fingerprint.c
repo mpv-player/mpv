@@ -66,8 +66,6 @@ struct priv {
     struct mp_zimg_context *zimg;
     struct print_entry entries[PRINT_ENTRY_NUM];
     int num_entries;
-    int last_imgfmt, last_w, last_h;
-    int gray_plane_imgfmt;
     bool fallback_warning;
 };
 
@@ -79,29 +77,8 @@ static void f_reset(struct mp_filter *f)
     for (int n = 0; n < p->num_entries; n++)
         talloc_free(p->entries[n].print);
     p->num_entries = 0;
-}
 
-static void reinit_fmt(struct mp_filter *f, struct mp_image *mpi)
-{
-    struct priv *p = f->priv;
-
-    if (mpi->imgfmt == p->last_imgfmt &&
-        mpi->w == p->last_w &&
-        mpi->h == p->last_h)
-        return;
-
-    p->last_imgfmt = mpi->imgfmt;
-    p->last_w = mpi->w;
-    p->last_h = mpi->h;
-    p->gray_plane_imgfmt = 0;
     p->fallback_warning = false;
-
-    if (mpi->fmt.flags & (MP_IMGFLAG_YUV_NV | MP_IMGFLAG_YUV_P)) {
-        // Try to pass only the first plane, in the hope that it might be
-        // faster.
-        p->gray_plane_imgfmt =
-            mp_imgfmt_find(0, 0, 1, mpi->fmt.component_bits, MP_IMGFLAG_YUV_P);
-    }
 }
 
 static void f_process(struct mp_filter *f)
@@ -123,20 +100,13 @@ static void f_process(struct mp_filter *f)
 
     struct mp_image *mpi = frame.data;
 
-    reinit_fmt(f, mpi);
-
     // Try to achieve minimum conversion, even if it makes the fingerprints less
     // "portable" across source video.
     p->scaled->params.color = mpi->params.color;
     // Make output always full range; no reason to lose precision.
     p->scaled->params.color.levels = MP_CSP_LEVELS_PC;
 
-    struct mp_image src = *mpi;
-
-    if (p->gray_plane_imgfmt)
-        mp_image_setfmt(&src, p->gray_plane_imgfmt);
-
-    if (!mp_zimg_convert(p->zimg, p->scaled, &src)) {
+    if (!mp_zimg_convert(p->zimg, p->scaled, mpi)) {
         if (!p->fallback_warning) {
             MP_WARN(f, "Falling back to libswscale.\n");
             p->fallback_warning = true;
