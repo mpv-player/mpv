@@ -77,8 +77,6 @@ static void f_reset(struct mp_filter *f)
     for (int n = 0; n < p->num_entries; n++)
         talloc_free(p->entries[n].print);
     p->num_entries = 0;
-
-    p->fallback_warning = false;
 }
 
 static void f_process(struct mp_filter *f)
