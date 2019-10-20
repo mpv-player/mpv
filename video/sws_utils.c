@@ -203,7 +203,7 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
             MP_VERBOSE(ctx, "using zimg\n");
             goto success;
         }
-        MP_VERBOSE(ctx, "falling back to swscale\n");
+        MP_WARN(ctx, "falling back to swscale\n");
     }
 #endif
 
