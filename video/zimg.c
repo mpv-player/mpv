@@ -321,14 +321,26 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
             return;
     }
 
+    // Component ID to plane, with 0 (padding) just mapping to plane 0.
+    const int *corder = NULL;
+
+    int typeflag = 0;
+    enum mp_csp forced_csp = mp_imgfmt_get_forced_csp(r->zimgfmt);
+    if (forced_csp == MP_CSP_RGB || forced_csp == MP_CSP_XYZ) {
+        typeflag = MP_IMGFLAG_RGB_P;
+        static const int gbrp[4] = {0, 2, 0, 1};
+        corder = gbrp;
+    } else {
+        typeflag = MP_IMGFLAG_YUV_P;
+        static const int yuv[4] = {0, 0, 1, 2};
+        corder = yuv;
+    }
+
     // Find a compatible planar format (typically AV_PIX_FMT_GBRP).
     int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
-    int planar_fmt = mp_imgfmt_find(0, 0, 3, depth, MP_IMGFLAG_RGB_P);
+    int planar_fmt = mp_imgfmt_find(0, 0, 3, depth, typeflag);
     if (!planar_fmt)
         return;
-
-    // Component ID to plane, implied by MP_IMGFLAG_RGB_P.
-    static int gbrp[4] = {0, 2, 0, 1};
 
     if (desc.component_size == 1 && p->num_components == 4) {
         if (!r->pack) // no unpacker yet
@@ -342,7 +354,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         r->packed_repack_scanline = p->components[0] ? cccx8_pack : xccc8_pack;
         r->zimgfmt = planar_fmt;
         for (int n = 0; n < 3; n++)
-            r->components[n] = gbrp[p->components[first + n]];
+            r->components[n] = corder[p->components[first + n]];
         return;
     }
 }
