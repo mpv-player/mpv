@@ -71,6 +71,8 @@ struct vo_wayland_state {
     bool maximized;
     bool configured;
     bool frame_wait;
+    bool hidden;
+    int timeout_count;
     int wakeup_pipe[2];
     int pending_vo_events;
     int mouse_x;

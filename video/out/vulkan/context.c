@@ -246,9 +246,18 @@ static void swap_buffers(struct ra_swapchain *sw)
         p->params.swap_buffers(sw->ctx);
 }
 
+static void get_vsync(struct ra_swapchain *sw,
+                      struct vo_vsync_info *info)
+{
+    struct priv *p = sw->priv;
+    if (p->params.get_vsync)
+        p->params.get_vsync(sw->ctx, info);
+}
+
 static const struct ra_swapchain_fns vulkan_swapchain = {
     .color_depth   = color_depth,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
     .swap_buffers  = swap_buffers,
+    .get_vsync     = get_vsync,
 };
