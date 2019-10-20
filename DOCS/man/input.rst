@@ -915,6 +915,12 @@ Input Commands that are Possibly Subject to Change
     is freed as soon as the result mpv_node is freed. As usual with client API
     semantics, you are not allowed to write to the image data.
 
+    The ``stride`` is the number of bytes from a pixel at ``(x0, y0)`` to the
+    pixel at ``(x0, y0 + 1)``. This can be larger than ``w * 4`` if the image
+    was cropped, or if there is padding. This number can be negative as well.
+    You access a pixel with ``byte_index = y * stride + x * 4`` (assuming the
+    ``bgr0`` format).
+
     The ``flags`` argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.
 
