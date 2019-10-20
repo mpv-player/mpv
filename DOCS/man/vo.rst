@@ -548,6 +548,10 @@ Available video output drivers are:
         xrgb2101010 is a packed 30 bits per pixel/10 bits per channel packed RGB
         format with 2 bits of padding.
 
+        Currently, you need to build mpv with libzimg and enable it with
+        ``--sws-allow-zimg=yes``, or initialization with the 30 bit format will
+        fail.
+
         There are cases when xrgb2101010 will work with the ``drm`` VO, but not
         with the ``drm`` backend for the ``gpu`` VO. This is because with the
         ``gpu`` VO, in addition to requiring support in your DRM driver,
