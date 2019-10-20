@@ -36,6 +36,7 @@ struct mp_imgfmt_entry {
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     {"vdpau_output",    IMGFMT_VDPAU_OUTPUT},
+    {"rgb30",           IMGFMT_RGB30},
     // FFmpeg names have an annoying "_vld" suffix
     {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
     {"vaapi",           IMGFMT_VAAPI},
@@ -106,6 +107,19 @@ static struct mp_imgfmt_desc mp_only_imgfmt_desc(int mpfmt)
             .avformat = AV_PIX_FMT_NONE,
             .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB |
                      MP_IMGFLAG_HWACCEL,
+        };
+    case IMGFMT_RGB30:
+        return (struct mp_imgfmt_desc) {
+            .id = mpfmt,
+            .avformat = AV_PIX_FMT_NONE,
+            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB,
+            .num_planes = 1,
+            .align_x = 1,
+            .align_y = 1,
+            .bytes = {4},
+            .bpp = {32},
+            .plane_bits = 30,
+            .component_bits = 10,
         };
     }
     return (struct mp_imgfmt_desc) {0};
@@ -309,6 +323,9 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
 
 enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 {
+    if (imgfmt == IMGFMT_RGB30)
+        return MP_CSP_RGB;
+
     enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
     const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
 
@@ -327,10 +344,13 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 
 enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
 {
+    if (imgfmt == IMGFMT_RGB30)
+        return MP_COMPONENT_TYPE_UINT;
+
     const AVPixFmtDescriptor *pixdesc =
         av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
 
-    if (!pixdesc)
+    if (!pixdesc || (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL))
         return MP_COMPONENT_TYPE_UNKNOWN;
 
 #if LIBAVUTIL_VERSION_MICRO >= 100

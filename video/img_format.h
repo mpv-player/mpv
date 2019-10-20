@@ -192,6 +192,9 @@ enum mp_imgfmt {
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
 
+    // Accessed with bit-shifts, uint32_t units.
+    IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSG to LSB)
+
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
     IMGFMT_VDPAU,           // VdpVideoSurface
