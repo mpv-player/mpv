@@ -109,8 +109,8 @@ static zimg_matrix_coefficients_e mp_to_z_matrix(enum mp_csp csp)
     case MP_CSP_BT_2020_NC:     return ZIMG_MATRIX_BT2020_NCL;
     case MP_CSP_BT_2020_C:      return ZIMG_MATRIX_BT2020_CL;
     case MP_CSP_RGB:            return ZIMG_MATRIX_RGB;
+    case MP_CSP_XYZ:            return ZIMG_MATRIX_RGB;
     case MP_CSP_YCGCO:          return ZIMG_MATRIX_YCGCO;
-    case MP_CSP_XYZ:            // ?
     default:                    return ZIMG_MATRIX_BT709;
     }
 }
@@ -145,12 +145,12 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_709:    return ZIMG_PRIMARIES_BT709;
     case MP_CSP_PRIM_BT_2020:   return ZIMG_PRIMARIES_BT2020;
     case MP_CSP_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
+    case MP_CSP_PRIM_CIE_1931:  return ZIMG_PRIMARIES_ST428;
+    case MP_CSP_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
+    case MP_CSP_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
     case MP_CSP_PRIM_APPLE:     // ?
     case MP_CSP_PRIM_ADOBE:
     case MP_CSP_PRIM_PRO_PHOTO:
-    case MP_CSP_PRIM_CIE_1931:
-    case MP_CSP_PRIM_DCI_P3:
-    case MP_CSP_PRIM_DISPLAY_P3:
     case MP_CSP_PRIM_V_GAMUT:
     case MP_CSP_PRIM_S_GAMUT:   // ?
     default:                    return ZIMG_PRIMARIES_BT709;
@@ -393,7 +393,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_family = ZIMG_COLOR_YUV;
     if (desc.num_planes == 1) {
         zfmt->color_family = ZIMG_COLOR_GREY;
-    } else if (csp == MP_CSP_RGB) {
+    } else if (csp == MP_CSP_RGB || csp == MP_CSP_XYZ) {
         zfmt->color_family = ZIMG_COLOR_RGB;
     }
 
