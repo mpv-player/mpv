@@ -215,10 +215,10 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         ctx->zimg->dst = *dst;
         if (mp_zimg_config(ctx->zimg)) {
             ctx->zimg_ok = true;
-            MP_VERBOSE(ctx, "using zimg\n");
+            MP_VERBOSE(ctx, "Using zimg.\n");
             goto success;
         }
-        MP_WARN(ctx, "falling back to swscale\n");
+        MP_WARN(ctx, "Not using zimg, falling back to swscale.\n");
     }
 #endif
 
