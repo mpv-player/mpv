@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <zimg.h>
-
 #include "common/common.h"
 #include "common/tags.h"
 #include "filters/filter.h"
@@ -25,10 +23,9 @@
 #include "options/m_option.h"
 #include "video/img_format.h"
 #include "video/sws_utils.h"
+#include "video/zimg.h"
 
 #include "osdep/timer.h"
-
-#define ZIMG_ALIGN 32
 
 #define PRINT_ENTRY_NUM 10
 
@@ -66,23 +63,13 @@ struct priv {
     struct f_opts *opts;
     struct mp_image *scaled;
     struct mp_sws_context *sws;
+    struct mp_zimg_context *zimg;
     struct print_entry entries[PRINT_ENTRY_NUM];
     int num_entries;
     int last_imgfmt, last_w, last_h;
     int gray_plane_imgfmt;
-    zimg_filter_graph *zimg_graph;
-    void *zimg_tmp;
+    bool fallback_warning;
 };
-
-static void destroy_zimg(struct mp_filter *f)
-{
-    struct priv *p = f->priv;
-
-    free(p->zimg_tmp);
-    p->zimg_tmp = NULL;
-    zimg_filter_graph_free(p->zimg_graph);
-    p->zimg_graph = NULL;
-}
 
 // (Other code internal to this filter also calls this to reset the frame list.)
 static void f_reset(struct mp_filter *f)
@@ -106,50 +93,14 @@ static void reinit_fmt(struct mp_filter *f, struct mp_image *mpi)
     p->last_imgfmt = mpi->imgfmt;
     p->last_w = mpi->w;
     p->last_h = mpi->h;
+    p->gray_plane_imgfmt = 0;
+    p->fallback_warning = false;
 
-    destroy_zimg(f);
-
-    if (!(mpi->fmt.flags & (MP_IMGFLAG_YUV_NV | MP_IMGFLAG_YUV_P)))
-        return;
-
-    zimg_image_format src_fmt, dst_fmt;
-
-    // Note: we try to pass only the first plane. Formats which do not have
-    // such a luma plane are excluded above.
-    zimg_image_format_default(&src_fmt, ZIMG_API_VERSION);
-    src_fmt.width = mpi->w;
-    src_fmt.height = mpi->h;
-    src_fmt.color_family = ZIMG_COLOR_GREY;
-    src_fmt.pixel_type = ZIMG_PIXEL_BYTE;
-    src_fmt.depth = mpi->fmt.component_bits;
-    src_fmt.pixel_range = mpi->params.color.levels == MP_CSP_LEVELS_PC ?
-                          ZIMG_RANGE_FULL : ZIMG_RANGE_LIMITED;
-
-    zimg_image_format_default(&dst_fmt, ZIMG_API_VERSION);
-    dst_fmt.width = p->scaled->w;
-    dst_fmt.height = p->scaled->h;
-    dst_fmt.color_family = ZIMG_COLOR_GREY;
-    dst_fmt.pixel_type = ZIMG_PIXEL_BYTE;
-    dst_fmt.depth = 8;
-    dst_fmt.pixel_range = ZIMG_RANGE_FULL;
-
-    zimg_graph_builder_params params;
-    zimg_graph_builder_params_default(&params, ZIMG_API_VERSION);
-    params.resample_filter = ZIMG_RESIZE_BILINEAR;
-
-    p->zimg_graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
-    if (!p->zimg_graph)
-        return;
-
-    size_t tmp_size;
-    if (!zimg_filter_graph_get_tmp_size(p->zimg_graph, &tmp_size)) {
-        tmp_size = MP_ALIGN_UP(tmp_size, ZIMG_ALIGN);
-        p->zimg_tmp = aligned_alloc(ZIMG_ALIGN, tmp_size);
-    }
-
-    if (!p->zimg_tmp) {
-        zimg_filter_graph_free(p->zimg_graph);
-        p->zimg_graph = NULL;
+    if (mpi->fmt.flags & (MP_IMGFLAG_YUV_NV | MP_IMGFLAG_YUV_P)) {
+        // Try to pass only the first plane, in the hope that it might be
+        // faster.
+        p->gray_plane_imgfmt =
+            mp_imgfmt_find(0, 0, 1, mpi->fmt.component_bits, MP_IMGFLAG_YUV_P);
     }
 }
 
@@ -174,23 +125,22 @@ static void f_process(struct mp_filter *f)
 
     reinit_fmt(f, mpi);
 
-    if (p->zimg_graph &&
-        !((uintptr_t)mpi->planes[0] % ZIMG_ALIGN) &&
-        !(mpi->stride[0] % ZIMG_ALIGN))
-    {
-        zimg_image_buffer_const src_buf = {ZIMG_API_VERSION};
-        src_buf.plane[0].data = mpi->planes[0];
-        src_buf.plane[0].stride = mpi->stride[0];
-        src_buf.plane[0].mask = ZIMG_BUFFER_MAX;
-        zimg_image_buffer dst_buf = {ZIMG_API_VERSION};
-        dst_buf.plane[0].data = p->scaled->planes[0];
-        dst_buf.plane[0].stride = p->scaled->stride[0];
-        dst_buf.plane[0].mask = ZIMG_BUFFER_MAX;
-        // (The API promises to succeed if no user callbacks fail, so no need
-        // to check the return value.)
-        zimg_filter_graph_process(p->zimg_graph, &src_buf, &dst_buf,
-                                  p->zimg_tmp, NULL, NULL, NULL, NULL);
-    } else {
+    // Try to achieve minimum conversion, even if it makes the fingerprints less
+    // "portable" across source video.
+    p->scaled->params.color = mpi->params.color;
+    // Make output always full range; no reason to lose precision.
+    p->scaled->params.color.levels = MP_CSP_LEVELS_PC;
+
+    struct mp_image src = *mpi;
+
+    if (p->gray_plane_imgfmt)
+        mp_image_setfmt(&src, p->gray_plane_imgfmt);
+
+    if (!mp_zimg_convert(p->zimg, p->scaled, &src)) {
+        if (!p->fallback_warning) {
+            MP_WARN(f, "Falling back to libswscale.\n");
+            p->fallback_warning = true;
+        }
         if (mp_sws_scale(p->sws, p->scaled, mpi) < 0)
             goto error;
     }
@@ -262,7 +212,6 @@ static const struct mp_filter_info filter = {
     .process = f_process,
     .command = f_command,
     .reset = f_reset,
-    .destroy = destroy_zimg,
     .priv_size = sizeof(struct priv),
 };
 
@@ -283,9 +232,10 @@ static struct mp_filter *f_create(struct mp_filter *parent, void *options)
     p->scaled = mp_image_alloc(IMGFMT_Y8, size, size);
     MP_HANDLE_OOM(p->scaled);
     talloc_steal(p, p->scaled);
-    p->scaled->params.color.levels = MP_CSP_LEVELS_PC;
     p->sws = mp_sws_alloc(p);
     MP_HANDLE_OOM(p->sws);
+    p->zimg = mp_zimg_alloc();
+    talloc_steal(p, p->zimg);
     return f;
 }
 
