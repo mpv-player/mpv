@@ -27,6 +27,8 @@ struct priv {
     int *imgfmts;
     int *subfmts;
     int num_imgfmts;
+    struct mp_image_params imgparams;
+    bool imgparams_set;
 
     // Enable special conversion for the final stage before the VO.
     bool vo_convert;
@@ -73,6 +75,7 @@ void mp_autoconvert_clear(struct mp_autoconvert *c)
     struct priv *p = c->f->priv;
 
     p->num_imgfmts = 0;
+    p->imgparams_set = false;
     p->num_afmts = 0;
     p->num_srates = 0;
     p->chmaps = (struct mp_chmap_sel){0};
@@ -91,6 +94,23 @@ void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt)
 
     p->num_imgfmts += 1;
     p->force_update = true;
+}
+
+void mp_autoconvert_set_target_image_params(struct mp_autoconvert *c,
+                                            struct mp_image_params *par)
+{
+    struct priv *p = c->f->priv;
+
+    if (p->imgparams_set && mp_image_params_equal(&p->imgparams, par) &&
+        p->num_imgfmts == 1 && p->imgfmts[0] == par->imgfmt &&
+        p->subfmts[0] == par->hw_subfmt)
+        return;
+
+    p->imgparams = *par;
+    p->imgparams_set = true;
+
+    p->num_imgfmts = 0;
+    mp_autoconvert_add_imgfmt(c, par->imgfmt, par->hw_subfmt);
 }
 
 void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c)
@@ -185,8 +205,13 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         bool samesubffmt = img->params.hw_subfmt == p->subfmts[n];
         if (samefmt && !samesubffmt)
             different_subfmt = true;
-        if (samefmt && (samesubffmt || !p->subfmts[n]))
+        if (samefmt && (samesubffmt || !p->subfmts[n])) {
+            if (p->imgparams_set) {
+                if (!mp_image_params_equal(&p->imgparams, &img->params))
+                    break;
+            }
             return true;
+        }
     }
 
     struct mp_stream_info *info = mp_filter_find_stream_info(f);
@@ -200,6 +225,8 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     // 2: sw->hw upload
     struct mp_filter *filters[3] = {0};
     bool need_sws = true;
+    bool force_sws_params = false;
+    struct mp_image_params imgpar = img->params;
 
     int *fmts = p->imgfmts;
     int num_fmts = p->num_imgfmts;
@@ -259,7 +286,19 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         if (hwd) {
             filters[0] = hwd->f;
             src_fmt = res_fmt;
+            // Downloading from hw will obviously change the parameters. We
+            // stupidly don't know the result parameters, but if it's
+            // sufficiently sane, it will only do the following.
+            imgpar.imgfmt = src_fmt;
+            imgpar.hw_subfmt = 0;
+            // Try to compensate for in-sane cases.
+            mp_image_params_guess_csp(&imgpar);
         }
+    }
+
+    if (p->imgparams_set) {
+        force_sws_params |= !mp_image_params_equal(&imgpar, &p->imgparams);
+        need_sws |= force_sws_params;
     }
 
     if (need_sws) {
@@ -277,11 +316,13 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
             goto fail;
         }
 
-        if (out == src_fmt) {
+        if (out == src_fmt && !force_sws_params) {
             // Can happen if hwupload goes to same format.
             talloc_free(sws->f);
         } else {
             sws->out_format = out;
+            sws->out_params = p->imgparams;
+            sws->use_out_params = force_sws_params;
             mp_info(log, "Converting %s -> %s\n", mp_imgfmt_to_name(src_fmt),
                     mp_imgfmt_to_name(sws->out_format));
             filters[1] = sws->f;

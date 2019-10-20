@@ -36,12 +36,11 @@
 
 struct priv {
     struct vf_format_opts *opts;
-    struct mp_pin *in_pin;
+    struct mp_autoconvert *conv;
 };
 
 struct vf_format_opts {
     int fmt;
-    int outfmt;
     int colormatrix;
     int colorlevels;
     int primaries;
@@ -53,34 +52,11 @@ struct vf_format_opts {
     int rotate;
     int dw, dh;
     double dar;
+    int convert;
 };
 
-static void vf_format_process(struct mp_filter *f)
+static void set_params(struct vf_format_opts *p, struct mp_image_params *out)
 {
-    struct priv *priv = f->priv;
-    struct vf_format_opts *p = priv->opts;
-
-    if (!mp_pin_can_transfer_data(f->ppins[1], priv->in_pin))
-        return;
-
-    struct mp_frame frame = mp_pin_out_read(priv->in_pin);
-
-    if (mp_frame_is_signaling(frame)) {
-        mp_pin_in_write(f->ppins[1], frame);
-        return;
-    }
-    if (frame.type != MP_FRAME_VIDEO) {
-        MP_ERR(f, "unsupported frame type\n");
-        mp_frame_unref(&frame);
-        mp_filter_internal_mark_failed(f);
-        return;
-    }
-
-    struct mp_image *img = frame.data;
-    struct mp_image_params *out = &img->params;
-
-    if (p->outfmt)
-        out->imgfmt = p->outfmt;
     if (p->colormatrix)
         out->color.space = p->colormatrix;
     if (p->colorlevels)
@@ -118,11 +94,53 @@ static void vf_format_process(struct mp_filter *f)
     if (p->dar > 0)
         dsize = av_d2q(p->dar, INT_MAX);
     mp_image_params_set_dsize(out, dsize.num, dsize.den);
+}
 
-    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
-    mp_image_params_guess_csp(out);
+static void vf_format_process(struct mp_filter *f)
+{
+    struct priv *priv = f->priv;
 
-    mp_pin_in_write(f->ppins[1], frame);
+    if (mp_pin_can_transfer_data(priv->conv->f->pins[0], f->ppins[0])) {
+        struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+
+        if (priv->opts->convert && frame.type == MP_FRAME_VIDEO) {
+            struct mp_image *img = frame.data;
+            struct mp_image_params par = img->params;
+            int outfmt = priv->opts->fmt;
+
+            // If we convert from RGB to YUV, default to limited range.
+            if (mp_imgfmt_get_forced_csp(img->imgfmt) == MP_CSP_RGB &&
+                outfmt && mp_imgfmt_get_forced_csp(outfmt) == MP_CSP_AUTO)
+            {
+                par.color.levels = MP_CSP_LEVELS_TV;
+            }
+
+            set_params(priv->opts, &par);
+
+            if (par.imgfmt != outfmt) {
+                par.imgfmt = outfmt;
+                par.hw_subfmt = 0;
+            }
+            mp_image_params_guess_csp(&par);
+
+            mp_autoconvert_set_target_image_params(priv->conv, &par);
+        }
+
+        mp_pin_in_write(priv->conv->f->pins[0], frame);
+    }
+
+    if (mp_pin_can_transfer_data(f->ppins[1], priv->conv->f->pins[1])) {
+        struct mp_frame frame = mp_pin_out_read(priv->conv->f->pins[1]);
+
+        if (!priv->opts->convert && frame.type == MP_FRAME_VIDEO) {
+            struct mp_image *img = frame.data;
+
+            set_params(priv->opts, &img->params);
+            mp_image_params_guess_csp(&img->params);
+        }
+
+        mp_pin_in_write(f->ppins[1], frame);
+    }
 }
 
 static const struct mp_filter_info vf_format_filter = {
@@ -145,17 +163,14 @@ static struct mp_filter *vf_format_create(struct mp_filter *parent, void *option
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 
-    struct mp_autoconvert *conv = mp_autoconvert_create(f);
-    if (!conv) {
+    priv->conv = mp_autoconvert_create(f);
+    if (!priv->conv) {
         talloc_free(f);
         return NULL;
     }
 
     if (priv->opts->fmt)
-        mp_autoconvert_add_imgfmt(conv, priv->opts->fmt, 0);
-
-    priv->in_pin = conv->f->pins[1];
-    mp_pin_connect(conv->f->pins[0], f->ppins[0]);
+        mp_autoconvert_add_imgfmt(priv->conv, priv->opts->fmt, 0);
 
     return f;
 }
@@ -175,6 +190,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),
     OPT_DOUBLE("dar", dar, 0),
+    OPT_FLAG("convert", convert, 0),
     OPT_REMOVED("outputlevels", "use the --video-output-levels global option"),
     OPT_REMOVED("peak", "use sig-peak instead (changed value scale!)"),
     {0}

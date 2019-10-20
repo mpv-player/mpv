@@ -88,9 +88,18 @@ static void process(struct mp_filter *f)
     }
 
     struct mp_image *src = frame.data;
-    int dstfmt = s->out_format ? s->out_format : src->imgfmt;
 
-    struct mp_image *dst = mp_image_pool_get(s->pool, dstfmt, src->w, src->h);
+    int dstfmt = s->out_format ? s->out_format : src->imgfmt;
+    int w = src->w;
+    int h = src->h;
+
+    if (s->use_out_params) {
+        w = s->out_params.w;
+        h = s->out_params.h;
+        dstfmt = s->out_params.imgfmt;
+    }
+
+    struct mp_image *dst = mp_image_pool_get(s->pool, dstfmt, w, h);
     if (!dst)
         goto error;
 
@@ -102,6 +111,8 @@ static void process(struct mp_filter *f)
     {
         dst->params.color.levels = MP_CSP_LEVELS_TV;
     }
+    if (s->use_out_params)
+        dst->params = s->out_params;
     mp_image_params_guess_csp(&dst->params);
 
     bool ok = mp_sws_scale(s->sws, dst, src) >= 0;

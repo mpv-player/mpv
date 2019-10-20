@@ -3,6 +3,7 @@
 #include "filter.h"
 
 struct mp_image;
+struct mp_image_params;
 
 // A filter which automatically creates and uses a conversion filter based on
 // the filter settings, or passes through data unchanged if no conversion is
@@ -21,6 +22,14 @@ struct mp_autoconvert {
 
 // (to free this, free the filter itself, mp_autoconvert.f)
 struct mp_autoconvert *mp_autoconvert_create(struct mp_filter *parent);
+
+// Require that output frames have the following params set.
+// This implicitly clears the image format list, and calls
+// mp_autoconvert_add_imgfmt() with the values in *p.
+// Idempotent on subsequent calls (no reinit forced if parameters don't change).
+// Mixing this with other format-altering calls has undefined effects.
+void mp_autoconvert_set_target_image_params(struct mp_autoconvert *c,
+                                            struct mp_image_params *p);
 
 // Add the imgfmt as allowed video image format, and error on non-video frames.
 // Each call adds to the list of allowed formats. Before the first call, all

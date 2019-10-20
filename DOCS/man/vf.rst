@@ -112,15 +112,55 @@ With filters that support it, you can access parameters by their name.
 Available mpv-only filters are:
 
 ``format=fmt=<value>:colormatrix=<value>:...``
-    Restricts the color space for the next filter without doing any conversion.
-    Use together with the scale filter for a real conversion.
+    Applies video parameter overrides, with optional conversion. By default,
+    this
 
     .. note::
 
-        For a list of available formats, see ``format=fmt=help``.
+        For a list of available formats, use ``--vf=format=fmt=help``.
 
     ``<fmt>``
-        Format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
+        Image format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
+
+        This filter always performs conversion to the given format.
+
+    ``<convert=yes|no>``
+        Force conversion of color parameters (default: no).
+
+        If this is disabled (the default), the only conversion that is possibly
+        performed is format conversion if ``<fmt>`` is set. All other parameters
+        (like ``<colormatrix>``) are forced without conversion. This mode is
+        typically useful when files have been incorrectly tagged.
+
+        If this is enabled, libswscale or zimg is used if any of the parameters
+        mismatch. zimg is used of the input/output image formats are supported
+        by mpv's zimg wrapper, and if ``--sws-allow-zimg=yes`` is used. Both
+        libraries may not support all kinds of conversions. This typically
+        results in silent incorrect conversion. zimg has in many cases a better
+        chance of performing the conversion correctly.
+
+        In both cases, the color parameters are set on the output stage of the
+        image format conversion (if ``fmt`` was set). The difference is that
+        with ``convert=no``, the color parameters are not passed on to the
+        converter.
+
+        If input and output video parameters are the same, conversion is always
+        skipped.
+
+        .. admonition:: Examples
+
+            ``mpv test.mkv --vf=format:colormatrix=ycgco``
+                Results in incorrect colors (if test.mkv was tagged correctly).
+
+            ``mpv test.mkv --vf=format:colormatrix=ycgco:convert=yes --sws-allow-zimg``
+                Results in true conversion to ``ycgco``, assuming the renderer
+                supports it (``--vo=gpu`` normally does). You can add ``--vo=xv``
+                to force a VO which definitely does not support it, which should
+                show incorrect colors as confirmation.
+
+                Using ``--sws-allow-zimg=no`` (or disabling zimg at build time)
+                will use libswscale, which cannot perform this conversion as
+                of this writing.
 
     ``<colormatrix>``
         Controls the YUV to RGB color space conversion when playing video. There
