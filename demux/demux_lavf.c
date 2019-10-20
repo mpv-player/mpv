@@ -247,6 +247,7 @@ static void update_read_stats(struct demuxer *demuxer)
     for (int n = 0; n < priv->num_nested; n++) {
         struct nested_stream *nest = &priv->nested[n];
 
+#if !HAVE_FFMPEG_STRICT_ABI
         // Note: accessing the bytes_read field is not allowed by FFmpeg's API.
         // This is fully intentional - there is no other way to get this
         // information (not even by custom I/O, because the connection reuse
@@ -255,6 +256,7 @@ static void update_read_stats(struct demuxer *demuxer)
         int64_t new = cur - nest->last_bytes;
         nest->last_bytes = cur;
         demux_report_unbuffered_read_bytes(demuxer, new);
+#endif
     }
 }
 
@@ -970,8 +972,10 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->access_references) {
         priv->default_io_open = avfc->io_open;
         priv->default_io_close = avfc->io_close;
+#if !HAVE_FFMPEG_STRICT_ABI
         avfc->io_open = nested_io_open;
         avfc->io_close = nested_io_close;
+#endif
     } else {
         avfc->io_open = block_io_open;
     }

@@ -490,6 +490,10 @@ FFmpeg/Libav libraries. Git master is recommended."
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
+    }, {
+        'name': '--ffmpeg-strict-abi',
+        'desc': 'Disable all known FFmpeg ABI violations',
+        'default': 'disable',
     }
 ]
 
