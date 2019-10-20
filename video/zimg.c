@@ -51,6 +51,10 @@ const struct m_sub_options zimg_conf = {
     },
 };
 
+// Component ID (see struct mp_regular_imgfmt_plane.components) to plane index.
+static const int corder_gbrp[4] = {0, 2, 0, 1};
+static const int corder_yuv[4] = {0, 0, 1, 2};
+
 struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
     struct mp_image_params fmt; // original mp format (possibly packed format)
@@ -339,12 +343,10 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     enum mp_csp forced_csp = mp_imgfmt_get_forced_csp(r->zimgfmt);
     if (forced_csp == MP_CSP_RGB || forced_csp == MP_CSP_XYZ) {
         typeflag = MP_IMGFLAG_RGB_P;
-        static const int gbrp[4] = {0, 2, 0, 1};
-        corder = gbrp;
+        corder = corder_gbrp;
     } else {
         typeflag = MP_IMGFLAG_YUV_P;
-        static const int yuv[4] = {0, 0, 1, 2};
-        corder = yuv;
+        corder = corder_yuv;
     }
 
     // Find a compatible planar format (typically AV_PIX_FMT_GBRP).
