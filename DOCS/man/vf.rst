@@ -113,16 +113,18 @@ Available mpv-only filters are:
 
 ``format=fmt=<value>:colormatrix=<value>:...``
     Applies video parameter overrides, with optional conversion. By default,
-    this
-
-    .. note::
-
-        For a list of available formats, use ``--vf=format=fmt=help``.
+    this overrides the video's parameters without conversion (except for the
+    ``fmt`` parameter), but can be made to perform an appropriate conversion
+    with ``convert=yes`` for parameters for which conversion is supported.
 
     ``<fmt>``
         Image format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
 
         This filter always performs conversion to the given format.
+
+        .. note::
+
+        For a list of available formats, use ``--vf=format=fmt=help``.
 
     ``<convert=yes|no>``
         Force conversion of color parameters (default: no).
