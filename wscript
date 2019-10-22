@@ -420,6 +420,16 @@ iconv support use --disable-iconv.",
         'deps': 'gpl',
         'func': check_true,
         'default': 'disable',
+    }, {
+        'name': '--sdl2',
+        'desc': 'SDL2',
+        'func': check_pkg_config('sdl2'),
+        'default': 'disable',
+    }, {
+        'name': '--sdl2-gamepad',
+        'desc': 'SDL2 gamepad input',
+        'deps': 'sdl2',
+        'func': check_true,
     }
 ]
 
@@ -499,10 +509,10 @@ FFmpeg/Libav libraries. Git master is recommended."
 
 audio_output_features = [
     {
-        'name': '--sdl2',
-        'desc': 'SDL2',
-        'func': check_pkg_config('sdl2'),
-        'default': 'disable'
+        'name': '--sdl2-audio',
+        'desc': 'SDL2 audio output',
+        'deps': 'sdl2',
+        'func': check_true,
     }, {
         'name': '--oss-audio',
         'desc': 'OSS',
@@ -563,6 +573,11 @@ audio_output_features = [
 
 video_output_features = [
     {
+        'name': '--sdl2-video',
+        'desc': 'SDL2 video output',
+        'deps': 'sdl2',
+        'func': check_true,
+    }, {
         'name': '--cocoa',
         'desc': 'Cocoa',
         'func': check_cocoa

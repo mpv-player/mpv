@@ -210,6 +210,8 @@ void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
 
 void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 
+void mp_input_sdl_gamepad_add(struct input_ctx *ictx);
+
 struct mp_ipc_ctx;
 struct mp_client_api;
 
