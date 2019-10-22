@@ -83,7 +83,7 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_XV
     &video_out_xv,
 #endif
-#if HAVE_SDL2
+#if HAVE_SDL2_VIDEO
     &video_out_sdl,
 #endif
 #if HAVE_VAAPI_X11 && HAVE_GPL

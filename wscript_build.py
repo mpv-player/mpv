@@ -257,7 +257,7 @@ def build(ctx):
         ( "audio/out/ao_pcm.c" ),
         ( "audio/out/ao_pulse.c",                "pulse" ),
         ( "audio/out/ao_rsound.c",               "rsound" ),
-        ( "audio/out/ao_sdl.c",                  "sdl2" ),
+        ( "audio/out/ao_sdl.c",                  "sdl2-audio" ),
         ( "audio/out/ao_sndio.c",                "sndio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
         ( "audio/out/ao_wasapi_changenotify.c",  "wasapi" ),
@@ -320,6 +320,7 @@ def build(ctx):
         ( ipc_c ),
         ( "input/keycodes.c" ),
         ( "input/pipe-win32.c",                  "win32-pipes" ),
+        ( "input/sdl_gamepad.c",                 "sdl2-gamepad" ),
 
         ## Misc
         ( "misc/bstr.c" ),
@@ -490,7 +491,7 @@ def build(ctx):
         ( "video/out/vo_mediacodec_embed.c",     "android" ),
         ( "video/out/vo_null.c" ),
         ( "video/out/vo_rpi.c",                  "rpi-mmal" ),
-        ( "video/out/vo_sdl.c",                  "sdl2" ),
+        ( "video/out/vo_sdl.c",                  "sdl2-video" ),
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),

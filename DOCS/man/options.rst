@@ -3407,6 +3407,9 @@ Input
     (OS X only)
     Enable/disable Apple Remote support. Enabled by default (except for libmpv).
 
+``--input-gamepad=<yes|no>``
+    Enable/disable SDL2 Gamepad support. Enabled by default (except for libmpv).
+
 ``--input-cursor``, ``--no-input-cursor``
     Permit mpv to receive pointer events reported by the video output
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
