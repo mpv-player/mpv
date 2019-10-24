@@ -109,11 +109,14 @@ extern const struct mp_decoder_fns vd_lavc;
 extern const struct mp_decoder_fns ad_lavc;
 extern const struct mp_decoder_fns ad_spdif;
 
-// Convenience wrapper for lavc based decoders. eof_flag must be set to false
-// on init and resets.
-void lavc_process(struct mp_filter *f, bool *eof_flag,
-                  bool (*send)(struct mp_filter *f, struct demux_packet *pkt),
-                  bool (*receive)(struct mp_filter *f, struct mp_frame *res));
+// Convenience wrapper for lavc based decoders. Treat lavc_state as private;
+// init to all-0 on init and resets.
+struct lavc_state {
+    bool eof_returned;
+};
+void lavc_process(struct mp_filter *f, struct lavc_state *state,
+                  int (*send)(struct mp_filter *f, struct demux_packet *pkt),
+                  int (*receive)(struct mp_filter *f, struct mp_frame *res));
 
 // ad_spdif.c
 struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);

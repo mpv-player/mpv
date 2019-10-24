@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <libavutil/buffer.h>
+#include <libavutil/common.h>
 #include <libavutil/rational.h>
 
 #include "config.h"
@@ -814,22 +815,23 @@ error:
     return NULL;
 }
 
-void lavc_process(struct mp_filter *f, bool *eof_flag,
-                  bool (*send)(struct mp_filter *f, struct demux_packet *pkt),
-                  bool (*receive)(struct mp_filter *f, struct mp_frame *res))
+void lavc_process(struct mp_filter *f, struct lavc_state *state,
+                  int (*send)(struct mp_filter *f, struct demux_packet *pkt),
+                  int (*receive)(struct mp_filter *f, struct mp_frame *res))
 {
     if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
 
     struct mp_frame frame = {0};
-    if (!receive(f, &frame)) {
-        if (!*eof_flag)
+    int ret_recv = receive(f, &frame);
+    if (ret_recv == AVERROR_EOF) {
+        if (!state->eof_returned)
             mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
-        *eof_flag = true;
+        state->eof_returned = true;
     } else if (frame.type) {
-        *eof_flag = false;
+        state->eof_returned = false;
         mp_pin_in_write(f->ppins[1], frame);
-    } else {
+    } else if (ret_recv == AVERROR(EAGAIN)) {
         // Need to feed a packet.
         frame = mp_pin_out_read(f->ppins[0]);
         struct demux_packet *pkt = NULL;
@@ -843,7 +845,8 @@ void lavc_process(struct mp_filter *f, bool *eof_flag,
             }
             return;
         }
-        if (!send(f, pkt)) {
+        int ret_send = send(f, pkt);
+        if (ret_send == AVERROR(EAGAIN)) {
             // Should never happen, but can happen with broken decoders.
             MP_WARN(f, "could not consume packet\n");
             mp_pin_out_unread(f->ppins[0], frame);
@@ -851,6 +854,9 @@ void lavc_process(struct mp_filter *f, bool *eof_flag,
             return;
         }
         talloc_free(pkt);
+        mp_filter_internal_mark_progress(f);
+    } else {
+        // Just try again.
         mp_filter_internal_mark_progress(f);
     }
 }
