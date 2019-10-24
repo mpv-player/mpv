@@ -69,7 +69,6 @@ struct mp_client_api {
 
     struct mpv_handle **clients;
     int num_clients;
-    uint64_t event_masks; // combined events of all clients, or 0 if unknown
     bool shutting_down; // do not allow new clients
     bool have_terminator; // a client took over the role of destroying the core
     bool terminate_core_thread; // make libmpv core thread exit
@@ -193,13 +192,6 @@ bool mp_clients_all_initialized(struct MPContext *mpctx)
     return all_ok;
 }
 
-static void invalidate_global_event_mask(struct mpv_handle *ctx)
-{
-    pthread_mutex_lock(&ctx->clients->lock);
-    ctx->clients->event_masks = 0;
-    pthread_mutex_unlock(&ctx->clients->lock);
-}
-
 static struct mpv_handle *find_client(struct mp_client_api *clients,
                                       const char *name)
 {
@@ -265,7 +257,6 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
     if (clients->num_clients == 1 && !clients->mpctx->is_cli)
         client->fuzzy_initialized = true;
 
-    clients->event_masks = 0;
     pthread_mutex_unlock(&clients->lock);
 
     mpv_request_event(client, MPV_EVENT_TICK, 0);
@@ -726,29 +717,6 @@ static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
     pthread_mutex_unlock(&ctx->lock);
 }
 
-// Return whether there's any client listening to this event.
-// If false is returned, the core doesn't need to send it.
-bool mp_client_event_is_registered(struct MPContext *mpctx, int event)
-{
-    struct mp_client_api *clients = mpctx->clients;
-
-    pthread_mutex_lock(&clients->lock);
-
-    if (!clients->event_masks) { // lazy update
-        for (int n = 0; n < clients->num_clients; n++) {
-            struct mpv_handle *ctx = clients->clients[n];
-            pthread_mutex_lock(&ctx->lock);
-            clients->event_masks |= ctx->event_mask | ctx->property_event_masks;
-            pthread_mutex_unlock(&ctx->lock);
-        }
-    }
-    bool r = clients->event_masks & (1ULL << event);
-
-    pthread_mutex_unlock(&clients->lock);
-
-    return r;
-}
-
 void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data)
 {
     struct mp_client_api *clients = mpctx->clients;
@@ -828,7 +796,6 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
     uint64_t bit = 1ULL << event;
     ctx->event_mask = enable ? ctx->event_mask | bit : ctx->event_mask & ~bit;
     pthread_mutex_unlock(&ctx->lock);
-    invalidate_global_event_mask(ctx);
     return 0;
 }
 
@@ -1484,7 +1451,6 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     ctx->property_event_masks |= prop->event_mask;
     ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
-    invalidate_global_event_mask(ctx);
     return 0;
 }
 
@@ -1513,7 +1479,6 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
     }
     ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
-    invalidate_global_event_mask(ctx);
     return count;
 }
 
