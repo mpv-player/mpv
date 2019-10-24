@@ -139,7 +139,7 @@ struct mpv_handle {
 };
 
 static bool gen_log_message_event(struct mpv_handle *ctx);
-static bool gen_property_change_event(struct mpv_handle *ctx);
+static bool gen_property_change_event(struct mpv_handle *ctx, bool *unlocked);
 static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask);
 
 void mp_clients_init(struct MPContext *mpctx)
@@ -834,12 +834,15 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
             talloc_steal(event, event->data);
             break;
         }
+        bool unlocked = false;
         // If there's a changed property, generate change event (never queued).
-        if (gen_property_change_event(ctx))
+        if (gen_property_change_event(ctx, &unlocked))
             break;
         // Pop item from message queue, and return as event.
         if (gen_log_message_event(ctx))
             break;
+        if (unlocked)
+            continue;
         int r = wait_wakeup(ctx, deadline);
         if (r == ETIMEDOUT)
             break;
@@ -1549,7 +1552,7 @@ static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
 
 // Set ctx->cur_event to a generated property change event, if there is any
 // outstanding property.
-static bool gen_property_change_event(struct mpv_handle *ctx)
+static bool gen_property_change_event(struct mpv_handle *ctx, bool *unlocked)
 {
     if (!ctx->mpctx->initialized)
         return false;
@@ -1570,6 +1573,7 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
         if (prop->changed && !prop->dead) {
             prop->changed = false;
             updated = update_prop(ctx, prop);
+            *unlocked = true; // not always; but good enough
         }
 
         if (prop->dead) {
