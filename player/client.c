@@ -39,6 +39,7 @@
 #include "options/m_property.h"
 #include "options/path.h"
 #include "options/parse_configfile.h"
+#include "osdep/atomic.h"
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
@@ -65,6 +66,8 @@ struct mp_client_api {
 
     pthread_mutex_t lock;
 
+    atomic_bool uses_vo_libmpv;
+
     // -- protected by lock
 
     struct mpv_handle **clients;
@@ -81,6 +84,7 @@ struct mp_client_api {
 };
 
 struct observe_property {
+    struct mpv_handle *owner;
     char *name;
     int id;                 // ==mp_get_property_id(name)
     uint64_t event_mask;    // ==mp_get_property_event_mask(name)
@@ -91,6 +95,12 @@ struct observe_property {
     bool dead;              // property unobserved while retrieving value
     bool value_valid;
     union m_option_value value;
+    // Only if async. update is used.
+    uint64_t async_change_ts;   // logical timestamp incremented on each change
+    uint64_t async_value_ts;    // logical timestamp for async_value contents
+    bool async_updating;        // if true, updating async_value_ts to change_ts
+    bool async_value_valid;
+    union m_option_value async_value;
 };
 
 struct mpv_handle {
@@ -126,6 +136,7 @@ struct mpv_handle {
     int first_event;        // events[first_event] is the first readable event
     int num_events;         // number of readable events
     int reserved_events;    // number of entries reserved for replies
+    size_t async_counter;   // pending other async events
     bool choked;            // recovering from queue overflow
 
     struct observe_property **properties;
@@ -355,7 +366,7 @@ static void unlock_core(mpv_handle *ctx)
 void mpv_wait_async_requests(mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->lock);
-    while (ctx->reserved_events)
+    while (ctx->reserved_events || ctx->async_counter)
         wait_wakeup(ctx, INT64_MAX);
     pthread_mutex_unlock(&ctx->lock);
 }
@@ -1416,8 +1427,13 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
 static void property_free(void *p)
 {
     struct observe_property *prop = p;
-    if (prop->type)
+
+    assert(!prop->async_updating);
+
+    if (prop->type) {
         m_option_free(prop->type, &prop->value);
+        m_option_free(prop->type, &prop->async_value);
+    }
 }
 
 int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
@@ -1434,6 +1450,7 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     struct observe_property *prop = talloc_ptrtype(ctx, prop);
     talloc_set_destructor(prop, property_free);
     *prop = (struct observe_property){
+        .owner = ctx,
         .name = talloc_strdup(prop, name),
         .id = mp_get_property_id(ctx->mpctx, name),
         .event_mask = mp_get_property_event_mask(name),
@@ -1453,6 +1470,7 @@ static void mark_property_changed(struct mpv_handle *client, int index)
 {
     struct observe_property *prop = client->properties[index];
     prop->changed = true;
+    prop->async_change_ts += 1;
     client->lowest_changed = MPMIN(client->lowest_changed, index);
 }
 
@@ -1509,13 +1527,18 @@ static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask)
         wakeup_client(ctx);
 }
 
-static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
+static void update_prop_async(void *p)
 {
-    if (!prop->type)
-        return true;
+    struct observe_property *prop = p;
+    struct mpv_handle *ctx = prop->owner;
 
     union m_option_value val = {0};
+    bool val_valid = false;
+    uint64_t value_ts;
 
+    pthread_mutex_lock(&ctx->lock);
+    value_ts = prop->async_change_ts;
+    assert(prop->async_updating);
     pthread_mutex_unlock(&ctx->lock);
 
     struct getproperty_request req = {
@@ -1524,11 +1547,71 @@ static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
         .format = prop->format,
         .data = &val,
     };
-    run_locked(ctx, getproperty_fn, &req);
+    getproperty_fn(&req);
+    val_valid = req.status >= 0;
 
     pthread_mutex_lock(&ctx->lock);
 
-    bool val_valid = req.status >= 0;
+    assert(prop->async_updating);
+
+    // Move to prop->async_value
+    m_option_free(prop->type, &prop->async_value);
+    memcpy(&prop->async_value, &val, prop->type->type->size);
+    prop->async_value_valid = val_valid;
+
+    prop->async_value_ts = value_ts;
+    prop->async_updating = false;
+
+    // Cause it to re-check the property.
+    prop->changed = true;
+    ctx->lowest_changed = 0;
+
+    ctx->async_counter -= 1;
+    wakeup_client(ctx);
+
+    pthread_mutex_unlock(&ctx->lock);
+}
+
+static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
+{
+    if (!prop->type)
+        return true;
+
+    union m_option_value val = {0};
+    bool val_valid = false;
+
+    // With vo_libmpv, we can't lock the core for stupid reasons.
+    // Yes, that's FUCKING HORRIBLE. On the other hand, might be useful for
+    // true async. properties in the future.
+    if (atomic_load_explicit(&ctx->clients->uses_vo_libmpv, memory_order_relaxed)) {
+        if (prop->async_change_ts > prop->async_value_ts) {
+            if (!prop->async_updating) {
+                prop->async_updating = true;
+                ctx->async_counter += 1;
+                mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop_async, prop);
+            }
+            return false; // re-update later when the changed value comes in
+        }
+
+        // Move to val
+        memcpy(&val, &prop->async_value, prop->type->type->size);
+        val_valid = prop->async_value_valid;
+        prop->async_value = (union m_option_value){0};
+        prop->async_value_valid = false;
+    } else {
+        pthread_mutex_unlock(&ctx->lock);
+
+        struct getproperty_request req = {
+            .mpctx = ctx->mpctx,
+            .name = prop->name,
+            .format = prop->format,
+            .data = &val,
+        };
+        run_locked(ctx, getproperty_fn, &req);
+        val_valid = req.status >= 0;
+
+        pthread_mutex_lock(&ctx->lock);
+    }
 
     bool changed = prop->value_valid != val_valid;
     if (prop->value_valid && val_valid)
@@ -1603,8 +1686,10 @@ static bool gen_property_change_event(struct mpv_handle *ctx, bool *unlocked)
         for (int n = ctx->num_properties - 1; n >= 0; n--) {
             struct observe_property *prop = ctx->properties[n];
             if (prop->dead) {
-                MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
-                talloc_free(prop);
+                if (!prop->async_updating) {
+                    MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
+                    talloc_free(prop);
+                }
             } else {
                 ctx->property_event_masks |= prop->event_mask;
             }
@@ -1836,6 +1921,7 @@ bool mp_set_main_render_context(struct mp_client_api *client_api,
     if (res)
         client_api->render_context = active ? ctx : NULL;
     pthread_mutex_unlock(&client_api->lock);
+    atomic_store(&client_api->uses_vo_libmpv, active);
     return res;
 }
 
