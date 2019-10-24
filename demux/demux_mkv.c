@@ -1347,6 +1347,7 @@ static const char *const mkv_video_tags[][2] = {
     {"V_MPEG4/ISO/ASP",     "mpeg4"},
     {"V_MPEG4/ISO/AP",      "mpeg4"},
     {"V_MPEG4/ISO/AVC",     "h264"},
+    {"V_MPEG4/MS/V3",       "msmpeg4v3"},
     {"V_THEORA",            "theora"},
     {"V_VP8",               "vp8"},
     {"V_VP9",               "vp9"},
