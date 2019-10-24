@@ -124,7 +124,7 @@ Available mpv-only filters are:
 
         .. note::
 
-        For a list of available formats, use ``--vf=format=fmt=help``.
+            For a list of available formats, use ``--vf=format=fmt=help``.
 
     ``<convert=yes|no>``
         Force conversion of color parameters (default: no).
