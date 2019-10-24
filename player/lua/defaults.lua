@@ -355,6 +355,7 @@ function mp.unobserve_property(cb)
     for prop_id, prop_cb in pairs(properties) do
         if cb == prop_cb then
             properties[prop_id] = nil
+            mp.raw_unobserve_property(prop_id)
         end
     end
 end
