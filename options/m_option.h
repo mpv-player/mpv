@@ -424,6 +424,9 @@ char *format_file_size(int64_t size);
 #define UPDATE_OPTS_MASK \
     (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
 
+// type_float/type_double: string "default" is parsed as NaN (and reverse)
+#define M_OPT_DEFAULT_NAN       (1 << 29)
+
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
 

@@ -4404,8 +4404,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
     smooth.
 
 ``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
-    Set filter parameters. Ignored if the filter is not tunable. Currently,
-    this affects the following filter parameters:
+    Set filter parameters. By default, these are set to the special string
+    ``default``, which maps to a scaler-specific default value. Ignored if the
+    filter is not tunable. Currently, this affects the following filter
+    parameters:
 
     bcspline
         Spline parameters (``B`` and ``C``). Defaults to 0.5 for both.
@@ -4477,8 +4479,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
 ``--scale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--tscale-wparam=<window>``
     (Advanced users only) Configure the parameter for the window function given
-    by ``--scale-window`` etc. Ignored if the window is not tunable. Currently,
-    this affects the following window parameters:
+    by ``--scale-window`` etc. By default, these are set to the special string
+    ``default``, which maps to a window-specific default value. Ignored if the
+    window is not tunable. Currently, this affects the following window
+    parameters:
 
     kaiser
         Window parameter (alpha). Defaults to 6.33.
@@ -5524,8 +5528,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
         the display.
 
 ``--tone-mapping-param=<value>``
-    Set tone mapping parameters. Ignored if the tone mapping algorithm is not
-    tunable. This affects the following tone mapping algorithms:
+    Set tone mapping parameters. By default, this is set to the special string
+    ``default``, which maps to an algorithm-specific default value. Ignored if
+    the tone mapping algorithm is not tunable. This affects the following tone
+    mapping algorithms:
 
     clip
         Specifies an extra linear coefficient to multiply into the signal

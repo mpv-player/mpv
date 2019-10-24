@@ -342,14 +342,18 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 
+// Use for options which use NAN for defaults.
+#define OPT_FLOATDEF(name, var, flags) \
+    OPT_FLOAT(name, var, (flags) | M_OPT_DEFAULT_NAN)
+
 #define SCALER_OPTS(n, i) \
     OPT_STRING_VALIDATE(n, scaler[i].kernel.name, 0, validate_scaler_opt), \
-    OPT_FLOAT(n"-param1", scaler[i].kernel.params[0], 0),                  \
-    OPT_FLOAT(n"-param2", scaler[i].kernel.params[1], 0),                  \
+    OPT_FLOATDEF(n"-param1", scaler[i].kernel.params[0], 0),               \
+    OPT_FLOATDEF(n"-param2", scaler[i].kernel.params[1], 0),               \
     OPT_FLOAT(n"-blur",   scaler[i].kernel.blur, 0),                       \
     OPT_FLOATRANGE(n"-cutoff", scaler[i].cutoff, 0, 0.0, 1.0),             \
     OPT_FLOATRANGE(n"-taper", scaler[i].kernel.taper, 0, 0.0, 1.0),        \
-    OPT_FLOAT(n"-wparam", scaler[i].window.params[0], 0),                  \
+    OPT_FLOATDEF(n"-wparam", scaler[i].window.params[0], 0),               \
     OPT_FLOAT(n"-wblur",  scaler[i].window.blur, 0),                       \
     OPT_FLOATRANGE(n"-wtaper", scaler[i].window.taper, 0, 0.0, 1.0),       \
     OPT_FLOATRANGE(n"-clamp", scaler[i].clamp, 0, 0.0, 1.0),               \
@@ -383,7 +387,7 @@ const struct m_sub_options gl_video_conf = {
                        tone_map.scene_threshold_low, 0, 0, 20.0),
         OPT_FLOATRANGE("hdr-scene-threshold-high",
                        tone_map.scene_threshold_high, 0, 0, 20.0),
-        OPT_FLOAT("tone-mapping-param", tone_map.curve_param, 0),
+        OPT_FLOATDEF("tone-mapping-param", tone_map.curve_param, 0),
         OPT_FLOATRANGE("tone-mapping-max-boost", tone_map.max_boost, 0, 1.0, 10.0),
         OPT_FLOAT("tone-mapping-desaturate", tone_map.desat, 0),
         OPT_FLOATRANGE("tone-mapping-desaturate-exponent",

@@ -191,6 +191,9 @@ Interface changes
       internal counter that remembered the current position.
     - remove deprecated ao/vo auto profiles. Consider using scripts like
       auto-profiles.lua instead.
+    - --[c]scale-[w]param[1|2] and --tone-mapping-param now accept "default",
+      and if set to that value, reading them as property will also return
+      "default", instead of float nan as in previous versions
  --- mpv 0.28.0 ---
     - rename --hwdec=mediacodec option to mediacodec-copy, to reflect
       conventions followed by other hardware video decoding APIs
