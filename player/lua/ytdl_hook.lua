@@ -501,9 +501,7 @@ function run_ytdl_hook(url)
 
     -- Checks if video option is "no", change format accordingly,
     -- but only if user didn't explicitly set one
-    if (mp.get_property("options/vid") == "no")
-        and not option_was_set("ytdl-format") then
-
+    if (mp.get_property("options/vid") == "no") and (#format == 0) then
         format = "bestaudio/best"
         msg.verbose("Video disabled. Only using audio")
     end
