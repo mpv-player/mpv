@@ -1454,6 +1454,13 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     return 0;
 }
 
+static void mark_property_changed(struct mpv_handle *client, int index)
+{
+    struct observe_property *prop = client->properties[index];
+    prop->changed = true;
+    client->lowest_changed = MPMIN(client->lowest_changed, index);
+}
+
 int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
 {
     pthread_mutex_lock(&ctx->lock);
@@ -1480,13 +1487,6 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
     ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
     return count;
-}
-
-static void mark_property_changed(struct mpv_handle *client, int index)
-{
-    struct observe_property *prop = client->properties[index];
-    prop->changed = true;
-    client->lowest_changed = MPMIN(client->lowest_changed, index);
 }
 
 // Broadcast that a property has changed.
