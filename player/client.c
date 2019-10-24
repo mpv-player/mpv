@@ -86,14 +86,11 @@ struct observe_property {
     uint64_t event_mask;    // ==mp_get_property_event_mask(name)
     int64_t reply_id;
     mpv_format format;
+    const struct m_option *type;
     bool changed;           // property change should be signaled to user
-    bool need_new_value;    // a new value should be retrieved
-    bool updating;          // a new value is being retrieved
-    bool updated;           // a new value was successfully retrieved
     bool dead;              // property unobserved while retrieving value
-    bool new_value_valid, user_value_valid;
-    union m_option_value new_value, user_value;
-    struct mpv_handle *client;
+    bool value_valid;
+    union m_option_value value;
 };
 
 struct mpv_handle {
@@ -134,7 +131,6 @@ struct mpv_handle {
     struct observe_property **properties;
     int num_properties;
     int lowest_changed;     // attempt at making change processing incremental
-    int properties_updating;
     uint64_t property_event_masks; // or-ed together event masks of all properties
 
     bool fuzzy_initialized; // see scripting.c wait_loaded()
@@ -359,7 +355,7 @@ static void unlock_core(mpv_handle *ctx)
 void mpv_wait_async_requests(mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->lock);
-    while (ctx->reserved_events || ctx->properties_updating)
+    while (ctx->reserved_events)
         wait_wakeup(ctx, INT64_MAX);
     pthread_mutex_unlock(&ctx->lock);
 }
@@ -1417,17 +1413,15 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
 static void property_free(void *p)
 {
     struct observe_property *prop = p;
-    const struct m_option *type = get_mp_type_get(prop->format);
-    if (type) {
-        m_option_free(type, &prop->new_value);
-        m_option_free(type, &prop->user_value);
-    }
+    if (prop->type)
+        m_option_free(prop->type, &prop->value);
 }
 
 int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
                          const char *name, mpv_format format)
 {
-    if (format != MPV_FORMAT_NONE && !get_mp_type_get(format))
+    const struct m_option *type = get_mp_type_get(format);
+    if (format != MPV_FORMAT_NONE && !type)
         return MPV_ERROR_PROPERTY_FORMAT;
     // Explicitly disallow this, because it would require a special code path.
     if (format == MPV_FORMAT_OSD_STRING)
@@ -1437,15 +1431,13 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     struct observe_property *prop = talloc_ptrtype(ctx, prop);
     talloc_set_destructor(prop, property_free);
     *prop = (struct observe_property){
-        .client = ctx,
         .name = talloc_strdup(prop, name),
         .id = mp_get_property_id(ctx->mpctx, name),
         .event_mask = mp_get_property_event_mask(name),
         .reply_id = userdata,
         .format = format,
+        .type = type,
         .changed = true,
-        .updating = false,
-        .updated = false,
     };
     MP_TARRAY_APPEND(ctx, ctx->properties, ctx->num_properties, prop);
     ctx->property_event_masks |= prop->event_mask;
@@ -1464,27 +1456,17 @@ static void mark_property_changed(struct mpv_handle *client, int index)
 int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
 {
     pthread_mutex_lock(&ctx->lock);
-    ctx->property_event_masks = 0;
     int count = 0;
-    for (int n = ctx->num_properties - 1; n >= 0; n--) {
+    for (int n = 0; n < ctx->num_properties; n++) {
         struct observe_property *prop = ctx->properties[n];
-        if (prop->reply_id == userdata) {
-            if (prop->updating) {
-                prop->dead = true;
-            } else {
-                // In case mpv_unobserve_property() is called after mpv_wait_event()
-                // returned, and the mpv_event still references the name somehow,
-                // make sure it's not freed while in use. The same can happen
-                // with the value update mechanism.
-                talloc_steal(ctx->cur_event, prop);
-            }
-            MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
+        // Perform actual removal of the property lazily to avoid creating
+        // dangling pointers and such.
+        if (prop->reply_id == userdata && !prop->dead) {
+            mark_property_changed(ctx, n);
+            prop->dead = true;
             count++;
         }
-        if (!prop->dead)
-            ctx->property_event_masks |= prop->event_mask;
     }
-    ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
     return count;
 }
@@ -1524,13 +1506,14 @@ static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask)
         wakeup_client(ctx);
 }
 
-static void update_prop(void *p)
+static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
 {
-    struct observe_property *prop = p;
-    struct mpv_handle *ctx = prop->client;
+    if (!prop->type)
+        return true;
 
-    const struct m_option *type = get_mp_type_get(prop->format);
     union m_option_value val = {0};
+
+    pthread_mutex_unlock(&ctx->lock);
 
     struct getproperty_request req = {
         .mpctx = ctx->mpctx,
@@ -1538,26 +1521,30 @@ static void update_prop(void *p)
         .format = prop->format,
         .data = &val,
     };
-
-    getproperty_fn(&req);
+    run_locked(ctx, getproperty_fn, &req);
 
     pthread_mutex_lock(&ctx->lock);
-    ctx->properties_updating--;
-    prop->updating = false;
-    m_option_free(type, &prop->new_value);
-    prop->new_value_valid = req.status >= 0;
-    if (prop->new_value_valid)
-        memcpy(&prop->new_value, &val, type->type->size);
-    if (prop->user_value_valid != prop->new_value_valid) {
-        prop->updated = true;
-    } else if (prop->user_value_valid && prop->new_value_valid) {
-        if (!equal_mpv_value(&prop->user_value, &prop->new_value, prop->format))
-            prop->updated = true;
+
+    bool val_valid = req.status >= 0;
+
+    bool changed = prop->value_valid != val_valid;
+    if (prop->value_valid && val_valid)
+        changed = !equal_mpv_value(&prop->value, &val, prop->format);
+
+    if (changed) {
+        prop->value_valid = val_valid;
+        if (val_valid) {
+            // move val to prop->value
+            m_option_free(prop->type, &prop->value);
+            memcpy(&prop->value, &val, prop->type->type->size);
+            val_valid = false;
+        }
     }
-    if (prop->dead)
-        talloc_steal(ctx->cur_event, prop);
-    wakeup_client(ctx);
-    pthread_mutex_unlock(&ctx->lock);
+
+    if (val_valid)
+        m_option_free(prop->type, &val);
+
+    return changed;
 }
 
 // Set ctx->cur_event to a generated property change event, if there is any
@@ -1566,44 +1553,61 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
 {
     if (!ctx->mpctx->initialized)
         return false;
+
+    *ctx->cur_event = (struct mpv_event){
+        .event_id = MPV_EVENT_NONE,
+    };
+
+    bool need_gc = false;
     int start = ctx->lowest_changed;
     ctx->lowest_changed = ctx->num_properties;
     for (int n = start; n < ctx->num_properties; n++) {
         struct observe_property *prop = ctx->properties[n];
-        if ((prop->changed || prop->updating || prop->updated) && n < ctx->lowest_changed)
+        if (prop->changed && n < ctx->lowest_changed)
             ctx->lowest_changed = n;
-        if (prop->changed) {
+
+        bool updated = false;
+        if (prop->changed && !prop->dead) {
             prop->changed = false;
-            if (prop->format != MPV_FORMAT_NONE) {
-                ctx->properties_updating++;
-                prop->updating = true;
-                mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop, prop);
-            } else {
-                prop->updated = true;
-            }
+            updated = update_prop(ctx, prop);
         }
-        bool updated = prop->updated;
-        prop->updated = false;
-        if (updated) {
-            const struct m_option *type = get_mp_type_get(prop->format);
-            prop->user_value_valid = prop->new_value_valid;
-            if (prop->new_value_valid)
-                m_option_copy(type, &prop->user_value, &prop->new_value);
+
+        if (prop->dead) {
+            need_gc = true;
+        } else if (updated) {
             ctx->cur_property_event = (struct mpv_event_property){
                 .name = prop->name,
-                .format = prop->user_value_valid ? prop->format : 0,
+                .format = prop->value_valid ? prop->format : 0,
+                .data = prop->value_valid ? &prop->value : NULL,
             };
-            if (prop->user_value_valid)
-                ctx->cur_property_event.data = &prop->user_value;
             *ctx->cur_event = (struct mpv_event){
                 .event_id = MPV_EVENT_PROPERTY_CHANGE,
                 .reply_userdata = prop->reply_id,
                 .data = &ctx->cur_property_event,
             };
-            return true;
+            break;
         }
     }
-    return false;
+
+    if (need_gc) {
+        // Remove entries which have the .dead flag set. The point of doing this
+        // here is to ensure that this does not conflict with update_prop(),
+        // and that a previously returned mpv_event struct pointing to removed
+        // property entries does not result in dangling pointers.
+        ctx->property_event_masks = 0;
+        ctx->lowest_changed = 0;
+        for (int n = ctx->num_properties - 1; n >= 0; n--) {
+            struct observe_property *prop = ctx->properties[n];
+            if (prop->dead) {
+                MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
+                talloc_free(prop);
+            } else {
+                ctx->property_event_masks |= prop->event_mask;
+            }
+        }
+    }
+
+    return !!ctx->cur_event->event_id;
 }
 
 int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
