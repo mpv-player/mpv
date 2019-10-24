@@ -522,9 +522,8 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
 
-    // -1 means auto aspect (prefer container size until aspect change)
-    //  0 means square pixels
-    OPT_ASPECT("video-aspect-override", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
+    OPT_ASPECT("video-aspect-override", movie_aspect, UPDATE_IMGPAR | M_OPT_RANGE,
+               .min = -1, .max = 10),
     OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"bitstream", 1}, {"container", 2})),
 
