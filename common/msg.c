@@ -50,7 +50,6 @@ struct mp_log_root {
     bool use_terminal;  // make accesses to stderr/stdout
     bool module;
     bool show_time;
-    bool termosd;       // use terminal control codes for status line
     int blank_lines;    // number of lines usable by status
     int status_lines;   // number of current status lines
     bool color;
@@ -361,7 +360,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     } else if (lev == MSGL_STATUS && !test_terminal_level(log, lev)) {
         /* discard */
     } else {
-        if (lev == MSGL_STATUS && root->termosd)
+        if (lev == MSGL_STATUS)
             prepare_status_line(root, text);
 
         // Split away each line. Normally we require full lines; buffer partial
@@ -382,7 +381,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
         if (lev == MSGL_STATUS) {
             if (text[0])
-                print_terminal_line(log, lev, text, root->termosd ? "\r" : "\n");
+                print_terminal_line(log, lev, text, "\r");
         } else if (text[0]) {
             int size = strlen(text) + 1;
             if (talloc_get_size(log->partial) < size)
@@ -510,10 +509,8 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     root->module = opts->msg_module;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
-    if (root->use_terminal) {
+    if (root->use_terminal)
         root->color = opts->msg_color && isatty(STDOUT_FILENO);
-        root->termosd = isatty(STDERR_FILENO);
-    }
 
     m_option_type_msglevels.free(&root->msg_levels);
     m_option_type_msglevels.copy(NULL, &root->msg_levels, &opts->msg_levels);
