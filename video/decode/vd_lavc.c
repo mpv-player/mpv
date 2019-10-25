@@ -1092,7 +1092,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
     if (!ctx->num_delay_queue)
         return ret;
 
-    if (ctx->num_delay_queue <= ctx->max_delay_queue && ret >= 0)
+    if (ctx->num_delay_queue <= ctx->max_delay_queue && ret != AVERROR_EOF)
         return AVERROR(EAGAIN);
 
     struct mp_image *res = ctx->delay_queue[0];
@@ -1100,7 +1100,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
 
     res = res ? mp_img_swap_to_native(res) : NULL;
     if (!res)
-        return ret;
+        return AVERROR_UNKNOWN;
 
     if (ctx->use_hwdec && ctx->hwdec.copying && res->hwctx) {
         struct mp_image *sw = mp_image_hw_download(res, ctx->hwdec_swpool);
@@ -1110,7 +1110,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
             MP_ERR(vd, "Could not copy back hardware decoded frame.\n");
             ctx->hwdec_fail_count = INT_MAX - 1; // force fallback
             handle_err(vd);
-            return ret;
+            return AVERROR_UNKNOWN;
         }
     }
 
@@ -1132,7 +1132,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
     }
 
     *out_frame = MAKE_FRAME(MP_FRAME_VIDEO, res);
-    return ret;
+    return 0;
 }
 
 static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
