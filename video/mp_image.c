@@ -493,6 +493,15 @@ static enum mp_csp mp_image_params_get_forced_csp(struct mp_image_params *params
     return mp_imgfmt_get_forced_csp(imgfmt);
 }
 
+static void assign_bufref(AVBufferRef **dst, AVBufferRef *new)
+{
+    av_buffer_unref(dst);
+    if (new) {
+        *dst = av_buffer_ref(new);
+        MP_HANDLE_OOM(*dst);
+    }
+}
+
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 {
     dst->pict_type = src->pict_type;
@@ -517,13 +526,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
                 memcpy(dst->planes[1], src->planes[1], AVPALETTE_SIZE);
         }
     }
-    av_buffer_unref(&dst->icc_profile);
-    dst->icc_profile = src->icc_profile;
-    if (dst->icc_profile) {
-        dst->icc_profile = av_buffer_ref(dst->icc_profile);
-        if (!dst->icc_profile)
-            abort();
-    }
+    assign_bufref(&dst->icc_profile, src->icc_profile);
 }
 
 // Crop the given image to (x0, y0)-(x1, y1) (bottom/right border exclusive)
