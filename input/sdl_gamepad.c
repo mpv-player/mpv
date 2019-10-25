@@ -29,7 +29,7 @@ struct gamepad_priv {
 
 static Uint32 gamepad_cancel_wakeup;
 
-static void initalize_events()
+static void initalize_events(void)
 {
     gamepad_cancel_wakeup = SDL_RegisterEvents(1);
 }
