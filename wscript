@@ -576,6 +576,7 @@ video_output_features = [
         'name': '--sdl2-video',
         'desc': 'SDL2 video output',
         'deps': 'sdl2',
+        'deps_neg': 'cocoa',
         'func': check_true,
     }, {
         'name': '--cocoa',
