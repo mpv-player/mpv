@@ -769,8 +769,8 @@ static int preinit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
 
-    if (SDL_WasInit(SDL_INIT_VIDEO)) {
-        MP_ERR(vo, "already initialized\n");
+    if (SDL_WasInit(SDL_INIT_EVENTS)) {
+        MP_ERR(vo, "Another component is using SDL already.\n");
         return -1;
     }
 
