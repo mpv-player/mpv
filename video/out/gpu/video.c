@@ -107,6 +107,7 @@ struct image {
     struct ra_tex *tex;
     int w, h; // logical size (after transformation)
     struct gl_transform transform; // rendering transformation
+    int padding; // number of leading padding components (e.g. 2 = rg is padding)
 };
 
 // A named image, for user scripting purposes
@@ -766,6 +767,7 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
         struct texplane *t = &vimg->planes[n];
 
         enum plane_type type = PLANE_NONE;
+        int padding = 0;
         for (int i = 0; i < 4; i++) {
             int c = p->ra_format.components[n][i];
             enum plane_type ctype;
@@ -781,6 +783,8 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
                 ctype = c == 1 ? PLANE_LUMA : PLANE_CHROMA;
             }
             type = merge_plane_types(type, ctype);
+            if (!c && padding == i)
+                padding = i + 1;
         }
 
         img[n] = (struct image){
@@ -789,6 +793,7 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
             .multiplier = tex_mul,
             .w = t->w,
             .h = t->h,
+            .padding = padding,
         };
 
         for (int i = 0; i < 4; i++)
@@ -1320,6 +1325,7 @@ static void copy_image(struct gl_video *p, int *offset, struct image img)
 {
     int count = img.components;
     assert(*offset + count <= 4);
+    assert(img.padding + count <= 4);
 
     int id = pass_bind(p, img);
     char src[5] = {0};
@@ -1327,7 +1333,7 @@ static void copy_image(struct gl_video *p, int *offset, struct image img)
     const char *tex_fmt = get_tex_swizzle(&img);
     const char *dst_fmt = "rgba";
     for (int i = 0; i < count; i++) {
-        src[i] = tex_fmt[i];
+        src[i] = tex_fmt[img.padding + i];
         dst[i] = dst_fmt[*offset + i];
     }
 
@@ -1368,9 +1374,22 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_map texmap%d\n", name, id);
     GLSLHF("#define %s_mul %f\n", name, img.multiplier);
 
+    char crap[5] = "";
+    snprintf(crap, sizeof(crap), "%s", get_tex_swizzle(&img));
+
+    // Remove leading padding by rotating the swizzle mask.
+    int len = strlen(crap);
+    for (int n = 0; n < img.padding; n++) {
+        if (len) {
+            char f = crap[0];
+            memmove(crap, crap + 1, len - 1);
+            crap[len - 1] = f;
+        }
+    }
+
     // Set up the sampling functions
     GLSLHF("#define %s_tex(pos) (%s_mul * vec4(texture(%s_raw, pos)).%s)\n",
-           name, name, name, get_tex_swizzle(&img));
+           name, name, name, crap);
 
     // Since the extra matrix multiplication impacts performance,
     // skip it unless the texture was actually rotated
