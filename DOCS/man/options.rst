@@ -696,9 +696,9 @@ Program Behavior
     configuration subdirectory (usually ``~/.config/mpv/scripts/``).
     (Default: ``yes``)
 
-``--script=<filename>``
-    Load a Lua script. You can load multiple scripts by separating them with
-    commas (``,``).
+``--script=<filename>``, ``--scripts=file1.lua:file2.lua:...``
+    Load a Lua script. The second option allows you to load multiple scripts by
+    separating them with the path separator (``:`` on Unix, ``;`` on Windows).
 
 ``--script-opts=key1=value1,key2=value2,...``
     Set options for scripts. A script can query an option by key. If an
