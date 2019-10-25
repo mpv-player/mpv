@@ -527,6 +527,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         }
     }
     assign_bufref(&dst->icc_profile, src->icc_profile);
+    assign_bufref(&dst->a53_cc, src->a53_cc);
 }
 
 // Crop the given image to (x0, y0)-(x1, y1) (bottom/right border exclusive)
