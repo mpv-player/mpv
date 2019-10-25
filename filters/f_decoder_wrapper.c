@@ -824,13 +824,13 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
 
     struct mp_frame frame = {0};
     int ret_recv = receive(f, &frame);
-    if (ret_recv == AVERROR_EOF) {
+    if (frame.type) {
+        state->eof_returned = false;
+        mp_pin_in_write(f->ppins[1], frame);
+    } else if (ret_recv == AVERROR_EOF) {
         if (!state->eof_returned)
             mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
         state->eof_returned = true;
-    } else if (frame.type) {
-        state->eof_returned = false;
-        mp_pin_in_write(f->ppins[1], frame);
     } else if (ret_recv == AVERROR(EAGAIN)) {
         // Need to feed a packet.
         frame = mp_pin_out_read(f->ppins[0]);
@@ -856,7 +856,7 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
         talloc_free(pkt);
         mp_filter_internal_mark_progress(f);
     } else {
-        // Just try again.
+        // Decoding error? Just try again.
         mp_filter_internal_mark_progress(f);
     }
 }
