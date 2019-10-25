@@ -219,9 +219,6 @@ const struct m_sub_options input_config = {
 #if HAVE_COCOA
         .use_appleremote = 1,
 #endif
-#if HAVE_SDL2_GAMEPAD
-        .use_gamepad = 1,
-#endif
         .default_bindings = 1,
         .vo_key_input = 1,
         .allow_win_drag = 1,
