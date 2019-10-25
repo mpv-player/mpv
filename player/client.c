@@ -1593,11 +1593,8 @@ static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
             return false; // re-update later when the changed value comes in
         }
 
-        // Move to val
-        memcpy(&val, &prop->async_value, prop->type->type->size);
+        m_option_copy(prop->type, &val, &prop->async_value);
         val_valid = prop->async_value_valid;
-        prop->async_value = (union m_option_value){0};
-        prop->async_value_valid = false;
     } else {
         pthread_mutex_unlock(&ctx->lock);
 
