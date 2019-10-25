@@ -809,6 +809,9 @@ static int preinit(struct vo *vo)
     if (vc->wakeup_event == (Uint32)-1)
         MP_ERR(vo, "SDL_RegisterEvents() failed.\n");
 
+    MP_WARN(vo, "Warning: this legacy VO has bad performance. Consider fixing "
+                "your graphics drivers, or not forcing the sdl VO.\n");
+
     return 0;
 }
 
