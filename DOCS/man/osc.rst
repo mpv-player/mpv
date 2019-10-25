@@ -330,8 +330,8 @@ Configurable Options
     user has set them. (It will not overwrite them if all of them are set to
     default values.)
 
-    Currently, this is supported for the ``bottombar`` layout only. The other
-    layouts do not change if this option is set.
+    Currently, this is supported for the ``bottombar`` and ``topbar`` layout
+    only. The other layouts do not change if this option is set.
 
     The border is static and appears even if the OSC is configured to appear
     only on mouse interaction. If the OSC is invisible, the border is simply
