@@ -304,6 +304,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     int h = p->dst.y1 - p->dst.y0;
 
     mp_sws_set_from_cmdline(p->sws, vo->global);
+    p->sws->allow_zimg = true;
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->imgfmt,
