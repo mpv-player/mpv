@@ -23,6 +23,7 @@ stats:
 ====   ==================
 1      Show usual stats
 2      Show frame timings
+3      Input cache stats
 ====   ==================
 
 Font
@@ -53,6 +54,8 @@ Configurable Options
     Default: 1
 ``key_page_2``
     Default: 2
+``key_page_3``
+    Default: 3
 
     Key bindings for page switching while stats are displayed.
 
