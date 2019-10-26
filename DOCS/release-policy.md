@@ -20,23 +20,27 @@ Release procedure
 
 While on master:
 
-- Update the `RELEASE_NOTES` file.
+- Update the `RELEASE_NOTES` file, replacing the previous release notes.
 
 - Update the `VERSION` file.
 
 - Update `DOCS/client-api-changes.rst` and `DOCS/interface-changes.rst`
   (in particular, update the last version numbers if necessary)
 
-- Commit changes.
+- Create signed commit with changes.
 
 - Create signed tag v0.X.Y.
 
 - Add -UNKNOWN suffix to version in `VERSION` file.
 
-- Commit changes, push branch and tag to GitHub.
+- Commit changes, push release branch (`release/0.X`) and tag to GitHub.
 
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
   the new version.
+
+If necessary (to e.g. exclude commits already on master), the release can
+be done on a branch with different commit history. The release branch **must**
+then be merged to master so `git describe` will pick up the tag.
 
 Release notes template
 ----------------------
