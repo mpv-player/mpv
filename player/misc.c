@@ -258,13 +258,13 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
             MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
                    (long long int)pos, (long long int)size);
         }
-        bstr data = stream_peek(stream, 4096);
-        if (data.len == 0) {
+        uint8_t buf[4096];
+        int len = stream_read(stream, buf, sizeof(buf));
+        if (!len) {
             ok &= stream->eof;
             break;
         }
-        ok &= fwrite(data.start, data.len, 1, dest) == 1;
-        stream_skip(stream, data.len);
+        ok &= fwrite(buf, len, 1, dest) == 1;
         mp_wakeup_core(mpctx); // don't actually sleep
         mp_idle(mpctx); // but process input
     }
