@@ -496,6 +496,16 @@ struct bstr stream_peek(stream_t *s, int len)
     return (bstr){.start = &s->buffer[s->buf_pos], .len = MPMIN(len, avail)};
 }
 
+// Peek the current buffer. This will return at least 1 byte, unless EOF was
+// reached. If data is returned, the length is essentially random.
+struct bstr stream_peek_buffer(stream_t *s)
+{
+    if (s->buf_len - s->buf_pos < 1)
+        stream_fill_buffer(s);
+    return (bstr){.start = &s->buffer[s->buf_pos],
+                  .len = s->buf_len - s->buf_pos};
+}
+
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 {
     if (!s->write_buffer)
@@ -676,16 +686,13 @@ static int read_characters(stream_t *s, uint8_t *dst, int dstsize, int utf16)
         }
         return cur - dst;
     } else {
-        if (s->buf_pos >= s->buf_len)
-            stream_fill_buffer(s);
-        uint8_t *src = s->buffer + s->buf_pos;
-        int src_len = s->buf_len - s->buf_pos;
-        uint8_t *end = memchr(src, '\n', src_len);
-        int len = end ? end - src + 1 : src_len;
+        bstr buf = stream_peek_buffer(s);
+        uint8_t *end = memchr(buf.start, '\n', buf.len);
+        int len = end ? end - buf.start + 1 : buf.len;
         if (len > dstsize)
             return -1; // line too long
-        memcpy(dst, src, len);
-        s->buf_pos += len;
+        memcpy(dst, buf.start, len);
+        stream_skip(s, len);
         return len;
     }
 }

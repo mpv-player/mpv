@@ -180,6 +180,7 @@ bool stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, char *mem, int total);
 int stream_read_partial(stream_t *s, char *buf, int buf_size);
 struct bstr stream_peek(stream_t *s, int len);
+struct bstr stream_peek_buffer(stream_t *s);
 void stream_drop_buffers(stream_t *s);
 int64_t stream_get_size(stream_t *s);
 
