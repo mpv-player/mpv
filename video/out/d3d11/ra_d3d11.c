@@ -19,6 +19,7 @@
 #ifndef D3D11_1_UAV_SLOT_COUNT
 #define D3D11_1_UAV_SLOT_COUNT (64)
 #endif
+#define D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE (0x80)
 
 struct dll_version {
     uint16_t major;
@@ -210,6 +211,9 @@ static void setup_formats(struct ra *ra)
     // RA requires renderable surfaces to be blendable as well
     static const UINT sup_render = D3D11_FORMAT_SUPPORT_RENDER_TARGET |
                                    D3D11_FORMAT_SUPPORT_BLENDABLE;
+    // Typed UAVs are equivalent to images. RA only cares if they're storable.
+    static const UINT sup_store = D3D11_FORMAT_SUPPORT_TYPED_UNORDERED_ACCESS_VIEW;
+    static const UINT sup2_store = D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE;
 
     struct ra_d3d11 *p = ra->priv;
     HRESULT hr;
@@ -223,6 +227,11 @@ static void setup_formats(struct ra *ra)
         if ((support & sup_basic) != sup_basic)
             continue;
 
+        D3D11_FEATURE_DATA_FORMAT_SUPPORT2 sup2 = { .InFormat = d3dfmt->fmt };
+        ID3D11Device_CheckFeatureSupport(p->dev, D3D11_FEATURE_FORMAT_SUPPORT2,
+                                         &sup2, sizeof(sup2));
+        UINT support2 = sup2.OutFormatSupport2;
+
         struct ra_format *fmt = talloc_zero(ra, struct ra_format);
         *fmt = (struct ra_format) {
             .name           = d3dfmt->name,
@@ -233,9 +242,9 @@ static void setup_formats(struct ra *ra)
             .pixel_size     = d3dfmt->bytes,
             .linear_filter  = (support & sup_filter) == sup_filter,
             .renderable     = (support & sup_render) == sup_render,
-            // TODO: Check whether it's a storage format
-            // https://docs.microsoft.com/en-us/windows/desktop/direct3d12/typed-unordered-access-view-loads
-            .storable       = true,
+            .storable       = p->fl >= D3D_FEATURE_LEVEL_11_0 &&
+                              (support & sup_store) == sup_store &&
+                              (support2 & sup2_store) == sup2_store,
         };
 
         if (support & D3D11_FORMAT_SUPPORT_TEXTURE1D)
