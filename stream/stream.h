@@ -161,8 +161,6 @@ inline static int stream_read_char(stream_t *s)
            (stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
 }
 
-unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
-                                int utf16);
 int stream_skip_bom(struct stream *s);
 
 inline static int stream_eof(stream_t *s)

@@ -20,6 +20,8 @@
 #include <strings.h>
 #include <dirent.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "common/common.h"
 #include "options/options.h"
@@ -60,9 +62,78 @@ struct pl_parser {
     char *format;
 };
 
+
+static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)
+{
+    unsigned int y = stream_read_char(s);
+    y = (y << 8) | stream_read_char(s);
+    if (!big_endian)
+        y = ((y >> 8) & 0xFF) | (y << 8);
+    return y;
+}
+
+// Read characters until the next '\n' (including), or until the buffer in s is
+// exhausted.
+static int read_characters(stream_t *s, uint8_t *dst, int dstsize, int utf16)
+{
+    if (utf16 == 1 || utf16 == 2) {
+        uint8_t *cur = dst;
+        while (1) {
+            if ((cur - dst) + 8 >= dstsize) // PUT_UTF8 writes max. 8 bytes
+                return -1; // line too long
+            uint32_t c;
+            uint8_t tmp;
+            GET_UTF16(c, stream_read_word_endian(s, utf16 == 2), return -1;)
+            if (s->eof)
+                break; // legitimate EOF; ignore the case of partial reads
+            PUT_UTF8(c, tmp, *cur++ = tmp;)
+            if (c == '\n')
+                break;
+        }
+        return cur - dst;
+    } else {
+        bstr buf = stream_peek_buffer(s);
+        uint8_t *end = memchr(buf.start, '\n', buf.len);
+        int len = end ? end - buf.start + 1 : buf.len;
+        if (len > dstsize)
+            return -1; // line too long
+        memcpy(dst, buf.start, len);
+        stream_skip(s, len);
+        return len;
+    }
+}
+
+// On error, or if the line is larger than max-1, return NULL and unset s->eof.
+// On EOF, return NULL, and s->eof will be set.
+// Otherwise, return the line (including \n or \r\n at the end of the line).
+// If the return value is non-NULL, it's always the same as mem.
+// utf16: 0: UTF8 or 8 bit legacy, 1: UTF16-LE, 2: UTF16-BE
+static char *read_line(stream_t *s, char *mem, int max, int utf16)
+{
+    if (max < 1)
+        return NULL;
+    int read = 0;
+    while (1) {
+        // Reserve 1 byte of ptr for terminating \0.
+        int l = read_characters(s, &mem[read], max - read - 1, utf16);
+        if (l < 0 || memchr(&mem[read], '\0', l)) {
+            MP_WARN(s, "error reading line\n");
+            s->eof = false;
+            return NULL;
+        }
+        read += l;
+        if (l == 0 || (read > 0 && mem[read - 1] == '\n'))
+            break;
+    }
+    mem[read] = '\0';
+    if (s->eof && read == 0) // legitimate EOF
+        return NULL;
+    return mem;
+}
+
 static char *pl_get_line0(struct pl_parser *p)
 {
-    char *res = stream_read_line(p->s, p->buffer, sizeof(p->buffer), p->utf16);
+    char *res = read_line(p->s, p->buffer, sizeof(p->buffer), p->utf16);
     if (res) {
         int len = strlen(res);
         if (len > 0 && res[len - 1] == '\n')
