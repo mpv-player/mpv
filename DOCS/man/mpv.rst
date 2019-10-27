@@ -268,10 +268,19 @@ in the mpv git repository.
 Mouse Control
 -------------
 
-button 3 and button 4
-    Seek backward/forward 1 minute.
+Left double click
+    Toggle fullscreen on/off.
 
-button 5 and button 6
+Right click
+    Toggle pause on/off.
+
+Forward/Back button
+    Skip to next/previous entry in playlist.
+
+Wheel up/down
+    Seek forward/backward 10 seconds.
+
+Wheel left/right
     Decrease/increase volume.
 
 
