@@ -276,8 +276,6 @@ static int preinit(struct vo *vo)
         return ENOSYS;
     }
 
-    caca_set_display_title(priv->display, "mpv");
-
     return 0;
 }
 
@@ -288,9 +286,13 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *priv = vo->priv;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+        caca_set_display_title(priv->display, (char *)data);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
