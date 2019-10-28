@@ -30,9 +30,6 @@
 
 #include <SDL.h>
 
-#include "input/input.h"
-#include "input/keycodes.h"
-#include "input/input.h"
 #include "common/msg.h"
 #include "options/options.h"
 
@@ -42,6 +39,7 @@
 
 #include "video/mp_image.h"
 
+#include "sdl_common.h"
 #include "win_state.h"
 #include "config.h"
 #include "vo.h"
@@ -80,91 +78,7 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_RGB565, IMGFMT_RGB565, 0},
 };
 
-struct keymap_entry {
-    SDL_Keycode sdl;
-    int mpv;
-};
-const struct keymap_entry keys[] = {
-    {SDLK_RETURN, MP_KEY_ENTER},
-    {SDLK_ESCAPE, MP_KEY_ESC},
-    {SDLK_BACKSPACE, MP_KEY_BACKSPACE},
-    {SDLK_TAB, MP_KEY_TAB},
-    {SDLK_PRINTSCREEN, MP_KEY_PRINT},
-    {SDLK_PAUSE, MP_KEY_PAUSE},
-    {SDLK_INSERT, MP_KEY_INSERT},
-    {SDLK_HOME, MP_KEY_HOME},
-    {SDLK_PAGEUP, MP_KEY_PAGE_UP},
-    {SDLK_DELETE, MP_KEY_DELETE},
-    {SDLK_END, MP_KEY_END},
-    {SDLK_PAGEDOWN, MP_KEY_PAGE_DOWN},
-    {SDLK_RIGHT, MP_KEY_RIGHT},
-    {SDLK_LEFT, MP_KEY_LEFT},
-    {SDLK_DOWN, MP_KEY_DOWN},
-    {SDLK_UP, MP_KEY_UP},
-    {SDLK_KP_ENTER, MP_KEY_KPENTER},
-    {SDLK_KP_1, MP_KEY_KP1},
-    {SDLK_KP_2, MP_KEY_KP2},
-    {SDLK_KP_3, MP_KEY_KP3},
-    {SDLK_KP_4, MP_KEY_KP4},
-    {SDLK_KP_5, MP_KEY_KP5},
-    {SDLK_KP_6, MP_KEY_KP6},
-    {SDLK_KP_7, MP_KEY_KP7},
-    {SDLK_KP_8, MP_KEY_KP8},
-    {SDLK_KP_9, MP_KEY_KP9},
-    {SDLK_KP_0, MP_KEY_KP0},
-    {SDLK_KP_PERIOD, MP_KEY_KPDEC},
-    {SDLK_POWER, MP_KEY_POWER},
-    {SDLK_MENU, MP_KEY_MENU},
-    {SDLK_STOP, MP_KEY_STOP},
-    {SDLK_MUTE, MP_KEY_MUTE},
-    {SDLK_VOLUMEUP, MP_KEY_VOLUME_UP},
-    {SDLK_VOLUMEDOWN, MP_KEY_VOLUME_DOWN},
-    {SDLK_KP_COMMA, MP_KEY_KPDEC},
-    {SDLK_AUDIONEXT, MP_KEY_NEXT},
-    {SDLK_AUDIOPREV, MP_KEY_PREV},
-    {SDLK_AUDIOSTOP, MP_KEY_STOP},
-    {SDLK_AUDIOPLAY, MP_KEY_PLAY},
-    {SDLK_AUDIOMUTE, MP_KEY_MUTE},
-    {SDLK_F1, MP_KEY_F + 1},
-    {SDLK_F2, MP_KEY_F + 2},
-    {SDLK_F3, MP_KEY_F + 3},
-    {SDLK_F4, MP_KEY_F + 4},
-    {SDLK_F5, MP_KEY_F + 5},
-    {SDLK_F6, MP_KEY_F + 6},
-    {SDLK_F7, MP_KEY_F + 7},
-    {SDLK_F8, MP_KEY_F + 8},
-    {SDLK_F9, MP_KEY_F + 9},
-    {SDLK_F10, MP_KEY_F + 10},
-    {SDLK_F11, MP_KEY_F + 11},
-    {SDLK_F12, MP_KEY_F + 12},
-    {SDLK_F13, MP_KEY_F + 13},
-    {SDLK_F14, MP_KEY_F + 14},
-    {SDLK_F15, MP_KEY_F + 15},
-    {SDLK_F16, MP_KEY_F + 16},
-    {SDLK_F17, MP_KEY_F + 17},
-    {SDLK_F18, MP_KEY_F + 18},
-    {SDLK_F19, MP_KEY_F + 19},
-    {SDLK_F20, MP_KEY_F + 20},
-    {SDLK_F21, MP_KEY_F + 21},
-    {SDLK_F22, MP_KEY_F + 22},
-    {SDLK_F23, MP_KEY_F + 23},
-    {SDLK_F24, MP_KEY_F + 24}
-};
-
-struct mousemap_entry {
-    Uint8 sdl;
-    int mpv;
-};
-const struct mousemap_entry mousebtns[] = {
-    {SDL_BUTTON_LEFT, MP_MBTN_LEFT},
-    {SDL_BUTTON_MIDDLE, MP_MBTN_MID},
-    {SDL_BUTTON_RIGHT, MP_MBTN_RIGHT},
-    {SDL_BUTTON_X1, MP_MBTN_BACK},
-    {SDL_BUTTON_X2, MP_MBTN_FORWARD},
-};
-
 struct priv {
-    SDL_Window *window;
     SDL_Renderer *renderer;
     int renderer_index;
     SDL_RendererInfo renderer_info;
@@ -187,8 +101,6 @@ struct priv {
         int targets_size;
     } osd_surfaces[MAX_OSD_PARTS];
     double osd_pts;
-    Uint32 wakeup_event;
-    bool screensaver_enabled;
 
     // options
     int allow_sw;
@@ -304,7 +216,7 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver)
     if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
         return false;
 
-    vc->renderer = SDL_CreateRenderer(vc->window, i, 0);
+    vc->renderer = SDL_CreateRenderer(vo->sdl->window, i, 0);
     if (!vc->renderer) {
         MP_ERR(vo, "SDL_CreateRenderer failed\n");
         return false;
@@ -370,93 +282,16 @@ static void resize(struct vo *vo, int w, int h)
 
 static void force_resize(struct vo *vo)
 {
-    struct priv *vc = vo->priv;
     int w, h;
-    SDL_GetWindowSize(vc->window, &w, &h);
+    SDL_GetWindowSize(vo->sdl->window, &w, &h);
     resize(vo, w, h);
-}
-
-static void check_resize(struct vo *vo)
-{
-    struct priv *vc = vo->priv;
-    int w, h;
-    SDL_GetWindowSize(vc->window, &w, &h);
-    if (vo->dwidth != w || vo->dheight != h)
-        resize(vo, w, h);
-}
-
-static inline void set_screensaver(bool enabled)
-{
-    if (!!enabled == !!SDL_IsScreenSaverEnabled())
-        return;
-
-    if (enabled)
-        SDL_EnableScreenSaver();
-    else
-        SDL_DisableScreenSaver();
-}
-
-static void set_fullscreen(struct vo *vo)
-{
-    struct priv *vc = vo->priv;
-    int fs = vo->opts->fullscreen;
-    SDL_bool prev_screensaver_state = SDL_IsScreenSaverEnabled();
-
-    Uint32 fs_flag;
-    if (vc->switch_mode)
-        fs_flag = SDL_WINDOW_FULLSCREEN;
-    else
-        fs_flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-    Uint32 old_flags = SDL_GetWindowFlags(vc->window);
-    int prev_fs = !!(old_flags & fs_flag);
-    if (fs == prev_fs)
-        return;
-
-    Uint32 flags = 0;
-    if (fs)
-        flags |= fs_flag;
-
-    if (SDL_SetWindowFullscreen(vc->window, flags)) {
-        MP_ERR(vo, "SDL_SetWindowFullscreen failed\n");
-        return;
-    }
-
-    // toggling fullscreen might recreate the window, so better guard for this
-    set_screensaver(prev_screensaver_state);
-
-    force_resize(vo);
-}
-
-static void update_screeninfo(struct vo *vo, struct mp_rect *screenrc)
-{
-    struct priv *vc = vo->priv;
-    SDL_DisplayMode mode;
-    if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
-                                  &mode)) {
-        MP_ERR(vo, "SDL_GetCurrentDisplayMode failed\n");
-        return;
-    }
-    *screenrc = (struct mp_rect){0, 0, mode.w, mode.h};
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *vc = vo->priv;
 
-    struct vo_win_geometry geo;
-    struct mp_rect screenrc;
-
-    update_screeninfo(vo, &screenrc);
-    vo_calc_window_geometry(vo, &screenrc, &geo);
-    vo_apply_window_geometry(vo, &geo);
-
-    int win_w = vo->dwidth;
-    int win_h = vo->dheight;
-
-    SDL_SetWindowSize(vc->window, win_w, win_h);
-    if (geo.flags & VO_WIN_FORCE_POS)
-        SDL_SetWindowPosition(vc->window, geo.win.x0, geo.win.y0);
+    vo_sdl_config(vo);
 
     if (vc->tex)
         SDL_DestroyTexture(vc->tex);
@@ -492,14 +327,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     mp_image_clear(&tmp, 0, 0, tmp.w, tmp.h);
     SDL_UnlockTexture(vc->tex);
 
-    resize(vo, win_w, win_h);
-
-    set_screensaver(vc->screensaver_enabled);
-    set_fullscreen(vo);
-
-    SDL_ShowWindow(vc->window);
-
-    check_resize(vo);
+    force_resize(vo);
 
     return 0;
 }
@@ -512,134 +340,18 @@ static void flip_page(struct vo *vo)
 
 static void wakeup(struct vo *vo)
 {
-    struct priv *vc = vo->priv;
-    SDL_Event event = {.type = vc->wakeup_event};
-    // Note that there is no context - SDL is a singleton.
-    SDL_PushEvent(&event);
+    vo_sdl_wakeup(vo);
 }
 
 static void wait_events(struct vo *vo, int64_t until_time_us)
 {
-    int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
-    SDL_Event ev;
-
-    while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
-        timeout_ms = 0;
-        switch (ev.type) {
-        case SDL_WINDOWEVENT:
-            switch (ev.window.event) {
-            case SDL_WINDOWEVENT_EXPOSED:
-                vo->want_redraw = true;
-                break;
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                check_resize(vo);
-                vo_event(vo, VO_EVENT_RESIZE);
-                break;
-            case SDL_WINDOWEVENT_ENTER:
-                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
-                break;
-            case SDL_WINDOWEVENT_LEAVE:
-                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
-                break;
-            }
-            break;
-        case SDL_QUIT:
-            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
-            break;
-        case SDL_TEXTINPUT: {
-            int sdl_mod = SDL_GetModState();
-            int mpv_mod = 0;
-            // we ignore KMOD_LSHIFT, KMOD_RSHIFT and KMOD_RALT (if
-            // mp_input_use_alt_gr() is true) because these are already
-            // factored into ev.text.text
-            if (sdl_mod & (KMOD_LCTRL | KMOD_RCTRL))
-                mpv_mod |= MP_KEY_MODIFIER_CTRL;
-            if ((sdl_mod & KMOD_LALT) ||
-                ((sdl_mod & KMOD_RALT) && !mp_input_use_alt_gr(vo->input_ctx)))
-                mpv_mod |= MP_KEY_MODIFIER_ALT;
-            if (sdl_mod & (KMOD_LGUI | KMOD_RGUI))
-                mpv_mod |= MP_KEY_MODIFIER_META;
-            struct bstr t = {
-                ev.text.text, strlen(ev.text.text)
-            };
-            mp_input_put_key_utf8(vo->input_ctx, mpv_mod, t);
-            break;
-        }
-        case SDL_KEYDOWN: {
-            // Issue: we don't know in advance whether this keydown event
-            // will ALSO cause a SDL_TEXTINPUT event
-            // So we're conservative, and only map non printable keycodes
-            // (e.g. function keys, arrow keys, etc.)
-            // However, this does lose some keypresses at least on X11
-            // (e.g. Ctrl-A generates SDL_KEYDOWN only, but the key is
-            // 'a'... and 'a' is normally also handled by SDL_TEXTINPUT).
-            // The default config does not use Ctrl, so this is fine...
-            int keycode = 0;
-            int i;
-            for (i = 0; i < sizeof(keys) / sizeof(keys[0]); ++i)
-                if (keys[i].sdl == ev.key.keysym.sym) {
-                    keycode = keys[i].mpv;
-                    break;
-                }
-            if (keycode) {
-                if (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-                    keycode |= MP_KEY_MODIFIER_SHIFT;
-                if (ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-                    keycode |= MP_KEY_MODIFIER_CTRL;
-                if (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                    keycode |= MP_KEY_MODIFIER_ALT;
-                if (ev.key.keysym.mod & (KMOD_LGUI | KMOD_RGUI))
-                    keycode |= MP_KEY_MODIFIER_META;
-                mp_input_put_key(vo->input_ctx, keycode);
-            }
-            break;
-        }
-        case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
-            break;
-        case SDL_MOUSEBUTTONDOWN: {
-            int i;
-            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
-                if (mousebtns[i].sdl == ev.button.button) {
-                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_DOWN);
-                    break;
-                }
-            break;
-        }
-        case SDL_MOUSEBUTTONUP: {
-            int i;
-            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
-                if (mousebtns[i].sdl == ev.button.button) {
-                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_UP);
-                    break;
-                }
-            break;
-        }
-        case SDL_MOUSEWHEEL: {
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -0.1 : 0.1;
-#else
-            double multiplier = 0.1;
-#endif
-            int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
-            mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
-            int x_code = ev.wheel.x > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
-            mp_input_put_wheel(vo->input_ctx, x_code, abs(ev.wheel.x) * multiplier);
-            break;
-        }
-        }
-    }
+    vo_sdl_wait_events(vo, until_time_us);
 }
 
 static void uninit(struct vo *vo)
 {
-    struct priv *vc = vo->priv;
     destroy_renderer(vo);
-    SDL_DestroyWindow(vc->window);
-    vc->window = NULL;
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    talloc_free(vc);
+    vo_sdl_uninit(vo);
 }
 
 static inline void upload_to_texture(struct vo *vo, SDL_Texture *tex,
@@ -807,45 +519,21 @@ static int preinit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
 
-    if (SDL_WasInit(SDL_INIT_EVENTS)) {
-        MP_ERR(vo, "Another component is using SDL already.\n");
-        return -1;
-    }
-
-    // predefine SDL defaults (SDL env vars shall override)
-    SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
-                            SDL_HINT_DEFAULT);
-    SDL_SetHintWithPriority(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0",
-                            SDL_HINT_DEFAULT);
-
     // predefine MPV options (SDL env vars shall be overridden)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, vc->vsync ? "1" : "0",
                             SDL_HINT_OVERRIDE);
 
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        MP_ERR(vo, "SDL_Init failed\n");
-        return -1;
-    }
-
-    // then actually try
-    vc->window = SDL_CreateWindow("MPV", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                  640, 480, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
-    if (!vc->window) {
-        MP_ERR(vo, "SDL_CreateWindow failed\n");
+    if (!vo_sdl_init(vo, 0)) {
+        vo_sdl_uninit(vo);
         return -1;
     }
 
     // try creating a renderer (this also gets the renderer_info data
     // for query_format to use!)
     if (init_renderer(vo) != 0) {
-        SDL_DestroyWindow(vc->window);
-        vc->window = NULL;
+        vo_sdl_uninit(vo);
         return -1;
     }
-
-    vc->wakeup_event = SDL_RegisterEvents(1);
-    if (vc->wakeup_event == (Uint32)-1)
-        MP_ERR(vo, "SDL_RegisterEvents() failed.\n");
 
     MP_WARN(vo, "Warning: this legacy VO has bad performance. Consider fixing "
                 "your graphics drivers, or not forcing the sdl VO.\n");
@@ -924,37 +612,24 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *vc = vo->priv;
-
     switch (request) {
-    case VOCTRL_FULLSCREEN:
-        set_fullscreen(vo);
-        return 1;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);
-        return 1;
+        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = get_window_screenshot(vo);
-        return true;
-    case VOCTRL_SET_CURSOR_VISIBILITY:
-        SDL_ShowCursor(*(bool *)data);
-        return true;
-    case VOCTRL_KILL_SCREENSAVER:
-        vc->screensaver_enabled = false;
-        set_screensaver(vc->screensaver_enabled);
         return VO_TRUE;
-    case VOCTRL_RESTORE_SCREENSAVER:
-        vc->screensaver_enabled = true;
-        set_screensaver(vc->screensaver_enabled);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_WINDOW_TITLE:
-        SDL_SetWindowTitle(vc->window, (char *)data);
-        return true;
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = vo_sdl_control(vo, &events, request, data);
+    if (vo->config_ok && (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE)))
+        force_resize(vo);
+    vo_event(vo, events);
+    return r;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -966,7 +641,6 @@ const struct vo_driver video_out_sdl = {
     .priv_defaults = &(const struct priv) {
         .renderer_index = -1,
         .vsync = 1,
-        .screensaver_enabled = false,
     },
     .options = (const struct m_option []){
         OPT_FLAG("sw", allow_sw, 0),
