@@ -44,6 +44,7 @@ extern const struct ra_ctx_fns ra_ctx_angle;
 extern const struct ra_ctx_fns ra_ctx_dxgl;
 extern const struct ra_ctx_fns ra_ctx_rpi;
 extern const struct ra_ctx_fns ra_ctx_android;
+extern const struct ra_ctx_fns ra_ctx_sdl2;
 
 /* Vulkan */
 extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
@@ -60,6 +61,8 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 
 // OpenGL contexts:
+#if HAVE_GL
+
 #if HAVE_EGL_ANDROID
     &ra_ctx_android,
 #endif
@@ -89,6 +92,11 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_EGL_DRM
     &ra_ctx_drm_egl,
+#endif
+#if HAVE_SDL2_GL
+    &ra_ctx_sdl2,
+#endif
+
 #endif
 
 // Vulkan contexts:

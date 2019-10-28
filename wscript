@@ -579,6 +579,12 @@ video_output_features = [
         'deps_neg': 'cocoa',
         'func': check_true,
     }, {
+        'name': '--sdl2-gl',
+        'desc': 'SDL2 OpenGL video output',
+        'deps': 'sdl2-video',
+        'groups': [ 'gl' ],
+        'func': check_true,
+    }, {
         'name': '--cocoa',
         'desc': 'Cocoa',
         'func': check_cocoa
@@ -814,7 +820,7 @@ video_output_features = [
         'name': '--gl',
         'desc': 'OpenGL context support',
         'deps': 'gl-cocoa || gl-x11 || egl-x11 || egl-drm || '
-                 + 'gl-win32 || gl-wayland || rpi || '
+                 + 'gl-win32 || gl-wayland || rpi || sdl2-gl || '
                  + 'plain-gl',
         'func': check_true,
         'req': True,
