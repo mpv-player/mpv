@@ -94,7 +94,7 @@ static const struct ra_ctx_fns *contexts[] = {
 // Vulkan contexts:
 #if HAVE_VULKAN
 
-#if HAVE_ANDROID
+#if HAVE_LIBANDROID
     &ra_ctx_vulkan_android,
 #endif
 #if HAVE_WIN32_DESKTOP

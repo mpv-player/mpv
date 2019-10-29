@@ -163,11 +163,16 @@ main_dependencies = [
             'static_assert(TARGET_OS_TV, "TARGET_OS_TV defined to zero!")'
         ),
     }, {
+        'name': '--libandroid',
+        'desc': 'libandroid environment',
+        'deps': 'android',
+        'func': check_cc(lib=['android']),
+    }, {
         'name': '--egl-android',
         'desc': 'Android EGL support',
-        'deps': 'android',
+        'deps': 'libandroid',
         'groups': [ 'gl' ],
-        'func': check_cc(lib=['android', 'EGL']),
+        'func': check_cc(lib=['EGL']),
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
