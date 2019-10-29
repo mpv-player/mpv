@@ -1253,13 +1253,11 @@ layouts["slimbox"] = function ()
 end
 
 function bar_layout(direction)
-    local y_offset = (direction < 0) and osc_param.playresy or 0
-
     local osc_geo = {
         x = -2,
-        y = y_offset + direction * (54 + user_opts.barmargin),
+        y,
         an = (direction < 0) and 7 or 1,
-        w = osc_param.playresx + 4,
+        w,
         h = 56,
     }
 
@@ -1273,8 +1271,12 @@ function bar_layout(direction)
     if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
         osc_param.playresy = minW / osc_param.display_aspect
         osc_param.playresx = osc_param.playresy * osc_param.display_aspect
-        osc_geo.y = y_offset + direction * (54 + user_opts.barmargin)
-        osc_geo.w = osc_param.playresx + 4
+    end
+
+    osc_geo.y = direction * (54 + user_opts.barmargin)
+    osc_geo.w = osc_param.playresx + 4
+    if direction < 0 then
+        osc_geo.y = osc_geo.y + osc_param.playresy
     end
 
     local line1 = osc_geo.y - direction * (9 + padY)
