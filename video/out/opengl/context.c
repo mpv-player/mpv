@@ -235,8 +235,10 @@ int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
 bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
-    out_fbo->tex = p->wrapped_fb;
-    out_fbo->flip = !p->params.flipped; // OpenGL FBs are normally flipped
+    *out_fbo = (struct ra_fbo) {
+         .tex = p->wrapped_fb,
+         .flip = !p->params.flipped, // OpenGL FBs are normally flipped
+    };
     return true;
 }
 
