@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libavutil/common.h>
-
 #include "common/common.h"
 #include "stream.h"
 
@@ -30,7 +28,7 @@ static int fill_buffer(stream_t *s, char* buffer, int len)
     bstr data = p->data;
     if (s->pos < 0 || s->pos > data.len)
         return 0;
-    len = FFMIN(len, data.len - s->pos);
+    len = MPMIN(len, data.len - s->pos);
     memcpy(buffer, data.start + s->pos, len);
     return len;
 }
