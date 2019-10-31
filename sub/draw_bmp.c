@@ -22,7 +22,6 @@
 #include <inttypes.h>
 
 #include <libswscale/swscale.h>
-#include <libavutil/common.h>
 
 #include "common/common.h"
 #include "draw_bmp.h"
@@ -161,9 +160,9 @@ static void unpremultiply_and_split_BGR32(struct mp_image *img,
             int div = (int) aval;
             int add = div / 2;
             if (aval) {
-                rval = FFMIN(255, (rval * 255 + add) / div);
-                gval = FFMIN(255, (gval * 255 + add) / div);
-                bval = FFMIN(255, (bval * 255 + add) / div);
+                rval = MPMIN(255, (rval * 255 + add) / div);
+                gval = MPMIN(255, (gval * 255 + add) / div);
+                bval = MPMIN(255, (bval * 255 + add) / div);
                 irow[x] = bval + (gval << 8) + (rval << 16) + (aval << 24);
             }
             arow[x] = aval;

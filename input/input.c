@@ -31,9 +31,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include <libavutil/avstring.h>
-#include <libavutil/common.h>
-
 #include "osdep/io.h"
 #include "misc/rendezvous.h"
 
@@ -623,7 +620,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
         cmd->scale = 1;
         cmd->scale_units = 1;
         // Avoid spamming the player with too many commands
-        scale_units = FFMIN(scale_units, 20);
+        scale_units = MPMIN(scale_units, 20);
         for (int i = 0; i < scale_units - 1; i++)
             mp_input_queue_cmd(ictx, mp_cmd_clone(cmd));
         if (scale_units)
@@ -877,8 +874,8 @@ static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
 {
     struct input_opts *opts = ictx->opts;
     if (ictx->last_key_down && opts->ar_rate > 0 && ictx->ar_state >= 0) {
-        *time = FFMIN(*time, 1.0 / opts->ar_rate);
-        *time = FFMIN(*time, opts->ar_delay / 1000.0);
+        *time = MPMIN(*time, 1.0 / opts->ar_rate);
+        *time = MPMIN(*time, opts->ar_delay / 1000.0);
     }
 }
 

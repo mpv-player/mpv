@@ -31,7 +31,6 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include <libavutil/avstring.h>
 
 #include "libmpv/client.h"
 #include "player/client.h"
@@ -611,12 +610,12 @@ static void choice_get_min_max(const struct m_option *opt, int *min, int *max)
     *min = INT_MAX;
     *max = INT_MIN;
     for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
-        *min = FFMIN(*min, alt->value);
-        *max = FFMAX(*max, alt->value);
+        *min = MPMIN(*min, alt->value);
+        *max = MPMAX(*max, alt->value);
     }
     if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
-        *min = FFMIN(*min, opt->min);
-        *max = FFMAX(*max, opt->max);
+        *min = MPMIN(*min, opt->min);
+        *max = MPMAX(*max, opt->max);
     }
 }
 

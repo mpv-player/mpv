@@ -22,7 +22,6 @@
 #include <strings.h>
 #include <assert.h>
 
-#include <libavutil/common.h>
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -458,7 +457,7 @@ int stream_read_partial(stream_t *s, char *buf, int buf_size)
         if (!stream_fill_buffer(s))
             return 0;
     }
-    int len = FFMIN(buf_size, s->buf_len - s->buf_pos);
+    int len = MPMIN(buf_size, s->buf_len - s->buf_pos);
     memcpy(buf, &s->buffer[s->buf_pos], len);
     s->buf_pos += len;
     if (len > 0)
@@ -708,7 +707,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
             talloc_free(buf);
             return (struct bstr){NULL, 0};
         }
-        bufsize = FFMIN(bufsize + (bufsize >> 1), max_size + padding);
+        bufsize = MPMIN(bufsize + (bufsize >> 1), max_size + padding);
     }
     buf = talloc_realloc_size(talloc_ctx, buf, total_read + padding);
     memset(&buf[total_read], 0, padding);

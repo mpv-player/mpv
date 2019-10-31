@@ -3076,7 +3076,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double seek_pts, int flags)
     if (!(flags & SEEK_FACTOR)) {       /* time in secs */
         mkv_index_t *index = NULL;
 
-        seek_pts = FFMAX(seek_pts, 0);
+        seek_pts = MPMAX(seek_pts, 0);
         int64_t target_timecode = seek_pts * 1e9 + 0.5;
 
         if (create_index_until(demuxer, target_timecode) >= 0) {

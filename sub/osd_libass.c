@@ -15,12 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
-#include <libavutil/common.h>
 
 #include "config.h"
 
@@ -288,7 +287,7 @@ struct ass_draw {
 
 static void ass_draw_start(struct ass_draw *d)
 {
-    d->scale = FFMAX(d->scale, 1);
+    d->scale = MPMAX(d->scale, 1);
     d->text = talloc_asprintf_append(d->text, "{\\p%d}", d->scale);
 }
 
@@ -368,9 +367,9 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
     float base_size = 0.03125;
     style->Outline *= *o_h / track->PlayResY / base_size;
     // So that the chapter marks have space between them
-    style->Outline = FFMIN(style->Outline, *o_h / 5.2);
+    style->Outline = MPMIN(style->Outline, *o_h / 5.2);
     // So that the border is not 0
-    style->Outline = FFMAX(style->Outline, *o_h / 32.0);
+    style->Outline = MPMAX(style->Outline, *o_h / 32.0);
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
 

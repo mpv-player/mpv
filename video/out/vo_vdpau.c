@@ -31,8 +31,6 @@
 #include <limits.h>
 #include <assert.h>
 
-#include <libavutil/common.h>
-
 #include "config.h"
 #include "video/vdpau.h"
 #include "video/vdpau_mixer.h"
@@ -810,7 +808,7 @@ static void flip_page(struct vo *vo)
      * not make the target time in reality. Without this check we could drop
      * every frame, freezing the display completely if video lags behind.
      */
-    if (now > PREV_VSYNC(FFMAX(pts, vc->last_queue_time + vc->vsync_interval)))
+    if (now > PREV_VSYNC(MPMAX(pts, vc->last_queue_time + vc->vsync_interval)))
         npts = UINT64_MAX;
 
     /* Allow flipping a frame at a vsync if its presentation time is a
@@ -837,15 +835,15 @@ static void flip_page(struct vo *vo)
 
     vc->dropped_time = ideal_pts;
 
-    pts = FFMAX(pts, vc->last_queue_time + vc->vsync_interval);
-    pts = FFMAX(pts, now);
+    pts = MPMAX(pts, vc->last_queue_time + vc->vsync_interval);
+    pts = MPMAX(pts, now);
     if (npts < PREV_VSYNC(pts) + vc->vsync_interval)
         goto drop;
 
     int num_flips = update_presentation_queue_status(vo);
     vsync = vc->recent_vsync_time + num_flips * vc->vsync_interval;
-    pts = FFMAX(pts, now);
-    pts = FFMAX(pts, vsync + (vc->vsync_interval >> 2));
+    pts = MPMAX(pts, now);
+    pts = MPMAX(pts, vsync + (vc->vsync_interval >> 2));
     vsync = PREV_VSYNC(pts);
     if (npts < vsync + vc->vsync_interval)
         goto drop;

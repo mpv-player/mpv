@@ -146,7 +146,7 @@ static int init(struct ao *ao)
     // enough frames for at least 0.25 seconds
     ac->framecount = ceil(ao->samplerate * 0.25 / ac->aframesize);
     // but at least one!
-    ac->framecount = FFMAX(ac->framecount, 1);
+    ac->framecount = MPMAX(ac->framecount, 1);
 
     ac->savepts = AV_NOPTS_VALUE;
     ac->lastpts = AV_NOPTS_VALUE;
@@ -324,7 +324,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     talloc_free(tempdata);
 
-    int taken = FFMIN(bufpos, orig_samples);
+    int taken = MPMIN(bufpos, orig_samples);
     ectx->samples_since_last_pts += taken;
 
     pthread_mutex_unlock(&ectx->lock);

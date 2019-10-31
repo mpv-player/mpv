@@ -720,7 +720,7 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
 
     double now = mp_time_sec();
     float minutes, megabytes, fps, x;
-    float f = FFMAX(0.0001, relative_position);
+    float f = MPMAX(0.0001, relative_position);
 
     pthread_mutex_lock(&ctx->lock);
 

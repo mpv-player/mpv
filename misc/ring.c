@@ -18,8 +18,9 @@
  */
 
 #include <inttypes.h>
-#include <libavutil/common.h>
 #include <assert.h>
+
+#include "common/common.h"
 #include "mpv_talloc.h"
 #include "osdep/atomic.h"
 #include "ring.h"
@@ -59,10 +60,10 @@ int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len)
 {
     int size     = mp_ring_size(buffer);
     int buffered = mp_ring_buffered(buffer);
-    int read_len = FFMIN(len, buffered);
+    int read_len = MPMIN(len, buffered);
     int read_ptr = mp_ring_get_rpos(buffer) % size;
 
-    int len1 = FFMIN(size - read_ptr, read_len);
+    int len1 = MPMIN(size - read_ptr, read_len);
     int len2 = read_len - len1;
 
     if (dest) {
@@ -84,10 +85,10 @@ int mp_ring_write(struct mp_ring *buffer, unsigned char *src, int len)
 {
     int size      = mp_ring_size(buffer);
     int free      = mp_ring_available(buffer);
-    int write_len = FFMIN(len, free);
+    int write_len = MPMIN(len, free);
     int write_ptr = mp_ring_get_wpos(buffer) % size;
 
-    int len1 = FFMIN(size - write_ptr, write_len);
+    int len1 = MPMIN(size - write_ptr, write_len);
     int len2 = write_len - len1;
 
     memcpy(buffer->buffer + write_ptr, src, len1);

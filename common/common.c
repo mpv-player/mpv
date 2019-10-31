@@ -96,10 +96,10 @@ char *mp_format_time(double time, bool fractions)
 // Set rc to the union of rc and rc2
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *rc2)
 {
-    rc->x0 = FFMIN(rc->x0, rc2->x0);
-    rc->y0 = FFMIN(rc->y0, rc2->y0);
-    rc->x1 = FFMAX(rc->x1, rc2->x1);
-    rc->y1 = FFMAX(rc->y1, rc2->y1);
+    rc->x0 = MPMIN(rc->x0, rc2->x0);
+    rc->y0 = MPMIN(rc->y0, rc2->y0);
+    rc->x1 = MPMAX(rc->x1, rc2->x1);
+    rc->y1 = MPMAX(rc->y1, rc2->y1);
 }
 
 // Returns whether or not a point is contained by rc
@@ -112,10 +112,10 @@ bool mp_rect_contains(struct mp_rect *rc, int x, int y)
 // Return false if the result is empty.
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
 {
-    rc->x0 = FFMAX(rc->x0, rc2->x0);
-    rc->y0 = FFMAX(rc->y0, rc2->y0);
-    rc->x1 = FFMIN(rc->x1, rc2->x1);
-    rc->y1 = FFMIN(rc->y1, rc2->y1);
+    rc->x0 = MPMAX(rc->x0, rc2->x0);
+    rc->y0 = MPMAX(rc->y0, rc2->y0);
+    rc->x1 = MPMIN(rc->x1, rc2->x1);
+    rc->y1 = MPMIN(rc->y1, rc2->y1);
 
     return rc->x1 > rc->x0 && rc->y1 > rc->y0;
 }
