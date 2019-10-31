@@ -148,6 +148,8 @@ static int preinit(struct vo *vo)
     if (!vo_wayland_init(vo))
         return -1;
     p->sws = mp_sws_alloc(vo);
+    p->sws->log = vo->log;
+    mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
     return 0;
 }
@@ -163,7 +165,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     if (!vo_wayland_reconfig(vo))
         return -1;
-    mp_sws_set_from_cmdline(p->sws, vo->global);
     p->sws->src = *params;
 
     return 0;

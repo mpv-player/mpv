@@ -55,9 +55,6 @@ typedef struct mp_vo_opts {
     double override_display_fps;
     double timing_offset;
 
-    struct sws_opts *sws_opts;
-    struct zimg_opts *zimg_opts;
-
     // vo_drm
     struct drm_opts *drm_opts;
 
@@ -339,6 +336,8 @@ typedef struct MPOpts {
     struct wayland_opts *wayland_opts;
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
+    struct sws_opts *sws_opts;
+    struct zimg_opts *zimg_opts;
 
     int cuda_device;
 } MPOpts;

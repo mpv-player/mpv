@@ -207,7 +207,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (p->buffer)
         free(p->buffer);
 
-    mp_sws_set_from_cmdline(p->sws, vo->global);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,
@@ -265,8 +264,6 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
     if (p->buffer)
         talloc_free(p->buffer);
-    if (p->sws)
-        talloc_free(p->sws);
 }
 
 static int preinit(struct vo *vo)
@@ -278,6 +275,8 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
     p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
+    p->sws->log = vo->log;
+    mp_sws_enable_cmdline_opts(p->sws, vo->global);
     return 0;
 }
 

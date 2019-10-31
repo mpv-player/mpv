@@ -106,10 +106,6 @@ static const struct m_sub_options screenshot_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
-    OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
-#if HAVE_ZIMG
-    OPT_SUBSTRUCT("zimg", zimg_opts, zimg_conf, 0),
-#endif
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
     OPT_FLAG("snap-window", snap_window, 0),
     OPT_FLAG("ontop", ontop, 0),
@@ -766,6 +762,12 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_VAAPI
     OPT_SUBSTRUCT("vaapi", vaapi_opts, vaapi_conf, 0),
+#endif
+
+    OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
+
+#if HAVE_ZIMG
+    OPT_SUBSTRUCT("zimg", zimg_opts, zimg_conf, 0),
 #endif
 
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),

@@ -85,14 +85,14 @@ struct mp_zimg_repack {
     struct mp_image *mpi;
 };
 
-void mp_zimg_set_from_cmdline(struct mp_zimg_context *ctx, struct mpv_global *g)
+static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
 {
-    struct zimg_opts *opts = mp_get_config_group(NULL, g, &zimg_conf);
+    m_config_cache_update(ctx->opts_cache);
+
+    struct zimg_opts *opts = ctx->opts_cache->opts;
 
     ctx->scaler = opts->scaler;
     ctx->fast = opts->fast;
-
-    talloc_free(opts);
 }
 
 static zimg_chroma_location_e mp_to_z_chroma(enum mp_chroma_location cl)
@@ -192,6 +192,17 @@ struct mp_zimg_context *mp_zimg_alloc(void)
     };
     talloc_set_destructor(ctx, free_mp_zimg);
     return ctx;
+}
+
+void mp_zimg_enable_cmdline_opts(struct mp_zimg_context *ctx,
+                                 struct mpv_global *g)
+{
+    if (ctx->opts_cache)
+        return;
+
+    ctx->opts_cache = m_config_cache_alloc(ctx, g, &zimg_conf);
+    destroy_zimg(ctx); // force update
+    mp_zimg_update_from_cmdline(ctx); // first update
 }
 
 static void copy_rect(struct mp_image *dst, unsigned dst_mask,
@@ -538,6 +549,9 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
 {
     destroy_zimg(ctx);
 
+    if (ctx->opts_cache)
+        mp_zimg_update_from_cmdline(ctx);
+
     ctx->zimg_src = talloc_zero(NULL, struct mp_zimg_repack);
     ctx->zimg_src->pack = false;
     ctx->zimg_src->fmt = ctx->src;
@@ -605,6 +619,7 @@ bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
 {
     if (ctx->zimg_src && mp_image_params_equal(&ctx->src, &ctx->zimg_src->fmt) &&
         ctx->zimg_dst && mp_image_params_equal(&ctx->dst, &ctx->zimg_dst->fmt) &&
+        (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache)) &&
         ctx->zimg_graph)
         return true;
     return mp_zimg_config(ctx);

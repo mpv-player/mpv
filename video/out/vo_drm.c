@@ -303,8 +303,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     int w = p->dst.x1 - p->dst.x0;
     int h = p->dst.y1 - p->dst.y0;
 
-    mp_sws_set_from_cmdline(p->sws, vo->global);
-    p->sws->allow_zimg = true;
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->imgfmt,
@@ -555,6 +553,8 @@ static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     p->sws = mp_sws_alloc(vo);
+    p->sws->log = vo->log;
+    mp_sws_enable_cmdline_opts(p->sws, vo->global);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
     p->ev.page_flip_handler = &drm_pflip_cb;
 

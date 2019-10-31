@@ -91,9 +91,10 @@ const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
 const int mp_sws_fast_flags = SWS_BILINEAR;
 
 // Set ctx parameters to global command line flags.
-void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g)
+static void mp_sws_update_from_cmdline(struct mp_sws_context *ctx)
 {
-    struct sws_opts *opts = mp_get_config_group(NULL, g, &sws_conf);
+    m_config_cache_update(ctx->opts_cache);
+    struct sws_opts *opts = ctx->opts_cache->opts;
 
     sws_freeFilter(ctx->src_filter);
     ctx->src_filter = sws_getDefaultFilter(opts->lum_gblur, opts->chr_gblur,
@@ -104,13 +105,7 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct mpv_global *g)
     ctx->flags = SWS_PRINT_INFO;
     ctx->flags |= opts->scaler;
 
-    ctx->opts_allow_zimg = opts->zimg;
-
-    talloc_free(opts);
-
-#if HAVE_ZIMG
-    mp_zimg_set_from_cmdline(ctx->zimg, g);
-#endif
+    ctx->allow_zimg = opts->zimg;
 }
 
 bool mp_sws_supported_format(int imgfmt)
@@ -125,7 +120,7 @@ bool mp_sws_supports_formats(struct mp_sws_context *ctx,
                              int imgfmt_out, int imgfmt_in)
 {
 #if HAVE_ZIMG
-    if (ctx->allow_zimg && ctx->opts_allow_zimg) {
+    if (ctx->allow_zimg) {
         if (mp_zimg_supports_in_format(imgfmt_in) &&
             mp_zimg_supports_out_format(imgfmt_out))
             return true;
@@ -154,7 +149,8 @@ static bool cache_valid(struct mp_sws_context *ctx)
            ctx->brightness == old->brightness &&
            ctx->contrast == old->contrast &&
            ctx->saturation == old->saturation &&
-           ctx->allow_zimg == old->allow_zimg;
+           ctx->allow_zimg == old->allow_zimg &&
+           (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache));
 }
 
 static void free_mp_sws(void *p)
@@ -178,7 +174,6 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
         .force_reload = true,
         .params = {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
         .cached = talloc_zero(ctx, struct mp_sws_context),
-        .opts_allow_zimg = true,
     };
     talloc_set_destructor(ctx, free_mp_sws);
 
@@ -188,6 +183,22 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
 #endif
 
     return ctx;
+}
+
+// Enable auto-update of parameters from command line. Don't try to set custom
+// options (other than possibly .src/.dst), because they might be overwritten
+// if the user changes any options.
+void mp_sws_enable_cmdline_opts(struct mp_sws_context *ctx, struct mpv_global *g)
+{
+    if (ctx->opts_cache)
+        return;
+
+    ctx->opts_cache = m_config_cache_alloc(ctx, g, &sws_conf);
+    ctx->force_reload = true;
+
+#if HAVE_ZIMG
+    mp_zimg_enable_cmdline_opts(ctx->zimg, g);
+#endif
 }
 
 // Reinitialize (if needed) - return error code.
@@ -204,12 +215,15 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (cache_valid(ctx))
         return 0;
 
+    if (ctx->opts_cache)
+        mp_sws_update_from_cmdline(ctx);
+
     sws_freeContext(ctx->sws);
     ctx->sws = NULL;
     ctx->zimg_ok = false;
 
 #if HAVE_ZIMG
-    if (ctx->allow_zimg && ctx->opts_allow_zimg) {
+    if (ctx->allow_zimg) {
         ctx->zimg->log = ctx->log;
         ctx->zimg->src = *src;
         ctx->zimg->dst = *dst;
