@@ -23,6 +23,7 @@
 struct MPContext;
 struct mp_image;
 struct mp_log;
+struct mpv_global;
 
 // One time initialization at program start.
 void screenshot_init(struct MPContext *mpctx);
@@ -32,9 +33,10 @@ void screenshot_flip(struct MPContext *mpctx);
 
 /* Return the image converted to the given format. If the pixel aspect ratio is
  * not 1:1, the image is scaled as well. Returns NULL on failure.
+ * If global!=NULL, use command line scaler options etc.
  */
 struct mp_image *convert_image(struct mp_image *image, int destfmt,
-                               struct mp_log *log);
+                               struct mpv_global *global, struct mp_log *log);
 
 // Handlers for the user-facing commands.
 void cmd_screenshot(void *p);

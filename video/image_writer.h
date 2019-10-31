@@ -57,12 +57,15 @@ int image_writer_format_from_ext(const char *ext);
  *
  * File format and compression settings are controlled via the opts parameter.
  *
+ * If global!=NULL, use command line scaler options etc.
+ *
  * NOTE: The fields w/h/width/height of the passed mp_image must be all set
  *       accordingly. Setting w and width or h and height to different values
  *       can be used to store snapshots of anamorphic video.
  */
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                 const char *filename, struct mp_log *log);
+                const char *filename, struct mpv_global *global,
+                 struct mp_log *log);
 
 // Debugging helper.
 void dump_png(struct mp_image *image, const char *filename, struct mp_log *log);

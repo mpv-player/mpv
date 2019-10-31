@@ -314,6 +314,7 @@ int image_writer_format_from_ext(const char *ext)
 
 static struct mp_image *convert_image(struct mp_image *image, int destfmt,
                                       enum mp_csp_levels yuv_levels,
+                                      struct mpv_global *global,
                                       struct mp_log *log)
 {
     int d_w, d_h;
@@ -350,7 +351,14 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     dst->params = p;
 
-    if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
+    struct mp_sws_context *sws = mp_sws_alloc(NULL);
+    sws->log = log;
+    if (global)
+        mp_sws_enable_cmdline_opts(sws, global);
+    bool ok = mp_sws_scale(sws, dst, image) >= 0;
+    talloc_free(sws);
+
+    if (!ok) {
         mp_err(log, "Error when converting image.\n");
         talloc_free(dst);
         return NULL;
@@ -360,7 +368,8 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 }
 
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                const char *filename, struct mp_log *log)
+                const char *filename, struct mpv_global *global,
+                 struct mp_log *log)
 {
     struct image_writer_opts defs = image_writer_opts_defaults;
     if (!opts)
@@ -393,7 +402,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         levels = MP_CSP_LEVELS_PC;
     }
 
-    struct mp_image *dst = convert_image(image, destfmt, levels, log);
+    struct mp_image *dst = convert_image(image, destfmt, levels, global, log);
     if (!dst)
         return false;
 
@@ -416,5 +425,5 @@ void dump_png(struct mp_image *image, const char *filename, struct mp_log *log)
 {
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = AV_CODEC_ID_PNG;
-    write_image(image, &opts, filename, log);
+    write_image(image, &opts, filename, NULL, log);
 }

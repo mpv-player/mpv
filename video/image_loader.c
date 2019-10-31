@@ -38,7 +38,7 @@ struct mp_image *load_image_png_buf(void *buffer, size_t buffer_size, int imgfmt
     if (frame && avcodec_receive_frame(avctx, frame) >= 0) {
         struct mp_image *r = mp_image_from_av_frame(frame);
         if (r)
-            res = convert_image(r, imgfmt, mp_null_log);
+            res = convert_image(r, imgfmt, NULL, mp_null_log);
         talloc_free(r);
     }
     av_frame_free(&frame);
