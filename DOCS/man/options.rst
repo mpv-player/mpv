@@ -3863,8 +3863,8 @@ Software Scaler
 
     Most things which need software conversion can make use of this.
 
-``--zimg--scaler=<point|bilinear|bicubic|spline16|spline36|lanczos>``
-    Zimg luma scaler to use (default: bilinear).
+``--zimg-scaler=<point|bilinear|bicubic|spline16|spline36|lanczos>``
+    Zimg luma scaler to use (default: lanczos).
 
 ``--zimg-scaler-param-a=<default|float>``, ``--zimg-scaler-param-b=<default|float>``
     Set scaler parameters. By default, these are set to the special string
@@ -3878,7 +3878,7 @@ Software Scaler
         a and b are the bicubic b and c parameters.
 
 ``--zimg-scaler-chroma=...``
-    Same as ``--zimg--scaler``, for for chroma interpolation.
+    Same as ``--zimg--scaler``, for for chroma interpolation (default: bilinear).
 
 ``--zimg-scaler-chroma-param-a``, ``--zimg-scaler-chroma-param-b``
     Same as ``--zimg-scaler-param-a`` / ``--zimg-scaler-param-b``, for chroma.
