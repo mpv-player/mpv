@@ -255,49 +255,91 @@ static int align_unpack(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
-// 3 8 bit color components sourced from 3 planes, plus 8 MSB padding bits.
-static void x8ccc8_pack(void *dst, void *src[], int x0, int x1)
-{
-    for (int x = x0; x < x1; x++) {
-        ((uint32_t *)dst)[x] =
-            ((uint8_t *)src[0])[x] |
-            ((uint32_t)((uint8_t *)src[1])[x] << 8) |
-            ((uint32_t)((uint8_t *)src[2])[x] << 16);
-    }
-}
+// PA = PAck, copy planar input to single packed array
+// UN = UNpack, copy packed input to planar output
+// Naming convention:
+//  pa_/un_ prefix to identify conversion direction.
+//  Left (LSB, lowest byte address) -> Right (MSB, highest byte address).
+//      (This is unusual; MSG to LSB is more commonly used to describe formats,
+//       but our convention makes more sense for byte access in little endian.)
+//  "c" identifies a color component.
+//  "z" identifies known zero padding.
+//  "o" identifies opaque alpha (unused/unsupported yet).
+//  "x" identifies uninitialized padding.
+//  A component is followed by its size in bits.
+//  Size can be omitted for multiple uniform components (c8c8c8 == ccc8).
+// Unpackers will often use "x" for padding, because they ignore it, while
+// packets will use "z" because they write zero.
 
-// 3 8 bit color components sourced from 3 planes, plus 8 LSB padding bits.
-static void ccc8x8_pack(void *dst, void *src[], int x0, int x1)
-{
-    for (int x = x0; x < x1; x++) {
-        ((uint32_t *)dst)[x] =
-            ((uint32_t)((uint8_t *)src[0])[x] << 8) |
-            ((uint32_t)((uint8_t *)src[1])[x] << 16) |
-            ((uint32_t)((uint8_t *)src[2])[x] << 24);
+#define PA_WORD_3(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, pad)        \
+    static void name(void *dst, void *src[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            ((packed_t *)dst)[x] = (pad) |                                  \
+                ((packed_t)((plane_t *)src[0])[x] << (sh_c0)) |             \
+                ((packed_t)((plane_t *)src[1])[x] << (sh_c1)) |             \
+                ((packed_t)((plane_t *)src[2])[x] << (sh_c2));              \
+        }                                                                   \
     }
-}
 
-// 3 16 bit color components written to 3 planes.
-static void ccc16_unpack(void *src, void *dst[], int x0, int x1)
-{
-    uint16_t *r = src;
-    for (int x = x0; x < x1; x++) {
-        ((uint16_t *)dst[0])[x] = *r++;
-        ((uint16_t *)dst[1])[x] = *r++;
-        ((uint16_t *)dst[2])[x] = *r++;
+#define UN_WORD_3(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, mask)       \
+    static void name(void *src, void *dst[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            packed_t c = ((packed_t *)src)[x];                              \
+            ((plane_t *)dst[0])[x] = (c >> (sh_c0)) & (mask);               \
+            ((plane_t *)dst[1])[x] = (c >> (sh_c1)) & (mask);               \
+            ((plane_t *)dst[2])[x] = (c >> (sh_c2)) & (mask);               \
+        }                                                                   \
     }
-}
 
-// 3 10 bit color components source from 3 planes, plus 2 MSB padding bits.
-static void x2ccc10_pack(void *dst, void *src[], int x0, int x1)
-{
-    for (int x = x0; x < x1; x++) {
-        ((uint32_t *)dst)[x] =
-            ((uint16_t *)src[0])[x] |
-            ((uint32_t)((uint16_t *)src[1])[x] << 10) |
-            ((uint32_t)((uint16_t *)src[2])[x] << 20);
+UN_WORD_3(un_ccc8x8,  uint32_t, uint8_t,  0, 8,  16, 0xFFu)
+PA_WORD_3(pa_ccc8z8,  uint32_t, uint8_t,  0, 8,  16, 0)
+UN_WORD_3(un_x8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0xFFu)
+PA_WORD_3(pa_z8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0)
+UN_WORD_3(un_ccc10x2, uint32_t, uint16_t, 0, 10, 20, 0x3FFu)
+PA_WORD_3(pa_ccc10z2, uint32_t, uint16_t, 0, 10, 20, 0)
+
+#define PA_SEQ_3(name, comp_t)                                              \
+    static void name(void *dst, void *src[], int x0, int x1) {              \
+        comp_t *r = dst;                                                    \
+        for (int x = x0; x < x1; x++) {                                     \
+            *r++ = ((comp_t *)src[0])[x];                                   \
+            *r++ = ((comp_t *)src[1])[x];                                   \
+            *r++ = ((comp_t *)src[2])[x];                                   \
+        }                                                                   \
     }
-}
+
+#define UN_SEQ_3(name, comp_t)                                              \
+    static void name(void *src, void *dst[], int x0, int x1) {              \
+        comp_t *r = src;                                                    \
+        for (int x = x0; x < x1; x++) {                                     \
+            ((comp_t *)dst[0])[x] = *r++;                                   \
+            ((comp_t *)dst[1])[x] = *r++;                                   \
+            ((comp_t *)dst[2])[x] = *r++;                                   \
+        }                                                                   \
+    }
+
+UN_SEQ_3(un_ccc8,  uint8_t)
+PA_SEQ_3(pa_ccc8,  uint8_t)
+UN_SEQ_3(un_ccc16, uint16_t)
+PA_SEQ_3(pa_ccc16, uint16_t)
+
+// "regular": single packed plane, all components have same width (except padding)
+struct regular_repacker {
+    int packed_width;       // number of bits of the packed pixel
+    int component_width;    // number of bits for a single component
+    int prepadding;         // number of bits of LSB padding
+    int num_components;     // number of components that can be accessed
+    void (*pa_scanline)(void *p1, void *p2[], int x0, int x1);
+    void (*un_scanline)(void *p1, void *p2[], int x0, int x1);
+};
+
+static const struct regular_repacker regular_repackers[] = {
+    {32, 8,  0, 3, pa_ccc8z8,  un_ccc8x8},
+    {32, 8,  8, 3, pa_z8ccc8,  un_x8ccc8},
+    {32, 10, 0, 3, pa_ccc10z2, un_ccc10x2},
+    {24, 8,  0, 3, pa_ccc8,    un_ccc8},
+    {48, 16, 0, 3, pa_ccc16,   un_ccc16},
+};
 
 static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 {
@@ -353,13 +395,15 @@ static void wrap_buffer(struct mp_zimg_repack *r,
 
 static void setup_misc_packer(struct mp_zimg_repack *r)
 {
+    // Although it's in regular_repackers[], the generic mpv imgfmt metadata
+    // can't handle it yet.
     if (r->zimgfmt == IMGFMT_RGB30) {
         int planar_fmt = mp_imgfmt_find(0, 0, 3, 10, MP_IMGFLAG_RGB_P);
-        if (!planar_fmt || !r->pack)
+        if (!planar_fmt)
             return;
         r->zimgfmt = planar_fmt;
         r->repack = packed_repack;
-        r->packed_repack_scanline = x2ccc10_pack;
+        r->packed_repack_scanline = r->pack ? pa_ccc10z2 : un_ccc10x2;
         static int c_order[] = {3, 2, 1};
         for (int n = 0; n < 3; n++)
             r->components[n] = corder_gbrp[c_order[n]];
@@ -373,7 +417,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
         return;
 
-    if (desc.num_planes != 1 || desc.planes[0].num_components < 2)
+    if (desc.num_planes != 1 || desc.planes[0].num_components < 3)
         return;
     struct mp_regular_imgfmt_plane *p = &desc.planes[0];
 
@@ -381,6 +425,10 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         if (p->components[n] >= 4) // no alpha
             return;
     }
+
+    // padding must be in MSB or LSB
+    if (p->components[0] && p->components[3])
+        return;
 
     // Component ID to plane, with 0 (padding) just mapping to plane 0.
     const int *corder = NULL;
@@ -401,30 +449,29 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     if (!planar_fmt)
         return;
 
-    if (desc.component_size == 1 && p->num_components == 4) {
-        if (!r->pack) // no unpacker yet
-            return;
-        if (p->components[0] && p->components[3]) // padding must be in MSB or LSB
-            return;
-        // The following assumes little endian (because the repack backends use
-        // word access, while the metadata here uses byte access).
-        int first = p->components[0] ? 0 : 1;
-        r->repack = packed_repack;
-        r->packed_repack_scanline = p->components[0] ? x8ccc8_pack : ccc8x8_pack;
-        r->zimgfmt = planar_fmt;
-        for (int n = 0; n < 3; n++)
-            r->components[n] = corder[p->components[first + n]];
-        return;
-    }
+    for (int i = 0; i < MP_ARRAY_SIZE(regular_repackers); i++) {
+        const struct regular_repacker *pa = &regular_repackers[i];
 
-    if (desc.component_size == 2 && p->num_components == 3) {
-        if (r->pack) // no packer yet
-            return;
+        // The following may assumes little endian (because some repack backends
+        // use word access, while the metadata here uses byte access).
+
+        int prepad = p->components[0] ? 0 : 8;
+        int first_comp = p->components[0] ? 0 : 1;
+        void (*repack_cb)(void *p1, void *p2[], int x0, int x1) =
+            r->pack ? pa->pa_scanline : pa->un_scanline;
+
+        if (pa->packed_width != desc.component_size * p->num_components * 8 ||
+            pa->component_width != depth ||
+            pa->num_components != 3 ||
+            pa->prepadding != prepad ||
+            !repack_cb)
+            continue;
+
         r->repack = packed_repack;
-        r->packed_repack_scanline = ccc16_unpack;
+        r->packed_repack_scanline = repack_cb;
         r->zimgfmt = planar_fmt;
         for (int n = 0; n < 3; n++)
-            r->components[n] = corder[p->components[n]];
+            r->components[n] = corder[p->components[first_comp + n]];
         return;
     }
 }
