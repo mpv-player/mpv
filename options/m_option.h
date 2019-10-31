@@ -482,9 +482,6 @@ char *format_file_size(int64_t size);
 
 char *m_option_strerror(int code);
 
-// Find the option matching the given name in the list.
-const m_option_t *m_option_list_find(const m_option_t *list, const char *name);
-
 // Helper to parse options, see \ref m_option_type::parse.
 static inline int m_option_parse(struct mp_log *log, const m_option_t *opt,
                                  struct bstr name, struct bstr param, void *dst)

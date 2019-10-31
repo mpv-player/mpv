@@ -85,15 +85,6 @@ int m_option_required_params(const m_option_t *opt)
     return 1;
 }
 
-const m_option_t *m_option_list_find(const m_option_t *list, const char *name)
-{
-    for (int i = 0; list[i].name; i++) {
-        if (strcmp(list[i].name, name) == 0)
-            return &list[i];
-    }
-    return NULL;
-}
-
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
                                 const char *name, void *dst, struct mpv_node *src)
 {
