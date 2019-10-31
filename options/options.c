@@ -332,8 +332,8 @@ const m_option_t mp_opts[] = {
     // handled in m_config.c
     { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
     { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
-    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
-      .offset = -1},
+    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED |
+        M_OPT_NOPROP | M_OPT_OPTIONAL_PARAM,  .offset = -1},
     { "list-options", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED |
       M_OPT_NOPROP, .offset = -1},
     OPT_FLAG("list-properties", property_print_help,

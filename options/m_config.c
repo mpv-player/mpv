@@ -129,11 +129,21 @@ static struct m_group_data *m_config_gdata(struct m_config_data *data,
     return &data->gdata[group_index - data->group_index];
 }
 
+static void list_profiles(struct m_config *config)
+{
+    MP_INFO(config, "Available profiles:\n");
+    for (struct m_profile *p = config->profiles; p; p = p->next)
+        MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
+    MP_INFO(config, "\n");
+}
+
 static int show_profile(struct m_config *config, bstr param)
 {
     struct m_profile *p;
-    if (!param.len)
-        return M_OPT_MISSING_PARAM;
+    if (!param.len) {
+        list_profiles(config);
+        return M_OPT_EXIT;
+    }
     if (!(p = m_config_get_profile(config, param))) {
         MP_ERR(config, "Unknown profile '%.*s'.\n", BSTR_P(param));
         return M_OPT_EXIT;
@@ -758,10 +768,7 @@ static int m_config_handle_special_options(struct m_config *config,
                 MP_INFO(config, "No profiles have been defined.\n");
                 return M_OPT_EXIT;
             }
-            MP_INFO(config, "Available profiles:\n");
-            for (struct m_profile *p = config->profiles; p; p = p->next)
-                MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
-            MP_INFO(config, "\n");
+            list_profiles(config);
             return M_OPT_EXIT;
         }
 
