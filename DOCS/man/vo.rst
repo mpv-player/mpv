@@ -71,6 +71,9 @@ Available video output drivers are:
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
 
+    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
+    performance.
+
     .. note:: This is a fallback only, and should not be normally used.
 
 ``vdpau`` (X11 only)
@@ -383,6 +386,9 @@ Available video output drivers are:
     Depends on support of true color by modern terminals to display the images
     at full color range. On Windows it requires an ansi terminal such as mintty.
 
+    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
+    performance.
+
     ``--vo-tct-algo=<algo>``
         Select how to write the pixels to the terminal.
 
@@ -481,6 +487,9 @@ Available video output drivers are:
     Should be used when one doesn't want to install full-blown graphical
     environment (e.g. no X). Does not support hardware acceleration (if you
     need this, check the ``drm`` backend for ``gpu`` VO).
+
+    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
+    performance.
 
     The following global options are supported by this video output:
 
@@ -582,5 +591,8 @@ Available video output drivers are:
 ``wlshm`` (Wayland only)
     Shared memory video output driver without hardware acceleration that works
     whenever Wayland is present.
+
+    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
+    performance.
 
     .. note:: This is a fallback only, and should not be normally used.

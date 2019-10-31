@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
+
 #include "common/common.h"
 #include "common/tags.h"
 #include "filters/filter.h"
@@ -204,6 +206,14 @@ static struct mp_filter *f_create(struct mp_filter *parent, void *options)
     MP_HANDLE_OOM(p->sws);
     p->zimg = mp_zimg_alloc();
     talloc_steal(p, p->zimg);
+    p->zimg->opts = (struct zimg_opts){
+        .scaler = ZIMG_RESIZE_BILINEAR,
+        .scaler_params = {NAN, NAN},
+        .scaler_chroma_params = {NAN, NAN},
+        .scaler_chroma = ZIMG_RESIZE_BILINEAR,
+        .dither = ZIMG_DITHER_NONE,
+        .fast = 1,
+    };
     return f;
 }
 

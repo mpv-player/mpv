@@ -13,7 +13,6 @@ struct mpv_global;
 // Guaranteed to be a power of 2 and > 1.
 #define SWS_MIN_BYTE_ALIGN MP_IMAGE_BYTE_ALIGN
 
-extern const int mp_sws_hq_flags;
 extern const int mp_sws_fast_flags;
 
 bool mp_sws_supported_format(int imgfmt);

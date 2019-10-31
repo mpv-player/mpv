@@ -27,27 +27,43 @@
 
 static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
 
-struct zimg_opts {
-    int scaler;
-    int fast;
+static const struct m_opt_choice_alternatives mp_zimg_scalers[] = {
+    {"point",           ZIMG_RESIZE_POINT},
+    {"bilinear",        ZIMG_RESIZE_BILINEAR},
+    {"bicubic",         ZIMG_RESIZE_BICUBIC},
+    {"spline16",        ZIMG_RESIZE_SPLINE16},
+    {"spline36",        ZIMG_RESIZE_SPLINE36},
+    {"lanczos",         ZIMG_RESIZE_LANCZOS},
+    {0}
 };
+
+#define OPT_PARAM(name, var, flags) \
+    OPT_DOUBLE(name, var, (flags) | M_OPT_DEFAULT_NAN)
 
 #define OPT_BASE_STRUCT struct zimg_opts
 const struct m_sub_options zimg_conf = {
     .opts = (struct m_option[]) {
-        OPT_CHOICE("scaler", scaler, 0,
-                   ({"point",           ZIMG_RESIZE_POINT},
-                    {"bilinear",        ZIMG_RESIZE_BILINEAR},
-                    {"bicubic",         ZIMG_RESIZE_BICUBIC},
-                    {"spline16",        ZIMG_RESIZE_SPLINE16},
-                    {"lanczos",         ZIMG_RESIZE_LANCZOS})),
+        OPT_CHOICE_C("scaler", scaler, 0, mp_zimg_scalers),
+        OPT_PARAM("scaler-param-a", scaler_params[0], 0),
+        OPT_PARAM("scaler-param-b", scaler_params[1], 0),
+        OPT_CHOICE_C("scaler-chroma", scaler_chroma, 0, mp_zimg_scalers),
+        OPT_PARAM("scaler-chroma-param-a", scaler_chroma_params[0], 0),
+        OPT_PARAM("scaler-chroma-param-b", scaler_chroma_params[1], 0),
+        OPT_CHOICE("dither", dither, 0,
+                   ({"no",              ZIMG_DITHER_NONE},
+                    {"ordered",         ZIMG_DITHER_ORDERED},
+                    {"random",          ZIMG_DITHER_RANDOM},
+                    {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})),
         OPT_FLAG("fast", fast, 0),
         {0}
     },
     .size = sizeof(struct zimg_opts),
     .defaults = &(const struct zimg_opts){
-        .scaler = ZIMG_RESIZE_BILINEAR,
-        .fast = 1,
+        .scaler = ZIMG_RESIZE_LANCZOS,
+        .scaler_params = {NAN, NAN},
+        .scaler_chroma_params = {NAN, NAN},
+        .scaler_chroma = ZIMG_RESIZE_BILINEAR,
+        .dither = ZIMG_DITHER_RANDOM,
     },
 };
 
@@ -90,9 +106,7 @@ static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
     m_config_cache_update(ctx->opts_cache);
 
     struct zimg_opts *opts = ctx->opts_cache->opts;
-
-    ctx->scaler = opts->scaler;
-    ctx->fast = opts->fast;
+    ctx->opts = *opts;
 }
 
 static zimg_chroma_location_e mp_to_z_chroma(enum mp_chroma_location cl)
@@ -183,13 +197,8 @@ struct mp_zimg_context *mp_zimg_alloc(void)
     struct mp_zimg_context *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mp_zimg_context) {
         .log = mp_null_log,
-        .scaler = ZIMG_RESIZE_BILINEAR,
-        .scaler_params = {NAN, NAN},
-        .scaler_chroma = ZIMG_RESIZE_BILINEAR,
-        .scaler_chroma_params = {NAN, NAN},
-        .dither = ZIMG_DITHER_NONE,
-        .fast = true,
     };
+    ctx->opts = *(struct zimg_opts *)zimg_conf.defaults;
     talloc_set_destructor(ctx, free_mp_zimg);
     return ctx;
 }
@@ -504,7 +513,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_primaries = mp_to_z_prim(fmt.color.primaries);
     zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
 
-    if (ctx && ctx->fast) {
+    if (ctx && ctx->opts.fast) {
         // mpv's default for RGB output slows down zimg significantly.
         if (zfmt->transfer_characteristics == ZIMG_TRANSFER_IEC_61966_2_1 &&
             zfmt->color_family == ZIMG_COLOR_RGB)
@@ -547,6 +556,8 @@ static bool allocate_buffer(struct mp_zimg_context *ctx,
 
 bool mp_zimg_config(struct mp_zimg_context *ctx)
 {
+    struct zimg_opts *opts = &ctx->opts;
+
     destroy_zimg(ctx);
 
     if (ctx->opts_cache)
@@ -569,19 +580,19 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
     zimg_graph_builder_params params;
     zimg_graph_builder_params_default(&params, ZIMG_API_VERSION);
 
-    params.resample_filter = ctx->scaler;
-    params.filter_param_a = ctx->scaler_params[0];
-    params.filter_param_b = ctx->scaler_params[1];
+    params.resample_filter = opts->scaler;
+    params.filter_param_a = opts->scaler_params[0];
+    params.filter_param_b = opts->scaler_params[1];
 
-    params.resample_filter_uv = ctx->scaler_chroma;
-    params.filter_param_a_uv = ctx->scaler_chroma_params[0];
-    params.filter_param_b_uv = ctx->scaler_chroma_params[1];
+    params.resample_filter_uv = opts->scaler_chroma;
+    params.filter_param_a_uv = opts->scaler_chroma_params[0];
+    params.filter_param_b_uv = opts->scaler_chroma_params[1];
 
-    params.dither_type = ctx->dither;
+    params.dither_type = opts->dither;
 
     params.cpu_type = ZIMG_CPU_AUTO_64B;
 
-    if (ctx->fast)
+    if (opts->fast)
         params.allow_approximate_gamma = 1;
 
     if (ctx->src.color.sig_peak > 0)

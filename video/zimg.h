@@ -13,6 +13,15 @@ struct mpv_global;
 bool mp_zimg_supports_in_format(int imgfmt);
 bool mp_zimg_supports_out_format(int imgfmt);
 
+struct zimg_opts {
+    int scaler;
+    double scaler_params[2];
+    int scaler_chroma;
+    double scaler_chroma_params[2];
+    int dither;
+    int fast;
+};
+
 struct mp_zimg_context {
     // Can be set for verbose error printing.
     struct mp_log *log;
@@ -20,12 +29,7 @@ struct mp_zimg_context {
     // User configuration. Note: changing these requires calling mp_zimg_config()
     // to update the filter graph. The first mp_zimg_convert() call (or if the
     // image format changes) will do this automatically.
-    zimg_resample_filter_e scaler;
-    double scaler_params[2];
-    zimg_resample_filter_e scaler_chroma;
-    double scaler_chroma_params[2];
-    zimg_dither_type_e dither;
-    bool fast; // reduce quality for better performance
+    struct zimg_opts opts;
 
     // Input/output parameters. Note: if these mismatch with the
     // mp_zimg_convert() parameters, mp_zimg_config() will be called

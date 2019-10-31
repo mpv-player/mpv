@@ -3833,6 +3833,21 @@ Software Scaler
 ``--sws-cvs=<v>``
     Software scaler chroma vertical shifting. See ``--sws-scaler``.
 
+``--sws-bitexact=<yes|no>``
+    Unknown functionality (default: no). Consult libswscale source code. The
+    primary purpose of this, as far as libswscale API goes), is to produce
+    exactly the same output for the same input on all platforms (output has the
+    same "bits" everywhere, thus "bitexact"). Typically disables optimizations.
+
+``--sws-fast=<yes|no>``
+    Allow optimizations that help with performance, but reduce quality (default:
+    no).
+
+    VOs like ``drm`` and ``x11`` will benefit a lot from using ``--sws-fast``.
+    You may need to set other options, like ``--sws-scaler``. The builtin
+    ``sws-fast`` profile sets this option and some others to gain performance
+    for reduced quality.
+
 ``--sws-allow-zimg=<yes|no>``
     Allow using zimg (if the component using the internal swscale wrapper
     explicitly allows so). In this case, zimg *may* be used, if the internal
@@ -3846,14 +3861,34 @@ Software Scaler
     correctly, a verbose priority log message will indicate whether zimg is
     being used.
 
-    Currently, barely anything uses this.
+    Most things which need software conversion can make use of this.
 
-``--zimg--scaler=<point|bilinear|bicubic|spline16|lanczos>``
+``--zimg--scaler=<point|bilinear|bicubic|spline16|spline36|lanczos>``
     Zimg luma scaler to use (default: bilinear).
+
+``--zimg-scaler-param-a=<default|float>``, ``--zimg-scaler-param-b=<default|float>``
+    Set scaler parameters. By default, these are set to the special string
+    ``default``, which maps to a scaler-specific default value. Ignored if the
+    scaler is not tunable.
+
+    ``lanczos``
+        ``--zimg-scaler-param-a`` is the number of taps.
+
+    ``bicubic``
+        a and b are the bicubic b and c parameters.
+
+``--zimg-scaler-chroma=...``
+    Same as ``--zimg--scaler``, for for chroma interpolation.
+
+``--zimg-scaler-chroma-param-a``, ``--zimg-scaler-chroma-param-b``
+    Same as ``--zimg-scaler-param-a`` / ``--zimg-scaler-param-b``, for chroma.
+
+``--zimg-dither=<no|ordered|random|error-diffusion>``
+    Dithering (default: random).
 
 ``--zimg-fast=<yes|no>``
     Allow optimizations that help with performance, but reduce quality (default:
-    yes). Currently, this may simplify gamma conversion operations.
+    no). Currently, this may simplify gamma conversion operations.
 
 
 Audio Resampler

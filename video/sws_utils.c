@@ -49,6 +49,8 @@ struct sws_opts {
     int chr_hshift;
     float chr_sharpen;
     float lum_sharpen;
+    int fast;
+    int bitexact;
     int zimg;
 };
 
@@ -73,19 +75,20 @@ const struct m_sub_options sws_conf = {
         OPT_INT("chs", chr_hshift, 0),
         OPT_FLOATRANGE("ls", lum_sharpen, 0, -100.0, 100.0),
         OPT_FLOATRANGE("cs", chr_sharpen, 0, -100.0, 100.0),
+        OPT_FLAG("fast", fast, 0),
+        OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("allow-zimg", zimg, 0),
         {0}
     },
     .size = sizeof(struct sws_opts),
     .defaults = &(const struct sws_opts){
-        .scaler = SWS_BICUBIC,
+        .scaler = SWS_LANCZOS,
     },
 };
 
 // Highest quality, but also slowest.
-const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
-                            SWS_FULL_CHR_H_INP | SWS_ACCURATE_RND |
-                            SWS_BITEXACT;
+static const int mp_sws_hq_flags = SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
+                                   SWS_ACCURATE_RND;
 
 // Fast, lossy.
 const int mp_sws_fast_flags = SWS_BILINEAR;
@@ -104,6 +107,10 @@ static void mp_sws_update_from_cmdline(struct mp_sws_context *ctx)
 
     ctx->flags = SWS_PRINT_INFO;
     ctx->flags |= opts->scaler;
+    if (!opts->fast)
+        ctx->flags |= mp_sws_hq_flags;
+    if (opts->bitexact)
+        ctx->flags |= SWS_BITEXACT;
 
     ctx->allow_zimg = opts->zimg;
 }
@@ -357,7 +364,7 @@ int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                            float gblur)
 {
     struct mp_sws_context *ctx = mp_sws_alloc(NULL);
-    ctx->flags = mp_sws_hq_flags;
+    ctx->flags = SWS_LANCZOS | mp_sws_hq_flags;
     ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
     ctx->force_reload = true;
     int res = mp_sws_scale(ctx, dst, src);
