@@ -88,6 +88,8 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
 bool mp_rect_contains(struct mp_rect *rc, int x, int y);
 bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2);
 
+unsigned int mp_log2(uint32_t v);
+
 int mp_snprintf_cat(char *str, size_t size, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
 
