@@ -24,8 +24,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include <libavutil/common.h>
-
 #include "mpv_talloc.h"
 #include "bitmap_packer.h"
 #include "common/common.h"
@@ -51,7 +49,7 @@ void packer_get_bb(struct bitmap_packer *packer, struct pos out_bb[2])
 #define HEIGHT_SORT_BITS 4
 static int size_index(int s)
 {
-    int n = av_log2_16bit(s);
+    int n = mp_log2(s);
     return (n << HEIGHT_SORT_BITS)
        + ((- 1 - (s << HEIGHT_SORT_BITS >> n)) & ((1 << HEIGHT_SORT_BITS) - 1));
 }
@@ -148,9 +146,9 @@ int packer_pack(struct bitmap_packer *packer)
         ymax = MPMAX(ymax, in[i].y);
     }
     if (xmax > packer->w)
-        packer->w = 1 << (av_log2(xmax - 1) + 1);
+        packer->w = 1 << (mp_log2(xmax - 1) + 1);
     if (ymax > packer->h)
-        packer->h = 1 << (av_log2(ymax - 1) + 1);
+        packer->h = 1 << (mp_log2(ymax - 1) + 1);
     while (1) {
         int used_width = 0;
         int y = pack_rectangles(in, packer->result, packer->count,

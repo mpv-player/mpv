@@ -15,7 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libavutil/common.h>
+#include <math.h>
 
 #include "common/common.h"
 #include "common/msg.h"
@@ -452,8 +452,8 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->width = fmt.w;
     zfmt->height = fmt.h;
 
-    zfmt->subsample_w = av_log2(desc.chroma_w);
-    zfmt->subsample_h = av_log2(desc.chroma_h);
+    zfmt->subsample_w = mp_log2(desc.chroma_w);
+    zfmt->subsample_h = mp_log2(desc.chroma_h);
 
     zfmt->color_family = ZIMG_COLOR_YUV;
     if (desc.num_planes == 1) {

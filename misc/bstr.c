@@ -22,8 +22,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <libavutil/common.h>
-
 #include "mpv_talloc.h"
 
 #include "common/common.h"
@@ -272,7 +270,7 @@ int bstr_parse_utf8_code_length(unsigned char b)
 {
     if (b < 128)
         return 1;
-    int bytes = 7 - av_log2(b ^ 255);
+    int bytes = 7 - mp_log2(b ^ 255);
     return (bytes >= 2 && bytes <= 4) ? bytes : -1;
 }
 
