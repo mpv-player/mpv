@@ -162,7 +162,7 @@ static void destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     if (p->decoder) {
-        MP_VERBOSE(f, "Uninit decoder.\n");
+        MP_DBG(f, "Uninit decoder.\n");
         talloc_free(p->decoder->f);
         p->decoder = NULL;
     }
