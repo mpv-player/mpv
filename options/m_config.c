@@ -1193,6 +1193,7 @@ int m_config_set_profile(struct m_config *config, char *name, int flags)
         MP_WARN(config, "Unknown profile '%s'.\n", name);
         return M_OPT_INVALID;
     }
+    MP_VERBOSE(config, "Applying profile '%s'...\n", name);
 
     if (config->profile_depth > MAX_PROFILE_DEPTH) {
         MP_WARN(config, "WARNING: Profile inclusion too deep.\n");
