@@ -40,7 +40,7 @@ local function read_options(options, identifier)
     local conffilename = "script-opts/" .. identifier .. ".conf"
     local conffile = mp.find_config_file(conffilename)
     if conffile == nil then
-        msg.verbose(conffilename .. " not found.")
+        msg.debug(conffilename .. " not found.")
         conffilename = "lua-settings/" .. identifier .. ".conf"
         conffile = mp.find_config_file(conffilename)
         if conffile then
@@ -50,9 +50,10 @@ local function read_options(options, identifier)
     local f = conffile and io.open(conffile,"r")
     if f == nil then
         -- config not found
-        msg.verbose(conffilename .. " not found.")
+        msg.debug(conffilename .. " not found.")
     else
         -- config exists, read values
+        msg.verbose("Opened config file " .. conffilename .. ".")
         local linecounter = 1
         for line in f:lines() do
             if string.find(line, "#") == 1 then
