@@ -312,7 +312,7 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
 {
 #define NET_WM_STATE_TEST(x) { \
     if (atom == XA(x11, _NET_WM_STATE_##x)) { \
-        MP_VERBOSE(x11, "Detected wm supports " #x " state.\n" ); \
+        MP_DBG(x11, "Detected wm supports " #x " state.\n" ); \
         return vo_wm_##x; \
     } \
 }
@@ -342,7 +342,7 @@ static int vo_wm_detect(struct vo *vo)
     if (args) {
         for (i = 0; i < nitems; i++) {
             if (args[i] == XA(x11, _WIN_LAYER)) {
-                MP_VERBOSE(x11, "Detected wm supports layers.\n");
+                MP_DBG(x11, "Detected wm supports layers.\n");
                 wm |= vo_wm_LAYER;
             }
         }
@@ -352,18 +352,18 @@ static int vo_wm_detect(struct vo *vo)
     args = x11_get_property(x11, win, XA(x11, _NET_SUPPORTED), XA_ATOM, 32,
                             &nitems);
     if (args) {
-        MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
+        MP_DBG(x11, "Detected wm supports NetWM.\n");
         if (vo->opts->x11_netwm >= 0) {
             for (i = 0; i < nitems; i++)
                 wm |= net_wm_support_state_test(vo->x11, args[i]);
         } else {
-            MP_VERBOSE(x11, "NetWM usage disabled by user.\n");
+            MP_DBG(x11, "NetWM usage disabled by user.\n");
         }
         XFree(args);
     }
 
     if (wm == 0)
-        MP_VERBOSE(x11, "Unknown wm type...\n");
+        MP_DBG(x11, "Unknown wm type...\n");
     if (vo->opts->x11_netwm > 0 && !(wm & vo_wm_FULLSCREEN)) {
         MP_WARN(x11, "Forcing NetWM FULLSCREEN support.\n");
         wm |= vo_wm_FULLSCREEN;
@@ -609,9 +609,9 @@ int vo_x11_init(struct vo *vo)
         dispName += 9;
     x11->display_is_local = dispName[0] == ':' &&
                             strtoul(dispName + 1, NULL, 10) < 10;
-    MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
-               x11->ws_width, x11->ws_height, dispName,
-               x11->display_is_local ? "local" : "remote");
+    MP_DBG(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
+           x11->ws_width, x11->ws_height, dispName,
+           x11->display_is_local ? "local" : "remote");
 
     int w_mm = DisplayWidthMM(x11->display, x11->screen);
     int h_mm = DisplayHeightMM(x11->display, x11->screen);
@@ -781,7 +781,7 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->colormap != None)
         XFreeColormap(vo->x11->display, x11->colormap);
 
-    MP_VERBOSE(x11, "uninit ...\n");
+    MP_DBG(x11, "uninit ...\n");
     if (x11->xim)
         XCloseIM(x11->xim);
     if (x11->display) {
