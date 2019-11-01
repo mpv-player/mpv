@@ -76,7 +76,7 @@ struct mp_zimg_repack {
     struct mp_image_params fmt; // original mp format (possibly packed format)
     int zimgfmt;                // zimg equivalent unpacked format
     int zplanes;                // number of planes (zimgfmt)
-    unsigned zmask;             // zimg_image_buffer.mask
+    unsigned zmask[4];          // zmask[n] = zimg_image_buffer.plane[n].mask
     int z_planes[4];            // z_planes[zimg_index] = mp_index
 
     // If set, the pack/unpack callback to pass to zimg.
@@ -214,43 +214,32 @@ void mp_zimg_enable_cmdline_opts(struct mp_zimg_context *ctx,
     mp_zimg_update_from_cmdline(ctx); // first update
 }
 
-static void copy_rect(struct mp_image *dst, unsigned dst_mask,
-                      struct mp_image *src, unsigned src_mask,
-                      unsigned i, unsigned x0, unsigned x1)
+static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
 {
-    for (int p = 0; p < dst->fmt.num_planes; p++) {
-        int bpp = dst->fmt.bytes[p];
-        int xs = dst->fmt.xs[p];
-        int ys = dst->fmt.ys[p];
+    struct mp_zimg_repack *r = user;
+
+    for (int p = 0; p < r->mpi->fmt.num_planes; p++) {
+        int bpp = r->mpi->fmt.bytes[p];
+        int xs = r->mpi->fmt.xs[p];
+        int ys = r->mpi->fmt.ys[p];
         // Number of lines on this plane.
-        int h = (1 << dst->fmt.chroma_ys) - (1 << ys) + 1;
+        int h = (1 << r->mpi->fmt.chroma_ys) - (1 << ys) + 1;
 
         for (int y = i; y < i + h; y++) {
-            void *psrc = src->planes[p] +
-                         src->stride[p] * (ptrdiff_t)((y >> ys) & src_mask) +
-                         bpp * (x0 >> xs);
-            void *pdst = dst->planes[p] +
-                         dst->stride[p] * (ptrdiff_t)((y >> ys) & dst_mask) +
-                         bpp * (x0 >> xs);
-            memcpy(pdst, psrc, ((x1 - x0) >> xs) * bpp);
+            void *a = r->mpi->planes[p] +
+                      r->mpi->stride[p] * (ptrdiff_t)(y >> ys) +
+                      bpp * (x0 >> xs);
+            void *b = r->tmp->planes[p] +
+                      r->tmp->stride[p] * (ptrdiff_t)((y >> ys) & r->zmask[p]) +
+                      bpp * (x0 >> xs);
+            size_t size = ((x1 - x0) >> xs) * bpp;
+            if (r->pack) {
+                memcpy(a, b, size);
+            } else {
+                memcpy(b, a, size);
+            }
         }
     }
-}
-
-static int align_pack(void *user, unsigned i, unsigned x0, unsigned x1)
-{
-    struct mp_zimg_repack *r = user;
-
-    copy_rect(r->mpi, ZIMG_BUFFER_MAX, r->tmp, r->zmask, i, x0, x1);
-
-    return 0;
-}
-
-static int align_unpack(void *user, unsigned i, unsigned x0, unsigned x1)
-{
-    struct mp_zimg_repack *r = user;
-
-    copy_rect(r->tmp, r->zmask, r->mpi, ZIMG_BUFFER_MAX, i, x0, x1);
 
     return 0;
 }
@@ -351,7 +340,8 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     void *p2[3];
     for (int p = 0; p < 3; p++) {
         int s = r->components[p];
-        p2[p] = r->tmp->planes[s] + r->tmp->stride[s] * (ptrdiff_t)(i & r->zmask);
+        p2[p] = r->tmp->planes[s] +
+                r->tmp->stride[s] * (ptrdiff_t)(i & r->zmask[s]);
     }
 
     r->packed_repack_scanline(p1, p2, x0, x1);
@@ -379,7 +369,7 @@ static void wrap_buffer(struct mp_zimg_repack *r,
         if (aligned) {
             wrap_mpi = mpi;
         } else {
-            *cb = r->pack ? align_pack : align_unpack;
+            *cb = repack_align;
         }
     }
 
@@ -387,7 +377,7 @@ static void wrap_buffer(struct mp_zimg_repack *r,
         int mplane = r->z_planes[n];
         buf->plane[n].data = wrap_mpi->planes[mplane];
         buf->plane[n].stride = wrap_mpi->stride[mplane];
-        buf->plane[n].mask = wrap_mpi == mpi ? ZIMG_BUFFER_MAX : r->zmask;
+        buf->plane[n].mask = wrap_mpi == mpi ? ZIMG_BUFFER_MAX : r->zmask[n];
     }
 
     r->mpi = mpi;
@@ -584,19 +574,27 @@ static bool allocate_buffer(struct mp_zimg_context *ctx,
     if (err)
         return false;
 
-    r->zmask = zimg_select_buffer_mask(lines);
+    r->zmask[0] = zimg_select_buffer_mask(lines);
 
     // Either ZIMG_BUFFER_MAX, or a power-of-2 slice buffer.
-    assert(r->zmask == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask + 1));
+    assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
 
-    int h = r->zmask == ZIMG_BUFFER_MAX ? r->fmt.h : r->zmask + 1;
+    int h = r->zmask[0] == ZIMG_BUFFER_MAX ? r->fmt.h : r->zmask[0] + 1;
     if (h >= r->fmt.h) {
         h = r->fmt.h;
-        r->zmask = ZIMG_BUFFER_MAX;
+        r->zmask[0] = ZIMG_BUFFER_MAX;
     }
 
     r->tmp = mp_image_alloc(r->zimgfmt, r->fmt.w, h);
     talloc_steal(r, r->tmp);
+
+    if (r->tmp) {
+        for (int n = 1; n < r->tmp->fmt.num_planes; n++) {
+            r->zmask[n] = r->zmask[0];
+            if (r->zmask[0] != ZIMG_BUFFER_MAX)
+                r->zmask[n] = r->zmask[n] >> r->tmp->fmt.ys[n];
+        }
+    }
 
     return !!r->tmp;
 }
