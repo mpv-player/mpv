@@ -408,7 +408,7 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
     struct MPContext *mpctx = ctx->mpctx;
     struct mp_client_api *clients = ctx->clients;
 
-    MP_VERBOSE(ctx, "Exiting...\n");
+    MP_DBG(ctx, "Exiting...\n");
 
     if (terminate)
         mpv_command(ctx, (const char*[]){"quit", NULL});
