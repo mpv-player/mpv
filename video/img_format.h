@@ -130,6 +130,11 @@ struct mp_regular_imgfmt {
 
     // If >0, LSB padding, if <0, MSB padding. The padding bits are always 0.
     // This applies: bit_depth = component_size * 8 - abs(component_pad)
+    //               bit_size  = component_size * 8 + MPMIN(0, component_pad)
+    //  E.g. P010: component_pad=6 (LSB always implied 0, all data in MSB)
+    //          => has a "depth" of 10 bit, but usually treated as 16 bit value
+    //       yuv420p10: component_pad=-6 (like a 10 bit value 0-extended to 16)
+    //          => has depth of 10 bit, needs <<6 to get a 16 bit value
     int8_t component_pad;
 
     uint8_t num_planes;
