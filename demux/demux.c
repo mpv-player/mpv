@@ -1605,8 +1605,8 @@ static void add_index_entry(struct demux_queue *queue, struct demux_packet *dp,
         // Needs to honor power-of-2 requirement.
         size_t new_size = MPMAX(128, queue->index_size * 2);
         assert(!(new_size & (new_size - 1)));
-        MP_VERBOSE(in, "stream %d: resize index to %zu\n", queue->ds->index,
-                   new_size);
+        MP_DBG(in, "stream %d: resize index to %zu\n", queue->ds->index,
+               new_size);
         // Note: we could tolerate allocation failure, and just discard the
         // entire index (and prevent the index from being recreated).
         MP_RESIZE_ARRAY(NULL, queue->index, new_size);
