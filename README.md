@@ -27,8 +27,10 @@
 ## Overview
 
 
-**mpv** is a media player based on MPlayer and mplayer2. It supports a wide
-variety of video file formats, audio and video codecs, and subtitle types.
+**mpv** is a free (as in freedom) media player for the command line. It supports
+a wide variety of media file formats, audio and video codecs, and subtitle types.
+
+There is a [FAQ](FAQ).
 
 Releases can be found on the [release list][releases].
 
@@ -38,11 +40,14 @@ Releases can be found on the [release list][releases].
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
-- A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
-  many caveats with drivers or system compositors causing tearing, stutter,
-  etc. On Windows, you might want to make sure the graphics drivers are
-  current. In some cases, ancient fallback video output methods can help
-  (such as `--vo=xv` on Linux), but this use is not recommended or supported.
+- A not too crappy GPU. mpv's focus is not on power-efficient playback on
+  embedded or integrated GPUs (for example, hardware decoding is not even
+  enabled by default). Low power GPUs may cause issues like tearing, stutter,
+  etc. The main video output uses shaders for video rendering and scaling,
+  rather than GPU fixed function hardware. On Windows, you might want to make
+  sure the graphics drivers are current. In some cases, ancient fallback video
+  output methods can help (such as `--vo=xv` on Linux), but this use is not
+  recommended or supported.
 
 
 ## Downloads
@@ -113,7 +118,7 @@ Essential dependencies (incomplete list):
 - uchardet (optional, for subtitle charset detection)
 - nvdec and vaapi libraries for hardware decoding on Linux (optional)
 
-Libass dependencies:
+Libass dependencies (when building libass):
 
 - gcc or clang, yasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
@@ -121,7 +126,7 @@ Libass dependencies:
   particularly for correct rendering of non-English text on OSX, and
   Arabic/Indic scripts on any platform)
 
-FFmpeg dependencies:
+FFmpeg dependencies (when building FFmpeg):
 
 - gcc or clang, yasm on x86 and x86_64
 - OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
@@ -185,6 +190,11 @@ for ideas on what you could contribute with.
 GPLv2 "or later" by default, LGPLv2.1 "or later" with `--enable-lgpl`.
 See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
+## History
+
+This software is based on the MPlayer project. Before mpv existed as a project,
+the code base was briefly developed under the mplayer2 project. For details,
+see the [FAQ](FAQ).
 
 ## Contact
 
@@ -195,6 +205,7 @@ Most activity happens on the IRC channel and the github issue tracker.
 - **User IRC Channel**: `#mpv` on `irc.freenode.net`
 - **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
 
+[FAQ]: https://github.com/mpv-player/mpv/wiki/FAQ
 [releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
