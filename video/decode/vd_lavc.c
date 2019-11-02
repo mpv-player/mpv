@@ -927,14 +927,14 @@ fallback:
     return avcodec_default_get_buffer2(avctx, pic, flags);
 }
 
-static bool prepare_decoding(struct mp_filter *vd)
+static void prepare_decoding(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
     struct vd_lavc_params *opts = ctx->opts;
 
-    if (!avctx || ctx->hwdec_failed)
-        return false;
+    if (!avctx)
+        return;
 
     int drop = ctx->framedrop_flags;
     if (drop == 1) {
@@ -950,8 +950,6 @@ static bool prepare_decoding(struct mp_filter *vd)
 
     if (ctx->hwdec_request_reinit)
         reset_avctx(vd);
-
-    return true;
 }
 
 static void handle_err(struct mp_filter *vd)
@@ -977,8 +975,13 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (ctx->num_requeue_packets && ctx->requeue_packets[0] != pkt)
         return AVERROR(EAGAIN); // cannot consume the packet
 
-    if (!prepare_decoding(vd))
-        return AVERROR_UNKNOWN;
+    if (ctx->hwdec_failed)
+        return AVERROR(EAGAIN);
+
+    if (!ctx->avctx)
+        return AVERROR_EOF;
+
+    prepare_decoding(vd);
 
     if (avctx->skip_frame == AVDISCARD_ALL)
         return 0;
@@ -1019,8 +1022,10 @@ static int decode_frame(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
-    if (!prepare_decoding(vd))
-        return AVERROR_UNKNOWN;
+    if (!avctx)
+        return AVERROR_EOF;
+
+    prepare_decoding(vd);
 
     // Re-send old packets (typically after a hwdec fallback during init).
     if (ctx->num_requeue_packets)
