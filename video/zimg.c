@@ -641,8 +641,15 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     r->zplanes = desc.num_planes;
 
-    zfmt->width = fmt.w;
-    zfmt->height = fmt.h;
+    // Note: formats with subsampled chroma may have odd width or height in mpv
+    // and FFmpeg. This is because the width/height is actually a cropping
+    // rectangle. Reconstruct the image allocation size and set the cropping.
+    zfmt->width = MP_ALIGN_UP(fmt.w, desc.chroma_w);
+    zfmt->height = MP_ALIGN_UP(fmt.h, desc.chroma_h);
+    if (zfmt->width != fmt.w)
+        zfmt->active_region.width = fmt.w;
+    if (zfmt->height != fmt.h)
+        zfmt->active_region.height = fmt.h;
 
     zfmt->subsample_w = mp_log2(desc.chroma_w);
     zfmt->subsample_h = mp_log2(desc.chroma_h);
