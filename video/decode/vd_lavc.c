@@ -968,10 +968,13 @@ static void handle_err(struct mp_filter *vd)
     }
 }
 
-static int do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
+static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
+
+    if (ctx->num_requeue_packets && ctx->requeue_packets[0] != pkt)
+        return AVERROR(EAGAIN); // cannot consume the packet
 
     if (!prepare_decoding(vd))
         return AVERROR_UNKNOWN;
@@ -996,28 +999,17 @@ static int do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     return ret;
 }
 
-static int send_queued(struct mp_filter *vd)
+static void send_queued_packet(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    while (ctx->num_requeue_packets) {
-        int ret = do_send_packet(vd, ctx->requeue_packets[0]);
-        if (ret < 0)
-            return ret;
+    assert(ctx->num_requeue_packets);
+    assert(!ctx->hw_probing);
+
+    if (send_packet(vd, ctx->requeue_packets[0]) != AVERROR(EAGAIN)) {
         talloc_free(ctx->requeue_packets[0]);
         MP_TARRAY_REMOVE_AT(ctx->requeue_packets, ctx->num_requeue_packets, 0);
     }
-
-    return 0;
-}
-
-static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
-{
-    int ret = send_queued(vd);
-    if (ret < 0)
-        return false;
-
-    return do_send_packet(vd, pkt);
 }
 
 // Returns whether decoder is still active (!EOF state).
@@ -1027,7 +1019,11 @@ static int decode_frame(struct mp_filter *vd)
     AVCodecContext *avctx = ctx->avctx;
 
     if (!prepare_decoding(vd))
-        return AVERROR(EAGAIN);
+        return AVERROR_UNKNOWN;
+
+    // Re-send old packets (typically after a hwdec fallback during init).
+    if (ctx->num_requeue_packets)
+        send_queued_packet(vd);
 
     int ret = avcodec_receive_frame(avctx, ctx->pic);
     if (ret == AVERROR_EOF) {
@@ -1085,9 +1081,11 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
         ctx->requeue_packets = pkts;
         ctx->num_requeue_packets = num_pkts;
 
-        send_queued(vd);
-        ret = decode_frame(vd);
+        return 0; // force retry
     }
+
+    if (ret == AVERROR(EAGAIN) && ctx->num_requeue_packets)
+        return 0; // force retry, so send_queued_packet() gets called
 
     if (!ctx->num_delay_queue)
         return ret;

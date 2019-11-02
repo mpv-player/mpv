@@ -856,7 +856,7 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
         talloc_free(pkt);
         mp_filter_internal_mark_progress(f);
     } else {
-        // Decoding error? Just try again.
+        // Decoding error, or hwdec fallback recovery. Just try again.
         mp_filter_internal_mark_progress(f);
     }
 }
