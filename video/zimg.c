@@ -78,6 +78,7 @@ struct mp_zimg_repack {
     int zplanes;                // number of planes (zimgfmt)
     unsigned zmask[4];          // zmask[n] = zimg_image_buffer.plane[n].mask
     int z_planes[4];            // z_planes[zimg_index] = mp_index
+    bool pass_through_y;        // luma plane optimization for e.g. nv12
 
     // If set, the pack/unpack callback to pass to zimg.
     // Called with user==mp_zimg_repack.
@@ -99,6 +100,9 @@ struct mp_zimg_repack {
     // by avoiding another "closure" indirection.)
     // To be used by the repack callback.
     struct mp_image *mpi;
+
+    // Also temporary, per-call. use_buf[n] == plane n uses tmp (and not mpi).
+    bool use_buf[4];
 };
 
 static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
@@ -219,6 +223,9 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
     struct mp_zimg_repack *r = user;
 
     for (int p = 0; p < r->mpi->fmt.num_planes; p++) {
+        if (!r->use_buf[p])
+            continue;
+
         int bpp = r->mpi->fmt.bytes[p];
         int xs = r->mpi->fmt.xs[p];
         int ys = r->mpi->fmt.ys[p];
@@ -381,19 +388,21 @@ static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
     int xs = r->mpi->fmt.chroma_xs;
     int ys = r->mpi->fmt.chroma_ys;
 
-    // Copy Y.
-    int l_h = 1 << ys;
-    for (int y = i; y < i + l_h; y++) {
-        ptrdiff_t bpp = r->mpi->fmt.bytes[0];
-        void *a = r->mpi->planes[0] +
-                  r->mpi->stride[0] * (ptrdiff_t)y + bpp * x0;
-        void *b = r->tmp->planes[0] +
-                  r->tmp->stride[0] * (ptrdiff_t)(y & r->zmask[0]) + bpp * x0;
-        size_t size = (x1 - x0) * bpp;
-        if (r->pack) {
-            memcpy(a, b, size);
-        } else {
-            memcpy(b, a, size);
+    if (r->use_buf[0]) {
+        // Copy Y.
+        int l_h = 1 << ys;
+        for (int y = i; y < i + l_h; y++) {
+            ptrdiff_t bpp = r->mpi->fmt.bytes[0];
+            void *a = r->mpi->planes[0] +
+                    r->mpi->stride[0] * (ptrdiff_t)y + bpp * x0;
+            void *b = r->tmp->planes[0] +
+                    r->tmp->stride[0] * (ptrdiff_t)(y & r->zmask[0]) + bpp * x0;
+            size_t size = (x1 - x0) * bpp;
+            if (r->pack) {
+                memcpy(a, b, size);
+            } else {
+                memcpy(b, a, size);
+            }
         }
     }
 
@@ -418,30 +427,27 @@ static void wrap_buffer(struct mp_zimg_repack *r,
                         struct mp_image *mpi)
 {
     *buf = (zimg_image_buffer){ZIMG_API_VERSION};
-    *cb = r->repack;
 
-    struct mp_image *wrap_mpi = r->tmp;
-
-    if (!*cb) {
-        bool aligned = true;
-        for (int n = 0; n < r->zplanes; n++) {
-            if (((uintptr_t)mpi->planes[n] % ZIMG_ALIGN) ||
-                (mpi->stride[n] % ZIMG_ALIGN))
-                aligned = false;
-        }
-        if (aligned) {
-            wrap_mpi = mpi;
-        } else {
-            *cb = repack_align;
-        }
+    bool plane_aligned[4] = {0};
+    for (int n = 0; n < r->zplanes; n++) {
+        plane_aligned[n] = !((uintptr_t)mpi->planes[n] % ZIMG_ALIGN) &&
+                           !(mpi->stride[n] % ZIMG_ALIGN);
     }
 
     for (int n = 0; n < r->zplanes; n++) {
         int mplane = r->z_planes[n];
-        buf->plane[n].data = wrap_mpi->planes[mplane];
-        buf->plane[n].stride = wrap_mpi->stride[mplane];
-        buf->plane[n].mask = wrap_mpi == mpi ? ZIMG_BUFFER_MAX : r->zmask[n];
+
+        r->use_buf[mplane] = !plane_aligned[n];
+        if (!(r->pass_through_y && mplane == 0))
+            r->use_buf[mplane] |= !!r->repack;
+
+        struct mp_image *tmpi = r->use_buf[mplane] ? r->tmp : mpi;
+        buf->plane[n].data = tmpi->planes[mplane];
+        buf->plane[n].stride = tmpi->stride[mplane];
+        buf->plane[n].mask = r->use_buf[mplane] ? r->zmask[n] : ZIMG_BUFFER_MAX;
     }
+
+    *cb = r->repack ? r->repack : repack_align;
 
     r->mpi = mpi;
 }
@@ -495,6 +501,7 @@ static void setup_nv_packer(struct mp_zimg_repack *r)
             continue;
 
         r->repack = repack_nv;
+        r->pass_through_y = true;
         r->packed_repack_scanline = repack_cb;
         r->zimgfmt = planar_fmt;
         r->components[0] = desc.planes[1].components[0] - 1;
