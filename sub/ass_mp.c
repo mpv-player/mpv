@@ -230,8 +230,10 @@ static bool pack(struct mp_ass_packer *p, struct sub_bitmaps *res, int imgfmt)
     {
         talloc_free(p->cached_img);
         p->cached_img = mp_image_alloc(imgfmt, p->packer->w, p->packer->h);
-        if (!p->cached_img)
+        if (!p->cached_img) {
+            packer_reset(p->packer);
             return false;
+        }
         talloc_steal(p, p->cached_img);
     }
 
