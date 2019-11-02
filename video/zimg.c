@@ -68,10 +68,6 @@ const struct m_sub_options zimg_conf = {
     },
 };
 
-// Component ID (see struct mp_regular_imgfmt_plane.components) to plane index.
-static const int corder_gbrp[4] = {0, 2, 0, 1};
-static const int corder_yuv[4] = {0, 0, 1, 2};
-
 struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
     struct mp_image_params fmt; // original mp format (possibly packed format)
@@ -516,7 +512,20 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
     // Although it's in regular_repackers[], the generic mpv imgfmt metadata
     // can't handle it yet.
     if (r->zimgfmt == IMGFMT_RGB30) {
-        int planar_fmt = mp_imgfmt_find(0, 0, 3, 10, MP_IMGFLAG_RGB_P);
+        struct mp_regular_imgfmt planar10 = {
+            .component_type = MP_COMPONENT_TYPE_UINT,
+            .component_size = 2,
+            .component_pad = -6,
+            .num_planes = 3,
+            .planes = {
+                {1, {1}},
+                {1, {2}},
+                {1, {3}},
+            },
+            .chroma_w = 1,
+            .chroma_h = 1,
+        };
+        int planar_fmt = mp_find_regular_imgfmt(&planar10);
         if (!planar_fmt)
             return;
         r->zimgfmt = planar_fmt;
@@ -524,7 +533,7 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
         r->packed_repack_scanline = r->pack ? pa_ccc10z2 : un_ccc10x2;
         static int c_order[] = {3, 2, 1};
         for (int n = 0; n < 3; n++)
-            r->components[n] = corder_gbrp[c_order[n]];
+            r->components[n] = c_order[n] - 1;
     }
 }
 
@@ -548,22 +557,19 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     if (p->components[0] && p->components[3])
         return;
 
-    // Component ID to plane, with 0 (padding) just mapping to plane 0.
-    const int *corder = NULL;
-
-    int typeflag = 0;
-    enum mp_csp forced_csp = mp_imgfmt_get_forced_csp(r->zimgfmt);
-    if (forced_csp == MP_CSP_RGB || forced_csp == MP_CSP_XYZ) {
-        typeflag = MP_IMGFLAG_RGB_P;
-        corder = corder_gbrp;
-    } else {
-        typeflag = MP_IMGFLAG_YUV_P;
-        corder = corder_yuv;
-    }
-
-    // Find a compatible planar format (typically AV_PIX_FMT_GBRP).
     int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
-    int planar_fmt = mp_imgfmt_find(0, 0, 3, depth, typeflag);
+
+    // Find a physically compatible planar format (typically IMGFMT_420P).
+    struct mp_regular_imgfmt desc2 = desc;
+    desc2.forced_csp = 0;
+    if (desc2.component_pad > 0)
+        desc2.component_pad = 0;
+    desc2.num_planes = 3;
+    for (int n = 0; n < desc2.num_planes; n++) {
+        desc2.planes[n].num_components = 1;
+        desc2.planes[n].components[0] = n + 1;
+    }
+    int planar_fmt = mp_find_regular_imgfmt(&desc2);
     if (!planar_fmt)
         return;
 
@@ -589,7 +595,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         r->packed_repack_scanline = repack_cb;
         r->zimgfmt = planar_fmt;
         for (int n = 0; n < 3; n++)
-            r->components[n] = corder[p->components[first_comp + n]];
+            r->components[n] = p->components[first_comp + n] - 1;
         return;
     }
 }
@@ -615,7 +621,6 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     struct mp_regular_imgfmt desc;
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
         return false;
-    enum mp_csp csp = mp_imgfmt_get_forced_csp(r->zimgfmt);
 
     // no alpha plane, no odd chroma subsampling
     if (desc.num_planes > 3 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
@@ -645,7 +650,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_family = ZIMG_COLOR_YUV;
     if (desc.num_planes == 1) {
         zfmt->color_family = ZIMG_COLOR_GREY;
-    } else if (csp == MP_CSP_RGB || csp == MP_CSP_XYZ) {
+    } else if (fmt.color.space == MP_CSP_RGB || fmt.color.space == MP_CSP_XYZ) {
         zfmt->color_family = ZIMG_COLOR_RGB;
     }
 
