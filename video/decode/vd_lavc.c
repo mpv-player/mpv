@@ -968,7 +968,7 @@ static void handle_err(struct mp_filter *vd)
     }
 }
 
-static bool do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
+static int do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
