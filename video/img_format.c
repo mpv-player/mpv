@@ -454,6 +454,8 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
         return false; // it's satan himself
 #endif
 
+    res.forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
+
     if (!validate_regular_imgfmt(&res))
         return false;
 

@@ -125,6 +125,11 @@ struct mp_regular_imgfmt {
     // Type of each component.
     enum mp_component_type component_type;
 
+    // See mp_imgfmt_get_forced_csp(). Normally code should use
+    // mp_image_params.colors. This field is only needed to map the format
+    // unambiguously to FFmpeg formats.
+    enum mp_csp forced_csp;
+
     // Size of each component in bytes.
     uint8_t component_size;
 
