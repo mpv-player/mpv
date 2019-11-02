@@ -309,7 +309,7 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
             goto fail;
         }
 
-        int out = mp_sws_find_best_out_format(src_fmt,  fmts, num_fmts);
+        int out = mp_sws_find_best_out_format(sws, src_fmt, fmts, num_fmts);
         if (!out) {
             mp_err(log, "can't find video conversion for %s\n",
                    mp_imgfmt_to_name(src_fmt));

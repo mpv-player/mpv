@@ -40,17 +40,14 @@
 #include "filter.h"
 #include "filter_internal.h"
 
-int mp_sws_find_best_out_format(int in_format, int *out_formats,
-                                int num_out_formats)
+int mp_sws_find_best_out_format(struct mp_sws_filter *sws, int in_format,
+                                int *out_formats, int num_out_formats)
 {
-    if (sws_isSupportedInput(imgfmt2pixfmt(in_format)) < 1)
-        return 0;
-
     int best = 0;
     for (int n = 0; n < num_out_formats; n++) {
         int out_format = out_formats[n];
 
-        if (sws_isSupportedOutput(imgfmt2pixfmt(out_format)) < 1)
+        if (!mp_sws_supports_formats(sws->sws, out_format, in_format))
             continue;
 
         if (best) {

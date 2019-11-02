@@ -202,6 +202,7 @@ void mp_sws_enable_cmdline_opts(struct mp_sws_context *ctx, struct mpv_global *g
 
     ctx->opts_cache = m_config_cache_alloc(ctx, g, &sws_conf);
     ctx->force_reload = true;
+    mp_sws_update_from_cmdline(ctx);
 
 #if HAVE_ZIMG
     mp_zimg_enable_cmdline_opts(ctx->zimg, g);
