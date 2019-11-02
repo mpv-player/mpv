@@ -959,7 +959,8 @@ static void handle_err(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct vd_lavc_params *opts = ctx->opts;
 
-    MP_WARN(vd, "Error while decoding frame!\n");
+    MP_WARN(vd, "Error while decoding frame%s!\n",
+            ctx->use_hwdec ? " (hardware decoding)" : "");
 
     if (ctx->use_hwdec) {
         ctx->hwdec_fail_count += 1;
