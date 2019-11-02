@@ -287,6 +287,29 @@ PA_WORD_3(pa_z8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0)
 UN_WORD_3(un_ccc10x2, uint32_t, uint16_t, 0, 10, 20, 0x3FFu)
 PA_WORD_3(pa_ccc10z2, uint32_t, uint16_t, 0, 10, 20, 0)
 
+#define PA_WORD_2(name, packed_t, plane_t, sh_c0, sh_c1, pad)               \
+    static void name(void *dst, void *src[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            ((packed_t *)dst)[x] = (pad) |                                  \
+                ((packed_t)((plane_t *)src[0])[x] << (sh_c0)) |             \
+                ((packed_t)((plane_t *)src[1])[x] << (sh_c1));              \
+        }                                                                   \
+    }
+
+#define UN_WORD_2(name, packed_t, plane_t, sh_c0, sh_c1, mask)              \
+    static void name(void *src, void *dst[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            packed_t c = ((packed_t *)src)[x];                              \
+            ((plane_t *)dst[0])[x] = (c >> (sh_c0)) & (mask);               \
+            ((plane_t *)dst[1])[x] = (c >> (sh_c1)) & (mask);               \
+        }                                                                   \
+    }
+
+UN_WORD_2(un_cc8,  uint16_t, uint8_t,  0, 8,  0xFFu)
+PA_WORD_2(pa_cc8,  uint16_t, uint8_t,  0, 8,  0)
+UN_WORD_2(un_cc16, uint32_t, uint16_t, 0, 16, 0xFFFFu)
+PA_WORD_2(pa_cc16, uint32_t, uint16_t, 0, 16, 0)
+
 #define PA_SEQ_3(name, comp_t)                                              \
     static void name(void *dst, void *src[], int x0, int x1) {              \
         comp_t *r = dst;                                                    \
@@ -325,9 +348,11 @@ struct regular_repacker {
 static const struct regular_repacker regular_repackers[] = {
     {32, 8,  0, 3, pa_ccc8z8,  un_ccc8x8},
     {32, 8,  8, 3, pa_z8ccc8,  un_x8ccc8},
-    {32, 10, 0, 3, pa_ccc10z2, un_ccc10x2},
     {24, 8,  0, 3, pa_ccc8,    un_ccc8},
     {48, 16, 0, 3, pa_ccc16,   un_ccc16},
+    {16, 8,  0, 2, pa_cc8,     un_cc8},
+    {32, 16, 0, 2, pa_cc16,    un_cc16},
+    {32, 10, 0, 3, pa_ccc10z2, un_ccc10x2},
 };
 
 static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
@@ -345,6 +370,44 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     }
 
     r->packed_repack_scanline(p1, p2, x0, x1);
+
+    return 0;
+}
+
+static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    int xs = r->mpi->fmt.chroma_xs;
+    int ys = r->mpi->fmt.chroma_ys;
+
+    // Copy Y.
+    int l_h = 1 << ys;
+    for (int y = i; y < i + l_h; y++) {
+        ptrdiff_t bpp = r->mpi->fmt.bytes[0];
+        void *a = r->mpi->planes[0] +
+                  r->mpi->stride[0] * (ptrdiff_t)y + bpp * x0;
+        void *b = r->tmp->planes[0] +
+                  r->tmp->stride[0] * (ptrdiff_t)(y & r->zmask[0]) + bpp * x0;
+        size_t size = (x1 - x0) * bpp;
+        if (r->pack) {
+            memcpy(a, b, size);
+        } else {
+            memcpy(b, a, size);
+        }
+    }
+
+    uint32_t *p1 =
+        (void *)(r->mpi->planes[1] + r->mpi->stride[1] * (ptrdiff_t)(i >> ys));
+
+    void *p2[2];
+    for (int p = 0; p < 2; p++) {
+        int s = r->components[p];
+        p2[p] = r->tmp->planes[s] +
+                r->tmp->stride[s] * (ptrdiff_t)((i >> ys) & r->zmask[s]);
+    }
+
+    r->packed_repack_scanline(p1, p2, x0 >> xs, x1 >> xs);
 
     return 0;
 }
@@ -381,6 +444,63 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     }
 
     r->mpi = mpi;
+}
+
+static void setup_nv_packer(struct mp_zimg_repack *r)
+{
+    struct mp_regular_imgfmt desc;
+    if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
+        return;
+
+    // Check for NV.
+    if (desc.num_planes != 2)
+        return;
+    if (desc.planes[0].num_components != 1 || desc.planes[0].components[0] != 1)
+        return;
+    if (desc.planes[1].num_components != 2)
+        return;
+    int cr0 = desc.planes[1].components[0];
+    int cr1 = desc.planes[1].components[1];
+    if (cr0 > cr1)
+        MPSWAP(int, cr0, cr1);
+    if (cr0 != 2 || cr1 != 3)
+        return;
+
+    // Construct equivalent planar format.
+    struct mp_regular_imgfmt desc2 = desc;
+    desc2.num_planes = 3;
+    desc2.planes[1].num_components = 1;
+    desc2.planes[1].components[0] = 2;
+    desc2.planes[2].num_components = 1;
+    desc2.planes[2].components[0] = 3;
+    // For P010. Strangely this concept exists only for the NV format.
+    if (desc2.component_pad > 0)
+        desc2.component_pad = 0;
+
+    int planar_fmt = mp_find_regular_imgfmt(&desc2);
+    if (!planar_fmt)
+        return;
+
+    for (int i = 0; i < MP_ARRAY_SIZE(regular_repackers); i++) {
+        const struct regular_repacker *pa = &regular_repackers[i];
+
+        void (*repack_cb)(void *p1, void *p2[], int x0, int x1) =
+            r->pack ? pa->pa_scanline : pa->un_scanline;
+
+        if (pa->packed_width != desc.component_size * 2 * 8 ||
+            pa->component_width != desc.component_size * 8 ||
+            pa->num_components != 2 ||
+            pa->prepadding != 0 ||
+            !repack_cb)
+            continue;
+
+        r->repack = repack_nv;
+        r->packed_repack_scanline = repack_cb;
+        r->zimgfmt = planar_fmt;
+        r->components[0] = desc.planes[1].components[0] - 1;
+        r->components[1] = desc.planes[1].components[1] - 1;
+        return;
+    }
 }
 
 static void setup_misc_packer(struct mp_zimg_repack *r)
@@ -477,6 +597,8 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     r->zimgfmt = fmt.imgfmt;
 
+    if (!r->repack)
+        setup_nv_packer(r);
     if (!r->repack)
         setup_misc_packer(r);
     if (!r->repack)
