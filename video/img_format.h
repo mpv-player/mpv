@@ -150,6 +150,7 @@ struct mp_regular_imgfmt {
 };
 
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);
+int mp_find_regular_imgfmt(struct mp_regular_imgfmt *src);
 
 enum mp_imgfmt {
     IMGFMT_NONE = 0,

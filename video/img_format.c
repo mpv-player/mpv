@@ -463,6 +463,41 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     return true;
 }
 
+static bool regular_imgfmt_equals(struct mp_regular_imgfmt *a,
+                                  struct mp_regular_imgfmt *b)
+{
+    if (a->component_type != b->component_type ||
+        a->component_size != b->component_size ||
+        a->num_planes     != b->num_planes ||
+        a->component_pad  != b->component_pad ||
+        a->forced_csp     != b->forced_csp ||
+        a->chroma_w       != b->chroma_w ||
+        a->chroma_h       != b->chroma_h)
+        return false;
+
+    for (int n = 0; n < a->num_planes; n++) {
+        int num_comps = a->planes[n].num_components;
+        if (num_comps != b->planes[n].num_components)
+            return false;
+        for (int i = 0; i < num_comps; i++) {
+            if (a->planes[n].components[i] != b->planes[n].components[i])
+                return false;
+        }
+    }
+
+    return true;
+}
+
+// Find a format that matches this one exactly.
+int mp_find_regular_imgfmt(struct mp_regular_imgfmt *src)
+{
+    for (int n = IMGFMT_START + 1; n < IMGFMT_END; n++) {
+        struct mp_regular_imgfmt f;
+        if (mp_get_regular_imgfmt(&f, n) && regular_imgfmt_equals(src, &f))
+            return n;
+    }
+    return 0;
+}
 
 // Find a format that has the given flags set with the following configuration.
 int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags)
