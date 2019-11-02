@@ -977,7 +977,7 @@ static int do_send_packet(struct mp_filter *vd, struct demux_packet *pkt)
         return AVERROR_UNKNOWN;
 
     if (avctx->skip_frame == AVDISCARD_ALL)
-        return AVERROR(EAGAIN);
+        return 0;
 
     AVPacket avpkt;
     mp_set_av_packet(&avpkt, pkt, &ctx->codec_timebase);
