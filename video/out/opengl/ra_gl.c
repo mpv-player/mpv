@@ -182,6 +182,17 @@ static int ra_init_gl(struct ra *ra, GL *gl)
                 desc->components[0][i] = i + 1;
             desc->chroma_w = desc->chroma_h = 1;
         }
+        if (strcmp(fmt->name, "rgb10_a2") == 0) {
+            fmt->special_imgfmt = IMGFMT_RGB30;
+            struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
+            fmt->special_imgfmt_desc = desc;
+            desc->component_bits = 10;
+            desc->num_planes = 1;
+            desc->planes[0] = fmt;
+            for (int i = 0; i < 3; i++)
+                desc->components[0][i] = i + 1;
+            desc->chroma_w = desc->chroma_h = 1;
+        }
         if (strcmp(fmt->name, "appleyp") == 0) {
             fmt->special_imgfmt = IMGFMT_UYVY;
             struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
