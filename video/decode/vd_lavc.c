@@ -993,7 +993,9 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return ret;
 
-    if (ctx->hw_probing && ctx->num_sent_packets < 32) {
+    if (ctx->hw_probing && ctx->num_sent_packets < 32 &&
+        ctx->opts->software_fallback <= 32)
+    {
         pkt = pkt ? demux_copy_packet(pkt) : NULL;
         MP_TARRAY_APPEND(ctx, ctx->sent_packets, ctx->num_sent_packets, pkt);
     }

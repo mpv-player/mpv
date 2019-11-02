@@ -1388,6 +1388,11 @@ Video
     (default: 3). If this is a number, then fallback will be triggered if
     N frames fail to decode in a row. 1 is equivalent to ``yes``.
 
+    Setting this to a higher number might break the playback start fallback: if
+    a fallback happens, parts of the file will be skipped, approximately by to
+    the number of packets that could not be decoded. Values below an unspecified
+    count will not have this problem, because mpv retains the packets.
+
 ``--vd-lavc-dr=<yes|no>``
     Enable direct rendering (default: yes). If this is set to ``yes``, the
     video will be decoded directly to GPU video memory (or staging buffers).
