@@ -64,6 +64,7 @@ const struct m_sub_options zimg_conf = {
         .scaler_chroma_params = {NAN, NAN},
         .scaler_chroma = ZIMG_RESIZE_BILINEAR,
         .dither = ZIMG_DITHER_RANDOM,
+        .fast = 1,
     },
 };
 

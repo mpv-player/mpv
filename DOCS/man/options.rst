@@ -3889,7 +3889,7 @@ Software Scaler
 
 ``--zimg-fast=<yes|no>``
     Allow optimizations that help with performance, but reduce quality (default:
-    no). Currently, this may simplify gamma conversion operations.
+    yes). Currently, this may simplify gamma conversion operations.
 
 
 Audio Resampler
