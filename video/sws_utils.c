@@ -251,11 +251,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     mp_image_params_guess_csp(src); // sanitize colorspace/colorlevels
     mp_image_params_guess_csp(dst);
 
-    struct mp_imgfmt_desc src_fmt = mp_imgfmt_get_desc(src->imgfmt);
-    struct mp_imgfmt_desc dst_fmt = mp_imgfmt_get_desc(dst->imgfmt);
-    if (!src_fmt.id || !dst_fmt.id)
-        return -1;
-
     enum AVPixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
     if (s_fmt == AV_PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1) {
         MP_ERR(ctx, "Input image format %s not supported by libswscale.\n",
@@ -275,12 +270,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
 
     int d_csp = mp_csp_to_sws_colorspace(dst->color.space);
     int d_range = dst->color.levels == MP_CSP_LEVELS_PC;
-
-    // Work around libswscale bug #1852 (fixed in ffmpeg commit 8edf9b1fa):
-    // setting range flags for RGB gives random bogus results.
-    // Newer libswscale always ignores range flags for RGB.
-    s_range = s_range && (src_fmt.flags & MP_IMGFLAG_YUV);
-    d_range = d_range && (dst_fmt.flags & MP_IMGFLAG_YUV);
 
     av_opt_set_int(ctx->sws, "sws_flags", ctx->flags, 0);
 
