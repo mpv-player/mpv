@@ -968,7 +968,7 @@ Video
         toggles this option between ``auto`` and ``no``.
 
         Always enabling HW decoding by putting it into the config file is
-        discouraged. If you use the Ubuntu package, delete ``/etc/mpv.conf``,
+        discouraged. If you use the Ubuntu package, delete ``/etc/mpv/mpv.conf``,
         as the package tries to enable HW decoding by default.
 
     Use one of the auto modes if you want to enable hardware decoding.
