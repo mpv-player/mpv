@@ -350,7 +350,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 static int query_format(struct vo *vo, int format)
 {
-    if (sws_isSupportedInput(imgfmt2pixfmt(format)))
+    struct priv *p = vo->priv;
+    if (mp_sws_supports_formats(p->sws, IMGFMT_RGB0, format))
         return 1;
     return 0;
 }
