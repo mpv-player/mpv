@@ -36,14 +36,10 @@
 #define MP_IMGFLAG_BYTE_ALIGNED 0x1
 // set if (possibly) alpha is included (might be not definitive for packed RGB)
 #define MP_IMGFLAG_ALPHA 0x80
-// Uses one component per plane (set even if it's just one plane)
-#define MP_IMGFLAG_PLANAR 0x100
 // set if it's YUV colorspace
 #define MP_IMGFLAG_YUV 0x200
 // set if it's RGB colorspace
 #define MP_IMGFLAG_RGB 0x400
-// set if it's XYZ colorspace
-#define MP_IMGFLAG_XYZ 0x800
 // set if the format is in a standard YUV format:
 // - planar and yuv colorspace
 // - chroma shift 0-2
@@ -57,12 +53,7 @@
 #define MP_IMGFLAG_BE 0x4000
 // set if in native (host) endian, or endian independent
 #define MP_IMGFLAG_NE MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
-// Carries a palette in plane[1] (see IMGFMT_PAL8 for format of the palette).
-// Note that some non-paletted formats have this flag set, because FFmpeg
-// mysteriously expects some formats to carry a palette plane for no apparent
-// reason. FFmpeg developer braindeath?
-// The only real paletted format we support is IMGFMT_PAL8, so check for that
-// format directly if you want an actual paletted format.
+// Carries a palette in plane[1] (see AV_PIX_FMT_PAL8 for format of the palette).
 #define MP_IMGFLAG_PAL 0x8000
 // planes don't contain real data
 #define MP_IMGFLAG_HWACCEL 0x10000
@@ -70,13 +61,7 @@
 // are always shuffled (G - B - R [- A]).
 #define MP_IMGFLAG_RGB_P 0x40000
 // Semi-planar YUV formats, like AV_PIX_FMT_NV12.
-// The flag MP_IMGFLAG_YUV_NV_SWAP is set for AV_PIX_FMT_NV21.
 #define MP_IMGFLAG_YUV_NV 0x80000
-#define MP_IMGFLAG_YUV_NV_SWAP 0x100000
-
-// Exactly one of these bits is set in mp_imgfmt_desc.flags
-#define MP_IMGFLAG_COLOR_CLASS_MASK \
-    (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB | MP_IMGFLAG_XYZ)
 
 struct mp_imgfmt_desc {
     int id;                 // IMGFMT_*

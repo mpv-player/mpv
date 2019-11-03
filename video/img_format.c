@@ -199,7 +199,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if ((pd->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
         desc.flags |= MP_IMGFLAG_HWACCEL;
     } else if (fmt == AV_PIX_FMT_XYZ12LE || fmt == AV_PIX_FMT_XYZ12BE) {
-        desc.flags |= MP_IMGFLAG_XYZ;
+        /* nothing */
     } else if (!(pd->flags & AV_PIX_FMT_FLAG_RGB) &&
                fmt != AV_PIX_FMT_MONOBLACK &&
                fmt != AV_PIX_FMT_PAL8)
@@ -214,9 +214,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if (mpfmt >= IMGFMT_RGB0_START && mpfmt <= IMGFMT_RGB0_END)
         desc.flags &= ~MP_IMGFLAG_ALPHA;
-
-    if (desc.num_planes == pd->nb_components)
-        desc.flags |= MP_IMGFLAG_PLANAR;
 
     if (!(pd->flags & AV_PIX_FMT_FLAG_HWACCEL) &&
         !(pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
@@ -254,8 +251,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         {
 
             desc.flags |= MP_IMGFLAG_YUV_NV;
-            if (fmt == AV_PIX_FMT_NV21)
-                desc.flags |= MP_IMGFLAG_YUV_NV_SWAP;
         }
         if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
             desc.component_bits += shift;
@@ -564,13 +559,10 @@ int main(int argc, char **argv)
 #define FLAG(t, c) if (d.flags & (t)) printf("[%s]", c);
         FLAG(MP_IMGFLAG_BYTE_ALIGNED, "BA")
         FLAG(MP_IMGFLAG_ALPHA, "a")
-        FLAG(MP_IMGFLAG_PLANAR, "P")
         FLAG(MP_IMGFLAG_YUV_P, "YUVP")
         FLAG(MP_IMGFLAG_YUV_NV, "NV")
-        FLAG(MP_IMGFLAG_YUV_NV_SWAP, "NVSWAP")
         FLAG(MP_IMGFLAG_YUV, "yuv")
         FLAG(MP_IMGFLAG_RGB, "rgb")
-        FLAG(MP_IMGFLAG_XYZ, "xyz")
         FLAG(MP_IMGFLAG_LE, "le")
         FLAG(MP_IMGFLAG_BE, "be")
         FLAG(MP_IMGFLAG_PAL, "pal")

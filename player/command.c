@@ -2359,7 +2359,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"average-bpp",     SUB_PROP_INT(bpp),
                             .unavailable = !bpp},
         {"plane-depth",     SUB_PROP_INT(desc.plane_bits),
-                            .unavailable = !(desc.flags & MP_IMGFLAG_PLANAR)},
+                            .unavailable = !(desc.flags & MP_IMGFLAG_YUV_P)},
         {"w",               SUB_PROP_INT(p.w)},
         {"h",               SUB_PROP_INT(p.h)},
         {"dw",              SUB_PROP_INT(d_w)},
