@@ -27,8 +27,13 @@ Interface changes
  --- mpv 0.31.0 ---
     - add `--d3d11-output-csp` to enable explicit selection of a D3D11
       swap chain color space.
-    - add an builtin "sw-fast" profile, which restores performance settings
-      that were switched to higher quality since mpv 0.30.0
+    - the --sws- options and similar now affect vo_image and screenshot
+      conversion (does not matter as much for vo_gpu, which does most of this
+      with shaders)
+    - add a builtin "sw-fast" profile, which restores performance settings
+      for software video conversion. These were switched to higher quality since
+      mpv 0.30.0 (related to the previous changelog entry). This affects video
+      outputs like vo_x11 and vo_drm, and screenshots, but not much else.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
