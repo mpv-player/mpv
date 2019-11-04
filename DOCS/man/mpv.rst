@@ -504,31 +504,6 @@ Some options only support a subset of the above.
 Options of this type can be changed at runtime using the ``change-list``
 command, which takes the suffix as separate operation parameter.
 
-Playing DVDs
-------------
-
-DVDs can be played with the ``dvd://[title]`` syntax. The optional
-title specifier is a number which selects between separate video
-streams on the DVD. If no title is given (``dvd://``) then the longest
-title is selected automatically by the library. This is usually what
-you want. mpv does not support DVD menus.
-
-DVDs which have been copied on to a hard drive or other mounted
-filesystem (by e.g. the ``dvdbackup`` tool) are accommodated by
-specifying the path to the local copy: ``--dvd-device=PATH``.
-Alternatively, running ``mpv PATH`` should auto-detect a DVD directory
-tree and play the longest title.
-
-.. note:: DVD subtitles
-    
-    DVDs use image-based subtitles. Image subtitles are implemented as
-    a bitmap video stream which can be superimposed over the main
-    movie. mpv's subtitle styling and positioning options and keyboard
-    shortcuts generally do not work with image-based subtitles.
-    Exceptions include options like ``--stretch-dvd-subs`` and
-    ``--stretch-image-subs-to-screen``.
-
-
 CONFIGURATION FILES
 ===================
 
@@ -650,12 +625,8 @@ Some profiles are loaded automatically. The following example demonstrates this:
 
     ::
 
-        [protocol.dvd]
-        profile-desc="profile for dvd:// streams"
-        alang=en
-
-        [extension.flv]
-        profile-desc="profile for .flv files"
+        [extension.mkv]
+        profile-desc="profile for .mkv files"
         vf=flip
 
 The profile name follows the schema ``type.name``, where type can be
@@ -792,10 +763,10 @@ PROTOCOLS
 
 ``ytdl://...``
 
-    By default, the youtube-dl hook script (enabled by default for mpv CLI)
-    only looks at http URLs. Prefixing an URL with ``ytdl://`` forces it to
-    be always processed by the script. This can also be used to invoke special
-    youtube-dl functionality like playing a video by ID or invoking search.
+    By default, the youtube-dl hook script only looks at http(s) URLs. Prefixing
+    an URL with ``ytdl://`` forces it to be always processed by the script. This
+    can also be used to invoke special youtube-dl functionality like playing a
+    video by ID or invoking search.
 
     Keep in mind that you can't pass youtube-dl command line options by this,
     and you have to use ``--ytdl-raw-options`` instead.
@@ -820,28 +791,14 @@ PROTOCOLS
 
     ``bluray://`` is an alias.
 
-``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
+``dvd://[title][/device]`` ``--dvd-device=PATH``
 
     Play a DVD. DVD menus are not supported. If no title is given, the longest
-    title is auto-selected.
+    title is auto-selected. Without ``--dvd-device``, it will probably try
+    to open an actual optical drive, if available and implemented for the OS.
 
     ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
     thing.
-
-``dvdread://...:``
-
-    Play a DVD using the old libdvdread code. This is what MPlayer and
-    older mpv versions used for ``dvd://``. Use is discouraged. It's
-    provided only for compatibility and for transition, and to work
-    around outstanding dvdnav bugs (see "DVD library choices" above).
-
-``tv://[channel][/input_id]`` ``--tv-...``
-
-    Analogue TV via V4L. Also useful for webcams. (Linux only.)
-
-``pvr://`` ``--pvr-...``
-
-    PVR. (Linux only.)
 
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 
@@ -866,9 +823,17 @@ PROTOCOLS
     demuxer name, and ``options`` is the (pseudo-)filename passed to the
     demuxer.
 
-    For example, ``mpv av://lavfi:mandelbrot`` makes use of the libavfilter
-    wrapper included in libavdevice, and will use the ``mandelbrot`` source
-    filter to generate input data.
+    .. admonition:: Example
+
+        ::
+
+            mpv av://v4l2:/dev/video0 --profile=low-latency --untimed
+
+        This plays video from the first v4l input with nearly the lowest latency
+        possible. It's a good replacement for the removed ``tv://`` input.
+        Using ``--untimed`` is a hack to output a captured frame immediately,
+        instead of respecting the input framerate. (There may be better ways to
+        handle this in the future.)
 
     ``avdevice://`` is an alias.
 
