@@ -1589,8 +1589,9 @@ static bool update_prop(struct mpv_handle *ctx, struct observe_property *prop)
                 prop->async_updating = true;
                 ctx->async_counter += 1;
                 mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop_async, prop);
+            } else {
+                return false; // re-update later when the changed value comes in
             }
-            return false; // re-update later when the changed value comes in
         }
 
         m_option_copy(prop->type, &val, &prop->async_value);
