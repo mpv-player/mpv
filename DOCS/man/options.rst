@@ -4197,7 +4197,7 @@ Cache
     Currently, this is used for ``--cache-on-disk`` only.
 
 ``--stream-buffer-size=<bytesize>``
-    Size of the low level stream byte buffer (default: 4KB). This is used as
+    Size of the low level stream byte buffer (default: 128KB). This is used as
     buffer between demuxer and low level I/O (e.g. sockets). Generally, this
     can be very small, and the main purpose is similar to the internal buffer
     FILE in the C standard library will have.

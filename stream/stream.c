@@ -113,7 +113,7 @@ const struct m_sub_options stream_conf = {
     },
     .size = sizeof(struct stream_opts),
     .defaults = &(const struct stream_opts){
-        .buffer_size = STREAM_MIN_BUFFER_SIZE,
+        .buffer_size = 128 * 1024,
     },
 };
 
