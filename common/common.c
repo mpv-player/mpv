@@ -336,3 +336,17 @@ unsigned int mp_log2(uint32_t v)
     return 0;
 #endif
 }
+
+// If a power of 2, return it, otherwise return the next highest one, or 0.
+//  mp_round_next_power_of_2(65)            == 128
+//  mp_round_next_power_of_2(64)            == 64
+//  mp_round_next_power_of_2(0)             == 1
+//  mp_round_next_power_of_2(UINT32_MAX)    == 0
+uint32_t mp_round_next_power_of_2(uint32_t v)
+{
+    for (int n = 0; n < 30; n++) {
+        if ((1 << n) >= v)
+            return 1 << n;
+    }
+    return 0;
+}
