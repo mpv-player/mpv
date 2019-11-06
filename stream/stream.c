@@ -95,6 +95,10 @@ static const stream_info_t *const stream_list[] = {
     NULL
 };
 
+// Because of guarantees documented on STREAM_BUFFER_SIZE.
+// Half the buffer is used as forward buffer, the other for seek-back.
+#define STREAM_MIN_BUFFER_SIZE (STREAM_BUFFER_SIZE * 2)
+
 struct stream_opts {
     int64_t buffer_size;
 };
@@ -104,12 +108,12 @@ struct stream_opts {
 const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
         OPT_BYTE_SIZE("stream-buffer-size", buffer_size, 0,
-                      STREAM_FIXED_BUFFER_SIZE, 512 * 1024 * 1024),
+                      STREAM_MIN_BUFFER_SIZE, 512 * 1024 * 1024),
         {0}
     },
     .size = sizeof(struct stream_opts),
     .defaults = &(const struct stream_opts){
-        .buffer_size = STREAM_FIXED_BUFFER_SIZE,
+        .buffer_size = STREAM_MIN_BUFFER_SIZE,
     },
 };
 
@@ -244,7 +248,7 @@ static bool stream_resize_buffer(struct stream *s, uint32_t new)
     new = MPMAX(new, s->requested_buffer_size);
 
     // This much is always required.
-    new = MPMAX(new, STREAM_FIXED_BUFFER_SIZE);
+    new = MPMAX(new, STREAM_MIN_BUFFER_SIZE);
 
     new = mp_round_next_power_of_2(new);
     if (!new || new > INT_MAX / 8)
@@ -255,15 +259,7 @@ static bool stream_resize_buffer(struct stream *s, uint32_t new)
 
     MP_DBG(s, "resize stream to %d bytes\n", new);
 
-    uint8_t *nbuf = s->buffer_inline;
-    if (new > STREAM_FIXED_BUFFER_SIZE) {
-        nbuf = ta_alloc_size(s, new);
-    } else {
-        static_assert(MP_IS_POWER_OF_2(STREAM_FIXED_BUFFER_SIZE), "");
-        assert(new == STREAM_FIXED_BUFFER_SIZE);
-    }
-    assert(nbuf != s->buffer);
-
+    void *nbuf = ta_alloc_size(s, new);
     if (!nbuf)
         return false; // oom; tolerate it, caller needs to check if required
 
@@ -276,8 +272,7 @@ static bool stream_resize_buffer(struct stream *s, uint32_t new)
     s->buf_cur = old_pos;
     s->buf_end = new_len;
 
-    if (s->buffer != s->buffer_inline)
-        ta_free(s->buffer);
+    ta_free(s->buffer);
 
     s->buffer = nbuf;
     s->buffer_mask = new - 1;

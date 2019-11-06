@@ -31,8 +31,6 @@
 // Minimum guaranteed buffer and seek-back size. For any reads <= of this size,
 // it's guaranteed that you can seek back by <= of this size again.
 #define STREAM_BUFFER_SIZE 2048
-// (Half of this is typically reserved for seeking back.)
-#define STREAM_FIXED_BUFFER_SIZE (STREAM_BUFFER_SIZE * 2)
 
 // stream->mode
 #define STREAM_READ  0
@@ -174,8 +172,6 @@ typedef struct stream {
 
     unsigned int buffer_mask; // buffer_size-1, where buffer_size == 2**n
     uint8_t *buffer;
-
-    uint8_t buffer_inline[STREAM_FIXED_BUFFER_SIZE];
 } stream_t;
 
 // Non-inline version with stream_read_char().
