@@ -4196,6 +4196,32 @@ Cache
 
     Currently, this is used for ``--cache-on-disk`` only.
 
+``--stream-buffer-size=<bytesize>``
+    Size of the low level stream byte buffer (default: 4KB). This is used as
+    buffer between demuxer and low level I/O (e.g. sockets). Generally, this
+    can be very small, and the main purpose is similar to the internal buffer
+    FILE in the C standard library will have.
+
+    Half of the buffer is always used for guaranteed seek back, which is
+    important for unseekable input.
+
+    There are known cases where this can help performance to set a large buffer:
+
+        1. mp4 files. libavformat may trigger many small seeks in both
+           directions, depending on how the file was muxed.
+
+        2. Certain network filesystems, which do not have a cache, and where
+           small reads can be inefficient.
+
+    In other cases, setting this to a large value can reduce performance.
+
+    Usually, read accesses are at half the buffer size, but it may happen that
+    accesses are done alternating with smaller and larger sizes (this is due to
+    the internal ring buffer wrap-around).
+
+    See ``--list-options`` for defaults and value range. ``<bytesize>`` options
+    accept suffixes such as ``KiB`` and ``MiB``.
+
 Network
 -------
 

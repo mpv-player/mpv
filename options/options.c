@@ -711,6 +711,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
     OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
     OPT_SUBSTRUCT("", demux_cache_opts, demux_cache_conf, 0),
+    OPT_SUBSTRUCT("", stream_opts, stream_conf, 0),
 
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
     OPT_SUBSTRUCT("", spirv_opts, spirv_conf, 0),

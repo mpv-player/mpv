@@ -321,7 +321,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     // Initialize the playback time. We need to read _some_ data to get the
     // correct stream-layer time (at least with libdvdnav).
-    stream_peek(demuxer->stream, 1);
+    stream_read_peek(demuxer->stream, &(char){0}, 1);
     reset_pts(demuxer);
 
     p->slave = demux_open_url("-", &params, demuxer->cancel, demuxer->global);

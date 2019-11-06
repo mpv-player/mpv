@@ -307,6 +307,7 @@ typedef struct MPOpts {
 
     struct demux_opts *demux_opts;
     struct demux_cache_opts *demux_cache_opts;
+    struct stream_opts *stream_opts;
 
     struct vd_lavc_params *vd_lavc_params;
     struct ad_lavc_params *ad_lavc_params;
@@ -360,5 +361,6 @@ extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
+extern const struct m_sub_options stream_conf;
 
 #endif

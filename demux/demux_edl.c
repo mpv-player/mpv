@@ -459,7 +459,9 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
         return 0;
     }
     if (check >= DEMUX_CHECK_UNSAFE) {
-        if (!bstr_equals0(stream_peek(s, strlen(HEADER)), HEADER))
+        char header[sizeof(HEADER) - 1];
+        int len = stream_read_peek(s, header, sizeof(header));
+        if (len != strlen(HEADER) || memcmp(header, HEADER, len) != 0)
             return -1;
     }
     p->data = stream_read_complete(s, demuxer, 1000000);

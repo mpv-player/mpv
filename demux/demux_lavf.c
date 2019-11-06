@@ -458,11 +458,10 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         } else {
             int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
                                 PROBE_BUF_SIZE);
-            bstr buf = stream_peek(s, nsize);
-            if (buf.len <= avpd.buf_size)
+            nsize = stream_read_peek(s, avpd.buf, nsize);
+            if (nsize <= avpd.buf_size)
                 final_probe = true;
-            memcpy(avpd.buf, buf.start, buf.len);
-            avpd.buf_size = buf.len;
+            avpd.buf_size = nsize;
 
             priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
         }

@@ -43,15 +43,17 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         probe_size *= 100;
     }
 
-    bstr probe = stream_peek(demuxer->stream, probe_size);
-    if (probe.len == 0)
+    void *probe = ta_alloc_size(NULL, probe_size);
+    if (!probe)
         return -1;
+    int probe_got = stream_read_peek(demuxer->stream, probe, probe_size);
     struct stream *probe_stream =
-        stream_memory_open(demuxer->global, probe.start, probe.len);
+        stream_memory_open(demuxer->global, probe, probe_got);
     struct mp_archive *mpa = mp_archive_new(mp_null_log, probe_stream, flags);
     bool ok = !!mpa;
     free_stream(probe_stream);
     mp_archive_free(mpa);
+    ta_free(probe);
     if (!ok)
         return -1;
 

@@ -215,7 +215,7 @@ main_dependencies = [
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
                 'atomic_fetch_add(&test, 1)'))
     }, {
-        # C11; technically we still support C99
+        # C11; technically we require C11, but aligned_alloc() is not in MinGW
         'name': 'aligned_alloc',
         'desc': 'C11 aligned_alloc()',
         'func': check_statement('stdlib.h', 'aligned_alloc(1, 1)'),
