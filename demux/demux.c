@@ -3214,6 +3214,9 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
 
+    if (stream)
+        stream_seek(stream, 0);
+
     in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
     if (ret >= 0) {
@@ -3323,8 +3326,6 @@ static struct demuxer *demux_open(struct stream *stream,
         for (int n = 0; demuxer_list[n]; n++) {
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
-                if (stream->seekable && (!params || !params->timeline))
-                    stream_seek(stream, 0);
                 demuxer = open_given_type(global, log, desc, stream, &sinfo,
                                           params, level);
                 if (demuxer) {
