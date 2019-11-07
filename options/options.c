@@ -347,6 +347,10 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("version", print_version),
     OPT_PRINT("V", print_version),
 
+#if HAVE_TESTS
+    OPT_STRING("unittest", test_mode, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
+#endif
+
     OPT_CHOICE("player-operation-mode", operation_mode,
                M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
                ({"cplayer", 0}, {"pseudo-gui", 1})),

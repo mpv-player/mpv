@@ -56,6 +56,7 @@
 #include "demux/demux.h"
 #include "misc/thread_tools.h"
 #include "sub/osd.h"
+#include "test/index.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -426,6 +427,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
+
+#if HAVE_TESTS
+    if (opts->test_mode && opts->test_mode[0])
+        return run_tests(mpctx) ? 1 : -1;
+#endif
 
     MP_STATS(mpctx, "end init");
 

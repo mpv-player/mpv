@@ -123,6 +123,7 @@ typedef struct MPOpts {
     int msg_time;
     char *log_file;
 
+    char *test_mode;
     int operation_mode;
 
     char **reset_options;

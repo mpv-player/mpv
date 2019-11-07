@@ -1,7 +1,7 @@
-#include "test_helpers.h"
-
 #include "common/common.h"
+#include "index.h"
 #include "misc/linked_list.h"
+#include "test_helpers.h"
 
 struct list_item {
     int v;
@@ -56,7 +56,7 @@ static bool do_check_list(struct the_list *lst, int *c, int num_c)
     return true;
 }
 
-static void test_linked_list(void **state)
+static void run(void)
 {
     struct the_list lst = {0};
     struct list_item e1 = {1};
@@ -159,10 +159,7 @@ static void test_linked_list(void **state)
     check_list(3, 4, 5, 2, 1, 6);
 }
 
-int main(void) {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_linked_list),
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
-}
-
+const struct unittest test_linked_list = {
+    .name = "linked_list",
+    .run_simple = run,
+};

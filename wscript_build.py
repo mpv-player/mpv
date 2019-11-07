@@ -394,6 +394,14 @@ def build(ctx):
         ( "sub/sd_ass.c",                        "libass" ),
         ( "sub/sd_lavc.c" ),
 
+        ## Tests
+        ( "test/chmap.c",                        "tests" ),
+        ( "test/gl_video.c",                     "tests" ),
+        ( "test/index.c",                        "tests" ),
+        ( "test/json.c",                         "tests" ),
+        ( "test/linked_list.c",                  "tests" ),
+        ( "test/test_helpers.c",                 "tests" ),
+
         ## Video
         ( "video/csputils.c" ),
         ( "video/d3d.c",                         "d3d-hwaccel" ),
@@ -581,7 +589,7 @@ def build(ctx):
                 ctx.path.find_node('osdep/mpv.rc'),
                 version)
 
-    if ctx.dependency_satisfied('cplayer') or ctx.dependency_satisfied('test'):
+    if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "objects",
             source       = ctx.filtered_sources(sources),
@@ -627,17 +635,6 @@ def build(ctx):
             wrapflags = ['-municode', '-mconsole']
             wrapctx.env.CFLAGS = ctx.env.CFLAGS + wrapflags
             wrapctx.env.LAST_LINKFLAGS = ctx.env.LAST_LINKFLAGS + wrapflags
-
-    if ctx.dependency_satisfied('test'):
-        for test in ctx.path.ant_glob("test/*.c"):
-            ctx(
-                target       = os.path.splitext(test.srcpath())[0],
-                source       = test.srcpath(),
-                use          = ctx.dependencies_use() + ['objects'],
-                includes     = _all_includes(ctx),
-                features     = "c cprogram",
-                install_path = None,
-            )
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')
     build_static = ctx.dependency_satisfied('libmpv-static')
