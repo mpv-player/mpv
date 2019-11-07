@@ -5413,11 +5413,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
         X11/EGL
     android
         Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
-    vdpauglx
-        Use vdpau presentation with GLX as backing. Experimental use only.
-        Using this will have no advantage (other than additional bugs or
-        performance problems), and is for doing experiments only. Will not
-        be used automatically.
 
 ``--gpu-api=<type>``
     Controls which type of graphics APIs will be accepted:
