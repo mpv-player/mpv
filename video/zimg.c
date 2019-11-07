@@ -576,7 +576,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     for (int i = 0; i < MP_ARRAY_SIZE(regular_repackers); i++) {
         const struct regular_repacker *pa = &regular_repackers[i];
 
-        // The following may assumes little endian (because some repack backends
+        // The following may assume little endian (because some repack backends
         // use word access, while the metadata here uses byte access).
 
         int prepad = p->components[0] ? 0 : 8;

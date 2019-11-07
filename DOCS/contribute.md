@@ -41,7 +41,7 @@ Copyright of contributions
   behalf of your employer, and the employer owns the copyright, you must mention
   this. If the license of the code is not LGPLv2.1+, you must mention this.
 - These license statements are legally binding.
-- Don't use fake names (something that looks like an actual names, and may be
+- Don't use fake names (something that looks like an actual name, and may be
   someone else's name, but is not your legal name). Using a pseudonyms is
   allowed if it can be used to identify or contact you, even if whatever
   account you used to submit the patch dies.
