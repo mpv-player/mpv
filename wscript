@@ -40,11 +40,6 @@ build_options = [
         'deps': '!lgpl',
         'func': check_true,
     }, {
-        'name': 'libaf',
-        'desc': 'internal audio filter chain',
-        'deps': 'gpl',
-        'func': check_true,
-    }, {
         'name': '--cplayer',
         'desc': 'mpv CLI player',
         'default': 'enable',
@@ -394,7 +389,6 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--rubberband',
         'desc': 'librubberband support',
-        'deps': 'libaf',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
         'name': '--zimg',
