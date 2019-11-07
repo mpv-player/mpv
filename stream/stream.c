@@ -203,7 +203,7 @@ static const char *match_proto(const char *url, const char *proto)
 }
 
 // Read len bytes from the start position, and wrap around as needed. Limit the
-// a actually read data to the size of the buffer. Return amount of copied bytes.
+// actually read data to the size of the buffer. Return amount of copied bytes.
 //  len: max bytes to copy to dst
 //  pos: index into s->buffer[], e.g. s->buf_start is byte 0
 //  returns: bytes copied to dst (limited by len and available buffered data)

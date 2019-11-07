@@ -152,7 +152,7 @@ typedef struct stream {
     // This is a ring buffer. It is reset only on seeks (or when buffers are
     // dropped). Otherwise old contents always stay valid.
     // The valid buffer is from buf_start to buf_end; buf_end can be larger
-    // then the buffer size (requires wrap around). buf_cur is a value in the
+    // than the buffer size (requires wrap around). buf_cur is a value in the
     // range [buf_start, buf_end].
     // When reading more data from the stream, buf_start is advanced as old
     // data is overwritten with new data.
@@ -164,7 +164,7 @@ typedef struct stream {
     //                  ^ buf_start (4)  |          |
     //                                   |          ^ buf_end (12 % 8 => 4)
     //                                   ^ buf_cur (9 % 8 => 1)
-    //  Here, the entire 8 byte buffer is filled, i.e. buf_end - buf_start = 8.
+    // Here, the entire 8 byte buffer is filled, i.e. buf_end - buf_start = 8.
     // buffer_mask == 7, so (x & buffer_mask) == (x % buffer_size)
     unsigned int buf_start; // index of oldest byte in buffer (is <= buffer_mask)
     unsigned int buf_cur;   // current read pos (can be > buffer_mask)
@@ -174,7 +174,7 @@ typedef struct stream {
     uint8_t *buffer;
 } stream_t;
 
-// Non-inline version with stream_read_char().
+// Non-inline version of stream_read_char().
 int stream_read_char_fallback(stream_t *s);
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
