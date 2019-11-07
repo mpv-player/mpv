@@ -273,6 +273,7 @@ struct demux_internal {
     int64_t slave_unbuffered_read_bytes; // value repoted from demuxer impl.
     int64_t hack_unbuffered_read_bytes;  // for demux_get_bytes_read_hack()
     int64_t cache_unbuffered_read_bytes; // for demux_reader_state.bytes_per_second
+    int64_t byte_level_seeks;            // for demux_reader_state.byte_level_seeks
 };
 
 struct timed_metadata {
@@ -3978,14 +3979,19 @@ static void update_bytes_read(struct demux_internal *in)
     int64_t new = in->slave_unbuffered_read_bytes;
     in->slave_unbuffered_read_bytes = 0;
 
+    int64_t new_seeks = 0;
+
     struct stream *stream = demuxer->stream;
     if (stream) {
         new += stream->total_unbuffered_read_bytes;
         stream->total_unbuffered_read_bytes = 0;
+        new_seeks += stream->total_stream_seeks;
+        stream->total_stream_seeks = 0;
     }
 
     in->cache_unbuffered_read_bytes += new;
     in->hack_unbuffered_read_bytes += new;
+    in->byte_level_seeks += new_seeks;
 }
 
 // must be called not locked
@@ -4346,6 +4352,7 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
         .low_level_seeks = in->low_level_seeks,
         .ts_last = in->demux_ts,
         .bytes_per_second = in->bytes_per_second,
+        .byte_level_seeks = in->byte_level_seeks,
         .file_cache_bytes = in->cache ? demux_cache_get_size(in->cache) : -1,
     };
     bool any_packets = false;

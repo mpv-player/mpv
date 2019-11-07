@@ -144,6 +144,8 @@ typedef struct stream {
     // Read statistic for fill_buffer calls. All bytes read by fill_buffer() are
     // added to this. The user can reset this as needed.
     uint64_t total_unbuffered_read_bytes;
+    // Seek statistics. The user can reset this as needed.
+    uint64_t total_stream_seeks;
 
     // Buffer size requested by user; s->buffer may have a different size
     int requested_buffer_size;

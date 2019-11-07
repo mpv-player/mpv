@@ -47,6 +47,7 @@ struct demux_reader_state {
     int64_t file_cache_bytes;
     double seeking; // current low level seek target, or NOPTS
     int low_level_seeks; // number of started low level seeks
+    uint64_t byte_level_seeks; // number of byte stream level seeks
     double ts_last; // approx. timestamp of demuxer position
     uint64_t bytes_per_second; // low level statistics
     // Positions that can be seeked to without incurring the latency of a low

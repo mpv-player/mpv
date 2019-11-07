@@ -634,6 +634,8 @@ static bool stream_seek_unbuffered(stream_t *s, int64_t newpos)
         MP_VERBOSE(s, "stream level seek from %" PRId64 " to %" PRId64 "\n",
                    s->pos, newpos);
 
+        s->total_stream_seeks++;
+
         if (newpos > s->pos && !s->seekable) {
             MP_ERR(s, "Cannot seek forward in this stream\n");
             return false;

@@ -674,6 +674,7 @@ local function cache_stats()
     append(stats, fc, {prefix = "Disk cache:"})
 
     append(stats, info["debug-low-level-seeks"], {prefix = "Media seeks:"})
+    append(stats, info["debug-byte-level-seeks"], {prefix = "Stream seeks:"})
 
     append(stats, "", {prefix=o.nl .. o.nl .. "Ranges:", nl="", indent=""})
 
