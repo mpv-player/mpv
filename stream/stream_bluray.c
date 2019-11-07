@@ -283,9 +283,6 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, meta->di_name);
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_SIZE:
-        *(int64_t *)arg = bd_get_title_size(b->bd);
-        return STREAM_OK;
     default:
         break;
     }
