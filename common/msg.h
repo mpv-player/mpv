@@ -32,14 +32,15 @@ extern struct mp_log *const mp_null_log;
 
 // Verbosity levels.
 enum {
-    MSGL_FATAL,     // will exit/abort (note: msg.c doesn't exit or abort)
-    MSGL_ERR,       // continues
-    MSGL_WARN,      // only warning
-    MSGL_INFO,      // -quiet
-    MSGL_STATUS,    // exclusively for the playback status line
-    MSGL_V,         // -v
-    MSGL_DEBUG,     // -v -v
-    MSGL_TRACE,     // -v -v -v
+    MSGL_FATAL,     // only errors (difference to MSGL_ERR isn't too clear)
+    MSGL_ERR,       // only errors
+    MSGL_WARN,      // only warnings
+    MSGL_INFO,      // what you normally see on the terminal
+    MSGL_STATUS,    // exclusively for the playback status line (-quiet disables)
+    MSGL_V,         // -v | slightly more information than default
+    MSGL_DEBUG,     // -v -v | full debug information; this and numerically below
+                    // should not produce "per frame" output
+    MSGL_TRACE,     // -v -v -v | anything that might flood the terminal
     MSGL_STATS,     // dumping fine grained stats (--dump-stats)
 
     MSGL_MAX = MSGL_STATS,
