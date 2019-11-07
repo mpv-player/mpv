@@ -22,7 +22,7 @@ struct priv {
     bstr data;
 };
 
-static int fill_buffer(stream_t *s, char* buffer, int len)
+static int fill_buffer(stream_t *s, void *buffer, int len)
 {
     struct priv *p = s->priv;
     bstr data = p->data;

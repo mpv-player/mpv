@@ -75,7 +75,7 @@ static int seek(stream_t *s,int64_t newpos) {
   return 1;
 }
 
-static int fill_buffer(stream_t *s, char* buffer, int max_len){
+static int fill_buffer(stream_t *s, void *buffer, int max_len){
   struct priv *p = s->priv;
   pthread_mutex_lock(&smb_lock);
   int r = smbc_read(p->fd,buffer,max_len);
@@ -83,7 +83,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
   return (r <= 0) ? -1 : r;
 }
 
-static int write_buffer(stream_t *s, char* buffer, int len) {
+static int write_buffer(stream_t *s, void *buffer, int len) {
   struct priv *p = s->priv;
   int wr;
   pthread_mutex_lock(&smb_lock);

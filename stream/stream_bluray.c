@@ -161,7 +161,7 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
     }
 }
 
-static int bluray_stream_fill_buffer(stream_t *s, char *buf, int len)
+static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
 {
     struct bluray_priv_s *b = s->priv;
     BD_EVENT event;

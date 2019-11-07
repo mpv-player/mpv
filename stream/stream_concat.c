@@ -29,7 +29,7 @@ struct priv {
     int cur; // streams[cur] is the stream for current stream.pos
 };
 
-static int fill_buffer(struct stream *s, char* buffer, int len)
+static int fill_buffer(struct stream *s, void *buffer, int len)
 {
     struct priv *p = s->priv;
 

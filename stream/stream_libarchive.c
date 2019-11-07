@@ -385,7 +385,7 @@ static int reopen_archive(stream_t *s)
     return STREAM_ERROR;
 }
 
-static int archive_entry_fill_buffer(stream_t *s, char *buffer, int max_len)
+static int archive_entry_fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
     if (!p->mpa)

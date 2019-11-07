@@ -730,7 +730,7 @@ void dvb_free_state(dvb_state_t *state)
     free(state);
 }
 
-static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
+static int dvb_streaming_read(stream_t *stream, void *buffer, int size)
 {
     struct pollfd pfds[1];
     int pos = 0, tries, rk, fd;
@@ -742,7 +742,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
     tries = state->retry;
     fd = state->dvr_fd;
     while (pos < size) {
-        rk = read(fd, &buffer[pos], (size - pos));
+        rk = read(fd, (char *)buffer + pos, (size - pos));
         if (rk <= 0) {
             if (pos || tries == 0)
                 break;

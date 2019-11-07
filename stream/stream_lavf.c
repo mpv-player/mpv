@@ -77,7 +77,7 @@ static const char *const http_like[];
 static int open_f(stream_t *stream);
 static struct mp_tags *read_icy(stream_t *stream);
 
-static int fill_buffer(stream_t *s, char *buffer, int max_len)
+static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     AVIOContext *avio = s->priv;
 #if LIBAVFORMAT_VERSION_MICRO >= 100 && LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 81, 100)
@@ -88,7 +88,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     return (r <= 0) ? -1 : r;
 }
 
-static int write_buffer(stream_t *s, char *buffer, int len)
+static int write_buffer(stream_t *s, void *buffer, int len)
 {
     AVIOContext *avio = s->priv;
     avio_write(avio, buffer, len);

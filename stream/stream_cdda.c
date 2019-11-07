@@ -153,7 +153,7 @@ static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function)
 {
 }
 
-static int fill_buffer(stream_t *s, char *buffer, int max_len)
+static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     cdda_priv *p = (cdda_priv *)s->priv;
     int16_t *buf;

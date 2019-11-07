@@ -24,7 +24,7 @@ struct priv {
     struct mp_cancel *cancel;
 };
 
-static int fill_buffer(stream_t *s, char *buffer, int max_len)
+static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
     return (int)p->info.read_fn(p->info.cookie, buffer, (size_t)max_len);

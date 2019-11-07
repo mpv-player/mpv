@@ -257,7 +257,7 @@ static int mp_dvdnav_number_of_subs(stream_t *stream)
     return n;
 }
 
-static int fill_buffer(stream_t *s, char *buf, int max_len)
+static int fill_buffer(stream_t *s, void *buf, int max_len)
 {
     struct priv *priv = s->priv;
     dvdnav_t *dvdnav = priv->dvdnav;

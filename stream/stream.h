@@ -110,9 +110,9 @@ typedef struct stream {
     const struct stream_info_st *info;
 
     // Read
-    int (*fill_buffer)(struct stream *s, char *buffer, int max_len);
+    int (*fill_buffer)(struct stream *s, void *buffer, int max_len);
     // Write
-    int (*write_buffer)(struct stream *s, char *buffer, int len);
+    int (*write_buffer)(struct stream *s, void *buffer, int len);
     // Seek
     int (*seek)(struct stream *s, int64_t pos);
     // Control
@@ -177,7 +177,7 @@ typedef struct stream {
 // Non-inline version of stream_read_char().
 int stream_read_char_fallback(stream_t *s);
 
-int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
+int stream_write_buffer(stream_t *s, void *buf, int len);
 
 inline static int stream_read_char(stream_t *s)
 {
@@ -195,9 +195,9 @@ inline static int64_t stream_tell(stream_t *s)
 
 bool stream_skip(stream_t *s, int64_t len);
 bool stream_seek(stream_t *s, int64_t pos);
-int stream_read(stream_t *s, char *mem, int total);
-int stream_read_partial(stream_t *s, char *buf, int buf_size);
-int stream_read_peek(stream_t *s, void* buf, int buf_size);
+int stream_read(stream_t *s, void *mem, int total);
+int stream_read_partial(stream_t *s, void *buf, int buf_size);
+int stream_read_peek(stream_t *s, void *buf, int buf_size);
 void stream_drop_buffers(stream_t *s);
 int64_t stream_get_size(stream_t *s);
 

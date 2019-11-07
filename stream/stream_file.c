@@ -80,7 +80,7 @@ static int64_t get_size(stream_t *s)
     return size == (off_t)-1 ? -1 : size;
 }
 
-static int fill_buffer(stream_t *s, char *buffer, int max_len)
+static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
 
@@ -120,7 +120,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     return 0;
 }
 
-static int write_buffer(stream_t *s, char *buffer, int len)
+static int write_buffer(stream_t *s, void *buffer, int len)
 {
     struct priv *p = s->priv;
     return write(p->fd, buffer, len);

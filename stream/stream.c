@@ -538,7 +538,7 @@ static bool stream_read_more(struct stream *s, int forward)
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
 // Return 0 on EOF, error, or if buf_size was 0.
-int stream_read_partial(stream_t *s, char *buf, int buf_size)
+int stream_read_partial(stream_t *s, void *buf, int buf_size)
 {
     assert(s->buf_cur <= s->buf_end);
     assert(buf_size >= 0);
@@ -562,14 +562,14 @@ int stream_read_char_fallback(stream_t *s)
     return stream_read_partial(s, &c, 1) ? c : -256;
 }
 
-int stream_read(stream_t *s, char *mem, int total)
+int stream_read(stream_t *s, void *mem, int total)
 {
     int len = total;
     while (len > 0) {
         int read = stream_read_partial(s, mem, len);
         if (read <= 0)
             break; // EOF
-        mem += read;
+        mem = (char *)mem + read;
         len -= read;
     }
     total -= len;
@@ -578,13 +578,13 @@ int stream_read(stream_t *s, char *mem, int total)
 
 // Like stream_read(), but do not advance the current position. This may resize
 // the buffer to satisfy the read request.
-int stream_read_peek(stream_t *s, void* buf, int buf_size)
+int stream_read_peek(stream_t *s, void *buf, int buf_size)
 {
     while (stream_read_more(s, buf_size)) {}
     return ring_copy(s, buf, buf_size, s->buf_cur);
 }
 
-int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
+int stream_write_buffer(stream_t *s, void *buf, int len)
 {
     if (!s->write_buffer)
         return -1;
@@ -594,7 +594,7 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
         if (w <= 0)
             return -1;
         s->pos += w;
-        buf += w;
+        buf = (char *)buf + w;
         len -= w;
     }
     return orig_len;
