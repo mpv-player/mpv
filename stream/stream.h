@@ -120,7 +120,6 @@ typedef struct stream {
     // Close
     void (*close)(struct stream *s);
 
-    int read_chunk; // maximum amount of data to read at once to limit latency
     int64_t pos;
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE

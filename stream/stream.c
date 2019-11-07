@@ -353,9 +353,6 @@ static int stream_create_instance(const stream_info_t *sinfo,
         return r;
     }
 
-    if (!s->read_chunk)
-        s->read_chunk = 4 * STREAM_BUFFER_SIZE;
-
     if (!stream_resize_buffer(s, 0)) {
         free_stream(s);
         return STREAM_ERROR;

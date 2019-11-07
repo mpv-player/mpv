@@ -141,7 +141,6 @@ static int open_f (stream_t *stream)
   stream->write_buffer = write_buffer;
   stream->close = close_f;
   stream->get_size = get_size;
-  stream->read_chunk = 128 * 1024;
   stream->streaming = true;
 
   return STREAM_OK;

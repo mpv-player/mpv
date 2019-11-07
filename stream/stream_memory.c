@@ -50,7 +50,6 @@ static int open2(stream_t *stream, struct stream_open_args *args)
     stream->seek = seek;
     stream->seekable = true;
     stream->get_size = get_size;
-    stream->read_chunk = 1024 * 1024;
 
     struct priv *p = talloc_zero(stream, struct priv);
     stream->priv = p;

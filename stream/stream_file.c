@@ -329,7 +329,6 @@ static int open_f(stream_t *stream)
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->get_size = get_size;
-    stream->read_chunk = 64 * 1024;
     stream->close = s_close;
 
     if (check_stream_network(p->fd))

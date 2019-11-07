@@ -92,7 +92,6 @@ static int open_cb(stream_t *stream)
     stream->fast_skip = true;
     stream->fill_buffer = fill_buffer;
     stream->get_size = get_size;
-    stream->read_chunk = 64 * 1024;
     stream->close = s_close;
 
     if (p->info.cancel_fn && stream->cancel) {

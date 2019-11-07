@@ -107,8 +107,6 @@ static int open2(struct stream *stream, struct stream_open_args *args)
     for (int n = 0; n < list->num_streams; n++) {
         struct stream *sub = list->streams[n];
 
-        stream->read_chunk = MPMAX(stream->read_chunk, sub->read_chunk);
-
         int64_t size = stream_get_size(sub);
         if (n != list->num_streams - 1 && size < 0) {
             MP_WARN(stream, "Sub stream %d has unknown size.\n", n);
