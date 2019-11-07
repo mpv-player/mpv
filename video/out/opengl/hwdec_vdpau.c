@@ -18,8 +18,6 @@
 #include <stddef.h>
 #include <assert.h>
 
-#include <GL/glx.h>
-
 #include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/vdpau.h"
@@ -49,7 +47,7 @@ struct priv {
 
 static int init(struct ra_hwdec *hw)
 {
-    Display *x11disp = glXGetCurrentDisplay();
+    Display *x11disp = ra_get_native_resource(hw->ra, "x11");
     if (!x11disp || !ra_is_gl(hw->ra))
         return -1;
     GL *gl = ra_gl_get(hw->ra);
@@ -313,7 +311,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 }
 
 const struct ra_hwdec_driver ra_hwdec_vdpau = {
-    .name = "vdpau-glx",
+    .name = "vdpau-gl",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_VDPAU, 0},
     .init = init,
