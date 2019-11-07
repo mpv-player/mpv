@@ -81,6 +81,13 @@ build_options = [
         'default': 'disable',
         'func': check_true
     }, {
+        # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
+        # Building it can be disabled only by defining NDEBUG through CFLAGS.
+        'name': '--ta-leak-report',
+        'desc': 'enable ta leak report by default (development only)',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--manpage-build',
         'desc': 'manpage generation',
         'func': check_ctx_vars('RST2MAN')
