@@ -185,6 +185,17 @@ mpv uses C99 with K&R formatting, with some exceptions.
 - Remove any trailing whitespace.
 - Do not make stray whitespaces changes.
 
+Header #include statement order
+-------------------------------
+
+The order of ``#include`` statements in the source code is not very consistent.
+New code should follow the following conventions:
+
+- Put standard includes (``#include <stdlib.h>`` etc.) on the top,
+- then after a blank line, add library includes (``#include <zlib.h`` etc.)
+- then after a blank line, add internal includes (``#include "player/core.h"``)
+- sort them alphabetically within these sections
+
 General coding
 --------------
 
