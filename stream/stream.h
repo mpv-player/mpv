@@ -188,11 +188,6 @@ inline static int stream_read_char(stream_t *s)
 
 int stream_skip_bom(struct stream *s);
 
-inline static int stream_eof(stream_t *s)
-{
-    return s->eof;
-}
-
 inline static int64_t stream_tell(stream_t *s)
 {
     return s->pos + s->buf_cur - s->buf_end;

@@ -2137,7 +2137,7 @@ static int demux_mkv_read_block_lacing(struct block_info *block, int type,
                 uint8_t t;
                 do {
                     t = stream_read_char(s);
-                    if (stream_eof(s) || stream_tell(s) >= endpos)
+                    if (s->eof || stream_tell(s) >= endpos)
                         goto error;
                     lace_size[i] += t;
                 } while (t == 0xFF);
