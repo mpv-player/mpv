@@ -470,14 +470,14 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 // Ask for having at most "forward" bytes ready to read in the buffer.
 // To read everything, you may have to call this in a loop.
 //  forward: desired amount of bytes in buffer after s->cur_pos
-//  returns: progress (false on EOF or memory allocation failure)
+//  returns: progress (false on EOF or on OOM or if enough data was available)
 static bool stream_read_more(struct stream *s, int forward)
 {
     assert(forward >= 0);
 
     int forward_avail = s->buf_end - s->buf_cur;
     if (forward_avail >= forward)
-        return true;
+        return false;
 
     // Avoid that many small reads will lead to many low-level read calls.
     forward = MPMAX(forward, s->requested_buffer_size / 2);
@@ -580,10 +580,7 @@ int stream_read(stream_t *s, char *mem, int total)
 // the buffer to satisfy the read request.
 int stream_read_peek(stream_t *s, void* buf, int buf_size)
 {
-    while (s->buf_end - s->buf_cur < buf_size) {
-        if (!stream_read_more(s, buf_size))
-            break;
-    }
+    while (stream_read_more(s, buf_size)) {}
     return ring_copy(s, buf, buf_size, s->buf_cur);
 }
 
