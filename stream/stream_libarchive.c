@@ -468,17 +468,10 @@ static void archive_entry_close(stream_t *s)
     free_stream(p->src);
 }
 
-static int archive_entry_control(stream_t *s, int cmd, void *arg)
+static int64_t archive_entry_get_size(stream_t *s)
 {
     struct priv *p = s->priv;
-    switch (cmd) {
-    case STREAM_CTRL_GET_SIZE:
-        if (p->entry_size < 0)
-            break;
-        *(int64_t *)arg = p->entry_size;
-        return STREAM_OK;
-    }
-    return STREAM_UNSUPPORTED;
+    return p->entry_size;
 }
 
 static int archive_entry_open(stream_t *stream)
@@ -514,7 +507,7 @@ static int archive_entry_open(stream_t *stream)
         stream->seekable = true;
     }
     stream->close = archive_entry_close;
-    stream->control = archive_entry_control;
+    stream->get_size = archive_entry_get_size;
     stream->streaming = true;
 
     return STREAM_OK;

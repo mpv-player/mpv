@@ -132,21 +132,6 @@ static int seek(stream_t *s, int64_t newpos)
     return lseek(p->fd, newpos, SEEK_SET) != (off_t)-1;
 }
 
-static int control(stream_t *s, int cmd, void *arg)
-{
-    switch (cmd) {
-    case STREAM_CTRL_GET_SIZE: {
-        int64_t size = get_size(s);
-        if (size >= 0) {
-            *(int64_t *)arg = size;
-            return 1;
-        }
-        break;
-    }
-    }
-    return STREAM_UNSUPPORTED;
-}
-
 static void s_close(stream_t *s)
 {
     struct priv *p = s->priv;
@@ -343,7 +328,7 @@ static int open_f(stream_t *stream)
     stream->fast_skip = true;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
-    stream->control = control;
+    stream->get_size = get_size;
     stream->read_chunk = 64 * 1024;
     stream->close = s_close;
 

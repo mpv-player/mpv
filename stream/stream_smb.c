@@ -46,22 +46,13 @@ static void smb_auth_fn(const char *server, const char *share,
   workgroup[wgmaxlen - 1] = '\0';
 }
 
-static int control(stream_t *s, int cmd, void *arg) {
+static int64_t get_size(stream_t *s) {
   struct priv *p = s->priv;
-  switch(cmd) {
-    case STREAM_CTRL_GET_SIZE: {
-      pthread_mutex_lock(&smb_lock);
-      off_t size = smbc_lseek(p->fd,0,SEEK_END);
-      smbc_lseek(p->fd,s->pos,SEEK_SET);
-      pthread_mutex_unlock(&smb_lock);
-      if(size != (off_t)-1) {
-        *(int64_t *)arg = size;
-        return 1;
-      }
-    }
-    break;
-  }
-  return STREAM_UNSUPPORTED;
+  pthread_mutex_lock(&smb_lock);
+  off_t size = smbc_lseek(p->fd,0,SEEK_END);
+  smbc_lseek(p->fd,s->pos,SEEK_SET);
+  pthread_mutex_unlock(&smb_lock);
+  return size;
 }
 
 static int seek(stream_t *s,int64_t newpos) {
@@ -149,7 +140,7 @@ static int open_f (stream_t *stream)
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
   stream->close = close_f;
-  stream->control = control;
+  stream->get_size = get_size;
   stream->read_chunk = 128 * 1024;
   stream->streaming = true;
 

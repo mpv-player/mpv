@@ -48,8 +48,6 @@
 #define STREAM_OK    1
 
 enum stream_ctrl {
-    STREAM_CTRL_GET_SIZE = 1,
-
     // Certain network protocols
     STREAM_CTRL_AVSEEK,
     STREAM_CTRL_HAS_AVSEEK,
@@ -115,6 +113,8 @@ typedef struct stream {
     int (*write_buffer)(struct stream *s, void *buffer, int len);
     // Seek
     int (*seek)(struct stream *s, int64_t pos);
+    // Total stream size in bytes (negative if unavailable)
+    int64_t (*get_size)(struct stream *s);
     // Control
     int (*control)(struct stream *s, int cmd, void *arg);
     // Close

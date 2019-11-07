@@ -38,14 +38,10 @@ static int seek(stream_t *s, int64_t newpos)
     return 1;
 }
 
-static int control(stream_t *s, int cmd, void *arg)
+static int64_t get_size(stream_t *s)
 {
     struct priv *p = s->priv;
-    if (cmd == STREAM_CTRL_GET_SIZE) {
-        *(int64_t *)arg = p->data.len;
-        return 1;
-    }
-    return STREAM_UNSUPPORTED;
+    return p->data.len;
 }
 
 static int open2(stream_t *stream, struct stream_open_args *args)
@@ -53,7 +49,7 @@ static int open2(stream_t *stream, struct stream_open_args *args)
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
     stream->seekable = true;
-    stream->control = control;
+    stream->get_size = get_size;
     stream->read_chunk = 1024 * 1024;
 
     struct priv *p = talloc_zero(stream, struct priv);

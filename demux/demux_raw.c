@@ -137,8 +137,8 @@ static int generic_open(struct demuxer *demuxer)
     struct stream *s = demuxer->stream;
     struct priv *p = demuxer->priv;
 
-    int64_t end = 0;
-    if (stream_control(s, STREAM_CTRL_GET_SIZE, &end) == STREAM_OK)
+    int64_t end = stream_get_size(s);
+    if (end >= 0)
         demuxer->duration = (end / p->frame_size) / p->frame_rate;
 
     return 0;
@@ -299,8 +299,7 @@ static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
     stream_t *s = demuxer->stream;
-    int64_t end = 0;
-    stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+    int64_t end = stream_get_size(s);
     int64_t frame_nr = seek_pts * p->frame_rate;
     frame_nr = frame_nr - (frame_nr % p->read_frames);
     int64_t pos = frame_nr * p->frame_size;
@@ -308,7 +307,7 @@ static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
         pos = end * seek_pts;
     if (pos < 0)
         pos = 0;
-    if (end && pos > end)
+    if (end > 0 && pos > end)
         pos = end;
     stream_seek(s, (pos / p->frame_size) * p->frame_size);
 }

@@ -107,6 +107,12 @@ static int seek(stream_t *s, int64_t newpos)
     return 1;
 }
 
+static int64_t get_size(stream_t *s)
+{
+    AVIOContext *avio = s->priv;
+    return avio_size(avio);
+}
+
 static void close_f(stream_t *stream)
 {
     AVIOContext *avio = stream->priv;
@@ -122,15 +128,7 @@ static void close_f(stream_t *stream)
 static int control(stream_t *s, int cmd, void *arg)
 {
     AVIOContext *avio = s->priv;
-    int64_t size;
     switch(cmd) {
-    case STREAM_CTRL_GET_SIZE:
-        size = avio_size(avio);
-        if (size >= 0) {
-            *(int64_t *)arg = size;
-            return 1;
-        }
-        break;
     case STREAM_CTRL_AVSEEK: {
         struct stream_avseek *c = arg;
         int64_t r = avio_seek_time(avio, c->stream_index, c->timestamp, c->flags);
@@ -333,6 +331,7 @@ static int open_f(stream_t *stream)
     stream->seek = stream->seekable ? seek : NULL;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
+    stream->get_size = get_size;
     stream->control = control;
     stream->close = close_f;
     // enable cache (should be avoided for files, but no way to detect this)

@@ -710,10 +710,7 @@ int stream_control(stream_t *s, int cmd, void *arg)
 // Return the current size of the stream, or a negative value if unknown.
 int64_t stream_get_size(stream_t *s)
 {
-    int64_t size = -1;
-    if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) != STREAM_OK)
-        size = -1;
-    return size;
+    return s->get_size ? s->get_size(s) : -1;
 }
 
 void free_stream(stream_t *s)
