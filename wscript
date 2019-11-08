@@ -540,11 +540,6 @@ audio_output_features = [
         'deps': 'gpl',
         'func': check_pkg_config('jack'),
     }, {
-        'name': '--openal',
-        'desc': 'OpenAL audio output',
-        'func': check_pkg_config('openal', '>= 1.13'),
-        'default': 'disable'
-    }, {
         'name': '--opensles',
         'desc': 'OpenSL ES audio output',
         'func': check_statement('SLES/OpenSLES.h', 'slCreateEngine', lib="OpenSLES"),
