@@ -95,7 +95,7 @@ enum AVPixelFormat imgfmt2pixfmt(int fmt)
         enum AVPixelFormat pixfmt = fmt - IMGFMT_AVPIXFMT_START;
         // Avoid duplicate format - each format must be unique.
         int mpfmt = pixfmt2imgfmt(pixfmt);
-        if (mpfmt == fmt)
+        if (mpfmt == fmt && av_pix_fmt_desc_get(pixfmt))
             return pixfmt;
         return AV_PIX_FMT_NONE;
     }
@@ -118,7 +118,7 @@ int pixfmt2imgfmt(enum AVPixelFormat pix_fmt)
     }
 
     int generic = IMGFMT_AVPIXFMT_START + pix_fmt;
-    if (generic < IMGFMT_AVPIXFMT_END)
+    if (generic < IMGFMT_AVPIXFMT_END && av_pix_fmt_desc_get(pix_fmt))
         return generic;
 
     return 0;

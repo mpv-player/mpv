@@ -13,6 +13,12 @@ bool run_tests(struct MPContext *mpctx);
 struct test_ctx {
     struct mpv_global *global;
     struct mp_log *log;
+
+    // Path for ref files, without trailing "/".
+    const char *ref_path;
+
+    // Path for result files, without trailing "/".
+    const char *out_path;
 };
 
 struct unittest {
@@ -32,6 +38,7 @@ struct unittest {
 
 extern const struct unittest test_chmap;
 extern const struct unittest test_gl_video;
+extern const struct unittest test_img_format;
 extern const struct unittest test_json;
 extern const struct unittest test_linked_list;
 
@@ -44,8 +51,21 @@ extern const struct unittest test_linked_list;
 #define assert_float_equal(a, b, tolerance) \
     assert_float_equal_impl(__FILE__, __LINE__, (a), (b), (tolerance))
 
+// Require that the files "ref" and "new" are the same. The paths can be
+// relative to ref_path and out_path respectively. If they're not the same,
+// the output of "diff" is shown, the err message (if not NULL), and the test
+// fails.
+#define assert_text_files_equal(ctx, ref, new, err) \
+    assert_text_files_equal_impl(__FILE__, __LINE__, (ctx), (ref), (new), (err))
+
 void assert_int_equal_impl(const char *file, int line, int64_t a, int64_t b);
 void assert_string_equal_impl(const char *file, int line,
                               const char *a, const char *b);
 void assert_float_equal_impl(const char *file, int line,
-                              double a, double b, double tolerance);
+                             double a, double b, double tolerance);
+void assert_text_files_equal_impl(const char *file, int line,
+                                  struct test_ctx *ctx, const char *ref,
+                                  const char *new, const char *err);
+
+// Open a new file in the out_path. Always succeeds.
+FILE *test_open_out(struct test_ctx *ctx, const char *name);

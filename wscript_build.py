@@ -397,6 +397,7 @@ def build(ctx):
         ## Tests
         ( "test/chmap.c",                        "tests" ),
         ( "test/gl_video.c",                     "tests" ),
+        ( "test/img_format.c",                   "tests" ),
         ( "test/json.c",                         "tests" ),
         ( "test/linked_list.c",                  "tests" ),
         ( "test/tests.c",                        "tests" ),
