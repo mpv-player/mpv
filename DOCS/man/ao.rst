@@ -109,23 +109,6 @@ Available audio output drivers are:
     Native Mac OS X audio output driver using direct device access and
     exclusive mode (bypasses the sound server).
 
-``openal``
-    OpenAL audio output driver
-
-    ``--openal-num-buffers=<2-128>``
-        Specify the number of audio buffers to use. Lower values are better for
-        lower CPU usage. Default: 4.
-
-    ``--openal-num-samples=<256-32768>``
-        Specify the number of complete samples to use for each buffer. Higher
-        values are better for lower CPU usage. Default: 8192.
-
-    ``--openal-direct-channels=<yes|no>``
-        Enable OpenAL Soft's direct channel extension when available to avoid
-        tinting the sound with ambisonics or HRTF.
-        Channels are dropped when when they are not available as downmixing
-        will be disabled. Default: no.
-
 ``pulse``
     PulseAudio audio output driver
 
