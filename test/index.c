@@ -51,3 +51,7 @@ bool run_tests(struct MPContext *mpctx)
 
     return num_run > 0; // still error if none
 }
+
+#ifdef NDEBUG
+static_assert(false, "don't define NDEBUG for tests");
+#endif
