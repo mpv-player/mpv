@@ -50,7 +50,7 @@ bool run_tests(struct MPContext *mpctx)
 
         bool run = false;
         run |= strcmp(sel, "all-simple") == 0 && !t->is_complex;
-        run |= strcmp(sel, t->name);
+        run |= strcmp(sel, t->name) == 0;
 
         if (run) {
             if (t->run)
