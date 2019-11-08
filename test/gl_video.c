@@ -1,5 +1,4 @@
-#include "index.h"
-#include "test_helpers.h"
+#include "tests.h"
 #include "video/out/gpu/video.h"
 
 static void run(struct test_ctx *ctx)

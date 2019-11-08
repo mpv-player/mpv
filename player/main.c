@@ -56,7 +56,7 @@
 #include "demux/demux.h"
 #include "misc/thread_tools.h"
 #include "sub/osd.h"
-#include "test/index.h"
+#include "test/tests.h"
 #include "video/out/vo.h"
 
 #include "core.h"

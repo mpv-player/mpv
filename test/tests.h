@@ -1,6 +1,10 @@
 #pragma once
 
-#include <stdbool.h>
+#include <float.h>
+#include <inttypes.h>
+#include <math.h>
+
+#include "common/common.h"
 
 struct MPContext;
 
@@ -30,3 +34,18 @@ extern const struct unittest test_chmap;
 extern const struct unittest test_gl_video;
 extern const struct unittest test_json;
 extern const struct unittest test_linked_list;
+
+#define assert_true(x) assert(x)
+#define assert_false(x) assert(!(x))
+#define assert_int_equal(a, b) \
+    assert_int_equal_impl(__FILE__, __LINE__, (a), (b))
+#define assert_string_equal(a, b) \
+    assert_string_equal_impl(__FILE__, __LINE__, (a), (b))
+#define assert_float_equal(a, b, tolerance) \
+    assert_float_equal_impl(__FILE__, __LINE__, (a), (b), (tolerance))
+
+void assert_int_equal_impl(const char *file, int line, int64_t a, int64_t b);
+void assert_string_equal_impl(const char *file, int line,
+                              const char *a, const char *b);
+void assert_float_equal_impl(const char *file, int line,
+                              double a, double b, double tolerance);

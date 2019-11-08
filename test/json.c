@@ -1,8 +1,7 @@
 #include "common/common.h"
-#include "index.h"
 #include "misc/json.h"
 #include "misc/node.h"
-#include "test_helpers.h"
+#include "tests.h"
 
 struct entry {
     const char *src;

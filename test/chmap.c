@@ -1,7 +1,6 @@
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"
-#include "index.h"
-#include "test_helpers.h"
+#include "tests.h"
 
 #define LAYOUTS(...) (char*[]){__VA_ARGS__, NULL}
 

@@ -1,7 +1,6 @@
 #include "common/common.h"
-#include "index.h"
 #include "misc/linked_list.h"
-#include "test_helpers.h"
+#include "tests.h"
 
 struct list_item {
     int v;
