@@ -179,9 +179,6 @@ enum mp_imgfmt {
     IMGFMT_0BGR,
     IMGFMT_RGB0,
 
-    IMGFMT_RGB0_START = IMGFMT_0RGB,
-    IMGFMT_RGB0_END = IMGFMT_RGB0,
-
     // Like IMGFMT_RGBA, but 2 bytes per component.
     IMGFMT_RGBA64,
 

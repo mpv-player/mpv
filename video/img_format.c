@@ -212,9 +212,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
         desc.flags |= MP_IMGFLAG_ALPHA;
 
-    if (mpfmt >= IMGFMT_RGB0_START && mpfmt <= IMGFMT_RGB0_END)
-        desc.flags &= ~MP_IMGFLAG_ALPHA;
-
     if (!(pd->flags & AV_PIX_FMT_FLAG_HWACCEL) &&
         !(pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
     {
