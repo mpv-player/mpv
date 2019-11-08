@@ -56,7 +56,7 @@ static bool do_check_list(struct the_list *lst, int *c, int num_c)
     return true;
 }
 
-static void run(void)
+static void run(struct test_ctx *ctx)
 {
     struct the_list lst = {0};
     struct list_item e1 = {1};
@@ -161,5 +161,5 @@ static void run(void)
 
 const struct unittest test_linked_list = {
     .name = "linked_list",
-    .run_simple = run,
+    .run = run,
 };

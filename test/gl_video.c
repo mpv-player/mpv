@@ -2,7 +2,7 @@
 #include "test_helpers.h"
 #include "video/out/gpu/video.h"
 
-static void run(void)
+static void run(struct test_ctx *ctx)
 {
     float x;
 
@@ -26,5 +26,5 @@ static void run(void)
 
 const struct unittest test_gl_video = {
     .name = "gl_video",
-    .run_simple = run,
+    .run = run,
 };

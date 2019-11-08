@@ -67,7 +67,7 @@ static const struct entry entries[] = {
 
 #define MAX_DEPTH 10
 
-static void run(void)
+static void run(struct test_ctx *ctx)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(entries); n++) {
         const struct entry *e = &entries[n];
@@ -91,5 +91,5 @@ static void run(void)
 
 const struct unittest test_json = {
     .name = "json",
-    .run_simple = run,
+    .run = run,
 };

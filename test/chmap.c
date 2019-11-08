@@ -30,7 +30,7 @@ static void test_sel(const char *input, const char *expected_selection,
                         mp_chmap_to_str(&expected_map));
 }
 
-static void run(void)
+static void run(struct test_ctx *ctx)
 {
     struct mp_chmap a;
     struct mp_chmap b;
@@ -89,5 +89,5 @@ static void run(void)
 
 const struct unittest test_chmap = {
     .name = "chmap",
-    .run_simple = run,
+    .run = run,
 };

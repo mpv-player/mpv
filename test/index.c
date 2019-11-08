@@ -22,6 +22,11 @@ bool run_tests(struct MPContext *mpctx)
         return true;
     }
 
+    struct test_ctx ctx = {
+        .global = mpctx->global,
+        .log = mpctx->log,
+    };
+
     int num_run = 0;
 
     for (int n = 0; unittests[n]; n++) {
@@ -29,18 +34,15 @@ bool run_tests(struct MPContext *mpctx)
 
         // Exactly 1 entrypoint please.
         assert(MP_IS_POWER_OF_2(
-            (t->run_simple ? (1 << 0) : 0) |
             (t->run        ? (1 << 1) : 0)));
 
         bool run = false;
-        run |= strcmp(sel, "all-simple") == 0 && !!t->run_simple;
+        run |= strcmp(sel, "all-simple") == 0 && !t->is_complex;
         run |= strcmp(sel, t->name);
 
         if (run) {
-            if (t->run_simple)
-                t->run_simple();
             if (t->run)
-                t->run(mpctx->global, mpctx->log);
+                t->run(&ctx);
             num_run++;
         }
     }
