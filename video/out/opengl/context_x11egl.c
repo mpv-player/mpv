@@ -125,7 +125,10 @@ static bool mpegl_init(struct ra_ctx *ctx)
         goto uninit;
 
     int vID, n;
-    eglGetConfigAttrib(p->egl_display, config, EGL_NATIVE_VISUAL_ID, &vID);
+    if (!eglGetConfigAttrib(p->egl_display, config, EGL_NATIVE_VISUAL_ID, &vID)) {
+        MP_FATAL(ctx, "Getting X visual ID failed!\n");
+        goto uninit;
+    }
     MP_VERBOSE(ctx, "chose visual 0x%x\n", vID);
     XVisualInfo template = {.visualid = vID};
     XVisualInfo *vi = XGetVisualInfo(vo->x11->display, VisualIDMask, &template, &n);
