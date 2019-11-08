@@ -396,6 +396,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
     }
 
+#if HAVE_TESTS
+    if (opts->test_mode && opts->test_mode[0])
+        return run_tests(mpctx) ? 1 : -1;
+#endif
+
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         // nothing to play
         mp_print_version(mpctx->log, true);
@@ -429,11 +434,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
-
-#if HAVE_TESTS
-    if (opts->test_mode && opts->test_mode[0])
-        return run_tests(mpctx) ? 1 : -1;
-#endif
 
     MP_STATS(mpctx, "end init");
 
