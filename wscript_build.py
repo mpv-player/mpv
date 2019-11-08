@@ -251,7 +251,6 @@ def build(ctx):
         ( "audio/out/ao_jack.c",                 "jack" ),
         ( "audio/out/ao_lavc.c" ),
         ( "audio/out/ao_null.c" ),
-        ( "audio/out/ao_openal.c",               "openal" ),
         ( "audio/out/ao_opensles.c",             "opensles" ),
         ( "audio/out/ao_oss.c",                  "oss-audio" ),
         ( "audio/out/ao_pcm.c" ),
