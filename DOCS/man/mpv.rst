@@ -983,7 +983,11 @@ behavior of mpv.
     of ``--v`` options passed to the command line.
 
 ``MPV_LEAK_REPORT``
-    If set to ``1``, enable internal talloc leak reporting.
+    If set to ``1``, enable internal talloc leak reporting. If set to another
+    value, disable leak reporting. If unset, use the default, which normally is
+    ``0``. If mpv was built with ``--enable-ta-leak-report``, the default is
+    ``1``. If leak reporting was disabled at compile time (``NDEBUG`` in
+    custom ``CFLAGS``), this environment variable is ignored.
 
 ``LADSPA_PATH``
     Specifies the search path for LADSPA plugins. If it is unset, fully
