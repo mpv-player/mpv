@@ -232,6 +232,7 @@ typedef struct MPOpts {
     double ab_loop[2];
     double step_sec;
     int position_resume;
+    int position_check_mtime;
     int position_save_on_quit;
     int write_filename_in_watch_later_config;
     int ignore_path_in_watch_later_config;
