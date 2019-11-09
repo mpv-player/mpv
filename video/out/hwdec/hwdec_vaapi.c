@@ -108,10 +108,10 @@ static void uninit(struct ra_hwdec *hw)
 }
 
 const static vaapi_interop_init interop_inits[] = {
-#if HAVE_GL
+#if HAVE_VAAPI_EGL
     vaapi_gl_init,
 #endif
-#if HAVE_VULKAN
+#if HAVE_VAAPI_VULKAN
     vaapi_vk_init,
 #endif
     NULL
