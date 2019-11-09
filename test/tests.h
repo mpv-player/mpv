@@ -41,6 +41,8 @@ extern const struct unittest test_gl_video;
 extern const struct unittest test_img_format;
 extern const struct unittest test_json;
 extern const struct unittest test_linked_list;
+extern const struct unittest test_repack_sws;
+extern const struct unittest test_repack_zimg;
 
 #define assert_true(x) assert(x)
 #define assert_false(x) assert(!(x))
@@ -69,3 +71,9 @@ void assert_text_files_equal_impl(const char *file, int line,
 
 // Open a new file in the out_path. Always succeeds.
 FILE *test_open_out(struct test_ctx *ctx, const char *name);
+
+// Sorted list of valid imgfmts. Call init_imgfmts_list() before use.
+extern int imgfmts[];
+extern int num_imgfmts;
+
+void init_imgfmts_list(void);

@@ -9,6 +9,10 @@ static const struct unittest *unittests[] = {
     &test_img_format,
     &test_json,
     &test_linked_list,
+    &test_repack_sws,
+#if HAVE_ZIMG
+    &test_repack_zimg,
+#endif
     NULL
 };
 

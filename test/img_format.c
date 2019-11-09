@@ -7,8 +7,9 @@
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 
-static int imgfmts[IMGFMT_AVPIXFMT_END - IMGFMT_AVPIXFMT_START + 100];
-static int num_imgfmts;
+int imgfmts[IMGFMT_AVPIXFMT_END - IMGFMT_AVPIXFMT_START + 100];
+int num_imgfmts;
+
 static enum AVPixelFormat pixfmt_unsup[100];
 static int num_pixfmt_unsup;
 static bool imgfmts_initialized;
@@ -21,7 +22,7 @@ static int cmp_imgfmt_name(const void *a, const void *b)
     return strcmp(name_a, name_b);
 }
 
-static void find_all_imgfmts(void)
+void init_imgfmts_list(void)
 {
     if (imgfmts_initialized)
         return;
@@ -61,7 +62,7 @@ static const char *comp_type(enum mp_component_type type)
 
 static void run(struct test_ctx *ctx)
 {
-    find_all_imgfmts();
+    init_imgfmts_list();
 
     FILE *f = test_open_out(ctx, "img_formats.txt");
 

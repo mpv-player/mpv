@@ -400,6 +400,9 @@ def build(ctx):
         ( "test/img_format.c",                   "tests" ),
         ( "test/json.c",                         "tests" ),
         ( "test/linked_list.c",                  "tests" ),
+        ( "test/scale_sws.c",                    "tests" ),
+        ( "test/scale_test.c",                   "tests" ),
+        ( "test/scale_zimg.c",                   "tests && zimg" ),
         ( "test/tests.c",                        "tests" ),
 
         ## Video
