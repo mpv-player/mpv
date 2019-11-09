@@ -25,6 +25,8 @@ Interface changes
 ::
 
  --- mpv 0.31.0 ---
+    - add `--resume-playback-check-mtime` to check consistent mtime when
+      restoring playback state.
     - add `--d3d11-output-csp` to enable explicit selection of a D3D11
       swap chain color space.
     - the --sws- options and similar now affect vo_image and screenshot

@@ -15,12 +15,14 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utime.h>
 
 #include <libavutil/md5.h>
 
@@ -154,6 +156,32 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
 }
 
 #define MP_WATCH_LATER_CONF "watch_later"
+
+static bool check_mtime(const char *f1, const char *f2)
+{
+    struct stat st1, st2;
+    if (stat(f1, &st1) != 0 || stat(f2, &st2) != 0)
+        return false;
+    return st1.st_mtime == st2.st_mtime;
+}
+
+static bool copy_mtime(const char *f1, const char *f2)
+{
+    struct stat st1, st2;
+
+    if (stat(f1, &st1) != 0 || stat(f2, &st2) != 0)
+        return false;
+
+    struct utimbuf ut = {
+        .actime = st2.st_atime,  // we want to pass this through intact
+        .modtime = st1.st_mtime,
+    };
+
+    if (!utime(f2, &ut))
+        return false;
+
+    return true;
+}
 
 static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
                                                     const char *fname)
@@ -290,6 +318,10 @@ static void write_redirect(struct MPContext *mpctx, char *path)
             write_filename(mpctx, file, path);
             fclose(file);
         }
+
+        if (mpctx->opts->position_check_mtime && !copy_mtime(path, conffile))
+            MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", path, conffile);
+
         talloc_free(conffile);
     }
 }
@@ -346,6 +378,13 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     }
     fclose(file);
 
+    if (mpctx->opts->position_check_mtime &&
+        !copy_mtime(cur->filename, conffile))
+    {
+        MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", cur->filename,
+                conffile);
+    }
+
     // This allows us to recursively resume directories etc., whose entries are
     // expanded the first time it's "played". For example, if "/a/b/c.mkv" is
     // the current entry, then we want to resume this file if the user does
@@ -387,6 +426,11 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
         return;
     char *fname = mp_get_playback_resume_config_filename(mpctx, file);
     if (fname && mp_path_exists(fname)) {
+        if (mpctx->opts->position_check_mtime && !check_mtime(file, fname)) {
+            talloc_free(fname);
+            return;
+        }
+
         // Never apply the saved start position to following files
         m_config_backup_opt(mpctx->mconfig, "start");
         MP_INFO(mpctx, "Resuming playback. This behavior can "

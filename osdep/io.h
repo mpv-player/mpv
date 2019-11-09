@@ -172,6 +172,9 @@ void mp_globfree(mp_glob_t *pglob);
 #undef fstat
 #define fstat(...) mp_fstat(__VA_ARGS__)
 
+#define utime(...) _utime(__VA_ARGS__)
+#define utimbuf _utimbuf
+
 void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
 int munmap(void *addr, size_t length);
 int msync(void *addr, size_t length, int flags);

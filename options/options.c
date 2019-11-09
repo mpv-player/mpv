@@ -631,6 +631,7 @@ const m_option_t mp_opts[] = {
     OPT_ALIAS("loop", "loop-file"),
 
     OPT_FLAG("resume-playback", position_resume, 0),
+    OPT_FLAG("resume-playback-check-mtime", position_check_mtime, 0),
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
     OPT_FLAG("write-filename-in-watch-later-config", write_filename_in_watch_later_config, 0),
     OPT_FLAG("ignore-path-in-watch-later-config", ignore_path_in_watch_later_config, 0),
