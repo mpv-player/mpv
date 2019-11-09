@@ -20,7 +20,7 @@
 
 
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
-* [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
+* [FAQ][FAQ]
 * [Manual](http://mpv.io/manual/master/)
 
 
@@ -30,7 +30,7 @@
 **mpv** is a free (as in freedom) media player for the command line. It supports
 a wide variety of media file formats, audio and video codecs, and subtitle types.
 
-There is a [FAQ](FAQ).
+There is a [FAQ][FAQ].
 
 Releases can be found on the [release list][releases].
 
@@ -194,7 +194,7 @@ See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
 This software is based on the MPlayer project. Before mpv existed as a project,
 the code base was briefly developed under the mplayer2 project. For details,
-see the [FAQ](FAQ).
+see the [FAQ][FAQ].
 
 ## Contact
 
