@@ -756,14 +756,6 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
         chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
     }
 
-    int msb_valid_bits =
-        p->ra_format.component_bits + MPMIN(p->ra_format.component_pad, 0);
-    // The existing code assumes we just have a single tex multiplier for
-    // all of the planes. This may change in the future
-    float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.color.space,
-                                         msb_valid_bits,
-                                         p->ra_format.component_bits);
-
     memset(img, 0, 4 * sizeof(img[0]));
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *t = &vimg->planes[n];
@@ -788,6 +780,12 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
             if (!c && padding == i)
                 padding = i + 1;
         }
+
+        int msb_valid_bits =
+            p->ra_format.component_bits + MPMIN(p->ra_format.component_pad, 0);
+        int csp = type == PLANE_ALPHA ? MP_CSP_RGB : p->image_params.color.space;
+        float tex_mul =
+            1.0 / mp_get_csp_mul(csp, msb_valid_bits, p->ra_format.component_bits);
 
         img[n] = (struct image){
             .type = type,
