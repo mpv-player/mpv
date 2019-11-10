@@ -410,10 +410,16 @@ void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
 {
     assert(samples >= 0 && samples <= mp_aframe_get_size(f));
 
+    if (av_frame_make_writable(f->av_frame) < 0)
+        return; // go complain to ffmpeg
+
     int num_planes = mp_aframe_get_planes(f);
     size_t sstride = mp_aframe_get_sstride(f);
-    for (int n = 0; n < num_planes; n++)
-        f->av_frame->extended_data[n] += samples * sstride;
+    for (int n = 0; n < num_planes; n++) {
+        memmove(f->av_frame->extended_data[n],
+                f->av_frame->extended_data[n] + samples * sstride,
+                (f->av_frame->nb_samples - samples) * sstride);
+    }
 
     f->av_frame->nb_samples -= samples;
 
