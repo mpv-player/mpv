@@ -181,7 +181,7 @@ struct input_opts {
 
 const struct m_sub_options input_config = {
     .opts = (const m_option_t[]) {
-        OPT_STRING("input-conf", config_file, M_OPT_FIXED | M_OPT_FILE),
+        OPT_STRING("input-conf", config_file, M_OPT_FILE),
         OPT_INT("input-ar-delay", ar_delay, 0),
         OPT_INT("input-ar-rate", ar_rate, 0),
         OPT_PRINT("input-keylist", mp_print_key_list),

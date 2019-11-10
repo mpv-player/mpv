@@ -150,13 +150,12 @@ enum {
     M_SETOPT_FROM_CMDLINE = 8,      // Mark as set by command line
     M_SETOPT_BACKUP = 16,           // Call m_config_backup_opt() before
     M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
-    M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
     M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
     M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
 };
 
 // Flags for safe option setting during runtime.
-#define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
+#define M_SETOPT_RUNTIME 0
 
 // Set the named option to the given string. This is for command line and config
 // file use only.

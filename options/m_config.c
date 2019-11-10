@@ -725,9 +725,6 @@ static int handle_set_opt_flags(struct m_config *config,
         (co->is_set_from_cmdline || co->is_set_from_config))
         set = false;
 
-    if ((flags & M_SETOPT_NO_FIXED) && (optflags & M_OPT_FIXED))
-        return M_OPT_INVALID;
-
     if ((flags & M_SETOPT_NO_PRE_PARSE) && (optflags & M_OPT_PRE_PARSE))
         return M_OPT_INVALID;
 
@@ -1100,8 +1097,6 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " [not in config files]");
         if (opt->flags & M_OPT_FILE)
             MP_INFO(config, " [file]");
-        if (opt->flags & M_OPT_FIXED)
-            MP_INFO(config, " [no runtime changes]");
         if (opt->type == &m_option_type_alias)
             MP_INFO(config, " for %s", (char *)opt->priv);
         if (opt->type == &m_option_type_cli_alias)

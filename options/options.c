@@ -320,39 +320,38 @@ const struct m_sub_options filter_conf = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", &m_option_type_dummy_flag, M_OPT_FIXED | CONF_NOCFG | M_OPT_NOPROP,
+    {"v", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_NOPROP,
      .offset = -1},
-    {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
+    {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FILE,
      .min = 1, .offset = -1},
-    {"{", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+    {"{", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_NOPROP,
      .offset = -1},
-    {"}", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP,
+    {"}", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_NOPROP,
      .offset = -1},
 
     // handled in m_config.c
     { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
     { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
-    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED |
-        M_OPT_NOPROP | M_OPT_OPTIONAL_PARAM,  .offset = -1},
-    { "list-options", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_FIXED |
-      M_OPT_NOPROP, .offset = -1},
-    OPT_FLAG("list-properties", property_print_help,
-             CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
-    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
-              M_OPT_OPTIONAL_PARAM, .offset = -1},
-    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP |
-           M_OPT_OPTIONAL_PARAM, .offset = -1},
+    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_NOPROP |
+        M_OPT_OPTIONAL_PARAM,  .offset = -1},
+    { "list-options", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_NOPROP,
+        .offset = -1},
+    OPT_FLAG("list-properties", property_print_help, CONF_NOCFG | M_OPT_NOPROP),
+    { "help", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_NOPROP | M_OPT_OPTIONAL_PARAM,
+        .offset = -1},
+    { "h", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_NOPROP | M_OPT_OPTIONAL_PARAM,
+        .offset = -1},
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("version", print_version),
     OPT_PRINT("V", print_version),
 
 #if HAVE_TESTS
-    OPT_STRING("unittest", test_mode, CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
+    OPT_STRING("unittest", test_mode, CONF_NOCFG | M_OPT_NOPROP),
 #endif
 
     OPT_CHOICE("player-operation-mode", operation_mode,
-               M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
+               M_OPT_PRE_PARSE | M_OPT_NOPROP,
                ({"cplayer", 0}, {"pseudo-gui", 1})),
 
     OPT_FLAG("shuffle", shuffle, 0),
@@ -378,13 +377,13 @@ const m_option_t mp_opts[] = {
                 {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
                 {"idle",        IDLE_PRIORITY_CLASS})),
 #endif
-    OPT_FLAG("config", load_config, M_OPT_FIXED | CONF_PRE_PARSE),
+    OPT_FLAG("config", load_config, CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
-               M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
+               CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA || HAVE_JAVASCRIPT
-    OPT_PATHLIST("scripts", script_files, M_OPT_FIXED | M_OPT_FILE),
+    OPT_PATHLIST("scripts", script_files, M_OPT_FILE),
     OPT_CLI_ALIAS("script", "scripts-append"),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("load-scripts", auto_load_scripts, 0),

@@ -386,12 +386,6 @@ char *format_file_size(int64_t size);
 // The option is forbidden in config files.
 #define M_OPT_NOCFG             (1 << 2)
 
-// Can not be freely changed at runtime (normally, all options can be changed,
-// even if the settings don't get effective immediately). Note that an option
-// might still change even if this is set, e.g. via properties or per-file
-// options.
-#define M_OPT_FIXED             (1 << 3)
-
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 4)
 
@@ -707,7 +701,7 @@ extern const char m_option_path_separator;
 
 #define OPT_PRINT(optname, fn)                                              \
     {.name = optname,                                                       \
-     .flags = M_OPT_FIXED | M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP,   \
+     .flags = M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP,                 \
      .type = &m_option_type_print_fn,                                       \
      .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn),                            \
      .offset = -1}
