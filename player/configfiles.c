@@ -94,8 +94,7 @@ static int try_load_config(struct MPContext *mpctx, const char *file, int flags,
 
 // Set options file-local, and don't set them if the user set them via the
 // command line.
-#define FILE_LOCAL_FLAGS \
-    (M_SETOPT_BACKUP | M_SETOPT_RUNTIME | M_SETOPT_PRESERVE_CMDLINE)
+#define FILE_LOCAL_FLAGS (M_SETOPT_BACKUP | M_SETOPT_PRESERVE_CMDLINE)
 
 static void mp_load_per_file_config(struct MPContext *mpctx)
 {

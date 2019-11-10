@@ -930,7 +930,6 @@ void mpv_free_node_contents(mpv_node *node)
 int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
                    void *data)
 {
-    int flags = ctx->mpctx->initialized ? M_SETOPT_RUNTIME : 0;
     const struct m_option *type = get_mp_type(format);
     if (!type)
         return MPV_ERROR_OPTION_FORMAT;
@@ -941,8 +940,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
         data = &tmp;
     }
     lock_core(ctx);
-    int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name),
-                                       data, flags);
+    int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name), data, 0);
     unlock_core(ctx);
     switch (err) {
     case M_OPT_MISSING_PARAM:
@@ -1715,9 +1713,8 @@ int mpv_hook_continue(mpv_handle *ctx, uint64_t id)
 
 int mpv_load_config_file(mpv_handle *ctx, const char *filename)
 {
-    int flags = ctx->mpctx->initialized ? M_SETOPT_RUNTIME : 0;
     lock_core(ctx);
-    int r = m_config_parse_config_file(ctx->mpctx->mconfig, filename, NULL, flags);
+    int r = m_config_parse_config_file(ctx->mpctx->mconfig, filename, NULL, 0);
     unlock_core(ctx);
     if (r == 0)
         return MPV_ERROR_INVALID_PARAMETER;

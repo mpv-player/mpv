@@ -154,9 +154,6 @@ enum {
     M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
 };
 
-// Flags for safe option setting during runtime.
-#define M_SETOPT_RUNTIME 0
-
 // Set the named option to the given string. This is for command line and config
 // file use only.
 // flags: combination of M_SETOPT_* flags (0 for normal operation)

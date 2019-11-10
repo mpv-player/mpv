@@ -427,7 +427,6 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
-    int flags = M_SETOPT_RUNTIME;
     struct m_config_option *opt;
     if (mpctx->command_ctx->silence_option_deprecations) {
         // This case is specifically for making --reset-on-next-file=all silent.
@@ -449,7 +448,7 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
         m_option_copy(opt->opt, arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, flags) < 0)
+        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, 0) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
     }
@@ -2793,12 +2792,10 @@ skip_warn: ;
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET: {
-        int flags = M_SETOPT_RUNTIME;
-        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, flags) < 0)
+    case M_PROPERTY_SET:
+        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, 0) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
-    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -3329,7 +3326,7 @@ static int access_options(struct m_property_action_arg *ka, bool local,
     case M_PROPERTY_SET: {
         if (local && !mpctx->playing)
             return M_PROPERTY_ERROR;
-        int flags = M_SETOPT_RUNTIME | (local ? M_SETOPT_BACKUP : 0);
+        int flags = local ? M_SETOPT_BACKUP : 0;
         int r = m_config_set_option_raw(mpctx->mconfig, opt, ka->arg, flags);
         mp_wakeup_core(mpctx);
         return r < 0 ? M_PROPERTY_ERROR : M_PROPERTY_OK;
@@ -4803,7 +4800,7 @@ static void cmd_change_list(void *p)
 
     char *optname = mp_tprintf(80, "%s-%s", name, op); // the dirty truth
     int r = m_config_set_option_cli(mpctx->mconfig, bstr0(optname),
-                                    bstr0(value), M_SETOPT_RUNTIME);
+                                    bstr0(value), 0);
     if (r < 0) {
         set_osd_msg(mpctx, osdl, osd_duration,
                     "Failed setting option: '%s'", name);
@@ -5672,7 +5669,7 @@ static void cmd_apply_profile(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     char *profile = cmd->args[0].v.s;
-    if (m_config_set_profile(mpctx->mconfig, profile, M_SETOPT_RUNTIME) < 0)
+    if (m_config_set_profile(mpctx->mconfig, profile, 0) < 0)
         cmd->success = false;
 }
 

@@ -973,7 +973,7 @@ static void load_per_file_options(m_config_t *conf,
 {
     for (int n = 0; n < params_count; n++) {
         m_config_set_option_cli(conf, params[n].name, params[n].value,
-                                M_SETOPT_RUNTIME | M_SETOPT_BACKUP);
+                                M_SETOPT_BACKUP);
     }
 }
 
