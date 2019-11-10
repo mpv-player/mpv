@@ -598,7 +598,11 @@ int mp_aframe_pool_allocate(struct mp_aframe_pool *pool, struct mp_aframe *frame
 {
     int planes = mp_aframe_get_planes(frame);
     size_t sstride = mp_aframe_get_sstride(frame);
-    int plane_size = MP_ALIGN_UP(sstride * MPMAX(samples, 1), 32);
+    // FFmpeg hardcodes similar hidden possibly-requirements in a number of
+    // places: av_frame_get_buffer(), libavcodec's get_buffer(), mem.c,
+    // probably more.
+    int align_samples = MP_ALIGN_UP(MPMAX(samples, 1), 32);
+    int plane_size = MP_ALIGN_UP(sstride * align_samples, 64);
     int size = plane_size * planes;
 
     if (size <= 0 || mp_aframe_is_allocated(frame))
