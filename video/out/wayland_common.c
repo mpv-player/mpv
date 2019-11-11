@@ -1251,6 +1251,8 @@ int vo_wayland_reconfig(struct vo *vo)
         } else {
             wl_out = out->output;
             wl->current_output = out;
+            if (!vo->opts->hidpi_window_scale)
+                out->scale = 1;
             wl->scaling = out->scale;
             screenrc = wl->current_output->geometry;
         }
