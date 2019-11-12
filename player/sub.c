@@ -26,6 +26,7 @@
 
 #include "common/msg.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "common/common.h"
 #include "common/global.h"
 
@@ -167,8 +168,16 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->demuxer || !track->stream)
         return false;
 
+    char *force_configdir = mpctx->global->configdir;
+    mpctx->global->configdir =
+            bstrto0(mpctx->global, mp_dirname(mpctx->filename));
+
     track->d_sub = sub_create(mpctx->global, track->stream,
                               get_all_attachments(mpctx));
+
+    TA_FREEP(&mpctx->global->configdir);
+    mpctx->global->configdir = force_configdir;
+
     if (!track->d_sub)
         return false;
 
