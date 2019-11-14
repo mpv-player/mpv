@@ -691,8 +691,7 @@ static void handle_update_cache(struct MPContext *mpctx)
     mpctx->demux_underrun |= s.underrun;
 
     int cache_buffer = 100;
-    bool use_pause_on_low_cache = demux_is_network_cached(mpctx->demuxer) &&
-                                  opts->cache_pause && mpctx->play_dir > 0;
+    bool use_pause_on_low_cache = opts->cache_pause && mpctx->play_dir > 0;
 
     if (!mpctx->restart_complete) {
         // Audio or video is restarting, and initial buffering is enabled. Make
