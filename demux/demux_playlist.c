@@ -99,7 +99,7 @@ static int read_characters(stream_t *s, uint8_t *dst, int dstsize, int utf16)
         if (len > dstsize)
             return -1; // line too long
         memcpy(dst, buf, len);
-        stream_skip(s, len);
+        stream_seek_skip(s, len);
         return len;
     }
 }

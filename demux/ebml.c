@@ -180,14 +180,14 @@ int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s)
     if (len >= INT64_MAX - pos2 || (end > 0 && pos2 + len > end))
         goto invalid;
 
-    if (!stream_skip(s, len))
+    if (!stream_seek_skip(s, pos2 + len))
         goto invalid;
 
     return 0;
 
 invalid:
     mp_err(log, "Invalid EBML length at position %"PRId64"\n", pos);
-    stream_seek(s, pos);
+    stream_seek_skip(s, pos);
     return 1;
 }
 
@@ -198,6 +198,7 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 {
     int64_t pos = stream_tell(s);
     uint32_t last_4_bytes = 0;
+    stream_read_peek(s, &(char){0}, 1);
     if (!s->eof) {
         mp_err(log, "Corrupt file detected. "
                "Trying to resync starting from position %"PRId64"...\n", pos);

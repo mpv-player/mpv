@@ -692,13 +692,13 @@ bool stream_seek(stream_t *s, int64_t pos)
     return stream_seek_unbuffered(s, pos);
 }
 
-bool stream_skip(stream_t *s, int64_t len)
+// Like stream_seek(), but strictly prefer skipping data instead of failing, if
+// it's a forward-seek.
+bool stream_seek_skip(stream_t *s, int64_t pos)
 {
-    if (!stream_seek(s, stream_tell(s) + len))
-        return false;
-    // Make sure s->eof is set correctly, even if a seek happened.
-    stream_read_more(s, 1);
-    return true;
+    return !s->seekable && pos > stream_tell(s)
+        ? stream_skip_read(s, pos - stream_tell(s))
+        : stream_seek(s, pos);
 }
 
 int stream_control(stream_t *s, int cmd, void *arg)
@@ -732,7 +732,7 @@ int stream_skip_bom(struct stream *s)
     bstr data = {buf, len};
     for (int n = 0; n < 3; n++) {
         if (bstr_startswith0(data, bom[n])) {
-            stream_skip(s, strlen(bom[n]));
+            stream_seek_skip(s, stream_tell(s) + strlen(bom[n]));
             return n;
         }
     }

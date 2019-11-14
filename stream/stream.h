@@ -121,7 +121,7 @@ typedef struct stream {
     void (*close)(struct stream *s);
 
     int64_t pos;
-    int eof;
+    int eof; // valid only after read calls that returned a short result
     int mode; //STREAM_READ or STREAM_WRITE
     void *priv; // used for DVD, TV, RTSP etc
     char *url;  // filename/url (possibly including protocol prefix)
@@ -194,7 +194,7 @@ inline static int64_t stream_tell(stream_t *s)
     return s->pos + s->buf_cur - s->buf_end;
 }
 
-bool stream_skip(stream_t *s, int64_t len);
+bool stream_seek_skip(stream_t *s, int64_t pos);
 bool stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, void *mem, int total);
 int stream_read_partial(stream_t *s, void *buf, int buf_size);

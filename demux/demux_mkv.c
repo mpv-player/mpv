@@ -1954,7 +1954,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
     if (demuxer->params)
         num_skip = demuxer->params->matroska_wanted_segment;
 
-    while (!s->eof) {
+    while (stream_read_peek(s, &(char){0}, 1)) {
         if (ebml_read_id(s) != MATROSKA_ID_SEGMENT) {
             MP_VERBOSE(demuxer, "segment not found\n");
             return 0;
@@ -2580,7 +2580,7 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
 exit:
     if (res <= 0)
         free_block(block);
-    stream_seek(s, endpos);
+    stream_seek_skip(s, endpos);
     return res;
 }
 
