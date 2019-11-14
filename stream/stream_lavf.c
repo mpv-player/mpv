@@ -69,6 +69,7 @@ const struct m_sub_options stream_lavf_conf = {
     .size = sizeof(struct stream_lavf_params),
     .defaults = &(const struct stream_lavf_params){
         .useragent = (char *)mpv_version,
+        .timeout = 60,
     },
 };
 
@@ -180,8 +181,8 @@ static int interrupt_cb(void *ctx)
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
-void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
-                                 struct mp_log *log)
+void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
+                                 struct mpv_global *global, struct mp_log *log)
 {
     void *temp = talloc_new(NULL);
     struct stream_lavf_params *opts =
@@ -220,10 +221,15 @@ void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
         av_dict_set(dict, "headers", cust_headers, 0);
     av_dict_set(dict, "icy", "1", 0);
     // So far, every known protocol uses microseconds for this
+    // Except rtsp.
     if (opts->timeout > 0) {
-        char buf[80];
-        snprintf(buf, sizeof(buf), "%lld", (long long)(opts->timeout * 1e6));
-        av_dict_set(dict, "timeout", buf, 0);
+        if (target_fmt && strcmp(target_fmt, "rtsp") == 0) {
+            mp_verbose(log, "Broken FFmpeg RTSP API => not setting timeout.\n");
+        } else {
+            char buf[80];
+            snprintf(buf, sizeof(buf), "%lld", (long long)(opts->timeout * 1e6));
+            av_dict_set(dict, "timeout", buf, 0);
+        }
     }
     if (opts->http_proxy && opts->http_proxy[0])
         av_dict_set(dict, "http_proxy", opts->http_proxy, 0);
@@ -292,7 +298,7 @@ static int open_f(stream_t *stream)
     av_dict_set(&dict, "reconnect", "1", 0);
     av_dict_set(&dict, "reconnect_delay_max", "7", 0);
 
-    mp_setup_av_network_options(&dict, stream->global, stream->log);
+    mp_setup_av_network_options(&dict, NULL, stream->global, stream->log);
 
     AVIOInterruptCB cb = {
         .callback = interrupt_cb,

@@ -4280,9 +4280,10 @@ Network
     Specify a referrer path or URL for HTTP requests.
 
 ``--network-timeout=<seconds>``
-    Specify the network timeout in seconds. This affects at least HTTP. The
-    special value 0 (default) uses the FFmpeg/Libav defaults. If a protocol
-    is used which does not support timeouts, this option is silently ignored.
+    Specify the network timeout in seconds (default: 60 seconds). This affects
+    at least HTTP. The special value 0 uses the FFmpeg/Libav defaults. If a
+    protocol is used which does not support timeouts, this option is silently
+    ignored.
 
     .. warning::
 
@@ -4291,8 +4292,10 @@ Network
         option accept different units (seconds instead of microseconds, causing
         mpv to pass it huge values), it will also overflow FFmpeg internal
         calculations. The worst is that merely setting the option will put RTSP
-        into listening mode, which breaks any client uses. Do not use this
-        option with RTSP URLs.
+        into listening mode, which breaks any client uses. At time of this
+        writing, the fix was not made effective yet. For this reason, this
+        option is ignored (or should be ignored) on RTSP URLs. You can still
+        set the timeout option directly with ``--demuxer-lavf-o``.
 
 ``--rtsp-transport=<lavf|udp|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying

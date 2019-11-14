@@ -243,6 +243,7 @@ char *mp_file_get_path(void *talloc_ctx, bstr url);
 // stream_lavf.c
 struct AVDictionary;
 void mp_setup_av_network_options(struct AVDictionary **dict,
+                                 const char *target_fmt,
                                  struct mpv_global *global,
                                  struct mp_log *log);
 
