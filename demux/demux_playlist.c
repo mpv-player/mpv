@@ -99,7 +99,7 @@ static int read_characters(stream_t *s, uint8_t *dst, int dstsize, int utf16)
         if (len > dstsize)
             return -1; // line too long
         memcpy(dst, buf, len);
-        stream_seek_skip(s, len);
+        stream_seek_skip(s, stream_tell(s) + len);
         return len;
     }
 }
@@ -119,7 +119,6 @@ static char *read_line(stream_t *s, char *mem, int max, int utf16)
         int l = read_characters(s, &mem[read], max - read - 1, utf16);
         if (l < 0 || memchr(&mem[read], '\0', l)) {
             MP_WARN(s, "error reading line\n");
-            s->eof = false;
             return NULL;
         }
         read += l;
@@ -127,7 +126,7 @@ static char *read_line(stream_t *s, char *mem, int max, int utf16)
             break;
     }
     mem[read] = '\0';
-    if (s->eof && read == 0) // legitimate EOF
+    if (!stream_read_peek(s, &(char){0}, 1) && read == 0) // legitimate EOF
         return NULL;
     return mem;
 }
