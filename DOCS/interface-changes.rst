@@ -34,6 +34,8 @@ Interface changes
       for software video conversion. These were switched to higher quality since
       mpv 0.30.0 (related to the previous changelog entry). This affects video
       outputs like vo_x11 and vo_drm, and screenshots, but not much else.
+    - deprecate --input-file (there are no plans to remove this short-term,
+      but it will probably eventually go away)
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

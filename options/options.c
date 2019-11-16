@@ -697,7 +697,8 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("input-terminal", consolecontrols, UPDATE_TERM),
 
-    OPT_STRING("input-file", input_file, M_OPT_FILE | UPDATE_INPUT),
+    OPT_STRING("input-file", input_file, M_OPT_FILE | UPDATE_INPUT,
+               .deprecation_message = "use --input-ipc-server"),
     OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | UPDATE_INPUT),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
