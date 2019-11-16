@@ -18,12 +18,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "ar/HIDRemote.h"
 #include "osdep/macosx_events.h"
 
 struct input_ctx;
 
-@interface EventsResponder : NSObject <HIDRemoteDelegate>
+@interface EventsResponder : NSObject
 
 + (EventsResponder *)sharedInstance;
 - (void)setInputContext:(struct input_ctx *)ctx;

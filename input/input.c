@@ -196,14 +196,14 @@ const struct m_sub_options input_config = {
         OPT_FLAG("input-cursor", enable_mouse_movements, 0),
         OPT_FLAG("input-vo-keyboard", vo_key_input, 0),
         OPT_FLAG("input-media-keys", use_media_keys, 0),
-#if HAVE_COCOA
-        OPT_FLAG("input-appleremote", use_appleremote, 0),
-#endif
 #if HAVE_SDL2_GAMEPAD
         OPT_FLAG("input-gamepad", use_gamepad, 0),
 #endif
         OPT_FLAG("window-dragging", allow_win_drag, 0),
         OPT_REPLACED("input-x11-keyboard", "input-vo-keyboard"),
+#if HAVE_COCOA
+        OPT_REMOVED("input-appleremote", "replaced by MediaPlayer support"),
+#endif
         {0}
     },
     .size = sizeof(struct input_opts),
@@ -215,9 +215,6 @@ const struct m_sub_options input_config = {
         .use_alt_gr = 1,
         .enable_mouse_movements = 1,
         .use_media_keys = 1,
-#if HAVE_COCOA
-        .use_appleremote = 1,
-#endif
         .default_bindings = 1,
         .vo_key_input = 1,
         .allow_win_drag = 1,
@@ -1334,15 +1331,6 @@ static void reload_opts(struct input_ctx *ictx, bool shutdown)
 
 #if HAVE_COCOA
     struct input_opts *opts = ictx->opts;
-
-    if (ictx->using_ar != (opts->use_appleremote && !shutdown)) {
-        ictx->using_ar = !ictx->using_ar;
-        if (ictx->using_ar) {
-            cocoa_init_apple_remote();
-        } else {
-            cocoa_uninit_apple_remote();
-        }
-    }
 
     if (ictx->using_cocoa_media_keys != (opts->use_media_keys && !shutdown)) {
         ictx->using_cocoa_media_keys = !ictx->using_cocoa_media_keys;

@@ -144,7 +144,6 @@ Mac OS X
 * Native OpenGL backend.
 * Cocoa event loop is independent from MPlayer's event loop, so user
   actions like accessing menus and live resizing do not block the playback.
-* Apple Remote support.
 * Media Keys support.
 * VDA support using libavcodec hwaccel API instead of FFmpeg's decoder with up
   to 2-2.5x reduction in CPU usage.
@@ -248,7 +247,7 @@ Command Line Switches
     ``-msglevel``               ``--msg-level`` (changed semantics)
     ``-msgmodule``              ``--msg-module``
     ``-name``                   ``--x11-name``
-    ``-noar``                   ``--no-input-appleremote``
+    ``-noar``                   ``(removed; replaced by MediaPlayer framework)``
     ``-noautosub``              ``--no-sub-auto``
     ``-noconsolecontrols``      ``--no-input-terminal``
     ``-nosound``                ``--no-audio``

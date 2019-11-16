@@ -27,9 +27,6 @@ struct mpv_handle;
 void cocoa_put_key(int keycode);
 void cocoa_put_key_with_modifiers(int keycode, int modifiers);
 
-void cocoa_init_apple_remote(void);
-void cocoa_uninit_apple_remote(void);
-
 void cocoa_init_media_keys(void);
 void cocoa_uninit_media_keys(void);
 

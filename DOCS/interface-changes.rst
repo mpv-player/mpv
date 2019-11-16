@@ -59,6 +59,9 @@ Interface changes
       setting the properties to non-existing tracks may report it as selected
       track for a small time window, until it's forced back to "no". The exact
       details how this is handled may change in the future.
+    - remove old Apple Remote support, including --input-appleremote
+    - add MediaPlayer support and remove the old Media Key event tap on macOS.
+      this possibly also re-adds the Apple Remote support
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
