@@ -647,11 +647,19 @@ video_output_features = [
                    check_cc(fragment=load_fragment('gl_x11.c'),
                             use=['x11', 'libdl', 'pthreads']))
     } , {
+        'name': '--egl15',
+        'desc': 'EGL 1.5',
+        'groups': [ 'gl' ],
+        'func': compose_checks(
+            check_pkg_config('egl'),
+            check_statement(['EGL/egl.h'], 'int x[EGL_VERSION_1_5]')
+            ),
+    } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
-        'deps': 'x11',
+        'deps': 'x11 && egl15',
         'groups': [ 'gl' ],
-        'func': check_pkg_config('egl'),
+        'func': check_true,
     } , {
         'name': '--egl-drm',
         'desc': 'OpenGL DRM EGL Backend',

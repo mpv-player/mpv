@@ -21,11 +21,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#ifndef EGL_VERSION_1_5
-#define EGL_CONTEXT_OPENGL_PROFILE_MASK         0x30FD
-#define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT     0x00000001
-#endif
-
 #include "common/common.h"
 #include "video/out/x11_common.h"
 #include "context.h"
@@ -109,7 +104,8 @@ static bool mpegl_init(struct ra_ctx *ctx)
     if (!vo_x11_init(vo))
         goto uninit;
 
-    p->egl_display = eglGetDisplay(vo->x11->display);
+    p->egl_display = eglGetPlatformDisplay(EGL_PLATFORM_X11_KHR,
+                                           vo->x11->display, NULL);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
         MP_MSG(ctx, msgl, "Could not initialize EGL.\n");
         goto uninit;
