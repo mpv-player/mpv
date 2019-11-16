@@ -544,7 +544,6 @@ def build(ctx):
 
         ( "osdep/android/posix-spawn.c",         "android"),
         ( "osdep/android/strnlen.c",             "android"),
-        ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
         ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),

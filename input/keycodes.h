@@ -141,23 +141,6 @@
 
 #define MP_KEY_MOUSE_BTN_COUNT (MP_MBTN_END - MP_MBTN_BASE)
 
-// Apple Remote input module
-#define MP_AR_BASE        (MP_KEY_BASE+0xE0)
-#define MP_AR_PLAY        (MP_AR_BASE + 0)
-#define MP_AR_PLAY_HOLD   (MP_AR_BASE + 1)
-#define MP_AR_CENTER      (MP_AR_BASE + 2)
-#define MP_AR_CENTER_HOLD (MP_AR_BASE + 3)
-#define MP_AR_NEXT        (MP_AR_BASE + 4)
-#define MP_AR_NEXT_HOLD   (MP_AR_BASE + 5)
-#define MP_AR_PREV        (MP_AR_BASE + 6)
-#define MP_AR_PREV_HOLD   (MP_AR_BASE + 7)
-#define MP_AR_MENU        (MP_AR_BASE + 8)
-#define MP_AR_MENU_HOLD   (MP_AR_BASE + 9)
-#define MP_AR_VUP         (MP_AR_BASE + 10)
-#define MP_AR_VUP_HOLD    (MP_AR_BASE + 11)
-#define MP_AR_VDOWN       (MP_AR_BASE + 12)
-#define MP_AR_VDOWN_HOLD  (MP_AR_BASE + 13)
-
 /* game controller keys */
 #define MP_KEY_GAMEPAD                    (MP_KEY_BASE+0xF0)
 #define MP_KEY_GAMEPAD_ACTION_DOWN        (MP_KEY_GAMEPAD+0)

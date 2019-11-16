@@ -905,11 +905,6 @@ standalone_features = [
         'deps': 'os-win32 || !(!(os-cygwin))',
         'func': check_ctx_vars('WINDRES')
     }, {
-        'name': '--apple-remote',
-        'desc': 'Apple Remote support',
-        'deps': 'cocoa',
-        'func': check_true
-    }, {
         'name': '--macos-touchbar',
         'desc': 'macOS Touch Bar support',
         'deps': 'cocoa',

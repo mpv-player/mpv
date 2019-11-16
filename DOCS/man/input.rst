@@ -145,9 +145,6 @@ Comments on some symbolic names:
 ``GAMEPAD_*``
     Keys emitted by the SDL gamepad backend.
 
-``AR_*``
-    Keys emitted by the OSX-only Apple Remote code.
-
 ``UNMAPPED``
     Pseudo-key that matches any unmapped key. (You should probably avoid this
     if possible, because it might change behavior or get removed in the future.)

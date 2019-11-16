@@ -50,17 +50,12 @@
     BOOL _is_application;
     NSCondition *_input_lock;
     CFMachPortRef _mk_tap_port;
-#if HAVE_APPLE_REMOTE
-    HIDRemote *_remote;
-#endif
 }
 
 - (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKey:(NSEvent *)event;
 - (BOOL)setMpvHandle:(struct mpv_handle *)ctx;
 - (void)readEvents;
-- (void)startAppleRemote;
-- (void)stopAppleRemote;
 - (void)startMediaKeys;
 - (void)restartMediaKeys;
 - (void)stopMediaKeys;
@@ -124,16 +119,6 @@ static int convert_key(unsigned key, unsigned charcode)
     if (mpkey)
         return mpkey;
     return charcode;
-}
-
-void cocoa_init_apple_remote(void)
-{
-    [[EventsResponder sharedInstance] startAppleRemote];
-}
-
-void cocoa_uninit_apple_remote(void)
-{
-    [[EventsResponder sharedInstance] stopAppleRemote];
 }
 
 static int mk_code(NSEvent *event)
@@ -352,29 +337,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     }
 }
 
-- (void)startAppleRemote
-{
-#if HAVE_APPLE_REMOTE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self->_remote = [[HIDRemote alloc] init];
-        if (self->_remote) {
-            [self->_remote setDelegate:self];
-            [self->_remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
-        }
-    });
-#endif
-}
-
-- (void)stopAppleRemote
-{
-#if HAVE_APPLE_REMOTE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self->_remote stopRemoteControl];
-        [self->_remote release];
-    });
-#endif
-}
-
 - (void)restartMediaKeys
 {
     if (self->_mk_tap_port)
@@ -446,33 +408,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     return [self handleKey:mk_code(event)
                   withMask:[self keyModifierMask:event]
                 andMapping:keymapd];
-}
-
-- (void)hidRemote:(HIDRemote *)remote
-    eventWithButton:(HIDRemoteButtonCode)buttonCode
-          isPressed:(BOOL)isPressed
- fromHardwareWithAttributes:(NSMutableDictionary *)attributes
-{
-    if (!isPressed) return;
-
-    NSDictionary *keymapd = @{
-        @(kHIDRemoteButtonCodePlay):       @(MP_AR_PLAY),
-        @(kHIDRemoteButtonCodePlayHold):   @(MP_AR_PLAY_HOLD),
-        @(kHIDRemoteButtonCodeCenter):     @(MP_AR_CENTER),
-        @(kHIDRemoteButtonCodeCenterHold): @(MP_AR_CENTER_HOLD),
-        @(kHIDRemoteButtonCodeLeft):       @(MP_AR_PREV),
-        @(kHIDRemoteButtonCodeLeftHold):   @(MP_AR_PREV_HOLD),
-        @(kHIDRemoteButtonCodeRight):      @(MP_AR_NEXT),
-        @(kHIDRemoteButtonCodeRightHold):  @(MP_AR_NEXT_HOLD),
-        @(kHIDRemoteButtonCodeMenu):       @(MP_AR_MENU),
-        @(kHIDRemoteButtonCodeMenuHold):   @(MP_AR_MENU_HOLD),
-        @(kHIDRemoteButtonCodeUp):         @(MP_AR_VUP),
-        @(kHIDRemoteButtonCodeUpHold):     @(MP_AR_VUP_HOLD),
-        @(kHIDRemoteButtonCodeDown):       @(MP_AR_VDOWN),
-        @(kHIDRemoteButtonCodeDownHold):   @(MP_AR_VDOWN_HOLD),
-    };
-
-    [self handleKey:buttonCode withMask:0 andMapping:keymapd];
 }
 
 - (int)mapKeyModifiers:(int)cocoaModifiers

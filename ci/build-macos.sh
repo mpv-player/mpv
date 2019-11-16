@@ -19,7 +19,7 @@ PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" pytho
     --variant="${MPV_VARIANT}" \
     --prefix="${MPV_INSTALL_PREFIX}" \
     --enable-{gl,iconv,lcms2,libass,libass-osd,libmpv-shared,lua,jpeg,plain-gl,zlib} \
-    --enable-{apple-remote,cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}
+    --enable-{cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}
 
 python3 ./waf build --variant="${MPV_VARIANT}" -j4
 
