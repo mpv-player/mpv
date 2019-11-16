@@ -2629,6 +2629,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
             "uint frame_max;"
             "uint counter;"
         );
+    } else {
+        tone_map.compute_peak = -1;
     }
 
     // Adapt from src to dst as necessary
