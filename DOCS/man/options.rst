@@ -3127,6 +3127,18 @@ Demuxer
     the first song in the stream. Well, you won't get anything useful either
     way if the seek is outside of mpv's cache.
 
+``--demuxer-lavf-propagate-opts=<yes|no>``
+    Propagate FFmpeg-level options to recursively opened connections (default:
+    yes). This is needed because FFmpeg will apply these settings to nested
+    AVIO contexts automatically. On the other hand, this could break in certain
+    situations - it's the FFmpeg API, you just can't win.
+
+    This affects in particular the ``--timeout`` option and anything passed
+    with ``--demuxer-lavf-o``.
+
+    If this option is deemed unnecessary at some point in the future, it will
+    be removed without notice.
+
 ``--demuxer-mkv-subtitle-preroll=<yes|index|no>``, ``--mkv-subtitle-preroll``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how

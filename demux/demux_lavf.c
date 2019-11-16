@@ -79,6 +79,7 @@ struct demux_lavf_opts {
     char *sub_cp;
     int rtsp_transport;
     int linearize_ts;
+    int propagate_opts;
 };
 
 const struct m_sub_options demux_lavf_conf = {
@@ -104,6 +105,7 @@ const struct m_sub_options demux_lavf_conf = {
                 {"http", 3})),
         OPT_CHOICE("demuxer-lavf-linearize-timestamps", linearize_ts, 0,
                    ({"no", 0}, {"auto", -1}, {"yes", 1})),
+        OPT_FLAG("demuxer-lavf-propagate-opts", propagate_opts, 0),
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -118,6 +120,7 @@ const struct m_sub_options demux_lavf_conf = {
         .sub_cp = "auto",
         .rtsp_transport = 2,
         .linearize_ts = -1,
+        .propagate_opts = 1,
     },
 };
 
@@ -231,6 +234,8 @@ typedef struct lavf_priv {
 
     int linearize_ts;
     bool any_ts_fixed;
+
+    AVDictionary *av_opts;
 
     // Proxying nested streams.
     struct nested_stream *nested;
@@ -851,8 +856,27 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
     struct demuxer *demuxer = s->opaque;
     lavf_priv_t *priv = demuxer->priv;
 
+    if (priv->opts->propagate_opts) {
+        // Copy av_opts to options, but only entries that are not present in
+        // options. (Hope this will break less by not overwriting important
+        // settings.)
+        AVDictionaryEntry *cur = NULL;
+        while ((cur = av_dict_get(priv->av_opts, "", cur, AV_DICT_IGNORE_SUFFIX)))
+        {
+            if (!*options || !av_dict_get(*options, cur->key, NULL, 0)) {
+                MP_TRACE(demuxer, "Nested option: '%s'='%s'\n",
+                         cur->key, cur->value);
+                av_dict_set(options, cur->key, cur->value, 0);
+            } else {
+                MP_TRACE(demuxer, "Skipping nested option: '%s'\n", cur->key);
+            }
+        }
+    }
+
     int r = priv->default_io_open(s, pb, url, flags, options);
     if (r >= 0) {
+        if (options)
+            mp_avdict_print_unset(demuxer->log, MSGL_TRACE, *options);
         struct nested_stream nest = {
             .id = *pb,
         };
@@ -972,15 +996,18 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->access_references) {
         priv->default_io_open = avfc->io_open;
         priv->default_io_close = avfc->io_close;
-#if !HAVE_FFMPEG_STRICT_ABI
         avfc->io_open = nested_io_open;
         avfc->io_close = nested_io_close;
-#endif
     } else {
         avfc->io_open = block_io_open;
     }
 
     mp_set_avdict(&dopts, lavfdopts->avopts);
+
+    if (av_dict_copy(&priv->av_opts, dopts, 0) < 0) {
+        av_dict_free(&dopts);
+        return -1;
+    }
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
         MP_ERR(demuxer, "avformat_open_input() failed\n");
