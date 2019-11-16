@@ -1177,8 +1177,14 @@ void write_video(struct MPContext *mpctx)
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
-    if (mpctx->vo_chain->is_coverart)
+    if (vo_c->filter->got_output_eof && !mpctx->num_next_frames &&
+        mpctx->ao_chain)
+    {
+        MP_VERBOSE(mpctx, "assuming this was the last video frame\n");
+        // The main point of doing this is to prevent use of this for the
+        // playback_pts if audio is still running (=> seek behavior).
         mpctx->video_status = STATUS_EOF;
+    }
 
     if (mpctx->video_status != STATUS_EOF) {
         if (mpctx->step_frames > 0) {
