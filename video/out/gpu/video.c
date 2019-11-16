@@ -216,7 +216,6 @@ struct gl_video {
     struct ra_tex *error_diffusion_tex[2];
     struct ra_tex *screen_tex;
     struct ra_tex *output_tex;
-    struct ra_tex *vdpau_deinterleave_tex[2];
     struct ra_tex **hook_textures;
     int num_hook_textures;
     int idx_hook_textures;
@@ -1044,9 +1043,6 @@ static void uninit_video(struct gl_video *p)
     p->hwdec_active = false;
     p->hwdec_overlay = NULL;
     ra_hwdec_mapper_free(&p->hwdec_mapper);
-
-    for (int n = 0; n < 2; n++)
-        ra_tex_free(p->ra, &p->vdpau_deinterleave_tex[n]);
 }
 
 static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
@@ -3502,42 +3498,6 @@ void gl_video_perfdata(struct gl_video *p, struct voctrl_performance_data *out)
     frame_perf_data(p->pass_redraw, &out->redraw);
 }
 
-// This assumes nv12, with textures set to GL_NEAREST filtering.
-static void reinterleave_vdpau(struct gl_video *p,
-                               struct ra_tex *input[4], struct ra_tex *output[2])
-{
-    for (int n = 0; n < 2; n++) {
-        struct ra_tex **tex = &p->vdpau_deinterleave_tex[n];
-        // This is an array of the 2 to-merge planes.
-        struct ra_tex **src = &input[n * 2];
-        int w = src[0]->params.w;
-        int h = src[0]->params.h;
-        int ids[2];
-        for (int t = 0; t < 2; t++) {
-            ids[t] = pass_bind(p, (struct image){
-                .tex = src[t],
-                .multiplier = 1.0,
-                .transform = identity_trans,
-                .w = w,
-                .h = h,
-            });
-        }
-
-        pass_describe(p, "vdpau reinterleaving");
-        GLSLF("color = fract(gl_FragCoord.y * 0.5) < 0.5\n");
-        GLSLF("      ? texture(texture%d, texcoord%d)\n", ids[0], ids[0]);
-        GLSLF("      : texture(texture%d, texcoord%d);", ids[1], ids[1]);
-
-        int comps = n == 0 ? 1 : 2;
-        const struct ra_format *fmt = ra_find_unorm_format(p->ra, 1, comps);
-        ra_tex_resize(p->ra, p->log, tex, w, h * 2, fmt);
-        struct ra_fbo fbo = { *tex };
-        finish_pass_fbo(p, fbo, true, &(struct mp_rect){0, 0, w, h * 2});
-
-        output[n] = *tex;
-    }
-}
-
 // Returns false on failure.
 static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t id)
 {
@@ -3574,11 +3534,6 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
             struct mp_image layout = {0};
             mp_image_set_params(&layout, &p->image_params);
             struct ra_tex **tex = p->hwdec_mapper->tex;
-            struct ra_tex *tmp[4] = {0};
-            if (p->hwdec_mapper->vdpau_fields) {
-                reinterleave_vdpau(p, tex, tmp);
-                tex = tmp;
-            }
             for (int n = 0; n < p->plane_count; n++) {
                 vimg->planes[n] = (struct texplane){
                     .w = mp_image_plane_w(&layout, n),

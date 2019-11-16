@@ -43,7 +43,6 @@ struct ra_hwdec_mapper {
     // The common code won't mess with these, so you can e.g. set them in the
     // .init() callback.
     struct ra_tex *tex[4];
-    bool vdpau_fields;
 };
 
 // This can be used to map frames of a specific hw format as GL textures.

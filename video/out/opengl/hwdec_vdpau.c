@@ -35,13 +35,12 @@ struct priv {
     struct mp_vdpau_ctx *ctx;
     GL *gl;
     uint64_t preemption_counter;
-    GLuint gl_textures[4];
+    GLuint gl_texture;
     bool vdpgl_initialized;
     GLvdpauSurfaceNV vdpgl_surface;
     VdpOutputSurface vdp_surface;
     struct mp_vdpau_mixer *mixer;
     struct ra_imgfmt_desc direct_desc;
-    bool direct_mode;
     bool mapped;
 };
 
@@ -85,10 +84,6 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 
     if (p->mapped) {
         gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
-        if (p->direct_mode) {
-            gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);
-            p->vdpgl_surface = 0;
-        }
     }
     p->mapped = false;
 }
@@ -114,7 +109,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
         gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);
     p->vdpgl_surface = 0;
 
-    gl->DeleteTextures(4, p->gl_textures);
+    gl->DeleteTextures(1, &p->gl_texture);
 
     if (p->vdp_surface != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(p->vdp_surface);
@@ -160,58 +155,32 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     p->vdpgl_initialized = true;
 
-    p->direct_mode = mapper->dst_params.hw_subfmt == IMGFMT_NV12 ||
-                     mapper->dst_params.hw_subfmt == IMGFMT_NV24 ||
-                     mapper->dst_params.hw_subfmt == IMGFMT_420P ||
-                     mapper->dst_params.hw_subfmt == IMGFMT_444P;
-    mapper->vdpau_fields = p->direct_mode;
+    gl->GenTextures(1, &p->gl_texture);
 
-    gl->GenTextures(4, p->gl_textures);
+    gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    if (p->direct_mode) {
-        int imgfmt = mapper->dst_params.hw_subfmt;
-        if (!ra_get_imgfmt_desc(mapper->ra, imgfmt, &p->direct_desc)) {
-            MP_ERR(mapper, "Unsupported format: %s\n", mp_imgfmt_to_name(imgfmt));
-            return -1;
-        }
-        mapper->dst_params.imgfmt = p->direct_desc.chroma_w == 1 ?
-                                    IMGFMT_NV24 : IMGFMT_NV12;
-        mapper->dst_params.hw_subfmt = 0;
+    vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
+                                        VDP_RGBA_FORMAT_B8G8R8A8,
+                                        mapper->src_params.w,
+                                        mapper->src_params.h,
+                                        &p->vdp_surface);
+    CHECK_VDP_ERROR(mapper, "Error when calling vdp_output_surface_create");
 
-        for (int n = 0; n < 4; n++) {
-            gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-            gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            gl->BindTexture(GL_TEXTURE_2D, 0);
-        }
-    } else {
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[0]);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
+    p->vdpgl_surface = gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(p->vdp_surface),
+                                                        GL_TEXTURE_2D,
+                                                        1, &p->gl_texture);
+    if (!p->vdpgl_surface)
+        return -1;
 
-        vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
-                                            VDP_RGBA_FORMAT_B8G8R8A8,
-                                            mapper->src_params.w,
-                                            mapper->src_params.h,
-                                            &p->vdp_surface);
-        CHECK_VDP_ERROR(mapper, "Error when calling vdp_output_surface_create");
+    gl->VDPAUSurfaceAccessNV(p->vdpgl_surface, GL_READ_ONLY);
 
-        p->vdpgl_surface = gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(p->vdp_surface),
-                                                            GL_TEXTURE_2D,
-                                                            1, p->gl_textures);
-        if (!p->vdpgl_surface)
-            return -1;
-
-        gl->VDPAUSurfaceAccessNV(p->vdpgl_surface, GL_READ_ONLY);
-
-        mapper->dst_params.imgfmt = IMGFMT_RGB0;
-        mapper->dst_params.hw_subfmt = 0;
-    }
+    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.hw_subfmt = 0;
 
     gl_check_error(gl, mapper->log, "After initializing vdpau OpenGL interop");
 
@@ -222,8 +191,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
     GL *gl = p->gl;
-    struct vdp_functions *vdp = &p->ctx->vdp;
-    VdpStatus vdp_st;
 
     int pe = mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter);
     if (pe < 1) {
@@ -235,77 +202,33 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
             return -1;
     }
 
-    if (p->direct_mode) {
-        VdpVideoSurface surface = (intptr_t)mapper->src->planes[3];
+    if (!p->vdpgl_surface)
+        return -1;
 
-        // We need the uncropped size.
-        VdpChromaType s_chroma_type;
-        uint32_t s_w, s_h;
-        vdp_st = vdp->video_surface_get_parameters(surface, &s_chroma_type, &s_w, &s_h);
-        CHECK_VDP_ERROR(mapper, "Error when calling vdp_video_surface_get_parameters");
+    mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, mapper->src,
+                            NULL);
 
-        p->vdpgl_surface = gl->VDPAURegisterVideoSurfaceNV(BRAINDEATH(surface),
-                                                           GL_TEXTURE_2D,
-                                                           4, p->gl_textures);
-        if (!p->vdpgl_surface)
-            return -1;
+    gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
 
-        gl->VDPAUSurfaceAccessNV(p->vdpgl_surface, GL_READ_ONLY);
-        gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
+    p->mapped = true;
 
-        p->mapped = true;
+    struct ra_tex_params params = {
+        .dimensions = 2,
+        .w = mapper->src_params.w,
+        .h = mapper->src_params.h,
+        .d = 1,
+        .format = ra_find_unorm_format(mapper->ra, 1, 4),
+        .render_src = true,
+        .src_linear = true,
+    };
 
-        for (int n = 0; n < 4; n++) {
-            bool chroma = n >= 2;
-            int w_scale = chroma ? p->direct_desc.chroma_w : 1;
-            int h_scale = chroma ? p->direct_desc.chroma_h * 2 : 2;
+    if (!params.format)
+        return -1;
 
-            struct ra_tex_params params = {
-                .dimensions = 2,
-                .w = s_w / w_scale,
-                .h = s_h / h_scale,
-                .d = 1,
-                .format = ra_find_unorm_format(mapper->ra, 1, chroma ? 2 : 1),
-                .render_src = true,
-            };
-
-            if (!params.format)
-                return -1;
-
-            mapper->tex[n] =
-                ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[n]);
-            if (!mapper->tex[n])
-                return -1;
-        }
-    } else {
-        if (!p->vdpgl_surface)
-            return -1;
-
-        mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, mapper->src,
-                              NULL);
-
-        gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
-
-        p->mapped = true;
-
-        struct ra_tex_params params = {
-            .dimensions = 2,
-            .w = mapper->src_params.w,
-            .h = mapper->src_params.h,
-            .d = 1,
-            .format = ra_find_unorm_format(mapper->ra, 1, 4),
-            .render_src = true,
-            .src_linear = true,
-        };
-
-        if (!params.format)
-            return -1;
-
-        mapper->tex[0] =
-            ra_create_wrapped_tex(mapper->ra, &params, p->gl_textures[0]);
-        if (!mapper->tex[0])
-            return -1;
-    }
+    mapper->tex[0] =
+        ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
+    if (!mapper->tex[0])
+        return -1;
 
     return 0;
 }
