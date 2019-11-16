@@ -494,12 +494,11 @@ static int video_output_image(struct MPContext *mpctx)
                 mp_pin_out_unread(vo_c->filter->f->pins[1], frame);
                 img = NULL;
                 r = VD_EOF;
-            } else if (hrseek && mpctx->hrseek_lastframe) {
+            } else if (hrseek && (img->pts < mpctx->hrseek_pts - .005 ||
+                                  mpctx->hrseek_lastframe))
+            {
+                /* just skip - but save in case it was the last frame */
                 mp_image_setrefp(&mpctx->saved_frame, img);
-            } else if (hrseek && img->pts < mpctx->hrseek_pts - .005) {
-                /* just skip - but save if backstep active */
-                if (mpctx->hrseek_backstep)
-                    mp_image_setrefp(&mpctx->saved_frame, img);
             } else if (mpctx->video_status == STATUS_SYNCING &&
                        mpctx->playback_pts != MP_NOPTS_VALUE &&
                        img->pts < mpctx->playback_pts && !vo_c->is_coverart)
@@ -522,8 +521,8 @@ static int video_output_image(struct MPContext *mpctx)
         }
     }
 
-    // Last-frame seek
-    if (r <= 0 && hrseek && mpctx->hrseek_lastframe && mpctx->saved_frame) {
+    // If hr-seek went past EOF, use the last frame.
+    if (r <= 0 && hrseek && mpctx->saved_frame && r == VD_EOF) {
         add_new_frame(mpctx, mpctx->saved_frame);
         mpctx->saved_frame = NULL;
         r = VD_PROGRESS;
