@@ -661,11 +661,13 @@ static void read_frame(struct priv *p)
 
     if (p->decoded_coverart.type) {
         if (p->coverart_returned == 0) {
-            mp_pin_in_write(pin, mp_frame_ref(p->decoded_coverart));
+            frame = mp_frame_ref(p->decoded_coverart);
             p->coverart_returned = 1;
+            goto output_frame;
         } else if (p->coverart_returned == 1) {
-            mp_pin_in_write(pin, MP_EOF_FRAME);
+            frame = MP_EOF_FRAME;
             p->coverart_returned = 2;
+            goto output_frame;
         }
         return;
     }
