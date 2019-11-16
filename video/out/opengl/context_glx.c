@@ -339,6 +339,8 @@ static bool glx_init(struct ra_ctx *ctx)
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto uninit;
 
+    ra_add_native_resource(ctx->ra, "x11", vo->x11->display);
+
     return true;
 
 uninit:
