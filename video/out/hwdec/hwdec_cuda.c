@@ -37,6 +37,7 @@ int check_cu(const struct ra_hwdec *hw, CUresult err, const char *func)
     const char *err_string;
 
     struct cuda_hw_priv *p = hw->priv;
+    int level = hw->probing ? MSGL_V : MSGL_ERR;
 
     MP_TRACE(hw, "Calling %s\n", func);
 
@@ -46,10 +47,10 @@ int check_cu(const struct ra_hwdec *hw, CUresult err, const char *func)
     p->cu->cuGetErrorName(err, &err_name);
     p->cu->cuGetErrorString(err, &err_string);
 
-    MP_ERR(hw, "%s failed", func);
+    MP_MSG(hw, level, "%s failed", func);
     if (err_name && err_string)
-        MP_ERR(hw, " -> %s: %s", err_name, err_string);
-    MP_ERR(hw, "\n");
+        MP_MSG(hw, level, " -> %s: %s", err_name, err_string);
+    MP_MSG(hw, level, "\n");
 
     return -1;
 }
