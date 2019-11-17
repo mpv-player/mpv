@@ -345,6 +345,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     }
 
     mp_init_paths(mpctx->global, opts);
+    mp_msg_set_early_logging(mpctx->global, true);
     mp_update_logging(mpctx, true);
 
     if (options) {

@@ -43,6 +43,8 @@
 #include "msg.h"
 #include "msg_control.h"
 
+#define TERM_BUF 100
+
 struct mp_log_root {
     struct mpv_global *global;
     // --- protected by mp_msg_lock
@@ -58,6 +60,7 @@ struct mp_log_root {
     bool force_stderr;
     struct mp_log_buffer **buffers;
     int num_buffers;
+    struct mp_log_buffer *early_buffer;
     FILE *log_file;
     FILE *stats_file;
     char *log_path;
@@ -85,6 +88,7 @@ struct mp_log_buffer {
     struct mp_log_root *root;
     struct mp_ring *ring;
     int level;
+    atomic_bool silent;
     void (*wakeup_cb)(void *ctx);
     void *wakeup_cb_ctx;
 };
@@ -323,7 +327,7 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
                 };
             }
             mp_ring_write(buffer->ring, (unsigned char *)&entry, sizeof(entry));
-            if (buffer->wakeup_cb)
+            if (buffer->wakeup_cb && !atomic_load(&buffer->silent))
                 buffer->wakeup_cb(buffer->wakeup_cb_ctx);
         }
     }
@@ -548,6 +552,9 @@ bool mp_msg_has_log_file(struct mpv_global *global)
 void mp_msg_uninit(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
+    if (root->early_buffer)
+        mp_msg_log_buffer_destroy(root->early_buffer);
+    assert(root->num_buffers == 0);
     if (root->stats_file)
         fclose(root->stats_file);
     talloc_free(root->stats_path);
@@ -559,6 +566,32 @@ void mp_msg_uninit(struct mpv_global *global)
     global->log = NULL;
 }
 
+void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
+{
+    struct mp_log_root *root = global->log->root;
+    pthread_mutex_lock(&mp_msg_lock);
+
+    if (enable != !!root->early_buffer) {
+        if (enable) {
+            pthread_mutex_unlock(&mp_msg_lock);
+            struct mp_log_buffer *buf =
+                mp_msg_log_buffer_new(global, TERM_BUF, MP_LOG_BUFFER_MSGL_TERM,
+                                      NULL, NULL);
+            pthread_mutex_lock(&mp_msg_lock);
+            assert(!root->early_buffer); // no concurrent calls to this function
+            root->early_buffer = buf;
+        } else {
+            struct mp_log_buffer *buf = root->early_buffer;
+            root->early_buffer = NULL;
+            pthread_mutex_unlock(&mp_msg_lock);
+            mp_msg_log_buffer_destroy(buf);
+            return;
+        }
+    }
+
+    pthread_mutex_unlock(&mp_msg_lock);
+}
+
 struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
                                             int size, int level,
                                             void (*wakeup_cb)(void *ctx),
@@ -567,6 +600,21 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
     struct mp_log_root *root = global->log->root;
 
     pthread_mutex_lock(&mp_msg_lock);
+
+    if (level == MP_LOG_BUFFER_MSGL_TERM) {
+        size = TERM_BUF;
+
+        // The first thing which creates a terminal-level log buffer gets the
+        // early log buffer, if it exists. This is supposed to enable a script
+        // to grab log messages from before it was initialized. It's OK that
+        // this works only for 1 script and only once.
+        if (root->early_buffer) {
+            struct mp_log_buffer *buffer = root->early_buffer;
+            root->early_buffer = NULL;
+            pthread_mutex_unlock(&mp_msg_lock);
+            return buffer;
+        }
+    }
 
     struct mp_log_buffer *buffer = talloc_ptrtype(NULL, buffer);
     *buffer = (struct mp_log_buffer) {
@@ -585,6 +633,13 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
     pthread_mutex_unlock(&mp_msg_lock);
 
     return buffer;
+}
+
+void mp_msg_log_buffer_set_silent(struct mp_log_buffer *buffer, bool silent)
+{
+    pthread_mutex_lock(&mp_msg_lock);
+    atomic_store(&buffer->silent, silent);
+    pthread_mutex_unlock(&mp_msg_lock);
 }
 
 void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer)
@@ -607,6 +662,7 @@ void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer)
 found:
 
     while (1) {
+        atomic_store(&buffer->silent, false);
         struct mp_log_buffer_entry *e = mp_msg_log_buffer_read(buffer);
         if (!e)
             break;
@@ -622,6 +678,8 @@ found:
 // Thread-safety: one buffer can be read by a single thread only.
 struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
 {
+    if (atomic_load(&buffer->silent))
+        return NULL;
     void *ptr = NULL;
     int read = mp_ring_read(buffer->ring, (unsigned char *)&ptr, sizeof(ptr));
     if (read == 0)

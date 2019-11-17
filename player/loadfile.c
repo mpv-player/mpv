@@ -35,6 +35,7 @@
 
 #include "client.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "common/global.h"
 #include "options/path.h"
 #include "options/m_config.h"
@@ -1766,6 +1767,8 @@ void mp_play_files(struct MPContext *mpctx)
         mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
         MP_VERBOSE(mpctx, "Done loading scripts.\n");
     }
+    // After above is finished; but even if it's skipped.
+    mp_msg_set_early_logging(mpctx->global, false);
 
     prepare_playlist(mpctx, mpctx->playlist);
 

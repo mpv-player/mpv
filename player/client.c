@@ -144,6 +144,7 @@ struct mpv_handle {
     bool fuzzy_initialized; // see scripting.c wait_loaded()
     bool is_weak;           // can not keep core alive on its own
     struct mp_log_buffer *messages;
+    int messages_level;
 };
 
 static bool gen_log_message_event(struct mpv_handle *ctx);
@@ -1703,29 +1704,43 @@ static void msg_wakeup(void *p)
     wakeup_client(ctx);
 }
 
+// Undocumented: if min_level starts with "silent:", then log messages are not
+// returned to the API user, but are stored until logging is enabled normally
+// again by calling this without "silent:". (Using a different level will
+// flush it, though.)
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 {
+    bstr blevel = bstr0(min_level);
+    bool silent = bstr_eatstart0(&blevel, "silent:");
+
     int level = -1;
     for (int n = 0; n < MSGL_MAX + 1; n++) {
-        if (mp_log_levels[n] && strcmp(min_level, mp_log_levels[n]) == 0) {
+        if (mp_log_levels[n] && bstr_equals0(blevel, mp_log_levels[n])) {
             level = n;
             break;
         }
     }
-    if (strcmp(min_level, "terminal-default") == 0)
+    if (bstr_equals0(blevel, "terminal-default"))
         level = MP_LOG_BUFFER_MSGL_TERM;
 
     if (level < 0 && strcmp(min_level, "no") != 0)
         return MPV_ERROR_INVALID_PARAMETER;
 
     pthread_mutex_lock(&ctx->lock);
-    mp_msg_log_buffer_destroy(ctx->messages);
-    ctx->messages = NULL;
-    if (level >= 0) {
-        int size = level >= MSGL_V ? 10000 : 1000;
-        ctx->messages = mp_msg_log_buffer_new(ctx->mpctx->global, size, level,
-                                              msg_wakeup, ctx);
+    if (level < 0 || level != ctx->messages_level) {
+        mp_msg_log_buffer_destroy(ctx->messages);
+        ctx->messages = NULL;
     }
+    if (level >= 0) {
+        if (!ctx->messages) {
+            int size = level >= MSGL_V ? 10000 : 1000;
+            ctx->messages = mp_msg_log_buffer_new(ctx->mpctx->global, size,
+                                                  level, msg_wakeup, ctx);
+            ctx->messages_level = level;
+        }
+        mp_msg_log_buffer_set_silent(ctx->messages, silent);
+    }
+    wakeup_client(ctx);
     pthread_mutex_unlock(&ctx->lock);
     return 0;
 }
