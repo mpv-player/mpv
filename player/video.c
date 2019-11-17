@@ -455,7 +455,18 @@ static bool have_new_frame(struct MPContext *mpctx, bool eof)
 static int video_output_image(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
-    bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
+    bool hrseek = false;
+    double hrseek_pts = mpctx->hrseek_pts;
+    if (mpctx->video_status == STATUS_SYNCING) {
+        hrseek = mpctx->hrseek_active;
+        // playback_pts is normally only set when audio and video have started
+        // playing normally. If video is in syncing mode, then this must mean
+        // video was just enabled via track switching - skip to current time.
+        if (!hrseek && mpctx->playback_pts != MP_NOPTS_VALUE) {
+            hrseek = true;
+            hrseek_pts = mpctx->playback_pts;
+        }
+    }
 
     if (vo_c->is_coverart) {
         if (vo_has_frame(mpctx->video_out))
@@ -494,16 +505,11 @@ static int video_output_image(struct MPContext *mpctx)
                 mp_pin_out_unread(vo_c->filter->f->pins[1], frame);
                 img = NULL;
                 r = VD_EOF;
-            } else if (hrseek && (img->pts < mpctx->hrseek_pts - .005 ||
+            } else if (hrseek && (img->pts < hrseek_pts - .005 ||
                                   mpctx->hrseek_lastframe))
             {
                 /* just skip - but save in case it was the last frame */
                 mp_image_setrefp(&mpctx->saved_frame, img);
-            } else if (mpctx->video_status == STATUS_SYNCING &&
-                       mpctx->playback_pts != MP_NOPTS_VALUE &&
-                       img->pts < mpctx->playback_pts && !vo_c->is_coverart)
-            {
-                /* skip after stream-switching */
             } else {
                 if (hrseek && mpctx->hrseek_backstep) {
                     if (mpctx->saved_frame) {
