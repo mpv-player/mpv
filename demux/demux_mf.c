@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -163,14 +164,15 @@ static mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename
 static void demux_seek_mf(demuxer_t *demuxer, double seek_pts, int flags)
 {
     mf_t *mf = demuxer->priv;
-    int newpos = seek_pts * mf->sh->codec->fps;
+    double newpos = seek_pts * mf->sh->codec->fps;
     if (flags & SEEK_FACTOR)
         newpos = seek_pts * (mf->nr_of_files - 1);
-    if (newpos < 0)
-        newpos = 0;
-    if (newpos >= mf->nr_of_files)
-        newpos = mf->nr_of_files;
-    mf->curr_frame = newpos;
+    if (flags & SEEK_FORWARD) {
+        newpos = ceil(newpos);
+    } else {
+        newpos = MPMIN(floor(newpos), mf->nr_of_files - 1);
+    }
+    mf->curr_frame = MPCLAMP((int)newpos, 0, mf->nr_of_files);
 }
 
 static bool demux_mf_read_packet(struct demuxer *demuxer,
