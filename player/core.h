@@ -171,7 +171,6 @@ struct vo_chain {
 
     struct mp_output_chain *filter;
 
-    //struct vf_chain *vf;
     struct vo *vo;
 
     struct track *track;
