@@ -596,9 +596,11 @@ static int script_request_event(lua_State *L)
 static int script_enable_messages(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    check_loglevel(L, 1);
     const char *level = luaL_checkstring(L, 1);
-    return check_error(L, mpv_request_log_messages(ctx->client, level));
+    int r = mpv_request_log_messages(ctx->client, level);
+    if (r == MPV_ERROR_INVALID_PARAMETER)
+        luaL_error(L, "Invalid log level '%s'", level);
+    return check_error(L, r);
 }
 
 static int script_command(lua_State *L)
