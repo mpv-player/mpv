@@ -270,6 +270,7 @@ static bool cuda_ext_vk_signal(const struct ra_hwdec_mapper *mapper, int n)
 
 bool cuda_vk_init(const struct ra_hwdec *hw) {
     int ret = 0;
+    int level = hw->probing ? MSGL_V : MSGL_ERR;
     struct cuda_hw_priv *p = hw->priv;
     CudaFunctions *cu = p->cu;
 
@@ -297,7 +298,7 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
     }
 
     if (!cu->cuImportExternalMemory) {
-        MP_ERR(hw, "CUDA hwdec with Vulkan requires driver version 410.48 or newer.\n");
+        MP_MSG(hw, level, "CUDA hwdec with Vulkan requires driver version 410.48 or newer.\n");
         return false;
     }
 
@@ -325,7 +326,7 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
     }
 
     if (display_dev == -1) {
-        MP_ERR(hw, "Could not match Vulkan display device in CUDA.\n");
+        MP_MSG(hw, level, "Could not match Vulkan display device in CUDA.\n");
         return false;
     }
 
