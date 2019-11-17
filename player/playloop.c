@@ -1055,7 +1055,6 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
 static void handle_playback_time(struct MPContext *mpctx)
 {
     if (mpctx->vo_chain &&
-        !mpctx->vo_chain->is_coverart &&
         !mpctx->vo_chain->is_sparse &&
         mpctx->video_status >= STATUS_PLAYING &&
         mpctx->video_status < STATUS_EOF)
