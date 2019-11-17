@@ -36,6 +36,8 @@ Interface changes
       outputs like vo_x11 and vo_drm, and screenshots, but not much else.
     - deprecate --input-file (there are no plans to remove this short-term,
       but it will probably eventually go away)
+    - deprecate --video-sync=display-adrop (might be removed if it's in the way;
+      undeprecated or readded if it's not too much of a problem)
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
