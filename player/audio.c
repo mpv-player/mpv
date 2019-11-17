@@ -656,6 +656,9 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     }
     ptsdiff = MPCLAMP(ptsdiff, -3600, 3600);
 
+    MP_VERBOSE(mpctx, "audio sync: sync_to_video=%d, offset=%f\n",
+               sync_to_video, ptsdiff);
+
     int align = af_format_sample_alignment(ao_format);
     *skip = (int)(-ptsdiff * play_samplerate) / align * align;
     return true;
