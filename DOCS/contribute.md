@@ -68,6 +68,10 @@ Write good commit messages
 
   Having a prefix gives context, and is especially useful when trying to find
   a specific change by looking at the history, or when running ``git blame``.
+- The first word after the ``:`` is lower case.
+- Don't end the subject line with a ``.``.
+- Put an empty line between the subject line and the commit message.
+  If this is missing, it will break display in common git tools.
 - The body of the commit message (everything else after the subject line) should
   be as informative as possible and contain everything that isn't obvious. Don't
   hesitate to dump as much information as you can - it doesn't cost you
@@ -81,9 +85,6 @@ Write good commit messages
   tools usually do not break text automatically. On the other hand, you do not
   need to break text that would be unnatural to break (like data for test cases,
   or long URLs).
-
-  Important: put an empty line between the subject line and the commit message.
-  If this is missing, it will break display in common git tools.
 - Another summary of good conventions: https://chris.beams.io/posts/git-commit/
 
 Split changes into multiple commits
@@ -95,6 +96,9 @@ Split changes into multiple commits
   additional cosmetic changes in the same file you're working on. But don't do
   something like reformatting a whole file, and hiding an actual functional
   change in the same commit.
+- Splitting changes does _not_ mean that you should make them as fine-grained
+  as possible. Commits should form logical steps in development. The way you
+  split changes is important for code review and analyzing bugs.
 
 Touching user-visible parts may require updating the mpv docs
 -------------------------------------------------------------
