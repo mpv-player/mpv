@@ -41,6 +41,8 @@ commands they're bound to on the OSD, instead of executing the commands::
 (Only closing the window will make **mpv** exit, pressing normal keys will
 merely display the binding, even if mapped to quit.)
 
+Also see `Key names`_.
+
 input.conf syntax
 -----------------
 
@@ -77,6 +79,78 @@ If ``a`` or ``a-b`` or ``b`` are already bound, this will run the first command
 that matches, and the multi-key command will never be called. Intermediate keys
 can be remapped to ``ignore`` in order to avoid this issue. The maximum number
 of (non-modifier) keys for combinations is currently 4.
+
+Key names
+---------
+
+All mouse and keyboard input is to converted to mpv-specific key names. Key
+names are either special symbolic identifiers representing a physical key, or a
+text key names, which are unicode code points encoded as UTF-8. These are what
+keyboard input would normally produce, for example ``a`` for the A key. As a
+consequence, mpv uses input translated by the current OS keyboard layout, rather
+than physical scan codes.
+
+Currently there is the hardcoded assumption that every text key can be
+represented as a single unicode code point (in NFKC form).
+
+All key names can be combined with the modifiers ``Shift``, ``Ctrl``, ``Alt``,
+``Meta``. They must be prefixed to the actual key name, where each modifier
+is followed by a ``+`` (for example ``ctrl+q``).
+
+Symbolic key names and modifier names are case-insensitive. Unicode key names
+are case-sensitive because input bindings typically respect the shift key.
+
+Another type of key names are hexadecimal key names, that serve as fallback
+for special keys that are neither unicode, nor have a special mpv defined name.
+They will break as soon as mpv adds proper names for them, but can enable you
+to use a key at all if that does not happen.
+
+All symbolic names are listed by ``--input-keylist``. ``--input-test`` is a
+special mode that prints all input on the OSD.
+
+Comments on some symbolic names:
+
+``KP*``
+    Keypad names. Behavior varies by backend (whether they implement this, and
+    on how they treat numlock), but typically, mpv tries to map keys on the
+    keypad to separate names, even if they produce the same text as normal keys.
+
+``MOUSE_BTN*``, ``MBTN*``
+    Various mouse buttons.
+
+    Depending on backend, the mouse wheel might also be represented as a button.
+    In addition, ``MOUSE_BTN3`` to ``MOUSE_BTN6`` are deprecated aliases for
+    ``WHEEL_UP``, ``WHEEL_DOWN``, ``WHEEL_LEFT``, ``WHEEL_RIGHT``.
+
+    ``MBTN*`` are aliases for ``MOUSE_BTN*``.
+
+``WHEEL_*``
+    Mouse wheels (typically).
+
+``AXIS_*``
+    Deprecated aliases for ``WHEEL_*``.
+
+``*_DBL``
+    Mouse button double clicks.
+
+``MOUSE_MOVE``, ``MOUSE_ENTER``, ``MOUSE_LEAVE``
+    Emitted by mouse move events. Enter/leave happens when the mouse enters or
+    leave the mpv window (or the current mouse region, using the deprecated
+    mouse region input section mechanism).
+
+``CLOSE_WIN``
+    Pseudo key emitted when closing the mpv window using the OS window manager
+    (for example, by clicking the close button in the window title bar).
+
+``GAMEPAD_*``
+    Keys emitted by the SDL gamepad backend.
+
+``AR_*``
+    Keys emitted by the OSX-only Apple Remote code.
+
+``UNMAPPED``
+    Pseudo-key that matches any unmapped key. (You should probably avoid this
+    if possible, because it might change behavior or get removed in the future.)
 
 Flat command syntax
 -------------------
