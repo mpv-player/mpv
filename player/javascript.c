@@ -561,9 +561,10 @@ static void script__request_event(js_State *J)
 static void script_enable_messages(js_State *J)
 {
     const char *level = js_tostring(J, 1);
-    if (mp_msg_find_level(level) < 0)
+    int e = mpv_request_log_messages(jclient(J), level);
+    if (e == MPV_ERROR_INVALID_PARAMETER)
         js_error(J, "Invalid log level '%s'", level);
-    push_status(J, mpv_request_log_messages(jclient(J), level));
+    push_status(J, e);
 }
 
 // args - command [with arguments] as string
