@@ -38,6 +38,8 @@ Interface changes
       but it will probably eventually go away)
     - deprecate --video-sync=display-adrop (might be removed if it's in the way;
       undeprecated or readded if it's not too much of a problem)
+    - deprecate all input section commands (these will be changed/removed, as
+      soon as mpv internals do not require them anymore)
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
