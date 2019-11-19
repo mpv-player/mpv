@@ -54,10 +54,10 @@ local function reserve_binding()
     return "__keybinding" .. tostring(message_id)
 end
 
-local function dispatch_key_binding(name, state)
+local function dispatch_key_binding(name, state, key_name)
     local fn = dispatch_key_bindings[name]
     if fn then
-        fn(name, state)
+        fn(name, state, key_name)
     end
 end
 
@@ -176,10 +176,11 @@ local function add_binding(attrs, key, name, fn, rp)
             ["r"] = "repeat",
             ["p"] = "press",
         }
-        key_cb = function(name, state)
+        key_cb = function(name, state, key_name)
             fn({
                 event = key_states[state:sub(1, 1)] or "unknown",
-                is_mouse = state:sub(2, 2) == "m"
+                is_mouse = state:sub(2, 2) == "m",
+                key = key_name,
             })
         end
         msg_cb = function()

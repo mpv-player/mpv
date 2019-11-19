@@ -253,9 +253,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             events (as well as key repeat, if enabled), with the first
             argument being a table. This table has an ``event`` entry, which
             is set to one of the strings ``down``, ``repeat``, ``up`` or
-            ``press`` (the latter if key up/down can't be tracked). It further
-            has an ``is_mouse`` entry, which tells whether the event was caused
-            by a mouse button.
+            ``press`` (the latter if key up/down can't be tracked). The
+            ``is_mouse`` entry tells whether the event was caused by a mouse
+            button. The ``key_name`` entry contains the name of they key that
+            triggered this, or ``nil`` if unknown or invoked artificially.
 
     Internally, key bindings are dispatched via the ``script-message-to`` or
     ``script-binding`` input commands and ``mp.register_script_message``.
