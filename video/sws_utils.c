@@ -309,7 +309,9 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
         return -1;
 
+#if HAVE_ZIMG
 success:
+#endif
     ctx->force_reload = false;
     *ctx->cached = *ctx;
     return 1;
