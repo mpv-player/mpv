@@ -180,7 +180,7 @@ local function add_binding(attrs, key, name, fn, rp)
             fn({
                 event = key_states[state:sub(1, 1)] or "unknown",
                 is_mouse = state:sub(2, 2) == "m",
-                key = key_name,
+                key_name = key_name,
             })
         end
         msg_cb = function()
