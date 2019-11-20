@@ -221,7 +221,7 @@ function add_binding(forced, key, name, fn, opts) {
             fn({
                 event: KEY_STATES[state[0]] || "unknown",
                 is_mouse: state[1] == "m",
-                key: key_name || undefined
+                key_name: key_name || undefined
             });
         }
     } else {
