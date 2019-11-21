@@ -262,8 +262,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
                 Boolean Whether the event was caused by a mouse button.
 
             ``key_name``
-                The name of they key that triggered this, or ``nil`` if unknown
-                or invoked artificially.
+                The name of they key that triggered this, or ``nil`` if invoked
+                artificially. If the key name is unknown, it's an empty string.
 
     Internally, key bindings are dispatched via the ``script-message-to`` or
     ``script-binding`` input commands and ``mp.register_script_message``.
