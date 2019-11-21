@@ -208,6 +208,7 @@ static const struct key_name key_names[] = {
   { MP_KEY_MOUSE_ENTER, "MOUSE_ENTER" },
 
   { MP_KEY_UNMAPPED,    "UNMAPPED" },
+  { MP_KEY_ANY_UNICODE, "ANY_UNICODE" },
 
   { 0, NULL }
 };
@@ -271,8 +272,7 @@ static void mp_input_append_key_name(bstr *buf, int key)
         }
     }
 
-    // printable, and valid unicode range
-    if (key >= 32 && key <= 0x10FFFF) {
+    if (MP_KEY_IS_UNICODE(key)) {
         mp_append_utf8_bstr(NULL, buf, key);
         return;
     }

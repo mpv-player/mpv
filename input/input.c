@@ -456,7 +456,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     if (ictx->opts->test)
         return handle_test(ictx, code);
 
-    struct cmd_bind *cmd = find_any_bind_for_key(ictx, force_section, code);
+    struct cmd_bind *cmd = NULL;
+
+    if (MP_KEY_IS_UNICODE(code))
+        cmd = find_any_bind_for_key(ictx, force_section, MP_KEY_ANY_UNICODE);
+    if (!cmd)
+        cmd = find_any_bind_for_key(ictx, force_section, code);
     if (!cmd)
         cmd = find_any_bind_for_key(ictx, force_section, MP_KEY_UNMAPPED);
     if (!cmd) {

@@ -22,6 +22,10 @@
 // Special keys come after this.
 #define MP_KEY_BASE (1<<21)
 
+// printable, and valid unicode range (we don't care too much about whether
+// certain sub-ranges are reserved and disallowed, like surrogate pairs)
+#define MP_KEY_IS_UNICODE(key) ((key) >= 32 && (key) <= 0x10FFFF)
+
 #define MP_KEY_ENTER 13
 #define MP_KEY_TAB 9
 
@@ -210,7 +214,8 @@
     (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_MOUSE_MOVE(code))
 
 // No input source should generate this.
-#define MP_KEY_UNMAPPED (MP_KEY_INTERN+4)
+#define MP_KEY_UNMAPPED         (MP_KEY_INTERN+4)
+#define MP_KEY_ANY_UNICODE      (MP_KEY_INTERN+5)
 
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
