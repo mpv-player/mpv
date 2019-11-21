@@ -5516,9 +5516,10 @@ static void cmd_script_binding(void *p)
     char state[3] = {'p', incmd->is_mouse_button ? 'm' : '-'};
     if (incmd->is_up_down)
         state[0] = incmd->repeated ? 'r' : (incmd->is_up ? 'u' : 'd');
-    event.num_args = 4;
-    event.args = (const char*[4]){"key-binding", name, state,
-                                  incmd->key_name ? incmd->key_name : ""};
+    event.num_args = 5;
+    event.args = (const char*[5]){"key-binding", name, state,
+                                  incmd->key_name ? incmd->key_name : "",
+                                  incmd->key_text ? incmd->key_text : ""};
     if (mp_client_send_event_dup(mpctx, target,
                                  MPV_EVENT_CLIENT_MESSAGE, &event) < 0)
     {

@@ -114,6 +114,7 @@ typedef struct mp_cmd {
     const struct mp_cmd_def *def;
     char *sender; // name of the client API user which sent this
     char *key_name; // string representation of the key binding
+    char *key_text; // text if key is a text key
 } mp_cmd_t;
 
 extern const struct mp_cmd_def mp_cmds[];

@@ -265,6 +265,11 @@ The ``mp`` module is preloaded, although it can be loaded manually with
                 The name of they key that triggered this, or ``nil`` if invoked
                 artificially. If the key name is unknown, it's an empty string.
 
+            ``key_text``
+                Text if triggered by a text key, otherwise ``nil``. See
+                description of ``script-binding`` command for details (this
+                field is equivalent to the 5th argument).
+
     Internally, key bindings are dispatched via the ``script-message-to`` or
     ``script-binding`` input commands and ``mp.register_script_message``.
 

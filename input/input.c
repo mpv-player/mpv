@@ -481,6 +481,11 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         ret->key_name = talloc_steal(ret, mp_input_get_key_combo_name(&code, 1));
         MP_TRACE(ictx, "key '%s' -> '%s' in '%s'\n",
                  ret->key_name, cmd->cmd, ret->input_section);
+        if (MP_KEY_IS_UNICODE(code)) {
+            bstr text = {0};
+            mp_append_utf8_bstr(ret, &text, code);
+            ret->key_text = text.start;
+        }
         ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {
         char *key_buf = mp_input_get_key_combo_name(&code, 1);

@@ -511,6 +511,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     }
     ret->original = bstrdup(ret, cmd->original);
     ret->key_name = talloc_strdup(ret, ret->key_name);
+    ret->key_text = talloc_strdup(ret, ret->key_text);
 
     if (cmd->def == &mp_cmd_list) {
         struct mp_cmd *prev = NULL;

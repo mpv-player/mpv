@@ -971,14 +971,22 @@ Input Commands that are Possibly Subject to Change
     2. The name of the binding (as established above).
     3. The key state as string (see below).
     4. The key name (since mpv 0.15.0).
+    5. The text the key would produce, or empty string if not applicable.
 
-    The key state consists of 2 letters:
+    The 5th argument is only set if no modifiers are present (using the shift
+    key with a letter is normally not emitted as having a modifier, and results
+    in upper case text instead, but some backends may mess up).
+
+    The key state consists of 2 characters:
 
     1. One of ``d`` (key was pressed down), ``u`` (was released), ``r`` (key
        is still down, and was repeated; only if key repeat is enabled for this
        binding), ``p`` (key was pressed; happens if up/down can't be tracked).
     2. Whether the event originates from the mouse, either ``m`` (mouse button)
        or ``-`` (something else).
+
+    Future versions can add more arguments and more key state characters to
+    support more input peculiarities.
 
 ``ab-loop``
     Cycle through A-B loop states. The first command will set the ``A`` point
