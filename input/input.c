@@ -553,7 +553,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
     int state = code & (MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
     code = code & ~(unsigned)state;
 
-    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
+    if (mp_msg_test(ictx->log, MSGL_TRACE)) {
         char *key = mp_input_get_key_name(code);
         MP_TRACE(ictx, "key code=%#x '%s'%s%s\n",
                  code, key, (state & MP_KEY_STATE_DOWN) ? " down" : "",
