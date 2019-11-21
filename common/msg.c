@@ -611,6 +611,8 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
         if (root->early_buffer) {
             struct mp_log_buffer *buffer = root->early_buffer;
             root->early_buffer = NULL;
+            buffer->wakeup_cb = wakeup_cb;
+            buffer->wakeup_cb_ctx = wakeup_cb_ctx;
             pthread_mutex_unlock(&mp_msg_lock);
             return buffer;
         }
