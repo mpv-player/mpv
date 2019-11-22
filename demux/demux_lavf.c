@@ -1123,7 +1123,7 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
             return true;
         if (r == AVERROR_EOF)
             return false;
-        MP_WARN(demux, "error reading packet.\n");
+        MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         return false;
     }
 
