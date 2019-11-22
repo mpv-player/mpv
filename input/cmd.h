@@ -99,7 +99,7 @@ typedef struct mp_cmd {
     struct mp_cmd_arg *args;
     int nargs;
     int flags; // mp_cmd_flags bitfield
-    bstr original;
+    char *original;
     char *input_section;
     bool is_up_down : 1;
     bool is_up : 1;

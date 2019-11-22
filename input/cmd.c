@@ -413,7 +413,7 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
     }
 
     bstr orig = {ctx->start.start, ctx->str.start - ctx->start.start};
-    cmd->original = bstrdup(cmd, bstr_strip(orig));
+    cmd->original = bstrto0(cmd, bstr_strip(orig));
 
     *str = ctx->str;
     return cmd;
@@ -449,7 +449,7 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
             *list = (struct mp_cmd) {
                 .name = (char *)mp_cmd_list.name,
                 .def = &mp_cmd_list,
-                .original = bstrdup(list, original),
+                .original = bstrto0(list, original),
             };
             talloc_steal(list, cmd);
             struct mp_cmd_arg arg = {0};
@@ -509,7 +509,8 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
         ret->args[i].type = cmd->args[i].type;
         m_option_copy(ret->args[i].type, &ret->args[i].v, &cmd->args[i].v);
     }
-    ret->original = bstrdup(ret, cmd->original);
+    ret->original = talloc_strdup(ret, cmd->original);
+    ret->sender = NULL;
     ret->key_name = talloc_strdup(ret, ret->key_name);
     ret->key_text = talloc_strdup(ret, ret->key_text);
 

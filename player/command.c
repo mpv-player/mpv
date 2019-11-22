@@ -4819,8 +4819,8 @@ static void cmd_add_cycle(void *p)
 
     char *property = cmd->args[0].v.s;
     if (cmd->cmd->repeated && !check_property_autorepeat(property, mpctx)) {
-        MP_VERBOSE(mpctx, "Dropping command '%.*s' from auto-repeated key.\n",
-                   BSTR_P(cmd->cmd->original));
+        MP_VERBOSE(mpctx, "Dropping command '%s' from auto-repeated key.\n",
+                   cmd->cmd->original);
         return;
     }
 

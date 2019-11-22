@@ -282,8 +282,8 @@ static void append_bind_info(struct input_ctx *ictx, char **pmsg,
     char *msg = *pmsg;
     struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0(bind->cmd),
                                             bind->location);
-    bstr stripped = cmd ? cmd->original : bstr0(bind->cmd);
-    msg = talloc_asprintf_append(msg, " '%.*s'", BSTR_P(stripped));
+    char *stripped = cmd ? cmd->original : bind->cmd;
+    msg = talloc_asprintf_append(msg, " '%s'", stripped);
     if (!cmd)
         msg = talloc_asprintf_append(msg, " (invalid)");
     if (strcmp(bind->owner->section, "default") != 0)
