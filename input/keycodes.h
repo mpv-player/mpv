@@ -216,6 +216,8 @@
 // No input source should generate this.
 #define MP_KEY_UNMAPPED         (MP_KEY_INTERN+4)
 #define MP_KEY_ANY_UNICODE      (MP_KEY_INTERN+5)
+// For mp_input_put_key(): release all keys that are down.
+#define MP_INPUT_RELEASE_ALL    (MP_KEY_INTERN+6)
 
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.

@@ -23,9 +23,6 @@
 
 #include "cmd.h"
 
-// For mp_input_put_key(): release all keys that are down.
-#define MP_INPUT_RELEASE_ALL -1
-
 struct input_ctx;
 struct mp_log;
 
