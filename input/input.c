@@ -46,6 +46,7 @@
 #include "mpv_talloc.h"
 #include "options/options.h"
 #include "misc/bstr.h"
+#include "misc/node.h"
 #include "stream/stream.h"
 #include "common/common.h"
 
@@ -1485,6 +1486,53 @@ void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
                  bind->cmd, bind->location);
         talloc_free(s);
     }
+}
+
+struct mpv_node mp_input_get_bindings(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    struct mpv_node root;
+    node_init(&root, MPV_FORMAT_NODE_ARRAY, NULL);
+
+    for (struct cmd_bind_section *s = ictx->cmd_bind_sections; s; s = s->next) {
+        int priority = -1;
+
+        for (int i = 0; i < ictx->num_active_sections; i++) {
+            struct active_section *as = &ictx->active_sections[i];
+            if (strcmp(as->name, s->section) == 0) {
+                priority = i;
+                break;
+            }
+        }
+
+        for (int n = 0; n < s->num_binds; n++) {
+            struct cmd_bind *b = &s->binds[n];
+            struct mpv_node *entry = node_array_add(&root, MPV_FORMAT_NODE_MAP);
+
+            int b_priority = priority;
+            if (b->is_builtin && !ictx->opts->default_bindings)
+                b_priority = -1;
+
+            // Try to fixup the weird logic so consumer of this bindings list
+            // does not get too confused.
+            if (b_priority >= 0 && !b->is_builtin)
+                b_priority += ictx->num_active_sections;
+
+            node_map_add_string(entry, "section", s->section);
+            if (s->owner)
+                node_map_add_string(entry, "owner", s->owner);
+            node_map_add_string(entry, "cmd", b->cmd);
+            node_map_add_flag(entry, "is_weak", b->is_builtin);
+            node_map_add_int64(entry, "priority", b_priority);
+
+            char *key = mp_input_get_key_combo_name(b->keys, b->num_keys);
+            node_map_add_string(entry, "key", key);
+            talloc_free(key);
+        }
+    }
+
+    input_unlock(ictx);
+    return root;
 }
 
 struct mp_input_src_internal {

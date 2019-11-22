@@ -2641,6 +2641,43 @@ Property list
     information, but it's a valid feature request to extend this property if
     needed.)
 
+``input-bindings``
+    Return list of current input key bindings. This returns an array of maps,
+    where each map node represents a binding for a single key/command. This map
+    has the following entries:
+
+    ``key``
+        The key name. This is normalized and may look slightly different from
+        how it was specified in the source (e.g. in input.conf).
+
+    ``cmd``
+        The command mapped to the key. (Currently, this is exactly the same
+        string as specified in the source. It's possible that it will be
+        normalized in the future.)
+
+    ``is_weak``
+        If set to true, any existing and active user bindings will take priority.
+
+    ``owner``
+        If this entry exists, the name of the script (or similar) which added
+        this binding.
+
+    ``section``
+        Name of the section this binding is part of. This is a rarely used
+        mechanism. This entry may be removed or change meaning in the future.
+
+    ``priority``
+        A number. Bindings with a higher value are preferred over bindings
+        with a lower value. If the value is negative, this binding is inactive
+        and will not be triggered by input. Note that mpv does not use this
+        value internally, and matching of bindings may work slightly differently
+        in some cases. In addition, this value is dynamic and can change around
+        at runtime.
+
+    This property is read-only, and change notification is not supported.
+    Currently, there is no mechanism to change key bindings at runtime, other
+    than scripts adding or removing their own bindings.
+
 Inconsistencies between options and properties
 ----------------------------------------------
 

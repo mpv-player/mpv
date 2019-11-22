@@ -3505,6 +3505,22 @@ static int mp_property_commands(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_bindings(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        *(struct mpv_node *)arg = mp_input_get_bindings(mpctx->input);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -3691,6 +3707,7 @@ static const struct m_property mp_properties_base[] = {
     {"property-list", mp_property_list},
     {"profile-list", mp_profile_list},
     {"command-list", mp_property_commands},
+    {"input-bindings", mp_property_bindings},
 
     {"play-dir", mp_property_play_direction},
 
@@ -5806,7 +5823,7 @@ static void cmd_dump_cache_ab(void *p)
  * command has an arbitrary number of arguments, all using the type indicated by
  * the last argument (they are appended to mp_cmd.args[] starting at the last
  * argument's index).
- * Arguments have named, which can be used by named argument functions, e.g. in
+ * Arguments have names, which can be used by named argument functions, e.g. in
  * Lua with mp.command_native().
  */
 
