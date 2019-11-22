@@ -3481,6 +3481,30 @@ static int mp_profile_list(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_commands(void *ctx, struct m_property *prop,
+                           int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        struct mpv_node *root = arg;
+        node_init(root, MPV_FORMAT_NODE_ARRAY, NULL);
+
+        for (int n = 0; mp_cmds[n].name; n++) {
+            const struct mp_cmd_def *cmd = &mp_cmds[n];
+            struct mpv_node *entry = node_array_add(root, MPV_FORMAT_NODE_MAP);
+
+            node_map_add_string(entry, "name", cmd->name);
+        }
+
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -3666,6 +3690,7 @@ static const struct m_property mp_properties_base[] = {
     {"option-info", mp_property_option_info},
     {"property-list", mp_property_list},
     {"profile-list", mp_profile_list},
+    {"command-list", mp_property_commands},
 
     {"play-dir", mp_property_play_direction},
 

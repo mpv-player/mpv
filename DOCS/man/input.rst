@@ -2633,6 +2633,14 @@ Property list
     is not a map, as order matters and duplicate entries are possible. Recursive
     profiles are not expanded, and show up as special ``profile`` options.
 
+``command-list``
+    Return the list of input commands. This returns an array of maps, where
+    each map node represents a command. This map currently only has a single
+    entry: ``name`` for the name of the command. (This property is supposed to
+    be a replacement for ``--input-cmdlist``. The option dumps some more
+    information, but it's a valid feature request to extend this property if
+    needed.)
+
 Inconsistencies between options and properties
 ----------------------------------------------
 
