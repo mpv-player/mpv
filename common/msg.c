@@ -692,7 +692,9 @@ struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
             *res = (struct mp_log_buffer_entry) {
                 .prefix = "overflow",
                 .level = MSGL_FATAL,
-                .text = "log message buffer overflow\n",
+                .text = talloc_asprintf(res,
+                    "log message buffer overflow: %"PRId64" messages skipped\n",
+                    buffer->dropped),
             };
             buffer->dropped = 0;
         } else {
