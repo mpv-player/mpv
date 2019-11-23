@@ -76,7 +76,6 @@ struct cmd_bind_section {
     char *section;
     struct mp_rect mouse_area;  // set at runtime, if at all
     bool mouse_area_set;        // mouse_area is valid and should be tested
-    struct cmd_bind_section *next;
 };
 
 #define MP_MAX_SOURCES 10
@@ -139,7 +138,8 @@ struct input_ctx {
     double last_wheel_time; // mp_time_sec() of the last wheel event
 
     // List of command binding sections
-    struct cmd_bind_section *cmd_bind_sections;
+    struct cmd_bind_section **sections;
+    int num_sections;
 
     // List currently active command sections
     struct active_section active_sections[MAX_ACTIVE_SECTIONS];
@@ -314,9 +314,9 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
     talloc_free(key_buf);
 
     int count = 0;
-    for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
-         bs; bs = bs->next)
-    {
+    for (int n = 0; n < ictx->num_sections; n++) {
+        struct cmd_bind_section *bs = ictx->sections[n];
+
         for (int i = 0; i < bs->num_binds; i++) {
             if (bs->binds[i].num_keys && bs->binds[i].keys[0] == code) {
                 count++;
@@ -338,32 +338,32 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
     return res;
 }
 
+static struct cmd_bind_section *find_section(struct input_ctx *ictx,
+                                             bstr section)
+{
+    for (int n = 0; n < ictx->num_sections; n++) {
+        struct cmd_bind_section *bs = ictx->sections[n];
+        if (bstr_equals0(section, bs->section))
+            return bs;
+    }
+    return NULL;
+}
+
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
                                                  bstr section)
 {
-    struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
-
     if (section.len == 0)
         section = bstr0("default");
-    while (bind_section) {
-        if (bstrcmp0(section, bind_section->section) == 0)
-            return bind_section;
-        if (bind_section->next == NULL)
-            break;
-        bind_section = bind_section->next;
-    }
-    if (bind_section) {
-        bind_section->next = talloc_ptrtype(ictx, bind_section->next);
-        bind_section = bind_section->next;
-    } else {
-        ictx->cmd_bind_sections = talloc_ptrtype(ictx, ictx->cmd_bind_sections);
-        bind_section = ictx->cmd_bind_sections;
-    }
+    struct cmd_bind_section *bind_section = find_section(ictx, section);
+    if (bind_section)
+        return bind_section;
+    bind_section = talloc_ptrtype(ictx, bind_section);
     *bind_section = (struct cmd_bind_section) {
         .section = bstrdup0(bind_section, section),
         .mouse_area = {INT_MIN, INT_MIN, INT_MAX, INT_MAX},
         .mouse_area_set = true,
     };
+    MP_TARRAY_APPEND(ictx, ictx->sections, ictx->num_sections, bind_section);
     return bind_section;
 }
 
@@ -1126,14 +1126,13 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
 void mp_input_remove_sections_by_owner(struct input_ctx *ictx, char *owner)
 {
     input_lock(ictx);
-    struct cmd_bind_section *bs = ictx->cmd_bind_sections;
-    while (bs) {
+    for (int n = 0; n < ictx->num_sections; n++) {
+        struct cmd_bind_section *bs = ictx->sections[n];
         if (bs->owner && owner && strcmp(bs->owner, owner) == 0) {
             mp_input_disable_section(ictx, bs->section);
             remove_binds(bs, false);
             remove_binds(bs, true);
         }
-        bs = bs->next;
     }
     input_unlock(ictx);
 }
@@ -1462,7 +1461,7 @@ void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
 
 void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
 {
-    struct cmd_bind_section *bs = ictx->cmd_bind_sections;
+    struct cmd_bind_section *bs = get_bind_section(ictx, (bstr){0});
     struct cmd_bind *bind = NULL;
 
     for (int n = 0; n < bs->num_binds; n++) {
@@ -1504,7 +1503,8 @@ struct mpv_node mp_input_get_bindings(struct input_ctx *ictx)
     struct mpv_node root;
     node_init(&root, MPV_FORMAT_NODE_ARRAY, NULL);
 
-    for (struct cmd_bind_section *s = ictx->cmd_bind_sections; s; s = s->next) {
+    for (int x = 0; x < ictx->num_sections; x++) {
+        struct cmd_bind_section *s = ictx->sections[x];
         int priority = -1;
 
         for (int i = 0; i < ictx->num_active_sections; i++) {
