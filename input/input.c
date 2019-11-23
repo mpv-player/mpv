@@ -1082,6 +1082,7 @@ static void bind_dealloc(struct cmd_bind *bind)
 {
     talloc_free(bind->cmd);
     talloc_free(bind->location);
+    talloc_free(bind->desc);
 }
 
 // builtin: if true, remove all builtin binds, else remove all user binds
