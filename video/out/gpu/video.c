@@ -1691,25 +1691,26 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     uninit_scaler(p, scaler);
 
-    scaler->conf = *conf;
+    const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
+    const struct filter_window *t_window = mp_find_filter_window(conf->window.name);
     bool is_tscale = scaler->index == SCALER_TSCALE;
+
+    scaler->conf = *conf;
     scaler->conf.kernel.name = (char *)handle_scaler_opt(conf->kernel.name, is_tscale);
-    scaler->conf.window.name = (char *)handle_scaler_opt(conf->window.name, is_tscale);
+    scaler->conf.window.name = t_window ? (char *)t_window->name : NULL;
     scaler->scale_factor = scale_factor;
     scaler->insufficient = false;
     scaler->initialized = true;
-
-    const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     if (!t_kernel)
         return;
 
     scaler->kernel_storage = *t_kernel;
     scaler->kernel = &scaler->kernel_storage;
 
-    const char *win = conf->window.name;
-    if (!win || !win[0])
-        win = t_kernel->window; // fall back to the scaler's default window
-    const struct filter_window *t_window = mp_find_filter_window(win);
+    if (!t_window) {
+        // fall back to the scaler's default window if available
+        t_window = mp_find_filter_window(t_kernel->window);
+    }
     if (t_window)
         scaler->kernel->w = *t_window;
 
