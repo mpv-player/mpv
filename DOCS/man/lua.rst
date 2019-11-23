@@ -240,7 +240,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     an example). The name should be unique across other bindings in the same
     script - if not, the previous binding with the same name will be
     overwritten. You can omit the name, in which case a random name is generated
-    internally.
+    internally. (Omitting works as follows: either pass ``nil`` for ``name``,
+    or pass the ``fn`` argument in place of the name. The latter is not
+    recommended and is handled for compatibility only.)
 
     The last argument is used for optional flags. This is a table, which can
     have the following entries:
