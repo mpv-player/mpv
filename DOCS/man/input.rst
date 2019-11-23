@@ -2652,8 +2652,8 @@ Property list
 
     ``cmd``
         The command mapped to the key. (Currently, this is exactly the same
-        string as specified in the source. It's possible that it will be
-        normalized in the future.)
+        string as specified in the source, other than stripping whitespace and
+        comments. It's possible that it will be normalized in the future.)
 
     ``is_weak``
         If set to true, any existing and active user bindings will take priority.
@@ -2673,6 +2673,11 @@ Property list
         value internally, and matching of bindings may work slightly differently
         in some cases. In addition, this value is dynamic and can change around
         at runtime.
+
+    ``comment``
+        If available, the comment following the command on the same line. (For
+        example, the input.conf entry ``f cycle bla # toggle bla`` would
+        result in an entry with ``comment = "toggle bla", cmd = "cycle bla"``.)
 
     This property is read-only, and change notification is not supported.
     Currently, there is no mechanism to change key bindings at runtime, other

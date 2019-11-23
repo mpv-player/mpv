@@ -64,6 +64,7 @@ struct cmd_bind {
     int num_keys;
     char *cmd;
     char *location;     // filename/line number of definition
+    char *desc;         // human readable description
     bool is_builtin;
     struct cmd_bind_section *owner;
 };
@@ -1149,7 +1150,7 @@ static bool bind_matches_key(struct cmd_bind *bind, int num_keys, const int *key
 
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
                       const int *keys, int num_keys, bstr command,
-                      const char *loc)
+                      const char *loc, const char *desc)
 {
     struct cmd_bind_section *bs = get_bind_section(ictx, section);
     struct cmd_bind *bind = NULL;
@@ -1175,6 +1176,7 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     *bind = (struct cmd_bind) {
         .cmd = bstrdup0(bs->binds, command),
         .location = talloc_strdup(bs->binds, loc),
+        .desc = talloc_strdup(bs->binds, desc),
         .owner = bs,
         .is_builtin = builtin,
         .num_keys = num_keys,
@@ -1250,11 +1252,18 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
             }
         }
 
-        bind_keys(ictx, builtin, section, keys, num_keys, command, cur_loc);
+        // Print warnings if invalid commands are encountered.
+        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, command, cur_loc);
+        const char *desc = NULL;
+        if (cmd) {
+            desc = cmd->desc;
+            command = bstr0(cmd->original);
+        }
+
+        bind_keys(ictx, builtin, section, keys, num_keys, command, cur_loc, desc);
         n_binds++;
 
-        // Print warnings if invalid commands are encountered.
-        talloc_free(mp_input_parse_cmd(ictx, command, cur_loc));
+        talloc_free(cmd);
     }
 
     talloc_free(cur_loc);
@@ -1524,6 +1533,8 @@ struct mpv_node mp_input_get_bindings(struct input_ctx *ictx)
             node_map_add_string(entry, "cmd", b->cmd);
             node_map_add_flag(entry, "is_weak", b->is_builtin);
             node_map_add_int64(entry, "priority", b_priority);
+            if (b->desc)
+                node_map_add_string(entry, "comment", b->desc);
 
             char *key = mp_input_get_key_combo_name(b->keys, b->num_keys);
             node_map_add_string(entry, "key", key);

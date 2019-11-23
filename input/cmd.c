@@ -449,7 +449,6 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
             *list = (struct mp_cmd) {
                 .name = (char *)mp_cmd_list.name,
                 .def = &mp_cmd_list,
-                .original = bstrto0(list, original),
             };
             talloc_steal(list, cmd);
             struct mp_cmd_arg arg = {0};
@@ -467,6 +466,16 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
         talloc_steal(cmd, sub);
         *p_prev = sub;
         p_prev = &sub->queue_next;
+    }
+
+    cmd->original = bstrto0(cmd, bstr_strip(
+                        bstr_splice(original, 0, str.start - original.start)));
+
+    str = bstr_strip(str);
+    if (bstr_eatstart0(&str, "#") && !bstr_startswith0(str, "#")) {
+        str = bstr_strip(str);
+        if (str.len)
+            cmd->desc = bstrto0(cmd, str);
     }
 
 done:
@@ -510,6 +519,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
         m_option_copy(ret->args[i].type, &ret->args[i].v, &cmd->args[i].v);
     }
     ret->original = talloc_strdup(ret, cmd->original);
+    ret->desc = talloc_strdup(ret, cmd->desc);
     ret->sender = NULL;
     ret->key_name = talloc_strdup(ret, ret->key_name);
     ret->key_text = talloc_strdup(ret, ret->key_text);
