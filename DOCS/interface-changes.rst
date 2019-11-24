@@ -43,6 +43,10 @@ Interface changes
     - deprecate all input section commands (these will be changed/removed, as
       soon as mpv internals do not require them anymore)
     - remove deprecated --playlist-pos alias (use --playlist-start)
+    - deprecate --display-fps, introduce --override-display-fps. The display-fps
+      property now is unavailable if no VO exists (or the VO did not return a
+      display FPS), instead of returning the option value in this case. The
+      property will keep existing, but writing to it is deprecated.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

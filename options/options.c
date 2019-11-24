@@ -147,7 +147,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
     OPT_FLAG("native-fs", native_fs, 0),
-    OPT_DOUBLE("display-fps", override_display_fps, M_OPT_MIN, .min = 0),
+    OPT_DOUBLE("override-display-fps", override_display_fps, M_OPT_MIN, .min = 0),
     OPT_DOUBLERANGE("video-timing-offset", timing_offset, 0, 0.0, 1.0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
@@ -891,6 +891,7 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("video-stereo-mode", "removed, try --vf=stereo3d"),
     OPT_REMOVED("chapter", "use '--start=#123' '--end=#124' (for chapter 123)"),
     OPT_REPLACED("video-aspect", "video-aspect-override"),
+    OPT_REPLACED("display-fps", "override-display-fps"),
 
     {0}
 };

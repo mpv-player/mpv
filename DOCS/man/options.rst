@@ -949,8 +949,7 @@ Video
       frame, so if this is not done, there is some likeliness that the VO has
       to drop some frames if rendering the first frame takes longer than needed.
 
-
-``--display-fps=<fps>``
+``--override-display-fps=<fps>``
     Set the display FPS used with the ``--video-sync=display-*`` modes. By
     default, a detected value is used. Keep in mind that setting an incorrect
     value (even if slightly incorrect) can ruin video playback. On multi-monitor
@@ -959,6 +958,9 @@ Video
 
     Set this option only if you have reason to believe the automatically
     determined value is wrong.
+
+``--display-fps=<fps>``
+    Deprecated alias for ``--override-display-fps``.
 
 ``--hwdec=<api>``
     Specify the hardware video decoding API that should be used if possible.
@@ -4776,7 +4778,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     require driver-specific hacks if using multiple monitors, to ensure mpv
     syncs to the right one. Compositing window managers can also lead to bad
     results, as can missing or incorrect display FPS information (see
-    ``--display-fps``).
+    ``--override-display-fps``).
 
 ``--vulkan-swap-mode=<mode>``
     Controls the presentation mode of the vulkan swapchain. This is similar

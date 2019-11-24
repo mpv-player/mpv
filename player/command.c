@@ -2445,9 +2445,27 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     double fps = mpctx->video_out ? vo_get_display_fps(mpctx->video_out) : 0;
-    if (fps > 0 && action != M_PROPERTY_SET)
+    switch (action) {
+    case M_PROPERTY_SET: {
+        MP_WARN(mpctx, "Setting the display-fps property is deprecated; set "
+                       "the override-display-fps property instead.\n");
+        struct mpv_node val = {
+            .format = MPV_FORMAT_DOUBLE,
+            .u.double_ = *(double *)arg,
+        };
+        return m_config_set_option_node(mpctx->mconfig,
+            bstr0("override-display-fps"), &val, 0)
+            >= 0 ? M_PROPERTY_OK : M_PROPERTY_ERROR;
+    }
+    case M_PROPERTY_GET:
+        if (fps <= 0)
+            return M_PROPERTY_UNAVAILABLE;
         return m_property_double_ro(action, arg, fps);
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_DOUBLE};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,

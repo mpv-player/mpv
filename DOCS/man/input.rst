@@ -2029,12 +2029,17 @@ Property list
     Display Product Names as used in the System Information and only one display
     name is returned since a window can only be on one screen.
 
-``display-fps`` (RW)
+``display-fps``
     The refresh rate of the current display. Currently, this is the lowest FPS
     of any display covered by the video, as retrieved by the underlying system
     APIs (e.g. xrandr on X11). It is not the measured FPS. It's not necessarily
     available on all platforms. Note that any of the listed facts may change
     any time without a warning.
+
+    Writing to this property is deprecated. It has the same effect as writing to
+    ``override-display-fps``. Since mpv 0.31.0, this property is unavailable
+    if no display FPS was reported (e.g. if no video is active), while in older
+    versions, it returned the ``--display-fps`` option value.
 
 ``estimated-display-fps``
     Only available if display-sync mode (as selected by ``--video-sync``) is
@@ -2697,8 +2702,9 @@ caveats with some properties (due to historical reasons):
     Option changes at runtime are affected by this as well.
 
 ``display-fps``
-    If a VO is created, this will return either the actual display FPS, or
-    an invalid value, instead of the option value.
+    This inconsistent behavior is deprecated. Post-deprecation, the reported
+    value and the option value are cleanly separated (``override-display-fps``
+    for the option value).
 
 ``vf``, ``af``
     If you set the properties during playback, and the filter chain fails to
