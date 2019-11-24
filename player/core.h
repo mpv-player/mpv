@@ -208,6 +208,8 @@ struct ao_chain {
     struct mp_pin *filter_src;
     struct mp_pin *dec_src;
 
+    double delay;
+
     bool underrun;
 };
 

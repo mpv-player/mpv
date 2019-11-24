@@ -486,6 +486,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     ao_c->last_out_pts = MP_NOPTS_VALUE;
     ao_c->ao_buffer = mp_audio_buffer_create(NULL);
     ao_c->ao = mpctx->ao;
+    ao_c->delay = mpctx->opts->audio_delay;
 
     if (track) {
         ao_c->track = track;
