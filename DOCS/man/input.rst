@@ -2722,19 +2722,6 @@ caveats with some properties (due to historical reasons):
 ``window-scale``
     Might verify the set value when setting while a window is created.
 
-``audio-file``, ``sub-file``, ``external-file``
-    These options/properties are actually lists of filenames. To make the
-    command-line interface easier, each ``--audio-file=...`` option appends
-    the full string to the internal list. However, when used as properties,
-    every time you set the property as a string the internal list will be
-    replaced with a single entry containing the string you set. ``,`` or other
-    separators are never used. You have to use ``MPV_FORMAT_NODE_ARRAY`` (or
-    corresponding API, e.g. ``mp.set_property_native()`` with a table in Lua)
-    to set multiple entries.
-
-    Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
-    has the same problem, and it's only a difference between CLI/API.
-
 ``profile``, ``include``
     These are write-only, and will perform actions as they are written to,
     exactly as if they were used on the mpv CLI commandline. Their only use is
