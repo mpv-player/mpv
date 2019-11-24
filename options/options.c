@@ -856,7 +856,6 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("input-unix-socket", "input-ipc-server"),
     OPT_REPLACED("softvol-max", "volume-max"),
     OPT_REMOVED("bluray-angle", "this didn't do anything for a few releases"),
-    OPT_REPLACED("playlist-pos", "playlist-start"),
     OPT_REPLACED("sub-text-font", "sub-font"),
     OPT_REPLACED("sub-text-font-size", "sub-font-size"),
     OPT_REPLACED("sub-text-color", "sub-color"),

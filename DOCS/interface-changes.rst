@@ -42,6 +42,7 @@ Interface changes
       undeprecated or readded if it's not too much of a problem)
     - deprecate all input section commands (these will be changed/removed, as
       soon as mpv internals do not require them anymore)
+    - remove deprecated --playlist-pos alias (use --playlist-start)
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

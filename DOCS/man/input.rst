@@ -2735,10 +2735,6 @@ caveats with some properties (due to historical reasons):
     Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
     has the same problem, and it's only a difference between CLI/API.
 
-``playlist-pos``, ``chapter``
-    These properties behave different from the deprecated options with the same
-    names.
-
 ``profile``, ``include``
     These are write-only, and will perform actions as they are written to,
     exactly as if they were used on the mpv CLI commandline. Their only use is
