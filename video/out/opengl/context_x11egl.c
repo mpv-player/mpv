@@ -104,8 +104,13 @@ static bool mpegl_init(struct ra_ctx *ctx)
     if (!vo_x11_init(vo))
         goto uninit;
 
-    p->egl_display = eglGetPlatformDisplay(EGL_PLATFORM_X11_KHR,
-                                           vo->x11->display, NULL);
+    if (!(p->egl_display = mpegl_get_platform_display(EGL_PLATFORM_X11_KHR,
+                                                      vo->x11->display, NULL)))
+    {
+        MP_MSG(ctx, msgl, "EGL 1.5 display not available.\n");
+        goto uninit;
+    }
+
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
         MP_MSG(ctx, msgl, "Could not initialize EGL.\n");
         goto uninit;

@@ -163,8 +163,8 @@ static bool egl_create_context(struct ra_ctx *ctx)
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    if (!(p->egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
-                                                 wl->display, NULL)))
+    if (!(p->egl_display = mpegl_get_platform_display(EGL_PLATFORM_WAYLAND_KHR,
+                                                      wl->display, NULL)))
         return false;
 
     if (eglInitialize(p->egl_display, NULL, NULL) != EGL_TRUE)

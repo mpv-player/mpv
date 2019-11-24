@@ -29,4 +29,6 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
 struct GL;
 void mpegl_load_functions(struct GL *gl, struct mp_log *log);
 
+EGLDisplay mpegl_get_platform_display(EGLenum platform, void *native_display, const EGLAttrib *attrib_list);
+
 #endif

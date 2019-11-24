@@ -51,6 +51,8 @@ struct mp_egl_config_attr {
 
 #define MP_EGL_ATTRIB(id) {id, # id}
 
+static PFNEGLGETPLATFORMDISPLAYPROC egl_get_platform_display  = NULL;
+
 static const struct mp_egl_config_attr mp_egl_attribs[] = {
     MP_EGL_ATTRIB(EGL_CONFIG_ID),
     MP_EGL_ATTRIB(EGL_RED_SIZE),
@@ -276,4 +278,14 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log)
     mpgl_load_functions2(gl, mpegl_get_proc_address, NULL, egl_exts, log);
     if (!gl->SwapInterval)
         gl->SwapInterval = swap_interval;
+}
+
+EGLDisplay mpegl_get_platform_display(EGLenum platform, void *native_display, const EGLAttrib *attrib_list)
+{
+    if (!egl_get_platform_display &&
+        !(egl_get_platform_display = mpegl_get_proc_address(NULL, "eglGetPlatformDisplay"))) {
+        return NULL;
+    }
+
+    return egl_get_platform_display(platform, native_display, attrib_list);
 }
