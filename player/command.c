@@ -2989,16 +2989,11 @@ static char *print_obj_osd_list(struct m_obj_settings *list)
 static int property_filter(struct m_property *prop, int action, void *arg,
                            MPContext *mpctx, enum stream_type mt)
 {
-    switch (action) {
-    case M_PROPERTY_PRINT: {
+    if (action == M_PROPERTY_PRINT) {
         struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                       bstr0(prop->name));
         *(char **)arg = print_obj_osd_list(*(struct m_obj_settings **)opt->data);
         return M_PROPERTY_OK;
-    }
-    case M_PROPERTY_SET:
-        return set_filters(mpctx, mt, *(struct m_obj_settings **)arg) >= 0
-            ? M_PROPERTY_OK : M_PROPERTY_ERROR;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
@@ -6314,6 +6309,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (opt_ptr == &opts->record_file)
         open_recorder(mpctx, false);
+
+    if (opt_ptr == &opts->vf_settings)
+        set_filters(mpctx, STREAM_VIDEO, opts->vf_settings);
+
+    if (opt_ptr == &opts->af_settings)
+        set_filters(mpctx, STREAM_AUDIO, opts->af_settings);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)

@@ -2708,12 +2708,13 @@ caveats with some properties (due to historical reasons):
 
 ``vf``, ``af``
     If you set the properties during playback, and the filter chain fails to
-    reinitialize, the new value will be rejected. Setting the option or
-    setting the property outside of playback will always succeed/fail in the
-    same way. Also, there are no ``vf-add`` etc. properties, but you can use
-    the ``vf``/``af`` group of commands to achieve the same.
+    reinitialize, the option will be set, but the runtime filter chain does not
+    change. On the other hand, the next video to be played will fail, because
+    the initial filter chain cannot be created.
 
-    Option changes at runtime are affected by this as well.
+    This behavior changed in mpv 0.31.0. Before this, the new value was rejected
+    *iff* video (for ``vf``) or audio (for ``af``) was active. If playback was
+    not active, the behavior was the same as the current behavior.
 
 ``edition``
     While a file is loaded, the property will always return the effective
@@ -2726,7 +2727,8 @@ caveats with some properties (due to historical reasons):
     uses, you should use the ``loadlist`` command instead.
 
 ``window-scale``
-    Might verify the set value when setting while a window is created.
+    Returns the current window values if a window exists, and the option value
+    otherwise.
 
 ``profile``, ``include``
     These are write-only, and will perform actions as they are written to,

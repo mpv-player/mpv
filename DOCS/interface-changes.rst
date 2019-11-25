@@ -47,6 +47,10 @@ Interface changes
       property now is unavailable if no VO exists (or the VO did not return a
       display FPS), instead of returning the option value in this case. The
       property will keep existing, but writing to it is deprecated.
+    - the vf/af properties now do not reject the set value anymore, even if
+      filter chain initialization fails. Instead, the vf/af options are always
+      set to the user's value, even if it does not reflect the "runtime" vf/af
+      chain.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
