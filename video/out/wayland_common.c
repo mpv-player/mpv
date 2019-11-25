@@ -56,6 +56,9 @@ const struct m_sub_options wayland_conf = {
     },
 };
 
+#define POINTER_EDGE_PIXELS 5
+#define TOUCH_EDGE_PIXELS 64
+
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
     xdg_wm_base_pong(wm_base, serial);
@@ -155,6 +158,8 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
     wl->prev_fullscreen = wl->fullscreen;
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
+    wl->mouse_unscaled_x = sx;
+    wl->mouse_unscaled_y = sy;
 
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
 }
@@ -163,6 +168,42 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
 {
     if (wl->xdg_toplevel)
         xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
+}
+
+static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
+                            int edge_pixels, enum xdg_toplevel_resize_edge *edge)
+{
+    if (wl->touch_entries || wl->fullscreen || wl->maximized)
+        return 0;
+
+    int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
+    int left_edge   = pos[0] < edge_pixels;
+    int top_edge    = pos[1] < edge_pixels;
+    int right_edge  = pos[0] > (mp_rect_w(wl->geometry) - edge_pixels);
+    int bottom_edge = pos[1] > (mp_rect_h(wl->geometry) - edge_pixels);
+
+    if (left_edge) {
+        *edge = XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
+        if (top_edge)
+            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_LEFT;
+        else if (bottom_edge)
+            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_LEFT;
+    } else if (right_edge) {
+        *edge = XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
+        if (top_edge)
+            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_RIGHT;
+        else if (bottom_edge)
+            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_RIGHT;
+    } else if (top_edge) {
+        *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP;
+    } else if (bottom_edge) {
+        *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
+    } else {
+        *edge = 0;
+        return 0;
+    }
+
+    return 1;
 }
 
 static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
@@ -200,8 +241,16 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     }
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
-        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
-        window_move(wl, serial);
+        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN)) {
+        uint32_t edges;
+        // Implement an edge resize zone if there are no decorations
+        if (!wl->xdg_toplevel_decoration &&
+            check_for_resize(wl, wl->mouse_unscaled_x, wl->mouse_unscaled_y,
+                             POINTER_EDGE_PIXELS, &edges))
+            xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
+        else
+            window_move(wl, serial);
+    }
 }
 
 static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
@@ -235,43 +284,6 @@ static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_axis,
 };
 
-static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
-                            enum xdg_toplevel_resize_edge *edge)
-{
-    if (wl->touch_entries || wl->fullscreen || wl->maximized)
-        return 0;
-
-    const int edge_pixels = 64;
-    int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
-    int left_edge   = pos[0] < edge_pixels;
-    int top_edge    = pos[1] < edge_pixels;
-    int right_edge  = pos[0] > (mp_rect_w(wl->geometry) - edge_pixels);
-    int bottom_edge = pos[1] > (mp_rect_h(wl->geometry) - edge_pixels);
-
-    if (left_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
-        if (top_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_LEFT;
-        else if (bottom_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_LEFT;
-    } else if (right_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
-        if (top_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_RIGHT;
-        else if (bottom_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_RIGHT;
-    } else if (top_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP;
-    } else if (bottom_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
-    } else {
-        *edge = 0;
-        return 0;
-    }
-
-    return 1;
-}
-
 static void touch_handle_down(void *data, struct wl_touch *wl_touch,
                               uint32_t serial, uint32_t time, struct wl_surface *surface,
                               int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
@@ -279,7 +291,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_state *wl = data;
 
     enum xdg_toplevel_resize_edge edge;
-    if (check_for_resize(wl, x_w, y_w, &edge)) {
+    if (check_for_resize(wl, x_w, y_w, TOUCH_EDGE_PIXELS, &edge)) {
         wl->touch_entries = 0;
         xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
         return;
