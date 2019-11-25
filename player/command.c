@@ -374,53 +374,6 @@ static char *format_delay(double time)
     return talloc_asprintf(NULL, "%d ms", (int)lrint(time * 1000));
 }
 
-// Option-property bridge. This is used so that setting options via various
-// mechanisms (including command line parsing, config files, per-file options)
-// updates state associated with them. For that, they have to go through the
-// property layer. (Ideally, this would be the other way around, and there
-// would be per-option change handlers instead.)
-// Note that the property-option bridge sidesteps this, as we'd get infinite
-// recursion.
-int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flags)
-{
-    struct MPContext *mpctx = ctx;
-    struct command_ctx *cmd = mpctx->command_ctx;
-    const char *name = co->name;
-
-    // Skip going through mp_property_generic_option (typically), because the
-    // property implementation is trivial, and can break some obscure features
-    // like --profile and --include if non-trivial flags are involved (which
-    // the bridge would drop).
-    struct m_property *prop = m_property_list_find(cmd->properties, name);
-    if (prop && prop->is_option)
-        goto direct_option;
-
-    struct m_option type = {0};
-
-    int r = mp_property_do_silent(name, M_PROPERTY_GET_TYPE, &type, mpctx);
-    if (r == M_PROPERTY_UNKNOWN)
-        goto direct_option; // not mapped as property
-    if (r != M_PROPERTY_OK)
-        return M_OPT_INVALID; // shouldn't happen
-
-    assert(type.type == co->opt->type);
-    assert(type.max == co->opt->max);
-    assert(type.min == co->opt->min);
-
-    r = mp_property_do_silent(name, M_PROPERTY_SET, data, mpctx);
-    if (r != M_PROPERTY_OK)
-        return M_OPT_INVALID;
-
-    // The flags can't be passed through the property layer correctly.
-    m_config_mark_co_flags(co, flags);
-
-    return 0;
-
-direct_option:
-    mp_notify_property(mpctx, name);
-    return m_config_set_option_raw_direct(mpctx->mconfig, co, data, flags);
-}
-
 // Property-option bridge. (Maps the property to the option with the same name.)
 static int mp_property_generic_option(void *ctx, struct m_property *prop,
                                       int action, void *arg)
@@ -448,7 +401,7 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
         m_option_copy(opt->opt, arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, 0) < 0)
+        if (m_config_set_option_raw(mpctx->mconfig, opt, arg, 0) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
     }
@@ -2643,7 +2596,7 @@ skip_warn: ;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, 0) < 0)
+        if (m_config_set_option_raw(mpctx->mconfig, opt, arg, 0) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
     }

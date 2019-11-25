@@ -71,11 +71,6 @@ typedef struct m_config {
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
 
-    // Can intercept option write accesses.
-    int (*option_set_callback)(void *ctx, struct m_config_option *co,
-                               void *data, int flags);
-    void *option_set_callback_cb;
-
     // Notification after an option was successfully written to.
     // Uses flags as set in UPDATE_OPTS_MASK.
     void (*option_change_callback)(void *ctx, struct m_config_option *co,
@@ -168,12 +163,6 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
 
 void m_config_mark_co_flags(struct m_config_option *co, int flags);
-
-// Unlike m_config_set_option_raw() this does not go through the property layer
-// via config.option_set_callback.
-int m_config_set_option_raw_direct(struct m_config *config,
-                                   struct m_config_option *co,
-                                   void *data, int flags);
 
 // Convert the mpv_node to raw option data, then call m_config_set_option_raw().
 struct mpv_node;

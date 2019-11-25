@@ -814,9 +814,9 @@ static int m_config_handle_special_options(struct m_config *config,
     return M_OPT_UNKNOWN;
 }
 
-int m_config_set_option_raw_direct(struct m_config *config,
-                                   struct m_config_option *co,
-                                   void *data, int flags)
+int m_config_set_option_raw(struct m_config *config,
+                            struct m_config_option *co,
+                            void *data, int flags)
 {
     if (!co)
         return M_OPT_UNKNOWN;
@@ -840,24 +840,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
     m_config_notify_change_co(config, co);
 
     return 0;
-}
-
-int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
-                            void *data, int flags)
-{
-    if (!co)
-        return M_OPT_UNKNOWN;
-
-    if (config->option_set_callback) {
-        int r = handle_set_opt_flags(config, co, flags);
-        if (r <= 1)
-            return r;
-
-        return config->option_set_callback(config->option_set_callback_cb,
-                                           co, data, flags);
-    } else {
-        return m_config_set_option_raw_direct(config, co, data, flags);
-    }
 }
 
 // Handle CLI exceptions to option handling.
