@@ -51,6 +51,11 @@ Interface changes
       filter chain initialization fails. Instead, the vf/af options are always
       set to the user's value, even if it does not reflect the "runtime" vf/af
       chain.
+    - the vid/aid/sid/secondary-sid properties (and their aliases: "audio",
+      "video", "sub") will now allow setting any track ID; before this change,
+      only IDs of actually existing tracks could be set (the restriction was
+      active the MPV_EVENT_FILE_LOADED/"file-loaded" event was sent). Setting
+      an ID for which no track exists is equivalent to disabling it.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

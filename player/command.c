@@ -1883,10 +1883,14 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
     return direction > 0 ? next : prev;
 }
 
-static int property_switch_track(struct m_property *prop, int action, void *arg,
-                                 MPContext *mpctx, int order,
-                                 enum stream_type type)
+static int property_switch_track(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
 {
+    MPContext *mpctx = ctx;
+    const int *def = prop->priv;
+    int order = def[0];
+    enum stream_type type = def[1];
+
     struct track *track = mpctx->current_track[order][type];
 
     switch (action) {
@@ -1935,16 +1939,6 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET:
-        if (mpctx->playback_initialized) {
-            track = mp_track_by_tid(mpctx, type, *(int *)arg);
-            mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
-            print_track_list(mpctx, "Track switched:");
-            mp_wakeup_core(mpctx);
-        } else {
-            mpctx->opts->stream_id[order][type] = *(int *)arg;
-        }
-        return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
@@ -2078,20 +2072,6 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
     }
     return m_property_read_list(action, arg, mpctx->num_tracks,
                                 get_track_entry, mpctx);
-}
-
-/// Selected audio id (RW)
-static int mp_property_audio(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    return property_switch_track(prop, action, arg, ctx, 0, STREAM_AUDIO);
-}
-
-/// Selected video id (RW)
-static int mp_property_video(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    return property_switch_track(prop, action, arg, ctx, 0, STREAM_VIDEO);
 }
 
 static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
@@ -2739,19 +2719,6 @@ skip_warn: ;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-/// Selected subtitles (RW)
-static int mp_property_sub(void *ctx, struct m_property *prop,
-                           int action, void *arg)
-{
-    return property_switch_track(prop, action, arg, ctx, 0, STREAM_SUB);
-}
-
-static int mp_property_sub2(void *ctx, struct m_property *prop,
-                            int action, void *arg)
-{
-    return property_switch_track(prop, action, arg, ctx, 1, STREAM_SUB);
 }
 
 /// Subtitle delay (RW)
@@ -3491,7 +3458,7 @@ static const struct m_property mp_properties_base[] = {
     {"audio-codec", mp_property_audio_codec},
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
-    {"aid", mp_property_audio},
+    {"aid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_AUDIO}},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
@@ -3519,7 +3486,7 @@ static const struct m_property mp_properties_base[] = {
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
-    {"vid", mp_property_video},
+    {"vid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
     {"hwdec-current", mp_property_hwdec_current},
     {"hwdec-interop", mp_property_hwdec_interop},
 
@@ -3534,8 +3501,9 @@ static const struct m_property mp_properties_base[] = {
     {"osd-ass-cc", mp_property_osd_ass},
 
     // Subs
-    {"sid", mp_property_sub},
-    {"secondary-sid", mp_property_sub2},
+    {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
+    {"secondary-sid", property_switch_track,
+     .priv = (void *)(const int[]){1, STREAM_SUB}},
     {"sub-delay", mp_property_sub_delay},
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
@@ -6315,6 +6283,20 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (opt_ptr == &opts->af_settings)
         set_filters(mpctx, STREAM_AUDIO, opts->af_settings);
+
+    for (int order = 0; order < NUM_PTRACKS; order++) {
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            if (opt_ptr == &opts->stream_id[order][type] &&
+                mpctx->playback_initialized)
+            {
+                struct track *track =
+                    mp_track_by_tid(mpctx, type, opts->stream_id[order][type]);
+                mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
+                print_track_list(mpctx, "Track switched:");
+                mp_wakeup_core(mpctx);
+            }
+        }
+    }
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
