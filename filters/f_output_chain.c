@@ -518,8 +518,10 @@ static bool compare_filter(struct m_obj_settings *a, struct m_obj_settings *b)
     if (a->enabled != b->enabled)
         return false;
 
-    if (!a->attribs || !a->attribs[0])
-        return !b->attribs || !b->attribs[0];
+    bool a_empty = !a->attribs || !a->attribs[0];
+    bool b_empty = !b->attribs || !b->attribs[0];
+    if (a_empty || b_empty)
+        return a_empty == b_empty;
 
     for (int n = 0; a->attribs[n] || b->attribs[n]; n++) {
         if (!a->attribs[n] || !b->attribs[n])
