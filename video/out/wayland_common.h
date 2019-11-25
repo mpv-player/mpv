@@ -77,6 +77,8 @@ struct vo_wayland_state {
     int pending_vo_events;
     int mouse_x;
     int mouse_y;
+    int mouse_unscaled_x;
+    int mouse_unscaled_y;
     int scaling;
     int touch_entries;
     uint32_t pointer_id;
