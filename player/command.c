@@ -2104,77 +2104,6 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
     return res;
 }
 
-/// Helper to set vo flags.
-/** \ingroup PropertyImplHelper
- */
-static int mp_property_vo_flag(struct m_property *prop, int action, void *arg,
-                               int vo_ctrl, int *vo_var, MPContext *mpctx)
-{
-    int old = *vo_var;
-    int res = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET && old != *vo_var) {
-        if (mpctx->video_out)
-            vo_control(mpctx->video_out, vo_ctrl, 0);
-    }
-    return res;
-}
-
-/// Fullscreen state (RW)
-static int mp_property_fullscreen(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int oldval = mpctx->opts->vo->fullscreen;
-    int r = mp_property_vo_flag(prop, action, arg, VOCTRL_FULLSCREEN,
-                                &mpctx->opts->vo->fullscreen, mpctx);
-    if (oldval && oldval != mpctx->opts->vo->fullscreen)
-        mpctx->mouse_event_ts--; // Show mouse cursor
-    return r;
-}
-
-/// Show playback progress in Windows 7+ taskbar (RW)
-static int mp_property_taskbar_progress(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_SET) {
-        int desired = !!*(int *) arg;
-        if (mpctx->opts->vo->taskbar_progress == desired)
-            return M_PROPERTY_OK;
-        mpctx->opts->vo->taskbar_progress = desired;
-        if (mpctx->video_out)
-            update_vo_playback_state(mpctx);
-        return M_PROPERTY_OK;
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
-/// Window always on top (RW)
-static int mp_property_ontop(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP,
-                               &mpctx->opts->vo->ontop, mpctx);
-}
-
-/// Show window borders (RW)
-static int mp_property_border(void *ctx, struct m_property *prop,
-                              int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_BORDER,
-                               &mpctx->opts->vo->border, mpctx);
-}
-
-static int mp_property_all_workspaces(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_ALL_WORKSPACES,
-                               &mpctx->opts->vo->all_workspaces, mpctx);
-}
-
 static int get_frame_count(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
@@ -3464,11 +3393,6 @@ static const struct m_property mp_properties_base[] = {
     {"current-ao", mp_property_ao},
 
     // Video
-    {"fullscreen", mp_property_fullscreen},
-    {"taskbar-progress", mp_property_taskbar_progress},
-    {"ontop", mp_property_ontop},
-    {"border", mp_property_border},
-    {"on-all-workspaces", mp_property_all_workspaces},
     {"video-out-params", mp_property_vo_imgparams},
     {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
@@ -6297,6 +6221,23 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
             }
         }
     }
+
+    if (mpctx->video_out) {
+        if (opt_ptr == &opts->vo->fullscreen) {
+            vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
+            if (!opts->vo->fullscreen)
+                mpctx->mouse_event_ts--; // Show mouse cursor
+        }
+        if (opt_ptr == &opts->vo->ontop)
+            vo_control(mpctx->video_out, VOCTRL_ONTOP, 0);
+        if (opt_ptr == &opts->vo->border)
+            vo_control(mpctx->video_out, VOCTRL_BORDER, 0);
+        if (opt_ptr == &opts->vo->all_workspaces)
+            vo_control(mpctx->video_out, VOCTRL_ALL_WORKSPACES, 0);
+    }
+
+    if (opt_ptr == &opts->vo->taskbar_progress)
+        update_vo_playback_state(mpctx);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
