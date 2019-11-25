@@ -3976,7 +3976,6 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
     } else {
         m_option_free(co->opt, list);
         *list = old_settings;
-        reinit_filters(mpctx, mediatype);
     }
 
     return success ? 0 : -1;
