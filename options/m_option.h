@@ -149,6 +149,9 @@ struct m_obj_list {
     // Allow unknown entries, for which a dummy entry is inserted, and whose
     // options are skipped and ignored.
     bool allow_unknown_entries;
+    // Callback to test whether an unknown entry should be allowed. (This can
+    // be useful if adding them as explicit entries is too much work.)
+    bool (*check_unknown_entry)(const char *name);
     // Allow syntax for disabling entries.
     bool allow_disable_entries;
     // This helps with confusing error messages if unknown flag options are used.

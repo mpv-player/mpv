@@ -48,11 +48,17 @@ static void print_af_lavfi_help(struct mp_log *log, const char *name)
     print_lavfi_help(log, name, AVMEDIA_TYPE_AUDIO);
 }
 
+static bool check_af_lavfi(const char *name)
+{
+    return mp_lavfi_is_usable(name, AVMEDIA_TYPE_AUDIO);
+}
+
 const struct m_obj_list af_obj_list = {
     .get_desc = get_af_desc,
     .description = "audio filters",
     .allow_disable_entries = true,
     .allow_unknown_entries = true,
+    .check_unknown_entry = check_af_lavfi,
     .print_help_list = print_af_help_list,
     .print_unknown_entry_help = print_af_lavfi_help,
 };
@@ -96,11 +102,17 @@ static void print_vf_lavfi_help(struct mp_log *log, const char *name)
     print_lavfi_help(log, name, AVMEDIA_TYPE_VIDEO);
 }
 
+static bool check_vf_lavfi(const char *name)
+{
+    return mp_lavfi_is_usable(name, AVMEDIA_TYPE_VIDEO);
+}
+
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_vf_desc,
     .description = "video filters",
     .allow_disable_entries = true,
     .allow_unknown_entries = true,
+    .check_unknown_entry = check_vf_lavfi,
     .print_help_list = print_vf_help_list,
     .print_unknown_entry_help = print_vf_lavfi_help,
 };

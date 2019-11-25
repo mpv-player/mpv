@@ -941,6 +941,12 @@ static bool is_usable(const AVFilter *filter, int media_type)
            is_single_media_only(filter->outputs, media_type);
 }
 
+bool mp_lavfi_is_usable(const char *name, int media_type)
+{
+    const AVFilter *f = avfilter_get_by_name(name);
+    return f && is_usable(f, media_type);
+}
+
 static void dump_list(struct mp_log *log, int media_type)
 {
     mp_info(log, "Available libavfilter filters:\n");

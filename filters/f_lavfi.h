@@ -34,3 +34,6 @@ void print_lavfi_help_list(struct mp_log *log, int media_type);
 
 // Print libavfilter help for the given filter
 void print_lavfi_help(struct mp_log *log, const char *name, int media_type);
+
+// Return whether the given filter exists and has the required media_type in/outs.
+bool mp_lavfi_is_usable(const char *name, int media_type);
