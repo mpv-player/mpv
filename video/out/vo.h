@@ -126,10 +126,14 @@ enum mp_voctrl {
 
     /* private to vo_gpu */
     VOCTRL_EXTERNAL_RESIZE,
+
+    VOCTRL_MAXIMIZE,
+    VOCTRL_MINIMIZE,
 };
 
 // VOCTRL_GET_WIN_STATE
-#define VO_WIN_STATE_MINIMIZED 1
+#define VO_WIN_STATE_MINIMIZED (1 << 0)
+#define VO_WIN_STATE_MAXIMIZED (1 << 1)
 
 #define VO_TRUE         true
 #define VO_FALSE        false
