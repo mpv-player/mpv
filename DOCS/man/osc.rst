@@ -341,6 +341,22 @@ Configurable Options
     ``--sub-use-margins`` option is set to ``yes``, the default). This may be
     fixed later.
 
+``windowcontrols``
+    Default: no (Do not show window controls)
+
+    Whether to show window management controls over the video, and if so,
+    which side of the window to place them. This may be desirable when the
+    window has no decorations, either because they have been explicitly
+    disabled (``border=no``) or because the current platform doesn't support
+    them (eg: gnome-shell with wayland).
+
+    The set of window controls is fixed, offering ``minimze``, ``maximize``,
+    and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
+    but ``quit`` will always work.
+
+    Supports ``left`` and ``right`` which will place the controls on those
+    respective sides.
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
