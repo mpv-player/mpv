@@ -28,6 +28,8 @@
 struct wayland_opts {
     int frame_offset;
     int disable_vsync;
+    int edge_pixels_pointer;
+    int edge_pixels_touch;
 };
 
 struct vo_wayland_sync {

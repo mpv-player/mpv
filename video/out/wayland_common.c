@@ -47,17 +47,18 @@ const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
         OPT_INTRANGE("wayland-frame-wait-offset", frame_offset, 0, -500, 3000),
         OPT_FLAG("wayland-disable-vsync", disable_vsync, 0),
+        OPT_INTRANGE("wayland-edge-pixels-pointer", edge_pixels_pointer, 10, 0, INT_MAX),
+        OPT_INTRANGE("wayland-edge-pixels-touch", edge_pixels_touch, 64, 0, INT_MAX),
         {0},
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
         .frame_offset = 1000,
         .disable_vsync = false,
+        .edge_pixels_pointer = 10,
+        .edge_pixels_touch = 64,
     },
 };
-
-#define POINTER_EDGE_PIXELS 5
-#define TOUCH_EDGE_PIXELS 64
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
@@ -246,7 +247,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         // Implement an edge resize zone if there are no decorations
         if (!wl->xdg_toplevel_decoration &&
             check_for_resize(wl, wl->mouse_unscaled_x, wl->mouse_unscaled_y,
-                             POINTER_EDGE_PIXELS, &edges))
+                             wl->opts->edge_pixels_pointer, &edges))
             xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
         else
             window_move(wl, serial);
@@ -291,7 +292,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_state *wl = data;
 
     enum xdg_toplevel_resize_edge edge;
-    if (check_for_resize(wl, x_w, y_w, TOUCH_EDGE_PIXELS, &edge)) {
+    if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
         wl->touch_entries = 0;
         xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
         return;
