@@ -979,9 +979,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
 
     if (width > 0 && height > 0) {
-        if (!wl->fullscreen) {
-            if (wl->vo->opts->keepaspect && wl->vo->opts->keepaspect_window &&
-                !wl->maximized) {
+        if (!wl->fullscreen && !wl->maximized) {
+            if (wl->vo->opts->keepaspect && wl->vo->opts->keepaspect_window) {
                 if (width > height)
                     width  = height * wl->aspect_ratio;
                 else
