@@ -50,6 +50,7 @@ struct xrandr_display {
 struct vo_x11_state {
     struct mp_log *log;
     struct input_ctx *input_ctx;
+    struct mp_vo_opts *opts;
     Display *display;
     int event_fd;
     int wakeup_pipe[2];
