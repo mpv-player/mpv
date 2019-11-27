@@ -55,7 +55,10 @@ Interface changes
       "video", "sub") will now allow setting any track ID; before this change,
       only IDs of actually existing tracks could be set (the restriction was
       active the MPV_EVENT_FILE_LOADED/"file-loaded" event was sent). Setting
-      an ID for which no track exists is equivalent to disabling it.
+      an ID for which no track exists is equivalent to disabling it. Note that
+      setting the properties to non-existing tracks may report it as selected
+      track for a small time window, until it's forced back to "no". The exact
+      details how this is handled may change in the future.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
