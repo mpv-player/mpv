@@ -296,8 +296,7 @@ struct MPContext *mp_create(void)
     mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
     // Create the config context and register the options
-    mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
-                                  &mp_default_opts, mp_opts);
+    mpctx->mconfig = m_config_new(mpctx, mpctx->log, &mp_opt_root);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->global->config = mpctx->mconfig->shadow;
     mpctx->mconfig->includefunc = cfg_include;

@@ -318,7 +318,7 @@ const struct m_sub_options filter_conf = {
 #undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct MPOpts
 
-const m_option_t mp_opts[] = {
+static const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
     {"v", &m_option_type_dummy_flag, CONF_NOCFG | M_OPT_NOPROP,
      .offset = -1},
@@ -896,7 +896,7 @@ const m_option_t mp_opts[] = {
     {0}
 };
 
-const struct MPOpts mp_default_opts = {
+static const struct MPOpts mp_default_opts = {
     .use_terminal = 1,
     .msg_color = 1,
     .audio_decoders = NULL,
@@ -989,6 +989,12 @@ const struct MPOpts mp_default_opts = {
     },
 
     .cuda_device = -1,
+};
+
+const struct m_sub_options mp_opt_root = {
+    .opts = mp_opts,
+    .size = sizeof(struct MPOpts),
+    .defaults = &mp_default_opts,
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

@@ -775,7 +775,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
     struct priv *p = f->priv;
     struct mp_decoder_wrapper *w = &p->public;
-    p->opt_cache = m_config_cache_alloc(p, f->global, GLOBAL_CONFIG);
+    p->opt_cache = m_config_cache_alloc(p, f->global, &mp_opt_root);
     p->log = f->log;
     p->f = f;
     p->header = src;

@@ -355,8 +355,6 @@ struct filter_opts {
     int deinterlace;
 };
 
-extern const m_option_t mp_opts[];
-extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
@@ -364,5 +362,6 @@ extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
 extern const struct m_sub_options stream_conf;
+extern const struct m_sub_options mp_opt_root;
 
 #endif

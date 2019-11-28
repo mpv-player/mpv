@@ -81,7 +81,7 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
                  const char *decoder)
 {
     struct priv *ctx = da->priv;
-    struct MPOpts *mpopts = mp_get_config_group(ctx, da->global, GLOBAL_CONFIG);
+    struct MPOpts *mpopts = mp_get_config_group(ctx, da->global, &mp_opt_root);
     struct ad_lavc_params *opts =
         mp_get_config_group(ctx, da->global, &ad_lavc_conf);
     AVCodecContext *lavc_context;

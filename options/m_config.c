@@ -451,23 +451,15 @@ static void config_destroy(void *p)
 }
 
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
-                              size_t size, const void *defaults,
-                              const struct m_option *options)
+                              const struct m_sub_options *root)
 {
     struct m_config *config = talloc(talloc_ctx, struct m_config);
     talloc_set_destructor(config, config_destroy);
     *config = (struct m_config){.log = log,};
 
-    struct m_sub_options *subopts = talloc_ptrtype(config, subopts);
-    *subopts = (struct m_sub_options){
-        .opts = options,
-        .size = size,
-        .defaults = defaults,
-    };
+    config->shadow = m_config_shadow_new(root);
 
-    config->shadow = m_config_shadow_new(subopts);
-
-    if (size) {
+    if (root->size) {
         config->data = allocate_option_data(config, config->shadow, 0,
                                             config->shadow->data);
         config->optstruct = config->data->gdata[0].udata;
@@ -500,9 +492,16 @@ static struct m_config *m_config_from_obj_desc(void *talloc_ctx,
                                                struct mpv_global *global,
                                                struct m_obj_desc *desc)
 {
-    struct m_config *c =
-        m_config_new(talloc_ctx, log, desc->priv_size, desc->priv_defaults,
-                     desc->options);
+    struct m_sub_options *root = talloc_ptrtype(NULL, root);
+    *root = (struct m_sub_options){
+        .opts = desc->options,
+        // (global == NULL got repurposed to mean "no alloc")
+        .size = global ? desc->priv_size : 0,
+        .defaults = desc->priv_defaults,
+    };
+
+    struct m_config *c = m_config_new(talloc_ctx, log, root);
+    talloc_steal(c, root);
     c->global = global;
     if (desc->set_defaults && c->global)
         desc->set_defaults(c->global, c->optstruct);
@@ -513,7 +512,7 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct mp_log *log,
                                                 struct m_obj_desc *desc)
 {
-    return m_config_new(talloc_ctx, log, 0, desc->priv_defaults, desc->options);
+    return m_config_from_obj_desc(talloc_ctx, log, NULL, desc);
 }
 
 static const struct m_config_group *find_group(struct mpv_global *global,
@@ -1365,8 +1364,7 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
     int group_index = -1;
 
     for (int n = 0; n < shadow->num_groups; n++) {
-        // group==NULL is special cased to root group.
-        if (shadow->groups[n].group == group || (!group && !n)) {
+        if (shadow->groups[n].group == group) {
             group_index = n;
             break;
         }

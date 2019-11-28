@@ -450,7 +450,7 @@ done:
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global)
 {
-    struct MPOpts *opts = mp_get_config_group(NULL, global, GLOBAL_CONFIG);
+    struct MPOpts *opts = mp_get_config_group(NULL, global, &mp_opt_root);
 
     struct mp_ipc_ctx *arg = talloc_ptrtype(NULL, arg);
     *arg = (struct mp_ipc_ctx){

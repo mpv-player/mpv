@@ -515,7 +515,7 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         .global = tl->global,
         .tl = tl,
         .demuxer = demuxer,
-        .opts = mp_get_config_group(ctx, tl->global, GLOBAL_CONFIG),
+        .opts = mp_get_config_group(ctx, tl->global, &mp_opt_root),
     };
 
     if (!ctx->opts->ordered_chapters || !demuxer->access_references) {

@@ -92,16 +92,10 @@ typedef struct m_config {
 
 // Create a new config object.
 //  talloc_ctx: talloc parent context for the m_config allocation
-//  size: size of the optstruct (where option values are stored)
-//        size==0 creates a config object with no option struct allocated
-//  defaults: if not NULL, points to a struct of same type as optstruct, which
-//            contains default values for all options
-//  options: list of options. Each option defines a member of the optstruct
-//           and a corresponding option switch or sub-option field.
-// Note that the m_config object will keep pointers to defaults and options.
+//  root: description of all options
+// Note that the m_config object will keep pointers to root and log.
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
-                              size_t size, const void *defaults,
-                              const struct m_option *options);
+                              const struct m_sub_options *root);
 
 // Create a m_config for the given desc. This is for --af/--vf, which have
 // different sub-options for every filter (represented by separate desc
@@ -279,8 +273,6 @@ struct m_config_cache {
     struct config_cache *internal;
 };
 
-#define GLOBAL_CONFIG NULL
-
 // Create a mirror copy from the global options.
 // Keep in mind that a m_config_cache object is not thread-safe; it merely
 // provides thread-safe access to the global options. All API functions for
@@ -290,9 +282,7 @@ struct m_config_cache {
 // time.
 //  ta_parent: parent for the returned allocation
 //  global: option data source
-//  group: the option group to return. This can be GLOBAL_CONFIG for the global
-//         option struct (MPOpts), or m_sub_options used in a certain
-//         OPT_SUBSTRUCT() item.
+//  group: the option group to return
 struct m_config_cache *m_config_cache_alloc(void *ta_parent,
                                             struct mpv_global *global,
                                             const struct m_sub_options *group);
@@ -355,7 +345,6 @@ void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr);
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
 // with a snapshot of the current option values.
-// group==GLOBAL_CONFIG is a special case, and always returns the root group.
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
 
