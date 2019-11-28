@@ -338,6 +338,17 @@ struct m_option_type {
     int (*get)(const m_option_t *opt, void *ta_parent, struct mpv_node *dst,
                void *src);
 
+    // Return whether the values are the same. (There are no "unordered"
+    // results; for example, two floats with the value NaN compare equal. Other
+    // ambiguous floats, such as +0 and -0 compare equal. Some option types may
+    // incorrectly report unequal for values that are equal, such as sets (if
+    // the element order is different, which incorrectly matters), but values
+    // duplicated with m_option_copy() always return as equal. Empty strings
+    // and NULL strings are equal. Ambiguous unicode representations compare
+    // unequal.)
+    // If not set, values are always considered equal (=> not really optional).
+    bool (*equal)(const m_option_t *opt, void *a, void *b);
+
     // Optional: list of suffixes, terminated with a {0} entry. An empty list
     // behaves like the list being NULL.
     const struct m_option_action *actions;
@@ -541,6 +552,15 @@ static inline int m_option_get_node(const m_option_t *opt, void *ta_parent,
     if (opt->type->get)
         return opt->type->get(opt, ta_parent, dst, src);
     return M_OPT_UNKNOWN;
+}
+
+static inline bool m_option_equal(const m_option_t *opt, void *a, void *b)
+{
+    // Handle trivial equivalence.
+    // If not implemented, assume this type has no actual values => always equal.
+    if (a == b || !opt->type->equal)
+        return true;
+    return opt->type->equal(opt, a, b);
 }
 
 int m_option_required_params(const m_option_t *opt);
