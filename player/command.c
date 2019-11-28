@@ -4164,18 +4164,6 @@ static void change_property_cmd(struct mp_cmd_ctx *cmd,
     show_property_status(cmd, name, r);
 }
 
-static bool compare_values(struct m_option *type, void *a, void *b)
-{
-    // Since there is no m_option_equals() or anything similar, we convert all
-    // values to a common, unambiguous representation - strings.
-    char *as = m_option_print(type, a);
-    char *bs = m_option_print(type, b);
-    bool res = bstr_equals(bstr0(as), bstr0(bs)); // treat as "" on failure
-    talloc_free(as);
-    talloc_free(bs);
-    return res;
-}
-
 static void cmd_cycle_values(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -4210,9 +4198,6 @@ static void cmd_cycle_values(void *p)
         return;
     }
 
-    // Find the current value. Note that we even though compare_values() uses
-    // strings internally, we need to convert the cycle-values arguments to
-    // native anyway to "normalize" the value for comparison.
     int current = -1;
     for (int n = first; n < cmd->num_args; n++) {
         union m_option_value val = {0};
@@ -4220,7 +4205,7 @@ static void cmd_cycle_values(void *p)
                            bstr0(cmd->args[n].v.s), &val) < 0)
             continue;
 
-        if (compare_values(&prop, &curval, &val))
+        if (m_option_equal(&prop, &curval, &val))
             current = n;
 
         m_option_free(&prop, &val);
