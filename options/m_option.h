@@ -63,6 +63,7 @@ extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_aspect;
+extern const m_option_type_t m_option_type_obj_settings_list;
 extern const m_option_type_t m_option_type_node;
 
 // Used internally by m_config.c
@@ -179,13 +180,6 @@ typedef struct m_obj_settings {
     // NULL terminated array of parameter/value pairs.
     char **attribs;
 } m_obj_settings_t;
-
-// A parser to set up a list of objects.
-/** It creates a NULL terminated array \ref m_obj_settings. The option priv
- *  field (\ref m_option::priv) must point to a \ref m_obj_list_t describing
- *  the available object types.
- */
-extern const m_option_type_t m_option_type_obj_settings_list;
 
 struct m_opt_choice_alternatives {
     char *name;
