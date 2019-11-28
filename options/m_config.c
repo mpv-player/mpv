@@ -102,6 +102,9 @@ struct config_cache {
     struct m_config_shadow *shadow; // global metadata
     uint64_t ts;                    // timestamp of this data copy
     bool in_list;                   // part of m_config_shadow->listeners[]
+    int upd_group;                  // for "incremental" change notification
+    int upd_opt;
+
 
     // --- Implicitly synchronized by setting/unsetting wakeup_cb.
     struct mp_dispatch_queue *wakeup_dispatch_queue;
@@ -609,6 +612,19 @@ static void add_sub_group(struct m_config *config, const char *name_prefix,
     }
 
     shadow->groups[group_index].group_count = shadow->num_groups - group_index;
+}
+
+static uint64_t get_option_change_mask(struct m_config_shadow *shadow,
+                                       int group_index, int group_root,
+                                       const struct m_option *opt)
+{
+    uint64_t changed = opt->flags & UPDATE_OPTS_MASK;
+    while (group_index != group_root) {
+        struct m_config_group *g = &shadow->groups[group_index];
+        changed |= g->group->change_flags;
+        group_index = g->parent_group;
+    }
+    return changed;
 }
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
@@ -1285,46 +1301,74 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
 
     cache->opts = in->data->gdata[0].udata;
 
+    in->upd_group = -1;
+
     return cache;
 }
 
-static bool update_options(struct m_config_data *dst, struct m_config_data *src)
+static void update_next_option(struct m_config_cache *cache, void **p_opt)
 {
-    assert(dst->shadow == src->shadow);
+    struct config_cache *in = cache->internal;
+    struct m_config_data *dst = in->data;
+    struct m_config_data *src = in->src;
 
-    bool res = false;
+    assert(src->group_index == 0); // must be the option root currently
 
-    // Must be from same root, but they can have arbitrary overlap.
-    int group_s = MPMAX(dst->group_index, src->group_index);
-    int group_e = MPMIN(dst->group_index + dst->num_gdata,
-                        src->group_index + src->num_gdata);
-    assert(group_s >= 0 && group_e <= dst->shadow->num_groups);
-    for (int n = group_s; n < group_e; n++) {
-        struct m_config_group *g = &dst->shadow->groups[n];
-        const struct m_option *opts = g->group->opts;
-        struct m_group_data *gsrc = m_config_gdata(src, n);
-        struct m_group_data *gdst = m_config_gdata(dst, n);
+    *p_opt = NULL;
+
+    while (in->upd_group < dst->group_index + dst->num_gdata) {
+        struct m_group_data *gsrc = m_config_gdata(src, in->upd_group);
+        struct m_group_data *gdst = m_config_gdata(dst, in->upd_group);
         assert(gsrc && gdst);
 
-        if (gdst->ts >= gsrc->ts)
-            continue;
-        gdst->ts = gsrc->ts;
-        res = true;
+        if (gdst->ts < gsrc->ts) {
+            struct m_config_group *g = &dst->shadow->groups[in->upd_group];
+            const struct m_option *opts = g->group->opts;
 
-        for (int i = 0; opts && opts[i].name; i++) {
-            const struct m_option *opt = &opts[i];
+            while (opts && opts[in->upd_opt].name) {
+                const struct m_option *opt = &opts[in->upd_opt];
 
-            if (opt->offset >= 0 && opt->type->size) {
-                m_option_copy(opt, gdst->udata + opt->offset,
-                                   gsrc->udata + opt->offset);
+                if (opt->offset >= 0 && opt->type->size) {
+                    void *dsrc = gsrc->udata + opt->offset;
+                    void *ddst = gdst->udata + opt->offset;
+
+                    if (!m_option_equal(opt, ddst, dsrc)) {
+                        uint64_t ch = get_option_change_mask(dst->shadow,
+                                        in->upd_group, dst->group_index, opt);
+
+                        if (cache->debug) {
+                            char *vdst = m_option_print(opt, ddst);
+                            char *vsrc = m_option_print(opt, dsrc);
+                            mp_warn(cache->debug, "Option '%s' changed from "
+                                    "'%s' to' %s' (flags = 0x%"PRIx64")\n",
+                                    opt->name, vdst, vsrc, ch);
+                            talloc_free(vdst);
+                            talloc_free(vsrc);
+                        }
+
+                        m_option_copy(opt, ddst, dsrc);
+                        cache->change_flags |= ch;
+
+                        in->upd_opt++; // skip this next time
+                        *p_opt = ddst;
+                        return;
+                    }
+                }
+
+                in->upd_opt++;
             }
+
+            gdst->ts = gsrc->ts;
         }
+
+        in->upd_group++;
+        in->upd_opt = 0;
     }
 
-    return res;
+    in->upd_group = -1;
 }
 
-bool m_config_cache_update(struct m_config_cache *cache)
+static bool cache_check_update(struct m_config_cache *cache)
 {
     struct config_cache *in = cache->internal;
     struct m_config_shadow *shadow = in->shadow;
@@ -1336,11 +1380,45 @@ bool m_config_cache_update(struct m_config_cache *cache)
         return false;
 
     in->ts = new_ts;
+    in->upd_group = in->data->group_index;
+    in->upd_opt = 0;
+    return true;
+}
+
+bool m_config_cache_update(struct m_config_cache *cache)
+{
+    struct config_cache *in = cache->internal;
+    struct m_config_shadow *shadow = in->shadow;
+
+    if (!cache_check_update(cache))
+        return false;
 
     pthread_mutex_lock(&shadow->lock);
-    bool res = update_options(in->data, in->src);
+    bool res = false;
+    while (1) {
+        void *p;
+        update_next_option(cache, &p);
+        if (!p)
+            break;
+        res = true;
+    }
     pthread_mutex_unlock(&shadow->lock);
     return res;
+}
+
+bool m_config_cache_get_next_changed(struct m_config_cache *cache, void **opt)
+{
+    struct config_cache *in = cache->internal;
+    struct m_config_shadow *shadow = in->shadow;
+
+    *opt = NULL;
+    if (!cache_check_update(cache) && in->upd_group < 0)
+        return false;
+
+    pthread_mutex_lock(&shadow->lock);
+    update_next_option(cache, opt);
+    pthread_mutex_unlock(&shadow->lock);
+    return !!*opt;
 }
 
 void m_config_notify_change_co(struct m_config *config,
@@ -1369,13 +1447,7 @@ void m_config_notify_change_co(struct m_config *config,
         pthread_mutex_unlock(&shadow->lock);
     }
 
-    int changed = co->opt->flags & UPDATE_OPTS_MASK;
-    int group_index = co->group_index;
-    while (group_index >= 0) {
-        struct m_config_group *g = &shadow->groups[group_index];
-        changed |= g->group->change_flags;
-        group_index = g->parent_group;
-    }
+    int changed = get_option_change_mask(shadow, co->group_index, 0, co->opt);
 
     if (config->option_change_callback) {
         config->option_change_callback(config->option_change_callback_ctx, co,

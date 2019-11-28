@@ -266,6 +266,14 @@ struct m_config_cache {
     // The struct as indicated by m_config_cache_alloc's group parameter.
     // (Internally the same as internal->gdata[0]->udata.)
     void *opts;
+    // Accumulated change flags. The user can set this to 0 to unset all flags.
+    // They are set when calling any of the update functions. A flag is only set
+    // once the new value is visible in ->opts.
+    uint64_t change_flags;
+
+    // Set to non-NULL for logging all option changes as they are retrieved
+    // with one of the update functions (like m_config_cache_update()).
+    struct mp_log *debug;
 
     // Do not access.
     struct config_cache *internal;
@@ -277,6 +285,9 @@ struct m_config_cache {
 // Keep in mind that a m_config_cache object is not thread-safe; it merely
 // provides thread-safe access to the global options. All API functions for
 // the same m_config_cache object must synchronized, unless otherwise noted.
+// This does not create an initial change event (m_config_cache_update() will
+// return false), but note that a change might be asynchronously signaled at any
+// time.
 //  ta_parent: parent for the returned allocation
 //  global: option data source
 //  group: the option group to return. This can be GLOBAL_CONFIG for the global
@@ -307,7 +318,25 @@ void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
 // some options have changed).
 // Keep in mind that while the cache->opts pointer does not change, the option
 // data itself will (e.g. string options might be reallocated).
+// New change flags are or-ed into cache->change_flags with this call (if you
+// use them, you should probably do cache->change_flags=0 before this call).
 bool m_config_cache_update(struct m_config_cache *cache);
+
+// Check for changes and return fine grained change information.
+// Warning: this conflicts with m_config_cache_update(). If you call
+//          m_config_cache_update(), all options will be marked as "not changed",
+//          and this function will return false. Also, calling this function and
+//          then m_config_cache_update() is not supported, and may skip updating
+//          some fields.
+// This returns true as long as there is a changed option, and false if all
+// changed options have been returned.
+// If multiple options have changed, the new option value is visible only once
+// this function has returned the change for it.
+//  out_ptr: pointer to a void*, which is set to the cache->opts field associated
+//           with the changed option if the function returns true; set to NULL
+//           if no option changed.
+//  returns: *out_ptr!=NULL (true if there was a changed option)
+bool m_config_cache_get_next_changed(struct m_config_cache *cache, void **out_ptr);
 
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
