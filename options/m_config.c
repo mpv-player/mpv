@@ -1421,6 +1421,66 @@ bool m_config_cache_get_next_changed(struct m_config_cache *cache, void **opt)
     return !!*opt;
 }
 
+static void find_opt(struct m_config_shadow *shadow, struct m_config_data *data,
+                     void *ptr, int *group_idx, int *opt_idx)
+{
+    *group_idx = -1;
+    *opt_idx = -1;
+
+    for (int n = data->group_index; n < data->group_index + data->num_gdata; n++)
+    {
+        struct m_group_data *gd = m_config_gdata(data, n);
+        struct m_config_group *g = &shadow->groups[n];
+        const struct m_option *opts = g->group->opts;
+
+        for (int i = 0; opts && opts[i].name; i++) {
+            const struct m_option *opt = &opts[i];
+
+            if (opt->offset >= 0 && opt->type->size &&
+                ptr == gd->udata + opt->offset)
+            {
+                *group_idx = n;
+                *opt_idx = i;
+                return;
+            }
+        }
+    }
+}
+
+void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
+{
+    struct config_cache *in = cache->internal;
+    struct m_config_shadow *shadow = in->shadow;
+
+    int group_idx = -1;
+    int opt_idx = -1;
+    find_opt(shadow, in->data, ptr, &group_idx, &opt_idx);
+
+    // ptr was not in cache->opts, or no option declaration matching it.
+    assert(group_idx >= 0);
+
+    struct m_config_group *g = &shadow->groups[group_idx];
+    const struct m_option *opt = &g->group->opts[opt_idx];
+
+    pthread_mutex_lock(&shadow->lock);
+
+    struct m_group_data *gdst = m_config_gdata(in->data, group_idx);
+    struct m_group_data *gsrc = m_config_gdata(in->src, group_idx);
+    assert(gdst && gsrc);
+
+    m_option_copy(opt, gsrc->udata + opt->offset, ptr);
+
+    gsrc->ts = atomic_fetch_add(&shadow->ts, 1) + 1;
+
+    for (int n = 0; n < shadow->num_listeners; n++) {
+        struct config_cache *listener = shadow->listeners[n];
+        if (listener->wakeup_cb && m_config_gdata(listener->data, group_idx))
+            listener->wakeup_cb(listener->wakeup_cb_ctx);
+    }
+
+    pthread_mutex_unlock(&shadow->lock);
+}
+
 void m_config_notify_change_co(struct m_config *config,
                                struct m_config_option *co)
 {

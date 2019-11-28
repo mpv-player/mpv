@@ -338,6 +338,20 @@ bool m_config_cache_update(struct m_config_cache *cache);
 //  returns: *out_ptr!=NULL (true if there was a changed option)
 bool m_config_cache_get_next_changed(struct m_config_cache *cache, void **out_ptr);
 
+// Copy the option field pointed to by ptr to the global option storage. This
+// is sort of similar to m_config_set_option_raw(), except doesn't require
+// access to the main thread. (And you can't pass any flags.)
+// You write the new value to the option struct, and then call this function
+// with the pointer to it. You will not get a change notification for it (though
+// you might still get a redundant wakeup callback).
+// Changing the option struct and not calling this function before any update
+// function (like m_config_cache_update()) will leave the value inconsistent,
+// and will possibly (but not necessarily) overwrite it with the next update
+// call.
+//  ptr: points to any field in cache->opts that is managed by an option. If
+//       this is not the case, the function crashes for your own good.
+void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr);
+
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
 // with a snapshot of the current option values.
