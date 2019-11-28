@@ -504,35 +504,6 @@ double mp_output_get_measured_total_delay(struct mp_output_chain *c)
     return delay;
 }
 
-static bool compare_filter(struct m_obj_settings *a, struct m_obj_settings *b)
-{
-    if (a == b || !a || !b)
-        return a == b;
-
-    if (!a->name || !b->name)
-        return a->name == b->name;
-
-    if (!!a->label != !!b->label || (a->label && strcmp(a->label, b->label) != 0))
-        return false;
-
-    if (a->enabled != b->enabled)
-        return false;
-
-    bool a_empty = !a->attribs || !a->attribs[0];
-    bool b_empty = !b->attribs || !b->attribs[0];
-    if (a_empty || b_empty)
-        return a_empty == b_empty;
-
-    for (int n = 0; a->attribs[n] || b->attribs[n]; n++) {
-        if (!a->attribs[n] || !b->attribs[n])
-            return false;
-        if (strcmp(a->attribs[n], b->attribs[n]) != 0)
-            return false;
-    }
-
-    return true;
-}
-
 bool mp_output_chain_update_filters(struct mp_output_chain *c,
                                     struct m_obj_settings *list)
 {
@@ -553,7 +524,9 @@ bool mp_output_chain_update_filters(struct mp_output_chain *c,
         struct mp_user_filter *u = NULL;
 
         for (int i = 0; i < p->num_user_filters; i++) {
-            if (!used[i] && compare_filter(entry, p->user_filters[i]->args)) {
+            struct m_option t = {.type = &m_option_type_obj_settings_list};
+            if (!used[i] && m_option_equal(&t, &entry, &p->user_filters[i]->args))
+            {
                 u = p->user_filters[i];
                 used[i] = true;
                 break;
