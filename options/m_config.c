@@ -57,6 +57,8 @@ static const union m_option_value default_value;
 struct m_config_shadow {
     struct m_config *root;
     pthread_mutex_t lock;
+    // Incremented on every option change.
+    mp_atomic_uint64 ts;
     // -- immutable after init
     // List of m_sub_options instances.
     // Index 0 is the top-level and is always present.
@@ -66,7 +68,7 @@ struct m_config_shadow {
     int num_groups;
     // -- protected by lock
     struct m_config_data *data; // protected shadow copy of the option data
-    struct m_config_cache **listeners;
+    struct config_cache **listeners;
     int num_listeners;
 };
 
@@ -90,13 +92,31 @@ struct m_config_data {
     int group_index;                // start index into m_config.groups[]
     struct m_group_data *gdata;     // user struct allocation (our copy of data)
     int num_gdata;                  // (group_index+num_gdata = end index)
-    atomic_llong ts;                // last change timestamp we've seen
+};
+
+struct config_cache {
+    struct m_config_cache *public;
+
+    struct m_config_data *data;     // public data
+    struct m_config_data *src;      // global data (currently ==shadow->data)
+    struct m_config_shadow *shadow; // global metadata
+    uint64_t ts;                    // timestamp of this data copy
+    bool in_list;                   // part of m_config_shadow->listeners[]
+
+    // --- Implicitly synchronized by setting/unsetting wakeup_cb.
+    struct mp_dispatch_queue *wakeup_dispatch_queue;
+    void (*wakeup_dispatch_cb)(void *ctx);
+    void *wakeup_dispatch_cb_ctx;
+
+    // --- Protected by shadow->lock
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_cb_ctx;
 };
 
 // Per m_config_data state for each m_config_group.
 struct m_group_data {
     char *udata;        // pointer to group user option struct
-    long long ts;       // incremented on every write access
+    uint64_t ts;        // timestamp of the data copy
 };
 
 struct m_profile {
@@ -297,9 +317,6 @@ static struct m_config_data *allocate_option_data(void *ta_parent,
 
     for (int n = group_index; n < group_index + root_group->group_count; n++)
         alloc_group(data, n, copy);
-
-    if (copy)
-        data->ts = copy->ts;
 
     return data;
 }
@@ -1248,15 +1265,25 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
 
     assert(group_index >= 0); // invalid group (or not in option tree)
 
-    struct m_config_cache *cache = talloc_zero(ta_parent, struct m_config_cache);
+    struct cache_alloc {
+        struct m_config_cache a;
+        struct config_cache b;
+    };
+    struct cache_alloc *alloc = talloc_zero(ta_parent, struct cache_alloc);
+    assert((void *)&alloc->a == (void *)alloc);
+    struct m_config_cache *cache = &alloc->a;
     talloc_set_destructor(cache, cache_destroy);
-    cache->shadow = shadow;
+    cache->internal = &alloc->b;
+
+    struct config_cache *in = cache->internal;
+    in->shadow = shadow;
+    in->src = shadow->data;
 
     pthread_mutex_lock(&shadow->lock);
-    cache->data = allocate_option_data(cache, shadow, group_index, shadow->data);
+    in->data = allocate_option_data(cache, shadow, group_index, in->src);
     pthread_mutex_unlock(&shadow->lock);
 
-    cache->opts = cache->data->gdata[0].udata;
+    cache->opts = in->data->gdata[0].udata;
 
     return cache;
 }
@@ -1266,7 +1293,6 @@ static bool update_options(struct m_config_data *dst, struct m_config_data *src)
     assert(dst->shadow == src->shadow);
 
     bool res = false;
-    dst->ts = src->ts;
 
     // Must be from same root, but they can have arbitrary overlap.
     int group_s = MPMAX(dst->group_index, src->group_index);
@@ -1300,16 +1326,19 @@ static bool update_options(struct m_config_data *dst, struct m_config_data *src)
 
 bool m_config_cache_update(struct m_config_cache *cache)
 {
-    struct m_config_shadow *shadow = cache->shadow;
+    struct config_cache *in = cache->internal;
+    struct m_config_shadow *shadow = in->shadow;
 
     // Using atomics and checking outside of the lock - it's unknown whether
     // this makes it faster or slower. Just cargo culting it.
-    if (atomic_load_explicit(&cache->data->ts, memory_order_relaxed) >=
-        atomic_load(&shadow->data->ts))
+    uint64_t new_ts = atomic_load(&shadow->ts);
+    if (in->ts >= new_ts)
         return false;
 
+    in->ts = new_ts;
+
     pthread_mutex_lock(&shadow->lock);
-    bool res = update_options(cache->data, shadow->data);
+    bool res = update_options(in->data, in->src);
     pthread_mutex_unlock(&shadow->lock);
     return res;
 }
@@ -1327,12 +1356,12 @@ void m_config_notify_change_co(struct m_config *config,
         struct m_group_data *gdata = m_config_gdata(data, co->group_index);
         assert(gdata);
 
-        gdata->ts = atomic_fetch_add(&data->ts, 1) + 1;
+        gdata->ts = atomic_fetch_add(&shadow->ts, 1) + 1;
 
         m_option_copy(co->opt, gdata->udata + co->opt->offset, co->data);
 
         for (int n = 0; n < shadow->num_listeners; n++) {
-            struct m_config_cache *cache = shadow->listeners[n];
+            struct config_cache *cache = shadow->listeners[n];
             if (cache->wakeup_cb && m_config_gdata(cache->data, co->group_index))
                 cache->wakeup_cb(cache->wakeup_cb_ctx);
         }
@@ -1371,18 +1400,19 @@ void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
 void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
                                   void (*cb)(void *ctx), void *cb_ctx)
 {
-    struct m_config_shadow *shadow = cache->shadow;
+    struct config_cache *in = cache->internal;
+    struct m_config_shadow *shadow = in->shadow;
 
     pthread_mutex_lock(&shadow->lock);
-    if (cache->in_list) {
+    if (in->in_list) {
         for (int n = 0; n < shadow->num_listeners; n++) {
-            if (shadow->listeners[n] == cache) {
+            if (shadow->listeners[n] == in) {
                 MP_TARRAY_REMOVE_AT(shadow->listeners, shadow->num_listeners, n);
                 break;
             }
         }
         for (int n = 0; n < shadow->num_listeners; n++)
-            assert(shadow->listeners[n] != cache); // only 1 wakeup_cb per cache
+            assert(shadow->listeners[n] != in); // only 1 wakeup_cb per cache
         // (The deinitialization path relies on this to free all memory.)
         if (!shadow->num_listeners) {
             talloc_free(shadow->listeners);
@@ -1390,48 +1420,50 @@ void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,
         }
     }
     if (cb) {
-        MP_TARRAY_APPEND(NULL, shadow->listeners, shadow->num_listeners, cache);
-        cache->in_list = true;
-        cache->wakeup_cb = cb;
-        cache->wakeup_cb_ctx = cb_ctx;
+        MP_TARRAY_APPEND(NULL, shadow->listeners, shadow->num_listeners, in);
+        in->in_list = true;
+        in->wakeup_cb = cb;
+        in->wakeup_cb_ctx = cb_ctx;
     }
     pthread_mutex_unlock(&shadow->lock);
 }
 
 static void dispatch_notify(void *p)
 {
-    struct m_config_cache *cache = p;
+    struct config_cache *in = p;
 
-    assert(cache->wakeup_dispatch_queue);
-    mp_dispatch_enqueue_notify(cache->wakeup_dispatch_queue,
-                               cache->wakeup_dispatch_cb,
-                               cache->wakeup_dispatch_cb_ctx);
+    assert(in->wakeup_dispatch_queue);
+    mp_dispatch_enqueue_notify(in->wakeup_dispatch_queue,
+                               in->wakeup_dispatch_cb,
+                               in->wakeup_dispatch_cb_ctx);
 }
 
 void m_config_cache_set_dispatch_change_cb(struct m_config_cache *cache,
                                            struct mp_dispatch_queue *dispatch,
                                            void (*cb)(void *ctx), void *cb_ctx)
 {
+    struct config_cache *in = cache->internal;
+
     // Removing the old one is tricky. First make sure no new notifications will
     // come.
     m_config_cache_set_wakeup_cb(cache, NULL, NULL);
     // Remove any pending notifications (assume we're on the same thread as
     // any potential mp_dispatch_queue_process() callers).
-    if (cache->wakeup_dispatch_queue) {
-        mp_dispatch_cancel_fn(cache->wakeup_dispatch_queue,
-                              cache->wakeup_dispatch_cb,
-                              cache->wakeup_dispatch_cb_ctx);
+    if (in->wakeup_dispatch_queue) {
+        mp_dispatch_cancel_fn(in->wakeup_dispatch_queue,
+                              in->wakeup_dispatch_cb,
+                              in->wakeup_dispatch_cb_ctx);
     }
 
-    cache->wakeup_dispatch_queue = NULL;
-    cache->wakeup_dispatch_cb = NULL;
-    cache->wakeup_dispatch_cb_ctx = NULL;
+    in->wakeup_dispatch_queue = NULL;
+    in->wakeup_dispatch_cb = NULL;
+    in->wakeup_dispatch_cb_ctx = NULL;
 
     if (cb) {
-        cache->wakeup_dispatch_queue = dispatch;
-        cache->wakeup_dispatch_cb = cb;
-        cache->wakeup_dispatch_cb_ctx = cb_ctx;
-        m_config_cache_set_wakeup_cb(cache, dispatch_notify, cache);
+        in->wakeup_dispatch_queue = dispatch;
+        in->wakeup_dispatch_cb = cb;
+        in->wakeup_dispatch_cb_ctx = cb_ctx;
+        m_config_cache_set_wakeup_cb(cache, dispatch_notify, in);
     }
 }
 

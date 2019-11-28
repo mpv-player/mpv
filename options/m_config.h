@@ -35,6 +35,7 @@ struct m_sub_options;
 struct m_obj_desc;
 struct m_obj_settings;
 struct mp_log;
+struct mp_dispatch_queue;
 
 // Config option
 struct m_config_option {
@@ -263,20 +264,11 @@ struct mpv_node m_config_get_profiles(struct m_config *config);
 // the cache itself is allowed.
 struct m_config_cache {
     // The struct as indicated by m_config_cache_alloc's group parameter.
-    // (Internally the same as data->gdata[0]->udata.)
+    // (Internally the same as internal->gdata[0]->udata.)
     void *opts;
 
-    // Internal.
-    struct m_config_shadow *shadow; // real data
-    struct m_config_data *data;     // copy for the cache user
-    bool in_list;                   // registered as listener with root config
-    // --- Implicitly synchronized by setting/unsetting wakeup_cb.
-    struct mp_dispatch_queue *wakeup_dispatch_queue;
-    void (*wakeup_dispatch_cb)(void *ctx);
-    void *wakeup_dispatch_cb_ctx;
-    // --- Protected by shadow->lock
-    void (*wakeup_cb)(void *ctx);
-    void *wakeup_cb_ctx;
+    // Do not access.
+    struct config_cache *internal;
 };
 
 #define GLOBAL_CONFIG NULL
