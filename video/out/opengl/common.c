@@ -494,7 +494,7 @@ static const struct gl_functions gl_functions[] = {
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                           void *fn_ctx, const char *ext2, struct mp_log *log)
 {
-    talloc_free_children(gl);
+    talloc_free(gl->extensions);
     *gl = (GL) {
         .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
     };
