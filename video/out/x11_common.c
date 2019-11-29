@@ -145,6 +145,8 @@ static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce)
 static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4]);
 static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
                                struct mp_rect rc);
+static void vo_x11_maximize(struct vo *vo);
+static void vo_x11_minimize(struct vo *vo);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 #define XAs(x11, s) XInternAtom((x11)->display, s, False)
@@ -1013,9 +1015,10 @@ static void vo_x11_update_composition_hint(struct vo *vo)
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&hint, 1);
 }
 
-static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
+static void vo_x11_check_net_wm_state_change(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
+    struct mp_vo_opts *opts = x11->opts;
 
     if (x11->parent)
         return;
@@ -1024,17 +1027,27 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
         int num_elems;
         long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
                                        XA_ATOM, 32, &num_elems);
-        int is_fullscreen = 0;
+        int is_fullscreen = 0, is_minimized = 0, is_maximized = 0;
         if (elems) {
             Atom fullscreen_prop = XA(x11, _NET_WM_STATE_FULLSCREEN);
+            Atom hidden = XA(x11, _NET_WM_STATE_HIDDEN);
+            Atom max_vert = XA(x11, _NET_WM_STATE_MAXIMIZED_VERT);
+            Atom max_horiz = XA(x11, _NET_WM_STATE_MAXIMIZED_HORZ);
             for (int n = 0; n < num_elems; n++) {
-                if (elems[n] == fullscreen_prop) {
+                if (elems[n] == fullscreen_prop)
                     is_fullscreen = 1;
-                    break;
-                }
+                if (elems[n] == hidden)
+                    is_minimized = 1;
+                if (elems[n] == max_vert || elems[n] == max_horiz)
+                    is_maximized = 1;
             }
             XFree(elems);
         }
+
+        opts->window_minimized = is_minimized;
+        m_config_cache_write_opt(x11->opts_cache, &opts->window_minimized);
+        opts->window_maximized = is_maximized;
+        m_config_cache_write_opt(x11->opts_cache, &opts->window_maximized);
 
         if ((x11->opts->fullscreen && !is_fullscreen) ||
             (!x11->opts->fullscreen && is_fullscreen))
@@ -1231,7 +1244,7 @@ void vo_x11_check_events(struct vo *vo)
                     x11->pseudo_mapped = true;
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
-                vo_x11_check_net_wm_state_fullscreen_change(vo);
+                vo_x11_check_net_wm_state_change(vo);
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_DESKTOP)) {
                 vo_x11_check_net_wm_desktop_change(vo);
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
@@ -1531,6 +1544,11 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
 
+    if (x11->opts->window_maximized) // don't override WM default on "no"
+        vo_x11_maximize(vo);
+    if (x11->opts->window_minimized) // don't override WM default on "no"
+        vo_x11_minimize(vo);
+
     if (x11->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN))
         x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", 1);
 
@@ -1805,15 +1823,8 @@ static void vo_x11_maximize(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    /*
-     * Although we only do full maximization, the user may do a partial
-     * maximization via other means. Toggling both when one is set and
-     * one is not results in implementation-dependent behaviour. In
-     * testing with gnome-shell, toggling goes from HORZ to un-maximized,
-     * and goes from VERT to fully maximized.
-     */
     long params[5] = {
-        NET_WM_STATE_TOGGLE,
+        x11->opts->window_maximized ? NET_WM_STATE_ADD : NET_WM_STATE_REMOVE,
         XA(x11, _NET_WM_STATE_MAXIMIZED_VERT),
         XA(x11, _NET_WM_STATE_MAXIMIZED_HORZ),
         1, // source indication: normal
@@ -1825,7 +1836,8 @@ static void vo_x11_minimize(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    XIconifyWindow(x11->display, x11->window, x11->screen);
+    if (x11->opts->window_minimized)
+        XIconifyWindow(x11->display, x11->window, x11->screen);
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
@@ -1857,6 +1869,10 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 }
                 x11_send_ewmh_msg(x11, "_NET_WM_DESKTOP", params);
             }
+            if (opt == &opts->window_minimized)
+                vo_x11_minimize(vo);
+            if (opt == &opts->window_maximized)
+                vo_x11_maximize(vo);
         }
         return VO_TRUE;
     }
@@ -1879,34 +1895,6 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         if (!x11->fs) { // guess new window size, instead of waiting for X
             x11->winrc.x1 = x11->winrc.x0 + s[0];
             x11->winrc.y1 = x11->winrc.y0 + s[1];
-        }
-        return VO_TRUE;
-    }
-    case VOCTRL_MAXIMIZE:
-        vo_x11_maximize(vo);
-        return VO_TRUE;
-    case VOCTRL_MINIMIZE:
-        vo_x11_minimize(vo);
-        return VO_TRUE;
-    case VOCTRL_GET_WIN_STATE: {
-        if (!x11->pseudo_mapped)
-            return VO_FALSE;
-        *(int *)arg = 0;
-        int num_elems;
-        long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
-                                       XA_ATOM, 32, &num_elems);
-        if (elems) {
-            Atom hidden = XA(x11, _NET_WM_STATE_HIDDEN);
-            Atom max_vert = XA(x11, _NET_WM_STATE_MAXIMIZED_VERT);
-            Atom max_horiz = XA(x11, _NET_WM_STATE_MAXIMIZED_HORZ);
-            for (int n = 0; n < num_elems; n++) {
-                if (elems[n] == hidden)
-                    *(int *)arg |= VO_WIN_STATE_MINIMIZED;
-                else if (elems[n] == max_vert ||
-                         elems[n] == max_horiz)
-                    *(int *)arg |= VO_WIN_STATE_MAXIMIZED;
-            }
-            XFree(elems);
         }
         return VO_TRUE;
     }
