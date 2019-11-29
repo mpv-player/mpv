@@ -2017,8 +2017,15 @@ Property list
     (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
-``window-minimized``
-    Return whether the video window is minimized or not.
+``window-maximized`` (RW)
+    Whether the video window is maximized or not. Setting this will maximize,
+    or unmaximize, the video window if the current VO supports it.
+
+``window-minimized`` (RW)
+    Whether the video window is minimized or not. Setting this will minimize,
+    or unminimze, the video window if the current VO supports it. Note that
+    some VOs may support minimization while not supporting unminimization
+    (eg: X11 and Wayland).
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
