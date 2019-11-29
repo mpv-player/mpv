@@ -74,8 +74,11 @@ typedef struct m_config {
 
     // Notification after an option was successfully written to.
     // Uses flags as set in UPDATE_OPTS_MASK.
+    // self_update==true means the update was caused by a call to
+    // m_config_notify_change_opt_ptr(). If false, it's caused either by
+    // m_config_set_option_*() (and similar) calls or external updates.
     void (*option_change_callback)(void *ctx, struct m_config_option *co,
-                                   int flags);
+                                   int flags, bool self_update);
     void *option_change_callback_ctx;
 
     // For the command line parser
@@ -84,7 +87,8 @@ typedef struct m_config {
     void *optstruct; // struct mpopts or other
 
     // Private. Non-NULL if data was allocated. m_config_option.data uses it.
-    struct m_config_data *data;
+    // API users call m_config_set_update_dispatch_queue() to get async updates.
+    struct m_config_cache *cache;
 
     // Private. Thread-safe shadow memory; only set for the main m_config.
     struct m_config_shadow *shadow;
@@ -189,11 +193,7 @@ const char *m_config_get_positional_option(const struct m_config *config, int n)
 int m_config_option_requires_param(struct m_config *config, bstr name);
 
 // Notify m_config_cache users that the option has (probably) changed its value.
-void m_config_notify_change_co(struct m_config *config,
-                               struct m_config_option *co);
-// Like m_config_notify_change_co(), but automatically find the option by its
-// pointer within the global option struct (config->optstruct). In practice,
-// it means it works only on fields in MPContext.opts.
+// This will force a self-notification back to config->option_change_callback.
 void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr);
 
 // Return all (visible) option names as NULL terminated string list.
@@ -252,6 +252,10 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
 int m_config_set_profile(struct m_config *config, char *name, int flags);
 
 struct mpv_node m_config_get_profiles(struct m_config *config);
+
+// Run async option updates here. This will call option_change_callback() on it.
+void m_config_set_update_dispatch_queue(struct m_config *config,
+                                        struct mp_dispatch_queue *dispatch);
 
 // This can be used to create and synchronize per-thread option structs,
 // which then can be read without synchronization. No concurrent access to

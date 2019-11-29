@@ -193,6 +193,7 @@ void mp_destroy(struct MPContext *mpctx)
     assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
     pthread_mutex_destroy(&mpctx->abort_lock);
+    talloc_free(mpctx->mconfig); // destroy before dispatch
     talloc_free(mpctx);
 }
 
@@ -379,8 +380,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     mpctx->initialized = true;
     mpctx->mconfig->option_change_callback = mp_option_change_callback;
     mpctx->mconfig->option_change_callback_ctx = mpctx;
+    m_config_set_update_dispatch_queue(mpctx->mconfig, mpctx->dispatch);
     // Run all update handlers.
-    mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK);
+    mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK, false);
 
     if (handle_help_options(mpctx))
         return 1; // help

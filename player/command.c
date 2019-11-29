@@ -1889,6 +1889,8 @@ static int property_switch_track(void *ctx, struct m_property *prop,
             // not always do what the user means, but keep the complexity low.
             mpctx->opts->stream_id[order][type] =
                 mpctx->opts->stream_id[order][type] == -1 ? -2 : -1;
+            m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                        &mpctx->opts->stream_id[order][type]);
         }
         return M_PROPERTY_OK;
     }
@@ -3485,11 +3487,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_FILE_LOADED, "*"),
     E(MP_EVENT_CHANGE_ALL, "*"),
     E(MPV_EVENT_TRACKS_CHANGED, "track-list"),
-    E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
-      "secondary-sid"),
     E(MPV_EVENT_IDLE, "*"),
-    E(MPV_EVENT_PAUSE,   "pause"),
-    E(MPV_EVENT_UNPAUSE, "pause"),
     E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
@@ -4952,6 +4950,8 @@ static void cmd_track_add(void *p)
                 print_track_list(mpctx, "Track switched:");
             } else {
                 mpctx->opts->stream_id[0][t->type] = t->user_tid;
+                m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                        &mpctx->opts->stream_id[0][t->type]);
             }
             return;
         }
@@ -4972,6 +4972,8 @@ static void cmd_track_add(void *p)
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
             } else {
                 mpctx->opts->stream_id[0][t->type] = t->user_tid;
+                m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                        &mpctx->opts->stream_id[0][t->type]);
             }
         }
         char *title = cmd->args[2].v.s;
@@ -6037,12 +6039,22 @@ static void update_priority(struct MPContext *mpctx)
 #endif
 }
 
-void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
+void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
+                               bool self_update)
 {
     struct MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
     struct command_ctx *cmd = mpctx->command_ctx;
     void *opt_ptr = co ? co->data : NULL; // NULL on start
+
+    if (co)
+        mp_notify_property(mpctx, co->name);
+
+    if (opt_ptr == &opts->pause)
+        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+
+    if (self_update)
+        return;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);

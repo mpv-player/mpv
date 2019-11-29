@@ -144,16 +144,12 @@ void update_core_idle_state(struct MPContext *mpctx)
 void set_pause_state(struct MPContext *mpctx, bool user_pause)
 {
     struct MPOpts *opts = mpctx->opts;
-    bool send_update = false;
 
-    if (opts->pause != user_pause)
-        send_update = true;
     opts->pause = user_pause;
 
     bool internal_paused = opts->pause || mpctx->paused_for_cache;
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
-        send_update = true;
 
         if (mpctx->ao && mpctx->ao_chain) {
             if (internal_paused) {
@@ -177,12 +173,15 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
         } else {
             (void)get_relative_time(mpctx); // ignore time that passed during pause
         }
+
+        // For some reason, these events are supposed to be sent even if only
+        // the internal pause state changed (and "pause" property didn't)... OK.
+        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
     }
 
     update_core_idle_state(mpctx);
 
-    if (send_update)
-        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+    m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->pause);
 }
 
 void update_internal_pause_state(struct MPContext *mpctx)
@@ -884,8 +883,10 @@ static void handle_loop_file(struct MPContext *mpctx)
         target = ab[0];
         prec = MPSEEK_EXACT;
     } else if (opts->loop_file) {
-        if (opts->loop_file > 0)
+        if (opts->loop_file > 0) {
             opts->loop_file--;
+            m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->loop_file);
+        }
         target = get_start_time(mpctx, mpctx->play_dir);
     }
 
@@ -1035,6 +1036,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
 
 err:
     mpctx->opts->force_vo = 0;
+    m_config_notify_change_opt_ptr(mpctx->mconfig, &mpctx->opts->force_vo);
     uninit_video_out(mpctx);
     MP_FATAL(mpctx, "Error opening/initializing the VO window.\n");
     return -1;

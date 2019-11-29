@@ -142,6 +142,9 @@ struct m_opt_backup {
     void *backup;
 };
 
+static struct m_config_cache *m_config_cache_alloc_internal(void *ta_parent,
+                                            struct m_config_shadow *shadow,
+                                            const struct m_sub_options *group);
 static void add_sub_group(struct m_config_shadow *shadow, const char *name_prefix,
                           int parent_group_index, int parent_ptr,
                           const struct m_sub_options *subopts);
@@ -446,7 +449,7 @@ static void config_destroy(void *p)
     struct m_config *config = p;
     m_config_restore_backups(config);
 
-    talloc_free(config->data);
+    talloc_free(config->cache);
     talloc_free(config->shadow);
 }
 
@@ -460,9 +463,9 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
     config->shadow = m_config_shadow_new(root);
 
     if (root->size) {
-        config->data = allocate_option_data(config, config->shadow, 0,
-                                            config->shadow->data);
-        config->optstruct = config->data->gdata[0].udata;
+        config->cache =
+            m_config_cache_alloc_internal(config, config->shadow, root);
+        config->optstruct = config->cache->opts;
     }
 
     struct opt_iterate_state it;
@@ -475,8 +478,9 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
             .is_hidden = !!it.opt->deprecation_message,
         };
 
-        struct m_group_data *gdata =
-            config->data ? m_config_gdata(config->data, it.group_index) : NULL;
+        struct m_group_data *gdata = config->cache
+            ? m_config_gdata(config->cache->internal->data,  it.group_index)
+            : NULL;
 
         if (gdata && co.opt->offset >= 0)
             co.data = gdata->udata + co.opt->offset;
@@ -939,6 +943,67 @@ static int m_config_handle_special_options(struct m_config *config,
     return M_OPT_UNKNOWN;
 }
 
+// This notification happens when anyone other than m_config->cache (i.e. not
+// through m_config_set_option_raw() or related) changes any options.
+static void async_change_cb(void *p)
+{
+    struct m_config *config = p;
+
+    void *ptr;
+    while (m_config_cache_get_next_changed(config->cache, &ptr)) {
+        // Regrettable linear search, might degenerate to quadratic.
+        for (int n = 0; n < config->num_opts; n++) {
+            struct m_config_option *co = &config->opts[n];
+            if (co->data == ptr) {
+                if (config->option_change_callback) {
+                    config->option_change_callback(
+                        config->option_change_callback_ctx, co,
+                        config->cache->change_flags, false);
+                }
+                break;
+            }
+        }
+        config->cache->change_flags = 0;
+    }
+}
+
+void m_config_set_update_dispatch_queue(struct m_config *config,
+                                        struct mp_dispatch_queue *dispatch)
+{
+    m_config_cache_set_dispatch_change_cb(config->cache, dispatch,
+                                          async_change_cb, config);
+}
+
+// Normally m_config_cache will not send notifications when _we_ change our
+// own stuff. For whatever funny reasons, we need that, though.
+static void force_self_notify_change_opt(struct m_config *config,
+                                         struct m_config_option *co,
+                                         bool self_notification)
+{
+    int changed =
+        get_option_change_mask(config->shadow, co->group_index, 0, co->opt);
+
+    if (config->option_change_callback) {
+        config->option_change_callback(config->option_change_callback_ctx, co,
+                                       changed, self_notification);
+    }
+}
+
+void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
+{
+    for (int n = 0; n < config->num_opts; n++) {
+        struct m_config_option *co = &config->opts[n];
+        if (co->data == ptr) {
+            if (m_config_cache_write_opt(config->cache, co->data))
+                force_self_notify_change_opt(config, co, true);
+            return;
+        }
+    }
+    // ptr doesn't point to any config->optstruct field declared in the
+    // option list?
+    assert(false);
+}
+
 int m_config_set_option_raw(struct m_config *config,
                             struct m_config_option *co,
                             void *data, int flags)
@@ -959,10 +1024,11 @@ int m_config_set_option_raw(struct m_config *config,
     if (!co->data)
         return flags & M_SETOPT_FROM_CMDLINE ? 0 : M_OPT_UNKNOWN;
 
-    m_option_copy(co->opt, co->data, data);
-
     m_config_mark_co_flags(co, flags);
-    m_config_notify_change_co(config, co);
+
+    m_option_copy(co->opt, co->data, data);
+    if (m_config_cache_write_opt(config->cache, co->data))
+        force_self_notify_change_opt(config, co, false);
 
     return 0;
 }
@@ -1356,11 +1422,10 @@ static void cache_destroy(void *p)
     m_config_cache_set_dispatch_change_cb(cache, NULL, NULL, NULL);
 }
 
-struct m_config_cache *m_config_cache_alloc(void *ta_parent,
-                                            struct mpv_global *global,
+static struct m_config_cache *m_config_cache_alloc_internal(void *ta_parent,
+                                            struct m_config_shadow *shadow,
                                             const struct m_sub_options *group)
 {
-    struct m_config_shadow *shadow = global->config;
     int group_index = -1;
 
     for (int n = 0; n < shadow->num_groups; n++) {
@@ -1395,6 +1460,13 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
     in->upd_group = -1;
 
     return cache;
+}
+
+struct m_config_cache *m_config_cache_alloc(void *ta_parent,
+                                            struct mpv_global *global,
+                                            const struct m_sub_options *group)
+{
+    return m_config_cache_alloc_internal(ta_parent, global->config, group);
 }
 
 static void update_next_option(struct m_config_cache *cache, void **p_opt)
@@ -1575,54 +1647,6 @@ bool m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
     pthread_mutex_unlock(&shadow->lock);
 
     return changed;
-}
-
-void m_config_notify_change_co(struct m_config *config,
-                               struct m_config_option *co)
-{
-    struct m_config_shadow *shadow = config->shadow;
-    assert(co->data);
-
-    if (shadow) {
-        pthread_mutex_lock(&shadow->lock);
-
-        struct m_config_data *data = shadow->data;
-        struct m_group_data *gdata = m_config_gdata(data, co->group_index);
-        assert(gdata);
-
-        gdata->ts = atomic_fetch_add(&shadow->ts, 1) + 1;
-
-        m_option_copy(co->opt, gdata->udata + co->opt->offset, co->data);
-
-        for (int n = 0; n < shadow->num_listeners; n++) {
-            struct config_cache *cache = shadow->listeners[n];
-            if (cache->wakeup_cb && m_config_gdata(cache->data, co->group_index))
-                cache->wakeup_cb(cache->wakeup_cb_ctx);
-        }
-
-        pthread_mutex_unlock(&shadow->lock);
-    }
-
-    int changed = get_option_change_mask(shadow, co->group_index, 0, co->opt);
-
-    if (config->option_change_callback) {
-        config->option_change_callback(config->option_change_callback_ctx, co,
-                                       changed);
-    }
-}
-
-void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
-{
-    for (int n = 0; n < config->num_opts; n++) {
-        struct m_config_option *co = &config->opts[n];
-        if (co->data == ptr) {
-            m_config_notify_change_co(config, co);
-            return;
-        }
-    }
-    // ptr doesn't point to any config->optstruct field declared in the
-    // option list?
-    assert(false);
 }
 
 void m_config_cache_set_wakeup_cb(struct m_config_cache *cache,

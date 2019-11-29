@@ -78,7 +78,8 @@ void property_print_help(struct MPContext *mpctx);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
 
-void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags);
+void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
+                               bool self_update);
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_notify_property(struct MPContext *mpctx, const char *property);
