@@ -2210,8 +2210,10 @@ function render()
     for k,cords in pairs(osc_param.areas["showhide"]) do
         set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide")
     end
-    for k,cords in pairs(osc_param.areas["showhide_wc"]) do
-        set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide_wc")
+    if osc_param.areas["showhide_wc"] then
+        for k,cords in pairs(osc_param.areas["showhide_wc"]) do
+            set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide_wc")
+        end
     end
     do_enable_keybindings()
 
