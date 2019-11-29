@@ -350,7 +350,7 @@ Configurable Options
     disabled (``border=no``) or because the current platform doesn't support
     them (eg: gnome-shell with wayland).
 
-    The set of window controls is fixed, offering ``minimze``, ``maximize``,
+    The set of window controls is fixed, offering ``minimize``, ``maximize``,
     and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
     but ``quit`` will always work.
 
