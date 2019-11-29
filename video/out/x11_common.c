@@ -1059,6 +1059,22 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
     }
 }
 
+static void vo_x11_check_net_wm_desktop_change(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (x11->parent)
+        return;
+
+    long params[5] = {0};
+    if (x11_get_property_copy(x11, x11->window, XA(x11, _NET_WM_DESKTOP),
+                              XA_CARDINAL, 32, params, sizeof(params)))
+    {
+        x11->opts->all_workspaces = params[0] == -1; // (gets sign-extended?)
+        m_config_cache_write_opt(x11->opts_cache, &x11->opts->all_workspaces);
+    }
+}
+
 // Releasing all keys on key-up or defocus is simpler and ensures no keys can
 // get "stuck".
 static void release_all_keys(struct vo *vo)
@@ -1216,6 +1232,8 @@ void vo_x11_check_events(struct vo *vo)
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
                 vo_x11_check_net_wm_state_fullscreen_change(vo);
+            } else if (Event.xproperty.atom == XA(x11, _NET_WM_DESKTOP)) {
+                vo_x11_check_net_wm_desktop_change(vo);
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
