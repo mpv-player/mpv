@@ -244,6 +244,8 @@ static void x11_set_ewmh_state(struct vo_x11_state *x11, char *state, bool set)
     long params[5] = {
         set ? NET_WM_STATE_ADD : NET_WM_STATE_REMOVE,
         XInternAtom(x11->display, state, False),
+        0, // No second state
+        1, // source indication: normal
     };
     x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
 }
@@ -1781,6 +1783,33 @@ static void vo_x11_fullscreen(struct vo *vo)
     vo_x11_update_composition_hint(vo);
 }
 
+static void vo_x11_maximize(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    /*
+     * Although we only do full maximization, the user may do a partial
+     * maximization via other means. Toggling both when one is set and
+     * one is not results in implementation-dependent behaviour. In
+     * testing with gnome-shell, toggling goes from HORZ to un-maximized,
+     * and goes from VERT to fully maximized.
+     */
+    long params[5] = {
+        NET_WM_STATE_TOGGLE,
+        XA(x11, _NET_WM_STATE_MAXIMIZED_VERT),
+        XA(x11, _NET_WM_STATE_MAXIMIZED_HORZ),
+        1, // source indication: normal
+    };
+    x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
+}
+
+static void vo_x11_minimize(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    XIconifyWindow(x11->display, x11->window, x11->screen);
+}
+
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1834,6 +1863,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         }
         return VO_TRUE;
     }
+    case VOCTRL_MAXIMIZE:
+        vo_x11_maximize(vo);
+        return VO_TRUE;
+    case VOCTRL_MINIMIZE:
+        vo_x11_minimize(vo);
+        return VO_TRUE;
     case VOCTRL_GET_WIN_STATE: {
         if (!x11->pseudo_mapped)
             return VO_FALSE;
@@ -1843,9 +1878,14 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                                        XA_ATOM, 32, &num_elems);
         if (elems) {
             Atom hidden = XA(x11, _NET_WM_STATE_HIDDEN);
+            Atom max_vert = XA(x11, _NET_WM_STATE_MAXIMIZED_VERT);
+            Atom max_horiz = XA(x11, _NET_WM_STATE_MAXIMIZED_HORZ);
             for (int n = 0; n < num_elems; n++) {
                 if (elems[n] == hidden)
                     *(int *)arg |= VO_WIN_STATE_MINIMIZED;
+                else if (elems[n] == max_vert ||
+                         elems[n] == max_horiz)
+                    *(int *)arg |= VO_WIN_STATE_MAXIMIZED;
             }
             XFree(elems);
         }
