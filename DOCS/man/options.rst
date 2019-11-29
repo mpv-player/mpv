@@ -2811,7 +2811,7 @@ Window
     Whether the video window is minimized or not. Setting this will minimize,
     or unminimze, the video window if the current VO supports it. Note that
     some VOs may support minimization while not supporting unminimization
-    (eg: X11 and Wayland).
+    (eg: Wayland).
 
     Whether this option and ``--window-maximized`` work on program start or
     at runtime, and whether they're (at runtime) updated to reflect the actual
