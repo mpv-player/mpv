@@ -87,7 +87,7 @@ local osc_styles = {
     timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\fs30}",
     vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
 
-    wcButtons = "{\\1c&HFFFFFF\\fs24\\fnmpv-osd-symbols}",
+    wcButtons = "{\\1c&HFFFFFF\\fs24}",
     wcBar = "{\\1c&H000000}",
 }
 
@@ -969,7 +969,7 @@ end
 function window_controls(alignment, topbar)
     local wc_geo = {
         x = 0,
-        y = 30,
+        y = 30 + user_opts.barmargin,
         an = 1,
         w = osc_param.playresx,
         h = 30,
@@ -1006,12 +1006,13 @@ function window_controls(alignment, topbar)
     lo.style = osc_styles.wcBar
     lo.alpha[1] = user_opts.boxalpha
 
+    local button_y = wc_geo.y - (wc_geo.h / 2)
     local first_geo =
-        {x = controlbox_left + 5, y = 15, an = 4, w = 25, h = 25}
+        {x = controlbox_left + 5, y = button_y, an = 4, w = 25, h = 25}
     local second_geo =
-        {x = controlbox_left + 30, y = 15, an = 4, w = 25, h = 25}
+        {x = controlbox_left + 30, y = button_y, an = 4, w = 25, h = 25}
     local third_geo =
-        {x = controlbox_left + 55, y = 15, an = 4, w = 25, h = 25}
+        {x = controlbox_left + 55, y = button_y, an = 4, w = 25, h = 25}
 
     -- Close
     ne = new_element("close", "button")
@@ -1039,8 +1040,16 @@ function window_controls(alignment, topbar)
     lo = add_layout("maximize")
     lo.geometry = alignment == "left" and third_geo or second_geo
     -- At least with default Ubuntu fonts, this symbol is differently aligned
-    lo.geometry.y = 13
+    lo.geometry.y = lo.geometry.y - 2
     lo.style = osc_styles.wcButtons
+
+    -- deadzone below window controls
+    local sh_area_y0, sh_area_y1
+    sh_area_y0 = user_opts.barmargin
+    sh_area_y1 = (wc_geo.y + (wc_geo.h / 2)) +
+                 get_align(1 - (2 * user_opts.deadzonesize),
+                 osc_param.playresy - (wc_geo.y + (wc_geo.h / 2)), 0, 0)
+    add_area("showhide_wc", wc_geo.x, sh_area_y0, wc_geo.w, sh_area_y1)
 
     if topbar then
         -- The title is already there as part of the top bar
@@ -2201,6 +2210,9 @@ function render()
     for k,cords in pairs(osc_param.areas["showhide"]) do
         set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide")
     end
+    for k,cords in pairs(osc_param.areas["showhide_wc"]) do
+        set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide_wc")
+    end
     do_enable_keybindings()
 
     --mouse input area
@@ -2228,6 +2240,9 @@ function render()
         for _,cords in ipairs(osc_param.areas["window-controls"]) do
             if state.osc_visible then -- activate only when OSC is actually visible
                 set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls")
+                mp.enable_key_bindings("window-controls")
+            else
+                mp.disable_key_bindings("window-controls")
             end
 
             if (mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2)) then
@@ -2379,6 +2394,7 @@ function tick()
 
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
+            mp.disable_key_bindings("showhide_wc")
             state.showhide_enabled = false
         end
 
@@ -2398,6 +2414,7 @@ function do_enable_keybindings()
     if state.enabled then
         if not state.showhide_enabled then
             mp.enable_key_bindings("showhide", "allow-vo-dragging+allow-hide-cursor")
+            mp.enable_key_bindings("showhide_wc", "allow-vo-dragging+allow-hide-cursor")
         end
         state.showhide_enabled = true
     end
@@ -2411,6 +2428,7 @@ function enable_osc(enable)
         hide_osc() -- acts immediately when state.enabled == false
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
+            mp.disable_key_bindings("showhide_wc")
         end
         state.showhide_enabled = false
     end
@@ -2465,6 +2483,10 @@ mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
 }, "showhide", "force")
+mp.set_key_bindings({
+    {"mouse_move",              function(e) process_event("mouse_move", nil) end},
+    {"mouse_leave",             mouse_leave},
+}, "showhide_wc", "force")
 do_enable_keybindings()
 
 --mouse input bindings
