@@ -710,3 +710,39 @@ Available mpv-only filters are:
         Print computed fingerprints the the terminal (default: no). This is
         mostly for testing and such. Scripts should use ``vf-metadata`` to
         read information from this filter instead.
+
+``gpu=...``
+    Convert video to RGB using the OpenGL renderer normally used with
+    ``--vo=gpu``. This requires that the EGL implementation supports off-screen
+    rendering on the default display. (This is the case with Mesa.)
+
+    Sub-options:
+
+    ``w=<pixels>``, ``h=<pixels>``
+        Size of the output in pixels (default: 0). If not positive, this will
+        use the size of the first filtered input frame.
+
+    .. warning::
+
+        This is highly experimental. Performance is bad, and it will not work
+        everywhere in the first place. Some features are not supported.
+
+    .. warning::
+
+        This does not do OSD rendering. If you see OSD or subtitles, then these
+        have been renderer by the VO backend (or the ``sub`` video filter). This
+        is normally done in software, and potentially questionable quality.
+
+    .. warning::
+
+        If you use this with encoding mode, keep in mind that encoding mode will
+        convert the RGB filter's output back to yuv420p in software, using the
+        configured software scaler. Using ``zimg`` might improve this, but in
+        any case it might go against your goals when using this filter.
+
+    .. warning::
+
+        Do not use this with ``--vo=gpu``. It will apply filtering twice, since
+        most ``--vo=gpu`` options are unconditionally applied to the ``gpu``
+        filter. There is no mechanism in mpv to prevent this.
+
