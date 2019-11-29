@@ -50,6 +50,7 @@ struct xrandr_display {
 struct vo_x11_state {
     struct mp_log *log;
     struct input_ctx *input_ctx;
+    struct m_config_cache *opts_cache;
     struct mp_vo_opts *opts;
     Display *display;
     int event_fd;

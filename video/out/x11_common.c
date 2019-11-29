@@ -562,8 +562,9 @@ int vo_x11_init(struct vo *vo)
         .xrandr_event = -1,
         .wakeup_pipe = {-1, -1},
         .dpi_scale = 1,
-        .opts = vo->opts,
+        .opts_cache = m_config_cache_alloc(x11, vo->global, &vo_sub_opts),
     };
+    x11->opts = x11->opts_cache->opts;
     vo->x11 = x11;
 
     sem_init(&x11->screensaver_sem, 0, 0);
@@ -1040,7 +1041,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
         {
             x11->opts->fullscreen = is_fullscreen;
             x11->fs = is_fullscreen;
-            x11->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
+            m_config_cache_write_opt(x11->opts_cache, &x11->opts->fullscreen);
 
             if (!is_fullscreen && (x11->pos_changed_during_fs ||
                                    x11->size_changed_during_fs))
@@ -1214,7 +1215,6 @@ void vo_x11_check_events(struct vo *vo)
                     x11->pseudo_mapped = true;
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
-                x11->pending_vo_events |= VO_EVENT_WIN_STATE;
                 vo_x11_check_net_wm_state_fullscreen_change(vo);
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
@@ -1820,12 +1820,14 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         *events |= x11->pending_vo_events;
         x11->pending_vo_events = 0;
         return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        vo_x11_fullscreen(vo);
+    case VOCTRL_VO_OPTS_CHANGED: {
+        void *opt;
+        while (m_config_cache_get_next_changed(x11->opts_cache, &opt)) {
+            if (opt == &opts->fullscreen)
+                vo_x11_fullscreen(vo);
+        }
         return VO_TRUE;
-    case VOCTRL_GET_FULLSCREEN:
-        *(int *)arg = x11->fs;
-        return VO_TRUE;
+    }
     case VOCTRL_ONTOP:
         vo_x11_setlayer(vo, opts->ontop);
         return VO_TRUE;
