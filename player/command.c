@@ -137,9 +137,6 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
 
 static bool is_property_set(int action, void *val);
 
-static int mp_property_do_silent(const char *name, int action, void *val,
-                                 struct MPContext *ctx);
-
 static void hook_remove(struct MPContext *mpctx, struct hook_handler *h)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -3531,20 +3528,15 @@ static bool is_property_set(int action, void *val)
     }
 }
 
-static int mp_property_do_silent(const char *name, int action, void *val,
-                                 struct MPContext *ctx)
-{
-    struct command_ctx *cmd = ctx->command_ctx;
-    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
-    if (r == M_PROPERTY_OK && is_property_set(action, val))
-        mp_notify_property(ctx, (char *)name);
-    return r;
-}
-
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
-    int r = mp_property_do_silent(name, action, val, ctx);
+    struct command_ctx *cmd = ctx->command_ctx;
+    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+
+    if (r == M_PROPERTY_OK && is_property_set(action, val))
+        mp_notify_property(ctx, (char *)name);
+
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
         struct m_option ot = {0};
         void *data = val;
