@@ -92,6 +92,8 @@ enum mp_voctrl {
     VOCTRL_ALL_WORKSPACES,
     VOCTRL_GET_FULLSCREEN,
     VOCTRL_GET_WIN_STATE,               // int* (VO_WIN_STATE_* flags)
+    VOCTRL_MAXIMIZE,
+    VOCTRL_MINIMIZE,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
@@ -130,12 +132,9 @@ enum mp_voctrl {
 
     /* private to vo_gpu */
     VOCTRL_EXTERNAL_RESIZE,
-
-    VOCTRL_MAXIMIZE,
-    VOCTRL_MINIMIZE,
 };
 
-// VOCTRL_GET_WIN_STATE
+// VOCTRL_GET_WIN_STATE (legacy, ignored)
 #define VO_WIN_STATE_MINIMIZED (1 << 0)
 #define VO_WIN_STATE_MAXIMIZED (1 << 1)
 

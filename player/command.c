@@ -2289,54 +2289,6 @@ static void update_window_scale(struct MPContext *mpctx)
         vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
 }
 
-static int mp_property_win_minimized(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return M_PROPERTY_UNAVAILABLE;
-
-    int state = 0;
-    if (vo_control(vo, VOCTRL_GET_WIN_STATE, &state) < 1)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        vo_control(vo, VOCTRL_MINIMIZE, 0);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-    case M_PROPERTY_GET_TYPE:
-        return m_property_flag_ro(action, arg, state & VO_WIN_STATE_MINIMIZED);
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-}
-
-static int mp_property_win_maximized(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return M_PROPERTY_UNAVAILABLE;
-
-    int state = 0;
-    if (vo_control(vo, VOCTRL_GET_WIN_STATE, &state) < 1)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        vo_control(vo, VOCTRL_MAXIMIZE, 0);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-    case M_PROPERTY_GET_TYPE:
-        return m_property_flag_ro(action, arg, state & VO_WIN_STATE_MAXIMIZED);
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-}
-
 static int mp_property_display_fps(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -3439,8 +3391,6 @@ static const struct m_property mp_properties_base[] = {
     PROPERTY_BITRATE("audio-bitrate", false, STREAM_AUDIO),
     PROPERTY_BITRATE("sub-bitrate", false, STREAM_SUB),
 
-    {"window-minimized", mp_property_win_minimized},
-    {"window-maximized", mp_property_win_maximized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
     {"estimated-display-fps", mp_property_estimated_display_fps},
@@ -6220,6 +6170,10 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             vo_control(mpctx->video_out, VOCTRL_BORDER, 0);
         if (opt_ptr == &opts->vo->all_workspaces)
             vo_control(mpctx->video_out, VOCTRL_ALL_WORKSPACES, 0);
+        if (opt_ptr == &opts->vo->window_minimized)
+            vo_control(mpctx->video_out, VOCTRL_MINIMIZE, 0);
+        if (opt_ptr == &opts->vo->window_maximized)
+            vo_control(mpctx->video_out, VOCTRL_MAXIMIZE, 0);
     }
 
     if (opt_ptr == &opts->vo->taskbar_progress)
