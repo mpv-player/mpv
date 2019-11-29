@@ -1538,7 +1538,7 @@ static void find_opt(struct m_config_shadow *shadow, struct m_config_data *data,
     }
 }
 
-void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
+bool m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
 {
     struct config_cache *in = cache->internal;
     struct m_config_shadow *shadow = in->shadow;
@@ -1559,17 +1559,22 @@ void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
     struct m_group_data *gsrc = m_config_gdata(in->src, group_idx);
     assert(gdst && gsrc);
 
-    m_option_copy(opt, gsrc->udata + opt->offset, ptr);
+    bool changed = !m_option_equal(opt, gsrc->udata + opt->offset, ptr);
+    if (changed) {
+        m_option_copy(opt, gsrc->udata + opt->offset, ptr);
 
-    gsrc->ts = atomic_fetch_add(&shadow->ts, 1) + 1;
+        gsrc->ts = atomic_fetch_add(&shadow->ts, 1) + 1;
 
-    for (int n = 0; n < shadow->num_listeners; n++) {
-        struct config_cache *listener = shadow->listeners[n];
-        if (listener->wakeup_cb && m_config_gdata(listener->data, group_idx))
-            listener->wakeup_cb(listener->wakeup_cb_ctx);
+        for (int n = 0; n < shadow->num_listeners; n++) {
+            struct config_cache *listener = shadow->listeners[n];
+            if (listener->wakeup_cb && m_config_gdata(listener->data, group_idx))
+                listener->wakeup_cb(listener->wakeup_cb_ctx);
+        }
     }
 
     pthread_mutex_unlock(&shadow->lock);
+
+    return changed;
 }
 
 void m_config_notify_change_co(struct m_config *config,

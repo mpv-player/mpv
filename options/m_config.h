@@ -340,7 +340,8 @@ bool m_config_cache_get_next_changed(struct m_config_cache *cache, void **out_pt
 // call.
 //  ptr: points to any field in cache->opts that is managed by an option. If
 //       this is not the case, the function crashes for your own good.
-void m_config_cache_write_opt(struct m_config_cache *cache, void *ptr);
+//  returns: if true, this was an update; if false, shadow had same value
+bool m_config_cache_write_opt(struct m_config_cache *cache, void *ptr);
 
 // Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
 // directly, with no way to update the config. Basically this returns a copy
