@@ -20,24 +20,41 @@ import Cocoa
 class MPVHelper: LogHelper {
 
     var vo: UnsafeMutablePointer<vo>
+    var optsCachePtr: UnsafeMutablePointer<m_config_cache>
+    var optsPtr: UnsafeMutablePointer<mp_vo_opts>
+
+    // these computed properties return a local copy of the struct accessed:
+    // - don't use if you rely on the pointers
+    // - only for reading
     var vout: vo { get { return vo.pointee } }
-    var opts: mp_vo_opts { get { return vout.opts.pointee } }
+    var optsCache: m_config_cache { get { return optsCachePtr.pointee } }
+    var opts: mp_vo_opts { get { return optsPtr.pointee } }
+
     var input: OpaquePointer { get { return vout.input_ctx } }
     var macOpts: macos_opts = macos_opts()
 
     init(_ vo: UnsafeMutablePointer<vo>, _ name: String) {
         self.vo = vo
+
+        guard let app = NSApp as? Application,
+              let cache = m_config_cache_alloc(vo, vo.pointee.global, app.getVoSubConf()) else
+        {
+            print("NSApp couldn't be retrieved")
+            exit(1)
+        }
+
         let newlog = mp_log_new(vo, vo.pointee.log, name)
+        optsCachePtr = cache
+        optsPtr = UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(cache.pointee.opts))
 
         super.init(newlog)
 
-        guard let app = NSApp as? Application,
-              let ptr = mp_get_config_group(vo,
+        guard let ptr = mp_get_config_group(vo,
                                             vo.pointee.global,
                                             app.getMacOSConf()) else
         {
-            sendError("macOS config group couldn't be retrieved'")
-            exit(1)
+            // will never be hit, mp_get_config_group asserts for invalid groups
+            return
         }
         macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr)).pointee
     }
@@ -57,6 +74,20 @@ class MPVHelper: LogHelper {
 
     func putAxis(_ mpkey: Int32, delta: Double) {
         mp_input_put_wheel(input, mpkey, delta)
+    }
+
+    func nextChangedConfig(property: inout UnsafeMutableRawPointer?) -> Bool {
+        return m_config_cache_get_next_changed(optsCachePtr, &property)
+    }
+
+    func setConfigProperty(fullscreen: Bool) {
+        optsPtr.pointee.fullscreen = Int32(fullscreen)
+        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.fullscreen))
+    }
+
+    func setConfigProperty(minimized: Bool) {
+        optsPtr.pointee.window_minimized = Int32(minimized)
+        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.window_minimized))
     }
 
     func command(_ cmd: String) {
