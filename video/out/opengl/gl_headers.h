@@ -28,6 +28,53 @@
 #endif
 #endif
 
+// Typedefs. This needs to work with system headers too (consider GLX), and
+// before C11, duplicated typedefs were an error. So try to tolerate at least
+// Mesa.
+#ifdef GL_TRUE
+    // Tolerate old Mesa which has only definitions up to GL 2.0.
+    #define MP_GET_GL_TYPES_2_0 0
+    #ifdef GL_VERSION_3_2
+        #define MP_GET_GL_TYPES_3_2 0
+    #else
+        #define MP_GET_GL_TYPES_3_2 1
+    #endif
+#else
+    // Get them all.
+    #define MP_GET_GL_TYPES_2_0 1
+    #define MP_GET_GL_TYPES_3_2 1
+#endif
+
+#if MP_GET_GL_TYPES_2_0
+// GL_VERSION_1_0, GL_ES_VERSION_2_0
+typedef unsigned int GLbitfield;
+typedef unsigned char GLboolean;
+typedef unsigned int GLenum;
+typedef float GLfloat;
+typedef int GLint;
+typedef int GLsizei;
+typedef uint8_t GLubyte;
+typedef unsigned int GLuint;
+typedef void GLvoid;
+// GL 1.1 GL_VERSION_1_1, GL_ES_VERSION_2_0
+typedef float GLclampf;
+// GL 1.5 GL_VERSION_1_5, GL_ES_VERSION_2_0
+typedef intptr_t GLintptr;
+typedef ptrdiff_t GLsizeiptr;
+// GL 2.0 GL_VERSION_2_0, GL_ES_VERSION_2_0
+typedef int8_t GLbyte;
+typedef char GLchar;
+typedef short GLshort;
+typedef unsigned short GLushort;
+#endif
+
+#if MP_GET_GL_TYPES_3_2
+// GL 3.2 GL_VERSION_3_2, GL_ES_VERSION_2_0
+typedef int64_t GLint64;
+typedef struct __GLsync *GLsync;
+typedef uint64_t GLuint64;
+#endif
+
 // --- GL 1.1
 
 #define GL_BACK_LEFT                      0x0402
@@ -117,29 +164,6 @@
 #define GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE 0x93A0
 
 // ---- GLES 2
-
-#ifndef GL_TRUE
-typedef int8_t GLbyte;
-typedef float GLclampf;
-typedef int32_t GLfixed;
-typedef short GLshort;
-typedef unsigned short GLushort;
-typedef void GLvoid;
-typedef struct __GLsync *GLsync;
-typedef int64_t GLint64;
-typedef uint64_t GLuint64;
-typedef unsigned int GLenum;
-typedef unsigned int GLuint;
-typedef char GLchar;
-typedef float GLfloat;
-typedef ptrdiff_t GLsizeiptr;
-typedef intptr_t GLintptr;
-typedef unsigned int GLbitfield;
-typedef int GLint;
-typedef unsigned char GLboolean;
-typedef int GLsizei;
-typedef uint8_t GLubyte;
-#endif
 
 #define GL_DEPTH_BUFFER_BIT               0x00000100
 #define GL_STENCIL_BUFFER_BIT             0x00000400
