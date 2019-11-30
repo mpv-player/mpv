@@ -486,6 +486,7 @@ static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
             return M_PROPERTY_ERROR;
         mpctx->stream_open_filename =
             talloc_strdup(mpctx->stream_open_filename, *(char **)arg);
+        mp_notify_property(mpctx, prop->name);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
@@ -997,6 +998,7 @@ static int parse_node_chapters(struct MPContext *mpctx,
     }
 
     mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
+    mp_notify_property(mpctx, "chapter-list");
 
     return M_PROPERTY_OK;
 }
@@ -3533,9 +3535,6 @@ int mp_property_do(const char *name, int action, void *val,
 {
     struct command_ctx *cmd = ctx->command_ctx;
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
-
-    if (r == M_PROPERTY_OK && is_property_set(action, val))
-        mp_notify_property(ctx, (char *)name);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
         struct m_option ot = {0};
