@@ -159,7 +159,8 @@ struct voctrl_screenshot;
 
 enum {
     RENDER_FRAME_SUBS = 1 << 0,
-    RENDER_FRAME_OSD = 2 << 0,
+    RENDER_FRAME_OSD = 1 << 1,
+    RENDER_FRAME_VF_SUBS = 1 << 2,
     RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD,
 };
 

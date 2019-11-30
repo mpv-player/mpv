@@ -729,9 +729,9 @@ Available mpv-only filters are:
 
     .. warning::
 
-        This does not do OSD rendering. If you see OSD or subtitles, then these
-        have been renderer by the VO backend (or the ``sub`` video filter). This
-        is normally done in software, and potentially questionable quality.
+        This does not do OSD rendering. If you see OSD, then it has been
+        rendered by the VO backend. (Subtitles are rendered by the ``gpu``
+        filter, if possible.)
 
     .. warning::
 

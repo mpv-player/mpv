@@ -2803,13 +2803,17 @@ static void pass_dither(struct gl_video *p)
 
 // Draws the OSD, in scene-referred colors.. If cms is true, subtitles are
 // instead adapted to the display's gamut.
-static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
-                          struct mp_osd_res rect, struct ra_fbo fbo, bool cms)
+static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
+                          double pts, struct mp_osd_res rect, struct ra_fbo fbo,
+                          bool cms)
 {
-    if ((draw_flags & OSD_DRAW_SUB_ONLY) && (draw_flags & OSD_DRAW_OSD_ONLY))
+    if (frame_flags & RENDER_FRAME_VF_SUBS)
+        osd_flags |= OSD_DRAW_SUB_FILTER;
+
+    if ((osd_flags & OSD_DRAW_SUB_ONLY) && (osd_flags & OSD_DRAW_OSD_ONLY))
         return;
 
-    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo3d, draw_flags);
+    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo3d, osd_flags);
 
     timer_pool_start(p->osd_timer);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
@@ -2922,7 +2926,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         };
         finish_pass_tex(p, &p->blend_subs_tex, rect.w, rect.h);
         struct ra_fbo fbo = { p->blend_subs_tex };
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, fbo, false);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, fbo, false);
         pass_read_tex(p, p->blend_subs_tex);
         pass_describe(p, "blend subs video");
     }
@@ -2954,7 +2958,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         }
         finish_pass_tex(p, &p->blend_subs_tex, p->texture_w, p->texture_h);
         struct ra_fbo fbo = { p->blend_subs_tex };
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, fbo, false);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, fbo, false);
         pass_read_tex(p, p->blend_subs_tex);
         pass_describe(p, "blend subs");
     }
@@ -3329,7 +3333,7 @@ done:
         if (!(flags & RENDER_FRAME_OSD))
             osd_flags |= OSD_DRAW_SUB_ONLY;
 
-        pass_draw_osd(p, osd_flags, p->osd_pts, p->osd_rect, fbo, true);
+        pass_draw_osd(p, osd_flags, flags, p->osd_pts, p->osd_rect, fbo, true);
         debug_check_gl(p, "after OSD rendering");
     }
 

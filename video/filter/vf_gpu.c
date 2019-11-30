@@ -176,6 +176,14 @@ static struct mp_image *gpu_render_frame(struct mp_filter *f, struct mp_image *i
         struct mp_rect src, dst;
         struct mp_osd_res osd;
 
+        struct mp_stream_info *info = mp_filter_find_stream_info(f);
+        struct osd_state *osd_state = info ? info->osd : NULL;
+        if (osd_state) {
+            osd_set_render_subs_in_filter(osd_state, true);
+            // Assume the osd_state doesn't somehow disappear.
+            gl_video_set_osd_source(priv->renderer, osd_state);
+        }
+
         mp_get_src_dst_rects(f->log, priv->vo_opts, VO_CAP_ROTATE90, &in->params,
                              w, h, 1, &src, &dst, &osd);
 
@@ -202,7 +210,7 @@ static struct mp_image *gpu_render_frame(struct mp_filter *f, struct mp_image *i
     }
 
     // (it doesn't have access to the OSD though)
-    int flags = RENDER_FRAME_SUBS | RENDER_FRAME_OSD;
+    int flags = RENDER_FRAME_SUBS | RENDER_FRAME_VF_SUBS;
     gl_video_render_frame(priv->renderer, &frame, (struct ra_fbo){priv->target},
                           flags);
 
