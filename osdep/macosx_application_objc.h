@@ -20,6 +20,7 @@
 #import "osdep/macosx_menubar_objc.h"
 
 @class CocoaCB;
+@class RemoteCommandCenter;
 struct mpv_event;
 struct mpv_handle;
 
@@ -28,6 +29,7 @@ struct mpv_handle;
 - (NSImage *)getMPVIcon;
 - (void)processEvent:(struct mpv_event *)event;
 - (void)queueCommand:(char *)cmd;
+- (void)handleMPKey:(int)key withMask:(int)mask;
 - (void)stopMPV:(char *)cmd;
 - (void)openFiles:(NSArray *)filenames;
 - (void)setMpvHandle:(struct mpv_handle *)ctx;
@@ -37,4 +39,5 @@ struct mpv_handle;
 @property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, assign) size_t openCount;
 @property(nonatomic, retain) CocoaCB *cocoaCB;
+@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
 @end

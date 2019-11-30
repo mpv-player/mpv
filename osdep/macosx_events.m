@@ -49,15 +49,12 @@
     struct mpv_handle *_ctx;
     BOOL _is_application;
     NSCondition *_input_lock;
-    CFMachPortRef _mk_tap_port;
 }
 
-- (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKey:(NSEvent *)event;
 - (BOOL)setMpvHandle:(struct mpv_handle *)ctx;
 - (void)readEvents;
 - (void)startMediaKeys;
-- (void)restartMediaKeys;
 - (void)stopMediaKeys;
 - (int)mapKeyModifiers:(int)cocoaModifiers;
 - (int)keyModifierMask:(NSEvent *)event;
@@ -119,53 +116,6 @@ static int convert_key(unsigned key, unsigned charcode)
     if (mpkey)
         return mpkey;
     return charcode;
-}
-
-static int mk_code(NSEvent *event)
-{
-    return (([event data1] & 0xFFFF0000) >> 16);
-}
-
-static int mk_flags(NSEvent *event)
-{
-    return ([event data1] & 0x0000FFFF);
-}
-
-static int mk_down(NSEvent *event)
-{
-    return (((mk_flags(event) & 0xFF00) >> 8)) == 0xA;
-}
-
-static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
-                                     CGEventRef event, void *ctx)
-{
-    EventsResponder *responder = ctx;
-
-    if (type == kCGEventTapDisabledByTimeout) {
-        // The Mach Port receiving the taps became unresponsive for some
-        // reason, restart listening on it.
-        [responder restartMediaKeys];
-        return event;
-    }
-
-    if (type == kCGEventTapDisabledByUserInput)
-        return event;
-
-    NSEvent *nse = [NSEvent eventWithCGEvent:event];
-
-    if ([nse type] != NSEventTypeSystemDefined || [nse subtype] != 8)
-        // This is not a media key
-        return event;
-
-    if (mk_down(nse) && [responder handleMediaKey:nse]) {
-        // Handled this event, return nil so that it is removed from the
-        // global queue.
-        return nil;
-    } else {
-        // Was a media key but we were not interested in it. Leave it in the
-        // global queue by returning the original event.
-        return event;
-    }
 }
 
 void cocoa_init_media_keys(void)
@@ -337,77 +287,18 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     }
 }
 
-- (void)restartMediaKeys
-{
-    if (self->_mk_tap_port)
-        CGEventTapEnable(self->_mk_tap_port, true);
-}
-
-- (void)setHighestPriotityMediaKeysTap
-{
-    if (self->_mk_tap_port == nil)
-        return;
-
-    CGEventTapInformation *taps = ta_alloc_size(nil, sizeof(CGEventTapInformation));
-    uint32_t numTaps = 0;
-    CGError err = CGGetEventTapList(1, taps, &numTaps);
-
-    if (err == kCGErrorSuccess && numTaps > 0) {
-        pid_t processID = [NSProcessInfo processInfo].processIdentifier;
-        if (taps[0].tappingProcess != processID) {
-            [self stopMediaKeys];
-            [self startMediaKeys];
-        }
-    }
-    talloc_free(taps);
-}
-
 - (void)startMediaKeys
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // Install a Quartz Event Tap. This will notify mpv through the
-        // returned Mach Port and cause mpv to execute the `tap_event_callback`
-        // function.
-        self->_mk_tap_port = CGEventTapCreate(kCGSessionEventTap,
-            kCGHeadInsertEventTap,
-            kCGEventTapOptionDefault,
-            CGEventMaskBit(NX_SYSDEFINED),
-            tap_event_callback,
-            self);
-
-        if (self->_mk_tap_port) {
-            NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
-            [[NSRunLoop mainRunLoop] addPort:port forMode:NSRunLoopCommonModes];
-        }
-    });
+    if ([(Application *)NSApp remoteCommandCenter]) {
+        [[(Application *)NSApp remoteCommandCenter] start];
+    }
 }
 
 - (void)stopMediaKeys
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
-        if (port) {
-            CGEventTapEnable(self->_mk_tap_port, false);
-            [[NSRunLoop mainRunLoop] removePort:port forMode:NSRunLoopCommonModes];
-            CFRelease(self->_mk_tap_port);
-            self->_mk_tap_port = nil;
-        }
-    });
-}
-
-- (BOOL)handleMediaKey:(NSEvent *)event
-{
-    NSDictionary *keymapd = @{
-        @(NX_KEYTYPE_PLAY):     @(MP_KEY_PLAY),
-        @(NX_KEYTYPE_REWIND):   @(MP_KEY_PREV),
-        @(NX_KEYTYPE_FAST):     @(MP_KEY_NEXT),
-        @(NX_KEYTYPE_PREVIOUS): @(MP_KEY_REWIND),
-        @(NX_KEYTYPE_NEXT):     @(MP_KEY_FORWARD),
-    };
-
-    return [self handleKey:mk_code(event)
-                  withMask:[self keyModifierMask:event]
-                andMapping:keymapd];
+    if ([(Application *)NSApp remoteCommandCenter]) {
+        [[(Application *)NSApp remoteCommandCenter] stop];
+    }
 }
 
 - (int)mapKeyModifiers:(int)cocoaModifiers
@@ -450,12 +341,6 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     } else {
         return NO;
     }
-}
-
--(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
-{
-    int mpkey = [mapping[@(key)] intValue];
-    return [self handleMPKey:mpkey withMask:mask];
 }
 
 - (NSEvent*)handleKey:(NSEvent *)event

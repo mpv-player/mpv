@@ -919,6 +919,11 @@ standalone_features = [
         'deps': 'cocoa',
         'func': check_macos_sdk('10.11')
     }, {
+        'name': '--macos-10-12-2-features',
+        'desc': 'macOS 10.12.2 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.12.2')
+    }, {
         'name': '--macos-10-14-features',
         'desc': 'macOS 10.14 SDK Features',
         'deps': 'cocoa',

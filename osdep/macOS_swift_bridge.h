@@ -44,11 +44,8 @@ static int SWIFT_MBTN_BACK       = MP_MBTN_BACK;
 static int SWIFT_MBTN_FORWARD    = MP_MBTN_FORWARD;
 static int SWIFT_MBTN9           = MP_MBTN9;
 
-static int SWIFT_KEY_CLOSE_WIN   = MP_KEY_CLOSE_WIN;
 static int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
 static int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
-static int SWIFT_KEY_STATE_DOWN  = MP_KEY_STATE_DOWN;
-static int SWIFT_KEY_STATE_UP    = MP_KEY_STATE_UP;
 
 // only used from Swift files and therefore seen as unused by the c compiler
 static void SWIFT_TARRAY_STRING_APPEND(void *t, char ***a, int *i, char *s) __attribute__ ((unused));
