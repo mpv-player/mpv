@@ -182,7 +182,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        cocoaCB.mpv?.setConfigProperty(fullscreen: isInFullscreen)
         cocoaCB.updateCusorVisibility()
         endAnimation(frame)
         cocoaCB.titleBar?.show()
@@ -191,7 +191,7 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidExitFullScreen(_ notification: Notification) {
         guard let tScreen = targetScreen else { return }
         isInFullscreen = false
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        cocoaCB.mpv?.setConfigProperty(fullscreen: isInFullscreen)
         endAnimation(calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen))
         cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
@@ -474,11 +474,11 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMiniaturize(_ notification: Notification) {
-        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+        cocoaCB.mpv?.setConfigProperty(minimized: true)
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+        cocoaCB.mpv?.setConfigProperty(minimized: false)
     }
 
     func windowDidResignKey(_ notification: Notification) {

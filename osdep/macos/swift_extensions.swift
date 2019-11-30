@@ -80,3 +80,10 @@ extension Bool {
         self.init(int32 != 0)
     }
 }
+
+extension Int32 {
+
+    init(_ bool: Bool) {
+        self.init(bool ? 1 : 0)
+    }
+}
