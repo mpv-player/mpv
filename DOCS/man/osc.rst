@@ -331,7 +331,9 @@ Configurable Options
     default values.)
 
     Currently, this is supported for the ``bottombar`` and ``topbar`` layout
-    only. The other layouts do not change if this option is set.
+    only. The other layouts do not change if this option is set. Separately,
+    if window controls are present (see below), they will be affected
+    regardless of which osc layout is in use.
 
     The border is static and appears even if the OSC is configured to appear
     only on mouse interaction. If the OSC is invisible, the border is simply
