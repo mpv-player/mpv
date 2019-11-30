@@ -204,8 +204,10 @@ function add_binding(forced, key, name, fn, opts) {
     if (typeof name == "function") {  // as if "name" is not part of the args
         opts = fn;
         fn = name;
-        name = "__keybinding" + next_bid++;  // new unique binding name
+        name = false;
     }
+    if (!name)
+        name = "__keybinding" + next_bid++;  // new unique binding name
     var key_data = {forced: forced};
     switch (typeof opts) {  // merge opts into key_data
         case "string": key_data[opts] = true; break;
