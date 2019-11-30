@@ -28,6 +28,8 @@
 // Generated from presentation-time.xml
 #include "video/out/wayland/presentation-time.h"
 
+#define EGL_PLATFORM_WAYLAND_EXT 0x31D8
+
 struct priv {
     GL gl;
     EGLDisplay egl_display;
@@ -163,8 +165,9 @@ static bool egl_create_context(struct ra_ctx *ctx)
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    if (!(p->egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
-                                                 wl->display, NULL)))
+    if (!(p->egl_display = mpegl_get_display(EGL_PLATFORM_WAYLAND_EXT,
+                                             "EGL_EXT_platform_wayland",
+                                             wl->display)))
         return false;
 
     if (eglInitialize(p->egl_display, NULL, NULL) != EGL_TRUE)
