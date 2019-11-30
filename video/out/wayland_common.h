@@ -65,12 +65,14 @@ struct vo_wayland_state {
     struct wl_registry   *registry;
     struct wayland_opts  *opts;
 
+    struct m_config_cache *vo_opts_cache;
+    struct mp_vo_opts *vo_opts;
+
     /* State */
     struct mp_rect geometry;
     struct mp_rect window_size;
     float aspect_ratio;
     bool fullscreen;
-    bool maximized;
     bool configured;
     bool frame_wait;
     bool hidden;
