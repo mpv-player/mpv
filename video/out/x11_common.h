@@ -24,6 +24,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "options/m_option.h"
 #include "osdep/atomic.h"
 #include "osdep/semaphore.h"
 
@@ -100,6 +101,7 @@ struct vo_x11_state {
     // Current actual window position (updated on window move/resize events).
     struct mp_rect winrc;
     double current_display_fps;
+    struct m_geometry last_geometry;
 
     int pending_vo_events;
 

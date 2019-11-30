@@ -2703,6 +2703,12 @@ Window
     The coordinates are relative to the screen given with ``--screen`` for the
     video output drivers that fully support ``--screen``.
 
+    Some backends update this option at runtime (like all options, it's exposed
+    as property, in this case ``geometry``), and resize their window if the user
+    sets the property. This means the window size is not reset when playing a
+    video with different file. Use ``--reset-on-next-file=geometry`` to get
+    the old behavior.
+
     .. note::
 
         Generally only supported by GUI VOs. Ignored for encoding.

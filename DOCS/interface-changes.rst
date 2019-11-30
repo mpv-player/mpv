@@ -59,6 +59,14 @@ Interface changes
       setting the properties to non-existing tracks may report it as selected
       track for a small time window, until it's forced back to "no". The exact
       details how this is handled may change in the future.
+    - x11 VOs now update --geometry at runtime according to the current window
+      position, and will react to writes to the option/property at runtime and
+      resize the window accordingly. This changes behavior when playing multiple
+      videos with different size: the first video initializes the window size
+      and thus overwrites --geometry, and the second video will obviously use
+      the size provided in --geometry, so the second video will not change the
+      window size. You can use --reset-on-next-file=geometry to get the old
+      behavior.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

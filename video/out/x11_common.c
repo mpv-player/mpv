@@ -1730,14 +1730,32 @@ static void vo_x11_update_geometry(struct vo *vo)
     Window dummy_win;
     Window win = x11->parent ? x11->parent : x11->window;
     x11->winrc = (struct mp_rect){0, 0, 0, 0};
+    x11->last_geometry = (struct m_geometry){0};
     if (win) {
-        XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
+        int r_x = 0, r_y = 0;
+        XGetGeometry(x11->display, win, &dummy_win, &r_x, &r_y,
                      &w, &h, &dummy_int, &dummy_uint);
         if (w > INT_MAX || h > INT_MAX)
             w = h = 0;
         XTranslateCoordinates(x11->display, win, x11->rootwin, 0, 0,
                               &x, &y, &dummy_win);
         x11->winrc = (struct mp_rect){x, y, x + w, y + h};
+        if (!x11->window_hidden) {
+            // Ah, the pain of X11.
+            long params[4] = {0};
+            x11_get_property_copy(x11, win, XA(x11, _NET_FRAME_EXTENTS),
+                                  XA_CARDINAL, 32, params, sizeof(params));
+            x11->last_geometry = (struct m_geometry){
+                .x = x - params[0],
+                .y = y - params[2],
+                .w = w,
+                .h = h,
+                .xy_valid = 1,
+                .wh_valid = w > 0 && h > 0,
+            };
+            x11->opts->geometry = x11->last_geometry;
+            m_config_cache_write_opt(x11->opts_cache, &x11->opts->geometry);
+        }
     }
     double fps = 1000.0;
     for (int n = 0; n < x11->num_displays; n++) {
@@ -1844,6 +1862,24 @@ static void vo_x11_minimize(struct vo *vo)
     }
 }
 
+static void vo_x11_set_geometry(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    struct m_geometry geo = x11->last_geometry;
+
+    if (x11->window_hidden || !geo.wh_valid || !geo.xy_valid)
+        return;
+
+    int s_w = mp_rect_w(x11->screenrc), s_h = mp_rect_h(x11->screenrc);
+    int nx = geo.x, ny = geo.y, nw = geo.w, nh = geo.h;
+    m_geometry_apply(&nx, &ny, &nw, &nh, s_w, s_h, &x11->opts->geometry);
+
+    MP_VERBOSE(vo, "Setting geometry: %d:%d %dx%d -> %d:%d %dx%d\n",
+               geo.x, geo.y, geo.w, geo.h, nx, ny, nw, nh);
+    if (nx != geo.x || ny != geo.y || nw != geo.w || nh != geo.h)
+        XMoveResizeWindow(x11->display, x11->window, nx, ny, nw, nh);
+}
+
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1877,6 +1913,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_minimize(vo);
             if (opt == &opts->window_maximized)
                 vo_x11_maximize(vo);
+            if (opt == &opts->geometry)
+                vo_x11_set_geometry(vo);
         }
         return VO_TRUE;
     }
