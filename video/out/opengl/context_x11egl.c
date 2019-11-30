@@ -28,6 +28,8 @@
 #include "oml_sync.h"
 #include "utils.h"
 
+#define EGL_PLATFORM_X11_EXT 0x31D5
+
 struct priv {
     GL gl;
     EGLDisplay egl_display;
@@ -101,8 +103,9 @@ static bool mpegl_init(struct ra_ctx *ctx)
     if (!vo_x11_init(vo))
         goto uninit;
 
-    p->egl_display = eglGetPlatformDisplay(EGL_PLATFORM_X11_KHR,
-                                           vo->x11->display, NULL);
+    p->egl_display = mpegl_get_display(EGL_PLATFORM_X11_EXT,
+                                       "EGL_EXT_platform_x11",
+                                        vo->x11->display);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
         MP_MSG(ctx, msgl, "Could not initialize EGL.\n");
         goto uninit;

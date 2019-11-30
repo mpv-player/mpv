@@ -277,3 +277,72 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log)
     if (!gl->SwapInterval)
         gl->SwapInterval = swap_interval;
 }
+
+// This is similar to eglGetPlatformDisplay(platform, native_display, NULL),
+// except that it 1. may use eglGetPlatformDisplayEXT, 2. checks for the
+// platform client extension platform_ext_name, and 3. does not support passing
+// an attrib list, because the type for that parameter is different in the EXT
+// and standard functions (EGL can't not fuck up, no matter what).
+//  platform: e.g. EGL_PLATFORM_X11_KHR
+//  platform_ext_name: e.g. "EGL_KHR_platform_x11"
+//  native_display: e.g. X11 Display*
+// Returns EGL_NO_DISPLAY on failure.
+// Warning: the EGL version can be different at runtime depending on the chosen
+// platform, so this might return a display corresponding to some older EGL
+// version (often 1.4).
+// Often, there are two extension variants of a platform (KHR and EXT). If you
+// need to check both, call this function twice. (Why do they define them twice?
+// They're crazy.)
+EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
+                             void *native_display)
+{
+    // EGL is awful. Designed as ultra-portable library, it fails at dealing
+    // with slightly more complex environment than its short-sighted design
+    // could deal with. So they invented an awful, awful kludge that modifies
+    // EGL standard behavior, the EGL_EXT_client_extensions extension. EGL 1.4
+    // normally is to return NULL when querying EGL_EXTENSIONS on EGL_NO_DISPLAY,
+    // however, with that extension, it'll return the set of "client extensions",
+    // which may include EGL_EXT_platform_base.
+
+    // Prerequisite: check the platform extension.
+    // If this is either EGL 1.5, or 1.4 with EGL_EXT_client_extensions, then
+    // this must return a valid extension string.
+    const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!exts || !gl_check_extension(exts, platform_ext_name))
+        return EGL_NO_DISPLAY;
+
+    // Before we go through the EGL 1.4 BS, try if we can use native EGL 1.5
+    // It appears that EGL 1.4 is specified to _require_ an initialized display
+    // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
+    const char *ver = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
+    // Of course we have to go through the excruciating pain of parsing a
+    // version string, since EGL provides no other way without a display. In
+    // theory version!=NULL is already proof enough that it's 1.5, but be
+    // extra defensive, since this should have been true for EGL_EXTENSIONS as
+    // well, but then they added an extension that modified standard behavior.
+    int ma = 0, mi = 0;
+    if (ver && sscanf(ver, "%d.%d", &ma, &mi) == 2 && (ma > 1 || mi >= 5)) {
+        // This is EGL 1.5. It must support querying standard functions through
+        // eglGetProcAddress(). Note that on EGL 1.4, even if the function is
+        // unknown, it could return non-NULL anyway (because EGL is crazy).
+        EGLDisplay (EGLAPIENTRYP GetPlatformDisplay)
+            (EGLenum, void *, const EGLAttrib *) =
+            (void *)eglGetProcAddress("eglGetPlatformDisplay");
+        // (It should be impossible to be NULL, but uh.)
+        if (GetPlatformDisplay)
+            return GetPlatformDisplay(platform, native_display, NULL);
+    }
+
+    // (It should be impossible to be missing, but uh.)
+    if (!gl_check_extension(exts, "EGL_EXT_client_extensions"))
+        return EGL_NO_DISPLAY;
+
+    EGLDisplay (EGLAPIENTRYP GetPlatformDisplayEXT)(EGLenum, void*, const EGLint*)
+        = (void *)eglGetProcAddress("eglGetPlatformDisplayEXT");
+
+    // (It should be impossible to be NULL, but uh.)
+    if (GetPlatformDisplayEXT)
+        return GetPlatformDisplayEXT(platform, native_display, NULL);
+
+    return EGL_NO_DISPLAY;
+}
