@@ -447,6 +447,7 @@ static struct m_config_shadow *m_config_shadow_new(const struct m_sub_options *r
 static void config_destroy(void *p)
 {
     struct m_config *config = p;
+    config->option_change_callback = NULL;
     m_config_restore_backups(config);
 
     talloc_free(config->cache);
