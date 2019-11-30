@@ -156,12 +156,12 @@ local function update_key_bindings()
 end
 
 local function add_binding(attrs, key, name, fn, rp)
-    rp = rp or ""
     if (type(name) ~= "string") and (name ~= nil) then
         rp = fn
         fn = name
         name = nil
     end
+    rp = rp or ""
     if name == nil then
         name = reserve_binding()
     end
