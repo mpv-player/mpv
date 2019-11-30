@@ -6151,10 +6151,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             vo_control(mpctx->video_out, VOCTRL_BORDER, 0);
         if (opt_ptr == &opts->vo->all_workspaces)
             vo_control(mpctx->video_out, VOCTRL_ALL_WORKSPACES, 0);
-        if (opt_ptr == &opts->vo->window_minimized)
-            vo_control(mpctx->video_out, VOCTRL_MINIMIZE, 0);
-        if (opt_ptr == &opts->vo->window_maximized)
-            vo_control(mpctx->video_out, VOCTRL_MAXIMIZE, 0);
     }
 
     if (opt_ptr == &opts->vo->taskbar_progress)
