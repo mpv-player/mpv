@@ -32,10 +32,11 @@ struct input_ctx;
 - (void)waitForInputContext;
 - (void)wakeup;
 - (void)putKey:(int)keycode;
-- (void)setHighestPriotityMediaKeysTap;
 - (void)handleFilesArray:(NSArray *)files;
 
 - (bool)queueCommand:(char *)cmd;
 - (bool)processKeyEvent:(NSEvent *)event;
+
+- (BOOL)handleMPKey:(int)key withMask:(int)mask;
 
 @end

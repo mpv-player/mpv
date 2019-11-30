@@ -180,20 +180,20 @@ class EventsView: NSView {
     }
 
     func signalMouseDown(_ event: NSEvent) {
-        signalMouseEvent(event, SWIFT_KEY_STATE_DOWN)
+        signalMouseEvent(event, MP_KEY_STATE_DOWN)
         if event.clickCount > 1 {
-            signalMouseEvent(event, SWIFT_KEY_STATE_UP)
+            signalMouseEvent(event, MP_KEY_STATE_UP)
         }
     }
 
     func signalMouseUp(_ event: NSEvent) {
-        signalMouseEvent(event, SWIFT_KEY_STATE_UP)
+        signalMouseEvent(event, MP_KEY_STATE_UP)
     }
 
-    func signalMouseEvent(_ event: NSEvent, _ state: Int32) {
-        hasMouseDown = state == SWIFT_KEY_STATE_DOWN
+    func signalMouseEvent(_ event: NSEvent, _ state: UInt32) {
+        hasMouseDown = state == MP_KEY_STATE_DOWN
         let mpkey = getMpvButton(event)
-        cocoa_put_key_with_modifiers((mpkey | state), Int32(event.modifierFlags.rawValue));
+        cocoa_put_key_with_modifiers((mpkey | Int32(state)), Int32(event.modifierFlags.rawValue));
     }
 
     func signalMouseMovement(_ event: NSEvent) {
