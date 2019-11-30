@@ -845,9 +845,11 @@ static int preinit(struct vo *vo)
     ctx->fo = XvListImageFormats(x11->display, ctx->xv_port,
                                  (int *) &ctx->formats);
 
-    MP_WARN(vo, "Warning: this legacy VO has bad quality and performance, "
-                "and will in particular result in blurry OSD and subtitles. "
-                "You should fix your graphics drivers, or not force the xv VO.\n");
+    if(vo->opts->warn_compat_vo) {
+        MP_WARN(vo, "Warning: this legacy VO has bad quality and performance, "
+                    "and will in particular result in blurry OSD and subtitles. "
+                    "You should fix your graphics drivers, or not force the xv VO.\n");
+    }
     return 0;
 
   error:

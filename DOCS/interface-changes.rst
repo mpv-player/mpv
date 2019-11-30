@@ -59,6 +59,8 @@ Interface changes
       setting the properties to non-existing tracks may report it as selected
       track for a small time window, until it's forced back to "no". The exact
       details how this is handled may change in the future.
+    - add `--no-warn-compat-vo` to suppress the compatibility or legacy warning
+      when the VOs x11, xv, vdpau or vaapi are used.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

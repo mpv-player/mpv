@@ -164,6 +164,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_SUBSTRUCT("", drm_opts, drm_conf, 0),
 #endif
     OPT_INTRANGE("swapchain-depth", swapchain_depth, 0, 1, 8),
+    OPT_FLAG("warn-compat-vo", warn_compat_vo, 0),
     {0}
 };
 
@@ -191,6 +192,7 @@ const struct m_sub_options vo_sub_opts = {
         .ontop_level = -1,
         .timing_offset = 0.050,
         .swapchain_depth = 3,
+        .warn_compat_vo = 1,
     },
 };
 

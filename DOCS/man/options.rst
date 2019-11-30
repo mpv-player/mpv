@@ -2964,6 +2964,10 @@ Window
 
     ``never`` asks the window manager to never disable the compositor.
 
+``--warn-compat-vo``, ``--no-warn-compat-vo``
+    Show a warning if a legacy/compatibility video output is used. On by
+    default.
+
 
 Disc Devices
 ------------
