@@ -1056,7 +1056,7 @@ function window_controls(alignment, topbar)
         return
     else
         -- Apply boxvideo margins to the control bar
-        osc_param.video_margins.t = wsc_geo.h / osc_param.playresy
+        osc_param.video_margins.t = wc_geo.h / osc_param.playresy
     end
 
     -- Window Title
