@@ -2488,10 +2488,12 @@ mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
 }, "showhide", "force")
-mp.set_key_bindings({
-    {"mouse_move",              function(e) process_event("mouse_move", nil) end},
-    {"mouse_leave",             mouse_leave},
-}, "showhide_wc", "force")
+if user_opts.windowcontrols ~= "no" then
+    mp.set_key_bindings({
+        {"mouse_move",              function(e) process_event("mouse_move", nil) end},
+        {"mouse_leave",             mouse_leave},
+    }, "showhide_wc", "force")
+end
 do_enable_keybindings()
 
 --mouse input bindings
