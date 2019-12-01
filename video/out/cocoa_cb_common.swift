@@ -58,8 +58,6 @@ class CocoaCB: NSObject {
         super.init()
         layer = VideoLayer(cocoaCB: self)
 
-        libmpv.observeFlag("ontop")
-        libmpv.observeFlag("keepaspect-window")
         libmpv.observeString("macos-title-bar-style")
         libmpv.observeString("macos-title-bar-appearance")
         libmpv.observeString("macos-title-bar-material")
@@ -459,6 +457,26 @@ class CocoaCB: NSObject {
                         ccb.window?.toggleFullScreen(nil)
                     }
                 }
+                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) {
+                    DispatchQueue.main.async {
+                        ccb.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
+                    }
+                }
+                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.keepaspect_window) {
+                    DispatchQueue.main.async {
+                        ccb.window?.keepAspect = Bool(mpv.opts.keepaspect_window)
+                    }
+                }
+                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_minimized) {
+                    DispatchQueue.main.async {
+                        ccb.window?.setMinimized(Bool(mpv.opts.window_minimized))
+                    }
+                }
+                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_maximized) {
+                    DispatchQueue.main.async {
+                        ccb.window?.setMaximized(Bool(mpv.opts.window_maximized))
+                    }
+                }
             }
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_FPS:
@@ -574,14 +592,6 @@ class CocoaCB: NSObject {
         }
 
         switch String(cString: property.name) {
-        case "ontop":
-            if let data = LibmpvHelper.mpvFlagToBool(property.data) {
-                window?.setOnTop(data, Int(mpv?.opts.ontop_level ?? -1))
-            }
-        case "keepaspect-window":
-            if let data = LibmpvHelper.mpvFlagToBool(property.data) {
-                window?.keepAspect = data
-            }
         case "macos-title-bar-appearance":
             if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
                 titleBar?.set(appearance: data)

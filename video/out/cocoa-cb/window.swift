@@ -272,6 +272,22 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
+    func setMinimized(_ stateWanted: Bool) {
+        if isMiniaturized == stateWanted { return }
+
+        if stateWanted {
+            performMiniaturize(self)
+        } else {
+            deminiaturize(self)
+        }
+    }
+
+    func setMaximized(_ stateWanted: Bool) {
+        if isZoomed == stateWanted { return }
+
+        zoom(self)
+    }
+
     func updateMovableBackground(_ pos: NSPoint) {
         if !isInFullscreen {
             isMovableByWindowBackground = mpv?.canBeDraggedAt(pos) ?? true
@@ -466,6 +482,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEndLiveResize(_ notification: Notification) {
         cocoaCB.layer?.inLiveResize = false
+        cocoaCB.mpv?.setConfigProperty(maximized: isZoomed)
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -497,5 +514,9 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowWillMove(_ notification: Notification) {
         isMoving = true
+    }
+
+    func windowDidMove(_ notification: Notification) {
+        cocoaCB.mpv?.setConfigProperty(maximized: isZoomed)
     }
 }
