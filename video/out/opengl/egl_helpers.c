@@ -300,12 +300,12 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
     // with slightly more complex environment than its short-sighted design
     // could deal with. So they invented an awful, awful kludge that modifies
     // EGL standard behavior, the EGL_EXT_client_extensions extension. EGL 1.4
-    // normally is to return NULL when querying EGL_EXTENSIONS, however, with
-    // that extension, it'll return the set of "client extensions", which may
-    // include EGL_EXT_platform_base.
+    // normally is to return NULL when querying EGL_EXTENSIONS on EGL_NO_DISPLAY,
+    // however, with that extension, it'll return the set of "client extensions",
+    // which may include EGL_EXT_platform_base.
 
     // Prerequisite: check the platform extension.
-    // If this is either EGL 1.5 or 1.4 with EGL_EXT_client_extensions, then
+    // If this is either EGL 1.5, or 1.4 with EGL_EXT_client_extensions, then
     // this must return a valid extension string.
     const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
     if (!exts || !gl_check_extension(exts, platform_ext_name))
@@ -316,12 +316,17 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
     // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
     const char *version = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
     // Of course we have to go through the excruciating pain of parsing a
-    // version string, since EGL provides no other way without a display.
-    int ma = 0, mi = 0;
-    if (sscanf(version, "%d.%d ", &ma, &mi) == 2 && (ma > 1 || mi >= 5)) {
+    // version string, since EGL provides no other way without a display. In
+    // theory version!=NULL is already proof enough that it's 1.5, but be
+    // extra defensive, since this should have been true for EGL_EXTENSIONS as
+    // well, but then they added an extension that modified standard behavior.
+    int ma = 0, mi = 0, end = 0;
+    if (version && sscanf(version, "%d.%d%n", &ma, &mi, &end) == 2 &&
+        version[end] == ' ' && (ma > 1 || mi >= 5))
+    {
         // This is EGL 1.5. It must support querying standard functions through
-        // eglGetProcAddress(). Note that on EGL 1.4, the function may be
-        // considered unknown, but could return non-NULL (because EGL is crazy).
+        // eglGetProcAddress(). Note that on EGL 1.4, even if the function is
+        // unknown, it could return non-NULL anyway (because EGL is crazy).
         PFNEGLGETPLATFORMDISPLAYPROC GetPlatformDisplay =
             (void *)eglGetProcAddress("eglGetPlatformDisplay");
         // (It should be impossible to be NULL, but uh.)
