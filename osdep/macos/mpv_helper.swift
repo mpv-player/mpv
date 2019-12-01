@@ -90,6 +90,11 @@ class MPVHelper: LogHelper {
         m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.window_minimized))
     }
 
+    func setConfigProperty(maximized: Bool) {
+        optsPtr.pointee.window_maximized = Int32(maximized)
+        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.window_maximized))
+    }
+
     func command(_ cmd: String) {
         let cCmd = UnsafePointer<Int8>(strdup(cmd))
         let mpvCmd = mp_input_parse_cmd(input, bstr0(cCmd), "")
