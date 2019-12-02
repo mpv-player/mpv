@@ -6101,7 +6101,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->vo->window_scale)
         update_window_scale(mpctx);
 
-    if (opt_ptr == &opts->cursor_autohide_delay)
+    if (opt_ptr == &opts->vo->cursor_autohide_delay)
         mpctx->mouse_timer = 0;
 
     if (flags & UPDATE_DVB_PROG) {
