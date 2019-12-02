@@ -151,12 +151,12 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
                                   uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
     struct vo_wayland_state *wl = data;
-    if (!wl->prev_fullscreen && wl->fullscreen) {
-        wl->prev_fullscreen = wl->fullscreen;
+    if (!wl->prev_fullscreen && wl->vo_opts->fullscreen) {
+        wl->prev_fullscreen = wl->vo_opts->fullscreen;
         return;
     }
 
-    wl->prev_fullscreen = wl->fullscreen;
+    wl->prev_fullscreen = wl->vo_opts->fullscreen;
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
     wl->mouse_unscaled_x = sx;
@@ -174,7 +174,7 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
 static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
                             int edge_pixels, enum xdg_toplevel_resize_edge *edge)
 {
-    if (wl->touch_entries || wl->fullscreen || wl->vo_opts->window_maximized)
+    if (wl->touch_entries || wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
         return 0;
 
     int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
@@ -950,14 +950,14 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
-    int prev_fs_state = wl->fullscreen;
+    int prev_fs_state = wl->vo_opts->fullscreen;
     bool is_maximized = false;
-    wl->fullscreen = false;
+    bool is_fullscreen = false;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
         case XDG_TOPLEVEL_STATE_FULLSCREEN:
-            wl->fullscreen = true;
+            is_fullscreen = true;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
             wl->pending_vo_events |= VO_EVENT_LIVE_RESIZING;
@@ -982,16 +982,18 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
+    vo_opts->fullscreen = is_fullscreen;
+    m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->fullscreen);
     vo_opts->window_maximized = is_maximized;
     m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
 
-    if (prev_fs_state != wl->fullscreen)
+    if (prev_fs_state != is_fullscreen)
         wl->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
     if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
         vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
 
     if (width > 0 && height > 0) {
-        if (!wl->fullscreen && !is_maximized) {
+        if (!is_fullscreen && !is_maximized) {
             if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window) {
                 if (width > height)
                     width  = height * wl->aspect_ratio;
@@ -1131,7 +1133,7 @@ int vo_wayland_init(struct vo *vo)
 
     if (wl->xdg_decoration_manager) {
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
-        set_border_decorations(wl, vo->opts->border);
+        set_border_decorations(wl, wl->vo_opts->border);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zxdg_decoration_manager_v1_interface.name);
@@ -1269,15 +1271,15 @@ int vo_wayland_reconfig(struct vo *vo)
 
     if (!wl->current_output) {
         int idx = 0;
-        if (vo->opts->fullscreen && (vo->opts->fsscreen_id >= 0))
-            idx = vo->opts->fsscreen_id;
+        if (wl->vo_opts->fullscreen && (wl->vo_opts->fsscreen_id >= 0))
+            idx = wl->vo_opts->fsscreen_id;
         struct vo_wayland_output *out = find_output(wl, idx);
         if (!out) {
             MP_ERR(wl, "Screen index %i not found/unavailable!\n", idx);
         } else {
             wl_out = out->output;
             wl->current_output = out;
-            if (!vo->opts->hidpi_window_scale)
+            if (!wl->vo_opts->hidpi_window_scale)
                 out->scale = 1;
             wl->scaling = out->scale;
             screenrc = wl->current_output->geometry;
@@ -1298,19 +1300,18 @@ int vo_wayland_reconfig(struct vo *vo)
 
     wl->aspect_ratio = vo->dwidth / (float)vo->dheight;
 
-    if (vo->opts->fullscreen) {
+    if (wl->vo_opts->fullscreen) {
         /* If already fullscreen, fix resolution for the frame size change */
-        if (wl->fullscreen && wl->current_output) {
+        if (wl->current_output) {
             wl->geometry.x0  = 0;
             wl->geometry.y0  = 0;
             wl->geometry.x1  = mp_rect_w(wl->current_output->geometry)/wl->scaling;
             wl->geometry.y1  = mp_rect_h(wl->current_output->geometry)/wl->scaling;
+        }
+        if (wl->vo_opts->fsscreen_id < 0) {
+            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
         } else {
-            if (vo->opts->fsscreen_id < 0) {
-                xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
-            } else {
-                xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl_out);
-            }
+            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl_out);
         }
     }
 
@@ -1349,10 +1350,10 @@ static int toggle_fullscreen(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
         return VO_NOTAVAIL;
-    if (wl->fullscreen)
-        xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
-    else
+    if (wl->vo_opts->fullscreen)
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
+    else
+        xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
     return VO_TRUE;
 }
 
@@ -1464,11 +1465,9 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 return do_minimize(wl);
             if (opt == &opts->window_maximized)
                 return toggle_maximized(wl);
+            if (opt == &opts->border)
+                return set_border_decorations(wl, opts->border);
         }
-        return VO_TRUE;
-    }
-    case VOCTRL_GET_FULLSCREEN: {
-        *(int *)arg = wl->fullscreen;
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_NAMES: {
@@ -1483,7 +1482,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        if (!wl->fullscreen && !wl->vo_opts->window_maximized) {
+        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
             wl->geometry.x0 = 0;
             wl->geometry.y0 = 0;
             wl->geometry.x1 = s[0]/wl->scaling;
@@ -1502,8 +1501,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return update_window_title(wl, (char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
         return set_cursor_visibility(wl, *(bool *)arg);
-    case VOCTRL_BORDER:
-        return set_border_decorations(wl, vo->opts->border);
     case VOCTRL_KILL_SCREENSAVER:
         return set_screensaver_inhibitor(wl, true);
     case VOCTRL_RESTORE_SCREENSAVER:
