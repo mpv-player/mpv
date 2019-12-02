@@ -136,6 +136,8 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     wl->pointer    = pointer;
     wl->pointer_id = serial;
 
+    if (wl->vo_opts->fullscreen && wl->vo_opts->cursor_autohide_delay != -1)
+        wl->cursor_visible = false;
     set_cursor_visibility(wl, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
@@ -151,12 +153,7 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
                                   uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
     struct vo_wayland_state *wl = data;
-    if (!wl->prev_fullscreen && wl->vo_opts->fullscreen) {
-        wl->prev_fullscreen = wl->vo_opts->fullscreen;
-        return;
-    }
 
-    wl->prev_fullscreen = wl->vo_opts->fullscreen;
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
     wl->mouse_unscaled_x = sx;
@@ -1078,7 +1075,6 @@ int vo_wayland_init(struct vo *vo)
         .wakeup_pipe = {-1, -1},
         .dnd_fd = -1,
         .cursor_visible = true,
-        .prev_fullscreen = vo->opts->fullscreen,
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->vo_opts = wl->vo_opts_cache->opts;

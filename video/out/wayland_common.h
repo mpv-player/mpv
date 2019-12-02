@@ -138,7 +138,6 @@ struct vo_wayland_state {
     struct wl_surface      *cursor_surface;
     int                     allocated_cursor_scale;
     bool                    cursor_visible;
-    bool                    prev_fullscreen;
 };
 
 int vo_wayland_init(struct vo *vo);
