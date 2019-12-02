@@ -985,7 +985,8 @@ function window_controls(alignment, topbar)
     if alignment == "left" then
         controlbox_left = wc_geo.x
         titlebox_left = wc_geo.x + controlbox_w + 5
-    elseif alignment == "right" then
+    elseif alignment == "right" or
+           alignment == "yes" then
         -- Already default
     else
         msg.error("Invalid setting \""..alignment.."\" for windowcontrols")
