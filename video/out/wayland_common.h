@@ -72,7 +72,6 @@ struct vo_wayland_state {
     struct mp_rect geometry;
     struct mp_rect window_size;
     float aspect_ratio;
-    bool fullscreen;
     bool configured;
     bool frame_wait;
     bool hidden;
