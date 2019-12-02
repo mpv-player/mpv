@@ -5289,6 +5289,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     results, as can missing or incorrect display FPS information (see
     ``--override-display-fps``).
 
+``--vulkan-device=<device name>``
+    The name of the Vulkan device to use for rendering and presentation. Use
+    ``--vulkan-device=help`` to see the list of available devices and their
+    names. If left unspecified, the first enumerated hardware Vulkan device will
+    be used.
+
 ``--vulkan-swap-mode=<mode>``
     Controls the presentation mode of the vulkan swapchain. This is similar
     to the ``--opengl-swapinterval`` option.
@@ -5332,6 +5338,25 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Disable the use of VkEvents, for debugging purposes or for compatibility
     with some older drivers / vulkan portability layers that don't provide
     working VkEvent support.
+
+``--vulkan-display-display=<n>``
+    The index of the display, on the selected Vulkan device, to present on when
+    using the ``displayvk`` GPU context. Use ``--vulkan-display-display=help``
+    to see the list of available displays. If left unspecified, the first
+    enumerated display will be used.
+
+
+``--vulkan-display-mode=<n>``
+    The index of the display mode, of the selected Vulkan display, to use when
+    using the ``displayvk`` GPU context. Use ``--vulkan-display-mode=help``
+    to see the list of available modes. If left unspecified, the first
+    enumerated mode will be used.
+
+``--vulkan-display-plane=<n>``
+    The index of the plane, on the selected Vulkan device, to present on when
+    using the ``displayvk`` GPU context. Use ``--vulkan-display-plane=help``
+    to see the list of available planes. If left unspecified, the first
+    enumerated plane will be used.
 
 ``--d3d11-exclusive-fs=<yes|no>``
     Switches the D3D11 swap chain fullscreen state to 'fullscreen' when
@@ -5979,6 +6004,10 @@ The following video options are currently all specific to ``--vo=gpu`` and
         VK_KHR_wayland_surface
     drm
         DRM/EGL
+    displayvk
+        VK_KHR_display. This backend is roughly the Vukan equivalent of
+        DRM/EGL, allowing for direct rendering via Vulkan without a display
+        manager.
     x11egl
         X11/EGL
     android
