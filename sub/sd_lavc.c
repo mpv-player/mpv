@@ -451,8 +451,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
         h = priv->video_params.h;
     }
     if (current->src_w > w || current->src_h > h) {
-        w = priv->video_params.w;
-        h = priv->video_params.h;
+        w = MPMAX(priv->video_params.w, current->src_w);
+        h = MPMAX(priv->video_params.h, current->src_h);
     }
 
     if (opts->sub_pos != 100 && opts->ass_style_override) {
