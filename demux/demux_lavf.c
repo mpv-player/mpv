@@ -134,7 +134,7 @@ struct format_hack {
     bool max_probe : 1;         // use probescore only if max. probe size reached
     bool ignore : 1;            // blacklisted
     bool no_stream : 1;         // do not wrap struct stream as AVIOContext
-    bool use_stream_ids : 1;    // export the native stream IDs
+    bool use_stream_ids : 1;    // has a meaningful native stream IDs (export it)
     bool fully_read : 1;        // set demuxer.fully_read flag
     bool detect_charset : 1;    // format is a small text file, possibly not UTF8
     bool image_format : 1;      // expected to contain exactly 1 frame
@@ -166,9 +166,12 @@ static const struct format_hack format_hacks[] = {
     {"sdp", .clear_filepos = true, .is_network = true, .no_seek = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
-
-    {"mp4", .skipinfo = true, .fix_editlists = true, .no_pcm_seek = true},
-    {"matroska", .skipinfo = true, .no_pcm_seek = true},
+    {"mxf", .use_stream_ids = true},
+    {"avi", .use_stream_ids = true},
+    {"asf", .use_stream_ids = true},
+    {"mp4", .skipinfo = true, .fix_editlists = true, .no_pcm_seek = true,
+            .use_stream_ids = true},
+    {"matroska", .skipinfo = true, .no_pcm_seek = true, .use_stream_ids = true},
 
     {"v4l2", .no_seek = true},
 
@@ -178,7 +181,7 @@ static const struct format_hack format_hacks[] = {
 
     // Some Ogg shoutcast streams are essentially concatenated OGG files. They
     // reset timestamps, which causes all sorts of problems.
-    {"ogg", .linearize_audio_ts = true},
+    {"ogg", .linearize_audio_ts = true, .use_stream_ids = true},
 
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
