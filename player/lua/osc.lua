@@ -2218,6 +2218,8 @@ function render()
         for k,cords in pairs(osc_param.areas["showhide_wc"]) do
             set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide_wc")
         end
+    else
+        set_virt_mouse_area(0, 0, 0, 0, "showhide_wc")
     end
     do_enable_keybindings()
 
@@ -2489,12 +2491,10 @@ mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
 }, "showhide", "force")
-if user_opts.windowcontrols ~= "no" then
-    mp.set_key_bindings({
-        {"mouse_move",              function(e) process_event("mouse_move", nil) end},
-        {"mouse_leave",             mouse_leave},
-    }, "showhide_wc", "force")
-end
+mp.set_key_bindings({
+    {"mouse_move",              function(e) process_event("mouse_move", nil) end},
+    {"mouse_leave",             mouse_leave},
+}, "showhide_wc", "force")
 do_enable_keybindings()
 
 --mouse input bindings
