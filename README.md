@@ -133,7 +133,7 @@ FFmpeg dependencies (when building FFmpeg):
 - libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
   explicitly enabled when compiling FFmpeg)
 - For native DASH playback, FFmpeg needs to be built with --enable-libxml2
-  (although there are security implications, and DAHS support has lots of bugs).
+  (although there are security implications, and DASH support has lots of bugs).
 - AV1 decoding support requires dav1d.
 - For good nvidia support on Linux, make sure nv-codec-headers is installed
   and can be found by configure.
