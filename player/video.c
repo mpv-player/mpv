@@ -457,6 +457,7 @@ static int video_output_image(struct MPContext *mpctx)
     struct vo_chain *vo_c = mpctx->vo_chain;
     bool hrseek = false;
     double hrseek_pts = mpctx->hrseek_pts;
+    double tolerance = mpctx->hrseek_backstep ? 0 : .005;
     if (mpctx->video_status == STATUS_SYNCING) {
         hrseek = mpctx->hrseek_active;
         // playback_pts is normally only set when audio and video have started
@@ -505,7 +506,7 @@ static int video_output_image(struct MPContext *mpctx)
                 mp_pin_out_unread(vo_c->filter->f->pins[1], frame);
                 img = NULL;
                 r = VD_EOF;
-            } else if (hrseek && (img->pts < hrseek_pts - .005 ||
+            } else if (hrseek && (img->pts < hrseek_pts - tolerance ||
                                   mpctx->hrseek_lastframe))
             {
                 /* just skip - but save in case it was the last frame */
