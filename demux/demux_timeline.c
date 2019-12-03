@@ -133,7 +133,7 @@ static void associate_streams(struct demuxer *demuxer,
 
             // Matching by demuxer ID is supposedly useful and preferable for
             // ordered chapters.
-            if (sh->demuxer_id == vs->sh->demuxer_id)
+            if (sh->demuxer_id >= 0 && sh->demuxer_id == vs->sh->demuxer_id)
                 other = vs;
         }
 

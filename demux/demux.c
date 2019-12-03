@@ -980,13 +980,6 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
 
     if (sh->ff_index < 0)
         sh->ff_index = sh->index;
-    if (sh->demuxer_id < 0) {
-        sh->demuxer_id = 0;
-        for (int n = 0; n < in->num_streams; n++) {
-            if (in->streams[n]->type == sh->type)
-                sh->demuxer_id += 1;
-        }
-    }
 
     MP_TARRAY_APPEND(in, in->streams, in->num_streams, sh);
     assert(in->streams[sh->index] == sh);
@@ -3762,6 +3755,8 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id)
 {
+    if (id < 0)
+        return NULL;
     int num = demux_get_num_stream(d);
     for (int n = 0; n < num; n++) {
         struct sh_stream *s = demux_get_stream(d, n);

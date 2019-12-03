@@ -2145,7 +2145,11 @@ Property list
         String describing the media type. One of ``audio``, ``video``, ``sub``.
 
     ``track-list/N/src-id``
-        Track ID as used in the source file. Not always available.
+        Track ID as used in the source file. Not always available. (It is
+        missing if the format has no native ID, if the track is a pseudo-track
+        that does not exist in this way in the actual file, or if the format
+        is handled by libavformat, and the format was not whitelisted as having
+        track IDs.)
 
     ``track-list/N/title``
         Track title as it is stored in the file. Not always available.
