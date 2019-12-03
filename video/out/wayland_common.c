@@ -1047,8 +1047,12 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
 
 static int set_border_decorations(struct vo_wayland_state *wl, int state)
 {
-    if (!wl->xdg_toplevel_decoration)
+    if (!wl->xdg_toplevel_decoration) {
+        wl->vo_opts->border = false;
+        m_config_cache_write_opt(wl->vo_opts_cache,
+                                 &wl->vo_opts->border);
         return VO_NOTIMPL;
+    }
 
     enum zxdg_toplevel_decoration_v1_mode mode;
     if (state) {
@@ -1131,6 +1135,9 @@ int vo_wayland_init(struct vo *vo)
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
         set_border_decorations(wl, wl->vo_opts->border);
     } else {
+        wl->vo_opts->border = false;
+        m_config_cache_write_opt(wl->vo_opts_cache,
+                                 &wl->vo_opts->border);
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zxdg_decoration_manager_v1_interface.name);
     }

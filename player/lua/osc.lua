@@ -45,7 +45,8 @@ local user_opts = {
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
-    windowcontrols = "no",      -- where to show window controls (or not at all)
+    windowcontrols = "auto",    -- whether to show window controls
+    windowcontrols_alignment = "right" -- which side to show window controls on
 }
 
 -- read_options may modify hidetimeout, so save the original default value in
@@ -56,6 +57,21 @@ opt.read_options(user_opts, "osc")
 if user_opts.hidetimeout < 0 then
     user_opts.hidetimeout = hidetimeout_def
     msg.warn("hidetimeout cannot be negative. Using " .. user_opts.hidetimeout)
+end
+
+-- validate window control options
+if user_opts.windowcontrols ~= "auto" and
+   user_opts.windowcontrols ~= "yes" and
+   user_opts.windowcontrols ~= "no" then
+    msg.warn("windowcontrols cannot be \"" ..
+             user_opts.windowcontrols .. "\". Ignoring.")
+    user_opts.windowcontrols = "auto"
+end
+if user_opts.windowcontrols_alignment ~= "right" and
+   user_opts.windowcontrols_alignment ~= "left" then
+    msg.warn("windowcontrols_alignment cannot be \"" ..
+             user_opts.windowcontrols_alignment .. "\". Ignoring.")
+    user_opts.windowcontrols_alignment = "right"
 end
 
 local osc_param = { -- calculated by osc_init()
@@ -117,6 +133,7 @@ local state = {
     showhide_enabled = false,
     dmx_cache = 0,
     using_video_margins = false,
+    border = true,
 }
 
 local window_control_box_width = 80
@@ -393,6 +410,19 @@ function get_track(type)
     return 0
 end
 
+-- WindowControl helpers
+function window_controls_enabled()
+    val = user_opts.windowcontrols
+    if val == "auto" then
+        return not state.border
+    else
+        return val ~= "no"
+    end
+end
+
+function window_controls_alignment()
+    return user_opts.windowcontrols_alignment
+end
 
 --
 -- Element Management
@@ -966,7 +996,7 @@ function add_layout(name)
 end
 
 -- Window Controls
-function window_controls(alignment, topbar)
+function window_controls(topbar)
     local wc_geo = {
         x = 0,
         y = 30 + user_opts.barmargin,
@@ -975,6 +1005,7 @@ function window_controls(alignment, topbar)
         h = 30,
     }
 
+    local alignment = window_controls_alignment()
     local controlbox_w = window_control_box_width
     local titlebox_w = wc_geo.w - controlbox_w
 
@@ -985,12 +1016,6 @@ function window_controls(alignment, topbar)
     if alignment == "left" then
         controlbox_left = wc_geo.x
         titlebox_left = wc_geo.x + controlbox_w + 5
-    elseif alignment == "right" or
-           alignment == "yes" then
-        -- Already default
-    else
-        msg.error("Invalid setting \""..alignment.."\" for windowcontrols")
-        -- Falls back to "right"
     end
 
     add_area("window-controls",
@@ -1367,7 +1392,7 @@ layouts["slimbox"] = function ()
 
 end
 
-function bar_layout(direction, windowcontrols)
+function bar_layout(direction)
     local osc_geo = {
         x = -2,
         y,
@@ -1386,10 +1411,10 @@ function bar_layout(direction, windowcontrols)
     -- Special topbar handling when window controls are present
     local padwc_l
     local padwc_r
-    if direction < 0 or windowcontrols == "no" then
+    if direction < 0 or not window_controls_enabled() then
         padwc_l = 0
         padwc_r = 0
-    elseif windowcontrols == "left" then
+    elseif window_controls_alignment() == "left" then
         padwc_l = window_control_box_width
         padwc_r = 0
     else
@@ -1571,11 +1596,11 @@ function bar_layout(direction, windowcontrols)
 end
 
 layouts["bottombar"] = function()
-    bar_layout(-1, false)
+    bar_layout(-1)
 end
 
 layouts["topbar"] = function()
-    bar_layout(1, user_opts.windowcontrols)
+    bar_layout(1)
 end
 
 -- Validate string type user options
@@ -1992,9 +2017,8 @@ function osc_init()
     layouts[user_opts.layout]()
 
     -- load window controls
-    if user_opts.windowcontrols ~= "no" then
-        window_controls(user_opts.windowcontrols,
-                        user_opts.layout == "topbar")
+    if window_controls_enabled() then
+        window_controls(user_opts.layout == "topbar")
     end
 
     --do something with the elements
@@ -2244,7 +2268,7 @@ function render()
         end
     end
 
-    if user_opts.windowcontrols ~= "no" then
+    if osc_param.areas["window-controls"] then
         for _,cords in ipairs(osc_param.areas["window-controls"]) do
             if state.osc_visible then -- activate only when OSC is actually visible
                 set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls")
@@ -2468,6 +2492,11 @@ mp.observe_property("fullscreen", "bool",
     function(name, val)
         state.fullscreen = val
         request_init()
+    end
+)
+mp.observe_property("border", "bool",
+    function(name, val)
+        state.border = val
     end
 )
 mp.observe_property("idle-active", "bool",
