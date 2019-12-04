@@ -883,6 +883,9 @@ static bool render_frame(struct vo *vo)
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
 
+    // Always render when paused (it's typically the last frame for a while).
+    in->dropped_frame &= !in->paused;
+
     bool use_vsync = in->current_frame->display_synced && !in->paused;
     if (use_vsync && !in->expecting_vsync) // first DS frame in a row
         in->prev_vsync = now;
