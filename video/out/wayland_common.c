@@ -1613,14 +1613,24 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl, int frame_offset)
     }
 
     if (wl->frame_wait) {
-        wl->timeout_count += 1;
+        if (!wl->hidden) {
+            wl->timeout_count += 1;
+        } else {
+            wl->timeout_count = 0;
+        }
     } else {
-        wl->timeout_count = 0;
-        wl->hidden = false;
+        if (wl->hidden) {
+            wl->timeout_count -= 1;
+        } else {
+            wl->timeout_count = 0;
+        }
     }
     
-    if (wl->timeout_count > wl->current_output->refresh_rate)
+    if (wl->timeout_count > wl->current_output->refresh_rate) {
         wl->hidden = true;
+    } else if (wl->timeout_count < -1*wl->current_output->refresh_rate) {
+        wl->hidden = false;
+    }
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
