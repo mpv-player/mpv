@@ -3777,7 +3777,7 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
 
     if (success) {
         m_option_free(co->opt, &old_settings);
-        mp_notify_property(mpctx, filter_opt[mediatype]);
+        m_config_notify_change_opt_ptr(mpctx->mconfig, list);
     } else {
         m_option_free(co->opt, list);
         *list = old_settings;
