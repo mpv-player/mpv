@@ -590,8 +590,9 @@ static int preinit(struct vo *vo)
         goto err;
     }
 
-    uint64_t has_dumb;
-    if (drmGetCap(p->kms->fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
+    uint64_t has_dumb = 0;
+    if (drmGetCap(p->kms->fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0
+        || has_dumb == 0) {
         MP_ERR(vo, "Card \"%d\" does not support dumb buffers.\n",
                p->kms->card_no);
         goto err;
