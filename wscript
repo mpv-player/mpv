@@ -400,7 +400,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--zimg',
         'deps': 'aligned_alloc',
-        'desc': 'libzimg support (for vf_fingerprint)',
+        'desc': 'libzimg support (high quality software scaler)',
         'func': check_pkg_config('zimg', '>= 2.9'),
     }, {
         'name': '--lcms2',
