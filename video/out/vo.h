@@ -478,6 +478,7 @@ struct vo {
     struct m_config_cache *eq_opts_cache;
 
     bool want_redraw;   // redraw as soon as possible
+    bool hidden; // true if the window's state is hidden from the backend
 
     // current window state
     int dwidth;

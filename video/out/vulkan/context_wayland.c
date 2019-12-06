@@ -122,7 +122,7 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 static void wayland_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
-    if (wl->presentation && !wl->hidden) {
+    if (wl->presentation) {
         info->vsync_duration = wl->vsync_duration;
         info->skipped_vsyncs = wl->last_skipped_vsyncs;
         info->last_queue_display_time = wl->last_queue_display_time;

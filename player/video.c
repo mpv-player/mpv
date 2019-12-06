@@ -718,7 +718,8 @@ static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
     struct MPOpts *opts = mpctx->opts;
     int mode = opts->video_sync;
 
-    if (mode != VS_DISP_RESAMPLE || mpctx->audio_status != STATUS_PLAYING) {
+    if (mode != VS_DISP_RESAMPLE || mpctx->audio_status != STATUS_PLAYING ||
+        mpctx->vo_chain->vo->hidden) {
         mpctx->speed_factor_a = mpctx->speed_factor_v;
         return;
     }
@@ -791,7 +792,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         mpctx->audio_drop_deprecated_msg = true;
     }
 
-    if (!VS_IS_DISP(mode))
+    if (!VS_IS_DISP(mode) || mpctx->vo_chain->vo->hidden)
         return;
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
