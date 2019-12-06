@@ -478,6 +478,10 @@ static bool setup_mode(struct kms *kms, const char *mode_spec)
         goto err;
     }
 
+    drmModeModeInfo *mode = &kms->mode.mode;
+    MP_VERBOSE(kms, "Selected mode: %s (%dx%d@%.2fHz)\n",
+        mode->name, mode->hdisplay, mode->vdisplay, mode_get_Hz(mode));
+
     return true;
 
 err:
@@ -538,6 +542,20 @@ struct kms *kms_create(struct mp_log *log, const char *connector_spec,
         mp_err(log, "Cannot open card \"%d\": %s.\n",
                card_no, mp_strerror(errno));
         goto err;
+    }
+
+    char *devname = drmGetDeviceNameFromFd(kms->fd);
+    if (devname) {
+        mp_verbose(log, "Device name: %s\n", devname);
+        drmFree(devname);
+    }
+
+    drmVersionPtr ver = drmGetVersion(kms->fd);
+    if (ver) {
+        mp_verbose(log, "Driver: %s %d.%d.%d (%s)\n", ver->name,
+            ver->version_major, ver->version_minor, ver->version_patchlevel,
+            ver->date);
+        drmFreeVersion(ver);
     }
 
     res = drmModeGetResources(kms->fd);
