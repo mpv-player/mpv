@@ -626,7 +626,10 @@ void kms_destroy(struct kms *kms)
 
 static double mode_get_Hz(const drmModeModeInfo *mode)
 {
-    return mode->clock * 1000.0 / mode->htotal / mode->vtotal;
+    double rate = mode->clock * 1000.0 / mode->htotal / mode->vtotal;
+    if (mode->flags & DRM_MODE_FLAG_INTERLACE)
+        rate *= 2.0;
+    return rate;
 }
 
 static void kms_show_available_modes(
