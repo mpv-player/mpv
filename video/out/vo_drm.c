@@ -489,6 +489,7 @@ static void queue_flip(struct vo *vo, struct kms_frame *frame)
     data->vsync = &p->vsync;
     data->vsync_info = &p->vsync_info;
     data->waiting_for_flip = &p->waiting_for_flip;
+    data->log = vo->log;
 
     ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id,
                           p->cur_fb->fb,

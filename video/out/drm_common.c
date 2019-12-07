@@ -944,6 +944,15 @@ void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
     const uint64_t ust = (sec * 1000000LL) + usec;
 
     const unsigned int msc_since_last_flip = msc - vsync->msc;
+    if (ready && msc == vsync->msc) {
+        // Seems like some drivers only increment msc every other page flip when
+        // running in interlaced mode (I'm looking at you nouveau). Obviously we
+        // can't work with this, so shame the driver and bail.
+        mp_err(closure->log,
+               "Got the same msc value twice: (msc: %u, vsync->msc: %u). This shouldn't happen. Possibly broken driver/interlaced mode?\n",
+               msc, vsync->msc);
+        goto fail;
+    }
 
     vsync->ust = ust;
     vsync->msc = msc;

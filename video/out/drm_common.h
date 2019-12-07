@@ -66,6 +66,7 @@ struct drm_pflip_cb_closure {
     struct drm_vsync_tuple *vsync; // vsync tuple of the latest page flip. drm_pflip_cb updates this
     struct vo_vsync_info *vsync_info; // where the drm_pflip_cb routine writes its output
     bool *waiting_for_flip; // drm_pflip_cb writes false here before returning
+    struct mp_log *log; // Needed to print error messages that shame bad drivers
 };
 
 bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
