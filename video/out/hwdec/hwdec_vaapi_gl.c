@@ -251,9 +251,9 @@ bool vaapi_gl_init(const struct ra_hwdec *hw)
         return false;
 
     GL *gl = ra_gl_get(hw->ra);
-    if (!strstr(exts, "EXT_image_dma_buf_import") ||
-        !strstr(exts, "EGL_KHR_image_base") ||
-        !strstr(gl->extensions, "GL_OES_EGL_image") ||
+    if (!gl_check_extension(exts, "EGL_EXT_image_dma_buf_import") ||
+        !gl_check_extension(exts, "EGL_KHR_image_base") ||
+        !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return false;
 
