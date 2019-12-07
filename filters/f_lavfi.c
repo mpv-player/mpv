@@ -943,10 +943,6 @@ static bool is_usable(const AVFilter *filter, int media_type)
 
 bool mp_lavfi_is_usable(const char *name, int media_type)
 {
-    // Skip the lavfi- prefix, if present.
-    if (strncmp(name, "lavfi-", 6) == 0)
-        name += 6;
-
     const AVFilter *f = avfilter_get_by_name(name);
     return f && is_usable(f, media_type);
 }

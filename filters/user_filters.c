@@ -20,6 +20,14 @@ static bool get_desc_from(const struct mp_user_filter_entry **list, int num,
     return true;
 }
 
+static bool check_unknown_entry(const char *name, int media_type)
+{
+    // Generic lavfi bridge: skip the lavfi- prefix, if present.
+    if (strncmp(name, "lavfi-", 6) == 0)
+        name += 6;
+    return mp_lavfi_is_usable(name, media_type);
+}
+
 // --af option
 
 const struct mp_user_filter_entry *af_list[] = {
@@ -50,7 +58,7 @@ static void print_af_lavfi_help(struct mp_log *log, const char *name)
 
 static bool check_af_lavfi(const char *name)
 {
-    return mp_lavfi_is_usable(name, AVMEDIA_TYPE_AUDIO);
+    return check_unknown_entry(name, AVMEDIA_TYPE_AUDIO);
 }
 
 const struct m_obj_list af_obj_list = {
@@ -107,7 +115,7 @@ static void print_vf_lavfi_help(struct mp_log *log, const char *name)
 
 static bool check_vf_lavfi(const char *name)
 {
-    return mp_lavfi_is_usable(name, AVMEDIA_TYPE_VIDEO);
+    return check_unknown_entry(name, AVMEDIA_TYPE_VIDEO);
 }
 
 const struct m_obj_list vf_obj_list = {
