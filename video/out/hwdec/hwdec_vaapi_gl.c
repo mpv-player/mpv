@@ -29,6 +29,7 @@ typedef void* GLeglImageOES;
 typedef void *EGLImageKHR;
 #endif
 
+// Any EGL_EXT_image_dma_buf_import definitions used in this source file.
 #ifndef EGL_LINUX_DMA_BUF_EXT
 #define EGL_LINUX_DMA_BUF_EXT             0x3270
 #define EGL_LINUX_DRM_FOURCC_EXT          0x3271
@@ -41,6 +42,13 @@ typedef void *EGLImageKHR;
 #define EGL_DMA_BUF_PLANE2_FD_EXT         0x3278
 #define EGL_DMA_BUF_PLANE2_OFFSET_EXT     0x3279
 #define EGL_DMA_BUF_PLANE2_PITCH_EXT      0x327A
+#endif
+
+// Any EGL_EXT_image_dma_buf_import definitions used in this source file.
+#ifndef EGL_DMA_BUF_PLANE3_FD_EXT
+#define EGL_DMA_BUF_PLANE3_FD_EXT         0x3440
+#define EGL_DMA_BUF_PLANE3_OFFSET_EXT     0x3441
+#define EGL_DMA_BUF_PLANE3_PITCH_EXT      0x3442
 #endif
 
 struct vaapi_gl_mapper_priv {
