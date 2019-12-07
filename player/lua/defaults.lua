@@ -131,6 +131,7 @@ end
 -- "Newer" and more convenient API
 
 local key_bindings = {}
+local key_binding_counter = 0
 
 local function update_key_bindings()
     for i = 1, 2 do
@@ -143,11 +144,18 @@ local function update_key_bindings()
             section = "input_forced_" .. mp.script_name
             flags = "force"
         end
-        local cfg = ""
+        local bindings = {}
         for k, v in pairs(key_bindings) do
             if v.bind and v.forced ~= def then
-                cfg = cfg .. v.bind .. "\n"
+                bindings[#bindings + 1] = v
             end
+        end
+        table.sort(bindings, function(a, b)
+            return a.priority < b.priority
+        end)
+        local cfg = ""
+        for _, v in ipairs(bindings) do
+            cfg = cfg .. v.bind .. "\n"
         end
         mp.input_define_section(section, cfg, flags)
         -- TODO: remove the section if the script is stopped
@@ -217,6 +225,9 @@ local function add_binding(attrs, key, name, fn, rp)
         attrs.bind = key .. " script-binding " .. mp.script_name .. "/" .. name
     end
     attrs.name = name
+    -- new bindings override old ones (but do not overwrite them)
+    key_binding_counter = key_binding_counter + 1
+    attrs.priority = key_binding_counter
     key_bindings[name] = attrs
     update_key_bindings()
     dispatch_key_bindings[name] = key_cb
