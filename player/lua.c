@@ -73,6 +73,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@stats.lua",
 #   include "player/lua/stats.inc"
     },
+    {"@console.lua",
+#   include "player/lua/console.inc"
+    },
     {0}
 };
 

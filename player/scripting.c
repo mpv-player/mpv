@@ -208,6 +208,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, mpctx->opts->lua_load_osc, "@osc.lua");
     load_builtin_script(mpctx, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
     load_builtin_script(mpctx, mpctx->opts->lua_load_stats, "@stats.lua");
+    load_builtin_script(mpctx, mpctx->opts->lua_load_console, "@console.lua");
 }
 
 void mp_load_scripts(struct MPContext *mpctx)

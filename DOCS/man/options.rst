@@ -847,6 +847,12 @@ Program Behavior
     binding (default: yes). By default, the ``i`` key is used (``I`` to make
     the overlay permanent).
 
+``--load-osd-console=<yes|no>``
+    Enable the builtin script that shows a console on a key binding and lets
+    you enter commands (default: yes). By default,. The ``´`` key is used to
+    show the console, and ``ESC`` to hide it again. (This is based on  a user
+    script called ``repl.lua``.)
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but

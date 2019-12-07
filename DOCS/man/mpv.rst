@@ -991,6 +991,8 @@ works like in older mpv releases. The profiles are currently defined as follows:
 
 .. include:: stats.rst
 
+.. include:: console.rst
+
 .. include:: lua.rst
 
 .. include:: javascript.rst
