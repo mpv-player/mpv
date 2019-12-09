@@ -61,29 +61,19 @@ def libraries(objfile, result = dict()):
 
     return result
 
-def leafs(libs_dict, processed = []):
-    result    = []
-    processed = set(processed)
-
-    for objfile, libs in libs_dict.items():
-        if libs <= processed:
-            result.append(objfile)
-
-    return result
-
 def lib_path(binary):
     return os.path.join(os.path.dirname(binary), 'lib')
 
 def lib_name(lib):
     return os.path.join("@executable_path", "lib", os.path.basename(lib))
 
-def process_libraries(libs_dict, binary, processed = []):
-    ls   = leafs(libs_dict, processed)
-    diff = set(ls) - set(processed)
-    if diff == set([binary]):
-        return
+def process_libraries(libs_dict, binary):
+    libs_set = set(libs_dict)
+    # Remove binary from libs_set to prevent a duplicate of the binary being 
+    # added to the libs directory.
+    libs_set.remove(binary)
 
-    for src in diff:
+    for src in libs_set:
         name = lib_name(src)
         dst  = os.path.join(lib_path(binary), os.path.basename(src))
 
@@ -94,11 +84,9 @@ def process_libraries(libs_dict, binary, processed = []):
         if src in libs_dict[binary]:
             install_name_tool_change(src, name, binary)
 
-        for p in processed:
+        for p in libs_set:
             if p in libs_dict[src]:
                 install_name_tool_change(p, lib_name(p), dst)
-
-    return ls
 
 def process_swift_libraries(binary):
     command = ['xcrun', '--find', 'swift-stdlib-tool']
@@ -130,9 +118,7 @@ def main():
     libs = libraries(binary)
 
     print(">> copying and processing all linked libraries")
-    libs_processed = process_libraries(libs, binary)
-    while libs_processed is not None:
-        libs_processed = process_libraries(libs, binary, libs_processed)
+    process_libraries(libs, binary)
 
     print(">> removing rpath definitions towards dev tools")
     remove_dev_tools_rapths(binary)
