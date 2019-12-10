@@ -2497,6 +2497,7 @@ mp.observe_property("fullscreen", "bool",
 mp.observe_property("border", "bool",
     function(name, val)
         state.border = val
+        request_init()
     end
 )
 mp.observe_property("idle-active", "bool",
