@@ -103,7 +103,8 @@ local osc_styles = {
     timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\fs30}",
     vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
 
-    wcButtons = "{\\1c&HFFFFFF\\fs24}",
+    wcButtons = "{\\1c&HFFFFFF\\fs24\\fnmpv-osd-symbols}",
+    wcTitle = "{\\1c&HFFFFFF\\fs24}",
     wcBar = "{\\1c&H000000}",
 }
 
@@ -134,6 +135,7 @@ local state = {
     dmx_cache = 0,
     using_video_margins = false,
     border = true,
+    maximized = false,
 }
 
 local window_control_box_width = 80
@@ -1040,33 +1042,41 @@ function window_controls(topbar)
     local third_geo =
         {x = controlbox_left + 55, y = button_y, an = 4, w = 25, h = 25}
 
-    -- Close
+    -- Window control buttons use symbols in the custom mpv osd font
+    -- because the official unicode codepoints are sufficiently
+    -- exotic that a system might lack an installed font with them,
+    -- and libass will complain that they are not present in the
+    -- default font, even if another font with them is available.
+
+    -- Close: 🗙
     ne = new_element("close", "button")
-    ne.content = "\226\152\146"
+    ne.content = "\238\132\149"
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("quit") end
     lo = add_layout("close")
     lo.geometry = alignment == "left" and first_geo or third_geo
     lo.style = osc_styles.wcButtons
 
-    -- Minimize
+    -- Minimize: 🗕
     ne = new_element("minimize", "button")
-    ne.content = "\226\154\128"
+    ne.content = "\238\132\146"
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "window-minimized") end
     lo = add_layout("minimize")
     lo.geometry = alignment == "left" and second_geo or first_geo
     lo.style = osc_styles.wcButtons
 
-    -- Maximize
+    -- Maximize: 🗖 /🗗
     ne = new_element("maximize", "button")
-    ne.content = "\226\150\163"
+    if state.maximized then
+        ne.content = "\238\132\148"
+    else
+        ne.content = "\238\132\147"
+    end
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "window-maximized") end
     lo = add_layout("maximize")
     lo.geometry = alignment == "left" and third_geo or second_geo
-    -- At least with default Ubuntu fonts, this symbol is differently aligned
-    lo.geometry.y = lo.geometry.y - 2
     lo.style = osc_styles.wcButtons
 
     -- deadzone below window controls
@@ -1097,7 +1107,7 @@ function window_controls(topbar)
     lo.geometry =
         { x = titlebox_left, y = wc_geo.y - 3, an = 1, w = titlebox_w, h = wc_geo.h }
     lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
-        osc_styles.wcButtons,
+        osc_styles.wcTitle,
         titlebox_left, wc_geo.y - wc_geo.h, titlebox_w, wc_geo.y + wc_geo.h)
 end
 
@@ -2497,6 +2507,12 @@ mp.observe_property("fullscreen", "bool",
 mp.observe_property("border", "bool",
     function(name, val)
         state.border = val
+        request_init()
+    end
+)
+mp.observe_property("window-maximized", "bool",
+    function(name, val)
+        state.maximized = val
         request_init()
     end
 )
