@@ -1,0 +1,20 @@
+StartChar: uniE113
+Encoding: 57619 57619 31
+Width: 622
+VWidth: 1178
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+768 42 m 5
+ 0 42 l 5
+ 0 746 l 5
+ 768 746 l 5
+ 768 42 l 5
+704 106 m 5
+ 704 618 l 5
+ 64 618 l 5
+ 64 106 l 5
+ 704 106 l 5
+EndSplineSet
+EndChar
