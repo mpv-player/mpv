@@ -41,7 +41,9 @@ def __add_generic_flags__(ctx):
                                  "-Werror=format-security",
                                  "-Wno-redundant-decls",
                                  "-Wvla",
-                                 "-Wno-format-truncation"])
+                                 "-Wno-format-truncation",
+                                 "-Wimplicit-fallthrough",
+                                 ])
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
