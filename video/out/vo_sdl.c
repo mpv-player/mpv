@@ -34,6 +34,7 @@
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "common/msg.h"
+#include "options/m_config.h"
 #include "options/options.h"
 
 #include "osdep/timer.h"
@@ -189,6 +190,7 @@ struct priv {
     double osd_pts;
     Uint32 wakeup_event;
     bool screensaver_enabled;
+    struct m_config_cache *opts_cache;
 
     // options
     int allow_sw;
@@ -399,7 +401,8 @@ static inline void set_screensaver(bool enabled)
 static void set_fullscreen(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    int fs = vo->opts->fullscreen;
+    struct mp_vo_opts *opts = vc->opts_cache->opts;
+    int fs = opts->fullscreen;
     SDL_bool prev_screensaver_state = SDL_IsScreenSaverEnabled();
 
     Uint32 fs_flag;
@@ -812,6 +815,8 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
+    vc->opts_cache = m_config_cache_alloc(vc, vo->global, &vo_sub_opts);
+
     // predefine SDL defaults (SDL env vars shall override)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
                             SDL_HINT_DEFAULT);
@@ -927,9 +932,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *vc = vo->priv;
 
     switch (request) {
-    case VOCTRL_FULLSCREEN:
-        set_fullscreen(vo);
+    case VOCTRL_VO_OPTS_CHANGED: {
+        void *opt;
+        while (m_config_cache_get_next_changed(vc->opts_cache, &opt)) {
+            struct mp_vo_opts *opts = vc->opts_cache->opts;
+            if (&opts->fullscreen == opt)
+                set_fullscreen(vo);
+        }
         return 1;
+    }
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);
         return 1;
