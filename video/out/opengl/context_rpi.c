@@ -303,9 +303,6 @@ static int rpi_control(struct ra_ctx *ctx, int *events, int request, void *arg)
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)arg = take_screenshot(ctx);
         return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        recreate_dispmanx(ctx);
-        return VO_TRUE;
     case VOCTRL_CHECK_EVENTS:
         if (atomic_fetch_and(&p->reload_display, 0)) {
             MP_WARN(ctx, "Recovering from display mode switch...\n");

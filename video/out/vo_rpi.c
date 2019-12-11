@@ -725,11 +725,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_FULLSCREEN:
-        if (p->renderer_enabled)
-            set_geometry(vo);
-        vo->want_redraw = true;
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         if (p->renderer_enabled)
             resize(vo);
