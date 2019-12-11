@@ -33,13 +33,6 @@ local -a tag_order
 zstyle -a ":completion:*:*:$service:*" tag-order tag_order ||
   zstyle  ":completion:*:*:$service:*" tag-order '!urls'
 
-# Use PCRE for regular expression matching if possible. This approximately
-# halves the execution time of generate_arguments compared to the default POSIX
-# regex, which translates to a more responsive first tab press. However, we
-# can't rely on PCRE being available, so we keep all our patterns
-# POSIX-compatible.
-setopt re_match_pcre &>/dev/null
-
 typeset -ga _mpv_completion_arguments _mpv_completion_protocols
 
 function generate_arguments {
@@ -169,6 +162,12 @@ function generate_if_changed {
   zmodload -F zsh/stat b:zstat
   current_binary+=T$(zstat +mtime $current_binary)
   if [[ $_mpv_completion_binary[$1] != $current_binary ]]; then
+    # Use PCRE for regular expression matching if possible. This approximately
+    # halves the execution time of generate_arguments compared to the default
+    # POSIX regex, which translates to a more responsive first tab press.
+    # However, we can't rely on PCRE being available, so we keep all our
+    # patterns POSIX-compatible.
+    zmodload -s -F zsh/pcre C:pcre-match && setopt re_match_pcre
     generate_$1
     _mpv_completion_binary[$1]=$current_binary
   fi
