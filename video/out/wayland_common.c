@@ -947,7 +947,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
-    int prev_fs_state = wl->vo_opts->fullscreen;
     bool is_maximized = false;
     bool is_fullscreen = false;
     enum xdg_toplevel_state *state;
@@ -984,8 +983,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     vo_opts->window_maximized = is_maximized;
     m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
 
-    if (prev_fs_state != is_fullscreen)
-        wl->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
     if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
         vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
 
