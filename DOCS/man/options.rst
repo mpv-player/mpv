@@ -4839,8 +4839,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
     GPUs. It's worth noting that if async compute is enabled, and the device
     supports more compute queues than graphics queues (bound by the restrictions
     set by ``--vulkan-queue-count``), mpv will internally try and prefer the
-    use of compute shaders over fragment shaders wherever possible. Not enabled
-    by default, since it seems to cause issues with some drivers.
+    use of compute shaders over fragment shaders wherever possible. Enabled by
+    default, although Nvidia users may want to disable it.
 
 ``--d3d11-warp=<yes|no|auto>``
     Use WARP (Windows Advanced Rasterization Platform) with the D3D11 GPU
