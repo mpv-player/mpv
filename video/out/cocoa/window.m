@@ -239,16 +239,6 @@
     [self.adapter windowDidBecomeKey:notification];
 }
 
-- (void)windowDidMiniaturize:(NSNotification *)notification
-{
-    [self.adapter windowDidMiniaturize:notification];
-}
-
-- (void)windowDidDeminiaturize:(NSNotification *)notification
-{
-    [self.adapter windowDidDeminiaturize:notification];
-}
-
 - (void)windowWillMove:(NSNotification *)notification
 {
     [self.adapter windowWillMove:notification];
