@@ -726,22 +726,22 @@ video_output_features = [
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
         'deps': 'libdl && (x11 || wayland || egl-drm)',
-        'func': check_pkg_config('libva', '>= 0.36.0'),
+        'func': check_pkg_config('libva', '>= 1.1.0'),
     }, {
         'name': '--vaapi-x11',
         'desc': 'VAAPI (X11 support)',
         'deps': 'vaapi && x11',
-        'func': check_pkg_config('libva-x11', '>= 0.36.0'),
+        'func': check_pkg_config('libva-x11', '>= 1.1.0'),
     }, {
         'name': '--vaapi-wayland',
         'desc': 'VAAPI (Wayland support)',
         'deps': 'vaapi && gl-wayland',
-        'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
+        'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
     }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
         'deps': 'vaapi && egl-drm',
-        'func': check_pkg_config('libva-drm', '>= 0.36.0'),
+        'func': check_pkg_config('libva-drm', '>= 1.1.0'),
     }, {
         'name': '--vaapi-x-egl',
         'desc': 'VAAPI EGL on X11',
