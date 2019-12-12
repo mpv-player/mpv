@@ -109,10 +109,8 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     hwctx->free = free_device_ref;
     hwctx->user_opaque = res;
 
-#if VA_CHECK_VERSION(1, 0, 0)
     vaSetErrorCallback(display, va_error_callback, res);
     vaSetInfoCallback(display,  va_info_callback,  res);
-#endif
 
     int major, minor;
     int status = vaInitialize(display, &major, &minor);

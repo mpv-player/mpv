@@ -166,29 +166,14 @@ static int init(struct ra_hwdec *hw)
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    VADisplay *display = p_owner->display;
     struct priv *p = mapper->priv;
-    VAStatus status;
 
     p_owner->interop_unmap(mapper);
 
-#if VA_CHECK_VERSION(1, 1, 0)
     if (p->surface_acquired) {
         for (int n = 0; n < p->desc.num_objects; n++)
             close(p->desc.objects[n].fd);
         p->surface_acquired = false;
-    }
-#endif
-
-    if (p->buffer_acquired) {
-        status = vaReleaseBufferHandle(display, p->current_image.buf);
-        CHECK_VA_STATUS(mapper, "vaReleaseBufferHandle()");
-        p->buffer_acquired = false;
-    }
-    if (p->current_image.image_id != VA_INVALID_ID) {
-        status = vaDestroyImage(display, p->current_image.image_id);
-        CHECK_VA_STATUS(mapper, "vaDestroyImage()");
-        p->current_image.image_id = VA_INVALID_ID;
     }
 }
 
@@ -214,8 +199,6 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
     struct priv *p = mapper->priv;
-
-    p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
 
     mapper->dst_params = mapper->src_params;
     mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
@@ -250,10 +233,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     VAStatus status;
     VADisplay *display = p_owner->display;
 
-#if VA_CHECK_VERSION(1, 1, 0)
-    if (p->esh_not_implemented)
-        goto esh_failed;
-
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                    VA_EXPORT_SURFACE_READ_ONLY |
@@ -261,9 +240,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                                    &p->desc);
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_V : MSGL_ERR)) {
-        if (status == VA_STATUS_ERROR_UNIMPLEMENTED)
-            p->esh_not_implemented = true;
-        goto esh_failed;
+        goto err;
     }
     vaSyncSurface(display, va_surface_id(mapper->src));
     // No need to error out if sync fails, but good to know if it did.
@@ -271,59 +248,16 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     p->surface_acquired = true;
 
     if (!p_owner->interop_map(mapper))
-        goto esh_failed;
+        goto err;
 
     if (p->desc.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
 
     return 0;
 
-esh_failed:
-    if (p->surface_acquired) {
-        for (int n = 0; n < p->desc.num_objects; n++)
-            close(p->desc.objects[n].fd);
-        p->surface_acquired = false;
-    }
-#endif // VA_CHECK_VERSION
-
-    if (p_owner->interop_map_legacy) {
-        VAImage *va_image = &p->current_image;
-        status = vaDeriveImage(display, va_surface_id(mapper->src), va_image);
-        if (!CHECK_VA_STATUS(mapper, "vaDeriveImage()"))
-            goto err;
-
-        VABufferInfo buffer_info = {.mem_type = VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME};
-        status = vaAcquireBufferHandle(display, va_image->buf, &buffer_info);
-        if (!CHECK_VA_STATUS(mapper, "vaAcquireBufferHandle()"))
-            goto err;
-        p->buffer_acquired = true;
-
-        int drm_fmts[8] = {
-            // 1 bytes per component, 1-4 components
-            MKTAG('R', '8', ' ', ' '),       // DRM_FORMAT_R8
-            MKTAG('G', 'R', '8', '8'),       // DRM_FORMAT_GR88
-            0,                               // untested (DRM_FORMAT_RGB888?)
-            0,                               // untested (DRM_FORMAT_RGBA8888?)
-            // 2 bytes per component, 1-4 components
-            MKTAG('R', '1', '6', ' '),       // proposed DRM_FORMAT_R16
-            MKTAG('G', 'R', '3', '2'),       // proposed DRM_FORMAT_GR32
-            0,                               // N/A
-            0,                               // N/A
-        };
-
-        if (!p_owner->interop_map_legacy(mapper, &buffer_info, drm_fmts))
-            goto err;
-
-        if (va_image->format.fourcc == VA_FOURCC_YV12)
-            MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
-
-        return 0;
-    } else {
-        mapper_unmap(mapper);
-        goto err;
-    }
-
 err:
+    mapper_unmap(mapper);
+
     if (!p_owner->probing_formats)
         MP_FATAL(mapper, "mapping VAAPI EGL image failed\n");
     return -1;

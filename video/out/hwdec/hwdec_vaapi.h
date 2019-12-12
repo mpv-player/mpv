@@ -34,9 +34,6 @@ struct priv_owner {
     void (*interop_uninit)(const struct ra_hwdec_mapper *mapper);
 
     bool (*interop_map)(struct ra_hwdec_mapper *mapper);
-    bool (*interop_map_legacy)(struct ra_hwdec_mapper *mapper,
-                               const VABufferInfo *buffer_info,
-                               const int *drm_fmts);
     void (*interop_unmap)(struct ra_hwdec_mapper *mapper);
 };
 
@@ -45,14 +42,8 @@ struct priv {
     struct mp_image layout;
     struct ra_tex *tex[4];
 
-    VAImage current_image;
-    bool buffer_acquired;
-
-#if VA_CHECK_VERSION(1, 1, 0)
-    bool esh_not_implemented;
     VADRMPRIMESurfaceDescriptor desc;
     bool surface_acquired;
-#endif
 
     void *interop_mapper_priv;
 };
