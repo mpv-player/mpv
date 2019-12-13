@@ -388,6 +388,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return 1; // help
 
     if (!print_libav_versions(mp_null_log, 0)) {
+        // This happens only if the runtime FFmpeg version is lower than the
+        // build version, which will not work according to FFmpeg's ABI rules.
+        // This does not happen if runtime FFmpeg is newer, which is compatible.
         print_libav_versions(mpctx->log, MSGL_FATAL);
         MP_FATAL(mpctx, "\nmpv was compiled against an incompatible version of "
                  "FFmpeg/Libav than the shared\nlibrary it is linked against. "
