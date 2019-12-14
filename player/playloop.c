@@ -103,8 +103,7 @@ void mp_core_unlock(struct MPContext *mpctx)
     mp_dispatch_unlock(mpctx->dispatch);
 }
 
-// Process any queued input, whether it's user input, or requests from client
-// API threads. This also resets the "wakeup" flag used with mp_wait_events().
+// Process any queued user input.
 void mp_process_input(struct MPContext *mpctx)
 {
     for (;;) {
