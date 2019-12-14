@@ -477,6 +477,12 @@ void execute_queued_seek(struct MPContext *mpctx)
             // Wait until a video frame is available and has been shown.
             if (mpctx->video_status < STATUS_PLAYING)
                 return;
+            // On A/V hr-seeks, always wait for the full result, to avoid corner
+            // cases when seeking past EOF (we want it to determine that EOF
+            // actually happened, instead of overwriting it with the new seek).
+            if (mpctx->hrseek_active && queued_hr_seek && mpctx->vo_chain &&
+                mpctx->ao_chain && !mpctx->restart_complete)
+                return;
         }
         mp_seek(mpctx, mpctx->seek);
         mpctx->seek = (struct seek_params){0};
@@ -1124,6 +1130,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         // actually play the audio, but resume seeking immediately.
         if (mpctx->seek.type && mpctx->video_status == STATUS_PLAYING) {
             handle_playback_time(mpctx);
+            mpctx->seek.flags &= ~MPSEEK_FLAG_DELAY; // immediately
             execute_queued_seek(mpctx);
             return;
         }

@@ -452,7 +452,7 @@ static bool have_new_frame(struct MPContext *mpctx, bool eof)
 
 // Fill mpctx->next_frames[] with a newly filtered or decoded image.
 // returns VD_* code
-static int video_output_image(struct MPContext *mpctx)
+static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
     bool hrseek = false;
@@ -532,7 +532,8 @@ static int video_output_image(struct MPContext *mpctx)
     if (r <= 0 && hrseek && mpctx->saved_frame && r == VD_EOF) {
         add_new_frame(mpctx, mpctx->saved_frame);
         mpctx->saved_frame = NULL;
-        r = VD_PROGRESS;
+        r = VD_EOF;
+        *logical_eof = true;
     }
 
     return have_new_frame(mpctx, r <= 0) ? VD_NEW_FRAME : r;
@@ -1003,7 +1004,8 @@ void write_video(struct MPContext *mpctx)
     if (mpctx->paused && mpctx->video_status >= STATUS_READY)
         return;
 
-    int r = video_output_image(mpctx);
+    bool logical_eof = false;
+    int r = video_output_image(mpctx, &logical_eof);
     MP_TRACE(mpctx, "video_output_image: %d\n", r);
 
     if (r < 0)
@@ -1198,6 +1200,10 @@ void write_video(struct MPContext *mpctx)
         // playback_pts if audio is still running (=> seek behavior).
         mpctx->video_status = STATUS_EOF;
     }
+
+    // hr-seek past EOF -> returns last frame, but terminates playback.
+    if (logical_eof)
+        mpctx->video_status = STATUS_EOF;
 
     if (mpctx->video_status != STATUS_EOF) {
         if (mpctx->step_frames > 0) {
