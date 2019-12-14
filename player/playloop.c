@@ -1239,6 +1239,8 @@ void run_playloop(struct MPContext *mpctx)
 
     update_core_idle_state(mpctx);
 
+    execute_queued_seek(mpctx);
+
     if (mpctx->stop_play)
         return;
 
@@ -1246,6 +1248,7 @@ void run_playloop(struct MPContext *mpctx)
 
     if (mp_filter_run(mpctx->filter_root))
         mp_wakeup_core(mpctx);
+
     mp_wait_events(mpctx);
 
     handle_update_cache(mpctx);
@@ -1255,8 +1258,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_chapter_change(mpctx);
 
     handle_force_window(mpctx, false);
-
-    execute_queued_seek(mpctx);
 }
 
 void mp_idle(struct MPContext *mpctx)
