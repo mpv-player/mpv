@@ -168,8 +168,12 @@ Or, compile and install both libmpv and mpv:
 Linking libmpv with MSVC programs
 ---------------------------------
 
-You can build C++ programs in Visual Studio and link them with libmpv. To do
-this, you need a Visual Studio which supports ``stdint.h`` (recent ones do),
+mpv/libmpv cannot be built with Visual Studio (Microsoft is too incompetent to
+support C99/C11 properly and/or hates open source and Linux too much to
+seriously do it). But you can build C++ programs in Visual Studio and link them
+with a libmpv built with MinGW.
+
+To do this, you need a Visual Studio which supports ``stdint.h`` (recent ones do),
 and you need to create a import library for the mpv DLL:
 
 ```bash
