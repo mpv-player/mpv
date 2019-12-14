@@ -240,6 +240,9 @@ Note: ``read_file`` and ``write_file`` throw on errors, allow text content only.
     anything from the filesystem), and returns it as a function. Very similar
     to a ``Function`` constructor, but shows at stack traces as ``fname``.
 
+``mp.module_paths``
+    Global modules search paths array for the ``require`` function (see below).
+
 Timers (global)
 ---------------
 
@@ -300,6 +303,11 @@ or ``~/x``. Otherwise, it's considered a global module id and searched at
 ``scripts/modules.js/`` in mpv config dirs - in normal config search order. E.g.
 ``require("x")`` is searched as file ``x.js`` at those dirs, and id ``foo/x`` is
 searched as file ``x.js`` inside dir ``foo`` at those dirs.
+
+Search paths for global module id's are at the array ``mp.module_paths``, which
+is searched in order. Initially it contains one item: ``~~/scripts/modules.js``
+such that it behaves as described above. Modifying it will affect future
+``require`` calls with global module id's which are not already loaded/cached.
 
 No ``global`` variable, but a module's ``this`` at its top lexical scope is the
 global object - also in strict mode. If you have a module which needs ``global``

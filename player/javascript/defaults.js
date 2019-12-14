@@ -375,6 +375,8 @@ function process_timers() {
  - Module id supports mpv path enhancements, e.g. ~/foo, ~~/bar, ~~desktop/baz
  *********************************************************************/
 
+mp.module_paths = ["~~/scripts/modules.js"];  // global modules search paths
+
 // Internal meta top-dirs. Users should not rely on these names.
 var MODULES_META = "~~modules",
     SCRIPTDIR_META = "~~scriptdir",  // relative script path -> meta absolute id
@@ -389,10 +391,14 @@ function resolve_module_file(id) {
         return mp.utils.join_path(main_script[0], rest);
 
     if (base == MODULES_META) {
-        var path = mp.find_config_file("scripts/modules.js/" + rest);
-        if (!path)
-            throw(Error("Cannot find module file '" + rest + "'"));
-        return path;
+        for (var i = 0; i < mp.module_paths.length; i++) {
+            try {
+                var f = mp.utils.join_path(mp.module_paths[i], rest);
+                mp.utils.read_file(f, 1);  // throws on any error
+                return f;
+            } catch (e) {}
+        }
+        throw(Error("Cannot find module file '" + rest + "'"));
     }
 
     return id + ".js";
