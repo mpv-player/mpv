@@ -464,16 +464,20 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 void execute_queued_seek(struct MPContext *mpctx)
 {
     if (mpctx->seek.type) {
+        bool queued_hr_seek = mpctx->seek.exact != MPSEEK_KEYFRAME;
         // Let explicitly imprecise seeks cancel precise seeks:
-        if (mpctx->hrseek_active && mpctx->seek.exact == MPSEEK_KEYFRAME)
+        if (mpctx->hrseek_active && !queued_hr_seek)
             mpctx->start_timestamp = -1e9;
-        /* If the user seeks continuously (keeps arrow key down)
-         * try to finish showing a frame from one location before doing
-         * another seek (which could lead to unchanging display). */
-        bool delay = mpctx->seek.flags & MPSEEK_FLAG_DELAY;
-        if (delay && mpctx->video_status < STATUS_PLAYING &&
+        // If the user seeks continuously (keeps arrow key down) try to finish
+        // showing a frame from one location before doing another seek (instead
+        // of never updating the screen).
+        if ((mpctx->seek.flags & MPSEEK_FLAG_DELAY) &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
-            return;
+        {
+            // Wait until a video frame is available and has been shown.
+            if (mpctx->video_status < STATUS_PLAYING)
+                return;
+        }
         mp_seek(mpctx, mpctx->seek);
         mpctx->seek = (struct seek_params){0};
     }
