@@ -44,7 +44,7 @@ function generate_arguments {
   local list_options_line
   for list_options_line in "${(@f)$($words[1] --list-options)}"; do
 
-    [[ $list_options_line =~ '^\s+--(\S+)\s*(.*)' ]] || continue
+    [[ $list_options_line =~ $'^[ \t]+--([^ \t]+)[ \t]*(.*)' ]] || continue
 
     local name=$match[1] desc=$match[2]
 
@@ -72,7 +72,7 @@ function generate_arguments {
 
       _mpv_completion_arguments+="$name"
 
-    elif [[ $desc =~ '^alias for --(\S+)' ]]; then
+    elif [[ $desc =~ $'^alias for --([^ \t]+)' ]]; then
 
       # Save this for later; we might not have parsed the target option yet
       option_aliases+="$name $match[1]"
@@ -147,7 +147,7 @@ function generate_protocols {
   _mpv_completion_protocols=()
   local list_protos_line
   for list_protos_line in "${(@f)$($words[1] --list-protocols)}"; do
-    if [[ $list_protos_line =~ '^\s+(.*)' ]]; then
+    if [[ $list_protos_line =~ $'^[ \t]+(.*)' ]]; then
       _mpv_completion_protocols+="$match[1]"
     fi
   done
@@ -192,7 +192,7 @@ case $state in
     local pattern name_group=1 desc_group=2
     case $option_name in
       audio-device|vulkan-device)
-        pattern='^\s+'\''([^'\'']*)'\''\s+\((.*)\)'
+        pattern=$'^[ \t]+'\''([^'\'']*)'\'$'[ \t]+''\((.*)\)'
       ;;
       profile)
         # The generic pattern would actually work in most cases for --profile,
@@ -201,7 +201,7 @@ case $state in
         pattern=$'^\t([^\t]*)\t(.*)'
       ;;
       *)
-        pattern='^\s+(--'${option_name}'=)?(\S+)\s*[-:]?\s*(.*)'
+        pattern=$'^[ \t]+(--'${option_name}$'=)?([^ \t]+)[ \t]*[-:]?[ \t]*(.*)'
         name_group=2 desc_group=3
       ;;
     esac
