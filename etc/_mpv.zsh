@@ -72,10 +72,10 @@ function generate_arguments {
 
       _mpv_completion_arguments+="$name"
 
-    elif [[ $desc =~ $'^alias for --([^ \t]+)' ]]; then
+    elif [[ $desc =~ $'^alias for (--)?([^ \t]+)' ]]; then
 
       # Save this for later; we might not have parsed the target option yet
-      option_aliases+="$name $match[1]"
+      option_aliases+="$name $match[2]"
 
     else
 
