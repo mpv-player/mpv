@@ -1035,20 +1035,25 @@ static int decode_frame(struct mp_filter *vd)
         send_queued_packet(vd);
 
     int ret = avcodec_receive_frame(avctx, ctx->pic);
-    if (ret == AVERROR_EOF) {
-        // If flushing was initialized earlier and has ended now, make it start
-        // over in case we get new packets at some point in the future. This
-        // must take the delay queue into account, so avctx returns EOF until
-        // the delay queue has been drained.
-        if (!ctx->num_delay_queue)
-            reset_avctx(vd);
+    if (ret < 0) {
+        if (ret == AVERROR_EOF) {
+            // If flushing was initialized earlier and has ended now, make it
+            // start over in case we get new packets at some point in the future.
+            // This must take the delay queue into account, so avctx returns EOF
+            // until the delay queue has been drained.
+            if (!ctx->num_delay_queue)
+                reset_avctx(vd);
+        } else if (ret == AVERROR(EAGAIN)) {
+            // just retry after caller writes a packet
+        } else {
+            handle_err(vd);
+        }
         return ret;
-    } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
-        handle_err(vd);
     }
 
-    if (!ctx->pic->buf[0])
-        return ret;
+    // If something was decoded successfully, it must return a frame with valid
+    // data.
+    assert(ctx->pic->buf[0]);
 
     ctx->hwdec_fail_count = 0;
 
