@@ -25,6 +25,7 @@ class LibmpvHelper: LogHelper {
 
     var mpvHandle: OpaquePointer?
     var mpvRenderContext: OpaquePointer?
+    var macOptsPtr: UnsafeMutableRawPointer?
     var macOpts: macos_opts = macos_opts()
     var fbo: GLint = 1
     let deinitLock = NSLock()
@@ -34,18 +35,15 @@ class LibmpvHelper: LogHelper {
         super.init(newlog)
         mpvHandle = mpv
 
-        guard let mpctx = UnsafeMutablePointer<MPContext>(mp_client_get_core(mpvHandle)) else {
-            sendError("No MPContext available")
-            exit(1)
-        }
         guard let app = NSApp as? Application,
-              let ptr = mp_get_config_group(mpctx,
+              let ptr = mp_get_config_group(nil,
                                             mp_client_get_global(mpvHandle),
                                             app.getMacOSConf()) else
         {
             sendError("macOS config group couldn't be retrieved'")
             exit(1)
         }
+        macOptsPtr = ptr
         macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr)).pointee
     }
 
@@ -234,6 +232,8 @@ class LibmpvHelper: LogHelper {
         if destroy {
             mpv_destroy(mpvHandle)
         }
+        ta_free(macOptsPtr)
+        macOptsPtr = nil
         mpvHandle = nil
         log = nil
     }
