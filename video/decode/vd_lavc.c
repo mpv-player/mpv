@@ -1062,7 +1062,8 @@ static int decode_frame(struct mp_filter *vd)
         av_frame_unref(ctx->pic);
         return ret;
     }
-    assert(mpi->planes[0] || mpi->planes[3]);
+    if (mpi->imgfmt == IMGFMT_CUDA)
+        assert(mpi->planes[0]);
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
