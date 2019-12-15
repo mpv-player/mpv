@@ -196,7 +196,7 @@ The order of ``#include`` statements in the source code is not very consistent.
 New code must follow the following conventions:
 
 - Put standard includes (``#include <stdlib.h>`` etc.) on the top,
-- then after a blank line, add library includes (``#include <zlib.h`` etc.)
+- then after a blank line, add library includes (``#include <zlib.h>`` etc.)
 - then after a blank line, add internal includes (``#include "player/core.h"``)
 - sort them alphabetically within these sections
 
