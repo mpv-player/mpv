@@ -282,6 +282,8 @@ static void add_int64(const m_option_t *opt, void *val, double add, bool wrap)
 {
     int64_t v = *(int64_t *)val;
 
+    clamp_int64(opt, &v);
+
     v = v + add;
 
     bool is64 = opt->type->size == sizeof(int64_t);
