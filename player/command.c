@@ -1040,24 +1040,32 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     return m_property_read_list(action, arg, count, get_chapter_entry, mpctx);
 }
 
+static int mp_property_current_edition(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer || demuxer->num_editions <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(action, arg, demuxer->edition);
+}
+
 static int mp_property_edition(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!mpctx->playback_initialized || !demuxer || demuxer->num_editions <= 0)
-        return mp_property_generic_option(mpctx, prop, action, arg);
 
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int *)arg = demuxer->edition;
+    if (action == M_PROPERTY_GET_CONSTRICTED_TYPE && demuxer) {
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_INT,
+            .flags = M_OPT_RANGE,
+            .min = 0,
+            .max = demuxer->num_editions - 1,
+        };
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET_CONSTRICTED_TYPE: {
-        int r = mp_property_generic_option(mpctx, prop, M_PROPERTY_GET_TYPE, arg);
-        ((struct m_option *)arg)->max = demuxer->num_editions - 1;
-        return r;
     }
-    }
+
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
@@ -3273,6 +3281,7 @@ static const struct m_property mp_properties_base[] = {
     {"playback-time", mp_property_playback_time},
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
+    {"current-edition", mp_property_current_edition},
     {"chapters", mp_property_chapters},
     {"editions", mp_property_editions},
     {"metadata", mp_property_metadata},

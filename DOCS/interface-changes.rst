@@ -62,6 +62,11 @@ Interface changes
     - remove old Apple Remote support, including --input-appleremote
     - add MediaPlayer support and remove the old Media Key event tap on macOS.
       this possibly also re-adds the Apple Remote support
+    - the "edition" property now strictly returns the value of the option,
+      instead of the runtime value. The new "current-edition" property needs to
+      be queried to read the runtime-chosen edition. This is a breaking change
+      for any users which expected "edition" to return the runtime-chosen
+      edition at default settings (--edition=auto).
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

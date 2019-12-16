@@ -1525,6 +1525,18 @@ Property list
     Current MKV edition number. Setting this property to a different value will
     restart playback. The number of the first edition is 0.
 
+    Before mpv 0.31.0, this showed the actual edition selected at runtime, if
+    you didn't set the option or property manually. With mpv 0.31.0 and later,
+    this strictly returns the user-set option or property value, and the
+    ``current-edition`` property was added to return the runtime selected
+    edition (this matters with ``--edition=auto``, the default).
+
+``current-edition``
+    Currently selected edition. This property is unavailable if no file is
+    loaded, or the file has no editions. (Matroska files make a difference
+    between having no editions and a single edition, which will be reflected by
+    the property, although in practice it does not matter.)
+
 ``chapters``
     Number of chapters.
 
@@ -2713,11 +2725,6 @@ caveats with some properties (due to historical reasons):
     This behavior changed in mpv 0.31.0. Before this, the new value was rejected
     *iff* video (for ``vf``) or audio (for ``af``) was active. If playback was
     not active, the behavior was the same as the current behavior.
-
-``edition``
-    While a file is loaded, the property will always return the effective
-    edition, and setting the ``auto`` value will show somewhat strange behavior
-    (the property eventually switching to whatever is the default edition).
 
 ``playlist``
     The property is read-only and returns the current internal playlist. The
