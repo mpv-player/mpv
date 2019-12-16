@@ -623,7 +623,7 @@ int vo_x11_init(struct vo *vo)
     double dpi_x = x11->ws_width * 25.4 / w_mm;
     double dpi_y = x11->ws_height * 25.4 / h_mm;
     double base_dpi = 96;
-    if (isfinite(dpi_x) && isfinite(dpi_y)) {
+    if (isfinite(dpi_x) && isfinite(dpi_y) && x11->opts->hidpi_window_scale) {
         int s_x = lrint(MPCLAMP(dpi_x / base_dpi, 0, 10));
         int s_y = lrint(MPCLAMP(dpi_y / base_dpi, 0, 10));
         if (s_x == s_y && s_x > 1 && s_x < 10) {
