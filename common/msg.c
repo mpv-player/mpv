@@ -123,8 +123,11 @@ static void update_loglevel(struct mp_log *log)
             log->level = mp_msg_find_level(root->msg_levels[n * 2 + 1]);
     }
     log->terminal_level = log->level;
-    for (int n = 0; n < log->root->num_buffers; n++)
-        log->level = MPMAX(log->level, log->root->buffers[n]->level);
+    for (int n = 0; n < log->root->num_buffers; n++) {
+        int buffer_level = log->root->buffers[n]->level;
+        if (buffer_level != MP_LOG_BUFFER_MSGL_TERM)
+            log->level = MPMAX(log->level, buffer_level);
+    }
     if (log->root->log_file)
         log->level = MPMAX(log->level, MSGL_DEBUG);
     if (log->root->stats_file)
