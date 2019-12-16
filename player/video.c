@@ -92,6 +92,7 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 {
     vo_seek_reset(vo_c->vo);
     vo_c->underrun = false;
+    vo_c->underrun_signaled = false;
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -1013,8 +1014,12 @@ void write_video(struct MPContext *mpctx)
 
     if (r == VD_WAIT) {
         // Heuristic to detect underruns.
-        if (mpctx->video_status == STATUS_PLAYING && !vo_still_displaying(vo))
+        if (mpctx->video_status == STATUS_PLAYING && !vo_still_displaying(vo) &&
+            !vo_c->underrun_signaled)
+        {
             vo_c->underrun = true;
+            vo_c->underrun_signaled = true;
+        }
         // Demuxer will wake us up for more packets to decode.
         return;
     }
@@ -1216,6 +1221,8 @@ void write_video(struct MPContext *mpctx)
         if (mpctx->max_frames > 0)
             mpctx->max_frames--;
     }
+
+    vo_c->underrun_signaled = false;
 
     screenshot_flip(mpctx);
 

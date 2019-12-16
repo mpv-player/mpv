@@ -184,6 +184,7 @@ struct vo_chain {
     bool is_sparse;
 
     bool underrun;
+    bool underrun_signaled;
 };
 
 // Like vo_chain, for audio.
