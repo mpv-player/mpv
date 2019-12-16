@@ -1575,20 +1575,6 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-/// Mute (RW)
-static int mp_property_mute(void *ctx, struct m_property *prop,
-                            int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-
-    if (action == M_PROPERTY_GET_CONSTRICTED_TYPE) {
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
-        return M_PROPERTY_OK;
-    }
-
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 static int mp_property_ao_volume(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
@@ -3319,7 +3305,6 @@ static const struct m_property mp_properties_base[] = {
     // Audio
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
-    {"mute", mp_property_mute},
     {"ao-volume", mp_property_ao_volume},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
