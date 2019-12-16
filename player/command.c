@@ -2226,34 +2226,28 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_window_scale(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
+static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
+                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct vo *vo = mpctx->video_out;
     if (!vo)
-        goto generic;
+        return M_PROPERTY_UNAVAILABLE;
 
     struct mp_image_params params = get_video_out_params(mpctx);
     int vid_w, vid_h;
     mp_image_params_get_dsize(&params, &vid_w, &vid_h);
     if (vid_w < 1 || vid_h < 1)
-        goto generic;
+        return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_GET: {
-        int s[2];
-        if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
-            s[0] < 1 || s[1] < 1)
-            goto generic;
-        double xs = (double)s[0] / vid_w;
-        double ys = (double)s[1] / vid_h;
-        *(double *)arg = (xs + ys) / 2;
-        return M_PROPERTY_OK;
-    }
-    }
-generic:
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    int s[2];
+    if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
+        s[0] < 1 || s[1] < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    double xs = (double)s[0] / vid_w;
+    double ys = (double)s[1] / vid_h;
+    return m_property_double_ro(action, arg, (xs + ys) / 2);
 }
 
 static void update_window_scale(struct MPContext *mpctx)
@@ -3328,7 +3322,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
     M_PROPERTY_ALIAS("width", "video-params/w"),
     M_PROPERTY_ALIAS("height", "video-params/h"),
-    {"window-scale", mp_property_window_scale},
+    {"current-window-scale", mp_property_current_window_scale},
     {"vo-configured", mp_property_vo_configured},
     {"vo-passes", mp_property_vo_passes},
     {"current-vo", mp_property_vo},
@@ -3449,7 +3443,8 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time", "cache-buffering-state", "cache-speed",
       "demuxer-cache-state"),
-    E(MP_EVENT_WIN_RESIZE, "window-scale", "osd-width", "osd-height", "osd-par"),
+    E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
+      "osd-par"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps",
       "fullscreen", "window-maximized"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",

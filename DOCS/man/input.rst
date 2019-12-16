@@ -2026,6 +2026,20 @@ Property list
     (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
+    See ``current-window-scale`` for the value derived from the actual window
+    size.
+
+    Since mpv 0.31.0, this always returns the previously set value (or the
+    default value), instead of the value implied by the actual window size.
+    Before mpv 0.31.0, this returned what ``current-window-scale`` returns now,
+    after the window was created.
+
+``current-window-scale``
+    The ``window-scale`` value calculated from the current window size. This
+    has the same value as ``window-scale`` if the window size was not changed
+    since setting the option, and the window size was not restricted in other
+    ways. The property is unavailable if no video is active.
+
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
@@ -2730,10 +2744,6 @@ caveats with some properties (due to historical reasons):
     The property is read-only and returns the current internal playlist. The
     option is for loading playlist during command line parsing. For client API
     uses, you should use the ``loadlist`` command instead.
-
-``window-scale``
-    Returns the current window values if a window exists, and the option value
-    otherwise.
 
 ``profile``, ``include``
     These are write-only, and will perform actions as they are written to,

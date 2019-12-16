@@ -67,6 +67,10 @@ Interface changes
       be queried to read the runtime-chosen edition. This is a breaking change
       for any users which expected "edition" to return the runtime-chosen
       edition at default settings (--edition=auto).
+    - the "window-scale" property now strictly returns the value of the option,
+      instead of the actual size of the window. The new "current-window-scale"
+      property needs to be queried to read the value as indicated by the current
+      window size. This is a breaking change.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
