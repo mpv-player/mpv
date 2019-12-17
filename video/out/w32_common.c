@@ -1578,14 +1578,13 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
             if (changed_option == &vo_opts->fullscreen) {
                 reinit_window_state(w32);
+            } else if (changed_option == &vo_opts->ontop) {
+                update_window_state(w32);
             }
         }
 
         return VO_TRUE;
     }
-    case VOCTRL_ONTOP:
-        update_window_state(w32);
-        return VO_TRUE;
     case VOCTRL_BORDER:
         update_window_style(w32);
         update_window_state(w32);
