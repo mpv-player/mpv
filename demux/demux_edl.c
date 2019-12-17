@@ -198,7 +198,7 @@ static struct demuxer *open_source(struct timeline *root,
 {
     for (int n = 0; n < tl->num_parts; n++) {
         struct demuxer *d = tl->parts[n].source;
-        if (d && strcmp(d->stream->url, filename) == 0)
+        if (d && d->filename && strcmp(d->filename, filename) == 0)
             return d;
     }
     struct demuxer_params params = {
@@ -366,6 +366,8 @@ static struct timeline_par *build_timeline(struct timeline *root,
 
         if (source && !tl->track_layout && part->is_layout)
             tl->track_layout = source;
+
+        tl->num_parts++;
     }
 
     if (!tl->track_layout) {
@@ -385,7 +387,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
     if (!root->meta)
         root->meta = tl->track_layout;
 
-    tl->num_parts = parts->num_parts;
+    assert(tl->num_parts == parts->num_parts);
     return tl;
 
 error:
