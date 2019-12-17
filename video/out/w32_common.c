@@ -991,6 +991,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
 
         // Window may have been minimized or restored
+        w32->opts->window_minimized = IsIconic(w32->window);
+        m_config_cache_write_opt(w32->opts_cache,
+                                 &w32->opts->window_minimized);
         signal_events(w32, VO_EVENT_WIN_STATE);
 
         update_display_info(w32);
@@ -1613,9 +1616,6 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         reinit_window_state(w32);
         return VO_TRUE;
     }
-    case VOCTRL_GET_WIN_STATE:
-        *(int *)arg = IsIconic(w32->window) ? VO_WIN_STATE_MINIMIZED : 0;
-        return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
         w32->cursor_visible = *(bool *)arg;
 
