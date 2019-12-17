@@ -6117,19 +6117,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         }
     }
 
-    if (mpctx->video_out) {
-        if (opt_ptr == &opts->vo->fullscreen) {
-            vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
-            if (!opts->vo->fullscreen)
-                mpctx->mouse_event_ts--; // Show mouse cursor
-        }
-        if (opt_ptr == &opts->vo->ontop)
-            vo_control(mpctx->video_out, VOCTRL_ONTOP, 0);
-        if (opt_ptr == &opts->vo->border)
-            vo_control(mpctx->video_out, VOCTRL_BORDER, 0);
-        if (opt_ptr == &opts->vo->all_workspaces)
-            vo_control(mpctx->video_out, VOCTRL_ALL_WORKSPACES, 0);
-    }
+    if (opt_ptr == &opts->vo->fullscreen && !opts->vo->fullscreen)
+        mpctx->mouse_event_ts--; // Show mouse cursor
 
     if (opt_ptr == &opts->vo->taskbar_progress)
         update_vo_playback_state(mpctx);

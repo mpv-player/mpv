@@ -230,7 +230,6 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         cocoaCB.layer?.update()
     }
 
@@ -242,7 +241,6 @@ class Window: NSWindow, NSWindowDelegate {
         styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         cocoaCB.layer?.update()
     }
 

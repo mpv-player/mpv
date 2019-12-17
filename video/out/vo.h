@@ -45,14 +45,13 @@ enum {
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
     // Legacy. Use m_config_cache_write_opt() instead to update the fullscreen
     // option.
-    VO_EVENT_FULLSCREEN_STATE           = 1 << 6,
     // Special thing for encode mode (vo_driver.initially_blocked).
     // Part of VO_EVENTS_USER to make vo_is_ready_for_frame() work properly.
     VO_EVENT_INITIAL_UNBLOCK            = 1 << 7,
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE |
-                     VO_EVENT_FULLSCREEN_STATE | VO_EVENT_INITIAL_UNBLOCK,
+                     VO_EVENT_INITIAL_UNBLOCK,
 };
 
 enum mp_voctrl {
@@ -84,14 +83,6 @@ enum mp_voctrl {
     VOCTRL_PREINIT,
     VOCTRL_UNINIT,
     VOCTRL_RECONFIG,
-
-    // Legacy stuff.
-    VOCTRL_FULLSCREEN,
-    VOCTRL_ONTOP,
-    VOCTRL_BORDER,
-    VOCTRL_ALL_WORKSPACES,
-    VOCTRL_GET_FULLSCREEN,
-    VOCTRL_GET_WIN_STATE,               // int* (VO_WIN_STATE_* flags)
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
@@ -131,9 +122,6 @@ enum mp_voctrl {
     /* private to vo_gpu */
     VOCTRL_EXTERNAL_RESIZE,
 };
-
-// VOCTRL_GET_WIN_STATE (legacy, ignored)
-#define VO_WIN_STATE_MINIMIZED (1 << 0)
 
 #define VO_TRUE         true
 #define VO_FALSE        false
