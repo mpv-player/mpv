@@ -101,9 +101,6 @@ struct command_ctx {
 
     struct ao_hotplug *hotplug;
 
-    char *cur_ipc;
-    char *cur_ipc_input;
-
     struct mp_cmd_ctx *cache_dump_cmd; // in progress cache dumping
 };
 
@@ -5964,8 +5961,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 {
     struct MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    struct command_ctx *cmd = mpctx->command_ctx;
-    void *opt_ptr = co ? co->data : NULL; // NULL on start
+    bool init = !co;
+    void *opt_ptr = init ? NULL : co->data; // NULL on start
 
     if (co)
         mp_notify_property(mpctx, co->name);
@@ -6001,20 +5998,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         }
     }
 
-    if (flags & UPDATE_INPUT) {
+    if (flags & UPDATE_INPUT)
         mp_input_update_opts(mpctx->input);
 
-        // Rather coarse change-detection, but sufficient effort.
-        if (!bstr_equals(bstr0(cmd->cur_ipc), bstr0(opts->ipc_path)) ||
-            !bstr_equals(bstr0(cmd->cur_ipc_input), bstr0(opts->input_file)))
-        {
-            talloc_free(cmd->cur_ipc);
-            talloc_free(cmd->cur_ipc_input);
-            cmd->cur_ipc = talloc_strdup(cmd, opts->ipc_path);
-            cmd->cur_ipc_input = talloc_strdup(cmd, opts->input_file);
-            mp_uninit_ipc(mpctx->ipc_ctx);
-            mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
-        }
+    if (init || opt_ptr == &opts->ipc_path || opt_ptr == &opts->input_file) {
+        mp_uninit_ipc(mpctx->ipc_ctx);
+        mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }
 
     if (flags & UPDATE_AUDIO)
