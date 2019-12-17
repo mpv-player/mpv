@@ -230,6 +230,7 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
+        cocoaCB.mpv?.setConfigProperty(fullscreen: isInFullscreen)
         cocoaCB.layer?.update()
     }
 
@@ -241,6 +242,7 @@ class Window: NSWindow, NSWindowDelegate {
         styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
+        cocoaCB.mpv?.setConfigProperty(fullscreen: isInFullscreen)
         cocoaCB.layer?.update()
     }
 
