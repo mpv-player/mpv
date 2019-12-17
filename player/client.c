@@ -126,7 +126,6 @@ struct mpv_handle {
 
     uint64_t event_mask;
     bool queued_wakeup;
-    int suspend_count;
 
     mpv_event *events;      // ringbuffer of max_events entries
     int max_events;         // allocated number of entries in events
@@ -829,11 +828,6 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
         if (ctx->choked && !ctx->num_events) {
             ctx->choked = false;
             event->event_id = MPV_EVENT_QUEUE_OVERFLOW;
-            break;
-        }
-        // This will almost surely lead to a deadlock. (Polling is still ok.)
-        if (ctx->suspend_count && timeout > 0) {
-            MP_ERR(ctx, "attempting to wait while core is suspended");
             break;
         }
         if (ctx->num_events) {
