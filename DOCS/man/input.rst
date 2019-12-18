@@ -752,7 +752,7 @@ Input Commands that are Possibly Subject to Change
         cases, the second parameter is a comma separated list of filter names
         or integer indexes. ``0`` would denote the first filter. Negative
         indexes start from the last filter, and ``-1`` denotes the last
-        filter.
+        filter. Deprecated.
 
     <clr>
         Remove all filters. Note that like the other sub-commands, this does

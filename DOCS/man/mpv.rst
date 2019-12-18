@@ -497,7 +497,7 @@ Suffix        Meaning
 -pre          Prepend 1 or more items (same syntax as -set)
 -clr          Clear the option (remove all items)
 -remove       Delete item if present (does not interpret escapes)
--del          Delete 1 or more items by integer index
+-del          Delete 1 or more items by integer index (deprecated)
 -toggle       Append an item, or remove if if it already exists (no escapes)
 ============= ===============================================
 
@@ -541,7 +541,7 @@ Suffix        Meaning
 -pre          Prepend 1 or more filters (same syntax as -set)
 -clr          Clear the option (remove all filters)
 -remove       Delete filter if present
--del          Delete 1 or more filters by integer index or filter label
+-del          Delete 1 or more filters by integer index or filter label (deprecated)
 -toggle       Append a filter, or remove if if it already exists
 -help         Pseudo operation that prints a help text to the terminal
 ============= ===============================================

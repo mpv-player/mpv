@@ -1404,6 +1404,9 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         op = OP_PRE;
     } else if (bstr_endswith0(name, "-del")) {
         op = OP_DEL;
+        mp_warn(log, "Option %.*s: -del is deprecated! "
+                "Use -remove (removes by content instead of by index).\n",
+                BSTR_P(name));
     } else if (bstr_endswith0(name, "-clr")) {
         op = OP_CLR;
     } else if (bstr_endswith0(name, "-set")) {
@@ -3278,6 +3281,9 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         op = OP_PRE;
     } else if (bstr_endswith0(name, "-del")) {
         op = OP_DEL;
+        mp_warn(log, "Option %.*s: -del is deprecated! "
+                "Use -remove (removes by content instead of by index).\n",
+                BSTR_P(name));
     } else if (bstr_endswith0(name, "-remove")) {
         op = OP_REMOVE;
     } else if (bstr_endswith0(name, "-clr")) {

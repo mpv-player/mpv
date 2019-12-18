@@ -75,6 +75,8 @@ Interface changes
       options (for example --script-opts-add). This was actually always
       deprecated, like with other list options, but the option parser did not
       print a warning in this particular case.
+    - deprecate -del for list options (use -remove instead, which is by content
+      instead of by integer index)
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

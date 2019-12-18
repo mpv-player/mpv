@@ -102,7 +102,8 @@ filter list.
     with ``@``). Matching of filters works as follows: if either of the compared
     filters has a label set, only the labels are compared. If none of the
     filters have a label, the filter name, arguments, and argument order are
-    compared.
+    compared. (Passing multiple filters is currently still possible, but
+    deprecated.)
 
 ``-vf-toggle=filter``
     Add the given filter to the list if it was not present yet, or remove it
@@ -112,8 +113,7 @@ filter list.
 ``--vf-del=filter``
     Sort of like ``--vf-remove``, but also accepts an index number. Index
     numbers start at 0, negative numbers address the end of the list (-1 is the
-    last). (Passing multiple filters is currently still possible, but
-    deprecated.)
+    last). Deprecated.
 
 ``--vf-clr``
     Completely empties the filter list.
