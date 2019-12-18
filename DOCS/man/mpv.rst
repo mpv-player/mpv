@@ -520,6 +520,9 @@ Suffix        Meaning
 -add          Append 1 or more items (same syntax as -set)
 ============= ===============================================
 
+Keys are unique within the list. If an already present key is set, the existing
+key is removed before the new value is appended.
+
 Filter options
 ~~~~~~~~~~~~~~
 

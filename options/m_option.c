@@ -1621,6 +1621,28 @@ const m_option_type_t m_option_type_string_list = {
 static int read_subparam(struct mp_log *log, bstr optname, char *termset,
                          bstr *str, bstr *out_subparam);
 
+static int keyvalue_list_find_key(char **lst, bstr str)
+{
+    for (int n = 0; lst && lst[n] && lst[n + 1]; n += 2) {
+        if (bstr_equals0(str, lst[n]))
+            return n / 2;
+    }
+    return -1;
+}
+
+static void keyvalue_list_del_key(char **lst, int index)
+{
+    int count = 0;
+    for (int n = 0; lst && lst[n]; n++)
+        count++;
+    assert(index * 2 + 1 < count);
+    count += 1; // terminating item
+    talloc_free(lst[index * 2 + 0]);
+    talloc_free(lst[index * 2 + 1]);
+    MP_TARRAY_REMOVE_AT(lst, count, index * 2 + 1);
+    MP_TARRAY_REMOVE_AT(lst, count, index * 2 + 0);
+}
+
 static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param, void *dst)
 {
@@ -1664,6 +1686,11 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
                 break;
         }
         if (dst) {
+            int index = keyvalue_list_find_key(lst, key);
+            if (index >= 0) {
+                keyvalue_list_del_key(lst, index);
+                num -= 2;
+            }
             MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, key));
             MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
         }
