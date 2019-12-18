@@ -207,7 +207,7 @@ static bool x11_get_property_copy(struct vo_x11_state *x11, Window w,
     void *ptr = x11_get_property(x11, w, property, type, format, &len);
     if (ptr) {
         size_t ib = format == 32 ? sizeof(long) : format / 8;
-        if (dst_size / ib >= len) {
+        if (dst_size <= len * ib) {
             memcpy(dst, ptr, dst_size);
             ret = true;
         }
@@ -1079,7 +1079,7 @@ static void vo_x11_check_net_wm_desktop_change(struct vo *vo)
     if (x11->parent)
         return;
 
-    long params[5] = {0};
+    long params[1] = {0};
     if (x11_get_property_copy(x11, x11->window, XA(x11, _NET_WM_DESKTOP),
                               XA_CARDINAL, 32, params, sizeof(params)))
     {
