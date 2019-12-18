@@ -1055,15 +1055,21 @@ static int decode_frame(struct mp_filter *vd)
     // data.
     assert(ctx->pic->buf[0]);
 
-    ctx->hwdec_fail_count = 0;
-
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     if (!mpi) {
         av_frame_unref(ctx->pic);
         return ret;
     }
-    if (mpi->imgfmt == IMGFMT_CUDA)
-        assert(mpi->planes[0]);
+
+    if (mpi->imgfmt == IMGFMT_CUDA && !mpi->planes[0]) {
+        MP_ERR(vd, "CUDA frame without data. This is a FFmpeg bug.\n");
+        talloc_free(mpi);
+        handle_err(vd);
+        return AVERROR_BUG;
+    }
+
+    ctx->hwdec_fail_count = 0;
+
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
