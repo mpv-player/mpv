@@ -117,6 +117,7 @@ struct lavfi_pad {
     AVFilterContext *buffer;
     AVRational timebase;
     bool buffer_is_eof; // received/sent EOF to the buffer
+    bool got_eagain;
 
     struct mp_tags *metadata;
 
@@ -140,6 +141,7 @@ static void free_graph(struct lavfi *c)
         pad->buffer = NULL;
         mp_frame_unref(&pad->in_fmt);
         pad->buffer_is_eof = false;
+        pad->got_eagain = false;
     }
     c->initialized = false;
     c->draining_recover = false;
@@ -643,6 +645,9 @@ static bool feed_input_pads(struct lavfi *c)
             MP_FATAL(c, "could not pass frame to filter\n");
         av_frame_free(&frame);
 
+        for (int i = 0; i < c->num_out_pads; i++)
+            c->out_pads[i]->got_eagain = false;
+
         progress = true;
     }
 
@@ -650,6 +655,26 @@ static bool feed_input_pads(struct lavfi *c)
         progress = true;
 
     return progress;
+}
+
+// Some filters get stuck and return EAGAIN forever if they did not get any
+// input (i.e. we send only EOF as input). "dynaudnorm" is known to be affected.
+static bool check_stuck_eagain_on_eof_bug(struct lavfi *c)
+{
+    for (int n = 0; n < c->num_in_pads; n++) {
+        if (!c->in_pads[n]->buffer_is_eof)
+            return false;
+    }
+
+    for (int n = 0; n < c->num_out_pads; n++) {
+        struct lavfi_pad *pad = c->out_pads[n];
+
+        if (!pad->buffer_is_eof && !pad->got_eagain)
+            return false;
+    }
+
+    MP_WARN(c, "Filter is stuck. This is a FFmpeg bug. Treating as EOF.\n");
+    return true;
 }
 
 static bool read_output_pads(struct lavfi *c)
@@ -669,6 +694,16 @@ static bool read_output_pads(struct lavfi *c)
         int r = AVERROR_EOF;
         if (!pad->buffer_is_eof)
             r = av_buffersink_get_frame_flags(pad->buffer, c->tmp_frame, 0);
+
+        pad->got_eagain = r == AVERROR(EAGAIN);
+        if (pad->got_eagain) {
+            if (check_stuck_eagain_on_eof_bug(c))
+                r = AVERROR_EOF;
+        } else {
+            for (int i = 0; i < c->num_out_pads; i++)
+                c->out_pads[i]->got_eagain = false;
+        }
+
         if (r >= 0) {
 #if LIBAVUTIL_VERSION_MICRO >= 100
             mp_tags_copy_from_av_dictionary(pad->metadata, c->tmp_frame->metadata);
