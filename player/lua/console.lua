@@ -81,6 +81,7 @@ local history = {}
 local history_pos = 1
 local log_buffer = {}
 local key_bindings = {}
+local global_margin_y = 0
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -91,6 +92,21 @@ update_timer = mp.add_periodic_timer(0.05, function()
     end
 end)
 update_timer:kill()
+
+utils.shared_script_property_observe("osc-margins", function(_, val)
+    if val then
+        -- formatted as "%f,%f,%f,%f" with left, right, top, bottom, each
+        -- value being the border size as ratio of the window size (0.0-1.0)
+        local vals = {}
+        for v in string.gmatch(val, "[^,]+") do
+            vals[#vals + 1] = tonumber(v)
+        end
+        global_margin_y = vals[4] -- bottom
+    else
+        global_margin_y = 0
+    end
+    update()
+end)
 
 -- Add a line to the log buffer (which is limited to 100 lines)
 function log_add(style, text)
@@ -172,7 +188,7 @@ function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2)
+    ass:pos(2, screeny - 2 - global_margin_y * screeny)
     ass:append(log_ass .. '\\N')
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
