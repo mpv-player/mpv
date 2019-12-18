@@ -2813,27 +2813,13 @@ static void obj_setting_free(m_obj_settings_t *item)
 }
 
 // If at least one item has a label, compare labels only - otherwise ignore them.
-static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
+static bool obj_setting_match(m_obj_settings_t *a, m_obj_settings_t *b)
 {
     bstr la = bstr0(a->label), lb = bstr0(b->label);
     if (la.len || lb.len)
         return bstr_equals(la, lb);
-    if (strcmp(a->name, b->name) != 0)
-        return false;
 
-    int a_attr_count = 0;
-    while (a->attribs && a->attribs[a_attr_count])
-        a_attr_count++;
-    int b_attr_count = 0;
-    while (b->attribs && b->attribs[b_attr_count])
-        b_attr_count++;
-    if (a_attr_count != b_attr_count)
-        return false;
-    for (int n = 0; n < a_attr_count; n++) {
-        if (strcmp(a->attribs[n], b->attribs[n]) != 0)
-            return false;
-    }
-    return true;
+    return m_obj_settings_equal(a, b);
 }
 
 static int obj_settings_list_num_items(m_obj_settings_t *obj_list)
@@ -2898,7 +2884,7 @@ static int obj_settings_find_by_content(m_obj_settings_t *obj_list,
                                         m_obj_settings_t *item)
 {
     for (int n = 0; obj_list && obj_list[n].name; n++) {
-        if (obj_setting_equals(&obj_list[n], item))
+        if (obj_setting_match(&obj_list[n], item))
             return n;
     }
     return -1;
@@ -3632,6 +3618,18 @@ static bool obj_settings_list_equal(const m_option_t *opt, void *pa, void *pb)
     if (a == b || !a || !b)
         return a == b;
 
+    for (int n = 0; a[n].name || b[n].name; n++) {
+        if (!a[n].name || !b[n].name)
+            return false;
+        if (!m_obj_settings_equal(&a[n], &b[n]))
+            return false;
+    }
+
+    return true;
+}
+
+bool m_obj_settings_equal(struct m_obj_settings *a, struct m_obj_settings *b)
+{
     if (!str_equal(NULL, &a->name, &b->name))
         return false;
 

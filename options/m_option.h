@@ -181,6 +181,8 @@ typedef struct m_obj_settings {
     char **attribs;
 } m_obj_settings_t;
 
+bool m_obj_settings_equal(struct m_obj_settings *a, struct m_obj_settings *b);
+
 struct m_opt_choice_alternatives {
     char *name;
     int value;

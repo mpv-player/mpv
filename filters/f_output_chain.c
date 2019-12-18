@@ -524,8 +524,7 @@ bool mp_output_chain_update_filters(struct mp_output_chain *c,
         struct mp_user_filter *u = NULL;
 
         for (int i = 0; i < p->num_user_filters; i++) {
-            struct m_option t = {.type = &m_option_type_obj_settings_list};
-            if (!used[i] && m_option_equal(&t, &entry, &p->user_filters[i]->args))
+            if (!used[i] && m_obj_settings_equal(entry, p->user_filters[i]->args))
             {
                 u = p->user_filters[i];
                 used[i] = true;
