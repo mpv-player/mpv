@@ -496,6 +496,7 @@ Suffix        Meaning
 -add          Append 1 or more items (same syntax as -set)
 -pre          Prepend 1 or more items (same syntax as -set)
 -clr          Clear the option (remove all items)
+-remove       Delete item if present (does not interpret escapes)
 -del          Delete 1 or more items by integer index
 -toggle       Append an item, or remove if if it already exists (no escapes)
 ============= ===============================================
@@ -518,6 +519,7 @@ Suffix        Meaning
 -set          Set a list of items (using ``,`` as separator)
 -append       Append a single item (escapes for the key, no escapes for the value)
 -add          Append 1 or more items (same syntax as -set)
+-remove       Delete item by key if present (does not interpret escapes)
 ============= ===============================================
 
 Keys are unique within the list. If an already present key is set, the existing
@@ -538,6 +540,7 @@ Suffix        Meaning
 -add          Append 1 or more filters (same syntax as -set)
 -pre          Prepend 1 or more filters (same syntax as -set)
 -clr          Clear the option (remove all filters)
+-remove       Delete filter if present
 -del          Delete 1 or more filters by integer index or filter label
 -toggle       Append a filter, or remove if if it already exists
 -help         Pseudo operation that prints a help text to the terminal

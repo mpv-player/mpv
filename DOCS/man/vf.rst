@@ -96,12 +96,24 @@ filter list.
     Prepends the filters given as arguments to the filter list. (Passing
     multiple filters is currently still possible, but deprecated.)
 
+``--vf-remove=filter``
+    Deletes the filter from the list. The filter can be either given the way it
+    was added (filter name and its full argument list), or by label (prefixed
+    with ``@``). Matching of filters works as follows: if either of the compared
+    filters has a label set, only the labels are compared. If none of the
+    filters have a label, the filter name, arguments, and argument order are
+    compared.
+
+``-vf-toggle=filter``
+    Add the given filter to the list if it was not present yet, or remove it
+    from the list if it was present. Matching of filters works as described in
+    ``--vf-remove``.
+
 ``--vf-del=filter``
-    Deletes the filter. The filter can even given the way it was added (filter
-    name and its full argument list), by label (prefixed with ``@``), or as
-    index number. Index numbers start at 0, negative numbers address the end of
-    the list (-1 is the last). (Passing multiple filters is currently still
-    possible, but deprecated.)
+    Sort of like ``--vf-remove``, but also accepts an index number. Index
+    numbers start at 0, negative numbers address the end of the list (-1 is the
+    last). (Passing multiple filters is currently still possible, but
+    deprecated.)
 
 ``--vf-clr``
     Completely empties the filter list.

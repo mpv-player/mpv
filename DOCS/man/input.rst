@@ -725,6 +725,10 @@ Input Commands that are Possibly Subject to Change
 ``vf <operation> <value>``
     Change video filter chain.
 
+    The semantics are exactly the same as with option parsing (see
+    `VIDEO FILTERS`_). As such the text below is a redundant and incomplete
+    summary.
+
     The first argument decides what happens:
 
     <set>
