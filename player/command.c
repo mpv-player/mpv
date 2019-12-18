@@ -4473,14 +4473,14 @@ static void cmd_change_list(void *p)
     int osd_duration = mpctx->opts->osd_duration;
     int osdl = cmd->msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
-    struct m_config_option *co = m_config_get_co(mpctx->mconfig, bstr0(name));
-    if (!co) {
+    struct m_option prop = {0};
+    if (mp_property_do(name, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0) {
         set_osd_msg(mpctx, osdl, osd_duration, "Unknown option: '%s'", name);
         cmd->success = false;
         return;
     }
 
-    const struct m_option_type *type = co->opt->type;
+    const struct m_option_type *type = prop.type;
     bool found = false;
     for (int i = 0; type->actions && type->actions[i].name; i++) {
         const struct m_option_action *action = &type->actions[i];
@@ -4493,9 +4493,18 @@ static void cmd_change_list(void *p)
         return;
     }
 
+    union m_option_value val = {0};
+    if (mp_property_do(name, M_PROPERTY_GET, &val, mpctx) <= 0) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Could not read: '%s'", name);
+        cmd->success = false;
+        return;
+    }
+
     char *optname = mp_tprintf(80, "%s-%s", name, op); // the dirty truth
-    int r = m_config_set_option_cli(mpctx->mconfig, bstr0(optname),
-                                    bstr0(value), 0);
+    int r = m_option_parse(mpctx->log, &prop, bstr0(optname), bstr0(value), &val);
+    if (r >= 0 && mp_property_do(name, M_PROPERTY_SET, &val, mpctx) <= 0)
+        r = -1;
+    m_option_free(&prop, &val);
     if (r < 0) {
         set_osd_msg(mpctx, osdl, osd_duration,
                     "Failed setting option: '%s'", name);
