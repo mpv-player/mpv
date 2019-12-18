@@ -1714,6 +1714,8 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
             }
             MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, key));
             MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
+            MP_TARRAY_APPEND(NULL, lst, num, NULL);
+            num -= 1;
         }
 
         if (!bstr_eatstart0(&param, ",") && !bstr_eatstart0(&param, ":"))
@@ -1722,8 +1724,6 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
                 BSTR_P(name));
     }
-    if (dst)
-        MP_TARRAY_APPEND(NULL, lst, num, NULL);
 
     if (param.len) {
         mp_err(log, "Unparseable garbage at end of option value: '%.*s'\n",
