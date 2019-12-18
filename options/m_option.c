@@ -1264,7 +1264,7 @@ const m_option_type_t m_option_type_string = {
 #define OP_DEL 3
 #define OP_CLR 4
 #define OP_TOGGLE 5
-#define OP_ADD_STR 6
+#define OP_APPEND 6
 
 static void free_str_list(void *dst)
 {
@@ -1670,6 +1670,9 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
 
         if (!bstr_eatstart0(&param, ",") && !bstr_eatstart0(&param, ":"))
             break;
+
+        mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
+                BSTR_P(name));
     }
     if (dst)
         MP_TARRAY_APPEND(NULL, lst, num, NULL);
@@ -3231,6 +3234,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
 
     if (bstr_endswith0(name, "-add")) {
         op = OP_ADD;
+    } else if (bstr_endswith0(name, "-append")) {
+        op = OP_APPEND;
     } else if (bstr_endswith0(name, "-set")) {
         op = OP_NONE;
     } else if (bstr_endswith0(name, "-pre")) {
@@ -3246,6 +3251,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 "Supported operations are:\n"
                 "  %s-set\n"
                 " Overwrite the old list with the given list\n\n"
+                "  %s-append\n"
+                " Append the given filter to the current list\n\n"
                 "  %s-add\n"
                 " Append the given list to the current list\n\n"
                 "  %s-pre\n"
@@ -3259,7 +3266,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 "  %s-clr\n"
                 " Clear the current list.\n\n",
                 opt->name, opt->name, opt->name, opt->name, opt->name,
-                opt->name, opt->name);
+                opt->name, opt->name, opt->name);
 
         return M_OPT_EXIT;
     }
@@ -3328,6 +3335,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     }
 
     if (op != OP_NONE && res && res[0].name && res[1].name) {
+        if (op == OP_APPEND) {
+            mp_err(log, "Option %.*s: -append takes only 1 filter (no ',').\n",
+                   BSTR_P(name));
+            return M_OPT_INVALID;
+        }
         mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
                 BSTR_P(name));
     }
@@ -3349,7 +3361,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 }
             }
             talloc_free(res);
-        } else if (op == OP_ADD) {
+        } else if (op == OP_ADD || op == OP_APPEND) {
             for (int n = 0; res && res[n].name; n++) {
                 int label = obj_settings_list_find_by_label0(list, res[n].label);
                 if (label < 0) {
@@ -3589,6 +3601,7 @@ const m_option_type_t m_option_type_obj_settings_list = {
     .equal = obj_settings_list_equal,
     .actions = (const struct m_option_action[]){
         {"add"},
+        {"append"},
         {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
         {"del"},
         {"help",    M_OPT_TYPE_OPTIONAL_PARAM},

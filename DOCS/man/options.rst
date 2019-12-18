@@ -10,6 +10,8 @@ Track Selection
     language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
     language codes, while OGM uses a free-form identifier. See also ``--aid``.
 
+    This is a string list option. See `List Options`_ for details.
+
     .. admonition:: Examples
 
         - ``mpv dvd://1 --alang=hu,en`` chooses the Hungarian language track
@@ -23,6 +25,8 @@ Track Selection
     language codes, Matroska uses ISO 639-2 three letter language codes while
     OGM uses a free-form identifier. See also ``--sid``.
 
+    This is a string list option. See `List Options`_ for details.
+
     .. admonition:: Examples
 
         - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
@@ -32,6 +36,8 @@ Track Selection
 
 ``--vlang=<...>``
     Equivalent to ``--alang`` and ``--slang``, for video tracks.
+
+    This is a string list option. See `List Options`_ for details.
 
 ``--aid=<ID|auto|no>``
     Select audio track. ``auto`` selects the default, ``no`` disables audio.
@@ -700,10 +706,14 @@ Program Behavior
     Load a Lua script. The second option allows you to load multiple scripts by
     separating them with the path separator (``:`` on Unix, ``;`` on Windows).
 
+    ``--scripts`` is a path list option. See `List Options`_ for details.
+
 ``--script-opts=key1=value1,key2=value2,...``
     Set options for scripts. A script can query an option by key. If an
     option is used and what semantics the option value has depends entirely on
     the loaded scripts. Values not claimed by any scripts are ignored.
+
+    This is a key/value list option. See `List Options`_ for details.
 
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
@@ -743,6 +753,8 @@ Program Behavior
     command line.
 
     The special name ``all`` resets as many options as possible.
+
+    This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
 
@@ -834,6 +846,8 @@ Program Behavior
     URLs also require a proxy for playback, so this can pass that proxy
     information to mpv. Take note that SOCKS proxies aren't supported and
     https URLs also bypass the proxy. This is a limitation in FFmpeg.
+
+    This is a key/value list option. See `List Options`_ for details.
 
     .. admonition:: Example
 
@@ -1453,6 +1467,8 @@ Video
     mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
     ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``), ``debug``.
 
+    This is a key/value list option. See `List Options`_ for details.
+
     .. admonition:: Example
 
         ``--vd-lavc-o=debug=pict``
@@ -1712,6 +1728,8 @@ Audio
     unneeded and pass all unknown options through the AVOption system is
     welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
+    This is a key/value list option. See `List Options`_ for details.
+
 ``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
     If DTS is passed through, use DTS-HD.
 
@@ -1799,7 +1817,7 @@ Audio
 ``--audio-files=<files>``
     Play audio from an external file while viewing a video.
 
-    This is a list option. See `List Options`_ for details.
+    This is a path list option. See `List Options`_ for details.
 
 ``--audio-file=<file>``
     CLI/config file only alias for ``--audio-files-append``. Each use of this
@@ -1880,6 +1898,8 @@ Audio
 ``--audio-file-paths=<path1:path2:...>``
     Equivalent to ``--sub-file-paths`` option, but for auto-loaded audio files.
 
+    This is a path list option. See `List Options`_ for details.
+
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
     if you want to force a different audio profile (e.g. with PulseAudio),
@@ -1953,7 +1973,7 @@ Subtitles
     and ``--secondary-sid`` to select the second index. (The index is printed
     on the terminal output after the ``--sid=`` in the list of streams.)
 
-    ``--sub-files`` is a list option (see `List Options`_  for details), and
+    ``--sub-files`` is a path list option (see `List Options`_  for details), and
     can take multiple file names separated by ``:`` (Unix) or ``;`` (Windows),
     while  ``--sub-file`` takes a single filename, but can be used multiple
     times to add multiple files. Technically, ``--sub-file`` is a CLI/config
@@ -2044,6 +2064,8 @@ Subtitles
 
 ``--sub-ass-force-style=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
+
+    This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
 
@@ -2325,7 +2347,7 @@ Subtitles
         - ``/path/to/video/subtitles/``
         -  the ``sub`` configuration subdirectory (usually ``~/.config/mpv/sub/``)
 
-    This is a list option. See `List Options`_ for details.
+    This is a path list option. See `List Options`_ for details.
 
 ``--sub-visibility``, ``--no-sub-visibility``
     Can be used to disable display of subtitles, but still select and decode
@@ -3127,6 +3149,8 @@ Demuxer
     through the AVOption system is welcome. A full list of AVOptions can
     be found in the FFmpeg manual. Note that some options may conflict
     with mpv options.
+
+    This is a key/value list option. See `List Options`_ for details.
 
     .. admonition:: Example
 
@@ -4016,6 +4040,8 @@ It also sets the defaults for the ``lavrresample`` audio filter.
     Set AVOptions on the SwrContext or AVAudioResampleContext. These should
     be documented by FFmpeg or Libav.
 
+    This is a key/value list option. See `List Options`_ for details.
+
 Terminal
 --------
 
@@ -4278,6 +4304,8 @@ Network
 
 ``--http-header-fields=<field1,field2>``
     Set custom HTTP fields when accessing HTTP stream.
+
+    This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Example
 
@@ -4943,11 +4971,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
         This option is deprecated, since there is only one reasonable value.
         It may be removed in the future.
 
-``--glsl-shaders=<file-list>``
+``--glsl-shader=<file>``, ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
     which can be injected at almost arbitrary points in the rendering pipeline,
-    and access all previous intermediate textures. Each use of the option will
-    add another file to the internal list of shaders (see `List Options`_).
+    and access all previous intermediate textures.
+
+    Each use of the ``--glsl-shader`` option will add another file to the
+    internal list of shaders, while ``--glsl-shaders`` takes a list of files,
+    and overwrites the internal list with it. The latter is a path list option
+    (see `List Options`_ for details).
 
     .. admonition:: Warning
 
@@ -5933,6 +5965,8 @@ Miscellaneous
     The default includes a common list of tags, call mpv with ``--list-options``
     to see it.
 
+    This is a string list option. See `List Options`_ for details.
+
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
 
@@ -6089,6 +6123,8 @@ Miscellaneous
     other options such as e.g. user agent are not available with all protocols,
     and printing errors for unknown options would end up being too noisy.)
 
+    This is a key/value list option. See `List Options`_ for details.
+
 ``--vo-mmcss-profile=<name>``
     (Windows only.)
     Set the MMCSS profile for the video renderer thread (default: ``Playback``).
@@ -6119,7 +6155,7 @@ Miscellaneous
     it slightly less intrusive. (In mpv 0.28.0 and before, this was not quite
     strictly enforced.)
 
-    This is a list option. See `List Options`_ for details.
+    This is a path list option. See `List Options`_ for details.
 
 ``--external-file=<file>``
     CLI/config file only alias for ``--external-files-append``. Each use of this

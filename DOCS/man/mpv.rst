@@ -472,37 +472,92 @@ List Options
 ------------
 
 Some options which store lists of option values can have action suffixes. For
-example, you can set a ``,``-separated list of filters with ``--vf``, but the
-option also allows you to append filters with ``--vf-append``.
+example, the ``--display-tags`` option takes a ``,``-separated list of tags, but
+the option also allows you to append a single tag with ``--display-tags-append``,
+and the tag name can for example contain a literal ``,`` without the need for
+escaping.
 
-Options for filenames do not use ``,`` as separator, but ``:`` (Unix) or ``;``
-(Windows).
+String list and path list options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+String lists are separated by ``,``. The strings are not parsed or interpreted
+by the option system itself. However, most
+
+Path or file list options use ``:`` (Unix) or ``;`` (Windows) as separator,
+instead of ``,``.
+
+They support the following operations:
 
 ============= ===============================================
 Suffix        Meaning
 ============= ===============================================
--add          Append 1 or more items (may become alias for -append)
--append       Append single item (avoids need for escaping)
--clr          Clear the option
--del          Delete an existing item by integer index
--pre          Prepend 1 or more items
--set          Set a list of items
--toggle       Append an item, or remove if if it already exists
+-set          Set a list of items (using the list separator, interprets escapes)
+-append       Append single item (does not interpret escapes)
+-add          Append 1 or more items (same syntax as -set)
+-pre          Prepend 1 or more items (same syntax as -set)
+-clr          Clear the option (remove all items)
+-del          Delete 1 or more items by integer index
+-toggle       Append an item, or remove if if it already exists (no escapes)
 ============= ===============================================
 
-Although some operations allow specifying multiple ``,``-separated items, using
-this is strongly discouraged and deprecated, except for ``-set``.
+``-append`` is meant as a simple way to append a single item without having
+to escape the argument (you may still need to escape on the shell level).
 
-Without suffix, the action taken is normally ``-set``.
+Key/value list options
+~~~~~~~~~~~~~~~~~~~~~~
+
+A key/value list is a list of key/value string pairs. In programming languages,
+this type of data structure is often called a map or a dictionary. The order
+normally does not matter, although in some cases the order might matter.
+
+They support the following operations:
+
+============= ===============================================
+Suffix        Meaning
+============= ===============================================
+-set          Set a list of items (using ``,`` as separator)
+-append       Append a single item (escapes for the key, no escapes for the value)
+-add          Append 1 or more items (same syntax as -set)
+============= ===============================================
+
+Filter options
+~~~~~~~~~~~~~~
+
+This is a very complex option type for the ``--af`` and ``--vf`` options only.
+They often require complicated escaping. See `VIDEO FILTERS`_ for details. They
+support the following operations:
+
+============= ===============================================
+Suffix        Meaning
+============= ===============================================
+-set          Set a list of filters (using ``,`` as separator)
+-append       Append single filter
+-add          Append 1 or more filters (same syntax as -set)
+-pre          Prepend 1 or more filters (same syntax as -set)
+-clr          Clear the option (remove all filters)
+-del          Delete 1 or more filters by integer index or filter label
+-toggle       Append a filter, or remove if if it already exists
+-help         Pseudo operation that prints a help text to the terminal
+============= ===============================================
+
+General
+~~~~~~~
+
+Without suffix, the operation used is normally ``-set``.
+
+Although some operations allow specifying multiple items, using this is strongly
+discouraged and deprecated, except for ``-set``. There is a chance that
+operations like ``-add`` and ``-pre`` will work like ``-append`` and accept a
+single, unescaped item only (so the ``,`` separator will not be interpreted and
+is passed on as part of the value).
 
 Some options (like ``--sub-file``, ``--audio-file``, ``--glsl-shader``) are
 aliases for the proper option with ``-append`` action. For example,
 ``--sub-file`` is an alias for ``--sub-files-append``.
 
-Some options only support a subset of the above.
-
 Options of this type can be changed at runtime using the ``change-list``
-command, which takes the suffix as separate operation parameter.
+command, which takes the suffix (without the ``-``) as separate operation
+parameter.
 
 CONFIGURATION FILES
 ===================

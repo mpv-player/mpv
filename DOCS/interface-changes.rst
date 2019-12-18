@@ -71,6 +71,10 @@ Interface changes
       instead of the actual size of the window. The new "current-window-scale"
       property needs to be queried to read the value as indicated by the current
       window size. This is a breaking change.
+    - explicitly deprecate passing more than 1 item to "-add" suffix in key/value
+      options (for example --script-opts-add). This was actually always
+      deprecated, like with other list options, but the option parser did not
+      print a warning in this particular case.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.

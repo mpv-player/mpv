@@ -85,6 +85,9 @@ libavfilter bridge.
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 
+``--vf-append=filter``
+    Appends the filter given as arguments to the filter list.
+
 ``--vf-add=filter``
     Appends the filter given as arguments to the filter list. (Passing multiple
     filters is currently still possible, but deprecated.)
