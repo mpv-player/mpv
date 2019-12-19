@@ -128,6 +128,7 @@ local state = {
     fullscreen = false,
     tick_timer = nil,
     tick_last_time = 0,                     -- when the last tick() was run
+    hide_timer = nil,
     cache_state = nil,
     idle = false,
     enabled = true,
@@ -2297,11 +2298,23 @@ function render()
     end
 
     -- autohide
-    if not (state.showtime == nil) and (user_opts.hidetimeout >= 0)
-        and (state.showtime + (user_opts.hidetimeout/1000) < now)
-        and (state.active_element == nil) and not (mouse_over_osc) then
-
-        hide_osc()
+    if not (state.showtime == nil) and (user_opts.hidetimeout >= 0) then
+        local timeout = state.showtime + (user_opts.hidetimeout/1000) - now
+        if timeout <= 0 then
+            if (state.active_element == nil) and not (mouse_over_osc) then
+                hide_osc()
+            end
+        else
+            -- the timer is only used to recheck the state and to possibly run
+            -- the code below again
+            if not state.hide_timer then
+                state.hide_timer = mp.add_timeout(0, tick)
+            end
+            state.hide_timer.timeout = timeout
+            -- re-arm
+            state.hide_timer:kill()
+            state.hide_timer:resume()
+        end
     end
 
 
