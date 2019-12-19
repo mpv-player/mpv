@@ -2306,7 +2306,7 @@ function render()
             end
         else
             -- the timer is only used to recheck the state and to possibly run
-            -- the code below again
+            -- the code above again
             if not state.hide_timer then
                 state.hide_timer = mp.add_timeout(0, tick)
             end
