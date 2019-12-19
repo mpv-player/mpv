@@ -221,6 +221,20 @@ bool ra_vk_ctx_resize(struct ra_ctx *ctx, int width, int height)
     return ok;
 }
 
+char *ra_vk_ctx_get_device_name(struct ra_ctx *ctx)
+{
+    /*
+     * This implementation is a bit odd because it has to work even if the
+     * ctx hasn't been initialised yet. A context implementation may need access
+     * to the device name before it can fully initialise the ctx.
+     */
+    struct vulkan_opts *opts = mp_get_config_group(NULL, ctx->global,
+                                                   &vulkan_conf);
+    char *device_name = talloc_strdup(NULL, opts->device);
+    talloc_free(opts);
+    return device_name;
+}
+
 static int color_depth(struct ra_swapchain *sw)
 {
     return 0; // TODO: implement this somehow?
