@@ -358,6 +358,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     of times in a row, only the last change triggers the change function. (The
     exact behavior depends on timing and other things.)
 
+    If a property is unavailable, or on error, the value argument to ``fn`` is
+    ``nil``. (The ``observe_property()`` call always succeeds, even if a
+    property does not exist.)
+
     In some cases the function is not called even if the property changes.
     This depends on the property, and it's a valid feature request to ask for
     better update handling of a specific property.
