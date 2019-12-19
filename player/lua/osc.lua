@@ -2131,9 +2131,11 @@ function hide_osc()
 end
 
 function osc_visible(visible)
-    state.osc_visible = visible
+    if state.osc_visible ~= visible then
+        state.osc_visible = visible
+        update_margins()
+    end
     request_tick()
-    update_margins()
 end
 
 function pause_state(name, enabled)
