@@ -1496,7 +1496,6 @@ typedef struct mpv_event_property {
      *
      * Note that this is set to NULL if retrieving the property failed (the
      * format will be MPV_FORMAT_NONE).
-     * See mpv_event.error for the status.
      */
     void *data;
 } mpv_event_property;
