@@ -1721,8 +1721,10 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         if (!bstr_eatstart0(&param, ",") && !bstr_eatstart0(&param, ":"))
             break;
 
-        mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
-                BSTR_P(name));
+        if (append) {
+            mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
+                    BSTR_P(name));
+        }
     }
 
     if (param.len) {
