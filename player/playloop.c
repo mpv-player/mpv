@@ -54,6 +54,8 @@
 // mp_wait_events() was called.
 void mp_wait_events(struct MPContext *mpctx)
 {
+    mp_client_send_property_changes(mpctx);
+
     bool sleeping = mpctx->sleeptime > 0;
     if (sleeping)
         MP_STATS(mpctx, "start sleep");
