@@ -25,3 +25,6 @@ bool ra_vk_ctx_resize(struct ra_ctx *ctx, int width, int height);
 
 // May be called on a ra_ctx of any type.
 struct mpvk_ctx *ra_vk_ctx_get(struct ra_ctx *ctx);
+
+// Get the user requested Vulkan device name.
+char *ra_vk_ctx_get_device_name(struct ra_ctx *ctx);
