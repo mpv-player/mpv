@@ -40,6 +40,7 @@ struct mp_cmd_def {
     bool vararg;        // last argument can be given 0 to multiple times
     bool scalable;
     bool is_ignore;
+    bool is_noisy;      // reduce log level
     bool default_async; // default to MP_ASYNC flag if none set by user
     // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
     // at some point (can be after handler() returns). If you don't set it, the

@@ -4341,8 +4341,8 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     ctx->seek_msg_osd = auto_osd ? opts->osd_on_seek & 2 : ctx->msg_osd;
     ctx->seek_bar_osd = auto_osd ? opts->osd_on_seek & 1 : ctx->bar_osd;
 
-    mp_cmd_dump(mpctx->log, cmd->def->is_ignore ? MSGL_TRACE : MSGL_DEBUG,
-                "Run command:", cmd);
+    bool noise = cmd->def->is_noisy || cmd->mouse_move;
+    mp_cmd_dump(mpctx->log, noise ? MSGL_TRACE : MSGL_DEBUG, "Run command:", cmd);
 
     if (cmd->flags & MP_EXPAND_PROPERTIES) {
         for (int n = 0; n < cmd->nargs; n++) {
@@ -5528,7 +5528,7 @@ static void cmd_dump_cache_ab(void *p)
 #define OPT_BASE_STRUCT struct mp_cmd_arg
 
 const struct mp_cmd_def mp_cmds[] = {
-    { "ignore", cmd_ignore, .is_ignore = true },
+    { "ignore", cmd_ignore, .is_ignore = true, .is_noisy = true, },
 
     { "seek", cmd_seek,
         {
@@ -5581,14 +5581,17 @@ const struct mp_cmd_def mp_cmds[] = {
     { "sub-seek", cmd_sub_step_seek, { OPT_INT("skip", v.i, 0) },
         .allow_auto_repeat = true, .priv = &(const bool){false} },
     { "print-text", cmd_print_text, { OPT_STRING("text", v.s, 0) },
-        .allow_auto_repeat = true },
+        .is_noisy = true, .allow_auto_repeat = true },
     { "show-text", cmd_show_text, { OPT_STRING("text", v.s, 0),
                                     OPT_INT("duration", v.i, 0, OPTDEF_INT(-1)),
                                     OPT_INT("level", v.i, MP_CMD_OPT_ARG), },
-        .allow_auto_repeat = true},
-    { "expand-text", cmd_expand_text, { OPT_STRING("text", v.s, 0) } },
-    { "expand-path", cmd_expand_path, { OPT_STRING("text", v.s, 0) } },
-    { "show-progress", cmd_show_progress, .allow_auto_repeat = true},
+        .is_noisy = true, .allow_auto_repeat = true},
+    { "expand-text", cmd_expand_text, { OPT_STRING("text", v.s, 0) },
+        .is_noisy = true },
+    { "expand-path", cmd_expand_path, { OPT_STRING("text", v.s, 0) },
+        .is_noisy = true },
+    { "show-progress", cmd_show_progress, .allow_auto_repeat = true,
+        .is_noisy = true },
 
     { "sub-add", cmd_track_add,
         {
