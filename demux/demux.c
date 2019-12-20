@@ -38,6 +38,7 @@
 #include "common/msg.h"
 #include "common/global.h"
 #include "common/recorder.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "osdep/atomic.h"
 #include "osdep/timer.h"
@@ -97,6 +98,7 @@ struct demux_opts {
     int audio_back_preroll;
     int back_batch[STREAM_TYPE_COUNT];
     double back_seek_size;
+    char *meta_cp;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -128,6 +130,7 @@ const struct m_sub_options demux_conf = {
         OPT_INTRANGE("audio-backward-batch", back_batch[STREAM_AUDIO], 0, 0, 1024),
         OPT_DOUBLE("demuxer-backward-playback-step", back_seek_size, M_OPT_MIN,
                    .min = 0),
+        OPT_STRING("metadata-codepage", meta_cp, 0),
         {0}
     },
     .size = sizeof(struct demux_opts),
@@ -146,6 +149,7 @@ const struct m_sub_options demux_conf = {
             [STREAM_VIDEO] = 1,
             [STREAM_AUDIO] = 10,
         },
+        .meta_cp = "utf-8",
     },
 };
 
@@ -180,6 +184,8 @@ struct demux_internal {
 
     struct sh_stream **streams;
     int num_streams;
+
+    char *meta_charset;
 
     // If non-NULL, a stream which is used for global (timed) metadata. It will
     // be an arbitrary stream, which hopefully will happen to work.
@@ -443,6 +449,7 @@ static struct demux_packet *find_seek_target(struct demux_queue *queue,
                                              double pts, int flags);
 static void prune_old_packets(struct demux_internal *in);
 static void dumper_close(struct demux_internal *in);
+static void demux_convert_tags_charset(struct demuxer *demuxer);
 
 static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
 {
@@ -3232,6 +3239,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         }
         demux_init_cuesheet(in->d_thread);
         demux_init_ccs(demuxer, opts);
+        demux_convert_tags_charset(in->d_thread);
         demux_copy(in->d_user, in->d_thread);
         in->duration = in->d_thread->duration;
         demuxer_sort_chapters(demuxer);
@@ -4401,4 +4409,78 @@ struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
         new[n].metadata = mp_tags_dup(new, new[n].metadata);
     }
     return new;
+}
+
+static void visit_tags(void *ctx, void (*visit)(void *ctx, void *ta, char **s),
+                       struct mp_tags *tags)
+{
+    for (int n = 0; n < (tags ? tags->num_keys : 0); n++)
+        visit(ctx, tags, &tags->values[n]);
+}
+
+static void visit_meta(struct demuxer *demuxer, void *ctx,
+                       void (*visit)(void *ctx, void *ta, char **s))
+{
+    struct demux_internal *in = demuxer->in;
+
+    for (int n = 0; n < in->num_streams; n++) {
+        struct sh_stream *sh = in->streams[n];
+
+        visit(ctx, sh, &sh->title);
+        visit_tags(ctx, visit, sh->tags);
+    }
+
+    for (int n = 0; n < demuxer->num_chapters; n++)
+        visit_tags(ctx, visit, demuxer->chapters[n].metadata);
+
+    visit_tags(ctx, visit, demuxer->metadata);
+}
+
+
+static void visit_detect(void *ctx, void *ta, char **s)
+{
+    char **all = ctx;
+abort();
+    if (*s)
+        *all = talloc_asprintf_append_buffer(*all, "%s\n", *s);
+}
+
+static void visit_convert(void *ctx, void *ta, char **s)
+{
+    struct demuxer *demuxer = ctx;
+    struct demux_internal *in = demuxer->in;
+
+    if (!*s)
+        return;
+
+    bstr data = bstr0(*s);
+    bstr conv = mp_iconv_to_utf8(in->log, data, in->meta_charset,
+                                 MP_ICONV_VERBOSE);
+    if (conv.start && conv.start != data.start) {
+        char *ns = conv.start; // 0-termination is guaranteed
+        // (The old string might not be an alloc, but if it is, it's a talloc
+        // child, and will not leak, even if it stays allocated uselessly.)
+        *s = ns;
+        talloc_steal(ta, *s);
+    }
+}
+
+static void demux_convert_tags_charset(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+
+    char *cp = in->opts->meta_cp;
+    if (!cp || mp_charset_is_utf8(cp))
+        return;
+
+    char *data = talloc_strdup(NULL, "");
+    visit_meta(demuxer, &data, visit_detect);
+
+    in->meta_charset = (char *)mp_charset_guess(in, in->log, bstr0(data), cp, 0);
+    if (in->meta_charset && !mp_charset_is_utf8(in->meta_charset)) {
+        MP_INFO(demuxer, "Using tag charset: %s\n", in->meta_charset);
+        visit_meta(demuxer, demuxer, visit_convert);
+    }
+
+    talloc_free(data);
 }

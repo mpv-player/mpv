@@ -365,7 +365,7 @@ static void convert_charset(struct demuxer *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     char *cp = priv->opts->sub_cp;
-    if (!cp || mp_charset_is_utf8(cp))
+    if (!cp || !cp[0] || mp_charset_is_utf8(cp))
         return;
     bstr data = stream_read_complete(priv->stream, NULL, 128 * 1024 * 1024);
     if (!data.start) {
