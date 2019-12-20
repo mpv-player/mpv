@@ -223,6 +223,12 @@ i and I
     file such as codec, framerate, number of dropped frames and so on. See
     `STATS`_ for more information.
 
+del
+    Cycles visibility between never / auto (mouse-move) / always
+
+\`
+    Show the console. (ESC closes it again. See `CONSOLE`_.)
+
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment.)
 
