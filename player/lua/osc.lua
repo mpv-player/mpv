@@ -59,21 +59,6 @@ if user_opts.hidetimeout < 0 then
     msg.warn("hidetimeout cannot be negative. Using " .. user_opts.hidetimeout)
 end
 
--- validate window control options
-if user_opts.windowcontrols ~= "auto" and
-   user_opts.windowcontrols ~= "yes" and
-   user_opts.windowcontrols ~= "no" then
-    msg.warn("windowcontrols cannot be \"" ..
-             user_opts.windowcontrols .. "\". Ignoring.")
-    user_opts.windowcontrols = "auto"
-end
-if user_opts.windowcontrols_alignment ~= "right" and
-   user_opts.windowcontrols_alignment ~= "left" then
-    msg.warn("windowcontrols_alignment cannot be \"" ..
-             user_opts.windowcontrols_alignment .. "\". Ignoring.")
-    user_opts.windowcontrols_alignment = "right"
-end
-
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
@@ -1644,6 +1629,20 @@ function validate_user_opts()
        user_opts.seekbarstyle == "bar" then
         msg.warn("Using \"slider\" seekrangestyle together with \"bar\" seekbarstyle is not supported")
         user_opts.seekrangestyle = "inverted"
+    end
+
+    if user_opts.windowcontrols ~= "auto" and
+       user_opts.windowcontrols ~= "yes" and
+       user_opts.windowcontrols ~= "no" then
+        msg.warn("windowcontrols cannot be \"" ..
+                user_opts.windowcontrols .. "\". Ignoring.")
+        user_opts.windowcontrols = "auto"
+    end
+    if user_opts.windowcontrols_alignment ~= "right" and
+       user_opts.windowcontrols_alignment ~= "left" then
+        msg.warn("windowcontrols_alignment cannot be \"" ..
+                user_opts.windowcontrols_alignment .. "\". Ignoring.")
+        user_opts.windowcontrols_alignment = "right"
     end
 end
 
