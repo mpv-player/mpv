@@ -29,8 +29,17 @@ local function typeconv(desttypeval, val)
     return val
 end
 
+-- performs a deep-copy of the given option value
+local function opt_copy(val)
+    return val -- no tables currently
+end
 
-local function read_options(options, identifier)
+-- compares the given option values for equality
+local function opt_equal(val1, val2)
+    return val1 == val2
+end
+
+local function read_options(options, identifier, on_update)
     if identifier == nil then
         identifier = mp.get_script_name()
     end
@@ -88,24 +97,62 @@ local function read_options(options, identifier)
     end
 
     --parse command-line options
-    for key, val in pairs(mp.get_property_native("options/script-opts")) do
-        local prefix = identifier.."-"
-        if not (string.find(key, prefix, 1, true) == nil) then
-            key = string.sub(key, string.len(prefix)+1)
+    local prefix = identifier.."-"
 
-            -- match found values with defaults
-            if options[key] == nil then
-                msg.warn("script-opts: unknown key " .. key .. ", ignoring")
-            else
-                local convval = typeconv(options[key], val)
-                if convval == nil then
-                    msg.error("script-opts: error converting value '" .. val ..
-                        "' for key '" .. key .. "'")
+    local option_types = {}
+    for key, value in pairs(options) do
+        option_types[key] = opt_copy(value)
+    end
+
+    local function parse_opts(full, options)
+        local changelist = {}
+        for key, val in pairs(full) do
+            if not (string.find(key, prefix, 1, true) == nil) then
+                key = string.sub(key, string.len(prefix)+1)
+
+                -- match found values with defaults
+                if option_types[key] == nil then
+                    msg.warn("script-opts: unknown key " .. key .. ", ignoring")
                 else
-                    options[key] = convval
+                    local convval = typeconv(option_types[key], val)
+                    if convval == nil then
+                        msg.error("script-opts: error converting value '" .. val ..
+                            "' for key '" .. key .. "'")
+                    else
+                        if not opt_equal(options[key], convval) then
+                            changelist[key] = true
+                            options[key] = convval
+                        end
+                    end
                 end
             end
         end
+        return changelist
+    end
+
+    --initial
+    parse_opts(mp.get_property_native("options/script-opts"), options)
+
+    --runtime updates
+    if on_update then
+        -- Current option state, so that we can detect changes, even if the
+        -- caller messes with the options table.
+        local cur_opts = {}
+
+        for key, value in pairs(options) do
+            cur_opts[key] = opt_copy(value)
+        end
+
+        mp.observe_property("options/script-opts", "native", function(name, val)
+            local changelist = parse_opts(val, cur_opts)
+            for key, _ in pairs(changelist) do
+                -- copy to user
+                options[key] = opt_copy(cur_opts[key])
+            end
+            if #changelist then
+                on_update(changelist)
+            end
+        end)
     end
 
 end
