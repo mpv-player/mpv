@@ -349,5 +349,5 @@ const stream_info_t stream_info_file = {
     .protocols = (const char*const[]){ "file", "", "fd", "fdclose",
                                        "appending", NULL },
     .can_write = true,
-    .is_safe = true,
+    .stream_origin = STREAM_ORIGIN_FS,
 };

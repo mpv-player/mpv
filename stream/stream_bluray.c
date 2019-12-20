@@ -512,12 +512,14 @@ const stream_info_t stream_info_bluray = {
     .name = "bd",
     .open = bluray_stream_open,
     .protocols = (const char*const[]){ "bd", "br", "bluray", NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };
 
 const stream_info_t stream_info_bdnav = {
     .name = "bdnav",
     .open = bluray_stream_open,
     .protocols = (const char*const[]){ "bdnav", "brnav", "bluraynav", NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };
 
 static bool check_bdmv(const char *path)
@@ -605,4 +607,5 @@ const stream_info_t stream_info_bdmv_dir = {
     .name = "bdmv/bluray",
     .open = bdmv_dir_stream_open,
     .protocols = (const char*const[]){ "file", "", NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };

@@ -64,9 +64,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     struct playlist *pl = talloc_zero(demuxer, struct playlist);
     demuxer->playlist = pl;
 
-    // make it load archive://
-    pl->disable_safety = true;
-
     char *prefix = mp_url_escape(mpa, demuxer->stream->url, "~|");
 
     char **files = NULL;
@@ -84,6 +81,9 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
 
     for (int n = 0; n < num_files; n++)
         playlist_add_file(pl, files[n]);
+
+    for (struct playlist_entry *e = pl->first; e; e = e->next)
+        e->stream_flags = demuxer->stream_origin;
 
     demuxer->filetype = "archive";
     demuxer->fully_read = true;

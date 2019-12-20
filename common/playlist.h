@@ -53,11 +53,8 @@ struct playlist_entry {
     // Additional refcount. Normally (reserved==0), the entry is owned by the
     // playlist, and this can be used to keep the entry alive.
     int reserved;
+    // Any flags from STREAM_ORIGIN_FLAGS. 0 if unknown.
     // Used to reject loading of unsafe entries from external playlists.
-    // Can have any of the following bit flags set:
-    //  STREAM_SAFE_ONLY: only allow streams marked with is_safe
-    //  STREAM_NETWORK_ONLY: only allow streams marked with is_network
-    // The value 0 allows everything.
     int stream_flags;
 };
 
@@ -69,8 +66,6 @@ struct playlist {
     // current_was_replaced is set to true.
     struct playlist_entry *current;
     bool current_was_replaced;
-
-    bool disable_safety;
 };
 
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value);

@@ -830,7 +830,9 @@ static void encoder_2pass_prepare(struct encoder_context *p)
 
     if (p->encoder->flags & AV_CODEC_FLAG_PASS2) {
         MP_INFO(p, "Reading 2-pass log: %s\n", filename);
-        struct stream *s = stream_open(filename, p->global);
+        struct stream *s = stream_create(filename,
+                                         STREAM_ORIGIN_DIRECT | STREAM_READ,
+                                         NULL, p->global);
         if (s) {
             struct bstr content = stream_read_complete(s, p, 1000000000);
             if (content.start) {

@@ -93,7 +93,9 @@ static int open_cb(struct archive *arch, void *priv)
     struct mp_archive_volume *vol = priv;
     vol->seek_to = -1;
     if (!vol->src) {
-        vol->src = stream_create(vol->url, STREAM_READ,
+        vol->src = stream_create(vol->url,
+                                 STREAM_READ |
+                                    vol->mpa->primary_src->stream_origin,
                                  vol->mpa->primary_src->cancel,
                                  vol->mpa->primary_src->global);
         return vol->src ? ARCHIVE_OK : ARCHIVE_FATAL;
@@ -207,7 +209,9 @@ static char **find_volumes(struct stream *primary_stream)
     struct bstr base = bstr_splice(primary_url, 0, -strlen(pattern->match));
     for (int i = pattern->start; i <= pattern->stop; i++) {
         char* url = pattern->volume_url(res, pattern->format, base, i);
-        struct stream *s = stream_create(url, STREAM_READ | STREAM_SAFE_ONLY,
+        struct stream *s = stream_create(url,
+                                         STREAM_READ |
+                                            primary_stream->stream_origin,
                                          primary_stream->cancel,
                                          primary_stream->global);
         if (!s) {
@@ -490,7 +494,7 @@ static int archive_entry_open(stream_t *stream)
     p->entry_name = name + 1;
     mp_url_unescape_inplace(base);
 
-    p->src = stream_create(base, STREAM_READ | STREAM_SAFE_ONLY,
+    p->src = stream_create(base, STREAM_READ | stream->stream_origin,
                            stream->cancel, stream->global);
     if (!p->src) {
         archive_entry_close(stream);

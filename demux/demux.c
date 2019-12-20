@@ -2894,6 +2894,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
     dst->duration = src->duration;
     dst->is_network = src->is_network;
     dst->is_streaming = src->is_streaming;
+    dst->stream_origin = src->stream_origin;
     dst->priv = src->priv;
     dst->metadata = mp_tags_dup(dst, src->metadata);
 }
@@ -3145,6 +3146,7 @@ struct parent_stream_info {
     bool seekable;
     bool is_network;
     bool is_streaming;
+    int stream_origin;
     struct mp_cancel *cancel;
     char *filename;
 };
@@ -3176,6 +3178,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .filename = talloc_strdup(demuxer, sinfo->filename),
         .is_network = sinfo->is_network,
         .is_streaming = sinfo->is_streaming,
+        .stream_origin = sinfo->stream_origin,
         .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
@@ -3309,6 +3312,7 @@ static struct demuxer *demux_open(struct stream *stream,
         .seekable = stream->seekable,
         .is_network = stream->is_network,
         .is_streaming = stream->streaming,
+        .stream_origin = stream->stream_origin,
         .cancel = cancel,
         .filename = talloc_strdup(NULL, stream->url),
     };
@@ -3364,9 +3368,8 @@ struct demuxer *demux_open_url(const char *url,
                                struct mp_cancel *cancel,
                                struct mpv_global *global)
 {
-    struct demuxer_params dummy = {0};
     if (!params)
-        params = &dummy;
+        return NULL;
     struct mp_cancel *priv_cancel = mp_cancel_new(NULL);
     if (cancel)
         mp_cancel_set_parent(priv_cancel, cancel);

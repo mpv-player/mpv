@@ -151,7 +151,7 @@ struct stream *stream_concat_open(struct mpv_global *global, struct mp_cancel *c
         .global = global,
         .cancel = c,
         .url = "concat://",
-        .flags = STREAM_READ | STREAM_SILENT,
+        .flags = STREAM_READ | STREAM_SILENT | STREAM_ORIGIN_DIRECT,
         .sinfo = &stream_info_concat,
         .special_arg = &arg,
     };

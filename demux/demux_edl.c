@@ -203,6 +203,7 @@ static struct demuxer *open_source(struct timeline *root,
     }
     struct demuxer_params params = {
         .init_fragment = tl->init_fragment,
+        .stream_flags = root->stream_origin,
     };
     struct demuxer *d = demux_open_url(filename, &params, root->cancel,
                                        root->global);
@@ -268,7 +269,8 @@ static struct timeline_par *build_timeline(struct timeline *root,
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
         MP_VERBOSE(root, "Opening init fragment...\n");
-        stream_t *s = stream_create(parts->init_fragment_url, STREAM_READ,
+        stream_t *s = stream_create(parts->init_fragment_url,
+                                    STREAM_READ | root->stream_origin,
                                     root->cancel, root->global);
         if (s) {
             root->is_network |= s->is_network;
@@ -282,6 +284,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
         }
         struct demuxer_params params = {
             .init_fragment = tl->init_fragment,
+            .stream_flags = root->stream_origin,
         };
         tl->track_layout = demux_open_url("memory://", &params, root->cancel,
                                           root->global);

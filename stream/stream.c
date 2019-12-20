@@ -101,6 +101,7 @@ static const stream_info_t *const stream_list[] = {
 
 struct stream_opts {
     int64_t buffer_size;
+    int load_unsafe_playlists;
 };
 
 #define OPT_BASE_STRUCT struct stream_opts
@@ -109,6 +110,7 @@ const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
         OPT_BYTE_SIZE("stream-buffer-size", buffer_size, 0,
                       STREAM_MIN_BUFFER_SIZE, 512 * 1024 * 1024),
+        OPT_FLAG("load-unsafe-playlists", load_unsafe_playlists, 0),
         {0}
     },
     .size = sizeof(struct stream_opts),
@@ -202,6 +204,30 @@ static const char *match_proto(const char *url, const char *proto)
     return NULL;
 }
 
+// src and new are both STREAM_ORIGIN_* values. This checks whether a stream
+// with flags "new" can be opened from the "src". On success, return
+// new origin, on incompatibility return 0.
+static int check_origin(int src, int new)
+{
+    switch (src) {
+    case STREAM_ORIGIN_DIRECT:
+    case STREAM_ORIGIN_UNSAFE:
+        // Allow anything, but constrain it to the new origin.
+        return new;
+    case STREAM_ORIGIN_FS:
+        // From unix FS, allow all but unsafe.
+        if (new == STREAM_ORIGIN_FS || new == STREAM_ORIGIN_NET)
+            return new;
+        break;
+    case STREAM_ORIGIN_NET:
+        // Allow only other network links.
+        if (new == STREAM_ORIGIN_NET)
+            return new;
+        break;
+    }
+    return 0;
+}
+
 // Read len bytes from the start position, and wrap around as needed. Limit the
 // actually read data to the size of the buffer. Return amount of copied bytes.
 //  len: max bytes to copy to dst
@@ -289,11 +315,6 @@ static int stream_create_instance(const stream_info_t *sinfo,
 
     *ret = NULL;
 
-    if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
-        return STREAM_UNSAFE;
-    if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
-        return STREAM_UNSAFE;
-
     const char *path = url;
     for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
         path = match_proto(url, sinfo->protocols[n]);
@@ -304,11 +325,9 @@ static int stream_create_instance(const stream_info_t *sinfo,
     if (!path)
         return STREAM_NO_MATCH;
 
-    struct stream_opts *opts =
-        mp_get_config_group(NULL, args->global, &stream_conf);
-
     stream_t *s = talloc_zero(NULL, stream_t);
     s->global = args->global;
+    struct stream_opts *opts = mp_get_config_group(s, s->global, &stream_conf);
     if (flags & STREAM_SILENT) {
         s->log = mp_null_log;
     } else {
@@ -318,15 +337,12 @@ static int stream_create_instance(const stream_info_t *sinfo,
     s->cancel = args->cancel;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
-    s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     s->requested_buffer_size = opts->buffer_size;
 
     int opt;
     mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
     s->access_references = opt;
-
-    talloc_free(opts);
 
     MP_VERBOSE(s, "Opening %s\n", url);
 
@@ -340,6 +356,18 @@ static int stream_create_instance(const stream_info_t *sinfo,
         MP_DBG(s, "No write access implemented.\n");
         talloc_free(s);
         return STREAM_NO_MATCH;
+    }
+
+    s->stream_origin = flags & STREAM_ORIGIN_MASK; // pass through by default
+    if (opts->load_unsafe_playlists) {
+        s->stream_origin = STREAM_ORIGIN_DIRECT;
+    } else if (sinfo->stream_origin) {
+        s->stream_origin = check_origin(s->stream_origin, sinfo->stream_origin);
+    }
+
+    if (!s->stream_origin) {
+        talloc_free(s);
+        return STREAM_UNSAFE;
     }
 
     int r = STREAM_UNSUPPORTED;
@@ -429,14 +457,10 @@ struct stream *stream_create(const char *url, int flags,
     return s;
 }
 
-struct stream *stream_open(const char *filename, struct mpv_global *global)
-{
-    return stream_create(filename, STREAM_READ, NULL, global);
-}
-
 stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 {
-    return stream_create(filename, STREAM_WRITE, NULL, global);
+    return stream_create(filename, STREAM_ORIGIN_DIRECT | STREAM_WRITE,
+                         NULL, global);
 }
 
 // Read function bypassing the local stream buffer. This will not write into
@@ -787,7 +811,8 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
 {
     struct bstr res = {0};
     char *fname = mp_get_user_path(NULL, global, filename);
-    stream_t *s = stream_open(fname, global);
+    stream_t *s =
+        stream_create(fname, STREAM_ORIGIN_DIRECT | STREAM_READ, NULL, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, max_size);
         free_stream(s);

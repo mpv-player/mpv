@@ -746,6 +746,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
 
     struct demuxer_params params = {
         .is_top_level = true,
+        .stream_flags = STREAM_ORIGIN_DIRECT,
     };
 
     switch (filter) {
@@ -949,7 +950,8 @@ static void load_chapters(struct MPContext *mpctx)
     if (chapter_file && chapter_file[0]) {
         chapter_file = talloc_strdup(NULL, chapter_file);
         mp_core_unlock(mpctx);
-        struct demuxer *demux = demux_open_url(chapter_file, NULL,
+        struct demuxer_params p = {.stream_flags = STREAM_ORIGIN_DIRECT};
+        struct demuxer *demux = demux_open_url(chapter_file, &p,
                                                mpctx->playback_abort,
                                                mpctx->global);
         mp_core_lock(mpctx);
@@ -1065,8 +1067,6 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
     mpctx->open_format = talloc_strdup(NULL, mpctx->opts->demuxer_name);
     mpctx->open_url_flags = url_flags;
     mpctx->open_for_prefetch = for_prefetch && mpctx->opts->demuxer_thread;
-    if (mpctx->opts->load_unsafe_playlists)
-        mpctx->open_url_flags = 0;
 
     if (pthread_create(&mpctx->open_thread, NULL, open_demux_thread, mpctx)) {
         cancel_open(mpctx);
@@ -1473,14 +1473,6 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (mpctx->demuxer->playlist) {
         struct playlist *pl = mpctx->demuxer->playlist;
-        int entry_stream_flags = 0;
-        if (!pl->disable_safety && !mpctx->opts->load_unsafe_playlists) {
-            entry_stream_flags = STREAM_SAFE_ONLY;
-            if (mpctx->demuxer->is_network)
-                entry_stream_flags |= STREAM_NETWORK_ONLY;
-        }
-        for (struct playlist_entry *e = pl->first; e; e = e->next)
-            e->stream_flags |= entry_stream_flags;
         transfer_playlist(mpctx, pl);
         mp_notify_property(mpctx, "playlist");
         mpctx->error_playing = 2;

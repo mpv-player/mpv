@@ -342,6 +342,8 @@ static int open_f(stream_t *stream)
     stream->close = close_f;
     // enable cache (should be avoided for files, but no way to detect this)
     stream->streaming = true;
+    if (stream->info->stream_origin == STREAM_ORIGIN_NET)
+        stream->is_network = true;
     res = STREAM_OK;
 
 out:
@@ -418,8 +420,7 @@ const stream_info_t stream_info_ffmpeg = {
      "gopher", "data",
      NULL },
   .can_write = true,
-  .is_safe = true,
-  .is_network = true,
+  .stream_origin = STREAM_ORIGIN_NET,
 };
 
 // Unlike above, this is not marked as safe, and can contain protocols which
@@ -433,6 +434,7 @@ const stream_info_t stream_info_ffmpeg_unsafe = {
      "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
      "concat",
      NULL },
+  .stream_origin = STREAM_ORIGIN_UNSAFE,
   .can_write = true,
 };
 

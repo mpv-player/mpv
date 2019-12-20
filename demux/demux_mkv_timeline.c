@@ -172,6 +172,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
         .disable_timeline = true,
+        .stream_flags = ctx->tl->stream_origin,
     };
     struct mp_cancel *cancel = ctx->tl->cancel;
     if (mp_cancel_test(cancel))

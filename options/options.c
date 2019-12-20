@@ -649,7 +649,6 @@ static const m_option_t mp_opts[] = {
 
     OPT_STRING("chapters-file", chapter_file, M_OPT_FILE),
 
-    OPT_FLAG("load-unsafe-playlists", load_unsafe_playlists, 0),
     OPT_FLAG("merge-files", merge_files, 0),
 
     // a-v sync stuff:

@@ -296,6 +296,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     struct demuxer_params params = {
         .force_format = "+lavf",
         .external_stream = demuxer->stream,
+        .stream_flags = demuxer->stream_origin,
     };
 
     struct stream *cur = demuxer->stream;

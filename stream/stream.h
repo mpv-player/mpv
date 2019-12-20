@@ -32,14 +32,23 @@
 // it's guaranteed that you can seek back by <= of this size again.
 #define STREAM_BUFFER_SIZE 2048
 
-// stream->mode
-#define STREAM_READ  0
-#define STREAM_WRITE 1
-
 // flags for stream_open_ext (this includes STREAM_READ and STREAM_WRITE)
-#define STREAM_SAFE_ONLY 4
-#define STREAM_NETWORK_ONLY 8
-#define STREAM_SILENT 16
+
+// stream->mode
+#define STREAM_READ             0
+#define STREAM_WRITE            (1 << 0)
+
+#define STREAM_SILENT           (1 << 1)
+
+// Origin value for "security". This is an integer within the flags bit-field.
+#define STREAM_ORIGIN_DIRECT    (1 << 2) // passed from cmdline or loadfile
+#define STREAM_ORIGIN_FS        (2 << 2) // referenced from playlist on unix FS
+#define STREAM_ORIGIN_NET       (3 << 2) // referenced from playlist on network
+#define STREAM_ORIGIN_UNSAFE    (4 << 2) // from a grotesque source
+
+#define STREAM_ORIGIN_MASK      (7 << 2) // for extracting origin value from flags
+
+// end flags for stream_open_ext (the naming convention sucks)
 
 #define STREAM_UNSAFE -3
 #define STREAM_NO_MATCH -2
@@ -100,8 +109,8 @@ typedef struct stream_info_st {
     int (*open2)(struct stream *st, struct stream_open_args *args);
     const char *const *protocols;
     bool can_write;     // correctly checks for READ/WRITE modes
-    bool is_safe;       // opening is no security issue, even with remote provided URLs
-    bool is_network;    // used to restrict remote playlist entries to remote URLs
+    int stream_origin;  // 0 or set of STREAM_ORIGIN_*; if 0, the same origin
+                        // is set, or the stream's open() function handles it
 } stream_info_t;
 
 typedef struct stream {
@@ -123,6 +132,7 @@ typedef struct stream {
     int64_t pos;
     int eof; // valid only after read calls that returned a short result
     int mode; //STREAM_READ or STREAM_WRITE
+    int stream_origin; // any STREAM_ORIGIN_*
     void *priv; // used for DVD, TV, RTSP etc
     char *url;  // filename/url (possibly including protocol prefix)
     char *path; // filename (url without protocol prefix)
@@ -132,7 +142,7 @@ typedef struct stream {
     bool streaming : 1; // known to be a network stream if true
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
-    bool is_network : 1; // original stream_info_t.is_network flag
+    bool is_network : 1; // I really don't know what this is for
     bool is_local_file : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
@@ -223,7 +233,6 @@ struct stream_open_args {
 int stream_create_with_args(struct stream_open_args *args, struct stream **ret);
 struct stream *stream_create(const char *url, int flags,
                              struct mp_cancel *c, struct mpv_global *global);
-struct stream *stream_open(const char *filename, struct mpv_global *global);
 stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 
 void mp_url_unescape_inplace(char *buf);

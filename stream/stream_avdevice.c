@@ -30,4 +30,5 @@ const stream_info_t stream_info_avdevice = {
     .name = "avdevice",
     .open = open_f,
     .protocols = (const char*const[]){ "avdevice", "av", NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };

@@ -188,8 +188,10 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
     struct stream *stream = entry_stream;
     if (!stream) {
         char *filename = mf->names[mf->curr_frame];
-        if (filename)
-            stream = stream_open(filename, demuxer->global);
+        if (filename) {
+            stream = stream_create(filename, demuxer->stream_origin | STREAM_READ,
+                                   demuxer->cancel, demuxer->global);
+        }
     }
 
     if (stream) {

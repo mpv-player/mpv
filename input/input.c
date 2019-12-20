@@ -1276,7 +1276,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
 
     file = mp_get_user_path(tmp, ictx->global, file);
 
-    s = stream_open(file, ictx->global);
+    s = stream_create(file, STREAM_ORIGIN_DIRECT | STREAM_READ, NULL, ictx->global);
     if (!s) {
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
         goto done;

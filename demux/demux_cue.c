@@ -78,7 +78,11 @@ static bool try_open(struct timeline *tl, char *filename)
         || bstrcasecmp(bstr0(tl->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct demuxer *d = demux_open_url(filename, NULL, tl->cancel, tl->global);
+    struct demuxer_params p = {
+        .stream_flags = tl->stream_origin,
+    };
+
+    struct demuxer *d = demux_open_url(filename, &p, tl->cancel, tl->global);
     // Since .bin files are raw PCM data with no headers, we have to explicitly
     // open them. Also, try to avoid to open files that are most likely not .bin
     // files, as that would only play noise. Checking the file extension is
@@ -87,7 +91,7 @@ static bool try_open(struct timeline *tl, char *filename)
     //       CD sector size (2352 bytes)
     if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
         MP_WARN(tl, "CUE: Opening as BIN file!\n");
-        struct demuxer_params p = {.force_format = "rawaudio"};
+        p.force_format = "rawaudio";
         d = demux_open_url(filename, &p, tl->cancel, tl->global);
     }
     if (d) {

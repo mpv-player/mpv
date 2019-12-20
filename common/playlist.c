@@ -32,6 +32,7 @@ struct playlist_entry *playlist_entry_new(const char *filename)
     struct playlist_entry *e = talloc_zero(NULL, struct playlist_entry);
     char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
     e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
+    e->stream_flags = STREAM_ORIGIN_DIRECT;
     return e;
 }
 
@@ -281,7 +282,10 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
     struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
     mp_verbose(log, "Parsing playlist file %s...\n", file);
 
-    struct demuxer_params p = {.force_format = "playlist"};
+    struct demuxer_params p = {
+        .force_format = "playlist",
+        .stream_flags = STREAM_ORIGIN_DIRECT,
+    };
     struct demuxer *d = demux_open_url(file, &p, cancel, global);
     if (!d) {
         talloc_free(log);

@@ -462,6 +462,8 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     bool ok = fmt->parse(p) >= 0 && !p->error;
     if (p->add_base)
         playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
+    for (struct playlist_entry *e = p->pl->first; e; e = e->next)
+        e->stream_flags = demuxer->stream_origin;
     demuxer->playlist = talloc_steal(demuxer, p->pl);
     demuxer->filetype = p->format ? p->format : fmt->name;
     demuxer->fully_read = true;

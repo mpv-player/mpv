@@ -151,4 +151,5 @@ const stream_info_t stream_info_smb = {
     .open = open_f,
     .protocols = (const char*const[]){"smb", NULL},
     .can_write = true, //who's gonna do that?
+    .stream_origin = STREAM_ORIGIN_FS,
 };

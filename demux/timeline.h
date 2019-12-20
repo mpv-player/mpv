@@ -36,6 +36,7 @@ struct timeline {
     struct mp_cancel *cancel;
 
     bool is_network, is_streaming;
+    int stream_origin;
     const char *format;
 
     // main source, and all other sources (this usually only has special meaning

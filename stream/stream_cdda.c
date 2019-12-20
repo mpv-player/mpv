@@ -401,4 +401,5 @@ const stream_info_t stream_info_cdda = {
     .name = "cdda",
     .open = open_cdda,
     .protocols = (const char*const[]){"cdda", NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };
