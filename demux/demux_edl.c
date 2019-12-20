@@ -61,7 +61,6 @@ struct tl_root {
 
 struct priv {
     bstr data;
-    bool allow_any;
 };
 
 // Parse a time (absolute file time or duration). Currently equivalent to a
@@ -398,18 +397,6 @@ error:
     return NULL;
 }
 
-// For security, don't allow relative or absolute paths, only plain filenames.
-// Also, make these filenames relative to the edl source file.
-static void fix_filenames(struct tl_parts *parts, char *source_path)
-{
-    struct bstr dirname = mp_dirname(source_path);
-    for (int n = 0; n < parts->num_parts; n++) {
-        struct tl_part *part = &parts->parts[n];
-        char *filename = mp_basename(part->filename); // plain filename only
-        part->filename = mp_path_join_bstr(parts, dirname, bstr0(filename));
-    }
-}
-
 static void build_mpv_edl_timeline(struct timeline *tl)
 {
     struct priv *p = tl->demuxer->priv;
@@ -426,8 +413,6 @@ static void build_mpv_edl_timeline(struct timeline *tl)
 
     for (int n = 0; n < root->num_pars; n++) {
         struct tl_parts *parts = root->pars[n];
-        if (!p->allow_any)
-            fix_filenames(parts, tl->demuxer->filename);
         struct timeline_par *par = build_timeline(tl, parts);
         if (!par)
             break;
@@ -459,8 +444,6 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     struct stream *s = demuxer->stream;
     if (s->info && strcmp(s->info->name, "edl") == 0) {
         p->data = bstr0(s->path);
-        // Source is edl:// and not .edl => allow arbitrary paths
-        p->allow_any = true;
         return 0;
     }
     if (check >= DEMUX_CHECK_UNSAFE) {
