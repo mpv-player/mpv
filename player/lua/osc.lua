@@ -49,15 +49,8 @@ local user_opts = {
     windowcontrols_alignment = "right" -- which side to show window controls on
 }
 
--- read_options may modify hidetimeout, so save the original default value in
--- case the user set hidetimeout < 0 and we need the default instead.
-local hidetimeout_def = user_opts.hidetimeout
 -- read options from config and command-line
 opt.read_options(user_opts, "osc")
-if user_opts.hidetimeout < 0 then
-    user_opts.hidetimeout = hidetimeout_def
-    msg.warn("hidetimeout cannot be negative. Using " .. user_opts.hidetimeout)
-end
 
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
@@ -2079,7 +2072,7 @@ function update_margins()
 
     -- Don't report margins if it's visible only temporarily. At least for
     -- console.lua this makes no sense.
-    if (not state.osc_visible) or (user_opts.hidetimeout >= 0) then
+    if (not state.osc_visible) or (get_hidetimeout() >= 0) then
         margins = {l = 0, r = 0, t = 0, b = 0}
     end
 
@@ -2167,7 +2160,7 @@ function request_tick()
 end
 
 function mouse_leave()
-    if user_opts.hidetimeout >= 0 then
+    if get_hidetimeout() >= 0 then
         hide_osc()
     end
     -- reset mouse position
@@ -2297,8 +2290,8 @@ function render()
     end
 
     -- autohide
-    if not (state.showtime == nil) and (user_opts.hidetimeout >= 0) then
-        local timeout = state.showtime + (user_opts.hidetimeout/1000) - now
+    if not (state.showtime == nil) and (get_hidetimeout() >= 0) then
+        local timeout = state.showtime + (get_hidetimeout()/1000) - now
         if timeout <= 0 then
             if (state.active_element == nil) and not (mouse_over_osc) then
                 hide_osc()
@@ -2588,15 +2581,20 @@ mp.set_key_bindings({
 }, "window-controls", "force")
 mp.enable_key_bindings("window-controls")
 
-user_opts.hidetimeout_orig = user_opts.hidetimeout
+function get_hidetimeout()
+    if user_opts.visibility == "always" then
+        return -1 -- disable autohide
+    end
+    return user_opts.hidetimeout
+end
 
 function always_on(val)
-    if val then
-        user_opts.hidetimeout = -1 -- disable autohide
-        if state.enabled then show_osc() end
-    else
-        user_opts.hidetimeout = user_opts.hidetimeout_orig
-        if state.enabled then hide_osc() end
+    if state.enabled then
+        if val then
+            show_osc()
+        else
+            hide_osc()
+        end
     end
 end
 
@@ -2606,7 +2604,7 @@ function visibility_mode(mode, no_osd)
     if mode == "cycle" then
         if not state.enabled then
             mode = "auto"
-        elseif user_opts.hidetimeout >= 0 then
+        elseif user_opts.visibility ~= "always" then
             mode = "always"
         else
             mode = "never"
@@ -2625,6 +2623,8 @@ function visibility_mode(mode, no_osd)
         msg.warn("Ignoring unknown visibility mode '" .. mode .. "'")
         return
     end
+
+    user_opts.visibility = mode
 
     if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
         mp.osd_message("OSC visibility: " .. mode)
