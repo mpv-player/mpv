@@ -74,7 +74,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
 
     while (mp_archive_next_entry(mpa)) {
         // stream_libarchive.c does the real work
-        char *f = talloc_asprintf(mpa, "archive://%s|%s", prefix,
+        char *f = talloc_asprintf(mpa, "archive://%s|/%s", prefix,
                                   mpa->entry_filename);
         MP_TARRAY_APPEND(mpa, files, num_files, f);
     }
