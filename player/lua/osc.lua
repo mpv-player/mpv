@@ -50,7 +50,7 @@ local user_opts = {
 }
 
 -- read options from config and command-line
-opt.read_options(user_opts, "osc")
+opt.read_options(user_opts, "osc", function(list) update_options(list) end)
 
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
@@ -1639,6 +1639,13 @@ function validate_user_opts()
     end
 end
 
+function update_options(list)
+    validate_user_opts()
+    request_tick()
+    if list["visibility"] then
+        visibility_mode(user_opts.visibility, true)
+    end
+end
 
 -- OSC INIT
 function osc_init()
