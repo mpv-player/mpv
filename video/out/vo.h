@@ -116,6 +116,7 @@ enum mp_voctrl {
     VOCTRL_GET_ICC_PROFILE,             // bstr*
     VOCTRL_GET_AMBIENT_LUX,             // int*
     VOCTRL_GET_DISPLAY_FPS,             // double*
+    VOCTRL_GET_HIDPI_SCALE,             // double*
 
     VOCTRL_GET_PREF_DEINT,              // int*
 

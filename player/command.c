@@ -2325,6 +2325,17 @@ static int mp_property_vsync_jitter(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, stddev);
 }
 
+static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    double scale = 0;
+    if (!vo || vo_control(vo, VOCTRL_GET_HIDPI_SCALE, &scale) < 1 || scale <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, scale);
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3398,6 +3409,7 @@ static const struct m_property mp_properties_base[] = {
     {"display-fps", mp_property_display_fps},
     {"estimated-display-fps", mp_property_estimated_display_fps},
     {"vsync-jitter", mp_property_vsync_jitter},
+    {"display-hidpi-scale", mp_property_hidpi_scale},
 
     {"working-directory", mp_property_cwd},
 

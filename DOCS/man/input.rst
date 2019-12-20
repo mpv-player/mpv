@@ -2073,6 +2073,12 @@ Property list
 ``vsync-jitter``
     Estimated deviation factor of the vsync duration.
 
+``display-hidpi-scale``
+    The HiDPI scale factor as reported by the windowing backend. If no VO is
+    active, or if the VO does not report a value, this property is unavailable.
+    It may be saner to report an absolute DPI, however, this is the way HiDPI
+    support is implemented on most OS APIs. See also ``--hidpi-window-scale``.
+
 ``video-aspect`` (RW)
     Deprecated. This is tied to ``--video-aspect-override``, but always
     reports the current video aspect if video is active.
