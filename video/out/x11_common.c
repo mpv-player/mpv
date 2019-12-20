@@ -1963,6 +1963,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         *(double *)arg = fps;
         return VO_TRUE;
     }
+    case VOCTRL_GET_HIDPI_SCALE:
+        *(double *)arg = x11->dpi_scale;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
