@@ -1678,9 +1678,6 @@ function osc_init()
     -- stop seeking with the slider to prevent skipping files
     state.active_element = nil
 
-
-
-
     elements = {}
 
     -- some often needed stuff
@@ -2331,10 +2328,6 @@ function render()
     -- submit
     mp.set_osd_ass(osc_param.playresy * osc_param.display_aspect,
                    osc_param.playresy, ass.text)
-
-
-
-
 end
 
 --
