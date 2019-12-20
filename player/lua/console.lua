@@ -143,9 +143,13 @@ end
 function update()
     pending_update = false
 
+    local dpi_scale = mp.get_property_native("display-hidpi-scale", 1.0)
+
+    dpi_scale = dpi_scale * opts.scale
+
     local screenx, screeny, aspect = mp.get_osd_size()
-    screenx = screenx / opts.scale
-    screeny = screeny / opts.scale
+    screenx = screenx / dpi_scale
+    screeny = screeny / dpi_scale
 
     -- Clear the OSD if the REPL is not active
     if not repl_active then
@@ -675,6 +679,7 @@ end)
 -- PlayRes of the OSD will need to be adjusted.
 mp.observe_property('osd-width', 'native', update)
 mp.observe_property('osd-height', 'native', update)
+mp.observe_property('display-hidpi-scale', 'native', update)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
 -- until enable_messages is called again without the silent: prefix.

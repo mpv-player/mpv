@@ -89,7 +89,10 @@ Configurable Options
     Default: 1
 
     All drawing is scaled by this value, including the text borders and the
-    cursor. Change it if you have a high-DPI display.
+    cursor.
+
+    If the VO backend in use has HiDPI scale reporting implemented, the option
+    value is scaled with the reported HiDPI scale.
 
 ``font``
     Default: unset (picks a hardcoded font depending on detected platform)
