@@ -511,8 +511,8 @@ g.require = new_require(SCRIPTDIR_META + "/" + main_script[1]);
 /**********************************************************************
  *  mp.options
  *********************************************************************/
-function read_options(opts, id) {
-    id = String(typeof id != "undefined" ? id : mp.get_script_name());
+function read_options(opts, id, on_update) {
+    id = String(id ? id : mp.get_script_name());
     mp.msg.debug("reading options for " + id);
 
     var conf, fname = "~~/script-opts/" + id + ".conf";
@@ -556,6 +556,20 @@ function read_options(opts, id) {
         else
             mp.msg.error(info, "Error: can't convert '" + val + "' to " + type);
     });
+
+    if (on_update) {
+        mp.observe_property("options/script-opts", "native", function(_n, _v) {
+            var saved = JSON.parse(JSON.stringify(opts));  // clone
+            var changelist = {}, changed = false;
+            read_options(opts, id);  // re-apply conf-file + script-opts
+            for (var key in opts) {
+                if (opts[key] != saved[key])  // type always stays the same
+                    changelist[key] = changed = true;
+            }
+            if (changed)
+                on_update(changelist);
+        });
+    }
 }
 
 mp.options = { read_options: read_options };
