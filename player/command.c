@@ -2583,6 +2583,38 @@ skip_warn: ;
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static bool floats_equal(float x, float y) {
+    float TOLERANCE = 0.001;
+    float difference = fabsf(x - y);
+    return difference <= TOLERANCE;
+}
+
+static int mp_property_video_aspect_override(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (action == M_PROPERTY_PRINT) {
+        float aspect_ratio;
+        mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &aspect_ratio);
+
+        if (floats_equal(aspect_ratio, 2.35F / 1.0F))
+            *(char **)arg = talloc_asprintf(NULL, "2.35:1");
+        else if (floats_equal(aspect_ratio, 16.0F / 9.0F))
+            *(char **)arg = talloc_asprintf(NULL, "16:9");
+        else if (floats_equal(aspect_ratio, 16.0F / 10.0F))
+            *(char **)arg = talloc_asprintf(NULL, "16:10");
+        else if (floats_equal(aspect_ratio, 4.0F / 3.0F))
+            *(char **)arg = talloc_asprintf(NULL, "4:3");
+        else if (floats_equal(aspect_ratio, -1.0F))
+            *(char **)arg = talloc_asprintf(NULL, "Original");
+        else
+            *(char **)arg = talloc_asprintf(NULL, "%.3f", aspect_ratio);
+
+        return M_PROPERTY_OK;
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 /// Subtitle delay (RW)
 static int mp_property_sub_delay(void *ctx, struct m_property *prop,
                                  int action, void *arg)
@@ -3364,6 +3396,7 @@ static const struct m_property mp_properties_base[] = {
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
+    {"video-aspect-override", mp_property_video_aspect_override},
     {"vid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
     {"hwdec-current", mp_property_hwdec_current},
     {"hwdec-interop", mp_property_hwdec_interop},
