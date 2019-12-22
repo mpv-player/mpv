@@ -1642,9 +1642,8 @@ end
 function update_options(list)
     validate_user_opts()
     request_tick()
-    if list["visibility"] then
-        visibility_mode(user_opts.visibility, true)
-    end
+    visibility_mode(user_opts.visibility, true)
+    request_init()
 end
 
 -- OSC INIT
