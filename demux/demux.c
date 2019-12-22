@@ -4440,7 +4440,7 @@ static void visit_meta(struct demuxer *demuxer, void *ctx,
 static void visit_detect(void *ctx, void *ta, char **s)
 {
     char **all = ctx;
-abort();
+
     if (*s)
         *all = talloc_asprintf_append_buffer(*all, "%s\n", *s);
 }
