@@ -928,6 +928,11 @@ standalone_features = [
         'desc': 'macOS 10.14 SDK Features',
         'deps': 'cocoa',
         'func': check_macos_sdk('10.14')
+    },{
+        'name': '--macos-media-player',
+        'desc': 'macOS Media Player support',
+        'deps': 'macos-10-12-2-features && swift',
+        'func': check_true
     }, {
         'name': '--macos-cocoa-cb',
         'desc': 'macOS libmpv backend',
