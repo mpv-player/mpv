@@ -2582,8 +2582,8 @@ Window
 ``--fs-screen=<all|current|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to go fullscreen to.
-    If ``default`` is provided mpv will fallback on using the behavior
-    depending on what the user provided with the ``screen`` option.
+    If ``current`` is used mpv will fallback on what the user provided with
+    the ``screen`` option.
 
     .. admonition:: Note (X11)
 

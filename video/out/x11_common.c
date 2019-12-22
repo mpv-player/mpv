@@ -473,6 +473,9 @@ static void vo_x11_update_screeninfo(struct vo *vo)
         XineramaScreenInfo *screens;
         int num_screens;
 
+        if (opts->fullscreen && opts->fsscreen_id == -1)
+            screen = opts->screen_id;
+
         screens = XineramaQueryScreens(x11->display, &num_screens);
         if (screen >= num_screens)
             screen = num_screens - 1;
