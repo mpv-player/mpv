@@ -24,6 +24,7 @@
 #include "input/input.h"
 #include "player/client.h"
 #include "options/m_config.h"
+#include "options/options.h"
 
 #import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
@@ -299,7 +300,7 @@ static void init_cocoa_application(bool regular)
     [NSApp setDelegate:NSApp];
     [NSApp setMenuBar:[[MenuBar alloc] init]];
 
-#if HAVE_MACOS_10_12_2_FEATURES
+#if HAVE_MACOS_MEDIA_PLAYER
     // 10.12.2 runtime availability check
     if ([NSApp respondsToSelector:@selector(touchBar)]) {
         [NSApp setRemoteCommandCenter:[[RemoteCommandCenter alloc] initWithApp:NSApp]];
