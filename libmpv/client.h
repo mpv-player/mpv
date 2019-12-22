@@ -227,7 +227,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 106)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 107)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1356,15 +1356,16 @@ typedef enum mpv_event_id {
      *             removed in the far future.
      */
     MPV_EVENT_UNPAUSE           = 13,
-#endif
     /**
      * Sent every time after a video frame is displayed. Note that currently,
      * this will be sent in lower frequency if there is no video, or playback
      * is paused - but that will be removed in the future, and it will be
      * restricted to video frames only.
+     *
+     * @deprecated Use mpv_observe_property() with relevant properties instead
+     *             (such as "playback-time").
      */
     MPV_EVENT_TICK              = 14,
-#if MPV_ENABLE_DEPRECATED
     /**
      * @deprecated This was used internally with the internal "script_dispatch"
      *             command to dispatch keyboard and mouse input for the OSC.

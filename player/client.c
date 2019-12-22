@@ -840,6 +840,8 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
     pthread_mutex_lock(&ctx->lock);
     uint64_t bit = 1ULL << event;
     ctx->event_mask = enable ? ctx->event_mask | bit : ctx->event_mask & ~bit;
+    if (enable && event == MPV_EVENT_TICK)
+        MP_WARN(ctx, "The 'tick' event is deprecated and will be removed.\n");
     pthread_mutex_unlock(&ctx->lock);
     return 0;
 }
