@@ -2051,6 +2051,11 @@ end
 function update_margins()
     local margins = osc_param.video_margins
 
+    -- Don't use margins if it's visible only temporarily.
+    if (not state.osc_visible) or (get_hidetimeout() >= 0) then
+        margins = {l = 0, r = 0, t = 0, b = 0}
+    end
+
     if user_opts.boxvideo then
         -- check whether any margin option has a non-default value
         local margins_used = false
@@ -2074,12 +2079,6 @@ function update_margins()
         end
     else
         reset_margins()
-    end
-
-    -- Don't report margins if it's visible only temporarily. At least for
-    -- console.lua this makes no sense.
-    if (not state.osc_visible) or (get_hidetimeout() >= 0) then
-        margins = {l = 0, r = 0, t = 0, b = 0}
     end
 
     utils.shared_script_property_set("osc-margins",
