@@ -77,6 +77,8 @@ Interface changes
       print a warning in this particular case.
     - deprecate -del for list options (use -remove instead, which is by content
       instead of by integer index)
+    - if `--fs` is used but `--fs-screen` is not set, mpv will now use `--screen`
+      instead.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
