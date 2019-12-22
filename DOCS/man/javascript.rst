@@ -188,7 +188,7 @@ success, ``fn`` is called always a-sync, ``error`` is empty string on success.
 ``mp.add_hook(type, priority, fn)``
 
 ``mp.options.read_options(obj [, identifier [, on_update]])`` (types:
-string/boolean/number, ``on_update`` does re-read the config file)
+string/boolean/number)
 
 Additional utilities
 --------------------

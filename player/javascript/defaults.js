@@ -511,13 +511,13 @@ g.require = new_require(SCRIPTDIR_META + "/" + main_script[1]);
 /**********************************************************************
  *  mp.options
  *********************************************************************/
-function read_options(opts, id, on_update) {
+function read_options(opts, id, on_update, conf_override) {
     id = String(id ? id : mp.get_script_name());
     mp.msg.debug("reading options for " + id);
 
     var conf, fname = "~~/script-opts/" + id + ".conf";
     try {
-        conf = mp.utils.read_file(fname);
+        conf = arguments.length > 3 ? conf_override : mp.utils.read_file(fname);
     } catch (e) {
         mp.msg.verbose(fname + " not found.");
     }
@@ -561,7 +561,7 @@ function read_options(opts, id, on_update) {
         mp.observe_property("options/script-opts", "native", function(_n, _v) {
             var saved = JSON.parse(JSON.stringify(opts));  // clone
             var changelist = {}, changed = false;
-            read_options(opts, id);  // re-apply conf-file + script-opts
+            read_options(opts, id, 0, conf);  // re-apply orig-file + script-opts
             for (var key in opts) {
                 if (opts[key] != saved[key])  // type always stays the same
                     changelist[key] = changed = true;
