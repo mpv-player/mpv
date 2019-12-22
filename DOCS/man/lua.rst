@@ -581,6 +581,12 @@ with values found in the config-file and the command-line (in that order).
     the function) are changed, and ``on_update(list)`` is called. ``list`` is
     a table where each updated option has a ``list[option_name] = true`` entry.
     There is no initial ``on_update()`` call. This never re-reads the config file.
+    ``script-opts`` is always applied on the original config file, ignoring
+    previous ``script-opts`` values (for example, if an option is removed from
+    ``script-opts`` at runtime, the option will have the value in the config
+    file). ``table`` entries are only written for option values whose values
+    effectively change (this is important if the script changes ``table``
+    entries independently).
 
 
 Example implementation::

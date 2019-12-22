@@ -39,7 +39,18 @@ local function opt_equal(val1, val2)
     return val1 == val2
 end
 
+-- performs a deep-copy of an entire option table
+local function opt_table_copy(opts)
+    local copy = {}
+    for key, value in pairs(opts) do
+        copy[key] = opt_copy(value)
+    end
+    return copy
+end
+
+
 local function read_options(options, identifier, on_update)
+    local option_types = opt_table_copy(options)
     if identifier == nil then
         identifier = mp.get_script_name()
     end
@@ -76,11 +87,11 @@ local function read_options(options, identifier, on_update)
                     local val = string.sub(line, eqpos+1)
 
                     -- match found values with defaults
-                    if options[key] == nil then
+                    if option_types[key] == nil then
                         msg.warn(conffilename..":"..linecounter..
                             " unknown key " .. key .. ", ignoring")
                     else
-                        local convval = typeconv(options[key], val)
+                        local convval = typeconv(option_types[key], val)
                         if convval == nil then
                             msg.error(conffilename..":"..linecounter..
                                 " error converting value '" .. val ..
@@ -98,14 +109,10 @@ local function read_options(options, identifier, on_update)
 
     --parse command-line options
     local prefix = identifier.."-"
-
-    local option_types = {}
-    for key, value in pairs(options) do
-        option_types[key] = opt_copy(value)
-    end
+    -- command line options are always applied on top of these
+    local conf_and_default_opts = opt_table_copy(options)
 
     local function parse_opts(full, options)
-        local changelist = {}
         for key, val in pairs(full) do
             if not (string.find(key, prefix, 1, true) == nil) then
                 key = string.sub(key, string.len(prefix)+1)
@@ -119,15 +126,11 @@ local function read_options(options, identifier, on_update)
                         msg.error("script-opts: error converting value '" .. val ..
                             "' for key '" .. key .. "'")
                     else
-                        if not opt_equal(options[key], convval) then
-                            changelist[key] = true
-                            options[key] = convval
-                        end
+                        options[key] = convval
                     end
                 end
             end
         end
-        return changelist
     end
 
     --initial
@@ -135,20 +138,20 @@ local function read_options(options, identifier, on_update)
 
     --runtime updates
     if on_update then
-        -- Current option state, so that we can detect changes, even if the
-        -- caller messes with the options table.
-        local cur_opts = {}
-
-        for key, value in pairs(options) do
-            cur_opts[key] = opt_copy(value)
-        end
+        local last_opts = opt_table_copy(options)
 
         mp.observe_property("options/script-opts", "native", function(name, val)
-            local changelist = parse_opts(val, cur_opts)
-            for key, _ in pairs(changelist) do
-                -- copy to user
-                options[key] = opt_copy(cur_opts[key])
+            local new_opts = opt_table_copy(conf_and_default_opts)
+            parse_opts(val, new_opts)
+            local changelist = {}
+            for key, val in pairs(new_opts) do
+                if not opt_equal(last_opts[key], val) then
+                    -- copy to user
+                    options[key] = opt_copy(val)
+                    changelist[key] = true
+                end
             end
+            last_opts = new_opts
             if #changelist then
                 on_update(changelist)
             end
