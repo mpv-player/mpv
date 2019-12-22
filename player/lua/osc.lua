@@ -1677,6 +1677,8 @@ function osc_init()
     -- stop seeking with the slider to prevent skipping files
     state.active_element = nil
 
+    osc_param.video_margins = {l = 0, r = 0, t = 0, b = 0}
+
     elements = {}
 
     -- some often needed stuff
@@ -2034,30 +2036,6 @@ function osc_init()
     --do something with the elements
     prepare_elements()
 
-    if user_opts.boxvideo then
-        -- check whether any margin option has a non-default value
-        local margins_used = false
-
-        for _, opt in ipairs(margins_opts) do
-            if mp.get_property_number(opt[2], 0.0) ~= 0.0 then
-                margins_used = true
-            end
-        end
-
-        if not margins_used then
-            local margins = osc_param.video_margins
-            for _, opt in ipairs(margins_opts) do
-                local v = margins[opt[1]]
-                if v ~= 0 then
-                    mp.set_property_number(opt[2], v)
-                    state.using_video_margins = true
-                end
-            end
-        end
-    else
-        reset_margins()
-    end
-
     update_margins()
 end
 
@@ -2072,6 +2050,31 @@ end
 
 function update_margins()
     local margins = osc_param.video_margins
+
+    if user_opts.boxvideo then
+        -- check whether any margin option has a non-default value
+        local margins_used = false
+
+        if not state.using_video_margins then
+            for _, opt in ipairs(margins_opts) do
+                if mp.get_property_number(opt[2], 0.0) ~= 0.0 then
+                    margins_used = true
+                end
+            end
+        end
+
+        if not margins_used then
+            for _, opt in ipairs(margins_opts) do
+                local v = margins[opt[1]]
+                if (v ~= 0) or state.using_video_margins then
+                    mp.set_property_number(opt[2], v)
+                    state.using_video_margins = true
+                end
+            end
+        end
+    else
+        reset_margins()
+    end
 
     -- Don't report margins if it's visible only temporarily. At least for
     -- console.lua this makes no sense.
