@@ -137,6 +137,7 @@ function set_osd(res_x, res_y, text)
     state.osd.res_x = res_x
     state.osd.res_y = res_y
     state.osd.data = text
+    state.osd.z = 1000
     state.osd:update()
 end
 
