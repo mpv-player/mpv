@@ -56,8 +56,9 @@ static void mf_add(mf_t *mf, const char *fname)
     MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
 }
 
-static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
+static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename)
 {
+    struct mp_log *log = d->log;
     int error_count = 0;
     int count = 0;
 
@@ -65,21 +66,33 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filenam
     mf->log = log;
 
     if (filename[0] == '@') {
-        FILE *lst_f = fopen(filename + 1, "r");
-        if (lst_f) {
-            char *fname = talloc_size(mf, 512);
-            while (fgets(fname, 512, lst_f)) {
-                /* remove spaces from end of fname */
-                char *t = fname + strlen(fname) - 1;
-                while (t > fname && mp_isspace(*t))
-                    *(t--) = 0;
-                if (!mp_path_exists(fname)) {
-                    mp_verbose(log, "file not found: '%s'\n", fname);
-                } else {
-                    mf_add(mf, fname);
+        struct stream *s = stream_create(filename + 1,
+                            d->stream_origin | STREAM_READ, d->cancel, d->global);
+        if (s) {
+            while (1) {
+                char buf[512];
+                int len = stream_read_peek(s, buf, sizeof(buf));
+                if (!len)
+                    break;
+                bstr data = (bstr){buf, len};
+                int pos = bstrchr(data, '\n');
+                data = bstr_splice(data, 0, pos < 0 ? data.len : pos + 1);
+                bstr fname = bstr_strip(data);
+                if (fname.len) {
+                    if (bstrchr(fname, '\0') >= 0) {
+                        mp_err(log, "invalid filename\n");
+                        break;
+                    }
+                    char *entry = bstrto0(mf, fname);
+                    if (!mp_path_exists(entry)) {
+                        mp_verbose(log, "file not found: '%s'\n", entry);
+                    } else {
+                        MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
+                    }
                 }
+                stream_seek_skip(s, stream_tell(s) + data.len);
             }
-            fclose(lst_f);
+            free_stream(s);
 
             mp_info(log, "number of files: %d\n", mf->nr_of_files);
             goto exit_mf;
@@ -299,7 +312,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
         demuxer->stream->info && strcmp(demuxer->stream->info->name, "mf") == 0)
     {
-        mf = open_mf_pattern(demuxer, demuxer->log, demuxer->stream->url + 5);
+        mf = open_mf_pattern(demuxer, demuxer, demuxer->stream->url + 5);
     } else {
         mf = open_mf_single(demuxer, demuxer->log, demuxer->stream->url);
         int bog = 0;
