@@ -132,8 +132,14 @@ end
 
 local key_bindings = {}
 local key_binding_counter = 0
+local key_bindings_dirty = false
 
-local function update_key_bindings()
+function mp.flush_keybindings()
+    if not key_bindings_dirty then
+        return
+    end
+    key_bindings_dirty = false
+
     for i = 1, 2 do
         local section, flags
         local def = i == 1
@@ -229,7 +235,7 @@ local function add_binding(attrs, key, name, fn, rp)
     key_binding_counter = key_binding_counter + 1
     attrs.priority = key_binding_counter
     key_bindings[name] = attrs
-    update_key_bindings()
+    key_bindings_dirty = true
     dispatch_key_bindings[name] = key_cb
     mp.register_script_message(name, msg_cb)
 end
@@ -245,7 +251,7 @@ end
 function mp.remove_key_binding(name)
     key_bindings[name] = nil
     dispatch_key_bindings[name] = nil
-    update_key_bindings()
+    key_bindings_dirty = true
     mp.unregister_script_message(name)
 end
 
@@ -516,6 +522,8 @@ function mp.dispatch_events(allow_wait)
         end
     end
 end
+
+mp.register_idle(mp.flush_keybindings)
 
 -- additional helpers
 
