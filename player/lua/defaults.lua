@@ -645,7 +645,7 @@ function mp.get_osd_size()
         par = 1
     end
 
-    local aspect = 1.0 * w / math.max(h) / par
+    local aspect = 1.0 * w / math.max(h, 1.0) / par
     return w, h, aspect
 end
 
