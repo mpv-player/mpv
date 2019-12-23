@@ -732,17 +732,6 @@ static void script_get_time_ms(js_State *J)
     js_pushnumber(J, mpv_get_time_us(jclient(J)) / (double)(1000));
 }
 
-static void script_set_osd_ass(js_State *J)
-{
-    struct script_ctx *ctx = jctx(J);
-    int res_x = jsL_checkint(J, 1);
-    int res_y = jsL_checkint(J, 2);
-    const char *text = js_tostring(J, 3);
-    //osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
-    mp_wakeup_core(ctx->mpctx);
-    push_success(J);
-}
-
 // push object with properties names (NULL terminated) with respective vals
 static void push_nums_obj(js_State *J, const char * const names[],
                           const double vals[])
@@ -752,16 +741,6 @@ static void push_nums_obj(js_State *J, const char * const names[],
         js_pushnumber(J, vals[i]);
         js_setproperty(J, -2, names[i]);
     }
-}
-
-// args: none, return: object with properties width, height, aspect
-static void script_get_osd_size(js_State *J)
-{
-    struct mp_osd_res r = osd_get_vo_res(jctx(J)->mpctx->osd);
-    double ar = 1.0 * r.w / MPMAX(r.h, 1) / (r.display_par ? r.display_par : 1);
-    const char * const names[] = {"width", "height", "aspect", NULL};
-    const double vals[] = {r.w, r.h, ar};
-    push_nums_obj(J, names, vals);
 }
 
 // args: none, return: object with properties top, bottom, left, right
@@ -1258,8 +1237,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_wakeup_pipe, 0),
     FN_ENTRY(_hook_add, 3),
     FN_ENTRY(_hook_continue, 1),
-    FN_ENTRY(set_osd_ass, 3),
-    FN_ENTRY(get_osd_size, 0),
     FN_ENTRY(get_osd_margins, 0),
     FN_ENTRY(get_mouse_pos, 0),
     FN_ENTRY(input_set_section_mouse_area, 5),

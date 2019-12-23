@@ -192,6 +192,59 @@ mp.utils.shared_script_property_set = shared_script_property_set;
 mp.utils.shared_script_property_get = shared_script_property_get;
 mp.utils.shared_script_property_observe = shared_script_property_observe;
 
+// osd-ass
+var next_assid = 1;
+mp.create_osd_overlay = function create_osd_overlay(format) {
+    return {
+        format: format || "ass-events",
+        id: next_assid++,
+        data: "",
+        res_x: 0,
+        res_y: 720,
+        z: 0,
+
+        update: function ass_update() {
+            mp.command_native({
+                name: "osd-overlay",
+                format: this.format,
+                id: this.id,
+                data: this.data,
+                res_x: Math.round(this.res_x),
+                res_y: Math.round(this.res_y),
+                z: this.z,
+            });
+            return mp.last_error() ? undefined : true;
+        },
+
+        remove: function ass_remove() {
+            mp.command_native({
+                name: "osd-overlay",
+                id: this.id,
+                format: "none",
+                data: "",
+            });
+            return mp.last_error() ? undefined : true;
+        },
+    };
+}
+
+// osd-ass legacy API
+mp.set_osd_ass = function set_osd_ass(res_x, res_y, data) {
+    if (!mp._legacy_overlay)
+        mp._legacy_overlay = mp.create_osd_overlay("ass-events");
+    mp._legacy_overlay.res_x = res_x;
+    mp._legacy_overlay.res_y = res_y;
+    mp._legacy_overlay.data = data;
+    return mp._legacy_overlay.update();
+}
+
+mp.get_osd_size = function get_osd_size() {
+    var w = mp.get_property_number("osd-width", 0),
+        h = mp.get_property_number("osd-height", 0),
+        par = mp.get_property_number("osd-par", 0);
+    return {width: w, height: h, aspect: w / (h || 1) / (par || 1)};
+}
+
 /**********************************************************************
  *  key bindings
  *********************************************************************/

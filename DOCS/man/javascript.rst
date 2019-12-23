@@ -153,6 +153,10 @@ success, ``fn`` is called always a-sync, ``error`` is empty string on success.
 
 ``mp.unregister_script_message(name)``
 
+``mp.create_osd_overlay(format)``
+
+``mp.get_osd_size()``  (returned object has properties: width, height, aspect)
+
 ``mp.msg.log(level, ...)``
 
 ``mp.msg.fatal(...)``
