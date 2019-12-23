@@ -46,7 +46,8 @@ local user_opts = {
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
     windowcontrols = "auto",    -- whether to show window controls
-    windowcontrols_alignment = "right" -- which side to show window controls on
+    windowcontrols_alignment = "right", -- which side to show window controls on
+    greenandgrumpy = false,     -- disable santa hat
 }
 
 -- read options from config and command-line
@@ -2469,7 +2470,7 @@ function tick()
         end
 
         -- Santa hat
-        if is_december then
+        if is_december and not user_opts.greenandgrumpy then
             for i, line in ipairs(santa_hat_lines) do
                 ass:new_event()
                 ass:append(line_prefix .. line)
