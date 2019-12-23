@@ -612,6 +612,8 @@ function overlay_mt.update(ov)
         cmd[k] = v
     end
     cmd.name = "osd-overlay"
+    cmd.res_x = math.floor(cmd.res_x)
+    cmd.res_y = math.floor(cmd.res_y)
     mp.command_native(cmd)
 end
 
