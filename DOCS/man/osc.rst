@@ -343,6 +343,9 @@ Configurable Options
     ``--sub-use-margins`` option is set to ``yes``, the default). This may be
     fixed later.
 
+    This does not work correctly with video outputs like ``--vo=xv``, which
+    render OSD into the unscaled video.
+
 ``windowcontrols``
     Default: auto (Show window controls if there is no window border)
 
