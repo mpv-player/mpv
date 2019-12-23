@@ -205,7 +205,8 @@ function dispatch_key_binding(name, state, key_name) {
         cb(state, key_name);
 }
 
-function update_input_sections() {
+var binds_tid = 0;  // flush timer id. actual id's are always true-thy
+mp.flush_key_bindings = function flush_key_bindings() {
     var def = [], forced = [];
     for (var n in binds)  // Array.join() will later skip undefined .input
         (binds[n].forced ? forced : def).push(binds[n].input);
@@ -217,6 +218,14 @@ function update_input_sections() {
     sect = "input_forced_" + mp.script_name;
     mp.commandv("define-section", sect, forced.join("\n"), "force");
     mp.commandv("enable-section", sect, "allow-hide-cursor+allow-vo-dragging");
+
+    clearTimeout(binds_tid);  // cancel future flush if called directly
+    binds_tid = 0;
+}
+
+function sched_bindings_flush() {
+    if (!binds_tid)
+        binds_tid = setTimeout(mp.flush_key_bindings, 0);  // fires on idle
 }
 
 // name/opts maybe omitted. opts: object with optional bool members: repeatable,
@@ -263,7 +272,7 @@ function add_binding(forced, key, name, fn, opts) {
     if (key)
         key_data.input = key + " script-binding " + mp.script_name + "/" + name;
     binds[name] = key_data;  // used by user and/or our (key) script-binding
-    update_input_sections();
+    sched_bindings_flush();
 }
 
 mp.add_key_binding = add_binding.bind(null, false);
@@ -272,7 +281,7 @@ mp.add_forced_key_binding = add_binding.bind(null, true);
 mp.remove_key_binding = function(name) {
     mp.unregister_script_message(name);
     delete binds[name];
-    update_input_sections();
+    sched_bindings_flush();
 }
 
 /**********************************************************************
