@@ -290,6 +290,8 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
     struct demuxer *demuxer = opaque;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
+    if (!stream)
+        return 0;
 
     int ret = stream_read_partial(stream, buf, size);
 
@@ -303,6 +305,8 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     struct demuxer *demuxer = opaque;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
+    if (!stream)
+        return -1;
 
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
              whence == SEEK_END ? "end" :
@@ -345,7 +349,7 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
         .flags = flags,
     };
 
-    if (stream_control(stream, STREAM_CTRL_AVSEEK, &cmd) == STREAM_OK) {
+    if (stream && stream_control(stream, STREAM_CTRL_AVSEEK, &cmd) == STREAM_OK) {
         stream_drop_buffers(stream);
         return 0;
     }
@@ -1106,7 +1110,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         if (priv->own_stream)
             free_stream(priv->stream);
         priv->own_stream = false;
-        priv->stream = demuxer->stream;
+        priv->stream = NULL;
     }
 
     return 0;
@@ -1227,7 +1231,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
 
     if (flags & SEEK_FACTOR) {
         struct stream *s = priv->stream;
-        int64_t end = stream_get_size(s);
+        int64_t end = s ? stream_get_size(s) : -1;
         if (end > 0 && demuxer->ts_resets_possible &&
             !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
         {

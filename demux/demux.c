@@ -3104,7 +3104,6 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
 // Calling this after opening was completed is not allowed. Also, if opening
 // failed, this must not be called (or trying another demuxer would fail).
 // Useful so that e.g. subtitles don't keep the file or socket open.
-// Replaces it with a dummy stream for dumb reasons.
 // If there's ever the situation where we can't allow the demuxer to close
 // the stream, this function could ignore the request.
 void demux_close_stream(struct demuxer *demuxer)
@@ -3117,9 +3116,8 @@ void demux_close_stream(struct demuxer *demuxer)
 
     MP_VERBOSE(demuxer, "demuxer read all data; closing stream\n");
     free_stream(demuxer->stream);
-    demuxer->stream = stream_memory_open(demuxer->global, NULL, 0); // dummy
-    demuxer->stream->cancel = demuxer->cancel;
-    in->d_user->stream = demuxer->stream;
+    demuxer->stream = NULL;
+    in->d_user->stream = NULL;
 }
 
 static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
