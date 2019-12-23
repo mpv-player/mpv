@@ -998,31 +998,6 @@ static int script_raw_abort_async_command(lua_State *L)
     return 0;
 }
 
-static int script_set_osd_ass(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-    int res_x = luaL_checkinteger(L, 1);
-    int res_y = luaL_checkinteger(L, 2);
-    const char *text = luaL_checkstring(L, 3);
-    if (!text[0])
-        text = " "; // force external OSD initialization
-    osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
-    mp_wakeup_core(ctx->mpctx);
-    return 0;
-}
-
-static int script_get_osd_size(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
-    double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
-                    (vo_res.display_par ? vo_res.display_par : 1);
-    lua_pushnumber(L, vo_res.w);
-    lua_pushnumber(L, vo_res.h);
-    lua_pushnumber(L, aspect);
-    return 3;
-}
-
 static int script_get_osd_margins(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -1275,8 +1250,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
-    FN_ENTRY(set_osd_ass),
-    FN_ENTRY(get_osd_size),
     FN_ENTRY(get_osd_margins),
     FN_ENTRY(get_mouse_pos),
     FN_ENTRY(get_time),

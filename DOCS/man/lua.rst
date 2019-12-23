@@ -536,6 +536,41 @@ are useful only in special situations.
     Undo a previous registration with ``mp.register_script_message``. Does
     nothing if the ``name`` wasn't registered.
 
+``mp.create_osd_overlay(format)``
+    Create an OSD overlay. This is a very thin wrapper around the ``osd-overlay``
+    command. The function returns a table, which mostly contains fields that
+    will be passed to ``osd-overlay``. The ``format`` parameter is used to
+    initialize the ``format`` field. The ``data`` field contains the text to
+    be used as overlay. For details, see the ``osd-overlay`` command.
+
+    In addition, it provides the following methods:
+
+    ``update()``
+        Commit the OSD overlay to the screen, or in other words, run the
+        ``osd-overlay`` command with the current fields of the overlay table.
+
+    ``remove()``
+        Remove the overlay from the screen. A ``update()`` call will add it
+        again.
+
+    Example:
+
+    ::
+
+        ov = mp.create_osd_overlay("ass-events")
+        ov.data = "{\\an5}{\\b1}hello world!"
+        ov:update()
+
+    The advantage of using this wrapper (as opposed to running ``osd-overlay``
+    directly) is that the ``id`` field is allocated automatically.
+
+``mp.get_osd_size()``
+    Returns a tuple of ``osd_width, osd_height, osd_par``. The first two give
+    the size of the OSD in pixels (for video ouputs like ``--vo=xv``, this may
+    be "scaled" pixels). The third is the display pixel aspect ratio.
+
+    May return invalid/nonsense values if OSD is not initialized yet.
+
 mp.msg functions
 ----------------
 

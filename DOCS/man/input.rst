@@ -937,6 +937,86 @@ Input Commands that are Possibly Subject to Change
     Remove an overlay added with ``overlay-add`` and the same ID. Does nothing
     if no overlay with this ID exists.
 
+``osd-overlay``
+    Add/update/remove an OSD overlay.
+
+    (Although this sounds similar to ``overlay-add``, ``osd-overlay`` is for
+    text overlays, while ``overlay-add`` is for bitmaps. Maybe ``overlay-add``
+    will be merged into ``osd-overlay`` to remove this oddity.)
+
+    You can use this to add text overlays in ASS format. ASS has advanced
+    positioning and rendering tags, which can be used to render almost any kind
+    of vector graphics.
+
+    This command accepts the following parameters:
+
+    ``id``
+        Arbitrary integer that identifies the overlay. Multiple overlays can be
+        added by calling this command with different ``id`` parameters. Calling
+        this command with the same ``id`` replaces the previously set overlay.
+
+        There is a separate namespace for each libmpv client (i.e. IPC
+        connection, script), so IDs can be made up and assigned by the API user
+        without conflicting with other API users.
+
+        If the libmpv client is destroyed, all overlays associated with it are
+        also deleted. In particular, connecting via ``--input-ipc-server``,
+        adding an overlay, and disconnecting will remove the overlay immediately
+        again.
+
+    ``format``
+        String that gives the type of the overlay. Accepts the following values:
+
+        ``ass-events``
+            The ``data`` parameter is a string. The string is split on the
+            newline character. Every line is turned into the ``Text`` part of
+            a ``Dialogue`` ASS event. Timing is unused (but behavior of timing
+            dependent ASS tags may change in future mpv versions).
+
+            Note that it's better to put multiple lines into ``data``, instead
+            of adding multiple OSD overlays.
+
+            This provides 2 ASS ``Styles``. ``OSD`` contains the text style as
+            defined by the current ``--osd-...`` options. ``Default`` is
+            similar, and contains style that ``OSD`` would have if all options
+            were set to the default.
+
+            In addition, the ``res_x`` and ``res_y`` options specify the value
+            of the ASS ``PlayResX`` and ``PlayResY`` header fields. If ``res_y``
+            is set to 0, ``PlayResY`` is initialized to an arbitrary default
+            value (but note that the default for this command is 720, not 0).
+            If ``res_x`` is set to 0, ``PlayResX`` is set based on ``res_y``
+            such that a virtual ASS pixel has a square pixel aspect ratio.
+
+        ``none``
+            Special value that causes the overlay to be removed. Most parameters
+            other than ``id`` and ``format`` are mostly ignored.
+
+    ``data``
+        String defining the overlay contents according to the ``format``
+        parameter.
+
+    ``res_x``, ``res_y``
+        Used if ``format`` is set to ``ass-events`` (see description there).
+        Optional, defaults to 0/720.
+
+    ``z``
+        The Z order of the overlay. Optional, defaults to 0.
+
+        Note that Z order between different overlays of different formats is
+        static, and cannot be changed (currently, this means that bitmap
+        overlays added by ``overlay-add`` are always on top of the ASS overlays
+        added by ``osd-overlay``). In addition, the builtin OSD components are
+        always below any of the custom OSD. (This includes subtitles of any kind
+        as well as text rendered by ``show-text``.)
+
+        It's possible that future mpv versions will randomly change how Z order
+        between different OSD formats and builtin OSD is handled.
+
+    Note: always use named arguments (``mpv_command_node()``). Scripts should
+    use the ``mp.create_osd_overlay()`` helper instead of invoking this command
+    directly.
+
 ``script-message [<arg1> [<arg2> [...]]]``
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments

@@ -38,7 +38,7 @@ struct osd_object {
     struct dec_sub *sub;
 
     // OSDTYPE_EXTERNAL
-    struct osd_external *externals;
+    struct osd_external **externals;
     int num_externals;
 
     // OSDTYPE_EXTERNAL2
@@ -56,9 +56,7 @@ struct osd_object {
 };
 
 struct osd_external {
-    void *id;
-    char *text;
-    int res_x, res_y;
+    struct osd_external_ass ov;
     struct ass_state ass;
 };
 

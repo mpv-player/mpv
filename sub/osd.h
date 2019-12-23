@@ -202,9 +202,18 @@ struct mp_osd_res osd_get_vo_res(struct osd_state *osd);
 void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
                          struct mp_osd_res res, double compensate_par);
 
+struct osd_external_ass {
+    void *owner; // unique pointer (NULL is also allowed)
+    int64_t id;
+    int format;
+    char *data;
+    int res_x, res_y;
+    int z;
+};
+
 // defined in osd_libass.c and osd_dummy.c
-void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
-                      char *text);
+void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov);
+void osd_set_external_remove_owner(struct osd_state *osd, void *owner);
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 

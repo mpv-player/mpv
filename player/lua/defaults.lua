@@ -589,6 +589,65 @@ function mp.abort_async_command(t)
     end
 end
 
+local overlay_mt = {}
+overlay_mt.__index = overlay_mt
+local overlay_new_id = 0
+
+function mp.create_osd_overlay(format)
+    overlay_new_id = overlay_new_id + 1
+    local overlay = {
+        format = format,
+        id = overlay_new_id,
+        data = "",
+        res_x = 0,
+        res_y = 720,
+    }
+    setmetatable(overlay, overlay_mt)
+    return overlay
+end
+
+function overlay_mt.update(ov)
+    local cmd = {}
+    for k, v in pairs(ov) do
+        cmd[k] = v
+    end
+    cmd.name = "osd-overlay"
+    mp.command_native(cmd)
+end
+
+function overlay_mt.remove(ov)
+    mp.command_native {
+        name = "osd-overlay",
+        id = ov.id,
+        format = "none",
+        data = "",
+    }
+end
+
+-- legacy API
+function mp.set_osd_ass(res_x, res_y, data)
+    if not mp._legacy_overlay then
+        mp._legacy_overlay = mp.create_osd_overlay("ass-events")
+    end
+    mp._legacy_overlay.res_x = res_x
+    mp._legacy_overlay.res_y = res_y
+    mp._legacy_overlay.data = data
+    mp._legacy_overlay:update()
+end
+
+function mp.get_osd_size()
+    local w = mp.get_property_number("osd-width", 0)
+    local h = mp.get_property_number("osd-height", 0)
+    local par = mp.get_property_number("osd-par", 0)
+    if par == 0 then
+        par = 1
+    end
+
+    local aspect = 1.0 * w / math.max(h) / par
+    return w, h, aspect
+end
+
+
 local mp_utils = package.loaded["mp.utils"]
 
 function mp_utils.format_table(t, set)

@@ -24,8 +24,11 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     *out_imgs = (struct sub_bitmaps) {0};
 }
 
-void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
-                      char *text)
+void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
+{
+}
+
+void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
 {
 }
 

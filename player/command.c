@@ -4085,6 +4085,25 @@ static void overlay_uninit(struct MPContext *mpctx)
         mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }
 
+static void cmd_osd_overlay(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    struct osd_external_ass ov = {
+        .owner  = cmd->cmd->sender,
+        .id     = cmd->args[0].v.i64,
+        .format = cmd->args[1].v.i,
+        .data   = cmd->args[2].v.s,
+        .res_x  = cmd->args[3].v.i,
+        .res_y  = cmd->args[4].v.i,
+        .z      = cmd->args[5].v.i,
+    };
+
+    osd_set_external(mpctx->osd, &ov);
+    mp_wakeup_core(mpctx);
+}
+
 static struct track *find_track_with_url(struct MPContext *mpctx, int type,
                                          const char *url)
 {
@@ -5876,6 +5895,19 @@ const struct mp_cmd_def mp_cmds[] = {
                                         OPT_INT("h", v.i, 0),
                                         OPT_INT("stride", v.i, 0), }},
     { "overlay-remove", cmd_overlay_remove, { OPT_INT("id", v.i, 0) } },
+
+    { "osd-overlay", cmd_osd_overlay,
+        {
+            OPT_INT64("id", v.i64, 0),
+            OPT_CHOICE("format", v.i, 0, ({"none", 0},
+                                          {"ass-events", 1})),
+            OPT_STRING("data", v.s, 0),
+            OPT_INT("res_x", v.i, 0, OPTDEF_INT(0)),
+            OPT_INT("res_y", v.i, 0, OPTDEF_INT(720)),
+            OPT_INT("z", v.i, 0, OPTDEF_INT(0)),
+        },
+        .is_noisy = true,
+    },
 
     { "write-watch-later-config", cmd_write_watch_later_config },
 

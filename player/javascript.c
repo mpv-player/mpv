@@ -738,7 +738,7 @@ static void script_set_osd_ass(js_State *J)
     int res_x = jsL_checkint(J, 1);
     int res_y = jsL_checkint(J, 2);
     const char *text = js_tostring(J, 3);
-    osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
+    //osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
     mp_wakeup_core(ctx->mpctx);
     push_success(J);
 }

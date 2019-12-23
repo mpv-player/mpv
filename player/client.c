@@ -457,7 +457,7 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
     // causes a crash, block until all asynchronous requests were served.
     mpv_wait_async_requests(ctx);
 
-    osd_set_external(mpctx->osd, ctx, 0, 0, NULL);
+    osd_set_external_remove_owner(mpctx->osd, ctx);
     mp_input_remove_sections_by_owner(mpctx->input, ctx->name);
 
     pthread_mutex_lock(&clients->lock);
