@@ -191,28 +191,6 @@ double bstrtod(struct bstr str, struct bstr *rest)
     return r;
 }
 
-struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str)
-{
-    if (str.len == 0)
-        return NULL;
-    int count = 0;
-    for (int i = 0; i < str.len; i++)
-        if (str.start[i] == '\n')
-            count++;
-    if (str.start[str.len - 1] != '\n')
-        count++;
-    struct bstr *r = talloc_array_ptrtype(talloc_ctx, r, count);
-    unsigned char *p = str.start;
-    for (int i = 0; i < count - 1; i++) {
-        r[i].start = p;
-        while (*p++ != '\n');
-        r[i].len = p - r[i].start;
-    }
-    r[count - 1].start = p;
-    r[count - 1].len = str.start + str.len - p;
-    return r;
-}
-
 struct bstr bstr_splitchar(struct bstr str, struct bstr *rest, const char c)
 {
     int pos = bstrchr(str, c);
