@@ -79,6 +79,9 @@ Interface changes
       instead of by integer index)
     - if `--fs` is used but `--fs-screen` is not set, mpv will now use `--screen`
       instead.
+    - change the default of --hwdec to "no" on RPI. The default used to be "mmal"
+      specifically if 'Raspberry Pi support' was enabled at configure time
+      (equivalent to --enable-rpi). Use --hwdec=mmal to get the old behavior.
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
