@@ -998,7 +998,10 @@ Video
 
         Always enabling HW decoding by putting it into the config file is
         discouraged. If you use the Ubuntu package, delete ``/etc/mpv/mpv.conf``,
-        as the package tries to enable HW decoding by default.
+        as the package tries to enable HW decoding by default by setting
+        ``hwdec=vaapi`` (which is less than ideal, and may even cause
+        sub-optimal wrappers to be used). Or at least change it to
+        ``hwdec=auto-safe``.
 
     Use one of the auto modes if you want to enable hardware decoding.
     Explicitly selecting the mode is mostly meant for testing and debugging.
@@ -1010,11 +1013,25 @@ Video
         Even if enabled, hardware decoding is still only white-listed for some
         codecs. See ``--hwdec-codecs`` to enable hardware decoding in more cases.
 
+    .. admonition:: Which method to choose?
+
+        - If you only want to enable hardware decoding at runtime, don't set the
+          parameter, or put ``hwdec=no`` into your ``mpv.conf`` (relevant on
+          distros which force-enable it by default, such as on Ubuntu). Use the
+          ``Ctrl+h`` default binding to enable it at runtime.
+        - If you're not sure, but want hardware decoding always enabled by
+          default, put ``hwdec=auto-safe`` into your ``mpv.conf``, and
+          acknowledge that this use case is not "really" supported and may cause
+          problems.
+        - If you want to test available hardware decoding methods, pass
+          ``--hwdec=auto --hwdec-codecs`` and look at the terminal output.
+
     ``<api>`` can be one of the following:
 
     :no:        always use software decoding (default)
-    :auto:      enable best hw decoder (see below)
+    :auto:      forcibly enable any hw decoder found (see below)
     :yes:       exactly the same as ``auto``
+    :auto-safe: enable any whitelisted hw decoder (see below)
     :auto-copy: enable best hw decoder with copy-back (see below)
     :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
@@ -1048,6 +1065,20 @@ Video
     work, it will always fall back to software decoding, instead of trying the
     next method (might matter on some Linux systems).
 
+    ``auto-safe`` is similar to ``auto``, but allows only whitelisted methods
+    that are considered "safe". This is supposed to be a reasonable way to
+    enable hardware decdoding by default in a config file (even though you
+    shouldn't do that anyway; prefer runtime enabling with ``Ctrl+h``). Unlike
+    ``auto``, this will not try to enable unknown or known-to-be-bad methods. In
+    addition, this may disable hardware decoding in other situations when it's
+    known to cause problems, but currently this mechanism is quite primitive.
+    (As an example for something that still causes problems: certain
+    combinations of HEVC and Intel chips on Windows tend to cause mpv to crash,
+    most likely due to driver bugs.)
+
+    ``auto-copy-safe`` selects the union of methods selected with ``auto-safe``
+    and ``auto-copy``.
+
     ``auto-copy`` selects only modes that copy the video data back to system
     memory after decoding. This selects modes like ``vaapi-copy`` (and so on).
     If none of these work, hardware decoding is disabled. This mode is usually
@@ -1074,8 +1105,9 @@ Video
     output path. To use this deinterlacing you must pass the option:
     ``vd-lavc-o=deint=[weave|bob|adaptive]``.
     Pass ``weave`` (or leave the option unset) to not attempt any
-    deinterlacing. ``cuda`` should always be preferred unless the ``gpu``
-    vo is not being used or filters are required.
+    deinterlacing. ``cuda`` should always be preferred over ``cuda-copy`` unless
+    the ``gpu`` vo is not being used or filters are required. Using ``nvdec``
+    should be preferred on Nvidia hardware.
 
     ``nvdec`` is a newer implementation of CUVID/CUDA decoding, which uses the
     FFmpeg decoders for file parsing. Experimental, is known not to correctly

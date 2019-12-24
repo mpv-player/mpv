@@ -155,6 +155,7 @@ struct hwdec_info {
     enum AVPixelFormat pix_fmt; // if not NONE, select in get_format
     bool use_hw_frames; // set AVCodecContext.hw_frames_ctx
     bool use_hw_device; // set AVCodecContext.hw_device_ctx
+    unsigned int flags; // HWDEC_FLAG_*
 
     // for internal sorting
     int auto_pos;
@@ -216,19 +217,33 @@ typedef struct lavc_ctx {
     struct mp_decoder public;
 } vd_ffmpeg_ctx;
 
+enum {
+    HWDEC_FLAG_AUTO         = (1 << 0), // prioritize in autoprobe order
+    HWDEC_FLAG_WHITELIST    = (1 << 1), // whitelist for auto-safe
+};
+
+struct autoprobe_info {
+    const char *method_name;
+    unsigned int flags;         // HWDEC_FLAG_*
+};
+
 // Things not included in this list will be tried last, in random order.
-static const char *const hwdec_autoprobe_order[] = {
-    "d3d11va",
-    "dxva2",
-    "dxva2-copy",
-    "d3d11va-copy",
-    "nvdec",
-    "nvdec-copy",
-    "vaapi",
-    "vaapi-copy",
-    "vdpau",
-    "vdpau-copy",
-    0
+const struct autoprobe_info hwdec_autoprobe_info[] = {
+    {"d3d11va",         HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"dxva2",           HWDEC_FLAG_AUTO},
+    {"dxva2-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"d3d11va-copy",    HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"nvdec",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"nvdec-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"vaapi",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"vaapi-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"vdpau",           HWDEC_FLAG_AUTO},
+    {"vdpau-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"mmal",            HWDEC_FLAG_AUTO},
+    {"mmal-copy",       HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"videotoolbox",    HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"videotoolbox-copy", HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {0}
 };
 
 static int hwdec_compare(const void *p1, const void *p2)
@@ -266,9 +281,14 @@ static void add_hwdec_item(struct hwdec_info **infos, int *num_infos,
 
     info.rank = *num_infos;
     info.auto_pos = INT_MAX;
-    for (int x = 0; hwdec_autoprobe_order[x]; x++) {
-        if (strcmp(hwdec_autoprobe_order[x], info.method_name) == 0)
-            info.auto_pos = x;
+
+    for (int x = 0; hwdec_autoprobe_info[x].method_name; x++) {
+        const struct autoprobe_info *entry = &hwdec_autoprobe_info[x];
+        if (strcmp(entry->method_name, info.method_name) == 0) {
+            info.flags |= entry->flags;
+            if (info.flags & HWDEC_FLAG_AUTO)
+                info.auto_pos = x;
+        }
     }
 
     MP_TARRAY_APPEND(NULL, *infos, *num_infos, info);
@@ -434,8 +454,11 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
                           bstr_equals0(opt, "yes") ||
                           bstr_equals0(opt, "");
-    bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy");
-    bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy;
+    bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
+                           bstr_equals0(opt, "auto-copy-safe");
+    bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
+                           bstr_equals0(opt, "auto-copy-safe");
+    bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;
 
     if (!hwdec_requested) {
         MP_VERBOSE(vd, "No hardware decoding requested.\n");
@@ -458,6 +481,9 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
             if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
                                  bstr_equals0(opt, hwdec->name)))
+                continue;
+
+            if (hwdec_auto_safe && !(hwdec->flags & HWDEC_FLAG_WHITELIST))
                 continue;
 
             MP_VERBOSE(vd, "Looking at hwdec %s...\n", hwdec->name);
@@ -529,6 +555,12 @@ static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
         }
 
         talloc_free(hwdecs);
+
+        mp_info(log, "  auto (yes '')\n");
+        mp_info(log, "  no\n");
+        mp_info(log, "  auto-safe\n");
+        mp_info(log, "  auto-copy\n");
+        mp_info(log, "  auto-copy-safe\n");
 
         return M_OPT_EXIT;
     }
