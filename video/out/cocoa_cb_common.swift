@@ -485,6 +485,12 @@ class CocoaCB: NSObject {
                 return VO_TRUE
             }
             return VO_FALSE
+        case VOCTRL_GET_HIDPI_SCALE:
+            if let scaleFactor = data?.assumingMemoryBound(to: CDouble.self) {
+                scaleFactor.pointee = Double(ccb.window?.backingScaleFactor ?? 1.0)
+                return VO_TRUE;
+            }
+            return VO_FALSE
         case VOCTRL_RESTORE_SCREENSAVER:
             ccb.enableDisplaySleep()
             return VO_TRUE
