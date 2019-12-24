@@ -3242,6 +3242,20 @@ static int mp_property_commands(void *ctx, struct m_property *prop,
             struct mpv_node *entry = node_array_add(root, MPV_FORMAT_NODE_MAP);
 
             node_map_add_string(entry, "name", cmd->name);
+
+            struct mpv_node *args =
+                node_map_add(entry, "args", MPV_FORMAT_NODE_ARRAY);
+            for (int i = 0; i < MP_CMD_DEF_MAX_ARGS; i++) {
+                const struct m_option *a = &cmd->args[i];
+                if (!a->type)
+                    break;
+                struct mpv_node *ae = node_array_add(args, MPV_FORMAT_NODE_MAP);
+                node_map_add_string(ae, "name", a->name);
+                node_map_add_string(ae, "type", a->type->name);
+                node_map_add_flag(ae, "optional", a->flags & MP_CMD_OPT_ARG);
+            }
+
+            node_map_add_flag(entry, "vararg", cmd->vararg);
         }
 
         return M_PROPERTY_OK;
