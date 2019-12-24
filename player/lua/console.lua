@@ -330,6 +330,47 @@ function maybe_exit()
     end
 end
 
+function help_command(param)
+    local cmdlist = mp.get_property_native('command-list')
+    local error_style = '{\\1c&H7a77f2&}'
+    local output = ''
+    if param == '' then
+        output = 'Available commands:\n'
+        for _, cmd in ipairs(cmdlist) do
+            output = output  .. '  ' .. cmd.name
+        end
+        output = output .. '\n'
+        output = output .. 'Use "help command" to show information about a command.\n'
+        output = output .. "ESC or Ctrl+d exits the console.\n"
+    else
+        local cmd = nil
+        for _, curcmd in ipairs(cmdlist) do
+            if curcmd.name:find(param, 1, true) then
+                cmd = curcmd
+                if curcmd.name == param then
+                    break -- exact match
+                end
+            end
+        end
+        if not cmd then
+            log_add(error_style, 'No command matches "' .. param .. '"!')
+            return
+        end
+        output = output .. 'Command "' .. cmd.name .. '"\n'
+        for _, arg in ipairs(cmd.args) do
+            output = output .. '    ' .. arg.name .. ' (' .. arg.type .. ')'
+            if arg.optional then
+                output = output .. ' (optional)'
+            end
+            output = output .. '\n'
+        end
+        if cmd.vararg then
+            output = output .. 'This command supports variable arguments.\n'
+        end
+    end
+    log_add('', output)
+end
+
 -- Run the current command and clear the line (Enter)
 function handle_enter()
     if line == '' then
@@ -339,7 +380,15 @@ function handle_enter()
         history[#history + 1] = line
     end
 
-    mp.command(line)
+    -- match "help [<text>]", return <text> or "", strip all whitespace
+    local help = line:match('^%s*help%s+(.-)%s*$') or
+                 (line:match('^%s*help$') and '')
+    if help then
+        help_command(help)
+    else
+        mp.command(line)
+    end
+
     clear()
 end
 
