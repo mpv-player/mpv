@@ -136,6 +136,9 @@ function ass_escape(str)
     -- Precede newlines with a ZWNBSP to prevent ASS's weird collapsing of
     -- consecutive newlines
     str = str:gsub('\n', '\239\187\191\\N')
+    -- Turn leading spaces into hard spaces to prevent ASS from stripping them
+    str = str:gsub('\\N ', '\\N\\h')
+    str = str:gsub('^ ', '\\h')
     return str
 end
 
