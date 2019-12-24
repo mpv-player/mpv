@@ -1024,7 +1024,9 @@ Video
           acknowledge that this use case is not "really" supported and may cause
           problems.
         - If you want to test available hardware decoding methods, pass
-          ``--hwdec=auto --hwdec-codecs`` and look at the terminal output.
+          ``--hwdec=auto --hwdec-codecs=all`` and look at the terminal output.
+        - If you're a developer, or want to perform elaborate tests, you may
+          need any of the other possible option values.
 
     ``<api>`` can be one of the following:
 
