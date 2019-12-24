@@ -301,6 +301,7 @@ class Window: NSWindow, NSWindowDelegate {
             let cRect = frameRect(forContentRect: rect)
             unfsContentFrame = rect
             setFrame(cRect, display: true)
+            cocoaCB.layer?.update(force: true)
         }
     }
 
@@ -464,6 +465,7 @@ class Window: NSWindow, NSWindowDelegate {
         }
         if currentScreen != screen {
             cocoaCB.updateDisplaylink()
+            cocoaCB.layer?.update(force: true)
         }
         currentScreen = screen
     }
