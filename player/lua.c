@@ -1131,7 +1131,7 @@ static int script_file_info(lua_State *L)
         "mode", "size",
         "atime", "mtime", "ctime", NULL
     };
-    const unsigned int stat_values[] = {
+    const lua_Number stat_values[] = {
         statbuf.st_mode,
         statbuf.st_size,
         statbuf.st_atime,
@@ -1141,7 +1141,7 @@ static int script_file_info(lua_State *L)
 
     // Add all fields
     for (int i = 0; stat_names[i]; i++) {
-        lua_pushinteger(L, stat_values[i]);
+        lua_pushnumber(L, stat_values[i]);
         lua_setfield(L, -2, stat_names[i]);
     }
 
