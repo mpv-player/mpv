@@ -122,6 +122,7 @@ struct input_ctx {
 
     // Mouse position on the consumer side (as command.c sees it)
     int mouse_x, mouse_y;
+    int mouse_hover;  // updated on mouse-enter/leave
     char *mouse_section; // last section to receive mouse event
 
     // Mouse position on the producer side (as the VO sees it)
@@ -719,8 +720,13 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod) && !force_mouse)
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE || unmod == MP_KEY_MOUSE_ENTER) {
+        ictx->mouse_hover = unmod == MP_KEY_MOUSE_ENTER;
         update_mouse_section(ictx);
-        mp_input_queue_cmd(ictx, get_cmd_from_keys(ictx, NULL, code));
+
+        mp_cmd_t *cmd = get_cmd_from_keys(ictx, NULL, code);
+        if (!cmd)  // queue dummy cmd so that mouse-pos can notify observers
+            cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
+        mp_input_queue_cmd(ictx, cmd);
         return;
     }
     double now = mp_time_sec();
@@ -962,11 +968,12 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
     return ret;
 }
 
-void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y)
+void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y, int *hover)
 {
     input_lock(ictx);
     *x = ictx->mouse_x;
     *y = ictx->mouse_y;
+    *hover = ictx->mouse_hover;
     input_unlock(ictx);
 }
 

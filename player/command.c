@@ -2633,12 +2633,13 @@ static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
 
     case M_PROPERTY_GET: {
         struct mpv_node node;
-        int x, y;
-        mp_input_get_mouse_pos(mpctx->input, &x, &y);
+        int x, y, hover;
+        mp_input_get_mouse_pos(mpctx->input, &x, &y, &hover);
 
         node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
         node_map_add_int64(&node, "x", x);
         node_map_add_int64(&node, "y", y);
+        node_map_add_flag(&node, "hover", hover);
         *(struct mpv_node *)arg = node;
 
         return M_PROPERTY_OK;

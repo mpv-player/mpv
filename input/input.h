@@ -99,7 +99,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
 // Like mp_input_set_mouse_pos(), but ignore mouse disable option.
 void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y);
 
-void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y);
+void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y, int *hover);
 
 // Return whether we want/accept mouse input.
 bool mp_input_mouse_enabled(struct input_ctx *ictx);
