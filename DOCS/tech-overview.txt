@@ -242,3 +242,376 @@ sub/:
 etc/:
     The file input.conf is actually integrated into the mpv binary by the
     build system. It contains the default keybindings.
+
+Best practices and Concepts within mpv
+======================================
+
+General contribution etc.
+-------------------------
+
+See DOCS/contribute.md.
+
+Error checking
+--------------
+
+If an error is relevant, it should be handled. If it's interesting, log the
+error. However, mpv often keeps errors silent and reports failures somewhat
+coarsely by propagating them upwards the caller chain. This is OK, as long as
+the errors are not very interesting, or would require a developer to debug it
+anyway (in which case using a debugger would be more convenient, and the
+developer would need to add temporary debug printfs to get extremely detailed
+information which would not be appropriate during normal operation).
+
+Basically, keep a balance on error reporting. But always check them, unless you
+have a good argument not to.
+
+Memory allocation errors (OOM) are a special class of errors. Normally such
+allocation failures are not handled "properly". Instead, abort() is called.
+(New code should use MP_HANDLE_OOM() for this.) This is done out of laziness and
+for convenience, and due to the fact that MPlayer/mplayer2 never handled it
+correctly. (MPlayer varied between handling it correctly, trying to do so but
+failing, and just not caring, while mplayer2 started using abort() for it.)
+
+This is justifiable in a number of ways. Error handling paths are notoriously
+untested and buggy, so merely having them won't make your program more reliable.
+Having these error handling paths also complicates non-error code, due to the
+need to roll back state at any point after a memory allocation.
+
+Take any larger body of code, that is supposed to handle OOM, and test whether
+the error paths actually work, for example by overriding malloc with a version
+that randomly fails. You will find bugs quickly, and often they will be very
+annoying to fix (if you can even reproduce them).
+
+In addition, a clear indication that something went wrong may be missing. On
+error your program may exhibit "degraded" behavior by design. Consider a video
+encoder dropping frames somewhere in the middle of a video due to temporary
+allocation failures, instead of just exiting with an errors. In other cases, it
+may open conceptual security holes. Failing fast may be better.
+
+mpv uses GPU APIs, which may be break on allocation errors (because driver
+authors will have the same issues as described here), or don't even have a real
+concept for dealing with OOM (OpenGL).
+
+libmpv is often used by GUIs, which I predict always break if OOM happens.
+
+Last but not least, OSes like Linux use "overcommit", which basically means that
+your program may crash any time OOM happens, even if it doesn't use malloc() at
+all!
+
+But still, don't just assume malloc() always succeeds. Use MP_HANDLE_OOM(). The
+ta* APIs do this for you. The reason for this is that dereferencing a NULL
+pointer can have security relevant consequences if large offsets are involved.
+Also, a clear error message is better than a random segfault.
+
+Some big memory allocations are checked anyway. For example, all code must
+assume that allocating video frames or packets can fail. (The above example
+of dropping video frames during encoding is entirely possible in mpv.)
+
+Undefined behavior
+------------------
+
+Undefined behavior (UB) is a concept in the C language. C is famous for being a
+language that makes it almost impossible to write working code, because
+undefined behavior is so easily triggered, compilers will happily abuse it to
+generate "faster" code, debugging tools will shout at you, and sometimes it
+even means your code doesn't work.
+
+There is a lot of literature on this topic. Read it.
+
+(In C's defense, UB exists in other languages too, but since they're not used
+for low level infrastructure, and/or these languages are at times not rigorously
+defined, simply nobody cares. However, the C standard committee is still guilty
+for not addressing this. I'll admit that I can't even tell from the standard's
+gibberish whether some specific behavior is UB or not. It's written like tax
+law.)
+
+In mpv, we generally try to avoid undefined behavior. For one, we want portable
+and reliable operation. But more importantly, we want clean output from
+debugging tools, in order to find real bugs more quickly and effectively.
+
+Avoid the "works in practice" argument. Once debugging tools come into play, or
+simply when "in practice" stops being true, this will all get back to you in a
+bad way.
+
+Global state, library safety
+----------------------------
+
+Mutable global state is when code uses global variables that are not read-only.
+This must be avoided in mpv. Always use context structs that the caller of
+your code needs to allocate, and whose pointers are passed to your functions.
+
+Library safety means that your code (or library) can be used by a library
+without causing conflicts with other library users in the same process. To any
+piece of code, a "safe" library's API can simply be used, without having to
+worry about other API users that may be around somewhere.
+
+Libraries are often not library safe, because they they use global mutable state
+or other "global" resources. Typical examples include use of signals, simple
+global variables (like hsearch() in libc), or internal caches not protected by
+locks.
+
+A surprisingly high number of libraries are not library safe because they need
+global initialization. Typically they provide an API function, which
+"initializes" the library, and which must be called before calling any other
+API functions. Often, you are to provide global configuration parameters, which
+can change the behavior of the library. If two libraries A and B use library C,
+but A and B initialize C with different parameters, something "bad" may happen.
+In addition, these global initialization functions are often not thread-safe. So
+if A and B try to initialize C at the same time (from different threads and
+without knowing about each other), it may cause undefined behavior. (libcurl is
+a good example of both of these issues. FFmpeg and some TLS libraries used to be
+affected, but improved.)
+
+This is so bad because library A and B from the previous example most likely
+have no way to cooperate, because they're from different authors and have no
+business knowing each others. They'd need a library D, which wraps library C
+in a safe way. Unfortunately, typically something worse happens: libraries get
+"infected" by the unsafeness of its sub-libraries, and export a global init API
+just to initialize the sub-libraries. In the previous example, libraries A and B
+would export global init APIs just to init library C, even though the rest of
+A/B are clean and library safe. (Again, libcurl is an example of this, if you
+subtract other historic anti-features.)
+
+The main problem with library safety is that its lack propagates to all
+libraries using the library.
+
+We require libmpv to be library safe. This is not really possible, because some
+libraries are not library safe (FFmpeg, Xlib, partially ALSA). However, for
+ideological reasons, there is no global init API, and best effort is made to try
+to avoid problems.
+
+libmpv has some features that are not library safe, but which are disabled by
+default (such as terminal usage aka stdout, or JSON IPC blocking SIGPIPE for
+internal convenience).
+
+A notable, very disgustingly library unsafe behavior of libmpv is calling
+abort() on some memory allocation failure. See error checking section.
+
+Logging
+-------
+
+All logging and terminal output in mpv goes through the functions and macros
+provided in common/msg.h. This is in part for library safety, and in part to
+make sure users can silence all output, or to redirect the output elsewhere,
+like a log file or the internal console.lua script.
+
+Locking
+-------
+
+See generally available literature. In mpv, we use pthread for this.
+
+Always keep locking clean. Don't skip locking just because it will work "in
+practice". (See undefined behavior section.) If your use case is simple, you may
+use C11 atomics( osdep/atomic.h for partial C99 support), but most likely you
+will only hurt yourself and others.
+
+Always make clear which fields in a struct are protected by which lock. If a
+field is immutable, or simply not thread-safe (e.g. state for a single worker
+thread), document it as well.
+
+Internal mpv APIs are assumed to be not thread-safe by default. If they have
+special guarantees (such as being usable by more than one thread at a time),
+these should be explicitly documented.
+
+All internal mpv APIs must be free of global state. Even if a component is not
+thread-safe, multiple threads can use _different_ instances of it without any
+locking.
+
+On a side note, recursive locks may seem convenient at first, but introduces
+additional problems with condition variables and locking hierarchies. They
+should be avoided.
+
+Locking hierarchy
+-----------------
+
+A simple way to avoid deadlocks with classic locking is to define a locking
+hierarchy or lock order. If all threads acquire locks in the same order, no
+deadlocks will happen.
+
+For example, a "leaf" lock is a lock that is below all other locks in the
+hierarchy. You can acquire it any time, as long as you don't acquire other
+locks while holding it.
+
+Unfortunately, C has no way to declare or check the lock order, so you should at
+least document it.
+
+In addition, try to avoid exposing locks to the outside. Making the declaration
+of a lock private to a specific .c file (and _not_ exporting accessors or
+lock/unlock that manipulate the lock) is a good idea. Your component's API may
+acquire internal locks, but should release them when returning. Keeping the
+entire locking in a single file makes it easy to check it.
+
+Avoiding callback hell
+----------------------
+
+mpv code is separated in components, like the "frontend" (i.e. MPContext mpctx),
+VOs, AOs, demuxers, and more. The frontend usually calls "down" the usage
+hierarchy: mpctx almost on top, then things like vo/ao, and utility code on the
+very bottom.
+
+"Callback hell" is when when components call both up and down the hierarchy,
+which for example leads to accidentally recursion, reentrancy problems, or
+locking nightmares. This is avoided by (mostly) calling only down the hierarchy.
+Basically the call graph forms a DAG. The other direction is handled by event
+queues, wakeup callbacks, and similar mechanisms.
+
+Typically, a component provides an API, and does not know anything about its
+user. The API user (component higher in the hierarchy) polls the state of the
+lower component when needed.
+
+This also enforces some level of modularization, and with some luck the locking
+hierarchy. (Basically, locks of lower components automatically become leaf
+locks.) Another positive effect is simpler memory management.
+
+(Also see e.g.: http://250bpm.com/blog:24)
+
+Wakeup callbacks
+----------------
+
+This is a common concept in mpv. Even the public API uses it. It's used when an
+API has internal threads (or otherwise triggers asynchronous events), but the
+component call hierarchy needs to be kept. The wakeup callback is the only
+exception to the call hierarchy, and always calls up.
+
+For example, vo spawns a thread that the API user. The mpv frontend is oblivious
+to this. vo simply provides a thread-safe API. vo needs to notify the API user
+of new events. But the vo event producer is on the vo thread - it can't simply
+invoke a callback back into the API user, because then the API user has to deal
+with locking, despite not using threads. In addition, this will probably cause
+problems like mentioned in the "callback hell" section, especially lock order
+issues.
+
+The solution is the wakeup callback. It merely unblocks the API user from
+waiting, and the API user then uses the normal vo API to examine whether or
+which state changed. As a concept, it documents what a wakeup callback is
+allowed to do and what not, to avoid the aforementioned problems.
+
+Generally, you are not allowed to call any API from the wakeup callback. You
+just do whatever is needed to unblock your thread. For example, if it's waiting
+on a mutex/condition variable, acquire the mutex, set a change flag, signal
+the condition variable, unlock, return. (This mutex must not be held when
+calling the API. It must be a leaf lock.)
+
+Restricting the wakeup callback like this sidesteps any reentrancy issues and
+other complexities. The API implementation can simply hold internal (and
+non-recursive) locks while invoking the wakeup callback.
+
+The API user still needs to deal with locking (probably), but there's only the
+need to implement a single "receiver", that can handle the entire API of the
+used component. (Or multiple APIs - MPContext for example has only 1 wakeup
+callback that handles all AOs, VOs, input, demuxers, and more. It simple re-runs
+the playloop.)
+
+You could get something more advanced by turning this into a message queue. The
+API would append a message to the queue, and the API user can read it. But then
+you still need a way to "wakeup" the API user (unless you force the API user
+to block on your API, which will make things inconvenient for the API user). You
+also need to worry about what happens if the message queue overruns (you either
+lose messages or have unbounded memory usage). In the mpv public API, the
+distinction between message queue and wakeup callback is sort of blurry, because
+it does provide a message queue, but an additional wakeup callback, so API
+users are not required to call mpv_wait_event() with a high timeout.
+
+mpv itself prefers using wakeup callbacks over a generic event queue, because
+most times an event queue is not needed (or complicates things), and it is
+better to do it manually.
+
+(You could still abstract the API user side of wakeup callback handling, and
+avoid reimplementing it all the time. Although mp_dispatch_queue already
+provides mechanisms for this.)
+
+Condition variables
+-------------------
+
+They're used whenever a thread needs to wait for something, without nonsense
+like sleep calls or busy waiting. mpv uses the standard pthread API for this.
+There's a lot of literature on it. Read it.
+
+For initial understanding, it may be helpful to know that condition variables
+are not variables that signal a condition. pthread_cond_t does not have any
+state per-se. Maybe pthread_cond_t would better be named pthread_interrupt_t,
+because its sole purpose is to interrupt a thread waiting via pthread_cond_wait()
+(or similar). The "something" in "waiting for something" can be called
+predicate (to avoid confusing it with "condition"). Consult literature for the
+proper terms.
+
+The very short version is:
+
+    // --- Shared declarations
+
+    pthread_mutex_t lock;
+    pthread_cond_t cond_var;
+    struct something state_var; // protected by lock, changes signaled by cond_var
+
+    // --- Waiter thread
+
+    pthread_mutex_lock(&lock);
+
+    // Wait for a change in state_var. We want to wait until predicate_fulfilled()
+    // returns true.
+    // Must be a loop for 2 reasons:
+    //  1. cond_var may be associated with other conditions too
+    //  2. pthread_cond_wait() can have sporadic wakeups
+    while (!predicate_fulfilled(&state_var)) {
+        // This unlocks, waits for cond_var to be signaled, and then locks again.
+        // The _whole_ point of cond_var is that unlocking and waiting for the
+        // signal happens atomically.
+        pthread_cond_wait(&cond_var, &lock);
+    }
+
+    // Here you may react to the state change. The state cannot change
+    // asynchronously as long as you still hold the lock (and didn't release
+    // and reacquire it).
+    // ...
+
+    pthread_mutex_unlock(&lock);
+
+    // --- Signaler thread
+
+    pthread_mutex_lock(&lock);
+
+    // Something changed. Update the shared variable with the new state.
+    update_state(&state_var);
+
+    // Notify that something changed. This will wake up the waiter thread if
+    // it's blocked in pthread_cond_wait(). If not, nothing happens.
+    pthread_cond_broadcast(&cond_var);
+
+    // Fun fact: good implementations wake up the waiter only when the lock is
+    // released, to reduce kernel scheduling overhead.
+    pthread_mutex_unlock(&lock);
+
+
+Some basic rules:
+    1. Always access your state under proper locking
+    2. Always check your predicate before every call to pthread_cond_wait()
+       (And don't call pthread_cond_wait() if the predicate is fulfilled.)
+    3. Always call pthread_cond_wait() in a loop
+       (And only if your predicate failed without releasing the lock..)
+    4. Always call pthread_cond_broadcast()/_signal() inside of its associated
+       lock
+
+mpv sometimes violates rule 3, and leaves "retrying" (i.e. looping) to the
+caller.
+
+Common pitfalls:
+    - Thinking that pthread_cond_t is some kind of semaphore, or holds any
+       application state or the user predicate (it _only_ wakes up threads
+       that are at the same time blocking on pthread_cond_wait() and friends,
+       nothing else)
+    - Changing the predicate, but not updating all pthread_cond_broadcast()/
+      _signal() calls correctly
+    - Forgetting that pthread_cond_wait() unlocks the lock (other threads can
+      and must acquire the lock)
+    - Holding multiple nested locks while trying to wait (=> deadlock, violates
+      the lock order anyway)
+    - Waiting for a predicate correctly, but unlocking/relocking before acting
+      on it (unlocking allows arbitrary state changes)
+    - Confusing which lock/condition var. is used to manage a bit of state
+
+Generally available literature probably has better examples and explanations.
+
+Using condition variables the proper way is generally preferred over using more
+messy variants of them. (Just saying because on win32, "Event" exists, and  it's
+inferior to condition variables. Try to avoid the win32 primitives, even if
+you're dealing with Windows-only code.)
