@@ -2585,9 +2585,20 @@ static void copy_channels(const m_option_t *opt, void *dst, const void *src)
 
 static bool channels_equal(const m_option_t *opt, void *a, void *b)
 {
-    struct mp_chmap *ca = a;
-    struct mp_chmap *cb = b;
-    return mp_chmap_equals(ca, cb);
+    struct m_channels *ca = a;
+    struct m_channels *cb = b;
+
+    if (ca->set         != cb->set ||
+        ca->auto_safe   != cb->auto_safe ||
+        ca->num_chmaps  != cb->num_chmaps)
+        return false;
+
+    for (int n = 0; n < ca->num_chmaps; n++) {
+        if (!mp_chmap_equals(&ca->chmaps[n], &cb->chmaps[n]))
+            return false;
+    }
+
+    return true;
 }
 
 const m_option_type_t m_option_type_channels = {
