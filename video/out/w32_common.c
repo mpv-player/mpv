@@ -867,6 +867,57 @@ static bool update_fullscreen_state(struct vo_w32_state *w32)
     return toggle_fs;
 }
 
+static void update_minimized_state(struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    if (!!IsMinimized(w32->window) != w32->opts->window_minimized) {
+        if (w32->opts->window_minimized) {
+            ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
+        } else {
+            ShowWindow(w32->window, SW_RESTORE);
+        }
+    }
+}
+
+static void update_maximized_state(struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    // Don't change the maximized state in fullscreen for now. In future, this
+    // should be made to apply the maximized state on leaving fullscreen.
+    if (w32->current_fs)
+        return;
+
+    WINDOWPLACEMENT wp = { .length = sizeof wp };
+    GetWindowPlacement(w32->window, &wp);
+
+    if (wp.showCmd == SW_SHOWMINIMIZED) {
+        // When the window is minimized, setting this property just changes
+        // whether it will be maximized when it's restored
+        if (w32->opts->window_maximized) {
+            wp.flags |= WPF_RESTORETOMAXIMIZED;
+        } else {
+            wp.flags &= ~WPF_RESTORETOMAXIMIZED;
+        }
+        SetWindowPlacement(w32->window, &wp);
+    } else if ((wp.showCmd == SW_SHOWMAXIMIZED) != w32->opts->window_maximized) {
+        if (w32->opts->window_maximized) {
+            ShowWindow(w32->window, SW_SHOWMAXIMIZED);
+        } else {
+            ShowWindow(w32->window, SW_SHOWNOACTIVATE);
+        }
+    }
+}
+
+static bool is_visible(HWND window)
+{
+    // Unlike IsWindowVisible, this doesn't check the window's parents
+    return GetWindowLongPtrW(window, GWL_STYLE) & WS_VISIBLE;
+}
+
 static void update_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -877,7 +928,19 @@ static void update_window_state(struct vo_w32_state *w32)
 
     SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
                  wr.left, wr.top, rect_w(wr), rect_h(wr),
-                 SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+                 SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+
+    // Show the window if it's not yet visible
+    if (!is_visible(w32->window)) {
+        if (w32->opts->window_minimized) {
+            ShowWindow(w32->window, SW_SHOWMINIMIZED);
+            update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
+        } else if (w32->opts->window_maximized) {
+            ShowWindow(w32->window, SW_SHOWMAXIMIZED);
+        } else {
+            ShowWindow(w32->window, SW_SHOW);
+        }
+    }
 
     // Notify the taskbar about the fullscreen state only after the window
     // is visible, to make sure the taskbar item has already been created
@@ -990,10 +1053,28 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             MP_VERBOSE(w32, "resize window: %d:%d\n", w, h);
         }
 
-        // Window may have been minimized or restored
-        w32->opts->window_minimized = IsIconic(w32->window);
-        m_config_cache_write_opt(w32->opts_cache,
-                                 &w32->opts->window_minimized);
+        // Window may have been minimized, maximized or restored
+        if (is_visible(w32->window)) {
+            WINDOWPLACEMENT wp = { .length = sizeof wp };
+            GetWindowPlacement(w32->window, &wp);
+
+            bool is_minimized = wp.showCmd == SW_SHOWMINIMIZED;
+            if (w32->opts->window_minimized != is_minimized) {
+                w32->opts->window_minimized = is_minimized;
+                m_config_cache_write_opt(w32->opts_cache,
+                                         &w32->opts->window_minimized);
+            }
+
+            bool is_maximized = wp.showCmd == SW_SHOWMAXIMIZED ||
+                (wp.showCmd == SW_SHOWMINIMIZED &&
+                    (wp.flags & WPF_RESTORETOMAXIMIZED));
+            if (w32->opts->window_maximized != is_maximized) {
+                w32->opts->window_maximized = is_maximized;
+                m_config_cache_write_opt(w32->opts_cache,
+                                         &w32->opts->window_maximized);
+            }
+        }
+
         signal_events(w32, VO_EVENT_WIN_STATE);
 
         update_display_info(w32);
@@ -1584,6 +1665,10 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->border) {
                 update_window_style(w32);
                 update_window_state(w32);
+            } else if (changed_option == &vo_opts->window_minimized) {
+                update_minimized_state(w32);
+            } else if (changed_option == &vo_opts->window_maximized) {
+                update_maximized_state(w32);
             }
         }
 
