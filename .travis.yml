@@ -1,16 +1,29 @@
 language: c
 
+macbase:
+  - &macOld
+    os: osx
+    compiler: clang
+    env:
+      - HOMEBREW_NO_AUTO_UPDATE=1
+      - HOMEBREW_NO_INSTALL_CLEANUP=1
+  - &macNew
+    <<: *macOld
+    addons:
+      homebrew:
+        packages: ['autoconf', 'automake', 'ffmpeg', 'freetype', 'fribidi',
+                   'libass', 'libtool', 'little-cms2', 'luajit', 'nasm',
+                   'pkg-config', 'python']
+        update: true
+
 matrix:
   include:
-    - os: osx
-      osx_image: xcode11
-      compiler: clang
-    - os: osx
+    - <<: *macNew
+      osx_image: xcode11.3
+    - <<: *macNew
       osx_image: xcode10.1
-      compiler: clang
-    - os: osx
+    - <<: *macOld
       osx_image: xcode9.2
-      compiler: clang
     - os: linux
       compiler: gcc
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
@@ -21,6 +34,10 @@ matrix:
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
     - os: linux
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
+  allow_failures:
+    - os: osx
+      osx_image: xcode9.2
+  fast_finish: true
 
 dist: bionic
 services:
@@ -48,9 +65,34 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-            brew link --overwrite python
-            "$TRAVIS_BUILD_DIR/ci/get_ffmpeg.sh"
+            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+                brew update
+                pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
+                git checkout 55e02323812604add9a69bab8730319b9255a697
+                popd
+                brew install autoconf
+                brew install automake
+                brew install pkg-config
+                brew install libtool
+                brew install python
+                brew install freetype
+                brew install fribidi
+                brew install little-cms2
+                brew install luajit
+                brew install libass
+                brew install ffmpeg
+            else
+                brew link --overwrite python
+            fi
         fi
+
+before_cache:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew cleanup -s ; fi
+
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+
 script:
   - ./bootstrap.py
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
@@ -75,17 +117,3 @@ addons:
     build_command_prepend: "./bootstrap.py && ./waf configure"
     build_command:   "./waf build"
     branch_pattern: coverity_scan
-  homebrew:
-    packages:
-      - autoconf
-      - automake
-      - freetype
-      - fribidi
-      - libass
-      - libtool
-      - little-cms2
-      - luajit
-      - nasm
-      - pkg-config
-      - python
-    update: true
