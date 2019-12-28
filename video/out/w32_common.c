@@ -1081,11 +1081,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             return 0;
         }
 
-        // Handle all other WM_SYSKEYDOWN messages as WM_KEYDOWN
-    case WM_KEYDOWN:
         handle_key_down(w32, wParam, HIWORD(lParam));
         if (wParam == VK_F10)
             return 0;
+        break;
+    case WM_KEYDOWN:
+        handle_key_down(w32, wParam, HIWORD(lParam));
         break;
     case WM_SYSKEYUP:
     case WM_KEYUP:
