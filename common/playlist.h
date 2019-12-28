@@ -42,6 +42,9 @@ struct playlist_entry {
     char **redirects;
     int num_redirects;
 
+    // Used for unshuffling: the pl_index before it was shuffled. -1 => unknown.
+    int original_index;
+
     // Set to true if playback didn't seem to work, or if the file could be
     // played only for a very short time. This is used to make playlist
     // navigation just work in case the user has unplayable files in the
@@ -87,6 +90,7 @@ void playlist_move(struct playlist *pl, struct playlist_entry *entry,
 
 void playlist_add_file(struct playlist *pl, const char *filename);
 void playlist_shuffle(struct playlist *pl);
+void playlist_unshuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_first(struct playlist *pl);
 struct playlist_entry *playlist_get_last(struct playlist *pl);
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);

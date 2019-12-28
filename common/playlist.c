@@ -33,6 +33,7 @@ struct playlist_entry *playlist_entry_new(const char *filename)
     char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
     e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
     e->stream_flags = STREAM_ORIGIN_DIRECT;
+    e->original_index = -1;
     return e;
 }
 
@@ -141,10 +142,31 @@ void playlist_add_file(struct playlist *pl, const char *filename)
 
 void playlist_shuffle(struct playlist *pl)
 {
+    for (int n = 0; n < pl->num_entries; n++)
+        pl->entries[n]->original_index = n;
     for (int n = 0; n < pl->num_entries - 1; n++) {
         int j = (int)((double)(pl->num_entries - n) * rand() / (RAND_MAX + 1.0));
         MPSWAP(struct playlist_entry *, pl->entries[n], pl->entries[n + j]);
     }
+    playlist_update_indexes(pl, 0, -1);
+}
+
+#define CMP_INT(a, b) ((a) == (b) ? 0 : ((a) > (b) ? 1 : -1))
+
+static int cmp_unshuffle(const void *a, const void *b)
+{
+    struct playlist_entry *ea = *(struct playlist_entry **)a;
+    struct playlist_entry *eb = *(struct playlist_entry **)b;
+
+    if (ea->original_index >= 0 && ea->original_index != eb->original_index)
+        return CMP_INT(ea->original_index, eb->original_index);
+    return CMP_INT(ea->pl_index, eb->pl_index);
+}
+
+void playlist_unshuffle(struct playlist *pl)
+{
+    if (pl->num_entries)
+        qsort(pl->entries, pl->num_entries, sizeof(pl->entries[0]), cmp_unshuffle);
     playlist_update_indexes(pl, 0, -1);
 }
 

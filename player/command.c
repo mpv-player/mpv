@@ -4916,6 +4916,15 @@ static void cmd_playlist_shuffle(void *p)
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
 }
 
+static void cmd_playlist_unshuffle(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    playlist_unshuffle(mpctx->playlist);
+    mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+}
+
 static void cmd_stop(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -5629,6 +5638,7 @@ const struct mp_cmd_def mp_cmds[] = {
         .priv = &(const int){-1},
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
+    { "playlist-unshuffle", cmd_playlist_unshuffle, },
     { "sub-step", cmd_sub_step_seek, { OPT_INT("skip", v.i, 0) },
         .allow_auto_repeat = true, .priv = &(const bool){true} },
     { "sub-seek", cmd_sub_step_seek, { OPT_INT("skip", v.i, 0) },

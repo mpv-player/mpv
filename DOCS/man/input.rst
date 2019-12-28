@@ -426,6 +426,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Shuffle the playlist. This is similar to what is done on start if the
     ``--shuffle`` option is used.
 
+``playlist-unshuffle``
+    Attempt to revert the previous ``playlist-shuffle`` command. This works
+    only once (multiple successive ``playlist-unshuffle`` commands do nothing).
+    May not work correctly if new recursive playlists have been opened since
+    a ``playlist-shuffle`` command.
+
 ``run <command> [<arg1> [<arg2> [...]]]``
     Run the given command. Unlike in MPlayer/mplayer2 and earlier versions of
     mpv (0.2.x and older), this doesn't call the shell. Instead, the command
