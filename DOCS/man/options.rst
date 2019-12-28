@@ -1233,17 +1233,18 @@ Video
 
 ``--cuda-decode-device=<auto|0..>``
     Choose the GPU device used for decoding when using the ``cuda`` or
-    ``nvdec`` hwdecs with the OpenGL GPU backend.
+    ``nvdec`` hwdecs with the OpenGL GPU backend, and with the ``cuda-copy``
+    or ``nvdec-copy`` hwdecs in all cases.
 
-    By default, the device that is being used to provide ``gpu`` output will
-    also be used for decoding (and in the vast majority of cases, only one
-    GPU will be present).
+    For the OpenGL GPU backend, the default device used for decoding is the one
+    being used to provide ``gpu`` output (and in the vast majority of cases,
+    only one GPU will be present).
 
-    Note that when using the ``cuda-copy`` or ``nvdec-copy`` hwdec, a
-    different option must be passed: ``--vd-lavc-o=gpu=<0..>``.
+    For the ``copy`` hwdecs, the default device will be the first device
+    enumerated by the CUDA libraries - however that is done.
 
-    Note that this option is not available with the Vulkan GPU backend. With
-    Vulkan, decoding must always happen on the display device.
+    For the Vulkan GPU backend, decoding must always happen on the display
+    device, and this option has no effect.
 
 ``--vaapi-device=<device file>``
     Choose the DRM device for ``vaapi-copy``. This should be the path to a

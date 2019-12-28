@@ -410,6 +410,7 @@ def build(ctx):
 
         ## Video
         ( "video/csputils.c" ),
+        ( "video/cuda.c",                        "cuda-hwaccel" ),
         ( "video/d3d.c",                         "d3d-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
@@ -460,9 +461,9 @@ def build(ctx):
         ( "video/out/gpu/utils.c" ),
         ( "video/out/gpu/video.c" ),
         ( "video/out/gpu/video_shaders.c" ),
-        ( "video/out/hwdec/hwdec_cuda.c",        "cuda-hwaccel" ),
-        ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-hwaccel && gl" ),
-        ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-hwaccel && vulkan" ),
+        ( "video/out/hwdec/hwdec_cuda.c",        "cuda-interop" ),
+        ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-interop && gl" ),
+        ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-interop && vulkan" ),
         ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-vulkan" ),
         ( "video/out/hwdec/hwdec_vaapi_gl.c",    "vaapi-egl" ),
         ( "video/out/hwdec/hwdec_vaapi_vk.c",    "vaapi-vulkan" ),

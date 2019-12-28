@@ -119,6 +119,9 @@ char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)
 }
 
 static const struct hwcontext_fns *const hwcontext_fns[] = {
+#if HAVE_CUDA_HWACCEL
+    &hwcontext_fns_cuda,
+#endif
 #if HAVE_D3D_HWACCEL
     &hwcontext_fns_d3d11,
 #endif

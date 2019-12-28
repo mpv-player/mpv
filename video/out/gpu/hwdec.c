@@ -64,7 +64,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_GL_DXINTEROP_D3D9
     &ra_hwdec_dxva2gldx,
 #endif
-#if HAVE_CUDA_HWACCEL
+#if HAVE_CUDA_INTEROP
     &ra_hwdec_cuda,
 #endif
 #if HAVE_VDPAU_GL_X11
