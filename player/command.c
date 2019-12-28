@@ -2709,7 +2709,7 @@ static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct playlist *pl = mpctx->playlist;
-    if (!pl->first)
+    if (!pl->num_entries)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -2754,30 +2754,11 @@ static int mp_property_playlist_pos_1(void *ctx, struct m_property *prop,
     return mp_property_playlist_pos_x(ctx, prop, action, arg, 1);
 }
 
-struct get_playlist_ctx {
-    struct MPContext *mpctx;
-    int last_index;
-    struct playlist_entry *last_entry;
-};
-
 static int get_playlist_entry(int item, int action, void *arg, void *ctx)
 {
-    struct get_playlist_ctx *p = ctx;
-    struct MPContext *mpctx = p->mpctx;
+    struct MPContext *mpctx = ctx;
 
-    struct playlist_entry *e;
-    // This is an optimization that prevents O(n^2) behaviour when the entire
-    // playlist is requested. If a request is made for the last requested entry
-    // or the entry immediately following it, it can be found without a full
-    // traversal of the linked list.
-    if (p->last_entry && item == p->last_index)
-        e = p->last_entry;
-    else if (p->last_entry && item == p->last_index + 1)
-        e = p->last_entry->next;
-    else
-        e = playlist_entry_from_index(mpctx->playlist, item);
-    p->last_index = item;
-    p->last_entry = e;
+    struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist, item);
     if (!e)
         return M_PROPERTY_ERROR;
 
@@ -2802,8 +2783,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
         struct playlist *pl = mpctx->playlist;
         char *res = talloc_strdup(NULL, "");
 
-        for (struct playlist_entry *e = pl->first; e; e = e->next)
-        {
+        for (int n = 0; n < pl->num_entries; n++) {
+            struct playlist_entry *e = pl->entries[n];
             char *p = e->title;
             if (!p) {
                 p = e->filename;
@@ -2822,9 +2803,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
 
-    struct get_playlist_ctx p = {.mpctx = mpctx};
     return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
-                                get_playlist_entry, &p);
+                                get_playlist_entry, mpctx);
 }
 
 static char *print_obj_osd_list(struct m_obj_settings *list)
@@ -4860,8 +4840,11 @@ static void cmd_loadlist(void *p)
         playlist_append_entries(mpctx->playlist, pl);
         talloc_free(pl);
 
-        if (!append && mpctx->playlist->first)
-            mp_set_playlist_entry(mpctx, new ? new : mpctx->playlist->first);
+        if (!new)
+            new = playlist_get_first(mpctx->playlist);
+
+        if (!append && new)
+            mp_set_playlist_entry(mpctx, new);
 
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         mp_wakeup_core(mpctx);
@@ -4879,15 +4862,7 @@ static void cmd_playlist_clear(void *p)
     // Supposed to clear the playlist, except the currently played item.
     if (mpctx->playlist->current_was_replaced)
         mpctx->playlist->current = NULL;
-    while (mpctx->playlist->first) {
-        struct playlist_entry *e = mpctx->playlist->first;
-        if (e == mpctx->playlist->current) {
-            e = e->next;
-            if (!e)
-                break;
-        }
-        playlist_remove(mpctx->playlist, e);
-    }
+    playlist_clear_except_current(mpctx->playlist);
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
 }

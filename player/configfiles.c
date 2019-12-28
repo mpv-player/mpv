@@ -451,7 +451,8 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
 {
     if (!mpctx->opts->position_resume)
         return NULL;
-    for (struct playlist_entry *e = playlist->first; e; e = e->next) {
+    for (int n = 0; n < playlist->num_entries; n++) {
+        struct playlist_entry *e = playlist->entries[n];
         char *conf = mp_get_playback_resume_config_filename(mpctx, e->filename);
         bool exists = conf && mp_path_exists(conf);
         talloc_free(conf);

@@ -905,14 +905,14 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
         pl->current = mp_check_playlist_resume(mpctx, pl);
 
     if (!pl->current)
-        pl->current = pl->first;
+        pl->current = playlist_get_first(pl);
 }
 
 // Replace the current playlist entry with playlist contents. Moves the entries
 // from the given playlist pl, so the entries don't actually need to be copied.
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
-    if (pl->first) {
+    if (pl->num_entries) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
         if (mpctx->playlist->current)
@@ -1441,8 +1441,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     handle_force_window(mpctx, false);
 
-    if (mpctx->playlist->first != mpctx->playing ||
-        mpctx->playlist->last != mpctx->playing ||
+    if (mpctx->playlist->num_entries > 1 ||
         mpctx->playing->num_redirects)
         MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
@@ -1720,34 +1719,33 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
     if (next && direction < 0 && !force) {
         // Don't jump to files that would immediately go to next file anyway
         while (next && next->playback_short)
-            next = next->prev;
+            next = playlist_entry_get_rel(next, -1);
         // Always allow jumping to first file
         if (!next && mpctx->opts->loop_times == 1)
-            next = mpctx->playlist->first;
+            next = playlist_get_first(mpctx->playlist);
     }
     if (!next && mpctx->opts->loop_times != 1) {
         if (direction > 0) {
             if (mpctx->opts->shuffle)
                 playlist_shuffle(mpctx->playlist);
-            next = mpctx->playlist->first;
+            next = playlist_get_first(mpctx->playlist);
             if (next && mpctx->opts->loop_times > 1) {
                 mpctx->opts->loop_times--;
                 m_config_notify_change_opt_ptr(mpctx->mconfig,
                                                &mpctx->opts->loop_times);
             }
         } else {
-            next = mpctx->playlist->last;
+            next = playlist_get_last(mpctx->playlist);
             // Don't jump to files that would immediately go to next file anyway
             while (next && next->playback_short)
-                next = next->prev;
+                next = playlist_entry_get_rel(next, -1);
         }
         bool ignore_failures = mpctx->opts->loop_times == -2;
         if (!force && next && next->init_failed && !ignore_failures) {
             // Don't endless loop if no file in playlist is playable
             bool all_failed = true;
-            struct playlist_entry *cur;
-            for (cur = mpctx->playlist->first; cur; cur = cur->next) {
-                all_failed &= cur->init_failed;
+            for (int n = 0; n < mpctx->playlist->num_entries; n++) {
+                all_failed &= mpctx->playlist->entries[n]->init_failed;
                 if (!all_failed)
                     break;
             }

@@ -82,8 +82,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     for (int n = 0; n < num_files; n++)
         playlist_add_file(pl, files[n]);
 
-    for (struct playlist_entry *e = pl->first; e; e = e->next)
-        e->stream_flags = demuxer->stream_origin;
+    playlist_set_stream_flags(pl, demuxer->stream_origin);
 
     demuxer->filetype = "archive";
     demuxer->fully_read = true;

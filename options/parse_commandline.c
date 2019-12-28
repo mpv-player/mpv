@@ -165,7 +165,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 }
                 mode = LOCAL;
                 assert(!local_start);
-                local_start = files->last;
+                local_start = playlist_get_last(files);
                 continue;
             }
 
@@ -179,14 +179,15 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     // the entry _after_ local_start, until the end of the list.
                     // If local_start is NULL, the list was empty on '{', and we
                     // want all files in the list.
-                    struct playlist_entry *cur
-                        = local_start ? local_start->next : files->first;
+                    struct playlist_entry *cur = local_start
+                        ? playlist_entry_get_rel(local_start, 1)
+                        : playlist_get_first(files);
                     if (!cur)
                         MP_WARN(config, "Ignored options!\n");
                     while (cur) {
                         playlist_entry_add_params(cur, local_params,
                                                 local_params_count);
-                        cur = cur->next;
+                        cur = playlist_entry_get_rel(cur, 1);
                     }
                 }
                 local_params_count = 0;

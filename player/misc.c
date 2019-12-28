@@ -278,11 +278,12 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
 void merge_playlist_files(struct playlist *pl)
 {
-    if (!pl->first)
+    if (!pl->num_entries)
         return;
     char *edl = talloc_strdup(NULL, "edl://");
-    for (struct playlist_entry *e = pl->first; e; e = e->next) {
-        if (e != pl->first)
+    for (int n = 0; n < pl->num_entries; n++) {
+        struct playlist_entry *e = pl->entries[n];
+        if (n)
             edl = talloc_strdup_append_buffer(edl, ";");
         // Escape if needed
         if (e->filename[strcspn(e->filename, "=%,;\n")] ||
