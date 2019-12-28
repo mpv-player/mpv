@@ -46,7 +46,11 @@ before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then "$TRAVIS_BUILD_DIR/ci/get_ffmpeg.sh"; fi
+  - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+            brew link --overwrite python
+            "$TRAVIS_BUILD_DIR/ci/get_ffmpeg.sh"
+        fi
 script:
   - ./bootstrap.py
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
@@ -83,4 +87,5 @@ addons:
       - luajit
       - nasm
       - pkg-config
+      - python
     update: true
