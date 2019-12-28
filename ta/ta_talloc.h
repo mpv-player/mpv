@@ -124,6 +124,21 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         (p)[at_] = (TA_EXPAND_ARGS(__VA_ARGS__));   \
     } while (0)
 
+// Given an array p with count idxvar, insert c elements at p[at], so that
+// p[at] to p[at+c-1] can be accessed. The elements at p[at] and following
+// are shifted up by c before insertion. The new entries are uninitialized.
+// ctx as ta parent. Required: at >= 0 && at <= idxvar.
+#define MP_TARRAY_INSERT_N_AT(ctx, p, idxvar, at, c)\
+    do {                                            \
+        size_t at_ = (at);                          \
+        assert(at_ <= (idxvar));                    \
+        size_t c_ = (c);                            \
+        MP_TARRAY_GROW(ctx, p, (idxvar) + c_);      \
+        memmove((p) + at_ + c_, (p) + at_,          \
+                ((idxvar) - at_) * sizeof((p)[0])); \
+        (idxvar) += c_;                             \
+    } while (0)
+
 // Remove p[at] from array p with count idxvar (inverse of MP_TARRAY_INSERT_AT()).
 // Doesn't actually free any memory, or do any other talloc calls.
 #define MP_TARRAY_REMOVE_AT(p, idxvar, at)          \
