@@ -15,7 +15,7 @@ player/*.c:
         * parse command line, add files from the command line to playlist
           (m_config_parse_mp_command_line())
         * check help options etc. (call handle_help_options()), possibly exit
-        * call play_files() function that works down the playlist:
+        * call mp_play_files() function that works down the playlist:
             * run idle loop (idle_loop()), until there are files in the
                 playlist or an exit command was given (only if --idle it set)
             * actually load and play a file in play_current_file():
@@ -30,7 +30,7 @@ player/*.c:
             * determine next entry on the playlist to play
             * loop, or exit if no next file or quit is requested
               (see enum stop_play_reason)
-        * call exit_player_with_rc()
+        * call mp_destroy()
     * run_playloop():
         * calls fill_audio_out_buffers()
             This checks whether new audio needs to be decoded, and pushes it
@@ -44,9 +44,9 @@ player/*.c:
 
     Things worth saying about the playback core:
     - most state is in MPContext (core.h), which is not available to the
-      subsystems
+      subsystems (and should not be made available)
     - the currently played tracks are in mpctx->current_tracks, and decoder
-      state in track.d_video/d_audio/d_sub
+      state in track.dec/d_sub
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
     - one exceptions are wakeup callbacks, which notify a "higher" component
@@ -104,12 +104,44 @@ options/options.h, options/options.c
     options.c. Most default values for options and MPOpts are in
     mp_default_opts at the end of options.c.
 
-    MPOpts is unfortunately quite monolithic, and virtually accessed by
-    everything.But some components (like video outputs and video filters) have
-    their own sub-option tables separate from MPOpts.
+    MPOpts is unfortunately quite monolithic, but is being incrementally broken
+    up into sub-structs. Many components have their own sub-option structs
+    separate from MPOpts. New options should be bound to the component that uses
+    them. Add a new option table/struct if needed.
+
+    The global MPOpts still contains the sub-structs as fields, which serves to
+    link them to the option parser. For example, an entry like this may be
+    typical:
+
+        OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
+
+    This directs the option access code to include all options in demux_conf
+    into the global option list, with no prefix (""), and as part of the
+    MPOpts.demux_opts field. The MPOpts.demux_opts field is actually not
+    accessed anywhere, and instead demux.c does this:
+
+        struct m_config_cache *opts_cache =
+            m_config_cache_alloc(demuxer, global, &demux_conf);
+        struct demux_opts *opts = opts_cache->opts;
+
+    ... to get a copy of its options.
+
+    See m_config.h (below) how to access options.
 
     The actual option parser is spread over m_option.c, m_config.c, and
     parse_commandline.c, and uses the option table in options.c.
+
+options/m_config.h & m_config.c:
+    Code for querying and managing options. This (unfortunately) contains both
+    declarations for the "legacy-ish" global m_config struct, and ways to access
+    options in a threads-safe way anywhere, like m_config_cache_alloc().
+
+    m_config_cache_alloc() lets anyone read, observe, and write options in any
+    thread. The only state it needs is struct mpv_global, which is an opaque
+    type that can be passed "down" the component hierarchy. For safety reasons,
+    you should not pass down any pointers to option structs (like MPOpts), but
+    instead pass down mpv_global, and use m_config_cache_alloc() (or similar)
+    to get a synchronized copy of the options.
 
 input/input.c:
     This translates keyboard input coming from VOs and other sources (such
@@ -249,7 +281,7 @@ Best practices and Concepts within mpv
 General contribution etc.
 -------------------------
 
-See DOCS/contribute.md.
+See: DOCS/contribute.md
 
 Error checking
 --------------
@@ -402,7 +434,7 @@ See generally available literature. In mpv, we use pthread for this.
 
 Always keep locking clean. Don't skip locking just because it will work "in
 practice". (See undefined behavior section.) If your use case is simple, you may
-use C11 atomics( osdep/atomic.h for partial C99 support), but most likely you
+use C11 atomics (osdep/atomic.h for partial C99 support), but most likely you
 will only hurt yourself and others.
 
 Always make clear which fields in a struct are protected by which lock. If a
@@ -417,7 +449,7 @@ All internal mpv APIs must be free of global state. Even if a component is not
 thread-safe, multiple threads can use _different_ instances of it without any
 locking.
 
-On a side note, recursive locks may seem convenient at first, but introduces
+On a side note, recursive locks may seem convenient at first, but introduce
 additional problems with condition variables and locking hierarchies. They
 should be avoided.
 
@@ -437,9 +469,9 @@ least document it.
 
 In addition, try to avoid exposing locks to the outside. Making the declaration
 of a lock private to a specific .c file (and _not_ exporting accessors or
-lock/unlock that manipulate the lock) is a good idea. Your component's API may
-acquire internal locks, but should release them when returning. Keeping the
-entire locking in a single file makes it easy to check it.
+lock/unlock functions that manipulate the lock) is a good idea. Your component's
+API may acquire internal locks, but should release them when returning. Keeping
+the entire locking in a single file makes it easy to check it.
 
 Avoiding callback hell
 ----------------------
@@ -473,13 +505,13 @@ API has internal threads (or otherwise triggers asynchronous events), but the
 component call hierarchy needs to be kept. The wakeup callback is the only
 exception to the call hierarchy, and always calls up.
 
-For example, vo spawns a thread that the API user. The mpv frontend is oblivious
-to this. vo simply provides a thread-safe API. vo needs to notify the API user
-of new events. But the vo event producer is on the vo thread - it can't simply
-invoke a callback back into the API user, because then the API user has to deal
-with locking, despite not using threads. In addition, this will probably cause
-problems like mentioned in the "callback hell" section, especially lock order
-issues.
+For example, vo spawns a thread that the API user (the mpv frontend) does not
+need to know about. vo simply provides a single-threaded API (or that looks like
+one). This API needs a way to notify the API user of new events. But the vo
+event producer is on the vo thread - it can't simply invoke a callback back into
+the API user, because then the API user has to deal with locking, despite not
+using threads. In addition, this will probably cause problems like mentioned in
+the "callback hell" section, especially lock order issues.
 
 The solution is the wakeup callback. It merely unblocks the API user from
 waiting, and the API user then uses the normal vo API to examine whether or
@@ -535,15 +567,15 @@ because its sole purpose is to interrupt a thread waiting via pthread_cond_wait(
 predicate (to avoid confusing it with "condition"). Consult literature for the
 proper terms.
 
-The very short version is:
+The very short version is...
 
-    // --- Shared declarations
+Shared declarations:
 
     pthread_mutex_t lock;
     pthread_cond_t cond_var;
     struct something state_var; // protected by lock, changes signaled by cond_var
 
-    // --- Waiter thread
+Waiter thread:
 
     pthread_mutex_lock(&lock);
 
@@ -566,7 +598,7 @@ The very short version is:
 
     pthread_mutex_unlock(&lock);
 
-    // --- Signaler thread
+Signaler thread:
 
     pthread_mutex_lock(&lock);
 
@@ -580,7 +612,6 @@ The very short version is:
     // Fun fact: good implementations wake up the waiter only when the lock is
     // released, to reduce kernel scheduling overhead.
     pthread_mutex_unlock(&lock);
-
 
 Some basic rules:
     1. Always access your state under proper locking
@@ -612,6 +643,15 @@ Common pitfalls:
 Generally available literature probably has better examples and explanations.
 
 Using condition variables the proper way is generally preferred over using more
-messy variants of them. (Just saying because on win32, "Event" exists, and  it's
-inferior to condition variables. Try to avoid the win32 primitives, even if
+messy variants of them. (Just saying because on win32, "SetEvent" exists, and
+it's inferior to condition variables. Try to avoid the win32 primitives, even if
 you're dealing with Windows-only code.)
+
+Threads
+-------
+
+Threading should be conservatively used. Normally, mpv code pretends to be
+single-threaded, and provides thread-unsafe APIs. Threads are used coarsely,
+and if you can avoid messing with threads, you should. For example, VOs and AOs
+do not need to deal with threads normally, even though they run on separate
+threads. The glue code "isolates" them from any threading issues.
