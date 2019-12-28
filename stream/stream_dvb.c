@@ -378,7 +378,13 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 }
                 if (!DELSYS_IS_SET(delsys_mask, delsys))
                     continue; /* Skip channel. */
-               /* PASSTROUTH */
+                mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
+                           "FREQ: %d, SRATE: %d, T2: %s",
+                           get_dvb_delsys(delsys),
+                           list->NUM_CHANNELS, fields,
+                           ptr->name, ptr->freq, ptr->srate,
+                           (delsys == SYS_DVBT2) ? "yes" : "no");
+                break;
             case SYS_DVBC_ANNEX_A:
             case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
@@ -418,7 +424,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                     }
                 }
 
-                mp_verbose(log, "%s NUM: %d, NUM_FIELDS: %d, NAME: %s, "
+                mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, "
                            "StreamID: %d, SID: %d",
                            get_dvb_delsys(delsys),
@@ -1197,14 +1203,16 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                 case SYS_DVBT:
                     if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBT2))
                         continue; /* Add all channels later with T2. */
-                    /* PASSTOUTH */
+                    conf_file_name = "channels.conf.ter";
+                    break;
                 case SYS_DVBT2:
                     conf_file_name = "channels.conf.ter";
                     break;
                 case SYS_DVBS:
                     if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBS2))
                         continue; /* Add all channels later with S2. */
-                    /* PASSTOUTH */
+                    conf_file_name = "channels.conf.sat";
+                    break;
                 case SYS_DVBS2:
                     conf_file_name = "channels.conf.sat";
                     break;
