@@ -82,14 +82,18 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 
 #define TA_EXPAND_ARGS(...) __VA_ARGS__
 
+// Return number of allocated entries in typed array p[].
 #define MP_TALLOC_AVAIL(p) (talloc_get_size(p) / sizeof((p)[0]))
 
+// Resize array p so that p[count-1] is the last valid entry. ctx as ta parent.
 #define MP_RESIZE_ARRAY(ctx, p, count)                          \
     do {                                                        \
         (p) = ta_xrealloc_size(ctx, p,                          \
                     ta_calc_array_size(sizeof((p)[0]), count)); \
     } while (0)
 
+// Resize array p so that p[nextidx] is accessible. Preallocate additional
+// space to make appending more efficient, never shrink. ctx as ta parent.
 #define MP_TARRAY_GROW(ctx, p, nextidx)             \
     do {                                            \
         size_t nextidx_ = (nextidx);                \
@@ -97,6 +101,8 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
             MP_RESIZE_ARRAY(ctx, p, ta_calc_prealloc_elems(nextidx_)); \
     } while (0)
 
+// Append the last argument to array p (with count idxvar), basically:
+// p[idxvar++] = ...; ctx as ta parent.
 #define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
     do {                                            \
         MP_TARRAY_GROW(ctx, p, idxvar);             \
@@ -104,6 +110,9 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         (idxvar)++;                                 \
     } while (0)
 
+// Insert the last argument at p[at] (array p with count idxvar), basically:
+// for(idxvar-1 down to at) p[n+1] = p[n]; p[at] = ...; idxvar++;
+// ctx as ta parent. Required: at >= 0 && at <= idxvar.
 #define MP_TARRAY_INSERT_AT(ctx, p, idxvar, at, ...)\
     do {                                            \
         size_t at_ = (at);                          \
@@ -115,6 +124,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         (p)[at_] = (TA_EXPAND_ARGS(__VA_ARGS__));   \
     } while (0)
 
+// Remove p[at] from array p with count idxvar (inverse of MP_TARRAY_INSERT_AT()).
 // Doesn't actually free any memory, or do any other talloc calls.
 #define MP_TARRAY_REMOVE_AT(p, idxvar, at)          \
     do {                                            \
