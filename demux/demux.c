@@ -2444,8 +2444,8 @@ static void update_opts(struct demux_internal *in)
             mp_recorder_destroy(in->recorder);
             in->recorder = NULL;
         }
-        in->record_filename = talloc_strdup(in, opts->record_file);
         talloc_free(in->record_filename);
+        in->record_filename = talloc_strdup(in, opts->record_file);
         // Note: actual recording only starts once packets are read. It may be
         // important to delay creating in->recorder to that point, because the
         // demuxer might detect more streams until finding the first packet.
