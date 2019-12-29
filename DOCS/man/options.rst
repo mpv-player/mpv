@@ -1053,10 +1053,10 @@ Video
     :mediacodec-copy: copies video back to system RAM (Android only)
     :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :mmal-copy: copies video back to system RAM (Raspberry Pi only)
-    :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
-    :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
+    :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
+    :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
     :rkmpp:     requires ``--vo=gpu`` (some RockChip devices only)
 
@@ -1090,32 +1090,30 @@ Video
     filters and VOs.
 
     Because these copy the decoded video back to system RAM, they're often less
-    less efficient than the direct modes, and may not help too much over
-    software decoding.
+    efficient than the direct modes, and may not help too much over software
+    decoding.
 
     .. note::
 
        Most non-copy methods only work with the OpenGL GPU backend. Currently,
-       only the ``nvdec`` and ``cuda`` methods work with Vulkan.
+       only the ``vaapi``, ``nvdec`` and ``cuda`` methods work with Vulkan.
 
-    The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11 and most
+    The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11, and most
     likely works with Intel and AMD GPUs only. It also requires the opengl EGL
     backend.
 
-    The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
-    which is useful as there is no other deinterlacing mechanism in the gpu
-    output path. To use this deinterlacing you must pass the option:
+    ``nvdec`` and ``nvdec-copy`` are the newest, and recommended method to do
+    hardware decoding on Nvidia GPUs.
+
+    ``cuda`` and ``cuda-copy`` are an older implementation of hardware decoding
+    on Nvidia GPUs that uses Nvidia's bitstream parsers rather than FFmpeg's.
+    This can lead to feature deficiencies, such as incorrect playback of HDR
+    content, and ``nvdec``/``nvdec-copy`` should always be preferred unless you
+    specifically need Nvidia's deinterlacing algorithms. To use this
+    deinterlacing you must pass the option:
     ``vd-lavc-o=deint=[weave|bob|adaptive]``.
     Pass ``weave`` (or leave the option unset) to not attempt any
-    deinterlacing. ``cuda`` should always be preferred over ``cuda-copy`` unless
-    the ``gpu`` vo is not being used or filters are required. Using ``nvdec``
-    should be preferred on Nvidia hardware.
-
-    ``nvdec`` is a newer implementation of CUVID/CUDA decoding, which uses the
-    FFmpeg decoders for file parsing. Experimental, is known not to correctly
-    check whether decoding is supported by the hardware at all. Deinterlacing
-    is not supported. Since this uses FFmpeg's codec parsers, it is expected
-    that this generally causes fewer issues than ``cuda``.
+    deinterlacing.
 
     .. admonition:: Quality reduction with hardware decoding
 
@@ -1133,10 +1131,10 @@ Video
         cases, hardware decoding can also reduce the bit depth of the decoded
         image, which can introduce banding or precision loss for 10-bit files.
 
-        ``vdpau`` is usually safe, except for 10 bit video. If deinterlacing
-        enabled (or the ``vdpaupp`` video filter is active in general), it
-        forces RGB conversion. The latter currently does not treat certain
-        colorspaces like BT.2020 correctly.
+        ``vdpau`` always does RGB conversion in hardware, which does not
+        support newer colorspaces like BT.2020 correctly. However, ``vdpau``
+        doesn't support 10 bit or HDR encodings, so these limitations are
+        unlikely to be relevant.
 
         ``vaapi`` and ``d3d11va`` are safe. Enabling deinterlacing (or simply
         their respective post-processing filters) will possibly at least reduce
@@ -1152,10 +1150,11 @@ Video
         ``rpi`` always uses the hardware overlay renderer, even with
         ``--vo=gpu``.
 
-        ``cuda`` should be safe, but it has been reported to corrupt the
-        timestamps causing glitched, flashing frames on some files. It can also
-        sometimes cause massive framedrops for unknown reasons. Caution is
-        advised.
+        ``cuda`` should usually be safe, but depending on how a file/stream
+        has been mixed, it has been reported to corrupt the timestamps causing
+        glitched, flashing frames. It can also sometimes cause massive
+        framedrops for unknown reasons. Caution is advised, and ``nvdec``
+        should always be preferred.
 
         ``crystalhd`` is not safe. It always converts to 4:2:2 YUV, which
         may be lossy, depending on how chroma sub-sampling is done during
