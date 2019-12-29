@@ -174,7 +174,7 @@ def build(ctx):
             ( "osdep/macos/mpv_helper.swift" ),
             ( "osdep/macos/swift_extensions.swift" ),
             ( "osdep/macos/swift_compat.swift" ),
-            ( "osdep/macos/remote_command_center.swift", "macos-10-12-2-features" ),
+            ( "osdep/macos/remote_command_center.swift", "macos-media-player" ),
             ( "video/out/cocoa-cb/events_view.swift" ),
             ( "video/out/cocoa-cb/video_layer.swift" ),
             ( "video/out/cocoa-cb/window.swift" ),
