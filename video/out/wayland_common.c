@@ -1110,6 +1110,10 @@ int vo_wayland_init(struct vo *vo)
     if (create_xdg_surface(wl))
         return false;
 
+    const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
+    if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
+        MP_WARN(wl, "GNOME's wayland compositor is known to have many serious issues with mpv. Switch to GNOME's xorg session for the best experience.\n");
+
     if (wl->dnd_devman && wl->seat) {
         wl->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, wl->seat);
         wl_data_device_add_listener(wl->dnd_ddev, &data_device_listener, wl);
