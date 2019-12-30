@@ -78,14 +78,14 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_GL_DXINTEROP
     &ra_ctx_dxgl,
 #endif
-#if HAVE_GL_WAYLAND
-    &ra_ctx_wayland_egl,
-#endif
 #if HAVE_EGL_X11
     &ra_ctx_x11_egl,
 #endif
 #if HAVE_GL_X11
     &ra_ctx_glx,
+#endif
+#if HAVE_GL_WAYLAND
+    &ra_ctx_wayland_egl,
 #endif
 #if HAVE_EGL_DRM
     &ra_ctx_drm_egl,
@@ -100,11 +100,11 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_WIN32_DESKTOP
     &ra_ctx_vulkan_win,
 #endif
-#if HAVE_WAYLAND
-    &ra_ctx_vulkan_wayland,
-#endif
 #if HAVE_X11
     &ra_ctx_vulkan_xlib,
+#endif
+#if HAVE_WAYLAND
+    &ra_ctx_vulkan_wayland,
 #endif
 
 #endif
