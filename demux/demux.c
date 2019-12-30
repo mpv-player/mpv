@@ -337,6 +337,7 @@ struct demux_queue {
     bool correct_dts;       // packet DTS is strictly monotonically increasing
     bool correct_pos;       // packet pos is strictly monotonically increasing
     int64_t last_pos;       // for determining correct_pos
+    int64_t last_pos_fixup; // for filling in unset dp->pos values
     double last_dts;        // for determining correct_dts
     double last_ts;         // timestamp of the last packet added to queue
 
@@ -741,6 +742,7 @@ static void clear_queue(struct demux_queue *queue)
     queue->correct_dts = queue->correct_pos = true;
     queue->last_pos = -1;
     queue->last_ts = queue->last_dts = MP_NOPTS_VALUE;
+    queue->last_pos_fixup = -1;
 
     queue->is_eof = false;
     queue->is_bof = false;
@@ -1761,6 +1763,8 @@ static void attempt_range_joining(struct demux_internal *in)
         q1->keyframe_latest = q2->keyframe_latest;
         q1->is_eof = q2->is_eof;
 
+        q1->last_pos_fixup = -1;
+
         q2->head = q2->tail = NULL;
         q2->keyframe_first = NULL;
         q2->keyframe_latest = NULL;
@@ -1996,6 +2000,15 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     struct demux_queue *queue = ds->queue;
 
     bool drop = !ds->selected || in->seeking || ds->sh->attached_picture;
+
+    if (!drop) {
+        // If libavformat splits packets, some packets will have pos unset, so
+        // make up one based on the first packet => makes refresh seeks work.
+        if (dp->pos < 0 && !dp->keyframe && queue->last_pos_fixup >= 0)
+            dp->pos = queue->last_pos_fixup + 1;
+        queue->last_pos_fixup = dp->pos;
+    }
+
     if (!drop && ds->refreshing) {
         // Resume reading once the old position was reached (i.e. we start
         // returning packets where we left off before the refresh).
@@ -2377,6 +2390,9 @@ static void execute_seek(struct demux_internal *in)
     in->after_seek_to_start =
         !(flags & (SEEK_FORWARD | SEEK_FACTOR)) &&
         pts <= in->d_thread->start_time;
+
+    for (int n = 0; n < in->num_streams; n++)
+        in->streams[n]->ds->queue->last_pos_fixup = -1;
 
     if (in->recorder)
         mp_recorder_mark_discontinuity(in->recorder);
