@@ -177,7 +177,7 @@ static bool copy_mtime(const char *f1, const char *f2)
         .modtime = st1.st_mtime,
     };
 
-    if (!utime(f2, &ut))
+    if (utime(f2, &ut) != 0)
         return false;
 
     return true;
