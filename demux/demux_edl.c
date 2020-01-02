@@ -397,6 +397,17 @@ error:
     return NULL;
 }
 
+static void fix_filenames(struct tl_parts *parts, char *source_path)
+{
+    if (bstr_equals0(mp_split_proto(bstr0(source_path), NULL), "edl"))
+        return;
+    struct bstr dirname = mp_dirname(source_path);
+    for (int n = 0; n < parts->num_parts; n++) {
+        struct tl_part *part = &parts->parts[n];
+        part->filename = mp_path_join_bstr(parts, dirname, bstr0(part->filename));
+    }
+}
+
 static void build_mpv_edl_timeline(struct timeline *tl)
 {
     struct priv *p = tl->demuxer->priv;
@@ -413,6 +424,7 @@ static void build_mpv_edl_timeline(struct timeline *tl)
 
     for (int n = 0; n < root->num_pars; n++) {
         struct tl_parts *parts = root->pars[n];
+        fix_filenames(parts, tl->demuxer->filename);
         struct timeline_par *par = build_timeline(tl, parts);
         if (!par)
             break;
