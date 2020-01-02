@@ -2671,6 +2671,13 @@ function visibility_mode(mode, no_osd)
         mp.osd_message("OSC visibility: " .. mode)
     end
 
+    -- Reset the input state on a mode change. The input state will be
+    -- recalcuated on the next render cycle, except in 'never' mode where it
+    -- will just stay disabled.
+    mp.disable_key_bindings("input")
+    mp.disable_key_bindings("window-controls")
+    state.input_enabled = false
+
     update_margins()
     request_tick()
 end
