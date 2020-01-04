@@ -218,7 +218,7 @@ static const struct file_pattern patterns[] = {
     { NULL, NULL, NULL, 0, 0 },
 };
 
-static bool find_volumes(struct mp_archive *mpa)
+static bool find_volumes(struct mp_archive *mpa, bool *is_multivolume)
 {
     struct bstr primary_url = bstr0(mpa->primary_src->url);
 
@@ -239,6 +239,7 @@ static bool find_volumes(struct mp_archive *mpa)
         if (!add_volume(mpa, NULL, url, i + 1))
             return false;
     }
+    *is_multivolume = true;
 
     return true;
 }
@@ -264,9 +265,10 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     if (!add_volume(mpa, src, src->url, 0))
         goto err;
 
+    bool is_multivolume = false;
     if (!(flags & MP_ARCHIVE_FLAG_NO_RAR_VOLUMES)) {
         // try to open other volumes
-        if (!find_volumes(mpa))
+        if (!find_volumes(mpa, &is_multivolume))
             goto err;
     }
 
@@ -298,6 +300,15 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
 
     if (fail)
         goto err;
+
+    if (is_multivolume) {
+        MP_WARN(mpa, "This appears to be a multi-volume rar file. Support is "
+            "not very good due to lack of good libarchive support for them. "
+            "They are also an excessively inefficient and stupid way to "
+            "distribute media files, so tell the people creating these files "
+            "to fuck off.\n");
+    }
+
     return mpa;
 
 err:
