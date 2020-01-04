@@ -1042,13 +1042,13 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     return 0;
 }
 
-static int set_border_decorations(struct vo_wayland_state *wl, int state)
+static void set_border_decorations(struct vo_wayland_state *wl, int state)
 {
     if (!wl->xdg_toplevel_decoration) {
         wl->vo_opts->border = false;
         m_config_cache_write_opt(wl->vo_opts_cache,
                                  &wl->vo_opts->border);
-        return VO_NOTIMPL;
+        return;
     }
 
     enum zxdg_toplevel_decoration_v1_mode mode;
@@ -1060,7 +1060,6 @@ static int set_border_decorations(struct vo_wayland_state *wl, int state)
         mode = ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
     }
     zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, mode);
-    return VO_TRUE;
 }
 
 int vo_wayland_init(struct vo *vo)
@@ -1350,35 +1349,32 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
     return VO_TRUE;
 }
 
-static int toggle_fullscreen(struct vo_wayland_state *wl)
+static void toggle_fullscreen(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
-        return VO_NOTAVAIL;
+        return;
     if (wl->vo_opts->fullscreen)
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
     else
         xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
-    return VO_TRUE;
 }
 
-static int toggle_maximized(struct vo_wayland_state *wl)
+static void toggle_maximized(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
-        return VO_NOTAVAIL;
+        return;
     if (wl->vo_opts->window_maximized)
         xdg_toplevel_set_maximized(wl->xdg_toplevel);
     else
         xdg_toplevel_unset_maximized(wl->xdg_toplevel);
-    return VO_TRUE;
 }
 
-static int do_minimize(struct vo_wayland_state *wl)
+static void do_minimize(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
-        return VO_NOTAVAIL;
+        return;
     if (wl->vo_opts->window_minimized)
         xdg_toplevel_set_minimized(wl->xdg_toplevel);
-    return VO_TRUE;
 }
 
 static int update_window_title(struct vo_wayland_state *wl, char *title)
@@ -1464,13 +1460,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         void *opt;
         while (m_config_cache_get_next_changed(wl->vo_opts_cache, &opt)) {
             if (opt == &opts->fullscreen)
-                return toggle_fullscreen(wl);
+                toggle_fullscreen(wl);
             if (opt == &opts->window_minimized)
-                return do_minimize(wl);
+                do_minimize(wl);
             if (opt == &opts->window_maximized)
-                return toggle_maximized(wl);
+                toggle_maximized(wl);
             if (opt == &opts->border)
-                return set_border_decorations(wl, opts->border);
+                set_border_decorations(wl, opts->border);
         }
         return VO_TRUE;
     }
