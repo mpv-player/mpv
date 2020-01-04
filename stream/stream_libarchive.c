@@ -171,6 +171,20 @@ void mp_archive_free(struct mp_archive *mpa)
     talloc_free(mpa);
 }
 
+static bool add_volume(struct mp_archive *mpa, struct stream *src,
+                       const char* url, int index)
+{
+    struct mp_archive_volume *vol = talloc_zero(mpa, struct mp_archive_volume);
+    vol->index = index;
+    vol->mpa = mpa;
+    vol->src = src;
+    vol->url = talloc_strdup(vol, url);
+    locale_t oldlocale = uselocale(mpa->locale);
+    bool res = archive_read_append_callback_data(mpa->arch, vol) == ARCHIVE_OK;
+    uselocale(oldlocale);
+    return res;
+}
+
 static char *standard_volume_url(void *ctx, const char *format,
                                  struct bstr base, int index)
 {
@@ -203,11 +217,9 @@ static const struct file_pattern patterns[] = {
     { NULL, NULL, NULL, 0, 0 },
 };
 
-static char **find_volumes(struct stream *primary_stream)
+static bool find_volumes(struct mp_archive *mpa)
 {
-    char **res = talloc_new(NULL);
-    int    num = 0;
-    struct bstr primary_url = bstr0(primary_stream->url);
+    struct bstr primary_url = bstr0(mpa->primary_src->url);
 
     const struct file_pattern *pattern = patterns;
     while (pattern->match) {
@@ -217,32 +229,17 @@ static char **find_volumes(struct stream *primary_stream)
     }
 
     if (!pattern->match)
-        goto done;
+        return true;
 
     struct bstr base = bstr_splice(primary_url, 0, -(int)strlen(pattern->match));
     for (int i = pattern->start; i <= pattern->stop; i++) {
-        char* url = pattern->volume_url(res, pattern->format, base, i);
-        MP_TARRAY_APPEND(res, res, num, url);
+        char* url = pattern->volume_url(mpa, pattern->format, base, i);
+
+        if (!add_volume(mpa, NULL, url, i + 1))
+            return false;
     }
 
-done:
-    MP_TARRAY_APPEND(res, res, num, NULL);
-    return res;
-}
-
-
-static bool add_volume(struct mp_log *log, struct mp_archive *mpa,
-                       struct stream *src, const char* url, int index)
-{
-    struct mp_archive_volume *vol = talloc_zero(mpa, struct mp_archive_volume);
-    vol->index = index;
-    vol->mpa = mpa;
-    vol->src = src;
-    vol->url = talloc_strdup(vol, url);
-    locale_t oldlocale = uselocale(mpa->locale);
-    bool res = archive_read_append_callback_data(mpa->arch, vol) == ARCHIVE_OK;
-    uselocale(oldlocale);
-    return res;
+    return true;
 }
 
 struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
@@ -263,18 +260,12 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     mpa->num_volumes = max_volumes ? max_volumes : INT_MAX;
 
     // first volume is the primary stream
-    if (!add_volume(log, mpa, src, src->url, 0))
+    if (!add_volume(mpa, src, src->url, 0))
         goto err;
 
     // try to open other volumes
-    char** volumes = find_volumes(src);
-    for (int i = 0; volumes[i]; i++) {
-        if (!add_volume(log, mpa, NULL, volumes[i], i + 1)) {
-            talloc_free(volumes);
-            goto err;
-        }
-    }
-    talloc_free(volumes);
+    if (!find_volumes(mpa))
+        goto err;
 
     locale_t oldlocale = uselocale(mpa->locale);
 
