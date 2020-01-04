@@ -103,6 +103,7 @@ static int open_cb(struct archive *arch, void *priv)
         // Avoid annoying warnings/latency for known dummy volumes.
         if (vol->index >= vol->mpa->num_volumes)
             return ARCHIVE_OK;
+        MP_INFO(vol->mpa, "Opening volume '%s'...\n", vol->url);
         vol->src = stream_create(vol->url,
                                  STREAM_READ |
                                     vol->mpa->primary_src->stream_origin,
