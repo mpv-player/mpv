@@ -1,9 +1,27 @@
-### mpv version and platform
+---
+name: 'Report a Bug for a different Platform'
+about: 'Create a report for a runtime related Bug'
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+### Important Information
+
+Provide following Information:
+- mpv version
+- Platform and Version
+- Source of the mpv binary
 
 If you're not using git master or the latest release, update.
 Releases are listed here: https://github.com/mpv-player/mpv/releases
 
 ### Reproduction steps
+
+Describe the reproduction steps as precise as possible. It's very likely that
+the bug you experience wasn't reproduced by the developer because the workflow
+differes from your own.
 
 ### Expected behavior
 
@@ -13,11 +31,7 @@ Releases are listed here: https://github.com/mpv-player/mpv/releases
 
 Make a log file made with -v -v or --log-file=output.txt, paste it to
 https://0x0.st/ or attach it to the github issue, and replace this text with a
-link to it. If the issue is a build failure, upload build/config.log instead.
-
-If this is a normal runtime bug, and no log is provided, the issue will be
-closed for ignoring the issue template. This is because analyzing a bug without
-a log file is harder than necessary. Low quality bug reports are noise.
+link to it.
 
 ### Sample files
 
