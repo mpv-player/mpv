@@ -1000,19 +1000,31 @@ static void force_self_notify_change_opt(struct m_config *config,
     }
 }
 
-void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
+static void notify_opt(struct m_config *config, void *ptr, bool self_notification)
 {
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
         if (co->data == ptr) {
             if (m_config_cache_write_opt(config->cache, co->data))
-                force_self_notify_change_opt(config, co, true);
+                force_self_notify_change_opt(config, co, self_notification);
             return;
         }
     }
     // ptr doesn't point to any config->optstruct field declared in the
     // option list?
     assert(false);
+}
+
+void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
+{
+    notify_opt(config, ptr, true);
+}
+
+void m_config_notify_change_opt_ptr_notify(struct m_config *config, void *ptr)
+{
+    // (the notify bool is inverted: by not marking it as self-notification,
+    // the mpctx option change handler actually applies it)
+    notify_opt(config, ptr, false);
 }
 
 int m_config_set_option_raw(struct m_config *config,

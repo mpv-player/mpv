@@ -4732,7 +4732,7 @@ static void cmd_sub_step_seek(void *p)
         if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
             if (step) {
                 mpctx->opts->subs_rend->sub_delay -= a[0] - refpts;
-                m_config_notify_change_opt_ptr(mpctx->mconfig,
+                m_config_notify_change_opt_ptr_notify(mpctx->mconfig,
                                                &mpctx->opts->subs_rend->sub_delay);
                 show_property_osd(mpctx, "sub-delay", cmd->on_osd);
             } else {

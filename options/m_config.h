@@ -196,6 +196,10 @@ int m_config_option_requires_param(struct m_config *config, bstr name);
 // This will force a self-notification back to config->option_change_callback.
 void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr);
 
+// Exactly like m_config_notify_change_opt_ptr(), but the option change callback
+// (config->option_change_callback()) is invoked with self_update=false, if at all.
+void m_config_notify_change_opt_ptr_notify(struct m_config *config, void *ptr);
+
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 
