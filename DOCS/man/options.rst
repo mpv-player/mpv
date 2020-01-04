@@ -3458,6 +3458,18 @@ Demuxer
     after the initial caching. This option is useless if the file cannot be
     cached completely.
 
+``--rar-list-all-volumes=<yes|no>``
+    When opening multi-volume rar files, open all volumes to create a full list
+    of contained files (default: no). If disabled, only the archive entries
+    whose headers are located within the first volume are listed (and thus
+    played when opening a .rar file with mpv). Doing so speeds up opening, and
+    the typical idiotic use-case of playing uncompressed multi-volume rar files
+    that contain a single media file is made faster.
+
+    Opening is still slow, because for unknown, idiotic, and unnecessary reasons
+    libarchive opens all volumes anyway when playing the main file, even though
+    mpv iterated no archive entries yet.
+
 Input
 -----
 

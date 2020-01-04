@@ -20,11 +20,16 @@
 
 #include "common/common.h"
 #include "common/playlist.h"
+#include "options/m_config.h"
 #include "stream/stream.h"
 #include "misc/natural_sort.h"
 #include "demux.h"
 
 #include "stream/stream_libarchive.h"
+
+struct demux_libarchive_opts {
+    int rar_list_all_volumes;
+};
 
 static int cmp_filename(const void *a, const void *b)
 {
@@ -56,6 +61,12 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     ta_free(probe);
     if (!ok)
         return -1;
+
+    struct demux_libarchive_opts *opts =
+        mp_get_config_group(demuxer, demuxer->global, demuxer->desc->options);
+
+    if (!opts->rar_list_all_volumes)
+        flags |= MP_ARCHIVE_FLAG_NO_RAR_VOLUMES;
 
     mpa = mp_archive_new(demuxer->log, demuxer->stream, flags, 0);
     if (!mpa)
@@ -93,8 +104,17 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     return 0;
 }
 
+#define OPT_BASE_STRUCT struct demux_libarchive_opts
+
 const struct demuxer_desc demuxer_desc_libarchive = {
     .name = "libarchive",
     .desc = "libarchive wrapper",
     .open = open_file,
+    .options = &(const struct m_sub_options){
+        .opts = (const struct m_option[]) {
+            OPT_FLAG("rar-list-all-volumes", rar_list_all_volumes, 0),
+            {0}
+        },
+        .size = sizeof(OPT_BASE_STRUCT),
+    },
 };

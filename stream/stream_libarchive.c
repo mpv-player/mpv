@@ -264,9 +264,11 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     if (!add_volume(mpa, src, src->url, 0))
         goto err;
 
-    // try to open other volumes
-    if (!find_volumes(mpa))
-        goto err;
+    if (!(flags & MP_ARCHIVE_FLAG_NO_RAR_VOLUMES)) {
+        // try to open other volumes
+        if (!find_volumes(mpa))
+            goto err;
+    }
 
     locale_t oldlocale = uselocale(mpa->locale);
 

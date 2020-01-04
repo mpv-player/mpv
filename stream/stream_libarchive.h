@@ -24,7 +24,8 @@ struct mp_archive {
 
 void mp_archive_free(struct mp_archive *mpa);
 
-#define MP_ARCHIVE_FLAG_UNSAFE 1
+#define MP_ARCHIVE_FLAG_UNSAFE          (1 << 0)
+#define MP_ARCHIVE_FLAG_NO_RAR_VOLUMES  (1 << 1)
 struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
                                   int flags, int max_volumes);
 
