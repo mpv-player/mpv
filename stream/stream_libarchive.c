@@ -277,6 +277,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     archive_read_support_format_7zip(mpa->arch);
     archive_read_support_format_iso9660(mpa->arch);
     archive_read_support_format_rar(mpa->arch);
+    archive_read_support_format_rar5(mpa->arch);
     archive_read_support_format_zip(mpa->arch);
     archive_read_support_filter_bzip2(mpa->arch);
     archive_read_support_filter_gzip(mpa->arch);

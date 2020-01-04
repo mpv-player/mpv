@@ -414,7 +414,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--libarchive',
         'desc': 'libarchive wrapper for reading zip files and more',
-        'func': check_pkg_config('libarchive >= 3.0.0'),
+        'func': check_pkg_config('libarchive >= 3.3.3'),
     }, {
         'name': '--dvbin',
         'desc': 'DVB input module',
