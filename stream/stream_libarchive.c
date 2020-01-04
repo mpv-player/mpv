@@ -192,13 +192,6 @@ static char *standard_volume_url(void *ctx, const char *format,
     return talloc_asprintf(ctx, format, BSTR_P(base), index);
 }
 
-static char *old_rar_volume_url(void *ctx, const char *format,
-                                struct bstr base, int index)
-{
-    return talloc_asprintf(ctx, format, BSTR_P(base),
-                           'r' + index / 100, index % 100);
-}
-
 struct file_pattern {
     const char *match;
     const char *format;
@@ -213,7 +206,6 @@ static const struct file_pattern patterns[] = {
     { ".part01.rar",   "%.*s.part%.2d.rar", standard_volume_url, 2,   99 },
     { ".part001.rar",  "%.*s.part%.3d.rar", standard_volume_url, 2,  999 },
     { ".part0001.rar", "%.*s.part%.4d.rar", standard_volume_url, 2, 9999 },
-    { ".rar",          "%.*s.%c%.2d",       old_rar_volume_url,  0, 9999 },
     { ".001",          "%.*s.%.3d",         standard_volume_url, 2, 9999 },
     { NULL, NULL, NULL, 0, 0 },
 };
