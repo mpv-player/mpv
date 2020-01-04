@@ -204,6 +204,11 @@ struct m_sub_options {
     // Change flags passed to mp_option_change_callback() if any option that is
     // directly or indirectly part of this group is changed.
     int change_flags;
+    // Return further sub-options, for example for optional components. If set,
+    // this is called with increasing index (starting from 0), as long as true
+    // is returned. If true is returned and *sub is set in any of these calls,
+    // they are added as options.
+    bool (*get_sub_options)(int index, const struct m_sub_options **sub);
 };
 
 #define CONF_TYPE_FLAG          (&m_option_type_flag)

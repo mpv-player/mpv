@@ -708,6 +708,16 @@ static void add_sub_group(struct m_config_shadow *shadow, const char *name_prefi
         }
     }
 
+    if (subopts->get_sub_options) {
+        for (int i = 0; ; i++) {
+            const struct m_sub_options *sub = NULL;
+            if (!subopts->get_sub_options(i, &sub))
+                break;
+            if (sub)
+                add_sub_group(shadow, NULL, group_index, -1, sub);
+        }
+    }
+
     shadow->groups[group_index].group_count = shadow->num_groups - group_index;
 }
 
