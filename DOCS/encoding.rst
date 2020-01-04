@@ -30,9 +30,13 @@ section::
   [myencprofile]
   vf-add = scale=480:-2
   ovc = libx264
-  ovcopts-add = preset=medium,tune=fastdecode
+  ovcopts-add = preset=medium
+  ovcopts-add = tune=fastdecode
   ovcopts-add = crf=23
-  ovcopts-add = maxrate=1500k,bufsize=1000k,rc_init_occupancy=900k,refs=2
+  ovcopts-add = maxrate=1500k
+  ovcopts-add = bufsize=1000k
+  ovcopts-add = rc_init_occupancy=900k
+  ovcopts-add = refs=2
   ovcopts-add = profile=baseline
   oac = aac
   oacopts-add = b=96k
