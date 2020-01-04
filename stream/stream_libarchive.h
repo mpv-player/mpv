@@ -14,6 +14,7 @@ struct mp_archive {
     struct archive *arch;
     struct stream *primary_src;
     char buffer[4096];
+    int num_volumes; // INT_MAX if unknown (initial state)
 
     // Current entry, as set by mp_archive_next_entry().
     struct archive_entry *entry;
@@ -25,6 +26,6 @@ void mp_archive_free(struct mp_archive *mpa);
 
 #define MP_ARCHIVE_FLAG_UNSAFE 1
 struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
-                                  int flags);
+                                  int flags, int max_volumes);
 
 bool mp_archive_next_entry(struct mp_archive *mpa);
