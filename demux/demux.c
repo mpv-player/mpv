@@ -105,6 +105,8 @@ struct demux_opts {
 
 #define MAX_BYTES MPMIN(INT64_MAX, SIZE_MAX / 2)
 
+static bool get_demux_sub_opts(int index, const struct m_sub_options **sub);
+
 const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
         OPT_CHOICE("cache", enable_cache, 0,
@@ -151,6 +153,7 @@ const struct m_sub_options demux_conf = {
         },
         .meta_cp = "utf-8",
     },
+    .get_sub_options = get_demux_sub_opts,
 };
 
 struct demux_internal {
@@ -4497,4 +4500,12 @@ static void demux_convert_tags_charset(struct demuxer *demuxer)
     }
 
     talloc_free(data);
+}
+
+static bool get_demux_sub_opts(int index, const struct m_sub_options **sub)
+{
+    if (!demuxer_list[index])
+        return false;
+    *sub = demuxer_list[index]->options;
+    return true;
 }

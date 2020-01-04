@@ -98,6 +98,9 @@ typedef struct demuxer_desc {
     const char *name;      // Demuxer name, used with -demuxer switch
     const char *desc;      // Displayed to user
 
+    // If non-NULL, these are added to the global option list.
+    const struct m_sub_options *options;
+
     // Return 0 on success, otherwise -1
     int (*open)(struct demuxer *demuxer, enum demux_check check);
     // The following functions are all optional
