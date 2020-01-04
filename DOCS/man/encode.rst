@@ -17,8 +17,9 @@ You can encode files from one format/codec to another using this facility.
 
     This is a key/value list option. See `List Options`_ for details.
 
-    ``--ofopts-add=<options1[,options2,...]>``
-        Appends the options given as arguments to the options list.
+    ``--ofopts-add=<option>``
+        Appends the option given as an argument to the options list. (Passing
+        multiple options is currently still possible, but deprecated.)
 
     ``--ofopts=""``
         Completely empties the options list.
@@ -42,8 +43,9 @@ You can encode files from one format/codec to another using this facility.
 
     This is a key/value list option. See `List Options`_ for details.
 
-    ``--oacopts-add=<options1[,options2,...]>``
-        Appends the options given as arguments to the options list.
+    ``--oacopts-add=<option>``
+        Appends the option given as an argument to the options list. (Passing
+        multiple options is currently still possible, but deprecated.)
 
     ``--oacopts=""``
         Completely empties the options list.
@@ -74,8 +76,9 @@ You can encode files from one format/codec to another using this facility.
 
     This is a key/value list option. See `List Options`_ for details.
 
-    ``--ovcopts-add=<options1[,options2,...]>``
-        Appends the options given as arguments to the options list.
+    ``--ovcopts-add=<option>``
+        Appends the option given as an argument to the options list. (Passing
+        multiple options is currently still possible, but deprecated.)
 
     ``--ovcopts=""``
         Completely empties the options list.
