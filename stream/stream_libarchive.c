@@ -111,11 +111,12 @@ static int open_cb(struct archive *arch, void *priv)
                                  vol->mpa->primary_src->global);
         // We pretend that failure to open a stream means it was not found,
         // we assume in turn means that the volume doesn't exist (since
-        // libarchive is too fucking stupid to detect when a multi-volume
-        // archive really ends). libarchive also throws up permanently when
-        // a volume could not be opened (because it's fucking stupid), but
-        // somehow accepts 0-sized volumes (because it's fucking stupid), which
-        // we simulate whenever vol->src==NULL for an opened volume.
+        // libarchive builds volumes as some sort of abstraction on top of its
+        // stream layer, and its rar code cannot access volumes or signal
+        // anything related to this). libarchive also encounters a fatal error
+        // when a volume could not be opened. However, due to the way volume
+        // support works, it is fine with 0-sized volumes, which we simulate
+        // whenever vol->src==NULL for an opened volume.
         if (!vol->src) {
             vol->mpa->num_volumes = MPMIN(vol->mpa->num_volumes, vol->index);
             MP_INFO(vol->mpa, "Assuming the volume above was not needed.\n");
@@ -298,7 +299,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
             "not very good due to lack of good libarchive support for them. "
             "They are also an excessively inefficient and stupid way to "
             "distribute media files, so tell the people creating these files "
-            "to fuck off.\n");
+            "to rethink this.\n");
     }
 
     return mpa;
