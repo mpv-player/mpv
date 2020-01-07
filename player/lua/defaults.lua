@@ -638,17 +638,14 @@ function mp.set_osd_ass(res_x, res_y, data)
 end
 
 function mp.get_osd_size()
-    local w = mp.get_property_number("osd-width", 0)
-    local h = mp.get_property_number("osd-height", 0)
-    local par = mp.get_property_number("osd-par", 0)
-    if par == 0 then
-        par = 1
-    end
-
-    local aspect = 1.0 * w / math.max(h, 1.0) / par
-    return w, h, aspect
+    local prop = mp.get_property_native("osd-dimensions")
+    return prop.w, prop.h, prop.aspect
 end
 
+function mp.get_osd_margins()
+    local prop = mp.get_property_native("osd-dimensions")
+    return prop.ml, prop.mt, prop.mr, prop.mb
+end
 
 local mp_utils = package.loaded["mp.utils"]
 

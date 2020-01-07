@@ -998,17 +998,6 @@ static int script_raw_abort_async_command(lua_State *L)
     return 0;
 }
 
-static int script_get_osd_margins(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
-    lua_pushnumber(L, vo_res.ml);
-    lua_pushnumber(L, vo_res.mt);
-    lua_pushnumber(L, vo_res.mr);
-    lua_pushnumber(L, vo_res.mb);
-    return 4;
-}
-
 static int script_get_mouse_pos(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -1250,7 +1239,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
-    FN_ENTRY(get_osd_margins),
     FN_ENTRY(get_mouse_pos),
     FN_ENTRY(get_time),
     FN_ENTRY(input_set_section_mouse_area),
