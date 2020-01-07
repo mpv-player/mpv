@@ -24,6 +24,14 @@ Interface changes
 
 ::
 
+ --- mpv 0.31.1 ---
+    - change behavior when using legacy option syntax with options that start
+      with two dashes (``--`` instead of a ``-``). Now, using the recommended
+      syntax is required for options starting with ``--``, which means an option
+      value must be strictly passed after a ``=``, instead of as separate
+      argument. For example, ``--log-file f.txt`` was previously accepted and
+      behaved like ``--log-file=f.txt``, but now causes an error. Use of legacy
+      syntax that is still supported now prints a deprecation warning.
  --- mpv 0.31.0 ---
     - add `--resume-playback-check-mtime` to check consistent mtime when
       restoring playback state.

@@ -314,7 +314,7 @@ Legacy option syntax
 --------------------
 
 The ``--option=value`` syntax is not strictly enforced, and the alternative
-legacy syntax ``-option value`` and ``--option value`` will also work. This is
+legacy syntax ``-option value`` and ``-option=value`` will also work. This is
 mostly  for compatibility with MPlayer. Using these should be avoided. Their
 semantics can change any time in the future.
 
@@ -324,9 +324,15 @@ because ``--fs`` is a flag option that requires no parameter. If an option
 changes and its parameter becomes optional, then a command line using the
 alternative syntax will break.
 
-Currently, the parser makes no difference whether an option starts with ``--``
-or a single ``-``. This might also change in the future, and ``--option value``
-might always interpret ``value`` as filename in order to reduce ambiguities.
+Until mpv 0.31.0, there was no difference whether an option started with ``--``
+or a single ``-``. Newer mpv releases strictly expect that you pass the option
+value after a ``=``. For example, before ``mpv --log-file f.txt`` would write
+a log to ``f.txt``, but now this command line fails, as ``--log-file`` expects
+an option value, and ``f.txt`` is simply considered a normal file to be played
+(as in ``mpv f.txt``).
+
+The future plan is that ``-option value`` will not work anymore, and options
+with a single ``-`` behave the same as ``--`` options.
 
 Escaping spaces and other special characters
 --------------------------------------------

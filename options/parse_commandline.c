@@ -40,6 +40,7 @@
 struct parse_state {
     struct m_config *config;
     char **argv;
+    struct mp_log *log; // silent if NULL
 
     bool no_more_opts;
     bool error;
@@ -52,6 +53,7 @@ struct parse_state {
 // Returns 0 if a valid option/file is available, <0 on error, 1 on end of args.
 static int split_opt_silent(struct parse_state *p)
 {
+    struct mp_log *log = p->log ? p->log : mp_null_log;
     assert(!p->error);
 
     if (!p->argv || !p->argv[0])
@@ -73,7 +75,8 @@ static int split_opt_silent(struct parse_state *p)
 
     p->is_opt = true;
 
-    if (!bstr_eatstart0(&p->arg, "--"))
+    bool new_opt = bstr_eatstart0(&p->arg, "--");
+    if (!new_opt)
         bstr_eatstart0(&p->arg, "-");
 
     bool ambiguous = !bstr_split_tok(p->arg, "=", &p->arg, &p->param);
@@ -81,10 +84,13 @@ static int split_opt_silent(struct parse_state *p)
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
     if (ambiguous && need_param) {
-        if (!p->argv[0])
+        if (!p->argv[0] || new_opt)
             return M_OPT_MISSING_PARAM;
         p->param = bstr0(p->argv[0]);
         p->argv++;
+        mp_warn(log, "The legacy option syntax ('-%.*s value') is deprecated "
+                     "and dangerous.\nPlease use '--%.*s=value'.\n",
+                BSTR_P(p->arg), BSTR_P(p->arg));
     }
 
     return 0;
@@ -140,7 +146,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
     mode = GLOBAL;
 
-    struct parse_state p = {config, argv};
+    struct parse_state p = {config, argv, config->log};
     while (split_opt(&p)) {
         if (p.is_opt) {
             int flags = M_SETOPT_FROM_CMDLINE;
