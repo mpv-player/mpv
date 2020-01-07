@@ -2455,28 +2455,31 @@ static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg
                     mpctx->video_out ? mpctx->video_out->driver->name : NULL);
 }
 
-static int mp_property_osd_w(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
-    return m_property_int_ro(action, arg, vo_res.w);
-}
-
-static int mp_property_osd_h(void *ctx, struct m_property *prop,
-                             int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
-    return m_property_int_ro(action, arg, vo_res.h);
-}
-
-static int mp_property_osd_par(void *ctx, struct m_property *prop,
+static int mp_property_osd_dim(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
-    return m_property_double_ro(action, arg, vo_res.display_par);
+
+    if (!mpctx->video_out || !mpctx->video_out->config_ok)
+        vo_res = (struct mp_osd_res){0};
+
+    double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
+                    (vo_res.display_par ? vo_res.display_par : 1);
+
+    struct m_sub_property props[] = {
+        {"w",       SUB_PROP_DOUBLE(vo_res.w)},
+        {"h",       SUB_PROP_DOUBLE(vo_res.h)},
+        {"par",     SUB_PROP_DOUBLE(vo_res.display_par)},
+        {"aspect",  SUB_PROP_DOUBLE(aspect)},
+        {"mt",      SUB_PROP_DOUBLE(vo_res.mt)},
+        {"mb",      SUB_PROP_DOUBLE(vo_res.mb)},
+        {"ml",      SUB_PROP_DOUBLE(vo_res.ml)},
+        {"mr",      SUB_PROP_DOUBLE(vo_res.mr)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
 }
 
 static int mp_property_osd_sym(void *ctx, struct m_property *prop,
@@ -3398,9 +3401,10 @@ static const struct m_property mp_properties_base[] = {
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},
 
-    {"osd-width", mp_property_osd_w},
-    {"osd-height", mp_property_osd_h},
-    {"osd-par", mp_property_osd_par},
+    {"osd-dimensions", mp_property_osd_dim},
+    M_PROPERTY_ALIAS("osd-width", "osd-dimensions/w"),
+    M_PROPERTY_ALIAS("osd-height", "osd-dimensions/h"),
+    M_PROPERTY_ALIAS("osd-par", "osd-dimensions/par"),
 
     {"osd-sym-cc", mp_property_osd_sym},
     {"osd-ass-cc", mp_property_osd_ass},
@@ -3494,7 +3498,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
-      "video-aspect", "video-dec-params",
+      "video-aspect", "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute",
@@ -3509,7 +3513,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-time", "cache-buffering-state", "cache-speed",
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
-      "osd-par"),
+      "osd-par", "osd-dimensions"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps",
       "fullscreen", "window-maximized"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",

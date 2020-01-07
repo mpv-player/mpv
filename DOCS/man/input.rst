@@ -2177,8 +2177,39 @@ Property list
     ``overlay-add`` command. It gives you the actual OSD size, which can be
     different from the window size in some cases.
 
+    Alias to ``osd-dimensions/w`` and ``osd-dimensions/h``.
+
 ``osd-par``
     Last known OSD display pixel aspect (can be 0).
+
+    Alias to ``osd-dimensions/osd-par``.
+
+``osd-dimensions``
+    Last known OSD dimensions.
+
+    Has the following sub-properties (which can be read as ``MPV_FORMAT_NODE``
+    or Lua table with ``mp.get_property_native``):
+
+    ``w``
+        Size of the VO window in OSD render units (usually pixels, but may be
+        scaled pixels with VOs like ``xv``).
+
+    ``h``
+        Size of the VO window in OSD render units,
+
+    ``par``
+        Pixel aspect ratio of the OSD (usually 1).
+
+    ``aspect``
+        Display aspect ratio of the VO window. (Computing from the properties
+        above.)
+
+    ``mt``, ``mb``, ``ml``, ``mr``
+        OSD to video margins (top, bottom, left, right). This describes the
+        area into which the video is rendered.
+
+    Any of these properties may be unavailable or set to dummy values if the
+    VO window is not created or visible.
 
 ``sub-text``
     Return the current subtitle text regardless of sub visibility.
