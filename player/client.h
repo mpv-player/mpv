@@ -39,6 +39,9 @@ struct mpv_global *mp_client_get_global(struct mpv_handle *ctx);
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
 struct MPContext *mp_client_api_get_core(struct mp_client_api *api);
 
+void mp_client_broadcast_event_external(struct mp_client_api *api, int event,
+                                        void *data);
+
 // m_option.c
 void *node_get_alloc(struct mpv_node *node);
 

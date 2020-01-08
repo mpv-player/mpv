@@ -779,6 +779,17 @@ void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data)
     pthread_mutex_unlock(&clients->lock);
 }
 
+// Like mp_client_broadcast_event(), but can be called from any thread.
+// Avoid using this.
+void mp_client_broadcast_event_external(struct mp_client_api *api, int event,
+                                        void *data)
+{
+    struct MPContext *mpctx = api->mpctx;
+
+    mp_client_broadcast_event(mpctx, event, data);
+    mp_wakeup_core(mpctx);
+}
+
 // If client_name == NULL, then broadcast and free the event.
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
                          uint64_t reply_userdata, int event, void *data)
