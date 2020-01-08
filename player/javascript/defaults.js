@@ -238,11 +238,14 @@ mp.set_osd_ass = function set_osd_ass(res_x, res_y, data) {
     return mp._legacy_overlay.update();
 }
 
+// the following return undefined on error, null passthrough, or legacy object
 mp.get_osd_size = function get_osd_size() {
-    var w = mp.get_property_number("osd-width", 0),
-        h = mp.get_property_number("osd-height", 0),
-        par = mp.get_property_number("osd-par", 0);
-    return {width: w, height: h, aspect: w / (h || 1) / (par || 1)};
+    var d = mp.get_property_native("osd-dimensions");
+    return d && {width: d.w, height: d.h, aspect: d.aspect};
+}
+mp.get_osd_margins = function get_osd_margins() {
+    var d = mp.get_property_native("osd-dimensions");
+    return d && {left: d.ml, right: d.mr, top: d.mt, bottom: d.mb};
 }
 
 /**********************************************************************

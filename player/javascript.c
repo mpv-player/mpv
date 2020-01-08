@@ -743,15 +743,6 @@ static void push_nums_obj(js_State *J, const char * const names[],
     }
 }
 
-// args: none, return: object with properties top, bottom, left, right
-static void script_get_osd_margins(js_State *J)
-{
-    struct mp_osd_res r = osd_get_vo_res(jctx(J)->mpctx->osd);
-    const char * const names[] = {"left", "top", "right", "bottom", NULL};
-    const double vals[] = {r.ml, r.mt, r.mr, r.mb};
-    push_nums_obj(J, names, vals);
-}
-
 // args: none, return: object with properties x, y
 static void script_get_mouse_pos(js_State *J)
 {
@@ -1237,7 +1228,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_wakeup_pipe, 0),
     FN_ENTRY(_hook_add, 3),
     FN_ENTRY(_hook_continue, 1),
-    FN_ENTRY(get_osd_margins, 0),
     FN_ENTRY(get_mouse_pos, 0),
     FN_ENTRY(input_set_section_mouse_area, 5),
     FN_ENTRY(last_error, 0),
