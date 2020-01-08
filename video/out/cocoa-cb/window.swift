@@ -476,7 +476,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidChangeBackingProperties(_ notification: Notification) {
         cocoaCB.layer?.contentsScale = backingScaleFactor
-        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+        cocoaCB.flagEvents(VO_EVENT_DPI)
     }
 
     func windowWillStartLiveResize(_ notification: Notification) {

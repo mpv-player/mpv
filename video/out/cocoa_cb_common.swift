@@ -371,7 +371,7 @@ class CocoaCB: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        let screenID = fs ? (mpv?.opts.fsscreen_id ?? 100) : (mpv?.opts.screen_id ?? 100)
+        let screenID = fs ? (mpv?.opts.fsscreen_id ?? 0) : (mpv?.opts.screen_id ?? 0)
         return getScreenBy(id: Int(screenID))
     }
 
@@ -487,7 +487,10 @@ class CocoaCB: NSObject {
             return VO_FALSE
         case VOCTRL_GET_HIDPI_SCALE:
             if let scaleFactor = data?.assumingMemoryBound(to: CDouble.self) {
-                scaleFactor.pointee = Double(ccb.window?.backingScaleFactor ?? 1.0)
+                let factor = ccb.window?.backingScaleFactor ??
+                             ccb.getTargetScreen(forFullscreen: false)?.backingScaleFactor ??
+                             NSScreen.main?.backingScaleFactor ?? 1.0
+                scaleFactor.pointee = Double(factor)
                 return VO_TRUE;
             }
             return VO_FALSE
@@ -524,7 +527,7 @@ class CocoaCB: NSObject {
                 var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
                 var count: Int32 = 0
                 let screen = ccb.window != nil ? ccb.window?.screen :
-                                                 ccb.getScreenBy(id: Int(ccb.mpv?.opts.screen_id ?? 0)) ??
+                                                 ccb.getTargetScreen(forFullscreen: false) ??
                                                  NSScreen.main
                 let displayName = screen?.displayName ?? "Unknown"
 
