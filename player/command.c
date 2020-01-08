@@ -104,6 +104,8 @@ struct command_ctx {
     struct mp_cmd_ctx *cache_dump_cmd; // in progress cache dumping
 
     char **script_props;
+
+    double cached_window_scale;
 };
 
 static const struct m_option script_props_type = {
@@ -2329,11 +2331,19 @@ static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
     struct vo *vo = mpctx->video_out;
-    double scale = 0;
-    if (!vo || vo_control(vo, VOCTRL_GET_HIDPI_SCALE, &scale) < 1 || scale <= 0)
+    if (!vo)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, scale);
+    if (!cmd->cached_window_scale) {
+        double scale = 0;
+        if (vo_control(vo, VOCTRL_GET_HIDPI_SCALE, &scale) < 1 || !scale)
+            scale = -1;
+        cmd->cached_window_scale = scale;
+    }
+    if (cmd->cached_window_scale < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, cmd->cached_window_scale);
 }
 
 static int mp_property_display_names(void *ctx, struct m_property *prop,
@@ -3514,7 +3524,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
-    E(MP_EVENT_WIN_STATE, "display-names", "display-fps"),
+    E(MP_EVENT_WIN_STATE, "display-names", "display-fps", "display-hidpi-scale"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
