@@ -43,14 +43,14 @@ enum {
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
     // Special mechanism for making resizing with Cocoa react faster
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
-    // Legacy. Use m_config_cache_write_opt() instead to update the fullscreen
-    // option.
+    // For VOCTRL_GET_HIDPI_SCALE changes.
+    VO_EVENT_DPI                        = 1 << 6,
     // Special thing for encode mode (vo_driver.initially_blocked).
     // Part of VO_EVENTS_USER to make vo_is_ready_for_frame() work properly.
     VO_EVENT_INITIAL_UNBLOCK            = 1 << 7,
 
     // Set of events the player core may be interested in.
-    VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE |
+    VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
                      VO_EVENT_INITIAL_UNBLOCK,
 };
 

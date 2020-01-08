@@ -3524,7 +3524,8 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
-    E(MP_EVENT_WIN_STATE, "display-names", "display-fps", "display-hidpi-scale"),
+    E(MP_EVENT_WIN_STATE, "display-names", "display-fps"),
+    E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
@@ -6054,6 +6055,8 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
+    if (event == MP_EVENT_WIN_STATE2)
+        ctx->cached_window_scale = 0;
 }
 
 void handle_command_updates(struct MPContext *mpctx)
