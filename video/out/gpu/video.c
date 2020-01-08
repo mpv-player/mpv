@@ -2764,6 +2764,9 @@ static void pass_dither(struct gl_video *p)
         debug_check_gl(p, "dither setup");
 
         talloc_free(temp);
+
+        if (!p->dither_texture)
+            return;
     }
 
     GLSLF("// dithering\n");
