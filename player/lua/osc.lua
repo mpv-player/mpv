@@ -2191,6 +2191,16 @@ end
 
 function request_init()
     state.initREQ = true
+    request_tick()
+end
+
+-- Like request_init(), but also request an immediate update
+function request_init_resize()
+    request_init()
+    -- ensure immediate update
+    state.tick_timer:kill()
+    state.tick_timer.timeout = 0
+    state.tick_timer:resume()
 end
 
 function render_wipe()
@@ -2208,7 +2218,7 @@ function render()
     if not (state.mp_screen_sizeX == current_screen_sizeX
         and state.mp_screen_sizeY == current_screen_sizeY) then
 
-        request_init()
+        request_init_resize()
 
         state.mp_screen_sizeX = current_screen_sizeX
         state.mp_screen_sizeY = current_screen_sizeY
@@ -2556,19 +2566,19 @@ end)
 mp.observe_property("fullscreen", "bool",
     function(name, val)
         state.fullscreen = val
-        request_init()
+        request_init_resize()
     end
 )
 mp.observe_property("border", "bool",
     function(name, val)
         state.border = val
-        request_init()
+        request_init_resize()
     end
 )
 mp.observe_property("window-maximized", "bool",
     function(name, val)
         state.maximized = val
-        request_init()
+        request_init_resize()
     end
 )
 mp.observe_property("idle-active", "bool",
@@ -2584,6 +2594,11 @@ mp.observe_property("vo-configured", "bool", function(name, val)
 end)
 mp.observe_property("playback-time", "number", function(name, val)
     request_tick()
+end)
+mp.observe_property("osd-dimensions", "native", function(name, val)
+    -- (we could use the value instead of re-querying it all the time, but then
+    --  we might have to worry about property update ordering)
+    request_init_resize()
 end)
 
 -- mouse show/hide bindings
