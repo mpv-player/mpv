@@ -737,6 +737,9 @@ def build(ctx):
         if ctx.env.ZSHDIR:
             ctx.install_as(ctx.env.ZSHDIR + '/_mpv', 'etc/_mpv.zsh')
 
+        if ctx.env.BASHDIR:
+            ctx.install_as(ctx.env.BASHDIR + '/mpv', 'etc/mpv.bash-completion')
+
         ctx.install_files(
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )

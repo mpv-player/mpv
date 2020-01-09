@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#
+# This file is part of mpv.
+#
+# mpv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# mpv is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+_mpv_get_args()
+{
+  local doc=$(mpv --list-options | grep -E "^\\s*$1\\s")
+  local partial="$2"
+  local type=$(echo "$doc" | awk '{print $2;}')
+
+  if [ "$1" = "--show-profile" ]; then
+    # This is a special case
+    type="Profile"
+  fi
+
+  declare -a candidates
+  case $type in
+    String)
+      echo "$doc" | grep -q '\[file\]'
+      if [ $? -eq 0 ]; then
+        if [ "$cur" = '=' ]; then
+          # Without this, _filedir will try and complete files starting with '='
+          cur=""
+        fi
+        _filedir
+        return 0
+      else
+        candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+        candidates+=("help")
+      fi
+      ;;
+    Flag)
+      candidates=("yes" "no" "help")
+      ;;
+    Choices:)
+      candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+      candidates+=("help")
+      ;;
+    Image)
+      candidates=($(mpv $1=help))
+      candidates=("${candidates[@]:2}")
+      candidates+=("help")
+      ;;
+    Profile)
+      candidates=($(mpv $1= | grep -v ':' | awk '{print $1;}'))
+      ;;
+    *)
+      # There are other categories; some of which we could do something smarter
+      # about, with enough work.
+      ;;
+  esac
+  COMPREPLY=($(compgen -W "${candidates[*]}" -- "${partial}"))
+  if [ ${#COMPREPLY[@]} -gt 1 ]; then
+    compopt -o nospace mpv
+  fi
+}
+
+_mpv()
+{
+  compopt +o nospace mpv
+
+  # This regex detects special options where we don't want an '=' appended
+  local special_regex='Flag.*\[not in config files\]|Print'
+  local options=($(mpv --list-options | grep -v -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+  local specials=($(mpv --list-options | grep -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+
+  # _filedir requires the current candidate be in $cur
+  local cur=${COMP_WORDS[COMP_CWORD]}
+  local prev=${COMP_WORDS[((COMP_CWORD - 1))]}
+
+  if [ "$cur" = '=' ]; then
+     # If the current word is '=' then we are looking for an argument for the
+     # option specified by the previous word.
+    _mpv_get_args "$prev"
+  elif [ "$prev" = '=' ]; then
+    # If the previous word is '=' then we are completing an argument for the
+    # option specified by the word before the '='.
+    local prevprev=${COMP_WORDS[((COMP_CWORD - 2))]}
+    _mpv_get_args "$prevprev" "$cur"
+  else
+    case $cur in
+      -*)
+        COMPREPLY=($(compgen -W "${options[*]}" -S '=' -- "${cur}"))
+        local normal_count=${#COMPREPLY[@]}
+        COMPREPLY+=($(compgen -W "${specials[*]}" -- "${cur}"))
+        if [ $normal_count -gt 0 -o ${#COMPREPLY[@]} -gt 1 ]; then
+          compopt -o nospace mpv
+        fi
+        ;;
+      *)
+        _filedir
+        ;;
+    esac
+  fi
+}
+
+complete -F _mpv mpv

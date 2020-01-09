@@ -950,6 +950,7 @@ _INSTALL_DIRS_LIST = [
     ('confdir', '${SYSCONFDIR}/mpv',  'configuration files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
     ('confloaddir', '${CONFDIR}', 'configuration files load directory'),
+    ('bashdir', '${DATADIR}/bash-completion/completions', 'bash completion functions'),
 ]
 
 def options(opt):
