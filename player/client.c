@@ -1576,8 +1576,10 @@ static void notify_property_events(struct mpv_handle *ctx, int event)
             ctx->has_pending_properties = true;
         }
     }
-    // Note: assume this function is called from the playloop only (at least
-    // if called with events that trigger property changes).
+
+    // Same as in mp_client_property_change().
+    if (ctx->has_pending_properties)
+        mp_dispatch_adjust_timeout(ctx->mpctx->dispatch, 0);
 }
 
 // Call with ctx->lock held (only). May temporarily drop the lock.
