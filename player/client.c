@@ -161,7 +161,7 @@ struct mpv_handle {
 
 static bool gen_log_message_event(struct mpv_handle *ctx);
 static bool gen_property_change_event(struct mpv_handle *ctx);
-static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask);
+static void notify_property_events(struct mpv_handle *ctx, int event);
 
 // Must be called with prop->owner->lock held.
 static void prop_unref(struct observe_property *prop)
@@ -730,7 +730,7 @@ static int send_event(struct mpv_handle *ctx, struct mpv_event *event, bool copy
     pthread_mutex_lock(&ctx->lock);
     uint64_t mask = 1ULL << event->event_id;
     if (ctx->property_event_masks & mask)
-        notify_property_events(ctx, mask);
+        notify_property_events(ctx, event->event_id);
     int r;
     if (!(ctx->event_mask & mask)) {
         r = 0;
@@ -1567,10 +1567,11 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name)
 
 // Mark properties as changed in reaction to specific events.
 // Called with ctx->lock held.
-static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask)
+static void notify_property_events(struct mpv_handle *ctx, int event)
 {
+    uint64_t mask = 1ULL << event;
     for (int i = 0; i < ctx->num_properties; i++) {
-        if (ctx->properties[i]->event_mask & event_mask) {
+        if (ctx->properties[i]->event_mask & mask) {
             ctx->properties[i]->change_ts += 1;
             ctx->has_pending_properties = true;
         }
