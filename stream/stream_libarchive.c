@@ -33,6 +33,33 @@ struct mp_archive_volume {
     char *url;
 };
 
+static bool probe_rar(struct stream *s)
+{
+    static uint8_t rar_sig[] = {0x52, 0x61, 0x72, 0x21, 0x1a, 0x07};
+    uint8_t buf[6];
+    if (stream_read_peek(s, buf, sizeof(buf)) != sizeof(buf))
+        return false;
+    return memcmp(buf, rar_sig, 6) == 0;
+}
+
+static bool probe_zip(struct stream *s)
+{
+    uint8_t p[4];
+    if (stream_read_peek(s, p, sizeof(p)) != sizeof(p))
+        return false;
+    // Lifted from libarchive, BSD license.
+    if (p[0] == 'P' && p[1] == 'K') {
+        if ((p[2] == '\001' && p[3] == '\002') ||
+            (p[2] == '\003' && p[3] == '\004') ||
+            (p[2] == '\005' && p[3] == '\006') ||
+            (p[2] == '\006' && p[3] == '\006') ||
+            (p[2] == '\007' && p[3] == '\010') ||
+            (p[2] == '0' && p[3] == '0'))
+            return true;
+    }
+    return false;
+}
+
 static bool volume_seek(struct mp_archive_volume *vol)
 {
     if (!vol->src || vol->seek_to < 0)
@@ -267,17 +294,35 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
 
     locale_t oldlocale = uselocale(mpa->locale);
 
-    archive_read_support_format_7zip(mpa->arch);
-    archive_read_support_format_iso9660(mpa->arch);
+    bool maybe_rar = probe_rar(src);
+    bool maybe_zip = probe_zip(src);
+    bool probe_all = flags & MP_ARCHIVE_FLAG_UNSAFE;
+
     archive_read_support_format_rar(mpa->arch);
     archive_read_support_format_rar5(mpa->arch);
-    archive_read_support_format_zip(mpa->arch);
-    archive_read_support_filter_bzip2(mpa->arch);
-    archive_read_support_filter_gzip(mpa->arch);
-    archive_read_support_filter_xz(mpa->arch);
-    if (flags & MP_ARCHIVE_FLAG_UNSAFE) {
-        archive_read_support_format_gnutar(mpa->arch);
-        archive_read_support_format_tar(mpa->arch);
+
+    // Exclude other formats if it's probably RAR, because other formats may
+    // behave suboptimal with multiple volumes exposed, such as opening every
+    // single volume by seeking at the end of the file.
+    if (!maybe_rar) {
+        archive_read_support_format_7zip(mpa->arch);
+        archive_read_support_format_iso9660(mpa->arch);
+        archive_read_support_filter_bzip2(mpa->arch);
+        archive_read_support_filter_gzip(mpa->arch);
+        archive_read_support_filter_xz(mpa->arch);
+        archive_read_support_format_zip_streamable(mpa->arch);
+
+        if (probe_all) {
+            archive_read_support_format_gnutar(mpa->arch);
+            archive_read_support_format_tar(mpa->arch);
+        }
+
+        // This zip reader is normally preferable. However, it seeks to the end
+        // of the file, which may be annoying (HTTP reconnect, volume skipping),
+        // so use it only as last resort, or if it's relatively likely that it's
+        // really zip.
+        if (maybe_zip || probe_all)
+            archive_read_support_format_zip_seekable(mpa->arch);
     }
 
     archive_read_set_read_callback(mpa->arch, read_cb);
