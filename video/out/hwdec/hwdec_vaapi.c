@@ -239,7 +239,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                                    VA_EXPORT_SURFACE_SEPARATE_LAYERS,
                                    &p->desc);
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
-                               p_owner->probing_formats ? MSGL_V : MSGL_ERR)) {
+                               p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
+    {
         goto err;
     }
     vaSyncSurface(display, va_surface_id(mapper->src));
@@ -341,6 +342,7 @@ static void determine_working_formats(struct ra_hwdec *hw)
     VAProfile *profiles = NULL;
     VAEntrypoint *entrypoints = NULL;
 
+    MP_VERBOSE(hw, "Going to probe surface formats (may log bogus errors)...\n");
     p->probing_formats = true;
 
     AVVAAPIHWConfig *hwconfig = av_hwdevice_hwconfig_alloc(p->ctx->av_device_ref);
@@ -363,8 +365,8 @@ static void determine_working_formats(struct ra_hwdec *hw)
         status = vaQueryConfigEntrypoints(p->display, profile, entrypoints,
                                           &num_ep);
         if (status != VA_STATUS_SUCCESS) {
-            MP_VERBOSE(hw, "vaQueryConfigEntrypoints(): '%s' for profile %d",
-                       vaErrorStr(status), (int)profile);
+            MP_DBG(hw, "vaQueryConfigEntrypoints(): '%s' for profile %d",
+                   vaErrorStr(status), (int)profile);
             continue;
         }
         for (int ep = 0; ep < num_ep; ep++) {
@@ -372,8 +374,8 @@ static void determine_working_formats(struct ra_hwdec *hw)
             status = vaCreateConfig(p->display, profile, entrypoints[ep],
                                     NULL, 0, &config);
             if (status != VA_STATUS_SUCCESS) {
-                MP_VERBOSE(hw, "vaCreateConfig(): '%s' for profile %d",
-                        vaErrorStr(status), (int)profile);
+                MP_DBG(hw, "vaCreateConfig(): '%s' for profile %d",
+                       vaErrorStr(status), (int)profile);
                 continue;
             }
 
@@ -391,9 +393,10 @@ done:
 
     p->probing_formats = false;
 
-    MP_VERBOSE(hw, "Supported formats:\n");
+    MP_DBG(hw, "Supported formats:\n");
     for (int n = 0; p->formats && p->formats[n]; n++)
-        MP_VERBOSE(hw, " %s\n", mp_imgfmt_to_name(p->formats[n]));
+        MP_DBG(hw, " %s\n", mp_imgfmt_to_name(p->formats[n]));
+    MP_VERBOSE(hw, "Done probing surface formats.\n");
 }
 
 const struct ra_hwdec_driver ra_hwdec_vaegl = {
