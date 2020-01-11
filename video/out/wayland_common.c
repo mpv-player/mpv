@@ -105,7 +105,7 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 {
-    if (!wl->pointer)
+    if (!wl->pointer || !wl->pointer_id)
         return VO_NOTAVAIL;
     wl->cursor_visible = on;
     if (on) {
