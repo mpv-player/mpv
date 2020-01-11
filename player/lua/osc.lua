@@ -1065,13 +1065,19 @@ function window_controls(topbar)
 
     -- Maximize: 🗖 /🗗
     ne = new_element("maximize", "button")
-    if state.maximized then
+    if state.maximized or state.fullscreen then
         ne.content = "\238\132\148"
     else
         ne.content = "\238\132\147"
     end
     ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "window-maximized") end
+        function ()
+            if state.fullscreen then
+                mp.commandv("cycle", "fullscreen")
+            else
+                mp.commandv("cycle", "window-maximized")
+            end
+        end
     lo = add_layout("maximize")
     lo.geometry = alignment == "left" and third_geo or second_geo
     lo.style = osc_styles.wcButtons
