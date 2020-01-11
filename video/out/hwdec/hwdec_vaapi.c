@@ -362,8 +362,11 @@ static void determine_working_formats(struct ra_hwdec *hw)
         int num_ep = 0;
         status = vaQueryConfigEntrypoints(p->display, profile, entrypoints,
                                           &num_ep);
-        if (!CHECK_VA_STATUS(hw, "vaQueryConfigEntrypoints()"))
+        if (status != VA_STATUS_SUCCESS) {
+            MP_VERBOSE(hw, "vaQueryConfigEntrypoints(): '%s' for profile %d",
+                       vaErrorStr(status), (int)profile);
             continue;
+        }
         for (int ep = 0; ep < num_ep; ep++) {
             VAConfigID config = VA_INVALID_ID;
             status = vaCreateConfig(p->display, profile, entrypoints[ep],
