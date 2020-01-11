@@ -2021,8 +2021,8 @@ function osc_init()
             return ""
         end
         local dmx_cache = mp.get_property_number("demuxer-cache-duration")
-        if dmx_cache and (dmx_cache > state.dmx_cache * 1.1 or
-                dmx_cache < state.dmx_cache * 0.9) then
+        local thresh = math.min(state.dmx_cache * 0.05, 5)  -- 5% or 5s
+        if dmx_cache and math.abs(dmx_cache - state.dmx_cache) >= thresh then
             state.dmx_cache = dmx_cache
         else
             dmx_cache = state.dmx_cache
