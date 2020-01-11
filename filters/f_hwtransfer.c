@@ -85,10 +85,11 @@ static bool update_format_decision(struct priv *p, int input_fmt)
     p->last_input_fmt = input_fmt;
     p->last_upload_fmt = up_fmt;
     p->last_sw_fmt = sw_fmt;
-    MP_INFO(u->f, "upload %s -> %s (%s)\n",
+    MP_INFO(u->f, "upload %s -> %s (%s, upload as %s)\n",
             mp_imgfmt_to_name(p->last_input_fmt),
-            mp_imgfmt_to_name(p->last_upload_fmt),
-            mp_imgfmt_to_name(p->last_sw_fmt));
+            mp_imgfmt_to_name(u->hw_imgfmt),
+            mp_imgfmt_to_name(p->last_sw_fmt),
+            mp_imgfmt_to_name(p->last_upload_fmt));
     return true;
 }
 
