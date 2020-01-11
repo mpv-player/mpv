@@ -34,41 +34,43 @@ static bool update_format_decision(struct priv *p, int input_fmt)
 
     p->last_input_fmt = 0;
 
-    int res = mp_imgfmt_select_best_list(u->upload_fmts, u->num_upload_fmts,
-                                         input_fmt);
-
-    if (!res)
+    // First find the closest sw fmt. Some hwdec APIs return crazy lists of
+    // "supported" formats, which then are not supported or crash (???), so
+    // the this is a good way to avoid problems.
+    // (Actually we should just have hardcoded everything instead of relying on
+    // this fragile bullshit FFmpeg API and the fragile bullshit hwdec drivers.)
+    int sw_fmt = mp_imgfmt_select_best_list(u->fmts, u->num_fmts, input_fmt);
+    if (!sw_fmt)
         return false;
 
-    // Find which sw format we should use.
-    // NOTE: if there are ever any hw APIs that actually do expensive
-    // conversions on mismatching format uploads, we should probably first look
-    // which sw format is preferred?
+    // Dumb, but find index for u->fmts[index]==sw_fmt.
     int index = -1;
-    for (int n = 0; n < u->num_upload_fmts; n++) {
-        if (u->upload_fmts[n] == res)
+    for (int n = 0; n < u->num_fmts; n++) {
+        if (u->fmts[n] == sw_fmt)
             index = n;
     }
-
     if (index < 0)
         return false;
 
-    for (int n = 0; n < u->num_fmts; n++) {
-        if (index >= u->fmt_upload_index[n] &&
-            index < u->fmt_upload_index[n] + u->fmt_upload_num[n])
-        {
-            p->last_input_fmt = input_fmt;
-            p->last_upload_fmt = u->upload_fmts[index];
-            p->last_sw_fmt = u->fmts[n];
-            MP_INFO(u->f, "upload %s -> %s (%s)\n",
-                    mp_imgfmt_to_name(p->last_input_fmt),
-                    mp_imgfmt_to_name(p->last_upload_fmt),
-                    mp_imgfmt_to_name(p->last_sw_fmt));
-            return true;
-        }
-    }
+    // Now check the available upload formats. This is the format our sw frame
+    // has to be in, and which the upload API will take (probably).
 
-    return false;
+    int *upload_fmts = &u->upload_fmts[u->fmt_upload_index[index]];
+    int num_upload_fmts = u->fmt_upload_num[index];
+
+    int up_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts,
+                                            input_fmt);
+    if (!up_fmt)
+        return false;
+
+    p->last_input_fmt = input_fmt;
+    p->last_upload_fmt = up_fmt;
+    p->last_sw_fmt = sw_fmt;
+    MP_INFO(u->f, "upload %s -> %s (%s)\n",
+            mp_imgfmt_to_name(p->last_input_fmt),
+            mp_imgfmt_to_name(p->last_upload_fmt),
+            mp_imgfmt_to_name(p->last_sw_fmt));
+    return true;
 }
 
 int mp_hwupload_find_upload_format(struct mp_hwupload *u, int imgfmt)
