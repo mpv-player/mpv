@@ -147,8 +147,8 @@ if hasval:
     ax[1] = win.addPlot()
     ax[1].setXLink(ax[0])
 for cur in ax:
-   if cur is not None:
-       cur.addLegend(offset = (-1, 1))
+    if cur is not None:
+        cur.addLegend(offset = (-1, 1))
 for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
     if not cur in G.curveno:

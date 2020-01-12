@@ -55,7 +55,7 @@ def __add_gcc_flags__(ctx):
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
                        "-Wno-tautological-compare",
-                       "-Wno-tautological-constant-out-of-range-compare" ]
+                       "-Wno-tautological-constant-out-of-range-compare"]
 
 def __add_mswin_flags__(ctx):
     ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
