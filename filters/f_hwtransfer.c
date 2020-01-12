@@ -41,17 +41,13 @@ static const struct ffmpeg_and_other_bugs shitlist[] = {
     {0}
 };
 
-static bool update_format_decision(struct priv *p, int input_fmt)
+static bool select_format(struct priv *p, int input_fmt, int *out_sw_fmt,
+                          int *out_upload_fmt)
 {
     struct mp_hwupload *u = &p->public;
 
     if (!input_fmt)
         return false;
-
-    if (input_fmt == p->last_input_fmt)
-        return true;
-
-    p->last_input_fmt = 0;
 
     // First find the closest sw fmt. Some hwdec APIs return crazy lists of
     // "supported" formats, which then are not supported or crash (???), so
@@ -82,14 +78,8 @@ static bool update_format_decision(struct priv *p, int input_fmt)
     if (!up_fmt)
         return false;
 
-    p->last_input_fmt = input_fmt;
-    p->last_upload_fmt = up_fmt;
-    p->last_sw_fmt = sw_fmt;
-    MP_INFO(u->f, "upload %s -> %s (%s, upload as %s)\n",
-            mp_imgfmt_to_name(p->last_input_fmt),
-            mp_imgfmt_to_name(u->hw_imgfmt),
-            mp_imgfmt_to_name(p->last_sw_fmt),
-            mp_imgfmt_to_name(p->last_upload_fmt));
+    *out_sw_fmt = sw_fmt;
+    *out_upload_fmt = up_fmt;
     return true;
 }
 
@@ -97,9 +87,9 @@ int mp_hwupload_find_upload_format(struct mp_hwupload *u, int imgfmt)
 {
     struct priv *p = u->f->priv;
 
-    if (!update_format_decision(p, imgfmt))
-        return 0;
-    return p->last_upload_fmt;
+    int sw = 0, up = 0;
+    select_format(p, imgfmt, &sw, &up);
+    return up;
 }
 
 static void process(struct mp_filter *f)
@@ -131,9 +121,23 @@ static void process(struct mp_filter *f)
         goto error;
     }
 
-    if (!update_format_decision(p, src->imgfmt)) {
-        MP_ERR(f, "no hw upload format found\n");
-        goto error;
+    if (src->imgfmt != p->last_input_fmt) {
+        if (!select_format(p, src->imgfmt, &p->last_sw_fmt, &p->last_upload_fmt))
+        {
+            MP_ERR(f, "no hw upload format found\n");
+            goto error;
+        }
+        if (src->imgfmt != p->last_upload_fmt) {
+            // Should not fail; if it does, mp_hwupload_find_upload_format()
+            // does not return the src->imgfmt format.
+            MP_ERR(f, "input format not an upload format\n");
+            goto error;
+        }
+        p->last_input_fmt = src->imgfmt;
+        MP_INFO(f, "upload %s -> %s[%s]\n",
+                mp_imgfmt_to_name(p->last_input_fmt),
+                mp_imgfmt_to_name(p->public.hw_imgfmt),
+                mp_imgfmt_to_name(p->last_sw_fmt));
     }
 
     if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ctx,
