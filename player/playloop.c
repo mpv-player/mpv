@@ -815,7 +815,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
     if (mpctx->mouse_event_ts != mouse_event_ts) {
         mpctx->mouse_event_ts = mouse_event_ts;
-        mpctx->mouse_timer = now + vo->opts->cursor_autohide_delay / 1000.0;
+        mpctx->mouse_timer = now + opts->cursor_autohide_delay / 1000.0;
         mouse_cursor_visible = true;
     }
 
@@ -825,13 +825,13 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
         mouse_cursor_visible = false;
     }
 
-    if (vo->opts->cursor_autohide_delay == -1)
+    if (opts->cursor_autohide_delay == -1)
         mouse_cursor_visible = true;
 
-    if (vo->opts->cursor_autohide_delay == -2)
+    if (opts->cursor_autohide_delay == -2)
         mouse_cursor_visible = false;
 
-    if (vo->opts->cursor_autohide_fs && !opts->vo->fullscreen)
+    if (opts->cursor_autohide_fs && !opts->vo->fullscreen)
         mouse_cursor_visible = true;
 
     if (mouse_cursor_visible != mpctx->mouse_cursor_visible)
