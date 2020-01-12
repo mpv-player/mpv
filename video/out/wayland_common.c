@@ -105,8 +105,6 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 {
-    if (!wl->pointer || !wl->pointer_id)
-        return VO_NOTAVAIL;
     wl->cursor_visible = on;
     if (on) {
         if (spawn_cursor(wl))
@@ -136,8 +134,6 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     wl->pointer    = pointer;
     wl->pointer_id = serial;
 
-    if (wl->vo_opts->fullscreen && wl->vo_opts->cursor_autohide_delay != -1)
-        wl->cursor_visible = false;
     set_cursor_visibility(wl, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
@@ -947,8 +943,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
-    bool is_maximized = false;
-    bool is_fullscreen = false;
+    bool is_maximized = vo_opts->window_maximized;
+    bool is_fullscreen = vo_opts->fullscreen;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
@@ -1500,6 +1496,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return update_window_title(wl, (char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
+        if (!wl->pointer)
+            return VO_NOTAVAIL;
         return set_cursor_visibility(wl, *(bool *)arg);
     case VOCTRL_KILL_SCREENSAVER:
         return set_screensaver_inhibitor(wl, true);
