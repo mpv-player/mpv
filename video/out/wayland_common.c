@@ -1314,6 +1314,12 @@ int vo_wayland_reconfig(struct vo *vo)
         }
     }
 
+    if (wl->vo_opts->window_maximized)
+        xdg_toplevel_set_maximized(wl->xdg_toplevel);
+
+    if (wl->vo_opts->window_minimized)
+        xdg_toplevel_set_minimized(wl->xdg_toplevel);
+
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
     wl_surface_commit(wl->surface);
     wl->pending_vo_events |= VO_EVENT_RESIZE;
