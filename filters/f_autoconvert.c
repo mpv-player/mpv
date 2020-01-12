@@ -230,6 +230,7 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
 
     int *fmts = p->imgfmts;
     int num_fmts = p->num_imgfmts;
+    int hwupload_fmt = 0;
 
     bool imgfmt_is_sw = !IMGFMT_IS_HWACCEL(img->imgfmt);
 
@@ -256,8 +257,9 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         if (upload) {
             mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[0]));
             filters[2] = upload->f;
-            fmts = upload->upload_fmts;
-            num_fmts = upload->num_upload_fmts;
+            hwupload_fmt = mp_hwupload_find_upload_format(upload, img->imgfmt);
+            fmts = &hwupload_fmt;
+            num_fmts = hwupload_fmt ? 1 : 0;
             hw_to_sw = false;
         }
     } else if (p->vo_convert && different_subfmt && info && info->hwdec_devs) {
