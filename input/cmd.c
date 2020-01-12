@@ -25,6 +25,7 @@
 
 #include "cmd.h"
 #include "input.h"
+#include "misc/json.h"
 
 #include "libmpv/client.h"
 
@@ -558,7 +559,14 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
         char *s = m_option_print(cmd->args[n].type, &cmd->args[n].v);
         if (n)
             mp_msg(log, msgl, ", ");
-        mp_msg(log, msgl, "%s", s ? s : "(NULL)");
+        struct mpv_node node = {
+            .format = MPV_FORMAT_STRING,
+            .u.string = s ? s : "(NULL)",
+        };
+        char *esc = NULL;
+        json_write(&esc, &node);
+        mp_msg(log, msgl, "%s", esc ? esc : "<error>");
+        talloc_free(esc);
         talloc_free(s);
     }
     mp_msg(log, msgl, "]\n");
