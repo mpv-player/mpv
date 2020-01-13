@@ -1010,11 +1010,13 @@ function window_controls(topbar)
 
     -- Default alignment is "right"
     local controlbox_left = wc_geo.w - controlbox_w
-    local titlebox_left = wc_geo.x + 5
+    local titlebox_left = wc_geo.x
+    local titlebox_right = wc_geo.w - controlbox_w
 
     if alignment == "left" then
         controlbox_left = wc_geo.x
-        titlebox_left = wc_geo.x + controlbox_w + 5
+        titlebox_left = wc_geo.x + controlbox_w
+        titlebox_right = wc_geo.w
     end
 
     add_area("window-controls",
@@ -1106,12 +1108,19 @@ function window_controls(topbar)
         title = title:gsub("\\n", " "):gsub("\\$", ""):gsub("{","\\{")
         return not (title == "") and title or "mpv"
     end
+    local left_pad = 5
+    local right_pad = 10
     lo = add_layout("wctitle")
     lo.geometry =
-        { x = titlebox_left, y = wc_geo.y - 3, an = 1, w = titlebox_w, h = wc_geo.h }
+        { x = titlebox_left + left_pad, y = wc_geo.y - 3, an = 1,
+          w = titlebox_w, h = wc_geo.h }
     lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
         osc_styles.wcTitle,
-        titlebox_left, wc_geo.y - wc_geo.h, titlebox_w, wc_geo.y + wc_geo.h)
+        titlebox_left + left_pad, wc_geo.y - wc_geo.h,
+        titlebox_right - right_pad , wc_geo.y + wc_geo.h)
+
+    add_area("window-controls-title",
+             titlebox_left, 0, titlebox_right, wc_geo.h)
 end
 
 --
@@ -2321,6 +2330,14 @@ function render()
                 mp.disable_key_bindings("window-controls")
             end
 
+            if (mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2)) then
+                mouse_over_osc = true
+            end
+        end
+    end
+
+    if osc_param.areas["window-controls-title"] then
+        for _,cords in ipairs(osc_param.areas["window-controls-title"]) do
             if (mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2)) then
                 mouse_over_osc = true
             end
