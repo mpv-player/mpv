@@ -74,11 +74,6 @@ _mpv()
 {
   compopt +o nospace mpv
 
-  # This regex detects special options where we don't want an '=' appended
-  local special_regex='Flag.*\[not in config files\]|Print'
-  local options=($(mpv --list-options | grep -v -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-  local specials=($(mpv --list-options | grep -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-
   # _filedir requires the current candidate be in $cur
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[((COMP_CWORD - 1))]}
@@ -95,6 +90,11 @@ _mpv()
   else
     case $cur in
       -*)
+        # This regex detects special options where we don't want an '=' appended
+        local special_regex='Flag.*\[not in config files\]|Print'
+        local options=($(mpv --list-options | grep -v -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+        local specials=($(mpv --list-options | grep -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+
         COMPREPLY=($(compgen -W "${options[*]}" -S '=' -- "${cur}"))
         local normal_count=${#COMPREPLY[@]}
         COMPREPLY+=($(compgen -W "${specials[*]}" -- "${cur}"))
