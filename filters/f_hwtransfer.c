@@ -51,7 +51,8 @@ struct ffmpeg_and_other_bugs {
 static const struct ffmpeg_and_other_bugs shitlist[] = {
     {
         .imgfmt = IMGFMT_VAAPI,
-        .whitelist_formats = (const int[]){IMGFMT_NV12, IMGFMT_P010, 0},
+        .whitelist_formats = (const int[]){IMGFMT_NV12, IMGFMT_P010, IMGFMT_BGRA,
+                                           IMGFMT_ABGR, IMGFMT_RGB0, 0},
         .force_same_upload_fmt = true,
     },
     {0}
