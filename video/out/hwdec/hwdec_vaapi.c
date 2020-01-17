@@ -157,6 +157,7 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
+    p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
     p->ctx->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
