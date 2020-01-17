@@ -334,10 +334,6 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
 
     struct demuxer *demux = mpctx->demuxer;
-    if (demux && (!demux->seekable || demux->partially_seekable)) {
-        MP_INFO(mpctx, "Not seekable - not saving state.\n");
-        goto exit;
-    }
 
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
@@ -354,8 +350,14 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     write_filename(mpctx, file, cur->filename);
 
     double pos = get_current_time(mpctx);
-    if (pos != MP_NOPTS_VALUE)
+
+    if ((demux && (!demux->seekable || demux->partially_seekable)) ||
+        pos == MP_NOPTS_VALUE)
+    {
+        MP_INFO(mpctx, "Not seekable, or time unknown - not saving position.\n");
+    } else {
         fprintf(file, "start=%f\n", pos);
+    }
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
         char *val = NULL;
