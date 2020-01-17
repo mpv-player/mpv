@@ -322,8 +322,11 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
                     MP_VERBOSE(u->f, "  ... skipping blacklisted format\n");
                     continue;
                 }
-                if (vo_supports(ctx, hw_imgfmt, fmt))
-                    MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
+                if (!vo_supports(ctx, hw_imgfmt, fmt)) {
+                    MP_VERBOSE(u->f, "  ... not supported by VO\n");
+                    continue;
+                }
+                MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
             }
 
             p->fmt_upload_num[index] =
