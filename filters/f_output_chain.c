@@ -88,9 +88,6 @@ static void update_output_caps(struct chain *p)
             if (allowed_output_formats[n])
                 mp_autoconvert_add_imgfmt(p->convert, IMGFMT_START + n, 0);
         }
-
-        if (p->vo->hwdec_devs)
-            mp_autoconvert_add_vo_hwdec_subfmts(p->convert, p->vo->hwdec_devs);
     }
 }
 

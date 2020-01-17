@@ -59,17 +59,6 @@ static const struct mp_filter_info convert_filter = {
     .name = "convert",
 };
 
-// For hw decoding: thing which can convert between underlying surface formats.
-// The filter detects the needed target format from struct mp_hwdec_ctx.
-struct subfmt_conv {
-    int hw_imgfmt;
-    struct mp_filter *(*create)(struct mp_filter *parent);
-};
-
-static const struct subfmt_conv subfmt_converters[] = {
-    {0}
-};
-
 void mp_autoconvert_clear(struct mp_autoconvert *c)
 {
     struct priv *p = c->f->priv;
@@ -121,44 +110,6 @@ void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c)
     }
 }
 
-void mp_autoconvert_add_vo_hwdec_subfmts(struct mp_autoconvert *c,
-                                         struct mp_hwdec_devices *devs)
-{
-    struct priv *p = c->f->priv;
-    assert(devs);
-
-    int prev_format = 0;
-
-    for (int n = 0; ; n++) {
-        struct mp_hwdec_ctx *ctx = hwdec_devices_get_n(devs, n);
-        if (!ctx)
-            break;
-        if (!ctx->hw_imgfmt || !ctx->supported_formats)
-            continue;
-        // Very hacky: don't let d3d11-egl-rgb overwrite d3d11-egl
-        if (ctx->hw_imgfmt == prev_format)
-            continue;
-        prev_format = ctx->hw_imgfmt;
-        // Stupidity: VOs export imgfmt only, so subfmt is always 0. Remove it
-        // to fix it up.
-        for (int i = 0; i < p->num_imgfmts; i++) {
-            if (p->imgfmts[i] != ctx->hw_imgfmt)
-                continue;
-
-            int count = p->num_imgfmts;
-            MP_TARRAY_REMOVE_AT(p->imgfmts, count, i);
-            count = p->num_imgfmts;
-            MP_TARRAY_REMOVE_AT(p->subfmts, count, i);
-            p->num_imgfmts -= 1;
-            break;
-        }
-        for (int i = 0; ctx->supported_formats[i]; i++)
-            mp_autoconvert_add_imgfmt(c, ctx->hw_imgfmt, ctx->supported_formats[i]);
-    }
-
-    p->vo_convert = true;
-}
-
 void mp_autoconvert_add_afmt(struct mp_autoconvert *c, int afmt)
 {
     struct priv *p = c->f->priv;
@@ -198,13 +149,9 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     if (!p->num_imgfmts)
         return true;
 
-    bool different_subfmt = false;
-
     for (int n = 0; n < p->num_imgfmts; n++) {
         bool samefmt = img->params.imgfmt == p->imgfmts[n];
         bool samesubffmt = img->params.hw_subfmt == p->subfmts[n];
-        if (samefmt && !samesubffmt)
-            different_subfmt = true;
         if (samefmt && (samesubffmt || !p->subfmts[n])) {
             if (p->imgparams_set) {
                 if (!mp_image_params_equal(&p->imgparams, &img->params))
@@ -213,8 +160,6 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
             return true;
         }
     }
-
-    struct mp_stream_info *info = mp_filter_find_stream_info(f);
 
     struct mp_filter *conv = mp_filter_create(f, &convert_filter);
     mp_filter_add_pin(conv, MP_PIN_IN, "in");
@@ -261,18 +206,6 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
             fmts = &hwupload_fmt;
             num_fmts = hwupload_fmt ? 1 : 0;
             hw_to_sw = false;
-        }
-    } else if (p->vo_convert && different_subfmt && info && info->hwdec_devs) {
-        for (int n = 0; subfmt_converters[n].hw_imgfmt; n++) {
-            if (subfmt_converters[n].hw_imgfmt == img->imgfmt) {
-                mp_info(log, "Using HW sub-conversion.\n");
-                filters[2] = subfmt_converters[n].create(conv);
-                if (filters[2]) {
-                    need_sws = false;
-                    hw_to_sw = false;
-                    break;
-                }
-            }
         }
     }
 
