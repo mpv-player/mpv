@@ -422,15 +422,15 @@ exit:
     talloc_free(conffile);
 }
 
-void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
+char *mp_load_playback_resume(struct MPContext *mpctx, const char *file)
 {
     if (!mpctx->opts->position_resume)
-        return;
+        return NULL;
     char *fname = mp_get_playback_resume_config_filename(mpctx, file);
     if (fname && mp_path_exists(fname)) {
         if (mpctx->opts->position_check_mtime && !check_mtime(file, fname)) {
             talloc_free(fname);
-            return;
+            return NULL;
         }
 
         // Never apply the saved start position to following files
@@ -438,9 +438,10 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
         MP_INFO(mpctx, "Resuming playback. This behavior can "
                "be disabled with --no-resume-playback.\n");
         try_load_config(mpctx, fname, M_SETOPT_PRESERVE_CMDLINE, MSGL_V);
-        unlink(fname);
+        return fname;
     }
     talloc_free(fname);
+    return NULL;
 }
 
 // Returns the first file that has a resume config.

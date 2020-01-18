@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <unistd.h>
 #include <inttypes.h>
 #include <assert.h>
 
@@ -1376,6 +1377,7 @@ static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     double playback_start = -1e100;
+    char *playback_resume_filename = NULL;
 
     assert(mpctx->stop_play);
 
@@ -1432,7 +1434,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mp_load_auto_profiles(mpctx);
 
-    mp_load_playback_resume(mpctx, mpctx->filename);
+    playback_resume_filename = mp_load_playback_resume(mpctx, mpctx->filename);
 
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
@@ -1560,6 +1562,10 @@ static void play_current_file(struct MPContext *mpctx)
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
     mpctx->playback_initialized = true;
+    if (playback_resume_filename) {
+        unlink(playback_resume_filename);
+        talloc_free(playback_resume_filename);
+    }
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
 
@@ -1636,6 +1642,7 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
+    talloc_free(playback_resume_filename);
 
     uninit_demuxer(mpctx);
 
