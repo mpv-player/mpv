@@ -319,7 +319,8 @@ static void write_redirect(struct MPContext *mpctx, char *path)
             fclose(file);
         }
 
-        if (mpctx->opts->position_check_mtime && !copy_mtime(path, conffile))
+        if (mpctx->opts->position_check_mtime &&
+            !mp_is_url(bstr0(path)) && !copy_mtime(path, conffile))
             MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", path, conffile);
 
         talloc_free(conffile);
@@ -381,6 +382,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     fclose(file);
 
     if (mpctx->opts->position_check_mtime &&
+        !mp_is_url(bstr0(cur->filename)) &&
         !copy_mtime(cur->filename, conffile))
     {
         MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", cur->filename,
@@ -428,7 +430,8 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
         return;
     char *fname = mp_get_playback_resume_config_filename(mpctx, file);
     if (fname && mp_path_exists(fname)) {
-        if (mpctx->opts->position_check_mtime && !check_mtime(file, fname)) {
+        if (mpctx->opts->position_check_mtime &&
+            !mp_is_url(bstr0(file)) && !check_mtime(file, fname)) {
             talloc_free(fname);
             return;
         }
