@@ -1,6 +1,6 @@
 ---
-name: 'Report a Bug for a different Platform'
-about: 'Create a report for a runtime related Bug'
+name: 'Report a different Issue'
+about: 'Create a report for a runtime related Issue'
 title: ''
 labels: ''
 assignees: ''

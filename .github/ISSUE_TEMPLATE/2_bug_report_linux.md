@@ -1,6 +1,6 @@
 ---
-name: 'Report a Linux Bug'
-about: 'Create a report for a runtime related Linux Bug'
+name: 'Report a Linux Issue'
+about: 'Create a report for a runtime related Linux Issue'
 title: ''
 labels: 'os:linux'
 assignees: ''

@@ -1,6 +1,6 @@
 ---
-name: 'Report a macOS Bug'
-about: 'Create a report for a runtime related macOS Bug'
+name: 'Report a macOS Issue'
+about: 'Create a report for a runtime related macOS Issue'
 title: ''
 labels: 'os:mac'
 assignees: ''
