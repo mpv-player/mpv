@@ -39,14 +39,17 @@ let glFormatSoftwareBase: [CGLPixelFormatAttribute] = [
 
 let glFormatOptional: [[CGLPixelFormatAttribute]] = [
     [kCGLPFABackingStore],
-    [kCGLPFAAllowOfflineRenderers],
-    [kCGLPFASupportsAutomaticGraphicsSwitching]
+    [kCGLPFAAllowOfflineRenderers]
 ]
 
 let glFormat10Bit: [CGLPixelFormatAttribute] = [
     kCGLPFAColorSize,
     _CGLPixelFormatAttribute(rawValue: 64),
     kCGLPFAColorFloat
+]
+
+let glFormatAutoGPU: [CGLPixelFormatAttribute] = [
+    kCGLPFASupportsAutomaticGraphicsSwitching
 ]
 
 let attributeLookUp: [UInt32:String] = [
@@ -271,6 +274,10 @@ class VideoLayer: CAOpenGLLayer {
                 glFormat += [glFormat10Bit]
             }
             glFormat += glFormatOptional
+
+            if (libmpv.macOpts.macos_force_dedicated_gpu == 0) {
+                glFormat += [glFormatAutoGPU]
+            }
 
             for index in stride(from: glFormat.count-1, through: 0, by: -1) {
                 let format = glFormat.flatMap { $0 } + [_CGLPixelFormatAttribute(rawValue: 0)]
