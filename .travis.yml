@@ -103,6 +103,7 @@ after_script: TOOLS/travis-rebuild-website
 notifications:
   email: false
   irc:
+    if: fork = false
     channels:
       - "irc.freenode.org#mpv-devel"
     on_success: change
