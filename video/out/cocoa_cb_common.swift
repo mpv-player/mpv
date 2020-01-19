@@ -574,6 +574,7 @@ class CocoaCB: NSObject {
         }
         if isShuttingDown { return }
 
+        uninit()
         setCursorVisiblility(true)
         stopDisplaylink()
         uninitLightSensor()
